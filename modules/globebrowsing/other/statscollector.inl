@@ -1,3 +1,4 @@
+#include "statscollector.h"
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -22,36 +23,91 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_TILE_PROVIDER_BY_INDEX_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_TILE_PROVIDER_BY_INDEX_H__
-
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-
 namespace openspace {
 namespace globebrowsing {
 
-class TileProviderByIndex : public TileProvider {
-public:
-    TileProviderByIndex(const ghoul::Dictionary& dictionary);
-    TileProviderByIndex(const std::string& imagePath);
-    virtual ~TileProviderByIndex() { }
+template <typename T>
+TemplatedStatsCollector<T>::TemplatedStatsCollector(bool& enabled,
+                                                    const std::string& delimiter)
+    : _enabled(enabled)
+    , _delimiter(delimiter)
+    , _writePos(0)
+{}
 
-    virtual Tile getTile(const TileIndex& tileIndex);
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& index);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
+template <typename T>
+void TemplatedStatsCollector<T>::startNewRecord() {
+    if (_enabled) {
+        _data.push_back(StatsRecord<T>());
+    }
+}
 
-private:
-    TileProvider* indexProvider(const TileIndex& tileIndex) const;
+template <typename T>
+T& TemplatedStatsCollector<T>::operator[](const std::string& name) {
+    if (_enabled) {
+        _data.keys.insert(name);
+        return _data.back()[name];
+    }
+    else {
+        return _dummy;
+    }
+}
 
-    std::unordered_map<TileHashKey, std::shared_ptr<TileProvider>> _tileProviderMap;
-    std::shared_ptr<TileProvider> _defaultTileProvider;
-};
+template<typename T>
+T TemplatedStatsCollector<T>::previous(const std::string& name) {
+    if (_data.size() > 1) {
+        return _data[_data.size() - 2][name];
+    }
+    return T();
+}
+
+template<typename T>
+bool TemplatedStatsCollector<T>::hasHeaders() {
+    return _data.keys.size() > 0;
+}
+
+template<typename T>
+bool TemplatedStatsCollector<T>::hasRecordsToWrite() {
+    return _writePos < _data.size() - 1;
+}
+
+template<typename T>
+void TemplatedStatsCollector<T>::reset() {
+    // copy last, i.e. current record
+    StatsRecord<T> lastRecord = _data.back();
+    _data.clear();
+    // add it again after cleared the vector
+    _data.push_back(lastRecord);
+    _writePos = 0;
+
+}
+
+template<typename T>
+void TemplatedStatsCollector<T>::writeHeader(std::ostream& os) {
+    auto keyIt = _data.keys.begin();
+    os << *keyIt;
+    while (++keyIt != _data.keys.end()) {
+        os << _delimiter << *keyIt;
+    }
+}
+
+template<typename T>
+void TemplatedStatsCollector<T>::writeNextRecord(std::ostream& os) {
+    if (hasRecordsToWrite()) {
+        // output line by line
+        StatsRecord<T>& record = _data[_writePos];
+
+        // Access every key. Records with no entry will get a default value
+        auto keyIt = _data.keys.begin();
+        if (keyIt != _data.keys.end()) {
+            os << record[(*keyIt)];
+            while (++keyIt != _data.keys.end()) {
+                os << _delimiter << record[(*keyIt)];
+            }
+        }
+
+        _writePos++;
+    }
+}
 
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_TILE_PROVIDER_BY_INDEX_H__

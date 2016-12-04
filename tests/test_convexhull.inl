@@ -41,7 +41,7 @@ TEST_F(ConvexHull2Test, basic) {
     // 0  x     x
     //   -1  0  1
 
-    std::vector<Point2> points = {
+    std::vector<glm::vec2> points = {
         { -1.0, 0.0 },
         { 1.0, 0.0 },
         { 0.0, 2.0 },
@@ -66,7 +66,7 @@ TEST_F(ConvexHull2Test, basic) {
 
 TEST_F(ConvexHull2Test, intersection) {
     using namespace openspace::globebrowsing;
-    std::vector<Point2> points1 = {
+    std::vector<glm::vec2> points1 = {
         { -1.0, 0.0 },
         { 1.0, 0.0 },
         { 0.0, 2.0 },
@@ -74,7 +74,7 @@ TEST_F(ConvexHull2Test, intersection) {
     };
     ConvexHull2 hull1 = ConvexHull2::grahamScan_NOT_THREAD_SAFE(points1);
 
-    std::vector<Point2> points2 = {
+    std::vector<glm::vec2> points2 = {
         { 0.0, 0.0 },
         { 2.0, 0.0 },
         { 1.0, 2.0 },
@@ -96,14 +96,14 @@ TEST_F(ConvexHull2Test, intersection) {
 
 TEST_F(ConvexHull2Test, non_intersection) {
     using namespace openspace::globebrowsing;
-    std::vector<Point2> points1 = {
+    std::vector<glm::vec2> points1 = {
         { -2.0, 0.0 },
         { 2.0, 0.0 },
         { 0.0, 2.0 },
     };
     ConvexHull2 hull1 = ConvexHull2::grahamScan_NOT_THREAD_SAFE(points1);
 
-    std::vector<Point2> points2 = {
+    std::vector<glm::vec2> points2 = {
         { 1.0, 2.0 },
         { 3.0, 0.0 },
         { 5.0, 2.0 }

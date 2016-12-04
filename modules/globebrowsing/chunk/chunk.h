@@ -22,93 +22,86 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CHUNK_H__
-#define __CHUNK_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_CHUNK_H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING_CHUNK_H__
+
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 #include <glm/glm.hpp>
 #include <vector>
-#include <memory>
-#include <ostream>
-
-#include <modules/globebrowsing/chunk/culling.h>
-#include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator.h>
-
-
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/angle.h>
-
 
 namespace openspace {
+
+struct RenderData;
+
 namespace globebrowsing {
 
-    class RenderableGlobe;
+class GeodeticPatch;
+class RenderableGlobe;
+struct TileIndex;
 
-    class Chunk {
-    public:
-        const static float DEFAULT_HEIGHT;
+class Chunk {
+public:
+    const static float DEFAULT_HEIGHT;
 
-        struct BoundingHeights {
-            float min, max;
-            bool available;
-        };
-
-        enum class Status {
-            DO_NOTHING,
-            WANT_MERGE,
-            WANT_SPLIT,
-        };
-        
-        Chunk(
-            const RenderableGlobe& owner,
-            const TileIndex& tileIndex,
-            bool initVisible = true);
-
-        /**
-         * Updates the Chunk internally and returns the Status of the Chunk.
-         *
-         * Tests if the Chunk is cullable and gets the desired level of the Chunk. If the
-         * Chunk is cullable it will be set to invisible and return Status::WANT_MERGE.
-         * If the desired level is smaller than the current level of the chunk it will
-         * return Status::WANT_MERGE, if it is larger it will return Status::WANT_SPLIT,
-         * otherwise Status::DO_NOTHING.
-         *
-         * \returns The Status of the chunk. 
-        */
-        Status update(const RenderData& data);
-
-        /**
-         * Returns a convex polyhedron of eight vertices tightly bounding the volume of
-         * the Chunk.
-        */
-        std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
-
-        const GeodeticPatch& surfacePatch() const;
-        const RenderableGlobe& owner() const;
-        const TileIndex tileIndex() const;
-        bool isVisible() const;
-        
-        /**
-         * Returns BoundingHeights that fits the Chunk as tightly as possible.
-         *
-         * If the Chunk uses more than one HightLayer, the BoundingHeights will be set
-         * to cover all HightLayers. If the Chunk has a higher level than its highest
-         * resolution HightLayer Tile, it will base its BoundingHeights on that Tile.
-         * This means that high level Chunks can have BoundingHeights that are not
-         * tightly fitting.
-        */
-        BoundingHeights getBoundingHeights() const;
-
-    private:
-        const RenderableGlobe& _owner;
-        const TileIndex _tileIndex;
-        bool _isVisible;
-        const GeodeticPatch _surfacePatch;
+    struct BoundingHeights {
+        float min, max;
+        bool available;
     };
+
+    enum class Status {
+        DO_NOTHING,
+        WANT_MERGE,
+        WANT_SPLIT,
+    };
+        
+    Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex,
+          bool initVisible = true);
+
+    /**
+     * Updates the Chunk internally and returns the Status of the Chunk.
+     *
+     * Tests if the Chunk is cullable and gets the desired level of the Chunk. If the
+     * Chunk is cullable it will be set to invisible and return Status::WANT_MERGE.
+     * If the desired level is smaller than the current level of the chunk it will
+     * return Status::WANT_MERGE, if it is larger it will return Status::WANT_SPLIT,
+     * otherwise Status::DO_NOTHING.
+     *
+     * \returns The Status of the chunk. 
+     */
+    Status update(const RenderData& data);
+
+    /**
+        * Returns a convex polyhedron of eight vertices tightly bounding the volume of
+        * the Chunk.
+    */
+    std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
+
+    const GeodeticPatch& surfacePatch() const;
+    const RenderableGlobe& owner() const;
+    const TileIndex tileIndex() const;
+    bool isVisible() const;
+        
+    /**
+        * Returns BoundingHeights that fits the Chunk as tightly as possible.
+        *
+        * If the Chunk uses more than one HightLayer, the BoundingHeights will be set
+        * to cover all HightLayers. If the Chunk has a higher level than its highest
+        * resolution HightLayer Tile, it will base its BoundingHeights on that Tile.
+        * This means that high level Chunks can have BoundingHeights that are not
+        * tightly fitting.
+    */
+    BoundingHeights getBoundingHeights() const;
+
+private:
+    const RenderableGlobe& _owner;
+    const TileIndex _tileIndex;
+    bool _isVisible;
+    const GeodeticPatch _surfacePatch;
+};
 
 } // namespace globebrowsing
 } // namespace openspace
 
-
-
-#endif // __CHUNK_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING_CHUNK_H__

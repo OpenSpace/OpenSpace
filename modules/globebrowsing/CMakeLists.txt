@@ -53,7 +53,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbylevel.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbyindex.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilepile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
@@ -106,9 +105,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbylevel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbyindex.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilepile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
@@ -126,6 +123,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

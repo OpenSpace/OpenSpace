@@ -1,57 +1,54 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2016                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
-#ifndef __GPU_LAYER_MANAGER_H__
-#define __GPU_LAYER_MANAGER_H__
-
-#include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/tile/chunktile.h>
-#include <modules/globebrowsing/rendering/layermanager.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_GPU_LAYER_MANAGER_H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING_GPU_LAYER_MANAGER_H__
 
 #include <openspace/util/gpudata.h>
 
-#include <glm/glm.hpp>
+#include <string>
 
-#include <vector>
-
-namespace ghoul{
-namespace opengl{
-    class ProgramObject;
-}//namespace opengl
-}//namespace ghoul
+namespace ghoul { namespace opengl {
+class ProgramObject;
+}}
 
 namespace openspace {
 namespace globebrowsing {
 
-using namespace ghoul::opengl;
+struct ChunkTile;
+struct ChunkTilePile;
+class Layer;
+class LayerRenderSettings;
+struct TileDepthTransform;
+struct TileIndex;
+struct TileUvTransform;
 
 /**
  * Manages a GPU representation of a <code>TileUvTransform</code>
  */
 class GPUTileUvTransform {
 public:
-    
     /**
      * Sets the value of <code>TileUvTransform</code> to its corresponding
      * GPU struct. OBS! Users must ensure bind has been 
@@ -319,4 +316,5 @@ private:
 
 } // namespace globebrowsing
 } // namespace openspace
-#endif  // __GPU_LAYER_MANAGER_H__
+
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_GPU_LAYER_MANAGER_H__

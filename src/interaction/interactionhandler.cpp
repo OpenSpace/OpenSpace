@@ -220,7 +220,10 @@ void InteractionHandler::goToGeo(double latitude, double longitude) {
     std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
         
     if (gbim) {
-        gbim->goToGeodetic2(*_camera, globebrowsing::Geodetic2(latitude, longitude) / 180 * M_PI, true);
+        gbim->goToGeodetic2(
+            *_camera,
+            globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(), true
+        );
     } else {
         LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
     }

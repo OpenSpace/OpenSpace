@@ -22,92 +22,83 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ELLIPSOID_H__
-#define __ELLIPSOID_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_ELLIPSOID_H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING_ELLIPSOID_H__
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
+
+#include <ghoul/glm.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-    /**
-    This class is based largely on the Ellipsoid class defined in the book
-    "3D Engine Design for Virtual Globes". Most planets or planetary objects are better
-    described using ellipsoids than spheres. All inputs and outputs to this class is
-    based on the WGS84 standard coordinate system where the x-axis points towards geographic
-    (lat = 0, lon = 0), the y-axis points towards (lat = 0, lon = 90deg) and the
-    z-axis points towards the north pole. For other globes than earth of course the radii
-    can differ.
-    */
+/**
+ * This class is based largely on the Ellipsoid class defined in the book
+ * "3D Engine Design for Virtual Globes". Most planets or planetary objects are better
+ * described using ellipsoids than spheres. All inputs and outputs to this class is
+ * based on the WGS84 standard coordinate system where the x-axis points towards geographic
+ * (lat = 0, lon = 0), the y-axis points towards (lat = 0, lon = 90deg) and the
+ * z-axis points towards the north pole. For other globes than earth of course the radii
+ * can differ.
+ */
 class Ellipsoid {
 public:
-
-    Ellipsoid();
+    /**
+     * \param radii defines three radii for the Ellipsoid
+     */
+    Ellipsoid(glm::dvec3 radii = glm::dvec3(1.0, 1.0, 1.0));
 
     /**
-    \param radii defines three radii for the Ellipsoid
-    */
-    Ellipsoid(Vec3 radii);
+     * Scales a point along the geocentric normal and places it on the surface of the
+     * Ellipsoid.
+     * \param p is a point in the cartesian coordinate system to be placed on the surface
+     * of the Ellipsoid
+     */
+    glm::dvec3 geocentricSurfaceProjection(const glm::dvec3& p) const;
 
     /**
-    \param x defines the radius in x direction.
-    \param y defines the radius in y direction.
-    \param z defines the radius in z direction.
-    */
-    Ellipsoid(Scalar x, Scalar y, Scalar z);
-    ~Ellipsoid();
+     * Scales a point along the geodetic normal and places it on the surface of the
+     * Ellipsoid.
+     * \param p is a point in the cartesian coordinate system to be placed on the surface
+     * of the Ellipsoid
+     */
+    glm::dvec3 geodeticSurfaceProjection(const glm::dvec3& p) const;
 
-    /**
-    Scales a point along the geocentric normal and places it on the surface of the
-    Ellipsoid.
-    \param p is a point in the cartesian coordinate system to be placed on the surface
-    of the Ellipsoid
-    */
-    Vec3 geocentricSurfaceProjection(const Vec3& p) const;
-
-    /**
-    Scales a point along the geodetic normal and places it on the surface of the
-    Ellipsoid.
-    \param p is a point in the cartesian coordinate system to be placed on the surface
-    of the Ellipsoid
-    */
-    Vec3 geodeticSurfaceProjection(const Vec3& p) const;
-
-    Vec3 geodeticSurfaceNormalForGeocentricallyProjectedPoint(const Vec3& p) const;
-    Vec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
+    glm::dvec3 geodeticSurfaceNormalForGeocentricallyProjectedPoint(const glm::dvec3& p) const;
+    glm::dvec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
     
-    const Vec3& radii() const;
-    const Vec3& radiiSquared() const;
-    const Vec3& oneOverRadiiSquared() const;
-    const Vec3& radiiToTheFourth() const;
+    const glm::dvec3& radii() const;
+    const glm::dvec3& radiiSquared() const;
+    const glm::dvec3& oneOverRadiiSquared() const;
+    const glm::dvec3& radiiToTheFourth() const;
     
-    Scalar minimumRadius() const;
-    Scalar maximumRadius() const;
-    Scalar averageRadius() const;
+    double minimumRadius() const;
+    double maximumRadius() const;
+    double averageRadius() const;
 
-    Scalar longitudalDistance(Scalar lat, Scalar lon1, Scalar lon2) const;
-    Scalar greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) const;
+    double longitudalDistance(double lat, double lon1, double lon2) const;
+    double greatCircleDistance(const Geodetic2& p1, const Geodetic2& p2) const;
 
-    Geodetic2 cartesianToGeodetic2(const Vec3& p) const;
-    Vec3 cartesianSurfacePosition(const Geodetic2& geodetic2) const;
-    Vec3 cartesianPosition(const Geodetic3& geodetic3) const;
+    Geodetic2 cartesianToGeodetic2(const glm::dvec3& p) const;
+    glm::dvec3 cartesianSurfacePosition(const Geodetic2& geodetic2) const;
+    glm::dvec3 cartesianPosition(const Geodetic3& geodetic3) const;
 
 private:
     struct EllipsoidCache {
-        Vec3 _radiiSquared;
-        Vec3 _oneOverRadiiSquared;
-        Vec3 _radiiToTheFourth;
-        Scalar _minimumRadius;
-        Scalar _maximumRadius;
-        Scalar _medianRadius;
+        glm::dvec3 _radiiSquared;
+        glm::dvec3 _oneOverRadiiSquared;
+        glm::dvec3 _radiiToTheFourth;
+        double _minimumRadius;
+        double _maximumRadius;
+        double _medianRadius;
     } _cached;
 
     void updateInternalCache();
 
-    Vec3 _radii;
+    glm::dvec3 _radii;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __ELLIPSOID_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING_ELLIPSOID_H__

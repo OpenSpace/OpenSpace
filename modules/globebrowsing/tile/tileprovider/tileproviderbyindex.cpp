@@ -22,90 +22,96 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
-#include <modules/globebrowsing/tile/tileindex.h>
 
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-
-#include <openspace/engine/openspaceengine.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     const std::string _loggerCat = "TileProviderByIndex";
     
-    const std::string KeyDefaultProvider = "DefaultProvider";
-    const std::string KeyProviders = "IndexTileProviders";
-    const std::string KeyTileIndex = "TileIndex";
-    const std::string KeyTileProvider = "TileProvider";
+    const char* KeyDefaultProvider = "DefaultProvider";
+    const char* KeyProviders = "IndexTileProviders";
+    const char* KeyTileIndex = "TileIndex";
+    const char* KeyTileProvider = "TileProvider";
 }
 
 namespace openspace {
 namespace globebrowsing {
 
-    TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
-        ghoul::Dictionary defaultProviderDict = dictionary.value<ghoul::Dictionary>(KeyDefaultProvider);
-        TileProvider * defaultProvider = TileProvider::createFromDictionary(defaultProviderDict);
-        _defaultTileProvider = std::shared_ptr<TileProvider>(defaultProvider);
+TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
+    ghoul::Dictionary defaultProviderDict = dictionary.value<ghoul::Dictionary>(
+        KeyDefaultProvider
+        );
+    TileProvider* defaultProvider = TileProvider::createFromDictionary(
+        defaultProviderDict
+    );
+    _defaultTileProvider = std::shared_ptr<TileProvider>(defaultProvider);
         
-        ghoul::Dictionary indexProvidersDict = dictionary.value<ghoul::Dictionary>(KeyProviders);
-        for (size_t i = 0; i < indexProvidersDict.size(); i++) {
-            std::string dictKey = std::to_string(i + 1);
-            ghoul::Dictionary indexProviderDict = indexProvidersDict.value<ghoul::Dictionary>(dictKey);
-            ghoul::Dictionary tileIndexDict = indexProviderDict.value<ghoul::Dictionary>(KeyTileIndex);
-            ghoul::Dictionary providerDict = indexProviderDict.value<ghoul::Dictionary>(KeyTileProvider);
+    ghoul::Dictionary indexProvidersDict = dictionary.value<ghoul::Dictionary>(
+        KeyProviders
+        );
+    for (size_t i = 0; i < indexProvidersDict.size(); i++) {
+        std::string dictKey = std::to_string(i + 1);
+        ghoul::Dictionary indexProviderDict = indexProvidersDict.value<ghoul::Dictionary>(
+            dictKey
+            );
+        ghoul::Dictionary tileIndexDict = indexProviderDict.value<ghoul::Dictionary>(
+            KeyTileIndex
+            );
+        ghoul::Dictionary providerDict = indexProviderDict.value<ghoul::Dictionary>(
+            KeyTileProvider
+            );
             
-            TileIndex tileIndex(tileIndexDict);
-            TileProvider* tileProvider = TileProvider::createFromDictionary(providerDict);
-            std::shared_ptr<TileProvider> stp = std::shared_ptr<TileProvider>(tileProvider);
-            TileHashKey key = tileIndex.hashKey();
-            _tileProviderMap.insert(std::make_pair(key, stp));
-        }
+        TileIndex tileIndex(tileIndexDict);
+        TileProvider* tileProvider = TileProvider::createFromDictionary(providerDict);
+        std::shared_ptr<TileProvider> stp = std::shared_ptr<TileProvider>(tileProvider);
+        TileHashKey key = tileIndex.hashKey();
+        _tileProviderMap.insert(std::make_pair(key, stp));
     }
+}
 
-    Tile TileProviderByIndex::getTile(const TileIndex& tileIndex) {
-        auto it = _tileProviderMap.find(tileIndex.hashKey());
-        bool hasProvider = it != _tileProviderMap.end();
-        return hasProvider ? it->second->getTile(tileIndex) : Tile::TileUnavailable;
-    }
+Tile TileProviderByIndex::getTile(const TileIndex& tileIndex) {
+    auto it = _tileProviderMap.find(tileIndex.hashKey());
+    bool hasProvider = it != _tileProviderMap.end();
+    return hasProvider ? it->second->getTile(tileIndex) : Tile::TileUnavailable;
+}
 
-    Tile TileProviderByIndex::getDefaultTile() {
-        return _defaultTileProvider->getDefaultTile();
-    }
+Tile TileProviderByIndex::getDefaultTile() {
+    return _defaultTileProvider->getDefaultTile();
+}
 
-    Tile::Status TileProviderByIndex::getTileStatus(const TileIndex& tileIndex) {
-        auto it = _tileProviderMap.find(tileIndex.hashKey());
-        bool hasProvider = it != _tileProviderMap.end();
-        return hasProvider ? it->second->getTileStatus(tileIndex) : Tile::Status::Unavailable;
-    }
+Tile::Status TileProviderByIndex::getTileStatus(const TileIndex& tileIndex) {
+    auto it = _tileProviderMap.find(tileIndex.hashKey());
+    bool hasProvider = it != _tileProviderMap.end();
+    return hasProvider ? it->second->getTileStatus(tileIndex) : Tile::Status::Unavailable;
+}
 
-    TileDepthTransform TileProviderByIndex::depthTransform() {
-        return _defaultTileProvider->depthTransform();
-    }
+TileDepthTransform TileProviderByIndex::depthTransform() {
+    return _defaultTileProvider->depthTransform();
+}
 
-    void TileProviderByIndex::update() {
-        for(auto it : _tileProviderMap){
-            it.second->update();
-        }
-        _defaultTileProvider->update();
+void TileProviderByIndex::update() {
+    for (auto& it : _tileProviderMap){
+        it.second->update();
     }
+    _defaultTileProvider->update();
+}
 
-    void TileProviderByIndex::reset() {
-        for(auto it : _tileProviderMap){
-            it.second->reset();
-        }
-        _defaultTileProvider->reset();
+void TileProviderByIndex::reset() {
+    for (auto& it : _tileProviderMap) {
+        it.second->reset();
     }
+    _defaultTileProvider->reset();
+}
 
-    int TileProviderByIndex::maxLevel() {
-        return _defaultTileProvider->maxLevel();
-    }
+int TileProviderByIndex::maxLevel() {
+    return _defaultTileProvider->maxLevel();
+}
 
-    TileProvider* TileProviderByIndex::indexProvider(const TileIndex& tileIndex) const{
-        auto it = _tileProviderMap.find(tileIndex.hashKey());
-        return (it != _tileProviderMap.end()) ? it->second.get() : nullptr;
-    }
+TileProvider* TileProviderByIndex::indexProvider(const TileIndex& tileIndex) const {
+    auto it = _tileProviderMap.find(tileIndex.hashKey());
+    return (it != _tileProviderMap.end()) ? it->second.get() : nullptr;
+}
 
 } // namespace globebrowsing
 } // namespace openspace

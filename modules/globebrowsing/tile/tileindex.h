@@ -22,13 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TILE_INDEX_H__
-#define __TILE_INDEX_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_TILE_INDEX_H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING_TILE_INDEX_H__
 
-#include <glm/glm.hpp>
-
-#include <string>
-#include <vector>
+#include <ghoul/glm.h>
 #include <stdint.h>
 
 namespace ghoul {
@@ -59,10 +56,18 @@ using TileHashKey = uint64_t;
 struct TileIndex {
     int x, y, level;
     
-    TileIndex() : x(0), y(0), level(0) { }
-    TileIndex(int x, int y, int level) : x(x), y(y), level(level) { }
-    TileIndex(const TileIndex& other) : x(other.x), y(other.y), level(other.level) { }
+    TileIndex(int x = 0, int y = 0, int level = 0);
+    TileIndex(const TileIndex& other);
+
+    /**
+     * Creates the geodetic tile index for the Geodetic patch that covers the
+     * point p at the specified level
+     */
     TileIndex(const Geodetic2& point, int level);
+
+    /**
+     * Initializes a TileIndex from a Dictionary
+     */
     TileIndex(const ghoul::Dictionary& dict);
 
 
@@ -101,9 +106,9 @@ struct TileIndex {
     std::string toString() const;
 
     /**
-    Gets the tile at a specified offset from this tile.
-    Accepts delta indices ranging from [-2^level, Infinity[
-    */
+     * Gets the tile at a specified offset from this tile.
+     * Accepts delta indices ranging from [-2^level, Infinity[
+     */
     TileIndex getRelatedTile(int deltaX, int deltaY) const;
 
     int manhattan(const TileIndex& other) const;
@@ -118,4 +123,4 @@ std::ostream& operator<<(std::ostream& os, const TileIndex& ti);
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __TILE_INDEX_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING_TILE_INDEX_H__

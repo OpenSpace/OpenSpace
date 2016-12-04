@@ -22,39 +22,34 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-
-#ifndef __BASICGRIDGEOMETRY_H__
-#define __BASICGRIDGEOMETRY_H__
-
-#include <glm/glm.hpp>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_BASICGRIDGEOMETRY_H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING_BASICGRIDGEOMETRY_H__
 
 #include <modules/globebrowsing/meshes/grid.h>
+
+#include <glm/glm.hpp>
 
 #include <vector>
 
 namespace openspace {
 namespace globebrowsing {
 
-class BasicGrid : public Grid
-{
+class BasicGrid : public Grid {
 public:
     /**
-    \param xSegments is the number of grid cells in the x direction.
-    \param ySegments is the number of grid cells in the y direction.
-    \param usePositions determines whether or not to upload any vertex position data
-    to the GPU.
-    \param useTextureCoordinates determines whether or not to upload any vertex texture
-    coordinate data to the GPU.
-    \param useNormals determines whether or not to upload any vertex normal data
-    to the GPU.
+     * \param xSegments is the number of grid cells in the x direction.
+     * \param ySegments is the number of grid cells in the y direction.
+     * \param usePositions determines whether or not to upload any vertex position data
+     * to the GPU.
+     * \param useTextureCoordinates determines whether or not to upload any vertex texture
+     * coordinate data to the GPU.
+     * \param useNormals determines whether or not to upload any vertex normal data
+     * to the GPU.
     */
-    BasicGrid(
-        unsigned int xSegments,
-        unsigned int ySegments,
-        TriangleSoup::Positions usePositions,
-        TriangleSoup::TextureCoordinates useTextureCoordinates,
-        TriangleSoup::Normals useNormals);
-    ~BasicGrid();
+    BasicGrid(unsigned int xSegments, unsigned int ySegments, 
+              TriangleSoup::Positions usePositions,
+              TriangleSoup::TextureCoordinates useTextureCoordinates,
+              TriangleSoup::Normals useNormals);
 
     virtual int xSegments() const;
     virtual int ySegments() const;
@@ -74,4 +69,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __BASICGRIDGEOMETRY_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING_BASICGRIDGEOMETRY_H__

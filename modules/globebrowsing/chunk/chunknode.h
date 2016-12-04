@@ -22,20 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __QUADTREE_H__
-#define __QUADTREE_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_CHUNKNODE_H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING_CHUNKNODE_H__
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <stack>
-#include <memory>
-#include <ostream>
-#include <functional>
-
-#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/rendering/chunkrenderer.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
+
+#include <array>
+#include <functional>
+#include <memory>
 
 namespace openspace {
 namespace globebrowsing {
@@ -63,9 +57,9 @@ public:
     bool isRoot() const;
     bool isLeaf() const;
 
-    void depthFirst(            const std::function<void(const ChunkNode&)>& f) const;
-    void breadthFirst(          const std::function<void(const ChunkNode&)>& f) const;
-    void reverseBreadthFirst(   const std::function<void(const ChunkNode&)>& f) const;
+    void depthFirst(const std::function<void(const ChunkNode&)>& f) const;
+    void breadthFirst(const std::function<void(const ChunkNode&)>& f) const;
+    void reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const;
 
     const ChunkNode& find(const Geodetic2& location) const;
     const ChunkNode& getChild(Quad quad) const;
@@ -84,7 +78,7 @@ public:
 
 private:    
     ChunkNode* _parent;
-    std::unique_ptr<ChunkNode> _children[4];    
+    std::array<std::unique_ptr<ChunkNode>, 4> _children;
 
     Chunk _chunk;
 };
@@ -92,4 +86,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __QUADTREE_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING_CHUNKNODE_H__

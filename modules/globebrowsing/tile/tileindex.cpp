@@ -23,144 +23,138 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/tileindex.h>
+
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 #include <ghoul/misc/dictionary.h>
 
-#include <sstream>
-
 namespace {
-    const std::string _loggerCat = "TileIndex";
-
-    const std::string KeyLevel = "Level";
-    const std::string KeyX = "X";
-    const std::string KeyY = "Y";
+    const char* KeyLevel = "Level";
+    const char* KeyX = "X";
+    const char* KeyY = "Y";
 }
 
 namespace openspace {
 namespace globebrowsing {
 
-    /**
-    Creates the geodetic tile index for the Geodetic patch that covers the
-    point p at the specified level
-    */
-    TileIndex::TileIndex(const Geodetic2& point, int level)
-    : level(level) {
-        int numIndicesAtLevel = 1 << level;
-        double u = 0.5 + point.lon / (2 * M_PI);
-        double v = 0.25 - point.lat / (2 * M_PI);
-        double xIndexSpace = u * numIndicesAtLevel;
-        double yIndexSpace = v * numIndicesAtLevel;
+TileIndex::TileIndex(int x, int y, int level)
+    : x(x), y(y), level(level)
+{}
 
-        x = floor(xIndexSpace);
-        y = floor(yIndexSpace);
-    }
+TileIndex::TileIndex(const TileIndex& other)
+    : x(other.x), y(other.y), level(other.level)
+{}
 
-    /** 
-    * Initializes a TileIndex from a Dictionary
-    */
-    TileIndex::TileIndex(const ghoul::Dictionary& dict){
-        level = static_cast<int>(dict.value<double>(KeyLevel));
-        x = static_cast<int>(dict.value<double>(KeyX));
-        y = static_cast<int>(dict.value<double>(KeyY));
-    }
+TileIndex::TileIndex(const Geodetic2& point, int level)
+    : level(level)
+{
+    int numIndicesAtLevel = 1 << level;
+    double u = 0.5 + point.lon / (2 * glm::pi<double>());
+    double v = 0.25 - point.lat / (2 * glm::pi<double>());
+    double xIndexSpace = u * numIndicesAtLevel;
+    double yIndexSpace = v * numIndicesAtLevel;
 
-    TileIndex TileIndex::child(Quad q) const {
-        return TileIndex(2 * x + q % 2, 2 * y + q / 2, level + 1);
-    }
+    x = floor(xIndexSpace);
+    y = floor(yIndexSpace);
+}
 
-    TileIndex TileIndex::parent() const {
-        //ghoul_assert(level > 0, "tile at level 0 has no parent!");
-        return TileIndex(x / 2, y / 2, level - 1);
-    }
+TileIndex::TileIndex(const ghoul::Dictionary& dict) {
+    level = static_cast<int>(dict.value<double>(KeyLevel));
+    x = static_cast<int>(dict.value<double>(KeyX));
+    y = static_cast<int>(dict.value<double>(KeyY));
+}
 
-    TileIndex& TileIndex::operator--() {
-        x /= 2;
-        y /= 2;
-        level--;
-        return *this;
-    }
+TileIndex TileIndex::child(Quad q) const {
+    return TileIndex(2 * x + q % 2, 2 * y + q / 2, level + 1);
+}
 
-    TileIndex TileIndex::operator--(int) {
-        TileIndex tmp(*this);
-        --(*this);
-        return tmp;
-    }
+TileIndex TileIndex::parent() const {
+    //ghoul_assert(level > 0, "tile at level 0 has no parent!");
+    return TileIndex(x / 2, y / 2, level - 1);
+}
 
-    TileIndex& TileIndex::operator-=(unsigned int levels) {
-        x <<= levels;
-        y <<= levels;
-        level -= levels;
-        return *this;
-    }
+TileIndex& TileIndex::operator--() {
+    x /= 2;
+    y /= 2;
+    level--;
+    return *this;
+}
 
+TileIndex TileIndex::operator--(int) {
+    TileIndex tmp(*this);
+    --(*this);
+    return tmp;
+}
 
-    glm::vec2 TileIndex::positionRelativeParent() const{
-        // In OpenGL, positive y direction is up
-        return glm::vec2(isEastChild() ? 0.5 : 0, isNorthChild() ? 0.5 : 0);
-    }
+TileIndex& TileIndex::operator-=(unsigned int levels) {
+    x <<= levels;
+    y <<= levels;
+    level -= levels;
+    return *this;
+}
 
-    /**
-    Gets the tile at a specified offset from this tile.
-    Accepts delta indices ranging from [-2^level, Infinity[
-    */
-    TileIndex TileIndex::getRelatedTile(int deltaX, int deltaY) const {
-        int indicesAtThisLevel = 1 << level;
-        int newX = (indicesAtThisLevel + x + deltaX) % indicesAtThisLevel;
-        int newY = (indicesAtThisLevel + y + deltaY) % indicesAtThisLevel;
-        return TileIndex(newX, newY, level);
-    }
+glm::vec2 TileIndex::positionRelativeParent() const {
+    // In OpenGL, positive y direction is up
+    return glm::vec2(isEastChild() ? 0.5 : 0, isNorthChild() ? 0.5 : 0);
+}
 
-    int TileIndex::manhattan(const TileIndex& other) const {
-        ghoul_assert(level == other.level, "makes no sense if not on same level");
-        return std::abs(x - other.x) + std::abs(y - other.y);
-    }
+TileIndex TileIndex::getRelatedTile(int deltaX, int deltaY) const {
+    int indicesAtThisLevel = 1 << level;
+    int newX = (indicesAtThisLevel + x + deltaX) % indicesAtThisLevel;
+    int newY = (indicesAtThisLevel + y + deltaY) % indicesAtThisLevel;
+    return TileIndex(newX, newY, level);
+}
 
-    /**
-    Creates a hash which can be used as key in hash maps.
+int TileIndex::manhattan(const TileIndex& other) const {
+    ghoul_assert(level == other.level, "makes no sense if not on same level");
+    return std::abs(x - other.x) + std::abs(y - other.y);
+}
+
+/**
+Creates a hash which can be used as key in hash maps.
     
-    +-------+------------+-------+------------+
-    | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
-    +-------+------------+-------+------------+
-    | level |   0 -  5   |   5   |         31 |
-    |     x |   5 - 35   |  30   | 1073741824 |
-    |     y |  35 - 64   |  29   |  536870912 |
-    +-------+------------+-------+------------+
++-------+------------+-------+------------+
+| USAGE | BIT RANGE  | #BITS | MAX VALUE  |
++-------+------------+-------+------------+
+| level |   0 -  5   |   5   |         31 |
+|     x |   5 - 35   |  30   | 1073741824 |
+|     y |  35 - 64   |  29   |  536870912 |
++-------+------------+-------+------------+
      
-    */
-    TileHashKey TileIndex::hashKey() const {
-        TileHashKey key = 0LL;
-        key |= level;
-        key |= x << 5;
-        key |= ((TileHashKey)y) << 35;
-        return key;
-    }
+*/
+TileHashKey TileIndex::hashKey() const {
+    TileHashKey key = 0LL;
+    key |= level;
+    key |= x << 5;
+    key |= ((TileHashKey)y) << 35;
+    return key;
+}
 
-    std::string TileIndex::toString() const {
-        std::stringstream ss;
-        for (int i = level; i > 0; i--){
-            char digit = '0';
-            int mask = 1 << (i - 1);
-            if ((x & mask) != 0) {
-                digit++;
-            }
-            if ((y & mask) != 0) {
-                digit++;
-                digit++;
-            }
-            ss << digit;
+std::string TileIndex::toString() const {
+    std::stringstream ss;
+    for (int i = level; i > 0; i--) {
+        char digit = '0';
+        int mask = 1 << (i - 1);
+        if ((x & mask) != 0) {
+            digit++;
         }
-        return ss.str();
+        if ((y & mask) != 0) {
+            digit++;
+            digit++;
+        }
+        ss << digit;
     }
+    return ss.str();
+}
 
-    bool TileIndex::operator==(const TileIndex& other) const {
-        return x == other.x && y == other.y && level == other.level;
-    }
+bool TileIndex::operator==(const TileIndex& other) const {
+    return x == other.x && y == other.y && level == other.level;
+}
 
-    std::ostream& operator<<(std::ostream& os, const TileIndex& ci) {
-        os << "{ x = " << ci.x << ", y = " << ci.y << ", level = " << ci.level << " }";
-        return os;
-    }
+std::ostream& operator<<(std::ostream& os, const TileIndex& ci) {
+    os << "{ x = " << ci.x << ", y = " << ci.y << ", level = " << ci.level << " }";
+    return os;
+}
 
 } // namespace globebrowsing
 } // namespace openspace

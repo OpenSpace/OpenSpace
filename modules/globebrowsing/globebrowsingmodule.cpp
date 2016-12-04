@@ -26,6 +26,13 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
+#include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
+#include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -33,44 +40,31 @@
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
-#include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
-#include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
-
-
 namespace openspace {
 
-    GlobeBrowsingModule::GlobeBrowsingModule()
-    : OpenSpaceModule("GlobeBrowsing")
-{}
+GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule("GlobeBrowsing") {}
 
 void GlobeBrowsingModule::internalInitialize() {
+    using namespace globebrowsing;
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
 
-    void addFactory(std::unique_ptr<ghoul::TemplateFactoryBase> factory);
-    
     // add Tile Provider factory
-    FactoryManager::ref().addFactory(
-        std::make_unique<ghoul::TemplateFactory<globebrowsing::TileProvider>>());
+    auto fTileProvider = std::make_unique<ghoul::TemplateFactory<TileProvider>>();
 
-    auto fTileProvider =
-        FactoryManager::ref().factory<globebrowsing::TileProvider>();
-    fTileProvider->registerClass<globebrowsing::CachingTileProvider>("LRUCaching");
-    fTileProvider->registerClass<globebrowsing::SingleImageProvider>("SingleImage");
-    fTileProvider->registerClass<globebrowsing::TemporalTileProvider>("Temporal");
-    fTileProvider->registerClass<globebrowsing::TileIndexTileProvider>("TileIndex");
-    fTileProvider->registerClass<globebrowsing::SizeReferenceTileProvider>("SizeReference");
+    fTileProvider->registerClass<CachingTileProvider>("LRUCaching");
+    fTileProvider->registerClass<SingleImageProvider>("SingleImage");
+    fTileProvider->registerClass<TemporalTileProvider>("Temporal");
+    fTileProvider->registerClass<TileIndexTileProvider>("TileIndex");
+    fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReference");
 
     // Combining Tile Providers
-    fTileProvider->registerClass<globebrowsing::TileProviderByLevel>("ByLevel");
-    fTileProvider->registerClass<globebrowsing::TileProviderByIndex>("ByIndex");
+    fTileProvider->registerClass<TileProviderByLevel>("ByLevel");
+    fTileProvider->registerClass<TileProviderByIndex>("ByIndex");
+
+    FactoryManager::ref().addFactory(std::move(fTileProvider));
 }
 
 } // namespace openspace

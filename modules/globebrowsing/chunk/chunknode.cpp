@@ -22,20 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <queue>
+#include <modules/globebrowsing/chunk/chunknode.h>
 
 #include <ghoul/misc/assert.h>
 
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/engine/openspaceengine.h>
-
-#include <modules/globebrowsing/chunk/chunknode.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/chunk/culling.h>
-
-namespace {
-    const std::string _loggerCat = "ChunkNode";
-}
+#include <stack>
+#include <queue>
 
 namespace openspace {
 namespace globebrowsing {
@@ -43,13 +35,10 @@ namespace globebrowsing {
 int ChunkNode::chunkNodeCount = 0;
 
 ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
-: _chunk(chunk)
-, _parent(parent)
+    : _chunk(chunk)
+    , _parent(parent)
+    , _children({ nullptr, nullptr, nullptr, nullptr })
 {
-    _children[0] = nullptr;
-    _children[1] = nullptr;
-    _children[2] = nullptr;
-    _children[3] = nullptr;
     chunkNodeCount++;
 }
 
@@ -121,8 +110,8 @@ void ChunkNode::breadthFirst(const std::function<void(const ChunkNode&)>& f) con
     }
 }
 
-void ChunkNode::reverseBreadthFirst(
-    const std::function<void(const ChunkNode&)>& f) const {
+void ChunkNode::reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const
+{
     std::stack<const ChunkNode*> S;
     std::queue<const ChunkNode*> Q;
 
@@ -137,9 +126,12 @@ void ChunkNode::reverseBreadthFirst(
 
         // Add children to queue, if any
         if (!node->isLeaf()) {
-            for (int i = 0; i < 4; ++i) {
-                Q.push(node->_children[i].get());
+            for (const auto& c : node->_children) {
+                Q.push(c.get());
             }
+            //for (int i = 0; i < 4; ++i) {
+            //    Q.push(node->_children[i].get());
+            //}
         }
     }
 
@@ -150,23 +142,21 @@ void ChunkNode::reverseBreadthFirst(
     }
 }
 
-#define CHUNK_NODE_FIND(node, p) \
-     while (!node->isLeaf()) { \
-        const Geodetic2 center = node->_chunk.surfacePatch().center();\
-        int index = 0;\
-        if (center.lon < p.lon) {\
-            ++index;\
-        }\
-        if (p.lat < center.lat) {\
-            ++index;\
-            ++index;\
-        }\
-        node = &(node->getChild((Quad)index));\
-    }
-
 const ChunkNode& ChunkNode::find(const Geodetic2& location) const {
     const ChunkNode* node = this;
-    CHUNK_NODE_FIND(node, location);
+
+    while (!node->isLeaf()) {
+        const Geodetic2 center = node->_chunk.surfacePatch().center();
+        int index = 0;
+        if (center.lon < location.lon) {
+            ++index;
+        }
+        if (location.lat < center.lat) {
+            ++index;
+            ++index;
+        }
+        node = &(node->getChild((Quad)index));
+    }
     return *node;
 }
 
@@ -176,21 +166,21 @@ const ChunkNode& ChunkNode::getChild(Quad quad) const {
 
 void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
-        for (size_t i = 0; i < 4; i++) {
+        for (size_t i = 0; i < _children.size(); i++) {
             Chunk chunk(_chunk.owner(), _chunk.tileIndex().child((Quad)i));
             _children[i] = std::make_unique<ChunkNode>(chunk, this);
         }
     }
 
     if (depth - 1 > 0) {
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < _children.size(); ++i) {
             _children[i]->split(depth - 1);
         }
     }
 }
 
 void ChunkNode::merge() {
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < _children.size(); ++i) {
         if (_children[i] != nullptr) {
             _children[i]->merge();
         }
