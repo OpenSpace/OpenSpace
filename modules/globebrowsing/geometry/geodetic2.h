@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_GEODETIC2_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_GEODETIC2_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GEODETIC2___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GEODETIC2___H__
 
 #include <modules/globebrowsing/tile/tileindex.h>
 
@@ -141,4 +141,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING_GEODETIC2_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GEODETIC2___H__

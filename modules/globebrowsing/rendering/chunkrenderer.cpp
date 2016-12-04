@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/grid.h>
 #include <modules/globebrowsing/rendering/layershadermanager.h>
+#include <modules/globebrowsing/rendering/gpulayermanager.h>
 
 namespace {
     const char* keyFrame = "Frame";

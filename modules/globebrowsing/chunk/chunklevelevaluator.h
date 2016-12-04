@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_CHUNKLEVELEVALUATOR_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_CHUNKLEVELEVALUATOR_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__
 
 namespace openspace {
 
@@ -79,4 +79,4 @@ public:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING_CHUNKLEVELEVALUATOR_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__

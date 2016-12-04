@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_AABB_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_AABB_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___AABB___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___AABB___H__
 
 #include <glm/glm.hpp>
 
@@ -88,4 +88,4 @@ struct AABB3 {
 } // namespace globebrowsing   
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_AABB_H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___AABB___H__

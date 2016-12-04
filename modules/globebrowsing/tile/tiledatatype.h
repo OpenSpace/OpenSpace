@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_TILE_DATA_TYPE_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_TILE_DATA_TYPE_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
 
 #include <modules/globebrowsing/tile/tile.h>
 
@@ -51,4 +51,4 @@ struct TileDataType {
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_TILE_DATA_TYPE_H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__

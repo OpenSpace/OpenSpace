@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_PIXELREGION_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_PIXELREGION_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___PIXELREGION___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___PIXELREGION___H__
 
 #include <glm/glm.hpp>
 
@@ -103,4 +103,4 @@ struct PixelRegion {
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_PIXELREGION_H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___PIXELREGION___H__

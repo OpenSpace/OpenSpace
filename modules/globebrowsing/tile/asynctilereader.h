@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_ASYNC_TILE_DATA_PROVIDER_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_ASYNC_TILE_DATA_PROVIDER_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATA_PROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATA_PROVIDER___H__
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/tile/tile.h>
@@ -107,4 +107,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_ASYNC_TILE_DATA_PROVIDER_H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATA_PROVIDER___H__

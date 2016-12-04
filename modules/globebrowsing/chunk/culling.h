@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_CULLING_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_CULLING_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CULLING___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___CULLING___H__
 
 #include <modules/globebrowsing/geometry/aabb.h>
 
@@ -85,4 +85,4 @@ public:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_CULLING_H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___CULLING___H__

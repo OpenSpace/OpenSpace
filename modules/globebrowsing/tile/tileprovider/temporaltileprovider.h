@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_TEMPORAL_TILE_PROVIDER_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_TEMPORAL_TILE_PROVIDER_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
@@ -279,11 +279,10 @@ private:
     std::string _datasetFile;
     std::string _gdalXmlTemplate;
 
-    std::unordered_map<TimeKey, std::shared_ptr<TileProvider> > _tileProviderMap;
+    std::unordered_map<TimeKey, std::shared_ptr<TileProvider>> _tileProviderMap;
 
     // Used for creation of time specific instances of CachingTileProvider
     ghoul::Dictionary _initDict;
-
 
     Tile _defaultTile;
 
@@ -296,4 +295,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_TEMPORAL_TILE_PROVIDER_H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__

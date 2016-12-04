@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_SKIRTEDGRID_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_SKIRTEDGRID_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
 
 #include <modules/globebrowsing/meshes/basicgrid.h>
 
@@ -75,4 +75,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING_SKIRTEDGRID_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__

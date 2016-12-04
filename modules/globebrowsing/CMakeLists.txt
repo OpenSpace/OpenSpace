@@ -72,7 +72,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
 )

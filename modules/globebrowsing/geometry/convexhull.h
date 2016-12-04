@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_CONVEX_HULL_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_CONVEX_HULL_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CONVEX_HULL___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___CONVEX_HULL___H__
 
 #include <modules/globebrowsing/geometry/aabb.h>
 
@@ -69,4 +69,4 @@ private:
 } // namespace globebrowsing   
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_CONVEX_HULL_H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___CONVEX_HULL___H__

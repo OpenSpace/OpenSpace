@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_CHUNKTILE_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_CHUNKTILE_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
 
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
@@ -46,4 +46,4 @@ struct ChunkTilePile {
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_CHUNKTILE_H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__

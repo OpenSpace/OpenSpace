@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_POINTGLOBE_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_POINTGLOBE_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -59,4 +59,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_POINTGLOBE_H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__

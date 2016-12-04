@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GLOBEBROWSING_H__
-#define __GLOBEBROWSING_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -39,4 +39,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __GLOBEBROWSING_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING___H__

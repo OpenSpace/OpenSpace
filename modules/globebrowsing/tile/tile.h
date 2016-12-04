@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_TILE_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_TILE_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__
 
 #include <modules/globebrowsing/tile/tileindex.h>
 
@@ -140,4 +140,4 @@ struct Tile {
 } // namespace openspace
 
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_TILE_H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__

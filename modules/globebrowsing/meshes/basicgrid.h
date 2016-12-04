@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_BASICGRIDGEOMETRY_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_BASICGRIDGEOMETRY_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___BASICGRIDGEOMETRY___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___BASICGRIDGEOMETRY___H__
 
 #include <modules/globebrowsing/meshes/grid.h>
 
@@ -69,4 +69,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING_BASICGRIDGEOMETRY_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___BASICGRIDGEOMETRY___H__

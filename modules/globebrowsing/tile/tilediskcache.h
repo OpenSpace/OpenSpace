@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_TILE_DISK_CACHE_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_TILE_DISK_CACHE_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__
 
 #include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/file.h>
@@ -60,4 +60,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING_TILE_DISK_CACHE_H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__

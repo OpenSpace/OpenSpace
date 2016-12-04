@@ -22,90 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONCURRENT_JOB_MANAGER_H__
-#define __CONCURRENT_JOB_MANAGER_H__
-
-#include <glm/glm.hpp>
-#include <memory>
-#include <ostream>
-#include <thread>
-#include <queue>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__
 
 #include <modules/globebrowsing/other/concurrentqueue.h>
 #include <modules/globebrowsing/other/threadpool.h>
-//#include <ghoul/misc/threadpool.h>
-
-#include <ghoul/misc/assert.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-    // Templated abstract base class representing a job to be done.
-    // Client code derive from this class and implement the virtual execute() method
-    template<typename P>
-    struct Job {
+// Templated abstract base class representing a job to be done.
+// Client code derive from this class and implement the virtual execute() method
+template<typename P>
+struct Job {
+    Job();
+    virtual ~Job();
 
-        Job() { }
-        virtual ~Job() { }
+    virtual void execute() = 0;
+    virtual std::shared_ptr<P> product() const = 0;
+};
 
-        virtual void execute() = 0;
-        virtual std::shared_ptr<P> product() const = 0;
-    
-    };
+/* 
+    * Templated Concurrent Job Manager
+    * This class is used execute specific jobs on one (1) parallell thread
+    */
+template<typename P>
+class ConcurrentJobManager {
+public:
+    ConcurrentJobManager(std::shared_ptr<ThreadPool> pool);
 
-    /* 
-     * Templated Concurrent Job Manager
-     * This class is used execute specific jobs on one (1) parallell thread
-     */
-    template<typename P>
-    class ConcurrentJobManager{
-    public:
-        ConcurrentJobManager(std::shared_ptr<ThreadPool> pool) : threadPool(pool)
-        {
+    void enqueueJob(std::shared_ptr<Job<P>> job);
 
-        }
+    void clearEnqueuedJobs();
 
-        ~ConcurrentJobManager() {
+    std::shared_ptr<Job<P>> popFinishedJob();
 
-        }
+    size_t numFinishedJobs() const;
 
-        void enqueueJob(std::shared_ptr<Job<P>> job) {
-            //threadPool->queue([this, job]() {
-            //    job->execute();
-            //    _finishedJobs.push(job);
-            //});
-            threadPool->enqueue([this, job]() {
-                job->execute();
-                _finishedJobs.push(job);
-            });
-        }
+    void reset();
 
-        void clearEnqueuedJobs() {
-            //threadPool->clearRemainingTasks();
-            threadPool->clearTasks();
-        }
-
-        std::shared_ptr<Job<P>> popFinishedJob() {
-            ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
-            return _finishedJobs.pop();
-        }
-
-        size_t numFinishedJobs() const{
-            return _finishedJobs.size();
-        }
-
-        void reset() {
-            //threadPool->clearRemainingTasks();
-            threadPool->clearTasks();
-        }
-
-    private:
-
-        ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
-        std::shared_ptr<ThreadPool> threadPool;
-    };
+private:
+    ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
+    std::shared_ptr<ThreadPool> threadPool;
+};
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __CONCURRENT_JOB_MANAGER_H__
+#include "concurrentjobmanager.inl"
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_JOB_MANAGER___H__

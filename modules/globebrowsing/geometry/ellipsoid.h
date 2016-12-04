@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING_ELLIPSOID_H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING_ELLIPSOID_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ELLIPSOID___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___ELLIPSOID___H__
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
@@ -101,4 +101,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING_ELLIPSOID_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ELLIPSOID___H__
