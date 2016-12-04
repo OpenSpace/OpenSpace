@@ -213,7 +213,9 @@ void InteractionHandler::goToChunk(int x, int y, int level) {
         std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
     
     if (gbim) {
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
         gbim->goToChunk(*_camera, globebrowsing::TileIndex(x,y,level), glm::vec2(0.5,0.5), true);
+#endif
     } else {
         LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
     }
@@ -224,10 +226,12 @@ void InteractionHandler::goToGeo(double latitude, double longitude) {
     std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
         
     if (gbim) {
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
         gbim->goToGeodetic2(
             *_camera,
             globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(), true
         );
+#endif
     } else {
         LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
     }
