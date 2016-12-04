@@ -100,14 +100,14 @@ class LayerManager : public properties::PropertyOwner  {
 public:
     static const size_t NUM_LAYER_GROUPS = 7;
     static const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS];
-    static enum LayerGroupId {
+    enum LayerGroupId {
         HeightLayers,
         ColorLayers,
         ColorOverlays,
         GrayScaleLayers,
         GrayScaleColorOverlays,
         NightLayers,
-        WaterMasks,
+        WaterMasks
     };
 
     LayerManager(const ghoul::Dictionary& textureCategoriesDictionary);
