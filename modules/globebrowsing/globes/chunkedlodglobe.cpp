@@ -39,6 +39,8 @@
 
 #include <ghoul/filesystem/filesystem.h>
 
+#include <math.h>
+
 namespace openspace {
 namespace globebrowsing {
 
@@ -216,10 +218,10 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
 
         // In case the texture has NaN or no data values don't use this height map.
         bool anySampleIsNaN =
-            isnan(sample00) ||
-            isnan(sample01) ||
-            isnan(sample10) ||
-            isnan(sample11);
+            std::isnan(sample00) ||
+            std::isnan(sample01) ||
+            std::isnan(sample10) ||
+            std::isnan(sample11);
 
         bool anySampleIsNoData =
             sample00 == tileProvider->noDataValueAsFloat() ||
