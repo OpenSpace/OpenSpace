@@ -191,7 +191,7 @@ private:
      * file provided in the ghoul::Dictionary used to create this provider. These
      * tags describe the temporal properties of the dataset.
      */
-    static const struct TemporalXMLTags {
+    struct TemporalXMLTags {
         /**
          * Tag should contain a ISO8601 time specifying the datasets start time
          */
