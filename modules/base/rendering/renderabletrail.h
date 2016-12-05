@@ -29,9 +29,11 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 

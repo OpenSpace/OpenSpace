@@ -52,7 +52,6 @@ namespace {
     const char* keyPointSteps = "PointSteps";
     const char* keyDrawLine = "DrawLine";
     const char* keRenderDistanceInterval = "RenderDistanceInterval";
-
 }
 
 namespace openspace {

@@ -21,10 +21,13 @@
 * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
+
 #ifndef __SCREENSPACEFRAMEBUFFER_H__
 #define __SCREENSPACEFRAMEBUFFER_H__
 
 #include <openspace/rendering/screenspacerenderable.h>
+
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/textureunit.h>
 

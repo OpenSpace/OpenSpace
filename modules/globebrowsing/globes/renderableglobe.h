@@ -34,6 +34,9 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/selectionproperty.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+
 #include <openspace/util/updatestructures.h>
 
 #include <modules/globebrowsing/meshes/trianglesoup.h>

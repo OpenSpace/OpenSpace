@@ -26,8 +26,8 @@
 #define __RENDERABLEPATH_H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 

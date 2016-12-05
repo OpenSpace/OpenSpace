@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/scalarproperty.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <ghoul/misc/dictionary.h>
 

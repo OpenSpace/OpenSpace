@@ -28,6 +28,7 @@
 #include <openspace/scene/scale.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
     

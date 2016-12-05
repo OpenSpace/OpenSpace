@@ -24,6 +24,8 @@
 
 #include <openspace/properties/selectionproperty.h>
 
+#include <ghoul/lua/ghoul_lua.h>
+
 namespace {
     const std::string _loggerCat = "SelectionProperty";
 

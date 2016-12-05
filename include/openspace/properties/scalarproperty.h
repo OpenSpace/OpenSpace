@@ -25,100 +25,23 @@
 #ifndef __SCALARPROPERTY_H__
 #define __SCALARPROPERTY_H__
 
- /**
- * \file scalarproperty.h
- *
- * \addtogroup openspace 
- * @{
- * \addtogroup properties 
- * @{
- 
- * \class BoolProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>bool</code>.
+#include <openspace/properties/numericalproperty.h>
 
- * \class CharProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>char</code>.
-
- * \class SignedCharProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>signed char</code>.
-
- * \class UCharProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned char</code>.
-
- * \class ShortProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>short</code>.
-
- * \class UShortProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned short</code>.
-
- * \class IntProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>int</code>.
-
- * \class UIntProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned int</code>.
-
- * \class LongProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>long</code>.
-
- * \class ULongProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned long</code>.
-
- * \class LongLongProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>long long</code>.
-
- * \class ULongLongProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>unsigned long long</code>.
-
- * \class FloatProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>float</code>.
-
- * \class DoubleProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>double</code>.
-
- * \class LongDoubleProperty
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
- * the type <code>long double</code>.
-
- * @} @}
- */
-
-#include "openspace/properties/numericalproperty.h"
-
-namespace openspace {
-namespace properties {
-
-REGISTER_TEMPLATEPROPERTY_HEADER(BoolProperty, bool);
-REGISTER_NUMERICALPROPERTY_HEADER(CharProperty, char);
-//REGISTER_NUMERICALPROPERTY_HEADER(WCharProperty, wchar_t);
-REGISTER_NUMERICALPROPERTY_HEADER(SignedCharProperty, signed char);
-REGISTER_NUMERICALPROPERTY_HEADER(UCharProperty, unsigned char);
-REGISTER_NUMERICALPROPERTY_HEADER(ShortProperty, short);
-REGISTER_NUMERICALPROPERTY_HEADER(UShortProperty, unsigned short);
-REGISTER_NUMERICALPROPERTY_HEADER(IntProperty, int);
-REGISTER_NUMERICALPROPERTY_HEADER(UIntProperty, unsigned int);
-REGISTER_NUMERICALPROPERTY_HEADER(LongProperty, long);
-REGISTER_NUMERICALPROPERTY_HEADER(ULongProperty, unsigned long);
-REGISTER_NUMERICALPROPERTY_HEADER(LongLongProperty, long long);
-REGISTER_NUMERICALPROPERTY_HEADER(ULongLongProperty, unsigned long long);
-REGISTER_NUMERICALPROPERTY_HEADER(FloatProperty, float);
-REGISTER_NUMERICALPROPERTY_HEADER(DoubleProperty, double);
-REGISTER_NUMERICALPROPERTY_HEADER(LongDoubleProperty, long double);
-
-} // namespace properties
-} // namespace openspace
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/charproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/longdoubleproperty.h>
+#include <openspace/properties/scalar/longlongproperty.h>
+#include <openspace/properties/scalar/longproperty.h>
+#include <openspace/properties/scalar/shortproperty.h>
+#include <openspace/properties/scalar/signedcharproperty.h>
+#include <openspace/properties/scalar/ucharproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
+#include <openspace/properties/scalar/ulonglongproperty.h>
+#include <openspace/properties/scalar/ulongproperty.h>
+#include <openspace/properties/scalar/ushortproperty.h>
+#include <openspace/properties/scalar/wcharproperty.h>
 
 #endif // __SCALARPROPERTY_H__

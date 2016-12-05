@@ -26,7 +26,7 @@
 #define __GUICOMPONENT_H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace {
 namespace gui {

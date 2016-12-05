@@ -30,7 +30,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace ghoul {
 namespace filesystem {

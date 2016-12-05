@@ -25,7 +25,7 @@
 #ifndef __OPTIONPROPERTY_H__
 #define __OPTIONPROPERTY_H__
 
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 #include <vector>
 

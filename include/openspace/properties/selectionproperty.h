@@ -25,7 +25,7 @@
 #ifndef __SELECTIONPROPERTY_H__
 #define __SELECTIONPROPERTY_H__
 
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/templateproperty.h>
 
 #include <vector>
 

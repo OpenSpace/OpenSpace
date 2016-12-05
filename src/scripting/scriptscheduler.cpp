@@ -27,74 +27,154 @@
 #include <openspace/engine/openspaceengine.h>
 
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/spicemanager.h> // parse time
+#include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem>
 
-
-namespace openspace {
-namespace scripting {
+#include <openspace/documentation/verifier.h>
 
 namespace {
-    const std::string _loggerCat = "ScriptScheduler";
-
-    const std::string KEY_TIME = "Time";
-    const std::string KEY_FORWARD_SCRIPT = "ReversibleLuaScript.Forward";
-    const std::string KEY_BACKWARD_SCRIPT = "ReversibleLuaScript.Backward";
+    const char* KeyTime = "Time";
+    const char* KeyForwardScript = "ForwardScript";
+    const char* KeyBackwardScript = "BackwardScript";
+    const char* KeyUniversalScript = "Script";
 }
 
+namespace openspace {
 
-ScheduledScript::ScheduledScript(const ghoul::Dictionary& dict) 
-    : ScheduledScript() // default init first
+#include "scriptscheduler_lua.inl"
+
+namespace scripting {
+
+openspace::Documentation ScriptScheduler::Documentation() {
+    using namespace openspace::documentation;
+
+    using TimeVerifier = StringVerifier;
+    using LuaScriptVerifier = StringVerifier;
+
+    return{
+        "Scheduled Scripts",
+        "core_scheduledscript",
+        {
+            {
+                "*",
+                new TableVerifier({
+                    {
+                        KeyTime,
+                        new TimeVerifier,
+                        "The time at which, when the in game time passes it, the two "
+                        "scripts will be executed. If the traversal is forwards (towards "
+                        "+ infinity), the ForwardScript will be executed, otherwise the "
+                        "BackwardScript will be executed instead.",
+                        Optional::No
+                    },
+                    {
+                        KeyUniversalScript,
+                        new LuaScriptVerifier,
+                        "The Lua script that will be executed when the specified time is "
+                        "passed independent of its direction. This script will be "
+                        "executed before the specific scripts if both versions are "
+                        "specified",
+                        Optional::Yes
+                    },
+                    {
+                        KeyForwardScript,
+                        new LuaScriptVerifier,
+                        "The Lua script that is executed when OpenSpace passes the time "
+                        "in a forward direction.",
+                        Optional::Yes
+                    },
+                    {
+                        KeyBackwardScript,
+                        new LuaScriptVerifier,
+                        "The Lua script that is executed when OpenSpace passes the time "
+                        "in a backward direction.",
+                        Optional::Yes
+                    }
+                })
+            }
+        },
+        Exhaustive::Yes
+    };
+}
+
+ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dictionary)
+    : time(-std::numeric_limits<double>::max())
 {
-    std::string timeStr;
-    if (dict.getValue(KEY_TIME, timeStr)) {
-        time = SpiceManager::ref().ephemerisTimeFromDate(timeStr);
+    std::string timeStr = dictionary.value<std::string>(KeyTime);
+    time = Time::ref().convertTime(timeStr);
+    
+    // If a universal script is specified, retrieve it and add a ; as a separator so that
+    // it can be added to the other scripts
+    std::string universal;
+    dictionary.getValue(KeyUniversalScript, universal);
+    if (!universal.empty()) {
+        universal += ";";
+    }
+    
+    if (dictionary.hasKeyAndValue<std::string>(KeyForwardScript)) {
+        forwardScript =
+            universal + dictionary.value<std::string>(KeyForwardScript);
+    }
+    
+    if (dictionary.hasKeyAndValue<std::string>(KeyBackwardScript)) {
+        backwardScript =
+            universal + dictionary.value<std::string>(KeyBackwardScript);
+    }
+}
 
-        if (!dict.getValue(KEY_FORWARD_SCRIPT, script.forwardScript)) {
-            LERROR("Unable to read " << KEY_FORWARD_SCRIPT);
+void ScriptScheduler::loadScripts(const ghoul::Dictionary& dictionary) {
+    // Check if all of the scheduled scripts are formed correctly
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "ScriptScheduler"
+    );
+    
+    // Create all the scheduled script first
+    std::vector<ScheduledScript> scheduledScripts;
+    for (size_t i = 1; i <= dictionary.size(); ++i) {
+        const ghoul::Dictionary& timedScriptDict = dictionary.value<ghoul::Dictionary>(
+            std::to_string(i)
+        );
+        scheduledScripts.emplace_back(timedScriptDict);
+    }
+
+    // Sort scripts by time; use a stable_sort as the user might have had an intention
+    // specifying multiple scripts for the same time in a specific order
+    std::stable_sort(
+        scheduledScripts.begin(),
+        scheduledScripts.end(),
+        [](const ScheduledScript& lhs, const ScheduledScript& rhs) {
+            return lhs.time < rhs.time;
         }
-        if (!dict.getValue(KEY_BACKWARD_SCRIPT, script.backwardScript)) {
-            LERROR("Unable to read " << KEY_BACKWARD_SCRIPT);
-        }
+    );
+    
+    // Move the scheduled scripts into their SOA alignment
+    // For the forward scripts, this is the forwards direction
+    // For the backward scripts, we insert them in the opposite order so that we can still
+    // return forward iterators to them in the progressTo method
+    for (ScheduledScript& script : scheduledScripts) {
+        _timings.push_back(script.time);
+
+        _forwardScripts.push_back(std::move(script.forwardScript));
+
+        _backwardScripts.insert(
+            _backwardScripts.begin(),
+            std::move(script.backwardScript)
+        );
     }
-    else {
-        LERROR("Unable to read " << KEY_TIME);
-    }
-}
-
-bool ScheduledScript::CompareByTime(const ScheduledScript& s1, const ScheduledScript& s2){
-    return s1.time < s2.time;
-}
-
-
-
-void ScriptScheduler::loadScripts(const std::string& filepath, lua_State* L) {
-    ghoul::Dictionary timedScriptsDict;
-    try {
-        ghoul::lua::loadDictionaryFromFile(absPath(filepath), timedScriptsDict, L);
-    }
-    catch (const ghoul::RuntimeError& e) {
-        LERROR(e.what());
-        return;
-    }
-    loadScripts(timedScriptsDict);
-}
-
-void ScriptScheduler::loadScripts(const ghoul::Dictionary& dict) {
-    for (size_t i = 0; i < dict.size(); ++i) {
-        std::string id = std::to_string(i + 1);
-        const ghoul::Dictionary& timedScriptDict = dict.value<ghoul::Dictionary>(id);
-        _scheduledScripts.push_back(ScheduledScript(timedScriptDict));
-    }
-
-    // Sort scripts by time
-    std::stable_sort(_scheduledScripts.begin(), _scheduledScripts.end(), &ScheduledScript::CompareByTime);
 
     // Ensure _currentIndex and _currentTime is accurate after new scripts was added
     double lastTime = _currentTime;
     rewind();
     progressTo(lastTime);
+    
+    ghoul_assert(
+        (_timings.size() == _forwardScripts.size()) &&
+        (_timings.size() == _backwardScripts.size()),
+        "The SOA data structure has been mistreated and has different number of values"
+    );
 }
 
 void ScriptScheduler::rewind() {
@@ -102,91 +182,113 @@ void ScriptScheduler::rewind() {
     _currentTime = -DBL_MAX;
 }
 
-
 void ScriptScheduler::clearSchedule() {
     rewind();
-    _scheduledScripts.clear();
+    _timings.clear();
+    _forwardScripts.clear();
+    _backwardScripts.clear();
 }
 
-std::queue<std::string> ScriptScheduler::progressTo(double newTime) {
-    std::queue<std::string> triggeredScripts;
+std::pair<
+    std::vector<std::string>::const_iterator, std::vector<std::string>::const_iterator
+>
+ScriptScheduler::progressTo(double newTime)
+{
+    if (newTime == _currentTime) {
+        return { _forwardScripts.end(), _forwardScripts.end() };
+    }
+
     if (newTime > _currentTime) {
-        while(_currentIndex < _scheduledScripts.size() && _scheduledScripts[_currentIndex].time <= newTime){
-            triggeredScripts.push(_scheduledScripts[_currentIndex].script.forwardScript);
-            _currentIndex++;
-        }
+        // Moving forward in time; we need to find the highest entry in the timings
+        // vector that is still smaller than the newTime
+        size_t prevIndex = _currentIndex;
+        auto it = std::upper_bound(
+            _timings.begin() + prevIndex, // We only need to start at the previous time
+            _timings.end(),
+            newTime
+         );
+        
+        // How many values did we pass over?
+        int n = std::distance(_timings.begin() + prevIndex, it);
+        _currentIndex = prevIndex + n;
+        
+        // Update the new time
+        _currentTime = newTime;
+        
+        return {
+            _forwardScripts.begin() + prevIndex,
+            _forwardScripts.begin() + _currentIndex
+        };
     }
     else {
-        while (0 < _currentIndex && _scheduledScripts[_currentIndex - 1].time > newTime) {
-            triggeredScripts.push(_scheduledScripts[_currentIndex - 1].script.backwardScript);
-            _currentIndex--;
-        }
+        // Moving backward in time; the need to find the lowest entry that is still bigger
+        // than the newTime
+        size_t prevIndex = _currentIndex;
+        auto it = std::lower_bound(
+            _timings.begin(),
+            _timings.begin() + prevIndex, // We can stop at the previous time
+            newTime
+        );
+        
+        // How many values did we pass over?
+        int n = std::distance(it, _timings.begin() + prevIndex);
+        _currentIndex = prevIndex - n;
+        
+        // Update the new time
+        _currentTime = newTime;
+
+        int size = _timings.size();
+        return {
+            _backwardScripts.begin() + (size - prevIndex),
+            _backwardScripts.begin() + (size - _currentIndex)
+        };
     }
-
-    _currentTime = newTime;
-    return triggeredScripts;
 }
 
-std::queue<std::string> ScriptScheduler::progressTo(const std::string& timeStr) {
-    return std::move(progressTo(SpiceManager::ref().ephemerisTimeFromDate(timeStr)));
-}
-
-double ScriptScheduler::currentTime() const { 
+double ScriptScheduler::currentTime() const {
     return _currentTime; 
 };
 
-const std::vector<ScheduledScript>& ScriptScheduler::allScripts() const { 
-    return _scheduledScripts; 
-};
-
-
-
-/////////////////////////////////////////////////////////////////////
-//                     Lua library functions                       //
-/////////////////////////////////////////////////////////////////////
-
-namespace luascriptfunctions {
-    int loadTimedScripts(lua_State* L) {
-        using ghoul::lua::luaTypeToString;
-        int nArguments = lua_gettop(L);
-        if (nArguments != 1)
-            return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-        std::string missionFileName = luaL_checkstring(L, -1);
-        if (missionFileName.empty()) {
-            return luaL_error(L, "filepath string is empty");
-        }
+std::vector<ScriptScheduler::ScheduledScript> ScriptScheduler::allScripts() const {
+    std::vector<ScheduledScript> result;
+    for (size_t i = 0; i < _timings.size(); ++i) {
+        ScheduledScript script;        
+        script.time = _timings[i];
+        script.forwardScript = _forwardScripts[i];
+        script.backwardScript = _backwardScripts[i];
         
-        OsEng.scriptScheduler().loadScripts(missionFileName, L);
+        result.push_back(std::move(script));
     }
-
-    int clear(lua_State* L) {
-        using ghoul::lua::luaTypeToString;
-        int nArguments = lua_gettop(L);
-        if (nArguments != 0)
-            return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-
-        OsEng.scriptScheduler().clearSchedule();
-    }
-} // namespace luascriptfunction
-
-
+    return result;
+};
 
 LuaLibrary ScriptScheduler::luaLibrary() {    
     return {
         "scriptScheduler",
         {
             {
-                "load",
-                &luascriptfunctions::loadTimedScripts,
+                "loadFile",
+                &luascriptfunctions::loadFile,
                 "string",
-                "Load timed scripts from file"
+                "Load timed scripts from a Lua script file that returns a list of "
+                "scheduled scripts."
+            },
+            {
+                "loadScheduledScript",
+                &luascriptfunctions::loadScheduledScript,
+                "string, string, (string, string)",
+                "Load a single scheduled script. The first argument is the time at which "
+                "the scheduled script is triggered, the second argument is the script "
+                "that is executed in the forward direction, the optional third argument "
+                "is the script executed in the backwards direction, and the optional "
+                "last argument is the universal script, executed in either direction."
+
             },
             {
                 "clear",
                 &luascriptfunctions::clear,
                 "",
-                "clears all scheduled scripts"
+                "Clears all scheduled scripts."
             },
         }
     };

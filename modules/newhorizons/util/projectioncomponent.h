@@ -28,9 +28,11 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/triggerproperty.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/misc/dictionary.h>

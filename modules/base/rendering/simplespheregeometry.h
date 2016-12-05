@@ -26,8 +26,9 @@
 #define __SIMPLESPHEREGEOMETRY_H__
 
 #include <modules/base/rendering/planetgeometry.h>
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/scalarproperty.h>
+
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 
 namespace openspace {
 

@@ -27,6 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/glm.h>
