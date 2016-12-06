@@ -41,8 +41,14 @@ function (create_new_module module_name output_library_name)
     # Add the module files to the list of sources
     add_module_files()
 
+    set(library_mode STATIC)
+    if (${library_name}_LIBRARY_MODE)
+        set(library_mode ${${library_name}_LIBRARY_MODE})
+        message(STATUS "\t Overwritten library mode: ${library_mode}")
+    endif ()
+
     # Create the library
-    add_library(${library_name} STATIC ${sources})
+    add_library(${library_name} ${library_mode} ${sources})
 
     # Set compile settings that are common to all modules
     set_common_compile_settings(${library_name})
@@ -154,6 +160,7 @@ function (handle_dependencies target_name module_name)
         # Handle OpenSpace dependencies
         foreach (dep ${OPENSPACE_DEPENDENCIES})
             create_library_name(${dep} dep_library)
+            message(STATUS "Link: ${target_name} <- ${dep_library}")
             target_link_libraries(${target_name} ${dep_library})
 
             get_property(
@@ -171,6 +178,7 @@ function (handle_dependencies target_name module_name)
             target_include_directories(${target_name} PUBLIC
                 ${${dep_upper}_INCLUDE_DIR} ${${dep_upper}_INCLUDE_DIRS}
             )
+            message(STATUS "Link: ${target_name} <- ${${dep_upper}_LIBRARIES}")
             target_link_libraries(${target_name}  ${${dep_upper}_LIBRARIES})
         endforeach ()
     endif ()

@@ -438,7 +438,12 @@ function (handle_internal_modules)
                 endif ()
             endforeach()
 
-            target_link_libraries(libOpenSpace ${libraryName})
+            # Only link libOpenSpace against the library if it has been set STATIC
+            get_target_property(libType ${libraryName} TYPE)
+            if (NOT ${libType} STREQUAL  "SHARED_LIBRARY")
+                target_link_libraries(libOpenSpace ${libraryName})
+            endif()
+
             create_define_name(${module} defineName)
             target_compile_definitions(libOpenSpace PUBLIC "${defineName}")
 
