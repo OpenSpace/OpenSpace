@@ -22,16 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLESHADOWCYLINDER_H__
-#define __RENDERABLESHADOWCYLINDER_H__
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLESHADOWCYLINDER___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLESHADOWCYLINDER___H__
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/util/updatestructures.h>
+
 #include <openspace/util/spicemanager.h>
 
 namespace ghoul {
@@ -41,7 +40,10 @@ class ProgramObject;
 }
 
 namespace openspace {
-    
+
+struct RenderData;
+struct UpdateData;
+
 class RenderableShadowCylinder : public Renderable {
 public:
     RenderableShadowCylinder(const ghoul::Dictionary& dictionary);
@@ -83,4 +85,4 @@ private:
 
 } // namespace openspace
 
-#endif // __RENDERABLESHADOWCYLINDER_H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLESHADOWCYLINDER___H__

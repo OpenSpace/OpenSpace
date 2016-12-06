@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/programobject.h>
 

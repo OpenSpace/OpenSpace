@@ -22,12 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TARGETDECODER_H__
-#define __TARGETDECODER_H__
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___TARGETDECODER___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___TARGETDECODER___H__
 
 #include <modules/newhorizons/util/decoder.h>
-
-#include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
     
@@ -43,4 +41,4 @@ private:
     
 } // namespace openspace
 
-#endif // __TARGETDECODER_H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___TARGETDECODER___H__

@@ -22,12 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __DECODER_H__
-#define __DECODER_H__
-
-#include <ghoul/misc/dictionary.h>
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___DECODER___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___DECODER___H__
 
 #include <memory>
+#include <string>
+#include <vector>
+
+namespace ghoul {
+class Dictionary;
+}
 
 namespace openspace {
 
@@ -47,4 +51,4 @@ protected:
 
 }  // namespace openspace
 
-#endif // __DECODER_H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___DECODER___H__

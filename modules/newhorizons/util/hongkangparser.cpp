@@ -39,9 +39,16 @@
 #include <iomanip>
 #include <limits>
 
+#include <modules/newhorizons/util/imagesequencer.h>
+
+#include <ghoul/misc/dictionary.h>
+
+#include <map>
+#include <string>
+#include <vector>
+
 
 namespace {
-    const std::string _loggerCat = "HongKangParser";
     const char* keyTranslation = "DataInputTranslation";
 
     const std::string PlaybookIdentifierName = "HongKang";
@@ -105,15 +112,17 @@ void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& 
 bool HongKangParser::create() {
     //check input for errors. 
     bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
-    if (!hasObserver){
-        LERROR("SPICE navigation system has no pooled observer: '" << _spacecraft << "' in kernel" <<
-               "Please check that all necessary kernels are loaded"<<
-               "along with correct modfile definition.");
-        return hasObserver;
+    if (!hasObserver) {
+        throw ghoul::RuntimeError(
+            "SPICE has no observer: '" + _spacecraft + "' in kernel pool",
+            "HongKangParser"
+        );
     }
-    if (_potentialTargets.size() == 0){
-        LERROR("In order to find targeting from event file user has to provide list of potential targets "
-               << "please check modfile");
+    if (_potentialTargets.size() == 0) {
+        throw ghoul::RuntimeError(
+            "List of potential target is missing in order to parse the event file",
+            "HongKangParser"
+        );
     }
 
     if (size_t position = _fileName.find_last_of(".") + 1){
@@ -121,12 +130,13 @@ bool HongKangParser::create() {
             std::string extension = ghoul::filesystem::File(_fileName).fileExtension();
 
             if (extension == "txt") {// Hong Kang. pre-parsed playbook
-                LINFO("Using Preparsed Playbook V9H");
-                std::ifstream file(_fileName , std::ios::binary);
-                if (!file.good()){
-                    LERROR("Failed to open event file '" << _fileName << "'");
-                    return false;
-                }
+                std::ifstream file;
+                file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+                //std::ifstream file(_fileName , std::ios::binary);
+                //if (!file.good()){
+                //    LERROR("Failed to open event file '" << _fileName << "'");
+                //    return false;
+                //}
 
                 std::string line = "";
                 double shutter = 0.01;

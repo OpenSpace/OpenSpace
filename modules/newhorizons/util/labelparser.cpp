@@ -39,6 +39,12 @@
 #include <iomanip>
 #include <limits>
 
+#include <modules/newhorizons/util/imagesequencer.h>
+
+#include <map>
+#include <string>
+#include <vector>
+
 namespace {
     const std::string _loggerCat = "LabelParser";
     const char* keySpecs   = "Read";

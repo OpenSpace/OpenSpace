@@ -24,11 +24,14 @@
 
 #include <modules/newhorizons/rendering/renderableplaneprojection.h>
 
+#include <modules/newhorizons/util/imagesequencer.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>

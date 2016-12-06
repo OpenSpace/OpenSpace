@@ -22,36 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __IMAGESEQUENCER_H__
-#define __IMAGESEQUENCER_H__
-
-// open space includes
-#include <ghoul/opengl/ghoul_gl.h>
-#include <openspace/util/powerscaledcoordinate.h>
-#include <openspace/util/powerscaledscalar.h>
-#include <openspace/util/timerange.h>
-#include <unordered_map>
-#include <map>
-#include <vector>
-
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___IMAGESEQUENCER___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___IMAGESEQUENCER___H__
 
 #include <modules/newhorizons/util/sequenceparser.h>
 
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace openspace {
-    /**
-    * The ImageSequencer singleton main function is to manage the timekeeping and
-    * distribution of large image data-sets across all openspace renderable instances, 
-    * both for past and future unmanned-spacecraft missions. To load the instance with 
-    * data the client must provide a parser inherited from the abstract base class 
-    * SequenceParser. Hence, there is no restriction imposed on data input, whether its
-    * data in the form of existing images or in the form of a planned observation schedule. 
-    * Notably, in order for the sequencer to function the client must provide or write a 
-    * parser that fills the ImageSequencers private members.
-    * \see SequenceParser
-    * \see ImageSequencer::runSequenceParser(SequenceParser* parser)
-    * std::map<std::string, bool>
-    */
+
+class SequenceParser;
+
+/**
+* The ImageSequencer singleton main function is to manage the timekeeping and
+* distribution of large image data-sets across all openspace renderable instances, 
+* both for past and future unmanned-spacecraft missions. To load the instance with 
+* data the client must provide a parser inherited from the abstract base class 
+* SequenceParser. Hence, there is no restriction imposed on data input, whether its
+* data in the form of existing images or in the form of a planned observation schedule. 
+* Notably, in order for the sequencer to function the client must provide or write a 
+* parser that fills the ImageSequencers private members.
+* \see SequenceParser
+* \see ImageSequencer::runSequenceParser(SequenceParser* parser)
+* std::map<std::string, bool>
+*/
 class ImageSequencer {
 public:
     ImageSequencer();
@@ -204,6 +201,4 @@ private:
 
 } // namespace openspace
 
-
-#endif // __IMAGESEQUENCER_H__
-
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___IMAGESEQUENCER___H__

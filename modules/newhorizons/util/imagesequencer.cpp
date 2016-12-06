@@ -36,6 +36,18 @@
 #include <iomanip>
 #include <limits>
 
+#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/powerscaledscalar.h>
+#include <openspace/util/timerange.h>
+#include <unordered_map>
+#include <map>
+#include <vector>
+
+
+
+
+
 namespace {
     const std::string _loggerCat = "ImageSequencer";
 }

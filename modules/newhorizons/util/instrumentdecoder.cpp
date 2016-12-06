@@ -26,7 +26,7 @@
 
 #include <ghoul/misc/assert.h>
 #include <ghoul/logging/logmanager.h>
-
+#include <ghoul/misc/dictionary.h>
 namespace {
     const std::string _loggerCat  = "InstrumentDecoder";
     const char* keyDetector = "DetectorType";

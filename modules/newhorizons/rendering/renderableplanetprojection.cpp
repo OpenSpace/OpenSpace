@@ -38,6 +38,14 @@
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <modules/newhorizons/util/imagesequencer.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/properties/triggerproperty.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #ifdef WIN32
 #define _USE_MATH_DEFINES
 #include <math.h>

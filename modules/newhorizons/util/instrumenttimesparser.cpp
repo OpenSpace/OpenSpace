@@ -36,6 +36,14 @@
 #include <sstream>
 #include <modules/newhorizons/util/instrumenttimesparser.h>
 
+#include <modules/newhorizons/util/imagesequencer.h>
+
+#include <ghoul/misc/dictionary.h>
+
+#include <map>
+#include <string>
+#include <vector>
+
 namespace {
     const std::string _loggerCat = "InstrumentTimesParser";
 

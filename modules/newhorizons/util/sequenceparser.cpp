@@ -26,7 +26,6 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/spicemanager.h>
-#include <modules/newhorizons/util/decoder.h>
 
 #include <ghoul/logging/logmanager.h>
 

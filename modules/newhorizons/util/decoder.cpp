@@ -26,20 +26,15 @@
 
 #include <openspace/util/factorymanager.h>
 
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
-
-namespace {
-    const std::string _loggerCat = "Decoder";
-}
 
 namespace openspace {
 
 std::unique_ptr<Decoder> Decoder::createFromDictionary(
     const ghoul::Dictionary& dictionary, const std::string& type)
 {
-    ghoul::TemplateFactory<Decoder>* factory
-        = FactoryManager::ref().factory<Decoder>();
+    ghoul::TemplateFactory<Decoder>* factory = FactoryManager::ref().factory<Decoder>();
     Decoder* result = factory->create(type, dictionary);
 
     if (result == nullptr) {

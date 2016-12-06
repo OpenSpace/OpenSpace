@@ -159,7 +159,7 @@ bool RenderableFov::deinitialize() {
 }
 
 bool RenderableFov::isReady() const {
-    return _programObject != nullptr;
+    return _programObject != nullptr && !_bounds.empty();
 }
 
 void RenderableFov::sendToGPU() {
