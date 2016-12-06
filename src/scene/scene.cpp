@@ -106,7 +106,7 @@ void Scene::update(const UpdateData& data) {
 
             // Reset the InteractionManager to Orbital/default mode
             // TODO: Decide if it belongs in the scene and/or how it gets reloaded
-            OsEng.interactionHandler().setInteractionMode("Orbital");
+            //OsEng.interactionHandler().setInteractionMode("Orbital");
 
             // After loading the scene, the keyboard bindings have been set
             const std::string KeyboardShortcutsType =
