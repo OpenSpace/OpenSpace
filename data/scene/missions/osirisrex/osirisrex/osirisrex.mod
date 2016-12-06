@@ -51,7 +51,7 @@ local OsirisRexKernels = {
     "${SPICE}/OsirisRexKernels/background/ik/orx_ola_v00.ti",
     "${SPICE}/OsirisRexKernels/background/ik/orx_ovirs_v00.ti",
     "${SPICE}/OsirisRexKernels/background/ik/orx_stowcam_v00.ti",
-    "${SPICE}/OsirisRexKernels/background/lsk/naif0011.tls",
+    -- "${SPICE}/OsirisRexKernels/background/lsk/naif0011.tls",
     "${SPICE}/OsirisRexKernels/background/pck/bennu_SPH250m.tpc",
     "${SPICE}/OsirisRexKernels/background/pck/bennu_v10.tpc",
 
@@ -146,9 +146,12 @@ local OsirisRexKernels = {
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case05_20negLatitude.wmv")
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case08_40negLatitude.wmv")
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case11_60negLatitude.wmv")
-
-    KernelCase
 }
+
+-- Append the CaseDependentKernels at the end of the OsirisRexKernels set
+for i = 0, #CaseDependentKernels do
+    OsirisRexKernels[#OsirisRexKernels + 1] = CaseDependentKernels[i]
+end
 
 
 return {

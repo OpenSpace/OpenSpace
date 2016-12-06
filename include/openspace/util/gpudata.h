@@ -25,7 +25,6 @@
 #ifndef __GPUDATA_H__
 #define __GPUDATA_H__
 
-
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>

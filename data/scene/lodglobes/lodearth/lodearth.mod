@@ -86,6 +86,11 @@ return {
                         Name = "Debug Tiles",
                         FilePath = "../../debugglobe/textures/test_tile.png",
                     },
+                    -- {
+                    --     Type = "Temporal",
+                    --     Name = "NOAA RT",
+                    --     FilePath = "map_service_configs/other/noaa_rt.xml"
+                    -- }
                 },
                 GrayScaleLayers = { },
                 GrayScaleColorOverlays = { },

@@ -22,28 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #include <openspace/util/gpudata.h>
 
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-
-#include <ghoul/logging/logmanager.h>
-
-#include <string>
-#include <memory>
-
-namespace {
-    const std::string _loggerCat = "GPUData";
-}
 
 namespace openspace {
 
-    void UniformLocation::bind(ProgramObject* program, const std::string& name){
-        _uniformLocation = program->uniformLocation(name);
-        LDEBUG(name);
-    }
+void UniformLocation::bind(ProgramObject* program, const std::string& name){
+    _uniformLocation = program->uniformLocation(name);
+}
 
 } // namespace openspace
-

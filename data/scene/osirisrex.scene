@@ -1,4 +1,4 @@
-local KernelCase = 2 -- Right now we only have the image times for case 2
+KernelCase = 2 -- Right now we only have the image times for case 2
 
 
 function preInitialization()
@@ -17,7 +17,7 @@ function preInitialization()
     --local startTime = "2019 APR 16 12:03:00.00"
     openspace.time.setTime("2016 SEP 8 23:00:00.500")
 
-    openspace.scriptScheduler.load("${OPENSPACE_DATA}/scene/missions/osirisrex/scheduled_scripts.lua")
+    openspace.scriptScheduler.loadFile("${OPENSPACE_DATA}/scene/missions/osirisrex/scheduled_scripts.lua")
 
 end
 
@@ -61,7 +61,7 @@ return {
         "sun",
         "mercury",
         "venus",
-        "lodearth",
+        "lodglobes/lodearth",
         "moon",
         "mars",
         "jupiter",

@@ -182,7 +182,7 @@ bool RenderableTrailTrajectory::initialize() {
     // last shown permanent line to the current position of the object
     glGenVertexArrays(1, &_floatingRenderInformation._vaoID);
     glGenBuffers(1, &_floatingRenderInformation._vBufferID);
-    _floatingRenderInformation.sorting = RenderInformation::VertexSorting::NoSorting;
+    _floatingRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 
     return res;
 }

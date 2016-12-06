@@ -354,13 +354,13 @@ void RenderableTrail::render(const RenderData & data) {
     // Render the primary batch of vertices
     render(_primaryRenderInformation, totalNumber, primaryOffset);
 
-    // The secondary batch is optional,. so we need to check whether we have any data here
-    if (_floatingRenderInformation._vaoID == 0 || _floatingRenderInformation.count == 0) {
+    // The secondary batch is optional, so we need to check whether we have any data here
+    if (_floatingRenderInformation._vaoID != 0 && _floatingRenderInformation.count != 0) {
         render(
             _floatingRenderInformation,
             totalNumber,
             // -1 because we duplicate the penultimate point between the vertices
-            primaryOffset + _primaryRenderInformation.count - 1
+            -(primaryOffset + _primaryRenderInformation.count - 1)
         );
     }
 

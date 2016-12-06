@@ -131,10 +131,8 @@ helper.scheduledScript.reversible.setEnabled = function(time, renderable, enable
     return 
     {
         Time = time,
-        ReversibleLuaScript = {
-            Forward = helper.renderable.setEnabled(renderable, enabled),
-            Backward = helper.renderable.setEnabled(renderable, not enabled)
-        }
+        ForwardScript = helper.renderable.setEnabled(renderable, enabled),
+        BackwardScript = helper.renderable.setEnabled(renderable, not enabled)
     }
 end
 
@@ -142,9 +140,6 @@ helper.scheduledScript.setEnabled = function(time, renderable, enabled)
     return 
     {
         Time = time,
-        ReversibleLuaScript = {
-            Forward = helper.renderable.setEnabled(renderable, enabled),
-            Backward = ""
-        }
+        ForwardScript = helper.renderable.setEnabled(renderable, enabled)
     }
 end
