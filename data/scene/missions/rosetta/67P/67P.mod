@@ -99,7 +99,7 @@ return {
             SampleInterval = 3600,
         },
     },
-    [[
+    --[[
     {   
         Name = "67PTrail",
         Parent = "SolarSystemBarycenter",

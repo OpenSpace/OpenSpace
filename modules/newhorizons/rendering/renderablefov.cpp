@@ -265,7 +265,7 @@ psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
     
     ivec *= 0.9999;// because fov lands exactly on top of surface we need to move it out slightly
     _interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
-    //_interceptVector[3] += 3;
+    _interceptVector[3] += 3;
 
     return _interceptVector;
 }
@@ -278,7 +278,7 @@ psc RenderableFov::orthogonalProjection(glm::dvec3 vecFov) {
     glm::dvec3 p = glm::proj(vecToTarget, vecFov);
 
     psc projection = PowerScaledCoordinate::CreatePowerScaledCoordinate(p[0], p[1], p[2]);
-    projection[3] += 3;
+    projection[3] += 3; 
 
     return projection;
 }
@@ -484,7 +484,7 @@ void RenderableFov::determineTarget() {
 }
 
 void RenderableFov::computeIntercepts(const RenderData& data) {
-    PerfMeasure("computeIntercepts");
+    //PerfMeasure("computeIntercepts");
     // for each FOV vector
     _fovBounds.clear();
     for (int i = 0; i <= _bounds.size(); ++i) {
@@ -519,7 +519,7 @@ void RenderableFov::computeIntercepts(const RenderData& data) {
 
         if (_interceptTag[r]) {
             _interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
-            //_interceptVector[3] += 3;
+            _interceptVector[3] += 3;
             // INTERCEPTIONS
             insertPoint(_fovBounds, fovOrigin, col_start);
             insertPoint(_fovBounds, _interceptVector.vec4(), col_end);
@@ -589,7 +589,7 @@ void RenderableFov::render(const RenderData& data) {
     if (_drawFOV) {
         // update only when time progresses.
         if (_oldTime != _time) {
-            PerfMeasure("Total");
+            //PerfMeasure("Total");
             determineTarget();
             computeColors();
             computeIntercepts(data);

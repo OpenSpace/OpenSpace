@@ -182,8 +182,6 @@ void TileDataset::initialize() {
     _dataLayout = TileDataLayout(_dataset, _initData.dataType);
     _depthTransform = calculateTileDepthTransform();
     _cached._tileLevelDifference = calculateTileLevelDifference(_initData.minimumPixelSize);
-
-    LDEBUG(_initData.gdalDatasetDesc << " - " << _cached._tileLevelDifference);
 }
 
 void TileDataset::gdalEnsureInitialized() {

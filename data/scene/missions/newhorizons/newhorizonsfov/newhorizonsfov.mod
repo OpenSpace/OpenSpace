@@ -2,7 +2,7 @@ return {
     -- NewHorizonsFov main module
     {   
         Name = "NH_LORRI",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
@@ -28,7 +28,7 @@ return {
     -- NewHorizonsFov module NH_RALPH_LEISA
     {   
         Name = "NH_RALPH_LEISA",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
@@ -55,7 +55,7 @@ return {
     -- NewHorizonsFov module NH_RALPH_MVIC_PAN1
     {   
         Name = "NH_RALPH_MVIC_PAN1",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
@@ -81,7 +81,7 @@ return {
     -- NewHorizonsFov module NH_RALPH_MVIC_PAN2
     {   
         Name = "NH_RALPH_MVIC_PAN2",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
@@ -108,7 +108,7 @@ return {
     -- NewHorizonsFov module NH_RALPH_MVIC_RED
     {   
         Name = "NH_RALPH_MVIC_RED",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
@@ -135,7 +135,7 @@ return {
     -- NewHorizonsFov module NH_RALPH_MVIC_BLUE
     {   
         Name = "NH_RALPH_MVIC_BLUE",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
@@ -161,7 +161,7 @@ return {
     -- NewHorizonsFov module NH_RALPH_MVIC_FT
     {   
         Name = "NH_RALPH_MVIC_FT",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
@@ -187,7 +187,7 @@ return {
     -- NewHorizonsFov module NH_RALPH_MVIC_METHANE
     {   
         Name = "NH_RALPH_MVIC_METHANE",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
@@ -213,7 +213,7 @@ return {
     -- NewHorizonsFov module NH_RALPH_MVIC_NIR
     {   
         Name = "NH_RALPH_MVIC_NIR",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
@@ -239,7 +239,7 @@ return {
     -- NewHorizonsFov module NH_ALICE_AIRGLOW
     {   
         Name = "NH_ALICE_AIRGLOW",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
@@ -265,7 +265,7 @@ return {
     -- NewHorizonsFov module NH_ALICE_SOC
     {   
         Name = "NH_ALICE_SOC",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableFov",
             Body  = "NEW HORIZONS",
@@ -290,7 +290,7 @@ return {
     },
     {
         Name = "NH_REX",
-        Parent = "NewHorizons",
+        Parent = "NewHorizonsPosition",
         Renderable = {
             Type  = "RenderableCrawlingLine",
             Source = "NH_REX",

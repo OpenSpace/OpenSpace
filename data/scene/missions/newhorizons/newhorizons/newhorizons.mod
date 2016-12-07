@@ -78,12 +78,28 @@ else
 end
 
 return {
-    -- New Horizons Body module
-    {   
+    {
+        Name = "NewHorizonsPosition",
+        Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "NEW HORIZONS",
+                Observer = "SUN",
+                Kernels = NewHorizonsKernels
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "NH_SPACECRAFT",
+                DestinationFrame = "GALACTIC",
+            },
+        }
+    },
+    {
         Name = "NewHorizons",
         -- Parent = "PlutoBarycenter", 
         -- Parent = "JupiterBarycenter", 
-        Parent = "SolarSystemBarycenter", 
+        Parent = "NewHorizonsPosition", 
         Renderable = {
             Type = "RenderableModel",
             Body = "NEW HORIZONS",
@@ -103,20 +119,9 @@ return {
             },
         },
         Transform = {
-            Translation = {
-                Type = "SpiceTranslation",
-                Body = "NEW HORIZONS",
-                Observer = "SUN",
-                Kernels = NewHorizonsKernels
-            },
-            Rotation = {
-                Type = "SpiceRotation",
-                SourceFrame = "NH_SPACECRAFT",
-                DestinationFrame = "GALACTIC",
-            },
             Scale = {
                 Type = "StaticScale",
-                Scale = 1000
+                Scale = 100
             }
         },
     },

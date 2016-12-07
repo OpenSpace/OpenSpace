@@ -30,6 +30,25 @@ function preInitialization()
         "Toggle background (Stars and Milkyway)."
     )
 
+    openspace.bindKey("g",
+        "openspace.setInteractionMode('GlobeBrowsing')" ..
+        helper.property.invert('MilkyWay.renderable.enabled') ..
+        helper.property.invert('Stars.renderable.enabled') ..
+        helper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.enabled') ..
+        helper.property.invert('Earth.RenderableGlobe.performShading') ..
+        helper.property.invert('Mars.RenderableGlobe.performShading') ..
+        helper.property.invert('Earth.RenderableGlobe.atmosphere') ..
+        helper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.enabled') ..
+        helper.property.invert('Moon.RenderableGlobe.enabled') ..
+        helper.property.invert('Sun.renderable.enabled'),
+        "Toogles background and shading mode on the Earth and Mars alongside visibility of the Moon and the Sun"
+    )
+
+    openspace.bindKey("h",
+        "openspace.setPropertyValue('*Trail.renderable.enabled', false)",
+        "Disables visibility of the trails"
+    )
+
     --[[
     -- Toggle trails
     openspace.bindKey("o",
