@@ -32,6 +32,7 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/angle.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/angle.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/convexhull.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.h
@@ -45,14 +46,16 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayermanager.h
@@ -85,7 +88,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/angle.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/convexhull.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.cpp
@@ -98,6 +100,15 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layermanager.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
@@ -114,18 +125,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbyindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbylevel.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayermanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layermanager.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

@@ -322,7 +322,6 @@ glm::dvec3 RenderableFov::bisection(glm::dvec3 p1, glm::dvec3 p2) {
     }
 }
 
-
 void RenderableFov::fovSurfaceIntercept(bool H[], std::vector<glm::dvec3> bounds) {
     _nrInserted = 0;
     _fovPlane.clear(); // empty the array
