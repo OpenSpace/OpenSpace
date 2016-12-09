@@ -32,6 +32,8 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/scripting/scriptengine.h>
 
+#include <ghoul/filesystem/filesystem.h>
+
 #include "imgui.h"
 
 namespace openspace {
@@ -140,12 +142,14 @@ void renderStringProperty(Property* prop, const std::string& ownerName) {
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
+    std::string value = FileSys.convertPathSeparator(p->value(), '/');
+
     static const int bufferSize = 256;
     static char buffer[bufferSize];
 #ifdef _MSC_VER
-    strcpy_s(buffer, p->value().length() + 1, p->value().c_str());
+    strcpy_s(buffer, value.length() + 1, value.c_str());
 #else
-    strcpy(buffer, p->value().c_str());
+    strcpy(buffer, value.c_str());
 #endif
     bool hasNewValue = ImGui::InputText(
         name.c_str(),

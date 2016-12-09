@@ -3,6 +3,14 @@ return {
     {
         Name = "UranusBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "URANUS BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
+        }
     },
 
     -- Uranus module
@@ -29,27 +37,18 @@ return {
             }
         },
         Transform = {
-            Translation = {
-                Type = "SpiceTranslation",
-                Body = "URANUS BARYCENTER",
-                Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_URANUS",
                 DestinationFrame = "ECLIPJ2000",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
+            }
         },
     },
+
     -- UranusTrail module
     {   
         Name = "UranusTrail",
-        Parent = "UranusBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrailOrbit",
             Translation = {

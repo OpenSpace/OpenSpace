@@ -12,6 +12,7 @@ return {
             },
         }
     },
+
     -- Venus module
     {   
         Name = "Venus",
@@ -41,8 +42,9 @@ return {
             Reference = "GALACTIC"
         },
     },
+
     -- VenusTrail module
-    {   
+    {
         Name = "VenusTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
@@ -55,6 +57,6 @@ return {
             Color = { 1.0, 0.5, 0.2 },
             Period = 224.695,
             Resolution = 1000
-        },
+        }
     }
 }

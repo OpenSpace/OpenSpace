@@ -1,5 +1,5 @@
 return {
     FileRequest = {
-        { Identifier = "milkyway_textures", Destination = "textures", Version = 1 }
+        { Identifier = "milkyway_textures", Destination = "textures", Version = 2 }
     },
 }

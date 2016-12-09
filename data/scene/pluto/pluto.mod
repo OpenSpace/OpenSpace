@@ -3,14 +3,18 @@ return {
     {
         Name = "PlutoBarycenter",
         Parent = "SolarSystemBarycenter",
-        Ephemeris = {
-            Type = "Spice",
-            Body = "PLUTO BARYCENTER",
-            Observer = "SUN",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp", 
-        },
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "PLUTO BARYCENTER",
+                Observer = "SUN",
+                Kernels = {
+                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp",
+                    "${OPENSPACE_DATA}/spice/plu055.bsp",
+                }
+            }
+        }
     },
-
     -- Pluto module
     {   
         Name = "Pluto",
@@ -34,19 +38,21 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "PLUTO",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp", 
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_PLUTO",
-            Reference = "GALACTIC"
-        },
+        Transformation = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "PLUTO",
+                Observer = "PLUTO BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/plu055.bsp", 
+            },
+            Rotation = {
+                Type = "Spice",
+                SourceFrame = "IAU_PLUTO",
+                DestinationFrame = "GALACTIC"
+            }
+        }
     },
-{   
+    {
         Name = "Charon",
         Parent = "PlutoBarycenter",
         Renderable = {
@@ -68,17 +74,19 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "CHARON",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_CHARON",
-            Reference = "ECLIPJ2000"
-        },
+        Transformation = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "CHARON",
+                Observer = "PLUTO BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/plu055.bsp", 
+            },
+            Rotation = {
+                Type = "Spice",
+                SourceFrame = "IAU_CHARON",
+                DestinationFrame = "GALACTIC"
+            }
+        }
     },
     -- CharonTrail module
     {   
@@ -129,5 +137,4 @@ return {
         },
         GuiName = "/Solar/PlutoTrail"
     }
-
 }

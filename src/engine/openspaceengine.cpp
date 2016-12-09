@@ -1016,7 +1016,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
         if (_gui->isEnabled()) {
             const bool isConsumed = _gui->mouseButtonCallback(button, action);
-            if (isConsumed && action != MouseAction::Release)
+            if (isConsumed /*&& action != MouseAction::Release*/)
                 return;
         }
 #endif
