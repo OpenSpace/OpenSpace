@@ -96,7 +96,7 @@ MainWindow::MainWindow()
     
     _informationWidget = new QTextEdit(this);
     _informationWidget->setReadOnly(true);
-    _informationWidget->setEnabled(false);
+    //_informationWidget->setEnabled(false);
     layout->addWidget(_informationWidget, 1, 0, 2, 1);
     layout->setRowStretch(1, 10);
     layout->setColumnStretch(0, 4);
@@ -106,13 +106,13 @@ MainWindow::MainWindow()
     {
         QGridLayout* innerLayout = new QGridLayout;
         
-        QLabel* shortcutLabel = new QLabel("Keyboard Shortcuts:");
-        innerLayout->addWidget(shortcutLabel, 0, 0);
-        QPushButton* shortcutButton = new QPushButton("Open...");
-        QObject::connect(shortcutButton, SIGNAL(clicked(bool)),
-                         this, SLOT(shortcutButtonPressed())
-                         );
-        innerLayout->addWidget(shortcutButton, 0, 1);
+        //QLabel* shortcutLabel = new QLabel("Keyboard Shortcuts:");
+        //innerLayout->addWidget(shortcutLabel, 0, 0);
+        //QPushButton* shortcutButton = new QPushButton("Open...");
+        //QObject::connect(shortcutButton, SIGNAL(clicked(bool)),
+        //                 this, SLOT(shortcutButtonPressed())
+        //                 );
+        //innerLayout->addWidget(shortcutButton, 0, 1);
 
         innerLayout->setRowStretch(1, 10);
 
