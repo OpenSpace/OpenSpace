@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLETRAILORBIT_H__
-#define __RENDERABLETRAILORBIT_H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLETRAILORBIT___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLETRAILORBIT___H__
 
 #include <modules/base/rendering/renderabletrail.h>
 
@@ -102,4 +102,4 @@ private:
 
 } // namespace openspace
 
-#endif // __RENDERABLETRAILORBIT_H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLETRAILORBIT___H__

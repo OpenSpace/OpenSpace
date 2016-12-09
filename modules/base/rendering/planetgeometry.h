@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PLANETGEOMETRY_H__
-#define __PLANETGEOMETRY_H__
+#ifndef __OPENSPACE_MODULE_BASE___PLANETGEOMETRY___H__
+#define __OPENSPACE_MODULE_BASE___PLANETGEOMETRY___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -53,4 +53,4 @@ protected:
 }  // namespace planetgeometry
 }  // namespace openspace
 
-#endif  // __PLANETGEOMETRY_H__
+#endif  // __OPENSPACE_MODULE_BASE___PLANETGEOMETRY___H__

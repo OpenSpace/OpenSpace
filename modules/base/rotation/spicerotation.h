@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SPICEROTATION_H__
-#define __SPICEROTATION_H__
+#ifndef __OPENSPACE_MODULE_BASE___SPICEROTATION___H__
+#define __OPENSPACE_MODULE_BASE___SPICEROTATION___H__
 
 #include <openspace/scene/rotation.h>
 #include <openspace/documentation/documentation.h>
@@ -46,4 +46,4 @@ private:
     
 } // namespace openspace
 
-#endif // __SPICEROTATION_H__
+#endif // __OPENSPACE_MODULE_BASE___SPICEROTATION___H__

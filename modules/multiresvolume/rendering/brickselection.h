@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2015                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,11 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __BRICKSELECTION_H__
-#define __BRICKSELECTION_H__
+#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___BRICKSELECTION___H__
+#define __OPENSPACE_MODULE_MULTIRESVOLUME___BRICKSELECTION___H__
 
 #include <modules/multiresvolume/rendering/brickcover.h>
-
 
 namespace openspace {
 
@@ -103,6 +102,7 @@ struct BrickSelection {
         return a.splitPoints < b.splitPoints;
     }
 };
-}
 
-#endif // __BRICKSELECTION_H__
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___BRICKSELECTION___H__

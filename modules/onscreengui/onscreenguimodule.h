@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ONSCREENGUIMODULE_H__
-#define __ONSCREENGUIMODULE_H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -36,4 +36,4 @@ public:
 
 } // namespace openspace
 
-#endif // __ONSCREENGUIMODULE_H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___ONSCREENGUIMODULE___H__

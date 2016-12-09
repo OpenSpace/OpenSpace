@@ -34,9 +34,9 @@ namespace {
 namespace openspace {
 
 TexturePlane::TexturePlane(const ghoul::Dictionary& dictionary)
-    :TextureCygnet(dictionary)
-    ,_quad(0)
-    ,_vertexPositionBuffer(0)
+    : TextureCygnet(dictionary)
+    , _quad(0)
+    , _vertexPositionBuffer(0)
 {
     _programName = "PlaneProgram";
     _vsPath = "${MODULE_ISWA}/shaders/textureplane_vs.glsl";
@@ -104,4 +104,4 @@ void TexturePlane::renderGeometry() const {
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-}// namespace openspace
+} // namespace openspace

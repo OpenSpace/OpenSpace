@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLESTARS_H__
-#define __RENDERABLESTARS_H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESTARS___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESTARS___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -105,4 +105,4 @@ private:
 
 } // namespace openspace
 
-#endif  // __RENDERABLESTARS_H__
+#endif  // __OPENSPACE_MODULE_BASE___RENDERABLESTARS___H__

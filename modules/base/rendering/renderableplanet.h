@@ -22,10 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEPLANET_H__
-#define __RENDERABLEPLANET_H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANET___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANET___H__
 
-// open space includes
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
@@ -39,7 +38,6 @@
 #include <vector>
 #include <string>
 
-// ghoul includes
 namespace ghoul {
     namespace opengl {
         class ProgramObject;
@@ -111,9 +109,8 @@ private:
     double _time;
 
     bool tempPic;
-
 };
 
 }  // namespace openspace
 
-#endif  // __RENDERABLEPLANET_H__
+#endif  // __OPENSPACE_MODULE_BASE___RENDERABLEPLANET___H__

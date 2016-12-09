@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLESPHERE_H__
-#define __RENDERABLESPHERE_H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
@@ -72,4 +72,5 @@ private:
 };
 
 } // namespace openspace
-#endif // __RENDERABLESPHERE_H__
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__

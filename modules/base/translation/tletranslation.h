@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TLETRANSLATION_H__
-#define __TLETRANSLATION_H__
+#ifndef __OPENSPACE_MODULE_BASE___TLETRANSLATION___H__
+#define __OPENSPACE_MODULE_BASE___TLETRANSLATION___H__
 
 #include <modules/base/translation/keplertranslation.h>
 
@@ -72,4 +72,4 @@ private:
     
 } // namespace openspace
 
-#endif // __TLETRANSLATION_H__
+#endif // __OPENSPACE_MODULE_BASE___TLETRANSLATION___H__

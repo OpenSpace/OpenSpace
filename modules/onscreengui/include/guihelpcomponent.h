@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIHELPCOMPONENT_H__
-#define __GUIHELPCOMPONENT_H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIHELPCOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIHELPCOMPONENT___H__
 
 #include <modules/onscreengui/include/guicomponent.h>
 
@@ -40,4 +40,4 @@ public:
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUIHELPCOMPONENT_H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIHELPCOMPONENT___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __DEBUG_RENDERER_H__
-#define __DEBUG_RENDERER_H__
+#ifndef __OPENSPACE_MODULE_BASE___DEBUGRENDERER___H__
+#define __OPENSPACE_MODULE_BASE___DEBUGRENDERER___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
@@ -36,126 +36,130 @@
 #include <memory>
 #include <vector>
 
-
-
 #include <ghoul/misc/assert.h>
 
 namespace openspace {
-    using namespace ghoul::opengl;
+
+/**
+ * A helper class for quick rendering of vertices IN clipping space. 
+ * The class is practically stateless. It only stores a ghoul::opengl::ProgramObject
+ * which can be reused despite the fact that rendering calls are invoked from different
+ * callers. Therefore a static reference is provided for convenience which is accessed
+ * through ref(). Note: That constructors are still public and the class is not a strict
+ * singleton.
+ */
+class DebugRenderer {
+public:
+    typedef std::vector<glm::vec4> Vertices;
+    typedef glm::vec4 RGBA;
 
     /**
-        A helper class for quick rendering of vertices IN clipping space. 
+     *  Consider using ref() before creating a new default instance!
+     */
+    DebugRenderer();
 
-        The class is practically stateless. It only stores a ghoul::opengl::ProgramObject
-        which can be reused despite the fact that rendering calls are invoked from different callers.
-        Therefor a static reference is provided for convenience which is accessed through ref(). Note:
-        That constructors are still public and the class is not a strict singleton.
-    */
-    class DebugRenderer {
-    public:
-        typedef std::vector<glm::vec4> Vertices;
-        typedef glm::vec4 RGBA;
+    /**
+     *  Instantiate a new DebugRenderer with a custom shader program
+     */
+    DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject);
+    ~DebugRenderer();
 
-        /**
-         *  Consider using ref() before creating a new default instance!
-         */
-        DebugRenderer();
+    /**
+     *  Access the static reference
+     */
+    static const DebugRenderer& ref();
 
-        /**
-         *  Instantiate a new DebugRenderer with a custom shader program
-         */
-        DebugRenderer(std::unique_ptr<ProgramObject> programObject);
-        ~DebugRenderer();
+    /**
+     *  Render the vector of clipping space points in the specified mode and color.
+     */
+    void renderVertices(const Vertices& clippingSpacePoints, GLenum mode,
+        RGBA color = {1, 0, 0, 1}) const;
 
-        /**
-         *  Access the static reference
-         */
-        static const DebugRenderer& ref();
-
-        /**
-         *  Render the vector of clipping space points in the specified mode and color.
-         */
-        void renderVertices(const Vertices& clippingSpacePoints, GLenum mode, RGBA = {1, 0, 0, 1}) const;
-
-        /**
-         *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
-         *  The box corners should be ordered from smaller to larger,
-         *  first by x, the, y and finally z. 
-         *
-         *  6-------7
-         *  |\      |\
-         *  | 2-------3
-         *  4 | - - 5 |
-         *   \|      \|
-         *    0-------1
-         *
-         */
-        void renderBoxFaces(const Vertices& clippingSpaceBoxCorners, RGBA rgba = { 1, 0, 0, 1 }) const;
+    /**
+     *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
+     *  The box corners should be ordered from smaller to larger,
+     *  first by x, the, y and finally z. 
+     *
+     *  6-------7
+     *  |\      |\
+     *  | 2-------3
+     *  4 | - - 5 |
+     *   \|      \|
+     *    0-------1
+     *
+     */
+    void renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
+        RGBA rgba = { 1, 0, 0, 1 }) const;
         
-         /**
-         *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
-         *  The box corners should be ordered from smaller to larger,
-         *  first by x, the, y and finally z. 
-         *
-         *  6-------7
-         *  |\      |\
-         *  | 2-------3
-         *  4 | - - 5 |
-         *   \|      \|
-         *    0-------1
-         *
-         */
-        void renderBoxEdges(const Vertices& clippingSpaceBoxCorners, RGBA rgba = { 1, 0, 0, 1 }) const;
+    /**
+     *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
+     *  The box corners should be ordered from smaller to larger,
+     *  first by x, the, y and finally z. 
+     *
+     *  6-------7
+     *  |\      |\
+     *  | 2-------3
+     *  4 | - - 5 |
+     *   \|      \|
+     *    0-------1
+     *
+     */
+    void renderBoxEdges(const Vertices& clippingSpaceBoxCorners,
+        RGBA rgba = { 1, 0, 0, 1 }) const;
 
-        /**
-        *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
-        *  The box corners should be ordered from smaller to larger,
-        *  first by x, the, y and finally z.
-        *
-        *  6-------7
-        *  |\      |\
-        *  | 2-------3
-        *  4 | - - 5 |
-        *   \|      \|
-        *    0-------1
-        *
-        */
-        void renderNiceBox(const Vertices& clippingSpaceBoxCorners, RGBA rgba = { 1, 0, 0, 0.3 }) const;
+    /**
+      *  Takes a vector of exactly 8 vertices, i.e. corner points in a box.
+      *  The box corners should be ordered from smaller to larger,
+      *  first by x, the, y and finally z.
+      *
+      *  6-------7
+      *  |\      |\
+      *  | 2-------3
+      *  4 | - - 5 |
+      *   \|      \|
+      *    0-------1
+      *
+      */
+    void renderNiceBox(const Vertices& clippingSpaceBoxCorners,
+        RGBA rgba = { 1, 0, 0, 0.3 }) const;
 
-        /**
-         *  Input arguments:
-         *  1. const RenderData& data:     defines position and camera that we will see the 
-         *                                 other cameras view frustum from
-         *  2. const Camera& otherCamera:  The camera who's view frustum is to be rendered
-         *  3. RGBA rgba                   Color to draw the view frustum with
-         */
-        void renderCameraFrustum(const RenderData& data, const Camera& otherCamera, RGBA rgba = { 1, 1, 1, 0.3 }) const;
+    /**
+     *  Input arguments:
+     *  1. const RenderData& data:     defines position and camera that we will see the 
+     *                                 other cameras view frustum from
+     *  2. const Camera& otherCamera:  The camera who's view frustum is to be rendered
+     *  3. RGBA rgba                   Color to draw the view frustum with
+     */
+    void renderCameraFrustum(const RenderData& data, const Camera& otherCamera,
+        RGBA rgba = { 1, 1, 1, 0.3 }) const;
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        /**
-         *  Renders a screen space AABB2 to the screen with the provided color
-         */
-        void renderAABB2(const globebrowsing::AABB2& screenSpaceAABB, RGBA rgba = { 1, 1, 1, 0.3 }) const;
+    /**
+     *  Renders a screen space AABB2 to the screen with the provided color
+     */
+    void renderAABB2(const globebrowsing::AABB2& screenSpaceAABB,
+        RGBA rgba = { 1, 1, 1, 0.3 }) const;
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
         
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        /**
-        *  Takes a AABB3 in screen space and returns vertices representing the corner points 
-        *  of the AABB. The ordering of the corner points is compatible with the box rendering 
-        *  methods in this class.
-        */
-        const Vertices verticesFor(const globebrowsing::AABB3& screenSpaceAABB) const;
+    /**
+      * Takes a AABB3 in screen space and returns vertices representing the corner points 
+      * of the AABB. The ordering of the corner points is compatible with the box
+      * rendering methods in this class.
+      */
+    const Vertices verticesFor(const globebrowsing::AABB3& screenSpaceAABB) const;
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
         
-    protected:
-        std::unique_ptr<ProgramObject> _programObject;
+protected:
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
 
-        // A raw pointer for the reason that it should not be deleted by the static
-        // destructor and the normal destructor. This class has ownership
-        static DebugRenderer* _reference;
-    };
+    // A raw pointer for the reason that it should not be deleted by the static
+    // destructor and the normal destructor. This class has ownership
+    static DebugRenderer* _reference;
+};
+
 } // namespace openspace
-#endif // __DEBUG_RENDERER_H__
 
+#endif // __OPENSPACE_MODULE_BASE___DEBUGRENDERER___H__

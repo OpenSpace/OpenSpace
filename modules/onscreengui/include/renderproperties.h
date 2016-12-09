@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERPROPERTIES_H__
-#define __RENDERPROPERTIES_H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___RENDERPROPERTIES___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___RENDERPROPERTIES___H__
 
 #include <string>
 
@@ -54,4 +54,4 @@ void renderTriggerProperty(properties::Property* prop, const std::string& ownerN
 
 } // namespace openspace
 
-#endif __RENDERPROPERTIES_H__
+#endif __OPENSPACE_MODULE_ONSCREENGUI___RENDERPROPERTIES___H__

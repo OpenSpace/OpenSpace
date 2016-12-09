@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLETOYVOLUME_H__
-#define __RENDERABLETOYVOLUME_H__
+#ifndef __OPENSPACE_MODULE_TOYVOLUME___RENDERABLETOYVOLUME___H__
+#define __OPENSPACE_MODULE_TOYVOLUME___RENDERABLETOYVOLUME___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -60,6 +60,7 @@ private:
     
     std::unique_ptr<ToyVolumeRaycaster> _raycaster;
 };
-}
 
-#endif // __RENDERABLETOYVOLUME_H__
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_TOYVOLUME___RENDERABLETOYVOLUME___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __STATICROTATION_H__
-#define __STATICROTATION_H__
+#ifndef __OPENSPACE_MODULE_BASE___STATICROTATION___H__
+#define __OPENSPACE_MODULE_BASE___STATICROTATION___H__
 
 #include <openspace/scene/rotation.h>
 
@@ -45,4 +45,4 @@ private:
     
 } // namespace openspace
 
-#endif // __STATICROTATION_H__
+#endif // __OPENSPACE_MODULE_BASE___STATICROTATION___H__

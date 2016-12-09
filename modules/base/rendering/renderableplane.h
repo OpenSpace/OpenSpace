@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef RENDERABLEPLANE_H_
-#define RENDERABLEPLANE_H_
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -92,4 +92,5 @@ private:
 };
 
 } // namespace openspace
-#endif // RENDERABLEFIELDLINES_H_
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__

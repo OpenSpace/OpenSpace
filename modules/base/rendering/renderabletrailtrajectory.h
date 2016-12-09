@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLETRAILTRAJECTORY_H__
-#define __RENDERABLETRAILTRAJECTORY_H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLETRAILTRAJECTORY___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLETRAILTRAJECTORY___H__
 
 #include <modules/base/rendering/renderabletrail.h>
 
@@ -86,4 +86,4 @@ private:
 
 } // namespace openspace
 
-#endif // __RENDERABLETRAILTRAJECTORY_H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLETRAILTRAJECTORY___H__

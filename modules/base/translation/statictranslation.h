@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __STATICTRANSLATION_H__
-#define __STATICTRANSLATION_H__
+#ifndef __OPENSPACE_MODULE_BASE___STATICTRANSLATION___H__
+#define __OPENSPACE_MODULE_BASE___STATICTRANSLATION___H__
 
 #include <openspace/scene/translation.h>
 
@@ -48,4 +48,4 @@ private:
     
 } // namespace openspace
 
-#endif // __STATICTRANSLATION_H__
+#endif // __OPENSPACE_MODULE_BASE___STATICTRANSLATION___H__
