@@ -46,6 +46,11 @@ return {
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
                         Enabled = true,
                     },
+                    {
+                        Name = "MOLA Pseudo Color",
+                        FilePath = "map_service_configs/Utah/MolaPseudoColor.xml",
+                        -- Enabled = true,
+                    },
                     --[[
                     {
                         Name = "Mars Viking Clr",
@@ -60,13 +65,21 @@ return {
                 GrayScaleColorOverlays = {
                     {
                         Name = "CTX Mosaic",
-                        FilePath = "map_service_configs/CTX_Mosaic.xml",
+                        FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
                         Enabled = true,
                     },
                     {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
                         FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
                     },
+                    {
+                        Name = "Themis IR Day",
+                        FilePath = "map_service_configs/Utah/ThemisIRDay.xml",
+                    },                    
+                    {
+                        Name = "Themis IR Night",
+                        FilePath = "map_service_configs/Utah/ThemisIRNight.xml",
+                    },                    
                     --[[
                     {
                         Name = "West Candor Chasma",
@@ -100,11 +113,18 @@ return {
                 HeightLayers = {
                     {
                         Name = "Mola Elevation",
-                        FilePath = "map_service_configs/Mola_Elevation.xml",
+                        FilePath = "map_service_configs/Utah/Mola_Elevation.xml",
                         Enabled = true,
                         MinimumPixelSize = 90,
                         DoPreProcessing = true,
                     },
+                    {
+                        Name = "Mola Elevation CTX",
+                        FilePath = "map_service_configs/Utah/MolaCTX_Elevation.xml",
+                        -- Enabled = true,
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
+                    },                    
                     {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
                         FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt",

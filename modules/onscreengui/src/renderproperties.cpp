@@ -393,6 +393,94 @@ void renderVec4Property(Property* prop, const std::string& ownerName) {
     ImGui::PopID();
 }
 
+void renderDVec2Property(Property* prop, const std::string& ownerName) {
+    DVec2Property* p = static_cast<DVec2Property*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    glm::vec2 value = glm::dvec2(*p);
+    float min = std::min(p->minValue().x, p->minValue().y);
+    float max = std::max(p->maxValue().x, p->maxValue().y);
+    ImGui::SliderFloat2(
+        name.c_str(),
+        &value.x,
+        min,
+        max
+    );
+    renderTooltip(prop);
+
+    if (glm::dvec2(value) != p->value()) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
+        );
+    }
+
+    ImGui::PopID();
+}
+
+void renderDVec3Property(Property* prop, const std::string& ownerName) {
+    DVec3Property* p = static_cast<DVec3Property*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    glm::vec3 value = glm::dvec3(*p);
+    float min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
+    float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
+
+
+    ImGui::SliderFloat3(
+        name.c_str(),
+        glm::value_ptr(value),
+        min,
+        max
+    );
+    renderTooltip(prop);
+
+    if (glm::dvec3(value) != p->value()) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," +
+            std::to_string(value.y) + "," +
+            std::to_string(value.z) + "}"
+        );
+    }
+
+    ImGui::PopID();
+}
+
+void renderDVec4Property(Property* prop, const std::string& ownerName) {
+    DVec4Property* p = static_cast<DVec4Property*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    glm::vec4 value = glm::dvec4(*p);
+    float min = std::min(std::min(std::min(
+        p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w);
+    float max = std::max(std::max(std::max(
+        p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w);
+
+    ImGui::SliderFloat4(
+        name.c_str(),
+        &value.x,
+        min,
+        max
+    );
+    renderTooltip(prop);
+
+    if (glm::dvec4(value) != p->value()) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," +
+            std::to_string(value.y) + "," +
+            std::to_string(value.z) + "," +
+            std::to_string(value.w) + "}"
+        );
+    }
+
+    ImGui::PopID();
+}
+
 void renderTriggerProperty(Property* prop, const std::string& ownerName) {
     std::string name = prop->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());

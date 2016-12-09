@@ -47,6 +47,9 @@ void renderFloatProperty(properties::Property* prop, const std::string& ownerNam
 void renderVec2Property(properties::Property* prop, const std::string& ownerName);
 void renderVec3Property(properties::Property* prop, const std::string& ownerName);
 void renderVec4Property(properties::Property* prop, const std::string& ownerName);
+void renderDVec2Property(properties::Property* prop, const std::string& ownerName);
+void renderDVec3Property(properties::Property* prop, const std::string& ownerName);
+void renderDVec4Property(properties::Property* prop, const std::string& ownerName);
 void renderTriggerProperty(properties::Property* prop, const std::string& ownerName);
 
 } // namespace openspace

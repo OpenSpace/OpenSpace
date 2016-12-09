@@ -1298,12 +1298,13 @@ void RenderEngine::renderInformation() {
         );
         penPosition.y -= _fontDate->height();
 
-        RenderFontCr(*_fontDate,
-            penPosition,
-            "Date: %s",
-            Time::ref().UTC().c_str()
+        if (_showInfo && _fontDate) {
+            RenderFontCr(*_fontDate,
+                penPosition,
+                "Date: %s",
+                Time::ref().UTC().c_str()
             );
-
+        }
         if (_showInfo && _fontInfo) {
             RenderFontCr(*_fontInfo,
                          penPosition,

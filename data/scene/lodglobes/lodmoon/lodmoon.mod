@@ -35,6 +35,18 @@ return {
                         FilePath = "map_service_configs/OnMoonColor.xml",
                         Enabled = true,
                     },
+                    {
+                        Name = "ClemUvvis",
+                        FilePath = "map_service_configs/Utah/ClemUvvis.wms"
+                    },
+                    {
+                        Name = "Kaguya",
+                        FilePath = "map_service_configs/Utah/Kaguya.wms"
+                    },
+                    {
+                        Name = "WAC",
+                        FilePath = "map_service_configs/Utah/Wac.wms"
+                    }
                 },
                 NightLayers = {
 
@@ -52,6 +64,10 @@ return {
                         Enabled = true,
                         DoPreProcessing = true,
                     },
+                    {
+                        Name = "LolaDem",
+                        FilePath = "map_service_configs/Utah/LolaDem.wms"
+                    }
                 },
             },
         }

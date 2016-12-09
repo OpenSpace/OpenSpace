@@ -86,6 +86,10 @@ return {
                         Name = "Debug Tiles",
                         FilePath = "../../debugglobe/textures/test_tile.png",
                     },
+                    {
+                        Name = "BMNG",
+                        FilePath = "map_service_configs/Utah/Bmng.wms"
+                    }
                     -- {
                     --     Type = "Temporal",
                     --     Name = "NOAA RT",
@@ -107,6 +111,10 @@ return {
                         FilePath = "map_service_configs/GIBS/MODIS_Water_Mask.xml",
                         Enabled = true,
                     },
+                    {
+                        Name = "GEBCO",
+                        FilePath = "map_service_configs/Utah/Gebco.wms",
+                    }
                 },
                 ColorOverlays = {
                     {

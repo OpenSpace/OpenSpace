@@ -1,6 +1,6 @@
 <GDAL_WMS>
   <Service name="TiledWMS">
-    <ServerUrl>http://wms.itn.liu.se/OnMars/wms.cgi?</ServerUrl>
+    <ServerUrl>http://asgard.sci.utah.edu/MolaCTX/tile/${z}/${y}/${x}</ServerUrl>
     <TiledGroupName>Mola Elevation</TiledGroupName>
   </Service>
   <DataWindow>

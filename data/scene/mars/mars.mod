@@ -39,7 +39,7 @@ return {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_MARS",
-                DestinationFrame = "ECLIPJ2000",
+                DestinationFrame = "GALACTIC",
             },
         }
     },

@@ -44,6 +44,10 @@ return {
                         Enabled = true,
                         MinimumPixelSize = 256,
                     },
+                    {
+                        Name = "Messenger_Mosaic",
+                        FilePath = "map_service_configs/Utah/MessengerMosaic.wms"
+                    }
                     --[[
                     {
                         Name = "On Mercury Color",
@@ -56,7 +60,12 @@ return {
                     },
                     ]]
                 },
-                GrayScaleLayers = { },
+                GrayScaleLayers = {
+                    {
+                        Name = "Messenger_MDIS",
+                        FilePath = "map_service_configs/Utah/MessengerMDIS.wms"
+                    }
+                },
                 GrayScaleColorOverlays = { },
                 NightLayers = { },
                 WaterMasks = { },
