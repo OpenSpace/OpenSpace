@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TIME_H__
-#define __TIME_H__
+#ifndef __OPENSPACE_CORE___TIME___H__
+#define __OPENSPACE_CORE___TIME___H__
 
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/syncdata.h>
@@ -224,4 +224,4 @@ private:
 
 } // namespace openspace
 
-#endif // __TIME_H__
+#endif // __OPENSPACE_CORE___TIME___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __DOCUMENTATIONENGINE_H__
-#define __DOCUMENTATIONENGINE_H__
+#ifndef __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
+#define __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 
 #include <openspace/documentation/documentation.h>
 
@@ -99,4 +99,4 @@ private:
 
 #define DocEng (openspace::documentation::DocumentationEngine::ref())
 
-#endif // __DOCUMENTATIONENGINE_H__
+#endif // __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__

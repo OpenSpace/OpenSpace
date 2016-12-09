@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_H__
-#define __OPENSPACE_H__
+#ifndef __OPENSPACE_CORE___OPENSPACE___H__
+#define __OPENSPACE_CORE___OPENSPACE___H__
 
 #include <string>
 
@@ -39,4 +39,4 @@ const std::string OPENSPACE_VERSION_STRING = "prerelease-11 (AGU)";
 
 } // namespace openspace
 
-#endif // __OPENSPACE_H__
+#endif // __OPENSPACE_CORE___OPENSPACE___H__

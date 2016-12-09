@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __WCHARPROPERTY_H__
-#define __WCHARPROPERTY_H__
+#ifndef __OPENSPACE_CORE___WCHARPROPERTY___H__
+#define __OPENSPACE_CORE___WCHARPROPERTY___H__
 
  /**
  * \file wcharproperty.h
@@ -50,4 +50,4 @@ namespace properties {
 } // namespace properties
 } // namespace openspace
 
-#endif // __WCHARPROPERTY_H__
+#endif // __OPENSPACE_CORE___WCHARPROPERTY___H__

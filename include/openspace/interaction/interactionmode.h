@@ -22,11 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __INTERACTION_MODE_H__
-#define __INTERACTION_MODE_H__
+#ifndef __OPENSPACE_CORE___INTERACTIONMODE___H__
+#define __OPENSPACE_CORE___INTERACTIONMODE___H__
 
 #include <openspace/interaction/keyboardcontroller.h>
-#include <openspace/interaction/mousecontroller.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
@@ -281,4 +280,4 @@ private:
 } // namespace interaction
 } // namespace openspace
 
-#endif // __INTERACTION_MODE_H__
+#endif // __OPENSPACE_CORE___INTERACTIONMODE___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UINTPROPERTY_H__
-#define __UINTPROPERTY_H__
+#ifndef __OPENSPACE_CORE___UINTPROPERTY___H__
+#define __OPENSPACE_CORE___UINTPROPERTY___H__
 
  /**
  * \file uintproperty.h
@@ -50,4 +50,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(UIntProperty, unsigned int);
 } // namespace properties
 } // namespace openspace
 
-#endif // __UINTPROPERTY_H__
+#endif // __OPENSPACE_CORE___UINTPROPERTY___H__

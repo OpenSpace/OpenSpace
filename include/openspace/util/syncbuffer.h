@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef SYNCBUFFER_H
-#define SYNCBUFFER_H
+#ifndef __OPENSPACE_CORE___SYNCBUFFER___H__
+#define __OPENSPACE_CORE___SYNCBUFFER___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/misc/assert.h>
@@ -116,4 +116,4 @@ private:
 
 } // namespace openspace
 
-#endif // SYNCBUFFER_H
+#endif // __OPENSPACE_CORE___SYNCBUFFER___H__

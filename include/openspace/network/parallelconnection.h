@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PARALLELCONNECTION_H__
-#define __PARALLELCONNECTION_H__
+#ifndef __OPENSPACE_CORE___PARALLELCONNECTION___H__
+#define __OPENSPACE_CORE___PARALLELCONNECTION___H__
 
 //openspace includes
 #include <openspace/network/messagestructures.h>
@@ -200,4 +200,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OSPARALLELCONNECTION_H__
+#endif // __OPENSPACE_CORE___PARALLELCONNECTION___H__

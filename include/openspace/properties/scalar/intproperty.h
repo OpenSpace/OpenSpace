@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __INTPROPERTY_H__
-#define __INTPROPERTY_H__
+#ifndef __OPENSPACE_CORE___INTPROPERTY___H__
+#define __OPENSPACE_CORE___INTPROPERTY___H__
 
  /**
  * \file intproperty.h
@@ -50,4 +50,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(IntProperty, int);
 } // namespace properties
 } // namespace openspace
 
-#endif // __INTPROPERTY_H__
+#endif // __OPENSPACE_CORE___INTPROPERTY___H__

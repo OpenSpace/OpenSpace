@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SPICEMANAGER_H__
-#define __SPICEMANAGER_H__
+#ifndef __OPENSPACE_CORE___SPICEMANAGER___H__
+#define __OPENSPACE_CORE___SPICEMANAGER___H__
 
 #include <ghoul/designpattern/singleton.h>
 
@@ -931,4 +931,4 @@ private:
 
 } // namespace openspace
 
-#endif // __SPICEMANAGER_H__
+#endif // __OPENSPACE_CORE___SPICEMANAGER___H__

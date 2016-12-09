@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MODULEENGINE_H__
-#define __MODULEENGINE_H__
+#ifndef __OPENSPACE_CORE___MODULEENGINE___H__
+#define __OPENSPACE_CORE___MODULEENGINE___H__
 
 #include <openspace/util/openspacemodule.h>
 #include <openspace/scripting/scriptengine.h>
@@ -96,4 +96,4 @@ private:
 
 } // namespace openspace
 
-#endif // __MODULEENGINE_H__
+#endif // __OPENSPACE_CORE___MODULEENGINE___H__

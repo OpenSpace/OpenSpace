@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TRANSFERFUNCTION_H__
-#define __TRANSFERFUNCTION_H__
+#ifndef __OPENSPACE_CORE___TRANSFERFUNCTION___H__
+#define __OPENSPACE_CORE___TRANSFERFUNCTION___H__
 
 #include <string>
 #include <glm/glm.hpp>
@@ -34,38 +34,38 @@
 
 namespace openspace {
 
-    class TransferFunction {
-    public:
-        typedef std::function<void (const TransferFunction&)> TfChangedCallback;
+class TransferFunction {
+public:
+    typedef std::function<void (const TransferFunction&)> TfChangedCallback;
 
-        TransferFunction(const std::string& filepath, TfChangedCallback tfChangedCallback = TfChangedCallback());
-        void setPath(const std::string& filepath);
-        ghoul::opengl::Texture& getTexture();
-        void bind();
-        void update();
-        glm::vec4 sample(size_t t);
-        size_t width();
-        void setCallback(TfChangedCallback callback);
-    private:
-        void setTextureFromTxt();
-        void setTextureFromImage();
-        void uploadTexture();
+    TransferFunction(const std::string& filepath, TfChangedCallback tfChangedCallback = TfChangedCallback());
+    void setPath(const std::string& filepath);
+    ghoul::opengl::Texture& getTexture();
+    void bind();
+    void update();
+    glm::vec4 sample(size_t t);
+    size_t width();
+    void setCallback(TfChangedCallback callback);
+private:
+    void setTextureFromTxt();
+    void setTextureFromImage();
+    void uploadTexture();
 
-        std::string _filepath;
-        std::unique_ptr<ghoul::filesystem::File> _file = nullptr;
-        std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
-        bool _needsUpdate = false;
-        TfChangedCallback _tfChangedCallback;
-    };
+    std::string _filepath;
+    std::unique_ptr<ghoul::filesystem::File> _file = nullptr;
+    std::unique_ptr<ghoul::opengl::Texture> _texture = nullptr;
+    bool _needsUpdate = false;
+    TfChangedCallback _tfChangedCallback;
+};
 
-    struct MappingKey {
-        float position{0.0f};
-        glm::vec4 color{0.0f,0.0f,0.0f,0.0f};
-        MappingKey(float p, const glm::vec4& c): position(p), color(c) {};
-        MappingKey(float p): position(p), color(glm::vec4(0.0f)) {};
-        bool operator<(const MappingKey& rhs) {return position < rhs.position;};
-    };
+struct MappingKey {
+    float position{0.0f};
+    glm::vec4 color{0.0f,0.0f,0.0f,0.0f};
+    MappingKey(float p, const glm::vec4& c): position(p), color(c) {};
+    MappingKey(float p): position(p), color(glm::vec4(0.0f)) {};
+    bool operator<(const MappingKey& rhs) {return position < rhs.position;};
+};
+
 } // namespace openspace
 
-#endif
-
+#endif // __OPENSPACE_CORE___TRANSFERFUNCTION___H__

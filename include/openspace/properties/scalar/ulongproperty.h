@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ULONGPROPERTY_H__
-#define __ULONGPROPERTY_H__
+#ifndef __OPENSPACE_CORE___ULONGPROPERTY___H__
+#define __OPENSPACE_CORE___ULONGPROPERTY___H__
 
  /**
  * \file ulongproperty.h
@@ -50,4 +50,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(ULongProperty, unsigned long);
 } // namespace properties
 } // namespace openspace
 
-#endif // __ULONGPROPERTY_H__
+#endif // __OPENSPACE_CORE___ULONGPROPERTY___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TEMPLATEPROPERTY_H__
-#define __TEMPLATEPROPERTY_H__
+#ifndef __OPENSPACE_CORE___TEMPLATEPROPERTY___H__
+#define __OPENSPACE_CORE___TEMPLATEPROPERTY___H__
 
 #include <openspace/properties/property.h>
 
@@ -191,4 +191,4 @@ protected:
 
 #include "openspace/properties/templateproperty.inl"
 
-#endif // __TEMPLATEPROPERTY_H__
+#endif // __OPENSPACE_CORE___TEMPLATEPROPERTY___H__

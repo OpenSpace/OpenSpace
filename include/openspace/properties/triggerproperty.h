@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TRIGGERPROPERTY_H__
-#define __TRIGGERPROPERTY_H__
+#ifndef __OPENSPACE_CORE___TRIGGERPROPERTY___H__
+#define __OPENSPACE_CORE___TRIGGERPROPERTY___H__
 
 #include <openspace/properties/property.h>
 
@@ -70,4 +70,4 @@ public:
 } // namespace properties
 } // namespace openspace
 
-#endif // __TRIGGERPROPERTY_H__
+#endif // __OPENSPACE_CORE___TRIGGERPROPERTY___H__

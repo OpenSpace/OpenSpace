@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __VECTORPROPERTY_H__
-#define __VECTORPROPERTY_H__
+#ifndef __OPENSPACE_CORE___VECTORPROPERTY___H__
+#define __OPENSPACE_CORE___VECTORPROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
 
@@ -47,4 +47,4 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 
-#endif // __INTPROPERTY_H__
+#endif // __OPENSPACE_CORE___VECTORPROPERTY___H__

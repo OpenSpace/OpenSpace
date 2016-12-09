@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef __SCENEGRAPHNODE_H__
-#define __SCENEGRAPHNODE_H__
+#ifndef __OPENSPACE_CORE___SCENEGRAPHNODE___H__
+#define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
 // open space includes
 #include <openspace/documentation/documentation.h>
@@ -138,4 +138,4 @@ private:
 
 } // namespace openspace
 
-#endif // __SCENEGRAPHNODE_H__
+#endif // __OPENSPACE_CORE___SCENEGRAPHNODE___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __VEC4PROPERTY_H__
-#define __VEC4PROPERTY_H__
+#ifndef __OPENSPACE_CORE___VEC4PROPERTY___H__
+#define __OPENSPACE_CORE___VEC4PROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
 
@@ -37,4 +37,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(Vec4Property, glm::vec4);
 } // namespace properties
 } // namespace openspace
 
-#endif // __VEC4PROPERTY_H__
+#endif // __OPENSPACE_CORE___VEC4PROPERTY___H__

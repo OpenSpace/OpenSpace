@@ -47,14 +47,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/interaction/keyboardcontroller.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/luaconsole.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/luaconsole_lua.inl
-    ${OPENSPACE_BASE_DIR}/src/interaction/mousecontroller.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/externalconnectioncontroller.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/externalcontrol.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/joystickexternalcontrol.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/keyboardexternalcontrol.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/mouseexternalcontrol.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/pythonexternalcontrol.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/randomexternalcontrol.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
@@ -189,14 +181,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionmode.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyboardcontroller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/luaconsole.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousecontroller.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/externalconnectioncontroller.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/externalcontrol.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/joystickexternalcontrol.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/keyboardexternalcontrol.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/mouseexternalcontrol.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/pythonexternalcontrol.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/randomexternalcontrol.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
@@ -309,6 +293,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h

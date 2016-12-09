@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MAT4PROPERTY_H__
-#define __MAT4PROPERTY_H__
+#ifndef __OPENSPACE_CORE___MAT4PROPERTY___H__
+#define __OPENSPACE_CORE___MAT4PROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
 
@@ -37,4 +37,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(Mat4Property, glm::mat4x4);
 } // namespace properties
 } // namespace openspace
 
-#endif // __MAT4PROPERTY_H__
+#endif // __OPENSPACE_CORE___MAT4PROPERTY___H__

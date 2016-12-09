@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef LUACONSOLE_H
-#define LUACONSOLE_H
+#ifndef __OPENSPACE_CORE___LUACONSOLE___H__
+#define __OPENSPACE_CORE___LUACONSOLE___H__
 
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/network/parallelconnection.h>
@@ -83,4 +83,4 @@ private:
 
 } // namespace openspace
 
-#endif
+#endif // __OPENSPACE_CORE___LUACONSOLE___H__

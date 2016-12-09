@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __LOGFACTORY_H__
-#define __LOGFACTORY_H__
+#ifndef __OPENSPACE_CORE___LOGFACTORY___H__
+#define __OPENSPACE_CORE___LOGFACTORY___H__
 
 #include <memory>
 
@@ -55,4 +55,4 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
 
 } // namespace openspace
 
-#endif // __LOGFACTORY_H__
+#endif // __OPENSPACE_CORE___LOGFACTORY___H__

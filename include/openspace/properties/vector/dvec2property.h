@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __DVEC2PROPERTY_H__
-#define __DVEC2PROPERTY_H__
+#ifndef __OPENSPACE_CORE___DVEC2PROPERTY___H__
+#define __OPENSPACE_CORE___DVEC2PROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
 
@@ -37,4 +37,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(DVec2Property, glm::dvec2);
 } // namespace properties
 } // namespace openspace
 
-#endif // __DVEC2PROPERTY_H__
+#endif // __OPENSPACE_CORE___DVEC2PROPERTY___H__

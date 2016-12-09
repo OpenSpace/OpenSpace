@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCRIPTSCHEDULER_H__
-#define __SCRIPTSCHEDULER_H__
+#ifndef __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
+#define __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
@@ -126,4 +126,4 @@ private:
 } // namespace scripting
 } // namespace openspace
 
-#endif // __SCRIPTSCHEDULER_H__
+#endif // __OPENSPACE_CORE___SCRIPTSCHEDULER___H__

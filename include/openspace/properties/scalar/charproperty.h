@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CHARPROPERTY_H__
-#define __CHARPROPERTY_H__
+#ifndef __OPENSPACE_CORE___CHARPROPERTY___H__
+#define __OPENSPACE_CORE___CHARPROPERTY___H__
 
  /**
  * \file charproperty.h
@@ -50,4 +50,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(CharProperty, char);
 } // namespace properties
 } // namespace openspace
 
-#endif // __CHARPROPERTY_H__
+#endif // __OPENSPACE_CORE___CHARPROPERTY___H__

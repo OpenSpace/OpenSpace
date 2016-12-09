@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __LONGPROPERTY_H__
-#define __LONGPROPERTY_H__
+#ifndef __OPENSPACE_CORE___LONGPROPERTY___H__
+#define __OPENSPACE_CORE___LONGPROPERTY___H__
 
  /**
  * \file longproperty.h
@@ -50,4 +50,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(LongProperty, long);
 } // namespace properties
 } // namespace openspace
 
-#endif // __LONGPROPERTY_H__
+#endif // __OPENSPACE_CORE___LONGPROPERTY___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SGCTWINDOWWRAPPER_H__
-#define __SGCTWINDOWWRAPPER_H__
+#ifndef __OPENSPACE_CORE___SGCTWINDOWWRAPPER___H__
+#define __OPENSPACE_CORE___SGCTWINDOWWRAPPER___H__
 
 #include <openspace/engine/wrapper/windowwrapper.h>
 
@@ -75,4 +75,4 @@ public:
 
 } // namespace openspace
 
-#endif // __SGCTWINDOWWRAPPER_H__
+#endif // __OPENSPACE_CORE___SGCTWINDOWWRAPPER___H__

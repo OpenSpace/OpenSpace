@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCREENLOG_H__
-#define __SCREENLOG_H__
+#ifndef __OPENSPACE_CORE___SCREENLOG___H__
+#define __OPENSPACE_CORE___SCREENLOG___H__
 
 #include <ghoul/logging/log.h>
 
@@ -115,4 +115,4 @@ private:
     
 } // namespace openspace
 
-#endif // __SCREENLOG_H__
+#endif // __OPENSPACE_CORE___SCREENLOG___H__

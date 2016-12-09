@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MATRIXPROPERTY_H__
-#define __MATRIXPROPERTY_H__
+#ifndef __OPENSPACE_CORE___MATRIXPROPERTY___H__
+#define __OPENSPACE_CORE___MATRIXPROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
 
@@ -47,4 +47,4 @@
 #include <openspace/properties/matrix/dmat4x3property.h>
 #include <openspace/properties/matrix/dmat4property.h>
 
-#endif // __MATRIXPROPERTY_H__
+#endif // __OPENSPACE_CORE___MATRIXPROPERTY___H__

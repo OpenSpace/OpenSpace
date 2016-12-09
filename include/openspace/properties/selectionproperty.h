@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SELECTIONPROPERTY_H__
-#define __SELECTIONPROPERTY_H__
+#ifndef __OPENSPACE_CORE___SELECTIONPROPERTY___H__
+#define __OPENSPACE_CORE___SELECTIONPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
 
@@ -80,4 +80,4 @@ bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toString(std::string&
 } // namespace properties
 } // namespace openspace
 
-#endif // __SELECTIONPROPERTY_H__
+#endif // __OPENSPACE_CORE___SELECTIONPROPERTY___H__

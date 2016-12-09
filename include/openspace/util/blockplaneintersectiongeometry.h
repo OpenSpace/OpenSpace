@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __BLOCKPLANEINTERSECTIONGEOMETRY_H__
-#define __BLOCKPLANEINTERSECTIONGEOMETRY_H__
+#ifndef __OPENSPACE_CORE___BLOCKPLANEINTERSECTIONGEOMETRY___H__
+#define __OPENSPACE_CORE___BLOCKPLANEINTERSECTIONGEOMETRY___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <glm/glm.hpp>
@@ -55,6 +55,6 @@ private:
     float _planeDistance;
 };
 
-}
+} // namespace openspace
 
-#endif // __BLOCKPLANEINTERSECTIONGEOMETRY_H__
+#endif // __OPENSPACE_CORE___BLOCKPLANEINTERSECTIONGEOMETRY___H__

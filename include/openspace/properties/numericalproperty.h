@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __NUMERICALPROPERTY_H__
-#define __NUMERICALPROPERTY_H__
+#ifndef __OPENSPACE_CORE___NUMERICALPROPERTY___H__
+#define __OPENSPACE_CORE___NUMERICALPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
 
@@ -78,4 +78,4 @@ protected:
 
 #include "openspace/properties/numericalproperty.inl"
 
-#endif // __NUMERICALPROPERTY_H__
+#endif // __OPENSPACE_CORE___NUMERICALPROPERTY___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPTIONPROPERTY_H__
-#define __OPTIONPROPERTY_H__
+#ifndef __OPENSPACE_CORE___OPTIONPROPERTY___H__
+#define __OPENSPACE_CORE___OPTIONPROPERTY___H__
 
 #include <openspace/properties/scalar/intproperty.h>
 
@@ -134,4 +134,4 @@ private:
 } // namespace properties
 } // namespace openspace
 
-#endif // __STRINGPROPERTY_H__
+#endif // __OPENSPACE_CORE___OPTIONPROPERTY___H__

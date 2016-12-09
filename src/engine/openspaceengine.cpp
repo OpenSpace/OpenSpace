@@ -38,7 +38,6 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/luaconsole.h>
-#include <openspace/interaction/mousecontroller.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/properties/propertyowner.h>
@@ -79,7 +78,7 @@
 #endif
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-#include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/iswamanager.h>
 #endif
 

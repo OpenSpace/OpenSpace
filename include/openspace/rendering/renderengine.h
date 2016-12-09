@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERENGINE_H__
-#define __RENDERENGINE_H__
+#ifndef __OPENSPACE_CORE___RENDERENGINE___H__
+#define __OPENSPACE_CORE___RENDERENGINE___H__
 
 #include <openspace/scripting/scriptengine.h>
 
@@ -243,4 +243,4 @@ private:
 
 } // namespace openspace
 
-#endif // __RENDERENGINE_H__
+#endif // __OPENSPACE_CORE___RENDERENGINE___H__

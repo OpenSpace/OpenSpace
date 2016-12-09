@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __KEYBOARDCONTROLLER_H__
-#define __KEYBOARDCONTROLLER_H__
+#ifndef __OPENSPACE_CORE___KEYBOARDCONTROLLER___H__
+#define __OPENSPACE_CORE___KEYBOARDCONTROLLER___H__
 
 #include <openspace/interaction/controller.h>
 
@@ -54,4 +54,4 @@ protected:
 } // namespace interaction
 } // namespace openspace
 
-#endif // __KEYBOARDCONTROLLER_H__
+#endif // __OPENSPACE_CORE___KEYBOARDCONTROLLER___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERER_H__
-#define __RENDERER_H__
+#ifndef __OPENSPACE_CORE___RENDERER___H__
+#define __OPENSPACE_CORE___RENDERER___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
@@ -79,7 +79,8 @@ public:
      */
     virtual void updateRendererData() = 0;
     
-};        // Renderer
-}        // openspace
+};
 
-#endif     // __RENDERER_H__
+} // openspace
+
+#endif // __OPENSPACE_CORE___RENDERER___H__

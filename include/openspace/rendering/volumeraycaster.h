@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __VOLUMERAYCASTER_H__
-#define __VOLUMERAYCASTER_H__
+#ifndef __OPENSPACE_CORE___VOLUMERAYCASTER___H__
+#define __OPENSPACE_CORE___VOLUMERAYCASTER___H__
 
 #include <string>
 #include <vector>
@@ -122,9 +122,8 @@ public:
      * which should be a prefix to all symbols defined by the helper
      */
     virtual std::string getHelperPath() const = 0;
+};
 
-}; // Raycaster
+} // namespace openspace
 
-} // openspace
-
-#endif  // __VOLUMERAYCASTER_H__ 
+#endif  // __OPENSPACE_CORE___VOLUMERAYCASTER___H__ 

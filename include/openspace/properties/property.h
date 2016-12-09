@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PROPERTY_H__
-#define __PROPERTY_H__
+#ifndef __OPENSPACE_CORE___PROPERTY___H__
+#define __OPENSPACE_CORE___PROPERTY___H__
 
 #include <openspace/properties/propertydelegate.h>
 
@@ -388,4 +388,4 @@ protected:
 } // namespace properties
 } // namespace openspace
 
-#endif // __PROPERTY_H__
+#endif // __OPENSPACE_CORE___PROPERTY___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PERFORMANCELAYOUT_H__
-#define __PERFORMANCELAYOUT_H__
+#ifndef __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
+#define __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
 
 #include <cstdint>
 
@@ -60,4 +60,4 @@ struct PerformanceLayout {
 } // namespace performance
 } // namespace openspace
 
-#endif // __PERFORMANCELAYOUT_H__
+#endif // __OPENSPACE_CORE___PERFORMANCELAYOUT___H__

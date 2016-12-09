@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GPUDATA_H__
-#define __GPUDATA_H__
+#ifndef __OPENSPACE_CORE___GPUDATA___H__
+#define __OPENSPACE_CORE___GPUDATA___H__
 
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -105,4 +105,4 @@ private:
 
 } // namespace openspace
 
-#endif // __GPUDATA_H__
+#endif // __OPENSPACE_CORE___GPUDATA___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCALARPROPERTY_H__
-#define __SCALARPROPERTY_H__
+#ifndef __OPENSPACE_CORE___SCALARPROPERTY___H__
+#define __OPENSPACE_CORE___SCALARPROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
 
@@ -44,4 +44,4 @@
 #include <openspace/properties/scalar/ushortproperty.h>
 #include <openspace/properties/scalar/wcharproperty.h>
 
-#endif // __SCALARPROPERTY_H__
+#endif // __OPENSPACE_CORE___SCALARPROPERTY___H__

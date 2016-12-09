@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SIGNEDCHARPROPERTY_H__
-#define __SIGNEDCHARPROPERTY_H__
+#ifndef __OPENSPACE_CORE___SIGNEDCHARPROPERTY___H__
+#define __OPENSPACE_CORE___SIGNEDCHARPROPERTY___H__
 
  /**
  * \file signedcharproperty.h
@@ -50,4 +50,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(SignedCharProperty, signed char);
 } // namespace properties
 } // namespace openspace
 
-#endif // __SIGNEDCHARPROPERTY_H__
+#endif // __OPENSPACE_CORE___SIGNEDCHARPROPERTY___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __DOUBLEPROPERTY_H__
-#define __DOUBLEPROPERTY_H__
+#ifndef __OPENSPACE_CORE___DOUBLEPROPERTY___H__
+#define __OPENSPACE_CORE___DOUBLEPROPERTY___H__
 
  /**
  * \file doubleproperty.h
@@ -50,4 +50,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(DoubleProperty, double);
 } // namespace properties
 } // namespace openspace
 
-#endif // __DOUBLEPROPERTY_H__
+#endif // __OPENSPACE_CORE___DOUBLEPROPERTY___H__

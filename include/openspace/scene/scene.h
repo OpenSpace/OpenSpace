@@ -22,10 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef __SCENE_H__
-#define __SCENE_H__
+#ifndef __OPENSPACE_CORE___SCENE___H__
+#define __OPENSPACE_CORE___SCENE___H__
 
-// std includes
 #include <vector>
 #include <map>
 #include <set>
@@ -158,4 +157,4 @@ private:
 
 } // namespace openspace
 
-#endif // __SCENE_H__
+#endif // __OPENSPACE_CORE___SCENE___H__

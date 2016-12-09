@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __BVEC3PROPERTY_H__
-#define __BVEC3PROPERTY_H__
+#ifndef __OPENSPACE_CORE___BVEC3PROPERTY___H__
+#define __OPENSPACE_CORE___BVEC3PROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
 
@@ -37,4 +37,4 @@ REGISTER_TEMPLATEPROPERTY_HEADER(BVec3Property, glm::bvec3);
 } // namespace properties
 } // namespace openspace
 
-#endif // __BVEC3PROPERTY_H__
+#endif // __OPENSPACE_CORE___BVEC3PROPERTY___H__

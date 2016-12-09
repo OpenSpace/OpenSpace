@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __POWERSCALEDCOORDINATE_H__
-#define __POWERSCALEDCOORDINATE_H__
+#ifndef __OPENSPACE_CORE___POWERSCALEDCOORDINATE___H__
+#define __OPENSPACE_CORE___POWERSCALEDCOORDINATE___H__
 
 // open space includes
 // glm includes
@@ -119,4 +119,4 @@ typedef PowerScaledCoordinate psc;
 
 } // namespace openspace
 
-#endif // __POWERSCALEDCOORDINATE_H__
+#endif // __OPENSPACE_CORE___POWERSCALEDCOORDINATE___H__

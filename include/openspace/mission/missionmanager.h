@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MISSIONMANAGER_H__
-#define __MISSIONMANAGER_H__
+#ifndef __OPENSPACE_CORE___MISSIONMANAGER___H__
+#define __OPENSPACE_CORE___MISSIONMANAGER___H__
 
 #include <openspace/mission/mission.h>
 
@@ -96,4 +96,4 @@ private:
 
 } // namespace openspace
 
-#endif // __MISSIONMANAGER_H__
+#endif // __OPENSPACE_CORE___MISSIONMANAGER___H__

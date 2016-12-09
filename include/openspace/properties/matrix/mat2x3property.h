@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MAT2x3PROPERTY_H__
-#define __MAT2x3PROPERTY_H__
+#ifndef __OPENSPACE_CORE___MAT2x3PROPERTY___H__
+#define __OPENSPACE_CORE___MAT2x3PROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
 
@@ -37,4 +37,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(Mat2x3Property, glm::mat2x3);
 } // namespace properties
 } // namespace openspace
 
-#endif // __MAT2x3PROPERTY_H__
+#endif // __OPENSPACE_CORE___MAT2x3PROPERTY___H__

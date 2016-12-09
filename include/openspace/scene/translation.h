@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TRANSLATION_H__
-#define __TRANSLATION_H__
+#ifndef __OPENSPACE_CORE___TRANSLATION___H__
+#define __OPENSPACE_CORE___TRANSLATION___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -58,6 +58,6 @@ protected:
     std::function<void()> _onParameterChangeCallback;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif // __TRANSLATION_H__
+#endif // __OPENSPACE_CORE___TRANSLATION___H__

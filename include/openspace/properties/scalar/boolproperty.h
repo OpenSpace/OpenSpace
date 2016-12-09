@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __BOOLPROPERTY_H__
-#define __BOOLPROPERTY_H__
+#ifndef __OPENSPACE_CORE___BOOLPROPERTY___H__
+#define __OPENSPACE_CORE___BOOLPROPERTY___H__
 
  /**
  * \file boolproperty.h
@@ -50,4 +50,4 @@ REGISTER_TEMPLATEPROPERTY_HEADER(BoolProperty, bool);
 } // namespace properties
 } // namespace openspace
 
-#endif // __BOOLPROPERTY_H__
+#endif // __OPENSPACE_CORE___BOOLPROPERTY___H__

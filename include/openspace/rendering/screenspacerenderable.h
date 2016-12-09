@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef __SCREENSPACERENDERABLE_H__
-#define __SCREENSPACERENDERABLE_H__
+#ifndef __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
+#define __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -114,6 +114,6 @@ protected:
     float _radius;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif  // __SCREENSPACERENDERABLE_H__
+#endif // __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__

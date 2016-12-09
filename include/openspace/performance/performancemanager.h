@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PERFORMANCEMANAGER_H__
-#define __PERFORMANCEMANAGER_H__
+#ifndef __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
+#define __OPENSPACE_CORE___PERFORMANCEMANAGER___H__
 
 #include <openspace/performance/performancelayout.h>
 
@@ -71,4 +71,4 @@ private:
 } // namespace performance
 } // namespace openspace
 
-#endif // __PERFORMANCEMANAGER_H__
+#endif // __OPENSPACE_CORE___PERFORMANCEMANAGER___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __USHORTPROPERTY_H__
-#define __USHORTPROPERTY_H__
+#ifndef __OPENSPACE_CORE___USHORTPROPERTY___H__
+#define __OPENSPACE_CORE___USHORTPROPERTY___H__
 
  /**
  * \file ushortproperty.h
@@ -50,4 +50,4 @@ REGISTER_NUMERICALPROPERTY_HEADER(UShortProperty, unsigned short);
 } // namespace properties
 } // namespace openspace
 
-#endif // __USHORTPROPERTY_H__
+#endif // __OPENSPACE_CORE___USHORTPROPERTY___H__
