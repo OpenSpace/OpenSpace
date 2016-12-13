@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/translation/keplertranslation.h>
+#include <modules/space/translation/keplertranslation.h>
 
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
@@ -30,7 +30,6 @@
 #include <glm/gtx/transform.hpp>
 
 namespace {
-
     const char* KeyEccentricity = "Eccentricity";
     const char* KeySemiMajorAxis = "SemiMajorAxis";
     const char* KeyInclination = "Inclination";
@@ -69,7 +68,7 @@ Documentation KeplerTranslation::Documentation() {
     using namespace openspace::documentation;
     return{
         "Kepler Translation",
-        "base_transform_kepler",
+        "space_transform_kepler",
         {
             {
                 "Type",

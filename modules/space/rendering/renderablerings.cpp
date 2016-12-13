@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderablerings.h>
+#include <modules/space/rendering/renderablerings.h>
 
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
@@ -47,7 +47,7 @@ Documentation RenderableRings::Documentation() {
     using namespace documentation;
     return {
         "Renderable Rings",
-        "base_renderable_rings",
+        "space_renderable_rings",
         {
             {
                 "Type",
@@ -135,8 +135,8 @@ bool RenderableRings::initialize() {
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram("RingProgram",
-            "${MODULE_BASE}/shaders/rings_vs.glsl",
-            "${MODULE_BASE}/shaders/rings_fs.glsl"
+            "${MODULE_SPACE}/shaders/rings_vs.glsl",
+            "${MODULE_SPACE}/shaders/rings_fs.glsl"
             );
         _shader->setIgnoreUniformLocationError(
             ghoul::opengl::ProgramObject::IgnoreError::Yes

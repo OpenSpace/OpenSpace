@@ -23,12 +23,12 @@
  ****************************************************************************************/
 
 // open space includes
-#include <modules/base/rendering/renderableplanet.h>
+#include <modules/space/rendering/renderableplanet.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <modules/base/rendering/planetgeometry.h>
+#include <modules/space/rendering/planetgeometry.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -242,8 +242,8 @@ bool RenderablePlanet::initialize() {
         // shadow program
         _programObject = renderEngine.buildRenderProgram(
             "shadowNightProgram",
-            "${MODULE_BASE}/shaders/shadow_nighttexture_vs.glsl",
-            "${MODULE_BASE}/shaders/shadow_nighttexture_fs.glsl");
+            "${MODULE_SPACE}/shaders/shadow_nighttexture_vs.glsl",
+            "${MODULE_SPACE}/shaders/shadow_nighttexture_fs.glsl");
         if (!_programObject)
             return false;
     } 
@@ -251,8 +251,8 @@ bool RenderablePlanet::initialize() {
         // shadow program
         _programObject = renderEngine.buildRenderProgram(
             "shadowProgram",
-            "${MODULE_BASE}/shaders/shadow_vs.glsl",
-            "${MODULE_BASE}/shaders/shadow_fs.glsl");
+            "${MODULE_SPACE}/shaders/shadow_vs.glsl",
+            "${MODULE_SPACE}/shaders/shadow_fs.glsl");
         if (!_programObject)
             return false;
     } 
@@ -260,8 +260,8 @@ bool RenderablePlanet::initialize() {
         // Night texture program
         _programObject = renderEngine.buildRenderProgram(
             "nightTextureProgram",
-            "${MODULE_BASE}/shaders/nighttexture_vs.glsl",
-            "${MODULE_BASE}/shaders/nighttexture_fs.glsl");
+            "${MODULE_SPACE}/shaders/nighttexture_vs.glsl",
+            "${MODULE_SPACE}/shaders/nighttexture_fs.glsl");
         if (!_programObject) 
             return false;
     }
@@ -269,8 +269,8 @@ bool RenderablePlanet::initialize() {
         // pscstandard
         _programObject = renderEngine.buildRenderProgram(
             "pscstandard",
-            "${MODULE_BASE}/shaders/renderableplanet_vs.glsl",
-            "${MODULE_BASE}/shaders/renderableplanet_fs.glsl");
+            "${MODULE_SPACE}/shaders/renderableplanet_vs.glsl",
+            "${MODULE_SPACE}/shaders/renderableplanet_fs.glsl");
         if (!_programObject)
             return false;
     }

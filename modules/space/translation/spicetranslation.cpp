@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/translation/spicetranslation.h>
+#include <modules/space/translation/spicetranslation.h>
 
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
@@ -47,7 +47,7 @@ Documentation SpiceTranslation::Documentation() {
 
     return{
         "Spice Translation",
-        "base_translation_spicetranslation",
+        "space_translation_spicetranslation",
         {
             {
                 "Type",

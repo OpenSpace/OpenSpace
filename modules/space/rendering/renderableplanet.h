@@ -22,21 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLERINGS___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLERINGS___H__
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/opengl/textureunit.h>
+
+#include <vector>
+#include <string>
+
 namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
     namespace opengl {
         class ProgramObject;
         class Texture;
@@ -44,42 +46,71 @@ namespace ghoul {
 }
 
 namespace openspace {
-class RenderableRings : public Renderable {
+
+namespace planetgeometry {
+class PlanetGeometry;
+}
+
+class RenderablePlanet : public Renderable {
 public:
-    RenderableRings(const ghoul::Dictionary& dictionary);
+    // Shadow structure
+    typedef struct {
+        std::pair<std::string, float> source;
+        std::pair<std::string, float> caster;
+    } ShadowConf;
+
+    struct ShadowRenderingStruct {
+        float xu, xp;
+        float rs, rc;
+        glm::vec3 sourceCasterVec;
+        glm::vec3 casterPositionVec;
+        bool isShadowing;
+    };
+
+public:
+    explicit RenderablePlanet(const ghoul::Dictionary& dictionary);
+    ~RenderablePlanet();
 
     bool initialize() override;
     bool deinitialize() override;
-
     bool isReady() const override;
 
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
-    static openspace::Documentation Documentation();
-
-private:
+protected:
     void loadTexture();
-    void createPlane();
-
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::Vec2Property _offset;
-    properties::FloatProperty _nightFactor;
-    properties::FloatProperty _transparency;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+private:
+    properties::StringProperty _colorTexturePath;
+    properties::StringProperty _nightTexturePath;
+    properties::StringProperty _heightMapTexturePath;
+    
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    
     std::unique_ptr<ghoul::opengl::Texture> _texture;
-    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+    std::unique_ptr<ghoul::opengl::Texture> _nightTexture;    
+    std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
+    
+    properties::FloatProperty _heightExaggeration;
 
-    bool _textureIsDirty;
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
-    bool _planeIsDirty;
+    planetgeometry::PlanetGeometry* _geometry;
+    properties::BoolProperty _performShading;
+    properties::IntProperty _rotation;
+    float _alpha;
+    std::vector< ShadowConf > _shadowConfArray;
+    float _planetRadius;
 
-    glm::vec3 _sunPosition;
+    glm::dmat3 _stateMatrix;
+    std::string _frame;
+    std::string _target;
+    bool _hasNightTexture;
+    bool _hasHeightTexture;
+    bool _shadowEnabled;
+    double _time;
+
+    bool tempPic;
 };
 
-} // namespace openspace
+}  // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLERINGS___H__
+#endif  // __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__

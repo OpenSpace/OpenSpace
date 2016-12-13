@@ -25,7 +25,7 @@
 // openspace
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <modules/base/rendering/renderableconstellationbounds.h>
+#include <modules/space/rendering/renderableconstellationbounds.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 
@@ -94,8 +94,8 @@ RenderableConstellationBounds::RenderableConstellationBounds(
 bool RenderableConstellationBounds::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram("ConstellationBounds",
-        "${MODULE_BASE}/shaders/constellationbounds_vs.glsl",
-        "${MODULE_BASE}/shaders/constellationbounds_fs.glsl");
+        "${MODULE_SPACE}/shaders/constellationbounds_vs.glsl",
+        "${MODULE_SPACE}/shaders/constellationbounds_fs.glsl");
 
     if (!_program)
         return false;

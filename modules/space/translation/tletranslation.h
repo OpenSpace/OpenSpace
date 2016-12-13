@@ -22,87 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESTARS___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESTARS___H__
+#ifndef __OPENSPACE_MODULE_SPACE___TLETRANSLATION___H__
+#define __OPENSPACE_MODULE_SPACE___TLETRANSLATION___H__
 
-#include <openspace/rendering/renderable.h>
-
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
-namespace ghoul {
-namespace filesystem {
-class File;
-}
-}
+#include <modules/space/translation/keplertranslation.h>
 
 namespace openspace {
-
-namespace opengl {
-class ProgramObject;
-class Texture;
-}
-
-class RenderableStars : public Renderable {
+    
+/**
+ * A specialization of the KeplerTranslation that extracts the Keplerian elements from a
+ * two-line element as described by the US Space Command
+ * https://celestrak.com/columns/v04n03
+ * The ghoul::Dictionary passed to the constructor must contain the pointer to a file that
+ * will be read.
+ */
+class TLETranslation : public KeplerTranslation {
 public:
-    explicit RenderableStars(const ghoul::Dictionary& dictionary);
-    ~RenderableStars();
-
-    bool initialize() override;
-    bool deinitialize() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-
+    /**
+     * Constructor for the TLETranslation class. The \p dictionary must contain a key for
+     * the file that contains the TLE information. The ghoul::Dictionary will be tested
+     * against the openspace::Documentation returned by Documentation.
+     * \param The ghoul::Dictionary that contains the information for this TLETranslation
+     (*/
+    TLETranslation(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+    
+    /**
+     * Method returning the openspace::Documentation that describes the ghoul::Dictinoary
+     * that can be passed to the constructor.
+     * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
+     * be passed to the constructor
+     */
     static openspace::Documentation Documentation();
 
 private:
-    enum ColorOption {
-        Color = 0,
-        Velocity = 1,
-        Speed = 2
-    };
-
-    void createDataSlice(ColorOption option);
-
-    bool loadData();
-    bool readSpeckFile();
-    bool loadCachedFile(const std::string& file);
-    bool saveCachedFile(const std::string& file) const;
-
-    properties::StringProperty _pointSpreadFunctionTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
-    std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
-    bool _pointSpreadFunctionTextureIsDirty;
-
-    properties::StringProperty _colorTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
-    std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
-    bool _colorTextureIsDirty;
-
-    properties::OptionProperty _colorOption;
-    bool _dataIsDirty;
-
-    properties::FloatProperty _alphaValue;
-    properties::FloatProperty _scaleFactor;
-    properties::FloatProperty _minBillboardSize;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-
-    std::string _speckFile;
-
-    std::vector<float> _slicedData;
-    std::vector<float> _fullData;
-    int _nValuesPerStar;
-
-    GLuint _vao;
-    GLuint _vbo;
+    /**
+     * Reads the provided TLE file and calles the KeplerTranslation::setKeplerElments
+     * method with the correct values. If \p filename is a valid TLE file but contains
+     * disallowed values (see KeplerTranslation::setKeplerElements), a 
+     * KeplerTranslation::RangeError is thrown.
+     * \param filename The path to the file that contains the TLE file.
+     * \throw std::system_error if the TLE file is malformed (does not contain at least
+     * two lines that start with \c 1 and \c 2.
+     * \throw KeplerTranslation::RangeError If the Keplerian elements are outside of
+     * the valid range supported by Kepler::setKeplerElements
+     * \pre The \p filename must exist
+     */
+    void readTLEFile(const std::string& filename);
 };
-
+    
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_BASE___RENDERABLESTARS___H__
+#endif // __OPENSPACE_MODULE_SPACE___TLETRANSLATION___H__

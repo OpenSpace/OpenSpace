@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rotation/spicerotation.h>
+#include <modules/space/rotation/spicerotation.h>
 
 #include <openspace/documentation/verifier.h>
 
@@ -44,7 +44,7 @@ Documentation SpiceRotation::Documentation() {
     using namespace openspace::documentation;
     return {
         "Spice Rotation",
-        "base_transform_rotation_spice",
+        "space_transform_rotation_spice",
         {
             {
                 "Type",

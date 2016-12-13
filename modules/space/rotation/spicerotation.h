@@ -22,44 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SIMPLESPHEREGEOMETRY___H__
-#define __OPENSPACE_MODULE_BASE___SIMPLESPHEREGEOMETRY___H__
+#ifndef __OPENSPACE_MODULE_SPACE___SPICEROTATION___H__
+#define __OPENSPACE_MODULE_SPACE___SPICEROTATION___H__
 
-#include <modules/base/rendering/planetgeometry.h>
-
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
-
-class Renderable;
-class PowerScaledSphere;
-
-namespace planetgeometry {
-
-class SimpleSphereGeometry : public PlanetGeometry {
+    
+class SpiceRotation : public Rotation {
 public:
-    SimpleSphereGeometry(const ghoul::Dictionary& dictionary);
-    ~SimpleSphereGeometry();
+    SpiceRotation(const ghoul::Dictionary& dictionary);
+    const glm::dmat3& matrix() const;
+    void update(const UpdateData& data) override;
 
-
-    bool initialize(Renderable* parent) override;
-    void deinitialize() override;
-    void render() override;
-    PowerScaledSphere* _planet;
+    static openspace::Documentation Documentation();
 
 private:
-    void createSphere();
-
-    glm::vec2 _modRadius;
-    properties::Vec4Property _realRadius;
-    properties::IntProperty _segments;
-    std::string _name;
-
-    PowerScaledSphere* _sphere;
+    properties::StringProperty _sourceFrame;
+    properties::StringProperty _destinationFrame;
 };
+    
+} // namespace openspace
 
-}  // namespace planetgeometry
-}  // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SIMPLESPHEREGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_SPACE___SPICEROTATION___H__

@@ -22,33 +22,69 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SPICETRANSLATION___H__
-#define __OPENSPACE_MODULE_BASE___SPICETRANSLATION___H__
+#include <modules/space/rendering/planetgeometry.h>
+#include <openspace/util/factorymanager.h>
 
-#include <openspace/scene/translation.h>
+#include <openspace/documentation/verifier.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/properties/stringproperty.h>
+namespace {
+    const std::string _loggerCat = "PlanetGeometry";
+    const char* KeyType = "Type";
+}
 
 namespace openspace {
-    
-class SpiceTranslation : public Translation {
-public:
-    SpiceTranslation(const ghoul::Dictionary& dictionary);
-    glm::dvec3 position() const;
-    void update(const UpdateData& data) override;
+namespace planetgeometry {
 
-    static openspace::Documentation Documentation();
+Documentation PlanetGeometry::Documentation() {
+    using namespace documentation;
+    return {
+        "Planet Geometry",
+        "space_geometry_planet",
+        {
+            {
+                KeyType,
+                new StringVerifier,
+                "The type of the PlanetGeometry that will can be constructed.",
+                Optional::No
+            }
+        }
+    };
+}
 
-private:
-    properties::StringProperty _target;
-    properties::StringProperty _origin;
-    properties::StringProperty _frame;
+PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
+{
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "PlanetGeometry"
+    );
 
-    glm::dvec3 _position;
-    bool _kernelsLoadedSuccessfully;
-};
-    
-} // namespace openspace
+    std::string geometryType = dictionary.value<std::string>(KeyType);
+    auto factory = FactoryManager::ref().factory<PlanetGeometry>();
 
-#endif // __OPENSPACE_MODULE_BASE___SPICETRANSLATION___H__
+    PlanetGeometry* result = factory->create(geometryType, dictionary);
+    if (result == nullptr) {
+        throw ghoul::RuntimeError(
+            "Failed to create a PlanetGeometry object of type '" + geometryType + "'"
+        );
+    }
+    return result;
+}
+
+PlanetGeometry::PlanetGeometry()
+    : _parent(nullptr)
+{
+    setName("PlanetGeometry");
+}
+
+PlanetGeometry::~PlanetGeometry() {}
+
+bool PlanetGeometry::initialize(Renderable* parent) {
+    _parent = parent;
+    return true;
+}
+
+void PlanetGeometry::deinitialize() {}
+
+}  // namespace planetgeometry
+}  // namespace openspace

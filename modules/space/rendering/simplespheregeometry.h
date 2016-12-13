@@ -22,35 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___PLANETGEOMETRY___H__
-#define __OPENSPACE_MODULE_BASE___PLANETGEOMETRY___H__
+#ifndef __OPENSPACE_MODULE_SPACE___SIMPLESPHEREGEOMETRY___H__
+#define __OPENSPACE_MODULE_SPACE___SIMPLESPHEREGEOMETRY___H__
 
-#include <openspace/properties/propertyowner.h>
+#include <modules/space/rendering/planetgeometry.h>
 
-#include <openspace/documentation/documentation.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 
 namespace openspace {
+
 class Renderable;
+class PowerScaledSphere;
 
 namespace planetgeometry {
 
-class PlanetGeometry : public properties::PropertyOwner {
+class SimpleSphereGeometry : public PlanetGeometry {
 public:
-    static PlanetGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
+    SimpleSphereGeometry(const ghoul::Dictionary& dictionary);
+    ~SimpleSphereGeometry();
 
-    PlanetGeometry();
-    virtual ~PlanetGeometry();
-    virtual bool initialize(Renderable* parent);
-    virtual void deinitialize();
-    virtual void render() = 0;
 
-    static openspace::Documentation Documentation();
+    bool initialize(Renderable* parent) override;
+    void deinitialize() override;
+    void render() override;
+    PowerScaledSphere* _planet;
 
-protected:
-    Renderable* _parent;
+private:
+    void createSphere();
+
+    glm::vec2 _modRadius;
+    properties::Vec4Property _realRadius;
+    properties::IntProperty _segments;
+    std::string _name;
+
+    PowerScaledSphere* _sphere;
 };
 
-}  // namespace planetgeometry
-}  // namespace openspace
+} // namespace planetgeometry
+} // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_BASE___PLANETGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_SPACE___SIMPLESPHEREGEOMETRY___H__

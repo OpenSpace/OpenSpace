@@ -24,7 +24,7 @@
 
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
 
-#include <modules/base/rendering/planetgeometry.h>
+#include <modules/space/rendering/planetgeometry.h>
 
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>

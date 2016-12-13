@@ -22,69 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/planetgeometry.h>
-#include <openspace/util/factorymanager.h>
+#ifndef __OPENSPACE_MODULE_SPACE___BASEMODULE___H__
+#define __OPENSPACE_MODULE_SPACE___BASEMODULE___H__
 
-#include <openspace/documentation/verifier.h>
-
-namespace {
-    const std::string _loggerCat = "PlanetGeometry";
-    const char* KeyType = "Type";
-}
+#include <openspace/util/openspacemodule.h>
 
 namespace openspace {
-namespace planetgeometry {
 
-Documentation PlanetGeometry::Documentation() {
-    using namespace documentation;
-    return {
-        "Planet Geometry",
-        "base_geometry_planet",
-        {
-            {
-                KeyType,
-                new StringVerifier,
-                "The type of the PlanetGeometry that will can be constructed.",
-                Optional::No
-            }
-        }
-    };
-}
+class SpaceModule : public OpenSpaceModule {
+public:
+    SpaceModule();
+    
+    std::vector<Documentation> documentations() const override;
 
-PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
-{
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "PlanetGeometry"
-    );
+protected:
+    void internalInitialize() override;
+};
 
-    std::string geometryType = dictionary.value<std::string>(KeyType);
-    auto factory = FactoryManager::ref().factory<PlanetGeometry>();
+} // namespace openspace
 
-    PlanetGeometry* result = factory->create(geometryType, dictionary);
-    if (result == nullptr) {
-        throw ghoul::RuntimeError(
-            "Failed to create a PlanetGeometry object of type '" + geometryType + "'"
-        );
-    }
-    return result;
-}
-
-PlanetGeometry::PlanetGeometry()
-    : _parent(nullptr)
-{
-    setName("PlanetGeometry");
-}
-
-PlanetGeometry::~PlanetGeometry() {}
-
-bool PlanetGeometry::initialize(Renderable* parent) {
-    _parent = parent;
-    return true;
-}
-
-void PlanetGeometry::deinitialize() {}
-
-}  // namespace planetgeometry
-}  // namespace openspace
+#endif // __OPENSPACE_MODULE_SPACE___BASEMODULE___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___KEPLERTRANSLATION___H__
-#define __OPENSPACE_MODULE_BASE___KEPLERTRANSLATION___H__
+#ifndef __OPENSPACE_MODULE_SPACE___KEPLERTRANSLATION___H__
+#define __OPENSPACE_MODULE_SPACE___KEPLERTRANSLATION___H__
 
 #include <openspace/scene/translation.h>
 
@@ -174,4 +174,4 @@ private:
     
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___KEPLERTRANSLATION___H__
+#endif // __OPENSPACE_MODULE_SPACE___KEPLERTRANSLATION___H__

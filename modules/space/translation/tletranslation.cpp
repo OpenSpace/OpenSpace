@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/translation/tletranslation.h>
+#include <modules/space/translation/tletranslation.h>
 
 #include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -228,7 +228,7 @@ Documentation TLETranslation::Documentation() {
     using namespace openspace::documentation;
     return {
         "TLE Translation",
-        "base_transform_tle",
+        "space_transform_tle",
         {
             {
                 "Type",

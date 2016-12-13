@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/renderablestars.h>
+#include <modules/space/rendering/renderablestars.h>
 
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
@@ -86,7 +86,7 @@ openspace::Documentation RenderableStars::Documentation() {
     using namespace documentation;
     return {
         "RenderableStars",
-        "base_renderablestars",
+        "space_renderablestars",
         {
             {
                 "Type",
@@ -203,9 +203,9 @@ bool RenderableStars::initialize() {
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     _program = renderEngine.buildRenderProgram("Star",
-        "${MODULE_BASE}/shaders/star_vs.glsl",
-        "${MODULE_BASE}/shaders/star_fs.glsl",
-        "${MODULE_BASE}/shaders/star_ge.glsl");
+        "${MODULE_SPACE}/shaders/star_vs.glsl",
+        "${MODULE_SPACE}/shaders/star_fs.glsl",
+        "${MODULE_SPACE}/shaders/star_ge.glsl");
 
     if (!_program) {
         return false;

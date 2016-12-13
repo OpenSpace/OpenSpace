@@ -22,28 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SPICEROTATION___H__
-#define __OPENSPACE_MODULE_BASE___SPICEROTATION___H__
+#ifndef __OPENSPACE_MODULE_SPACE___RENDERABLERINGS___H__
+#define __OPENSPACE_MODULE_SPACE___RENDERABLERINGS___H__
 
-#include <openspace/scene/rotation.h>
+#include <openspace/rendering/renderable.h>
+
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/util/updatestructures.h>
+
+namespace ghoul {
+    namespace filesystem {
+        class File;
+    }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    }
+}
 
 namespace openspace {
-    
-class SpiceRotation : public Rotation {
+
+class RenderableRings : public Renderable {
 public:
-    SpiceRotation(const ghoul::Dictionary& dictionary);
-    const glm::dmat3& matrix() const;
+    RenderableRings(const ghoul::Dictionary& dictionary);
+
+    bool initialize() override;
+    bool deinitialize() override;
+
+    bool isReady() const override;
+
+    void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
     static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _sourceFrame;
-    properties::StringProperty _destinationFrame;
+    void loadTexture();
+    void createPlane();
+
+    properties::StringProperty _texturePath;
+    properties::FloatProperty _size;
+    properties::Vec2Property _offset;
+    properties::FloatProperty _nightFactor;
+    properties::FloatProperty _transparency;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+
+    bool _textureIsDirty;
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
+    bool _planeIsDirty;
+
+    glm::vec3 _sunPosition;
 };
-    
+
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SPICEROTATION___H__
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLERINGS___H__
