@@ -357,18 +357,6 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     //    child->render(newData);
 }
 
-void SceneGraphNode::postRender(const RenderData& data) {
-    const psc thisPosition = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
-    RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement, data.renderBinMask, _worldPositionCached};
-
-    //_performanceRecord.renderTime = 0;
-    if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
-        _renderable->postRender(newData);
-    }
-}
-
-
-
 
 // not used anymore @AA
 //void SceneGraphNode::addNode(SceneGraphNode* child)

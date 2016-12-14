@@ -78,7 +78,6 @@ public:
 
     virtual void render(const RenderData& data);
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
-    virtual void postRender(const RenderData& data);
     virtual void update(const UpdateData& data);
 
     RenderBin renderBin() const;

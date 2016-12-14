@@ -86,11 +86,6 @@ public:
     void render(const RenderData& data, RendererTasks& tasks);
 
     /*
-    * Post-Render visible SceneGraphNodes using the provided camera
-    */
-    void postRender(const RenderData& data);
-
-    /*
      * Returns the root SceneGraphNode
      */
     SceneGraphNode* root() const;

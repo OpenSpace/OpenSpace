@@ -68,11 +68,6 @@ public:
         Invalid
     };
 
-    enum class RenderProgramType {
-        Default = 0,
-        Post
-    };
-
     enum class FrametimeType {
         DtTimeAvg = 0,
         FPS,
@@ -135,16 +130,14 @@ public:
         std::string name,
         std::string vsPath,
         std::string fsPath,
-        const ghoul::Dictionary& dictionary = ghoul::Dictionary(),
-        RenderEngine::RenderProgramType type = RenderEngine::RenderProgramType::Default);
+        const ghoul::Dictionary& dictionary = ghoul::Dictionary());
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         std::string name,
         std::string vsPath,
         std::string fsPath,
         std::string csPath,
-        const ghoul::Dictionary& dictionary = ghoul::Dictionary(),
-        RenderEngine::RenderProgramType type = RenderEngine::RenderProgramType::Default);
+        const ghoul::Dictionary& dictionary = ghoul::Dictionary());
 
     std::string progressToStr(int size, double t);
 

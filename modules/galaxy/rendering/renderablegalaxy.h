@@ -45,7 +45,6 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
-    void postRender(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
 private:

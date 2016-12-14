@@ -164,12 +164,6 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
     }
 }
 
-void Scene::postRender(const RenderData& data) {
-    for (SceneGraphNode* node : _graph.nodes()) {
-        node->postRender(data);
-    }
-}
-
 void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
     _sceneGraphToLoad = sceneDescriptionFilePath;
 }
