@@ -170,6 +170,15 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         std::make_unique<ghoul::TemplateFactory<Translation>>(),
         "Translation"
     );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
+        "Rotation"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Scale>>(),
+        "Scale"
+    );
+
     SpiceManager::initialize();
     Time::initialize();
     TransformationManager::initialize();
