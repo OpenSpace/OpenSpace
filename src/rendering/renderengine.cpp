@@ -1695,7 +1695,7 @@ void RenderEngine::renderScreenLog() {
         if (alpha <= 0.0)
             break;
 
-        const std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
+        const std::string lvl = "(" + ghoul::logging::stringFromLevel(e->level) + ")";
         const std::string& message = e->message.substr(0, msg_length);
         nr += std::count(message.begin(), message.end(), '\n');
 
@@ -1708,13 +1708,13 @@ void RenderEngine::renderScreenLog() {
             e->category.length() > 20 ? "..." : "");        // Pad category with "..." if exceeds category_length
 
         glm::vec4 color = white;
-        if (e->level == ghoul::logging::LogManager::LogLevel::Debug)
+        if (e->level == ghoul::logging::LogLevel::Debug)
             color = green;
-        if (e->level == ghoul::logging::LogManager::LogLevel::Warning)
+        if (e->level == ghoul::logging::LogLevel::Warning)
             color = yellow;
-        if (e->level == ghoul::logging::LogManager::LogLevel::Error)
+        if (e->level == ghoul::logging::LogLevel::Error)
             color = red;
-        if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
+        if (e->level == ghoul::logging::LogLevel::Fatal)
             color = blue;
 
         //                    const float font_with_light = 5;

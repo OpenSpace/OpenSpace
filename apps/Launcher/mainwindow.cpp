@@ -62,7 +62,7 @@ namespace {
     class QLog : public ghoul::logging::Log {
     public:
         void log(
-            ghoul::logging::LogManager::LogLevel level,
+            ghoul::logging::LogLevel level,
             const std::string& category,
             const std::string& message
         ) {
@@ -189,7 +189,7 @@ void MainWindow::initialize() {
     _syncWidget->setWindowModality(Qt::WindowModal);
     _syncWidget->hide();
 
-    ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Debug);
+    ghoul::logging::LogManager::initialize(ghoul::logging::LogLevel::Debug);
     LogMgr.addLog( std::make_unique< ghoul::logging::ConsoleLog >() );
     // TODO: This can crash the system in cases where the logfile can't be created ---abock
     LogMgr.addLog( std::make_unique< ghoul::logging::HTMLLog >("LauncherLog.html", ghoul::logging::HTMLLog::Append::No) );

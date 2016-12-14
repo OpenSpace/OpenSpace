@@ -231,7 +231,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     // configuration file, we will deinitialize this LogManager and reinitialize it later
     // with the correct LogLevel
     LogManager::initialize(
-        LogManager::LogLevel::Debug,
+        LogLevel::Debug,
         ghoul::logging::LogManager::ImmediateFlush::Yes
     );
     LogMgr.addLog(std::make_unique<ConsoleLog>());
@@ -792,7 +792,7 @@ void OpenSpaceEngine::configureLogging() {
         bool immediateFlush = false;
         configurationManager().getValue(KeyLogImmediateFlush, immediateFlush);
 
-        LogManager::LogLevel level = LogManager::levelFromString(logLevel);
+        LogLevel level = ghoul::logging::levelFromString(logLevel);
         LogManager::deinitialize();
         using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
         LogManager::initialize(
@@ -938,9 +938,9 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     // Testing this every frame has minimal impact on the performance --- abock
     // Debug build: 1-2 us ; Release build: <= 1 us
     using ghoul::logging::LogManager;
-    int warningCounter = LogMgr.messageCounter(LogManager::LogLevel::Warning);
-    int errorCounter = LogMgr.messageCounter(LogManager::LogLevel::Error);
-    int fatalCounter = LogMgr.messageCounter(LogManager::LogLevel::Fatal);
+    int warningCounter = LogMgr.messageCounter(LogLevel::Warning);
+    int errorCounter = LogMgr.messageCounter(LogLevel::Error);
+    int fatalCounter = LogMgr.messageCounter(LogLevel::Fatal);
 
     if (warningCounter > 0)
         LWARNINGC("Logging", "Number of Warnings raised: " << warningCounter);
