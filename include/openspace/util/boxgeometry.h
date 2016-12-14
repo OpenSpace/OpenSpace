@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __BOXGEOMETRY_H__
-#define __BOXGEOMETRY_H__
+#ifndef __OPENSPACE_CORE___BOXGEOMETRY___H__
+#define __OPENSPACE_CORE___BOXGEOMETRY___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <glm/glm.hpp>
@@ -46,4 +46,4 @@ public:
 
 } // namespace openspace
 
-#endif // __BOXGEOMETRY_H__
+#endif // __OPENSPACE_CORE___BOXGEOMETRY___H__

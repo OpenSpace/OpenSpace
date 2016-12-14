@@ -27,28 +27,23 @@
 #include <modules/newhorizons/util/imagesequencer.h>
 #include <modules/newhorizons/util/instrumentdecoder.h>
 
-#include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/directory.h>
 
 #include <fstream>
-#include <iterator>
-#include <iomanip>
-#include <limits>
-
 
 namespace {
-    const std::string _loggerCat = "HongKangParser";
-    const std::string keyTranslation = "DataInputTranslation";
+    const char* keyTranslation = "DataInputTranslation";
 
-    const std::string PlaybookIdentifierName = "HongKang";
+    const char* PlaybookIdentifierName = "HongKang";
 }
 
 namespace openspace {
-HongKangParser::HongKangParser(std::string name, std::string fileName,
+
+HongKangParser::HongKangParser(std::string name, std::string fileName, 
                                std::string spacecraft,
                                ghoul::Dictionary translationDictionary,
                                std::vector<std::string> potentialTargets)
@@ -91,12 +86,12 @@ void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& 
     std::vector<std::string> ptarg = _potentialTargets;
     for (const auto& p : ptarg) {
         // loop over all targets and determine from 4th col which target this instrument points to
-        if (line.find(p) != std::string::npos){
+        if (line.find(p) != std::string::npos) {
             target = p;
             break;
         }
         else {
-        // not found - we set void until we have more info. 
+            // not found - we set void until we have more info. 
             target = "VOID";
         }
     }
@@ -105,28 +100,31 @@ void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& 
 bool HongKangParser::create() {
     //check input for errors. 
     bool hasObserver = SpiceManager::ref().hasNaifId(_spacecraft);
-    if (!hasObserver){
-        LERROR("SPICE navigation system has no pooled observer: '" << _spacecraft << "' in kernel" <<
-               "Please check that all necessary kernels are loaded"<<
-               "along with correct modfile definition.");
-        return hasObserver;
+    if (!hasObserver) {
+        throw ghoul::RuntimeError(
+            "SPICE has no observer: '" + _spacecraft + "' in kernel pool",
+            "HongKangParser"
+        );
     }
-    if (_potentialTargets.size() == 0){
-        LERROR("In order to find targeting from event file user has to provide list of potential targets "
-               << "please check modfile");
+    if (_potentialTargets.size() == 0) {
+        throw ghoul::RuntimeError(
+            "List of potential target is missing in order to parse the event file",
+            "HongKangParser"
+        );
     }
 
     if (size_t position = _fileName.find_last_of(".") + 1){
         if (position != std::string::npos){
             std::string extension = ghoul::filesystem::File(_fileName).fileExtension();
 
-            if (extension == "txt") {// Hong Kang. pre-parsed playbook
-                LINFO("Using Preparsed Playbook V9H");
-                std::ifstream file(_fileName , std::ios::binary);
-                if (!file.good()){
-                    LERROR("Failed to open event file '" << _fileName << "'");
-                    return false;
-                }
+            if (extension == "txt") { // Hong Kang. pre-parsed playbook
+                std::ifstream file;
+                file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+                //std::ifstream file(_fileName , std::ios::binary);
+                //if (!file.good()){
+                //    LERROR("Failed to open event file '" << _fileName << "'");
+                //    return false;
+                //}
 
                 std::string line = "";
                 double shutter = 0.01;
@@ -149,7 +147,7 @@ bool HongKangParser::create() {
                 std::string cameraTarget  = "VOID";
                 std::string scannerTarget = "VOID";
 
-                while (!file.eof()){
+                while (!file.eof()) {
                     std::getline(file, line);
                     
                     std::string event = line.substr(0, line.find_first_of(" ")); 
@@ -164,8 +162,8 @@ bool HongKangParser::create() {
                         //store the time, this is used for getNextCaptureTime() 
                         _captureProgression.push_back(time);
                         
-                        if (it->second->getDecoderType() == "CAMERA"){
-                            if (capture_start == -1){
+                        if (it->second->getDecoderType() == "CAMERA") {
+                            if (capture_start == -1) {
                                 //encountered new camera sequence- store start time
                                 capture_start = time;
                                 previousCamera = it->first;
@@ -187,7 +185,7 @@ bool HongKangParser::create() {
                             //createImage(image, time, time + shutter, cameraSpiceID, cameraTarget, _defaultCaptureImage);
 
                             //IFF spaccraft has decided to switch target, store in target map (used for: 'next observation focus')
-                            if (previousTarget != image.target){
+                            if (previousTarget != image.target) {
                                 previousTarget = image.target;
                                 std::pair<double, std::string> v_target = std::make_pair(time, image.target);
                                 _targetTimes.push_back(v_target);
@@ -198,7 +196,7 @@ bool HongKangParser::create() {
                             //compute and store the range for each subset 
                             _subsetMap[image.target]._range.include(time);
                         }
-                        if (it->second->getDecoderType() == "SCANNER"){ // SCANNER START 
+                        if (it->second->getDecoderType() == "SCANNER") { // SCANNER START 
                             scan_start = time;
 
                             InstrumentDecoder* scanner = static_cast<InstrumentDecoder*>(it->second.get());
@@ -208,10 +206,10 @@ bool HongKangParser::create() {
                             std::streampos len = file.tellg();
                             std::string linePeek;
                             bool foundstop = false;
-                            while (!file.eof() && !foundstop){
+                            while (!file.eof() && !foundstop) {
                                 //continue grabbing next line until we find what we need
                                 getline(file, linePeek);
-                                if (linePeek.find(endNominal) != std::string::npos){
+                                if (linePeek.find(endNominal) != std::string::npos) {
                                     foundstop = true;
 
                                     met = linePeek.substr(25, 9);
@@ -240,8 +238,8 @@ bool HongKangParser::create() {
                             file.seekg(len, std::ios_base::beg);
                         }
                     }
-                    else{ // we have reached the end of a scan or consecutive capture sequence!
-                        if (capture_start != -1){
+                    else { // we have reached the end of a scan or consecutive capture sequence!
+                        if (capture_start != -1) {
                             //end of capture sequence for camera, store end time of this sequence
                             capture_stop = time;
                             cameraRange = { capture_start, capture_stop };
@@ -256,13 +254,11 @@ bool HongKangParser::create() {
         }
     }
 
-
     sendPlaybookInformation(PlaybookIdentifierName);
     return true;
 }
 
-bool HongKangParser::augmentWithSpice(Image& image,
-                                      std::string spacecraft, 
+bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft, 
                                       std::vector<std::string> payload, 
                                       std::vector<std::string> potentialTargets)
 {
@@ -280,7 +276,7 @@ bool HongKangParser::augmentWithSpice(Image& image,
         bool _withinFOV = false;
         for (int j = 0; j < image.activeInstruments.size(); ++j) {
             double time = image.timeRange.start;
-            for (int k = 0; k < exposureTime; k++){
+            for (int k = 0; k < exposureTime; k++) {
                 time += k;
                 _withinFOV = SpiceManager::ref().isTargetInFieldOfView(
                     potentialTargets[i],
@@ -301,54 +297,34 @@ bool HongKangParser::augmentWithSpice(Image& image,
     return false;
 }
 
-//Image HongKangParser::createImage(double startTime, double stopTime, std::vector<std::string> instr, std::string targ, std::string path) {
-//    image.startTime = startTime;
-//    image.stopTime = stopTime;
-//    image.path = path;
-//    for (int i = 0; i < instr.size(); i++){
-//        image.activeInstruments.push_back(instr[i]);
-//    }
-//    image.target = targ;
-//    image.projected = false;
-//    image.isPlaceholder = true;
-//}
-
-double HongKangParser::getETfromMet(std::string line){
+double HongKangParser::getETfromMet(std::string line) {
     std::string::size_type sz;
     return getETfromMet(std::stod(line, &sz));
 }
 
-double HongKangParser::getETfromMet(double met){
-    double diff;
-    double referenceET =
+double HongKangParser::getETfromMet(double met) {
+    const double referenceET =
         SpiceManager::ref().ephemerisTimeFromDate("2015-07-14T11:50:00.00");
-    double et = referenceET;
 
     //_metRef += 3; // MET reference time is off by 3 sec? 
 
-    diff = std::abs(met - _metRef);
-    if (met > _metRef){
-        et = referenceET + diff;
-    } else if (met < _metRef){
-        et = referenceET - diff;
+    const double diff = std::abs(met - _metRef);
+    if (met > _metRef) {
+        return referenceET + diff;
+    } else if (met < _metRef) {
+        return referenceET - diff;
     }
-    return et;
 }
 
-
-double HongKangParser::getMetFromET(double et){
-    double met;
-    double referenceET =
+double HongKangParser::getMetFromET(double et) {
+    const double referenceET =
         SpiceManager::ref().ephemerisTimeFromDate("2015-07-14T11:50:00.00");
 
-    if (et >= referenceET){
-        met = _metRef + (et - referenceET);
-    }else{
-        met = _metRef - (referenceET - et);
+    if (et >= referenceET) {
+        return _metRef + (et - referenceET);
+    }else {
+        return _metRef - (referenceET - et);
     }
-
-    return met;
 }
 
-
-}
+} // namespace openspace

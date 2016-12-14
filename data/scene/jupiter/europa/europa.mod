@@ -24,7 +24,7 @@ return {
         },
         Transform = {
             Translation = {
-                Type = "SpiceEphemeris",
+                Type = "SpiceTranslation",
                 Body = "EUROPA",
                 Observer = "JUPITER BARYCENTER",
                 Kernels = "${OPENSPACE_DATA}/spice/jup260.bsp"
@@ -33,11 +33,7 @@ return {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_EUROPA",
                 DestinationFrame = "IAU_JUPITER",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
+            }
         }
     },
     -- EuropaTrail module
@@ -45,19 +41,15 @@ return {
         Name = "EuropaTrail",
         Parent = "JupiterBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "EUROPA",
-            Frame = "GALACTIC",
-            Observer = "JUPITER BARYCENTER",
-            RGB = { 0.5, 0.3, 0.3 },
-            TropicalOrbitPeriod =  60,
-            EarthOrbitRatio = 0.01,
-            DayLength = 9.9259,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "EUROPA",
+                Observer = "JUPITER BARYCENTER",
+            },
+            Color = { 0.5, 0.3, 0.3 },
+            Period =  85 / 24,
+            Resolution = 1000
         }
     }
 }

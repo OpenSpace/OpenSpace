@@ -22,11 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MISSIONPHASEEQUENCER_H__
-#define __MISSIONPHASEEQUENCER_H__
+#ifndef __OPENSPACE_CORE___MISSIONMANAGER___H__
+#define __OPENSPACE_CORE___MISSIONMANAGER___H__
 
 #include <openspace/mission/mission.h>
 
+#include <ghoul/designpattern/singleton.h>
 #include <ghoul/misc/exception.h>
 
 #include <map>
@@ -39,16 +40,13 @@ namespace scripting { struct LuaLibrary; }
 /**
 * Singleton class keeping track of space missions. 
 */
-class MissionManager {
+class MissionManager : public ghoul::Singleton<MissionManager> {
 public:
     struct MissionManagerException : public ghoul::RuntimeError {
         explicit MissionManagerException(std::string error);
     };
 
-    static MissionManager& ref();
-    
-    static void initialize();
-    static void deinitialize();
+    MissionManager();
 
     /**
     * Reads a mission from file and maps the mission name to the Mission object. If
@@ -71,6 +69,7 @@ public:
     /**
     * Sets the mission with the name <missionName> as the current mission. The current
     * mission is what is return by `currentMission()`.
+    * \pre missionName must not be empty
     */
     void setCurrentMission(const std::string& missionName);
 
@@ -85,20 +84,16 @@ public:
     * loaded, a warning will be printed and a dummy mission will be returned.
     */
     const Mission& currentMission();
-    
-private:
-    static scripting::LuaLibrary luaLibrary();
-    static MissionManager _instance;
 
+    static scripting::LuaLibrary luaLibrary();
+
+private:
     using MissionMap = std::map<std::string, Mission>;
     MissionMap _missionMap;
 
     MissionMap::iterator _currentMission;
-
-    // Singleton
-    MissionManager();
 };
 
 } // namespace openspace
 
-#endif // __MISSIONPHASEEQUENCER_H__
+#endif // __OPENSPACE_CORE___MISSIONMANAGER___H__

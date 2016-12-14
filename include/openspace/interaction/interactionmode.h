@@ -22,15 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __INTERACTION_MODE_H__
-#define __INTERACTION_MODE_H__
+#ifndef __OPENSPACE_CORE___INTERACTIONMODE___H__
+#define __OPENSPACE_CORE___INTERACTIONMODE___H__
 
 #include <openspace/interaction/keyboardcontroller.h>
-#include <openspace/interaction/mousecontroller.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#endif
 
 #include <list>
 
@@ -38,10 +41,32 @@ namespace openspace {
 
 class Camera;
 class SceneGraphNode;
-class RenderableGlobe;
+
+namespace globebrowsing {
+    class RenderableGlobe;
+}
 
 namespace interaction {
 
+    template <typename T>
+    class Interpolator
+    {
+    public:
+        Interpolator(std::function<T(double)> transferFunction)
+        : _t(0.0)
+        , _transferFunction(transferFunction) {};
+        ~Interpolator() {};
+
+        void start() { _t = 0.0; };
+        void end() { _t = 1.0; };
+        void step(double delta) { _t += delta; };
+
+        T value() { return _transferFunction(_t); };
+        bool isInterpolating() { return _t < 1.0; };
+    private:
+        std::function<T(double)> _transferFunction;
+        double _t;
+    };
 
     class InputState
     {
@@ -56,17 +81,19 @@ namespace interaction {
         void mouseScrollWheelCallback(double mouseScrollDelta);
 
         // Mutators
-        void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
+        void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
         void clearKeyframes();
+        void clearOldKeyframes();
 
         // Accessors
         const std::list<std::pair<Key, KeyModifier> >& getPressedKeys() const;
         const std::list<MouseButton>& getPressedMouseButtons() const;
         glm::dvec2 getMousePosition() const;
         double getMouseScrollDelta() const;
-        std::vector<network::datamessagestructures::PositionKeyframe>& getKeyFrames() const;
+        const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
         bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
+        bool isKeyPressed(Key key) const;
         bool isMouseButtonPressed(MouseButton mouseButton) const;
     private:
         // Input from keyboard and mouse
@@ -76,8 +103,7 @@ namespace interaction {
         double _mouseScrollDelta;
 
         // Remote input via keyframes
-        std::vector<network::datamessagestructures::PositionKeyframe> _keyframes;
-        std::mutex _keyframeMutex;
+        std::vector<datamessagestructures::CameraKeyframe> _keyframes;
     };
 
 
@@ -93,9 +119,10 @@ public:
 
     // Accessors
     SceneGraphNode* focusNode();
-
+    Interpolator<double>& rotateToFocusNodeInterpolator();
+    
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime) = 0;
-    virtual void updateCameraStateFromMouseStates(Camera& camera) = 0;
+    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime) = 0;
 
 protected:
     /**
@@ -156,6 +183,9 @@ protected:
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;
     glm::dquat _previousFocusNodeRotation;
+    
+    
+    Interpolator<double> _rotateToFocusNodeInterpolator;
 };
 
 class KeyframeInteractionMode : public InteractionMode
@@ -165,9 +195,10 @@ public:
     ~KeyframeInteractionMode();
 
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-    virtual void updateCameraStateFromMouseStates(Camera& camera);
+    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
 
 private:
+    std::vector<datamessagestructures::CameraKeyframe> _keyframes;
     double _currentKeyframeTime;
 };
 
@@ -214,10 +245,10 @@ public:
     //virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
 
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-    virtual void updateCameraStateFromMouseStates(Camera& camera);
+    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
 
 protected:
-    //void updateCameraStateFromMouseStates(Camera& camera);
+    //void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
     std::shared_ptr<MouseStates> _mouseStates;
 };
 
@@ -229,14 +260,24 @@ public:
 
     virtual void setFocusNode(SceneGraphNode* focusNode);
     //virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
-    virtual void updateCameraStateFromMouseStates(Camera& camera);
-
+    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
+                   bool resetCameraDirection);
+    void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,
+                   bool resetCameraDirection);
+    
+    void goToGeodetic3(Camera& camera,  globebrowsing::Geodetic3 geo3);
+    void resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2);
+#endif
 private:
-    //void updateCameraStateFromMouseStates(Camera& camera);
-    RenderableGlobe* _globe;
+    //void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    globebrowsing::RenderableGlobe* _globe;
+#endif
 };
 
 } // namespace interaction
 } // namespace openspace
 
-#endif // __INTERACTION_MODE_H__
+#endif // __OPENSPACE_CORE___INTERACTIONMODE___H__

@@ -22,11 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLE_H__
-#define __RENDERABLE_H__
+#ifndef __OPENSPACE_CORE___RENDERABLE___H__
+#define __OPENSPACE_CORE___RENDERABLE___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
+
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/updatestructures.h>
 
@@ -77,7 +78,6 @@ public:
 
     virtual void render(const RenderData& data);
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
-    virtual void postRender(const RenderData& data);
     virtual void update(const UpdateData& data);
 
     RenderBin renderBin() const;
@@ -106,6 +106,6 @@ private:
     bool _hasTimeInterval;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif  // __RENDERABLE_H__
+#endif // __OPENSPACE_CORE___RENDERABLE___H__

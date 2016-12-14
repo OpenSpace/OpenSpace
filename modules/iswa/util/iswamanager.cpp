@@ -1,26 +1,27 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2015                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
 #include <modules/iswa/util/iswamanager.h>
 
 #include <modules/iswa/rendering/dataplane.h>
@@ -439,7 +440,10 @@ std::string IswaManager::jsonSphereToLuaTable(std::shared_ptr<MetadataFuture> da
 void IswaManager::createScreenSpace(int id){
     std::string script = "openspace.iswa.addScreenSpaceCygnet("
         "{CygnetId =" + std::to_string(id) + "});";
-    OsEng.scriptEngine().queueScript(script);
+    OsEng.scriptEngine().queueScript(
+        script,
+        scripting::ScriptEngine::RemoteScripting::Yes
+    );
 }
 
 void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
@@ -475,7 +479,10 @@ void IswaManager::createPlane(std::shared_ptr<MetadataFuture> data){
     std::string luaTable = jsonPlaneToLuaTable(data);
     if(luaTable != ""){
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(script);
+        OsEng.scriptEngine().queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 
@@ -504,7 +511,10 @@ void IswaManager::createSphere(std::shared_ptr<MetadataFuture> data){
     std::string luaTable = jsonSphereToLuaTable(data);
     if(luaTable != ""){
         std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-        OsEng.scriptEngine().queueScript(script);
+        OsEng.scriptEngine().queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     }
 }
 
@@ -536,7 +546,10 @@ void IswaManager::createKameleonPlane(CdfInfo info, std::string cut){
         std::string luaTable = parseKWToLuaTable(info, cut);
         if(!luaTable.empty()){
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            OsEng.scriptEngine().queueScript(script);
+            OsEng.scriptEngine().queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         }
     }else{
         LWARNING( absPath(info.path) + " is not a cdf file or can't be found.");
@@ -570,7 +583,10 @@ void IswaManager::createFieldline(std::string name, std::string cdfPath, std::st
         "}";
         if(!luaTable.empty()){
             std::string script = "openspace.addSceneGraphNode(" + luaTable + ");";
-            OsEng.scriptEngine().queueScript(script);
+            OsEng.scriptEngine().queueScript(
+                script,
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
         }
     }else{
         LWARNING( cdfPath + " is not a cdf file or can't be found.");
@@ -661,21 +677,18 @@ scripting::LuaLibrary IswaManager::luaLibrary() {
                 &luascriptfunctions::iswa_addCygnet,
                 "int, string, string",
                 "Adds a IswaCygnet",
-                true
             },
             {
                 "addScreenSpaceCygnet",
                 &luascriptfunctions::iswa_addScreenSpaceCygnet,
                 "int, string, string",
                 "Adds a Screen Space Cygnets",
-                true
             },
             {
                 "addKameleonPlanes",
                 &luascriptfunctions::iswa_addKameleonPlanes,
                 "string, int",
                 "Adds KameleonPlanes from cdf file.",
-                true
             },
             // {
             //     "addKameleonPlane",
@@ -689,38 +702,33 @@ scripting::LuaLibrary IswaManager::luaLibrary() {
                 &luascriptfunctions::iswa_addCdfFiles,
                 "string",
                 "Adds a cdf files to choose from.",
-                true
             },
             {
                 "removeCygnet",
                 &luascriptfunctions::iswa_removeCygnet,
                 "string",
                 "Remove a Cygnets",
-                true
             },
             {
                 "removeScreenSpaceCygnet",
                 &luascriptfunctions::iswa_removeScrenSpaceCygnet,
                 "int",
                 "Remove a Screen Space Cygnets",
-                true
             },
             {
                 "removeGroup",
                 &luascriptfunctions::iswa_removeGroup,
                 "int",
                 "Remove a group of Cygnets",
-                true
             },
             {
                 "setBaseUrl",
                 &luascriptfunctions::iswa_setBaseUrl,
                 "string",
                 "sets the base url",
-                true
             }
         }
     };
 }
 
-}// namsepace openspace
+} // namsepace openspace

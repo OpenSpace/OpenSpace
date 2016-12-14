@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MODULEENGINE_H__
-#define __MODULEENGINE_H__
+#ifndef __OPENSPACE_CORE___MODULEENGINE___H__
+#define __OPENSPACE_CORE___MODULEENGINE___H__
 
 #include <openspace/util/openspacemodule.h>
 #include <openspace/scripting/scriptengine.h>
@@ -76,6 +76,14 @@ public:
     std::vector<OpenSpaceModule*> modules() const;
 
     /**
+     * Returns the combined minimum OpenGL version. The return value is the maximum
+     * version of all registered modules' OpenGL versions.
+     * \return The combined minimum OpenGL version
+     */
+    ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
+        requiredOpenGLVersion() const;
+
+    /**
     * Returns the Lua library that contains all Lua functions available to affect the
     * modules.
     */
@@ -88,4 +96,4 @@ private:
 
 } // namespace openspace
 
-#endif // __MODULEENGINE_H__
+#endif // __OPENSPACE_CORE___MODULEENGINE___H__

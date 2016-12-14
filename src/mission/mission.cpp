@@ -24,18 +24,12 @@
 
 #include <openspace/mission/mission.h>
 
-#include <assert.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/mission/missionmanager.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/scripting/scriptengine.h>
-
 #include <openspace/documentation/verifier.h>
 
-namespace {
-    const std::string _loggerCat = "MissionPhaseSequencer";
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/lua/lua_helper.h>
 
+namespace {
     const std::string KeyName = "Name";
     const std::string KeyDescription = "Description";
     const std::string KeyPhases = "Phases";
@@ -43,7 +37,6 @@ namespace {
 }
 
 namespace openspace {
-
 
 Documentation MissionPhase::Documentation() {
     using namespace documentation;
@@ -85,15 +78,8 @@ Documentation MissionPhase::Documentation() {
 }
 
 MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
-    const auto byPhaseStartTime = [](const MissionPhase& a, const MissionPhase& b)->bool{
-        return a.timeRange().start < b.timeRange().start;
-    };
-
     _name = dict.value<std::string>(KeyName);
-    if (!dict.getValue(KeyDescription, _description)) {
-        // If no description specified, just init to empty string
-        _description = "";
-    }
+    dict.getValue(KeyDescription, _description);
     
     ghoul::Dictionary childDicts;
     if (dict.getValue(KeyPhases, childDicts)) {
@@ -101,11 +87,17 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
         _subphases.reserve(childDicts.size());
         for (size_t i = 0; i < childDicts.size(); ++i) {
             std::string key = std::to_string(i + 1);
-            _subphases[i] = MissionPhase(childDicts.value<ghoul::Dictionary>(key));
+            _subphases.emplace_back(childDicts.value<ghoul::Dictionary>(key));
         }
 
         // Ensure subphases are sorted
-        std::stable_sort(_subphases.begin(), _subphases.end(), byPhaseStartTime);
+        std::stable_sort(
+            _subphases.begin(),
+            _subphases.end(),
+            [](const MissionPhase& a, const MissionPhase& b) {
+                return a.timeRange().start < b.timeRange().start;
+            }
+        );
 
         // Calculate the total time range of all subphases
         TimeRange timeRangeSubPhases;
@@ -116,8 +108,13 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
         ghoul::Dictionary timeRangeDict;
         if (dict.getValue(KeyTimeRange, timeRangeDict)) {
             TimeRange overallTimeRange(timeRangeDict);
-            ghoul_assert(overallTimeRange.includes(timeRangeSubPhases),
-                "User specified time range must at least include its subphases'");
+            if (!overallTimeRange.includes(timeRangeSubPhases)) {
+                throw ghoul::RuntimeError(
+                    "User specified time range must at least include its subphases'",
+                    "Mission (" + _name + ")"
+                );
+            }
+
             _timeRange.include(overallTimeRange);
         }
         else {
@@ -132,7 +129,10 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
             _timeRange = TimeRange(timeRangeDict); // throws exception if unable to parse
         }
         else {
-            throw std::runtime_error("Must specify key: " + KeyTimeRange);
+            throw ghoul::RuntimeError(
+                "If there are no subphases specified, the time range has to be specified",
+                "Mission (" + _name + ")"
+            );
         }
     }
 }
@@ -149,48 +149,35 @@ const std::string & MissionPhase::description() const {
     return _description;
 }
 
-/**
-* Returns all subphases sorted by start time
-*/
-
 const std::vector<MissionPhase>& MissionPhase::phases() const {
     return _subphases;
 }
 
-/**
-* Returns the i:th subphase, sorted by start time
-*/
-
-const MissionPhase& MissionPhase::phase(size_t i) const {
-    return _subphases[i];
-}
-
-std::vector<const MissionPhase*> MissionPhase::phaseTrace(double time, int maxDepth) const {
-    std::vector<const MissionPhase*> trace;
+MissionPhase::Trace MissionPhase::phaseTrace(double time, int maxDepth) const {
+    Trace trace;
     if (_timeRange.includes(time)) {
-        trace.push_back(this);
+        trace.push_back(std::cref(*this));
         phaseTrace(time, trace, maxDepth);
     }
     return std::move(trace);
 }
 
-bool MissionPhase::phaseTrace(double time, std::vector<const MissionPhase*>& trace, int maxDepth) const {
+void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
     if (maxDepth == 0) {
-        return false;
+        return;
     }
 
-    for (int i = 0; i < _subphases.size(); ++i) {
-        if (_subphases[i]._timeRange.includes(time)) {
-            trace.push_back(&_subphases[i]);
-            _subphases[i].phaseTrace(time, trace, maxDepth - 1);
-            return true; // only add the first one
+    for (const MissionPhase& phase : _subphases) {
+        if (phase.timeRange().includes(time)) {
+            trace.push_back(phase);
+            phase.phaseTrace(time, trace, maxDepth - 1);
+            return;
         }
-        // Since time ranges are sorted we can do early termination
-        else if (_subphases[i]._timeRange.start > time) {
-            return false;
+        else if (phase.timeRange().start > time) {
+            // Since time ranges are sorted we can do early termination
+            return;
         }
     }
-    return true;
 }
 
 Mission missionFromFile(std::string filename) {

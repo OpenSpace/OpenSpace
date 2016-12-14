@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TIME_H__
-#define __TIME_H__
+#ifndef __OPENSPACE_CORE___TIME___H__
+#define __OPENSPACE_CORE___TIME___H__
 
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/syncdata.h>
@@ -59,9 +59,19 @@ class SyncBuffer;
 
 class Time {
 public:
+    /**
+     * Converts the \p timeString representing a date to a double precision
+     * value representing the ephemeris time; that is the number of TDB
+     * seconds past the J2000 epoch.
+     * \param timeString A string representing the time to be converted
+     * \return The converted time; the number of TDB seconds past the J2000 epoch,
+     * representing the passed \p timeString
+     * \pre \p timeString must not be empty
+     */
+    static double convertTime(const std::string& time);
+    
     Time(double secondsJ2000 = -1);
     Time(const Time& other);
-
 
     /**
      * Initializes the Time singleton.
@@ -214,4 +224,4 @@ private:
 
 } // namespace openspace
 
-#endif // __TIME_H__
+#endif // __OPENSPACE_CORE___TIME___H__

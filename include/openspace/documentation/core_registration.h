@@ -22,17 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CORE_REGISTRATION_H__
-#define __CORE_REGISTRATION_H__
+#ifndef __OPENSPACE_CORE___REGISTRATION___H__
+#define __OPENSPACE_CORE___REGISTRATION___H__
 
 namespace openspace {
-namespace documentation {
 
-class DocumentationEngine;
+namespace documentation { class DocumentationEngine; }
+namespace scripting { class ScriptEngine; }
 
 void registerCoreClasses(documentation::DocumentationEngine& engine);
+void registerCoreClasses(scripting::ScriptEngine& engine);
 
-} // namespace documentation
 } // namespace openspace
 
-#endif // __CORE_REGISTRATION_H__
+#endif // __OPENSPACE_CORE___REGISTRATION___H__

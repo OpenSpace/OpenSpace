@@ -107,10 +107,12 @@ bool KameleonPlane::initialize(){
             // and unregister backgroundvalues property.
             if(_autoFilter.value()){
                 _backgroundValues.setValue(_dataProcessor->filterValues());
-                _backgroundValues.setVisible(false);
+                _backgroundValues.setVisibility(properties::Property::Visibility::None);
+                //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues 
             } else {
-                _backgroundValues.setVisible(true);
+                _backgroundValues.setVisibility(properties::Property::Visibility::All);
+                //_backgroundValues.setVisible(true);
             }
         });
     }
@@ -232,7 +234,10 @@ void KameleonPlane::updateFieldlineSeeds(){
             if(OsEng.renderEngine().scene()->sceneGraphNode(std::get<0>(seedPath.second)) == nullptr) return;
             
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
-            OsEng.scriptEngine().queueScript("openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')");
+            OsEng.scriptEngine().queueScript(
+                "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
+                scripting::ScriptEngine::RemoteScripting::Yes
+            );
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
         } else if( std::find(selectedOptions.begin(), selectedOptions.end(), seedPath.first)!=selectedOptions.end() && !std::get<2>(seedPath.second)) {

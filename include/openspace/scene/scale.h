@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCALE_H__
-#define __SCALE_H__
+#ifndef __OPENSPACE_CORE___SCALE___H__
+#define __OPENSPACE_CORE___SCALE___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -48,4 +48,4 @@ public:
 
 }  // namespace openspace
 
-#endif // __SCALE_H__
+#endif // __OPENSPACE_CORE___SCALE___H__

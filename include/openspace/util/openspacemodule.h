@@ -22,12 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACEMODULE_H__
-#define __OPENSPACEMODULE_H__
+#ifndef __OPENSPACE_CORE___OPENSPACEMODULE___H__
+#define __OPENSPACE_CORE___OPENSPACEMODULE___H__
 
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/documentation/documentation.h>
+
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #include <string>
 #include <vector>
@@ -66,7 +68,19 @@ public:
      */
     void deinitialize();
 
+    /**
+     * Returns a list of Documentation classes that are valid for this OpenSpaceModule.
+     * \return A list of Documentation classes that are valid for this OpenSapceModule
+     */
     virtual std::vector<Documentation> documentations() const;
+
+    /**
+     * Returns the minimum required OpenGL version of this OpenSpaceModule. Unless
+     * overwritten, it returns an OpenGL version of <code>3.3</code>.
+     * \return The minimum required OpenGL version of this OpenSpaceModule
+     */
+    virtual ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
+        requiredOpenGLVersion() const;
 
 protected:
     /**
@@ -90,4 +104,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __OPENSPACEMODULE_H__
+#endif // __OPENSPACE_CORE___OPENSPACEMODULE___H__

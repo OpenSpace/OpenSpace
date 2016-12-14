@@ -22,14 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef __SCREENSPACERENDERABLE_H__
-#define __SCREENSPACERENDERABLE_H__
+#ifndef __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
+#define __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/triggerproperty.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -113,6 +114,6 @@ protected:
     float _radius;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif  // __SCREENSPACERENDERABLE_H__
+#endif // __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__

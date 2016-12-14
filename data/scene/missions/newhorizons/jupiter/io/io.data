@@ -1,0 +1,5 @@
+return {
+    FileRequest = {
+        { Identifier = "io_textures", Destination = "textures", Version = 1 }
+    },
+}

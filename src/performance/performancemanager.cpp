@@ -264,12 +264,26 @@ void PerformanceManager::storeScenePerformanceMeasurements(
         entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / 1000.f;
         
         std::rotate(
-            std::begin(entry.updateEphemeris),
-            std::next(std::begin(entry.updateEphemeris)),
-            std::end(entry.updateEphemeris)
+            std::begin(entry.updateTranslation),
+            std::next(std::begin(entry.updateTranslation)),
+            std::end(entry.updateTranslation)
         );
-        entry.updateEphemeris[PerformanceLayout::NumberValues - 1] = r.updateTimeEphemeris / 1000.f;
-        
+        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = r.updateTimeTranslation / 1000.f;
+
+        std::rotate(
+            std::begin(entry.updateRotation),
+            std::next(std::begin(entry.updateRotation)),
+            std::end(entry.updateRotation)
+        );
+        entry.updateRotation[PerformanceLayout::NumberValues - 1] = r.updateTimeRotation / 1000.f;
+
+        std::rotate(
+            std::begin(entry.updateScaling),
+            std::next(std::begin(entry.updateScaling)),
+            std::end(entry.updateScaling)
+        );
+        entry.updateScaling[PerformanceLayout::NumberValues - 1] = r.updateTimeScaling / 1000.f;
+
         std::rotate(
             std::begin(entry.updateRenderable),
             std::next(std::begin(entry.updateRenderable)),

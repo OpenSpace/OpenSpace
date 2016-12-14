@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUI_H__
-#define __GUI_H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__
 
 #include <modules/onscreengui/include/guicomponent.h>
 #include <modules/onscreengui/include/guihelpcomponent.h>
@@ -33,6 +33,7 @@
 #include <modules/onscreengui/include/guitimecomponent.h>
 #include <modules/onscreengui/include/guiiswacomponent.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/properties/property.h>
 
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -56,12 +57,11 @@ public:
     bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
     bool charCallback(unsigned int character, KeyModifier modifier);
 
-    void startFrame(float deltaTime, const glm::vec2& windowSize, const glm::vec2& mousePosCorrectionFactor, const glm::vec2& mousePos, uint32_t mouseButtons);
+    void startFrame(float deltaTime, const glm::vec2& windowSize,
+        const glm::vec2& dpiScaling, const glm::vec2& mousePos, uint32_t mouseButtons);
     void endFrame();
 
     void render();
-
-    static openspace::scripting::LuaLibrary luaLibrary();
 
 //protected:
     GuiHelpComponent _help;
@@ -72,9 +72,15 @@ public:
     GuiPropertyComponent _screenSpaceProperty;
     GuiTimeComponent _time;
     GuiIswaComponent _iswa;
+
+private:
+    void renderAndUpdatePropertyVisibility();
+
+    properties::Property::Visibility _currentVisibility;
+
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUI_H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__

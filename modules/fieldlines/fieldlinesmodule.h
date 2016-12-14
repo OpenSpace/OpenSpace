@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __FIELDLINESMODULE_H__
-#define __FIELDLINESMODULE_H__
+#ifndef __OPENSPACE_MODULE_FIELDLINES___FIELDLINESMODULE___H__
+#define __OPENSPACE_MODULE_FIELDLINES___FIELDLINESMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -39,4 +39,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __FIELDLINESMODULE_H__
+#endif // __OPENSPACE_MODULE_FIELDLINES___FIELDLINESMODULE___H__

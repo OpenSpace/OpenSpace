@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PERFORMANCELAYOUT_H__
-#define __PERFORMANCELAYOUT_H__
+#ifndef __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
+#define __OPENSPACE_CORE___PERFORMANCELAYOUT___H__
 
 #include <cstdint>
 
@@ -42,7 +42,9 @@ struct PerformanceLayout {
         char name[LengthName];
         float renderTime[NumberValues];
         float updateRenderable[NumberValues];
-        float updateEphemeris[NumberValues];
+        float updateTranslation[NumberValues];
+        float updateRotation[NumberValues];
+        float updateScaling[NumberValues];
     };
     SceneGraphPerformanceLayout sceneGraphEntries[MaxValues];
     int16_t nScaleGraphEntries;
@@ -58,4 +60,4 @@ struct PerformanceLayout {
 } // namespace performance
 } // namespace openspace
 
-#endif // __PERFORMANCELAYOUT_H__
+#endif // __OPENSPACE_CORE___PERFORMANCELAYOUT___H__

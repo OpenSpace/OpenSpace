@@ -32,13 +32,13 @@
 #include <math.h>
 
 namespace {
-    const std::string _loggerCat = "RenderableSphericalGrid";
-    const std::string KeyGridType = "GridType";
-    const std::string KeyGridColor = "GridColor";
-    const std::string KeyGridMatrix = "GridMatrix";
-    const std::string KeyGridSegments = "GridSegments";
-    const std::string KeyGridRadius = "GridRadius";
-    const std::string KeyGridParentsRotation = "ParentsRotation";
+    static const std::string _loggerCat = "RenderableSphericalGrid";
+    const char* KeyGridType = "GridType";
+    const char* KeyGridColor = "GridColor";
+    const char* KeyGridMatrix = "GridMatrix";
+    const char* KeyGridSegments = "GridSegments";
+    const char* KeyGridRadius = "GridRadius";
+    const char* KeyGridParentsRotation = "ParentsRotation";
 }
 namespace openspace {
 

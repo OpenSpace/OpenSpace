@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __BASEMODULE_H__
-#define __BASEMODULE_H__
+#ifndef __OPENSPACE_MODULE_BASE___BASEMODULE___H__
+#define __OPENSPACE_MODULE_BASE___BASEMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -41,4 +41,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __BASEMODULE_H__
+#endif // __OPENSPACE_MODULE_BASE___BASEMODULE___H__

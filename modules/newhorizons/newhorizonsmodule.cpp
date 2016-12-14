@@ -24,23 +24,21 @@
 
 #include <modules/newhorizons/newhorizonsmodule.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-
-#include <ghoul/misc/assert.h>
-
 #include <modules/newhorizons/rendering/renderablecrawlingline.h>
-#include <modules/newhorizons/rendering/renderableshadowcylinder.h>
 #include <modules/newhorizons/rendering/renderablefov.h>
+#include <modules/newhorizons/rendering/renderablemodelprojection.h>
 #include <modules/newhorizons/rendering/renderableplaneprojection.h>
 #include <modules/newhorizons/rendering/renderableplanetprojection.h>
-#include <modules/newhorizons/rendering/renderablemodelprojection.h>
+#include <modules/newhorizons/rendering/renderableshadowcylinder.h>
 
 #include <modules/newhorizons/util/decoder.h>
 #include <modules/newhorizons/util/instrumentdecoder.h>
 #include <modules/newhorizons/util/targetdecoder.h>
 
-#include <modules/newhorizons/util/imagesequencer.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
+
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
@@ -69,6 +67,14 @@ void NewHorizonsModule::internalInitialize() {
     auto fDecoder = FactoryManager::ref().factory<Decoder>();
     fDecoder->registerClass<InstrumentDecoder>("Instrument");
     fDecoder->registerClass<TargetDecoder>("Target");
+}
+
+std::vector<Documentation> NewHorizonsModule::documentations() const {
+    return {
+        RenderableModelProjection::Documentation(),
+        RenderablePlanetProjection::Documentation(),
+        ProjectionComponent::Documentation()
+    };
 }
 
 } // namespace openspace

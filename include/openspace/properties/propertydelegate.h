@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PROPERTYDELEGATE_H__
-#define __PROPERTYDELEGATE_H__
+#ifndef __OPENSPACE_CORE___PROPERTYDELEGATE___H__
+#define __OPENSPACE_CORE___PROPERTYDELEGATE___H__
 
 #include <string>
 
@@ -163,4 +163,4 @@ public:
 
 #include <openspace/properties/propertydelegate.inl>
 
-#endif // __PROPERTYDELEGATE_H__
+#endif // __OPENSPACE_CORE___PROPERTYDELEGATE___H__

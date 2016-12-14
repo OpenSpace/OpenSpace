@@ -24,29 +24,67 @@
 
 #include <modules/base/rotation/staticrotation.h>
 
+#include <openspace/documentation/verifier.h>
+
 namespace {
-    const std::string KeyEulerAngles = "EulerAngles";
+    const char* KeyRotation = "Rotation";
 }
 
 namespace openspace {
 
+Documentation StaticRotation::Documentation() {
+    using namespace openspace::documentation;
+    return {
+        "Static Rotation",
+        "base_transform_rotation_static",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("StaticRotation"),
+                "",
+                Optional::No
+            },
+            {
+                KeyRotation,
+                new OrVerifier(
+                    new DoubleVector3Verifier(),
+                    new DoubleMatrix3Verifier()
+                ),
+                "Stores the static rotation as either a vector containing Euler angles "
+                "or by specifiying the 3x3 rotation matrix directly",
+                Optional::No
+            }
+        },
+        Exhaustive::Yes
+    };
+}
+
+StaticRotation::StaticRotation()
+    : _rotationMatrix("rotation", "Rotation", glm::dmat3(1.0))
+{}
+
 StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
-    : _rotationMatrix(1.0)
+    : StaticRotation()
 {
-    const bool hasEulerAngles = dictionary.hasKeyAndValue<glm::dvec3>(KeyEulerAngles);
-    if (hasEulerAngles) {
-        glm::dvec3 tmp;
-        dictionary.getValue(KeyEulerAngles, tmp);
-        _rotationMatrix = glm::mat3_cast(glm::dquat(tmp));
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "StaticRotation"
+    );
+
+
+    if (dictionary.hasKeyAndValue<glm::dvec3>(KeyRotation)) {
+        _rotationMatrix = glm::mat3_cast(
+            glm::dquat(dictionary.value<glm::dvec3>(KeyRotation))
+        );
     }
+    else {
+        // Must be glm::dmat3 due to specification restriction
+        _rotationMatrix = dictionary.value<glm::dmat3>(KeyRotation);
+    }
+
+    addProperty(_rotationMatrix);
+    _rotationMatrix.onChange([this]() { _matrix = _rotationMatrix; });
 }
-
-StaticRotation::~StaticRotation() {}
-
-const glm::dmat3& StaticRotation::matrix() const {
-    return _rotationMatrix;
-}
-
-void StaticRotation::update(const UpdateData&) {}
 
 } // namespace openspace

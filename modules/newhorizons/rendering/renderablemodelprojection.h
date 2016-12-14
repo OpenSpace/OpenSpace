@@ -22,24 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEMODELPROJECTION_H__
-#define __RENDERABLEMODELPROJECTION_H__
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEMODELPROJECTION___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEMODELPROJECTION___H__
 
 #include <openspace/rendering/renderable.h>
+
 #include <modules/newhorizons/util/projectioncomponent.h>
 
-#include <modules/base/rendering/modelgeometry.h>
+#include <openspace/documentation/documentation.h>
 #include <modules/newhorizons/util/imagesequencer.h>
 
-#include <openspace/properties/numericalproperty.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vectorproperty.h>
-#include <openspace/util/updatestructures.h>
+#include <openspace/properties/vector/vec3property.h>
 
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+namespace ghoul {
+namespace opengl {
+class ProgramObject;
+class Texture;
+}
+}
 
 namespace openspace {
+
+struct RenderData;
+struct UpdateData;
 
 namespace modelgeometry {
     class ModelGeometry;
@@ -48,6 +54,7 @@ namespace modelgeometry {
 class RenderableModelProjection : public Renderable {
 public:
     RenderableModelProjection(const ghoul::Dictionary& dictionary);
+    ~RenderableModelProjection();
 
     bool initialize() override;
     bool deinitialize() override;
@@ -58,6 +65,8 @@ public:
     virtual void update(const UpdateData& data) final override;
 
     ghoul::opengl::Texture& baseTexture() const;
+
+    static openspace::Documentation Documentation();
 
 private:
     bool loadTextures();
@@ -83,11 +92,6 @@ private:
     glm::dmat3 _stateMatrix;
     glm::dmat3 _instrumentMatrix;
 
-    std::string _defaultProjImage;
-    std::string _source;
-    std::string _destination;
-    std::string _target;
-
     // uniforms
     glm::vec2  _camScaling;
     glm::vec3  _up;
@@ -104,6 +108,6 @@ private:
     properties::BoolProperty _performShading;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif  // __RENDERABLEMODELPROJECTION_H__
+#endif  // __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEMODELPROJECTION___H__

@@ -1,0 +1,41 @@
+<div id="wrapper">
+  <div id="sidebar-wrapper">
+    <ul class="sidebar-nav">
+      <li class="sidebar-brand">
+        <a href="#">
+            OpenSpace Scene Properties
+        </a>
+      </li>
+      {{#each propertyOwners}}
+        <li>
+          <a href="#{{name}}">{{name}}</a>
+        </li>
+      {{/each}}
+    </ul>
+  </div>
+
+  <div id="page-content-wrapper">
+    <div class="container-fluid documentation-container">
+      <h1>OpenSpace Scene Properties</h1>
+      <p>Version: {{version.[0]}}.{{version.[1]}}.{{version.[2]}}</p>
+      <p>Scene name: {{sceneFilename}}</p>
+      <p>Generated: {{generationTime}}</p>
+
+    	{{#each propertyOwners}}
+        <div class="row">
+          <div class="col-lg-12">
+            <h2><a class="documentation-name" href="#{{name}}" name="{{name}}">{{name}}</a></h2>
+            {{#each properties}}
+              {{> property}}
+            {{/each}}
+            {{#each propertyOwners}}
+              {{> propertyOwner}}
+            {{else}}
+              <p>{{name}} has no property owners</p>
+            {{/each}}
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+</div>

@@ -32,13 +32,18 @@
 namespace openspace {
 namespace gui {
 
+GuiTimeComponent::GuiTimeComponent()
+    : GuiComponent("Time")
+{}
+
 void GuiTimeComponent::render() {
     float deltaTime = static_cast<float>(Time::ref().deltaTime());
     
-    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -5000.f, 5000.f);
+    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -50000.f, 50000.f);
     if (changed) {
         OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")"
+            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
+            scripting::ScriptEngine::RemoteScripting::Yes
         );
     }
 }

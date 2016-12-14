@@ -3,6 +3,14 @@ return {
     {
         Name = "MercuryBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "MERCURY BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
+        }
     },
     -- Mercury module
     {   
@@ -28,12 +36,6 @@ return {
             }
         },
         Transform = {
-            Translation = {
-                Type = "SpiceEphemeris",
-                Body = "MERCURY",
-                Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_MERCURY",
@@ -48,21 +50,17 @@ return {
     -- MercuryTrail module
     {   
         Name = "MercuryTrail",
-        Parent = "MercuryBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "MERCURY",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = {0.6, 0.5, 0.5 },
-            TropicalOrbitPeriod = 87.968 ,
-            EarthOrbitRatio = 0.241,
-            DayLength = 4222.6,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "MERCURY",
+                Observer = "SUN",
+            },
+            Color = {0.6, 0.5, 0.5 },
+            Period = 87.968,
+            Resolution = 100
         }
     }
 }

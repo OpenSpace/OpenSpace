@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SGCTWINDOWWRAPPER_H__
-#define __SGCTWINDOWWRAPPER_H__
+#ifndef __OPENSPACE_CORE___SGCTWINDOWWRAPPER___H__
+#define __OPENSPACE_CORE___SGCTWINDOWWRAPPER___H__
 
 #include <openspace/engine/wrapper/windowwrapper.h>
 
@@ -49,6 +49,7 @@ public:
     glm::ivec2 currentWindowSize() const override;
     glm::ivec2 currentWindowResolution() const override;
     glm::ivec2 currentDrawBufferResolution() const override;
+    glm::vec2 dpiScaling() const override;
     int currentNumberOfAaSamples() const override;
 
     bool isRegularRendering() const override;
@@ -74,4 +75,4 @@ public:
 
 } // namespace openspace
 
-#endif // __SGCTWINDOWWRAPPER_H__
+#endif // __OPENSPACE_CORE___SGCTWINDOWWRAPPER___H__

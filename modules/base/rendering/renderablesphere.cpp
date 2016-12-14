@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #include <modules/base/rendering/renderablesphere.h>
 
 #include <openspace/engine/openspaceengine.h>
@@ -37,12 +36,12 @@
 #include <math.h>
 
 namespace {
-    const std::string _loggerCat = "RenderableSphere";
+    static const std::string _loggerCat = "RenderableSphere";
 
-    const std::string keySize = "Size";
-    const std::string keySegments = "Segments";
-    const std::string keyTexture = "Texture";
-    const std::string keyOrientation = "Orientation";
+    const char* keySize = "Size";
+    const char* keySegments = "Segments";
+    const char* keyTexture = "Texture";
+    const char* keyOrientation = "Orientation";
 
     enum Orientation {
         Outside = 1,
@@ -122,7 +121,7 @@ bool RenderableSphere::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram("Sphere",
         "${MODULE_BASE}/shaders/sphere_vs.glsl",
-        "${MODULES}/base/shaders/sphere_fs.glsl");
+        "${MODULE_BASE}/shaders/sphere_fs.glsl");
     if (!_shader)
         return false;
 

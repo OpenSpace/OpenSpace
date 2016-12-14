@@ -2,7 +2,7 @@
 #                                                                                       #
 # OpenSpace                                                                             #
 #                                                                                       #
-# Copyright (c) 2014-2015                                                               #
+# Copyright (c) 2014-2016                                                               #
 #                                                                                       #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
 # software and associated documentation files (the "Software"), to deal in the Software #
@@ -124,6 +124,7 @@ function (add_external_dependencies)
     set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
     set(SGCT_BUILD_CSHARP_PROJECTS OFF CACHE BOOL "" FORCE)
     set(SGCT_LIGHT_ONLY ON CACHE BOOL "" FORCE)
+    set(SGCT_CUSTOMOUTPUTDIRS OFF CACHE BOOL "" FORCE)
     
     add_subdirectory(${OPENSPACE_EXT_DIR}/sgct)
     target_include_directories(libOpenSpace SYSTEM PUBLIC ${OPENSPACE_EXT_DIR}/sgct/include)
@@ -301,6 +302,7 @@ function (handle_option_tests)
             add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/googletest)
             # add_subdirectory(${OPENSPACE_EXT_DIR}/ghoul/ext/gtest)
             set_property(TARGET gtest PROPERTY FOLDER "External")
+            set_property(TARGET gtest_main PROPERTY FOLDER "External")
         endif ()
 
         file(GLOB_RECURSE OPENSPACE_TEST_FILES ${OPENSPACE_BASE_DIR}/tests/*.inl)
@@ -344,7 +346,7 @@ function (handle_internal_modules)
     file(GLOB moduleDirs RELATIVE ${OPENSPACE_MODULE_DIR} ${OPENSPACE_MODULE_DIR}/*)
     set(sortedModules ${moduleDirs})
     foreach (dir ${moduleDirs})
-        if(IS_DIRECTORY ${OPENSPACE_MODULE_DIR}/${dir})
+        if (IS_DIRECTORY ${OPENSPACE_MODULE_DIR}/${dir})
             set(defaultModule OFF)
             if (EXISTS "${OPENSPACE_MODULE_DIR}/${dir}/include.cmake")
                 unset(OPENSPACE_DEPENDENCIES)
@@ -436,7 +438,12 @@ function (handle_internal_modules)
                 endif ()
             endforeach()
 
-            target_link_libraries(libOpenSpace ${libraryName})
+            # Only link libOpenSpace against the library if it has been set STATIC
+            get_target_property(libType ${libraryName} TYPE)
+            if (NOT ${libType} STREQUAL  "SHARED_LIBRARY")
+                target_link_libraries(libOpenSpace ${libraryName})
+            endif()
+
             create_define_name(${module} defineName)
             target_compile_definitions(libOpenSpace PUBLIC "${defineName}")
 

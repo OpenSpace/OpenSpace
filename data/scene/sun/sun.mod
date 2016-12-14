@@ -6,7 +6,7 @@ return {
     },
 
     -- Sun module
-    {   
+    {
         Name = "Sun",
         Parent = "SolarSystemBarycenter",
         Renderable = {
@@ -24,18 +24,21 @@ return {
             },
             PerformShading = false,
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "SUN",
-            Observer = "SSB",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_SUN",
-            Reference = "GALACTIC"
-        },
+        Transformation = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "SUN",
+                Observer = "SSB",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_SUN",
+                DestinationFrame = "GALACTIC"
+            }
+        }
     },
+
     {
         Name = "SunGlare",
         Parent = "SolarSystemBarycenter",
@@ -47,13 +50,16 @@ return {
             Texture = "textures/sun-glare.png",
             BlendMode = "Additive"
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "SUN",
-            Observer = "SSB",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-        },
+        Transformation = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "SUN",
+                Observer = "SSB",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            }
+        }
     },
+
     {
         Name = "SunMarker",
         Parent = "Sun",
@@ -65,9 +71,11 @@ return {
             Texture = "textures/marker.png",
             BlendMode = "Additive"
         },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 5}
+        Transformation = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = {0, 0, 0, 5}
+            }
         }
     }
 }

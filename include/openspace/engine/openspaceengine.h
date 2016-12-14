@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACEENGINE_H__
-#define __OPENSPACEENGINE_H__
+#ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
+#define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -51,12 +51,13 @@ class RenderEngine;
 class ModuleEngine;
 class WindowWrapper;
 class SettingsEngine;
+class TimeManager;
 class SyncEngine;
+class ParallelConnection;
 
 namespace interaction { class InteractionHandler; }
 namespace gui { class GUI; }
 //namespace scripting { class ScriptEngine; }
-namespace network { class ParallelConnection; }
 namespace properties { class PropertyOwner; }
 namespace scripting { struct LuaLibrary; }
 namespace scripting { class ScriptScheduler; }
@@ -85,11 +86,12 @@ public:
     NetworkEngine& networkEngine();
     LuaConsole& console();
     ModuleEngine& moduleEngine();
-    network::ParallelConnection& parallelConnection();
+    ParallelConnection& parallelConnection();
     properties::PropertyOwner& globalPropertyOwner();
     WindowWrapper& windowWrapper();
     ghoul::fontrendering::FontManager& fontManager();
     DownloadManager& downloadManager();
+    TimeManager& timeManager();
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     gui::GUI& gui();
@@ -114,6 +116,7 @@ public:
     void enableBarrier();
     void disableBarrier();
 
+    void writeDocumentation();
     void toggleShutdownMode();
     
     bool useBusyWaitForDecode();
@@ -150,11 +153,12 @@ private:
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
     std::unique_ptr<SettingsEngine> _settingsEngine;
+    std::unique_ptr<TimeManager> _timeManager;
     std::unique_ptr<DownloadManager> _downloadManager;
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     std::unique_ptr<gui::GUI> _gui;
 #endif
-    std::unique_ptr<network::ParallelConnection> _parallelConnection;
+    std::unique_ptr<ParallelConnection> _parallelConnection;
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
 
@@ -181,6 +185,6 @@ private:
 
 #define OsEng (openspace::OpenSpaceEngine::ref())
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif  // __OPENSPACEENGINE_H__
+#endif  // __OPENSPACE_CORE___OPENSPACEENGINE___H__

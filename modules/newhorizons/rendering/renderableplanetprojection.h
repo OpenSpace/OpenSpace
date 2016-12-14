@@ -22,22 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEPLANETPROJECTION_H__
-#define __RENDERABLEPLANETPROJECTION_H__
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEPLANETPROJECTION___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEPLANETPROJECTION___H__
 
 #include <openspace/rendering/renderable.h>
+
 #include <modules/newhorizons/util/projectioncomponent.h>
 
-#include <modules/newhorizons/util/imagesequencer.h>
-
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
-#include <openspace/util/updatestructures.h>
-
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 
 namespace openspace {
+
+struct Image;
 
 namespace planetgeometry {
     class PlanetGeometry;
@@ -55,6 +51,8 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
     ghoul::opengl::Texture& baseTexture() const;
+
+    static openspace::Documentation Documentation();
 
 protected:
     bool loadTextures();
@@ -95,15 +93,14 @@ private:
 
     std::vector<Image> _imageTimes;
 
-    std::string _body;
     std::string _frame;
 
     bool _capture;
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;
-
 };
+
 }  // namespace openspace
 
-#endif  // __RENDERABLEPLANETPROJECTION_H__
+#endif  // __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEPLANETPROJECTION___H__

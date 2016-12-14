@@ -28,7 +28,7 @@
 #include <tiny_obj_loader.h>
 
 namespace {
-    const std::string _loggerCat = "WavefrontGeometry";
+    static const std::string _loggerCat = "WavefrontGeometry";
 }
 
 namespace openspace {

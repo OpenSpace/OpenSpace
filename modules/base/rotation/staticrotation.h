@@ -22,24 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __STATICROTATION_H__
-#define __STATICROTATION_H__
+#ifndef __OPENSPACE_MODULE_BASE___STATICROTATION___H__
+#define __OPENSPACE_MODULE_BASE___STATICROTATION___H__
 
 #include <openspace/scene/rotation.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/properties/matrix/dmat3property.h>
+
 namespace openspace {
     
-class StaticRotation: public Rotation {
+class StaticRotation : public Rotation {
 public:
-    StaticRotation(const ghoul::Dictionary& dictionary
-                                = ghoul::Dictionary());
-    virtual ~StaticRotation();
-    virtual const glm::dmat3& matrix() const;
-    virtual void update(const UpdateData& data) override;
+    StaticRotation();
+    StaticRotation(const ghoul::Dictionary& dictionary);
+
+    static openspace::Documentation Documentation();
+
 private:
-    glm::dmat3 _rotationMatrix;
+    properties::DMat3Property _rotationMatrix;
 };
     
 } // namespace openspace
 
-#endif // __STATICROTATION_H__
+#endif // __OPENSPACE_MODULE_BASE___STATICROTATION___H__

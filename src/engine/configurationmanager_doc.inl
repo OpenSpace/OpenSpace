@@ -31,6 +31,7 @@ Documentation ConfigurationManager::Documentation() {
 
     return {
         "OpenSpace Configuration",
+        "openspace_configuraion",
         {
         {
             ConfigurationManager::KeyConfigSgct,
@@ -41,7 +42,8 @@ Documentation ConfigurationManager::Documentation() {
         {
             ConfigurationManager::KeyConfigScene,
             new StringAnnotationVerifier(
-                "A valid scene file as described in the Scene documentation"),
+                "A valid scene file as described in the Scene documentation"
+            ),
             "The scene description that is used to populate the application after "
             "startup. The scene determines which objects are loaded, the startup "
             "time and other scene-specific settings. More information is provided in "
@@ -49,9 +51,7 @@ Documentation ConfigurationManager::Documentation() {
         },
         {
             ConfigurationManager::KeyPaths,
-            new TableVerifier({
-                { "*", new StringVerifier }
-            }),
+            new StringListVerifier,
             "A list of paths that are automatically registered with the file system. "
             "If a key X is used in the table, it is then useable by referencing ${X} "
             "in all other configuration files or scripts.",
@@ -59,9 +59,7 @@ Documentation ConfigurationManager::Documentation() {
         },
         {
             ConfigurationManager::KeyFonts,
-            new TableVerifier({
-                { "*", new StringVerifier, "Font paths loadable by FreeType" }
-            }),
+            new StringListVerifier("Font paths loadable by FreeType"),
             "A list of all fonts that will automatically be loaded on startup. Each "
             "key-value pair contained in the table will become the name and the file "
             "for a font.",
@@ -74,7 +72,7 @@ Documentation ConfigurationManager::Documentation() {
                     ConfigurationManager::PartLogLevel,
                     new StringInListVerifier(
                         // List from logmanager.cpp::levelFromString
-                        {"Debug", "Info", "Warning", "Error", "Fatal", "None" }
+                        { "Debug", "Info", "Warning", "Error", "Fatal", "None" }
                     ),
                     "The severity of log messages that will be displayed. Only "
                     "messages of the selected level or higher will be displayed. All "
@@ -201,8 +199,8 @@ Documentation ConfigurationManager::Documentation() {
                     new StringInListVerifier(
                         // List taken from ScriptEngine::writeLog
                         { "text" }
-                    ),
-                    "The type of logfile that will be created."
+                        ),
+                        "The type of logfile that will be created."
                 },
                 {
                     ConfigurationManager::PartFile,
@@ -284,7 +282,8 @@ Documentation ConfigurationManager::Documentation() {
             }),
             "This defines the location and type of the factory documentation file, which "
             "shows the different types of objects that can be created in the current "
-            "application configuration."
+            "application configuration.",
+            Optional::Yes
         },
         {
             ConfigurationManager::KeyShutdownCountdown,
@@ -295,12 +294,31 @@ Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
+            ConfigurationManager::KeyPerSceneCache,
+            new BoolVerifier,
+            "If this is set to 'true', the name of the scene will be appended to the "
+            "cache directory, thus not reusing the same directory. This is useful in "
+            "cases where the same instance of OpenSpace is run with multiple scenes, but "
+            "the caches should be retained. This value defaults to 'false'.",
+            Optional::Yes
+        },
+        {
+            ConfigurationManager::KeyOnScreenTextScaling,
+            new StringInListVerifier({
+                // Values from RenderEngine:updateRenderer
+                "window", "framebuffer"
+            }),
+            "The method for scaling the onscreen text in the window. As the resolution "
+            "of the rendering can be different from the size of the window, the onscreen "
+            "text can either be scaled according to the window size ('window'), or the "
+            "rendering resolution ('framebuffer'). This value defaults to 'window'.",
+            Optional::Yes
+        },
+        {
             ConfigurationManager::KeyDownloadRequestURL,
             new OrVerifier(
                 new StringVerifier,
-                new TableVerifier({
-                    { "*", new StringVerifier }
-                })
+                new StringListVerifier
             ),
             "The URL from which files will be downloaded by the Launcher. This can "
             "either be a single URL or a list of possible URLs from which the "
@@ -324,7 +342,45 @@ Documentation ConfigurationManager::Documentation() {
             "or just managing the state of the network. This is desired in cases where "
             "the master computer does not have the resources to render a scene.",
             Optional::Yes
-        }
+        },
+        {
+            ConfigurationManager::KeyHttpProxy,
+            new TableVerifier({
+                {
+                    ConfigurationManager::PartHttpProxyAddress,
+                    new StringVerifier,
+                    "The address of the http proxy"
+                },
+                {
+                    ConfigurationManager::PartHttpProxyPort,
+                    new StringVerifier,
+                    "The port of the http proxy"
+                },
+                {
+                    ConfigurationManager::PartHttpProxyAuthentication,
+                    new StringInListVerifier(
+                        { "basic", "ntlm", "digest", "any" }
+                    ),
+                    "The authentication method of the http proxy",
+                    Optional::Yes
+                },
+                {
+                    ConfigurationManager::PartHttpProxyUser,
+                    new StringVerifier,
+                    "The user of the http proxy",
+                    Optional::Yes
+                },
+                {
+                    ConfigurationManager::PartHttpProxyPassword,
+                    new StringVerifier,
+                    "The password of the http proxy",
+                    Optional::Yes
+                }
+            }),
+            "This defines the use for a proxy when fetching data over http."
+            "No proxy will be used if this is left out.",
+            Optional::Yes
+            }
         }
     };
 };

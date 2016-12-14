@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUITIMECOMPONENT_H__
-#define __GUITIMECOMPONENT_H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUITIMECOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUITIMECOMPONENT___H__
 
 #include <modules/onscreengui/include/guicomponent.h>
 
@@ -32,10 +32,12 @@ namespace gui {
 
 class GuiTimeComponent : public GuiComponent {
 public:
+    GuiTimeComponent();
+
     void render() override;
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUITIMECOMPONENT_H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUITIMECOMPONENT___H__

@@ -28,6 +28,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <algorithm>
 #include "imgui.h"
 
 namespace {
@@ -36,21 +37,53 @@ namespace {
 }
 
 namespace openspace {
+
+namespace {
+int nVisibleProperties(const std::vector<properties::Property*>& properties,
+    properties::Property::Visibility visibility)
+{
+    return std::count_if(
+        properties.begin(),
+        properties.end(),
+        [visibility](properties::Property* p) {
+        using V = properties::Property::Visibility;
+        return
+            static_cast<std::underlying_type_t<V>>(visibility) >=
+            static_cast<std::underlying_type_t<V>>(p->visibility());
+    }
+    );
+}
+}
+
 namespace gui {
 
 GuiPropertyComponent::GuiPropertyComponent(std::string name) 
-    : _name(std::move(name))
+    : GuiComponent(std::move(name))
 {}
 
 void GuiPropertyComponent::setSource(SourceFunction function) {
     _function = std::move(function);
 }
 
+void GuiPropertyComponent::setVisibility(properties::Property::Visibility visibility) {
+    _visibility = visibility;
+}
+
 void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
+    if (owner->propertiesRecursive().empty()) {
+        return;
+    }
+
+    int nThisProperty = nVisibleProperties(owner->properties(), _visibility);
     ImGui::PushID(owner->name().c_str());
     const auto& subOwners = owner->propertySubOwners();
     for (properties::PropertyOwner* subOwner : subOwners) {
-        if (subOwners.size() == 1) {
+        std::vector<properties::Property*> properties = subOwner->propertiesRecursive();
+        int count = nVisibleProperties(properties, _visibility);
+        if (count == 0) {
+            continue;
+        }
+        if (subOwners.size() == 1 && (nThisProperty == 0)) {
             renderPropertyOwner(subOwner);
         }
         else {
@@ -89,24 +122,34 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
     ImGui::Spacing();
 
     for (properties::Property* prop : remainingProperies) {
-        if (prop->isVisible()) {
-            renderProperty(prop, owner);
-        }
+        renderProperty(prop, owner);
     }
     ImGui::PopID();
 }
 
 void GuiPropertyComponent::render() {
-    ImGui::Begin(_name.c_str(), &_isEnabled, size, 0.5f);
+    bool v = _isEnabled;
+    ImGui::Begin(name().c_str(), &v, size, 0.5f);
+    _isEnabled = v;
 
     ImGui::Spacing();
 
     if (_function) {
-        const std::vector<properties::PropertyOwner*>& owners = _function();
+        std::vector<properties::PropertyOwner*> owners = _function();
+        std::sort(
+            owners.begin(),
+            owners.end(),
+            [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
+                return lhs->name() < rhs->name();
+            }
+        );
 
         for (properties::PropertyOwner* pOwner : owners) {
-            if (pOwner->propertiesRecursive().empty())
+            int count = nVisibleProperties(pOwner->propertiesRecursive(), _visibility);
+
+            if (count == 0) {
                 continue;
+            }
 
             auto header = [&]() -> bool {
                 if (owners.size() > 1) {
@@ -130,10 +173,13 @@ void GuiPropertyComponent::render() {
     ImGui::End();
 }
 
-void GuiPropertyComponent::renderProperty(properties::Property* prop, properties::PropertyOwner* owner)     {
+void GuiPropertyComponent::renderProperty(properties::Property* prop,
+                                          properties::PropertyOwner* owner)
+{
     using Func = std::function<void(properties::Property*, const std::string&)>;
-    static std::map<std::string, Func> FunctionMapping = {
+    static const std::map<std::string, Func> FunctionMapping = {
         { "BoolProperty", &renderBoolProperty },
+        { "DoubleProperty", &renderDoubleProperty},
         { "IntProperty", &renderIntProperty },
         { "IVec2Property", &renderIVec2Property },
         { "IVec3Property", &renderIVec3Property },
@@ -142,15 +188,24 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop, properties
         { "Vec2Property", &renderVec2Property },
         { "Vec3Property", &renderVec3Property },
         { "Vec4Property", &renderVec4Property },
+        { "DVec2Property", &renderDVec2Property },
+        { "DVec3Property", &renderDVec3Property },
+        { "DVec4Property", &renderDVec4Property },
         { "StringProperty", &renderStringProperty },
         { "OptionProperty", &renderOptionProperty },
         { "TriggerProperty", &renderTriggerProperty },
         { "SelectionProperty", &renderSelectionProperty }
     };
 
-    auto it = FunctionMapping.find(prop->className());
-    if (it != FunctionMapping.end()) {
-        it->second(prop, owner->name());
+    // Check if the visibility of the property is high enough to be displayed
+    using V = properties::Property::Visibility;
+    auto v = static_cast<std::underlying_type_t<V>>(_visibility);
+    auto propV = static_cast<std::underlying_type_t<V>>(prop->visibility());
+    if (v >= propV) {
+        auto it = FunctionMapping.find(prop->className());
+        if (it != FunctionMapping.end()) {
+            it->second(prop, owner->name());
+        }
     }
 }
 

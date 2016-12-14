@@ -24,6 +24,8 @@
 
 #include <modules/newhorizons/util/scannerdecoder.h>
 
+#include <ghoul/misc/dictionary.h>
+
 namespace {
     const std::string _loggerCat = "ScannerDecoder";
 }

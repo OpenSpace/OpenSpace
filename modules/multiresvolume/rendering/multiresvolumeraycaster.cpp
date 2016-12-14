@@ -149,7 +149,7 @@ bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data, glm::vec3& 
     glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) * camWorldPos;
 
 
-    localPosition = (modelPos.xyz() + glm::vec3(0.5));
+    localPosition = (glm::vec3(modelPos) + glm::vec3(0.5));
     return (localPosition.x > 0 && localPosition.y > 0 && localPosition.z > 0 && localPosition.x < 1 && localPosition.y < 1 && localPosition.z < 1);
 
 }

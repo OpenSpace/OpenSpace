@@ -26,23 +26,34 @@
 
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/mission.h>
+#include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/ephemeris.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scale.h>
+#include <openspace/scene/translation.h>
+#include <openspace/scripting/scriptengine.h>
+#include <openspace/scripting/scriptscheduler.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timerange.h>
 
+#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
+#include <modules/onscreengui/include/gui.h>
+#endif
 
 namespace openspace {
-namespace documentation {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(ConfigurationManager::Documentation());
-    engine.addDocumentation(Ephemeris::Documentation());
     engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());
@@ -51,7 +62,22 @@ void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(SceneGraphNode::Documentation());
     engine.addDocumentation(ScreenSpaceRenderable::Documentation());
     engine.addDocumentation(TimeRange::Documentation());
+    engine.addDocumentation(Translation::Documentation());
 }
 
-} // namespace documentation
+void registerCoreClasses(scripting::ScriptEngine& engine) {
+    engine.addLibrary(OpenSpaceEngine::luaLibrary());
+    engine.addLibrary(SpiceManager::luaLibrary());
+    engine.addLibrary(RenderEngine::luaLibrary());
+    engine.addLibrary(Scene::luaLibrary());
+    engine.addLibrary(Time::luaLibrary());
+    engine.addLibrary(interaction::InteractionHandler::luaLibrary());
+    engine.addLibrary(LuaConsole::luaLibrary());
+    engine.addLibrary(ParallelConnection::luaLibrary());
+    engine.addLibrary(ModuleEngine::luaLibrary());
+    engine.addLibrary(scripting::ScriptScheduler::luaLibrary());
+    engine.addLibrary(WindowWrapper::luaLibrary());
+    engine.addLibrary(MissionManager::luaLibrary());
+}
+
 } // namespace openspace

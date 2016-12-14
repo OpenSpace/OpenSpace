@@ -22,28 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ANGLE_H__
-#define __ANGLE_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ANGLE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___ANGLE___H__
 
 #include <glm/glm.hpp>
 #include <memory>
 #include <math.h>
 
 namespace openspace {
-
+namespace globebrowsing {
 
 template <typename T>
 class Angle {
 public:
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                             STATIC CONSTANTS                                     //
-    //////////////////////////////////////////////////////////////////////////////////////
-
     static const T PI;
     static const T EPSILON;
 
-    
     /** = 0 radians = 0 degrees = no revolution */
     static const Angle<T> ZERO;
 
@@ -56,17 +50,9 @@ public:
     /** = 2PI radians = 360 degrees = a full revolution */
     static const Angle<T> FULL;
 
-
-
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                                 Factory Methods                                  //
-    //////////////////////////////////////////////////////////////////////////////////////
-
     static Angle<T> fromRadians(T radians);
     static Angle<T> fromDegrees(T degrees);
     static Angle<T> fromRevolutions(T revs);
-
 
 public:
     /** Copy constructor */
@@ -76,19 +62,10 @@ private:
     /** Private constructor. Use factory methods to avoid unit confusion */
     Angle<T>(T rad);
 
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                                     Conversions                                  //
-    //////////////////////////////////////////////////////////////////////////////////////
 public:
     inline T asRadians() const;
     inline T asDegrees() const;
     inline T asRevolutions() const;
-
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                          Operators (boilerplate, I know.. /eb)                   //
-    //////////////////////////////////////////////////////////////////////////////////////
 
     Angle<T> operator+(const Angle<T>& rhs) const;
     Angle<T> operator-(const Angle<T>& rhs) const;
@@ -109,14 +86,6 @@ public:
     bool operator==(const Angle<T>& rhs) const;
     bool operator!=(const Angle<T>& rhs) const;
 
-
-
-
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                            Chainable Relative Mutators                           //
-    //////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * Normalizes the angle to the interval [0, 2pi[
      */
@@ -133,15 +102,7 @@ public:
     */
     Angle<T>& clamp(const Angle<T>& min = ZERO, const Angle<T>& max = FULL);
 
-
     Angle<T>& abs();
-
-
-
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                         Chainable Relative Factory Methods                       //
-    //////////////////////////////////////////////////////////////////////////////////////
 
     /**
     * Returns a new angle normalized to the interval [0, 2pi[
@@ -159,28 +120,18 @@ public:
     */
     Angle<T> getClamped(const Angle<T>& min = ZERO, const Angle<T>& max = FULL) const;
 
-
     Angle<T> getAbs() const;
     
-
-
 private:
-
     T _radians;
-
 };
 
 using dAngle = Angle<double>;
 using fAngle = Angle<float>;
 
+} // namespace globebrowsing
 } // namespace openspace
-
-
 
 #include <modules/globebrowsing/geometry/angle.inl>
 
-
-
-
-
-#endif // __ANGLE_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ANGLE___H__

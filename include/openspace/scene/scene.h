@@ -22,10 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef __SCENE_H__
-#define __SCENE_H__
+#ifndef __OPENSPACE_CORE___SCENE___H__
+#define __OPENSPACE_CORE___SCENE___H__
 
-// std includes
 #include <vector>
 #include <map>
 #include <set>
@@ -87,11 +86,6 @@ public:
     void render(const RenderData& data, RendererTasks& tasks);
 
     /*
-    * Post-Render visible SceneGraphNodes using the provided camera
-    */
-    void postRender(const RenderData& data);
-
-    /*
      * Returns the root SceneGraphNode
      */
     SceneGraphNode* root() const;
@@ -124,7 +118,7 @@ public:
 private:
     bool loadSceneInternal(const std::string& sceneDescriptionFilePath);
 
-    void writePropertyDocumentation(const std::string& filename, const std::string& type);
+    void writePropertyDocumentation(const std::string& filename, const std::string& type, const std::string& sceneFilename);
 
     std::string _focus;
 
@@ -158,4 +152,4 @@ private:
 
 } // namespace openspace
 
-#endif // __SCENE_H__
+#endif // __OPENSPACE_CORE___SCENE___H__

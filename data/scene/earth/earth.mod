@@ -3,6 +3,26 @@ return {
     {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "EARTH",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            }
+        }
+    },
+    {
+    -- The default reference frame for Earth-orbiting satellites
+        Name = "EarthInertial",
+        Parent = "EarthBarycenter",
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "J2000",
+                DestinationFrame = "GALACTIC",
+            }
+        },
     },
     -- Earth module
     {   
@@ -30,12 +50,6 @@ return {
             }
         },
         Transform = {
-            Translation = {
-                Type = "SpiceEphemeris",
-                Body = "EARTH",
-                Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_EARTH",
@@ -51,16 +65,20 @@ return {
     -- EarthTrail module
     {   
         Name = "EarthTrail",
-        Parent = "EarthBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "EARTH",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = { 0.5, 0.8, 1.0},
-            TropicalOrbitPeriod = 365.242,
-            EarthOrbitRatio = 1,
-            DayLength = 24
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "EARTH",
+                Observer = "SUN"
+            },
+            Color = { 0.5, 0.8, 1.0 },
+            -- StartTime = "2016 JUN 01 12:00:00.000",
+            -- EndTime = "2017 JAN 01 12:00:00.000",
+            -- SampleInterval = 3600
+            Period = 365.242,
+            Resolution = 1000
         },
         GuiName = "/Solar/EarthTrail"
     },
@@ -76,7 +94,7 @@ return {
             Texture = "textures/marker.png",
             BlendMode = "Additive"
         },
-		Ephemeris = {
+        Ephemeris = {
             Type = "Static",
             Position = {0, 0, 0, 5}
         }

@@ -27,30 +27,37 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/htmllog.h>
 #include <ghoul/logging/textlog.h>
 
 namespace {
-    const std::string keyType = "Type";
-    const std::string keyFilename = "File";
-    const std::string keyAppend = "Append";
-    const std::string keyTimeStamping = "TimeStamping";
-    const std::string keyDateStamping = "DateStamping";
-    const std::string keyCategoryStamping = "CategoryStamping";
-    const std::string keyLogLevelStamping = "LogLevelStamping";
+    const char* keyType = "Type";
+    const char* keyFilename = "File";
+    const char* keyAppend = "Append";
+    const char* keyTimeStamping = "TimeStamping";
+    const char* keyDateStamping = "DateStamping";
+    const char* keyCategoryStamping = "CategoryStamping";
+    const char* keyLogLevelStamping = "LogLevelStamping";
+    const char* keyLogLevel = "LogLevel";
 
-    const std::string valueHtmlLog = "html";
-    const std::string valueTextLog = "Text";
+    const char* valueHtmlLog = "html";
+    const char* valueTextLog = "Text";
+
+    const char* BootstrapPath = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const char* CssPath = "${OPENSPACE_DATA}/web/log/style.css";
+    const char* JsPath = "${OPENSPACE_DATA}/web/log/script.js";
 }
 
 namespace openspace {
 
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {
+    using namespace std::string_literals;
     std::string type;
     bool typeSuccess = dictionary.getValue(keyType, type);
     if (!typeSuccess) {
         throw ghoul::RuntimeError(
-            "Requested log did not contain key '" + keyType + "'", "LogFactory"
+            "Requested log did not contain key '"s + keyType + "'", "LogFactory"
         );
     }
 
@@ -58,7 +65,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     bool filenameSuccess = dictionary.getValue(keyFilename, filename);
     if (!filenameSuccess) {
         throw ghoul::RuntimeError(
-            "Requested log did not contain key '" + keyFilename + "'", "LogFactory"
+            "Requested log did not contain key '"s + keyFilename + "'", "LogFactory"
         );
     }
     filename = absPath(filename);
@@ -73,6 +80,8 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     dictionary.getValue(keyCategoryStamping, categoryStamp);
     bool logLevelStamp = true;
     dictionary.getValue(keyLogLevelStamping, logLevelStamp);
+    std::string logLevel;
+    dictionary.getValue(keyLogLevel, logLevel);
 
     using Append = ghoul::logging::TextLog::Append;
     using TimeStamping = ghoul::logging::Log::TimeStamping;
@@ -81,24 +90,56 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     using LogLevelStamping = ghoul::logging::Log::LogLevelStamping;
 
     if (type == valueHtmlLog) {
-        return std::make_unique<ghoul::logging::HTMLLog>(
-            filename,
-            append ? Append::Yes : Append::No,
-            timeStamp ? TimeStamping::Yes : TimeStamping::No,
-            dateStamp ? DateStamping::Yes : DateStamping::No,
-            categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
-            logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No
-        );
+
+        std::vector<std::string> cssFiles{absPath(BootstrapPath), absPath(CssPath)};
+        std::vector<std::string> jsFiles{absPath(JsPath)};
+
+        if (logLevel.empty()) {
+            return std::make_unique<ghoul::logging::HTMLLog>(
+                filename,
+                append ? Append::Yes : Append::No,
+                timeStamp ? TimeStamping::Yes : TimeStamping::No,
+                dateStamp ? DateStamping::Yes : DateStamping::No,
+                categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
+                logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No,
+                cssFiles, jsFiles
+            );
+        }
+        else {
+            return std::make_unique<ghoul::logging::HTMLLog>(
+                filename,
+                append ? Append::Yes : Append::No,
+                timeStamp ? TimeStamping::Yes : TimeStamping::No,
+                dateStamp ? DateStamping::Yes : DateStamping::No,
+                categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
+                logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No,
+                cssFiles, jsFiles,
+                ghoul::logging::levelFromString(logLevel)
+                );
+        }
     }
     else if (type == valueTextLog) {
-        return std::make_unique<ghoul::logging::TextLog>(
-            filename,
-            append ? Append::Yes : Append::No,
-            timeStamp ? TimeStamping::Yes : TimeStamping::No,
-            dateStamp ? DateStamping::Yes : DateStamping::No,
-            categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
-            logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No
-        );
+        if (logLevel.empty()) {
+            return std::make_unique<ghoul::logging::TextLog>(
+                filename,
+                append ? Append::Yes : Append::No,
+                timeStamp ? TimeStamping::Yes : TimeStamping::No,
+                dateStamp ? DateStamping::Yes : DateStamping::No,
+                categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
+                logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No
+            );
+        }
+        else {
+            return std::make_unique<ghoul::logging::TextLog>(
+                filename,
+                append ? Append::Yes : Append::No,
+                timeStamp ? TimeStamping::Yes : TimeStamping::No,
+                dateStamp ? DateStamping::Yes : DateStamping::No,
+                categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
+                logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No,
+                ghoul::logging::levelFromString(logLevel)
+            );
+        }
     }
     else {
         throw ghoul::RuntimeError(

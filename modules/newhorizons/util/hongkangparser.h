@@ -1,48 +1,39 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2016                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
-#ifndef __HONGKANGPARSER_H__
-#define __HONGKANGPARSER_H__
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___HONGKANGPARSER___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___HONGKANGPARSER___H__
 
-#include <modules/newhorizons/util/imagesequencer.h>
 #include <modules/newhorizons/util/sequenceparser.h>
-
-#include <ghoul/misc/dictionary.h>
-
-#include <map>
-#include <string>
-#include <vector>
 
 namespace openspace {
 
 class HongKangParser : public SequenceParser {
 public:
     HongKangParser();
-    HongKangParser(std::string name, std::string fileName,
-                    std::string spacecraft,
-                    ghoul::Dictionary dictionary,
-                    std::vector<std::string> potentialTargets);
+    HongKangParser(std::string name, std::string fileName, std::string spacecraft,
+        ghoul::Dictionary dictionary, std::vector<std::string> potentialTargets);
 
     bool create() override;
     void findPlaybookSpecifiedTarget(std::string line, std::string& target);
@@ -52,16 +43,8 @@ private:
     double getETfromMet(std::string timestr);
     double getETfromMet(double met);
 
-    //Image createImage(double startTime,
-    //                    double stopTime,
-    //                    std::vector<std::string> instr,
-    //                    std::string targ,
-    //                    std::string pot);
-
-    bool augmentWithSpice(Image& image, 
-                            std::string spacecraft, 
-                            std::vector<std::string> payload, 
-                            std::vector<std::string> potentialTargets);
+    bool augmentWithSpice(Image& image,  std::string spacecraft, 
+        std::vector<std::string> payload, std::vector<std::string> potentialTargets);
 
     std::string _defaultCaptureImage;
     double _metRef = 299180517;
@@ -73,5 +56,6 @@ private:
     std::vector<std::string> _potentialTargets;
 };
 
-}
-#endif //__HONGKANGPARSER_H__
+} // namespace openspace
+
+#endif //__OPENSPACE_MODULE_NEWHORIZONS___HONGKANGPARSER___H__

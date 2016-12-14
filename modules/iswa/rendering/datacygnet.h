@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __DATACYGNET_H__
-#define __DATACYGNET_H__
+#ifndef __OPENSPACE_MODULE_ISWA___DATACYGNET___H__
+#define __OPENSPACE_MODULE_ISWA___DATACYGNET___H__
 
 #include <modules/iswa/rendering/iswacygnet.h>
 #include <modules/iswa/util/dataprocessor.h>
@@ -32,7 +32,7 @@ namespace {
     const int MAX_TEXTURES = 6;
 }
 
-namespace openspace{
+namespace openspace {
 
 /**
  * This class abstracts away the the loading of data and creation of
@@ -108,8 +108,9 @@ protected:
 
 private:
     bool readyToRender() const override;
-    bool downloadTextureResource(double timestamp = Time::ref().currentTime()) override;
+    bool downloadTextureResource(double timestamp = Time::ref().j2000Seconds()) override;
 };
+
 } //namespace openspace
 
-#endif //__DATACYGNET_H__
+#endif //__OPENSPACE_MODULE_ISWA___DATACYGNET___H__

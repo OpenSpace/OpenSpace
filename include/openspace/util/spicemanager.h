@@ -22,27 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SPICEMANAGER_H__
-#define __SPICEMANAGER_H__
+#ifndef __OPENSPACE_CORE___SPICEMANAGER___H__
+#define __OPENSPACE_CORE___SPICEMANAGER___H__
+
+#include <ghoul/designpattern/singleton.h>
 
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/util/powerscaledcoordinate.h>
 
 #include <ghoul/glm.h>
-#include <ghoul/designpattern/singleton.h>
+#include <ghoul/misc/boolean.h>
 #include <ghoul/misc/exception.h>
 
-#include <glm/gtc/type_ptr.hpp>
-
 #include <array>
-#include <exception>
 #include <map>
 #include <string>
 #include <vector>
 #include <set>
-
-#include "SpiceUsr.h"
-#include "SpiceZpr.h"
 
 namespace openspace {
 
@@ -50,6 +45,7 @@ class SpiceManager : public ghoul::Singleton<SpiceManager> {
     friend class ghoul::Singleton<SpiceManager>;
 public:
     using TransformMatrix = std::array<double, 36>;
+    using UseException = ghoul::Boolean;
     using KernelHandle = unsigned int;
     
     struct SpiceException : public ghoul::RuntimeError {
@@ -808,6 +804,21 @@ public:
      * \todo I think this function should die ---abock
      */
     std::string frameFromBody(const std::string& body) const;
+
+    /**
+     * Sets the SpiceManager's exception handling. If UseException::No is passed to this 
+     * function, all subsequent calls will not throw an error, but fail silently instead.
+     * If set to UseException::Yes, a SpiceException is thrown whenever an error occurs.
+     * \param useException The new exeception handling method that the SpiceManager should
+     * use
+     */
+    void setExceptionHandling(UseException useException);
+
+    /**
+     * Returns the current SpiceManager's exception strategy. See setExceptionHandling
+     * \return The current exception handling strategy.
+     */
+    UseException exceptionHandling() const;
     
     static scripting::LuaLibrary luaLibrary();
 
@@ -910,6 +921,9 @@ private:
     std::map<int, std::set<double>> _spkCoverageTimes;
     // Vector of pairs: Body, Frame
     std::vector<std::pair<std::string, std::string>> _frameByBody;
+
+    /// Stores whether the SpiceManager throws exceptions (Yes) or fails silently (No)
+    UseException _useExceptions;
     
     /// The last assigned kernel-id, used to determine the next free kernel id
     KernelHandle _lastAssignedKernel = KernelHandle(0);
@@ -917,4 +931,4 @@ private:
 
 } // namespace openspace
 
-#endif // __SPICEMANAGER_H__
+#endif // __OPENSPACE_CORE___SPICEMANAGER___H__

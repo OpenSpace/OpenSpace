@@ -4,12 +4,14 @@ return {
         Name = "EarthBarycenter",
         Parent = "SolarSystemBarycenter",
         Static = true,
-        Ephemeris = {
-            Type = "Spice",
-            Body = "EARTH BARYCENTER",
-            Observer = "SUN",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-        },
+        Transform = {
+            Translation = {
+                Type = "Spice",
+                Body = "EARTH BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
+        }
     },
     -- Earth module
     {   
@@ -18,7 +20,7 @@ return {
         Renderable = {
             Type = "RenderablePlanet",
             Frame = "IAU_EARTH",
-			Body = "EARTH",
+            Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.371, 6 },
@@ -41,7 +43,7 @@ return {
             Textures = {
                 Type = "simple",
                 Color = "textures/earth_bluemarble.jpg",
-				Night = "textures/earth_night.jpg",
+                Night = "textures/earth_night.jpg",
                 --Height = "textures/earth_bluemarble_height.jpg",                
                 -- Depth = "textures/earth_depth.png",
                 Reflectance = "textures/earth_reflectance.png",
@@ -105,15 +107,20 @@ return {
         Name = "EarthTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "EARTH",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = { 0.5, 0.8, 1.0},
-            TropicalOrbitPeriod = 365.242,
-            EarthOrbitRatio = 1,
-            DayLength = 24
-        }
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "EARTH",
+                Observer = "SUN"
+            },
+            Color = { 0.5, 0.8, 1.0 },
+            -- StartTime = "2016 JUN 01 12:00:00.000",
+            -- EndTime = "2017 JAN 01 12:00:00.000",
+            -- SampleInterval = 3600
+            Period = 365.242,
+            Resolution = 1000
+        },
+        GuiName = "/Solar/EarthTrail"
     },
     {
         Name = "EarthMarker",
@@ -126,7 +133,7 @@ return {
             Texture = "textures/marker.png",
             BlendMode = "Additive"
         },
-		Ephemeris = {
+        Ephemeris = {
             Type = "Static",
             Position = {0, 0, 0, 5}
         }

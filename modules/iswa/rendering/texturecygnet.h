@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TEXTURECYGNET_H__
-#define __TEXTURECYGNET_H__
+#ifndef __OPENSPACE_MODULE_ISWA___TEXTURECYGNET___H__
+#define __OPENSPACE_MODULE_ISWA___TEXTURECYGNET___H__
 
 #include <modules/iswa/rendering/iswacygnet.h>
 
-namespace openspace{
+namespace openspace {
 
 /**
  * This class exist to abstract away the loading of images
@@ -43,7 +43,7 @@ public:
 protected:
 
     bool updateTexture() override;
-    bool downloadTextureResource(double timestamp = Time::ref().currentTime()) override;
+    bool downloadTextureResource(double timestamp = Time::ref().j2000Seconds()) override;
     bool readyToRender() const override;
     bool updateTextureResource() override;
 
@@ -58,4 +58,4 @@ private:
 };
 } //namespace openspace
 
-#endif //__TEXTURECYGNET_H__
+#endif //__OPENSPACE_MODULE_ISWA___TEXTURECYGNET___H__

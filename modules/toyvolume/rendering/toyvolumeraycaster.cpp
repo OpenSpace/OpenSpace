@@ -33,9 +33,9 @@
 #include <openspace/rendering/renderable.h>
 
 namespace {
-    const std::string GlslRaycastPath = "${MODULES}/toyvolume/shaders/raycast.glsl";
-    const std::string GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsVs.glsl";
-    const std::string GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsFs.glsl";
+    const char* GlslRaycastPath = "${MODULES}/toyvolume/shaders/raycast.glsl";
+    const char* GlslBoundsVsPath = "${MODULES}/toyvolume/shaders/boundsvs.glsl";
+    const char* GlslBoundsFsPath = "${MODULES}/toyvolume/shaders/boundsfs.glsl";
 }
 
 namespace openspace {

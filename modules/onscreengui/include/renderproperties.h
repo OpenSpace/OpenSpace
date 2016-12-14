@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERPROPERTIES_H__
-#define __RENDERPROPERTIES_H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___RENDERPROPERTIES___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___RENDERPROPERTIES___H__
 
 #include <string>
 
@@ -38,6 +38,7 @@ void renderBoolProperty(properties::Property* prop, const std::string& ownerName
 void renderOptionProperty(properties::Property* prop, const std::string& ownerName);
 void renderSelectionProperty(properties::Property* prop, const std::string& ownerName);
 void renderStringProperty(properties::Property* prop, const std::string& ownerName);
+void renderDoubleProperty(properties::Property* prop, const std::string& ownerName);
 void renderIntProperty(properties::Property* prop, const std::string& ownerName);
 void renderIVec2Property(properties::Property* prop, const std::string& ownerName);
 void renderIVec3Property(properties::Property* prop, const std::string& ownerName);
@@ -46,8 +47,11 @@ void renderFloatProperty(properties::Property* prop, const std::string& ownerNam
 void renderVec2Property(properties::Property* prop, const std::string& ownerName);
 void renderVec3Property(properties::Property* prop, const std::string& ownerName);
 void renderVec4Property(properties::Property* prop, const std::string& ownerName);
+void renderDVec2Property(properties::Property* prop, const std::string& ownerName);
+void renderDVec3Property(properties::Property* prop, const std::string& ownerName);
+void renderDVec4Property(properties::Property* prop, const std::string& ownerName);
 void renderTriggerProperty(properties::Property* prop, const std::string& ownerName);
 
 } // namespace openspace
 
-#endif __RENDERPROPERTIES_H__
+#endif __OPENSPACE_MODULE_ONSCREENGUI___RENDERPROPERTIES___H__

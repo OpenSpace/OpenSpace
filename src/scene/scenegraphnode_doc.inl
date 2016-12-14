@@ -31,6 +31,7 @@ Documentation SceneGraphNode::Documentation() {
 
     return {
         "Scenegraph Node",
+        "core_scene_node",
         {
         {
             "Name",
@@ -38,7 +39,8 @@ Documentation SceneGraphNode::Documentation() {
             "The name of this scenegraph node. This name must be unique among all scene "
             "graph nodes that are loaded in a specific scene. If a duplicate is detected "
             "the loading of the node will fail, as will all childing that depend on the "
-            "node."
+            "node.",
+            Optional::No
         },
         {
             "Parent",
@@ -48,7 +50,8 @@ Documentation SceneGraphNode::Documentation() {
             "This names the parent of the currently specified scenegraph node. The "
             "parent must not have been defined earlier, but must exist at loading time, "
             "or the scenegraph node creation will fail. A special parent 'Root' is "
-            "available that denotes the root of the scenegraph."
+            "available that denotes the root of the scenegraph.",
+            Optional::No
         },
         {
             "Renderable",

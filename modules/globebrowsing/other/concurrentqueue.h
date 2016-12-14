@@ -22,20 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONCURRENT_QUEUE_H__
-#define __CONCURRENT_QUEUE_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_QUEUE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_QUEUE___H__
 
-#include <glm/glm.hpp>
-#include <memory>
-#include <ostream>
-#include <thread>
-#include <queue>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
+#include <queue>
 
 namespace openspace {
-
-
+namespace globebrowsing {
 
 /**
  * Templated thread-safe queue based on std::thread and std::queue
@@ -43,47 +38,15 @@ namespace openspace {
 template <typename T>
 class ConcurrentQueue {
 public:
+    T pop();
 
-    T pop() {
-        std::unique_lock<std::mutex> mlock(_mutex);
-        while (_queue.empty()) {
-            _cond.wait(mlock);
-        }
-        auto item = _queue.front();
-        _queue.pop();
-        return item;
-    }
+    void pop(T& item);
 
-    void pop(T& item) {
-        std::unique_lock<std::mutex> mlock(_mutex);
-        while (_queue.empty()) {
-            _cond.wait(mlock);
-        }
-        item = _queue.front();
-        _queue.pop();
-    }
+    void push(const T& item);
 
-    void push(const T& item) {
-        std::unique_lock<std::mutex> mlock(_mutex);
-        _queue.push(item);
-        mlock.unlock();
-        _cond.notify_one();
-    }
+    void push(T&& item);
 
-    void push(T&& item) {
-        std::unique_lock<std::mutex> mlock(_mutex);
-        _queue.push(std::move(item));
-        mlock.unlock();
-        _cond.notify_one();
-    }
-
-    size_t size() const{
-        std::unique_lock<std::mutex> mlock(_mutex);
-        size_t s = _queue.size();
-        mlock.unlock();
-        _cond.notify_one();
-        return s;
-    }
+    size_t size() const;
 
 private:
     std::queue<T> _queue;
@@ -91,6 +54,9 @@ private:
     mutable std::condition_variable _cond;
 };
 
-}
+} // namespace globebrowsing
+} // namespace openspace
 
-#endif // __CONCURRENT_QUEUE_H__
+#include "concurrentqueue.inl"
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CONCURRENT_QUEUE___H__

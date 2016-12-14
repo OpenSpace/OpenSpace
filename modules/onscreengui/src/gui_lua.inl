@@ -35,8 +35,9 @@ namespace gui {
  */
 int show(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 0)
+    if (nArguments != 0) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
 
     OsEng.gui().setEnabled(true);
     return 0;
@@ -49,8 +50,9 @@ int show(lua_State* L) {
  */
 int hide(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 0)
+    if (nArguments != 0) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
 
     OsEng.gui().setEnabled(false);
     return 0;
@@ -63,8 +65,9 @@ int hide(lua_State* L) {
  */
 int toggle(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 0)
+    if (nArguments != 0) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
 
     OsEng.gui().setEnabled(!OsEng.gui().isEnabled());
     return 0;

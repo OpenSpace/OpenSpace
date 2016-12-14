@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// open space includes
 #include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/documentation/documentation.h>
@@ -31,7 +30,6 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 
-// ghoul includes
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -39,7 +37,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderobject.h>
 
-#include <modules/base/ephemeris/staticephemeris.h>
+#include <modules/base/translation/statictranslation.h>
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/scale/staticscale.h>
 
@@ -77,13 +75,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 
     SceneGraphNode* result = new SceneGraphNode;
 
-    if (!dictionary.hasValue<std::string>(KeyName)) {
-        LERROR("SceneGraphNode did not contain a '" << KeyName << "' key");
-        delete result;
-        return nullptr;
-    }
-    std::string name;
-    dictionary.getValue(KeyName, name);
+    std::string name = dictionary.value<std::string>(KeyName);
     result->setName(name);
 
     if (dictionary.hasValue<ghoul::Dictionary>(KeyRenderable)) {
@@ -106,59 +98,47 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
     if (dictionary.hasKey(keyTransformTranslation)) {
         ghoul::Dictionary translationDictionary;
         dictionary.getValue(keyTransformTranslation, translationDictionary);
-        result->_ephemeris = 
-            (Ephemeris::createFromDictionary(translationDictionary));
-        if (result->_ephemeris == nullptr) {
+        result->_transform.translation = 
+            std::unique_ptr<Translation>(Translation::createFromDictionary(translationDictionary));
+        if (result->_transform.translation == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
                 << result->name() << "'");
             delete result;
             return nullptr;
         }
+        result->addPropertySubOwner(result->_transform.translation.get());
         LDEBUG("Successfully created ephemeris for '" << result->name() << "'");
     }
 
     if (dictionary.hasKey(keyTransformRotation)) {
         ghoul::Dictionary rotationDictionary;
         dictionary.getValue(keyTransformRotation, rotationDictionary);
-        result->_rotation = 
-            (Rotation::createFromDictionary(rotationDictionary));
-        if (result->_rotation == nullptr) {
+        result->_transform.rotation =
+            std::unique_ptr<Rotation>(Rotation::createFromDictionary(rotationDictionary));
+        if (result->_transform.rotation == nullptr) {
             LERROR("Failed to create rotation for SceneGraphNode '"
                 << result->name() << "'");
             delete result;
             return nullptr;
         }
+        result->addPropertySubOwner(result->_transform.rotation.get());
         LDEBUG("Successfully created rotation for '" << result->name() << "'");
     }
 
     if (dictionary.hasKey(keyTransformScale)) {
         ghoul::Dictionary scaleDictionary;
         dictionary.getValue(keyTransformScale, scaleDictionary);
-        result->_scale = 
-            (Scale::createFromDictionary(scaleDictionary));
-        if (result->_scale == nullptr) {
+        result->_transform.scale =
+            std::unique_ptr<Scale>(Scale::createFromDictionary(scaleDictionary));
+        if (result->_transform.scale == nullptr) {
             LERROR("Failed to create scale for SceneGraphNode '"
                 << result->name() << "'");
             delete result;
             return nullptr;
         }
+        result->addPropertySubOwner(result->_transform.scale.get());
         LDEBUG("Successfully created scale for '" << result->name() << "'");
     }
-
-    //std::string parentName;
-    //if (!dictionary.getValue(KeyParentName, parentName)) {
-    //    LWARNING("Could not find '" << KeyParentName << "' key, using 'Root'.");
-    //    parentName = "Root";
-    //}
-
-    //SceneGraphNode* parentNode = sceneGraphNode(parentName);
-    //if (parentNode == nullptr) {
-    //    LFATAL("Could not find parent named '"
-    //           << parentName << "' for '" << result->name() << "'."
-    //           << " Check module definition order. Skipping module.");
-    //}
-
-    //parentNode->addNode(result);
 
     LDEBUG("Successfully created SceneGraphNode '"
                    << result->name() << "'");
@@ -167,9 +147,11 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 
 SceneGraphNode::SceneGraphNode()
     : _parent(nullptr)
-    , _ephemeris(new StaticEphemeris())
-    , _rotation(new StaticRotation())
-    , _scale(new StaticScale())
+    , _transform {
+        std::make_unique<StaticTranslation>(),
+        std::make_unique<StaticRotation>(),
+        std::make_unique<StaticScale>()
+    }
     , _performanceRecord({0, 0, 0})
     , _renderable(nullptr)
     , _renderableVisible(false)
@@ -182,15 +164,20 @@ SceneGraphNode::~SceneGraphNode() {
 }
 
 bool SceneGraphNode::initialize() {
-    if (_renderable)
+    if (_renderable) {
         _renderable->initialize();
+    }
 
-    if (_ephemeris)
-        _ephemeris->initialize();
-    if (_rotation)
-        _rotation->initialize();
-    if (_scale)
-        _scale->initialize();
+    if (_transform.translation) {
+        _transform.translation->initialize();
+    }
+
+    if (_transform.rotation) {
+        _transform.rotation->initialize();
+    }
+    if (_transform.scale) {
+        _transform.scale->initialize();
+    }
 
     return true;
 }
@@ -203,26 +190,6 @@ bool SceneGraphNode::deinitialize() {
         delete _renderable;
         _renderable = nullptr;
     }
-    if (_ephemeris) {
-        delete _ephemeris;
-        _ephemeris = nullptr;
-    }
-    if (_rotation) {
-        delete _rotation;
-        _rotation = nullptr;
-    }
-    if (_scale) {
-        delete _scale;
-        _scale = nullptr;
-    }
-
-    //delete _ephemeris;
-    //_ephemeris = nullptr;
-
- //   for (SceneGraphNode* child : _children) {
-    //    child->deinitialize();
-    //    delete child;
-    //}
     _children.clear();
 
     // reset variables
@@ -235,49 +202,52 @@ bool SceneGraphNode::deinitialize() {
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
-    if (_ephemeris) {
+    if (_transform.translation) {
         if (data.doPerformanceMeasurement) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _ephemeris->update(data);
+            _transform.translation->update(data);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeEphemeris = (end - start).count();
+            _performanceRecord.updateTimeTranslation = (end - start).count();
         }
-        else
-            _ephemeris->update(data);
+        else {
+            _transform.translation->update(data);
+        }
     }
 
-    if (_rotation) {
+    if (_transform.rotation) {
         if (data.doPerformanceMeasurement) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _rotation->update(data);
+            _transform.rotation->update(data);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeEphemeris = (end - start).count();
+            _performanceRecord.updateTimeRotation = (end - start).count();
         }
-        else
-            _rotation->update(data);
+        else {
+            _transform.rotation->update(data);
+        }
     }
 
-    if (_scale) {
+    if (_transform.scale) {
         if (data.doPerformanceMeasurement) {
             glFinish();
             auto start = std::chrono::high_resolution_clock::now();
 
-            _scale->update(data);
+            _transform.scale->update(data);
 
             glFinish();
             auto end = std::chrono::high_resolution_clock::now();
-            _performanceRecord.updateTimeEphemeris = (end - start).count();
+            _performanceRecord.updateTimeScaling = (end - start).count();
         }
-        else
-            _scale->update(data);
+        else {
+            _transform.scale->update(data);
+        }
     }
     UpdateData newUpdateData = data;
 
@@ -358,7 +328,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         _worldRotationCached,
         _worldScaleCached};
 
-    _performanceRecord.renderTime = 0;
+    //_performanceRecord.renderTime = 0;
 
     bool visible = _renderableVisible &&
         _renderable->isVisible() &&
@@ -386,18 +356,6 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     //for (SceneGraphNode* child : _children)
     //    child->render(newData);
 }
-
-void SceneGraphNode::postRender(const RenderData& data) {
-    const psc thisPosition = psc::CreatePowerScaledCoordinate(_worldPositionCached.x, _worldPositionCached.y, _worldPositionCached.z);
-    RenderData newData = { data.camera, thisPosition, data.doPerformanceMeasurement, data.renderBinMask, _worldPositionCached};
-
-    _performanceRecord.renderTime = 0;
-    if (_renderableVisible && _renderable->isVisible() && _renderable->isReady() && _renderable->isEnabled()) {
-        _renderable->postRender(newData);
-    }
-}
-
-
 
 
 // not used anymore @AA
@@ -431,17 +389,17 @@ void SceneGraphNode::addChild(SceneGraphNode* child) {
 
 glm::dvec3 SceneGraphNode::position() const
 {
-    return _ephemeris->position();
+    return _transform.translation->position();
 }
 
 const glm::dmat3& SceneGraphNode::rotationMatrix() const
 {
-    return _rotation->matrix();
+    return _transform.rotation->matrix();
 }
 
 double SceneGraphNode::scale() const
 {
-    return _scale->scaleValue();
+    return _transform.scale->scaleValue();
 }
 
 glm::dvec3 SceneGraphNode::worldPosition() const

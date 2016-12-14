@@ -22,11 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef __SCENEGRAPH_H__
-#define __SCENEGRAPH_H__
+#ifndef __OPENSPACE_CORE___SCENEGRAPH___H__
+#define __OPENSPACE_CORE___SCENEGRAPH___H__
 
 #include <vector>
 #include <string>
+
 namespace openspace {
 
 class SceneGraphNode;
@@ -71,4 +72,4 @@ private:
 
 } // namespace openspace
 
-#endif // __SCENEGRAPH_H__
+#endif // __OPENSPACE_CORE___SCENEGRAPH___H__

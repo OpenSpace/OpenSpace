@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,17 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TSP_H__
-#define __TSP_H__
+#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___TSP___H__
+#define __OPENSPACE_MODULE_MULTIRESVOLUME___TSP___H__
 
-// std includes
 #include <string>
 #include <vector>
 #include <list>
 #include <iostream>
 #include <fstream>
 
-// ghoul includes
 #include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
@@ -143,6 +141,7 @@ private:
     float medianTemporalError_;
 
 }; // class TSP
+
 }  // namespace openspace
 
-#endif
+#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___TSP___H__

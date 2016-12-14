@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __LUALIBRARY_H__
-#define __LUALIBRARY_H__
+#ifndef __OPENSPACE_CORE___LUALIBRARY___H__
+#define __OPENSPACE_CORE___LUALIBRARY___H__
 
 #include <ghoul/lua/ghoul_lua.h>
 
@@ -37,9 +37,8 @@ namespace scripting {
 struct LuaLibrary {
     /**
     * This structure represents a Lua function with its #name, #function pointer
-    * #argumentText describing the arguments this function takes, the #helpText
-    * describing the function, and whether it should be shared in a parallel
-    * connection (#parallelShared)
+    * #argumentText describing the arguments this function takes, and the the #helpText
+    * describing the function.
     */
     struct Function {
         /// The name of the function
@@ -50,9 +49,6 @@ struct LuaLibrary {
         std::string argumentText;
         /// A help text describing what the function does/
         std::string helpText;
-        /// If <code>true</code>, this function will be shared with other parallel
-        /// connections
-        bool parallelShared;
     };
     /// The name of the library
     std::string name;
@@ -66,4 +62,4 @@ struct LuaLibrary {
 } // namespace scripting
 } // namespace openspace
 
-#endif // __LUALIBRARY_H__
+#endif // __OPENSPACE_CORE___LUALIBRARY___H__

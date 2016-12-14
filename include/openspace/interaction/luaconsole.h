@@ -22,10 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef LUACONSOLE_H
-#define LUACONSOLE_H
+#ifndef __OPENSPACE_CORE___LUACONSOLE___H__
+#define __OPENSPACE_CORE___LUACONSOLE___H__
 
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/network/parallelconnection.h>
 
 #include <openspace/util/keys.h>
 
@@ -50,12 +51,16 @@ public:
 
     bool isVisible() const;
     void setVisible(bool visible);
-    void toggleVisibility();
+    bool isRemoteScripting() const;
+    void setRemoteScripting(bool remoteScripting);
+
+    void toggleMode();
         
     static scripting::LuaLibrary luaLibrary();
 
 
 private:
+    void parallelConnectionChanged(const ParallelConnection::Status& status);
     void addToCommand(std::string c);
     std::string UnicodeToUTF8(unsigned int codepoint);
 
@@ -73,8 +78,9 @@ private:
     } _autoCompleteInfo;
 
     bool _isVisible;
+    bool _remoteScripting;
 };
 
 } // namespace openspace
 
-#endif
+#endif // __OPENSPACE_CORE___LUACONSOLE___H__

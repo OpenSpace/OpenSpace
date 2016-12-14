@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __FRAMEBUFFERRENDERER_H__
-#define __FRAMEBUFFERRENDERER_H__
+#ifndef __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
+#define __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
@@ -107,7 +107,8 @@ private:
     int _nAaSamples;
 
     ghoul::Dictionary _rendererData;
-};        // FramebufferRenderer
-}        // openspace
+};
 
-#endif     // __FRAMEBUFFERRENDERER_H__
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___FRAMEBUFFERRENDERER___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TOYVOLUMERAYCASTER_H__
-#define __TOYVOLUMERAYCASTER_H__
+#ifndef __OPENSPACE_MODULE_TOYVOLUME___TOYVOLUMERAYCASTER___H__
+#define __OPENSPACE_MODULE_TOYVOLUME___TOYVOLUMERAYCASTER___H__
 
 #include <ghoul/glm.h>
 #include <string>
@@ -77,4 +77,4 @@ private:
 
 } // openspace
 
-#endif  // __TOYVOLUMERAYCASTER_H__ 
+#endif  // __OPENSPACE_MODULE_TOYVOLUME___TOYVOLUMERAYCASTER___H__ 

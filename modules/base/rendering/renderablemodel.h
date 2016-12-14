@@ -22,12 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEMODEL_H__
-#define __RENDERABLEMODEL_H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
 
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/programobject.h>
@@ -84,4 +87,4 @@ private:
 
 }  // namespace openspace
 
-#endif  // __RENDERABLEMODEL_H__
+#endif  // __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__

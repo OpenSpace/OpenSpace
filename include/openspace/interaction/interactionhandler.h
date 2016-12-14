@@ -22,18 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __INTERACTIONHANDLER_H__
-#define __INTERACTIONHANDLER_H__
+#ifndef __OPENSPACE_CORE___INTERACTIONHANDLER___H__
+#define __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 
 #include <openspace/interaction/keyboardcontroller.h>
-#include <openspace/interaction/mousecontroller.h>
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
+#include <ghoul/misc/boolean.h>
 
 #include <list>
 
@@ -47,112 +49,14 @@ class SceneGraphNode;
 namespace interaction {
 
 
-//#define USE_OLD_INTERACTIONHANDLER
-#ifdef USE_OLD_INTERACTIONHANDLER
-
-class InteractionHandler : public properties::PropertyOwner {
-public:
-    InteractionHandler();
-    ~InteractionHandler();
-
-    // Mutators
-    void setKeyboardController(KeyboardController* controller);
-    void setMouseController(MouseController* controller);
-    void setFocusNode(SceneGraphNode* node);
-    void setCamera(Camera* camera);
-    void setInteractionSensitivity(float sensitivity);
-    void resetKeyBindings();
-    void setInvertRoll(bool invert);
-    void setInvertRotation(bool invert);
-
-    void addController(Controller* controller);
-    void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
-    void clearKeyframes();
-
-    void bindKey(Key key, KeyModifier modifier, std::string lua);
-
-    void lockControls();
-    void unlockControls();
-
-    void update(double deltaTime);
-    
-    // Accessors
-    const SceneGraphNode* const focusNode() const;
-    const Camera* const camera() const;
-    double deltaTime() const;
-    float interactionSensitivity() const;
-    bool invertRoll() const;
-    bool invertRotation() const;
-
-    /**
-    * Returns the Lua library that contains all Lua functions available to affect the
-    * interaction. The functions contained are
-    * - openspace::luascriptfunctions::setOrigin
-    * \return The Lua library that contains all Lua functions available to affect the
-    * interaction
-    */
-    static scripting::LuaLibrary luaLibrary();
-
-
-    // Callback functions
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double x, double y);
-    void mouseScrollWheelCallback(double pos);
-
-    // Interaction functions
-    void orbitDelta(const glm::quat& rotation);
-    void orbit(const float &dx, const float &dy, const float &dz, const float &dist);
-    void rotateDelta(const glm::quat& rotation);
-    void distanceDelta(const PowerScaledScalar& distance, size_t iterations = 0);
-    void lookAt(const glm::quat& rotation);
-    void setRotation(const glm::quat& rotation);
-    
-
-private:
-    // Remove copy and move constructors
-    InteractionHandler(const InteractionHandler&) = delete;
-    InteractionHandler& operator=(const InteractionHandler&) = delete;
-    InteractionHandler(InteractionHandler&&) = delete;
-    InteractionHandler& operator=(InteractionHandler&&) = delete;
-
-    // Settings
-    float _controllerSensitivity;
-    bool _invertRoll;
-    bool _invertRotation;
-
-    // Pointers to entities to affect
-    Camera* _camera;
-    SceneGraphNode* _focusNode;
-
-    // Cached data
-    double _deltaTime;
-    std::mutex _mutex;
-
-    //bool _validKeyLua;
-    std::multimap<KeyWithModifier, std::string > _keyLua;
-
-    
-    KeyboardController* _keyboardController;
-    MouseController* _mouseController;
-    std::vector<Controller*> _controllers;
-
-    properties::StringProperty _origin;
-    properties::StringProperty _coordinateSystem;
-    
-    //remote controller
-    std::vector<network::datamessagestructures::PositionKeyframe> _keyframes;
-    double _currentKeyframeTime;
-    std::mutex _keyframeMutex;
-};
-
-#else // USE_OLD_INTERACTIONHANDLER
-
 class InteractionHandler : public properties::PropertyOwner
 {
 public:
     InteractionHandler();
     ~InteractionHandler();
+
+    void initialize();
+    void deinitialize();
 
     // Mutators
     void setFocusNode(SceneGraphNode* node);
@@ -162,18 +66,32 @@ public:
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
     void setInteractionMode(const std::string& interactionModeKey);
-
+    
+    void goToChunk(int x, int y, int level);
+    void goToGeo(double latitude, double longitude);
+    
     void resetKeyBindings();
 
-    void addKeyframe(const network::datamessagestructures::PositionKeyframe &kf);
+    void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
     void clearKeyframes();
 
-    void bindKey(Key key, KeyModifier modifier, std::string lua);
+    void bindKeyLocal(
+        Key key,
+        KeyModifier modifier,
+        std::string luaCommand,
+        std::string documentation = ""
+    );
+    void bindKey(
+        Key key,
+        KeyModifier modifier,
+        std::string luaCommand,
+        std::string documentation = ""
+    );
     void lockControls();
     void unlockControls();
 
     //void update(double deltaTime);
-    void updateCamera();
+    void updateCamera(double deltaTime);
     void updateInputStates(double timeSinceLastUpdate);    
 
     // Accessors
@@ -202,11 +120,19 @@ public:
     void writeKeyboardDocumentation(const std::string& type, const std::string& file);
 
 private:
+    using Synchronized = ghoul::Boolean;
+
+    struct KeyInformation {
+        std::string command;
+        Synchronized synchronization;
+        std::string documentation;
+    };
+
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
 
     bool _cameraUpdatedFromScript = false;
 
-    std::multimap<KeyWithModifier, std::string > _keyLua;
+    std::multimap<KeyWithModifier, KeyInformation> _keyLua;
 
     std::unique_ptr<InputState> _inputState;
     Camera* _camera;
@@ -228,9 +154,7 @@ private:
     properties::FloatProperty _rapidness;
 };
 
-#endif // USE_OLD_INTERACTIONHANDLER
-
 } // namespace interaction
 } // namespace openspace
 
-#endif // __INTERACTIONHANDLER_H__
+#endif // __OPENSPACE_CORE___INTERACTIONHANDLER___H__

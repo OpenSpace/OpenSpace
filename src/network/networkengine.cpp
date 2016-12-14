@@ -27,6 +27,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 
+#include <ghoul/logging/logmanager.h>
+
 #include <array>
 #include <chrono>
 #include <thread>
@@ -67,7 +69,7 @@ bool NetworkEngine::handleMessage(const std::string& message) {
     {
         std::string script = message.substr(1);
         //LINFO("Received Lua Script: '" << script << "'");
-        OsEng.scriptEngine().queueScript(script);
+        OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::No);
         return true;
     }
     case MessageTypeExternalControlConnected:

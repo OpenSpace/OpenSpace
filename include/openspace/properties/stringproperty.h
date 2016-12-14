@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __STRINGPROPERTY_H__
-#define __STRINGPROPERTY_H__
+#ifndef __OPENSPACE_CORE___STRINGPROPERTY___H__
+#define __OPENSPACE_CORE___STRINGPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
 
@@ -35,4 +35,4 @@ REGISTER_TEMPLATEPROPERTY_HEADER(StringProperty, std::string);
 } // namespace properties
 } // namespace openspace
 
-#endif // __STRINGPROPERTY_H__
+#endif // __OPENSPACE_CORE___STRINGPROPERTY___H__

@@ -22,13 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef RENDERABLEPLANE_H_
-#define RENDERABLEPLANE_H_
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__
 
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/util/updatestructures.h>
 
 namespace ghoul {
@@ -91,4 +92,5 @@ private:
 };
 
 } // namespace openspace
-#endif // RENDERABLEFIELDLINES_H_
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPLANE___H__

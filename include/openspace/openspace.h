@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_H__
-#define __OPENSPACE_H__
+#ifndef __OPENSPACE_CORE___OPENSPACE___H__
+#define __OPENSPACE_CORE___OPENSPACE___H__
 
 #include <string>
 
@@ -32,11 +32,11 @@ namespace openspace {
 std::string licenseText();
     
 const int OPENSPACE_VERSION_MAJOR = 0;
-const int OPENSPACE_VERSION_MINOR = 5;
+const int OPENSPACE_VERSION_MINOR = 6;
 const int OPENSPACE_VERSION_PATCH = 0;
     
-const std::string OPENSPACE_VERSION_STRING = "prerelease-10 (Kulturnatten)";
+const std::string OPENSPACE_VERSION_STRING = "prerelease-11 (AGU)";
 
 } // namespace openspace
 
-#endif // __OPENSPACE_H__
+#endif // __OPENSPACE_CORE___OPENSPACE___H__

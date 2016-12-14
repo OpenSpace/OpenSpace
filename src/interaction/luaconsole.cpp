@@ -24,6 +24,7 @@
 
 #include <openspace/interaction/luaconsole.h>
 
+#include <openspace/network/parallelconnection.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 
@@ -58,6 +59,7 @@ LuaConsole::LuaConsole()
     , _filename("")
     , _autoCompleteInfo({NoAutoComplete, false, ""})
     , _isVisible(false)
+    , _remoteScripting(true)
 {
 //    _commands.push_back("");
 //    _activeCommand = _commands.size() - 1;
@@ -89,6 +91,13 @@ void LuaConsole::initialize() {
     }
     _commands.push_back("");
     _activeCommand = _commands.size() - 1;
+
+    OsEng.parallelConnection().connectionEvent()->subscribe("luaConsole",
+        "statusChanged", [this]() {
+        ParallelConnection::Status status = OsEng.parallelConnection().status();
+        parallelConnectionChanged(status);
+    });
+
 }
 
 void LuaConsole::deinitialize() {
@@ -102,6 +111,8 @@ void LuaConsole::deinitialize() {
             file.write(s.c_str(), length);
         }
     }
+
+    OsEng.parallelConnection().connectionEvent()->unsubscribe("luaConsole");
 }
 
 void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
@@ -169,7 +180,8 @@ void LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             else {
                 std::string cmd = _commands.at(_activeCommand);
                 if (cmd != "") {
-                    OsEng.scriptEngine().queueScript(cmd);
+                    OsEng.scriptEngine().queueScript(cmd,
+                        _remoteScripting ? scripting::ScriptEngine::RemoteScripting::Yes : scripting::ScriptEngine::RemoteScripting::No);
                     
                     // Only add the current command to the history if it hasn't been
                     // executed before. We don't want two of the same commands in a row
@@ -303,19 +315,36 @@ void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
 void LuaConsole::render() {
     const float font_size = 10.0f;
     
-    int ySize = OsEng.windowWrapper().viewportPixelCoordinates().w;
+    int ySize = OsEng.renderEngine().fontResolution().y;
+    //int ySize = OsEng.windowWrapper().currentWindowSize().y;
+    //int ySize = OsEng.windowWrapper().viewportPixelCoordinates().w;
 
     float startY = static_cast<float>(ySize) - 2.0f * font_size;
     startY = startY - font_size * 15.0f * 2.0f;
 
     const glm::vec4 red(1, 0, 0, 1);
+    const glm::vec4 lightBlue(0.4, 0.4, 1, 1);
     const glm::vec4 green(0, 1, 0, 1);
     const glm::vec4 white(1, 1, 1, 1);
     std::shared_ptr<ghoul::fontrendering::Font> font = OsEng.fontManager().font("Mono", font_size);
 
     using ghoul::fontrendering::RenderFont;
 
-    RenderFont(*font, glm::vec2(15.f, startY), red, "$");
+    if (_remoteScripting) {
+        int nClients = OsEng.parallelConnection().nConnections() - 1;
+        if (nClients == 1) {
+            RenderFont(*font, glm::vec2(15.f, startY + 20.0f), red, "Broadcasting script to 1 client");
+        } else {
+            RenderFont(*font, glm::vec2(15.f, startY + 20.0f), red, ("Broadcasting script to " + std::to_string(nClients) + " clients").c_str());
+        }
+        RenderFont(*font, glm::vec2(15.f, startY), red, "$");
+    }
+    else {
+        if (OsEng.parallelConnection().isHost()) {
+            RenderFont(*font, glm::vec2(15.f, startY + 20.0f), lightBlue, "Local script execution");
+        }
+        RenderFont(*font, glm::vec2(15.f, startY), lightBlue, "$");
+    }
     RenderFont(*font, glm::vec2(15.f + font_size, startY), white, "%s", _commands.at(_activeCommand).c_str());
     
     size_t n = std::count(_commands.at(_activeCommand).begin(), _commands.at(_activeCommand).begin() + _inputPosition, '\n');
@@ -390,9 +419,23 @@ void LuaConsole::setVisible(bool visible) {
     _isVisible = visible;
 }
 
-void LuaConsole::toggleVisibility() {
-    _isVisible = !_isVisible;
+void LuaConsole::toggleMode() {
+    if (_isVisible) {
+        if (_remoteScripting) {
+            _remoteScripting = false;
+        } else {
+            _isVisible = false;
+        }
+    } else {
+        _remoteScripting = OsEng.parallelConnection().isHost();
+        _isVisible = true;
+    }
 }
+
+void LuaConsole::parallelConnectionChanged(const ParallelConnection::Status& status) {
+    _remoteScripting = status == ParallelConnection::Status::Host;
+}
+
 
 scripting::LuaLibrary LuaConsole::luaLibrary() {
     return {

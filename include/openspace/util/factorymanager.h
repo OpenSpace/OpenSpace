@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __FACTORYMANAGER_H__
-#define __FACTORYMANAGER_H__
+#ifndef __OPENSPACE_CORE___FACTORYMANAGER___H__
+#define __OPENSPACE_CORE___FACTORYMANAGER___H__
 
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/templatefactory.h>
@@ -129,4 +129,4 @@ private:
 
 #include <openspace/util/factorymanager.inl>
 
-#endif // __FACTORYMANAGER_H__
+#endif // __OPENSPACE_CORE___FACTORYMANAGER___H__

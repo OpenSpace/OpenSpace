@@ -34,12 +34,15 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 
-
-
-
 namespace openspace {
 
 Time* Time::_instance = nullptr;
+    
+
+double Time::convertTime(const std::string& time) {
+    ghoul_assert(!time.empty(), "timeString must not be empty");
+    return SpiceManager::ref().ephemerisTimeFromDate(time);
+}
 
 Time::Time(double secondsJ2000)
     : _time(secondsJ2000)
@@ -80,7 +83,6 @@ Time Time::now() {
     now.setTime(secondsSince2000);
     return now;
 }
-
 
 bool Time::isInitialized() {
     return (_instance != nullptr);
@@ -179,8 +181,7 @@ scripting::LuaLibrary Time::luaLibrary() {
                 &luascriptfunctions::time_setDeltaTime,
                 "number",
                 "Sets the amount of simulation time that happens "
-                "in one second of real time",
-                true
+                "in one second of real time"
             },
             {
                 "deltaTime",
@@ -193,16 +194,14 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "setPause",
                 &luascriptfunctions::time_setPause,
                 "bool",
-                "Pauses the simulation time or restores the delta time",
-                true
+                "Pauses the simulation time or restores the delta time"
             },
             {
                 "togglePause",
                 &luascriptfunctions::time_togglePause,
                 "",
                 "Toggles the pause function, i.e. temporarily setting the delta time to 0"
-                " and restoring it afterwards",
-                true
+                " and restoring it afterwards"
             },
             {
                 "setTime",
@@ -211,8 +210,7 @@ scripting::LuaLibrary Time::luaLibrary() {
                 "Sets the current simulation time to the "
                 "specified value. If the parameter is a number, the value is the number "
                 "of seconds past the J2000 epoch. If it is a string, it has to be a "
-                "valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)",
-                true
+                "valid ISO 8601 date string (YYYY-MM-DDTHH:MN:SS)"
             },
             {
                 "currentTime",

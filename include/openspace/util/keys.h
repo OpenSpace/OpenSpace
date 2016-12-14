@@ -51,8 +51,8 @@
  *
  *************************************************************************/
 
-#ifndef __KEYS_H__
-#define __KEYS_H__
+#ifndef __OPENSPACE_CORE___KEYS___H__
+#define __OPENSPACE_CORE___KEYS___H__
 
 // All values that are defined here are compatible with (and are based on) the
 // definitions GLFW v3.1
@@ -369,4 +369,4 @@ std::string to_string(openspace::KeyWithModifier key);
     
 } // namespace std
 
-#endif // __KEYS_H__
+#endif // __OPENSPACE_CORE___KEYS___H__

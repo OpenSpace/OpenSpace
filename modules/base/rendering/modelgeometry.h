@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MODELGEOMETRY_H__
-#define __MODELGEOMETRY_H__
+#ifndef __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
+#define __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/documentation/documentation.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <ghoul/misc/dictionary.h>
 
@@ -59,13 +59,14 @@ public:
 
     virtual void setUniforms(ghoul::opengl::ProgramObject& program);
 
+    static openspace::Documentation Documentation();
+
 protected:
     Renderable* _parent;
 
     bool loadObj(const std::string& filename);
     bool loadCachedFile(const std::string& filename);
     bool saveCachedFile(const std::string& filename);
-    properties::FloatProperty _magnification;
 
     GLuint _vaoID;
     GLuint _vbo;
@@ -80,4 +81,4 @@ protected:
 }  // namespace modelgeometry
 }  // namespace openspace
 
-#endif  // __MODELGEOMETRY_H__
+#endif  // __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__

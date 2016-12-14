@@ -3,6 +3,14 @@ return {
     {
         Name = "UranusBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "URANUS BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            },
+        }
     },
 
     -- Uranus module
@@ -29,41 +37,28 @@ return {
             }
         },
         Transform = {
-            Translation = {
-                Type = "SpiceEphemeris",
-                Body = "URANUS BARYCENTER",
-                Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-            },
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_URANUS",
                 DestinationFrame = "ECLIPJ2000",
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            },
+            }
         },
     },
+
     -- UranusTrail module
     {   
         Name = "UranusTrail",
-        Parent = "UranusBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "URANUS BARYCENTER",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = {0.60,0.95,1.00 },
-            TropicalOrbitPeriod = 30588.740 ,
-            EarthOrbitRatio = 83.749,
-            DayLength = 17.24,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "URANUS BARYCENTER",
+                Observer = "SUN",
+            },
+            Color = {0.60, 0.95, 1.00 },
+            Period = 30588.740,
+            Resolution = 1000
         },
     }
 }

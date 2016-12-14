@@ -38,19 +38,13 @@ MissionManager::MissionManagerException::MissionManagerException(std::string err
     : ghoul::RuntimeError(std::move(error), "MissionManager")
 {}
 
-MissionManager MissionManager::_instance;
 
-MissionManager& MissionManager::ref() {
-    return _instance;
-}
-
-void MissionManager::initialize() {
-    OsEng.scriptEngine().addLibrary(MissionManager::luaLibrary());
-}
-
-void MissionManager::deinitialize() {}
+MissionManager::MissionManager()
+    : _currentMission(_missionMap.end())
+{}
 
 void MissionManager::setCurrentMission(const std::string& missionName) {
+    ghoul_assert(!missionName.empty(), "missionName must not be empty");
     auto it = _missionMap.find(missionName);
     if (it == _missionMap.end()) {
         throw MissionManagerException("Mission has not been loaded");
@@ -70,15 +64,18 @@ void MissionManager::loadMission(const std::string& filename) {
     ghoul_assert(FileSys.fileExists(filename), "filename must exist");
 
     // Changing the values might invalidate the _currentMission iterator
-    const std::string& currentMission = _currentMission->first;
+    std::string currentMission = _currentMission != _missionMap.end() ? _currentMission->first : "";
 
     Mission mission = missionFromFile(filename);
-    _missionMap.insert({ mission.name(), std::move(mission) });
+    std::string missionName = mission.name();
+    _missionMap.insert({ missionName, std::move(mission) });
     if (_missionMap.size() == 1) {
-        setCurrentMission(mission.name());
+        setCurrentMission(missionName);
     }
 
-    setCurrentMission(currentMission);
+    if (!currentMission.empty()) {
+        setCurrentMission(currentMission);
+    }
 }
 
 bool MissionManager::hasMission(const std::string& missionName) {
@@ -114,8 +111,5 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
 
 // Singleton
 
-MissionManager::MissionManager()
-     : _currentMission(_missionMap.end())
-{}
 
 }  // namespace openspace

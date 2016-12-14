@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef __SCENEGRAPHNODE_H__
-#define __SCENEGRAPHNODE_H__
+#ifndef __OPENSPACE_CORE___SCENEGRAPHNODE___H__
+#define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
 // open space includes
 #include <openspace/documentation/documentation.h>
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/scene/ephemeris.h>
+#include <openspace/scene/translation.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/properties/propertyowner.h>
@@ -51,7 +51,9 @@ public:
     struct PerformanceRecord {
         long long renderTime;  // time in ns
         long long updateTimeRenderable;  // time in ns
-        long long updateTimeEphemeris;  // time in ns
+        long long updateTimeTranslation; // time in ns
+        long long updateTimeRotation;  // time in ns
+        long long updateTimeScaling;  // time in ns
     };
 
     static const std::string RootNodeName;
@@ -70,7 +72,6 @@ public:
     void update(const UpdateData& data);
     void evaluate(const Camera* camera, const psc& parentPosition = psc());
     void render(const RenderData& data, RendererTasks& tasks);
-    void postRender(const RenderData& data);
     void updateCamera(Camera* camera) const;
 
     //void addNode(SceneGraphNode* child);
@@ -101,13 +102,6 @@ public:
     const Renderable* renderable() const;
     Renderable* renderable();
 
-    // @TODO Remove once the scalegraph is in effect ---abock
-    
-    void setEphemeris(Ephemeris* eph) {
-        delete _ephemeris;
-        _ephemeris = eph;
-    }
-
     static documentation::Documentation Documentation();
 
 private:
@@ -129,9 +123,11 @@ private:
     PowerScaledScalar _boundingSphere;
 
     // Transformation defined by ephemeris, rotation and scale
-    Ephemeris* _ephemeris;
-    Rotation* _rotation;
-    Scale* _scale;
+    struct {
+        std::unique_ptr<Translation> translation;
+        std::unique_ptr<Rotation> rotation;
+        std::unique_ptr<Scale> scale;
+    } _transform;
 
     // Cached transform data
     glm::dvec3 _worldPositionCached;
@@ -141,4 +137,4 @@ private:
 
 } // namespace openspace
 
-#endif // __SCENEGRAPHNODE_H__
+#endif // __OPENSPACE_CORE___SCENEGRAPHNODE___H__

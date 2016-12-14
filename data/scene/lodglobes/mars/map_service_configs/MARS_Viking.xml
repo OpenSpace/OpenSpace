@@ -1,0 +1,10 @@
+<GDAL_WMTS>
+  <GetCapabilitiesUrl>http://webgis3.wr.usgs.gov/arcgis/rest/services/Mars_color/MapServer/WMTS/1.0.0/WMTSCapabilities.xml</GetCapabilitiesUrl>
+  <DataWindow>
+  	<UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90</UpperLeftY>
+    <LowerRightX>180.0</LowerRightX>
+    <LowerRightY>-90</LowerRightY>
+  </DataWindow>
+  <BandsCount>3</BandsCount>
+</GDAL_WMTS>

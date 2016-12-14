@@ -1,3 +1,5 @@
 set (OPENSPACE_DEPENDENCIES
-    base kameleon
+    base
+    kameleon
+    space
 )

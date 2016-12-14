@@ -22,12 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __INSTRUMENTDECODER_H__
-#define __INSTRUMENTDECODER_H__
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___INSTRUMENTDECODER___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___INSTRUMENTDECODER___H__
 
 #include <modules/newhorizons/util/decoder.h>
-
-#include <openspace/util/powerscaledcoordinate.h>
 
 namespace openspace {
     
@@ -45,4 +43,4 @@ private:
     
 } // namespace openspace
 
-#endif // __INSTRUMENTDECODER_H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___INSTRUMENTDECODER___H__

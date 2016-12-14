@@ -22,12 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// temporary includes (will fix as soon as I figure out how class hierarchy should work, 
-//                     ie after I see model on screen)
-
-// open space includes
-#include <openspace/rendering/renderengine.h>
 #include <modules/base/rendering/renderablemodel.h>
+
+#include <openspace/rendering/renderengine.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <openspace/engine/configurationmanager.h>
 
@@ -37,7 +34,6 @@
 #include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/util/time.h>
-#include <openspace/util/spicemanager.h>
 
 #include <openspace/engine/openspaceengine.h>
 
@@ -46,13 +42,13 @@
 
 namespace { 
     const std::string _loggerCat     = "RenderableModel";
-    const std::string keyGeometry    = "Geometry";
-    const std::string keyBody        = "Body";
-    const std::string keyStart       = "StartTime";
-    const std::string keyEnd         = "EndTime";
-    const std::string keyFading      = "Shading.Fadeable";
+    const char* keyGeometry    = "Geometry";
+    const char* keyBody        = "Body";
+    const char* keyStart       = "StartTime";
+    const char* keyEnd         = "EndTime";
+    const char* keyFading      = "Shading.Fadeable";
     
-    const std::string keyModelTransform = "Rotation.ModelTransform";
+    const char* keyModelTransform = "Rotation.ModelTransform";
     //const std::string keyGhosting      = "Shading.Ghosting";
 
 }
@@ -177,18 +173,6 @@ void RenderableModel::render(const RenderData& data) {
     
     double lt;
     
-    // Fade away if it does not have spice coverage
-    double time = openspace::Time::ref().j2000Seconds();
-    bool targetPositionCoverage = openspace::SpiceManager::ref().hasSpkCoverage(_target, time);
-    if (!targetPositionCoverage) {
-        int frame = _frameCount % 180;
-
-        float fadingFactor = static_cast<float>(sin((frame * M_PI) / 180));
-        _alpha = 0.5f + fadingFactor * 0.5f;
-    }
-    else
-        _alpha = 1.0f;
-
     // Fading
     if (_performFade && _fading > 0.f) {
         _fading = _fading - 0.01f;
@@ -261,7 +245,7 @@ void RenderableModel::update(const UpdateData& data) {
     //}
 
     double  lt;
-    _sunPos = openspace::SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
+    _sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 }
 
 void RenderableModel::loadTexture() {

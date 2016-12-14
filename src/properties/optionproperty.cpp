@@ -33,13 +33,15 @@ namespace properties {
     
 const std::string OptionProperty::OptionsKey = "Options";
 
-OptionProperty::OptionProperty(std::string identifier, std::string guiName)
-    : IntProperty(std::move(identifier), std::move(guiName))
-    , _displayType(DisplayType::RADIO)
+OptionProperty::OptionProperty(std::string identifier, std::string guiName,
+                               Property::Visibility visibility)
+    : IntProperty(std::move(identifier), std::move(guiName), visibility)
+    , _displayType(DisplayType::Radio)
 {}
 
-OptionProperty::OptionProperty(std::string identifier, std::string guiName, DisplayType displayType) 
-    : IntProperty(std::move(identifier), std::move(guiName))
+OptionProperty::OptionProperty(std::string identifier, std::string guiName,
+                               DisplayType displayType, Property::Visibility visibility)
+    : IntProperty(std::move(identifier), std::move(guiName), visibility)
     , _displayType(displayType)
 {}
 
@@ -57,11 +59,9 @@ const std::vector<OptionProperty::Option>& OptionProperty::options() const {
 }
 
 void OptionProperty::addOption(int value, std::string desc) {
-    Option option;
-    option.value = value;
-    option.description = desc;
+    Option option = { std::move(value), std::move(desc) };
 
-    for (auto o : _options) {
+    for (const auto& o : _options) {
         if (o.value == option.value) {
             LWARNING("The value of option {" << o.value << " -> " << o.description <<
                 "} was already registered when trying to add option {" << option.value <<
@@ -72,20 +72,9 @@ void OptionProperty::addOption(int value, std::string desc) {
     _options.push_back(std::move(option));
 }
 
-void OptionProperty::addOptions(std::vector<int> values, std::vector<std::string> descs) {
-    if (values.size() != descs.size()) {
-        LERROR("Skipping " << this->fullyQualifiedIdentifier() << ": "
-            << "number of values (" << values.size() << ") "
-            << "does not equal number of descriptions (" << descs.size() << ")"
-        );
-        return;
-    }
-    for (int i = 0; i < values.size(); i++) {
-        LDEBUG(this->fullyQualifiedIdentifier() << ": Adding "
-            << descs[i]
-            << " (" << values[i] << ")"
-        );
-        this->addOption(values[i], descs[i]);
+void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options) {
+    for (std::pair<int, std::string>& p : options) {
+        addOption(std::move(p.first), std::move(p.second));
     }
 }
 
