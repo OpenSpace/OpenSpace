@@ -2,7 +2,7 @@
 #                                                                                       #
 # OpenSpace                                                                             #
 #                                                                                       #
-# Copyright (c) 2014-2015                                                               #
+# Copyright (c) 2014-2016                                                               #
 #                                                                                       #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
 # software and associated documentation files (the "Software"), to deal in the Software #
@@ -346,7 +346,7 @@ function (handle_internal_modules)
     file(GLOB moduleDirs RELATIVE ${OPENSPACE_MODULE_DIR} ${OPENSPACE_MODULE_DIR}/*)
     set(sortedModules ${moduleDirs})
     foreach (dir ${moduleDirs})
-        if(IS_DIRECTORY ${OPENSPACE_MODULE_DIR}/${dir})
+        if (IS_DIRECTORY ${OPENSPACE_MODULE_DIR}/${dir})
             set(defaultModule OFF)
             if (EXISTS "${OPENSPACE_MODULE_DIR}/${dir}/include.cmake")
                 unset(OPENSPACE_DEPENDENCIES)
