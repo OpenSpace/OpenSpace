@@ -47,7 +47,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scene/translation.h>
-#include <openspace/scene/scene.h>
+#include <openspace/scene/scenemanager.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
@@ -121,16 +121,20 @@ namespace {
 namespace openspace {
 
 namespace properties {
-    class Property;
+class Property;
 }
-    
+
+class Scene;
+
 OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
-OpenSpaceEngine::OpenSpaceEngine(std::string programName,
-                                 std::unique_ptr<WindowWrapper> windowWrapper)
+OpenSpaceEngine::OpenSpaceEngine(
+    std::string programName,
+    std::unique_ptr<WindowWrapper> windowWrapper)
     : _configurationManager(new ConfigurationManager)
     , _interactionHandler(new interaction::InteractionHandler)
     , _renderEngine(new RenderEngine)
+    , _sceneManager(new SceneManager)
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _networkEngine(new NetworkEngine)
@@ -149,6 +153,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _parallelConnection(new ParallelConnection)
     , _windowWrapper(std::move(windowWrapper))
     , _globalPropertyNamespace(new properties::PropertyOwner)
+    , _switchScene(false)
+    , _scenePath("")
     , _isMaster(false)
     , _runTime(0.0)
     , _isInShutdownMode(false)
@@ -190,6 +196,11 @@ OpenSpaceEngine::~OpenSpaceEngine() {
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     _gui->deinitializeGL();
 #endif
+
+    _renderEngine->setScene(nullptr);
+    _renderEngine->setCamera(nullptr);
+    _sceneManager = nullptr;
+
     _interactionHandler->deinitialize();
     _renderEngine->deinitialize();
 
@@ -217,12 +228,12 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
 }
 
 bool OpenSpaceEngine::create(int argc, char** argv,
-                             std::unique_ptr<WindowWrapper> windowWrapper,
-                             std::vector<std::string>& sgctArguments)
+    std::unique_ptr<WindowWrapper> windowWrapper,
+    std::vector<std::string>& sgctArguments)
 {
     ghoul_assert(!_engine, "OpenSpaceEngine was already created");
     ghoul_assert(windowWrapper != nullptr, "No Window Wrapper was provided");
-    
+
     ghoul::initialize();
 
     // Initialize the LogManager and add the console log as this will be used every time
@@ -323,13 +334,13 @@ bool OpenSpaceEngine::create(int argc, char** argv,
             "${CACHE}",
             cacheFolder,
             ghoul::filesystem::FileSystem::Override::Yes
-        );
+            );
     }
 
     // Initialize the requested logs from the configuration file
     _engine->configureLogging();
 
-    LINFOC("OpenSpace Version", 
+    LINFOC("OpenSpace Version",
         OPENSPACE_VERSION_MAJOR << "." <<
         OPENSPACE_VERSION_MINOR << "." <<
         OPENSPACE_VERSION_PATCH << " (" << OPENSPACE_VERSION_STRING << ")");
@@ -488,33 +499,123 @@ bool OpenSpaceEngine::initialize() {
     // Load a light and a monospaced font
     loadFonts();
 
-    // Initialize the Scene
-    Scene* sceneGraph = new Scene;
-    sceneGraph->initialize();
-    
     std::string scenePath = "";
     configurationManager().getValue(ConfigurationManager::KeyConfigScene, scenePath);
-    sceneGraph->scheduleLoadSceneFile(scenePath);
 
-    // Initialize the RenderEngine
-    _renderEngine->setSceneGraph(sceneGraph);
     _renderEngine->initialize();
-    _renderEngine->setGlobalBlackOutFactor(0.0);
-    _renderEngine->startFading(1, 3.0);
+    scheduleLoadScene(scenePath);
 
+    LINFO("Finished initializing");
+    return true;
+}
+
+void OpenSpaceEngine::scheduleLoadScene(const std::string& scenePath) {
+    _switchScene = true;
+    _scenePath = scenePath;
+}
+
+void OpenSpaceEngine::loadScene(const std::string& scenePath) {
+    windowWrapper().setSynchronization(false);
+    OnExit(
+        [this]() { windowWrapper().setSynchronization(true); }
+    );
+    
     // Run start up scripts
     try {
         runPreInitializationScripts(scenePath);
     }
     catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+    }
+
+
+    Scene* scene;
+    try {
+        scene = _sceneManager->loadScene(scenePath);
+    } catch (const ghoul::FileNotFoundError& e) {
+        LERRORC(e.component, e.message);
+        return;
+    } catch (const Scene::InvalidSceneError& e) {
+        LERRORC(e.component, e.message);
+        return;
+    } catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+        return;
+    }
+
+    Scene* previousScene = _renderEngine->scene();
+    if (previousScene) {
+        _syncEngine->removeSyncables(Time::ref().getSyncables());
+        _syncEngine->removeSyncables(_renderEngine->getSyncables());
+        _syncEngine->removeSyncable(_scriptEngine.get());
+
+        _renderEngine->setScene(nullptr);
+        _renderEngine->setCamera(nullptr);
+        _sceneManager->unloadScene(*previousScene);
+    }
+
+    // Initialize the RenderEngine
+    _renderEngine->setScene(scene);
+    _renderEngine->setCamera(scene->camera());
+    _renderEngine->setGlobalBlackOutFactor(0.0);
+    _renderEngine->startFading(1, 3.0);
+
+
+    scene->initialize();
+    _interactionHandler->setCamera(scene->camera());
+
+    try {
+        runPostInitializationScripts(scenePath);
+    }
+    catch (const ghoul::RuntimeError& e) {
         LFATALC(e.component, e.message);
     }
+
+    // Write keyboard documentation.
+    const std::string KeyboardShortcutsType =
+        ConfigurationManager::KeyKeyboardShortcuts + "." +
+        ConfigurationManager::PartType;
+
+    const std::string KeyboardShortcutsFile =
+        ConfigurationManager::KeyKeyboardShortcuts + "." +
+        ConfigurationManager::PartFile;
+
+    std::string type, file;
+    bool hasType = configurationManager().getValue(KeyboardShortcutsType, type);
+    bool hasFile = configurationManager().getValue(KeyboardShortcutsFile, file);
+
+    if (hasType && hasFile) {
+        interactionHandler().writeKeyboardDocumentation(type, file);
+    }
+
+    // If a PropertyDocumentationFile was specified, generate it now.
+    const std::string KeyPropertyDocumentationType =
+        ConfigurationManager::KeyPropertyDocumentation + '.' +
+        ConfigurationManager::PartType;
+
+    const std::string KeyPropertyDocumentationFile =
+        ConfigurationManager::KeyPropertyDocumentation + '.' +
+        ConfigurationManager::PartFile;
+
+    hasType = configurationManager().hasKey(KeyPropertyDocumentationType);
+    hasFile = configurationManager().hasKey(KeyPropertyDocumentationFile);
+
+    if (hasType && hasFile) {
+        std::string propertyDocumentationType;
+        OsEng.configurationManager().getValue(KeyPropertyDocumentationType, propertyDocumentationType);
+        std::string propertyDocumentationFile;
+        OsEng.configurationManager().getValue(KeyPropertyDocumentationFile, propertyDocumentationFile);
+
+        propertyDocumentationFile = absPath(propertyDocumentationFile);
+        scene->writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType, scenePath);
+    }
+
 
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
     LINFO("Initializing GUI");
     _gui->initialize();
     _gui->_globalProperty.setSource(
-            [&]() {
+        [&]() {
             std::vector<properties::PropertyOwner*> res = {
                 _settingsEngine.get(),
                 _interactionHandler.get(),
@@ -548,14 +649,14 @@ bool OpenSpaceEngine::initialize() {
                 groups.end(),
                 std::back_inserter(res),
                 [](const auto& val) {
-                    return val.second.get(); 
+                    return val.second.get();
                 }
             );
             return res;
         }
     );
 #endif
-    
+
 #endif
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
@@ -565,9 +666,6 @@ bool OpenSpaceEngine::initialize() {
     _syncEngine->addSyncables(Time::ref().getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
     _syncEngine->addSyncable(_scriptEngine.get());
-
-    LINFO("Finished initializing");
-    return true;
 }
 
 
@@ -865,6 +963,11 @@ void OpenSpaceEngine::setRunTime(double d){
 void OpenSpaceEngine::preSynchronization() {
     FileSys.triggerFilesystemEvents();
 
+    if (_switchScene) {
+        loadScene(_scenePath);
+        _switchScene = false;
+    }
+
     if (_isFirstRenderingFirstFrame) {
         _windowWrapper->setSynchronization(false);
     }
@@ -883,7 +986,7 @@ void OpenSpaceEngine::preSynchronization() {
 
         _interactionHandler->updateInputStates(dt);
         
-        _renderEngine->updateSceneGraph();
+        _renderEngine->updateScene();
         _interactionHandler->updateCamera(dt);
         _renderEngine->camera()->invalidateCache();
 
@@ -902,7 +1005,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _shutdownCountdown -= _windowWrapper->averageDeltaTime();
     }
 
-    _renderEngine->updateSceneGraph();
+    _renderEngine->updateScene();
     _renderEngine->updateFade();
     _renderEngine->updateRenderer();
     _renderEngine->updateScreenSpaceRenderables();

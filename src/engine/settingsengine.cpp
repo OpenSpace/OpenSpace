@@ -141,19 +141,23 @@ void SettingsEngine::initSceneFiles() {
     // Load all matching files in the Scene
     // TODO: match regex with either with new ghoul readFiles or local code
     std::string sceneDir = "${SCENE}";
+    std::string pathSep(1, ghoul::filesystem::FileSystem::PathSeparator);
+
     std::vector<std::string> scenes = ghoul::filesystem::Directory(sceneDir).readFiles();
     for (std::size_t i = 0; i < scenes.size(); ++i) {
-        std::size_t found = scenes[i].find_last_of("/\\");
+        std::size_t found = scenes[i].find_last_of(pathSep);
         _scenes.addOption(i, scenes[i].substr(found+1));
     }
 
     // Set interaction to change ConfigurationManager and schedule the load
     _scenes.onChange(
-        [this]() {
+        [this, sceneDir, pathSep]() {
             std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
             OsEng.configurationManager().setValue(
                 ConfigurationManager::KeyConfigScene, sceneFile);
-            OsEng.renderEngine().scene()->scheduleLoadSceneFile(sceneFile);
+            std::string fullPath =
+                sceneDir + pathSep + sceneFile;
+            OsEng.scheduleLoadScene(fullPath);
         }
     );
 }

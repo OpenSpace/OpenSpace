@@ -53,8 +53,8 @@ class PerformanceManager;
 // Forward declare to minimize dependencies
 class Camera;
 class SyncBuffer;
-
 class Scene;
+class SceneManager;
 class Renderer;
 class RaycasterManager;
 class ScreenLog;
@@ -79,13 +79,14 @@ public:
     static const std::vector<FrametimeType> FrametimeTypes;
 
     RenderEngine();
-    ~RenderEngine();
+    ~RenderEngine() = default;
     
     bool initialize();
     bool deinitialize();
 
-    void setSceneGraph(Scene* sceneGraph);
+    void setScene(Scene* scene);
     Scene* scene();
+    void updateScene();
 
     Camera* camera() const;
     Renderer* renderer() const;
@@ -95,7 +96,7 @@ public:
     // sgct wrapped functions
     bool initializeGL();
     
-    void updateSceneGraph();
+
     void updateShaderPrograms();
     void updateFade();
     void updateRenderer();
@@ -153,6 +154,11 @@ public:
     */
     void postRaycast(ghoul::opengl::ProgramObject& programObject);
 
+    /**
+     * Set the camera to use for rendering
+     */
+    void setCamera(Camera* camera);
+
 
     void setRendererFromString(const std::string& method);
 
@@ -174,9 +180,6 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-    // This is a temporary method to change the origin of the coordinate system ---abock
-    void changeViewPoint(std::string origin);
-
     // Temporary fade functionality
     void startFading(int direction, float fadeDuration);
 
@@ -193,9 +196,9 @@ private:
 
     void renderInformation();
 
-    Camera* _mainCamera;
-    Scene* _sceneGraph;
-    RaycasterManager* _raycasterManager;
+    Camera* _camera;
+    Scene* _scene;
+    std::unique_ptr<RaycasterManager> _raycasterManager;
 
     properties::BoolProperty _performanceMeasurements;
     std::unique_ptr<performance::PerformanceManager> _performanceManager;

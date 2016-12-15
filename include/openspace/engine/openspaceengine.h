@@ -52,6 +52,7 @@ class ModuleEngine;
 class WindowWrapper;
 class SettingsEngine;
 class TimeManager;
+class SceneManager;
 class SyncEngine;
 class ParallelConnection;
 
@@ -76,6 +77,7 @@ public:
     void setMaster(bool master);
     double runTime();
     void setRunTime(double t);
+    void loadScene(const std::string& scenePath);
 
     // Guaranteed to return a valid pointer
     ConfigurationManager& configurationManager();
@@ -112,6 +114,7 @@ public:
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
+    void scheduleLoadScene(const std::string& scenePath);
 
     void enableBarrier();
     void disableBarrier();
@@ -145,6 +148,7 @@ private:
     std::unique_ptr<ConfigurationManager> _configurationManager;
     std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
     std::unique_ptr<RenderEngine> _renderEngine;
+    std::unique_ptr<SceneManager> _sceneManager;
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
     std::unique_ptr<NetworkEngine> _networkEngine;
@@ -165,6 +169,9 @@ private:
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
     
+    bool _switchScene;
+    std::string _scenePath;
+
     bool _isMaster;
     double _runTime;
 

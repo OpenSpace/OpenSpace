@@ -1,0 +1,14 @@
+-- Multiple Dependencies
+return {
+    ScenePath = ".",
+    Camera = {
+    	Position = {0.0, 0.0, 0.0},
+    	Rotation = {0.0, 0.0, 0.0, 0.0},
+    	Focus = "Root"
+    },
+    Modules = {
+        "no-dependency",
+        "dependent"
+    }
+}
+
