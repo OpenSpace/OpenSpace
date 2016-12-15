@@ -22,15 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+//#version __CONTEXT__
+#version 400
 
 layout(location = 0) in vec4 in_position;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+//#include "PowerScaling/powerScaling_vs.hglsl"
 
-uniform dmat4 completeInverse;
-uniform dmat4 projInverse;
-uniform dvec4 cameraPosObj;
+uniform dmat4 inverseSgctProjectionMatrix;
+uniform dmat4 objToWorldTransform;
+uniform dmat4 worldToObjectTransform;
+uniform dmat4 worldToEyeTransform;
+uniform dmat4 eyeToWorldTransform;
+uniform dmat4 eyeToViewTranform;
+uniform dmat4 viewToEyeTranform;
 
 out vec3 viewDirectionVS;
 out vec4 vertexPosObjVS;

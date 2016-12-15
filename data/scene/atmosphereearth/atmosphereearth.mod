@@ -24,6 +24,7 @@ return {
             Geometry = {
                 Type = "SimpleSphere",
                 Radius = { 6.3781366, 6 },
+                --Radius = { 6.420, 6 },                  
                 Segments = 100
             },
             Shadow_Group = {

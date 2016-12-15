@@ -81,7 +81,7 @@ SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     // TODO: Possibly add a scaling property @AA
     addProperty(_realRadius);
     // Changing the radius/scaling should affect the shader but not the geometry? @AA
-    //_radius.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));
+    //_realRadius.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));
     addProperty(_segments);
     _segments.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));
 }

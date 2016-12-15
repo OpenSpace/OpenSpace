@@ -169,6 +169,8 @@ namespace openspace {
         GLuint _dummyTexture;
         GLuint _atmosphereTexture;
         GLuint _atmosphereDepthTexture;
+
+        // Deferred debug rendering
         GLuint _atmosphereFBO;
         GLuint _atmosphereRenderVAO;
         GLuint _atmosphereRenderVBO;

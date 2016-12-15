@@ -75,6 +75,7 @@ return {
         "sun",
         "atmosphereearth",
         "moon",
+        "atmospheremars",
         --"earth",
         "stars",
         --"stars-denver",

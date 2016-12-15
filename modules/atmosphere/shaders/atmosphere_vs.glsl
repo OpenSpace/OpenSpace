@@ -25,6 +25,7 @@
 #version __CONTEXT__
 
 uniform mat4 ViewProjection;
+// Model Transformation: transforms the source frame of the planet to the GALACTIC frame, also adds the planet rotation
 uniform mat4 ModelTransform;
 uniform mat4 NormalTransform;
 uniform sampler2D heightTex;
@@ -34,8 +35,6 @@ uniform float _heightExaggeration;
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
-//layout(location = 3) in vec2 in_nightTex;
-
 
 out vec2 vs_st;
 out vec4 vs_normal;
@@ -50,17 +49,17 @@ void main()
 {
     // set variables
     vs_st = in_st;
-    vs_position = in_position;
     vec4 tmp = in_position;
 
     // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
     //vs_normal = normalize(ModelTransform * vec4(in_normal,0));
     
-    // This is the wright transformation for the normals
+    // This is the correct transformation for the normals
     vs_normal = normalize(NormalTransform * vec4(in_normal,0));
 
     // The position is not in world coordinates, it is in
     // regular view/eye coordinates.
+    // tmp is the object position in Eye space but in PSC coords.
     vec4 position = pscTransform(tmp, ModelTransform);
 
     // Vertex position in world coordinates in meters and 
@@ -69,7 +68,8 @@ void main()
     vec4 vP = psc_addition(vec4(local_vertex_pos,in_position.w),objpos);    
     vec4 conv = vec4(vP.xyz * pow(10,vP.w), 1.0);
     vs_posWorld = conv;
-    
+
+    // vs_position is the object position in Eye space but in PSC coords.
     vs_position = tmp;
 
     if (_hasHeightMap) {

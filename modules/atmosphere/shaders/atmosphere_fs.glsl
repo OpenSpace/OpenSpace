@@ -66,10 +66,12 @@ uniform sampler2D transmittanceTexture;
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
 
+// Texture coordinates
 in vec2 vs_st;
-in vec2 vs_nightTex;
 in vec4 vs_normal;
+// vs_position is the object position in Eye space but in PSC coords.
 in vec4 vs_position;
+// Vertex position in world coordinates in meters (no powerscalling coors).    
 in vec4 vs_posWorld;
  
 #include "hdr.glsl"
