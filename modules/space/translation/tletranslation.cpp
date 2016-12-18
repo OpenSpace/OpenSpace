@@ -290,30 +290,30 @@ void TLETranslation::readTLEFile(const std::string& filename) {
             //    3  08-08   Classification (U = Unclassified)
             //    4  10-11   International Designator (Last two digits of launch year)
             //    5  12-14   International Designator (Launch number of the year)
-            //    6  15-17   International Designator(piece of the launch)	A
+            //    6  15-17   International Designator(piece of the launch)    A
             //    7  19-20   Epoch Year(last two digits of year)
-            //    8	 21-32   Epoch(day of the year and fractional portion of the day)
-            //    9	 34-43   First Time Derivative of the Mean Motion divided by two
+            //    8     21-32   Epoch(day of the year and fractional portion of the day)
+            //    9     34-43   First Time Derivative of the Mean Motion divided by two
             //    10 45-52   Second Time Derivative of Mean Motion divided by six
             //    11 54-61   BSTAR drag term(decimal point assumed)[10] - 11606 - 4
             //    12 63-63   The "Ephemeris type"
-            //    13 65-68	 Element set  number.Incremented when a new TLE is generated
+            //    13 65-68     Element set  number.Incremented when a new TLE is generated
             //    14 69-69   Checksum (modulo 10)
         
             keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
         }
         else if (line[0] == '2') {
             // Second line
-            //Field	Columns	Content
+            //Field    Columns    Content
             //    1  01-01  Line number
             //    2  03-07  Satellite number
-            //    3	 09-16  Inclination (degrees)
-            //    4	 18-25  Right ascension of the ascending node (degrees)
-            //    5	 27-33  Eccentricity (decimal point assumed)
-            //    6	 35-42  Argument of perigee (degrees)
-            //    7	 44-51  Mean Anomaly (degrees)
-            //    8	 53-63  Mean Motion (revolutions per day)
-            //    9	 64-68  Revolution number at epoch (revolutions)
+            //    3     09-16  Inclination (degrees)
+            //    4     18-25  Right ascension of the ascending node (degrees)
+            //    5     27-33  Eccentricity (decimal point assumed)
+            //    6     35-42  Argument of perigee (degrees)
+            //    7     44-51  Mean Anomaly (degrees)
+            //    8     53-63  Mean Motion (revolutions per day)
+            //    9     64-68  Revolution number at epoch (revolutions)
             //    10 69-69  Checksum (modulo 10)
             
             std::stringstream stream;
