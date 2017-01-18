@@ -33,6 +33,11 @@
 #include <chrono>
 #include <thread>
 
+#ifdef OPENVR_SUPPORT
+#include <SGCTOpenVR.h>
+sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
+#endif
+
 sgct::Engine* _sgctEngine;
 
 void mainInitFunc();
@@ -202,6 +207,11 @@ int main(int argc, char** argv) {
     LDEBUG("Destroying SGCT Engine");
     delete _sgctEngine;
 
+#ifdef OPENVR_SUPPORT
+	// Clean up OpenVR
+	sgct::SGCTOpenVR::shutdown();
+#endif
+
     // Exit program
     exit(EXIT_SUCCESS); 
 }
@@ -218,6 +228,21 @@ void mainInitFunc() {
         LFATAL("Initializing OpenSpaceEngine failed");
         exit(EXIT_FAILURE);
     }
+	
+#ifdef OPENVR_SUPPORT
+	//Find if we have at least one OpenVR window
+	//Save reference to first OpenVR window, which is the one we will copy to the HMD.
+	for (size_t i = 0; i < _sgctEngine->getNumberOfWindows(); i++) {
+		if (_sgctEngine->getWindowPtr(i)->checkIfTagExists("OpenVR")) {
+			FirstOpenVRWindow = _sgctEngine->getWindowPtr(i);
+			break;
+		}
+	}
+	//If we have an OpenVRWindow, initialize OpenVR.
+	if (FirstOpenVRWindow) {
+		sgct::SGCTOpenVR::initialize(_sgctEngine->getNearClippingPlane(), _sgctEngine->getFarClippingPlane());
+	}
+#endif
     
     // Set the clear color for all non-linear projection viewports
     size_t nWindows = _sgctEngine->getNumberOfWindows();
@@ -282,7 +307,16 @@ void mainPostSyncPreDrawFunc() {
         }
     }
     LOG_BEGIN(POST_SYNC);
+
     OsEng.postSynchronizationPreDraw();
+
+#ifdef OPENVR_SUPPORT
+	if (FirstOpenVRWindow) {
+		//Update pose matrices for all tracked OpenVR devices once per frame
+		sgct::SGCTOpenVR::updatePoses();
+	}
+#endif
+
     LOG_END(POST_SYNC);
 }
 
@@ -301,13 +335,30 @@ void mainRenderFunc() {
         viewMatrix = viewMatrix * sceneMatrix;
 
     mat4 projectionMatrix = _sgctEngine->getCurrentProjectionMatrix();
+
+#ifdef OPENVR_SUPPORT
+	if (sgct::SGCTOpenVR::isHMDActive() &&
+		(FirstOpenVRWindow == _sgctEngine->getCurrentWindowPtr() || _sgctEngine->getCurrentWindowPtr()->checkIfTagExists("OpenVR"))) {
+		projectionMatrix = sgct::SGCTOpenVR::getHMDCurrentViewProjectionMatrix(_sgctEngine->getCurrentFrustumMode());
+	}
+#endif
+
     OsEng.render(projectionMatrix, viewMatrix);
     LOG_END(RENDER);
 }
 
 void mainPostDrawFunc() {
     LOG_BEGIN(POST_DRAW);
+
+#ifdef OPENVR_SUPPORT
+	if (FirstOpenVRWindow) {
+		//Copy the first OpenVR window to the HMD
+		sgct::SGCTOpenVR::copyWindowToHMD(FirstOpenVRWindow);
+	}
+#endif
+
     OsEng.postDraw();
+
     LOG_END(POST_DRAW);
 
     if (OsEng.logSGCTOutOfOrderErrors()) {
