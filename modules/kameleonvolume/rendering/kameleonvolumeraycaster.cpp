@@ -161,7 +161,7 @@ std::string KameleonVolumeRaycaster::getRaycastPath() const {
 }
 
 std::string KameleonVolumeRaycaster::getHelperPath() const {
-    return GlslHelperPath; // no helper file
+    return GlslHelperPath;
 }
     
 void KameleonVolumeRaycaster::setStepSize(float stepSize) {

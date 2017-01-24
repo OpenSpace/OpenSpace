@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEKAMELEONVOLUME_H__
-#define __RENDERABLEKAMELEONVOLUME_H__
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME_H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME_H__
 
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/properties/optionproperty.h>
@@ -99,4 +99,4 @@ private:
 };
 }
 
-#endif // __RENDERABLETOYVOLUME_H__
+#endif // __RENDERABLEKAMELEONVOLUME_H__

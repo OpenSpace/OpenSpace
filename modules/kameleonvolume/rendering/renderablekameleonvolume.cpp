@@ -158,8 +158,6 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
             _autoGridType = true;
         }
     }
-
-    // TODO: read transformation: position/rotation/scale from dictionary.
 }
     
 RenderableKameleonVolume::~RenderableKameleonVolume() {}
@@ -189,9 +187,7 @@ bool RenderableKameleonVolume::initialize() {
         updateRaycasterModelTransform();
     });
 
-
     _raycaster->initialize();
-
 
     OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
 
@@ -221,9 +217,6 @@ bool RenderableKameleonVolume::initialize() {
     addProperty(_gridType);
     addProperty(_cache);
     addPropertySubOwner(_clipPlanes.get());
-    
-
-
     return true;
 }
 
@@ -369,7 +362,6 @@ bool RenderableKameleonVolume::isReady() const {
 }
     
 void RenderableKameleonVolume::update(const UpdateData& data) {
-    // forward this transformation! 
     if (_raycaster) {
         _raycaster->setStepSize(_stepSize);
     }

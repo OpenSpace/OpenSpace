@@ -72,6 +72,4 @@ private:
 
 }
 
-#include <modules/kameleonvolume/kameleonvolumereader.inl>
-
 #endif

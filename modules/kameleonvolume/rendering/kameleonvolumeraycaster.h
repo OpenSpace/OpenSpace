@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __KAMELEONVOLUMERAYCASTER_H__
-#define __KAMELEONVOLUMERAYCASTER_H__
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER_H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER_H__
 
 
 #include <string>
