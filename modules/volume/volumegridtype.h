@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __VOLUMEGRIDTYPE_H__
-#define __VOLUMEGRIDTYPE_H__
+#ifndef __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
+#define __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
 
 enum class VolumeGridType : int {
     Cartesian = 0,

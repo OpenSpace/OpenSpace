@@ -58,7 +58,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _lowerValueBound("lowerValueBound", "Lower Value Bound", 0.0, 0.0, 1)
     , _upperValueBound("upperValueBound", "Upper Value Bound", 1, 0.01, 1)
     , _autoValueBounds(false)
-    , _gridType("gridType", "Grid Type", properties::OptionProperty::DisplayType::DROPDOWN)
+    , _gridType("gridType", "Grid Type", properties::OptionProperty::DisplayType::Dropdown)
     , _autoGridType(false)
     , _clipPlanes(nullptr)
     , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)

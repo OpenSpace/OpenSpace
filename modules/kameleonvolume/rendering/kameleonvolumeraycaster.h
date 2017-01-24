@@ -45,6 +45,7 @@ namespace ghoul {
     namespace opengl {
         class Texture;
         class ProgramObject;
+        class TextureUnit;
     }
 }
 
