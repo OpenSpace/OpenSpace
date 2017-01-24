@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2017                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,20 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __KAMELEONVOLUMEMODULE_H__
-#define __KAMELEONVOLUMEMODULE_H__
+#include <#{fragmentPath}>
 
-#include <openspace/util/openspacemodule.h>
-
-namespace openspace {
-
-class KameleonVolumeModule : public OpenSpaceModule {
-public:
-    KameleonVolumeModule();
-    void internalInitialize() override;
-    std::vector<Documentation> documentations() const override;
-};
-
-} // namespace openspace
-
-#endif // __KAMELEONVOLUMEMODULE_H__
+void getEntry(inout vec3 entryPos, inout float entryDepth) {
+    // fetch entry point from rendered fragment
+    Fragment f = getFragment();
+    entryPos = f.color.xyz;
+    entryDepth = f.depth;
+}
