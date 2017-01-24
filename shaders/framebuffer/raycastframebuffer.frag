@@ -34,7 +34,7 @@ uniform vec2 windowSize;
 
 #include "blending.glsl"
 #include "rand.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "floatoperations.glsl"
 #include <#{fragmentPath}>
 
 

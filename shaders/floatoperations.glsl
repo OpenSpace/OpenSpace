@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2017                                                                   *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,13 +22,72 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "floatoperations.glsl"
-#include <#{fragmentPath}>
+#ifndef _FLOATOPERATIONS_GLSL_
+#define _FLOATOPERATIONS_GLSL_
 
-out vec4 _out_color_;
 
-void main() {
-     Fragment f = getFragment();
-     _out_color_ = f.color;
-     gl_FragDepth = normalizeFloat(f.depth);
+/**
+ * Convert a positive floating point distance [0, 10^27]
+ * (size of observable universe)
+ * to a float in the range [-1, 1], suitable for depth buffer storage.
+ * Note: This needs to be a monotonic function, so that the value can
+ * still be used for depth comparison.
+ */
+float normalizeFloat(float inpt) {
+    if (inpt > 1.0) {
+        return inpt / pow(10, 27);
+    } else {
+        return inpt - 1.0;
+    }
 }
+
+float denormalizeFloat(float inpt) {
+    if (inpt < 0.0) {
+        return inpt + 1.0;
+    } else {
+        return inpt * pow(10, 27);
+    }
+}
+
+/**
+ * Compute the length of a vector.
+ * Supporting huge vectors, where the square of any of the components is too large to represent as a float. 
+ */
+float safeLength(vec4 v) {
+    float m = max(max(max(abs(v.x), abs(v.y)), abs(v.z)), abs(v.w));
+    if (m > 0.0) {
+        return length(v / m) * m;
+    } else {
+        return 0;
+    }
+}
+
+float safeLength(vec3 v) {
+    float m = max(max(abs(v.x), abs(v.y)), abs(v.z));
+    if (m > 0.0) {
+        return length(v / m) * m;
+    } else {
+        return 0;
+    }
+}
+
+float safeLength(vec2 v) {
+    float m = max(abs(v.x), abs(v.y));
+    if (m > 0.0) {
+        return length(v / m) * m;
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * Normalize a vector
+ * Supporting huge vectors, where the square of any of the components is too large to represent as a float. 
+ */
+vec3 safeNormalize(vec3 v) {
+    float m = max(max(abs(v.x), abs(v.y)), abs(v.z));
+    return normalize(v / m);
+}
+
+
+#endif
