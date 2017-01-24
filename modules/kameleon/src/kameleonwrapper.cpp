@@ -1008,20 +1008,34 @@ glm::vec4 KameleonWrapper::classifyFieldline(FieldlineEnd fEnd, FieldlineEnd bEn
     return color;
 }
 
-std::string KameleonWrapper::getFrame(){
-    if(    _type == KameleonWrapper::Model::BATSRUS ||
-        _type == KameleonWrapper::Model::OpenGGCM ||
-        _type == KameleonWrapper::Model::LFM)
-    {
+std::string KameleonWrapper::getParent() {
+    switch (_type) {
+    case KameleonWrapper::Model::BATSRUS:
+    case KameleonWrapper::Model::OpenGGCM:
+    case KameleonWrapper::Model::LFM:
+        return "Earth";
+    case  KameleonWrapper::Model::ENLIL:
+    case KameleonWrapper::Model::MAS:
+    case KameleonWrapper::Model::Adapt3D:
+    case KameleonWrapper::Model::SWMF:
+        return "Sun";
+    default:
+        return "";
+    }
+}
+
+std::string KameleonWrapper::getFrame() {
+    switch (_type) {
+    case KameleonWrapper::Model::BATSRUS:
+    case KameleonWrapper::Model::OpenGGCM:
+    case KameleonWrapper::Model::LFM:
         return "GSM";
-    }else if(
-        _type == KameleonWrapper::Model::ENLIL ||
-        _type == KameleonWrapper::Model::MAS ||
-        _type == KameleonWrapper::Model::Adapt3D ||
-        _type == KameleonWrapper::Model::SWMF)
-    {
+    case  KameleonWrapper::Model::ENLIL:
+    case KameleonWrapper::Model::MAS:
+    case KameleonWrapper::Model::Adapt3D:
+    case KameleonWrapper::Model::SWMF:
         return "HEEQ";
-    }else{
+    default:
         return "";
     }
 }

@@ -154,7 +154,7 @@ bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data, glm::vec3& 
 }
 
 void MultiresVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
-    _textureUnit = nullptr;
+    _atlasUnit = nullptr;
     _tfUnit = nullptr;
 }
     

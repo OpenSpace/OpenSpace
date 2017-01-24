@@ -22,15 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/milkyway/milkywayconversiontask.h>
+#include <modules/galaxy/tasks/milkywayconversiontask.h>
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/volumesampler.h>
 
 namespace openspace {
-namespace dataconverter {
     
-MilkyWayConversionTask::MilkyWayConversionTask(
+/*MilkywayConversionTask::MilkywayConversionTask(
     const std::string& inFilenamePrefix,
     const std::string& inFilenameSuffix,
     size_t inFirstIndex,
@@ -42,10 +41,20 @@ MilkyWayConversionTask::MilkyWayConversionTask(
     , _inFirstIndex(inFirstIndex)
     , _inNSlices(inNSlices)
     , _outFilename(outFilename)
-    , _outDimensions(outDimensions) {}
+    , _outDimensions(outDimensions) {}*/
 
     
-void MilkyWayConversionTask::perform(const std::function<void(float)>& onProgress) {
+MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
+}
+
+MilkywayConversionTask::~MilkywayConversionTask() {}
+
+std::string MilkywayConversionTask::description()
+{
+    return std::string();
+}
+
+void MilkywayConversionTask::perform(const Task::ProgressCallback& progressCallback) {
     std::vector<std::string> filenames;
     for (int i = 0; i < _inNSlices; i++) {
         filenames.push_back(_inFilenamePrefix + std::to_string(i + _inFirstIndex) + _inFilenameSuffix);
@@ -67,8 +76,12 @@ void MilkyWayConversionTask::perform(const std::function<void(float)>& onProgres
         return value;
     };
 
-    rawWriter.write(sampleFunction, onProgress);
+    rawWriter.write(sampleFunction, progressCallback);
 }
 
+Documentation MilkywayConversionTask::documentation()
+{
+    return Documentation();
 }
+
 }

@@ -41,7 +41,7 @@ void GalaxyModule::internalInitialize() {
 
     auto fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fRenderable, "No task factory existed");
-    fTask->registerClass<MilkywayConversionTask>("MilkywayPointsConversionTask");
+    fTask->registerClass<MilkywayConversionTask>("MilkywayConversionTask");
     fTask->registerClass<MilkywayPointsConversionTask>("MilkywayPointsConversionTask");
 }
  

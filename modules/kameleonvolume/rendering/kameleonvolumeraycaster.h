@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER_H__
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER_H__
 
-
 #include <string>
 #include <vector>
 #include <memory>

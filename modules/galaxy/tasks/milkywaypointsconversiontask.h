@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
-#define __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
+#ifndef __OPENSPACE_MODULE_GALAXY___MILKYWAYPOINTSCONVERSIONTASK_H__
+#define __OPENSPACE_MODULE_GALAXY___MILKYWAYPOINTSCONVERSIONTASK_H__
 
-#include <modules/galaxy/conversiontask.h>
+#include <openspace/util/task.h>
 #include <string>
 #include <ghoul/glm.h>
 #include <functional>
@@ -34,7 +34,6 @@
 
 
 namespace openspace {
-namespace dataconverter {
 
 /**
  * Converts ascii based point data
@@ -42,18 +41,18 @@ namespace dataconverter {
  * (float x, float y, float z, float r, float g, float b) * n
  * to a binary (floating point) representation with the same layout.
  */
-class MilkyWayPointsConversionTask : public Task {
+class MilkywayPointsConversionTask : public Task {
 public:
-    MilkyWayPointsConversionTask(const std::string& inFilename,
-                                 const std::string& outFilename);
-    
-    void perform(const std::function<void(float)>& onProgress) override;
+    MilkywayPointsConversionTask(const ghoul::Dictionary& dictionary);
+    virtual ~MilkywayPointsConversionTask();
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static Documentation documentation();
 private:
     std::string _inFilename;    
     std::string _outFilename;
 };
 
-} // namespace dataconverter
-} // namespace openspace
+}
 
-#endif // __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
+#endif // __OPENSPACE_MODULE_GALAXY___MILKYWAYPOINTSCONVERSIONTASK_H__

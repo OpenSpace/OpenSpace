@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __KAMELEONVOLUMEMODULE_H__
-#define __KAMELEONVOLUMEMODULE_H__
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___BASEMODULE___H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___BASEMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -32,6 +32,7 @@ namespace openspace {
 class KameleonVolumeModule : public OpenSpaceModule {
 public:
     KameleonVolumeModule();
+    virtual ~KameleonVolumeModule() = default;
     void internalInitialize() override;
     std::vector<Documentation> documentations() const override;
 };

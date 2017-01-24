@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/galaxy/milkywaypointsconversiontask.h>
+#include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/volumesampler.h>
@@ -30,27 +30,30 @@
 #include <iostream>
 
 namespace openspace {
-namespace dataconverter {
-    
 
-
-MilkyWayPointsConversionTask::MilkyWayPointsConversionTask(
+/*MilkywayPointsConversionTask::MilkywayPointsConversionTask(
     const std::string& inFilename,
     const std::string& outFilename)
     : _inFilename(inFilename)
-    , _outFilename(outFilename) {}
+    , _outFilename(outFilename) {}*/
 
+MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary & dictionary) {}
 
-void MilkyWayPointsConversionTask::perform(const std::function<void(float)>& onProgress) {
+MilkywayPointsConversionTask::~MilkywayPointsConversionTask() {}
+
+std::string MilkywayPointsConversionTask::description()
+{
+    return std::string();
+}
+
+void MilkywayPointsConversionTask::perform(const Task::ProgressCallback & progressCallback) {
     std::ifstream in(_inFilename, std::ios::in);
     std::ofstream out(_outFilename, std::ios::out | std::ios::binary);
-      
+
     std::string format;
     int64_t nPoints;
     in >> format >> nPoints;
 
-
- 
     size_t nFloats = nPoints * 7;
 
     float* pointData = new float[nFloats];
@@ -66,8 +69,9 @@ void MilkyWayPointsConversionTask::perform(const std::function<void(float)>& onP
             pointData[i * 7 + 4] = g;
             pointData[i * 7 + 5] = b;
             pointData[i * 7 + 6] = a;
-            onProgress(static_cast<float>(i + 1) / nPoints);
-        } else {
+            progressCallback(static_cast<float>(i + 1) / nPoints);
+        }
+        else {
             std::cout << "Failed to convert point data.";
             return;
         }
@@ -80,7 +84,9 @@ void MilkyWayPointsConversionTask::perform(const std::function<void(float)>& onP
     out.close();
 }
 
-
-
+Documentation MilkywayPointsConversionTask::documentation()
+{
+    return Documentation();
 }
+
 }

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
-#define __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
+#ifndef __OPENSPACE_MODULE_GALAXY___MILKYWAYCONVERSIONTASK___H__
+#define __OPENSPACE_MODULE_GALAXY___MILKYWAYCONVERSIONTASK___H__
 
 #include <openspace/util/task.h>
 #include <string>
@@ -34,22 +34,18 @@
 
 
 namespace openspace {
-namespace dataconverter {
 
 /**
  * Converts a set of exr image slices to a raw volume
  * with floating point RGBA data (32 bit per channel).
  */
-class MilkyWayConversionTask : public Task {
+class MilkywayConversionTask : public Task {
 public:
-    MilkyWayConversionTask(const std::string& inFilenamePrefix,
-                           const std::string& inFilenameSuffix,
-                           size_t inFirstIndex,
-                           size_t inNSlices, 
-                           const std::string& outFilename,
-                           const glm::ivec3& outDimensions);
-    
-    void perform(const std::function<void(float)>& onProgress) override;
+    MilkywayConversionTask(const ghoul::Dictionary& dictionary);
+    virtual ~MilkywayConversionTask();
+    std::string description() override;
+    void perform(const Task::ProgressCallback& onProgress) override;
+    static Documentation documentation();
 private:
     std::string _inFilenamePrefix;
     std::string _inFilenameSuffix;
@@ -59,7 +55,6 @@ private:
     glm::ivec3 _outDimensions;
 };
 
-} // namespace dataconverter
-} // namespace openspace
+}
 
-#endif // __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
+#endif // __OPENSPACE_MODULE_GALAXY___MILKYWAYCONVERSIONTASK___H__
