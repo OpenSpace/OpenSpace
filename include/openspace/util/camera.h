@@ -39,6 +39,7 @@
 
 namespace openspace {
 class SyncBuffer;
+class SceneGraphNode;
 
 /**
     * This class still needs some more love. Suggested improvements:
@@ -92,6 +93,7 @@ public:
     void setRotation(Quat rotation);
     void setScaling(glm::vec2 scaling);
     void setMaxFov(float fov);
+    void setParent(SceneGraphNode* parent);
 
     // Relative mutators
     void rotate(Quat rotation);
@@ -109,6 +111,7 @@ public:
     const Quat& rotationQuaternion() const;
     float maxFov() const;
     float sinMaxFov() const;
+    SceneGraphNode* parent() const;
 
     // @TODO this should simply be called viewMatrix!
     // Or it needs to be changed so that it actually is combined. Right now it is
@@ -181,6 +184,7 @@ private:
     SyncData<Vec3> _position;
     SyncData<Quat> _rotation;
     SyncData<glm::vec2> _scaling;
+    SceneGraphNode* _parent;
 
 
     // _focusPosition to be removed

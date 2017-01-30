@@ -22,88 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCENGINE___H__
-#define __OPENSPACE_CORE___SYNCENGINE___H__
+#ifndef __OPENSPACE_CORE___SCENEMANAGER___H__
+#define __OPENSPACE_CORE___SCENEMANAGER___H__
 
 #include <vector>
 #include <memory>
 
 namespace openspace {
 
-class Syncable;
-class SyncBuffer;
+class Scene;
 
-/**
-* Manages a collection of <code>Syncable</code>s and ensures they are synchronized
-* over SGCT nodes. Encoding/Decoding order is handles internally.
-*/
-class SyncEngine {
+class SceneManager {
 public:
-
-    /**
-    * Dependency injection: a SyncEngine relies on a SyncBuffer to encode the sync data.
-    */
-    SyncEngine(SyncBuffer* syncBuffer);
-
-
-    /**
-    * Encodes all added Syncables in the injected <code>SyncBuffer</code>. 
-    * This method is only called on the SGCT master node
-    */
-    void encodeSyncables();
-
-    /**
-    * Decodes the <code>SyncBuffer</code> into the added Syncables.
-    * This method is only called on the SGCT slave nodes
-    */
-    void decodeSyncables();
-
-    /**
-    * Invokes the presync method of all added Syncables
-    */
-    void presync(bool isMaster);
-
-    /**
-    * Invokes the postsync method of all added Syncables
-    */
-    void postsync(bool isMaster);
-    
-
-
-    /**
-    * Add a Syncable to be synchronized over the SGCT cluster
-    */
-    void addSyncable(Syncable* syncable);
-
-    /**
-    * Add multiple Syncables to be synchronized over the SGCT cluster
-    */
-    void addSyncables(const std::vector<Syncable*>& syncables);
-
-    /**
-    * Remove a Syncable from being synchronized over the SGCT cluster
-    */
-    void removeSyncable(Syncable* syncable);
-
-    /**
-    * Remove multiple Syncables from being synchronized over the SGCT cluster
-    */
-    void removeSyncables(const std::vector<Syncable*>& syncables);
-
+    SceneManager() = default;
+    ~SceneManager() = default;
+    Scene* loadScene(const std::string& path);
+    void unloadScene(Scene& scene);
 private:
-    
-    /** 
-    * Vector of Syncables. The vectors ensures consistent encode/decode order
-    */
-    std::vector<Syncable*> _syncables;
-
-    /**
-    * Databuffer used in encoding/decoding
-    */
-    std::unique_ptr<SyncBuffer> _syncBuffer;
+    std::vector<std::unique_ptr<Scene>> _scenes;
 };
 
+}
 
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___SYNCENGINE___H__
+#endif  // __OPENSPACE_CORE___SCENEMANAGER___H__

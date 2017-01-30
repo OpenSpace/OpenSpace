@@ -44,7 +44,6 @@ namespace openspace {
 
     }
 
-
     void SyncEngine::presync(bool isMaster) {
         for (const auto& syncable : _syncables) {
             syncable->presync(isMaster);
@@ -73,8 +72,6 @@ namespace openspace {
         }
     }
 
-
-
     void SyncEngine::addSyncable(Syncable*  syncable) {
         _syncables.push_back(syncable);
     }
@@ -90,6 +87,12 @@ namespace openspace {
             std::remove(_syncables.begin(), _syncables.end(), syncable),
             _syncables.end()
         );
+    }
+
+    void SyncEngine::removeSyncables(const std::vector<Syncable*>& syncables) {
+        for (const auto& syncable : syncables) {
+            removeSyncable(syncable);
+        }
     }
 
 }

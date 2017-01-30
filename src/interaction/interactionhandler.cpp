@@ -72,7 +72,6 @@ namespace interaction {
 // InteractionHandler
 InteractionHandler::InteractionHandler()
     : _origin("origin", "Origin", "")
-    , _coordinateSystem("coordinateSystem", "Coordinate System", "")
     , _rotationalFriction("rotationalFriction", "Rotational Friction", true)
     , _horizontalFriction("horizontalFriction", "Horizontal Friction", true)
     , _verticalFriction("verticalFriction", "Vertical Friction", true)
@@ -89,10 +88,6 @@ InteractionHandler::InteractionHandler()
         }
         setFocusNode(node);
         resetCameraDirection();
-    });
-
-    _coordinateSystem.onChange([this]() {
-        OsEng.renderEngine().changeViewPoint(_coordinateSystem.value());
     });
 
     // Create the interactionModes
@@ -137,7 +132,6 @@ InteractionHandler::InteractionHandler()
 
     // Add the properties
     addProperty(_origin);
-    addProperty(_coordinateSystem);
 
     addProperty(_rotationalFriction);
     addProperty(_horizontalFriction);
@@ -175,6 +169,7 @@ void InteractionHandler::setFocusNode(SceneGraphNode* node) {
 
 void InteractionHandler::setCamera(Camera* camera) {
     _camera = camera;
+    setFocusNode(_camera->parent());
 }
 
 void InteractionHandler::resetCameraDirection() {

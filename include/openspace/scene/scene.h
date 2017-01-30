@@ -35,8 +35,6 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/scene/scenegraph.h>
-
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/dictionary.h>
 
@@ -48,28 +46,48 @@ class SceneGraphNode;
 // SceneGraphFinishedLoading
 class Scene {
 public:
+
+    using UpdateDependencies = ghoul::Boolean;
+
+    struct InvalidSceneError : ghoul::RuntimeError {
+        /**
+        * \param message The reason that caused this exception to be thrown
+        * \param component The optional compoment that caused this exception to be thrown
+        * \pre message may not be empty
+        */
+        explicit InvalidSceneError(const std::string& message, const std::string& component = "");
+    };
+
     // constructors & destructor
     Scene();
     ~Scene();
 
     /**
-     * Initalizes the SceneGraph by loading modules from the ${SCENEPATH} directory
+     * Initalizes the SceneGraph
      */
-    bool initialize();
-
-    /*
-     * Clean up everything
-     */
-    bool deinitialize();
+    void initialize();
 
     /*
      * Load the scenegraph from the provided folder
      */
-    void scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath);
-    void clearSceneGraph();
+    //void scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath);
+    void clear();
 
-    void loadModule(const std::string& modulePath);
+    /*
+     * Set the root node of the scene
+     */
+    void setRoot(std::unique_ptr<SceneGraphNode> root);
 
+    /*
+     * Set the root node of the scene
+     */
+    void setCamera(std::unique_ptr<Camera> camera);
+
+    /**
+     * Return the camera
+     */
+    Camera* camera() const;
+   
     /*
      * Updates all SceneGraphNodes relative positions
      */
@@ -96,13 +114,20 @@ public:
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
-    std::vector<SceneGraphNode*> allSceneGraphNodes() const;
+    void addNode(SceneGraphNode* node, UpdateDependencies updateDeps = UpdateDependencies::Yes);
 
-    SceneGraph& sceneGraph();
+    void removeNode(SceneGraphNode* node, UpdateDependencies updateDeps = UpdateDependencies::Yes);
 
-    void addSceneGraphNode(SceneGraphNode* node){
-        _graph.addSceneGraphNode(node);
-    }
+    void updateDependencies();
+
+    void sortTopologically();
+
+    const std::vector<SceneGraphNode*>& allSceneGraphNodes() const;
+
+    const std::map<std::string, SceneGraphNode*>& nodesByName() const;
+
+    void writePropertyDocumentation(const std::string& filename, const std::string& type, const std::string& sceneFilename);
+
     /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph. The functions contained are
@@ -115,39 +140,16 @@ public:
 
     static documentation::Documentation Documentation();
 
-private:
-    bool loadSceneInternal(const std::string& sceneDescriptionFilePath);
-
-    void writePropertyDocumentation(const std::string& filename, const std::string& type, const std::string& sceneFilename);
-
-    std::string _focus;
-
-    // actual scenegraph
-    SceneGraph _graph;
-    //SceneGraphNode* _root;
-    //std::vector<SceneGraphNode*> _nodes;
-    //std::map<std::string, SceneGraphNode*> _allNodes;
-
-    std::string _sceneGraphToLoad;
+private:  
+    std::unique_ptr<SceneGraphNode> _root;
+    std::unique_ptr<Camera> _camera;
+    std::vector<SceneGraphNode*> _topologicallySortedNodes;
+    std::vector<SceneGraphNode*> _circularNodes;
+    std::map<std::string, SceneGraphNode*> _nodesByName;
 
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;
     std::vector<std::unique_ptr<ghoul::opengl::ProgramObject>> _programs;
-
-    typedef std::map<std::string, ghoul::Dictionary> NodeMap;
-    typedef std::multimap<std::string, std::string> DependencyMap;
-    typedef std::vector<std::string> LoadedList;
-
-    struct LoadMaps {
-        NodeMap nodes;
-        DependencyMap dependencies;
-        LoadedList loadedNodes;
-    };
-
-    void loadModules(const std::string& directory, const ghoul::Dictionary& dictionary);
-    void loadModule(LoadMaps& m,const std::string& modulePath, lua_State* state);
-    void loadNodes(const std::string& parentName, LoadMaps& m);
-    void loadNode(const ghoul::Dictionary& dictionary);
 };
 
 } // namespace openspace

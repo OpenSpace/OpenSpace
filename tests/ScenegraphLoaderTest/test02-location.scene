@@ -1,9 +1,0 @@
--- Loading a module without dependencies in a different folder
-return {
-    ScenePath = "scene-folder",
-    CommonFolder = "common",
-    Modules = {
-        "no-dependency"
-    }
-}
-

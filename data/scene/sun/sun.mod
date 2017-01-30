@@ -1,4 +1,9 @@
 return {
+    -- Solar system module
+    {
+        Name = "SolarSystem",
+        Parent = "Root"
+    },
     -- Sun barycenter module
     {
         Name = "SolarSystemBarycenter",

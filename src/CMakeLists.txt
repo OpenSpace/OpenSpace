@@ -127,7 +127,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
-    ${OPENSPACE_BASE_DIR}/src/scene/scenegraph.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/sceneloader.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/scenemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
@@ -269,7 +270,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraph.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/sceneloader.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/lualibrary.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/script_helper.h
