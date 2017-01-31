@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/newhorizons/util/imagesequencer.h>
+
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/directory.h>
@@ -30,14 +31,23 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <modules/newhorizons/util/decoder.h>
 
+#include <ghoul/misc/assert.h>
 #include <openspace/util/spicemanager.h>
 #include <fstream>
 #include <iterator>
 #include <iomanip>
 #include <limits>
 
+#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/powerscaledscalar.h>
+#include <openspace/util/timerange.h>
+#include <unordered_map>
+#include <map>
+#include <vector>
+
 namespace {
-const std::string _loggerCat = "ImageSequencer";
+    const std::string _loggerCat = "ImageSequencer";
 }
 
 namespace openspace {
@@ -53,13 +63,14 @@ ImageSequencer::ImageSequencer()
 {}
 
 ImageSequencer& ImageSequencer::ref() {
-    assert(_instance != nullptr);
+    ghoul_assert(_instance != nullptr, "Instance has not been initialized");
     return *_instance;
 }
 void ImageSequencer::initialize() {
-    assert(_instance == nullptr);
+    ghoul_assert(_instance == nullptr, "Instance already has been initialized");
     _instance = new ImageSequencer;
-    _instance->_defaultCaptureImage = absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png");
+    _instance->_defaultCaptureImage =
+        absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder_blank.png");
 }
 
 void ImageSequencer::deinitialize() {
@@ -89,12 +100,19 @@ std::pair<double, std::string> ImageSequencer::getNextTarget() {
     };
     std::pair<double, std::string> findEqualToThis;
     findEqualToThis.first = _currentTime;
-    auto it = std::lower_bound(_targetTimes.begin(), _targetTimes.end(), findEqualToThis, compareTime);
+    auto it = std::lower_bound(
+        _targetTimes.begin(),
+        _targetTimes.end(),
+        findEqualToThis,
+        compareTime
+    );
 
-    if (it != _targetTimes.end() && it != _targetTimes.begin())
+    if (it != _targetTimes.end() && it != _targetTimes.begin()) {
         return (*it);
-    else
-        return std::make_pair(0.0, "");
+    }
+    else {
+        return { 0.0, "" };
+    }
 }
 
 std::pair<double, std::string> ImageSequencer::getCurrentTarget() {
@@ -104,26 +122,39 @@ std::pair<double, std::string> ImageSequencer::getCurrentTarget() {
     };
     std::pair<double, std::string> findEqualToThis;
     findEqualToThis.first = _currentTime;
-    auto it = std::lower_bound(_targetTimes.begin(), _targetTimes.end(), findEqualToThis, compareTime);
+    auto it = std::lower_bound(
+        _targetTimes.begin(),
+        _targetTimes.end(),
+        findEqualToThis,
+        compareTime
+    );
 
     if (it != _targetTimes.end() && it != _targetTimes.begin()){
-        return *std::prev(it);
+        return *(std::prev(it));
     }
     else
-        return std::make_pair(0.0, "No Target");
+        return { 0.0, "No Target" };
 }
 
-std::pair<double, std::vector<std::string>> ImageSequencer::getIncidentTargetList(int range) {
+std::pair<double, std::vector<std::string>> ImageSequencer::getIncidentTargetList(
+                                                                                int range)
+{
     std::pair<double, std::vector<std::string>> incidentTargets;
 
-    auto compareTime = [](const std::pair<double, std::string> &a,
-                         const std::pair<double, std::string> &b)->bool{
+    auto compareTime = [](const std::pair<double, std::string>& a,
+                         const std::pair<double, std::string>& b) -> bool {
          return a.first < b.first;
     };
+
     // what to look for
     std::pair<double, std::string> findEqualToThis;
     findEqualToThis.first = _currentTime;
-    auto it = std::lower_bound(_targetTimes.begin(), _targetTimes.end(), findEqualToThis, compareTime);
+    auto it = std::lower_bound(
+        _targetTimes.begin(),
+        _targetTimes.end(),
+        findEqualToThis,
+        compareTime
+    );
     
     if (it != _targetTimes.end() && it != _targetTimes.begin()){
         // move the iterator to the first element of the range
@@ -134,17 +165,18 @@ std::pair<double, std::vector<std::string>> ImageSequencer::getIncidentTargetLis
             incidentTargets.first = it->first;
             incidentTargets.second.push_back(it->second);
             it++;
-            if (it == _targetTimes.end())
+            if (it == _targetTimes.end()) {
                 break;
+            }
         }
     }
 
     return incidentTargets;
 }
 
-double ImageSequencer::getIntervalLength(){
+double ImageSequencer::getIntervalLength() {
     double upcoming = getNextCaptureTime();
-    if (_nextCapture != upcoming){
+    if (_nextCapture != upcoming) {
         _nextCapture = upcoming;
         _intervalLength = upcoming - _currentTime;
     }
@@ -152,46 +184,56 @@ double ImageSequencer::getIntervalLength(){
 }
 
 double ImageSequencer::getNextCaptureTime(){
-    auto compareTime = [](const double &a, const double &b)->bool{
+    auto compareTime = [](const double &a, const double &b) -> bool {
         return a < b;
     };
     double nextCaptureTime = 0;
-    auto it = std::lower_bound(_captureProgression.begin(), _captureProgression.end(), _currentTime, compareTime);
-    if (it != _captureProgression.end())
+    auto it = std::lower_bound(
+        _captureProgression.begin(),
+        _captureProgression.end(),
+        _currentTime,
+        compareTime
+    );
+    if (it != _captureProgression.end()) {
         nextCaptureTime = *it;
+    }
 
     return nextCaptureTime;
 }
-Image ImageSequencer::getLatestImageForInstrument(const std::string& _instrumentID){
+
+Image ImageSequencer::getLatestImageForInstrument(const std::string& _instrumentID) {
     auto it = _latestImages.find(_instrumentID);
-    if (it != _latestImages.end())
+    if (it != _latestImages.end()) {
         return _latestImages[_instrumentID];
+    }
     else {
         return Image();
     }
 }
 
-std::map<std::string, bool> ImageSequencer::getActiveInstruments(){
+std::map<std::string, bool> ImageSequencer::getActiveInstruments() {
     // first set all instruments to off
-    for (auto i : _switchingMap)
+    for (const auto& i : _switchingMap) {
         _switchingMap[i.first] = false;
+    }
+
     // go over the filetranslation map
-    for (const auto &key : _fileTranslation){
+    for (const auto& key : _fileTranslation) {
         // for each spice-instrument
-        for (const auto &instrumentID : key.second->getTranslation()){
+        for (const auto& instrumentID : key.second->getTranslation()) {
             // check if the spice-instrument is active 
-                if (instrumentActive(instrumentID)){
-                    // go over switching map
-                    for (const auto &instrument : _switchingMap){
-                        // if instrument is present in switching map
-                        if (instrumentID == instrument.first){
-                            // set as active
-                            _switchingMap[instrumentID] = true;
-                        }
+            if (instrumentActive(instrumentID)) {
+                // go over switching map
+                for (const auto& instrument : _switchingMap) {
+                    // if instrument is present in switching map
+                    if (instrumentID == instrument.first) {
+                        // set as active
+                        _switchingMap[instrumentID] = true;
                     }
                 }
             }
         }
+    }
     // return entire map, seen in GUI.
     return _switchingMap;
 }
@@ -203,7 +245,7 @@ bool ImageSequencer::instrumentActive(std::string instrumentID) {
             //if so, then get the corresponding spiceID
             std::vector<std::string> spiceIDs = _fileTranslation[i.first]->getTranslation(); 
             //check which specific subinstrument is firing
-            for (auto s : spiceIDs) {
+            for (const auto& s : spiceIDs) {
                 if (s == instrumentID) {
                     return true;
                 }

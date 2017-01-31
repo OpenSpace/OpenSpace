@@ -26,15 +26,14 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/spicemanager.h>
-#include <modules/newhorizons/util/decoder.h>
 
 #include <ghoul/logging/logmanager.h>
 
 namespace {
     const std::string _loggerCat = "SequenceParser";
-    const std::string keyTranslation = "DataInputTranslation";
+    const char* keyTranslation = "DataInputTranslation";
 
-    const std::string PlaybookIdentifierName = "Playbook";
+    const char* PlaybookIdentifierName = "Playbook";
 }
 
 namespace openspace {
@@ -79,7 +78,7 @@ void writeToBuffer<std::string>(std::vector<char>& buffer, size_t& currentWriteL
 }
 
 void SequenceParser::sendPlaybookInformation(const std::string& name) {
-    std::string fullName = PlaybookIdentifierName + "_" + name;
+    std::string fullName = std::string(PlaybookIdentifierName) + "_" + name;
     _messageIdentifier = OsEng.networkEngine().identifier(fullName);
 
     std::vector<char> buffer(1024);

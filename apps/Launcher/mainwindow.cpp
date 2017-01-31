@@ -62,7 +62,7 @@ namespace {
     class QLog : public ghoul::logging::Log {
     public:
         void log(
-            ghoul::logging::LogManager::LogLevel level,
+            ghoul::logging::LogLevel level,
             const std::string& category,
             const std::string& message
         ) {
@@ -96,7 +96,7 @@ MainWindow::MainWindow()
     
     _informationWidget = new QTextEdit(this);
     _informationWidget->setReadOnly(true);
-    _informationWidget->setEnabled(false);
+    //_informationWidget->setEnabled(false);
     layout->addWidget(_informationWidget, 1, 0, 2, 1);
     layout->setRowStretch(1, 10);
     layout->setColumnStretch(0, 4);
@@ -106,13 +106,13 @@ MainWindow::MainWindow()
     {
         QGridLayout* innerLayout = new QGridLayout;
         
-        QLabel* shortcutLabel = new QLabel("Keyboard Shortcuts:");
-        innerLayout->addWidget(shortcutLabel, 0, 0);
-        QPushButton* shortcutButton = new QPushButton("Open...");
-        QObject::connect(shortcutButton, SIGNAL(clicked(bool)),
-                         this, SLOT(shortcutButtonPressed())
-                         );
-        innerLayout->addWidget(shortcutButton, 0, 1);
+        //QLabel* shortcutLabel = new QLabel("Keyboard Shortcuts:");
+        //innerLayout->addWidget(shortcutLabel, 0, 0);
+        //QPushButton* shortcutButton = new QPushButton("Open...");
+        //QObject::connect(shortcutButton, SIGNAL(clicked(bool)),
+        //                 this, SLOT(shortcutButtonPressed())
+        //                 );
+        //innerLayout->addWidget(shortcutButton, 0, 1);
 
         innerLayout->setRowStretch(1, 10);
 
@@ -189,7 +189,7 @@ void MainWindow::initialize() {
     _syncWidget->setWindowModality(Qt::WindowModal);
     _syncWidget->hide();
 
-    ghoul::logging::LogManager::initialize(ghoul::logging::LogManager::LogLevel::Debug);
+    ghoul::logging::LogManager::initialize(ghoul::logging::LogLevel::Debug);
     LogMgr.addLog( std::make_unique< ghoul::logging::ConsoleLog >() );
     // TODO: This can crash the system in cases where the logfile can't be created ---abock
     LogMgr.addLog( std::make_unique< ghoul::logging::HTMLLog >("LauncherLog.html", ghoul::logging::HTMLLog::Append::No) );

@@ -22,10 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIPERFORMANCECOMPONENT_H__
-#define __GUIPERFORMANCECOMPONENT_H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPERFORMANCECOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPERFORMANCECOMPONENT___H__
 
 #include <modules/onscreengui/include/guicomponent.h>
+
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 #include <ghoul/misc/sharedmemory.h>
 
@@ -40,17 +43,20 @@ namespace gui {
 
 class GuiPerformanceComponent : public GuiComponent {
 public:
+    GuiPerformanceComponent();
+
     void render() override;
 
 protected:
     std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
-    int _sortingSelection = -1;
-    
-    bool _sceneGraphIsEnabled = false;
-    bool _functionsIsEnabled = false;
+
+    properties::IntProperty _sortingSelection;
+
+    properties::BoolProperty _sceneGraphIsEnabled;
+    properties::BoolProperty _functionsIsEnabled;
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUIPERFORMANCECOMPONENT_H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPERFORMANCECOMPONENT___H__

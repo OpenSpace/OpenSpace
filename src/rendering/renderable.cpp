@@ -134,8 +134,6 @@ void Renderable::render(const RenderData& data, RendererTasks&) {
 
 void Renderable::render(const RenderData& data) {}
 
-void Renderable::postRender(const RenderData& data) {}
-
 void Renderable::setPscUniforms(
     ghoul::opengl::ProgramObject& program, 
     const Camera& camera,

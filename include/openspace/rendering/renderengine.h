@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERENGINE_H__
-#define __RENDERENGINE_H__
+#ifndef __OPENSPACE_CORE___RENDERENGINE___H__
+#define __OPENSPACE_CORE___RENDERENGINE___H__
 
 #include <openspace/scripting/scriptengine.h>
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 #include <openspace/util/syncdata.h>
 
@@ -66,11 +66,6 @@ public:
         Framebuffer = 0,
         ABuffer,
         Invalid
-    };
-
-    enum class RenderProgramType {
-        Default = 0,
-        Post
     };
 
     enum class FrametimeType {
@@ -135,16 +130,14 @@ public:
         std::string name,
         std::string vsPath,
         std::string fsPath,
-        const ghoul::Dictionary& dictionary = ghoul::Dictionary(),
-        RenderEngine::RenderProgramType type = RenderEngine::RenderProgramType::Default);
+        const ghoul::Dictionary& dictionary = ghoul::Dictionary());
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         std::string name,
         std::string vsPath,
         std::string fsPath,
         std::string csPath,
-        const ghoul::Dictionary& dictionary = ghoul::Dictionary(),
-        RenderEngine::RenderProgramType type = RenderEngine::RenderProgramType::Default);
+        const ghoul::Dictionary& dictionary = ghoul::Dictionary());
 
     std::string progressToStr(int size, double t);
 
@@ -243,4 +236,4 @@ private:
 
 } // namespace openspace
 
-#endif // __RENDERENGINE_H__
+#endif // __OPENSPACE_CORE___RENDERENGINE___H__

@@ -1,6 +1,6 @@
 return {
     {
-        Name = "MilkyWay",
+        Name = "MilkyWay (ESO)",
         Parent = "SolarSystem",
         Renderable = {
             Type = "RenderableSphere",

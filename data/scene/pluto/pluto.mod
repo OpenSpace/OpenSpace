@@ -3,14 +3,18 @@ return {
     {
         Name = "PlutoBarycenter",
         Parent = "SolarSystemBarycenter",
-        Ephemeris = {
-            Type = "Spice",
-            Body = "PLUTO BARYCENTER",
-            Observer = "SUN",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp", 
-        },
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "PLUTO BARYCENTER",
+                Observer = "SUN",
+                Kernels = {
+                    "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp",
+                    "${OPENSPACE_DATA}/spice/plu055.bsp",
+                }
+            }
+        }
     },
-
     -- Pluto module
     {   
         Name = "Pluto",
@@ -34,19 +38,21 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "PLUTO",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp", 
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_PLUTO",
-            Reference = "GALACTIC"
-        },
+        Transformation = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "PLUTO",
+                Observer = "PLUTO BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/plu055.bsp", 
+            },
+            Rotation = {
+                Type = "Spice",
+                SourceFrame = "IAU_PLUTO",
+                DestinationFrame = "GALACTIC"
+            }
+        }
     },
-{   
+    {
         Name = "Charon",
         Parent = "PlutoBarycenter",
         Renderable = {
@@ -68,59 +74,67 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "CHARON",
-            Observer = "PLUTO BARYCENTER",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_CHARON",
-            Reference = "ECLIPJ2000"
-        },
+        Transformation = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "CHARON",
+                Observer = "PLUTO BARYCENTER",
+                Kernels = "${OPENSPACE_DATA}/spice/plu055.bsp", 
+            },
+            Rotation = {
+                Type = "Spice",
+                SourceFrame = "IAU_CHARON",
+                DestinationFrame = "GALACTIC"
+            }
+        }
     },
     -- CharonTrail module
     {   
         Name = "CharonTrail",
         Parent = "PlutoBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "CHARON",
-            Frame = "GALACTIC",
-            Observer = "PLUTO BARYCENTER",
-            RGB = {0.00,0.62,1.00},
-            TropicalOrbitPeriod = 120 ,
-            EarthOrbitRatio = 0.03,
-            DayLength = 1,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "CHARON",
+                Observer = "PLUTO BARYCENTER",
+            },
+            Color = {0.00,0.62,1.00},
+            Period = 6.38725,
+            Resolution = 1000,
         },
-    }    
-    --[[
+    },
     -- PlutoTrail module
     {   
-        Name = "PlutoTrail",
+        Name = "PlutoTrailSolarSystem",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "PLUTO BARYCENTER",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = {0.58, 0.61, 1.00},
-            TropicalOrbitPeriod = 59799.9 ,
-            EarthOrbitRatio = 163.73,
-            DayLength = 16.11,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "PLUTO BARYCENTER",
+                Observer = "SUN",
+            },
+            Color = {0.58, 0.61, 1.00},
+            Period = 247.92 * 365.242,
+            Resolution = 1000
+        },
+        GuiName = "/Solar/PlutoTrail"
+    },
+    {
+        Name = "PlutoTrailPluto",
+        Parent = "PlutoBarycenter",
+        Renderable = {
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "PLUTO",
+                Observer = "PLUTO BARYCENTER",
+            },
+            Color = {0.58, 0.61, 1.00},
+            Period = 6.38725,
+            Resolution = 1000
         },
         GuiName = "/Solar/PlutoTrail"
     }
---]]
 }

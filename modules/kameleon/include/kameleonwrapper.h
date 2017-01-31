@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef KAMELEONWRAPPER_H_
-#define KAMELEONWRAPPER_H_
+#ifndef __OPENSPACE_MODULE_ISWA___KAMELEONWRAPPER___H__
+#define __OPENSPACE_MODULE_ISWA___KAMELEONWRAPPER___H__
 
 #include <glm/gtx/std_based_type.hpp>
 
@@ -179,4 +179,4 @@ private:
 
 } // namespace openspace
 
-#endif // KAMELEONWRAPPER_H_
+#endif // __OPENSPACE_MODULE_ISWA___KAMELEONWRAPPER___H__

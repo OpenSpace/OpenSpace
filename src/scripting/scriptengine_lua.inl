@@ -26,7 +26,7 @@ namespace openspace {
 
 namespace luascriptfunctions {
 
-    int printInternal(ghoul::logging::LogManager::LogLevel level, lua_State* L) {
+    int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
         using ghoul::lua::luaTypeToString;
         const std::string _loggerCat = "print";
 
@@ -67,7 +67,7 @@ namespace luascriptfunctions {
      * types, the type is printed instead
      */
     int printDebug(lua_State* L) {
-        return printInternal(ghoul::logging::LogManager::LogLevel::Debug, L);
+        return printInternal(ghoul::logging::LogLevel::Debug, L);
     }
 
     /**
@@ -78,7 +78,7 @@ namespace luascriptfunctions {
      * types, the type is printed instead
      */
     int printInfo(lua_State* L) {
-        return printInternal(ghoul::logging::LogManager::LogLevel::Info, L);
+        return printInternal(ghoul::logging::LogLevel::Info, L);
     }
 
     /**
@@ -89,7 +89,7 @@ namespace luascriptfunctions {
      * types, the type is printed instead
      */
     int printWarning(lua_State* L) {
-        return printInternal(ghoul::logging::LogManager::LogLevel::Warning, L);
+        return printInternal(ghoul::logging::LogLevel::Warning, L);
     }
 
     /**
@@ -100,7 +100,7 @@ namespace luascriptfunctions {
      * types, the type is printed instead
      */
     int printError(lua_State* L) {
-        return printInternal(ghoul::logging::LogManager::LogLevel::Error, L);
+        return printInternal(ghoul::logging::LogLevel::Error, L);
     }
 
     /**
@@ -111,7 +111,7 @@ namespace luascriptfunctions {
      * types, the type is printed instead
      */
     int printFatal(lua_State* L) {
-        return printInternal(ghoul::logging::LogManager::LogLevel::Fatal, L);
+        return printInternal(ghoul::logging::LogLevel::Fatal, L);
     }
 
     /**

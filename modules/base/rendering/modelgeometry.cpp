@@ -35,8 +35,8 @@ namespace {
     const std::string _loggerCat = "ModelGeometry";
     const std::string keyGeomModelFile = "GeometryFile";
     const int8_t CurrentCacheVersion = 3;
-    const std::string keyType = "Type";
-    const std::string keyName = "Name";
+    const char* keyType = "Type";
+    const char* keyName = "Name";
 }
 
 namespace openspace {

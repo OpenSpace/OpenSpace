@@ -32,11 +32,11 @@
 namespace {
     const std::string _loggerCat = "RenderableCrawlingLine";
 
-    const std::string KeySource = "Source";
-    const std::string KeyTarget = "Target";
-    const std::string KeyInstrument = "Instrument";
-    const std::string KeyReferenceFrame = "Frame";
-    const std::string keyColor = "RGB";
+    const char* KeySource = "Source";
+    const char* KeyTarget = "Target";
+    const char* KeyInstrument = "Instrument";
+    const char* KeyReferenceFrame = "Frame";
+    const char* KeyColor = "RGB";
 
     static const int SourcePosition = 0;
     static const int TargetPosition = 1;
@@ -59,10 +59,12 @@ RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictiona
     dictionary.getValue(KeyReferenceFrame, _referenceFrame);
 
 
-    if (dictionary.hasKeyAndValue<glm::vec3>(keyColor))
-        dictionary.getValue(keyColor, _lineColor);
-    else
+    if (dictionary.hasKeyAndValue<glm::vec3>(KeyColor)) {
+        dictionary.getValue(KeyColor, _lineColor);
+    }
+    else {
         _lineColor = glm::vec3(1);
+    }
 }
 
 bool RenderableCrawlingLine::isReady() const {

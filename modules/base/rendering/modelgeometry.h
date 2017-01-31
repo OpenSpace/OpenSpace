@@ -22,13 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MODELGEOMETRY_H__
-#define __MODELGEOMETRY_H__
+#ifndef __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
+#define __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
 
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/scalarproperty.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <ghoul/misc/dictionary.h>
 
@@ -82,4 +81,4 @@ protected:
 }  // namespace modelgeometry
 }  // namespace openspace
 
-#endif  // __MODELGEOMETRY_H__
+#endif  // __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__

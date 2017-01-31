@@ -35,8 +35,8 @@
 
 namespace openspace {
 
-    RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
-        : Renderable(dictionary)
+RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
     , _scalingExponent("scalingExponent", "Scaling Exponent", 1, -10, 20)
     , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
     , _scaling("scaling", "Scaling", glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0), glm::vec3(10.0))
@@ -130,4 +130,4 @@ void RenderableToyVolume::render(const RenderData& data, RendererTasks& tasks) {
     tasks.raycasterTasks.push_back(task);
 }
        
-}
+} // namespace openspace

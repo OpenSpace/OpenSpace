@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __VOLUME_H__
-#define __VOLUME_H__
+#ifndef __OPENSPACE_CORE___VOLUME___H__
+#define __OPENSPACE_CORE___VOLUME___H__
 
 #include <string>
 #include <vector>
@@ -125,8 +125,8 @@ public:
      */
     //virtual std::string getHelperPath() = 0;
 
-}; // Volume
+};
 
-} // openspace
+} // namespace openspace
 
-#endif  // __VOLUME_H__
+#endif  // __OPENSPACE_CORE___VOLUME___H__

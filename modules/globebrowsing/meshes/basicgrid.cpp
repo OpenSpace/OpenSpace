@@ -1,68 +1,58 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2016                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2016                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/globebrowsing/meshes/basicgrid.h>
 
-namespace {
-    const std::string _loggerCat = "BasicGrid";
-}
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
+namespace globebrowsing {
 
-BasicGrid::BasicGrid(
-    unsigned int xSegments,
-    unsigned int ySegments,
-    TriangleSoup::Positions usePositions,
-    TriangleSoup::TextureCoordinates useTextureCoordinates,
-    TriangleSoup::Normals useNormals)
-    : Grid(
-        xSegments, 
-        ySegments,
-        usePositions,
-        useTextureCoordinates,
-        useNormals)
+BasicGrid::BasicGrid(unsigned int xSegments, unsigned int ySegments,
+                     TriangleSoup::Positions usePositions,
+                     TriangleSoup::TextureCoordinates useTextureCoordinates,
+                     TriangleSoup::Normals useNormals)
+    : Grid(xSegments, ySegments, usePositions, useTextureCoordinates, useNormals)
 {
-    _geometry = std::unique_ptr<TriangleSoup>(new TriangleSoup(
+    _geometry = std::make_unique<TriangleSoup>(
         CreateElements(xSegments, ySegments),
         usePositions,
         useTextureCoordinates,
-        useNormals));
+        useNormals
+    );
 
-    if (usePositions == TriangleSoup::Positions::Yes) {
+    if (usePositions) {
         _geometry->setVertexPositions(CreatePositions(_xSegments, _ySegments));
     }
-    if (useTextureCoordinates == TriangleSoup::TextureCoordinates::Yes) {
-        _geometry->setVertexTextureCoordinates(CreateTextureCoordinates(_xSegments, _ySegments));
+    if (useTextureCoordinates) {
+        _geometry->setVertexTextureCoordinates(
+            CreateTextureCoordinates(_xSegments, _ySegments)
+        );
     }
-    if (useNormals == TriangleSoup::Normals::Yes) {
+    if (useNormals) {
         _geometry->setVertexNormals(CreateNormals(_xSegments, _ySegments));
     }
-}
-
-BasicGrid::~BasicGrid()
-{
-
 }
 
 int BasicGrid::xSegments() const {
@@ -78,7 +68,7 @@ void BasicGrid::validate(int xSegments, int ySegments) {
         "Resolution must be at least 1x1. (" << xSegments << ", " << ySegments << ")");
 }
 
-inline size_t BasicGrid::numElements(int xSegments, int ySegments){
+inline size_t BasicGrid::numElements(int xSegments, int ySegments) {
     return 3 * 2 * xSegments * ySegments;
 }
 
@@ -121,28 +111,29 @@ std::vector<GLuint> BasicGrid::CreateElements(int xSegments, int ySegments) {
     return elements;
 }
 
-std::vector<glm::vec4> BasicGrid::CreatePositions(
-    int xSegments,
-    int ySegments) 
-{
+std::vector<glm::vec4> BasicGrid::CreatePositions(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
     std::vector<glm::vec4> positions;
     positions.reserve(numVertices(xSegments, ySegments));
 
     // Copy from 2d texture coordinates and use as template to create positions
-    std::vector<glm::vec2> templateTextureCoords = CreateTextureCoordinates(xSegments, ySegments);
-    for (unsigned int i = 0; i < templateTextureCoords.size(); i++)
-    {
-        positions.push_back(glm::vec4(
-            templateTextureCoords[i],
-            0.0f,
-            1.0f
-            ));
+    std::vector<glm::vec2> templateTextureCoords = CreateTextureCoordinates(
+        xSegments, ySegments
+    );
+    for (const glm::vec2& coords : templateTextureCoords) {
+        positions.push_back(glm::vec4(coords, 0.f, 1.f));
     }
+    //for (unsigned int i = 0; i < templateTextureCoords.size(); i++) {
+    //    positions.push_back(glm::vec4(
+    //        templateTextureCoords[i],
+    //        0.0f,
+    //        1.0f
+    //        ));
+    //}
     return positions;
 }
 
-std::vector<glm::vec2> BasicGrid::CreateTextureCoordinates(int xSegments, int ySegments){
+std::vector<glm::vec2> BasicGrid::CreateTextureCoordinates(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
     std::vector<glm::vec2> textureCoordinates;
     textureCoordinates.reserve(numVertices(xSegments, ySegments));
@@ -172,4 +163,5 @@ std::vector<glm::vec3> BasicGrid::CreateNormals(int xSegments, int ySegments) {
     return normals;
 }
 
-}// namespace openspace
+} // namespace globebrowsing
+} // namespace openspace

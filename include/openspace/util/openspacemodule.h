@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACEMODULE_H__
-#define __OPENSPACEMODULE_H__
+#ifndef __OPENSPACE_CORE___OPENSPACEMODULE___H__
+#define __OPENSPACE_CORE___OPENSPACEMODULE___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -104,4 +104,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __OPENSPACEMODULE_H__
+#endif // __OPENSPACE_CORE___OPENSPACEMODULE___H__

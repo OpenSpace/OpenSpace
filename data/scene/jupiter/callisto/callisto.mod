@@ -45,19 +45,15 @@ return {
         Name = "CallistoTrail",
         Parent = "JupiterBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "CALLISTO",
-            Frame = "GALACTIC",
-            Observer = "JUPITER BARYCENTER",
-            RGB = { 0.4, 0.3, 0.01 },
-            TropicalOrbitPeriod =  60 ,
-            EarthOrbitRatio = 0.045,
-            DayLength = 9.9259,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "CALLISTO",
+                Observer = "JUPITER BARYCENTER",
+            },
+            Color = { 0.4, 0.3, 0.01 },
+            Period =  17,
+            Resolution = 1000
         }
     }
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,30 +41,30 @@ namespace {
     const float defaultFieldlineStepSize = 0.5f;;
     const glm::vec4 defaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
-    const std::string keyVectorField = "VectorField";
-    const std::string keyVectorFieldType = "Type";
-    const std::string keyVectorFieldFile = "File";
-    const std::string keyVectorFieldVolumeModel = "Model";
-    const std::string keyVectorFieldVolumeVariable = "Variables";
+    const char* keyVectorField = "VectorField";
+    const char* keyVectorFieldType = "Type";
+    const char* keyVectorFieldFile = "File";
+    const char* keyVectorFieldVolumeModel = "Model";
+    const char* keyVectorFieldVolumeVariable = "Variables";
 
-    const std::string keyFieldlines = "Fieldlines";
-    const std::string keyFieldlinesStepSize = "Stepsize";
-    const std::string keyFieldlinesClassification = "Classification";
-    const std::string keyFieldlinesColor = "Color";
+    const char* keyFieldlines = "Fieldlines";
+    const char* keyFieldlinesStepSize = "Stepsize";
+    const char* keyFieldlinesClassification = "Classification";
+    const char* keyFieldlinesColor = "Color";
 
-    const std::string keySeedPoints = "SeedPoints";
-    const std::string keySeedPointsType = "Type";
-    const std::string keySeedPointsFile = "File";
-    const std::string keySeedPointsTable = "SeedPoints";
+    const char* keySeedPoints = "SeedPoints";
+    const char* keySeedPointsType = "Type";
+    const char* keySeedPointsFile = "File";
+    const char* keySeedPointsTable = "SeedPoints";
 
-    const std::string seedPointsSourceFile = "File";
-    const std::string seedPointsSourceTable = "Table";
+    const char* seedPointsSourceFile = "File";
+    const char* seedPointsSourceTable = "Table";
 
-    const std::string vectorFieldTypeVolumeKameleon = "VolumeKameleon";
+    const char* vectorFieldTypeVolumeKameleon = "VolumeKameleon";
 
-    const std::string vectorFieldKameleonModelBATSRUS = "BATSRUS";
+    const char* vectorFieldKameleonModelBATSRUS = "BATSRUS";
 
-    const std::string vectorFieldKameleonVariableLorentz = "Lorentz";
+    const char* vectorFieldKameleonVariableLorentz = "Lorentz";
 
     const int SeedPointSourceFile = 0;
     const int SeedPointSourceTable = 1;
@@ -353,7 +353,7 @@ void RenderableFieldlines::loadSeedPointsFromTable() {
     _seedPointsInfo.getValue(keySeedPointsTable, seedpointsDictionary);
     glm::vec3 seedPos;
     for (const std::string& index : seedpointsDictionary.keys()) {
-        _fieldlineInfo.getValue(keySeedPointsTable + "." + index, seedPos);
+        _fieldlineInfo.getValue(std::string(keySeedPointsTable) + "." + index, seedPos);
         _seedPoints.push_back(seedPos);
     }
 }
@@ -403,9 +403,9 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         return {};
     }
 
-    std::string v1 = keyVectorFieldVolumeVariable + ".1";
-    std::string v2 = keyVectorFieldVolumeVariable + ".2";
-    std::string v3 = keyVectorFieldVolumeVariable + ".3";
+    std::string v1 = std::string(keyVectorFieldVolumeVariable) + ".1";
+    std::string v2 = std::string(keyVectorFieldVolumeVariable) + ".2";
+    std::string v3 = std::string(keyVectorFieldVolumeVariable) + ".3";
 
     bool threeVariables =
         _vectorFieldInfo.hasKeyAndValue<std::string>(v1) &&

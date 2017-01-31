@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ABUFFERRENDERER_H__
-#define __ABUFFERRENDERER_H__
+#ifndef __OPENSPACE_CORE___ABUFFERRENDERER___H__
+#define __OPENSPACE_CORE___ABUFFERRENDERER___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
@@ -136,7 +136,8 @@ private:
     float _blackoutFactor;
 
     ghoul::Dictionary _rendererData;
-};        // ABufferRenderer
-}        // openspace
+};
 
-#endif     // __RENDERER_H__
+} // namespace openspace
+
+#endif  // __OPENSPACE_CORE___ABUFFERRENDERER___H__

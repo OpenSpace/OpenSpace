@@ -22,15 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __INTERACTIONHANDLER_H__
-#define __INTERACTIONHANDLER_H__
+#ifndef __OPENSPACE_CORE___INTERACTIONHANDLER___H__
+#define __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 
 #include <openspace/interaction/keyboardcontroller.h>
-#include <openspace/interaction/mousecontroller.h>
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
@@ -65,7 +66,10 @@ public:
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
     void setInteractionMode(const std::string& interactionModeKey);
-
+    
+    void goToChunk(int x, int y, int level);
+    void goToGeo(double latitude, double longitude);
+    
     void resetKeyBindings();
 
     void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
@@ -87,7 +91,7 @@ public:
     void unlockControls();
 
     //void update(double deltaTime);
-    void updateCamera();
+    void updateCamera(double deltaTime);
     void updateInputStates(double timeSinceLastUpdate);    
 
     // Accessors
@@ -153,4 +157,4 @@ private:
 } // namespace interaction
 } // namespace openspace
 
-#endif // __INTERACTIONHANDLER_H__
+#endif // __OPENSPACE_CORE___INTERACTIONHANDLER___H__

@@ -27,8 +27,8 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const std::string _loggerCat = "StaticScale";
-    const std::string KeyValue = "Scale";
+    const char* _loggerCat = "StaticScale";
+    const char* KeyValue = "Scale";
 }
 
 namespace openspace {

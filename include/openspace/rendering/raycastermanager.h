@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RAYCASTERMANAGER_H__
-#define __RAYCASTERMANAGER_H__
+#ifndef __OPENSPACE_CORE___RAYCASTERMANAGER___H__
+#define __OPENSPACE_CORE___RAYCASTERMANAGER___H__
 
 #include <vector>
 
@@ -46,8 +46,8 @@ public:
 private:
     std::vector<VolumeRaycaster*> _raycasters;
     std::vector<RaycasterListener*> _listeners;
-}; // Volume
+};
 
-} // openspace
+} // namespace openspace
 
-#endif  // __RAYCASTERMANAGER_H__
+#endif  // __OPENSPACE_CORE___RAYCASTERMANAGER___H__

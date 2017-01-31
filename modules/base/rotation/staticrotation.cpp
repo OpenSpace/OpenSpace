@@ -27,7 +27,7 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const std::string KeyRotation = "Rotation";
+    const char* KeyRotation = "Rotation";
 }
 
 namespace openspace {

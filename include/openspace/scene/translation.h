@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TRANSLATION_H__
-#define __TRANSLATION_H__
+#ifndef __OPENSPACE_CORE___TRANSLATION___H__
+#define __OPENSPACE_CORE___TRANSLATION___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -40,12 +40,24 @@ public:
 
     virtual ~Translation();
     virtual bool initialize();
+
     virtual glm::dvec3 position() const = 0;
     virtual void update(const UpdateData& data);
 
+    glm::dvec3 position(double time);
+
+    // Registers a callback that gets called when a significant change has been made that
+    // invalidates potentially stored points, for example in trails
+    void onParameterChange(std::function<void()> callback);
+
     static openspace::Documentation Documentation();
+
+protected:
+    void notifyObservers();
+
+    std::function<void()> _onParameterChangeCallback;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif // __TRANSLATION_H__
+#endif // __OPENSPACE_CORE___TRANSLATION___H__

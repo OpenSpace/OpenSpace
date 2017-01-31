@@ -22,14 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __POWERSCALEDSPHERE_H__
-#define __POWERSCALEDSPHERE_H__
+#ifndef __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
+#define __OPENSPACE_CORE___POWERSCALEDSPHERE___H__
 
 // open space includes
 #include <ghoul/opengl/ghoul_gl.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/powerscaledscalar.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 
 namespace openspace {
 
@@ -69,4 +69,4 @@ public:
 
 } // namespace openspace
 
-#endif // __POWERSCALEDSPHERE_H__
+#endif // __OPENSPACE_CORE___POWERSCALEDSPHERE___H__

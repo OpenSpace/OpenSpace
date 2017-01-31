@@ -21,8 +21,6 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", true)
-    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
     openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
@@ -33,10 +31,6 @@ function postInitialization()
     openspace.resetCameraDirection()
 
     openspace.printInfo("Done setting default values")
-
-    if openspace.modules.isLoaded("ISWA") then
-        openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
-    end
 end
 
 

@@ -22,15 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __HISTOGRAM_H__
-#define __HISTOGRAM_H__
+#ifndef __OPENSPACE_CORE___HISTOGRAM___H__
+#define __OPENSPACE_CORE___HISTOGRAM___H__
 
 #include <vector>
 #include <iostream>
 
 namespace openspace {
-class Histogram {
 
+class Histogram {
 public:
     Histogram();
     Histogram(float minValue, float maxValue, int numBins);
@@ -86,7 +86,8 @@ private:
     std::vector<float> _equalizer;
     int _numValues;
 
-}; // class Histogram
+};
+
 }  // namespace openspace
 
-#endif //__HISTOGRAM_H__
+#endif //__OPENSPACE_CORE___HISTOGRAM___H__

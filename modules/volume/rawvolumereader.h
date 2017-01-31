@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RAWVOLUMEREADER_H__
-#define __RAWVOLUMEREADER_H__
+#ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUMEREADER___H__
+#define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEREADER___H__
 
 #include <functional>
 #include <modules/volume/rawvolume.h>
@@ -49,8 +49,8 @@ private:
     std::string _path;
 };
 
-}
+} // namespace openspace
 
 #include "rawvolumereader.inl"
 
-#endif // __RAWVOLUMEREADER_H__
+#endif // __OPENSPACE_MODULE_VOLUME___RAWVOLUMEREADER___H__

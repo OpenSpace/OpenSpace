@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PERFORMANCEMEASUREMENT_H__
-#define __PERFORMANCEMEASUREMENT_H__
+#ifndef __OPENSPACE_CORE___PERFORMANCEMEASUREMENT___H__
+#define __OPENSPACE_CORE___PERFORMANCEMEASUREMENT___H__
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -62,4 +62,4 @@ private:
 } // namespace performance
 } // namespace openspace
 
-#endif // __PERFORMANCEMEASUREMENTHELPER_H__
+#endif // __OPENSPACE_CORE___PERFORMANCEMEASUREMENT___H__

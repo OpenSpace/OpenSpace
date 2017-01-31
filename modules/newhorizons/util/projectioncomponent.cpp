@@ -34,40 +34,41 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 namespace {
-    const std::string keyPotentialTargets = "PotentialTargets";
+    const char* keyPotentialTargets = "PotentialTargets";
 
-    const std::string keyInstrument = "Instrument.Name";
-    const std::string keyInstrumentFovy = "Instrument.Fovy";
-    const std::string keyInstrumentAspect = "Instrument.Aspect";
+    const char* keyInstrument = "Instrument.Name";
+    const char* keyInstrumentFovy = "Instrument.Fovy";
+    const char* keyInstrumentAspect = "Instrument.Aspect";
 
-    const std::string keyTranslation = "DataInputTranslation";
+    const char* keyTranslation = "DataInputTranslation";
 
-    const std::string keyProjObserver = "Observer";
-    const std::string keyProjTarget = "Target";
-    const std::string keyProjAberration = "Aberration";
+    const char* keyProjObserver = "Observer";
+    const char* keyProjTarget = "Target";
+    const char* keyProjAberration = "Aberration";
 
-    const std::string keySequenceDir = "Sequence";
-    const std::string keySequenceType = "SequenceType";
+    const char* keySequenceDir = "Sequence";
+    const char* keySequenceType = "SequenceType";
 
-    const std::string keyNeedsTextureMapDilation = "TextureMap";
-    const std::string keyNeedsShadowing = "ShadowMap";
-    const std::string keyTextureMapAspectRatio = "AspectRatio";
+    const char* keyNeedsTextureMapDilation = "TextureMap";
+    const char* keyNeedsShadowing = "ShadowMap";
+    const char* keyTextureMapAspectRatio = "AspectRatio";
 
-    const std::string sequenceTypeImage = "image-sequence";
-    const std::string sequenceTypePlaybook = "playbook";
-    const std::string sequenceTypeHybrid = "hybrid";
-    const std::string sequenceTypeInstrumentTimes = "instrument-times";
+    const char* sequenceTypeImage = "image-sequence";
+    const char* sequenceTypePlaybook = "playbook";
+    const char* sequenceTypeHybrid = "hybrid";
+    const char* sequenceTypeInstrumentTimes = "instrument-times";
 
-    const std::string placeholderFile =
+    const char* placeholderFile =
         "${OPENSPACE_DATA}/scene/common/textures/placeholder.png";
 
-    const std::string _loggerCat = "ProjectionComponent";
+    const char* _loggerCat = "ProjectionComponent";
 }
 
 namespace openspace {

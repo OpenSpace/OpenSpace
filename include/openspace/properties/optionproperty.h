@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPTIONPROPERTY_H__
-#define __OPTIONPROPERTY_H__
+#ifndef __OPENSPACE_CORE___OPTIONPROPERTY___H__
+#define __OPENSPACE_CORE___OPTIONPROPERTY___H__
 
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 #include <vector>
 
@@ -61,7 +61,8 @@ public:
      * \param identifier A unique identifier for this property
      * \param guiName The GUI name that should be used to represent this property
      */
-    OptionProperty(std::string identifier, std::string guiName);
+    OptionProperty(std::string identifier, std::string guiName, 
+        Property::Visibility visibility = Property::Visibility::User);
 
     /**
     * The constructor delegating the <code>identifier</code> and the <code>guiName</code>
@@ -70,7 +71,8 @@ public:
     * \param guiName The GUI name that should be used to represent this property
     * \param displayType Optional DisplayType for GUI (default RADIO)
     */
-    OptionProperty(std::string identifier, std::string guiName, DisplayType displayType);
+    OptionProperty(std::string identifier, std::string guiName, DisplayType displayType,
+        Property::Visibility visibility = Property::Visibility::User);
 
     /**
      * Returns the name of the class for reflection purposes.
@@ -95,11 +97,11 @@ public:
     void addOption(int value, std::string desc);
 
     /**
-    * Appends options with vectors of values and descriptions
-    * \param values A std::vector<int> of values for the options
-    * \param descs A std::vector<string> of descriptions for each value
+    * Adds multiple options to the OptionProperty. Each value in the vector consists of
+    * an integer value and a string description.
+    * \param options Pairs of <option, description> that are added to the OptionProperty
     */
-    void addOptions(std::vector<int> values, std::vector<std::string> descs);
+    void addOptions(std::vector<std::pair<int, std::string>> options);
 
     /**
      * Returns the list of available options.
@@ -132,4 +134,4 @@ private:
 } // namespace properties
 } // namespace openspace
 
-#endif // __STRINGPROPERTY_H__
+#endif // __OPENSPACE_CORE___OPTIONPROPERTY___H__

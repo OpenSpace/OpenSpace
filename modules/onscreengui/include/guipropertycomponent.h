@@ -22,10 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIPROPERTYCOMPONENT_H__
-#define __GUIPROPERTYCOMPONENT_H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
 
 #include <modules/onscreengui/include/guicomponent.h>
+
+#include <openspace/properties/property.h>
 
 #include <functional>
 #include <string>
@@ -50,17 +52,20 @@ public:
     // component should render
     void setSource(SourceFunction func);
 
+    void setVisibility(properties::Property::Visibility visibility);
+
     void render();
 
 protected:
     void renderPropertyOwner(properties::PropertyOwner* owner);
     void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
 
-    std::string _name;
+    properties::Property::Visibility _visibility;
+
     SourceFunction _function;
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUIPROPERTYCOMPONENT_H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __DOWNLOADMANAGER_H__
-#define __DOWNLOADMANAGER_H__
+#ifndef __OPENSPACE_CORE___DOWNLOADMANAGER___H__
+#define __OPENSPACE_CORE___DOWNLOADMANAGER___H__
 
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/directory.h>
@@ -119,4 +119,4 @@ private:
 
 } // namespace openspace
 
-#endif // __DOWNLOADMANAGER_H__
+#endif // __OPENSPACE_CORE___DOWNLOADMANAGER___H__

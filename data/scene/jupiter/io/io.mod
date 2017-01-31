@@ -45,19 +45,15 @@ return {
         Name = "IoTrail",
         Parent = "JupiterBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "IO",
-            Frame = "GALACTIC",
-            Observer = "JUPITER BARYCENTER",
-            RGB = { 0.4, 0.4, 0.2 },
-            TropicalOrbitPeriod =  40 ,
-            EarthOrbitRatio = 0.0045,
-            DayLength = 9.9259,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "IO",
+                Observer = "JUPITER BARYCENTER",
+            },
+            Color = { 0.4, 0.4, 0.2 },
+            Period =  42 / 24,
+            Resolution = 1000
         }
     }
 }

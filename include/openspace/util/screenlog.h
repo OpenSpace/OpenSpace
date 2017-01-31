@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCREENLOG_H__
-#define __SCREENLOG_H__
+#ifndef __OPENSPACE_CORE___SCREENLOG___H__
+#define __OPENSPACE_CORE___SCREENLOG___H__
 
 #include <ghoul/logging/log.h>
 
@@ -42,14 +42,14 @@ namespace openspace {
 class ScreenLog : public ghoul::logging::Log {
 public:
     /// Just a shortcut for the LogLevel access
-    using LogLevel = ghoul::logging::LogManager::LogLevel;
+    using LogLevel = ghoul::logging::LogLevel;
     
     /**
      * This struct stores the incoming log entries with their #level, #timeString,
      * #category, #message, and the generated #timeStamp used for the expiry calculation.
      */
     struct LogEntry {
-        /// The ghoul::logging::LogManager::LogLevel of the log message
+        /// The ghoul::logging::LogLevel of the log message
         LogLevel level;
         
         /// The timepoint when the log message arrived at the ScreenLog
@@ -68,10 +68,10 @@ public:
     /**
      * Constructor that creates a ScreenLog with the provided \p timeToLive, and the
      * minimum \p logLevel that is stored. Log message with a lower
-     * ghoul::logging::LogManager::LogLevel are automatically discarded.
+     * ghoul::logging::LogLevel are automatically discarded.
      * \param timeToLive The time-to-live for the messages in this ScreenLog. Expired
      * messages are removed whenever the #removeExpiredEntries method is called
-     * \param logLevel The minimum ghoul::logging::LogManager::LogLevel that messages must
+     * \param logLevel The minimum ghoul::logging::LogLevel that messages must
      * have in order to be stored in the ScreenLog
      */
     ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel = LogLevel::Info);
@@ -79,11 +79,11 @@ public:
     /**
      * Overwritten ghoul::loggling::Log method that is called whenever a new log message
      * shall be stored.
-     * \param level The ghoul::logging::LogManager::LogLevel of the incoming log message
+     * \param level The ghoul::logging::LogLevel of the incoming log message
      * \param category The category of the log message
      * \param message The actual log message that was transmitted
      */
-    void log(ghoul::logging::LogManager::LogLevel level, const std::string& category,
+    void log(ghoul::logging::LogLevel level, const std::string& category,
         const std::string& message) override;
     
     /**
@@ -115,4 +115,4 @@ private:
     
 } // namespace openspace
 
-#endif // __SCREENLOG_H__
+#endif // __OPENSPACE_CORE___SCREENLOG___H__

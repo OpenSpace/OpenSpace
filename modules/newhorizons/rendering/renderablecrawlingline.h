@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLECRAWLINGLINE_H__
-#define __RENDERABLECRAWLINGLINE_H__
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLECRAWLINGLINE___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLECRAWLINGLINE___H__
 
 #include <openspace/rendering/renderable.h>
 
@@ -62,4 +62,4 @@ private:
 
 } // namespace openspace
 
-#endif // __RENDERABLECRAWLINGLINE_H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLECRAWLINGLINE___H__

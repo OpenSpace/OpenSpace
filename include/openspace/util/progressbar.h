@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PROGRESSBAR_H__
-#define __PROGRESSBAR_H__
+#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
+#define __OPENSPACE_CORE___PROGRESSBAR___H__
 
 #include <iostream>
 
@@ -43,9 +43,8 @@ private:
     int _previous;
     int _end;
     std::ostream& _stream;
-
 };
 
 } // namespace openspace
 
-#endif // __PROGRESSBAR_H__
+#endif // __OPENSPACE_CORE___PROGRESSBAR___H__

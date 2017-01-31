@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONFIGURATIONMANAGER_H__
-#define __CONFIGURATIONMANAGER_H__
+#ifndef __OPENSPACE_CORE___CONFIGURATIONMANAGER___H__
+#define __OPENSPACE_CORE___CONFIGURATIONMANAGER___H__
 
 #include <openspace/documentation/documentation.h>
 
@@ -167,4 +167,4 @@ private:
 
 } // namespace openspace
 
-#endif  // __CONFIGURATIONMANAGER_H__
+#endif  // __OPENSPACE_CORE___CONFIGURATIONMANAGER___H__

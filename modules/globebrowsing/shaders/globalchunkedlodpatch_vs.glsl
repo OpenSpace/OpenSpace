@@ -37,6 +37,7 @@ uniform vec3 radiiSquared;
 uniform vec2 minLatLon;
 uniform vec2 lonLatScalingFactor;
 uniform vec3 cameraPosition;
+uniform float chunkMinHeight;
 
 layout(location = 1) in vec2 in_uv;
 
@@ -56,9 +57,14 @@ PositionNormalPair globalInterpolation() {
 
 void main() {
     PositionNormalPair pair = globalInterpolation();
-    float distToVertexOnEllipsoid = length(pair.position - cameraPosition);
+    float distToVertexOnEllipsoid =
+        length(pair.position + pair.normal * chunkMinHeight - cameraPosition);
 
-    float levelInterpolationParameter = getLevelInterpolationParameter(chunkLevel, distanceScaleFactor, distToVertexOnEllipsoid);
+    float levelInterpolationParameter =
+        getLevelInterpolationParameter(
+            chunkLevel,
+            distanceScaleFactor,
+            distToVertexOnEllipsoid);
 
     // use level weight for height sampling, and output to fragment shader
     levelWeights = getLevelWeights(levelInterpolationParameter);

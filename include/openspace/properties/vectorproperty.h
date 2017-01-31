@@ -22,34 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __VECTORPROPERTY_H__
-#define __VECTORPROPERTY_H__
+#ifndef __OPENSPACE_CORE___VECTORPROPERTY___H__
+#define __OPENSPACE_CORE___VECTORPROPERTY___H__
 
-#include "openspace/properties/numericalproperty.h"
+#include <openspace/properties/numericalproperty.h>
 
-#include <ghoul/glm.h>
+#include <openspace/properties/vector/bvec2property.h>
+#include <openspace/properties/vector/bvec3property.h>
+#include <openspace/properties/vector/bvec4property.h>
 
-namespace openspace {
-namespace properties {
+#include <openspace/properties/vector/dvec2property.h>
+#include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/vector/dvec4property.h>
 
-REGISTER_TEMPLATEPROPERTY_HEADER(BVec2Property, glm::bvec2);
-REGISTER_TEMPLATEPROPERTY_HEADER(BVec3Property, glm::bvec3);
-REGISTER_TEMPLATEPROPERTY_HEADER(BVec4Property, glm::bvec4);
+#include <openspace/properties/vector/ivec2property.h>
+#include <openspace/properties/vector/ivec3property.h>
+#include <openspace/properties/vector/ivec4property.h>
 
-REGISTER_NUMERICALPROPERTY_HEADER(Vec2Property, glm::vec2);
-REGISTER_NUMERICALPROPERTY_HEADER(Vec3Property, glm::vec3);
-REGISTER_NUMERICALPROPERTY_HEADER(Vec4Property, glm::vec4);
-REGISTER_NUMERICALPROPERTY_HEADER(DVec2Property, glm::dvec2);
-REGISTER_NUMERICALPROPERTY_HEADER(DVec3Property, glm::dvec3);
-REGISTER_NUMERICALPROPERTY_HEADER(DVec4Property, glm::dvec4);
-REGISTER_NUMERICALPROPERTY_HEADER(IVec2Property, glm::ivec2);
-REGISTER_NUMERICALPROPERTY_HEADER(IVec3Property, glm::ivec3);
-REGISTER_NUMERICALPROPERTY_HEADER(IVec4Property, glm::ivec4);
-REGISTER_NUMERICALPROPERTY_HEADER(UVec2Property, glm::uvec2);
-REGISTER_NUMERICALPROPERTY_HEADER(UVec3Property, glm::uvec3);
-REGISTER_NUMERICALPROPERTY_HEADER(UVec4Property, glm::uvec4);
+#include <openspace/properties/vector/uvec2property.h>
+#include <openspace/properties/vector/uvec3property.h>
+#include <openspace/properties/vector/uvec4property.h>
 
-} // namespace properties
-} // namespace openspace
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 
-#endif // __INTPROPERTY_H__
+#endif // __OPENSPACE_CORE___VECTORPROPERTY___H__

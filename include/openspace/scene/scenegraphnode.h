@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef __SCENEGRAPHNODE_H__
-#define __SCENEGRAPHNODE_H__
+#ifndef __OPENSPACE_CORE___SCENEGRAPHNODE___H__
+#define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
 // open space includes
 #include <openspace/documentation/documentation.h>
@@ -72,7 +72,6 @@ public:
     void update(const UpdateData& data);
     void evaluate(const Camera* camera, const psc& parentPosition = psc());
     void render(const RenderData& data, RendererTasks& tasks);
-    void postRender(const RenderData& data);
     void updateCamera(Camera* camera) const;
 
     //void addNode(SceneGraphNode* child);
@@ -138,4 +137,4 @@ private:
 
 } // namespace openspace
 
-#endif // __SCENEGRAPHNODE_H__
+#endif // __OPENSPACE_CORE___SCENEGRAPHNODE___H__

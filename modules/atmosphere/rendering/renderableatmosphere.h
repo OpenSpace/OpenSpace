@@ -30,6 +30,7 @@
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <modules/atmosphere/rendering/atmosphereraycaster.h>
 
 namespace openspace {

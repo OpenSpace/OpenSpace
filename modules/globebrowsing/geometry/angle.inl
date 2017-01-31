@@ -24,19 +24,14 @@
 
 #include <modules/globebrowsing/geometry/angle.h>
 
-
-
-
 namespace openspace {
-
+namespace globebrowsing {
 
 template <typename T>
 const T Angle<T>::PI = 3.14159265358979323846264338327950;
 
 template <typename T>
 const T Angle<T>::EPSILON = 1e-10; // Should depend on the typedef /eb 
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                             STATIC CONSTANTS                                         //
@@ -54,8 +49,6 @@ const Angle<T> Angle<T>::HALF = Angle::fromRadians(PI);
 template <typename T>
 const Angle<T> Angle<T>::FULL = Angle::fromRadians(2*PI);
 
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                 Constructors                                         //
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -65,9 +58,6 @@ template <typename T> Angle<T>::Angle(const Angle<T>& other)
 
 template <typename T> Angle<T>::Angle(T radians)
     : _radians(radians) { }
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                 Factory Methods                                      //
@@ -88,8 +78,6 @@ Angle<T> Angle<T>::fromRevolutions(T revs) {
     return Angle<T>(revs * 2 * PI);
 }
 
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                     Conversions                                      //
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -109,11 +97,9 @@ T Angle<T>::asRevolutions() const {
     return _radians / (2 * PI);
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                     Operators                                        //
 //////////////////////////////////////////////////////////////////////////////////////////
-
 
 template <typename T>
 Angle<T> Angle<T>::operator+(const Angle<T>& rhs) const{
@@ -135,12 +121,10 @@ Angle<T> Angle<T>::operator/(T divisor) const{
     return Angle<T>(_radians / divisor);
 }
 
-
 template <typename T>
 Angle<T> Angle<T>::operator-() const {
     return Angle<T>(-_radians);
 }
-
 
 template <typename T>
 void Angle<T>::operator+=(const Angle<T>& rhs){
@@ -161,9 +145,6 @@ template <typename T>
 void Angle<T>::operator/=(T divisor){
     _radians /= divisor;
 }
-
-
-
 
 template <typename T>
 bool Angle<T>::operator<(const Angle<T>& rhs) const{
@@ -194,8 +175,6 @@ template <typename T>
 bool Angle<T>::operator!=(const Angle<T>& rhs) const{
     return _radians != rhs._radians;
 }
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //                            Chainable Relative Mutators                               //
@@ -237,8 +216,6 @@ Angle<T>& Angle<T>::abs(){
     return *this;
 }
 
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 //                         Chainable Relative Factory Methods                           //
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -258,11 +235,10 @@ Angle<T> Angle<T>::getClamped(const Angle<T>& min, const Angle<T>& max) const {
     return Angle<T>(*this).clamp(min, max);
 }
 
-
-
 template <typename T>
 Angle<T> Angle<T>::getAbs() const {
     return Angle<T>(*this).abs();
 }
 
+} // namespace globebrowsing
 } // namespace openspace

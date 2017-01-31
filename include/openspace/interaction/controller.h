@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONTROLLER_H__
-#define __CONTROLLER_H__
+#ifndef __OPENSPACE_CORE___CONTROLLER___H__
+#define __OPENSPACE_CORE___CONTROLLER___H__
 
 #include <openspace/scene/scenegraphnode.h>
 
@@ -50,4 +50,4 @@ protected:
 } // namespace interaction
 } // namespace openspace
 
-#endif // __CONTROLLER_H__
+#endif // __OPENSPACE_CORE___CONTROLLER___H__

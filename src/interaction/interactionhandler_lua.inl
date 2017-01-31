@@ -191,6 +191,37 @@ int setInteractionMode(lua_State* L) {
     return 0;
 }
 
+int goToChunk(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    
+    int nArguments = lua_gettop(L);
+    if (nArguments != 3)
+    return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
+    
+    int x = lua_tonumber(L, 1);
+    int y = lua_tonumber(L, 2);
+    int level = lua_tonumber(L, 3);
+
+    OsEng.interactionHandler().goToChunk(x, y, level);
+
+    return 0;
+}
+
+int goToGeo(lua_State* L) {
+    using ghoul::lua::luaTypeToString;
+    
+    int nArguments = lua_gettop(L);
+    if (nArguments != 2)
+    return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    
+    double latitude = lua_tonumber(L, 1);
+    double longitude = lua_tonumber(L, 2);
+    
+    OsEng.interactionHandler().goToGeo(latitude, longitude);
+    
+    return 0;
+}
+
 int restoreCameraStateFromFile(lua_State* L) {
     using ghoul::lua::luaTypeToString;
     const std::string _loggerCat = "lua.restoreCameraStateFromFile";

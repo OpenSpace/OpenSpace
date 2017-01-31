@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __DOCUMENTATION_H__
-#define __DOCUMENTATION_H__
+#ifndef __OPENSPACE_CORE___DOCUMENTATION___H__
+#define __OPENSPACE_CORE___DOCUMENTATION___H__
 
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/dictionary.h>
@@ -317,6 +317,6 @@ namespace std {
 
 std::string to_string(openspace::documentation::TestResult::Offense::Reason reason);
 
-} // namespace
+} // namespace std
 
-#endif // __DOCUMENTATION_H__
+#endif // __OPENSPACE_CORE___DOCUMENTATION___H__
