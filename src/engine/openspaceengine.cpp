@@ -66,6 +66,7 @@
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/onscopeexit.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
@@ -680,11 +681,8 @@ void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
 
 void OpenSpaceEngine::runPreInitializationScripts(const std::string& sceneDescription) {
     LINFO("Running Initialization scripts");
-    lua_State* state = ghoul::lua::createNewLuaState();
-    OnExit(
-           // Delete the Lua state at the end of the scope, no matter what
-           [state](){ghoul::lua::destroyLuaState(state);}
-    );
+    
+    ghoul::lua::LuaState state;
     OsEng.scriptEngine().initializeLuaState(state);
 
     // First execute the script to get all global variables
@@ -710,11 +708,7 @@ void OpenSpaceEngine::runPreInitializationScripts(const std::string& sceneDescri
 
 void OpenSpaceEngine::runPostInitializationScripts(const std::string& sceneDescription) {
     LINFO("Running Setup scripts");
-    lua_State* state = ghoul::lua::createNewLuaState();
-    OnExit(
-        // Delete the Lua state at the end of the scope, no matter what
-        [state](){ghoul::lua::destroyLuaState(state);}
-    );
+    ghoul::lua::LuaState state;
     OsEng.scriptEngine().initializeLuaState(state);
     
     // First execute the script to get all global variables
