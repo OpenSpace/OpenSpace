@@ -210,12 +210,17 @@ void mainInitFunc() {
     //is this node the master?    (must be set after call to _sgctEngine->init())
     OsEng.setMaster(_sgctEngine->isMaster());
     
+    LDEBUG("Initializing OpenSpace Engine");
     bool success = OsEng.initialize();
-    if (success)
+
+    LDEBUG("Initializing OpenGL in OpenSpace Engine");
+    if (success) {
         success = OsEng.initializeGL();
+    }
 
     if (!success) {
         LFATAL("Initializing OpenSpaceEngine failed");
+        LogMgr.flushLogs();
         exit(EXIT_FAILURE);
     }
     

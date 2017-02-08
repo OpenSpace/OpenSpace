@@ -407,8 +407,10 @@ void OpenSpaceEngine::destroy() {
 bool OpenSpaceEngine::initialize() {
     // clear the screen so the user don't have to see old buffer contents from the
     // graphics card
+    LDEBUG("Clearing all Windows");
     clearAllWindows();
 
+    LDEBUG("Adding system components");
     // Detect and log OpenCL and OpenGL versions and available devices
     SysCap.addComponent(
         std::make_unique<ghoul::systemcapabilities::GeneralCapabilitiesComponent>()
@@ -416,13 +418,15 @@ bool OpenSpaceEngine::initialize() {
     SysCap.addComponent(
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
+    
+    LDEBUG("Detecting capabilities");
     SysCap.detectCapabilities();
 
     using Verbosity = ghoul::systemcapabilities::SystemCapabilitiesComponent::Verbosity;
     Verbosity verbosity = Verbosity::Default;
     if (configurationManager().hasKeyAndValue<std::string>(
-
-        ConfigurationManager::KeyCapabilitiesVerbosity)) {
+        ConfigurationManager::KeyCapabilitiesVerbosity))
+    {
         std::map<std::string, Verbosity> verbosityMap = {
             { "None", Verbosity::None },
             { "Minimal", Verbosity::Minimal },

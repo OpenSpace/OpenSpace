@@ -80,7 +80,7 @@ Documentation RenderablePlanetProjection::Documentation() {
             },
             {
                 keyGeometry,
-                new ReferencingVerifier("base_geometry_planet"),
+                new ReferencingVerifier("space_geometry_planet"),
                 "The geometry that is used for rendering this planet.",
                 Optional::No
             },
