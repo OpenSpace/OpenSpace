@@ -22,77 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-class AsyncTileDataProvider;
+LayerGroup::LayerGroup(std::string name)
+    : _levelBlendingEnabled("blendTileLevels", "blend tile levels", true)
+{
+    setName(std::move(name));
+    addProperty(_levelBlendingEnabled);
+}
 
-/**
-* Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
-* caches them in memory using LRU caching
-*/
-class CachingTileProvider : public TileProvider {
-public:
-    CachingTileProvider(const ghoul::Dictionary& dictionary);
+LayerGroup::LayerGroup(std::string name, const ghoul::Dictionary& dict)
+    : LayerGroup(std::move(name))
+{
+    for (size_t i = 0; i < dict.size(); i++) {
+        std::string dictKey = std::to_string(i + 1);
+        ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(dictKey);
 
-    CachingTileProvider(
-        std::shared_ptr<AsyncTileDataProvider> tileReader, 
-        std::shared_ptr<TileCache> tileCache,
-        int framesUntilFlushRequestQueue);
+        try {
+            _layers.push_back(std::make_shared<Layer>(layerDict));
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+            continue;
+        }
+        //_layers.push_back(std::make_shared<Layer>(layerDict));
+    }
 
-    virtual ~CachingTileProvider();
-        
-    /**
-    * \returns a Tile with status OK iff it exists in in-memory 
-    * cache. If not, it may enqueue some IO operations on a 
-    * separate thread.
-    */
-    virtual Tile getTile(const TileIndex& tileIndex);
+    for (const auto& layer : _layers) {
+        addPropertySubOwner(layer.get());
+    }
+}
 
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& tileIndex);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
-    virtual float noDataValueAsFloat();
+void LayerGroup::update() {
+    _activeLayers.clear();
 
-private:
-    /**
-    * Collects all asynchronously downloaded <code>RawTile</code>
-    * and uses <code>createTile</code> to create <code>Tile</code>s, 
-    * which are put in the LRU cache - potentially pushing out outdated
-    * Tiles.
-    */
-    void initTexturesFromLoadedData();
+    for (const auto& layer : _layers) {
+        if (layer->enabled()) {
+            layer->tileProvider()->update();
+            _activeLayers.push_back(layer);
+        }
+    }
+}
 
-    /**
-    * \returns A tile with <code>Tile::Status::OK</code> if no errors
-    * occured, a tile with <code>Tile::Status::IOError</code> otherwise
-    */
-    Tile createTile(std::shared_ptr<RawTile> res);
+const std::vector<std::shared_ptr<Layer>>& LayerGroup::layers() const {
+    return _layers;
+}
 
-    /**
-    * Deletes all enqueued, but not yet started async downloads of textures.
-    * Note that this does not cancel any currently ongoing async downloads.
-    */
-    void clearRequestQueue();
+const std::vector<std::shared_ptr<Layer>>& LayerGroup::activeLayers() const {
+    return _activeLayers;
+}
 
-    std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    std::shared_ptr<TileCache> _tileCache;
-
-    int _framesSinceLastRequestFlush;
-    int _framesUntilRequestFlush;
-
-    Tile _defaultTile;
-};
+int LayerGroup::pileSize() const{
+    return _levelBlendingEnabled.value() ? 3 : 1;
+}
 
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__

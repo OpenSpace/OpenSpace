@@ -22,77 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___FRUSTUMCULLER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___FRUSTUMCULLER___H__
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/chunk/culling/chunkculler.h>
+
+#include <modules/globebrowsing/geometry/aabb.h>
 
 namespace openspace {
+
 namespace globebrowsing {
 
-class AsyncTileDataProvider;
-
 /**
-* Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
-* caches them in memory using LRU caching
-*/
-class CachingTileProvider : public TileProvider {
+ * Culls all chunks that are completely outside the view frustum.
+ *
+ * The frustum culling uses a 2D axis aligned bounding box for the Chunk in
+ * screen space. This is calculated from a bounding polyhedron bounding the
+ * Chunk. Hence the culling will not be 'perfect' but fast and good enough for
+ * culling chunks outside the frustum with some margin.
+ */
+class FrustumCuller : public ChunkCuller {
 public:
-    CachingTileProvider(const ghoul::Dictionary& dictionary);
-
-    CachingTileProvider(
-        std::shared_ptr<AsyncTileDataProvider> tileReader, 
-        std::shared_ptr<TileCache> tileCache,
-        int framesUntilFlushRequestQueue);
-
-    virtual ~CachingTileProvider();
-        
     /**
-    * \returns a Tile with status OK iff it exists in in-memory 
-    * cache. If not, it may enqueue some IO operations on a 
-    * separate thread.
-    */
-    virtual Tile getTile(const TileIndex& tileIndex);
+     * \param viewFrustum is the view space in normalized device coordinates space.
+     * Hence it is an axis aligned bounding box and not a real frustum.
+     */
+    FrustumCuller(const AABB3 viewFrustum);
 
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& tileIndex);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
-    virtual float noDataValueAsFloat();
+    bool isCullable(const Chunk& chunk, const RenderData& renderData) override;
 
 private:
-    /**
-    * Collects all asynchronously downloaded <code>RawTile</code>
-    * and uses <code>createTile</code> to create <code>Tile</code>s, 
-    * which are put in the LRU cache - potentially pushing out outdated
-    * Tiles.
-    */
-    void initTexturesFromLoadedData();
-
-    /**
-    * \returns A tile with <code>Tile::Status::OK</code> if no errors
-    * occured, a tile with <code>Tile::Status::IOError</code> otherwise
-    */
-    Tile createTile(std::shared_ptr<RawTile> res);
-
-    /**
-    * Deletes all enqueued, but not yet started async downloads of textures.
-    * Note that this does not cancel any currently ongoing async downloads.
-    */
-    void clearRequestQueue();
-
-    std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    std::shared_ptr<TileCache> _tileCache;
-
-    int _framesSinceLastRequestFlush;
-    int _framesUntilRequestFlush;
-
-    Tile _defaultTile;
+    const AABB3 _viewFrustum;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___FRUSTUMCULLER___H__

@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/tile/tileselector.h>
 
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 namespace openspace {

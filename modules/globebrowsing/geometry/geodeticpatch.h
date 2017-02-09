@@ -22,61 +22,94 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GEODETICPATCH___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GEODETICPATCH___H__
+
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 namespace openspace {
-
-struct RenderData;
-
 namespace globebrowsing {
 
-class Chunk;
-
-/**
- * Abstract class defining an interface for accessing a desired level of a Chunk.
- * The desired level can be used in the process of determining whether a Chunk should
- * want to split, merge or do nothing.
-*/
-class ChunkLevelEvaluator {
+class GeodeticPatch {
 public:
-    virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const = 0;
-    static const int UNKNOWN_DESIRED_LEVEL = -1;
-};
+    GeodeticPatch(
+        double centerLat,
+        double centerLon,
+        double halfSizeLat,
+        double halfSizeLon);
 
-/**
- * Evaluate the Chunk level depending on the distance from the Camera to the Chunk.
- * This evaluation method aims to keep the screen size (horizontal length and not
- * area) of all chunks constant.
-*/
-class EvaluateChunkLevelByDistance : public ChunkLevelEvaluator {
-public:
-    virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
-};
+    GeodeticPatch(
+        const Geodetic2& center,
+        const Geodetic2& halfSize);
 
-/**
- * Evaluate the chunk level using the area of the non-heightmapped Chunk projected
- * on a sphere with the center in the position of the camera. A Chunk near the
- * horizon will have a small projected area and hence a lower desired level. This
- * evaluation is more forgiving than EvaluateChunkLevelByDistance, meaning it results
- * in lower desired levels.
-*/
-class EvaluateChunkLevelByProjectedArea : public ChunkLevelEvaluator {
-public:
-    virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
-};
+    GeodeticPatch(const GeodeticPatch& patch);
 
-/**
- * If this chunk has available tile data for any LayerGroup on any of its active
- * Layers it will return an UNKNOWN_DESIRED_LEVEL. If no data is available it will
- * evaluate to a level that is <code>current level -1</code>.
-*/
-class EvaluateChunkLevelByAvailableTileData : public ChunkLevelEvaluator {
-public:
-    virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
+    GeodeticPatch(const TileIndex& tileIndex);
+
+    void setCenter(const Geodetic2&);
+    void setHalfSize(const Geodetic2&);    
+
+    /**
+     * Returns the latitude boundary which is closest to the equator
+     */
+    double edgeLatitudeNearestEquator() const;
+
+    /**
+     * Returns \c true if the center above the equator
+     */
+    double isNorthern() const;
+
+    Geodetic2 getCorner(Quad q) const;
+    Geodetic2 getSize() const;
+
+    double minLat() const;
+    double maxLat() const;
+    double minLon() const;
+    double maxLon() const;
+
+    /**
+     * Returns \c true if the specified coordinate is contained within the patch
+     */
+    bool contains(const Geodetic2& p) const;
+
+
+    /**
+     * Clamps a point to the patch region
+     */
+    Geodetic2 clamp(const Geodetic2& p) const;
+
+    /**
+     * Returns the corner of the patch that is closest to the given point p
+     */
+    Geodetic2 closestCorner(const Geodetic2& p) const;
+
+    /**
+     * Returns a point on the patch that minimizes the great-circle distance to
+     * the given point p.
+     */
+    Geodetic2 closestPoint(const Geodetic2& p) const;
+
+    /**
+     * Returns the minimum tile level of the patch (based on largest side)
+     */
+    double minimumTileLevel() const;
+
+    /**
+     * Returns the maximum level of the patch (based on smallest side)
+     */
+    double maximumTileLevel() const;
+
+    const Geodetic2& center() const;
+    const Geodetic2& halfSize() const;
+    Geodetic2 size() const;
+
+private:
+    Geodetic2 _center;
+    Geodetic2 _halfSize;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GEODETICPATCH___H__

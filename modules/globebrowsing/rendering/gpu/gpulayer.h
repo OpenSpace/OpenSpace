@@ -22,85 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNK___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNK___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
 
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/rendering/gpu/gpuchunktilepile.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayerrendersettings.h>
+#include <openspace/util/gpudata.h>
+#include <string>
 
-#include <glm/glm.hpp>
-#include <vector>
+namespace ghoul { namespace opengl {
+class ProgramObject;
+}}
 
 namespace openspace {
-
-struct RenderData;
-
 namespace globebrowsing {
 
-class RenderableGlobe;
+class Layer;
 struct TileIndex;
 
-class Chunk {
+/**
+ * Manages a GPU representation of a <code>Layer</code>
+ */
+class GPULayer {
 public:
-    const static float DEFAULT_HEIGHT;
-
-    struct BoundingHeights {
-        float min, max;
-        bool available;
-    };
-
-    enum class Status {
-        DO_NOTHING,
-        WANT_MERGE,
-        WANT_SPLIT,
-    };
-        
-    Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex,
-          bool initVisible = true);
 
     /**
-     * Updates the Chunk internally and returns the Status of the Chunk.
-     *
-     * Tests if the Chunk is cullable and gets the desired level of the Chunk. If the
-     * Chunk is cullable it will be set to invisible and return Status::WANT_MERGE.
-     * If the desired level is smaller than the current level of the chunk it will
-     * return Status::WANT_MERGE, if it is larger it will return Status::WANT_SPLIT,
-     * otherwise Status::DO_NOTHING.
-     *
-     * \returns The Status of the chunk. 
+     * Sets the value of <code>Layer</code> to its corresponding
+     * GPU struct. OBS! Users must ensure bind has been 
+     * called before setting using this method.
      */
-    Status update(const RenderData& data);
+    virtual void setValue(ProgramObject* programObject, const Layer& layer,
+                          const TileIndex& tileIndex, int pileSize);
+
+    /** 
+     * Binds this object with GLSL variables with identifiers starting 
+     * with nameBase within the provided shader program.
+     * After this method has been called, users may invoke setValue.
+     */
+    virtual void bind(ProgramObject* programObject, const Layer& layer,
+                      const std::string& nameBase, int pileSize);
 
     /**
-        * Returns a convex polyhedron of eight vertices tightly bounding the volume of
-        * the Chunk.
+    * Deactivates any <code>TextureUnit</code>s assigned by this object.
+    * This method should be called after the OpenGL draw call.
     */
-    std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
-
-    const GeodeticPatch& surfacePatch() const;
-    const RenderableGlobe& owner() const;
-    const TileIndex tileIndex() const;
-    bool isVisible() const;
-        
-    /**
-        * Returns BoundingHeights that fits the Chunk as tightly as possible.
-        *
-        * If the Chunk uses more than one HightLayer, the BoundingHeights will be set
-        * to cover all HightLayers. If the Chunk has a higher level than its highest
-        * resolution HightLayer Tile, it will base its BoundingHeights on that Tile.
-        * This means that high level Chunks can have BoundingHeights that are not
-        * tightly fitting.
-    */
-    BoundingHeights getBoundingHeights() const;
+    virtual void deactivate();
 
 private:
-    const RenderableGlobe& _owner;
-    const TileIndex _tileIndex;
-    bool _isVisible;
-    const GeodeticPatch _surfacePatch;
+    GPUChunkTilePile gpuChunkTilePile;
+    GPULayerRenderSettings gpuRenderSettings;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNK___H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__

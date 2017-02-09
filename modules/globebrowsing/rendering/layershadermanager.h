@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_SHADER_MANAGER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_SHADER_MANAGER___H__
 
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 
 #include <array>
 #include <string>

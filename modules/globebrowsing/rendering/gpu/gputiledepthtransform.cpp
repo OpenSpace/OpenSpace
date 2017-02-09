@@ -22,41 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+#include <modules/globebrowsing/rendering/gpu/gputiledepthtransform.h>
 
-#include <openspace/rendering/renderable.h>
-
-namespace ghoul { namespace opengl {
-class ProgramObject;
-} }
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-class RenderableGlobe;
+void GPUTileDepthTransform::setValue(ProgramObject* programObject, 
+                                     const TileDepthTransform& depthTransform)
+{
+    gpuDepthOffset.setValue(programObject, depthTransform.depthOffset);
+    gpuDepthScale.setValue(programObject, depthTransform.depthScale);
+}
 
-class PointGlobe : public Renderable {
-public:
-    PointGlobe(const RenderableGlobe& owner);
-    virtual ~PointGlobe();
+void GPUTileDepthTransform::bind(ProgramObject* programObject,
+                                 const std::string& nameBase)
+{
+    gpuDepthOffset.bind(programObject, nameBase + "depthOffset");
+    gpuDepthScale.bind(programObject, nameBase + "depthScale");
+}
 
-    bool initialize() override;
-    bool deinitialize() override;
-    bool isReady() const override;
-
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-    
-private:
-    const RenderableGlobe& _owner;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-
-    GLuint _vertexBufferID;
-    GLuint _vaoID;
-};
-
-} // namespace globebrowsing
-} // namespace openspace
-
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+}  // namespace globebrowsing
+}  // namespace openspace

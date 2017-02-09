@@ -26,9 +26,14 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/chunklevelevaluator.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/availabletiledataevaluator.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/distanceevaluator.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/projectedareaevaluator.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/chunkculler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/frustumculler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/horizonculler.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/angle.h
@@ -36,6 +41,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/convexhull.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic3.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.h
@@ -58,9 +65,20 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayermanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktile.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktilepile.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuheightlayer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayergroup.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayerrendersettings.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputiledepthtransform.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputileuvtransform.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
@@ -72,6 +90,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
@@ -83,14 +104,20 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/availabletiledataevaluator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/distanceevaluator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/projectedareaevaluator.cpp
+    
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/frustumculler.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/horizonculler.cpp
+
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/convexhull.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.cpp
@@ -106,9 +133,20 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpulayermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktile.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktilepile.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuheightlayer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayergroup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpulayerrendersettings.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputiledepthtransform.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputileuvtransform.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
@@ -118,6 +156,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp

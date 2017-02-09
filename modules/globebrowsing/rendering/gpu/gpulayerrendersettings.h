@@ -22,77 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERRENDERSETTINGS___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERRENDERSETTINGS___H__
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <openspace/util/gpudata.h>
+
+#include <string>
+
+namespace ghoul { namespace opengl {
+class ProgramObject;
+}}
 
 namespace openspace {
 namespace globebrowsing {
 
-class AsyncTileDataProvider;
+class LayerRenderSettings;
 
 /**
-* Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
-* caches them in memory using LRU caching
-*/
-class CachingTileProvider : public TileProvider {
+ * Manages a GPU representation of a <code>LayerRenderSettings</code>
+ */
+class GPULayerRenderSettings{
 public:
-    CachingTileProvider(const ghoul::Dictionary& dictionary);
-
-    CachingTileProvider(
-        std::shared_ptr<AsyncTileDataProvider> tileReader, 
-        std::shared_ptr<TileCache> tileCache,
-        int framesUntilFlushRequestQueue);
-
-    virtual ~CachingTileProvider();
-        
     /**
-    * \returns a Tile with status OK iff it exists in in-memory 
-    * cache. If not, it may enqueue some IO operations on a 
-    * separate thread.
-    */
-    virtual Tile getTile(const TileIndex& tileIndex);
+     * Sets the value of <code>LayerRenderSettings</code> to its corresponding
+     * GPU struct. OBS! Users must ensure bind has been 
+     * called before setting using this method.
+     */
+    void setValue(ProgramObject* programObject, const LayerRenderSettings& layerSettings);
 
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& tileIndex);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
-    virtual float noDataValueAsFloat();
+    /** 
+     * Binds this object with GLSL variables with identifiers starting 
+     * with nameBase within the provided shader program.
+     * After this method has been called, users may invoke setValue.
+     */
+    void bind(ProgramObject* programObject, const std::string& nameBase);
 
 private:
-    /**
-    * Collects all asynchronously downloaded <code>RawTile</code>
-    * and uses <code>createTile</code> to create <code>Tile</code>s, 
-    * which are put in the LRU cache - potentially pushing out outdated
-    * Tiles.
-    */
-    void initTexturesFromLoadedData();
-
-    /**
-    * \returns A tile with <code>Tile::Status::OK</code> if no errors
-    * occured, a tile with <code>Tile::Status::IOError</code> otherwise
-    */
-    Tile createTile(std::shared_ptr<RawTile> res);
-
-    /**
-    * Deletes all enqueued, but not yet started async downloads of textures.
-    * Note that this does not cancel any currently ongoing async downloads.
-    */
-    void clearRequestQueue();
-
-    std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    std::shared_ptr<TileCache> _tileCache;
-
-    int _framesSinceLastRequestFlush;
-    int _framesUntilRequestFlush;
-
-    Tile _defaultTile;
+    GPUData<float> gpuOpacity;
+    GPUData<float> gpuGamma;
+    GPUData<float> gpuMultiplier;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERRENDERSETTINGS___H__

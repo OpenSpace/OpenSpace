@@ -26,7 +26,7 @@
  
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 
 namespace {
     const char* keyFrame = "Frame";

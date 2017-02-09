@@ -22,41 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+#include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 
-#include <openspace/rendering/renderable.h>
-
-namespace ghoul { namespace opengl {
-class ProgramObject;
-} }
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-class RenderableGlobe;
+void GPULayerManager::setValue(ProgramObject* programObject,
+                               const LayerManager& layerManager, 
+                               const TileIndex& tileIndex)
+{
+    auto layerGroups = layerManager.layerGroups();
+    for (size_t i = 0; i < layerGroups.size(); ++i) {
+        gpuLayerGroups[i]->setValue(programObject, *layerGroups[i], tileIndex);
+    }
+}
 
-class PointGlobe : public Renderable {
-public:
-    PointGlobe(const RenderableGlobe& owner);
-    virtual ~PointGlobe();
-
-    bool initialize() override;
-    bool deinitialize() override;
-    bool isReady() const override;
-
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
+void GPULayerManager::bind(ProgramObject* programObject, const LayerManager& layerManager)
+{
+    auto layerGroups = layerManager.layerGroups();
+    if (gpuLayerGroups.size() != layerGroups.size()) {
+        gpuLayerGroups.resize(layerGroups.size());
+        for (auto& gpuLayerGroup : gpuLayerGroups){
+            gpuLayerGroup = std::make_unique<GPULayerGroup>();
+        }
+    }
     
-private:
-    const RenderableGlobe& _owner;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    for (size_t i = 0; i < layerGroups.size(); ++i) {
+        std::string nameBase = LayerManager::LAYER_GROUP_NAMES[i];
+        gpuLayerGroups[i]->bind(programObject, *layerGroups[i], nameBase, i);
+    }
+}
 
-    GLuint _vertexBufferID;
-    GLuint _vaoID;
-};
+void GPULayerManager::deactivate() {
+    for (size_t i = 0; i < gpuLayerGroups.size(); ++i) {
+        gpuLayerGroups[i]->deactivate();
+    }
+}
 
-} // namespace globebrowsing
-} // namespace openspace
-
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+}  // namespace globebrowsing
+}  // namespace openspace

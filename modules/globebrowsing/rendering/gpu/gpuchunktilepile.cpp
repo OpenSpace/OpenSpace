@@ -22,41 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+#include <modules/globebrowsing/rendering/gpu/gpuchunktilepile.h>
 
-#include <openspace/rendering/renderable.h>
-
-namespace ghoul { namespace opengl {
-class ProgramObject;
-} }
+#include <modules/globebrowsing/tile/chunktile.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-class RenderableGlobe;
+void GPUChunkTilePile::setValue(ProgramObject* programObject,
+                                const ChunkTilePile& chunkTilePile)
+{
+    ghoul_assert(
+        gpuChunkTiles.size() == chunkTilePile.chunkTiles.size(),
+        "GPU and CPU ChunkTilePile must have same size!"
+    );
+    for (size_t i = 0; i < gpuChunkTiles.size(); ++i) {
+        gpuChunkTiles[i].setValue(programObject, chunkTilePile.chunkTiles[i]);
+    }
+}
 
-class PointGlobe : public Renderable {
-public:
-    PointGlobe(const RenderableGlobe& owner);
-    virtual ~PointGlobe();
+void GPUChunkTilePile::bind(ProgramObject* programObject, const std::string& nameBase, 
+                            int pileSize)
+{
+    gpuChunkTiles.resize(pileSize);
+    for (size_t i = 0; i < gpuChunkTiles.size(); ++i) {
+        std::string nameExtension = "chunkTile" + std::to_string(i) + ".";
+        gpuChunkTiles[i].bind(programObject, nameBase + nameExtension);
+    }
+}
 
-    bool initialize() override;
-    bool deinitialize() override;
-    bool isReady() const override;
+void GPUChunkTilePile::deactivate() {
+    for (auto& gpuChunkTile : gpuChunkTiles) {
+        gpuChunkTile.deactivate();
+    }
+}
 
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-    
-private:
-    const RenderableGlobe& _owner;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-
-    GLuint _vertexBufferID;
-    GLuint _vaoID;
-};
-
-} // namespace globebrowsing
-} // namespace openspace
-
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+}  // namespace globebrowsing
+}  // namespace openspace

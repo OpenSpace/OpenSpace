@@ -22,67 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CULLING___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CULLING___H__
+#include <modules/globebrowsing/rendering/gpu/gpulayergroup.h>
 
-#include <modules/globebrowsing/geometry/aabb.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/rendering/gpu/gpuheightlayer.h>
 
 namespace openspace {
-
-struct RenderData;
-
 namespace globebrowsing {
 
-class Chunk;
+void GPULayerGroup::setValue(ProgramObject* programObject, const LayerGroup& layerGroup,
+                             const TileIndex& tileIndex)
+{
+    auto& activeLayers = layerGroup.activeLayers();
+    ghoul_assert(
+        activeLayers.size() == gpuActiveLayers.size(),
+        "GPU and CPU active layers must have same size!"
+    );
+    for (int i = 0; i < activeLayers.size(); ++i) {
+        gpuActiveLayers[i]->setValue(
+            programObject,
+            *activeLayers[i],
+            tileIndex,
+            layerGroup.pileSize()
+        );
+    }
+}
 
-class ChunkCuller {
-public:
-    /**
-     * Determine if the Chunk is cullable. That is return true if removing the
-     * Chunk 'culling it' will not have any result on the final rendering. Culling
-     * it will make the rendering faster.
-     */
-    virtual bool isCullable(const Chunk& chunk, const RenderData& renderData) = 0;
-};
+void GPULayerGroup::bind(ProgramObject* programObject, const LayerGroup& layerGroup, 
+                         const std::string& nameBase, int category)
+{
+    auto activeLayers = layerGroup.activeLayers();
+    gpuActiveLayers.resize(activeLayers.size());
+    int pileSize = layerGroup.pileSize();
+    for (size_t i = 0; i < gpuActiveLayers.size(); ++i) {
+        // should maybe a proper GPULayer factory
+        gpuActiveLayers[i] = (category == LayerManager::HeightLayers) ?
+            std::make_unique<GPUHeightLayer>() : 
+            std::make_unique<GPULayer>();
+        std::string nameExtension = "[" + std::to_string(i) + "].";
+        gpuActiveLayers[i]->bind(
+            programObject,
+            *activeLayers[i],
+            nameBase + nameExtension,
+            pileSize
+        );
+    }
+}
 
-    /**
-     * Culls all chunks that are completely outside the view frustum.
-     *
-     * The frustum culling uses a 2D axis aligned bounding box for the Chunk in
-     * screen space. This is calculated from a bounding polyhedron bounding the
-     * Chunk. Hence the culling will not be 'perfect' but fast and good enough for
-     * culling chunks outside the frustum with some margin.
-     */
-class FrustumCuller : public ChunkCuller {
-public:
-    /**
-     * \param viewFrustum is the view space in normalized device coordinates space.
-     * Hence it is an axis aligned bounding box and not a real frustum.
-     */
-    FrustumCuller(const AABB3 viewFrustum);
-
-    bool isCullable(const Chunk& chunk, const RenderData& renderData) override;
-
-private:
-    const AABB3 _viewFrustum;
-};
-
-/**
- * In this implementation of the horizon culling, the closer the ellipsoid is to a
- * sphere, the better this will make the culling. Using the minimum radius to
- * be safe. This means that if the ellipsoid has high difference between radii,
- * splitting might accur even though it may not be needed.
- */
-class HorizonCuller : public ChunkCuller {
-public:
-    bool isCullable(const Chunk& chunk, const RenderData& renderData) override;
-
-    bool isCullable(const glm::dvec3& cameraPosition, const glm::dvec3& globePosition,
-        const glm::dvec3& objectPosition, double objectBoundingSphereRadius,
-        double minimumGlobeRadius);
-};
-
-} // namespace globebrowsing
-} // namespace openspace
-
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___CULLING___H__
+void GPULayerGroup::deactivate() {
+    for (size_t i = 0; i < gpuActiveLayers.size(); ++i) {
+        gpuActiveLayers[i]->deactivate();
+    }
+}
+    
+}  // namespace globebrowsing
+}  // namespace openspace

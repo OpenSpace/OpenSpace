@@ -25,14 +25,20 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 #include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/chunklevelevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/availabletiledataevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/distanceevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/projectedareaevaluator.h>
 #include <modules/globebrowsing/chunk/chunknode.h>
-#include <modules/globebrowsing/chunk/culling.h>
+#include <modules/globebrowsing/chunk/culling/chunkculler.h>
+#include <modules/globebrowsing/chunk/culling/frustumculler.h>
+#include <modules/globebrowsing/chunk/culling/horizonculler.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/rendering/chunkrenderer.h>
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/debugging/rendering/debugrenderer.h>
 
 #include <openspace/util/time.h>
@@ -72,11 +78,11 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
     );
 
     _chunkEvaluatorByAvailableTiles = 
-        std::make_unique<EvaluateChunkLevelByAvailableTileData>();
+        std::make_unique<chunklevelevaluator::AvailableTileData>();
     _chunkEvaluatorByProjectedArea =
-        std::make_unique<EvaluateChunkLevelByProjectedArea>();
+    std::make_unique<chunklevelevaluator::ProjectedArea>();
     _chunkEvaluatorByDistance =
-        std::make_unique<EvaluateChunkLevelByDistance>();
+    std::make_unique<chunklevelevaluator::Distance>();
 
     _renderer = std::make_unique<ChunkRenderer>(geometry, layerManager);
 }
@@ -135,7 +141,7 @@ int ChunkedLodGlobe::getDesiredLevel(
     int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
         chunk, renderData
     );
-    if (desiredLevelByAvailableData != ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
+    if (desiredLevelByAvailableData != chunklevelevaluator::Evaluator::UNKNOWN_DESIRED_LEVEL) {
         desiredLevel = glm::min(desiredLevel, desiredLevelByAvailableData);
     }
 

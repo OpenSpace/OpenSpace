@@ -22,77 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#include <modules/globebrowsing/rendering/layer/layer.h>
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-class AsyncTileDataProvider;
-
-/**
-* Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
-* caches them in memory using LRU caching
-*/
-class CachingTileProvider : public TileProvider {
-public:
-    CachingTileProvider(const ghoul::Dictionary& dictionary);
-
-    CachingTileProvider(
-        std::shared_ptr<AsyncTileDataProvider> tileReader, 
-        std::shared_ptr<TileCache> tileCache,
-        int framesUntilFlushRequestQueue);
-
-    virtual ~CachingTileProvider();
+Layer::Layer(const ghoul::Dictionary& layerDict)
+    : _enabled(properties::BoolProperty("enabled", "enabled", false))
+{
+    std::string layerName = "error!";
+    layerDict.getValue("Name", layerName);
+    setName(layerName);
         
-    /**
-    * \returns a Tile with status OK iff it exists in in-memory 
-    * cache. If not, it may enqueue some IO operations on a 
-    * separate thread.
-    */
-    virtual Tile getTile(const TileIndex& tileIndex);
+    _tileProvider = std::shared_ptr<TileProvider>(
+        TileProvider::createFromDictionary(layerDict));
+        
+    // Something else went wrong and no exception was thrown
+    if (_tileProvider == nullptr) {
+        throw ghoul::RuntimeError("Unable to create TileProvider '" + name() + "'");
+    }
 
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& tileIndex);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
-    virtual float noDataValueAsFloat();
+    bool enabled = false; // defaults to false if unspecified
+    layerDict.getValue("Enabled", enabled);
+    _enabled.setValue(enabled);
+    addProperty(_enabled);
 
-private:
-    /**
-    * Collects all asynchronously downloaded <code>RawTile</code>
-    * and uses <code>createTile</code> to create <code>Tile</code>s, 
-    * which are put in the LRU cache - potentially pushing out outdated
-    * Tiles.
-    */
-    void initTexturesFromLoadedData();
+    addPropertySubOwner(_renderSettings);
+}
 
-    /**
-    * \returns A tile with <code>Tile::Status::OK</code> if no errors
-    * occured, a tile with <code>Tile::Status::IOError</code> otherwise
-    */
-    Tile createTile(std::shared_ptr<RawTile> res);
-
-    /**
-    * Deletes all enqueued, but not yet started async downloads of textures.
-    * Note that this does not cancel any currently ongoing async downloads.
-    */
-    void clearRequestQueue();
-
-    std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    std::shared_ptr<TileCache> _tileCache;
-
-    int _framesSinceLastRequestFlush;
-    int _framesUntilRequestFlush;
-
-    Tile _defaultTile;
-};
+ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
+    return std::move(_tileProvider->getChunkTilePile(tileIndex, pileSize));
+}
 
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__

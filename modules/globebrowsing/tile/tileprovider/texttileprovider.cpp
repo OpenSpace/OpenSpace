@@ -24,6 +24,8 @@
 
 #include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
 
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
+
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/filesystem/filesystem.h>

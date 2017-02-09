@@ -22,41 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+#include <modules/globebrowsing/rendering/gpu/gpulayerrendersettings.h>
 
-#include <openspace/rendering/renderable.h>
-
-namespace ghoul { namespace opengl {
-class ProgramObject;
-} }
+#include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-class RenderableGlobe;
+void GPULayerRenderSettings::setValue(ProgramObject* programObject, 
+                                      const LayerRenderSettings& layerSettings)
+{
+    gpuOpacity.setValue(programObject, layerSettings.opacity.value());
+    gpuGamma.setValue(programObject, layerSettings.gamma.value());
+    gpuMultiplier.setValue(programObject, layerSettings.multiplier.value());
+}
 
-class PointGlobe : public Renderable {
-public:
-    PointGlobe(const RenderableGlobe& owner);
-    virtual ~PointGlobe();
+void GPULayerRenderSettings::bind(ProgramObject* programObject,
+                                  const std::string& nameBase)
+{
+    gpuOpacity.bind(programObject, nameBase + "opacity");
+    gpuGamma.bind(programObject, nameBase + "gamma");
+    gpuMultiplier.bind(programObject, nameBase + "multiplier");
+}
 
-    bool initialize() override;
-    bool deinitialize() override;
-    bool isReady() const override;
-
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-    
-private:
-    const RenderableGlobe& _owner;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-
-    GLuint _vertexBufferID;
-    GLuint _vaoID;
-};
-
-} // namespace globebrowsing
-} // namespace openspace
-
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+}  // namespace globebrowsing
+}  // namespace openspace

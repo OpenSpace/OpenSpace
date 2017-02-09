@@ -22,77 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#include <modules/globebrowsing/tile/loadjob/diskcachedtileloadjob.h>
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/tilediskcache.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-class AsyncTileDataProvider;
+DiskCachedTileLoadJob::DiskCachedTileLoadJob(
+                                         std::shared_ptr<TileDataset> textureDataProvider, 
+                                         const TileIndex& tileIndex,
+                                         std::shared_ptr<TileDiskCache> tdc,
+                                         CacheMode m)
+    : TileLoadJob(textureDataProvider, tileIndex)
+    , _tileDiskCache(tdc)
+    , _mode(m)
+{}
 
-/**
-* Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
-* caches them in memory using LRU caching
-*/
-class CachingTileProvider : public TileProvider {
-public:
-    CachingTileProvider(const ghoul::Dictionary& dictionary);
+void DiskCachedTileLoadJob::execute() {
+    _rawTile = nullptr;
 
-    CachingTileProvider(
-        std::shared_ptr<AsyncTileDataProvider> tileReader, 
-        std::shared_ptr<TileCache> tileCache,
-        int framesUntilFlushRequestQueue);
+    switch (_mode) {
+        case CacheMode::Disabled: 
+            _rawTile = _tileDataset->readTileData(_chunkIndex); 
+            break;
 
-    virtual ~CachingTileProvider();
-        
-    /**
-    * \returns a Tile with status OK iff it exists in in-memory 
-    * cache. If not, it may enqueue some IO operations on a 
-    * separate thread.
-    */
-    virtual Tile getTile(const TileIndex& tileIndex);
+        case CacheMode::ReadOnly:
+            _rawTile = _tileDiskCache->get(_chunkIndex);
+            if (_rawTile == nullptr) {
+                _rawTile = _tileDataset->readTileData(_chunkIndex);
+            }
+            break;
 
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& tileIndex);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
-    virtual float noDataValueAsFloat();
+        case CacheMode::ReadAndWrite:
+            _rawTile = _tileDiskCache->get(_chunkIndex);
+            if (_rawTile == nullptr) {
+                _rawTile = _tileDataset->readTileData(_chunkIndex);
+                _tileDiskCache->put(_chunkIndex, _rawTile);
+            }
+            break;
 
-private:
-    /**
-    * Collects all asynchronously downloaded <code>RawTile</code>
-    * and uses <code>createTile</code> to create <code>Tile</code>s, 
-    * which are put in the LRU cache - potentially pushing out outdated
-    * Tiles.
-    */
-    void initTexturesFromLoadedData();
+        case CacheMode::WriteOnly:
+            _rawTile = _tileDataset->readTileData(_chunkIndex);
+            _tileDiskCache->put(_chunkIndex, _rawTile);
+            break;
 
-    /**
-    * \returns A tile with <code>Tile::Status::OK</code> if no errors
-    * occured, a tile with <code>Tile::Status::IOError</code> otherwise
-    */
-    Tile createTile(std::shared_ptr<RawTile> res);
-
-    /**
-    * Deletes all enqueued, but not yet started async downloads of textures.
-    * Note that this does not cancel any currently ongoing async downloads.
-    */
-    void clearRequestQueue();
-
-    std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    std::shared_ptr<TileCache> _tileCache;
-
-    int _framesSinceLastRequestFlush;
-    int _framesUntilRequestFlush;
-
-    Tile _defaultTile;
-};
+        case CacheMode::CacheHitsOnly:
+            _rawTile = _tileDiskCache->get(_chunkIndex);
+            if (_rawTile == nullptr) {
+                RawTile res = RawTile::createDefaultRes();
+                res.tileIndex = _chunkIndex;
+                _rawTile = std::make_shared<RawTile>(res);
+            }
+            break;
+    }
+}
 
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__

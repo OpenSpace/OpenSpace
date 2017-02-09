@@ -22,41 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+#include <modules/globebrowsing/rendering/gpu/gpuchunktile.h>
 
-#include <openspace/rendering/renderable.h>
-
-namespace ghoul { namespace opengl {
-class ProgramObject;
-} }
+#include <modules/globebrowsing/tile/chunktile.h>
+#include <modules/globebrowsing/tile/tile.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-class RenderableGlobe;
+void GPUChunkTile::setValue(ProgramObject* programObject, const ChunkTile& chunkTile) {
+    gpuTexture.setValue(programObject, chunkTile.tile.texture);
+    gpuTileUvTransform.setValue(programObject, chunkTile.uvTransform);
+}
 
-class PointGlobe : public Renderable {
-public:
-    PointGlobe(const RenderableGlobe& owner);
-    virtual ~PointGlobe();
+void GPUChunkTile::bind(ProgramObject* programObject, const std::string& nameBase) {
+    gpuTexture.bind(programObject, nameBase + "textureSampler");
+    gpuTileUvTransform.bind(programObject, nameBase + "uvTransform.");
+}
 
-    bool initialize() override;
-    bool deinitialize() override;
-    bool isReady() const override;
+void GPUChunkTile::deactivate() {
+    gpuTexture.deactivate();
+}
 
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-    
-private:
-    const RenderableGlobe& _owner;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-
-    GLuint _vertexBufferID;
-    GLuint _vaoID;
-};
-
-} // namespace globebrowsing
-} // namespace openspace
-
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+}  // namespace globebrowsing
+}  // namespace openspace

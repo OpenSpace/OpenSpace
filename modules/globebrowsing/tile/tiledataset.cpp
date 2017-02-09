@@ -63,7 +63,7 @@
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
-
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
 
 namespace {
     const std::string _loggerCat = "TileDataset";
