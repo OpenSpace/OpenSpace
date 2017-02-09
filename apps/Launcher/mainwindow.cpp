@@ -169,6 +169,9 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::initialize() {
+    // ParseOptions
+    generateOptions();
+
     // Get the news information
     QNetworkRequest request;
     request.setUrl(QUrl(NewsURL));
@@ -189,7 +192,8 @@ void MainWindow::initialize() {
     _syncWidget->setWindowModality(Qt::WindowModal);
     _syncWidget->hide();
 
-    ghoul::logging::LogManager::initialize(ghoul::logging::LogLevel::Debug);
+    printf("%d", _optionParser->value("d").toInt());
+    ghoul::logging::LogManager::initialize(static_cast<ghoul::logging::LogLevel>(_optionParser->value("d").toInt()));
     LogMgr.addLog( std::make_unique< ghoul::logging::ConsoleLog >() );
     // TODO: This can crash the system in cases where the logfile can't be created ---abock
     LogMgr.addLog( std::make_unique< ghoul::logging::HTMLLog >("LauncherLog.html", ghoul::logging::HTMLLog::Append::No) );
@@ -262,4 +266,21 @@ void MainWindow::newsReadyRead() {
     QString news = QString::fromLatin1(arrayData);
     _informationWidget->setText(news);
     _newsReply->deleteLater();
+}
+
+void MainWindow::generateOptions() {
+
+    _optionParser = new QCommandLineParser;
+    _optionParser->setApplicationDescription("OpenSpace Launcher");
+    _optionParser->addHelpOption();
+    _optionParser->addVersionOption();
+
+    _optionParser->addOptions({
+        { { "d", "debug" },
+        QCoreApplication::translate("main", "Debug output level"),
+        QCoreApplication::translate("main", "0, 1, 2, 3, 4, 5, 6"),
+        QCoreApplication::translate("main", "1"),
+        }
+    });
+    _optionParser->process(*QApplication::instance());
 }

@@ -31,6 +31,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QTextEdit>
+#include <QCommandLineParser>
 
 class QComboBox;
 class QNetworkAccessManager;
@@ -56,6 +57,8 @@ private slots:
     void newsNetworkError();
     void newsReadyRead();
 
+    void generateOptions();
+
 private:
     void initialize();
     
@@ -74,6 +77,8 @@ private:
 
     QNetworkAccessManager _networkManager;
     openspace::ConfigurationManager* _configuration;
+
+    QCommandLineParser* _optionParser;
 };
 
 //class MainWindow : public QWidget {
