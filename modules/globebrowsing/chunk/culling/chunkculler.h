@@ -46,4 +46,4 @@ public:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKCULLER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKCULLER___H__

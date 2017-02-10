@@ -42,4 +42,4 @@ struct LoadJob : public Job<RawTile> {
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LOADJOB___H__

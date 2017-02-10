@@ -71,4 +71,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___GPUHEIGHTLAYER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPUHEIGHTLAYER___H__

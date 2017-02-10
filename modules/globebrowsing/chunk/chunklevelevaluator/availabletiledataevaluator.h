@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR_AVAILABLETILEDATA___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR_AVAILABLETILEDATA___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___AVAILABLETILEDATAEVALUATOR___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___AVAILABLETILEDATAEVALUATOR___H__
 
 #include <modules/globebrowsing/chunk/chunklevelevaluator/chunklevelevaluator.h>
 
@@ -45,4 +45,4 @@ public:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR_AVAILABLETILEDATA___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___AVAILABLETILEDATAEVALUATOR___H__

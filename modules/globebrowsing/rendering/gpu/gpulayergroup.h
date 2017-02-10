@@ -81,4 +81,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__

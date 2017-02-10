@@ -42,4 +42,4 @@ struct LayerRenderSettings : public properties::PropertyOwner {
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__

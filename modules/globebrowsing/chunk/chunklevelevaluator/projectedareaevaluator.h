@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___EVALUATECHUNKLEVELBYPROJECTEDAREA___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___EVALUATECHUNKLEVELBYPROJECTEDAREA___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTEDAREAEVALUATOR___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTEDAREAEVALUATOR___H__
 
 #include <modules/globebrowsing/chunk/chunklevelevaluator/chunklevelevaluator.h>
 
@@ -48,4 +48,4 @@ public:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___EVALUATECHUNKLEVELBYPROJECTEDAREA___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTEDAREAEVALUATOR___H__
