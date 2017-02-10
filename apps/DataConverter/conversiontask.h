@@ -14,4 +14,4 @@ public:
 }
 }
 
-#endif
+#endif // __CONVERSIONTASK_H__

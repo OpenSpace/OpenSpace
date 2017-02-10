@@ -90,4 +90,4 @@ private:
 
 }  // namespace openspace
 
-#endif //__OPENSPACE_CORE___HISTOGRAM___H__
+#endif // __OPENSPACE_CORE___HISTOGRAM___H__

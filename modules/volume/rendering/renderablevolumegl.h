@@ -83,4 +83,4 @@ private:
 
 } // namespace openspace
 
-#endif
+#endif // __RENDERABLEVOLUMEGL_H__

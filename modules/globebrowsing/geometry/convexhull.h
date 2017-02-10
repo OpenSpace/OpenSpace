@@ -69,4 +69,4 @@ private:
 } // namespace globebrowsing   
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___CONVEX_HULL___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CONVEX_HULL___H__

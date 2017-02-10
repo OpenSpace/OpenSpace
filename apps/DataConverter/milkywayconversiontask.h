@@ -38,4 +38,4 @@ private:
 }
 }
 
-#endif
+#endif // __MILKYWAYCONVERSIONTASK_H__

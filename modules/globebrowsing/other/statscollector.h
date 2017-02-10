@@ -121,4 +121,4 @@ private:
 
 #include "statscollector.inl"
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___STATS_TRACKER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___STATS_TRACKER___H__

@@ -317,4 +317,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___GPU_LAYER_MANAGER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPU_LAYER_MANAGER___H__

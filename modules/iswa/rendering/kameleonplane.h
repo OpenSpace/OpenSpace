@@ -106,4 +106,4 @@ private:
  
 } // namespace openspace
 
-#endif //__OPENSPACE_MODULE_ISWA___KAMELEONPLANE___H__
+#endif // __OPENSPACE_MODULE_ISWA___KAMELEONPLANE___H__

@@ -107,4 +107,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATA_PROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATA_PROVIDER___H__

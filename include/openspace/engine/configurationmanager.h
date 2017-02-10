@@ -167,4 +167,4 @@ private:
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_CORE___CONFIGURATIONMANAGER___H__
+#endif // __OPENSPACE_CORE___CONFIGURATIONMANAGER___H__

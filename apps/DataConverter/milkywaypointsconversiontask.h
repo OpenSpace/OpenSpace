@@ -32,4 +32,4 @@ private:
 }
 }
 
-#endif
+#endif // __MILKYWAYPOINTSCONVERSIONTASK_H__

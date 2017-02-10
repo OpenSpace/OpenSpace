@@ -58,4 +58,4 @@ private:
 
 } // namespace openspace
 
-#endif //__OPENSPACE_MODULE_NEWHORIZONS___HONGKANGPARSER___H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___HONGKANGPARSER___H__

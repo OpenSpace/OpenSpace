@@ -48,4 +48,4 @@ namespace modelgeometry {
 }  // namespace modelgeometry
 }  // namespace openspace
 
-#endif // __WAVEFRONTOBJECT_H__
+#endif // __WAVEFRONTGEOMETRY_H__

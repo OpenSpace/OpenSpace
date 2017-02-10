@@ -36,4 +36,4 @@ public:
 
 } // openspace
 
-#endif  // __OPENSPACE_CORE___RAYCASTERLISTENER___H__
+#endif // __OPENSPACE_CORE___RAYCASTERLISTENER___H__

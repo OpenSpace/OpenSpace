@@ -61,4 +61,4 @@ private:
 
 } // namespace openspace
 
- #endif //__OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__
+#endif // __OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__

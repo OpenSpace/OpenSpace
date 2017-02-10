@@ -146,4 +146,4 @@ using TileCache = LRUCache<TileHashKey, Tile>;
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER___H__

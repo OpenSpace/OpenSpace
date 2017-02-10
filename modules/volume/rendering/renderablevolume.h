@@ -60,4 +60,4 @@ private:
 
 } // namespace openspace
 
-#endif
+#endif // __RENDERABLEVOLUME_H__
