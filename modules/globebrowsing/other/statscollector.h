@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___STATS_TRACKER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___STATS_TRACKER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___STATS_COLLECTOR___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___STATS_COLLECTOR___H__
 
 #include <ghoul/misc/boolean.h>
 
@@ -121,4 +121,4 @@ private:
 
 #include "statscollector.inl"
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___STATS_TRACKER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___STATS_COLLECTOR___H__

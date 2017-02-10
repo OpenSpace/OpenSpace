@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCRIPTHELPER___H__
-#define __OPENSPACE_CORE___SCRIPTHELPER___H__
+#ifndef __OPENSPACE_CORE___SCRIPT_HELPER___H__
+#define __OPENSPACE_CORE___SCRIPT_HELPER___H__
 
 #define SCRIPT_CHECK_ARGUMENTS(__category__, __stack__, __reqArg__, __realArg__) \
     if (__realArg__ != __reqArg__) { \
@@ -32,5 +32,4 @@
         return 0; \
         }
 
-
-#endif // __OPENSPACE_CORE___SCRIPTHELPER___H__
+#endif // __OPENSPACE_CORE___SCRIPT_HELPER___H__

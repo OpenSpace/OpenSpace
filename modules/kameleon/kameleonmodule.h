@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ISWA___KAMELEONMODULE___H__
-#define __OPENSPACE_MODULE_ISWA___KAMELEONMODULE___H__
+#ifndef __OPENSPACE_MODULE_KAMELEON___KAMELEONMODULE___H__
+#define __OPENSPACE_MODULE_KAMELEON___KAMELEONMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -36,4 +36,4 @@ public:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___KAMELEONMODULE___H__
+#endif // __OPENSPACE_MODULE_KAMELEON___KAMELEONMODULE___H__

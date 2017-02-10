@@ -25,13 +25,19 @@ This script traverses the file tree of OpenSpace and will check all files' inclu
 guards for correctness. At the moment this includes:
  * Correctness (file has a #ifndef. #define, and #endif lines)
  * Equality (using the same name for the #ifdef and #define)
- * Styling (no empty line between #ifndef and #define lines, empty lines before and 
-   after #ifndef #define block, files end with an empty line, and copyright header
-   is correctly indented)
+ * Styling 
+   * no empty line between #ifndef and #define lines
+   * Empty lines before and after #ifndef #define block
+   * Files end with an empty line
+   * Copyright header is correctly indented
+   * Include guard correctly uses the filename
+   * Include guard is all upper case
  * Correct usage of the name in the final comment of the file
  * Correct year of copyright notice
- * Naming convention (OpenSpace include guards start with OPENSPACE, Ghoul with GHOUL,
-   module includes have the module name in it)
+ * Naming convention
+   * OpenSpace include guards start with OPENSPACE, Ghoul with GHOUL,
+     module includes have the module name in it
+   * The correct submodule is used
  * Checking for duplicates between all files
 
 If this script is executed from the base directory of OpenSpace, no arguments need to
@@ -41,6 +47,7 @@ Thus, the default value of the first argument is '.'
 
 import fnmatch
 import glob
+import os
 import re
 import sys
 
@@ -89,7 +96,7 @@ def check_equality(lines):
         return ifndef + ' ' + define
 
 def check_styling(lines):
-    _, ifndef_line = get_ifndef_symbol(lines)
+    ifndef_symbol, ifndef_line = get_ifndef_symbol(lines)
     _, define_line = get_define_symbol(lines)
 
     if abs(ifndef_line - define_line) != 1:
@@ -108,7 +115,17 @@ def check_styling(lines):
         if l[0] != ' ':
             return 'Copyright header must be indented'
 
+    if ifndef_symbol != ifndef_symbol.upper():
+        return 'Include guard is not all upper case'
+
     return ''
+
+def check_styling_filename(lines, filename):
+    ifndef_symbol, _ = get_ifndef_symbol(lines)
+    file = os.path.splitext(os.path.basename(filename))[0].upper()
+
+    if not (file in ifndef_symbol or file in ifndef_symbol.replace('_', '')):
+        return 'Malformed include guard: ' + ifndef_symbol + ' || ' + file
 
 def check_comment(lines):
     ifndef_symbol, _ = get_ifndef_symbol(lines)
@@ -137,13 +154,29 @@ def check_copyright(lines):
     else:
         return ''
 
-def check_naming_convention(lines, component):
+def check_naming_convention_component(lines, component):
     ifndef_symbol, _ = get_ifndef_symbol(lines)
 
     component_part = ifndef_symbol[2:2 + len(component)]
 
     if component_part != component.upper():
-        return '#ifndef naming convention broken: ' + ifndef_symbol + ' // ' + component.upper() 
+        return '#ifndef naming convention broken: ' + ifndef_symbol + ' || ' + component.upper() 
+    else:
+        return ''
+
+def check_naming_convention_subcomponent(lines, component, file):
+    ifndef_symbol, _ = get_ifndef_symbol(lines)
+
+    if component == "ghoul" or component == "openspace_core":
+        return
+
+    subcomponent_part = ifndef_symbol[2 + len(component) + 1 :]
+    subcomponent_part = subcomponent_part[: subcomponent_part.find('_')]
+
+    path_part = file.split(os.sep)[2]
+
+    if path_part.upper() != subcomponent_part:
+        return 'Subcomponent naming convention broken: ' + ifndef_symbol
     else:
         return ''
 
@@ -175,6 +208,12 @@ def check_file(file, component):
             print(file, '\t',  'Styling check failed', '\t', styling)
             return
 
+        styling_filename = check_styling_filename(lines, file)
+        if styling_filename:
+            print(file, '\t',  'Filename styling check failed', '\t', styling_filename)
+            return
+
+
         comment = check_comment(lines)
         if comment:
             print(file, '\t',  'Comment check failed', '\t', comment)
@@ -185,9 +224,14 @@ def check_file(file, component):
             print(file, '\t', 'Copyright check failed', '\t', copyright)
             return
 
-        naming = check_naming_convention(lines, component)
-        if naming:
-            print(file, '\t', 'Naming convention broken', '\t', naming)
+        naming_component = check_naming_convention_component(lines, component)
+        if naming_component:
+            print(file, '\t', 'Naming convention broken', '\t', naming_component)
+            return
+
+        naming_subcomponent = check_naming_convention_subcomponent(lines, component, file)
+        if naming_subcomponent:
+            print(file, '\t', 'Naming convention broken', '\t', naming_subcomponent)
             return
 
         duplicates, symbol = check_duplicates(lines, previousSymbols)
