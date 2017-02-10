@@ -67,7 +67,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
 
     // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
     for (int i = 0; i < parents && tileIndex.level > 1; i++) {
-        TileSelector::ascendToParent(tileIndex, uvTransform);
+        tileselector::ascendToParent(tileIndex, uvTransform);
     }
     maxParents -= parents;
 
@@ -75,7 +75,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
     //         the range of defined data.
     int maximumLevel = maxLevel();
     while (tileIndex.level > maximumLevel){
-        TileSelector::ascendToParent(tileIndex, uvTransform);
+        tileselector::ascendToParent(tileIndex, uvTransform);
         maxParents--;
     }
     if(maxParents < 0){
@@ -90,7 +90,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
             if (--maxParents < 0){
                 return{ Tile::TileUnavailable, uvTransform };
             }
-            TileSelector::ascendToParent(tileIndex, uvTransform);
+            tileselector::ascendToParent(tileIndex, uvTransform);
         }
         else {
             return { tile, uvTransform };

@@ -132,7 +132,7 @@ private:
     void setGdalProxyConfiguration();
     GDALDataset* gdalDataset(const std::string& gdalDatasetDesc);
     bool gdalHasOverviews() const;
-    int gdalOverview(const PixelRange& baseRegionSize) const;
+    int gdalOverview(const PixelRegion::PixelRange& baseRegionSize) const;
     int gdalOverview(const TileIndex& tileIndex) const;
     int gdalVirtualOverview(const TileIndex& tileIndex) const;
     PixelRegion gdalPixelRegion(const GeodeticPatch& geodeticPatch) const;
@@ -153,8 +153,8 @@ private:
     */
     std::array<double, 6> getGeoTransform() const;
 
-    PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
-    Geodetic2 pixelToGeodetic(const PixelCoordinate& p) const;
+    PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
+    Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
     IODescription getIODescription(const TileIndex& tileIndex) const;
     char* readImageData(IODescription& io, CPLErr& worstError) const;
     CPLErr rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst) const;

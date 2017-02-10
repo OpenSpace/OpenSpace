@@ -30,11 +30,11 @@
 namespace openspace {
 namespace globebrowsing {
 
-using PixelCoordinate = glm::ivec2;
-using PixelRange= glm::ivec2;
-
 struct PixelRegion {
-    enum Side {
+    using PixelCoordinate = glm::ivec2;
+    using PixelRange = glm::ivec2;
+
+    enum class Side {
         LEFT = 0,
         TOP,
         RIGHT,

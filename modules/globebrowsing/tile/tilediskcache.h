@@ -54,7 +54,6 @@ private:
     std::string getFilePath(const TileIndex& tileIndex) const;
     ghoul::filesystem::File getMetaDataFile(const TileIndex& tileIndex) const;
     ghoul::filesystem::File getDataFile(const TileIndex& tileIndex) const;
-
 };
 
 } // namespace globebrowsing

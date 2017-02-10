@@ -24,7 +24,6 @@
 
 #include <modules/globebrowsing/tile/tiledataset.h>
 
-
 #include <limits>
 
 #include <ogr_featurestyle.h>
@@ -106,8 +105,8 @@ IODescription IODescription::cut(PixelRegion::Side side, int pos) {
     IODescription whatCameOff = *this;
     whatCameOff.read.region = read.region.globalCut(side, pos);
 
-    PixelRange cutSize = whatCameOff.read.region.numPixels;
-    PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
+    PixelRegion::PixelRange cutSize = whatCameOff.read.region.numPixels;
+    PixelRegion::PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
         
     if (cutSize.x == 0 || cutSize.y == 0) {
         ghoul_assert(
@@ -120,7 +119,8 @@ IODescription IODescription::cut(PixelRegion::Side side, int pos) {
         );
     }
 
-    int localWriteCutPos = (side % 2 == 0) ? localWriteCutSize.x : localWriteCutSize.y;
+    int localWriteCutPos = (side == PixelRegion::Side::LEFT || side == PixelRegion::Side::RIGHT)
+        ? localWriteCutSize.x : localWriteCutSize.y;
     whatCameOff.write.region = write.region.localCut(side, localWriteCutPos);
 
     return whatCameOff;
@@ -321,7 +321,10 @@ std::shared_ptr<RawTile> TileDataset::readTileData(TileIndex tileIndex) {
 
 std::shared_ptr<RawTile> TileDataset::defaultTileData() {
     ensureInitialized();
-    PixelRegion pixelRegion = { PixelCoordinate(0, 0), PixelRange(16, 16) };
+    PixelRegion pixelRegion = {
+        PixelRegion::PixelCoordinate(0, 0),
+        PixelRegion::PixelRange(16, 16)
+    };
     std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
     rawTile->tileIndex = { 0, 0, 0 };
     rawTile->dimensions = glm::uvec3(pixelRegion.numPixels, 1);
@@ -397,7 +400,7 @@ bool TileDataset::gdalHasOverviews() const {
     return _dataset->GetRasterBand(1)->GetOverviewCount() > 0;
 }
 
-int TileDataset::gdalOverview(const PixelRange& regionSizeOverviewZero) const {
+int TileDataset::gdalOverview(const PixelRegion::PixelRange& regionSizeOverviewZero) const {
     GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
 
     int minNumPixels0 = glm::min(regionSizeOverviewZero.x, regionSizeOverviewZero.y);
@@ -441,8 +444,8 @@ PixelRegion TileDataset::gdalPixelRegion(GDALRasterBand* rasterBand) const {
 PixelRegion TileDataset::gdalPixelRegion(const GeodeticPatch& geodeticPatch) const {
     Geodetic2 nwCorner = geodeticPatch.getCorner(Quad::NORTH_WEST);
     Geodetic2 swCorner = geodeticPatch.getCorner(Quad::SOUTH_EAST);
-    PixelCoordinate pixelStart = geodeticToPixel(nwCorner);
-    PixelCoordinate pixelEnd = geodeticToPixel(swCorner);
+    PixelRegion::PixelCoordinate pixelStart = geodeticToPixel(nwCorner);
+    PixelRegion::PixelCoordinate pixelEnd = geodeticToPixel(swCorner);
     PixelRegion gdalRegion(pixelStart, pixelEnd - pixelStart);
     return gdalRegion;
 }
@@ -474,7 +477,7 @@ std::array<double, 6> TileDataset::getGeoTransform() const {
     return padfTransform;
 }
 
-PixelCoordinate TileDataset::geodeticToPixel(const Geodetic2& geo) const {
+PixelRegion::PixelCoordinate TileDataset::geodeticToPixel(const Geodetic2& geo) const {
     std::array<double, 6> padfTransform = getGeoTransform();
         
     double Y = Angle<double>::fromRadians(geo.lat).asDegrees();
@@ -505,10 +508,10 @@ PixelCoordinate TileDataset::geodeticToPixel(const Geodetic2& geo) const {
     ghoul_assert(abs(X - Xp) < 1e-10, "inverse should yield X as before");
     ghoul_assert(abs(Y - Yp) < 1e-10, "inverse should yield Y as before");
 
-    return PixelCoordinate(glm::round(P), glm::round(L));
+    return PixelRegion::PixelCoordinate(glm::round(P), glm::round(L));
 }
 
-Geodetic2 TileDataset::pixelToGeodetic(const PixelCoordinate& p) const {
+Geodetic2 TileDataset::pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const {
     std::array<double, 6> padfTransform = getGeoTransform();
     Geodetic2 geodetic;
     // Should be using radians and not degrees?
@@ -541,14 +544,14 @@ IODescription TileDataset::getIODescription(const TileIndex& tileIndex) const {
 
     // For correct sampling in height dataset, we need to pad the texture tile
     io.write.region.pad(padding);
-    PixelRange preRound = io.write.region.numPixels;
+    PixelRegion::PixelRange preRound = io.write.region.numPixels;
     io.write.region.roundDownToQuadratic();
     io.write.region.roundUpNumPixelToNearestMultipleOf(2);
     if (preRound != io.write.region.numPixels) {
         LDEBUG(tileIndex << " | " << preRound.x << ", " << preRound.y << " --> " << io.write.region.numPixels.x << ", " << io.write.region.numPixels.y);
     }
 
-    io.write.region.start = PixelCoordinate(0, 0); // write region starts in origin
+    io.write.region.start = PixelRegion::PixelCoordinate(0, 0); // write region starts in origin
     io.write.bytesPerLine = _dataLayout.bytesPerPixel * io.write.region.numPixels.x;
     io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
 
@@ -705,7 +708,7 @@ CPLErr TileDataset::rasterIO(GDALRasterBand* rasterBand, const IODescription& io
         "Invalid write region"
     );
 
-    PixelCoordinate end = io.write.region.end();
+    PixelRegion::PixelCoordinate end = io.write.region.end();
     size_t largestIndex =
         (end.y - 1) * io.write.bytesPerLine + (end.x - 1) * _dataLayout.bytesPerPixel;
     ghoul_assert(largestIndex <= io.write.totalNumBytes, "Invalid write region");

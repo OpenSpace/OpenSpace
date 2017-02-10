@@ -31,6 +31,7 @@
 
 namespace openspace {
 namespace globebrowsing {
+namespace culling {
 
 /**
  * In this implementation of the horizon culling, the closer the ellipsoid is to a
@@ -47,6 +48,7 @@ public:
         double minimumGlobeRadius);
 };
 
+} // namespace culling
 } // namespace globebrowsing
 } // namespace openspace
 

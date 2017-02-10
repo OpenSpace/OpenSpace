@@ -29,8 +29,11 @@
 
 namespace openspace {
 namespace globebrowsing {
+namespace culling {
 
-FrustumCuller::FrustumCuller(const AABB3 viewFrustum) : _viewFrustum(viewFrustum) {}
+FrustumCuller::FrustumCuller(AABB3 viewFrustum)
+    : _viewFrustum(std::move(viewFrustum))
+{}
 
 bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     // Calculate the MVP matrix
@@ -56,5 +59,6 @@ bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     return !_viewFrustum.intersects(bounds);
 }
 
+} // namespace culling
 } // namespace globebrowsing
 } // namespace openspace

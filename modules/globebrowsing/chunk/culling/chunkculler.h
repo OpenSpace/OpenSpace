@@ -33,6 +33,8 @@ namespace globebrowsing {
 
 class Chunk;
 
+namespace culling {
+
 class ChunkCuller {
 public:
     /**
@@ -43,6 +45,7 @@ public:
     virtual bool isCullable(const Chunk& chunk, const RenderData& renderData) = 0;
 };
 
+} // namespace culling
 } // namespace globebrowsing
 } // namespace openspace
 

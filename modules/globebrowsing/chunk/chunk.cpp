@@ -96,7 +96,7 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
     // (that is channel 0).
     size_t HEIGHT_CHANNEL = 0;
     const LayerGroup& heightmaps = layerManager->layerGroup(LayerManager::HeightLayers);
-    std::vector<ChunkTile> chunkTiles = TileSelector::getTilesSortedByHighestResolution(
+    std::vector<ChunkTile> chunkTiles = tileselector::getTilesSortedByHighestResolution(
         heightmaps, _tileIndex
     );
 

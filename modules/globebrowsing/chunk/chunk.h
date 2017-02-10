@@ -27,7 +27,6 @@
 
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/tileindex.h>
-
 #include <glm/glm.hpp>
 #include <vector>
 

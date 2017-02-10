@@ -72,8 +72,8 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
         TriangleSoup::Normals::No
     );
 
-    _chunkCullers.push_back(std::make_unique<HorizonCuller>());
-    _chunkCullers.push_back(std::make_unique<FrustumCuller>(
+    _chunkCullers.push_back(std::make_unique<culling::HorizonCuller>());
+    _chunkCullers.push_back(std::make_unique<culling::FrustumCuller>(
         AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35)))
     );
 

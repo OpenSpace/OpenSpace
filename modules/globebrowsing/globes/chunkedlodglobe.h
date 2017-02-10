@@ -40,8 +40,11 @@ namespace chunklevelevaluator {
     class Evaluator;
 } // namespace chunklevelevaluator
     
+namespace culling {
+    class ChunkCuller;
+} // namespace culling
+
 class Chunk;
-class ChunkCuller;
 class ChunkNode;
 class ChunkRenderer;
 class Geodetic2;
@@ -127,7 +130,7 @@ private:
     // the patch used for actual rendering
     std::unique_ptr<ChunkRenderer> _renderer;
 
-    std::vector<std::unique_ptr<ChunkCuller>> _chunkCullers;
+    std::vector<std::unique_ptr<culling::ChunkCuller>> _chunkCullers;
 
     std::unique_ptr<chunklevelevaluator::Evaluator> _chunkEvaluatorByAvailableTiles;
     std::unique_ptr<chunklevelevaluator::Evaluator> _chunkEvaluatorByProjectedArea;

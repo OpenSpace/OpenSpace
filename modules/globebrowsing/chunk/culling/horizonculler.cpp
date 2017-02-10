@@ -29,6 +29,7 @@
 
 namespace openspace {
 namespace globebrowsing {
+namespace culling {
 
 bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     // Calculations are done in the reference frame of the globe. Hence, the camera
@@ -95,5 +96,6 @@ bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
     return distanceToObjectSquared > minimumAllowedDistanceToObjectSquared;
 }
 
+} // namespace culling
 } // namespace globebrowsing
 } // namespace openspace

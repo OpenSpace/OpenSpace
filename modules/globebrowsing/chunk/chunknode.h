@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKNODE___H__
 
 #include <modules/globebrowsing/chunk/chunk.h>
-
 #include <array>
 #include <functional>
 #include <memory>
