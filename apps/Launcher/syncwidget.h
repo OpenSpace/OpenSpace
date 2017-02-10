@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SYNCWIDGET_H__
-#define __SYNCWIDGET_H__
+#ifndef __OPENSPACE_APP_LAUNCHER___SYNCWIDGET___H__
+#define __OPENSPACE_APP_LAUNCHER___SYNCWIDGET___H__
 
 #include <QWidget>
 
@@ -121,4 +121,4 @@ private:
 
 };
 
-#endif // __SYNCWIDGET_H__
+#endif // __OPENSPACE_APP_LAUNCHER___SYNCWIDGET___H__

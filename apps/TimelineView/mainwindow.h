@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MAINWINDOW_H__
-#define __MAINWINDOW_H__
+#ifndef __OPENSPACE_APP_TIMELINEVIEW___MAINWINDOW___H__
+#define __OPENSPACE_APP_TIMELINEVIEW___MAINWINDOW___H__
 
 #include <QWidget>
 #include <QTcpSocket>
@@ -71,4 +71,4 @@ private:
     bool _isConnected = false;
 };
 
-#endif // __MAINWINDOW_H__
+#endif // __OPENSPACE_APP_TIMELINEVIEW___MAINWINDOW___H__

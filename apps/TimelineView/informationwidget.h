@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __INFORMATIONWIDGET_H__
-#define __INFORMATIONWIDGET_H__
+#ifndef __OPENSPACE_APP_TIMELINEVIEW___INFORMATIONWIDGET___H__
+#define __OPENSPACE_APP_TIMELINEVIEW___INFORMATIONWIDGET___H__
 
 #include <QTextEdit>
 
@@ -38,4 +38,4 @@ public slots:
     void logInformation(QString text);
 };
 
-#endif // __INFORMATIONWIDGET_H__
+#endif // __OPENSPACE_APP_TIMELINEVIEW___INFORMATIONWIDGET___H__

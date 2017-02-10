@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONTROLWIDGET_H__
-#define __CONTROLWIDGET_H__
+#ifndef __OPENSPACE_APP_TIMELINEVIEW___CONTROLWIDGET___H__
+#define __OPENSPACE_APP_TIMELINEVIEW___CONTROLWIDGET___H__
 
 #include <QWidget>
 
@@ -66,4 +66,4 @@ private:
     QPushButton* _setFocusToNewHorizons;
 };
 
-#endif // __CONTROLWIDGET_H__
+#endif // __OPENSPACE_APP_TIMELINEVIEW___CONTROLWIDGET___H__

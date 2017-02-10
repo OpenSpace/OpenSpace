@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TIMELINEWIDGET_H__
-#define __TIMELINEWIDGET_H__
+#ifndef __OPENSPACE_APP_TIMELINEVIEW___TIMELINEWIDGET___H__
+#define __OPENSPACE_APP_TIMELINEVIEW___TIMELINEWIDGET___H__
 
 #include <QWidget>
 
@@ -67,4 +67,4 @@ private:
     } _currentTime;
 };
 
-#endif // __TIMELINEWIDGET_H__
+#endif // __OPENSPACE_APP_TIMELINEVIEW___TIMELINEWIDGET___H__

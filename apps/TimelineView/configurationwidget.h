@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __CONFIGURATIONWIDGET_H__
-#define __CONFIGURATIONWIDGET_H__
+#ifndef __OPENSPACE_APP_TIMELINEVIEW___CONFIGURATIONWIDGET___H__
+#define __OPENSPACE_APP_TIMELINEVIEW___CONFIGURATIONWIDGET___H__
 
 #include <QWidget>
 #include <QLineEdit>
@@ -50,4 +50,4 @@ private:
     QPushButton* _connect;
 };
 
-#endif // __CONFIGURATIONWIDGET_H__
+#endif // __OPENSPACE_APP_TIMELINEVIEW___CONFIGURATIONWIDGET___H__
