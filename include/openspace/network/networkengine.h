@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef PARALLELCONNECTION__OPENSPACE_CORE___NETWORKENGINE___H__
-#define PARALLELCONNECTION__OPENSPACE_CORE___NETWORKENGINE___H__
+#ifndef __OPENSPACE_CORE___NETWORKENGINE___H__
+#define __OPENSPACE_CORE___NETWORKENGINE___H__
 
 #include <cstdint>
 #include <map>
@@ -75,4 +75,4 @@ private:
 
 } // namespace openspace
 
-#endif // PARALLELCONNECTION__OPENSPACE_CORE___NETWORKENGINE___H__
+#endif // __OPENSPACE_CORE___NETWORKENGINE___H__

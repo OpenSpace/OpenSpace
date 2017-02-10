@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __NEWHORIZONSMODULE_H__
-#define __NEWHORIZONSMODULE_H__
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___NEWHORIZONS___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___NEWHORIZONS___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -41,4 +41,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __NEWHORIZONSMODULE_H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___NEWHORIZONS___H__
