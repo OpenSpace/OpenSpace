@@ -68,4 +68,4 @@ private:
 
 } //namespace openspace
 
-#endif //__OPENSPACE_MODULE_BASE___SCREENSPACEFRAMEBUFFER___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEFRAMEBUFFER___H__

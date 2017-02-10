@@ -46,4 +46,4 @@ private:
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_ISWA___DATAPROCESSORTEXT___H__
+#endif // __OPENSPACE_MODULE_ISWA___DATAPROCESSORTEXT___H__

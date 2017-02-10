@@ -113,4 +113,4 @@ private:
 
 } //namespace openspace
 
-#endif //__OPENSPACE_MODULE_ISWA___DATACYGNET___H__
+#endif // __OPENSPACE_MODULE_ISWA___DATACYGNET___H__

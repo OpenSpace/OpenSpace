@@ -54,4 +54,4 @@ void renderTriggerProperty(properties::Property* prop, const std::string& ownerN
 
 } // namespace openspace
 
-#endif __OPENSPACE_MODULE_ONSCREENGUI___RENDERPROPERTIES___H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___RENDERPROPERTIES___H__

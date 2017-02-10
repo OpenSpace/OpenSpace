@@ -61,6 +61,6 @@ private:
     properties::StringProperty _texturePath;
 };
 
-} //namespace openspace
+} // namespace openspace
 
-#endif //__OPENSPACE_MODULE_BASE___SCREENSPACEIMAGE___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEIMAGE___H__

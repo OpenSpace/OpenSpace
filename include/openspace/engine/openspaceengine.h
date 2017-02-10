@@ -187,4 +187,4 @@ private:
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_CORE___OPENSPACEENGINE___H__
+#endif // __OPENSPACE_CORE___OPENSPACEENGINE___H__

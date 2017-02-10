@@ -81,4 +81,4 @@ protected:
 }  // namespace modelgeometry
 }  // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_BASE___MODELGEOMETRY___H__

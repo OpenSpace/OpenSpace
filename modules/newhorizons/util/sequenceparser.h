@@ -74,4 +74,4 @@ protected:
 
 } // namespace openspace
 
-#endif //__OPENSPACE_MODULE_NEWHORIZONS___SEQUENCEPARSER___H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___SEQUENCEPARSER___H__

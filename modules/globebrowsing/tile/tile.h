@@ -140,4 +140,4 @@ struct Tile {
 } // namespace openspace
 
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__

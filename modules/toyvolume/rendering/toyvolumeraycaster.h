@@ -77,4 +77,4 @@ private:
 
 } // openspace
 
-#endif  // __OPENSPACE_MODULE_TOYVOLUME___TOYVOLUMERAYCASTER___H__ 
+#endif // __OPENSPACE_MODULE_TOYVOLUME___TOYVOLUMERAYCASTER___H__ 

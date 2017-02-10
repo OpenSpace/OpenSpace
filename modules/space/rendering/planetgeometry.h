@@ -53,4 +53,4 @@ protected:
 }  // namespace planetgeometry
 }  // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_SPACE___PLANETGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_SPACE___PLANETGEOMETRY___H__

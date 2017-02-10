@@ -105,4 +105,4 @@ private:
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_SPACE___RENDERABLESTARS___H__
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLESTARS___H__

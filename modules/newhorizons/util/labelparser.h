@@ -72,4 +72,4 @@ private:
 
 } // namespace openspace
 
-#endif //__OPENSPACE_MODULE_NEWHORIZONS___LABELPARSER___H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___LABELPARSER___H__

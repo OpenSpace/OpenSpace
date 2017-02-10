@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __INFOWIDGET_H__
-#define __INFOWIDGET_H__
+#ifndef __OPENSPACE_APP_LAUNCHER___INFOWIDGET___H__
+#define __OPENSPACE_APP_LAUNCHER___INFOWIDGET___H__
 
 //#include <QWidget>
 #include <QGroupBox>
@@ -58,4 +58,4 @@ private:
     int _totalBytes;
 };
 
-#endif // __INFOWIDGET_H__
+#endif // __OPENSPACE_APP_LAUNCHER___INFOWIDGET___H__

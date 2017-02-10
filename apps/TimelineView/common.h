@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __COMMON_H__
-#define __COMMON_H__
+#ifndef __OPENSPACE_APP_TIMELINEVIEW___COMMON___H__
+#define __OPENSPACE_APP_TIMELINEVIEW___COMMON___H__
 
 struct Image {
     double beginning;
@@ -34,4 +34,4 @@ struct Image {
     std::vector<std::string> instruments;
 };
 
-#endif // __COMMON_H__
+#endif // __OPENSPACE_APP_TIMELINEVIEW___COMMON___H__

@@ -111,6 +111,6 @@ private:
     bool tempPic;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__

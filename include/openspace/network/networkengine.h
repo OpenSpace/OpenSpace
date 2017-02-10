@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #ifndef __OPENSPACE_CORE___NETWORKENGINE___H__
-#define PARALLELCONNECTION__OPENSPACE_CORE___NETWORKENGINE___H__
+#define __OPENSPACE_CORE___NETWORKENGINE___H__
 
 #include <cstdint>
 #include <map>

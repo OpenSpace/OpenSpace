@@ -58,4 +58,4 @@ protected:
 
 } // namespace openspace 
 
-#endif //__OPENSPACE_MODULE_ISWA___DATASPHERE___H__
+#endif // __OPENSPACE_MODULE_ISWA___DATASPHERE___H__

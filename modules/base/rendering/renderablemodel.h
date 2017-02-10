@@ -87,4 +87,4 @@ private:
 
 }  // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
