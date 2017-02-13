@@ -27,13 +27,9 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
-#include <modules/globebrowsing/geometry/ellipsoid.h>
-
 namespace ghoul { namespace fontrendering {
-
 class Font;
 class FontRenderer;
-
 }}
 
 namespace openspace {
@@ -98,37 +94,6 @@ private:
 
     TileCache _tileCache;
     GLuint _fbo;
-};
-
-/**
- * Provides <code>Tile</code>s with the chunk index rendered as text onto its tiles.
- */
-class TileIndexTileProvider : public TextTileProvider {
-public:
-    virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
-        const TileIndex& tileIndex) const;
-};
-
-/**
- * Constructed with an ellipsoid and uses that to render the longitudal length of each
- * of each tile.
- */
-class SizeReferenceTileProvider : public TextTileProvider {
-public:
-    SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
-
-    virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
-        const TileIndex& tileIndex) const;
-    virtual Tile backgroundTile(const TileIndex& tileIndex) const;
-
-    virtual TileHashKey toHash(const TileIndex& tileIndex) const;
-
-private:
-
-    int roundedLongitudalLength(const TileIndex& tileIndex) const;
-
-    Ellipsoid _ellipsoid;
-    Tile _backgroundTile;
 };
 
 } // namespace globebrowsing

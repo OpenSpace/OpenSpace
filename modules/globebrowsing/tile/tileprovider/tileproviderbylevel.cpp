@@ -27,8 +27,6 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const std::string _loggerCat = "TileProviderByLevel";
-
     const char* KeyProviders = "LevelTileProviders";
     const char* KeyMaxLevel = "MaxLevel";
     const char* KeyTileProvider = "TileProvider";
@@ -38,18 +36,16 @@ namespace openspace {
 namespace globebrowsing {
 
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
-    ghoul::Dictionary levelProvidersDict = dictionary.value<ghoul::Dictionary>(
-        KeyProviders
-    );
+    ghoul::Dictionary providers = dictionary.value<ghoul::Dictionary>(KeyProviders);
 
-    for (size_t i = 0; i < levelProvidersDict.size(); i++) {
+    for (size_t i = 0; i < providers.size(); i++) {
         std::string dictKey = std::to_string(i + 1);
-        ghoul::Dictionary levelProviderDict = levelProvidersDict.value<ghoul::Dictionary>(
+        ghoul::Dictionary levelProviderDict = providers.value<ghoul::Dictionary>(
             dictKey
         );
         double floatMaxLevel;
         int maxLevel = 0;
-        if (!levelProviderDict.getValue<double>(KeyMaxLevel, floatMaxLevel)) {
+        if (!providers.getValue<double>(KeyMaxLevel, floatMaxLevel)) {
             throw std::runtime_error(
                 "Must define key '" + std::string(KeyMaxLevel) + "'"
             );

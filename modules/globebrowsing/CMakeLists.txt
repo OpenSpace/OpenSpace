@@ -95,8 +95,10 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/sizereferencetileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/texttileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileindextileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbyindex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbylevel.h
@@ -160,8 +162,10 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/sizereferencetileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/texttileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileindextileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbyindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbylevel.cpp
