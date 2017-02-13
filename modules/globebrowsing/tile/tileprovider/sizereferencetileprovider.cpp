@@ -117,9 +117,9 @@ int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileInde
     return l;
 }
 
-TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIndex) const {
+TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIndex) const {
     int l = roundedLongitudalLength(tileIndex);
-    TileHashKey key = static_cast<TileHashKey>(l);
+    TileIndex::TileHashKey key = static_cast<TileIndex::TileHashKey>(l);
     return key;
 }
 
@@ -129,7 +129,7 @@ Tile SizeReferenceTileProvider::backgroundTile(const TileIndex& tileIndex) const
         auto t = _backgroundTile.texture;
         void* pixelData = new char[t->expectedPixelDataSize()];
         memcpy(pixelData, t->pixelData(), t->expectedPixelDataSize());
-        tile.texture = std::make_shared<Texture>(
+        tile.texture = std::make_shared<ghoul::opengl::Texture>(
             pixelData,
             t->dimensions(),
             t->format(),
@@ -139,7 +139,7 @@ Tile SizeReferenceTileProvider::backgroundTile(const TileIndex& tileIndex) const
             t->wrapping()
         );
         tile.texture->uploadTexture();
-        tile.texture->setDataOwnership(Texture::TakeOwnership::Yes);
+        tile.texture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::Yes);
         tile.status = Tile::Status::OK;
         return tile;
     }

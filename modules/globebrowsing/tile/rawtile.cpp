@@ -22,40 +22,75 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
+#include <modules/globebrowsing/tile/rawtile.h>
 
-#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
+#include <modules/globebrowsing/tile/tilemetadata.h>
 
-#include <modules/globebrowsing/geometry/ellipsoid.h>
+#include <gdal_priv.h>
+
+namespace {
+    const std::string _loggerCat = "Tile";
+}
 
 namespace openspace {
 namespace globebrowsing {
-namespace tileprovider {
-    
-/**
- * Constructed with an ellipsoid and uses that to render the longitudal length of each
- * of each tile.
- */
-class SizeReferenceTileProvider : public TextTileProvider {
-public:
-    SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
-    virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
-        const TileIndex& tileIndex) const;
-    virtual Tile backgroundTile(const TileIndex& tileIndex) const;
+RawTile::RawTile()
+    : imageData(nullptr)
+    , dimensions(0, 0, 0)
+    , tileMetaData(nullptr)
+    , tileIndex(0, 0, 0)
+    , error(CE_None)
+    , nBytesImageData(0)
+{}
+        
+RawTile RawTile::createDefaultRes() {
+    RawTile defaultRes;
+    int w = 8;
+    int h = 8;
+    defaultRes.dimensions = glm::uvec3(w, h, 1);
+    defaultRes.nBytesImageData = w * h * 1 * 3 * 4; // assume max 3 channels, max 4 bytes per pixel
+    defaultRes.imageData = new char[defaultRes.nBytesImageData];
+    std::fill_n((char*)defaultRes.imageData, defaultRes.nBytesImageData, 0);
+    return std::move(defaultRes);
+}
 
-    virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
+void RawTile::serializeMetaData(std::ostream& os) {
+    os << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
+    os << tileIndex.x << " " << tileIndex.y << " " << tileIndex.level << std::endl;
+    os << error << std::endl;
 
-private:
-    int roundedLongitudalLength(const TileIndex& tileIndex) const;
+    // preprocess data
+    os << (tileMetaData != nullptr) << std::endl;
+    if (tileMetaData != nullptr) {    
+        tileMetaData->serialize(os);
+    }
+        
+    os << nBytesImageData << std::endl;
+}
 
-    Ellipsoid _ellipsoid;
-    Tile _backgroundTile;
-};
+RawTile RawTile::deserializeMetaData(std::istream& is) {
+    RawTile res;
+    is >> res.dimensions.x >> res.dimensions.y >> res.dimensions.z;
+    is >> res.tileIndex.x >> res.tileIndex.y >> res.tileIndex.level;
+    int err; is >> err; res.error = (CPLErr) err;
+        
+    res.tileMetaData = nullptr;
+    bool hastileMetaData; 
+    is >> hastileMetaData;
+    if (hastileMetaData) {
+        TileMetaData tileMetaData = TileMetaData::deserialize(is);
+        res.tileMetaData = std::make_shared<TileMetaData>(tileMetaData);
+    }
+        
+    is >> res.nBytesImageData;
 
-} // namespace tileprovider
+    char binaryDataSeparator;
+    is >> binaryDataSeparator; // not used
+        
+    char* buffer = new char[res.nBytesImageData]();
+    return std::move(res);
+}
+
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__

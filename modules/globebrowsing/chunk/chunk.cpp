@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileselector.h>
+#include <modules/globebrowsing/tile/tilemetadata.h>
 
 namespace openspace {
 namespace globebrowsing {

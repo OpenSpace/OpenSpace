@@ -112,7 +112,7 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
 
     switch (rasterCount) {
         case 1: // Red
-            format.ghoulFormat = Texture::Format::Red;
+            format.ghoulFormat = ghoul::opengl::Texture::Format::Red;
             switch (gdalType) {
                 case GDT_Byte:
                     format.glFormat = GL_R8;
@@ -141,7 +141,7 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
             }
             break;
         case 2:
-            format.ghoulFormat = Texture::Format::RG;
+            format.ghoulFormat = ghoul::opengl::Texture::Format::RG;
             switch (gdalType) {
                 case GDT_Byte:
                     format.glFormat = GL_RG8;
@@ -169,7 +169,7 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
             }
             break;
         case 3:
-            format.ghoulFormat = Texture::Format::RGB;
+            format.ghoulFormat = ghoul::opengl::Texture::Format::RGB;
             switch (gdalType) {
                 case GDT_Byte:
                     format.glFormat = GL_RGB8;
@@ -198,7 +198,7 @@ TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
             }
             break;
         case 4:
-            format.ghoulFormat = Texture::Format::RGBA;
+            format.ghoulFormat = ghoul::opengl::Texture::Format::RGBA;
             switch (gdalType) {
                 case GDT_Byte:
                     format.glFormat = GL_RGBA8;

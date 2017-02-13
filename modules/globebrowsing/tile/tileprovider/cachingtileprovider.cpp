@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/tile/asynctilereader.h>
 #include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/rawtile.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -135,7 +136,7 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
         return tile;
     }
 
-    TileHashKey key = tileIndex.hashKey();
+    TileIndex::TileHashKey key = tileIndex.hashKey();
 
     if (_tileCache->exist(key)) {
         return _tileCache->get(key);
@@ -163,7 +164,7 @@ Tile CachingTileProvider::getDefaultTile() {
 void CachingTileProvider::initTexturesFromLoadedData() {
     auto rawTiles = _asyncTextureDataProvider->getRawTiles();
     for (auto rawTile : rawTiles){
-        TileHashKey key = rawTile->tileIndex.hashKey();
+        TileIndex::TileHashKey key = rawTile->tileIndex.hashKey();
         Tile tile = createTile(rawTile);
         _tileCache->put(key, tile);
     }
@@ -180,7 +181,7 @@ Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
         return Tile::Status::OutOfRange;
     }
 
-    TileHashKey key = tileIndex.hashKey();
+    TileIndex::TileHashKey key = tileIndex.hashKey();
 
     if (_tileCache->exist(key)) {
         return _tileCache->get(key).status;
@@ -198,11 +199,12 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
         return{ nullptr, nullptr, Tile::Status::IOError };
     }
 
-    TileHashKey key = rawTile->tileIndex.hashKey();
+    TileIndex::TileHashKey key = rawTile->tileIndex.hashKey();
     TileDataLayout dataLayout =
         _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         
     // The texture should take ownership of the data
+    using ghoul::opengl::Texture;
     std::shared_ptr<Texture> texture = std::make_shared<Texture>(
         rawTile->imageData,
         rawTile->dimensions,

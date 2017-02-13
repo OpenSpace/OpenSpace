@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/tile/loadjob/diskcachedtileloadjob.h>
 
+#include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/tiledataset.h>
 #include <modules/globebrowsing/tile/tilediskcache.h>
 

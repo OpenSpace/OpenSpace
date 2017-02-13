@@ -26,6 +26,7 @@
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
     const char* KeyFilePath = "FilePath";

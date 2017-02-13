@@ -22,40 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEXTUREFORMAT___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TEXTUREFORMAT___H__
 
-#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
-
-#include <modules/globebrowsing/geometry/ellipsoid.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
 namespace globebrowsing {
-namespace tileprovider {
-    
-/**
- * Constructed with an ellipsoid and uses that to render the longitudal length of each
- * of each tile.
- */
-class SizeReferenceTileProvider : public TextTileProvider {
-public:
-    SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
-    virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
-        const TileIndex& tileIndex) const;
-    virtual Tile backgroundTile(const TileIndex& tileIndex) const;
-
-    virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
-
-private:
-    int roundedLongitudalLength(const TileIndex& tileIndex) const;
-
-    Ellipsoid _ellipsoid;
-    Tile _backgroundTile;
+struct TextureFormat {
+    ghoul::opengl::Texture::Format ghoulFormat;
+    GLuint glFormat;
 };
 
-} // namespace tileprovider
+    
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEXTUREFORMAT___H__

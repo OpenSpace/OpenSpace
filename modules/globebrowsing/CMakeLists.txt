@@ -83,13 +83,17 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/textureformat.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.h
@@ -152,11 +156,13 @@ set(SOURCE_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.cpp

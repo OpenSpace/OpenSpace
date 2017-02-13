@@ -44,6 +44,7 @@
 #include <openspace/util/time.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/texture.h>
 
 #include <math.h>
 

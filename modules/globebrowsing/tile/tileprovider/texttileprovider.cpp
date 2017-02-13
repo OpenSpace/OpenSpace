@@ -58,7 +58,7 @@ TextTileProvider::~TextTileProvider() {
 }
 
 Tile TextTileProvider::getTile(const TileIndex& tileIndex) {
-    TileHashKey key = tileIndex.hashKey();
+    TileIndex::TileHashKey key = tileIndex.hashKey();
         
     if (!_tileCache.exist(key)) {
         _tileCache.put(key, createChunkIndexTile(tileIndex));
@@ -129,7 +129,7 @@ int TextTileProvider::maxLevel() {
     return 1337; // unlimited
 }
 
-TileHashKey TextTileProvider::toHash(const TileIndex& tileIndex) const {
+TileIndex::TileHashKey TextTileProvider::toHash(const TileIndex& tileIndex) const {
     return tileIndex.hashKey();
 }
 

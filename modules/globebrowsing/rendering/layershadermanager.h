@@ -82,7 +82,7 @@ public:
      * from the last time this function was called the shader program will be
      * recompiled before returned.
      */
-    ProgramObject* programObject(
+    ghoul::opengl::ProgramObject* programObject(
         LayerShaderPreprocessingData preprocessingData);
 
     bool updatedOnLastCall();
@@ -91,7 +91,7 @@ private:
         
     void recompileShaderProgram(LayerShaderPreprocessingData preprocessingData);
 
-    std::unique_ptr<ProgramObject> _programObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     LayerShaderPreprocessingData _preprocessingData;
 
     const std::string _shaderName;

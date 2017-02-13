@@ -26,13 +26,15 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <modules/globebrowsing/tile/tile.h>
+
+#include <modules/globebrowsing/tile/tileindex.h>
 
 #include <unordered_map>
 
 namespace openspace {
 namespace globebrowsing {
     
+class RawTile;
 class TileDataset;
 
 class AsyncTileDataProvider {
@@ -55,7 +57,7 @@ protected:
 private:
     std::shared_ptr<TileDataset> _tileDataset;
     ConcurrentJobManager<RawTile> _concurrentJobManager;
-    std::unordered_map<TileHashKey, TileIndex> _enqueuedTileRequests;
+    std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
 };
 
 } // namespace globebrowsing

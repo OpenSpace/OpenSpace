@@ -142,7 +142,7 @@ public:
     virtual float noDataValueAsFloat();
 };
 
-using TileCache = LRUCache<TileHashKey, Tile>;
+using TileCache = LRUCache<TileIndex::TileHashKey, Tile>;
 
 } // namespace tileprovider
 } // namespace globebrowsing

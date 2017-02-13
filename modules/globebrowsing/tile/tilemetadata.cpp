@@ -22,40 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
+#include <modules/globebrowsing/tile/tilemetadata.h>
 
-#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
-
-#include <modules/globebrowsing/geometry/ellipsoid.h>
+#include <gdal_priv.h>
 
 namespace openspace {
 namespace globebrowsing {
-namespace tileprovider {
-    
-/**
- * Constructed with an ellipsoid and uses that to render the longitudal length of each
- * of each tile.
- */
-class SizeReferenceTileProvider : public TextTileProvider {
-public:
-    SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
-    virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
-        const TileIndex& tileIndex) const;
-    virtual Tile backgroundTile(const TileIndex& tileIndex) const;
+void TileMetaData::serialize(std::ostream& os) {
+    os << maxValues.size() << std::endl;
+    for (float f : maxValues) {
+        os << f << " ";
+    }
+    os << std::endl;
+    for (float f : minValues) {
+        os << f << " ";
+    }
+    os << std::endl;
+}
 
-    virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
+TileMetaData TileMetaData::deserialize(std::istream& is) {
+    TileMetaData res;
+    int n; is >> n;
+    res.maxValues.resize(n);
+    for (int i = 0; i < n; i++) {
+        is >> res.maxValues[i];
+    }
+    res.minValues.resize(n);
+    for (int i = 0; i < n; i++) {
+        is >> res.minValues[i];
+    }
 
-private:
-    int roundedLongitudalLength(const TileIndex& tileIndex) const;
+    return std::move(res);
+}
 
-    Ellipsoid _ellipsoid;
-    Tile _backgroundTile;
-};
-
-} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__

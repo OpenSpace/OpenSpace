@@ -61,6 +61,8 @@
 #include <modules/globebrowsing/tile/tiledatatype.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
+#include <modules/globebrowsing/tile/rawtile.h>
+#include <modules/globebrowsing/tile/tilemetadata.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 
@@ -821,7 +823,7 @@ CPLErr TileDataset::postProcessErrorCheck(std::shared_ptr<const RawTile> rawTile
         return CE_Fatal;
     }
     // ugly test for heightmap overlay
-    if (_dataLayout.textureFormat.ghoulFormat == Texture::Format::RG) {
+    if (_dataLayout.textureFormat.ghoulFormat == ghoul::opengl::Texture::Format::RG) {
         // check the alpha
         if (rawTile->tileMetaData->maxValues[1] == 0.0
             && rawTile->tileMetaData->minValues[1] == 0.0)

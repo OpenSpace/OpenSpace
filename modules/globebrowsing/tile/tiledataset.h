@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATASET___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATASET___H__
 
+#include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/tiledataset.h>
@@ -32,6 +33,7 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
 
 #include <gdal.h>
 #include <string>
@@ -42,6 +44,7 @@ class GDALRasterBand;
 namespace openspace {
 namespace globebrowsing {
 
+class RawTile;
 class GeodeticPatch;
 
 struct TileDataLayout {

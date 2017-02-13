@@ -27,6 +27,8 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 namespace ghoul { namespace fontrendering {
 class Font;
 class FontRenderer;
@@ -72,7 +74,7 @@ public:
      * \param tileIndex tileIndex to hash
      * \returns hashkey used for in LRU cache for this tile
      */
-    virtual TileHashKey toHash(const TileIndex& tileIndex) const;
+    virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
         
     /**
      * Uses the fontRenderer to render some text onto the tile texture provided in 

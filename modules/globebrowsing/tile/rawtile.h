@@ -22,40 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__
 
-#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
-#include <modules/globebrowsing/geometry/ellipsoid.h>
+#include <ghoul/glm.h>
+
+#include <sstream>
+
+#include <cpl_error.h>
 
 namespace openspace {
 namespace globebrowsing {
-namespace tileprovider {
     
-/**
- * Constructed with an ellipsoid and uses that to render the longitudal length of each
- * of each tile.
- */
-class SizeReferenceTileProvider : public TextTileProvider {
-public:
-    SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
+struct TileMetaData;
 
-    virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
-        const TileIndex& tileIndex) const;
-    virtual Tile backgroundTile(const TileIndex& tileIndex) const;
+struct RawTile {
+    RawTile();
 
-    virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
+    char* imageData;
+    glm::uvec3 dimensions;
+    std::shared_ptr<TileMetaData> tileMetaData;
+    TileIndex tileIndex;
+    CPLErr error;
+    size_t nBytesImageData;
 
-private:
-    int roundedLongitudalLength(const TileIndex& tileIndex) const;
-
-    Ellipsoid _ellipsoid;
-    Tile _backgroundTile;
+    void serializeMetaData(std::ostream& s);
+    static RawTile deserializeMetaData(std::istream& s);
+   
+    static RawTile createDefaultRes();
 };
 
-} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___RAWTILE___H__

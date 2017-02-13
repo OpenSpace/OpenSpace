@@ -22,40 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEMETADATA___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEMETADATA___H__
 
-#include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
-
-#include <modules/globebrowsing/geometry/ellipsoid.h>
+#include <sstream>
+#include <vector>
 
 namespace openspace {
 namespace globebrowsing {
-namespace tileprovider {
-    
-/**
- * Constructed with an ellipsoid and uses that to render the longitudal length of each
- * of each tile.
- */
-class SizeReferenceTileProvider : public TextTileProvider {
-public:
-    SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
-    virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
-        const TileIndex& tileIndex) const;
-    virtual Tile backgroundTile(const TileIndex& tileIndex) const;
+struct TileMetaData {
+    std::vector<float> maxValues;
+    std::vector<float> minValues;
+    std::vector<bool> hasMissingData;
 
-    virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
-
-private:
-    int roundedLongitudalLength(const TileIndex& tileIndex) const;
-
-    Ellipsoid _ellipsoid;
-    Tile _backgroundTile;
+    void serialize(std::ostream& s);
+    static TileMetaData deserialize(std::istream& s);
 };
 
-} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIZEREFERENCE_TILE_PROVIDER___H__
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEMETADATA___H__

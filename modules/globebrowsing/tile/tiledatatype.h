@@ -27,6 +27,8 @@
 
 #include <modules/globebrowsing/tile/tile.h>
 
+#include <modules/globebrowsing/tile/textureformat.h>
+
 #include <ghoul/opengl/ghoul_gl.h>
 
 #include <gdal.h>
