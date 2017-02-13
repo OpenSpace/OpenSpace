@@ -83,10 +83,10 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 {
     const TileIndex& tileIndex = chunk.tileIndex();
 
-    LayerShaderPreprocessingData layeredTexturePreprocessingData;
+    LayerShaderManager::LayerShaderPreprocessingData layeredTexturePreprocessingData;
         
     for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; i++) {
-        LayerGroupPreprocessingData layeredTextureInfo;
+        LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData layeredTextureInfo;
         auto layerGroup = _layerManager->layerGroup(i);
         layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();

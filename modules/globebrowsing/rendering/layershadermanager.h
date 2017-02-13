@@ -35,40 +35,41 @@ namespace opengl {
 class ProgramObject;
 }
 }
+
 namespace openspace {
 namespace globebrowsing {
-
-/**
- * Settings per texture group that contains shader preprocessing information.
- */
-struct LayerGroupPreprocessingData {
-    int lastLayerIdx;
-    bool layerBlendingEnabled;
-    bool operator==(const LayerGroupPreprocessingData& other) const;
-};
-
-/**
- * Data needed for shader preprocessing before compiling a layered texture shader
- * program.
- *
- * If a <code>LayerShaderPreprocessingData</code> is compared with another it can
- * be determined wheter or not a <code>LayerShaderManager</code> needs to
- * recompile its shader program. For each <code>TextureGroup</code> there is
- * information about how many layers it has and whether or not to blend the texture
- * levels.
- */
-struct LayerShaderPreprocessingData {
-    std::array<LayerGroupPreprocessingData, LayerManager::NUM_LAYER_GROUPS>
-        layeredTextureInfo;
-    std::vector<std::pair<std::string, std::string> > keyValuePairs;
-    bool operator==(const LayerShaderPreprocessingData& other) const;
-};
 
 /**
  * This class has ownership of an updated shader program for rendering tiles.
  */
 class LayerShaderManager {
 public:
+    /**
+     * Data needed for shader preprocessing before compiling a layered texture shader
+     * program.
+     *
+     * If a <code>LayerShaderPreprocessingData</code> is compared with another it can
+     * be determined wheter or not a <code>LayerShaderManager</code> needs to
+     * recompile its shader program. For each <code>TextureGroup</code> there is
+     * information about how many layers it has and whether or not to blend the texture
+     * levels.
+     */
+    struct LayerShaderPreprocessingData {
+        /**
+         * Settings per texture group that contains shader preprocessing information.
+         */
+        struct LayerGroupPreprocessingData {
+            int lastLayerIdx;
+            bool layerBlendingEnabled;
+            bool operator==(const LayerGroupPreprocessingData& other) const;
+        };
+        
+        std::array<LayerGroupPreprocessingData, LayerManager::NUM_LAYER_GROUPS>
+        layeredTextureInfo;
+        std::vector<std::pair<std::string, std::string> > keyValuePairs;
+        bool operator==(const LayerShaderPreprocessingData& other) const;
+    };
+    
     LayerShaderManager(
         const std::string& shaderName,
         const std::string& vsPath,
