@@ -139,4 +139,4 @@ private:
 
 } //namespace openspace
 
-#endif //__OPENSPACE_MODULE_ISWA___ISWAMANAGER___H__
+#endif // __OPENSPACE_MODULE_ISWA___ISWAMANAGER___H__

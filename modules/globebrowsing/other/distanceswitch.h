@@ -67,4 +67,4 @@ private:
 } // namespace globebrowsing
 } // openspace
 
-#endif //__OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__

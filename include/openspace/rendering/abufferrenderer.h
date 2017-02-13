@@ -140,4 +140,4 @@ private:
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_CORE___ABUFFERRENDERER___H__
+#endif // __OPENSPACE_CORE___ABUFFERRENDERER___H__

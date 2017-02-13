@@ -46,4 +46,4 @@ struct ChunkTilePile {
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__

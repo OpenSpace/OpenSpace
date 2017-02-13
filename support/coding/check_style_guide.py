@@ -25,11 +25,19 @@ This script traverses the file tree of OpenSpace and will check all files' inclu
 guards for correctness. At the moment this includes:
  * Correctness (file has a #ifndef. #define, and #endif lines)
  * Equality (using the same name for the #ifdef and #define)
- * Styling (no empty line between #ifndef and #define lines, empty lines before and 
-   after #ifndef #define block)
+ * Styling 
+   * no empty line between #ifndef and #define lines
+   * Empty lines before and after #ifndef #define block
+   * Files end with an empty line
+   * Copyright header is correctly indented
+   * Include guard correctly uses the filename
+   * Include guard is all upper case
  * Correct usage of the name in the final comment of the file
- * Naming convention (OpenSpace include guards start with OPENSPACE, Ghoul with GHOUL,
-   module includes have the module name in it)
+ * Correct year of copyright notice
+ * Naming convention
+   * OpenSpace include guards start with OPENSPACE, Ghoul with GHOUL,
+     module includes have the module name in it
+   * The correct submodule is used
  * Checking for duplicates between all files
 
 If this script is executed from the base directory of OpenSpace, no arguments need to
@@ -37,9 +45,13 @@ be passed, otherwise the first and only argument has to point to the base direct
 Thus, the default value of the first argument is '.'
 """
 
+import fnmatch
 import glob
+import os
 import re
 import sys
+
+current_year = '2017'
 
 def get_ifndef_symbol(lines):
     index = [i for i,s in enumerate(lines) if '#ifndef ' in s]
@@ -84,7 +96,7 @@ def check_equality(lines):
         return ifndef + ' ' + define
 
 def check_styling(lines):
-    _, ifndef_line = get_ifndef_symbol(lines)
+    ifndef_symbol, ifndef_line = get_ifndef_symbol(lines)
     _, define_line = get_define_symbol(lines)
 
     if abs(ifndef_line - define_line) != 1:
@@ -96,7 +108,24 @@ def check_styling(lines):
     if lines[define_line + 1].strip() != '':
         return 'Following line is not empty'
 
+    if not lines[-1][-1] in ['\n', '\r']:
+        return 'Last line must end with a newline'
+
+    for l in lines[2:23]:
+        if l[0] != ' ':
+            return 'Copyright header must be indented'
+
+    if ifndef_symbol != ifndef_symbol.upper():
+        return 'Include guard is not all upper case'
+
     return ''
+
+def check_styling_filename(lines, filename):
+    ifndef_symbol, _ = get_ifndef_symbol(lines)
+    file = os.path.splitext(os.path.basename(filename))[0].upper()
+
+    if not (file in ifndef_symbol or file in ifndef_symbol.replace('_', '')):
+        return 'Malformed include guard: ' + ifndef_symbol + ' || ' + file
 
 def check_comment(lines):
     ifndef_symbol, _ = get_ifndef_symbol(lines)
@@ -109,6 +138,48 @@ def check_comment(lines):
     else:
         return ''
 
+def check_copyright(lines):
+    index = [i for i,s in enumerate(lines[0:23]) if 'Copyright' in s]
+
+    if len(index) == 0:
+        return 'No copyright header found'
+
+    beginning_string = ' * Copyright (c) 2012-'
+    #  * Copyright (c) 2014-
+
+    year = lines[index[0]][len(beginning_string) : len(beginning_string) + 4]
+
+    if year != current_year:
+        return 'Out of date copyright notice ' + year + ' || ' + current_year
+    else:
+        return ''
+
+def check_naming_convention_component(lines, component):
+    ifndef_symbol, _ = get_ifndef_symbol(lines)
+
+    component_part = ifndef_symbol[2:2 + len(component)]
+
+    if component_part != component.upper():
+        return '#ifndef naming convention broken: ' + ifndef_symbol + ' || ' + component.upper() 
+    else:
+        return ''
+
+def check_naming_convention_subcomponent(lines, component, file):
+    ifndef_symbol, _ = get_ifndef_symbol(lines)
+
+    if component == "ghoul" or component == "openspace_core":
+        return
+
+    subcomponent_part = ifndef_symbol[2 + len(component) + 1 :]
+    subcomponent_part = subcomponent_part[: subcomponent_part.find('_')]
+
+    path_part = file.split(os.sep)[2]
+
+    if path_part.upper() != subcomponent_part:
+        return 'Subcomponent naming convention broken: ' + ifndef_symbol
+    else:
+        return ''
+
 def check_duplicates(lines, previousSymbols):
     ifndef_symbol, _ = get_ifndef_symbol(lines)
 
@@ -117,68 +188,74 @@ def check_duplicates(lines, previousSymbols):
     else:
         return True, ifndef_symbol
 
-basePath = './'
-if len(sys.argv) > 1:
-    basePath = sys.argv[1] + '/'
-
-positivePathList = [
-    'include/**/*.h',
-    'apps/**/*.h',
-    'modules/**/*.h',
-    'ext/ghoul/include/**/*.h'
-]
-
-negativePathList = [
-    'modules/**/ext/**/*.h',
-    'apps/**/ext/**/*.h',
-]
-
-# Collect all the files that we might apply this script to
-files = []
-for p in positivePathList:
-    f = glob.glob(basePath + p, recursive=True)
-    files = files + f
-
-# Collect all files that we want to remove from the full list
-# These are mostly the external directories from modules
-negativeFiles = []
-for p in negativePathList:
-    f = glob.glob(basePath + p, recursive=True)
-    negativeFiles = negativeFiles + f
-
-# Actually remove the negative files from the positive ones
-files = [f for f in files if f not in negativeFiles]
-
 previousSymbols  = {}
-
-for file in files:
-    success = True
+def check_file(file, component):
     with open(file, 'r+') as f:
         lines = f.readlines()
 
         correctness = check_correctness(lines)
         if correctness:
             print(file, '\t', 'Correctness check failed', '\t', correctness)
-            continue
+            return
 
         equality = check_equality(lines)
         if equality:
             print(file, '\t', 'Equality check failed', '\t', equality)
-            continue
+            return
 
         styling = check_styling(lines)
         if styling:
             print(file, '\t',  'Styling check failed', '\t', styling)
-            continue
+            return
+
+        styling_filename = check_styling_filename(lines, file)
+        if styling_filename:
+            print(file, '\t',  'Filename styling check failed', '\t', styling_filename)
+            return
+
 
         comment = check_comment(lines)
         if comment:
             print(file, '\t',  'Comment check failed', '\t', comment)
-            continue
+            return
+
+        copyright = check_copyright(lines)
+        if copyright:
+            print(file, '\t', 'Copyright check failed', '\t', copyright)
+            return
+
+        naming_component = check_naming_convention_component(lines, component)
+        if naming_component:
+            print(file, '\t', 'Naming convention broken', '\t', naming_component)
+            return
+
+        naming_subcomponent = check_naming_convention_subcomponent(lines, component, file)
+        if naming_subcomponent:
+            print(file, '\t', 'Naming convention broken', '\t', naming_subcomponent)
+            return
 
         duplicates, symbol = check_duplicates(lines, previousSymbols)
         if not duplicates:
             print(file, '\t',  'Duplicate include guard', symbol, 'first in', previousSymbols[symbol])
-            continue
+            return
         else:
-            previousSymbols[symbol] = file
+            previousSymbols[symbol] = file    
+
+def check_files(positiveList, negativeList, component):
+    files = glob.glob(positiveList, recursive=True)
+    negativeFiles = glob.glob(negativeList, recursive=True)
+
+    files = [f for f in files if f not in negativeFiles]
+
+    for file in files:
+        check_file(file, component)
+
+
+basePath = './'
+if len(sys.argv) > 1:
+    basePath = sys.argv[1] + '/'
+
+check_files(basePath + 'include/**/*.h', '', 'openspace_core')
+check_files(basePath + 'apps/**/*.h', basePath + 'apps/**/ext/**/*.h', 'openspace_app')
+check_files(basePath + 'modules/**/*.h', basePath + 'modules/**/ext/**/*.h', 'openspace_module')
+check_files(basePath + 'ext/ghoul/include/**/*.h', '', 'ghoul')

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___REGISTRATION___H__
-#define __OPENSPACE_CORE___REGISTRATION___H__
+#ifndef __OPENSPACE_CORE___CORE_REGISTRATION___H__
+#define __OPENSPACE_CORE___CORE_REGISTRATION___H__
 
 namespace openspace {
 
@@ -35,4 +35,4 @@ void registerCoreClasses(scripting::ScriptEngine& engine);
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___REGISTRATION___H__
+#endif // __OPENSPACE_CORE___CORE_REGISTRATION___H__

@@ -49,4 +49,4 @@ public:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_SELECTOR___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_SELECTOR___H__

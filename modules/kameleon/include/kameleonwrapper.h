@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ISWA___KAMELEONWRAPPER___H__
-#define __OPENSPACE_MODULE_ISWA___KAMELEONWRAPPER___H__
+#ifndef __OPENSPACE_MODULE_KAMELEON___KAMELEONWRAPPER___H__
+#define __OPENSPACE_MODULE_KAMELEON___KAMELEONWRAPPER___H__
 
 #include <glm/gtx/std_based_type.hpp>
 
@@ -179,4 +179,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___KAMELEONWRAPPER___H__
+#endif // __OPENSPACE_MODULE_KAMELEON___KAMELEONWRAPPER___H__

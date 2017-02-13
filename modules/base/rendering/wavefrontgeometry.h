@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __WAVEFRONTGEOMETRY_H__
-#define __WAVEFRONTGEOMETRY_H__
+#ifndef __OPENSPACE_MODULE_BASE___WAVEFRONTGEOMETRY___H__
+#define __OPENSPACE_MODULE_BASE___WAVEFRONTGEOMETRY___H__
 
 #include <modules/base/rendering/modelgeometry.h>
 
@@ -45,7 +45,7 @@ namespace modelgeometry {
         bool loadModel(const std::string& filename);
     };
 
-}  // namespace modelgeometry
-}  // namespace openspace
+} // namespace modelgeometry
+} // namespace openspace
 
-#endif // __WAVEFRONTOBJECT_H__
+#endif // __OPENSPACE_MODULE_BASE___WAVEFRONTGEOMETRY___H__

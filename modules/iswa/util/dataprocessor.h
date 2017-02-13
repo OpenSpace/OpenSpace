@@ -78,4 +78,4 @@ protected:
 
 } // namespace openspace
 
-#endif //__OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__
+#endif // __OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__

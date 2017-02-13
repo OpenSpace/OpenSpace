@@ -129,4 +129,4 @@ public:
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_CORE___VOLUME___H__
+#endif // __OPENSPACE_CORE___VOLUME___H__

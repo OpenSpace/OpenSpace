@@ -59,4 +59,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__

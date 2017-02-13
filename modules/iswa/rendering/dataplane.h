@@ -59,4 +59,4 @@ private:
 
 } // namespace openspace
 
-#endif //__OPENSPACE_MODULE_ISWA___DATAPLANE___H__
+#endif // __OPENSPACE_MODULE_ISWA___DATAPLANE___H__

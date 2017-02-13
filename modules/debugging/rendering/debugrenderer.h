@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___DEBUGRENDERER___H__
-#define __OPENSPACE_MODULE_BASE___DEBUGRENDERER___H__
+#ifndef __OPENSPACE_MODULE_DEBUGGING___DEBUGRENDERER___H__
+#define __OPENSPACE_MODULE_DEBUGGING___DEBUGRENDERER___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
@@ -162,4 +162,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___DEBUGRENDERER___H__
+#endif // __OPENSPACE_MODULE_DEBUGGING___DEBUGRENDERER___H__
