@@ -86,6 +86,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/textureformat.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatalayout.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
@@ -158,6 +159,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatalayout.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp

@@ -92,7 +92,7 @@ TileDataLayout::TileDataLayout(GDALDataset* dataSet, GLuint preferredGlType) {
     textureFormat = tiledatatype::getTextureFormat(numRasters, gdalType);
 }
   
-IODescription IODescription::cut(PixelRegion::Side side, int pos) {
+TileDataset::IODescription TileDataset::IODescription::cut(PixelRegion::Side side, int pos) {
     PixelRegion readPreCut = read.region;
     PixelRegion writePreCut = write.region;
 
@@ -522,7 +522,7 @@ Geodetic2 TileDataset::pixelToGeodetic(const PixelRegion::PixelCoordinate& p) co
     return geodetic;
 }
 
-IODescription TileDataset::getIODescription(const TileIndex& tileIndex) const {
+TileDataset::IODescription TileDataset::getIODescription(const TileIndex& tileIndex) const {
     IODescription io;
     io.read.region = gdalPixelRegion(tileIndex);
 

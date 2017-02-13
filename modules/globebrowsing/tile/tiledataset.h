@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/tiledataset.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 
@@ -46,35 +47,6 @@ namespace globebrowsing {
 
 class RawTile;
 class GeodeticPatch;
-
-struct TileDataLayout {
-    TileDataLayout();
-    TileDataLayout(GDALDataset* dataSet, GLuint preferredGlType);
-
-    GDALDataType gdalType;
-    GLuint glType;
-
-    size_t bytesPerDatum;
-    size_t numRasters;
-    size_t bytesPerPixel;
-
-    TextureFormat textureFormat;
-};
-
-struct IODescription {
-    struct ReadData {
-        int overview;
-        PixelRegion region;
-    } read;
-
-    struct WriteData {
-        PixelRegion region;
-        size_t bytesPerLine; 
-        size_t totalNumBytes;
-    } write;
-
-    IODescription cut(PixelRegion::Side side, int pos);
-};
 
 class TileDataset {
 public:
@@ -116,6 +88,21 @@ public:
 
 
 private:
+    struct IODescription {
+        struct ReadData {
+            int overview;
+            PixelRegion region;
+        } read;
+        
+        struct WriteData {
+            PixelRegion region;
+            size_t bytesPerLine;
+            size_t totalNumBytes;
+        } write;
+        
+        IODescription cut(PixelRegion::Side side, int pos);
+    };
+    
 
     //////////////////////////////////////////////////////////////////////////////////
     //                                Initialization                                //
