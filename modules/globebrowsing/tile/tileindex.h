@@ -37,6 +37,8 @@ namespace globebrowsing {
 
 class Geodetic2;
 
+using TileHashKey = uint64_t;
+
 enum Quad {
     NORTH_WEST = 0,
     NORTH_EAST,
@@ -50,8 +52,6 @@ enum CardinalDirection {
     NORTH,
     SOUTH,
 };
-
-using TileHashKey = uint64_t;
 
 struct TileIndex {
     int x, y, level;

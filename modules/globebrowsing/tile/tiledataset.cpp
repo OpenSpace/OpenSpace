@@ -80,14 +80,14 @@ TileDataLayout::TileDataLayout() {}
 TileDataLayout::TileDataLayout(GDALDataset* dataSet, GLuint preferredGlType) {
     // Assume all raster bands have the same data type
     gdalType =preferredGlType != 0 ?
-        TileDataType::getGdalDataType(preferredGlType) :
+        tiledatatype::getGdalDataType(preferredGlType) :
         dataSet->GetRasterBand(1)->GetRasterDataType();
 
-    glType = TileDataType::getOpenGLDataType(gdalType);
+    glType = tiledatatype::getOpenGLDataType(gdalType);
     numRasters = dataSet->GetRasterCount();
-    bytesPerDatum = TileDataType::numberOfBytes(gdalType);
+    bytesPerDatum = tiledatatype::numberOfBytes(gdalType);
     bytesPerPixel = bytesPerDatum * numRasters;
-    textureFormat = TileDataType::getTextureFormat(numRasters, gdalType);
+    textureFormat = tiledatatype::getTextureFormat(numRasters, gdalType);
 }
   
 IODescription IODescription::cut(PixelRegion::Side side, int pos) {
@@ -388,7 +388,7 @@ TileDepthTransform TileDataset::calculateTileDepthTransform() {
     bool isFloat =
         (_dataLayout.gdalType == GDT_Float32 || _dataLayout.gdalType == GDT_Float64);
     double maximumValue =
-        isFloat ? 1.0 : TileDataType::getMaximumValue(_dataLayout.gdalType);
+        isFloat ? 1.0 : tiledatatype::getMaximumValue(_dataLayout.gdalType);
 
     TileDepthTransform transform;
     transform.depthOffset = firstBand->GetOffset();
@@ -768,7 +768,7 @@ std::shared_ptr<TileMetaData> TileDataset::getTileMetaData(
         for (size_t x = 0; x < region.numPixels.x; x++) {
             for (size_t c = 0; c < _dataLayout.numRasters; c++) {
                 float noDataValue = _dataset->GetRasterBand(c + 1)->GetNoDataValue();
-                float val = TileDataType::interpretFloat(
+                float val = tiledatatype::interpretFloat(
                     _dataLayout.gdalType,
                     &(rawTile->imageData[yi + i])
                 );

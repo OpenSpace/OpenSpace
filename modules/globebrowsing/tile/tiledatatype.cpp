@@ -44,8 +44,9 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
+namespace tiledatatype {
 
-float TileDataType::interpretFloat(GDALDataType gdalType, const char* src) {
+float interpretFloat(GDALDataType gdalType, const char* src) {
     switch (gdalType) {
         case GDT_Byte:
             return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
@@ -66,7 +67,7 @@ float TileDataType::interpretFloat(GDALDataType gdalType, const char* src) {
         }
 }
 
-size_t TileDataType::numberOfBytes(GDALDataType gdalType) {
+size_t numberOfBytes(GDALDataType gdalType) {
     switch (gdalType) {
         case GDT_Byte:
             return sizeof(GLubyte);
@@ -88,7 +89,7 @@ size_t TileDataType::numberOfBytes(GDALDataType gdalType) {
     }
 }
 
-size_t TileDataType::getMaximumValue(GDALDataType gdalType) {
+size_t getMaximumValue(GDALDataType gdalType) {
     switch (gdalType) {
         case GDT_Byte:
             return 1 << 8;
@@ -106,9 +107,7 @@ size_t TileDataType::getMaximumValue(GDALDataType gdalType) {
     }
 }
 
-TextureFormat TileDataType::getTextureFormat(
-    int rasterCount, GDALDataType gdalType)
-{
+TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
     TextureFormat format;
 
     switch (rasterCount) {
@@ -234,7 +233,7 @@ TextureFormat TileDataType::getTextureFormat(
     return format;
 }
 
-GLuint TileDataType::getOpenGLDataType(GDALDataType gdalType) {
+GLuint getOpenGLDataType(GDALDataType gdalType) {
     switch (gdalType) {
         case GDT_Byte:
             return GL_UNSIGNED_BYTE;
@@ -256,7 +255,7 @@ GLuint TileDataType::getOpenGLDataType(GDALDataType gdalType) {
     }
 }
 
-GDALDataType TileDataType::getGdalDataType(GLuint glType) {
+GDALDataType getGdalDataType(GLuint glType) {
     switch (glType) {
         case GL_UNSIGNED_BYTE:
             return GDT_Byte;
@@ -278,5 +277,6 @@ GDALDataType TileDataType::getGdalDataType(GLuint glType) {
     }
 }
 
+} // namespace tiledatatype
 } // namespace globebrowsing
 } // namespace openspace
