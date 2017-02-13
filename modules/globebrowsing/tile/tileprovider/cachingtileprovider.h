@@ -32,6 +32,8 @@ namespace globebrowsing {
 
 class AsyncTileDataProvider;
 
+namespace tileprovider {
+
 /**
 * Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
 * caches them in memory using LRU caching
@@ -92,6 +94,7 @@ private:
     Tile _defaultTile;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 

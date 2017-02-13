@@ -31,7 +31,8 @@
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 /**
  * Constructed with an ellipsoid and uses that to render the longitudal length of each
  * of each tile.
@@ -53,6 +54,7 @@ private:
     Tile _backgroundTile;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 

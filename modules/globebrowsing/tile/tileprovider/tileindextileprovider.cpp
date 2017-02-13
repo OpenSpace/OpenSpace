@@ -28,7 +28,8 @@
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
                                        fontRenderer, const TileIndex& tileIndex) const
 {
@@ -43,5 +44,6 @@ void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
     );
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

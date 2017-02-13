@@ -29,6 +29,7 @@
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileprovider {
 
 class TileProviderByIndex : public TileProvider {
 public:
@@ -51,6 +52,7 @@ private:
     std::shared_ptr<TileProvider> _defaultTileProvider;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 

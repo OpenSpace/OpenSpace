@@ -34,6 +34,7 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileprovider {
 
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     ghoul::Dictionary providers = dictionary.value<ghoul::Dictionary>(KeyProviders);
@@ -124,5 +125,6 @@ TileProvider* TileProviderByLevel::levelProvider(int level) const {
     return _levelTileProviders[providerIndex(level)].get();
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

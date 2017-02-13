@@ -33,7 +33,8 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary) {
     // Required input
     if (!dictionary.getValue<std::string>(KeyFilePath, _imagePath)) {
@@ -86,5 +87,6 @@ int SingleImageProvider::maxLevel() {
     return 1337; // unlimited
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

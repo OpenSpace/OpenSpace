@@ -37,6 +37,7 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileprovider {
 
 TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
     ghoul::Dictionary defaultProviderDict = dictionary.value<ghoul::Dictionary>(
@@ -113,5 +114,6 @@ TileProvider* TileProviderByIndex::indexProvider(const TileIndex& tileIndex) con
     return (it != _tileProviderMap.end()) ? it->second.get() : nullptr;
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

@@ -29,7 +29,8 @@
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 /**
  * Provides <code>Tile</code>s with the chunk index rendered as text onto its tiles.
  */
@@ -39,6 +40,7 @@ public:
         const TileIndex& tileIndex) const;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 

@@ -39,7 +39,8 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 TileProvider* TileProvider::createFromDictionary(const ghoul::Dictionary& dictionary) {
     std::string type = "LRUCaching";
     dictionary.getValue(KeyType, type);
@@ -122,5 +123,6 @@ ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize){
     return std::move(chunkTilePile);
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

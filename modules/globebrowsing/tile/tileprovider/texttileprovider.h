@@ -34,6 +34,7 @@ class FontRenderer;
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileprovider {
 
 /**
  * Enables a simple way of providing tiles with any type of rendered text. 
@@ -96,6 +97,7 @@ private:
     GLuint _fbo;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 

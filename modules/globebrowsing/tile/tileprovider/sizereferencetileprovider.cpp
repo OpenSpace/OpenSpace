@@ -38,7 +38,8 @@ using namespace ghoul::fontrendering;
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 namespace {
     const char* KeyRadii = "Radii";
     const char* KeyBackgroundImagePath = "BackgroundImagePath";
@@ -148,5 +149,6 @@ Tile SizeReferenceTileProvider::backgroundTile(const TileIndex& tileIndex) const
     }
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

@@ -38,7 +38,8 @@ using namespace ghoul::fontrendering;
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 TextTileProvider::TextTileProvider(const glm::uvec2& textureSize, size_t fontSize)
     : _tileCache(500)
     , _textureSize(textureSize)
@@ -137,5 +138,6 @@ Tile TextTileProvider::backgroundTile(const TileIndex& tileIndex) const {
     return Tile::createPlainTile(_textureSize, color);
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

@@ -36,8 +36,8 @@ Layer::Layer(const ghoul::Dictionary& layerDict)
     layerDict.getValue("Name", layerName);
     setName(layerName);
         
-    _tileProvider = std::shared_ptr<TileProvider>(
-        TileProvider::createFromDictionary(layerDict));
+    _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
+        tileprovider::TileProvider::createFromDictionary(layerDict));
         
     // Something else went wrong and no exception was thrown
     if (_tileProvider == nullptr) {

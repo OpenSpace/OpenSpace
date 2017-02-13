@@ -33,7 +33,9 @@
 namespace openspace {
 namespace globebrowsing {
 
-class TileProvider;
+namespace tileprovider {
+    class TileProvider;
+}
 
 /**
  * Convenience class for dealing with multiple <code>Layer</code>s.

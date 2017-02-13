@@ -35,7 +35,9 @@
 namespace openspace {
 namespace globebrowsing {
 
-class TileProvider;
+namespace tileprovider {
+    class TileProvider;
+}
 
 /**
  * Simple struct which is used to enable/disable <code>TileProvider</code> 
@@ -49,12 +51,12 @@ public:
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
 
     bool enabled() const { return _enabled.value(); }
-    TileProvider* tileProvider() const { return _tileProvider.get(); }
+    tileprovider::TileProvider* tileProvider() const { return _tileProvider.get(); }
     const LayerRenderSettings& renderSettings() const { return _renderSettings; }
 
 private:
     properties::BoolProperty _enabled;
-    std::shared_ptr<TileProvider> _tileProvider;
+    std::shared_ptr<tileprovider::TileProvider> _tileProvider;
     LayerRenderSettings _renderSettings;
 };
 

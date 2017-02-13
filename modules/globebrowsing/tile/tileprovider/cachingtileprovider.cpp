@@ -42,7 +42,8 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
     : _framesSinceLastRequestFlush(0)
 {
@@ -225,5 +226,6 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
     return tile;
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
