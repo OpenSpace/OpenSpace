@@ -38,7 +38,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/angle.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/angle.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/convexhull.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic3.h
@@ -121,7 +120,6 @@ set(SOURCE_FILES
 
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/convexhull.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.cpp

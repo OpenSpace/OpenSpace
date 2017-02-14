@@ -26,7 +26,10 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__
 
 #include <modules/globebrowsing/rendering/gpu/gpulayer.h>
+#include <modules/globebrowsing/tile/chunktile.h>
+
 #include <openspace/util/gpudata.h>
+
 #include <string>
 
 namespace ghoul { namespace opengl {
@@ -37,7 +40,6 @@ namespace openspace {
 namespace globebrowsing {
 
 struct ChunkTile;
-struct ChunkTilePile;
 class Layer;
 class LayerRenderSettings;
 struct TileDepthTransform;

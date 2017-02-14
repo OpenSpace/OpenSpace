@@ -104,19 +104,19 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
 ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize){
     ghoul_assert(pileSize >= 0, "pileSize must be positive");
     ChunkTilePile chunkTilePile;
-    chunkTilePile.chunkTiles.resize(pileSize);
+    chunkTilePile.resize(pileSize);
     for (size_t i = 0; i < pileSize; ++i) {
-        chunkTilePile.chunkTiles[i] = getChunkTile(tileIndex, i);
-        if (chunkTilePile.chunkTiles[i].tile.status == Tile::Status::Unavailable) {
+        chunkTilePile[i] = getChunkTile(tileIndex, i);
+        if (chunkTilePile[i].tile.status == Tile::Status::Unavailable) {
             if (i>0) {
-                chunkTilePile.chunkTiles[i].tile = chunkTilePile.chunkTiles[i-1].tile;
-                chunkTilePile.chunkTiles[i].uvTransform.uvOffset = chunkTilePile.chunkTiles[i-1].uvTransform.uvOffset;
-                chunkTilePile.chunkTiles[i].uvTransform.uvScale = chunkTilePile.chunkTiles[i-1].uvTransform.uvScale;
+                chunkTilePile[i].tile = chunkTilePile[i-1].tile;
+                chunkTilePile[i].uvTransform.uvOffset = chunkTilePile[i-1].uvTransform.uvOffset;
+                chunkTilePile[i].uvTransform.uvScale = chunkTilePile[i-1].uvTransform.uvScale;
             }
             else {
-                chunkTilePile.chunkTiles[i].tile = getDefaultTile();
-                chunkTilePile.chunkTiles[i].uvTransform.uvOffset = { 0, 0 };
-                chunkTilePile.chunkTiles[i].uvTransform.uvScale = { 1, 1 };
+                chunkTilePile[i].tile = getDefaultTile();
+                chunkTilePile[i].uvTransform.uvOffset = { 0, 0 };
+                chunkTilePile[i].uvTransform.uvScale = { 1, 1 };
             }
         }
     }

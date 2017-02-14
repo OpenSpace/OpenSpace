@@ -27,6 +27,8 @@
 
 #include <modules/globebrowsing/rendering/gpu/gpuchunktile.h>
 
+#include <modules/globebrowsing/tile/chunktile.h>
+
 #include <openspace/util/gpudata.h>
 
 #include <string>
@@ -37,8 +39,6 @@ class ProgramObject;
 
 namespace openspace {
 namespace globebrowsing {
-
-struct ChunkTilePile;
 
 /**
  * Manages a GPU representation of a <code>ChunkTilePile</code>

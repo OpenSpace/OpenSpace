@@ -39,9 +39,7 @@ struct ChunkTile {
     TileDepthTransform depthTransform;
 };
 
-struct ChunkTilePile {
-    std::vector<ChunkTile> chunkTiles;
-};
+using ChunkTilePile = std::vector<ChunkTile>;
 
 } // namespace globebrowsing
 } // namespace openspace

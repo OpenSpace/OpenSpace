@@ -24,7 +24,6 @@
 
 #include <modules/globebrowsing/rendering/gpu/gpuchunktilepile.h>
 
-#include <modules/globebrowsing/tile/chunktile.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -33,11 +32,11 @@ void GPUChunkTilePile::setValue(ProgramObject* programObject,
                                 const ChunkTilePile& chunkTilePile)
 {
     ghoul_assert(
-        gpuChunkTiles.size() == chunkTilePile.chunkTiles.size(),
+        gpuChunkTiles.size() == chunkTilePile.size(),
         "GPU and CPU ChunkTilePile must have same size!"
     );
     for (size_t i = 0; i < gpuChunkTiles.size(); ++i) {
-        gpuChunkTiles[i].setValue(programObject, chunkTilePile.chunkTiles[i]);
+        gpuChunkTiles[i].setValue(programObject, chunkTilePile[i]);
     }
 }
 
