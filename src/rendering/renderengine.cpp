@@ -362,6 +362,7 @@ bool RenderEngine::initializeGL() {
 }
 
 void RenderEngine::updateSceneGraph() {
+    LTRACE("RenderEngine::updateSceneGraph(begin)");
     _sceneGraph->update({
         glm::dvec3(0),
         glm::dmat3(1),
@@ -380,6 +381,8 @@ void RenderEngine::updateSceneGraph() {
     //if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
     //node->updateCamera(_mainCamera);
     //}
+    
+    LTRACE("RenderEngine::updateSceneGraph(end)");
 }
 
 void RenderEngine::updateShaderPrograms() {
@@ -466,6 +469,7 @@ void RenderEngine::updateFade() {
 }
 
 void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix){
+    LTRACE("RenderEngine::render(begin)");
     _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
     _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
 
@@ -494,6 +498,7 @@ void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& vi
         if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady())
             screenSpaceRenderable->render();
     }
+    LTRACE("RenderEngine::render(end)");
 }
 
 void RenderEngine::renderShutdownInformation(float timer, float fullTime) {

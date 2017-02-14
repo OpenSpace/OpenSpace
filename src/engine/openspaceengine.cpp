@@ -822,6 +822,17 @@ void OpenSpaceEngine::configureLogging() {
         LogMgr.addLog(std::make_unique<VisualStudioOutputLog>());
     }
 #endif // WIN32
+    
+#ifndef GHOUL_LOGGING_ENABLE_TRACE
+    std::string logLevel;
+    configurationManager().getValue(KeyLogLevel, logLevel);
+    LogLevel level = ghoul::logging::levelFromString(logLevel);
+    
+    if (level == ghoul::logging::LogLevel::Trace) {
+        LWARNING("Desired logging level is set to 'Trace' but application was " <<
+                 "compiled without Trace support");
+    }
+#endif // GHOUL_LOGGING_ENABLE_TRACE
 }
 
 bool OpenSpaceEngine::initializeGL() {
