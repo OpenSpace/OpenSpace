@@ -30,7 +30,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>

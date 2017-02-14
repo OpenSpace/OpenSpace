@@ -24,8 +24,9 @@
 
 #include <modules/galaxy/rendering/galaxyraycaster.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+
 #include <sstream>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>

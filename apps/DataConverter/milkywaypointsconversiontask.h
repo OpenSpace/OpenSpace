@@ -27,7 +27,7 @@
 
 #include <apps/DataConverter/conversiontask.h>
 #include <string>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <functional>
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>

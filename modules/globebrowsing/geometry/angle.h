@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ANGLE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ANGLE___H__
 
-#include <glm/glm.hpp>
-
+#include <ghoul/glm.h>
 #include <memory>
+#include <math.h>
 
 namespace openspace {
 namespace globebrowsing {
