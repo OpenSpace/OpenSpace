@@ -31,8 +31,7 @@
 #include <openspace/util/updatestructures.h>
 #include <modules/globebrowsing/geometry/aabb.h>
 
-
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <memory>
 #include <vector>
 

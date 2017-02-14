@@ -26,7 +26,7 @@
 
 #include <ghoul/logging/logmanager.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <vector>
 #include <algorithm>
 

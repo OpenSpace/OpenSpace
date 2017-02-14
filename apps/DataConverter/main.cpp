@@ -24,7 +24,7 @@
 
 #include <iostream>
 #include <string>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/io/texture/texturereader.h>

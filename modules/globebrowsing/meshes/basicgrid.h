@@ -27,7 +27,7 @@
 
 #include <modules/globebrowsing/meshes/grid.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <vector>
 

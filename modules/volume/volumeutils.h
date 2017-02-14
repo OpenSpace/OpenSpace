@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___VOLUMEUTILS___H__
 #define __OPENSPACE_MODULE_VOLUME___VOLUMEUTILS___H__
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 namespace openspace {
 namespace volumeutils {

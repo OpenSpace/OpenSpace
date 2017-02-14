@@ -27,7 +27,7 @@
 
 #include <modules/globebrowsing/meshes/basicgrid.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <vector>
 
 namespace openspace {

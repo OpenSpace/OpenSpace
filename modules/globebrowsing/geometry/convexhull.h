@@ -30,7 +30,7 @@
 #include <stack>
 #include <vector>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 namespace openspace {
 namespace globebrowsing {
