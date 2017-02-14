@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 
 #include <modules/globebrowsing/geometry/angle.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 namespace openspace {
 namespace globebrowsing {

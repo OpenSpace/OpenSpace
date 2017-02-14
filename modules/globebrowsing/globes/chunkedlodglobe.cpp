@@ -142,7 +142,7 @@ int ChunkedLodGlobe::getDesiredLevel(
     int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
         chunk, renderData
     );
-    if (desiredLevelByAvailableData != chunklevelevaluator::Evaluator::UNKNOWN_DESIRED_LEVEL) {
+    if (desiredLevelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel) {
         desiredLevel = glm::min(desiredLevel, desiredLevelByAvailableData);
     }
 

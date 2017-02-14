@@ -26,10 +26,12 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GEODETICPATCH___H__
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/tile/quad.h>
 
 namespace openspace {
 namespace globebrowsing {
+    
+class TileIndex;
 
 class GeodeticPatch {
 public:

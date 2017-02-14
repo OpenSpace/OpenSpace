@@ -38,7 +38,7 @@ namespace chunklevelevaluator {
 */
 class Distance : public Evaluator {
 public:
-    virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
+    int getDesiredLevel(const Chunk& chunk, const RenderData& data) const override;
 };
 
 } // namespace chunklevelevaluator

@@ -37,7 +37,7 @@ ConvexHull2 ConvexHull2::grahamScan_NOT_THREAD_SAFE(std::vector<glm::vec2>& poin
     if (yMinIndex == -1) {
         yMinIndex = 0;
         float ymin = points[0].y;
-        for (int i = 1; i < points.size(); i++) {
+        for (int i = 1; i < points.size(); ++i) {
             float y = points[i].y;
             // Pick the bottom-most or chose the left most point in case of tie
             if ((y < ymin) || (ymin == y && points[i].x < points[yMinIndex].x)) {
@@ -54,10 +54,24 @@ ConvexHull2 ConvexHull2::grahamScan_NOT_THREAD_SAFE(std::vector<glm::vec2>& poin
     // before p2 in sorted ouput if p2 has larger polar angle (in
     // counterclockwise direction) than p1
     hull.p0 = points[0];
-        
+    
+    
+//    std::sort(
+//        points.begin() + 1,
+//        points.end(),
+//        [](const glm::vec2& a, const glm::vec2& b) {
+//            int o = orientation(p0, a, b);
+//            if (o == 0) {
+//                return (dist(p0, b) >= dist(p0, a)) ? -1 : 1;
+//            }
+//            
+//            return (o == 2) ? -1 : 1;
+//        }
+//    );
+//    
     // Replace with std::sort
     qsort(&(points.data()[1]), points.size()-1, sizeof(glm::vec2), &(hull.compare));
-
+    
     // Create an empty stack and push first three points to it.
     std::stack<glm::vec2> S;
     S.push(points[0]);
@@ -153,18 +167,20 @@ float ConvexHull2::dist(const glm::vec2& p1, const glm::vec2& p2) {
     return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
 }
 
-int ConvexHull2::compare(const void *vp1, const void *vp2) {
-    glm::vec2* p1 = (glm::vec2 *)vp1;
-    glm::vec2* p2 = (glm::vec2 *)vp2;
-
-    // Find orientation
-    int o = orientation(p0, *p1, *p2);
-    if (o == 0) {
-        return (dist(p0, *p2) >= dist(p0, *p1)) ? -1 : 1;
+    int ConvexHull2::compare(const void *vp1, const void *vp2) {
+        glm::vec2* p1 = (glm::vec2 *)vp1;
+        glm::vec2* p2 = (glm::vec2 *)vp2;
+        
+        // Find orientation
+        int o = orientation(p0, *p1, *p2);
+        if (o == 0) {
+            return (dist(p0, *p2) >= dist(p0, *p1)) ? -1 : 1;
+        }
+        
+        return (o == 2) ? -1 : 1;
     }
+    
 
-    return (o == 2) ? -1 : 1;
-}
-
+    
 } // namespace globebrowsing
 } // namespace openspace

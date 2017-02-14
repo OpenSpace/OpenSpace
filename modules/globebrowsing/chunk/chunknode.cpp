@@ -32,19 +32,11 @@
 namespace openspace {
 namespace globebrowsing {
 
-int ChunkNode::chunkNodeCount = 0;
-
 ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
     : _chunk(chunk)
     , _parent(parent)
     , _children({ nullptr, nullptr, nullptr, nullptr })
-{
-    chunkNodeCount++;
-}
-
-ChunkNode::~ChunkNode() {
-    chunkNodeCount--;
-}
+{}
 
 bool ChunkNode::isRoot() const {
     return _parent == nullptr;
@@ -57,10 +49,10 @@ bool ChunkNode::isLeaf() const {
 bool ChunkNode::updateChunkTree(const RenderData& data) {
     if (isLeaf()) {
         Chunk::Status status = _chunk.update(data);
-        if (status == Chunk::Status::WANT_SPLIT) {
+        if (status == Chunk::Status::WantSplit) {
             split();
         }
-        return status == Chunk::Status::WANT_MERGE;
+        return status == Chunk::Status::WantMerge;
     }
     else {
         char requestedMergeMask = 0;
@@ -71,7 +63,7 @@ bool ChunkNode::updateChunkTree(const RenderData& data) {
         }
 
         bool allChildrenWantsMerge = requestedMergeMask == 0xf;
-        bool thisChunkWantsSplit = _chunk.update(data) == Chunk::Status::WANT_SPLIT;
+        bool thisChunkWantsSplit = _chunk.update(data) == Chunk::Status::WantSplit;
 
         if (allChildrenWantsMerge && !thisChunkWantsSplit) {
             merge();
@@ -166,7 +158,7 @@ const ChunkNode& ChunkNode::getChild(Quad quad) const {
 
 void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
-        for (size_t i = 0; i < _children.size(); i++) {
+        for (size_t i = 0; i < _children.size(); ++i) {
             Chunk chunk(_chunk.owner(), _chunk.tileIndex().child((Quad)i));
             _children[i] = std::make_unique<ChunkNode>(chunk, this);
         }

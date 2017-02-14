@@ -42,8 +42,9 @@ namespace chunklevelevaluator {
 */
 class Evaluator {
 public:
+    static const int UnknownDesiredLevel = -1;
+
     virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const = 0;
-    static const int UNKNOWN_DESIRED_LEVEL = -1;
 };
 
 } // namespace chunklevelevaluator

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKNODE___H__
 
 #include <modules/globebrowsing/chunk/chunk.h>
+
 #include <array>
 #include <functional>
 #include <memory>
@@ -38,19 +39,18 @@ class ChunkedLodGlobe;
 class ChunkNode {
 public:
     ChunkNode(const Chunk& chunk, ChunkNode* parent = nullptr);
-    ~ChunkNode();
 
     /**
      * Recursively split the ChunkNode.
      *
      * \param depth defines how deep the recursion should go. If depth == 1 (default),
      * the ChunkNode will only split once.
-    */
+     */
     void split(int depth = 1);
 
     /**
      * Deletes all children of the ChunkNode recursively.
-    */
+     */
     void merge();
 
     bool isRoot() const;
@@ -73,9 +73,7 @@ public:
     */
     bool updateChunkTree(const RenderData& data);
 
-    static int chunkNodeCount;
-
-private:    
+private:
     ChunkNode* _parent;
     std::array<std::unique_ptr<ChunkNode>, 4> _children;
 

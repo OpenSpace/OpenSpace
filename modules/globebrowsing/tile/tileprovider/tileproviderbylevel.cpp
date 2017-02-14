@@ -46,7 +46,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
         );
         double floatMaxLevel;
         int maxLevel = 0;
-        if (!providers.getValue<double>(KeyMaxLevel, floatMaxLevel)) {
+        if (!levelProviderDict.getValue<double>(KeyMaxLevel, floatMaxLevel)) {
             throw std::runtime_error(
                 "Must define key '" + std::string(KeyMaxLevel) + "'"
             );

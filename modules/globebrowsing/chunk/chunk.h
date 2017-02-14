@@ -27,7 +27,9 @@
 
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/tileindex.h>
-#include <glm/glm.hpp>
+
+#include <ghoul/glm.h>
+
 #include <vector>
 
 namespace openspace {
@@ -49,9 +51,9 @@ public:
     };
 
     enum class Status {
-        DO_NOTHING,
-        WANT_MERGE,
-        WANT_SPLIT,
+        DoNothing,
+        WantMerge,
+        WantSplit,
     };
         
     Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex,
@@ -71,8 +73,8 @@ public:
     Status update(const RenderData& data);
 
     /**
-        * Returns a convex polyhedron of eight vertices tightly bounding the volume of
-        * the Chunk.
+     * Returns a convex polyhedron of eight vertices tightly bounding the volume of
+     * the Chunk.
     */
     std::vector<glm::dvec4> getBoundingPolyhedronCorners() const;
 
@@ -82,13 +84,13 @@ public:
     bool isVisible() const;
         
     /**
-        * Returns BoundingHeights that fits the Chunk as tightly as possible.
-        *
-        * If the Chunk uses more than one HightLayer, the BoundingHeights will be set
-        * to cover all HightLayers. If the Chunk has a higher level than its highest
-        * resolution HightLayer Tile, it will base its BoundingHeights on that Tile.
-        * This means that high level Chunks can have BoundingHeights that are not
-        * tightly fitting.
+     * Returns BoundingHeights that fits the Chunk as tightly as possible.
+     *
+     * If the Chunk uses more than one HightLayer, the BoundingHeights will be set
+     * to cover all HeightLayers. If the Chunk has a higher level than its highest
+     * resolution HightLayer Tile, it will base its BoundingHeights on that Tile.
+     * This means that high level Chunks can have BoundingHeights that are not
+    * tightly fitting.
     */
     BoundingHeights getBoundingHeights() const;
 

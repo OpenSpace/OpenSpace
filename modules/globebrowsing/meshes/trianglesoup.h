@@ -54,6 +54,7 @@ public:
         Positions usePositions = Positions::No,
         TextureCoordinates useTextures = TextureCoordinates::No,
         Normals useNormals = Normals::No);
+    
     ~TriangleSoup();
 
     // Setters
@@ -78,14 +79,13 @@ protected:
     bool _useTextureCoordinates;
     bool _useVertexNormals;
 
-    typedef struct {
-    public:
+    struct Vertex {
         GLfloat position[4];
         GLfloat texture[2];
         GLfloat normal[3];
     private:
         GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
-    } Vertex;
+    };
 
     // Vertex data
     std::vector<Vertex> _vertexData;

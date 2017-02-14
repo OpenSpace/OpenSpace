@@ -43,6 +43,7 @@ class HorizonCuller : public ChunkCuller {
 public:
     bool isCullable(const Chunk& chunk, const RenderData& renderData) override;
 
+private:
     bool isCullable(const glm::dvec3& cameraPosition, const glm::dvec3& globePosition,
         const glm::dvec3& objectPosition, double objectBoundingSphereRadius,
         double minimumGlobeRadius);
