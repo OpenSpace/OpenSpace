@@ -83,14 +83,14 @@ QCheckBox::indicator {
 }
 QCheckBox::indicator::unchecked {
     border: 1px solid #5A5A5A;
-    background: transparent;
+    background: #a10000;
 }
 QCheckBox::indicator:unchecked:hover {
     border: 1px solid #DDDDDD;
 }
 QCheckBox::indicator::checked {
-    border: 1px solid #AAAAAA;
-    background: #666666;
+    border: 1px solid #5A5A5A;
+    background: #8dc73f;
 }
 QCheckBox::indicator:checked:hover {
     border: 1px solid #DDDDDD;

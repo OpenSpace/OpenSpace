@@ -63,7 +63,7 @@ create_new_module(
     endif ()
     set_property(TARGET ccmc PROPERTY FOLDER "External")
     if (TARGET cdf)
-        if (OPENSPACE_DISABLE_EXTERNAL_WARNINGS)
+        if (GHOUL_DISABLE_EXTERNAL_WARNINGS)
             if (MSVC)
                 target_compile_options(cdf PUBLIC "/W0" "/MP")
             else ()
