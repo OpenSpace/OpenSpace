@@ -8,19 +8,6 @@ function dirListing(dirname)
   return files
 end
 
-function listTleFiles(dirname)
-  files = dirListing(dirname)
-  listOfFiles = {}
-  for tleFile in values(files) do
-    startIdx, endIdx = string.find(tleFile, ".tle")
-    fLen = string.len(tleFile)
-    if( endIdx == fLen ) then
-      table.insert(listOfFiles, tleFile)
-    end
-  end
-  return listOfFiles 
-end
-
 function values(t)
   local i = 0
   return function () i = i + 1; return t[i] end
@@ -33,30 +20,8 @@ function trimString(s)
   return s
 end
 
-function getTitleFromFile(filename)
-  f = io.open(filename, "r")
-  if f then
-      line1 = f:read('*l')
-  end
-  f:close()
-  --Remove spaces and invalid characters from title line
-  return trimString(line1)
-end
-
-function getPeriodFromFile(filename)
-  f = io.open(filename, "r")
-  if f then
-      --Ignore the first 2 lines
-      f:read('*l')
-      f:read('*l')
-      --Ignore first 7 numbers on line 3
-      for x=1,7 do
-        f:read('*n')
-      end
-      period = f:read('*n')
-  end
-  f:close()
-  return period
+function getPeriodFromFile(line2)
+  return tonumber(string.sub(line2, 53, 63))
 end
 
 function getNumLinesInFile(filename)
@@ -67,34 +32,19 @@ function getNumLinesInFile(filename)
   return ctr
 end
 
---Check format of a TLE file and return nonzero if there is a format error
-function checkTleFileFormat(file)
-  lines = getNumLinesInFile(file)
-  if( lines ~= 3 ) then
+--Check format of a set of 3 TLE file lines and return nonzero if there is a format error
+function checkTleFileFormat(lineArr)
+  if string.sub(lineArr[2], 1, 2) ~= "1 " then
     return -1
   end
-
-  myfile = io.open(file, "r")
-  if myfile then
-      myfile:read('*l') --title line
-      lineNum = myfile:read('*n')
-      myfile:read('*l') --rest of line 1
-      if( lineNum ~= 1 ) then
-        return -1
-      end
-      lineNum = myfile:read('*n')
-      myfile:read('*l') --rest of line 2
-      if( lineNum ~= 2 ) then
-        return -1
-      end
-  else
+  if string.sub(lineArr[3], 1, 2) ~= "2 " then
     return -1
   end
-  myfile:close()
   return 0
 end
 
-function  getSat(title, file)
+
+function  getSat(title, file, lineNum)
   return {
       Name = title,
       Parent = "EarthInertial",
@@ -111,7 +61,8 @@ function  getSat(title, file)
               Type = "TLETranslation",
               Body = title,
               Observer = "EarthInertial",
-              File = file
+              File = file,
+              LineNum = lineNum
           },
           Scale = {
               Type = "StaticScale",
@@ -121,7 +72,7 @@ function  getSat(title, file)
   }
 end
 
-function getSatTrail(title, file, per, color)
+function getSatTrail(title, file, lineNum, per, color)
   trailName = title .. "_trail"
 
   return {
@@ -133,7 +84,8 @@ function getSatTrail(title, file, per, color)
               Type = "TLETranslation",
               Body = title,
               Observer = "EarthInertial",
-              File = file
+              File = file,
+              LineNum = lineNum
           },
           Color = color,
           Period = per,
@@ -144,15 +96,18 @@ function getSatTrail(title, file, per, color)
 end
 
 -------------------------------------------------------------
---Subdirectory name and color scheme for each satellite group
+--Name, URL, and color scheme for each satellite group
 satelliteGroups = {
-    { dir = "leo",
-      trailColor = {1.0, 0.0, 0.0}
+    { title = "GPS",
+      url = "http://celestrak.com/NORAD/elements/gps-ops.txt",
+      trailColor = {0.9, 0.5, 0.0}
     },
-    { dir = "meo",
-      trailColor = {0.9, 0.6, 0.0}
+    { title = "SpaceStations",
+      url = "http://celestrak.com/NORAD/elements/stations.txt",
+      trailColor = {0.9, 0.0, 0.0}
     },
-    { dir = "heo",
+    { title = "Geostationary",
+      url = "http://celestrak.com/NORAD/elements/geo.txt",
       trailColor = {0.9, 0.9, 0.0}
     },
 }
@@ -160,23 +115,31 @@ satelliteGroups = {
 modElements = {}  
 fileErr = ""
 for sOrbit in values(satelliteGroups) do
-  sOrbit.dir = "../satellites/" .. sOrbit.dir
-  for elem in values(listTleFiles(sOrbit.dir)) do
-    elem = sOrbit.dir .. "/" .. elem
-    if( checkTleFileFormat(elem) == 0 ) then
-      title = getTitleFromFile(elem)
-      per = getPeriodFromFile(elem)
-      if( per ~= nil ) then
+  filename = sOrbit.url:match("([^/]+)$")
+  sOrbit.path = "../satellites/tle/" .. filename
+
+  line = {} 
+  myfile = io.open(sOrbit.path, "r")
+  lines = getNumLinesInFile(sOrbit.path)
+  --now loop through the tle file and get each set of 3 lines
+  if myfile then
+    for n=1,lines,3 do
+      line[1] = myfile:read('*l') --title line
+      line[2] = myfile:read('*l')
+      line[3] = myfile:read('*l')
+      if( checkTleFileFormat(line) == 0 ) then
+        title = trimString(line[1])
+        per = getPeriodFromFile(line[3])
         per = 1.0 / per * 2 --trail for 2x a single revolution
-        table.insert(modElements, getSat(title, elem))
+        table.insert(modElements, getSat(title, sOrbit.path, n))
         table.insert(modElements, getSatTrail(title,
-                     elem, per, sOrbit.trailColor))
+                     sOrbit.path, n, per, sOrbit.trailColor))
       else
-        fileErr = fileErr .. elem .. ","
+        fileErr = fileErr .. filename .. " " .. n .. ","
       end
-    else
-      fileErr = fileErr .. elem .. ","
     end
+  else
+    fileErr = fileErr .. " Invalid file " .. sOrbit.path .. ","
   end
 end
 

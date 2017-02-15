@@ -26,6 +26,7 @@ for i=1,outputLen do
     print(output[i].Transform.Translation.Body)
     print(output[i].Transform.Translation.Observer)
     print(output[i].Transform.Translation.File)
+    print(output[i].Transform.Translation.LineNum)
     print(output[i].Transform.Scale.Type)
     print(output[i].Transform.Scale.Scale)
   elseif( type == "RenderableTrailOrbit" ) then
@@ -36,6 +37,7 @@ for i=1,outputLen do
     print(output[i].Renderable.Translation.Body)
     print(output[i].Renderable.Translation.Observer)
     print(output[i].Renderable.Translation.File)
+    print(output[i].Renderable.Translation.LineNum)
     print(output[i].Renderable.Color[1])
     print(output[i].Renderable.Color[2])
     print(output[i].Renderable.Color[3])

@@ -38,6 +38,11 @@ namespace openspace {
  */
 class TLETranslation : public KeplerTranslation {
 public:
+    struct FileFormatError : public ghoul::RuntimeError {
+        explicit FileFormatError(std::string offense);
+        std::string offense;
+    };
+
     /**
      * Constructor for the TLETranslation class. The \p dictionary must contain a key for
      * the file that contains the TLE information. The ghoul::Dictionary will be tested
@@ -61,13 +66,14 @@ private:
      * disallowed values (see KeplerTranslation::setKeplerElements), a 
      * KeplerTranslation::RangeError is thrown.
      * \param filename The path to the file that contains the TLE file.
+     * \param lineNum The line number in the file where the set of 3 TLE lines starts
      * \throw std::system_error if the TLE file is malformed (does not contain at least
      * two lines that start with \c 1 and \c 2.
      * \throw KeplerTranslation::RangeError If the Keplerian elements are outside of
      * the valid range supported by Kepler::setKeplerElements
      * \pre The \p filename must exist
      */
-    void readTLEFile(const std::string& filename);
+    void readTLEFile(const std::string& filename, int lineNum);
 };
     
 } // namespace openspace
