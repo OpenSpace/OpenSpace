@@ -27,6 +27,7 @@
 #include <openspace/openspace.h>
 
 #include <openspace/documentation/core_registration.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/downloadmanager.h>
@@ -290,6 +291,17 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     LDEBUG("Loading configuration from disk");
     try {
         _engine->configurationManager().loadFromFile(configurationFilePath);
+    }
+    catch (const documentation::SpecificationError& e) {
+        LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
+        for (const documentation::TestResult::Offense& o : e.result.offenses) {
+            LERRORC(o.offender, std::to_string(o.reason));
+        }
+        for (const documentation::TestResult::Warning& w : e.result.warnings) {
+            LWARNINGC(w.offender, std::to_string(w.reason));
+        }
+        return false;
+        
     }
     catch (const ghoul::RuntimeError& e) {
         LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
@@ -822,6 +834,17 @@ void OpenSpaceEngine::configureLogging() {
         LogMgr.addLog(std::make_unique<VisualStudioOutputLog>());
     }
 #endif // WIN32
+    
+#ifndef GHOUL_LOGGING_ENABLE_TRACE
+    std::string logLevel;
+    configurationManager().getValue(KeyLogLevel, logLevel);
+    LogLevel level = ghoul::logging::levelFromString(logLevel);
+    
+    if (level == ghoul::logging::LogLevel::Trace) {
+        LWARNING("Desired logging level is set to 'Trace' but application was " <<
+                 "compiled without Trace support");
+    }
+#endif // GHOUL_LOGGING_ENABLE_TRACE
 }
 
 bool OpenSpaceEngine::initializeGL() {

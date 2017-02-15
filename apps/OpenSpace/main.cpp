@@ -168,9 +168,10 @@ int main(int argc, char** argv) {
     }
 
     // Main loop
-    LDEBUG("Starting rendering loop");
     try {
+        LDEBUG("Starting rendering loop");
         _sgctEngine->render();
+        LDEBUG("Ending rendering loop");
     }
     catch (const ghoul::RuntimeError& e) {
         // Write out all of the information about the exception, flush the logs, and throw
@@ -207,6 +208,7 @@ int main(int argc, char** argv) {
 }
 
 void mainInitFunc() {
+    LTRACE("main::mainInitFunc(begin)");
     //is this node the master?    (must be set after call to _sgctEngine->init())
     OsEng.setMaster(_sgctEngine->isMaster());
     
@@ -237,12 +239,14 @@ void mainInitFunc() {
                 p->setClearColor(glm::vec4(0.f, 0.f, 0.f, 1.f));
         }
     }
-
+    LTRACE("main::mainInitFunc(end)");
 }
 
 void mainPreSyncFunc() {
+    LTRACE("main::mainPreSyncFunc(begin)");
     OsEng.setRunTime(sgct::Engine::getTime());
     OsEng.preSynchronization();
+    LTRACE("main::mainPreSyncFunc(end)");
 }
 
 volatile bool busyWaitDecode = false;
@@ -252,10 +256,13 @@ void mainPostSyncPreDrawFunc() {
 //            std::this_thread::sleep_for(std::chrono::microseconds(10));
 //        }
 //    }
+    LTRACE("main::postSynchronizationPreDraw(begin)");
     OsEng.postSynchronizationPreDraw();
+    LTRACE("main::postSynchronizationPreDraw(end)");
 }
 
 void mainRenderFunc() {
+    LTRACE("main::mainRenderFunc(begin)");
     using glm::mat4;
     using glm::translate;
     //not the most efficient, but for clarity @JK
@@ -270,10 +277,13 @@ void mainRenderFunc() {
 
     mat4 projectionMatrix = _sgctEngine->getCurrentProjectionMatrix();
     OsEng.render(projectionMatrix, viewMatrix);
+    LTRACE("main::mainRenderFunc(end)");
 }
 
 void mainPostDrawFunc() {
+    LTRACE("main::mainPostDrawFunc(begin)");
     OsEng.postDraw();
+    LTRACE("main::mainPostDrawFunc(end)");
 
 //    if (OsEng.logSGCTOutOfOrderErrors()) {
 //        if (sgct::Engine::instance()->isMaster()) {
@@ -290,11 +300,15 @@ void mainPostDrawFunc() {
 }
 
 void mainExternalControlCallback(const char* receivedChars, int size) {
-    if (OsEng.isMaster())
+    LTRACE("main::mainExternalControlCallback(begin)");
+    if (OsEng.isMaster()) {
         OsEng.externalControlCallback(receivedChars, size, 0);
+    }
+    LTRACE("main::mainExternalControlCallback(end)");
 }
 
 void mainKeyboardCallback(int key, int, int action, int mods) {
+    LTRACE("main::mainKeyboardCallback(begin)");
     if (OsEng.isMaster()) {
         OsEng.keyboardCallback(
             openspace::Key(key),
@@ -302,15 +316,18 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
             openspace::KeyAction(action)
             );
     }
+    LTRACE("main::mainKeyboardCallback(begin)");
 }
 
 void mainMouseButtonCallback(int key, int action) {
+    LTRACE("main::mainMouseButtonCallback(begin)");
     if (OsEng.isMaster()) {
         OsEng.mouseButtonCallback(
             openspace::MouseButton(key),
             openspace::MouseAction(action)
             );
     }
+    LTRACE("main::mainMouseButtonCallback(end)");
 }
 
 void mainMousePosCallback(double x, double y) {
@@ -329,11 +346,15 @@ void mainCharCallback(unsigned int codepoint, int mods) {
 }
 
 void mainEncodeFun() {
+    LTRACE("main::mainEncodeFun(begin)");
     OsEng.encode();
+    LTRACE("main::mainEncodeFun(end)");
 }
 
 void mainDecodeFun() {
+    LTRACE("main::mainDecodeFun(begin)");
     OsEng.decode();
+    LTRACE("main::mainDecodeFun(end)");
 }
 
 void mainLogCallback(const char* msg) {
