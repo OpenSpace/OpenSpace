@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___TRANSFERFUNCTION___H__
 
 #include <string>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <functional>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/filesystem/file.h>

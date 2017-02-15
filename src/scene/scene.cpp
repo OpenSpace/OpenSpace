@@ -144,7 +144,9 @@ void Scene::update(const UpdateData& data) {
 
     for (SceneGraphNode* node : _graph.nodes()) {
         try {
+            LTRACE("Scene::update(begin '" + node->name() + "')");
             node->update(data);
+            LTRACE("Scene::update(end '" + node->name() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -160,7 +162,9 @@ void Scene::evaluate(Camera* camera) {
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
     for (SceneGraphNode* node : _graph.nodes()) {
+        LTRACE("Scene::render(begin '" + node->name() + "')");
         node->render(data, tasks);
+        LTRACE("Scene::render(end '" + node->name() + "')");
     }
 }
 

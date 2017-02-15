@@ -316,6 +316,7 @@ using documentation::Documentation;
 namespace std {
 
 std::string to_string(openspace::documentation::TestResult::Offense::Reason reason);
+std::string to_string(openspace::documentation::TestResult::Warning::Reason reason);
 
 } // namespace std
 

@@ -61,6 +61,17 @@ namespace luascriptfunctions {
 
     /**
      * \ingroup LuaScripts
+     * printTrace(*):
+     * Logs the passed value to the installed LogManager with a LogLevel of 'Trace'.
+     * For Boolean, numbers, and strings, the internal values are printed, for all other
+     * types, the type is printed instead
+     */
+    int printTrace(lua_State* L) {
+        return printInternal(ghoul::logging::LogLevel::Trace, L);
+    }
+
+    /**
+     * \ingroup LuaScripts
      * printDebug(*):
      * Logs the passed value to the installed LogManager with a LogLevel of 'Debug'.
      * For Boolean, numbers, and strings, the internal values are printed, for all other

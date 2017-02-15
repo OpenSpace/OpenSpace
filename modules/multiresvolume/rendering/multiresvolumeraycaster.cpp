@@ -26,7 +26,7 @@
 #include <memory>
 
 #include <modules/multiresvolume/rendering/multiresvolumeraycaster.h>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/bufferbinding.h>
 

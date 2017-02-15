@@ -27,7 +27,7 @@
 
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <memory>
 #include <vector>

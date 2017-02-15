@@ -370,6 +370,13 @@ void ScriptEngine::addBaseLibrary() {
         "",
         {
             {
+                "printTrace",
+                &luascriptfunctions::printTrace,
+                "*",
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Trace'"
+            },
+            {
                 "printDebug",
                 &luascriptfunctions::printDebug,
                 "*",

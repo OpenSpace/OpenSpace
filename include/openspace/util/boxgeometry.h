@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___BOXGEOMETRY___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 namespace openspace {
 

@@ -48,7 +48,7 @@ void ModuleEngine::initialize() {
 void ModuleEngine::deinitialize() {
     LDEBUG("Deinitializing modules");
     for (auto& m : _modules) {
-        LDEBUG("Deinitialieing module '" << m->name() << "'");
+        LDEBUG("Deinitializing module '" << m->name() << "'");
         m->deinitialize();
     }
     _modules.clear();

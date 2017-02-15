@@ -39,6 +39,7 @@ guards for correctness. At the moment this includes:
      module includes have the module name in it
    * The correct submodule is used
  * Checking for duplicates between all files
+ * Checking that no file includes glm header directly
 
 If this script is executed from the base directory of OpenSpace, no arguments need to
 be passed, otherwise the first and only argument has to point to the base directory.
@@ -62,6 +63,8 @@ def get_ifndef_symbol(lines):
     result = re.search('#ifndef (.*)\n', lines[index[0]])
     return result.group(1), index[0]
 
+
+
 def get_define_symbol(lines):
     index = [i for i,s in enumerate(lines) if '#define ' in s]
 
@@ -70,6 +73,8 @@ def get_define_symbol(lines):
 
     result = re.search('#define (.*)\n', lines[index[0]])
     return result.group(1), index[0]
+
+
 
 def check_correctness(lines):
     ifndef_symbol, line_number = get_ifndef_symbol(lines)
@@ -86,6 +91,8 @@ def check_correctness(lines):
 
     return ''
 
+
+
 def check_equality(lines):
     ifndef, _ = get_ifndef_symbol(lines)
     define, _ = get_define_symbol(lines)
@@ -94,6 +101,8 @@ def check_equality(lines):
         return ''
     else:
         return ifndef + ' ' + define
+
+
 
 def check_styling(lines):
     ifndef_symbol, ifndef_line = get_ifndef_symbol(lines)
@@ -120,12 +129,16 @@ def check_styling(lines):
 
     return ''
 
+
+
 def check_styling_filename(lines, filename):
     ifndef_symbol, _ = get_ifndef_symbol(lines)
     file = os.path.splitext(os.path.basename(filename))[0].upper()
 
     if not (file in ifndef_symbol or file in ifndef_symbol.replace('_', '')):
         return 'Malformed include guard: ' + ifndef_symbol + ' || ' + file
+
+
 
 def check_comment(lines):
     ifndef_symbol, _ = get_ifndef_symbol(lines)
@@ -137,6 +150,8 @@ def check_comment(lines):
         return '#endif line is not correctly formatted'
     else:
         return ''
+
+
 
 def check_copyright(lines):
     index = [i for i,s in enumerate(lines[0:23]) if 'Copyright' in s]
@@ -154,6 +169,8 @@ def check_copyright(lines):
     else:
         return ''
 
+
+
 def check_naming_convention_component(lines, component):
     ifndef_symbol, _ = get_ifndef_symbol(lines)
 
@@ -163,6 +180,8 @@ def check_naming_convention_component(lines, component):
         return '#ifndef naming convention broken: ' + ifndef_symbol + ' || ' + component.upper() 
     else:
         return ''
+
+
 
 def check_naming_convention_subcomponent(lines, component, file):
     ifndef_symbol, _ = get_ifndef_symbol(lines)
@@ -180,6 +199,8 @@ def check_naming_convention_subcomponent(lines, component, file):
     else:
         return ''
 
+
+
 def check_duplicates(lines, previousSymbols):
     ifndef_symbol, _ = get_ifndef_symbol(lines)
 
@@ -188,8 +209,29 @@ def check_duplicates(lines, previousSymbols):
     else:
         return True, ifndef_symbol
 
+
+
+def check_glm_header(lines, file):
+    Allowed_Files = [
+        'ghoul/glm.h'
+    ]
+
+    for f in Allowed_Files:
+        if f in file:
+            return ''
+
+    index = [i for i,s in enumerate(lines)
+                if '#include <glm/glm.hpp>' in s or 
+                '#include "glm/glm.hpp>"' in s]
+
+    if len(index) > 0:
+        return 'File used wrong glm include. Use "#include <ghoul/glm.h>" instead'
+    else:
+        return ''
+
+
 previousSymbols  = {}
-def check_file(file, component):
+def check_header_file(file, component):
     with open(file, 'r+') as f:
         lines = f.readlines()
 
@@ -239,23 +281,47 @@ def check_file(file, component):
             print(file, '\t',  'Duplicate include guard', symbol, 'first in', previousSymbols[symbol])
             return
         else:
-            previousSymbols[symbol] = file    
+            previousSymbols[symbol] = file
 
-def check_files(positiveList, negativeList, component):
+        header = check_glm_header(lines, file)
+        if header:
+            print(file, '\t',  'Illegal glm header include', header)
+            return
+
+
+def check_source_file(file, component):
+    with open(file, 'r+') as f:
+        lines = f.readlines()
+
+        header = check_glm_header(lines, file)
+        if header:
+            print(file, '\t',  'Illegal glm header include', header)
+            return
+
+
+
+def check_files(positiveList, negativeList, component, check_function):
     files = glob.glob(positiveList, recursive=True)
     negativeFiles = glob.glob(negativeList, recursive=True)
 
     files = [f for f in files if f not in negativeFiles]
 
     for file in files:
-        check_file(file, component)
+        check_function(file, component)
+
+
 
 
 basePath = './'
 if len(sys.argv) > 1:
     basePath = sys.argv[1] + '/'
 
-check_files(basePath + 'include/**/*.h', '', 'openspace_core')
-check_files(basePath + 'apps/**/*.h', basePath + 'apps/**/ext/**/*.h', 'openspace_app')
-check_files(basePath + 'modules/**/*.h', basePath + 'modules/**/ext/**/*.h', 'openspace_module')
-check_files(basePath + 'ext/ghoul/include/**/*.h', '', 'ghoul')
+check_files(basePath + 'include/**/*.h', '', 'openspace_core', check_header_file)
+check_files(basePath + 'apps/**/*.h', basePath + 'apps/**/ext/**/*.h', 'openspace_app', check_header_file)
+check_files(basePath + 'modules/**/*.h', basePath + 'modules/**/ext/**/*.h', 'openspace_module', check_header_file)
+check_files(basePath + 'ext/ghoul/include/**/*.h', '', 'ghoul', check_header_file)
+
+check_files(basePath + 'src/**/*.cpp', '', 'openspace_core', check_source_file)
+check_files(basePath + 'apps/**/*.cpp', basePath + 'apps/**/ext/**/*.cpp', 'openspace_app', check_source_file)
+check_files(basePath + 'modules/**/*.cpp', basePath + 'modules/**/ext/**/*.cpp', 'openspace_module', check_source_file)
+check_files(basePath + 'ext/ghoul/include/**/*.cpp', '', 'ghoul', check_source_file)

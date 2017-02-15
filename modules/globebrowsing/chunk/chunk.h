@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <vector>
 
 namespace openspace {

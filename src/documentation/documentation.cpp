@@ -78,6 +78,13 @@ std::string to_string(openspace::documentation::TestResult::Offense::Reason reas
             return "Wrong type";
     }
 }
+    
+std::string to_string(openspace::documentation::TestResult::Warning::Reason reason) {
+    switch (reason) {
+        case openspace::documentation::TestResult::Warning::Reason::Deprecated:
+            return "Deprecated";
+    }
+}
 
 } // namespace std
 
@@ -91,6 +98,12 @@ SpecificationError::SpecificationError(TestResult res, std::string component)
     , result(std::move(res))
 {
     ghoul_assert(!result.success, "Result's success must be false");
+    
+    message += " (";
+    for (const TestResult::Offense& o : result.offenses) {
+        message += o.offender + ',';
+    }
+    message.back() = ')';
 }
 
 DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> v,

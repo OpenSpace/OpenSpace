@@ -29,7 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <ghoul/opengl/ghoul_gl.h>
 
