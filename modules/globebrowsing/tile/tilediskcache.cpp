@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/tile/tilediskcache.h>
 
+#include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/tile.h>
 
 #include <ghoul/filesystem/filesystem.h>

@@ -38,7 +38,8 @@ struct CPLXMLNode;
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 /**
  * Interface for stringifying OpenSpace Time instances.
  *
@@ -292,6 +293,7 @@ private:
     TimeQuantizer _timeQuantizer;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 

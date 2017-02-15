@@ -29,69 +29,10 @@
 
 #include <modules/globebrowsing/tile/chunktile.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
 namespace openspace {
 namespace globebrowsing {
-
-class TileProvider;
-
-struct LayerRenderSettings : public properties::PropertyOwner {
-    LayerRenderSettings();
-    properties::FloatProperty opacity;
-    properties::FloatProperty gamma;
-    properties::FloatProperty multiplier;
-};
-
-/**
- * Simple struct which is used to enable/disable <code>TileProvider</code> 
- * and associate is with a name. It also holds layer specific information
- * which is used in rendering of layer.
- */
-class Layer : public properties::PropertyOwner {
-public:
-    Layer(const ghoul::Dictionary& layerDict);
-
-    ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
-
-    bool enabled() const { return _enabled.value(); }
-    TileProvider* tileProvider() const { return _tileProvider.get(); }
-    const LayerRenderSettings& renderSettings() const { return _renderSettings; }
-
-private:
-    properties::BoolProperty _enabled;
-    std::shared_ptr<TileProvider> _tileProvider;
-    LayerRenderSettings _renderSettings;
-};
-
-/**
- * Convenience class for dealing with multiple <code>Layer</code>s.
- */
-struct LayerGroup : public properties::PropertyOwner {
-    LayerGroup(std::string name);
-    LayerGroup(std::string name, const ghoul::Dictionary& dict);
-
-    /// Updates all layers tile providers within this group
-    void update();
-
-    /// @returns const vector of all layers
-    const std::vector<std::shared_ptr<Layer>>& layers() const;
-
-    /// @returns const vector of all active layers
-    const std::vector<std::shared_ptr<Layer>>& activeLayers() const;
-
-    /// @returns the size of the pile to be used in rendering of this layer
-    int pileSize() const;
-
-    bool layerBlendingEnabled() const { return _levelBlendingEnabled.value(); }
-
-private:
-    std::vector<std::shared_ptr<Layer>> _layers;
-    std::vector<std::shared_ptr<Layer>> _activeLayers;
-
-    properties::BoolProperty _levelBlendingEnabled;
-};
+    
+class LayerGroup;
 
 /**
  * Manages multiple LayerGroups.

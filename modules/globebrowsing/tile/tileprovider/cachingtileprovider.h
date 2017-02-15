@@ -31,6 +31,9 @@ namespace openspace {
 namespace globebrowsing {
 
 class AsyncTileDataProvider;
+class RawTile;
+    
+namespace tileprovider {
 
 /**
 * Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
@@ -92,6 +95,7 @@ private:
     Tile _defaultTile;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 

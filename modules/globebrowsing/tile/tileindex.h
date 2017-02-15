@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_INDEX___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_INDEX___H__
 
+#include <modules/globebrowsing/tile/quad.h>
+
 #include <ghoul/glm.h>
 #include <stdint.h>
 
@@ -37,13 +39,6 @@ namespace globebrowsing {
 
 class Geodetic2;
 
-enum Quad {
-    NORTH_WEST = 0,
-    NORTH_EAST,
-    SOUTH_WEST,
-    SOUTH_EAST
-};
-
 enum CardinalDirection {
     WEST = 0,
     EAST,
@@ -51,9 +46,9 @@ enum CardinalDirection {
     SOUTH,
 };
 
-using TileHashKey = uint64_t;
-
 struct TileIndex {
+    using TileHashKey = uint64_t;
+    
     int x, y, level;
     
     TileIndex(int x = 0, int y = 0, int level = 0);

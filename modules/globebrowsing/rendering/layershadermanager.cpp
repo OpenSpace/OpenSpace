@@ -32,13 +32,13 @@
 namespace openspace {
 namespace globebrowsing {
 
-bool LayerGroupPreprocessingData::operator==(
+bool LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
     const LayerGroupPreprocessingData& other) const {
     return lastLayerIdx == other.lastLayerIdx &&
         layerBlendingEnabled == other.layerBlendingEnabled;
 }
 
-bool LayerShaderPreprocessingData::operator==(
+bool LayerShaderManager::LayerShaderPreprocessingData::operator==(
     const LayerShaderPreprocessingData& other) const {
     if (layeredTextureInfo.size() != other.layeredTextureInfo.size() ||
         keyValuePairs.size() != other.keyValuePairs.size()) {
@@ -73,7 +73,7 @@ LayerShaderManager::~LayerShaderManager() {
     }
 }
 
-ProgramObject* LayerShaderManager::programObject(
+ghoul::opengl::ProgramObject* LayerShaderManager::programObject(
                                            LayerShaderPreprocessingData preprocessingData)
 {
     _updatedOnLastCall = false;
@@ -128,7 +128,7 @@ void LayerShaderManager::recompileShaderProgram(
     );
 
     ghoul_assert(_programObject != nullptr, "Failed to initialize programObject!");
-    using IgnoreError = ProgramObject::IgnoreError;
+    using IgnoreError = ghoul::opengl::ProgramObject::ProgramObject::IgnoreError;
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
 }
 

@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
 
     // deallocate sgct c arguments
     delete[] newArgv;
-
+    
     // Bind functions
     _sgctEngine->setInitOGLFunction(mainInitFunc);
     _sgctEngine->setPreSyncFunction(mainPreSyncFunc);

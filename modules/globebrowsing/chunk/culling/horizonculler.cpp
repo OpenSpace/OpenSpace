@@ -22,39 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/chunk/culling.h>
+#include <modules/globebrowsing/chunk/culling/horizonculler.h>
 
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
 namespace openspace {
 namespace globebrowsing {
-
-FrustumCuller::FrustumCuller(const AABB3 viewFrustum) : _viewFrustum(viewFrustum) {}
-
-bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
-    // Calculate the MVP matrix
-    glm::dmat4 modelTransform = chunk.owner().modelTransform();
-    glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    glm::dmat4 modelViewProjectionTransform = glm::dmat4(data.camera.projectionMatrix())
-        * viewTransform * modelTransform;
-
-    const std::vector<glm::dvec4>& corners = chunk.getBoundingPolyhedronCorners();
-        
-    // Create a bounding box that fits the patch corners
-    AABB3 bounds; // in screen space
-    std::vector<glm::vec4> clippingSpaceCorners(8);
-    for (size_t i = 0; i < 8; i++) {
-        glm::dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
-        clippingSpaceCorners[i] = cornerClippingSpace;
-
-        glm::dvec3 cornerNDC =
-            (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
-        bounds.expand(cornerNDC);
-    }
-        
-    return !_viewFrustum.intersects(bounds);
-}
+namespace culling {
 
 bool HorizonCuller::isCullable(const Chunk& chunk, const RenderData& data) {
     // Calculations are done in the reference frame of the globe. Hence, the camera
@@ -110,16 +85,20 @@ bool HorizonCuller::isCullable(const glm::dvec3& cameraPosition,
     double distanceToHorizon =
         sqrt(pow(length(cameraPosition - globePosition), 2) -
         pow(minimumGlobeRadius, 2));
+    
     double minimumAllowedDistanceToObjectFromHorizon = sqrt(
         pow(length(objectPosition - globePosition), 2) -
         pow(minimumGlobeRadius - objectBoundingSphereRadius, 2));
+    
     // Minimum allowed for the object to be occluded
     double minimumAllowedDistanceToObjectSquared =
         pow(distanceToHorizon + minimumAllowedDistanceToObjectFromHorizon, 2)
         + pow(objectBoundingSphereRadius, 2);
+    
     double distanceToObjectSquared = pow(length(objectPosition - cameraPosition), 2);
     return distanceToObjectSquared > minimumAllowedDistanceToObjectSquared;
 }
 
+} // namespace culling
 } // namespace globebrowsing
 } // namespace openspace

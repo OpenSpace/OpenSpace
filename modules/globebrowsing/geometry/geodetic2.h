@@ -25,14 +25,10 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GEODETIC2___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GEODETIC2___H__
 
-#include <modules/globebrowsing/tile/tileindex.h>
-
 #include <ghoul/glm.h>
 
 namespace openspace {
 namespace globebrowsing {
-
-class Ellipsoid;
 
 struct Geodetic2 {
     Geodetic2(double latitude = 0.0, double longitude = 0.0);
@@ -53,89 +49,6 @@ struct Geodetic2 {
 
     double lat;
     double lon;
-};
-
-struct Geodetic3 {
-    Geodetic2 geodetic2;
-    double height;
-};
-
-class GeodeticPatch {
-public:
-    GeodeticPatch(
-        double centerLat,
-        double centerLon,
-        double halfSizeLat,
-        double halfSizeLon);
-
-    GeodeticPatch(
-        const Geodetic2& center,
-        const Geodetic2& halfSize);
-
-    GeodeticPatch(const GeodeticPatch& patch);
-
-    GeodeticPatch(const TileIndex& tileIndex);
-
-    void setCenter(const Geodetic2&);
-    void setHalfSize(const Geodetic2&);    
-
-    /**
-        returns the latitude boundary which is closest to the equator
-    */
-    double edgeLatitudeNearestEquator() const;
-
-    /**
-        Returns true if the center above the equator
-    */
-    double isNorthern() const;
-
-    Geodetic2 getCorner(Quad q) const;
-    Geodetic2 getSize() const;
-
-    double minLat() const;
-    double maxLat() const;
-    double minLon() const;
-    double maxLon() const;
-
-    /**
-     * returns true if the specified coordinate is contained within the patch
-     */
-    bool contains(const Geodetic2& p) const;
-
-
-    /**
-     * Clamps a point to the patch region
-     */
-    Geodetic2 clamp(const Geodetic2& p) const;
-
-    /**
-     * Returns the corner of the patch that is closest to the given point p
-     */
-    Geodetic2 closestCorner(const Geodetic2& p) const;
-
-    /**
-     * Returns a point on the patch that minimizes the great-circle distance to
-     * the given point p.
-     */
-    Geodetic2 closestPoint(const Geodetic2& p) const;
-
-    /**
-     * Returns the minimum tile level of the patch (based on largest side)
-     */
-    double minimumTileLevel() const;
-
-    /**
-    * Returns the maximum level of the patch (based on smallest side)
-    */
-    double maximumTileLevel() const;
-
-    const Geodetic2& center() const;
-    const Geodetic2& halfSize() const;
-    Geodetic2 size() const;
-
-private:
-    Geodetic2 _center;
-    Geodetic2 _halfSize;
 };
 
 } // namespace globebrowsing

@@ -30,14 +30,14 @@
 namespace openspace {
 namespace globebrowsing {
 
-enum class AABBSpatialRelation {
-    None,
-    Intersecting,
-    Contained,
-    Containing
-};
-
 struct AABB1 {
+    enum class AABBSpatialRelation {
+        None,
+        Intersecting,
+        Contained,
+        Containing
+    };
+
     AABB1();
     AABB1(float min, float max);
 
@@ -54,8 +54,15 @@ struct AABB1 {
 };
 
 struct AABB2 {
+    enum class AABBSpatialRelation {
+        None,
+        Intersecting,
+        Contained,
+        Containing
+    };
+
     AABB2();
-    AABB2(const glm::vec2& min, const glm::vec2& max);
+    AABB2(glm::vec2 min, glm::vec2 max);
 
     void expand(const glm::vec2& p);
     glm::vec2 center() const;
@@ -70,8 +77,15 @@ struct AABB2 {
 };
 
 struct AABB3 {
+    enum class AABBSpatialRelation {
+        None,
+        Intersecting,
+        Contained,
+        Containing
+    };
+
     AABB3();
-    AABB3(const glm::vec3& min, const glm::vec3& max);
+    AABB3(glm::vec3 min, glm::vec3 max);
 
     void expand(const glm::vec3 p);
     glm::vec3 center() const;

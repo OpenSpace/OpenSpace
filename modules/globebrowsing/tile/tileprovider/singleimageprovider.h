@@ -29,6 +29,7 @@
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileprovider {
 
 using namespace ghoul::opengl;    
 
@@ -51,6 +52,7 @@ private:
     std::string _imagePath;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 

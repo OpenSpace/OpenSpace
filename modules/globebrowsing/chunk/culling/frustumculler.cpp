@@ -22,61 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__
+#include <modules/globebrowsing/chunk/culling/frustumculler.h>
+
+#include <modules/globebrowsing/chunk/chunk.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
 
 namespace openspace {
-
-struct RenderData;
-
 namespace globebrowsing {
+namespace culling {
 
-class Chunk;
+FrustumCuller::FrustumCuller(AABB3 viewFrustum)
+    : _viewFrustum(std::move(viewFrustum))
+{}
 
-/**
- * Abstract class defining an interface for accessing a desired level of a Chunk.
- * The desired level can be used in the process of determining whether a Chunk should
- * want to split, merge or do nothing.
-*/
-class ChunkLevelEvaluator {
-public:
-    virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const = 0;
-    static const int UNKNOWN_DESIRED_LEVEL = -1;
-};
+bool FrustumCuller::isCullable(const Chunk& chunk, const RenderData& data) {
+    // Calculate the MVP matrix
+    glm::dmat4 modelTransform = chunk.owner().modelTransform();
+    glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
+    glm::dmat4 modelViewProjectionTransform = glm::dmat4(data.camera.projectionMatrix())
+        * viewTransform * modelTransform;
 
-/**
- * Evaluate the Chunk level depending on the distance from the Camera to the Chunk.
- * This evaluation method aims to keep the screen size (horizontal length and not
- * area) of all chunks constant.
-*/
-class EvaluateChunkLevelByDistance : public ChunkLevelEvaluator {
-public:
-    virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
-};
+    const std::vector<glm::dvec4>& corners = chunk.getBoundingPolyhedronCorners();
+        
+    // Create a bounding box that fits the patch corners
+    AABB3 bounds; // in screen space
+    std::vector<glm::vec4> clippingSpaceCorners(8);
+    for (size_t i = 0; i < 8; ++i) {
+        glm::dvec4 cornerClippingSpace = modelViewProjectionTransform * corners[i];
+        clippingSpaceCorners[i] = cornerClippingSpace;
 
-/**
- * Evaluate the chunk level using the area of the non-heightmapped Chunk projected
- * on a sphere with the center in the position of the camera. A Chunk near the
- * horizon will have a small projected area and hence a lower desired level. This
- * evaluation is more forgiving than EvaluateChunkLevelByDistance, meaning it results
- * in lower desired levels.
-*/
-class EvaluateChunkLevelByProjectedArea : public ChunkLevelEvaluator {
-public:
-    virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
-};
+        glm::dvec3 ndc = (1.0f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
+        bounds.expand(ndc);
+    }
+        
+    return !(_viewFrustum.intersects(bounds));
+}
 
-/**
- * If this chunk has available tile data for any LayerGroup on any of its active
- * Layers it will return an UNKNOWN_DESIRED_LEVEL. If no data is available it will
- * evaluate to a level that is <code>current level -1</code>.
-*/
-class EvaluateChunkLevelByAvailableTileData : public ChunkLevelEvaluator {
-public:
-    virtual int getDesiredLevel(const Chunk& chunk, const RenderData& data) const;
-};
-
+} // namespace culling
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKLEVELEVALUATOR___H__

@@ -27,57 +27,25 @@
 
 #include <modules/globebrowsing/tile/tileindex.h>
 
-#include <ghoul/opengl/texture.h>
+#include <modules/globebrowsing/tile/tileuvtransform.h>
 
-#include <cpl_error.h>
 #include <memory>
-#include <vector>
+
+namespace ghoul { namespace opengl {
+    class Texture;
+}}
 
 namespace openspace {
 namespace globebrowsing {
 
-struct TileMetaData {
-    std::vector<float> maxValues;
-    std::vector<float> minValues;
-    std::vector<bool> hasMissingData;
-
-    void serialize(std::ostream& s);
-    static TileMetaData deserialize(std::istream& s);
-};
-
-struct TextureFormat {
-    ghoul::opengl::Texture::Format ghoulFormat;
-    GLuint glFormat;
-};
-    
-using namespace ghoul::opengl;
-    
-struct RawTile {
-    RawTile();
-
-    char* imageData;
-    glm::uvec3 dimensions;
-    std::shared_ptr<TileMetaData> tileMetaData;
-    TileIndex tileIndex;
-    CPLErr error;
-    size_t nBytesImageData;
-
-    void serializeMetaData(std::ostream& s);
-    static RawTile deserializeMetaData(std::istream& s);
-   
-    static RawTile createDefaultRes();
-};
-
-struct TileUvTransform {
-    glm::vec2 uvOffset;
-    glm::vec2 uvScale;
-};
+struct TileMetaData;
+struct TileUvTransform;
 
 /**
  * Defines a status and may have a Texture and TileMetaData
  */
 struct Tile {
-    std::shared_ptr<Texture> texture;
+    std::shared_ptr<ghoul::opengl::Texture> texture;
     std::shared_ptr<TileMetaData> metaData;
 
     /**
@@ -126,7 +94,7 @@ struct Tile {
     static glm::vec2 compensateSourceTextureSampling(glm::vec2 startOffset, 
         glm::vec2 sizeDiff, glm::uvec2 resolution, glm::vec2 tileUV);
 
-    static glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform uvTransform,
+    static glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
         glm::vec2 tileUV, glm::uvec2 resolution);
 
     /**
