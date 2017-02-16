@@ -77,21 +77,6 @@ std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
     return os << pr.start.x << ", " << pr.start.y << " with size " << pr.numPixels.x << ", " << pr.numPixels.y;
 }
 
-TileDataLayout::TileDataLayout() {}
-
-TileDataLayout::TileDataLayout(GDALDataset* dataSet, GLuint preferredGlType) {
-    // Assume all raster bands have the same data type
-    gdalType =preferredGlType != 0 ?
-        tiledatatype::getGdalDataType(preferredGlType) :
-        dataSet->GetRasterBand(1)->GetRasterDataType();
-
-    glType = tiledatatype::getOpenGLDataType(gdalType);
-    numRasters = dataSet->GetRasterCount();
-    bytesPerDatum = tiledatatype::numberOfBytes(gdalType);
-    bytesPerPixel = bytesPerDatum * numRasters;
-    textureFormat = tiledatatype::getTextureFormat(numRasters, gdalType);
-}
-  
 TileDataset::IODescription TileDataset::IODescription::cut(PixelRegion::Side side, int pos) {
     PixelRegion readPreCut = read.region;
     PixelRegion writePreCut = write.region;

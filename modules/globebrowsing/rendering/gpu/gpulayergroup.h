@@ -45,7 +45,7 @@ class LayerRenderSettings;
 struct TileDepthTransform;
 struct TileUvTransform;
 
-class LayerGroup;
+struct LayerGroup;
 struct TileIndex;
 
 /**

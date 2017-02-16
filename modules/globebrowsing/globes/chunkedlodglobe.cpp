@@ -40,6 +40,7 @@
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/debugging/rendering/debugrenderer.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 #include <openspace/util/time.h>
 
