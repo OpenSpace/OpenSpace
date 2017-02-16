@@ -73,6 +73,7 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
     
     LDEBUG("Registering module '" << module->name() << "'");
     module->initialize();
+    LDEBUG("Registered module '" << module->name() << "'");
     _modules.push_back(std::move(module));
 }
 

@@ -35,6 +35,7 @@
 
 sgct::Engine* _sgctEngine;
 
+int main_main(int argc, char** argv);
 void mainInitFunc();
 void mainPreSyncFunc();
 void mainPostSyncPreDrawFunc();
@@ -82,6 +83,30 @@ namespace {
 }
 
 int main(int argc, char** argv) {
+    try {
+        return main_main(argc, argv);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        // Write out all of the information about the exception, flush the logs, and throw
+        LFATALC(e.component, e.message);
+        LogMgr.flushLogs();
+        throw;
+    }
+    catch (const std::exception& e) {
+        // Write out all of the information about the exception, flush the logs, and throw
+        LFATALC("Exception", e.what());
+        LogMgr.flushLogs();
+        throw;
+    }
+    catch (...) {
+        // Write out all of the information about the exception, flush the logs, and throw
+        LFATALC("Exception", "Unknown exception");
+        LogMgr.flushLogs();
+        throw;
+    }
+}
+
+int main_main(int argc, char** argv) {
     auto glVersion = supportedOpenGLVersion();
     
     // create the OpenSpace engine and get arguments for the sgct engine
@@ -99,8 +124,9 @@ int main(int argc, char** argv) {
     // create sgct engine c arguments
     int newArgc = static_cast<int>(sgctArguments.size());
     char** newArgv = new char*[newArgc];
-    for (int i = 0; i < newArgc; ++i)
+    for (int i = 0; i < newArgc; ++i) {
         newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
+    }
 
     // Need to set this before the creation of the sgct::Engine
     sgct::MessageHandler::instance()->setLogToConsole(false);
@@ -168,29 +194,9 @@ int main(int argc, char** argv) {
     }
 
     // Main loop
-    try {
-        LDEBUG("Starting rendering loop");
-        _sgctEngine->render();
-        LDEBUG("Ending rendering loop");
-    }
-    catch (const ghoul::RuntimeError& e) {
-        // Write out all of the information about the exception, flush the logs, and throw
-        LFATALC(e.component, e.message);
-        LogMgr.flushLogs();
-        throw;
-    }
-    catch (const std::exception& e) {
-        // Write out all of the information about the exception, flush the logs, and throw
-        LFATALC("Exception", e.what());
-        LogMgr.flushLogs();
-        throw;
-    }
-    catch (...) {
-        // Write out all of the information about the exception, flush the logs, and throw
-        LFATALC("Exception", "Unknown exception");
-        LogMgr.flushLogs();
-        throw;
-    }
+    LDEBUG("Starting rendering loop");
+    _sgctEngine->render();
+    LDEBUG("Ending rendering loop");
 
     //clear function bindings to avoid crash after destroying the OpenSpace Engine
     sgct::MessageHandler::instance()->setLogToCallback(false);

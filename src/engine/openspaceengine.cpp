@@ -975,7 +975,9 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 }
 
 void OpenSpaceEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) {
+    LTRACE("OpenSpaceEngine::render(begin)");
     _renderEngine->render(projectionMatrix, viewMatrix);
+    LTRACE("OpenSpaceEngine::render(end)");
 }
 
 void OpenSpaceEngine::postDraw() {
