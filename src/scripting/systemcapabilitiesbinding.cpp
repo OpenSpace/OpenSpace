@@ -32,6 +32,8 @@
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
+#include <cctype>
+
 using namespace ghoul::lua;
 using namespace ghoul::systemcapabilities;
 
