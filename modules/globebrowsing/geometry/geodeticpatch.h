@@ -31,7 +31,7 @@
 namespace openspace {
 namespace globebrowsing {
     
-class TileIndex;
+struct TileIndex;
 
 class GeodeticPatch {
 public:

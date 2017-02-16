@@ -39,7 +39,7 @@ namespace openspace {
 OpenSpaceModule::OpenSpaceModule(std::string name) {
     ghoul_assert(!name.empty(), "Name must not be empty");
     
-    setName(name);
+    setName(std::move(name));
 }
 
 void OpenSpaceModule::initialize() {
@@ -77,8 +77,9 @@ std::string OpenSpaceModule::modulePath() const {
     std::string moduleName = name();
     std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), tolower);
 
-    if (FileSys.directoryExists("${MODULES}/" + moduleName))
+    if (FileSys.directoryExists("${MODULES}/" + moduleName)) {
         return absPath("${MODULES}/" + moduleName);
+    }
 
 #ifdef EXTERNAL_MODULES_PATHS
 

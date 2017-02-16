@@ -29,6 +29,7 @@
 
 #include <ghoul/glm.h>
 
+#include <memory>
 #include <sstream>
 
 #include <cpl_error.h>

@@ -47,7 +47,7 @@ namespace culling {
 class Chunk;
 class ChunkNode;
 class ChunkRenderer;
-class Geodetic2;
+struct Geodetic2;
 class LayerManager;
 class RenderableGlobe;
 

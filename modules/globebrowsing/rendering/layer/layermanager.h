@@ -32,7 +32,7 @@
 namespace openspace {
 namespace globebrowsing {
     
-class LayerGroup;
+struct LayerGroup;
 
 /**
  * Manages multiple LayerGroups.

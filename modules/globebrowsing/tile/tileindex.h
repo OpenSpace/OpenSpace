@@ -37,7 +37,7 @@ namespace ghoul {
 namespace openspace {
 namespace globebrowsing {
 
-class Geodetic2;
+struct Geodetic2;
 
 enum CardinalDirection {
     WEST = 0,
