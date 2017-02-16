@@ -40,20 +40,20 @@ SkirtedGrid::SkirtedGrid(unsigned int xSegments, unsigned int ySegments,
     : Grid(xSegments, ySegments, usePositions, useTextureCoordinates, useNormals)
 {
     _geometry = std::make_unique<TriangleSoup>(
-        CreateElements(xSegments, ySegments),
+        createElements(xSegments, ySegments),
         usePositions,
         useTextureCoordinates,
         useNormals
     );
 
     if (usePositions) {
-        _geometry->setVertexPositions(CreatePositions(_xSegments, _ySegments));
+        _geometry->setVertexPositions(createPositions(_xSegments, _ySegments));
     }
     if (useTextureCoordinates) {
-        _geometry->setVertexTextureCoordinates(CreateTextureCoordinates(_xSegments, _ySegments));
+        _geometry->setVertexTextureCoordinates(createTextureCoordinates(_xSegments, _ySegments));
     }
     if (useNormals) {
-        _geometry->setVertexNormals(CreateNormals(_xSegments, _ySegments));
+        _geometry->setVertexNormals(createNormals(_xSegments, _ySegments));
     }
 }
 
@@ -80,7 +80,7 @@ inline size_t SkirtedGrid::numVertices(int xSegments, int ySegments) {
     return (xSegments + 1) * (ySegments + 1);
 }
 
-std::vector<GLuint> SkirtedGrid::CreateElements(int xSegments, int ySegments) {
+std::vector<GLuint> SkirtedGrid::createElements(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
 
     std::vector<GLuint> elements;
@@ -115,13 +115,13 @@ std::vector<GLuint> SkirtedGrid::CreateElements(int xSegments, int ySegments) {
     return elements;
 }
 
-std::vector<glm::vec4> SkirtedGrid::CreatePositions(int xSegments, int ySegments) {
+std::vector<glm::vec4> SkirtedGrid::createPositions(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
     std::vector<glm::vec4> positions;
     positions.reserve(numVertices(xSegments, ySegments));
 
     // Copy from 2d texture coordinates and use as template to create positions
-    std::vector<glm::vec2> templateTextureCoords = CreateTextureCoordinates(
+    std::vector<glm::vec2> templateTextureCoords = createTextureCoordinates(
         xSegments, ySegments
     );
     for (const auto& c : templateTextureCoords) {
@@ -137,7 +137,7 @@ std::vector<glm::vec4> SkirtedGrid::CreatePositions(int xSegments, int ySegments
     return positions;
 }
 
-std::vector<glm::vec2> SkirtedGrid::CreateTextureCoordinates(int xSegments, int ySegments)
+std::vector<glm::vec2> SkirtedGrid::createTextureCoordinates(int xSegments, int ySegments)
 {
     validate(xSegments, ySegments);
     std::vector<glm::vec2> textureCoordinates;
@@ -162,7 +162,7 @@ std::vector<glm::vec2> SkirtedGrid::CreateTextureCoordinates(int xSegments, int 
     return textureCoordinates;
 }
 
-std::vector<glm::vec3> SkirtedGrid::CreateNormals(int xSegments, int ySegments) {
+std::vector<glm::vec3> SkirtedGrid::createNormals(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
     std::vector<glm::vec3> normals;
     normals.reserve(numVertices(xSegments + 2, ySegments + 2));

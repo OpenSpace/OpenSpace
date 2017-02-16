@@ -29,7 +29,7 @@
 
 namespace ghoul { namespace opengl {
 class ProgramObject;
-}}
+} }
 
 namespace openspace {
 namespace globebrowsing {

@@ -29,15 +29,22 @@
 
 #include <modules/globebrowsing/geometry/ellipsoid.h>
 #include <modules/globebrowsing/other/statscollector.h>
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
 
 #include <memory>
 
 namespace openspace {
 namespace globebrowsing {
 
+namespace chunklevelevaluator {
+    class Evaluator;
+} // namespace chunklevelevaluator
+    
+namespace culling {
+    class ChunkCuller;
+} // namespace culling
+
 class Chunk;
-class ChunkCuller;
-class ChunkLevelEvaluator;
 class ChunkNode;
 class ChunkRenderer;
 class Geodetic2;
@@ -61,13 +68,13 @@ public:
      * Traverse the chunk tree and find the highest level chunk node.
      *
      * \param location is given in geodetic coordinates and must be in the range
-     * latitude [-90. 90] and longitude [-180, 180]. In other words, it must be a
+     * latitude [-90, 90] and longitude [-180, 180]. In other words, it must be a
      * position defined on the globe in georeferenced coordinates.
      */
     const ChunkNode& findChunkNode(const Geodetic2& location) const;
 
     /**
-     * Test if a specific chunk can saefely be culled without affecting the rendered
+     * Test if a specific chunk can saf;ely be culled without affecting the rendered
      * image.
      *
      * Goes through all available <code>ChunkCuller</code>s and check if any of them
@@ -123,11 +130,11 @@ private:
     // the patch used for actual rendering
     std::unique_ptr<ChunkRenderer> _renderer;
 
-    std::vector<std::unique_ptr<ChunkCuller>> _chunkCullers;
+    std::vector<std::unique_ptr<culling::ChunkCuller>> _chunkCullers;
 
-    std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByAvailableTiles;
-    std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByProjectedArea;
-    std::unique_ptr<ChunkLevelEvaluator> _chunkEvaluatorByDistance;
+    std::unique_ptr<chunklevelevaluator::Evaluator> _chunkEvaluatorByAvailableTiles;
+    std::unique_ptr<chunklevelevaluator::Evaluator> _chunkEvaluatorByProjectedArea;
+    std::unique_ptr<chunklevelevaluator::Evaluator> _chunkEvaluatorByDistance;
 
     std::shared_ptr<LayerManager> _layerManager;
 

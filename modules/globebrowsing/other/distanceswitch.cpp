@@ -24,8 +24,12 @@
 
 #include <modules/globebrowsing/other/distanceswitch.h>
 
+#include <openspace/rendering/renderable.h>
+
 namespace openspace {
 namespace globebrowsing {
+
+DistanceSwitch::~DistanceSwitch() {}
 
 bool DistanceSwitch::initialize() {
     for (int i = 0; i < _renderables.size(); ++i) {

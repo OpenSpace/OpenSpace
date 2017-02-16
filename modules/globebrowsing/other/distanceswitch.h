@@ -25,13 +25,12 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___DISTANCESWITCH___H__
 
-#include <openspace/rendering/renderable.h>
-
 #include <memory>
 #include <vector>
 
 namespace openspace {
 
+class Renderable;
 struct RenderData;
 struct UpdateData;
 
@@ -43,6 +42,8 @@ namespace globebrowsing {
 */
 class DistanceSwitch {
 public:
+    ~DistanceSwitch();
+
     bool initialize();
     bool deinitialize();
 

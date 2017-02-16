@@ -33,6 +33,7 @@
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodetic3.h>
 #endif
 
 #include <list>

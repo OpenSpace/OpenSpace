@@ -28,8 +28,10 @@
 #include <modules/globebrowsing/other/distanceswitch.h>
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/sizereferencetileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/tileindextileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
@@ -52,17 +54,17 @@ void GlobeBrowsingModule::internalInitialize() {
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
 
     // add Tile Provider factory
-    auto fTileProvider = std::make_unique<ghoul::TemplateFactory<TileProvider>>();
+    auto fTileProvider = std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
 
-    fTileProvider->registerClass<CachingTileProvider>("LRUCaching");
-    fTileProvider->registerClass<SingleImageProvider>("SingleImage");
-    fTileProvider->registerClass<TemporalTileProvider>("Temporal");
-    fTileProvider->registerClass<TileIndexTileProvider>("TileIndex");
-    fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReference");
+    fTileProvider->registerClass<tileprovider::CachingTileProvider>("LRUCaching");
+    fTileProvider->registerClass<tileprovider::SingleImageProvider>("SingleImage");
+    fTileProvider->registerClass<tileprovider::TemporalTileProvider>("Temporal");
+    fTileProvider->registerClass<tileprovider::TileIndexTileProvider>("TileIndex");
+    fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>("SizeReference");
 
     // Combining Tile Providers
-    fTileProvider->registerClass<TileProviderByLevel>("ByLevel");
-    fTileProvider->registerClass<TileProviderByIndex>("ByIndex");
+    fTileProvider->registerClass<tileprovider::TileProviderByLevel>("ByLevel");
+    fTileProvider->registerClass<tileprovider::TileProviderByIndex>("ByIndex");
 
     FactoryManager::ref().addFactory(std::move(fTileProvider));
 }

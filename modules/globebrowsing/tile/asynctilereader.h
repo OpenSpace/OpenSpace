@@ -26,60 +26,16 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <modules/globebrowsing/tile/tile.h>
+
+#include <modules/globebrowsing/tile/tileindex.h>
 
 #include <unordered_map>
 
 namespace openspace {
 namespace globebrowsing {
-
+    
+class RawTile;
 class TileDataset;
-
-struct LoadJob : public Job<RawTile> {
-    virtual void execute() = 0;
-    virtual std::shared_ptr<RawTile> product() const = 0;
-};
-
-struct TileLoadJob : LoadJob {
-    TileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
-        const TileIndex& tileIndex)
-        : _tileDataset(textureDataProvider)
-        , _chunkIndex(tileIndex) 
-    {}
-
-    virtual ~TileLoadJob() = default;
-
-    virtual void execute() override;
-
-    virtual std::shared_ptr<RawTile> product() const override;
-
-protected:
-    TileIndex _chunkIndex;
-    std::shared_ptr<TileDataset> _tileDataset;
-    std::shared_ptr<RawTile> _rawTile;
-};
-
-class TileDiskCache;
-
-struct DiskCachedTileLoadJob : public TileLoadJob {
-    enum CacheMode {
-        Disabled,
-        ReadOnly,
-        ReadAndWrite,
-        WriteOnly,
-        CacheHitsOnly,
-    };
-        
-    DiskCachedTileLoadJob(std::shared_ptr<TileDataset> textureDataProvider, 
-        const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc, 
-        CacheMode cacheMode = CacheMode::ReadOnly);
-
-    void execute() override;
-
-protected:
-    std::shared_ptr<TileDiskCache> _tileDiskCache;
-    CacheMode _mode;
-};
 
 class AsyncTileDataProvider {
 public:
@@ -101,7 +57,7 @@ protected:
 private:
     std::shared_ptr<TileDataset> _tileDataset;
     ConcurrentJobManager<RawTile> _concurrentJobManager;
-    std::unordered_map<TileHashKey, TileIndex> _enqueuedTileRequests;
+    std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
 };
 
 } // namespace globebrowsing

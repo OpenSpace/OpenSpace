@@ -122,7 +122,7 @@ Creates a hash which can be used as key in hash maps.
 +-------+------------+-------+------------+
      
 */
-TileHashKey TileIndex::hashKey() const {
+TileIndex::TileHashKey TileIndex::hashKey() const {
     TileHashKey key = 0LL;
     key |= level;
     key |= x << 5;

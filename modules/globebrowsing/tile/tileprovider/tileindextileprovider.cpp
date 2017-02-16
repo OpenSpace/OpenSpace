@@ -22,67 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CULLING___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CULLING___H__
+#include <modules/globebrowsing/tile/tileprovider/tileindextileprovider.h>
 
-#include <modules/globebrowsing/geometry/aabb.h>
+#include <ghoul/font/fontrenderer.h>
 
 namespace openspace {
-
-struct RenderData;
-
 namespace globebrowsing {
+namespace tileprovider {
+    
+void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
+                                       fontRenderer, const TileIndex& tileIndex) const
+{
+    fontRenderer.render(
+        *_font,
+        glm::vec2(
+            _textureSize.x / 4 - (_textureSize.x / 32) * log10(1 << tileIndex.level),
+            _textureSize.y / 2 + _fontSize),
+        glm::vec4(1.0, 0.0, 0.0, 1.0),
+        "level: %i \nx: %i \ny: %i",
+        tileIndex.level, tileIndex.x, tileIndex.y
+    );
+}
 
-class Chunk;
-
-class ChunkCuller {
-public:
-    /**
-     * Determine if the Chunk is cullable. That is return true if removing the
-     * Chunk 'culling it' will not have any result on the final rendering. Culling
-     * it will make the rendering faster.
-     */
-    virtual bool isCullable(const Chunk& chunk, const RenderData& renderData) = 0;
-};
-
-    /**
-     * Culls all chunks that are completely outside the view frustum.
-     *
-     * The frustum culling uses a 2D axis aligned bounding box for the Chunk in
-     * screen space. This is calculated from a bounding polyhedron bounding the
-     * Chunk. Hence the culling will not be 'perfect' but fast and good enough for
-     * culling chunks outside the frustum with some margin.
-     */
-class FrustumCuller : public ChunkCuller {
-public:
-    /**
-     * \param viewFrustum is the view space in normalized device coordinates space.
-     * Hence it is an axis aligned bounding box and not a real frustum.
-     */
-    FrustumCuller(const AABB3 viewFrustum);
-
-    bool isCullable(const Chunk& chunk, const RenderData& renderData) override;
-
-private:
-    const AABB3 _viewFrustum;
-};
-
-/**
- * In this implementation of the horizon culling, the closer the ellipsoid is to a
- * sphere, the better this will make the culling. Using the minimum radius to
- * be safe. This means that if the ellipsoid has high difference between radii,
- * splitting might accur even though it may not be needed.
- */
-class HorizonCuller : public ChunkCuller {
-public:
-    bool isCullable(const Chunk& chunk, const RenderData& renderData) override;
-
-    bool isCullable(const glm::dvec3& cameraPosition, const glm::dvec3& globePosition,
-        const glm::dvec3& objectPosition, double objectBoundingSphereRadius,
-        double minimumGlobeRadius);
-};
-
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CULLING___H__

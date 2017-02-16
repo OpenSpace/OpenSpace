@@ -25,13 +25,16 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATASET___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATASET___H__
 
+#include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/tiledataset.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
 
 #include <gdal.h>
 #include <string>
@@ -42,36 +45,8 @@ class GDALRasterBand;
 namespace openspace {
 namespace globebrowsing {
 
+class RawTile;
 class GeodeticPatch;
-
-struct TileDataLayout {
-    TileDataLayout();
-    TileDataLayout(GDALDataset* dataSet, GLuint preferredGlType);
-
-    GDALDataType gdalType;
-    GLuint glType;
-
-    size_t bytesPerDatum;
-    size_t numRasters;
-    size_t bytesPerPixel;
-
-    TextureFormat textureFormat;
-};
-
-struct IODescription {
-    struct ReadData {
-        int overview;
-        PixelRegion region;
-    } read;
-
-    struct WriteData {
-        PixelRegion region;
-        size_t bytesPerLine; 
-        size_t totalNumBytes;
-    } write;
-
-    IODescription cut(PixelRegion::Side side, int pos);
-};
 
 class TileDataset {
 public:
@@ -113,6 +88,21 @@ public:
 
 
 private:
+    struct IODescription {
+        struct ReadData {
+            int overview;
+            PixelRegion region;
+        } read;
+        
+        struct WriteData {
+            PixelRegion region;
+            size_t bytesPerLine;
+            size_t totalNumBytes;
+        } write;
+        
+        IODescription cut(PixelRegion::Side side, int pos);
+    };
+    
 
     //////////////////////////////////////////////////////////////////////////////////
     //                                Initialization                                //
@@ -132,7 +122,7 @@ private:
     void setGdalProxyConfiguration();
     GDALDataset* gdalDataset(const std::string& gdalDatasetDesc);
     bool gdalHasOverviews() const;
-    int gdalOverview(const PixelRange& baseRegionSize) const;
+    int gdalOverview(const PixelRegion::PixelRange& baseRegionSize) const;
     int gdalOverview(const TileIndex& tileIndex) const;
     int gdalVirtualOverview(const TileIndex& tileIndex) const;
     PixelRegion gdalPixelRegion(const GeodeticPatch& geodeticPatch) const;
@@ -153,8 +143,8 @@ private:
     */
     std::array<double, 6> getGeoTransform() const;
 
-    PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
-    Geodetic2 pixelToGeodetic(const PixelCoordinate& p) const;
+    PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
+    Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
     IODescription getIODescription(const TileIndex& tileIndex) const;
     char* readImageData(IODescription& io, CPLErr& worstError) const;
     CPLErr rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst) const;

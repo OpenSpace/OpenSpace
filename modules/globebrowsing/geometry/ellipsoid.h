@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ELLIPSOID___H__
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodetic3.h>
 
 #include <ghoul/glm.h>
 
