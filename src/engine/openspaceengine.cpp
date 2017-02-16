@@ -75,15 +75,6 @@
 #include <fstream>
 #include <queue>
 
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-#include <modules/onscreengui/include/gui.h>
-#endif
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-#include <modules/iswa/rendering/iswabasegroup.h>
-#include <modules/iswa/util/iswamanager.h>
-#endif
-
 #if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
 #endif
@@ -145,9 +136,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _settingsEngine(new SettingsEngine)
     , _timeManager(new TimeManager)
     , _downloadManager(nullptr)
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    , _gui(new gui::GUI)
-#endif
     , _parallelConnection(new ParallelConnection)
     , _windowWrapper(std::move(windowWrapper))
     , _globalPropertyNamespace(new properties::PropertyOwner)
@@ -189,9 +177,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
 OpenSpaceEngine::~OpenSpaceEngine() {
     LINFO("_windowWrapper->isUsingSwapGroups(): " << _windowWrapper->isUsingSwapGroups());
     LINFO("_windowWrapper->isSwapGroupMaster(): " << _windowWrapper->isSwapGroupMaster());
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    _gui->deinitializeGL();
-#endif
     _interactionHandler->deinitialize();
     _renderEngine->deinitialize();
 
@@ -208,9 +193,6 @@ OpenSpaceEngine::~OpenSpaceEngine() {
     _console = nullptr;
     _moduleEngine = nullptr;
     _settingsEngine = nullptr;
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    _gui = nullptr;
-#endif
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
@@ -400,6 +382,14 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
+    for (const auto& func : _engine->_moduleCallbacks.deinitializeGL) {
+        func();
+    }
+
+    for (const auto& func : _engine->_moduleCallbacks.deinitialize) {
+        func();
+    }
+
     _engine->_moduleEngine->deinitialize();
     _engine->_console->deinitialize();
 
@@ -471,11 +461,11 @@ bool OpenSpaceEngine::initialize() {
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(*_scriptEngine);
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    _scriptEngine->addLibrary(IswaManager::luaLibrary());
-#endif
-
+    
+    for (OpenSpaceModule* module : _moduleEngine->modules()) {
+        _scriptEngine->addLibrary(module->luaLibrary());
+    }
+         
     // TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
     scriptEngine().initialize();
 
@@ -518,6 +508,10 @@ bool OpenSpaceEngine::initialize() {
     _renderEngine->initialize();
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
+    
+    for (const auto& func : _moduleCallbacks.initialize) {
+        func();
+    }
 
     // Run start up scripts
     try {
@@ -526,58 +520,6 @@ bool OpenSpaceEngine::initialize() {
     catch (const ghoul::RuntimeError& e) {
         LFATALC(e.component, e.message);
     }
-
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    LINFO("Initializing GUI");
-    _gui->initialize();
-    _gui->_globalProperty.setSource(
-            [&]() {
-            std::vector<properties::PropertyOwner*> res = {
-                _settingsEngine.get(),
-                _interactionHandler.get(),
-                _renderEngine.get()
-            };
-            return res;
-        }
-    );
-
-    OsEng.gui()._screenSpaceProperty.setSource(
-        [&]() {
-            const auto& ssr = renderEngine().screenSpaceRenderables();
-            return std::vector<properties::PropertyOwner*>(ssr.begin(), ssr.end());
-        }
-    );
-
-    OsEng.gui()._property.setSource(
-        [&]() {
-            const auto& nodes = renderEngine().scene()->allSceneGraphNodes();
-            return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
-        }
-    );
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    OsEng.gui()._iswa.setSource(
-        [&]() {
-            const auto& groups = IswaManager::ref().groups();
-            std::vector<properties::PropertyOwner*> res;
-            std::transform(
-                groups.begin(),
-                groups.end(),
-                std::back_inserter(res),
-                [](const auto& val) {
-                    return val.second.get(); 
-                }
-            );
-            return res;
-        }
-    );
-#endif
-    
-#endif
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    IswaManager::initialize();
-#endif
 
     _syncEngine->addSyncables(Time::ref().getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
@@ -850,15 +792,11 @@ void OpenSpaceEngine::configureLogging() {
 bool OpenSpaceEngine::initializeGL() {
     LINFO("Initializing Rendering Engine");
     bool success = _renderEngine->initializeGL();
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    LINFO("Initializing OnScreen GUI GL");
-    try {
-        _gui->initializeGL();
+    
+    for (const auto& func : _moduleCallbacks.initializeGL) {
+        func();
     }
-    catch (const ghoul::RuntimeError& e) {
-        LERROR(e.what());
-    }
-#endif
+    
     LINFO("Finished initializing OpenGL");
 
     // If using swapgroups, 
@@ -867,19 +805,19 @@ bool OpenSpaceEngine::initializeGL() {
     return success;
 }
 
-bool OpenSpaceEngine::isMaster(){
+bool OpenSpaceEngine::isMaster() {
     return _isMaster;
 }
 
-void OpenSpaceEngine::setMaster(bool master){
+void OpenSpaceEngine::setMaster(bool master) {
     _isMaster = master;
 }
     
-double OpenSpaceEngine::runTime(){
+double OpenSpaceEngine::runTime() {
     return _runTime;
 }
 
-void OpenSpaceEngine::setRunTime(double d){
+void OpenSpaceEngine::setRunTime(double d) {
     _runTime = d;
 }
     
@@ -911,6 +849,10 @@ void OpenSpaceEngine::preSynchronization() {
         _parallelConnection->preSynchronization();
 
     }
+    
+    for (const auto& func : _moduleCallbacks.preSync) {
+        func();
+    }
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
@@ -936,26 +878,10 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     // Step the camera using the current mouse velocities which are synced
     //_interactionHandler->updateCamera();
     
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    if (_isMaster && _windowWrapper->isRegularRendering()) {
-        glm::vec2 mousePosition = _windowWrapper->mousePosition();
-        //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
-        glm::ivec2 windowSize = _windowWrapper->currentWindowSize();
-        glm::ivec2 renderingSize = _windowWrapper->currentWindowResolution();
-        uint32_t mouseButtons = _windowWrapper->mouseButtons(2);
-        
-        double dt = std::max(_windowWrapper->averageDeltaTime(), 0.0);
-
-        _gui->startFrame(
-            static_cast<float>(dt),
-            glm::vec2(windowSize),
-            _windowWrapper->dpiScaling(),
-            mousePosition,
-            mouseButtons
-        );
+    for (const auto& func : _moduleCallbacks.postSyncPreDraw) {
+        func();
     }
-#endif
-
+    
     // Testing this every frame has minimal impact on the performance --- abock
     // Debug build: 1-2 us ; Release build: <= 1 us
     using ghoul::logging::LogManager;
@@ -963,35 +889,42 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     int errorCounter = LogMgr.messageCounter(LogLevel::Error);
     int fatalCounter = LogMgr.messageCounter(LogLevel::Fatal);
 
-    if (warningCounter > 0)
+    if (warningCounter > 0) {
         LWARNINGC("Logging", "Number of Warnings raised: " << warningCounter);
-    if (errorCounter > 0)
+    }
+    if (errorCounter > 0) {
         LWARNINGC("Logging", "Number of Errors raised: " << errorCounter);
-    if (fatalCounter > 0)
+    }
+    if (fatalCounter > 0) {
         LWARNINGC("Logging", "Number of Fatals raised: " << fatalCounter);
+    }
 
     LogMgr.resetMessageCounters();
-
 }
 
 void OpenSpaceEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) {
     LTRACE("OpenSpaceEngine::render(begin)");
     _renderEngine->render(projectionMatrix, viewMatrix);
+    
+    for (const auto& func : _moduleCallbacks.render) {
+        func();
+    }
+    
     LTRACE("OpenSpaceEngine::render(end)");
 }
 
 void OpenSpaceEngine::postDraw() {
     _renderEngine->postDraw();
 
+    for (const auto& func : _moduleCallbacks.postDraw) {
+        func();
+    }
+    
     bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
     if (showGui) {
         _renderEngine->renderScreenLog();
         if (_console->isVisible())
             _console->render();
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_isMaster && _windowWrapper->isRegularRendering())
-            _gui->endFrame();
-#endif
     }
 
     if (_isInShutdownMode) {
@@ -1007,14 +940,13 @@ void OpenSpaceEngine::postDraw() {
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
     if (_isMaster) {
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled()) {
-            bool isConsumed = _gui->keyCallback(key, mod, action);
-            if (isConsumed) {
+        for (const auto& func : _moduleCallbacks.keyboard) {
+            bool consumed = func(key, mod, action);
+            if (consumed) {
                 return;
             }
         }
-#endif
+        
         if (key == _console->commandInputButton()) {
             if (action == KeyAction::Press) {
                 _console->toggleMode();
@@ -1029,13 +961,13 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
     if (_isMaster) {
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled()) {
-            const bool isConsumed = _gui->charCallback(codepoint, modifier);
-            if (isConsumed)
+        for (const auto& func : _moduleCallbacks.character) {
+            bool consumed = func(codepoint, modifier);
+            if (consumed) {
                 return;
+            }
         }
-#endif
+
         if (_console->isVisible()) {
             _console->charCallback(codepoint, modifier);
         }
@@ -1044,32 +976,36 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (_isMaster) {
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled()) {
-            const bool isConsumed = _gui->mouseButtonCallback(button, action);
-            if (isConsumed /*&& action != MouseAction::Release*/)
+        for (const auto& func : _moduleCallbacks.mouseButton) {
+            bool consumed = func(button, action);
+            if (consumed) {
                 return;
+            }
         }
-#endif
+        
         _interactionHandler->mouseButtonCallback(button, action);
     }
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y) {
     if (_isMaster) {
+        for (const auto& func : _moduleCallbacks.mousePosition) {
+            func(x, y);
+        }
+
         _interactionHandler->mousePositionCallback(x, y);
     }
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
     if (_isMaster) {
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled()) {
-            const bool isConsumed = _gui->mouseWheelCallback(pos);
-            if (isConsumed)
+        for (const auto& func : _moduleCallbacks.mouseScrollWheel) {
+            bool consumed = func(pos);
+            if (consumed) {
                 return;
+            }
         }
-#endif
+        
         _interactionHandler->mouseScrollWheelCallback(pos);
     }
 }
@@ -1088,8 +1024,9 @@ void OpenSpaceEngine::decode() {
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int size,
                                               int clientId)
 {
-    if (size == 0)
+    if (size == 0) {
         return;
+    }
 
     _networkEngine->handleMessage(std::string(receivedChars, size));
 }
@@ -1144,6 +1081,37 @@ void OpenSpaceEngine::enableBarrier() {
 void OpenSpaceEngine::disableBarrier() {
     _windowWrapper->setBarrier(false);
 }
+    
+    
+void OpenSpaceEngine::registerModuleKeyboardCallback(
+                               std::function<bool (Key, KeyModifier, KeyAction)> function)
+{
+    _moduleCallbacks.keyboard.push_back(std::move(function));
+}
+    
+void OpenSpaceEngine::registerModuleCharCallback(
+                                 std::function<bool (unsigned int, KeyModifier)> function)
+{
+    _moduleCallbacks.character.push_back(std::move(function));
+}
+
+void OpenSpaceEngine::registerModuleMouseButtonCallback(
+                                  std::function<bool (MouseButton, MouseAction)> function)
+{
+    _moduleCallbacks.mouseButton.push_back(std::move(function));
+}
+
+void OpenSpaceEngine::registerModuleMousePositionCallback(
+                                            std::function<void (double, double)> function)
+{
+    _moduleCallbacks.mousePosition.push_back(std::move(function));
+}
+
+void OpenSpaceEngine::registerModuleMouseScrollWheelCallback(
+                                                    std::function<bool (double)> function)
+{
+    _moduleCallbacks.mouseScrollWheel.push_back(std::move(function));
+}
 
 NetworkEngine& OpenSpaceEngine::networkEngine() {
     ghoul_assert(_networkEngine, "NetworkEngine must not be nullptr");
@@ -1185,13 +1153,6 @@ LuaConsole& OpenSpaceEngine::console() {
     return *_console;
 }
 
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-gui::GUI& OpenSpaceEngine::gui() {
-    ghoul_assert(_gui, "GUI must not be nullptr");
-    return *_gui;
-}
-#endif
-
 ParallelConnection& OpenSpaceEngine::parallelConnection() {
     ghoul_assert(_parallelConnection, "ParallelConnection must not be nullptr");
     return *_parallelConnection;
@@ -1224,6 +1185,10 @@ TimeManager& OpenSpaceEngine::timeManager() {
     ghoul_assert(_timeManager, "Download Manager must not be nullptr");
     return *_timeManager;
 }
-
+    
+SettingsEngine& OpenSpaceEngine::settingsEngine() {
+    ghoul_assert(_settingsEngine, "Settings Engine must not be nullptr");
+    return *_settingsEngine;
+}
 
 }  // namespace openspace

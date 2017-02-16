@@ -24,6 +24,8 @@
 
 #include <modules/onscreengui/include/gui.h>
 
+#include <modules/onscreengui/onscreenguimodule.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/keys.h>
@@ -237,10 +239,6 @@ GUI::GUI()
     addPropertySubOwner(_iswa);
 }
 
-GUI::~GUI() {
-    ImGui::Shutdown();
-}
-
 void GUI::initialize() {
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         configurationFile, "", ghoul::filesystem::CacheManager::Persistent::Yes
@@ -322,6 +320,8 @@ void GUI::initialize() {
 }
 
 void GUI::deinitialize() {
+    ImGui::Shutdown();
+
     _iswa.deinitialize();
     _help.deinitialize();
     _performance.deinitialize();

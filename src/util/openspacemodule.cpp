@@ -66,6 +66,10 @@ void OpenSpaceModule::deinitialize() {
 std::vector<Documentation> OpenSpaceModule::documentations() const {
     return {};
 }
+    
+scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
+    return {};
+}
 
 ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
 OpenSpaceModule::requiredOpenGLVersion() const

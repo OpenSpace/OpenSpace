@@ -40,7 +40,18 @@ namespace openspace {
 
 IswaModule::IswaModule()
     : OpenSpaceModule("ISWA")
-{}
+{
+    OsEng.registerModuleCallback(
+        OpenSpaceEngine::CallbackOption::Initialize,
+        [](){
+            IswaManager::initialize();
+        }
+    );
+}
+    
+scripting::LuaLibrary IswaModule::luaLibrary() const {
+    return IswaManager::luaLibrary();
+}
 
 void IswaModule::internalInitialize(){
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

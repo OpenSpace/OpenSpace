@@ -39,7 +39,7 @@ int show(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
-    OsEng.gui().setEnabled(true);
+    OnScreenGUIModule::gui.setEnabled(true);
     return 0;
 }
 
@@ -54,7 +54,7 @@ int hide(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
-    OsEng.gui().setEnabled(false);
+    OnScreenGUIModule::gui.setEnabled(false);
     return 0;
 }
 
@@ -69,7 +69,7 @@ int toggle(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
-    OsEng.gui().setEnabled(!OsEng.gui().isEnabled());
+    OnScreenGUIModule::gui.setEnabled(!OnScreenGUIModule::gui.isEnabled());
     return 0;
 }
 
