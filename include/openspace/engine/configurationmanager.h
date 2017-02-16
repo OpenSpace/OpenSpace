@@ -92,6 +92,8 @@ public:
     /// The key that stores the verbosity (None, Minimal, Default, Full) of the system
     /// capabilities components
     static const std::string PartCapabilitiesVerbosity;
+    /// The key that stores the settings for determining Launcher-related settings
+    static const std::string KeyLauncher;
     /// The full key that stores the verbosity of the system capabilities component
     static const std::string KeyCapabilitiesVerbosity;
     /// The key that stores the time (in seconds) that the application will wait before

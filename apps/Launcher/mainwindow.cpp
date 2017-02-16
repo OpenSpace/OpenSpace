@@ -29,6 +29,7 @@
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/logfactory.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/log.h>
@@ -168,6 +169,75 @@ MainWindow::~MainWindow() {
     delete _informationWidget;
 }
 
+
+void MainWindow::configureLogging() {
+    const std::string KeyLogLevel =
+    openspace::ConfigurationManager::KeyLauncher + '.' + openspace::ConfigurationManager::PartLogLevel;
+    const std::string KeyLogImmediateFlush =
+    openspace::ConfigurationManager::KeyLauncher + '.' + openspace::ConfigurationManager::PartImmediateFlush;
+    const std::string KeyLogs =
+    openspace::ConfigurationManager::KeyLauncher + '.' + openspace::ConfigurationManager::PartLogs;
+
+    if (_configuration->hasKeyAndValue<std::string>(KeyLogLevel)) {
+        std::string logLevel;
+        _configuration->getValue(KeyLogLevel, logLevel);
+
+        bool immediateFlush = false;
+        _configuration->getValue(KeyLogImmediateFlush, immediateFlush);
+
+        ghoul::logging::LogLevel level = ghoul::logging::levelFromString(logLevel);
+        LogMgr.deinitialize();
+        using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
+        LogMgr.initialize(
+                               level,
+                               immediateFlush ? ImmediateFlush::Yes : ImmediateFlush::No
+                               );
+        LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
+    }
+
+    if (_configuration->hasKeyAndValue<ghoul::Dictionary>(KeyLogs)) {
+        ghoul::Dictionary logs;
+        _configuration->getValue(KeyLogs, logs);
+
+        for (size_t i = 1; i <= logs.size(); ++i) {
+            ghoul::Dictionary logInfo;
+            logs.getValue(std::to_string(i), logInfo);
+
+            try {
+                LogMgr.addLog(openspace::createLog(logInfo));
+            }
+            catch (const ghoul::RuntimeError& e) {
+                LERRORC(e.component, e.message);
+            }
+        }
+    }
+
+#ifdef WIN32
+    if (IsDebuggerPresent()) {
+        LogMgr.addLog(std::make_unique<VisualStudioOutputLog>());
+    }
+#endif // WIN32
+
+#ifndef GHOUL_LOGGING_ENABLE_TRACE
+    std::string logLevel;
+    _configuration->getValue(KeyLogLevel, logLevel);
+    LogLevel level = ghoul::logging::levelFromString(logLevel);
+
+    if (level == ghoul::logging::LogLevel::Trace) {
+        LWARNING("Desired logging level is set to 'Trace' but application was " <<
+                 "compiled without Trace support");
+    }
+#endif // GHOUL_LOGGING_ENABLE_TRACE
+
+//    printf("%d", _optionParser->value("d").toInt());
+//    ghoul::logging::LogManager::initialize(static_cast<ghoul::logging::LogLevel>(_optionParser->value("d").toInt()));
+//    LogMgr.addLog( std::make_unique< ghoul::logging::ConsoleLog >() );
+//    // TODO: This can crash the system in cases where the logfile can't be created ---abock
+//    LogMgr.addLog( std::make_unique< ghoul::logging::HTMLLog >("LauncherLog.html", ghoul::logging::HTMLLog::Append::No) );
+//    LogMgr.addLog( std::make_unique< QLog >() );
+
+}
+
 void MainWindow::initialize() {
     // ParseOptions
     generateOptions();
@@ -192,18 +262,13 @@ void MainWindow::initialize() {
     _syncWidget->setWindowModality(Qt::WindowModal);
     _syncWidget->hide();
 
-    printf("%d", _optionParser->value("d").toInt());
-    ghoul::logging::LogManager::initialize(static_cast<ghoul::logging::LogLevel>(_optionParser->value("d").toInt()));
-    LogMgr.addLog( std::make_unique< ghoul::logging::ConsoleLog >() );
-    // TODO: This can crash the system in cases where the logfile can't be created ---abock
-    LogMgr.addLog( std::make_unique< ghoul::logging::HTMLLog >("LauncherLog.html", ghoul::logging::HTMLLog::Append::No) );
-    LogMgr.addLog( std::make_unique< QLog >() );
-
     std::string configurationFile = _configurationFile;
-    
+
     _configuration = new openspace::ConfigurationManager;
     configurationFile = _configuration->findConfiguration( configurationFile );
     _configuration->loadFromFile(configurationFile);
+
+    configureLogging();
 
     // Load all available scenes
     QString modulesDirectory = QString::fromStdString(absPath("${SCENE}"));

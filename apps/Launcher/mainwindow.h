@@ -61,7 +61,8 @@ private slots:
 
 private:
     void initialize();
-    
+    void configureLogging();
+
     QNetworkReply* _newsReply;
     
     QTextEdit* _informationWidget;
