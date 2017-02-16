@@ -179,25 +179,25 @@ void MainWindow::configureLogging() {
     const std::string KeyLogs =
     openspace::ConfigurationManager::KeyLauncher + '.' + openspace::ConfigurationManager::PartLogs;
 
+    std::string logLevel = "None";
+    bool immediateFlush = false;
+
     if (_configuration->hasKeyAndValue<std::string>(KeyLogLevel)) {
-        std::string logLevel;
         _configuration->getValue(KeyLogLevel, logLevel);
-
-        bool immediateFlush = false;
         _configuration->getValue(KeyLogImmediateFlush, immediateFlush);
-
-        ghoul::logging::LogLevel level = ghoul::logging::levelFromString(logLevel);
-        LogMgr.deinitialize();
-        using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
-        LogMgr.initialize(
-                               level,
-                               immediateFlush ? ImmediateFlush::Yes : ImmediateFlush::No
-                               );
-        LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
-        // TODO: This can crash the system in cases where the logfile can't be created ---abock
-        LogMgr.addLog(std::make_unique< ghoul::logging::HTMLLog >("LauncherLog.html", ghoul::logging::HTMLLog::Append::No));
-        LogMgr.addLog(std::make_unique< QLog >());
     }
+
+    ghoul::logging::LogLevel level = ghoul::logging::levelFromString(logLevel);
+    using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
+
+    ghoul::logging::LogManager::initialize(
+                      level,
+                      immediateFlush ? ImmediateFlush::Yes : ImmediateFlush::No
+                      );
+    LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
+    // TODO: This can crash the system in cases where the logfile can't be created ---abock
+    LogMgr.addLog(std::make_unique< ghoul::logging::HTMLLog >("LauncherLog.html", ghoul::logging::HTMLLog::Append::No));
+    LogMgr.addLog(std::make_unique< QLog >());
 
     if (_configuration->hasKeyAndValue<ghoul::Dictionary>(KeyLogs)) {
         ghoul::Dictionary logs;
