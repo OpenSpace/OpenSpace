@@ -185,7 +185,8 @@ namespace {
         // 3
         using namespace std::chrono;
         int SecondsPerDay = seconds(hours(24)).count();
-        double nSecondsSince2000 = (daysSince2000 + daysInYear) * SecondsPerDay;
+        //Need to subtract 1 from daysInYear since it is not a zero-based count
+        double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
         
         // 4
         // We need to remove additionbal leap seconds past 2000 and add them prior to
