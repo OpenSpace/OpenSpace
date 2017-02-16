@@ -47,18 +47,19 @@ public:
      * to the GPU.
     */
     BasicGrid(unsigned int xSegments, unsigned int ySegments, 
-              TriangleSoup::Positions usePositions,
-              TriangleSoup::TextureCoordinates useTextureCoordinates,
-              TriangleSoup::Normals useNormals);
+        TriangleSoup::Positions usePositions,
+        TriangleSoup::TextureCoordinates useTextureCoordinates,
+        TriangleSoup::Normals useNormals);
 
     virtual int xSegments() const;
     virtual int ySegments() const;
 
 private:
-    virtual std::vector<GLuint> CreateElements(int xRes, int yRes);
-    virtual std::vector<glm::vec4> CreatePositions(int xRes, int yRes);
-    virtual std::vector<glm::vec2> CreateTextureCoordinates(int xRes, int yRes);
-    virtual std::vector<glm::vec3> CreateNormals(int xRes, int yRes);
+    std::vector<GLuint> createElements(int xRes, int yRes) override;
+    std::vector<glm::vec4> createPositions(int xRes, int yRes) override;
+    std::vector<glm::vec2> createTextureCoordinates(int xRes, int yRes)
+        override;
+    std::vector<glm::vec3> createNormals(int xRes, int yRes) override;
 
     void validate(int xSegments, int ySegments);
 

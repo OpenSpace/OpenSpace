@@ -22,103 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 namespace openspace {
 namespace globebrowsing {
-
-LayerRenderSettings::LayerRenderSettings()
-    : opacity(properties::FloatProperty("opacity", "opacity", 1.f, 0.f, 1.f))    
-    , gamma(properties::FloatProperty("gamma", "gamma", 1, 0, 5))
-    , multiplier(properties::FloatProperty("multiplier", "multiplier", 1.f, 0.f, 20.f))
-{
-    setName("settings");
-
-    addProperty(opacity);
-    addProperty(gamma);
-    addProperty(multiplier);
-}
-    
-Layer::Layer(const ghoul::Dictionary& layerDict)
-    : _enabled(properties::BoolProperty("enabled", "enabled", false))
-{
-    std::string layerName = "error!";
-    layerDict.getValue("Name", layerName);
-    setName(layerName);
-        
-    _tileProvider = std::shared_ptr<TileProvider>(
-        TileProvider::createFromDictionary(layerDict));
-        
-    // Something else went wrong and no exception was thrown
-    if (_tileProvider == nullptr) {
-        throw ghoul::RuntimeError("Unable to create TileProvider '" + name() + "'");
-    }
-
-    bool enabled = false; // defaults to false if unspecified
-    layerDict.getValue("Enabled", enabled);
-    _enabled.setValue(enabled);
-    addProperty(_enabled);
-
-    addPropertySubOwner(_renderSettings);
-}
-
-ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
-    return std::move(_tileProvider->getChunkTilePile(tileIndex, pileSize));
-}
-
-LayerGroup::LayerGroup(std::string name)
-    : _levelBlendingEnabled("blendTileLevels", "blend tile levels", true)
-{
-    setName(std::move(name));
-    addProperty(_levelBlendingEnabled);
-}
-
-LayerGroup::LayerGroup(std::string name, const ghoul::Dictionary& dict)
-    : LayerGroup(std::move(name))
-{
-    for (size_t i = 0; i < dict.size(); i++) {
-        std::string dictKey = std::to_string(i + 1);
-        ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(dictKey);
-
-        try {
-            _layers.push_back(std::make_shared<Layer>(layerDict));
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-            continue;
-        }
-        //_layers.push_back(std::make_shared<Layer>(layerDict));
-    }
-
-    for (const auto& layer : _layers) {
-        addPropertySubOwner(layer.get());
-    }
-}
-
-void LayerGroup::update() {
-    _activeLayers.clear();
-
-    for (const auto& layer : _layers) {
-        if (layer->enabled()) {
-            layer->tileProvider()->update();
-            _activeLayers.push_back(layer);
-        }
-    }
-}
-
-const std::vector<std::shared_ptr<Layer>>& LayerGroup::layers() const {
-    return _layers;
-}
-
-const std::vector<std::shared_ptr<Layer>>& LayerGroup::activeLayers() const {
-    return _activeLayers;
-}
-
-int LayerGroup::pileSize() const{
-    return _levelBlendingEnabled.value() ? 3 : 1;
-}
 
 const char* LayerManager::LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
     "HeightLayers",

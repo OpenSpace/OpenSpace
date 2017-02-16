@@ -46,8 +46,6 @@ public:
 private:
     void clean();
 
-// Member varialbes
-private:
     std::list<std::pair<KeyType, ValueType>> _itemList;
     std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
     size_t _cacheSize;

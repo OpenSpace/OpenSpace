@@ -25,19 +25,26 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 #include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/chunklevelevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/availabletiledataevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/distanceevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/projectedareaevaluator.h>
 #include <modules/globebrowsing/chunk/chunknode.h>
-#include <modules/globebrowsing/chunk/culling.h>
+#include <modules/globebrowsing/chunk/culling/chunkculler.h>
+#include <modules/globebrowsing/chunk/culling/frustumculler.h>
+#include <modules/globebrowsing/chunk/culling/horizonculler.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/rendering/chunkrenderer.h>
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/debugging/rendering/debugrenderer.h>
 
 #include <openspace/util/time.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/texture.h>
 
 #include <math.h>
 
@@ -66,17 +73,17 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
         TriangleSoup::Normals::No
     );
 
-    _chunkCullers.push_back(std::make_unique<HorizonCuller>());
-    _chunkCullers.push_back(std::make_unique<FrustumCuller>(
+    _chunkCullers.push_back(std::make_unique<culling::HorizonCuller>());
+    _chunkCullers.push_back(std::make_unique<culling::FrustumCuller>(
         AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35)))
     );
 
     _chunkEvaluatorByAvailableTiles = 
-        std::make_unique<EvaluateChunkLevelByAvailableTileData>();
+        std::make_unique<chunklevelevaluator::AvailableTileData>();
     _chunkEvaluatorByProjectedArea =
-        std::make_unique<EvaluateChunkLevelByProjectedArea>();
+    std::make_unique<chunklevelevaluator::ProjectedArea>();
     _chunkEvaluatorByDistance =
-        std::make_unique<EvaluateChunkLevelByDistance>();
+    std::make_unique<chunklevelevaluator::Distance>();
 
     _renderer = std::make_unique<ChunkRenderer>(geometry, layerManager);
 }
@@ -135,7 +142,7 @@ int ChunkedLodGlobe::getDesiredLevel(
     int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
         chunk, renderData
     );
-    if (desiredLevelByAvailableData != ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
+    if (desiredLevelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel) {
         desiredLevel = glm::min(desiredLevel, desiredLevelByAvailableData);
     }
 
@@ -166,7 +173,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
     const auto& heightMapLayers = _layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
         
     for (const auto& layer : heightMapLayers) {
-        TileProvider* tileProvider = layer->tileProvider();
+        tileprovider::TileProvider* tileProvider = layer->tileProvider();
         // Transform the uv coordinates to the current tile texture
         ChunkTile chunkTile = tileProvider->getChunkTile(tileIndex);
         const auto& tile = chunkTile.tile;

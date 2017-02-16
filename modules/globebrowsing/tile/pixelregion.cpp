@@ -42,18 +42,18 @@ PixelRegion::PixelRegion(const PixelRegion& o)
 
 void PixelRegion::setSide(Side side, int pos) {
     switch (side) {
-        case LEFT:
-            setLeft(pos);
-            break;
-        case TOP:
-            setTop(pos);
-            break;
-        case RIGHT:
-            setRight(pos);
-            break;
-        case BOTTOM:
-            setBottom(pos);
-            break;
+    case Side::LEFT:
+        setLeft(pos);
+        break;
+    case Side::TOP:
+        setTop(pos);
+        break;
+    case Side::RIGHT:
+        setRight(pos);
+        break;
+    case Side::BOTTOM:
+        setBottom(pos);
+        break;
     }
 }
 
@@ -77,18 +77,18 @@ void PixelRegion::setBottom(int y) {
 
 void PixelRegion::align(Side side, int pos) {
     switch (side) {
-        case LEFT:
-            alignLeft(pos);
-            break;
-        case TOP:
-            alignTop(pos);
-            break;
-        case RIGHT:
-            alignRight(pos);
-            break;
-        case BOTTOM:
-            alignBottom(pos);
-            break;
+    case Side::LEFT:
+        alignLeft(pos);
+        break;
+    case Side::TOP:
+        alignTop(pos);
+        break;
+    case Side::RIGHT:
+        alignRight(pos);
+        break;
+    case Side::BOTTOM:
+        alignBottom(pos);
+        break;
     }
 }
 
@@ -137,18 +137,18 @@ void PixelRegion::upscalePow2(int exponent, PixelCoordinate wrt) {
 
 void PixelRegion::move(Side side, int amount) {
     switch (side) {
-        case LEFT:
-            start.x -= amount;
-            break;
-        case TOP:
-            start.y -= amount;
-            break;
-        case RIGHT:
-            start.x += amount;
-            break;
-        case BOTTOM:
-            start.y += amount;
-            break;
+    case Side::LEFT:
+        start.x -= amount;
+        break;
+    case Side::TOP:
+        start.y -= amount;
+        break;
+    case Side::RIGHT:
+        start.x += amount;
+        break;
+    case Side::BOTTOM:
+        start.y += amount;
+        break;
     }
 }
 
@@ -198,19 +198,19 @@ PixelRegion PixelRegion::globalCut(Side side, int p) {
     PixelRegion cutOff(*this);
     int cutSize = 0;
     switch (side) {
-    case LEFT:
+    case Side::LEFT:
         setLeft(p);
         cutOff.setRight(p - cutSize);
         break;
-    case TOP:
+    case Side::TOP:
         setTop(p);
         cutOff.setBottom(p - cutSize);
         break;
-    case RIGHT:
+    case Side::RIGHT:
         setRight(p);
         cutOff.setLeft(p + cutSize);
         break;
-    case BOTTOM:
+    case Side::BOTTOM:
         setBottom(p);
         cutOff.setTop(p + cutSize);
         break;
@@ -233,30 +233,34 @@ int PixelRegion::area() const {
 
 int PixelRegion::edge(Side side) const {
     switch (side) {
-    case LEFT: return start.x;
-    case TOP: return start.y;
-    case RIGHT: return start.x + numPixels.x;
-    case BOTTOM: return start.y + numPixels.y;
+    case Side::LEFT:
+        return start.x;
+    case Side::TOP:
+        return start.y;
+    case Side::RIGHT:
+        return start.x + numPixels.x;
+    case Side::BOTTOM:
+        return start.y + numPixels.y;
     }
 }
 
 int PixelRegion::edgeDirectionSign(Side side) const {
-    return side < RIGHT ? -1 : 1;
+    return side < Side::RIGHT ? -1 : 1;
 }
 
-PixelCoordinate PixelRegion::end() const {
+PixelRegion::PixelCoordinate PixelRegion::end() const {
     return start + numPixels;
 }
 
 bool PixelRegion::lineIntersect(Side side, int p) {
     switch (side) {
-        case PixelRegion::LEFT:
-        case PixelRegion::RIGHT:
-            return start.x <= p && p <= (start.x + numPixels.x);
+    case Side::LEFT:
+    case Side::RIGHT:
+        return start.x <= p && p <= (start.x + numPixels.x);
 
-        case PixelRegion::TOP:
-        case PixelRegion::BOTTOM:
-            return start.y <= p && p <= (start.y + numPixels.y);
+    case Side::TOP:
+    case Side::BOTTOM:
+        return start.y <= p && p <= (start.y + numPixels.y);
     }
 }
 

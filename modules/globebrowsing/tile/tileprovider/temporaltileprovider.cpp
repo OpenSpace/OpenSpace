@@ -43,7 +43,8 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 const char* TemporalTileProvider::URL_TIME_PLACEHOLDER("${OpenSpaceTimeId}");
 
 const char* TemporalTileProvider::TemporalXMLTags::TIME_START = "OpenSpaceTimeStart";
@@ -347,5 +348,6 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) const {
     }
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

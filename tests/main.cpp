@@ -39,7 +39,6 @@
 //#include <test_chunknode.inl>
 #include <test_lrucache.inl>
 #include <test_aabb.inl>
-#include <test_convexhull.inl>
 
 #include <test_angle.inl>
 //#include <test_latlonpatch.inl>

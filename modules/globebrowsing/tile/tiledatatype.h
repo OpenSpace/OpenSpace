@@ -27,27 +27,29 @@
 
 #include <modules/globebrowsing/tile/tile.h>
 
+#include <modules/globebrowsing/tile/textureformat.h>
+
 #include <ghoul/opengl/ghoul_gl.h>
 
 #include <gdal.h>
 
 namespace openspace {
 namespace globebrowsing {
+namespace tiledatatype {
 
-struct TileDataType {
-    static GLuint getOpenGLDataType(GDALDataType gdalType);
+GLuint getOpenGLDataType(GDALDataType gdalType);
 
-    static GDALDataType getGdalDataType(GLuint glType);
+GDALDataType getGdalDataType(GLuint glType);
 
-    static TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
+TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
 
-    static size_t getMaximumValue(GDALDataType gdalType);
+size_t getMaximumValue(GDALDataType gdalType);
 
-    static size_t numberOfBytes(GDALDataType gdalType);
+size_t numberOfBytes(GDALDataType gdalType);
 
-    static float interpretFloat(GDALDataType gdalType, const char* src);
-};
+float interpretFloat(GDALDataType gdalType, const char* src);
 
+} // namespace tiledatatype
 } // namespace globebrowsing
 } // namespace openspace
 

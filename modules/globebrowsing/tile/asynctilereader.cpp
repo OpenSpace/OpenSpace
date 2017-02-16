@@ -24,68 +24,12 @@
 
 #include <modules/globebrowsing/tile/asynctilereader.h>
 
+#include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
 #include <modules/globebrowsing/tile/tiledataset.h>
 #include <modules/globebrowsing/tile/tilediskcache.h>
 
 namespace openspace {
 namespace globebrowsing {
-
-void TileLoadJob::execute() {
-    _rawTile = _tileDataset->readTileData(_chunkIndex);
-}
-
-std::shared_ptr<RawTile> TileLoadJob::product() const {
-    return _rawTile;
-}
-
-DiskCachedTileLoadJob::DiskCachedTileLoadJob(
-                                         std::shared_ptr<TileDataset> textureDataProvider, 
-                                         const TileIndex& tileIndex,
-                                         std::shared_ptr<TileDiskCache> tdc,
-                                         CacheMode m)
-    : TileLoadJob(textureDataProvider, tileIndex)
-    , _tileDiskCache(tdc)
-    , _mode(m)
-{}
-
-void DiskCachedTileLoadJob::execute() {
-    _rawTile = nullptr;
-
-    switch (_mode) {
-        case CacheMode::Disabled: 
-            _rawTile = _tileDataset->readTileData(_chunkIndex); 
-            break;
-
-        case CacheMode::ReadOnly:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                _rawTile = _tileDataset->readTileData(_chunkIndex);
-            }
-            break;
-
-        case CacheMode::ReadAndWrite:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                _rawTile = _tileDataset->readTileData(_chunkIndex);
-                _tileDiskCache->put(_chunkIndex, _rawTile);
-            }
-            break;
-
-        case CacheMode::WriteOnly:
-            _rawTile = _tileDataset->readTileData(_chunkIndex);
-            _tileDiskCache->put(_chunkIndex, _rawTile);
-            break;
-
-        case CacheMode::CacheHitsOnly:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                RawTile res = RawTile::createDefaultRes();
-                res.tileIndex = _chunkIndex;
-                _rawTile = std::make_shared<RawTile>(res);
-            }
-            break;
-    }
-}
 
 AsyncTileDataProvider::AsyncTileDataProvider(std::shared_ptr<TileDataset> tileDataset,
                                              std::shared_ptr<ThreadPool> pool)

@@ -22,58 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/chunk/chunklevelevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/projectedareaevaluator.h>
 
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 namespace openspace {
 namespace globebrowsing {
+namespace chunklevelevaluator {
     
-int EvaluateChunkLevelByDistance::getDesiredLevel(const Chunk& chunk,
-                                                  const RenderData& data) const
-{
-    // Calculations are done in the reference frame of the globe
-    // (model space). Hence, the camera position needs to be transformed
-    // with the inverse model matrix
-    glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
-    const RenderableGlobe& globe = chunk.owner();
-    const Ellipsoid& ellipsoid = globe.ellipsoid();
-
-    glm::dvec3 cameraPosition =
-        glm::dvec3(inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
-        
-    Geodetic2 pointOnPatch = chunk.surfacePatch().closestPoint(
-        ellipsoid.cartesianToGeodetic2(cameraPosition)
-    );
-    glm::dvec3 patchNormal = ellipsoid.geodeticSurfaceNormal(pointOnPatch);
-    glm::dvec3 patchPosition = ellipsoid.cartesianSurfacePosition(pointOnPatch);
-        
-    Chunk::BoundingHeights heights = chunk.getBoundingHeights();
-    double heightToChunk = heights.min;
-
-    // Offset position according to height
-    patchPosition += patchNormal * heightToChunk;
-    
-    glm::dvec3 cameraToChunk = patchPosition - cameraPosition;
-
-    // Calculate desired level based on distance
-    double distanceToPatch = glm::length(cameraToChunk);
-    double distance = distanceToPatch;
-
-    double scaleFactor =
-        globe.generalProperties().lodScaleFactor * ellipsoid.minimumRadius();
-    double projectedScaleFactor = scaleFactor / distance;
-    int desiredLevel = ceil(log2(projectedScaleFactor));
-    return desiredLevel;
-}
-
-int EvaluateChunkLevelByProjectedArea::getDesiredLevel(const Chunk& chunk,
-                                                       const RenderData& data) const
-{
+int ProjectedArea::getDesiredLevel(const Chunk& chunk, const RenderData& data) const {
     // Calculations are done in the reference frame of the globe
     // (model space). Hence, the camera position needs to be transformed
     // with the inverse model matrix
@@ -163,25 +124,6 @@ int EvaluateChunkLevelByProjectedArea::getDesiredLevel(const Chunk& chunk,
     return chunk.tileIndex().level + round(scaledArea - 1);
 }
 
-int EvaluateChunkLevelByAvailableTileData::getDesiredLevel(const Chunk& chunk,
-                                                           const RenderData& data) const
-{
-    auto layerManager = chunk.owner().chunkedLodGlobe()->layerManager();
-    auto heightLayers = layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
-    int currLevel = chunk.tileIndex().level;
-        
-    for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; ++i) {
-        for (auto& layer : layerManager->layerGroup(i).activeLayers()) {
-            Tile::Status tileStatus =
-                layer->tileProvider()->getTileStatus(chunk.tileIndex());
-            if (tileStatus == Tile::Status::OK) {
-                return UNKNOWN_DESIRED_LEVEL;
-            }
-        }
-    }
-
-    return currLevel - 1;
-}
-
+} // namespace chunklevelevaluator
 } // namespace globebrowsing
 } // namespace openspace

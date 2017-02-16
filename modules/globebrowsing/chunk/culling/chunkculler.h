@@ -22,51 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CONVEX_HULL___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CONVEX_HULL___H__
-
-#include <modules/globebrowsing/geometry/aabb.h>
-
-#include <stack>
-#include <vector>
-
-#include <ghoul/glm.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKCULLER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKCULLER___H__
 
 namespace openspace {
+
+struct RenderData;
+
 namespace globebrowsing {
 
-// Implementation based on 
-// http://www.sanfoundry.com/cpp-program-implement-graham-scan-algorithm-find-convex-hull/
+class Chunk;
 
-class ConvexHull2 {
-public: 
-    static ConvexHull2 grahamScan_NOT_THREAD_SAFE(std::vector<glm::vec2>& points,
-        int yMinIndex = -1);
+namespace culling {
 
-    const std::vector<glm::vec2> points() const;
-
-    bool intersects(const ConvexHull2& o) const;
-
-    AABB1 projectedRegion(glm::vec2 direction) const;
-    
-private:
-    bool hasPerpendicularLineWhereProjectedPointsOverlap(const ConvexHull2& other) const;
-
-    static int compare(const void* vp1, const void* vp2);
-
-    static glm::vec2 oneBelowTop(std::stack<glm::vec2>&);
-    static void swap(glm::vec2& p1, glm::vec2& p2);
-
-    // returns 0 = colinear, 1 = clockwise, 2 = counterclockwise
-    static int orientation(const glm::vec2& p, const glm::vec2& q, const glm::vec2& r);
-    static float dist(const glm::vec2& p1, const glm::vec2& p2);
-
-private:
-    static glm::vec2 p0;
-    std::vector<glm::vec2> _points;
+class ChunkCuller {
+public:
+    /**
+     * Determine if the Chunk is cullable. That is return true if removing the
+     * Chunk 'culling it' will not have any result on the final rendering. Culling
+     * it will make the rendering faster.
+     */
+    virtual bool isCullable(const Chunk& chunk, const RenderData& renderData) = 0;
 };
 
-} // namespace globebrowsing   
+} // namespace culling
+} // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CONVEX_HULL___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKCULLER___H__

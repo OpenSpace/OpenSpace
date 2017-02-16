@@ -36,14 +36,6 @@ namespace openspace {
 namespace globebrowsing {    
 
 template <typename T>
-using StatsRecord = std::unordered_map<std::string, T>;
-
-template <typename T>
-struct StatsCollection : public std::vector<StatsRecord<T>> {
-    std::set<std::string> keys;
-};
-
-template <typename T>
 class TemplatedStatsCollector {
 public:
     TemplatedStatsCollector(bool& enabled, const std::string& delimiter);
@@ -67,6 +59,14 @@ public:
     void writeNextRecord(std::ostream& os);
 
 private:
+    template <typename U>
+    using StatsRecord = std::unordered_map<std::string, U>;
+
+    template <typename U>
+    struct StatsCollection : public std::vector<StatsRecord<U>> {
+        std::set<std::string> keys;
+    };
+
     StatsCollection<T> _data;
     T _dummy; // used when disabled
     bool& _enabled;

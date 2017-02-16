@@ -33,6 +33,7 @@
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileprovider {
     
 /**
  * Interface for providing <code>Tile</code>s given a 
@@ -141,8 +142,9 @@ public:
     virtual float noDataValueAsFloat();
 };
 
-using TileCache = LRUCache<TileHashKey, Tile>;
+using TileCache = LRUCache<TileIndex::TileHashKey, Tile>;
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
