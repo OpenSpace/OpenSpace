@@ -36,6 +36,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/htmllog.h>
+#include <ghoul/logging/visualstudiooutputlog.h>
 
 #include <QApplication>
 #include <QComboBox>
@@ -193,6 +194,9 @@ void MainWindow::configureLogging() {
                                immediateFlush ? ImmediateFlush::Yes : ImmediateFlush::No
                                );
         LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
+        // TODO: This can crash the system in cases where the logfile can't be created ---abock
+        LogMgr.addLog(std::make_unique< ghoul::logging::HTMLLog >("LauncherLog.html", ghoul::logging::HTMLLog::Append::No));
+        LogMgr.addLog(std::make_unique< QLog >());
     }
 
     if (_configuration->hasKeyAndValue<ghoul::Dictionary>(KeyLogs)) {
@@ -214,7 +218,7 @@ void MainWindow::configureLogging() {
 
 #ifdef WIN32
     if (IsDebuggerPresent()) {
-        LogMgr.addLog(std::make_unique<VisualStudioOutputLog>());
+        LogMgr.addLog(std::make_unique<ghoul::logging::VisualStudioOutputLog>());
     }
 #endif // WIN32
 
@@ -232,9 +236,7 @@ void MainWindow::configureLogging() {
 //    printf("%d", _optionParser->value("d").toInt());
 //    ghoul::logging::LogManager::initialize(static_cast<ghoul::logging::LogLevel>(_optionParser->value("d").toInt()));
 //    LogMgr.addLog( std::make_unique< ghoul::logging::ConsoleLog >() );
-//    // TODO: This can crash the system in cases where the logfile can't be created ---abock
-//    LogMgr.addLog( std::make_unique< ghoul::logging::HTMLLog >("LauncherLog.html", ghoul::logging::HTMLLog::Append::No) );
-//    LogMgr.addLog( std::make_unique< QLog >() );
+
 
 }
 
