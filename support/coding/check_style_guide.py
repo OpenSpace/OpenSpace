@@ -229,6 +229,17 @@ def check_glm_header(lines, file):
     else:
         return ''
 
+def check_core_dependency(lines, component):
+    if component != "openspace_core":
+        return ''
+
+    index = [i for i,s in enumerate(lines) if 'OPENSPACE_MODULE_' in s]
+
+    if len(index) > 0:
+        return lines[index[0]][:-1]
+    else:
+        return ''
+
 
 previousSymbols  = {}
 def check_header_file(file, component):
@@ -255,7 +266,6 @@ def check_header_file(file, component):
             print(file, '\t',  'Filename styling check failed', '\t', styling_filename)
             return
 
-
         comment = check_comment(lines)
         if comment:
             print(file, '\t',  'Comment check failed', '\t', comment)
@@ -278,15 +288,19 @@ def check_header_file(file, component):
 
         duplicates, symbol = check_duplicates(lines, previousSymbols)
         if not duplicates:
-            print(file, '\t',  'Duplicate include guard', symbol, 'first in', previousSymbols[symbol])
+            print(file, '\t', 'Duplicate include guard', symbol, 'first in', previousSymbols[symbol])
             return
         else:
             previousSymbols[symbol] = file
 
         header = check_glm_header(lines, file)
         if header:
-            print(file, '\t',  'Illegal glm header include', header)
+            print(file, '\t', 'Illegal glm header include', header)
             return
+
+        core_dependency = check_core_dependency(lines, component)
+        if core_dependency:
+            print(file, '\t' 'Wrong core dependency', core_dependency)
 
 
 def check_source_file(file, component):
@@ -297,6 +311,10 @@ def check_source_file(file, component):
         if header:
             print(file, '\t',  'Illegal glm header include', header)
             return
+
+        core_dependency = check_core_dependency(lines, component)
+        if core_dependency:
+            print(file, '\t' 'Wrong core dependency', core_dependency)
 
 
 
