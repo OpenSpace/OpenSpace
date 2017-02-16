@@ -1,4 +1,4 @@
-var levels = ['trace', 'debug', 'info', 'warning', 'error', 'fatal'];
+var levels = ['debug', 'info', 'warning', 'error', 'fatal'];
 var filterLevel = 0;
 
 function insertAfter(newNode, referenceNode) {
