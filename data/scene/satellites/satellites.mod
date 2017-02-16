@@ -95,6 +95,31 @@ function getSatTrail(title, file, lineNum, per, color)
   }
 end
 
+function getTestPoint(parent, name, x, y, z)
+  return {
+        Name = name,
+        Parent = parent,
+        Renderable = {
+            Type = "RenderablePlane",
+            Size = {3.0, 4.0},
+            Origin = "Center",
+            Body = "TLE",
+            Billboard = true,
+            Texture = "tle.jpg"
+        },
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = {x, y, z},
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            }
+        }
+  }
+end
+
 -------------------------------------------------------------
 --Name, URL, and color scheme for each satellite group
 satelliteGroups = {

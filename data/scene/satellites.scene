@@ -11,9 +11,9 @@ function preInitialization()
     -- openspace.spice.loadKernel("${OPENSPACE_DATA}/spice/de430_1850-2150.bsp")
 
     openspace.time.setTime(openspace.time.currentWallTime())
+
     --Test for vernal equinox time 2017
     --openspace.time.setTime("2017 MAR 20 10:28:30.500")
-    --openspace.time.setTime("2017 JAN 25 17:29:00.500")
 
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 end
@@ -61,8 +61,10 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        Position = {-101717665165.846237, -61587044113.095749, 87131803969.474838},
-        Rotation = {0.760854, -0.131627, 0.443751, 0.454818},
+        Position = {7395454647.565954, -73663596142.693726, 129203098002.802811},
+        Rotation = {0.103265, -0.821622, -0.058358, 0.557555},
+        --Position = {-101717665165.846237, -61587044113.095749, 87131803969.474838},
+        --Rotation = {0.760854, -0.131627, 0.443751, 0.454818},
     },
     Modules = {
         --"satellites/earth",
