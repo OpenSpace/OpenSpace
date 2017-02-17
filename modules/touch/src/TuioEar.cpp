@@ -24,66 +24,75 @@
 
 #include <modules/touch/include/TuioEar.h>
 #include <vector>
-#include <algorithm>    // std::find
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/settingsengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <boost/thread/mutex.hpp>
 
 namespace {
 	const std::string _loggerCat = "TuioEar";
 }
 
 void TuioEar::tuioAdd(TuioObject *tobj) {
-	
-	if (tobj->containsNewTuioToken()) LINFO("add tok " << tobj->getTuioToken()->getSessionID() << "\n");
 	if (tobj->containsNewTuioPointer()) {
-		list.push_back(tobj->getTuioPointer());
-		LINFO("add ptr " << tobj->getTuioPointer()->getSessionID() << ", Fingers: " << list.size() << "\n");
+		boost::lock_guard<boost::mutex> lock(_mx);
+		_list.push_back(tobj);
 
+		LINFO("add ptr " << tobj->getTuioPointer()->getSessionID() << ", size: " << _list.size() << "\n");
 	}
+	if (tobj->containsNewTuioToken()) LINFO("add tok " << tobj->getTuioToken()->getSessionID() << "\n");
 	if(tobj->containsNewTuioBounds()) LINFO("add bnd " << tobj->getTuioBounds()->getSessionID() << "\n");
 	if(tobj->containsNewTuioSymbol()) LINFO("add sym " << tobj->getTuioSymbol()->getSessionID() << "\n");
 	//std::cout << "add obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/"<<  tobj->getTuioSourceID() << ") "<< tobj->getX() << " " << tobj->getY() << " " << tobj->getAngle() << std::endl;
-	//std::cout << std::flush;
 }
 
 void TuioEar::tuioUpdate(TuioObject *tobj) {
+	if (tobj->containsTuioPointer()) {
+		boost::lock_guard<boost::mutex> lock(_mx);
+		_list.push_back(tobj);
+
+		LINFO("set ptr " << tobj->getTuioPointer()->getSessionID() << ", size: " << _list.size() << "\n");
+	}
 	if (tobj->containsTuioToken()) LINFO("set tok " << tobj->getTuioToken()->getSessionID() << "\n");
-	if (tobj->containsTuioPointer()) LINFO("set ptr " << tobj->getTuioPointer()->getSessionID() << "\n");
 	if (tobj->containsTuioBounds()) LINFO("set bnd " << tobj->getTuioBounds()->getSessionID() << "\n");
 	if (tobj->containsTuioSymbol()) LINFO("set sym " << tobj->getTuioSymbol()->getSessionID() << "\n");
 	//std::cout << "set obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/"<<  tobj->getTuioSourceID() << ") "<< tobj->getX() << " " << tobj->getY() << " " << tobj->getAngle() << " " << tobj->getMotionSpeed() << " " << tobj->getRotationSpeed() << " " << tobj->getMotionAccel() << " " << tobj->getRotationAccel() << std::endl;	
-	//std::cout << std::flush;
 }
 
 void TuioEar::tuioRemove(TuioObject *tobj) {
-	if (tobj->containsTuioToken()) LINFO("del tok " << tobj->getTuioToken()->getSessionID() << "\n");
-
 	if (tobj->containsTuioPointer()) {
-		it = list.begin();
-		for (; it != list.end(); ++it) {
-			if (it->getSessionID() == tobj->getTuioPointer()->getSessionID()) {
-				list.erase(it);
-				LINFO("del ptr " << tobj->getTuioPointer()->getSessionID() << ", Fingers: " << list.size() << "\n");
-				break;
-			}
-		}
+		LINFO("del ptr " << tobj->getTuioPointer()->getSessionID() << ", size: " << _list.size() << "\n");
 	} 
-
+	if (tobj->containsTuioToken()) LINFO("del tok " << tobj->getTuioToken()->getSessionID() << "\n");
 	if (tobj->containsTuioBounds()) LINFO("del bnd " << tobj->getTuioBounds()->getSessionID() << "\n");
 	if (tobj->containsTuioSymbol()) LINFO("del sym " << tobj->getTuioSymbol()->getSessionID() << "\n");
 	//std::cout << "del obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/"<<  tobj->getTuioSourceID() << ")" << std::endl;
-	//std::cout << std::flush;
 }
 
 void TuioEar::tuioRefresh(TuioTime frameTime) {
 	LINFO("refresh " << frameTime.getFrameID() << " "<< frameTime.getTotalMilliseconds() << "\n");
 }
 
+std::vector<TuioObject*> TuioEar::getInput() {
+	boost::lock_guard<boost::mutex> lock(_mx);
+	return _list;
+}
+
+void TuioEar::clearInput() {
+	boost::lock_guard<boost::mutex> lock(_mx);
+	_list.clear();
+}
+
 TuioEar::TuioEar() {
-	oscReceiver = new UdpReceiver(3333);
+	_oscReceiver = new UdpReceiver(3333);
 	//oscReceiver = new TcpReceiver("127.0.0.1",3333);
-	tuioClient = new TuioClient(oscReceiver);
-	tuioClient->addTuioListener(this);
-	tuioClient->connect();
+	_tuioClient = new TuioClient(_oscReceiver);
+	_tuioClient->addTuioListener(this);
+	_tuioClient->connect();
 }

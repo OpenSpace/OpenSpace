@@ -26,12 +26,15 @@
 #define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <modules/touch/include/TuioEar.h>
 
 namespace openspace {
 
 class TouchModule : public OpenSpaceModule {
 public:
     TouchModule();
+
+	static TuioEar *ear;
 };
 
 } // namespace openspace

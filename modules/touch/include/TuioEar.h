@@ -31,7 +31,7 @@
 #include <modules/touch/ext/libTUIO2/TUIO2/TcpReceiver.h>
 #include <math.h>
 #include <vector>
-
+#include <boost/thread/mutex.hpp>
 
 using namespace TUIO2;
 
@@ -40,9 +40,9 @@ class TuioEar : public TuioListener {
 	public:
 		TuioEar();
 		~TuioEar() {
-			tuioClient->disconnect();
-			delete tuioClient;
-			delete oscReceiver;
+			_tuioClient->disconnect();
+			delete _tuioClient;
+			delete _oscReceiver;
 		}
 	
 		void tuioAdd(TuioObject *tobj);
@@ -50,13 +50,15 @@ class TuioEar : public TuioListener {
 		void tuioRemove(TuioObject *tobj);
 		void tuioRefresh(TuioTime frameTime);
 
-		std::vector<TuioPointer>* getInput() { return &list; }
+		std::vector<TuioObject*> getInput();
+		void clearInput();
 		
 	private:
-		TuioClient *tuioClient;
-		OscReceiver *oscReceiver;
-		std::vector<TuioPointer> list;
-		std::vector<TuioPointer>::iterator it;
+		TuioClient *_tuioClient;
+		OscReceiver *_oscReceiver;
+
+		std::vector<TuioObject*> _list;
+		boost::mutex _mx;
 };
 
 #endif // __OPENSPACE_MODULE_TOUCH___TOUCHWRAPPER___H__
