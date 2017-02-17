@@ -33,6 +33,8 @@
 #include <chrono>
 #include <thread>
 
+#include <modules/touch/include/TuioEar.h>
+
 sgct::Engine* _sgctEngine;
 
 int main_main(int argc, char** argv);
@@ -109,6 +111,8 @@ int main(int argc, char** argv) {
 int main_main(int argc, char** argv) {
     auto glVersion = supportedOpenGLVersion();
     
+	TuioEar *ear = new TuioEar();
+
     // create the OpenSpace engine and get arguments for the sgct engine
     std::vector<std::string> sgctArguments;
     const bool success = openspace::OpenSpaceEngine::create(
