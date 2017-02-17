@@ -32,11 +32,6 @@ function postInitialization()
     openspace.setPropertyValue("EarthTrail.renderable.enabled", false)
     openspace.setPropertyValue("Earth.renderable.performShading", false)
 
-    openspace.setPropertyValue("vernal01.renderable.enabled", false)
-    openspace.setPropertyValue("vernal02.renderable.enabled", false)
-    openspace.setPropertyValue("vernal03.renderable.enabled", false)
-    openspace.setPropertyValue("vernal04.renderable.enabled", false)
-
     openspace.resetCameraDirection()
 
     openspace.printInfo("Done setting default values")
@@ -61,10 +56,8 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        Position = {7395454647.565954, -73663596142.693726, 129203098002.802811},
-        Rotation = {0.103265, -0.821622, -0.058358, 0.557555},
-        --Position = {-101717665165.846237, -61587044113.095749, 87131803969.474838},
-        --Rotation = {0.760854, -0.131627, 0.443751, 0.454818},
+        Position = {-68152103445.645149, -71145526468.627335, 110168621302.621155},
+        Rotation = {-0.479623, -0.500297, -0.357370, -0.626060},
     },
     Modules = {
         --"satellites/earth",

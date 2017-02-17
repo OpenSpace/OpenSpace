@@ -142,6 +142,7 @@ fileErr = ""
 for sOrbit in values(satelliteGroups) do
   filename = sOrbit.url:match("([^/]+)$")
   sOrbit.path = "../satellites/tle/" .. filename
+  pathFromScenegraphParent = "./" .. sOrbit.path
 
   line = {} 
   myfile = io.open(sOrbit.path, "r")
@@ -156,9 +157,9 @@ for sOrbit in values(satelliteGroups) do
         title = trimString(line[1])
         per = getPeriodFromFile(line[3])
         per = 1.0 / per * 2 --trail for 2x a single revolution
-        table.insert(modElements, getSat(title, sOrbit.path, n))
+        table.insert(modElements, getSat(title, pathFromScenegraphParent, n))
         table.insert(modElements, getSatTrail(title,
-                     sOrbit.path, n, per, sOrbit.trailColor))
+                     pathFromScenegraphParent, n, per, sOrbit.trailColor))
       else
         fileErr = fileErr .. filename .. " " .. n .. ","
       end
