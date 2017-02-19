@@ -225,8 +225,11 @@ void SyncWidget::setSceneFiles(QMap<QString, QString> sceneFiles) {
         const QString& sceneName = keys[i];
 
         QCheckBox* checkbox = new QCheckBox(sceneName);
-        checkbox->setChecked(true);
-
+        checkbox->setChecked(false);
+        QString defaultName = "default";
+        if(QString::compare(defaultName, sceneName, Qt::CaseInsensitive)==0){
+            checkbox->setChecked(true);
+        }
         _sceneLayout->addWidget(checkbox, i / nColumns, i % nColumns);
     }
 }
