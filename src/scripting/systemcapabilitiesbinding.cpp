@@ -136,8 +136,14 @@ int gpuVendor(lua_State* L) {
 }
     
 int extensions(lua_State* L) {
-    std::string e = ghoul::join(OpenGLCap.extensions(), ",");
-    lua_pushstring(L, e.c_str());
+    const std::vector<std::string>& extensions = OpenGLCap.extensions();
+    
+    lua_newtable(L);
+    
+    for (int i = 1; i <= extensions.size(); ++i) {
+        lua_pushstring(L, extensions[i].c_str());
+        lua_rawseti(L, -2, i);
+    }
     return 1;
 }
     
