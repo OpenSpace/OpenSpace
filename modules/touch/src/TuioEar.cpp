@@ -33,7 +33,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <ghoul/logging/logmanager.h>
-#include <boost/thread/mutex.hpp>
+#include <mutex>
 
 namespace {
 	const std::string _loggerCat = "TuioEar";
@@ -41,28 +41,30 @@ namespace {
 
 void TuioEar::tuioAdd(TuioObject *tobj) {
 	if (tobj->containsNewTuioPointer()) {
-		boost::lock_guard<boost::mutex> lock(_mx);
+		_mx.lock();
 		_list.push_back(tobj);
 
-		LINFO("add ptr " << tobj->getTuioPointer()->getSessionID() << ", size: " << _list.size() << "\n");
+		//LINFO("add ptr " << tobj->getTuioPointer()->getSessionID() << ", size: " << _list.size() << "\n");
 	}
 	if (tobj->containsNewTuioToken()) LINFO("add tok " << tobj->getTuioToken()->getSessionID() << "\n");
 	if(tobj->containsNewTuioBounds()) LINFO("add bnd " << tobj->getTuioBounds()->getSessionID() << "\n");
 	if(tobj->containsNewTuioSymbol()) LINFO("add sym " << tobj->getTuioSymbol()->getSessionID() << "\n");
 	//std::cout << "add obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/"<<  tobj->getTuioSourceID() << ") "<< tobj->getX() << " " << tobj->getY() << " " << tobj->getAngle() << std::endl;
+	_mx.unlock();
 }
 
 void TuioEar::tuioUpdate(TuioObject *tobj) {
 	if (tobj->containsTuioPointer()) {
-		boost::lock_guard<boost::mutex> lock(_mx);
+		_mx.lock();
 		_list.push_back(tobj);
 
-		LINFO("set ptr " << tobj->getTuioPointer()->getSessionID() << ", size: " << _list.size() << "\n");
+		//LINFO("set ptr " << tobj->getTuioPointer()->getSessionID() << ", size: " << _list.size() << "\n");
 	}
 	if (tobj->containsTuioToken()) LINFO("set tok " << tobj->getTuioToken()->getSessionID() << "\n");
 	if (tobj->containsTuioBounds()) LINFO("set bnd " << tobj->getTuioBounds()->getSessionID() << "\n");
 	if (tobj->containsTuioSymbol()) LINFO("set sym " << tobj->getTuioSymbol()->getSessionID() << "\n");
 	//std::cout << "set obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/"<<  tobj->getTuioSourceID() << ") "<< tobj->getX() << " " << tobj->getY() << " " << tobj->getAngle() << " " << tobj->getMotionSpeed() << " " << tobj->getRotationSpeed() << " " << tobj->getMotionAccel() << " " << tobj->getRotationAccel() << std::endl;	
+	_mx.unlock();
 }
 
 void TuioEar::tuioRemove(TuioObject *tobj) {
@@ -76,17 +78,18 @@ void TuioEar::tuioRemove(TuioObject *tobj) {
 }
 
 void TuioEar::tuioRefresh(TuioTime frameTime) {
-	LINFO("refresh " << frameTime.getFrameID() << " "<< frameTime.getTotalMilliseconds() << "\n");
+	//LINFO("refresh " << frameTime.getFrameID() << " "<< frameTime.getTotalMilliseconds() << "\n");
 }
 
 std::vector<TuioObject*> TuioEar::getInput() {
-	boost::lock_guard<boost::mutex> lock(_mx);
+	_mx.lock();
 	return _list;
 }
 
 void TuioEar::clearInput() {
-	boost::lock_guard<boost::mutex> lock(_mx);
+	_mx.lock();
 	_list.clear();
+	_mx.unlock();
 }
 
 TuioEar::TuioEar() {

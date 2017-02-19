@@ -82,6 +82,12 @@ namespace TUIO2 {
 		 */
 		TuioObject (unsigned int s_id);
         
+		/**
+		* Copy constructor takes a reference of a TuioObject
+		* @param	t		the reference TuioObject to assign
+		*/
+		//TuioObject(const TuioObject &t);
+
         /**
          * This constructor takes a TuioTime and the Session ID
          * @param	ttime	the TuioTime to assign

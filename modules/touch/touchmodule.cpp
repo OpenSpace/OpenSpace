@@ -36,6 +36,10 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+#include <sstream>
+#include <string>
+#include <iostream>
+
 namespace openspace {
 
 	TuioEar TouchModule::*ear;
@@ -46,68 +50,78 @@ TouchModule::TouchModule()
 
 	OsEng.registerModuleCallback(
 		OpenSpaceEngine::CallbackOption::Initialize,
-		[]() {
+		[&]() {
 		LDEBUGC("TouchModule", "Initializing TuioEar");
 		ear = new TuioEar();
 	}
 	);
-
+	
 	OsEng.registerModuleCallback(
 		OpenSpaceEngine::CallbackOption::Deinitialize,
-		[]() {
+		[&]() {
 		LDEBUGC("TouchModule", "Deinitialize TuioEar");
 		delete ear;
 	}
 	);
 	
-	OsEng.registerModuleCallback(
-		OpenSpaceEngine::CallbackOption::PostSyncPreDraw,
-		[]() {
-		WindowWrapper& wrapper = OsEng.windowWrapper();
-		if (OsEng.isMaster() && wrapper.isRegularRendering()) {
-			std::vector<TuioObject*> list = ear->getInput();
-			std::vector<TuioObject*>::iterator it = list.begin();
-
-			// step through the list (from the start) and find each unique id tuioobject
-			std::vector<TuioObject*> group;
-			
-			for (auto &&i : list) {
-				bool sameId = false;
-				glm::vec2 centroid = glm::vec2(0.0f, 0.0f);
-				if (i->containsTuioPointer()) {
-					int id = i->getSessionID();
-					for (auto &&j : group) // change to lambda/find function
-						if (j->getSessionID() == id)
-							sameId = true; // step out of for
-					if (sameId) { // calculate a centroid
-						for (auto &&j : group) {
-							centroid.x += j->getTuioPointer()->getX();
-							centroid.y += j->getTuioPointer()->getY();
-						}
-						centroid.x /= group.size();
-						centroid.y /= group.size();
-					}
-					else
-						group.push_back(i);
-
-
-				}
-			}
-
-			// group 
+	OsEng.registerModuleCallback( // maybe call ear->clearInput() here rather than postdraw
+		OpenSpaceEngine::CallbackOption::PreSync,
+		[&]() {
+		std::vector<TuioObject*> list = ear->getInput();
+		std::vector<TuioObject*> group;
+		glm::vec2 centroid;
+		ear->unlock();
+		std::string s = "";
+		//print list for debugging
+		const std::string _loggerCat = "TouchModule";
+		std::ostringstream os;
+		for (auto &&j : list) {
+			os << " (" << j->getTuioPointer()->getX() << "," << j->getTuioPointer()->getY() << ") ";
 		}
+		if (list.size() > 0)
+			LINFO("List size: " << list.size() << os.str() << "\n");
+		os.clear();
+
+		// step through the list (from the start) and find each unique id TuioObject
+		for (auto &&i : list) {
+			bool sameId = false;
+			centroid = glm::vec2(0.0f, 0.0f);
+			if (i->containsTuioPointer()) { // sanity check
+				int id = i->getSessionID();
+				for (auto &&j : group) // change to lambda/find function
+					if (j->getSessionID() == id)
+						sameId = true; // step out of for
+				if (sameId) { // calculate a centroid
+					for (auto &&j : group) {
+						centroid.x += j->getTuioPointer()->getX();
+						centroid.y += j->getTuioPointer()->getY();
+					}
+					centroid.x /= group.size();
+					centroid.y /= group.size();
+				}
+				else
+					group.push_back(i);
+
+
+			}
+		}
+		
+		//if (centroid.x + centroid.y != 0.0f)
+			//LINFO("List size: " << list.size() << ", Centroid: (" << centroid.x << ", " << centroid.y << ")\n");
+		// group 
 	}
 	);
 
 	OsEng.registerModuleCallback(
 		OpenSpaceEngine::CallbackOption::PostDraw,
-		[]() {
+		[&]() {
 		WindowWrapper& wrapper = OsEng.windowWrapper();
 		if (OsEng.isMaster() && wrapper.isRegularRendering()) {
 			ear->clearInput();
 		}
 	}
 	);
+	
 }
 
 } // namespace openspace

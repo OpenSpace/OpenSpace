@@ -34,7 +34,7 @@ class TouchModule : public OpenSpaceModule {
 public:
     TouchModule();
 
-	static TuioEar *ear;
+	TuioEar *ear;
 };
 
 } // namespace openspace
