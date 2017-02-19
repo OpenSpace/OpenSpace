@@ -61,7 +61,7 @@ return {
         "sun",
         "mercury",
         "venus",
-        "lodglobes/lodearth",
+        "lodglobes/earth",
         "moon",
         "mars",
         "jupiter",
