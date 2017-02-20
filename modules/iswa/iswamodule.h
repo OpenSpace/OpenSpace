@@ -32,6 +32,8 @@
 class IswaModule : public OpenSpaceModule {
 public:
     IswaModule();
+    
+    scripting::LuaLibrary luaLibrary() const override;
 
 protected:
     void internalInitialize() override;

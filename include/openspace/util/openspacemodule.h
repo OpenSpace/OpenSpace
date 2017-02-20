@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/scripting/lualibrary.h>
 
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
@@ -73,6 +74,13 @@ public:
      * \return A list of Documentation classes that are valid for this OpenSapceModule
      */
     virtual std::vector<Documentation> documentations() const;
+    
+    /**
+     * Returns the Lua library with functions defined by this OpenSpaceModule. The default
+     * implementation returns an empty library.
+     * \return The Lua library with functions defined by this OpenSpaceModule
+     */
+    virtual scripting::LuaLibrary luaLibrary() const;
 
     /**
      * Returns the minimum required OpenGL version of this OpenSpaceModule. Unless

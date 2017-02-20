@@ -54,10 +54,6 @@
 #include <fstream>
 #include <string>
 
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-#include <modules/onscreengui/include/gui.h>
-#endif
-
 #include "scene_doc.inl"
 #include "scene_lua.inl"
 

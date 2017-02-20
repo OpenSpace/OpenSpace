@@ -30,6 +30,7 @@
 
 #include <ghoul/glm.h>
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -92,10 +93,7 @@ public:
     ghoul::fontrendering::FontManager& fontManager();
     DownloadManager& downloadManager();
     TimeManager& timeManager();
-
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    gui::GUI& gui();
-#endif
+    SettingsEngine& settingsEngine();
 
     // SGCT callbacks
     bool initialize();
@@ -124,6 +122,70 @@ public:
 
     void runPostInitializationScripts(const std::string& sceneDescription);
 
+
+    
+    // This method is only to be called from Modules
+
+    enum class CallbackOption {
+        Initialize = 0,  // Callback for the end of the initialization
+        Deinitialize,    // Callback for the end of the deinitialization
+        InitializeGL,    // Callback for the end of the OpenGL initialization
+        DeinitializeGL,  // Callback for the end of the OpenGL deinitialization
+        PreSync,         // Callback for the end of the pre-sync function
+        PostSyncPreDraw, // Callback for the end of the post-sync-pre-draw function
+        Render,          // Callback for the end of the render function
+        PostDraw         // Callback for the end of the post-draw function
+    };
+    
+    // Registers a callback for a specific CallbackOption
+    void registerModuleCallback(CallbackOption option, std::function<void()> function) {
+        switch (option) {
+            case CallbackOption::Initialize:
+                _moduleCallbacks.initialize.push_back(std::move(function));
+                break;
+            case CallbackOption::Deinitialize:
+                _moduleCallbacks.deinitialize.push_back(std::move(function));
+                break;
+            case CallbackOption::InitializeGL:
+                _moduleCallbacks.initializeGL.push_back(std::move(function));
+                break;
+            case CallbackOption::DeinitializeGL:
+                _moduleCallbacks.deinitializeGL.push_back(std::move(function));
+                break;
+            case CallbackOption::PreSync:
+                _moduleCallbacks.preSync.push_back(std::move(function));
+                break;
+            case CallbackOption::PostSyncPreDraw:
+                _moduleCallbacks.postSyncPreDraw.push_back(std::move(function));
+                break;
+            case CallbackOption::Render:
+                _moduleCallbacks.render.push_back(std::move(function));
+                break;
+            case CallbackOption::PostDraw:
+                _moduleCallbacks.postDraw.push_back(std::move(function));
+                break;
+        }
+    }
+    
+    // Registers a callback that is called when a new keyboard event is received
+    void registerModuleKeyboardCallback(
+        std::function<bool (Key, KeyModifier, KeyAction)> function);
+    
+    // Registers a callback that is called when a new character event is received
+    void registerModuleCharCallback(
+        std::function<bool (unsigned int, KeyModifier)> function);
+
+    // Registers a callback that is called when a new mouse button is received
+    void registerModuleMouseButtonCallback(
+       std::function<bool (MouseButton, MouseAction)> function);
+    
+    // Registers a callback that is called when a new mouse movement is received
+    void registerModuleMousePositionCallback(
+        std::function<void (double, double)> function);
+    
+    // Registers a callback that is called when a scroll wheel change is received
+    void registerModuleMouseScrollWheelCallback(std::function<bool (double)> function);
+    
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
     * application.
@@ -155,15 +217,36 @@ private:
     std::unique_ptr<SettingsEngine> _settingsEngine;
     std::unique_ptr<TimeManager> _timeManager;
     std::unique_ptr<DownloadManager> _downloadManager;
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    std::unique_ptr<gui::GUI> _gui;
-#endif
     std::unique_ptr<ParallelConnection> _parallelConnection;
     std::unique_ptr<WindowWrapper> _windowWrapper;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
+    
+    struct {
+        std::vector<std::function<void()>> initialize;
+        std::vector<std::function<void()>> deinitialize;
+        
+        std::vector<std::function<void()>> initializeGL;
+        std::vector<std::function<void()>> deinitializeGL;
+        
+        std::vector<std::function<void()>> preSync;
+        std::vector<std::function<void()>> postSyncPreDraw;
+        std::vector<std::function<void()>> render;
+        std::vector<std::function<void()>> postDraw;
+        
+        std::vector<std::function<bool (Key, KeyModifier, KeyAction)>> keyboard;
+        std::vector<std::function<bool (unsigned int, KeyModifier)>> character;
+        
+        std::vector<std::function<bool (MouseButton, MouseAction)>> mouseButton;
+        std::vector<std::function<void (double, double)>> mousePosition;
+        std::vector<std::function<bool (double)>> mouseScrollWheel;
+        
+        
+        
+        
+    } _moduleCallbacks;
     
     bool _isMaster;
     double _runTime;

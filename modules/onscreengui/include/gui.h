@@ -44,7 +44,6 @@ namespace gui {
 class GUI : public GuiComponent {
 public:
     GUI();
-    ~GUI();
 
     void initialize();
     void deinitialize();

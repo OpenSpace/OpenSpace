@@ -27,11 +27,15 @@
 
 #include <openspace/util/openspacemodule.h>
 
-namespace openspace {
+#include <modules/onscreengui/include/gui.h>
 
+namespace openspace {
+    
 class OnScreenGUIModule : public OpenSpaceModule {
 public:
     OnScreenGUIModule();
+    
+    static gui::GUI gui;
 };
 
 } // namespace openspace

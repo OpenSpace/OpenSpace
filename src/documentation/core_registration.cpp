@@ -46,10 +46,6 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timerange.h>
 
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-#include <modules/onscreengui/include/gui.h>
-#endif
-
 namespace openspace {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
