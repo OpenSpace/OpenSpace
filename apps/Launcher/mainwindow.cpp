@@ -136,7 +136,7 @@ MainWindow::MainWindow()
     {
         QBoxLayout* innerLayout = new QHBoxLayout;
         
-        QPushButton* cancelButton = new QPushButton("Cancel");
+        QPushButton* cancelButton = new QPushButton("Exit");
         QObject::connect(
             cancelButton, SIGNAL(clicked(bool)),
             QApplication::instance(), SLOT(quit())
