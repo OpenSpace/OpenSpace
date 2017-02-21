@@ -196,7 +196,6 @@ int main_main(int argc, char** argv) {
 
     // Main loop
     LDEBUG("Starting rendering loop");
-    exit(0);
     _sgctEngine->render();
     LDEBUG("Ending rendering loop");
 
