@@ -34,6 +34,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/shenbrickselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tfbrickselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localtfbrickselector.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/timebrickselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simpletfbrickselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemultiresvolume.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tsp.h
@@ -50,6 +51,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/shenbrickselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tfbrickselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localtfbrickselector.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/timebrickselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simpletfbrickselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemultiresvolume.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tsp.cpp

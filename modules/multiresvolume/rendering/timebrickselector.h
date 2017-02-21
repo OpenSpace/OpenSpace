@@ -1,4 +1,4 @@
-/*****************************************************************************************
+`/*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___OPACITYTFBRICKSELECTOR___H__
-#define __OPENSPACE_MODULE_MULTIRESVOLUME___OPACITYTFBRICKSELECTOR___H__
+#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___TIMEBRICKSELECTOR___H__
+#define __OPENSPACE_MODULE_MULTIRESVOLUME___TIMEBRICKSELECTOR___H__
 
 #include <vector>
 #include <modules/multiresvolume/rendering/brickselection.h>
@@ -37,10 +37,10 @@ class TSP;
 class HistogramManager;
 class TransferFunction;
 
-class OpacityTfBrickSelector : public BrickSelector {
+class TimeBrickSelector : public BrickSelector {
 public:
-    OpacityTfBrickSelector(TSP* tsp, HistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
-    ~OpacityTfBrickSelector();
+    TimeBrickSelector(TSP* tsp, HistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
+    ~TimeBrickSelector();
 
     virtual bool initialize();
 
@@ -67,4 +67,4 @@ public:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___OPACITYTFBRICKSELECTOR___H__
+#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___TIMEBRICKSELECTOR___H__
