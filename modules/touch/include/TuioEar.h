@@ -25,15 +25,16 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___TOUCHEAR___H__
 #define __OPENSPACE_MODULE_TOUCH___TOUCHEAR___H__
 
-#include <modules/touch/ext/libTUIO2/TUIO2/TuioListener.h>
-#include <modules/touch/ext/libTUIO2/TUIO2/TuioClient.h>
-#include <modules/touch/ext/libTUIO2/TUIO2/UdpReceiver.h>
-#include <modules/touch/ext/libTUIO2/TUIO2/TcpReceiver.h>
+#include <modules/touch/ext/libTUIO/TUIO/TuioListener.h>
+#include <modules/touch/ext/libTUIO/TUIO/TuioClient.h>
+#include <modules/touch/ext/libTUIO/TUIO/UdpReceiver.h>
+#include <modules/touch/ext/libTUIO/TUIO/TcpReceiver.h>
+#include "glm/glm.hpp"
 #include <math.h>
 #include <vector>
 #include <mutex>
 
-using namespace TUIO2;
+using namespace TUIO;
 
 class TuioEar : public TuioListener {
 	
@@ -45,12 +46,21 @@ class TuioEar : public TuioListener {
 			delete _oscReceiver;
 		}
 	
-		void tuioAdd(TuioObject *tobj);
-		void tuioUpdate(TuioObject *tobj);
-		void tuioRemove(TuioObject *tobj);
-		void tuioRefresh(TuioTime frameTime);
+		void addTuioObject(TuioObject *tobj);
+		void updateTuioObject(TuioObject *tobj);
+		void removeTuioObject(TuioObject *tobj);
 
-		std::vector<TuioObject*> getInput();
+		void addTuioCursor(TuioCursor *tcur);
+		void updateTuioCursor(TuioCursor *tcur);
+		void removeTuioCursor(TuioCursor *tcur);
+
+		void addTuioBlob(TuioBlob *tblb);
+		void updateTuioBlob(TuioBlob *tblb);
+		void removeTuioBlob(TuioBlob *tblb);
+
+		void refresh(TuioTime frameTime);
+
+		std::vector<TuioCursor*> getInput();
 		void clearInput();
 		void unlock() { _mx.unlock(); };
 		
@@ -58,7 +68,7 @@ class TuioEar : public TuioListener {
 		TuioClient *_tuioClient;
 		OscReceiver *_oscReceiver;
 
-		std::vector<TuioObject*> _list;
+		std::vector<TuioCursor*> _list;
 		std::mutex _mx;
 };
 

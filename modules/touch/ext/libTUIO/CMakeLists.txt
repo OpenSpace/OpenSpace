@@ -2,7 +2,7 @@
 #                                                                                       #
 # OpenSpace                                                                             #
 #                                                                                       #
-# Copyright (c) 2014-2017                                                               #
+# Copyright (c) 2014-2016                                                               #
 #                                                                                       #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this  #
 # software and associated documentation files (the "Software"), to deal in the Software #
@@ -22,22 +22,46 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+project(libTUIO)
+message(STATUS "Generating libTUIO project")
 
-set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/TuioEar.h
-)
-source_group("Header Files" FILES ${HEADER_FILES})
-
-set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/TuioEar.cpp
-)
-source_group("Source Files" FILES ${SOURCE_FILES})
+add_library(libTUIO
+    ${PROJECT_SOURCE_DIR}/TUIO/WebSockSender.cpp
+    ${PROJECT_SOURCE_DIR}/TUIO/UdpSender.cpp
+    ${PROJECT_SOURCE_DIR}/TUIO/UdpReceiver.cpp
+	#${PROJECT_SOURCE_DIR}/TUIO2/TuioToken.cpp
+	${PROJECT_SOURCE_DIR}/TUIO/TuioTime.cpp
+	#${PROJECT_SOURCE_DIR}/TUIO2/TuioSymbol.cpp
+	${PROJECT_SOURCE_DIR}/TUIO/TuioServer.cpp
+	#${PROJECT_SOURCE_DIR}/TUIO2/TuioPointer.cpp
+	${PROJECT_SOURCE_DIR}/TUIO/TuioPoint.cpp
+	${PROJECT_SOURCE_DIR}/TUIO/TuioObject.cpp
+	${PROJECT_SOURCE_DIR}/TUIO/TuioManager.cpp
+	${PROJECT_SOURCE_DIR}/TUIO/TuioDispatcher.cpp
+	#${PROJECT_SOURCE_DIR}/TUIO2/TuioComponent.cpp 
+	${PROJECT_SOURCE_DIR}/TUIO/TuioCursor.cpp #
+	${PROJECT_SOURCE_DIR}/TUIO/TuioContainer.cpp #
+	${PROJECT_SOURCE_DIR}/TUIO/TuioClient.cpp
+	#${PROJECT_SOURCE_DIR}/TUIO2/TuioBounds.cpp 
+	${PROJECT_SOURCE_DIR}/TUIO/TuioBlob.cpp #
+	${PROJECT_SOURCE_DIR}/TUIO/TcpSender.cpp
+	${PROJECT_SOURCE_DIR}/TUIO/TcpReceiver.cpp
+	${PROJECT_SOURCE_DIR}/TUIO/OscReceiver.cpp 
+	${PROJECT_SOURCE_DIR}/TUIO/OneEuroFilter.cpp #
+	${PROJECT_SOURCE_DIR}/TUIO/FlashSender.cpp
 	
-create_new_module(
-    "Touch"
-    touch_module
-    ${HEADER_FILES} ${SOURCE_FILES}
-)
+	${PROJECT_SOURCE_DIR}/oscpack/ip/IpEndpointName.cpp
 	
-include_external_library(${touch_module} libTUIO ${CMAKE_CURRENT_SOURCE_DIR}/ext/libTUIO)
+	#if (WIN32)
+	${PROJECT_SOURCE_DIR}/oscpack/ip/win32/NetworkingUtils.cpp
+	${PROJECT_SOURCE_DIR}/oscpack/ip/win32/UdpSocket.cpp
+	#else (WIN32)
+	#${PROJECT_SOURCE_DIR}/oscpack/ip/posix/NetworkingUtils.cpp
+	#${PROJECT_SOURCE_DIR}/oscpack/ip/posix/UdpSocket.cpp
+	#endif ()
+	${PROJECT_SOURCE_DIR}/oscpack/osc/OscTypes.cpp
+	${PROJECT_SOURCE_DIR}/oscpack/osc/OscReceivedElements.cpp
+	${PROJECT_SOURCE_DIR}/oscpack/osc/OscPrintReceivedElements.cpp
+	${PROJECT_SOURCE_DIR}/oscpack/osc/OscOutboundPacketStream.cpp
+)
+target_include_directories(libTUIO PUBLIC ${PROJECT_SOURCE_DIR})

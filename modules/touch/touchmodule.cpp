@@ -67,21 +67,25 @@ TouchModule::TouchModule()
 	OsEng.registerModuleCallback( // maybe call ear->clearInput() here rather than postdraw
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
-		std::vector<TuioObject*> list = ear->getInput();
-		std::vector<TuioObject*> group;
+		std::vector<TuioCursor*> list = ear->getInput();
+		std::vector<TuioCursor*> group;
 		glm::vec2 centroid;
 		ear->unlock();
-		std::string s = "";
+		
 		//print list for debugging
+		std::string s = "";
 		const std::string _loggerCat = "TouchModule";
 		std::ostringstream os;
 		for (auto &&j : list) {
-			os << " (" << j->getTuioPointer()->getX() << "," << j->getTuioPointer()->getY() << ") ";
+			os << " (" << j->getX() << "," << j->getY() << ") ";
 		}
 		if (list.size() > 0)
 			LINFO("List size: " << list.size() << os.str() << "\n");
 		os.clear();
 
+
+		ear->clearInput();
+		/*
 		// step through the list (from the start) and find each unique id TuioObject
 		for (auto &&i : list) {
 			bool sameId = false;
@@ -104,7 +108,7 @@ TouchModule::TouchModule()
 
 
 			}
-		}
+		}*/
 		
 		//if (centroid.x + centroid.y != 0.0f)
 			//LINFO("List size: " << list.size() << ", Centroid: (" << centroid.x << ", " << centroid.y << ")\n");
@@ -117,7 +121,7 @@ TouchModule::TouchModule()
 		[&]() {
 		WindowWrapper& wrapper = OsEng.windowWrapper();
 		if (OsEng.isMaster() && wrapper.isRegularRendering()) {
-			ear->clearInput();
+			
 		}
 	}
 	);

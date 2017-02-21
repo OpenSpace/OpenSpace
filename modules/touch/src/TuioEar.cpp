@@ -39,55 +39,70 @@ namespace {
 	const std::string _loggerCat = "TuioEar";
 }
 
-void TuioEar::tuioAdd(TuioObject *tobj) {
-	if (tobj->containsNewTuioPointer()) {
-		_mx.lock();
-		_list.push_back(tobj);
+void TuioEar::addTuioObject(TuioObject *tobj) {
+	//std::cout << "add obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/" << tobj->getTuioSourceID() << ") " << tobj->getX() << " " << tobj->getY() << " " << tobj->getAngle() << std::endl;
+}
 
-		//LINFO("add ptr " << tobj->getTuioPointer()->getSessionID() << ", size: " << _list.size() << "\n");
-	}
-	if (tobj->containsNewTuioToken()) LINFO("add tok " << tobj->getTuioToken()->getSessionID() << "\n");
-	if(tobj->containsNewTuioBounds()) LINFO("add bnd " << tobj->getTuioBounds()->getSessionID() << "\n");
-	if(tobj->containsNewTuioSymbol()) LINFO("add sym " << tobj->getTuioSymbol()->getSessionID() << "\n");
-	//std::cout << "add obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/"<<  tobj->getTuioSourceID() << ") "<< tobj->getX() << " " << tobj->getY() << " " << tobj->getAngle() << std::endl;
+void TuioEar::updateTuioObject(TuioObject *tobj) {
+	//std::cout << "set obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/" << tobj->getTuioSourceID() << ") " << tobj->getX() << " " << tobj->getY() << " " << tobj->getAngle()
+	//<< " " << tobj->getMotionSpeed() << " " << tobj->getRotationSpeed() << " " << tobj->getMotionAccel() << " " << tobj->getRotationAccel() << std::endl;
+}
+
+void TuioEar::removeTuioObject(TuioObject *tobj) {
+	//std::cout << "del obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/" << tobj->getTuioSourceID() << ")" << std::endl;
+}
+
+void TuioEar::addTuioCursor(TuioCursor *tcur) {
+	_mx.lock(); 
+	_list.push_back(new TuioCursor(tcur));
 	_mx.unlock();
+
+	//LINFO("add cur " << tcur->getCursorID() << " (" << tcur->getSessionID() << "/" << tcur->getTuioSourceID() << ") " << tcur->getX() << " " << tcur->getY() << " " << tobj->getY() << ", size: " << _list.size() << "\n");
+	//std::cout << "add cur " << tcur->getCursorID() << " (" << tcur->getSessionID() << "/" << tcur->getTuioSourceID() << ") " << tcur->getX() << " " << tcur->getY() << ", size: " << _list.size() << "\n";
 }
 
-void TuioEar::tuioUpdate(TuioObject *tobj) {
-	if (tobj->containsTuioPointer()) {
-		_mx.lock();
-		_list.push_back(tobj);
-
-		//LINFO("set ptr " << tobj->getTuioPointer()->getSessionID() << ", size: " << _list.size() << "\n");
-	}
-	if (tobj->containsTuioToken()) LINFO("set tok " << tobj->getTuioToken()->getSessionID() << "\n");
-	if (tobj->containsTuioBounds()) LINFO("set bnd " << tobj->getTuioBounds()->getSessionID() << "\n");
-	if (tobj->containsTuioSymbol()) LINFO("set sym " << tobj->getTuioSymbol()->getSessionID() << "\n");
-	//std::cout << "set obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/"<<  tobj->getTuioSourceID() << ") "<< tobj->getX() << " " << tobj->getY() << " " << tobj->getAngle() << " " << tobj->getMotionSpeed() << " " << tobj->getRotationSpeed() << " " << tobj->getMotionAccel() << " " << tobj->getRotationAccel() << std::endl;	
+void TuioEar::updateTuioCursor(TuioCursor *tcur) {
+	_mx.lock();
+	_list.push_back(new TuioCursor(tcur));
 	_mx.unlock();
+	
+	//LINFO("set obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/" << tobj->getTuioSourceID() << ") " << tobj->getX() << " " << tobj->getY() << ", size: " << _list.size() << "\n");
+	//std::cout << "set cur " << tcur->getCursorID() << " (" << tcur->getSessionID() << "/" << tcur->getTuioSourceID() << ") " << tcur->getX() << " " << tcur->getY()
+	//<< " " << tcur->getMotionSpeed() << " " << tcur->getMotionAccel() << " " << ", size: " << _list.size() << "\n";
 }
 
-void TuioEar::tuioRemove(TuioObject *tobj) {
-	if (tobj->containsTuioPointer()) {
-		LINFO("del ptr " << tobj->getTuioPointer()->getSessionID() << ", size: " << _list.size() << "\n");
-	} 
-	if (tobj->containsTuioToken()) LINFO("del tok " << tobj->getTuioToken()->getSessionID() << "\n");
-	if (tobj->containsTuioBounds()) LINFO("del bnd " << tobj->getTuioBounds()->getSessionID() << "\n");
-	if (tobj->containsTuioSymbol()) LINFO("del sym " << tobj->getTuioSymbol()->getSessionID() << "\n");
-	//std::cout << "del obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/"<<  tobj->getTuioSourceID() << ")" << std::endl;
+void TuioEar::removeTuioCursor(TuioCursor *tcur) {
+	//std::cout << "del cur " << tcur->getCursorID() << " (" << tcur->getSessionID() << "/" << tcur->getTuioSourceID() << ")" << std::endl;
 }
 
-void TuioEar::tuioRefresh(TuioTime frameTime) {
-	//LINFO("refresh " << frameTime.getFrameID() << " "<< frameTime.getTotalMilliseconds() << "\n");
+void TuioEar::addTuioBlob(TuioBlob *tblb) {
+		std::cout << "add blb " << tblb->getBlobID() << " (" << tblb->getSessionID() << "/" << tblb->getTuioSourceID() << ") " << tblb->getX() << " " << tblb->getY() << " " << tblb->getAngle() << " " << tblb->getWidth() << " " << tblb->getHeight() << " " << tblb->getArea() << std::endl;
 }
 
-std::vector<TuioObject*> TuioEar::getInput() {
+void TuioEar::updateTuioBlob(TuioBlob *tblb) {
+		std::cout << "set blb " << tblb->getBlobID() << " (" << tblb->getSessionID() << "/" << tblb->getTuioSourceID() << ") " << tblb->getX() << " " << tblb->getY() << " " << tblb->getAngle() << " " << tblb->getWidth() << " " << tblb->getHeight() << " " << tblb->getArea()
+		<< " " << tblb->getMotionSpeed() << " " << tblb->getRotationSpeed() << " " << tblb->getMotionAccel() << " " << tblb->getRotationAccel() << std::endl;
+}
+
+void TuioEar::removeTuioBlob(TuioBlob *tblb) {
+		std::cout << "del blb " << tblb->getBlobID() << " (" << tblb->getSessionID() << "/" << tblb->getTuioSourceID() << ")" << std::endl;
+}
+
+
+void TuioEar::refresh(TuioTime frameTime) {
+	//LINFO("refresh " << frameTime.getTotalMilliseconds() << "\n"); // about every 15ms on TuioPad app
+}
+
+std::vector<TuioCursor*> TuioEar::getInput() {
 	_mx.lock();
 	return _list;
 }
 
 void TuioEar::clearInput() {
 	_mx.lock();
+	for (auto &&j : _list) {
+		delete j;
+	}
 	_list.clear();
 	_mx.unlock();
 }
