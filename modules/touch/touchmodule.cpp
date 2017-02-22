@@ -39,6 +39,12 @@
 #include <sstream>
 #include <string>
 #include <iostream>
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
+
+namespace {
+	const std::string _loggerCat = "TouchModule";
+}
 
 namespace openspace {
 
@@ -67,52 +73,39 @@ TouchModule::TouchModule()
 	OsEng.registerModuleCallback( // maybe call ear->clearInput() here rather than postdraw
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
-		std::vector<TuioCursor*> list = ear->getInput();
-		std::vector<TuioCursor*> group;
+		//std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::vector<TuioCursor> list = ear->getInput();
+		ear->clearInput();
 		glm::vec2 centroid;
-		ear->unlock();
+		
 		
 		//print list for debugging
 		std::string s = "";
-		const std::string _loggerCat = "TouchModule";
 		std::ostringstream os;
-		for (auto &&j : list) {
-			os << " (" << j->getX() << "," << j->getY() << ") ";
+		for (const TuioCursor &j : list) {
+
+			os << j.getCursorID() << ", path size: " << j.getPath().size() << ", (" << j.getX() << "," << j.getY() << ") ";
 		}
 		if (list.size() > 0)
-			LINFO("List size: " << list.size() << os.str() << "\n");
+			LINFO("List size: " << list.size() << ", Id: " << os.str() << "\n");
 		os.clear();
-
-
-		ear->clearInput();
 		/*
-		// step through the list (from the start) and find each unique id TuioObject
-		for (auto &&i : list) {
-			bool sameId = false;
+		// calculate centroid if multipleID
+		if (list.size() > 1) {
 			centroid = glm::vec2(0.0f, 0.0f);
-			if (i->containsTuioPointer()) { // sanity check
-				int id = i->getSessionID();
-				for (auto &&j : group) // change to lambda/find function
-					if (j->getSessionID() == id)
-						sameId = true; // step out of for
-				if (sameId) { // calculate a centroid
-					for (auto &&j : group) {
-						centroid.x += j->getTuioPointer()->getX();
-						centroid.y += j->getTuioPointer()->getY();
-					}
-					centroid.x /= group.size();
-					centroid.y /= group.size();
-				}
-				else
-					group.push_back(i);
-
-
+			for (auto &&i : list) {
+				centroid.x += i->getX();
+				centroid.y += i->getY();
 			}
-		}*/
+			centroid.x /= list.size();
+			centroid.y /= list.size();
+
+			//LINFO("List size: " << list.size() << ", Centroid: (" << centroid.x << ", " << centroid.y << ")" << "\n");
+		}
+		*/
 		
-		//if (centroid.x + centroid.y != 0.0f)
-			//LINFO("List size: " << list.size() << ", Centroid: (" << centroid.x << ", " << centroid.y << ")\n");
-		// group 
+		glm::mat4 t;
+		//OsEng.interactionHandler().camera()->rotate();
 	}
 	);
 

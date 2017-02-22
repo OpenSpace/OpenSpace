@@ -34,6 +34,7 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <mutex>
+#include <algorithm>
 
 namespace {
 	const std::string _loggerCat = "TuioEar";
@@ -53,26 +54,49 @@ void TuioEar::removeTuioObject(TuioObject *tobj) {
 }
 
 void TuioEar::addTuioCursor(TuioCursor *tcur) {
-	_mx.lock(); 
-	_list.push_back(new TuioCursor(tcur));
-	_mx.unlock();
+	_mx.lock();
 
-	//LINFO("add cur " << tcur->getCursorID() << " (" << tcur->getSessionID() << "/" << tcur->getTuioSourceID() << ") " << tcur->getX() << " " << tcur->getY() << " " << tobj->getY() << ", size: " << _list.size() << "\n");
-	//std::cout << "add cur " << tcur->getCursorID() << " (" << tcur->getSessionID() << "/" << tcur->getTuioSourceID() << ") " << tcur->getX() << " " << tcur->getY() << ", size: " << _list.size() << "\n";
+	// find same id in _list if it exists in _removeList (new input with same ID as a previously stored)
+	int i = tcur->getSessionID();
+	auto foundID = std::find_if(
+		_removeList.begin(),
+		_removeList.end(),
+		[&i](int id) { return id == i; });
+
+	// if found, remove id from _removeList and update, otherwise add new id to list
+	if (foundID != _removeList.end()) {
+		std::find_if(
+			_list.begin(),
+			_list.end(),
+			[&i](const TuioCursor& cursor) {
+			return cursor.getSessionID() == i;
+		})->update(tcur);
+		_removeList.erase(foundID);
+	}
+	else
+		_list.push_back(TuioCursor(*tcur));
+
+	_mx.unlock();
 }
 
 void TuioEar::updateTuioCursor(TuioCursor *tcur) {
 	_mx.lock();
-	_list.push_back(new TuioCursor(tcur));
+	int i = tcur->getSessionID();
+	std::find_if(
+		_list.begin(),
+		_list.end(),
+		[&i](const TuioCursor& cursor) {
+			return cursor.getSessionID() == i;
+	})->update(tcur);
 	_mx.unlock();
-	
-	//LINFO("set obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/" << tobj->getTuioSourceID() << ") " << tobj->getX() << " " << tobj->getY() << ", size: " << _list.size() << "\n");
-	//std::cout << "set cur " << tcur->getCursorID() << " (" << tcur->getSessionID() << "/" << tcur->getTuioSourceID() << ") " << tcur->getX() << " " << tcur->getY()
-	//<< " " << tcur->getMotionSpeed() << " " << tcur->getMotionAccel() << " " << ", size: " << _list.size() << "\n";
 }
 
+// save id to be removed and remove it in clearInput
 void TuioEar::removeTuioCursor(TuioCursor *tcur) {
-	//std::cout << "del cur " << tcur->getCursorID() << " (" << tcur->getSessionID() << "/" << tcur->getTuioSourceID() << ")" << std::endl;
+	_mx.lock();
+	_removeList.push_back(tcur->getSessionID());
+	//LINFO("To be removed: " << _removeFromList.size() << "\n");
+	_mx.unlock();
 }
 
 void TuioEar::addTuioBlob(TuioBlob *tblb) {
@@ -88,22 +112,44 @@ void TuioEar::removeTuioBlob(TuioBlob *tblb) {
 		std::cout << "del blb " << tblb->getBlobID() << " (" << tblb->getSessionID() << "/" << tblb->getTuioSourceID() << ")" << std::endl;
 }
 
-
 void TuioEar::refresh(TuioTime frameTime) {
 	//LINFO("refresh " << frameTime.getTotalMilliseconds() << "\n"); // about every 15ms on TuioPad app
 }
 
-std::vector<TuioCursor*> TuioEar::getInput() {
-	_mx.lock();
+TuioTime TuioEar::getLastProcessedTime(int id) {
+	return std::find_if(
+		_processedPath.begin(),
+		_processedPath.end(),
+		[&id](std::pair<int, TuioTime> t) { return id = t.first; }
+	)->second;
+}
+
+std::vector<TuioCursor> TuioEar::getInput() {
+	std::lock_guard<std::mutex> lock(_mx);
+	_processedPath.clear();
+	for (const TuioCursor& c : _list)
+		_processedPath.push_back(std::make_pair(c.getSessionID(), c.getTuioTime()));
 	return _list;
 }
 
 void TuioEar::clearInput() {
 	_mx.lock();
-	for (auto &&j : _list) {
-		delete j;
-	}
-	_list.clear();
+	_list.erase(
+		std::remove_if(
+			_list.begin(),
+			_list.end(),
+			[this](const TuioCursor& cursor) {
+		return std::find_if(
+			_removeList.begin(),
+			_removeList.end(),
+			[&cursor](int id) {
+			return cursor.getSessionID() == id;
+		}
+		) != _removeList.end();
+	}),
+	_list.end()
+	);
+	_removeList.clear();
 	_mx.unlock();
 }
 
