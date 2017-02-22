@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 
 int main_main(int argc, char** argv) {
     auto glVersion = supportedOpenGLVersion();
-    
+
     // create the OpenSpace engine and get arguments for the sgct engine
     std::vector<std::string> sgctArguments;
     const bool success = openspace::OpenSpaceEngine::create(
@@ -116,8 +116,9 @@ int main_main(int argc, char** argv) {
         std::make_unique<openspace::SGCTWindowWrapper>(),
         sgctArguments
     );
-    if (!success)
+    if (!success) {
         return EXIT_FAILURE;
+    }
     
     LINFO("Detected OpenGL version: " << glVersion.first << "." << glVersion.second);
 

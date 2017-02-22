@@ -25,6 +25,7 @@
 #include <openspace/engine/configurationmanager.h>
 
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/lua/luastate.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -38,6 +39,7 @@ using std::string;
 namespace {
     const string _configurationFile = "openspace.cfg";
     const string _keyBasePath = "BASE_PATH";
+    const string _initialConfigHelper = "${BASE_PATH}/scripts/configuration_helper.lua";
 }
 
 namespace openspace {
@@ -126,9 +128,15 @@ void ConfigurationManager::loadFromFile(const string& filename) {
     string absolutePath = FileSys.absolutePath(filename);
     string basePath = ghoul::filesystem::File(absolutePath).directoryName();
     FileSys.registerPathToken(basePathToken, basePath);
+    
+    ghoul::lua::LuaState state;
+    
+    if (FileSys.fileExists(absPath(_initialConfigHelper))) {
+        ghoul::lua::runScriptFile(state, absPath(_initialConfigHelper));
+    }
 
     // Loading the configuration file into ourselves
-    ghoul::lua::loadDictionaryFromFile(filename, *this);
+    ghoul::lua::loadDictionaryFromFile(filename, *this, state);
 
     // Perform testing against the documentation/specification
     openspace::documentation::testSpecificationAndThrow(
