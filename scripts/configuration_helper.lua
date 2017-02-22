@@ -543,15 +543,6 @@ end
 function sgct.makeConfig(config)
     local configFile = os.tmpname()
 
-    print(configFile)
-    print(configFile)
-    print(configFile)
-    print(configFile)
-    print(configFile)
-    print(configFile)
-    print(configFile)
-    print(configFile)
-
     local file = io.open(configFile, "w+")
 
     file:write(config)
