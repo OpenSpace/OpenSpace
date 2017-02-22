@@ -198,6 +198,8 @@ int main_main(int argc, char** argv) {
     _sgctEngine->render();
     LDEBUG("Ending rendering loop");
 
+    OsEng.deinitialize();
+
     //clear function bindings to avoid crash after destroying the OpenSpace Engine
     sgct::MessageHandler::instance()->setLogToCallback(false);
     sgct::MessageHandler::instance()->setLogCallback(nullptr);
