@@ -82,18 +82,17 @@ QCheckBox::indicator {
 }
 QCheckBox::indicator::unchecked {
     border: 1px solid #5A5A5A;
-    background: #a10000;
+    background: #A0A0A0;
 }
 QCheckBox::indicator:unchecked:hover {
     border: 1px solid #DDDDDD;
 }
 QCheckBox::indicator::checked {
     border: 1px solid #5A5A5A;
-    background: #8dc73f;
+    background: #5AB65A;
 }
 QCheckBox::indicator:checked:hover {
     border: 1px solid #DDDDDD;
-    background: #555555;
 }
 QGroupBox, QScrollArea {
     border: 0px;
