@@ -73,53 +73,59 @@ TouchModule::TouchModule()
 	OsEng.registerModuleCallback( // maybe call ear->clearInput() here rather than postdraw
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
-		//std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 		list = ear->getInput();
 		ear->clearInput();
-		glm::vec2 centroid;
-		
-		
-		//print list for debugging
-		std::string s = "";
-		std::ostringstream os;
-		for (const TuioCursor &j : list) {
-			
-			int count = 0;
-			std::list<TuioPoint> path = j.getPath();
-			if (lastList.size() > 0 && list.size() > 0) { // sanity check
-				std::vector<TuioCursor>::iterator last = find_if(
+
+		if (list.size() > 0) { // sanity check, no need to process if no input
+			glm::vec2 centroid;
+
+			//print list for debugging
+			std::ostringstream os;
+			for (const TuioCursor &j : list) {
+				int count = 0;
+				TuioTime lastTime;
+				std::list<TuioPoint> path = j.getPath();
+				std::vector<TuioCursor>::iterator it = find_if(
 					lastList.begin(),
 					lastList.end(),
 					[&j](const TuioCursor& c) { return c.getSessionID() == j.getSessionID(); }
 				);
-				if (last != lastList.end())
-					(path.size() < 128) ? count = path.size() - last->getPath().size() : count = 1; // guess how many? all?
+				if (it != lastList.end()) // sanity check, if first element id wont be found in lastList
+					lastTime = it->getPath().back().getTuioTime();
+
+				// step through path and find where lastTime == c.getTuioTime()
+				std::list<TuioPoint>::iterator lastPoint = find_if(
+					path.begin(),
+					path.end(),
+					[&lastTime](const TuioPoint& c) { return lastTime == c.getTuioTime();  });
+
+				for (; lastPoint != path.end(); ++lastPoint) // here we can access all elements that are to be processed
+					count++;
+
+				os << ", Id: " << j.getCursorID() << ", path size: " << j.getPath().size() << ", (" << j.getX() << "," << j.getY() << "), To Process: " << count;
 			}
+			LINFO("List size: " << list.size() << os.str() << "\n");
+			os.clear();
+		
 			
-			os << ", Id: " << j.getCursorID() << ", path size: " << j.getPath().size() << ", (" << j.getX() << "," << j.getY() << "), To Process: " << count;
-		}
-		if (list.size() > 0)
-			LINFO("List size: " << list.size()  << os.str() << "\n");
-		os.clear();
-		/*
-		// calculate centroid if multipleID
-		if (list.size() > 1) {
-			centroid = glm::vec2(0.0f, 0.0f);
-			for (auto &&i : list) {
-				centroid.x += i->getX();
-				centroid.y += i->getY();
+			// calculate centroid if multipleID
+			/*if (list.size() > 1) {
+				centroid = glm::vec2(0.0f, 0.0f);
+				for (auto &&i : list) {
+					centroid.x += i->getX();
+					centroid.y += i->getY();
+				}
+				centroid.x /= list.size();
+				centroid.y /= list.size();
+
+				//LINFO("List size: " << list.size() << ", Centroid: (" << centroid.x << ", " << centroid.y << ")" << "\n");
 			}
-			centroid.x /= list.size();
-			centroid.y /= list.size();
+			*/
 
-			//LINFO("List size: " << list.size() << ", Centroid: (" << centroid.x << ", " << centroid.y << ")" << "\n");
+			glm::mat4 t;
+			//OsEng.interactionHandler().camera()->rotate();
 		}
-		*/
-		
-		glm::mat4 t;
-		
-		//OsEng.interactionHandler().camera()->rotate();
-
 		lastList = list;
 	}
 	);
