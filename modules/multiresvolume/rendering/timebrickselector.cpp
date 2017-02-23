@@ -35,17 +35,16 @@ namespace {
 }
 
 namespace openspace {
-namespace TimeBrickSelector {
-TimeBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
-        : _tsp(tsp)
-        , _histogramManager(hm)
-        , _transferFunction(tf)
-        , _memoryBudget(memoryBudget)
-        , _streamingBudget(streamingBudget) {}
+TimeBrickSelector::TimeBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
+    : _tsp(tsp)
+    , _histogramManager(hm)
+    , _transferFunction(tf)
+    , _memoryBudget(memoryBudget)
+    , _streamingBudget(streamingBudget) {}
 
-~TimeBrickSelector() {}
+TimeBrickSelector::~TimeBrickSelector() {}
 
-void selectBricks(int timestep, std::vector<int>& bricks) {
+void TimeBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
     int numTimeSteps = _tsp->header().numTimesteps_;
     int numBricksPerDim = _tsp->header().xNumBricks_;
 
@@ -246,7 +245,7 @@ void selectBricks(int timestep, std::vector<int>& bricks) {
     }
 }
 
-float temporalSplitPoints(unsigned int brickIndex) {
+float TimeBrickSelector::temporalSplitPoints(unsigned int brickIndex) {
     if (_tsp->isBstLeaf(brickIndex)) {
         return -1;
     }
@@ -264,7 +263,7 @@ float temporalSplitPoints(unsigned int brickIndex) {
     return diff * 0.5;
 }
 
-float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType) {
+float TimeBrickSelector::splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType) {
     float temporalPoints = temporalSplitPoints(brickIndex);
     float spatialPoints = spatialSplitPoints(brickIndex);
     float splitPoints;
@@ -284,7 +283,7 @@ float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType)
     return splitPoints;
 }
 
-bool calculateBrickErrors() {
+bool TimeBrickSelector::calculateBrickErrors() {
     TransferFunction *tf = _transferFunction;
     if (!tf) return false;
 
@@ -328,5 +327,4 @@ bool calculateBrickErrors() {
     return true;
 }
 
-} // namespace TimeBrickSelector
 } // namespace openspace

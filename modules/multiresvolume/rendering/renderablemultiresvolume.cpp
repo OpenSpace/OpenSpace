@@ -47,6 +47,7 @@
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 #include <modules/multiresvolume/rendering/simpletfbrickselector.h>
 #include <modules/multiresvolume/rendering/localtfbrickselector.h>
+#include <modules/multiresvolume/rendering/timebrickselector.h>
 
 #include <modules/multiresvolume/rendering/histogrammanager.h>
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
@@ -80,6 +81,18 @@ namespace {
     const std::string GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
     const std::string GlslHeaderPath = "${MODULES}/multiresvolume/shaders/header.glsl";
     bool registeredGlslHelpers = false;
+
+    static const char* TYPE_SIMPLE = "simple";
+    static const char* TYPE_TIME = "time";
+    static const char* TYPE_TF = "tf";
+    static const char* TYPE_LOCAL = "local";
+
+    static const std::map<const char *, openspace::RenderableMultiresVolume::Selector> SelectorValues = {
+        {TYPE_SIMPLE , openspace::RenderableMultiresVolume::Selector::SIMPLE},
+        {TYPE_TF     , openspace::RenderableMultiresVolume::Selector::TF},
+        {TYPE_LOCAL  , openspace::RenderableMultiresVolume::Selector::LOCAL},
+        {TYPE_TIME   , openspace::RenderableMultiresVolume::Selector::TIME}
+    };
 }
 
 namespace openspace {
@@ -92,6 +105,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _tfBrickSelector(nullptr)
     , _simpleTfBrickSelector(nullptr)
     , _localTfBrickSelector(nullptr)
+    , _timeBrickSelector(nullptr)
     , _errorHistogramManager(nullptr)
     , _histogramManager(nullptr)
     , _localErrorHistogramManager(nullptr)
@@ -214,29 +228,11 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
         }
     }
 
-    std::string selectorName = _selectorName;
-    if (selectorName == "simple") {
-        _selector = Selector::SIMPLE;
-    } else if (selectorName == "local") {
-        _selector = Selector::LOCAL;
-    } else {
-        _selector = Selector::TF;
-    }
+    _selector = getSelector();
 
     addProperty(_selectorName);
     _selectorName.onChange([&] {
-        Selector s;
-        std::string newSelectorName = _selectorName;
-        if (newSelectorName == "simple") {
-            s = Selector::SIMPLE;
-        } else if (newSelectorName == "local") {
-            s = Selector::LOCAL;
-        } else if (newSelectorName == "tf") {
-            s = Selector::TF;
-        } else {
-            return;
-        }
-        setSelectorType(s);
+        setSelectorType(getSelector());
     });
 
     addProperty(_stepSizeCoefficient);
@@ -262,6 +258,8 @@ RenderableMultiresVolume::~RenderableMultiresVolume() {
         delete _simpleTfBrickSelector;
     if (_localTfBrickSelector)
         delete _localTfBrickSelector;
+    if (_timeBrickSelector)
+        delete _timeBrickSelector;
 
     if (_errorHistogramManager)
         delete _errorHistogramManager;
@@ -647,6 +645,22 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
 void RenderableMultiresVolume::render(const RenderData& data, RendererTasks& tasks) {
     RaycasterTask task{ _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);
+}
+
+RenderableMultiresVolume::Selector RenderableMultiresVolume::getSelector() {
+    return SelectorValues[_selectorName];/* {
+    case TYPE_TF:
+        return Selector::TF;
+    case TYPE_SIMPLE:
+        return Selector::SIMPLE;
+    case TYPE_LOCAL:
+        return Selector::LOCAL;
+    case TYPE_TIME:
+        return Selector::TIME;
+    default:
+        return Selector::TF;
+    }
+    return _selector;*/
 }
 
 } // namespace openspace

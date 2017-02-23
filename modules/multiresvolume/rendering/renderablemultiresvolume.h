@@ -56,6 +56,7 @@ class BrickSelector;
 class TfBrickSelector;
 class SimpleTfBrickSelector;
 class LocalTfBrickSelector;
+class TimeBrickSelector;
 class HistogramManager;
 class ErrorHistogramManager;
 class LocalErrorHistogramManager;
@@ -63,13 +64,18 @@ class LocalErrorHistogramManager;
 class RenderableMultiresVolume : public Renderable {
 
 
+    static const char* TYPE_SIMPLE;
+    static const char* TYPE_TIME;
+    static const char* TYPE_TF;
+    static const char* TYPE_LOCAL;
 
 
 public:
     RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
     ~RenderableMultiresVolume();
 
-    enum Selector {TF, SIMPLE, LOCAL};
+    enum Selector {TF, SIMPLE, LOCAL, TIME};
+    static const std::map<const char *, Selector> SelectorValues;
 
     bool setSelectorType(Selector selector);
     bool initializeSelector();
@@ -82,6 +88,7 @@ public:
     virtual void update(const UpdateData& data) override;
     virtual void render(const RenderData& data, RendererTasks& tasks);
 
+    Selector getSelector();
   
      
     //virtual void preResolve(ghoul::opengl::ProgramObject* program) override;
@@ -141,6 +148,7 @@ private:
     TfBrickSelector* _tfBrickSelector;
     SimpleTfBrickSelector* _simpleTfBrickSelector;
     LocalTfBrickSelector* _localTfBrickSelector;
+    TimeBrickSelector* _timeBrickSelector;
 
     Selector _selector;
 

@@ -35,6 +35,12 @@ namespace {
 }
 
 namespace openspace {
+TfBrickSelector::TfBrickSelector()
+    : _tsp(nullptr)
+    , _histogramManager(nullptr)
+    , _transferFunction(nullptr)
+    , _memoryBudget(0)
+    , _streamingBudget(0) {}
 
 TfBrickSelector::TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
     : _tsp(tsp)

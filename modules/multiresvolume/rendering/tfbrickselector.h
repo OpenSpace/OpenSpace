@@ -38,6 +38,7 @@ class TransferFunction;
 
 class TfBrickSelector : public BrickSelector {
 public:
+    TfBrickSelector();
     TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
 
     ~TfBrickSelector();
@@ -48,8 +49,8 @@ public:
     virtual void setMemoryBudget(int memoryBudget);
     virtual void setStreamingBudget(int streamingBudget);
     virtual bool calculateBrickErrors();
- private:
 
+protected:
     TSP* _tsp;
     ErrorHistogramManager* _histogramManager;
     TransferFunction* _transferFunction;
