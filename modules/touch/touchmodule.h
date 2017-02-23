@@ -35,6 +35,8 @@ public:
     TouchModule();
 
 	TuioEar *ear;
+	std::vector<TuioCursor> list;
+	std::vector<TuioCursor> lastList;
 };
 
 } // namespace openspace

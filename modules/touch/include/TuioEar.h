@@ -60,7 +60,6 @@ class TuioEar : public TuioListener {
 
 		void refresh(TuioTime frameTime);
 
-		TuioTime getLastProcessedTime(int id);
 		std::vector<TuioCursor> getInput();
 		void clearInput();
 		
@@ -70,7 +69,6 @@ class TuioEar : public TuioListener {
 
 		std::vector<TuioCursor> _list;
 		std::vector<int> _removeList;
-		std::vector<std::pair<int, TuioTime>> _processedPath;
 		std::mutex _mx;
 };
 

@@ -74,7 +74,7 @@ TouchModule::TouchModule()
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
 		//std::this_thread::sleep_for(std::chrono::seconds(1));
-		std::vector<TuioCursor> list = ear->getInput();
+		list = ear->getInput();
 		ear->clearInput();
 		glm::vec2 centroid;
 		
@@ -83,11 +83,23 @@ TouchModule::TouchModule()
 		std::string s = "";
 		std::ostringstream os;
 		for (const TuioCursor &j : list) {
-
-			os << j.getCursorID() << ", path size: " << j.getPath().size() << ", (" << j.getX() << "," << j.getY() << ") ";
+			
+			int count = 0;
+			std::list<TuioPoint> path = j.getPath();
+			if (lastList.size() > 0 && list.size() > 0) { // sanity check
+				std::vector<TuioCursor>::iterator last = find_if(
+					lastList.begin(),
+					lastList.end(),
+					[&j](const TuioCursor& c) { return c.getSessionID() == j.getSessionID(); }
+				);
+				if (last != lastList.end())
+					(path.size() < 128) ? count = path.size() - last->getPath().size() : count = 1; // guess how many? all?
+			}
+			
+			os << ", Id: " << j.getCursorID() << ", path size: " << j.getPath().size() << ", (" << j.getX() << "," << j.getY() << "), To Process: " << count;
 		}
 		if (list.size() > 0)
-			LINFO("List size: " << list.size() << ", Id: " << os.str() << "\n");
+			LINFO("List size: " << list.size()  << os.str() << "\n");
 		os.clear();
 		/*
 		// calculate centroid if multipleID
@@ -105,7 +117,10 @@ TouchModule::TouchModule()
 		*/
 		
 		glm::mat4 t;
+		
 		//OsEng.interactionHandler().camera()->rotate();
+
+		lastList = list;
 	}
 	);
 

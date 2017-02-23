@@ -58,7 +58,7 @@ void TuioEar::addTuioCursor(TuioCursor *tcur) {
 
 	// find same id in _list if it exists in _removeList (new input with same ID as a previously stored)
 	int i = tcur->getSessionID();
-	auto foundID = std::find_if(
+	std::vector<int>::iterator foundID = std::find_if(
 		_removeList.begin(),
 		_removeList.end(),
 		[&i](int id) { return id == i; });
@@ -116,19 +116,8 @@ void TuioEar::refresh(TuioTime frameTime) {
 	//LINFO("refresh " << frameTime.getTotalMilliseconds() << "\n"); // about every 15ms on TuioPad app
 }
 
-TuioTime TuioEar::getLastProcessedTime(int id) {
-	return std::find_if(
-		_processedPath.begin(),
-		_processedPath.end(),
-		[&id](std::pair<int, TuioTime> t) { return id = t.first; }
-	)->second;
-}
-
 std::vector<TuioCursor> TuioEar::getInput() {
 	std::lock_guard<std::mutex> lock(_mx);
-	_processedPath.clear();
-	for (const TuioCursor& c : _list)
-		_processedPath.push_back(std::make_pair(c.getSessionID(), c.getTuioTime()));
 	return _list;
 }
 
