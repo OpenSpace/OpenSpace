@@ -54,7 +54,7 @@ function  getSat(title, file, lineNum)
           Origin = "Center",
           Body = "TLE",
           Billboard = true,
-          Texture = "tle.jpg"
+          Texture = "satB.png"
       },
       Transform = {
           Translation = {
@@ -105,7 +105,7 @@ function getTestPoint(parent, name, x, y, z)
             Origin = "Center",
             Body = "TLE",
             Billboard = true,
-            Texture = "tle.jpg"
+            Texture = "satB.png"
         },
         Transform = {
             Translation = {
