@@ -3,34 +3,26 @@
     <Node address="127.0.0.1" port="20401">
         <Window fullScreen="false" numberOfSamples="8" border="true">
             <Pos x="10" y="100" />
-            <Size x="320" y="480" />
+            <Size x="1280" y="720" />
             <Viewport>
                 <Pos x="0.0" y="0.0" />
                 <Size x="1.0" y="1.0" />
-                <Viewplane>
-                    <!-- Lower left -->
-                    <Pos x="-1.778" y="-1.0" z="0.0" />
-                    <!-- Upper left -->
-                    <Pos x="-1.778" y="1.0" z="0.0" />
-                    <!-- Upper right -->
-                    <Pos x="0.0" y="1.0" z="0.0" />
-                </Viewplane>
+                <PlanarProjection>
+                    <FOV down="16.875" left="30.0" right="30.0" up="16.875" />
+                    <Orientation heading="0.0" pitch="0.0" roll="0.0" />
+                </PlanarProjection>
             </Viewport>
         </Window>
         <Window fullScreen="false" numberOfSamples="8" border="false">
             <Pos x="340" y="100" />
-            <Size x="320" y="480" />
+            <Size x="1280" y="720" />
             <Viewport>
                 <Pos x="0.0" y="0.0" />
                 <Size x="1.0" y="1.0" />
-                <Viewplane>
-                    <!-- Lower left -->
-                    <Pos x="0.0" y="-1.0" z="0.0" />
-                    <!-- Upper left -->
-                    <Pos x="0.0" y="1.0" z="0.0" />
-                    <!-- Upper right -->
-                    <Pos x="1.778" y="1.0" z="0.0" />
-                </Viewplane>
+                <PlanarProjection>
+                    <FOV down="16.875" left="30.0" right="30.0" up="16.875" />
+                    <Orientation heading="0.0" pitch="0.0" roll="0.0" />
+                </PlanarProjection>
             </Viewport>
         </Window>
     </Node>

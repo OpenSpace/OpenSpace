@@ -41,12 +41,12 @@
 #include "scriptengine_lua.inl"
 
 namespace {
-    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/main.hbs";
-    const std::string ScriptingTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/scripting.hbs";
-    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
-    const std::string JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
-    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
+    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/main.hbs";
+    const char* ScriptingTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/scripting.hbs";
+    const char* HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const char* JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
+    const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
 }
 
 namespace openspace {
@@ -56,40 +56,35 @@ namespace scripting {
 namespace {
     const std::string _loggerCat = "ScriptEngine";
     
-    const std::string _openspaceLibraryName = "openspace";
-    const std::string _luaGlobalNamespace = "_G";
-    const std::string _printFunctionName = "print";
+    const char* LuaGlobalNamespace = "_G";
+    const char* PrintFunctionName = "print";
     //const lua_CFunction _printFunctionReplacement = luascriptfunctions::printInfo;
     
-    const int _setTableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
+    const int TableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
 }
+
+std::string ScriptEngine::OpenSpaceLibraryName = "openspace";
 
 void ScriptEngine::initialize() {
     LDEBUG("Adding base library");
     addBaseLibrary();
-    LDEBUG("Creating new Lua state");
-    _state = ghoul::lua::createNewLuaState();
     LDEBUG("Initializing Lua state");
     initializeLuaState(_state);
     LDEBUG("Remapping Print functions");
     remapPrintFunction();
 }
 
-void ScriptEngine::deinitialize() {
-    if (_state) {
-        lua_close(_state);
-        _state = nullptr;
-    }
-}
+void ScriptEngine::deinitialize() {}
 
 void ScriptEngine::initializeLuaState(lua_State* state) {
     LDEBUG("Create openspace base library");
     lua_newtable(state);
-    lua_setglobal(state, _openspaceLibraryName.c_str());
+    lua_setglobal(state, OpenSpaceLibraryName.c_str());
     
     LDEBUG("Add OpenSpace modules");
-    for (const LuaLibrary& lib : _registeredLibraries)
+    for (const LuaLibrary& lib : _registeredLibraries) {
         registerLuaLibrary(state, lib);
+    }
 }
 
 void ScriptEngine::addLibrary(LuaLibrary library) {
@@ -294,7 +289,7 @@ bool ScriptEngine::parseLibraryAndFunctionNames(std::string &library, std::strin
 */
 bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& name) {
     bool result = false;
-    lua_getglobal(state, _openspaceLibraryName.c_str());
+    lua_getglobal(state, OpenSpaceLibraryName.c_str());
     const bool hasOpenSpaceLibrary = lua_istable(state, -1);
     if (!hasOpenSpaceLibrary) {
         LFATAL("OpenSpace library was not created in initialize method");
@@ -360,7 +355,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, const LuaLibrary& libra
         //ghoul::lua::logStack(_state);
         lua_pushcfunction(state, p.function);
         //ghoul::lua::logStack(_state);
-        lua_settable(state, _setTableOffset);
+        lua_settable(state, TableOffset);
         //ghoul::lua::logStack(_state);
     }
 }
@@ -443,14 +438,15 @@ void ScriptEngine::remapPrintFunction() {
 }
 
 bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& library) {
-    assert(state);
+    ghoul_assert(state, "State must not be nullptr");
+
     if (library.functions.empty()) {
         LERROR("Lua library '" << library.name << "' does not have any functions");
         return false;
     }
 
     //ghoul::lua::logStack(_state);
-    lua_getglobal(state, _openspaceLibraryName.c_str());
+    lua_getglobal(state, OpenSpaceLibraryName.c_str());
     //ghoul::lua::logStack(_state);
     if (library.name.empty()) {
         //ghoul::lua::logStack(_state);
@@ -461,8 +457,9 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& librar
     }
     else {
         const bool allowed = isLibraryNameAllowed(state, library.name);
-        if (!allowed)
+        if (!allowed) {
             return false;
+        }
         
         //ghoul::lua::logStack(_state);
         
@@ -471,7 +468,7 @@ bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& librar
         lua_newtable(state);
         //ghoul::lua::logStack(_state);
         addLibraryFunctions(state, library, false);
-        lua_settable(state, _setTableOffset);
+        lua_settable(state, TableOffset);
         //ghoul::lua::logStack(_state);
 
         //_registeredLibraries.insert(library);

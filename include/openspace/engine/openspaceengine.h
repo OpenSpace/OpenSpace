@@ -98,6 +98,7 @@ public:
     // SGCT callbacks
     bool initialize();
     bool initializeGL();
+    void deinitialize();
     void preSynchronization();
     void postSynchronizationPreDraw();
     void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);

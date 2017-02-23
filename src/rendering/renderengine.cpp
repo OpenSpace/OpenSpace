@@ -114,6 +114,7 @@ const std::vector<RenderEngine::FrametimeType> RenderEngine::FrametimeTypes({
 
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
+    , _raycasterManager(nullptr)
     , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
     , _frametimeType(
         "frametimeType",
@@ -172,7 +173,6 @@ RenderEngine::~RenderEngine() {
 
     delete _mainCamera;
     delete _raycasterManager;
-
 }
 
 bool RenderEngine::deinitialize() {

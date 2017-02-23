@@ -175,11 +175,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
 }
 
 OpenSpaceEngine::~OpenSpaceEngine() {
-    LINFO("_windowWrapper->isUsingSwapGroups(): " << _windowWrapper->isUsingSwapGroups());
-    LINFO("_windowWrapper->isSwapGroupMaster(): " << _windowWrapper->isSwapGroupMaster());
-    _interactionHandler->deinitialize();
-    _renderEngine->deinitialize();
-
     _globalPropertyNamespace = nullptr;
     _windowWrapper = nullptr;
     _parallelConnection = nullptr;
@@ -529,6 +524,10 @@ bool OpenSpaceEngine::initialize() {
     return true;
 }
 
+void OpenSpaceEngine::deinitialize() {
+    _interactionHandler->deinitialize();
+    _renderEngine->deinitialize();
+}
 
 void OpenSpaceEngine::writeDocumentation() {
     // If a LuaDocumentationFile was specified, generate it now

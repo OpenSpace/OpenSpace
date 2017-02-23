@@ -170,7 +170,6 @@ bool SGCTWindowWrapper::isSwapGroupMaster() const {
 bool SGCTWindowWrapper::isUsingSwapGroups() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->isUsingSwapGroups();
 }
-
     
 glm::mat4 SGCTWindowWrapper::viewProjectionMatrix() const {
     return sgct::Engine::instance()->getCurrentModelViewProjectionMatrix();
