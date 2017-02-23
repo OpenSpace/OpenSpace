@@ -25,46 +25,23 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___TIMEBRICKSELECTOR___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___TIMEBRICKSELECTOR___H__
 
-#include <vector>
-#include <modules/multiresvolume/rendering/brickselection.h>
-#include <modules/multiresvolume/rendering/brickselector.h>
-#include <modules/multiresvolume/rendering/brickcover.h>
+#include <modules/multiresvolume/rendering/tfbrickselector.h>
 
 namespace openspace {
 
-    class TSP;
-    class ErrorHistogramManager;
-    class TransferFunction;
+class TimeBrickSelector : public TfBrickSelector {
+public:
+    TimeBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
 
-    class TimeBrickSelector : public BrickSelector {
-    public:
-        TimeBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
+    ~TimeBrickSelector();
 
-        ~TimeBrickSelector();
+    void selectBricks(int timestep, std::vector<int>& bricks);
+    bool calculateBrickErrors();
+private:
 
-        virtual bool initialize();
-
-        void selectBricks(int timestep, std::vector<int>& bricks);
-        void setMemoryBudget(int memoryBudget);
-        void setStreamingBudget(int streamingBudget);
-        bool calculateBrickErrors();
-    private:
-
-        TSP* _tsp;
-        ErrorHistogramManager* _histogramManager;
-        TransferFunction* _transferFunction;
-        std::vector<float> _brickErrors;
-        float spatialSplitPoints(unsigned int brickIndex);
-        float temporalSplitPoints(unsigned int brickIndex);
-        float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
-
-        int linearCoords(int x, int y, int z);
-        void writeSelection(BrickSelection coveredBricks, std::vector<int>& bricks);
-
-        int _memoryBudget;
-        int _streamingBudget;
-
-    };
+    float temporalSplitPoints(unsigned int brickIndex);
+    float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
+};
 
 } // namespace openspace
 

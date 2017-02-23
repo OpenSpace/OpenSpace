@@ -44,19 +44,19 @@ public:
 
     virtual bool initialize();
 
-    void selectBricks(int timestep, std::vector<int>& bricks);
-    void setMemoryBudget(int memoryBudget);
-    void setStreamingBudget(int streamingBudget);
-    bool calculateBrickErrors();
+    virtual void selectBricks(int timestep, std::vector<int>& bricks);
+    virtual void setMemoryBudget(int memoryBudget);
+    virtual void setStreamingBudget(int streamingBudget);
+    virtual bool calculateBrickErrors();
  private:
 
     TSP* _tsp;
     ErrorHistogramManager* _histogramManager;
     TransferFunction* _transferFunction;
     std::vector<float> _brickErrors;
-    float spatialSplitPoints(unsigned int brickIndex);
-    float temporalSplitPoints(unsigned int brickIndex);
-    float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
+    virtual float spatialSplitPoints(unsigned int brickIndex);
+    virtual float temporalSplitPoints(unsigned int brickIndex);
+    virtual float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
 
     int linearCoords(int x, int y, int z);
     void writeSelection(BrickSelection coveredBricks, std::vector<int>& bricks);
