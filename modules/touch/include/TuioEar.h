@@ -29,10 +29,15 @@
 #include <modules/touch/ext/libTUIO/TUIO/TuioClient.h>
 #include <modules/touch/ext/libTUIO/TUIO/UdpReceiver.h>
 #include <modules/touch/ext/libTUIO/TUIO/TcpReceiver.h>
-#include "glm/glm.hpp"
+
+#include <glm/glm.hpp>
+
 #include <math.h>
 #include <vector>
 #include <mutex>
+#include <numeric>
+#include <mutex>
+#include <algorithm>
 
 using namespace TUIO;
 

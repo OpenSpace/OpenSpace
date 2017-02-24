@@ -33,8 +33,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <ghoul/logging/logmanager.h>
-#include <vector>
-#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 
 #include <sstream>
 #include <string>
@@ -73,58 +72,84 @@ TouchModule::TouchModule()
 	OsEng.registerModuleCallback( // maybe call ear->clearInput() here rather than postdraw
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		//std::this_thread::sleep_for(std::chrono::seconds(1));
 		list = ear->getInput();
 		ear->clearInput();
 
-		if (list.size() > 0) { // sanity check, no need to process if no input
-			glm::vec2 centroid;
+		Camera* cam = OsEng.interactionHandler().camera();
+		glm::vec3 pos = cam->positionVec3();
+		glm::vec3 focusDir = glm::normalize(glm::vec3(cam->focusPositionVec3()) - pos);
 
-			//print list for debugging
-			std::ostringstream os;
-			for (const TuioCursor &j : list) {
-				int count = 0;
-				TuioTime lastTime;
+		glm::vec2 centroid;
+		float distance = 0.0f;
+		float lastDistance = 0.0f;
+		float zoomFactor = 0.0f;
+
+		if (list.size() > 0) { // sanity check, no need to process if no input
+			if (list.size() > 1 && list.size() == lastList.size()) { // calculate centroid if we have multiple IDs
+				centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](float x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
+				centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](float y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
+
+
+
+
+				// ------- testing, should use more than just one point in lastList later on
+				distance = std::accumulate(list.begin(), list.end(), 0.0f, [&centroid](float d, const TuioCursor& c) { 
+					return d + sqrt(pow(c.getX() - centroid.x,2) + pow(c.getY() - centroid.y,2)); 
+				});
+				lastDistance = std::accumulate(lastList.begin(), lastList.end(), 0.0f, [&centroid](float d, const TuioCursor& c) {
+					return d + sqrt(pow(c.getX() - centroid.x, 2) + pow(c.getY() - centroid.y, 2));
+				});
+				zoomFactor = distance - lastDistance; // should be dependant on screen size, distance from focusNode
+				zoomFactor *= glm::distance(pos, glm::vec3(cam->focusPositionVec3()));
+
+				std::cout << "Distance: " << distance << ", Last Distance: " << lastDistance << ", zoomFactor: " << zoomFactor 
+					<< ", pos: " << glm::to_string(pos) << ", focusDir: " << glm::to_string(focusDir) << "\n";
+
+				glm::vec3 newPos = pos + focusDir*zoomFactor;
+				cam->setPosition(newPos);
+			}
+			else if (lastList.size() > 0) {
+				// do new rotation
+				float x = list.at(0).getX() - lastList.at(0).getX();
+				float y = list.at(0).getY() - lastList.at(0).getY();
+
+				glm::quat rot;
+			
+				//cam->rotate(rot);
+			}
+			// ----------------
+
+
+			std::ostringstream os; // for debugging
+
+			for (const TuioCursor &j : list) { // go through each item
 				std::list<TuioPoint> path = j.getPath();
 				std::vector<TuioCursor>::iterator it = find_if(
 					lastList.begin(),
 					lastList.end(),
 					[&j](const TuioCursor& c) { return c.getSessionID() == j.getSessionID(); }
 				);
+				TuioTime lastTime;
 				if (it != lastList.end()) // sanity check, if first element id wont be found in lastList
 					lastTime = it->getPath().back().getTuioTime();
 
-				// step through path and find where lastTime == c.getTuioTime()
 				std::list<TuioPoint>::iterator lastPoint = find_if(
 					path.begin(),
 					path.end(),
 					[&lastTime](const TuioPoint& c) { return lastTime == c.getTuioTime();  });
 
+				int count = 0;
 				for (; lastPoint != path.end(); ++lastPoint) // here we can access all elements that are to be processed
 					count++;
 
 				os << ", Id: " << j.getCursorID() << ", path size: " << j.getPath().size() << ", (" << j.getX() << "," << j.getY() << "), To Process: " << count;
 			}
-			LINFO("List size: " << list.size() << os.str() << "\n");
+			//LINFO("List size: " << list.size() << os.str() << "\n");
 			os.clear();
-		
-			
-			// calculate centroid if multipleID
-			/*if (list.size() > 1) {
-				centroid = glm::vec2(0.0f, 0.0f);
-				for (auto &&i : list) {
-					centroid.x += i->getX();
-					centroid.y += i->getY();
-				}
-				centroid.x /= list.size();
-				centroid.y /= list.size();
-
-				//LINFO("List size: " << list.size() << ", Centroid: (" << centroid.x << ", " << centroid.y << ")" << "\n");
-			}
-			*/
 
 			glm::mat4 t;
-			//OsEng.interactionHandler().camera()->rotate();
+			
 		}
 		lastList = list;
 	}

@@ -33,8 +33,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <ghoul/logging/logmanager.h>
-#include <mutex>
-#include <algorithm>
+
 
 namespace {
 	const std::string _loggerCat = "TuioEar";
