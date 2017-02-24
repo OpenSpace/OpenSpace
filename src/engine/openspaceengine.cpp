@@ -80,7 +80,7 @@
 #endif
 
 #ifdef WIN32
-#include <WinBase.h>
+#include <Windows.h>
 #endif
 
 #include "openspaceengine_lua.inl"
