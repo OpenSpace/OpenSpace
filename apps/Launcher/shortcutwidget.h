@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SHORTCUTWIDGET_H__
-#define __SHORTCUTWIDGET_H__
+#ifndef __OPENSPACE_APP_LAUNCHER___SHORTCUTWIDGET___H__
+#define __OPENSPACE_APP_LAUNCHER___SHORTCUTWIDGET___H__
 
 #include <QWidget>
 
@@ -33,4 +33,4 @@ public:
     ShortcutWidget(QWidget* parent, Qt::WindowFlags f = 0);
 };
 
-#endif // __SHORTCUTWIDGET_H__
+#endif // __OPENSPACE_APP_LAUNCHER___SHORTCUTWIDGET___H__

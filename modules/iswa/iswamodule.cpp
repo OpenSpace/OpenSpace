@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,18 @@ namespace openspace {
 
 IswaModule::IswaModule()
     : OpenSpaceModule("ISWA")
-{}
+{
+    OsEng.registerModuleCallback(
+        OpenSpaceEngine::CallbackOption::Initialize,
+        [](){
+            IswaManager::initialize();
+        }
+    );
+}
+    
+scripting::LuaLibrary IswaModule::luaLibrary() const {
+    return IswaManager::luaLibrary();
+}
 
 void IswaModule::internalInitialize(){
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

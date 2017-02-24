@@ -135,6 +135,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding.cpp
     ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
@@ -275,6 +276,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/script_helper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptscheduler.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scripting/systemcapabilitiesbinding.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h

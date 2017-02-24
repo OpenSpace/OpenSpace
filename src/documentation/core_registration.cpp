@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,13 +42,10 @@
 #include <openspace/scene/translation.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/scripting/systemcapabilitiesbinding.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timerange.h>
-
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-#include <modules/onscreengui/include/gui.h>
-#endif
 
 namespace openspace {
 
@@ -78,6 +75,9 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());
     engine.addLibrary(WindowWrapper::luaLibrary());
     engine.addLibrary(MissionManager::luaLibrary());
+    
+    engine.addLibrary(scripting::generalSystemCapabilities());
+    engine.addLibrary(scripting::openglSystemCapabilities());
 }
 
 } // namespace openspace

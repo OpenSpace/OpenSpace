@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,16 +25,16 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___PIXELREGION___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___PIXELREGION___H__
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-using PixelCoordinate = glm::ivec2;
-using PixelRange= glm::ivec2;
-
 struct PixelRegion {
-    enum Side {
+    using PixelCoordinate = glm::ivec2;
+    using PixelRange = glm::ivec2;
+
+    enum class Side {
         LEFT = 0,
         TOP,
         RIGHT,
@@ -103,4 +103,4 @@ struct PixelRegion {
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___PIXELREGION___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___PIXELREGION___H__

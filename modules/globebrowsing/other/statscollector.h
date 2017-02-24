@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___STATS_TRACKER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___STATS_TRACKER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___STATS_COLLECTOR___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___STATS_COLLECTOR___H__
 
 #include <ghoul/misc/boolean.h>
 
@@ -34,14 +34,6 @@
 
 namespace openspace {
 namespace globebrowsing {    
-
-template <typename T>
-using StatsRecord = std::unordered_map<std::string, T>;
-
-template <typename T>
-struct StatsCollection : public std::vector<StatsRecord<T>> {
-    std::set<std::string> keys;
-};
 
 template <typename T>
 class TemplatedStatsCollector {
@@ -67,6 +59,14 @@ public:
     void writeNextRecord(std::ostream& os);
 
 private:
+    template <typename U>
+    using StatsRecord = std::unordered_map<std::string, U>;
+
+    template <typename U>
+    struct StatsCollection : public std::vector<StatsRecord<U>> {
+        std::set<std::string> keys;
+    };
+
     StatsCollection<T> _data;
     T _dummy; // used when disabled
     bool& _enabled;
@@ -121,4 +121,4 @@ private:
 
 #include "statscollector.inl"
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___STATS_TRACKER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___STATS_COLLECTOR___H__

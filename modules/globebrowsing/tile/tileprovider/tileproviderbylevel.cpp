@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,6 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const std::string _loggerCat = "TileProviderByLevel";
-
     const char* KeyProviders = "LevelTileProviders";
     const char* KeyMaxLevel = "MaxLevel";
     const char* KeyTileProvider = "TileProvider";
@@ -36,15 +34,14 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileprovider {
 
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
-    ghoul::Dictionary levelProvidersDict = dictionary.value<ghoul::Dictionary>(
-        KeyProviders
-    );
+    ghoul::Dictionary providers = dictionary.value<ghoul::Dictionary>(KeyProviders);
 
-    for (size_t i = 0; i < levelProvidersDict.size(); i++) {
+    for (size_t i = 0; i < providers.size(); i++) {
         std::string dictKey = std::to_string(i + 1);
-        ghoul::Dictionary levelProviderDict = levelProvidersDict.value<ghoul::Dictionary>(
+        ghoul::Dictionary levelProviderDict = providers.value<ghoul::Dictionary>(
             dictKey
         );
         double floatMaxLevel;
@@ -128,5 +125,6 @@ TileProvider* TileProviderByLevel::levelProvider(int level) const {
     return _levelTileProviders[providerIndex(level)].get();
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

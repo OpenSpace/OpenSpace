@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -63,17 +63,17 @@ bool AABB1::intersects(const AABB1& o) const {
     return (min <= o.max) && (o.min <= max);
 }
 
-AABBSpatialRelation AABB1::relationTo(const AABB1& o) const {
+AABB1::AABBSpatialRelation AABB1::relationTo(const AABB1& o) const {
     if (intersects(o)) {
         if (contains(o)) {
-            return AABBSpatialRelation::Containing;
+            return AABB1::AABBSpatialRelation::Containing;
         }
         if (o.contains(*this)) {
-            return AABBSpatialRelation::Contained;
+            return AABB1::AABBSpatialRelation::Contained;
         }
-        return AABBSpatialRelation::Intersecting;
+        return AABB1::AABBSpatialRelation::Intersecting;
     }
-    return AABBSpatialRelation::None;
+    return AABB1::AABBSpatialRelation::None;
 }
 
 AABB2::AABB2()
@@ -83,9 +83,9 @@ AABB2::AABB2()
     )
 {}
 
-AABB2::AABB2(const glm::vec2& min, const glm::vec2& max)
-    : min(min)
-    , max(max)
+AABB2::AABB2(glm::vec2 min, glm::vec2 max)
+    : min(std::move(min))
+    , max(std::move(max))
 {}
 
 void AABB2::expand(const glm::vec2& p) {
@@ -116,17 +116,17 @@ bool AABB2::intersects(const AABB2& o) const {
         && (min.y <= o.max.y) && (o.min.y <= max.y);
 }
 
-AABBSpatialRelation AABB2::relationTo(const AABB2& o) const {
+AABB2::AABBSpatialRelation AABB2::relationTo(const AABB2& o) const {
     if (intersects(o)) {
         if (contains(o)) {
-            return AABBSpatialRelation::Containing;
+            return AABB2::AABBSpatialRelation::Containing;
         }
         if (o.contains(*this)) {
-            return AABBSpatialRelation::Contained;
+            return AABB2::AABBSpatialRelation::Contained;
         }
-        return AABBSpatialRelation::Intersecting;
+        return AABB2::AABBSpatialRelation::Intersecting;
     }
-    return AABBSpatialRelation::None;
+    return AABB2::AABBSpatialRelation::None;
 }
 
 AABB3::AABB3()
@@ -136,9 +136,9 @@ AABB3::AABB3()
     )
 {}
 
-AABB3::AABB3(const glm::vec3& min, const glm::vec3& max)
-    : min(min),
-    max(max)
+AABB3::AABB3(glm::vec3 min, glm::vec3 max)
+    : min(std::move(min))
+    , max(std::move(max))
 {}
 
 void AABB3::expand(const glm::vec3 p) {
@@ -172,17 +172,17 @@ bool AABB3::intersects(const AABB3& o) const {
         && (min.z <= o.max.z) && (o.min.z <= max.z);
 }
 
-AABBSpatialRelation AABB3::relationTo(const AABB3& o) const {
+AABB3::AABBSpatialRelation AABB3::relationTo(const AABB3& o) const {
     if (intersects(o)) {
         if (contains(o)) {
-            return AABBSpatialRelation::Containing;
+            return AABB3::AABBSpatialRelation::Containing;
         }
         if (o.contains(*this)) {
-            return AABBSpatialRelation::Contained;
+            return AABB3::AABBSpatialRelation::Contained;
         }
-        return AABBSpatialRelation::Intersecting;
+        return AABB3::AABBSpatialRelation::Intersecting;
     }
-    return AABBSpatialRelation::None;
+    return AABB3::AABBSpatialRelation::None;
 }
 
 } // namespace globebrowsing

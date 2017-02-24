@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
     const char* KeyFilePath = "FilePath";
@@ -33,7 +34,8 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary) {
     // Required input
     if (!dictionary.getValue<std::string>(KeyFilePath, _imagePath)) {
@@ -86,5 +88,6 @@ int SingleImageProvider::maxLevel() {
     return 1337; // unlimited
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

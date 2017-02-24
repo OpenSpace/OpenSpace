@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,7 @@ namespace openspace {
 OpenSpaceModule::OpenSpaceModule(std::string name) {
     ghoul_assert(!name.empty(), "Name must not be empty");
     
-    setName(name);
+    setName(std::move(name));
 }
 
 void OpenSpaceModule::initialize() {
@@ -66,6 +66,10 @@ void OpenSpaceModule::deinitialize() {
 std::vector<Documentation> OpenSpaceModule::documentations() const {
     return {};
 }
+    
+scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
+    return {};
+}
 
 ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
 OpenSpaceModule::requiredOpenGLVersion() const
@@ -77,8 +81,9 @@ std::string OpenSpaceModule::modulePath() const {
     std::string moduleName = name();
     std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), tolower);
 
-    if (FileSys.directoryExists("${MODULES}/" + moduleName))
+    if (FileSys.directoryExists("${MODULES}/" + moduleName)) {
         return absPath("${MODULES}/" + moduleName);
+    }
 
 #ifdef EXTERNAL_MODULES_PATHS
 

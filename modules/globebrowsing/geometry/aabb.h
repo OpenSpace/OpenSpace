@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,19 +25,19 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___AABB___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___AABB___H__
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-enum class AABBSpatialRelation {
-    None,
-    Intersecting,
-    Contained,
-    Containing
-};
-
 struct AABB1 {
+    enum class AABBSpatialRelation {
+        None,
+        Intersecting,
+        Contained,
+        Containing
+    };
+
     AABB1();
     AABB1(float min, float max);
 
@@ -54,8 +54,15 @@ struct AABB1 {
 };
 
 struct AABB2 {
+    enum class AABBSpatialRelation {
+        None,
+        Intersecting,
+        Contained,
+        Containing
+    };
+
     AABB2();
-    AABB2(const glm::vec2& min, const glm::vec2& max);
+    AABB2(glm::vec2 min, glm::vec2 max);
 
     void expand(const glm::vec2& p);
     glm::vec2 center() const;
@@ -70,8 +77,15 @@ struct AABB2 {
 };
 
 struct AABB3 {
+    enum class AABBSpatialRelation {
+        None,
+        Intersecting,
+        Contained,
+        Containing
+    };
+
     AABB3();
-    AABB3(const glm::vec3& min, const glm::vec3& max);
+    AABB3(glm::vec3 min, glm::vec3 max);
 
     void expand(const glm::vec3 p);
     glm::vec3 center() const;
@@ -88,4 +102,4 @@ struct AABB3 {
 } // namespace globebrowsing   
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___AABB___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___AABB___H__

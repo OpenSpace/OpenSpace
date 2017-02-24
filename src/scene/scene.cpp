@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,10 +53,6 @@
 #include <numeric>
 #include <fstream>
 #include <string>
-
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-#include <modules/onscreengui/include/gui.h>
-#endif
 
 #include "scene_doc.inl"
 #include "scene_lua.inl"
@@ -144,7 +140,9 @@ void Scene::update(const UpdateData& data) {
 
     for (SceneGraphNode* node : _graph.nodes()) {
         try {
+            LTRACE("Scene::update(begin '" + node->name() + "')");
             node->update(data);
+            LTRACE("Scene::update(end '" + node->name() + "')");
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.what());
@@ -160,7 +158,9 @@ void Scene::evaluate(Camera* camera) {
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
     for (SceneGraphNode* node : _graph.nodes()) {
+        LTRACE("Scene::render(begin '" + node->name() + "')");
         node->render(data, tasks);
+        LTRACE("Scene::render(end '" + node->name() + "')");
     }
 }
 

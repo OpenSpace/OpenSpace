@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,6 +57,17 @@ namespace luascriptfunctions {
                 break;
         }
         return 0;
+    }
+
+    /**
+     * \ingroup LuaScripts
+     * printTrace(*):
+     * Logs the passed value to the installed LogManager with a LogLevel of 'Trace'.
+     * For Boolean, numbers, and strings, the internal values are printed, for all other
+     * types, the type is printed instead
+     */
+    int printTrace(lua_State* L) {
+        return printInternal(ghoul::logging::LogLevel::Trace, L);
     }
 
     /**

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,6 +40,7 @@ sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
 
 sgct::Engine* _sgctEngine;
 
+int main_main(int argc, char** argv);
 void mainInitFunc();
 void mainPreSyncFunc();
 void mainPostSyncPreDrawFunc();
@@ -87,8 +88,32 @@ namespace {
 }
 
 int main(int argc, char** argv) {
+    try {
+        return main_main(argc, argv);
+    }
+    catch (const ghoul::RuntimeError& e) {
+        // Write out all of the information about the exception, flush the logs, and throw
+        LFATALC(e.component, e.message);
+        LogMgr.flushLogs();
+        throw;
+    }
+    catch (const std::exception& e) {
+        // Write out all of the information about the exception, flush the logs, and throw
+        LFATALC("Exception", e.what());
+        LogMgr.flushLogs();
+        throw;
+    }
+    catch (...) {
+        // Write out all of the information about the exception, flush the logs, and throw
+        LFATALC("Exception", "Unknown exception");
+        LogMgr.flushLogs();
+        throw;
+    }
+}
+
+int main_main(int argc, char** argv) {
     auto glVersion = supportedOpenGLVersion();
-    
+
     // create the OpenSpace engine and get arguments for the sgct engine
     std::vector<std::string> sgctArguments;
     const bool success = openspace::OpenSpaceEngine::create(
@@ -96,16 +121,18 @@ int main(int argc, char** argv) {
         std::make_unique<openspace::SGCTWindowWrapper>(),
         sgctArguments
     );
-    if (!success)
+    if (!success) {
         return EXIT_FAILURE;
+    }
     
     LINFO("Detected OpenGL version: " << glVersion.first << "." << glVersion.second);
 
     // create sgct engine c arguments
     int newArgc = static_cast<int>(sgctArguments.size());
     char** newArgv = new char*[newArgc];
-    for (int i = 0; i < newArgc; ++i)
+    for (int i = 0; i < newArgc; ++i) {
         newArgv[i] = const_cast<char*>(sgctArguments.at(i).c_str());
+    }
 
     // Need to set this before the creation of the sgct::Engine
     sgct::MessageHandler::instance()->setLogToConsole(false);
@@ -122,7 +149,7 @@ int main(int argc, char** argv) {
 
     // deallocate sgct c arguments
     delete[] newArgv;
-
+    
     // Bind functions
     _sgctEngine->setInitOGLFunction(mainInitFunc);
     _sgctEngine->setPreSyncFunction(mainPreSyncFunc);
@@ -174,27 +201,10 @@ int main(int argc, char** argv) {
 
     // Main loop
     LDEBUG("Starting rendering loop");
-    try {
-        _sgctEngine->render();
-    }
-    catch (const ghoul::RuntimeError& e) {
-        // Write out all of the information about the exception, flush the logs, and throw
-        LFATALC(e.component, e.message);
-        LogMgr.flushLogs();
-        throw;
-    }
-    catch (const std::exception& e) {
-        // Write out all of the information about the exception, flush the logs, and throw
-        LFATALC("Exception", e.what());
-        LogMgr.flushLogs();
-        throw;
-    }
-    catch (...) {
-        // Write out all of the information about the exception, flush the logs, and throw
-        LFATALC("Exception", "Unknown exception");
-        LogMgr.flushLogs();
-        throw;
-    }
+    _sgctEngine->render();
+    LDEBUG("Ending rendering loop");
+
+    OsEng.deinitialize();
 
     //clear function bindings to avoid crash after destroying the OpenSpace Engine
     sgct::MessageHandler::instance()->setLogToCallback(false);
@@ -217,15 +227,21 @@ int main(int argc, char** argv) {
 }
 
 void mainInitFunc() {
+    LTRACE("main::mainInitFunc(begin)");
     //is this node the master?    (must be set after call to _sgctEngine->init())
     OsEng.setMaster(_sgctEngine->isMaster());
     
+    LDEBUG("Initializing OpenSpace Engine");
     bool success = OsEng.initialize();
-    if (success)
+
+    LDEBUG("Initializing OpenGL in OpenSpace Engine");
+    if (success) {
         success = OsEng.initializeGL();
+    }
 
     if (!success) {
         LFATAL("Initializing OpenSpaceEngine failed");
+        LogMgr.flushLogs();
         exit(EXIT_FAILURE);
     }
 	
@@ -257,12 +273,14 @@ void mainInitFunc() {
                 p->setClearColor(glm::vec4(0.f, 0.f, 0.f, 1.f));
         }
     }
-
+    LTRACE("main::mainInitFunc(end)");
 }
 
 void mainPreSyncFunc() {
+    LTRACE("main::mainPreSyncFunc(begin)");
     OsEng.setRunTime(sgct::Engine::getTime());
     OsEng.preSynchronization();
+    LTRACE("main::mainPreSyncFunc(end)");
 }
 
 volatile bool busyWaitDecode = false;
@@ -272,6 +290,7 @@ void mainPostSyncPreDrawFunc() {
 //            std::this_thread::sleep_for(std::chrono::microseconds(10));
 //        }
 //    }
+    LTRACE("main::postSynchronizationPreDraw(begin)");
     OsEng.postSynchronizationPreDraw();
 
 #ifdef OPENVR_SUPPORT
@@ -280,9 +299,12 @@ void mainPostSyncPreDrawFunc() {
 		sgct::SGCTOpenVR::updatePoses();
 	}
 #endif
+
+    LTRACE("main::postSynchronizationPreDraw(end)");
 }
 
 void mainRenderFunc() {
+    LTRACE("main::mainRenderFunc(begin)");
     using glm::mat4;
     using glm::translate;
     //not the most efficient, but for clarity @JK
@@ -305,9 +327,11 @@ void mainRenderFunc() {
 #endif
 
     OsEng.render(projectionMatrix, viewMatrix);
+    LTRACE("main::mainRenderFunc(end)");
 }
 
 void mainPostDrawFunc() {
+    LTRACE("main::mainPostDrawFunc(begin)");
 
 #ifdef OPENVR_SUPPORT
 	if (FirstOpenVRWindow) {
@@ -317,6 +341,7 @@ void mainPostDrawFunc() {
 #endif
 
     OsEng.postDraw();
+    LTRACE("main::mainPostDrawFunc(end)");
 
 //    if (OsEng.logSGCTOutOfOrderErrors()) {
 //        if (sgct::Engine::instance()->isMaster()) {
@@ -333,11 +358,15 @@ void mainPostDrawFunc() {
 }
 
 void mainExternalControlCallback(const char* receivedChars, int size) {
-    if (OsEng.isMaster())
+    LTRACE("main::mainExternalControlCallback(begin)");
+    if (OsEng.isMaster()) {
         OsEng.externalControlCallback(receivedChars, size, 0);
+    }
+    LTRACE("main::mainExternalControlCallback(end)");
 }
 
 void mainKeyboardCallback(int key, int, int action, int mods) {
+    LTRACE("main::mainKeyboardCallback(begin)");
     if (OsEng.isMaster()) {
         OsEng.keyboardCallback(
             openspace::Key(key),
@@ -345,15 +374,18 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
             openspace::KeyAction(action)
             );
     }
+    LTRACE("main::mainKeyboardCallback(begin)");
 }
 
 void mainMouseButtonCallback(int key, int action) {
+    LTRACE("main::mainMouseButtonCallback(begin)");
     if (OsEng.isMaster()) {
         OsEng.mouseButtonCallback(
             openspace::MouseButton(key),
             openspace::MouseAction(action)
             );
     }
+    LTRACE("main::mainMouseButtonCallback(end)");
 }
 
 void mainMousePosCallback(double x, double y) {
@@ -372,11 +404,15 @@ void mainCharCallback(unsigned int codepoint, int mods) {
 }
 
 void mainEncodeFun() {
+    LTRACE("main::mainEncodeFun(begin)");
     OsEng.encode();
+    LTRACE("main::mainEncodeFun(end)");
 }
 
 void mainDecodeFun() {
+    LTRACE("main::mainDecodeFun(begin)");
     OsEng.decode();
+    LTRACE("main::mainDecodeFun(end)");
 }
 
 void mainLogCallback(const char* msg) {

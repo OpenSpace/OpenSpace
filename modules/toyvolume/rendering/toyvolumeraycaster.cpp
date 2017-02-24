@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,7 @@
 
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <sstream>
 #include <ghoul/opengl/programobject.h>
