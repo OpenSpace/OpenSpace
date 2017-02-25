@@ -100,7 +100,7 @@ public:
     void updateFade();
     void updateRenderer();
     void updateScreenSpaceRenderables();
-    void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
+    void render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
 
     void renderScreenLog();
     void renderShutdownInformation(float timer, float fullTime);

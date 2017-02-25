@@ -49,7 +49,6 @@ sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
 std::pair<int, int> supportedOpenGLVersion() {
     // Just create a window in order to retrieve the available OpenGL version before we
     // create the real window
-
     glfwInit();
 
     // On OS X we need to explicitly set the version and specify that we are using CORE
@@ -77,26 +76,20 @@ std::pair<int, int> supportedOpenGLVersion() {
     // And get rid of the window again
     glfwDestroyWindow(offscreen);
     glfwWindowHint(GLFW_VISIBLE, GL_TRUE);
+    
     return { major, minor };
 }
 
 void mainInitFunc() {
     LTRACE("main::mainInitFunc(begin)");
 
-    LDEBUG("Initializing OpenSpace Engine");
-    // @CLEANUP:  The return value should be replaced with an exception ---abock
-    bool success = OsEng.initialize();
+    LDEBUG("Initializing OpenSpace Engine started");
+    OsEng.initialize();
+    LDEBUG("Initializing OpenSpace Engine finished");
 
-    LDEBUG("Initializing OpenGL in OpenSpace Engine");
-    if (success) {
-        success = OsEng.initializeGL();
-    }
-
-    if (!success) {
-        LFATAL("Initializing OpenSpaceEngine failed");
-        LogMgr.flushLogs();
-        exit(EXIT_FAILURE);
-    }
+    LDEBUG("Initializing OpenGL in OpenSpace Engine started");
+    OsEng.initializeGL();
+    LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
 	
 	// Find if we have at least one OpenVR window
 	// Save reference to first OpenVR window, which is the one we will copy to the HMD.
@@ -160,21 +153,17 @@ void mainPostSyncPreDrawFunc() {
 
 void mainRenderFunc() {
     LTRACE("main::mainRenderFunc(begin)");
-    using glm::mat4;
-    using glm::translate;
-    //not the most efficient, but for clarity @JK
 
-    mat4 userMatrix = translate(mat4(1.f), SgctEngine->getDefaultUserPtr()->getPos());
-    mat4 sceneMatrix = SgctEngine->getModelMatrix();
-    mat4 viewMatrix = SgctEngine->getCurrentViewMatrix() * userMatrix;
+    glm::mat4 viewMatrix =
+        SgctEngine->getCurrentViewMatrix() *
+        // User matrix
+        glm::translate(
+           glm::mat4(1.f),
+           SgctEngine->getDefaultUserPtr()->getPos()
+       )
+    ;
 
-    //dont shift nav-direction on master, makes it very tricky to navigate @JK
-    if (!SgctEngine->isMaster()) {
-        viewMatrix = viewMatrix * sceneMatrix;
-    }
-
-    mat4 projectionMatrix = SgctEngine->getCurrentProjectionMatrix();
-
+    glm::mat4 projectionMatrix = SgctEngine->getCurrentProjectionMatrix();
 #ifdef OPENVR_SUPPORT
     bool currentWindowIsHMD = FirstOpenVRWindow == _sgctEngine->getCurrentWindowPtr();
     if (sgct::SGCTOpenVR::isHMDActive() && currentWindowIsHMD) {
@@ -184,9 +173,13 @@ void mainRenderFunc() {
 	}
 #endif
 
-    // @CLEANUP:  Pass the scene matrix to the render function as well and let the
-    // OpenSpaceEngine decide whether it wants to apply it or not
-    OsEng.render(projectionMatrix, viewMatrix);
+    if (SgctEngine->isMaster()) {
+        OsEng.render(viewMatrix, projectionMatrix);
+    }
+    else {
+        glm::mat4 sceneMatrix = SgctEngine->getModelMatrix();
+        OsEng.render(viewMatrix * sceneMatrix, projectionMatrix);
+    }
     LTRACE("main::mainRenderFunc(end)");
 }
 
@@ -195,7 +188,7 @@ void mainPostDrawFunc() {
 
 #ifdef OPENVR_SUPPORT
 	if (FirstOpenVRWindow) {
-		//Copy the first OpenVR window to the HMD
+		// Copy the first OpenVR window to the HMD
 		sgct::SGCTOpenVR::copyWindowToHMD(FirstOpenVRWindow);
 	}
 #endif
@@ -242,9 +235,11 @@ void mainMousePosCallback(double x, double y) {
 }
 
 void mainMouseScrollCallback(double posX, double posY) {
+    LTRACE("main::mainMouseScrollCallback(begin");
     if (SgctEngine->isMaster()) {
         OsEng.mouseScrollWheelCallback(posY);
     }
+    LTRACE("main::mainMouseScrollCallback(end)");
 }
 
 void mainCharCallback(unsigned int codepoint, int mods) {
@@ -273,28 +268,30 @@ void mainLogCallback(const char* msg) {
         return;
     }
     // Remove the trailing \n that is passed along
-    LINFOC("SGCT", message.substr(0, std::max<size_t>(message.size() - 1, 0)));
+    LINFOC("SGCT", message.substr(0, message.size() - 1));
 }
 
 int main_main(int argc, char** argv) {
     std::pair<int, int> glVersion = supportedOpenGLVersion();
     
-    // create the OpenSpace engine and get arguments for the sgct engine
+    // Create the OpenSpace engine and get arguments for the SGCT engine
     // @CLEANUP:  Replace the return valua with throwing an exception --abock
     std::vector<std::string> sgctArguments;
-    bool success = openspace::OpenSpaceEngine::create(
+    bool requestQuit = false;
+    openspace::OpenSpaceEngine::create(
         argc, argv,
         std::make_unique<openspace::SGCTWindowWrapper>(),
-        sgctArguments
+        sgctArguments,
+        requestQuit
     );
     
-    if (!success) {
-        return EXIT_FAILURE;
+    if (requestQuit) {
+        return EXIT_SUCCESS;
     }
     
     LINFO("Detected OpenGL version: " << glVersion.first << "." << glVersion.second);
     
-    // create sgct engine c arguments
+    // Create sgct engine c arguments
     int newArgc = static_cast<int>(sgctArguments.size());
     
     char** newArgv = new char*[newArgc];
@@ -315,7 +312,7 @@ int main_main(int argc, char** argv) {
     LDEBUG("Creating SGCT Engine");
     SgctEngine = new sgct::Engine(newArgc, newArgv);
     
-    // deallocate sgct c arguments
+    // Deallocate sgct c arguments
     delete[] newArgv;
     
     // Bind functions
@@ -336,12 +333,12 @@ int main_main(int argc, char** argv) {
     
     sgct::MessageHandler::instance()->setNotifyLevel(sgct::MessageHandler::NOTIFY_ALL);
     
-    // set encode and decode functions
+    // Set encode and decode functions
     // NOTE: starts synchronizing before init functions
     sgct::SharedData::instance()->setEncodeFunction(mainEncodeFun);
     sgct::SharedData::instance()->setDecodeFunction(mainDecodeFun);
     
-    // try to open a window
+    // Try to open a window
     LDEBUG("Initialize SGCT Engine");
     std::map<std::pair<int, int>, sgct::Engine::RunMode> versionMapping = {
         { { 3, 3 }, sgct::Engine::RunMode::OpenGL_3_3_Core_Profile },
@@ -360,14 +357,13 @@ int main_main(int argc, char** argv) {
     auto cleanup = [&](){
         OsEng.deinitialize();
         
-        // clear function bindings to avoid crash after destroying the OpenSpace Engine
+        // Clear function bindings to avoid crash after destroying the OpenSpace Engine
         sgct::MessageHandler::instance()->setLogToCallback(false);
         sgct::MessageHandler::instance()->setLogCallback(nullptr);
         
         LDEBUG("Destroying OpenSpaceEngine");
         openspace::OpenSpaceEngine::destroy();
         
-        // Clean up (deallocate)
         LDEBUG("Destroying SGCT Engine");
         delete SgctEngine;
     };
@@ -405,21 +401,19 @@ int main(int argc, char** argv) {
         return main_main(argc, argv);
     }
     catch (const ghoul::RuntimeError& e) {
-        // Write out all of the information about the exception, flush the logs, and throw
+        // Write out all of the information about the exception and flush the logs
         LFATALC(e.component, e.message);
         LogMgr.flushLogs();
-        throw;
+        return EXIT_FAILURE;
     }
     catch (const std::exception& e) {
-        // Write out all of the information about the exception, flush the logs, and throw
         LFATALC("Exception", e.what());
         LogMgr.flushLogs();
-        throw;
+        return EXIT_FAILURE;
     }
     catch (...) {
-        // Write out all of the information about the exception, flush the logs, and throw
         LFATALC("Exception", "Unknown exception");
         LogMgr.flushLogs();
-        throw;
+        return EXIT_FAILURE;
     }
 }

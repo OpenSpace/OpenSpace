@@ -468,7 +468,8 @@ void RenderEngine::updateFade() {
     }
 }
 
-void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix){
+void RenderEngine::render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+{
     LTRACE("RenderEngine::render(begin)");
     _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
     _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);

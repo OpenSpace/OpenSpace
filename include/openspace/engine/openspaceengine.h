@@ -36,39 +36,43 @@
 #include <vector>
 
 namespace ghoul {
+    
 class Dictionary;
+
 namespace cmdparser { class CommandlineParser; }
 namespace fontrendering { class FontManager; }
-}
+
+} // namespace ghoul
 
 namespace openspace {
 
 class ConfigurationManager;
 class DownloadManager;
-class LuaConsole;
-class NetworkEngine;
 class GUI;
-class RenderEngine;
+class LuaConsole;
 class ModuleEngine;
-class WindowWrapper;
-class SettingsEngine;
-class TimeManager;
-class SyncEngine;
+class NetworkEngine;
 class ParallelConnection;
+class RenderEngine;
+class SettingsEngine;
+class SyncEngine;
+class TimeManager;
+class WindowWrapper;
 
 namespace interaction { class InteractionHandler; }
 namespace gui { class GUI; }
-//namespace scripting { class ScriptEngine; }
 namespace properties { class PropertyOwner; }
-namespace scripting { struct LuaLibrary; }
-namespace scripting { class ScriptScheduler; }
-namespace scripting { class ScriptEngine; }
- 
+namespace scripting {
+    struct LuaLibrary;
+    class ScriptEngine;
+    class ScriptScheduler;
+} // namespace scripting
+
 class OpenSpaceEngine {
 public:
-    static bool create(int argc, char** argv,
+    static void create(int argc, char** argv,
         std::unique_ptr<WindowWrapper> windowWrapper,
-        std::vector<std::string>& sgctArguments);
+        std::vector<std::string>& sgctArguments, bool& requestClose);
     static void destroy();
     static bool isInitialized();
     static OpenSpaceEngine& ref();
@@ -76,30 +80,13 @@ public:
     double runTime();
     void setRunTime(double t);
 
-    // Guaranteed to return a valid pointer
-    ConfigurationManager& configurationManager();
-    interaction::InteractionHandler& interactionHandler();
-    RenderEngine& renderEngine();
-    scripting::ScriptEngine& scriptEngine();
-    scripting::ScriptScheduler& scriptScheduler();
-    NetworkEngine& networkEngine();
-    LuaConsole& console();
-    ModuleEngine& moduleEngine();
-    ParallelConnection& parallelConnection();
-    properties::PropertyOwner& globalPropertyOwner();
-    WindowWrapper& windowWrapper();
-    ghoul::fontrendering::FontManager& fontManager();
-    DownloadManager& downloadManager();
-    TimeManager& timeManager();
-    SettingsEngine& settingsEngine();
-
-    // SGCT callbacks
-    bool initialize();
-    bool initializeGL();
+    // callbacks
+    void initialize();
+    void initializeGL();
     void deinitialize();
     void preSynchronization();
     void postSynchronizationPreDraw();
-    void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
+    void render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
     void postDraw();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier mod);
@@ -109,22 +96,35 @@ public:
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
-
+    
     void enableBarrier();
     void disableBarrier();
-
+    
     void writeDocumentation();
     void toggleShutdownMode();
     
-    bool useBusyWaitForDecode();
-    bool logSGCTOutOfOrderErrors();
-
     void runPostInitializationScripts(const std::string& sceneDescription);
-
+    
+    
+    // Guaranteed to return a valid pointer
+    ConfigurationManager& configurationManager();
+    LuaConsole& console();
+    DownloadManager& downloadManager();
+    ModuleEngine& moduleEngine();
+    NetworkEngine& networkEngine();
+    ParallelConnection& parallelConnection();
+    RenderEngine& renderEngine();
+    SettingsEngine& settingsEngine();
+    TimeManager& timeManager();
+    WindowWrapper& windowWrapper();
+    ghoul::fontrendering::FontManager& fontManager();
+    interaction::InteractionHandler& interactionHandler();
+    properties::PropertyOwner& globalPropertyOwner();
+    scripting::ScriptEngine& scriptEngine();
+    scripting::ScriptScheduler& scriptScheduler();
 
     
     // This method is only to be called from Modules
-
     enum class CallbackOption {
         Initialize = 0,  // Callback for the end of the initialization
         Deinitialize,    // Callback for the end of the deinitialization
@@ -186,39 +186,38 @@ public:
     void registerModuleMouseScrollWheelCallback(std::function<bool (double)> function);
     
     /**
-    * Returns the Lua library that contains all Lua functions available to affect the
-    * application.
-    */
+     * Returns the Lua library that contains all Lua functions available to affect the
+     * application.
+     */
     static scripting::LuaLibrary luaLibrary();
 
 private:
     OpenSpaceEngine(std::string programName, std::unique_ptr<WindowWrapper> windowWrapper);
-    ~OpenSpaceEngine();
+    ~OpenSpaceEngine() = default;
 
     void clearAllWindows();
     void gatherCommandlineArguments();
     void loadFonts();
-    void runScripts(const ghoul::Dictionary& scripts);
     void runPreInitializationScripts(const std::string& sceneDescription);
     void configureLogging();
     
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
-    std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
-    std::unique_ptr<RenderEngine> _renderEngine;
-    std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
-    std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
-    std::unique_ptr<NetworkEngine> _networkEngine;
-    std::unique_ptr<SyncEngine> _syncEngine;
-    std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
+    std::unique_ptr<DownloadManager> _downloadManager;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
-    std::unique_ptr<SettingsEngine> _settingsEngine;
-    std::unique_ptr<TimeManager> _timeManager;
-    std::unique_ptr<DownloadManager> _downloadManager;
+    std::unique_ptr<NetworkEngine> _networkEngine;
     std::unique_ptr<ParallelConnection> _parallelConnection;
+    std::unique_ptr<RenderEngine> _renderEngine;
+    std::unique_ptr<SettingsEngine> _settingsEngine;
+    std::unique_ptr<SyncEngine> _syncEngine;
+    std::unique_ptr<TimeManager> _timeManager;
     std::unique_ptr<WindowWrapper> _windowWrapper;
+    std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
+    std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
+    std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
+    std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
@@ -241,24 +240,24 @@ private:
         std::vector<std::function<bool (MouseButton, MouseAction)>> mouseButton;
         std::vector<std::function<void (double, double)>> mousePosition;
         std::vector<std::function<bool (double)>> mouseScrollWheel;
-        
-        
-        
-        
     } _moduleCallbacks;
     
     double _runTime;
 
-    // Whether the application is currently in shutdown mode (i.e. counting down the timer
-    // and closing it at '0'
-    bool _isInShutdownMode;
-    // The total amount of time the application will wait before actually shutting down
-    float _shutdownWait;
-    // The current state of the countdown; if it reaches '0', the application will close
-    float _shutdownCountdown;
+    // Structure that is responsible for the delayed shutdown of the application
+    struct {
+        // Whether the application is currently in shutdown mode (i.e. counting down the
+        // timer and closing it at '0'
+        bool inShutdown;
+        // Total amount of time the application will wait before actually shutting down
+        float waitTime;
+        // Current state of the countdown; if it reaches '0', the application will
+        // close
+        float timer;
+    } _shutdown;
 
     // The first frame might take some more time in the update loop, so we need to know to
-    // disable the synchronization; otherwise a hardware sync will kill us after 1 sec
+    // disable the synchronization; otherwise a hardware sync will kill us after 1 minute
     bool _isFirstRenderingFirstFrame;
 
     static OpenSpaceEngine* _engine;
