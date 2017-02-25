@@ -162,6 +162,10 @@ bool SGCTWindowWrapper::hasGuiWindow() const {
 bool SGCTWindowWrapper::isGuiWindow() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->getName() == GuiWindowName;
 }
+    
+bool SGCTWindowWrapper::isMaster() const {
+    return sgct::Engine::instance()->isMaster();
+}
 
 bool SGCTWindowWrapper::isSwapGroupMaster() const {
     return sgct::Engine::instance()->getCurrentWindowPtr()->isSwapGroupMaster();

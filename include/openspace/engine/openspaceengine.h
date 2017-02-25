@@ -73,8 +73,6 @@ public:
     static bool isInitialized();
     static OpenSpaceEngine& ref();
 
-    bool isMaster();
-    void setMaster(bool master);
     double runTime();
     void setRunTime(double t);
 
@@ -249,7 +247,6 @@ private:
         
     } _moduleCallbacks;
     
-    bool _isMaster;
     double _runTime;
 
     // Whether the application is currently in shutdown mode (i.e. counting down the timer

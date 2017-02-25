@@ -83,10 +83,6 @@ std::pair<int, int> supportedOpenGLVersion() {
 void mainInitFunc() {
     LTRACE("main::mainInitFunc(begin)");
 
-    // Is this node the master?
-    // @CLEANUP:  This can be removed and replaced with a call to a windowwrapper ---abock
-    OsEng.setMaster(SgctEngine->isMaster());
-    
     LDEBUG("Initializing OpenSpace Engine");
     // @CLEANUP:  The return value should be replaced with an exception ---abock
     bool success = OsEng.initialize();
@@ -210,7 +206,7 @@ void mainPostDrawFunc() {
 
 void mainExternalControlCallback(const char* receivedChars, int size) {
     LTRACE("main::mainExternalControlCallback(begin)");
-    if (OsEng.isMaster()) {
+    if (SgctEngine->isMaster()) {
         OsEng.externalControlCallback(receivedChars, size, 0);
     }
     LTRACE("main::mainExternalControlCallback(end)");
@@ -218,7 +214,7 @@ void mainExternalControlCallback(const char* receivedChars, int size) {
 
 void mainKeyboardCallback(int key, int, int action, int mods) {
     LTRACE("main::mainKeyboardCallback(begin)");
-    if (OsEng.isMaster()) {
+    if (SgctEngine->isMaster()) {
         OsEng.keyboardCallback(
             openspace::Key(key),
             openspace::KeyModifier(mods),
@@ -230,7 +226,7 @@ void mainKeyboardCallback(int key, int, int action, int mods) {
 
 void mainMouseButtonCallback(int key, int action) {
     LTRACE("main::mainMouseButtonCallback(begin)");
-    if (OsEng.isMaster()) {
+    if (SgctEngine->isMaster()) {
         OsEng.mouseButtonCallback(
             openspace::MouseButton(key),
             openspace::MouseAction(action)
@@ -240,19 +236,19 @@ void mainMouseButtonCallback(int key, int action) {
 }
 
 void mainMousePosCallback(double x, double y) {
-    if (OsEng.isMaster()) {
+    if (SgctEngine->isMaster()) {
         OsEng.mousePositionCallback(x, y);
     }
 }
 
 void mainMouseScrollCallback(double posX, double posY) {
-    if (OsEng.isMaster()) {
+    if (SgctEngine->isMaster()) {
         OsEng.mouseScrollWheelCallback(posY);
     }
 }
 
 void mainCharCallback(unsigned int codepoint, int mods) {
-    if (OsEng.isMaster()) {
+    if (SgctEngine->isMaster()) {
         OsEng.charCallback(codepoint, openspace::KeyModifier(mods));
     }
 }

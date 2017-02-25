@@ -129,6 +129,10 @@ bool WindowWrapper::isGuiWindow() const {
     return false;
 }
 
+bool WindowWrapper::isMaster() const {
+    return false;
+}
+
 bool WindowWrapper::isSwapGroupMaster() const {
     return false;
 }

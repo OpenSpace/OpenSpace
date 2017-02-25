@@ -175,6 +175,13 @@ public:
      * \return Whether the current rendering window is GUI-only
      */
     virtual bool isGuiWindow() const;
+    
+    /**
+     * Returns <code>true</code> if this application is the master for a clustered
+     * environment.
+     * \return Whether this applicaiton is the master for a clustered environment.
+     */
+    virtual bool isMaster() const;
 
     /**
     * Returns <code>true</code> if the current rendering window is using swap groups.

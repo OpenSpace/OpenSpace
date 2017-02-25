@@ -472,13 +472,15 @@ void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& vi
     LTRACE("RenderEngine::render(begin)");
     _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
     _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
+    
+    WindowWrapper& wrapper = OsEng.windowWrapper();
 
-    if (!(OsEng.isMaster() && _disableMasterRendering) && !OsEng.windowWrapper().isGuiWindow()) {
+    if (!(wrapper.isMaster() && _disableMasterRendering) && !wrapper.isGuiWindow()) {
         _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);
     }
 
     // Print some useful information on the master viewport
-    if (OsEng.isMaster() && OsEng.windowWrapper().isSimpleRendering()) {
+    if (wrapper.isMaster() && wrapper.isSimpleRendering()) {
         renderInformation();
     }
 
@@ -487,7 +489,7 @@ void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& vi
         OsEng.windowWrapper().viewportPixelCoordinates().w / 3
         );
 
-    if(_showFrameNumber) {
+    if (_showFrameNumber) {
         RenderFontCr(*_fontBig, penPosition, "%i", _frameNumber);
     }
     
@@ -495,8 +497,9 @@ void RenderEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& vi
 
     
     for (auto screenSpaceRenderable : _screenSpaceRenderables) {
-        if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady())
+        if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady()) {
             screenSpaceRenderable->render();
+        }
     }
     LTRACE("RenderEngine::render(end)");
 }

@@ -139,7 +139,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _parallelConnection(new ParallelConnection)
     , _windowWrapper(std::move(windowWrapper))
     , _globalPropertyNamespace(new properties::PropertyOwner)
-    , _isMaster(false)
     , _runTime(0.0)
     , _isInShutdownMode(false)
     , _shutdownCountdown(0.f)
@@ -804,14 +803,6 @@ bool OpenSpaceEngine::initializeGL() {
     return success;
 }
 
-bool OpenSpaceEngine::isMaster() {
-    return _isMaster;
-}
-
-void OpenSpaceEngine::setMaster(bool master) {
-    _isMaster = master;
-}
-    
 double OpenSpaceEngine::runTime() {
     return _runTime;
 }
@@ -827,8 +818,10 @@ void OpenSpaceEngine::preSynchronization() {
         _windowWrapper->setSynchronization(false);
     }
     
-    _syncEngine->presync(_isMaster);
-    if (_isMaster) {
+    bool master = _windowWrapper->isMaster();
+    
+    _syncEngine->presync(master);
+    if (master) {
         double dt = _windowWrapper->averageDeltaTime();
         _timeManager->preSynchronization(dt);
 
@@ -855,7 +848,8 @@ void OpenSpaceEngine::preSynchronization() {
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
-    _syncEngine->postsync(_isMaster);
+    bool master = _windowWrapper->isMaster();
+    _syncEngine->postsync(master);
 
     if (_isInShutdownMode) {
         if (_shutdownCountdown <= 0.f) {
@@ -870,7 +864,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     _renderEngine->updateScreenSpaceRenderables();
     _renderEngine->updateShaderPrograms();
     
-    if (!_isMaster) {
+    if (!master) {
         _renderEngine->camera()->invalidateCache();
     }   
 
@@ -938,75 +932,65 @@ void OpenSpaceEngine::postDraw() {
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
-    if (_isMaster) {
-        for (const auto& func : _moduleCallbacks.keyboard) {
-            bool consumed = func(key, mod, action);
-            if (consumed) {
-                return;
-            }
+    for (const auto& func : _moduleCallbacks.keyboard) {
+        bool consumed = func(key, mod, action);
+        if (consumed) {
+            return;
         }
-        
-        if (key == _console->commandInputButton()) {
-            if (action == KeyAction::Press) {
-                _console->toggleMode();
-            }
-        } else if (!_console->isVisible()) {
-            _interactionHandler->keyboardCallback(key, mod, action);
-        } else {
-            _console->keyboardCallback(key, mod, action);
+    }
+    
+    if (key == _console->commandInputButton()) {
+        if (action == KeyAction::Press) {
+            _console->toggleMode();
         }
+    } else if (!_console->isVisible()) {
+        _interactionHandler->keyboardCallback(key, mod, action);
+    } else {
+        _console->keyboardCallback(key, mod, action);
     }
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
-    if (_isMaster) {
-        for (const auto& func : _moduleCallbacks.character) {
-            bool consumed = func(codepoint, modifier);
-            if (consumed) {
-                return;
-            }
+    for (const auto& func : _moduleCallbacks.character) {
+        bool consumed = func(codepoint, modifier);
+        if (consumed) {
+            return;
         }
+    }
 
-        if (_console->isVisible()) {
-            _console->charCallback(codepoint, modifier);
-        }
+    if (_console->isVisible()) {
+        _console->charCallback(codepoint, modifier);
     }
 }
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action) {
-    if (_isMaster) {
-        for (const auto& func : _moduleCallbacks.mouseButton) {
-            bool consumed = func(button, action);
-            if (consumed) {
-                return;
-            }
+    for (const auto& func : _moduleCallbacks.mouseButton) {
+        bool consumed = func(button, action);
+        if (consumed) {
+            return;
         }
-        
-        _interactionHandler->mouseButtonCallback(button, action);
     }
+    
+    _interactionHandler->mouseButtonCallback(button, action);
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y) {
-    if (_isMaster) {
-        for (const auto& func : _moduleCallbacks.mousePosition) {
-            func(x, y);
-        }
-
-        _interactionHandler->mousePositionCallback(x, y);
+    for (const auto& func : _moduleCallbacks.mousePosition) {
+        func(x, y);
     }
+
+    _interactionHandler->mousePositionCallback(x, y);
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
-    if (_isMaster) {
-        for (const auto& func : _moduleCallbacks.mouseScrollWheel) {
-            bool consumed = func(pos);
-            if (consumed) {
-                return;
-            }
+    for (const auto& func : _moduleCallbacks.mouseScrollWheel) {
+        bool consumed = func(pos);
+        if (consumed) {
+            return;
         }
-        
-        _interactionHandler->mouseScrollWheelCallback(pos);
     }
+    
+    _interactionHandler->mouseScrollWheelCallback(pos);
 }
 
 void OpenSpaceEngine::encode() {

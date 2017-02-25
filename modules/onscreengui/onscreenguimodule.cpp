@@ -105,7 +105,7 @@ OnScreenGUIModule::OnScreenGUIModule()
         OpenSpaceEngine::CallbackOption::PostSyncPreDraw,
         [](){
             WindowWrapper& wrapper = OsEng.windowWrapper();
-            if (OsEng.isMaster() && wrapper.isRegularRendering()) {
+            if (wrapper.isMaster() && wrapper.isRegularRendering()) {
                 glm::vec2 mousePosition = wrapper.mousePosition();
                 //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
                 glm::ivec2 windowSize = wrapper.currentWindowSize();
@@ -130,7 +130,7 @@ OnScreenGUIModule::OnScreenGUIModule()
         [](){
             WindowWrapper& wrapper = OsEng.windowWrapper();
             bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
-            if (OsEng.isMaster() && wrapper.isRegularRendering() && showGui) {
+            if (wrapper.isMaster() && wrapper.isRegularRendering() && showGui) {
                 gui.endFrame();
             }
         }
