@@ -74,7 +74,6 @@ public:
         std::unique_ptr<WindowWrapper> windowWrapper,
         std::vector<std::string>& sgctArguments, bool& requestClose);
     static void destroy();
-    static bool isInitialized();
     static OpenSpaceEngine& ref();
 
     double runTime();
@@ -104,8 +103,7 @@ public:
     void toggleShutdownMode();
     
     void runPostInitializationScripts(const std::string& sceneDescription);
-    
-    
+
     // Guaranteed to return a valid pointer
     ConfigurationManager& configurationManager();
     LuaConsole& console();
@@ -137,34 +135,7 @@ public:
     };
     
     // Registers a callback for a specific CallbackOption
-    void registerModuleCallback(CallbackOption option, std::function<void()> function) {
-        switch (option) {
-            case CallbackOption::Initialize:
-                _moduleCallbacks.initialize.push_back(std::move(function));
-                break;
-            case CallbackOption::Deinitialize:
-                _moduleCallbacks.deinitialize.push_back(std::move(function));
-                break;
-            case CallbackOption::InitializeGL:
-                _moduleCallbacks.initializeGL.push_back(std::move(function));
-                break;
-            case CallbackOption::DeinitializeGL:
-                _moduleCallbacks.deinitializeGL.push_back(std::move(function));
-                break;
-            case CallbackOption::PreSync:
-                _moduleCallbacks.preSync.push_back(std::move(function));
-                break;
-            case CallbackOption::PostSyncPreDraw:
-                _moduleCallbacks.postSyncPreDraw.push_back(std::move(function));
-                break;
-            case CallbackOption::Render:
-                _moduleCallbacks.render.push_back(std::move(function));
-                break;
-            case CallbackOption::PostDraw:
-                _moduleCallbacks.postDraw.push_back(std::move(function));
-                break;
-        }
-    }
+    void registerModuleCallback(CallbackOption option, std::function<void()> function);
     
     // Registers a callback that is called when a new keyboard event is received
     void registerModuleKeyboardCallback(
@@ -192,10 +163,10 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
 private:
-    OpenSpaceEngine(std::string programName, std::unique_ptr<WindowWrapper> windowWrapper);
+    OpenSpaceEngine(std::string programName,
+        std::unique_ptr<WindowWrapper> windowWrapper);
     ~OpenSpaceEngine() = default;
 
-    void clearAllWindows();
     void gatherCommandlineArguments();
     void loadFonts();
     void runPreInitializationScripts(const std::string& sceneDescription);

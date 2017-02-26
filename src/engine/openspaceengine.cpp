@@ -404,7 +404,7 @@ void OpenSpaceEngine::initialize() {
     // clear the screen so the user don't have to see old buffer contents from the
     // graphics card
     LDEBUG("Clearing all Windows");
-    clearAllWindows();
+    _windowWrapper->clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
     LDEBUG("Adding system components");
     // Detect and log OpenCL and OpenGL versions and available devices
@@ -614,14 +614,6 @@ void OpenSpaceEngine::writeDocumentation() {
 
         FactoryManager::ref().writeDocumentation(absPath(file), type);
     }
-}
-
-bool OpenSpaceEngine::isInitialized() {
-    return _engine != nullptr;
-}
-
-void OpenSpaceEngine::clearAllWindows() {
-    _windowWrapper->clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
 }
 
 void OpenSpaceEngine::gatherCommandlineArguments() {
@@ -1104,7 +1096,40 @@ void OpenSpaceEngine::enableBarrier() {
 void OpenSpaceEngine::disableBarrier() {
     _windowWrapper->setBarrier(false);
 }
-    
+
+// Registers a callback for a specific CallbackOption
+void OpenSpaceEngine::registerModuleCallback(OpenSpaceEngine::CallbackOption option,
+                                             std::function<void()> function)
+{
+    switch (option) {
+        case CallbackOption::Initialize:
+            _moduleCallbacks.initialize.push_back(std::move(function));
+            break;
+        case CallbackOption::Deinitialize:
+            _moduleCallbacks.deinitialize.push_back(std::move(function));
+            break;
+        case CallbackOption::InitializeGL:
+            _moduleCallbacks.initializeGL.push_back(std::move(function));
+            break;
+        case CallbackOption::DeinitializeGL:
+            _moduleCallbacks.deinitializeGL.push_back(std::move(function));
+            break;
+        case CallbackOption::PreSync:
+            _moduleCallbacks.preSync.push_back(std::move(function));
+            break;
+        case CallbackOption::PostSyncPreDraw:
+            _moduleCallbacks.postSyncPreDraw.push_back(std::move(function));
+            break;
+        case CallbackOption::Render:
+            _moduleCallbacks.render.push_back(std::move(function));
+            break;
+        case CallbackOption::PostDraw:
+            _moduleCallbacks.postDraw.push_back(std::move(function));
+            break;
+        default:
+            ghoul_assert(false, "Missing case label");
+    }
+}
     
 void OpenSpaceEngine::registerModuleKeyboardCallback(
                                std::function<bool (Key, KeyModifier, KeyAction)> function)
