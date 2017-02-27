@@ -698,24 +698,18 @@ return {
             -- Dawn Trail Module
     {   
         Name = "DawnTrail2",
-        Parent = "Root",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "DAWN",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            -- 3 Dummy values for compilation:
-            TropicalOrbitPeriod = 10000.0,
-            EarthOrbitRatio = 1,
-            DayLength = 50,
-            -- End of Dummy values
-            RGB = { 0.7, 0.4, 0.9 },
-            Textures = {
-                Type = "simple",
-                Color = "textures/glare.png"
-            },  
+            Type = "RenderableTrailTrajectory",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "DAWN",
+                Observer = "SUN",
+            },
+            Color = { 0.7, 0.4, 0.9 },
             StartTime = "2007 SEP 26 13:28:00",
-            EndTime = "2012 SEP 12 12:00:00"
+            EndTime = "2012 SEP 12 12:00:00",
+            SampleInterval = 3600 * 24
         },
     },
  --

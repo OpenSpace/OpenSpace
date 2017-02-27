@@ -51,7 +51,7 @@ local OsirisRexKernels = {
     "${SPICE}/OsirisRexKernels/background/ik/orx_ola_v00.ti",
     "${SPICE}/OsirisRexKernels/background/ik/orx_ovirs_v00.ti",
     "${SPICE}/OsirisRexKernels/background/ik/orx_stowcam_v00.ti",
-    "${SPICE}/OsirisRexKernels/background/lsk/naif0011.tls",
+    -- "${SPICE}/OsirisRexKernels/background/lsk/naif0011.tls",
     "${SPICE}/OsirisRexKernels/background/pck/bennu_SPH250m.tpc",
     "${SPICE}/OsirisRexKernels/background/pck/bennu_v10.tpc",
 
@@ -146,9 +146,12 @@ local OsirisRexKernels = {
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case05_20negLatitude.wmv")
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case08_40negLatitude.wmv")
     --openspace.spice.loadKernel("${SPICE}/OsirisRexKernels/Nominal_Observations_Science/08_Recon/225m_Sortie_v2/Case11_60negLatitude.wmv")
-
-    KernelCase
 }
+
+-- Append the CaseDependentKernels at the end of the OsirisRexKernels set
+for i = 0, #CaseDependentKernels do
+    OsirisRexKernels[#OsirisRexKernels + 1] = CaseDependentKernels[i]
+end
 
 
 return {
@@ -339,26 +342,17 @@ return {
         Name = "OsirisRexTrailEarth",
         Parent = "Earth",
         Renderable = {
-            Type = "RenderableTrailNew",
-            -- Spice
-            Body = "OSIRIS-REX",
-            Frame = "IAU_EARTH",
+            Type = "RenderableTrailTrajectory",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "OSIRIS-REX",
+                Frame = "IAU_EARTH",
             Observer = "EARTH",
-            -- Optional rendering properties
-            LineColor = { 0.9, 0.9, 0.0 },
-            PointColor = { 0.9, 0.9, 0.0 },
-            LineFade = 0.0, -- [0,1]
-            RenderPart = 1,
-            LineWidth = 2,
-            ShowTimeStamps = false,
-            RenderFullTrail = false,
-            -- Time interval
-            TimeRange = {
-                Start = "2016 SEP 8 23:05:00.50",
-                End = "2016 SEP 9 00:05:00",
             },
-            SampleDeltaTime = 60, -- Seconds between each point
-            SubSamples = 59, 
+            Color = { 0.9, 0.9, 0.0 },
+            StartTime = "2016 SEP 8 23:05:00.50",
+            EndTime = "2016 SEP 9 00:05:00",
+            SampleInterval = 60,
         },
     },
 
@@ -367,26 +361,16 @@ return {
         Name = "OsirisRexTrailSolarSystem",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrailNew",
-            -- Spice
-            Body = "OSIRIS-REX",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            -- Optional rendering properties
-            LineColor = { 0.2, 0.9, 0.2 },
-            PointColor = { 0.2, 0.9, 0.2 },
-            LineFade = 0.0, -- [0,1]
-            RenderPart = 0.13,
-            LineWidth = 2,
-            ShowTimeStamps = false,
-            RenderFullTrail = false,
-            -- Time interval
-            TimeRange = {
-                Start = "2016 SEP 8 23:05:00.50",
-                End = "2023 SEP 24 12:00:00",
+            Type = "RenderableTrailTrajectory",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "OSIRIS-REX",
+                Observer = "SUN",
             },
-            SampleDeltaTime = 3600, -- Seconds between each point
-            SubSamples = 0, 
+            Color = { 0.2, 0.9, 0.2 },
+            StartTime = "2016 SEP 8 23:05:00.50",
+            EndTime = "2023 SEP 24 12:00:00",
+            SampleInterval = 3600,
         },
     },
 
@@ -395,28 +379,16 @@ return {
         Name = "OsirisRexTrailBennu",
         Parent = "BennuBarycenter",
         Renderable = {
-            Type = "RenderableTrailNew",
-            -- Spice
-            Body = "OSIRIS-REX",
-            Frame = "GALACTIC",
-            Observer = BENNU_BODY,
-            -- Optional rendering properties
-            LineColor = { 0.9, 0.2, 0.9 },
-            PointColor = { 0.9, 0.2, 0.9 },
-            LineFade = 0.5, -- [0,1]
-            RenderPart = 0.06,
-            LineWidth = 2,
-            ShowTimeStamps = false,
-            RenderFullTrail = false,
-            -- Time interval
-            TimeRange = {
-                Start = "2016 SEP 8 23:05:00.50",
-                End = "2023 SEP 24 12:00:00",
+            Type = "RenderableTrailTrajectory",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "OSIRIS-REX",
+                Observer = BENNU_BODY,
             },
-            SampleDeltaTime = 3600, -- Seconds between each point
-            SubSamples = 3, 
+            Color = { 0.9, 0.2, 0.9 },
+            StartTime = "2016 SEP 8 23:05:00.50",
+            EndTime = "2023 SEP 24 12:00:00",
+            SampleInterval = 3600,
         },
     },
-
-
 }

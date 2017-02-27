@@ -36,6 +36,10 @@
 namespace openspace {
 namespace gui {
 
+GuiOriginComponent::GuiOriginComponent()
+    : GuiComponent("Origin")
+{}
+
 void GuiOriginComponent::render() {
     SceneGraphNode* currentFocus = OsEng.interactionHandler().focusNode();
 

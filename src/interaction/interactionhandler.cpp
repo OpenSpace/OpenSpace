@@ -28,6 +28,7 @@
 #include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/interactionmode.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
@@ -37,9 +38,12 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
 
+
 #include <glm/gtx/quaternion.hpp>
 
-//#include <modules/globebrowsing/globes/renderableglobe.h>
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#endif
 
 #include <ghoul/glm.h>
 
@@ -72,7 +76,7 @@ InteractionHandler::InteractionHandler()
     , _rotationalFriction("rotationalFriction", "Rotational Friction", true)
     , _horizontalFriction("horizontalFriction", "Horizontal Friction", true)
     , _verticalFriction("verticalFriction", "Vertical Friction", true)
-    , _sensitivity("sensitivity", "Sensitivity", 0.002, 0.0001, 0.02)
+    , _sensitivity("sensitivity", "Sensitivity", 0.5, 0.001, 1)
     , _rapidness("rapidness", "Rapidness", 1, 0.1, 60)
 {
     setName("Interaction");
@@ -94,7 +98,7 @@ InteractionHandler::InteractionHandler()
     // Create the interactionModes
     _inputState = std::make_unique<InputState>();
     // Inject the same mouse states to both orbital and global interaction mode
-    _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(0.002, 1);
+    _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(_sensitivity * pow(10.0,-4), 1);
     _interactionModes.insert(
         std::pair<std::string, std::shared_ptr<InteractionMode>>(
             "Orbital",
@@ -125,7 +129,7 @@ InteractionHandler::InteractionHandler()
         _mouseStates->setVerticalFriction(_verticalFriction);
     });
     _sensitivity.onChange([&]() {
-        _mouseStates->setSensitivity(_sensitivity);
+        _mouseStates->setSensitivity(_sensitivity * pow(10.0,-4));
     });
     _rapidness.onChange([&]() {
         _mouseStates->setVelocityScaleFactor(_rapidness);
@@ -175,30 +179,7 @@ void InteractionHandler::setCamera(Camera* camera) {
 
 void InteractionHandler::resetCameraDirection() {
     LINFO("Setting camera direction to point at focus node.");
-
-    glm::dquat rotation = _camera->rotationQuaternion();
-    glm::dvec3 focusPosition = focusNode()->worldPosition();
-    glm::dvec3 cameraPosition = _camera->positionVec3();
-    glm::dvec3 lookUpVector = _camera->lookUpVectorWorldSpace();
-
-    glm::dvec3 directionToFocusNode = glm::normalize(focusPosition - cameraPosition);
-
-    // To make sure the lookAt function won't fail
-    static const double epsilon = 0.000001;
-    if (glm::dot(lookUpVector, directionToFocusNode) > 1.0 - epsilon) {
-        // Change the look up vector a little bit
-        lookUpVector = glm::normalize(lookUpVector + glm::dvec3(epsilon));
-    }
-
-    // Create the rotation to look at  focus node
-    glm::dmat4 lookAtMat = glm::lookAt(
-        glm::dvec3(0, 0, 0),
-        directionToFocusNode,
-        lookUpVector);
-    glm::dquat rotationLookAtFocusNode = normalize(quat_cast(inverse(lookAtMat)));
-
-    // Update camera Rotation
-    _camera->setRotation(rotationLookAtFocusNode);
+    _currentInteractionMode->rotateToFocusNodeInterpolator().start();
 }
 
 void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> interactionMode) {
@@ -226,6 +207,35 @@ void InteractionHandler::setInteractionMode(const std::string& interactionModeKe
             "' is not a valid interaction mode. Candidates are " << listInteractionModes);
     }
 }
+    
+void InteractionHandler::goToChunk(int x, int y, int level) {
+    std::shared_ptr<GlobeBrowsingInteractionMode> gbim =
+        std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
+    
+    if (gbim) {
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+        gbim->goToChunk(*_camera, globebrowsing::TileIndex(x,y,level), glm::vec2(0.5,0.5), true);
+#endif
+    } else {
+        LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
+    }
+}
+
+void InteractionHandler::goToGeo(double latitude, double longitude) {
+    std::shared_ptr<GlobeBrowsingInteractionMode> gbim =
+    std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
+        
+    if (gbim) {
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+        gbim->goToGeodetic2(
+            *_camera,
+            globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(), true
+        );
+#endif
+    } else {
+        LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
+    }
+}
 
 void InteractionHandler::lockControls() {
 
@@ -241,7 +251,7 @@ void InteractionHandler::updateInputStates(double timeSinceLastUpdate) {
     _currentInteractionMode->updateMouseStatesFromInput(*_inputState, timeSinceLastUpdate);
 }
 
-void InteractionHandler::updateCamera() {
+void InteractionHandler::updateCamera(double deltaTime) {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
 
@@ -250,7 +260,7 @@ void InteractionHandler::updateCamera() {
     }
     else {
         if (_camera && focusNode()) {
-            _currentInteractionMode->updateCameraStateFromMouseStates(*_camera);
+            _currentInteractionMode->updateCameraStateFromMouseStates(*_camera, deltaTime);
             _camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
     }
@@ -590,6 +600,18 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
                 &luascriptfunctions::resetCameraDirection,
                 "void",
                 "Reset the camera direction to point at the focus node"
+            },
+            {
+                "goToChunk",
+                &luascriptfunctions::goToChunk,
+                "void",
+                "Go to chunk with given index x, y, level"
+            },
+            {
+                "goToGeo",
+                &luascriptfunctions::goToGeo,
+                "void",
+                "Go to geographic coordinates latitude and longitude"
             },
         }
     };

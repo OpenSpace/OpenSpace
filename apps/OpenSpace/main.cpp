@@ -29,10 +29,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
-#include <thread>
-
 #include <sgct.h>
+#include <chrono>
+#include <thread>
 
 sgct::Engine* _sgctEngine;
 
@@ -170,7 +169,27 @@ int main(int argc, char** argv) {
 
     // Main loop
     LDEBUG("Starting rendering loop");
-    _sgctEngine->render();
+    try {
+        _sgctEngine->render();
+    }
+    catch (const ghoul::RuntimeError& e) {
+        // Write out all of the information about the exception, flush the logs, and throw
+        LFATALC(e.component, e.message);
+        LogMgr.flushLogs();
+        throw;
+    }
+    catch (const std::exception& e) {
+        // Write out all of the information about the exception, flush the logs, and throw
+        LFATALC("Exception", e.what());
+        LogMgr.flushLogs();
+        throw;
+    }
+    catch (...) {
+        // Write out all of the information about the exception, flush the logs, and throw
+        LFATALC("Exception", "Unknown exception");
+        LogMgr.flushLogs();
+        throw;
+    }
 
     //clear function bindings to avoid crash after destroying the OpenSpace Engine
     sgct::MessageHandler::instance()->setLogToCallback(false);
@@ -216,59 +235,22 @@ void mainInitFunc() {
 
 }
 
-struct FunctionLogKey {
-    char begin, end;
-};
-
-#include <sstream>
-
-
-std::stringstream& operator<<(std::stringstream& o, const FunctionLogKey& l) {
-    o << l.begin << l.end;
-    return o;
-}
-
-
-
-const FunctionLogKey PRE_SYNC = { '1', '2' };
-const FunctionLogKey ENCODE = { 'E', 'e' };
-const FunctionLogKey DECODE = { 'D', 'd' };
-const FunctionLogKey POST_SYNC = { '3', '4' };
-const FunctionLogKey RENDER = { 'R', 'r' };
-const FunctionLogKey POST_DRAW = { 'P', 'p' };
-
-std::stringstream minilog;
-std::stringstream masterlog;
-std::stringstream slavelog;
-
-const std::string EXPECTED_MASTER_LOG = (masterlog << PRE_SYNC << ENCODE << POST_SYNC << RENDER << POST_DRAW).str();
-const std::string EXPECTED_SLAVE_LOG = (slavelog << PRE_SYNC << DECODE << POST_SYNC << RENDER << POST_DRAW).str();
-
-#define LOG_BEGIN(x) minilog << (x).begin
-#define LOG_END(x) minilog << (x).end
-
-
 void mainPreSyncFunc() {
-    LOG_BEGIN(PRE_SYNC);
     OsEng.setRunTime(sgct::Engine::getTime());
     OsEng.preSynchronization();
-    LOG_END(PRE_SYNC);
 }
 
 volatile bool busyWaitDecode = false;
 void mainPostSyncPreDrawFunc() {
-    if (OsEng.useBusyWaitForDecode() && !sgct::Engine::instance()->isMaster()) {
-        while (minilog.str().size() && minilog.str().back() != DECODE.end) {
-            std::this_thread::sleep_for(std::chrono::microseconds(10));
-        }
-    }
-    LOG_BEGIN(POST_SYNC);
+//    if (OsEng.useBusyWaitForDecode() && !sgct::Engine::instance()->isMaster()) {
+//        while (minilog.str().size() && minilog.str().back() != DECODE.end) {
+//            std::this_thread::sleep_for(std::chrono::microseconds(10));
+//        }
+//    }
     OsEng.postSynchronizationPreDraw();
-    LOG_END(POST_SYNC);
 }
 
 void mainRenderFunc() {
-    LOG_BEGIN(RENDER);
     using glm::mat4;
     using glm::translate;
     //not the most efficient, but for clarity @JK
@@ -283,30 +265,23 @@ void mainRenderFunc() {
 
     mat4 projectionMatrix = _sgctEngine->getCurrentProjectionMatrix();
     OsEng.render(projectionMatrix, viewMatrix);
-    LOG_END(RENDER);
 }
 
 void mainPostDrawFunc() {
-    LOG_BEGIN(POST_DRAW);
     OsEng.postDraw();
-    LOG_END(POST_DRAW);
 
-    if (OsEng.logSGCTOutOfOrderErrors()) {
-        if (sgct::Engine::instance()->isMaster()) {
-            if (minilog.str() != EXPECTED_MASTER_LOG) {
-                LERRORC("Minilog", "Bad combination: " << minilog.str());
-            }
-        }
-        else {
-            if (minilog.str() != EXPECTED_SLAVE_LOG) {
-                LERRORC("Minilog", "Bad combination: " << minilog.str());
-            }
-        }
-    }
-    
-
-    // clear
-    minilog.str(std::string());
+//    if (OsEng.logSGCTOutOfOrderErrors()) {
+//        if (sgct::Engine::instance()->isMaster()) {
+//            if (minilog.str() != EXPECTED_MASTER_LOG) {
+//                LERRORC("Minilog", "Bad combination: " << minilog.str());
+//            }
+//        }
+//        else {
+//            if (minilog.str() != EXPECTED_SLAVE_LOG) {
+//                LERRORC("Minilog", "Bad combination: " << minilog.str());
+//            }
+//        }
+//    }
 }
 
 void mainExternalControlCallback(const char* receivedChars, int size) {
@@ -349,16 +324,11 @@ void mainCharCallback(unsigned int codepoint, int mods) {
 }
 
 void mainEncodeFun() {
-    LOG_BEGIN(ENCODE);
     OsEng.encode();
-    LOG_END(ENCODE);
 }
 
 void mainDecodeFun() {
-    LOG_BEGIN(DECODE);
     OsEng.decode();
-    LOG_END(DECODE);
-
 }
 
 void mainLogCallback(const char* msg) {

@@ -33,14 +33,15 @@ return {
         Name = "RheaTrail",
         Parent = "SaturnBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "RHEA",
-            Frame = "GALACTIC",
-            Observer = "SATURN BARYCENTER",
-            RGB = { 0.5, 0.3, 0.3 },
-            TropicalOrbitPeriod = 60,
-            EarthOrbitRatio = 0.01,
-            DayLength = 0.9424218
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "RHEA",
+                Observer = "SATURN BARYCENTER",
+            },
+            Color = { 0.5, 0.3, 0.3 },
+            Period = 108 / 24,
+            Resolution = 1000
         }
     }
 }

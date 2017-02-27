@@ -22,81 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GEODETIC2_H__
-#define __GEODETIC2_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GEODETIC2___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GEODETIC2___H__
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <memory>
-#include <ostream>
+#include <modules/globebrowsing/tile/tileindex.h>
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
-#include <modules/globebrowsing/chunk/chunkindex.h>
-
-#include <ghoul/misc/assert.h>
-
-
-
-
-// Using double precision
-typedef double Scalar;
-typedef glm::dvec2 Vec2;
-typedef glm::dvec3 Vec3;
+#include <ghoul/glm.h>
 
 namespace openspace {
+namespace globebrowsing {
 
-    // Forward declaration
-    class Ellipsoid;
+class Ellipsoid;
 
 struct Geodetic2 {
-    Geodetic2();
-    Geodetic2(Scalar latitude, Scalar longitude);
+    Geodetic2(double latitude = 0.0, double longitude = 0.0);
     Geodetic2(const Geodetic2& src);
-
     
-    /*
-    static Geodetic2 fromCartesian(const Vec3& v);
-    Vec3 asUnitCartesian() const;
-    */
+    //static Geodetic2 fromCartesian(const Vec3& v);
+    //Vec3 asUnitCartesian() const;
 
-
-
-    Vec2 toLonLatVec2() const;
+    glm::dvec2 toLonLatVec2() const;
 
     bool operator==(const Geodetic2& other) const;
     bool operator!=(const Geodetic2& other) const { return !(*this == (other)); }
 
     Geodetic2 operator+(const Geodetic2& other) const;
     Geodetic2 operator-(const Geodetic2& other) const;
-    Geodetic2 operator*(Scalar scalar) const;
-    Geodetic2 operator/(Scalar scalar) const;
+    Geodetic2 operator*(double scalar) const;
+    Geodetic2 operator/(double scalar) const;
 
-    Scalar lat;
-    Scalar lon;
+    double lat;
+    double lon;
 };
-
-
 
 struct Geodetic3 {
     Geodetic2 geodetic2;
-    Scalar height;
+    double height;
 };
 
- 
-
-
-//////////////////////////////////////////////////////////////////////////////////////
-//                                 GEODETICPATCH                                        //
-//////////////////////////////////////////////////////////////////////////////////////
 class GeodeticPatch {
 public:
     GeodeticPatch(
-        Scalar centerLat,
-        Scalar centerLon,
-        Scalar halfSizeLat,
-        Scalar halfSizeLon);
+        double centerLat,
+        double centerLon,
+        double halfSizeLat,
+        double halfSizeLon);
 
     GeodeticPatch(
         const Geodetic2& center,
@@ -104,8 +74,7 @@ public:
 
     GeodeticPatch(const GeodeticPatch& patch);
 
-    GeodeticPatch(const ChunkIndex& chunkIndex);
-
+    GeodeticPatch(const TileIndex& tileIndex);
 
     void setCenter(const Geodetic2&);
     void setHalfSize(const Geodetic2&);    
@@ -113,19 +82,20 @@ public:
     /**
         returns the latitude boundary which is closest to the equator
     */
-    Scalar edgeLatitudeNearestEquator() const;
+    double edgeLatitudeNearestEquator() const;
 
     /**
         Returns true if the center above the equator
     */
-    Scalar isNorthern() const;
+    double isNorthern() const;
 
     Geodetic2 getCorner(Quad q) const;
+    Geodetic2 getSize() const;
 
-    Scalar minLat() const;
-    Scalar maxLat() const;
-    Scalar minLon() const;
-    Scalar maxLon() const;
+    double minLat() const;
+    double maxLat() const;
+    double minLon() const;
+    double maxLon() const;
 
     /**
      * returns true if the specified coordinate is contained within the patch
@@ -152,12 +122,12 @@ public:
     /**
      * Returns the minimum tile level of the patch (based on largest side)
      */
-    Scalar minimumTileLevel() const;
+    double minimumTileLevel() const;
 
     /**
     * Returns the maximum level of the patch (based on smallest side)
     */
-    Scalar maximumTileLevel() const;
+    double maximumTileLevel() const;
 
     const Geodetic2& center() const;
     const Geodetic2& halfSize() const;
@@ -168,6 +138,7 @@ private:
     Geodetic2 _halfSize;
 };
 
+} // namespace globebrowsing
 } // namespace openspace
 
-#endif // __GEODETIC2_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GEODETIC2___H__

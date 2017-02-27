@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __QUERY_H__
-#define __QUERY_H__
+#ifndef __OPENSPACE_CORE___QUERY___H__
+#define __OPENSPACE_CORE___QUERY___H__
 
 #include <string>
 #include <vector>
@@ -46,6 +46,6 @@ Renderable* renderable(const std::string& name);
 properties::Property* property(const std::string& uri);
 std::vector<properties::Property*> allProperties();
 
-} // namespace
+} // namespace openspace
 
-#endif // __QUERY_H__
+#endif // __OPENSPACE_CORE___QUERY___H__

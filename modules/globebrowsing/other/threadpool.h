@@ -22,60 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __THREAD_POOL_H__
-#define __THREAD_POOL_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
 
-#include <glm/glm.hpp>
-#include <memory>
-#include <ostream>
-#include <thread>
+#include <condition_variable>
+#include <functional>
+#include <mutex>
 #include <queue>
-
-#include <modules/globebrowsing/other/concurrentqueue.h>
-
-#include <ghoul/misc/assert.h>
-
-
+#include <thread>
+#include <vector>
 
 // Implementatin based on http://progsch.net/wordpress/?p=81
 
 namespace openspace {
-    
+namespace globebrowsing {    
 
-    class ThreadPool;
+class ThreadPool;
 
-    class Worker {
-    public: 
-        Worker(ThreadPool& pool);
-        void operator()();
-    private:
-        ThreadPool& pool;
-    };
+class Worker {
+public: 
+    Worker(ThreadPool& pool);
+    void operator()();
+private:
+    ThreadPool& pool;
+};
 
-    class ThreadPool {
-    public:
-        ThreadPool(size_t numThreads);
-        ~ThreadPool();
+class ThreadPool {
+public:
+    ThreadPool(size_t numThreads);
+    ~ThreadPool();
 
-        void enqueue(std::function<void()> f);
-        void clearTasks();
+    void enqueue(std::function<void()> f);
+    void clearTasks();
 
-    private:
-        friend class Worker;
+private:
+    friend class Worker;
 
-        std::vector<std::thread> workers;
+    std::vector<std::thread> workers;
 
-        std::deque<std::function<void()>> tasks;
+    std::deque<std::function<void()>> tasks;
 
-        std::mutex queue_mutex;
-        std::condition_variable condition;
+    std::mutex queue_mutex;
+    std::condition_variable condition;
 
-        bool stop;
-    };
+    bool stop;
+};
 
-
+} // namespace globebrowsing
 } // namespace openspace
 
-
-
-#endif // __THREAD_POOL_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__

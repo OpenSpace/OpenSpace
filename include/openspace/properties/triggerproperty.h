@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TRIGGERPROPERTY_H__
-#define __TRIGGERPROPERTY_H__
+#ifndef __OPENSPACE_CORE___TRIGGERPROPERTY___H__
+#define __OPENSPACE_CORE___TRIGGERPROPERTY___H__
 
 #include <openspace/properties/property.h>
 
@@ -42,7 +42,8 @@ public:
      * \param identifier The unique identifier used for this Property
      * \param guiName The human-readable name of this Property
      */
-    TriggerProperty(std::string identifier, std::string guiName);
+    TriggerProperty(std::string identifier, std::string guiName,
+        Property::Visibility visibility = Property::Visibility::User);
 
     /**
      * Returns the class name <code>TriggerProperty</code>.
@@ -69,4 +70,4 @@ public:
 } // namespace properties
 } // namespace openspace
 
-#endif // __TRIGGERPROPERTY_H__
+#endif // __OPENSPACE_CORE___TRIGGERPROPERTY___H__

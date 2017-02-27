@@ -226,8 +226,7 @@ bool RenderableGalaxy::initialize() {
     _pointsProgram = renderEngine.buildRenderProgram("Galaxy points",
         "${MODULE_GALAXY}/shaders/points.vs",
         "${MODULE_GALAXY}/shaders/points.fs",
-        ghoul::Dictionary(),
-        RenderEngine::RenderProgramType::Post);
+        ghoul::Dictionary());
 
     _pointsProgram->setIgnoreUniformLocationError(ghoul::opengl::ProgramObject::IgnoreError::Yes);
 
@@ -331,7 +330,7 @@ float RenderableGalaxy::safeLength(const glm::vec3& vector) {
     return glm::length(vector / maxComponent) * maxComponent;
 }
 
-void RenderableGalaxy::postRender(const RenderData& data) {
+/*void RenderableGalaxy::postRender(const RenderData& data) {
 
     _raycaster->setStepSize(_pointStepSize);
 
@@ -362,6 +361,6 @@ void RenderableGalaxy::postRender(const RenderData& data) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     OsEng.ref().renderEngine().postRaycast(*_pointsProgram);
-}
+}*/
        
 }

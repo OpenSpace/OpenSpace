@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ROTATION_H__
-#define __ROTATION_H__
+#ifndef __OPENSPACE_CORE___ROTATION___H__
+#define __OPENSPACE_CORE___ROTATION___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -54,4 +54,4 @@ protected:
 
 }  // namespace openspace
 
-#endif // __ROTATION_H__
+#endif // __OPENSPACE_CORE___ROTATION___H__

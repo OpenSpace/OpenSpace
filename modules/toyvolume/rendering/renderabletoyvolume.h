@@ -22,18 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLETOYVOLUME_H__
-#define __RENDERABLETOYVOLUME_H__
+#ifndef __OPENSPACE_MODULE_TOYVOLUME___RENDERABLETOYVOLUME___H__
+#define __OPENSPACE_MODULE_TOYVOLUME___RENDERABLETOYVOLUME___H__
 
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/boxgeometry.h>
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
-#include <openspace/rendering/renderable.h>
-#include <modules/toyvolume/rendering/toyvolumeraycaster.h>
-
 namespace openspace {
 
+class ToyVolumeRaycaster;
 struct RenderData;
     
 class RenderableToyVolume : public Renderable {
@@ -57,6 +60,7 @@ private:
     
     std::unique_ptr<ToyVolumeRaycaster> _raycaster;
 };
-}
 
-#endif // __RENDERABLETOYVOLUME_H__
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_TOYVOLUME___RENDERABLETOYVOLUME___H__

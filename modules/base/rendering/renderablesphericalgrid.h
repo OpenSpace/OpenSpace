@@ -22,16 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLESPHERICALGRID_H__
-#define __RENDERABLESPHERICALGRID_H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__
 
-// more or less a brutal adaptation of powerscaledsphere class
-
-// open space includes
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/stringproperty.h>
 
-// ghoul includes
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
@@ -48,7 +44,7 @@ public:
 
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
-private:
+
 protected:
     typedef struct {
         GLfloat location[4];
@@ -56,7 +52,6 @@ protected:
         GLfloat normal[3];
         GLubyte padding[28];  // Pads the struct out to 64 bytes for performance increase
     } Vertex;
-
 
     ghoul::opengl::ProgramObject* _gridProgram;
     std::string _gridType;
@@ -79,5 +74,7 @@ protected:
     Vertex* _varray;
     int* _iarray;
 };
+
 }// namespace openspace
-#endif
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERICALGRID___H__

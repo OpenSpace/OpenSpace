@@ -20,17 +20,18 @@ return {
         Renderable = {
             Type = "RenderablePlanetAtmosphere",
             Frame = "IAU_EARTH",
-			Body = "EARTH",
+            Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 6.371, 6 },
+                Radius = { 6.3781366, 6 },
+                --Radius = { 6.420, 6 },                  
                 Segments = 100
             },
             Shadow_Group = {
                 Source1 = {
                     Name = "Sun",
                     -- All radius in meters
-                    Radius = {696.3, 6}
+                    Radius = {696.0, 6}
                 },
                 --Source2 = { Name = "Monolith", Radius = {0.01, 6} },
                 Caster1 = { 
@@ -44,7 +45,7 @@ return {
                 Type = "simple",
                 Color = "textures/earth_bluemarble.jpg",
 				Night = "textures/earth_night.jpg",
-                --Height = "textures/earth_bluemarble_height.jpg",                
+                Height = "textures/earth_bluemarble_height.jpg",                
                 -- Depth = "textures/earth_depth.png",
                 Reflectance = "textures/earth_reflectance.png",
                 Clouds = "textures/earth_clouds.jpg"
@@ -54,7 +55,8 @@ return {
                 AtmoshereRadius = 6420,
                 --AtmoshereRadius = 6390,
                 --PlanetRadius    = 6371,
-                PlanetRadius    = 6360,
+                --PlanetRadius    = 6360,
+                PlanetRadius    = 6378.1366,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
                     Coefficients = {
@@ -71,10 +73,10 @@ return {
                 Mie = {
                     Coefficients = {
                         -- Reflection coefficients are given in km^-1
-                        Scattering = {4e-3, 4e-3, 4e-3},
-                        --Scattering = {2e-5, 2e-5, 2e-5},
+                        Scattering = {4.0e-3, 4.0e-3, 4.0e-3},
+                        --Scattering = {2.0e-5, 2.0e-5, 2.0e-5},
                         -- Extinction coefficients are a fraction of the Scattering coefficients
-                        Extinction = {4e-3/0.9, 4e-3/0.9, 4e-3/0.9}
+                        Extinction = {4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9}
                         -- Height scale (atmosphere thickness for constant density) in Km
                     },
                     H_M = 1.2,
@@ -125,15 +127,20 @@ return {
         Name = "EarthTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "EARTH",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = { 0.5, 0.8, 1.0},
-            TropicalOrbitPeriod = 365.242,
-            EarthOrbitRatio = 1,
-            DayLength = 24
-        }
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "EARTH",
+                Observer = "SUN"
+            },
+            Color = { 0.5, 0.8, 1.0 },
+            -- StartTime = "2016 JUN 01 12:00:00.000",
+            -- EndTime = "2017 JAN 01 12:00:00.000",
+            -- SampleInterval = 3600
+            Period = 365.242,
+            Resolution = 1000
+        },
+        GuiName = "/Solar/EarthTrail"
     },
     --[[
     {
@@ -147,7 +154,7 @@ return {
             Texture = "textures/marker.png",
             BlendMode = "Additive"
         },
-		Ephemeris = {
+        Ephemeris = {
             Type = "Static",
             Position = {0, 0, 0, 5}
         }

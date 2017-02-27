@@ -22,10 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
  
-#ifndef __SCENE_H__
-#define __SCENE_H__
+#ifndef __OPENSPACE_CORE___SCENE___H__
+#define __OPENSPACE_CORE___SCENE___H__
 
-// std includes
 #include <vector>
 #include <map>
 #include <set>
@@ -85,11 +84,6 @@ public:
      * Render visible SceneGraphNodes using the provided camera
      */
     void render(const RenderData& data, RendererTasks& tasks);
-
-    /*
-    * Post-Render visible SceneGraphNodes using the provided camera
-    */
-    void postRender(const RenderData& data);
 
     /*
      * Returns the root SceneGraphNode
@@ -158,4 +152,4 @@ private:
 
 } // namespace openspace
 
-#endif // __SCENE_H__
+#endif // __OPENSPACE_CORE___SCENE___H__

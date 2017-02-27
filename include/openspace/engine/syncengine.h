@@ -22,13 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SYNCENGINE_H__
-#define __SYNCENGINE_H__
-
+#ifndef __OPENSPACE_CORE___SYNCENGINE___H__
+#define __OPENSPACE_CORE___SYNCENGINE___H__
 
 #include <vector>
 #include <memory>
-
 
 namespace openspace {
 
@@ -103,4 +101,4 @@ private:
 
 } // namespace openspace
 
-#endif //#ifndef __SYNCENGINE_H__
+#endif // __OPENSPACE_CORE___SYNCENGINE___H__

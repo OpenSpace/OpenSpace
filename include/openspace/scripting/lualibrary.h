@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __LUALIBRARY_H__
-#define __LUALIBRARY_H__
+#ifndef __OPENSPACE_CORE___LUALIBRARY___H__
+#define __OPENSPACE_CORE___LUALIBRARY___H__
 
 #include <ghoul/lua/ghoul_lua.h>
 
@@ -62,4 +62,4 @@ struct LuaLibrary {
 } // namespace scripting
 } // namespace openspace
 
-#endif // __LUALIBRARY_H__
+#endif // __OPENSPACE_CORE___LUALIBRARY___H__

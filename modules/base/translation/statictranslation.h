@@ -22,13 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __STATICTRANSLATION_H__
-#define __STATICTRANSLATION_H__
+#ifndef __OPENSPACE_MODULE_BASE___STATICTRANSLATION___H__
+#define __OPENSPACE_MODULE_BASE___STATICTRANSLATION___H__
 
 #include <openspace/scene/translation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/vector/dvec3property.h>
 
 namespace openspace {
     
@@ -48,4 +48,4 @@ private:
     
 } // namespace openspace
 
-#endif // __STATICTRANSLATION_H__
+#endif // __OPENSPACE_MODULE_BASE___STATICTRANSLATION___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __NUMERICALPROPERTY_H__
-#define __NUMERICALPROPERTY_H__
+#ifndef __OPENSPACE_CORE___NUMERICALPROPERTY___H__
+#define __OPENSPACE_CORE___NUMERICALPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
 
@@ -33,12 +33,16 @@ namespace properties {
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
 public:
-    NumericalProperty(std::string identifier, std::string guiName);
-    NumericalProperty(std::string identifier, std::string guiName, T value);
+    NumericalProperty(std::string identifier, std::string guiName,
+        Property::Visibility visibility = Property::Visibility::User);
     NumericalProperty(std::string identifier, std::string guiName, T value,
-        T minimumValue, T maximumValue);
+        Property::Visibility visibility = Property::Visibility::User);
     NumericalProperty(std::string identifier, std::string guiName, T value,
-        T minimumValue, T maximumValue, T steppingValue);
+        T minimumValue, T maximumValue,
+        Property::Visibility visibility = Property::Visibility::User);
+    NumericalProperty(std::string identifier, std::string guiName, T value,
+        T minimumValue, T maximumValue, T steppingValue,
+        Property::Visibility visibility = Property::Visibility::User);
 
     bool getLuaValue(lua_State* state) const override;
     bool setLuaValue(lua_State* state) override;
@@ -74,4 +78,4 @@ protected:
 
 #include "openspace/properties/numericalproperty.inl"
 
-#endif // __NUMERICALPROPERTY_H__
+#endif // __OPENSPACE_CORE___NUMERICALPROPERTY___H__

@@ -32,6 +32,8 @@
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/scripting/scriptengine.h>
 
+#include <ghoul/filesystem/filesystem.h>
+
 #include "imgui.h"
 
 namespace openspace {
@@ -140,20 +142,45 @@ void renderStringProperty(Property* prop, const std::string& ownerName) {
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
+    std::string value = FileSys.convertPathSeparator(p->value(), '/');
+
     static const int bufferSize = 256;
     static char buffer[bufferSize];
 #ifdef _MSC_VER
-    strcpy_s(buffer, p->value().length() + 1, p->value().c_str());
+    strcpy_s(buffer, value.length() + 1, value.c_str());
 #else
-    strcpy(buffer, p->value().c_str());
+    strcpy(buffer, value.c_str());
 #endif
-    ImGui::InputText(name.c_str(), buffer, bufferSize);
+    bool hasNewValue = ImGui::InputText(
+        name.c_str(),
+        buffer,
+        bufferSize,
+        ImGuiInputTextFlags_EnterReturnsTrue
+    );
     renderTooltip(prop);
 
-    std::string newValue(buffer);
 
-    if (newValue != p->value()) {
-        executeScript(p->fullyQualifiedIdentifier(), "'" + newValue + "'");
+    if (hasNewValue) {
+        executeScript(p->fullyQualifiedIdentifier(), "'" + std::string(buffer) + "'");
+    }
+
+    ImGui::PopID();
+}
+
+void renderDoubleProperty(properties::Property* prop, const std::string& ownerName) {
+    DoubleProperty* p = static_cast<DoubleProperty*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    float value = *p;
+    float min = p->minValue();
+    float max = p->maxValue();
+
+    ImGui::SliderFloat(name.c_str(), &value, min, max);
+    renderTooltip(prop);
+
+    if (value != static_cast<float>(p->value())) {
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
     }
 
     ImGui::PopID();
@@ -317,9 +344,10 @@ void renderVec3Property(Property* prop, const std::string& ownerName) {
     float min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
     float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
 
+
     ImGui::SliderFloat3(
         name.c_str(),
-        &value.x,
+        glm::value_ptr(value),
         min,
         max
     );
@@ -357,6 +385,94 @@ void renderVec4Property(Property* prop, const std::string& ownerName) {
     renderTooltip(prop);
 
     if (value != p->value()) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," +
+            std::to_string(value.y) + "," +
+            std::to_string(value.z) + "," +
+            std::to_string(value.w) + "}"
+        );
+    }
+
+    ImGui::PopID();
+}
+
+void renderDVec2Property(Property* prop, const std::string& ownerName) {
+    DVec2Property* p = static_cast<DVec2Property*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    glm::vec2 value = glm::dvec2(*p);
+    float min = std::min(p->minValue().x, p->minValue().y);
+    float max = std::max(p->maxValue().x, p->maxValue().y);
+    ImGui::SliderFloat2(
+        name.c_str(),
+        &value.x,
+        min,
+        max
+    );
+    renderTooltip(prop);
+
+    if (glm::dvec2(value) != p->value()) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
+        );
+    }
+
+    ImGui::PopID();
+}
+
+void renderDVec3Property(Property* prop, const std::string& ownerName) {
+    DVec3Property* p = static_cast<DVec3Property*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    glm::vec3 value = glm::dvec3(*p);
+    float min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
+    float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
+
+
+    ImGui::SliderFloat3(
+        name.c_str(),
+        glm::value_ptr(value),
+        min,
+        max
+    );
+    renderTooltip(prop);
+
+    if (glm::dvec3(value) != p->value()) {
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "{" + std::to_string(value.x) + "," +
+            std::to_string(value.y) + "," +
+            std::to_string(value.z) + "}"
+        );
+    }
+
+    ImGui::PopID();
+}
+
+void renderDVec4Property(Property* prop, const std::string& ownerName) {
+    DVec4Property* p = static_cast<DVec4Property*>(prop);
+    std::string name = p->guiName();
+    ImGui::PushID((ownerName + "." + name).c_str());
+
+    glm::vec4 value = glm::dvec4(*p);
+    float min = std::min(std::min(std::min(
+        p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w);
+    float max = std::max(std::max(std::max(
+        p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w);
+
+    ImGui::SliderFloat4(
+        name.c_str(),
+        &value.x,
+        min,
+        max
+    );
+    renderTooltip(prop);
+
+    if (glm::dvec4(value) != p->value()) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +

@@ -22,11 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEFOV_H__
-#define __RENDERABLEFOV_H__
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEFOV___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEFOV___H__
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/glm.h>
@@ -130,4 +132,4 @@ public:
     
 } // namespace openspace
 
-#endif // __RENDERABLEFOV_H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEFOV___H__

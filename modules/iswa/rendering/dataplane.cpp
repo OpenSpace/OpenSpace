@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #include <modules/iswa/rendering/dataplane.h>
 #include <modules/iswa/util/dataprocessortext.h>
 
@@ -55,10 +56,12 @@ bool DataPlane::initialize(){
             // and unregister backgroundvalues property.
             if(_autoFilter.value()){
                 _backgroundValues.setValue(_dataProcessor->filterValues());
-                _backgroundValues.setVisible(false);
+                _backgroundValues.setVisibility(properties::Property::Visibility::None);
+                //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues 
             } else {
-                _backgroundValues.setVisible(true);
+                _backgroundValues.setVisibility(properties::Property::Visibility::All);
+                //_backgroundValues.setVisible(true);
             }
         });
     }

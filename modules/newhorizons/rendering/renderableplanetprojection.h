@@ -22,23 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEPLANETPROJECTION_H__
-#define __RENDERABLEPLANETPROJECTION_H__
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEPLANETPROJECTION___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEPLANETPROJECTION___H__
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/newhorizons/util/imagesequencer.h>
 #include <modules/newhorizons/util/projectioncomponent.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
-#include <openspace/util/updatestructures.h>
-
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 
 namespace openspace {
+
+struct Image;
 
 namespace planetgeometry {
     class PlanetGeometry;
@@ -104,8 +99,8 @@ private:
 
     GLuint _quad;
     GLuint _vertexPositionBuffer;
-
 };
+
 }  // namespace openspace
 
-#endif  // __RENDERABLEPLANETPROJECTION_H__
+#endif  // __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEPLANETPROJECTION___H__

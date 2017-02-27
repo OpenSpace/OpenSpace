@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TIMEMANAGER_H__
-#define __TIMEMANAGER_H__
+#ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
+#define __OPENSPACE_CORE___TIMEMANAGER___H__
 
 #include <deque>
 #include <openspace/network/messagestructures.h>
@@ -45,7 +45,6 @@ private:
     double _latestConsumedTimestamp;
 };
 
-}
+} // namespace openspace
 
-
-#endif // __TIMEMANAGER_H__
+#endif // __OPENSPACE_CORE___TIMEMANAGER___H__

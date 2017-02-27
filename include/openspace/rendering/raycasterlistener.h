@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RAYCASTERLISTENER_H__
-#define __RAYCASTERLISTENER_H__
+#ifndef __OPENSPACE_CORE___RAYCASTERLISTENER___H__
+#define __OPENSPACE_CORE___RAYCASTERLISTENER___H__
 
 namespace openspace {
 
@@ -36,4 +36,4 @@ public:
 
 } // openspace
 
-#endif  // __RAYCASTERLISTENER_H__
+#endif  // __OPENSPACE_CORE___RAYCASTERLISTENER___H__

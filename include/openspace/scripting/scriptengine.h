@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SCRIPTENGINE_H__
-#define __SCRIPTENGINE_H__
+#ifndef __OPENSPACE_CORE___SCRIPTENGINE___H__
+#define __OPENSPACE_CORE___SCRIPTENGINE___H__
 
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/syncdata.h>
@@ -121,11 +121,9 @@ private:
     bool _logScripts = true;
     std::string _logType;
     std::string _logFilename;
-
-
 };
 
 } // namespace scripting
 } // namespace openspace
 
-#endif // __SCRIPTENGINE_H__
+#endif // __OPENSPACE_CORE___SCRIPTENGINE___H__

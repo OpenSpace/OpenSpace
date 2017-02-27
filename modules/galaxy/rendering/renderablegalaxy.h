@@ -22,14 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLEGALAXY_H__
-#define __RENDERABLEGALAXY_H__
+#ifndef __OPENSPACE_MODULE_GALAXY___RENDERABLEGALAXY___H__
+#define __OPENSPACE_MODULE_GALAXY___RENDERABLEGALAXY___H__
 
 #include <openspace/properties/vectorproperty.h>
 #include <openspace/util/boxgeometry.h>
 #include <openspace/rendering/renderable.h>
 #include <modules/galaxy/rendering/galaxyraycaster.h>
 #include <modules/volume/rawvolume.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
 
@@ -44,7 +45,6 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
-    void postRender(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
 private:
@@ -75,6 +75,7 @@ private:
     GLuint _positionVbo;
     GLuint _colorVbo;
 };
-}
 
-#endif // __RENDERABLEGALAXY_H__
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GALAXY___RENDERABLEGALAXY___H__

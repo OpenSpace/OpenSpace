@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MISSION_H__
-#define __MISSION_H__
+#ifndef __OPENSPACE_CORE___MISSION___H__
+#define __OPENSPACE_CORE___MISSION___H__
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/timerange.h>
@@ -143,4 +143,4 @@ Mission missionFromFile(std::string filename);
 
 } // namespace openspace
 
-#endif // __MISSION_H__
+#endif // __OPENSPACE_CORE___MISSION___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __POWERSCALEDSCALAR_H__
-#define __POWERSCALEDSCALAR_H__
+#ifndef __OPENSPACE_CORE___POWERSCALEDSCALAR___H__
+#define __OPENSPACE_CORE___POWERSCALEDSCALAR___H__
 
 // glm includes
 #include <ghoul/glm.h>
@@ -92,4 +92,4 @@ typedef PowerScaledScalar pss;
 
 } // namespace openspace
 
-#endif // __POWERSCALEDSCALAR_H__
+#endif // __OPENSPACE_CORE___POWERSCALEDSCALAR___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __UPDATESTRUCTURES_H__
-#define __UPDATESTRUCTURES_H__
+#ifndef __OPENSPACE_CORE___UPDATESTRUCTURES___H__
+#define __OPENSPACE_CORE___UPDATESTRUCTURES___H__
 
 #include <openspace/util/camera.h>
 #include <openspace/util/powerscaledcoordinate.h>
@@ -46,6 +46,7 @@ struct UpdateData {
     TransformData modelTransform;
     double time;
     double delta;
+    bool timePaused;
     bool isTimeJump;
     bool doPerformanceMeasurement;
 };
@@ -75,7 +76,6 @@ struct RaycastData {
     std::string namespaceName;
 };
 
+} // namespace openspace
 
-}
-
-#endif // __UPDATESTRUCTURES_H__
+#endif // __OPENSPACE_CORE___UPDATESTRUCTURES___H__

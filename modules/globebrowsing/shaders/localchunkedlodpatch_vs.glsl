@@ -39,6 +39,7 @@ uniform vec3 p10;
 uniform vec3 p01;
 uniform vec3 p11;
 uniform vec3 patchNormalCameraSpace;
+uniform float chunkMinHeight;
 
 layout(location = 1) in vec2 in_uv;
 
@@ -62,9 +63,14 @@ void main() {
     
     // Calculate desired level based on distance to the vertex on the ellipsoid
     // Before any heightmapping is done
-    float distToVertexOnEllipsoid = length(p);
-    float levelInterpolationParameter = getLevelInterpolationParameter(chunkLevel, distanceScaleFactor, distToVertexOnEllipsoid);
-
+    float distToVertexOnEllipsoid =
+        length(p + patchNormalCameraSpace * chunkMinHeight);
+    float levelInterpolationParameter =
+        getLevelInterpolationParameter(
+            chunkLevel,
+            distanceScaleFactor,
+            distToVertexOnEllipsoid);
+    
     // use level weight for height sampling, and output to fragment shader
     levelWeights = getLevelWeights(levelInterpolationParameter);
 

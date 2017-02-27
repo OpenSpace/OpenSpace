@@ -82,31 +82,21 @@ return {
             },
         },
     },
-    -- 67P Trail Module
+    -- -- 67P Trail Module
     {   
         Name = "67PTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrailNew",
-            -- Spice
-            Body = "CHURYUMOV-GERASIMENKO",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            -- Optional rendering properties
-            LineColor = { 0.1, 0.9, 0.2 },
-            PointColor = { 0.1, 0.9, 0.2 },
-            LineFade = 0.5, -- [0,1]
-            RenderPart = 0.5,
-            LineWidth = 2,
-            ShowTimeStamps = false,
-            RenderFullTrail = false,
-            -- Time interval
-            TimeRange = {
-                Start = "2014 JAN 01 00:00:00.000",
-                End = "2017 JAN 01 00:00:00.000",
+            Type = "RenderableTrailTrajectory",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "CHURYUMOV-GERASIMENKO",
+                Observer = "SUN",
             },
-            SampleDeltaTime = 3600, -- Seconds between each point
-            SubSamples = 0,
+            Color = { 0.1, 0.9, 0.2 },
+            StartTime = "2014 JAN 01 00:00:00.000",
+            EndTime = "2017 JAN 01 00:00:00.000",
+            SampleInterval = 3600,
         },
     },
     --[[

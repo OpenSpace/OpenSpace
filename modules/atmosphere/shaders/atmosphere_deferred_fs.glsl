@@ -21,6 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
 #version 400
 
 #define EPSILON 0.0001f
@@ -481,24 +482,22 @@ void main(void) {
     // Window to NDC coordinates
     dvec4 viewPort = vec4(screenX, screenY, screenWIDTH, screenHEIGHT);
     dvec4 ndcCoords = vec4(0.0);
-    ndcCoords.xy = (2.0/viewPort.zw) * (windowCoords.xy - viewPort.xy) + vec2(1.0);
+    ndcCoords.xy = (2.0 * (windowCoords.xy - viewPort.xy) / viewPort.zw) - vec2(1.0);
     double f_plus_n = gl_DepthRange.far + gl_DepthRange.near;
     double f_minus_n = gl_DepthRange.far - gl_DepthRange.near;
     ndcCoords.z = (2.0 * windowCoords.z - f_plus_n) / f_minus_n;
-    ndcCoords.w = windowCoords.w;
+    ndcCoords.w = 1.0;
 
     // NDC to clip coordinates
-    dvec4 clipCoords = vec4(0.0);
-    clipCoords.xyz = ndcCoords.xyz / ndcCoords.w;
-    clipCoords.w = 1.0 / ndcCoords.w;
+    dvec4 clipCoords = ndcCoords / gl_FragCoord.w;
 
-    // Clip to View
-    dvec4 projCoords = inverseSgctProjectionMatrix * clipCoords;
+    // Clip to SGCT Eye
+    dvec4 sgctEyeCoords = inverseSgctProjectionMatrix * clipCoords;
 
-    // View to Eye (This is SGCT view to OS view)
-    dvec4 osEyeCoords = viewToEyeTranform * projCoords;
+    // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
+    dvec4 osEyeCoords = viewToEyeTranform * sgctEyeCoords;
 
-    // Eye to World
+    // OS Eye to World
     dvec4 worldCoords = eyeToWorldTransform * osEyeCoords;
 
     // World to Object
@@ -515,23 +514,14 @@ void main(void) {
     //diffuse = vec4(rayDirection.xyz, 1.0);
 
     if ( algebraicIntersecSphere(ray, Rt*1000.0, planetPositionObjectCoords, offset, maxLength) ) {
-      diffuse = vec4(0.0, 1.0, 0.0, 1.0);
+      renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
     } else {
-      diffuse = vec4(1.0, 0.0, 1.0, 1.0);
+      renderTarget = vec4(0.0, 0.0, 0.0, 1.0);
     }
 
-    //diffuse = vec4(ray.direction.xyz, 1.0);
-
-    //diffuse = vec4(normalize(projCoords).xyz, 1.0);
-    //diffuse = vec4(inverseSgctProjectionMatrix[2][1], 0.0, 0.0, 1.0);
-  }  
-  
-  renderTarget = diffuse;
-  //renderTarget = vec4(1.0,0.0,0.0,1.0);
-    
-  // diffuse[3] = transparency;
-  // frag.color = diffuse;
-  // frag.depth = 0.0;
-
-  // return frag;
+    renderTarget = vec4(normalize(sgctEyeCoords).xyz, 1.0);
+    //renderTarget = vec4(inverseSgctProjectionMatrix[2][1], 0.0, 0.0, 1.0);
+  } else {
+    renderTarget = vec4(0.5, 0.5, 0.5, 1.0);
+  }
 }

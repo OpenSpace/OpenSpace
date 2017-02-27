@@ -14,7 +14,7 @@ helper.scheduledScript.reversible = {}
 helper.setCommonKeys = function()
     openspace.bindKeyLocal(
         "F1",
-        "openspace.gui.toggle()",
+        helper.property.invert('Global Properties.OnScreenGUI.Main.enabled'),
         "Toggles the visibility of the on-screen GUI."
     )
     openspace.bindKeyLocal(
@@ -51,15 +51,21 @@ helper.setCommonKeys = function()
         "Changes the currently used renderer to use the 'ABuffer' implementation."
     )
 
-    openspace.bindKeyLocal(
+    openspace.bindKey(
         "f",
-        helper.property.invert('Interaction.rotationalFriction'),
-        "Toggles the rotational friction on the camera. If it is disabled, the camera rotates around the focus object indefinitely."
+        helper.property.invert('Interaction.horizontalFriction'),
+        "Toggles the horizontal friction of the camera. If it is disabled, the camera rotates around the focus object indefinitely."
     )
-    openspace.bindKeyLocal(
+
+    openspace.bindKey(
         "Shift+f",
-        helper.property.invert('Interaction.zoomFriction'),
-        "Toggles the zoom friction on the camera."
+        helper.property.invert('Interaction.verticalFriction'),
+        "Toggles the vertical friction of the camera. If it is disabled, the camera rises up from or closes in towards the focus object indefinitely."
+    )
+    openspace.bindKey(
+        "Ctrl+f",
+        helper.property.invert('Interaction.rotationalFriction'),
+        "Toggles the rotational friction of the camera. If it is disabled, the camera rotates around its own axis indefinitely."
     )
 
     openspace.bindKey(
@@ -125,10 +131,8 @@ helper.scheduledScript.reversible.setEnabled = function(time, renderable, enable
     return 
     {
         Time = time,
-        ReversibleLuaScript = {
-            Forward = helper.renderable.setEnabled(renderable, enabled),
-            Backward = helper.renderable.setEnabled(renderable, not enabled)
-        }
+        ForwardScript = helper.renderable.setEnabled(renderable, enabled),
+        BackwardScript = helper.renderable.setEnabled(renderable, not enabled)
     }
 end
 
@@ -136,9 +140,6 @@ helper.scheduledScript.setEnabled = function(time, renderable, enabled)
     return 
     {
         Time = time,
-        ReversibleLuaScript = {
-            Forward = helper.renderable.setEnabled(renderable, enabled),
-            Backward = ""
-        }
+        ForwardScript = helper.renderable.setEnabled(renderable, enabled)
     }
 end

@@ -22,12 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __SETTINGSENGINE_H__
-#define __SETTINGSENGINE_H__
+#ifndef __OPENSPACE_CORE___SETTINGSENGINE___H__
+#define __OPENSPACE_CORE___SETTINGSENGINE___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalarproperty.h>
+
 #include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 #include <vector>
 
@@ -61,9 +63,10 @@ private:
     properties::BoolProperty _busyWaitForDecode;
     properties::BoolProperty _logSGCTOutOfOrderErrors;
     properties::BoolProperty _useDoubleBuffering;
+    properties::BoolProperty _spiceUseExceptions;
 
 };
 
 } // namespace openspace
 
-#endif //#ifndef __SETTINGSENGINE_H__
+#endif // __OPENSPACE_CORE___SETTINGSENGINE___H__

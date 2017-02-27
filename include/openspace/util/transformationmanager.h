@@ -22,8 +22,8 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TRANSFORMATIONMANAGER__
-#define __TRANSFORMATIONMANAGER__
+#ifndef __OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__
+#define __OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__
 
 #include <ghoul/designpattern/singleton.h>
 #include <ghoul/glm.h>
@@ -59,6 +59,6 @@ private:
     std::set<std::string> _dipoleFrames;
 };
 
-}
+} // namespace openspace
 
- #endif //__TRANSFORMATIONMANAGER__
+ #endif //__OPENSPACE_CORE___TRANSFORMATIONMANAGER___H__

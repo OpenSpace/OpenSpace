@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/programobject.h>
 
@@ -35,13 +36,13 @@
 namespace {
     const std::string _loggerCat      = "RenderablePlane";
     
-    const std::string KeyType        = "TerminatorType";
-    const std::string KeyLightSource = "LightSource";
-    const std::string KeyObserver    = "Observer";
-    const std::string KeyBody        = "Body";
-    const std::string KeyBodyFrame   = "BodyFrame";
-    const std::string KeyMainFrame   = "MainFrame";
-    const std::string KeyAberration  = "Aberration"; 
+    const char* KeyType        = "TerminatorType";
+    const char* KeyLightSource = "LightSource";
+    const char* KeyObserver    = "Observer";
+    const char* KeyBody        = "Body";
+    const char* KeyBodyFrame   = "BodyFrame";
+    const char* KeyMainFrame   = "MainFrame";
+    const char* KeyAberration  = "Aberration";
 }
 
 namespace openspace {
@@ -76,7 +77,7 @@ bool RenderableShadowCylinder::initialize() {
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     _shader = renderEngine.buildRenderProgram(
-        "ShadowProgram",
+        "ShadowCylinderProgram",
         "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_vs.glsl",
         "${MODULE_NEWHORIZONS}/shaders/terminatorshadow_fs.glsl"
     );

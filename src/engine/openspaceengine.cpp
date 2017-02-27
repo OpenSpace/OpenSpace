@@ -38,7 +38,6 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/luaconsole.h>
-#include <openspace/interaction/mousecontroller.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/properties/propertyowner.h>
@@ -79,7 +78,7 @@
 #endif
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
-#include <modules/iswa/rendering/iswagroup.h>
+#include <modules/iswa/rendering/iswabasegroup.h>
 #include <modules/iswa/util/iswamanager.h>
 #endif
 
@@ -171,6 +170,15 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         std::make_unique<ghoul::TemplateFactory<Translation>>(),
         "Translation"
     );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
+        "Rotation"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Scale>>(),
+        "Scale"
+    );
+
     SpiceManager::initialize();
     Time::initialize();
     TransformationManager::initialize();
@@ -223,7 +231,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     // configuration file, we will deinitialize this LogManager and reinitialize it later
     // with the correct LogLevel
     LogManager::initialize(
-        LogManager::LogLevel::Debug,
+        LogLevel::Debug,
         ghoul::logging::LogManager::ImmediateFlush::Yes
     );
     LogMgr.addLog(std::make_unique<ConsoleLog>());
@@ -784,7 +792,7 @@ void OpenSpaceEngine::configureLogging() {
         bool immediateFlush = false;
         configurationManager().getValue(KeyLogImmediateFlush, immediateFlush);
 
-        LogManager::LogLevel level = LogManager::levelFromString(logLevel);
+        LogLevel level = ghoul::logging::levelFromString(logLevel);
         LogManager::deinitialize();
         using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
         LogManager::initialize(
@@ -867,17 +875,16 @@ void OpenSpaceEngine::preSynchronization() {
         _timeManager->preSynchronization(dt);
 
         auto scheduledScripts = _scriptScheduler->progressTo(Time::ref().j2000Seconds());
-        while(scheduledScripts.size()){
-            auto scheduledScript = scheduledScripts.front();
-            LINFO(scheduledScript);
-            _scriptEngine->queueScript(scheduledScript, ScriptEngine::RemoteScripting::Yes);
-            scheduledScripts.pop();
+        for (auto it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
+            _scriptEngine->queueScript(
+                *it, ScriptEngine::RemoteScripting::Yes
+            );
         }
 
         _interactionHandler->updateInputStates(dt);
         
         _renderEngine->updateSceneGraph();
-        _interactionHandler->updateCamera();
+        _interactionHandler->updateCamera(dt);
         _renderEngine->camera()->invalidateCache();
 
         _parallelConnection->preSynchronization();
@@ -895,13 +902,13 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _shutdownCountdown -= _windowWrapper->averageDeltaTime();
     }
 
+    _renderEngine->updateSceneGraph();
     _renderEngine->updateFade();
     _renderEngine->updateRenderer();
     _renderEngine->updateScreenSpaceRenderables();
     _renderEngine->updateShaderPrograms();
     
     if (!_isMaster) {
-        _renderEngine->updateSceneGraph();
         _renderEngine->camera()->invalidateCache();
     }   
 
@@ -909,14 +916,14 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     //_interactionHandler->updateCamera();
     
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    if (_isMaster && _gui->isEnabled() && _windowWrapper->isRegularRendering()) {
+    if (_isMaster && _windowWrapper->isRegularRendering()) {
         glm::vec2 mousePosition = _windowWrapper->mousePosition();
         //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
         glm::ivec2 windowSize = _windowWrapper->currentWindowSize();
         glm::ivec2 renderingSize = _windowWrapper->currentWindowResolution();
         uint32_t mouseButtons = _windowWrapper->mouseButtons(2);
         
-        double dt = _windowWrapper->averageDeltaTime();
+        double dt = std::max(_windowWrapper->averageDeltaTime(), 0.0);
 
         _gui->startFrame(
             static_cast<float>(dt),
@@ -931,9 +938,9 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     // Testing this every frame has minimal impact on the performance --- abock
     // Debug build: 1-2 us ; Release build: <= 1 us
     using ghoul::logging::LogManager;
-    int warningCounter = LogMgr.messageCounter(LogManager::LogLevel::Warning);
-    int errorCounter = LogMgr.messageCounter(LogManager::LogLevel::Error);
-    int fatalCounter = LogMgr.messageCounter(LogManager::LogLevel::Fatal);
+    int warningCounter = LogMgr.messageCounter(LogLevel::Warning);
+    int errorCounter = LogMgr.messageCounter(LogLevel::Error);
+    int fatalCounter = LogMgr.messageCounter(LogLevel::Fatal);
 
     if (warningCounter > 0)
         LWARNINGC("Logging", "Number of Warnings raised: " << warningCounter);
@@ -959,7 +966,7 @@ void OpenSpaceEngine::postDraw() {
         if (_console->isVisible())
             _console->render();
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled() && _isMaster && _windowWrapper->isRegularRendering())
+        if (_isMaster && _windowWrapper->isRegularRendering())
             _gui->endFrame();
 #endif
     }
@@ -980,8 +987,9 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
         if (_gui->isEnabled()) {
             bool isConsumed = _gui->keyCallback(key, mod, action);
-            if (isConsumed)
+            if (isConsumed) {
                 return;
+            }
         }
 #endif
         if (key == _console->commandInputButton()) {
@@ -1016,7 +1024,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
 #ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
         if (_gui->isEnabled()) {
             const bool isConsumed = _gui->mouseButtonCallback(button, action);
-            if (isConsumed && action != MouseAction::Release)
+            if (isConsumed /*&& action != MouseAction::Release*/)
                 return;
         }
 #endif

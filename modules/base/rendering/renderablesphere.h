@@ -22,15 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __RENDERABLESPHERE_H__
-#define __RENDERABLESPHERE_H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
-#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
@@ -70,4 +72,5 @@ private:
 };
 
 } // namespace openspace
-#endif // __RENDERABLESPHERE_H__
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__

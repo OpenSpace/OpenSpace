@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TEMPLATEPROPERTY_H__
-#define __TEMPLATEPROPERTY_H__
+#ifndef __OPENSPACE_CORE___TEMPLATEPROPERTY___H__
+#define __OPENSPACE_CORE___TEMPLATEPROPERTY___H__
 
 #include <openspace/properties/property.h>
 
@@ -63,14 +63,16 @@ public:
      * \param identifier The identifier that is used for this TemplateProperty
      * \param guiName The human-readable GUI name for this TemplateProperty
      */
-    TemplateProperty(std::string identifier, std::string guiName);
+    TemplateProperty(std::string identifier, std::string guiName,
+        Property::Visibility visibility = Visibility::User);
 
     /**
      * The constructor initializing the TemplateProperty with the provided
      * <code>identifier</code>, human-readable <code>guiName</code> and provided
      * <code>value</code>.
      */
-    TemplateProperty(std::string identifier, std::string guiName, T value);
+    TemplateProperty(std::string identifier, std::string guiName, T value,
+        Property::Visibility visibility = Visibility::User);
 
     /**
      * Returns the class name for this TemplateProperty. The default implementation makes
@@ -189,4 +191,4 @@ protected:
 
 #include "openspace/properties/templateproperty.inl"
 
-#endif // __TEMPLATEPROPERTY_H__
+#endif // __OPENSPACE_CORE___TEMPLATEPROPERTY___H__

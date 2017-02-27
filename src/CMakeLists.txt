@@ -47,14 +47,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/interaction/keyboardcontroller.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/luaconsole.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/luaconsole_lua.inl
-    ${OPENSPACE_BASE_DIR}/src/interaction/mousecontroller.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/externalconnectioncontroller.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/externalcontrol.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/joystickexternalcontrol.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/keyboardexternalcontrol.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/mouseexternalcontrol.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/pythonexternalcontrol.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/externalcontrol/randomexternalcontrol.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
@@ -65,15 +57,61 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/performance/performancemeasurement.cpp
     ${OPENSPACE_BASE_DIR}/src/performance/performancelayout.cpp
     ${OPENSPACE_BASE_DIR}/src/performance/performancemanager.cpp
-    ${OPENSPACE_BASE_DIR}/src/properties/matrixproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/optionproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/property.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/propertyowner.cpp
-    ${OPENSPACE_BASE_DIR}/src/properties/scalarproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/selectionproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/stringproperty.cpp
     ${OPENSPACE_BASE_DIR}/src/properties/triggerproperty.cpp
-    ${OPENSPACE_BASE_DIR}/src/properties/vectorproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x3property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat2x4property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3x2property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat3x4property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4x2property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4x3property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/dmat4property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2x3property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat2x4property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3x2property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat3x4property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4x2property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4x3property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/matrix/mat4property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/boolproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/charproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/doubleproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/floatproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/intproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/longdoubleproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/longlongproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/longproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/shortproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/signedcharproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/ucharproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/uintproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/ulonglongproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/ulongproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/ushortproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/scalar/wcharproperty.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec2property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec3property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/bvec4property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec2property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec3property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/dvec4property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/ivec2property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/ivec3property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/ivec4property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/uvec2property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/uvec3property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/uvec4property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/vec2property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/vec3property.cpp
+    ${OPENSPACE_BASE_DIR}/src/properties/vector/vec4property.cpp
     ${OPENSPACE_BASE_DIR}/src/query/query.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/abufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
@@ -94,8 +132,9 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine.cpp
-    ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler.cpp
+    ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
@@ -117,6 +156,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
     ${OPENSPACE_BASE_DIR}/src/util/timerange.cpp
     ${OPENSPACE_BASE_DIR}/src/util/transformationmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/gpudata.cpp
 )
 
 set(OPENSPACE_HEADER
@@ -141,14 +181,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionmode.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyboardcontroller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/luaconsole.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousecontroller.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/externalconnectioncontroller.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/externalcontrol.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/joystickexternalcontrol.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/keyboardexternalcontrol.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/mouseexternalcontrol.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/pythonexternalcontrol.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/externalcontrol/randomexternalcontrol.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/network/networkengine.h
@@ -172,6 +204,55 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/templateproperty.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/triggerproperty.h
     ${OPENSPACE_BASE_DIR}/include/openspace/properties/vectorproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x3property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat2x4property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3x2property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat3x4property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4x2property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4x3property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/dmat4property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2x3property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat2x4property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3x2property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat3x4property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4x2property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4x3property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/matrix/mat4property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/boolproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/charproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/doubleproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/floatproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/intproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longdoubleproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longlongproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/longproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/shortproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/signedcharproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ucharproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/uintproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ulonglongproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ulongproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/ushortproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/scalar/wcharproperty.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec2property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec3property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/bvec4property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec2property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec3property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/dvec4property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/ivec2property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/ivec3property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/ivec4property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/uvec2property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/uvec3property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/uvec4property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/vec2property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/vec3property.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/properties/vector/vec4property.h
     ${OPENSPACE_BASE_DIR}/include/openspace/query/query.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
@@ -212,9 +293,11 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/updatestructures.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/transformationmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/histogram.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/gpudata.h
 )
 
 # Place files into source groups

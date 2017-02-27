@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACEENGINE_H__
-#define __OPENSPACEENGINE_H__
+#ifndef __OPENSPACE_CORE___OPENSPACEENGINE___H__
+#define __OPENSPACE_CORE___OPENSPACEENGINE___H__
 
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
@@ -185,6 +185,6 @@ private:
 
 #define OsEng (openspace::OpenSpaceEngine::ref())
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif  // __OPENSPACEENGINE_H__
+#endif  // __OPENSPACE_CORE___OPENSPACEENGINE___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GUIORIGINCOMPONENT_H__
-#define __GUIORIGINCOMPONENT_H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIORIGINCOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIORIGINCOMPONENT___H__
 
 #include <modules/onscreengui/include/guicomponent.h>
 
@@ -32,10 +32,12 @@ namespace gui {
 
 class GuiOriginComponent : public GuiComponent {
 public:
+    GuiOriginComponent();
+
     void render() override;
 };
 
 } // namespace gui
 } // namespace openspace
 
-#endif // __GUIORIGINCOMPONENT_H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIORIGINCOMPONENT___H__

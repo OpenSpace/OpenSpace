@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TOYVOLUMEMODULE_H__
-#define __TOYVOLUMEMODULE_H__
+#ifndef __OPENSPACE_MODULE_TOYVOLUME___TOYVOLUMEMODULE___H__
+#define __OPENSPACE_MODULE_TOYVOLUME___TOYVOLUMEMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -37,4 +37,4 @@ public:
 
 } // namespace openspace
 
-#endif // __TOYVOLUMEMODULE_H__
+#endif // __OPENSPACE_MODULE_TOYVOLUME___TOYVOLUMEMODULE___H__

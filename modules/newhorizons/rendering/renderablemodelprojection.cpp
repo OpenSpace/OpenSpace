@@ -24,28 +24,33 @@
 
 #include <modules/newhorizons/rendering/renderablemodelprojection.h>
 
+#include <modules/base/rendering/modelgeometry.h>
+
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
     const std::string _loggerCat = "RenderableModelProjection";
-    const std::string keySource = "Rotation.Source";
-    const std::string keyDestination = "Rotation.Destination";
-    const std::string keyGeometry = "Geometry";
-    const std::string keyProjection = "Projection";
-    const std::string keyBoundingSphereRadius = "BoundingSphereRadius";
+    const char* keySource = "Rotation.Source";
+    const char* keyDestination = "Rotation.Destination";
+    const char* keyGeometry = "Geometry";
+    const char* keyProjection = "Projection";
+    const char* keyBoundingSphereRadius = "BoundingSphereRadius";
 
-    const std::string keyTextureColor = "Textures.Color";
+    const char* keyTextureColor = "Textures.Color";
 
-    const std::string _destination = "GALACTIC";
+    const char* _destination = "GALACTIC";
 }
 
 namespace openspace {
@@ -142,6 +147,12 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     Renderable::addProperty(_performShading);
     Renderable::addProperty(_rotation);
 }
+
+RenderableModelProjection::~RenderableModelProjection() {
+    // This empty method needs to be here in order to use forward declaration with 
+    // std::unique_ptr
+}
+
 
 bool RenderableModelProjection::isReady() const {
     bool ready = true;

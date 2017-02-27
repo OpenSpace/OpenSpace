@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TIMERANGE_H__
-#define __TIMERANGE_H__
+#ifndef __OPENSPACE_CORE___TIMERANGE___H__
+#define __OPENSPACE_CORE___TIMERANGE___H__
 
 #include <openspace/documentation/documentation.h>
 
@@ -78,4 +78,4 @@ struct TimeRange {
 
 } // namespace openspace
 
-#endif //__TIMERANGE_H__
+#endif //__OPENSPACE_CORE___TIMERANGE___H__

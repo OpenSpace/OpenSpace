@@ -34,12 +34,15 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 
-
-
-
 namespace openspace {
 
 Time* Time::_instance = nullptr;
+    
+
+double Time::convertTime(const std::string& time) {
+    ghoul_assert(!time.empty(), "timeString must not be empty");
+    return SpiceManager::ref().ephemerisTimeFromDate(time);
+}
 
 Time::Time(double secondsJ2000)
     : _time(secondsJ2000)
@@ -80,7 +83,6 @@ Time Time::now() {
     now.setTime(secondsSince2000);
     return now;
 }
-
 
 bool Time::isInitialized() {
     return (_instance != nullptr);

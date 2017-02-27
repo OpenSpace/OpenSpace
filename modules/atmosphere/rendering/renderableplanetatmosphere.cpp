@@ -28,7 +28,7 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <modules/base/rendering/planetgeometry.h>
+#include <modules/space/rendering/planetgeometry.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -500,8 +500,7 @@ namespace openspace {
 
 #ifdef _ATMOSPHERE_DEBUG
         // DEBUG: Deferred rendering of the Atmosphere
-        _deferredAtmosphereProgramObject = //renderEngine.buildRenderProgram(
-            ghoul::opengl::ProgramObject::Build(
+        _deferredAtmosphereProgramObject = ghoul::opengl::ProgramObject::Build(
             "atmosphereDeferredProgram",
             "${MODULE_ATMOSPHERE}/shaders/atmosphere_deferred_vs.glsl",
             "${MODULE_ATMOSPHERE}/shaders/atmosphere_deferred_fs.glsl");
@@ -901,6 +900,35 @@ namespace openspace {
         // DEBUG: Deferred Rendering of the atmosphere to a texture.
         // Render Atmosphere to a texture:
         if (_atmosphereEnabled) {
+
+            /*std::cout << "\nTestes..." << std::endl;
+            glm::dvec3 sunPosSun = SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
+            glm::dvec3 earthPosSun = SpiceManager::ref().targetPosition("EARTH", "SUN", "GALACTIC", {}, _time, lt);
+            std::cout << "\n\nSun in Sun: " << sunPosSun.x << ", " << sunPosSun.y << ", " << sunPosSun.z << std::endl;
+            std::cout << "\n\nEarth in Sun: " << earthPosSun.x << ", " << earthPosSun.y << ", " << earthPosSun.z << std::endl;
+            std::cout << "\n\nCam Position in Sun: " << data.camera.position().vec3().x << ", " << data.camera.position().vec3().y << ", " << data.camera.position().vec3().z << std::endl;
+            std::cout << "\n\nCam Position from Earth in Sun: " << cam_dir.x << ", " << cam_dir.y << ", " << cam_dir.z << std::endl;
+
+            glm::dmat3 sun2earthMat = SpiceManager::ref().frameTransformationMatrix("GALACTIC", "IAU_EARTH", _time);
+            glm::dvec3 sunPosEarth = sun2earthMat * sunPosSun;
+            glm::dvec3 earthPosEarth = sun2earthMat * earthPosSun;
+            glm::dvec3 camDirEarth = sun2earthMat * cam_dir;
+            glm::dvec3 camPosEarth = sun2earthMat * data.camera.position().vec3();
+            std::cout << "\n\nSun in Earth: " << sunPosEarth.x << ", " << sunPosEarth.y << ", " << sunPosEarth.z << std::endl;
+            std::cout << "\n\nEarth in Earth: " << earthPosEarth.x << ", " << earthPosEarth.y << ", " << earthPosEarth.z << std::endl;
+            std::cout << "\n\nCam Position in Earth: " << camPosEarth.x << ", " << camPosEarth.y << ", " << camPosEarth.z << std::endl;
+            std::cout << "\n\nCam Position from Earth in Earth: " << camDirEarth.x << ", " << camDirEarth.y << ", " << camDirEarth.z << std::endl;
+
+            glm::dvec3 sunPosView = glm::dvec3(data.camera.viewMatrix() * glm::dvec4(sunPosSun.x, sunPosSun.y, sunPosSun.z, 1.0));
+            glm::dvec3 earthPosView = glm::dvec3(data.camera.viewMatrix() * glm::dvec4(earthPosSun.x, earthPosSun.y, earthPosSun.z, 1.0));
+            glm::dvec3 camDirView = glm::dvec3(data.camera.viewMatrix() * glm::dvec4(cam_dir.x, cam_dir.y, cam_dir.z, 0.0));
+            glm::dvec3 camPosView = glm::dvec3(data.camera.viewMatrix() * glm::dvec4(data.camera.position().vec3().x, data.camera.position().vec3().y, data.camera.position().vec3().z, 1.0));
+            std::cout << "\n\nSun in View: " << sunPosView.x << ", " << sunPosView.y << ", " << sunPosView.z << std::endl;
+            std::cout << "\n\nEarth in View: " << earthPosView.x << ", " << earthPosView.y << ", " << earthPosView.z << std::endl;
+            std::cout << "\n\nCam Position in View: " << camPosView.x << ", " << camPosView.y << ", " << camPosView.z << std::endl;
+            std::cout << "\n\nCam Position from Earth in View: " << camDirView.x << ", " << camDirView.y << ", " << camDirView.z << std::endl;*/
+
+
             GLint defaultFBO;
             glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
@@ -929,7 +957,7 @@ namespace openspace {
             }
 
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _dummyTexture, 0);
-            //checkFrameBufferState("dummy framebuffer - line 955");
+            checkFrameBufferState("dummy framebuffer - line 955");
             //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _atmosphereTexture, 0);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _atmosphereDepthTexture, 0);
             checkFrameBufferState("deferred atmosphere framebuffer - line 958");
@@ -974,9 +1002,7 @@ namespace openspace {
             _deferredAtmosphereProgramObject->setUniform("worldToObjectTransform", world2Obj);
 
             // World to Eye Space in OS
-            //glm::dmat4 world2Eye = dScaleCamTransf * glm::dmat4(data.camera.viewRotationMatrix()) *
-            //    glm::translate(glm::dmat4(1.0), -data.camera.position().dvec3());
-            glm::dmat4 world2Eye = glm::dmat4(data.camera.viewRotationMatrix()) *
+            glm::dmat4 world2Eye = dScaleCamTransf * glm::dmat4(data.camera.viewRotationMatrix()) *
                 glm::translate(glm::dmat4(1.0), -data.camera.position().dvec3());
             _deferredAtmosphereProgramObject->setUniform("worldToEyeTransform", world2Eye);
             glm::dmat4 eye2World = glm::inverse(world2Eye);
@@ -988,16 +1014,15 @@ namespace openspace {
             _deferredAtmosphereProgramObject->setUniform("viewToEyeTranform", glm::inverse(eye2View));
 
             // Camera Position in Object Space in Meters
-            //glm::dvec4 cameraPosObjecCoords = glm::dvec4(0.0, 0.0, 0.0, 1.0);
+            glm::dvec4 cameraPosObjecCoords = glm::dvec4(0.0, 0.0, 0.0, 1.0);
             //cameraPosObjecCoords = world2Obj * eye2World * cameraPosObjecCoords;
-            glm::dvec4 cameraPosObjecCoords = glm::dvec4(data.camera.position().dvec3(), 1.0);
-            cameraPosObjecCoords = world2Obj * cameraPosObjecCoords;
+            cameraPosObjecCoords = world2Obj * glm::dvec4(data.camera.positionVec3(), 1.0);
             _deferredAtmosphereProgramObject->setUniform("cameraPositionObjectCoords", cameraPosObjecCoords);
             
             glm::dmat4 inverseProjection = glm::inverse(data.camera.projectionMatrix());
             _deferredAtmosphereProgramObject->setUniform("inverseSgctProjectionMatrix", inverseProjection);
-            //std::cout << "\nProjection: " << glm::to_string(data.camera.projectionMatrix()) << std::endl;
-            //std::cout << "\nInverse Projection: " << glm::to_string(inverseProjection) << std::endl;
+            /*std::cout << "\nProjection: " << glm::to_string(data.camera.projectionMatrix()) << std::endl;
+            std::cout << "\nInverse Projection: " << glm::to_string(inverseProjection) << std::endl;*/
 
             ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
             transmittanceTableTextureUnit.activate();

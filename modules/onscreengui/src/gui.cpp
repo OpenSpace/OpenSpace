@@ -44,8 +44,8 @@
 namespace {
 
 const std::string _loggerCat = "GUI";
-const std::string configurationFile = "imgui.ini";
-const std::string GuiFont = "${FONTS}/Roboto/Roboto-Regular.ttf";
+const char* configurationFile = "imgui.ini";
+const char* GuiFont = "${FONTS}/Roboto/Roboto-Regular.ttf";
 const ImVec2 size = ImVec2(350, 500);
 
 //GLuint fontTex = 0;
@@ -221,11 +221,21 @@ namespace openspace {
 namespace gui {
 
 GUI::GUI() 
-    : GuiComponent()
+    : GuiComponent("Main")
     , _globalProperty("Global")
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
-{}
+    , _currentVisibility(properties::Property::Visibility::All)
+{
+    addPropertySubOwner(_help);
+    addPropertySubOwner(_origin);
+    addPropertySubOwner(_performance);
+    addPropertySubOwner(_globalProperty);
+    addPropertySubOwner(_property);
+    addPropertySubOwner(_screenSpaceProperty);
+    addPropertySubOwner(_time);
+    addPropertySubOwner(_iswa);
+}
 
 GUI::~GUI() {
     ImGui::Shutdown();
@@ -432,27 +442,29 @@ void GUI::endFrame() {
         _program->rebuildFromFile();
     }
 
-    render();
-
-    if (_globalProperty.isEnabled()) {
-        _globalProperty.render();
-    }
-    if (_property.isEnabled()) {
-        _property.render();
-    }
-    if (_screenSpaceProperty.isEnabled()) {
-        _screenSpaceProperty.render();
-    }
-
     if (OsEng.renderEngine().doesPerformanceMeasurements()) {
         _performance.render();
     }
 
-    if (_help.isEnabled()) {
-        _help.render();
-    }
-    if (_iswa.isEnabled()) {
-        _iswa.render();
+    if (_isEnabled) {
+        render();
+
+        if (_globalProperty.isEnabled()) {
+            _globalProperty.render();
+        }
+        if (_property.isEnabled()) {
+            _property.render();
+        }
+        if (_screenSpaceProperty.isEnabled()) {
+            _screenSpaceProperty.render();
+        }
+
+        if (_help.isEnabled()) {
+            _help.render();
+        }
+        if (_iswa.isEnabled()) {
+            _iswa.render();
+        }
     }
 
     ImGui::Render();
@@ -535,6 +547,8 @@ void GUI::render() {
     ImGui::Checkbox("Help", &help);
     _help.setEnabled(help);
 
+    renderAndUpdatePropertyVisibility();
+
     static const int addImageBufferSize = 256;
     static char addImageBuffer[addImageBufferSize];
 
@@ -565,31 +579,21 @@ void GUI::render() {
     ImGui::End();
 }
     
-scripting::LuaLibrary GUI::luaLibrary() {
-    return {
-        "gui",
-        {
-            {
-                "show",
-                &luascriptfunctions::gui::show,
-                "",
-                "Shows the console"
-            },
-            {
-                "hide",
-                &luascriptfunctions::gui::hide,
-                "",
-                "Hides the console"
-            },
-            {
-                "toggle",
-                &luascriptfunctions::gui::toggle,
-                "",
-                "Toggles the console"
-            }
-        }
-    };
+void GUI::renderAndUpdatePropertyVisibility() {
+    // Fragile! Keep this in sync with properties::Property::Visibility
+    using V = properties::Property::Visibility;
+    int t = static_cast<std::underlying_type_t<V>>(_currentVisibility);
+
+    // Array is sorted by importance
+    std::array<const char*, 4> items = {  "None", "User", "Developer", "All"};
+    ImGui::Combo("PropertyVisibility", &t, items.data(), items.size());
+
+    _currentVisibility = static_cast<V>(t);
+    _globalProperty.setVisibility(_currentVisibility);
+    _property.setVisibility(_currentVisibility);
+    _screenSpaceProperty.setVisibility(_currentVisibility);
 }
+
 
 } // namespace gui
 } // namespace openspace

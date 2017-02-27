@@ -97,25 +97,16 @@ return {
         Name = "BennuTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrailNew",
-            -- Spice
-            Body = BENNU_BODY,
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            -- Optional rendering properties
-            LineColor = { 0.4, 0.0, 0.7},
-            PointColor = { 0.4, 0.0, 0.7},
-            LineFade = 0, -- [0,1]
-            RenderPart = 0.12,
-            LineWidth = 2,
-            ShowTimeStamps = false,
-            -- Time interval
-            TimeRange = {
-                Start = "2015 JAN 01 00:00:00.000",
-                End = "2023 MAY 31 00:00:00.000",
+            Type = "RenderableTrailTrajectory",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = BENNU_BODY,
+                Observer = "SUN",
             },
-            SampleDeltaTime = 3600, -- Seconds between each point
-            SubSamples = 0, 
+            Color = { 0.4, 0.0, 0.7},
+            StartTime = "2015 JAN 01 00:00:00.000",
+            EndTime = "2023 MAY 31 00:00:00.000",
+            SampleInterval = 3600,
         },
     },
 }

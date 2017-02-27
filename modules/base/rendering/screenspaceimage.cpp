@@ -35,9 +35,9 @@
 namespace {
     const std::string _loggerCat = "ScreenSpaceImage";
 
-    const std::string KeyName = "Name";
-    const std::string KeyTexturePath = "TexturePath";
-    const std::string KeyUrl = "URL";
+    const char* KeyName = "Name";
+    const char* KeyTexturePath = "TexturePath";
+    const char* KeyUrl = "URL";
 }
 
 namespace openspace {

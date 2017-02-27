@@ -47,7 +47,6 @@ namespace {
     const std::string ExitFragmentShaderPath = "${SHADERS}/framebuffer/exitframebuffer.frag";
     const std::string RaycastFragmentShaderPath = "${SHADERS}/framebuffer/raycastframebuffer.frag";
     const std::string RenderFragmentShaderPath = "${SHADERS}/framebuffer/renderframebuffer.frag";
-    const std::string PostRenderFragmentShaderPath = "${SHADERS}/framebuffer/postrenderframebuffer.frag";
 }
 
 namespace openspace {
@@ -467,7 +466,6 @@ void FramebufferRenderer::setNAaSamples(int nAaSamples) {
 void FramebufferRenderer::updateRendererData() {
     ghoul::Dictionary dict;
     dict.setValue("fragmentRendererPath", std::string(RenderFragmentShaderPath));
-    dict.setValue("postFragmentRendererPath", std::string(PostRenderFragmentShaderPath));
 
     _rendererData = dict;
 

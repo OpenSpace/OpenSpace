@@ -85,4 +85,26 @@ bool Translation::initialize() {
     
 void Translation::update(const UpdateData& data) {}
 
+glm::dvec3 Translation::position(double time) {
+    update({
+        {},
+        time,
+        1.0,
+        false,
+        false
+    });
+
+    return position();
+}
+
+void Translation::notifyObservers() {
+    if (_onParameterChangeCallback) {
+        _onParameterChangeCallback();
+    }
+}
+
+void Translation::onParameterChange(std::function<void()> callback) {
+    _onParameterChangeCallback = std::move(callback);
+}
+
 } // namespace openspace

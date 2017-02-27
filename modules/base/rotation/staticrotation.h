@@ -22,13 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __STATICROTATION_H__
-#define __STATICROTATION_H__
+#ifndef __OPENSPACE_MODULE_BASE___STATICROTATION___H__
+#define __OPENSPACE_MODULE_BASE___STATICROTATION___H__
 
 #include <openspace/scene/rotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/matrixproperty.h>
+#include <openspace/properties/matrix/dmat3property.h>
 
 namespace openspace {
     
@@ -45,4 +45,4 @@ private:
     
 } // namespace openspace
 
-#endif // __STATICROTATION_H__
+#endif // __OPENSPACE_MODULE_BASE___STATICROTATION___H__

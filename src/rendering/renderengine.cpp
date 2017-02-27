@@ -99,7 +99,6 @@ namespace {
     std::chrono::seconds ScreenLogTimeToLive(15);
     const std::string DefaultRenderingMethod = "ABuffer";
     const std::string RenderFsPath = "${SHADERS}/render.frag";
-    const std::string PostRenderFsPath = "${SHADERS}/postrender.frag";
 }
 
 
@@ -369,6 +368,7 @@ void RenderEngine::updateSceneGraph() {
         1,
         Time::ref().j2000Seconds(),
         Time::ref().deltaTime(),
+        Time::ref().paused(),
         Time::ref().timeJumped(),
         _performanceManager != nullptr
     });
@@ -591,8 +591,7 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::string name,
     std::string vsPath,
     std::string fsPath,
-    const ghoul::Dictionary& data,
-    RenderEngine::RenderProgramType type) {
+    const ghoul::Dictionary& data) {
 
     ghoul::Dictionary dict = data;
 
@@ -603,16 +602,10 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // instead of a void main() setting glFragColor, glFragDepth, etc.
     dict.setValue("fragmentPath", fsPath);
 
-    if (type == RenderEngine::RenderProgramType::Post) {
-        dict.setValue("resolveData", _resolveData);
-    }
-
-    std::string path = (type == RenderEngine::RenderProgramType::Post) ? PostRenderFsPath : RenderFsPath;
-
     std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
         name,
         vsPath,
-        path,
+        RenderFsPath,
         dict);
 
     if (program) {
@@ -629,27 +622,20 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     std::string vsPath,
     std::string fsPath,
     std::string csPath,
-    const ghoul::Dictionary& data, 
-    RenderEngine::RenderProgramType type) {
+    const ghoul::Dictionary& data) {
 
     ghoul::Dictionary dict = data;
     dict.setValue("rendererData", _rendererData);
-
-    if (type == RenderEngine::RenderProgramType::Post) {
-        dict.setValue("resolveData", _resolveData);
-    }
 
     // parameterize the main fragment shader program with specific contents.
     // fsPath should point to a shader file defining a Fragment getFragment() function
     // instead of a void main() setting glFragColor, glFragDepth, etc.
     dict.setValue("fragmentPath", fsPath);
 
-    std::string path = (type == RenderEngine::RenderProgramType::Post) ? PostRenderFsPath : RenderFsPath;
-
     std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
         name,
         vsPath,
-        path,
+        RenderFsPath,
         csPath,
         dict);
 
@@ -1297,12 +1283,13 @@ void RenderEngine::renderInformation() {
         );
         penPosition.y -= _fontDate->height();
 
-        RenderFontCr(*_fontDate,
-            penPosition,
-            "Date: %s",
-            Time::ref().UTC().c_str()
+        if (_showInfo && _fontDate) {
+            RenderFontCr(*_fontDate,
+                penPosition,
+                "Date: %s",
+                Time::ref().UTC().c_str()
             );
-
+        }
         if (_showInfo && _fontInfo) {
             RenderFontCr(*_fontInfo,
                          penPosition,
@@ -1708,7 +1695,7 @@ void RenderEngine::renderScreenLog() {
         if (alpha <= 0.0)
             break;
 
-        const std::string lvl = "(" + ghoul::logging::LogManager::stringFromLevel(e->level) + ")";
+        const std::string lvl = "(" + ghoul::logging::stringFromLevel(e->level) + ")";
         const std::string& message = e->message.substr(0, msg_length);
         nr += std::count(message.begin(), message.end(), '\n');
 
@@ -1721,13 +1708,13 @@ void RenderEngine::renderScreenLog() {
             e->category.length() > 20 ? "..." : "");        // Pad category with "..." if exceeds category_length
 
         glm::vec4 color = white;
-        if (e->level == ghoul::logging::LogManager::LogLevel::Debug)
+        if (e->level == ghoul::logging::LogLevel::Debug)
             color = green;
-        if (e->level == ghoul::logging::LogManager::LogLevel::Warning)
+        if (e->level == ghoul::logging::LogLevel::Warning)
             color = yellow;
-        if (e->level == ghoul::logging::LogManager::LogLevel::Error)
+        if (e->level == ghoul::logging::LogLevel::Error)
             color = red;
-        if (e->level == ghoul::logging::LogManager::LogLevel::Fatal)
+        if (e->level == ghoul::logging::LogLevel::Fatal)
             color = blue;
 
         //                    const float font_with_light = 5;

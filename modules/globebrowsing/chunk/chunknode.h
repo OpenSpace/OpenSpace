@@ -22,41 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __QUADTREE_H__
-#define __QUADTREE_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKNODE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKNODE___H__
 
-#include <glm/glm.hpp>
-#include <vector>
-#include <stack>
-#include <memory>
-#include <ostream>
-
-#include <modules/globebrowsing/chunk/chunkindex.h>
 #include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/chunk/chunkrenderer.h>
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-
+#include <array>
 #include <functional>
-
-
-
-// forward declaration
-namespace openspace {
-    class ChunkedLodGlobe;
-}
-
+#include <memory>
 
 namespace openspace {
+namespace globebrowsing {
 
+class ChunkedLodGlobe;
 
 class ChunkNode {
 public:
     ChunkNode(const Chunk& chunk, ChunkNode* parent = nullptr);
     ~ChunkNode();
 
-
+    /**
+     * Recursively split the ChunkNode.
+     *
+     * \param depth defines how deep the recursion should go. If depth == 1 (default),
+     * the ChunkNode will only split once.
+    */
     void split(int depth = 1);
+
+    /**
+     * Deletes all children of the ChunkNode recursively.
+    */
     void merge();
 
     bool isRoot() const;
@@ -67,28 +62,28 @@ public:
     void reverseBreadthFirst(const std::function<void(const ChunkNode&)>& f) const;
 
     const ChunkNode& find(const Geodetic2& location) const;
-    ChunkNode& find(const Geodetic2& location);
-    
     const ChunkNode& getChild(Quad quad) const;
-    ChunkNode& getChild(Quad quad);
-
     const Chunk& getChunk() const;
 
+    /**
+     * Updates all children recursively. If this ChunkNode wants to split it will,
+     * otherwise check if the children wants to merge. If all children wants to merge
+     * and the Status of this Chunk is not Status::WANT_SPLIT it will merge.
+     *
+     * \returns true if the ChunkNode can merge and false if it can not merge.
+    */
     bool updateChunkTree(const RenderData& data);
 
     static int chunkNodeCount;
 
-
-private:
-    
+private:    
     ChunkNode* _parent;
-    std::unique_ptr<ChunkNode> _children[4];    
+    std::array<std::unique_ptr<ChunkNode>, 4> _children;
 
     Chunk _chunk;
 };
 
+} // namespace globebrowsing
 } // namespace openspace
 
-
-
-#endif // __QUADTREE_H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKNODE___H__

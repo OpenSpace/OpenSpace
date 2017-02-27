@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __VERIFIER_H__
-#define __VERIFIER_H__
+#ifndef __OPENSPACE_CORE___VERIFIER___H__
+#define __OPENSPACE_CORE___VERIFIER___H__
 
 #include <openspace/documentation/documentation.h>
 
@@ -1141,4 +1141,4 @@ extern template struct DeprecatedVerifier<DoubleVector4Verifier>;
 
 #include "verifier.inl"
 
-#endif // __VERIFIER_H__
+#endif // __OPENSPACE_CORE___VERIFIER___H__

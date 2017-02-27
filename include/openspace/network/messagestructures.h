@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MESSAGESTRUCTURES_H__
-#define __MESSAGESTRUCTURES_H__
+#ifndef __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
+#define __OPENSPACE_CORE___MESSAGESTRUCTURES___H__
 
 //std includes
 #include <string>
@@ -164,4 +164,4 @@ struct ScriptMessage {
 } //namespace messagestructures
 } // namespace openspace
 
-#endif // __MESSAGESTRUCTURES_H__
+#endif // __OPENSPACE_CORE___MESSAGESTRUCTURES___H__

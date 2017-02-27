@@ -237,19 +237,15 @@ return {
         Name = "PlutoBarycentricTrail",
         Parent = "PlutoBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "PLUTO",
-            Frame = "GALACTIC",
-            Observer = "PLUTO BARYCENTER",
-            RGB = {0.00,0.62,1.00},
-            TropicalOrbitPeriod = 120 ,
-            EarthOrbitRatio = 0.03,
-            DayLength = 1,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "PLUTO",
+                Observer = "PLUTO BARYCENTER",
+            },
+            Color = {0.00, 0.62, 1.00},
+            Period = 6.38723,
+            Resolution = 1000
         },
     },
   -- PlutoTrail module
@@ -257,19 +253,17 @@ return {
         Name = "PlutoTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "PLUTO BARYCENTER",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = { 0.3, 0.7, 0.3 },
-            TropicalOrbitPeriod = 90588 ,
-            EarthOrbitRatio = 248.02,
-            DayLength = 9.9259,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "PLUTO BARYCENTER",
+                Observer = "SUN",
+            },
+            Color = { 0.3, 0.7, 0.3 },
+            -- Not the actual Period, but the SPICE kernels we have only
+            -- go back to 1850, about 150 yeays ago
+            Period = 160 * 365.242, 
+            Resolution = 1000
         },
     }    
 }

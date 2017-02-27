@@ -22,12 +22,18 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __TILEDEPTHTRANSFORM_H__
-#define __TILEDEPTHTRANSFORM_H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEDEPTHTRANSFORM___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEDEPTHTRANSFORM___H__
+
+namespace openspace {
+namespace globebrowsing {
 
 struct TileDepthTransform {
     float depthScale;
     float depthOffset;
 };
 
-#endif // __TILEDEPTHTRANSFORM_H__
+} // namespace globebrowsing
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEDEPTHTRANSFORM___H__

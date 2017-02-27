@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __MULTIRESVOLUMERAYCASTER_H__
-#define __MULTIRESVOLUMERAYCASTER_H__
+#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___MULTIRESVOLUMERAYCASTER___H__
+#define __OPENSPACE_MODULE_MULTIRESVOLUME___MULTIRESVOLUMERAYCASTER___H__
 
 #include <ghoul/glm.h>
 #include <string>
@@ -93,6 +93,6 @@ private:
 
 }; // MultiresVolumeRaycaster
 
-} // openspace
+} // namespace openspace
 
-#endif  // __MULTIRESVOLUMERAYCASTER_H__ 
+#endif  // __OPENSPACE_MODULE_MULTIRESVOLUME___MULTIRESVOLUMERAYCASTER___H__ 

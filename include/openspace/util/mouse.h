@@ -54,8 +54,8 @@
 // All values that are defined here are compatible with (and are based on) the
 // definitions GLFW v3.1
 
-#ifndef __MOUSE_H__
-#define __MOUSE_H__
+#ifndef __OPENSPACE_CORE___MOUSE___H__
+#define __OPENSPACE_CORE___MOUSE___H__
 
 namespace openspace {
 
@@ -92,4 +92,4 @@ enum class MouseButton {
 
 } // namespace openspace
 
-#endif // __MOUSE_H__
+#endif // __OPENSPACE_CORE___MOUSE___H__

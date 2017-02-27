@@ -39,13 +39,18 @@
 #include <iomanip>
 #include <limits>
 
+#include <modules/newhorizons/util/imagesequencer.h>
+
+#include <map>
+#include <string>
+#include <vector>
 
 namespace {
     const std::string _loggerCat = "LabelParser";
-    const std::string keySpecs   = "Read";
-    const std::string keyConvert = "Convert";
+    const char* keySpecs   = "Read";
+    const char* keyConvert = "Convert";
 
-    const std::string PlaybookIdentifierName = "LabelParser";
+    const char* PlaybookIdentifierName = "LabelParser";
 }
 
 namespace openspace {

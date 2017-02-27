@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __GALAXYRAYCASTER_H__
-#define __GALAXYRAYCASTER_H__
+#ifndef __OPENSPACE_MODULE_GALAXY___GALAXYRAYCASTER___H__
+#define __OPENSPACE_MODULE_GALAXY___GALAXYRAYCASTER___H__
 
 #include <memory>
 
@@ -49,7 +49,6 @@ class RaycastData;
 
 class GalaxyRaycaster : public VolumeRaycaster {
 public:
-
     GalaxyRaycaster(ghoul::opengl::Texture& texture);
 
     virtual ~GalaxyRaycaster();
@@ -84,6 +83,6 @@ private:
 
 }; // GalaxyRaycaster
 
-} // openspace
+} // namespace openspace
 
-#endif  // __GALAXYRRAYCASTER_H__
+#endif  // __OPENSPACE_MODULE_GALAXY___GALAXYRAYCASTER___H__

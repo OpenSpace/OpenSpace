@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2015                                                                    *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,14 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __TFBRICKSELECTOR_H__
-#define __TFBRICKSELECTOR_H__
+#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__
+#define __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__
 
 #include <vector>
 #include <modules/multiresvolume/rendering/brickselection.h>
 #include <modules/multiresvolume/rendering/brickselector.h>
 #include <modules/multiresvolume/rendering/brickcover.h>
-
 
 namespace openspace {
 
@@ -69,5 +68,4 @@ public:
 
 } // namespace openspace
 
-#endif // __TFBRICKSELECTOR_H__
-
+#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__

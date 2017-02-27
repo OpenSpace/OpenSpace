@@ -78,12 +78,28 @@ else
 end
 
 return {
-    -- New Horizons Body module
-    {   
+    {
+        Name = "NewHorizonsPosition",
+        Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "NEW HORIZONS",
+                Observer = "SUN",
+                Kernels = NewHorizonsKernels
+            },
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "NH_SPACECRAFT",
+                DestinationFrame = "GALACTIC",
+            },
+        }
+    },
+    {
         Name = "NewHorizons",
         -- Parent = "PlutoBarycenter", 
         -- Parent = "JupiterBarycenter", 
-        Parent = "SolarSystemBarycenter", 
+        Parent = "NewHorizonsPosition", 
         Renderable = {
             Type = "RenderableModel",
             Body = "NEW HORIZONS",
@@ -103,20 +119,9 @@ return {
             },
         },
         Transform = {
-            Translation = {
-                Type = "SpiceTranslation",
-                Body = "NEW HORIZONS",
-                Observer = "SUN",
-                Kernels = NewHorizonsKernels
-            },
-            Rotation = {
-                Type = "SpiceRotation",
-                SourceFrame = "NH_SPACECRAFT",
-                DestinationFrame = "GALACTIC",
-            },
             Scale = {
                 Type = "StaticScale",
-                Scale = 1000
+                Scale = 100
             }
         },
     },
@@ -176,26 +181,21 @@ return {
         Name = "NewHorizonsTrailPluto",
         Parent = "PlutoBarycenter",
         Renderable = {
-            Type = "RenderableTrailNew",
-            -- Spice
-            Body = "NEW HORIZONS",
-            Frame = "GALACTIC",
-            Observer = "PLUTO BARYCENTER",
-            -- Optional rendering properties
-            LineColor = { 1.0, 0.8, 0.4 },
-            PointColor = { 1.0, 0.8, 0.4 },
-            LineFade = 0.0, -- [0,1]
-            RenderPart = 1,
-            LineWidth = 2,
-            ShowTimeStamps = true,
-            RenderFullTrail = true,
-            -- Time interval
-            TimeRange = {
-                Start = "2015 JUL 07 12:00:00",
-                End = "2015 JUL 17 12:00:00"
+            Type = "RenderableTrailTrajectory",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "NEW HORIZONS",
+                Observer = "PLUTO BARYCENTER"
             },
-            SampleDeltaTime = 3600, -- Seconds between each point
-            SubSamples = 3, 
+            Color = { 1.0, 0.8, 0.4 },
+            ShowFullTrail = true,
+            StartTime = "2015 JUL 07 12:00:00",
+            EndTime = "2015 JUL 17 12:00:00",
+            PointSize = 5,
+            SampleInterval = 3600,
+            TimeStampSubsampleFactor = 4,
+            EnableFade = false,
+            Rendering = "Lines+Points"
         },
     },
     --[[

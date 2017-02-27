@@ -3,6 +3,14 @@ return {
     {
         Name = "NeptuneBarycenter",
         Parent = "SolarSystemBarycenter",
+        Transform = {
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "NEPTUNE BARYCENTER",
+                Observer = "SUN",
+                Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
+            }
+        }
     },
 
     -- Neptune module
@@ -23,36 +31,28 @@ return {
                 Color = "textures/neptune.jpg",
             },
         },
-        Ephemeris = {
-            Type = "Spice",
-            Body = "NEPTUNE BARYCENTER",
-            Observer = "SUN",
-            Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
-        },
-        Rotation = {
-            Type = "Spice",
-            Frame = "IAU_NEPTUNE",
-            Reference = "ECLIPJ2000"
-        },
+        Translation = {
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_NEPTUNE",
+                DestinationFrame = "GALACTIC"
+            },
+        }
     },
     -- NeptuneTrail module
     {   
         Name = "NeptuneTrail",
-        Parent = "NeptuneBarycenter",
+        Parent = "SolarSystemBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "NEPTUNE BARYCENTER",
-            Frame = "GALACTIC",
-            Observer = "SUN",
-            RGB = {0.2, 0.5, 1.0 },
-            TropicalOrbitPeriod = 59799.9 ,
-            EarthOrbitRatio = 163.73,
-            DayLength = 16.11,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "NEPTUNE BARYCENTER",
+                Observer = "SUN",
+            },
+            Color = {0.2, 0.5, 1.0 },
+            Period  = 60200,
+            Resolution = 1000
         },
     }
 }

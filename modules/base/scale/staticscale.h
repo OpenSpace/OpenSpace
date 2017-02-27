@@ -22,12 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __STATICSCALE_H__
-#define __STATICSCALE_H__
+#ifndef __OPENSPACE_MODULE_BASE___STATICSCALE___H__
+#define __OPENSPACE_MODULE_BASE___STATICSCALE___H__
 
 #include <openspace/scene/scale.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
     
@@ -45,4 +46,4 @@ private:
     
 } // namespace openspace
 
-#endif // __STATICSCALE_H__
+#endif // __OPENSPACE_MODULE_BASE___STATICSCALE___H__

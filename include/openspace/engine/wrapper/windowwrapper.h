@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __WINDOWWRAPPER_H__
-#define __WINDOWWRAPPER_H__
+#ifndef __OPENSPACE_CORE___WINDOWWRAPPER___H__
+#define __OPENSPACE_CORE___WINDOWWRAPPER___H__
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
@@ -258,4 +258,4 @@ public:
 
 } // namespace openspace
 
-#endif // _WINDOW_H__
+#endif // __OPENSPACE_CORE___WINDOWWRAPPER___H__

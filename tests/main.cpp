@@ -58,12 +58,16 @@
 //#include <test_iswamanager.inl>
 #endif
 
+#include <test_scriptscheduler.inl>
+
 #include <test_documentation.inl>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/engine/configurationmanager.h>
+
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 
 #include <iostream>
@@ -88,7 +92,7 @@ int main(int argc, char** argv) {
     testing::internal::CaptureStdout();
     testing::internal::CaptureStderr();
 #endif
-
+    
     openspace::SpiceManager::deinitialize();
 
     bool b = RUN_ALL_TESTS();

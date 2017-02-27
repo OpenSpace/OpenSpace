@@ -104,19 +104,15 @@ return {
         Name = "CharonTrail",
         Parent = "PlutoBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "CHARON",
-            Frame = "GALACTIC",
-            Observer = "PLUTO BARYCENTER",
-            RGB = {0.00,0.62,1.00},
-            TropicalOrbitPeriod = 120 ,
-            EarthOrbitRatio = 0.03,
-            DayLength = 1,
-            Textures = {
-                Type = "simple",
-                Color = "${COMMON_MODULE}/textures/glare_blue.png",
-                -- need to add different texture
-            },  
+            Type = "RenderableTrailOrbit",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "CHARON",
+                Observer = "PLUTO BARYCENTER",
+            },
+            Color = {0.00, 0.62, 1.00},
+            Period = 6.38725,
+            Resolution = 1000
         },
     }
 }

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __PROPERTYOWNER_H__
-#define __PROPERTYOWNER_H__
+#ifndef __OPENSPACE_CORE___PROPERTYOWNER___H__
+#define __OPENSPACE_CORE___PROPERTYOWNER___H__
 
 #include <openspace/properties/property.h>
 #include <map>
@@ -222,4 +222,4 @@ private:
 }  // namespace properties
 }  // namespace openspace
 
-#endif // __PROPERTYOWNER_H__
+#endif // __OPENSPACE_CORE___PROPERTYOWNER___H__

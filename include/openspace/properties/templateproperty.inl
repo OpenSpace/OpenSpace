@@ -149,19 +149,21 @@ namespace properties {
 // a single constructor
 
 template <typename T>
-TemplateProperty<T>::TemplateProperty(std::string identifier, std::string guiName)
+TemplateProperty<T>::TemplateProperty(std::string identifier, std::string guiName,
+                                      Property::Visibility visibility)
     : TemplateProperty<T>(
             std::move(identifier), std::move(guiName),
-            PropertyDelegate<TemplateProperty<T>>::template defaultValue<T>())
+            PropertyDelegate<TemplateProperty<T>>::template defaultValue<T>(),
+            visibility)
 {
 }
 
 template <typename T>
 TemplateProperty<T>::TemplateProperty(std::string identifier, std::string guiName,
-                                      T value)
-    : Property(std::move(identifier), std::move(guiName))
-    , _value(std::move(value)) {
-}
+                                      T value, Property::Visibility visibility)
+    : Property(std::move(identifier), std::move(guiName), visibility)
+    , _value(std::move(value))
+{}
 
 template <typename T>
 std::string TemplateProperty<T>::className() const {

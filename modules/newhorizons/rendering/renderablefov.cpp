@@ -38,15 +38,15 @@
 namespace {
     const std::string _loggerCat              = "RenderableFov";
 
-    const std::string keyBody                 = "Body";
-    const std::string keyFrame                = "Frame";
-    const std::string keyPathModule           = "ModulePath";
-    const std::string keyColor                = "RGB";
-    const std::string keyInstrument           = "Instrument.Name";
-    const std::string keyInstrumentMethod     = "Instrument.Method";
-    const std::string keyInstrumentAberration = "Instrument.Aberration";
-    const std::string keyPotentialTargets     = "PotentialTargets";
-    const std::string keyFrameConversions     = "FrameConversions";
+    const char* keyBody                 = "Body";
+    const char* keyFrame                = "Frame";
+    const char* keyPathModule           = "ModulePath";
+    const char* keyColor                = "RGB";
+    const char* keyInstrument           = "Instrument.Name";
+    const char* keyInstrumentMethod     = "Instrument.Method";
+    const char* keyInstrumentAberration = "Instrument.Aberration";
+    const char* keyPotentialTargets     = "PotentialTargets";
+    const char* keyFrameConversions     = "FrameConversions";
 
     const int InterpolationSteps = 10;
     const int Stride = 8;
@@ -159,7 +159,7 @@ bool RenderableFov::deinitialize() {
 }
 
 bool RenderableFov::isReady() const {
-    return _programObject != nullptr;
+    return _programObject != nullptr && !_bounds.empty();
 }
 
 void RenderableFov::sendToGPU() {
@@ -265,7 +265,7 @@ psc RenderableFov::checkForIntercept(glm::dvec3 ray) {
     
     ivec *= 0.9999;// because fov lands exactly on top of surface we need to move it out slightly
     _interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
-    //_interceptVector[3] += 3;
+    _interceptVector[3] += 3;
 
     return _interceptVector;
 }
@@ -278,7 +278,7 @@ psc RenderableFov::orthogonalProjection(glm::dvec3 vecFov) {
     glm::dvec3 p = glm::proj(vecToTarget, vecFov);
 
     psc projection = PowerScaledCoordinate::CreatePowerScaledCoordinate(p[0], p[1], p[2]);
-    projection[3] += 3;
+    projection[3] += 3; 
 
     return projection;
 }
@@ -321,7 +321,6 @@ glm::dvec3 RenderableFov::bisection(glm::dvec3 p1, glm::dvec3 p2) {
         return bisection(half, p2);
     }
 }
-
 
 void RenderableFov::fovSurfaceIntercept(bool H[], std::vector<glm::dvec3> bounds) {
     _nrInserted = 0;
@@ -484,7 +483,7 @@ void RenderableFov::determineTarget() {
 }
 
 void RenderableFov::computeIntercepts(const RenderData& data) {
-    PerfMeasure("computeIntercepts");
+    //PerfMeasure("computeIntercepts");
     // for each FOV vector
     _fovBounds.clear();
     for (int i = 0; i <= _bounds.size(); ++i) {
@@ -519,7 +518,7 @@ void RenderableFov::computeIntercepts(const RenderData& data) {
 
         if (_interceptTag[r]) {
             _interceptVector = PowerScaledCoordinate::CreatePowerScaledCoordinate(ivec[0], ivec[1], ivec[2]);
-            //_interceptVector[3] += 3;
+            _interceptVector[3] += 3;
             // INTERCEPTIONS
             insertPoint(_fovBounds, fovOrigin, col_start);
             insertPoint(_fovBounds, _interceptVector.vec4(), col_end);
@@ -589,7 +588,7 @@ void RenderableFov::render(const RenderData& data) {
     if (_drawFOV) {
         // update only when time progresses.
         if (_oldTime != _time) {
-            PerfMeasure("Total");
+            //PerfMeasure("Total");
             determineTarget();
             computeColors();
             computeIntercepts(data);
