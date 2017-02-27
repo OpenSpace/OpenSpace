@@ -35,7 +35,7 @@ namespace openspace {
 using datamessagestructures::TimeKeyframe;
 
 void TimeManager::preSynchronization(double dt) {
-    double now = OsEng.runTime();
+//    double now = OsEng.runTime();
     removeKeyframesBefore(_latestConsumedTimestamp);
     if (_keyframes.size() == 0) {
         Time::ref().advanceTime(dt);

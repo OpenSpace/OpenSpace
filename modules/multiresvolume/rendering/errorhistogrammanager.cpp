@@ -94,7 +94,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset, unsigned int o
     int numOtNodes = _tsp->numOTNodes();
     unsigned int leafIndex = bstOffset * numOtNodes + octreeOffset;
     std::vector<float> leafValues = readValues(leafIndex);
-    int numVoxels = leafValues.size();
+//    int numVoxels = leafValues.size();
 
     int bstNode = bstOffset;
     bool bstRightOnly = true;

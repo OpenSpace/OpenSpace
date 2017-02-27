@@ -74,10 +74,6 @@ public:
         FPSAvg
     };
 
-    static const std::string KeyFontMono;
-    static const std::string KeyFontLight;
-    static const std::vector<FrametimeType> FrametimeTypes;
-
     RenderEngine();
     ~RenderEngine();
     

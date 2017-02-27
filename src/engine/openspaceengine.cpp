@@ -810,7 +810,7 @@ void OpenSpaceEngine::initializeGL() {
 
     LINFO("Initializing Rendering Engine");
     // @CLEANUP:  Remove the return statement and replace with exceptions ---abock
-    bool success = _renderEngine->initializeGL();
+    _renderEngine->initializeGL();
     
     for (const auto& func : _moduleCallbacks.initializeGL) {
         func();

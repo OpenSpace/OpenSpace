@@ -99,18 +99,13 @@ namespace {
     std::chrono::seconds ScreenLogTimeToLive(15);
     const std::string DefaultRenderingMethod = "ABuffer";
     const std::string RenderFsPath = "${SHADERS}/render.frag";
+    
+    const std::string KeyFontMono = "Mono";
+    const std::string KeyFontLight = "Light";
 }
 
 
 namespace openspace {
-
-const std::string RenderEngine::KeyFontMono = "Mono";
-const std::string RenderEngine::KeyFontLight = "Light";
-const std::vector<RenderEngine::FrametimeType> RenderEngine::FrametimeTypes({
-    RenderEngine::FrametimeType::DtTimeAvg,
-    RenderEngine::FrametimeType::FPS,
-    RenderEngine::FrametimeType::FPSAvg
-});
 
 RenderEngine::RenderEngine()
     : _mainCamera(nullptr)
@@ -191,15 +186,15 @@ void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
 
     std::unique_ptr<Renderer> newRenderer = nullptr;
     switch (_rendererImplementation) {
-    case RendererImplementation::Framebuffer:
-        newRenderer = std::make_unique<FramebufferRenderer>();
-        break;
-    case RendererImplementation::ABuffer:
-        newRenderer = std::make_unique<ABufferRenderer>();
-        break;
-    case RendererImplementation::Invalid:
-        LFATAL("Rendering method '" << renderingMethod << "' not among the available "
-               << "rendering methods");
+        case RendererImplementation::Framebuffer:
+            newRenderer = std::make_unique<FramebufferRenderer>();
+            break;
+        case RendererImplementation::ABuffer:
+            newRenderer = std::make_unique<ABufferRenderer>();
+            break;
+        case RendererImplementation::Invalid:
+            LFATAL("Rendering method '" << renderingMethod << "' not among the available "
+                   << "rendering methods");
     }
 
     setRenderer(std::move(newRenderer));

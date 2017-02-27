@@ -98,7 +98,7 @@ size_t getMaximumValue(GDALDataType gdalType) {
         case GDT_Int16:
             return 1 << 15;
         case GDT_UInt32:
-            return 1 << 32;
+            return size_t(1) << 32;
         case GDT_Int32:
             return 1 << 31;
         default:

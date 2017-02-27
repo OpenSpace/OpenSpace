@@ -88,7 +88,7 @@ RawTile RawTile::deserializeMetaData(std::istream& is) {
     char binaryDataSeparator;
     is >> binaryDataSeparator; // not used
         
-    char* buffer = new char[res.nBytesImageData]();
+//    char* buffer = new char[res.nBytesImageData]();
     return std::move(res);
 }
 

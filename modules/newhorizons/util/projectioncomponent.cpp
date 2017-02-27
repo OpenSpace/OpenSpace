@@ -242,7 +242,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
     if (foundSequence) {
         sequenceSource = absPath(sequenceSource);
 
-        foundSequence = dictionary.getValue(keySequenceType, sequenceType);
+        dictionary.getValue(keySequenceType, sequenceType);
         //Important: client must define translation-list in mod file IFF playbook
         if (dictionary.hasKey(keyTranslation)) {
             ghoul::Dictionary translationDictionary;

@@ -110,9 +110,9 @@ glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
 }
     
 glm::ivec2 SGCTWindowWrapper::currentWindowResolution() const {
-    auto window = sgct::Engine::instance()->getCurrentWindowPtr();
     int x, y;
-    sgct::Engine::instance()->getCurrentWindowPtr()->getFinalFBODimensions(x, y);
+    auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+    window->getFinalFBODimensions(x, y);
     return glm::ivec2(x, y);
 }
 

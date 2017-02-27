@@ -226,7 +226,7 @@ void RenderableModel::render(const RenderData& data) {
 void RenderableModel::update(const UpdateData& data) {
     if (_programObject->isDirty())
         _programObject->rebuildFromFile();
-    double _time = data.time;
+//    double _time = data.time;
 
     //if (_isGhost){
     //    futureTime = openspace::ImageSequencer::ref().getNextCaptureTime();
