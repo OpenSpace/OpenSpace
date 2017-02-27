@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,9 @@
 
 #include <modules/globebrowsing/tile/tileprovider/texttileprovider.h>
 
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/tile/tileindex.h>
+
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -36,7 +39,8 @@ using namespace ghoul::fontrendering;
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 TextTileProvider::TextTileProvider(const glm::uvec2& textureSize, size_t fontSize)
     : _tileCache(500)
     , _textureSize(textureSize)
@@ -55,7 +59,7 @@ TextTileProvider::~TextTileProvider() {
 }
 
 Tile TextTileProvider::getTile(const TileIndex& tileIndex) {
-    TileHashKey key = tileIndex.hashKey();
+    TileIndex::TileHashKey key = tileIndex.hashKey();
         
     if (!_tileCache.exist(key)) {
         _tileCache.put(key, createChunkIndexTile(tileIndex));
@@ -126,7 +130,7 @@ int TextTileProvider::maxLevel() {
     return 1337; // unlimited
 }
 
-TileHashKey TextTileProvider::toHash(const TileIndex& tileIndex) const {
+TileIndex::TileHashKey TextTileProvider::toHash(const TileIndex& tileIndex) const {
     return tileIndex.hashKey();
 }
 
@@ -135,127 +139,6 @@ Tile TextTileProvider::backgroundTile(const TileIndex& tileIndex) const {
     return Tile::createPlainTile(_textureSize, color);
 }
 
-void TileIndexTileProvider::renderText(const FontRenderer& fontRenderer, const TileIndex& tileIndex) const {
-    fontRenderer.render(
-        *_font,
-        glm::vec2(
-            _textureSize.x / 4 - (_textureSize.x / 32) * log10(1 << tileIndex.level),
-            _textureSize.y / 2 + _fontSize),
-        glm::vec4(1.0, 0.0, 0.0, 1.0),
-        "level: %i \nx: %i \ny: %i",
-        tileIndex.level, tileIndex.x, tileIndex.y
-    );
-}
-
-namespace {
-    const char* KeyRadii = "Radii";
-    const char* KeyBackgroundImagePath = "BackgroundImagePath";
-}
-
-SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
-{
-    _fontSize = 50;
-    FontManager& fm = OsEng.fontManager();
-    _font = fm.font("Mono", _fontSize);
-
-    glm::dvec3 radii(1,1,1);
-    if (!dictionary.getValue(KeyRadii, radii)) {
-        throw std::runtime_error("Must define key '" + std::string(KeyRadii) + "'");
-    }
-    _ellipsoid = Ellipsoid(radii);
-
-    _backgroundTile.status = Tile::Status::Unavailable;
-    std::string backgroundImagePath;
-    if (dictionary.getValue(KeyBackgroundImagePath, backgroundImagePath)) {
-        using namespace ghoul::io;
-        std::string imgAbsPath = absPath(backgroundImagePath);
-        _backgroundTile.texture = TextureReader::ref().loadTexture(imgAbsPath);
-        _backgroundTile.texture->uploadTexture();
-        _backgroundTile.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        _backgroundTile.status = Tile::Status::OK;
-    }
-
-}
-
-void SizeReferenceTileProvider::renderText(const FontRenderer& fontRenderer,
-                                           const TileIndex& tileIndex) const
-{
-    GeodeticPatch patch(tileIndex);
-    bool aboveEquator = patch.isNorthern();
-        
-    double tileLongitudalLength = roundedLongitudalLength(tileIndex);
-
-    std::string unit = "m";
-    if (tileLongitudalLength > 9999) {
-        tileLongitudalLength *= 0.001;
-        unit = "km";
-    }
-
-    glm::vec2 textPosition;
-    textPosition.x = 0;
-    textPosition.y = aboveEquator ? _fontSize / 2 : _textureSize.y - 3 * _fontSize / 2;
-    glm::vec4 color(1.0, 1.0, 1.0, 1.0);
-
-    fontRenderer.render(
-        *_font,
-        textPosition,
-        color,
-        " %.0f %s",
-        tileLongitudalLength, unit.c_str()
-        );
-}
-
-int SizeReferenceTileProvider::roundedLongitudalLength(const TileIndex& tileIndex) const {
-    GeodeticPatch patch(tileIndex);
-    bool aboveEquator = patch.isNorthern();
-    double lat = aboveEquator ? patch.minLat() : patch.maxLat();
-    double lon1 = patch.minLon();
-    double lon2 = patch.maxLon();
-    int l = static_cast<int>(_ellipsoid.longitudalDistance(lat, lon1, lon2));
-
-    bool useKm = l > 9999;
-    if (useKm) {
-        l /= 1000;
-    }
-    l = std::round(l);
-    if (useKm) {
-        l *= 1000;
-    }
-
-    return l;
-}
-
-TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIndex) const {
-    int l = roundedLongitudalLength(tileIndex);
-    TileHashKey key = static_cast<TileHashKey>(l);
-    return key;
-}
-
-Tile SizeReferenceTileProvider::backgroundTile(const TileIndex& tileIndex) const {
-    if (_backgroundTile.status == Tile::Status::OK) {
-        Tile tile;
-        auto t = _backgroundTile.texture;
-        void* pixelData = new char[t->expectedPixelDataSize()];
-        memcpy(pixelData, t->pixelData(), t->expectedPixelDataSize());
-        tile.texture = std::make_shared<Texture>(
-            pixelData,
-            t->dimensions(),
-            t->format(),
-            t->internalFormat(),
-            t->dataType(),
-            t->filter(),
-            t->wrapping()
-        );
-        tile.texture->uploadTexture();
-        tile.texture->setDataOwnership(Texture::TakeOwnership::Yes);
-        tile.status = Tile::Status::OK;
-        return tile;
-    }
-    else {
-        // use default background
-        return TextTileProvider::backgroundTile(tileIndex);
-    }
-}
-
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

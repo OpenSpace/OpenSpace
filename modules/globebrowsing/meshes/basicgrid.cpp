@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,22 +36,22 @@ BasicGrid::BasicGrid(unsigned int xSegments, unsigned int ySegments,
     : Grid(xSegments, ySegments, usePositions, useTextureCoordinates, useNormals)
 {
     _geometry = std::make_unique<TriangleSoup>(
-        CreateElements(xSegments, ySegments),
+        createElements(xSegments, ySegments),
         usePositions,
         useTextureCoordinates,
         useNormals
     );
 
     if (usePositions) {
-        _geometry->setVertexPositions(CreatePositions(_xSegments, _ySegments));
+        _geometry->setVertexPositions(createPositions(_xSegments, _ySegments));
     }
     if (useTextureCoordinates) {
         _geometry->setVertexTextureCoordinates(
-            CreateTextureCoordinates(_xSegments, _ySegments)
+            createTextureCoordinates(_xSegments, _ySegments)
         );
     }
     if (useNormals) {
-        _geometry->setVertexNormals(CreateNormals(_xSegments, _ySegments));
+        _geometry->setVertexNormals(createNormals(_xSegments, _ySegments));
     }
 }
 
@@ -76,7 +76,7 @@ inline size_t BasicGrid::numVertices(int xSegments, int ySegments) {
     return (xSegments + 1) * (ySegments + 1);
 }
 
-std::vector<GLuint> BasicGrid::CreateElements(int xSegments, int ySegments) {
+std::vector<GLuint> BasicGrid::createElements(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
 
     std::vector<GLuint> elements;
@@ -111,13 +111,13 @@ std::vector<GLuint> BasicGrid::CreateElements(int xSegments, int ySegments) {
     return elements;
 }
 
-std::vector<glm::vec4> BasicGrid::CreatePositions(int xSegments, int ySegments) {
+std::vector<glm::vec4> BasicGrid::createPositions(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
     std::vector<glm::vec4> positions;
     positions.reserve(numVertices(xSegments, ySegments));
 
     // Copy from 2d texture coordinates and use as template to create positions
-    std::vector<glm::vec2> templateTextureCoords = CreateTextureCoordinates(
+    std::vector<glm::vec2> templateTextureCoords = createTextureCoordinates(
         xSegments, ySegments
     );
     for (const glm::vec2& coords : templateTextureCoords) {
@@ -133,7 +133,7 @@ std::vector<glm::vec4> BasicGrid::CreatePositions(int xSegments, int ySegments) 
     return positions;
 }
 
-std::vector<glm::vec2> BasicGrid::CreateTextureCoordinates(int xSegments, int ySegments) {
+std::vector<glm::vec2> BasicGrid::createTextureCoordinates(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
     std::vector<glm::vec2> textureCoordinates;
     textureCoordinates.reserve(numVertices(xSegments, ySegments));
@@ -149,7 +149,7 @@ std::vector<glm::vec2> BasicGrid::CreateTextureCoordinates(int xSegments, int yS
     return textureCoordinates;
 }
 
-std::vector<glm::vec3> BasicGrid::CreateNormals(int xSegments, int ySegments) {
+std::vector<glm::vec3> BasicGrid::createNormals(int xSegments, int ySegments) {
     validate(xSegments, ySegments);
     std::vector<glm::vec3> normals;
     normals.reserve(numVertices(xSegments, ySegments));

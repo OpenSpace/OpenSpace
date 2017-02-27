@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -316,6 +316,7 @@ using documentation::Documentation;
 namespace std {
 
 std::string to_string(openspace::documentation::TestResult::Offense::Reason reason);
+std::string to_string(openspace::documentation::TestResult::Warning::Reason reason);
 
 } // namespace std
 

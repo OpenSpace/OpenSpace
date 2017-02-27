@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileprovider {
 
 class TileProviderByIndex : public TileProvider {
 public:
@@ -47,11 +48,12 @@ public:
 private:
     TileProvider* indexProvider(const TileIndex& tileIndex) const;
 
-    std::unordered_map<TileHashKey, std::shared_ptr<TileProvider>> _tileProviderMap;
+    std::unordered_map<TileIndex::TileHashKey, std::shared_ptr<TileProvider>> _tileProviderMap;
     std::shared_ptr<TileProvider> _defaultTileProvider;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_INDEX___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_INDEX___H__

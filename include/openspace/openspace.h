@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,10 +32,10 @@ namespace openspace {
 std::string licenseText();
     
 const int OPENSPACE_VERSION_MAJOR = 0;
-const int OPENSPACE_VERSION_MINOR = 6;
+const int OPENSPACE_VERSION_MINOR = 7;
 const int OPENSPACE_VERSION_PATCH = 0;
     
-const std::string OPENSPACE_VERSION_STRING = "prerelease-11 (AGU)";
+const std::string OPENSPACE_VERSION_STRING = "prerelease-12 (NAOJ)";
 
 } // namespace openspace
 

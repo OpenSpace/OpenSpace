@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@ namespace openspace {
 template <typename VoxelType>
 VoxelType TextureSliceVolumeReader<VoxelType>::get(const glm::ivec3& coordinates) const {
     ghoul::opengl::Texture& slice = getSlice(coordinates.z);
-    return slice.texel<VoxelType>(coordinates.xy());
+    return slice.texel<VoxelType>(glm::ivec2(coordinates));
 }
 
 template <typename VoxelType>
@@ -52,7 +52,7 @@ void TextureSliceVolumeReader<VoxelType>::initialize() {
     std::shared_ptr<ghoul::opengl::Texture> firstSlice =
         ghoul::io::TextureReader::ref().loadTexture(_paths[0]);
     
-    _sliceDimensions = firstSlice->dimensions().xy();
+    _sliceDimensions = firstSlice->dimensions();
     _initialized = true;
     _cache.set(0, firstSlice);
 }
@@ -72,7 +72,7 @@ ghoul::opengl::Texture& TextureSliceVolumeReader<VoxelType>::getSlice(int sliceI
         std::shared_ptr<ghoul::opengl::Texture> texture =
             ghoul::io::TextureReader::ref().loadTexture(_paths[sliceIndex]);
         
-        glm::ivec2 dims = texture->dimensions().xy();
+        glm::ivec2 dims = texture->dimensions();
         ghoul_assert(dims == _sliceDimensions, "Slice dimensions do not agree.");
         _cache.set(sliceIndex, std::move(texture));
     }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -72,7 +72,7 @@ Documentation ConfigurationManager::Documentation() {
                     ConfigurationManager::PartLogLevel,
                     new StringInListVerifier(
                         // List from logmanager.cpp::levelFromString
-                        { "Debug", "Info", "Warning", "Error", "Fatal", "None" }
+                        { "Trace", "Debug", "Info", "Warning", "Error", "Fatal", "None" }
                     ),
                     "The severity of log messages that will be displayed. Only "
                     "messages of the selected level or higher will be displayed. All "

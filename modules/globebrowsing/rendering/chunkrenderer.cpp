@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,8 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/grid.h>
 #include <modules/globebrowsing/rendering/layershadermanager.h>
-#include <modules/globebrowsing/rendering/gpulayermanager.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
 
 namespace {
     const char* keyFrame = "Frame";
@@ -82,10 +83,10 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 {
     const TileIndex& tileIndex = chunk.tileIndex();
 
-    LayerShaderPreprocessingData layeredTexturePreprocessingData;
+    LayerShaderManager::LayerShaderPreprocessingData layeredTexturePreprocessingData;
         
     for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; i++) {
-        LayerGroupPreprocessingData layeredTextureInfo;
+        LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData layeredTextureInfo;
         auto layerGroup = _layerManager->layerGroup(i);
         layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();

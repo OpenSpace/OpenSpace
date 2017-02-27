@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/onscreengui/include/gui.h>
+
+#include <modules/onscreengui/onscreenguimodule.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -237,10 +239,6 @@ GUI::GUI()
     addPropertySubOwner(_iswa);
 }
 
-GUI::~GUI() {
-    ImGui::Shutdown();
-}
-
 void GUI::initialize() {
     std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         configurationFile, "", ghoul::filesystem::CacheManager::Persistent::Yes
@@ -322,6 +320,8 @@ void GUI::initialize() {
 }
 
 void GUI::deinitialize() {
+    ImGui::Shutdown();
+
     _iswa.deinitialize();
     _help.deinitialize();
     _performance.deinitialize();
@@ -408,9 +408,15 @@ void GUI::deinitializeGL() {
     _program = nullptr;
     _fontTexture = nullptr;
 
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &vboElements);
+    if (vao) {
+        glDeleteVertexArrays(1, &vao);
+    }
+    if (vbo) {
+        glDeleteBuffers(1, &vbo);
+    }
+    if (vboElements) {
+        glDeleteBuffers(1, &vboElements);
+    }
 
     _iswa.deinitializeGL();
     _help.deinitializeGL();

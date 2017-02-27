@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,7 +48,7 @@ void ModuleEngine::initialize() {
 void ModuleEngine::deinitialize() {
     LDEBUG("Deinitializing modules");
     for (auto& m : _modules) {
-        LDEBUG("Deinitialieing module '" << m->name() << "'");
+        LDEBUG("Deinitializing module '" << m->name() << "'");
         m->deinitialize();
     }
     _modules.clear();
@@ -73,6 +73,7 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
     
     LDEBUG("Registering module '" << module->name() << "'");
     module->initialize();
+    LDEBUG("Registered module '" << module->name() << "'");
     _modules.push_back(std::move(module));
 }
 

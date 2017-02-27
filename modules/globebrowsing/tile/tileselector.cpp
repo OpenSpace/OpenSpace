@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,14 @@
 
 #include <modules/globebrowsing/tile/tileselector.h>
 
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileselector {
 
-ChunkTile TileSelector::getHighestResolutionTile(const LayerGroup& layerGroup,
-                                                 TileIndex tileIndex)
-{
+ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup, TileIndex tileIndex) {
     ChunkTile mostHighResolution;
     mostHighResolution.tile = Tile::TileUnavailable;
     mostHighResolution.uvTransform.uvScale.x = 0;
@@ -51,9 +50,8 @@ ChunkTile TileSelector::getHighestResolutionTile(const LayerGroup& layerGroup,
     return mostHighResolution;
 }
 
-std::vector<ChunkTile> TileSelector::getTilesSortedByHighestResolution(
-                                                             const LayerGroup& layerGroup,
-                                                               const TileIndex& tileIndex)
+std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup& layerGroup,
+                                                         const TileIndex& tileIndex)
 {
     std::vector<ChunkTile> tiles;
     for (const auto& layer : layerGroup.activeLayers()) {
@@ -71,7 +69,7 @@ std::vector<ChunkTile> TileSelector::getTilesSortedByHighestResolution(
     return tiles;
 }
 
-void TileSelector::ascendToParent(TileIndex& tileIndex, TileUvTransform& uv) {
+void ascendToParent(TileIndex& tileIndex, TileUvTransform& uv) {
     uv.uvOffset *= 0.5;
     uv.uvScale *= 0.5;
 
@@ -80,5 +78,6 @@ void TileSelector::ascendToParent(TileIndex& tileIndex, TileUvTransform& uv) {
     --tileIndex;
 }
 
+} // namespace tileselector¢
 } // namespace globebrowsing
 } // namespace openspace
