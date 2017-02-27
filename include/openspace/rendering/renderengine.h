@@ -77,8 +77,9 @@ public:
     RenderEngine();
     ~RenderEngine();
     
-    bool initialize();
-    bool deinitialize();
+    void initialize();
+    void initializeGL();
+    void deinitialize();
 
     void setSceneGraph(Scene* sceneGraph);
     Scene* scene();
@@ -89,7 +90,6 @@ public:
     RaycasterManager& raycasterManager();
 
     // sgct wrapped functions
-    bool initializeGL();
     
     void updateSceneGraph();
     void updateShaderPrograms();
@@ -170,9 +170,6 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-    // This is a temporary method to change the origin of the coordinate system ---abock
-    void changeViewPoint(std::string origin);
-
     // Temporary fade functionality
     void startFading(int direction, float fadeDuration);
 
@@ -217,7 +214,7 @@ private:
     float _currentFadeTime;
     int _fadeDirection;
     int _nAaSamples;
-    unsigned int _frameNumber;
+    uint64_t _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
