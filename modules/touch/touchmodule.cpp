@@ -109,11 +109,27 @@ TouchModule::TouchModule()
 				glm::vec3 newPos = pos + focusDir*zoomFactor;
 				cam->setPosition(newPos);
 			}
-			else if (lastList.size() > 0) {
-				// do new rotation
+			else if (lastList.size() > 0) { // do new rotation
 				float x = list.at(0).getX() - lastList.at(0).getX();
 				float y = list.at(0).getY() - lastList.at(0).getY();
+				// make x/y beteween -1 and 1
+				//x = 2 * (x - 0.5);
+				//y = 2 * (y - 0.5);
+				// arcsin to get angles
+				float thetaX = std::max(5*acos(x), 1.0f);
+				float thetaY = std::max(5*asin(y), 1.0f);
+				// make rotation around right axis..
+				
+				glm::vec3 lookDir = cam->viewDirectionWorldSpace();
+				glm::vec3 lookUp = cam->lookUpVectorWorldSpace();
+				glm::vec3 right = glm::cross(lookUp, lookDir);
 
+				glm::vec3 rotVec = glm::vec3(1.0, 0.0, 0.0);
+				glm::rotate(rotVec, thetaX, lookUp);
+				glm::rotate(rotVec, thetaY, right);
+
+				//std::cout << "Coordinates: (" << x << ", " << y << "), Angles: (" << thetaX << ", " << thetaY << ")\n";
+				std::cout << "Before rotation: " << glm::to_string(glm::vec3(1.0,0.0,0.0)) << ", After: " << glm::to_string(rotVec) << "\n";
 				glm::quat rot;
 			
 				//cam->rotate(rot);
