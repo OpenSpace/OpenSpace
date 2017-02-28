@@ -316,6 +316,12 @@ def check_source_file(file, component):
         if core_dependency:
             print(file, '\t' 'Wrong core dependency', core_dependency)
 
+        copyright = check_copyright(lines)
+        if copyright:
+            print(file, '\t', 'Copyright check failed', '\t', copyright)
+            return
+
+
 
 
 def check_files(positiveList, negativeList, component, check_function):
