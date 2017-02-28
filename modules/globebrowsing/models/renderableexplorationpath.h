@@ -22,11 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLE_EXPLORATION_PATH___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLE_EXPLORATION_PATH___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <modules/globebrowsing/models/roverpath.h>
+#include <ghoul/opengl/programobject.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
 
 namespace openspace {
 
@@ -42,11 +45,20 @@ public:
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
 private:
+	void calculatePathModelCoordinates();
+	void calculatePathWorldCoordinates();
 
+	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 	properties::BoolProperty _isEnabled;
 
 	std::string _filePath;
 	bool _isReady;
+
+	std::vector<glm::dvec2> _stationPoints;
+	std::vector<glm::dvec3> _stationPointsWorldCoordinates;
+	globebrowsing::RenderableGlobe* _globe;
+
+	RoverPath* _roverPath;
 	
 };
 }

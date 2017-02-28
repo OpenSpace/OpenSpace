@@ -25,6 +25,10 @@
 
 
 #include <modules/globebrowsing/models/renderableexplorationpath.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+
 
 namespace {
 	static const std::string _loggerCat = "RenderableExplorationPath";
@@ -32,6 +36,9 @@ namespace {
 namespace openspace {
 RenderableExplorationPath::RenderableExplorationPath(const ghoul::Dictionary& dictionary) 
 	: Renderable(dictionary)
+	, _roverPath(nullptr)
+	, _shader(nullptr)
+	, _globe(nullptr)
 	, _isEnabled(properties::BoolProperty("enabled", "enabled", false))
 {
 	bool isEnabled;
@@ -42,12 +49,42 @@ RenderableExplorationPath::RenderableExplorationPath(const ghoul::Dictionary& di
 }
 
 bool RenderableExplorationPath::initialize() {
-	
+
+	// Getting the parent renderable to be able to calculate world coordinates
+	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(this->owner()->name())->parent();
+	_globe = (globebrowsing::RenderableGlobe *)parent->renderable();
+
+	if (_shader == nullptr) {
+		_shader = OsEng.renderEngine().buildRenderProgram(
+			"RoverPath",
+			"${MODULE_GLOBEBROWSING}/shaders/roverpath_vs.glsl",
+			"${MODULE_GLOBEBROWSING}/shaders/roverpath_fs.glsl"
+		);
+		if (!_shader)
+			return false;
+	}
+
+	//Temp points
+	_stationPoints.push_back(glm::dvec2(-4.7, 137.4));
+	_stationPoints.push_back(glm::dvec2(-4.71, 137.6));
+
+	calculatePathModelCoordinates();
+
+	_roverPath = new RoverPath(_stationPoints);
+
 	return true;
 }
 
 bool RenderableExplorationPath::deinitialize() {
-	
+	delete _roverPath;
+	_roverPath = nullptr;
+
+	RenderEngine& renderEngine = OsEng.renderEngine();
+	if (_shader) {
+		renderEngine.removeRenderProgram(_shader);
+		_shader = nullptr;
+	}
+
 	return false;
 }
 
@@ -57,10 +94,30 @@ bool RenderableExplorationPath::isReady() const {
 }
 
 void RenderableExplorationPath::render(const RenderData& data) {
+	//_roverPath->render();
 }
 
 void RenderableExplorationPath::update(const UpdateData& data) {
+	calculatePathWorldCoordinates();
+}
 
+void RenderableExplorationPath::calculatePathModelCoordinates() {
+	globebrowsing::Geodetic2 geo;
+	glm::dvec3 positionModelSpace;
+
+	for (auto i : _stationPoints) {
+		geo = globebrowsing::Geodetic2{ i.x, i.y } / 180 * glm::pi<double>();
+		positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
+		_stationPointsWorldCoordinates.push_back(positionModelSpace);
+	}
+}
+
+void RenderableExplorationPath::calculatePathWorldCoordinates() {
+	glm::dmat4 modelTransform = _globe->modelTransform();
+	for (auto i : _stationPointsWorldCoordinates) {
+		i = modelTransform * glm::dvec4(i, 1.0);
+		LERROR("VertexCoords: " << i[0] << " " << i[1] << " " << i[2]);
+	}
 }
 
 }
