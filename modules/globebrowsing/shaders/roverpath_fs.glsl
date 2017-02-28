@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,49 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
+#include "PowerScaling/powerScaling_fs.hglsl"
+#include "fragment.glsl"
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <modules/globebrowsing/models/roverpath.h>
-#include <ghoul/opengl/programobject.h>
-#include <modules/globebrowsing/globes/renderableglobe.h>
+in vec4 vs_positionScreenSpace;
+in vec4 vs_pointColor;
 
-#include <map>
+Fragment getFragment() {
 
-namespace openspace {
-
-class RenderableExplorationPath : public Renderable {
-public: 
-	RenderableExplorationPath(const ghoul::Dictionary& dictionary);
-	
-	bool initialize() override;
-	bool deinitialize() override;
-
-	bool isReady() const override;
-
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
-
-	bool extractCoordinates();
-private:
-	void calculatePathModelCoordinates();
-	void calculatePathWorldCoordinates();
-
-	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-	properties::BoolProperty _isEnabled;
-
-	std::string _filePath;
-	bool _isReady;
-
-	std::vector<glm::dvec3> _stationPointsWorldCoordinates;
-	globebrowsing::RenderableGlobe* _globe;
-
-	RoverPath* _roverPath;
-
-	std::map<std::string, glm::vec2> _coordMap;
-};
+    if (vs_pointColor.a < 0.01)
+        discard;
+    Fragment frag;
+    frag.color = vs_pointColor;
+    frag.depth = vs_positionScreenSpace.w;
+    return frag;
 }
-
-#endif //__OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__

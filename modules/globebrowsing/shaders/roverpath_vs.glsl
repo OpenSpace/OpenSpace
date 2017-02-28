@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,49 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
+#version __CONTEXT__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <modules/globebrowsing/models/roverpath.h>
-#include <ghoul/opengl/programobject.h>
-#include <modules/globebrowsing/globes/renderableglobe.h>
+in vec4 in_point_position;
 
-#include <map>
+uniform vec3 color;
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
+uniform int pointSteps;
 
-namespace openspace {
+out vec4 vs_positionScreenSpace;
+out vec4 vs_pointColor;
 
-class RenderableExplorationPath : public Renderable {
-public: 
-	RenderableExplorationPath(const ghoul::Dictionary& dictionary);
-	
-	bool initialize() override;
-	bool deinitialize() override;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-	bool isReady() const override;
+void main() {
+    vec4 positionCameraSpace = modelViewTransform * in_point_position;
+    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+    gl_Position = vs_positionScreenSpace;
 
-	bool extractCoordinates();
-private:
-	void calculatePathModelCoordinates();
-	void calculatePathWorldCoordinates();
+    if(mod(gl_VertexID, pointSteps) == 0) {
+        vs_pointColor.rgb = color;
+        gl_PointSize = 5.0f;
+    }
+    else {
+        vs_pointColor.rgb = (color + vec3(0.6f, 0.6f, 0.6f)) / 2;
+        gl_PointSize = 2.f;
+    }
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-	properties::BoolProperty _isEnabled;
+    // I don't like this random variable k defined in powerScalingMath.hglsl.
+    // Will ignore it and use 10 in protest of psc dependencies. /KB
+    // float maximumDistance = pow(k, 10);
+    float maximumDistance = pow(10, 10);
+    float distanceToCamera = length(positionCameraSpace.xyz);
 
-	std::string _filePath;
-	bool _isReady;
-
-	std::vector<glm::dvec3> _stationPointsWorldCoordinates;
-	globebrowsing::RenderableGlobe* _globe;
-
-	RoverPath* _roverPath;
-
-	std::map<std::string, glm::vec2> _coordMap;
-};
+    vs_pointColor.a = maximumDistance / (distanceToCamera/100);
 }
-
-#endif //__OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
