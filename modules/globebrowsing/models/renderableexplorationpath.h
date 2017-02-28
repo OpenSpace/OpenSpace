@@ -22,11 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLE_EXPLORATION_PATH___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLE_EXPLORATION_PATH___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/scalar/boolproperty.h>
+
+#include <map>
 
 namespace openspace {
 
@@ -41,14 +43,17 @@ public:
 
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
+
+	bool extractCoordinates();
 private:
 
 	properties::BoolProperty _isEnabled;
 
-	std::string _filePath;
-	bool _isReady;
-	
+	std::string _filepath;
+	bool _isReady;	
+
+	std::map<std::string, glm::vec2> _coordMap;
 };
 }
 
-#endif //__OPENSPACE_MODULE_BASE___RENDERABLE_EXPLORATION_PATH___H__
+#endif //__OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
