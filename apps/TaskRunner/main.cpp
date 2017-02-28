@@ -44,6 +44,8 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/task.h>
 #include <openspace/scene/translation.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 #include <openspace/engine/moduleengine.h>
 
 namespace {
@@ -78,6 +80,16 @@ int main(int argc, char** argv) {
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Translation>>(),
         "Translation"
+        );
+
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Rotation>>(),
+        "Rotation"
+        );
+
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Scale>>(),
+        "Scale"
         );
 
     openspace::ConfigurationManager configuration;

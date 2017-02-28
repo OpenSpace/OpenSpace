@@ -29,22 +29,36 @@
 
 namespace openspace {
     
-/*MilkywayConversionTask::MilkywayConversionTask(
-    const std::string& inFilenamePrefix,
-    const std::string& inFilenameSuffix,
-    size_t inFirstIndex,
-    size_t inNSlices, 
-    const std::string& outFilename,
-    const glm::ivec3& outDimensions)
-    : _inFilenamePrefix(inFilenamePrefix)
-    , _inFilenameSuffix(inFilenameSuffix)
-    , _inFirstIndex(inFirstIndex)
-    , _inNSlices(inNSlices)
-    , _outFilename(outFilename)
-    , _outDimensions(outDimensions) {}*/
-
-    
 MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
+    std::string inFilenamePrefix;
+    if (dictionary.getValue("InFilenamePrefix", inFilenamePrefix)) {
+        _inFilenamePrefix = inFilenamePrefix;
+    }
+
+    std::string inFilenamePrefix;
+    if (dictionary.getValue("InFilenameSuffix", inFilenameSuffix)) {
+        _inFilenameSuffix = inFilenameSuffix;
+    }
+
+    size_t inFirstIndex;
+    if (dictionary.getValue("InFirstIndex", inFirstIndex)) {
+        _inFirstIndex = inFirstIndex;
+    }
+
+    size_t inNSlices;
+    if (dictionary.getValue("InNSlices", inNSlices)) {
+        _inNSlices = inNSlices;
+    }
+
+    std::string outFilename;
+    if (dictionary.getValue("OutFilename", outFilename)) {
+        _outFilename = outFilename;
+    }
+
+    glm::ivec3 outDimensions;
+    if (dictionary.getValue("OutDimensions", outDimensions)) {
+        _outDimensions = outDimensions;
+    }
 }
 
 MilkywayConversionTask::~MilkywayConversionTask() {}
