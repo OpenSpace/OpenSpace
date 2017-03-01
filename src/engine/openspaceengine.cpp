@@ -958,7 +958,7 @@ void OpenSpaceEngine::postDraw() {
     for (const auto& func : _moduleCallbacks.postDraw) {
         func();
     }
-    
+        
     if (_isFirstRenderingFirstFrame) {
         _windowWrapper->setSynchronization(true);
         _isFirstRenderingFirstFrame = false;
