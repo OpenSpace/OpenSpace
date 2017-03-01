@@ -934,6 +934,19 @@ void OpenSpaceEngine::render(const glm::mat4& viewMatrix,
         func();
     }
     
+    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
+    // rendered ---abock
+    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    if (showGui && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering()) {
+        _renderEngine->renderScreenLog();
+        if (_console->isVisible())
+            _console->render();
+    }
+
+    if (_shutdown.inShutdown) {
+        _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
+    }
+
     LTRACE("OpenSpaceEngine::render(end)");
 }
 
@@ -946,19 +959,6 @@ void OpenSpaceEngine::postDraw() {
         func();
     }
     
-    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
-    // rendered ---abock
-    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
-    if (showGui) {
-        _renderEngine->renderScreenLog();
-        if (_console->isVisible())
-            _console->render();
-    }
-
-    if (_shutdown.inShutdown) {
-        _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
-    }
-
     if (_isFirstRenderingFirstFrame) {
         _windowWrapper->setSynchronization(true);
         _isFirstRenderingFirstFrame = false;

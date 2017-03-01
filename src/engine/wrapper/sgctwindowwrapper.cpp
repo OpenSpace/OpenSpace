@@ -31,7 +31,7 @@
 #undef far
 
 namespace {
-    const std::string GuiWindowName = "GUI";
+    const char* GuiWindowTag = "GUI";
 }
 
 namespace openspace {
@@ -153,14 +153,17 @@ bool SGCTWindowWrapper::isRegularRendering() const {
 bool SGCTWindowWrapper::hasGuiWindow() const {
     auto engine = sgct::Engine::instance();
     for (size_t i = 0; i < engine->getNumberOfWindows(); ++i) {
-        if (engine->getWindowPtr(i)->getName() == GuiWindowName)
+        if (engine->getWindowPtr(i)->checkIfTagExists(GuiWindowTag)) {
             return true;
+        }
     }
     return false;
 }
 
 bool SGCTWindowWrapper::isGuiWindow() const {
-    return sgct::Engine::instance()->getCurrentWindowPtr()->getName() == GuiWindowName;
+    return sgct::Engine::instance()->getCurrentWindowPtr()->checkIfTagExists(
+        GuiWindowTag
+    );
 }
     
 bool SGCTWindowWrapper::isMaster() const {

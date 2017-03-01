@@ -102,10 +102,11 @@ OnScreenGUIModule::OnScreenGUIModule()
     );
 
     OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::PostSyncPreDraw,
+        OpenSpaceEngine::CallbackOption::Render,
         [](){
             WindowWrapper& wrapper = OsEng.windowWrapper();
-            if (wrapper.isMaster() && wrapper.isRegularRendering()) {
+            bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
+            if (wrapper.isMaster() && wrapper.isRegularRendering() && showGui ) {
                 glm::vec2 mousePosition = wrapper.mousePosition();
                 //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
                 glm::ivec2 windowSize = wrapper.currentWindowSize();
@@ -114,6 +115,8 @@ OnScreenGUIModule::OnScreenGUIModule()
                 
                 double dt = std::max(wrapper.averageDeltaTime(), 0.0);
                 
+                // We don't do any collection of immediate mode user interface, so it is
+                // fine to open and close a frame immediately
                 gui.startFrame(
                     static_cast<float>(dt),
                     glm::vec2(windowSize),
@@ -121,16 +124,7 @@ OnScreenGUIModule::OnScreenGUIModule()
                     mousePosition,
                     mouseButtons
                 );
-            }
-        }
-    );
-    
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::PostDraw,
-        [](){
-            WindowWrapper& wrapper = OsEng.windowWrapper();
-            bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
-            if (wrapper.isMaster() && wrapper.isRegularRendering() && showGui) {
+
                 gui.endFrame();
             }
         }
