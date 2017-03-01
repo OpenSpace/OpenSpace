@@ -29,7 +29,9 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 #include <openspace/util/syncdata.h>
 
@@ -102,17 +104,12 @@ public:
     void renderShutdownInformation(float timer, float fullTime);
     void postDraw();
 
-    void takeScreenshot(bool applyWarping = false);
-    void toggleInfoText(bool b);
-
     // Performance measurements
     bool doesPerformanceMeasurements() const;
     performance::PerformanceManager* performanceManager();
 
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
-    void setNAaSamples(int nAaSamples);
-    void setShowFrameNumber(bool enabled);
 
     void setDisableRenderingOnMaster(bool enabled);
 
@@ -203,17 +200,20 @@ private:
 
     //FrametimeType _frametimeType;
 
-    bool _showInfo;
-    bool _showLog;
-    bool _takeScreenshot;
-    bool _applyWarping;
-    bool _showFrameNumber;
+    properties::BoolProperty _showInfo;
+    properties::BoolProperty _showLog;
+    
+    properties::TriggerProperty _takeScreenshot;
+    bool _shouldTakeScreenshot;
+    properties::BoolProperty _applyWarping;
+    properties::BoolProperty _showFrameNumber;
+    properties::BoolProperty _disableMasterRendering;
 
     float _globalBlackOutFactor;
     float _fadeDuration;
     float _currentFadeTime;
     int _fadeDirection;
-    int _nAaSamples;
+    properties::IntProperty _nAaSamples;
     uint64_t _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
@@ -223,8 +223,6 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;
-
-    bool _disableMasterRendering = false;
 };
 
 } // namespace openspace

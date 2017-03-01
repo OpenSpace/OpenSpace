@@ -48,7 +48,6 @@ namespace openspace {
 SettingsEngine::SettingsEngine()
     : _eyeSeparation("eyeSeparation", "Eye Separation" , 0.f, 0.f, 10.f)
     , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::Dropdown)
-    , _showFrameNumber("showFrameNumber", "Show frame number", false)
     , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
     , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
     , _useDoubleBuffering("useDoubleBuffering", "Use double buffering", false)
@@ -70,7 +69,6 @@ SettingsEngine::SettingsEngine()
 void SettingsEngine::initialize() {
     initEyeSeparation();
     initSceneFiles();
-    initShowFrameNumber();
     initBusyWaitForDecode();
     initLogSGCTOutOfOrderErrors();
     initUseDoubleBuffering();
@@ -88,13 +86,6 @@ void SettingsEngine::initEyeSeparation() {
     // Set interaction to change the window's (SGCT's) eye separation
     _eyeSeparation.onChange(
         [this]() { OsEng.windowWrapper().setEyeSeparationDistance(_eyeSeparation); });
-}
-
-void SettingsEngine::initShowFrameNumber() {
-    addProperty(_showFrameNumber);
-
-    _showFrameNumber.onChange(
-        [this]() { OsEng.renderEngine().setShowFrameNumber(_showFrameNumber.value()); } );
 }
 
 void SettingsEngine::initBusyWaitForDecode() {
