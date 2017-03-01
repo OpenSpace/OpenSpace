@@ -24,6 +24,7 @@
 
 #include <modules/space/spacemodule.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
@@ -79,7 +80,7 @@ void SpaceModule::internalInitialize() {
     fPlanetGeometry->registerClass<planetgeometry::SimpleSphereGeometry>("SimpleSphere");
 }
 
-std::vector<Documentation> SpaceModule::documentations() const {
+std::vector<documentation::Documentation> SpaceModule::documentations() const {
     return {
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),

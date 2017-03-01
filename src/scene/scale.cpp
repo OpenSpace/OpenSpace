@@ -23,19 +23,21 @@
  ****************************************************************************************/
 
 #include <openspace/scene/scale.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
+
 #include <ghoul/logging/logmanager.h>
 
-#include <openspace/documentation/verifier.h>
-
 namespace {
-    const std::string _loggerCat = "Scale";
-    const std::string KeyType = "Type";
+    const char* _loggerCat = "Scale";
+    const char* KeyType = "Type";
 }
 
 namespace openspace {
 
-Documentation Scale::Documentation() {
+documentation::Documentation Scale::Documentation() {
     using namespace openspace::documentation;
 
     return {

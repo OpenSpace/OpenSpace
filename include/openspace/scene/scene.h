@@ -30,8 +30,6 @@
 #include <set>
 #include <mutex>
 
-#include <openspace/documentation/documentation.h>
-
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scripting/scriptengine.h>
@@ -41,6 +39,8 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class SceneGraphNode;
 

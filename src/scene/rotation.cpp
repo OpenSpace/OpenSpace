@@ -23,19 +23,21 @@
  ****************************************************************************************/
 
 #include <openspace/scene/rotation.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
+
 #include <ghoul/logging/logmanager.h>
 
-#include <openspace/documentation/verifier.h>
-
 namespace {
-    const std::string _loggerCat = "Rotation";
-    const std::string KeyType = "Type";
+    const char* _loggerCat = "Rotation";
+    const char* KeyType = "Type";
 }
 
 namespace openspace {
 
-Documentation Rotation::Documentation() {
+documentation::Documentation Rotation::Documentation() {
     using namespace openspace::documentation;
 
     return {

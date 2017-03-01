@@ -27,10 +27,11 @@
 
 #include <openspace/scene/scale.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace {
+    
+namespace documentation { struct Documentation; }
     
 class StaticScale : public Scale {
 public:
@@ -38,7 +39,7 @@ public:
     StaticScale(const ghoul::Dictionary& dictionary);
     double scaleValue() const;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     properties::FloatProperty _scaleValue;

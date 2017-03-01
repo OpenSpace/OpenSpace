@@ -27,12 +27,13 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; };
 
 class Scale : public properties::PropertyOwner {
 public:
@@ -43,7 +44,7 @@ public:
     virtual double scaleValue() const = 0;
     virtual void update(const UpdateData& data);
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 };
 
 }  // namespace openspace

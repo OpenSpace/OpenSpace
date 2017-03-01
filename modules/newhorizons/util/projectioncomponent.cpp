@@ -29,6 +29,7 @@
 #include <modules/newhorizons/util/instrumenttimesparser.h>
 #include <modules/newhorizons/util/labelparser.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/scenegraphnode.h>
 
@@ -76,7 +77,7 @@ namespace openspace {
 using ghoul::Dictionary;
 using glm::ivec2;
 
-Documentation ProjectionComponent::Documentation() {
+documentation::Documentation ProjectionComponent::Documentation() {
     using namespace documentation;
     return {
         "Projection Component",

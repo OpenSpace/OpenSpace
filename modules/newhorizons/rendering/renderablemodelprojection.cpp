@@ -26,6 +26,7 @@
 
 #include <modules/base/rendering/modelgeometry.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -41,7 +42,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const std::string _loggerCat = "RenderableModelProjection";
+    const char* _loggerCat = "RenderableModelProjection";
     const char* keySource = "Rotation.Source";
     const char* keyDestination = "Rotation.Destination";
     const char* keyGeometry = "Geometry";
@@ -55,7 +56,7 @@ namespace {
 
 namespace openspace {
 
-Documentation RenderableModelProjection::Documentation() {
+documentation::Documentation RenderableModelProjection::Documentation() {
     using namespace documentation;
 
     return {

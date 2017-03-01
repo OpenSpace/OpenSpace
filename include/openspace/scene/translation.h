@@ -27,12 +27,13 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
+
+namespace documentation {  struct Documentation; }
 
 class Translation : public properties::PropertyOwner {
 public:
@@ -50,7 +51,7 @@ public:
     // invalidates potentially stored points, for example in trails
     void onParameterChange(std::function<void()> callback);
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     void notifyObservers();

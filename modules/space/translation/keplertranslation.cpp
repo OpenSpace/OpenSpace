@@ -64,7 +64,7 @@ KeplerTranslation::RangeError::RangeError(std::string offender)
     , offender(std::move(offender))
 {}
 
-Documentation KeplerTranslation::Documentation() {
+documentation::Documentation KeplerTranslation::Documentation() {
     using namespace openspace::documentation;
     return{
         "Kepler Translation",

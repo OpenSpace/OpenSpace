@@ -31,6 +31,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
 namespace {
@@ -46,7 +47,7 @@ namespace openspace {
 
 namespace scripting {
 
-openspace::Documentation ScriptScheduler::Documentation() {
+documentation::Documentation ScriptScheduler::Documentation() {
     using namespace openspace::documentation;
 
     using TimeVerifier = StringVerifier;

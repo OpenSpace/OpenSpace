@@ -30,14 +30,14 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const std::string _loggerCat = "Translation";
-    const std::string KeyType = "Type";
+    const char* _loggerCat = "Translation";
+    const char* KeyType = "Type";
 }
 
 namespace openspace {
 
-Documentation Translation::Documentation() {
-    using namespace openspace::documentation;
+documentation::Documentation Translation::Documentation() {
+    using namespace documentation;
 
     return {
         "Transformation Translation",

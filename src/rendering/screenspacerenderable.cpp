@@ -24,35 +24,36 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 
-#include <openspace/documentation/verifier.h>
 
- #ifdef WIN32
- #define _USE_MATH_DEFINES
- #include <math.h>
- #endif
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif
 
 namespace {
-    const std::string _loggerCat = "ScreenSpaceRenderable";
+    const char* _loggerCat = "ScreenSpaceRenderable";
 
-    const std::string KeyType = "Type";
-    const std::string KeyFlatScreen = "FlatScreen";
-    const std::string KeyPosition = "Position";
-    const std::string KeyScale = "Scale";
-    const std::string KeyDepth = "Depth";
-    const std::string KeyAlpha = "Alpha";
+    const char* KeyType = "Type";
+    const char* KeyFlatScreen = "FlatScreen";
+    const char* KeyPosition = "Position";
+    const char* KeyScale = "Scale";
+    const char* KeyDepth = "Depth";
+    const char* KeyAlpha = "Alpha";
 
     const float PlaneDepth = -2.f;
 }
 
 namespace openspace {
 
-Documentation ScreenSpaceRenderable::Documentation() {
+documentation::Documentation ScreenSpaceRenderable::Documentation() {
     using namespace openspace::documentation;
 
     return {

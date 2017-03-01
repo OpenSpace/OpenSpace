@@ -304,10 +304,6 @@ void testSpecificationAndThrow(const Documentation& documentation,
 
 } // namespace documentation
 
-// We want to make it easier for people to use it, so we pull the Documentation class into
-// the openspace namespace
-using documentation::Documentation;
-
 } // namespace openspace
 
 // Make the overload for std::to_string available for the Offense::Reason for easier

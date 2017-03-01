@@ -36,9 +36,9 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-#include <openspace/documentation/documentation.h>
-
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 /**
  * The base class for screen space images and screen space framebuffers.
@@ -66,7 +66,7 @@ public:
     glm::vec3 sphericalPosition() const;
     float depth() const;
     
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     void createPlane();

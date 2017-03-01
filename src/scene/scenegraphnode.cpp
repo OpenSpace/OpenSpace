@@ -24,8 +24,6 @@
 
 #include <openspace/scene/scenegraphnode.h>
 
-#include <openspace/documentation/documentation.h>
-
 #include <openspace/query/query.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>

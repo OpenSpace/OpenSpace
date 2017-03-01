@@ -23,8 +23,10 @@
  ****************************************************************************************/
 
 #include <modules/space/rendering/planetgeometry.h>
+
 #include <openspace/util/factorymanager.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
 namespace {
@@ -35,7 +37,7 @@ namespace {
 namespace openspace {
 namespace planetgeometry {
 
-Documentation PlanetGeometry::Documentation() {
+documentation::Documentation PlanetGeometry::Documentation() {
     using namespace documentation;
     return {
         "Planet Geometry",

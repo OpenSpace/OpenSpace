@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/renderabletrailorbit.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 
@@ -83,9 +84,9 @@ namespace {
 
 namespace openspace {
 
-openspace::Documentation RenderableTrailOrbit::Documentation() {
+documentation::Documentation RenderableTrailOrbit::Documentation() {
     using namespace documentation;
-    openspace::Documentation doc{
+    documentation::Documentation doc {
         "RenderableTrailOrbit",
         "base_renderable_renderabletrailorbit",
         {
@@ -118,7 +119,7 @@ openspace::Documentation RenderableTrailOrbit::Documentation() {
 
     // Insert the parents documentation entries until we have a verifier that can deal
     // with class hierarchy
-    openspace::Documentation parentDoc = RenderableTrail::Documentation();
+    documentation::Documentation parentDoc = RenderableTrail::Documentation();
     doc.entries.insert(
         doc.entries.end(),
         parentDoc.entries.begin(),

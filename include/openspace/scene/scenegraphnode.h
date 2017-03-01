@@ -25,9 +25,6 @@
 #ifndef __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 #define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
-// open space includes
-#include <openspace/documentation/documentation.h>
-
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/rotation.h>
@@ -45,6 +42,8 @@
 #include <vector>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class SceneGraphNode : public properties::PropertyOwner {
 public:

@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/renderabletrail.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -56,8 +57,8 @@ namespace {
 
 namespace openspace {
 
-Documentation RenderableTrail::Documentation() {
-using namespace documentation;
+documentation::Documentation RenderableTrail::Documentation() {
+    using namespace documentation;
     return {
         "RenderableTrail",
         "base_renderable_renderabletrail",

@@ -27,12 +27,13 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class Rotation : public properties::PropertyOwner {
 public:
@@ -44,7 +45,7 @@ public:
     const glm::dmat3& matrix() const;
     virtual void update(const UpdateData& data);
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     Rotation();

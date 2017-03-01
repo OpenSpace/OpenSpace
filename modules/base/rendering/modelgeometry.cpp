@@ -32,8 +32,8 @@
 #include <fstream>
 
 namespace {
-    const std::string _loggerCat = "ModelGeometry";
-    const std::string keyGeomModelFile = "GeometryFile";
+    const char* _loggerCat = "ModelGeometry";
+    const char* keyGeomModelFile = "GeometryFile";
     const int8_t CurrentCacheVersion = 3;
     const char* keyType = "Type";
     const char* keyName = "Name";
@@ -42,7 +42,7 @@ namespace {
 namespace openspace {
 namespace modelgeometry {
 
-Documentation ModelGeometry::Documentation() {
+documentation:: Documentation ModelGeometry::Documentation() {
     using namespace documentation;
     return {
         "Model Geometry",

@@ -27,11 +27,11 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
 #include <modules/base/rendering/renderablemodel.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
+namespace documentation {  struct Documentation; }
 
 namespace modelgeometry {
 
@@ -59,7 +59,7 @@ public:
 
     virtual void setUniforms(ghoul::opengl::ProgramObject& program);
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     Renderable* _parent;

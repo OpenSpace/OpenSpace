@@ -27,10 +27,10 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
-
 namespace openspace {
+
 class Renderable;
+namespace documentation {  struct Documentation; }
 
 namespace planetgeometry {
 
@@ -44,7 +44,7 @@ public:
     virtual void deinitialize();
     virtual void render() = 0;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     Renderable* _parent;

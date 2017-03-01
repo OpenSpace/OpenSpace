@@ -28,6 +28,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
 #include <ghoul/misc/dictionary.h>
@@ -36,15 +37,15 @@
 #include <ghoul/misc/assert.h>
 
 namespace {
-    const std::string _loggerCat = "Renderable";
-    const std::string keyStart = "StartTime";
-    const std::string keyEnd = "EndTime";
-    const std::string KeyType = "Type";
+    const char* _loggerCat = "Renderable";
+    const char* keyStart = "StartTime";
+    const char* keyEnd = "EndTime";
+    const char* KeyType = "Type";
 }
 
 namespace openspace {
 
-Documentation Renderable::Documentation() {
+documentation::Documentation Renderable::Documentation() {
     using namespace openspace::documentation;
 
     return {

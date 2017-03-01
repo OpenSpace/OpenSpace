@@ -24,12 +24,13 @@
 
 #include <modules/space/translation/spicetranslation.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 
 #include <ghoul/filesystem/filesystem.h>
 
-#include <openspace/documentation/verifier.h>
 
 namespace {
     const char* KeyBody = "Body";
@@ -42,7 +43,7 @@ namespace {
 
 namespace openspace {
     
-Documentation SpiceTranslation::Documentation() {
+documentation::Documentation SpiceTranslation::Documentation() {
     using namespace openspace::documentation;
 
     return{
