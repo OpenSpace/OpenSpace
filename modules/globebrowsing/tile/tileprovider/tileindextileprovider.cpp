@@ -30,6 +30,8 @@ namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
     
+TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dict) {}
+
 void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
                                        fontRenderer, const TileIndex& tileIndex) const
 {
