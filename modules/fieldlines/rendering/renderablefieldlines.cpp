@@ -40,7 +40,7 @@
 namespace {
     std::string _loggerCat = "RenderableFieldlines";
 
-    const float defaultFieldlineStepSize = 0.5f;;
+    const float defaultFieldlineStepSize = 0.5f;
     const glm::vec4 defaultFieldlineColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
     const char* keyVectorField = "VectorField";
@@ -123,7 +123,8 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     }
 
     // @TODO a non-magic number perhaps ---abock
-    setBoundingSphere(250.f*6371000.f);
+    const float EARTH_RADIUS = 6371000.f;
+    setBoundingSphere(250.f*EARTH_RADIUS);
 
     _seedPointSource.addOption(SeedPointSourceFile, "File");
     _seedPointSource.addOption(SeedPointSourceTable, "Lua Table");
@@ -213,9 +214,11 @@ bool RenderableFieldlines::initialize() {
 
     _program = OsEng.renderEngine().buildRenderProgram(
         "Fieldline",
-        "${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl",
-        "${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl",
-        "${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl"
+        "${MODULE_FIELDLINES}/shaders/fieldline_flow_direction_vs.glsl",
+        "${MODULE_FIELDLINES}/shaders/fieldline_flow_direction_fs.glsl"
+        //"${MODULE_FIELDLINES}/shaders/fieldline_vs.glsl",
+        //"${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl",
+        //"${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl"
     );
 
     if (!_program)
@@ -243,7 +246,9 @@ void RenderableFieldlines::render(const RenderData& data) {
     _program->activate();
     _program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
     _program->setUniform("modelTransform", glm::mat4(1.0));
-    _program->setUniform("cameraViewDir", glm::vec3(data.camera.viewDirectionWorldSpace()));
+    int testTime = static_cast<int>(OsEng.runTime()*100)/5;
+    _program->setUniform("time", testTime);
+    //_program->setUniform("cameraViewDir", glm::vec3(data.camera.viewDirectionWorldSpace()));
     glDisable(GL_CULL_FACE);
     setPscUniforms(*_program, data.camera, data.position);
 
@@ -333,9 +338,9 @@ void RenderableFieldlines::loadSeedPointsFromFile() {
     LINFO("Reading seed points from file '" << _seedPointSourceFile.value() << "'");
 
     std::ifstream seedFile(_seedPointSourceFile);
-    if (!seedFile.good())
+    if (!seedFile.good()) {
         LERROR("Could not open seed points file '" << _seedPointSourceFile.value() << "'");
-    else {
+    } else {
         std::string line;
         glm::vec3 point;
         while (std::getline(seedFile, line)) {
@@ -369,9 +374,9 @@ std::vector<RenderableFieldlines::Line> RenderableFieldlines::generateFieldlines
         return {};
     }
 
-    if (type == vectorFieldTypeVolumeKameleon)
+    if (type == vectorFieldTypeVolumeKameleon) {
         return generateFieldlinesVolumeKameleon();
-    else {
+    } else {
         LERROR(keyVectorField << "." << keyVectorFieldType <<
             " does not name a valid type");
         return {};
