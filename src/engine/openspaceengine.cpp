@@ -259,6 +259,12 @@ void OpenSpaceEngine::create(int argc, char** argv,
             ConfigurationManager::findConfiguration(configurationFilePath);
     }
     configurationFilePath = absPath(configurationFilePath);
+    
+    if (!FileSys.fileExists(configurationFilePath)) {
+        throw ghoul::FileNotFoundError(
+            "Configuration file '" + configurationFilePath + "' not found"
+        );
+    }
     LINFO("Configuration Path: '" << configurationFilePath << "'");
 
     // Loading configuration from disk

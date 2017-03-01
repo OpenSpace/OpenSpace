@@ -37,7 +37,8 @@ Documentation ConfigurationManager::Documentation() {
             ConfigurationManager::KeyConfigSgct,
             new StringAnnotationVerifier("A valid SGCT configuration file"),
             "The SGCT configuration file that determines the window and view frustum "
-            "settings that are being used when OpenSpace is started."
+            "settings that are being used when OpenSpace is started.",
+            Optional::No
         },
         {
             ConfigurationManager::KeyConfigScene,
@@ -47,7 +48,8 @@ Documentation ConfigurationManager::Documentation() {
             "The scene description that is used to populate the application after "
             "startup. The scene determines which objects are loaded, the startup "
             "time and other scene-specific settings. More information is provided in "
-            "the Scene documentation."
+            "the Scene documentation.",
+            Optional::No
         },
         {
             ConfigurationManager::KeyPaths,
@@ -55,7 +57,14 @@ Documentation ConfigurationManager::Documentation() {
             "A list of paths that are automatically registered with the file system. "
             "If a key X is used in the table, it is then useable by referencing ${X} "
             "in all other configuration files or scripts.",
-            Optional::Yes
+            Optional::No
+        },
+        {
+            ConfigurationManager::KeyPaths + '.' + ConfigurationManager::KeyCache,
+            new StringVerifier,
+            "The path to be used as a cache folder. If per scene caching is enabled, the "
+            "name of the scene will be appended to this folder",
+            Optional::No
         },
         {
             ConfigurationManager::KeyFonts,
