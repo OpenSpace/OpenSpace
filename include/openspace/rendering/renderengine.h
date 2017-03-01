@@ -111,8 +111,6 @@ public:
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
 
-    void setDisableRenderingOnMaster(bool enabled);
-
     void registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
     void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
     void unregisterScreenSpaceRenderable(std::string name);

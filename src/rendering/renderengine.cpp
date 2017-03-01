@@ -194,6 +194,12 @@ void RenderEngine::initialize() {
             renderingMethod = "Framebuffer";
         }
     }
+    
+    if (confManager.hasKey(ConfigurationManager::KeyDisableMasterRendering)) {
+        _disableMasterRendering = confManager.value<bool>(
+            ConfigurationManager::KeyDisableMasterRendering
+        );
+    }
 
     _raycasterManager = new RaycasterManager();
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
@@ -782,10 +788,6 @@ bool RenderEngine::doesPerformanceMeasurements() const {
 
 performance::PerformanceManager* RenderEngine::performanceManager() {
     return _performanceManager.get();
-}
-
-void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
-    _disableMasterRendering = enabled;
 }
 
 void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s)

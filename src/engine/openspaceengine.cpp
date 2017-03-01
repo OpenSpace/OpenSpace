@@ -475,13 +475,6 @@ void OpenSpaceEngine::initialize() {
 
     writeDocumentation();
 
-    if (configurationManager().hasKey(ConfigurationManager::KeyDisableMasterRendering)) {
-        const bool disableMasterRendering = configurationManager().value<bool>(
-            ConfigurationManager::KeyDisableMasterRendering
-        );
-        _renderEngine->setDisableRenderingOnMaster(disableMasterRendering);
-    }
-
     if (configurationManager().hasKey(ConfigurationManager::KeyShutdownCountdown)) {
         _shutdown.waitTime = configurationManager().value<double>(
             ConfigurationManager::KeyShutdownCountdown
