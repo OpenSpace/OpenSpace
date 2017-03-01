@@ -108,10 +108,10 @@ bool RenderableExplorationPath::initialize() {
 			"${MODULE_GLOBEBROWSING}/shaders/roverpath_vs.glsl",
 			"${MODULE_GLOBEBROWSING}/shaders/roverpath_fs.glsl"
 		);
-		if (!_shader)
+		if (!_shader) {
 			return false;
+		}
 	}
-
 
 	calculatePathModelCoordinates();
 
@@ -140,28 +140,63 @@ bool RenderableExplorationPath::isReady() const {
 }
 
 void RenderableExplorationPath::render(const RenderData& data) {
-	//_roverPath->render();
+	GLuint _vaioID = 0;
+	glGenVertexArrays(1, &_vaioID);
+	ghoul_assert(_vaioID != 0, "Could not generate vertex arrays");
+
+	GLuint _vertexBufferID = 0;
+	glGenBuffers(1, &_vertexBufferID);
+	ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
+	
+	_shader->activate();
+	
+	// Model transform and view transform needs to be in double precision
+	glm::dmat4 modelTransform = _globe->modelTransform();
+	glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+	_shader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+	_shader->setUniform("projectionTransform", data.camera.projectionMatrix());
+	_shader->setUniform("color", glm::vec4(0.0, 0.0, 1.0, 1.0));
+
+	glBindVertexArray(_vaioID);
+	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
+	glBufferData(GL_ARRAY_BUFFER,
+		_stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
+		&_stationPointsModelCoordinates[0],
+		GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(_stationPointsModelCoordinates[0]), 0);
+
+	glLineWidth(8.0f);
+	glDrawArrays(GL_LINE_STRIP, 0, _stationPointsModelCoordinates.size());
+	glLineWidth(1.0f);
+	
+	_shader->setUniform("color", glm::vec4(1.0, 0.0, 0.0, 1.0));
+
+	// Better to render some kind of sphere instead of a point?
+	//glPointSize(10.0f);
+	//glDrawArrays(GL_POINTS, 0, _stationPointsModelCoordinates.size());
+
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &_vaioID);
+	glDeleteBuffers(1, &_vertexBufferID);
+	_shader->deactivate();
 }
 
 void RenderableExplorationPath::update(const UpdateData& data) {
-	calculatePathWorldCoordinates();
+
 }
 
 void RenderableExplorationPath::calculatePathModelCoordinates() {
 	globebrowsing::Geodetic2 geo;
 	glm::dvec3 positionModelSpace;
-
 	for (auto i : _coordMap) {
-		geo = globebrowsing::Geodetic2{ i.second.x, i.second.y } / 180 * glm::pi<double>();
+		// The map has longitude first and lattitude after, need to switch
+		geo = globebrowsing::Geodetic2{ i.second.y, i.second.x } / 180 * glm::pi<double>();
 		positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
-		_stationPointsWorldCoordinates.push_back(positionModelSpace);
+		_stationPointsModelCoordinates.push_back(glm::vec4(positionModelSpace, 1.0f));
 	}
 }
 
-void RenderableExplorationPath::calculatePathWorldCoordinates() {
-	glm::dmat4 modelTransform = _globe->modelTransform();
-	for (auto i : _stationPointsWorldCoordinates) {
-		i = modelTransform * glm::dvec4(i, 1.0);
-	}
-}
 } // namespace openspace

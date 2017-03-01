@@ -50,7 +50,6 @@ public:
 	bool extractCoordinates();
 private:
 	void calculatePathModelCoordinates();
-	void calculatePathWorldCoordinates();
 
 	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 	properties::BoolProperty _isEnabled;
@@ -58,7 +57,7 @@ private:
 	std::string _filePath;
 	bool _isReady;
 
-	std::vector<glm::dvec3> _stationPointsWorldCoordinates;
+	std::vector<glm::vec4> _stationPointsModelCoordinates;
 	globebrowsing::RenderableGlobe* _globe;
 
 	RoverPath* _roverPath;
