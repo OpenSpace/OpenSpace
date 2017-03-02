@@ -37,7 +37,6 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
@@ -47,8 +46,10 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <openspace/scene/translation.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/translation.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
@@ -235,6 +236,8 @@ void OpenSpaceEngine::create(int argc, char** argv,
     LDEBUG("Creating OpenSpaceEngine");
     _engine = new OpenSpaceEngine(std::string(argv[0]), std::move(windowWrapper));
 
+    registerCoreClasses(DocEng);
+
     // Query modules for commandline arguments
     _engine->gatherCommandlineArguments();
 
@@ -341,7 +344,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
     // Register modules
     _engine->_moduleEngine->initialize();
 
-    registerCoreClasses(DocEng);
     // After registering the modules, the documentations for the available classes
     // can be added as well
     for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
@@ -938,8 +940,7 @@ void OpenSpaceEngine::render(const glm::mat4& viewMatrix,
     bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
     if (showGui && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering()) {
         _renderEngine->renderScreenLog();
-        if (_console->isVisible())
-            _console->render();
+        _console->render();
     }
 
     if (_shutdown.inShutdown) {
@@ -968,25 +969,18 @@ void OpenSpaceEngine::postDraw() {
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
     for (const auto& func : _moduleCallbacks.keyboard) {
-        bool consumed = func(key, mod, action);
+        const bool consumed = func(key, mod, action);
         if (consumed) {
             return;
         }
     }
-    
-    // @CLEANUP:  Remove the commandInputButton and replace with a method just based
-    // on Lua by binding a key to the Lua script toggling the console ---abock
-    if (key == _console->commandInputButton()) {
-        if (action == KeyAction::Press) {
-            _console->toggleMode();
-        }
-    } else if (!_console->isVisible()) {
-        // @CLEANUP:  Make the interaction handler return whether a key has been consumed
-        // and then pass it on to the console ---abock
-        _interactionHandler->keyboardCallback(key, mod, action);
-    } else {
-        _console->keyboardCallback(key, mod, action);
+
+    const bool consoleConsumed = _console->keyboardCallback(key, mod, action);
+    if (consoleConsumed) {
+        return;
     }
+
+    _interactionHandler->keyboardCallback(key, mod, action);
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
@@ -997,9 +991,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
         }
     }
 
-    if (_console->isVisible()) {
-        _console->charCallback(codepoint, modifier);
-    }
+    _console->charCallback(codepoint, modifier);
 }
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action) {

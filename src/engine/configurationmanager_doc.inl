@@ -105,31 +105,8 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     new TableVerifier({
                         {
                             "*",
-                            new TableVerifier({
-                                {
-                                    ConfigurationManager::PartType,
-                                    new StringInListVerifier({
-                                    // List from logfactory.cpp::createLog
-                                        "text", "html"
-                                    }),
-                                    "The type of the new log to be generated."
-                                },
-                                {
-                                    ConfigurationManager::PartFile,
-                                    new StringVerifier,
-                                    "The filename to which the log will be written."
-                                },
-                                {
-                                    ConfigurationManager::PartAppend,
-                                    new BoolVerifier,
-                                    "Determines whether the file will be cleared at "
-                                    "startup or if the contents will be appended to "
-                                    "previous runs.",
-                                    Optional::Yes
-                                }
-                            }),
-                            "Additional log files",
-                            Optional::Yes
+                            new ReferencingVerifier("core_logfactory"),
+                            "Additional log files"
                         }
                     }),
                     "Per default, log messages are written to the console, the "

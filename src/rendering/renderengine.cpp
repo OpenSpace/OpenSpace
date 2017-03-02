@@ -39,6 +39,7 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
@@ -1098,6 +1099,8 @@ void RenderEngine::renderInformation() {
                         penPosition.y -= _fontInfo->height();
                     }
                     catch (...) {
+                        // @CLEANUP:  This is bad as it will discard all exceptions
+                        // without telling us about it! ---abock
                     }
                 }
 

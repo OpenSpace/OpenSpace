@@ -26,11 +26,11 @@
 
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/renderable.h>
@@ -51,6 +51,7 @@ namespace openspace {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
     engine.addDocumentation(ConfigurationManager::Documentation());
+    engine.addDocumentation(LogFactoryDocumentation());
     engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());
@@ -69,7 +70,6 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
     engine.addLibrary(interaction::InteractionHandler::luaLibrary());
-    engine.addLibrary(LuaConsole::luaLibrary());
     engine.addLibrary(ParallelConnection::luaLibrary());
     engine.addLibrary(ModuleEngine::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());

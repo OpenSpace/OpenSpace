@@ -65,7 +65,7 @@ KeyModifier operator|(KeyModifier lhs, KeyModifier rhs) {
     return static_cast<KeyModifier>(
         static_cast<std::underlying_type_t<KeyModifier>>(lhs) |
         static_cast<std::underlying_type_t<KeyModifier>>(rhs)
-        );
+    );
 }
 
 KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs) {
@@ -82,8 +82,9 @@ KeyWithModifier stringToKey(std::string str) {
     // default is unknown
     Key k = Key::Unknown;
     auto it = KeyMapping.find(tokens.back());
-    if (it != KeyMapping.end())
+    if (it != KeyMapping.end()) {
         k = it->second;
+    }
 
 
     KeyModifier m = KeyModifier::NoModifier;
@@ -92,10 +93,12 @@ KeyWithModifier stringToKey(std::string str) {
         tokens.end() - 1,
         [&m](const std::string& s) {
             auto it = KeyModifierMapping.find(s);
-            if (it != KeyModifierMapping.end())
+            if (it != KeyModifierMapping.end()) {
                 m |= it->second;
-            else
+            }
+            else {
                 LERROR("Unknown modifier key '" << s << "'");
+            }
         }
     );
 
@@ -103,10 +106,12 @@ KeyWithModifier stringToKey(std::string str) {
 }
 
 bool operator<(const KeyWithModifier& lhs, const KeyWithModifier& rhs) {
-    if (lhs.modifier == rhs.modifier)
+    if (lhs.modifier == rhs.modifier) {
         return lhs.key < rhs.key;
-    else
+    }
+    else {
         return lhs.modifier < rhs.modifier;
+    }
 }
 
 } // namespace openspace
@@ -115,8 +120,9 @@ namespace std {
  
 std::string to_string(openspace::Key key) {
     for (const auto& p : openspace::KeyMapping) {
-        if (p.second == key)
+        if (p.second == key) {
             return p.first;
+        }
     }
     ghoul_assert(false, "Missing key in KeyMapping");
 }
@@ -124,8 +130,9 @@ std::string to_string(openspace::Key key) {
 std::string to_string(openspace::KeyModifier mod) {
     using namespace openspace;
     
-    if (mod == KeyModifier::NoModifier)
+    if (mod == KeyModifier::NoModifier) {
         return "";
+    }
     
     std::string result;
     for (const auto& p : KeyModifierMapping) {
@@ -139,10 +146,12 @@ std::string to_string(openspace::KeyModifier mod) {
 }
 
 std::string to_string(openspace::KeyWithModifier key) {
-    if (key.modifier == openspace::KeyModifier::NoModifier)
+    if (key.modifier == openspace::KeyModifier::NoModifier) {
         return to_string(key.key);
-    else
+    }
+    else {
         return to_string(key.modifier) + "+" + to_string(key.key);
+    }
 }
     
 } // namespace std

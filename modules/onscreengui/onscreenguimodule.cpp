@@ -32,6 +32,8 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/logging/logmanager.h>
 
