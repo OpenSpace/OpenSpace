@@ -82,7 +82,7 @@ struct PixelRegion {
 
     void forceNumPixelToDifferByNearestMultipleOf(unsigned int multiple);
     void roundUpNumPixelToNearestMultipleOf(unsigned int multiple);
-    void roundDownToQuadratic();
+	void roundDownToQuadratic();
 
     PixelRegion globalCut(Side side, int globalPos);
     PixelRegion localCut(Side side, int localPos);

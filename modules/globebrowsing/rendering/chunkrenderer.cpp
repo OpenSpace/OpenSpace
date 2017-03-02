@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/rendering/layershadermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <modules/globebrowsing/tile/tiledataset.h>
 
 namespace {
     const char* keyFrame = "Frame";
@@ -108,8 +109,19 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
         std::to_string(debugProps.showHeightResolution)));
     pairs.push_back(std::make_pair("showHeightIntensities",
         std::to_string(debugProps.showHeightIntensities)));
-    pairs.push_back(std::make_pair("defaultHeight",
-        std::to_string(Chunk::DEFAULT_HEIGHT)));
+	pairs.push_back(std::make_pair("defaultHeight",
+		std::to_string(Chunk::DEFAULT_HEIGHT)));
+
+	pairs.push_back(std::make_pair("tilePaddingStart",
+		"ivec2(" +
+		std::to_string(TileDataset::padding.start.x) + "," +
+		std::to_string(TileDataset::padding.start.y) + ")"
+	));
+	pairs.push_back(std::make_pair("tilePaddingSizeDiff",
+		"ivec2(" +
+		std::to_string(TileDataset::padding.numPixels.x) + "," +
+		std::to_string(TileDataset::padding.numPixels.y) + ")"
+	));
 
     // Now the shader program can be accessed
     ProgramObject* programObject =

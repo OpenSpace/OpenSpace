@@ -45,7 +45,12 @@ struct TileDataLayout {
     GLuint glType;
 
     size_t bytesPerDatum;
-    size_t numRasters;
+	size_t numRasters;
+	/// Number of rasters available in the GDAL dataset.
+	/// Does not necessarily have to be equal to numRasters.
+	/// In case an extra alpha channel needs to be added that
+	/// does not exist in the GDAL dataset for example
+	size_t numRastersAvailable;
     size_t bytesPerPixel;
 
     TextureFormat textureFormat;

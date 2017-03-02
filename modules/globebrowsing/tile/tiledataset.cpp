@@ -529,14 +529,12 @@ TileDataset::IODescription TileDataset::getIODescription(const TileIndex& tileIn
         io.read.region.pad(scaledPadding);
     }
 
-    // For correct sampling in height dataset, we need to pad the texture tile
+    // For correct sampling in dataset, we need to pad the texture tile
     io.write.region.pad(padding);
-    PixelRegion::PixelRange preRound = io.write.region.numPixels;
-    io.write.region.roundDownToQuadratic();
-    io.write.region.roundUpNumPixelToNearestMultipleOf(2);
-    if (preRound != io.write.region.numPixels) {
-        LDEBUG(tileIndex << " | " << preRound.x << ", " << preRound.y << " --> " << io.write.region.numPixels.x << ", " << io.write.region.numPixels.y);
-    }
+	// OpenGL does not like if the number of bytes per line is not 4
+	if (io.write.bytesPerLine % 4 != 0) {
+		io.write.region.roundUpNumPixelToNearestMultipleOf(4);
+	}
 
     io.write.region.start = PixelRegion::PixelCoordinate(0, 0); // write region starts in origin
     io.write.bytesPerLine = _dataLayout.bytesPerPixel * io.write.region.numPixels.x;
@@ -549,8 +547,15 @@ char* TileDataset::readImageData(IODescription& io, CPLErr& worstError) const {
     // allocate memory for the image
     char* imageData = new char[io.write.totalNumBytes];
 
+	// In case there are extra channels not existing in the GDAL dataset
+	// we set the bytes to 255 (for example an extra alpha channel that)
+	// needs to be 1.
+	if (_dataLayout.numRasters > _dataLayout.numRastersAvailable) {
+		memset(imageData, 255, io.write.totalNumBytes);
+	}
+	
     // Read the data (each rasterband is a separate channel)
-    for (size_t i = 0; i < _dataLayout.numRasters; i++) {
+    for (size_t i = 0; i < _dataLayout.numRastersAvailable; i++) {
         GDALRasterBand* rasterBand = gdalRasterBand(io.read.overview, i + 1);
 
         // The final destination pointer is offsetted by one datum byte size
