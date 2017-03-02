@@ -180,7 +180,6 @@ bool RenderablePlane::deinitialize() {
     delete _textureFile;
     _textureFile = nullptr;
 
-
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
@@ -212,8 +211,15 @@ void RenderablePlane::render(const RenderData& data) {
     glm::dmat4 rotationTransform;
     if (_billboard)
         rotationTransform = glm::inverse(glm::dmat4(data.camera.viewRotationMatrix()));
-    else
-        rotationTransform = glm::dmat4(data.modelTransform.rotation);
+    else { // TODO(michaeln): Do NOT render all non-billboard planes like this. Create separate class or integrate better
+        // Sun's barycenter
+        SceneGraphNode* p = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent()->parent();
+        glm::dmat4 rotationTransformTangentTrajectory = glm::lookAt(glm::normalize(data.modelTransform.translation),
+                                             glm::dvec3(p->worldPosition()), data.modelTransform.rotation * glm::dvec3(0.f, 0.0, 1.0));
+        rotationTransform = glm::dmat4(glm::inverse(rotationTransformTangentTrajectory));
+        // Stereos internal ref frame. pass in as property
+        //staticRotationTransform = glm::dmat4({0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0});
+    }
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
