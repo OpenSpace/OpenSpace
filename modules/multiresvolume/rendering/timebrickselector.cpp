@@ -36,11 +36,7 @@ namespace {
 
 namespace openspace {
 TimeBrickSelector::TimeBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
-    : _tsp(tsp)
-    , _histogramManager(hm)
-    , _transferFunction(tf)
-    , _memoryBudget(memoryBudget)
-    , _streamingBudget(streamingBudget) {}
+    : TfBrickSelector(tsp, hm, tf, memoryBudget, streamingBudget) { }
 
 TimeBrickSelector::~TimeBrickSelector() {}
 
