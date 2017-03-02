@@ -57,86 +57,62 @@ std::string TemplateVerifier<T>::documentation() const {
 
 template <typename T>
 std::string Vector2Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Vector2<"s + typeid(T).name() + ">";
+    return std::string("Vector2<") + typeid(T).name() + ">";
 }
 
 template <typename T>
 std::string Vector3Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Vector3<"s + typeid(T).name() + ">";
+    return std::string("Vector3<") + typeid(T).name() + ">";
 }
 
 template <typename T>
 std::string Vector4Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Vector4<"s + typeid(T).name() + ">";
+    return std::string("Vector4<") + typeid(T).name() + ">";
 }
 
 template <typename T>
 std::string Matrix2x2Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Matrix2x2<"s + typeid(T).name() + ">";
+    return std::string("Matrix2x2<") + typeid(T).name() + ">";
 }
 
 template <typename T>
 std::string Matrix2x3Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Matrix2x3<"s + typeid(T).name() + ">";
+    return std::string("Matrix2x3<") + typeid(T).name() + ">";
 }
 
 template <typename T>
 std::string Matrix2x4Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Matrix2x4<"s + typeid(T).name() + ">";
+    return std::string("Matrix2x4<") + typeid(T).name() + ">";
 }
 
 template <typename T>
 std::string Matrix3x2Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Matrix3x2<"s + typeid(T).name() + ">";
+    return std::string("Matrix3x2<") + typeid(T).name() + ">";
 }
 
 template <typename T>
 std::string Matrix3x3Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Matrix3x3<"s + typeid(T).name() + ">";
+    return std::string("Matrix3x3<") + typeid(T).name() + ">";
 }
 
 template <typename T>
 std::string Matrix3x4Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Matrix3x4<"s + typeid(T).name() + ">";
+    return std::string("Matrix3x4<") + typeid(T).name() + ">";
 }
 
 template <typename T>
 std::string Matrix4x2Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Matrix4x2<"s + typeid(T).name() + ">";
+    return std::string("Matrix4x2<") + typeid(T).name() + ">";
 }
 
 template <typename T>
 std::string Matrix4x3Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Matrix4x3<"s + typeid(T).name() + ">";
+    return std::string("Matrix4x3<") + typeid(T).name() + ">";
 }
 
 template <typename T>
 std::string Matrix4x4Verifier<T>::type() const {
-    using namespace std::string_literals;
-
-    return "Matrix4x4<"s + typeid(T).name() + ">";
+    return std::string("Matrix4x4<") + typeid(T).name() + ">";
 }
 
 template <typename T, typename Operator>

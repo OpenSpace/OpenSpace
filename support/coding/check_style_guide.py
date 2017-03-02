@@ -314,6 +314,31 @@ def check_header_file(file, component):
         if using_namespaces:
             print(file, '\t', 'Using namespace found in header file')
 
+def check_inline_file(file, component):
+    with open(file, 'r+') as f:
+        lines = f.readlines()
+
+        copyright = check_copyright(lines)
+        if copyright:
+            print(file, '\t', 'Copyright check failed', '\t', copyright)
+            return
+
+        header = check_glm_header(lines, file)
+        if header:
+            print(file, '\t', 'Illegal glm header include', header)
+            return
+
+        core_dependency = check_core_dependency(lines, component)
+        if core_dependency:
+            print(file, '\t', 'Wrong dependency (core depends on module)', core_dependency)
+
+        if (not '_doc.inl' in file):
+            # The _doc.inl files are allowed to use using namespace as they are inclued
+            # from the cpp files and thus don't leak it
+            using_namespaces = check_using_namespace(lines)
+            if using_namespaces:
+                print(file, '\t', 'Using namespace found in inline file')
+
 
 def check_source_file(file, component):
     with open(file, 'r+') as f:
@@ -352,12 +377,27 @@ basePath = './'
 if len(sys.argv) > 1:
     basePath = sys.argv[1] + '/'
 
+# Check header files
+print("Checking header files")
+print("=====================")
 check_files(basePath + 'include/**/*.h', '', 'openspace_core', check_header_file)
 check_files(basePath + 'apps/**/*.h', basePath + 'apps/**/ext/**/*.h', 'openspace_app', check_header_file)
 check_files(basePath + 'modules/**/*.h', basePath + 'modules/**/ext/**/*.h', 'openspace_module', check_header_file)
 check_files(basePath + 'ext/ghoul/include/**/*.h', '', 'ghoul', check_header_file)
+print("")
 
+print("Checking inline files")
+print("=====================")
+check_files(basePath + 'include/**/*.inl', '', 'openspace_core', check_inline_file)
+check_files(basePath + 'src/**/*.inl', '', 'openspace_core', check_inline_file)
+check_files(basePath + 'apps/**/*.inl', basePath + 'apps/**/ext/**/*.h', 'openspace_app', check_inline_file)
+check_files(basePath + 'modules/**/*.inl', basePath + 'modules/**/ext/**/*.h', 'openspace_module', check_inline_file)
+check_files(basePath + 'ext/ghoul/include/**/*.inl', '', 'ghoul', check_inline_file)
+print("")
+
+print("Checking source files")
+print("=====================")
 check_files(basePath + 'src/**/*.cpp', '', 'openspace_core', check_source_file)
 check_files(basePath + 'apps/**/*.cpp', basePath + 'apps/**/ext/**/*.cpp', 'openspace_app', check_source_file)
 check_files(basePath + 'modules/**/*.cpp', basePath + 'modules/**/ext/**/*.cpp', 'openspace_module', check_source_file)
-check_files(basePath + 'ext/ghoul/include/**/*.cpp', '', 'ghoul', check_source_file)
+check_files(basePath + 'ext/ghoul/src/**/*.cpp', '', 'ghoul', check_source_file)
