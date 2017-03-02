@@ -201,7 +201,7 @@ Interpolator<double>& InteractionMode::rotateToFocusNodeInterpolator() {
     
     
 // KeyframeInteractionMode
-KeyframeInteractionMode::KeyframeInteractionMode(){
+KeyframeInteractionMode::KeyframeInteractionMode() {
 
 }
 

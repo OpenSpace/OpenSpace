@@ -71,6 +71,10 @@ return {
                         },
                         Enabled = true,
                     },
+					{
+						FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
+						Name = "ESRI",
+					},
                     {
                         Type = "Temporal",
                         Name = "Temporal VIIRS SNPP",
