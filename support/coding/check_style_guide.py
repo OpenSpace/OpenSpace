@@ -166,8 +166,11 @@ def check_copyright(lines):
 
     if year != current_year:
         return 'Out of date copyright notice ' + year + ' || ' + current_year
-    else:
-        return ''
+
+    if lines[index[0] + 1][0] != ' ':
+        return 'Copyright header is not correctly indented'
+
+    return ''
 
 
 
