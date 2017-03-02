@@ -88,7 +88,8 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
 }
 
 Renderable::Renderable()
-    : _enabled("enabled", "Is Enabled", true)
+    : properties::PropertyOwner("renderable")
+    , _enabled("enabled", "Is Enabled", true)
     , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
@@ -96,14 +97,13 @@ Renderable::Renderable()
 {}
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
-    : _enabled("enabled", "Is Enabled", true)
+    : properties::PropertyOwner("renderable")
+    , _enabled("enabled", "Is Enabled", true)
     , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
     , _hasTimeInterval(false)
 {
-    setName("renderable");
-
     ghoul_assert(
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
         "SceneGraphNode must specify '" << SceneGraphNode::KeyName << "'"

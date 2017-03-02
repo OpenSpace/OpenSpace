@@ -48,14 +48,13 @@ namespace {
 namespace openspace {
 
 LuaConsole::LuaConsole()
-    : _isVisible("isVisible", "Is Visible", false)
+    : properties::PropertyOwner("LuaConsole")
+    , _isVisible("isVisible", "Is Visible", false)
     , _remoteScripting(true)
     , _inputPosition(0)
     , _activeCommand(0)
     , _autoCompleteInfo({NoAutoComplete, false, ""})
 {
-    setName("LuaConsole");
-
     _isVisible.onChange([this](){
         if (_isVisible) {
             _remoteScripting = false;

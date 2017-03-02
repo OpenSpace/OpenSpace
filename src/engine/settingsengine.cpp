@@ -46,15 +46,14 @@ namespace {
 namespace openspace {
 
 SettingsEngine::SettingsEngine()
-    : _eyeSeparation("eyeSeparation", "Eye Separation", 0.f, 0.f, 10.f)
+    : properties::PropertyOwner("Global Properties")
+    , _eyeSeparation("eyeSeparation", "Eye Separation", 0.f, 0.f, 10.f)
     , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::Dropdown)
     , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
     , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
     , _useDoubleBuffering("useDoubleBuffering", "Use double buffering", false)
     , _spiceUseExceptions("enableSpiceExceptions", "Enable Spice Exceptions", false)
 {
-    setName("Global Properties");
-
     _spiceUseExceptions.onChange([this] {
         if (_spiceUseExceptions) {
             SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::Yes);

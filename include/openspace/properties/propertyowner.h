@@ -53,7 +53,7 @@ public:
     static const char URISeparator = '.';
     
     /// The constructor initializing the PropertyOwner's name to <code>""</code>
-    PropertyOwner();
+    PropertyOwner(std::string name = "");
 
     /**
      * The destructor will remove all Propertys and PropertyOwners it owns along with

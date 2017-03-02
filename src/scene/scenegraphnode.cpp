@@ -145,7 +145,8 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 }
 
 SceneGraphNode::SceneGraphNode()
-    : _parent(nullptr)
+    : properties::PropertyOwner("")
+    , _parent(nullptr)
     , _transform {
         std::make_unique<StaticTranslation>(),
         std::make_unique<StaticRotation>(),

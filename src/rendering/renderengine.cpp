@@ -92,7 +92,8 @@ namespace {
 namespace openspace {
 
 RenderEngine::RenderEngine()
-    : _mainCamera(nullptr)
+    : properties::PropertyOwner("RenderEngine")
+    , _mainCamera(nullptr)
     , _raycasterManager(nullptr)
     , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
     , _frametimeType(
@@ -119,8 +120,6 @@ RenderEngine::RenderEngine()
     , _fadeDirection(0)
     , _frameNumber(0)
 {
-    setName("RenderEngine");
-
     _performanceMeasurements.onChange([this](){
         if (_performanceMeasurements) {
             if (!_performanceManager) {

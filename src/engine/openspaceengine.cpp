@@ -140,7 +140,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _downloadManager(nullptr)
     , _parallelConnection(new ParallelConnection)
     , _windowWrapper(std::move(windowWrapper))
-    , _globalPropertyNamespace(new properties::PropertyOwner)
+    , _globalPropertyNamespace(new properties::PropertyOwner(""))
     , _runTime(0.0)
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)

@@ -72,11 +72,13 @@ std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary
     return result;
 }
 
-Rotation::Rotation() {
-    setName("Rotation");
-}
+Rotation::Rotation() 
+    : properties::PropertyOwner("Rotation")
+{}
     
-Rotation::Rotation(const ghoul::Dictionary& dictionary) {}
+Rotation::Rotation(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner("Rotation")
+{}
     
 Rotation::~Rotation() {}
     

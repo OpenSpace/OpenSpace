@@ -38,11 +38,9 @@ namespace {
 
 namespace openspace {
 
-OpenSpaceModule::OpenSpaceModule(std::string name) {
-    ghoul_assert(!name.empty(), "Name must not be empty");
-    
-    setName(std::move(name));
-}
+OpenSpaceModule::OpenSpaceModule(std::string name) 
+    : properties::PropertyOwner(std::move(name))
+{}
 
 void OpenSpaceModule::initialize() {
     std::string upperName = name();

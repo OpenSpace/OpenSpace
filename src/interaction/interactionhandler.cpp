@@ -72,15 +72,14 @@ namespace interaction {
 
 // InteractionHandler
 InteractionHandler::InteractionHandler()
-    : _origin("origin", "Origin", "")
+    : properties::PropertyOwner("Interaction")
+    , _origin("origin", "Origin", "")
     , _rotationalFriction("rotationalFriction", "Rotational Friction", true)
     , _horizontalFriction("horizontalFriction", "Horizontal Friction", true)
     , _verticalFriction("verticalFriction", "Vertical Friction", true)
     , _sensitivity("sensitivity", "Sensitivity", 0.5, 0.001, 1)
     , _rapidness("rapidness", "Rapidness", 1, 0.1, 60)
 {
-    setName("Interaction");
-
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {
