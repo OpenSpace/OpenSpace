@@ -33,7 +33,6 @@
 #include <vector>
 #include <memory>
 
-// Forward declare to minimize dependencies
 namespace ghoul {
     class Dictionary;
 }

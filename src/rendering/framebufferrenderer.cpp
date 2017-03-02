@@ -385,8 +385,6 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         }
         
         if (raycastProgram) {
-
-            //raycastProgram->setUniform("insideRaycaster", cameraIsInside);
             raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 
             ghoul::opengl::TextureUnit exitColorTextureUnit;
