@@ -29,7 +29,7 @@
 namespace openspace {
 namespace globebrowsing {
 
-void GPULayer::setValue(ProgramObject* programObject, const Layer& layer, 
+void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                         const TileIndex& tileIndex, int pileSize)
 {
     ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
@@ -37,7 +37,7 @@ void GPULayer::setValue(ProgramObject* programObject, const Layer& layer,
     gpuRenderSettings.setValue(programObject, layer.renderSettings());
 }
 
-void GPULayer::bind(ProgramObject* programObject, const Layer& layer, 
+void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                     const std::string& nameBase, int pileSize)
 {
     gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);

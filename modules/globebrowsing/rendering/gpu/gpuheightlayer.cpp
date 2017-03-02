@@ -33,18 +33,19 @@
 namespace openspace {
 namespace globebrowsing {
 
-void GPUHeightLayer::setValue(ProgramObject* programObject, const Layer& layer, 
-                              const TileIndex& tileIndex, int pileSize)
+void GPUHeightLayer::setValue(ghoul::opengl::ProgramObject* programObject,
+                              const Layer& layer, const TileIndex& tileIndex,
+                              int pileSize)
 {
     GPULayer::setValue(programObject, layer, tileIndex, pileSize);
-    gpuDepthTransform.setValue(programObject, layer.tileProvider()->depthTransform());
+    _gpuDepthTransform.setValue(programObject, layer.tileProvider()->depthTransform());
 }
 
-void GPUHeightLayer::bind(ProgramObject* programObject, const Layer& layer,
+void GPUHeightLayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                           const std::string& nameBase, int pileSize)
 {
     GPULayer::bind(programObject, layer, nameBase, pileSize);
-    gpuDepthTransform.bind(programObject, nameBase + "depthTransform.");
+    _gpuDepthTransform.bind(programObject, nameBase + "depthTransform.");
 }
 
 

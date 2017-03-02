@@ -240,6 +240,14 @@ def check_core_dependency(lines, component):
     else:
         return ''
 
+def check_using_namespace(lines):
+    index = [i for i,s in enumerate(lines) if "using namespace" in s.strip()]
+
+    if len(index) > 0:
+        return lines[index[0]]
+    else:
+        return ''
+
 
 previousSymbols  = {}
 def check_header_file(file, component):
@@ -300,7 +308,11 @@ def check_header_file(file, component):
 
         core_dependency = check_core_dependency(lines, component)
         if core_dependency:
-            print(file, '\t' 'Wrong core dependency', core_dependency)
+            print(file, '\t', 'Wrong dependency (core depends on module)', core_dependency)
+
+        using_namespaces = check_using_namespace(lines)
+        if using_namespaces:
+            print(file, '\t', 'Using namespace found in header file')
 
 
 def check_source_file(file, component):
