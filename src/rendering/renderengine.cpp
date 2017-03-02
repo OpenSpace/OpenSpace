@@ -186,7 +186,7 @@ void RenderEngine::initialize() {
     if (confManager.hasKeyAndValue<std::string>(KeyRenderingMethod)) {
         renderingMethod = confManager.value<std::string>(KeyRenderingMethod);
     } else {
-        using Version = ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version;
+        using Version = ghoul::systemcapabilities::Version;
 
         // The default rendering method has a requirement of OpenGL 4.3, so if we are
         // below that, we will fall back to frame buffer operation
@@ -556,7 +556,9 @@ void RenderEngine::postDraw() {
     }
 
     if (_performanceManager) {
-        _performanceManager->storeScenePerformanceMeasurements(scene()->allSceneGraphNodes());
+        _performanceManager->storeScenePerformanceMeasurements(
+            scene()->allSceneGraphNodes()
+        );
     }
 }
 

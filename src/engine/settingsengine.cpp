@@ -40,13 +40,13 @@
 
 
 namespace {
-    const std::string _loggerCat = "SettingsEngine";
+    const char* _loggerCat = "SettingsEngine";
 }
 
 namespace openspace {
 
 SettingsEngine::SettingsEngine()
-    : _eyeSeparation("eyeSeparation", "Eye Separation" , 0.f, 0.f, 10.f)
+    : _eyeSeparation("eyeSeparation", "Eye Separation", 0.f, 0.f, 10.f)
     , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::Dropdown)
     , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
     , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
@@ -55,79 +55,26 @@ SettingsEngine::SettingsEngine()
 {
     setName("Global Properties");
 
-    _spiceUseExceptions.onChange([this]{
+    _spiceUseExceptions.onChange([this] {
         if (_spiceUseExceptions) {
             SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::Yes);
-        }
-        else {
+        } else {
             SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::No);
         }
     });
     addProperty(_spiceUseExceptions);
+    addProperty(_eyeSeparation);
+    addProperty(_busyWaitForDecode);
+    addProperty(_logSGCTOutOfOrderErrors);
+    addProperty(_useDoubleBuffering);
+    addProperty(_scenes);
 }
 
 void SettingsEngine::initialize() {
-    initEyeSeparation();
-    initSceneFiles();
-    initBusyWaitForDecode();
-    initLogSGCTOutOfOrderErrors();
-    initUseDoubleBuffering();
-}
-    
-void SettingsEngine::setModules(std::vector<OpenSpaceModule*> modules) {
-    for (OpenSpaceModule* m : modules) {
-        addPropertySubOwner(m);
-    }
-}
-
-void SettingsEngine::initEyeSeparation() {
-    addProperty(_eyeSeparation);
-
     // Set interaction to change the window's (SGCT's) eye separation
     _eyeSeparation.onChange(
-        [this]() { OsEng.windowWrapper().setEyeSeparationDistance(_eyeSeparation); });
-}
-
-void SettingsEngine::initBusyWaitForDecode() {
-    addProperty(_busyWaitForDecode);
-    _busyWaitForDecode.onChange(
-        [this]() { 
-        LINFO((_busyWaitForDecode.value() ? "Busy wait for decode" : "Async decode"));
-    });
-}
-
-bool SettingsEngine::busyWaitForDecode() {
-    return _busyWaitForDecode.value();
-}
-
-void SettingsEngine::initLogSGCTOutOfOrderErrors() {
-    addProperty(_logSGCTOutOfOrderErrors);
-    _logSGCTOutOfOrderErrors.onChange(
-        [this]() {
-        LINFO("Turn " << (_logSGCTOutOfOrderErrors.value() ? "on" : "off") << " SGCT out of order logging");
-    });
-}
-
-bool SettingsEngine::logSGCTOutOfOrderErrors() {
-    return _logSGCTOutOfOrderErrors.value();
-}
-
-
-void SettingsEngine::initUseDoubleBuffering() {
-    addProperty(_useDoubleBuffering);
-    _useDoubleBuffering.onChange(
-        [this]() {
-        LINFO("Turn " << (_useDoubleBuffering.value() ? "on" : "off") << " double buffering");
-    });
-}
-
-
-bool SettingsEngine::useDoubleBuffering() {
-    return _useDoubleBuffering.value();
-}
-
-void SettingsEngine::initSceneFiles() {
-    addProperty(_scenes);
+        [this]() { OsEng.windowWrapper().setEyeSeparationDistance(_eyeSeparation); }
+    );
 
     // Load all matching files in the Scene
     // TODO: match regex with either with new ghoul readFiles or local code
@@ -135,18 +82,36 @@ void SettingsEngine::initSceneFiles() {
     std::vector<std::string> scenes = ghoul::filesystem::Directory(sceneDir).readFiles();
     for (std::size_t i = 0; i < scenes.size(); ++i) {
         std::size_t found = scenes[i].find_last_of("/\\");
-        _scenes.addOption(i, scenes[i].substr(found+1));
+        _scenes.addOption(i, scenes[i].substr(found + 1));
     }
 
     // Set interaction to change ConfigurationManager and schedule the load
     _scenes.onChange(
         [this]() {
-            std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
-            OsEng.configurationManager().setValue(
-                ConfigurationManager::KeyConfigScene, sceneFile);
-            OsEng.renderEngine().scene()->scheduleLoadSceneFile(sceneFile);
-        }
+        std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
+        OsEng.configurationManager().setValue(
+            ConfigurationManager::KeyConfigScene, sceneFile);
+        OsEng.renderEngine().scene()->scheduleLoadSceneFile(sceneFile);
+    }
     );
 }
 
+void SettingsEngine::setModules(const std::vector<OpenSpaceModule*>& modules) {
+    for (OpenSpaceModule* m : modules) {
+        addPropertySubOwner(m);
+    }
 }
+
+bool SettingsEngine::busyWaitForDecode() {
+    return _busyWaitForDecode.value();
+}
+
+bool SettingsEngine::logSGCTOutOfOrderErrors() {
+    return _logSGCTOutOfOrderErrors.value();
+}
+
+bool SettingsEngine::useDoubleBuffering() {
+    return _useDoubleBuffering.value();
+}
+
+} // namespace openspace

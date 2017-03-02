@@ -51,6 +51,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/openspacemodule.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/spicemanager.h>
@@ -128,7 +129,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _networkEngine(new NetworkEngine)
-    , _syncEngine(std::make_unique<SyncEngine>(new SyncBuffer(4096)))
+    , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
         programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
       ))
@@ -448,9 +449,9 @@ void OpenSpaceEngine::initialize() {
     SysCap.logCapabilities(verbosity);
 
     // Check the required OpenGL versions of the registered modules
-    ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version version =
+    ghoul::systemcapabilities::Version version =
         _engine->_moduleEngine->requiredOpenGLVersion();
-    LINFO("Required OpenGL version: " << version.toString());
+    LINFO("Required OpenGL version: " << std::to_string(version));
 
     if (OpenGLCap.openGLVersion() < version) {
         throw ghoul::RuntimeError(
@@ -845,7 +846,7 @@ void OpenSpaceEngine::preSynchronization() {
     
     bool master = _windowWrapper->isMaster();
     
-    _syncEngine->presync(master);
+    _syncEngine->preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
         double dt = _windowWrapper->averageDeltaTime();
         _timeManager->preSynchronization(dt);
@@ -877,7 +878,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
     
     bool master = _windowWrapper->isMaster();
-    _syncEngine->postsync(master);
+    _syncEngine->postSynchronization(SyncEngine::IsMaster(master));
 
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {

@@ -73,9 +73,7 @@ scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
     return {};
 }
 
-ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
-OpenSpaceModule::requiredOpenGLVersion() const
-{
+ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() const {
     return { 3, 3 };
 }
 
