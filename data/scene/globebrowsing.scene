@@ -7,7 +7,7 @@ function preInitialization()
     ]]--
 
     --openspace.time.setTime(openspace.time.currentWallTime())
-    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
     openspace.time.setTime(openspace.time.currentWallTime())

@@ -31,7 +31,7 @@
 #undef far
 
 namespace {
-    const std::string GuiWindowName = "GUI";
+    const char* GuiWindowTag = "GUI";
 }
 
 namespace openspace {
@@ -110,9 +110,9 @@ glm::ivec2 SGCTWindowWrapper::currentWindowSize() const {
 }
     
 glm::ivec2 SGCTWindowWrapper::currentWindowResolution() const {
-    auto window = sgct::Engine::instance()->getCurrentWindowPtr();
     int x, y;
-    sgct::Engine::instance()->getCurrentWindowPtr()->getFinalFBODimensions(x, y);
+    auto window = sgct::Engine::instance()->getCurrentWindowPtr();
+    window->getFinalFBODimensions(x, y);
     return glm::ivec2(x, y);
 }
 
@@ -153,14 +153,21 @@ bool SGCTWindowWrapper::isRegularRendering() const {
 bool SGCTWindowWrapper::hasGuiWindow() const {
     auto engine = sgct::Engine::instance();
     for (size_t i = 0; i < engine->getNumberOfWindows(); ++i) {
-        if (engine->getWindowPtr(i)->getName() == GuiWindowName)
+        if (engine->getWindowPtr(i)->checkIfTagExists(GuiWindowTag)) {
             return true;
+        }
     }
     return false;
 }
 
 bool SGCTWindowWrapper::isGuiWindow() const {
-    return sgct::Engine::instance()->getCurrentWindowPtr()->getName() == GuiWindowName;
+    return sgct::Engine::instance()->getCurrentWindowPtr()->checkIfTagExists(
+        GuiWindowTag
+    );
+}
+    
+bool SGCTWindowWrapper::isMaster() const {
+    return sgct::Engine::instance()->isMaster();
 }
 
 bool SGCTWindowWrapper::isSwapGroupMaster() const {

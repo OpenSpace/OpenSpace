@@ -85,7 +85,7 @@ TileDataset::IODescription TileDataset::IODescription::cut(PixelRegion::Side sid
     ratio.x = write.region.numPixels.x / (double) read.region.numPixels.x;
     ratio.y = write.region.numPixels.y / (double) read.region.numPixels.y;
 
-    double ratioRatio = ratio.x / ratio.y;
+//    double ratioRatio = ratio.x / ratio.y;
 
     //ghoul_assert(glm::abs(ratioRatio - 1.0) < 0.01, "Different read/write aspect ratio!");
 
@@ -439,7 +439,7 @@ PixelRegion TileDataset::gdalPixelRegion(const GeodeticPatch& geodeticPatch) con
 
 GDALRasterBand* TileDataset::gdalRasterBand(int overview, int raster) const {
     GDALRasterBand* rasterBand = _dataset->GetRasterBand(raster);
-    int numberOfOverviews = rasterBand->GetOverviewCount();
+//    int numberOfOverviews = rasterBand->GetOverviewCount();
     rasterBand = gdalHasOverviews() ? rasterBand->GetOverview(overview) : rasterBand;
     ghoul_assert(rasterBand != nullptr, "Rasterband is null");
     return rasterBand;
@@ -637,7 +637,7 @@ CPLErr TileDataset::repeatedRasterIO(GDALRasterBand* rasterBand, const IODescrip
             //                           +--------------+
 
             if (cutoff.read.region.area() > 0) {
-                didCutOff = true;
+//                didCutOff = true;
 
                 // Wrap by repeating
                 PixelRegion::Side oppositeSide = (PixelRegion::Side) ((i + 2) % 4);
@@ -676,7 +676,7 @@ CPLErr TileDataset::repeatedRasterIO(GDALRasterBand* rasterBand, const IODescrip
     }
         
     CPLErr err = rasterIO(rasterBand, io, dataDestination);
-    worstError = std::max(worstError, err);
+//    worstError = std::max(worstError, err);
 
     // The return error from a repeated rasterIO is ONLY based on the main region,
     // which in the usual case will cover the main area of the patch anyway
@@ -732,7 +732,7 @@ std::shared_ptr<TileMetaData> TileDataset::getTileMetaData(
                                                          const PixelRegion& region) const
 {
     size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
-    size_t totalNumBytes = bytesPerLine * region.numPixels.y;
+//    size_t totalNumBytes = bytesPerLine * region.numPixels.y;
 
     TileMetaData* preprocessData = new TileMetaData();
     preprocessData->maxValues.resize(_dataLayout.numRasters);

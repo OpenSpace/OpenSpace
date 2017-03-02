@@ -27,13 +27,14 @@
 
 #include <modules/base/rendering/renderabletrail.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 /**
  * This concrete implementation of a RenderableTrail renders a fixed trail, regardless of
@@ -55,7 +56,7 @@ public:
 
     void update(const UpdateData& data) override;
    
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     /// The start time of the trail

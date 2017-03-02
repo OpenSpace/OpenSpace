@@ -33,9 +33,10 @@
 
 #include <ghoul/misc/assert.h>
 #include <openspace/util/spicemanager.h>
-#include <fstream>
+#include <algorithm>
 #include <iterator>
 #include <iomanip>
+#include <fstream>
 #include <limits>
 
 #include <ghoul/opengl/ghoul_gl.h>

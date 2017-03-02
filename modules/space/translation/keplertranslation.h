@@ -83,7 +83,7 @@ public:
      * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
      * be passed to the constructor
      */
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
     
 protected:
     /// Default construct that initializes all the properties and member variables

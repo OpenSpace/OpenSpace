@@ -29,7 +29,6 @@
 
 #include <modules/newhorizons/util/projectioncomponent.h>
 
-#include <openspace/documentation/documentation.h>
 #include <modules/newhorizons/util/imagesequencer.h>
 
 #include <openspace/properties/stringproperty.h>
@@ -43,6 +42,7 @@ class Texture;
 }
 
 namespace openspace {
+namespace documentation { struct Documentation; } 
 
 struct RenderData;
 struct UpdateData;
@@ -66,7 +66,7 @@ public:
 
     ghoul::opengl::Texture& baseTexture() const;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     bool loadTextures();

@@ -83,7 +83,8 @@ namespace {
 
 int main(int argc, char** argv) {
     std::vector<std::string> args;
-    openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+    bool close;
+    openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args, close);
 
     testing::InitGoogleTest(&argc, argv);
 

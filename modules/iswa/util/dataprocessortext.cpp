@@ -150,7 +150,7 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
         std::stringstream memorystream(data);
 
         std::vector<int> selectedOptions = dataOptions.value();
-        int numSelected = selectedOptions.size();
+//        int numSelected = selectedOptions.size();
         int numOptions  = dataOptions.options().size();
 
         std::vector<float> values;
@@ -195,7 +195,7 @@ std::vector<float*> DataProcessorText::processData(std::string data, properties:
             // }
             // ----------- OLD METHODS ------------------------
 
-            first = 0; 
+//            first = 0; 
             last = 0;
             option = -3;
             lineSize = line.size();

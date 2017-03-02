@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
 #define __OPENSPACE_CORE___SCRIPTSCHEDULER___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
 
 #include <queue>
@@ -36,6 +35,7 @@ class Dictionary;
 } // namespace ghoul
 
 namespace openspace {
+namespace documentation { struct Documentation; }
 namespace scripting {
 
 /**
@@ -111,7 +111,7 @@ public:
 
     static LuaLibrary luaLibrary();
     
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     std::vector<double> _timings;

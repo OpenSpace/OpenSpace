@@ -27,7 +27,6 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -49,6 +48,8 @@ class ProgramObject;
 } // namespace ghoul
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class ProjectionComponent : public properties::PropertyOwner {
 public:
@@ -105,7 +106,7 @@ public:
     float fieldOfViewY() const;
     float aspectRatio() const;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     bool generateProjectionLayerTexture(const glm::ivec2& size);

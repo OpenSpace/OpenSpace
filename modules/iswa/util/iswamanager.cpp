@@ -89,9 +89,6 @@ IswaManager::IswaManager()
         "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
         [this](const DownloadManager::MemoryFile& file){
             fillCygnetInfo(std::string(file.buffer));
-        },
-        [](const std::string& err){
-            LWARNING("Download to memory was aborted: " + err);
         }
     );
 }

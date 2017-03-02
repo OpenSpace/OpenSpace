@@ -24,6 +24,7 @@
 
 #include <modules/space/rendering/renderablestars.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
@@ -82,7 +83,7 @@ namespace {
 
 namespace openspace {
 
-openspace::Documentation RenderableStars::Documentation() {
+documentation::Documentation RenderableStars::Documentation() {
     using namespace documentation;
     return {
         "RenderableStars",

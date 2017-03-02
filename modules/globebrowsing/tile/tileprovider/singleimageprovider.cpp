@@ -76,7 +76,9 @@ void SingleImageProvider::update() {
 
 void SingleImageProvider::reset() {
     _tile = Tile();
-    _tile.texture = std::shared_ptr<Texture>(ghoul::io::TextureReader::ref().loadTexture(_imagePath).release());
+    _tile.texture = std::shared_ptr<ghoul::opengl::Texture>(
+        std::move(ghoul::io::TextureReader::ref().loadTexture(_imagePath))
+    );
     _tile.status = _tile.texture != nullptr ? Tile::Status::OK : Tile::Status::IOError;
     _tile.metaData = nullptr;
 
