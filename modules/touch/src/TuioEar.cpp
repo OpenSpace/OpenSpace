@@ -130,7 +130,7 @@ void TuioEar::clearInput() {
 		return std::find_if(
 			_removeList.begin(),
 			_removeList.end(),
-			[&cursor](int id) {\
+			[&cursor](int id) {
 			return cursor.getSessionID() == id;
 		}
 		) != _removeList.end();

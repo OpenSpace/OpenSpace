@@ -108,7 +108,7 @@ TouchModule::TouchModule()
 	OsEng.registerModuleCallback( // maybe call ear->clearInput() here rather than postdraw
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
-		if (OsEng.isMaster() && gotNewInput()) {
+		if (gotNewInput()) {
 			//std::this_thread::sleep_for(std::chrono::seconds(1));
 
 			Camera* cam = OsEng.interactionHandler().camera();
@@ -123,9 +123,6 @@ TouchModule::TouchModule()
 			if (list.size() > 1) { // calculate centroid if we have multiple IDs
 				centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](float x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
 				centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](float y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
-
-
-
 
 				// ------- testing, should use more than just one point later on
 				distance = std::accumulate(list.begin(), list.end(), 0.0f, [&centroid](float d, const TuioCursor& c) {
@@ -181,16 +178,6 @@ TouchModule::TouchModule()
 		lastProcessed.clear();
 		for (const TuioCursor& c : list) {
 			lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
-		}
-	}
-	);
-
-	OsEng.registerModuleCallback(
-		OpenSpaceEngine::CallbackOption::PostDraw,
-		[&]() {
-		WindowWrapper& wrapper = OsEng.windowWrapper();
-		if (OsEng.isMaster() && wrapper.isRegularRendering()) {
-			
 		}
 	}
 	);
