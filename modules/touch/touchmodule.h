@@ -28,15 +28,21 @@
 #include <openspace/util/openspacemodule.h>
 #include <modules/touch/include/TuioEar.h>
 
+//using Point = std::vector<TuioCursor>::iterator;
+
+using Point = std::pair<int, TuioPoint>;
+
 namespace openspace {
 
 class TouchModule : public OpenSpaceModule {
 public:
     TouchModule();
 
+	bool gotNewInput();
+
 	TuioEar *ear;
 	std::vector<TuioCursor> list;
-	std::vector<TuioCursor> lastList;
+	std::vector<Point> lastProcessed; // contains an id and the TuioPoint that was processed last frame
 
 };
 

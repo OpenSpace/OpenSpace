@@ -49,6 +49,42 @@ namespace openspace {
 
 	TuioEar TouchModule::*ear;
 
+
+
+bool TouchModule::gotNewInput() {
+	// Get new input from listener
+	list = ear->getInput();
+	ear->clearInput();
+
+	// Erase old input id's that no longer exists
+	lastProcessed.erase(
+		std::remove_if(
+			lastProcessed.begin(),
+			lastProcessed.end(),
+			[this](const Point& point) {
+		return std::find_if(
+			list.begin(),
+			list.end(),
+			[&point](const TuioCursor& c) {
+			return point.first == c.getSessionID();
+		}
+		) == list.end(); }),
+		lastProcessed.end()
+	);
+
+	// Return true if we got new input
+	if (list.size() == lastProcessed.size() && list.size() > 0) {
+		for (Point& p : lastProcessed) {
+			std::vector<TuioCursor>::iterator foundID = find_if(list.begin(), list.end(), [&p](const TuioCursor& c) { return c.getSessionID() == p.first; });
+			if (p.second.getTuioTime() == foundID->getPath().back().getTuioTime())
+				return false;
+		}
+		return true;
+	}		
+	else
+		return false;
+}
+
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
 {
@@ -72,66 +108,42 @@ TouchModule::TouchModule()
 	OsEng.registerModuleCallback( // maybe call ear->clearInput() here rather than postdraw
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
-		//std::this_thread::sleep_for(std::chrono::seconds(1));
-		list = ear->getInput();
-		ear->clearInput();
+		if (OsEng.isMaster() && gotNewInput()) {
+			//std::this_thread::sleep_for(std::chrono::seconds(1));
 
-		Camera* cam = OsEng.interactionHandler().camera();
-		glm::vec3 pos = cam->positionVec3();
-		glm::vec3 focusDir = glm::normalize(glm::vec3(cam->focusPositionVec3()) - pos);
+			Camera* cam = OsEng.interactionHandler().camera();
+			glm::vec3 pos = cam->positionVec3();
+			glm::vec3 focusDir = glm::normalize(glm::vec3(cam->focusPositionVec3()) - pos);
 
-		glm::vec2 centroid;
-		float distance = 0.0f;
-		float lastDistance = 0.0f;
-		float zoomFactor = 0.0f;
+			glm::vec2 centroid;
+			float distance = 0.0f;
+			float lastDistance = 0.0f;
+			float zoomFactor = 0.0f;
 
-		if (list.size() > 0) { // sanity check, no need to process if no input
-			if (list.size() > 1 && list.size() == lastList.size()) { // calculate centroid if we have multiple IDs
+			if (list.size() > 1) { // calculate centroid if we have multiple IDs
 				centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](float x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
 				centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](float y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
 
 
 
 
-				// ------- testing, should use more than just one point in lastList later on
-				distance = std::accumulate(list.begin(), list.end(), 0.0f, [&centroid](float d, const TuioCursor& c) { 
-					return d + sqrt(pow(c.getX() - centroid.x,2) + pow(c.getY() - centroid.y,2)); 
-				});
-				lastDistance = std::accumulate(lastList.begin(), lastList.end(), 0.0f, [&centroid](float d, const TuioCursor& c) {
+				// ------- testing, should use more than just one point later on
+				distance = std::accumulate(list.begin(), list.end(), 0.0f, [&centroid](float d, const TuioCursor& c) {
 					return d + sqrt(pow(c.getX() - centroid.x, 2) + pow(c.getY() - centroid.y, 2));
+				});
+				lastDistance = std::accumulate(lastProcessed.begin(), lastProcessed.end(), 0.0f, [&centroid](float d, const Point& p) {
+					return d + sqrt(pow(p.second.getX() - centroid.x, 2) + pow(p.second.getY() - centroid.y, 2));
 				});
 				zoomFactor = distance - lastDistance; // should be dependant on screen size, distance from focusNode
 				zoomFactor *= glm::distance(pos, glm::vec3(cam->focusPositionVec3()));
 
-				std::cout << "Distance: " << distance << ", Last Distance: " << lastDistance << ", zoomFactor: " << zoomFactor 
-					<< ", pos: " << glm::to_string(pos) << ", focusDir: " << glm::to_string(focusDir) << "\n";
+				std::cout << "Distance: " << distance << ", Last Distance: " << lastDistance << ", zoomFactor: " << zoomFactor
+					<< "\n";
 
 				glm::vec3 newPos = pos + focusDir*zoomFactor;
 				cam->setPosition(newPos);
 			}
-			else if (lastList.size() > 0) { // do new rotation
-				float x = list.at(0).getX() - lastList.at(0).getX();
-				float y = list.at(0).getY() - lastList.at(0).getY();
-				// make x/y beteween -1 and 1
-				//x = 2 * (x - 0.5);
-				//y = 2 * (y - 0.5);
-				// arcsin to get angles
-				float thetaX = std::max(5*acos(x), 1.0f);
-				float thetaY = std::max(5*asin(y), 1.0f);
-				// make rotation around right axis..
-				
-				glm::vec3 lookDir = cam->viewDirectionWorldSpace();
-				glm::vec3 lookUp = cam->lookUpVectorWorldSpace();
-				glm::vec3 right = glm::cross(lookUp, lookDir);
-
-				glm::vec3 rotVec = glm::vec3(1.0, 0.0, 0.0);
-				glm::rotate(rotVec, thetaX, lookUp);
-				glm::rotate(rotVec, thetaY, right);
-
-				//std::cout << "Coordinates: (" << x << ", " << y << "), Angles: (" << thetaX << ", " << thetaY << ")\n";
-				std::cout << "Before rotation: " << glm::to_string(glm::vec3(1.0,0.0,0.0)) << ", After: " << glm::to_string(rotVec) << "\n";
-				glm::quat rot;
-			
+			else { // do new rotation, work with spherical coordinates. Orbit it both position and rotation, check OrbitInteractionMode in interactionmode
 				//cam->rotate(rot);
 			}
 			// ----------------
@@ -141,33 +153,35 @@ TouchModule::TouchModule()
 
 			for (const TuioCursor &j : list) { // go through each item
 				std::list<TuioPoint> path = j.getPath();
-				std::vector<TuioCursor>::iterator it = find_if(
-					lastList.begin(),
-					lastList.end(),
-					[&j](const TuioCursor& c) { return c.getSessionID() == j.getSessionID(); }
-				);
-				TuioTime lastTime;
-				if (it != lastList.end()) // sanity check, if first element id wont be found in lastList
-					lastTime = it->getPath().back().getTuioTime();
-
+				
+				TuioTime lastTime = find_if(
+				lastProcessed.begin(),
+				lastProcessed.end(),
+				[&j](const Point& p) { return p.first == j.getSessionID(); }
+				)->second.getTuioTime();
+				
 				std::list<TuioPoint>::iterator lastPoint = find_if(
-					path.begin(),
-					path.end(),
-					[&lastTime](const TuioPoint& c) { return lastTime == c.getTuioTime();  });
-
+				path.begin(),
+				path.end(),
+				[&lastTime](const TuioPoint& c) { return lastTime == c.getTuioTime();  });
+				
 				int count = 0;
 				for (; lastPoint != path.end(); ++lastPoint) // here we can access all elements that are to be processed
 					count++;
 
 				os << ", Id: " << j.getCursorID() << ", path size: " << j.getPath().size() << ", (" << j.getX() << "," << j.getY() << "), To Process: " << count;
+
 			}
-			//LINFO("List size: " << list.size() << os.str() << "\n");
+			LINFO("List size: " << list.size() << os.str() << "\n");
 			os.clear();
 
-			glm::mat4 t;
-			
 		}
-		lastList = list;
+
+		// update lastProcessed
+		lastProcessed.clear();
+		for (const TuioCursor& c : list) {
+			lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
+		}
 	}
 	);
 
