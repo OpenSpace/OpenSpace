@@ -50,9 +50,9 @@ void KameleonVolumeModule::internalInitialize() {
   
 }
 
-std::vector<Documentation> KameleonVolumeModule::documentations() const
+std::vector<documentation::Documentation> KameleonVolumeModule::documentations() const
 {
-    return std::vector<Documentation>{KameleonMetadataToJsonTask::documentation()};
+    return std::vector<documentation::Documentation>{KameleonMetadataToJsonTask::documentation()};
 }
 
 } // namespace openspace

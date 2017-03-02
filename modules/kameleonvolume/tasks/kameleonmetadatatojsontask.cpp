@@ -63,7 +63,7 @@ void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback & progress
     progressCallback(1.0f);
 }
 
-Documentation KameleonMetadataToJsonTask::documentation()
+documentation::Documentation KameleonMetadataToJsonTask::documentation()
 {
     using namespace documentation;
     return {

@@ -34,7 +34,7 @@ namespace {
 
 namespace openspace {
 
-Documentation Task::documentation() {
+documentation::Documentation Task::documentation() {
     using namespace openspace::documentation;
     return{
         "Renderable",
@@ -54,17 +54,17 @@ Documentation Task::documentation() {
 }
 
 std::unique_ptr<Task> Task::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    openspace::documentation::testSpecificationAndThrow(Documentation(), dictionary, "Task");
+    openspace::documentation::testSpecificationAndThrow(documentation::Documentation(), dictionary, "Task");
     std::string taskType = dictionary.value<std::string>("Type");
     auto factory = FactoryManager::ref().factory<Task>();
-    Task *task = factory->create(taskType, dictionary);
+    std::unique_ptr<Task> task = factory->create(taskType, dictionary);
 
     if (task == nullptr) {
         LERROR("Failed to create a Task object of type '" << taskType << "'");
         return nullptr;
     }
 
-    return std::unique_ptr<Task>(task);
+    return std::move(task);
 }
 
 }

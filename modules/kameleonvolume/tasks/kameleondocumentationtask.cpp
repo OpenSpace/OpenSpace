@@ -131,8 +131,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     progressCallback(1.0f);
 }
 
-Documentation KameleonDocumentationTask::documentation()
-{
+documentation::Documentation KameleonDocumentationTask::documentation() {
     using namespace documentation;
     return {
         "KameleonDocumentationTask",

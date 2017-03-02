@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___BASEMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/documentation/documentation.h>
 
 namespace openspace {
 
@@ -34,7 +35,7 @@ public:
     KameleonVolumeModule();
     virtual ~KameleonVolumeModule() = default;
     void internalInitialize() override;
-    std::vector<Documentation> documentations() const override;
+    std::vector<documentation::Documentation> documentations() const override;
 };
 
 } // namespace openspace

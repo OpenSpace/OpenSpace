@@ -34,7 +34,7 @@ public:
     KameleonDocumentationTask(const ghoul::Dictionary& dictionary);
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
-    static Documentation documentation();
+    static documentation::Documentation documentation();
 private:
     std::string _inputPath;
     std::string _outputPath;

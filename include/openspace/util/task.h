@@ -39,7 +39,7 @@ public:
     virtual void perform(const ProgressCallback& onProgress) = 0;
     virtual std::string description() = 0;
     static std::unique_ptr<Task> createFromDictionary(const ghoul::Dictionary& dictionary);
-    static openspace::Documentation documentation();
+    static documentation::Documentation documentation();
 };
 
 }
