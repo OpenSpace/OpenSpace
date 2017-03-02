@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
-#define __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANES___H__
+#define __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANES___H__
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
@@ -54,4 +54,4 @@ private:
 
 }  // namespace openspace
 
-#endif // __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
+#endif // __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANES___H__
