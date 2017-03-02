@@ -68,7 +68,9 @@ documentation:: Documentation ModelGeometry::Documentation() {
 }
 
 
-ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     if (!dictionary.hasKeyAndValue<std::string>(keyType)) {
         throw ghoul::RuntimeError("Dictionary did not contain a key 'Type'");
     }
@@ -76,7 +78,7 @@ ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dict
     std::string geometryType = dictionary.value<std::string>(keyType);
     auto factory = FactoryManager::ref().factory<ModelGeometry>();
 
-    ModelGeometry* result = factory->create(geometryType, dictionary);
+    std::unique_ptr<ModelGeometry> result = factory->create(geometryType, dictionary);
     if (result == nullptr) {
         throw ghoul::RuntimeError(
             "Failed to create a ModelGeometry object of type '" + geometryType + "'"

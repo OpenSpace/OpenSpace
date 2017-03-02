@@ -29,6 +29,8 @@
 
 #include <openspace/util/updatestructures.h>
 
+#include <memory>
+
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
@@ -37,7 +39,7 @@ namespace documentation { struct Documentation; }
 
 class Rotation : public properties::PropertyOwner {
 public:
-    static Rotation* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Rotation> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     Rotation(const ghoul::Dictionary& dictionary);
     virtual ~Rotation();

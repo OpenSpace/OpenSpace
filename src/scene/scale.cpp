@@ -60,13 +60,13 @@ documentation::Documentation Scale::Documentation() {
 }
 
 
-Scale* Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
 
     std::string scaleType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<Scale>();
-    Scale* result = factory->create(scaleType, dictionary);
+    std::unique_ptr<Scale> result = factory->create(scaleType, dictionary);
     result->setName("Scale");
     if (result == nullptr) {
         LERROR("Failed creating Scale object of type '" << scaleType << "'");

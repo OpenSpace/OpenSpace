@@ -58,7 +58,9 @@ documentation::Documentation Translation::Documentation() {
     };
 }
 
-Translation* Translation::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Translation> Translation::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     if (!dictionary.hasValue<std::string>(KeyType)) {
         LERROR("Translation did not have key '" << KeyType << "'");
         return nullptr;
@@ -68,7 +70,7 @@ Translation* Translation::createFromDictionary(const ghoul::Dictionary& dictiona
     dictionary.getValue(KeyType, translationType);
     ghoul::TemplateFactory<Translation>* factory
           = FactoryManager::ref().factory<Translation>();
-    Translation* result = factory->create(translationType, dictionary);
+    std::unique_ptr<Translation> result = factory->create(translationType, dictionary);
     result->setName("Translation");
     if (result == nullptr) {
         LERROR("Failed creating Translation object of type '" << translationType << "'");

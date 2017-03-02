@@ -65,7 +65,9 @@ documentation::Documentation Renderable::Documentation() {
     };
 }
 
-Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Renderable> Renderable::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     // The name is passed down from the SceneGraphNode
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -76,7 +78,7 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
     std::string renderableType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<Renderable>();
-    Renderable* result = factory->create(renderableType, dictionary);
+    std::unique_ptr<Renderable> result = factory->create(renderableType, dictionary);
     if (result == nullptr) {
         LERROR("Failed to create a Renderable object of type '" << renderableType << "'");
         return nullptr;

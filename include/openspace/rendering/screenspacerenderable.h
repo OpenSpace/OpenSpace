@@ -36,6 +36,8 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <memory>
+
 namespace openspace {
 
 namespace documentation { struct Documentation; }
@@ -49,7 +51,7 @@ namespace documentation { struct Documentation; }
  */
 class ScreenSpaceRenderable : public properties::PropertyOwner {
 public:
-    static ScreenSpaceRenderable* createFromDictionary(
+    static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);

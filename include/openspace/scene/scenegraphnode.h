@@ -97,7 +97,7 @@ public:
 
     const PerformanceRecord& performanceRecord() const { return _performanceRecord; }
 
-    void setRenderable(Renderable* renderable);
+    void setRenderable(std::unique_ptr<Renderable> renderable);
     const Renderable* renderable() const;
     Renderable* renderable();
 
@@ -115,7 +115,7 @@ private:
 
     PerformanceRecord _performanceRecord;
 
-    Renderable* _renderable;
+    std::unique_ptr<Renderable> _renderable;
     bool _renderableVisible;
 
     bool _boundingSphereVisible;

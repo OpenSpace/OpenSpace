@@ -43,11 +43,10 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
     ghoul::Dictionary defaultProviderDict = dictionary.value<ghoul::Dictionary>(
         KeyDefaultProvider
         );
-    TileProvider* defaultProvider = TileProvider::createFromDictionary(
+    _defaultTileProvider = TileProvider::createFromDictionary(
         defaultProviderDict
     );
-    _defaultTileProvider = std::shared_ptr<TileProvider>(defaultProvider);
-        
+    
     ghoul::Dictionary indexProvidersDict = dictionary.value<ghoul::Dictionary>(
         KeyProviders
         );
@@ -64,8 +63,9 @@ TileProviderByIndex::TileProviderByIndex(const ghoul::Dictionary& dictionary) {
             );
             
         TileIndex tileIndex(tileIndexDict);
-        TileProvider* tileProvider = TileProvider::createFromDictionary(providerDict);
-        std::shared_ptr<TileProvider> stp = std::shared_ptr<TileProvider>(tileProvider);
+        std::shared_ptr<TileProvider> stp = TileProvider::createFromDictionary(
+            providerDict
+        );
         TileIndex::TileHashKey key = tileIndex.hashKey();
         _tileProviderMap.insert(std::make_pair(key, stp));
     }

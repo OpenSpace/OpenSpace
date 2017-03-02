@@ -73,8 +73,8 @@ documentation::Documentation ScreenSpaceRenderable::Documentation() {
     };
 }
 
-ScreenSpaceRenderable* ScreenSpaceRenderable::createFromDictionary(
-    const ghoul::Dictionary& dictionary)
+std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -85,7 +85,7 @@ ScreenSpaceRenderable* ScreenSpaceRenderable::createFromDictionary(
     std::string renderableType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ScreenSpaceRenderable* result = factory->create(renderableType, dictionary);
+    std::unique_ptr<ScreenSpaceRenderable> result = factory->create(renderableType, dictionary);
     if (result == nullptr) {
         LERROR("Failed to create a ScreenSpaceRenderable object of type '" <<
                renderableType << "'"
@@ -95,7 +95,6 @@ ScreenSpaceRenderable* ScreenSpaceRenderable::createFromDictionary(
 
     return result;
 }
-
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
     : _enabled("enabled", "Is Enabled", true)

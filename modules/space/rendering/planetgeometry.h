@@ -36,7 +36,9 @@ namespace planetgeometry {
 
 class PlanetGeometry : public properties::PropertyOwner {
 public:
-    static PlanetGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<PlanetGeometry> createFromDictionary(
+        const ghoul::Dictionary& dictionary
+    );
 
     PlanetGeometry();
     virtual ~PlanetGeometry();

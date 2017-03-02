@@ -38,7 +38,9 @@ namespace modelgeometry {
 
 class ModelGeometry : public properties::PropertyOwner {
 public:
-    static ModelGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<ModelGeometry> createFromDictionary(
+        const ghoul::Dictionary& dictionary
+    );
 
     struct Vertex {
         GLfloat location[4];

@@ -90,7 +90,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
             delete result;
             return nullptr;
         }
-        result->addPropertySubOwner(result->_renderable);
+        result->addPropertySubOwner(result->_renderable.get());
         LDEBUG("Successfully created renderable for '" << result->name() << "'");
     }
 
@@ -186,7 +186,6 @@ bool SceneGraphNode::deinitialize() {
 
     if (_renderable) {
         _renderable->deinitialize();
-        delete _renderable;
         _renderable = nullptr;
     }
     _children.clear();
@@ -499,17 +498,17 @@ PowerScaledScalar SceneGraphNode::boundingSphere() const{
 }
 
 // renderable
-void SceneGraphNode::setRenderable(Renderable* renderable) {
-    _renderable = renderable;
+void SceneGraphNode::setRenderable(std::unique_ptr<Renderable> renderable) {
+    _renderable = std::move(renderable);
 }
 
 const Renderable* SceneGraphNode::renderable() const
 {
-    return _renderable;
+    return _renderable.get();
 }
 
 Renderable* SceneGraphNode::renderable() {
-    return _renderable;
+    return _renderable.get();
 }
 
 // private helper methods

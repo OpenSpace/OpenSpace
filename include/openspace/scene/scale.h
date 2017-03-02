@@ -36,7 +36,7 @@ namespace documentation { struct Documentation; };
 
 class Scale : public properties::PropertyOwner {
 public:
-    static Scale* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Scale> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     virtual ~Scale();
     virtual bool initialize();

@@ -53,7 +53,7 @@ documentation::Documentation PlanetGeometry::Documentation() {
     };
 }
 
-PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
+std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -64,7 +64,7 @@ PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& di
     std::string geometryType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<PlanetGeometry>();
 
-    PlanetGeometry* result = factory->create(geometryType, dictionary);
+    std::unique_ptr<PlanetGeometry> result = factory->create(geometryType, dictionary);
     if (result == nullptr) {
         throw ghoul::RuntimeError(
             "Failed to create a PlanetGeometry object of type '" + geometryType + "'"

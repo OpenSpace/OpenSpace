@@ -58,12 +58,12 @@ documentation::Documentation Rotation::Documentation() {
     };
 }
 
-Rotation* Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Rotation");
 
     std::string rotationType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<Rotation>();
-    Rotation* result = factory->create(rotationType, dictionary);
+    std::unique_ptr<Rotation> result = factory->create(rotationType, dictionary);
     if (result == nullptr) {
         LERROR("Failed creating Rotation object of type '" << rotationType << "'");
         return nullptr;

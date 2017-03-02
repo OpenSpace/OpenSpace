@@ -35,7 +35,7 @@ std::unique_ptr<Decoder> Decoder::createFromDictionary(
     const ghoul::Dictionary& dictionary, const std::string& type)
 {
     ghoul::TemplateFactory<Decoder>* factory = FactoryManager::ref().factory<Decoder>();
-    Decoder* result = factory->create(type, dictionary);
+    std::unique_ptr<Decoder> result = factory->create(type, dictionary);
 
     if (result == nullptr) {
         throw ghoul::RuntimeError(
@@ -43,7 +43,7 @@ std::unique_ptr<Decoder> Decoder::createFromDictionary(
             "Decoder"
         );
     }
-    return std::unique_ptr<Decoder>(result);
+    return result;
 }
 
 Decoder::~Decoder() {}
