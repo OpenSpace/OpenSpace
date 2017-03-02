@@ -25,6 +25,7 @@
 // open space includes
 #include <openspace/interaction/deviceidentifier.h>
 
+#include <stdio.h>
 #include <assert.h>
 
 namespace openspace {
