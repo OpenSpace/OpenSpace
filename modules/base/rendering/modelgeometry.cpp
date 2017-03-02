@@ -28,6 +28,7 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <fstream>
 

@@ -31,6 +31,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/shadermanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderobject.h>

@@ -26,12 +26,13 @@
 #define __OPENSPACE_CORE___DOCUMENTATION___H__
 
 #include <ghoul/misc/boolean.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 
 #include <memory>
 #include <string>
 #include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 namespace documentation {

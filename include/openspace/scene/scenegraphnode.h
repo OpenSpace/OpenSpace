@@ -32,14 +32,14 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/scene/scene.h>
-#include <ghoul/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
 
-// std includes
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 

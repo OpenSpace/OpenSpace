@@ -29,7 +29,7 @@
 
 #include <openspace/util/updatestructures.h>
 
-#include <ghoul/misc/dictionary.h>
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 

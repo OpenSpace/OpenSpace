@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
 
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {

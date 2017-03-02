@@ -29,6 +29,7 @@
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     const char* _loggerCat = "Scale";

@@ -36,7 +36,8 @@
 #include <openspace/scene/scenegraph.h>
 
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/misc/dictionary.h>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 

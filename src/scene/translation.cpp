@@ -26,6 +26,7 @@
 
 #include <openspace/util/factorymanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <openspace/documentation/verifier.h>
 
