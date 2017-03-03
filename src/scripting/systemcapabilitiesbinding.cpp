@@ -111,7 +111,7 @@ int hasOpenGLVersion(lua_State* L) {
     int major = std::stoi(v[0]);
     int minor = std::stoi(v[1]);
     int release = v.size() == 3 ? std::stoi(v[2]) : 0;
-    OpenGLCapabilitiesComponent::Version version = { major, minor, release };
+    Version version = { major, minor, release };
     
     bool supported = OpenGLCap.openGLVersion() >= version;
     
@@ -121,7 +121,7 @@ int hasOpenGLVersion(lua_State* L) {
 }
     
 int openGLVersion(lua_State* L) {
-    lua_pushstring(L, OpenGLCap.openGLVersion().toString().c_str());
+    lua_pushstring(L, std::to_string(OpenGLCap.openGLVersion()).c_str());
     return 1;
 }
     

@@ -38,11 +38,9 @@ namespace {
 
 namespace openspace {
 
-OpenSpaceModule::OpenSpaceModule(std::string name) {
-    ghoul_assert(!name.empty(), "Name must not be empty");
-    
-    setName(std::move(name));
-}
+OpenSpaceModule::OpenSpaceModule(std::string name) 
+    : properties::PropertyOwner(std::move(name))
+{}
 
 void OpenSpaceModule::initialize() {
     std::string upperName = name();
@@ -73,9 +71,7 @@ scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
     return {};
 }
 
-ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
-OpenSpaceModule::requiredOpenGLVersion() const
-{
+ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() const {
     return { 3, 3 };
 }
 

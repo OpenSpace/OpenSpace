@@ -28,11 +28,15 @@
 #include <memory>
 
 namespace ghoul {
+
 class Dictionary;
 namespace logging { class Log; }
-}
+
+} // namespace ghoul
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 /**
  * This function provides the capabilities to create a new ghoul::logging::Log from the
@@ -44,14 +48,23 @@ namespace openspace {
  * created . Both logs can be customized using the <code>Append</code>,
  * <code>TimeStamping</code>, <code>DateStamping</code>, <code>CategoryStamping</code>,
  * and <code>LogLevelStamping</code> values.
- * \param dictionary The dictionary from which the ghoul::logging::Log should be created
+ *
+ * \param  dictionary The dictionary from which the ghoul::logging::Log should be created
  * \return The created ghoul::logging::Log
- * \post The return value will not be <code>nullptr</code>
- * \throw ghoul::RuntimeError If there was an error creating the ghoul::logging::Log
- * \sa ghoul::logging::TextLeg
- * \sa ghoul::logging::HTMLLog
+ * \post   The return value will not be <code>nullptr</code>
+ * \throw  ghoul::RuntimeError If there was an error creating the ghoul::logging::Log
+ * \sa     ghoul::logging::TextLog
+ * \sa     ghoul::logging::HTMLLog
  */
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary);
+
+/**
+ * Returns the Documentation that describes a Dictionary used to create a log by using the
+ * function createLog.
+ * \return The Documentation that describes an acceptable Dictionary for the method
+ *         createLog
+ */
+documentation::Documentation LogFactoryDocumentation();
 
 } // namespace openspace
 

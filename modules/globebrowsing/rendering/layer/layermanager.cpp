@@ -40,9 +40,9 @@ const char* LayerManager::LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
     "WaterMasks"
 };
 
-LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict) {
-    setName("Layers");
-        
+LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict) 
+    : properties::PropertyOwner("Layers")
+{
     if (NUM_LAYER_GROUPS != layerGroupsDict.size()) {
         throw ghoul::RuntimeError(
             "Number of Layer Groups must be equal to " + NUM_LAYER_GROUPS);

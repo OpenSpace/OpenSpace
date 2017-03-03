@@ -80,6 +80,10 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
     return result;
 }
 
+Translation::Translation()
+    : properties::PropertyOwner("Translation")
+{}
+
 Translation::~Translation() {}
     
 bool Translation::initialize() {

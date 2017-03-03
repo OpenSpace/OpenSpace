@@ -287,7 +287,7 @@ TimeFormat* TimeIdProviderFactory::getProvider(const std::string& format) {
     }
     ghoul_assert(
         _timeIdProviderMap.find(format) != _timeIdProviderMap.end(), 
-        "Unsupported Time format: " << format
+        "Unsupported Time format: " + format
     );
     return _timeIdProviderMap[format].get();
 }
