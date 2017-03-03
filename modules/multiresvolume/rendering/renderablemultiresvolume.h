@@ -28,6 +28,7 @@
 #include <vector>
 #include <chrono>
 #include <memory>
+#include <unordered_map>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/powerscaledcoordinate.h>
@@ -63,19 +64,19 @@ class LocalErrorHistogramManager;
 
 class RenderableMultiresVolume : public Renderable {
 
+public:
+
+    RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
+    ~RenderableMultiresVolume();
+
+    enum Selector {TF, SIMPLE, LOCAL, TIME};
 
     static const char* TYPE_SIMPLE;
     static const char* TYPE_TIME;
     static const char* TYPE_TF;
     static const char* TYPE_LOCAL;
 
-
-public:
-    RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
-    ~RenderableMultiresVolume();
-
-    enum Selector {TF, SIMPLE, LOCAL, TIME};
-    static const std::map<const char *, Selector> SelectorValues;
+    static const std::unordered_map<const char *, Selector> SelectorValues;
 
     bool setSelectorType(Selector selector);
     bool initializeSelector();

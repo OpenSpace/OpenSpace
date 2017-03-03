@@ -29,7 +29,7 @@
 #include "abufferfragment.glsl"
 #include "abufferresources.glsl"
 #include "fragment.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "floatoperations.glsl"
 #include "blending.glsl"
 #include "rand.glsl"
 

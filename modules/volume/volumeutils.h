@@ -30,8 +30,8 @@
 namespace openspace {
 namespace volumeutils {
 
-size_t coordsToIndex(const glm::vec3& coords, const glm::ivec3& dimensions);
-glm::vec3 indexToCoords(size_t index, const glm::ivec3& dimensions);
+size_t coordsToIndex(const glm::uvec3& coords, const glm::uvec3& dimensions);
+glm::uvec3 indexToCoords(size_t index, const glm::uvec3& dimensions);
 
 } // namespace volumeutils
 

@@ -74,10 +74,9 @@ std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(const ghoul
 }
 
 PlanetGeometry::PlanetGeometry()
-    : _parent(nullptr)
-{
-    setName("PlanetGeometry");
-}
+    : properties::PropertyOwner("PlanetGeometry")
+    , _parent(nullptr)
+{}
 
 PlanetGeometry::~PlanetGeometry() {}
 

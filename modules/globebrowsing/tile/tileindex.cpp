@@ -28,6 +28,8 @@
 
 #include <ghoul/misc/dictionary.h>
 
+#include <sstream>
+
 namespace {
     const char* KeyLevel = "Level";
     const char* KeyX = "X";

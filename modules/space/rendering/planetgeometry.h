@@ -27,6 +27,10 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <memory>
+
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
 
 class Renderable;

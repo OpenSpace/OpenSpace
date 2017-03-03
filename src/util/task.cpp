@@ -22,52 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/util/task.h>
+#include <ghoul/misc/dictionary.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/util/factorymanager.h>
+#include <ghoul/logging/logmanager.h>
+
+namespace {
+    const std::string _loggerCat = "Task";
+}
+
 namespace openspace {
 
-namespace luascriptfunctions {
-
-/**
- * \ingroup LuaScripts
- * show():
- * Shows the console
- */
-int show(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-
-    OsEng.console().setVisible(true);
-    return 0;
+documentation::Documentation Task::documentation() {
+    using namespace openspace::documentation;
+    return{
+        "Renderable",
+        "renderable",
+        {
+            {
+                "Type",
+                new StringAnnotationVerifier("A valid Task created by a factory"),
+                "This key specifies the type of Task that gets created. It has to be one"
+                "of the valid Tasks that are available for creation (see the "
+                "FactoryDocumentation for a list of possible Tasks), which depends on "
+                "the configration of the application",
+                Optional::No
+            }
+        }
+    };
 }
 
-/**
- * \ingroup LuaScripts
- * hide():
- * Hides the console
- */
-int hide(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+std::unique_ptr<Task> Task::createFromDictionary(const ghoul::Dictionary& dictionary) {
+    openspace::documentation::testSpecificationAndThrow(documentation::Documentation(), dictionary, "Task");
+    std::string taskType = dictionary.value<std::string>("Type");
+    auto factory = FactoryManager::ref().factory<Task>();
+    std::unique_ptr<Task> task = factory->create(taskType, dictionary);
 
-    OsEng.console().setVisible(false);
-    return 0;
+    if (task == nullptr) {
+        LERROR("Failed to create a Task object of type '" << taskType << "'");
+        return nullptr;
+    }
+
+    return std::move(task);
 }
 
-/**
- * \ingroup LuaScripts
- * toggle():
- * Toggles the console
- */
-int toggle(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-
-    OsEng.console().toggleMode();
-    return 0;
 }
-
-} // namespace luascriptfunctions
-
-} // namespace openspace

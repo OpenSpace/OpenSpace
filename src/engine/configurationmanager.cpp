@@ -24,6 +24,8 @@
 
 #include <openspace/engine/configurationmanager.h>
 
+#include <openspace/documentation/documentation.h>
+
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
@@ -57,6 +59,7 @@ const string ConfigurationManager::KeyKeyboardShortcuts = "KeyboardShortcuts";
 const string ConfigurationManager::KeyDocumentation = "Documentation";
 const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentation";
 const string ConfigurationManager::KeyConfigScene = "Scene";
+const string ConfigurationManager::KeyConfigTask = "Task";
 
 const string ConfigurationManager::KeyLogging = "Logging";
 const string ConfigurationManager::PartLogLevel = "LogLevel";

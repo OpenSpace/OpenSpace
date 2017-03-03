@@ -97,7 +97,8 @@ std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictiona
 }
 
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
-    : _enabled("enabled", "Is Enabled", true)
+    : properties::PropertyOwner("")
+    , _enabled("enabled", "Is Enabled", true)
     , _useFlatScreen("flatScreen", "Flat Screen", true)
     , _euclideanPosition(
         "euclideanPosition",
@@ -130,14 +131,15 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_alpha);
     addProperty(_delete);
 
-
     dictionary.getValue(KeyFlatScreen, _useFlatScreen);
     useEuclideanCoordinates(_useFlatScreen);
     
-    if (_useFlatScreen)
+    if (_useFlatScreen) {
         dictionary.getValue(KeyPosition, _euclideanPosition);
-    else
+    }
+    else {
         dictionary.getValue(KeyPosition, _sphericalPosition);
+    }
 
 
     dictionary.getValue(KeyScale, _scale);

@@ -22,42 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
-#define __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
+#define __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-// ghoul includes
-#include <ghoul/io/volume/rawvolumereader.h>
-
-// Forward declare to minimize dependencies
-namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class Texture;
-    }
-}
-
-namespace openspace {
-
-class RenderableVolume: public Renderable {
-public:
-    // constructors & destructor
-    RenderableVolume(const ghoul::Dictionary& dictionary);
-    ~RenderableVolume();
-    
-protected:
-    ghoul::opengl::Texture* loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
-    glm::vec3 getVolumeOffset(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
-    ghoul::RawVolumeReader::ReadHints readHints(const ghoul::Dictionary& dictionary);
-    ghoul::opengl::Texture* loadTransferFunction(const std::string& filepath);
-
-private:
+enum class VolumeGridType : int {
+    Cartesian = 0,
+    Spherical = 1
 };
 
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
+#endif // __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__

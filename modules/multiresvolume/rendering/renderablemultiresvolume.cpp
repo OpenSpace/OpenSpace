@@ -81,21 +81,21 @@ namespace {
     const std::string GlslHelperPath = "${MODULES}/multiresvolume/shaders/helper.glsl";
     const std::string GlslHeaderPath = "${MODULES}/multiresvolume/shaders/header.glsl";
     bool registeredGlslHelpers = false;
-
-    static const char* TYPE_SIMPLE = "simple";
-    static const char* TYPE_TIME = "time";
-    static const char* TYPE_TF = "tf";
-    static const char* TYPE_LOCAL = "local";
-
-    static const std::map<const char *, openspace::RenderableMultiresVolume::Selector> SelectorValues = {
-        {TYPE_SIMPLE , openspace::RenderableMultiresVolume::Selector::SIMPLE},
-        {TYPE_TF     , openspace::RenderableMultiresVolume::Selector::TF},
-        {TYPE_LOCAL  , openspace::RenderableMultiresVolume::Selector::LOCAL},
-        {TYPE_TIME   , openspace::RenderableMultiresVolume::Selector::TIME}
-    };
 }
 
 namespace openspace {
+
+    const char* RenderableMultiresVolume::TYPE_SIMPLE = "simple";
+    const char* RenderableMultiresVolume::TYPE_TIME = "time";
+    const char* RenderableMultiresVolume::TYPE_TF = "tf";
+    const char* RenderableMultiresVolume::TYPE_LOCAL = "local";
+
+    const std::unordered_map<const char *, RenderableMultiresVolume::Selector> RenderableMultiresVolume::SelectorValues = {
+        {RenderableMultiresVolume::TYPE_SIMPLE , RenderableMultiresVolume::Selector::SIMPLE},
+        {RenderableMultiresVolume::TYPE_TF     , RenderableMultiresVolume::Selector::TF},
+        {RenderableMultiresVolume::TYPE_LOCAL  , RenderableMultiresVolume::Selector::LOCAL},
+        {RenderableMultiresVolume::TYPE_TIME   , RenderableMultiresVolume::Selector::TIME}
+    };
 
 RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dictionary)
     :  Renderable(dictionary)
@@ -648,7 +648,10 @@ void RenderableMultiresVolume::render(const RenderData& data, RendererTasks& tas
 }
 
 RenderableMultiresVolume::Selector RenderableMultiresVolume::getSelector() {
-    return SelectorValues[_selectorName];/* {
+
+    return Selector::TIME;
+    /*
+    return SelectorValues.at(_selectorName.value().c_str());/* {
     case TYPE_TF:
         return Selector::TF;
     case TYPE_SIMPLE:

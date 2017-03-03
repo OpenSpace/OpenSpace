@@ -35,9 +35,12 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/linearlrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/volumegridtype.h
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/volumeutils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplane.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplanes.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -48,6 +51,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/volumeutils.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplane.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/volumeclipplanes.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

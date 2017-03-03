@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 
 #include <fstream>
+#include <sstream>
 #include <streambuf>
 
 #include <fmt/format.h>

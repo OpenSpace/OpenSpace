@@ -22,26 +22,18 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-set(APPLICATION_NAME DataConverter)
+set(APPLICATION_NAME TaskRunner)
 set(APPLICATION_LINK_TO_OPENSPACE ON)
 
 include (${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
-set(application_path ${OPENSPACE_APPS_DIR}/DataConverter)
+set(application_path ${OPENSPACE_APPS_DIR}/TaskRunner)
 
 set(SOURCE_FILES
   ${application_path}/main.cpp
-  ${application_path}/milkywayconversiontask.cpp
-  ${application_path}/milkywaypointsconversiontask.cpp    
-)
-set(HEADER_FILES
-  ${application_path}/conversiontask.h
-  ${application_path}/milkywayconversiontask.h
-  ${application_path}/milkywaypointsconversiontask.h    
 )
 
 add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
     ${SOURCE_FILES}
-    ${HEADER_FILES}
 )
 

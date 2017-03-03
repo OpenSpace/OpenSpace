@@ -64,8 +64,11 @@ int BasicGrid::ySegments() const {
 }
 
 void BasicGrid::validate(int xSegments, int ySegments) {
-    ghoul_assert(xSegments > 0 && ySegments > 0,
-        "Resolution must be at least 1x1. (" << xSegments << ", " << ySegments << ")");
+    ghoul_assert(
+        xSegments > 0 && ySegments > 0,
+        std::string("Resolution must be at least 1x1. (") +
+            std::to_string(xSegments) + ", " + std::to_string(ySegments) + ")"
+    );
 }
 
 inline size_t BasicGrid::numElements(int xSegments, int ySegments) {
