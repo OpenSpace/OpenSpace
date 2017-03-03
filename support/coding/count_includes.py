@@ -44,12 +44,13 @@ with open(file) as f:
     lines = [l for l in lines if "Note: including file" in l]
 
     # Prefix to remove from each line an
-    prefix = "X>  Note: including file:"
-    lines = [l[len(prefix):-1].strip() for l in lines]
+    prefix = ">  Note: including file:"
+    lines = [l[l.find(prefix) + len(prefix):-1].strip() for l in lines]
 
     # Remove system header
     lines = [l for l in lines if "windows kits" not in l.lower()]
     lines = [l for l in lines if "microsoft visual studio " not in l.lower()]
+    lines = [l for l in lines if "boost\\include\\boost-" not in l.lower()]
 
     # Remove external headers
     lines = [l for l in lines if "ghoul\\ext\\" not in l.lower()]
