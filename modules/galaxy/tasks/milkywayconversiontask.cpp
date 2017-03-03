@@ -23,19 +23,21 @@
  ****************************************************************************************/
 
 #include <modules/galaxy/tasks/milkywayconversiontask.h>
+
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/volumesampler.h>
 
-namespace {
-    char* KeyInFilenamePrefix = "InFilenamePrefix";
-    char* KeyInFilenameSuffix = "InFilenameSuffix";
-    char* KeyInFirstIndex = "InFirstIndex";
-    char* KeyInNSlices = "InNSlices";
-    char* KeyOutFilename = "OutFilename";
-    char* KeyOutDimensions = "OutDimensions";
-}
+#include <openspace/documentation/documentation.h>
 
+namespace {
+    const char* KeyInFilenamePrefix = "InFilenamePrefix";
+    const char* KeyInFilenameSuffix = "InFilenameSuffix";
+    const char* KeyInFirstIndex = "InFirstIndex";
+    const char* KeyInNSlices = "InNSlices";
+    const char* KeyOutFilename = "OutFilename";
+    const char* KeyOutDimensions = "OutDimensions";
+} // namespace 
 
 namespace openspace {
     
@@ -45,7 +47,7 @@ MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictiona
         _inFilenamePrefix = inFilenamePrefix;
     }
 
-    std::string inFilenamePrefix;
+    std::string inFilenameSuffix;
     if (dictionary.getValue(KeyInFilenameSuffix, inFilenameSuffix)) {
         _inFilenameSuffix = inFilenameSuffix;
     }
@@ -103,9 +105,9 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& progressCallb
     rawWriter.write(sampleFunction, progressCallback);
 }
 
-Documentation MilkywayConversionTask::documentation()
+documentation::Documentation MilkywayConversionTask::documentation()
 {
-    return Documentation();
+    return documentation::Documentation();
 }
 
 }

@@ -23,9 +23,13 @@
  ****************************************************************************************/
 
 #include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
+
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/volumesampler.h>
+
+#include <openspace/documentation/documentation.h>
+
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -79,15 +83,15 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback & progre
     }
 
     out.write(reinterpret_cast<char*>(&nPoints), sizeof(int64_t));
-    out.write(reinterpret_cast<char*>(pointData), nFloats * sizeof(float));
+    out.write(reinterpret_cast<char*>(pointData.data()), nFloats * sizeof(float));
 
     in.close();
     out.close();
 }
 
-Documentation MilkywayPointsConversionTask::documentation()
+documentation::Documentation MilkywayPointsConversionTask::documentation()
 {
-    return Documentation();
+    return documentation::Documentation();
 }
 
 }
