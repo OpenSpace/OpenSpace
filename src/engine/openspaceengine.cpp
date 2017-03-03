@@ -27,7 +27,6 @@
 #include <openspace/openspace.h>
 
 #include <openspace/documentation/core_registration.h>
-#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/downloadmanager.h>
@@ -38,13 +37,8 @@
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/luaconsole.h>
-#include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
@@ -55,28 +49,18 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/util/syncbuffer.h>
 #include <openspace/util/transformationmanager.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/onscopeexit.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
 
-#include <fstream>
-#include <queue>
 
 #if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>

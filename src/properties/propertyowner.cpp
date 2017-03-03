@@ -24,6 +24,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/properties/property.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 
@@ -33,17 +34,16 @@ namespace openspace {
 namespace properties {
 
 namespace {
+    const char* _loggerCat = "PropertyOwner";
 
-const char* _loggerCat = "PropertyOwner";
-
-bool propertyLess(Property* lhs, Property* rhs)
-{
-    return lhs->identifier() < rhs->identifier();
-}
+    bool propertyLess(Property* lhs, Property* rhs)
+    {
+        return lhs->identifier() < rhs->identifier();
+    }
     
-bool subOwnerLess(PropertyOwner* lhs, PropertyOwner* rhs) {
-    return lhs->name() < rhs->name();
-}
+    bool subOwnerLess(PropertyOwner* lhs, PropertyOwner* rhs) {
+        return lhs->name() < rhs->name();
+    }
     
 } // namespace
 

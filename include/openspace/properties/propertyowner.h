@@ -25,13 +25,14 @@
 #ifndef __OPENSPACE_CORE___PROPERTYOWNER___H__
 #define __OPENSPACE_CORE___PROPERTYOWNER___H__
 
-#include <openspace/properties/property.h>
 #include <map>
 #include <string>
 #include <vector>
 
 namespace openspace {
 namespace properties {
+
+class Property;
 
 /**
  * A PropertyOwner can own Propertys or other PropertyOwner and provide access to both in
