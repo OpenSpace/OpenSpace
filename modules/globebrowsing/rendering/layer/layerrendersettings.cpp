@@ -28,12 +28,11 @@ namespace openspace {
 namespace globebrowsing {
 
 LayerRenderSettings::LayerRenderSettings()
-    : opacity(properties::FloatProperty("opacity", "opacity", 1.f, 0.f, 1.f))    
+    : properties::PropertyOwner("Settings")
+    , opacity(properties::FloatProperty("opacity", "opacity", 1.f, 0.f, 1.f))    
     , gamma(properties::FloatProperty("gamma", "gamma", 1, 0, 5))
     , multiplier(properties::FloatProperty("multiplier", "multiplier", 1.f, 0.f, 20.f))
 {
-    setName("settings");
-
     addProperty(opacity);
     addProperty(gamma);
     addProperty(multiplier);

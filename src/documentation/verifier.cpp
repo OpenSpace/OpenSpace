@@ -225,25 +225,25 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
             [this](const Documentation& doc) { return doc.id == identifier; }
         );
 
-        if (it == documentations.end()) {
-            return { false, { { key, TestResult::Offense::Reason::UnknownIdentifier } } };
+        ghoul_assert(
+            it != documentations.end(),
+            "Did not find referencing identifier '" + identifier + "'"
+        );
+
+        ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
+        TestResult res = testSpecification(*it, d);
+
+        // Add the 'key' as a prefix to make the offender a fully qualified identifer
+        for (TestResult::Offense& s : res.offenses) {
+            s.offender = key + "." + s.offender;
         }
-        else {
-            ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
-            TestResult res = testSpecification(*it, d);
 
-            // Add the 'key' as a prefix to make the offender a fully qualified identifer
-            for (TestResult::Offense& s : res.offenses) {
-                s.offender = key + "." + s.offender;
-            }
-
-            // Add the 'key' as a prefix to make the warning a fully qualified identifer
-            for (TestResult::Warning& w : res.warnings) {
-                w.offender = key + "." + w.offender;
-            }
-
-            return res;
+        // Add the 'key' as a prefix to make the warning a fully qualified identifer
+        for (TestResult::Warning& w : res.warnings) {
+            w.offender = key + "." + w.offender;
         }
+
+        return res;
     }
     else {
         return res;

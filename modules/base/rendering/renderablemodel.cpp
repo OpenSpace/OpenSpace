@@ -85,7 +85,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     if (success)
         _colorTexturePath = absPath(texturePath);
 
-    addPropertySubOwner(_geometry);
+    addPropertySubOwner(_geometry.get());
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
@@ -153,7 +153,6 @@ bool RenderableModel::initialize() {
 bool RenderableModel::deinitialize() {
     if (_geometry) {
         _geometry->deinitialize();
-        delete _geometry;
         _geometry = nullptr;
     }
     _texture = nullptr;

@@ -24,6 +24,7 @@
 
 #include <openspace/scene/scenegraph.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/rendering/renderengine.h>
@@ -112,6 +113,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         );
     }
     catch (...) {
+        // @CLEANUP:  This is bad to just catch all exceptions! ---abock
         return false;
     }
 

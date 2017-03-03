@@ -125,7 +125,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         _heightMapTexturePath = absPath(heightMapTexturePath);
     }
 
-    addPropertySubOwner(_geometry);
+    addPropertySubOwner(_geometry.get());
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
@@ -309,7 +309,7 @@ bool RenderablePlanet::initialize() {
 bool RenderablePlanet::deinitialize() {
     if(_geometry) {
         _geometry->deinitialize();
-        delete _geometry;
+        _geometry = nullptr;
     }
 
     RenderEngine& renderEngine = OsEng.renderEngine();

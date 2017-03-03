@@ -124,7 +124,7 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 	));
 
     // Now the shader program can be accessed
-    ProgramObject* programObject =
+    ghoul::opengl::ProgramObject* programObject =
         layeredShaderManager->programObject(
             layeredTexturePreprocessingData);
         
@@ -155,7 +155,7 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 
 void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data){
 
-    ProgramObject* programObject = getActivatedProgramWithTileData(
+    ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
         _globalLayerShaderManager,
         _globalGpuLayerManager,
         chunk);
@@ -229,7 +229,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
 
 void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& data) {
         
-    ProgramObject* programObject = getActivatedProgramWithTileData(
+    ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
         _localLayerShaderManager,
         _localGpuLayerManager,
         chunk);

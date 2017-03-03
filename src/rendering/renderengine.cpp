@@ -39,6 +39,7 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
@@ -91,7 +92,8 @@ namespace {
 namespace openspace {
 
 RenderEngine::RenderEngine()
-    : _mainCamera(nullptr)
+    : properties::PropertyOwner("RenderEngine")
+    , _mainCamera(nullptr)
     , _raycasterManager(nullptr)
     , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
     , _frametimeType(
@@ -99,23 +101,25 @@ RenderEngine::RenderEngine()
         "Type of the frametime display",
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _showInfo("showInfo", "Show Render Information", true)
+    , _showLog("showLog", "Show the OnScreen log", true)
+    , _nAaSamples("nAaSamples", "Number of Antialiasing samples", 8, 1, 16)
+    , _applyWarping("applyWarpingScreenshot", "Apply Warping to Screenshots", false)
+    , _takeScreenshot("takeScreenshot", "Take Screenshot")
+    , _showFrameNumber("showFrameNumber", "Show Frame Number", false)
+    , _disableMasterRendering("disableMasterRendering", "Disable Master Rendering", false)
+    , _shouldTakeScreenshot(false)
     , _sceneGraph(nullptr)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
     , _performanceManager(nullptr)
     , _log(nullptr)
-    , _showInfo(true)
-    , _showLog(true)
-    , _takeScreenshot(false)
-    , _showFrameNumber(false)
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
     , _frameNumber(0)
 {
-    setName("RenderEngine");
-
     _performanceMeasurements.onChange([this](){
         if (_performanceMeasurements) {
             if (!_performanceManager) {
@@ -142,6 +146,26 @@ RenderEngine::RenderEngine()
         "Average frames per second"
     );
     addProperty(_frametimeType);
+    
+    addProperty(_showInfo);
+    addProperty(_showLog);
+    
+    _nAaSamples.onChange([this](){
+        if (_renderer) {
+            _renderer->setNAaSamples(_nAaSamples);
+        }
+    });
+    addProperty(_nAaSamples);
+    addProperty(_applyWarping);
+    
+    _takeScreenshot.onChange([this](){
+        _shouldTakeScreenshot = true;
+    });
+    addProperty(_takeScreenshot);
+    
+    addProperty(_showFrameNumber);
+    
+    addProperty(_disableMasterRendering);
 }
 
 RenderEngine::~RenderEngine() {
@@ -161,7 +185,7 @@ void RenderEngine::initialize() {
     if (confManager.hasKeyAndValue<std::string>(KeyRenderingMethod)) {
         renderingMethod = confManager.value<std::string>(KeyRenderingMethod);
     } else {
-        using Version = ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version;
+        using Version = ghoul::systemcapabilities::Version;
 
         // The default rendering method has a requirement of OpenGL 4.3, so if we are
         // below that, we will fall back to frame buffer operation
@@ -169,6 +193,12 @@ void RenderEngine::initialize() {
             LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
             renderingMethod = "Framebuffer";
         }
+    }
+    
+    if (confManager.hasKey(ConfigurationManager::KeyDisableMasterRendering)) {
+        _disableMasterRendering = confManager.value<bool>(
+            ConfigurationManager::KeyDisableMasterRendering
+        );
     }
 
     _raycasterManager = new RaycasterManager();
@@ -519,23 +549,16 @@ void RenderEngine::postDraw() {
         Time::ref().setTimeJumped(false);
     }
 
-    if (_takeScreenshot) {
+    if (_shouldTakeScreenshot) {
         OsEng.windowWrapper().takeScreenshot(_applyWarping);
-        _takeScreenshot = false;
+        _shouldTakeScreenshot = false;
     }
 
     if (_performanceManager) {
-        _performanceManager->storeScenePerformanceMeasurements(scene()->allSceneGraphNodes());
+        _performanceManager->storeScenePerformanceMeasurements(
+            scene()->allSceneGraphNodes()
+        );
     }
-}
-
-void RenderEngine::takeScreenshot(bool applyWarping) {
-    _takeScreenshot = true;
-    _applyWarping = applyWarping;
-}
-
-void RenderEngine::toggleInfoText(bool b) {
-    _showInfo = b;
 }
 
 Scene* RenderEngine::scene() {
@@ -716,43 +739,15 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
     _renderer->setScene(_sceneGraph);
 }
 
-
-void RenderEngine::setNAaSamples(int nAaSamples) {
-    _nAaSamples = nAaSamples;
-    if (_renderer) {
-        _renderer->setNAaSamples(_nAaSamples);
-    }
-}
-
 scripting::LuaLibrary RenderEngine::luaLibrary() {
     return {
         "",
         {
             {
-                "takeScreenshot",
-                &luascriptfunctions::takeScreenshot,
-                "(optional bool)",
-                "Renders the current image to a file on disk. If the boolean parameter "
-                "is set to 'true', the screenshot will include the blending and the "
-                "meshes. If it is 'false', the straight FBO will be recorded."
-            },
-            {
                 "setRenderer",
                 &luascriptfunctions::setRenderer,
                 "string",
                 "Sets the renderer (ABuffer or FrameBuffer)"
-            },
-            {
-                "setNAaSamples",
-                &luascriptfunctions::setNAaSamples,
-                "int",
-                "Sets the number of anti-aliasing (MSAA) samples"
-            },
-            {
-                "showRenderInformation",
-                &luascriptfunctions::showRenderInformation,
-                "bool",
-                "Toggles the showing of render information on-screen text"
             },
             {
                 "toggleFade",
@@ -795,14 +790,6 @@ bool RenderEngine::doesPerformanceMeasurements() const {
 
 performance::PerformanceManager* RenderEngine::performanceManager() {
     return _performanceManager.get();
-}
-
-void RenderEngine::setShowFrameNumber(bool enabled){
-    _showFrameNumber = enabled;
-}
-
-void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
-    _disableMasterRendering = enabled;
 }
 
 void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s)
@@ -1113,6 +1100,8 @@ void RenderEngine::renderInformation() {
                         penPosition.y -= _fontInfo->height();
                     }
                     catch (...) {
+                        // @CLEANUP:  This is bad as it will discard all exceptions
+                        // without telling us about it! ---abock
                     }
                 }
 

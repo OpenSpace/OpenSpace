@@ -22,11 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
 namespace openspace {
 
-Documentation Scene::Documentation() {
+documentation::Documentation Scene::Documentation() {
     using namespace documentation;
 
     return {

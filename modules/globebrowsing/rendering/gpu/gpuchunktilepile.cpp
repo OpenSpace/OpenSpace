@@ -28,31 +28,31 @@
 namespace openspace {
 namespace globebrowsing {
 
-void GPUChunkTilePile::setValue(ProgramObject* programObject,
+void GPUChunkTilePile::setValue(ghoul::opengl::ProgramObject* programObject,
                                 const ChunkTilePile& chunkTilePile)
 {
     ghoul_assert(
-        gpuChunkTiles.size() == chunkTilePile.size(),
+        _gpuChunkTiles.size() == chunkTilePile.size(),
         "GPU and CPU ChunkTilePile must have same size!"
     );
-    for (size_t i = 0; i < gpuChunkTiles.size(); ++i) {
-        gpuChunkTiles[i].setValue(programObject, chunkTilePile[i]);
+    for (size_t i = 0; i < _gpuChunkTiles.size(); ++i) {
+        _gpuChunkTiles[i].setValue(programObject, chunkTilePile[i]);
     }
 }
 
-void GPUChunkTilePile::bind(ProgramObject* programObject, const std::string& nameBase, 
-                            int pileSize)
+void GPUChunkTilePile::bind(ghoul::opengl::ProgramObject* programObject,
+                            const std::string& nameBase, int pileSize)
 {
-    gpuChunkTiles.resize(pileSize);
-    for (size_t i = 0; i < gpuChunkTiles.size(); ++i) {
+    _gpuChunkTiles.resize(pileSize);
+    for (size_t i = 0; i < _gpuChunkTiles.size(); ++i) {
         std::string nameExtension = "chunkTile" + std::to_string(i) + ".";
-        gpuChunkTiles[i].bind(programObject, nameBase + nameExtension);
+        _gpuChunkTiles[i].bind(programObject, nameBase + nameExtension);
     }
 }
 
 void GPUChunkTilePile::deactivate() {
-    for (auto& gpuChunkTile : gpuChunkTiles) {
-        gpuChunkTile.deactivate();
+    for (auto& t : _gpuChunkTiles) {
+        t.deactivate();
     }
 }
 

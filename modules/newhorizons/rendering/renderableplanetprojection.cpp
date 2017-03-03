@@ -26,6 +26,7 @@
 
 #include <modules/space/rendering/planetgeometry.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -66,7 +67,7 @@ namespace {
 
 namespace openspace {
 
-Documentation RenderablePlanetProjection::Documentation() {
+documentation::Documentation RenderablePlanetProjection::Documentation() {
     using namespace openspace::documentation;
     return {
         "Renderable Planet Projection",

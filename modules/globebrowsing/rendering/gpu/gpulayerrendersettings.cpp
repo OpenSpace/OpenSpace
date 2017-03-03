@@ -29,7 +29,7 @@
 namespace openspace {
 namespace globebrowsing {
 
-void GPULayerRenderSettings::setValue(ProgramObject* programObject, 
+void GPULayerRenderSettings::setValue(ghoul::opengl::ProgramObject* programObject,
                                       const LayerRenderSettings& layerSettings)
 {
     gpuOpacity.setValue(programObject, layerSettings.opacity.value());
@@ -37,7 +37,7 @@ void GPULayerRenderSettings::setValue(ProgramObject* programObject,
     gpuMultiplier.setValue(programObject, layerSettings.multiplier.value());
 }
 
-void GPULayerRenderSettings::bind(ProgramObject* programObject,
+void GPULayerRenderSettings::bind(ghoul::opengl::ProgramObject* programObject,
                                   const std::string& nameBase)
 {
     gpuOpacity.bind(programObject, nameBase + "opacity");

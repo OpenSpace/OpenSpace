@@ -51,15 +51,16 @@ public:
      * GPU struct. OBS! Users must ensure bind has been 
      * called before setting using this method.
      */
-    void setValue(ProgramObject* programObject, const ChunkTilePile& chunkTilePile);
+    void setValue(ghoul::opengl::ProgramObject* programObject,
+        const ChunkTilePile& chunkTilePile);
 
     /** 
      * Binds this object with GLSL variables with identifiers starting 
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
-    void bind(ProgramObject* programObject, const std::string& nameBase, 
-              int pileSize);
+    void bind(ghoul::opengl::ProgramObject* programObject, const std::string& nameBase, 
+          int pileSize);
     /**
     * Deactivates any <code>TextureUnit</code>s assigned by this object.
     * This method should be called after the OpenGL draw call.
@@ -67,7 +68,7 @@ public:
     void deactivate();
 
 private:
-    std::vector<GPUChunkTile> gpuChunkTiles;
+    std::vector<GPUChunkTile> _gpuChunkTiles;
 };
 
 } // namespace globebrowsing

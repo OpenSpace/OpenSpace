@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 #define __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 
-#include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/propertyowner.h>

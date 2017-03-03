@@ -25,6 +25,7 @@
 #include <openspace/engine/moduleengine.h>
 
 #include <openspace/moduleregistration.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/openspacemodule.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -34,7 +35,7 @@
 #include "moduleengine_lua.inl"
 
 namespace {
-    const std::string _loggerCat = "ModuleEngine";
+    const char* _loggerCat = "ModuleEngine";
 }
 
 namespace openspace {
@@ -67,7 +68,8 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            "Module name '" + module->name() + "' was registered before", "ModuleEngine"
+            "Module name '" + module->name() + "' was registered before",
+            "ModuleEngine"
         );
     }
     
@@ -85,11 +87,8 @@ std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
     return result;
 }
 
-ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
-ModuleEngine::requiredOpenGLVersion() const
-{
-    using Version = ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version;
-    Version version = { 0,0 };
+ghoul::systemcapabilities::Version ModuleEngine::requiredOpenGLVersion() const {
+    ghoul::systemcapabilities::Version version = { 0, 0 };
 
     for (const auto& m : _modules) {
         version = std::max(version, m->requiredOpenGLVersion());

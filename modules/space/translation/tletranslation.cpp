@@ -224,7 +224,7 @@ namespace {
 
 namespace openspace {
 
-Documentation TLETranslation::Documentation() {
+documentation::Documentation TLETranslation::Documentation() {
     using namespace openspace::documentation;
     return {
         "TLE Translation",

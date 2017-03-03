@@ -24,6 +24,7 @@
 
 #include <modules/base/scale/staticscale.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
 namespace {
@@ -33,7 +34,7 @@ namespace {
 
 namespace openspace {
 
-Documentation StaticScale::Documentation() {
+documentation::Documentation StaticScale::Documentation() {
     using namespace openspace::documentation;
     return {
         "Static Scaling",
