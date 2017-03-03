@@ -47,6 +47,7 @@ namespace openspace {
 RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
+    , _target("target", "Target", "Sun")
 {
     // if (dictionary.hasKey("MoveFactor")) {
     //     float moveFactor = 0.5f;
@@ -54,9 +55,13 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     //         _moveFactor = moveFactor;
     //     }
     // }
+    std::string target;
+    if ( dictionary.getValue("Target", target)){
+        _target = target;
+    }
+    addProperty(_target);
     addProperty(_moveFactor);
 }
-
 
 void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     glm::mat4 scaleTransform = glm::mat4(1.0);
@@ -69,7 +74,7 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     glm::dvec3 translationTransform;
     rotationTransform = glm::inverse(glm::dmat4(data.camera.viewRotationMatrix()));
     // Sun's barycenter
-    SceneGraphNode* p = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent()->parent();
+    SceneGraphNode* p = OsEng.renderEngine().scene()->sceneGraphNode(_target);
     glm::dmat4 rotationTransformTangentTrajectory = glm::lookAt(glm::normalize(data.modelTransform.translation),
                                          glm::dvec3(p->worldPosition()), data.modelTransform.rotation * glm::dvec3(0.0, 0.0, 1.0));
     rotationTransform = glm::dmat4(glm::inverse(rotationTransformTangentTrajectory));
