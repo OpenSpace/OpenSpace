@@ -55,6 +55,7 @@ OnScreenGUIModule::OnScreenGUIModule()
             gui._globalProperty.setSource(
                 []() {
                     std::vector<properties::PropertyOwner*> res = {
+                        &(OsEng.windowWrapper()),
                         &(OsEng.settingsEngine()),
                         &(OsEng.interactionHandler()),
                         &(OsEng.renderEngine())

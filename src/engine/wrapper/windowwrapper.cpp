@@ -52,6 +52,10 @@ WindowWrapper::WindowWrapperException::WindowWrapperException(const std::string&
     : ghoul::RuntimeError(msg, "WindowWrapper")
 {}
 
+WindowWrapper::WindowWrapper()
+    : properties::PropertyOwner("WindowWrapper")
+{}
+
 scripting::LuaLibrary WindowWrapper::luaLibrary() {
     return {
         "cluster",

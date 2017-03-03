@@ -131,9 +131,12 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _isFirstRenderingFirstFrame(true)
 {
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
+    
+    // New property subowners also have to be added to the OnScreenGuiModule callback!
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
+    _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
