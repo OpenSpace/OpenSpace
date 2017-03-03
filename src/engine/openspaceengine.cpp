@@ -45,6 +45,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/task.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
@@ -150,6 +151,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Scale>>(),
         "Scale"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Task>>(),
+        "Task"
     );
 
     SpiceManager::initialize();

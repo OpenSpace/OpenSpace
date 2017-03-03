@@ -22,42 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
-#define __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANE___H__
+#define __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANE___H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-// ghoul includes
-#include <ghoul/io/volume/rawvolumereader.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/vectorproperty.h>
 
 // Forward declare to minimize dependencies
 namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class Texture;
-    }
+    class Dictionary;
 }
 
 namespace openspace {
 
-class RenderableVolume: public Renderable {
+class VolumeClipPlane : public properties::PropertyOwner {
 public:
-    // constructors & destructor
-    RenderableVolume(const ghoul::Dictionary& dictionary);
-    ~RenderableVolume();
-    
-protected:
-    ghoul::opengl::Texture* loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
-    glm::vec3 getVolumeOffset(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
-    ghoul::RawVolumeReader::ReadHints readHints(const ghoul::Dictionary& dictionary);
-    ghoul::opengl::Texture* loadTransferFunction(const std::string& filepath);
-
+    VolumeClipPlane(const ghoul::Dictionary& dictionary);
+    virtual ~VolumeClipPlane() = default;
+    virtual void initialize();
+    glm::vec3 normal();
+    glm::vec2 offsets();
 private:
+    properties::Vec3Property _normal;
+    properties::Vec2Property _offsets;
+
 };
 
-} // namespace openspace
+}  // namespace openspace
 
-#endif // __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
+#endif // __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANE___H__

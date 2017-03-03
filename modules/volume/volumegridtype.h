@@ -22,38 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
-#define __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
+#define __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__
 
-#include <apps/DataConverter/conversiontask.h>
-#include <string>
-#include <ghoul/glm.h>
-#include <functional>
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
-
-
-namespace openspace {
-namespace dataconverter {
-
-/**
- * Converts ascii based point data
- * int64_t n
- * (float x, float y, float z, float r, float g, float b) * n
- * to a binary (floating point) representation with the same layout.
- */
-class MilkyWayPointsConversionTask : public ConversionTask {
-public:
-    MilkyWayPointsConversionTask(const std::string& inFilename,
-                                 const std::string& outFilename);
-    
-    void perform(const std::function<void(float)>& onProgress) override;
-private:
-    std::string _inFilename;    
-    std::string _outFilename;
+enum class VolumeGridType : int {
+    Cartesian = 0,
+    Spherical = 1
 };
 
-} // namespace dataconverter
-} // namespace openspace
-
-#endif // __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
+#endif // __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE_H__

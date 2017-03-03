@@ -24,8 +24,6 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
-
 layout (location = 0) out vec4 finalColor;
 uniform float blackoutFactor;
 uniform int nAaSamples;

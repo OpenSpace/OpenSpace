@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -22,62 +23,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <iostream>
-#include <string>
-#include <ghoul/glm.h>
-
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereaderdevil.h>
-#include <ghoul/io/texture/texturereaderfreeimage.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-
-#include <openspace/util/progressbar.h>
-
-#include <apps/DataConverter/milkywayconversiontask.h>
-#include <apps/DataConverter/milkywaypointsconversiontask.h>
-
-int main(int argc, char** argv) {
-    using namespace openspace;
-    using namespace dataconverter;
-
-    ghoul::initialize();
-
-    #ifdef GHOUL_USE_DEVIL
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
-    #endif // GHOUL_USE_DEVIL
-    #ifdef GHOUL_USE_FREEIMAGE
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
-    #endif // GHOUL_USE_FREEIMAGE
-
-    openspace::ProgressBar pb(100);
-    std::function<void(float)> onProgress = [&](float progress) {
-        pb.print(progress * 100);
-    };
-
-    // TODO: Make the converter configurable using either
-    // config files (json, lua dictionaries),
-    // lua scripts,
-    // or at the very least: a command line interface.
- 
-    MilkyWayConversionTask mwConversionTask(
-        "F:/mw_june2016/volumeslices/img/comp/v003/frames/primary/0100/cam2_main.",
-        ".exr",
-        1385,
-        512,
-        "F:/mw_june2016/mw_512_512_64_june.rawvolume", 
-        glm::vec3(512, 512, 64));
-    
-    //MilkyWayPointsConversionTask mwpConversionTask("F:/mw_june2016/points.off", "F:/mw_june2016/points.off.binary");
+#include <modules/volume/rendering/volumeclipplanes.h>
+#include <ghoul/misc/dictionary.h>
 
 
-    mwConversionTask.perform(onProgress);
-    //mwpConversionTask.perform(onProgress);
+namespace openspace {
 
+VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
+    : _nClipPlanes("nClipPlanes", "Number of clip planes", 0, 0, 10)
+{
+    std::vector<std::string> keys = dictionary.keys();
+    for (const std::string& key : keys) {
+        ghoul::Dictionary cutPlaneDictionary;
+        dictionary.getValue(key, cutPlaneDictionary);
+        auto clipPlane = std::make_shared<VolumeClipPlane>(cutPlaneDictionary);
+        clipPlane->setName(key);
+        _clipPlanes.push_back(clipPlane);
+    }
+    _nClipPlanes = keys.size();
+}
 
-    std::cout << "Done." << std::endl;
+void VolumeClipPlanes::initialize() {
+    addProperty(_nClipPlanes);
+    for (const auto& clipPlane : _clipPlanes) {
+        addPropertySubOwner(clipPlane.get());
+        clipPlane->initialize();
+    }
+}
 
-    std::cin.get();
-    return 0;
-};
+void VolumeClipPlanes::deinitialize() {}
+
+std::vector<glm::vec3> VolumeClipPlanes::normals() {
+    std::vector<glm::vec3> normals;
+    for (const auto& clipPlane : _clipPlanes) {
+        normals.push_back(clipPlane->normal());
+    }
+    return normals;
+}
+
+std::vector<glm::vec2> VolumeClipPlanes::offsets() {
+    std::vector<glm::vec2> offsets;
+    for (const auto& clipPlane : _clipPlanes) {
+        offsets.push_back(clipPlane->offsets());
+    }
+    return offsets;
+}
+
+} // namespace openspace

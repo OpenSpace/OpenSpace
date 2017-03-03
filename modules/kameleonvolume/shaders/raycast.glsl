@@ -22,44 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
-#define __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
+uniform float maxStepSize#{id} = 0.02;
+uniform sampler3D volumeTexture_#{id};
+uniform sampler1D transferFunction_#{id};
+uniform int gridType_#{id} = 0;
 
-#include <apps/DataConverter/conversiontask.h>
-#include <string>
-#include <ghoul/glm.h>
-#include <functional>
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
+uniform int nClips_#{id};
+uniform vec3 clipNormals_#{id}[8];
+uniform vec2 clipOffsets_#{id}[8];
 
 
-namespace openspace {
-namespace dataconverter {
+void sample#{id}(vec3 samplePos,
+             vec3 dir,
+             inout vec3 accumulatedColor,
+             inout vec3 accumulatedAlpha,
+             inout float stepSize) {
 
-/**
- * Converts a set of exr image slices to a raw volume
- * with floating point RGBA data (32 bit per channel).
- */
-class MilkyWayConversionTask : public ConversionTask {
-public:
-    MilkyWayConversionTask(const std::string& inFilenamePrefix,
-                           const std::string& inFilenameSuffix,
-                           size_t inFirstIndex,
-                           size_t inNSlices, 
-                           const std::string& outFilename,
-                           const glm::ivec3& outDimensions);
-    
-    void perform(const std::function<void(float)>& onProgress) override;
-private:
-    std::string _inFilenamePrefix;
-    std::string _inFilenameSuffix;
-    size_t _inFirstIndex;
-    size_t _inNSlices;
-    std::string _outFilename;
-    glm::ivec3 _outDimensions;
-};
+    vec3 transformedPos = samplePos;
+    if (gridType_#{id} == 1) {
+        transformedPos = kameleon_cartesianToSpherical(samplePos);
+    }
 
-} // namespace dataconverter
-} // namespace openspace
 
-#endif // __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
+    float clipAlpha = 1.0;
+    vec3 centerToPos = transformedPos - vec3(0.5);
+
+
+    for (int i = 0; i < nClips_#{id} && i < 8; i++) {
+        vec3 clipNormal = clipNormals_#{id}[i];
+        float clipBegin = clipOffsets_#{id}[i].x;
+        float clipEnd = clipBegin + clipOffsets_#{id}[i].y;
+        clipAlpha *= smoothstep(clipBegin, clipEnd, dot(centerToPos, clipNormal));
+    }
+
+    if (clipAlpha > 0) {
+        float val = texture(volumeTexture_#{id}, transformedPos).r;
+        vec4 color = texture(transferFunction_#{id}, val);
+        vec3 backColor = color.rgb;
+        vec3 backAlpha = color.aaa;
+
+        backColor *= stepSize * clipAlpha;
+        backAlpha *= stepSize * clipAlpha;
+
+        backColor = clamp(backColor, 0.0, 1.0);
+        backAlpha = clamp(backAlpha, 0.0, 1.0);
+
+        vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
+        accumulatedColor += oneMinusFrontAlpha * backColor;
+        accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
+    }
+
+    stepSize = maxStepSize#{id};
+}
+
+float stepSize#{id}(vec3 samplePos, vec3 dir) {
+    return maxStepSize#{id};
+}
