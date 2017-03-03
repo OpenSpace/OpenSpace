@@ -27,6 +27,7 @@
 
 #include <modules/base/rendering/renderableplane.h>
 #include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
@@ -39,6 +40,7 @@ public:
 
 private:
     properties::DoubleProperty _moveFactor;
+    properties::StringProperty _target;
 };
 
 } // namespace openspace
