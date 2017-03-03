@@ -41,6 +41,7 @@ class Translation : public properties::PropertyOwner {
 public:
     static std::unique_ptr<Translation> createFromDictionary(const ghoul::Dictionary& dictionary);
 
+    Translation();
     virtual ~Translation();
     virtual bool initialize();
 

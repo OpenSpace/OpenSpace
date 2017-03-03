@@ -83,8 +83,11 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(success,
-            "RenderablePlanet need the '" << SceneGraphNode::KeyName<<"' be specified");
+    ghoul_assert(
+        success,
+        std::string("RenderablePlanet need the '") + SceneGraphNode::KeyName +
+            "' be specified"
+    );
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(keyGeometry, geometryDictionary);

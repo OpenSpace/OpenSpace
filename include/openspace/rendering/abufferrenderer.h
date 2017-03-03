@@ -43,14 +43,14 @@
 
 namespace ghoul {
     
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
-}
+namespace filesystem { class File; }
+
+namespace opengl {
+    class ProgramObject;
+    class Texture;
+} // namepsace opengl
+
+} // namespace ghoul
 
 namespace openspace {
 

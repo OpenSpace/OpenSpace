@@ -51,6 +51,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
         FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f)
     })
+    , _debugPropertyOwner("Debug")
     , _debugProperties({
         BoolProperty("saveOrThrowCamera", "save or throw camera", false),
         BoolProperty("showChunkEdges", "show chunk edges", false),
@@ -66,6 +67,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty("collectStats", "collect stats", false),
         BoolProperty("onlyModelSpaceRendering", "Only Model Space Rendering", false)
     })
+    , _texturePropertyOwner("Textures")
 {
     setName("RenderableGlobe");
         
@@ -105,9 +107,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     double distance = res * _ellipsoid.maximumRadius() / tan(fov / 2);
     _distanceSwitch.addSwitchValue(_chunkedLodGlobe, distance);
         
-    _debugPropertyOwner.setName("Debug");
-    _texturePropertyOwner.setName("Textures");
-
     addProperty(_generalProperties.isEnabled);
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);

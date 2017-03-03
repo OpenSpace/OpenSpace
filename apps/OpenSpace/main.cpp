@@ -90,13 +90,13 @@ void mainInitFunc() {
     LDEBUG("Initializing OpenGL in OpenSpace Engine started");
     OsEng.initializeGL();
     LDEBUG("Initializing OpenGL in OpenSpace Engine finished");
-	
-	// Find if we have at least one OpenVR window
-	// Save reference to first OpenVR window, which is the one we will copy to the HMD.
-	for (size_t i = 0; i < SgctEngine->getNumberOfWindows(); ++i) {
-		if (SgctEngine->getWindowPtr(i)->checkIfTagExists("OpenVR")) {
+    
+    // Find if we have at least one OpenVR window
+    // Save reference to first OpenVR window, which is the one we will copy to the HMD.
+    for (size_t i = 0; i < SgctEngine->getNumberOfWindows(); ++i) {
+        if (SgctEngine->getWindowPtr(i)->checkIfTagExists("OpenVR")) {
 #ifdef OPENVR_SUPPORT
-			FirstOpenVRWindow = SgctEngine->getWindowPtr(i);
+            FirstOpenVRWindow = SgctEngine->getWindowPtr(i);
             
             // If we have an OpenVRWindow, initialize OpenVR.
             sgct::SGCTOpenVR::initialize(
@@ -109,8 +109,8 @@ void mainInitFunc() {
 #endif
 
             break;
-		}
-	}
+        }
+    }
 
     // Set the clear color for all non-linear projection viewports
     // @CLEANUP:  Why is this necessary?  We can set the clear color in the configuration
@@ -142,10 +142,10 @@ void mainPostSyncPreDrawFunc() {
     OsEng.postSynchronizationPreDraw();
 
 #ifdef OPENVR_SUPPORT
-	if (FirstOpenVRWindow) {
-		// Update pose matrices for all tracked OpenVR devices once per frame
-		sgct::SGCTOpenVR::updatePoses();
-	}
+    if (FirstOpenVRWindow) {
+        // Update pose matrices for all tracked OpenVR devices once per frame
+        sgct::SGCTOpenVR::updatePoses();
+    }
 #endif
 
     LTRACE("main::postSynchronizationPreDraw(end)");
@@ -167,10 +167,10 @@ void mainRenderFunc() {
 #ifdef OPENVR_SUPPORT
     bool currentWindowIsHMD = FirstOpenVRWindow == _sgctEngine->getCurrentWindowPtr();
     if (sgct::SGCTOpenVR::isHMDActive() && currentWindowIsHMD) {
-		projectionMatrix = sgct::SGCTOpenVR::getHMDCurrentViewProjectionMatrix(
+        projectionMatrix = sgct::SGCTOpenVR::getHMDCurrentViewProjectionMatrix(
             _sgctEngine->getCurrentFrustumMode()
         );
-	}
+    }
 #endif
 
     if (SgctEngine->isMaster()) {
@@ -187,10 +187,10 @@ void mainPostDrawFunc() {
     LTRACE("main::mainPostDrawFunc(begin)");
 
 #ifdef OPENVR_SUPPORT
-	if (FirstOpenVRWindow) {
-		// Copy the first OpenVR window to the HMD
-		sgct::SGCTOpenVR::copyWindowToHMD(FirstOpenVRWindow);
-	}
+    if (FirstOpenVRWindow) {
+        // Copy the first OpenVR window to the HMD
+        sgct::SGCTOpenVR::copyWindowToHMD(FirstOpenVRWindow);
+    }
 #endif
 
     OsEng.postDraw();
@@ -395,6 +395,7 @@ int main_main(int argc, char** argv) {
 } // namespace
 
 int main(int argc, char** argv) {
+    return main_main(argc, argv);
     // We wrap the actual main function in a try catch block so that we can get and print
     // some additional information in case an exception is raised
     try {
@@ -406,7 +407,12 @@ int main(int argc, char** argv) {
         LogMgr.flushLogs();
         return EXIT_FAILURE;
     }
-    catch (const std::exception& e) {
+    catch (const ghoul::AssertionException& e) {
+        // We don't want to catch the assertion exception as we won't be able to add a
+        // breakpoint for debugging
+        LFATALC("Assertion failed", e.what());
+        throw;
+    } catch (const std::exception& e) {
         LFATALC("Exception", e.what());
         LogMgr.flushLogs();
         return EXIT_FAILURE;
