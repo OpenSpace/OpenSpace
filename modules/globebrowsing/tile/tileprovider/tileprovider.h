@@ -140,6 +140,24 @@ public:
      * \returns the no data value for the dataset. Default is the minimum float avalue.
      */
     virtual float noDataValueAsFloat();
+
+    /**
+     * \returns a unique identifier for the <code>TileProvider<\code>. All
+     * <code>TileProviders<\code> have an ID starting at 0 from the first created.
+     * The maximum number of unique identifiers is UINT_MAX 
+     */
+    unsigned int uniqueIdentifier();
+
+protected:
+    /**
+     * This function needs to be called in the constructor of a class extending the
+     * TileProvider interface.
+     */
+    void initialize();
+private:
+    static unsigned int _numTileProviders;
+    unsigned int _uniqueIdentifier;
+    bool _initialized;
 };
 
 using TileCache = LRUCache<TileIndex::TileHashKey, Tile>;

@@ -103,17 +103,15 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
         heightmaps, _tileIndex
     );
 
-	heightmaps.layers()[0]->renderSettings();
-
     bool lastHadMissingData = true;
     for (const auto& chunkTileSettingsPair : chunkTileSettingPairs) {
         auto chunkTile = chunkTileSettingsPair.first;
         const LayerRenderSettings* settings = chunkTileSettingsPair.second;
-        bool goodTile = (chunkTile.tile.status == Tile::Status::OK);
-        bool hasTileMetaData = (chunkTile.tile.metaData != nullptr);
+        bool goodTile = (chunkTile.tile.status() == Tile::Status::OK);
+        bool hasTileMetaData = (chunkTile.tile.metaData() != nullptr);
 
         if (goodTile && hasTileMetaData) {
-            auto tileMetaData = chunkTile.tile.metaData;
+            auto tileMetaData = chunkTile.tile.metaData();
 
 			float minValue = settings->performLayerSettings(tileMetaData->minValues[HeightChannel]);
 			float maxValue = settings->performLayerSettings(tileMetaData->maxValues[HeightChannel]);

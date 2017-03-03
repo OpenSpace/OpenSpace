@@ -59,6 +59,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/lrumemorycache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/lrumemorycache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h

@@ -22,32 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
+#include <modules/globebrowsing/tile/tilecaching/memorytilecache.h>
 
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <ghoul/logging/logmanager.h>
 
-#include <vector>
+namespace {
+    const std::string _loggerCat = "MemoryTileKey";
+}
 
 namespace openspace {
 namespace globebrowsing {
+    MemoryTileCache::MemoryTileCache() {
 
-struct ChunkTile {
-	ChunkTile() : tile(Tile::TileUnavailable) {};
-	ChunkTile(Tile tile, TileUvTransform uvTransform, TileDepthTransform depthTransform) :
-		tile(tile),
-		uvTransform(uvTransform),
-		depthTransform(depthTransform) {};
+    }
 
-    Tile tile;
-    TileUvTransform uvTransform;
-    TileDepthTransform depthTransform;
-};
+    MemoryTileCache::~MemoryTileCache() {
 
-using ChunkTilePile = std::vector<ChunkTile>;
-
+    }
+    
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__

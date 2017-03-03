@@ -33,8 +33,17 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
-    
+const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavailable);
+
+Tile::Tile(std::shared_ptr<ghoul::opengl::Texture> texture,
+         std::shared_ptr<TileMetaData> metaData,
+         Status status)
+: _texture(texture)
+, _metaData(metaData)
+, _status(status) {
+
+}
+
 Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
     using namespace ghoul::opengl;
         
@@ -58,11 +67,7 @@ Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
     texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
     // Create tile
-    Tile tile;
-    tile.status = Tile::Status::OK;
-    tile.metaData = nullptr;
-    tile.texture = texture;
-
+    Tile tile(texture, nullptr, Tile::Status::OK);
     return tile;
 }
 

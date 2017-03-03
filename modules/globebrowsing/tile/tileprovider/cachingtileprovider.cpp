@@ -47,6 +47,7 @@ namespace tileprovider {
     
 CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
     : _framesSinceLastRequestFlush(0)
+	, _defaultTile(Tile::TileUnavailable)
 {
     std::string name = "Name unspecified";
     dictionary.getValue("Name", name);
@@ -106,6 +107,7 @@ CachingTileProvider::CachingTileProvider(
     , _tileCache(tileCache)
     , _framesUntilRequestFlush(framesUntilFlushRequestQueue)
     , _framesSinceLastRequestFlush(0)
+	, _defaultTile(Tile::TileUnavailable)
 {}
 
 CachingTileProvider::~CachingTileProvider(){
@@ -129,11 +131,8 @@ int CachingTileProvider::maxLevel() {
 }
 
 Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
-    Tile tile = Tile::TileUnavailable;
-
     if (tileIndex.level > maxLevel()) {
-        tile.status = Tile::Status::OutOfRange;
-        return tile;
+        return Tile(nullptr, nullptr, Tile::Status::OutOfRange);
     }
 
     TileIndex::TileHashKey key = tileIndex.hashKey();
@@ -145,7 +144,7 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
         _asyncTextureDataProvider->enqueueTileIO(tileIndex);
     }
         
-    return tile;
+    return Tile::TileUnavailable;
 }
 
 float CachingTileProvider::noDataValueAsFloat() {
@@ -153,7 +152,7 @@ float CachingTileProvider::noDataValueAsFloat() {
 }
 
 Tile CachingTileProvider::getDefaultTile() {
-    if (_defaultTile.texture == nullptr) {
+    if (_defaultTile.texture() == nullptr) {
         _defaultTile = createTile(
             _asyncTextureDataProvider->getTextureDataProvider()->defaultTileData()
         );
@@ -184,7 +183,7 @@ Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
     TileIndex::TileHashKey key = tileIndex.hashKey();
 
     if (_tileCache->exist(key)) {
-        return _tileCache->get(key).status;
+        return _tileCache->get(key).status();
     }
 
     return Tile::Status::Unavailable;

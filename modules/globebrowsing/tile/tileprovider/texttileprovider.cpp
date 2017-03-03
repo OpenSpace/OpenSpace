@@ -104,14 +104,14 @@ Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        *(tile.texture),
+        *(tile.texture()),
         0
     );
 
     glViewport(
         0, 0,
-        static_cast<GLsizei>(tile.texture->width()),
-        static_cast<GLsizei>(tile.texture->height())
+        static_cast<GLsizei>(tile.texture()->width()),
+        static_cast<GLsizei>(tile.texture()->height())
     );
         
     ghoul_assert(_fontRenderer != nullptr, "_fontRenderer must not be null");

@@ -22,32 +22,72 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
-
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-
-#include <vector>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 namespace globebrowsing {
+namespace cache {
 
-struct ChunkTile {
-	ChunkTile() : tile(Tile::TileUnavailable) {};
-	ChunkTile(Tile tile, TileUvTransform uvTransform, TileDepthTransform depthTransform) :
-		tile(tile),
-		uvTransform(uvTransform),
-		depthTransform(depthTransform) {};
+template<typename KeyType, typename ValueType>
+LRUMemoryCache<KeyType, ValueType>::LRUMemoryCache(size_t size)
+    : _maxCacheSize(size)
+{}
 
-    Tile tile;
-    TileUvTransform uvTransform;
-    TileDepthTransform depthTransform;
-};
+template<typename KeyType, typename ValueType>
+void LRUMemoryCache<KeyType, ValueType>::clear() {
+    _itemList.erase(_itemList.begin(), _itemList.end());
+    _itemMap.erase(_itemMap.begin(), _itemMap.end());
+    _cacheSize = 0;
+}
 
-using ChunkTilePile = std::vector<ChunkTile>;
+template<typename KeyType, typename ValueType>
+void LRUMemoryCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value) {
+    auto it = _itemMap.find(key);
+    if (it != _itemMap.end()) {
+        _itemList.erase(it->second);
+        _itemMap.erase(it);
+        _cacheSize -= it->second.memoryImpact(_dataSizeType);
+    }
+    _itemList.push_front(std::make_pair(key, value));
+    _itemMap.insert(std::make_pair(key, _itemList.begin()));
+    _cacheSize += it->second.memoryImpact(_dataSizeType);
+    clean();
+}
 
+template<typename KeyType, typename ValueType>
+bool LRUMemoryCache<KeyType, ValueType>::exist(const KeyType& key) const {
+    return _itemMap.count(key) > 0;
+}
+
+template<typename KeyType, typename ValueType>
+ValueType LRUMemoryCache<KeyType, ValueType>::get(const KeyType& key) {
+    //ghoul_assert(exist(key), "Key " << key << " must exist");
+    auto it = _itemMap.find(key);
+    // Move list iterator pointing to value
+    _itemList.splice(_itemList.begin(), _itemList, it->second);
+    return it->second->second;
+}
+
+template<typename KeyType, typename ValueType>
+size_t LRUMemoryCache<KeyType, ValueType>::size() const {
+    return _cacheSize;
+}
+
+template<typename KeyType, typename ValueType>
+size_t LRUMemoryCache<KeyType, ValueType>::maximumSize() const {
+    return _maxCacheSize;
+}
+
+template<typename KeyType, typename ValueType>
+void LRUMemoryCache<KeyType, ValueType>::clean() {
+    while (_cacheSize > _maxCacheSize) {
+        auto last_it = _itemList.end(); last_it--;
+        _itemMap.erase(last_it->first);
+        _cacheSize -= it->second.memoryImpact(_dataSizeType);
+        _itemList.pop_back();
+    }
+}
+
+} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__

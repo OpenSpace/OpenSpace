@@ -22,32 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__
 
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-
-#include <vector>
+#include <modules/globebrowsing/other/lrucache.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-struct ChunkTile {
-	ChunkTile() : tile(Tile::TileUnavailable) {};
-	ChunkTile(Tile tile, TileUvTransform uvTransform, TileDepthTransform depthTransform) :
-		tile(tile),
-		uvTransform(uvTransform),
-		depthTransform(depthTransform) {};
+struct MemoryTileKey
+{
+    /// Each <code>TileProvider</code> has its own unique identifier
+    unsigned int tileProviderId;
+    TileIndex::TileHashKey tileKey;
+}
 
-    Tile tile;
-    TileUvTransform uvTransform;
-    TileDepthTransform depthTransform;
+class MemoryTileCache
+{
+public:
+    /**
+     * \param cacheSize is the cache size given in megabytes.
+    */
+    MemoryTileCache(size_t cacheSize);
+    ~MemoryTileCache();
+private:
+    size_t cacheSize;
+    LRUCache<MemoryTileKey, Tile>;
 };
-
-using ChunkTilePile = std::vector<ChunkTile>;
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__

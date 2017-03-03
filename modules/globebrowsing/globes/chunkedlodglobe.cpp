@@ -180,14 +180,14 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
         const auto& tile = chunkTile.tile;
         const auto& uvTransform = chunkTile.uvTransform;
         const auto& depthTransform = tileProvider->depthTransform();
-        if (tile.status != Tile::Status::OK) {
+        if (tile.status() != Tile::Status::OK) {
             return 0;
         }
 
         glm::vec2 transformedUv = Tile::TileUvToTextureSamplePosition(
             uvTransform,
             patchUV,
-            glm::uvec2(tile.texture->dimensions())
+            glm::uvec2(tile.texture()->dimensions())
         );
 
         // Sample and do linear interpolation
@@ -195,7 +195,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
         // Suggestion: a function in ghoul::opengl::Texture that takes uv coordinates
         // in range [0,1] and uses the set interpolation method and clamping.
 
-        glm::uvec3 dimensions = tile.texture->dimensions();
+        glm::uvec3 dimensions = tile.texture()->dimensions();
             
         glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
         glm::uvec2 samplePos00 = samplePos;
@@ -219,10 +219,10 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             glm::uvec2(dimensions) - glm::uvec2(1)
         );
 
-        float sample00 = tile.texture->texelAsFloat(samplePos00).x;
-        float sample10 = tile.texture->texelAsFloat(samplePos10).x;
-        float sample01 = tile.texture->texelAsFloat(samplePos01).x;
-        float sample11 = tile.texture->texelAsFloat(samplePos11).x;
+        float sample00 = tile.texture()->texelAsFloat(samplePos00).x;
+        float sample10 = tile.texture()->texelAsFloat(samplePos10).x;
+        float sample01 = tile.texture()->texelAsFloat(samplePos01).x;
+        float sample11 = tile.texture()->texelAsFloat(samplePos11).x;
 
         // In case the texture has NaN or no data values don't use this height map.
         bool anySampleIsNaN =

@@ -72,7 +72,6 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         (std::istreambuf_iterator<char>())
     );
     _gdalXmlTemplate = consumeTemporalMetaData(xml);
-    _defaultTile = getTileProvider()->getDefaultTile();
 }
 
 std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
@@ -164,7 +163,7 @@ Tile TemporalTileProvider::getTile(const TileIndex& tileIndex) {
 }
 
 Tile TemporalTileProvider::getDefaultTile() {
-    return _defaultTile;
+	return getTileProvider()->getDefaultTile();
 }
 
 int TemporalTileProvider::maxLevel() {

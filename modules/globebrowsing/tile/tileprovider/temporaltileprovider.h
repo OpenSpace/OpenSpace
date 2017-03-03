@@ -287,8 +287,6 @@ private:
     // Used for creation of time specific instances of CachingTileProvider
     ghoul::Dictionary _initDict;
 
-    Tile _defaultTile;
-
     std::shared_ptr<TileProvider> _currentTileProvider;
         
     TimeFormat* _timeFormat;
