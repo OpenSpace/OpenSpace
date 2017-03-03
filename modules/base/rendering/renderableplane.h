@@ -67,7 +67,7 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
-private:
+protected:
     void loadTexture();
     void createPlane();
 
