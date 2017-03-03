@@ -106,7 +106,7 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 {
     ghoul_assert(
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        "SceneGraphNode must specify '" << SceneGraphNode::KeyName << "'"
+        std::string("SceneGraphNode must specify '") + SceneGraphNode::KeyName + "'"
     );
 
     dictionary.getValue(keyStart, _startTime);
