@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/configurationmanager.h>
-#include <modules/base/rendering/renderableplane.h>
+#include <modules/base/rendering/renderablespacecraftcameraplane.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 
@@ -38,24 +38,24 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    static const std::string _loggerCat = "RenderablePlane";
+    static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
 
-    const char* keyFieldlines = "Fieldlines";
-    const char* keyFilename = "File";
-    const char* keyHints = "Hints";
-    const char* keyShaders = "Shaders";
-    const char* keyVertexShader = "VertexShader";
-    const char* keyFragmentShader = "FragmentShader";
+    // const char* keyFieldlines = "Fieldlines";
+    // const char* keyFilename = "File";
+    // const char* keyHints = "Hints";
+    // const char* keyShaders = "Shaders"
+    // const char* keyVertexShader = "VertexShader";
+    // const char* keyFragmentShader = "FragmentShader";
 }
 
 namespace openspace {
 
-RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
+RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath("texture", "Texture")
-    , _billboard("billboard", "Billboard", false)
+    //, _billboard("billboard", "Billboard", false)
     , _projectionListener("projectionListener", "DisplayProjections", false)
-    , _size("size", "Size", 10, 0, std::pow(10, 25))
+    , _size("size", "Size", glm::vec2(1,1), glm::vec2(0.f), glm::vec2(1.f, 25.f))
     , _origin(Origin::Center)
     , _shader(nullptr)
     , _textureIsDirty(false)
@@ -64,7 +64,9 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _quad(0)
     , _vertexPositionBuffer(0)
 {
-    dictionary.getValue("Size", _size);
+    glm::vec2 size;
+    dictionary.getValue("Size", size);
+    _size = size;
 
     if (dictionary.hasKey("Name")) {
         dictionary.getValue("Name", _nodeName);
@@ -90,16 +92,16 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     }
 
     // Attempt to get the billboard value
-    bool billboard = false;
-    if (dictionary.getValue("Billboard", billboard)) {
-        _billboard = billboard;
-    }
-    if (dictionary.hasKey("ProjectionListener")){
-        bool projectionListener = false;
-        if (dictionary.getValue("ProjectionListener", projectionListener)) {
-            _projectionListener = projectionListener;
-        }
-    }
+    //bool billboard = false;
+    //if (dictionary.getValue("Billboard", billboard)) {
+   //     _billboard = billboard;
+    //}
+    // if (dictionary.hasKey("ProjectionListener")){
+    //     bool projectionListener = false;
+    //     if (dictionary.getValue("ProjectionListener", projectionListener)) {
+    //         _projectionListener = projectionListener;
+    //     }
+    // }
 
     std::string blendMode;
     if (dictionary.getValue("BlendMode", blendMode)) {
@@ -116,24 +118,24 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         _textureFile = new ghoul::filesystem::File(_texturePath);
     }
 
-    addProperty(_billboard);
+  //  addProperty(_billboard);
     addProperty(_texturePath);
-    _texturePath.onChange(std::bind(&RenderablePlane::loadTexture, this));
+    _texturePath.onChange(std::bind(&RenderableSpacecraftCameraPlane::loadTexture, this));
     _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
 
     addProperty(_size);
-    //_size.onChange(std::bind(&RenderablePlane::createPlane, this));
+    //_size.onChange(std::bind(&RenderableSpacecraftCameraPlane::createPlane, this));
     _size.onChange([this](){ _planeIsDirty = true; });
 
-    setBoundingSphere(_size);
+    setBoundingSphere(_size.value());
 }
 
-RenderablePlane::~RenderablePlane() {
+RenderableSpacecraftCameraPlane::~RenderableSpacecraftCameraPlane() {
     delete _textureFile;
     _textureFile = nullptr;
 }
 
-bool RenderablePlane::isReady() const {
+bool RenderableSpacecraftCameraPlane::isReady() const {
     bool ready = true;
     if (!_shader)
         ready &= false;
@@ -142,7 +144,7 @@ bool RenderablePlane::isReady() const {
     return ready;
 }
 
-bool RenderablePlane::initialize() {
+bool RenderableSpacecraftCameraPlane::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
@@ -164,7 +166,7 @@ bool RenderablePlane::initialize() {
     return isReady();
 }
 
-bool RenderablePlane::deinitialize() {
+bool RenderableSpacecraftCameraPlane::deinitialize() {
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -180,7 +182,6 @@ bool RenderablePlane::deinitialize() {
     delete _textureFile;
     _textureFile = nullptr;
 
-
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
@@ -190,33 +191,42 @@ bool RenderablePlane::deinitialize() {
     return true;
 }
 
-void RenderablePlane::render(const RenderData& data) {
+void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     glm::mat4 scaleTransform = glm::mat4(1.0);
-    
     // Activate shader
     _shader->activate();
-    if (_projectionListener){
-        //get parent node-texture and set with correct dimensions  
-        SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
-        if (textureNode != nullptr){
-            RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
-            _texture = std::unique_ptr<ghoul::opengl::Texture>(&(t->baseTexture()));
-            unsigned int h = _texture->height();
-            unsigned int w = _texture->width();
-            float scale = static_cast<float>(h) / static_cast<float>(w);
-            scaleTransform = glm::scale(glm::mat4(1.0), glm::vec3(1.f, scale, 1.f));
-        }
-    }
+    // if (_projectionListener){
+    //     //get parent node-texture and set with correct dimensions  
+    //     SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
+    //     if (textureNode != nullptr){
+    //         RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
+    //         _texture = std::unique_ptr<ghoul::opengl::Texture>(&(t->baseTexture()));
+    //         float h = _texture->height();
+    //         float w = _texture->width();
+    //         float scale = h / w;
+    //         scaleTransform = glm::scale(glm::mat4(1.0), glm::vec3(1.f, scale, 1.f));
+    //     }
+    // }
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 rotationTransform;
-    if (_billboard)
+    glm::dvec3 translationTransform;
+//    if (_billboard)
         rotationTransform = glm::inverse(glm::dmat4(data.camera.viewRotationMatrix()));
-    else
-        rotationTransform = glm::dmat4(data.modelTransform.rotation);
+ //   else { // TODO(michaeln): Do NOT render all non-billboard planes like this. Create separate class or integrate better
+        // Sun's barycenter
+        SceneGraphNode* p = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent()->parent();
+        glm::dmat4 rotationTransformTangentTrajectory = glm::lookAt(glm::normalize(data.modelTransform.translation),
+                                             glm::dvec3(p->worldPosition()), data.modelTransform.rotation * glm::dvec3(0.f, 0.0, 1.0));
+        rotationTransform = glm::dmat4(glm::inverse(rotationTransformTangentTrajectory));
+        // TODO(michaeln): Get distance from Lua
+        translationTransform = glm::normalize(p->worldPosition() - data.modelTransform.translation) * 100000000.0;
+        // Stereos internal ref frame. pass in as property
+        //staticRotationTransform = glm::dmat4({0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0});
+  //  }
 
     glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation + translationTransform) *
         rotationTransform *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
         glm::dmat4(scaleTransform);
@@ -261,7 +271,7 @@ void RenderablePlane::render(const RenderData& data) {
     _shader->deactivate();
 }
 
-void RenderablePlane::update(const UpdateData&) {
+void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     if (_shader->isDirty())
         _shader->rebuildFromFile();
 
@@ -274,7 +284,7 @@ void RenderablePlane::update(const UpdateData&) {
     }
 }
 
-void RenderablePlane::loadTexture() {
+void RenderableSpacecraftCameraPlane::loadTexture() {
     if (_texturePath.value() != "") {
         std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
         if (texture) {
@@ -293,19 +303,20 @@ void RenderablePlane::loadTexture() {
     }
 }
 
-void RenderablePlane::createPlane() {
+void RenderableSpacecraftCameraPlane::createPlane() {
     // ============================
     //         GEOMETRY (quad)
     // ============================
-    const GLfloat size = _size;
+    const GLfloat size = _size.value()[0];
+    const GLfloat w = _size.value()[1];
     const GLfloat vertex_data[] = {
         //      x      y     z     w     s     t
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
-        -size, size, 0.f, 0.f, 0.f, 1.f,
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, -size, 0.f, 0.f, 1.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
+        -size, size, 0.f, w, 0.f, 1.f,
+        -size, -size, 0.f, w, 0.f, 0.f,
+        size, -size, 0.f, w, 1.f, 0.f,
+        size, size, 0.f, w, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad); // bind array

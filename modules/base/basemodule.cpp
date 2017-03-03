@@ -38,6 +38,7 @@
 #include <modules/base/rendering/renderabletrailorbit.h>
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 #include <modules/base/rendering/renderableplane.h>
+#include <modules/base/rendering/renderablespacecraftcameraplane.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/base/rendering/multimodelgeometry.h>
 #include <modules/base/rendering/screenspaceimage.h>
@@ -79,6 +80,7 @@ void BaseModule::internalInitialize() {
     fRenderable->registerClass<RenderableModel>("RenderableModel");
     fRenderable->registerClass<RenderablePath>("RenderablePath");
     fRenderable->registerClass<RenderablePlane>("RenderablePlane");
+    fRenderable->registerClass<RenderableSpacecraftCameraPlane>("RenderableSpacecraftCameraPlane");
     fRenderable->registerClass<RenderableSphere>("RenderableSphere");
     fRenderable->registerClass<RenderableSphericalGrid>("RenderableSphericalGrid");
     fRenderable->registerClass<RenderableTrailOrbit>("RenderableTrailOrbit");

@@ -71,7 +71,7 @@ return {
         Name = "Stereo Plane",
         Parent = "StereoA",
         Renderable = {
-            Type = "RenderablePlane",
+            Type = "RenderableSpacecraftCameraPlane",
             Size = {1.4, 7.8},
             Origin = "Center",
             -- Dummy texture
