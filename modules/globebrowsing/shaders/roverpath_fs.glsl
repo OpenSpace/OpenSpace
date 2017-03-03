@@ -27,11 +27,12 @@
 
 in vec4 vs_positionScreenSpace;
 
-uniform vec4 color;
+uniform vec3 color;
+uniform float fading;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = color;
+    frag.color = vec4(color, fading);
     frag.depth = vs_positionScreenSpace.w;
     return frag;
 }
