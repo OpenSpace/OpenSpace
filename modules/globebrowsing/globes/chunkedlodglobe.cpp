@@ -248,6 +248,10 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
 
         // Perform depth transform to get the value in meters
         height = depthTransform.depthOffset + depthTransform.depthScale * sample;
+        // Make sure that the height value follows the layer settings.
+        // For example if the multiplier is set to a value bigger than one,
+        // the sampled height should be modified as well.
+        height = layer->renderSettings().performLayerSettings(height);
     }
     // Return the result
     return height;
