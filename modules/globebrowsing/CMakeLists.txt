@@ -189,8 +189,6 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/globalchunkedlodpatch_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localchunkedlodpatch_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localchunkedlodpatch_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/model_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/model_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointglobe_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointglobe_fs.glsl
 	${CMAKE_CURRENT_SOURCE_DIR}/shaders/roverpath_vs.glsl
