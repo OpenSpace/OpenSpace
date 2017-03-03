@@ -209,6 +209,7 @@ void RenderablePlane::render(const RenderData& data) {
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 rotationTransform;
+    glm::dvec3 translationTransform;
     if (_billboard)
         rotationTransform = glm::inverse(glm::dmat4(data.camera.viewRotationMatrix()));
     else { // TODO(michaeln): Do NOT render all non-billboard planes like this. Create separate class or integrate better
@@ -217,12 +218,14 @@ void RenderablePlane::render(const RenderData& data) {
         glm::dmat4 rotationTransformTangentTrajectory = glm::lookAt(glm::normalize(data.modelTransform.translation),
                                              glm::dvec3(p->worldPosition()), data.modelTransform.rotation * glm::dvec3(0.f, 0.0, 1.0));
         rotationTransform = glm::dmat4(glm::inverse(rotationTransformTangentTrajectory));
+        // TODO(michaeln): Get distance from Lua
+        translationTransform = glm::normalize(p->worldPosition() - data.modelTransform.translation) * 100000000.0;
         // Stereos internal ref frame. pass in as property
         //staticRotationTransform = glm::dmat4({0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0});
     }
 
     glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation + translationTransform) *
         rotationTransform *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
         glm::dmat4(scaleTransform);
