@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <modules/globebrowsing/models/roverpath.h>
 #include <ghoul/opengl/programobject.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
@@ -51,7 +50,8 @@ public:
 private:
 	void calculatePathModelCoordinates();
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+	std::unique_ptr<ghoul::opengl::ProgramObject> _pathShader;
+	std::unique_ptr<ghoul::opengl::ProgramObject> _siteShader;
 	properties::BoolProperty _isEnabled;
 
 	std::string _filePath;
@@ -60,9 +60,12 @@ private:
 	std::vector<glm::vec4> _stationPointsModelCoordinates;
 	globebrowsing::RenderableGlobe* _globe;
 
-	RoverPath* _roverPath;
-
 	std::map<std::string, glm::vec2> _coordMap;
+
+	float _fading;
+	GLuint _vaioID;
+	GLuint _vertexBufferID;
+
 };
 }
 
