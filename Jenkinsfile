@@ -31,7 +31,7 @@ stage('Build') {
 			sh '''
 				mkdir -p build
 				cd build 
-				cmake ''' +
+				cmake .. ''' +
 				flags + ''' ..
 			make
 			'''
@@ -44,7 +44,7 @@ stage('Build') {
 				git submodule update --init --recursive
 				if not exist "build" mkdir "build"
 				cd build
-				cmake -G "Visual Studio 14 2015 Win64" ''' +
+				cmake -G "Visual Studio 14 2015 Win64" .. ''' +
 				flags + ''' ..
 				msbuild.exe OpenSpace.sln /m:8 /p:Configuration=Debug
 			'''
@@ -65,7 +65,7 @@ stage('Build') {
 				  mkdir ${srcDir}/build
 				fi
 				cd ${srcDir}/build
-				/Applications/CMake.app/Contents/bin/cmake -G Xcode -D NASM=/usr/local/Cellar/nasm/2.11.08/bin/nasm ${srcDir} ''' +
+				/Applications/CMake.app/Contents/bin/cmake -G Xcode -D NASM=/usr/local/Cellar/nasm/2.11.08/bin/nasm ${srcDir} .. ''' +
 				flags + '''
 				xcodebuild
 				'''

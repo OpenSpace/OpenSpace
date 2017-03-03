@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,13 +35,13 @@
 #include <fstream>
 
 namespace {
-    const std::string KeyInput = "Input";
-    const std::string KeyOutput = "Output";
-    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/kameleondocumentation/main.hbs";
-    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
-    const std::string JsFilename = "${OPENSPACE_DATA}/web/kameleondocumentation/script.js";
-    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
+    const char* KeyInput = "Input";
+    const char* KeyOutput = "Output";
+    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/kameleondocumentation/main.hbs";
+    const char* HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const char* JsFilename = "${OPENSPACE_DATA}/web/kameleondocumentation/script.js";
+    const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
 }
 
 namespace openspace {
@@ -68,12 +68,15 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     ghoul::DictionaryJsonFormatter formatter;
 
 
-    ghoul::Dictionary dictionary;
-    dictionary.setValue<ghoul::Dictionary>("kameleon", kameleonDictionary);
-    dictionary.setValue<std::string>("version", std::to_string(OPENSPACE_VERSION_MAJOR) + "." +
-        std::to_string(OPENSPACE_VERSION_MINOR) + "." +
-        std::to_string(OPENSPACE_VERSION_PATCH));
-    dictionary.setValue<std::string>("input", _inputPath);
+    ghoul::Dictionary dictionary = {
+        {"kameleon", std::move(kameleonDictionary)},
+        {"version",
+            std::to_string(OPENSPACE_VERSION_MAJOR) + "." +
+            std::to_string(OPENSPACE_VERSION_MINOR) + "." +
+            std::to_string(OPENSPACE_VERSION_PATCH)
+        },
+        {"input", _inputPath}
+    };
 
     std::string json = formatter.format(dictionary);
     progressCallback(0.66f);
@@ -155,7 +158,5 @@ documentation::Documentation KameleonDocumentationTask::documentation() {
         }
     };
 }
-
-
 
 } // namespace openspace

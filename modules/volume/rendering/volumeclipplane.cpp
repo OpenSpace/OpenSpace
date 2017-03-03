@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -48,14 +48,12 @@ void VolumeClipPlane::initialize()
     addProperty(_offsets);
 }
 
-glm::vec3 VolumeClipPlane::normal()
-{
+glm::vec3 VolumeClipPlane::normal() {
     return glm::normalize(_normal.value());
 }
 
-glm::vec2 VolumeClipPlane::offsets()
-{
+glm::vec2 VolumeClipPlane::offsets() {
     return _offsets;
 }
 
-}
+} // namespace openspace

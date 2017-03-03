@@ -2,9 +2,9 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy of this *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
  * without restriction, including without limitation the rights to use, copy, modify,    *
  * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __KAMELEONVOLUMEREADER_H__
-#define __KAMELEONVOLUMEREADER_H__
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__
 
 #include <string>
 #include <memory>
@@ -31,13 +31,11 @@
 #include <ghoul/misc/dictionary.h>
 
 #include <ccmc/Kameleon.h>
-#include <ccmc/Model.h>
 #include <ccmc/Interpolator.h>
-#include <ccmc/BATSRUS.h>
-#include <ccmc/ENLIL.h>
-#include <ccmc/CCMCTime.h>
-#include <ccmc/Attribute.h>
 
+namespace ccmc {
+    class Model;
+}
 
 namespace openspace {
 
@@ -70,6 +68,6 @@ private:
 
 };
 
-}
+} // namespace openspace
 
-#endif
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__

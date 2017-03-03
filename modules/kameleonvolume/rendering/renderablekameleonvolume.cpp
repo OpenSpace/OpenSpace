@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <ghoul/opengl/ghoul_gl.h>
@@ -42,7 +42,24 @@
 #include <modules/volume/rawvolume.h>
 
 namespace {
-    const std::string _loggerCat = "RenderableKameleonVolume";
+    const char* _loggerCat = "RenderableKameleonVolume";
+}
+
+namespace {
+    const char* KeyDimensions = "Dimensions";
+    const char* KeyStepSize = "StepSize";
+    const char* KeyTransferFunction = "TransferFunction";
+    const char* KeySource = "Source";
+    const char* KeyVariable = "Variable";
+    const char* KeyLowerDomainBound = "LowerDomainBound";
+    const char* KeyUpperDomainBound = "UpperDomainBound";
+    const char* KeyDomainScale = "DomainScale";
+    const char* KeyLowerValueBound = "LowerValueBound";
+    const char* KeyUpperValueBound = "UpperValueBound";
+    const char* KeyClipPlanes = "ClipPlanes";
+    const char* KeyCache = "Cache";
+    const char* KeyGridType = "GridType";
+    const char* ValueSphericalGridType = "Spherical";
 }
 
 namespace openspace {
@@ -69,7 +86,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _cache("cache", "Cache") {
 
     glm::vec3 dimensions;
-    if (dictionary.getValue("Dimensions", dimensions)) {
+    if (dictionary.getValue(KeyDimensions, dimensions)) {
         _dimensions = dimensions;
     } else {
         LWARNING("No dimensions specified for volumetric data, falling back to 32^3");
@@ -77,28 +94,28 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     }
 
     float stepSize;
-    if (dictionary.getValue("StepSize", stepSize)) {
+    if (dictionary.getValue(KeyStepSize, stepSize)) {
         _stepSize = stepSize;
     }
 
     std::string transferFunctionPath;
-    if (dictionary.getValue("TransferFunction", transferFunctionPath)) {
+    if (dictionary.getValue(KeyTransferFunction, transferFunctionPath)) {
         _transferFunctionPath = transferFunctionPath;
         _transferFunction = std::make_shared<TransferFunction>(absPath(transferFunctionPath));
     }
 
     std::string sourcePath;
-    if (dictionary.getValue("Source", sourcePath)) {
+    if (dictionary.getValue(KeySource, sourcePath)) {
         _sourcePath = absPath(sourcePath);
     }
     
     std::string variable;
-    if (dictionary.getValue("Variable", variable)) {
+    if (dictionary.getValue(KeyVariable, variable)) {
         _variable = variable;
     }
 
     glm::vec3 lowerDomainBound;
-    if (dictionary.getValue("LowerDomainBound", lowerDomainBound)) {
+    if (dictionary.getValue(KeyLowerDomainBound, lowerDomainBound)) {
         _lowerDomainBound = lowerDomainBound;
     }
     else {
@@ -106,7 +123,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     }
 
     glm::vec3 upperDomainBound;
-    if (dictionary.getValue("UpperDomainBound", upperDomainBound)) {
+    if (dictionary.getValue(KeyUpperDomainBound, upperDomainBound)) {
         _upperDomainBound = upperDomainBound;
     }
     else {
@@ -114,14 +131,14 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     }
 
     glm::vec3 domainScale;
-    if (dictionary.getValue("DomainScale", domainScale)) {
+    if (dictionary.getValue(KeyDomainScale, domainScale)) {
         _domainScale = domainScale;
     } else {
         _domainScale = glm::vec3(1, 1, 1); // Assume meters if nothing else is specified.
     }
 
     float lowerValueBound;
-    if (dictionary.getValue("LowerValueBound", lowerValueBound)) {
+    if (dictionary.getValue(KeyLowerValueBound, lowerValueBound)) {
         _lowerValueBound = lowerValueBound;
     }
     else {
@@ -129,7 +146,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     }
 
     float upperValueBound;
-    if (dictionary.getValue("UpperValueBound", upperValueBound)) {
+    if (dictionary.getValue(KeyUpperValueBound, upperValueBound)) {
         _upperValueBound = upperValueBound;
     }
     else {
@@ -137,12 +154,12 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     }
 
     ghoul::Dictionary clipPlanesDictionary;
-    dictionary.getValue("ClipPlanes", clipPlanesDictionary);
+    dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
     _clipPlanes = std::make_shared<VolumeClipPlanes>(clipPlanesDictionary);
     _clipPlanes->setName("clipPlanes");
 
     bool cache;
-    if (dictionary.getValue("Cache", cache)) {
+    if (dictionary.getValue(KeyCache, cache)) {
         _cache = cache;
     }
 
@@ -151,8 +168,8 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     _gridType.setValue(static_cast<int>(VolumeGridType::Cartesian));
 
     std::string gridType;
-    if (dictionary.getValue("GridType", gridType)) {
-        if (gridType == "Spherical") {
+    if (dictionary.getValue(KeyGridType, gridType)) {
+        if (gridType == ValueSphericalGridType) {
             _gridType.setValue(static_cast<int>(VolumeGridType::Spherical));
         } else {
             _autoGridType = true;
@@ -191,7 +208,7 @@ bool RenderableKameleonVolume::initialize() {
 
     OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
 
-    std::function<void(bool)> onChange = [&](bool enabled) {
+    auto onChange = [&](bool enabled) {
         if (enabled) {
             OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
         }
@@ -328,7 +345,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
     float min = _lowerValueBound;
     float diff = _upperValueBound - _lowerValueBound;
 
-    for (size_t i = 0; i < _normalizedVolume->nCells(); i++) {
+    for (size_t i = 0; i < _normalizedVolume->nCells(); ++i) {
         out[i] = glm::clamp((in[i] - min) / diff, 0.0f, 1.0f);
     }
 
@@ -338,7 +355,8 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
         GL_RED,
         GL_FLOAT,
         ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::Repeat);
+        ghoul::opengl::Texture::WrappingMode::Repeat
+    );
 
     void* data = reinterpret_cast<void*>(_normalizedVolume->data());
     _volumeTexture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
@@ -368,8 +386,7 @@ void RenderableKameleonVolume::update(const UpdateData& data) {
 }
 
 void RenderableKameleonVolume::render(const RenderData& data, RendererTasks& tasks) {
-    RaycasterTask task{ _raycaster.get(), data };
-    tasks.raycasterTasks.push_back(task);
+    tasks.raycasterTasks.push_back({ _raycaster.get(), data });
 }
        
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,7 @@
 
 #include <modules/kameleonvolume/rendering/kameleonvolumeraycaster.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <sstream>
 #include <ghoul/opengl/programobject.h>
@@ -36,10 +36,10 @@
 
 
 namespace {
-    const std::string GlslRaycastPath = "${MODULES}/kameleonvolume/shaders/raycast.glsl";
-    const std::string GlslHelperPath = "${MODULES}/kameleonvolume/shaders/helper.glsl";
-    const std::string GlslBoundsVsPath = "${MODULES}/kameleonvolume/shaders/boundsvs.glsl";
-    const std::string GlslBoundsFsPath = "${MODULES}/kameleonvolume/shaders/boundsfs.glsl";
+    const char* GlslRaycastPath = "${MODULES}/kameleonvolume/shaders/raycast.glsl";
+    const char* GlslHelperPath = "${MODULES}/kameleonvolume/shaders/helper.glsl";
+    const char* GlslBoundsVsPath = "${MODULES}/kameleonvolume/shaders/boundsvs.glsl";
+    const char* GlslBoundsFsPath = "${MODULES}/kameleonvolume/shaders/boundsfs.glsl";
 }
 
 namespace openspace {
@@ -168,8 +168,7 @@ void KameleonVolumeRaycaster::setStepSize(float stepSize) {
     _stepSize = stepSize;
 }
 
-void KameleonVolumeRaycaster::setGridType(VolumeGridType gridType)
-{
+void KameleonVolumeRaycaster::setGridType(VolumeGridType gridType) {
     _gridType = gridType;
 }
 

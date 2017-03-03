@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,7 +36,7 @@ VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
     for (const std::string& key : keys) {
         ghoul::Dictionary cutPlaneDictionary;
         dictionary.getValue(key, cutPlaneDictionary);
-        std::shared_ptr<VolumeClipPlane> clipPlane = std::make_shared<VolumeClipPlane>(cutPlaneDictionary);
+        auto clipPlane = std::make_shared<VolumeClipPlane>(cutPlaneDictionary);
         clipPlane->setName(key);
         _clipPlanes.push_back(clipPlane);
     }
@@ -51,12 +51,9 @@ void VolumeClipPlanes::initialize() {
     }
 }
 
-void VolumeClipPlanes::deinitialize() {
-    
-}
+void VolumeClipPlanes::deinitialize() {}
 
-std::vector<glm::vec3> VolumeClipPlanes::normals()
-{
+std::vector<glm::vec3> VolumeClipPlanes::normals() {
     std::vector<glm::vec3> normals;
     for (const auto& clipPlane : _clipPlanes) {
         normals.push_back(clipPlane->normal());
@@ -64,8 +61,7 @@ std::vector<glm::vec3> VolumeClipPlanes::normals()
     return normals;
 }
 
-std::vector<glm::vec2> VolumeClipPlanes::offsets()
-{
+std::vector<glm::vec2> VolumeClipPlanes::offsets() {
     std::vector<glm::vec2> offsets;
     for (const auto& clipPlane : _clipPlanes) {
         offsets.push_back(clipPlane->offsets());
@@ -73,4 +69,4 @@ std::vector<glm::vec2> VolumeClipPlanes::offsets()
     return offsets;
 }
 
-}
+} // namespace openspace

@@ -2,12 +2,12 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014 - 2016                                                             *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
- *  Permission is hereby granted, free of charge, to any person obtaining a copy of this *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
  * without restriction, including without limitation the rights to use, copy, modify,    *
- *  merge, publish, distribute, sublicense, and/or sell copies of the Software, and to   *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
  * permit persons to whom the Software is furnished to do so, subject to the following   *
  * conditions:                                                                           *
  *                                                                                       *
@@ -26,12 +26,14 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
-//#include <openspace/util/distanceconstants.h>
-
-
+#include <ccmc/Model.h>
+#include <ccmc/BATSRUS.h>
+#include <ccmc/ENLIL.h>
+#include <ccmc/CCMCTime.h>
+#include <ccmc/Attribute.h>
 
 namespace {
-    const std::string _loggerCat = "KameleonVolumeReader";
+    const char* _loggerCat = "KameleonVolumeReader";
 }
 
 namespace openspace {
@@ -61,8 +63,8 @@ std::unique_ptr<RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     const glm::vec3 & upperBound) const
 {
     auto volume = std::make_unique<RawVolume<float>>(dimensions);
-    glm::vec3 dims = volume->dimensions();
-    glm::vec3 diff = upperBound - lowerBound;
+    const glm::vec3 dims = volume->dimensions();
+    const glm::vec3 diff = upperBound - lowerBound;
 
     _model->loadVariable(variable);
 
@@ -101,7 +103,10 @@ std::vector<std::string> KameleonVolumeReader::gridVariableNames() const {
 
     // validate
     if (tokens.size() != 3) {
-        return std::vector<std::string>();
+        throw ghoul::RuntimeError(
+            "Expected three dimensional grid system. Got " +
+            std::to_string(tokens.size()) +
+            "dimensions");
     }
 
     std::string x = tokens.at(0);
@@ -117,8 +122,8 @@ std::vector<std::string> KameleonVolumeReader::gridVariableNames() const {
 
 std::vector<std::string> KameleonVolumeReader::variableNames() const {
     std::vector<std::string> variableNames;
-    int nVariables = _model->getNumberOfVariables();
-    for (int i = 0; i < nVariables; i++) {
+    const int nVariables = _model->getNumberOfVariables();
+    for (int i = 0; i < nVariables; ++i) {
         variableNames.push_back(_model->getVariableName(i));
     }
     return variableNames;
@@ -130,8 +135,8 @@ std::vector<std::string> KameleonVolumeReader::variableAttributeNames() const {
 
 std::vector<std::string> KameleonVolumeReader::globalAttributeNames() const {
     std::vector<std::string> attributeNames;
-    int nAttributes = _model->getNumberOfGlobalAttributes();
-    for (int i = 0; i < nAttributes; i++) {
+    const int nAttributes = _model->getNumberOfGlobalAttributes();
+    for (int i = 0; i < nAttributes; ++i) {
         attributeNames.push_back(_model->getGlobalAttributeName(i));
     }
     return attributeNames;
@@ -139,14 +144,16 @@ std::vector<std::string> KameleonVolumeReader::globalAttributeNames() const {
 
 void KameleonVolumeReader::addAttributeToDictionary(ghoul::Dictionary& dictionary, const std::string& key, ccmc::Attribute& attr) {
     ccmc::Attribute::AttributeType type = attr.getAttributeType();
-    if (type == ccmc::Attribute::AttributeType::FLOAT) {
+    switch (type) {
+    case ccmc::Attribute::AttributeType::FLOAT:
         dictionary.setValue<float>(key, attr.getAttributeFloat());
-    }
-    else if (type == ccmc::Attribute::AttributeType::INT) {
+        return;
+    case ccmc::Attribute::AttributeType::INT:
         dictionary.setValue<int>(key, attr.getAttributeInt());
-    }
-    else if (type == ccmc::Attribute::AttributeType::STRING) {
+        return;
+    case ccmc::Attribute::AttributeType::STRING:
         dictionary.setValue<std::string>(key, attr.getAttributeString());
+        return;
     }
 }
 
@@ -168,10 +175,10 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
         variableDictionary.setValue(variableName, variableAttributesDictionary);
     }
 
-    ghoul::Dictionary metaData;
-    metaData.setValue("globalAttributes", globalAttributesDictionary);
-    metaData.setValue("variableAttributes", variableDictionary);
-    return metaData;
+    return {
+        {"globalAttributes", std::move(globalAttributesDictionary) },
+        {"variableAttributes", std::move(variableDictionary) }
+    };
 }
 
 float KameleonVolumeReader::minValue(const std::string & variable) const {

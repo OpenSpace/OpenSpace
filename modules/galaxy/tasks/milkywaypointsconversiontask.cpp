@@ -28,6 +28,7 @@
 #include <modules/volume/volumesampler.h>
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 namespace openspace {
 
@@ -56,7 +57,7 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback & progre
 
     size_t nFloats = nPoints * 7;
 
-    float* pointData = new float[nFloats];
+    std::vector<float> pointData(nFloats);
 
     float x, y, z, r, g, b, a;
     for (size_t i = 0; i < nPoints; ++i) {

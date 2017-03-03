@@ -27,36 +27,46 @@
 #include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/volumesampler.h>
 
+namespace {
+    char* KeyInFilenamePrefix = "InFilenamePrefix";
+    char* KeyInFilenameSuffix = "InFilenameSuffix";
+    char* KeyInFirstIndex = "InFirstIndex";
+    char* KeyInNSlices = "InNSlices";
+    char* KeyOutFilename = "OutFilename";
+    char* KeyOutDimensions = "OutDimensions";
+}
+
+
 namespace openspace {
     
 MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
     std::string inFilenamePrefix;
-    if (dictionary.getValue("InFilenamePrefix", inFilenamePrefix)) {
+    if (dictionary.getValue(KeyInFilenamePrefix, inFilenamePrefix)) {
         _inFilenamePrefix = inFilenamePrefix;
     }
 
     std::string inFilenamePrefix;
-    if (dictionary.getValue("InFilenameSuffix", inFilenameSuffix)) {
+    if (dictionary.getValue(KeyInFilenameSuffix, inFilenameSuffix)) {
         _inFilenameSuffix = inFilenameSuffix;
     }
 
     size_t inFirstIndex;
-    if (dictionary.getValue("InFirstIndex", inFirstIndex)) {
+    if (dictionary.getValue(KeyInFirstIndex, inFirstIndex)) {
         _inFirstIndex = inFirstIndex;
     }
 
     size_t inNSlices;
-    if (dictionary.getValue("InNSlices", inNSlices)) {
+    if (dictionary.getValue(KeyInNSlices, inNSlices)) {
         _inNSlices = inNSlices;
     }
 
     std::string outFilename;
-    if (dictionary.getValue("OutFilename", outFilename)) {
+    if (dictionary.getValue(KeyOutFilename, outFilename)) {
         _outFilename = outFilename;
     }
 
     glm::ivec3 outDimensions;
-    if (dictionary.getValue("OutDimensions", outDimensions)) {
+    if (dictionary.getValue(KeyOutDimensions, outDimensions)) {
         _outDimensions = outDimensions;
     }
 }
