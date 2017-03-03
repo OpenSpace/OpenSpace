@@ -30,9 +30,9 @@ namespace openspace {
 namespace globebrowsing {
 
 LayerGroup::LayerGroup(std::string name)
-    : _levelBlendingEnabled("blendTileLevels", "blend tile levels", true)
+    : properties::PropertyOwner(std::move(name))
+    , _levelBlendingEnabled("blendTileLevels", "blend tile levels", true)
 {
-    setName(std::move(name));
     addProperty(_levelBlendingEnabled);
 }
 

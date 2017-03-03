@@ -41,16 +41,16 @@ namespace {
 }
 
 namespace openspace {
-IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
-    :_enabled("enabled", "Enabled", true)
-    ,_alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
-    ,_delete("delete", "Delete")
-    ,_registered(false)
-    ,_type(type)
-    ,_dataProcessor(nullptr)
-{
-    setName(name);
 
+IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
+    : properties::PropertyOwner(std::move(name))
+    , _enabled("enabled", "Enabled", true)
+    , _alpha("alpha", "Alpha", 0.9f, 0.0f, 1.0f)
+    , _delete("delete", "Delete")
+    , _registered(false)
+    , _type(type)
+    , _dataProcessor(nullptr)
+{
     addProperty(_enabled);
     addProperty(_alpha);
     addProperty(_delete);

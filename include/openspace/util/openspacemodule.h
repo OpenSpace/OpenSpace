@@ -29,7 +29,7 @@
 
 #include <openspace/scripting/lualibrary.h>
 
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/version.h>
 
 #include <string>
 #include <vector>
@@ -87,8 +87,7 @@ public:
      * overwritten, it returns an OpenGL version of <code>3.3</code>.
      * \return The minimum required OpenGL version of this OpenSpaceModule
      */
-    virtual ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
-        requiredOpenGLVersion() const;
+    virtual ghoul::systemcapabilities::Version requiredOpenGLVersion() const;
 
 protected:
     /**

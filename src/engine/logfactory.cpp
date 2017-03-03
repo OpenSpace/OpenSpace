@@ -24,6 +24,9 @@
 
 #include <openspace/engine/logfactory.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -51,37 +54,105 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation LogFactoryDocumentation() {
+    using namespace documentation;
+
+    return {
+        "LogFactory",
+        "core_logfactory",
+        {
+            {
+                keyType,
+                new StringInListVerifier({
+                    // List from createLog
+                    valueTextLog, valueHtmlLog
+                }),
+                "The type of the new log to be generated."
+            },
+            {
+                keyFilename,
+                new StringVerifier,
+                "The filename to which the log will be written."
+            },
+            {
+                keyAppend,
+                new BoolVerifier,
+                "Determines whether the file will be cleared at startup or if the "
+                "contents will be appended to previous runs.",
+                Optional::Yes
+            },
+            {
+                keyTimeStamping,
+                new BoolVerifier,
+                "Determines whether the log entires should be stamped with the time at "
+                "which the message was logged.",
+                Optional::Yes
+            },
+            {
+                keyDateStamping,
+                new BoolVerifier,
+                "Determines whether the log entries should be stamped with the date at "
+                "which the message was logged.",
+                Optional::Yes
+            },
+            {
+                keyCategoryStamping,
+                new BoolVerifier,
+                "Determines whether the log entries should be stamped with the "
+                "category that creates the log message.",
+                Optional::Yes
+            },
+            {
+                keyLogLevelStamping,
+                new BoolVerifier,
+                "Determines whether the log entries should be stamped with the log level "
+                "that was used to create the log message.",
+                Optional::Yes
+            }
+        },
+        Exhaustive::Yes
+    };
+}
+
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {
     using namespace std::string_literals;
-    std::string type;
-    bool typeSuccess = dictionary.getValue(keyType, type);
-    if (!typeSuccess) {
-        throw ghoul::RuntimeError(
-            "Requested log did not contain key '"s + keyType + "'", "LogFactory"
-        );
-    }
 
-    std::string filename;
-    bool filenameSuccess = dictionary.getValue(keyFilename, filename);
-    if (!filenameSuccess) {
-        throw ghoul::RuntimeError(
-            "Requested log did not contain key '"s + keyFilename + "'", "LogFactory"
-        );
-    }
-    filename = absPath(filename);
+    documentation::testSpecificationAndThrow(
+        LogFactoryDocumentation(),
+        dictionary,
+        "LogFactory"
+    );
 
+    // 'type' and 'filename' are required keys
+    std::string type = dictionary.value<std::string>(keyType);
+    std::string filename = absPath(dictionary.value<std::string>(keyFilename));
+
+    // the rest are optional
     bool append = true;
-    dictionary.getValue(keyAppend, append);
+    if (dictionary.hasKeyAndValue<bool>(keyAppend)) {
+        dictionary.value<bool>(keyAppend);
+    }
     bool timeStamp = true;
-    dictionary.getValue(keyTimeStamping, timeStamp);
+    if (dictionary.hasKeyAndValue<bool>(keyTimeStamping)) {
+        dictionary.value<bool>(keyTimeStamping);
+    }
     bool dateStamp = true;
-    dictionary.getValue(keyDateStamping, dateStamp);
+    if (dictionary.hasKeyAndValue<bool>(keyDateStamping)) {
+        dictionary.value<bool>(keyDateStamping);
+    }
     bool categoryStamp = true;
-    dictionary.getValue(keyCategoryStamping, categoryStamp);
+    if (dictionary.hasKeyAndValue<bool>(keyCategoryStamping)) {
+        dictionary.value<bool>(keyCategoryStamping);
+    }
     bool logLevelStamp = true;
-    dictionary.getValue(keyLogLevelStamping, logLevelStamp);
+    if (dictionary.hasKeyAndValue<bool>(keyLogLevelStamping)) {
+        dictionary.value<bool>(keyLogLevelStamping);
+    }
     std::string logLevel;
-    dictionary.getValue(keyLogLevel, logLevel);
+    if (dictionary.hasKeyAndValue<std::string>(keyLogLevel)) {
+        dictionary.value<std::string>(keyLogLevel);
+    }
+
 
     using Append = ghoul::logging::TextLog::Append;
     using TimeStamping = ghoul::logging::Log::TimeStamping;
@@ -90,7 +161,6 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     using LogLevelStamping = ghoul::logging::Log::LogLevelStamping;
 
     if (type == valueHtmlLog) {
-
         std::vector<std::string> cssFiles{absPath(BootstrapPath), absPath(CssPath)};
         std::vector<std::string> jsFiles{absPath(JsPath)};
 
@@ -102,7 +172,8 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
                 dateStamp ? DateStamping::Yes : DateStamping::No,
                 categoryStamp ? CategoryStamping::Yes : CategoryStamping::No,
                 logLevelStamp ? LogLevelStamping::Yes : LogLevelStamping::No,
-                cssFiles, jsFiles
+                cssFiles,
+                jsFiles
             );
         }
         else {
@@ -141,11 +212,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
             );
         }
     }
-    else {
-        throw ghoul::RuntimeError(
-            "Log with type '" + type + "' did not name a valid log", "LogFactory"
-        );
-    }
+    ghoul_assert(false, "Missing case in the documentation for LogFactory");
 }
     
 } // namespace openspace

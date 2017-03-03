@@ -38,6 +38,7 @@ class Scale : public properties::PropertyOwner {
 public:
     static std::unique_ptr<Scale> createFromDictionary(const ghoul::Dictionary& dictionary);
 
+    Scale();
     virtual ~Scale();
     virtual bool initialize();
     virtual double scaleValue() const = 0;

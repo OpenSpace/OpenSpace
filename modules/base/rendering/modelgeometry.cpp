@@ -88,7 +88,8 @@ std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
 }
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
-    : _parent(nullptr)
+    : properties::PropertyOwner("ModelGeometry")
+    , _parent(nullptr)
     , _mode(GL_TRIANGLES)
 {
     documentation::testSpecificationAndThrow(
@@ -96,8 +97,6 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
         dictionary,
         "ModelGeometry"
     );
-
-    setName("ModelGeometry");
 
     std::string name;
     bool success = dictionary.getValue(keyName, name);

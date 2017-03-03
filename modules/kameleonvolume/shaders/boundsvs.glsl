@@ -21,37 +21,28 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+#version __CONTEXT__
 
-#ifndef __OPENSPACE_CORE___KEYBOARDCONTROLLER___H__
-#define __OPENSPACE_CORE___KEYBOARDCONTROLLER___H__
+layout(location = 0) in vec3 vertPosition;
 
-#include <openspace/interaction/controller.h>
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 
-#include <openspace/util/keys.h>
+out vec4 positionLocalSpace;
+out vec4 positionCameraSpace;
 
-namespace openspace {
-namespace interaction {
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-class KeyboardController : public Controller {
-public:
-    virtual ~KeyboardController() {};
-    virtual void keyPressed(KeyAction action, Key key, KeyModifier modifier) = 0;
-};
+void main() {
 
-class KeyboardControllerFixed : public KeyboardController {
-public:
-    void keyPressed(KeyAction action, Key key, KeyModifier modifier);
-};
+    positionLocalSpace = vec4(vertPosition, 1.0);
+    positionCameraSpace = modelViewTransform * positionLocalSpace;
 
-class KeyboardControllerLua : public KeyboardController {
-public:
-    void keyPressed(KeyAction action, Key key, KeyModifier modifier);
-
-protected:
-    std::string keyToString(Key key, KeyModifier mod) const;
-};
-
-} // namespace interaction
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___KEYBOARDCONTROLLER___H__
+    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    
+    //positionScreenSpace.z = 1.0;
+    // project the position to view space
+    gl_Position = positionScreenSpace;
+}

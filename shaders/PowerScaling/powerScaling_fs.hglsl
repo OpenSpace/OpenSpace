@@ -25,6 +25,8 @@
 #ifndef POWERSCALING_FS_H_HGLSL
 #define POWERSCALING_FS_H_HGLSL
 
+#include "floatoperations.glsl"
+
 // Observable universe is 10^27m, setting the far value to extremely high, aka 30!! ERMAHGERD!
 
 #include "powerScalingMath.hglsl"

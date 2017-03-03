@@ -166,7 +166,7 @@ documentation::Documentation ProjectionComponent::Documentation() {
 }
 
 ProjectionComponent::ProjectionComponent()
-    : properties::PropertyOwner()
+    : properties::PropertyOwner("ProjectionComponent")
     , _performProjection("performProjection", "Perform Projections", true)
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _projectionFading("projectionFading", "Projection Fading", 1.f, 0.f, 1.f)
@@ -175,8 +175,6 @@ ProjectionComponent::ProjectionComponent()
     , _textureSizeDirty(false)
     , _projectionTexture(nullptr)
 {
-    setName("ProjectionComponent");
-
     _shadowing.isEnabled = false;
     _dilation.isEnabled = false;
 

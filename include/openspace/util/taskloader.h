@@ -22,38 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
-#define __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
+#ifndef __OPENSPACE_CORE___TASKLOADER___H__
+#define __OPENSPACE_CORE___TASKLOADER___H__
 
-#include <apps/DataConverter/conversiontask.h>
 #include <string>
-#include <ghoul/glm.h>
-#include <functional>
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
-
+#include <ghoul/misc/dictionary.h>
+#include <openspace/util/task.h>
 
 namespace openspace {
-namespace dataconverter {
-
-/**
- * Converts ascii based point data
- * int64_t n
- * (float x, float y, float z, float r, float g, float b) * n
- * to a binary (floating point) representation with the same layout.
- */
-class MilkyWayPointsConversionTask : public ConversionTask {
+class TaskLoader {
 public:
-    MilkyWayPointsConversionTask(const std::string& inFilename,
-                                 const std::string& outFilename);
-    
-    void perform(const std::function<void(float)>& onProgress) override;
-private:
-    std::string _inFilename;    
-    std::string _outFilename;
+    std::vector<std::unique_ptr<Task>> tasksFromDictionary(const ghoul::Dictionary& dictionary);
+    std::vector<std::unique_ptr<Task>> tasksFromFile(const std::string& path);
 };
 
-} // namespace dataconverter
-} // namespace openspace
+}
 
-#endif // __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
+#endif // __OPENSPACE_CORE___TASKLOADER___H__

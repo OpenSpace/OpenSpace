@@ -27,14 +27,18 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/galaxymodule.h  
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/galaxyraycaster.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegalaxy.h  
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegalaxy.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywayconversiontask.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywaypointsconversiontask.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/galaxymodule.cpp  
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/galaxyraycaster.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegalaxy.cpp  
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablegalaxy.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywayconversiontask.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/milkywaypointsconversiontask.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

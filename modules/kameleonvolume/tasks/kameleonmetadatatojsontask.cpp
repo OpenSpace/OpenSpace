@@ -22,62 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <iostream>
+#include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
+#include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <string>
-#include <ghoul/glm.h>
-
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereaderdevil.h>
-#include <ghoul/io/texture/texturereaderfreeimage.h>
+#include <openspace/documentation/verifier.h>
+#include <ghoul/misc/dictionaryjsonformatter.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
+#include <fstream>
 
-#include <openspace/util/progressbar.h>
+namespace {
+    const char* KeyInput = "Input";
+    const char* KeyOutput = "Output";
+}
 
-#include <apps/DataConverter/milkywayconversiontask.h>
-#include <apps/DataConverter/milkywaypointsconversiontask.h>
+namespace openspace {
 
-int main(int argc, char** argv) {
-    using namespace openspace;
-    using namespace dataconverter;
+KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(const ghoul::Dictionary& dictionary) {
+    openspace::documentation::testSpecificationAndThrow(
+        documentation(),
+        dictionary,
+        "KameleonMetadataToJsonTask"
+    );
 
-    ghoul::initialize();
+    _inputPath = absPath(dictionary.value<std::string>(KeyInput));
+    _outputPath = absPath(dictionary.value<std::string>(KeyOutput));
+}
 
-    #ifdef GHOUL_USE_DEVIL
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
-    #endif // GHOUL_USE_DEVIL
-    #ifdef GHOUL_USE_FREEIMAGE
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
-    #endif // GHOUL_USE_FREEIMAGE
+std::string KameleonMetadataToJsonTask::description() {
+    return "Extract metadata from cdf-file " + _inputPath + " and write as json to " + _outputPath;
+}
 
-    openspace::ProgressBar pb(100);
-    std::function<void(float)> onProgress = [&](float progress) {
-        pb.print(progress * 100);
+void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback & progressCallback) {
+    KameleonVolumeReader reader(_inputPath);
+    ghoul::Dictionary dictionary = reader.readMetaData();
+    progressCallback(0.5f);
+    ghoul::DictionaryJsonFormatter formatter;
+    std::string json = formatter.format(dictionary);
+    std::ofstream output(_outputPath);
+    output << json;
+    progressCallback(1.0f);
+}
+
+documentation::Documentation KameleonMetadataToJsonTask::documentation()
+{
+    using namespace documentation;
+    return {
+        "KameleonMetadataToJsonTask",
+        "kameleon_metadata_to_json_task",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("KameleonMetadataToJsonTask"),
+                "The type of this task"
+            },
+            {
+                KeyInput,
+                new StringAnnotationVerifier("A file path to a cdf file"),
+                "The cdf file to extract data from"
+            },
+            {
+                KeyOutput,
+                new StringAnnotationVerifier("A valid filepath"),
+                "The json file to export data into"
+            }
+        }
     };
-
-    // TODO: Make the converter configurable using either
-    // config files (json, lua dictionaries),
-    // lua scripts,
-    // or at the very least: a command line interface.
- 
-    MilkyWayConversionTask mwConversionTask(
-        "F:/mw_june2016/volumeslices/img/comp/v003/frames/primary/0100/cam2_main.",
-        ".exr",
-        1385,
-        512,
-        "F:/mw_june2016/mw_512_512_64_june.rawvolume", 
-        glm::vec3(512, 512, 64));
-    
-    //MilkyWayPointsConversionTask mwpConversionTask("F:/mw_june2016/points.off", "F:/mw_june2016/points.off.binary");
+}
 
 
-    mwConversionTask.perform(onProgress);
-    //mwpConversionTask.perform(onProgress);
 
-
-    std::cout << "Done." << std::endl;
-
-    std::cin.get();
-    return 0;
-};
+} // namespace openspace

@@ -123,7 +123,7 @@ void SpiceRotation::update(const UpdateData& data) {
             data.time
         );
     }
-    catch (...) {
+    catch (const SpiceManager::SpiceException&) {
         _matrix = glm::dmat3(1.0);
     }
 }

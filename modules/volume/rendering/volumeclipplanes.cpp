@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -22,65 +23,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__
-#define __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__
+#include <modules/volume/rendering/volumeclipplanes.h>
+#include <ghoul/misc/dictionary.h>
 
-#include <modules/volume/rendering/renderablevolume.h>
-#include <openspace/util/powerscaledcoordinate.h>
-
-// Forward declare to minimize dependencies
-namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
-}
 
 namespace openspace {
 
-class RenderableVolumeGL: public RenderableVolume {
-public:
-    RenderableVolumeGL(const ghoul::Dictionary& dictionary);
-    ~RenderableVolumeGL();
-    
-    bool initialize() override;
-    bool deinitialize() override;
+VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
+    : _nClipPlanes("nClipPlanes", "Number of clip planes", 0, 0, 10)
+{
+    std::vector<std::string> keys = dictionary.keys();
+    for (const std::string& key : keys) {
+        ghoul::Dictionary cutPlaneDictionary;
+        dictionary.getValue(key, cutPlaneDictionary);
+        auto clipPlane = std::make_shared<VolumeClipPlane>(cutPlaneDictionary);
+        clipPlane->setName(key);
+        _clipPlanes.push_back(clipPlane);
+    }
+    _nClipPlanes = keys.size();
+}
 
-    bool isReady() const override;
+void VolumeClipPlanes::initialize() {
+    addProperty(_nClipPlanes);
+    for (const auto& clipPlane : _clipPlanes) {
+        addPropertySubOwner(clipPlane.get());
+        clipPlane->initialize();
+    }
+}
 
-    virtual void render(const RenderData& data) override;
-    virtual void update(const UpdateData& data) override;
+void VolumeClipPlanes::deinitialize() {}
 
-private:
-    ghoul::Dictionary _hintsDictionary;
+std::vector<glm::vec3> VolumeClipPlanes::normals() {
+    std::vector<glm::vec3> normals;
+    for (const auto& clipPlane : _clipPlanes) {
+        normals.push_back(clipPlane->normal());
+    }
+    return normals;
+}
 
-    std::string _filename;
-
-    std::string _transferFunctionName;
-    std::string _volumeName;
-
-    std::string _transferFunctionPath;
-    std::string _samplerFilename;
-    
-    ghoul::filesystem::File* _transferFunctionFile;
-
-    ghoul::opengl::Texture* _volume;
-    ghoul::opengl::Texture* _transferFunction;
-
-    GLuint _boxArray; 
-    GLuint _vertexPositionBuffer;
-    ghoul::opengl::ProgramObject* _boxProgram;
-    glm::vec3 _boxScaling;
-    psc _pscOffset;
-    float _w;
-    
-    bool _updateTransferfunction;
-    int _id;
-};
+std::vector<glm::vec2> VolumeClipPlanes::offsets() {
+    std::vector<glm::vec2> offsets;
+    for (const auto& clipPlane : _clipPlanes) {
+        offsets.push_back(clipPlane->offsets());
+    }
+    return offsets;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__

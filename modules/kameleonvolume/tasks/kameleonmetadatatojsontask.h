@@ -22,44 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
-#define __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__
 
-#include <apps/DataConverter/conversiontask.h>
-#include <string>
-#include <ghoul/glm.h>
-#include <functional>
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
-
+#include <openspace/util/task.h>
 
 namespace openspace {
-namespace dataconverter {
 
-/**
- * Converts a set of exr image slices to a raw volume
- * with floating point RGBA data (32 bit per channel).
- */
-class MilkyWayConversionTask : public ConversionTask {
+class KameleonMetadataToJsonTask : public Task {
 public:
-    MilkyWayConversionTask(const std::string& inFilenamePrefix,
-                           const std::string& inFilenameSuffix,
-                           size_t inFirstIndex,
-                           size_t inNSlices, 
-                           const std::string& outFilename,
-                           const glm::ivec3& outDimensions);
-    
-    void perform(const std::function<void(float)>& onProgress) override;
+    KameleonMetadataToJsonTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
 private:
-    std::string _inFilenamePrefix;
-    std::string _inFilenameSuffix;
-    size_t _inFirstIndex;
-    size_t _inNSlices;
-    std::string _outFilename;
-    glm::ivec3 _outDimensions;
+    std::string _inputPath;
+    std::string _outputPath;
 };
 
-} // namespace dataconverter
 } // namespace openspace
 
-#endif // __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__

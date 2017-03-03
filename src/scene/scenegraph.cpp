@@ -113,6 +113,7 @@ bool SceneGraph::loadFromFile(const std::string& sceneDescription) {
         );
     }
     catch (...) {
+        // @CLEANUP:  This is bad to just catch all exceptions! ---abock
         return false;
     }
 

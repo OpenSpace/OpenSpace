@@ -162,7 +162,10 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(file.filename());
     errno = 0;
     FILE* fp = fopen(file.path().c_str(), "wb"); // write binary
-    ghoul_assert(fp != nullptr, "Could not open/create file:\n" << file.path().c_str() << " \nerrno: " << errno);
+    ghoul_assert(
+        fp != nullptr,
+        "Could not open/create file:\n" + file.path() + " \nerrno: " + std::to_string(errno)
+    );
 
     //LDEBUG("Start downloading file: '" << url << "' into file '" << file.path() << "'");
     
