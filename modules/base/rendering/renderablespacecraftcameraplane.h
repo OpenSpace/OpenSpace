@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
 
 #include <modules/base/rendering/renderableplane.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace {
 
@@ -35,36 +36,9 @@ public:
     RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary);
 
     void render(const RenderData& data);
-    // ~RenderableSpacecraftCameraPlane();
 
-    // bool initialize() override;
-    // bool deinitialize() override;
-
-    // bool isReady() const override;
-
-    // void render(const RenderData& data) override;
-    // void update(const UpdateData& data) override;
-
-// private:
-//     void loadTexture();
-//     void createPlane();
-
-//     properties::StringProperty _texturePath;
-//     properties::BoolProperty _projectionListener;
-//     properties::Vec2Property _size;
-
-//     Origin _origin;
-//     std::string _nodeName;
-
-//     bool _planeIsDirty;
-
-//     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-//     bool _textureIsDirty;
-//     std::unique_ptr<ghoul::opengl::Texture> _texture;
-//     BlendMode _blendMode;
-//     ghoul::filesystem::File* _textureFile;
-//     GLuint _quad;
-//     GLuint _vertexPositionBuffer;
+private:
+    properties::DoubleProperty _moveFactor;
 };
 
 } // namespace openspace

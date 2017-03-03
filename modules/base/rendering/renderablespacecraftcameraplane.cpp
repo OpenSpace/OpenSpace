@@ -37,6 +37,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
+
 // namespace {
 //     static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
 // }
@@ -44,7 +45,17 @@
 namespace openspace {
 
 RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary) {}
+    : RenderablePlane(dictionary)
+    , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
+{
+    // if (dictionary.hasKey("MoveFactor")) {
+    //     float moveFactor = 0.5f;
+    //     if (dictionary.getValue("MoveFactor", moveFactor)) {
+    //         _moveFactor = moveFactor;
+    //     }
+    // }
+    addProperty(_moveFactor);
+}
 
 
 void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
@@ -60,10 +71,11 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     // Sun's barycenter
     SceneGraphNode* p = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent()->parent();
     glm::dmat4 rotationTransformTangentTrajectory = glm::lookAt(glm::normalize(data.modelTransform.translation),
-                                         glm::dvec3(p->worldPosition()), data.modelTransform.rotation * glm::dvec3(0.f, 0.0, 1.0));
+                                         glm::dvec3(p->worldPosition()), data.modelTransform.rotation * glm::dvec3(0.0, 0.0, 1.0));
     rotationTransform = glm::dmat4(glm::inverse(rotationTransformTangentTrajectory));
-    // TODO(michaeln): Get distance from Lua
-    translationTransform = glm::normalize(p->worldPosition() - data.modelTransform.translation) * 100000000.0;
+
+    // Scale vector to sun barycenter to get translation distance
+    translationTransform = (p->worldPosition() - data.modelTransform.translation) * _moveFactor.value();
     // Stereos internal ref frame. pass in as property
     //staticRotationTransform = glm::dmat4({0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0});
 
