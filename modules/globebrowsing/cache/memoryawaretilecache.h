@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
 
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/cache/memoryawarelrucache.h>
@@ -71,4 +71,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
