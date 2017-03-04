@@ -22,38 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
-
-#include <list>
-#include <unordered_map>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 namespace globebrowsing {
-
-// Templated class implementing a Least-Recently-Used Cache
+namespace cache {
+    
 template<typename KeyType, typename ValueType>
-class LRUCache {
-public:
-    LRUCache(size_t size);
+MemoryAwareLRUCache<KeyType, ValueType>::MemoryAwareLRUCache(size_t maximumSize)
+    : _maximumCacheSize(maximumSize)
+    , _cacheSize(0)
+{}
 
-    void put(const KeyType& key, const ValueType& value);
-    void clear();
-    bool exist(const KeyType& key) const;
-    ValueType get(const KeyType& key);
-    size_t size() const;
+template<typename KeyType, typename ValueType>
+void MemoryAwareLRUCache<KeyType, ValueType>::clear() {
+    _itemList.erase(_itemList.begin(), _itemList.end());
+    _itemMap.erase(_itemMap.begin(), _itemMap.end());
+    _cacheSize = 0;
+}
 
-private:
-    void clean();
+template<typename KeyType, typename ValueType>
+void MemoryAwareLRUCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value) {
+    auto it = _itemMap.find(key);
+    if (it != _itemMap.end()) {
+        _itemList.erase(it->second);
+        _itemMap.erase(it);
+        _cacheSize -= it->second->second.memoryImpact();
+    }
+    _itemList.push_front(std::make_pair(key, value));
+    _itemMap.insert(std::make_pair(key, _itemList.begin()));
+    _cacheSize += _itemList.begin()->second.memoryImpact();
+    clean();
+}
 
-    std::list<std::pair<KeyType, ValueType>> _itemList;
-    std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
-    size_t _cacheSize;
-};
+template<typename KeyType, typename ValueType>
+bool MemoryAwareLRUCache<KeyType, ValueType>::exist(const KeyType& key) const {
+    return _itemMap.count(key) > 0;
+}
 
+template<typename KeyType, typename ValueType>
+ValueType MemoryAwareLRUCache<KeyType, ValueType>::get(const KeyType& key) {
+    //ghoul_assert(exist(key), "Key " << key << " must exist");
+    auto it = _itemMap.find(key);
+    // Move list iterator pointing to value
+    _itemList.splice(_itemList.begin(), _itemList, it->second);
+    return it->second->second;
+}
+
+template<typename KeyType, typename ValueType>
+size_t MemoryAwareLRUCache<KeyType, ValueType>::size() const {
+    return _cacheSize;
+}
+
+template<typename KeyType, typename ValueType>
+size_t MemoryAwareLRUCache<KeyType, ValueType>::maximumSize() const {
+    return _maximumCacheSize;
+}
+
+template<typename KeyType, typename ValueType>
+void MemoryAwareLRUCache<KeyType, ValueType>::clean() {
+    while (_cacheSize > _maximumCacheSize) {
+        auto last_it = _itemList.end(); last_it--;
+        _itemMap.erase(last_it->first);
+        _cacheSize -= last_it->second.memoryImpact();
+        _itemList.pop_back();
+    }
+}
+
+} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
-
-#include <modules/globebrowsing/other/lrucache.inl>
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__

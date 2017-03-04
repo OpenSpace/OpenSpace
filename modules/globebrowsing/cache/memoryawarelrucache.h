@@ -22,52 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/cache/memorytilecache.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_LRU_CACHE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_LRU_CACHE___H__
 
-#include <ghoul/ghoul.h>
-#include <ghoul/logging/consolelog.h>
+#include <list>
+#include <map>
 
 namespace openspace {
 namespace globebrowsing {
 namespace cache {
 
-MemoryTileCache* MemoryTileCache::_singleton = nullptr;
+/**
+ * Least recently used cache that knows about its memory impact. This class is templated
+ * and the second template argument <code>ValueType</code> needs to have a function
+ * <code>void memoryImpact()</code> that returns the size of the object given in whatever
+ * unit is used for size in the creation of the <code>MemoryAwareLRUCache</code>.
+ * It can for example be given in kilobytes.
+ * <code>KeyType</code> needs to be a size comparable type.
+ */
+template<typename KeyType, typename ValueType>
+class MemoryAwareLRUCache {
+public:
+    /**
+     * \param maximumSize is the maximum size of the <code>MemoryAwareLRUCache</code>
+     * Once the maximum size is reached, the cache will start removing objects that were
+     * least recently used. The maximum size can for example be given in kilobytes. It
+     * must be the same size unit as used by the cached object class
+     * <code>ValueType</code>. 
+     */
+    MemoryAwareLRUCache(size_t maximumSize);
 
-void MemoryTileCache::create(size_t cacheSize) {
-    _singleton = new MemoryTileCache(cacheSize);
-}
+    void put(const KeyType& key, const ValueType& value);
+    void clear();
+    bool exist(const KeyType& key) const;
+    ValueType get(const KeyType& key);
+    size_t size() const;
+    size_t maximumSize() const;
 
-void MemoryTileCache::destroy() {
-    delete _singleton;
-}
+private:
+    void clean();
 
-MemoryTileCache& MemoryTileCache::ref() {
-    ghoul_assert(_singleton, "MemoryTileCache not created");
-    return *_singleton;
-}
-
-void MemoryTileCache::clear() {
-    _tileCache->clear();
-}
-
-bool MemoryTileCache::exist(ProviderTileHashKey key) {
-    return _tileCache->exist(key);
-}
-
-Tile MemoryTileCache::get(ProviderTileHashKey key) {
-    return _tileCache->get(key);
-}
-
-void MemoryTileCache::put(ProviderTileHashKey key, Tile tile) {
-    _tileCache->put(key, tile);
-}
-
-MemoryTileCache::MemoryTileCache(size_t cacheSize)
-{
-	_tileCache = std::make_shared<LRUMemoryCache<ProviderTileHashKey, Tile> >(static_cast<size_t>(cacheSize));
-}
+    std::list<std::pair<KeyType, ValueType> > _itemList;
+    std::map<KeyType, decltype(_itemList.begin())> _itemMap;
+    size_t _cacheSize;
+    size_t _maximumCacheSize;
+};
 
 } // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
 
+#include <modules/globebrowsing/cache/memoryawarelrucache.inl>
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_LRU_CACHE___H__

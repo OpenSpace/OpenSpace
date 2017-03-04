@@ -22,28 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_CACHE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_CACHE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__
+
+#include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/cache/memoryawarelrucache.h>
+
+#include <memory>
 
 namespace openspace {
 namespace globebrowsing {
 namespace cache {
 
 /**
- * 
+ * Enumerable type used in the LRU cache. 128 bytes are able to account for tile index
+ * and an unique identifier for the tile provider.
  */
-class Cacheable {
-public:
-	Cacheable(long memoryImpact) : _memoryImpact(memoryImpact) {};
-	~Cacheable() {};
+typedef unsigned __int128 uint128_t;
+using ProviderTileHashKey = uint128_t;
 
-	long memoryImpact() { return _memoryImpact; };
-protected:
-	long _memoryImpact;
+/**
+ * Singleton class used to cache tiles for all <code>CachingTileProvider</code>s.
+ */
+class MemoryAwareTileCache
+{
+public:
+    static void create(size_t cacheSize);
+    static void destroy();
+
+    void clear();
+    bool exist(ProviderTileHashKey key);
+    Tile get(ProviderTileHashKey key);
+    void put(ProviderTileHashKey key, Tile tile);
+
+    static MemoryAwareTileCache& ref();
+private:
+    /**
+     * \param cacheSize is the cache size given in bytes.
+     */
+    MemoryAwareTileCache(size_t cacheSize);
+    ~MemoryAwareTileCache() = default;
+    
+    static MemoryAwareTileCache* _singleton;
+    std::shared_ptr<MemoryAwareLRUCache<ProviderTileHashKey, Tile> > _tileCache;
 };
 
 } // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_CACHE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__

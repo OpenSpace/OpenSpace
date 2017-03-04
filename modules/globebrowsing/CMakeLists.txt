@@ -57,16 +57,16 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/other/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memorytilecache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrumemorycache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrumemorycache.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/cacheable.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawarelrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawarelrucache.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawarecacheable.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.inl
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.h
@@ -142,7 +142,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memorytilecache.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.cpp

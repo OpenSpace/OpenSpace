@@ -27,7 +27,7 @@
 
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/other/lrucache.h>
+#include <modules/globebrowsing/cache/lrucache.h>
 
 #include <vector>
 
@@ -160,7 +160,7 @@ private:
     bool _initialized;
 };
 
-using TileCache = LRUCache<TileIndex::TileHashKey, Tile>;
+using TileCache = cache::LRUCache<TileIndex::TileHashKey, Tile>;
 
 } // namespace tileprovider
 } // namespace globebrowsing

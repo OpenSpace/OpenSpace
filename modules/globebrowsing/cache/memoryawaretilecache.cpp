@@ -22,42 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LRU_MEMORY_CACHE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LRU_MEMORY_CACHE___H__
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
-#include <list>
-#include <map>
+#include <ghoul/ghoul.h>
+#include <ghoul/logging/consolelog.h>
 
 namespace openspace {
 namespace globebrowsing {
 namespace cache {
 
-// Templated class implementing a Least-Recently-Used Cache
-template<typename KeyType, typename ValueType>
-class LRUMemoryCache {
-public:
-    LRUMemoryCache(long maximumSize);
+MemoryAwareTileCache* MemoryAwareTileCache::_singleton = nullptr;
 
-    void put(const KeyType& key, const ValueType& value);
-    void clear();
-    bool exist(const KeyType& key) const;
-    ValueType get(const KeyType& key);
-    long size() const;
-    long maximumSize() const;
+void MemoryAwareTileCache::create(size_t cacheSize) {
+    _singleton = new MemoryAwareTileCache(cacheSize);
+}
 
-private:
-    void clean();
+void MemoryAwareTileCache::destroy() {
+    delete _singleton;
+}
 
-    std::list<std::pair<KeyType, ValueType> > _itemList;
-    std::map<KeyType, decltype(_itemList.begin())> _itemMap;
-    long _cacheSize;
-    long _maximumCacheSize;
-};
+MemoryAwareTileCache& MemoryAwareTileCache::ref() {
+    ghoul_assert(_singleton, "MemoryAwareTileCache not created");
+    return *_singleton;
+}
+
+void MemoryAwareTileCache::clear() {
+    _tileCache->clear();
+}
+
+bool MemoryAwareTileCache::exist(ProviderTileHashKey key) {
+    return _tileCache->exist(key);
+}
+
+Tile MemoryAwareTileCache::get(ProviderTileHashKey key) {
+    return _tileCache->get(key);
+}
+
+void MemoryAwareTileCache::put(ProviderTileHashKey key, Tile tile) {
+    _tileCache->put(key, tile);
+}
+
+MemoryAwareTileCache::MemoryAwareTileCache(size_t cacheSize)
+{
+	_tileCache = std::make_shared<MemoryAwareLRUCache<ProviderTileHashKey, Tile> >(
+		static_cast<size_t>(cacheSize));
+}
 
 } // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
 
-#include <modules/globebrowsing/cache/lrumemorycache.inl>
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LRU_MEMORY_CACHE___H__

@@ -27,7 +27,7 @@
 #include <modules/globebrowsing/tile/asynctilereader.h>
 #include <modules/globebrowsing/tile/tiledataset.h>
 #include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/cache/memorytilecache.h>
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -125,7 +125,7 @@ void CachingTileProvider::update() {
 }
 
 void CachingTileProvider::reset() {
-    cache::MemoryTileCache::ref().clear();
+    cache::MemoryAwareTileCache::ref().clear();
     _asyncTextureDataProvider->reset();
 }
 
@@ -140,8 +140,8 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
 
     cache::ProviderTileHashKey key = providerTileHashKey(tileIndex);
 
-    if (cache::MemoryTileCache::ref().exist(key)) {
-        return cache::MemoryTileCache::ref().get(key);
+    if (cache::MemoryAwareTileCache::ref().exist(key)) {
+        return cache::MemoryAwareTileCache::ref().get(key);
     }
     else {
         _asyncTextureDataProvider->enqueueTileIO(tileIndex);
@@ -168,7 +168,7 @@ void CachingTileProvider::initTexturesFromLoadedData() {
     for (auto rawTile : rawTiles){
         cache::ProviderTileHashKey key = providerTileHashKey(rawTile->tileIndex);
         Tile tile = createTile(rawTile);
-        cache::MemoryTileCache::ref().put(key, tile);
+        cache::MemoryAwareTileCache::ref().put(key, tile);
     }
 }
 
@@ -185,8 +185,8 @@ Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
 
     cache::ProviderTileHashKey key = providerTileHashKey(tileIndex);
 
-    if (cache::MemoryTileCache::ref().exist(key)) {
-        return cache::MemoryTileCache::ref().get(key).status();
+    if (cache::MemoryAwareTileCache::ref().exist(key)) {
+        return cache::MemoryAwareTileCache::ref().get(key).status();
     }
 
     return Tile::Status::Unavailable;

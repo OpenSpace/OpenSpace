@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/cache/memorytilecache.h>
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
 namespace openspace {
 namespace globebrowsing {

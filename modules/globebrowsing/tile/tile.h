@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileuvtransform.h>
 
-#include <modules/globebrowsing/cache/cacheable.h>
+#include <modules/globebrowsing/cache/memoryawarecacheable.h>
 
 #include <memory>
 
@@ -45,7 +45,7 @@ struct TileUvTransform;
 /**
  * Defines a status and may have a Texture and TileMetaData
  */
-class Tile : public cache::Cacheable{
+class Tile : public cache::MemoryAwareCacheable{
 public:
      /**
      * Describe if this Tile is good for usage (OK) or otherwise

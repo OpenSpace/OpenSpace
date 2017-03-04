@@ -26,6 +26,7 @@
 
 namespace openspace {
 namespace globebrowsing {
+namespace cache {
     
 template<typename KeyType, typename ValueType>
 LRUCache<KeyType, ValueType>::LRUCache(size_t size)
@@ -78,5 +79,6 @@ void LRUCache<KeyType, ValueType>::clean() {
     }
 }
 
+} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace

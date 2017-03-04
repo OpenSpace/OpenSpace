@@ -22,73 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_CACHEABLE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_CACHEABLE___H__
 
 namespace openspace {
 namespace globebrowsing {
 namespace cache {
-    
-template<typename KeyType, typename ValueType>
-LRUMemoryCache<KeyType, ValueType>::LRUMemoryCache(long maximumSize)
-    : _maximumCacheSize(maximumSize)
-    , _cacheSize(0)
-{}
 
-template<typename KeyType, typename ValueType>
-void LRUMemoryCache<KeyType, ValueType>::clear() {
-    _itemList.erase(_itemList.begin(), _itemList.end());
-    _itemMap.erase(_itemMap.begin(), _itemMap.end());
-    _cacheSize = 0;
-}
+/**
+ * Base class to be extended by classes that need to be cached and make use of the
+ * memoryImpact interface. A class extending <code>MemoryAwareCacheable</code> needs to
+ * know its memory impact at initialization and hence provide the memory impact in its
+ * constructors. The memory impact can not change during the lifetime of an object that is
+ * a <code>MemoryAwareCacheable</code>.
+ */
+class MemoryAwareCacheable {
+public:
+	/**
+	 * \param memoryImpact is the memory impact of the object. Can for example be given
+	 * in kilobytes.
+	 */
+	MemoryAwareCacheable(size_t memoryImpact) : _memoryImpact(memoryImpact) {};
+	~MemoryAwareCacheable() {};
 
-template<typename KeyType, typename ValueType>
-void LRUMemoryCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value) {
-    auto it = _itemMap.find(key);
-    if (it != _itemMap.end()) {
-        _itemList.erase(it->second);
-        _itemMap.erase(it);
-        _cacheSize -= it->second->second.memoryImpact();
-    }
-    _itemList.push_front(std::make_pair(key, value));
-    _itemMap.insert(std::make_pair(key, _itemList.begin()));
-    _cacheSize += _itemList.begin()->second.memoryImpact();
-    clean();
-}
-
-template<typename KeyType, typename ValueType>
-bool LRUMemoryCache<KeyType, ValueType>::exist(const KeyType& key) const {
-    return _itemMap.count(key) > 0;
-}
-
-template<typename KeyType, typename ValueType>
-ValueType LRUMemoryCache<KeyType, ValueType>::get(const KeyType& key) {
-    //ghoul_assert(exist(key), "Key " << key << " must exist");
-    auto it = _itemMap.find(key);
-    // Move list iterator pointing to value
-    _itemList.splice(_itemList.begin(), _itemList, it->second);
-    return it->second->second;
-}
-
-template<typename KeyType, typename ValueType>
-long LRUMemoryCache<KeyType, ValueType>::size() const {
-    return _cacheSize;
-}
-
-template<typename KeyType, typename ValueType>
-long LRUMemoryCache<KeyType, ValueType>::maximumSize() const {
-    return _maximumCacheSize;
-}
-
-template<typename KeyType, typename ValueType>
-void LRUMemoryCache<KeyType, ValueType>::clean() {
-    while (_cacheSize > _maximumCacheSize) {
-        auto last_it = _itemList.end(); last_it--;
-        _itemMap.erase(last_it->first);
-        _cacheSize -= last_it->second.memoryImpact();
-        _itemList.pop_back();
-    }
-}
+	size_t memoryImpact() { return _memoryImpact; };
+protected:
+	size_t _memoryImpact;
+};
 
 } // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_CACHEABLE___H__

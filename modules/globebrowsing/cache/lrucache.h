@@ -22,55 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
 
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/cache/lrumemorycache.h>
-
-#include <memory>
+#include <list>
+#include <unordered_map>
 
 namespace openspace {
 namespace globebrowsing {
 namespace cache {
 
-/*
-struct ProviderTileHashKey
-{
-    /// Each <code>TileProvider</code> has its own unique identifier
-    unsigned int tileProviderId;
-    TileIndex::TileHashKey tileKey;
-};
-*/
-
-typedef unsigned __int128 uint128_t;
-using ProviderTileHashKey = uint128_t;
-
-class MemoryTileCache
-{
+/**
+ * Templated class implementing a Least-Recently-Used Cache.
+ * <code>KeyType</code> needs to be an enumerable type.
+ */
+template<typename KeyType, typename ValueType>
+class LRUCache {
 public:
-    static void create(size_t cacheSize);
-    static void destroy();
-
-    void clear();
-    bool exist(ProviderTileHashKey key);
-    Tile get(ProviderTileHashKey key);
-    void put(ProviderTileHashKey key, Tile tile);
-
-    static MemoryTileCache& ref();
-private:
     /**
-     * \param cacheSize is the cache size given in bytes.
+     * \param size is the maximum size of the cache given in number of cached items.
      */
-    MemoryTileCache(size_t cacheSize);
-    ~MemoryTileCache() = default;
-    
-    static MemoryTileCache* _singleton;
-    std::shared_ptr<LRUMemoryCache<ProviderTileHashKey, Tile> > _tileCache;
+    LRUCache(size_t size);
+
+    void put(const KeyType& key, const ValueType& value);
+    void clear();
+    bool exist(const KeyType& key) const;
+    ValueType get(const KeyType& key);
+    size_t size() const;
+
+private:
+    void clean();
+
+    std::list<std::pair<KeyType, ValueType>> _itemList;
+    std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
+    size_t _cacheSize;
 };
 
 } // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__
+#include <modules/globebrowsing/cache/lrucache.inl>
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
