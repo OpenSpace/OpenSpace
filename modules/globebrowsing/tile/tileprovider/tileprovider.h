@@ -50,9 +50,9 @@ public:
     static std::unique_ptr<TileProvider> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     /** 
-     * Empty default constructor 
+     * Default constructor. 
      */
-    TileProvider() = default;
+    TileProvider();
 
     /**
      * Implementations of the TileProvider interface must implement 
@@ -146,7 +146,7 @@ public:
      * <code>TileProviders<\code> have an ID starting at 0 from the first created.
      * The maximum number of unique identifiers is UINT_MAX 
      */
-    unsigned int uniqueIdentifier();
+    unsigned int uniqueIdentifier() const;
 
 protected:
     /**

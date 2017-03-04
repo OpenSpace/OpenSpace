@@ -38,7 +38,8 @@ const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavaila
 Tile::Tile(std::shared_ptr<ghoul::opengl::Texture> texture,
          std::shared_ptr<TileMetaData> metaData,
          Status status)
-: _texture(texture)
+: Cacheable(texture ? texture->expectedPixelDataSize() / 1000 : 0)
+, _texture(texture)
 , _metaData(metaData)
 , _status(status) {
 

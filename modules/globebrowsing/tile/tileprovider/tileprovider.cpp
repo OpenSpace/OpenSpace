@@ -59,7 +59,13 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(const ghoul::Di
     return result;
 }
 
-TileProvider::TileProvider(const ghoul::Dictionary& dictionary) {};
+TileProvider::TileProvider() {
+    initialize();
+}
+
+TileProvider::TileProvider(const ghoul::Dictionary& dictionary) {
+    initialize();
+};
 
 float TileProvider::noDataValueAsFloat() {
     ghoul_assert(_initialized, "TileProvider was not initialized.");
@@ -136,6 +142,10 @@ void TileProvider::initialize() {
     _uniqueIdentifier = _numTileProviders;
     _numTileProviders++;
     _initialized = true;
+}
+
+unsigned int TileProvider::uniqueIdentifier() const {
+    return _uniqueIdentifier;
 }
 
 } // namespace tileprovider

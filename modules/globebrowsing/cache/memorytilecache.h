@@ -26,31 +26,50 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_TILE_CACHE___H__
 
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/other/lrucache.h>
+#include <modules/globebrowsing/cache/lrumemorycache.h>
+
+#include <memory>
 
 namespace openspace {
 namespace globebrowsing {
+namespace cache {
 
-struct MemoryTileKey
+/*
+struct ProviderTileHashKey
 {
     /// Each <code>TileProvider</code> has its own unique identifier
     unsigned int tileProviderId;
     TileIndex::TileHashKey tileKey;
-}
+};
+*/
+
+typedef unsigned __int128 uint128_t;
+using ProviderTileHashKey = uint128_t;
 
 class MemoryTileCache
 {
 public:
-    /**
-     * \param cacheSize is the cache size given in megabytes.
-    */
-    MemoryTileCache(size_t cacheSize);
-    ~MemoryTileCache();
+    static void create(size_t cacheSize);
+    static void destroy();
+
+    void clear();
+    bool exist(ProviderTileHashKey key);
+    Tile get(ProviderTileHashKey key);
+    void put(ProviderTileHashKey key, Tile tile);
+
+    static MemoryTileCache& ref();
 private:
-    size_t cacheSize;
-    LRUCache<MemoryTileKey, Tile>;
+    /**
+     * \param cacheSize is the cache size given in bytes.
+     */
+    MemoryTileCache(size_t cacheSize);
+    ~MemoryTileCache() = default;
+    
+    static MemoryTileCache* _singleton;
+    std::shared_ptr<LRUMemoryCache<ProviderTileHashKey, Tile> > _tileCache;
 };
 
+} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
 

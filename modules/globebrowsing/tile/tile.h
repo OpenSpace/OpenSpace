@@ -45,7 +45,7 @@ struct TileUvTransform;
 /**
  * Defines a status and may have a Texture and TileMetaData
  */
-class Tile {
+class Tile : public cache::Cacheable{
 public:
      /**
      * Describe if this Tile is good for usage (OK) or otherwise
@@ -82,6 +82,8 @@ public:
     Tile(std::shared_ptr<ghoul::opengl::Texture> texture,
          std::shared_ptr<TileMetaData> metaData,
          Status status);
+    ~Tile() {};
+
 	std::shared_ptr<TileMetaData> metaData() const { return _metaData; };
 	Status status() const { return _status; };
 	std::shared_ptr<ghoul::opengl::Texture> texture() const { return _texture; };

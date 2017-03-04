@@ -22,23 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tilecaching/memorytilecache.h>
+#include <modules/globebrowsing/cache/memorytilecache.h>
 
-#include <ghoul/logging/logmanager.h>
-
-namespace {
-    const std::string _loggerCat = "MemoryTileKey";
-}
+#include <ghoul/ghoul.h>
+#include <ghoul/logging/consolelog.h>
 
 namespace openspace {
 namespace globebrowsing {
-    MemoryTileCache::MemoryTileCache() {
+namespace cache {
 
-    }
+MemoryTileCache* MemoryTileCache::_singleton = nullptr;
 
-    MemoryTileCache::~MemoryTileCache() {
+void MemoryTileCache::create(size_t cacheSize) {
+    _singleton = new MemoryTileCache(cacheSize);
+}
 
-    }
-    
+void MemoryTileCache::destroy() {
+    delete _singleton;
+}
+
+MemoryTileCache& MemoryTileCache::ref() {
+    ghoul_assert(_singleton, "MemoryTileCache not created");
+    return *_singleton;
+}
+
+void MemoryTileCache::clear() {
+    _tileCache->clear();
+}
+
+bool MemoryTileCache::exist(ProviderTileHashKey key) {
+    return _tileCache->exist(key);
+}
+
+Tile MemoryTileCache::get(ProviderTileHashKey key) {
+    return _tileCache->get(key);
+}
+
+void MemoryTileCache::put(ProviderTileHashKey key, Tile tile) {
+    _tileCache->put(key, tile);
+}
+
+MemoryTileCache::MemoryTileCache(size_t cacheSize)
+{
+	_tileCache = std::make_shared<LRUMemoryCache<ProviderTileHashKey, Tile> >(static_cast<size_t>(cacheSize));
+}
+
+} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
+

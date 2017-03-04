@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/cache/memorytilecache.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -65,6 +66,8 @@ public:
     virtual int maxLevel();
     virtual float noDataValueAsFloat();
 
+    cache::ProviderTileHashKey providerTileHashKey(TileIndex tileIndex) const;
+
 private:
     /**
     * Collects all asynchronously downloaded <code>RawTile</code>
@@ -87,7 +90,7 @@ private:
     void clearRequestQueue();
 
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    std::shared_ptr<TileCache> _tileCache;
+    //std::shared_ptr<TileCache> _tileCache;
 
     int _framesSinceLastRequestFlush;
     int _framesUntilRequestFlush;

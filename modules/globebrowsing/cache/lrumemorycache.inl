@@ -27,10 +27,11 @@
 namespace openspace {
 namespace globebrowsing {
 namespace cache {
-
+    
 template<typename KeyType, typename ValueType>
-LRUMemoryCache<KeyType, ValueType>::LRUMemoryCache(size_t size)
-    : _maxCacheSize(size)
+LRUMemoryCache<KeyType, ValueType>::LRUMemoryCache(long maximumSize)
+    : _maximumCacheSize(maximumSize)
+    , _cacheSize(0)
 {}
 
 template<typename KeyType, typename ValueType>
@@ -46,11 +47,11 @@ void LRUMemoryCache<KeyType, ValueType>::put(const KeyType& key, const ValueType
     if (it != _itemMap.end()) {
         _itemList.erase(it->second);
         _itemMap.erase(it);
-        _cacheSize -= it->second.memoryImpact(_dataSizeType);
+        _cacheSize -= it->second->second.memoryImpact();
     }
     _itemList.push_front(std::make_pair(key, value));
     _itemMap.insert(std::make_pair(key, _itemList.begin()));
-    _cacheSize += it->second.memoryImpact(_dataSizeType);
+    _cacheSize += _itemList.begin()->second.memoryImpact();
     clean();
 }
 
@@ -69,21 +70,21 @@ ValueType LRUMemoryCache<KeyType, ValueType>::get(const KeyType& key) {
 }
 
 template<typename KeyType, typename ValueType>
-size_t LRUMemoryCache<KeyType, ValueType>::size() const {
+long LRUMemoryCache<KeyType, ValueType>::size() const {
     return _cacheSize;
 }
 
 template<typename KeyType, typename ValueType>
-size_t LRUMemoryCache<KeyType, ValueType>::maximumSize() const {
-    return _maxCacheSize;
+long LRUMemoryCache<KeyType, ValueType>::maximumSize() const {
+    return _maximumCacheSize;
 }
 
 template<typename KeyType, typename ValueType>
 void LRUMemoryCache<KeyType, ValueType>::clean() {
-    while (_cacheSize > _maxCacheSize) {
+    while (_cacheSize > _maximumCacheSize) {
         auto last_it = _itemList.end(); last_it--;
         _itemMap.erase(last_it->first);
-        _cacheSize -= it->second.memoryImpact(_dataSizeType);
+        _cacheSize -= last_it->second.memoryImpact();
         _itemList.pop_back();
     }
 }

@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
+#include <modules/globebrowsing/cache/memorytilecache.h>
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/sizereferencetileprovider.h>
@@ -48,6 +49,8 @@ GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule("GlobeBrowsing") {}
 
 void GlobeBrowsingModule::internalInitialize() {
     using namespace globebrowsing;
+
+    cache::MemoryTileCache::create(200 * 1000); // 200 MB
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");

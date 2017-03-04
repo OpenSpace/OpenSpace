@@ -27,6 +27,7 @@
 #include <modules/globebrowsing/tile/asynctilereader.h>
 #include <modules/globebrowsing/tile/tiledataset.h>
 #include <modules/globebrowsing/tile/rawtile.h>
+#include <modules/globebrowsing/cache/memorytilecache.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -37,7 +38,7 @@ namespace {
     const char* KeyDoPreProcessing = "DoPreProcessing";
     const char* KeyMinimumPixelSize = "MinimumPixelSize";
     const char* KeyFilePath = "FilePath";
-    const char* KeyCacheSize = "CacheSize";
+    //const char* KeyCacheSize = "CacheSize";
     const char* KeyFlushInterval = "FlushInterval";
 }
 
@@ -66,7 +67,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
         
     // getValue does not work for integers
     double minimumPixelSize; 
-    double cacheSize = 512;
+    //double cacheSize = 512;
     double framesUntilRequestFlush = 60;
 
     // 3. Check for used spcified optional keys
@@ -77,9 +78,11 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
         LDEBUG("Default minimumPixelSize overridden: " << minimumPixelSize);
         config.minimumTilePixelSize = static_cast<int>(minimumPixelSize); 
     }
+    /*
     if (dictionary.getValue<double>(KeyCacheSize, cacheSize)) {
         LDEBUG("Default cacheSize overridden: " << cacheSize);
     }
+    */
     if (dictionary.getValue<double>(KeyFlushInterval, framesUntilRequestFlush)) {
         LDEBUG("Default framesUntilRequestFlush overridden: " <<
             framesUntilRequestFlush);
@@ -95,7 +98,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
 
     _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
         tileDataset, threadPool);
-    _tileCache = std::make_shared<TileCache>(static_cast<size_t>(cacheSize));
+    //_tileCache = std::make_shared<TileCache>(static_cast<size_t>(cacheSize));
     _framesUntilRequestFlush = framesUntilRequestFlush;
 }
 
@@ -104,7 +107,7 @@ CachingTileProvider::CachingTileProvider(
                                         std::shared_ptr<TileCache> tileCache,
                                         int framesUntilFlushRequestQueue)
     : _asyncTextureDataProvider(tileReader)
-    , _tileCache(tileCache)
+    //, _tileCache(tileCache)
     , _framesUntilRequestFlush(framesUntilFlushRequestQueue)
     , _framesSinceLastRequestFlush(0)
 	, _defaultTile(Tile::TileUnavailable)
@@ -122,7 +125,7 @@ void CachingTileProvider::update() {
 }
 
 void CachingTileProvider::reset() {
-    _tileCache->clear();
+    cache::MemoryTileCache::ref().clear();
     _asyncTextureDataProvider->reset();
 }
 
@@ -135,10 +138,10 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
         return Tile(nullptr, nullptr, Tile::Status::OutOfRange);
     }
 
-    TileIndex::TileHashKey key = tileIndex.hashKey();
+    cache::ProviderTileHashKey key = providerTileHashKey(tileIndex);
 
-    if (_tileCache->exist(key)) {
-        return _tileCache->get(key);
+    if (cache::MemoryTileCache::ref().exist(key)) {
+        return cache::MemoryTileCache::ref().get(key);
     }
     else {
         _asyncTextureDataProvider->enqueueTileIO(tileIndex);
@@ -163,9 +166,9 @@ Tile CachingTileProvider::getDefaultTile() {
 void CachingTileProvider::initTexturesFromLoadedData() {
     auto rawTiles = _asyncTextureDataProvider->getRawTiles();
     for (auto rawTile : rawTiles){
-        TileIndex::TileHashKey key = rawTile->tileIndex.hashKey();
+        cache::ProviderTileHashKey key = providerTileHashKey(rawTile->tileIndex);
         Tile tile = createTile(rawTile);
-        _tileCache->put(key, tile);
+        cache::MemoryTileCache::ref().put(key, tile);
     }
 }
 
@@ -180,10 +183,10 @@ Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
         return Tile::Status::OutOfRange;
     }
 
-    TileIndex::TileHashKey key = tileIndex.hashKey();
+    cache::ProviderTileHashKey key = providerTileHashKey(tileIndex);
 
-    if (_tileCache->exist(key)) {
-        return _tileCache->get(key).status();
+    if (cache::MemoryTileCache::ref().exist(key)) {
+        return cache::MemoryTileCache::ref().get(key).status();
     }
 
     return Tile::Status::Unavailable;
@@ -198,7 +201,7 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
         return{ nullptr, nullptr, Tile::Status::IOError };
     }
 
-//    TileIndex::TileHashKey key = rawTile->tileIndex.hashKey();
+//    ProviderTileHashKey key = rawTile->tileIndex.hashKey();
     TileDataLayout dataLayout =
         _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         
@@ -225,6 +228,28 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
     };
 
     return tile;
+}
+
+/**
+Creates a hash which can be used as key in hash maps.
+    
++-------+------------+-------+------------+
+| USAGE | BIT RANGE  | #BITS | MAX VALUE  |
++-------+------------+-------+------------+
+| level |   0 -  5   |   5   |         31 |
+|     x |   5 - 35   |  30   | 1073741824 |
+|     y |  35 - 64   |  29   |  536870912 |
+|    ID |  65 - 128  |  64   |       2^63 |
++-------+------------+-------+------------+
+     
+*/
+cache::ProviderTileHashKey CachingTileProvider::providerTileHashKey(TileIndex tileIndex) const {
+    cache::ProviderTileHashKey key = 0;
+    key |= (cache::ProviderTileHashKey)tileIndex.level;
+    key |= (cache::ProviderTileHashKey)tileIndex.x << 5;
+    key |= (cache::ProviderTileHashKey)tileIndex.y << 35;
+    key |= (cache::ProviderTileHashKey)uniqueIdentifier() << 65;
+    return key;
 }
 
 } // namespace tileprovider
