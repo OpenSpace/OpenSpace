@@ -45,8 +45,7 @@ public:
     CachingTileProvider(const ghoul::Dictionary& dictionary);
 
     CachingTileProvider(
-        std::shared_ptr<AsyncTileDataProvider> tileReader, 
-        std::shared_ptr<TileCache> tileCache,
+        std::shared_ptr<AsyncTileDataProvider> tileReader,
         int framesUntilFlushRequestQueue);
 
     virtual ~CachingTileProvider();

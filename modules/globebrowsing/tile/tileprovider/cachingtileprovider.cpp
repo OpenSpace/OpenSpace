@@ -38,7 +38,6 @@ namespace {
     const char* KeyDoPreProcessing = "DoPreProcessing";
     const char* KeyMinimumPixelSize = "MinimumPixelSize";
     const char* KeyFilePath = "FilePath";
-    //const char* KeyCacheSize = "CacheSize";
     const char* KeyFlushInterval = "FlushInterval";
 }
 
@@ -66,8 +65,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     config.minimumTilePixelSize = 512;
         
     // getValue does not work for integers
-    double minimumPixelSize; 
-    //double cacheSize = 512;
+    double minimumPixelSize;
     double framesUntilRequestFlush = 60;
 
     // 3. Check for used spcified optional keys
@@ -78,11 +76,6 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
         LDEBUG("Default minimumPixelSize overridden: " << minimumPixelSize);
         config.minimumTilePixelSize = static_cast<int>(minimumPixelSize); 
     }
-    /*
-    if (dictionary.getValue<double>(KeyCacheSize, cacheSize)) {
-        LDEBUG("Default cacheSize overridden: " << cacheSize);
-    }
-    */
     if (dictionary.getValue<double>(KeyFlushInterval, framesUntilRequestFlush)) {
         LDEBUG("Default framesUntilRequestFlush overridden: " <<
             framesUntilRequestFlush);
@@ -98,16 +91,13 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
 
     _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
         tileDataset, threadPool);
-    //_tileCache = std::make_shared<TileCache>(static_cast<size_t>(cacheSize));
     _framesUntilRequestFlush = framesUntilRequestFlush;
 }
 
 CachingTileProvider::CachingTileProvider(
                                         std::shared_ptr<AsyncTileDataProvider> tileReader, 
-                                        std::shared_ptr<TileCache> tileCache,
                                         int framesUntilFlushRequestQueue)
     : _asyncTextureDataProvider(tileReader)
-    //, _tileCache(tileCache)
     , _framesUntilRequestFlush(framesUntilFlushRequestQueue)
     , _framesSinceLastRequestFlush(0)
 	, _defaultTile(Tile::TileUnavailable)
@@ -198,10 +188,9 @@ TileDepthTransform CachingTileProvider::depthTransform() {
 
 Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
     if (rawTile->error != CE_None) {
-        return{ nullptr, nullptr, Tile::Status::IOError };
+        return Tile(nullptr, nullptr, Tile::Status::IOError);
     }
 
-//    ProviderTileHashKey key = rawTile->tileIndex.hashKey();
     TileDataLayout dataLayout =
         _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         
@@ -221,13 +210,7 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
     // AnisotropicMipMap must be set after texture is uploaded. Why?!
     texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-    Tile tile = {
-        texture,
-        rawTile->tileMetaData,
-        Tile::Status::OK
-    };
-
-    return tile;
+    return Tile(texture, rawTile->tileMetaData, Tile::Status::OK);
 }
 
 /**
