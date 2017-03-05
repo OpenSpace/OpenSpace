@@ -185,11 +185,12 @@ bool LabelParser::create() {
                     do {
                         std::getline(file, line);
 
-                        std::string read = line.substr(0, line.find_first_of(" "));
 
                         line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
                         line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
                         line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+
+                        std::string read = line.substr(0, line.find_first_of("="));
 
                         _detectorType = "CAMERA"; //default value
 
@@ -218,15 +219,19 @@ bool LabelParser::create() {
 
                         
                         if (read == "START_TIME"){
-                            std::string start = line.substr(line.find("=") + 2);
+                            std::string start = line.substr(line.find("=") + 1);
                             start.erase(std::remove(start.begin(), start.end(), ' '), start.end());
                             startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
                             count++;
 
                             getline(file, line);
-                            read = line.substr(0, line.find_first_of(" "));
+                            line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
+                            line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+                            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+
+                            read = line.substr(0, line.find_first_of("="));
                             if (read == "STOP_TIME"){
-                                std::string stop = line.substr(line.find("=") + 2);
+                                std::string stop = line.substr(line.find("=") + 1);
                                 stop.erase(
                                     std::remove_if(
                                         stop.begin(),
