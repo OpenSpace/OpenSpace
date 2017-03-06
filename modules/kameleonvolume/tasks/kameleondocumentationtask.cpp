@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/kameleonvolume/tasks/kameleondocumentationtask.h>
+
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 
 #include <openspace/openspace.h>
@@ -58,7 +59,8 @@ KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& di
 }
 
 std::string KameleonDocumentationTask::description() {
-    return "Extract metadata from cdf-file " + _inputPath + " and output html documentation to " + _outputPath;
+    return "Extract metadata from cdf-file " + _inputPath +
+        " and output html documentation to " + _outputPath;
 }
 
 void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressCallback) {

@@ -27,6 +27,8 @@
 
 #include <openspace/util/task.h>
 
+#include <string>
+
 namespace openspace {
 
 class KameleonMetadataToJsonTask : public Task {
@@ -35,6 +37,7 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
+    
 private:
     std::string _inputPath;
     std::string _outputPath;

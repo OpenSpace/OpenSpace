@@ -26,10 +26,13 @@
 #define __OPENSPACE_CORE___TASK___H__
 
 #include <functional>
-#include <ghoul/misc/dictionary.h>
-#include <openspace/documentation/documentation.h>
+#include <memory>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class Task {
 public:
@@ -38,7 +41,10 @@ public:
     virtual ~Task() = default;
     virtual void perform(const ProgressCallback& onProgress) = 0;
     virtual std::string description() = 0;
-    static std::unique_ptr<Task> createFromDictionary(const ghoul::Dictionary& dictionary);
+    
+    static std::unique_ptr<Task> createFromDictionary(
+        const ghoul::Dictionary& dictionary
+    );
     static documentation::Documentation documentation();
 };
 

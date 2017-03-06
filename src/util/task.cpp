@@ -23,22 +23,20 @@
  ****************************************************************************************/
 
 #include <openspace/util/task.h>
+
 #include <ghoul/misc/dictionary.h>
+
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/logging/logmanager.h>
-
-namespace {
-    const std::string _loggerCat = "Task";
-}
 
 namespace openspace {
 
 documentation::Documentation Task::documentation() {
-    using namespace openspace::documentation;
-    return{
-        "Renderable",
-        "renderable",
+    using namespace documentation;
+    return {
+        "Task",
+        "core_task",
         {
             {
                 "Type",
@@ -54,17 +52,17 @@ documentation::Documentation Task::documentation() {
 }
 
 std::unique_ptr<Task> Task::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    openspace::documentation::testSpecificationAndThrow(documentation::Documentation(), dictionary, "Task");
+    openspace::documentation::testSpecificationAndThrow(
+        documentation::Documentation(),
+        dictionary,
+        "Task"
+    );
+    
     std::string taskType = dictionary.value<std::string>("Type");
     auto factory = FactoryManager::ref().factory<Task>();
+
     std::unique_ptr<Task> task = factory->create(taskType, dictionary);
-
-    if (task == nullptr) {
-        LERROR("Failed to create a Task object of type '" << taskType << "'");
-        return nullptr;
-    }
-
-    return std::move(task);
+    return task;
 }
 
-}
+} // namespace openspace
