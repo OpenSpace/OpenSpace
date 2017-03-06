@@ -81,6 +81,10 @@ public:
     void reset();
     float noDataValueAsFloat();
 
+    /**
+     * Returns the number of bytes currently in the GDAL memory cache.
+     */
+    static size_t getTotalAllocatedGDALData();
 
     const static glm::ivec2 tilePixelStartOffset;
     const static glm::ivec2 tilePixelSizeDifference;

@@ -28,6 +28,7 @@
 
 #include <ogr_featurestyle.h>
 #include <ogr_spatialref.h>
+#include <cpl_virtualmem.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // abspath
@@ -141,6 +142,11 @@ void TileDataset::reset() {
     initialize();
 }
 
+size_t TileDataset::getTotalAllocatedGDALData() {
+    size_t maximum = GdalHasBeenInitialized ? GDALGetCacheMax64() : 0;
+    return GdalHasBeenInitialized ? GDALGetCacheUsed64() : 0;
+}
+
 float TileDataset::noDataValueAsFloat() {
     float noDataValue;
     if (_dataset && _dataset->GetRasterBand(1)) {
@@ -178,6 +184,7 @@ void TileDataset::gdalEnsureInitialized() {
             "GDAL_DATA",
             absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str()
         );
+        //GDALSetCacheMax64(1000 * 1000 * 1000); // 1 GB
         setGdalProxyConfiguration();
         GdalHasBeenInitialized = true;
     }
@@ -282,7 +289,10 @@ GDALDataset* TileDataset::gdalDataset(const std::string& gdalDatasetDesc) {
 }
 
 TileDataset::~TileDataset() {
-    delete _dataset;
+    // Do not call delete on _dataset. Instead use GDALClose.
+    if (_dataset != nullptr) {
+        GDALClose((GDALDatasetH)_dataset);
+    }
 }
 
 std::shared_ptr<RawTile> TileDataset::readTileData(TileIndex tileIndex) {
@@ -302,7 +312,7 @@ std::shared_ptr<RawTile> TileDataset::readTileData(TileIndex tileIndex) {
         rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);
         rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile, io));
     }
-
+  
     return rawTile;
 }
 

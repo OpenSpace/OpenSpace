@@ -62,6 +62,11 @@ void MemoryAwareTileCache::put(ProviderTileHashKey key, Tile tile) {
     _tileCache->put(key, tile);
 }
 
+void MemoryAwareTileCache::clean(size_t extraMemorySize) {
+	_tileCache->clean(extraMemorySize);
+}
+
+
 MemoryAwareTileCache::MemoryAwareTileCache(size_t cacheSize)
 {
 	_tileCache = std::make_shared<MemoryAwareLRUCache<ProviderTileHashKey, Tile> >(

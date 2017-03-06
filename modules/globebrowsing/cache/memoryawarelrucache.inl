@@ -80,8 +80,9 @@ size_t MemoryAwareLRUCache<KeyType, ValueType>::maximumSize() const {
 }
 
 template<typename KeyType, typename ValueType>
-void MemoryAwareLRUCache<KeyType, ValueType>::clean() {
-    while (_cacheSize > _maximumCacheSize) {
+void MemoryAwareLRUCache<KeyType, ValueType>::clean(size_t extraMemorySize) {
+    ghoul_assert(extraMemorySize < _maximumCacheSize, "Too big extra memory size.");
+    while (_cacheSize + extraMemorySize > _maximumCacheSize) {
         auto last_it = _itemList.end(); last_it--;
         _itemMap.erase(last_it->first);
         _cacheSize -= last_it->second.memoryImpact();

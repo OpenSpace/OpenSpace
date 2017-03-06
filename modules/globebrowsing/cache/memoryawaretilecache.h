@@ -54,6 +54,15 @@ public:
     bool exist(ProviderTileHashKey key);
     Tile get(ProviderTileHashKey key);
     void put(ProviderTileHashKey key, Tile tile);
+    
+    /**
+     * Cleans the cache if the amount of allocated data is more than the maximum cache
+     * size.
+     * \param extraMemorySize is the amount of extra memory the cache needs to consider
+     * when cleaning the cache. This memory size is simply added to the current cache
+     * size when checking if the cache size is too big.
+     */
+    void clean(size_t extraMemorySize = 0);
 
     static MemoryAwareTileCache& ref();
 private:

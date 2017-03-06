@@ -59,8 +59,15 @@ public:
     size_t size() const;
     size_t maximumSize() const;
 
+    /**
+     * Cleans the cache if the amount of allocated data is more than the maximum cache
+     * size.
+     * \param extraMemorySize is the amount of extra memory the cache needs to consider
+     * when cleaning the cache. This memory size is simply added to the current cache
+     * size when checking if the cache size is too big.
+     */
+    void clean(size_t extraMemorySize = 0);
 private:
-    void clean();
 
     std::list<std::pair<KeyType, ValueType> > _itemList;
     std::map<KeyType, decltype(_itemList.begin())> _itemMap;

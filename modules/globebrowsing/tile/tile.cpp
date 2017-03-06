@@ -22,7 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/globebrowsing/tile/tile.h>
+
 #include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/tilemetadata.h>
 
 #include <gdal_priv.h>
 
@@ -38,7 +41,15 @@ const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavaila
 Tile::Tile(std::shared_ptr<ghoul::opengl::Texture> texture,
          std::shared_ptr<TileMetaData> metaData,
          Status status)
-: MemoryAwareCacheable(texture ? texture->expectedPixelDataSize() / 1000 : 0)
+: MemoryAwareCacheable(
+    (sizeof(Tile) +
+    (metaData ? sizeof(TileMetaData) : 0) +
+    (texture ? sizeof(ghoul::opengl::Texture) + texture->expectedPixelDataSize() * 2 : 0))
+    // multiply by 2 because on OSX call to gfxAllocateTextureLevel() is also made for
+    // textures which makes them have double the data size expected. I don't know why but
+    // it seems like a known issue. Need to check the memory allocation on windows and
+    // linux too to see if it also is doubled there. / Kalle
+    / 1000) // Convert from bytes to kilobytes
 , _texture(texture)
 , _metaData(metaData)
 , _status(status) {

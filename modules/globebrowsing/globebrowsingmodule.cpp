@@ -50,7 +50,7 @@ GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule("GlobeBrowsing") {}
 void GlobeBrowsingModule::internalInitialize() {
     using namespace globebrowsing;
 
-    cache::MemoryAwareTileCache::create(200 * 1000); // 200 MB
+    cache::MemoryAwareTileCache::create(1000 * 200); // 200 MB
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
