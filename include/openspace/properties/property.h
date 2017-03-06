@@ -64,13 +64,13 @@ class Property {
 public:
     /**
      * The visibility classes for Property%s. The classes are strictly ordered as
-     * All > Developer > User > None
+     * All > Developer > User > Hidden
      */
     enum class Visibility {
         All = 3,  ///< Visible for all types, no matter what
         Developer = 2, ///< Visible in Developer mode
         User = 1, ///< Visible in User mode
-        None = 0 ///< Never visible
+        Hidden = 0 ///< Never visible
     };
 
     /**

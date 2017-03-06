@@ -84,7 +84,7 @@ public:
     // instance variables
     int _nrInserted = 0;
     bool _rebuild = false;
-    bool _interceptTag[8];
+    bool _interceptTag[35];
     bool _withinFOV;
     std::vector<psc> _projectionBounds;
     psc _interceptVector;

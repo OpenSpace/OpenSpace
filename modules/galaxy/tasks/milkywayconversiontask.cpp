@@ -30,6 +30,8 @@
 
 #include <openspace/documentation/documentation.h>
 
+#include <ghoul/misc/dictionary.h>
+
 namespace {
     const char* KeyInFilenamePrefix = "InFilenamePrefix";
     const char* KeyInFilenameSuffix = "InFilenameSuffix";

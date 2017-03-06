@@ -23,11 +23,14 @@
  ****************************************************************************************/
 
 #include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
+
 #include <modules/kameleonvolume/kameleonvolumereader.h>
-#include <string>
+
 #include <openspace/documentation/verifier.h>
+
 #include <ghoul/misc/dictionaryjsonformatter.h>
 #include <ghoul/filesystem/filesystem.h>
+
 #include <fstream>
 
 namespace {
@@ -37,7 +40,9 @@ namespace {
 
 namespace openspace {
 
-KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(const ghoul::Dictionary& dictionary) {
+KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
+                                                      const ghoul::Dictionary& dictionary)
+{
     openspace::documentation::testSpecificationAndThrow(
         documentation(),
         dictionary,
@@ -49,13 +54,15 @@ KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(const ghoul::Dictionary& 
 }
 
 std::string KameleonMetadataToJsonTask::description() {
-    return "Extract metadata from cdf-file " + _inputPath + " and write as json to " + _outputPath;
+    return "Extract metadata from cdf-file " + _inputPath +
+        " and write as json to " + _outputPath;
 }
 
-void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback & progressCallback) {
+void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressCallback) {
     KameleonVolumeReader reader(_inputPath);
     ghoul::Dictionary dictionary = reader.readMetaData();
     progressCallback(0.5f);
+
     ghoul::DictionaryJsonFormatter formatter;
     std::string json = formatter.format(dictionary);
     std::ofstream output(_outputPath);
@@ -63,8 +70,7 @@ void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback & progress
     progressCallback(1.0f);
 }
 
-documentation::Documentation KameleonMetadataToJsonTask::documentation()
-{
+documentation::Documentation KameleonMetadataToJsonTask::documentation() {
     using namespace documentation;
     return {
         "KameleonMetadataToJsonTask",
@@ -88,7 +94,5 @@ documentation::Documentation KameleonMetadataToJsonTask::documentation()
         }
     };
 }
-
-
 
 } // namespace openspace

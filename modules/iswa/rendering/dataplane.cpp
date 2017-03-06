@@ -56,7 +56,7 @@ bool DataPlane::initialize(){
             // and unregister backgroundvalues property.
             if(_autoFilter.value()){
                 _backgroundValues.setValue(_dataProcessor->filterValues());
-                _backgroundValues.setVisibility(properties::Property::Visibility::None);
+                _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues 
             } else {
