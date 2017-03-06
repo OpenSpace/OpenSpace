@@ -35,6 +35,8 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
+#include "ccmc/CCMCTime.h"
+
 namespace ghoul {
 namespace opengl {
     class ProgramObject;
@@ -42,6 +44,7 @@ namespace opengl {
 }
 
 namespace openspace {
+    class Time;
     struct LinePoint;
 
 class RenderableFieldlines : public Renderable {
@@ -71,6 +74,7 @@ private:
 
     properties::FloatProperty _stepSize;
     properties::BoolProperty _classification;
+    properties::BoolProperty _isTimeDependent;
     properties::Vec4Property _fieldlineColor;
     properties::OptionProperty _seedPointSource;
     properties::StringProperty _seedPointSourceFile;
@@ -83,6 +87,7 @@ private:
 
     bool _seedPointsAreDirty;
     bool _fieldLinesAreDirty;
+    bool _isWithinTimeInterval;
 
     std::vector<glm::vec3> _seedPoints;
 
@@ -91,6 +96,12 @@ private:
 
     std::vector<GLint> _lineStart;
     std::vector<GLsizei> _lineCount;
+
+    Time* _osTime;
+    double _currentTime;
+    double _startTime;
+    double _endTime;
+    //double _timeDuration;
 };
 
 } // namespace openspace
