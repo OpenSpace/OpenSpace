@@ -529,11 +529,14 @@ void RenderableFov::computeIntercepts(const RenderData& data) {
             insertPoint(_fovBounds, _projectionBounds[r].vec4(), col_blue);
         }
         else {
-            glm::vec4 corner(_bounds[r][0], _bounds[r][1], _bounds[r][2], data.position[3] + 2);
-            corner = _spacecraftRotation*corner;
-            // NONE OF THE FOV-RAYS INTERCEPT AND NO OBJECT IN FOV
+            //glm::vec4 corner(_bounds[r][0], _bounds[r][1], _bounds[r][2], 8);
+            ////glm::vec4 corner = _projectionBounds[r].vec4();
+            //corner = _spacecraftRotation*corner;
+            //// NONE OF THE FOV-RAYS INTERCEPT AND NO OBJECT IN FOV
+            //insertPoint(_fovBounds, fovOrigin, col_gray);
+            //insertPoint(_fovBounds, corner, glm::vec4(0));
             insertPoint(_fovBounds, fovOrigin, col_gray);
-            insertPoint(_fovBounds, corner, glm::vec4(0));
+            insertPoint(_fovBounds, _projectionBounds[r].vec4(), glm::vec4(0.4));
         }
     }
     _interceptTag[_bounds.size()] = _interceptTag[0];
