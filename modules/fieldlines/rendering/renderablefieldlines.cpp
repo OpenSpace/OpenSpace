@@ -23,9 +23,13 @@
  ****************************************************************************************/
 
 #include <modules/fieldlines/rendering/renderablefieldlines.h>
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/time.h>
+
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
@@ -48,6 +52,7 @@ namespace {
     const char* keyVectorFieldFile = "File";
     const char* keyVectorFieldVolumeModel = "Model";
     const char* keyVectorFieldVolumeVariable = "Variables";
+    const char* keyVectorFieldTimeDependent = "TimeDependent";
 
     const char* keyFieldlines = "Fieldlines";
     const char* keyFieldlinesStepSize = "Stepsize";
@@ -78,6 +83,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _stepSize("stepSize", "Fieldline Step Size", defaultFieldlineStepSize, 0.f, 10.f)
     , _classification("classification", "Fieldline Classification", true)
+    , _isTimeDependent("isTimeDependent", "Is Time Dependent", false)
     , _fieldlineColor(
         "fieldlineColor",
         "Fieldline Color",
@@ -90,6 +96,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     , _program(nullptr)
     , _seedPointsAreDirty(true)
     , _fieldLinesAreDirty(true)
+    , _isWithinTimeInterval(true)
     , _fieldlineVAO(0)
     , _vertexPositionBuffer(0)
 {
@@ -141,6 +148,8 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 
     addProperty(_classification);
 
+    addProperty(_isTimeDependent);
+
     _fieldlineColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_fieldlineColor);
 
@@ -153,6 +162,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     // OsEng.gui()._property.registerProperty(&_enabled);
     // OsEng.gui()._property.registerProperty(&_stepSize);
     // OsEng.gui()._property.registerProperty(&_classification);
+    // OsEng.gui()._property.registerProperty(&_isTimeDependent);
     // OsEng.gui()._property.registerProperty(&_fieldlineColor);
     // OsEng.gui()._property.registerProperty(&_seedPointSource);
     // OsEng.gui()._property.registerProperty(&_seedPointSourceFile);
@@ -160,7 +170,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 
 void RenderableFieldlines::initializeDefaultPropertyValues() {
     bool success;
-    
+
     // Step size
     float stepSize;
     success = _fieldlineInfo.getValue(keyFieldlinesStepSize, stepSize);
@@ -205,10 +215,7 @@ bool RenderableFieldlines::isReady() const {
 }
 
 bool RenderableFieldlines::initialize() {
-    if (_vectorFieldInfo.empty() ||
-        _fieldlineInfo.empty() ||
-        _seedPointsInfo.empty())
-    {
+    if (_vectorFieldInfo.empty() || _fieldlineInfo.empty() || _seedPointsInfo.empty()) {
         return false;
     }
 
@@ -243,29 +250,31 @@ bool RenderableFieldlines::deinitialize() {
 }
 
 void RenderableFieldlines::render(const RenderData& data) {
-    _program->activate();
-    _program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
-    _program->setUniform("modelTransform", glm::mat4(1.0));
-    int testTime = static_cast<int>(OsEng.runTime()*100)/5;
-    _program->setUniform("time", testTime);
-    //_program->setUniform("cameraViewDir", glm::vec3(data.camera.viewDirectionWorldSpace()));
-    glDisable(GL_CULL_FACE);
-    setPscUniforms(*_program, data.camera, data.position);
+    if (_isWithinTimeInterval) {
+        _program->activate();
+        _program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
+        _program->setUniform("modelTransform", glm::mat4(1.0));
+        int testTime = static_cast<int>(OsEng.runTime()*100)/5;
+        _program->setUniform("time", testTime);
+        //_program->setUniform("cameraViewDir", glm::vec3(data.camera.viewDirectionWorldSpace()));
+        glDisable(GL_CULL_FACE);
+        setPscUniforms(*_program, data.camera, data.position);
 
-    _program->setUniform("classification", _classification);
-    if (!_classification)
-        _program->setUniform("fieldLineColor", _fieldlineColor);
+        _program->setUniform("classification", _classification);
+        if (!_classification)
+            _program->setUniform("fieldLineColor", _fieldlineColor);
 
-    glBindVertexArray(_fieldlineVAO);
-    glMultiDrawArrays(
-        GL_LINE_STRIP_ADJACENCY,
-        &_lineStart[0],
-        &_lineCount[0],
-        static_cast<GLsizei>(_lineStart.size())
-    );
-    glBindVertexArray(0);
-    glEnable(GL_CULL_FACE);
-    _program->deactivate();
+        glBindVertexArray(_fieldlineVAO);
+        glMultiDrawArrays(
+            GL_LINE_STRIP_ADJACENCY,
+            &_lineStart[0],
+            &_lineCount[0],
+            static_cast<GLsizei>(_lineStart.size())
+        );
+        glBindVertexArray(0);
+        glEnable(GL_CULL_FACE);
+        _program->deactivate();
+    }
 }
 
 void RenderableFieldlines::update(const UpdateData&) {
@@ -317,6 +326,15 @@ void RenderableFieldlines::update(const UpdateData&) {
         glBindVertexArray(0);
 
         _fieldLinesAreDirty = false;
+    }
+
+    if (_isTimeDependent) {
+        _currentTime = _osTime->j2000Seconds();
+        if (_currentTime > _startTime && _currentTime < _endTime) {
+            _isWithinTimeInterval = true;
+        } else {
+            _isWithinTimeInterval = false;
+        }
     }
 }
 
@@ -393,6 +411,12 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         return {};
     }
 
+    bool isTimeDependent;
+    success = _vectorFieldInfo.getValue(keyVectorFieldTimeDependent, isTimeDependent);
+    if (success) {
+        _isTimeDependent = isTimeDependent;
+    }
+
     std::string fileName;
     success = _vectorFieldInfo.getValue(keyVectorFieldFile, fileName);
     if (!success) {
@@ -435,14 +459,21 @@ RenderableFieldlines::generateFieldlinesVolumeKameleon()
         _vectorFieldInfo.getValue(v3, zVariable);
 
         KameleonWrapper kw(fileName);
+        if (_isTimeDependent) {
+            _osTime = &Time::ref();
+            _currentTime = _osTime->j2000Seconds();
+            std::string tempString = kw.getStartTimeString();
+            _startTime = _osTime->convertTime(tempString.substr(0, tempString.length()-2)) + kw.getElapsedTime();
+            _endTime = _startTime + 240.0; // TODO this should NOT be a hardcoded value.. should be taken from meta data
+        }
         return kw.getClassifiedFieldLines(xVariable, yVariable, zVariable, _seedPoints, _stepSize);
     }
-    
+
     if (lorentzForce) {
         KameleonWrapper kw(fileName);
         return kw.getLorentzTrajectories(_seedPoints, _fieldlineColor, _stepSize);
     }
-    
+
     ghoul_assert(false, "Should not reach this");
     return {};
 }
