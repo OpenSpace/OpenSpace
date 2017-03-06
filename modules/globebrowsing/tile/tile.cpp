@@ -81,7 +81,7 @@ Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
     // Create tile
     Tile tile(texture, nullptr, Tile::Status::OK);
     return tile;
-}
+} 
 
 glm::vec2 Tile::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
                                                 glm::uvec2 resolution, glm::vec2 tileUV)

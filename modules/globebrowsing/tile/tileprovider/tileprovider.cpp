@@ -59,11 +59,11 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(const ghoul::Di
     return result;
 }
 
-TileProvider::TileProvider() {
+TileProvider::TileProvider() : _initialized(false) {
     initialize();
 }
 
-TileProvider::TileProvider(const ghoul::Dictionary& dictionary) {
+TileProvider::TileProvider(const ghoul::Dictionary& dictionary) : _initialized(false) {
     initialize();
 };
 

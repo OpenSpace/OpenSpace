@@ -222,16 +222,16 @@ Creates a hash which can be used as key in hash maps.
 | level |   0 -  5   |   5   |         31 |
 |     x |   5 - 35   |  30   | 1073741824 |
 |     y |  35 - 64   |  29   |  536870912 |
-|    ID |  65 - 128  |  64   |       2^63 |
+|    ID |  65 - 81   |  16   |       2^16 |
 +-------+------------+-------+------------+
      
 */
 cache::ProviderTileHashKey CachingTileProvider::providerTileHashKey(TileIndex tileIndex) const {
-    cache::ProviderTileHashKey key = 0;
-    key |= (cache::ProviderTileHashKey)tileIndex.level;
-    key |= (cache::ProviderTileHashKey)tileIndex.x << 5;
-    key |= (cache::ProviderTileHashKey)tileIndex.y << 35;
-    key |= (cache::ProviderTileHashKey)uniqueIdentifier() << 65;
+    cache::ProviderTileHashKey key;
+    key.tileHashKey |= (TileIndex::TileHashKey) tileIndex.level;
+    key.tileHashKey |= (TileIndex::TileHashKey) tileIndex.x << 5;
+    key.tileHashKey |= (TileIndex::TileHashKey) tileIndex.y << 35;
+    key.providerHashKey |= (size_t) uniqueIdentifier();
     return key;
 }
 

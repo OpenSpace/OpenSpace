@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
 
 #include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/cache/memoryawarelrucache.h>
 
 #include <memory>
@@ -38,8 +39,25 @@ namespace cache {
  * Enumerable type used in the LRU cache. 128 bytes are able to account for tile index
  * and an unique identifier for the tile provider.
  */
-typedef unsigned __int128 uint128_t;
-using ProviderTileHashKey = uint128_t;
+//typedef unsigned __int128 uint128_t;
+//using ProviderTileHashKey = uint128_t;
+
+struct ProviderTileHashKey {
+    TileIndex::TileHashKey tileHashKey;
+    size_t providerHashKey;
+
+	ProviderTileHashKey() {
+		tileHashKey = 0;
+		providerHashKey = 0;
+	}
+
+    bool operator<(const ProviderTileHashKey& r ) const
+    {
+       return ( tileHashKey < r.tileHashKey ) ||
+              (( tileHashKey == r.tileHashKey) &&
+                ( providerHashKey < r.providerHashKey ));
+    }
+};
 
 /**
  * Singleton class used to cache tiles for all <code>CachingTileProvider</code>s.

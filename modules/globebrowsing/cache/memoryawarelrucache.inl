@@ -45,9 +45,9 @@ template<typename KeyType, typename ValueType>
 void MemoryAwareLRUCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value) {
     auto it = _itemMap.find(key);
     if (it != _itemMap.end()) {
+		_cacheSize -= it->second->second.memoryImpact();
         _itemList.erase(it->second);
         _itemMap.erase(it);
-        _cacheSize -= it->second->second.memoryImpact();
     }
     _itemList.push_front(std::make_pair(key, value));
     _itemMap.insert(std::make_pair(key, _itemList.begin()));
