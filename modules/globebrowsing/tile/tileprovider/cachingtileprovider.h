@@ -65,8 +65,6 @@ public:
     virtual int maxLevel();
     virtual float noDataValueAsFloat();
 
-    cache::ProviderTileHashKey providerTileHashKey(TileIndex tileIndex) const;
-
 private:
     /**
     * Collects all asynchronously downloaded <code>RawTile</code>

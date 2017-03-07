@@ -50,15 +50,15 @@ void MemoryAwareTileCache::clear() {
     _tileCache->clear();
 }
 
-bool MemoryAwareTileCache::exist(ProviderTileHashKey key) {
+bool MemoryAwareTileCache::exist(ProviderTileKey key) {
     return _tileCache->exist(key);
 }
 
-Tile MemoryAwareTileCache::get(ProviderTileHashKey key) {
+Tile MemoryAwareTileCache::get(ProviderTileKey key) {
     return _tileCache->get(key);
 }
 
-void MemoryAwareTileCache::put(ProviderTileHashKey key, Tile tile) {
+void MemoryAwareTileCache::put(ProviderTileKey key, Tile tile) {
     _tileCache->put(key, tile);
 }
 
@@ -69,7 +69,7 @@ void MemoryAwareTileCache::clean(size_t extraMemorySize) {
 
 MemoryAwareTileCache::MemoryAwareTileCache(size_t cacheSize)
 {
-	_tileCache = std::make_shared<MemoryAwareLRUCache<ProviderTileHashKey, Tile> >(
+	_tileCache = std::make_shared<MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher> >(
 		static_cast<size_t>(cacheSize));
 }
 

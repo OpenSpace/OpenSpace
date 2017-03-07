@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_LRU_CACHE___H__
 
 #include <list>
-#include <map>
+#include <unordered_map>
 
 namespace openspace {
 namespace globebrowsing {
@@ -40,7 +40,7 @@ namespace cache {
  * It can for example be given in kilobytes.
  * <code>KeyType</code> needs to be a size comparable type.
  */
-template<typename KeyType, typename ValueType>
+template<typename KeyType, typename ValueType, typename HasherType>
 class MemoryAwareLRUCache {
 public:
     /**
@@ -70,7 +70,7 @@ public:
 private:
 
     std::list<std::pair<KeyType, ValueType> > _itemList;
-    std::map<KeyType, decltype(_itemList.begin())> _itemMap;
+    std::unordered_map<KeyType, decltype(_itemList.begin()), HasherType> _itemMap;
     size_t _cacheSize;
     size_t _maximumCacheSize;
 };

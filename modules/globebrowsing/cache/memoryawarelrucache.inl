@@ -28,21 +28,21 @@ namespace openspace {
 namespace globebrowsing {
 namespace cache {
     
-template<typename KeyType, typename ValueType>
-MemoryAwareLRUCache<KeyType, ValueType>::MemoryAwareLRUCache(size_t maximumSize)
+template<typename KeyType, typename ValueType, typename HasherType>
+MemoryAwareLRUCache<KeyType, ValueType, HasherType>::MemoryAwareLRUCache(size_t maximumSize)
     : _maximumCacheSize(maximumSize)
     , _cacheSize(0)
 {}
 
-template<typename KeyType, typename ValueType>
-void MemoryAwareLRUCache<KeyType, ValueType>::clear() {
+template<typename KeyType, typename ValueType, typename HasherType>
+void MemoryAwareLRUCache<KeyType, ValueType, HasherType>::clear() {
     _itemList.erase(_itemList.begin(), _itemList.end());
     _itemMap.erase(_itemMap.begin(), _itemMap.end());
     _cacheSize = 0;
 }
 
-template<typename KeyType, typename ValueType>
-void MemoryAwareLRUCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value) {
+template<typename KeyType, typename ValueType, typename HasherType>
+void MemoryAwareLRUCache<KeyType, ValueType, HasherType>::put(const KeyType& key, const ValueType& value) {
     auto it = _itemMap.find(key);
     if (it != _itemMap.end()) {
 		_cacheSize -= it->second->second.memoryImpact();
@@ -55,13 +55,13 @@ void MemoryAwareLRUCache<KeyType, ValueType>::put(const KeyType& key, const Valu
     clean();
 }
 
-template<typename KeyType, typename ValueType>
-bool MemoryAwareLRUCache<KeyType, ValueType>::exist(const KeyType& key) const {
+template<typename KeyType, typename ValueType, typename HasherType>
+bool MemoryAwareLRUCache<KeyType, ValueType, HasherType>::exist(const KeyType& key) const {
     return _itemMap.count(key) > 0;
 }
 
-template<typename KeyType, typename ValueType>
-ValueType MemoryAwareLRUCache<KeyType, ValueType>::get(const KeyType& key) {
+template<typename KeyType, typename ValueType, typename HasherType>
+ValueType MemoryAwareLRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
     //ghoul_assert(exist(key), "Key " << key << " must exist");
     auto it = _itemMap.find(key);
     // Move list iterator pointing to value
@@ -69,18 +69,18 @@ ValueType MemoryAwareLRUCache<KeyType, ValueType>::get(const KeyType& key) {
     return it->second->second;
 }
 
-template<typename KeyType, typename ValueType>
-size_t MemoryAwareLRUCache<KeyType, ValueType>::size() const {
+template<typename KeyType, typename ValueType, typename HasherType>
+size_t MemoryAwareLRUCache<KeyType, ValueType, HasherType>::size() const {
     return _cacheSize;
 }
 
-template<typename KeyType, typename ValueType>
-size_t MemoryAwareLRUCache<KeyType, ValueType>::maximumSize() const {
+template<typename KeyType, typename ValueType, typename HasherType>
+size_t MemoryAwareLRUCache<KeyType, ValueType, HasherType>::maximumSize() const {
     return _maximumCacheSize;
 }
 
-template<typename KeyType, typename ValueType>
-void MemoryAwareLRUCache<KeyType, ValueType>::clean(size_t extraMemorySize) {
+template<typename KeyType, typename ValueType, typename HasherType>
+void MemoryAwareLRUCache<KeyType, ValueType, HasherType>::clean(size_t extraMemorySize) {
     ghoul_assert(extraMemorySize < _maximumCacheSize, "Too big extra memory size.");
     while (_cacheSize + extraMemorySize > _maximumCacheSize) {
         auto last_it = _itemList.end(); last_it--;

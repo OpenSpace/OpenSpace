@@ -128,7 +128,7 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
         return Tile(nullptr, nullptr, Tile::Status::OutOfRange);
     }
 
-    cache::ProviderTileHashKey key = providerTileHashKey(tileIndex);
+	cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
     if (cache::MemoryAwareTileCache::ref().exist(key)) {
         return cache::MemoryAwareTileCache::ref().get(key);
@@ -156,7 +156,7 @@ Tile CachingTileProvider::getDefaultTile() {
 void CachingTileProvider::initTexturesFromLoadedData() {
     auto rawTiles = _asyncTextureDataProvider->getRawTiles();
     for (auto rawTile : rawTiles){
-        cache::ProviderTileHashKey key = providerTileHashKey(rawTile->tileIndex);
+		cache::ProviderTileKey key = { rawTile->tileIndex, uniqueIdentifier() };
         Tile tile = createTile(rawTile);
         cache::MemoryAwareTileCache::ref().put(key, tile);
     }
@@ -173,7 +173,7 @@ Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
         return Tile::Status::OutOfRange;
     }
 
-    cache::ProviderTileHashKey key = providerTileHashKey(tileIndex);
+	cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
     if (cache::MemoryAwareTileCache::ref().exist(key)) {
         return cache::MemoryAwareTileCache::ref().get(key).status();
@@ -211,28 +211,6 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
     texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
     return Tile(texture, rawTile->tileMetaData, Tile::Status::OK);
-}
-
-/**
-Creates a hash which can be used as key in hash maps.
-    
-+-------+------------+-------+------------+
-| USAGE | BIT RANGE  | #BITS | MAX VALUE  |
-+-------+------------+-------+------------+
-| level |   0 -  5   |   5   |         31 |
-|     x |   5 - 35   |  30   | 1073741824 |
-|     y |  35 - 64   |  29   |  536870912 |
-|    ID |  65 - 81   |  16   |       2^16 |
-+-------+------------+-------+------------+
-     
-*/
-cache::ProviderTileHashKey CachingTileProvider::providerTileHashKey(TileIndex tileIndex) const {
-    cache::ProviderTileHashKey key;
-    key.tileHashKey |= (TileIndex::TileHashKey) tileIndex.level;
-    key.tileHashKey |= (TileIndex::TileHashKey) tileIndex.x << 5;
-    key.tileHashKey |= (TileIndex::TileHashKey) tileIndex.y << 35;
-    key.providerHashKey |= (size_t) uniqueIdentifier();
-    return key;
 }
 
 } // namespace tileprovider

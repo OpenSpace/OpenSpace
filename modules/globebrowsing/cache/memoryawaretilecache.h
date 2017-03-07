@@ -42,22 +42,46 @@ namespace cache {
 //typedef unsigned __int128 uint128_t;
 //using ProviderTileHashKey = uint128_t;
 
-struct ProviderTileHashKey {
-    TileIndex::TileHashKey tileHashKey;
-    size_t providerHashKey;
+struct ProviderTileKey {
+    TileIndex tileIndex;
+    int providerID;
 
-	ProviderTileHashKey() {
-		tileHashKey = 0;
-		providerHashKey = 0;
-	}
-
-    bool operator<(const ProviderTileHashKey& r ) const
+    bool operator==(const ProviderTileKey& r ) const
     {
-       return ( tileHashKey < r.tileHashKey ) ||
-              (( tileHashKey == r.tileHashKey) &&
-                ( providerHashKey < r.providerHashKey ));
+       return (providerID == r.providerID) &&
+            (tileIndex == r.tileIndex);
     }
 };
+
+struct ProviderTileHasher {
+    /**
+    Creates a hash which can be used as key in hash maps.
+    First set the bits to be unique for all tiles.
+    +-------+------------+-------+------------+
+    | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
+    +-------+------------+-------+------------+
+    | level |   0 -  5   |   5   |         31 |
+    |     x |   5 - 35   |  30   | 1073741824 |
+    |     y |  35 - 64   |  29   |  536870912 |
+    +-------+------------+-------+------------+
+
+    */
+    unsigned long long operator()(const ProviderTileKey& t) const {
+        unsigned long long key;
+        key |= static_cast<unsigned long long>(t.tileIndex.level);
+        key |= static_cast<unsigned long long>(t.tileIndex.x << 5);
+        key |= static_cast<unsigned long long>(t.tileIndex.y << 35);
+        // Now the key is unique for all tiles, however not for all tile providers.
+        // Add to the key depending on the tile provider to avoid some hash collisions.
+        // (All hash collisions can not be avoided due to the limit in 64 bit for the
+        // hash key)
+        // Idea make some offset in the place of the bits for the x value. Lesser chance
+        // of having different x-value than having different tile provider ids.
+        key += static_cast<unsigned long long>(t.providerID << 25);
+        return key;
+    }
+};
+
 
 /**
  * Singleton class used to cache tiles for all <code>CachingTileProvider</code>s.
@@ -69,9 +93,9 @@ public:
     static void destroy();
 
     void clear();
-    bool exist(ProviderTileHashKey key);
-    Tile get(ProviderTileHashKey key);
-    void put(ProviderTileHashKey key, Tile tile);
+    bool exist(ProviderTileKey key);
+    Tile get(ProviderTileKey key);
+    void put(ProviderTileKey key, Tile tile);
     
     /**
      * Cleans the cache if the amount of allocated data is more than the maximum cache
@@ -91,7 +115,7 @@ private:
     ~MemoryAwareTileCache() = default;
     
     static MemoryAwareTileCache* _singleton;
-    std::shared_ptr<MemoryAwareLRUCache<ProviderTileHashKey, Tile> > _tileCache;
+    std::shared_ptr<MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher> > _tileCache;
 };
 
 } // namespace cache
