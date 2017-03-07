@@ -53,6 +53,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesol.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
@@ -136,6 +137,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
 
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesol.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
