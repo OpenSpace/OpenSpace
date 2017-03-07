@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
  
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 
 namespace {
     const char* keyFrame = "Frame";
@@ -51,6 +51,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
         FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f)
     })
+    , _debugPropertyOwner("Debug")
     , _debugProperties({
         BoolProperty("saveOrThrowCamera", "save or throw camera", false),
         BoolProperty("showChunkEdges", "show chunk edges", false),
@@ -66,6 +67,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty("collectStats", "collect stats", false),
         BoolProperty("onlyModelSpaceRendering", "Only Model Space Rendering", false)
     })
+    , _texturePropertyOwner("Textures")
 {
     setName("RenderableGlobe");
         
@@ -105,9 +107,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     double distance = res * _ellipsoid.maximumRadius() / tan(fov / 2);
     _distanceSwitch.addSwitchValue(_chunkedLodGlobe, distance);
         
-    _debugPropertyOwner.setName("Debug");
-    _texturePropertyOwner.setName("Textures");
-
     addProperty(_generalProperties.isEnabled);
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);

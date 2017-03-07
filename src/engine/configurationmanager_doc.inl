@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,11 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
 namespace openspace {
 
-Documentation ConfigurationManager::Documentation() {
+documentation::Documentation ConfigurationManager::Documentation() {
     using namespace documentation;
 
     return {
@@ -37,7 +38,8 @@ Documentation ConfigurationManager::Documentation() {
             ConfigurationManager::KeyConfigSgct,
             new StringAnnotationVerifier("A valid SGCT configuration file"),
             "The SGCT configuration file that determines the window and view frustum "
-            "settings that are being used when OpenSpace is started."
+            "settings that are being used when OpenSpace is started.",
+            Optional::No
         },
         {
             ConfigurationManager::KeyConfigScene,
@@ -47,7 +49,16 @@ Documentation ConfigurationManager::Documentation() {
             "The scene description that is used to populate the application after "
             "startup. The scene determines which objects are loaded, the startup "
             "time and other scene-specific settings. More information is provided in "
-            "the Scene documentation."
+            "the Scene documentation.",
+            Optional::No
+        },
+        {
+            ConfigurationManager::KeyConfigTask,
+            new StringAnnotationVerifier(
+                "A valid task file as described in the Task documentation"),
+                "The root task to be performed when launching the task runner "
+                "applicaition.",
+                Optional::Yes
         },
         {
             ConfigurationManager::KeyPaths,
@@ -55,7 +66,14 @@ Documentation ConfigurationManager::Documentation() {
             "A list of paths that are automatically registered with the file system. "
             "If a key X is used in the table, it is then useable by referencing ${X} "
             "in all other configuration files or scripts.",
-            Optional::Yes
+            Optional::No
+        },
+        {
+            ConfigurationManager::KeyPaths + '.' + ConfigurationManager::KeyCache,
+            new StringVerifier,
+            "The path to be used as a cache folder. If per scene caching is enabled, the "
+            "name of the scene will be appended to this folder",
+            Optional::No
         },
         {
             ConfigurationManager::KeyFonts,
@@ -72,7 +90,7 @@ Documentation ConfigurationManager::Documentation() {
                     ConfigurationManager::PartLogLevel,
                     new StringInListVerifier(
                         // List from logmanager.cpp::levelFromString
-                        { "Debug", "Info", "Warning", "Error", "Fatal", "None" }
+                        { "Trace", "Debug", "Info", "Warning", "Error", "Fatal", "None" }
                     ),
                     "The severity of log messages that will be displayed. Only "
                     "messages of the selected level or higher will be displayed. All "
@@ -95,31 +113,8 @@ Documentation ConfigurationManager::Documentation() {
                     new TableVerifier({
                         {
                             "*",
-                            new TableVerifier({
-                                {
-                                    ConfigurationManager::PartType,
-                                    new StringInListVerifier({
-                                    // List from logfactory.cpp::createLog
-                                        "text", "html"
-                                    }),
-                                    "The type of the new log to be generated."
-                                },
-                                {
-                                    ConfigurationManager::PartFile,
-                                    new StringVerifier,
-                                    "The filename to which the log will be written."
-                                },
-                                {
-                                    ConfigurationManager::PartAppend,
-                                    new BoolVerifier,
-                                    "Determines whether the file will be cleared at "
-                                    "startup or if the contents will be appended to "
-                                    "previous runs.",
-                                    Optional::Yes
-                                }
-                            }),
-                            "Additional log files",
-                            Optional::Yes
+                            new ReferencingVerifier("core_logfactory"),
+                            "Additional log files"
                         }
                     }),
                     "Per default, log messages are written to the console, the "

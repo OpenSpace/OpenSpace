@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,19 +32,18 @@ namespace luascriptfunctions {
  * Set the port for parallel connection
  */
 int setPort(lua_State* L) {
-    
-    const bool isFunction = (lua_isfunction(L, -1) != 0);
+    bool isFunction = (lua_isfunction(L, -1) != 0);
     if (isFunction) {
         // If the top of the stack is a function, it is ourself
         const char* msg = lua_pushfstring(L, "method called without argument");
         return luaL_error(L, "bad argument (%s)", msg);
     }
 
-    const bool isNumber = (lua_isnumber(L, -1) != 0);
+    bool isNumber = (lua_isnumber(L, -1) != 0);
     if (isNumber) {
         int value = lua_tonumber(L, -1);
         std::string port = std::to_string(value);
-        if(OsEng.isMaster()){
+        if (OsEng.windowWrapper().isMaster()) {
             OsEng.parallelConnection().setPort(port);
         }
         return 0;
@@ -59,18 +58,17 @@ int setPort(lua_State* L) {
 }
 
 int setAddress(lua_State* L) {
-    
-    const bool isFunction = (lua_isfunction(L, -1) != 0);
+    bool isFunction = (lua_isfunction(L, -1) != 0);
     if (isFunction) {
         // If the top of the stack is a function, it is ourself
         const char* msg = lua_pushfstring(L, "method called without argument");
         return luaL_error(L, "bad argument (%s)", msg);
     }
 
-    const int type = lua_type(L, -1);
+    int type = lua_type(L, -1);
     if (type == LUA_TSTRING) {
         std::string address = luaL_checkstring(L, -1);
-        if(OsEng.isMaster()){
+        if (OsEng.windowWrapper().isMaster()) {
             OsEng.parallelConnection().setAddress(address);
         }
         return 0;
@@ -85,18 +83,17 @@ int setAddress(lua_State* L) {
 }
 
 int setPassword(lua_State* L) {
-    
-    const bool isFunction = (lua_isfunction(L, -1) != 0);
+    bool isFunction = (lua_isfunction(L, -1) != 0);
     if (isFunction) {
         // If the top of the stack is a function, it is ourself
         const char* msg = lua_pushfstring(L, "method called without argument");
         return luaL_error(L, "bad argument (%s)", msg);
     }
 
-    const int type = lua_type(L, -1);
+    int type = lua_type(L, -1);
     if (type == LUA_TSTRING) {
         std::string pwd = luaL_checkstring(L, -1);
-        if(OsEng.isMaster()){
+        if (OsEng.windowWrapper().isMaster()) {
             OsEng.parallelConnection().setPassword(pwd);
         }
         return 0;
@@ -111,18 +108,17 @@ int setPassword(lua_State* L) {
 }
 
 int setDisplayName(lua_State* L) {
-    
-    const bool isFunction = (lua_isfunction(L, -1) != 0);
+    bool isFunction = (lua_isfunction(L, -1) != 0);
     if (isFunction) {
         // If the top of the stack is a function, it is ourself
         const char* msg = lua_pushfstring(L, "method called without argument");
         return luaL_error(L, "bad argument (%s)", msg);
     }
 
-    const int type = lua_type(L, -1);
+    int type = lua_type(L, -1);
     if (type == LUA_TSTRING) {
         std::string name = luaL_checkstring(L, -1);
-        if(OsEng.isMaster()){
+        if (OsEng.windowWrapper().isMaster()) {
             OsEng.parallelConnection().setName(name);
         }
         return 0;
@@ -137,40 +133,39 @@ int setDisplayName(lua_State* L) {
 }
 
 int connect(lua_State* L) {
-    
     int nArguments = lua_gettop(L);
-    if (nArguments != 0)
+    if (nArguments != 0) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    if(OsEng.isMaster()){
+    }
+    if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().clientConnect();
     }
     return 0;
 }
 
 int disconnect(lua_State* L) {
-    
     int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-    return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    if(OsEng.isMaster()){
+    if (nArguments != 0) {
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
+    if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().signalDisconnect();
     }
     return 0;
 }
 
 int requestHostship(lua_State* L) {
-    
-    const bool isFunction = (lua_isfunction(L, -1) != 0);
+    bool isFunction = (lua_isfunction(L, -1) != 0);
     if (isFunction) {
         // If the top of the stack is a function, it is ourself
         const char* msg = lua_pushfstring(L, "method called without argument");
         return luaL_error(L, "bad argument (%s)", msg);
     }
     
-    const int type = lua_type(L, -1);
+    int type = lua_type(L, -1);
     if (type == LUA_TSTRING) {
         std::string pwd = luaL_checkstring(L, -1);
-        if(OsEng.isMaster()){
+        if (OsEng.windowWrapper().isMaster()) {
             OsEng.parallelConnection().requestHostship(pwd);
         }
         return 0;
@@ -185,11 +180,11 @@ int requestHostship(lua_State* L) {
 }
 
 int resignHostship(lua_State* L) {
-
     int nArguments = lua_gettop(L);
-    if (nArguments != 0)
+    if (nArguments != 0) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-    if (OsEng.isMaster()) {
+    }
+    if (OsEng.windowWrapper().isMaster()) {
         OsEng.parallelConnection().resignHostship();
     }
     return 0;

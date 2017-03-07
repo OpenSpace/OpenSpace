@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <modules/globebrowsing/meshes/trianglesoup.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 
 #include <memory>
 #include <vector>
@@ -46,7 +46,7 @@ public:
     Grid(int xSegments, int ySegments,
         TriangleSoup::Positions usePositions = TriangleSoup::Positions::No,
         TriangleSoup::TextureCoordinates useTextures =
-         TriangleSoup::TextureCoordinates::No,
+        TriangleSoup::TextureCoordinates::No,
         TriangleSoup::Normals useNormals = TriangleSoup::Normals::No);
     
     virtual ~Grid() = default;
@@ -71,14 +71,14 @@ protected:
      * <code>ySegments</code>. Where the number of vertices in each direction is the number
      * of segments + 1.
      */
-    virtual std::vector<GLuint> CreateElements(int xSegments, int ySegments) = 0;
+    virtual std::vector<GLuint> createElements(int xSegments, int ySegments) = 0;
     
     /**
      * Should return the positions of vertices for a grid with size <code>xSegments</code>
      * * <code>ySegments</code>. Where the number of vertices in each direction is the
      * number of segments + 1.
      */
-    virtual std::vector<glm::vec4> CreatePositions(int xSegments, int ySegments) = 0;
+    virtual std::vector<glm::vec4> createPositions(int xSegments, int ySegments) = 0;
     
     /**
      * Should return the texture coordinates of vertices for a grid with size
@@ -86,14 +86,14 @@ protected:
      * each direction is the number of segments + 1.
      */
     virtual std::vector<glm::vec2>
-        CreateTextureCoordinates(int xSegments, int ySegments) = 0;
+        createTextureCoordinates(int xSegments, int ySegments) = 0;
     
     /**
      * Should return the normals of vertices for a grid with size <code>xSegments</code> *
      * <code>ySegments</code>. Where the number of vertices in each direction is the number
      * of segments + 1.
      */
-    virtual std::vector<glm::vec3> CreateNormals(int xSegments, int ySegments) = 0;
+    virtual std::vector<glm::vec3> createNormals(int xSegments, int ySegments) = 0;
 
     std::unique_ptr<TriangleSoup> _geometry;
 

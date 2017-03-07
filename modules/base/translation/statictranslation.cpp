@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <modules/base/translation/statictranslation.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
 namespace {
@@ -32,8 +33,8 @@ namespace {
 
 namespace openspace {
 
-Documentation StaticTranslation::Documentation() {
-    using namespace openspace::documentation;
+documentation::Documentation StaticTranslation::Documentation() {
+    using namespace documentation;
     return {
         "Static Translation",
         "base_transform_translation_static",

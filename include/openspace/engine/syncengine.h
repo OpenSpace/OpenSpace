@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,64 +25,68 @@
 #ifndef __OPENSPACE_CORE___SYNCENGINE___H__
 #define __OPENSPACE_CORE___SYNCENGINE___H__
 
+#include <openspace/util/syncbuffer.h>
+
+#include <ghoul/misc/boolean.h>
+
 #include <vector>
 #include <memory>
 
 namespace openspace {
 
 class Syncable;
-class SyncBuffer;
 
 /**
-* Manages a collection of <code>Syncable</code>s and ensures they are synchronized
-* over SGCT nodes. Encoding/Decoding order is handles internally.
-*/
+ * Manages a collection of <code>Syncable</code>s and ensures they are synchronized
+ * over SGCT nodes. Encoding/Decoding order is handles internally.
+ */
 class SyncEngine {
 public:
+    using IsMaster = ghoul::Boolean;
 
     /**
-    * Dependency injection: a SyncEngine relies on a SyncBuffer to encode the sync data.
-    */
-    SyncEngine(SyncBuffer* syncBuffer);
-
+     * Creates a new SyncEngine which a buffer size of \p syncBufferSize
+     * \pre syncBufferSize must be bigger than 0
+     */
+    SyncEngine(unsigned int syncBufferSize);
 
     /**
-    * Encodes all added Syncables in the injected <code>SyncBuffer</code>. 
-    * This method is only called on the SGCT master node
-    */
+     * Encodes all added Syncables in the injected <code>SyncBuffer</code>. 
+     * This method is only called on the SGCT master node
+     */
     void encodeSyncables();
 
     /**
-    * Decodes the <code>SyncBuffer</code> into the added Syncables.
-    * This method is only called on the SGCT slave nodes
-    */
+     * Decodes the <code>SyncBuffer</code> into the added Syncables.
+     * This method is only called on the SGCT slave nodes
+     */
     void decodeSyncables();
 
     /**
-    * Invokes the presync method of all added Syncables
-    */
-    void presync(bool isMaster);
+     * Invokes the presync method of all added Syncables
+     */
+    void preSynchronization(IsMaster isMaster);
 
     /**
-    * Invokes the postsync method of all added Syncables
-    */
-    void postsync(bool isMaster);
+     * Invokes the postsync method of all added Syncables
+     */
+    void postSynchronization(IsMaster isMaster);
     
-
-
     /**
-    * Add a Syncable to be synchronized over the SGCT cluster
-    */
+     * Add a Syncable to be synchronized over the SGCT cluster.
+     * \pre syncable must not be nullptr
+     */
     void addSyncable(Syncable* syncable);
 
     /**
-    * Add multiple Syncables to be synchronized over the SGCT cluster
-    */
+     * Add multiple Syncables to be synchronized over the SGCT cluster
+     * \pre syncables must not contain any nullptr
+     */
     void addSyncables(const std::vector<Syncable*>& syncables);
 
     /**
-    * Remove a Syncable from being synchronized over the SGCT cluster
-    */
+     * Remove a Syncable from being synchronized over the SGCT cluster
+     */
     void removeSyncable(Syncable* syncable);
 
     /**
@@ -91,18 +95,16 @@ public:
     void removeSyncables(const std::vector<Syncable*>& syncables);
 
 private:
-    
     /** 
-    * Vector of Syncables. The vectors ensures consistent encode/decode order
-    */
+     * Vector of Syncables. The vectors ensures consistent encode/decode order
+     */
     std::vector<Syncable*> _syncables;
 
     /**
-    * Databuffer used in encoding/decoding
-    */
-    std::unique_ptr<SyncBuffer> _syncBuffer;
+     * Databuffer used in encoding/decoding
+     */
+    SyncBuffer _syncBuffer;
 };
-
 
 } // namespace openspace
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,8 @@
 
 namespace openspace {
 
-void UniformLocation::bind(ProgramObject* program, const std::string& name){
+void UniformLocation::bind(ghoul::opengl::ProgramObject* program, const std::string& name)
+{
     _uniformLocation = program->uniformLocation(name);
 }
 

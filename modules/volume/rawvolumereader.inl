@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,18 +28,18 @@ namespace openspace {
 
 template <typename VoxelType>
 RawVolumeReader<VoxelType>::RawVolumeReader(const std::string& path,
-                                            const glm::ivec3& dimensions)
+                                            const glm::uvec3& dimensions)
     : _path(path)
     , _dimensions(dimensions)
 {}
 
 template <typename VoxelType>
-glm::ivec3 RawVolumeReader<VoxelType>::dimensions() const {
+glm::uvec3 RawVolumeReader<VoxelType>::dimensions() const {
     return _dimensions;
 }
 
 template <typename VoxelType>
-void RawVolumeReader<VoxelType>::setDimensions(const glm::ivec3& dimensions) {
+void RawVolumeReader<VoxelType>::setDimensions(const glm::uvec3& dimensions) {
     _dimensions = dimensions;
 }
 
@@ -68,19 +68,19 @@ VoxelType RawVolumeReader<VoxelType>::get(size_t index) const {
 }*/
 
 template <typename VoxelType>
-size_t RawVolumeReader<VoxelType>::coordsToIndex(const glm::ivec3& cartesian) const {
+size_t RawVolumeReader<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {
     return volumeutils::coordsToIndex(cartesian, dimensions());
 }
 
 template <typename VoxelType>
-glm::ivec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
+glm::uvec3 RawVolumeReader<VoxelType>::indexToCoords(size_t linear) const {
     return volumeutils::indexToCoords(linear, dimensions());
 }
 
 
 template <typename VoxelType>
 std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read() {
-    glm::ivec3 dims = dimensions();
+    glm::uvec3 dims = dimensions();
     std::unique_ptr<RawVolume<VoxelType>> volume =
         std::make_unique<RawVolume<VoxelType>>(dims);
 

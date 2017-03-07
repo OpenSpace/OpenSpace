@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,11 @@
 
 #include <openspace/scene/translation.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/vector/dvec3property.h>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
     
 class StaticTranslation : public Translation {
 public:
@@ -40,7 +41,7 @@ public:
     virtual glm::dvec3 position() const;
     virtual void update(const UpdateData& data) override;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     properties::DVec3Property _position;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___DEBUGRENDERER___H__
-#define __OPENSPACE_MODULE_BASE___DEBUGRENDERER___H__
+#ifndef __OPENSPACE_MODULE_DEBUGGING___DEBUGRENDERER___H__
+#define __OPENSPACE_MODULE_DEBUGGING___DEBUGRENDERER___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
@@ -31,8 +31,7 @@
 #include <openspace/util/updatestructures.h>
 #include <modules/globebrowsing/geometry/aabb.h>
 
-
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <memory>
 #include <vector>
 
@@ -162,4 +161,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___DEBUGRENDERER___H__
+#endif // __OPENSPACE_MODULE_DEBUGGING___DEBUGRENDERER___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
@@ -44,6 +43,7 @@ namespace ghoul {
 }
 
 namespace openspace {
+namespace documentation { struct Documentation; }
 
 class RenderableRings : public Renderable {
 public:
@@ -57,7 +57,7 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     void loadTexture();

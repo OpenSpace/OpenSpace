@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,10 @@
 #ifndef __OPENSPACE_CORE___CONFIGURATIONMANAGER___H__
 #define __OPENSPACE_CORE___CONFIGURATIONMANAGER___H__
 
-#include <openspace/documentation/documentation.h>
-
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
+namespace documentation {  struct Documentation; }
 
 /**
  * The ConfigurationManager takes care of loading the major configuration file
@@ -69,6 +68,8 @@ public:
     static const std::string KeyFactoryDocumentation;
     /// The key that stores the location of the scene file that is initially loaded
     static const std::string KeyConfigScene;
+    /// The key that stores the location of the tasks file that is initially loaded
+    static const std::string KeyConfigTask;
     /// The key that stores the subdirectory containing a list of all startup scripts to
     /// be executed on application start before the scene file is loaded
     static const std::string KeyStartupScript;
@@ -142,29 +143,19 @@ public:
      * that are specified in the configuration file will automatically be registered in
      * the ghoul::filesystem::FileSystem.
      * \param filename The filename to be loaded
-     * \throw ghoul::FileNotFoundException If the \p filename did not exist
-     * \throw ghoul::RuntimeError If the configuration file was not complete (i.e., did
+     * \throw SpecificationError If the configuration file was not complete (i.e., did
      * not specify the necessary keys KeyPaths, KeyPaths.KeyCache, KeyFonts, and
      * KeyConfigSgct)
      * \throw ghoul::lua::LuaRuntimeException If there was Lua-based error loading the
      * configuration file
      * \pre \p filename must not be empty
+     * \pre \p filename must exist
      */
     void loadFromFile(const std::string& filename);
 
-    static openspace::Documentation Documentation();
-
-private:
-    /**
-     * Checks whether the loaded configuration file is complete, that is specifying the
-     * necessary keys KeyPaths, KeyPaths.KeyCache, KeyFonts, and KeyConfigSgct. The method
-     * will log fatal errors if a key is missing.
-     * \return <code>true</code> if the configuration file was complete;
-     * <code>false</code> otherwise
-     */
-    bool checkCompleteness() const;
+    static documentation::Documentation Documentation();
 };
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_CORE___CONFIGURATIONMANAGER___H__
+#endif // __OPENSPACE_CORE___CONFIGURATIONMANAGER___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,19 +23,22 @@
  ****************************************************************************************/
 
 #include <openspace/scene/rotation.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
+
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
 
-#include <openspace/documentation/verifier.h>
-
 namespace {
-    const std::string _loggerCat = "Rotation";
-    const std::string KeyType = "Type";
+    const char* _loggerCat = "Rotation";
+    const char* KeyType = "Type";
 }
 
 namespace openspace {
 
-Documentation Rotation::Documentation() {
+documentation::Documentation Rotation::Documentation() {
     using namespace openspace::documentation;
 
     return {
@@ -55,12 +58,12 @@ Documentation Rotation::Documentation() {
     };
 }
 
-Rotation* Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Rotation");
 
     std::string rotationType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<Rotation>();
-    Rotation* result = factory->create(rotationType, dictionary);
+    std::unique_ptr<Rotation> result = factory->create(rotationType, dictionary);
     if (result == nullptr) {
         LERROR("Failed creating Rotation object of type '" << rotationType << "'");
         return nullptr;
@@ -69,11 +72,13 @@ Rotation* Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
     return result;
 }
 
-Rotation::Rotation() {
-    setName("Rotation");
-}
+Rotation::Rotation() 
+    : properties::PropertyOwner("Rotation")
+{}
     
-Rotation::Rotation(const ghoul::Dictionary& dictionary) {}
+Rotation::Rotation(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner("Rotation")
+{}
     
 Rotation::~Rotation() {}
     

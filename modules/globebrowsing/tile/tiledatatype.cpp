@@ -1,26 +1,26 @@
-  /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2016                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2017                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/tiledatatype.h>
 
@@ -44,8 +44,9 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
+namespace tiledatatype {
 
-float TileDataType::interpretFloat(GDALDataType gdalType, const char* src) {
+float interpretFloat(GDALDataType gdalType, const char* src) {
     switch (gdalType) {
         case GDT_Byte:
             return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
@@ -66,7 +67,7 @@ float TileDataType::interpretFloat(GDALDataType gdalType, const char* src) {
         }
 }
 
-size_t TileDataType::numberOfBytes(GDALDataType gdalType) {
+size_t numberOfBytes(GDALDataType gdalType) {
     switch (gdalType) {
         case GDT_Byte:
             return sizeof(GLubyte);
@@ -88,7 +89,7 @@ size_t TileDataType::numberOfBytes(GDALDataType gdalType) {
     }
 }
 
-size_t TileDataType::getMaximumValue(GDALDataType gdalType) {
+size_t getMaximumValue(GDALDataType gdalType) {
     switch (gdalType) {
         case GDT_Byte:
             return 1 << 8;
@@ -97,7 +98,7 @@ size_t TileDataType::getMaximumValue(GDALDataType gdalType) {
         case GDT_Int16:
             return 1 << 15;
         case GDT_UInt32:
-            return 1 << 32;
+            return size_t(1) << 32;
         case GDT_Int32:
             return 1 << 31;
         default:
@@ -106,14 +107,12 @@ size_t TileDataType::getMaximumValue(GDALDataType gdalType) {
     }
 }
 
-TextureFormat TileDataType::getTextureFormat(
-    int rasterCount, GDALDataType gdalType)
-{
+TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType) {
     TextureFormat format;
 
     switch (rasterCount) {
         case 1: // Red
-            format.ghoulFormat = Texture::Format::Red;
+            format.ghoulFormat = ghoul::opengl::Texture::Format::Red;
             switch (gdalType) {
                 case GDT_Byte:
                     format.glFormat = GL_R8;
@@ -142,7 +141,7 @@ TextureFormat TileDataType::getTextureFormat(
             }
             break;
         case 2:
-            format.ghoulFormat = Texture::Format::RG;
+            format.ghoulFormat = ghoul::opengl::Texture::Format::RG;
             switch (gdalType) {
                 case GDT_Byte:
                     format.glFormat = GL_RG8;
@@ -170,7 +169,7 @@ TextureFormat TileDataType::getTextureFormat(
             }
             break;
         case 3:
-            format.ghoulFormat = Texture::Format::RGB;
+            format.ghoulFormat = ghoul::opengl::Texture::Format::RGB;
             switch (gdalType) {
                 case GDT_Byte:
                     format.glFormat = GL_RGB8;
@@ -199,7 +198,7 @@ TextureFormat TileDataType::getTextureFormat(
             }
             break;
         case 4:
-            format.ghoulFormat = Texture::Format::RGBA;
+            format.ghoulFormat = ghoul::opengl::Texture::Format::RGBA;
             switch (gdalType) {
                 case GDT_Byte:
                     format.glFormat = GL_RGBA8;
@@ -234,7 +233,7 @@ TextureFormat TileDataType::getTextureFormat(
     return format;
 }
 
-GLuint TileDataType::getOpenGLDataType(GDALDataType gdalType) {
+GLuint getOpenGLDataType(GDALDataType gdalType) {
     switch (gdalType) {
         case GDT_Byte:
             return GL_UNSIGNED_BYTE;
@@ -256,7 +255,7 @@ GLuint TileDataType::getOpenGLDataType(GDALDataType gdalType) {
     }
 }
 
-GDALDataType TileDataType::getGdalDataType(GLuint glType) {
+GDALDataType getGdalDataType(GLuint glType) {
     switch (glType) {
         case GL_UNSIGNED_BYTE:
             return GDT_Byte;
@@ -278,5 +277,6 @@ GDALDataType TileDataType::getGdalDataType(GLuint glType) {
     }
 }
 
+} // namespace tiledatatype
 } // namespace globebrowsing
 } // namespace openspace

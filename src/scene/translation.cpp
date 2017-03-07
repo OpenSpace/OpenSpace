@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,19 @@
 
 #include <openspace/util/factorymanager.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const std::string _loggerCat = "Translation";
-    const std::string KeyType = "Type";
+    const char* _loggerCat = "Translation";
+    const char* KeyType = "Type";
 }
 
 namespace openspace {
 
-Documentation Translation::Documentation() {
-    using namespace openspace::documentation;
+documentation::Documentation Translation::Documentation() {
+    using namespace documentation;
 
     return {
         "Transformation Translation",
@@ -57,7 +58,9 @@ Documentation Translation::Documentation() {
     };
 }
 
-Translation* Translation::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Translation> Translation::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     if (!dictionary.hasValue<std::string>(KeyType)) {
         LERROR("Translation did not have key '" << KeyType << "'");
         return nullptr;
@@ -67,7 +70,7 @@ Translation* Translation::createFromDictionary(const ghoul::Dictionary& dictiona
     dictionary.getValue(KeyType, translationType);
     ghoul::TemplateFactory<Translation>* factory
           = FactoryManager::ref().factory<Translation>();
-    Translation* result = factory->create(translationType, dictionary);
+    std::unique_ptr<Translation> result = factory->create(translationType, dictionary);
     result->setName("Translation");
     if (result == nullptr) {
         LERROR("Failed creating Translation object of type '" << translationType << "'");
@@ -76,6 +79,10 @@ Translation* Translation::createFromDictionary(const ghoul::Dictionary& dictiona
 
     return result;
 }
+
+Translation::Translation()
+    : properties::PropertyOwner("Translation")
+{}
 
 Translation::~Translation() {}
     

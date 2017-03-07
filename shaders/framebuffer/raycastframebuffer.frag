@@ -34,9 +34,7 @@ uniform vec2 windowSize;
 
 #include "blending.glsl"
 #include "rand.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
-#include <#{fragmentPath}>
-
+#include "floatoperations.glsl"
 
 #for id, helperPath in helperPaths
 #include <#{helperPath}>
@@ -46,18 +44,16 @@ uniform vec2 windowSize;
 
 out vec4 finalColor;
 
-
 #define ALPHA_LIMIT 0.99
 #define RAYCAST_MAX_STEPS 1000
 #define MAX_AA_SAMPLES 8
 
 uniform int nAaSamples;
 
+#include <#{getEntryPath}>
 
 void main() {
-
     vec2 texCoord = vec2(gl_FragCoord.xy / windowSize);
-
 
     vec4 exitColorTexture = texture(exitColorTexture, texCoord);
     if (exitColorTexture.a < 1.0) {
@@ -68,22 +64,11 @@ void main() {
     vec3 exitPos = exitColorTexture.rgb;
     float exitDepth =  denormalizeFloat(texture(exitDepthTexture, texCoord).x);
 
-
-
     float jitterFactor = 0.5 + 0.5 * rand(gl_FragCoord.xy); // should be between 0.5 and 1.0
 
     vec3 entryPos; 
     float entryDepth;
-
-    if (insideRaycaster) {
-        entryPos = cameraPosInRaycaster;
-        entryDepth = 0;
-    } else {
-        // fetch entry point from rendered fragment
-        Fragment f = getFragment();
-        entryPos = f.color.xyz;
-        entryDepth = f.depth;
-    } 
+    getEntry(entryPos, entryDepth);
 
     vec3 position = entryPos;
     vec3 diff = exitPos - entryPos;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,16 +27,22 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
+#include <memory>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
 class Renderable;
+namespace documentation {  struct Documentation; }
 
 namespace planetgeometry {
 
 class PlanetGeometry : public properties::PropertyOwner {
 public:
-    static PlanetGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<PlanetGeometry> createFromDictionary(
+        const ghoul::Dictionary& dictionary
+    );
 
     PlanetGeometry();
     virtual ~PlanetGeometry();
@@ -44,7 +50,7 @@ public:
     virtual void deinitialize();
     virtual void render() = 0;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     Renderable* _parent;
@@ -53,4 +59,4 @@ protected:
 }  // namespace planetgeometry
 }  // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_SPACE___PLANETGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_SPACE___PLANETGEOMETRY___H__

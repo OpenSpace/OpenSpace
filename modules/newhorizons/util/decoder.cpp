@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,7 +35,7 @@ std::unique_ptr<Decoder> Decoder::createFromDictionary(
     const ghoul::Dictionary& dictionary, const std::string& type)
 {
     ghoul::TemplateFactory<Decoder>* factory = FactoryManager::ref().factory<Decoder>();
-    Decoder* result = factory->create(type, dictionary);
+    std::unique_ptr<Decoder> result = factory->create(type, dictionary);
 
     if (result == nullptr) {
         throw ghoul::RuntimeError(
@@ -43,7 +43,7 @@ std::unique_ptr<Decoder> Decoder::createFromDictionary(
             "Decoder"
         );
     }
-    return std::unique_ptr<Decoder>(result);
+    return result;
 }
 
 Decoder::~Decoder() {}

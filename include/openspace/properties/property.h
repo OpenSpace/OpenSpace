@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -314,10 +314,10 @@ public:
      * Property::ViewOptions::PowerScaledCoordinate = <code>powerScaledCoordinate</code>.
      */
     struct ViewOptions {
-        static const std::string Color;
-        static const std::string LightPosition;
-        static const std::string PowerScaledScalar;
-        static const std::string PowerScaledCoordinate;
+        static const char* Color;
+        static const char* LightPosition;
+        static const char* PowerScaledScalar;
+        static const char* PowerScaledCoordinate;
     };
 
     /**
@@ -329,10 +329,10 @@ public:
     const ghoul::Dictionary& metaData() const;
 
 protected:
-    static const std::string IdentifierKey;
-    static const std::string NameKey;
-    static const std::string TypeKey;
-    static const std::string MetaDataKey;
+    static const char* IdentifierKey;
+    static const char* NameKey;
+    static const char* TypeKey;
+    static const char* MetaDataKey;
 
     /**
      * Creates the information that is general to every Property and adds the

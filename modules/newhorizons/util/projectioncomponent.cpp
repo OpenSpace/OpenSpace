@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <modules/newhorizons/util/instrumenttimesparser.h>
 #include <modules/newhorizons/util/labelparser.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/scenegraphnode.h>
 
@@ -76,7 +77,7 @@ namespace openspace {
 using ghoul::Dictionary;
 using glm::ivec2;
 
-Documentation ProjectionComponent::Documentation() {
+documentation::Documentation ProjectionComponent::Documentation() {
     using namespace documentation;
     return {
         "Projection Component",
@@ -165,7 +166,7 @@ Documentation ProjectionComponent::Documentation() {
 }
 
 ProjectionComponent::ProjectionComponent()
-    : properties::PropertyOwner()
+    : properties::PropertyOwner("ProjectionComponent")
     , _performProjection("performProjection", "Perform Projections", true)
     , _clearAllProjections("clearAllProjections", "Clear Projections", false)
     , _projectionFading("projectionFading", "Projection Fading", 1.f, 0.f, 1.f)
@@ -174,8 +175,6 @@ ProjectionComponent::ProjectionComponent()
     , _textureSizeDirty(false)
     , _projectionTexture(nullptr)
 {
-    setName("ProjectionComponent");
-
     _shadowing.isEnabled = false;
     _dilation.isEnabled = false;
 
@@ -242,7 +241,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
     if (foundSequence) {
         sequenceSource = absPath(sequenceSource);
 
-        foundSequence = dictionary.getValue(keySequenceType, sequenceType);
+        dictionary.getValue(keySequenceType, sequenceType);
         //Important: client must define translation-list in mod file IFF playbook
         if (dictionary.hasKey(keyTranslation)) {
             ghoul::Dictionary translationDictionary;
@@ -271,7 +270,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                     translationDictionary));
 
                 std::string _eventFile;
-                bool foundEventFile = dictionary.getValue("Projection.EventFile", _eventFile);
+                bool foundEventFile = dictionary.getValue("EventFile", _eventFile);
                 if (foundEventFile) {
                     //then read playbook
                     _eventFile = absPath(_eventFile);

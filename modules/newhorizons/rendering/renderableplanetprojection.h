@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
+namespace documentation { struct Documentation; }
 
 struct Image;
 
@@ -52,7 +53,7 @@ public:
     void update(const UpdateData& data) override;
     ghoul::opengl::Texture& baseTexture() const;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     bool loadTextures();
@@ -74,6 +75,8 @@ private:
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
+
+    properties::BoolProperty _shiftMeridianBy180;
 
     properties::FloatProperty _heightExaggeration;
     properties::FloatProperty _debugProjectionTextureRotation;
@@ -103,4 +106,4 @@ private:
 
 }  // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEPLANETPROJECTION___H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEPLANETPROJECTION___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,58 +36,44 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/luaconsole.h>
-#include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/scripting/scriptengine.h>
+
+#include <openspace/scene/scene.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/scenemanager.h>
+
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/task.h>
+#include <openspace/util/openspacemodule.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/util/syncbuffer.h>
 #include <openspace/util/transformationmanager.h>
 
 #include <ghoul/ghoul.h>
+#include <ghoul/misc/onscopeexit.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/onscopeexit.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
 
-#include <fstream>
-#include <queue>
-
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-#include <modules/onscreengui/include/gui.h>
-#endif
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-#include <modules/iswa/rendering/iswabasegroup.h>
-#include <modules/iswa/util/iswamanager.h>
-#endif
 
 #if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
 #endif
 
 #ifdef WIN32
-#include <WinBase.h>
+#include <Windows.h>
 #endif
 
 #include "openspaceengine_lua.inl"
@@ -98,14 +84,13 @@ using namespace ghoul::logging;
 using namespace ghoul::cmdparser;
 
 namespace {
-    const std::string _loggerCat = "OpenSpaceEngine";
-    const std::string _sgctDefaultConfigFile = "${SGCT}/single.xml";
-    const std::string _defaultCacheLocation = "${BASE_PATH}/cache";
+    const char* _loggerCat = "OpenSpaceEngine";
+    const char* SgctDefaultConfigFile = "${SGCT}/single.xml";
     
-    const std::string _sgctConfigArgumentCommand = "-config";
+    const char* SgctConfigArgumentCommand = "-config";
     
-    const std::string PreInitializeFunction = "preInitialization";
-    const std::string PostInitializationFunction = "postInitialization";
+    const char* PreInitializeFunction = "preInitialization";
+    const char* PostInitializationFunction = "postInitialization";
 
     const int CacheVersion = 1;
     const int DownloadVersion = 1;
@@ -138,7 +123,7 @@ OpenSpaceEngine::OpenSpaceEngine(
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _networkEngine(new NetworkEngine)
-    , _syncEngine(std::make_unique<SyncEngine>(new SyncBuffer(4096)))
+    , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
         programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
       ))
@@ -147,25 +132,23 @@ OpenSpaceEngine::OpenSpaceEngine(
     , _settingsEngine(new SettingsEngine)
     , _timeManager(new TimeManager)
     , _downloadManager(nullptr)
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    , _gui(new gui::GUI)
-#endif
     , _parallelConnection(new ParallelConnection)
     , _windowWrapper(std::move(windowWrapper))
-    , _globalPropertyNamespace(new properties::PropertyOwner)
+    , _globalPropertyNamespace(new properties::PropertyOwner(""))
     , _switchScene(false)
     , _scenePath("")
     , _isMaster(false)
     , _runTime(0.0)
-    , _isInShutdownMode(false)
-    , _shutdownCountdown(0.f)
-    , _shutdownWait(0.f)
+    , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
 {
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
+    
+    // New property subowners also have to be added to the OnScreenGuiModule callback!
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
+    _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -184,42 +167,14 @@ OpenSpaceEngine::OpenSpaceEngine(
         std::make_unique<ghoul::TemplateFactory<Scale>>(),
         "Scale"
     );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Task>>(),
+        "Task"
+    );
 
     SpiceManager::initialize();
     Time::initialize();
     TransformationManager::initialize();
-}
-
-OpenSpaceEngine::~OpenSpaceEngine() {
-    LINFO("_windowWrapper->isUsingSwapGroups(): " << _windowWrapper->isUsingSwapGroups());
-    LINFO("_windowWrapper->isSwapGroupMaster(): " << _windowWrapper->isSwapGroupMaster());
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    _gui->deinitializeGL();
-#endif
-
-    _renderEngine->setScene(nullptr);
-    _renderEngine->setCamera(nullptr);
-    _sceneManager = nullptr;
-
-    _interactionHandler->deinitialize();
-    _renderEngine->deinitialize();
-
-    _globalPropertyNamespace = nullptr;
-    _windowWrapper = nullptr;
-    _parallelConnection = nullptr;
-    _configurationManager = nullptr;
-    _interactionHandler = nullptr;
-    _renderEngine = nullptr;
-    _scriptEngine = nullptr;
-    _networkEngine = nullptr;
-    _syncEngine = nullptr;
-    _commandlineParser = nullptr;
-    _console = nullptr;
-    _moduleEngine = nullptr;
-    _settingsEngine = nullptr;
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    _gui = nullptr;
-#endif
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
@@ -227,12 +182,14 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
     return *_engine;
 }
 
-bool OpenSpaceEngine::create(int argc, char** argv,
-    std::unique_ptr<WindowWrapper> windowWrapper,
-    std::vector<std::string>& sgctArguments)
+void OpenSpaceEngine::create(int argc, char** argv,
+                             std::unique_ptr<WindowWrapper> windowWrapper,
+                             std::vector<std::string>& sgctArguments, bool& requestClose)
 {
     ghoul_assert(!_engine, "OpenSpaceEngine was already created");
     ghoul_assert(windowWrapper != nullptr, "No Window Wrapper was provided");
+    
+    requestClose = false;
 
     ghoul::initialize();
 
@@ -258,13 +215,17 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 
     // Sanity check of values
     if (argc < 1 || argv == nullptr) {
-        LFATAL("No arguments were passed to this function");
-        return false;
+        throw ghoul::RuntimeError(
+            "No arguments were passed to this function",
+            "OpenSpaceEngine"
+        );
     }
 
     // Create other objects
     LDEBUG("Creating OpenSpaceEngine");
     _engine = new OpenSpaceEngine(std::string(argv[0]), std::move(windowWrapper));
+
+    registerCoreClasses(DocEng);
 
     // Query modules for commandline arguments
     _engine->gatherCommandlineArguments();
@@ -277,7 +238,8 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     bool showHelp = _engine->_commandlineParser->execute();
     if (showHelp) {
         _engine->_commandlineParser->displayHelp();
-        return false;
+        requestClose = true;
+        return;
     }
     sgctArguments = *arguments;
 
@@ -285,15 +247,16 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     std::string configurationFilePath = commandlineArgumentPlaceholders.configurationName;
     if (configurationFilePath.empty()) {
         LDEBUG("Finding configuration");
-        try {
-            configurationFilePath =
-                ConfigurationManager::findConfiguration(configurationFilePath);
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LFATALC(e.component, e.message);
-        }
+        configurationFilePath =
+            ConfigurationManager::findConfiguration(configurationFilePath);
     }
     configurationFilePath = absPath(configurationFilePath);
+    
+    if (!FileSys.fileExists(configurationFilePath)) {
+        throw ghoul::FileNotFoundError(
+            "Configuration file '" + configurationFilePath + "' not found"
+        );
+    }
     LINFO("Configuration Path: '" << configurationFilePath << "'");
 
     // Loading configuration from disk
@@ -301,19 +264,29 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     try {
         _engine->configurationManager().loadFromFile(configurationFilePath);
     }
+    catch (const documentation::SpecificationError& e) {
+        LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
+        for (const documentation::TestResult::Offense& o : e.result.offenses) {
+            LERRORC(o.offender, std::to_string(o.reason));
+        }
+        for (const documentation::TestResult::Warning& w : e.result.warnings) {
+            LWARNINGC(w.offender, std::to_string(w.reason));
+        }
+        throw;
+    }
     catch (const ghoul::RuntimeError& e) {
         LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
-        LFATALC(e.component, e.message);
-        return false;
+        throw;
     }
 
-    bool hasCacheCommandline = !commandlineArgumentPlaceholders.cacheFolder.empty();
-    bool hasCacheConfiguration = _engine->configurationManager().hasKeyAndValue<bool>(
+    const bool hasCacheCommandline = !commandlineArgumentPlaceholders.cacheFolder.empty();
+    const bool hasCacheConfiguration = _engine->configurationManager().hasKeyAndValue<bool>(
         ConfigurationManager::KeyPerSceneCache
     );
     std::string cacheFolder = absPath("${CACHE}");
     if (hasCacheCommandline) {
         cacheFolder = commandlineArgumentPlaceholders.cacheFolder;
+        // @CLEANUP:  Why is this commented out? ---abock
         //FileSys.registerPathToken(
         //    "${CACHE}",
         //    commandlineArgumentPlaceholders.cacheFolder,
@@ -343,7 +316,9 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     LINFOC("OpenSpace Version",
         OPENSPACE_VERSION_MAJOR << "." <<
         OPENSPACE_VERSION_MINOR << "." <<
-        OPENSPACE_VERSION_PATCH << " (" << OPENSPACE_VERSION_STRING << ")");
+        OPENSPACE_VERSION_PATCH <<
+        " (" << OPENSPACE_VERSION_STRING << ")"
+    );
 
     // Create directories that doesn't exist
     auto tokens = FileSys.tokens();
@@ -358,7 +333,6 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     // Register modules
     _engine->_moduleEngine->initialize();
 
-    registerCoreClasses(DocEng);
     // After registering the modules, the documentations for the available classes
     // can be added as well
     for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
@@ -378,7 +352,7 @@ bool OpenSpaceEngine::create(int argc, char** argv,
 
     // Determining SGCT configuration file
     LDEBUG("Determining SGCT configuration file");
-    std::string sgctConfigurationPath = _sgctDefaultConfigFile;
+    std::string sgctConfigurationPath = SgctDefaultConfigFile;
     _engine->configurationManager().getValue(
         ConfigurationManager::KeyConfigSgct, sgctConfigurationPath);
 
@@ -391,13 +365,20 @@ bool OpenSpaceEngine::create(int argc, char** argv,
     // Prepend the outgoing sgctArguments with the program name
     // as well as the configuration file that sgct is supposed to use
     sgctArguments.insert(sgctArguments.begin(), argv[0]);
-    sgctArguments.insert(sgctArguments.begin() + 1, _sgctConfigArgumentCommand);
+    sgctArguments.insert(sgctArguments.begin() + 1, SgctConfigArgumentCommand);
     sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
-
-    return true;
 }
 
 void OpenSpaceEngine::destroy() {
+    LTRACE("OpenSpaceEngine::destroy(begin)");
+    for (const auto& func : _engine->_moduleCallbacks.deinitializeGL) {
+        func();
+    }
+
+    for (const auto& func : _engine->_moduleCallbacks.deinitialize) {
+        func();
+    }
+
     _engine->_moduleEngine->deinitialize();
     _engine->_console->deinitialize();
 
@@ -412,13 +393,17 @@ void OpenSpaceEngine::destroy() {
     LogManager::deinitialize();
 
     ghoul::deinitialize();
+    LTRACE("OpenSpaceEngine::destroy(end)");
 }
 
-bool OpenSpaceEngine::initialize() {
+void OpenSpaceEngine::initialize() {
+    LTRACE("OpenSpaceEngine::initialize(begin)");
     // clear the screen so the user don't have to see old buffer contents from the
     // graphics card
-    clearAllWindows();
+    LDEBUG("Clearing all Windows");
+    _windowWrapper->clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
 
+    LDEBUG("Adding system components");
     // Detect and log OpenCL and OpenGL versions and available devices
     SysCap.addComponent(
         std::make_unique<ghoul::systemcapabilities::GeneralCapabilitiesComponent>()
@@ -426,68 +411,79 @@ bool OpenSpaceEngine::initialize() {
     SysCap.addComponent(
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
+    
+    LDEBUG("Detecting capabilities");
     SysCap.detectCapabilities();
 
     using Verbosity = ghoul::systemcapabilities::SystemCapabilitiesComponent::Verbosity;
     Verbosity verbosity = Verbosity::Default;
-    if (configurationManager().hasKeyAndValue<std::string>(
-
-        ConfigurationManager::KeyCapabilitiesVerbosity)) {
-        std::map<std::string, Verbosity> verbosityMap = {
+    if (configurationManager().hasKey(ConfigurationManager::KeyCapabilitiesVerbosity)) {
+        static const std::map<std::string, Verbosity> VerbosityMap = {
             { "None", Verbosity::None },
             { "Minimal", Verbosity::Minimal },
             { "Default", Verbosity::Default },
             { "Full", Verbosity::Full }
         };
 
-        std::string v = configurationManager().value<std::string>(ConfigurationManager::KeyCapabilitiesVerbosity);
-        if (verbosityMap.find(v) != verbosityMap.end())
-            verbosity = verbosityMap[v];
+        std::string v = configurationManager().value<std::string>(
+            ConfigurationManager::KeyCapabilitiesVerbosity
+        );
+        ghoul_assert(
+            VerbosityMap.find(v) != VerbosityMap.end(),
+            "Missing check for syscaps verbosity in openspace.cfg documentation"
+        );
+        verbosity = VerbosityMap.find(v)->second;
     }
     SysCap.logCapabilities(verbosity);
 
     // Check the required OpenGL versions of the registered modules
-    ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version version =
+    ghoul::systemcapabilities::Version version =
         _engine->_moduleEngine->requiredOpenGLVersion();
-    LINFO("Required OpenGL version: " << version.toString());
+    LINFO("Required OpenGL version: " << std::to_string(version));
 
     if (OpenGLCap.openGLVersion() < version) {
-        LFATAL("Module required higher OpenGL version than is supported");
-        return false;
+        throw ghoul::RuntimeError(
+            "Module required higher OpenGL version than is supported",
+            "OpenSpaceEngine"
+        );
     }
 
-    std::string requestURL = "";
-    bool success = configurationManager().getValue(ConfigurationManager::KeyDownloadRequestURL, requestURL);
-    if (success) {
-        _downloadManager = std::make_unique<DownloadManager>(requestURL, DownloadVersion);
+    if (configurationManager().hasKey(ConfigurationManager::KeyDownloadRequestURL)) {
+        const std::string requestUrl = configurationManager().value<std::string>(
+            ConfigurationManager::KeyDownloadRequestURL
+        );
+
+        _downloadManager = std::make_unique<DownloadManager>(
+            requestUrl,
+            DownloadVersion
+        );
     }
 
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(*_scriptEngine);
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    _scriptEngine->addLibrary(IswaManager::luaLibrary());
-#endif
-
+    
+    for (OpenSpaceModule* module : _moduleEngine->modules()) {
+        _scriptEngine->addLibrary(module->luaLibrary());
+    }
+         
     // TODO: Maybe move all scenegraph and renderengine stuff to initializeGL
     scriptEngine().initialize();
 
     writeDocumentation();
 
-    bool disableMasterRendering = false;
-    configurationManager().getValue(
-        ConfigurationManager::KeyDisableMasterRendering, disableMasterRendering);
-    _renderEngine->setDisableRenderingOnMaster(disableMasterRendering);
+    if (configurationManager().hasKey(ConfigurationManager::KeyShutdownCountdown)) {
+        _shutdown.waitTime = configurationManager().value<double>(
+            ConfigurationManager::KeyShutdownCountdown
+        );
+    }
 
-    configurationManager().getValue(
-        ConfigurationManager::KeyShutdownCountdown, _shutdownWait
-    );
-
-    if (!commandlineArgumentPlaceholders.sceneName.empty())
+    if (!commandlineArgumentPlaceholders.sceneName.empty()) {
         configurationManager().setValue(
             ConfigurationManager::KeyConfigScene,
-            commandlineArgumentPlaceholders.sceneName);
+            commandlineArgumentPlaceholders.sceneName
+        );
+    }
 
     // Initialize the SettingsEngine
     _settingsEngine->initialize();
@@ -503,10 +499,10 @@ bool OpenSpaceEngine::initialize() {
     configurationManager().getValue(ConfigurationManager::KeyConfigScene, scenePath);
 
     _renderEngine->initialize();
+
     scheduleLoadScene(scenePath);
 
     LINFO("Finished initializing");
-    return true;
 }
 
 void OpenSpaceEngine::scheduleLoadScene(const std::string& scenePath) {
@@ -610,64 +606,32 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         scene->writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType, scenePath);
     }
 
+    _renderEngine->setGlobalBlackOutFactor(0.0);
+    _renderEngine->startFading(1, 3.0);
 
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    LINFO("Initializing GUI");
-    _gui->initialize();
-    _gui->_globalProperty.setSource(
-        [&]() {
-            std::vector<properties::PropertyOwner*> res = {
-                _settingsEngine.get(),
-                _interactionHandler.get(),
-                _renderEngine.get()
-            };
-            return res;
-        }
-    );
+    for (const auto& func : _moduleCallbacks.initialize) {
+        func();
+    }
 
-    OsEng.gui()._screenSpaceProperty.setSource(
-        [&]() {
-            const auto& ssr = renderEngine().screenSpaceRenderables();
-            return std::vector<properties::PropertyOwner*>(ssr.begin(), ssr.end());
-        }
-    );
-
-    OsEng.gui()._property.setSource(
-        [&]() {
-            const auto& nodes = renderEngine().scene()->allSceneGraphNodes();
-            return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
-        }
-    );
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    OsEng.gui()._iswa.setSource(
-        [&]() {
-            const auto& groups = IswaManager::ref().groups();
-            std::vector<properties::PropertyOwner*> res;
-            std::transform(
-                groups.begin(),
-                groups.end(),
-                std::back_inserter(res),
-                [](const auto& val) {
-                    return val.second.get();
-                }
-            );
-            return res;
-        }
-    );
-#endif
-
-#endif
-
-#ifdef OPENSPACE_MODULE_ISWA_ENABLED
-    IswaManager::initialize();
-#endif
+    // Run start up scripts
+    runPreInitializationScripts(scenePath);
 
     _syncEngine->addSyncables(Time::ref().getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
     _syncEngine->addSyncable(_scriptEngine.get());
+
+    LINFO("Finished initializing");
+    LTRACE("OpenSpaceEngine::initialize(end)");
 }
 
+void OpenSpaceEngine::deinitialize() {
+    LTRACE("OpenSpaceEngine::deinitialize(begin)");
+
+    _interactionHandler->deinitialize();
+    _renderEngine->deinitialize();
+
+    LTRACE("OpenSpaceEngine::deinitialize(end)");
+}
 
 void OpenSpaceEngine::writeDocumentation() {
     // If a LuaDocumentationFile was specified, generate it now
@@ -679,13 +643,17 @@ void OpenSpaceEngine::writeDocumentation() {
     const bool hasLuaDocType = configurationManager().hasKey(LuaDocumentationType);
     const bool hasLuaDocFile = configurationManager().hasKey(LuaDocumentationFile);
     if (hasLuaDocType && hasLuaDocFile) {
-        std::string luaDocumentationType;
-        configurationManager().getValue(LuaDocumentationType, luaDocumentationType);
-        std::string luaDocumentationFile;
-        configurationManager().getValue(LuaDocumentationFile, luaDocumentationFile);
+        std::string luaDocumentationType = configurationManager().value<std::string>(
+            LuaDocumentationType
+        );
+        std::string luaDocumentationFile = configurationManager().value<std::string>(
+            LuaDocumentationFile
+        );
 
-        luaDocumentationFile = absPath(luaDocumentationFile);
-        _scriptEngine->writeDocumentation(luaDocumentationFile, luaDocumentationType);
+        _scriptEngine->writeDocumentation(
+            absPath(luaDocumentationFile),
+            luaDocumentationType
+        );
     }
 
     // If a general documentation was specified, generate it now
@@ -697,35 +665,43 @@ void OpenSpaceEngine::writeDocumentation() {
     const bool hasDocumentationType = configurationManager().hasKey(DocumentationType);
     const bool hasDocumentationFile = configurationManager().hasKey(DocumentationFile);
     if (hasDocumentationType && hasDocumentationFile) {
-        std::string documentationType;
-        configurationManager().getValue(DocumentationType, documentationType);
-        std::string documentationFile;
-        configurationManager().getValue(DocumentationFile, documentationFile);
-        documentationFile = absPath(documentationFile);
-        DocEng.writeDocumentation(documentationFile, documentationType);
+        std::string documentationType = configurationManager().value<std::string>(
+            DocumentationType
+        );
+        std::string documentationFile = configurationManager().value<std::string>(
+            DocumentationFile
+        );
+
+        DocEng.writeDocumentation(
+            absPath(documentationFile),
+            documentationType
+        );
     }
 
     const std::string FactoryDocumentationType =
-        ConfigurationManager::KeyFactoryDocumentation + '.' + ConfigurationManager::PartType;
+        ConfigurationManager::KeyFactoryDocumentation + '.' +
+        ConfigurationManager::PartType;
 
     const std::string FactoryDocumentationFile =
-        ConfigurationManager::KeyFactoryDocumentation + '.' + ConfigurationManager::PartFile;
-    bool hasFactoryDocumentationType = configurationManager().hasKey(FactoryDocumentationType);
-    bool hasFactoryDocumentationFile = configurationManager().hasKey(FactoryDocumentationFile);
+        ConfigurationManager::KeyFactoryDocumentation + '.' +
+        ConfigurationManager::PartFile;
+    
+    bool hasFactoryDocumentationType = configurationManager().hasKey(
+        FactoryDocumentationType
+    );
+    bool hasFactoryDocumentationFile = configurationManager().hasKey(
+        FactoryDocumentationFile
+    );
     if (hasFactoryDocumentationType && hasFactoryDocumentationFile) {
-        std::string type = configurationManager().value<std::string>(FactoryDocumentationType);
-        std::string file = configurationManager().value<std::string>(FactoryDocumentationFile);
+        std::string type = configurationManager().value<std::string>(
+            FactoryDocumentationType
+        );
+        std::string file = configurationManager().value<std::string>(
+            FactoryDocumentationFile
+        );
 
         FactoryManager::ref().writeDocumentation(absPath(file), type);
     }
-}
-
-bool OpenSpaceEngine::isInitialized() {
-    return _engine != nullptr;
-}
-
-void OpenSpaceEngine::clearAllWindows() {
-    _windowWrapper->clearAllWindows(glm::vec4(0.f, 0.f, 0.f, 1.f));
 }
 
 void OpenSpaceEngine::gatherCommandlineArguments() {
@@ -756,83 +732,65 @@ void OpenSpaceEngine::gatherCommandlineArguments() {
     ));
 }
 
-void OpenSpaceEngine::runScripts(const ghoul::Dictionary& scripts) {
-    for (size_t i = 1; i <= scripts.size(); ++i) {
-        std::stringstream stream;
-        stream << i;
-        const std::string& key = stream.str();
-        const bool hasKey = scripts.hasKeyAndValue<std::string>(key);
-        if (!hasKey) {
-            LERROR("The startup scripts have to be declared in a simple array format."
-                " Startup scripts did not contain the key '" << key << "'");
-            break;
-        }
-
-        std::string scriptPath;
-        scripts.getValue(key, scriptPath);
-        std::string&& absoluteScriptPath = absPath(scriptPath);
-        _engine->scriptEngine().runScriptFile(absoluteScriptPath);
-    }
-}
-
-
 void OpenSpaceEngine::runPreInitializationScripts(const std::string& sceneDescription) {
+    // @CLEANUP:  Move this into the scene loading?  ---abock
     LINFO("Running Initialization scripts");
-    lua_State* state = ghoul::lua::createNewLuaState();
-    OnExit(
-           // Delete the Lua state at the end of the scope, no matter what
-           [state](){ghoul::lua::destroyLuaState(state);}
-    );
+    
+    ghoul::lua::LuaState state;
     OsEng.scriptEngine().initializeLuaState(state);
 
     // First execute the script to get all global variables
     ghoul::lua::runScriptFile(state, absPath(sceneDescription));
 
     // Get the preinitialize function
-    lua_getglobal(state, PreInitializeFunction.c_str());
+    lua_getglobal(state, PreInitializeFunction);
     bool isFunction = lua_isfunction(state, -1);
     if (!isFunction) {
-        LERROR("Error executing startup script '" << sceneDescription << "'. Scene '" <<
-               sceneDescription << "' does not have a function '" <<
-               PreInitializeFunction << "'");
+        LERROR(
+            "Error executing startup script '" << sceneDescription << "'. Scene '" <<
+            sceneDescription << "' does not have a function '" <<
+            PreInitializeFunction << "'"
+        );
         return;
     }
     
     // And execute the preinitialize function
     int success = lua_pcall(state, 0, 0, 0);
     if (success != 0) {
-        LERROR("Error executing '" << PreInitializeFunction << "': " <<
-               lua_tostring(state, -1));
+        LERROR(
+            "Error executing '" << PreInitializeFunction << "': " <<
+            lua_tostring(state, -1)
+        );
     }
 }
 
 void OpenSpaceEngine::runPostInitializationScripts(const std::string& sceneDescription) {
+    // @CLEANUP:  Move this into the scene loading?  ---abock
     LINFO("Running Setup scripts");
-    lua_State* state = ghoul::lua::createNewLuaState();
-    OnExit(
-        // Delete the Lua state at the end of the scope, no matter what
-        [state](){ghoul::lua::destroyLuaState(state);}
-    );
+    ghoul::lua::LuaState state;
     OsEng.scriptEngine().initializeLuaState(state);
     
     // First execute the script to get all global variables
     ghoul::lua::runScriptFile(state, absPath(sceneDescription));
     
     // Get the preinitialize function
-    lua_getglobal(state, PostInitializationFunction.c_str());
+    lua_getglobal(state, PostInitializationFunction);
     bool isFunction = lua_isfunction(state, -1);
     if (!isFunction) {
-        LERROR("Error executing startup script '" << sceneDescription << "'. Scene '" <<
-               sceneDescription << "' does not have a function '" <<
-               PostInitializationFunction << "'");
+        LERROR(
+            "Error executing startup script '" << sceneDescription << "'. Scene '" <<
+            sceneDescription << "' does not have a function '" <<
+            PostInitializationFunction << "'"
+        );
         return;
     }
     
     // And execute the preinitialize function
     int success = lua_pcall(state, 0, 0, 0);
     if (success != 0) {
-        LERROR("Error executing '" << PostInitializationFunction << "': " <<
-               lua_tostring(state, -1)
+        LERROR(
+            "Error executing '" << PostInitializationFunction << "': " <<
+            lua_tostring(state, -1)
         );
     }
 }
@@ -841,12 +799,11 @@ void OpenSpaceEngine::loadFonts() {
     ghoul::Dictionary fonts;
     configurationManager().getValue(ConfigurationManager::KeyFonts, fonts);
 
-    const glm::ivec3 fontAtlasSize{1024, 1024, 1};
+    glm::ivec3 fontAtlasSize{1024, 1024, 1};
     _fontManager = std::make_unique<ghoul::fontrendering::FontManager>(fontAtlasSize);
     
     for (const std::string& key : fonts.keys()) {
-        std::string font;
-        fonts.getValue(key, font);
+        std::string font = fonts.value<std::string>(key);
         font = absPath(font);
         
         if (!FileSys.fileExists(font)) {
@@ -884,7 +841,7 @@ void OpenSpaceEngine::configureLogging() {
         ConfigurationManager::KeyLogging + '.' + ConfigurationManager::PartLogs;
 
     if (configurationManager().hasKeyAndValue<std::string>(KeyLogLevel)) {
-        std::string logLevel;
+        std::string logLevel = "Info";
         configurationManager().getValue(KeyLogLevel, logLevel);
 
         bool immediateFlush = false;
@@ -897,16 +854,15 @@ void OpenSpaceEngine::configureLogging() {
             level,
             immediateFlush ? ImmediateFlush::Yes : ImmediateFlush::No
         );
+        
         LogMgr.addLog(std::make_unique<ConsoleLog>());
     }
 
     if (configurationManager().hasKeyAndValue<ghoul::Dictionary>(KeyLogs)) {
-        ghoul::Dictionary logs;
-        configurationManager().getValue(KeyLogs, logs);
+        ghoul::Dictionary logs = configurationManager().value<ghoul::Dictionary>(KeyLogs);
 
         for (size_t i = 1; i <= logs.size(); ++i) {
-            ghoul::Dictionary logInfo;
-            logs.getValue(std::to_string(i), logInfo);
+            ghoul::Dictionary logInfo = logs.value<ghoul::Dictionary>(std::to_string(i));
 
             try {
                 LogMgr.addLog(createLog(logInfo));
@@ -922,45 +878,52 @@ void OpenSpaceEngine::configureLogging() {
         LogMgr.addLog(std::make_unique<VisualStudioOutputLog>());
     }
 #endif // WIN32
+    
+#ifndef GHOUL_LOGGING_ENABLE_TRACE
+    std::string logLevel = "Info";
+    configurationManager().getValue(KeyLogLevel, logLevel);
+    LogLevel level = ghoul::logging::levelFromString(logLevel);
+    
+    if (level == ghoul::logging::LogLevel::Trace) {
+        LWARNING(
+            "Desired logging level is set to 'Trace' but application was " <<
+            "compiled without Trace support"
+        );
+    }
+#endif // GHOUL_LOGGING_ENABLE_TRACE
 }
 
-bool OpenSpaceEngine::initializeGL() {
+void OpenSpaceEngine::initializeGL() {
+    LTRACE("OpenSpaceEngine::initializeGL(begin)");
+
     LINFO("Initializing Rendering Engine");
-    bool success = _renderEngine->initializeGL();
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    LINFO("Initializing OnScreen GUI GL");
-    try {
-        _gui->initializeGL();
+    // @CLEANUP:  Remove the return statement and replace with exceptions ---abock
+    _renderEngine->initializeGL();
+    
+    for (const auto& func : _moduleCallbacks.initializeGL) {
+        func();
     }
-    catch (const ghoul::RuntimeError& e) {
-        LERROR(e.what());
-    }
-#endif
+    
     LINFO("Finished initializing OpenGL");
 
-    // If using swapgroups, 
-    LINFO("_windowWrapper->isUsingSwapGroups(): " << _windowWrapper->isUsingSwapGroups());
-    LINFO("_windowWrapper->isSwapGroupMaster(): " << _windowWrapper->isSwapGroupMaster());
-    return success;
-}
-
-bool OpenSpaceEngine::isMaster(){
-    return _isMaster;
-}
-
-void OpenSpaceEngine::setMaster(bool master){
-    _isMaster = master;
-}
+    // If using swapgroups,
     
-double OpenSpaceEngine::runTime(){
+    LINFO("IsUsingSwapGroups: " << _windowWrapper->isUsingSwapGroups());
+    LINFO("IsSwapGroupMaster: " << _windowWrapper->isSwapGroupMaster());
+    
+    LTRACE("OpenSpaceEngine::initializeGL(end)");
+}
+
+double OpenSpaceEngine::runTime() {
     return _runTime;
 }
 
-void OpenSpaceEngine::setRunTime(double d){
+void OpenSpaceEngine::setRunTime(double d) {
     _runTime = d;
 }
     
 void OpenSpaceEngine::preSynchronization() {
+    LTRACE("OpenSpaceEngine::preSynchronization(begin)");
     FileSys.triggerFilesystemEvents();
 
     if (_switchScene) {
@@ -972,8 +935,10 @@ void OpenSpaceEngine::preSynchronization() {
         _windowWrapper->setSynchronization(false);
     }
     
-    _syncEngine->presync(_isMaster);
-    if (_isMaster) {
+    bool master = _windowWrapper->isMaster();
+    
+    _syncEngine->preSynchronization(SyncEngine::IsMaster(master));
+    if (master) {
         double dt = _windowWrapper->averageDeltaTime();
         _timeManager->preSynchronization(dt);
 
@@ -993,16 +958,24 @@ void OpenSpaceEngine::preSynchronization() {
         _parallelConnection->preSynchronization();
 
     }
+    
+    for (const auto& func : _moduleCallbacks.preSync) {
+        func();
+    }
+    LTRACE("OpenSpaceEngine::preSynchronization(end)");
 }
 
 void OpenSpaceEngine::postSynchronizationPreDraw() {
-    _syncEngine->postsync(_isMaster);
+    LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
+    
+    bool master = _windowWrapper->isMaster();
+    _syncEngine->postSynchronization(SyncEngine::IsMaster(master));
 
-    if (_isInShutdownMode) {
-        if (_shutdownCountdown <= 0.f) {
+    if (_shutdown.inShutdown) {
+        if (_shutdown.timer <= 0.f) {
             _windowWrapper->terminate();
         }
-        _shutdownCountdown -= _windowWrapper->averageDeltaTime();
+        _shutdown.timer -= _windowWrapper->averageDeltaTime();
     }
 
     _renderEngine->updateScene();
@@ -1011,33 +984,17 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     _renderEngine->updateScreenSpaceRenderables();
     _renderEngine->updateShaderPrograms();
     
-    if (!_isMaster) {
+    if (!master) {
         _renderEngine->camera()->invalidateCache();
     }   
 
     // Step the camera using the current mouse velocities which are synced
     //_interactionHandler->updateCamera();
     
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-    if (_isMaster && _windowWrapper->isRegularRendering()) {
-        glm::vec2 mousePosition = _windowWrapper->mousePosition();
-        //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
-        glm::ivec2 windowSize = _windowWrapper->currentWindowSize();
-        glm::ivec2 renderingSize = _windowWrapper->currentWindowResolution();
-        uint32_t mouseButtons = _windowWrapper->mouseButtons(2);
-        
-        double dt = std::max(_windowWrapper->averageDeltaTime(), 0.0);
-
-        _gui->startFrame(
-            static_cast<float>(dt),
-            glm::vec2(windowSize),
-            _windowWrapper->dpiScaling(),
-            mousePosition,
-            mouseButtons
-        );
+    for (const auto& func : _moduleCallbacks.postSyncPreDraw) {
+        func();
     }
-#endif
-
+    
     // Testing this every frame has minimal impact on the performance --- abock
     // Debug build: 1-2 us ; Release build: <= 1 us
     using ghoul::logging::LogManager;
@@ -1045,113 +1002,118 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     int errorCounter = LogMgr.messageCounter(LogLevel::Error);
     int fatalCounter = LogMgr.messageCounter(LogLevel::Fatal);
 
-    if (warningCounter > 0)
+    if (warningCounter > 0) {
         LWARNINGC("Logging", "Number of Warnings raised: " << warningCounter);
-    if (errorCounter > 0)
+    }
+    if (errorCounter > 0) {
         LWARNINGC("Logging", "Number of Errors raised: " << errorCounter);
-    if (fatalCounter > 0)
+    }
+    if (fatalCounter > 0) {
         LWARNINGC("Logging", "Number of Fatals raised: " << fatalCounter);
+    }
 
     LogMgr.resetMessageCounters();
-
+    
+    LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(end)");
 }
 
-void OpenSpaceEngine::render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix) {
-    _renderEngine->render(projectionMatrix, viewMatrix);
+void OpenSpaceEngine::render(const glm::mat4& viewMatrix,
+                             const glm::mat4& projectionMatrix)
+{
+    LTRACE("OpenSpaceEngine::render(begin)");
+    _renderEngine->render(viewMatrix, projectionMatrix);
+    
+    for (const auto& func : _moduleCallbacks.render) {
+        func();
+    }
+    
+    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
+    // rendered ---abock
+    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    if (showGui && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering()) {
+        _renderEngine->renderScreenLog();
+        _console->render();
+    }
+
+    if (_shutdown.inShutdown) {
+        _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
+    }
+
+    LTRACE("OpenSpaceEngine::render(end)");
 }
 
 void OpenSpaceEngine::postDraw() {
+    LTRACE("OpenSpaceEngine::postDraw(begin)");
+    
     _renderEngine->postDraw();
 
-    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
-    if (showGui) {
-        _renderEngine->renderScreenLog();
-        if (_console->isVisible())
-            _console->render();
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_isMaster && _windowWrapper->isRegularRendering())
-            _gui->endFrame();
-#endif
+    for (const auto& func : _moduleCallbacks.postDraw) {
+        func();
     }
-
-    if (_isInShutdownMode) {
-        _renderEngine->renderShutdownInformation(_shutdownCountdown, _shutdownWait);
-    }
-
+        
     if (_isFirstRenderingFirstFrame) {
         _windowWrapper->setSynchronization(true);
         _isFirstRenderingFirstFrame = false;
     }
 
+    LTRACE("OpenSpaceEngine::postDraw(end)");
 }
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
-    if (_isMaster) {
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled()) {
-            bool isConsumed = _gui->keyCallback(key, mod, action);
-            if (isConsumed) {
-                return;
-            }
-        }
-#endif
-        if (key == _console->commandInputButton()) {
-            if (action == KeyAction::Press) {
-                _console->toggleMode();
-            }
-        } else if (!_console->isVisible()) {
-            _interactionHandler->keyboardCallback(key, mod, action);
-        } else {
-            _console->keyboardCallback(key, mod, action);
+    for (const auto& func : _moduleCallbacks.keyboard) {
+        const bool consumed = func(key, mod, action);
+        if (consumed) {
+            return;
         }
     }
+
+    const bool consoleConsumed = _console->keyboardCallback(key, mod, action);
+    if (consoleConsumed) {
+        return;
+    }
+
+    _interactionHandler->keyboardCallback(key, mod, action);
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
-    if (_isMaster) {
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled()) {
-            const bool isConsumed = _gui->charCallback(codepoint, modifier);
-            if (isConsumed)
-                return;
-        }
-#endif
-        if (_console->isVisible()) {
-            _console->charCallback(codepoint, modifier);
+    for (const auto& func : _moduleCallbacks.character) {
+        bool consumed = func(codepoint, modifier);
+        if (consumed) {
+            return;
         }
     }
+
+    _console->charCallback(codepoint, modifier);
 }
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action) {
-    if (_isMaster) {
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled()) {
-            const bool isConsumed = _gui->mouseButtonCallback(button, action);
-            if (isConsumed /*&& action != MouseAction::Release*/)
-                return;
+    for (const auto& func : _moduleCallbacks.mouseButton) {
+        bool consumed = func(button, action);
+        if (consumed) {
+            return;
         }
-#endif
-        _interactionHandler->mouseButtonCallback(button, action);
     }
+    
+    _interactionHandler->mouseButtonCallback(button, action);
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y) {
-    if (_isMaster) {
-        _interactionHandler->mousePositionCallback(x, y);
+    for (const auto& func : _moduleCallbacks.mousePosition) {
+        func(x, y);
     }
+
+    _interactionHandler->mousePositionCallback(x, y);
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
-    if (_isMaster) {
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-        if (_gui->isEnabled()) {
-            const bool isConsumed = _gui->mouseWheelCallback(pos);
-            if (isConsumed)
-                return;
+    for (const auto& func : _moduleCallbacks.mouseScrollWheel) {
+        bool consumed = func(pos);
+        if (consumed) {
+            return;
         }
-#endif
-        _interactionHandler->mouseScrollWheelCallback(pos);
     }
+    
+    _interactionHandler->mouseScrollWheelCallback(pos);
 }
 
 void OpenSpaceEngine::encode() {
@@ -1168,23 +1130,24 @@ void OpenSpaceEngine::decode() {
 void OpenSpaceEngine::externalControlCallback(const char* receivedChars, int size,
                                               int clientId)
 {
-    if (size == 0)
+    if (size == 0) {
         return;
+    }
 
     _networkEngine->handleMessage(std::string(receivedChars, size));
 }
 
 void OpenSpaceEngine::toggleShutdownMode() {
-    if (_isInShutdownMode) {
-        // If we are already in shutdown mode, we want to disable it instead
+    if (_shutdown.inShutdown) {
+        // If we are already in shutdown mode, we want to disable it
         LINFO("Disabled shutdown mode");
-        _isInShutdownMode = false;
+        _shutdown.inShutdown = false;
     }
     else {
-        // Else, we hav eto enable it
+        // Else, we have to enable it
         LINFO("Shutting down OpenSpace");
-        _shutdownCountdown = _shutdownWait;
-        _isInShutdownMode = true;
+        _shutdown.timer = _shutdown.waitTime;
+        _shutdown.inShutdown = true;
     }
 }
 
@@ -1209,20 +1172,91 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
     };
 }
 
-bool OpenSpaceEngine::useBusyWaitForDecode() {
-    return _settingsEngine->busyWaitForDecode();
-}
-
-bool OpenSpaceEngine::logSGCTOutOfOrderErrors() {
-    return _settingsEngine->logSGCTOutOfOrderErrors();
-}
-
 void OpenSpaceEngine::enableBarrier() {
     _windowWrapper->setBarrier(true);
 }
 
 void OpenSpaceEngine::disableBarrier() {
     _windowWrapper->setBarrier(false);
+}
+
+// Registers a callback for a specific CallbackOption
+void OpenSpaceEngine::registerModuleCallback(OpenSpaceEngine::CallbackOption option,
+                                             std::function<void()> function)
+{
+    switch (option) {
+        case CallbackOption::Initialize:
+            _moduleCallbacks.initialize.push_back(std::move(function));
+            break;
+        case CallbackOption::Deinitialize:
+            _moduleCallbacks.deinitialize.push_back(std::move(function));
+            break;
+        case CallbackOption::InitializeGL:
+            _moduleCallbacks.initializeGL.push_back(std::move(function));
+            break;
+        case CallbackOption::DeinitializeGL:
+            _moduleCallbacks.deinitializeGL.push_back(std::move(function));
+            break;
+        case CallbackOption::PreSync:
+            _moduleCallbacks.preSync.push_back(std::move(function));
+            break;
+        case CallbackOption::PostSyncPreDraw:
+            _moduleCallbacks.postSyncPreDraw.push_back(std::move(function));
+            break;
+        case CallbackOption::Render:
+            _moduleCallbacks.render.push_back(std::move(function));
+            break;
+        case CallbackOption::PostDraw:
+            _moduleCallbacks.postDraw.push_back(std::move(function));
+            break;
+        default:
+            ghoul_assert(false, "Missing case label");
+    }
+}
+    
+void OpenSpaceEngine::registerModuleKeyboardCallback(
+                               std::function<bool (Key, KeyModifier, KeyAction)> function)
+{
+    _moduleCallbacks.keyboard.push_back(std::move(function));
+}
+    
+void OpenSpaceEngine::registerModuleCharCallback(
+                                 std::function<bool (unsigned int, KeyModifier)> function)
+{
+    _moduleCallbacks.character.push_back(std::move(function));
+}
+
+void OpenSpaceEngine::registerModuleMouseButtonCallback(
+                                  std::function<bool (MouseButton, MouseAction)> function)
+{
+    _moduleCallbacks.mouseButton.push_back(std::move(function));
+}
+
+void OpenSpaceEngine::registerModuleMousePositionCallback(
+                                            std::function<void (double, double)> function)
+{
+    _moduleCallbacks.mousePosition.push_back(std::move(function));
+}
+
+void OpenSpaceEngine::registerModuleMouseScrollWheelCallback(
+                                                    std::function<bool (double)> function)
+{
+    _moduleCallbacks.mouseScrollWheel.push_back(std::move(function));
+}
+
+ConfigurationManager& OpenSpaceEngine::configurationManager() {
+    ghoul_assert(_configurationManager, "ConfigurationManager must not be nullptr");
+    return *_configurationManager;
+}
+    
+LuaConsole& OpenSpaceEngine::console() {
+    ghoul_assert(_console, "LuaConsole must not be nullptr");
+    return *_console;
+}
+    
+DownloadManager& OpenSpaceEngine::downloadManager() {
+    ghoul_assert(_downloadManager, "Download Manager must not be nullptr");
+    return *_downloadManager;
 }
 
 NetworkEngine& OpenSpaceEngine::networkEngine() {
@@ -1235,9 +1269,34 @@ ModuleEngine& OpenSpaceEngine::moduleEngine() {
     return *_moduleEngine;
 }
 
-ConfigurationManager& OpenSpaceEngine::configurationManager() {
-    ghoul_assert(_configurationManager, "ConfigurationManager must not be nullptr");
-    return *_configurationManager;
+ParallelConnection& OpenSpaceEngine::parallelConnection() {
+    ghoul_assert(_parallelConnection, "ParallelConnection must not be nullptr");
+    return *_parallelConnection;
+}
+
+RenderEngine& OpenSpaceEngine::renderEngine() {
+    ghoul_assert(_renderEngine, "RenderEngine must not be nullptr");
+    return *_renderEngine;
+}
+    
+SettingsEngine& OpenSpaceEngine::settingsEngine() {
+    ghoul_assert(_settingsEngine, "Settings Engine must not be nullptr");
+    return *_settingsEngine;
+}
+
+TimeManager& OpenSpaceEngine::timeManager() {
+    ghoul_assert(_timeManager, "Download Manager must not be nullptr");
+    return *_timeManager;
+}
+
+WindowWrapper& OpenSpaceEngine::windowWrapper() {
+    ghoul_assert(_windowWrapper, "Window Wrapper must not be nullptr");
+    return *_windowWrapper;
+}
+
+ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
+    ghoul_assert(_fontManager, "Font Manager must not be nullptr");
+    return *_fontManager;
 }
 
 interaction::InteractionHandler& OpenSpaceEngine::interactionHandler() {
@@ -1245,38 +1304,6 @@ interaction::InteractionHandler& OpenSpaceEngine::interactionHandler() {
     return *_interactionHandler;
 }
 
-RenderEngine& OpenSpaceEngine::renderEngine() {
-    ghoul_assert(_renderEngine, "RenderEngine must not be nullptr");
-    return *_renderEngine;
-}
-
-ScriptEngine& OpenSpaceEngine::scriptEngine() {
-    ghoul_assert(_scriptEngine, "ScriptEngine must not be nullptr");
-    return *_scriptEngine;
-}
-
-ScriptScheduler& OpenSpaceEngine::scriptScheduler(){
-    ghoul_assert(_scriptScheduler, "ScriptScheduler must not be nullptr");
-    return *_scriptScheduler;
-}
-
-LuaConsole& OpenSpaceEngine::console() {
-    ghoul_assert(_console, "LuaConsole must not be nullptr");
-    return *_console;
-}
-
-#ifdef OPENSPACE_MODULE_ONSCREENGUI_ENABLED
-gui::GUI& OpenSpaceEngine::gui() {
-    ghoul_assert(_gui, "GUI must not be nullptr");
-    return *_gui;
-}
-#endif
-
-ParallelConnection& OpenSpaceEngine::parallelConnection() {
-    ghoul_assert(_parallelConnection, "ParallelConnection must not be nullptr");
-    return *_parallelConnection;
-}
-    
 properties::PropertyOwner& OpenSpaceEngine::globalPropertyOwner() {
     ghoul_assert(
         _globalPropertyNamespace,
@@ -1285,25 +1312,14 @@ properties::PropertyOwner& OpenSpaceEngine::globalPropertyOwner() {
     return *_globalPropertyNamespace;
 }
 
-WindowWrapper& OpenSpaceEngine::windowWrapper() {
-    ghoul_assert(_windowWrapper, "Window Wrapper must not be nullptr");
-    return *_windowWrapper;
-}
-    
-ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
-    ghoul_assert(_fontManager, "Font Manager must not be nullptr");
-    return *_fontManager;
+ScriptEngine& OpenSpaceEngine::scriptEngine() {
+    ghoul_assert(_scriptEngine, "ScriptEngine must not be nullptr");
+    return *_scriptEngine;
 }
 
-DownloadManager& OpenSpaceEngine::downloadManager() {
-    ghoul_assert(_downloadManager, "Download Manager must not be nullptr");
-    return *_downloadManager;
+ScriptScheduler& OpenSpaceEngine::scriptScheduler() {
+    ghoul_assert(_scriptScheduler, "ScriptScheduler must not be nullptr");
+    return *_scriptScheduler;
 }
-
-TimeManager& OpenSpaceEngine::timeManager() {
-    ghoul_assert(_timeManager, "Download Manager must not be nullptr");
-    return *_timeManager;
-}
-
 
 }  // namespace openspace

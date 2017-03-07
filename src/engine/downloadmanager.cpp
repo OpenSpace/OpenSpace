@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -162,7 +162,10 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     std::shared_ptr<FileFuture> future = std::make_shared<FileFuture>(file.filename());
     errno = 0;
     FILE* fp = fopen(file.path().c_str(), "wb"); // write binary
-    ghoul_assert(fp != nullptr, "Could not open/create file:\n" << file.path().c_str() << " \nerrno: " << errno);
+    ghoul_assert(
+        fp != nullptr,
+        "Could not open/create file:\n" + file.path() + " \nerrno: " + std::to_string(errno)
+    );
 
     //LDEBUG("Start downloading file: '" << url << "' into file '" << file.path() << "'");
     
@@ -299,6 +302,12 @@ std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downl
         std::string line;
         int nFiles = 0;
         while (std::getline(temporary, line)) {
+            if (line.empty()) {
+                // This might occur if someone added multiple newlines
+                // or mixing carriage return and newlines
+                continue;
+            }
+            
             ++nFiles;
 #ifdef __APPLE__
             // @TODO: Fix this so that the ifdef is not necessary anymore ---abock

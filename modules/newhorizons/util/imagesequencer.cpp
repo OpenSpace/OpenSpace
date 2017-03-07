@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,9 +33,10 @@
 
 #include <ghoul/misc/assert.h>
 #include <openspace/util/spicemanager.h>
-#include <fstream>
+#include <algorithm>
 #include <iterator>
 #include <iomanip>
+#include <fstream>
 #include <limits>
 
 #include <ghoul/opengl/ghoul_gl.h>
@@ -387,7 +388,8 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
         std::vector<double> captureProgression = parser->getCaptureProgression();  //in5
 
         // check for sanity
-        if (translations.empty() || imageData.empty() || instrumentTimes.empty() || targetTimes.empty() || captureProgression.empty()) {
+        //if (translations.empty() || imageData.empty() || instrumentTimes.empty() || targetTimes.empty() || captureProgression.empty()) {
+        if (imageData.empty() || instrumentTimes.empty() || targetTimes.empty() || captureProgression.empty()) {
             LERROR("Missing sequence data");
             return;
         }

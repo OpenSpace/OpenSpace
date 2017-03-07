@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -224,7 +224,7 @@ namespace {
 
 namespace openspace {
 
-Documentation TLETranslation::Documentation() {
+documentation::Documentation TLETranslation::Documentation() {
     using namespace openspace::documentation;
     return {
         "TLE Translation",
@@ -279,6 +279,15 @@ void TLETranslation::readTLEFile(const std::string& filename) {
         double meanMotion;
         double epoch;
     } keplerElements;
+    
+    enum class State {
+        Initial = 0,
+        ReadFirstLine,
+        ReadSecondLine,
+        Finished = ReadSecondLine
+    };
+    
+    State state = State::Initial;
 
     std::string line;
     while (std::getline(file, line)) {
@@ -301,8 +310,15 @@ void TLETranslation::readTLEFile(const std::string& filename) {
             //    14 69-69   Checksum (modulo 10)
         
             keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
+            state = State::ReadFirstLine;
         }
         else if (line[0] == '2') {
+            if (state != State::ReadFirstLine) {
+                throw ghoul::RuntimeError(
+                    "Malformed TLE file: '" + filename + "'. Line 2 before line 1",
+                    "TLETranslation"
+                );
+            }
             // Second line
             //Field    Columns    Content
             //    1  01-01  Line number
@@ -348,8 +364,16 @@ void TLETranslation::readTLEFile(const std::string& filename) {
             stream.str(line.substr(52, 11));
             stream >> keplerElements.meanMotion;
             
+            state = State::ReadSecondLine;
             break;
         }
+    }
+    
+    if (state != State::Finished) {
+        throw ghoul::RuntimeError(
+            "Malformed TLE file: Line 1 or 2 missing",
+            "TLETranslation"
+        );
     }
     
     // Calculate the semi major axis based on the mean motion using kepler's laws

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,8 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 const char* TemporalTileProvider::URL_TIME_PLACEHOLDER("${OpenSpaceTimeId}");
 
 const char* TemporalTileProvider::TemporalXMLTags::TIME_START = "OpenSpaceTimeStart";
@@ -286,7 +287,7 @@ TimeFormat* TimeIdProviderFactory::getProvider(const std::string& format) {
     }
     ghoul_assert(
         _timeIdProviderMap.find(format) != _timeIdProviderMap.end(), 
-        "Unsupported Time format: " << format
+        "Unsupported Time format: " + format
     );
     return _timeIdProviderMap[format].get();
 }
@@ -347,5 +348,6 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) const {
     }
 }
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

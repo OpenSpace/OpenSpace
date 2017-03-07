@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,101 +40,73 @@
 
 
 namespace {
-    const std::string _loggerCat = "SettingsEngine";
+    const char* _loggerCat = "SettingsEngine";
 }
 
 namespace openspace {
 
 SettingsEngine::SettingsEngine()
-    : _eyeSeparation("eyeSeparation", "Eye Separation" , 0.f, 0.f, 10.f)
+    : properties::PropertyOwner("Global Properties")
     , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::Dropdown)
-    , _showFrameNumber("showFrameNumber", "Show frame number", false)
     , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
     , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
     , _useDoubleBuffering("useDoubleBuffering", "Use double buffering", false)
     , _spiceUseExceptions("enableSpiceExceptions", "Enable Spice Exceptions", false)
 {
-    setName("Global Properties");
-
-    _spiceUseExceptions.onChange([this]{
+    _spiceUseExceptions.onChange([this] {
         if (_spiceUseExceptions) {
             SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::Yes);
-        }
-        else {
+        } else {
             SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::No);
         }
     });
     addProperty(_spiceUseExceptions);
+    addProperty(_busyWaitForDecode);
+    addProperty(_logSGCTOutOfOrderErrors);
+    addProperty(_useDoubleBuffering);
+    addProperty(_scenes);
 }
 
 void SettingsEngine::initialize() {
-    initEyeSeparation();
-    initSceneFiles();
-    initShowFrameNumber();
-    initBusyWaitForDecode();
-    initLogSGCTOutOfOrderErrors();
-    initUseDoubleBuffering();
+    // Load all matching files in the Scene
+    // TODO: match regex with either with new ghoul readFiles or local code
+    std::string sceneDir = "${SCENE}";
+    std::vector<std::string> scenes = ghoul::filesystem::Directory(sceneDir).readFiles();
+    for (std::size_t i = 0; i < scenes.size(); ++i) {
+        std::size_t found = scenes[i].find_last_of("/\\");
+        _scenes.addOption(i, scenes[i].substr(found + 1));
+    }
+
+    // Set interaction to change ConfigurationManager and schedule the load
+    _scenes.onChange(
+        [this]() {
+        std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
+        OsEng.configurationManager().setValue(
+            ConfigurationManager::KeyConfigScene, sceneFile);
+        OsEng.loadScene(sceneFile);
+    }
+    );
 }
-    
-void SettingsEngine::setModules(std::vector<OpenSpaceModule*> modules) {
+
+void SettingsEngine::setModules(const std::vector<OpenSpaceModule*>& modules) {
     for (OpenSpaceModule* m : modules) {
         addPropertySubOwner(m);
     }
-}
-
-void SettingsEngine::initEyeSeparation() {
-    addProperty(_eyeSeparation);
-
-    // Set interaction to change the window's (SGCT's) eye separation
-    _eyeSeparation.onChange(
-        [this]() { OsEng.windowWrapper().setEyeSeparationDistance(_eyeSeparation); });
-}
-
-void SettingsEngine::initShowFrameNumber() {
-    addProperty(_showFrameNumber);
-
-    _showFrameNumber.onChange(
-        [this]() { OsEng.renderEngine().setShowFrameNumber(_showFrameNumber.value()); } );
-}
-
-void SettingsEngine::initBusyWaitForDecode() {
-    addProperty(_busyWaitForDecode);
-    _busyWaitForDecode.onChange(
-        [this]() { 
-        LINFO((_busyWaitForDecode.value() ? "Busy wait for decode" : "Async decode"));
-    });
 }
 
 bool SettingsEngine::busyWaitForDecode() {
     return _busyWaitForDecode.value();
 }
 
-void SettingsEngine::initLogSGCTOutOfOrderErrors() {
-    addProperty(_logSGCTOutOfOrderErrors);
-    _logSGCTOutOfOrderErrors.onChange(
-        [this]() {
-        LINFO("Turn " << (_logSGCTOutOfOrderErrors.value() ? "on" : "off") << " SGCT out of order logging");
-    });
-}
-
 bool SettingsEngine::logSGCTOutOfOrderErrors() {
     return _logSGCTOutOfOrderErrors.value();
 }
-
-
-void SettingsEngine::initUseDoubleBuffering() {
-    addProperty(_useDoubleBuffering);
-    _useDoubleBuffering.onChange(
-        [this]() {
-        LINFO("Turn " << (_useDoubleBuffering.value() ? "on" : "off") << " double buffering");
-    });
-}
-
 
 bool SettingsEngine::useDoubleBuffering() {
     return _useDoubleBuffering.value();
 }
 
+/*
 void SettingsEngine::initSceneFiles() {
     addProperty(_scenes);
 
@@ -151,15 +123,15 @@ void SettingsEngine::initSceneFiles() {
 
     // Set interaction to change ConfigurationManager and schedule the load
     _scenes.onChange(
-        [this, sceneDir, pathSep]() {
+        [sceneDir, pathSep]() {
             std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
             OsEng.configurationManager().setValue(
                 ConfigurationManager::KeyConfigScene, sceneFile);
             std::string fullPath =
                 sceneDir + pathSep + sceneFile;
-            OsEng.scheduleLoadScene(fullPath);
+            OsEng.loadScene(sceneFile);
         }
     );
-}
+}*/
 
-}
+}  // namespace openspace

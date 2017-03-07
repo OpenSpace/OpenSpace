@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,7 +39,6 @@
 //#include <test_chunknode.inl>
 #include <test_lrucache.inl>
 #include <test_aabb.inl>
-#include <test_convexhull.inl>
 
 #include <test_angle.inl>
 //#include <test_latlonpatch.inl>
@@ -84,7 +83,8 @@ namespace {
 
 int main(int argc, char** argv) {
     std::vector<std::string> args;
-    openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+    bool close;
+    openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args, close);
 
     testing::InitGoogleTest(&argc, argv);
 

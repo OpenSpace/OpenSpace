@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,28 +43,18 @@ public:
 
     void initialize();
     
-    void setModules(std::vector<OpenSpaceModule*> modules);
+    void setModules(const std::vector<OpenSpaceModule*>& modules);
 
     bool busyWaitForDecode();
     bool logSGCTOutOfOrderErrors();
     bool useDoubleBuffering();
 
 private:
-    void initEyeSeparation();
-    void initSceneFiles();
-    void initShowFrameNumber();
-    void initBusyWaitForDecode();
-    void initLogSGCTOutOfOrderErrors();
-    void initUseDoubleBuffering();
-
-    properties::FloatProperty _eyeSeparation;
     properties::OptionProperty _scenes;
-    properties::BoolProperty _showFrameNumber;
     properties::BoolProperty _busyWaitForDecode;
     properties::BoolProperty _logSGCTOutOfOrderErrors;
     properties::BoolProperty _useDoubleBuffering;
     properties::BoolProperty _spiceUseExceptions;
-
 };
 
 } // namespace openspace

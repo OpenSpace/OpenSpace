@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ ProgressBar::~ProgressBar() {
 }
 
 void ProgressBar::print(int current) {
-    float progress = static_cast<float>(current) / static_cast<float>(_end - 1);
+    float progress = static_cast<float>(current) / static_cast<float>(_end);
     int iprogress = static_cast<int>(progress*100.0f);
     if (iprogress != _previous) {
         int pos = static_cast<int>(static_cast<float>(_width)* progress);

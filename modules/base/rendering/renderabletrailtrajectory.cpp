@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/spicemanager.h>
@@ -51,9 +52,10 @@ namespace {
 
 namespace openspace {
 
-openspace::Documentation RenderableTrailTrajectory::Documentation() {
+documentation::Documentation RenderableTrailTrajectory::Documentation() {
     using namespace documentation;
-    openspace::Documentation doc {
+    
+    documentation::Documentation doc {
         "RenderableTrailTrajectory",
         "base_renderable_renderabletrailtrajectory",
         {
@@ -110,7 +112,7 @@ openspace::Documentation RenderableTrailTrajectory::Documentation() {
 
     // Insert the parents documentation entries until we have a verifier that can deal
     // with class hierarchy
-    openspace::Documentation parentDoc = RenderableTrail::Documentation();
+    documentation::Documentation parentDoc = RenderableTrail::Documentation();
     doc.entries.insert(
         doc.entries.end(),
         parentDoc.entries.begin(),

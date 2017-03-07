@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,10 +26,11 @@
 #define __OPENSPACE_MODULE_SPACE___SPICEROTATION___H__
 
 #include <openspace/scene/rotation.h>
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
+    
+namespace documentation { struct Documentation; }
     
 class SpiceRotation : public Rotation {
 public:
@@ -37,7 +38,7 @@ public:
     const glm::dmat3& matrix() const;
     void update(const UpdateData& data) override;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     properties::StringProperty _sourceFrame;

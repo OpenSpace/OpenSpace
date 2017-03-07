@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,6 @@
 #ifndef __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 #define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
-// open space includes
-#include <openspace/documentation/documentation.h>
-
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/rotation.h>
@@ -35,16 +32,18 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/scene/scene.h>
-#include <ghoul/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
 
-// std includes
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class SceneGraphNode : public properties::PropertyOwner {
 public:
@@ -112,7 +111,7 @@ public:
 
     const PerformanceRecord& performanceRecord() const { return _performanceRecord; }
 
-    void setRenderable(Renderable* renderable);
+    void setRenderable(std::unique_ptr<Renderable> renderable);
     const Renderable* renderable() const;
     Renderable* renderable();
 
@@ -131,7 +130,7 @@ private:
 
     PerformanceRecord _performanceRecord;
 
-    Renderable* _renderable;
+    std::unique_ptr<Renderable> _renderable;
     bool _renderableVisible;
 
     bool _boundingSphereVisible;

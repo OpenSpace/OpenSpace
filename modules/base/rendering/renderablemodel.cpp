@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -85,7 +85,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     if (success)
         _colorTexturePath = absPath(texturePath);
 
-    addPropertySubOwner(_geometry);
+    addPropertySubOwner(_geometry.get());
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
@@ -153,7 +153,6 @@ bool RenderableModel::initialize() {
 bool RenderableModel::deinitialize() {
     if (_geometry) {
         _geometry->deinitialize();
-        delete _geometry;
         _geometry = nullptr;
     }
     _texture = nullptr;
@@ -226,7 +225,7 @@ void RenderableModel::render(const RenderData& data) {
 void RenderableModel::update(const UpdateData& data) {
     if (_programObject->isDirty())
         _programObject->rebuildFromFile();
-    double _time = data.time;
+//    double _time = data.time;
 
     //if (_isGhost){
     //    futureTime = openspace::ImageSequencer::ref().getNextCaptureTime();

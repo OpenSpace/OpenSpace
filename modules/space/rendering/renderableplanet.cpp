@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,8 +83,11 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(success,
-            "RenderablePlanet need the '" << SceneGraphNode::KeyName<<"' be specified");
+    ghoul_assert(
+        success,
+        std::string("RenderablePlanet need the '") + SceneGraphNode::KeyName +
+            "' be specified"
+    );
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(keyGeometry, geometryDictionary);
@@ -125,7 +128,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         _heightMapTexturePath = absPath(heightMapTexturePath);
     }
 
-    addPropertySubOwner(_geometry);
+    addPropertySubOwner(_geometry.get());
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
@@ -309,7 +312,7 @@ bool RenderablePlanet::initialize() {
 bool RenderablePlanet::deinitialize() {
     if(_geometry) {
         _geometry->deinitialize();
-        delete _geometry;
+        _geometry = nullptr;
     }
 
     RenderEngine& renderEngine = OsEng.renderEngine();

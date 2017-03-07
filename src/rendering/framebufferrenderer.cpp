@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,6 +46,8 @@ namespace {
     const std::string _loggerCat = "FramebufferRenderer";
     const std::string ExitFragmentShaderPath = "${SHADERS}/framebuffer/exitframebuffer.frag";
     const std::string RaycastFragmentShaderPath = "${SHADERS}/framebuffer/raycastframebuffer.frag";
+    const std::string GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
+    const std::string GetEntryOutsidePath = "${SHADERS}/framebuffer/outside.glsl";
     const std::string RenderFragmentShaderPath = "${SHADERS}/framebuffer/renderframebuffer.frag";
 }
 
@@ -286,20 +288,28 @@ void FramebufferRenderer::updateRaycastData() {
 
         try {
             _exitPrograms[raycaster] = ghoul::opengl::ProgramObject::Build("Volume " + std::to_string(data.id) + " exit", vsPath, ExitFragmentShaderPath, dict);
-        }
-        catch (ghoul::RuntimeError e) {
-            LERROR(e.message);
-        }
-        try {
-            _raycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build("Volume " + std::to_string(data.id) + " raycast", vsPath, RaycastFragmentShaderPath, dict);
         } catch (ghoul::RuntimeError e) {
             LERROR(e.message);
         }
         try {
+            ghoul::Dictionary outsideDict = dict;
+            outsideDict.setValue("getEntryPath", GetEntryOutsidePath);
+            _raycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
+                "Volume " + std::to_string(data.id) + " raycast",
+                vsPath,
+                RaycastFragmentShaderPath,
+                outsideDict);
+        } catch (ghoul::RuntimeError e) {
+            LERROR(e.message);
+        }
+        try {
+            ghoul::Dictionary insideDict = dict;
+            insideDict.setValue("getEntryPath", GetEntryInsidePath);
             _insideRaycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 "Volume " + std::to_string(data.id) + " inside raycast",
                 "${SHADERS}/framebuffer/resolveframebuffer.vert",
-                RaycastFragmentShaderPath, dict);
+                RaycastFragmentShaderPath,
+                insideDict);
         }
         catch (ghoul::RuntimeError e) {
             LERROR(e.message);
@@ -359,26 +369,22 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
-
-        
-        ghoul::opengl::ProgramObject* insideRaycastProgram = _raycastPrograms[raycaster].get();
-
         glm::vec3 cameraPosition;
         bool cameraIsInside = raycaster->cameraIsInside(raycasterTask.renderData, cameraPosition);
         ghoul::opengl::ProgramObject* raycastProgram = nullptr;
 
         if (cameraIsInside) {
-            raycastProgram = _insideRaycastPrograms[raycaster].get();
+            if (raycastProgram = _insideRaycastPrograms[raycaster].get()) {
+                raycastProgram->activate();
+                raycastProgram->setUniform("cameraPosInRaycaster", cameraPosition);
+            }
         } else {
-            raycastProgram = _raycastPrograms[raycaster].get();
+            if (raycastProgram = _raycastPrograms[raycaster].get()) {
+                raycastProgram->activate();
+            }
         }
         
         if (raycastProgram) {
-            raycastProgram->activate();
-
-            raycastProgram->setUniform("insideRaycaster", cameraIsInside);
-            raycastProgram->setUniform("cameraPosInRaycaster", cameraPosition);
-
             raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 
             ghoul::opengl::TextureUnit exitColorTextureUnit;

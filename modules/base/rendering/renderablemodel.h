@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,6 +36,8 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
+#include <memory>
+
 namespace openspace {
 
 namespace modelgeometry {
@@ -65,7 +67,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    modelgeometry::ModelGeometry* _geometry;
+    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
     
     glm::dmat3 _modelTransform;
 
@@ -87,4 +89,4 @@ private:
 
 }  // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,9 +34,6 @@
 
 namespace openspace {
 
-using namespace ghoul::opengl;
-
-
 /**
  * Very simple class maintaining a uniform location.
  */
@@ -47,7 +44,7 @@ public:
     * Updates the uniform location of the uniform variable named <name> 
     * in the provided shader program.
     */
-    void bind(ProgramObject* program, const std::string& name);
+    void bind(ghoul::opengl::ProgramObject* program, const std::string& name);
     
 protected:
     GLint _uniformLocation = -1;
@@ -67,7 +64,7 @@ public:
      * Sets the value of T to its corresponding GPU value.
      * OBS! Users must ensure bind has been called before using this method
      */
-    void setValue(ProgramObject* program, T val){
+    void setValue(ghoul::opengl::ProgramObject* program, T val){
         program->setUniform(_uniformLocation, val);
     }
 
@@ -86,8 +83,8 @@ public:
      * program.
      * OBS! Users must ensure bind has been called before using this method.
      */
-    void setValue(ProgramObject* program, std::shared_ptr<Texture> texture){
-        _texUnit = std::make_unique<TextureUnit>();
+    void setValue(ghoul::opengl::ProgramObject* program, std::shared_ptr<ghoul::opengl::Texture> texture){
+        _texUnit = std::make_unique<ghoul::opengl::TextureUnit>();
         _texUnit->activate();
         texture->bind();
         program->setUniform(_uniformLocation, *_texUnit);
@@ -99,7 +96,7 @@ public:
 
 private:
 
-    std::unique_ptr<TextureUnit> _texUnit;
+    std::unique_ptr<ghoul::opengl::TextureUnit> _texUnit;
 
 };
 

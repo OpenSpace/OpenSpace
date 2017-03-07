@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -83,8 +83,6 @@ void main() {
       inRange(projected.y, 0, 1)) &&
       dot(v_b, normal) < 0 )
     {
-    // The 1-x is in this texture call because of flipped textures
-    // to be fixed soon ---abock
         color = texture(projectionTexture, vec2(projected.x, projected.y));
         stencil = vec4(1.0); 
     }

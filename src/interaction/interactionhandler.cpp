@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/keys.h>
 
@@ -50,19 +51,19 @@
 #include <fstream>
 
 namespace {
-    const std::string _loggerCat = "InteractionHandler";
+    const char* _loggerCat = "InteractionHandler";
 
-    const std::string KeyFocus = "Focus";
-    const std::string KeyPosition = "Position";
-    const std::string KeyRotation = "Rotation";
+    const char* KeyFocus = "Focus";
+    const char* KeyPosition = "Position";
+    const char* KeyRotation = "Rotation";
 
-    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/main.hbs";
-    const std::string KeybindingTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs";
-    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
-    const std::string JsFilename = "${OPENSPACE_DATA}/web/keybindings/script.js";
-    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
-}
+    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/main.hbs";
+    const char* KeybindingTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs";
+    const char* HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const char* JsFilename = "${OPENSPACE_DATA}/web/keybindings/script.js";
+    const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
+} // namespace
 
 #include "interactionhandler_lua.inl"
 
@@ -71,15 +72,14 @@ namespace interaction {
 
 // InteractionHandler
 InteractionHandler::InteractionHandler()
-    : _origin("origin", "Origin", "")
+    : properties::PropertyOwner("Interaction")
+    , _origin("origin", "Origin", "")
     , _rotationalFriction("rotationalFriction", "Rotational Friction", true)
     , _horizontalFriction("horizontalFriction", "Horizontal Friction", true)
     , _verticalFriction("verticalFriction", "Vertical Friction", true)
     , _sensitivity("sensitivity", "Sensitivity", 0.5, 0.001, 1)
     , _rapidness("rapidness", "Rapidness", 1, 0.1, 60)
 {
-    setName("Interaction");
-
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
         if (!node) {

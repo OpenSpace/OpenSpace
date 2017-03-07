@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,11 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/rendering/renderer.h>
 
 #include <openspace/util/syncdata.h>
 
@@ -55,7 +59,6 @@ class Camera;
 class SyncBuffer;
 class Scene;
 class SceneManager;
-class Renderer;
 class RaycasterManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
@@ -74,15 +77,12 @@ public:
         FPSAvg
     };
 
-    static const std::string KeyFontMono;
-    static const std::string KeyFontLight;
-    static const std::vector<FrametimeType> FrametimeTypes;
-
     RenderEngine();
     ~RenderEngine() = default;
     
-    bool initialize();
-    bool deinitialize();
+    void initialize();
+    void initializeGL();
+    void deinitialize();
 
     void setScene(Scene* scene);
     Scene* scene();
@@ -94,21 +94,17 @@ public:
     RaycasterManager& raycasterManager();
 
     // sgct wrapped functions
-    bool initializeGL();
     
 
     void updateShaderPrograms();
     void updateFade();
     void updateRenderer();
     void updateScreenSpaceRenderables();
-    void render(const glm::mat4& projectionMatrix, const glm::mat4& viewMatrix);
+    void render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
 
     void renderScreenLog();
     void renderShutdownInformation(float timer, float fullTime);
     void postDraw();
-
-    void takeScreenshot(bool applyWarping = false);
-    void toggleInfoText(bool b);
 
     // Performance measurements
     bool doesPerformanceMeasurements() const;
@@ -116,10 +112,6 @@ public:
 
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
-    void setNAaSamples(int nAaSamples);
-    void setShowFrameNumber(bool enabled);
-
-    void setDisableRenderingOnMaster(bool enabled);
 
     void registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
     void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
@@ -213,18 +205,21 @@ private:
 
     //FrametimeType _frametimeType;
 
-    bool _showInfo;
-    bool _showLog;
-    bool _takeScreenshot;
-    bool _applyWarping;
-    bool _showFrameNumber;
+    properties::BoolProperty _showInfo;
+    properties::BoolProperty _showLog;
+    
+    properties::TriggerProperty _takeScreenshot;
+    bool _shouldTakeScreenshot;
+    properties::BoolProperty _applyWarping;
+    properties::BoolProperty _showFrameNumber;
+    properties::BoolProperty _disableMasterRendering;
 
     float _globalBlackOutFactor;
     float _fadeDuration;
     float _currentFadeTime;
     int _fadeDirection;
-    int _nAaSamples;
-    unsigned int _frameNumber;
+    properties::IntProperty _nAaSamples;
+    uint64_t _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
@@ -233,8 +228,6 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;
-
-    bool _disableMasterRendering = false;
 };
 
 } // namespace openspace

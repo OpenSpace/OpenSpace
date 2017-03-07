@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __NEWHORIZONSMODULE_H__
-#define __NEWHORIZONSMODULE_H__
+#ifndef __OPENSPACE_MODULE_NEWHORIZONS___NEWHORIZONS_MODULE___H__
+#define __OPENSPACE_MODULE_NEWHORIZONS___NEWHORIZONS_MODULE___H__
 
 #include <openspace/util/openspacemodule.h>
 
@@ -33,7 +33,7 @@ class NewHorizonsModule : public OpenSpaceModule {
 public:
     NewHorizonsModule();
     
-    std::vector<Documentation> documentations() const override;
+    std::vector<documentation::Documentation> documentations() const override;
 
 protected:
     void internalInitialize() override;
@@ -41,4 +41,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __NEWHORIZONSMODULE_H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___NEWHORIZONS_MODULE___H__
