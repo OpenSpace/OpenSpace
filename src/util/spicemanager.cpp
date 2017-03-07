@@ -38,7 +38,7 @@
 #include "SpiceZpr.h"
 
 namespace {
-    const std::string _loggerCat = "SpiceManager";
+    const char* _loggerCat = "SpiceManager";
     
     // The value comes from
     // http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getmsg_c.html

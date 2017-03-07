@@ -225,8 +225,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
     LDEBUG("Creating OpenSpaceEngine");
     _engine = new OpenSpaceEngine(std::string(argv[0]), std::move(windowWrapper));
 
-    registerCoreClasses(DocEng);
-
     // Query modules for commandline arguments
     _engine->gatherCommandlineArguments();
 
