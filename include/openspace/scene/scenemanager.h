@@ -38,6 +38,7 @@ public:
     ~SceneManager() = default;
     Scene* loadScene(const std::string& path);
     void unloadScene(Scene& scene);
+    void unloadAll();
 private:
     std::vector<std::unique_ptr<Scene>> _scenes;
 };

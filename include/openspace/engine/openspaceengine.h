@@ -178,22 +178,22 @@ private:
     
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
-    std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
-    std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<SceneManager> _sceneManager;
-    std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
-    std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
-    std::unique_ptr<NetworkEngine> _networkEngine;
-    std::unique_ptr<SyncEngine> _syncEngine;
-    std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<DownloadManager> _downloadManager;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
+    std::unique_ptr<NetworkEngine> _networkEngine;
     std::unique_ptr<ParallelConnection> _parallelConnection;
+    std::unique_ptr<RenderEngine> _renderEngine;
     std::unique_ptr<SettingsEngine> _settingsEngine;
+    std::unique_ptr<SyncEngine> _syncEngine;
     std::unique_ptr<TimeManager> _timeManager;
     std::unique_ptr<WindowWrapper> _windowWrapper;
+    std::unique_ptr<ghoul::cmdparser::CommandlineParser> _commandlineParser;
     std::unique_ptr<ghoul::fontrendering::FontManager> _fontManager;
+    std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
+    std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
+    std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;

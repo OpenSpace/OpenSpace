@@ -381,10 +381,13 @@ void OpenSpaceEngine::destroy() {
     _engine->_console->deinitialize();
 
     _engine->_scriptEngine->deinitialize();
+    _engine->_sceneManager->unloadAll();
+
     delete _engine;
     FactoryManager::deinitialize();
     Time::deinitialize();
     SpiceManager::deinitialize();
+
 
     ghoul::fontrendering::FontRenderer::deinitialize();
 

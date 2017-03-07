@@ -367,15 +367,6 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     //    child->render(newData);
 }
 
-
-// not used anymore @AA
-//void SceneGraphNode::addNode(SceneGraphNode* child)
-//{
-//    // add a child node and set this node to be the parent
-//    child->setParent(this);
-//    _children.push_back(child);
-//}
-
 void SceneGraphNode::setParent(SceneGraphNode& parent, UpdateScene updateScene) {
     ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
     ghoul_assert(

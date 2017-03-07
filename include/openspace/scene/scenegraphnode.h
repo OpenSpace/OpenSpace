@@ -81,7 +81,6 @@ public:
     std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child, UpdateScene updateScene = UpdateScene::Yes);
     void setParent(SceneGraphNode& parent, UpdateScene updateScene = UpdateScene::Yes);
 
-
     void addDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
     void removeDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
     void clearDependencies(UpdateScene updateScene = UpdateScene::Yes);

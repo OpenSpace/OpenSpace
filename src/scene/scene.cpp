@@ -117,9 +117,12 @@ void Scene::addNode(SceneGraphNode* node, Scene::UpdateDependencies updateDeps) 
 
 void Scene::removeNode(SceneGraphNode* node, Scene::UpdateDependencies updateDeps) {
     // Remove the node and all its children.
-    node->traversePostOrder([this](SceneGraphNode* n) {
-        _topologicallySortedNodes.erase(std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), n), _topologicallySortedNodes.end());
-        _nodesByName.erase(n->name());
+    node->traversePostOrder([this](SceneGraphNode* node) {
+        _topologicallySortedNodes.erase(
+            std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), node),
+            _topologicallySortedNodes.end()
+        );
+        _nodesByName.erase(node->name());
     });
     
     if (updateDeps) {

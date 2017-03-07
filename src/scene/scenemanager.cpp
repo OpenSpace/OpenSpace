@@ -45,4 +45,8 @@ void SceneManager::unloadScene(Scene& scene) {
         return s.get() == &scene;
     });
 }
+
+void SceneManager::unloadAll() {
+    _scenes.clear();
+}
 }

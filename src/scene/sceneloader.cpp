@@ -306,7 +306,6 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
         return static_cast<SceneGraphNode*>(nullptr);
     };
 
-
     std::vector<SceneGraphNode*> attachedBranches;
     std::vector<std::unique_ptr<SceneGraphNode>> badNodes;
     
@@ -348,11 +347,6 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
         }
     }
 
-    // Add the nodes to the scene.
-    for (auto& node : attachedBranches) {
-        scene.addNode(node, Scene::UpdateDependencies::No);
-    }
-
     // Remove all bad nodes (parent or deps missing) and all their children and dependent nodes.
     // Use unsorted set `visited` to avoid infinite loop in case of circular deps.
     std::unordered_set<SceneGraphNode*> visited;
@@ -378,14 +372,21 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
             LWARNING("Node '" << node.first << "' is not connected to the root and will not be added to the scene");
         }
     }
+
+    // Add the nodes to the scene.
+    for (auto& node : attachedBranches) {
+        scene.addNode(node, Scene::UpdateDependencies::No);
+    }
+
     // Update dependencies: sort nodes topologically.
     scene.updateDependencies();
 
     // Return a vector of all added nodes.
     std::vector<SceneGraphNode*> addedNodesVector;
-    for (auto& it : addedNodes) {
-        addedNodesVector.push_back(it.second);
-    }
+    std::transform(addedNodes.begin(), addedNodes.end(), std::back_inserter(addedNodesVector), [] (auto& pair) {
+        return pair.second;
+    });
+
     return addedNodesVector;
 }
 }

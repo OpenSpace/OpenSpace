@@ -68,18 +68,17 @@ public:
      */
     void initialize();
 
-    /*
+    /**
      * Load the scenegraph from the provided folder
      */
-    //void scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath);
     void clear();
 
-    /*
+    /**
      * Set the root node of the scene
      */
     void setRoot(std::unique_ptr<SceneGraphNode> root);
 
-    /*
+    /**
      * Set the root node of the scene
      */
     void setCamera(std::unique_ptr<Camera> camera);
@@ -88,45 +87,61 @@ public:
      * Return the camera
      */
     Camera* camera() const;
-   
-    /*
+
+    /**
      * Updates all SceneGraphNodes relative positions
      */
     void update(const UpdateData& data);
 
-    /*
-     * Evaluates if the SceneGraphNodes are visible to the provided camera
+    /**
+     * Evaluate if the SceneGraphNodes are visible to the provided camera.
      */
     void evaluate(Camera* camera);
 
-    /*
-     * Render visible SceneGraphNodes using the provided camera
+    /**
+     * Render visible SceneGraphNodes using the provided camera.
      */
     void render(const RenderData& data, RendererTasks& tasks);
 
-    /*
-     * Returns the root SceneGraphNode
+    /**
+     * Return the root SceneGraphNode.
      */
     SceneGraphNode* root() const;
 
     /**
      * Return the scenegraph node with the specified name or <code>nullptr</code> if that
-     * name does not exist
+     * name does not exist.
      */
     SceneGraphNode* sceneGraphNode(const std::string& name) const;
 
+    /**
+     * Add a node and all its children to the scene.
+     */
     void addNode(SceneGraphNode* node, UpdateDependencies updateDeps = UpdateDependencies::Yes);
 
+    /**
+     * Remove a node and all its children from the scene.
+     */
     void removeNode(SceneGraphNode* node, UpdateDependencies updateDeps = UpdateDependencies::Yes);
 
+    /**
+     * Update dependencies.
+     */
     void updateDependencies();
 
-    void sortTopologically();
-
+    /**
+     * Return a vector of all scene graph nodes in the scene.
+     */
     const std::vector<SceneGraphNode*>& allSceneGraphNodes() const;
 
+    /**
+     * Return a a map from name to scene graph node.
+     */
     const std::map<std::string, SceneGraphNode*>& nodesByName() const;
 
+    /**
+     * Output property documentation to a file.
+     */
     void writePropertyDocumentation(const std::string& filename, const std::string& type, const std::string& sceneFilename);
 
     /**
@@ -142,6 +157,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:  
+    void sortTopologically();
+
     std::unique_ptr<SceneGraphNode> _root;
     std::unique_ptr<Camera> _camera;
     std::vector<SceneGraphNode*> _topologicallySortedNodes;
