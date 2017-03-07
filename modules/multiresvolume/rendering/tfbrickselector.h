@@ -38,7 +38,6 @@ class TransferFunction;
 
 class TfBrickSelector : public BrickSelector {
 public:
-    TfBrickSelector();
     TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
 
     ~TfBrickSelector();

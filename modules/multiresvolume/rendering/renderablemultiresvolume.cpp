@@ -219,7 +219,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     _tsp = std::make_shared<TSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
-    _selectorName = "tf";
+    _selectorName = TYPE_TF;
     std::string brickSelectorType;
     if (dictionary.hasKey(KeyBrickSelector)) {
         success = dictionary.getValue(KeyBrickSelector, brickSelectorType);
@@ -649,9 +649,10 @@ void RenderableMultiresVolume::render(const RenderData& data, RendererTasks& tas
 
 RenderableMultiresVolume::Selector RenderableMultiresVolume::getSelector() {
 
-    return Selector::TIME;
-    /*
-    return SelectorValues.at(_selectorName.value().c_str());/* {
+    //return Selector::TIME;
+    //SelectorValues.at(std::string(_selectorName).c_str());
+    LINFO(SelectorValues.at("tf"));
+    return SelectorValues.at("tf"); /*{
     case TYPE_TF:
         return Selector::TF;
     case TYPE_SIMPLE:
