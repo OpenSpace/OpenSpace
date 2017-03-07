@@ -1,4 +1,3 @@
-#include "renderableexplorationpath.h"
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -38,7 +37,7 @@ namespace {
 	static const std::string _loggerCat = "RenderableExplorationPath";
 }
 namespace openspace {
-RenderableExplorationPath::RenderableExplorationPath(const ghoul::Dictionary& dictionary) 
+RenderableExplorationPath::RenderableExplorationPath(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _pathShader(nullptr)
 	, _siteShader(nullptr)
@@ -236,15 +235,15 @@ void RenderableExplorationPath::render(const RenderData& data) {
 void RenderableExplorationPath::update(const UpdateData& data) {
 
 	glm::dvec3 tempPos;
-	
+
 	for (int i = 0; i < _stationPoints.size(); i++) {
 		// TODO: Add padding to the height to surface
 
 		// Gets the height of the station point to the surface of the active heightlayers(s)
 		double heightToSurface = _globe->getHeight(glm::dvec3(_stationPoints[i].stationPosition));
 
-		// Small precission issue with heightToSurface which makes the loop run multiple times 
-		if( heightToSurface > _stationPoints[i].previousStationHeight + 0.5 || 
+		// Small precission issue with heightToSurface which makes the loop run multiple times
+		if( heightToSurface > _stationPoints[i].previousStationHeight + 0.5 ||
 				heightToSurface < _stationPoints[i].previousStationHeight - 0.5) {
 
 			// The direction in which the point is to be moved
@@ -262,9 +261,9 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 				tempPos += directionFromSurfaceToPointModelSpace * heightToSurface;
 			else if (heightToSurface == 0.0 && _stationPoints[i].previousStationHeight < 0.0)
 				tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight);
-			else if (heightToSurface < 0.0 && _stationPoints[i].previousStationHeight > 0.0) 
+			else if (heightToSurface < 0.0 && _stationPoints[i].previousStationHeight > 0.0)
 				tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight + heightToSurface);
-			else if (heightToSurface > 0.0 && _stationPoints[i].previousStationHeight < 0.0) 
+			else if (heightToSurface > 0.0 && _stationPoints[i].previousStationHeight < 0.0)
 				tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight + heightToSurface);
 
 			_stationPoints[i].previousStationHeight = heightToSurface;
@@ -298,7 +297,7 @@ void RenderableExplorationPath::calculatePathModelCoordinates() {
 	glm::dvec3 positionModelSpace;
 	StationInformation k;
 	for (auto i : _coordMap) {
-		
+
 		// The map has longitude first and lattitude after, need to switch
 		geo = globebrowsing::Geodetic2{ i.second.y, i.second.x } / 180 * glm::pi<double>();
 		positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
