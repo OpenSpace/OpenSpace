@@ -115,9 +115,16 @@ return {
                 },
                 HeightLayers = {
                     {
-                        Name = "Mola Elevation",
-                        FilePath = "map_service_configs/Utah/Mola_Elevation.xml",
+                        Name = "Mola Elevation [Europe]",
+                        FilePath = "map_service_configs/Mola_Elevation.xml",
                         Enabled = true,
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
+                    },
+                    {
+                        Name = "Mola Elevation [Utah]",
+                        FilePath = "map_service_configs/Utah/Mola_Elevation.xml",
+                        Enabled = false,
                         MinimumPixelSize = 90,
                         DoPreProcessing = true,
                     },
