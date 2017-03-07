@@ -43,7 +43,7 @@ RenderableExplorationPath::RenderableExplorationPath(const ghoul::Dictionary& di
 	, _pathShader(nullptr)
 	, _siteShader(nullptr)
 	, _globe(nullptr)
-	, _fading(0.0)
+	, _fading(1.0)
 	, _vertexBufferID(0)
 	, _vaioID(0)
 	, _isEnabled(properties::BoolProperty("enabled", "enabled", false))
@@ -235,16 +235,78 @@ void RenderableExplorationPath::render(const RenderData& data) {
 
 void RenderableExplorationPath::update(const UpdateData& data) {
 
+	glm::dvec3 tempPos;
+	
+	for (int i = 0; i < _stationPoints.size(); i++) {
+		// TODO: Add padding to the height to surface
+
+		// Gets the height of the station point to the surface of the active heightlayers(s)
+		double heightToSurface = _globe->getHeight(glm::dvec3(_stationPoints[i].stationPosition));
+
+		// Small precission issue with heightToSurface which makes the loop run multiple times 
+		if( heightToSurface > _stationPoints[i].previousStationHeight + 0.5 || 
+				heightToSurface < _stationPoints[i].previousStationHeight - 0.5) {
+
+			// The direction in which the point is to be moved
+			glm::dvec3 directionFromSurfaceToPointModelSpace = _globe->ellipsoid().
+				geodeticSurfaceNormal(_globe->ellipsoid().cartesianToGeodetic2(_stationPoints[i].stationPosition));
+			tempPos = glm::dvec3(0.0, 0.0, 0.0);
+			tempPos = _stationPoints[i].stationPosition;
+
+			// There is probably a nicer way to do this
+			if (heightToSurface > 0.0 && _stationPoints[i].previousStationHeight == 0.0)
+				tempPos += directionFromSurfaceToPointModelSpace * heightToSurface;
+			else if (heightToSurface == 0.0 && _stationPoints[i].previousStationHeight > 0.0)
+				tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight);
+			else if (heightToSurface < 0.0 && _stationPoints[i].previousStationHeight == 0.0)
+				tempPos += directionFromSurfaceToPointModelSpace * heightToSurface;
+			else if (heightToSurface == 0.0 && _stationPoints[i].previousStationHeight < 0.0)
+				tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight);
+			else if (heightToSurface < 0.0 && _stationPoints[i].previousStationHeight > 0.0) 
+				tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight + heightToSurface);
+			else if (heightToSurface > 0.0 && _stationPoints[i].previousStationHeight < 0.0) 
+				tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight + heightToSurface);
+
+			_stationPoints[i].previousStationHeight = heightToSurface;
+			_stationPoints[i].stationPosition = glm::dvec4(tempPos, 1.0);
+		}
+	}
+
+	// Clears and pushes the new position values into the vector used in the vertex buffer
+	// TODO: Find a way to only use one vector (e.g. either only _stationModelCoordinates or _stationPoints
+	_stationPointsModelCoordinates.clear();
+	for (int i = 0; i < _stationPoints.size(); i++) {
+		_stationPointsModelCoordinates.push_back(glm::vec4(_stationPoints[i].stationPosition));
+	}
+
+	// Buffer new data
+	glBindVertexArray(_vaioID);
+	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
+	glBufferData(GL_ARRAY_BUFFER,
+		_stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
+		&_stationPointsModelCoordinates[0],
+		GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(_stationPointsModelCoordinates[0]), 0);
+
+	glBindVertexArray(0);
 }
 
 void RenderableExplorationPath::calculatePathModelCoordinates() {
 	globebrowsing::Geodetic2 geo;
 	glm::dvec3 positionModelSpace;
+	StationInformation k;
 	for (auto i : _coordMap) {
+		
 		// The map has longitude first and lattitude after, need to switch
 		geo = globebrowsing::Geodetic2{ i.second.y, i.second.x } / 180 * glm::pi<double>();
 		positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
-		_stationPointsModelCoordinates.push_back(glm::vec4(positionModelSpace, 1.0f));
+		_stationPointsModelCoordinates.push_back(glm::dvec4(positionModelSpace, 1.0f));
+
+		k.previousStationHeight = 0.0;
+		k.stationPosition = glm::dvec4(positionModelSpace, 1.0);
+		_stationPoints.push_back(k);
 	}
 }
 

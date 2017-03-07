@@ -35,7 +35,13 @@
 namespace openspace {
 
 class RenderableExplorationPath : public Renderable {
-public: 
+public:
+
+	struct StationInformation {
+		glm::dvec4 stationPosition;
+		double previousStationHeight;
+	};
+
 	RenderableExplorationPath(const ghoul::Dictionary& dictionary);
 	
 	bool initialize() override;
@@ -58,6 +64,8 @@ private:
 	bool _isReady;
 
 	std::vector<glm::vec4> _stationPointsModelCoordinates;
+	std::vector<StationInformation> _stationPoints;
+
 	globebrowsing::RenderableGlobe* _globe;
 
 	std::map<std::string, glm::vec2> _coordMap;
