@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,59 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
+#version __CONTEXT__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <ghoul/opengl/programobject.h>
-#include <modules/globebrowsing/globes/renderableglobe.h>
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-#include <map>
+in vec4 in_point_position;
 
-namespace openspace {
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 
-class RenderableExplorationPath : public Renderable {
-public:
+out vec4 vs_positionScreenSpace;
 
-	struct StationInformation {
-		glm::dvec4 stationPosition;
-		double previousStationHeight;
-	};
+void main() {
+    vec4 positionCameraSpace = modelViewTransform * in_point_position;
+    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
 
-	RenderableExplorationPath(const ghoul::Dictionary& dictionary);
-	
-	bool initialize() override;
-	bool deinitialize() override;
-
-	bool isReady() const override;
-
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
-
-	bool extractCoordinates();
-private:
-	void calculatePathModelCoordinates();
-
-	std::unique_ptr<ghoul::opengl::ProgramObject> _pathShader;
-	std::unique_ptr<ghoul::opengl::ProgramObject> _siteShader;
-	properties::BoolProperty _isEnabled;
-
-	std::string _filePath;
-	bool _isReady;
-
-	std::vector<glm::vec4> _stationPointsModelCoordinates;
-	std::vector<StationInformation> _stationPoints;
-
-	globebrowsing::RenderableGlobe* _globe;
-
-	std::map<std::string, glm::vec2> _coordMap;
-
-	float _fading;
-	GLuint _vaioID;
-	GLuint _vertexBufferID;
-
-};
+    gl_Position = vs_positionScreenSpace;
 }
-
-#endif //__OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__

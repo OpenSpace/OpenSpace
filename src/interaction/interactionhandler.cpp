@@ -207,11 +207,11 @@ void InteractionHandler::setInteractionMode(const std::string& interactionModeKe
             "' is not a valid interaction mode. Candidates are " << listInteractionModes);
     }
 }
-    
+
 void InteractionHandler::goToChunk(int x, int y, int level) {
     std::shared_ptr<GlobeBrowsingInteractionMode> gbim =
         std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
-    
+
     if (gbim) {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
         gbim->goToChunk(*_camera, globebrowsing::TileIndex(x,y,level), glm::vec2(0.5,0.5), true);
@@ -224,17 +224,30 @@ void InteractionHandler::goToChunk(int x, int y, int level) {
 void InteractionHandler::goToGeo(double latitude, double longitude) {
     std::shared_ptr<GlobeBrowsingInteractionMode> gbim =
     std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
-        
+
     if (gbim) {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        gbim->goToGeodetic2(
-            *_camera,
+        gbim->goToGeodetic2(*_camera,
             globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(), true
         );
 #endif
     } else {
         LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
     }
+}
+
+void InteractionHandler::goToSol(int sol) {
+	std::shared_ptr<GlobeBrowsingInteractionMode> gbim =
+		std::dynamic_pointer_cast<GlobeBrowsingInteractionMode> (_currentInteractionMode);
+
+	if (gbim) {
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+		LERROR("Solnumber " << sol);
+#endif
+	}
+	else {
+		LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
+	}
 }
 
 void InteractionHandler::lockControls() {
@@ -362,9 +375,9 @@ void InteractionHandler::saveCameraStateToFile(const std::string& filepath) {
 
         // TODO : Should get the camera state as a dictionary and save the dictionary to
         // a file in form of a lua state and not use ofstreams here.
-        
+
         std::ofstream ofs(fullpath.c_str());
-        
+
         glm::dvec3 p = _camera->positionVec3();
         glm::dquat q = _camera->rotationQuaternion();
 
@@ -424,7 +437,7 @@ void InteractionHandler::bindKey(Key key, KeyModifier modifier,
     });
 }
 
-    
+
 void InteractionHandler::writeKeyboardDocumentation(const std::string& type,
                                                     const std::string& file)
 {
@@ -432,7 +445,7 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type,
         std::ofstream f;
         f.exceptions(~std::ofstream::goodbit);
         f.open(absPath(file));
-        
+
         for (const auto& p : _keyLua) {
             std::string remoteScriptingInfo;
             bool remoteScripting = p.second.synchronization;
@@ -613,6 +626,12 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
                 "void",
                 "Go to geographic coordinates latitude and longitude"
             },
+			{
+				"goToSol",
+				&luascriptfunctions::goToSol,
+				"void",
+				"Go to a specific sol number"
+			},
         }
     };
 }
