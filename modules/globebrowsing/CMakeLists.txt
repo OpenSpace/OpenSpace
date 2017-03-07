@@ -42,10 +42,12 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic3.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.h
+	${CMAKE_CURRENT_SOURCE_DIR}/geometry/spheregeometry.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablepanoramic.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
@@ -114,7 +116,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/availabletiledataevaluator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/distanceevaluator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/projectedareaevaluator.cpp
-    
+
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/frustumculler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/horizonculler.cpp
 
@@ -123,11 +125,13 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/geometry/spheregeometry.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
-    
+	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablepanoramic.cpp
+
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
@@ -191,6 +195,8 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tile.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilefragcolor.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilevertexheight.hglsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablepanoramic_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablepanoramic_fs.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})
