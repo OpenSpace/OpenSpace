@@ -69,16 +69,14 @@ bool TouchModule::gotNewInput() {
 			return point.first == c.getSessionID();
 		}
 		) == list.end(); }),
-		lastProcessed.end()
-	);
+		lastProcessed.end());
 
 	// Return true if we got new input
 	if (list.size() == lastProcessed.size() && list.size() > 0) {
-		for (Point& p : lastProcessed) {
-			std::vector<TuioCursor>::iterator foundID = find_if(list.begin(), list.end(), [&p](const TuioCursor& c) { return c.getSessionID() == p.first; });
-			if (p.second.getTuioTime() == foundID->getPath().back().getTuioTime())
+		for_each(lastProcessed.begin(), lastProcessed.end(), [this](Point& p) {
+			if (p.second.getTuioTime() == find_if(list.begin(), list.end(), [&p](const TuioCursor& c) { return c.getSessionID() == p.first; })->getPath().back().getTuioTime())
 				return false;
-		}
+		});
 		return true;
 	}		
 	else
@@ -105,10 +103,10 @@ TouchModule::TouchModule()
 	}
 	);
 	
-	OsEng.registerModuleCallback( // maybe call ear->clearInput() here rather than postdraw
+	OsEng.registerModuleCallback(
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
-		if (gotNewInput()) {
+		if (gotNewInput() && OsEng.windowWrapper().isMaster()) {
 			//std::this_thread::sleep_for(std::chrono::seconds(1));
 
 			Camera* cam = OsEng.interactionHandler().camera();
