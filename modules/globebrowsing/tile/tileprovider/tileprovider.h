@@ -160,8 +160,6 @@ private:
     bool _initialized;
 };
 
-using TileCache = cache::LRUCache<TileIndex::TileHashKey, Tile>;
-
 } // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

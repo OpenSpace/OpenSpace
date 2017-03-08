@@ -35,13 +35,6 @@ namespace openspace {
 namespace globebrowsing {
 namespace cache {
 
-/**
- * Enumerable type used in the LRU cache. 128 bytes are able to account for tile index
- * and an unique identifier for the tile provider.
- */
-//typedef unsigned __int128 uint128_t;
-//using ProviderTileHashKey = uint128_t;
-
 struct ProviderTileKey {
     TileIndex tileIndex;
     unsigned int providerID;
@@ -75,7 +68,7 @@ struct ProviderTileHasher {
         // Add to the key depending on the tile provider to avoid some hash collisions.
         // (All hash collisions can not be avoided due to the limit in 64 bit for the
         // hash key)
-        // Idea make some offset in the place of the bits for the x value. Lesser chance
+        // Idea: make some offset in the place of the bits for the x value. Lesser chance
         // of having different x-value than having different tile provider ids.
         key += static_cast<unsigned long long>(t.providerID << 25);
         return key;
