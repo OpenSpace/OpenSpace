@@ -44,7 +44,7 @@ namespace cache {
 
 struct ProviderTileKey {
     TileIndex tileIndex;
-    int providerID;
+    unsigned int providerID;
 
     bool operator==(const ProviderTileKey& r ) const
     {
@@ -67,7 +67,7 @@ struct ProviderTileHasher {
 
     */
     unsigned long long operator()(const ProviderTileKey& t) const {
-        unsigned long long key;
+        unsigned long long key = 0;
         key |= static_cast<unsigned long long>(t.tileIndex.level);
         key |= static_cast<unsigned long long>(t.tileIndex.x << 5);
         key |= static_cast<unsigned long long>(t.tileIndex.y << 35);

@@ -63,10 +63,10 @@ bool MemoryAwareLRUCache<KeyType, ValueType, HasherType>::exist(const KeyType& k
 template<typename KeyType, typename ValueType, typename HasherType>
 ValueType MemoryAwareLRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
     //ghoul_assert(exist(key), "Key " << key << " must exist");
-    auto it = _itemMap.find(key);
+    auto it = _itemMap.at(key);
     // Move list iterator pointing to value
-    _itemList.splice(_itemList.begin(), _itemList, it->second);
-    return it->second->second;
+    _itemList.splice(_itemList.begin(), _itemList, it);
+    return it->second;
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
