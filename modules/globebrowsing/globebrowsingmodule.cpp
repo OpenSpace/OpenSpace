@@ -27,6 +27,7 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
+#include <modules/globebrowsing/tile/tiledataset.h>
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/sizereferencetileprovider.h>
@@ -37,20 +38,71 @@
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
 
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
 
+#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+
 namespace openspace {
 
-GlobeBrowsingModule::GlobeBrowsingModule() : OpenSpaceModule("GlobeBrowsing") {}
+GlobeBrowsingModule::GlobeBrowsingModule()
+: OpenSpaceModule("GlobeBrowsing")
+{
+}
 
 void GlobeBrowsingModule::internalInitialize() {
     using namespace globebrowsing;
 
-    cache::MemoryAwareTileCache::create(1000 * 200); // 200 MB
+    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&]{
+        _openSpaceMaximumTileCacheSize = std::make_unique<properties::IntProperty>(
+            "MaximumTileCacheSize", "Maximum tile cache size",
+            512, // Default: 512 MB
+            0,    // Minimum: No caching
+            CpuCap.installedMainMemory() * 0.25, // 25% Of total RAM
+            1);   // Step: One MB
+        
+        _GDALMaximumTileCacheSize = std::make_unique<properties::IntProperty> (
+            "MaximumGDALBlockCacheSize", "Maximum GDAL block cache size",
+            16, // Default: 16 MB
+            0,  // Minimum: No caching
+            CpuCap.installedMainMemory() * 0.25, // 25% Of total RAM
+            1); // Step: One MB
+      
+        _clearTileCache = std::make_unique<properties::TriggerProperty> (
+            "ClearTileCache", "Clear tile cache");
+      
+        // Convert from MB to KB
+        cache::MemoryAwareTileCache::create(*_openSpaceMaximumTileCacheSize * 1024);
+
+        _openSpaceMaximumTileCacheSize->onChange(
+        [&]{
+            // Convert from MB to KB
+            globebrowsing::cache::MemoryAwareTileCache::ref().setMaximumSize(
+                *_openSpaceMaximumTileCacheSize * 1024);
+        });
+        _GDALMaximumTileCacheSize->onChange(
+        [&]{
+            // Convert from MB to KB
+            globebrowsing::TileDataset::setGDALMaximumCacheSize(
+                *_GDALMaximumTileCacheSize * 1024);
+        });
+        _clearTileCache->onChange(
+        [&]{
+            globebrowsing::cache::MemoryAwareTileCache::ref().clear();
+        });
+
+        addProperty(*_openSpaceMaximumTileCacheSize);
+        addProperty(*_GDALMaximumTileCacheSize);
+        addProperty(*_clearTileCache);
+    });
+  
+    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&]{
+        globebrowsing::cache::MemoryAwareTileCache::ref().clear();
+    });
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");

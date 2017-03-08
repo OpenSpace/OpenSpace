@@ -142,9 +142,17 @@ void TileDataset::reset() {
     initialize();
 }
 
-size_t TileDataset::getTotalAllocatedGDALData() {
+size_t TileDataset::GDALCacheSize() {
     size_t maximum = GdalHasBeenInitialized ? GDALGetCacheMax64() : 0;
     return GdalHasBeenInitialized ? GDALGetCacheUsed64() : 0;
+}
+
+size_t TileDataset::GDALMaximumCacheSize() {
+    return GdalHasBeenInitialized ? GDALGetCacheMax64() : 0;
+}
+
+void TileDataset::setGDALMaximumCacheSize(size_t cacheSize) {
+    GDALSetCacheMax64(cacheSize);
 }
 
 float TileDataset::noDataValueAsFloat() {
@@ -184,7 +192,6 @@ void TileDataset::gdalEnsureInitialized() {
             "GDAL_DATA",
             absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str()
         );
-        //GDALSetCacheMax64(1000 * 1000 * 1000); // 1 GB
         setGdalProxyConfiguration();
         GdalHasBeenInitialized = true;
     }

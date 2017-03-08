@@ -26,6 +26,10 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/triggerproperty.h>
+
+#include <memory>
 
 namespace openspace {
 
@@ -35,6 +39,11 @@ public:
     
 protected:
     void internalInitialize() override;
+private:
+    std::unique_ptr<properties::IntProperty> _openSpaceMaximumTileCacheSize;
+    std::unique_ptr<properties::IntProperty> _GDALMaximumTileCacheSize;
+  
+    std::unique_ptr<properties::TriggerProperty> _clearTileCache;
 };
 
 } // namespace openspace

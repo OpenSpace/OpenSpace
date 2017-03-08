@@ -82,10 +82,23 @@ public:
     float noDataValueAsFloat();
 
     /**
-     * Returns the number of bytes currently in the GDAL memory cache.
+     * Get the current size of the GDAL in memory cache.
+     * \returns the number of bytes currently in the GDAL memory cache.
      */
-    static size_t getTotalAllocatedGDALData();
+    static size_t GDALCacheSize();
 
+    /**
+     * Get the maximum GDAL in memory cache size.
+     * \returns the maximum number of bytes allowed for the GDAL cache.
+     */
+    static size_t GDALMaximumCacheSize();
+
+    /**
+     * Set the GDAL in memory cache size.
+     * \param cacheSize is the cache size in bytes.
+     */
+    static void setGDALMaximumCacheSize(size_t cacheSize);
+  
     const static glm::ivec2 tilePixelStartOffset;
     const static glm::ivec2 tilePixelSizeDifference;
     const static PixelRegion padding; // same as the two above

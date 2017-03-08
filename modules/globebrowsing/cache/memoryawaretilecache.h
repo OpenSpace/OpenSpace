@@ -96,15 +96,8 @@ public:
     bool exist(ProviderTileKey key);
     Tile get(ProviderTileKey key);
     void put(ProviderTileKey key, Tile tile);
-    
-    /**
-     * Cleans the cache if the amount of allocated data is more than the maximum cache
-     * size.
-     * \param extraMemorySize is the amount of extra memory the cache needs to consider
-     * when cleaning the cache. This memory size is simply added to the current cache
-     * size when checking if the cache size is too big.
-     */
-    void clean(size_t extraMemorySize = 0);
+  
+    void setMaximumSize(size_t maximumSize);
 
     static MemoryAwareTileCache& ref();
 private:
@@ -115,7 +108,7 @@ private:
     ~MemoryAwareTileCache() = default;
     
     static MemoryAwareTileCache* _singleton;
-    std::shared_ptr<MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher> > _tileCache;
+    MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher> _tileCache;
 };
 
 } // namespace cache

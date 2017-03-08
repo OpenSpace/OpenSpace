@@ -47,30 +47,28 @@ MemoryAwareTileCache& MemoryAwareTileCache::ref() {
 }
 
 void MemoryAwareTileCache::clear() {
-    _tileCache->clear();
+    _tileCache.clear();
 }
 
 bool MemoryAwareTileCache::exist(ProviderTileKey key) {
-    return _tileCache->exist(key);
+    return _tileCache.exist(key);
 }
 
 Tile MemoryAwareTileCache::get(ProviderTileKey key) {
-    return _tileCache->get(key);
+    return _tileCache.get(key);
 }
 
 void MemoryAwareTileCache::put(ProviderTileKey key, Tile tile) {
-    _tileCache->put(key, tile);
+    _tileCache.put(key, tile);
 }
 
-void MemoryAwareTileCache::clean(size_t extraMemorySize) {
-	_tileCache->clean(extraMemorySize);
+void MemoryAwareTileCache::setMaximumSize(size_t maximumSize) {
+  _tileCache.setMaximumSize(maximumSize);
 }
 
+MemoryAwareTileCache::MemoryAwareTileCache(size_t cacheSize) :
+  _tileCache(cacheSize) {
 
-MemoryAwareTileCache::MemoryAwareTileCache(size_t cacheSize)
-{
-	_tileCache = std::make_shared<MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher> >(
-		static_cast<size_t>(cacheSize));
 }
 
 } // namespace cache
