@@ -177,8 +177,8 @@ void PixelRegion::forceNumPixelToDifferByNearestMultipleOf(unsigned int multiple
 
 void PixelRegion::roundUpNumPixelToNearestMultipleOf(unsigned int multiple) {
     ghoul_assert(multiple > 0, "multiple must be 1 or larger");
-    numPixels.x += numPixels.x % multiple ? 0 : multiple - numPixels.x % multiple;
-    numPixels.y += numPixels.y % multiple ? 0 : multiple - numPixels.y % multiple;
+    numPixels.x += numPixels.x % multiple == 0 ? 0 : multiple - (numPixels.x % multiple);
+    numPixels.y += numPixels.y % multiple == 0 ? 0 : multiple - (numPixels.y % multiple);
 	ghoul_assert((numPixels.x % multiple) == 0, "Round to nearest multiple failed");
 	ghoul_assert((numPixels.y % multiple) == 0, "Round to nearest multiple failed");
 }

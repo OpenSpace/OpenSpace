@@ -541,14 +541,18 @@ TileDataset::IODescription TileDataset::getIODescription(const TileIndex& tileIn
 
     // For correct sampling in dataset, we need to pad the texture tile
     io.write.region.pad(padding);
+
+    io.write.region.start = PixelRegion::PixelCoordinate(0, 0); // write region starts in origin
+  
+    io.write.bytesPerLine = _dataLayout.bytesPerPixel * io.write.region.numPixels.x;
+    io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
+
 	// OpenGL does not like if the number of bytes per line is not 4
 	if (io.write.bytesPerLine % 4 != 0) {
 		io.write.region.roundUpNumPixelToNearestMultipleOf(4);
-	}
-
-    io.write.region.start = PixelRegion::PixelCoordinate(0, 0); // write region starts in origin
     io.write.bytesPerLine = _dataLayout.bytesPerPixel * io.write.region.numPixels.x;
     io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
+	}
 
     return io;
 }
