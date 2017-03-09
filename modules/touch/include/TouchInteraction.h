@@ -29,6 +29,7 @@
 #include <modules/touch/touchmodule.h>
 
 #include <openspace/util/camera.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/interaction/interactionhandler.h>
 
@@ -57,7 +58,7 @@ class TouchInteraction
 		
 		void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
 		int interpret(const std::vector<TUIO::TuioCursor>& list);
-		void performStep(double dt);
+		void step(double dt);
 
 
 		// Get & Setters
@@ -77,19 +78,22 @@ class TouchInteraction
 		#endif
 
 	private:
-		double _dt;
 		int _interactionMode;
 
 		double _sensitivity;
 		double _friction;
 		
 		glm::dvec3 _cameraPosition;
+		glm::dvec3 _previousFocusNodePosition;
 		glm::dquat _localCameraRotation;
 		glm::dquat _globalCameraRotation;
+		
+
 		glm::dvec3 _centroid;
 
 		glm::dvec3 _velocityPos;
 		glm::dvec3 _velocityRot;
+		glm::dvec3 _rotationDiff;
 		
 		openspace::Camera* _camera;
 		openspace::SceneGraphNode* _focusNode;

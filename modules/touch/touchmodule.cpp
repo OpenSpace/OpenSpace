@@ -49,7 +49,7 @@ namespace {
 namespace openspace {
 
 	TuioEar TouchModule::*ear;
-	//TouchInteraction TouchModule::*touch;
+	TouchInteraction *touch;
 
 bool TouchModule::gotNewInput() {
 	// Get new input from listener
@@ -92,7 +92,7 @@ TouchModule::TouchModule()
 		[&]() {
 		LDEBUGC("TouchModule", "Initializing TuioEar");
 		ear = new TuioEar();
-		//touch = new TouchInteraction();
+		touch = new TouchInteraction();
 	}
 	);
 	
@@ -101,7 +101,7 @@ TouchModule::TouchModule()
 		[&]() {
 		LDEBUGC("TouchModule", "Deinitialize TuioEar");
 		delete ear;
-		//delete touch;
+		delete touch;
 	}
 	);
 	
@@ -109,47 +109,11 @@ TouchModule::TouchModule()
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
 		if (gotNewInput() && OsEng.windowWrapper().isMaster()) {
+			touch->update(list, lastProcessed);
+
+			// for debugging
 			//std::this_thread::sleep_for(std::chrono::seconds(1));
-
-			//touch->update(list, lastProcessed);
-
-			Camera* cam = OsEng.interactionHandler().camera();
-			glm::vec3 pos = cam->positionVec3();
-			glm::vec3 focusDir = glm::normalize(glm::vec3(cam->focusPositionVec3()) - pos);
-
-			glm::vec2 centroid;
-			float distance = 0.0f;
-			float lastDistance = 0.0f;
-			float zoomFactor = 0.0f;
-
-			if (list.size() > 1) { // calculate centroid if we have multiple IDs
-				centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](float x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
-				centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](float y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
-
-				// ------- testing, should use more than just one point later on
-				distance = std::accumulate(list.begin(), list.end(), 0.0f, [&centroid](float d, const TuioCursor& c) {
-					return d + sqrt(pow(c.getX() - centroid.x, 2) + pow(c.getY() - centroid.y, 2));
-				});
-				lastDistance = std::accumulate(lastProcessed.begin(), lastProcessed.end(), 0.0f, [&centroid](float d, const Point& p) {
-					return d + sqrt(pow(p.second.getX() - centroid.x, 2) + pow(p.second.getY() - centroid.y, 2));
-				});
-				zoomFactor = distance - lastDistance; // should be dependant on screen size, distance from focusNode
-				zoomFactor *= glm::distance(pos, glm::vec3(cam->focusPositionVec3()));
-
-				std::cout << "Distance: " << distance << ", Last Distance: " << lastDistance << ", zoomFactor: " << zoomFactor
-					<< "\n";
-
-				glm::vec3 newPos = pos + focusDir*zoomFactor;
-				cam->setPosition(newPos);
-			}
-			else { // do new rotation, work with spherical coordinates. Orbit it both position and rotation, check OrbitInteractionMode in interactionmode
-				//cam->rotate(rot);
-			}
-			// ----------------
-
-
-			std::ostringstream os; // for debugging
-
+			std::ostringstream os; 
 			for (const TuioCursor &j : list) { // go through each item
 				std::list<TuioPoint> path = j.getPath();
 				
@@ -169,7 +133,6 @@ TouchModule::TouchModule()
 					count++;
 
 				os << ", Id: " << j.getCursorID() << ", path size: " << j.getPath().size() << ", (" << j.getX() << "," << j.getY() << "), To Process: " << count;
-
 			}
 			LINFO("List size: " << list.size() << os.str() << "\n");
 			os.clear();
@@ -181,8 +144,7 @@ TouchModule::TouchModule()
 		for (const TuioCursor& c : list) {
 			lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
 		}
-
-		//touch->performStep(OsEng.windowWrapper->averageDeltaTime());
+		touch->step(OsEng.windowWrapper().deltaTime());
 	}
 	);
 	

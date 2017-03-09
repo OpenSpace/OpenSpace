@@ -39,10 +39,11 @@ public:
 
 	bool gotNewInput();
 
-	//TouchInteraction* touch;
+	//TouchInteraction touch;
 	TuioEar* ear;
 	
 
+private:
 	std::vector<TUIO::TuioCursor> list;
 	std::vector<Point> lastProcessed; // contains an id and the TuioPoint that was processed last frame
 
