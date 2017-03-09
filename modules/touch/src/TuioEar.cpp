@@ -34,23 +34,17 @@
 
 #include <ghoul/logging/logmanager.h>
 
+using namespace TUIO;
 
 namespace {
 	const std::string _loggerCat = "TuioEar";
 }
 
-void TuioEar::addTuioObject(TuioObject *tobj) {
-	//std::cout << "add obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/" << tobj->getTuioSourceID() << ") " << tobj->getX() << " " << tobj->getY() << " " << tobj->getAngle() << std::endl;
-}
+void TuioEar::addTuioObject(TuioObject *tobj) { }
 
-void TuioEar::updateTuioObject(TuioObject *tobj) {
-	//std::cout << "set obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/" << tobj->getTuioSourceID() << ") " << tobj->getX() << " " << tobj->getY() << " " << tobj->getAngle()
-	//<< " " << tobj->getMotionSpeed() << " " << tobj->getRotationSpeed() << " " << tobj->getMotionAccel() << " " << tobj->getRotationAccel() << std::endl;
-}
+void TuioEar::updateTuioObject(TuioObject *tobj) { }
 
-void TuioEar::removeTuioObject(TuioObject *tobj) {
-	//std::cout << "del obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << "/" << tobj->getTuioSourceID() << ")" << std::endl;
-}
+void TuioEar::removeTuioObject(TuioObject *tobj) { }
 
 void TuioEar::addTuioCursor(TuioCursor *tcur) {
 	_mx.lock();
@@ -98,22 +92,13 @@ void TuioEar::removeTuioCursor(TuioCursor *tcur) {
 	_mx.unlock();
 }
 
-void TuioEar::addTuioBlob(TuioBlob *tblb) {
-		std::cout << "add blb " << tblb->getBlobID() << " (" << tblb->getSessionID() << "/" << tblb->getTuioSourceID() << ") " << tblb->getX() << " " << tblb->getY() << " " << tblb->getAngle() << " " << tblb->getWidth() << " " << tblb->getHeight() << " " << tblb->getArea() << std::endl;
-}
+void TuioEar::addTuioBlob(TuioBlob *tblb) { }
 
-void TuioEar::updateTuioBlob(TuioBlob *tblb) {
-		std::cout << "set blb " << tblb->getBlobID() << " (" << tblb->getSessionID() << "/" << tblb->getTuioSourceID() << ") " << tblb->getX() << " " << tblb->getY() << " " << tblb->getAngle() << " " << tblb->getWidth() << " " << tblb->getHeight() << " " << tblb->getArea()
-		<< " " << tblb->getMotionSpeed() << " " << tblb->getRotationSpeed() << " " << tblb->getMotionAccel() << " " << tblb->getRotationAccel() << std::endl;
-}
+void TuioEar::updateTuioBlob(TuioBlob *tblb) { }
 
-void TuioEar::removeTuioBlob(TuioBlob *tblb) {
-		std::cout << "del blb " << tblb->getBlobID() << " (" << tblb->getSessionID() << "/" << tblb->getTuioSourceID() << ")" << std::endl;
-}
+void TuioEar::removeTuioBlob(TuioBlob *tblb) { }
 
-void TuioEar::refresh(TuioTime frameTime) {
-	//LINFO("refresh " << frameTime.getTotalMilliseconds() << "\n"); // about every 15ms on TuioPad app
-}
+void TuioEar::refresh(TuioTime frameTime) { } // about every 15ms on TuioPad app
 
 std::vector<TuioCursor> TuioEar::getInput() {
 	std::lock_guard<std::mutex> lock(_mx);
@@ -143,7 +128,6 @@ void TuioEar::clearInput() {
 
 TuioEar::TuioEar() {
 	_oscReceiver = new UdpReceiver(3333);
-	//oscReceiver = new TcpReceiver("127.0.0.1",3333);
 	_tuioClient = new TuioClient(_oscReceiver);
 	_tuioClient->addTuioListener(this);
 	_tuioClient->connect();

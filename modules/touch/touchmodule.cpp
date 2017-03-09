@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/touch/touchmodule.h>
-#include <modules/touch/include/TuioEar.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settingsengine.h>
@@ -41,6 +40,8 @@
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
 
+using namespace TUIO;
+
 namespace {
 	const std::string _loggerCat = "TouchModule";
 }
@@ -48,8 +49,7 @@ namespace {
 namespace openspace {
 
 	TuioEar TouchModule::*ear;
-
-
+	//TouchInteraction TouchModule::*touch;
 
 bool TouchModule::gotNewInput() {
 	// Get new input from listener
@@ -92,6 +92,7 @@ TouchModule::TouchModule()
 		[&]() {
 		LDEBUGC("TouchModule", "Initializing TuioEar");
 		ear = new TuioEar();
+		//touch = new TouchInteraction();
 	}
 	);
 	
@@ -100,6 +101,7 @@ TouchModule::TouchModule()
 		[&]() {
 		LDEBUGC("TouchModule", "Deinitialize TuioEar");
 		delete ear;
+		//delete touch;
 	}
 	);
 	
@@ -108,6 +110,8 @@ TouchModule::TouchModule()
 		[&]() {
 		if (gotNewInput() && OsEng.windowWrapper().isMaster()) {
 			//std::this_thread::sleep_for(std::chrono::seconds(1));
+
+			//touch->update(list, lastProcessed);
 
 			Camera* cam = OsEng.interactionHandler().camera();
 			glm::vec3 pos = cam->positionVec3();
@@ -177,6 +181,8 @@ TouchModule::TouchModule()
 		for (const TuioCursor& c : list) {
 			lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
 		}
+
+		//touch->performStep(OsEng.render.runTime());
 	}
 	);
 	

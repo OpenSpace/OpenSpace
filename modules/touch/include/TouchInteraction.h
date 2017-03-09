@@ -22,58 +22,87 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHEAR___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHEAR___H__
+#ifndef __OPENSPACE_TOUCH___INTERACTION___H__
+#define __OPENSPACE_TOUCH___INTERACTION___H__
 
-#include <modules/touch/ext/libTUIO/TUIO/TuioListener.h>
-#include <modules/touch/ext/libTUIO/TUIO/TuioClient.h>
-#include <modules/touch/ext/libTUIO/TUIO/UdpReceiver.h>
-#include <modules/touch/ext/libTUIO/TUIO/TcpReceiver.h>
+#include <modules/touch/include/TuioEar.h>
+#include <modules/touch/touchmodule.h>
 
-#include <glm/glm.hpp>
+#include <openspace/util/camera.h>
+#include <openspace/interaction/interactionmode.h>
+#include <openspace/interaction/interactionhandler.h>
 
-#include <math.h>
-#include <vector>
-#include <mutex>
-#include <numeric>
-#include <mutex>
-#include <algorithm>
+#include <openspace/network/parallelconnection.h>
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodetic3.h>
+#endif
 
-class TuioEar : public TUIO::TuioListener {
-	
+#include <list>
+
+#define ROT 0
+#define PINCH 1
+#define PAN 2
+#define PICK 3
+
+using Point = std::pair<int, TUIO::TuioPoint>;
+
+class TouchInteraction
+{
 	public:
-		TuioEar();
-		~TuioEar() {
-			_tuioClient->disconnect();
-			delete _tuioClient;
-			delete _oscReceiver;
-		}
-	
-		void addTuioObject(TUIO::TuioObject *tobj);
-		void updateTuioObject(TUIO::TuioObject *tobj);
-		void removeTuioObject(TUIO::TuioObject *tobj);
-
-		void addTuioCursor(TUIO::TuioCursor *tcur);
-		void updateTuioCursor(TUIO::TuioCursor *tcur);
-		void removeTuioCursor(TUIO::TuioCursor *tcur);
-
-		void addTuioBlob(TUIO::TuioBlob *tblb);
-		void updateTuioBlob(TUIO::TuioBlob *tblb);
-		void removeTuioBlob(TUIO::TuioBlob *tblb);
-
-		void refresh(TUIO::TuioTime frameTime);
-
-		std::vector<TUIO::TuioCursor> getInput();
-		void clearInput();
+		TouchInteraction();
+		~TouchInteraction();
 		
-	private:
-		TUIO::TuioClient *_tuioClient;
-		TUIO::OscReceiver *_oscReceiver;
+		void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
+		int interpret(const std::vector<TUIO::TuioCursor>& list);
+		void performStep(double dt);
 
-		std::vector<TUIO::TuioCursor> _list;
-		std::vector<int> _removeList;
-		std::mutex _mx;
+
+		// Get & Setters
+		openspace::Camera* TouchInteraction::getCamera();
+		openspace::SceneGraphNode* TouchInteraction::getFocusNode();
+		double TouchInteraction::getFriction();
+		double TouchInteraction::getSensitivity();
+
+		void setFocusNode(openspace::SceneGraphNode* focusNode);
+		void setCamera(openspace::Camera* cam);
+		void setFriction(double friction);
+		void setSensitivity(double sensitivity);
+
+
+		#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+			// later work
+		#endif
+
+	private:
+		double _dt;
+		int _interactionMode;
+
+		double _sensitivity;
+		double _friction;
+		
+		glm::dvec3 _cameraPosition;
+		glm::dquat _localCameraRotation;
+		glm::dquat _globalCameraRotation;
+		glm::dvec3 _centroid;
+
+		glm::dvec3 _velocityPos;
+		glm::dvec3 _velocityRot;
+		
+		openspace::Camera* _camera;
+		openspace::SceneGraphNode* _focusNode;
+		//bool globebrowsing;
+
+		#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+			// later work
+		#endif
+		
 };
 
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHWRAPPER___H__
+	#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+		//globebrowsing::RenderableGlobe* _globe;
+	#endif
+
+#endif // __OPENSPACE_TOUCH___INTERACTION___H__
