@@ -182,7 +182,7 @@ TouchModule::TouchModule()
 			lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
 		}
 
-		//touch->performStep(OsEng.render.runTime());
+		//touch->performStep(OsEng.windowWrapper->averageDeltaTime());
 	}
 	);
 	

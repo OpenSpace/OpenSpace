@@ -144,7 +144,7 @@ void TouchInteraction::setFocusNode(SceneGraphNode* focusNode) {
 	_focusNode = focusNode;
 }
 void TouchInteraction::setFriction(double friction) {
-	_friction = glm::max(friction, 0.0);
+	_friction = std::max(friction, 0.0);
 }
 void TouchInteraction::setSensitivity(double sensitivity) {
 	_sensitivity = sensitivity;

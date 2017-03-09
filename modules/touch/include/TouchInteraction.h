@@ -61,10 +61,10 @@ class TouchInteraction
 
 
 		// Get & Setters
-		openspace::Camera* TouchInteraction::getCamera();
-		openspace::SceneGraphNode* TouchInteraction::getFocusNode();
-		double TouchInteraction::getFriction();
-		double TouchInteraction::getSensitivity();
+		openspace::Camera* getCamera();
+		openspace::SceneGraphNode* getFocusNode();
+		double getFriction();
+		double getSensitivity();
 
 		void setFocusNode(openspace::SceneGraphNode* focusNode);
 		void setCamera(openspace::Camera* cam);
