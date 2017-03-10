@@ -48,6 +48,11 @@ namespace globebrowsing {
 class RawTile;
 class GeodeticPatch;
 
+/**
+ * Function for passing GDAL error messages to the GHOL logging system.
+ */
+void errorHandler(CPLErr eErrClass, int errNo, const char *msg);
+
 class TileDataset {
 public:
     struct Configuration {

@@ -74,6 +74,16 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
+void errorHandler(CPLErr eErrClass, int errNo, const char *msg) {
+    switch (eErrClass) {
+        case CE_None: break;
+        case CE_Debug:    LDEBUG("GDAL " << msg); break;
+        case CE_Warning:  LWARNING("GDAL " << msg); break;
+        case CE_Failure:  LERROR("GDAL " << msg); break;
+        case CE_Fatal:    LFATAL("GDAL " << msg); break;
+    }
+}
+
 std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
     return os << pr.start.x << ", " << pr.start.y << " with size " << pr.numPixels.x << ", " << pr.numPixels.y;
 }
@@ -193,6 +203,7 @@ void TileDataset::gdalEnsureInitialized() {
             absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str()
         );
         setGdalProxyConfiguration();
+        CPLSetErrorHandler(errorHandler);
         GdalHasBeenInitialized = true;
     }
 }

@@ -116,7 +116,7 @@ void CachingTileProvider::update() {
 
 void CachingTileProvider::reset() {
     cache::MemoryAwareTileCache::ref().clear();
-    _asyncTextureDataProvider->reset();
+    //_asyncTextureDataProvider->reset();
 }
 
 int CachingTileProvider::maxLevel() {
