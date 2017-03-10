@@ -46,7 +46,8 @@
 #define ROT 0
 #define PINCH 1
 #define PAN 2
-#define PICK 3
+#define ROLL 3
+#define PICK 4
 
 struct VelocityStates {
 	double zoom;
@@ -72,7 +73,7 @@ class TouchInteraction
 		~TouchInteraction();
 		
 		void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
-		int interpret(const std::vector<TUIO::TuioCursor>& list);
+		int interpret(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void step(double dt);
 		void decelerate();
 
@@ -98,6 +99,8 @@ class TouchInteraction
 		openspace::SceneGraphNode* _focusNode;
 		glm::dvec3 _previousFocusNodePosition;
 
+
+		double _dt;
 		int _interactionMode;
 		double _sensitivity;
 		double _baseFriction;
