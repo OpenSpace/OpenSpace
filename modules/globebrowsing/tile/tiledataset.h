@@ -108,7 +108,7 @@ public:
     const static glm::ivec2 tilePixelSizeDifference;
     const static PixelRegion padding; // same as the two above
 
-
+	static bool logGDALErrors;
 private:
     struct IODescription {
         struct ReadData {

@@ -42,6 +42,7 @@ protected:
 private:
     std::unique_ptr<properties::IntProperty> _openSpaceMaximumTileCacheSize;
     std::unique_ptr<properties::IntProperty> _GDALMaximumTileCacheSize;
+    std::unique_ptr<properties::BoolProperty> _logGDALErrors;
   
     std::unique_ptr<properties::TriggerProperty> _clearTileCache;
 };

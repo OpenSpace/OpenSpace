@@ -75,13 +75,15 @@ namespace openspace {
 namespace globebrowsing {
 
 void errorHandler(CPLErr eErrClass, int errNo, const char *msg) {
-    switch (eErrClass) {
-        case CE_None: break;
-        case CE_Debug:    LDEBUG("GDAL " << msg); break;
-        case CE_Warning:  LWARNING("GDAL " << msg); break;
-        case CE_Failure:  LERROR("GDAL " << msg); break;
-        case CE_Fatal:    LFATAL("GDAL " << msg); break;
-    }
+	if (TileDataset::logGDALErrors) {
+		switch (eErrClass) {
+		case CE_None: break;
+		case CE_Debug:    LDEBUG("GDAL " << msg); break;
+		case CE_Warning:  LWARNING("GDAL " << msg); break;
+		case CE_Failure:  LERROR("GDAL " << msg); break;
+		case CE_Fatal:    LFATAL("GDAL " << msg); break;
+		}
+	}
 }
 
 std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
@@ -133,6 +135,7 @@ const PixelRegion TileDataset::padding = PixelRegion(
 );
     
 bool TileDataset::GdalHasBeenInitialized = false;
+bool TileDataset::logGDALErrors = false;
 
 TileDataset::TileDataset(const std::string& gdalDatasetDesc, const Configuration& config)
     : _config(config)

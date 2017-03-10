@@ -59,21 +59,24 @@ void GlobeBrowsingModule::internalInitialize() {
 
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&]{
         _openSpaceMaximumTileCacheSize = std::make_unique<properties::IntProperty>(
-            "MaximumTileCacheSize", "Maximum tile cache size",
+            "maximumTileCacheSize", "Maximum tile cache size",
             512, // Default: 512 MB
             0,    // Minimum: No caching
             CpuCap.installedMainMemory() * 0.25, // 25% Of total RAM
             1);   // Step: One MB
         
         _GDALMaximumTileCacheSize = std::make_unique<properties::IntProperty> (
-            "MaximumGDALBlockCacheSize", "Maximum GDAL block cache size",
+            "maximumGDALBlockCacheSize", "Maximum GDAL block cache size",
             16, // Default: 16 MB
             0,  // Minimum: No caching
             CpuCap.installedMainMemory() * 0.25, // 25% Of total RAM
             1); // Step: One MB
+
+        _logGDALErrors = std::make_unique<properties::BoolProperty> (
+            "logGDALErrors", "Log GDAL errors", false);
       
         _clearTileCache = std::make_unique<properties::TriggerProperty> (
-            "ClearTileCache", "Clear tile cache");
+            "clearTileCache", "Clear tile cache");
       
         // Convert from MB to KB
         cache::MemoryAwareTileCache::create(*_openSpaceMaximumTileCacheSize * 1024);
@@ -94,11 +97,16 @@ void GlobeBrowsingModule::internalInitialize() {
         [&]{
             globebrowsing::cache::MemoryAwareTileCache::ref().clear();
         });
+        _logGDALErrors->onChange(
+        [&]{
+            globebrowsing::TileDataset::logGDALErrors = *_logGDALErrors;
+        });
 
         addProperty(*_openSpaceMaximumTileCacheSize);
         addProperty(*_GDALMaximumTileCacheSize);
-        addProperty(*_clearTileCache);
-    });
+		addProperty(*_clearTileCache);
+		addProperty(*_logGDALErrors);
+	});
   
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&]{
         globebrowsing::cache::MemoryAwareTileCache::ref().clear();
