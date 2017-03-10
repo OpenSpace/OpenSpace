@@ -23,7 +23,11 @@
 ##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
-create_new_module("FitsFileReader" fitsfilereader_module)
+
+set(HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/fitsfilereader.cpp")
+set(SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/include/fitsfilereader.h")
+
+create_new_module("FitsFileReader" fitsfilereader_module ${HEADER_FILES} ${SOURCE_FILES})
 
 set(CFITSIO_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/cfitsio/")
 set(CCFITS_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/CCfits/")
