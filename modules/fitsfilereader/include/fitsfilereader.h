@@ -26,18 +26,26 @@
 #define __OPENSPACE_MODULE_KAMELEON___FITSFILEREADER___H__
 
 #include <string>
+#include <memory>
 
 namespace CCfits {
 class ExtHDU;
 class PHDU;
 }
 
+namespace ghoul {
+namespace opengl{
+class Texture;
+}
+}
+
 namespace openspace {
 
 class FitsFileReader {
 public:
-    static std::valarray<unsigned long> readRawImage(std::string path);
-    static CCfits::ExtHDU& readHeader(std::string path);
+    static std::unique_ptr<ghoul::opengl::Texture> loadTexture(std::string& path);
+    static std::valarray<unsigned long> readRawImage(std::string& path);
+    static CCfits::ExtHDU& readHeader(std::string& path);
 
 private:
 	// Only for debugging
