@@ -217,33 +217,33 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
 {
     TestResult res = TableVerifier::operator()(dictionary, key);
     if (res.success) {
-        std::vector<Documentation> documentations = DocEng.documentations();
+        std::vector<Documentation> docs = DocEng.documentations();
 
         auto it = std::find_if(
-            documentations.begin(),
-            documentations.end(),
+            docs.begin(),
+            docs.end(),
             [this](const Documentation& doc) { return doc.id == identifier; }
         );
 
         ghoul_assert(
-            it != documentations.end(),
+            it != docs.end(),
             "Did not find referencing identifier '" + identifier + "'"
         );
 
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
-        TestResult res = testSpecification(*it, d);
+        TestResult r = testSpecification(*it, d);
 
         // Add the 'key' as a prefix to make the offender a fully qualified identifer
-        for (TestResult::Offense& s : res.offenses) {
+        for (TestResult::Offense& s : r.offenses) {
             s.offender = key + "." + s.offender;
         }
 
         // Add the 'key' as a prefix to make the warning a fully qualified identifer
-        for (TestResult::Warning& w : res.warnings) {
+        for (TestResult::Warning& w : r.warnings) {
             w.offender = key + "." + w.offender;
         }
 
-        return res;
+        return r;
     }
     else {
         return res;

@@ -65,7 +65,9 @@ bool inRange(float x, float a, float b){
 void main() {
     vec2 uv = (vs_position.xy + vec2(1.0)) / vec2(2.0);
 
-    vec4 vertex = uvToModel(uv, _radius, _segments);
+    vec4 radius = vec4(1.1883, 1.1883, 1.1883, 6);
+    vec4 vertex = uvToModel(uv, radius, _segments);
+    // vec4 vertex = uvToModel(uv, _radius, _segments);
 
     vec4 raw_pos   = psc_to_meter(vertex, _scaling);
     vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;

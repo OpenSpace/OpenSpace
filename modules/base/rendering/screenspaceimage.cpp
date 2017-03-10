@@ -157,15 +157,18 @@ void ScreenSpaceImage::updateTexture() {
     if (_futureImage.valid() && DownloadManager::futureReady(_futureImage)) {
         DownloadManager::MemoryFile imageFile = _futureImage.get();
 
-        if (imageFile.corrupted)
+        if (imageFile.corrupted) {
             return nullptr;
+        }
 
         return (ghoul::io::TextureReader::ref().loadTexture(
             reinterpret_cast<void*>(imageFile.buffer), 
             imageFile.size, 
             imageFile.format)
         );
-
+    }
+    else {
+        return nullptr;
     }
  }
 

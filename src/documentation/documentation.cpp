@@ -78,6 +78,8 @@ std::string to_string(openspace::documentation::TestResult::Offense::Reason reas
             return "Verification failed";
         case openspace::documentation::TestResult::Offense::Reason::WrongType:
             return "Wrong type";
+        default:
+            ghoul_assert(false, "Missing case label");
     }
 }
     
@@ -85,6 +87,8 @@ std::string to_string(openspace::documentation::TestResult::Warning::Reason reas
     switch (reason) {
         case openspace::documentation::TestResult::Warning::Reason::Deprecated:
             return "Deprecated";
+        default:
+            ghoul_assert(false, "Missing case label");
     }
 }
 

@@ -74,6 +74,8 @@ namespace {
                 return "ELLIPSOID";
             case openspace::SpiceManager::FieldOfViewMethod::Point:
                 return "POINT";
+            default:
+                ghoul_assert(false, "Missing case label");
         }
     }
     
@@ -83,6 +85,8 @@ namespace {
                 return "UMBRAL";
             case openspace::SpiceManager::TerminatorType::Penumbral:
                 return "PENUMBRAL";
+            default:
+                ghoul_assert(false, "Missing case label");
         }
     }
 }
@@ -143,6 +147,8 @@ SpiceManager::AberrationCorrection::operator const char*() const {
             return (direction == Direction::Reception) ? "CN" : "XCN";
         case Type::ConvergedNewtonianStellar:
             return (direction == Direction::Reception) ? "CN+S" : "XCN+S";
+        default:
+            ghoul_assert(false, "Missing case label");
     }
 }
     

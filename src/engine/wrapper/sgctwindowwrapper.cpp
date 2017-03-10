@@ -224,8 +224,9 @@ bool SGCTWindowWrapper::isExternalControlConnected() const {
     
 void SGCTWindowWrapper::sendMessageToExternalControl(const std::vector<char>& message) const {
     sgct::Engine::instance()->sendMessageToExternalControl(
-                                                           message.data(),
-                                                           message.size());
+        message.data(),
+        static_cast<int>(message.size())
+    );
 }
     
 bool SGCTWindowWrapper::isSimpleRendering() const {

@@ -252,6 +252,9 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
         };
         return solveIteration(solver, e, 0.0, 8);
     }
+    else {
+        ghoul_assert(false, "Eccentricity must not be >= 1.0");
+    }
 }
 
 void KeplerTranslation::update(const UpdateData& data) {

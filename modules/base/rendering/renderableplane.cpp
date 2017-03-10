@@ -203,9 +203,9 @@ void RenderablePlane::render(const RenderData& data) {
         if (textureNode != nullptr){
             RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
             _texture = std::unique_ptr<ghoul::opengl::Texture>(&(t->baseTexture()));
-            float h = _texture->height();
-            float w = _texture->width();
-            float scale = h / w;
+            unsigned int h = _texture->height();
+            unsigned int w = _texture->width();
+            float scale = static_cast<float>(h) / static_cast<float>(w);
             scaleTransform = glm::scale(glm::mat4(1.0), glm::vec3(1.f, scale, 1.f));
         }
     }

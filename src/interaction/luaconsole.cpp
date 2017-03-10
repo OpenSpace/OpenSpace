@@ -384,7 +384,7 @@ void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
         return;
     }
 
-    addToCommand(std::string(1, codepoint));
+    addToCommand(std::string(1, static_cast<const char>(codepoint)));
 }
 
 void LuaConsole::render() {
