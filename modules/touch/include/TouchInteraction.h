@@ -96,26 +96,19 @@ class TouchInteraction
 	private:
 		openspace::Camera* _camera;
 		openspace::SceneGraphNode* _focusNode;
+		glm::dvec3 _previousFocusNodePosition;
 
 		int _interactionMode;
 		double _sensitivity;
 		double _baseFriction;
-		
-		glm::dvec3 _previousFocusNodePosition;
-		glm::dvec3 _centroid;
 
 		VelocityStates _vel;
 		Friction _friction;
-
-		
-		
 		
 		//bool globebrowsing;
-
 		#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 			// later work
 		#endif
-		
 };
 
 	#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED

@@ -72,12 +72,14 @@ bool TouchModule::gotNewInput() {
 		lastProcessed.end());
 
 	// Return true if we got new input
+	
 	if (list.size() == lastProcessed.size() && list.size() > 0) {
-		for_each(lastProcessed.begin(), lastProcessed.end(), [this](Point& p) {
-			if (p.second.getTuioTime() == find_if(list.begin(), list.end(), [&p](const TuioCursor& c) { return c.getSessionID() == p.first; })->getPath().back().getTuioTime())
-				return false;
+		bool newInput = true;
+		for_each(lastProcessed.begin(), lastProcessed.end(), [this, &newInput](Point& p) {
+			if (p.second.getTuioTime().getTotalMilliseconds() == find_if(list.begin(), list.end(), [&p](const TuioCursor& c) { return c.getSessionID() == p.first; })->getPath().back().getTuioTime().getTotalMilliseconds())
+				newInput = false;
 		});
-		return true;
+		return newInput;
 	}		
 	else
 		return false;
@@ -128,11 +130,11 @@ TouchModule::TouchModule()
 				path.end(),
 				[&lastTime](const TuioPoint& c) { return lastTime == c.getTuioTime();  });
 				
-				int count = 0;
+				int count = -1;
 				for (; lastPoint != path.end(); ++lastPoint) // here we can access all elements that are to be processed
 					count++;
 
-				os << ", Id: " << j.getCursorID() << ", path size: " << j.getPath().size() << ", (" << j.getX() << "," << j.getY() << "), To Process: " << count;
+				os << ", Id: " << j.getCursorID() << ", path size: " << j.getPath().size() << ", To Process: " << count;
 			}
 			LINFO("List size: " << list.size() << os.str() << "\n");
 			os.clear();
