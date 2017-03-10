@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/cache/memoryawarelrucache.h>
 
 #include <memory>
+#include <mutex>
 
 namespace openspace {
 namespace globebrowsing {
@@ -102,6 +103,7 @@ private:
     
     static MemoryAwareTileCache* _singleton;
     MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher> _tileCache;
+	static std::mutex _mutexLock;
 };
 
 } // namespace cache

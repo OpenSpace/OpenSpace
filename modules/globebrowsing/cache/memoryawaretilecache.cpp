@@ -32,44 +32,51 @@ namespace globebrowsing {
 namespace cache {
 
 MemoryAwareTileCache* MemoryAwareTileCache::_singleton = nullptr;
+std::mutex MemoryAwareTileCache::_mutexLock;
 
 void MemoryAwareTileCache::create(size_t cacheSize) {
+	std::lock_guard<std::mutex> guard(_mutexLock);
     _singleton = new MemoryAwareTileCache(cacheSize);
 }
 
 void MemoryAwareTileCache::destroy() {
+	std::lock_guard<std::mutex> guard(_mutexLock);
     delete _singleton;
 }
 
 MemoryAwareTileCache& MemoryAwareTileCache::ref() {
+	std::lock_guard<std::mutex> guard(_mutexLock);
     ghoul_assert(_singleton, "MemoryAwareTileCache not created");
     return *_singleton;
 }
 
 void MemoryAwareTileCache::clear() {
+	std::lock_guard<std::mutex> guard(_mutexLock);
     _tileCache.clear();
 }
 
 bool MemoryAwareTileCache::exist(ProviderTileKey key) {
+	std::lock_guard<std::mutex> guard(_mutexLock);
     return _tileCache.exist(key);
 }
 
 Tile MemoryAwareTileCache::get(ProviderTileKey key) {
+	std::lock_guard<std::mutex> guard(_mutexLock);
     return _tileCache.get(key);
 }
 
 void MemoryAwareTileCache::put(ProviderTileKey key, Tile tile) {
+	std::lock_guard<std::mutex> guard(_mutexLock);
     _tileCache.put(key, tile);
 }
 
 void MemoryAwareTileCache::setMaximumSize(size_t maximumSize) {
+	std::lock_guard<std::mutex> guard(_mutexLock);
   _tileCache.setMaximumSize(maximumSize);
 }
 
 MemoryAwareTileCache::MemoryAwareTileCache(size_t cacheSize) :
-  _tileCache(cacheSize) {
-
-}
+  _tileCache(cacheSize) {}
 
 } // namespace cache
 } // namespace globebrowsing
