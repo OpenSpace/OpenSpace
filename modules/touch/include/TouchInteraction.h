@@ -100,7 +100,7 @@ class TouchInteraction
 		glm::dvec3 _previousFocusNodePosition;
 
 
-		double _dt;
+		double _minHeightFromSurface;
 		int _interactionMode;
 		double _sensitivity;
 		double _baseFriction;

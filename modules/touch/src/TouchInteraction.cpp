@@ -56,7 +56,7 @@ TouchInteraction::TouchInteraction()
 	_sensitivity{ 0.5 }, _baseFriction{ 0.02 },
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), glm::dvec2(0.0), glm::dvec2(0.0) },
 	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction },
-	_previousFocusNodePosition{ glm::dvec3(0.0) }, _dt{ 0.0 }
+	_previousFocusNodePosition{ glm::dvec3(0.0) }, _minHeightFromSurface{ 6.6 * 1000000.0 }
 	{}
 
 TouchInteraction::~TouchInteraction() { }
@@ -85,7 +85,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		});
 
 		double zoomFactor = (distance - lastDistance) * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
-		_vel.zoom += zoomFactor * (_sensitivity*3.0);
+		_vel.zoom += zoomFactor / _sensitivity;
 		break;
 	}
 	case PAN: { // add local rotation velocity
@@ -187,7 +187,11 @@ void TouchInteraction::step(double dt) {
 		globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
 	}
 	{ // Zooming
-		camPos += directionToCenter*_vel.zoom*dt;
+		dvec3 centerToCamera = camPos - centerPos;
+		if (length(_vel.zoom*dt) < length(centerToCamera) && length(centerToCamera) > _minHeightFromSurface) // should get boundingsphere from focusnode
+			camPos += directionToCenter*_vel.zoom*dt;
+		else
+			_vel.zoom = 0.0;
 	}
 
 	decelerate();
