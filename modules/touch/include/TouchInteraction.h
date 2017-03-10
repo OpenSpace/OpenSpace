@@ -48,6 +48,21 @@
 #define PAN 2
 #define PICK 3
 
+struct VelocityStates {
+	double zoom;
+	glm::vec2 globalRot;
+	glm::vec2 localRot;
+	glm::vec2 localRoll;
+	glm::vec2 globalRoll;
+};
+struct Friction {
+	double zoom;
+	double globalRot;
+	double localRot;
+	double localRoll;
+	double globalRoll;
+};
+
 using Point = std::pair<int, TUIO::TuioPoint>;
 
 class TouchInteraction
@@ -59,6 +74,7 @@ class TouchInteraction
 		void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
 		int interpret(const std::vector<TUIO::TuioCursor>& list);
 		void step(double dt);
+		void decelerate();
 
 
 		// Get & Setters
@@ -78,25 +94,22 @@ class TouchInteraction
 		#endif
 
 	private:
-		int _interactionMode;
-
-		double _sensitivity;
-		double _friction;
-		
-		glm::dvec3 _cameraPosition;
-		glm::dvec3 _previousFocusNodePosition;
-		glm::dquat _localCameraRotation;
-		glm::dquat _globalCameraRotation;
-		
-
-		glm::dvec3 _centroid;
-
-		glm::dvec3 _velocityPos;
-		glm::dvec3 _velocityRot;
-		glm::dvec3 _rotationDiff;
-		
 		openspace::Camera* _camera;
 		openspace::SceneGraphNode* _focusNode;
+
+		int _interactionMode;
+		double _sensitivity;
+		double _baseFriction;
+		
+		glm::dvec3 _previousFocusNodePosition;
+		glm::dvec3 _centroid;
+
+		VelocityStates _vel;
+		Friction _friction;
+
+		
+		
+		
 		//bool globebrowsing;
 
 		#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED

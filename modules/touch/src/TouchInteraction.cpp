@@ -52,73 +52,23 @@ using namespace TUIO;
 using namespace openspace;
 
 TouchInteraction::TouchInteraction()
-	: _sensitivity{ 1.0 }, _friction{ 0.98 }, _focusNode{ OsEng.interactionHandler().focusNode() },
-	_camera{ OsEng.interactionHandler().camera() },
-	_globalCameraRotation{ glm::dquat(0.0, 0.0, 0.0, 0.0) }, _localCameraRotation{ glm::dquat(0.0, 0.0, 0.0, 0.0) },
-	_cameraPosition{ OsEng.interactionHandler().camera()->positionVec3() }, // initialise local/global rotations? 
-	_velocityPos{ glm::dvec3(0.0) }, _velocityRot{ glm::dvec3(0.0) }, _centroid{ glm::dvec3(0.0) },
+	: _focusNode{ OsEng.interactionHandler().focusNode() }, _camera{ OsEng.interactionHandler().camera() },
+	_sensitivity{ 1.0 }, _baseFriction{ 0.02 },
+	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), glm::dvec2(0.0), glm::dvec2(0.0) },
+	_friction{ _baseFriction, 0.01, _baseFriction, _baseFriction, _baseFriction },
+	_centroid{ glm::dvec3(0.0) },
 	_previousFocusNodePosition{ glm::dvec3(0.0) }
 	{}
 
 TouchInteraction::~TouchInteraction() { }
 
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
-	using namespace glm;
-
-	// Create variables from current state
-	_focusNode = OsEng.interactionHandler().focusNode();
-	_cameraPosition = _camera->positionVec3();
-	dvec3 centerPos = _focusNode->worldPosition();
-	if (length(_previousFocusNodePosition) == 0) // ugly check to not make startup freak out
-		_previousFocusNodePosition = centerPos;
-
 	TuioCursor cursor = list.at(0);
-
-	// Follow the focus node
-	dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
-	_previousFocusNodePosition = centerPos;
-	_cameraPosition += focusNodeDiff;
-
-	dquat totalRotation = _camera->rotationQuaternion();
-	dvec3 directionToCenter = normalize(centerPos - _cameraPosition);
-	dvec3 centerToCamera = _cameraPosition - centerPos;
-	dvec3 lookUp = _camera->lookUpVectorWorldSpace();
-	dvec3 camDirection = _camera->viewDirectionWorldSpace();
-	
-	// Create the internal representation of the local and global camera rotations
-	dmat4 lookAtMat = lookAt(
-		dvec3(0, 0, 0),
-		directionToCenter,
-		normalize(camDirection + lookUp)); // To avoid problem with lookup in up direction
-	_globalCameraRotation = normalize(quat_cast(inverse(lookAtMat)));
-	_localCameraRotation = inverse(_globalCameraRotation) * totalRotation;
 	
 	_interactionMode = interpret(list);
 	switch (_interactionMode) {
 	case ROT: { // add rotation velocity
-		// Do global rotation
-		dvec2 rotationVelocity = dvec2(cursor.getXSpeed()*0.1, cursor.getYSpeed()*0.1);
-		dvec3 eulerAngles(rotationVelocity.y, rotationVelocity.x, 0);
-		dquat rotationDiffCamSpace = dquat(eulerAngles);
-
-		dquat newRotationCamspace = _globalCameraRotation * rotationDiffCamSpace;
-		dquat rotationDiffWorldSpace = newRotationCamspace * inverse(_globalCameraRotation);
-		_rotationDiff = centerToCamera * rotationDiffWorldSpace - centerToCamera; // _velocityPos += rotationDiffVec3
-
-
-		_cameraPosition += _rotationDiff;
-		centerToCamera = _cameraPosition - centerPos;
-		directionToCenter = normalize(-centerToCamera);
-
-		dvec3 lookUpWhenFacingCenter = _globalCameraRotation * dvec3(_camera->lookUpVectorCameraSpace());
-		dmat4 lookAtMat = lookAt(
-			dvec3(0, 0, 0),
-			directionToCenter,
-			lookUpWhenFacingCenter);
-		_globalCameraRotation = normalize(quat_cast(inverse(lookAtMat)));
-
-		_camera->setPositionVec3(_cameraPosition);
-		_camera->setRotation(_globalCameraRotation * _localCameraRotation);
+		_vel.globalRot += glm::dvec2(cursor.getXSpeed()*0.1, cursor.getYSpeed()*0.1);
 		break;
 	}
 	case PINCH: { // add zooming velocity
@@ -132,9 +82,9 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			return d + sqrt(pow(p.second.getX() - _centroid.x, 2) + pow(p.second.getY() - _centroid.y, 2));
 		});
 		double zoomFactor = distance - lastDistance; // should be dependant on screen size, distance from focusNode
-		zoomFactor *= glm::distance(_cameraPosition, _camera->focusPositionVec3());
+		zoomFactor *= glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
 		// gets really crazy if you set a velocity when we're far away, limit zooming to not go into globe
-		_velocityPos += directionToCenter*zoomFactor;
+		_vel.zoom += zoomFactor;
 		break;
 	}
 	case PAN: { // add local rotation velocity
@@ -155,17 +105,74 @@ int TouchInteraction::interpret(const std::vector<TuioCursor>& list) {
 }
 
 void TouchInteraction::step(double dt) {
-	_cameraPosition = _camera->positionVec3();
-	_cameraPosition += _velocityPos * dt;
-	_velocityPos *= _friction;
+	using namespace glm;
 
+	// Create variables from current state
+	_focusNode = OsEng.interactionHandler().focusNode();
+	dvec3 camPos = _camera->positionVec3();
+	dvec3 centerPos = _focusNode->worldPosition();
+	if (length(_previousFocusNodePosition) == 0) // ugly check to not make startup freak out
+		_previousFocusNodePosition = centerPos;
+
+	// Follow the focus node
+	dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
+	_previousFocusNodePosition = centerPos;
+	camPos += focusNodeDiff;
+
+	dvec3 directionToCenter = normalize(centerPos - camPos);
+	dvec3 centerToCamera = camPos - centerPos;
+	dvec3 lookUp = _camera->lookUpVectorWorldSpace();
+	dvec3 camDirection = _camera->viewDirectionWorldSpace();
+
+	// Make a representation of the rotation quaternion with local and global rotations
+	dmat4 lookAtMat = lookAt(
+		dvec3(0, 0, 0),
+		directionToCenter,
+		normalize(camDirection + lookUp)); // To avoid problem with lookup in up direction
+	dquat globalCameraRotation = normalize(quat_cast(inverse(lookAtMat)));
+	dquat localCameraRotation = inverse(globalCameraRotation) * _camera->rotationQuaternion();
+
+	
+	{ // Orbit (global rotation)
+		dvec2 smoothVelocity = _vel.globalRot*dt;
+		dvec3 eulerAngles(smoothVelocity.y, smoothVelocity.x, 0);
+		dquat rotationDiffCamSpace = dquat(eulerAngles);
+
+		dquat newRotationCamspace = globalCameraRotation * rotationDiffCamSpace;
+		dquat rotationDiffWorldSpace = newRotationCamspace * inverse(globalCameraRotation);
+		dvec3 rotationDiffVec3 = centerToCamera * rotationDiffWorldSpace - centerToCamera;
+
+		camPos += rotationDiffVec3;
+		dvec3 centerToCamera = camPos - centerPos;
+		directionToCenter = normalize(-centerToCamera);
+
+		dvec3 lookUpWhenFacingCenter =
+			globalCameraRotation * dvec3(_camera->lookUpVectorCameraSpace());
+		dmat4 lookAtMat = lookAt(
+			dvec3(0, 0, 0),
+			directionToCenter,
+			lookUpWhenFacingCenter);
+		globalCameraRotation = normalize(quat_cast(inverse(lookAtMat)));
+	}
+	{ // Zooming
+		camPos += directionToCenter*_vel.zoom*dt;
+	}
+
+	decelerate();
 
 	// Update the camera state
-	_camera->setPositionVec3(_cameraPosition);
-	//_camera->setRotation(_globalCameraRotation * _localCameraRotation); // need to initialize these camerarotations
-	
+	_camera->setPositionVec3(camPos);
+	_camera->setRotation(globalCameraRotation * localCameraRotation);
 
 	
+}
+
+void TouchInteraction::decelerate() {
+	_vel.zoom *= (1 - _friction.zoom);
+	_vel.globalRot *= (1 - _friction.globalRot);
+	_vel.localRot *= (1 - _friction.localRot);
+	_vel.globalRoll *= (1 - _friction.globalRoll);
+	_vel.localRoll *= (1 - _friction.localRoll);
 }
 
 
@@ -177,7 +184,7 @@ SceneGraphNode* TouchInteraction::getFocusNode() {
 	return _focusNode;
 }
 double TouchInteraction::getFriction() {
-	return _friction;
+	return _baseFriction;
 }
 double TouchInteraction::getSensitivity() {
 	return _sensitivity;
@@ -190,7 +197,7 @@ void TouchInteraction::setFocusNode(SceneGraphNode* focusNode) {
 	_focusNode = focusNode;
 }
 void TouchInteraction::setFriction(double friction) {
-	_friction = std::max(friction, 0.0);
+	_baseFriction = std::max(friction, 0.0);
 }
 void TouchInteraction::setSensitivity(double sensitivity) {
 	_sensitivity = sensitivity;
