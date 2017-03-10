@@ -21,26 +21,24 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
-//#include <openspace/engine/configurationmanager.h>
 #include <modules/base/rendering/renderablespacecraftcameraplane.h>
 #include <openspace/engine/openspaceengine.h>
-//#include <openspace/util/powerscaledcoordinate.h>
 
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/rendering/renderengine.h>
-//#include <modules/newhorizons/rendering/renderableplanetprojection.h>
 
-//#include <ghoul/filesystem/filesystem>
-//#include <ghoul/io/texture/texturereader.h>
-//#include <ghoul/opengl/programobject.h>
+// TODO(mn) CLEAN REDUNDANT STUFF
+#include <ghoul/filesystem/filesystem>
+#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <modules/fitsfilereader/include/fitsfilereader.h>
+#include <valarray>
 
-
-// namespace {
-//     static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
-// }
+namespace {
+    static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
+}
 
 namespace openspace {
 
@@ -59,8 +57,42 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     if ( dictionary.getValue("Target", target)){
         _target = target;
     }
+
+    loadTexture();
+
     addProperty(_target);
     addProperty(_moveFactor);
+}
+
+void RenderableSpacecraftCameraPlane::loadTexture() {
+    std::string fitsPath = "1.fit";
+    std::valarray<unsigned long> contents = FitsFileReader::readRawImage(fitsPath);
+    contents *= 10; // Increase intensity a bit
+    // Probably a much better way to do this, convert to char data for now
+    unsigned char* imageData = new unsigned char[contents.size()];
+    for ( int i = 0; i < contents.size(); i++) {
+        imageData[i] = contents[i];
+    }
+
+    // TODO(mn): Remove hardcode
+    const glm::size3_t imageSize(1024, 1024, 1);
+    const ghoul::opengl::Texture::Format format = ghoul::opengl::Texture::Red;
+
+    // TODO(mn): Move to FitsReader
+    std::unique_ptr<ghoul::opengl::Texture> texture = std::make_unique<ghoul::opengl::Texture>(
+                                                            imageData,
+                                                            imageSize,
+                                                            format,
+                                                            static_cast<int>(format),
+                                                            GL_UNSIGNED_BYTE,
+                                                            ghoul::opengl::Texture::FilterMode::Linear
+                                                        );
+    if (texture) {
+        LDEBUG("Loaded texture from '" << absPath(fitsPath) << "'");
+        texture->uploadTexture();
+        _texture = std::move(texture);
+    }
+    //delete data;
 }
 
 void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
