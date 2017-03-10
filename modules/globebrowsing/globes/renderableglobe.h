@@ -65,6 +65,7 @@ public:
         properties::BoolProperty toggleEnabledEveryFrame;
         properties::BoolProperty collectStats;
         properties::BoolProperty onlyModelSpaceRendering;
+        properties::BoolProperty limitLevelByAvailableData;
     };
     
     struct GeneralProperties {

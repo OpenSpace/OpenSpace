@@ -65,7 +65,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty("resetTileProviders", "reset tile providers", false),
         BoolProperty("toggleEnabledEveryFrame", "toggle enabled every frame", false),
         BoolProperty("collectStats", "collect stats", false),
-        BoolProperty("onlyModelSpaceRendering", "Only Model Space Rendering", false)
+        BoolProperty("onlyModelSpaceRendering", "Only Model Space Rendering", false),
+        BoolProperty("limitLevelByAvailableData", "Limit level by available data", true)
     })
     , _texturePropertyOwner("Textures")
 {
@@ -128,6 +129,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
     _debugPropertyOwner.addProperty(_debugProperties.collectStats);
     _debugPropertyOwner.addProperty(_debugProperties.onlyModelSpaceRendering);
+    _debugPropertyOwner.addProperty(_debugProperties.limitLevelByAvailableData);
         
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager.get());
