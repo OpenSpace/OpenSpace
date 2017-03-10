@@ -21,12 +21,13 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/texture.h>
 #include <CCfits>
 
 using namespace CCfits;
+using namespace ghoul::opengl;
 
 namespace {
     const std::string _loggerCat = "FitsFileReader";
@@ -34,7 +35,45 @@ namespace {
 
 namespace openspace {
 
-std::valarray<unsigned long> FitsFileReader::readRawImage(std::string path) {
+std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
+    FITS::setVerboseMode(true);
+    std::valarray<unsigned long> contents;
+    long sizeX;
+    long sizeY;
+
+    try {
+        const std::auto_ptr<FITS> pInfile(new FITS(path, Read, true));
+        PHDU& image = pInfile->pHDU();
+        image.read(contents);
+        sizeX = image.axis(0);
+        sizeY = image.axis(1);
+    } catch (FitsException& e){
+        LERROR("Could not load FITS Texture");
+    }
+
+    contents *= 10; // Increase intensity a bit
+    // Probably a much better way to do this, convert to char data for now
+    unsigned char* imageData = new unsigned char[contents.size()]; // TODO(mn): deallocate
+    for ( int i = 0; i < contents.size(); i++) {
+        imageData[i] = (short)contents[i];
+    }
+
+    const glm::size3_t imageSize(sizeY, sizeY, 1);
+    const Texture::Format format = ghoul::opengl::Texture::Red;
+    const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
+
+    std::unique_ptr<Texture> texture = std::make_unique<Texture>(
+                                                            imageData,
+                                                            imageSize,
+                                                            format,
+                                                            static_cast<int>(format),
+                                                            GL_UNSIGNED_BYTE,
+                                                            Texture::FilterMode::Linear
+                                                        );
+    return texture;
+}
+
+std::valarray<unsigned long> FitsFileReader::readRawImage(std::string& path) {
     FITS::setVerboseMode(true);
 
     try {
@@ -48,7 +87,7 @@ std::valarray<unsigned long> FitsFileReader::readRawImage(std::string path) {
     }
 }
 
-ExtHDU& FitsFileReader::readHeader(std::string path) {
+ExtHDU& FitsFileReader::readHeader(std::string& path) {
     FITS::setVerboseMode(true);
     std::string SPECTRUM = "SPECTRUM";
 
