@@ -29,6 +29,12 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/stringproperty.h>
 
+namespace ghoul {
+    namespace opengl {
+        class Texture;
+    }
+}
+
 namespace openspace {
 
 class RenderableSpacecraftCameraPlane : public RenderablePlane {
@@ -37,10 +43,12 @@ public:
     RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary);
 
     void render(const RenderData& data);
+    void loadTexture();
 
 private:
     properties::DoubleProperty _moveFactor;
     properties::StringProperty _target;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 };
 
 } // namespace openspace
