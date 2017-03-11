@@ -74,7 +74,7 @@ public:
 
         /**
          * Default constructor initializing the AberrationCorrection to Type::None with a
-         * Drection::Reception
+         * Direction::Reception
          */
         AberrationCorrection() = default;
         

@@ -432,8 +432,7 @@ void renderDVec3Property(Property* prop, const std::string& ownerName) {
     float min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
     float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
 
-
-    ImGui::SliderFloat3(
+    bool changed = ImGui::SliderFloat3(
         name.c_str(),
         glm::value_ptr(value),
         min,
@@ -441,7 +440,7 @@ void renderDVec3Property(Property* prop, const std::string& ownerName) {
     );
     renderTooltip(prop);
 
-    if (glm::dvec3(value) != p->value()) {
+    if (changed) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +
