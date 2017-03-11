@@ -565,6 +565,21 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
         }
 }
 
+glm::dvec3 SpiceManager::targetPosition(const std::string& target,
+    const std::string& observer, const std::string& referenceFrame,
+    AberrationCorrection aberrationCorrection, double ephemerisTime) const
+{
+    double unused = 0.0;
+    return targetPosition(
+        target,
+        observer,
+        referenceFrame,
+        aberrationCorrection,
+        ephemerisTime,
+        unused
+    );
+}
+
 glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
                                                    const std::string& to,
                                                    double ephemerisTime) const
