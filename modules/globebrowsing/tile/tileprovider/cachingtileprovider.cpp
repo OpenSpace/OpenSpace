@@ -25,7 +25,7 @@
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 
 #include <modules/globebrowsing/tile/asynctilereader.h>
-#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
@@ -60,7 +60,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     }
 
     // 2. Initialize default values for any optional Keys
-    TileDataset::Configuration config;
+    RawTileDataReader::Configuration config;
     config.doPreProcessing = false;
     config.minimumTilePixelSize = 512;
         
@@ -82,7 +82,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     }
 
     // Initialize instance variables
-    auto tileDataset = std::make_shared<TileDataset>(filePath, config);
+    auto tileDataset = std::make_shared<GdalRawTileDataReader>(filePath, config);
 
     // only one thread per provider supported atm
     // (GDAL does not handle multiple threads for a single dataset very well
@@ -191,17 +191,17 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
         return Tile(nullptr, nullptr, Tile::Status::IOError);
     }
 
-    TileDataLayout dataLayout =
-        _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
+    //TileDataLayout dataLayout =
+    //   _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         
     // The texture should take ownership of the data
     using ghoul::opengl::Texture;
     std::shared_ptr<Texture> texture = std::make_shared<Texture>(
         rawTile->imageData,
         rawTile->dimensions,
-        dataLayout.textureFormat.ghoulFormat,
-        dataLayout.textureFormat.glFormat,
-        dataLayout.glType,
+        rawTile->textureFormat.ghoulFormat,
+        rawTile->textureFormat.glFormat,
+        rawTile->glType,
         Texture::FilterMode::Linear,
         Texture::WrappingMode::ClampToEdge);
         

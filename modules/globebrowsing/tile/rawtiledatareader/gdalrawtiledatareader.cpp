@@ -22,131 +22,73 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 
-#include <limits>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/geometry/angle.h>
+#include <modules/globebrowsing/tile/tiledatatype.h>
+#include <modules/globebrowsing/tile/tilemetadata.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/configurationmanager.h>
+
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h> // abspath
+#include <ghoul/filesystem/file.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <ogr_featurestyle.h>
 #include <ogr_spatialref.h>
 #include <cpl_virtualmem.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h> // abspath
-#include <ghoul/misc/assert.h>
-
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-
-
-#include <modules/globebrowsing/geometry/angle.h>
-
-#include <float.h>
-#include <sstream>
-#include <algorithm>
-
 #include <gdal_priv.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
-
-#include <memory>
-#include <set>
-#include <queue>
-#include <iostream>
-#include <unordered_map>
-
-#include <ghoul/filesystem/file.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/misc/threadpool.h>
-
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledatatype.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/pixelregion.h>
-#include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/tilemetadata.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
 
 namespace {
-    const std::string _loggerCat = "TileDataset";
+    const std::string _loggerCat = "GdalRawTileDataReader";
 }
 
 namespace openspace {
 namespace globebrowsing {
 
 void errorHandler(CPLErr eErrClass, int errNo, const char *msg) {
-	if (TileDataset::logGDALErrors) {
+	//if (GdalRawTileDataReader::logGDALErrors) {
 		switch (eErrClass) {
-		case CE_None: break;
-		case CE_Debug:    LDEBUG("GDAL " << msg); break;
-		case CE_Warning:  LWARNING("GDAL " << msg); break;
-		case CE_Failure:  LERROR("GDAL " << msg); break;
-		case CE_Fatal:    LFATAL("GDAL " << msg); break;
+        	case CE_None: break;
+        	case CE_Debug:    LDEBUG  ("GDAL " << msg); break;
+        	case CE_Warning:  LWARNING("GDAL " << msg); break;
+        	case CE_Failure:  LERROR  ("GDAL " << msg); break;
+        	case CE_Fatal:    LFATAL  ("GDAL " << msg); break;
 		}
-	}
+	//}
 }
 
 std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
     return os << pr.start.x << ", " << pr.start.y << " with size " << pr.numPixels.x << ", " << pr.numPixels.y;
 }
-
-TileDataset::IODescription TileDataset::IODescription::cut(PixelRegion::Side side, int pos) {
-    PixelRegion readPreCut = read.region;
-    PixelRegion writePreCut = write.region;
-
-    glm::dvec2 ratio;
-    ratio.x = write.region.numPixels.x / (double) read.region.numPixels.x;
-    ratio.y = write.region.numPixels.y / (double) read.region.numPixels.y;
-
-//    double ratioRatio = ratio.x / ratio.y;
-
-    //ghoul_assert(glm::abs(ratioRatio - 1.0) < 0.01, "Different read/write aspect ratio!");
-
-    IODescription whatCameOff = *this;
-    whatCameOff.read.region = read.region.globalCut(side, pos);
-
-    PixelRegion::PixelRange cutSize = whatCameOff.read.region.numPixels;
-    PixelRegion::PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
-        
-    if (cutSize.x == 0 || cutSize.y == 0) {
-        ghoul_assert(
-            read.region.equals(readPreCut),
-            "Read region should not have been modified"
-        );
-        ghoul_assert(
-            write.region.equals(writePreCut),
-            "Write region should not have been modified"
-        );
-    }
-
-    int localWriteCutPos = (side == PixelRegion::Side::LEFT || side == PixelRegion::Side::RIGHT)
-        ? localWriteCutSize.x : localWriteCutSize.y;
-    whatCameOff.write.region = write.region.localCut(side, localWriteCutPos);
-
-    return whatCameOff;
-}
-
-const glm::ivec2 TileDataset::tilePixelStartOffset = glm::ivec2(-2);
-const glm::ivec2 TileDataset::tilePixelSizeDifference = glm::ivec2(4);
-
-const PixelRegion TileDataset::padding = PixelRegion(
-    tilePixelStartOffset,
-    tilePixelSizeDifference
-);
     
-bool TileDataset::GdalHasBeenInitialized = false;
-bool TileDataset::logGDALErrors = false;
+bool GdalRawTileDataReader::GdalHasBeenInitialized = false;
+//bool GdalRawTileDataReader::logGDALErrors = false;
 
-TileDataset::TileDataset(const std::string& gdalDatasetDesc, const Configuration& config)
-    : _config(config)
+GdalRawTileDataReader::GdalRawTileDataReader(
+    const std::string& gdalDatasetDesc, const Configuration& config)
+    : RawTileDataReader(config)
     , hasBeenInitialized(false)
 {
     _initData = { "",  gdalDatasetDesc, config.minimumTilePixelSize, config.dataType };
-    ensureInitialized();
     _initData.initDirectory = CPLGetCurrentDir();
+    ensureInitialized();
 }
 
-void TileDataset::reset() {
+GdalRawTileDataReader::~GdalRawTileDataReader() {
+    // Do not call delete on _dataset. Instead use GDALClose.
+    if (_dataset != nullptr) {
+        GDALClose((GDALDatasetH)_dataset);
+    }
+}
+
+void GdalRawTileDataReader::reset() {
     _cached._maxLevel = -1;
     if (_dataset != nullptr) {
         GDALClose((GDALDatasetH)_dataset);
@@ -155,20 +97,7 @@ void TileDataset::reset() {
     initialize();
 }
 
-size_t TileDataset::GDALCacheSize() {
-    size_t maximum = GdalHasBeenInitialized ? GDALGetCacheMax64() : 0;
-    return GdalHasBeenInitialized ? GDALGetCacheUsed64() : 0;
-}
-
-size_t TileDataset::GDALMaximumCacheSize() {
-    return GdalHasBeenInitialized ? GDALGetCacheMax64() : 0;
-}
-
-void TileDataset::setGDALMaximumCacheSize(size_t cacheSize) {
-    GDALSetCacheMax64(cacheSize);
-}
-
-float TileDataset::noDataValueAsFloat() {
+float GdalRawTileDataReader::noDataValueAsFloat() {
     float noDataValue;
     if (_dataset && _dataset->GetRasterBand(1)) {
         noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();;
@@ -179,26 +108,26 @@ float TileDataset::noDataValueAsFloat() {
     return noDataValue;
 }
 
-void TileDataset::ensureInitialized() {
-    if (!hasBeenInitialized) {
-        initialize();
-        hasBeenInitialized = true;
-    }
-
+size_t GdalRawTileDataReader::rasterXSize() const {
+    _dataset->GetRasterXSize();
 }
 
-void TileDataset::initialize() {
+size_t GdalRawTileDataReader::rasterYSize() const {
+    _dataset->GetRasterYSize();
+}
+
+void GdalRawTileDataReader::initialize() {
     gdalEnsureInitialized();
 
-    _dataset = gdalDataset(_initData.gdalDatasetDesc);
+    _dataset = gdalDataset(_initData.datasetFilePath);
 
-    //Do any other initialization needed for the TileDataset
+    //Do any other initialization needed for the GdalRawTileDataReader
     _dataLayout = TileDataLayout(_dataset, _initData.dataType);
     _depthTransform = calculateTileDepthTransform();
     _cached._tileLevelDifference = calculateTileLevelDifference(_initData.minimumPixelSize);
 }
 
-void TileDataset::gdalEnsureInitialized() {
+void GdalRawTileDataReader::gdalEnsureInitialized() {
     if (!GdalHasBeenInitialized) {
         GDALAllRegister();
         CPLSetConfigOption(
@@ -211,7 +140,14 @@ void TileDataset::gdalEnsureInitialized() {
     }
 }
 
-void TileDataset::setGdalProxyConfiguration() {
+void GdalRawTileDataReader::ensureInitialized() {
+    if (!hasBeenInitialized) {
+        initialize();
+        hasBeenInitialized = true;
+    }
+}
+
+void GdalRawTileDataReader::setGdalProxyConfiguration() {
     ghoul::Dictionary proxySettings;
     bool proxyEnabled = OsEng.configurationManager().getValue(
         ConfigurationManager::KeyHttpProxy, proxySettings
@@ -272,7 +208,7 @@ void TileDataset::setGdalProxyConfiguration() {
     }
 }
 
-GDALDataset* TileDataset::gdalDataset(const std::string& gdalDatasetDesc) {
+GDALDataset* GdalRawTileDataReader::gdalDataset(const std::string& gdalDatasetDesc) {
     GDALDataset* dataset = (GDALDataset *)GDALOpen(gdalDatasetDesc.c_str(), GA_ReadOnly);
     if (!dataset) {
         using namespace ghoul::filesystem;
@@ -309,17 +245,10 @@ GDALDataset* TileDataset::gdalDataset(const std::string& gdalDatasetDesc) {
     return dataset;
 }
 
-TileDataset::~TileDataset() {
-    // Do not call delete on _dataset. Instead use GDALClose.
-    if (_dataset != nullptr) {
-        GDALClose((GDALDatasetH)_dataset);
-    }
-}
-
-std::shared_ptr<RawTile> TileDataset::readTileData(TileIndex tileIndex) {
+std::shared_ptr<RawTile> GdalRawTileDataReader::readTileData(TileIndex tileIndex) {
     ensureInitialized();
     IODescription io = getIODescription(tileIndex);
-    CPLErr worstError = CPLErr::CE_None;
+    RawTile::ReadError worstError = RawTile::ReadError::None;
 
     // Build the RawTile from the data we querred
     std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
@@ -328,7 +257,9 @@ std::shared_ptr<RawTile> TileDataset::readTileData(TileIndex tileIndex) {
     rawTile->tileIndex = tileIndex;
     rawTile->dimensions = glm::uvec3(io.write.region.numPixels, 1);
     rawTile->nBytesImageData = io.write.totalNumBytes;
-        
+    rawTile->glType = _dataLayout.glType;
+    rawTile->textureFormat = _dataLayout.textureFormat;
+
     if (_config.doPreProcessing) {
         rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);
         rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile, io));
@@ -337,32 +268,7 @@ std::shared_ptr<RawTile> TileDataset::readTileData(TileIndex tileIndex) {
     return rawTile;
 }
 
-std::shared_ptr<RawTile> TileDataset::defaultTileData() {
-    ensureInitialized();
-    PixelRegion pixelRegion = {
-        PixelRegion::PixelCoordinate(0, 0),
-        PixelRegion::PixelRange(16, 16)
-    };
-    std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
-    rawTile->tileIndex = { 0, 0, 0 };
-    rawTile->dimensions = glm::uvec3(pixelRegion.numPixels, 1);
-    rawTile->nBytesImageData =
-        rawTile->dimensions.x * rawTile->dimensions.y * _dataLayout.bytesPerPixel;
-    rawTile->imageData = new char[rawTile->nBytesImageData];
-    for (size_t i = 0; i < rawTile->nBytesImageData; ++i) {
-        rawTile->imageData[i] = 0;
-    }
-    rawTile->error = CPLErr::CE_None;
-        
-    if (_config.doPreProcessing) {
-        rawTile->tileMetaData = getTileMetaData(rawTile, pixelRegion);
-        //rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile, io));
-    }
-
-    return rawTile;
-}
-
-int TileDataset::maxChunkLevel() {
+int GdalRawTileDataReader::maxChunkLevel() {
     ensureInitialized();
     if (_cached._maxLevel < 0) {
         int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
@@ -374,17 +280,12 @@ int TileDataset::maxChunkLevel() {
     return _cached._maxLevel;
 }
 
-TileDepthTransform TileDataset::getDepthTransform() {
-    ensureInitialized();
-    return _depthTransform;
-}
+//const TileDataLayout& GdalRawTileDataReader::getDataLayout() {
+//    ensureInitialized();
+//    return _dataLayout;
+//}
 
-const TileDataLayout& TileDataset::getDataLayout() {
-    ensureInitialized();
-    return _dataLayout;
-}
-
-int TileDataset::calculateTileLevelDifference(int minimumPixelSize) {
+int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) {
     GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
     GDALRasterBand* maxOverview;
     int numOverviews = firstBand->GetOverviewCount();
@@ -400,7 +301,7 @@ int TileDataset::calculateTileLevelDifference(int minimumPixelSize) {
     return diff;
 }
 
-TileDepthTransform TileDataset::calculateTileDepthTransform() {
+TileDepthTransform GdalRawTileDataReader::calculateTileDepthTransform() {
     GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
         
     bool isFloat =
@@ -414,11 +315,11 @@ TileDepthTransform TileDataset::calculateTileDepthTransform() {
     return transform;
 }
 
-bool TileDataset::gdalHasOverviews() const {
+bool GdalRawTileDataReader::gdalHasOverviews() const {
     return _dataset->GetRasterBand(1)->GetOverviewCount() > 0;
 }
 
-int TileDataset::gdalOverview(const PixelRegion::PixelRange& regionSizeOverviewZero) const {
+int GdalRawTileDataReader::gdalOverview(const PixelRegion::PixelRange& regionSizeOverviewZero) const {
     GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
 
     int minNumPixels0 = glm::min(regionSizeOverviewZero.x, regionSizeOverviewZero.y);
@@ -438,19 +339,19 @@ int TileDataset::gdalOverview(const PixelRegion::PixelRange& regionSizeOverviewZ
     return ov;
 }
 
-int TileDataset::gdalOverview(const TileIndex& tileIndex) const {
+int GdalRawTileDataReader::gdalOverview(const TileIndex& tileIndex) const {
     int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
     int ov = overviews - (tileIndex.level + _cached._tileLevelDifference + 1);
     return glm::clamp(ov, 0, overviews - 1);
 }
 
-int TileDataset::gdalVirtualOverview(const TileIndex& tileIndex) const {
+int GdalRawTileDataReader::gdalVirtualOverview(const TileIndex& tileIndex) const {
     int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
     int ov = overviews - (tileIndex.level + _cached._tileLevelDifference + 1);
     return ov;
 }
 
-PixelRegion TileDataset::gdalPixelRegion(GDALRasterBand* rasterBand) const {
+PixelRegion GdalRawTileDataReader::gdalPixelRegion(GDALRasterBand* rasterBand) const {
     PixelRegion gdalRegion;
     gdalRegion.start.x = 0;
     gdalRegion.start.y = 0;
@@ -459,7 +360,7 @@ PixelRegion TileDataset::gdalPixelRegion(GDALRasterBand* rasterBand) const {
     return gdalRegion;
 }
 
-PixelRegion TileDataset::gdalPixelRegion(const GeodeticPatch& geodeticPatch) const {
+PixelRegion GdalRawTileDataReader::gdalPixelRegion(const GeodeticPatch& geodeticPatch) const {
     Geodetic2 nwCorner = geodeticPatch.getCorner(Quad::NORTH_WEST);
     Geodetic2 swCorner = geodeticPatch.getCorner(Quad::SOUTH_EAST);
     PixelRegion::PixelCoordinate pixelStart = geodeticToPixel(nwCorner);
@@ -468,7 +369,7 @@ PixelRegion TileDataset::gdalPixelRegion(const GeodeticPatch& geodeticPatch) con
     return gdalRegion;
 }
 
-GDALRasterBand* TileDataset::gdalRasterBand(int overview, int raster) const {
+GDALRasterBand* GdalRawTileDataReader::gdalRasterBand(int overview, int raster) const {
     GDALRasterBand* rasterBand = _dataset->GetRasterBand(raster);
 //    int numberOfOverviews = rasterBand->GetOverviewCount();
     rasterBand = gdalHasOverviews() ? rasterBand->GetOverview(overview) : rasterBand;
@@ -476,69 +377,7 @@ GDALRasterBand* TileDataset::gdalRasterBand(int overview, int raster) const {
     return rasterBand;
 }
 
-std::array<double, 6> TileDataset::getGeoTransform() const {
-    std::array<double, 6> padfTransform;
-    CPLErr err = _dataset->GetGeoTransform(&padfTransform[0]);
-    if (err == CE_Failure) {
-        GeodeticPatch globalCoverage(Geodetic2(0,0), Geodetic2(M_PI / 2, M_PI));
-        padfTransform[1] = Angle<double>::fromRadians(
-            globalCoverage.size().lon).asDegrees() / _dataset->GetRasterXSize();
-        padfTransform[5] = -Angle<double>::fromRadians(
-            globalCoverage.size().lat).asDegrees() / _dataset->GetRasterYSize();
-        padfTransform[0] = Angle<double>::fromRadians(
-            globalCoverage.getCorner(Quad::NORTH_WEST).lon).asDegrees();
-        padfTransform[3] = Angle<double>::fromRadians(
-            globalCoverage.getCorner(Quad::NORTH_WEST).lat).asDegrees();
-        padfTransform[2] = 0;
-        padfTransform[4] = 0;
-    }
-    return padfTransform;
-}
-
-PixelRegion::PixelCoordinate TileDataset::geodeticToPixel(const Geodetic2& geo) const {
-    std::array<double, 6> padfTransform = getGeoTransform();
-        
-    double Y = Angle<double>::fromRadians(geo.lat).asDegrees();
-    double X = Angle<double>::fromRadians(geo.lon).asDegrees();
-
-    // convert from pixel and line to geodetic coordinates
-    // Xp = padfTransform[0] + P*padfTransform[1] + L*padfTransform[2];
-    // Yp = padfTransform[3] + P*padfTransform[4] + L*padfTransform[5];
-
-    // <=>
-    double* a = &(padfTransform[0]);
-    double* b = &(padfTransform[3]);
-
-    // Xp = a[0] + P*a[1] + L*a[2];
-    // Yp = b[0] + P*b[1] + L*b[2];
-
-    // <=>
-    double divisor = (a[2] * b[1] - a[1] * b[2]);
-    ghoul_assert(divisor != 0.0, "Division by zero!");
-    //ghoul_assert(a[2] != 0.0, "a2 must not be zero!");
-    double P = (a[0] * b[2] - a[2] * b[0] + a[2] * Y - b[2] * X) / divisor;
-    double L = (-a[0] * b[1] + a[1] * b[0] - a[1] * Y + b[1] * X) / divisor;
-    // ref: https://www.wolframalpha.com/input/?i=X+%3D+a0+%2B+a1P+%2B+a2L,+Y+%3D+b0+%2B+b1P+%2B+b2L,+solve+for+P+and+L
-
-    double Xp = a[0] + P*a[1] + L*a[2];
-    double Yp = b[0] + P*b[1] + L*b[2];
-
-    ghoul_assert(abs(X - Xp) < 1e-10, "inverse should yield X as before");
-    ghoul_assert(abs(Y - Yp) < 1e-10, "inverse should yield Y as before");
-
-    return PixelRegion::PixelCoordinate(glm::round(P), glm::round(L));
-}
-
-Geodetic2 TileDataset::pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const {
-    std::array<double, 6> padfTransform = getGeoTransform();
-    Geodetic2 geodetic;
-    // Should be using radians and not degrees?
-    geodetic.lon = padfTransform[0] + p.x * padfTransform[1] + p.y * padfTransform[2];
-    geodetic.lat = padfTransform[3] + p.x * padfTransform[4] + p.y * padfTransform[5];
-    return geodetic;
-}
-
-TileDataset::IODescription TileDataset::getIODescription(const TileIndex& tileIndex) const {
+GdalRawTileDataReader::IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
     IODescription io;
     io.read.region = gdalPixelRegion(tileIndex);
 
@@ -578,7 +417,26 @@ TileDataset::IODescription TileDataset::getIODescription(const TileIndex& tileIn
     return io;
 }
 
-char* TileDataset::readImageData(IODescription& io, CPLErr& worstError) const {
+std::array<double, 6> GdalRawTileDataReader::getGeoTransform() const {
+    std::array<double, 6> padfTransform;
+    CPLErr err = _dataset->GetGeoTransform(&padfTransform[0]);
+    if (err == CE_Failure) {
+        GeodeticPatch globalCoverage(Geodetic2(0,0), Geodetic2(M_PI / 2, M_PI));
+        padfTransform[1] = Angle<double>::fromRadians(
+            globalCoverage.size().lon).asDegrees() / _dataset->GetRasterXSize();
+        padfTransform[5] = -Angle<double>::fromRadians(
+            globalCoverage.size().lat).asDegrees() / _dataset->GetRasterYSize();
+        padfTransform[0] = Angle<double>::fromRadians(
+            globalCoverage.getCorner(Quad::NORTH_WEST).lon).asDegrees();
+        padfTransform[3] = Angle<double>::fromRadians(
+            globalCoverage.getCorner(Quad::NORTH_WEST).lat).asDegrees();
+        padfTransform[2] = 0;
+        padfTransform[4] = 0;
+    }
+    return padfTransform;
+}
+
+char* GdalRawTileDataReader::readImageData(IODescription& io, RawTile::ReadError& worstError) const {
     // allocate memory for the image
     char* imageData = new char[io.write.totalNumBytes];
 
@@ -597,7 +455,7 @@ char* TileDataset::readImageData(IODescription& io, CPLErr& worstError) const {
         // for every raster (or data channel, i.e. R in RGB)
         char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
 
-        CPLErr err = repeatedRasterIO(rasterBand, io, dataDestination);
+        RawTile::ReadError err = repeatedRasterIO(rasterBand, io, dataDestination);
 
         // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
         worstError = std::max(worstError, err);
@@ -607,11 +465,11 @@ char* TileDataset::readImageData(IODescription& io, CPLErr& worstError) const {
     return imageData;
 }
 
-CPLErr TileDataset::repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& fullIO, char* dataDestination, int depth) const {
+RawTile::ReadError GdalRawTileDataReader::repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& fullIO, char* dataDestination, int depth) const {
     std::string spaces = "                      ";
     std::string indentation = spaces.substr(0, 2 * depth);
 
-    CPLErr worstError = CPLErr::CE_None;
+    RawTile::ReadError worstError = RawTile::ReadError::None;
 
     // NOTE: 
     // Ascii graphics illustrates the implementation details of this method, for one  
@@ -705,17 +563,17 @@ CPLErr TileDataset::repeatedRasterIO(GDALRasterBand* rasterBand, const IODescrip
                 // The cutoff region has been repeated along one of its sides, but 
                 // as we can see in this example, it still has a top part outside the
                 // defined gdal region. This is handled through recursion.
-                CPLErr err = repeatedRasterIO(rasterBand, cutoff, dataDestination, depth + 1);
+                RawTile::ReadError err = repeatedRasterIO(rasterBand, cutoff, dataDestination, depth + 1);
 
                 worstError = std::max(worstError, err);
             }
         }
     }
-    else if (worstError > CPLErr::CE_None) {
+    else if (worstError > RawTile::ReadError::None) {
         LDEBUG(indentation << "Error reading padding: " << worstError);
     }
         
-    CPLErr err = rasterIO(rasterBand, io, dataDestination);
+    RawTile::ReadError err = rasterIO(rasterBand, io, dataDestination);
 //    worstError = std::max(worstError, err);
 
     // The return error from a repeated rasterIO is ONLY based on the main region,
@@ -724,7 +582,7 @@ CPLErr TileDataset::repeatedRasterIO(GDALRasterBand* rasterBand, const IODescrip
     return err;
 }
 
-CPLErr TileDataset::rasterIO(GDALRasterBand* rasterBand, const IODescription& io,
+RawTile::ReadError GdalRawTileDataReader::rasterIO(GDALRasterBand* rasterBand, const IODescription& io,
                              char* dataDestination) const
 {
     PixelRegion gdalRegion = gdalPixelRegion(rasterBand);
@@ -751,8 +609,8 @@ CPLErr TileDataset::rasterIO(GDALRasterBand* rasterBand, const IODescription& io
     // handle requested write region
     dataDest -= io.write.region.start.y * io.write.bytesPerLine; // note -= since flipped y axis
     dataDest += io.write.region.start.x * _dataLayout.bytesPerPixel;
-        
-    return rasterBand->RasterIO(
+  
+    CPLErr readError = rasterBand->RasterIO(
         GF_Read,
         io.read.region.start.x,             // Begin read x
         io.read.region.start.y,             // Begin read y
@@ -765,9 +623,20 @@ CPLErr TileDataset::rasterIO(GDALRasterBand* rasterBand, const IODescription& io
         _dataLayout.bytesPerPixel,          // Pixel spacing
         -io.write.bytesPerLine              // Line spacing
     );
+  
+    RawTile::ReadError error;
+    switch (readError) {
+        case CE_None: error = RawTile::ReadError::None; break;
+        case CE_Debug: error = RawTile::ReadError::Debug; break;
+        case CE_Warning: error = RawTile::ReadError::Warning; break;
+        case CE_Failure: error = RawTile::ReadError::Failure; break;
+        case CE_Fatal: error = RawTile::ReadError::Fatal; break;
+        default: error = RawTile::ReadError::Failure; break;
+    }
+    return error;
 }
 
-std::shared_ptr<TileMetaData> TileDataset::getTileMetaData(
+std::shared_ptr<TileMetaData> GdalRawTileDataReader::getTileMetaData(
                                                          std::shared_ptr<RawTile> rawTile,
                                                          const PixelRegion& region) const
 {
@@ -826,7 +695,7 @@ std::shared_ptr<TileMetaData> TileDataset::getTileMetaData(
     return std::shared_ptr<TileMetaData>(preprocessData);
 }
 
-CPLErr TileDataset::postProcessErrorCheck(std::shared_ptr<const RawTile> rawTile,
+RawTile::ReadError GdalRawTileDataReader::postProcessErrorCheck(std::shared_ptr<const RawTile> rawTile,
                                           const IODescription& io) const
 {
     int success;
@@ -845,7 +714,7 @@ CPLErr TileDataset::postProcessErrorCheck(std::shared_ptr<const RawTile> rawTile
         
     bool onHighLevel = rawTile->tileIndex.level > 6;
     if (hasMissingData && onHighLevel) {
-        return CE_Fatal;
+        return RawTile::ReadError::Fatal;
     }
     // ugly test for heightmap overlay
     if (_dataLayout.textureFormat.ghoulFormat == ghoul::opengl::Texture::Format::RG) {
@@ -856,7 +725,7 @@ CPLErr TileDataset::postProcessErrorCheck(std::shared_ptr<const RawTile> rawTile
             //return CE_Warning;
         }
     }
-    return CE_None;
+    return RawTile::ReadError::None;
 }
 
 } // namespace globebrowsing

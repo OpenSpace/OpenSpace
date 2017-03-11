@@ -25,25 +25,25 @@
 #include <modules/globebrowsing/tile/asynctilereader.h>
 
 #include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
-#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 #include <modules/globebrowsing/tile/tilediskcache.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-AsyncTileDataProvider::AsyncTileDataProvider(std::shared_ptr<TileDataset> tileDataset,
+AsyncTileDataProvider::AsyncTileDataProvider(std::shared_ptr<GdalRawTileDataReader> rawTileDataReader,
                                              std::shared_ptr<ThreadPool> pool)
-    : _tileDataset(tileDataset)
+    : _rawTileDataReader(rawTileDataReader)
     , _concurrentJobManager(pool)
 {}
 
-std::shared_ptr<TileDataset> AsyncTileDataProvider::getTextureDataProvider() const {
-    return _tileDataset;
+std::shared_ptr<GdalRawTileDataReader> AsyncTileDataProvider::getTextureDataProvider() const {
+    return _rawTileDataReader;
 }
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
     if (satisfiesEnqueueCriteria(tileIndex)) {
-        auto job = std::make_shared<TileLoadJob>(_tileDataset, tileIndex);
+        auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex);
         //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, tileIndex, tileDiskCache, "ReadAndWrite");
         _concurrentJobManager.enqueueJob(job);
         _enqueuedTileRequests[tileIndex.hashKey()] = tileIndex;
@@ -88,7 +88,7 @@ void AsyncTileDataProvider::clearRequestQueue() {
 }
 
 float AsyncTileDataProvider::noDataValueAsFloat() {
-    return _tileDataset->noDataValueAsFloat();
+    return _rawTileDataReader->noDataValueAsFloat();
 }
 
 } // namespace globebrowsing

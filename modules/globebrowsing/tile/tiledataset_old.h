@@ -31,6 +31,7 @@
 #include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/tiledataset.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
+#include <modules/globebrowsing/tile/rawtile.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -45,7 +46,6 @@ class GDALRasterBand;
 namespace openspace {
 namespace globebrowsing {
 
-class RawTile;
 class GeodeticPatch;
 
 /**
@@ -168,11 +168,11 @@ private:
     PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
     Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
     IODescription getIODescription(const TileIndex& tileIndex) const;
-    char* readImageData(IODescription& io, CPLErr& worstError) const;
-    CPLErr rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst) const;
-    CPLErr repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst, int depth = 0) const;
+    char* readImageData(IODescription& io, RawTile::ReadError& worstError) const;
+    RawTile::ReadError rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst) const;
+    RawTile::ReadError repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst, int depth = 0) const;
     std::shared_ptr<TileMetaData> getTileMetaData(std::shared_ptr<RawTile> result, const PixelRegion& region) const;
-    CPLErr postProcessErrorCheck(std::shared_ptr<const RawTile> ioResult, const IODescription& io) const;
+    RawTile::ReadError postProcessErrorCheck(std::shared_ptr<const RawTile> ioResult, const IODescription& io) const;
 
 
 

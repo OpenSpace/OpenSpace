@@ -24,10 +24,8 @@
 
 #include <modules/globebrowsing/tile/tile.h>
 
-#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
-
-#include <gdal_priv.h>
 
 namespace {
     const std::string _loggerCat = "Tile";
@@ -98,8 +96,8 @@ glm::vec2 Tile::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform
 {
     glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
     uv = compensateSourceTextureSampling(
-        TileDataset::tilePixelStartOffset,
-        TileDataset::tilePixelSizeDifference,
+        RawTileDataReader::tilePixelStartOffset,
+        RawTileDataReader::tilePixelSizeDifference,
         resolution,
         uv);
     return uv;

@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/rendering/layershadermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
-#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
 namespace {
     const char* keyFrame = "Frame";
@@ -114,13 +114,13 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 
 	pairs.push_back(std::make_pair("tilePaddingStart",
 		"ivec2(" +
-		std::to_string(TileDataset::padding.start.x) + "," +
-		std::to_string(TileDataset::padding.start.y) + ")"
+		std::to_string(RawTileDataReader::padding.start.x) + "," +
+		std::to_string(RawTileDataReader::padding.start.y) + ")"
 	));
 	pairs.push_back(std::make_pair("tilePaddingSizeDiff",
 		"ivec2(" +
-		std::to_string(TileDataset::padding.numPixels.x) + "," +
-		std::to_string(TileDataset::padding.numPixels.y) + ")"
+		std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
+		std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
 	));
 
     // Now the shader program can be accessed

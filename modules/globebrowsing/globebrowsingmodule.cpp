@@ -27,7 +27,7 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
-#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/sizereferencetileprovider.h>
@@ -87,20 +87,24 @@ void GlobeBrowsingModule::internalInitialize() {
             globebrowsing::cache::MemoryAwareTileCache::ref().setMaximumSize(
                 *_openSpaceMaximumTileCacheSize * 1024);
         });
+        /*
         _GDALMaximumTileCacheSize->onChange(
         [&]{
             // Convert from MB to KB
             globebrowsing::TileDataset::setGDALMaximumCacheSize(
                 *_GDALMaximumTileCacheSize * 1024);
         });
+        */
         _clearTileCache->onChange(
         [&]{
             globebrowsing::cache::MemoryAwareTileCache::ref().clear();
         });
+        /*
         _logGDALErrors->onChange(
         [&]{
             globebrowsing::TileDataset::logGDALErrors = *_logGDALErrors;
         });
+        */
 
         addProperty(*_openSpaceMaximumTileCacheSize);
         addProperty(*_GDALMaximumTileCacheSize);
