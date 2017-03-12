@@ -22,75 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___RAW_TILE_DATA_READER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___RAW_TILE_DATA_READER___H__
-
-#include <modules/globebrowsing/tile/textureformat.h>
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/tiledatalayout.h>
-#include <modules/globebrowsing/tile/pixelregion.h>
-#include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
+#include <modules/globebrowsing/tile/pixelregion.h>
 
-#include <string>
+namespace {
+    const std::string _loggerCat = "IODescription";
+}
 
 namespace openspace {
 namespace globebrowsing {
 
-class GeodeticPatch;
+IODescription IODescription::cut(
+    PixelRegion::Side side, int pos) {
+    PixelRegion readPreCut = read.region;
+    PixelRegion writePreCut = write.region;
 
-class RawTileDataReader {
-public:
-    struct Configuration {
-        bool doPreProcessing;
-        int minimumTilePixelSize;
-        GLuint dataType = 0; // default = no datatype reinterpretation
-    };
+    glm::dvec2 ratio;
+    ratio.x = write.region.numPixels.x / (double) read.region.numPixels.x;
+    ratio.y = write.region.numPixels.y / (double) read.region.numPixels.y;
 
-    RawTileDataReader(const Configuration& config);
-    virtual ~RawTileDataReader() { };
+    IODescription whatCameOff = *this;
+    whatCameOff.read.region = read.region.globalCut(side, pos);
 
-    virtual std::shared_ptr<RawTile> readTileData(TileIndex tileIndex) = 0;
-    virtual int maxChunkLevel() = 0;
-    TileDepthTransform getDepthTransform();
-    virtual void reset() = 0;
-    virtual float noDataValueAsFloat() = 0;
-    virtual size_t rasterXSize() const = 0;
-    virtual size_t rasterYSize() const = 0;
+    PixelRegion::PixelRange cutSize = whatCameOff.read.region.numPixels;
+    PixelRegion::PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
+        
+    if (cutSize.x == 0 || cutSize.y == 0) {
+        ghoul_assert(
+            read.region.equals(readPreCut),
+            "Read region should not have been modified"
+        );
+        ghoul_assert(
+            write.region.equals(writePreCut),
+            "Write region should not have been modified"
+        );
+    }
 
-    std::shared_ptr<RawTile> defaultTileData();
-    
-    const static glm::ivec2 tilePixelStartOffset;
-    const static glm::ivec2 tilePixelSizeDifference;
-    const static PixelRegion padding; // same as the two above
+    int localWriteCutPos =
+        (side == PixelRegion::Side::LEFT || side == PixelRegion::Side::RIGHT)
+        ? localWriteCutSize.x : localWriteCutSize.y;
+    whatCameOff.write.region = write.region.localCut(side, localWriteCutPos);
 
-protected:
-    /**
-        The function returns a transform to map
-        the pixel coordinates to cover the whole geodetic lat long space.
-    */
-    virtual std::array<double, 6> getGeoTransform() const;
-    PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
-    Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
-    
-    virtual IODescription getIODescription(const TileIndex& tileIndex) const = 0;
-    
-    struct Cached {
-        int _maxLevel = -1;
-        double _tileLevelDifference;
-    } _cached;
-
-    const Configuration _config;
-
-    TileDepthTransform _depthTransform;
-};
+    return whatCameOff;
+}
 
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___RAW_TILE_DATA_READER___H__

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___RAW_TILE_DATA_READER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___RAW_TILE_DATA_READER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__
 
 #include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/tile.h>
@@ -31,7 +31,6 @@
 #include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -42,55 +41,22 @@
 namespace openspace {
 namespace globebrowsing {
 
-class GeodeticPatch;
-
-class RawTileDataReader {
-public:
-    struct Configuration {
-        bool doPreProcessing;
-        int minimumTilePixelSize;
-        GLuint dataType = 0; // default = no datatype reinterpretation
-    };
-
-    RawTileDataReader(const Configuration& config);
-    virtual ~RawTileDataReader() { };
-
-    virtual std::shared_ptr<RawTile> readTileData(TileIndex tileIndex) = 0;
-    virtual int maxChunkLevel() = 0;
-    TileDepthTransform getDepthTransform();
-    virtual void reset() = 0;
-    virtual float noDataValueAsFloat() = 0;
-    virtual size_t rasterXSize() const = 0;
-    virtual size_t rasterYSize() const = 0;
-
-    std::shared_ptr<RawTile> defaultTileData();
+struct IODescription {
+    struct ReadData {
+        int overview;
+        PixelRegion region;
+    } read;
     
-    const static glm::ivec2 tilePixelStartOffset;
-    const static glm::ivec2 tilePixelSizeDifference;
-    const static PixelRegion padding; // same as the two above
-
-protected:
-    /**
-        The function returns a transform to map
-        the pixel coordinates to cover the whole geodetic lat long space.
-    */
-    virtual std::array<double, 6> getGeoTransform() const;
-    PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
-    Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
+    struct WriteData {
+        PixelRegion region;
+        size_t bytesPerLine;
+        size_t totalNumBytes;
+    } write;
     
-    virtual IODescription getIODescription(const TileIndex& tileIndex) const = 0;
-    
-    struct Cached {
-        int _maxLevel = -1;
-        double _tileLevelDifference;
-    } _cached;
-
-    const Configuration _config;
-
-    TileDepthTransform _depthTransform;
+    IODescription cut(PixelRegion::Side side, int pos);
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___RAW_TILE_DATA_READER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__

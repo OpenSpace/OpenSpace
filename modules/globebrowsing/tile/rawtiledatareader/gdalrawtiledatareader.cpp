@@ -255,24 +255,6 @@ int GdalRawTileDataReader::gdalVirtualOverview(const TileIndex& tileIndex) const
     return ov;
 }
 
-PixelRegion GdalRawTileDataReader::gdalPixelRegion(GDALRasterBand* rasterBand) const {
-    PixelRegion gdalRegion;
-    gdalRegion.start.x = 0;
-    gdalRegion.start.y = 0;
-    gdalRegion.numPixels.x = rasterBand->GetXSize();
-    gdalRegion.numPixels.y = rasterBand->GetYSize();
-    return gdalRegion;
-}
-
-PixelRegion GdalRawTileDataReader::gdalPixelRegion(const GeodeticPatch& geodeticPatch) const {
-    Geodetic2 nwCorner = geodeticPatch.getCorner(Quad::NORTH_WEST);
-    Geodetic2 swCorner = geodeticPatch.getCorner(Quad::SOUTH_EAST);
-    PixelRegion::PixelCoordinate pixelStart = geodeticToPixel(nwCorner);
-    PixelRegion::PixelCoordinate pixelEnd = geodeticToPixel(swCorner);
-    PixelRegion gdalRegion(pixelStart, pixelEnd - pixelStart);
-    return gdalRegion;
-}
-
 GDALRasterBand* GdalRawTileDataReader::gdalRasterBand(int overview, int raster) const {
     GDALRasterBand* rasterBand = _dataset->GetRasterBand(raster);
 //    int numberOfOverviews = rasterBand->GetOverviewCount();
@@ -281,7 +263,7 @@ GDALRasterBand* GdalRawTileDataReader::gdalRasterBand(int overview, int raster) 
     return rasterBand;
 }
 
-GdalRawTileDataReader::IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
+IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
     IODescription io;
     io.read.region = gdalPixelRegion(tileIndex);
 

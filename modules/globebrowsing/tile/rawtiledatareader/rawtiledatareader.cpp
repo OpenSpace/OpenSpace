@@ -54,40 +54,6 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-RawTileDataReader::IODescription RawTileDataReader::IODescription::cut(
-    PixelRegion::Side side, int pos) {
-    PixelRegion readPreCut = read.region;
-    PixelRegion writePreCut = write.region;
-
-    glm::dvec2 ratio;
-    ratio.x = write.region.numPixels.x / (double) read.region.numPixels.x;
-    ratio.y = write.region.numPixels.y / (double) read.region.numPixels.y;
-
-    IODescription whatCameOff = *this;
-    whatCameOff.read.region = read.region.globalCut(side, pos);
-
-    PixelRegion::PixelRange cutSize = whatCameOff.read.region.numPixels;
-    PixelRegion::PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
-        
-    if (cutSize.x == 0 || cutSize.y == 0) {
-        ghoul_assert(
-            read.region.equals(readPreCut),
-            "Read region should not have been modified"
-        );
-        ghoul_assert(
-            write.region.equals(writePreCut),
-            "Write region should not have been modified"
-        );
-    }
-
-    int localWriteCutPos =
-        (side == PixelRegion::Side::LEFT || side == PixelRegion::Side::RIGHT)
-        ? localWriteCutSize.x : localWriteCutSize.y;
-    whatCameOff.write.region = write.region.localCut(side, localWriteCutPos);
-
-    return whatCameOff;
-}
-
 const glm::ivec2 RawTileDataReader::tilePixelStartOffset = glm::ivec2(-2);
 const glm::ivec2 RawTileDataReader::tilePixelSizeDifference = glm::ivec2(4);
 
@@ -146,7 +112,8 @@ std::array<double, 6> RawTileDataReader::getGeoTransform() const {
     return padfTransform;
 }
 
-PixelRegion::PixelCoordinate RawTileDataReader::geodeticToPixel(const Geodetic2& geo) const {
+PixelRegion::PixelCoordinate RawTileDataReader::geodeticToPixel(
+        const Geodetic2& geo) const {
     std::array<double, 6> padfTransform = getGeoTransform();
         
     double Y = Angle<double>::fromRadians(geo.lat).asDegrees();
@@ -180,7 +147,8 @@ PixelRegion::PixelCoordinate RawTileDataReader::geodeticToPixel(const Geodetic2&
     return PixelRegion::PixelCoordinate(glm::round(P), glm::round(L));
 }
 
-Geodetic2 RawTileDataReader::pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const {
+Geodetic2 RawTileDataReader::pixelToGeodetic(
+        const PixelRegion::PixelCoordinate& p) const {
     std::array<double, 6> padfTransform = getGeoTransform();
     Geodetic2 geodetic;
     // Should be using radians and not degrees?

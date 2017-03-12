@@ -62,11 +62,11 @@ void GdalWrapper::create(size_t maximumCacheSize, size_t maximumMaximumCacheSize
 
 void GdalWrapper::destroy() {
     std::lock_guard<std::mutex> guard(_mutexLock);
+    ghoul_assert(_singleton, "Cannot delete null");
     delete _singleton;
 }
 
 GdalWrapper& GdalWrapper::ref() {
-	std::lock_guard<std::mutex> guard(_mutexLock);
     ghoul_assert(_singleton, "GdalWrapper not created");
     return *_singleton;
 }
