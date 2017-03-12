@@ -68,9 +68,11 @@ public:
     virtual std::shared_ptr<RawTile> readTileData(TileIndex tileIndex) override;
     virtual int maxChunkLevel() override;
     virtual void reset() override;
-    virtual float noDataValueAsFloat() override;
-    virtual size_t rasterXSize() const override;
-    virtual size_t rasterYSize() const override;
+    virtual float noDataValueAsFloat() const override;
+    virtual int rasterXSize() const override;
+    virtual int rasterYSize() const override;
+    virtual float depthOffset() const override;
+    virtual float depthScale() const override;
 
 protected:
 
@@ -89,15 +91,13 @@ private:
     //                                Initialization                                    //
     //////////////////////////////////////////////////////////////////////////////////////
 
-    void initialize();
-    TileDepthTransform calculateTileDepthTransform();
+    virtual void initialize();
     int calculateTileLevelDifference(int minimumPixelSize);
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                            GDAL helper methods                                   //
     //////////////////////////////////////////////////////////////////////////////////////
 
-    void ensureInitialized();
     GDALDataset* openGdalDataset(const std::string& gdalDatasetDesc);
     bool gdalHasOverviews() const;
     int gdalOverview(const PixelRegion::PixelRange& baseRegionSize) const;
@@ -105,6 +105,7 @@ private:
     int gdalVirtualOverview(const TileIndex& tileIndex) const;
     GDALRasterBand* gdalRasterBand(int overview, int raster = 1) const;
     PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
+    TileDataLayout getTileDataLayout(GLuint prefferedGLType);
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                          ReadTileData helper functions                           //
@@ -112,8 +113,6 @@ private:
 
     char* readImageData(IODescription& io, RawTile::ReadError& worstError) const;
     virtual RawTile::ReadError rasterRead(int rasterBand, const IODescription& io, char* dst) const;
-    std::shared_ptr<TileMetaData> getTileMetaData(std::shared_ptr<RawTile> result, const PixelRegion& region) const;
-    RawTile::ReadError postProcessErrorCheck(std::shared_ptr<const RawTile> ioResult, const IODescription& io) const;
 
     //////////////////////////////////////////////////////////////////////////////////////
     //                              Member variables                                    //
@@ -128,11 +127,7 @@ private:
     } _initData;
 
     GDALDataset* _dataset;
-    TileDataLayout _dataLayout;
-
-    static bool GdalHasBeenInitialized;
-
-    bool hasBeenInitialized;
+    GDALDataType _gdalType; // The type to reinterpret to when reading
 };
 
 } // namespace globebrowsing

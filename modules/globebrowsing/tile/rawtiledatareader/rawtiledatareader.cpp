@@ -30,6 +30,8 @@
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/rawtile.h>
+#include <modules/globebrowsing/tile/tilemetadata.h>
+#include <modules/globebrowsing/tile/tiledatatype.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
@@ -64,7 +66,15 @@ const PixelRegion RawTileDataReader::padding = PixelRegion(
     
 RawTileDataReader::RawTileDataReader(const Configuration& config)
     : _config(config)
+    , hasBeenInitialized(false)
 {
+}
+
+void RawTileDataReader::ensureInitialized() {
+    if (!hasBeenInitialized) {
+        initialize();
+        hasBeenInitialized = true;
+    }
 }
 
 std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() {
@@ -108,7 +118,6 @@ std::array<double, 6> RawTileDataReader::getGeoTransform() const {
         globalCoverage.getCorner(Quad::NORTH_WEST).lat).asDegrees();
     padfTransform[2] = 0;
     padfTransform[4] = 0;
-
     return padfTransform;
 }
 
@@ -267,6 +276,120 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
     // The return error from a repeated rasterRead is ONLY based on the main region,
     // which in the usual case will cover the main area of the patch anyway
     return err;
+}
+
+
+std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
+    std::shared_ptr<RawTile> rawTile, const PixelRegion& region)
+{
+    ensureInitialized();
+    size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
+//    size_t totalNumBytes = bytesPerLine * region.numPixels.y;
+
+    TileMetaData* preprocessData = new TileMetaData();
+    preprocessData->maxValues.resize(_dataLayout.numRasters);
+    preprocessData->minValues.resize(_dataLayout.numRasters);
+    preprocessData->hasMissingData.resize(_dataLayout.numRasters);
+        
+    std::vector<float> noDataValues;
+    noDataValues.resize(_dataLayout.numRasters);
+
+    for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+        preprocessData->maxValues[c] = -FLT_MAX;
+        preprocessData->minValues[c] = FLT_MAX;
+        preprocessData->hasMissingData[c] = false;
+        noDataValues[c] = noDataValueAsFloat();
+    }
+
+    for (size_t y = 0; y < region.numPixels.y; y++) {
+        size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
+        size_t i = 0;
+        for (size_t x = 0; x < region.numPixels.x; x++) {
+            for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+                float noDataValue = noDataValueAsFloat();
+                float val = tiledatatype::interpretFloat(
+                    _dataLayout.glType,
+                    &(rawTile->imageData[yi + i])
+                );
+                if (val != noDataValue) {
+                    preprocessData->maxValues[c] = std::max(
+                        val,
+                        preprocessData->maxValues[c]
+                    );
+                    preprocessData->minValues[c] = std::min(
+                        val,
+                        preprocessData->minValues[c]
+                    );
+                }
+                else {
+                    preprocessData->hasMissingData[c] = true;
+                }
+                i += _dataLayout.bytesPerDatum;
+            }
+        }
+    }
+
+    for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+        if (preprocessData->maxValues[c] > 8800.0f) {
+            //LDEBUG("Bad preprocess data: " << preprocessData->maxValues[c] << " at " << region.tileIndex);
+        }
+    }
+
+    return std::shared_ptr<TileMetaData>(preprocessData);
+}
+
+float RawTileDataReader::depthOffset() const {
+    return 0.0f;
+}
+
+float RawTileDataReader::depthScale() const {
+    return 1.0f;
+}
+
+TileDepthTransform RawTileDataReader::calculateTileDepthTransform() {
+    bool isFloat =
+        (_dataLayout.glType == GL_FLOAT || _dataLayout.glType == GL_DOUBLE);
+    double maximumValue =
+        isFloat ? 1.0 : tiledatatype::getMaximumValue(_dataLayout.glType);
+
+    TileDepthTransform transform;
+    transform.depthOffset = depthOffset();
+    transform.depthScale = depthScale() * maximumValue;
+    return transform;
+}
+
+RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
+    std::shared_ptr<const RawTile> rawTile, const IODescription& io)
+{
+    ensureInitialized();
+    int success;
+
+    double missingDataValue = noDataValueAsFloat();
+    if (!success) {
+        // missing data value for TERRAIN.wms. Should be specified in XML
+        missingDataValue = 32767;
+    }
+
+    bool hasMissingData = false;
+        
+    for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+        hasMissingData |= rawTile->tileMetaData->maxValues[c] == missingDataValue;
+    }
+        
+    bool onHighLevel = rawTile->tileIndex.level > 6;
+    if (hasMissingData && onHighLevel) {
+        return RawTile::ReadError::Fatal;
+    }
+    // ugly test for heightmap overlay
+    if (_dataLayout.textureFormat.ghoulFormat == ghoul::opengl::Texture::Format::RG) {
+        // check the alpha
+        if (rawTile->tileMetaData->maxValues[1] == 0.0
+            && rawTile->tileMetaData->minValues[1] == 0.0)
+        {
+            //return CE_Warning;
+        }
+    }
+    return RawTile::ReadError::None;
 }
 
 } // namespace globebrowsing

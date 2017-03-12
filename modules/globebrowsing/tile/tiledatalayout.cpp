@@ -73,31 +73,5 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-TileDataLayout::TileDataLayout() {}
-
-TileDataLayout::TileDataLayout(GDALDataset* dataSet, GLuint preferredGlType) {
-    // Assume all raster bands have the same data type
-    gdalType =preferredGlType != 0 ?
-        tiledatatype::getGdalDataType(preferredGlType) :
-        dataSet->GetRasterBand(1)->GetRasterDataType();
-
-    glType = tiledatatype::getOpenGLDataType(gdalType);
-    numRastersAvailable = dataSet->GetRasterCount();
-	numRasters = numRastersAvailable;
-    
-	// This is to avoid corrupted textures that can appear when the number of
-	// bytes per row is not a multiplie of 4. 
-	// Info here: https://www.khronos.org/opengl/wiki/Pixel_Transfer#Pixel_layout
-	// This also mean that we need to make sure not to read from non existing
-	// rasters from the GDAL dataset
-	if (gdalType == GDT_Byte && numRasters == 3) {
-		numRasters = 4;
-	}
-	
-	bytesPerDatum = tiledatatype::numberOfBytes(gdalType);
-    bytesPerPixel = bytesPerDatum * numRasters;
-    textureFormat = tiledatatype::getTextureFormat(numRasters, gdalType);
-}
-  
 } // namespace globebrowsing
 } // namespace openspace

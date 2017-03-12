@@ -28,7 +28,6 @@
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/geometry/angle.h>
 #include <modules/globebrowsing/tile/tiledatatype.h>
-#include <modules/globebrowsing/tile/tilemetadata.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // abspath
@@ -52,14 +51,10 @@ namespace globebrowsing {
 std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
     return os << pr.start.x << ", " << pr.start.y << " with size " << pr.numPixels.x << ", " << pr.numPixels.y;
 }
-    
-bool GdalRawTileDataReader::GdalHasBeenInitialized = false;
-//bool GdalRawTileDataReader::logGDALErrors = false;
 
 GdalRawTileDataReader::GdalRawTileDataReader(
     const std::string& gdalDatasetDesc, const Configuration& config)
     : RawTileDataReader(config)
-    , hasBeenInitialized(false)
 {
     _initData = { "",  gdalDatasetDesc, config.minimumTilePixelSize, config.dataType };
     _initData.initDirectory = CPLGetCurrentDir();
@@ -81,7 +76,7 @@ void GdalRawTileDataReader::reset() {
     initialize();
 }
 
-float GdalRawTileDataReader::noDataValueAsFloat() {
+float GdalRawTileDataReader::noDataValueAsFloat() const {
     float noDataValue;
     if (_dataset && _dataset->GetRasterBand(1)) {
         noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();;
@@ -92,28 +87,29 @@ float GdalRawTileDataReader::noDataValueAsFloat() {
     return noDataValue;
 }
 
-size_t GdalRawTileDataReader::rasterXSize() const {
-    _dataset->GetRasterXSize();
+int GdalRawTileDataReader::rasterXSize() const {
+    return _dataset->GetRasterXSize();
 }
 
-size_t GdalRawTileDataReader::rasterYSize() const {
-    _dataset->GetRasterYSize();
+int GdalRawTileDataReader::rasterYSize() const {
+    return _dataset->GetRasterYSize();
+}
+
+float GdalRawTileDataReader::depthOffset() const {
+    return _dataset->GetRasterBand(1)->GetOffset();
+}
+
+float GdalRawTileDataReader::depthScale() const {
+    return _dataset->GetRasterBand(1)->GetScale();
 }
 
 void GdalRawTileDataReader::initialize() {
     _dataset = openGdalDataset(_initData.datasetFilePath);
 
     //Do any other initialization needed for the GdalRawTileDataReader
-    _dataLayout = TileDataLayout(_dataset, _initData.dataType);
+    _dataLayout = getTileDataLayout(_initData.dataType);
     _depthTransform = calculateTileDepthTransform();
     _cached._tileLevelDifference = calculateTileLevelDifference(_initData.minimumPixelSize);
-}
-
-void GdalRawTileDataReader::ensureInitialized() {
-    if (!hasBeenInitialized) {
-        initialize();
-        hasBeenInitialized = true;
-    }
 }
 
 GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& gdalDatasetDesc) {
@@ -180,20 +176,6 @@ int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) {
     sizeLevel0 = maxOverview->GetXSize();
     double diff = log2(minimumPixelSize) - log2(sizeLevel0);
     return diff;
-}
-
-TileDepthTransform GdalRawTileDataReader::calculateTileDepthTransform() {
-    GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
-        
-    bool isFloat =
-        (_dataLayout.gdalType == GDT_Float32 || _dataLayout.gdalType == GDT_Float64);
-    double maximumValue =
-        isFloat ? 1.0 : tiledatatype::getMaximumValue(_dataLayout.gdalType);
-
-    TileDepthTransform transform;
-    transform.depthOffset = firstBand->GetOffset();
-    transform.depthScale = firstBand->GetScale() * maximumValue;
-    return transform;
 }
 
 bool GdalRawTileDataReader::gdalHasOverviews() const {
@@ -295,17 +277,7 @@ std::array<double, 6> GdalRawTileDataReader::getGeoTransform() const {
     std::array<double, 6> padfTransform;
     CPLErr err = _dataset->GetGeoTransform(&padfTransform[0]);
     if (err == CE_Failure) {
-        GeodeticPatch globalCoverage(Geodetic2(0,0), Geodetic2(M_PI / 2, M_PI));
-        padfTransform[1] = Angle<double>::fromRadians(
-            globalCoverage.size().lon).asDegrees() / _dataset->GetRasterXSize();
-        padfTransform[5] = -Angle<double>::fromRadians(
-            globalCoverage.size().lat).asDegrees() / _dataset->GetRasterYSize();
-        padfTransform[0] = Angle<double>::fromRadians(
-            globalCoverage.getCorner(Quad::NORTH_WEST).lon).asDegrees();
-        padfTransform[3] = Angle<double>::fromRadians(
-            globalCoverage.getCorner(Quad::NORTH_WEST).lat).asDegrees();
-        padfTransform[2] = 0;
-        padfTransform[4] = 0;
+        return RawTileDataReader::getGeoTransform();
     }
     return padfTransform;
 }
@@ -375,7 +347,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(int rasterBand, const IODes
         dataDest,                           // Where to put data
         io.write.region.numPixels.x,        // width to write x in destination
         io.write.region.numPixels.y,        // width to write y in destination
-        _dataLayout.gdalType,               // Type
+        _gdalType,                          // Type
         _dataLayout.bytesPerPixel,          // Pixel spacing
         -io.write.bytesPerLine              // Line spacing
     );
@@ -393,96 +365,34 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(int rasterBand, const IODes
     return error;
 }
 
-std::shared_ptr<TileMetaData> GdalRawTileDataReader::getTileMetaData(
-    std::shared_ptr<RawTile> rawTile, const PixelRegion& region) const
-{
-    size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
-//    size_t totalNumBytes = bytesPerLine * region.numPixels.y;
+TileDataLayout GdalRawTileDataReader::getTileDataLayout(GLuint preferredGlType) {
+    TileDataLayout layout;
 
-    TileMetaData* preprocessData = new TileMetaData();
-    preprocessData->maxValues.resize(_dataLayout.numRasters);
-    preprocessData->minValues.resize(_dataLayout.numRasters);
-    preprocessData->hasMissingData.resize(_dataLayout.numRasters);
-        
-    std::vector<float> noDataValues;
-    noDataValues.resize(_dataLayout.numRasters);
+    // Assume all raster bands have the same data type
+    _gdalType = preferredGlType != 0 ?
+        tiledatatype::getGdalDataType(preferredGlType) :
+        _dataset->GetRasterBand(1)->GetRasterDataType();
 
-    for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-        preprocessData->maxValues[c] = -FLT_MAX;
-        preprocessData->minValues[c] = FLT_MAX;
-        preprocessData->hasMissingData[c] = false;
-        noDataValues[c] = noDataValueAsFloat();
+    layout.glType = tiledatatype::getOpenGLDataType(_gdalType);
+    layout.numRastersAvailable = _dataset->GetRasterCount();
+    layout.numRasters = layout.numRastersAvailable;
+    
+    // This is to avoid corrupted textures that can appear when the number of
+    // bytes per row is not a multiplie of 4. 
+    // Info here: https://www.khronos.org/opengl/wiki/Pixel_Transfer#Pixel_layout
+    // This also mean that we need to make sure not to read from non existing
+    // rasters from the GDAL dataset
+    if (_gdalType == GDT_Byte && layout.numRasters == 3) {
+        layout.numRasters = 4;
     }
+    
+    layout.bytesPerDatum = tiledatatype::numberOfBytes(_gdalType);
+    layout.bytesPerPixel = layout.bytesPerDatum * layout.numRasters;
+    layout.textureFormat = tiledatatype::getTextureFormat(layout.numRasters, _gdalType);
 
-    for (size_t y = 0; y < region.numPixels.y; y++) {
-        size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
-        size_t i = 0;
-        for (size_t x = 0; x < region.numPixels.x; x++) {
-            for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-                float noDataValue = noDataValueAsFloat();
-                float val = tiledatatype::interpretFloat(
-                    _dataLayout.gdalType,
-                    &(rawTile->imageData[yi + i])
-                );
-                if (val != noDataValue) {
-                    preprocessData->maxValues[c] = std::max(
-                        val,
-                        preprocessData->maxValues[c]
-                    );
-                    preprocessData->minValues[c] = std::min(
-                        val,
-                        preprocessData->minValues[c]
-                    );
-                }
-                else {
-                    preprocessData->hasMissingData[c] = true;
-                }
-                i += _dataLayout.bytesPerDatum;
-            }
-        }
-    }
-
-    for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-        if (preprocessData->maxValues[c] > 8800.0f) {
-            //LDEBUG("Bad preprocess data: " << preprocessData->maxValues[c] << " at " << region.tileIndex);
-        }
-    }
-
-    return std::shared_ptr<TileMetaData>(preprocessData);
+    return layout;
 }
 
-RawTile::ReadError GdalRawTileDataReader::postProcessErrorCheck(std::shared_ptr<const RawTile> rawTile,
-                                          const IODescription& io) const
-{
-    int success;
-
-    double missingDataValue = gdalRasterBand(io.read.overview)->GetNoDataValue(&success);
-    if (!success) {
-        // missing data value for TERRAIN.wms. Should be specified in XML
-        missingDataValue = 32767; 
-    }
-
-    bool hasMissingData = false;
-        
-    for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-        hasMissingData |= rawTile->tileMetaData->maxValues[c] == missingDataValue;
-    }
-        
-    bool onHighLevel = rawTile->tileIndex.level > 6;
-    if (hasMissingData && onHighLevel) {
-        return RawTile::ReadError::Fatal;
-    }
-    // ugly test for heightmap overlay
-    if (_dataLayout.textureFormat.ghoulFormat == ghoul::opengl::Texture::Format::RG) {
-        // check the alpha
-        if (rawTile->tileMetaData->maxValues[1] == 0.0
-            && rawTile->tileMetaData->minValues[1] == 0.0)
-        {
-            //return CE_Warning;
-        }
-    }
-    return RawTile::ReadError::None;
-}
 
 } // namespace globebrowsing
 } // namespace openspace

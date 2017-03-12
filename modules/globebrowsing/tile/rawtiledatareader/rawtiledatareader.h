@@ -59,9 +59,11 @@ public:
     virtual int maxChunkLevel() = 0;
     TileDepthTransform getDepthTransform();
     virtual void reset() = 0;
-    virtual float noDataValueAsFloat() = 0;
-    virtual size_t rasterXSize() const = 0;
-    virtual size_t rasterYSize() const = 0;
+    virtual float noDataValueAsFloat() const = 0;
+    virtual int rasterXSize() const = 0;
+    virtual int rasterYSize() const = 0;
+    virtual float depthOffset() const;
+    virtual float depthScale() const;
 
     std::shared_ptr<RawTile> defaultTileData();
     
@@ -70,6 +72,9 @@ public:
     const static PixelRegion padding; // same as the two above
 
 protected:
+
+    virtual void initialize() = 0;
+    void ensureInitialized();
     /**
         The function returns a transform to map
         the pixel coordinates to cover the whole geodetic lat long space.
@@ -85,14 +90,21 @@ protected:
         int rasterBand, const IODescription& io, char* dst) const = 0;
     virtual IODescription getIODescription(const TileIndex& tileIndex) const = 0;
     
+    std::shared_ptr<TileMetaData> getTileMetaData(
+        std::shared_ptr<RawTile> result, const PixelRegion& region);
+    TileDepthTransform calculateTileDepthTransform();
+    RawTile::ReadError postProcessErrorCheck(
+        std::shared_ptr<const RawTile> ioResult, const IODescription& io);
+
     struct Cached {
         int _maxLevel = -1;
         double _tileLevelDifference;
     } _cached;
-
     const Configuration _config;
-
+    TileDataLayout _dataLayout;
     TileDepthTransform _depthTransform;
+
+    bool hasBeenInitialized;
 };
 
 } // namespace globebrowsing

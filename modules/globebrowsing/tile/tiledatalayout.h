@@ -30,18 +30,12 @@
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
-#include <gdal.h>
-
 class GDALDataset;
 
 namespace openspace {
 namespace globebrowsing {
 
 struct TileDataLayout {
-    TileDataLayout();
-    TileDataLayout(GDALDataset* dataSet, GLuint preferredGlType);
-
-    GDALDataType gdalType;
     GLuint glType;
 
     size_t bytesPerDatum;
