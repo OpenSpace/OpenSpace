@@ -33,15 +33,12 @@
 namespace openspace {
 namespace globebrowsing {
 
-class GdalRawTileDataReader;
+class RawTileDataReader;
 class RawTile;
 
 struct TileLoadJob : LoadJob {
-    TileLoadJob(std::shared_ptr<GdalRawTileDataReader> rawTileDataReader,
-        const TileIndex& tileIndex)
-        : _rawTileDataReader(rawTileDataReader)
-        , _chunkIndex(tileIndex) 
-    {}
+    TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
+        const TileIndex& tileIndex);
 
     virtual ~TileLoadJob() = default;
 
@@ -51,7 +48,7 @@ struct TileLoadJob : LoadJob {
 
 protected:
     TileIndex _chunkIndex;
-    std::shared_ptr<GdalRawTileDataReader> _rawTileDataReader;
+    std::shared_ptr<RawTileDataReader> _rawTileDataReader;
     std::shared_ptr<RawTile> _rawTile;
 };
 

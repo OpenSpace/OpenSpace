@@ -70,11 +70,6 @@ void GlobeBrowsingModule::internalInitialize() {
       
         // Convert from MB to KB
         cache::MemoryAwareTileCache::create(*_openSpaceMaximumTileCacheSize * 1024);
-        // Convert from MB to Bytes
-        GdalWrapper::create(
-            16 * 1024 * 1024, // 16 MB
-            CpuCap.installedMainMemory() * 0.25 * 1024 * 1024);
-
         _openSpaceMaximumTileCacheSize->onChange(
         [&]{
             // Convert from MB to KB
@@ -88,13 +83,22 @@ void GlobeBrowsingModule::internalInitialize() {
 
         addProperty(*_openSpaceMaximumTileCacheSize);
         addProperty(*_clearTileCache);
+      
+#ifdef GLOBEBROWSING_USE_GDAL
+        // Convert from MB to Bytes
+        GdalWrapper::create(
+            16 * 1024 * 1024, // 16 MB
+            CpuCap.installedMainMemory() * 0.25 * 1024 * 1024);
         addPropertySubOwner(GdalWrapper::ref());
+#endif // GLOBEBROWSING_USE_GDAL
 	});
   
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&]{
         cache::MemoryAwareTileCache::ref().clear();
         cache::MemoryAwareTileCache::ref().destroy();
+#ifdef GLOBEBROWSING_USE_GDAL
         GdalWrapper::ref().destroy();
+#endif // GLOBEBROWSING_USE_GDAL
     });
 
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
@@ -106,7 +110,10 @@ void GlobeBrowsingModule::internalInitialize() {
 
     fTileProvider->registerClass<tileprovider::CachingTileProvider>("LRUCaching");
     fTileProvider->registerClass<tileprovider::SingleImageProvider>("SingleImage");
+#ifdef GLOBEBROWSING_USE_GDAL
     fTileProvider->registerClass<tileprovider::TemporalTileProvider>("Temporal");
+#endif // GLOBEBROWSING_USE_GDAL
+
     fTileProvider->registerClass<tileprovider::TileIndexTileProvider>("TileIndex");
     fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>("SizeReference");
 

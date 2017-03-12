@@ -22,44 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
 
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/tile/textureformat.h>
+#include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <modules/globebrowsing/tile/tiledatalayout.h>
+#include <modules/globebrowsing/tile/pixelregion.h>
+#include <modules/globebrowsing/tile/rawtile.h>
 
-#include <unordered_map>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
+
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
-    
-class RawTile;
-class RawTileDataReader;
 
-class AsyncTileDataProvider {
+class GeodeticPatch;
+
+class SimpleRawTileDataReader : public RawTileDataReader {
 public:
-    AsyncTileDataProvider(std::shared_ptr<RawTileDataReader> textureDataProvider,
-        std::shared_ptr<ThreadPool> pool);
 
-    bool enqueueTileIO(const TileIndex& tileIndex);        
-    std::vector<std::shared_ptr<RawTile>> getRawTiles();
-        
-    void reset();
-    void clearRequestQueue();
+    SimpleRawTileDataReader(const std::string& filePath, const Configuration& config);
 
-    std::shared_ptr<RawTileDataReader> getTextureDataProvider() const;
-    float noDataValueAsFloat();
+    virtual ~SimpleRawTileDataReader() override;
+
+    // Public virtual function overloading
+    virtual void reset() override;
+    virtual int maxChunkLevel() override;
+    virtual float noDataValueAsFloat() const override;
+    virtual int rasterXSize() const override;
+    virtual int rasterYSize() const override;
+    virtual float depthOffset() const override;
+    virtual float depthScale() const override;
 
 protected:
-    virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;
+
+    virtual IODescription getIODescription(const TileIndex& tileIndex) const override;
 
 private:
-    std::shared_ptr<RawTileDataReader> _rawTileDataReader;
-    ConcurrentJobManager<RawTile> _concurrentJobManager;
-    std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
+    // Private virtual function overloading
+    virtual void initialize() override;
+    virtual char* readImageData(
+        IODescription& io, RawTile::ReadError& worstError) const override;
+    virtual RawTile::ReadError rasterRead(
+        int rasterBand, const IODescription& io, char* dst) const override;
+
+    // Member variables
+    struct InitData {
+        std::string initDirectory;
+        std::string datasetFilePath;
+        int minimumPixelSize;
+        GLuint dataType;
+    } _initData;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__

@@ -25,19 +25,19 @@
 #include <modules/globebrowsing/tile/asynctilereader.h>
 
 #include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tilediskcache.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-AsyncTileDataProvider::AsyncTileDataProvider(std::shared_ptr<GdalRawTileDataReader> rawTileDataReader,
+AsyncTileDataProvider::AsyncTileDataProvider(std::shared_ptr<RawTileDataReader> rawTileDataReader,
                                              std::shared_ptr<ThreadPool> pool)
     : _rawTileDataReader(rawTileDataReader)
     , _concurrentJobManager(pool)
 {}
 
-std::shared_ptr<GdalRawTileDataReader> AsyncTileDataProvider::getTextureDataProvider() const {
+std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getTextureDataProvider() const {
     return _rawTileDataReader;
 }
 

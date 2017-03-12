@@ -55,9 +55,22 @@ public:
     RawTileDataReader(const Configuration& config);
     virtual ~RawTileDataReader() { };
 
-    virtual std::shared_ptr<RawTile> readTileData(TileIndex tileIndex) = 0;
-    virtual int maxChunkLevel() = 0;
+    /**
+     * Reads data from the current dataset and initializes a <code>RawTile</code>
+     * which gets returned.
+     */
+    std::shared_ptr<RawTile> readTileData(TileIndex tileIndex);
     TileDepthTransform getDepthTransform();
+    
+    /**
+     * \returns the maximum chunk level available in the dataset. Should be a value
+     * between 2 and 31.
+     */
+    virtual int maxChunkLevel() = 0;
+    
+    /**
+     * Reset the dataset to its initial state. This is the place to clear any cache used.
+     */
     virtual void reset() = 0;
     virtual float noDataValueAsFloat() const = 0;
     virtual int rasterXSize() const = 0;
@@ -65,31 +78,83 @@ public:
     virtual float depthOffset() const;
     virtual float depthScale() const;
 
+    /**
+     * Returns a single channeled empty <code>RawTile</code> of size 16 * 16 pixels.
+     */
     std::shared_ptr<RawTile> defaultTileData();
     
     const static glm::ivec2 tilePixelStartOffset;
     const static glm::ivec2 tilePixelSizeDifference;
+    
+    /// Padding around all tiles to read to make sure edge blending works.
     const static PixelRegion padding; // same as the two above
-
 protected:
 
-    virtual void initialize() = 0;
-    void ensureInitialized();
     /**
-        The function returns a transform to map
-        the pixel coordinates to cover the whole geodetic lat long space.
-    */
+     * This function should set the variables <code>_cached</code>,
+     * <code>_dataLayout</code> and <code>_depthTransform</code>.
+     */
+    virtual void initialize() = 0;
+
+    /**
+     * Call this in the constructor of the class extending <code>RawTileDataReader</code>
+     */
+    void ensureInitialized();
+
+    /**
+     * The function returns a transform to map
+     * the pixel coordinates to cover the whole geodetic lat long space.
+     */
     virtual std::array<double, 6> getGeoTransform() const;
-    PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
-    Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
-    PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch) const;
-    RawTile::ReadError repeatedRasterRead(
-        int rasterBand, const IODescription& io, char* dst, int depth = 0) const;
+    
+    /**
+     * Read image data as described by the given <code>IODescription</code>.
+     * \param <code>io</code> describes how to read the data.
+     * \param <code>worstError</code> should be set to the error code returned when
+     * reading the data.
+     */
+    virtual char* readImageData(
+        IODescription& io, RawTile::ReadError& worstError) const = 0;
 
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const = 0;
+
     virtual IODescription getIODescription(const TileIndex& tileIndex) const = 0;
-    
+
+    /**
+     * Get the pixel corresponding to a specific position on the globe defined by the
+     * <code>Geodetic2</code> coordinate <code>geo</code>. If the dataset has overviews
+     * the function returns the pixel at the lowest overview (highest resolution).
+     * \param <code>geo</code> is the position on the globe to convert to pixel space.
+     * \returns a pixel coordinate in the dataset.
+     */
+    PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
+
+    /**
+     * Get the geodetic coordinate corresponding to the given pixel in the dataset. If
+     * The dataset has overviews it is the lowest overview that is used. That is the
+     * one with highest resolution.
+     */
+    Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
+
+    /**
+     * Get a pixel region corresponding to the given <code>GeodeticPatch</code>. If the
+     * dataset has overviews the function returns the pixel region at the lowest overview
+     * (highest resolution).
+     * \param <code>geodeticPatch</code> is a patch covering an area in geodetic
+     * coordinates
+     * \returns a <code>PixelRegion</code> covering the given geodetic patch at highest
+     * resolution.
+     */
+    PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch) const;
+
+    /**
+     * A recursive function that is able to perform wrapping in case the read region of
+     * the given <code>IODescription</code> is outside of the given write region.
+     */
+    RawTile::ReadError repeatedRasterRead(
+        int rasterBand, const IODescription& io, char* dst, int depth = 0) const;
+
     std::shared_ptr<TileMetaData> getTileMetaData(
         std::shared_ptr<RawTile> result, const PixelRegion& region);
     TileDepthTransform calculateTileDepthTransform();
@@ -104,7 +169,8 @@ protected:
     TileDataLayout _dataLayout;
     TileDepthTransform _depthTransform;
 
-    bool hasBeenInitialized;
+private:
+    bool _hasBeenInitialized;    
 };
 
 } // namespace globebrowsing

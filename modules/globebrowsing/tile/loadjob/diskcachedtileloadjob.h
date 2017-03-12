@@ -41,7 +41,7 @@ struct DiskCachedTileLoadJob : public TileLoadJob {
         CacheHitsOnly,
     };
         
-    DiskCachedTileLoadJob(std::shared_ptr<GdalRawTileDataReader> rawTileDataReader,
+    DiskCachedTileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
         const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc, 
         CacheMode cacheMode = CacheMode::ReadOnly);
 

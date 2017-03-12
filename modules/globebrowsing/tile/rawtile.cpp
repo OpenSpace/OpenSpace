@@ -26,10 +26,8 @@
 
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
-#include <gdal_priv.h>
-
 namespace {
-    const std::string _loggerCat = "Tile";
+    const std::string _loggerCat = "RawTile";
 }
 
 namespace openspace {

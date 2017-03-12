@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifdef GLOBEBROWSING_USE_GDAL
+
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
@@ -350,3 +352,5 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) const {
 } // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif // GLOBEBROWSING_USE_GDAL

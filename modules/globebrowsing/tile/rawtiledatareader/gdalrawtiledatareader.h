@@ -57,17 +57,16 @@ public:
     * Opens a GDALDataset in readonly mode and calculates meta data required for 
     * reading tile using a TileIndex.
     *
-    * \param gdalDatasetDesc  - A path to a specific file or raw XML describing the dataset 
-    * \param minimumPixelSize - minimum number of pixels per side per tile requested 
-    * \param datatype         - datatype for storing pixel data in requested tile
+    * \param filePath, a path to a specific file GDAL can read
+    * \param config, Configuration used for initialization
     */
-    GdalRawTileDataReader(const std::string& gdalDatasetDesc, const Configuration& config);
+    GdalRawTileDataReader(const std::string& filePath, const Configuration& config);
 
     virtual ~GdalRawTileDataReader() override;
 
-    virtual std::shared_ptr<RawTile> readTileData(TileIndex tileIndex) override;
-    virtual int maxChunkLevel() override;
+    // Public virtual function overloading
     virtual void reset() override;
+    virtual int maxChunkLevel() override;
     virtual float noDataValueAsFloat() const override;
     virtual int rasterXSize() const override;
     virtual int rasterYSize() const override;
@@ -77,48 +76,33 @@ public:
 protected:
 
     /**
-        Returns the geo transform from raster space to projection coordinates as defined
-        by GDAL.
-
-        If the transform is not available, the function returns a transform to map
-        the pixel coordinates to cover the whole geodetic lat long space.
+     * Returns the geo transform from raster space to projection coordinates as defined
+     * by GDAL.
+     * If the transform is not available, the function returns a transform to map
+     * the pixel coordinates to cover the whole geodetic lat long space.
     */
-    virtual std::array<double, 6> getGeoTransform() const;
-    IODescription getIODescription(const TileIndex& tileIndex) const;
+    virtual std::array<double, 6> getGeoTransform() const override;
+    virtual IODescription getIODescription(const TileIndex& tileIndex) const override;
 
 private:
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                                Initialization                                    //
-    //////////////////////////////////////////////////////////////////////////////////////
+    // Private virtual function overloading
+    virtual void initialize() override;
+    virtual char* readImageData(
+        IODescription& io, RawTile::ReadError& worstError) const override;
+    virtual RawTile::ReadError rasterRead(
+        int rasterBand, const IODescription& io, char* dst) const override;
 
-    virtual void initialize();
+    // GDAL Helper methods
+    GDALDataset* openGdalDataset(const std::string& filePath);
     int calculateTileLevelDifference(int minimumPixelSize);
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                            GDAL helper methods                                   //
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    GDALDataset* openGdalDataset(const std::string& gdalDatasetDesc);
     bool gdalHasOverviews() const;
     int gdalOverview(const PixelRegion::PixelRange& baseRegionSize) const;
     int gdalOverview(const TileIndex& tileIndex) const;
     int gdalVirtualOverview(const TileIndex& tileIndex) const;
-    GDALRasterBand* gdalRasterBand(int overview, int raster = 1) const;
     PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
     TileDataLayout getTileDataLayout(GLuint prefferedGLType);
 
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                          ReadTileData helper functions                           //
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    char* readImageData(IODescription& io, RawTile::ReadError& worstError) const;
-    virtual RawTile::ReadError rasterRead(int rasterBand, const IODescription& io, char* dst) const;
-
-    //////////////////////////////////////////////////////////////////////////////////////
-    //                              Member variables                                    //
-    //////////////////////////////////////////////////////////////////////////////////////
-
-    // init data
+    // Member variables
     struct InitData {
         std::string initDirectory;
         std::string datasetFilePath;

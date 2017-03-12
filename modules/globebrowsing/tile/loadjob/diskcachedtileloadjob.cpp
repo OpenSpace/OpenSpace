@@ -25,14 +25,14 @@
 #include <modules/globebrowsing/tile/loadjob/diskcachedtileloadjob.h>
 
 #include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tilediskcache.h>
 
 namespace openspace {
 namespace globebrowsing {
 
 DiskCachedTileLoadJob::DiskCachedTileLoadJob(
-    std::shared_ptr<GdalRawTileDataReader> textureDataProvider,
+    std::shared_ptr<RawTileDataReader> textureDataProvider,
     const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc,
     CacheMode m)
     : TileLoadJob(textureDataProvider, tileIndex)

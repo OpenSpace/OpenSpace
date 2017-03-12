@@ -37,13 +37,16 @@ namespace openspace {
 namespace globebrowsing {
 namespace tiledatatype {
 
+#ifdef GLOBEBROWSING_USE_GDAL
 GLuint getOpenGLDataType(GDALDataType gdalType);
 GDALDataType getGdalDataType(GLuint glType);
 TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
 size_t getMaximumValue(GDALDataType gdalType);
-size_t getMaximumValue(GLuint glType);
 size_t numberOfBytes(GDALDataType gdalType);
 float interpretFloat(GDALDataType gdalType, const char* src);
+#endif // GLOBEBROWSING_USE_GDAL
+
+size_t getMaximumValue(GLuint glType);
 float interpretFloat(GLuint glType, const char* src);
 
 } // namespace tiledatatype

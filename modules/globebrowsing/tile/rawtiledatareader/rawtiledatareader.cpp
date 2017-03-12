@@ -24,6 +24,8 @@
 
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
+#include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
+
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tile.h>
@@ -31,7 +33,6 @@
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
-#include <modules/globebrowsing/tile/tiledatatype.h>
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
@@ -66,14 +67,14 @@ const PixelRegion RawTileDataReader::padding = PixelRegion(
     
 RawTileDataReader::RawTileDataReader(const Configuration& config)
     : _config(config)
-    , hasBeenInitialized(false)
+    , _hasBeenInitialized(false)
 {
 }
 
 void RawTileDataReader::ensureInitialized() {
-    if (!hasBeenInitialized) {
+    if (!_hasBeenInitialized) {
         initialize();
-        hasBeenInitialized = true;
+        _hasBeenInitialized = true;
     }
 }
 
@@ -98,6 +99,29 @@ std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() {
     }
     rawTile->error = RawTile::ReadError::None;
 
+    return rawTile;
+}
+
+std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex) {
+    ensureInitialized();
+    IODescription io = getIODescription(tileIndex);
+    RawTile::ReadError worstError = RawTile::ReadError::None;
+
+    // Build the RawTile from the data we querred
+    std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
+    rawTile->imageData = readImageData(io, worstError);
+    rawTile->error = worstError;
+    rawTile->tileIndex = tileIndex;
+    rawTile->dimensions = glm::uvec3(io.write.region.numPixels, 1);
+    rawTile->nBytesImageData = io.write.totalNumBytes;
+    rawTile->glType = _dataLayout.glType;
+    rawTile->textureFormat = _dataLayout.textureFormat;
+
+    if (_config.doPreProcessing) {
+        rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);
+        rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile, io));
+    }
+  
     return rawTile;
 }
 
@@ -188,12 +212,10 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
     // Make a copy of the full IO desription as we will have to modify it
     IODescription io = fullIO;
 
-
     // Example: 
     // We have an io description that defines a WRITE and a READ region.
     // In this case the READ region extends outside of the defined io.read.fullRegion,
     // meaning we will have to perform wrapping
-
 
     // io.write.region             io.read.region
     //    |                         |
@@ -278,13 +300,11 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
     return err;
 }
 
-
 std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
     std::shared_ptr<RawTile> rawTile, const PixelRegion& region)
 {
     ensureInitialized();
     size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
-//    size_t totalNumBytes = bytesPerLine * region.numPixels.y;
 
     TileMetaData* preprocessData = new TileMetaData();
     preprocessData->maxValues.resize(_dataLayout.numRasters);
@@ -366,7 +386,6 @@ RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
 
     double missingDataValue = noDataValueAsFloat();
     if (!success) {
-        // missing data value for TERRAIN.wms. Should be specified in XML
         missingDataValue = 32767;
     }
 

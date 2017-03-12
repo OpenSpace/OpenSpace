@@ -26,6 +26,8 @@
 
 #include <modules/globebrowsing/tile/asynctilereader.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/simplerawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
@@ -82,7 +84,11 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     }
 
     // Initialize instance variables
+#ifdef GLOBEBROWSING_USE_GDAL
     auto tileDataset = std::make_shared<GdalRawTileDataReader>(filePath, config);
+#else // GLOBEBROWSING_USE_GDAL
+    auto tileDataset = std::make_shared<SimpleRawTileDataReader>(filePath, config);
+#endif // GLOBEBROWSING_USE_GDAL
 
     // only one thread per provider supported atm
     // (GDAL does not handle multiple threads for a single dataset very well
@@ -187,7 +193,7 @@ TileDepthTransform CachingTileProvider::depthTransform() {
 }
 
 Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
-    if (rawTile->error != CE_None) {
+    if (rawTile->error != RawTile::ReadError::None) {
         return Tile(nullptr, nullptr, Tile::Status::IOError);
     }
 

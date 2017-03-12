@@ -24,10 +24,18 @@
 
 #include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
 
-#include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
 namespace openspace {
 namespace globebrowsing {
+
+TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
+    const TileIndex& tileIndex)
+: _rawTileDataReader(rawTileDataReader)
+, _chunkIndex(tileIndex)
+{
+
+}
 
 void TileLoadJob::execute() {
     _rawTile = _rawTileDataReader->readTileData(_chunkIndex);

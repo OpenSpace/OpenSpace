@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tiledatatype.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
 
 #include <ogr_featurestyle.h>
 #include <ogr_spatialref.h>
@@ -39,12 +39,14 @@
 #include <algorithm>
 
 namespace {
-    const std::string _loggerCat = "RawTile";
+    const std::string _loggerCat = "TileDataType";
 }
 
 namespace openspace {
 namespace globebrowsing {
 namespace tiledatatype {
+
+#ifdef GLOBEBROWSING_USE_GDAL
 
 float interpretFloat(GDALDataType gdalType, const char* src) {
     switch (gdalType) {
@@ -65,28 +67,6 @@ float interpretFloat(GDALDataType gdalType, const char* src) {
         default:
             ghoul_assert(false, "Unknown data type");
         }
-}
-
-float interpretFloat(GLuint glType, const char* src) {
-
-    switch (glType) {
-        case GL_UNSIGNED_BYTE:
-            return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
-        case GL_UNSIGNED_SHORT:
-            return static_cast<float>(*reinterpret_cast<const GLushort*>(src));
-        case GL_SHORT:
-            return static_cast<float>(*reinterpret_cast<const GLshort*>(src));
-        case GL_UNSIGNED_INT:
-            return static_cast<float>(*reinterpret_cast<const GLuint*>(src));
-        case GL_INT:
-            return static_cast<float>(*reinterpret_cast<const GLint*>(src));
-        case GL_FLOAT:
-            return static_cast<float>(*reinterpret_cast<const GLfloat*>(src));
-        case GL_DOUBLE:
-            return static_cast<float>(*reinterpret_cast<const GLdouble*>(src));
-        default:
-            ghoul_assert(false, "Unknown data type");
-    }
 }
 
 size_t numberOfBytes(GDALDataType gdalType) {
@@ -126,23 +106,6 @@ size_t getMaximumValue(GDALDataType gdalType) {
         default:
             ghoul_assert(false, "Unknown data type");
 
-    }
-}
-
-size_t getMaximumValue(GLuint glType) {
-    switch (glType) {
-        case GL_UNSIGNED_BYTE:
-            return 1 << 8;
-        case GL_UNSIGNED_SHORT:
-            return 1 << 16;
-        case GL_SHORT:
-            return 1 << 15;
-        case GL_UNSIGNED_INT:
-            return size_t(1) << 32;
-        case GL_INT:
-            return 1 << 31;
-        default:
-            ghoul_assert(false, "Unknown data type");
     }
 }
 
@@ -313,6 +276,47 @@ GDALDataType getGdalDataType(GLuint glType) {
         default:
             LERROR("OpenGL data type unknown to GDAL: " << glType);
             return GDT_Unknown;
+    }
+}
+
+#endif // GLOBEBROWSING_USE_GDAL
+
+size_t getMaximumValue(GLuint glType) {
+    switch (glType) {
+        case GL_UNSIGNED_BYTE:
+            return 1 << 8;
+        case GL_UNSIGNED_SHORT:
+            return 1 << 16;
+        case GL_SHORT:
+            return 1 << 15;
+        case GL_UNSIGNED_INT:
+            return size_t(1) << 32;
+        case GL_INT:
+            return 1 << 31;
+        default:
+            ghoul_assert(false, "Unknown data type");
+    }
+}
+
+float interpretFloat(GLuint glType, const char* src) {
+
+    switch (glType) {
+        case GL_UNSIGNED_BYTE:
+            return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
+        case GL_UNSIGNED_SHORT:
+            return static_cast<float>(*reinterpret_cast<const GLushort*>(src));
+        case GL_SHORT:
+            return static_cast<float>(*reinterpret_cast<const GLshort*>(src));
+        case GL_UNSIGNED_INT:
+            return static_cast<float>(*reinterpret_cast<const GLuint*>(src));
+        case GL_INT:
+            return static_cast<float>(*reinterpret_cast<const GLint*>(src));
+        case GL_FLOAT:
+            return static_cast<float>(*reinterpret_cast<const GLfloat*>(src));
+        case GL_DOUBLE:
+            return static_cast<float>(*reinterpret_cast<const GLdouble*>(src));
+        default:
+            ghoul_assert(false, "Unknown data type");
     }
 }
 

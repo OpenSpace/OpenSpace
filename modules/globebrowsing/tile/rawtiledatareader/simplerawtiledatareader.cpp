@@ -22,56 +22,96 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tiledatalayout.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/simplerawtiledatareader.h>
 
-#include <limits>
-
-#include <ogr_featurestyle.h>
-#include <ogr_spatialref.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/geometry/angle.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // abspath
-#include <ghoul/misc/assert.h>
-
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-
-
-#include <modules/globebrowsing/geometry/angle.h>
-
-#include <float.h>
-#include <sstream>
-#include <algorithm>
-
-#include <gdal_priv.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
-
-#include <memory>
-#include <set>
-#include <queue>
-#include <iostream>
-#include <unordered_map>
-
 #include <ghoul/filesystem/file.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/misc/threadpool.h>
-
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledatatype.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/pixelregion.h>
-#include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/tilemetadata.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
-    const std::string _loggerCat = "TileDataset";
+    const std::string _loggerCat = "SimpleRawTileDataReader";
 }
 
 namespace openspace {
 namespace globebrowsing {
+
+SimpleRawTileDataReader::SimpleRawTileDataReader(
+    const std::string& filePath, const Configuration& config)
+    : RawTileDataReader(config)
+{
+    using namespace ghoul::filesystem;
+    std::string correctedPath = FileSystem::ref().pathByAppendingComponent(
+        _initData.initDirectory, filePath);
+    throw ghoul::RuntimeError(
+        "SimpleRawTileDataReader is not yet implemented! Failed to load dataset:\n" +
+        filePath + ". \nCompile OpenSpace with GDAL.");
+
+    _initData = { "",  filePath, config.minimumTilePixelSize, config.dataType };
+    ensureInitialized();
+}
+
+SimpleRawTileDataReader::~SimpleRawTileDataReader() {
+    
+}
+
+void SimpleRawTileDataReader::reset() {
+    _cached._maxLevel = -1;
+    initialize();
+}
+
+int SimpleRawTileDataReader::maxChunkLevel() {
+    return _cached._maxLevel;
+}
+
+float SimpleRawTileDataReader::noDataValueAsFloat() const {
+    return 0.0f;
+}
+
+int SimpleRawTileDataReader::rasterXSize() const {
+    return 0;
+}
+
+int SimpleRawTileDataReader::rasterYSize() const {
+    return 0;
+}
+
+float SimpleRawTileDataReader::depthOffset() const {
+    return 0.0f;
+}
+
+float SimpleRawTileDataReader::depthScale() const {
+    return 1.0f;
+}
+
+IODescription SimpleRawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
+    IODescription io;
+
+    return io;
+}
+
+void SimpleRawTileDataReader::initialize() {
+
+}
+
+char* SimpleRawTileDataReader::readImageData(
+    IODescription& io, RawTile::ReadError& worstError) const {
+    
+}
+
+RawTile::ReadError SimpleRawTileDataReader::rasterRead(
+    int rasterBand, const IODescription& io, char* dataDestination) const
+{
+    RawTile::ReadError error = RawTile::ReadError::Fatal;
+    return error;
+}
+
 
 } // namespace globebrowsing
 } // namespace openspace
