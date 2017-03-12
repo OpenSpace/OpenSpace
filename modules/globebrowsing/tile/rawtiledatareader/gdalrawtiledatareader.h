@@ -50,11 +50,6 @@ namespace globebrowsing {
 
 class GeodeticPatch;
 
-/**
- * Function for passing GDAL error messages to the GHOL logging system.
- */
-void errorHandler(CPLErr eErrClass, int errNo, const char *msg);
-
 class GdalRawTileDataReader : public RawTileDataReader {
 public:
 
@@ -76,8 +71,6 @@ public:
     virtual float noDataValueAsFloat() override;
     virtual size_t rasterXSize() const override;
     virtual size_t rasterYSize() const override;
-
-    //const TileDataLayout& getDataLayout();
 
 protected:
 
@@ -105,8 +98,6 @@ private:
     //////////////////////////////////////////////////////////////////////////////////
 
     void ensureInitialized();
-    void gdalEnsureInitialized();
-    void setGdalProxyConfiguration();
     GDALDataset* gdalDataset(const std::string& gdalDatasetDesc);
     bool gdalHasOverviews() const;
     int gdalOverview(const PixelRegion::PixelRange& baseRegionSize) const;

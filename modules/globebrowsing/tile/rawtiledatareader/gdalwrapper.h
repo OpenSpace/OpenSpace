@@ -22,28 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
+#include <gdal.h>
+
+#include <mutex>
 #include <memory>
 
 namespace openspace {
+namespace globebrowsing {
 
-class GlobeBrowsingModule : public OpenSpaceModule {
+/**
+ * Function for passing GDAL error messages to the GHOUL logging system.
+ */
+static void gdalErrorHandler(CPLErr eErrClass, int errNo, const char *msg);
+
+/**
+ * Singleton class interfacing with global GDAL functions.
+ */
+class GdalWrapper : public properties::PropertyOwner
+{
 public:
-    GlobeBrowsingModule();
-    
-protected:
-    void internalInitialize() override;
+    /**
+     * Create the singleton. Must be called before the class can be used.
+     * \param maximumCacheSize is the current maximum cache size GDAL can use
+     * for caching blocks in memory given in bytes.
+     * \param maximumMaximumCacheSize is the maximum cache size GDAL can use
+     * for caching blocks in memory given in bytes.
+     */
+    static void create(size_t maximumCacheSize, size_t maximumMaximumCacheSize);
+    static void destroy();
+
+    static GdalWrapper& ref();
+
+    /**
+     * Get the current size of the GDAL in memory cache.
+     * \returns the number of bytes currently in the GDAL memory cache.
+     */
+    static size_t GDALCacheUsed();
+
+    /**
+     * Get the maximum GDAL in memory cache size.
+     * \returns the maximum number of bytes allowed for the GDAL cache.
+     */
+    static size_t GDALMaximumCacheSize();
+
+    properties::BoolProperty logGdalErrors;
 private:
-    std::unique_ptr<properties::IntProperty> _openSpaceMaximumTileCacheSize;
-    std::unique_ptr<properties::TriggerProperty> _clearTileCache;
+    GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize);
+    ~GdalWrapper() = default;
+    
+    void setGdalProxyConfiguration();
+    
+    properties::IntProperty _gdalMaximumCacheSize;
+
+    static GdalWrapper* _singleton;
+    static std::mutex _mutexLock;
 };
 
+} // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__

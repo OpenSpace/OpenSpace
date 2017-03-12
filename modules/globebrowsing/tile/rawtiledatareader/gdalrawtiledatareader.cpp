@@ -30,9 +30,6 @@
 #include <modules/globebrowsing/tile/tiledatatype.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
-
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // abspath
 #include <ghoul/filesystem/file.h>
@@ -51,18 +48,6 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-
-void errorHandler(CPLErr eErrClass, int errNo, const char *msg) {
-	//if (GdalRawTileDataReader::logGDALErrors) {
-		switch (eErrClass) {
-        	case CE_None: break;
-        	case CE_Debug:    LDEBUG  ("GDAL " << msg); break;
-        	case CE_Warning:  LWARNING("GDAL " << msg); break;
-        	case CE_Failure:  LERROR  ("GDAL " << msg); break;
-        	case CE_Fatal:    LFATAL  ("GDAL " << msg); break;
-		}
-	//}
-}
 
 std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
     return os << pr.start.x << ", " << pr.start.y << " with size " << pr.numPixels.x << ", " << pr.numPixels.y;
@@ -117,8 +102,6 @@ size_t GdalRawTileDataReader::rasterYSize() const {
 }
 
 void GdalRawTileDataReader::initialize() {
-    gdalEnsureInitialized();
-
     _dataset = gdalDataset(_initData.datasetFilePath);
 
     //Do any other initialization needed for the GdalRawTileDataReader
@@ -127,84 +110,10 @@ void GdalRawTileDataReader::initialize() {
     _cached._tileLevelDifference = calculateTileLevelDifference(_initData.minimumPixelSize);
 }
 
-void GdalRawTileDataReader::gdalEnsureInitialized() {
-    if (!GdalHasBeenInitialized) {
-        GDALAllRegister();
-        CPLSetConfigOption(
-            "GDAL_DATA",
-            absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str()
-        );
-        setGdalProxyConfiguration();
-        CPLSetErrorHandler(errorHandler);
-        GdalHasBeenInitialized = true;
-    }
-}
-
 void GdalRawTileDataReader::ensureInitialized() {
     if (!hasBeenInitialized) {
         initialize();
         hasBeenInitialized = true;
-    }
-}
-
-void GdalRawTileDataReader::setGdalProxyConfiguration() {
-    ghoul::Dictionary proxySettings;
-    bool proxyEnabled = OsEng.configurationManager().getValue(
-        ConfigurationManager::KeyHttpProxy, proxySettings
-    );
-    if (proxyEnabled) {
-        std::string proxyAddress, proxyPort, proxyUser, proxyPassword, proxyAuth;
-
-        bool success = proxySettings.getValue(
-            ConfigurationManager::PartHttpProxyAddress,
-            proxyAddress
-        );
-        success &= proxySettings.getValue(
-            ConfigurationManager::PartHttpProxyPort,
-            proxyPort
-        );
-        proxySettings.getValue(
-            ConfigurationManager::PartHttpProxyAuthentication,
-            proxyAuth
-        );
-
-        std::string proxyAuthString = "BASIC";
-        if (proxyAuth == "basic" || proxyAuth == "") {
-            proxyAuthString = "BASIC";
-        } else if (proxyAuth == "ntlm") {
-            proxyAuthString = "NTLM";
-        } else if (proxyAuth == "digest") {
-            proxyAuthString = "DIGEST";
-        } else if (proxyAuth == "any") {
-            proxyAuthString = "ANY";
-        } else {
-            success = false;
-        }
-
-        bool userAndPassword = proxySettings.getValue(
-            ConfigurationManager::PartHttpProxyUser,
-            proxyUser
-        );
-        userAndPassword &= proxySettings.getValue(
-            ConfigurationManager::PartHttpProxyPassword,
-            proxyPassword
-        );
-
-        if (success) {
-            std::string proxy = proxyAddress + ":" + proxyPort;
-            CPLSetConfigOption("GDAL_HTTP_PROXY", proxy.c_str());
-            LDEBUG("Using proxy server " << proxy);
-            if (userAndPassword) {
-                std::string proxyUserPwd = proxyUser + ":" + proxyPassword;
-                CPLSetConfigOption("GDAL_HTTP_PROXYUSERPWD", proxyUserPwd.c_str());
-                CPLSetConfigOption("GDAL_HTTP_PROXYAUTH", proxyAuthString.c_str());
-                LDEBUG("Using authentication method: " << proxyAuthString);
-            }
-        } else {
-            LERROR("Invalid proxy settings for GDAL");
-        }
-    } else {
-        LDEBUG("Setting up GDAL without proxy server");
     }
 }
 
@@ -279,11 +188,6 @@ int GdalRawTileDataReader::maxChunkLevel() {
     }
     return _cached._maxLevel;
 }
-
-//const TileDataLayout& GdalRawTileDataReader::getDataLayout() {
-//    ensureInitialized();
-//    return _dataLayout;
-//}
 
 int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) {
     GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
