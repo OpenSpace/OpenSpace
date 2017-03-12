@@ -26,12 +26,13 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
 
 #include <modules/globebrowsing/tile/tile.h>
-
 #include <modules/globebrowsing/tile/textureformat.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
+#ifdef GLOBEBROWSING_USE_GDAL
 #include <gdal.h>
+#endif // GLOBEBROWSING_USE_GDAL
 
 namespace openspace {
 namespace globebrowsing {

@@ -24,8 +24,10 @@
 
 #include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
 
+#ifdef GLOBEBROWSING_USE_GDAL
 #include <ogr_featurestyle.h>
 #include <ogr_spatialref.h>
+#endif // GLOBEBROWSING_USE_GDAL
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h> // abspath
