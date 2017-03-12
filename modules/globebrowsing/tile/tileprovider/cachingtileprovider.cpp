@@ -213,7 +213,7 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
         
     texture->uploadTexture();
 
-    // AnisotropicMipMap must be set after texture is uploaded. Why?!
+    // AnisotropicMipMap must be set after texture is uploaded
     texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
     return Tile(texture, rawTile->tileMetaData, Tile::Status::OK);

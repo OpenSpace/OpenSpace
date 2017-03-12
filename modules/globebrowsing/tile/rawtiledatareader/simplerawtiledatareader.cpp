@@ -35,6 +35,8 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 
+#include <ghoul/io/texture/texturereader.h>
+
 namespace {
     const std::string _loggerCat = "SimpleRawTileDataReader";
 }
@@ -46,14 +48,7 @@ SimpleRawTileDataReader::SimpleRawTileDataReader(
     const std::string& filePath, const Configuration& config)
     : RawTileDataReader(config)
 {
-    using namespace ghoul::filesystem;
-    std::string correctedPath = FileSystem::ref().pathByAppendingComponent(
-        _initData.initDirectory, filePath);
-    throw ghoul::RuntimeError(
-        "SimpleRawTileDataReader is not yet implemented! Failed to load dataset:\n" +
-        filePath + ". \nCompile OpenSpace with GDAL.");
-
-    _initData = { "",  filePath, config.minimumTilePixelSize, config.dataType };
+    _datasetFilePath = filePath;
     ensureInitialized();
 }
 
@@ -62,7 +57,6 @@ SimpleRawTileDataReader::~SimpleRawTileDataReader() {
 }
 
 void SimpleRawTileDataReader::reset() {
-    _cached._maxLevel = -1;
     initialize();
 }
 
@@ -75,11 +69,11 @@ float SimpleRawTileDataReader::noDataValueAsFloat() const {
 }
 
 int SimpleRawTileDataReader::rasterXSize() const {
-    return 0;
+    return _dataTexture->dimensions().x;
 }
 
 int SimpleRawTileDataReader::rasterYSize() const {
-    return 0;
+    return _dataTexture->dimensions().y;
 }
 
 float SimpleRawTileDataReader::depthOffset() const {
@@ -91,25 +85,100 @@ float SimpleRawTileDataReader::depthScale() const {
 }
 
 IODescription SimpleRawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
-    IODescription io;
 
+    IODescription io;
+    io.read.overview = 0;
+    io.read.region = highestResPixelRegion(tileIndex);
+    io.read.fullRegion = PixelRegion({0, 0}, {rasterXSize(), rasterYSize()});
+    io.write.region = PixelRegion({0, 0}, io.read.region.numPixels);
+    io.write.bytesPerLine = _dataTexture->bytesPerPixel() * io.write.region.numPixels.x;
+    io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
+    
     return io;
 }
 
 void SimpleRawTileDataReader::initialize() {
+    _dataTexture = ghoul::io::TextureReader::ref().loadTexture(_datasetFilePath);
+    if (_dataTexture == nullptr) {
+        throw ghoul::RuntimeError(
+            "Unable to read dataset: " + _datasetFilePath +
+            ".\nCompiling OpenSpace with GDAL will allow for better support for different formats.");
+    }
+    float exponentX = log2(_dataTexture->dimensions().x);
+    float exponentY = log2(_dataTexture->dimensions().y);
+    if ( (exponentX - static_cast<int>(exponentX)) > 0.0001 ||
+       (exponentY - static_cast<int>(exponentY)) > 0.0001 ) {
+        throw ghoul::RuntimeError(
+            "Unable to read dataset: " + _datasetFilePath +
+            ".\nCurrently only supporting power of 2 textures.");
+    }
+  
+    _cached._maxLevel = 2;
+    _cached._tileLevelDifference = 0;
 
+    _dataLayout.glType = _dataTexture->dataType();
+    _dataLayout.bytesPerDatum = tiledatatype::numberOfBytes(_dataLayout.glType);
+    _dataLayout.numRasters = tiledatatype::numberOfRasters(_dataTexture->format());
+    _dataLayout.numRastersAvailable = _dataLayout.numRasters;
+    _dataLayout.bytesPerPixel = _dataLayout.bytesPerDatum * _dataLayout.numRasters;
+    _dataLayout.textureFormat = {_dataTexture->format(), _dataTexture->internalFormat()};
+
+    _depthTransform = {depthScale(), depthOffset()};
 }
 
 char* SimpleRawTileDataReader::readImageData(
     IODescription& io, RawTile::ReadError& worstError) const {
+    // allocate memory for the image
+    char* imageData = new char[io.write.totalNumBytes];
+
+    // In case there are extra channels not existing in the dataset
+    // we set the bytes to 255 (for example an extra alpha channel that)
+    // needs to be 1.
+    if (_dataLayout.numRasters > _dataLayout.numRastersAvailable) {
+        memset(imageData, 255, io.write.totalNumBytes);
+    }
     
+    // Modify to match OpenGL texture layout:
+    IODescription modifiedIO = io;
+    modifiedIO.read.region.start.y = modifiedIO.read.fullRegion.numPixels.y - modifiedIO.read.region.numPixels.y - modifiedIO.read.region.start.y;
+  
+    RawTile::ReadError err = repeatedRasterRead(0, modifiedIO, imageData);
+
+    // None = 0, Debug = 1, Warning = 2, Failure = 3, Fatal = 4
+    worstError = std::max(worstError, err);
+
+    return imageData;
 }
 
 RawTile::ReadError SimpleRawTileDataReader::rasterRead(
     int rasterBand, const IODescription& io, char* dataDestination) const
 {
-    RawTile::ReadError error = RawTile::ReadError::Fatal;
-    return error;
+    ghoul_assert(io.read.fullRegion.numPixels.x == _dataTexture->dimensions().x,
+        "IODescription does not match data texture.");
+    ghoul_assert(io.read.fullRegion.numPixels.y == _dataTexture->dimensions().y,
+        "IODescription does not match data texture.");
+    ghoul_assert(io.read.region.numPixels.x == io.write.region.numPixels.x,
+        "IODescription does not match data texture.");
+    ghoul_assert(io.read.region.numPixels.y == io.write.region.numPixels.y,
+        "IODescription does not match data texture.");
+
+    char* pixelWriteRow = dataDestination;
+    try {
+        // For each row
+        for (int y = 0; y < io.read.region.numPixels.y; y++) {
+            int bytesPerLineDataTexture =
+                _dataTexture->bytesPerPixel() * _dataTexture->dimensions().x;
+            const char* textureRow = (static_cast<const char*>(_dataTexture->pixelData())
+                + io.read.region.start.x * _dataTexture->bytesPerPixel())
+                + io.read.region.start.y * bytesPerLineDataTexture
+                + y * bytesPerLineDataTexture;
+            memcpy(pixelWriteRow, textureRow, io.write.bytesPerLine);
+            pixelWriteRow += io.write.bytesPerLine;
+        }
+    } catch (const std::exception&) {
+        return RawTile::ReadError::Failure;
+    }
+    return RawTile::ReadError::None;
 }
 
 

@@ -283,6 +283,30 @@ GDALDataType getGdalDataType(GLuint glType) {
 
 #endif // GLOBEBROWSING_USE_GDAL
 
+size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
+    switch (format) {
+        case ghoul::opengl::Texture::Format::Red: return 1;
+        case ghoul::opengl::Texture::Format::RG: return 2;
+        case ghoul::opengl::Texture::Format::RGB: return 3;
+        case ghoul::opengl::Texture::Format::RGBA: return 4;
+        default: ghoul_assert(false, "Unknown format");
+    }
+}
+
+size_t numberOfBytes(GLuint glType) {
+    switch (glType) {
+        case GL_UNSIGNED_BYTE: return sizeof(GLubyte);
+        case GL_UNSIGNED_SHORT: return sizeof(GLushort);
+        case GL_SHORT: return sizeof(GLshort);
+        case GL_UNSIGNED_INT: return sizeof(GLuint);
+        case GL_INT: return sizeof(GLint);
+        case GL_FLOAT: return sizeof(GLfloat);
+        case GL_DOUBLE: return sizeof(GLdouble);
+        default:
+            ghoul_assert(false, "Unknown data type");
+    }
+}
+
 size_t getMaximumValue(GLuint glType) {
     switch (glType) {
         case GL_UNSIGNED_BYTE:

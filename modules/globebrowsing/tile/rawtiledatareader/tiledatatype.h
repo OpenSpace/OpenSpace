@@ -47,6 +47,8 @@ size_t numberOfBytes(GDALDataType gdalType);
 float interpretFloat(GDALDataType gdalType, const char* src);
 #endif // GLOBEBROWSING_USE_GDAL
 
+size_t numberOfRasters(ghoul::opengl::Texture::Format format);
+size_t numberOfBytes(GLuint glType);
 size_t getMaximumValue(GLuint glType);
 float interpretFloat(GLuint glType, const char* src);
 

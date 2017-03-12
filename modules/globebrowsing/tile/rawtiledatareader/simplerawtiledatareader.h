@@ -74,12 +74,8 @@ private:
         int rasterBand, const IODescription& io, char* dst) const override;
 
     // Member variables
-    struct InitData {
-        std::string initDirectory;
-        std::string datasetFilePath;
-        int minimumPixelSize;
-        GLuint dataType;
-    } _initData;
+    std::string _datasetFilePath;
+    std::unique_ptr<ghoul::opengl::Texture> _dataTexture;
 };
 
 } // namespace globebrowsing
