@@ -45,6 +45,7 @@ struct IODescription {
     struct ReadData {
         int overview;
         PixelRegion region;
+        PixelRegion fullRegion;
     } read;
     
     struct WriteData {

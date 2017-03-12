@@ -85,41 +85,39 @@ protected:
     IODescription getIODescription(const TileIndex& tileIndex) const;
 
 private:
-    //////////////////////////////////////////////////////////////////////////////////
-    //                                Initialization                                //
-    //////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                                Initialization                                    //
+    //////////////////////////////////////////////////////////////////////////////////////
 
     void initialize();
     TileDepthTransform calculateTileDepthTransform();
     int calculateTileLevelDifference(int minimumPixelSize);
 
-    //////////////////////////////////////////////////////////////////////////////////
-    //                            GDAL helper methods                               //
-    //////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                            GDAL helper methods                                   //
+    //////////////////////////////////////////////////////////////////////////////////////
 
     void ensureInitialized();
-    GDALDataset* gdalDataset(const std::string& gdalDatasetDesc);
+    GDALDataset* openGdalDataset(const std::string& gdalDatasetDesc);
     bool gdalHasOverviews() const;
     int gdalOverview(const PixelRegion::PixelRange& baseRegionSize) const;
     int gdalOverview(const TileIndex& tileIndex) const;
     int gdalVirtualOverview(const TileIndex& tileIndex) const;
-    PixelRegion gdalPixelRegion(const GeodeticPatch& geodeticPatch) const;
-    PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
     GDALRasterBand* gdalRasterBand(int overview, int raster = 1) const;
+    PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
 
-    //////////////////////////////////////////////////////////////////////////////////
-    //                          ReadTileData helper functions                       //
-    //////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                          ReadTileData helper functions                           //
+    //////////////////////////////////////////////////////////////////////////////////////
 
     char* readImageData(IODescription& io, RawTile::ReadError& worstError) const;
-    RawTile::ReadError rasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst) const;
-    RawTile::ReadError repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& io, char* dst, int depth = 0) const;
+    virtual RawTile::ReadError rasterRead(int rasterBand, const IODescription& io, char* dst) const;
     std::shared_ptr<TileMetaData> getTileMetaData(std::shared_ptr<RawTile> result, const PixelRegion& region) const;
     RawTile::ReadError postProcessErrorCheck(std::shared_ptr<const RawTile> ioResult, const IODescription& io) const;
 
-    //////////////////////////////////////////////////////////////////////////////////
-    //                              Member variables                                //
-    //////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
+    //                              Member variables                                    //
+    //////////////////////////////////////////////////////////////////////////////////////
 
     // init data
     struct InitData {

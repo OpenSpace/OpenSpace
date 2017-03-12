@@ -67,7 +67,6 @@ GdalRawTileDataReader::GdalRawTileDataReader(
 }
 
 GdalRawTileDataReader::~GdalRawTileDataReader() {
-    // Do not call delete on _dataset. Instead use GDALClose.
     if (_dataset != nullptr) {
         GDALClose((GDALDatasetH)_dataset);
     }
@@ -102,7 +101,7 @@ size_t GdalRawTileDataReader::rasterYSize() const {
 }
 
 void GdalRawTileDataReader::initialize() {
-    _dataset = gdalDataset(_initData.datasetFilePath);
+    _dataset = openGdalDataset(_initData.datasetFilePath);
 
     //Do any other initialization needed for the GdalRawTileDataReader
     _dataLayout = TileDataLayout(_dataset, _initData.dataType);
@@ -117,7 +116,7 @@ void GdalRawTileDataReader::ensureInitialized() {
     }
 }
 
-GDALDataset* GdalRawTileDataReader::gdalDataset(const std::string& gdalDatasetDesc) {
+GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& gdalDatasetDesc) {
     GDALDataset* dataset = (GDALDataset *)GDALOpen(gdalDatasetDesc.c_str(), GA_ReadOnly);
     if (!dataset) {
         using namespace ghoul::filesystem;
@@ -129,28 +128,6 @@ GDALDataset* GdalRawTileDataReader::gdalDataset(const std::string& gdalDatasetDe
             throw ghoul::RuntimeError("Failed to load dataset:\n" + gdalDatasetDesc);
         }
     }
-
-    // Commenting away the following for now since it is not supported for older
-    // versions of GDAL. Only used for debug info.
-    /*
-    const std::string originalDriverName = dataset->GetDriverName();
-        
-    if (originalDriverName != "WMS") {
-        LDEBUG("  " << originalDriverName);
-        LDEBUG("  " << dataset->GetGCPProjection());
-        LDEBUG("  " << dataset->GetProjectionRef());
-
-        GDALDriver* driver = dataset->GetDriver();
-        char** metadata = driver->GetMetadata();
-        for (int i = 0; metadata[i] != nullptr; i++) {
-            LDEBUG("  " << metadata[i]);
-        }
-
-        const char* in_memory = "";
-        //GDALDataset* vrtDataset = driver->CreateCopy(in_memory, dataset, false, nullptr, nullptr, nullptr);
-    }
-    */
-
     return dataset;
 }
 
@@ -255,6 +232,15 @@ int GdalRawTileDataReader::gdalVirtualOverview(const TileIndex& tileIndex) const
     return ov;
 }
 
+PixelRegion GdalRawTileDataReader::gdalPixelRegion(GDALRasterBand* rasterBand) const {
+    PixelRegion gdalRegion;
+    gdalRegion.start.x = 0;
+    gdalRegion.start.y = 0;
+    gdalRegion.numPixels.x = rasterBand->GetXSize();
+    gdalRegion.numPixels.y = rasterBand->GetYSize();
+    return gdalRegion;
+}
+
 GDALRasterBand* GdalRawTileDataReader::gdalRasterBand(int overview, int raster) const {
     GDALRasterBand* rasterBand = _dataset->GetRasterBand(raster);
 //    int numberOfOverviews = rasterBand->GetOverviewCount();
@@ -265,7 +251,7 @@ GDALRasterBand* GdalRawTileDataReader::gdalRasterBand(int overview, int raster) 
 
 IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
     IODescription io;
-    io.read.region = gdalPixelRegion(tileIndex);
+    io.read.region = highestResPixelRegion(tileIndex);
 
     if (gdalHasOverviews()) {
         int overview = gdalOverview(tileIndex);
@@ -273,6 +259,7 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
         io.read.region.downscalePow2(overview + 1);
         io.write.region = io.read.region;
         io.read.region.pad(padding);
+        io.read.fullRegion = gdalPixelRegion(_dataset->GetRasterBand(1)->GetOverview(overview));
     }
     else {
         io.read.overview = 0;
@@ -283,6 +270,7 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
 
         scaledPadding.upscalePow2(std::max(virtualOverview + 1, 0));
         io.read.region.pad(scaledPadding);
+        io.read.fullRegion = gdalPixelRegion(_dataset->GetRasterBand(1));
     }
 
     // For correct sampling in dataset, we need to pad the texture tile
@@ -335,145 +323,27 @@ char* GdalRawTileDataReader::readImageData(IODescription& io, RawTile::ReadError
 	
     // Read the data (each rasterband is a separate channel)
     for (size_t i = 0; i < _dataLayout.numRastersAvailable; i++) {
-        GDALRasterBand* rasterBand = gdalRasterBand(io.read.overview, i + 1);
+        GDALRasterBand* rasterBand = _dataset->GetRasterBand(i + 1);
+      
 
         // The final destination pointer is offsetted by one datum byte size
         // for every raster (or data channel, i.e. R in RGB)
         char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
 
-        RawTile::ReadError err = repeatedRasterIO(rasterBand, io, dataDestination);
+        RawTile::ReadError err = repeatedRasterRead(i + 1, io, dataDestination);
 
         // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
         worstError = std::max(worstError, err);
     }
 
-    // GDAL reads pixel lines top to bottom, we want the opposit
+    // GDAL reads pixel lines top to bottom, we want the opposite
     return imageData;
 }
 
-RawTile::ReadError GdalRawTileDataReader::repeatedRasterIO(GDALRasterBand* rasterBand, const IODescription& fullIO, char* dataDestination, int depth) const {
-    std::string spaces = "                      ";
-    std::string indentation = spaces.substr(0, 2 * depth);
-
-    RawTile::ReadError worstError = RawTile::ReadError::None;
-
-    // NOTE: 
-    // Ascii graphics illustrates the implementation details of this method, for one  
-    // specific case. Even though the illustrated case is specific, readers can 
-    // hopefully find it useful to get the general idea.
-
-    // Make a copy of the full IO desription as we will have to modify it
-    IODescription io = fullIO;
-    PixelRegion gdalRegion = gdalPixelRegion(rasterBand);
-
-
-    // Example: 
-    // We have an io description that defines a WRITE and a READ region.
-    // In this case the READ region extends outside of the defined gdal region,
-    // meaning we will have to do wrapping
-
-
-    // io.write.region             io.read.region
-    //    |                         |
-    //    V                         V
-    // +-------+                +-------+ 
-    // |       |                |       |--------+ 
-    // |       |                |       |        |
-    // |       |                |       |        |
-    // +-------+                +-------+        |
-    //                            |              | <-- gdalRegion  
-    //                            |              |
-    //                            +--------------+
-
-
-    //LDEBUG(indentation << "-");
-    //LDEBUG(indentation << "repeated read: " << io.read.region);
-    //LDEBUG(indentation << "repeated write: " << io.write.region);
-
-    bool didCutOff = false;
-
-    if (!io.read.region.isInside(gdalRegion)) {
-        //  Loop through each side: left, top, right, bottom
-        for (int i = 0; i < 4; ++i) {
-
-            // Example: 
-            // We are currently considering the left side of the pixel region
-            PixelRegion::Side side = (PixelRegion::Side) i;
-            IODescription cutoff = io.cut(side, gdalRegion.edge(side));
-
-            // Example: 
-            // We cut off the left part that was outside the gdal region, and we now 
-            // have an additional io description for the cut off region. 
-            // Note that the cut-method used above takes care of the corresponding 
-            // WRITE region for us.
-
-            // cutoff.write.region    cutoff.read.region
-            //  |  io.write.region     |  io.read.region
-            //  |   |                  |   |
-            //  V   V                  V   V
-            // +-+-----+               +-+-----+ 
-            // | |     |               | |     |--------+
-            // | |     |               | |     |        |
-            // | |     |               | |     |        |
-            // +-+-----+               +-+-----+        |
-            //                           |              | <-- gdalRegion  
-            //                           |              |
-            //                           +--------------+
-
-            if (cutoff.read.region.area() > 0) {
-//                didCutOff = true;
-
-                // Wrap by repeating
-                PixelRegion::Side oppositeSide = (PixelRegion::Side) ((i + 2) % 4);
-
-                cutoff.read.region.align(oppositeSide, gdalRegion.edge(oppositeSide));
-
-                // Example:
-                // The cut off region is wrapped to the opposite side of the region,
-                // i.e. "repeated". Note that we don't want WRITE region to change, 
-                // we're only wrapping the READ region.
-
-                // cutoff.write.region   io.read.region cutoff.read.region
-                //  |  io.write.region        |          |
-                //  |   |                     V          V
-                //  V   V                  +-----+      +-+
-                // +-+-----+               |     |------| |
-                // | |     |               |     |      | | 
-                // | |     |               |     |      | |
-                // | |     |               +-----+      +-+
-                // +-+-----+               |              | <-- gdalRegion  
-                //                         |              |
-                //                         +--------------+
-
-                // Example:
-                // The cutoff region has been repeated along one of its sides, but 
-                // as we can see in this example, it still has a top part outside the
-                // defined gdal region. This is handled through recursion.
-                RawTile::ReadError err = repeatedRasterIO(rasterBand, cutoff, dataDestination, depth + 1);
-
-                worstError = std::max(worstError, err);
-            }
-        }
-    }
-    else if (worstError > RawTile::ReadError::None) {
-        LDEBUG(indentation << "Error reading padding: " << worstError);
-    }
-        
-    RawTile::ReadError err = rasterIO(rasterBand, io, dataDestination);
-//    worstError = std::max(worstError, err);
-
-    // The return error from a repeated rasterIO is ONLY based on the main region,
-    // which in the usual case will cover the main area of the patch anyway
-
-    return err;
-}
-
-RawTile::ReadError GdalRawTileDataReader::rasterIO(GDALRasterBand* rasterBand, const IODescription& io,
+RawTile::ReadError GdalRawTileDataReader::rasterRead(int rasterBand, const IODescription& io,
                              char* dataDestination) const
 {
-    PixelRegion gdalRegion = gdalPixelRegion(rasterBand);
-
-    ghoul_assert(io.read.region.isInside(gdalRegion), "write region of bounds!");
+    ghoul_assert(io.read.region.isInside(io.read.fullRegion), "write region of bounds!");
     ghoul_assert(
         io.write.region.start.x >= 0 && io.write.region.start.y >= 0,
         "Invalid write region"
@@ -486,17 +356,17 @@ RawTile::ReadError GdalRawTileDataReader::rasterIO(GDALRasterBand* rasterBand, c
 
     char* dataDest = dataDestination;
 
-    // OBS! GDAL reads pixels top to bottom, but we want our pixels bottom to top.
+    // GDAL reads pixels top to bottom, but we want our pixels bottom to top.
     // Therefore, we increment the destination pointer to the last line on in the 
     // buffer, and the we specify in the rasterIO call that we want negative line 
     // spacing. Doing this compensates the flipped Y axis
     dataDest += (io.write.totalNumBytes - io.write.bytesPerLine);
 
-    // handle requested write region
-    dataDest -= io.write.region.start.y * io.write.bytesPerLine; // note -= since flipped y axis
+    // handle requested write region. Note -= since flipped y axis
+    dataDest -= io.write.region.start.y * io.write.bytesPerLine;
     dataDest += io.write.region.start.x * _dataLayout.bytesPerPixel;
   
-    CPLErr readError = rasterBand->RasterIO(
+    CPLErr readError = _dataset->GetRasterBand(rasterBand)->GetOverview(io.read.overview)->RasterIO(
         GF_Read,
         io.read.region.start.x,             // Begin read x
         io.read.region.start.y,             // Begin read y
@@ -510,6 +380,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterIO(GDALRasterBand* rasterBand, c
         -io.write.bytesPerLine              // Line spacing
     );
   
+    // Convert error to RawTile::ReadError
     RawTile::ReadError error;
     switch (readError) {
         case CE_None: error = RawTile::ReadError::None; break;
@@ -523,8 +394,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterIO(GDALRasterBand* rasterBand, c
 }
 
 std::shared_ptr<TileMetaData> GdalRawTileDataReader::getTileMetaData(
-                                                         std::shared_ptr<RawTile> rawTile,
-                                                         const PixelRegion& region) const
+    std::shared_ptr<RawTile> rawTile, const PixelRegion& region) const
 {
     size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
 //    size_t totalNumBytes = bytesPerLine * region.numPixels.y;
@@ -541,7 +411,7 @@ std::shared_ptr<TileMetaData> GdalRawTileDataReader::getTileMetaData(
         preprocessData->maxValues[c] = -FLT_MAX;
         preprocessData->minValues[c] = FLT_MAX;
         preprocessData->hasMissingData[c] = false;
-        noDataValues[c] = _dataset->GetRasterBand(1)->GetNoDataValue();
+        noDataValues[c] = noDataValueAsFloat();
     }
 
     for (size_t y = 0; y < region.numPixels.y; y++) {
@@ -549,7 +419,7 @@ std::shared_ptr<TileMetaData> GdalRawTileDataReader::getTileMetaData(
         size_t i = 0;
         for (size_t x = 0; x < region.numPixels.x; x++) {
             for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-                float noDataValue = _dataset->GetRasterBand(c + 1)->GetNoDataValue();
+                float noDataValue = noDataValueAsFloat();
                 float val = tiledatatype::interpretFloat(
                     _dataLayout.gdalType,
                     &(rawTile->imageData[yi + i])

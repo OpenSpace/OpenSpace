@@ -157,5 +157,117 @@ Geodetic2 RawTileDataReader::pixelToGeodetic(
     return geodetic;
 }
 
+PixelRegion RawTileDataReader::highestResPixelRegion(const GeodeticPatch& geodeticPatch) const {
+    Geodetic2 nwCorner = geodeticPatch.getCorner(Quad::NORTH_WEST);
+    Geodetic2 swCorner = geodeticPatch.getCorner(Quad::SOUTH_EAST);
+    PixelRegion::PixelCoordinate pixelStart = geodeticToPixel(nwCorner);
+    PixelRegion::PixelCoordinate pixelEnd = geodeticToPixel(swCorner);
+    PixelRegion region(pixelStart, pixelEnd - pixelStart);
+    return region;
+}
+
+RawTile::ReadError RawTileDataReader::repeatedRasterRead(
+        int rasterBand, const IODescription& fullIO, char* dataDestination,
+        int depth) const {
+    RawTile::ReadError worstError = RawTile::ReadError::None;
+    
+    // NOTE: 
+    // Ascii graphics illustrates the implementation details of this method, for one  
+    // specific case. Even though the illustrated case is specific, readers can 
+    // hopefully find it useful to get the general idea.
+
+    // Make a copy of the full IO desription as we will have to modify it
+    IODescription io = fullIO;
+
+
+    // Example: 
+    // We have an io description that defines a WRITE and a READ region.
+    // In this case the READ region extends outside of the defined io.read.fullRegion,
+    // meaning we will have to perform wrapping
+
+
+    // io.write.region             io.read.region
+    //    |                         |
+    //    V                         V
+    // +-------+                +-------+ 
+    // |       |                |       |--------+ 
+    // |       |                |       |        |
+    // |       |                |       |        |
+    // +-------+                +-------+        |
+    //                            |              | <-- io.read.fullRegion  
+    //                            |              |
+    //                            +--------------+
+
+    if (!io.read.region.isInside(io.read.fullRegion)) {
+        //  Loop through each side: left, top, right, bottom
+        for (int i = 0; i < 4; ++i) {
+
+            // Example: 
+            // We are currently considering the left side of the pixel region
+            PixelRegion::Side side = (PixelRegion::Side) i;
+            IODescription cutoff = io.cut(side, io.read.fullRegion.edge(side));
+
+            // Example: 
+            // We cut off the left part that was outside the io.read.fullRegion, and we
+            // now have an additional io description for the cut off region. 
+            // Note that the cut-method used above takes care of the corresponding 
+            // WRITE region for us.
+
+            // cutoff.write.region    cutoff.read.region
+            //  |  io.write.region     |  io.read.region
+            //  |   |                  |   |
+            //  V   V                  V   V
+            // +-+-----+               +-+-----+ 
+            // | |     |               | |     |--------+
+            // | |     |               | |     |        |
+            // | |     |               | |     |        |
+            // +-+-----+               +-+-----+        |
+            //                           |              | <-- io.read.fullRegion  
+            //                           |              |
+            //                           +--------------+
+
+            if (cutoff.read.region.area() > 0) {
+                // Wrap by repeating
+                PixelRegion::Side oppositeSide = (PixelRegion::Side) ((i + 2) % 4);
+
+                cutoff.read.region.align(
+                    oppositeSide, io.read.fullRegion.edge(oppositeSide));
+
+                // Example:
+                // The cut off region is wrapped to the opposite side of the region,
+                // i.e. "repeated". Note that we don't want WRITE region to change, 
+                // we're only wrapping the READ region.
+
+                // cutoff.write.region   io.read.region cutoff.read.region
+                //  |  io.write.region        |          |
+                //  |   |                     V          V
+                //  V   V                  +-----+      +-+
+                // +-+-----+               |     |------| |
+                // | |     |               |     |      | | 
+                // | |     |               |     |      | |
+                // | |     |               +-----+      +-+
+                // +-+-----+               |              | <-- io.read.fullRegion  
+                //                         |              |
+                //                         +--------------+
+
+                // Example:
+                // The cutoff region has been repeated along one of its sides, but 
+                // as we can see in this example, it still has a top part outside the
+                // defined gdal region. This is handled through recursion.
+                RawTile::ReadError err = repeatedRasterRead(
+                    rasterBand, cutoff, dataDestination, depth + 1);
+
+                worstError = std::max(worstError, err);
+            }
+        }
+    }
+        
+    RawTile::ReadError err = rasterRead(rasterBand, io, dataDestination);
+
+    // The return error from a repeated rasterRead is ONLY based on the main region,
+    // which in the usual case will cover the main area of the patch anyway
+    return err;
+}
+
 } // namespace globebrowsing
 } // namespace openspace

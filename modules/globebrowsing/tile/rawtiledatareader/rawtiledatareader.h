@@ -77,7 +77,12 @@ protected:
     virtual std::array<double, 6> getGeoTransform() const;
     PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
     Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
-    
+    PixelRegion highestResPixelRegion(const GeodeticPatch& geodeticPatch) const;
+    RawTile::ReadError repeatedRasterRead(
+        int rasterBand, const IODescription& io, char* dst, int depth = 0) const;
+
+    virtual RawTile::ReadError rasterRead(
+        int rasterBand, const IODescription& io, char* dst) const = 0;
     virtual IODescription getIODescription(const TileIndex& tileIndex) const = 0;
     
     struct Cached {
