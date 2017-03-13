@@ -49,7 +49,7 @@ namespace {
     const char* KeyPotentialTargets     = "PotentialTargets";
     const char* KeyFrameConversions     = "FrameConversions";
 
-    const int InterpolationSteps = 10;
+    const int InterpolationSteps = 5;
 } // namespace
 
 namespace openspace {
@@ -130,7 +130,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
     , _drawSolid("solidDraw", "Draw as Quads", false)
-    , _standOffDistance("standOffDistance", "Standoff Distance", 0.9999, 0.999, 1.0)
+    , _standOffDistance("standOffDistance", "Standoff Distance", 0.9999, 0.99, 1.0, 0.000001)
     , _colors({
         {
             "colors.defaultStart",

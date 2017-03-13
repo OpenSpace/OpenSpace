@@ -176,7 +176,7 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
     float min = p->minValue();
     float max = p->maxValue();
 
-    ImGui::SliderFloat(name.c_str(), &value, min, max);
+    ImGui::SliderFloat(name.c_str(), &value, min, max, "%.5f");
     renderTooltip(prop);
 
     if (value != static_cast<float>(p->value())) {
@@ -299,7 +299,7 @@ void renderFloatProperty(Property* prop, const std::string& ownerName) {
     FloatProperty::ValueType value = *p;
     float min = p->minValue();
     float max = p->maxValue();
-    ImGui::SliderFloat(name.c_str(), &value, min, max);
+    ImGui::SliderFloat(name.c_str(), &value, min, max, "%.5f");
     renderTooltip(prop);
 
     if (value != p->value()) {
@@ -321,7 +321,8 @@ void renderVec2Property(Property* prop, const std::string& ownerName) {
         name.c_str(),
         &value.x,
         min,
-        max
+        max,
+        "%.5f"
     );
     renderTooltip(prop);
 
@@ -349,7 +350,8 @@ void renderVec3Property(Property* prop, const std::string& ownerName) {
         name.c_str(),
         glm::value_ptr(value),
         min,
-        max
+        max,
+        "%.5f"
     );
     renderTooltip(prop);
 
@@ -380,7 +382,8 @@ void renderVec4Property(Property* prop, const std::string& ownerName) {
         name.c_str(),
         &value.x,
         min,
-        max
+        max,
+        "%.5f"
     );
     renderTooltip(prop);
 
@@ -409,7 +412,8 @@ void renderDVec2Property(Property* prop, const std::string& ownerName) {
         name.c_str(),
         &value.x,
         min,
-        max
+        max,
+        "%.5f"
     );
     renderTooltip(prop);
 
@@ -436,7 +440,8 @@ void renderDVec3Property(Property* prop, const std::string& ownerName) {
         name.c_str(),
         glm::value_ptr(value),
         min,
-        max
+        max,
+        "%.5f"
     );
     renderTooltip(prop);
 
@@ -467,7 +472,8 @@ void renderDVec4Property(Property* prop, const std::string& ownerName) {
         name.c_str(),
         &value.x,
         min,
-        max
+        max,
+        "%.5f"
     );
     renderTooltip(prop);
 
