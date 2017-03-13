@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/spicemanager.h>
@@ -91,6 +92,7 @@ private:
     // properties
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _drawSolid;
+    properties::DoubleProperty _standOffDistance;
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
     // instance variables

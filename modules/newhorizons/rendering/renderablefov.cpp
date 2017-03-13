@@ -130,6 +130,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
     , _drawSolid("solidDraw", "Draw as Quads", false)
+    , _standOffDistance("standOffDistance", "Standoff Distance", 0.9999, 0.999, 1.0)
     , _colors({
         {
             "colors.defaultStart",
@@ -208,6 +209,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
     addProperty(_lineWidth);
     addProperty(_drawSolid);
+    addProperty(_standOffDistance);
 
     addProperty(_colors.defaultStart);
     addProperty(_colors.defaultEnd);
@@ -448,7 +450,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                 glm::vec3 srfVec = r.surfaceVector * 1000.0;
 
                 // Standoff distance, we would otherwise end up *exactly* on the surface
-                srfVec *= 0.999;
+                srfVec *= _standOffDistance;
 
                 second = {
                     srfVec.x, srfVec.y, srfVec.z,
@@ -543,7 +545,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
 
                 // Convert the KM scale that SPICE uses to meter
                 // Standoff distance, we would otherwise end up *exactly* on the surface
-                return r.surfaceVector * 1000.0 * 0.999;
+                return r.surfaceVector * 1000.0 * _standOffDistance.value();
             };
 
             for (size_t m = 0; m < InterpolationSteps; ++m) {
