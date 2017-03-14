@@ -47,7 +47,6 @@ namespace openspace {
 
 SettingsEngine::SettingsEngine()
     : properties::PropertyOwner("Global Properties")
-    , _eyeSeparation("eyeSeparation", "Eye Separation", 0.f, 0.f, 10.f)
     , _scenes("scenes", "Scene", properties::OptionProperty::DisplayType::Dropdown)
     , _busyWaitForDecode("busyWaitForDecode", "Busy Wait for decode", false)
     , _logSGCTOutOfOrderErrors("logSGCTOutOfOrderErrors", "Log SGCT out-of-order", false)
@@ -62,7 +61,6 @@ SettingsEngine::SettingsEngine()
         }
     });
     addProperty(_spiceUseExceptions);
-    addProperty(_eyeSeparation);
     addProperty(_busyWaitForDecode);
     addProperty(_logSGCTOutOfOrderErrors);
     addProperty(_useDoubleBuffering);
@@ -70,18 +68,13 @@ SettingsEngine::SettingsEngine()
 }
 
 void SettingsEngine::initialize() {
-    // Set interaction to change the window's (SGCT's) eye separation
-    _eyeSeparation.onChange(
-        [this]() { OsEng.windowWrapper().setEyeSeparationDistance(_eyeSeparation); }
-    );
-
     // Load all matching files in the Scene
     // TODO: match regex with either with new ghoul readFiles or local code
     std::string sceneDir = "${SCENE}";
     std::vector<std::string> scenes = ghoul::filesystem::Directory(sceneDir).readFiles();
     for (std::size_t i = 0; i < scenes.size(); ++i) {
         std::size_t found = scenes[i].find_last_of("/\\");
-        _scenes.addOption(i, scenes[i].substr(found + 1));
+        _scenes.addOption(static_cast<int>(i), scenes[i].substr(found + 1));
     }
 
     // Set interaction to change ConfigurationManager and schedule the load

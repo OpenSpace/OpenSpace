@@ -193,7 +193,7 @@ std::string Property::generateMetaDataDescription() const {
         { Visibility::All, "All" },
         { Visibility::Developer, "Developer" },
         { Visibility::User, "User" },
-        { Visibility::None, "None" }
+        { Visibility::Hidden, "Hidden" }
     };
     Visibility visibility = _metaData.value<Visibility>(MetaDataKeyVisibility);
     bool isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);

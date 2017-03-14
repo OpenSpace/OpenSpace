@@ -72,6 +72,7 @@ void NewHorizonsModule::internalInitialize() {
 
 std::vector<documentation::Documentation> NewHorizonsModule::documentations() const {
     return {
+        RenderableFov::Documentation(),
         RenderableModelProjection::Documentation(),
         RenderablePlanetProjection::Documentation(),
         ProjectionComponent::Documentation()

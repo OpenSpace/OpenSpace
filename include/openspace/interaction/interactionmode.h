@@ -108,11 +108,10 @@ namespace interaction {
 
 
 
-class InteractionMode
-{
+class InteractionMode {
 public:
     InteractionMode();
-    ~InteractionMode();
+    virtual ~InteractionMode();
 
     // Mutators
     virtual void setFocusNode(SceneGraphNode* focusNode);

@@ -27,6 +27,9 @@
 
 #include <openspace/engine/wrapper/windowwrapper.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+
 namespace openspace {
 
 /**
@@ -36,6 +39,8 @@ namespace openspace {
  */
 class SGCTWindowWrapper : public WindowWrapper {
 public:
+    SGCTWindowWrapper();
+
     void terminate() override;
     void setBarrier(bool enabled) override;
     void setSynchronization(bool enabled) override;
@@ -72,6 +77,10 @@ public:
     bool isSimpleRendering() const override;
 
     void takeScreenshot(bool applyWarping = false) const override;
+
+private:
+    properties::FloatProperty _eyeSeparation;
+    properties::BoolProperty _showStatsGraph;
 };
 
 } // namespace openspace

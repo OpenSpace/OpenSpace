@@ -105,7 +105,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
         "RenderableRings"
     );
 
-    _size = dictionary.value<double>(KeySize);
+    _size = static_cast<float>(dictionary.value<double>(KeySize));
     setBoundingSphere(PowerScaledScalar::CreatePSS(_size));
     addProperty(_size);
     _size.onChange([&]() { _planeIsDirty = true; });

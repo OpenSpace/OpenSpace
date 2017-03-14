@@ -35,6 +35,8 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 /**
  * Converts ascii based point data
  * int64_t n
@@ -47,7 +49,8 @@ public:
     virtual ~MilkywayPointsConversionTask();
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
-    static Documentation documentation();
+    static documentation::Documentation documentation();
+
 private:
     std::string _inFilename;    
     std::string _outFilename;

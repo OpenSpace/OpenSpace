@@ -128,13 +128,13 @@ void NetworkEngine::publishIdentifierMappingMessage() {
 
     std::vector<char> buffer(bufferSize);
     size_t currentWritingPosition = 0;
-    uint16_t size = _identifiers.size();
+    uint16_t size = static_cast<uint16_t>(_identifiers.size());
     std::memcpy(buffer.data(), &size, sizeof(uint16_t));
     currentWritingPosition += sizeof(uint16_t);
     for (const std::pair<std::string, MessageIdentifier>& i : _identifiers) {
         std::memcpy(buffer.data() + currentWritingPosition, &(i.second), sizeof(MessageIdentifier));
         currentWritingPosition += sizeof(MessageIdentifier);
-        uint8_t stringSize = i.first.size();
+        uint8_t stringSize = static_cast<uint8_t>(i.first.size());
         std::memcpy(buffer.data() + currentWritingPosition, &stringSize, sizeof(uint8_t));
         currentWritingPosition += sizeof(uint8_t);
         std::memcpy(buffer.data() + currentWritingPosition, i.first.data(), stringSize);

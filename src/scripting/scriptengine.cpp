@@ -375,50 +375,50 @@ void ScriptEngine::addBaseLibrary() {
                 "printDebug",
                 &luascriptfunctions::printDebug,
                 "*",
-                "Logs the passed value to the installed LogManager with a "
-                "LogLevel of 'Debug'"
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Debug'"
             },
             {
                 "printInfo",
                 &luascriptfunctions::printInfo,
                 "*",
-                "Logs the passed value to the installed LogManager with a "
-                " LogLevel of 'Info'"
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Info'"
             },
             {
                 "printWarning",
                 &luascriptfunctions::printWarning,
                 "*",
-                "Logs the passed value to the installed LogManager with "
-                "a LogLevel of 'Warning'"
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Warning'"
             },
             {
                 "printError",
                 &luascriptfunctions::printError,
                 "*",
-                "Logs the passed value to the installed LogManager with a "
-                "LogLevel of 'Error'"
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Error'"
             },
             {
                 "printFatal",
                 &luascriptfunctions::printFatal,
                 "*",
-                "Logs the passed value to the installed LogManager with a "
-                "LogLevel of 'Fatal'"
+                "Logs the passed value to the installed LogManager with a LogLevel of "
+                "'Fatal'"
             },
             {
                 "absPath",
                 &luascriptfunctions::absolutePath,
                 "string",
-                "Returns the absolute path to the passed path, resolving"
-                " path tokens as well as resolving relative paths"
+                "Returns the absolute path to the passed path, resolving path tokens as "
+                "well as resolving relative paths"
             },
             {
                 "setPathToken",
                 &luascriptfunctions::setPathToken,
                 "string, string",
-                "Registers a new path token provided by the"
-                " first argument to the path provided in the second argument"
+                "Registers a new path token provided by the first argument to the path "
+                "provided in the second argument"
             }
         }
     };
