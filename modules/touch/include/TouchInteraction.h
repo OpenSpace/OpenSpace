@@ -54,17 +54,17 @@ namespace openspace {
 
 struct VelocityStates {
 	double zoom;
-	glm::vec2 globalRot;
-	glm::vec2 localRot;
-	glm::vec2 localRoll;
-	glm::vec2 globalRoll;
+	glm::dvec2 globalRot;
+	glm::dvec2 localRot;
+	double globalRoll;
+	double localRoll;
 };
-struct Friction {
+struct ScaleFactor {
 	double zoom;
 	double globalRot;
 	double localRot;
-	double localRoll;
 	double globalRoll;
+	double localRoll;
 };
 
 using Point = std::pair<int, TUIO::TuioPoint>;
@@ -78,6 +78,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
 		int interpret(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void step(double dt);
+		void configSensitivities(double dist);
 		void decelerate();
 
 
@@ -92,35 +93,25 @@ class TouchInteraction : public properties::PropertyOwner
 		void setFriction(double friction);
 		void setSensitivity(double sensitivity);
 
-
-		#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-			// later work
-		#endif
-
 	private:
 		Camera* _camera;
 		SceneGraphNode* _focusNode;
+		globebrowsing::RenderableGlobe* _globe;
 		glm::dvec3 _previousFocusNodePosition;
-
+		glm::dquat _previousFocusNodeRotation;
 
 		double _minHeightFromSurface;
 		int _interactionMode;
-		double _sensitivity;
+		double _baseSensitivity;
 		double _baseFriction;
 
 		VelocityStates _vel;
-		Friction _friction;
-		
-		//bool globebrowsing;
-		#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-			// later work
-		#endif
+		ScaleFactor _friction;
+		ScaleFactor _sensitivity;
+
 };
 
-	#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-		//globebrowsing::RenderableGlobe* _globe;
-	#endif
-} // namespace
+} // openspace namespace
 
 #endif // __OPENSPACE_TOUCH___INTERACTION___H__
 
