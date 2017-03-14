@@ -95,9 +95,10 @@ TouchModule::TouchModule()
 		LDEBUGC("TouchModule", "Initializing TuioEar");
 		ear = new TuioEar();
 		touch = new TouchInteraction();
+		addPropertySubOwner(touch);
 	}
 	);
-	
+
 	OsEng.registerModuleCallback(
 		OpenSpaceEngine::CallbackOption::Deinitialize,
 		[&]() {

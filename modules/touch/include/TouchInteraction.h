@@ -32,6 +32,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/properties/propertyowner.h>
 
 #include <openspace/network/parallelconnection.h>
 
@@ -48,6 +49,8 @@
 #define PAN 2
 #define ROLL 3
 #define PICK 4
+
+namespace openspace {
 
 struct VelocityStates {
 	double zoom;
@@ -66,7 +69,7 @@ struct Friction {
 
 using Point = std::pair<int, TUIO::TuioPoint>;
 
-class TouchInteraction
+class TouchInteraction : public properties::PropertyOwner
 {
 	public:
 		TouchInteraction();
@@ -79,13 +82,13 @@ class TouchInteraction
 
 
 		// Get & Setters
-		openspace::Camera* getCamera();
-		openspace::SceneGraphNode* getFocusNode();
+		Camera* getCamera();
+		SceneGraphNode* getFocusNode();
 		double getFriction();
 		double getSensitivity();
 
-		void setFocusNode(openspace::SceneGraphNode* focusNode);
-		void setCamera(openspace::Camera* cam);
+		void setFocusNode(SceneGraphNode* focusNode);
+		void setCamera(Camera* cam);
 		void setFriction(double friction);
 		void setSensitivity(double sensitivity);
 
@@ -95,8 +98,8 @@ class TouchInteraction
 		#endif
 
 	private:
-		openspace::Camera* _camera;
-		openspace::SceneGraphNode* _focusNode;
+		Camera* _camera;
+		SceneGraphNode* _focusNode;
 		glm::dvec3 _previousFocusNodePosition;
 
 
@@ -117,5 +120,7 @@ class TouchInteraction
 	#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 		//globebrowsing::RenderableGlobe* _globe;
 	#endif
+} // namespace
 
 #endif // __OPENSPACE_TOUCH___INTERACTION___H__
+

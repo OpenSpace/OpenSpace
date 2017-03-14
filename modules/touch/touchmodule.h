@@ -29,9 +29,11 @@
 #include <modules/touch/include/TuioEar.h>
 #include <modules/touch/include/TouchInteraction.h>
 
-using Point = std::pair<int, TUIO::TuioPoint>;
+
 
 namespace openspace {
+
+using Point = std::pair<int, TUIO::TuioPoint>;
 
 class TouchModule : public OpenSpaceModule {
 public:

@@ -851,7 +851,7 @@ void OpenSpaceEngine::preSynchronization() {
         
         _renderEngine->updateSceneGraph();
         _interactionHandler->updateCamera(dt);
-        _renderEngine->camera()->invalidateCache();
+        
 
         _parallelConnection->preSynchronization();
 
@@ -860,6 +860,9 @@ void OpenSpaceEngine::preSynchronization() {
     for (const auto& func : _moduleCallbacks.preSync) {
         func();
     }
+	if (master)
+		_renderEngine->camera()->invalidateCache();
+
     LTRACE("OpenSpaceEngine::preSynchronization(end)");
 }
 
