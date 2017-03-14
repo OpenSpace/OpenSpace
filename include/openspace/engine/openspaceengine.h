@@ -80,7 +80,6 @@ public:
 
     double runTime();
     void setRunTime(double t);
-    void loadScene(const std::string& scenePath);
 
     // callbacks
     void initialize();
@@ -98,6 +97,7 @@ public:
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
+
     void scheduleLoadScene(const std::string& scenePath);
 
     void enableBarrier();
@@ -171,6 +171,7 @@ private:
         std::unique_ptr<WindowWrapper> windowWrapper);
     ~OpenSpaceEngine() = default;
 
+    void loadScene(const std::string& scenePath);
     void gatherCommandlineArguments();
     void loadFonts();
     void runPreInitializationScripts(const std::string& sceneDescription);
@@ -200,8 +201,6 @@ private:
     
     bool _switchScene;
     std::string _scenePath;
-
-    bool _isMaster;
 
     struct {
         std::vector<std::function<void()>> initialize;

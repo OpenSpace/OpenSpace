@@ -83,7 +83,7 @@ void SyncEngine::removeSyncable(Syncable* syncable) {
     _syncables.erase(
         std::remove(_syncables.begin(), _syncables.end(), syncable),
         _syncables.end()
-        );
+    );
 }
 
 void SyncEngine::removeSyncables(const std::vector<Syncable*>& syncables) {

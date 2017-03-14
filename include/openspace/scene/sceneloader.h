@@ -2,7 +2,7 @@
 *                                                                                       *
 * OpenSpace                                                                             *
 *                                                                                       *
-* Copyright (c) 2014-2016                                                               *
+* Copyright (c) 2014-2017                                                               *
 *                                                                                       *
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
 * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,18 +73,47 @@ public:
 
     SceneLoader() = default;
     ~SceneLoader() = default;
-    
+
+    /**
+     * Load a scene file.
+     */
     std::unique_ptr<Scene> loadScene(const std::string& path);
+
+    /**
+     * Import a directory of scene contents into an existing scene.
+     */
     std::vector<SceneGraphNode*> importDirectory(Scene& scene, const std::string& directory);
+
+    /**
+     * Import a scene graph node from a dictionary into an existing scene.
+     */
     SceneGraphNode* importNodeDictionary(Scene& scene, const ghoul::Dictionary& dictionary);
 
 private:
+    /**
+     * Load a scene graph node from a dictionary
+     */
     SceneLoader::LoadedNode loadNode(const ghoul::Dictionary& dictionary);
+
+    /**
+     * Load a mod file.
+     */
     std::vector<SceneLoader::LoadedNode> loadModule(const std::string& path, lua_State* luaState);
+
+    /**
+     * Load a directory.
+     */
     std::vector<SceneLoader::LoadedNode> loadDirectory(const std::string& path, lua_State* luaState);
 
+    /**
+     * Load a camera from a dictionary
+     */
     SceneLoader::LoadedCamera loadCamera(const ghoul::Dictionary& dictionary);
-    std::vector<SceneGraphNode*> addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode> nodes);
+
+    /**
+     * Add loaded nodes to an existing scene
+     */
+    std::vector<SceneGraphNode*> addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode>&& nodes);
 };
 
 }

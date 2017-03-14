@@ -137,7 +137,6 @@ OpenSpaceEngine::OpenSpaceEngine(
     , _globalPropertyNamespace(new properties::PropertyOwner(""))
     , _switchScene(false)
     , _scenePath("")
-    , _isMaster(false)
     , _runTime(0.0)
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
@@ -305,7 +304,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
             "${CACHE}",
             cacheFolder,
             ghoul::filesystem::FileSystem::Override::Yes
-            );
+        );
     }
 
     // Initialize the requested logs from the configuration file
@@ -556,7 +555,6 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     _renderEngine->setCamera(scene->camera());
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
-
 
     scene->initialize();
     _interactionHandler->setCamera(scene->camera());

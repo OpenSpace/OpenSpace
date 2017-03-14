@@ -37,18 +37,7 @@
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
-
-//#include <modules/base/rendering/screenspaceimage.h>
-//#include <modules/base/rendering/screenspaceframebuffer.h>
-//#include <openspace/engine/wrapper/windowwrapper.h>
-
-//#include <openspace/performance/performancemanager.h>
-
-//#include <openspace/documentation/documentationengine.h>
-//#include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scene.h>
-
-//#include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>

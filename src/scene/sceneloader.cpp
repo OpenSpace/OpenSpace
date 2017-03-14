@@ -127,6 +127,11 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
     auto it = nodeMap.find(loadedCamera.parent);
     if (it != nodeMap.end()) {
         loadedCamera.camera->setParent(it->second);
+    } else {
+        LWARNING(
+            "Could not find the camera parent '" + loadedCamera.parent +
+            "'. Attaching camera to root node.");
+        loadedCamera.camera->setParent(scene->root());
     }
 
     scene->setCamera(std::move(loadedCamera.camera));
@@ -273,7 +278,7 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadModule(const std::string& 
     return loadedNodes;
 };
 
-std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode> loadedNodes) {
+std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode>&& loadedNodes) {
     std::map<std::string, SceneGraphNode*> existingNodes = scene.nodesByName();
     std::map<std::string, SceneGraphNode*> addedNodes;
 

@@ -83,7 +83,7 @@ void SettingsEngine::initialize() {
         std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
         OsEng.configurationManager().setValue(
             ConfigurationManager::KeyConfigScene, sceneFile);
-        OsEng.loadScene(sceneFile);
+        OsEng.scheduleLoadScene("${SCENE}/" + sceneFile);
     }
     );
 }
@@ -105,33 +105,5 @@ bool SettingsEngine::logSGCTOutOfOrderErrors() {
 bool SettingsEngine::useDoubleBuffering() {
     return _useDoubleBuffering.value();
 }
-
-/*
-void SettingsEngine::initSceneFiles() {
-    addProperty(_scenes);
-
-    // Load all matching files in the Scene
-    // TODO: match regex with either with new ghoul readFiles or local code
-    std::string sceneDir = "${SCENE}";
-    std::string pathSep(1, ghoul::filesystem::FileSystem::PathSeparator);
-
-    std::vector<std::string> scenes = ghoul::filesystem::Directory(sceneDir).readFiles();
-    for (std::size_t i = 0; i < scenes.size(); ++i) {
-        std::size_t found = scenes[i].find_last_of(pathSep);
-        _scenes.addOption(i, scenes[i].substr(found+1));
-    }
-
-    // Set interaction to change ConfigurationManager and schedule the load
-    _scenes.onChange(
-        [sceneDir, pathSep]() {
-            std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
-            OsEng.configurationManager().setValue(
-                ConfigurationManager::KeyConfigScene, sceneFile);
-            std::string fullPath =
-                sceneDir + pathSep + sceneFile;
-            OsEng.loadScene(sceneFile);
-        }
-    );
-}*/
 
 }  // namespace openspace
