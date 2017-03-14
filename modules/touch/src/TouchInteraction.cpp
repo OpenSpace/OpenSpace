@@ -53,7 +53,7 @@ using namespace openspace;
 
 TouchInteraction::TouchInteraction()
 	: _focusNode{ OsEng.interactionHandler().focusNode() }, _camera{ OsEng.interactionHandler().camera() },
-	_sensitivity{ 0.5 }, _baseFriction{ 0.02 },
+	_sensitivity{ 0.1 }, _baseFriction{ 0.02 },
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), glm::dvec2(0.0), glm::dvec2(0.0) },
 	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction },
 	_previousFocusNodePosition{ glm::dvec3(0.0) }, _minHeightFromSurface{ 6.6 * 1000000.0 }
@@ -83,12 +83,16 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		double lastDistance = std::accumulate(lastProcessed.begin(), lastProcessed.end(), 0.0f, [&](float d, const Point& p) {
 			return d + sqrt(pow(p.second.getX() - centroid.x, 2) + pow(p.second.getY() - centroid.y, 2));
 		});
-
+		
 		double zoomFactor = (distance - lastDistance) * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
-		_vel.zoom += zoomFactor / _sensitivity;
+		_vel.zoom += zoomFactor * 2.0;
 		break;
 	}
 	case PAN: { // add local rotation velocity
+		glm::dvec3 lastCentroid;
+		lastCentroid.x = std::accumulate(lastProcessed.begin(), lastProcessed.end(), 0.0f, [](double x, const Point& p) { return x + p.second.getX(); }) / lastProcessed.size();
+		lastCentroid.y = std::accumulate(lastProcessed.begin(), lastProcessed.end(), 0.0f, [](double y, const Point& p) { return y + p.second.getY(); }) / lastProcessed.size();
+
 		_vel.localRot += glm::dvec2(cursor.getXSpeed(), cursor.getYSpeed()) * _sensitivity * 0.5;
 		break;
 	}
@@ -119,10 +123,11 @@ int TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::
 		point = p.second;
 	}
 
+	std::cout << std::abs(dist - lastDist) / list.size() << "\n";
 	if (list.size() == 1)
 		return ROT;
 	else {
-		if (std::abs(dist - lastDist)/list.size() < 0.05)
+		if (std::abs(dist - lastDist)/list.size() < 0.3 && list.size() == 2)
 			return PAN;
 		else
 			return PINCH;
@@ -188,7 +193,7 @@ void TouchInteraction::step(double dt) {
 	}
 	{ // Zooming
 		dvec3 centerToCamera = camPos - centerPos;
-		if (length(_vel.zoom*dt) < length(centerToCamera) && length(centerToCamera) > _minHeightFromSurface) // should get boundingsphere from focusnode
+		if (length(_vel.zoom*dt) < length(centerToCamera) && length(centerToCamera) > _minHeightFromSurface && length(camPos+directionToCenter*_vel.zoom*dt) > length(centerToCamera)) // should get boundingsphere from focusnode
 			camPos += directionToCenter*_vel.zoom*dt;
 		else
 			_vel.zoom = 0.0;
