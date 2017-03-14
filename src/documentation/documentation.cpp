@@ -30,32 +30,33 @@
 #include <set>
 
 namespace {
-    // Structure used to make offenses unique
-    struct OffenseCompare {
-        using Offense = openspace::documentation::TestResult::Offense;
-        bool operator()(const Offense& lhs, const Offense& rhs) const {
-            if (lhs.offender != rhs.offender) {
-                return lhs.offender < rhs.offender;
-            }
-            else {
-                return std::underlying_type_t<Offense::Reason>(lhs.reason) <
-                    std::underlying_type_t<Offense::Reason>(rhs.reason);
-            }
-        }
-    };
 
-    struct WarningCompare {
-        using Warning = openspace::documentation::TestResult::Warning;
-        bool operator()(const Warning& lhs, const Warning& rhs) const {
-            if (lhs.offender != rhs.offender) {
-                return lhs.offender < rhs.offender;
-            }
-            else {
-                return std::underlying_type_t<Warning::Reason>(lhs.reason) <
-                    std::underlying_type_t<Warning::Reason>(rhs.reason);
-            }
+// Structure used to make offenses unique
+struct OffenseCompare {
+    using Offense = openspace::documentation::TestResult::Offense;
+    bool operator()(const Offense& lhs, const Offense& rhs) const {
+        if (lhs.offender != rhs.offender) {
+            return lhs.offender < rhs.offender;
         }
-    };
+        else {
+            return std::underlying_type_t<Offense::Reason>(lhs.reason) <
+                std::underlying_type_t<Offense::Reason>(rhs.reason);
+        }
+    }
+};
+
+struct WarningCompare {
+    using Warning = openspace::documentation::TestResult::Warning;
+    bool operator()(const Warning& lhs, const Warning& rhs) const {
+        if (lhs.offender != rhs.offender) {
+            return lhs.offender < rhs.offender;
+        }
+        else {
+            return std::underlying_type_t<Warning::Reason>(lhs.reason) <
+                std::underlying_type_t<Warning::Reason>(rhs.reason);
+        }
+    }
+};
 
 } // namespace
 

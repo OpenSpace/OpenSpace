@@ -225,10 +225,19 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
             [this](const Documentation& doc) { return doc.id == identifier; }
         );
 
-        ghoul_assert(
-            it != docs.end(),
-            "Did not find referencing identifier '" + identifier + "'"
-        );
+        if (it == docs.end()) {
+            res.offenses.push_back({
+                key,
+                TestResult::Offense::Reason::UnknownIdentifier
+            });
+            res.success = false;
+            return res;
+        }
+
+        //ghoul_assert(
+        //    it != docs.end(),
+        //    "Did not find referencing identifier '" + identifier + "'"
+        //);
 
         ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
         TestResult r = testSpecification(*it, d);
