@@ -270,7 +270,7 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
             _lineColorBegin.r, _lineColorBegin.g, _lineColorBegin.b, _lineColorBegin.a
         },
         {
-            { target.x * pow(10, target.w), target.y * pow(10, target.w), target.z * pow(10, target.w) },
+            { target.x * powf(10, target.w), target.y * powf(10, target.w), target.z * powf(10, target.w) },
             { _lineColorEnd.r,  _lineColorEnd.g,  _lineColorEnd.b,  _lineColorEnd.a }
         }
     };
