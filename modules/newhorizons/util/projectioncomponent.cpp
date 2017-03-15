@@ -270,7 +270,7 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
                     translationDictionary));
 
                 std::string _eventFile;
-                bool foundEventFile = dictionary.getValue("Projection.EventFile", _eventFile);
+                bool foundEventFile = dictionary.getValue("EventFile", _eventFile);
                 if (foundEventFile) {
                     //then read playbook
                     _eventFile = absPath(_eventFile);

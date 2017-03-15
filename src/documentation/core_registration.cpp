@@ -50,8 +50,8 @@
 namespace openspace {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
-    engine.addDocumentation(ConfigurationManager::Documentation());
     engine.addDocumentation(LogFactoryDocumentation());
+    engine.addDocumentation(ConfigurationManager::Documentation());
     engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());
     engine.addDocumentation(Rotation::Documentation());

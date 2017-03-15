@@ -130,7 +130,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     , _timeStampSubsamplingFactor(
         "subSample",
         "Time Stamp Subsampling Factor",
-        1, 1, 1e9
+        1, 1, 1000000000
     )
     , _renderFullTrail("renderFullTrail", "Render Full Trail", false)
     , _needsFullSweep(true)
@@ -159,7 +159,9 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     addProperty(_sampleInterval);
 
     if (dictionary.hasKeyAndValue<double>(KeyTimeStampSubsample)) {
-        _timeStampSubsamplingFactor = dictionary.value<double>(KeyTimeStampSubsample);
+        _timeStampSubsamplingFactor = static_cast<int>(
+            dictionary.value<double>(KeyTimeStampSubsample)
+        );
     }
     _timeStampSubsamplingFactor.onChange([this] { _subsamplingIsDirty = true; });
     addProperty(_timeStampSubsamplingFactor);
@@ -208,7 +210,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         double totalSampleInterval = _sampleInterval / _timeStampSubsamplingFactor;
         // How many values do we need to compute given the distance between the start and
         // end date and the desired sample interval
-        int nValues = (_end - _start) / totalSampleInterval;
+        int nValues = static_cast<int>((_end - _start) / totalSampleInterval);
 
         // Make space for the vertices
         _vertexArray.clear();
@@ -246,16 +248,16 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // If the full trail should be rendered at all times, we can directly render the
         // entire set
         _primaryRenderInformation.first = 0;
-        _primaryRenderInformation.count = _vertexArray.size();
+        _primaryRenderInformation.count = static_cast<GLsizei>(_vertexArray.size());
     }
     else {
         // If only trail so far should be rendered, we need to find the corresponding time
         // in the array and only render it until then
         _primaryRenderInformation.first = 0;
         double t = (data.time - _start) / (_end - _start);
-        _primaryRenderInformation.count = std::min<GLsizei>(
-            ceil(_vertexArray.size() * t),
-            _vertexArray.size() - 1
+        _primaryRenderInformation.count = std::min(
+            static_cast<GLsizei>(ceil(_vertexArray.size() * t)),
+            static_cast<GLsizei>(_vertexArray.size() - 1)
         );
     }
 

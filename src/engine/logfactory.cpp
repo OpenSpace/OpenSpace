@@ -130,27 +130,27 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
     // the rest are optional
     bool append = true;
     if (dictionary.hasKeyAndValue<bool>(keyAppend)) {
-        dictionary.value<bool>(keyAppend);
+        append = dictionary.value<bool>(keyAppend);
     }
     bool timeStamp = true;
     if (dictionary.hasKeyAndValue<bool>(keyTimeStamping)) {
-        dictionary.value<bool>(keyTimeStamping);
+        timeStamp = dictionary.value<bool>(keyTimeStamping);
     }
     bool dateStamp = true;
     if (dictionary.hasKeyAndValue<bool>(keyDateStamping)) {
-        dictionary.value<bool>(keyDateStamping);
+        dateStamp = dictionary.value<bool>(keyDateStamping);
     }
     bool categoryStamp = true;
     if (dictionary.hasKeyAndValue<bool>(keyCategoryStamping)) {
-        dictionary.value<bool>(keyCategoryStamping);
+        categoryStamp = dictionary.value<bool>(keyCategoryStamping);
     }
     bool logLevelStamp = true;
     if (dictionary.hasKeyAndValue<bool>(keyLogLevelStamping)) {
-        dictionary.value<bool>(keyLogLevelStamping);
+        logLevelStamp = dictionary.value<bool>(keyLogLevelStamping);
     }
     std::string logLevel;
     if (dictionary.hasKeyAndValue<std::string>(keyLogLevel)) {
-        dictionary.value<std::string>(keyLogLevel);
+        logLevel = dictionary.value<std::string>(keyLogLevel);
     }
 
 

@@ -25,6 +25,7 @@
 #include <ghoul/misc/dictionary.h>
 
 #include <iterator>
+#include <sstream>
 
 namespace std {
     std::string to_string(std::string value);

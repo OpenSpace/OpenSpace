@@ -898,7 +898,7 @@ void RenderEngine::renderInformation() {
             RenderFontCr(
                 *_fontInfo,
                 penPosition,
-                "Simulation increment (s): %.0f",
+                "Simulation increment (s): %.3f",
                 Time::ref().deltaTime()
             );
 

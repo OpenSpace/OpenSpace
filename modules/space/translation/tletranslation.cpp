@@ -64,7 +64,7 @@ namespace {
         auto y2000 = std::find(LeapYears.begin(), LeapYears.end(), Epoch);
         
         // The distance between the two iterators gives us the number of leap years
-        int nLeapYears = std::abs(std::distance(y2000, lb));
+        int nLeapYears = static_cast<int>(std::abs(std::distance(y2000, lb)));
         
         int nYears = std::abs(year - Epoch);
         int nRegularYears = nYears - nLeapYears;
@@ -130,7 +130,7 @@ namespace {
         auto y2000 = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), Epoch);
         
         // The distance between the two iterators gives us the number of leap years
-        int nLeapSeconds = std::abs(std::distance(y2000, it));
+        int nLeapSeconds = static_cast<int>(std::abs(std::distance(y2000, it)));
         return nLeapSeconds;
     };
     
@@ -182,16 +182,19 @@ namespace {
         
         // 3
         using namespace std::chrono;
-        int SecondsPerDay = seconds(hours(24)).count();
+        int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
         double nSecondsSince2000 = (daysSince2000 + daysInYear) * SecondsPerDay;
         
         // 4
         // We need to remove additionbal leap seconds past 2000 and add them prior to
         // 2000 to sync up the time zones
-        double nLeapSecondsOffset = -countLeapSeconds(year, std::floor(daysInYear));
+        double nLeapSecondsOffset = -countLeapSeconds(
+            year,
+            static_cast<int>(std::floor(daysInYear))
+        );
 
         // 5
-        double nSecondsEpochOffset = seconds(hours(12)).count();
+        double nSecondsEpochOffset = static_cast<double>(seconds(hours(12)).count());
         
         // Combine all of the values
         double epoch = nSecondsSince2000 + nLeapSecondsOffset - nSecondsEpochOffset;
@@ -270,14 +273,14 @@ void TLETranslation::readTLEFile(const std::string& filename) {
 
     // All of the Kepler element information
     struct {
-        double inclination;
-        double semiMajorAxis;
-        double ascendingNode;
-        double eccentricity;
-        double argumentOfPeriapsis;
-        double meanAnomaly;
-        double meanMotion;
-        double epoch;
+        double inclination = 0.0;
+        double semiMajorAxis = 0.0;
+        double ascendingNode = 0.0;
+        double eccentricity = 0.0;
+        double argumentOfPeriapsis = 0.0;
+        double meanAnomaly = 0.0;
+        double meanMotion = 0.0;
+        double epoch = 0.0;
     } keplerElements;
     
     enum class State {

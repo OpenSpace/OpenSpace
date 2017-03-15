@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___WINDOWWRAPPER___H__
 #define __OPENSPACE_CORE___WINDOWWRAPPER___H__
 
+#include <openspace/properties/propertyowner.h>
+
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
 
@@ -42,8 +44,11 @@ namespace scripting { struct LuaLibrary; }
  * Every new windowing framework needs to have its own WindowWrapper subclass exposing the
  * required features.
  */
-class WindowWrapper {
+class WindowWrapper : public properties::PropertyOwner {
 public:
+    /// Default constructor
+    WindowWrapper();
+
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
     * windowing system.

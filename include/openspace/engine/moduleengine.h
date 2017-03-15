@@ -28,6 +28,8 @@
 #include <memory>
 #include <vector>
 
+#include <openspace/util/openspacemodule.h>
+
 namespace ghoul {
 namespace systemcapabilities {
 
@@ -39,8 +41,6 @@ struct Version;
 namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
-
-class OpenSpaceModule;
 
 /**
  * The ModuleEngine is the central repository for registering and accessing

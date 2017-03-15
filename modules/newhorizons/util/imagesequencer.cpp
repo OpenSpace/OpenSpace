@@ -388,11 +388,10 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
         std::vector<double> captureProgression = parser->getCaptureProgression();  //in5
 
         // check for sanity
-        if (translations.empty() || imageData.empty() || instrumentTimes.empty() || targetTimes.empty() || captureProgression.empty()) {
+        if (imageData.empty() || instrumentTimes.empty() || captureProgression.empty()) {
             LERROR("Missing sequence data");
             return;
         }
-         
 
         // append data
         for (auto& it : translations) {

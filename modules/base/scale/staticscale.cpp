@@ -59,7 +59,7 @@ StaticScale::StaticScale(const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "StaticScale");
     
-    _scaleValue = dictionary.value<double>(KeyValue);
+    _scaleValue = static_cast<float>(dictionary.value<double>(KeyValue));
 }
 
 double StaticScale::scaleValue() const {
