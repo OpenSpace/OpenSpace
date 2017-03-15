@@ -129,8 +129,8 @@ int TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::
 	else {
 		if (std::abs(dist - lastDist) / list.size() < 0.1 && list.size() == 2)
 			return PAN;
-		else if (list.size() == 3)
-			return ROLL;
+		//else if (list.size() == 3)
+			//return ROLL;
 		else
 			return PINCH;
 	}
@@ -198,9 +198,7 @@ void TouchInteraction::step(double dt) {
 	{ // Zooming
 		centerToBoundingSphere = -directionToCenter * boundingSphere;
 		dvec3 centerToCamera = camPos - centerPos;
-		if (length(_vel.zoom*dt) < length(centerToCamera) && length(centerToCamera) > length(centerToBoundingSphere)) // should get boundingsphere from focusnode
-			camPos += directionToCenter*_vel.zoom*dt;
-		else if (length(centerToCamera) < length(centerToBoundingSphere) && length(centerToCamera + directionToCenter*_vel.zoom*dt) > length(centerToCamera))
+		if (length(_vel.zoom*dt) < length(centerToCamera - centerToBoundingSphere) && length(centerToCamera + directionToCenter*_vel.zoom*dt) > length(centerToBoundingSphere)) // should get boundingsphere from focusnode
 			camPos += directionToCenter*_vel.zoom*dt;
 		else
 			_vel.zoom = 0.0;
@@ -231,8 +229,8 @@ void TouchInteraction::configSensitivities(double dist) {
 	// Configurates sensitivities to appropriate values when the camera is close to the focus node.
 	double close = 4.6 * 1000000;
 	if (dist < close) {
-		_sensitivity.zoom = 2.0 * dist/close;
-		_sensitivity.globalRot = 0.1 * dist/close;
+		_sensitivity.zoom = 2.0 * std::max(dist, 100.0)/close;
+		_sensitivity.globalRot = 0.1 * std::max(dist, 100.0) /close;
 		//_sensitivity.localRot = 0.1;
 		//_sensitivity.globalRoll = 0.1;
 		//_sensitivity.localRoll = 0.1;

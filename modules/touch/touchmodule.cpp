@@ -137,7 +137,7 @@ TouchModule::TouchModule()
 
 				os << ", Id: " << j.getCursorID() << ", path size: " << j.getPath().size() << ", To Process: " << count;
 			}
-			LINFO("List size: " << list.size() << os.str() << "\n");
+			//LINFO("List size: " << list.size() << os.str() << "\n");
 			os.clear();
 
 		}
