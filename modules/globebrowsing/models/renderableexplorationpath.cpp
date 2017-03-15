@@ -1,3 +1,4 @@
+#include "renderableexplorationpath.h"
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -45,6 +46,9 @@ RenderableExplorationPath::RenderableExplorationPath(const ghoul::Dictionary& di
 	, _fading(1.0)
 	, _vertexBufferID(0)
 	, _vaioID(0)
+	, _hasLoopedOnce(false)
+	, _isCloseEnough(false)
+	, _cameraToPointDistance(0.0)
 	, _isEnabled(properties::BoolProperty("enabled", "enabled", false))
 {
 	if (!dictionary.getValue("Filepath", _filePath)) {
@@ -69,28 +73,55 @@ bool RenderableExplorationPath::extractCoordinates() {
 		LERROR("Could not open file");
 	}
 
-	OGRLayer *poLayer = poDS->GetLayerByName("test");
+	OGRLayer *poLayer = poDS->GetLayerByName("rover_locations");
 
-	_coordMap = std::map<std::string, glm::vec2>();
+	_coordMap = std::map<int, SiteInformation>();
 
 	OGRFeature *poFeature;
 	poLayer->ResetReading();
 
 	while ((poFeature = poLayer->GetNextFeature()) != NULL) {
+		
 		// Extract coordinates from OGR
-		std::string site = poFeature->GetFieldAsString("site");
+		int site = poFeature->GetFieldAsInteger("site");
+		int sol = poFeature->GetFieldAsInteger("sol");
+		double lat = poFeature->GetFieldAsDouble("plcl");
+		double lon = poFeature->GetFieldAsDouble("longitude");
 
+		// Site allready exists
 		if (_coordMap.find(site) != _coordMap.end()) {
-			//Coordinates already found for this site
-			continue;
+			bool allreadyExists = false;
+			std::vector<glm::dvec2> tempVec = _coordMap.at(site).lonlatCoordinates;
+
+			// Check if the latitude and longitude allready exists in the vector
+			for (auto i : tempVec) {
+				if (i.x == lat && i.y == lon){
+					allreadyExists = true;
+					break;
+				}
+			}
+
+			// Only add new coordinates to prevent duplicates
+			if (allreadyExists == false)
+				_coordMap.at(site).lonlatCoordinates.push_back(glm::dvec2(lat, lon));
+		}
+		// Create a new site
+		else {
+			// Temp variables
+			SiteInformation tempSiteInformation;
+			std::vector<glm::dvec2> tempVec;
+
+			// Push back the new coordinates
+			tempVec.push_back(glm::dvec2(lat, lon));
+
+			// Save variables in the tmep struct
+			tempSiteInformation.sol = sol;
+			tempSiteInformation.lonlatCoordinates = tempVec;
+
+			_coordMap.insert(std::make_pair(site, tempSiteInformation));
+
 		}
 
-		OGRGeometry *poGeometry;
-		poGeometry = poFeature->GetGeometryRef();
-		if (poGeometry != NULL && wkbFlatten(poGeometry->getGeometryType()) == wkbPoint) {
-			OGRPoint *poPoint = (OGRPoint*)poGeometry;
-			_coordMap.insert(std::make_pair(site, glm::vec2(poPoint->getX(), poPoint->getY())));
-		}
 		OGRFeature::DestroyFeature(poFeature);
 	}
 	GDALClose(poDS);
@@ -187,95 +218,125 @@ void RenderableExplorationPath::render(const RenderData& data) {
 	int vectorSize = _stationPointsModelCoordinates.size();
 	glm::dvec3 positionOnEllipsoid = _stationPointsModelCoordinates[int(vectorSize / 2)];
 
+	// Temporary solution to trigger the calculation of new positions of the stations when the camera is 
+	// less than 5000 meters from the "middle' station. Should possibly be moved do a distanceswitch.
+	double heightToSurface = _globe->getHeight(_stationPointsModelCoordinates[int(vectorSize / 2)]);
+	glm::dvec3 directionFromSurfaceToPointModelSpace = _globe->ellipsoid().
+		geodeticSurfaceNormal(_globe->ellipsoid().cartesianToGeodetic2(_stationPointsModelCoordinates[int(vectorSize / 2)]));
+	glm::dvec3 tempPos = glm::dvec3(_stationPointsModelCoordinates[int(vectorSize / 2)]) + heightToSurface * directionFromSurfaceToPointModelSpace;
+
 	// The distance from the camera to the position on the ellipsoid
-	double distance = glm::length(cameraPositionModelSpace - positionOnEllipsoid);
+	_cameraToPointDistance = glm::length(cameraPositionModelSpace - tempPos);
+	LERROR(_cameraToPointDistance);
 
-	// Only show the path when camera is close enough. Especially GL_POINTS look bad
-	// when camera is far form the globe. Will have to improve this.
-	if (distance < 16737 && _fading < 1.f)
-		_fading += 0.01f;
-	else if (distance >= 16737 && _fading > 0.f)
-		_fading -= 0.01f;
+	if (_cameraToPointDistance < 10000.0) {
+		_isCloseEnough = true;
 
-	// Model transform and view transform needs to be in double precision
-	glm::dmat4 modelTransform = _globe->modelTransform();
-	glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+		// Only show the path when camera is close enough. Especially GL_POINTS look bad
+		// when camera is far form the globe. Will have to improve this.
+		/*if (distance < 16737 && _fading < 1.f)
+			_fading += 0.01f;
+		else if (distance >= 16737 && _fading > 0.f)
+			_fading -= 0.01f;*/
 
-	_pathShader->activate();
+		// Model transform and view transform needs to be in double precision
+		glm::dmat4 modelTransform = _globe->modelTransform();
+		glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-	_pathShader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-	_pathShader->setUniform("projectionTransform", data.camera.projectionMatrix());
-	_pathShader->setUniform("fading", _fading);
-	_pathShader->setUniform("color", glm::vec3(1.0, 1.0, 1.0));
+		_pathShader->activate();
 
-	glBindVertexArray(_vaioID);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
-	glLineWidth(1.0f);
-	glDrawArrays(GL_LINE_STRIP, 0, _stationPointsModelCoordinates.size());
-	glBindVertexArray(0);
+		_pathShader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+		_pathShader->setUniform("projectionTransform", data.camera.projectionMatrix());
+		_pathShader->setUniform("fading", _fading);
+		_pathShader->setUniform("color", glm::vec3(1.0, 1.0, 1.0));
 
-	_pathShader->deactivate();
+		glBindVertexArray(_vaioID);
+		glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
+		glLineWidth(1.0f);
+		glDrawArrays(GL_LINE_STRIP, 0, _stationPointsModelCoordinates.size());
+		glBindVertexArray(0);
 
-	_siteShader->activate();
+		_pathShader->deactivate();
 
-	_siteShader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-	_siteShader->setUniform("projectionTransform", data.camera.projectionMatrix());
-	_siteShader->setUniform("fading", _fading);
-	_siteShader->setUniform("color", glm::vec3(1.0, 1.0, 1.0));
+		/*_siteShader->activate();
 
-	glBindVertexArray(_vaioID);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
-	glPointSize(20.0f);
-	glDrawArrays(GL_POINTS, 0, _stationPointsModelCoordinates.size());
-	glBindVertexArray(0);
+		_siteShader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+		_siteShader->setUniform("projectionTransform", data.camera.projectionMatrix());
+		_siteShader->setUniform("fading", _fading);
+		_siteShader->setUniform("color", glm::vec3(1.0, 1.0, 1.0));
 
-	_siteShader->deactivate();
+		glBindVertexArray(_vaioID);
+		glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
+		glPointSize(20.0f);
+		glDrawArrays(GL_POINTS, 0, _stationPointsModelCoordinates.size());
+		glBindVertexArray(0);
+
+		_siteShader->deactivate();*/
+	}
 }
 
 void RenderableExplorationPath::update(const UpdateData& data) {
 
-	glm::dvec3 tempPos;
+	double heightToSurfaceCheck = _globe->getHeight(glm::dvec3(_stationPoints[50].stationPosition));
+	//LERROR(_cameraToPointDistance);
+	if(_isCloseEnough == true && _hasLoopedOnce == false) {
 
-	for (int i = 0; i < _stationPoints.size(); i++) {
-		// TODO: Add padding to the height to surface
+		if(heightToSurfaceCheck < 0.0 || heightToSurfaceCheck > 6.0) {
+			glm::dvec3 tempPos;
 
-		// Gets the height of the station point to the surface of the active heightlayers(s)
-		double heightToSurface = _globe->getHeight(glm::dvec3(_stationPoints[i].stationPosition));
+			for (int i = 0; i < _stationPoints.size(); i++) {
+				// TODO: Add padding to the height to surface
 
-		// Small precission issue with heightToSurface which makes the loop run multiple times
-		if( heightToSurface > _stationPoints[i].previousStationHeight + 0.5 ||
-				heightToSurface < _stationPoints[i].previousStationHeight - 0.5) {
+				// Gets the height of the station point to the surface of the active heightlayers(s)
+				double heightToSurface = _globe->getHeight(glm::dvec3(_stationPoints[i].stationPosition));
 
-			// The direction in which the point is to be moved
-			glm::dvec3 directionFromSurfaceToPointModelSpace = _globe->ellipsoid().
-				geodeticSurfaceNormal(_globe->ellipsoid().cartesianToGeodetic2(_stationPoints[i].stationPosition));
-			tempPos = glm::dvec3(0.0, 0.0, 0.0);
-			tempPos = _stationPoints[i].stationPosition;
+				// Small precission issue with heightToSurface which makes the loop run multiple times
+				if( heightToSurface > _stationPoints[i].previousStationHeight + 0.5 ||
+						heightToSurface < _stationPoints[i].previousStationHeight - 0.5) {
+					//LERROR(heightToSurfaceCheck);
 
-			// There is probably a nicer way to do this
-			if (heightToSurface > 0.0 && _stationPoints[i].previousStationHeight == 0.0)
-				tempPos += directionFromSurfaceToPointModelSpace * heightToSurface;
-			else if (heightToSurface == 0.0 && _stationPoints[i].previousStationHeight > 0.0)
-				tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight);
-			else if (heightToSurface < 0.0 && _stationPoints[i].previousStationHeight == 0.0)
-				tempPos += directionFromSurfaceToPointModelSpace * heightToSurface;
-			else if (heightToSurface == 0.0 && _stationPoints[i].previousStationHeight < 0.0)
-				tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight);
-			else if (heightToSurface < 0.0 && _stationPoints[i].previousStationHeight > 0.0)
-				tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight + heightToSurface);
-			else if (heightToSurface > 0.0 && _stationPoints[i].previousStationHeight < 0.0)
-				tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight + heightToSurface);
+					// The direction in which the point is to be moved
+					glm::dvec3 directionFromSurfaceToPointModelSpace = _globe->ellipsoid().
+						geodeticSurfaceNormal(_globe->ellipsoid().cartesianToGeodetic2(_stationPoints[i].stationPosition));
+					tempPos = glm::dvec3(0.0, 0.0, 0.0);
+					tempPos = _stationPoints[i].stationPosition;
+					//tempPos += directionFromSurfaceToPointModelSpace * heightToSurface;
 
-			_stationPoints[i].previousStationHeight = heightToSurface;
-			_stationPoints[i].stationPosition = glm::dvec4(tempPos, 1.0);
+					// There is probably a nicer way to do this
+					/*if (heightToSurface > 0.0 && _stationPoints[i].previousStationHeight == 0.0)
+						tempPos += directionFromSurfaceToPointModelSpace * heightToSurface;
+					else if (heightToSurface == 0.0 && _stationPoints[i].previousStationHeight > 0.0)
+						tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight);
+					else if (heightToSurface < 0.0 && _stationPoints[i].previousStationHeight == 0.0)
+						tempPos += directionFromSurfaceToPointModelSpace * heightToSurface;
+					else if (heightToSurface == 0.0 && _stationPoints[i].previousStationHeight < 0.0)
+						tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight);
+					else if (heightToSurface < 0.0 && _stationPoints[i].previousStationHeight > 0.0)
+						tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight + heightToSurface);
+					else if (heightToSurface > 0.0 && _stationPoints[i].previousStationHeight < 0.0)
+						tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight + heightToSurface);*/
+					//if (_stationPoints[i].previousStationHeight == 0.0)
+						//LERROR("Previous station Height = 0");
+
+					if(heightToSurface < 0.0) {
+						tempPos += directionFromSurfaceToPointModelSpace * ( heightToSurface + 5.0 - _stationPoints[i].previousStationHeight);
+						//LERROR("Station: " << i << " Height: " << heightToSurface);
+					}
+
+					_stationPoints[i].previousStationHeight = heightToSurface;
+					_stationPoints[i].stationPosition = glm::dvec4(tempPos, 1.0);
+				}
+			}
+
+			// Clears and pushes the new position values into the vector used in the vertex buffer
+			// TODO: Find a way to only use one vector (e.g. either only _stationModelCoordinates or _stationPoints
+			_stationPointsModelCoordinates.clear();
+			for (int i = 0; i < _stationPoints.size(); i++) {
+				_stationPointsModelCoordinates.push_back(glm::vec4(_stationPoints[i].stationPosition));
+			}
+
 		}
-	}
-
-	// Clears and pushes the new position values into the vector used in the vertex buffer
-	// TODO: Find a way to only use one vector (e.g. either only _stationModelCoordinates or _stationPoints
-	_stationPointsModelCoordinates.clear();
-	for (int i = 0; i < _stationPoints.size(); i++) {
-		_stationPointsModelCoordinates.push_back(glm::vec4(_stationPoints[i].stationPosition));
+		_hasLoopedOnce = true;
 	}
 
 	// Buffer new data
@@ -296,16 +357,17 @@ void RenderableExplorationPath::calculatePathModelCoordinates() {
 	globebrowsing::Geodetic2 geo;
 	glm::dvec3 positionModelSpace;
 	StationInformation k;
-	for (auto i : _coordMap) {
+	for (auto site : _coordMap) {
+		for (auto position : site.second.lonlatCoordinates) {
 
-		// The map has longitude first and lattitude after, need to switch
-		geo = globebrowsing::Geodetic2{ i.second.y, i.second.x } / 180 * glm::pi<double>();
-		positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
-		_stationPointsModelCoordinates.push_back(glm::dvec4(positionModelSpace, 1.0f));
+			geo = globebrowsing::Geodetic2{ position.x, position.y } / 180 * glm::pi<double>();
+			positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
+			_stationPointsModelCoordinates.push_back(glm::dvec4(positionModelSpace, 1.0f));
 
-		k.previousStationHeight = 0.0;
-		k.stationPosition = glm::dvec4(positionModelSpace, 1.0);
-		_stationPoints.push_back(k);
+			k.previousStationHeight = 0.0;
+			k.stationPosition = glm::dvec4(positionModelSpace, 1.0);
+			_stationPoints.push_back(k);
+		}
 	}
 }
 

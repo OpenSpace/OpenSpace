@@ -42,6 +42,11 @@ public:
 		double previousStationHeight;
 	};
 
+	struct SiteInformation {
+		int sol;
+		std::vector<glm::dvec2> lonlatCoordinates;
+	};
+
 	RenderableExplorationPath(const ghoul::Dictionary& dictionary);
 	
 	bool initialize() override;
@@ -68,11 +73,14 @@ private:
 
 	globebrowsing::RenderableGlobe* _globe;
 
-	std::map<std::string, glm::vec2> _coordMap;
+	std::map<int, SiteInformation> _coordMap;
 
 	float _fading;
 	GLuint _vaioID;
 	GLuint _vertexBufferID;
+	double _cameraToPointDistance;
+	bool _hasLoopedOnce;
+	bool _isCloseEnough;
 
 };
 }
