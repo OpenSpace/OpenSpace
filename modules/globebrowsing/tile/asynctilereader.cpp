@@ -61,6 +61,13 @@ std::vector<std::shared_ptr<RawTile>> AsyncTileDataProvider::getRawTiles() {
     return readyResults;
 }   
 
+std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
+    if (_concurrentJobManager.numFinishedJobs() > 0)
+        return _concurrentJobManager.popFinishedJob()->product();
+    else
+        return nullptr;
+}   
+
 bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) const {
     // only allow tile to be enqueued if it's not already enqueued
     //return _futureTileIOResults.find(tileIndex.hashKey()) == _futureTileIOResults.end();

@@ -22,46 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
 
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
+#include <modules/globebrowsing/tile/textureformat.h>
+#include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <modules/globebrowsing/tile/tiledatalayout.h>
+#include <modules/globebrowsing/tile/pixelregion.h>
 
-#include <modules/globebrowsing/tile/tileindex.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
 
-#include <unordered_map>
+#include <gdal.h>
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
-    
+
 class RawTile;
-class TileDataset;
+class GeodeticPatch;
 
-class AsyncTileDataProvider {
+/**
+ * Interface for reading <code>RawTile</code>s given a <code>TileIndex</code>
+ */
+class TileDataReader {
 public:
-    AsyncTileDataProvider(std::shared_ptr<TileDataset> textureDataProvider, 
-        std::shared_ptr<ThreadPool> pool);
+    struct Configuration {
+        bool doPreProcessing;
+        int minimumTilePixelSize;
+        GLuint dataType = 0; // default = no datatype reinterpretation
+    };
 
-    bool enqueueTileIO(const TileIndex& tileIndex);        
-    std::vector<std::shared_ptr<RawTile>> getRawTiles();
-    std::shared_ptr<RawTile> popFinishedRawTile();
+    virtual TileDataReader(const Configuration& config);
 
-    void reset();
-    void clearRequestQueue();
+    std::shared_ptr<RawTile> defaultTileData();
+    
+    virtual std::shared_ptr<RawTile> readTileData(TileIndex tileIndex) = 0;
+    virtual int maxChunkLevel() = 0;
+    virtual TileDepthTransform getDepthTransform() = 0;
+    virtual const TileDataLayout& getDataLayout() = 0;
+    virtual void reset() = 0;
+    virtual float noDataValueAsFloat() = 0;
+    virtual size_t rasterXSize() = 0;
+    virtual size_t rasterYSize() = 0;
 
-    std::shared_ptr<TileDataset> getTextureDataProvider() const;
-    float noDataValueAsFloat();
+    const static glm::ivec2 tilePixelStartOffset;
+    const static glm::ivec2 tilePixelSizeDifference;
+    const static PixelRegion padding; // same as the two above
+  
+    const static glm::ivec2 tilePixelStartOffset;
+    const static glm::ivec2 tilePixelSizeDifference;
+    const static PixelRegion padding; // same as the two above
 
+    static bool logReadErrors;
 protected:
-    virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;
+    Configuration _config;
 
-private:
-    std::shared_ptr<TileDataset> _tileDataset;
-    ConcurrentJobManager<RawTile> _concurrentJobManager;
-    std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
+    virtual std::array<double, 6> padfTransform getGeoTransform();
+    PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
+    Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
