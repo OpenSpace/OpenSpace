@@ -22,28 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_KAMELEON___FITSFILEREADER___H__
-#define __OPENSPACE_MODULE_KAMELEON___FITSFILEREADER___H__
+#include <modules/solarbrowsing/solarbrowsingmodule.h>
 
-#include <string>
-#include <memory>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
 
-namespace CCfits { class ExtHDU; class PHDU; }
-namespace ghoul { namespace opengl{ class Texture; }}
+#include <ghoul/misc/assert.h>
+
+#include <modules/solarbrowsing/rendering/renderablespacecraftcameraplane.h>
 
 namespace openspace {
 
-class FitsFileReader {
-public:
-    static std::unique_ptr<ghoul::opengl::Texture> loadTexture(std::string& path);
-    static std::valarray<unsigned long> readRawImage(std::string& path);
-    static CCfits::ExtHDU& readHeader(std::string& path);
+SolarBrowsingModule::SolarBrowsingModule()
+    : OpenSpaceModule("SolarBrowsing")
+{}
 
-private:
-	// Only for debugging
-	static void dump(CCfits::PHDU& image);
-};
+void SolarBrowsingModule::internalInitialize(){
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
+
+    fRenderable->registerClass<RenderableSpacecraftCameraPlane>("RenderableSpacecraftCameraPlane");
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_KAMELEON___FITSFILEREADER___H__
