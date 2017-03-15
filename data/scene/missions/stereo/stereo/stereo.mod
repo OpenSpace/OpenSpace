@@ -72,7 +72,7 @@ return {
         Parent = "StereoA",
         Renderable = {
             Type = "RenderableSpacecraftCameraPlane",
-            Target = "Earth",
+            Target = "Sun",
             Size = {1.4, 7.8},
             Origin = "Center",
             -- Dummy texture

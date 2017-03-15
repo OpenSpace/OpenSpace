@@ -29,11 +29,7 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/stringproperty.h>
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-    }
-}
+namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
 

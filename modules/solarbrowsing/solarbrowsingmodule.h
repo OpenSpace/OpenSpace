@@ -22,28 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_KAMELEON___FITSFILEREADER___H__
-#define __OPENSPACE_MODULE_KAMELEON___FITSFILEREADER___H__
+ #ifndef __OPENSPACE_MODULE_ISWA___SOLARBROWSINGMODULE___H__
+ #define __OPENSPACE_MODULE_ISWA___SOLARBROWSINGMODULE___H__
 
-#include <string>
-#include <memory>
+ #include <openspace/util/openspacemodule.h>
 
-namespace CCfits { class ExtHDU; class PHDU; }
-namespace ghoul { namespace opengl{ class Texture; }}
+ namespace openspace {
 
-namespace openspace {
-
-class FitsFileReader {
+class SolarBrowsingModule : public OpenSpaceModule {
 public:
-    static std::unique_ptr<ghoul::opengl::Texture> loadTexture(std::string& path);
-    static std::valarray<unsigned long> readRawImage(std::string& path);
-    static CCfits::ExtHDU& readHeader(std::string& path);
+    SolarBrowsingModule();
 
-private:
-	// Only for debugging
-	static void dump(CCfits::PHDU& image);
+protected:
+    void internalInitialize() override;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_KAMELEON___FITSFILEREADER___H__
+#endif // __OPENSPACE_MODULE_ISWA___SOLARBROWSINGMODULE___H__
