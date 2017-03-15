@@ -52,13 +52,15 @@ using namespace TUIO;
 using namespace openspace;
 
 TouchInteraction::TouchInteraction()
-	: _focusNode{ OsEng.interactionHandler().focusNode() }, _camera{ OsEng.interactionHandler().camera() },
-	_baseSensitivity{ 0.1 }, _baseFriction{ 0.02 },
-	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
-	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction },
-	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.3 },
-	_previousFocusNodePosition{ glm::dvec3(0.0) }, _minHeightFromSurface{ 6.6 * 1000000.0 }
-	{}
+    : PropertyOwner("TouchInteraction")
+    , _focusNode{ OsEng.interactionHandler().focusNode() }
+    , _camera{ OsEng.interactionHandler().camera() }
+    , _baseSensitivity{ 0.1 }, _baseFriction{ 0.02 }
+    , _vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 }
+    , _friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction }
+    , _sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.3 }
+    , _previousFocusNodePosition{ glm::dvec3(0.0) }, _minHeightFromSurface{ 6.6 * 1000000.0 }
+    {}
 
 TouchInteraction::~TouchInteraction() { }
 
