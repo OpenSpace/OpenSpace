@@ -33,7 +33,7 @@
 namespace openspace {
 namespace globebrowsing {
     
-class RawTile;
+struct RawTile;
 class RawTileDataReader;
 
 class AsyncTileDataProvider {

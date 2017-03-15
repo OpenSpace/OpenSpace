@@ -41,7 +41,7 @@
 namespace openspace {
 namespace globebrowsing {
 
-class RawTile;
+struct RawTile;
 class GeodeticPatch;
 
 /**

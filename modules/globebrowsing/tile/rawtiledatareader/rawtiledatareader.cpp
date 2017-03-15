@@ -382,12 +382,8 @@ RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
     std::shared_ptr<const RawTile> rawTile, const IODescription& io)
 {
     ensureInitialized();
-    int success;
 
     double missingDataValue = noDataValueAsFloat();
-    if (!success) {
-        missingDataValue = 32767;
-    }
 
     bool hasMissingData = false;
         
