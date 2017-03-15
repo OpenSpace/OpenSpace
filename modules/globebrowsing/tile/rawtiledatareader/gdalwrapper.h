@@ -22,35 +22,72 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__
+#ifdef GLOBEBROWSING_USE_GDAL
 
-#include <modules/globebrowsing/tile/textureformat.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/triggerproperty.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <gdal.h>
 
-class GDALDataset;
+#include <mutex>
+#include <memory>
 
 namespace openspace {
 namespace globebrowsing {
 
-struct TileDataLayout {
-    GLuint glType;
+/**
+ * Function for passing GDAL error messages to the GHOUL logging system.
+ */
+static void gdalErrorHandler(CPLErr eErrClass, int errNo, const char *msg);
 
-    size_t bytesPerDatum;
-    size_t numRasters;
-    /// Number of rasters available in the GDAL dataset.
-    /// Does not necessarily have to be equal to numRasters.
-    /// In case an extra alpha channel needs to be added that
-    /// does not exist in the GDAL dataset for example
-    size_t numRastersAvailable;
-    size_t bytesPerPixel;
+/**
+ * Singleton class interfacing with global GDAL functions.
+ */
+class GdalWrapper : public properties::PropertyOwner
+{
+public:
+    /**
+     * Create the singleton. Must be called before the class can be used.
+     * \param maximumCacheSize is the current maximum cache size GDAL can use
+     * for caching blocks in memory given in bytes.
+     * \param maximumMaximumCacheSize is the maximum cache size GDAL can use
+     * for caching blocks in memory given in bytes.
+     */
+    static void create(size_t maximumCacheSize, size_t maximumMaximumCacheSize);
+    static void destroy();
 
-    TextureFormat textureFormat;
+    static GdalWrapper& ref();
+
+    /**
+     * Get the current size of the GDAL in memory cache.
+     * \returns the number of bytes currently in the GDAL memory cache.
+     */
+    static size_t GDALCacheUsed();
+
+    /**
+     * Get the maximum GDAL in memory cache size.
+     * \returns the maximum number of bytes allowed for the GDAL cache.
+     */
+    static size_t GDALMaximumCacheSize();
+
+    properties::BoolProperty logGdalErrors;
+private:
+    GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize);
+    ~GdalWrapper() = default;
+    
+    void setGdalProxyConfiguration();
+    
+    properties::IntProperty _gdalMaximumCacheSize;
+
+    static GdalWrapper* _singleton;
+    static std::mutex _mutexLock;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__
+#endif // GLOBEBROWSING_USE_GDAL
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__

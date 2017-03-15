@@ -25,7 +25,9 @@
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 
 #include <modules/globebrowsing/tile/asynctilereader.h>
-#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/simplerawtiledatareader.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
@@ -60,7 +62,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     }
 
     // 2. Initialize default values for any optional Keys
-    TileDataset::Configuration config;
+    RawTileDataReader::Configuration config;
     config.doPreProcessing = false;
     config.minimumTilePixelSize = 512;
         
@@ -82,7 +84,11 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     }
 
     // Initialize instance variables
-    auto tileDataset = std::make_shared<TileDataset>(filePath, config);
+#ifdef GLOBEBROWSING_USE_GDAL
+    auto tileDataset = std::make_shared<GdalRawTileDataReader>(filePath, config);
+#else // GLOBEBROWSING_USE_GDAL
+    auto tileDataset = std::make_shared<SimpleRawTileDataReader>(filePath, config);
+#endif // GLOBEBROWSING_USE_GDAL
 
     // only one thread per provider supported atm
     // (GDAL does not handle multiple threads for a single dataset very well
@@ -187,27 +193,27 @@ TileDepthTransform CachingTileProvider::depthTransform() {
 }
 
 Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
-    if (rawTile->error != CE_None) {
+    if (rawTile->error != RawTile::ReadError::None) {
         return Tile(nullptr, nullptr, Tile::Status::IOError);
     }
 
-    TileDataLayout dataLayout =
-        _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
+    //TileDataLayout dataLayout =
+    //   _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         
     // The texture should take ownership of the data
     using ghoul::opengl::Texture;
     std::shared_ptr<Texture> texture = std::make_shared<Texture>(
         rawTile->imageData,
         rawTile->dimensions,
-        dataLayout.textureFormat.ghoulFormat,
-        dataLayout.textureFormat.glFormat,
-        dataLayout.glType,
+        rawTile->textureFormat.ghoulFormat,
+        rawTile->textureFormat.glFormat,
+        rawTile->glType,
         Texture::FilterMode::Linear,
         Texture::WrappingMode::ClampToEdge);
         
     texture->uploadTexture();
 
-    // AnisotropicMipMap must be set after texture is uploaded. Why?!
+    // AnisotropicMipMap must be set after texture is uploaded
     texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
     return Tile(texture, rawTile->tileMetaData, Tile::Status::OK);

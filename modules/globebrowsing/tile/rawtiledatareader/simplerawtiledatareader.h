@@ -22,35 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
-
-#include <modules/globebrowsing/tile/tile.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
 
 #include <modules/globebrowsing/tile/textureformat.h>
+#include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <modules/globebrowsing/tile/tiledatalayout.h>
+#include <modules/globebrowsing/tile/pixelregion.h>
+#include <modules/globebrowsing/tile/rawtile.h>
 
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+
+#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
 
-#include <gdal.h>
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
-namespace tiledatatype {
 
-GLuint getOpenGLDataType(GDALDataType gdalType);
+class GeodeticPatch;
 
-GDALDataType getGdalDataType(GLuint glType);
+class SimpleRawTileDataReader : public RawTileDataReader {
+public:
 
-TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
+    SimpleRawTileDataReader(const std::string& filePath, const Configuration& config);
 
-size_t getMaximumValue(GDALDataType gdalType);
+    virtual ~SimpleRawTileDataReader() override;
 
-size_t numberOfBytes(GDALDataType gdalType);
+    // Public virtual function overloading
+    virtual void reset() override;
+    virtual int maxChunkLevel() override;
+    virtual float noDataValueAsFloat() const override;
+    virtual int rasterXSize() const override;
+    virtual int rasterYSize() const override;
+    virtual float depthOffset() const override;
+    virtual float depthScale() const override;
 
-float interpretFloat(GDALDataType gdalType, const char* src);
+protected:
 
-} // namespace tiledatatype
+    virtual IODescription getIODescription(const TileIndex& tileIndex) const override;
+
+private:
+    // Private virtual function overloading
+    virtual void initialize() override;
+    virtual char* readImageData(
+        IODescription& io, RawTile::ReadError& worstError) const override;
+    virtual RawTile::ReadError rasterRead(
+        int rasterBand, const IODescription& io, char* dst) const override;
+
+    // Member variables
+    std::string _datasetFilePath;
+    std::unique_ptr<ghoul::opengl::Texture> _dataTexture;
+};
+
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__

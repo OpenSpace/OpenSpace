@@ -22,35 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
 
+#include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/textureformat.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
-class GDALDataset;
+#ifdef GLOBEBROWSING_USE_GDAL
+#include <gdal.h>
+#endif // GLOBEBROWSING_USE_GDAL
 
 namespace openspace {
 namespace globebrowsing {
+namespace tiledatatype {
 
-struct TileDataLayout {
-    GLuint glType;
+#ifdef GLOBEBROWSING_USE_GDAL
+GLuint getOpenGLDataType(GDALDataType gdalType);
+GDALDataType getGdalDataType(GLuint glType);
+TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
+size_t getMaximumValue(GDALDataType gdalType);
+size_t numberOfBytes(GDALDataType gdalType);
+float interpretFloat(GDALDataType gdalType, const char* src);
+#endif // GLOBEBROWSING_USE_GDAL
 
-    size_t bytesPerDatum;
-    size_t numRasters;
-    /// Number of rasters available in the GDAL dataset.
-    /// Does not necessarily have to be equal to numRasters.
-    /// In case an extra alpha channel needs to be added that
-    /// does not exist in the GDAL dataset for example
-    size_t numRastersAvailable;
-    size_t bytesPerPixel;
+size_t numberOfRasters(ghoul::opengl::Texture::Format format);
+size_t numberOfBytes(GLuint glType);
+size_t getMaximumValue(GLuint glType);
+float interpretFloat(GLuint glType, const char* src);
 
-    TextureFormat textureFormat;
-};
-
+} // namespace tiledatatype
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__

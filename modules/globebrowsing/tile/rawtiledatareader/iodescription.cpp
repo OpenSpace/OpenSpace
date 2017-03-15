@@ -22,35 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__
+#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
-#include <modules/globebrowsing/tile/textureformat.h>
+#include <modules/globebrowsing/tile/pixelregion.h>
 
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-
-class GDALDataset;
+namespace {
+    const std::string _loggerCat = "IODescription";
+}
 
 namespace openspace {
 namespace globebrowsing {
 
-struct TileDataLayout {
-    GLuint glType;
+IODescription IODescription::cut(
+    PixelRegion::Side side, int pos) {
+    PixelRegion readPreCut = read.region;
+    PixelRegion writePreCut = write.region;
 
-    size_t bytesPerDatum;
-    size_t numRasters;
-    /// Number of rasters available in the GDAL dataset.
-    /// Does not necessarily have to be equal to numRasters.
-    /// In case an extra alpha channel needs to be added that
-    /// does not exist in the GDAL dataset for example
-    size_t numRastersAvailable;
-    size_t bytesPerPixel;
+    glm::dvec2 ratio;
+    ratio.x = write.region.numPixels.x / (double) read.region.numPixels.x;
+    ratio.y = write.region.numPixels.y / (double) read.region.numPixels.y;
 
-    TextureFormat textureFormat;
-};
+    IODescription whatCameOff = *this;
+    whatCameOff.read.region = read.region.globalCut(side, pos);
+
+    PixelRegion::PixelRange cutSize = whatCameOff.read.region.numPixels;
+    PixelRegion::PixelRange localWriteCutSize = ratio * glm::dvec2(cutSize);
+        
+    if (cutSize.x == 0 || cutSize.y == 0) {
+        ghoul_assert(
+            read.region.equals(readPreCut),
+            "Read region should not have been modified"
+        );
+        ghoul_assert(
+            write.region.equals(writePreCut),
+            "Write region should not have been modified"
+        );
+    }
+
+    int localWriteCutPos =
+        (side == PixelRegion::Side::LEFT || side == PixelRegion::Side::RIGHT)
+        ? localWriteCutSize.x : localWriteCutSize.y;
+    whatCameOff.write.region = write.region.localCut(side, localWriteCutPos);
+
+    return whatCameOff;
+}
 
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__

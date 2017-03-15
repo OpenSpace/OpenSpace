@@ -22,82 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tiledatalayout.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__
 
-#include <limits>
-
-#include <ogr_featurestyle.h>
-#include <ogr_spatialref.h>
-
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h> // abspath
-#include <ghoul/misc/assert.h>
-
+#include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-
-
-#include <modules/globebrowsing/geometry/angle.h>
-
-#include <float.h>
-#include <sstream>
-#include <algorithm>
-
-#include <gdal_priv.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
-
-#include <memory>
-#include <set>
-#include <queue>
-#include <iostream>
-#include <unordered_map>
-
-#include <ghoul/filesystem/file.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/misc/threadpool.h>
-
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledatatype.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/tilemetadata.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
 
-namespace {
-    const std::string _loggerCat = "TileDataset";
-}
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
+
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
 
-TileDataLayout::TileDataLayout() {}
-
-TileDataLayout::TileDataLayout(GDALDataset* dataSet, GLuint preferredGlType) {
-    // Assume all raster bands have the same data type
-    gdalType =preferredGlType != 0 ?
-        tiledatatype::getGdalDataType(preferredGlType) :
-        dataSet->GetRasterBand(1)->GetRasterDataType();
-
-    glType = tiledatatype::getOpenGLDataType(gdalType);
-    numRastersAvailable = dataSet->GetRasterCount();
-	numRasters = numRastersAvailable;
+struct IODescription {
+    struct ReadData {
+        int overview;
+        PixelRegion region;
+        PixelRegion fullRegion;
+    } read;
     
-	// This is to avoid corrupted textures that can appear when the number of
-	// bytes per row is not a multiplie of 4. 
-	// Info here: https://www.khronos.org/opengl/wiki/Pixel_Transfer#Pixel_layout
-	// This also mean that we need to make sure not to read from non existing
-	// rasters from the GDAL dataset
-	if (gdalType == GDT_Byte && numRasters == 3) {
-		numRasters = 4;
-	}
-	
-	bytesPerDatum = tiledatatype::numberOfBytes(gdalType);
-    bytesPerPixel = bytesPerDatum * numRasters;
-    textureFormat = tiledatatype::getTextureFormat(numRasters, gdalType);
-}
-  
+    struct WriteData {
+        PixelRegion region;
+        size_t bytesPerLine;
+        size_t totalNumBytes;
+    } write;
+    
+    IODescription cut(PixelRegion::Side side, int pos);
+};
+
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__

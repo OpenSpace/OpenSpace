@@ -91,8 +91,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/textureformat.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatalayout.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
@@ -111,6 +109,13 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbyindex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbylevel.h
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/rawtiledatareader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/gdalrawtiledatareader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/simplerawtiledatareader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/gdalwrapper.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/iodescription.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/tiledatatype.h
 )
 
 set(SOURCE_FILES
@@ -164,9 +169,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatalayout.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledataset.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledatatype.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.cpp
@@ -182,6 +184,13 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbyindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbylevel.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/rawtiledatareader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/gdalrawtiledatareader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/simplerawtiledatareader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/gdalwrapper.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/iodescription.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/tiledatatype.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
@@ -208,31 +217,34 @@ create_new_module(
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-if (WIN32)
-    target_include_directories(
-        openspace-module-globebrowsing
-        SYSTEM PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include
-    )
+option(OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL "Use GDAL" ON)
 
-    target_link_libraries(
-        openspace-module-globebrowsing
-        ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
-    )
+if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
+    if (WIN32)
+        target_include_directories(
+            openspace-module-globebrowsing
+            SYSTEM PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/include
+        )
 
-    set(EXTERNAL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal201.dll" PARENT_SCOPE)
+        target_link_libraries(
+            openspace-module-globebrowsing
+            ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
+        )
+        set(EXTERNAL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal201.dll" PARENT_SCOPE)
+    else (WIN32)
+        find_package(GDAL REQUIRED)
 
-else (WIN32)
-    find_package(GDAL REQUIRED)
+        target_include_directories(
+            openspace-module-globebrowsing
+            SYSTEM PUBLIC
+            ${GDAL_INCLUDE_DIR}
+        )
 
-    target_include_directories(
-        openspace-module-globebrowsing
-        SYSTEM PUBLIC
-        ${GDAL_INCLUDE_DIR}
-    )
-
-    target_link_libraries(
-        openspace-module-globebrowsing
-        ${GDAL_LIBRARY}
-    )
-endif ()
+        target_link_libraries(
+            openspace-module-globebrowsing
+            ${GDAL_LIBRARY}
+        )
+    endif () # WIN32
+    target_compile_definitions(openspace-module-globebrowsing PRIVATE GLOBEBROWSING_USE_GDAL)
+endif () # OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL
