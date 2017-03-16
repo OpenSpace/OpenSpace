@@ -73,6 +73,7 @@ bool RenderableSite::initialize() {
 }
 
 bool RenderableSite::deinitialize() {
+	_renderableExplorationPath->deinitialize();
 	return false;
 }
 
