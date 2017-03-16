@@ -1,4 +1,3 @@
-#include "renderableexplorationpath.h"
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -28,6 +27,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/properties/scalar/boolproperty.h>
 
 #include <fstream>
 #include "ogr_geometry.h"
@@ -37,9 +37,15 @@
 namespace {
 	static const std::string _loggerCat = "RenderableExplorationPath";
 }
+
 namespace openspace {
-RenderableExplorationPath::RenderableExplorationPath(const ghoul::Dictionary& dictionary)
-	: Renderable(dictionary)
+namespace globebrowsing {
+
+	//class RenderableSite;
+
+RenderableExplorationPath::RenderableExplorationPath(const RenderableSite& owner, std::vector<glm::dvec2> coordinates)
+	: _owner(owner)
+	, _coordinates(coordinates)
 	, _pathShader(nullptr)
 	, _siteShader(nullptr)
 	, _globe(nullptr)
@@ -51,88 +57,14 @@ RenderableExplorationPath::RenderableExplorationPath(const ghoul::Dictionary& di
 	, _cameraToPointDistance(0.0)
 	, _isEnabled(properties::BoolProperty("enabled", "enabled", false))
 {
-	if (!dictionary.getValue("Filepath", _filePath)) {
-		throw std::runtime_error(std::string("Must define key Filepath"));
-	}
-
-	std::ifstream in(_filePath.c_str());
-
-	if (!in.is_open()) {
-		throw ghoul::FileNotFoundError(_filePath);
-	}
-
-	std::string json(std::istreambuf_iterator<char>(in), (std::istreambuf_iterator<char>()));
-	_isReady = extractCoordinates();
-	dictionary.getValue("Enabled", _isEnabled);
 }
 
-bool RenderableExplorationPath::extractCoordinates() {
-	GDALDataset *poDS;
-	poDS = (GDALDataset*)GDALOpenEx(_filePath.c_str(), GDAL_OF_VECTOR, NULL, NULL, NULL);
-	if (poDS == NULL) {
-		LERROR("Could not open file");
-	}
-
-	OGRLayer *poLayer = poDS->GetLayerByName("rover_locations");
-
-	_coordMap = std::map<int, SiteInformation>();
-
-	OGRFeature *poFeature;
-	poLayer->ResetReading();
-
-	while ((poFeature = poLayer->GetNextFeature()) != NULL) {
-		
-		// Extract coordinates from OGR
-		int site = poFeature->GetFieldAsInteger("site");
-		int sol = poFeature->GetFieldAsInteger("sol");
-		double lat = poFeature->GetFieldAsDouble("plcl");
-		double lon = poFeature->GetFieldAsDouble("longitude");
-
-		// Site allready exists
-		if (_coordMap.find(site) != _coordMap.end()) {
-			bool allreadyExists = false;
-			std::vector<glm::dvec2> tempVec = _coordMap.at(site).lonlatCoordinates;
-
-			// Check if the latitude and longitude allready exists in the vector
-			for (auto i : tempVec) {
-				if (i.x == lat && i.y == lon){
-					allreadyExists = true;
-					break;
-				}
-			}
-
-			// Only add new coordinates to prevent duplicates
-			if (allreadyExists == false)
-				_coordMap.at(site).lonlatCoordinates.push_back(glm::dvec2(lat, lon));
-		}
-		// Create a new site
-		else {
-			// Temp variables
-			SiteInformation tempSiteInformation;
-			std::vector<glm::dvec2> tempVec;
-
-			// Push back the new coordinates
-			tempVec.push_back(glm::dvec2(lat, lon));
-
-			// Save variables in the tmep struct
-			tempSiteInformation.sol = sol;
-			tempSiteInformation.lonlatCoordinates = tempVec;
-
-			_coordMap.insert(std::make_pair(site, tempSiteInformation));
-
-		}
-
-		OGRFeature::DestroyFeature(poFeature);
-	}
-	GDALClose(poDS);
-
-	return (_coordMap.size() != 0);
-}
+RenderableExplorationPath::~RenderableExplorationPath() {}
 
 bool RenderableExplorationPath::initialize() {
-
+	
 	// Getting the parent renderable to calculate rover model coordinates to world coordinates
-	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(this->owner()->name())->parent();
+	auto parent = OsEng.renderEngine().scene()->sceneGraphNode("RoverSite")->parent();
 	_globe = (globebrowsing::RenderableGlobe *)parent->renderable();
 
 	// Shaders for the path (GL_LINES)
@@ -160,7 +92,7 @@ bool RenderableExplorationPath::initialize() {
 	}
 
 	calculatePathModelCoordinates();
-	if (_filePath.empty() || _coordMap.size() == 0) return false;
+	if (_coordinates.size() == 0) return false;
 
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaioID);
@@ -179,7 +111,7 @@ bool RenderableExplorationPath::initialize() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(_stationPointsModelCoordinates[0]), 0);
 
-	glBindVertexArray(0);
+	glBindVertexArray(0); 
 
 	return true;
 }
@@ -201,8 +133,9 @@ bool RenderableExplorationPath::deinitialize() {
 	return false;
 }
 
-bool RenderableExplorationPath::isReady() const {
-	return _isReady;
+bool RenderableExplorationPath::isReady() const
+{
+	return true;
 }
 
 void RenderableExplorationPath::render(const RenderData& data) {
@@ -227,7 +160,7 @@ void RenderableExplorationPath::render(const RenderData& data) {
 
 	// The distance from the camera to the position on the ellipsoid
 	_cameraToPointDistance = glm::length(cameraPositionModelSpace - tempPos);
-	LERROR(_cameraToPointDistance);
+	//LERROR(_cameraToPointDistance);
 
 	if (_cameraToPointDistance < 10000.0) {
 		_isCloseEnough = true;
@@ -278,7 +211,7 @@ void RenderableExplorationPath::render(const RenderData& data) {
 void RenderableExplorationPath::update(const UpdateData& data) {
 
 	double heightToSurfaceCheck = _globe->getHeight(glm::dvec3(_stationPoints[50].stationPosition));
-	//LERROR(_cameraToPointDistance);
+
 	if(_isCloseEnough == true && _hasLoopedOnce == false) {
 
 		if(heightToSurfaceCheck < 0.0 || heightToSurfaceCheck > 6.0) {
@@ -293,7 +226,6 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 				// Small precission issue with heightToSurface which makes the loop run multiple times
 				if( heightToSurface > _stationPoints[i].previousStationHeight + 0.5 ||
 						heightToSurface < _stationPoints[i].previousStationHeight - 0.5) {
-					//LERROR(heightToSurfaceCheck);
 
 					// The direction in which the point is to be moved
 					glm::dvec3 directionFromSurfaceToPointModelSpace = _globe->ellipsoid().
@@ -320,7 +252,6 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 
 					if(heightToSurface < 0.0) {
 						tempPos += directionFromSurfaceToPointModelSpace * ( heightToSurface + 5.0 - _stationPoints[i].previousStationHeight);
-						//LERROR("Station: " << i << " Height: " << heightToSurface);
 					}
 
 					_stationPoints[i].previousStationHeight = heightToSurface;
@@ -329,7 +260,7 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 			}
 
 			// Clears and pushes the new position values into the vector used in the vertex buffer
-			// TODO: Find a way to only use one vector (e.g. either only _stationModelCoordinates or _stationPoints
+			// Really unecessary to use multiple vectors....
 			_stationPointsModelCoordinates.clear();
 			for (int i = 0; i < _stationPoints.size(); i++) {
 				_stationPointsModelCoordinates.push_back(glm::vec4(_stationPoints[i].stationPosition));
@@ -357,18 +288,17 @@ void RenderableExplorationPath::calculatePathModelCoordinates() {
 	globebrowsing::Geodetic2 geo;
 	glm::dvec3 positionModelSpace;
 	StationInformation k;
-	for (auto site : _coordMap) {
-		for (auto position : site.second.lonlatCoordinates) {
 
-			geo = globebrowsing::Geodetic2{ position.x, position.y } / 180 * glm::pi<double>();
-			positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
-			_stationPointsModelCoordinates.push_back(glm::dvec4(positionModelSpace, 1.0f));
+	for (auto position : _coordinates) {
+		geo = globebrowsing::Geodetic2{ position.x, position.y } / 180 * glm::pi<double>();
+		positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
+		_stationPointsModelCoordinates.push_back(glm::dvec4(positionModelSpace, 1.0f));
 
-			k.previousStationHeight = 0.0;
-			k.stationPosition = glm::dvec4(positionModelSpace, 1.0);
-			_stationPoints.push_back(k);
-		}
+		k.previousStationHeight = 0.0;
+		k.stationPosition = glm::dvec4(positionModelSpace, 1.0);
+		_stationPoints.push_back(k);
 	}
 }
 
+} // namespace globebrowsing
 } // namespace openspace

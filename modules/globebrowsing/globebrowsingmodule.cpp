@@ -35,8 +35,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
-#include <modules/globebrowsing/models/renderableexplorationpath.h>
-#include <modules/globebrowsing/models/renderablesol.h>
+#include <modules/globebrowsing/models/renderablesite.h>
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -54,8 +53,7 @@ void GlobeBrowsingModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
-	fRenderable->registerClass<RenderableExplorationPath>("RenderableExplorationPath");
-	fRenderable->registerClass<RenderableSol>("RenderableSol");
+	fRenderable->registerClass<globebrowsing::RenderableSite>("RenderableSite");
 
 
     // add Tile Provider factory

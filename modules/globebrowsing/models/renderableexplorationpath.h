@@ -26,13 +26,16 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/opengl/programobject.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/models/renderablesite.h>
+
 
 #include <map>
 
 namespace openspace {
+namespace globebrowsing {
+	class RenderableSite;
 
 class RenderableExplorationPath : public Renderable {
 public:
@@ -42,22 +45,16 @@ public:
 		double previousStationHeight;
 	};
 
-	struct SiteInformation {
-		int sol;
-		std::vector<glm::dvec2> lonlatCoordinates;
-	};
-
-	RenderableExplorationPath(const ghoul::Dictionary& dictionary);
+	RenderableExplorationPath(const RenderableSite& owner, std::vector<glm::dvec2> coordinates);
+	~RenderableExplorationPath();
 	
 	bool initialize() override;
 	bool deinitialize() override;
-
 	bool isReady() const override;
 
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
 
-	bool extractCoordinates();
 private:
 	void calculatePathModelCoordinates();
 
@@ -65,7 +62,6 @@ private:
 	std::unique_ptr<ghoul::opengl::ProgramObject> _siteShader;
 	properties::BoolProperty _isEnabled;
 
-	std::string _filePath;
 	bool _isReady;
 
 	std::vector<glm::vec4> _stationPointsModelCoordinates;
@@ -73,7 +69,7 @@ private:
 
 	globebrowsing::RenderableGlobe* _globe;
 
-	std::map<int, SiteInformation> _coordMap;
+	std::vector<glm::dvec2> _coordinates;
 
 	float _fading;
 	GLuint _vaioID;
@@ -82,7 +78,10 @@ private:
 	bool _hasLoopedOnce;
 	bool _isCloseEnough;
 
+	const RenderableSite& _owner;
+
 };
+}
 }
 
 #endif //__OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__
