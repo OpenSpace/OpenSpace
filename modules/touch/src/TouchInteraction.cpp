@@ -59,6 +59,7 @@ TouchInteraction::TouchInteraction()
 	_baseSensitivity{ 0.1 }, _baseFriction{ 0.02 },
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
 	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction },
+	_centroid{ glm::dvec3(0.0) },
 	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.3 }, 
 	_minHeightFromSurface{ 0.0 }
 {
@@ -77,14 +78,13 @@ TouchInteraction::~TouchInteraction() { }
 
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
 	TuioCursor cursor = list.at(0);
-	glm::dvec3 centroid;
 
 	_interactionMode = interpret(list, lastProcessed);
 	if (_interactionMode != ROT) {
-		centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
-		centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](double y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
+		_centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
+		_centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](double y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
 	}
-		
+	
 	switch (_interactionMode) {
 	case ROT: { // add rotation velocity
 		_vel.globalRot += glm::dvec2(cursor.getXSpeed(), cursor.getYSpeed()) * _sensitivity.globalRot;
@@ -92,10 +92,10 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 	}
 	case PINCH: { // add zooming velocity
 		double distance = std::accumulate(list.begin(), list.end(), 0.0, [&](double d, const TuioCursor& c) {
-			return d + sqrt(pow(c.getX() - centroid.x, 2) + pow(c.getY() - centroid.y, 2));
+			return d + c.getDistance(_centroid.x, _centroid.y);
 		});
 		double lastDistance = std::accumulate(lastProcessed.begin(), lastProcessed.end(), 0.0f, [&](float d, const Point& p) {
-			return d + sqrt(pow(p.second.getX() - centroid.x, 2) + pow(p.second.getY() - centroid.y, 2));
+			return d + p.second.getDistance(_centroid.x, _centroid.y);
 		});
 		
 		double zoomFactor = (distance - lastDistance) * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
@@ -107,13 +107,35 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		break;
 	}
 	case ROLL: { // add global roll rotation velocity
-		double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [](double s, const TuioCursor& c) {
+		/*double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [](double s, const TuioCursor& c) {
 			return s + c.getXSpeed();
+		});*/
+		double minDiff = 1000;
+		int id = 0;
+		for (const TuioCursor& c : list) {
+			TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
+			 double diff = c.getX() - point.getX() + c.getY() - point.getY();
+			 if (std::abs(diff) < std::abs(minDiff)) {
+				 minDiff = diff;
+				 id = c.getSessionID();
+			 }
+		}
+		auto cTemp = find_if(list.begin(), list.end(), [&id](const TuioCursor& c) { return c.getSessionID() == id; });
+		glm::dvec2 thumb = glm::dvec2(cTemp->getX(), cTemp->getY());
+		double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
+			auto found = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); });
+			double res = diff;
+			if (found != lastProcessed.end())
+				res += c.getAngleDegrees(thumb.x, thumb.y) - found->second.getAngleDegrees(thumb.x, thumb.y);
+			std::cout << res << "\n";
+			return res;
 		});
-		_vel.localRoll += rollFactor * _sensitivity.localRoll;
+		std::cout << "Angle: " << rollFactor << "\n";
+		//_vel.localRoll += rollFactor * _sensitivity.localRoll;
 		break;
 	}
 	case PICK: { // pick something in the scene as focus node
+		//if(!cursor.isMoving())
 		break;
 	}
 	default:
@@ -142,7 +164,7 @@ int TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::
 	else {
 		if (std::abs(dist - lastDist) / list.size() < 0.1 && list.size() == 2)
 			return PAN;
-		//else if (list.size() == 3)
+		//else if (list.size() == 5)
 			//return ROLL;
 		else
 			return PINCH;

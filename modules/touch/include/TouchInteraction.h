@@ -106,6 +106,7 @@ class TouchInteraction : public properties::PropertyOwner
 		int _interactionMode;
 		double _baseSensitivity;
 		double _baseFriction;
+		glm::dvec3 _centroid;
 
 		VelocityStates _vel;
 		ScaleFactor _friction;
