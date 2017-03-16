@@ -95,7 +95,9 @@ class TouchInteraction : public properties::PropertyOwner
 
 	private:
 		Camera* _camera;
-		SceneGraphNode* _focusNode;
+		SceneGraphNode* _focusNode = nullptr;
+		properties::StringProperty _origin;
+
 		globebrowsing::RenderableGlobe* _globe;
 		glm::dvec3 _previousFocusNodePosition;
 		glm::dquat _previousFocusNodeRotation;

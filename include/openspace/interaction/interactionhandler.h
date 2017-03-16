@@ -97,6 +97,7 @@ public:
     ghoul::Dictionary getCameraStateDictionary();
     SceneGraphNode* const focusNode() const;
     Camera* const camera() const;
+	std::shared_ptr<InteractionMode> interactionmode();
     const InputState& inputState() const;
 
     /**

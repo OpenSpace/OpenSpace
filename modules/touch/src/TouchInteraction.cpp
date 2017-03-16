@@ -25,6 +25,7 @@
 
 #include <modules/touch/include/TouchInteraction.h>
 
+#include <openspace/interaction/interactionmode.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
@@ -52,13 +53,23 @@ using namespace TUIO;
 using namespace openspace;
 
 TouchInteraction::TouchInteraction()
-	: _focusNode{ OsEng.interactionHandler().focusNode() }, _camera{ OsEng.interactionHandler().camera() },
+	: properties::PropertyOwner("TouchInteraction"),
+	_origin("origin", "Origin", ""), _camera{ OsEng.interactionHandler().camera() },
 	_baseSensitivity{ 0.1 }, _baseFriction{ 0.02 },
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
 	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction },
-	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.3 },
-	_previousFocusNodePosition{ glm::dvec3(0.0) }, _minHeightFromSurface{ 6.6 * 1000000.0 }
-	{}
+	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.3 }, _minHeightFromSurface{ 6.6 * 1000000.0 }
+{
+	_origin.onChange([this]() {
+		SceneGraphNode* node = sceneGraphNode(_origin.value());
+		if (!node) {
+			LWARNING("Could not find a node in scenegraph called '" << _origin.value() << "'");
+			return;
+		}
+		setFocusNode(node);
+	});
+
+}
 
 TouchInteraction::~TouchInteraction() { }
 
@@ -140,88 +151,96 @@ int TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::
 void TouchInteraction::step(double dt) {
 	using namespace glm;
 
-	// Create variables from current state
-	_focusNode = OsEng.interactionHandler().focusNode();
-	dvec3 camPos = _camera->positionVec3();
-	dvec3 centerPos = _focusNode->worldPosition();
-	if (length(_previousFocusNodePosition) == 0) // ugly check to not make startup freak out
+	if (_focusNode) {
+		// Create variables from current state
+		dvec3 camPos = _camera->positionVec3();
+
+		// Follow the focus node
+		dquat totRot = _camera->rotationQuaternion();
+		dvec3 centerPos = _focusNode->worldPosition();
+		dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
 		_previousFocusNodePosition = centerPos;
+		camPos += focusNodeDiff;
 
-	// Follow the focus node
-	dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
-	_previousFocusNodePosition = centerPos;
-	camPos += focusNodeDiff;
+		dvec3 directionToCenter = normalize(centerPos - camPos);
+		dvec3 centerToCamera = camPos - centerPos;
+		dvec3 lookUp = _camera->lookUpVectorWorldSpace();
+		dvec3 camDirection = _camera->viewDirectionWorldSpace();
 
-	dvec3 directionToCenter = normalize(centerPos - camPos);
-	dvec3 centerToCamera = camPos - centerPos;
-	dvec3 lookUp = _camera->lookUpVectorWorldSpace();
-	dvec3 camDirection = _camera->viewDirectionWorldSpace();
-
-	// Make a representation of the rotation quaternion with local and global rotations
-	dmat4 lookAtMat = lookAt(
-		dvec3(0, 0, 0),
-		directionToCenter,
-		normalize(camDirection + lookUp)); // To avoid problem with lookup in up direction
-	dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
-	dquat localCamRot = inverse(globalCamRot) * _camera->rotationQuaternion();
-
-
-	double boundingSphere = _focusNode->boundingSphere().lengthf();
-	double minHeightAboveBoundingSphere = 1;
-	dvec3 centerToBoundingSphere;
-
-	{ // Roll
-		dquat camRollRot = angleAxis(_vel.localRoll*dt, dvec3(0.0, 0.0, 1.0));
-		localCamRot = localCamRot * camRollRot;
-	}
-	{ // Panning (local rotation)
-		dvec3 eulerAngles(-_vel.localRot.y*dt, -_vel.localRot.x*dt, 0);
-		dquat rotationDiff = dquat(eulerAngles);
-		localCamRot = localCamRot * rotationDiff;
-	}
-	{ // Orbit (global rotation)
-		dvec3 eulerAngles(_vel.globalRot.y*dt, _vel.globalRot.x*dt, 0);
-		dquat rotationDiffCamSpace = dquat(eulerAngles);
-
-		dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace * inverse(globalCamRot);
-		dvec3 rotationDiffVec3 = centerToCamera * rotationDiffWorldSpace - centerToCamera;
-		camPos += rotationDiffVec3;
-
-		directionToCenter = normalize(-(camPos - centerPos));
-		dvec3 lookUpWhenFacingCenter = globalCamRot * dvec3(_camera->lookUpVectorCameraSpace());
+		// Make a representation of the rotation quaternion with local and global rotations
 		dmat4 lookAtMat = lookAt(
 			dvec3(0, 0, 0),
 			directionToCenter,
-			lookUpWhenFacingCenter);
-		globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
-	}
-	{ // Zooming
-		centerToBoundingSphere = -directionToCenter * boundingSphere;
-		dvec3 centerToCamera = camPos - centerPos;
-		if (length(_vel.zoom*dt) < length(centerToCamera - centerToBoundingSphere) && length(centerToCamera + directionToCenter*_vel.zoom*dt) > length(centerToBoundingSphere)) // should get boundingsphere from focusnode
-			camPos += directionToCenter*_vel.zoom*dt;
-		else
-			_vel.zoom = 0.0;
-	}
-	{ // Roll around sphere normal
-		dquat camRollRot = angleAxis(_vel.globalRoll*dt, -directionToCenter);
-		globalCamRot = camRollRot * globalCamRot;
-	}
-	{ // Push up to surface
-		dvec3 sphereSurfaceToCamera = camPos - (centerPos + centerToBoundingSphere);
-		double distFromSphereSurfaceToCamera = length(sphereSurfaceToCamera);
-		camPos += -directionToCenter * max(minHeightAboveBoundingSphere - distFromSphereSurfaceToCamera, 0.0);
-	}
+			normalize(camDirection + lookUp)); // To avoid problem with lookup in up direction
+		dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
+		dquat localCamRot = inverse(globalCamRot) * totRot;
 
-	double dist = length(camPos - (centerPos + centerToBoundingSphere));
-	configSensitivities(dist);
-	decelerate();
 
-	// Update the camera state
-	_camera->setPositionVec3(camPos);
-	_camera->setRotation(globalCamRot * localCamRot);
+		double boundingSphere = _focusNode->boundingSphere().lengthf();
+		double minHeightAboveBoundingSphere = 1;
+		dvec3 centerToBoundingSphere;
 
-	
+		{ // Roll
+			dquat camRollRot = angleAxis(_vel.localRoll*dt, dvec3(0.0, 0.0, 1.0));
+			localCamRot = localCamRot * camRollRot;
+		}
+		{ // Panning (local rotation)
+			dvec3 eulerAngles(-_vel.localRot.y*dt, -_vel.localRot.x*dt, 0);
+			dquat rotationDiff = dquat(eulerAngles);
+			localCamRot = localCamRot * rotationDiff;
+		}
+		{ // Orbit (global rotation)
+			dvec3 eulerAngles(_vel.globalRot.y*dt, _vel.globalRot.x*dt, 0);
+			dquat rotationDiffCamSpace = dquat(eulerAngles);
+
+			dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace * inverse(globalCamRot);
+			dvec3 rotationDiffVec3 = centerToCamera * rotationDiffWorldSpace - centerToCamera;
+			camPos += rotationDiffVec3;
+
+			dvec3 centerToCamera = camPos - centerPos;
+			directionToCenter = normalize(-centerToCamera);
+			dvec3 lookUpWhenFacingCenter = globalCamRot * dvec3(_camera->lookUpVectorCameraSpace());
+			dmat4 lookAtMat = lookAt(
+				dvec3(0, 0, 0),
+				directionToCenter,
+				lookUpWhenFacingCenter);
+			globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
+		}
+		{ // Zooming
+			centerToBoundingSphere = -directionToCenter * boundingSphere;
+			dvec3 centerToCamera = camPos - centerPos;
+			if (length(_vel.zoom*dt) < length(centerToCamera - centerToBoundingSphere) && length(centerToCamera + directionToCenter*_vel.zoom*dt) > length(centerToBoundingSphere)) // should get boundingsphere from focusnode
+				camPos += directionToCenter*_vel.zoom*dt;
+			else
+				_vel.zoom = 0.0;
+		}
+		{ // Roll around sphere normal
+			dquat camRollRot = angleAxis(_vel.globalRoll*dt, -directionToCenter);
+			globalCamRot = camRollRot * globalCamRot;
+		}
+		{ // Push up to surface
+			dvec3 sphereSurfaceToCamera = camPos - (centerPos + centerToBoundingSphere);
+			double distFromSphereSurfaceToCamera = length(sphereSurfaceToCamera);
+			camPos += -directionToCenter * max(minHeightAboveBoundingSphere - distFromSphereSurfaceToCamera, 0.0);
+		}
+		
+		std::shared_ptr<interaction::GlobeBrowsingInteractionMode> gbim =
+			std::dynamic_pointer_cast<interaction::GlobeBrowsingInteractionMode> (OsEng.interactionHandler().interactionmode());
+		if (gbim) {
+			double dist = length(camPos - (centerPos + centerToBoundingSphere));
+			configSensitivities(dist);
+		}
+		decelerate();
+
+		// Update the camera state
+		_camera->setPositionVec3(camPos);
+		_camera->setRotation(globalCamRot * localCamRot);
+	}
+	else {
+		setFocusNode(OsEng.interactionHandler().focusNode());
+		std::cout << "focus node set\n";
+	}
+		
 }
 
 
@@ -274,6 +293,11 @@ void TouchInteraction::setCamera(Camera* camera) {
 }
 void TouchInteraction::setFocusNode(SceneGraphNode* focusNode) {
 	_focusNode = focusNode;
+
+	if (_focusNode != nullptr) {
+		_previousFocusNodePosition = _focusNode->worldPosition();
+		_previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
+	}
 }
 void TouchInteraction::setFriction(double friction) {
 	_baseFriction = std::max(friction, 0.0);

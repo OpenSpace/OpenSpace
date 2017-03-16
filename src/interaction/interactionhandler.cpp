@@ -268,6 +268,10 @@ Camera* const InteractionHandler::camera() const {
     return _camera;
 }
 
+std::shared_ptr<InteractionMode> InteractionHandler::interactionmode() {
+	return _currentInteractionMode;
+}
+
 const InputState& InteractionHandler::inputState() const {
     return *_inputState;
 }

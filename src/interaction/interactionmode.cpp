@@ -481,8 +481,8 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
         }
       
         // Update the camera state
-        camera.setPositionVec3(camPos);
-        camera.setRotation(globalCameraRotation * localCameraRotation);
+        //camera.setPositionVec3(camPos);
+        //camera.setRotation(globalCameraRotation * localCameraRotation);
     }
 }
 
@@ -681,8 +681,15 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         }
         
         // Update the camera state
-        camera.setPositionVec3(camPos); 
-        camera.setRotation(globalCameraRotation * localCameraRotation);
+        //camera.setPositionVec3(camPos); 
+        //camera.setRotation(globalCameraRotation * localCameraRotation);
+
+		std::cout << "gRot: " << "(" << _mouseStates->synchedGlobalRotationMouseVelocity().x << "," << _mouseStates->synchedGlobalRotationMouseVelocity().y << ")"
+			<< ", lRot: " << "(" << _mouseStates->synchedLocalRotationMouseVelocity().x << "," << _mouseStates->synchedLocalRotationMouseVelocity().y << ")"
+			<< ", Zoom: " << "(" << _mouseStates->synchedTruckMovementMouseVelocity().x << "," << _mouseStates->synchedTruckMovementMouseVelocity().y << ")"
+			<< ", gRoll: " << "(" << _mouseStates->synchedGlobalRollMouseVelocity().x << "," << _mouseStates->synchedGlobalRollMouseVelocity().y << ")"
+			<< ", lRoll: " << "(" << _mouseStates->synchedLocalRollMouseVelocity().x << "," << _mouseStates->synchedLocalRollMouseVelocity().y << ")"
+			<< "\n";
     }
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 }
