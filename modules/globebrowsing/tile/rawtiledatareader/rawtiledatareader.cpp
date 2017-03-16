@@ -50,6 +50,10 @@
 #include <unordered_map>
 #include <limits>
 
+#ifndef M_PI // This definition is not in the standard
+#define M_PI 3.14159265358979323846
+#endif
+
 namespace {
     const std::string _loggerCat = "RawTileDataReader";
 }
@@ -131,8 +135,9 @@ TileDepthTransform RawTileDataReader::getDepthTransform() {
 
 std::array<double, 6> RawTileDataReader::getGeoTransform() const {
     std::array<double, 6> padfTransform;
-    GeodeticPatch globalCoverage(Geodetic2(0,0), Geodetic2(M_PI / 2, M_PI));
-    padfTransform[1] = Angle<double>::fromRadians(
+	
+    GeodeticPatch globalCoverage(Geodetic2(0,0), Geodetic2(M_PI / 2.0, M_PI));
+	padfTransform[1] = Angle<double>::fromRadians(
         globalCoverage.size().lon).asDegrees() / rasterXSize();
     padfTransform[5] = -Angle<double>::fromRadians(
         globalCoverage.size().lat).asDegrees() / rasterYSize();
