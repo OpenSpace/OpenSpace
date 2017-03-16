@@ -22,11 +22,14 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <modules/globebrowsing/models/renderablesite.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/filesystem/filesystem.h>
 
 #include <fstream>
 #include "ogr_geometry.h"
 #include "ogrsf_frmts.h"
 #include <gdal_priv.h>
+#include <iostream>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -42,6 +45,7 @@ namespace globebrowsing {
 
 RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
+	, _textureTxtPath("textureTxtpath", "Texture txt Path")
 	, _generalProperties({
 		BoolProperty("enabled", "enabled", true)
 	})
@@ -61,6 +65,25 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	std::string json(std::istreambuf_iterator<char>(in), (std::istreambuf_iterator<char>()));
 	_isReady = extractCoordinates();
 
+	// Get absolute path to txt file containing list of all textures
+	std::string name;
+	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
+	ghoul_assert(success, "Name was not passed to RenderableSite");
+
+	std::string textureTxtPath = "";
+	success = dictionary.getValue("TerrainTextures.Filepath", textureTxtPath);
+
+	bool texturePathsAreLoaded;
+	if (success) {
+		_textureTxtPath = absPath(textureTxtPath);
+		texturePathsAreLoaded = loadTexturePaths();
+	}
+	
+	if (texturePathsAreLoaded) {
+		// Do something
+	}
+		
+	
 	if (_isReady) {
 		_renderableExplorationPath = std::make_shared<RenderableExplorationPath>(*this, _pathCoordinates);
 	}
@@ -89,6 +112,23 @@ void RenderableSite::render(const RenderData& data) {
 void RenderableSite::update(const UpdateData & data) {
 	_renderableExplorationPath->update(data);
 
+}
+
+bool RenderableSite::loadTexturePaths()
+{
+	std::string absolutePath;
+	std::ifstream myfile(_textureTxtPath);
+	if (myfile.is_open()) {
+		while (std::getline(myfile, absolutePath)) {
+			LERROR(absolutePath);
+			_texturePaths.push_back(absolutePath);
+		}
+		myfile.close();
+	}
+	else
+		LERROR("Could not open file");
+
+	return (_texturePaths.size() != 0);
 }
 
 bool RenderableSite::extractCoordinates() {

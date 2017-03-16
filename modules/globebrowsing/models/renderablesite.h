@@ -28,6 +28,10 @@
 #include <openspace/rendering/renderable.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/models/renderableexplorationpath.h>
+#include <ghoul/opengl/texture.h>
+#include <openspace/properties/stringproperty.h>
+
+
 
 namespace openspace {
 namespace globebrowsing {
@@ -63,6 +67,8 @@ public:
 	void update(const UpdateData& data) override;
 
 private:
+	bool loadTexturePaths();
+
 	std::string _filePath;
 
 	//::unique_ptr<ghoul::opengl::ProgramObject> _pathShader;
@@ -72,6 +78,10 @@ private:
 
 	std::vector<glm::dvec2> _pathCoordinates;
 	std::vector<glm::dvec2> _siteCoordinates;
+
+	properties::StringProperty _textureTxtPath;
+	std::vector<std::string> _texturePaths;
+
 
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
 
