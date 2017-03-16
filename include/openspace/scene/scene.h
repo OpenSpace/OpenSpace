@@ -69,7 +69,8 @@ public:
     void initialize();
 
     /**
-     * Load the scenegraph from the provided folder
+     * Clear the scene graph,
+     * i.e. set the root node to nullptr and deallocate all scene graph nodes.
      */
     void clear();
 
@@ -79,7 +80,7 @@ public:
     void setRoot(std::unique_ptr<SceneGraphNode> root);
 
     /**
-     * Set the root node of the scene
+     * Set the camera of the scene
      */
     void setCamera(std::unique_ptr<Camera> camera);
 

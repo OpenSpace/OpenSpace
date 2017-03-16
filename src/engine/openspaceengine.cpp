@@ -106,7 +106,7 @@ namespace {
 namespace openspace {
 
 namespace properties {
-class Property;
+    class Property;
 }
 
 class Scene;

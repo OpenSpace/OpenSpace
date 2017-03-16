@@ -45,13 +45,12 @@ public:
             const std::string& nodeName,
             const std::string& parentName,
             const std::vector<std::string>& deps,
-            std::unique_ptr<SceneGraphNode> n)
-        {
-            name = nodeName;
-            parent = parentName;
-            dependencies = deps;
-            node = std::move(n);
-        }
+            std::unique_ptr<SceneGraphNode> n
+        )
+            : name(nodeName)
+            , parent(parentName)
+            , dependencies(deps)
+            , node(std::move(n)) {}
 
         std::string name;
         std::string parent;
@@ -62,11 +61,10 @@ public:
     struct LoadedCamera {
         LoadedCamera(
             const std::string& parentName,
-            std::unique_ptr<Camera> c)
-        {
-            parent = parentName;
-            camera = std::move(c);
-        }
+            std::unique_ptr<Camera> c
+        )
+            : parent(parentName)
+            , camera(std::move(c)) {}
         std::string parent;
         std::unique_ptr<Camera> camera;
     };

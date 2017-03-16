@@ -488,7 +488,6 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
     }
 }
 
-
 const std::vector<SceneGraphNode*>& SceneGraphNode::dependencies() const {
     return _dependencies;
 }
