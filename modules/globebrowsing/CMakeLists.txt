@@ -48,15 +48,15 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablepanoramic.h
-
+	
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
 
+	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesol.h
-
+	
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
@@ -123,7 +123,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/frustumculler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/horizonculler.cpp
 
-
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.cpp
@@ -135,14 +134,13 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablepanoramic.cpp
 
-
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
 
+	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesol.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
