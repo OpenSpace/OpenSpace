@@ -54,11 +54,13 @@ using namespace openspace;
 
 TouchInteraction::TouchInteraction()
 	: properties::PropertyOwner("TouchInteraction"),
-	_origin("origin", "Origin", ""), _camera{ OsEng.interactionHandler().camera() },
+	_origin("origin", "Origin", ""), 
+	_camera{ OsEng.interactionHandler().camera() },
 	_baseSensitivity{ 0.1 }, _baseFriction{ 0.02 },
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
 	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction },
-	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.3 }, _minHeightFromSurface{ 6.6 * 1000000.0 }
+	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.3 }, 
+	_minHeightFromSurface{ 0.0 }
 {
 	_origin.onChange([this]() {
 		SceneGraphNode* node = sceneGraphNode(_origin.value());
