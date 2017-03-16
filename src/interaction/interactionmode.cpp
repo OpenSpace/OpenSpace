@@ -42,6 +42,7 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #endif
 
+#include <glm/gtx/string_cast.hpp>
 
 namespace {
     const std::string _loggerCat = "InteractionMode";
@@ -395,7 +396,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
         // Follow focus nodes movement
         dvec3 centerPos = _focusNode->worldPosition();
         dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
-        _previousFocusNodePosition = centerPos;
+		_previousFocusNodePosition = centerPos;
         camPos += focusNodeDiff;
 
         dquat totalRotation = camera.rotationQuaternion();
@@ -481,8 +482,8 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
         }
       
         // Update the camera state
-        //camera.setPositionVec3(camPos);
-        //camera.setRotation(globalCameraRotation * localCameraRotation);
+        camera.setPositionVec3(camPos);
+        camera.setRotation(globalCameraRotation * localCameraRotation);
     }
 }
 
@@ -681,15 +682,8 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         }
         
         // Update the camera state
-        //camera.setPositionVec3(camPos); 
-        //camera.setRotation(globalCameraRotation * localCameraRotation);
-
-		std::cout << "gRot: " << "(" << _mouseStates->synchedGlobalRotationMouseVelocity().x << "," << _mouseStates->synchedGlobalRotationMouseVelocity().y << ")"
-			<< ", lRot: " << "(" << _mouseStates->synchedLocalRotationMouseVelocity().x << "," << _mouseStates->synchedLocalRotationMouseVelocity().y << ")"
-			<< ", Zoom: " << "(" << _mouseStates->synchedTruckMovementMouseVelocity().x << "," << _mouseStates->synchedTruckMovementMouseVelocity().y << ")"
-			<< ", gRoll: " << "(" << _mouseStates->synchedGlobalRollMouseVelocity().x << "," << _mouseStates->synchedGlobalRollMouseVelocity().y << ")"
-			<< ", lRoll: " << "(" << _mouseStates->synchedLocalRollMouseVelocity().x << "," << _mouseStates->synchedLocalRollMouseVelocity().y << ")"
-			<< "\n";
+        camera.setPositionVec3(camPos); 
+        camera.setRotation(globalCameraRotation * localCameraRotation);
     }
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 }

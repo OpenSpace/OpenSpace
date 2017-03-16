@@ -160,7 +160,7 @@ void TouchInteraction::step(double dt) {
 		dvec3 centerPos = _focusNode->worldPosition();
 		dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
 		_previousFocusNodePosition = centerPos;
-		camPos += focusNodeDiff;
+		//camPos += focusNodeDiff;
 
 		dvec3 directionToCenter = normalize(centerPos - camPos);
 		dvec3 centerToCamera = camPos - centerPos;
@@ -236,10 +236,8 @@ void TouchInteraction::step(double dt) {
 		_camera->setPositionVec3(camPos);
 		_camera->setRotation(globalCamRot * localCamRot);
 	}
-	else {
+	else
 		setFocusNode(OsEng.interactionHandler().focusNode());
-		std::cout << "focus node set\n";
-	}
 		
 }
 
