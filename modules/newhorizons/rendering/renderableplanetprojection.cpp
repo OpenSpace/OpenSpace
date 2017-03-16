@@ -486,7 +486,9 @@ bool RenderablePlanetProjection::loadTextures() {
     using ghoul::opengl::Texture;
     _baseTexture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
+        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_colorTexturePath)
+        );
         if (_baseTexture) {
             ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
             _baseTexture->uploadTexture();
@@ -496,7 +498,9 @@ bool RenderablePlanetProjection::loadTextures() {
 
     _heightMapTexture = nullptr;
     if (_heightMapTexturePath.value() != "") {
-        _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(_heightMapTexturePath);
+        _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_heightMapTexturePath)
+        );
         if (_heightMapTexture) {
             ghoul::opengl::convertTextureFormat(*_heightMapTexture, Texture::Format::RGB);
             _heightMapTexture->uploadTexture();

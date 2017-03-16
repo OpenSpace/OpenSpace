@@ -170,8 +170,6 @@ bool RenderableModel::deinitialize() {
 void RenderableModel::render(const RenderData& data) {
     _programObject->activate();
     
-    double lt;
-    
     // Fading
     if (_performFade && _fading > 0.f) {
         _fading = _fading - 0.01f;
@@ -243,7 +241,6 @@ void RenderableModel::update(const UpdateData& data) {
     //    _time = futureTime;
     //}
 
-    double  lt;
     _sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 }
 

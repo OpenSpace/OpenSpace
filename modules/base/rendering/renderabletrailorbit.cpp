@@ -132,7 +132,7 @@ documentation::Documentation RenderableTrailOrbit::Documentation() {
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
     , _period("period", "Period in days", 0.0, 0.0, 1e9)
-    , _resolution("resolution", "Number of Samples along Orbit", 10000, 1, 1e6)
+    , _resolution("resolution", "Number of Samples along Orbit", 10000, 1, 1000000)
     , _needsFullSweep(true)
     , _indexBufferDirty(true)
 {
@@ -148,7 +148,7 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
 
     // Period is in days
     using namespace std::chrono;
-    int factor = duration_cast<seconds>(hours(24)).count();
+    long long factor = duration_cast<seconds>(hours(24)).count();
     _period = dictionary.value<double>(KeyPeriod) * factor;
     _period.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
     addProperty(_period);
@@ -349,7 +349,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         }
 
         // See how many points we need to drop
-        int nNewPoints = floor(delta / secondsPerPoint);
+        int nNewPoints = static_cast<int>(floor(delta / secondsPerPoint));
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
@@ -384,7 +384,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     else {
         // See how many new points needs to be generated. Delta is negative, so we need
         // to invert the ratio
-        int nNewPoints = -(floor(delta / secondsPerPoint));
+        int nNewPoints = -(static_cast<int>(floor(delta / secondsPerPoint)));
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array

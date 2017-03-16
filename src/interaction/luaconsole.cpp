@@ -85,9 +85,9 @@ void LuaConsole::initialize() {
             int64_t length;
             file.read(reinterpret_cast<char*>(&length), sizeof(int64_t));
 
-            std::vector<char> tmp(length + 1);
+            std::vector<char> tmp(length);
             file.read(tmp.data(), length);
-            tmp[length] = '\0';
+            //tmp[length] = '\0';
             _commandsHistory.emplace_back(std::string(tmp.begin(), tmp.end()));
         }
 
@@ -384,7 +384,7 @@ void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
         return;
     }
 
-    addToCommand(std::string(1, codepoint));
+    addToCommand(std::string(1, static_cast<const char>(codepoint)));
 }
 
 void LuaConsole::render() {

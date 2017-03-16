@@ -36,6 +36,8 @@
 #include <SGCTOpenVR.h>
 #endif // OPENVR_SUPPORT
 
+#define DEVELOPER_MODE
+
 namespace {
     
 const char* _loggerCat = "main";
@@ -395,7 +397,13 @@ int main_main(int argc, char** argv) {
 } // namespace
 
 int main(int argc, char** argv) {
+    // If we are working as a developer, we don't want to catch the exceptions in order to
+    // find the locations where the exceptions are raised.
+    // If we are not in developer mode, we want to catch and at least log the error before
+    // dying
+#ifdef DEVELOPER_MODE
     return main_main(argc, argv);
+#else
     // We wrap the actual main function in a try catch block so that we can get and print
     // some additional information in case an exception is raised
     try {
@@ -422,4 +430,5 @@ int main(int argc, char** argv) {
         LogMgr.flushLogs();
         return EXIT_FAILURE;
     }
+#endif // DEVELOPER_MODE
 }

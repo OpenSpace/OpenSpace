@@ -120,7 +120,7 @@ class ParallelConnection {
         */
     static scripting::LuaLibrary luaLibrary();
     Status status();
-    size_t nConnections();
+    int nConnections();
     std::shared_ptr<ghoul::Event<>> connectionEvent();
 
             

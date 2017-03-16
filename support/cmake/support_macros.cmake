@@ -317,6 +317,10 @@ function (handle_option_tests)
             "${OPENSPACE_BASE_DIR}/tests"
             "${OPENSPACE_EXT_DIR}/ghoul/ext/googletest/googletest/include"
         )
+        target_compile_definitions(OpenSpaceTest PUBLIC
+            "GHL_THROW_ON_ASSERT"
+            "GTEST_HAS_TR1_TUPLE=0"
+        )
         target_link_libraries(OpenSpaceTest gtest libOpenSpace)
 
         if (MSVC)

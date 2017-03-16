@@ -41,7 +41,7 @@ int setPort(lua_State* L) {
 
     bool isNumber = (lua_isnumber(L, -1) != 0);
     if (isNumber) {
-        int value = lua_tonumber(L, -1);
+        int value = static_cast<int>(lua_tonumber(L, -1));
         std::string port = std::to_string(value);
         if (OsEng.windowWrapper().isMaster()) {
             OsEng.parallelConnection().setPort(port);
@@ -53,8 +53,6 @@ int setPort(lua_State* L) {
             lua_typename(L, LUA_TNUMBER), luaL_typename(L, -1));
         return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
-
-    return 0;
 }
 
 int setAddress(lua_State* L) {
@@ -78,8 +76,6 @@ int setAddress(lua_State* L) {
             lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
         return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
-
-    return 0;
 }
 
 int setPassword(lua_State* L) {
@@ -103,8 +99,6 @@ int setPassword(lua_State* L) {
             lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
         return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
-
-    return 0;
 }
 
 int setDisplayName(lua_State* L) {
@@ -128,8 +122,6 @@ int setDisplayName(lua_State* L) {
             lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
         return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
-
-    return 0;
 }
 
 int connect(lua_State* L) {
@@ -175,8 +167,6 @@ int requestHostship(lua_State* L) {
         lua_typename(L, LUA_TSTRING), luaL_typename(L, -1));
         return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
-    
-    return 0;
 }
 
 int resignHostship(lua_State* L) {

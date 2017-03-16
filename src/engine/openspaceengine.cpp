@@ -276,7 +276,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
         }
         throw;
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const ghoul::RuntimeError&) {
         LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
         throw;
     }
@@ -475,9 +475,9 @@ void OpenSpaceEngine::initialize() {
     writeDocumentation();
 
     if (configurationManager().hasKey(ConfigurationManager::KeyShutdownCountdown)) {
-        _shutdown.waitTime = configurationManager().value<double>(
+        _shutdown.waitTime = static_cast<float>(configurationManager().value<double>(
             ConfigurationManager::KeyShutdownCountdown
-        );
+        ));
     }
 
     if (!commandlineArgumentPlaceholders.sceneName.empty()) {
@@ -874,7 +874,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         if (_shutdown.timer <= 0.f) {
             _windowWrapper->terminate();
         }
-        _shutdown.timer -= _windowWrapper->averageDeltaTime();
+        _shutdown.timer -= static_cast<float>(_windowWrapper->averageDeltaTime());
     }
 
     _renderEngine->updateSceneGraph();
