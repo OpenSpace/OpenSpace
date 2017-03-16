@@ -73,16 +73,11 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	std::string textureTxtPath = "";
 	success = dictionary.getValue("TerrainTextures.Filepath", textureTxtPath);
 
-	bool texturePathsAreLoaded;
 	if (success) {
 		_textureTxtPath = absPath(textureTxtPath);
-		texturePathsAreLoaded = loadTexturePaths();
-	}
-	
-	if (texturePathsAreLoaded) {
-		// Do something
-	}
-		
+		// Get the file texture file names
+		_textureFileNames = loadTexturePaths(_textureTxtPath);
+	}		
 	
 	if (_isReady) {
 		_renderableExplorationPath = std::make_shared<RenderableExplorationPath>(*this, _pathCoordinates);
@@ -114,21 +109,23 @@ void RenderableSite::update(const UpdateData & data) {
 
 }
 
-bool RenderableSite::loadTexturePaths()
+std::vector<std::string> RenderableSite::loadTexturePaths(std::string absoluteFilePath)
 {
-	std::string absolutePath;
-	std::ifstream myfile(_textureTxtPath);
+	std::string fileName;
+	std::ifstream myfile(absoluteFilePath);
+	std::vector<std::string> fileNameVector;
+
 	if (myfile.is_open()) {
-		while (std::getline(myfile, absolutePath)) {
-			LERROR(absolutePath);
-			_texturePaths.push_back(absolutePath);
+		while (std::getline(myfile, fileName)) {
+			LERROR(fileName);
+			fileNameVector.push_back(fileName);
 		}
 		myfile.close();
 	}
 	else
 		LERROR("Could not open file");
 
-	return (_texturePaths.size() != 0);
+	return fileNameVector;
 }
 
 bool RenderableSite::extractCoordinates() {

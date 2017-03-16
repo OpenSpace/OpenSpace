@@ -67,7 +67,7 @@ public:
 	void update(const UpdateData& data) override;
 
 private:
-	bool loadTexturePaths();
+	std::vector < std::string> loadTexturePaths(std::string txtPath);
 
 	std::string _filePath;
 
@@ -80,7 +80,7 @@ private:
 	std::vector<glm::dvec2> _siteCoordinates;
 
 	properties::StringProperty _textureTxtPath;
-	std::vector<std::string> _texturePaths;
+	std::vector<std::string> _textureFileNames;
 
 
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
