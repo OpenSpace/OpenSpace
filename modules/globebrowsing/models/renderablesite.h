@@ -71,6 +71,7 @@ private:
 	//std::map<int, SiteInformation> _coordMap;
 
 	std::vector<glm::dvec2> _pathCoordinates;
+	std::vector<glm::dvec2> _siteCoordinates;
 
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
 

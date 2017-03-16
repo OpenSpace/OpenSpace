@@ -107,10 +107,12 @@ bool RenderableSite::extractCoordinates() {
 	while ((poFeature = poLayer->GetNextFeature()) != NULL) {
 
 		// Extract coordinates from OGR
+		std::string frame = poFeature->GetFieldAsString("frame");
 		int site = poFeature->GetFieldAsInteger("site");
 		int sol = poFeature->GetFieldAsInteger("sol");
 		double lat = poFeature->GetFieldAsDouble("plcl");
 		double lon = poFeature->GetFieldAsDouble("longitude");
+		//LERROR(frame);
 
 		/*// Site allready exists
 		if (_coordMap.find(site) != _coordMap.end()) {
@@ -145,9 +147,15 @@ bool RenderableSite::extractCoordinates() {
 			_coordMap.insert(std::make_pair(site, tempSiteInformation));
 
 		}*/
-		if(lat != 0 && lon != 0)
+
+		// Saves all coordinates for rendering the path and only site coordinates for rendering sites.
+		if(lat != 0 && lon != 0) {
 			_pathCoordinates.push_back(glm::dvec2(lat, lon));
 
+			if (frame == "SITE") {
+				_siteCoordinates.push_back(glm::dvec2(lat, lon));
+			}
+		}
 		OGRFeature::DestroyFeature(poFeature);
 	}
 	GDALClose(poDS);
