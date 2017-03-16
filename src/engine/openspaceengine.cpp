@@ -376,6 +376,10 @@ void OpenSpaceEngine::destroy() {
         func();
     }
 
+    _engine->_syncEngine->removeSyncables(Time::ref().getSyncables());
+    _engine->_syncEngine->removeSyncables(_engine->_renderEngine->getSyncables());
+    _engine->_syncEngine->removeSyncable(_engine->_scriptEngine.get());
+
     _engine->_moduleEngine->deinitialize();
     _engine->_console->deinitialize();
 
@@ -511,9 +515,14 @@ void OpenSpaceEngine::scheduleLoadScene(const std::string& scenePath) {
 }
 
 void OpenSpaceEngine::loadScene(const std::string& scenePath) {
+    
+    windowWrapper().setBarrier(false);
     windowWrapper().setSynchronization(false);
     OnExit(
-        [this]() { windowWrapper().setSynchronization(true); }
+        [this]() {
+            windowWrapper().setSynchronization(true);
+            windowWrapper().setBarrier(true);
+        }
     );
     
     // Run start up scripts
