@@ -42,8 +42,6 @@ namespace globebrowsing {
 
 RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
-	, _pathShader(nullptr)
-	, _globe(nullptr)
 	, _generalProperties({
 		BoolProperty("enabled", "enabled", true)
 	})
@@ -83,10 +81,12 @@ bool RenderableSite::isReady() const {
 }
 
 void RenderableSite::render(const RenderData& data) {
+	_renderableExplorationPath->render(data);
 
 }
 
 void RenderableSite::update(const UpdateData & data) {
+	_renderableExplorationPath->update(data);
 
 }
 
@@ -99,7 +99,7 @@ bool RenderableSite::extractCoordinates() {
 
 	OGRLayer *poLayer = poDS->GetLayerByName("rover_locations");
 
-	_coordMap = std::map<int, SiteInformation>();
+	//_coordMap = std::map<int, SiteInformation>();
 
 	OGRFeature *poFeature;
 	poLayer->ResetReading();

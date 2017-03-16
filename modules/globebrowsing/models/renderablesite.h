@@ -65,12 +65,10 @@ public:
 private:
 	std::string _filePath;
 
-	std::unique_ptr<ghoul::opengl::ProgramObject> _pathShader;
-
-	globebrowsing::RenderableGlobe* _globe;
+	//::unique_ptr<ghoul::opengl::ProgramObject> _pathShader;
 
 	bool extractCoordinates();
-	std::map<int, SiteInformation> _coordMap;
+	//std::map<int, SiteInformation> _coordMap;
 
 	std::vector<glm::dvec2> _pathCoordinates;
 
