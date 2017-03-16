@@ -97,10 +97,14 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
         glm::vec2 planetRadiusVec;
         success = geometryDictionary.getValue(keyRadius, planetRadiusVec);
-        if (success)
-            _planetRadius = planetRadiusVec[0] * glm::pow(10, planetRadiusVec[1]);
-        else
+        if (success) {
+            _planetRadius = static_cast<float>(
+                planetRadiusVec[0] * glm::pow(10, planetRadiusVec[1])
+            );
+        }
+        else {
             LWARNING("No Radius value expecified for " << name << " planet.");
+        }
     }
 
     dictionary.getValue(keyFrame, _frame);
@@ -432,7 +436,7 @@ void RenderablePlanet::render(const RenderData& data) {
             float xp_test               = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
             float rp_test               = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
                         
-            float casterDistSun = glm::length(casterPos);
+            double casterDistSun = glm::length(casterPos);
             float planetDistSun = glm::length(data.position.vec3());
 
             ShadowRenderingStruct shadowData;

@@ -77,8 +77,8 @@ InteractionHandler::InteractionHandler()
     , _rotationalFriction("rotationalFriction", "Rotational Friction", true)
     , _horizontalFriction("horizontalFriction", "Horizontal Friction", true)
     , _verticalFriction("verticalFriction", "Vertical Friction", true)
-    , _sensitivity("sensitivity", "Sensitivity", 0.5, 0.001, 1)
-    , _rapidness("rapidness", "Rapidness", 1, 0.1, 60)
+    , _sensitivity("sensitivity", "Sensitivity", 0.5f, 0.001f, 1.f)
+    , _rapidness("rapidness", "Rapidness", 1.f, 0.1f, 60.f)
 {
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());

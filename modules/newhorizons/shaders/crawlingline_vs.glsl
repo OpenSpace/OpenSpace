@@ -24,33 +24,24 @@
 
 #version __CONTEXT__
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec4 in_color;
 
-uniform vec3 color;
-
-layout(location = 0) in vec4 in_position;
+uniform mat4 modelViewProjection;
+// uniform vec3 color;
 
 out vec4 vs_color;
-out vec4 vs_position;
+out vec4 vs_positionScreenSpace;
+// out vec4 vs_positionCameraSpace;
+
 const int targetId = 1;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-    vs_position = in_position;
-    vec4 tmp = in_position;
-    int id = gl_VertexID;
-    
-    vec3 black = vec3(0.0);
+    vec4 positionClipSpace = modelViewProjection * vec4(in_position, 1.0);
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
+    gl_Position = vs_positionScreenSpace;
 
-    if(id == targetId)
-        vs_color.xyz = black;
-    else
-        vs_color.xyz = color;
-        
-    vec4 position = pscTransform(tmp, ModelTransform);
-    vs_position = tmp;
-    position = ViewProjection * position;
-    gl_Position =  z_normalization(position);
+    vs_color = in_color;
 }

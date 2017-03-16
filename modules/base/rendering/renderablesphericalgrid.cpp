@@ -82,10 +82,10 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 
     //int nr2 = 0;
 
-    for (int i = 0; i <= _segments; i++) {
+    for (int nSegment = 0; nSegment <= _segments; ++nSegment) {
         // define an extra vertex around the y-axis due to texture mapping
         for (int j = 0; j <= _segments; j++) {
-            const float fi = static_cast<float>(i);
+            const float fi = static_cast<float>(nSegment);
             const float fj = static_cast<float>(j);
 
             // inclination angle (north to south)

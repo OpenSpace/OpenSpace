@@ -74,6 +74,8 @@ namespace {
                 return "ELLIPSOID";
             case openspace::SpiceManager::FieldOfViewMethod::Point:
                 return "POINT";
+            default:
+                ghoul_assert(false, "Missing case label");
         }
     }
     
@@ -83,6 +85,8 @@ namespace {
                 return "UMBRAL";
             case openspace::SpiceManager::TerminatorType::Penumbral:
                 return "PENUMBRAL";
+            default:
+                ghoul_assert(false, "Missing case label");
         }
     }
 }
@@ -143,6 +147,8 @@ SpiceManager::AberrationCorrection::operator const char*() const {
             return (direction == Direction::Reception) ? "CN" : "XCN";
         case Type::ConvergedNewtonianStellar:
             return (direction == Direction::Reception) ? "CN+S" : "XCN+S";
+        default:
+            ghoul_assert(false, "Missing case label");
     }
 }
     
@@ -557,6 +563,21 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
                 lightTime
             );
         }
+}
+
+glm::dvec3 SpiceManager::targetPosition(const std::string& target,
+    const std::string& observer, const std::string& referenceFrame,
+    AberrationCorrection aberrationCorrection, double ephemerisTime) const
+{
+    double unused = 0.0;
+    return targetPosition(
+        target,
+        observer,
+        referenceFrame,
+        aberrationCorrection,
+        ephemerisTime,
+        unused
+    );
 }
 
 glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,

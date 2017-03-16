@@ -82,15 +82,20 @@ bool ScreenSpaceFramebuffer::deinitialize(){
     return true;
 }
 
-void ScreenSpaceFramebuffer::render(){
+void ScreenSpaceFramebuffer::render() {
     glm::vec2 resolution = OsEng.windowWrapper().currentWindowResolution();
     glm::vec4 size = _size.value();
 
     float xratio = _originalViewportSize.x / (size.z-size.x);
     float yratio = _originalViewportSize.y / (size.w-size.y);;
 
-    if(!_renderFunctions.empty()){
-        glViewport (-size.x*xratio, -size.y*yratio, _originalViewportSize.x*xratio, _originalViewportSize.y*yratio);
+    if (!_renderFunctions.empty()) {
+        glViewport(
+            static_cast<GLint>(-size.x * xratio),
+            static_cast<GLint>(-size.y * yratio),
+            static_cast<GLsizei>(_originalViewportSize.x * xratio),
+            static_cast<GLsizei>(_originalViewportSize.y * yratio)
+        );
         GLint defaultFBO = _framebuffer->getActiveObject();
         _framebuffer->activate();
         
@@ -103,7 +108,12 @@ void ScreenSpaceFramebuffer::render(){
         _framebuffer->deactivate();
 
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-        glViewport (0, 0, resolution.x, resolution.y);
+        glViewport(
+            0,
+            0,
+            static_cast<GLsizei>(resolution.x),
+            static_cast<GLsizei>(resolution.y)
+        );
         
         glm::mat4 rotation = rotationMatrix();
         glm::mat4 translation = translationMatrix();
