@@ -28,7 +28,20 @@ namespace openspace {
 
 namespace {
 
-void applyRegularExpression(lua_State* L, std::regex regex, std::vector<properties::Property*> properties, int type) {
+void executePropertySet(properties::Property* prop, lua_State* L) {
+    prop->setLuaValue(L);
+    //ensure properties are synced over parallel connection
+    std::string value;
+    prop->getStringValue(value);
+    /*OsEng.parallelConnection().scriptMessage(
+    prop->fullyQualifiedIdentifier(),
+    value
+    );*/
+}
+
+void applyRegularExpression(lua_State* L, std::regex regex,
+                            std::vector<properties::Property*> properties, int type,
+                            const std::string* tagToMatch = nullptr)                     {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
 
@@ -47,17 +60,16 @@ void applyRegularExpression(lua_State* L, std::regex regex, std::vector<properti
                         "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'"
                 );
             }
-            else {
-                prop->setLuaValue(L);
-                //ensure properties are synced over parallel connection
-                std::string value;
-                prop->getStringValue(value);
-/*                OsEng.parallelConnection().scriptMessage(
-                    prop->fullyQualifiedIdentifier(),
-                    value
-                );*/
+            else if (tagToMatch) {
+                for (const std::string tagEvaluate : *prop->getTags()) {
+                    if (tagEvaluate.compare(*tagToMatch) == 0) {
+                        executePropertySet(prop, L); 
+                        break;
+                    }
+                }
+            } else {
+                executePropertySet(prop, L); 
             }
-
         }
     }
 }
@@ -85,7 +97,8 @@ int property_setValueSingle(lua_State* L) {
 
     properties::Property* prop = property(uri);
     if (!prop) {
-        LERRORC("property_setValue", errorLocation(L) << "Property with URI '" << uri << "' was not found");
+        LERRORC("property_setValue", errorLocation(L) << "Property with URI '"
+            << uri << "' was not found");
         return 0;
     }
 
@@ -131,7 +144,8 @@ int property_setValueRegex(lua_State* L) {
         );
     }
     catch (const std::regex_error& e) {
-        LERRORC("property_setValueRegex", "Malformed regular expression: '" << regex << "'");
+        LERRORC("property_setValueRegex", "Malformed regular expression: '"
+            << regex << "'");
     }
 
     return 0;
@@ -169,6 +183,86 @@ int property_setValue(lua_State* L) {
         std::regex(regex/*, std::regex_constants::optimize*/),
         allProperties(),
         lua_type(L, -1)
+    );
+
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * setPropertyGroupSingle(string, *):
+ * Sets value of any property containing a tag that matches that of the first argument
+ * to the value of the second argument, which is arbirtrary, but must agree with the
+ * type the denoted Property expects
+ */
+int property_setGroupSingle(lua_State* L) {
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
+
+    int nArguments = lua_gettop(L);
+    SCRIPT_CHECK_ARGUMENTS("property_setValueSingle", L, 2, nArguments);
+
+    std::string tagToMatch = luaL_checkstring(L, -2);
+    const int type = lua_type(L, -1);
+    
+    for (properties::Property* prop : allProperties()) {
+        for (std::string tagEvaluate : *prop->getTags()) {
+            if (tagEvaluate.compare(tagToMatch) == 0) {
+                if (type != prop->typeLua()) {
+                    LERRORC("property_setValue", errorLocation(L) << "Property '"
+                        << prop->guiName() << "' does not accept input of type '"
+                        << luaTypeToString(type) << "'. Requested type: '"
+                        << luaTypeToString(prop->typeLua()) << "'");
+                    return 0;
+                }
+                else {
+                    prop->setLuaValue(L);
+                    //ensure properties are synced over parallel connection
+                    std::string value;
+                    prop->getStringValue(value);
+                    //OsEng.parallelConnection().scriptMessage(
+                        prop->fullyQualifiedIdentifier(), value);
+                    break;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * \ingroup LuaScripts
+ * setPropertyGroup(string, string, *):
+ * Sets all properties identified by the URI (with potential wildcards) in the first
+ * argument, AND contain a tag that matches that given in the second argument. The third
+ * argument can be any type, but it has to match the type that the property(s) expect.
+ */
+
+int property_setGroup(lua_State* L) {
+    using ghoul::lua::errorLocation;
+    using ghoul::lua::luaTypeToString;
+
+    int nArguments = lua_gettop(L);
+    SCRIPT_CHECK_ARGUMENTS("property_setGroup", L, 3, nArguments);
+
+    std::string tag = luaL_checkstring(L, -2);
+    std::string regex = luaL_checkstring(L, -3);
+
+    // Replace all wildcards *  with the correct regex (.*)
+    size_t startPos = regex.find("*");
+    while (startPos != std::string::npos) {
+        regex.replace(startPos, 1, "(.*)");
+        startPos += 4;
+        startPos = regex.find("*", startPos);
+    }
+
+    applyRegularExpression(
+        L,
+        std::regex(regex/*, std::regex_constants::optimize*/),
+        allProperties(),
+        lua_type(L, -1),
+        &tag
     );
 
     return 0;

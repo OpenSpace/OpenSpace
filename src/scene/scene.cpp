@@ -672,6 +672,23 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "the first argument. The second argument can be any type, but it has to "
                 "match the type that the property expects.",
             },
+			{
+                "setPropertyGroup",
+				&luascriptfunctions::property_setGroup,
+				"string, string, *",
+				"Sets all properties that belong to a tagged group AND match the "
+				"URI (with optional wildcards) in the first argument. Second argument is "
+				"the tag name to match. The third argument can be any type, but it has to "
+				"match tye type that the property expects.",
+			},
+			{
+                "setPropertyGroupSingle",
+				&luascriptfunctions::property_setGroupSingle,
+				"string, *",
+				"Sets all properties that belong to a tagged group. The first argument "
+				"is the tag name to match. The second argument can be any time, but it "
+				"has to match tye type that the property expects.",
+			},
             {
                 "getPropertyValue",
                 &luascriptfunctions::property_getValue,
