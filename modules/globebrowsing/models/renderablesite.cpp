@@ -27,8 +27,12 @@
 #include "ogr_geometry.h"
 #include "ogrsf_frmts.h"
 #include <gdal_priv.h>
+#include <modules/base/rendering/modelgeometry.h>
 
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
 	static const std::string _loggerCat = "RenderableSite";
@@ -64,16 +68,43 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	if (_isReady) {
 		_renderableExplorationPath = std::make_shared<RenderableExplorationPath>(*this, _pathCoordinates);
 	}
+	
+	ghoul::Dictionary modelDic;
+
+	if (dictionary.getValue("TerrainModel", modelDic)) {
+		int i = 0;
+		std::string modelFilepath;
+		modelDic.getValue("Filepath", modelFilepath);
+		modelDic.setValue("GeometryFile", modelFilepath + "/NLB_486003207RAS_F0481570NCAM00353M1.obj");
+		
+		modelgeometry::ModelGeometry* m = modelgeometry::ModelGeometry::createFromDictionary(modelDic);
+		
+		_models.push_back(Models());
+
+		std::string k;
+		modelDic.getValue("TexturePath", k);
+		LINFO("k : " << k);
+		_models.at(i)._texturePath = absPath(k + "/NLB_486003207RAS_F0481570NCAM00353M1.png");
+		_models.at(i)._model = m;
+	}
 }
 	
 bool RenderableSite::initialize() {
 	_renderableExplorationPath->initialize();
 
+
+	for (auto it = _models.begin(); it != _models.end(); ++it) {
+		(*it)._model->initialize(this);
+	}
+
+	loadTexture();
+
 	return true;
 }
 
 bool RenderableSite::deinitialize() {
-	return false;
+
+	return true;
 }
 
 bool RenderableSite::isReady() const {
@@ -155,5 +186,19 @@ bool RenderableSite::extractCoordinates() {
 	return (_pathCoordinates.size() != 0);
 	//return (_coordMap.size() != 0);
 }
+
+void RenderableSite::loadTexture() {
+	for (auto it = _models.begin(); it != _models.end(); ++it) {
+		(*it)._texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath((*it)._texturePath)));
+
+		if ((*it)._texture) {
+			LDEBUG("Loaded texture from: " << absPath((*it)._texturePath));
+			(*it)._texture->uploadTexture();
+
+			(*it)._texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+		}
+	}
 }
+
+} // namespace globebrowsing
 } // namespace openspace

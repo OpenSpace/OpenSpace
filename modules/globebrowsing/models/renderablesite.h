@@ -28,14 +28,27 @@
 #include <openspace/rendering/renderable.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/models/renderableexplorationpath.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
+
+namespace modelgeometry {
+	class ModelGeometry;
+}
+
 namespace globebrowsing {
-	
-	
+
+
 	struct SiteInformation {
 		int sol;
 		std::vector<glm::dvec2> lonlatCoordinates;
+	};
+
+
+	struct Models {
+		std::string _texturePath;
+		modelgeometry::ModelGeometry* _model;
+		std::unique_ptr<ghoul::opengl::Texture> _texture;
 	};
 
 	class RenderableExplorationPath;
@@ -50,7 +63,7 @@ public:
 
 	struct DebugProperties {
 		properties::BoolProperty test;
-	};	
+	};
 
 	RenderableSite(const ghoul::Dictionary& dictionary);
 	~RenderableSite() = default;
@@ -64,10 +77,12 @@ public:
 
 private:
 	std::string _filePath;
+	std::string _colorTexturePath;
 
 	//::unique_ptr<ghoul::opengl::ProgramObject> _pathShader;
 
 	bool extractCoordinates();
+	void loadTexture();
 	//std::map<int, SiteInformation> _coordMap;
 
 	std::vector<glm::dvec2> _pathCoordinates;
@@ -78,6 +93,7 @@ private:
 
 	GeneralProperties _generalProperties;
 
+	std::vector<Models> _models;
 };
 
 }
