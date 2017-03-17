@@ -34,6 +34,8 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/rendering/renderer.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/performance/performancemanager.h>
 
 #include <openspace/util/syncdata.h>
 
@@ -50,16 +52,11 @@ class SharedMemory;
 
 namespace openspace {
 
-namespace performance {
-class PerformanceManager;
-}
-
 // Forward declare to minimize dependencies
 class Camera;
 class SyncBuffer;
 class Scene;
 class SceneManager;
-class RaycasterManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
 
