@@ -103,40 +103,40 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		_vel.localRot += glm::dvec2(cursor.getXSpeed(), cursor.getYSpeed()) * _sensitivity.localRot;
 	}
 	if (_interactionMode.roll) { // add global roll rotation velocity
-		/*double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [](double s, const TuioCursor& c) {
-			return s + c.getXSpeed();
-		});*/
-		double minDiff = 1000;
-		int id = 0;
-		for (const TuioCursor& c : list) {
-			TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
-			 double diff = c.getX() - point.getX() + c.getY() - point.getY();
-			 if (std::abs(diff) < std::abs(minDiff)) {
-				 minDiff = diff;
-				 id = c.getSessionID();
-			 }
-		}
-		auto cTemp = find_if(list.begin(), list.end(), [&id](const TuioCursor& c) { return c.getSessionID() == id; });
-		glm::dvec2 thumb = _centroid; //glm::dvec2(cTemp->getX(), cTemp->getY());
-		id = -1;
 		double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
 			TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
 			double res = diff;
-			if (c.getSessionID() != id) {
-				if (point.getAngle(thumb.x, thumb.y) > c.getAngle(thumb.x, thumb.y) + 1.5*M_PI)
-					res += c.getAngle(thumb.x, thumb.y) + (2*M_PI-point.getAngle(thumb.x, thumb.y));
-				else if (c.getAngle(thumb.x, thumb.y) > point.getAngle(thumb.x, thumb.y) + 1.5*M_PI)
-					res += (2*M_PI - c.getAngle(thumb.x, thumb.y)) + point.getAngle(thumb.x, thumb.y);
-				else
-					res += c.getAngle(thumb.x, thumb.y) - point.getAngle(thumb.x, thumb.y);
-			}
+			double lastAngle = point.getAngle(_centroid.x, _centroid.y);
+			double currentAngle = c.getAngle(_centroid.x, _centroid.y);
+			if (lastAngle > currentAngle + 1.5*M_PI)
+				res += currentAngle + (2*M_PI - lastAngle);
+			else if (currentAngle > lastAngle + 1.5*M_PI)
+				res += (2*M_PI - currentAngle) + lastAngle;
+			else
+				res += currentAngle - lastAngle;
 			return res;
 		});
-		if (std::abs(rollFactor) > 0.2)
+		double maxX = 0.0;
+		double minX = 1.0;
+		double maxY = 0.0;
+		double minY = 1.0;
+		for (const TuioCursor& c : list) {
+			if (c.getX() > maxX)
+				maxX = c.getX();
+			if (c.getX() < minX)
+				minX = c.getX();
+			if (c.getY() > maxY)
+				maxY = c.getY();
+			if (c.getY() < minY)
+				minY = c.getY();
+		}
+		double xRange = (maxX - minX) / list.size();
+		double yRange = (maxY - minY) / list.size();
+		//if (std::abs(rollFactor)/list.size() > 0.02)
 			_vel.localRoll += -rollFactor * _sensitivity.localRoll;
 	}
 	if (_interactionMode.pick) { // pick something in the scene as focus node
-		//if(!cursor.isMoving())
+		
 	}
 	//default:
 		//LINFO("Couldn't interpret touch input" << "\n");
@@ -159,6 +159,8 @@ void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std:
 		point = p.second;
 	}
 	if (list.size() == 1) {
+		//if(!cursor.isMoving()) // pick
+
 		_interactionMode.rot = true;
 		_interactionMode.pinch = false;
 		_interactionMode.pan = false;
@@ -177,8 +179,41 @@ void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std:
 			_interactionMode.rot = false;
 			_interactionMode.pinch = true;
 			_interactionMode.pan = false;
-			_interactionMode.roll = true;
+			//_interactionMode.roll = true;
 			_interactionMode.pick = false;
+
+			double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
+				TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
+				double res = diff;
+				double lastAngle = point.getAngle(_centroid.x, _centroid.y);
+				double currentAngle = c.getAngle(_centroid.x, _centroid.y);
+				if (lastAngle > currentAngle + 1.5*M_PI)
+					res += currentAngle + (2 * M_PI - lastAngle);
+				else if (currentAngle > lastAngle + 1.5*M_PI)
+					res += (2 * M_PI - currentAngle) + lastAngle;
+				else
+					res += currentAngle - lastAngle;
+				return res;
+			});
+			double maxX = 0.0;
+			double minX = 1.0;
+			double maxY = 0.0;
+			double minY = 1.0;
+			for (const TuioCursor& c : list) {
+				if (c.getX() > maxX)
+					maxX = c.getX();
+				if (c.getX() < minX)
+					minX = c.getX();
+				if (c.getY() > maxY)
+					maxY = c.getY();
+				if (c.getY() < minY)
+					minY = c.getY();
+			}
+			double xRange = (maxX - minX) / list.size();
+			double yRange = (maxY - minY) / list.size();
+			if (std::abs(rollFactor) / list.size() > 0.05)
+				_interactionMode.roll = true;
+
 		}
 	}	
 }
@@ -186,6 +221,7 @@ void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std:
 void TouchInteraction::step(double dt) {
 	using namespace glm;
 
+	setFocusNode(OsEng.interactionHandler().focusNode());
 	if (_focusNode) {
 		// Create variables from current state
 		dvec3 camPos = _camera->positionVec3();
@@ -214,7 +250,7 @@ void TouchInteraction::step(double dt) {
 			localCamRot = localCamRot * camRollRot;
 		}
 		{ // Panning (local rotation)
-			dvec3 eulerAngles(-_vel.localRot.y*dt, -_vel.localRot.x*dt, 0);
+			dvec3 eulerAngles(_vel.localRot.y*dt, _vel.localRot.x*dt, 0);
 			dquat rotationDiff = dquat(eulerAngles);
 			localCamRot = localCamRot * rotationDiff;
 		}
@@ -260,9 +296,6 @@ void TouchInteraction::step(double dt) {
 		_camera->setPositionVec3(camPos);
 		_camera->setRotation(globalCamRot * localCamRot);
 	}
-	else
-		setFocusNode(OsEng.interactionHandler().focusNode());
-		
 }
 
 
@@ -295,6 +328,14 @@ void TouchInteraction::decelerate() {
 	_vel.localRot *= (1 - _friction.localRot);
 	_vel.globalRoll *= (1 - _friction.globalRoll);
 	_vel.localRoll *= (1 - _friction.localRoll);
+}
+
+void TouchInteraction::clear() {
+	_interactionMode.rot = false;
+	_interactionMode.pinch = false;
+	_interactionMode.pan = false;
+	_interactionMode.roll = false;
+	_interactionMode.pick = false;
 }
 
 

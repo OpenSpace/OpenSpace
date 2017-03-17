@@ -87,6 +87,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void step(double dt);
 		void configSensitivities(double dist);
 		void decelerate();
+		void clear();
 
 
 		// Get & Setters
