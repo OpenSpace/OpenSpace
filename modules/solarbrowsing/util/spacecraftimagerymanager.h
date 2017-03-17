@@ -22,21 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
- #ifndef __OPENSPACE_MODULE_ISWA___SOLARBROWSINGMODULE___H__
- #define __OPENSPACE_MODULE_ISWA___SOLARBROWSINGMODULE___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___SPACECRAFTIMAGERYMANAGER___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___SPACECRAFTIMAGERYMANAGER___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <ghoul/designpattern/singleton.h>
+#include <memory>
+
+namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
 
-class SolarBrowsingModule : public OpenSpaceModule {
-public:
-    SolarBrowsingModule();
+class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManager> {
+    friend class ghoul::Singleton<SpacecraftImageryManager>;
 
-protected:
-    void internalInitialize() override;
+public:
+    SpacecraftImageryManager();
+    std::unique_ptr<ghoul::opengl::Texture> getSpacecraftTexture(std::string& type);
+private:
+    void fetchServerImages(std::string type);
+    void fillImageryInfo(std::string buffer, std::string type);
+    //void fetchLatestImage(std::string& url);
+    //fetchLocalPlaneTexturesAndStoreInMap();
+    //preProcessImageData();
+    //postProcessTexture();
+    //startFetchingCycle();
 };
 
-} // namespace openspace
+} //namespace openspace
 
-#endif // __OPENSPACE_MODULE_ISWA___SOLARBROWSINGMODULE___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___SPACECRAFTIMAGERYMANAGER___H__
