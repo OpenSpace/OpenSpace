@@ -33,8 +33,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <modules/fitsfilereader/include/fitsfilereader.h>
-#include <valarray>
+#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 
 using namespace ghoul::opengl;
 
@@ -49,14 +48,8 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _target("target", "Target", "Sun")
 {
-    // if (dictionary.hasKey("MoveFactor")) {
-    //     float moveFactor = 0.5f;
-    //     if (dictionary.getValue("MoveFactor", moveFactor)) {
-    //         _moveFactor = moveFactor;
-    //     }
-    // }
     std::string target;
-    if ( dictionary.getValue("Target", target)) {
+    if (dictionary.getValue("Target", target)) {
         _target = target;
     }
 
@@ -67,11 +60,11 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 }
 
 void RenderableSpacecraftCameraPlane::loadTexture() {
-    std::string fitsPath = "1.fit";
-    std::unique_ptr<Texture> texture = FitsFileReader::loadTexture(fitsPath);
-
+    std::string spacecraftName = "STEREO";
+    std::unique_ptr<Texture> texture;
+    texture = SpacecraftImageryManager::ref().getSpacecraftTexture(spacecraftName);
     if (texture) {
-        LDEBUG("Loaded texture from '" << absPath(fitsPath) << "'");
+       //LDEBUG("Loaded texture from '" << absPath(fitsPath) << "'");
         texture->uploadTexture();
         _texture = std::move(texture);
     }
@@ -95,8 +88,6 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
 
     // Scale vector to sun barycenter to get translation distance
     translationTransform = (p->worldPosition() - data.modelTransform.translation) * _moveFactor.value();
-    // Stereos internal ref frame. pass in as property
-    //staticRotationTransform = glm::dmat4({0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0});
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation + translationTransform) *
@@ -107,10 +98,6 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
 
     _shader->setUniform("modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
-
-    //_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    //_shader->setUniform("ModelTransform", transform);
-    //setPscUniforms(*_shader.get(), data.camera, data.position);
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();

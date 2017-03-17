@@ -26,16 +26,25 @@
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/misc/assert.h>
 
 #include <modules/solarbrowsing/rendering/renderablespacecraftcameraplane.h>
+#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 
 namespace openspace {
 
 SolarBrowsingModule::SolarBrowsingModule()
     : OpenSpaceModule("SolarBrowsing")
-{}
+{
+	OsEng.registerModuleCallback(
+        OpenSpaceEngine::CallbackOption::Initialize,
+        [](){
+            SpacecraftImageryManager::initialize();
+        }
+    );
+}
 
 void SolarBrowsingModule::internalInitialize(){
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
