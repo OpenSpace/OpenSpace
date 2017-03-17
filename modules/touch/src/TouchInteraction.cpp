@@ -58,9 +58,9 @@ TouchInteraction::TouchInteraction()
 	_camera{ OsEng.interactionHandler().camera() },
 	_baseSensitivity{ 0.1 }, _baseFriction{ 0.02 },
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
-	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction },
+	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction/4.0 },
 	_centroid{ glm::dvec3(0.0) },
-	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.3 }, 
+	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.5 }, 
 	_minHeightFromSurface{ 0.0 }
 {
 	_origin.onChange([this]() {
@@ -123,15 +123,19 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		auto cTemp = find_if(list.begin(), list.end(), [&id](const TuioCursor& c) { return c.getSessionID() == id; });
 		glm::dvec2 thumb = glm::dvec2(cTemp->getX(), cTemp->getY());
 		double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
-			auto found = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); });
+			TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
 			double res = diff;
-			if (found != lastProcessed.end())
-				res += c.getAngleDegrees(thumb.x, thumb.y) - found->second.getAngleDegrees(thumb.x, thumb.y);
-			std::cout << res << "\n";
+			if (c.getSessionID() != id) {
+				if (point.getAngle(thumb.x, thumb.y) > c.getAngle(thumb.x, thumb.y) + 1.5*M_PI)
+					res += c.getAngle(thumb.x, thumb.y) + (2*M_PI-point.getAngle(thumb.x, thumb.y));
+				else if (c.getAngle(thumb.x, thumb.y) > point.getAngle(thumb.x, thumb.y) + 1.5*M_PI)
+					res += (2*M_PI - c.getAngle(thumb.x, thumb.y)) + point.getAngle(thumb.x, thumb.y);
+				else
+					res += c.getAngle(thumb.x, thumb.y) - point.getAngle(thumb.x, thumb.y);
+			}
 			return res;
 		});
-		std::cout << "Angle: " << rollFactor << "\n";
-		//_vel.localRoll += rollFactor * _sensitivity.localRoll;
+		_vel.localRoll += -rollFactor * _sensitivity.localRoll;
 		break;
 	}
 	case PICK: { // pick something in the scene as focus node
@@ -164,8 +168,8 @@ int TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::
 	else {
 		if (std::abs(dist - lastDist) / list.size() < 0.1 && list.size() == 2)
 			return PAN;
-		//else if (list.size() == 5)
-			//return ROLL;
+		else if (list.size() == 5)
+			return ROLL;
 		else
 			return PINCH;
 	}
@@ -178,13 +182,7 @@ void TouchInteraction::step(double dt) {
 	if (_focusNode) {
 		// Create variables from current state
 		dvec3 camPos = _camera->positionVec3();
-
-		// Follow the focus node
-		dquat totRot = _camera->rotationQuaternion();
 		dvec3 centerPos = _focusNode->worldPosition();
-		dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
-		_previousFocusNodePosition = centerPos;
-		//camPos += focusNodeDiff;
 
 		dvec3 directionToCenter = normalize(centerPos - camPos);
 		dvec3 centerToCamera = camPos - centerPos;
@@ -197,7 +195,7 @@ void TouchInteraction::step(double dt) {
 			directionToCenter,
 			normalize(camDirection + lookUp)); // To avoid problem with lookup in up direction
 		dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
-		dquat localCamRot = inverse(globalCamRot) * totRot;
+		dquat localCamRot = inverse(globalCamRot) * _camera->rotationQuaternion();;
 
 
 		double boundingSphere = _focusNode->boundingSphere().lengthf();
@@ -248,12 +246,7 @@ void TouchInteraction::step(double dt) {
 			camPos += -directionToCenter * max(minHeightAboveBoundingSphere - distFromSphereSurfaceToCamera, 0.0);
 		}
 		
-		std::shared_ptr<interaction::GlobeBrowsingInteractionMode> gbim =
-			std::dynamic_pointer_cast<interaction::GlobeBrowsingInteractionMode> (OsEng.interactionHandler().interactionmode());
-		if (gbim) {
-			double dist = length(camPos - (centerPos + centerToBoundingSphere));
-			configSensitivities(dist);
-		}
+		configSensitivities(length(camPos - (centerPos + centerToBoundingSphere)));
 		decelerate();
 
 		// Update the camera state
@@ -268,8 +261,10 @@ void TouchInteraction::step(double dt) {
 
 void TouchInteraction::configSensitivities(double dist) {
 	// Configurates sensitivities to appropriate values when the camera is close to the focus node.
+	std::shared_ptr<interaction::GlobeBrowsingInteractionMode> gbim =
+		std::dynamic_pointer_cast<interaction::GlobeBrowsingInteractionMode> (OsEng.interactionHandler().interactionmode());
 	double close = 4.6 * 1000000;
-	if (dist < close) {
+	if (gbim && dist < close) {
 		_sensitivity.zoom = 2.0 * std::max(dist, 100.0)/close;
 		_sensitivity.globalRot = 0.1 * std::max(dist, 100.0) /close;
 		//_sensitivity.localRot = 0.1;
@@ -281,7 +276,7 @@ void TouchInteraction::configSensitivities(double dist) {
 		_sensitivity.globalRot = 0.1;
 		_sensitivity.localRot = 0.1;
 		_sensitivity.globalRoll = 0.1;
-		_sensitivity.localRoll = 0.3;
+		_sensitivity.localRoll = 0.5;
 	}
 
 
@@ -315,11 +310,6 @@ void TouchInteraction::setCamera(Camera* camera) {
 }
 void TouchInteraction::setFocusNode(SceneGraphNode* focusNode) {
 	_focusNode = focusNode;
-
-	if (_focusNode != nullptr) {
-		_previousFocusNodePosition = _focusNode->worldPosition();
-		_previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
-	}
 }
 void TouchInteraction::setFriction(double friction) {
 	_baseFriction = std::max(friction, 0.0);
