@@ -90,11 +90,10 @@ private:
 	//std::map<int, SiteInformation> _coordMap;
 
 	std::vector<glm::dvec2> _pathCoordinates;
-	std::vector<glm::dvec2> _siteCoordinates;
+	std::map<int, glm::dvec2> _siteCoordinates;
 
 	properties::StringProperty _textureTxtPath;
-	std::vector<std::string> _textureFileNames;
-
+	std::vector<std::string> _fileNames;
 
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
 
