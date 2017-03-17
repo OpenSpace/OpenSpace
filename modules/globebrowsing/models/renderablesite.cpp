@@ -133,12 +133,10 @@ bool RenderableSite::isReady() const {
 
 void RenderableSite::render(const RenderData& data) {
 	_renderableExplorationPath->render(data);
-
 }
 
 void RenderableSite::update(const UpdateData & data) {
 	_renderableExplorationPath->update(data);
-
 }
 
 std::vector<std::string> RenderableSite::loadTexturePaths(std::string absoluteFilePath)
@@ -168,8 +166,6 @@ bool RenderableSite::extractCoordinates() {
 
 	OGRLayer *poLayer = poDS->GetLayerByName("rover_locations");
 
-	//_coordMap = std::map<int, SiteInformation>();
-
 	OGRFeature *poFeature;
 	poLayer->ResetReading();
 
@@ -181,43 +177,9 @@ bool RenderableSite::extractCoordinates() {
 		int sol = poFeature->GetFieldAsInteger("sol");
 		double lat = poFeature->GetFieldAsDouble("plcl");
 		double lon = poFeature->GetFieldAsDouble("longitude");
-		//LERROR(frame);
-
-		/*// Site allready exists
-		if (_coordMap.find(site) != _coordMap.end()) {
-			bool allreadyExists = false;
-			std::vector<glm::dvec2> tempVec = _coordMap.at(site).lonlatCoordinates;
-
-			// Check if the latitude and longitude allready exists in the vector
-			for (auto i : tempVec) {
-				if (i.x == lat && i.y == lon) {
-					allreadyExists = true;
-					break;
-				}
-			}
-
-			// Only add new coordinates to prevent duplicates
-			if (allreadyExists == false)
-				_coordMap.at(site).lonlatCoordinates.push_back(glm::dvec2(lat, lon));
-		}
-		// Create a new site
-		else {
-			// Temp variables
-			SiteInformation tempSiteInformation;
-			std::vector<glm::dvec2> tempVec;
-
-			// Push back the new coordinates
-			tempVec.push_back(glm::dvec2(lat, lon));
-
-			// Save variables in the tmep struct
-			tempSiteInformation.sol = sol;
-			tempSiteInformation.lonlatCoordinates = tempVec;
-
-			_coordMap.insert(std::make_pair(site, tempSiteInformation));
-
-		}*/
 
 		// Saves all coordinates for rendering the path and only site coordinates for rendering sites.
+		// GetFieldAsDouble resturns zero (0) if field is empty.
 		if(lat != 0 && lon != 0) {
 			_pathCoordinates.push_back(glm::dvec2(lat, lon));
 
@@ -230,7 +192,6 @@ bool RenderableSite::extractCoordinates() {
 	GDALClose(poDS);
 	
 	return (_pathCoordinates.size() != 0);
-	//return (_coordMap.size() != 0);
 }
 
 void RenderableSite::loadTexture() {

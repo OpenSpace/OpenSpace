@@ -31,7 +31,6 @@
 #include <ghoul/opengl/texture.h>
 #include <openspace/properties/stringproperty.h>
 
-
 namespace openspace {
 
 namespace modelgeometry {
@@ -40,12 +39,10 @@ namespace modelgeometry {
 
 namespace globebrowsing {
 
-
 	struct SiteInformation {
 		int sol;
 		std::vector<glm::dvec2> lonlatCoordinates;
 	};
-
 
 	struct Models {
 		std::string _texturePath;
@@ -83,11 +80,8 @@ private:
 	std::string _filePath;
 	std::string _colorTexturePath;
 
-	//::unique_ptr<ghoul::opengl::ProgramObject> _pathShader;
-
 	bool extractCoordinates();
 	void loadTexture();
-	//std::map<int, SiteInformation> _coordMap;
 
 	std::vector<glm::dvec2> _pathCoordinates;
 	std::map<int, glm::dvec2> _siteCoordinates;
