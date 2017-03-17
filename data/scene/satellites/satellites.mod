@@ -1,3 +1,7 @@
+SOCKET = true
+if SOCKET then
+  http = require("socket.http")
+end
 
 function dirListing(dirname)
   f = io.popen('ls ' .. dirname)
@@ -143,6 +147,13 @@ for sOrbit in values(satelliteGroups) do
   filename = sOrbit.url:match("([^/]+)$")
   sOrbit.path = "../satellites/tle/" .. filename
   pathFromScenegraphParent = "./" .. sOrbit.path
+  if SOCKET then
+    local body, code = http.request(sOrbit.url)
+    if not body then error(code) end
+    local f = assert(io.open(sOrbit.path, 'w'))
+    f:write(body)
+    f:close()
+  end
 
   line = {} 
   myfile = io.open(sOrbit.path, "r")
