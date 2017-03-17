@@ -22,12 +22,15 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 #include <modules/globebrowsing/models/renderablesite.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <modules/base/rendering/modelgeometry.h>
 
 #include <fstream>
 #include "ogr_geometry.h"
 #include "ogrsf_frmts.h"
 #include <gdal_priv.h>
-#include <modules/base/rendering/modelgeometry.h>
+#include <iostream>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -43,9 +46,10 @@ namespace openspace {
 using namespace properties;
 
 namespace globebrowsing {
-
+	
 RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
+	, _textureTxtPath("textureTxtpath", "Texture txt Path")
 	, _generalProperties({
 		BoolProperty("enabled", "enabled", true)
 	})
@@ -65,6 +69,20 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	std::string json(std::istreambuf_iterator<char>(in), (std::istreambuf_iterator<char>()));
 	_isReady = extractCoordinates();
 
+	// Get absolute path to txt file containing list of all textures
+	std::string name;
+	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
+	ghoul_assert(success, "Name was not passed to RenderableSite");
+
+	std::string textureTxtPath = "";
+	success = dictionary.getValue("TerrainTextures.Filepath", textureTxtPath);
+
+	if (success) {
+		_textureTxtPath = absPath(textureTxtPath);
+		// Get the file texture file names
+		_textureFileNames = loadTexturePaths(_textureTxtPath);
+	}		
+	
 	if (_isReady) {
 		_renderableExplorationPath = std::make_shared<RenderableExplorationPath>(*this, _pathCoordinates);
 	}
@@ -103,7 +121,8 @@ bool RenderableSite::initialize() {
 }
 
 bool RenderableSite::deinitialize() {
-
+	_renderableExplorationPath->deinitialize();
+	
 	return true;
 }
 
@@ -119,6 +138,25 @@ void RenderableSite::render(const RenderData& data) {
 void RenderableSite::update(const UpdateData & data) {
 	_renderableExplorationPath->update(data);
 
+}
+
+std::vector<std::string> RenderableSite::loadTexturePaths(std::string absoluteFilePath)
+{
+	std::string fileName;
+	std::ifstream myfile(absoluteFilePath);
+	std::vector<std::string> fileNameVector;
+
+	if (myfile.is_open()) {
+		while (std::getline(myfile, fileName)) {
+			LERROR(fileName);
+			fileNameVector.push_back(fileName);
+		}
+		myfile.close();
+	}
+	else
+		LERROR("Could not open file");
+
+	return fileNameVector;
 }
 
 bool RenderableSite::extractCoordinates() {
@@ -138,10 +176,12 @@ bool RenderableSite::extractCoordinates() {
 	while ((poFeature = poLayer->GetNextFeature()) != NULL) {
 
 		// Extract coordinates from OGR
+		std::string frame = poFeature->GetFieldAsString("frame");
 		int site = poFeature->GetFieldAsInteger("site");
 		int sol = poFeature->GetFieldAsInteger("sol");
 		double lat = poFeature->GetFieldAsDouble("plcl");
 		double lon = poFeature->GetFieldAsDouble("longitude");
+		//LERROR(frame);
 
 		/*// Site allready exists
 		if (_coordMap.find(site) != _coordMap.end()) {
@@ -176,9 +216,15 @@ bool RenderableSite::extractCoordinates() {
 			_coordMap.insert(std::make_pair(site, tempSiteInformation));
 
 		}*/
-		if(lat != 0 && lon != 0)
+
+		// Saves all coordinates for rendering the path and only site coordinates for rendering sites.
+		if(lat != 0 && lon != 0) {
 			_pathCoordinates.push_back(glm::dvec2(lat, lon));
 
+			if (frame == "SITE") {
+				_siteCoordinates.push_back(glm::dvec2(lat, lon));
+			}
+		}
 		OGRFeature::DestroyFeature(poFeature);
 	}
 	GDALClose(poDS);

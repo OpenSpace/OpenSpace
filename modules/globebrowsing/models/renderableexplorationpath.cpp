@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #include <modules/globebrowsing/models/renderableexplorationpath.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/engine/openspaceengine.h>
@@ -40,8 +39,6 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-
-	//class RenderableSite;
 
 RenderableExplorationPath::RenderableExplorationPath(const RenderableSite& owner, std::vector<glm::dvec2> coordinates)
 	: _owner(owner)
@@ -64,7 +61,7 @@ RenderableExplorationPath::~RenderableExplorationPath() {}
 bool RenderableExplorationPath::initialize() {
 	
 	// Getting the parent renderable to calculate rover model coordinates to world coordinates
-	auto parent = OsEng.renderEngine().scene()->sceneGraphNode("RoverSite")->parent();
+	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(_owner.owner()->name())->parent();
 	_globe = (globebrowsing::RenderableGlobe *)parent->renderable();
 
 	// Shaders for the path (GL_LINES)
