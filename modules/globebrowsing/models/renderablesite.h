@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/models/renderableexplorationpath.h>
 #include <ghoul/opengl/texture.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
 
 namespace openspace {
@@ -50,6 +51,7 @@ namespace globebrowsing {
 	struct Models {
 		std::string _texturePath;
 		modelgeometry::ModelGeometry* _model;
+		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 		std::unique_ptr<ghoul::opengl::Texture> _texture;
 	};
 
@@ -102,7 +104,12 @@ private:
 
 	GeneralProperties _generalProperties;
 
+	properties::Vec3Property _debugModelRotation;
+
 	std::vector<Models> _models;
+	globebrowsing::RenderableGlobe* _globe;
+
+	glm::dvec3 _sunPos;
 };
 
 }
