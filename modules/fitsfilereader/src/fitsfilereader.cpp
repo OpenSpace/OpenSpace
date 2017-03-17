@@ -35,6 +35,66 @@ namespace {
 
 namespace openspace {
 
+std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buffer) {
+    fitsfile* infile;
+    // Get string adress
+    const char* memory = buffer.c_str();
+    size_t size = buffer.size() * sizeof(std::string::value_type);
+    void* v = const_cast<char*>(memory);
+    int status = 0;
+    if (!fits_open_memfile(&infile, "", READONLY, &v, &size, 0, NULL, &status)) {
+        fits_report_error(stderr, status);
+    }
+
+    int numAxis = 0;
+    fits_get_img_dim(infile, &numAxis, &status);
+    if (numAxis != 2) {
+        LERROR("Only support images with 2 axes");
+    }
+
+    long axLengths[2];
+    if (fits_get_img_size(infile, 2, axLengths, &status)) {
+        LERROR("Error in getting image size");
+        fits_report_error(stderr, status);
+    }
+
+    // Compute number of pixels
+    int numPixels = axLengths[0] * axLengths[1];
+    unsigned long* imageArray;
+
+    // Set up fpixel for a full image read
+    long fpixel[2];
+    fpixel[0] = 1;
+    fpixel[1] = 1;
+
+    // Allocate space for the image - TODO do this C++ style
+    imageArray = (unsigned long*)malloc(sizeof(unsigned long) * (numPixels + 1));
+    fits_read_pix(infile, TULONG, fpixel, numPixels, NULL, imageArray, NULL, &status);
+
+    // Still ugly workaround
+    unsigned char* imageData = new unsigned char[numPixels];
+    for (int i = 0; i < numPixels; i++) {
+        imageData[i] =  (unsigned char) imageArray[i];
+    }
+
+    std::cout << "Img size x " << axLengths[0]<< ", y : " << axLengths[1];
+
+    const glm::size3_t imageSize(axLengths[0], axLengths[1], 1);
+    const Texture::Format format = ghoul::opengl::Texture::Red;
+    const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
+
+    // NOT WORKING
+    // std::unique_ptr<Texture> texture = std::make_unique<Texture>(
+    //                                                         imageData,
+    //                                                         imageSize,
+    //                                                         format,
+    //                                                         static_cast<int>(format),
+    //                                                         GL_UNSIGNED_BYTE,
+    //                                                         Texture::FilterMode::Linear
+    //                                                     );
+    return nullptr;
+}
+
 std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
     FITS::setVerboseMode(true);
     std::valarray<unsigned long> contents;
@@ -55,10 +115,10 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
     // Probably a much better way to do this, convert to char data for now
     unsigned char* imageData = new unsigned char[contents.size()]; // TODO(mn): deallocate
     for ( int i = 0; i < contents.size(); i++) {
-        imageData[i] = (short)contents[i];
+        imageData[i] = (unsigned char)(contents[i]);
     }
 
-    const glm::size3_t imageSize(sizeY, sizeY, 1);
+    const glm::size3_t imageSize(sizeX, sizeY, 1);
     const Texture::Format format = ghoul::opengl::Texture::Red;
     const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
 
