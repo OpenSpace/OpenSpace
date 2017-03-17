@@ -81,12 +81,12 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	ghoul_assert(success, "Name was not passed to RenderableSite");
 
 	std::string textureTxtPath = "";
-	success = dictionary.getValue("TerrainTextures.Filepath", textureTxtPath);
+	success = dictionary.getValue("TerrainTextures.Txtpath", textureTxtPath);
 
 	if (success) {
 		_textureTxtPath = absPath(textureTxtPath);
 		// Get the file texture file names
-		_textureFileNames = loadTexturePaths(_textureTxtPath);
+		_fileNames = loadTexturePaths(_textureTxtPath);
 	}		
 		
 	if (_isReady) {
@@ -96,22 +96,25 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	ghoul::Dictionary modelDic;
 
 	if (dictionary.getValue("TerrainModel", modelDic)) {
-		int i = 0;
-		std::string modelFilepath;
-		modelDic.getValue("Filepath", modelFilepath);
-		modelDic.setValue("GeometryFile", modelFilepath + "/NLB_486003207RAS_F0481570NCAM00353M1.obj");
+		int count = 0;
+		for(auto i : _fileNames) {
+			std::string modelFilepath;
+			modelDic.getValue("ModelPath", modelFilepath);
+			modelDic.setValue("GeometryFile", modelFilepath + "/" + _fileNames[count] + ".obj");
 		
-		modelgeometry::ModelGeometry* m = modelgeometry::ModelGeometry::createFromDictionary(modelDic);
+			modelgeometry::ModelGeometry* m = modelgeometry::ModelGeometry::createFromDictionary(modelDic);
 		
-		_models.push_back(Models());
+			_models.push_back(Models());
+			std::string k;
+			modelDic.getValue("TexturePath", k);
+			
+			_models.at(count)._texturePath = absPath(k + "/" + _fileNames[count] + ".png");
+			_models.at(count)._model = m;
+			_models.at(count)._programObject = nullptr;
+			_models.at(count)._texture = nullptr;
+			count++;
+		}
 
-		std::string k;
-		modelDic.getValue("TexturePath", k);
-		LINFO("k : " << k);
-		_models.at(i)._texturePath = absPath(k + "/NLB_486003207RAS_F0481570NCAM00353M1.png");
-		_models.at(i)._model = m;
-		_models.at(i)._programObject = nullptr;
-		_models.at(i)._texture = nullptr;
 	}
 	_sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 }
@@ -120,14 +123,13 @@ bool RenderableSite::initialize() {
 	_renderableExplorationPath->initialize();
 		
 	for (auto it = _models.begin(); it != _models.end(); ++it) {
-		(*it)._model->initialize(this); 
+		(*it)._model->initialize(this);
 		if ((*it)._programObject == nullptr) {
 			RenderEngine& renderEngine = OsEng.renderEngine();
 			(*it)._programObject = renderEngine.buildRenderProgram("RenderableSite",
 				"${MODULE_BASE}/shaders/model_vs.glsl", "${MODULE_BASE}/shaders/model_fs.glsl");
 
 			if (!(*it)._programObject) return false;
-
 		}
 	}
 
@@ -251,7 +253,6 @@ void RenderableSite::render(const RenderData& data) {
 
 void RenderableSite::update(const UpdateData & data) {
 	_renderableExplorationPath->update(data);
-
 }
 
 std::vector<std::string> RenderableSite::loadTexturePaths(std::string absoluteFilePath)
@@ -262,7 +263,6 @@ std::vector<std::string> RenderableSite::loadTexturePaths(std::string absoluteFi
 
 	if (myfile.is_open()) {
 		while (std::getline(myfile, fileName)) {
-			LERROR(fileName);
 			fileNameVector.push_back(fileName);
 		}
 		myfile.close();
@@ -282,8 +282,6 @@ bool RenderableSite::extractCoordinates() {
 
 	OGRLayer *poLayer = poDS->GetLayerByName("rover_locations");
 
-	//_coordMap = std::map<int, SiteInformation>();
-
 	OGRFeature *poFeature;
 	poLayer->ResetReading();
 
@@ -295,48 +293,14 @@ bool RenderableSite::extractCoordinates() {
 		int sol = poFeature->GetFieldAsInteger("sol");
 		double lat = poFeature->GetFieldAsDouble("plcl");
 		double lon = poFeature->GetFieldAsDouble("longitude");
-		//LERROR(frame);
-
-		/*// Site allready exists
-		if (_coordMap.find(site) != _coordMap.end()) {
-			bool allreadyExists = false;
-			std::vector<glm::dvec2> tempVec = _coordMap.at(site).lonlatCoordinates;
-
-			// Check if the latitude and longitude allready exists in the vector
-			for (auto i : tempVec) {
-				if (i.x == lat && i.y == lon) {
-					allreadyExists = true;
-					break;
-				}
-			}
-
-			// Only add new coordinates to prevent duplicates
-			if (allreadyExists == false)
-				_coordMap.at(site).lonlatCoordinates.push_back(glm::dvec2(lat, lon));
-		}
-		// Create a new site
-		else {
-			// Temp variables
-			SiteInformation tempSiteInformation;
-			std::vector<glm::dvec2> tempVec;
-
-			// Push back the new coordinates
-			tempVec.push_back(glm::dvec2(lat, lon));
-
-			// Save variables in the tmep struct
-			tempSiteInformation.sol = sol;
-			tempSiteInformation.lonlatCoordinates = tempVec;
-
-			_coordMap.insert(std::make_pair(site, tempSiteInformation));
-
-		}*/
 
 		// Saves all coordinates for rendering the path and only site coordinates for rendering sites.
+		// GetFieldAsDouble resturns zero (0) if field is empty.
 		if(lat != 0 && lon != 0) {
 			_pathCoordinates.push_back(glm::dvec2(lat, lon));
 
 			if (frame == "SITE") {
-				_siteCoordinates.push_back(glm::dvec2(lat, lon));
+				_siteCoordinates.insert(std::make_pair(site, glm::dvec2(lat, lon)));
 			}
 		}
 		OGRFeature::DestroyFeature(poFeature);
@@ -344,7 +308,6 @@ bool RenderableSite::extractCoordinates() {
 	GDALClose(poDS);
 	
 	return (_pathCoordinates.size() != 0);
-	//return (_coordMap.size() != 0);
 }
 
 void RenderableSite::loadTexture() {

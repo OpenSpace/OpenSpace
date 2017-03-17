@@ -32,7 +32,6 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 
-
 namespace openspace {
 
 namespace modelgeometry {
@@ -41,12 +40,10 @@ namespace modelgeometry {
 
 namespace globebrowsing {
 
-
 	struct SiteInformation {
 		int sol;
 		std::vector<glm::dvec2> lonlatCoordinates;
 	};
-
 
 	struct Models {
 		std::string _texturePath;
@@ -85,18 +82,14 @@ private:
 	std::string _filePath;
 	std::string _colorTexturePath;
 
-	//::unique_ptr<ghoul::opengl::ProgramObject> _pathShader;
-
 	bool extractCoordinates();
 	void loadTexture();
-	//std::map<int, SiteInformation> _coordMap;
 
 	std::vector<glm::dvec2> _pathCoordinates;
-	std::vector<glm::dvec2> _siteCoordinates;
+	std::map<int, glm::dvec2> _siteCoordinates;
 
 	properties::StringProperty _textureTxtPath;
-	std::vector<std::string> _textureFileNames;
-
+	std::vector<std::string> _fileNames;
 
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
 

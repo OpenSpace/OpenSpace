@@ -103,7 +103,7 @@ bool RenderableExplorationPath::initialize() {
 	glBufferData(GL_ARRAY_BUFFER,
 		_stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
 		&_stationPointsModelCoordinates[0],
-		GL_STATIC_DRAW);
+		GL_DYNAMIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(_stationPointsModelCoordinates[0]), 0);
@@ -273,7 +273,7 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 	glBufferData(GL_ARRAY_BUFFER,
 		_stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
 		&_stationPointsModelCoordinates[0],
-		GL_STATIC_DRAW);
+		GL_DYNAMIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(_stationPointsModelCoordinates[0]), 0);
