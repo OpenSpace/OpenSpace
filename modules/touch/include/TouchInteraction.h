@@ -66,6 +66,13 @@ struct ScaleFactor {
 	double globalRoll;
 	double localRoll;
 };
+struct InteractionType {
+	bool rot;
+	bool pinch;
+	bool pan;
+	bool roll;
+	bool pick;
+};
 
 using Point = std::pair<int, TUIO::TuioPoint>;
 
@@ -76,7 +83,7 @@ class TouchInteraction : public properties::PropertyOwner
 		~TouchInteraction();
 		
 		void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
-		int interpret(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
+		void interpret(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void step(double dt);
 		void configSensitivities(double dist);
 		void decelerate();
@@ -100,7 +107,7 @@ class TouchInteraction : public properties::PropertyOwner
 		globebrowsing::RenderableGlobe* _globe;
 
 		double _minHeightFromSurface;
-		int _interactionMode;
+		InteractionType _interactionMode;
 		double _baseSensitivity;
 		double _baseFriction;
 		glm::dvec3 _centroid;
