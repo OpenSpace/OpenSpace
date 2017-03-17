@@ -15,7 +15,7 @@ function preInitialization()
     --Test for vernal equinox time 2017
     --openspace.time.setTime("2017 MAR 20 10:28:30.500")
 
-    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys_satellites.lua'))
 end
 
 function postInitialization()
@@ -56,8 +56,8 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "Earth",
-        Position = {-68152103445.645149, -71145526468.627335, 110168621302.621155},
-        Rotation = {-0.479623, -0.500297, -0.357370, -0.626060},
+        Position = {-54343425747.129051, -73298476295.934555, 116584089130.590012},
+        Rotation = {-0.078983, 0.830093, 0.014241, -0.551819},
     },
     Modules = {
         --"satellites/earth",

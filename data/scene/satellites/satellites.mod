@@ -58,7 +58,7 @@ function  getSat(title, file, lineNum)
           Origin = "Center",
           Body = "TLE",
           Billboard = true,
-          Texture = "tle.jpg"
+          Texture = "satB.png"
       },
       Transform = {
           Translation = {
@@ -109,7 +109,7 @@ function getTestPoint(parent, name, x, y, z)
             Origin = "Center",
             Body = "TLE",
             Billboard = true,
-            Texture = "tle.jpg"
+            Texture = "satB.png"
         },
         Transform = {
             Translation = {
@@ -145,6 +145,7 @@ modElements = {}
 fileErr = ""
 for sOrbit in values(satelliteGroups) do
   filename = sOrbit.url:match("([^/]+)$")
+  filenameSansExt = filename:gsub(filename:match "(%.%w+)$", "")
   sOrbit.path = "../satellites/tle/" .. filename
   pathFromScenegraphParent = "./" .. sOrbit.path
   if SOCKET then
@@ -168,8 +169,8 @@ for sOrbit in values(satelliteGroups) do
         title = trimString(line[1])
         per = getPeriodFromFile(line[3])
         per = 1.0 / per * 2 --trail for 2x a single revolution
-        table.insert(modElements, getSat(title, pathFromScenegraphParent, n))
-        table.insert(modElements, getSatTrail(title,
+        table.insert(modElements, getSat(filenameSansExt .. "_" .. title, pathFromScenegraphParent, n))
+        table.insert(modElements, getSatTrail(filenameSansExt .. "_" .. title,
                      pathFromScenegraphParent, n, per, sOrbit.trailColor))
       else
         fileErr = fileErr .. filename .. " " .. n .. ","
