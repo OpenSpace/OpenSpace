@@ -220,6 +220,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
     _selectorName = TYPE_TF;
+	//_selectorName = "tf";
     std::string brickSelectorType;
     if (dictionary.hasKey(KeyBrickSelector)) {
         success = dictionary.getValue(KeyBrickSelector, brickSelectorType);
@@ -286,7 +287,21 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 }
             }
             break;
-
+		case Selector::TIME:
+			if (!_timeBrickSelector) {
+				TimeBrickSelector* tbs;
+				_errorHistogramManager = new ErrorHistogramManager(_tsp.get());
+				tbs = new TimeBrickSelector(_tsp.get(), _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
+				_timeBrickSelector = tbs;
+				_transferFunction->setCallback([tbs](const TransferFunction &tf) {
+					tbs->calculateBrickErrors();
+				});
+				if (initializeSelector()) {
+					tbs->calculateBrickErrors();
+					return true;
+				}
+			}
+			break;
         case Selector::SIMPLE:
             if (!_simpleTfBrickSelector) {
                 SimpleTfBrickSelector *stbs;
@@ -412,6 +427,39 @@ bool RenderableMultiresVolume::initializeSelector() {
                 success &= _tfBrickSelector && _tfBrickSelector->initialize();
             }
             break;
+
+		case Selector::TIME:
+			if (_errorHistogramManager) {
+				std::stringstream cacheName;
+				ghoul::filesystem::File f = _filename;
+				cacheName << f.baseName() << "_" << nHistograms << "_errorHistograms";
+				std::string cacheFilename;
+				cacheFilename = FileSys.cacheManager()->cachedFilename(
+					cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
+				std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
+				std::string errorHistogramsPath = _errorHistogramsPath;
+				if (cacheFile.is_open()) {
+					// Read histograms from cache.
+					cacheFile.close();
+					LINFO("Loading histograms from cache: " << cacheFilename);
+					success &= _errorHistogramManager->loadFromFile(cacheFilename);
+				}
+				else if (_errorHistogramsPath != "") {
+					// Read histograms from scene data.
+					LINFO("Loading histograms from scene data: " << _errorHistogramsPath);
+					success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
+				}
+				else {
+					// Build histograms from tsp file.
+					LWARNING("Failed to open " << cacheFilename);
+					if (success &= _errorHistogramManager->buildHistograms(nHistograms)) {
+						LINFO("Writing cache to " << cacheFilename);
+						_errorHistogramManager->saveToFile(cacheFilename);
+					}
+				}
+				success &= _timeBrickSelector && _timeBrickSelector->initialize();
+			}
+			break;
 
         case Selector::SIMPLE:
             if (_histogramManager) {
@@ -605,7 +653,14 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
                 _localTfBrickSelector->selectBricks(currentTimestep, _brickIndices);
             }
             break;
-        }
+		case Selector::TIME:
+			if (_timeBrickSelector) {
+				_timeBrickSelector->setMemoryBudget(_memoryBudget);
+				_timeBrickSelector->setStreamingBudget(_streamingBudget);
+				_timeBrickSelector->selectBricks(currentTimestep, _brickIndices);
+			}
+			break;
+		}
 
         std::chrono::system_clock::time_point uploadStart;
         if (_gatheringStats) {
@@ -651,8 +706,19 @@ RenderableMultiresVolume::Selector RenderableMultiresVolume::getSelector() {
 
     //return Selector::TIME;
     //SelectorValues.at(std::string(_selectorName).c_str());
-    LINFO(SelectorValues.at("tf"));
-    return SelectorValues.at("tf"); /*{
+    //LINFO(SelectorValues.at("time"));
+	//LINFO(SelectorValues.at(std::string(_selectorName).c_str()));
+	//return SelectorValues.at(std::string(_selectorName).c_str());
+/*	std::string s;
+//	const char quote = '"';
+	_selectorName.getStringValue(s);
+//	if (s.at(0) == '"' && s.at(s.length()) == quote) {
+	s = s.substr(1, s.length() - 2);
+//	}
+	const char * f = &s[0];
+	LINFO(f);
+	return SelectorValues.at(f);
+	switch (_selectorName) {
     case TYPE_TF:
         return Selector::TF;
     case TYPE_SIMPLE:
@@ -664,7 +730,17 @@ RenderableMultiresVolume::Selector RenderableMultiresVolume::getSelector() {
     default:
         return Selector::TF;
     }
-    return _selector;*/
+*/
+	std::string s;
+	_selectorName.getStringValue(s);
+	s = s.substr(1, s.length() - 2);
+
+	if (s == TYPE_TF)		return SelectorValues.at(TYPE_TF);
+	if (s == TYPE_SIMPLE)	return SelectorValues.at(TYPE_SIMPLE);
+	if (s == TYPE_LOCAL)	return SelectorValues.at(TYPE_LOCAL);
+	if (s == TYPE_TIME)		return SelectorValues.at(TYPE_TIME);
+
+	return Selector::SIMPLE;
 }
 
 } // namespace openspace
