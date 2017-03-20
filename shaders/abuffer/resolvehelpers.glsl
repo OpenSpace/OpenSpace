@@ -47,7 +47,7 @@ float acc = 0;
 
 #for index in 1..#{resolveData.nRaycasters}
 uniform bool insideRaycaster#{index};
-uniform vec3 cameraPosInRaycaster#{index}
+uniform vec3 cameraPosInRaycaster#{index};
 #endfor
 
 
