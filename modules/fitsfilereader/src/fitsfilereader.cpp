@@ -42,7 +42,8 @@ std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buff
     size_t size = buffer.size() * sizeof(std::string::value_type);
     void* v = const_cast<char*>(memory);
     int status = 0;
-    if (!fits_open_memfile(&infile, "", READONLY, &v, &size, 0, NULL, &status)) {
+    if (fits_open_memfile(&infile, "", READONLY, &v, &size, 0, NULL, &status)) {
+        LERROR("Error opening file");
         fits_report_error(stderr, status);
     }
 
@@ -58,41 +59,38 @@ std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buff
         fits_report_error(stderr, status);
     }
 
-    // Compute number of pixels
     int numPixels = axLengths[0] * axLengths[1];
-    unsigned long* imageArray;
-
     // Set up fpixel for a full image read
-    long fpixel[2];
-    fpixel[0] = 1;
-    fpixel[1] = 1;
+    long fpixel[2] = {1, 1};
 
     // Allocate space for the image - TODO do this C++ style
-    imageArray = (unsigned long*)malloc(sizeof(unsigned long) * (numPixels + 1));
-    fits_read_pix(infile, TULONG, fpixel, numPixels, NULL, imageArray, NULL, &status);
+    float* imageArray = (float*)calloc(numPixels, sizeof(float));
+    fits_read_pix(infile, TFLOAT, fpixel, numPixels, NULL, imageArray, NULL, &status);
+
+    if (fits_close_file(infile, &status)) {
+        LERROR("Error closing file");
+        fits_report_error(stderr, status);
+    }
 
     // Still ugly workaround
     unsigned char* imageData = new unsigned char[numPixels];
     for (int i = 0; i < numPixels; i++) {
-        imageData[i] =  (unsigned char) imageArray[i];
+        imageData[i] = (unsigned char) imageArray[i];
     }
-
-    std::cout << "Img size x " << axLengths[0]<< ", y : " << axLengths[1];
 
     const glm::size3_t imageSize(axLengths[0], axLengths[1], 1);
     const Texture::Format format = ghoul::opengl::Texture::Red;
     const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
 
-    // NOT WORKING
-    // std::unique_ptr<Texture> texture = std::make_unique<Texture>(
-    //                                                         imageData,
-    //                                                         imageSize,
-    //                                                         format,
-    //                                                         static_cast<int>(format),
-    //                                                         GL_UNSIGNED_BYTE,
-    //                                                         Texture::FilterMode::Linear
-    //                                                     );
-    return nullptr;
+    std::unique_ptr<Texture> texture = std::make_unique<Texture>(
+                                                            imageData,
+                                                            imageSize,
+                                                            format,
+                                                            static_cast<int>(format),
+                                                            GL_UNSIGNED_BYTE,
+                                                            Texture::FilterMode::Linear
+                                                        );
+    return texture;
 }
 
 std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
