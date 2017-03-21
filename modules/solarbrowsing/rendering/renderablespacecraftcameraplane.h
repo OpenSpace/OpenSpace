@@ -28,6 +28,8 @@
 #include <modules/base/rendering/renderableplane.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/engine/downloadmanager.h> // Make pointer & forward declare?
+#include <memory>
 
 namespace ghoul { namespace opengl { class Texture; }}
 
@@ -39,12 +41,26 @@ public:
     RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary);
 
     void render(const RenderData& data);
+    void update(const UpdateData& data);
     void loadTexture();
+    void updateTexture();
 
 private:
     properties::DoubleProperty _moveFactor;
     properties::StringProperty _target;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::future<DownloadManager::MemoryFile> _imageData;
+
+    double _openSpaceTime;
+    double _lastUpdateOpenSpaceTime;
+
+    std::chrono::milliseconds _realTime;
+    std::chrono::milliseconds _lastUpdateRealTime;
+
+    int currentActiveTexture;
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+
+    void loadLocalTextures(std::string url);
+    void downloadTextureResource();
 };
 
 } // namespace openspace
