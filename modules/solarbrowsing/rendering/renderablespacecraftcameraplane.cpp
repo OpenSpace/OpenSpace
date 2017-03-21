@@ -43,11 +43,12 @@
 #include <math.h>
 
 using namespace ghoul::opengl;
+using namespace std::chrono;
 
 namespace {
     static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
     static const int _minRealTimeUpdateInterval = 100;
-    static const int _minOpenSpaceTimeUpdateInterval = 2;
+    static const int _minOpenSpaceTimeUpdateInterval = 1; // Should probably be set to real update value of data later
     static const std::string _dummyImageUrl = "https://sdo.gsfc.nasa.gov/assets/img/swpc/fitsfiles/0094/AIAsynoptic_20170320_185420_0094.fits";
 }
 
@@ -72,7 +73,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     // Initialize time
     _openSpaceTime = Time::ref().j2000Seconds();
     _lastUpdateOpenSpaceTime = 0.0;
-    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
 
     addProperty(_target);
@@ -104,7 +105,6 @@ void RenderableSpacecraftCameraPlane::loadLocalTextures(std::string url) {
                     // We'll need to scan the header of the fits
                     // and insert in some smart data structure that handles time / mn
                     _textures.push_back(FitsFileReader::loadTexture(relativePath));
-                    //_localImageData.push_back(FitsFileReader::readImageData(relativePath));
                 }
             }
         }
@@ -112,8 +112,10 @@ void RenderableSpacecraftCameraPlane::loadLocalTextures(std::string url) {
 }
 
 void RenderableSpacecraftCameraPlane::updateTexture() {
-    if (currentActiveTexture + 1 < _textures.size()) {
-        currentActiveTexture = currentActiveTexture + 1;
+    int clockwiseSign = (Time::ref().deltaTime()>0) ? 1 : -1;
+    int newIndex = clockwiseSign + currentActiveTexture;
+    if (newIndex < _textures.size() && newIndex >= 0) {
+        currentActiveTexture = newIndex;
         LDEBUG("Updating texture to " << currentActiveTexture);
         _textures[currentActiveTexture]->uploadTexture();
     }
@@ -133,14 +135,13 @@ void RenderableSpacecraftCameraPlane::updateTexture() {
 
 void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     _openSpaceTime = Time::ref().j2000Seconds();
-    _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
 
     float realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
     float openspaceDiff = abs(_openSpaceTime-_lastUpdateOpenSpaceTime);
 
-    bool timeToUpdateTexture = (openspaceDiff >= _minOpenSpaceTimeUpdateInterval) && 
+    bool timeToUpdateTexture = (openspaceDiff >= _minOpenSpaceTimeUpdateInterval) &&
                                (realTimeDiff > _minRealTimeUpdateInterval);
-    std::chrono::milliseconds _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
     // Future ready, push to texture vector
     // if (_imageData.valid() && DownloadManager::futureReady(_imageData)) {
