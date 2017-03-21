@@ -328,20 +328,6 @@ public:
      */
     const ghoul::Dictionary& metaData() const;
 
-    /**
-     * Returns a list of all tags that have been assigned to the Property. Useful for
-     * trying to find a match for a desired batch operation on Properties.
-     * \return Pointer to vector of string tags that were assigned to the Property
-     */
-    const std::vector<std::string>* getTags(void) const;
-
-    /**
-     * Adds a tag to the Property's list of assigned tags. Tags are useful for creating
-     * groups of Properties that can be used in batch operations.
-     * \param tag The string that is to be assigned to the Property
-     */
-    void addTag(std::string tag);
-
 protected:
     static const char* IdentifierKey;
     static const char* NameKey;
@@ -398,8 +384,6 @@ protected:
     /// The callback function that will be invoked whenever the encapsulated value changes
     std::function<void()> _onChangeCallback;
 
-    /// Collection of string tag(s) assigned to this property
-    std::vector<std::string> _tags;
 };
 
 } // namespace properties

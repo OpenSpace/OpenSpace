@@ -207,6 +207,20 @@ public:
     /// \see PropertyOwner::removePropertySubOwner(PropertyOwner*)
     void removePropertySubOwner(PropertyOwner& owner);
 
+    /**
+     * Returns a list of all tags that have been assigned to the Property. Useful for
+     * trying to find a match for a desired batch operation on Properties.
+     * \return Pointer to vector of string tags that were assigned to the Property
+     */
+    const std::vector<std::string>* getTags(void) const;
+
+    /**
+     * Adds a tag to the Property's list of assigned tags. Tags are useful for creating
+     * groups of Properties that can be used in batch operations.
+     * \param tag The string that is to be assigned to the Property
+     */
+    void addTag(std::string tag);
+
 private:
     /// The name of this PropertyOwner
     std::string _name;
@@ -218,6 +232,8 @@ private:
     std::vector<PropertyOwner*> _subOwners;
     /// The associations between group identifiers of Property's and human-readable names
     std::map<std::string, std::string> _groupNames;
+    /// Collection of string tag(s) assigned to this property
+    std::vector<std::string> _tags;
 };
 
 }  // namespace properties

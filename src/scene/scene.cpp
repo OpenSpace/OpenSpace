@@ -675,29 +675,30 @@ scripting::LuaLibrary Scene::luaLibrary() {
 			{
                 "setPropertyGroup",
 				&luascriptfunctions::property_setGroup,
-				"string, string, *",
+				"string, *",
 				"Sets all properties that belong to a tagged group AND match the "
-				"URI (with optional wildcards) in the first argument. Second argument is "
-				"the tag name to match. The third argument can be any type, but it has to "
-				"match tye type that the property expects.",
+				"URI (with optional wildcards) in the first argument (group tag name is "
+				"given in place of property owner name). The second argument can be any "
+				"type, but it has to match the type that the property expects.",
 			},
 			{
                 "setPropertyGroupSingle",
 				&luascriptfunctions::property_setGroupSingle,
-				"string, string, *",
+				"string, *",
 				"Sets all properties that belong to a tagged group AND match the "
-				"URI (requires exact match) in the first argument. Second argument is "
-				"the tag name to match. The third argument can be any type, but it has to "
-				"match tye type that the property expects.",
+				"URI (requires exact match) in the first argument (group tag name is "
+				"given in place of property owner name). The second argument can be any "
+				"type, but it has to match the type that the property expects.",
 			},
 			{
                 "setPropertyGroupRegex",
 				&luascriptfunctions::property_setGroupRegex,
-				"string, string, *",
+				"string, *",
 				"Sets all properties that belong to a tagged group AND match the "
-				"URI regex in the first argument. Second argument is the tag name to"
-				"match. The third argument can be any type, but it has to match the "
-				"type that the property expects.",
+				"URI (allows regular expression syntax) in the first argument "
+				"(group tag name is given in place of property owner name). The second "
+				"argument can be any type, but it has to match the type that the "
+				"property expects.",
 			},
             {
                 "getPropertyValue",

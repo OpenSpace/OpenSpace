@@ -324,5 +324,13 @@ const std::string& PropertyOwner::name() const {
     return _name;
 }
 
+const std::vector<std::string>* PropertyOwner::getTags(void) const {
+    return &_tags;
+}
+
+void PropertyOwner::addTag(std::string tag) {
+    _tags.push_back(tag);
+}
+
 } // namespace properties
 } // namespace openspace

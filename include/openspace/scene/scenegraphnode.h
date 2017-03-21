@@ -59,6 +59,7 @@ public:
     static const std::string KeyName;
     static const std::string KeyParentName;
     static const std::string KeyDependencies;
+    static const std::string KeyTag;
     
     SceneGraphNode();
     ~SceneGraphNode();

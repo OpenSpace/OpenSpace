@@ -211,14 +211,5 @@ std::string Property::generateAdditionalDescription() const {
     return "";
 }
 
-const std::vector<std::string>* Property::getTags(void) const {
-	return &_tags;
-}
-
-void Property::addTag(std::string tag) {
-	_tags.push_back(tag);
-}
-
-
 } // namespace properties
 } // namespace openspace

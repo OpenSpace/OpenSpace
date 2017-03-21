@@ -64,6 +64,7 @@ const std::string SceneGraphNode::RootNodeName = "Root";
 const std::string SceneGraphNode::KeyName = "Name";
 const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
+const std::string SceneGraphNode::KeyTag = "Tag";
 
 SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary){
     openspace::documentation::testSpecificationAndThrow(
@@ -137,6 +138,13 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         }
         result->addPropertySubOwner(result->_transform.scale.get());
         LDEBUG("Successfully created scale for '" << result->name() << "'");
+    }
+
+    if (dictionary.hasKey(KeyTag)) {
+        std::string tagString;
+        dictionary.getValue(KeyTag, tagString);
+        result->addTag(tagString);
+        LDEBUG("Successfully added tag for '" << result->name() << "'");
     }
 
     LDEBUG("Successfully created SceneGraphNode '"
