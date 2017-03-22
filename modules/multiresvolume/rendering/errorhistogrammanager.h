@@ -32,8 +32,6 @@
 
 namespace openspace {
 
-class HistogramManager;
-
 class ErrorHistogramManager: public HistogramManager {
 public:
     ErrorHistogramManager(TSP* tsp);

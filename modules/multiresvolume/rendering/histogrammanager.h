@@ -50,8 +50,8 @@ protected:
     float _maxBin;
     int _numBins;
 
-    bool buildHistogram(TSP* tsp, unsigned int brickIndex);
-    std::vector<float> readValues(TSP* tsp, unsigned int brickIndex);
+    bool buildHistogram(unsigned int brickIndex);
+    std::vector<float> readValues(unsigned int brickIndex) const;
 };
 
 } // namespace openspace

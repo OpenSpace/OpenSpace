@@ -55,7 +55,7 @@ bool HistogramManager::buildHistograms(int numBins) {
     int numTotalNodes = _tsp->numTotalNodes();
     _histograms = std::vector<Histogram>(numTotalNodes);
 
-    bool success = buildHistogram(_tsp, 0);
+    bool success = buildHistogram(0);
 
     return success;
 }
@@ -64,14 +64,14 @@ const Histogram* HistogramManager::getHistogram(unsigned int brickIndex) const {
     return &_histograms[brickIndex];
 }
 
-bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
+bool HistogramManager::buildHistogram(unsigned int brickIndex) {
     Histogram histogram(_minBin, _maxBin, _numBins);
-    bool isBstLeaf = tsp->isBstLeaf(brickIndex);
-    bool isOctreeLeaf = tsp->isOctreeLeaf(brickIndex);
+    bool isBstLeaf = _tsp->isBstLeaf(brickIndex);
+    bool isOctreeLeaf = _tsp->isOctreeLeaf(brickIndex);
 
     if (isBstLeaf && isOctreeLeaf) {
         // TSP leaf, read from file and build histogram
-        std::vector<float> voxelValues = readValues(tsp, brickIndex);
+        std::vector<float> voxelValues = readValues(brickIndex);
         unsigned int numVoxels = voxelValues.size();
 
         for (unsigned int v = 0; v < numVoxels; ++v) {
@@ -83,12 +83,12 @@ bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
 
         if (!isBstLeaf) {
             // Push BST children
-            children.push_back(tsp->getBstLeft(brickIndex));
-            children.push_back(tsp->getBstRight(brickIndex));
+            children.push_back(_tsp->getBstLeft(brickIndex));
+            children.push_back(_tsp->getBstRight(brickIndex));
         }
         if (!isOctreeLeaf) {
             // Push Octree children
-            unsigned int firstChild = tsp->getFirstOctreeChild(brickIndex);
+            unsigned int firstChild = _tsp->getFirstOctreeChild(brickIndex);
             for (int c = 0; c < 8; c++) {
                 children.push_back(firstChild + c);
             }
@@ -97,7 +97,7 @@ bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
         for (int c = 0; c < numChildren; c++) {
             // Visit child
             unsigned int childIndex = children[c];
-            if (_histograms[childIndex].isValid() || buildHistogram(tsp, childIndex)) {
+            if (_histograms[childIndex].isValid() || buildHistogram(childIndex)) {
                 if (numChildren <= 8 || c < 2) {
                     // If node has both BST and Octree children, only add BST ones
                     histogram.add(_histograms[childIndex]);
@@ -115,13 +115,13 @@ bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
     return true;
 }
 
-std::vector<float> HistogramManager::readValues(TSP* tsp, unsigned int brickIndex) {
-    unsigned int paddedBrickDim = tsp->paddedBrickDim();
+std::vector<float> HistogramManager::readValues(unsigned int brickIndex) const {
+    unsigned int paddedBrickDim = _tsp->paddedBrickDim();
     unsigned int numBrickVals = paddedBrickDim * paddedBrickDim * paddedBrickDim;
     std::vector<float> voxelValues(numBrickVals);
 
-    std::streampos offset = tsp->dataPosition() + static_cast<long long>(brickIndex*numBrickVals*sizeof(float));
-    std::ifstream& file = tsp->file();
+    std::streampos offset = _tsp->dataPosition() + static_cast<long long>(brickIndex*numBrickVals*sizeof(float));
+    std::ifstream& file = _tsp->file();
     file.seekg(offset);
 
     file.read(reinterpret_cast<char*>(&voxelValues[0]),
