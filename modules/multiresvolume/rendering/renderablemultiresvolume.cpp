@@ -631,36 +631,18 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
             selectionStart = std::chrono::system_clock::now();
         }
 
+        BrickSelector * s;
         switch (_selector) {
-        case Selector::TF:
-            if (_tfBrickSelector) {
-                _tfBrickSelector->setMemoryBudget(_memoryBudget);
-                _tfBrickSelector->setStreamingBudget(_streamingBudget);
-                _tfBrickSelector->selectBricks(currentTimestep, _brickIndices);
-            }
-            break;
-        case Selector::SIMPLE:
-            if (_simpleTfBrickSelector) {
-                _simpleTfBrickSelector->setMemoryBudget(_memoryBudget);
-                _simpleTfBrickSelector->setStreamingBudget(_streamingBudget);
-                _simpleTfBrickSelector->selectBricks(currentTimestep, _brickIndices);
-            }
-            break;
-        case Selector::LOCAL:
-            if (_localTfBrickSelector) {
-                _localTfBrickSelector->setMemoryBudget(_memoryBudget);
-                _localTfBrickSelector->setStreamingBudget(_streamingBudget);
-                _localTfBrickSelector->selectBricks(currentTimestep, _brickIndices);
-            }
-            break;
-		case Selector::TIME:
-			if (_timeBrickSelector) {
-				_timeBrickSelector->setMemoryBudget(_memoryBudget);
-				_timeBrickSelector->setStreamingBudget(_streamingBudget);
-				_timeBrickSelector->selectBricks(currentTimestep, _brickIndices);
-			}
-			break;
-		}
+        case Selector::TF:      s = _tfBrickSelector; break;
+        case Selector::SIMPLE:  s = _simpleTfBrickSelector; break;
+        case Selector::LOCAL:   s = _localTfBrickSelector; break;
+        case Selector::TIME:    s = _timeBrickSelector; break;
+        }
+        if (s) {
+            s->setMemoryBudget(_memoryBudget);
+            s->setStreamingBudget(_streamingBudget);
+            s->selectBricks(currentTimestep, _brickIndices);
+        }
 
         std::chrono::system_clock::time_point uploadStart;
         if (_gatheringStats) {

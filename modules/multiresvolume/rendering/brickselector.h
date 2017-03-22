@@ -35,6 +35,8 @@ public:
     virtual bool initialize() { return true; };
     virtual void selectBricks(int timestep,
                       std::vector<int>& bricks) = 0;
+    virtual void setMemoryBudget(int memoryBudget) = 0;
+    virtual void setStreamingBudget(int streamingBudget) = 0;
 };
 
 } // namespace openspace
