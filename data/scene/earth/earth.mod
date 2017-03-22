@@ -78,9 +78,10 @@ return {
             -- EndTime = "2017 JAN 01 12:00:00.000",
             -- SampleInterval = 3600
             Period = 365.242,
-            Resolution = 1000
+            Resolution = 1000,
+            Tag = "defaultTrails"
         },
-        GuiName = "/Solar/EarthTrail"
+        GuiName = "/Solar/EarthTrail",
     },
     --[[
     {

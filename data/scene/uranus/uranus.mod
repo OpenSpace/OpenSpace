@@ -58,7 +58,8 @@ return {
             },
             Color = {0.60, 0.95, 1.00 },
             Period = 30588.740,
-            Resolution = 1000
-        },
+            Resolution = 1000,
+            Tag = "defaultTrails"
+        }
     }
 }
