@@ -25,16 +25,16 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___ERRORHISTOGRAMMANAGER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___ERRORHISTOGRAMMANAGER___H__
 
-#include <fstream>
-#include <modules/multiresvolume/rendering/tsp.h>
-#include <openspace/util/histogram.h>
+#include <modules/multiresvolume/rendering/histogrammanager.h>
 #include <map>
 
 #include <ghoul/glm.h>
 
 namespace openspace {
 
-class ErrorHistogramManager {
+class HistogramManager;
+
+class ErrorHistogramManager: public HistogramManager {
 public:
     ErrorHistogramManager(TSP* tsp);
     ~ErrorHistogramManager();
@@ -45,15 +45,8 @@ public:
     bool loadFromFile(const std::string& filename);
     bool saveToFile(const std::string& filename);
 
-private:
-    TSP* _tsp;
-    std::ifstream* _file;
-
-    std::vector<Histogram> _histograms;
+protected:
     unsigned int _numInnerNodes;
-    float _minBin;
-    float _maxBin;
-    int _numBins;
 
     std::map<unsigned int, std::vector<float>> _voxelCache;
 

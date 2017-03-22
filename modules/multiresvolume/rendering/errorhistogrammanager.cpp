@@ -40,7 +40,7 @@ namespace {
 
 namespace openspace {
 
-ErrorHistogramManager::ErrorHistogramManager(TSP* tsp) : _tsp(tsp) {}
+ErrorHistogramManager::ErrorHistogramManager(TSP* tsp) : HistogramManager(tsp) {}
 
 ErrorHistogramManager::~ErrorHistogramManager() {}
 

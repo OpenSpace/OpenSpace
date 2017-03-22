@@ -41,7 +41,7 @@ public:
 
     bool loadFromFile(const std::string& filename);
     bool saveToFile(const std::string& filename);
-private:
+protected:
     TSP* _tsp;
     std::ifstream* _file;
 
