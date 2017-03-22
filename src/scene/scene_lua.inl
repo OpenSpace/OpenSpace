@@ -39,19 +39,50 @@ void executePropertySet(properties::Property* prop, lua_State* L) {
     );*/
 }
 
+template <class T>
+properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
+const std::string tagToMatch)     {
+    properties::PropertyOwner* tagMatchOwner = nullptr;
+    properties::PropertyOwner* owner = prop->owner();
+    
+    if (owner != nullptr) {
+        std::vector<std::string>* tags = (std::vector<std::string>*)owner->getTags();
+        for (std::string currTag : *tags) {
+            if (tagToMatch.compare(currTag) == 0) {
+                tagMatchOwner = owner;
+                break;
+            }
+        }
+        
+        //Call recursively until we find an owner with matching tag or the top of the
+        // ownership list
+        if (tagMatchOwner == nullptr)
+        tagMatchOwner = findPropertyOwnerWithMatchingGroupTag(owner, tagToMatch);
+    }
+    return tagMatchOwner;
+}
+
 void applyRegularExpression(lua_State* L, std::regex regex,
                             std::vector<properties::Property*> properties, int type,
-                            const std::string* tagToMatch = nullptr)                     {
+                            std::string groupName = "")                               {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
-
+    bool isGroupMode = (groupName.compare("") != 0) ? true : false;
+    
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties
         std::string id = prop->fullyQualifiedIdentifier();
+
         if (std::regex_match(id, regex)) {
             // If the fully qualified id matches the regular expression, we queue the
             // value change if the types agree
-
+            if (isGroupMode) {
+                properties::PropertyOwner* matchingTaggedOwner = findPropertyOwnerWithMatchingGroupTag(prop,
+                groupName);
+                if (matchingTaggedOwner == nullptr)
+                    continue;
+            }
+            
             if (type != prop->typeLua()) {
                 LERRORC("property_setValue",
                         errorLocation(L) << "Property '" <<
@@ -59,16 +90,8 @@ void applyRegularExpression(lua_State* L, std::regex regex,
                         "' does not accept input of type '" << luaTypeToString(type) <<
                         "'. Requested type: '" << luaTypeToString(prop->typeLua()) << "'"
                 );
-            }
-            else if (tagToMatch) {
-                for (const std::string tagEvaluate : *prop->getTags()) {
-                    if (tagEvaluate.compare(*tagToMatch) == 0) {
-                        executePropertySet(prop, L); 
-                        break;
-                    }
-                }
             } else {
-                executePropertySet(prop, L); 
+               executePropertySet(prop, L);
             }
         }
     }
@@ -78,32 +101,14 @@ std::string extractGroupNameFromUri(std::string command) {
     return command.substr(0, command.find_first_of("."));
 }
 
-template <class T>
-PropertyOwner* findPropertyOwnerWithMatchingGroupTag<T>(T* prop,
-                                                     const std::string tagToMatch)     {
-    PropertyOwner* tagMatchOwner = nullptr;
-    PropertyOwner* owner = prop->owner();
- 
-    if (owner != nullptr) {
-        std::vector<std::string>* tags = owner->getTags();
-        for (currTag : tags) {
-            if (currTag == tagToMatch) {
-                tagMatchOwner = owner;
-                break;
-            }
-        }
- 
-        //Call recursively until we find an owner with matching tag or the top of the
-        // ownership list
-        if (tagMatchOwner == nullptr)
-            tagMatchOwner = findPropertyOwnerWithMatchingGroupTag(owner, tagToMatch);
-    }
-    return tagMatchOwner;
-}
-
 std::string replaceUriGroupNameWith(std::string uri, std::string ownerName) {
     size_t pos = uri.find_first_of(".");
     return ownerName + "." + uri.substr(pos);
+}
+
+std::string extractUriWithoutGroupName(std::string uri) {
+    size_t pos = uri.find_first_of(".");
+    return uri.substr(pos);
 }
 }
 
@@ -237,29 +242,38 @@ int property_setGroupSingle(lua_State* L) {
 
     std::string uri = luaL_checkstring(L, -2);
     const int type = lua_type(L, -1);
-    std::string tagToMatch = extractGroupNameFromUri(uri); 
+    std::string tagToMatch = extractGroupNameFromUri(uri);
+    std::string pathRemainderToMatch = extractUriWithoutGroupName(uri);
  
     for (properties::Property* prop : allProperties()) {
-        //std::string id = prop->fullyQualifiedIdentifier();
-        PropertyOwner* matchingTaggedOwner = findPropertyOwnerWithMatchingGroupTag(prop,
-                                                 tagToMatch);
-        if (matchingTaggedOwner != nullptr) {
-            uri = replaceUriGroupNameWith(uri, matchingTaggedOwner.name());
-            if (type != prop->typeLua()) {
-                LERRORC("property_setValue", errorLocation(L) << "Property '"
-                    << prop->guiName() << "' does not accept input of type '"
-                    << luaTypeToString(type) << "'. Requested type: '"
-                    << luaTypeToString(prop->typeLua()) << "'");
-                return 0;
-            }
-            else {
-                prop->setLuaValue(L);
-                //ensure properties are synced over parallel connection
-                std::string value;
-                prop->getStringValue(value);
-                //OsEng.parallelConnection().scriptMessage(
-                //    prop->fullyQualifiedIdentifier(), value);
-                break;
+        std::string propFullId = prop->fullyQualifiedIdentifier();
+        //Look for a match in the uri with the group name (first term) removed
+        int propMatchLength = propFullId.length() - pathRemainderToMatch.length();
+
+        if (propMatchLength >= 0) {
+            std::string thisPropMatchId = propFullId.substr(propMatchLength);
+            //If remainder of uri matches (with group name removed),
+            if (pathRemainderToMatch.compare(thisPropMatchId) == 0)  {
+                properties::PropertyOwner* matchingTaggedOwner
+                    = findPropertyOwnerWithMatchingGroupTag(prop, tagToMatch);
+                if (matchingTaggedOwner != nullptr) {
+                    if (type != prop->typeLua()) {
+                        LERRORC("property_setValue", errorLocation(L) << "Property '"
+                            << prop->guiName() << "' does not accept input of type '"
+                            << luaTypeToString(type) << "'. Requested type: '"
+                            << luaTypeToString(prop->typeLua()) << "'");
+                        return 0;
+                    }
+                    else {
+                        prop->setLuaValue(L);
+                        //ensure properties are synced over parallel connection
+                        std::string value;
+                        prop->getStringValue(value);
+                        //OsEng.parallelConnection().scriptMessage(
+                        //    prop->fullyQualifiedIdentifier(), value);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -284,6 +298,7 @@ int property_setGroup(lua_State* L) {
     SCRIPT_CHECK_ARGUMENTS("property_setGroup", L, 2, nArguments);
 
     std::string regex = luaL_checkstring(L, -2);
+    std::string groupName = extractGroupNameFromUri(regex);
 
     // Replace all wildcards *  with the correct regex (.*)
     size_t startPos = regex.find("*");
@@ -292,13 +307,15 @@ int property_setGroup(lua_State* L) {
         startPos += 4;
         startPos = regex.find("*", startPos);
     }
+    //Remove group name from start of regex and replace with '.*'
+    regex = replaceUriGroupNameWith(regex, ".*");
 
     applyRegularExpression(
         L,
         std::regex(regex/*, std::regex_constants::optimize*/),
         allProperties(),
         lua_type(L, -1),
-        &tag
+        groupName
     );
 
     return 0;
@@ -320,13 +337,17 @@ int property_setGroupRegex(lua_State* L) {
     SCRIPT_CHECK_ARGUMENTS("property_setGroupRegex<", L, 2, nArguments);
 
     std::string regex = luaL_checkstring(L, -2);
+    std::string groupName = extractGroupNameFromUri(regex);
+    //Remove group name from start of regex and replace with '.*'
+    regex = replaceUriGroupNameWith(regex, ".*");
+
     try {
         applyRegularExpression(
             L,
             std::regex(regex, std::regex_constants::optimize),
             allProperties(),
             lua_type(L, -1),
-            &tag
+            groupName
         );
     }
     catch (const std::regex_error& e) {
