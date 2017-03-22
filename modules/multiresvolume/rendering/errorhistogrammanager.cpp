@@ -357,5 +357,6 @@ unsigned int ErrorHistogramManager::innerNodeToBrickIndex(unsigned int innerNode
     return numInnerBstNodes + leavesOffset;
 }
 
+const char * ErrorHistogramManager::getName() const { return _name; }
 } // namespace openspace
 

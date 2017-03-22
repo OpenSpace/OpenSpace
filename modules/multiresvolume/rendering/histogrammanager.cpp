@@ -189,5 +189,7 @@ bool HistogramManager::saveToFile(const std::string& filename) {
     return true;
 }
 
+const char * HistogramManager::getName() const  { return _name; }
+
 } // namespace openspace
 

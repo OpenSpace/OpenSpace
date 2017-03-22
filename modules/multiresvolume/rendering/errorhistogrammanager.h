@@ -34,6 +34,9 @@ namespace openspace {
 
 class ErrorHistogramManager: public HistogramManager {
 public:
+
+    static constexpr const char* NAME = "errorHistogram";
+
     ErrorHistogramManager(TSP* tsp);
     ~ErrorHistogramManager();
 
@@ -43,7 +46,9 @@ public:
     bool loadFromFile(const std::string& filename);
     bool saveToFile(const std::string& filename);
 
+    virtual const char * getName() const;
 protected:
+    const char * _name = "errorHistogram";
     unsigned int _numInnerNodes;
 
     std::map<unsigned int, std::vector<float>> _voxelCache;

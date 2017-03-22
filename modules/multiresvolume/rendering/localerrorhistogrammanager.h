@@ -32,6 +32,7 @@
 namespace openspace {
 
 class LocalErrorHistogramManager: public ErrorHistogramManager{
+    static constexpr const char* NAME = "localErrorHistogram";
 public:
     LocalErrorHistogramManager(TSP* tsp);
     ~LocalErrorHistogramManager();
@@ -43,12 +44,16 @@ public:
     bool loadFromFile(const std::string& filename);
     bool saveToFile(const std::string& filename);
 
+    const char * getName() const;
 protected:
+    const char * _name = "localErrorHistogram";
     std::vector<Histogram> _spatialHistograms;
     std::vector<Histogram> _temporalHistograms;
 
     bool buildFromOctreeChild(unsigned int bstOffset, unsigned int octreeOffset);
     bool buildFromBstChild(unsigned int bstOffset, unsigned int octreeOffset);
+    
+
 
 };
 

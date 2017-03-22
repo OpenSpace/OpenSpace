@@ -36,11 +36,13 @@ public:
     HistogramManager(TSP * tsp);
     ~HistogramManager();
 
-    bool buildHistograms(int numBins);
-    const Histogram* getHistogram(unsigned int brickIndex) const;
+    virtual bool buildHistograms(int numBins);
+    virtual const Histogram* getHistogram(unsigned int brickIndex) const;
 
-    bool loadFromFile(const std::string& filename);
-    bool saveToFile(const std::string& filename);
+    virtual bool loadFromFile(const std::string& filename);
+    virtual bool saveToFile(const std::string& filename);
+
+    virtual const char * getName() const;
 protected:
     TSP* _tsp;
     std::ifstream* _file;
@@ -50,8 +52,10 @@ protected:
     float _maxBin;
     int _numBins;
 
-    bool buildHistogram(unsigned int brickIndex);
-    std::vector<float> readValues(unsigned int brickIndex) const;
+    virtual bool buildHistogram(unsigned int brickIndex);
+    virtual std::vector<float> readValues(unsigned int brickIndex) const;
+
+    const char * _name = "histogram";
 };
 
 } // namespace openspace

@@ -396,123 +396,55 @@ bool RenderableMultiresVolume::initializeSelector() {
     int nHistograms = 50;
     bool success = true;
 
+    BrickSelector * selector;
+    HistogramManager * manager;
+    std::string scenePath = "";
+
     switch (_selector) {
-        case Selector::TF:
-            if (_errorHistogramManager) {
-                std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_errorHistograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
-                std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
-                std::string errorHistogramsPath = _errorHistogramsPath;
-                if (cacheFile.is_open()) {
-                    // Read histograms from cache.
-                    cacheFile.close();
-                    LINFO("Loading histograms from cache: " << cacheFilename);
-                    success &= _errorHistogramManager->loadFromFile(cacheFilename);
-                } else if (_errorHistogramsPath != "") {
-                    // Read histograms from scene data.
-                    LINFO("Loading histograms from scene data: " << _errorHistogramsPath);
-                    success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
-                } else {
-                    // Build histograms from tsp file.
-                    LWARNING("Failed to open " << cacheFilename);
-                    if (success &= _errorHistogramManager->buildHistograms(nHistograms)) {
-                        LINFO("Writing cache to " << cacheFilename);
-                        _errorHistogramManager->saveToFile(cacheFilename);
-                    }
-                }
-                success &= _tfBrickSelector && _tfBrickSelector->initialize();
-            }
-            break;
-
-		case Selector::TIME:
-			if (_errorHistogramManager) {
-				std::stringstream cacheName;
-				ghoul::filesystem::File f = _filename;
-				cacheName << f.baseName() << "_" << nHistograms << "_errorHistograms";
-				std::string cacheFilename;
-				cacheFilename = FileSys.cacheManager()->cachedFilename(
-					cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
-				std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
-				std::string errorHistogramsPath = _errorHistogramsPath;
-				if (cacheFile.is_open()) {
-					// Read histograms from cache.
-					cacheFile.close();
-					LINFO("Loading histograms from cache: " << cacheFilename);
-					success &= _errorHistogramManager->loadFromFile(cacheFilename);
-				}
-				else if (_errorHistogramsPath != "") {
-					// Read histograms from scene data.
-					LINFO("Loading histograms from scene data: " << _errorHistogramsPath);
-					success &= _errorHistogramManager->loadFromFile(_errorHistogramsPath);
-				}
-				else {
-					// Build histograms from tsp file.
-					LWARNING("Failed to open " << cacheFilename);
-					if (success &= _errorHistogramManager->buildHistograms(nHistograms)) {
-						LINFO("Writing cache to " << cacheFilename);
-						_errorHistogramManager->saveToFile(cacheFilename);
-					}
-				}
-				success &= _timeBrickSelector && _timeBrickSelector->initialize();
-			}
-			break;
-
-        case Selector::SIMPLE:
-            if (_histogramManager) {
-                std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_histograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
-                std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
-                if (cacheFile.is_open()) {
-                    // Read histograms from cache.
-                    cacheFile.close();
-                    LINFO("Loading histograms from " << cacheFilename);
-                    success &= _histogramManager->loadFromFile(cacheFilename);
-                } else {
-                    // Build histograms from tsp file.
-                    LWARNING("Failed to open " << cacheFilename);
-                    if (success &= _histogramManager->buildHistograms(nHistograms)) {
-                        LINFO("Writing cache to " << cacheFilename);
-                        _histogramManager->saveToFile(cacheFilename);
-                    }
-                }
-                success &= _simpleTfBrickSelector && _simpleTfBrickSelector->initialize();
-            }
-            break;
-
-        case Selector::LOCAL:
-            if (_localErrorHistogramManager) {
-                std::stringstream cacheName;
-                ghoul::filesystem::File f = _filename;
-                cacheName << f.baseName() << "_" << nHistograms << "_localErrorHistograms";
-                std::string cacheFilename;
-                cacheFilename = FileSys.cacheManager()->cachedFilename(
-                    cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
-                std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
-                if (cacheFile.is_open()) {
-                    // Read histograms from cache.
-                    cacheFile.close();
-                    LINFO("Loading histograms from " << cacheFilename);
-                    success &= _localErrorHistogramManager->loadFromFile(cacheFilename);
-                } else {
-                    // Build histograms from tsp file.
-                    LWARNING("Failed to open " << cacheFilename);
-                    if (success &= _localErrorHistogramManager->buildHistograms(nHistograms)) {
-                        LINFO("Writing cache to " << cacheFilename);
-                        _localErrorHistogramManager->saveToFile(cacheFilename);
-                    }
-                }
-                success &= _localTfBrickSelector && _localTfBrickSelector->initialize();
-            }
-            break;
+    case Selector::TF:      selector = _tfBrickSelector;        manager = _errorHistogramManager;        scenePath = _errorHistogramsPath;  break;
+    case Selector::TIME:    selector = _timeBrickSelector;      manager = _errorHistogramManager;        scenePath = _errorHistogramsPath;  break;
+    case Selector::LOCAL:   selector = _localTfBrickSelector;   manager = _localErrorHistogramManager;                                      break;
+    case Selector::SIMPLE:  selector = _simpleTfBrickSelector;  manager = _histogramManager;                                                break;
     }
+
+    if (manager) {
+        LINFO("Histogram Manager: " << manager->getName());
+        std::stringstream cacheName;
+        ghoul::filesystem::File f = _filename;
+        cacheName << f.baseName() << "_" << nHistograms << "_" << manager->getName();
+        std::string cacheFilename;
+        cacheFilename = FileSys.cacheManager()->cachedFilename(
+            cacheName.str(), "", ghoul::filesystem::CacheManager::Persistent::Yes);
+        LINFO("Trying to open cache: " << cacheFilename);
+        std::ifstream cacheFile(cacheFilename, std::ios::in | std::ios::binary);
+        if (cacheFile.is_open()) {
+            // Read histograms from cache.
+            cacheFile.close();
+            LINFO("Loading histograms from cache: " << cacheFilename);
+            success &= manager->loadFromFile(cacheFilename);
+        }
+        else {
+            if (scenePath != "") {
+                // Read histograms from scene data.
+                LINFO("Loading histograms from scene data: " << scenePath);
+                success &= manager->loadFromFile(scenePath);
+            }
+            else {
+                // Build histograms from tsp file.
+                LWARNING("Failed to open " << cacheFilename);
+                success &= manager->buildHistograms(nHistograms);
+            }
+            if (success) {
+                LINFO("Writing cache to " << cacheFilename);
+                manager->saveToFile(cacheFilename);
+            }
+        }
+        success &= selector && selector->initialize();
+    }
+
+
+
+
 
     return success;
 }

@@ -367,5 +367,6 @@ const Histogram* LocalErrorHistogramManager::getTemporalHistogram(unsigned int b
     }
 }
 
+const char * LocalErrorHistogramManager::getName() const { return _name; }
 } // namespace openspace
 
