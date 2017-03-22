@@ -57,7 +57,7 @@ const std::string tagToMatch)     {
         //Call recursively until we find an owner with matching tag or the top of the
         // ownership list
         if (tagMatchOwner == nullptr)
-        tagMatchOwner = findPropertyOwnerWithMatchingGroupTag(owner, tagToMatch);
+            tagMatchOwner = findPropertyOwnerWithMatchingGroupTag(owner, tagToMatch);
     }
     return tagMatchOwner;
 }
@@ -250,6 +250,9 @@ int property_setGroupSingle(lua_State* L) {
         //Look for a match in the uri with the group name (first term) removed
         int propMatchLength = propFullId.length() - pathRemainderToMatch.length();
 
+if( propFullId.substr(0, 31).compare("MercuryTrail.renderable.enabled") == 0 )
+  int type2 = 3;
+
         if (propMatchLength >= 0) {
             std::string thisPropMatchId = propFullId.substr(propMatchLength);
             //If remainder of uri matches (with group name removed),
@@ -262,7 +265,7 @@ int property_setGroupSingle(lua_State* L) {
                             << prop->guiName() << "' does not accept input of type '"
                             << luaTypeToString(type) << "'. Requested type: '"
                             << luaTypeToString(prop->typeLua()) << "'");
-                        return 0;
+                        continue;
                     }
                     else {
                         prop->setLuaValue(L);
@@ -271,7 +274,7 @@ int property_setGroupSingle(lua_State* L) {
                         prop->getStringValue(value);
                         //OsEng.parallelConnection().scriptMessage(
                         //    prop->fullyQualifiedIdentifier(), value);
-                        break;
+                        //break;
                     }
                 }
             }

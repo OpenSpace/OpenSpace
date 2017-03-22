@@ -41,6 +41,8 @@ namespace {
     const char* keyStart = "StartTime";
     const char* keyEnd = "EndTime";
     const char* KeyType = "Type";
+
+    const char* keyTag = "Tag";
 }
 
 namespace openspace {
@@ -111,6 +113,10 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
     dictionary.getValue(keyStart, _startTime);
     dictionary.getValue(keyEnd, _endTime);
+    std::string tagName;
+    dictionary.getValue(keyTag, tagName);
+    if (! tagName.empty())
+        addTag(tagName);
 
     if (_startTime != "" && _endTime != "") {
         _hasTimeInterval = true;
