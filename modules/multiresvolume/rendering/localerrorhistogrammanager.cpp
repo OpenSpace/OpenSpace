@@ -40,7 +40,7 @@ namespace {
 
 namespace openspace {
 
-LocalErrorHistogramManager::LocalErrorHistogramManager(TSP* tsp) : _tsp(tsp) {}
+LocalErrorHistogramManager::LocalErrorHistogramManager(TSP* tsp) : ErrorHistogramManager(tsp) { }
 
 LocalErrorHistogramManager::~LocalErrorHistogramManager() {}
 
@@ -291,8 +291,8 @@ bool LocalErrorHistogramManager::loadFromFile(const std::string& filename) {
 
     int nFloats = _numInnerNodes * _numBins;
     float* histogramData = new float[nFloats];
-
     file.read(reinterpret_cast<char*>(histogramData), sizeof(float) * nFloats);
+
     _spatialHistograms = std::vector<Histogram>(_numInnerNodes);
     for (int i = 0; i < _numInnerNodes; ++i) {
         int offset = i*_numBins;
@@ -349,53 +349,6 @@ bool LocalErrorHistogramManager::saveToFile(const std::string& filename) {
     return true;
 }
 
-unsigned int LocalErrorHistogramManager::linearCoords(glm::vec3 coords) const {
-    return linearCoords(glm::ivec3(coords));
-}
-
-unsigned int LocalErrorHistogramManager::linearCoords(int x, int y, int z) const {
-    return linearCoords(glm::ivec3(x, y, z));
-}
-
-unsigned int LocalErrorHistogramManager::linearCoords(glm::ivec3 coords) const {
-    unsigned int paddedBrickDim = _tsp->paddedBrickDim();
-    return coords.z * paddedBrickDim * paddedBrickDim + coords.y * paddedBrickDim + coords.x;
-}
-
-float LocalErrorHistogramManager::interpolate(glm::vec3 samplePoint, const std::vector<float>& voxels) const {
-    int lowX = samplePoint.x;
-    int lowY = samplePoint.y;
-    int lowZ = samplePoint.z;
-
-    int highX = ceil(samplePoint.x);
-    int highY = ceil(samplePoint.y);
-    int highZ = ceil(samplePoint.z);
-
-    float interpolatorX = 1.0 - (samplePoint.x - lowX);
-    float interpolatorY = 1.0 - (samplePoint.y - lowY);
-    float interpolatorZ = 1.0 - (samplePoint.z - lowZ);
-
-    float v000 = voxels[linearCoords(lowX, lowY, lowZ)];
-    float v001 = voxels[linearCoords(lowX, lowY, highZ)];
-    float v010 = voxels[linearCoords(lowX, highY, lowZ)];
-    float v011 = voxels[linearCoords(lowX, highY, highZ)];
-    float v100 = voxels[linearCoords(highX, lowY, lowZ)];
-    float v101 = voxels[linearCoords(highX, lowY, highZ)];
-    float v110 = voxels[linearCoords(highX, highY, lowZ)];
-    float v111 = voxels[linearCoords(highX, highY, highZ)];
-
-    float v00 = interpolatorZ * v000 + (1.0 - interpolatorZ) * v001;
-    float v01 = interpolatorZ * v010 + (1.0 - interpolatorZ) * v011;
-    float v10 = interpolatorZ * v100 + (1.0 - interpolatorZ) * v101;
-    float v11 = interpolatorZ * v110 + (1.0 - interpolatorZ) * v111;
-
-    float v0 = interpolatorY * v00 + (1.0 - interpolatorY) * v01;
-    float v1 = interpolatorY * v10 + (1.0 - interpolatorY) * v11;
-
-    return interpolatorX * v0 + (1.0 - interpolatorX) * v1;
-
-}
-
 const Histogram* LocalErrorHistogramManager::getSpatialHistogram(unsigned int brickIndex) const {
     unsigned int innerNodeIndex = brickToInnerNodeIndex(brickIndex);
     if (innerNodeIndex < _numInnerNodes) {
@@ -412,78 +365,6 @@ const Histogram* LocalErrorHistogramManager::getTemporalHistogram(unsigned int b
     } else {
         return nullptr;
     }
-}
-
-int LocalErrorHistogramManager::parentOffset(int offset, int base) const {
-    if (offset == 0) {
-        return -1;
-    }
-    int depth = floor(log(((base - 1) * offset + 1.0)) / log(base));
-    int firstInLevel = (pow(base, depth) - 1) / (base - 1);
-    int inLevelOffset = offset - firstInLevel;
-
-    int parentDepth = depth - 1;
-    int firstInParentLevel = (pow(base, parentDepth) - 1) / (base - 1);
-    int parentInLevelOffset = inLevelOffset / base;
-
-    int parentOffset = firstInParentLevel + parentInLevelOffset;
-    return parentOffset;
-}
-
-std::vector<float> LocalErrorHistogramManager::readValues(unsigned int brickIndex) const {
-    unsigned int paddedBrickDim = _tsp->paddedBrickDim();
-    unsigned int numBrickVals = paddedBrickDim * paddedBrickDim * paddedBrickDim;
-    std::vector<float> voxelValues(numBrickVals);
-
-    std::streampos offset = _tsp->dataPosition() + static_cast<long long>(brickIndex*numBrickVals*sizeof(float));
-    _file->seekg(offset);
-
-    _file->read(reinterpret_cast<char*>(&voxelValues[0]),
-        static_cast<size_t>(numBrickVals)*sizeof(float));
-
-    return voxelValues;
-}
-
-unsigned int LocalErrorHistogramManager::brickToInnerNodeIndex(unsigned int brickIndex) const {
-    unsigned int numOtNodes = _tsp->numOTNodes();
-    unsigned int numBstLevels = _tsp->numBSTLevels();
-
-    unsigned int numInnerBstNodes = (pow(2, numBstLevels - 1) - 1) * numOtNodes;
-    if (brickIndex < numInnerBstNodes) return brickIndex;
-
-    unsigned int numOtLeaves = pow(8, _tsp->numOTLevels() - 1);
-    unsigned int numOtInnerNodes = (numOtNodes - numOtLeaves);
-
-    unsigned int innerBstOffset = brickIndex - numInnerBstNodes;
-    unsigned int rowIndex = innerBstOffset / numOtNodes;
-    unsigned int indexInRow = innerBstOffset % numOtNodes;
-
-    if (indexInRow >= numOtInnerNodes) return _numInnerNodes;
-
-    unsigned int offset = rowIndex * numOtInnerNodes;
-    unsigned int leavesOffset = offset + indexInRow;
-
-    return numInnerBstNodes + leavesOffset;
-}
-
-unsigned int LocalErrorHistogramManager::innerNodeToBrickIndex(unsigned int innerNodeIndex) const {
-    unsigned int numOtNodes = _tsp->numOTNodes();
-    unsigned int numBstLevels = _tsp->numBSTLevels();
-
-    unsigned int numInnerBstNodes = (pow(2, numBstLevels - 1) - 1) * numOtNodes;
-    if (innerNodeIndex < numInnerBstNodes) return innerNodeIndex;
-
-    unsigned int numOtLeaves = pow(8, _tsp->numOTLevels() - 1);
-    unsigned int numOtInnerNodes = (numOtNodes - numOtLeaves);
-
-    unsigned int innerBstOffset = innerNodeIndex - numInnerBstNodes;
-    unsigned int rowIndex = innerBstOffset / numOtInnerNodes;
-    unsigned int indexInRow = innerBstOffset % numOtInnerNodes;
-
-    unsigned int offset = rowIndex * numOtNodes;
-    unsigned int leavesOffset = offset + indexInRow;
-
-    return numInnerBstNodes + leavesOffset;
 }
 
 } // namespace openspace

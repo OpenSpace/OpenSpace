@@ -25,16 +25,13 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___LOCALERRORHISTOGRAMMANAGER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___LOCALERRORHISTOGRAMMANAGER___H__
 
-#include <fstream>
-#include <modules/multiresvolume/rendering/tsp.h>
-#include <openspace/util/histogram.h>
-#include <map>
+#include <modules/multiresvolume/rendering/errorhistogrammanager.h>
 
 #include <ghoul/glm.h>
 
 namespace openspace {
 
-class LocalErrorHistogramManager {
+class LocalErrorHistogramManager: public ErrorHistogramManager{
 public:
     LocalErrorHistogramManager(TSP* tsp);
     ~LocalErrorHistogramManager();
@@ -46,33 +43,13 @@ public:
     bool loadFromFile(const std::string& filename);
     bool saveToFile(const std::string& filename);
 
-private:
-    TSP* _tsp;
-    std::ifstream* _file;
-
+protected:
     std::vector<Histogram> _spatialHistograms;
     std::vector<Histogram> _temporalHistograms;
-    unsigned int _numInnerNodes;
-    float _minBin;
-    float _maxBin;
-    int _numBins;
-
-    std::map<unsigned int, std::vector<float>> _voxelCache;
 
     bool buildFromOctreeChild(unsigned int bstOffset, unsigned int octreeOffset);
     bool buildFromBstChild(unsigned int bstOffset, unsigned int octreeOffset);
 
-    std::vector<float> readValues(unsigned int brickIndex) const;
-
-    int parentOffset(int offset, int base) const;
-
-    unsigned int brickToInnerNodeIndex(unsigned int brickIndex) const;
-    unsigned int innerNodeToBrickIndex(unsigned int innerNodeIndex) const;
-    unsigned int linearCoords(glm::vec3 coords) const;
-    unsigned int linearCoords(int x, int y, int z) const;
-    unsigned int linearCoords(glm::ivec3 coords) const;
-
-    float interpolate(glm::vec3 samplePoint, const std::vector<float>& voxels) const;
 };
 
 } // namespace openspace
