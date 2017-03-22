@@ -40,11 +40,6 @@ namespace globebrowsing {
 class RenderableExplorationPath : public Renderable {
 public:
 
-	struct StationInformation {
-		glm::dvec4 stationPosition;
-		double previousStationHeight;
-	};
-
 	RenderableExplorationPath(const RenderableSite& owner, std::vector<glm::dvec2> coordinates);
 	~RenderableExplorationPath();
 	
@@ -65,11 +60,10 @@ private:
 	bool _isReady;
 
 	std::vector<glm::vec4> _stationPointsModelCoordinates;
-	std::vector<StationInformation> _stationPoints;
 
 	globebrowsing::RenderableGlobe* _globe;
 
-	std::vector<glm::dvec2> _coordinates;
+	std::vector<glm::dvec2> _latLonCoordinates;
 
 	float _fading;
 	GLuint _vaioID;

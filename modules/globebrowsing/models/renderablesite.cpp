@@ -53,11 +53,22 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	: Renderable(dictionary)
 	, _textureTxtPath("textureTxtpath", "Texture txt Path")
 	, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.f), glm::vec3(0.f), glm::vec3(360.f))
+	, _hasLoopedOnce(false)
+	, _isCloseEnough(false)
+	, _cameraToPointDistance(1000000000.0)
 	, _generalProperties({
 		BoolProperty("enabled", "enabled", false),
 	})
 {
 	setName("RenderableSite");
+
+	// Site 48
+	_tempLonLat = glm::dvec2(-4.668255201, 137.371271221);
+	// Site 49
+	//_tempLonLat = glm::dvec2(-4.668262624, 137.370031147);
+	// Site 6
+	//_tempLonLat = glm::dvec2(-4.589484879, 137.449129568);
+
 
 	if (!dictionary.getValue("Filepath", _filePath)) {
 		throw std::runtime_error(std::string("Must define key Filepath"));
@@ -74,7 +85,6 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 
 	addProperty(_debugModelRotation);
 
-
 	// Get absolute path to txt file containing list of all textures
 	std::string name;
 	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -90,7 +100,7 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	}		
 		
 	if (_isReady) {
-		_renderableExplorationPath = std::make_shared<RenderableExplorationPath>(*this, _pathCoordinates);
+		_renderableExplorationPath = std::make_shared<RenderableExplorationPath>(*this, _pathLatlonCoordinates);
 	}
 	
 	ghoul::Dictionary modelDic;
@@ -120,6 +130,7 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 }
 	
 bool RenderableSite::initialize() {
+	//TODO: Check if _renderableExplorationPath has been created before calling initialize.
 	_renderableExplorationPath->initialize();
 		
 	for (auto it = _models.begin(); it != _models.end(); ++it) {
@@ -141,11 +152,18 @@ bool RenderableSite::initialize() {
 			completeSuccess = false;
 		}
 	}
+
+	std::string name = owner()->name();
+	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(name)->parent();
+	_globe = (globebrowsing::RenderableGlobe *)parent->renderable();
+
+	calculateSiteWorldCoordinates();
 	
 	return completeSuccess;
 }
 
 bool RenderableSite::deinitialize() {
+	//TODO: Check if _renderableExplorationPath has been created before calling deinitialize.
 	_renderableExplorationPath->deinitialize();
 
 	for (auto it = _models.begin(); it != _models.end(); ++it) {
@@ -154,9 +172,7 @@ bool RenderableSite::deinitialize() {
 			OsEng.renderEngine().removeRenderProgram((*it)._programObject);
 			(*it)._programObject = nullptr;
 		}
-
 	}
-	
 	return true;
 }
 
@@ -171,11 +187,32 @@ bool RenderableSite::isReady() const {
 }
 
 void RenderableSite::render(const RenderData& data) {
+	//TODO: Check if _renderableExplorationPath has been created before calling render.
 	_renderableExplorationPath->render(data);
 
-	std::string name = owner()->name();
-	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(name)->parent();
-	_globe = (globebrowsing::RenderableGlobe *)parent->renderable();
+	// Camera position in model space
+	glm::dvec3 camPos = data.camera.positionVec3();
+	glm::dmat4 inverseModelTransform = _globe->inverseModelTransform();
+	glm::dvec3 cameraPositionModelSpace =
+		glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+
+	// Takes the coordinates for the station in the middle of the array
+	// and calculates the position on the ellipsoid
+	glm::dvec3 positionOnEllipsoid = glm::dvec3(_sitesModelCoordinates[48].stationPosition);
+
+	// Temporary solution to trigger the calculation of new positions of the stations when the camera is 
+	// less than 5000 meters from the "middle' station. Should possibly be moved do a distanceswitch.
+	double heightToSurface = _globe->getHeight(positionOnEllipsoid);
+	glm::dvec3 directionFromSurfaceToPointModelSpace = _globe->ellipsoid().
+		geodeticSurfaceNormal(_globe->ellipsoid().cartesianToGeodetic2(positionOnEllipsoid));
+	glm::dvec3 tempPos = glm::dvec3(positionOnEllipsoid) + heightToSurface * directionFromSurfaceToPointModelSpace;
+
+	// The distance from the camera to the position on the ellipsoid
+	_cameraToPointDistance = glm::length(cameraPositionModelSpace - tempPos);
+
+	if (_cameraToPointDistance < 10000.0)
+		_isCloseEnough = true;
+
 	glm::dmat4 globeModelTransform = _globe->modelTransform();
 	
 	for (auto it = _models.begin(); it != _models.end(); ++it) {
@@ -186,11 +223,11 @@ void RenderableSite::render(const RenderData& data) {
 		globebrowsing::RenderableGlobe* globe = (globebrowsing::RenderableGlobe *)k->renderable();
 
 		//TODO: Change to dynamic coordinates
-		globebrowsing::Geodetic2 geo = globebrowsing::Geodetic2{ -4.668255201, 137.371271221 } / 180 * glm::pi<double>();
+		globebrowsing::Geodetic2 geo = globebrowsing::Geodetic2{ _tempLonLat.x, _tempLonLat.y } / 180 * glm::pi<double>();
 		glm::dvec3 positionModelSpace1 = globe->ellipsoid().cartesianSurfacePosition(geo);
 
 		glm::dmat4 globeModelTransform = globe->modelTransform();
-		glm::dvec3 positionWorldSpace = globeModelTransform * glm::dvec4(positionModelSpace1, 1.0);
+		glm::dvec3 positionWorldSpace = globeModelTransform * _sitesModelCoordinates[48].stationPosition;//glm::dvec4(positionModelSpace1, 1.0);
 
 		// debug rotation controlled from GUI
 		glm::mat4 unitMat4(1);
@@ -200,7 +237,6 @@ void RenderableSite::render(const RenderData& data) {
 		glm::mat4 rotZ = glm::rotate(unitMat4, debugEulerRot.z, glm::vec3(0, 0, 1));
 
 		glm::dmat4 debugModelRotation = rotX * rotY * rotZ;
-
 
 		// Rotation to make model up become normal of position on ellipsoid
 		glm::dvec3 surfaceNormal = globe->ellipsoid().geodeticSurfaceNormal(geo);
@@ -213,7 +249,6 @@ void RenderableSite::render(const RenderData& data) {
 		float s = sqrt((1 + cosTheta) * 2);
 		float invs = 1 / s;
 
-		
 		glm::quat rotationMatrix = glm::quat(s * 0.5f, rotationAxis.x * invs, rotationAxis.y * invs, rotationAxis.z * invs);
 		// Model transform and view transform needs to be in double precision
 		glm::dmat4 modelTransform =
@@ -248,11 +283,39 @@ void RenderableSite::render(const RenderData& data) {
 
 		(*it)._programObject->deactivate();
 	}
-
 }
 
 void RenderableSite::update(const UpdateData & data) {
+	//TODO: Check if _renderableExplorationPath has been created before calling update.
 	_renderableExplorationPath->update(data);
+	
+	if (_isCloseEnough == true && _hasLoopedOnce == false) {
+		globebrowsing::Geodetic2 geoTemp = globebrowsing::Geodetic2{ _tempLonLat.x, _tempLonLat.y } / 180 * glm::pi<double>();
+		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geoTemp);
+		double heightToSurfaceCheck = _globe->getHeight(positionModelSpaceTemp);
+
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geoTemp, heightToSurfaceCheck + 2.0 }; 
+		glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
+				
+		_sitesModelCoordinates[48].stationPosition = glm::dvec4(tempPos2, 1.0);
+		
+		_hasLoopedOnce = true;
+	}
+}
+
+void RenderableSite::calculateSiteWorldCoordinates() {
+	globebrowsing::Geodetic2 geo;
+	glm::dvec3 positionModelSpace;
+	SiteInformation k;
+
+	for (auto position : _siteLatlonCoordinates) {
+		geo = globebrowsing::Geodetic2{ _tempLonLat.x, _tempLonLat.y } / 180 * glm::pi<double>();
+		positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
+
+		k.previousStationHeight = 0;
+		k.stationPosition = glm::dvec4(positionModelSpace, 1.0);
+		_sitesModelCoordinates.push_back(k);
+	}
 }
 
 std::vector<std::string> RenderableSite::loadTexturePaths(std::string absoluteFilePath)
@@ -268,7 +331,7 @@ std::vector<std::string> RenderableSite::loadTexturePaths(std::string absoluteFi
 		myfile.close();
 	}
 	else
-		LERROR("Could not open file");
+		LERROR("Could not open .txt file");
 
 	return fileNameVector;
 }
@@ -277,7 +340,7 @@ bool RenderableSite::extractCoordinates() {
 	GDALDataset *poDS;
 	poDS = (GDALDataset*)GDALOpenEx(_filePath.c_str(), GDAL_OF_VECTOR, NULL, NULL, NULL);
 	if (poDS == NULL) {
-		LERROR("Could not open file");
+		LERROR("Could not open .shp file");
 	}
 
 	OGRLayer *poLayer = poDS->GetLayerByName("rover_locations");
@@ -297,17 +360,17 @@ bool RenderableSite::extractCoordinates() {
 		// Saves all coordinates for rendering the path and only site coordinates for rendering sites.
 		// GetFieldAsDouble resturns zero (0) if field is empty.
 		if(lat != 0 && lon != 0) {
-			_pathCoordinates.push_back(glm::dvec2(lat, lon));
+			_pathLatlonCoordinates.push_back(glm::dvec2(lat, lon));
 
 			if (frame == "SITE") {
-				_siteCoordinates.insert(std::make_pair(site, glm::dvec2(lat, lon)));
+				_siteLatlonCoordinates.insert(std::make_pair(site, glm::dvec2(lat, lon)));
 			}
 		}
 		OGRFeature::DestroyFeature(poFeature);
 	}
 	GDALClose(poDS);
 	
-	return (_pathCoordinates.size() != 0);
+	return (_pathLatlonCoordinates.size() != 0);
 }
 
 void RenderableSite::loadTexture() {

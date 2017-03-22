@@ -40,11 +40,6 @@ namespace modelgeometry {
 
 namespace globebrowsing {
 
-	struct SiteInformation {
-		int sol;
-		std::vector<glm::dvec2> lonlatCoordinates;
-	};
-
 	struct Models {
 		std::string _texturePath;
 		modelgeometry::ModelGeometry* _model;
@@ -57,6 +52,11 @@ namespace globebrowsing {
 class RenderableSite : public Renderable {
 
 public:
+
+	struct SiteInformation {
+		glm::dvec4 stationPosition;
+		double previousStationHeight;
+	};
 
 	struct GeneralProperties {
 		properties::BoolProperty isEnabled;
@@ -77,6 +77,8 @@ public:
 	void update(const UpdateData& data) override;
 
 private:
+	void calculateSiteWorldCoordinates();
+
 	std::vector < std::string> loadTexturePaths(std::string txtPath);
 
 	std::string _filePath;
@@ -85,8 +87,10 @@ private:
 	bool extractCoordinates();
 	void loadTexture();
 
-	std::vector<glm::dvec2> _pathCoordinates;
-	std::map<int, glm::dvec2> _siteCoordinates;
+	std::vector<glm::dvec2> _pathLatlonCoordinates;
+	std::map<int, glm::dvec2> _siteLatlonCoordinates;
+	std::vector<glm::dvec2> _siteCartesianWorldCoordinates;
+	std::vector<SiteInformation> _sitesModelCoordinates;
 
 	properties::StringProperty _textureTxtPath;
 	std::vector<std::string> _fileNames;
@@ -94,6 +98,10 @@ private:
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
 
 	bool _isReady;
+	bool _hasLoopedOnce;
+	bool _isCloseEnough;
+
+	double _cameraToPointDistance;
 
 	GeneralProperties _generalProperties;
 
@@ -103,6 +111,8 @@ private:
 	globebrowsing::RenderableGlobe* _globe;
 
 	glm::dvec3 _sunPos;
+
+	glm::dvec2 _tempLonLat;
 };
 
 }

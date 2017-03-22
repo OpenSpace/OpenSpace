@@ -42,7 +42,7 @@ namespace globebrowsing {
 
 RenderableExplorationPath::RenderableExplorationPath(const RenderableSite& owner, std::vector<glm::dvec2> coordinates)
 	: _owner(owner)
-	, _coordinates(coordinates)
+	, _latLonCoordinates(coordinates)
 	, _pathShader(nullptr)
 	, _siteShader(nullptr)
 	, _globe(nullptr)
@@ -89,7 +89,7 @@ bool RenderableExplorationPath::initialize() {
 	}
 
 	calculatePathModelCoordinates();
-	if (_coordinates.size() == 0) return false;
+	if (_latLonCoordinates.size() == 0) return false;
 
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaioID);
@@ -157,7 +157,6 @@ void RenderableExplorationPath::render(const RenderData& data) {
 
 	// The distance from the camera to the position on the ellipsoid
 	_cameraToPointDistance = glm::length(cameraPositionModelSpace - tempPos);
-	//LERROR(_cameraToPointDistance);
 
 	if (_cameraToPointDistance < 10000.0) {
 		_isCloseEnough = true;
@@ -209,63 +208,21 @@ void RenderableExplorationPath::render(const RenderData& data) {
 
 void RenderableExplorationPath::update(const UpdateData& data) {
 
-	double heightToSurfaceCheck = _globe->getHeight(glm::dvec3(_stationPoints[50].stationPosition));
-
+	
 	if(_isCloseEnough == true && _hasLoopedOnce == false) {
-		LERROR("EEEN GANG");
-		if(heightToSurfaceCheck < 0.0 || heightToSurfaceCheck > 6.0) {
-			glm::dvec3 tempPos;
+		// Clear old coordinates values.
+		_stationPointsModelCoordinates.clear();
+			for (auto i : _latLonCoordinates) {
 
-			for (int i = 0; i < _stationPoints.size(); i++) {
-				// TODO: Add padding to the height to surface
+				globebrowsing::Geodetic2 geoTemp = globebrowsing::Geodetic2{ i.x, i.y } / 180 * glm::pi<double>();
+				glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geoTemp);
+				double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-				// Path twitching problem might be because getHeight returns a float.
-				// Gets the height of the station point to the surface of the active heightlayers(s)
-				double heightToSurface = _globe->getHeight(glm::dvec3(_stationPoints[i].stationPosition));
-
-				// Small precission issue with heightToSurface which makes the loop run multiple times
-				if( heightToSurface > _stationPoints[i].previousStationHeight + 0.5 ||
-						heightToSurface < _stationPoints[i].previousStationHeight - 0.5) {
-
-					// The direction in which the point is to be moved
-					glm::dvec3 directionFromSurfaceToPointModelSpace = _globe->ellipsoid().
-						geodeticSurfaceNormal(_globe->ellipsoid().cartesianToGeodetic2(_stationPoints[i].stationPosition));
-					tempPos = glm::dvec3(0.0, 0.0, 0.0);
-					tempPos = _stationPoints[i].stationPosition;
-					//tempPos += directionFromSurfaceToPointModelSpace * heightToSurface;
-
-					// There is probably a nicer way to do this
-					/*if (heightToSurface > 0.0 && _stationPoints[i].previousStationHeight == 0.0)
-						tempPos += directionFromSurfaceToPointModelSpace * heightToSurface;
-					else if (heightToSurface == 0.0 && _stationPoints[i].previousStationHeight > 0.0)
-						tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight);
-					else if (heightToSurface < 0.0 && _stationPoints[i].previousStationHeight == 0.0)
-						tempPos += directionFromSurfaceToPointModelSpace * heightToSurface;
-					else if (heightToSurface == 0.0 && _stationPoints[i].previousStationHeight < 0.0)
-						tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight);
-					else if (heightToSurface < 0.0 && _stationPoints[i].previousStationHeight > 0.0)
-						tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight + heightToSurface);
-					else if (heightToSurface > 0.0 && _stationPoints[i].previousStationHeight < 0.0)
-						tempPos += directionFromSurfaceToPointModelSpace * 	(-_stationPoints[i].previousStationHeight + heightToSurface);*/
-					//if (_stationPoints[i].previousStationHeight == 0.0)
-						//LERROR("Previous station Height = 0");
-
-					if(heightToSurface < 0.0) {
-						tempPos += directionFromSurfaceToPointModelSpace * ( heightToSurface + 5.0 - _stationPoints[i].previousStationHeight);
-					}
-
-					_stationPoints[i].previousStationHeight = heightToSurface;
-					_stationPoints[i].stationPosition = glm::dvec4(tempPos, 1.0);
-				}
+				globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geoTemp, heightToSurface + 2.0 };
+				glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
+				_stationPointsModelCoordinates.push_back(glm::dvec4(tempPos2, 1.0));
 			}
-
-			// Clears and pushes the new position values into the vector used in the vertex buffer
-			// Really unecessary to use multiple vectors....
-			_stationPointsModelCoordinates.clear();
-			for (int i = 0; i < _stationPoints.size(); i++) {
-				_stationPointsModelCoordinates.push_back(glm::vec4(_stationPoints[i].stationPosition));
-			}
-		}
+		
 		_hasLoopedOnce = true;
 
 		// Buffer new data
@@ -288,16 +245,11 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 void RenderableExplorationPath::calculatePathModelCoordinates() {
 	globebrowsing::Geodetic2 geo;
 	glm::dvec3 positionModelSpace;
-	StationInformation k;
 
-	for (auto position : _coordinates) {
+	for (auto position : _latLonCoordinates) {
 		geo = globebrowsing::Geodetic2{ position.x, position.y } / 180 * glm::pi<double>();
 		positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
 		_stationPointsModelCoordinates.push_back(glm::dvec4(positionModelSpace, 1.0f));
-
-		k.previousStationHeight = 0.0;
-		k.stationPosition = glm::dvec4(positionModelSpace, 1.0);
-		_stationPoints.push_back(k);
 	}
 }
 
