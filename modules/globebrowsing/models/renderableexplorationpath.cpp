@@ -170,12 +170,14 @@ void RenderableExplorationPath::render(const RenderData& data) {
 			_fading -= 0.01f;*/
 
 		// Model transform and view transform needs to be in double precision
-		glm::dmat4 modelTransform = _globe->modelTransform();
-		glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+		glm::dmat4 globeModelTransform = _globe->modelTransform();
+		glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * globeModelTransform;
 
 		_pathShader->activate();
 
-		_pathShader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+		// Passing model view transform as double to maintain precision for vertices.
+		// Otherwise the path i "jumping".
+		_pathShader->setUniform("modelViewTransform", modelViewTransform);
 		_pathShader->setUniform("projectionTransform", data.camera.projectionMatrix());
 		_pathShader->setUniform("fading", _fading);
 		_pathShader->setUniform("color", glm::vec3(1.0, 1.0, 1.0));
@@ -187,10 +189,10 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		glBindVertexArray(0);
 
 		_pathShader->deactivate();
-
+		
 		/*_siteShader->activate();
 
-		_siteShader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+		_siteShader->setUniform("modelViewTransform", modelViewTransform);
 		_siteShader->setUniform("projectionTransform", data.camera.projectionMatrix());
 		_siteShader->setUniform("fading", _fading);
 		_siteShader->setUniform("color", glm::vec3(1.0, 1.0, 1.0));
@@ -210,13 +212,14 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 	double heightToSurfaceCheck = _globe->getHeight(glm::dvec3(_stationPoints[50].stationPosition));
 
 	if(_isCloseEnough == true && _hasLoopedOnce == false) {
-
+		LERROR("EEEN GANG");
 		if(heightToSurfaceCheck < 0.0 || heightToSurfaceCheck > 6.0) {
 			glm::dvec3 tempPos;
 
 			for (int i = 0; i < _stationPoints.size(); i++) {
 				// TODO: Add padding to the height to surface
 
+				// Path twitching problem might be because getHeight returns a float.
 				// Gets the height of the station point to the surface of the active heightlayers(s)
 				double heightToSurface = _globe->getHeight(glm::dvec3(_stationPoints[i].stationPosition));
 
@@ -262,23 +265,24 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 			for (int i = 0; i < _stationPoints.size(); i++) {
 				_stationPointsModelCoordinates.push_back(glm::vec4(_stationPoints[i].stationPosition));
 			}
-
 		}
 		_hasLoopedOnce = true;
-	}
 
-	// Buffer new data
-	glBindVertexArray(_vaioID);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
-	glBufferData(GL_ARRAY_BUFFER,
-		_stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
-		&_stationPointsModelCoordinates[0],
-		GL_DYNAMIC_DRAW);
+		// Buffer new data
+		glBindVertexArray(_vaioID);
+		glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(_stationPointsModelCoordinates[0]), 0);
+		glBufferData(GL_ARRAY_BUFFER, _stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
+			NULL, GL_STREAM_DRAW);
+		glBufferSubData(GL_ARRAY_BUFFER, 0,
+			_stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
+			&_stationPointsModelCoordinates[0]);
 
-	glBindVertexArray(0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+		glBindVertexArray(0);
+	}	
 }
 
 void RenderableExplorationPath::calculatePathModelCoordinates() {

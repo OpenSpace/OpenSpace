@@ -28,13 +28,13 @@
 
 in vec4 in_point_position;
 
-uniform mat4 modelViewTransform;
+uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
 out vec4 vs_positionScreenSpace;
 
 void main() {
-    vec4 positionCameraSpace = modelViewTransform * in_point_position;
+    vec4 positionCameraSpace = vec4(modelViewTransform * in_point_position);
     vec4 positionClipSpace = projectionTransform * positionCameraSpace;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
 
