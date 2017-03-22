@@ -33,13 +33,18 @@ namespace openspace {
 
 class HistogramManager {
 public:
-    HistogramManager();
+    HistogramManager(TSP * tsp);
     ~HistogramManager();
-    bool buildHistograms(TSP* tsp, int numBins);
-    Histogram* getHistogram(unsigned int brickIndex);
+
+    bool buildHistograms(int numBins);
+    const Histogram* getHistogram(unsigned int brickIndex) const;
+
     bool loadFromFile(const std::string& filename);
     bool saveToFile(const std::string& filename);
 private:
+    TSP* _tsp;
+    std::ifstream* _file;
+
     std::vector<Histogram> _histograms;
     float _minBin;
     float _maxBin;

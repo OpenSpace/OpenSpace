@@ -36,30 +36,31 @@ namespace {
 
 namespace openspace {
 
-HistogramManager::HistogramManager() {}
+HistogramManager::HistogramManager(TSP* tsp)
+: _tsp(tsp) { }
 
 HistogramManager::~HistogramManager() {}
 
-bool HistogramManager::buildHistograms(TSP* tsp, int numBins) {
+bool HistogramManager::buildHistograms(int numBins) {
     std::cout << "Build histograms with " << numBins << " bins each" << std::endl;
     _numBins = numBins;
 
-    std::ifstream& file = tsp->file();
+    std::ifstream& file = _tsp->file();
     if (!file.is_open()) {
         return false;
     }
     _minBin = 0.0; // Should be calculated from tsp file
     _maxBin = 1.0; // Should be calculated from tsp file
 
-    int numTotalNodes = tsp->numTotalNodes();
+    int numTotalNodes = _tsp->numTotalNodes();
     _histograms = std::vector<Histogram>(numTotalNodes);
 
-    bool success = buildHistogram(tsp, 0);
+    bool success = buildHistogram(_tsp, 0);
 
     return success;
 }
 
-Histogram* HistogramManager::getHistogram(unsigned int brickIndex) {
+const Histogram* HistogramManager::getHistogram(unsigned int brickIndex) const {
     return &_histograms[brickIndex];
 }
 

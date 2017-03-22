@@ -305,7 +305,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
         case Selector::SIMPLE:
             if (!_simpleTfBrickSelector) {
                 SimpleTfBrickSelector *stbs;
-                _histogramManager = new HistogramManager();
+                _histogramManager = new HistogramManager(_tsp.get());
                 _simpleTfBrickSelector = stbs = new SimpleTfBrickSelector(_tsp.get(), _histogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
                 _transferFunction->setCallback([stbs](const TransferFunction &tf) {
                     stbs->calculateBrickImportances();
@@ -478,7 +478,7 @@ bool RenderableMultiresVolume::initializeSelector() {
                 } else {
                     // Build histograms from tsp file.
                     LWARNING("Failed to open " << cacheFilename);
-                    if (success &= _histogramManager->buildHistograms(_tsp.get(), nHistograms)) {
+                    if (success &= _histogramManager->buildHistograms(nHistograms)) {
                         LINFO("Writing cache to " << cacheFilename);
                         _histogramManager->saveToFile(cacheFilename);
                     }
@@ -638,6 +638,7 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         case Selector::LOCAL:   s = _localTfBrickSelector; break;
         case Selector::TIME:    s = _timeBrickSelector; break;
         }
+
         if (s) {
             s->setMemoryBudget(_memoryBudget);
             s->setStreamingBudget(_streamingBudget);
