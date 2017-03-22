@@ -287,21 +287,21 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 }
             }
             break;
-		case Selector::TIME:
-			if (!_timeBrickSelector) {
-				TimeBrickSelector* tbs;
-				_errorHistogramManager = new ErrorHistogramManager(_tsp.get());
-				tbs = new TimeBrickSelector(_tsp.get(), _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
-				_timeBrickSelector = tbs;
-				_transferFunction->setCallback([tbs](const TransferFunction &tf) {
-					tbs->calculateBrickErrors();
-				});
-				if (initializeSelector()) {
-					tbs->calculateBrickErrors();
-					return true;
-				}
-			}
-			break;
+        case Selector::TIME:
+            if (!_timeBrickSelector) {
+                TimeBrickSelector* tbs;
+                _errorHistogramManager = new ErrorHistogramManager(_tsp.get());
+                tbs = new TimeBrickSelector(_tsp.get(), _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
+                _timeBrickSelector = tbs;
+                _transferFunction->setCallback([tbs](const TransferFunction &tf) {
+                    tbs->calculateBrickErrors();
+                });
+                if (initializeSelector()) {
+                    tbs->calculateBrickErrors();
+                    return true;
+                }
+            }
+            break;
         case Selector::SIMPLE:
             if (!_simpleTfBrickSelector) {
                 SimpleTfBrickSelector *stbs;
@@ -685,44 +685,16 @@ void RenderableMultiresVolume::render(const RenderData& data, RendererTasks& tas
 }
 
 RenderableMultiresVolume::Selector RenderableMultiresVolume::getSelector() {
+    std::string s;
+    _selectorName.getStringValue(s);
+    s = s.substr(1, s.length() - 2);
 
-    //return Selector::TIME;
-    //SelectorValues.at(std::string(_selectorName).c_str());
-    //LINFO(SelectorValues.at("time"));
-	//LINFO(SelectorValues.at(std::string(_selectorName).c_str()));
-	//return SelectorValues.at(std::string(_selectorName).c_str());
-/*	std::string s;
-//	const char quote = '"';
-	_selectorName.getStringValue(s);
-//	if (s.at(0) == '"' && s.at(s.length()) == quote) {
-	s = s.substr(1, s.length() - 2);
-//	}
-	const char * f = &s[0];
-	LINFO(f);
-	return SelectorValues.at(f);
-	switch (_selectorName) {
-    case TYPE_TF:
-        return Selector::TF;
-    case TYPE_SIMPLE:
-        return Selector::SIMPLE;
-    case TYPE_LOCAL:
-        return Selector::LOCAL;
-    case TYPE_TIME:
-        return Selector::TIME;
-    default:
-        return Selector::TF;
-    }
-*/
-	std::string s;
-	_selectorName.getStringValue(s);
-	s = s.substr(1, s.length() - 2);
+    if (s == TYPE_TF)       return SelectorValues.at(TYPE_TF);
+    if (s == TYPE_SIMPLE)   return SelectorValues.at(TYPE_SIMPLE);
+    if (s == TYPE_LOCAL)    return SelectorValues.at(TYPE_LOCAL);
+    if (s == TYPE_TIME)     return SelectorValues.at(TYPE_TIME);
 
-	if (s == TYPE_TF)		return SelectorValues.at(TYPE_TF);
-	if (s == TYPE_SIMPLE)	return SelectorValues.at(TYPE_SIMPLE);
-	if (s == TYPE_LOCAL)	return SelectorValues.at(TYPE_LOCAL);
-	if (s == TYPE_TIME)		return SelectorValues.at(TYPE_TIME);
-
-	return Selector::SIMPLE;
+    return Selector::SIMPLE;
 }
 
 } // namespace openspace
