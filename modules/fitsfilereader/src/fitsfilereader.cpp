@@ -29,7 +29,12 @@
 using namespace CCfits;
 using namespace ghoul::opengl;
 
+#define FITS_PRECISION unsigned char
+#define FITS_OPENGL_FORMAT GL_UNSIGNED_BYTE
+
 namespace {
+    // Responsible for the memory of all loaded FITS data
+    std::vector<std::valarray<FITS_PRECISION>> _buffer;
     const std::string _loggerCat = "FitsFileReader";
 }
 
@@ -87,7 +92,7 @@ std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buff
                                                             imageSize,
                                                             format,
                                                             static_cast<int>(format),
-                                                            GL_UNSIGNED_BYTE,
+                                                            FITS_OPENGL_FORMAT,
                                                             Texture::FilterMode::Linear
                                                         );
     return texture;
@@ -95,7 +100,7 @@ std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buff
 
 std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
     FITS::setVerboseMode(true);
-    std::valarray<unsigned long> contents;
+    std::valarray<FITS_PRECISION> contents;
     long sizeX;
     long sizeY;
 
@@ -105,30 +110,25 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
         image.read(contents);
         sizeX = image.axis(0);
         sizeY = image.axis(1);
-    } catch (FitsException& e){
+    } catch (FitsException& e) {
         LERROR("Could not load FITS Texture");
     }
 
     contents *= 10; // Increase intensity a bit
-    // Probably a much better way to do this, convert to char data for now
-    unsigned char* imageData = new unsigned char[contents.size()]; // TODO(mn): deallocate
-    for ( int i = 0; i < contents.size(); i++) {
-        imageData[i] = (unsigned char)(contents[i]);
-    }
-
     const glm::size3_t imageSize(sizeX, sizeY, 1);
     const Texture::Format format = ghoul::opengl::Texture::Red;
     const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
 
-    std::unique_ptr<Texture> texture = std::make_unique<Texture>(
-                                                            imageData,
-                                                            imageSize,
-                                                            format,
-                                                            static_cast<int>(format),
-                                                            GL_UNSIGNED_BYTE,
-                                                            Texture::FilterMode::Linear
-                                                        );
-    return texture;
+    _buffer.push_back(contents);
+    return std::make_unique<Texture>(
+                                &_buffer.back()[0],
+                                imageSize,
+                                format, // Internal format: More preferable to give explicit precision here, otherwise up to the driver to decide
+                                static_cast<int>(format), // Format of pixel data
+                                GL_UNSIGNED_BYTE, // Type of data
+                                Texture::FilterMode::Linear,
+                                Texture::WrappingMode::Repeat
+                            );
 }
 
 std::valarray<unsigned long> FitsFileReader::readRawImage(std::string& path) {
