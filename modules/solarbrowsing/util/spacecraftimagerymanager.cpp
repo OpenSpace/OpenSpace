@@ -45,7 +45,7 @@ namespace {
 namespace openspace {
 
 SpacecraftImageryManager::SpacecraftImageryManager() {
-   fetchServerImages("SDO");
+   //fetchServerImages("SDO");
 }
 
 void SpacecraftImageryManager::fetchServerImages(std::string type) {
