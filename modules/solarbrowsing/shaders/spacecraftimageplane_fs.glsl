@@ -22,50 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
+uniform float time;
+uniform sampler2D texture1;
+uniform bool additiveBlending;
 
-#include <modules/base/rendering/renderableplane.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/engine/downloadmanager.h> // Make pointer & forward declare?
-#include <memory>
+in vec2 vs_st;
+in vec4 vs_positionScreenSpace;
 
-namespace ghoul { namespace opengl { class Texture; }}
+#include "fragment.glsl"
 
-namespace openspace {
+Fragment getFragment() {
+    float intensity = texture(texture1, vs_st).r;
+    vec4 diffuse = vec4(intensity, intensity, intensity, 1.0);
 
-class RenderableSpacecraftCameraPlane : public RenderablePlane {
+    if (diffuse.a == 0.0)
+        discard;
 
-public:
-    RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary);
+    Fragment frag;
+    frag.color = diffuse;
+    frag.depth = vs_positionScreenSpace.w;
 
-    void render(const RenderData& data);
-    void update(const UpdateData& data);
-    void loadTexture();
-    void updateTexture();
-
-private:
-    properties::DoubleProperty _moveFactor;
-    properties::StringProperty _target;
-    //std::future<DownloadManager::MemoryFile> _imageData;
-
-    double _openSpaceTime;
-    double _lastUpdateOpenSpaceTime;
-
-    std::chrono::milliseconds _realTime;
-    std::chrono::milliseconds _lastUpdateRealTime;
-
-    int currentActiveTexture;
-    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
-
-    void loadLocalTextures(std::string url);
-    void downloadTextureResource();
-    bool initialize() override;
-    bool deinitialize() override;
-    bool isReady() const override;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
+    if (additiveBlending) {
+        frag.blend = BLEND_MODE_ADDITIVE;
+    }
+    return frag;
+}

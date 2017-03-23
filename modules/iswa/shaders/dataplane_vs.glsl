@@ -43,7 +43,7 @@ void main()
 
     vs_position = tmp;
     vs_st = in_st;
-    
+
     position = ViewProjection * position;
     gl_Position =  z_normalization(position);
 }

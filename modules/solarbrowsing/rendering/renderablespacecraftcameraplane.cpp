@@ -36,7 +36,6 @@
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 
-#include <ghoul/filesystem/directory.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/util/time.h>
@@ -111,6 +110,43 @@ void RenderableSpacecraftCameraPlane::loadLocalTextures(std::string url) {
     }
 }
 
+bool RenderableSpacecraftCameraPlane::isReady() const {
+    return _shader && !_textures.empty();
+}
+
+bool RenderableSpacecraftCameraPlane::initialize() {
+    glGenVertexArrays(1, &_quad); // generate array
+    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    createPlane();
+
+    if (!_shader) {
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _shader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
+            "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl",
+            "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl"
+            );
+        if (!_shader)
+            return false;
+    }
+
+    return isReady();
+}
+
+bool RenderableSpacecraftCameraPlane::deinitialize() {
+    glDeleteVertexArrays(1, &_quad);
+    _quad = 0;
+
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    _vertexPositionBuffer = 0;
+
+    RenderEngine& renderEngine = OsEng.renderEngine();
+    if (_shader) {
+        renderEngine.removeRenderProgram(_shader);
+        _shader = nullptr;
+    }
+    return true;
+}
+
 void RenderableSpacecraftCameraPlane::updateTexture() {
     int clockwiseSign = (Time::ref().deltaTime()>0) ? 1 : -1;
     int newIndex = clockwiseSign + currentActiveTexture;
@@ -120,18 +156,6 @@ void RenderableSpacecraftCameraPlane::updateTexture() {
         _textures[currentActiveTexture]->uploadTexture();
     }
 }
-
-// void RenderableSpacecraftCameraPlane::loadTexture() {
-//     std::unique_ptr<Texture> texture;
-//     // Dummy start texture for program not to crash
-//     std::string s = "2.fit";
-//     texture = FitsFileReader::loadTexture(s);
-
-//     if (texture) {
-//         texture->uploadTexture();
-//         _texture = std::move(texture);
-//     }
-// }
 
 void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     _openSpaceTime = Time::ref().j2000Seconds();

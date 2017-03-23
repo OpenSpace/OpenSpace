@@ -22,50 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
+#version __CONTEXT__
 
-#include <modules/base/rendering/renderableplane.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/engine/downloadmanager.h> // Make pointer & forward declare?
-#include <memory>
+uniform mat4 modelViewProjectionTransform;
 
-namespace ghoul { namespace opengl { class Texture; }}
+layout(location = 0) in vec4 in_position;
+layout(location = 1) in vec2 in_st;
 
-namespace openspace {
+out vec2 vs_st;
+out vec4 vs_positionScreenSpace;
+out float s;
 
-class RenderableSpacecraftCameraPlane : public RenderablePlane {
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-public:
-    RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary);
+void main() {
+    // Transform the damn psc to homogenous coordinate
+    vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+    vec4 positionClipSpace = modelViewProjectionTransform * position;
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
+    gl_Position = vs_positionScreenSpace;
 
-    void render(const RenderData& data);
-    void update(const UpdateData& data);
-    void loadTexture();
-    void updateTexture();
-
-private:
-    properties::DoubleProperty _moveFactor;
-    properties::StringProperty _target;
-    //std::future<DownloadManager::MemoryFile> _imageData;
-
-    double _openSpaceTime;
-    double _lastUpdateOpenSpaceTime;
-
-    std::chrono::milliseconds _realTime;
-    std::chrono::milliseconds _lastUpdateRealTime;
-
-    int currentActiveTexture;
-    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
-
-    void loadLocalTextures(std::string url);
-    void downloadTextureResource();
-    bool initialize() override;
-    bool deinitialize() override;
-    bool isReady() const override;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
+    vs_st = in_st;
+}
