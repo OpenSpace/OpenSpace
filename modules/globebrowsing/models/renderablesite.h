@@ -42,7 +42,7 @@ namespace globebrowsing {
 
 	struct Models {
 		std::string _texturePath;
-		modelgeometry::ModelGeometry* _model;
+		std::unique_ptr<modelgeometry::ModelGeometry> _model;
 		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 		std::unique_ptr<ghoul::opengl::Texture> _texture;
 	};

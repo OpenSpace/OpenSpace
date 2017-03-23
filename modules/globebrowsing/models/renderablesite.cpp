@@ -112,14 +112,14 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 			modelDic.getValue("ModelPath", modelFilepath);
 			modelDic.setValue("GeometryFile", modelFilepath + "/" + _fileNames[count] + ".obj");
 		
-			modelgeometry::ModelGeometry* m = modelgeometry::ModelGeometry::createFromDictionary(modelDic);
+			std::unique_ptr<modelgeometry::ModelGeometry> m = modelgeometry::ModelGeometry::createFromDictionary(modelDic);
 		
 			_models.push_back(Models());
 			std::string k;
 			modelDic.getValue("TexturePath", k);
 			
 			_models.at(count)._texturePath = absPath(k + "/" + _fileNames[count] + ".png");
-			_models.at(count)._model = m;
+			_models.at(count)._model = std::move(m);
 			_models.at(count)._programObject = nullptr;
 			_models.at(count)._texture = nullptr;
 			count++;
