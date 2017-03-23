@@ -27,10 +27,11 @@
 
 #include <openspace/scene/translation.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/vector/dvec3property.h>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
     
 class StaticTranslation : public Translation {
 public:
@@ -40,7 +41,7 @@ public:
     virtual glm::dvec3 position() const;
     virtual void update(const UpdateData& data) override;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     properties::DVec3Property _position;

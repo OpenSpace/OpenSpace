@@ -64,7 +64,7 @@ KeplerTranslation::RangeError::RangeError(std::string offender)
     , offender(std::move(offender))
 {}
 
-Documentation KeplerTranslation::Documentation() {
+documentation::Documentation KeplerTranslation::Documentation() {
     using namespace openspace::documentation;
     return{
         "Kepler Translation",
@@ -251,6 +251,9 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
             return x + (-5 * f / (f1 + sign(f1) * sqrt(abs(16 * f1 * f1 - 20 * f * f2))));
         };
         return solveIteration(solver, e, 0.0, 8);
+    }
+    else {
+        ghoul_assert(false, "Eccentricity must not be >= 1.0");
     }
 }
 

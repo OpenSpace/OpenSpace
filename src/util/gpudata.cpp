@@ -28,7 +28,8 @@
 
 namespace openspace {
 
-void UniformLocation::bind(ProgramObject* program, const std::string& name){
+void UniformLocation::bind(ghoul::opengl::ProgramObject* program, const std::string& name)
+{
     _uniformLocation = program->uniformLocation(name);
 }
 

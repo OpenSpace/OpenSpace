@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYSTEMCAPABLITIESBINDING___H__
-#define __OPENSPACE_CORE___SYSTEMCAPABLITIESBINDING___H__
+#ifndef __OPENSPACE_CORE___SYSTEMCAPABILITIESBINDING___H__
+#define __OPENSPACE_CORE___SYSTEMCAPABILITIESBINDING___H__
 
 #include <openspace/scripting/lualibrary.h>
 
@@ -36,4 +36,4 @@ LuaLibrary openglSystemCapabilities();
 } // namespace scripting
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___SYSTEMCAPABLITIESBINDING___H__
+#endif // __OPENSPACE_CORE___SYSTEMCAPABILITIESBINDING___H__

@@ -126,19 +126,16 @@ return {
         Name = "JunoTrail",
         Parent = "JupiterBarycenter",
         Renderable = {
-            Type = "RenderableTrail",
-            Body = "JUNO",
-            Frame = "GALACTIC",
-            Observer = "JUPITER BARYCENTER",
-            RGB = { 0.70,0.50,0.20 },
-            TropicalOrbitPeriod = 394250.0,
-            EarthOrbitRatio = 4.5,
-            DayLength = 9.9259,
-            TimeStamps = false,
-            Textures = {
-                Type = "simple",
-                Color = "textures/glare_blue.png",
-            },  
+            Type = "RenderableTrailTrajectory",
+            Translation = {
+                Type = "SpiceTranslation",
+                Body = "JUNO",
+                Observer = "JUPITER BARYCENTER"
+            },
+            Color = { 0.70, 0.50, 0.20 },
+            StartTime = "2016 JUN 28",
+            EndTime = "2016 APR 01",
+            SampleInterval = 3600
         },
     },
     }

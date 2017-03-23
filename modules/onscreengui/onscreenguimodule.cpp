@@ -32,6 +32,8 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -53,6 +55,7 @@ OnScreenGUIModule::OnScreenGUIModule()
             gui._globalProperty.setSource(
                 []() {
                     std::vector<properties::PropertyOwner*> res = {
+                        &(OsEng.windowWrapper()),
                         &(OsEng.settingsEngine()),
                         &(OsEng.interactionHandler()),
                         &(OsEng.renderEngine())
@@ -102,10 +105,11 @@ OnScreenGUIModule::OnScreenGUIModule()
     );
 
     OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::PostSyncPreDraw,
+        OpenSpaceEngine::CallbackOption::Render,
         [](){
             WindowWrapper& wrapper = OsEng.windowWrapper();
-            if (OsEng.isMaster() && wrapper.isRegularRendering()) {
+            bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
+            if (wrapper.isMaster() && wrapper.isRegularRendering() && showGui ) {
                 glm::vec2 mousePosition = wrapper.mousePosition();
                 //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
                 glm::ivec2 windowSize = wrapper.currentWindowSize();
@@ -114,6 +118,8 @@ OnScreenGUIModule::OnScreenGUIModule()
                 
                 double dt = std::max(wrapper.averageDeltaTime(), 0.0);
                 
+                // We don't do any collection of immediate mode user interface, so it is
+                // fine to open and close a frame immediately
                 gui.startFrame(
                     static_cast<float>(dt),
                     glm::vec2(windowSize),
@@ -121,16 +127,7 @@ OnScreenGUIModule::OnScreenGUIModule()
                     mousePosition,
                     mouseButtons
                 );
-            }
-        }
-    );
-    
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::PostDraw,
-        [](){
-            WindowWrapper& wrapper = OsEng.windowWrapper();
-            bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
-            if (OsEng.isMaster() && wrapper.isRegularRendering() && showGui) {
+
                 gui.endFrame();
             }
         }

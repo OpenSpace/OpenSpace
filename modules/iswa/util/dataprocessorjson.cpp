@@ -80,7 +80,7 @@ void DataProcessorJson::addDataValues(std::string data, properties::SelectionPro
 
         for(int i=0; i<numOptions; i++){
             json row = variables[options[i].description];
-            int rowsize = row.size();
+//            int rowsize = row.size();
 
             for(int y=0; y<row.size(); y++){
                 json col = row.at(y);
@@ -107,7 +107,7 @@ std::vector<float*> DataProcessorJson::processData(std::string data, properties:
         json variables = j["variables"]; 
 
         std::vector<int> selectedOptions = dataOptions.value();
-        int numSelected = selectedOptions.size();
+//        int numSelected = selectedOptions.size();
         
         auto options = dataOptions.options();
         int numOptions = options.size();

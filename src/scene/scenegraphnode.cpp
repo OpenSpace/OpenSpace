@@ -24,8 +24,6 @@
 
 #include <openspace/scene/scenegraphnode.h>
 
-#include <openspace/documentation/documentation.h>
-
 #include <openspace/query/query.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
@@ -33,6 +31,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/shadermanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderobject.h>
@@ -91,7 +90,7 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
             delete result;
             return nullptr;
         }
-        result->addPropertySubOwner(result->_renderable);
+        result->addPropertySubOwner(result->_renderable.get());
         LDEBUG("Successfully created renderable for '" << result->name() << "'");
     }
 
@@ -146,7 +145,8 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 }
 
 SceneGraphNode::SceneGraphNode()
-    : _parent(nullptr)
+    : properties::PropertyOwner("")
+    , _parent(nullptr)
     , _transform {
         std::make_unique<StaticTranslation>(),
         std::make_unique<StaticRotation>(),
@@ -187,7 +187,6 @@ bool SceneGraphNode::deinitialize() {
 
     if (_renderable) {
         _renderable->deinitialize();
-        delete _renderable;
         _renderable = nullptr;
     }
     _children.clear();
@@ -500,17 +499,17 @@ PowerScaledScalar SceneGraphNode::boundingSphere() const{
 }
 
 // renderable
-void SceneGraphNode::setRenderable(Renderable* renderable) {
-    _renderable = renderable;
+void SceneGraphNode::setRenderable(std::unique_ptr<Renderable> renderable) {
+    _renderable = std::move(renderable);
 }
 
 const Renderable* SceneGraphNode::renderable() const
 {
-    return _renderable;
+    return _renderable.get();
 }
 
 Renderable* SceneGraphNode::renderable() {
-    return _renderable;
+    return _renderable.get();
 }
 
 // private helper methods

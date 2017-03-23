@@ -41,11 +41,11 @@ namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
     
-TileProvider* TileProvider::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<TileProvider> TileProvider::createFromDictionary(const ghoul::Dictionary& dictionary) {
     std::string type = "LRUCaching";
     dictionary.getValue(KeyType, type);
     auto factory = FactoryManager::ref().factory<TileProvider>();
-    TileProvider* result = factory->create(type, dictionary);
+    std::unique_ptr<TileProvider> result = factory->create(type, dictionary);
 
     if (result == nullptr) {
         LERROR("Failed creating TileProvider of type '" << type << "'");

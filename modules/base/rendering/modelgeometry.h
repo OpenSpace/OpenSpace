@@ -27,17 +27,20 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
 #include <modules/base/rendering/renderablemodel.h>
-#include <ghoul/misc/dictionary.h>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
+namespace documentation {  struct Documentation; }
 
 namespace modelgeometry {
 
 class ModelGeometry : public properties::PropertyOwner {
 public:
-    static ModelGeometry* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<ModelGeometry> createFromDictionary(
+        const ghoul::Dictionary& dictionary
+    );
 
     struct Vertex {
         GLfloat location[4];
@@ -59,7 +62,7 @@ public:
 
     virtual void setUniforms(ghoul::opengl::ProgramObject& program);
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     Renderable* _parent;

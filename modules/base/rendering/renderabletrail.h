@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -41,10 +40,12 @@ namespace ghoul {
 namespace opengl {
     class ProgramObject;
     class Texture;
-}
-}
+} // namespace opengl
+} // namespace ghoul
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class Translation;
 
@@ -89,7 +90,7 @@ protected:
     explicit RenderableTrail(const ghoul::Dictionary& dictionary);
 
     /// Returns the documentation entries that the con
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
    
     /// The layout of the VBOs
     struct TrailVBOLayout {

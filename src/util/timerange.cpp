@@ -24,6 +24,7 @@
 
 #include <openspace/util/timerange.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 
@@ -36,7 +37,7 @@ namespace {
 
 namespace openspace {
 
-openspace::Documentation TimeRange::Documentation() {
+documentation::Documentation TimeRange::Documentation() {
     using namespace documentation;
     return {
         "Time Range",

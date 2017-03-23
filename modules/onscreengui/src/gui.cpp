@@ -408,9 +408,15 @@ void GUI::deinitializeGL() {
     _program = nullptr;
     _fontTexture = nullptr;
 
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &vboElements);
+    if (vao) {
+        glDeleteVertexArrays(1, &vao);
+    }
+    if (vbo) {
+        glDeleteBuffers(1, &vbo);
+    }
+    if (vboElements) {
+        glDeleteBuffers(1, &vboElements);
+    }
 
     _iswa.deinitializeGL();
     _help.deinitializeGL();

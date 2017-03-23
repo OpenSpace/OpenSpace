@@ -6,7 +6,7 @@ function preInitialization()
     critical objects.
     ]]--
 
-    openspace.spice.loadKernel("${SPICE}/naif0011.tls")
+    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
     openspace.time.setTime("2015 JAN 01 12:00:00.000")

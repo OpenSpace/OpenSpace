@@ -112,7 +112,7 @@ std::vector<float*> DataProcessorKameleon::processData(std::string path, propert
             initializeKameleonWrapper(path);
 
         std::vector<int> selectedOptions = dataOptions.value();
-        int numSelected = selectedOptions.size();
+//        int numSelected = selectedOptions.size();
 
         auto options = dataOptions.options();
         int numOptions = options.size();

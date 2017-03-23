@@ -30,6 +30,8 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timerange.h>
 
+#include <ghoul/misc/dictionary.h>
+
 #include <memory>
 #include <string>
 #include <unordered_map>

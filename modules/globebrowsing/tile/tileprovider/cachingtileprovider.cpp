@@ -199,7 +199,7 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
         return{ nullptr, nullptr, Tile::Status::IOError };
     }
 
-    TileIndex::TileHashKey key = rawTile->tileIndex.hashKey();
+//    TileIndex::TileHashKey key = rawTile->tileIndex.hashKey();
     TileDataLayout dataLayout =
         _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
         

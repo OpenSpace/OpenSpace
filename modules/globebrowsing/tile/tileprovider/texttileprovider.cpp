@@ -108,8 +108,6 @@ Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
         0
     );
 
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
     glViewport(
         0, 0,
         static_cast<GLsizei>(tile.texture->width()),

@@ -30,15 +30,15 @@
 #include <ghoul/lua/lua_helper.h>
 
 namespace {
-    const std::string KeyName = "Name";
-    const std::string KeyDescription = "Description";
-    const std::string KeyPhases = "Phases";
-    const std::string KeyTimeRange = "TimeRange";
+    const char* KeyName = "Name";
+    const char* KeyDescription = "Description";
+    const char* KeyPhases = "Phases";
+    const char* KeyTimeRange = "TimeRange";
 }
 
 namespace openspace {
 
-Documentation MissionPhase::Documentation() {
+documentation::Documentation MissionPhase::Documentation() {
     using namespace documentation;
 
     return {
@@ -188,7 +188,11 @@ Mission missionFromFile(std::string filename) {
     ghoul::Dictionary missionDict;
     ghoul::lua::loadDictionaryFromFile(filename, missionDict);
 
-    documentation::testSpecificationAndThrow(Documentation(), missionDict, "Mission");
+    documentation::testSpecificationAndThrow(
+        MissionPhase::Documentation(),
+        missionDict,
+        "Mission"
+    );
 
     return MissionPhase(missionDict);
 }

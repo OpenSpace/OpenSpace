@@ -59,8 +59,10 @@ namespace {
 namespace openspace{
 
 IswaManager::IswaManager()
-    : _iswaEvent()
+    : properties::PropertyOwner("IswaManager")
+    , _iswaEvent()
 {
+    // @CLEANUP: Make this staticly allocated ---abock
     _month["JAN"] = "01";
     _month["FEB"] = "02";
     _month["MAR"] = "03";
@@ -89,9 +91,6 @@ IswaManager::IswaManager()
         "http://iswa3.ccmc.gsfc.nasa.gov/IswaSystemWebApp/CygnetHealthServlet",
         [this](const DownloadManager::MemoryFile& file){
             fillCygnetInfo(std::string(file.buffer));
-        },
-        [](const std::string& err){
-            LWARNING("Download to memory was aborted: " + err);
         }
     );
 }
@@ -102,19 +101,16 @@ IswaManager::~IswaManager(){
 }
 
 void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
-    if(id > 0){
-
+    if (id > 0) {
         createScreenSpace(id);
-
-    }else if(id < 0){
-
+    } else if(id < 0) {
         // create metadata object and assign group and id
         std::shared_ptr<MetadataFuture> metaFuture = std::make_shared<MetadataFuture>();
         metaFuture->id = id;
         metaFuture->group = group;
 
         // Assign type of cygnet Texture/Data
-        if(type == _type[CygnetType::Texture]){
+        if (type == _type[CygnetType::Texture]) {
             metaFuture->type = CygnetType::Texture;
         } else if (type  == _type[CygnetType::Data]) {
             metaFuture->type = CygnetType::Data;
@@ -125,7 +121,7 @@ void IswaManager::addIswaCygnet(int id, std::string type, std::string group){
 
         // This callback determines what geometry should be used and creates the right cygbet
         auto metadataCallback = 
-        [this, metaFuture](const DownloadManager::MemoryFile& file){
+        [this, metaFuture](const DownloadManager::MemoryFile& file) {
             //Create a string from downloaded file
             std::string res;
             res.append(file.buffer, file.size);

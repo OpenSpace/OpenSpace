@@ -83,8 +83,11 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(success,
-            "RenderablePlanet need the '" << SceneGraphNode::KeyName<<"' be specified");
+    ghoul_assert(
+        success,
+        std::string("RenderablePlanet need the '") + SceneGraphNode::KeyName +
+            "' be specified"
+    );
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(keyGeometry, geometryDictionary);
@@ -94,10 +97,14 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
         glm::vec2 planetRadiusVec;
         success = geometryDictionary.getValue(keyRadius, planetRadiusVec);
-        if (success)
-            _planetRadius = planetRadiusVec[0] * glm::pow(10, planetRadiusVec[1]);
-        else
+        if (success) {
+            _planetRadius = static_cast<float>(
+                planetRadiusVec[0] * glm::pow(10, planetRadiusVec[1])
+            );
+        }
+        else {
             LWARNING("No Radius value expecified for " << name << " planet.");
+        }
     }
 
     dictionary.getValue(keyFrame, _frame);
@@ -125,7 +132,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         _heightMapTexturePath = absPath(heightMapTexturePath);
     }
 
-    addPropertySubOwner(_geometry);
+    addPropertySubOwner(_geometry.get());
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
@@ -309,7 +316,7 @@ bool RenderablePlanet::initialize() {
 bool RenderablePlanet::deinitialize() {
     if(_geometry) {
         _geometry->deinitialize();
-        delete _geometry;
+        _geometry = nullptr;
     }
 
     RenderEngine& renderEngine = OsEng.renderEngine();
@@ -429,7 +436,7 @@ void RenderablePlanet::render(const RenderData& data) {
             float xp_test               = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
             float rp_test               = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
                         
-            float casterDistSun = glm::length(casterPos);
+            double casterDistSun = glm::length(casterPos);
             float planetDistSun = glm::length(data.position.vec3());
 
             ShadowRenderingStruct shadowData;

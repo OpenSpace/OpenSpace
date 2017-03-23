@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___INTERACTIONMODE___H__
 #define __OPENSPACE_CORE___INTERACTIONMODE___H__
 
-#include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
@@ -109,11 +108,10 @@ namespace interaction {
 
 
 
-class InteractionMode
-{
+class InteractionMode {
 public:
     InteractionMode();
-    ~InteractionMode();
+    virtual ~InteractionMode();
 
     // Mutators
     virtual void setFocusNode(SceneGraphNode* focusNode);

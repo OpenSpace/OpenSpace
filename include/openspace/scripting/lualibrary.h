@@ -27,6 +27,9 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 
+#include <string>
+#include <vector>
+
 namespace openspace {
 namespace scripting {
 

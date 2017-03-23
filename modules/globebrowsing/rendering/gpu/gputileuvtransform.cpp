@@ -33,16 +33,18 @@
 namespace openspace {
 namespace globebrowsing {
 
-void GPUTileUvTransform::setValue(ProgramObject* programObject, 
+void GPUTileUvTransform::setValue(ghoul::opengl::ProgramObject* programObject,
                                   const TileUvTransform& tileUvTransform)
 {
-    gpuUvOffset.setValue(programObject, tileUvTransform.uvOffset);
-    gpuUvScale.setValue(programObject, tileUvTransform.uvScale);
+    _gpuUvOffset.setValue(programObject, tileUvTransform.uvOffset);
+    _gpuUvScale.setValue(programObject, tileUvTransform.uvScale);
 }
 
-void GPUTileUvTransform::bind(ProgramObject* programObject, const std::string& nameBase) {
-    gpuUvOffset.bind(programObject, nameBase + "uvOffset");
-    gpuUvScale.bind(programObject, nameBase + "uvScale");
+void GPUTileUvTransform::bind(ghoul::opengl::ProgramObject* programObject,
+                              const std::string& nameBase)
+{
+    _gpuUvOffset.bind(programObject, nameBase + "uvOffset");
+    _gpuUvScale.bind(programObject, nameBase + "uvScale");
 }
 
 }  // namespace globebrowsing
