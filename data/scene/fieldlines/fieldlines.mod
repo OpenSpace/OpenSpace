@@ -3,16 +3,46 @@ local file2 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_open_nort
 local file3 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_open_south_all.txt';
 local file4 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_solar_wind_all.txt';
 local file5 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_separatrix_seeds_all.txt';
+local file6 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_all_combined.txt';
 
-local volumeFile = '${OPENSPACE_DATA}/batsrus.cdf';
-local volumeFile1 = '${OPENSPACE_DATA}/batsrus.cdf';
-local volumeFile2 = '${OPENSPACE_DATA}/batsrus2.cdf';
-local volumeFile3 = '${OPENSPACE_DATA}/batsrus3.cdf';
+local volumeFile1 = '${OPENSPACE_DATA}/bats_sequence/batsrus1.cdf';
+local volumeFile2 = '${OPENSPACE_DATA}/bats_sequence/batsrus2.cdf';
+local volumeFile3 = '${OPENSPACE_DATA}/bats_sequence/batsrus3.cdf';
+local volumeFileEnlil = '${OPENSPACE_DATA}/enlil_sequence/Ailsa_Prise_101414_SH_1.enlil.0001.cdf';
 
 return {
     {
+        Name = "HNMReferenceFrame",
+        Parent = "SolarSystemBarycenter",
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                -- SourceFrame = "GALACTIC",
+                -- DestinationFrame = "HEEQ",
+                SourceFrame = "HEEQ180",
+                DestinationFrame = "GALACTIC",
+                Kernels = "${OPENSPACE_DATA}/spice/iSWAKernels/HNM-enlil_ref_frame.tf",
+            },
+        },
+    },
+    {
+        Name = "GSMReferenceFrame",
+        Parent = "EarthBarycenter",
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                -- SourceFrame = "HEEQ",
+                -- DestinationFrame = "GALACTIC",
+
+                SourceFrame = "GSM",
+                DestinationFrame = "GALACTIC",
+                Kernels = "${OPENSPACE_DATA}/spice/iSWAKernels/GSM.ti",
+            },
+        },
+    },
+    {
         Name = "FieldlinesTimestep1",
-        Parent = "Earth",
+        Parent = "GSMReferenceFrame",
         Renderable = {
             Type = "RenderableFieldlines",
             VectorField = {
@@ -28,13 +58,13 @@ return {
             },
             SeedPoints = {
                 Type = "File",
-                File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_all_combined.txt';
+                File = file6;
             }
         }
     },
     {
         Name = "FieldlinesTimestep2",
-        Parent = "Earth",
+        Parent = "GSMReferenceFrame",
         Renderable = {
             Type = "RenderableFieldlines",
             VectorField = {
@@ -45,18 +75,18 @@ return {
                 TimeDependent = true,
             },
             Fieldlines = {
-                Stepsize = 0.5,
-                Classification = false,
+                Stepsize = 1.0,
+                Classification = true,
             },
             SeedPoints = {
                 Type = "File",
-                File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_all_combined.txt';
+                File = file6;
             }
         }
     },
     {
         Name = "FieldlinesTimestep3",
-        Parent = "Earth",
+        Parent = "GSMReferenceFrame",
         Renderable = {
             Type = "RenderableFieldlines",
             VectorField = {
@@ -67,12 +97,34 @@ return {
                 TimeDependent = true,
             },
             Fieldlines = {
-                Stepsize = 0.1,
+                Stepsize = 1.0,
                 Classification = true,
             },
             SeedPoints = {
                 Type = "File",
-                File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_all_combined.txt';
+                File = file1;
+            }
+        }
+    },
+    {
+        Name = "FieldlinesEnlil",
+        Parent = "HNMReferenceFrame", --"Sun",
+        Renderable = {
+            Type = "RenderableFieldlines",
+            VectorField = {
+                Type = "VolumeKameleon",
+                File = volumeFileEnlil,
+                Model = "ENLIL",
+                Variables = {"br", "btheta", "bphi"},
+                TimeDependent = false,
+            },
+            Fieldlines = {
+                Stepsize = 1.0,
+                Classification = true,
+            },
+            SeedPoints = {
+                Type = "File",
+                File = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/enlil.txt';
             }
         }
     },

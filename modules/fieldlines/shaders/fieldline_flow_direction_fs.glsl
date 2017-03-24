@@ -39,10 +39,10 @@ Fragment getFragment() {
         fragColor = vec4(fieldLineColor.rgb * fieldLineColor.a , 1.0);
     }
 
-    float depth = pscDepth(vs_position);
+    //float depth = pscDepth(vs_position);
 
     Fragment frag;
-    frag.depth = depth;
+    frag.depth = vs_position.w;
     frag.color = fragColor;
     return frag;
 }
