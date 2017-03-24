@@ -27,11 +27,13 @@
 
 #include <ghoul/designpattern/singleton.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/ghoul_gl.h> // TODO: FORWARD DECLARE glm::vec3 instead?
 #include <ghoul/glm.h>
 
+#include <vector>
+
 // #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
-#include <ccmc/Kameleon.h>
+// #include <ccmc/Kameleon.h>
 // #endif
 
 // #include <openspace/properties/selectionproperty.h>
@@ -39,9 +41,11 @@
 // #include <openspace/util/spicemanager.h>
 // #include <openspace/util/time.h>
 
-#include <modules/fieldlinessequence/util/fieldlinesstate.h>
+// #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
 namespace openspace {
+// Forward declarations
+class FieldlinesState;
 
 class FieldlinesSequenceManager : public ghoul::Singleton<FieldlinesSequenceManager> /*, public properties::PropertyOwner */ {
     friend class ghoul::Singleton<FieldlinesSequenceManager>;
@@ -54,6 +58,15 @@ public:
 
     bool getCdfFilePaths(const std::string& pathToCdfDirectory,
                          std::vector<std::string>& outCdfFilePaths);
+
+    bool traceFieldlinesState(const std::string& pathToCdfFile,
+                              const std::string& tracingVariable,
+                              const std::vector<glm::vec3>& inSeedPoints,
+                              FieldlinesState& outFieldlinesStates);
+
+    // bool traceFieldlines(const std::string& pathToCdfDirectory,
+    //                      const std::vector<glm::vec3>& inSeedPoints,
+    //                      std::vector<FieldlinesState>& outFieldlinesStates);
 
 private:
 

@@ -46,6 +46,7 @@ public:
 private:
     std::vector<glm::vec3> _seedPoints;
     std::vector<FieldlinesState> _states;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 };
 
 } // namespace openspace

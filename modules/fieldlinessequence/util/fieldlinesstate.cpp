@@ -26,8 +26,14 @@
 
 namespace openspace {
 
-FieldlinesState::FieldlinesState() {
+FieldlinesState::FieldlinesState(size_t numLines) {
+    _lineStart.reserve(numLines);
+    _lineCount.reserve(numLines);
+}
 
+void FieldlinesState::reserveSize(size_t size) {
+    _vertexPositions.reserve(size);
+    _vertexColors.reserve(size);
 }
 
 } // namespace openspace
