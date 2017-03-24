@@ -26,11 +26,13 @@
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSEQUENCEMANAGER___H__
 
 #include <ghoul/designpattern/singleton.h>
-// #include <ghoul/glm.h>
 
-#ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/glm.h>
+
+// #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 #include <ccmc/Kameleon.h>
-#endif
+// #endif
 
 // #include <openspace/properties/selectionproperty.h>
 // #include <openspace/rendering/renderable.h>
@@ -47,6 +49,8 @@ class FieldlinesSequenceManager : public ghoul::Singleton<FieldlinesSequenceMana
 public:
     FieldlinesSequenceManager();
     ~FieldlinesSequenceManager();
+
+    bool getSeedPointsFromFile(const std::string& path, std::vector<glm::vec3>& outVec);
 
 private:
 
