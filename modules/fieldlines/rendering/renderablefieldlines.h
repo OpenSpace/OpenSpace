@@ -35,7 +35,10 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
+//ADDED BY CARLBAUM //
 #include "ccmc/CCMCTime.h"
+#include "ccmc/Kameleon.h"
+//////////////////////
 
 namespace ghoul {
 namespace opengl {
@@ -71,6 +74,9 @@ private:
 
     std::vector<Line> generateFieldlines();
     std::vector<Line> generateFieldlinesVolumeKameleon();
+    std::vector<Line> generateFieldlinesVolumeKameleonBypassWrapper();
+    glm::vec3 convertGsmToJ2000(ccmc::Position& p, ccmc::Kameleon* kameleon);
+    glm::vec3 convertHnmToJ2000(ccmc::Position& p, ccmc::Kameleon* kameleon);
 
     properties::FloatProperty _stepSize;
     properties::BoolProperty _classification;
@@ -88,6 +94,7 @@ private:
     bool _seedPointsAreDirty;
     bool _fieldLinesAreDirty;
     bool _isWithinTimeInterval;
+    bool _updateCoordinates;
 
     std::vector<glm::vec3> _seedPoints;
 
@@ -97,10 +104,16 @@ private:
     std::vector<GLint> _lineStart;
     std::vector<GLsizei> _lineCount;
 
+    std::vector<LinePoint> _vertexData;
+    std::vector<ccmc::Position> _modelCoordinates;
+    std::vector<glm::vec4> _vertexColor;
+    //std::vector<int> _vertexColor; //TODO use this instead of the one above
+
     Time* _osTime;
     double _currentTime;
     double _startTime;
     double _endTime;
+    double _timeDelay;
     //double _timeDuration;
 };
 
