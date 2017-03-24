@@ -37,6 +37,8 @@
 // #include <openspace/util/spicemanager.h>
 // #include <openspace/util/time.h>
 
+#include <modules/fieldlinessequence/util/fieldlinesstate.h>
+
 namespace openspace {
 
 class FieldlinesSequenceManager : public ghoul::Singleton<FieldlinesSequenceManager> /*, public properties::PropertyOwner */ {
