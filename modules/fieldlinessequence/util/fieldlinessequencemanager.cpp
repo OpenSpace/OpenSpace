@@ -27,9 +27,19 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+// #include <ghoul/misc/assert.h>
 
 #include <fstream>
 #include <algorithm>
+#include <memory>
+
+#include <ccmc/Kameleon.h>
+
+#include <modules/fieldlinessequence/util/fieldlinesstate.h>
+
+//#include <glm>
+// #include <ccmc/Tracer.h>
+// #include "ccmc/Point3f.h"
 
 namespace {
     const std::string _loggerCat = "FieldlinesSequenceManager";
@@ -100,4 +110,45 @@ bool FieldlinesSequenceManager::getCdfFilePaths(
 
     return true;
 }
+
+bool FieldlinesSequenceManager::traceFieldlinesState(
+        const std::string& pathToCdfFile,
+        const std::string& tracingVariable,
+        const std::vector<glm::vec3>& inSeedPoints,
+        FieldlinesState& outFieldlinesStates) {
+
+    std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
+    long status = kameleon->open(pathToCdfFile);
+    if (status == ccmc::FileReader::OK) {
+        LDEBUG("Successfully created a Kameleon Object from file: " << pathToCdfFile);
+        kameleon->loadVariable(tracingVariable);
+    //     bool isEnlil = kameleon->getModelName() == "enlil"; // TODO, specify in Lua and confirm
+        ccmc::Tracer tracer(kameleon.get());
+    //     tracer.setMaxIterations(5000); // TODO specify in Lua
+    //     tracer.setInnerBoundary(.1f); // TODO specify in Lua
+    //     std::vector<Line> fieldlines;
+        int lineStart = 0;
+        int lineCount = 0;
+        for (glm::vec3 seedPoint : inSeedPoints) {
+            // A ccmc::Fieldline contains much more info than we need here, but might be
+            // needed in future.
+            ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(tracingVariable, seedPoint.x, seedPoint.y, seedPoint.z); //TODO convert positions to glm::vec3
+            lineCount = ccmcFieldline.size();
+            outFieldlinesStates._lineStart.push_back(lineStart);
+            outFieldlinesStates._lineStart.push_back(lineCount);
+            outFieldlinesStates.reserveSize(lineCount);
+
+            // TODO clean this ugly $*$& up
+            for (int i = 0; i < lineCount; ++i) {
+                const ccmc::Point3f* vP = &ccmcFieldline.getPositions()[i];
+                outFieldlinesStates._vertexPositions.push_back(glm::vec3(vP->component1,vP->component2,vP->component3));
+            }
+
+            lineStart += lineCount; // for next iteration (line)
+        }
+    }
+
+    return true;
+}
+
 } // namsepace openspace

@@ -26,20 +26,24 @@
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
 
 #include <vector>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/ghoul_gl.h> // TODO forward declare?
 #include <ghoul/glm.h>
 
 namespace openspace {
 
 class FieldlinesState {
 public:
-    FieldlinesState();
+    FieldlinesState(size_t numLines);
     // ~FieldlinesState();
-private:
-    std::vector<glm::vec3> _vertexPositions;
-    std::vector<glm::vec4> _vertexColors;
+
+    // TODO: MOVE TO PRIVATE
     std::vector<GLint> _lineStart;
     std::vector<GLsizei> _lineCount;
+    std::vector<glm::vec3> _vertexPositions;
+    std::vector<glm::vec4> _vertexColors;
+
+    void reserveSize(size_t size);
+private:
 };
 
 } // namespace openspace
