@@ -24,24 +24,26 @@
 
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/assert.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
+#include <modules/fieldlinessequence/util/fieldlinessequencemanager.h>
 
 namespace openspace {
 
 FieldlinesSequenceModule::FieldlinesSequenceModule()
     : OpenSpaceModule("FieldlinesSequence")
 {
-    // OsEng.registerModuleCallback(
-    //     OpenSpaceEngine::CallbackOption::Initialize,
-    //     [](){
-    //         FieldlinesSequenceManager::initialize();
-    //     }
-    // );
+    OsEng.registerModuleCallback(
+        OpenSpaceEngine::CallbackOption::Initialize,
+        [](){
+            FieldlinesSequenceManager::initialize();
+        }
+    );
 }
 
 void FieldlinesSequenceModule::internalInitialize() {

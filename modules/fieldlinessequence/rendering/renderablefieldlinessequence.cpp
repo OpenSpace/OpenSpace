@@ -77,6 +77,17 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
         LERROR("Renderable does not contain a key for '" << keySeedPoints << "'");
         // deinitialize();
     }
+
+    // SeedPoints Info. Needs a .txt file containing seed points. Each row should have 3 floats seperated by spaces
+    std::string pathToSeedPointFile;
+    if (!seedPointsInfo.getValue(keySeedPointsFile, pathToSeedPointFile)) {
+        LERROR(keySeedPoints << " doesn't specify a '" << keySeedPointsFile << "'" <<
+            "\n\tRequires a path to a .txt file containing seed point data. Each row should have 3 floats seperated by spaces.");
+    } else {
+        if(!FieldlinesSequenceManager::ref().getSeedPointsFromFile(pathToSeedPointFile, _seedPoints)) {
+            LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
+        }
+    }
 }
 
 bool RenderableFieldlinesSequence::isReady() const {}

@@ -44,7 +44,7 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 private:
-
+    std::vector<glm::vec3> _seedPoints;
     std::vector<FieldlinesState> _states;
 };
 
