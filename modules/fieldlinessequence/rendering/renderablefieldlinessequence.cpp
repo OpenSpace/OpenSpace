@@ -25,19 +25,59 @@
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 #include <modules/fieldlinessequence/util/fieldlinessequencemanager.h>
 
+#include <ghoul/misc/assert.h>
 
-// #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/openspaceengine.h>
 // #include <openspace/rendering/renderengine.h>
-// #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scenegraphnode.h>
+
+namespace {
+    std::string _loggerCat = "RenderableFieldlinesSequence";
+}
+
+namespace {
+    const char* keyVectorVolume = "VectorVolume";
+    const char* keyFieldlines = "Fieldlines";
+    const char* keySeedPoints = "SeedPoints";
+
+    const char* keyVectorVolumeDirectory = "Directory";
+
+    const char* keySeedPointsFile = "File";
+
+    // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
+
+}
 
 namespace openspace {
 
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary) {
 
-}
+    std::string name;
+    dictionary.getValue(SceneGraphNode::KeyName, name);
 
-//KULPEWSE
+    _loggerCat = "RenderableFieldlines [" + name + "]";
+
+    ghoul::Dictionary vectorVolumeInfo;
+    ghoul::Dictionary fieldlineInfo;
+    ghoul::Dictionary seedPointsInfo;
+
+    // Find VectorVolume, SeedPoint and Fieldlines Info from Lua
+    if (!dictionary.getValue(keyVectorVolume, vectorVolumeInfo)) {
+        LERROR("Renderable does not contain a key for '" << keyVectorVolume << "'");
+        // deinitialize();
+    }
+
+    if (!dictionary.getValue(keyFieldlines, fieldlineInfo)) {
+        LERROR("Renderable does not contain a key for '" << keyFieldlines << "'");
+        // deinitialize();
+    }
+
+    if (!dictionary.getValue(keySeedPoints, seedPointsInfo)) {
+        LERROR("Renderable does not contain a key for '" << keySeedPoints << "'");
+        // deinitialize();
+    }
+}
 
 bool RenderableFieldlinesSequence::isReady() const {}
 
