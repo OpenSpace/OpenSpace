@@ -22,32 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEFIELDLINESSEQUENCE___H__
-#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEFIELDLINESSEQUENCE___H__
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
 
-#include <openspace/rendering/renderable.h>
-
-#include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#include <vector>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/glm.h>
 
 namespace openspace {
 
-class RenderableFieldlinesSequence : public Renderable {
+class FieldlinesState {
 public:
-    RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary);
-    // ~RenderableFieldlinesSequence();
-
-    bool initialize() override;
-    bool deinitialize() override;
-
-    bool isReady() const override;
-
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
+    FieldlinesState();
+    // ~FieldlinesState();
 private:
-
-    std::vector<FieldlinesState> _states;
+    std::vector<glm::vec3> _vertexPositions;
+    std::vector<glm::vec4> _vertexColors;
+    std::vector<GLint> _lineStart;
+    std::vector<GLsizei> _lineCount;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEFIELDLINESSEQUENCE___H__
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
