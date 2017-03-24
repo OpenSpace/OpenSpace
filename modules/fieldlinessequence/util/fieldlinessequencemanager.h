@@ -52,6 +52,9 @@ public:
 
     bool getSeedPointsFromFile(const std::string& path, std::vector<glm::vec3>& outVec);
 
+    bool getCdfFilePaths(const std::string& pathToCdfDirectory,
+                         std::vector<std::string>& outCdfFilePaths);
+
 private:
 
 };
