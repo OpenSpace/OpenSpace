@@ -29,10 +29,13 @@
 #include <ghoul/misc/dictionary.h>
 
 #include <fstream>
+#include <algorithm>
 
 namespace {
     const std::string _loggerCat = "FieldlinesSequenceManager";
     using RawPath = ghoul::filesystem::FileSystem::RawPath;
+    using FileSystem = ghoul::filesystem::FileSystem;
+    using Sort = ghoul::filesystem::Directory::Sort;
 }
 
 namespace openspace {
@@ -71,4 +74,30 @@ bool FieldlinesSequenceManager::getSeedPointsFromFile(
     return true;
 }
 
+bool FieldlinesSequenceManager::getCdfFilePaths(
+        const std::string& pathToCdfDirectory,
+        std::vector<std::string>& outCdfFilePaths) {
+
+    std::string absFolderPath;
+    absFolderPath = absPath(pathToCdfDirectory);
+
+    if ( !FileSys.directoryExists(absFolderPath) ) {
+        LERROR("The folder '" << absFolderPath << "' could not be found!");
+        return false;
+    }
+
+    // Get absolute path to
+    ghoul::filesystem::Directory cdfDirectory(absFolderPath, RawPath::Yes);
+    outCdfFilePaths = cdfDirectory.read(FileSystem::Recursive::Yes, Sort::No);
+
+    outCdfFilePaths.erase(std::remove_if(
+            outCdfFilePaths.begin(), outCdfFilePaths.end(), [](std::string s) {
+                    std::string sub = s.substr(s.length()-4, 4);
+                    std::transform(sub.begin(), sub.end(), sub.begin(),
+                       [](unsigned char c) { return std::tolower(c); });
+                    return sub != ".cdf";
+                }), outCdfFilePaths.end());
+
+    return true;
+}
 } // namsepace openspace

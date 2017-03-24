@@ -88,6 +88,23 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
             LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
         }
     }
+
+    // VectorVolume Info. Needs a folder containing .CDF files
+    std::string pathToCdfDirectory;
+    std::vector<std::string> validCdfFilePaths;
+    if (!vectorVolumeInfo.getValue(keyVectorVolumeDirectory, pathToCdfDirectory)) {
+        LERROR(keyVectorVolume << " doesn't specify a '" << keyVectorVolumeDirectory << "'" <<
+            "\n\tRequires a path to a Directory containing .CDF files. Files should be of the same model and in sequence!");
+    } else {
+        if(!FieldlinesSequenceManager::ref().getCdfFilePaths(pathToCdfDirectory, validCdfFilePaths)) {
+            LERROR("Failed to get valid .cdf file paths from '" << pathToCdfDirectory << "'");
+        } else {
+            LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory );
+            for (int i = 0; i< validCdfFilePaths.size(); ++i) {
+                LDEBUG(validCdfFilePaths[i]);
+            }
+        }
+    }
 }
 
 bool RenderableFieldlinesSequence::isReady() const {}
