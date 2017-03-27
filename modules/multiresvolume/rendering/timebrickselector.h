@@ -39,7 +39,6 @@ public:
     bool calculateBrickErrors();
 private:
 
-    float temporalSplitPoints(unsigned int brickIndex);
     float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
 };
 

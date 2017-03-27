@@ -241,24 +241,6 @@ void TimeBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
     }
 }
 
-float TimeBrickSelector::temporalSplitPoints(unsigned int brickIndex) {
-    if (_tsp->isBstLeaf(brickIndex)) {
-        return -1;
-    }
-
-    unsigned int leftChild = _tsp->getBstLeft(brickIndex);
-    unsigned int rightChild = _tsp->getBstRight(brickIndex);
-
-    float currentError = _brickErrors[brickIndex];
-    float splitError = _brickErrors[leftChild] + _brickErrors[rightChild];
-
-    float diff = currentError - splitError;
-    if (diff < 0.0) {
-        diff = -diff;
-    }
-    return diff * 0.5;
-}
-
 float TimeBrickSelector::splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType) {
     float temporalPoints = temporalSplitPoints(brickIndex);
     float spatialPoints = spatialSplitPoints(brickIndex);

@@ -277,11 +277,7 @@ float TfBrickSelector::temporalSplitPoints(unsigned int brickIndex) {
     /*if (currentError + 0.001 < splitError) {
         std::cout << "Warning! (TEMPORAL SPLIT) Current error " << currentError << " is smaller than split error " << splitError << "." << std::endl;
     }*/
-    float diff = currentError - splitError;
-    if (diff < 0.0) {
-    //std::cout << "local temporal split minimum for brick " << brickIndex << std::endl;
-    diff = -diff;
-    }
+    float diff = fabs(currentError - splitError);
     return diff * 0.5;
 }
 
@@ -304,12 +300,7 @@ float TfBrickSelector::spatialSplitPoints(unsigned int brickIndex) {
         std::cout << "Warning! (SPATIAL SPLIT) Current error " << currentError << " is smaller than split error " << splitError << "." << std::endl;
     }*/
 
-    float diff = currentError - splitError;
-    if (diff < 0.0) {
-    //std::cout << "local spatial split minimum for brick " << brickIndex << std::endl;
-    diff = -diff;
-    }
-
+    float diff = fabs(currentError - splitError);
     return diff * 0.125;
 }
 
