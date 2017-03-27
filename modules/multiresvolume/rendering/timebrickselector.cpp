@@ -41,8 +41,10 @@ TimeBrickSelector::TimeBrickSelector(TSP* tsp, ErrorHistogramManager* hm, Transf
 TimeBrickSelector::~TimeBrickSelector() {}
 
 void TimeBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
-    int numTimeSteps = _tsp->header().numTimesteps_;
-    int numBricksPerDim = _tsp->header().xNumBricks_;
+    const unsigned int numTimeSteps = _tsp->header().numTimesteps_;
+    const unsigned int numBricksPerDim = _tsp->header().xNumBricks_;
+    const unsigned int memoryBudget = _memoryBudget;
+    const unsigned int totalStreamingBudget = _streamingBudget * numTimeSteps;
 
     unsigned int rootNode = 0;
     BrickSelection::SplitType splitType;
@@ -63,8 +65,6 @@ void TimeBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
         leafSelections.push_back(brickSelection);
     }
 
-    int memoryBudget = _memoryBudget;
-    int totalStreamingBudget = _streamingBudget * numTimeSteps;
     int nBricksInMemory = 1;
     int nStreamedBricks = 1;
 
@@ -118,7 +118,7 @@ void TimeBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
         }
         else if (bs.splitType == BrickSelection::SplitType::Spatial) {
             nBricksInMemory += 7; // Remove one and add eight.
-            unsigned int firstChild = _tsp->getFirstOctreeChild(brickIndex);
+            const unsigned int firstChild = _tsp->getFirstOctreeChild(brickIndex);
 
             // On average on the whole time period, splitting this spatial brick into eight spatial bricks
             // would generate eight times as much streaming. Current number of streams of this spatial brick
@@ -246,18 +246,17 @@ float TimeBrickSelector::splitPoints(unsigned int brickIndex, BrickSelection::Sp
     float spatialPoints = spatialSplitPoints(brickIndex);
     float splitPoints;
 
+    splitType = BrickSelection::SplitType::None;
+    splitPoints = -1;
+
     if (spatialPoints > 0 && spatialPoints > temporalPoints) {
-        splitPoints = spatialPoints;
         splitType = BrickSelection::SplitType::Spatial;
-    }
-    else if (temporalPoints > 0) {
-        splitPoints = temporalPoints;
+        return spatialPoints;
+    } else if (temporalPoints > 0) {
         splitType = BrickSelection::SplitType::Temporal;
+        return temporalPoints;
     }
-    else {
-        splitPoints = -1;
-        splitType = BrickSelection::SplitType::None;
-    }
+
     return splitPoints;
 }
 
