@@ -44,9 +44,21 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 private:
+    ghoul::Dictionary _vectorVolumeInfo;
+    ghoul::Dictionary _fieldlineInfo;
+    ghoul::Dictionary _seedPointsInfo;
+
     std::vector<glm::vec3> _seedPoints;
     std::vector<FieldlinesState> _states;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+
+    bool _shouldRender; // only temporary
+
+    GLuint _vertexArrayObject;
+    GLuint _vertexPositionBuffer;
+    GLuint _vertexColorBuffer;
+
+    int _activeStateIndex;
 };
 
 } // namespace openspace
