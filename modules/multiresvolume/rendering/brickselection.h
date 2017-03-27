@@ -59,24 +59,14 @@ struct BrickSelection {
     }
 
     BrickSelection splitSpatially(bool x, bool y, bool z, unsigned int childBrickIndex, SplitType childSplitType, float childSplitPoints) {
-        BrickSelection child;
-        child.cover = cover.split(x, y, z);
-        child.brickIndex = childBrickIndex;
-        child.splitPoints = childSplitPoints;
-        child.splitType = childSplitType;
-        child.nSpatialSplits = nSpatialSplits + 1;
-        child.nTemporalSplits = nTemporalSplits;
+        BrickSelection child = split(cover.split(x, y, z), childBrickIndex, childSplitType, childSplitPoints);
         child.lowT = lowT;
         child.highT = highT;
         return child;
     }
 
     BrickSelection splitTemporally(bool t, unsigned int childBrickIndex, SplitType childSplitType, float childSplitPoints) {
-        BrickSelection child;
-        child.cover = cover;
-        child.brickIndex = childBrickIndex;
-        child.splitPoints = childSplitPoints;
-        child.splitType = childSplitType;
+        BrickSelection child = split(cover, childBrickIndex, childSplitType, childSplitPoints);
         if (t) {
             child.lowT = centerT();
             child.highT = highT;
@@ -84,9 +74,23 @@ struct BrickSelection {
             child.lowT = lowT;
             child.highT = centerT();
         }
-        child.nSpatialSplits = nSpatialSplits;
-        child.nTemporalSplits = nTemporalSplits + 1;
+        return child;
+    }
 
+    BrickSelection split(BrickCover childCover, unsigned int childBrickIndex, SplitType childSplitType, float childSplitPoints) {
+        BrickSelection child = BrickSelection(0, 0, childSplitType, childSplitPoints);
+        child.cover = childCover;
+        child.brickIndex = childBrickIndex;
+        child.nSpatialSplits = nSpatialSplits;
+        child.nTemporalSplits = nTemporalSplits;
+        switch (childSplitType) {
+        case SplitType::Spatial:
+            child.nSpatialSplits++;
+            break;
+        case SplitType::Temporal:
+            child.nTemporalSplits++;
+            break;
+        }
         return child;
     }
 
