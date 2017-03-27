@@ -65,7 +65,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
     currentActiveTexture = 0;
     //downloadTextureResource();
-    loadLocalTextures("/home/noven/workspace/OpenSpace/data/fitsfiles");
+    loadLocalTextures("/home/noven/workspace/OpenSpace/data/fits");
     updateTexture();
    // loadTexture();
 
@@ -149,7 +149,7 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 
 void RenderableSpacecraftCameraPlane::updateTexture() {
     int clockwiseSign = (Time::ref().deltaTime()>0) ? 1 : -1;
-    int newIndex = clockwiseSign + currentActiveTexture;
+    int newIndex = (clockwiseSign + currentActiveTexture - 1);
     if (newIndex < _textures.size() && newIndex >= 0) {
         currentActiveTexture = newIndex;
         LDEBUG("Updating texture to " << currentActiveTexture);

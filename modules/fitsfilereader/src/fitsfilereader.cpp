@@ -25,20 +25,55 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <CCfits>
+#include <cstdint>
+#include <algorithm>
 
 using namespace CCfits;
 using namespace ghoul::opengl;
 
-#define FITS_PRECISION unsigned char
-#define FITS_OPENGL_FORMAT GL_UNSIGNED_BYTE
+#define FITS_PRECISION int32_t // TODO: Read this from FITS header
+#define FITS_DATA_TYPE_OPENGL GL_INT
 
 namespace {
     // Responsible for the memory of all loaded FITS data
     std::vector<std::valarray<FITS_PRECISION>> _buffer;
     const std::string _loggerCat = "FitsFileReader";
+    int d = 0;
 }
 
 namespace openspace {
+
+std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
+    FITS::setVerboseMode(true);
+    std::valarray<FITS_PRECISION> contents;
+    long sizeX;
+    long sizeY;
+
+    try {
+        const std::auto_ptr<FITS> pInfile(new FITS(path, Read, true));
+        PHDU& image = pInfile->pHDU();
+        image.read(contents);
+        sizeX = image.axis(0);
+        sizeY = image.axis(1);
+    } catch (FitsException& e) {
+        LERROR("Could not load FITS Texture");
+    }
+
+    const glm::size3_t imageSize(sizeX, sizeY, 1);
+    const Texture::Format format = ghoul::opengl::Texture::RedInt;
+    const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
+
+    _buffer.push_back(contents);
+    return std::make_unique<Texture>(
+                                &_buffer.back()[0],
+                                imageSize,
+                                format, // Format of the pixeldata
+                                GL_R32I, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
+                                FITS_DATA_TYPE_OPENGL, // Type of data
+                                Texture::FilterMode::Linear,
+                                Texture::WrappingMode::Repeat
+                            );
+}
 
 std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buffer) {
     fitsfile* infile;
@@ -84,7 +119,7 @@ std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buff
     }
 
     const glm::size3_t imageSize(axLengths[0], axLengths[1], 1);
-    const Texture::Format format = ghoul::opengl::Texture::Red;
+    const Texture::Format format = ghoul::opengl::Texture::RedInt;
     const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
 
     std::unique_ptr<Texture> texture = std::make_unique<Texture>(
@@ -92,43 +127,10 @@ std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buff
                                                             imageSize,
                                                             format,
                                                             static_cast<int>(format),
-                                                            FITS_OPENGL_FORMAT,
+                                                            FITS_DATA_TYPE_OPENGL,
                                                             Texture::FilterMode::Linear
                                                         );
     return texture;
-}
-
-std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
-    FITS::setVerboseMode(true);
-    std::valarray<FITS_PRECISION> contents;
-    long sizeX;
-    long sizeY;
-
-    try {
-        const std::auto_ptr<FITS> pInfile(new FITS(path, Read, true));
-        PHDU& image = pInfile->pHDU();
-        image.read(contents);
-        sizeX = image.axis(0);
-        sizeY = image.axis(1);
-    } catch (FitsException& e) {
-        LERROR("Could not load FITS Texture");
-    }
-
-    contents *= 10; // Increase intensity a bit
-    const glm::size3_t imageSize(sizeX, sizeY, 1);
-    const Texture::Format format = ghoul::opengl::Texture::Red;
-    const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
-
-    _buffer.push_back(contents);
-    return std::make_unique<Texture>(
-                                &_buffer.back()[0],
-                                imageSize,
-                                format, // Internal format: More preferable to give explicit precision here, otherwise up to the driver to decide
-                                static_cast<int>(format), // Format of pixel data
-                                GL_UNSIGNED_BYTE, // Type of data
-                                Texture::FilterMode::Linear,
-                                Texture::WrappingMode::Repeat
-                            );
 }
 
 std::valarray<unsigned long> FitsFileReader::readRawImage(std::string& path) {
