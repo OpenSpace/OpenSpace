@@ -59,38 +59,30 @@ struct BrickSelection {
     }
 
     BrickSelection splitSpatially(bool x, bool y, bool z, unsigned int childBrickIndex, SplitType childSplitType, float childSplitPoints) {
-        BrickSelection child = split(cover.split(x, y, z), childBrickIndex, childSplitType, childSplitPoints);
-        child.lowT = lowT;
-        child.highT = highT;
+        BrickSelection child = initSplitChild(cover.split(x, y, z), childBrickIndex, childSplitType, childSplitPoints);
+        child.nSpatialSplits++;
         return child;
     }
 
     BrickSelection splitTemporally(bool t, unsigned int childBrickIndex, SplitType childSplitType, float childSplitPoints) {
-        BrickSelection child = split(cover, childBrickIndex, childSplitType, childSplitPoints);
+        BrickSelection child = initSplitChild(cover, childBrickIndex, childSplitType, childSplitPoints);
+        child.nTemporalSplits++;
         if (t) {
             child.lowT = centerT();
-            child.highT = highT;
         } else {
-            child.lowT = lowT;
             child.highT = centerT();
         }
         return child;
     }
 
-    BrickSelection split(BrickCover childCover, unsigned int childBrickIndex, SplitType childSplitType, float childSplitPoints) {
+    BrickSelection initSplitChild(BrickCover childCover, unsigned int childBrickIndex, SplitType childSplitType, float childSplitPoints) {
         BrickSelection child = BrickSelection(0, 0, childSplitType, childSplitPoints);
         child.cover = childCover;
         child.brickIndex = childBrickIndex;
         child.nSpatialSplits = nSpatialSplits;
         child.nTemporalSplits = nTemporalSplits;
-        switch (childSplitType) {
-        case SplitType::Spatial:
-            child.nSpatialSplits++;
-            break;
-        case SplitType::Temporal:
-            child.nTemporalSplits++;
-            break;
-        }
+        child.lowT = lowT;
+        child.highT = highT;
         return child;
     }
 
