@@ -103,8 +103,7 @@ bool FieldlinesSequenceManager::getCdfFilePaths(
     outCdfFilePaths.erase(std::remove_if(
             outCdfFilePaths.begin(), outCdfFilePaths.end(), [](std::string s) {
                     std::string sub = s.substr(s.length()-4, 4);
-                    std::transform(sub.begin(), sub.end(), sub.begin(),
-                       [](unsigned char c) { return std::tolower(c); });
+                    std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
                     return sub != ".cdf";
                 }), outCdfFilePaths.end());
 
@@ -117,6 +116,7 @@ bool FieldlinesSequenceManager::traceFieldlinesState(
         const std::vector<glm::vec3>& inSeedPoints,
         FieldlinesState& outFieldlinesStates) {
 
+  const float R_E_TO_METER = 6371000.f;
     std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
     long status = kameleon->open(pathToCdfFile);
     if (status == ccmc::FileReader::OK) {
@@ -124,7 +124,7 @@ bool FieldlinesSequenceManager::traceFieldlinesState(
         kameleon->loadVariable(tracingVariable);
     //     bool isEnlil = kameleon->getModelName() == "enlil"; // TODO, specify in Lua and confirm
         ccmc::Tracer tracer(kameleon.get());
-    //     tracer.setMaxIterations(5000); // TODO specify in Lua
+         tracer.setMaxIterations(1000); // TODO specify in Lua
     //     tracer.setInnerBoundary(.1f); // TODO specify in Lua
     //     std::vector<Line> fieldlines;
         int lineStart = 0;
@@ -133,15 +133,18 @@ bool FieldlinesSequenceManager::traceFieldlinesState(
             // A ccmc::Fieldline contains much more info than we need here, but might be
             // needed in future.
             ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(tracingVariable, seedPoint.x, seedPoint.y, seedPoint.z); //TODO convert positions to glm::vec3
-            lineCount = ccmcFieldline.size();
+            lineCount = static_cast<int>(ccmcFieldline.size());
             outFieldlinesStates._lineStart.push_back(lineStart);
-            outFieldlinesStates._lineStart.push_back(lineCount);
-            outFieldlinesStates.reserveSize(lineCount);
+            outFieldlinesStates._lineCount.push_back(lineCount);
+            // outFieldlinesStates.reserveSize(lineCount);
 
             // TODO clean this ugly $*$& up
             for (int i = 0; i < lineCount; ++i) {
                 const ccmc::Point3f* vP = &ccmcFieldline.getPositions()[i];
-                outFieldlinesStates._vertexPositions.push_back(glm::vec3(vP->component1,vP->component2,vP->component3));
+                outFieldlinesStates._vertexPositions.push_back(glm::vec3(
+                    vP->component1 * R_E_TO_METER,
+                    vP->component2 * R_E_TO_METER,
+                    vP->component3 * R_E_TO_METER)); // can i use std::move here?
             }
 
             lineStart += lineCount; // for next iteration (line)

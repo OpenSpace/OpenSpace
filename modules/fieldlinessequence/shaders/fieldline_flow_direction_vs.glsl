@@ -29,7 +29,7 @@ uniform mat4 modelViewProjection;
 uniform int time;
 
 layout(location = 0) in vec3 in_position; // in meters
-layout(location = 1) in vec4 in_color;
+// layout(location = 1) in vec4 in_color;
 
 out vec4 vs_color;
 out vec4 vs_position;
@@ -37,12 +37,13 @@ out vec4 vs_position;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
+    vec4 in_color = vec4(1.0,1.0,0.0,0.0);
     // Color every n-th vertex differently to show fieldline flow direction
     int modulus = (gl_VertexID + time) % 100;
     if ( modulus > 0 && modulus < 99) {
-        vs_color = vec4(in_color.rgb * 0.99, 0.75   );
+        vs_color = vec4(in_color.rgb * 0.99, 0.25);
     } else {
-        vs_color = vec4(in_color.rgb * 0.99, 0.05);
+        vs_color = vec4(in_color.rgb * 0.99, 0.40);
     }
     // vs_color = in_color;
     //vec4 tmp = vec4(in_position, 0);

@@ -1,7 +1,7 @@
 local seedPointsFileBatsrus = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/BATS_R_US_all_combined.txt';
 local seedPointsFileEnlil = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/enlil.txt';
 
-local volumeFolderBatsrus = '${OPENSPACE_DATA}/bats_sequence/';
+local volumeFolderBatsrus = '${OPENSPACE_DATA}/bats_sequence';
 local volumeFile1 = '${OPENSPACE_DATA}/bats_sequence/batsrus1.cdf';
 local volumeFile2 = '${OPENSPACE_DATA}/bats_sequence/batsrus2.cdf';
 local volumeFile3 = '${OPENSPACE_DATA}/bats_sequence/batsrus3.cdf';
@@ -55,29 +55,29 @@ return {
             }
         }
     },
-    {
-        Name = "EMF",
-        Parent = "GSMReferenceFrame",
-        Renderable = {
-            Type = "RenderableFieldlinesSequence",
-            VectorVolume = {
-                -- Type = "VolumeKameleon",
-                -- Directory = volumeFolderBatsrus,
-                -- Model = "BATSRUS",
-                -- TracingVariable = "bx",
-                -- Variables = {"bx", "by", "bz"},
-                -- TimeDependent = true,
-            },
-            Fieldlines = {
-                -- Stepsize = 1.0,
-                -- Classification = true,
-            },
-            SeedPoints = {
-                -- Type = "File",
-                -- File = seedPointsFileBatsrus,
-            }
-        }
-    },
+    -- {
+    --     Name = "EMF",
+    --     Parent = "GSMReferenceFrame",
+    --     Renderable = {
+    --         Type = "RenderableFieldlinesSequence",
+    --         VectorVolume = {
+    --             -- Type = "VolumeKameleon",
+    --             -- Directory = volumeFolderBatsrus,
+    --             -- Model = "BATSRUS",
+    --             -- TracingVariable = "bx",
+    --             -- Variables = {"bx", "by", "bz"},
+    --             -- TimeDependent = true,
+    --         },
+    --         Fieldlines = {
+    --             -- Stepsize = 1.0,
+    --             -- Classification = true,
+    --         },
+    --         SeedPoints = {
+    --             -- Type = "File",
+    --             -- File = seedPointsFileBatsrus,
+    --         }
+    --     }
+    -- },
 
     -- {
     --     Name = "FieldlinesTimestep1",

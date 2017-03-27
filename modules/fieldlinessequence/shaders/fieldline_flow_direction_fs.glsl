@@ -25,19 +25,19 @@
 in vec4 vs_color;
 in vec4 vs_position;
 
-uniform bool classification;
-uniform vec4 fieldLineColor;
+//uniform bool classification;
+//uniform vec4 fieldLineColor;
 
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 Fragment getFragment() {
     vec4 fragColor;
-    if (classification) {
+  //  if (classification) {
         fragColor = vs_color;
-    } else {
-        fragColor = vec4(fieldLineColor.rgb * fieldLineColor.a , 1.0);
-    }
+    //} else {
+    //    fragColor = vec4(fieldLineColor.rgb * fieldLineColor.a , 1.0);
+    //}
 
     //float depth = pscDepth(vs_position);
 

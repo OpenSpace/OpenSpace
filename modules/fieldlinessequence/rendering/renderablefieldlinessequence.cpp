@@ -25,10 +25,19 @@
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 #include <modules/fieldlinessequence/util/fieldlinessequencemanager.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/raycastermanager.h>
+
+#include <ghoul/glm.h>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/misc/assert.h>
 
 #include <openspace/engine/openspaceengine.h>
-// #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 
 namespace {
@@ -76,33 +85,38 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
 
     _loggerCat = "RenderableFieldlines [" + name + "]";
 
-    ghoul::Dictionary vectorVolumeInfo;
-    ghoul::Dictionary fieldlineInfo;
-    ghoul::Dictionary seedPointsInfo;
-
     // Find VectorVolume, SeedPoint and Fieldlines Info from Lua
-    if (!dictionary.getValue(keyVectorVolume, vectorVolumeInfo)) {
+    if (!dictionary.getValue(keyVectorVolume, _vectorVolumeInfo)) {
         LERROR("Renderable does not contain a key for '" << keyVectorVolume << "'");
         // deinitialize();
     }
 
-    if (!dictionary.getValue(keyFieldlines, fieldlineInfo)) {
+    if (!dictionary.getValue(keyFieldlines, _fieldlineInfo)) {
         LERROR("Renderable does not contain a key for '" << keyFieldlines << "'");
         // deinitialize();
     }
 
-    if (!dictionary.getValue(keySeedPoints, seedPointsInfo)) {
+    if (!dictionary.getValue(keySeedPoints, _seedPointsInfo)) {
         LERROR("Renderable does not contain a key for '" << keySeedPoints << "'");
         // deinitialize();
     }
+}
+
+bool RenderableFieldlinesSequence::isReady() const {
+    return true;
+}
+
+bool RenderableFieldlinesSequence::initialize() {
+    _shouldRender = false; // TODO: remove this
+    _activeStateIndex = 0; // TODO: remove this
 
     // SeedPoints Info. Needs a .txt file containing seed points. Each row should have 3 floats seperated by spaces
     std::string pathToSeedPointFile;
-    if (!seedPointsInfo.getValue(keySeedPointsFile, pathToSeedPointFile)) {
+    if (!_seedPointsInfo.getValue(keySeedPointsFile, pathToSeedPointFile)) {
         LERROR(keySeedPoints << " doesn't specify a '" << keySeedPointsFile << "'" <<
             "\n\tRequires a path to a .txt file containing seed point data. Each row should have 3 floats seperated by spaces.");
     } else {
-        if(!FieldlinesSequenceManager::ref().getSeedPointsFromFile(pathToSeedPointFile, _seedPoints)) {
+        if (!FieldlinesSequenceManager::ref().getSeedPointsFromFile(pathToSeedPointFile, _seedPoints)) {
             LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
         }
     }
@@ -111,21 +125,21 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     std::string pathToCdfDirectory;
     std::string tracingVariable;
     std::vector<std::string> validCdfFilePaths;
-    if (!vectorVolumeInfo.getValue(keyVectorVolumeDirectory, pathToCdfDirectory)) {
+    if (!_vectorVolumeInfo.getValue(keyVectorVolumeDirectory, pathToCdfDirectory)) {
         LERROR(keyVectorVolume << " doesn't specify a '" << keyVectorVolumeDirectory << "'" <<
-            "\n\tRequires a path to a Directory containing .CDF files. Files should be of the same model and in sequence!");
+                "\n\tRequires a path to a Directory containing .CDF files. Files should be of the same model and in sequence!");
     } else {
-        if (!vectorVolumeInfo.getValue(keyVectorVolumeTracingVariable, tracingVariable)) {
+        if (!_vectorVolumeInfo.getValue(keyVectorVolumeTracingVariable, tracingVariable)) {
 
         } else {
-            tracingVariable = 'b'; //default: b = magnetic field.
+            tracingVariable = "b"; //default: b = magnetic field.
         }
         if (!FieldlinesSequenceManager::ref().getCdfFilePaths(pathToCdfDirectory, validCdfFilePaths)) {
             LERROR("Failed to get valid .cdf file paths from '" << pathToCdfDirectory << "'");
         } else {
             int numberOfStates = validCdfFilePaths.size();
             _states.reserve(numberOfStates);
-            LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory );
+            LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
             for (int i = 0; i < numberOfStates; ++i) {
                 LDEBUG(validCdfFilePaths[i] << " is now being traced.");
                 _states.push_back(FieldlinesState(_seedPoints.size()));
@@ -138,20 +152,14 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
         }
     }
 
-
-
-        // if(!FieldlinesSequenceManager::ref().traceFieldlines(pathToCdfDirectory, _seedPoints, _states)) {
+    // if(!FieldlinesSequenceManager::ref().traceFieldlines(pathToCdfDirectory, _seedPoints, _states)) {
     { //ONLY FOR DEBUG
         // int spSize = _seedPoints.size();
         // for (int i = 0; i < spSize ; ++i) {
-        //     LINFO(_seedPoints[i].x << " " << _seedPoints[i].y << " " << _seedPoints[i].z);
+        //   LINFO(_seedPoints[i].x << " " << _seedPoints[i].y << " " << _seedPoints[i].z);
         // }
     }
-}
 
-bool RenderableFieldlinesSequence::isReady() const { return true; }
-
-bool RenderableFieldlinesSequence::initialize() { 
     _program = OsEng.renderEngine().buildRenderProgram(
         "FieldlinesSequence",
         "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_flow_direction_vs.glsl",
@@ -165,51 +173,86 @@ bool RenderableFieldlinesSequence::initialize() {
     return true;
 }
 
-bool RenderableFieldlinesSequence::deinitialize() { return true; }
+bool RenderableFieldlinesSequence::deinitialize() {
+    return true;
+}
 
 void RenderableFieldlinesSequence::render(const RenderData& data) {
     // if (_isWithinTimeInterval) {
+    if (_shouldRender) {
         _program->activate();
 
+
         glm::dmat4 rotationTransform = glm::dmat4(data.modelTransform.rotation);
-        glm::mat4 scaleTransform = glm::scale(R_E_TO_METER);
+        glm::mat4 scaleTransform = glm::mat4(1.0);
         glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            rotationTransform *
-            glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
-            glm::dmat4(scaleTransform);
+                glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+                rotationTransform *
+                glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
+                glm::dmat4(scaleTransform);
         glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
         // Set uniforms for shaders
         _program->setUniform("modelViewProjection",
                 data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
 
-        //_program->setUniform("modelViewProjection", data.camera.viewProjectionMatrix());
-        //_program->setUniform("modelTransform", glm::mat4(1.0));
-        int testTime = static_cast<int>(OsEng.runTime()*100)/5;
+        int testTime = static_cast<int>(OsEng.runTime() * 100) / 5;
         _program->setUniform("time", testTime);
-        //_program->setUniform("cameraViewDir", glm::vec3(data.camera.viewDirectionWorldSpace()));
+
         glDisable(GL_CULL_FACE);
-        //setPscUniforms(*_program, data.camera, data.position);
 
         // _program->setUniform("classification", _classification);
         // if (!_classification)
         //     _program->setUniform("fieldLineColor", _fieldlineColor);
 
-        glBindVertexArray(_fieldlineVAO);
+        glBindVertexArray(_vertexArrayObject);
         glMultiDrawArrays(
-            GL_LINE_STRIP_ADJACENCY,
-            &_lineStart[0],
-            &_lineCount[0],
-            static_cast<GLsizei>(_lineStart.size())
+                GL_LINE_STRIP_ADJACENCY,
+                &_states[_activeStateIndex]._lineStart[0],
+                &_states[_activeStateIndex]._lineCount[0],
+                static_cast<GLsizei>(_states[_activeStateIndex]._lineStart.size())
         );
+
         glBindVertexArray(0);
         glEnable(GL_CULL_FACE);
         _program->deactivate();
-    // }
-
+    }
 }
 
-void RenderableFieldlinesSequence::update(const UpdateData&) {}
+void RenderableFieldlinesSequence::update(const UpdateData&) {
+    if (_program->isDirty()) {
+        _program->rebuildFromFile();
+    }
+
+    if(!_shouldRender) {
+        // if (_vertexArrayObject == 0) {
+            glGenVertexArrays(1, &_vertexArrayObject);
+        // }
+        glBindVertexArray(_vertexArrayObject);
+
+        // if (_vertexPositionBuffer == 0) {
+            glGenBuffers(1, &_vertexPositionBuffer);
+        // }
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+
+        glBufferData(GL_ARRAY_BUFFER,
+            _states[_activeStateIndex]._vertexPositions.size() * sizeof(glm::vec3),
+            &_states[_activeStateIndex]._vertexPositions.front(),
+            GL_STATIC_DRAW);
+
+        GLuint vertexLocation = 0;
+        glEnableVertexAttribArray(vertexLocation);
+        glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);//sizeof(glm::vec3), reinterpret_cast<void*>(0));
+
+        // GLuint colorLocation = 1;
+        // glEnableVertexAttribArray(colorLocation);
+        // glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+        _shouldRender = true;
+    }
+}
 
 } // namespace openspace
