@@ -61,7 +61,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty("showHeightIntensities", "show height intensities", false),
         BoolProperty("performFrustumCulling", "perform frustum culling", true),
         BoolProperty("performHorizonCulling", "perform horizon culling", true),
-        BoolProperty("levelByProjectedAreaElseDistance", "level by projected area (else distance)",false),
+        BoolProperty("levelByProjectedAreaElseDistance", "level by projected area (else distance)", true),
         BoolProperty("resetTileProviders", "reset tile providers", false),
         BoolProperty("toggleEnabledEveryFrame", "toggle enabled every frame", false),
         BoolProperty("collectStats", "collect stats", false),
