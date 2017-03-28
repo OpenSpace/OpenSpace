@@ -24,13 +24,15 @@
 
 #include <modules/fieldlinessequence/util/fieldlinessequencemanager.h>
 
+#include <openspace/util/time.h>
+
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 // #include <ghoul/misc/assert.h>
 
-#include <fstream>
 #include <algorithm>
+#include <fstream>
 #include <memory>
 
 #include <ccmc/Kameleon.h>
@@ -50,7 +52,7 @@ namespace {
 
 namespace openspace {
 
-FieldlinesSequenceManager::FieldlinesSequenceManager() /*: properties::PropertyOwner("FieldlinesSequenceManager")*/ {}
+FieldlinesSequenceManager::FieldlinesSequenceManager() {}
 
 FieldlinesSequenceManager::~FieldlinesSequenceManager() {}
 
@@ -110,47 +112,87 @@ bool FieldlinesSequenceManager::getCdfFilePaths(
     return true;
 }
 
-bool FieldlinesSequenceManager::traceFieldlinesState(
+bool FieldlinesSequenceManager::getFieldlinesState(
         const std::string& pathToCdfFile,
         const std::string& tracingVariable,
         const std::vector<glm::vec3>& inSeedPoints,
+        const int& maxIterations,
+        std::vector<double>& startTimes,
         FieldlinesState& outFieldlinesStates) {
 
-  const float R_E_TO_METER = 6371000.f;
     std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
     long status = kameleon->open(pathToCdfFile);
     if (status == ccmc::FileReader::OK) {
         LDEBUG("Successfully created a Kameleon Object from file: " << pathToCdfFile);
-        kameleon->loadVariable(tracingVariable);
-    //     bool isEnlil = kameleon->getModelName() == "enlil"; // TODO, specify in Lua and confirm
-        ccmc::Tracer tracer(kameleon.get());
-         tracer.setMaxIterations(1000); // TODO specify in Lua
-    //     tracer.setInnerBoundary(.1f); // TODO specify in Lua
-    //     std::vector<Line> fieldlines;
-        int lineStart = 0;
-        int lineCount = 0;
-        for (glm::vec3 seedPoint : inSeedPoints) {
-            // A ccmc::Fieldline contains much more info than we need here, but might be
-            // needed in future.
-            ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(tracingVariable, seedPoint.x, seedPoint.y, seedPoint.z); //TODO convert positions to glm::vec3
-            lineCount = static_cast<int>(ccmcFieldline.size());
-            outFieldlinesStates._lineStart.push_back(lineStart);
-            outFieldlinesStates._lineCount.push_back(lineCount);
-            // outFieldlinesStates.reserveSize(lineCount);
 
-            // TODO clean this ugly $*$& up
-            for (int i = 0; i < lineCount; ++i) {
-                const ccmc::Point3f* vP = &ccmcFieldline.getPositions()[i];
-                outFieldlinesStates._vertexPositions.push_back(glm::vec3(
-                    vP->component1 * R_E_TO_METER,
-                    vP->component2 * R_E_TO_METER,
-                    vP->component3 * R_E_TO_METER)); // can i use std::move here?
-            }
+        // TODO: check model
+        // std::string model = kameleon->getModelName();
+        // == "enlil"; // TODO, specify in Lua and confirm
+        std::string seqStartStr =
+                kameleon->getGlobalAttribute("start_time").getAttributeString();
 
-            lineStart += lineCount; // for next iteration (line)
-        }
+        double seqStartDbl =
+                Time::ref().convertTime(seqStartStr.substr(0, seqStartStr.length() - 2));
+
+        double stateOffset = static_cast<double>(
+                kameleon->getGlobalAttribute(
+                        "elapsed_time_in_seconds").getAttributeFloat());
+        startTimes.push_back(seqStartDbl + stateOffset);
+
+        bool status;
+        // TODO: check status
+        status = traceFieldlines(kameleon.get(),
+                                 tracingVariable,
+                                 inSeedPoints,maxIterations,
+                                 outFieldlinesStates);
     }
 
+    return true;
+}
+
+bool FieldlinesSequenceManager::traceFieldlines(
+        ccmc::Kameleon* kameleon,
+        const std::string& tracingVariable,
+        const std::vector<glm::vec3>& inSeedPoints,
+        const int& maxIterations,
+        FieldlinesState& outFieldlinesStates) {
+
+    // TODO: depending on model. Scale according to its reference frame
+    const float R_E_TO_METER = 6371000.f; // BATSRUS
+    kameleon->loadVariable(tracingVariable);
+    ccmc::Tracer tracer(kameleon);
+    tracer.setMaxIterations(maxIterations); // TODO specify in Lua
+    //     tracer.setInnerBoundary(.1f); // TODO specify in Lua
+    //     std::vector<Line> fieldlines;
+    int lineStart = 0;
+    int lineCount = 0;
+    for (glm::vec3 seedPoint : inSeedPoints) {
+        // A ccmc::Fieldline contains much more info than we need here, but might be
+        // needed in future.
+        ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(tracingVariable,
+                                                                  seedPoint.x,
+                                                                  seedPoint.y,
+                                                                  seedPoint.z);
+
+        lineCount = static_cast<int>(ccmcFieldline.size());
+        outFieldlinesStates._lineStart.push_back(lineStart);
+        outFieldlinesStates._lineCount.push_back(lineCount);
+        // outFieldlinesStates.reserveSize(lineCount);
+
+        // TODO clean this ugly $*$& up
+        for (int i = 0; i < lineCount; ++i) {
+            const ccmc::Point3f* vP = &ccmcFieldline.getPositions()[i];
+            // TODO: If I don't want to scale here, then I might be able to use std::move here?
+            outFieldlinesStates._vertexPositions.push_back(
+                    glm::vec3(vP->component1 * R_E_TO_METER,
+                              vP->component2 * R_E_TO_METER,
+                              vP->component3 * R_E_TO_METER));
+        }
+
+        lineStart += lineCount; // for next iteration (line)
+    }
+
+    // TODO check that everything worked out?
     return true;
 }
 
