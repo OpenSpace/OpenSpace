@@ -67,6 +67,7 @@ return {
                     {
                         Name = "LolaDem",
                         FilePath = "map_service_configs/Utah/LolaDem.wms"
+                        DoPreProcessing = true,
                     }
                 },
             },
