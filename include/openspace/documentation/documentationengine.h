@@ -92,6 +92,8 @@ public:
 private:
     /// The list of all Documentation%s that are stored by the DocumentationEngine
     std::vector<Documentation> _documentations;
+
+    static DocumentationEngine* _instance;
 };
 
 } // namespace documentation

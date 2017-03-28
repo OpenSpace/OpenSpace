@@ -76,7 +76,7 @@ RenderablePath::RenderablePath(const ghoul::Dictionary& dictionary)
     float fPointSteps; // Dictionary can not pick out ints...
     if (!dictionary.getValue(keyPointSteps, fPointSteps))
         fPointSteps = 4;
-    _pointSteps = fPointSteps;
+    _pointSteps = static_cast<int>(fPointSteps);
 
     glm::vec3 color(0.f);
     if (dictionary.hasKeyAndValue<glm::vec3>(keyColor))
@@ -145,7 +145,7 @@ void RenderablePath::render(const RenderData& data) {
         return;
 
 
-    int nPointsToDraw = _vertexArray.size();// (time - _start) / (_stop - _start) * (_vertexArray.size()) + 1 + 0.5;
+    size_t nPointsToDraw = _vertexArray.size();// (time - _start) / (_stop - _start) * (_vertexArray.size()) + 1 + 0.5;
 
     _programObject->activate();
 

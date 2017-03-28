@@ -76,6 +76,8 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
 
+    properties::BoolProperty _shiftMeridianBy180;
+
     properties::FloatProperty _heightExaggeration;
     properties::FloatProperty _debugProjectionTextureRotation;
 

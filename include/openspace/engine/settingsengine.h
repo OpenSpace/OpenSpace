@@ -50,7 +50,6 @@ public:
     bool useDoubleBuffering();
 
 private:
-    properties::FloatProperty _eyeSeparation;
     properties::OptionProperty _scenes;
     properties::BoolProperty _busyWaitForDecode;
     properties::BoolProperty _logSGCTOutOfOrderErrors;

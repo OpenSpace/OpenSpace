@@ -25,12 +25,14 @@
 #include <openspace/documentation/documentationengine.h>
 
 #include <openspace/openspace.h>
+#include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
 
 #include <ghoul/misc/assert.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <fstream>
+#include <sstream>
 #include <streambuf>
 
 #include <fmt/format.h>
@@ -47,6 +49,8 @@ namespace {
 namespace openspace {
 namespace documentation {
 
+DocumentationEngine* DocumentationEngine::_instance = nullptr;
+
 DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationException(
                     Documentation documentation)
     : ghoul::RuntimeError(fmt::format(
@@ -58,8 +62,11 @@ DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationExce
 {}
 
 DocumentationEngine& DocumentationEngine::ref() {
-    static DocumentationEngine engine;
-    return engine;
+    if (_instance == nullptr) {
+        _instance = new DocumentationEngine;
+        registerCoreClasses(*_instance);
+    }
+    return *_instance;
 }
 
 std::string generateTextDocumentation(const Documentation& d, int& indentLevel) {

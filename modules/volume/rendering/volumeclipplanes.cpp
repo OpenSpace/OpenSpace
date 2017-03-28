@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *                                                                                       *
  * OpenSpace                                                                             *
@@ -22,42 +23,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
-#define __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
+#include <modules/volume/rendering/volumeclipplanes.h>
+#include <ghoul/misc/dictionary.h>
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-// ghoul includes
-#include <ghoul/io/volume/rawvolumereader.h>
-
-// Forward declare to minimize dependencies
-namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class Texture;
-    }
-}
 
 namespace openspace {
 
-class RenderableVolume: public Renderable {
-public:
-    // constructors & destructor
-    RenderableVolume(const ghoul::Dictionary& dictionary);
-    ~RenderableVolume();
-    
-protected:
-    ghoul::opengl::Texture* loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
-    glm::vec3 getVolumeOffset(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
-    ghoul::RawVolumeReader::ReadHints readHints(const ghoul::Dictionary& dictionary);
-    ghoul::opengl::Texture* loadTransferFunction(const std::string& filepath);
+VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
+    : _nClipPlanes("nClipPlanes", "Number of clip planes", 0, 0, 10)
+{
+    std::vector<std::string> keys = dictionary.keys();
+    for (const std::string& key : keys) {
+        ghoul::Dictionary cutPlaneDictionary;
+        dictionary.getValue(key, cutPlaneDictionary);
+        auto clipPlane = std::make_shared<VolumeClipPlane>(cutPlaneDictionary);
+        clipPlane->setName(key);
+        _clipPlanes.push_back(clipPlane);
+    }
+    _nClipPlanes = keys.size();
+}
 
-private:
-};
+void VolumeClipPlanes::initialize() {
+    addProperty(_nClipPlanes);
+    for (const auto& clipPlane : _clipPlanes) {
+        addPropertySubOwner(clipPlane.get());
+        clipPlane->initialize();
+    }
+}
+
+void VolumeClipPlanes::deinitialize() {}
+
+std::vector<glm::vec3> VolumeClipPlanes::normals() {
+    std::vector<glm::vec3> normals;
+    for (const auto& clipPlane : _clipPlanes) {
+        normals.push_back(clipPlane->normal());
+    }
+    return normals;
+}
+
+std::vector<glm::vec2> VolumeClipPlanes::offsets() {
+    std::vector<glm::vec2> offsets;
+    for (const auto& clipPlane : _clipPlanes) {
+        offsets.push_back(clipPlane->offsets());
+    }
+    return offsets;
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__

@@ -27,20 +27,15 @@ uniform vec4 objpos;
 uniform vec3 color;
 uniform float _alpha;
 
-in vec4 vs_position;
+in vec4 vs_positionScreenSpace;
 in vec4 vs_color;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    vec4 position = vs_position;
-    vec4 diffuse = vs_color;
-    float depth = pscDepth(position);
-    diffuse.a = _alpha;
-
     Fragment frag;
-    frag.color = diffuse;
-    frag.depth = depth;
+    frag.color = vec4(vs_color.rgb, vs_color.a * _alpha);
+    frag.depth = vs_positionScreenSpace.w;
     return frag;
 }

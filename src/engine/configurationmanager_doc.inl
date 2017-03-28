@@ -53,6 +53,14 @@ documentation::Documentation ConfigurationManager::Documentation() {
             Optional::No
         },
         {
+            ConfigurationManager::KeyConfigTask,
+            new StringAnnotationVerifier(
+                "A valid task file as described in the Task documentation"),
+                "The root task to be performed when launching the task runner "
+                "applicaition.",
+                Optional::Yes
+        },
+        {
             ConfigurationManager::KeyPaths,
             new StringListVerifier,
             "A list of paths that are automatically registered with the file system. "

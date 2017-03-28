@@ -231,7 +231,7 @@ void ParallelConnection::clientConnect(){
         return;
     }
             
-    struct addrinfo *addresult = NULL, *ptr = NULL, hints;
+    struct addrinfo *addresult = NULL, hints;
     
     memset(&hints, 0, sizeof(hints));
     
@@ -963,7 +963,7 @@ void ParallelConnection::setNConnections(size_t nConnections) {
     }
 }
 
-size_t ParallelConnection::nConnections() {
+int ParallelConnection::nConnections() {
     return _nConnections;
 }
 

@@ -45,6 +45,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/task.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
@@ -130,9 +131,12 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _isFirstRenderingFirstFrame(true)
 {
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
+    
+    // New property subowners also have to be added to the OnScreenGuiModule callback!
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
+    _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -150,6 +154,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Scale>>(),
         "Scale"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Task>>(),
+        "Task"
     );
 
     SpiceManager::initialize();
@@ -221,8 +229,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
     LDEBUG("Creating OpenSpaceEngine");
     _engine = new OpenSpaceEngine(std::string(argv[0]), std::move(windowWrapper));
 
-    registerCoreClasses(DocEng);
-
     // Query modules for commandline arguments
     _engine->gatherCommandlineArguments();
 
@@ -270,7 +276,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
         }
         throw;
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const ghoul::RuntimeError&) {
         LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
         throw;
     }
@@ -469,9 +475,9 @@ void OpenSpaceEngine::initialize() {
     writeDocumentation();
 
     if (configurationManager().hasKey(ConfigurationManager::KeyShutdownCountdown)) {
-        _shutdown.waitTime = configurationManager().value<double>(
+        _shutdown.waitTime = static_cast<float>(configurationManager().value<double>(
             ConfigurationManager::KeyShutdownCountdown
-        );
+        ));
     }
 
     if (!commandlineArgumentPlaceholders.sceneName.empty()) {
@@ -868,7 +874,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         if (_shutdown.timer <= 0.f) {
             _windowWrapper->terminate();
         }
-        _shutdown.timer -= _windowWrapper->averageDeltaTime();
+        _shutdown.timer -= static_cast<float>(_windowWrapper->averageDeltaTime());
     }
 
     _renderEngine->updateSceneGraph();

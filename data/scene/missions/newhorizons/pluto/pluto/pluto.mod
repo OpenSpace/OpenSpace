@@ -30,9 +30,9 @@ return {
             },
         },
     },
-    -- PlutoProjection module
+    -- Pluto module
     {   
-        Name = "PlutoProjection",
+        Name = "Pluto",
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanetProjection",
@@ -184,7 +184,7 @@ return {
     },
     {
         Name = "PlutoText",
-        Parent = "PlutoProjection",
+        Parent = "Pluto",
         Renderable = {
             Type = "RenderablePlane",
             Size = {1.0, 6.3},
@@ -202,7 +202,7 @@ return {
     },
     {
         Name = "PlutoTexture",
-        Parent = "PlutoProjection",
+        Parent = "Pluto",
         Renderable = {
             Type = "RenderablePlane",
             Size = {1.0, 6.4},
@@ -220,7 +220,7 @@ return {
     },
     {
         Name = "PlutoShadow",
-        Parent = "PlutoProjection",
+        Parent = "Pluto",
         Renderable = {
             Type = "RenderableShadowCylinder",
             TerminatorType = "PENUMBRAL", 

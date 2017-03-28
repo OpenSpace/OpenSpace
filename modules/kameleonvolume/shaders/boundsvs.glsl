@@ -21,63 +21,28 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
-#include <iostream>
-#include <string>
-#include <ghoul/glm.h>
-
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereaderdevil.h>
-#include <ghoul/io/texture/texturereaderfreeimage.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
-
-#include <openspace/util/progressbar.h>
-
-#include <apps/DataConverter/milkywayconversiontask.h>
-#include <apps/DataConverter/milkywaypointsconversiontask.h>
-
-int main(int argc, char** argv) {
-    using namespace openspace;
-    using namespace dataconverter;
-
-    ghoul::initialize();
-
-    #ifdef GHOUL_USE_DEVIL
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
-    #endif // GHOUL_USE_DEVIL
-    #ifdef GHOUL_USE_FREEIMAGE
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
-    #endif // GHOUL_USE_FREEIMAGE
-
-    openspace::ProgressBar pb(100);
-    std::function<void(float)> onProgress = [&](float progress) {
-        pb.print(progress * 100);
-    };
-
-    // TODO: Make the converter configurable using either
-    // config files (json, lua dictionaries),
-    // lua scripts,
-    // or at the very least: a command line interface.
  
-    MilkyWayConversionTask mwConversionTask(
-        "F:/mw_june2016/volumeslices/img/comp/v003/frames/primary/0100/cam2_main.",
-        ".exr",
-        1385,
-        512,
-        "F:/mw_june2016/mw_512_512_64_june.rawvolume", 
-        glm::vec3(512, 512, 64));
+#version __CONTEXT__
+
+layout(location = 0) in vec3 vertPosition;
+
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
+
+out vec4 positionLocalSpace;
+out vec4 positionCameraSpace;
+
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+void main() {
+
+    positionLocalSpace = vec4(vertPosition, 1.0);
+    positionCameraSpace = modelViewTransform * positionLocalSpace;
+
+    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+    vec4 positionScreenSpace = z_normalization(positionClipSpace);
     
-    //MilkyWayPointsConversionTask mwpConversionTask("F:/mw_june2016/points.off", "F:/mw_june2016/points.off.binary");
-
-
-    mwConversionTask.perform(onProgress);
-    //mwpConversionTask.perform(onProgress);
-
-
-    std::cout << "Done." << std::endl;
-
-    std::cin.get();
-    return 0;
-};
+    //positionScreenSpace.z = 1.0;
+    // project the position to view space
+    gl_Position = positionScreenSpace;
+}

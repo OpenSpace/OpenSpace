@@ -26,6 +26,7 @@
 #include <#{fragmentPath}>
 #include "abufferfragment.glsl"
 #include "abufferresources.glsl"
+#include "floatoperations.glsl"
 
 out vec4 _out_color_;
 
