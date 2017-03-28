@@ -67,15 +67,22 @@ return {
                         Name = "CTX Mosaic [Europe]",
                         FilePath = "map_service_configs/CTX_Mosaic.xml",
                         Enabled = true,
-                    },                    {
+                    },
+                    --[[{
                         Name = "CTX Mosaic [Utah]",
                         FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
+                    },
+                    ]]
+                    {
+                        Name = "West Candor Chasma",
+                        FilePath = "map_datasets/CTX/West_Candor_Chasma_longlat_global.vrt",
+                        --Enabled = true,
                     },
                     {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
                         FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
                     },
-                    {
+                    --[[{
                         Name = "Themis IR Day",
                         FilePath = "map_service_configs/Utah/ThemisIRDay.xml",
                     },                    
@@ -83,12 +90,7 @@ return {
                         Name = "Themis IR Night",
                         FilePath = "map_service_configs/Utah/ThemisIRNight.xml",
                     },                    
-                    --[[
-                    {
-                        Name = "West Candor Chasma",
-                        FilePath = "map_datasets/CTX/West_Candor_Chasma_longlat_global.vrt",
-                        --Enabled = true,
-                    },
+                    
                     {
                         Name = "MER_Meridianni_Endeavor_Basemap_25cm",
                         FilePath = "map_datasets/Basemap/MER_Meridianni_Endeavor_Basemap_25cm.vrt",
@@ -121,6 +123,7 @@ return {
                         MinimumPixelSize = 90,
                         DoPreProcessing = true,
                     },
+                    --[[
                     {
                         Name = "Mola Elevation [Utah]",
                         FilePath = "map_service_configs/Utah/Mola_Elevation.xml",
@@ -132,6 +135,13 @@ return {
                         Name = "Mola Elevation CTX",
                         FilePath = "map_service_configs/Utah/MolaCTX_Elevation.xml",
                         -- Enabled = true,
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
+                    },]]   
+                    {
+                        Name = "West Candor Chasma",
+                        FilePath = "map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt",
+                        --Enabled = true,
                         MinimumPixelSize = 90,
                         DoPreProcessing = true,
                     },
@@ -149,14 +159,8 @@ return {
                         MinimumPixelSize = 64,
                         DoPreProcessing = true,
                     },
---]]                    
---[[                    {
-                        Name = "West Candor Chasma",
-                        FilePath = "map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt",
-                        --Enabled = true,
-                        MinimumPixelSize = 90,
-                        DoPreProcessing = true,
-                    },
+--]]                 
+                    --[[
                     {
                         Name = "Part of Area Traversed by the Mars Exploration Rover",
                         FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt",
