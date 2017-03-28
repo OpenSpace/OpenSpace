@@ -107,8 +107,12 @@ class TouchInteraction : public properties::PropertyOwner
 		properties::StringProperty _origin;
 		globebrowsing::RenderableGlobe* _globe;
 
+
+		bool _directTouchMode;
+		double _projectionScaleFactor;
+		double _currentRadius;
 		double _minHeightFromSurface;
-		InteractionType _interactionMode;
+		InteractionType _action;
 		double _baseSensitivity;
 		double _baseFriction;
 		glm::dvec3 _centroid;
