@@ -43,6 +43,9 @@ public:
 
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
+
+    bool isWithinSequenceInterval();
+    void updateActiveStateIndex();
 private:
     ghoul::Dictionary _vectorVolumeInfo;
     ghoul::Dictionary _fieldlineInfo;
@@ -53,12 +56,19 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
     bool _shouldRender; // only temporary
+    bool _needsUpdate;
 
     GLuint _vertexArrayObject;
     GLuint _vertexPositionBuffer;
     GLuint _vertexColorBuffer;
 
     int _activeStateIndex;
+    int _numberOfStates;
+    double _seqStartTime; // redundant, but hey.. nice n clear
+    double _seqEndTime;
+    double _currentTime;
+
+    std::vector<double> _startTimes;
 };
 
 } // namespace openspace

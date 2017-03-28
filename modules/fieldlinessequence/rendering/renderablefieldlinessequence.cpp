@@ -39,6 +39,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/time.h>
 
 namespace {
     std::string _loggerCat = "RenderableFieldlinesSequence";
@@ -51,6 +52,8 @@ namespace {
 
     const char* keyVectorVolumeDirectory = "Directory";
     const char* keyVectorVolumeTracingVariable = "TracingVariable";
+
+    const char* keyFieldlineMaximumTracingSteps = "MaximumTracingSteps";
 
     const char* keySeedPointsFile = "File";
 
@@ -107,9 +110,6 @@ bool RenderableFieldlinesSequence::isReady() const {
 }
 
 bool RenderableFieldlinesSequence::initialize() {
-    _shouldRender = false; // TODO: remove this
-    _activeStateIndex = 0; // TODO: remove this
-
     // SeedPoints Info. Needs a .txt file containing seed points. Each row should have 3 floats seperated by spaces
     std::string pathToSeedPointFile;
     if (!_seedPointsInfo.getValue(keySeedPointsFile, pathToSeedPointFile)) {
@@ -125,32 +125,58 @@ bool RenderableFieldlinesSequence::initialize() {
     std::string pathToCdfDirectory;
     std::string tracingVariable;
     std::vector<std::string> validCdfFilePaths;
+    int maxSteps;
+    if (!_fieldlineInfo.getValue(keyFieldlineMaximumTracingSteps, maxSteps)) {
+        maxSteps = 1000; // Default value
+        LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineMaximumTracingSteps
+                << ". Using default value: " << maxSteps);
+    }
     if (!_vectorVolumeInfo.getValue(keyVectorVolumeDirectory, pathToCdfDirectory)) {
-        LERROR(keyVectorVolume << " doesn't specify a '" << keyVectorVolumeDirectory << "'" <<
-                "\n\tRequires a path to a Directory containing .CDF files. Files should be of the same model and in sequence!");
+        LERROR(keyVectorVolume << " doesn't specify a '" << keyVectorVolumeDirectory <<
+                "'\n\tRequires a path to a Directory containing .CDF files. " <<
+                "Files must be of the same model and in sequence!");
     } else {
         if (!_vectorVolumeInfo.getValue(keyVectorVolumeTracingVariable, tracingVariable)) {
 
         } else {
             tracingVariable = "b"; //default: b = magnetic field.
         }
-        if (!FieldlinesSequenceManager::ref().getCdfFilePaths(pathToCdfDirectory, validCdfFilePaths)) {
-            LERROR("Failed to get valid .cdf file paths from '" << pathToCdfDirectory << "'");
+        if (!FieldlinesSequenceManager::ref().getCdfFilePaths(pathToCdfDirectory,
+                                                              validCdfFilePaths)) {
+            LERROR("Failed to get valid .cdf file paths from '"
+                    << pathToCdfDirectory << "'" );
         } else {
-            int numberOfStates = validCdfFilePaths.size();
-            _states.reserve(numberOfStates);
+            _numberOfStates = validCdfFilePaths.size();
+            _states.reserve(_numberOfStates);
+            _startTimes.reserve(_numberOfStates);
             LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
-            for (int i = 0; i < numberOfStates; ++i) {
+            for (int i = 0; i < _numberOfStates; ++i) {
                 LDEBUG(validCdfFilePaths[i] << " is now being traced.");
                 _states.push_back(FieldlinesState(_seedPoints.size()));
-                FieldlinesSequenceManager::ref().traceFieldlinesState(
-                        validCdfFilePaths[i],
-                        tracingVariable,
-                        _seedPoints,
-                        _states[i]);
+                FieldlinesSequenceManager::ref().getFieldlinesState(validCdfFilePaths[i],
+                                                                    tracingVariable,
+                                                                    _seedPoints,
+                                                                    maxSteps,
+                                                                    _startTimes,
+                                                                    _states[i]);
+
+            }
+            // Approximate the end time of last state (and for the sequence as a whole)
+            if (_numberOfStates > 0) {
+                _seqStartTime = _startTimes[0];
+                double lastStateStart = _startTimes[_numberOfStates-1];
+                double avgTimeOffset = (lastStateStart - _seqStartTime) /
+                                       (static_cast<double>(_numberOfStates) - 1.0);
+                _seqEndTime =  lastStateStart + avgTimeOffset;
+                // Add sequence end time as the last start time, to prevent vector from going out of bounds later.
+                _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
             }
         }
     }
+
+    _shouldRender = false; // TODO: remove this?
+    _needsUpdate = false;
+    _activeStateIndex = -1; // TODO: remove this?
 
     // if(!FieldlinesSequenceManager::ref().traceFieldlines(pathToCdfDirectory, _seedPoints, _states)) {
     { //ONLY FOR DEBUG
@@ -174,6 +200,7 @@ bool RenderableFieldlinesSequence::initialize() {
 }
 
 bool RenderableFieldlinesSequence::deinitialize() {
+    // TODO deinitialize VAO
     return true;
 }
 
@@ -224,7 +251,24 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
         _program->rebuildFromFile();
     }
 
-    if(!_shouldRender) {
+    // Check if current time in OpenSpace is within sequence interval
+    // TODO clean this up
+    if (isWithinSequenceInterval()) {
+        // if NOT in the same state as in the previous update..
+        if ( _activeStateIndex < 0 ||
+             _currentTime < _startTimes[_activeStateIndex] ||
+             // This next line requires seqEndTime to be last position in _startTimes
+             _currentTime >= _startTimes[_activeStateIndex + 1]) {
+            _needsUpdate = true;
+        } // else we're still in same state as previous update (no changes needed)
+    } else {
+        _activeStateIndex = -1;
+        _shouldRender = false;
+        _needsUpdate = false;
+    }
+
+    if(_needsUpdate) {
+        updateActiveStateIndex(); // sets _activeStateIndex
         // if (_vertexArrayObject == 0) {
             glGenVertexArrays(1, &_vertexArrayObject);
         // }
@@ -251,7 +295,27 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
+        _needsUpdate = false;
         _shouldRender = true;
+    }
+}
+
+bool RenderableFieldlinesSequence::isWithinSequenceInterval() {
+    _currentTime = Time::ref().j2000Seconds();
+    return (_currentTime >= _seqStartTime && _currentTime < _seqEndTime);
+}
+
+void RenderableFieldlinesSequence::updateActiveStateIndex() {
+    auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), _currentTime);
+    //
+    if (iter != _startTimes.end()) {
+        if ( iter != _startTimes.begin()) {
+            _activeStateIndex = std::distance(_startTimes.begin(), iter) - 1;
+        } else {
+            _activeStateIndex = 0;
+        }
+    } else {
+        _activeStateIndex = _numberOfStates - 1;
     }
 }
 

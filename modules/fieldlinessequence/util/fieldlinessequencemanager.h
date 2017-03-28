@@ -43,11 +43,16 @@
 
 // #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
+// forward declarations
+namespace ccmc {
+    class Kameleon;
+}
+
 namespace openspace {
 // Forward declarations
 class FieldlinesState;
 
-class FieldlinesSequenceManager : public ghoul::Singleton<FieldlinesSequenceManager> /*, public properties::PropertyOwner */ {
+class FieldlinesSequenceManager : public ghoul::Singleton<FieldlinesSequenceManager> {
     friend class ghoul::Singleton<FieldlinesSequenceManager>;
 
 public:
@@ -59,17 +64,19 @@ public:
     bool getCdfFilePaths(const std::string& pathToCdfDirectory,
                          std::vector<std::string>& outCdfFilePaths);
 
-    bool traceFieldlinesState(const std::string& pathToCdfFile,
-                              const std::string& tracingVariable,
-                              const std::vector<glm::vec3>& inSeedPoints,
-                              FieldlinesState& outFieldlinesStates);
-
-    // bool traceFieldlines(const std::string& pathToCdfDirectory,
-    //                      const std::vector<glm::vec3>& inSeedPoints,
-    //                      std::vector<FieldlinesState>& outFieldlinesStates);
+    bool getFieldlinesState(const std::string& pathToCdfFile,
+      const std::string& tracingVariable,
+      const std::vector<glm::vec3>& inSeedPoints,
+      const int& maxIterations,
+      std::vector<double>& startTimes,
+      FieldlinesState& outFieldlinesStates);
 
 private:
-
+    bool traceFieldlines( ccmc::Kameleon* kameleon,
+                          const std::string& tracingVariable,
+                          const std::vector<glm::vec3>& inSeedPoints,
+                          const int& maxIterations,
+                          FieldlinesState& outFieldlinesStates);
 };
 
 } //namespace openspace
