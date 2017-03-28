@@ -117,6 +117,8 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         const std::string& tracingVariable,
         const std::vector<glm::vec3>& inSeedPoints,
         const int& maxIterations,
+        const bool& shouldResample,
+        const int& numResamples,
         std::vector<double>& startTimes,
         FieldlinesState& outFieldlinesStates) {
 
@@ -144,6 +146,8 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         status = traceFieldlines(kameleon.get(),
                                  tracingVariable,
                                  inSeedPoints,maxIterations,
+                                 shouldResample,
+                                 numResamples,
                                  outFieldlinesStates);
     }
 
@@ -155,6 +159,8 @@ bool FieldlinesSequenceManager::traceFieldlines(
         const std::string& tracingVariable,
         const std::vector<glm::vec3>& inSeedPoints,
         const int& maxIterations,
+        const bool& shouldResample,
+        const int& numResamples,
         FieldlinesState& outFieldlinesStates) {
 
     // TODO: depending on model. Scale according to its reference frame
@@ -174,7 +180,34 @@ bool FieldlinesSequenceManager::traceFieldlines(
                                                                   seedPoint.y,
                                                                   seedPoint.z);
 
+
+        LDEBUG("Getting Index");
+        int seedPointIdx = ccmcFieldline.getStartIndex();
+        LDEBUG("\tGot it!"  << seedPointIdx);
+        LDEBUG("\tFieldline size!"  << ccmcFieldline.size());
+        if (ccmcFieldline.size() > 0 && seedPointIdx != 0) {
+            seedPointIdx -= 1;
+        }
+
+        if (ccmcFieldline.size() > 0 && (&ccmcFieldline.getPositions()[seedPointIdx])->component1 != seedPoint.x) {
+            LERROR("Incorrect SeedPoint Index");
+        // } else if ((&ccmcFieldline.getPositions()[seedPointIdx +1 ])->component1 == seedPoint.x) {
+        //     LDEBUG("InCorrect SeedPoint Index!! should be + 1");
+        // } else if ((&ccmcFieldline.getPositions()[seedPointIdx -1 ])->component1 == seedPoint.x) {
+        //     LDEBUG("InCorrect SeedPoint Index!! should be -1");
+        // } else {
+        //     LDEBUG("Nothing was correct!");
+        }
+
+        if (shouldResample) {
+            //resampleFieldline
+        } //else {
+
         lineCount = static_cast<int>(ccmcFieldline.size());
+        // TODO : remove this if when not needed anymore
+        if (lineCount > maxIterations) {
+            LDEBUG("Number of Line Vertices = " << lineCount);
+        }
         outFieldlinesStates._lineStart.push_back(lineStart);
         outFieldlinesStates._lineCount.push_back(lineCount);
         // outFieldlinesStates.reserveSize(lineCount);
@@ -182,7 +215,8 @@ bool FieldlinesSequenceManager::traceFieldlines(
         // TODO clean this ugly $*$& up
         for (int i = 0; i < lineCount; ++i) {
             const ccmc::Point3f* vP = &ccmcFieldline.getPositions()[i];
-            // TODO: If I don't want to scale here, then I might be able to use std::move here?
+            // TODO: If I don't want to scale here, then I might be able to use std::move
+            // or memmove here?
             outFieldlinesStates._vertexPositions.push_back(
                     glm::vec3(vP->component1 * R_E_TO_METER,
                               vP->component2 * R_E_TO_METER,
@@ -194,6 +228,13 @@ bool FieldlinesSequenceManager::traceFieldlines(
 
     // TODO check that everything worked out?
     return true;
+}
+
+// Already traced
+void FieldlinesSequenceManager::resampleFieldline(const int& numResamples,
+                                                  const ccmc::Fieldline& line,
+                                                  FieldlinesState& outFieldlinesState) {
+
 }
 
 } // namsepace openspace

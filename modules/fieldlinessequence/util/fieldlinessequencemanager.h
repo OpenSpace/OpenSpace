@@ -46,6 +46,7 @@
 // forward declarations
 namespace ccmc {
     class Kameleon;
+    class Fieldline;
 }
 
 namespace openspace {
@@ -65,18 +66,26 @@ public:
                          std::vector<std::string>& outCdfFilePaths);
 
     bool getFieldlinesState(const std::string& pathToCdfFile,
-      const std::string& tracingVariable,
-      const std::vector<glm::vec3>& inSeedPoints,
-      const int& maxIterations,
-      std::vector<double>& startTimes,
-      FieldlinesState& outFieldlinesStates);
+                            const std::string& tracingVariable,
+                            const std::vector<glm::vec3>& inSeedPoints,
+                            const int& maxIterations,
+                            const bool& shouldResample, //does const bool& make sense?
+                            const int& numResamples,
+                            std::vector<double>& startTimes,
+                            FieldlinesState& outFieldlinesStates);
 
 private:
     bool traceFieldlines( ccmc::Kameleon* kameleon,
                           const std::string& tracingVariable,
                           const std::vector<glm::vec3>& inSeedPoints,
                           const int& maxIterations,
+                          const bool& shouldResample,
+                          const int& numResamples,
                           FieldlinesState& outFieldlinesStates);
+
+    void resampleFieldline( const int& numResamples,
+                            const ccmc::Fieldline& line,
+                            FieldlinesState& outFieldlinesState);
 };
 
 } //namespace openspace
