@@ -46,8 +46,10 @@ return {
                 -- TimeDependent = true,
             },
             Fieldlines = {
+                MaximumTracingSteps = 50.0,
                 -- Stepsize = 1.0,
                 -- Classification = true,
+                Morphing = true,
             },
             SeedPoints = {
                 -- Type = "File",

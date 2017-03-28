@@ -46,14 +46,16 @@ namespace {
 }
 
 namespace {
-    const char* keyVectorVolume = "VectorVolume";
+    const char* keyVolume = "VectorVolume";
     const char* keyFieldlines = "Fieldlines";
     const char* keySeedPoints = "SeedPoints";
 
-    const char* keyVectorVolumeDirectory = "Directory";
-    const char* keyVectorVolumeTracingVariable = "TracingVariable";
+    const char* keyVolumeDirectory = "Directory";
+    const char* keyVolumeTracingVariable = "TracingVariable";
 
-    const char* keyFieldlineMaximumTracingSteps = "MaximumTracingSteps";
+    const char* keyFieldlineMaxTraceSteps = "MaximumTracingSteps";
+    const char* keyFieldlineShouldMorph = "Morphing";
+    const char* keyFieldlineResamples = "NumResamples";
 
     const char* keySeedPointsFile = "File";
 
@@ -89,8 +91,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     _loggerCat = "RenderableFieldlines [" + name + "]";
 
     // Find VectorVolume, SeedPoint and Fieldlines Info from Lua
-    if (!dictionary.getValue(keyVectorVolume, _vectorVolumeInfo)) {
-        LERROR("Renderable does not contain a key for '" << keyVectorVolume << "'");
+    if (!dictionary.getValue(keyVolume, _vectorVolumeInfo)) {
+        LERROR("Renderable does not contain a key for '" << keyVolume << "'");
         // deinitialize();
     }
 
@@ -110,67 +112,97 @@ bool RenderableFieldlinesSequence::isReady() const {
 }
 
 bool RenderableFieldlinesSequence::initialize() {
-    // SeedPoints Info. Needs a .txt file containing seed points. Each row should have 3 floats seperated by spaces
+    // SeedPoints Info. Needs a .txt file containing seed points.
+    // Each row should have 3 floats seperated by spaces
     std::string pathToSeedPointFile;
     if (!_seedPointsInfo.getValue(keySeedPointsFile, pathToSeedPointFile)) {
         LERROR(keySeedPoints << " doesn't specify a '" << keySeedPointsFile << "'" <<
-            "\n\tRequires a path to a .txt file containing seed point data. Each row should have 3 floats seperated by spaces.");
+            "\n\tRequires a path to a .txt file containing seed point data." <<
+            "Each row should have 3 floats seperated by spaces.");
     } else {
-        if (!FieldlinesSequenceManager::ref().getSeedPointsFromFile(pathToSeedPointFile, _seedPoints)) {
+        if (!FieldlinesSequenceManager::ref().getSeedPointsFromFile(pathToSeedPointFile,
+                                                                    _seedPoints)) {
             LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
         }
     }
 
     // VectorVolume Info. Needs a folder containing .CDF files
     std::string pathToCdfDirectory;
-    std::string tracingVariable;
-    std::vector<std::string> validCdfFilePaths;
-    int maxSteps;
-    if (!_fieldlineInfo.getValue(keyFieldlineMaximumTracingSteps, maxSteps)) {
-        maxSteps = 1000; // Default value
-        LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineMaximumTracingSteps
-                << ". Using default value: " << maxSteps);
-    }
-    if (!_vectorVolumeInfo.getValue(keyVectorVolumeDirectory, pathToCdfDirectory)) {
-        LERROR(keyVectorVolume << " doesn't specify a '" << keyVectorVolumeDirectory <<
+    if (!_vectorVolumeInfo.getValue(keyVolumeDirectory, pathToCdfDirectory)) {
+        LERROR(keyVolume << " doesn't specify a '" << keyVolumeDirectory <<
                 "'\n\tRequires a path to a Directory containing .CDF files. " <<
                 "Files must be of the same model and in sequence!");
+        return false;
     } else {
-        if (!_vectorVolumeInfo.getValue(keyVectorVolumeTracingVariable, tracingVariable)) {
-
-        } else {
-            tracingVariable = "b"; //default: b = magnetic field.
-        }
+        std::vector<std::string> validCdfFilePaths;
         if (!FieldlinesSequenceManager::ref().getCdfFilePaths(pathToCdfDirectory,
                                                               validCdfFilePaths)) {
             LERROR("Failed to get valid .cdf file paths from '"
                     << pathToCdfDirectory << "'" );
-        } else {
-            _numberOfStates = validCdfFilePaths.size();
-            _states.reserve(_numberOfStates);
-            _startTimes.reserve(_numberOfStates);
-            LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
-            for (int i = 0; i < _numberOfStates; ++i) {
-                LDEBUG(validCdfFilePaths[i] << " is now being traced.");
-                _states.push_back(FieldlinesState(_seedPoints.size()));
-                FieldlinesSequenceManager::ref().getFieldlinesState(validCdfFilePaths[i],
-                                                                    tracingVariable,
-                                                                    _seedPoints,
-                                                                    maxSteps,
-                                                                    _startTimes,
-                                                                    _states[i]);
+            return false;
+        }
 
-            }
-            // Approximate the end time of last state (and for the sequence as a whole)
-            if (_numberOfStates > 0) {
-                _seqStartTime = _startTimes[0];
-                double lastStateStart = _startTimes[_numberOfStates-1];
-                double avgTimeOffset = (lastStateStart - _seqStartTime) /
-                                       (static_cast<double>(_numberOfStates) - 1.0);
-                _seqEndTime =  lastStateStart + avgTimeOffset;
-                // Add sequence end time as the last start time, to prevent vector from going out of bounds later.
-                _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
-            }
+        std::string tracingVariable;
+        if (!_vectorVolumeInfo.getValue(keyVolumeTracingVariable, tracingVariable)) {
+            tracingVariable = "b"; //default: b = magnetic field.
+            LWARNING(keyVolume << " isn't specifying a " <<
+                     keyVolumeTracingVariable << ". Using default value: '" <<
+                     tracingVariable << "' for magnetic field.");
+        }
+
+        float f_maxSteps;
+        if (!_fieldlineInfo.getValue(keyFieldlineMaxTraceSteps, f_maxSteps)) {
+            f_maxSteps = 1000.f; // Default value
+            LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineMaxTraceSteps
+                    << ". Using default value: " << f_maxSteps);
+        }
+
+        bool shouldMorph;
+        if (!_fieldlineInfo.getValue(keyFieldlineShouldMorph, shouldMorph)) {
+            shouldMorph = false; // Default value
+            LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph
+                    << ". Using default: " << shouldMorph);
+        }
+
+        float f_numResamples = 2.f * f_maxSteps + 3; // Default value;
+        if (shouldMorph && !_fieldlineInfo.getValue(keyFieldlineResamples, f_numResamples)) {
+            LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph <<
+                     ". Default is set to (@*" << keyFieldlineMaxTraceSteps << "+3) = " <<
+                     f_numResamples);
+        }
+
+        int maxSteps = static_cast<int>(f_maxSteps);
+        int numResamples = static_cast<int>(f_numResamples);
+
+        _numberOfStates = validCdfFilePaths.size();
+        _states.reserve(_numberOfStates);
+        _startTimes.reserve(_numberOfStates);
+
+        LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
+
+        for (int i = 0; i < _numberOfStates; ++i) {
+            LDEBUG(validCdfFilePaths[i] << " is now being traced.");
+            _states.push_back(FieldlinesState(_seedPoints.size()));
+            FieldlinesSequenceManager::ref().getFieldlinesState(validCdfFilePaths[i],
+                                                                tracingVariable,
+                                                                _seedPoints,
+                                                                maxSteps,
+                                                                shouldMorph,
+                                                                numResamples,
+                                                                _startTimes,
+                                                                _states[i]);
+
+        }
+        // Approximate the end time of last state (and for the sequence as a whole)
+        if (_numberOfStates > 0) {
+            _seqStartTime = _startTimes[0];
+            double lastStateStart = _startTimes[_numberOfStates-1];
+            double avgTimeOffset = (lastStateStart - _seqStartTime) /
+                                   (static_cast<double>(_numberOfStates) - 1.0);
+            _seqEndTime =  lastStateStart + avgTimeOffset;
+            // Add seqEndTime as the last start time
+            // to prevent vector from going out of bounds later.
+            _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
         }
     }
 
@@ -186,6 +218,9 @@ bool RenderableFieldlinesSequence::initialize() {
         // }
     }
 
+
+    // TODO if enlil or batsrus etc..
+    // TODO if morphing
     _program = OsEng.renderEngine().buildRenderProgram(
         "FieldlinesSequence",
         "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_flow_direction_vs.glsl",
