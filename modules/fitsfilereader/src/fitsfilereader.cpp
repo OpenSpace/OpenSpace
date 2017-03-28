@@ -25,18 +25,16 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <CCfits>
-#include <cstdint>
 #include <algorithm>
+#include <cstring>
 
 using namespace CCfits;
 using namespace ghoul::opengl;
 
-#define FITS_PRECISION float // TODO: Read this from FITS header
+#define FITS_PRECISION float // Might use this later from header, but will probably just read everything as floats
 #define FITS_DATA_TYPE_OPENGL GL_FLOAT
 
 namespace {
-    // Responsible for the memory of all loaded FITS data
-    std::vector<std::valarray<float>> _buffer;
     const std::string _loggerCat = "FitsFileReader";
     bool _printFirst = true;
 }
@@ -45,7 +43,7 @@ namespace openspace {
 
 std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
     FITS::setVerboseMode(true);
-    std::valarray<FITS_PRECISION> contents;
+    std::valarray<float> contents;
     long sizeX;
     long sizeY;
 
@@ -86,9 +84,12 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
     contents = (255.0f + 0.9999f) * (contents - min) / (max - min);
     contents /= 255.f;
 
-     _buffer.push_back(contents);
+    // Let texture take ownership of memory
+    float* data = new float[contents.size()];
+    std::memmove(data, &contents[0], contents.size() * sizeof(float));
+
     return std::make_unique<Texture>(
-                                &_buffer.back()[0],
+                                data,
                                 imageSize,
                                 format, // Format of the pixeldata
                                 GL_R32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
