@@ -46,9 +46,9 @@ using namespace std::chrono;
 
 namespace {
     static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
-    static const int _minRealTimeUpdateInterval = 100;
+    static const int _minRealTimeUpdateInterval = 10;
     static const int _minOpenSpaceTimeUpdateInterval = 1; // Should probably be set to real update value of data later
-    static const std::string _dummyImageUrl = "https://sdo.gsfc.nasa.gov/assets/img/swpc/fitsfiles/0094/AIAsynoptic_20170320_185420_0094.fits";
+    //static const std::string _dummyImageUrl = "https://sdo.gsfc.nasa.gov/assets/img/swpc/fitsfiles/0094/AIAsynoptic_20170320_185420_0094.fits";
 }
 
 namespace openspace {
@@ -63,9 +63,10 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         _target = target;
     }
 
-    currentActiveTexture = 0;
     //downloadTextureResource();
-    loadLocalTextures("/home/noven/workspace/OpenSpace/data/fits");
+    loadLocalTextures("/home/noven/workspace/OpenSpace/data/singlefits");
+
+    currentActiveTexture = -1;
     updateTexture();
    // loadTexture();
 
@@ -92,7 +93,7 @@ void RenderableSpacecraftCameraPlane::loadLocalTextures(std::string url) {
     }
     using Recursive = ghoul::filesystem::Directory::RawPath;
     using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequancePaths = sequenceDir.read(Recursive::Yes, Sort:: No);
+    std::vector<std::string> sequancePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
 
     for (auto path : sequancePaths) {
         if (size_t position = path.find_last_of(".") + 1) {
@@ -103,11 +104,13 @@ void RenderableSpacecraftCameraPlane::loadLocalTextures(std::string url) {
                     std::string relativePath = FileSys.relativePath(path);
                     // We'll need to scan the header of the fits
                     // and insert in some smart data structure that handles time / mn
-                    _textures.push_back(FitsFileReader::loadTexture(relativePath));
+                    //_textures.push_back(FitsFileReader::loadTexture(relativePath));
                 }
             }
         }
     }
+    std::string relPath = FileSys.relativePath("/home/noven/workspace/OpenSpace/data/singlefits/0094.fits");
+    _textures.push_back(FitsFileReader::loadTexture(relPath));
 }
 
 bool RenderableSpacecraftCameraPlane::isReady() const {
@@ -149,10 +152,10 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 
 void RenderableSpacecraftCameraPlane::updateTexture() {
     int clockwiseSign = (Time::ref().deltaTime()>0) ? 1 : -1;
-    int newIndex = (clockwiseSign + currentActiveTexture - 1);
+    int newIndex = clockwiseSign + currentActiveTexture;
     if (newIndex < _textures.size() && newIndex >= 0) {
-        currentActiveTexture = newIndex;
         LDEBUG("Updating texture to " << currentActiveTexture);
+        currentActiveTexture = newIndex;
         _textures[currentActiveTexture]->uploadTexture();
     }
 }

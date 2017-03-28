@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 uniform float time;
-uniform isampler2D texture1;
+uniform sampler2D texture1;
 uniform bool additiveBlending;
 
 in vec2 vs_st;
@@ -32,9 +32,8 @@ in vec4 vs_positionScreenSpace;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    int intensity = texture(texture1, vs_st).r;
-    float res = float(intensity)/255.0;
-    vec4 diffuse = vec4(res, res, res, 1.0);
+    float intensityScaled = texture(texture1, vs_st).r;
+    vec4 diffuse = vec4(intensityScaled, intensityScaled, intensityScaled, 1.0);
 
     if (diffuse.a == 0.0)
         discard;
