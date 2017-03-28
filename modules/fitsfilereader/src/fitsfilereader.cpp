@@ -31,14 +31,14 @@
 using namespace CCfits;
 using namespace ghoul::opengl;
 
-#define FITS_PRECISION int32_t // TODO: Read this from FITS header
-#define FITS_DATA_TYPE_OPENGL GL_INT
+#define FITS_PRECISION float // TODO: Read this from FITS header
+#define FITS_DATA_TYPE_OPENGL GL_FLOAT
 
 namespace {
     // Responsible for the memory of all loaded FITS data
-    std::vector<std::valarray<FITS_PRECISION>> _buffer;
+    std::vector<std::valarray<float>> _buffer;
     const std::string _loggerCat = "FitsFileReader";
-    int d = 0;
+    bool _printFirst = true;
 }
 
 namespace openspace {
@@ -60,15 +60,38 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
     }
 
     const glm::size3_t imageSize(sizeX, sizeY, 1);
-    const Texture::Format format = ghoul::opengl::Texture::RedInt;
+    const Texture::Format format = ghoul::opengl::Texture::Red;
     const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
 
-    _buffer.push_back(contents);
+    if (!_printFirst) {
+        for (int i = 0; i < contents.size(); i++) {
+            std::cout << contents[i] << " ";
+        }
+    }
+    _printFirst = !_printFirst;
+
+    // Hardcode 0094!!
+    const float exptime = 2.902028f;
+    const float minvalue = -1.0f;
+    const float maxvalue = 41.0f;
+    contents *= (4.99803f / exptime);
+    contents = contents.apply([](float val)->float {
+        if (val < 1.5f / 1.06f) return 1.5f / 1.06f;
+        else if (val > 50.0f / 1.06f) return 50.0f / 1.06f;
+    });
+    contents = sqrt(contents);
+    float max = contents.max();
+    float min = contents.min();
+
+    contents = (255.0f + 0.9999f) * (contents - min) / (max - min);
+    contents /= 255.f;
+
+     _buffer.push_back(contents);
     return std::make_unique<Texture>(
                                 &_buffer.back()[0],
                                 imageSize,
                                 format, // Format of the pixeldata
-                                GL_R32I, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
+                                GL_R32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
                                 FITS_DATA_TYPE_OPENGL, // Type of data
                                 Texture::FilterMode::Linear,
                                 Texture::WrappingMode::Repeat
