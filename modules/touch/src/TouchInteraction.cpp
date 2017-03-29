@@ -58,10 +58,10 @@ TouchInteraction::TouchInteraction()
 	_camera{ OsEng.interactionHandler().camera() },
 	_baseSensitivity{ 0.1 }, _baseFriction{ 0.02 },
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
-	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction/4.0 },
+	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction },
 	_centroid{ glm::dvec3(0.0) },
 	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.2 }, 
-	_projectionScaleFactor{ 1.000004 },
+	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
 	_directTouchMode{ false }
 {
 	_origin.onChange([this]() {
@@ -85,15 +85,19 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 	else
 		_directTouchMode = false;
 
-
-	double xCo = 2 * (cursor.getX() - 0.5);
+	//glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
+	double aspectRatio = 1.777778; // res.x/res.y;
+	double xCo = 2 * (cursor.getX() - 0.5) * aspectRatio;
 	double yCo = -2 * (cursor.getY() - 0.5); // normalized -1 to 1 coordinates on screen
 	glm::dvec3 cursorInWorldSpace = _camera->rotationQuaternion() * glm::dvec3(xCo, yCo, -1.0);
 	glm::dvec3 camToCenter = _focusNode->worldPosition() - _camera->positionVec3();
-	double dist = std::max(length(glm::cross(cursorInWorldSpace, camToCenter)) / length(cursorInWorldSpace) - _focusNode->boundingSphere().lengthd(), 0.0);
-
-	std::cout << "Dist: " << dist << ", Ray: " << glm::to_string(cursorInWorldSpace) << "\n";
+	double dist = std::max(length(glm::cross(cursorInWorldSpace, camToCenter)) / glm::length(cursorInWorldSpace) - _focusNode->boundingSphere().lengthd(), 0.0);
+	// fix panning issue
 	
+	/*std::cout << "Dist: " << dist << ", Ray: " << glm::to_string(glm::normalize(cursorInWorldSpace)) 
+		<< "\nview: " << glm::to_string(_camera->viewDirectionWorldSpace())
+		<< "\ntoFocus: " << glm::to_string(glm::normalize(camToCenter)) << "\n\n";*/
+
 	interpret(list, lastProcessed);
 	if (!_action.rot) {
 		_centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
@@ -153,11 +157,24 @@ void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std:
 	}
 	TuioPoint point = lastProcessed.at(0).second;
 	for (const Point& p : lastProcessed) {
-		dist += glm::length(glm::dvec2(p.second.getX(), p.second.getY()) - glm::dvec2(point.getX(), point.getY()));
+		lastDist += glm::length(glm::dvec2(p.second.getX(), p.second.getY()) - glm::dvec2(point.getX(), point.getY()));
 		point = p.second;
 	}
+	double betweenPoints;
+
+	double minDiff = 1000;
+	int id = 0;
+	for (const TuioCursor& c : list) {
+		TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
+		double diff = c.getX() - point.getX() + c.getY() - point.getY();
+		if (std::abs(diff) < std::abs(minDiff)) {
+			minDiff = diff;
+			id = c.getSessionID();
+		}
+	}
 	if (list.size() == 1) {
-		//if(!cursor.isMoving()) // pick
+		if (!cursor.isMoving())
+			std::cout << "cursor was moving but has now stopped\n";
 
 		_action.rot = true;
 		_action.pinch = false;
@@ -166,52 +183,26 @@ void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std:
 		_action.pick = false;
 	}
 	else {
-		if (std::abs(dist - lastDist) / list.size() < 0.1 && list.size() == 2) {
+		if (std::abs(dist - lastDist)/list.at(0).getMotionSpeed() < 0.01 && list.size() == 2) {
 			_action.rot = false;
 			_action.pinch = false;
 			_action.pan = true;
 			_action.roll = false;
 			_action.pick = false;
 		}
+		else if (list.size() > 2 && std::abs(minDiff) < 0.0008) {
+			_action.rot = false;
+			_action.pinch = false;
+			_action.pan = false;
+			_action.roll = true;
+			_action.pick = false;
+		}
 		else {
 			_action.rot = false;
 			_action.pinch = true;
 			_action.pan = false;
-			//_action.roll = true;
+			_action.roll = false;
 			_action.pick = false;
-
-			double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
-				TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
-				double res = diff;
-				double lastAngle = point.getAngle(_centroid.x, _centroid.y);
-				double currentAngle = c.getAngle(_centroid.x, _centroid.y);
-				if (lastAngle > currentAngle + 1.5*M_PI)
-					res += currentAngle + (2 * M_PI - lastAngle);
-				else if (currentAngle > lastAngle + 1.5*M_PI)
-					res += (2 * M_PI - currentAngle) + lastAngle;
-				else
-					res += currentAngle - lastAngle;
-				return res;
-			});
-			double maxX = 0.0;
-			double minX = 1.0;
-			double maxY = 0.0;
-			double minY = 1.0;
-			for (const TuioCursor& c : list) {
-				if (c.getX() > maxX)
-					maxX = c.getX();
-				if (c.getX() < minX)
-					minX = c.getX();
-				if (c.getY() > maxY)
-					maxY = c.getY();
-				if (c.getY() < minY)
-					minY = c.getY();
-			}
-			double xRange = (maxX - minX) / list.size();
-			double yRange = (maxY - minY) / list.size();
-			if (std::abs(rollFactor) / list.size() > 0.05)
-				_action.roll = true;
-
 		}
 	}	
 }
@@ -325,7 +316,7 @@ void TouchInteraction::configSensitivities(double dist) {
 
 void TouchInteraction::decelerate() {
 	_vel.zoom *= (1 - _friction.zoom);
-	_vel.globalRot *= (1 - 0.005);
+	_vel.globalRot *= (1 - _friction.globalRot);
 	_vel.localRot *= (1 - _friction.localRot);
 	_vel.globalRoll *= (1 - _friction.globalRoll);
 	_vel.localRoll *= (1 - _friction.localRoll);
