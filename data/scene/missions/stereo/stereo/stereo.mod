@@ -73,7 +73,7 @@ return {
         Renderable = {
             Type = "RenderableSpacecraftCameraPlane",
             Target = "Sun",
-            Size = {1.4, 7.8},
+            Size = {23.454, 9.949},
             Origin = "Center",
             -- Dummy texture
             Texture = "images/stereo2.png",

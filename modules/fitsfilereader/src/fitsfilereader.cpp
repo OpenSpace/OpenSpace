@@ -61,29 +61,6 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
     const Texture::Format format = ghoul::opengl::Texture::Red;
     const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
 
-    if (!_printFirst) {
-        for (int i = 0; i < contents.size(); i++) {
-            std::cout << contents[i] << " ";
-        }
-    }
-    _printFirst = !_printFirst;
-
-    // Hardcode 0094!!
-    const float exptime = 2.902028f;
-    const float minvalue = -1.0f;
-    const float maxvalue = 41.0f;
-    contents *= (4.99803f / exptime);
-    contents = contents.apply([](float val)->float {
-        if (val < 1.5f / 1.06f) return 1.5f / 1.06f;
-        else if (val > 50.0f / 1.06f) return 50.0f / 1.06f;
-    });
-    contents = sqrt(contents);
-    float max = contents.max();
-    float min = contents.min();
-
-    contents = (255.0f + 0.9999f) * (contents - min) / (max - min);
-    contents /= 255.f;
-
     // Let texture take ownership of memory
     float* data = new float[contents.size()];
     std::memmove(data, &contents[0], contents.size() * sizeof(float));
@@ -97,6 +74,20 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
                                 Texture::FilterMode::Linear,
                                 Texture::WrappingMode::Repeat
                             );
+}
+
+std::valarray<float> FitsFileReader::readImage(std::string& path) {
+    FITS::setVerboseMode(true);
+
+    try {
+        const std::auto_ptr<FITS> pInfile(new FITS(path, Read, true));
+        PHDU& image = pInfile->pHDU();
+        std::valarray<float> contents;
+        image.read(contents);
+        return std::move(contents);
+    } catch (FitsException& e){
+        LERROR("Could not read FITS image");
+    }
 }
 
 std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buffer) {
@@ -155,20 +146,6 @@ std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buff
                                                             Texture::FilterMode::Linear
                                                         );
     return texture;
-}
-
-std::valarray<unsigned long> FitsFileReader::readRawImage(std::string& path) {
-    FITS::setVerboseMode(true);
-
-    try {
-        const std::auto_ptr<FITS> pInfile(new FITS(path, Read, true));
-        PHDU& image = pInfile->pHDU();
-        std::valarray<unsigned long> contents;
-        image.read(contents);
-        return contents;
-    } catch (FitsException& e){
-        LERROR("Could not read FITS image");
-    }
 }
 
 ExtHDU& FitsFileReader::readHeader(std::string& path) {
