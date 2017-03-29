@@ -27,6 +27,8 @@
 
 #include <ghoul/designpattern/singleton.h>
 #include <memory>
+#include <vector>
+#include <valarray>
 
 namespace ghoul { namespace opengl { class Texture; }}
 
@@ -37,7 +39,9 @@ class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManage
 
 public:
     SpacecraftImageryManager();
-    std::unique_ptr<ghoul::opengl::Texture> getSpacecraftTexture(std::string& type);
+    std::vector<std::valarray<float>> loadImageData(const std::string& path);
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> loadTextures(std::vector<std::valarray<float>>& imageData);
+    void scaleImageData(std::vector<std::valarray<float>>& _imageData, const std::string& type);
 private:
     void fetchServerImages(std::string type);
     void fillImageryInfo(std::string buffer, std::string type);

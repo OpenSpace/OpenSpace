@@ -30,6 +30,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/engine/downloadmanager.h> // Make pointer & forward declare?
 #include <memory>
+#include <valarray>
 
 namespace ghoul { namespace opengl { class Texture; }}
 
@@ -58,8 +59,10 @@ private:
 
     int currentActiveTexture;
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+    std::vector<std::valarray<float>> _imageData;
 
-    void loadLocalTextures(std::string url);
+    std::string _type;
+
     void downloadTextureResource();
     bool initialize() override;
     bool deinitialize() override;

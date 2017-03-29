@@ -37,7 +37,7 @@ class FitsFileReader {
 public:
     static std::unique_ptr<ghoul::opengl::Texture> loadTexture(std::string& path);
     static std::unique_ptr<ghoul::opengl::Texture> loadTextureFromMemory(std::string& buffer);
-    static std::valarray<unsigned long> readRawImage(std::string& path);
+    static std::valarray<float> readImage(std::string& path);
     static CCfits::ExtHDU& readHeader(std::string& path);
 
 private:

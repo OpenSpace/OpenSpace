@@ -34,7 +34,6 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
-#include <modules/fitsfilereader/include/fitsfilereader.h>
 
 #include <ghoul/filesystem/filesystem.h>
 
@@ -49,6 +48,7 @@ namespace {
     static const int _minRealTimeUpdateInterval = 10;
     static const int _minOpenSpaceTimeUpdateInterval = 1; // Should probably be set to real update value of data later
     //static const std::string _dummyImageUrl = "https://sdo.gsfc.nasa.gov/assets/img/swpc/fitsfiles/0094/AIAsynoptic_20170320_185420_0094.fits";
+    std::vector<std::vector<std::vector<int>>> _map;
 }
 
 namespace openspace {
@@ -63,12 +63,18 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         _target = target;
     }
 
-    //downloadTextureResource();
-    loadLocalTextures("/home/noven/workspace/OpenSpace/data/singlefits");
+    _type = "SDO";
+    // TODO(mnoven): Lua
+    std::string path = "/home/noven/workspace/OpenSpace/data/smallfitsseq";
+
+    _imageData = SpacecraftImageryManager::ref().loadImageData(path);
+    assert(_imageData.size() == 5);
+
+    SpacecraftImageryManager::ref().scaleImageData(_imageData, _type);
+    _textures = SpacecraftImageryManager::ref().loadTextures(_imageData);
 
     currentActiveTexture = -1;
     updateTexture();
-   // loadTexture();
 
     // Initialize time
     _openSpaceTime = Time::ref().j2000Seconds();
@@ -78,39 +84,6 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
     addProperty(_target);
     addProperty(_moveFactor);
-}
-
-// void RenderableSpacecraftCameraPlane::downloadTextureResource() {
-//     _imageData = SpacecraftImageryManager::ref().fetchImage(_dummyImageUrl);
-// }
-
-// TODO(mnoven): Move to manager
-void RenderableSpacecraftCameraPlane::loadLocalTextures(std::string url) {
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(url, RawPath::Yes);
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load Label Directory '" << sequenceDir.path() << "'");
-    }
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequancePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
-
-    for (auto path : sequancePaths) {
-        if (size_t position = path.find_last_of(".") + 1) {
-            if(position != std::string::npos) {
-                ghoul::filesystem::File currentFile(path);
-                std::string extension = currentFile.fileExtension();
-                if(extension == "fits" || extension == "fit") {
-                    std::string relativePath = FileSys.relativePath(path);
-                    // We'll need to scan the header of the fits
-                    // and insert in some smart data structure that handles time / mn
-                    //_textures.push_back(FitsFileReader::loadTexture(relativePath));
-                }
-            }
-        }
-    }
-    std::string relPath = FileSys.relativePath("/home/noven/workspace/OpenSpace/data/singlefits/0094.fits");
-    _textures.push_back(FitsFileReader::loadTexture(relPath));
 }
 
 bool RenderableSpacecraftCameraPlane::isReady() const {
@@ -154,7 +127,7 @@ void RenderableSpacecraftCameraPlane::updateTexture() {
     int clockwiseSign = (Time::ref().deltaTime()>0) ? 1 : -1;
     int newIndex = clockwiseSign + currentActiveTexture;
     if (newIndex < _textures.size() && newIndex >= 0) {
-        LDEBUG("Updating texture to " << currentActiveTexture);
+        LDEBUG("Updating texture to " << newIndex);
         currentActiveTexture = newIndex;
         _textures[currentActiveTexture]->uploadTexture();
     }
