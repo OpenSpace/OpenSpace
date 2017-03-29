@@ -86,12 +86,27 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		_directTouchMode = false;
 
 	//glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
-	double aspectRatio = 1.777778; // res.x/res.y;
-	double xCo = 2 * (cursor.getX() - 0.5) * aspectRatio;
-	double yCo = -2 * (cursor.getY() - 0.5); // normalized -1 to 1 coordinates on screen
-	glm::dvec3 cursorInWorldSpace = _camera->rotationQuaternion() * glm::dvec3(xCo, yCo, -1.0);
-	glm::dvec3 camToCenter = _focusNode->worldPosition() - _camera->positionVec3();
-	double dist = std::max(length(glm::cross(cursorInWorldSpace, camToCenter)) / glm::length(cursorInWorldSpace) - _focusNode->boundingSphere().lengthd(), 0.0);
+	double aspectRatio = 1.777778; // static_cast<double>(res.x/res.y);
+	glm::dquat camToWorldSpace = _camera->rotationQuaternion();
+	glm::dvec3 camPos = _camera->positionVec3();
+	std::vector<std::pair<int, glm::dvec3>> hitSelectables;
+	for (const TuioCursor& c : list) {
+		double xCo = 2 * (c.getX() - 0.5) * aspectRatio;
+		double yCo = -2 * (c.getY() - 0.5); // normalized -1 to 1 coordinates on screen
+		glm::dvec3 cursorInWorldSpace = camToWorldSpace * glm::dvec3(xCo, yCo, -1.0);
+		for (const SceneGraphNode* node : OsEng.renderEngine().scene()->allSceneGraphNodes()) { // should clean out to only use visible nodes that makes sense
+			double boundingSphere = node->boundingSphere().lengthd(); //should get current renderable's boundingSphere
+			glm::dvec3 camToSelectable = node->worldPosition() - camPos; // should get current renderable's position
+			double dist = std::max(length(glm::cross(cursorInWorldSpace, camToSelectable)) / glm::length(cursorInWorldSpace) - boundingSphere, 0.0);
+			if (dist == 0.0) { 
+				// hit, push back cursor ID and selectable's position, need to clean list later to only have one a maximum of each id (delete pos further away in camera.z)
+				hitSelectables.push_back(std::make_pair(c.getSessionID(), node->worldPosition()));
+				std::cout << node->name() << " hit with cursor " << c.getSessionID() << ". World Pos: " << glm::to_string(node->worldPosition()) << "\n";
+			}
+		}
+		
+	}
+	
 	// fix panning issue
 	
 	/*std::cout << "Dist: " << dist << ", Ray: " << glm::to_string(glm::normalize(cursorInWorldSpace)) 
@@ -146,7 +161,6 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 
 }
 
-
 void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
 	double dist = 0;
 	double lastDist = 0;
@@ -160,14 +174,17 @@ void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std:
 		lastDist += glm::length(glm::dvec2(p.second.getX(), p.second.getY()) - glm::dvec2(point.getX(), point.getY()));
 		point = p.second;
 	}
-	double betweenPoints;
 
 	double minDiff = 1000;
 	int id = 0;
 	for (const TuioCursor& c : list) {
 		TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
 		double diff = c.getX() - point.getX() + c.getY() - point.getY();
-		if (std::abs(diff) < std::abs(minDiff)) {
+		if (!c.isMoving()) {
+			diff = minDiff = 0.0;
+			id = c.getSessionID();
+		}
+		else if (std::abs(diff) < std::abs(minDiff)) {
 			minDiff = diff;
 			id = c.getSessionID();
 		}
