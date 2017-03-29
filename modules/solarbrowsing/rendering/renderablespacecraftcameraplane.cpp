@@ -57,23 +57,37 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     : RenderablePlane(dictionary)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _target("target", "Target", "Sun")
+    , _currentActiveChannel("activeChannel", "Active Channel", 5, 0, 9)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
         _target = target;
     }
 
-    _type = "SDO";
     // TODO(mnoven): Lua
-    std::string path = "/home/noven/workspace/OpenSpace/data/smallfitsseq";
+    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171",
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171",
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171",
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // OK 0094
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171",
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // OK 0171
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0193", // OK 0193
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0211", // OK 0211
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0304", // OK 0304
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};
+    _type = "SDO";
+    const int numChannels = 10;
+    _imageData.reserve(numChannels);
+    _textures.reserve(numChannels);
+    for (int i = 0; i < numChannels; i++) {
+        _imageData.push_back(SpacecraftImageryManager::ref().loadImageData(paths[i]));
+        SpacecraftImageryManager::ref().scaleImageData(_imageData[i], _type, i);
+        _textures.push_back(SpacecraftImageryManager::ref().loadTextures(_imageData[i]));
+    }
 
-    _imageData = SpacecraftImageryManager::ref().loadImageData(path);
-    assert(_imageData.size() == 5);
+    _currentActiveTexture = -1;
 
-    SpacecraftImageryManager::ref().scaleImageData(_imageData, _type);
-    _textures = SpacecraftImageryManager::ref().loadTextures(_imageData);
-
-    currentActiveTexture = -1;
+    assert(_currentActiveChannel < numChannels);
     updateTexture();
 
     // Initialize time
@@ -82,9 +96,15 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
 
+    _currentActiveChannel.onChange([this]() {
+        _textures[_currentActiveChannel][_currentActiveTexture]->uploadTexture();
+    });
+    addProperty(_currentActiveChannel);
     addProperty(_target);
     addProperty(_moveFactor);
 }
+
+
 
 bool RenderableSpacecraftCameraPlane::isReady() const {
     return _shader && !_textures.empty();
@@ -125,11 +145,11 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 
 void RenderableSpacecraftCameraPlane::updateTexture() {
     int clockwiseSign = (Time::ref().deltaTime()>0) ? 1 : -1;
-    int newIndex = clockwiseSign + currentActiveTexture;
-    if (newIndex < _textures.size() && newIndex >= 0) {
+    int newIndex = clockwiseSign + _currentActiveTexture;
+    if (newIndex < _textures[_currentActiveChannel].size() && newIndex >= 0) {
         LDEBUG("Updating texture to " << newIndex);
-        currentActiveTexture = newIndex;
-        _textures[currentActiveTexture]->uploadTexture();
+        _currentActiveTexture = newIndex;
+        _textures[_currentActiveChannel][_currentActiveTexture]->uploadTexture();
     }
 }
 
@@ -199,7 +219,7 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
 
     ghoul::opengl::TextureUnit unit;
     unit.activate();
-    _textures[currentActiveTexture]->bind();
+    _textures[_currentActiveChannel][_currentActiveTexture]->bind();
     _shader->setUniform("texture1", unit);
 
     bool usingFramebufferRenderer =

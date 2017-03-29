@@ -27,6 +27,7 @@
 
 #include <modules/base/rendering/renderableplane.h>
 #include <openspace/properties/scalar/doubleproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/engine/downloadmanager.h> // Make pointer & forward declare?
 #include <memory>
@@ -49,7 +50,7 @@ public:
 private:
     properties::DoubleProperty _moveFactor;
     properties::StringProperty _target;
-    //std::future<DownloadManager::MemoryFile> _imageData;
+    properties::IntProperty _currentActiveChannel;
 
     double _openSpaceTime;
     double _lastUpdateOpenSpaceTime;
@@ -57,11 +58,11 @@ private:
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
 
-    int currentActiveTexture;
-    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
-    std::vector<std::valarray<float>> _imageData;
-
     std::string _type;
+    int _currentActiveTexture;
+    // Channels -> Series of images
+    std::vector<std::vector<std::unique_ptr<ghoul::opengl::Texture>>> _textures;
+    std::vector<std::vector<std::valarray<float>>> _imageData;
 
     void downloadTextureResource();
     bool initialize() override;
