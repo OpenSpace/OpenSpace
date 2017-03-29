@@ -45,25 +45,54 @@ namespace openspace {
 
 SpacecraftImageryManager::SpacecraftImageryManager() { }
 
-void SpacecraftImageryManager::scaleImageData(std::vector<std::valarray<float>>& imageData, const std::string& type) {
-    if (_spacecraftTypes.find(type) != _spacecraftTypes.end()) {
-        if (type == "SDO") {
-            for (auto& data : imageData) {
-                const float exptime = 2.902028f;
-                const float minvalue = -1.0f;
-                const float maxvalue = 41.0f;
-                data *= (4.99803f / exptime);
-                data = data.apply([](float val)->float {
-                    if (val < 1.5f / 1.06f) return 1.5f / 1.06f;
-                    else if (val > 50.0f / 1.06f) return 50.0f / 1.06f;
-                });
-                data = sqrt(data);
-                float max = data.max();
-                float min = data.min();
+void SpacecraftImageryManager::scaleImageData(std::vector<std::valarray<float>>& imageData, const std::string& type, const int& channel) {
+    if (type == "SDO") {
+        // 1600, 1700, 4500, 94, 131, 171, 193, 211, 304, 335
+        const std::vector<float> normtimes = {2.99911f, 1.00026f, 1.00026f, 4.99803f, 6.99685f, 4.99803f, 2.99950f, 4.99801f, 4.99941f, 6.99734f};
+        const std::vector<float> clipmins = {0.f, 0.f, 0.f, 1.5f, 7.f, 10.f, 120.f, 30.f, 15.f, 3.5f};
+        const std::vector<float> clipmax = {4000.f, 10000.f, 26000.f, 50.f, 1200.f, 12000.f, 12000.f, 13000.f, 3000.f, 1000.f};
+        //TODO(mnoven) : Get from header and put in metadata
+        const std::vector<float> exptimes = {0.f, 0.f, 0.f, 2.902028f, 0.f, 2.000160f, 2.000050f, 2.900777f, 2.900826f, 0.f};
+        const float exptime = exptimes[channel];
+        const float normtime = normtimes[channel];
+        const float cmin = clipmins[channel];
+        const float cmax = clipmax[channel];
 
-                data = (255.0f + 0.9999f) * (data - min) / (max - min);
-                data /= 255.f;
+        for (auto& data : imageData) {
+            data = data * normtimes[channel] / exptimes[channel];
+            std::for_each(begin(data), end(data), [&cmin, &cmax](float& val) {
+                std::min(cmax, std::max(val, cmin));
+            });
+            // Note: No need to set range right now,
+            // glTexImage2D() will clamp all values to [0,1] using GL_RED
+            switch (channel) {
+                case 0 ... 2: {
+                    data = 0.f; // TODO(mnoven): Remove this
+                    //data = (data - cmin) / (cmax - cmin);
+                    break;
+                }
+                case 3: {
+                    float sqcmin = sqrt(cmin), sqcmax = sqrt(cmax);
+                    data = sqrt(data);
+                    data = (data - sqcmin) / (sqcmax - sqcmin);
+                    break;
+                }
+                case 4 ... 9: {
+                    // TODO(mnoven) : Remove this
+                    if (channel == 4 || channel == 9) data = 0.f;
+
+                    float alogcmin = log10(cmin), alogcmax = log10(cmax);
+                    data = log10(data);
+                    data = (data - alogcmin) / (alogcmax - alogcmin);
+                    break;
+                }
+                default: {
+                    LERROR("Wrong channel for SDO");
+                    break;
+                }
+
             }
+
         }
     } else {
         LERROR("Couldn't find any spacecraft with type " << type);

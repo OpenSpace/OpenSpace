@@ -41,7 +41,7 @@ public:
     SpacecraftImageryManager();
     std::vector<std::valarray<float>> loadImageData(const std::string& path);
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> loadTextures(std::vector<std::valarray<float>>& imageData);
-    void scaleImageData(std::vector<std::valarray<float>>& _imageData, const std::string& type);
+    void scaleImageData(std::vector<std::valarray<float>>& _imageData, const std::string& type, const int& channel);
 private:
     void fetchServerImages(std::string type);
     void fillImageryInfo(std::string buffer, std::string type);
