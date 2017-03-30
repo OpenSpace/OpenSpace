@@ -31,119 +31,49 @@ out vec4 renderTarget1;
 uniform float r;
 uniform vec4 dhdH;
 
-uniform sampler2D transmittanceTexture;
+//uniform sampler2D transmittanceTexture;
 uniform sampler3D deltaJTexture;
 
-void getMuMuSNu(const float r, vec4 dhdH, out float mu, out float mu_s, out float nu) {
-    float x = gl_FragCoord.x - 0.5;
-    float y = gl_FragCoord.y - 0.5;
-    if (y < float(RES_MU) / 2.0) {
-        float d = 1.0 - y / (float(RES_MU) / 2.0 - 1.0);
-        d = min(max(dhdH.z, d * dhdH.w), dhdH.w * 0.999);
-        mu = (Rg * Rg - r * r - d * d) / (2.0 * r * d);
-        mu = min(mu, -sqrt(1.0 - (Rg / r) * (Rg / r)) - 0.001);
-    } else {
-        float d = (y - float(RES_MU) / 2.0) / (float(RES_MU) / 2.0 - 1.0);
-        d = min(max(dhdH.x, d * dhdH.y), dhdH.y * 0.999);
-        mu = (Rt * Rt - r * r - d * d) / (2.0 * r * d);
-    }
-    mu_s = mod(x, float(RES_MU_S)) / (float(RES_MU_S) - 1.0);
-    mu_s = tan((2.0 * mu_s - 1.0 + 0.26) * 1.1) / tan(1.26 * 1.1);
-    nu = -1.0 + floor(x / float(RES_MU_S)) / (float(RES_NU) - 1.0) * 2.0;
+// The integrand here is the f(y) of the trapezoidal rule:
+vec3 integrand(const float r, const float mu, const float muSun, const float nu, const float dist) {
+  // We can calculate r_i by the cosine law: r_i^2=dist^2 + r^2 - 2*r*dist*cos(PI-theta)
+  float r_i     = sqrt(r * r + dist * dist + 2.0f * r * dist * mu);
+  // r_i can be found using the dot product:
+  // vec(y_i) dot vec(dist) = cos(theta_i) * ||vec(y_i)|| * ||vec(dist)||
+  // But vec(y_i) = vec(x) + vec(dist), also: vec(x) dot vec(dist) = cos(theta) = mu
+  // So, cos(theta_i) = mu_i = (r*dist**mu + dist*2)/(r_i*dist)
+  float mu_i    = (r * mu + dist) / r_i;
+  // muSun_i can also be found by the dot product:
+  // cos(sigma_i) = muSun_i = (vec(s) dot vec(y_i))/(||vec(y_i)|| * ||vec(s)||)
+  // But vec(y_i) = vec(x) + vec(dist), and vec(x) dot vec(s) = muSun, cos(sigma_i + theta_i) = nu
+  float muSun_i = (r * muSun + dist * nu) / r_i;
+  // The irradiance attenuated from point r until y (y-x = dist)
+  return transmittance(r, mu, dist) * texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu).rgb;
 }
 
-vec4 texture4D(sampler3D table, float r, float mu, float muS, float nu)
-{
-    float H = sqrt(Rt * Rt - Rg * Rg);
-    float rho = sqrt(r * r - Rg * Rg);
-    float rmu = r * mu;
-    float delta = rmu * rmu - r * r + Rg * Rg;
-    vec4 cst = rmu < 0.0 && delta > 0.0 ? vec4(1.0, 0.0, 0.0, 0.5 - 0.5 / float(RES_MU)) : vec4(-1.0, H * H, H, 0.5 + 0.5 / float(RES_MU));
-    float uR = 0.5 / float(RES_R) + rho / H * (1.0 - 1.0 / float(RES_R));
-    float uMu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - 1.0 / float(RES_MU));
-    float uMuS = 0.5 / float(RES_MU_S) + (atan(max(muS, -0.1975) * tan(1.26 * 1.1)) / 1.1 + (1.0 - 0.26)) * 0.5 * (1.0 - 1.0 / float(RES_MU_S));
-    float lerp = (nu + 1.0) / 2.0 * (float(RES_NU) - 1.0);
-    float uNu = floor(lerp);
-    lerp = lerp - uNu;
-    return texture(table, vec3((uNu + uMuS) / float(RES_NU), uMu, uR)) * (1.0 - lerp) +
-           texture(table, vec3((uNu + uMuS + 1.0) / float(RES_NU), uMu, uR)) * lerp;
-}
-
-float limit(float r, float mu) {
-    float dout = -r * mu + sqrt(r * r * (mu * mu - 1.0) + ((Rt+ATM_EPSILON) * (Rt+ATM_EPSILON)));
-    float delta2 = r * r * (mu * mu - 1.0) + Rg * Rg;
-    if (delta2 >= 0.0) {
-        float din = -r * mu - sqrt(delta2);
-        if (din >= 0.0) {
-            dout = min(dout, din);
-        }
-    }
-    return dout;
-}
-
-vec3 transmittanceFromTexture(const float r, const float mu) {
-    float u_r  = sqrt((r - Rg) / (Rt - Rg));
-    // See Colliene to understand the different mapping.
-    float u_mu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
-    
-    return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
-}
-
-vec3 transmittance(const float r, const float mu, const float d) {
-    vec3 result;
-    float r1 = sqrt(r * r + d * d + 2.0 * r * mu * d);
-    float mu1 = (r * mu + d) / r1;
-    if (mu > 0.0) {
-        result = min(transmittanceFromTexture(r, mu) / 
-            transmittanceFromTexture(r1, mu1), 1.0);
-    } else {
-        result = min(transmittanceFromTexture(r1, -mu1) / 
-            transmittanceFromTexture(r, -mu), 1.0);
-    }
-    return result;
-}
-
-vec3 integrand(float r, float mu, float muS, float nu, float t) {
-    float ri = sqrt(r * r + t * t + 2.0 * r * mu * t);
-    float mui = (r * mu + t) / ri;
-    float muSi = (nu * t + muS * r) / ri;
-    return texture4D(deltaJTexture, ri, mui, muSi, nu).rgb * transmittance(r, mu, t);
-}
-
-float rayDistance(const float r, const float mu) {
-    // cosine law
-    float distanceAtmosphereIntersect = -r * mu + sqrt(r * r * (mu * mu - 1.0) + 
-    (Rt + ATM_EPSILON)*(Rt + ATM_EPSILON)); 
-    float distance = distanceAtmosphereIntersect;      
-    float delta = r * r * (mu * mu - 1.0) + Rg * Rg;
-    // No imaginary numbers... :-)
-    if (delta >= 0.0) {
-        float distanceEarthIntersect = -r * mu - sqrt(delta);
-        if (distanceEarthIntersect >= 0.0) {
-            distance = min(distanceAtmosphereIntersect, distanceEarthIntersect);
-        }
-    }
-    return distance;
-}
-
-vec3 inscatter(float r, float mu, float muS, float nu) {
-    vec3 raymie = vec3(0.0);
-    float dx = rayDistance(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES);
-    float xi = 0.0;
-    vec3 raymiei = integrand(r, mu, muS, nu, 0.0);
-    for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; ++i) {
-        float xj = float(i) * dx;
-        vec3 raymiej = integrand(r, mu, muS, nu, xj);
-        raymie += (raymiei + raymiej) / 2.0 * dx;
-        xi = xj;
-        raymiei = raymiej;
-    }
-    return raymie;
+vec3 inscatter(float r, float mu, float muSun, float nu) {
+  vec3  inScatteringRadiance   = vec3(0.0f);
+  float dy                     = rayDistance(r, mu) / float(INSCATTER_INTEGRAL_SAMPLES);
+  vec3  inScatteringRadiance_i = integrand(r, mu, muSun, nu, 0.0);
+  
+  // In order to solve the integral from equation (11) we use the trapezoidal
+  // rule: Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
+  // where y_i+1 = y_j
+  for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; ++i) {
+    float y_j = float(i) * dy;
+    vec3 inScatteringRadiance_j = integrand(r, mu, muSun, nu, y_j);
+    inScatteringRadiance  += (inScatteringRadiance_i + inScatteringRadiance_j) / 2.0 * dy;
+    inScatteringRadiance_i = inScatteringRadiance_j;
+  }
+  return inScatteringRadiance;
 }
 
 void main(void) {
-    float mu, muS, nu;
-    getMuMuSNu(r, dhdH, mu, muS, nu);
-    
-    renderTarget1 = vec4(inscatter(r, mu, muS, nu), 1.0);
+  float mu = 0.0f, muSunun = 0.0f, nu = 0.0f;
+  // Unmapping the variables from texture texels coordinates
+  // to mapped coordinates
+  unmappingMuMuSunNu(r, dhdH, mu, muSunun, nu);
+  
+  // Write to texture deltaSR 
+  renderTarget1 = vec4(inscatter(r, mu, muSunun, nu), 1.0);
 }

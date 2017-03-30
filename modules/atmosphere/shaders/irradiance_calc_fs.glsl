@@ -27,23 +27,7 @@
 
 out vec4 renderTableColor;
 
-uniform sampler2D transmittanceTexture;
-
-void unmappingRAndMuSun(out float r, out float muSun) {
-  // See Bruneton and Colliene to understand the mapping.
-  muSun = -0.2f + (gl_FragCoord.x - 0.5f) / (float(OTHER_TEXTURES_W) - 1.0f) * (1.0f + 0.2f);
-  r  = Rg + (gl_FragCoord.y - 0.5f) / (float(OTHER_TEXTURES_H) - 1.0f) * (Rt - Rg);
-}
-
-vec3 transmittanceLUT(const float r, const float mu) {
-  // Given the position x (here the altitude r) and the view
-  // angle v (here the cosine(v)= mu), we map this
-  float u_r  = sqrt((r - Rg) / (Rt - Rg));
-  // See Colliene to understand the different mapping.
-  float u_mu = atan((mu + 0.15f) / (1.0f + 0.15f) * tan(1.5f)) / 1.5f;
-  
-  return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
-}
+//uniform sampler2D transmittanceTexture;
 
 void main(void) {
   float muSun, r;
@@ -55,5 +39,5 @@ void main(void) {
   // considering only single scattering here, the
   // dot product dot(w,n) is equal to dot(s,n) that is equal to
   // dot(s, r/||r||) = muSun.
-  renderTableColor = vec4(transmittanceLUT(r, muSun) * clamp(muSun, 0.0, 1.0), 1.0);     
+  renderTableColor = vec4(transmittanceLUT(r, muSun) * max(muSun, 0.0), 0.0);     
 }

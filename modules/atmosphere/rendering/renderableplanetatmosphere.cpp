@@ -49,7 +49,7 @@
 #include <math.h>
 
 #define _ATMOSPHERE_DEBUG
-//#define _SAVE_ATMOSPHERE_TEXTURES
+#define _SAVE_ATMOSPHERE_TEXTURES
 
 namespace {
     const std::string _loggerCat = "RenderablePlanetAtmosphere";
@@ -90,6 +90,7 @@ namespace openspace {
         , _inScatteringProgramObject(nullptr)
         , _inScatteringSupTermsProgramObject(nullptr)
         , _deltaEProgramObject(nullptr)
+        , _irradianceFinalProgramObject(nullptr)
         , _deltaSProgramObject(nullptr)
         , _deltaSSupTermsProgramObject(nullptr)
         , _deltaJProgramObject(nullptr)
@@ -984,45 +985,64 @@ namespace openspace {
             }
 
 
-            // Object ModelTranform in double matrix
-            glm::dmat4 dTransform = glm::dmat4(transform);
-            //std::cout << "\n dTransform: " << glm::to_string(dTransform) << std::endl;
+            // Object ModelTransform
+            //std::cout << "\n transform: " << glm::to_string(transform) << std::endl;
 
             // The following scale comes from PSC transformations.
-            double dScaleFactor = data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
-            //std::cout << "\n Scaling Factor: " << dScaleFactor << std::endl;
-            glm::dmat4 dScaleCamTransf = glm::scale(glm::dmat4(1.0), glm::dvec3(dScaleFactor));
-            _deferredAtmosphereProgramObject->setUniform("scaleTransformMatrix", dScaleCamTransf);
-            //std::cout << "\n dScaleCamTransf: " << glm::to_string(dScaleCamTransf) << std::endl;
+            float fScaleFactor = data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
+            //std::cout << "\n Scaling Factor: " << fScaleFactor << std::endl;
+            glm::mat4 fScaleCamTransf = glm::scale(glm::mat4(1.0), glm::vec3(fScaleFactor));
+            _deferredAtmosphereProgramObject->setUniform("scaleTransformMatrix", fScaleCamTransf);
+            //std::cout << "\n fScaleCamTransf: " << glm::to_string(fScaleCamTransf) << std::endl;
 
             // Object Space to World Space (in meters)
-            glm::dmat4 obj2World = glm::translate(glm::dmat4(1.0), data.position.dvec3()) * dTransform;
+            glm::mat4 obj2World = glm::translate(glm::mat4(1.0), data.position.vec3()) * transform;
             _deferredAtmosphereProgramObject->setUniform("objToWorldTransform", obj2World);
-            glm::dmat4 world2Obj = glm::inverse(obj2World);
+            glm::mat4 world2Obj = glm::inverse(obj2World);
             _deferredAtmosphereProgramObject->setUniform("worldToObjectTransform", world2Obj);
 
             // World to Eye Space in OS
-            glm::dmat4 world2Eye = dScaleCamTransf * glm::dmat4(data.camera.viewRotationMatrix()) *
-                glm::translate(glm::dmat4(1.0), -data.camera.position().dvec3());
+            glm::mat4 world2Eye = fScaleCamTransf * glm::mat4(data.camera.viewRotationMatrix()) *
+                glm::translate(glm::mat4(1.0), -data.camera.position().vec3());
             _deferredAtmosphereProgramObject->setUniform("worldToEyeTransform", world2Eye);
-            glm::dmat4 eye2World = glm::inverse(world2Eye);
+            glm::mat4 eye2World = glm::inverse(world2Eye);
             _deferredAtmosphereProgramObject->setUniform("eyeToWorldTransform", eye2World);
 
             // Eye Space in OS to Eye Space in SGCT
-            glm::dmat4 eye2View = data.camera.viewMatrix();
+            glm::mat4 eye2View = data.camera.viewMatrix();
             _deferredAtmosphereProgramObject->setUniform("eyeToViewTranform", eye2View);
             _deferredAtmosphereProgramObject->setUniform("viewToEyeTranform", glm::inverse(eye2View));
 
-            // Camera Position in Object Space in Meters
-            glm::dvec4 cameraPosObjecCoords = glm::dvec4(0.0, 0.0, 0.0, 1.0);
-            //cameraPosObjecCoords = world2Obj * eye2World * cameraPosObjecCoords;
-            cameraPosObjecCoords = world2Obj * glm::dvec4(data.camera.positionVec3(), 1.0);
-            _deferredAtmosphereProgramObject->setUniform("cameraPositionObjectCoords", cameraPosObjecCoords);
-            
-            glm::dmat4 inverseProjection = glm::inverse(data.camera.projectionMatrix());
+            glm::mat4 inverseProjection = glm::inverse(data.camera.projectionMatrix());
             _deferredAtmosphereProgramObject->setUniform("inverseSgctProjectionMatrix", inverseProjection);
             /*std::cout << "\nProjection: " << glm::to_string(data.camera.projectionMatrix()) << std::endl;
             std::cout << "\nInverse Projection: " << glm::to_string(inverseProjection) << std::endl;*/
+
+            glm::mat4 completeVertexTransformations = data.camera.viewProjectionMatrix() *
+                    glm::mat4(data.camera.viewRotationMatrix()) *
+                    glm::translate(glm::mat4(1.0), -data.camera.position().vec3()) *
+                    glm::translate(glm::mat4(1.0), data.position.vec3())
+                    * transform;
+            _deferredAtmosphereProgramObject->setUniform("completeVertexTransform", completeVertexTransformations);
+            glm::mat4 inverseCompleteVertexTransformations = glm::inverse(completeVertexTransformations);
+            _deferredAtmosphereProgramObject->setUniform("inverseCompleteVertexTransform", inverseCompleteVertexTransformations);
+
+            _deferredAtmosphereProgramObject->setUniform("inverseSgctProjectionMatrix", inverseProjection);
+            /*std::cout << "\nProjection: " << glm::to_string(data.camera.projectionMatrix()) << std::endl;
+            std::cout << "\nInverse Projection: " << glm::to_string(inverseProjection) << std::endl;*/
+
+
+            // Camera Position in Object Space in Meters
+            glm::vec4 cameraPosObjecCoords = glm::vec4(0.0, 0.0, 0.0, 1.0);
+            cameraPosObjecCoords = world2Obj * glm::vec4(data.camera.positionVec3(), 1.0);
+            _deferredAtmosphereProgramObject->setUniform("cameraPositionObjectCoords", cameraPosObjecCoords);
+            std::cout << "\n== Camera position Object Space: " << glm::to_string(cameraPosObjecCoords) << std::endl;
+            std::cout << "\n== Camera position World Space: " << glm::to_string(data.camera.positionVec3()) << std::endl;
+
+            std::cout << "\n-- Object position World Space: " << glm::to_string(data.position.vec3()) << std::endl;
+            std::cout << "\n-- Object position Obj Space: " << glm::to_string(world2Obj * glm::vec4(data.position.vec3(), 1.0)) << std::endl;
+
+            _deferredAtmosphereProgramObject->setUniform("objpos", glm::vec4(data.position.vec3(),1.0));
 
             ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
             transmittanceTableTextureUnit.activate();
@@ -1363,6 +1383,49 @@ namespace openspace {
         _deltaEProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
         _deltaEProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
+        //============== Irradiance finel E =================
+        if (_irradianceFinalProgramObject == nullptr) {
+            _irradianceFinalProgramObject = ghoul::opengl::ProgramObject::Build(
+                "irradianceEFinalProgram",
+                "${MODULE_ATMOSPHERE}/shaders/irradiance_final_vs.glsl",
+                "${MODULE_ATMOSPHERE}/shaders/irradiance_final_fs.glsl");
+            if (!_irradianceFinalProgramObject) {
+                if (_transmittanceProgramObject) {
+                    _transmittanceProgramObject.reset();
+                    _transmittanceProgramObject = nullptr;
+                }
+
+                if (_irradianceProgramObject) {
+                    _irradianceProgramObject.reset();
+                    _irradianceProgramObject = nullptr;
+                }
+
+                if (_irradianceSupTermsProgramObject) {
+                    _irradianceSupTermsProgramObject.reset();
+                    _irradianceSupTermsProgramObject = nullptr;
+                }
+
+                if (_inScatteringProgramObject) {
+                    _inScatteringProgramObject.reset();
+                    _inScatteringProgramObject = nullptr;
+                }
+
+                if (_inScatteringSupTermsProgramObject) {
+                    _inScatteringSupTermsProgramObject.reset();
+                    _inScatteringSupTermsProgramObject = nullptr;
+                }
+
+                if (_deltaEProgramObject) {
+                    _deltaEProgramObject.reset();
+                    _deltaEProgramObject = nullptr;
+                }
+
+                return;
+            }
+        }
+        _irradianceFinalProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+        _irradianceFinalProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
+
         //============== Delta S =================
         if (_deltaSProgramObject == nullptr) {
             _deltaSProgramObject = ghoul::opengl::ProgramObject::Build(
@@ -1399,6 +1462,11 @@ namespace openspace {
                 if (_deltaEProgramObject) {
                     _deltaEProgramObject.reset();
                     _deltaEProgramObject = nullptr;
+                }
+
+                if (_irradianceFinalProgramObject) {
+                    _irradianceFinalProgramObject.reset();
+                    _irradianceFinalProgramObject = nullptr;
                 }
 
                 return;
@@ -1442,6 +1510,11 @@ namespace openspace {
                 if (_deltaEProgramObject) {
                     _deltaEProgramObject.reset();
                     _deltaEProgramObject = nullptr;
+                }
+
+                if (_irradianceFinalProgramObject) {
+                    _irradianceFinalProgramObject.reset();
+                    _irradianceFinalProgramObject = nullptr;
                 }
 
                 if (_deltaSProgramObject) {
@@ -1491,6 +1564,11 @@ namespace openspace {
                 if (_deltaEProgramObject) {
                     _deltaEProgramObject.reset();
                     _deltaEProgramObject = nullptr;
+                }
+
+                if (_irradianceFinalProgramObject) {
+                    _irradianceFinalProgramObject.reset();
+                    _irradianceFinalProgramObject = nullptr;
                 }
 
                 if (_deltaSProgramObject) {
@@ -1546,6 +1624,11 @@ namespace openspace {
                 if (_deltaEProgramObject) {
                     _deltaEProgramObject.reset();
                     _deltaEProgramObject = nullptr;
+                }
+
+                if (_irradianceFinalProgramObject) {
+                    _irradianceFinalProgramObject.reset();
+                    _irradianceFinalProgramObject = nullptr;
                 }
 
                 if (_deltaSProgramObject) {
@@ -1605,6 +1688,11 @@ namespace openspace {
         if (_deltaEProgramObject) {
             _deltaEProgramObject.reset();
             _deltaEProgramObject = nullptr;
+        }
+
+        if (_irradianceFinalProgramObject) {
+            _irradianceFinalProgramObject.reset();
+            _irradianceFinalProgramObject = nullptr;
         }
 
         if (_deltaSProgramObject) {
@@ -1934,7 +2022,7 @@ namespace openspace {
 
         glViewport(0, 0, DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
         _deltaEProgramObject->activate();
-        _deltaEProgramObject->setUniform("line", 4);
+        //_deltaEProgramObject->setUniform("line", 4);
         deltaETableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
         _deltaEProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
@@ -1987,9 +2075,9 @@ namespace openspace {
             glViewport(0, 0, MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
             _deltaJProgramObject->activate();
             if (scatteringOrder == 2)
-                _deltaJProgramObject->setUniform("first", 1.0f);
+                _deltaJProgramObject->setUniform("firstIteraction", 1);
             else
-                _deltaJProgramObject->setUniform("first", 0.0f);
+                _deltaJProgramObject->setUniform("firstIteraction", 0);
             transmittanceTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
             deltaETableTextureUnit.activate();
@@ -2025,9 +2113,9 @@ namespace openspace {
             glViewport(0, 0, DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
             _irradianceSupTermsProgramObject->activate();
             if (scatteringOrder == 2)
-                _irradianceSupTermsProgramObject->setUniform("first", 1.0f);
+                _irradianceSupTermsProgramObject->setUniform("firstIteraction", (int)1);
             else
-                _irradianceSupTermsProgramObject->setUniform("first", 0.0f);
+                _irradianceSupTermsProgramObject->setUniform("firstIteraction", (int)0);
             transmittanceTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
             deltaSRayleighTableTextureUnit.activate();
@@ -2056,10 +2144,10 @@ namespace openspace {
             checkFrameBufferState("_deltaSRayleighTableTexture");
             glViewport(0, 0, MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
             _inScatteringSupTermsProgramObject->activate();
-            if (scatteringOrder == 2)
-                _inScatteringSupTermsProgramObject->setUniform("first", 1.0f);
+            /*if (scatteringOrder == 2)
+                _inScatteringSupTermsProgramObject->setUniform("firstIteraction", (int)1);
             else
-                _inScatteringSupTermsProgramObject->setUniform("first", 0.0f);
+                _inScatteringSupTermsProgramObject->setUniform("firstIteraction", (int)0);*/
             transmittanceTableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
             deltaJTableTextureUnit.activate();
@@ -2087,16 +2175,38 @@ namespace openspace {
             glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
             glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
 
+//            // line 10 in algorithm 4.1
+//            glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _irradianceTableTexture, 0);
+//            checkFrameBufferState("_irradianceTableTexture");
+//            glViewport(0, 0, DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
+//            _deltaEProgramObject->activate();
+//            _deltaEProgramObject->setUniform("line", 10);
+//            deltaETableTextureUnit.activate();
+//            glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
+//            _deltaEProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
+//            loadAtmosphereDataIntoShaderProgram(_deltaEProgramObject);            
+//            renderQuadForCalc(quadCalcVAO, vertexSize);
+//#ifdef _SAVE_ATMOSPHERE_TEXTURES
+//            sst.str(std::string());
+//            sst << "irradianceTable_order-" << scatteringOrder << ".ppm";
+//            saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
+//                DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
+//#endif
+//            _deltaEProgramObject->deactivate();
+//            while ((err = glGetError()) != GL_NO_ERROR) {
+//                const GLubyte * errString = gluErrorString(err);
+//                LERROR("Error computing E Table (Sup. Terms). OpenGL error: " << errString);
+//            }
+
             // line 10 in algorithm 4.1
             glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _irradianceTableTexture, 0);
             checkFrameBufferState("_irradianceTableTexture");
             glViewport(0, 0, DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
-            _deltaEProgramObject->activate();
-            _deltaEProgramObject->setUniform("line", 10);
+            _irradianceFinalProgramObject->activate();
             deltaETableTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
-            _deltaEProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
-            loadAtmosphereDataIntoShaderProgram(_deltaEProgramObject);            
+            _irradianceFinalProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
+            loadAtmosphereDataIntoShaderProgram(_irradianceFinalProgramObject);
             renderQuadForCalc(quadCalcVAO, vertexSize);
 #ifdef _SAVE_ATMOSPHERE_TEXTURES
             sst.str(std::string());
@@ -2104,7 +2214,7 @@ namespace openspace {
             saveTextureToPPMFile(GL_COLOR_ATTACHMENT0, sst.str(),
                 DELTA_E_TABLE_WIDTH, DELTA_E_TABLE_HEIGHT);
 #endif
-            _deltaEProgramObject->deactivate();
+            _irradianceFinalProgramObject->deactivate();
             while ((err = glGetError()) != GL_NO_ERROR) {
                 const GLubyte * errString = gluErrorString(err);
                 LERROR("Error computing E Table (Sup. Terms). OpenGL error: " << errString);
@@ -2157,9 +2267,9 @@ namespace openspace {
             << "Rayleigh HR: " << _rayleighHeightScale << std::endl
             << "Mie HR: " << _mieHeightScale << std::endl
             << "Mie G phase constant: " << _miePhaseConstant << std::endl
-            << "Mie Extinction coeff: " << _mieExtinctionCoeff << std::endl
-            << "Rayleigh Scattering coeff: " << _rayleighScatteringCoeff << std::endl
-            << "Mie Scattering coeff: " << _mieScatteringCoeff << std::endl
+            << "Mie Extinction coeff: " << glm::to_string(_mieExtinctionCoeff) << std::endl
+            << "Rayleigh Scattering coeff: " << glm::to_string(_rayleighScatteringCoeff) << std::endl
+            << "Mie Scattering coeff: " << glm::to_string(_mieScatteringCoeff) << std::endl
             << "Textures:" << std::endl
             << "NightTexture: " << _hasNightTexture << std::endl
             << "ReflectanceTexture: " << _hasReflectanceTexture << std::endl
@@ -2384,27 +2494,20 @@ namespace openspace {
         // See OpenGL redbook 8th Edition page 556 for Layered Rendering
         if (doCalc)
         {
-
-            float earth2 = _atmospherePlanetRadius * _atmospherePlanetRadius;
-            float atm2 = _atmosphereRadius * _atmosphereRadius;
-            float diff = atm2 - earth2;
-            float r = static_cast<double>(layer) / static_cast<double>(R_SAMPLES - 1);
-            float r2 = r * r;
-            float c = 0.0;
-            if (layer == 0)
-                c = 0.01f;
-            else if (layer == (R_SAMPLES - 1))
-                c = -0.001f;
-            else
-                c = 0.0;
-            r = sqrtf(earth2 + r2 * diff) + c;
-            float dmin = _atmosphereRadius - r;
-            float dmax = sqrtf(r * r - earth2) + sqrtf(diff);
-            float dminp = r - _atmospherePlanetRadius;
-            float dmaxp = sqrtf(r * r - earth2);
-
+            float earth2  = _atmospherePlanetRadius * _atmospherePlanetRadius;
+            float atm2    = _atmosphereRadius * _atmosphereRadius;
+            float diff    = atm2 - earth2;
+            float ri      = static_cast<float>(layer) / static_cast<float>(R_SAMPLES - 1);
+            float ri_2    = ri * ri;
+            float epsilon = (layer == 0) ? 0.01f : (layer == (R_SAMPLES - 1)) ? -0.001f : 0.0f;
+            float r       = sqrtf(earth2 + ri_2 * diff) + epsilon;
+            float dminG   = r - _atmospherePlanetRadius;
+            float dminT   = _atmosphereRadius - r;
+            float dh      = sqrtf(r * r - earth2);
+            float dH      = dh + sqrtf(diff);            
+            
             shaderProg->setUniform("r", r);
-            shaderProg->setUniform("dhdH", dmin, dmax, dminp, dmaxp);
+            shaderProg->setUniform("dhdH", dminT, dH, dminG, dh);
         }
 
         shaderProg->setUniform("layer", static_cast<int>(layer));
@@ -2419,7 +2522,6 @@ namespace openspace {
             unsigned char * pixels = new unsigned char[width*height * 3];
             for (int t = 0; t < width*height * 3; ++t)
                 pixels[t] = 255;
-
 
             // check OpenGL error
             GLenum err;

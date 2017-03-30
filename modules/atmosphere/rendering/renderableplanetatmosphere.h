@@ -145,6 +145,7 @@ namespace openspace {
         std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject;
         std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceProgramObject;
         std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceSupTermsProgramObject;
+        std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceFinalProgramObject;
         std::unique_ptr<ghoul::opengl::ProgramObject> _inScatteringProgramObject;
         std::unique_ptr<ghoul::opengl::ProgramObject> _inScatteringSupTermsProgramObject;
         std::unique_ptr<ghoul::opengl::ProgramObject> _deltaEProgramObject;

@@ -79,8 +79,257 @@ const int SKY_H = 16;
 const int OTHER_TEXTURES_W = 64;
 const int OTHER_TEXTURES_H = 16;
 
+// cosines sampling
+const int SAMPLES_R    = 32;
+const int SAMPLES_MU   = 128;
+const int SAMPLES_MU_S = 32;
+const int SAMPLES_NU   = 8;
 
-const int RES_R = 32;
-const int RES_MU = 128;
-const int RES_MU_S = 32;
-const int RES_NU = 8;
+uniform sampler2D transmittanceTexture;
+
+//================================================//
+//=============== General Functions ==============//
+//================================================//
+// In the following shaders r (altitude) is the length of vector/position x in the
+// atmosphere (or on the top of it when considering an observer in space),
+// where the light is comming from the opposite direction of the view direction,
+// here the vector v or viewDirection.
+// Rg is the planet radius and Rt the atmosphere radius.
+
+//--- Calculate the distance of the ray starting at x (height r)
+// until the planet's ground or top of atmosphere. ---
+// r := || vec(x) || e [0, Rt]
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r 
+float rayDistance(const float r, const float mu) {
+  // The light ray starting at the observer in/on the atmosphere can
+  // have to possible end points: the top of the atmosphere or the
+  // planet ground. So the shortest path is the one we are looking for,
+  // otherwise we may be passing through the ground.
+  
+  // cosine law
+  float atmRadiusEps = Rt + ATM_EPSILON;
+  float rayDistanceAtmosphere = -r * mu +
+    sqrt(r * r * (mu * mu - 1.0f) + atmRadiusEps * atmRadiusEps); 
+  float delta = r * r * (mu * mu - 1.0f) + Rg * Rg;
+
+  // Ray may be hitting ground
+  if (delta >= 0.0f) {
+    float rayDistanceGround = -r * mu - sqrt(delta);
+    if (rayDistanceGround >= 0.0f) {
+      return min(rayDistanceAtmosphere, rayDistanceGround);
+    }
+  }
+  return rayDistanceAtmosphere;
+}
+
+//-- Given the window's fragment coordinates, for a defined
+// viewport, gives back the interpolated r e [Rg, Rt] and
+// mu e [-1, 1] --
+// r := height of starting point vect(x)
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+void unmappingRAndMu(out float r, out float mu) {
+  float u_mu  = gl_FragCoord.x / float(TRANSMITTANCE_W);
+  float u_r   = gl_FragCoord.y / float(TRANSMITTANCE_H);
+  
+  // In the paper u_r^2 = (r^2-Rg^2)/(Rt^2-Rg^2)
+  // So, extracting r from u_r in the above equation:
+  //r  = sqrt( Rg * Rg + (u_r * u_r) * (Rt * Rt - Rg * Rg) );
+  r  = Rg + (u_r * u_r) * (Rt - Rg);
+  
+  // In the paper the Bruneton suggest mu = dot(v,x)/||x|| with ||v|| = 1.0
+  // Later he proposes u_mu = (1-exp(-3mu-0.6))/(1-exp(-3.6))
+  // But the below one is better. See Colliene. 
+  mu = -0.15f + tan(1.5f * u_mu) / tan(1.5f) * (1.0f + 0.15f);
+}
+
+//-- Given the windows's fragment coordinates, for a defined view port,
+// gives back the interpolated r e [Rg, Rt] and muSun e [-1, 1] --
+// r := height of starting point vect(x)
+// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
+void unmappingRAndMuSun(out float r, out float muSun) {
+  // See Bruneton and Colliene to understand the mapping.
+  muSun = -0.2f + (gl_FragCoord.x - 0.5f) / (float(OTHER_TEXTURES_W) - 1.0f) * (1.0f + 0.2f);
+  //r  = Rg + (gl_FragCoord.y - 0.5f) / (float(OTHER_TEXTURES_H) - 1.0f) * (Rt - Rg);
+  r  = Rg + (gl_FragCoord.y - 0.5f) / (float(OTHER_TEXTURES_H) ) * (Rt - Rg);
+}
+
+//-- Given the windows's fragment coordinates, for a defined view port,
+// gives back the interpolated r e [Rg, Rt] and muSun e [-1, 1] for the
+// Irradiance deltaE texture table --
+// r := height of starting point vect(x)
+// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
+void unmappingRAndMuSunIrradiance(out float r, out float muSun) {
+  // See Bruneton and Colliene to understand the mapping.
+  muSun = -0.2f + (gl_FragCoord.x - 0.5f) / (float(SKY_W) - 1.0f) * (1.0f + 0.2f);
+  r  = Rg + (gl_FragCoord.y - 0.5f) / (float(SKY_H) - 1.0f) * (Rt - Rg);
+}
+
+//-- Given the windows's fragment coordinates, for a defined view port,
+// gives back the interpolated r e [Rg, Rt] and mu, muSun amd nu e [-1, 1] --
+// r := height of starting point vect(x)
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
+// nu := cosone of the angle between vec(s) and vec(v)
+// dhdH := it is a vec4. dhdH.x stores the dminT := Rt - r, dhdH.y stores the dH value (see paper),
+// dhdH.z stores dminG := r - Rg and dhdH.w stores dh (see paper).
+void unmappingMuMuSunNu(const float r, vec4 dhdH, out float mu, out float muSun, out float nu) {
+  // Window coordinates of pixel (uncentering also)
+  float fragmentX = gl_FragCoord.x - 0.5f;
+  float fragmentY = gl_FragCoord.y - 0.5f;
+
+  // Pre-calculations
+  float Rg2 = Rg * Rg;
+  float Rt2 = Rt * Rt;
+  float r2  = r * r;
+  
+  float halfSAMPLE_MU = float(SAMPLES_MU) / 2.0f;
+  // If the (vec(x) dot vec(v))/r is negative, i.e.,
+  // the light ray has great probability to touch
+  // the ground, we obtain mu considering the geometry
+  // of the ground
+  if (fragmentY < halfSAMPLE_MU) {
+    float ud = 1.0f - (fragmentY / (halfSAMPLE_MU - 1.0f));
+    float d  = min(max(dhdH.z, ud * dhdH.w), dhdH.w * 0.999);
+    // cosine law: Rg^2 = r^2 + d^2 - 2rdcos(pi-theta)
+    // where cosine(theta) = mu
+    mu = (Rg2 - r2 - d * d) / (2.0 * r * d);
+    // We can't handle a ray inside the planet, i.e.,
+    // when r ~ Rg, so we check against it.
+    // If that is the case, we approximate to
+    // a ray touching the ground.
+    // cosine(pi-theta) = dh/r = sqrt(r^2-Rg^2)
+    // cosine(theta) = - sqrt(1 - Rg^2/r^2)
+    mu = min(mu, -sqrt(1.0 - (Rg2 / r2)) - 0.001);
+  }
+  // The light ray is touching the atmosphere and
+  // not the ground
+  else {
+    float d = (fragmentY - halfSAMPLE_MU) / (halfSAMPLE_MU - 1.0f);
+    d = min(max(dhdH.x, d * dhdH.y), dhdH.y * 0.999);
+    // cosine law: Rt^2 = r^2 + d^2 - 2rdcos(pi-theta)
+    // whre cosine(theta) = mu
+    mu = (Rt2 - r2 - d * d) / (2.0f * r * d);
+  }
+  
+  float modValueMuSun = mod(fragmentX, float(SAMPLES_MU_S)) / (float(SAMPLES_MU_S) - 1.0f);
+  // The following mapping is different from the paper. See Colliene for an details.
+  muSun = tan((2.0f * modValueMuSun - 1.0f + 0.26f) * 1.1f) / tan(1.26f * 1.1f);
+  nu = -1.0f + floor(fragmentX / float(SAMPLES_MU_S)) / (float(SAMPLES_NU) - 1.0f) * 2.0f;
+}
+
+
+//-- Function to access the transmittance texture. Given r
+// and mu, returns the transmittance of a ray starting at vec(x),
+// height r, and direction vec(v), mu, and length until it hits
+// the ground or the top of atmosphere. --
+// r := height of starting point vect(x)
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+vec3 transmittanceLUT(const float r, const float mu) {
+  // Given the position x (here the altitude r) and the view
+  // angle v (here the cosine(v)= mu), we map this
+  float u_r  = sqrt((r - Rg) / (Rt - Rg));
+  //float u_r  = sqrt((r*r - Rg*Rg) / (Rt*Rt - Rg*Rg));
+  // See Colliene to understand the different mapping.
+  float u_mu = atan((mu + 0.15f) / (1.0f + 0.15f) * tan(1.5f)) / 1.5f;
+  
+  return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
+}
+
+// -- Given a position r and direction mu, calculates de transmittance
+// along the ray with length d. This function uses the propriety
+// of Transmittance: T(a,b) = TableT(a,v)/TableT(b, v) --
+// r := height of starting point vect(x)
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+vec3 transmittance(const float r, const float mu, const float d) {
+  // Here we use the transmittance property: T(x,v) = T(x,d)*T(d,v)
+  // to, given a distance d, calculates that transmittance along
+  // that distance starting in x (hight r): T(x,d) = T(x,v)/T(d,v).
+  // 
+  // From cosine law: c^2 = a^2 + b^2 - 2*a*b*cos(ab)
+  float ri = sqrt(d * d  + r * r + 2.0 * r * d * mu);
+  // mu_i = (vec(d) dot vec(v)) / r_i
+  //      = ((vec(x) + vec(d-x)) dot vec(v))/ r_i
+  //      = (r*mu + d) / r_i
+  float mui = (d + r * mu) / ri;
+
+  // It's important to remember that we calculate the Transmittance
+  // table only for zenith angles between 0 and pi/2+episilon.
+  // Then, if mu < 0.0, we just need to invert the view direction
+  // and the start and end points between them, i.e., if
+  // x --> x0, then x0-->x.
+  // Also, let's use the property: T(a,c) = T(a,b)*T(b,c)
+  // Because T(a,c) and T(b,c) are already in the table T,
+  // T(a,b) = T(a,c)/T(b,c).
+  if (mu > 0.0f) {
+    return min(transmittanceLUT(r, mu) / 
+               transmittanceLUT(ri, mui), 1.0f);
+  } else {
+    return min(transmittanceLUT(ri, -mui) / 
+               transmittanceLUT(r, -mu), 1.0f);
+  }
+}
+
+// -- Calculates Rayleigh phase function given the
+// scattering cosine angle mu --
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+float rayleighPhaseFunction(const float mu) {
+    return (3.0f / (16.0f * M_PI)) * (1.0f + mu * mu);
+}
+
+// -- Calculates Mie phase function given the
+// scattering cosine angle mu --
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+float miePhaseFunction(const float mu) {
+  //return (3.0f / (8.0f * M_PI)) * 
+  //      ( ( (1.0f - (mieG * mieG) ) * (1.0f + mu * mu) ) / 
+  //      ( (2.0f + mieG * mieG) *
+  //        pow(1.0f + mieG * mieG - 2.0f * mieG * mu, 3.0f/2.0f) ) );
+  return 1.5f * 1.0f / (4.0f * M_PI) * (1.0f - mieG*mieG) *
+    pow(1.0f + (mieG*mieG) - 2.0f*mieG*mu, -3.0f/2.0f) * (1.0f + mu * mu) / (2.0f + mieG*mieG);
+}
+
+// -- Given the height rm view-zenith angle (cosine) mu,
+// sun-zenith angle (cosine) muSun and the angle (cosine)
+// between the vec(s) and vec(v), nu, we access the 3D textures
+// and interpolate between them (r) to find the value for the
+// 4D texture. --
+// r := height of starting point vect(x)
+// mu := cosine of the zeith angle of vec(v). Or mu = (vec(x) * vec(v))/r
+// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
+// nu := cosine of the angle between vec(s) and vec(v)
+vec4 texture4D(sampler3D table, const float r, const float mu, 
+                const float muSun, const float nu)
+{
+  float Rg2 = Rg * Rg;
+  float Rt2 = Rt * Rt;
+  float H      = sqrt(Rt2 - Rg2);
+  float rho    = sqrt(r * r - Rg2);
+  float rmu    = r * mu;
+  float delta  = rmu * rmu - r * r + Rg2;
+  vec4 cst     = rmu < 0.0f && delta > 0.0f ?
+    vec4(1.0f, 0.0f, 0.0f, 0.5f - 0.5f / float(SAMPLES_MU)) :
+    vec4(-1.0f, H * H, H, 0.5f + 0.5f / float(SAMPLES_MU));
+  float u_r    = 0.5f / float(SAMPLES_R) + rho / H * (1.0f - 1.0f / float(SAMPLES_R));
+  float u_mu   = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5f - 1.0f / float(SAMPLES_MU));
+  float u_mu_s = 0.5f / float(SAMPLES_MU_S) +
+    (atan(max(muSun, -0.1975) * tan(1.26f * 1.1f)) / 1.1f + (1.0f - 0.26f)) * 0.5f * (1.0f - 1.0f / float(SAMPLES_MU_S));
+  float lerp = (nu + 1.0f) / 2.0f * (float(SAMPLES_NU) - 1.0f);
+  float uNu = floor(lerp);
+  lerp = lerp - uNu;
+  return texture(table, vec3((uNu + u_mu_s) / float(SAMPLES_NU), u_mu, u_r)) * (1.0f - lerp) +
+    texture(table, vec3((uNu + u_mu_s + 1.0f) / float(SAMPLES_NU), u_mu, u_r)) * lerp;
+}
+
+
+// -- Given the irradiance texture table, the cosine of zenith sun vector
+// and the height of the observer (ray's stating point x), calculates the
+// mapping for u_r and u_muSun and returns the value in the LUT. --
+// lut   := OpenGL texture2D sampler (the irradiance texture deltaE)
+// muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
+// r     := height of starting point vect(x)
+vec3 irradianceLUT(sampler2D lut, const float muSun, const float r) {
+  // See Bruneton paper and Coliene to understand the mapping
+  float u_muSun = (muSun + 0.2f) / (1.0f + 0.2f);
+  float u_r     = (r - Rg) / (Rt - Rg);
+  return texture(lut, vec2(u_muSun, u_r)).rgb;
+}

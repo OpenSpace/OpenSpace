@@ -31,67 +31,7 @@ layout(location = 1) out vec4 renderTarget2;
 uniform float r;
 uniform vec4 dhdH;
 
-uniform sampler2D transmittanceTexture;
-
-// In the following shaders r (altitude) is the length of vector/position x in the
-// atmosphere (or on the top of it when considering an observer in space),
-// where the light is comming from the opposity direction of the view direction,
-// here the vector v or viewDirection.
-// Rg is the planet radius
-
-void unmappingMuMuSunNu(const float r, vec4 dhdH, out float mu, out float muSun, out float nu) {
-  float x = gl_FragCoord.x - 0.5f;
-  float y = gl_FragCoord.y - 0.5f;
-  if (y < (float(RES_MU) / 2.0f)) {
-    float d = 1.0f - y / (float(RES_MU) / 2.0f - 1.0f);
-    d = min(max(dhdH.z, d * dhdH.w), dhdH.w * 0.999);
-    mu = (Rg * Rg - r * r - d * d) / (2.0 * r * d);
-    mu = min(mu, -sqrt(1.0 - (Rg / r) * (Rg / r)) - 0.001);
-  } else {
-    float d = (y - float(RES_MU) / 2.0f) / (float(RES_MU) / 2.0f - 1.0f);
-    d = min(max(dhdH.x, d * dhdH.y), dhdH.y * 0.999);
-    mu = (Rt * Rt - r * r - d * d) / (2.0f * r * d);
-  }
-  muSun = mod(x, float(RES_MU_S)) / (float(RES_MU_S) - 1.0f);
-  muSun = tan((2.0f * muSun - 1.0f + 0.26f) * 1.1f) / tan(1.26f * 1.1f);
-  nu = -1.0f + floor(x / float(RES_MU_S)) / (float(RES_NU) - 1.0f) * 2.0f;
-}
-
-vec3 transmittanceLUT(const float r, const float mu) {
-  // Given the position x (here the altitude r) and the view
-  // angle v (here the cosine(v)= mu), we map this 
-  float u_r  = sqrt((r - Rg) / (Rt - Rg));
-  // See Colliene to understand the different mapping.
-  float u_mu = atan((mu + 0.15) / (1.0 + 0.15) * tan(1.5)) / 1.5;
-  
-  return texture(transmittanceTexture, vec2(u_mu, u_r)).rgb;
-}
-
-vec3 transmittance(const float r, const float mu, const float d) {
-  // Here we use the transmittance property: T(x,v) = T(x,d)*T(d,v)
-  // to, given a distance d, calculates that transmittance along
-  // that distance starting in x (hight r): T(x,d) = T(x,v)/T(d,v).
-  // 
-  // From cosine law: c^2 = a^2 + b^2 - 2*a*b*cos(ab)
-  float ri = sqrt(d * d  + r * r + 2.0 * r * d * mu);
-  float mui = (d + r * mu) / ri;
-
-  // It's important to remember that we calculate the Transmittance
-  // table only for zenith angles between 0 and pi/2+episilon.
-  // Then, if mu < 0.0, we just need to invert the view direction
-  // and the start and end points between them, i.e., if
-  // x --> x0, then x0-->x.
-  // Also, let's use the property: T(a,c) = T(a,b)*T(b,c)
-  // Because T(a,c) and T(b,c) are already in the table T,
-  // T(a,b) = T(a,c)/T(b,c).
-  if (mu > 0.0f) {
-    return min(transmittanceLUT(r, mu) / 
-               transmittanceLUT(ri, mui), 1.0f);
-  } else {
-    return min(transmittanceLUT(ri, -mui) / 
-               transmittanceLUT(r, -mu), 1.0f);
-  }
-}
+//uniform sampler2D transmittanceTexture;
 
 void integrand(const float r, const float mu, const float muSun, const float nu, 
                 const float y, out vec3 S_R, out vec3 S_M) {
@@ -103,18 +43,19 @@ void integrand(const float r, const float mu, const float muSun, const float nu,
   // One must remember that because the occlusion on L0, the integrand
   // here will be equal to 0 in that cases.
   // Also it is important to remember that the phase function for the
-  // Rayleigh and Mie scattering are addded during the rendering time
+  // Rayleigh and Mie scattering are added during the rendering time
   // to increase the angular precision
   S_R = vec3(0.0);
   S_M = vec3(0.0);
   
   // cosine law
-  float ri = sqrt(r * r + y * y + 2.0 * r * mu * y);
-  // Approximate and interpolate muSun_i
+  float ri = max(sqrt(r * r + y * y + 2.0 * r * mu * y), Rg);
+  
+  // Considering the Sun as a parallel light source,
+  // thew vector s_i = s.
+  // So muSun_i = (vec(y_i) dot vec(s))/r_i = ((vec(x) + vec(yi-x)) dot vec(s))/r_i
+  // muSun_i = (vec(x) dot vec(s) + vec(yi-x) dot vec(s))/r_i = (r*muSun + yi*nu)/r_i
   float muSun_i = (nu * y + muSun * r) / ri;
-
-  // ri >= Rg
-  ri = max(Rg, ri);
 
   // If the muSun_i is smaller than the angle to horizon (no sun radiance
   // hitting the point y), we return S_R = S_M = 0.0f.
@@ -128,27 +69,6 @@ void integrand(const float r, const float mu, const float muSun, const float nu,
     S_M = exp( -(ri - Rg) / HM ) * transmittanceY;
     // The L0 (sun radiance) is added in real-time.
   }
-}
-
-float rayDistance(const float r, const float mu) {
-  // The light ray starting at the observer in/on the atmosphere can
-  // have to possible end points: the top of the atmosphere or the
-  // planet ground. So the shortest path is the one we are looking for,
-  // otherwise we may be passing through the ground.
-  
-  // cosine law
-  float atmRadiusEps = Rt + ATM_EPSILON;
-  float rayDistanceAtmosphere = -r * mu +
-    sqrt(r * r * (mu * mu - 1.0f) + atmRadiusEps * atmRadiusEps); 
-  float delta = r * r * (mu * mu - 1.0f) + Rg * Rg;
-  // No imaginary numbers... :-)
-  if (delta >= 0.0f) {
-    float rayDistanceGround = -r * mu - sqrt(delta);
-    if (rayDistanceGround >= 0.0f) {
-      return min(rayDistanceAtmosphere, rayDistanceGround);
-    }
-  }
-  return rayDistanceAtmosphere;
 }
 
 void inscatter(const float r, const float mu, const float muSun, const float nu,
@@ -183,10 +103,14 @@ void inscatter(const float r, const float mu, const float muSun, const float nu,
 }
 
 void main(void) {
-  vec3 S_R;
-  vec3 S_M;
-  float mu, muSun, nu;
+  vec3 S_R; // First Order Rayleigh InScattering 
+  vec3 S_M; // First Order Mie InScattering
+  float mu, muSun, nu; // parametrization angles
+
+  // From the layer interpolation (see C++ code for layer to r)
+  // and the textures parameters (uv), we unmapping mu, muSun and nu.
   unmappingMuMuSunNu(r, dhdH, mu, muSun, nu);
+  
   // Here we calculate the single inScattered light.
   // Because this is a single inscattering, the light
   // that arrives at a point y in the path from the

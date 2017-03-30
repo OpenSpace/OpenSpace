@@ -55,8 +55,8 @@ return {
                 AtmoshereRadius = 6420,
                 --AtmoshereRadius = 6390,
                 --PlanetRadius    = 6371,
-                --PlanetRadius    = 6360,
-                PlanetRadius    = 6378.1366,
+                PlanetRadius    = 6360,
+                --PlanetRadius    = 6378.1366,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
                     Coefficients = {
@@ -81,7 +81,8 @@ return {
                     },
                     H_M = 1.2,
                     -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
-                    G = 1.0,
+                    --G = 1.0,
+                    G = 0.85
                 },
                 -- Clear Sky
                 -- Mie = {

@@ -74,12 +74,12 @@ return {
     Modules = {
         "sun",
         "atmosphereearth",
-        "moon",
-        "atmospheremars",
+        --"moon",
+        --"atmospheremars",
         --"earth",
-        "stars",
+        --"stars",
         --"stars-denver",
-        "milkyway",
+        --"milkyway",
         -- "milkyway-eso",
     }
 }

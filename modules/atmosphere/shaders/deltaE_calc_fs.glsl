@@ -27,15 +27,6 @@
 
 out vec4 renderTableColor;
 
-// See paper algorithm
-uniform int line; 
-uniform sampler2D deltaETexture;
-
 void main(void) {   
-    if (line == 4)
-        renderTableColor = vec4(0.0);
-    else if (line == 10) {
-        vec2 uv = gl_FragCoord.xy / vec2(OTHER_TEXTURES_W, OTHER_TEXTURES_H); 
-        renderTableColor = texture(deltaETexture, uv); 
-    }
+  renderTableColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

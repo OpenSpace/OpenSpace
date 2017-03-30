@@ -28,69 +28,66 @@
 
 out vec4 renderTableColor;
 
-uniform float first;
+uniform int firstIteraction;
+//uniform float firstIteraction;
 
-const float dphi = M_PI / float(IRRADIANCE_INTEGRAL_SAMPLES);
-const float dtheta = M_PI / float(IRRADIANCE_INTEGRAL_SAMPLES);
+// -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI/2]
+const float stepPhi = (2.0f * M_PI) / float(IRRADIANCE_INTEGRAL_SAMPLES);
+const float stepTheta = M_PI / (2.0f * float(IRRADIANCE_INTEGRAL_SAMPLES));
 
-uniform sampler2D transmittanceTexture;
+//uniform sampler2D transmittanceTexture;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 
-// Rayleigh phase
-float phaseFunctionR(const float mu) {
-    return (3.0 / (16.0 * M_PI)) * (1.0 + mu * mu);
-}
-
-// Mie phase
-float phaseFunctionM(const float mu) {
-    return (3.0 / (8.0 * M_PI)) * 
-        ( ( (1.0 - (mieG*mieG) ) * (1+mu*mu) ) / 
-        ( (2+mieG*mieG) * pow(1+mieG*mieG - 2.0*mieG*mu, 3.0/2.0) ) );
-}
-
-vec4 texture4D(sampler3D table, const float r, const float mu, 
-            const float muS, const float nu)
-{
-    float H = sqrt(Rt * Rt - Rg * Rg);
-    float rho = sqrt(r * r - Rg * Rg);
-    float rmu = r * mu;
-    float delta = rmu * rmu - r * r + Rg * Rg;
-    vec4 cst = rmu < 0.0 && delta > 0.0 ? vec4(1.0, 0.0, 0.0, 0.5 - 0.5 / float(RES_MU)) : vec4(-1.0, H * H, H, 0.5 + 0.5 / float(RES_MU));
-    float uR = 0.5 / float(RES_R) + rho / H * (1.0 - 1.0 / float(RES_R));
-    float uMu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - 1.0 / float(RES_MU));
-    float uMuS = 0.5 / float(RES_MU_S) + (atan(max(muS, -0.1975) * tan(1.26 * 1.1)) / 1.1 + (1.0 - 0.26)) * 0.5 * (1.0 - 1.0 / float(RES_MU_S));
-    float lerp = (nu + 1.0) / 2.0 * (float(RES_NU) - 1.0);
-    float uNu = floor(lerp);
-    lerp = lerp - uNu;
-    return texture(table, vec3((uNu + uMuS) / float(RES_NU), uMu, uR)) * (1.0 - lerp) +
-           texture(table, vec3((uNu + uMuS + 1.0) / float(RES_NU), uMu, uR)) * lerp;
-}
-
 void main(void) {
-    float r = Rg + (gl_FragCoord.y - 0.5) / (float(SKY_H) - 1.0) * (Rt - Rg);
-    float mu_s = -0.2 + (gl_FragCoord.x - 0.5) / (float(SKY_W) - 1.0) * (1.0 + 0.2);
-    vec3 s = vec3(max(sqrt(1.0 - mu_s * mu_s), 0.0), 0.0, mu_s);
+  
+  float r     = 0.0f;
+  float muSun = 0.0f;
+  // Unmapping the variables from texture texels coordinates
+  // to mapped coordinates
+  unmappingRAndMuSunIrradiance(r, muSun);
 
-    vec3 result = vec3(0.0);
-    for (int iphi = 0; iphi < 2 * IRRADIANCE_INTEGRAL_SAMPLES; ++iphi) {
-        float phi = (float(iphi) + 0.5) * dphi;
-        for (int itheta = 0; itheta < IRRADIANCE_INTEGRAL_SAMPLES / 2; ++itheta) {
-            float theta = (float(itheta) + 0.5) * dtheta;
-            float dw = dtheta * dphi * sin(theta);
-            vec3 w = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
-            float nu = dot(s, w);
-            if (first == 1.0) {
-                float pr1 = phaseFunctionR(nu);
-                float pm1 = phaseFunctionM(nu);
-                vec3 ray1 = texture4D(deltaSRTexture, r, w.z, mu_s, nu).rgb;
-                vec3 mie1 = texture4D(deltaSMTexture, r, w.z, mu_s, nu).rgb;
-                result += (ray1 * pr1 + mie1 * pm1) * w.z * dw;
-            } else {
-                result += texture4D(deltaSRTexture, r, w.z, mu_s, nu).rgb * w.z * dw;
-            }
-        }
+  // We now that muSun = cos(sigma) = s.z/||s||
+  // But, ||s|| = 1, so s.z = muSun. Also,
+  // ||s|| = 1, so s.x = sin(sigma) = sqrt(1-muSun^2) and s.y = 0.0f
+  vec3 s = vec3(max(sqrt(1.0f - muSun * muSun), 0.0f), 0.0f, muSun);
+
+  // In order to solve the integral from equation (15) we use the trapezoidal
+  // rule: Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
+  vec3 irradianceE = vec3(0.0f);
+  for (int iphi = 0; iphi < IRRADIANCE_INTEGRAL_SAMPLES; ++iphi) {
+    float phi = (float(iphi) + 0.5f) * stepPhi;
+    for (int itheta = 0; itheta < IRRADIANCE_INTEGRAL_SAMPLES; ++itheta) {
+      float theta = (float(itheta) + 0.5f) * stepTheta;
+      // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
+      // rho = 1, we are integrating over a unit sphere
+      float dw    = stepTheta * stepPhi * sin(theta);
+      // w = (cos(phi) * sin(theta) * rho, sin(phi) * sin(theta) * rho, cos(theta) * rho)
+      vec3  w     = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta));
+      float nu    = dot(s, w);
+
+      // The first iteraction is different from the others, that's because in the first
+      // iteraction all the light arriving are coming from the initial pre-computed
+      // single scattered light. We stored these values in the deltaS textures (Ray and Mie),
+      // and in order to avoid problems with the high angle dependency in the phase functions,
+      // we don't include the phase functions on those tables (that's why we calculate them now).
+      if (firstIteraction == 1) {
+        float phaseRay = rayleighPhaseFunction(nu);
+        float phaseMie = miePhaseFunction(nu);
+        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nu).rgb;
+        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nu).rgb;
+        // w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
+        irradianceE += (singleRay * phaseRay + singleMie * phaseMie) * w.z * dw;
+      } else {
+        // On line 10 of the algorithm, the texture table deltaE is updated, so when we are not in the first
+        // iteraction, we are getting the updated result of deltaE (not the single irradiance light but the
+        // accumulated (higher order) irradiance light.
+        // w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
+        irradianceE += texture4D(deltaSRTexture, r, w.z, muSun, nu).rgb * w.z * dw;
+      }
     }
+  }
 
-    renderTableColor = vec4(result, 1.0);    
+  // Write the higher oder irradiance to texture deltaE
+  renderTableColor = vec4(irradianceE, 0.0);    
 }

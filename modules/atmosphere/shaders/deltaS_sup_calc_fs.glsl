@@ -32,17 +32,14 @@ uniform int layer;
 
 uniform sampler3D deltaSTexture;
 
-// Rayleigh phase
-float phaseFunctionR(const float mu) {
-    return (3.0 / (16.0 * M_PI)) * (1.0 + mu * mu);
-}
-
 void main(void) {
-    float x = gl_FragCoord.x - 0.5;
-    float y = gl_FragCoord.y - 0.5;
+    float x = gl_FragCoord.x - 0.5f;
+    float y = gl_FragCoord.y - 0.5f;
 
-    float nu = -1.0 + floor(x / float(RES_MU_S)) / (float(RES_NU) - 1.0) * 2.0;
-    vec3 uvw = vec3(gl_FragCoord.xy, float(layer) + 0.5) / vec3(ivec3(RES_MU_S * RES_NU, RES_MU, RES_R));
+    float nu = -1.0f + floor(x / float(SAMPLES_MU_S)) / (float(SAMPLES_NU) - 1.0f) * 2.0f;
+    vec3 uvw = vec3(gl_FragCoord.xy, float(layer) + 0.5f) / vec3(ivec3(SAMPLES_MU_S * SAMPLES_NU, SAMPLES_MU, SAMPLES_R));
 
-    renderTarget1 = vec4(texture(deltaSTexture, uvw).rgb / phaseFunctionR(nu), 1.0);
+    // See Bruneton and Neyret paper, "Angular Precision" paragraph to understanding why we are
+    // dividing the S[L*] by the Rayleigh phase function.
+    renderTarget1 = vec4(texture(deltaSTexture, uvw).rgb / rayleighPhaseFunction(nu), 1.0f);
  }

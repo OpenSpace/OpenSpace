@@ -77,6 +77,10 @@ vec2 psc_subtraction(vec2 v1, vec2 v2) {
 vec4 z_normalization(vec4 v_in) {
     vec4 v_out = v_in;
     v_out.z = 0;
+    //if ( v_out.z < -v_out.w )
+    //  v_out.z = -v_out.w;
+    //else if (v_out.z > v_out.w)
+    //  v_out.z = v_out.w;
     return v_out;
 }
 

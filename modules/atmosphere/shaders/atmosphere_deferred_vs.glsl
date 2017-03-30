@@ -22,22 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+//#version __CONTEXT__
 #version 400
 
 layout(location = 0) in vec4 in_position;
 
 //#include "PowerScaling/powerScaling_vs.hglsl"
 
-uniform dmat4 inverseSgctProjectionMatrix;
-uniform dmat4 objToWorldTransform;
-uniform dmat4 worldToObjectTransform;
-uniform dmat4 worldToEyeTransform;
-uniform dmat4 eyeToWorldTransform;
-uniform dmat4 eyeToViewTranform;
-uniform dmat4 viewToEyeTranform;
+uniform mat4 inverseSgctProjectionMatrix;
+uniform mat4 objToWorldTransform;
+uniform mat4 worldToObjectTransform;
+uniform mat4 worldToEyeTransform;
+uniform mat4 eyeToWorldTransform;
+uniform mat4 eyeToViewTranform;
+uniform mat4 viewToEyeTranform;
 
-out vec3 viewDirectionVS;
+out vec3 interpolatedNDCPos;
 out vec4 vertexPosObjVS;
+out vec3 interpolatedRayDirection;
 
 void main()
 {
@@ -46,7 +48,7 @@ void main()
     //viewDirectionVS = normalize( (completeInverse * vec4(projInverse * in_position) ).xyz );
 
     //viewDirectionVS = (completeInverse * projInverse * in_position).xyz;
-
-    vertexPosObjVS = in_position;
-    gl_Position = in_position;
+    interpolatedRayDirection = (viewToEyeTranform * vec4((inverseSgctProjectionMatrix * in_position).xyz, 0.0)).xyz;
+    interpolatedNDCPos = in_position.xyz;
+    gl_Position        = in_position;
 }
