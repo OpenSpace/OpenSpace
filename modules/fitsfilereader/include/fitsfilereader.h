@@ -27,18 +27,22 @@
 
 #include <string>
 #include <memory>
+#include <vector>
+#include <unordered_map>
 
-namespace CCfits { class ExtHDU; class PHDU; }
+namespace CCfits { class PHDU; }
 namespace ghoul { namespace opengl{ class Texture; }}
 
 namespace openspace {
 
 class FitsFileReader {
 public:
-    static std::unique_ptr<ghoul::opengl::Texture> loadTexture(std::string& path);
-    static std::unique_ptr<ghoul::opengl::Texture> loadTextureFromMemory(std::string& buffer);
-    static std::valarray<float> readImage(std::string& path);
-    static CCfits::ExtHDU& readHeader(std::string& path);
+    static std::unique_ptr<ghoul::opengl::Texture> loadTexture(const std::string& path);
+    static std::unique_ptr<ghoul::opengl::Texture> loadTextureFromMemory(const std::string& buffer);
+
+    static std::valarray<float> readImage(const std::string& path);
+    // Fits will throw error if keyword does not exist in header
+    static std::unordered_map<std::string, float> readHeader(const std::string& path, std::vector<std::string>& keywords);
 
 private:
 	// Only for debugging

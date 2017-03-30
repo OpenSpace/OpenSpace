@@ -31,35 +31,39 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem>
-#include <unordered_set>
 
 using namespace ghoul::opengl;
 
 namespace {
     static const std::string _loggerCat = "SpacecraftImageryManager";
-    static const std::unordered_set<std::string> _spacecraftTypes = {"SDO"};
+   // static const std::unordered_set<std::string> _spacecraftTypes = {"SDO"};
     //static std::map<std::string, std::unique_ptr<Texture>> imageFiles; // Spacecraft -> Imagebuffer
+    static std::vector<std::string> _headerKeywords = {"EXPTIME", "BITPIX", "DATAVALS"};
 }
 
 namespace openspace {
 
 SpacecraftImageryManager::SpacecraftImageryManager() { }
 
-void SpacecraftImageryManager::scaleImageData(std::vector<std::valarray<float>>& imageData, const std::string& type, const int& channel) {
+void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imageData, const std::string& type, const int& channel) {
     if (type == "SDO") {
         // 1600, 1700, 4500, 94, 131, 171, 193, 211, 304, 335
         const std::vector<float> normtimes = {2.99911f, 1.00026f, 1.00026f, 4.99803f, 6.99685f, 4.99803f, 2.99950f, 4.99801f, 4.99941f, 6.99734f};
         const std::vector<float> clipmins = {0.f, 0.f, 0.f, 1.5f, 7.f, 10.f, 120.f, 30.f, 15.f, 3.5f};
         const std::vector<float> clipmax = {4000.f, 10000.f, 26000.f, 50.f, 1200.f, 12000.f, 12000.f, 13000.f, 3000.f, 1000.f};
-        //TODO(mnoven) : Get from header and put in metadata
-        const std::vector<float> exptimes = {0.f, 0.f, 0.f, 2.902028f, 0.f, 2.000160f, 2.000050f, 2.900777f, 2.900826f, 0.f};
-        const float exptime = exptimes[channel];
+
         const float normtime = normtimes[channel];
         const float cmin = clipmins[channel];
         const float cmax = clipmax[channel];
 
-        for (auto& data : imageData) {
-            data = data * normtimes[channel] / exptimes[channel];
+        for (auto& dataObject : imageData) {
+            std::unordered_map<std::string, float>& metaData = dataObject.metaData;
+            std::valarray<float>& data = dataObject.contents;
+
+            const float exptime = metaData["EXPTIME"];
+            assert(exptime > 0.f && exptime < 10.f);
+
+            data = data * normtimes[channel] / exptime;
             std::for_each(begin(data), end(data), [&cmin, &cmax](float& val) {
                 std::min(cmax, std::max(val, cmin));
             });
@@ -99,11 +103,12 @@ void SpacecraftImageryManager::scaleImageData(std::vector<std::valarray<float>>&
     }
 }
 
-std::vector<std::unique_ptr<Texture>> SpacecraftImageryManager::loadTextures(std::vector<std::valarray<float>>& imageData) {
+std::vector<std::unique_ptr<Texture>> SpacecraftImageryManager::loadTextures(std::vector<ImageDataObject>& imageData) {
     std::vector<std::unique_ptr<Texture>> textures;
     textures.reserve(imageData.size());
 
-    std::transform(imageData.begin(), imageData.end(), std::back_inserter(textures), [](std::valarray<float>& data) {
+    std::transform(imageData.begin(), imageData.end(), std::back_inserter(textures), [](ImageDataObject& dataObject) {
+        std::valarray<float>& data = dataObject.contents;
         const glm::size3_t imageSize(1024, 1024, 1); // TODO(mnoven) : Metadata
         const Texture::Format format = ghoul::opengl::Texture::Red;
         const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
@@ -124,8 +129,8 @@ std::vector<std::unique_ptr<Texture>> SpacecraftImageryManager::loadTextures(std
     return std::move(textures);
 }
 
-std::vector<std::valarray<float>> SpacecraftImageryManager::loadImageData(const std::string& path) {
-    std::vector<std::valarray<float>> imageData;
+std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::string& path) {
+    std::vector<ImageDataObject> imageData;
 
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
@@ -148,7 +153,10 @@ std::vector<std::valarray<float>> SpacecraftImageryManager::loadImageData(const 
                     std::string relativePath = FileSys.relativePath(path);
                     // We'll need to scan the header of the fits
                     // and insert in some smart data structure that handles time / mn
-                    imageData.push_back(FitsFileReader::readImage(relativePath));
+                    ImageDataObject im;
+                    im.metaData = FitsFileReader::readHeader(relativePath, _headerKeywords);
+                    im.contents = FitsFileReader::readImage(relativePath);
+                    imageData.push_back(im);
                 }
             }
         }

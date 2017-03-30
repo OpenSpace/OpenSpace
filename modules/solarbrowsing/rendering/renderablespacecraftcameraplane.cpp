@@ -33,7 +33,6 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 
 #include <ghoul/filesystem/filesystem.h>
 
