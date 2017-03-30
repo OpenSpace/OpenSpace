@@ -76,7 +76,9 @@ bool TouchModule::gotNewInput() {
 	if (list.size() == lastProcessed.size() && list.size() > 0) {
 		bool newInput = true;
 		for_each(lastProcessed.begin(), lastProcessed.end(), [this, &newInput](Point& p) {
-			if (p.second.getTuioTime().getTotalMilliseconds() == find_if(list.begin(), list.end(), [&p](const TuioCursor& c) { return c.getSessionID() == p.first; })->getPath().back().getTuioTime().getTotalMilliseconds())
+			std::vector<TuioCursor>::iterator cursor = find_if(list.begin(), list.end(), [&p](const TuioCursor& c) { return c.getSessionID() == p.first; });
+			double now = cursor->getPath().back().getTuioTime().getTotalMilliseconds();
+			if (p.second.getTuioTime().getTotalMilliseconds() == now || !cursor->isMoving())
 				newInput = false;
 		});
 		return newInput;

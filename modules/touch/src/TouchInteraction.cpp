@@ -60,7 +60,7 @@ TouchInteraction::TouchInteraction()
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
 	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction },
 	_centroid{ glm::dvec3(0.0) },
-	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.2 }, 
+	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.4 }, 
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
 	_directTouchMode{ false }
 {
@@ -78,87 +78,58 @@ TouchInteraction::TouchInteraction()
 TouchInteraction::~TouchInteraction() { }
 
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
-	TuioCursor cursor = list.at(0);
-
 	if (_currentRadius > 0.3) // good value to make any planet sufficiently large for direct-touch
 		_directTouchMode = true;
 	else
 		_directTouchMode = false;
 
-	//glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
-	double aspectRatio = 1.777778; // static_cast<double>(res.x/res.y);
+	trace(list);
+	interpret(list, lastProcessed);
+	accelerate(list, lastProcessed);
+}
+
+void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
+	//trim OsEng.renderEngine().scene()->allSceneGraphNodes() to only contain visible nodes that make sense
+
+	glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
+	double aspectRatio = res.x/res.y;
+	std::cout << aspectRatio << ", " << glm::to_string(res) << "\n";
 	glm::dquat camToWorldSpace = _camera->rotationQuaternion();
 	glm::dvec3 camPos = _camera->positionVec3();
-	std::vector<std::pair<int, glm::dvec3>> hitSelectables;
+	std::vector<std::pair<int, SceneGraphNode*>> newSelected;
 	for (const TuioCursor& c : list) {
 		double xCo = 2 * (c.getX() - 0.5) * aspectRatio;
 		double yCo = -2 * (c.getY() - 0.5); // normalized -1 to 1 coordinates on screen
 		glm::dvec3 cursorInWorldSpace = camToWorldSpace * glm::dvec3(xCo, yCo, -1.0);
-		for (const SceneGraphNode* node : OsEng.renderEngine().scene()->allSceneGraphNodes()) { // should clean out to only use visible nodes that makes sense
-			double boundingSphere = node->boundingSphere().lengthd(); //should get current renderable's boundingSphere
-			glm::dvec3 camToSelectable = node->worldPosition() - camPos; // should get current renderable's position
-			double dist = std::max(length(glm::cross(cursorInWorldSpace, camToSelectable)) / glm::length(cursorInWorldSpace) - boundingSphere, 0.0);
-			if (dist == 0.0) { 
-				// hit, push back cursor ID and selectable's position, need to clean list later to only have one a maximum of each id (delete pos further away in camera.z)
-				hitSelectables.push_back(std::make_pair(c.getSessionID(), node->worldPosition()));
-				std::cout << node->name() << " hit with cursor " << c.getSessionID() << ". World Pos: " << glm::to_string(node->worldPosition()) << "\n";
+		for (SceneGraphNode* node : OsEng.renderEngine().scene()->allSceneGraphNodes()) {
+			double boundingSphere = node->boundingSphere().lengthd();
+			glm::dvec3 camToSelectable = node->worldPosition() - camPos;
+			int id = c.getSessionID();
+			double dist = length(glm::cross(cursorInWorldSpace, camToSelectable)) / glm::length(cursorInWorldSpace) - boundingSphere;
+			if (dist < 0.0) {
+				auto found = find_if(newSelected.begin(), newSelected.end(), [id](std::pair<int, SceneGraphNode*> p) { return p.first == id; });
+				if (found != newSelected.end()) {
+					double oldNodeDist = glm::length(found->second->worldPosition() - camPos);
+					if (glm::length(camToSelectable) < oldNodeDist) { // new node is closer, remove added node and add the new one instead
+						newSelected.pop_back();
+						newSelected.push_back(std::make_pair(id, node));
+					}
+				}
+				else
+					newSelected.push_back(std::make_pair(id, node));
 			}
 		}
-		
 	}
-	
-	// fix panning issue
-	
-	/*std::cout << "Dist: " << dist << ", Ray: " << glm::to_string(glm::normalize(cursorInWorldSpace)) 
-		<< "\nview: " << glm::to_string(_camera->viewDirectionWorldSpace())
-		<< "\ntoFocus: " << glm::to_string(glm::normalize(camToCenter)) << "\n\n";*/
 
-	interpret(list, lastProcessed);
-	if (!_action.rot) {
-		_centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
-		_centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](double y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
-	}
-	
-	if (_action.rot) { // add rotation velocity
-		_vel.globalRot += glm::dvec2(cursor.getXSpeed(), cursor.getYSpeed()) * _sensitivity.globalRot;
-	}
-	if (_action.pinch) { // add zooming velocity
-		double distance = std::accumulate(list.begin(), list.end(), 0.0, [&](double d, const TuioCursor& c) {
-			return d + c.getDistance(_centroid.x, _centroid.y);
-		});
-		double lastDistance = std::accumulate(lastProcessed.begin(), lastProcessed.end(), 0.0f, [&](float d, const Point& p) {
-			return d + p.second.getDistance(_centroid.x, _centroid.y);
-		});
-		
-		double zoomFactor = (distance - lastDistance) * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
-		_vel.zoom += zoomFactor * _sensitivity.zoom;
-	}
-	if (_action.pan) { // add local rotation velocity
-		_vel.localRot += glm::dvec2(cursor.getXSpeed(), cursor.getYSpeed()) * _sensitivity.localRot;
-	}
-	if (_action.roll) { // add global roll rotation velocity
-		double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
-			TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
-			double res = diff;
-			double lastAngle = point.getAngle(_centroid.x, _centroid.y);
-			double currentAngle = c.getAngle(_centroid.x, _centroid.y);
-			if (lastAngle > currentAngle + 1.5*M_PI)
-				res += currentAngle + (2*M_PI - lastAngle);
-			else if (currentAngle > lastAngle + 1.5*M_PI)
-				res += (2*M_PI - currentAngle) + lastAngle;
-			else
-				res += currentAngle - lastAngle;
-			return res;
-		});
-		_vel.localRoll += -rollFactor * _sensitivity.localRoll;
-	}
-	if (_action.pick) { // pick something in the scene as focus node
-		
-	}
-	//default:
-		//LINFO("Couldn't interpret touch input" << "\n");
-	//}
+	//debugging
+	for (auto it : newSelected)
+		std::cout << it.second->name() << " hit with cursor " << it.first << ". World Pos: " << glm::to_string(it.second->worldPosition()) << "\n";
+	/*std::cout << "Dist: " << dist << ", Ray: " << glm::to_string(glm::normalize(cursorInWorldSpace))
+	<< "\nview: " << glm::to_string(_camera->viewDirectionWorldSpace())
+	<< "\ntoFocus: " << glm::to_string(glm::normalize(camToCenter)) << "\n\n";*/
 
+
+	_selected = newSelected; // might want to remember what was selected last frame
 }
 
 void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
@@ -222,6 +193,51 @@ void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std:
 			_action.pick = false;
 		}
 	}	
+}
+
+void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
+	TuioCursor cursor = list.at(0);
+	if (!_action.rot) {
+		_centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
+		_centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](double y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
+	}
+
+	if (_action.rot) { // add rotation velocity
+		_vel.globalRot += glm::dvec2(cursor.getXSpeed(), cursor.getYSpeed()) * _sensitivity.globalRot;
+	}
+	if (_action.pinch) { // add zooming velocity
+		double distance = std::accumulate(list.begin(), list.end(), 0.0, [&](double d, const TuioCursor& c) {
+			return d + c.getDistance(_centroid.x, _centroid.y);
+		});
+		double lastDistance = std::accumulate(lastProcessed.begin(), lastProcessed.end(), 0.0f, [&](float d, const Point& p) {
+			return d + p.second.getDistance(_centroid.x, _centroid.y);
+		});
+
+		double zoomFactor = (distance - lastDistance) * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
+		_vel.zoom += zoomFactor * _sensitivity.zoom;
+	}
+	if (_action.pan) { // add local rotation velocity
+		_vel.localRot += glm::dvec2(cursor.getXSpeed(), cursor.getYSpeed()) * _sensitivity.localRot;
+	}
+	if (_action.roll) { // add global roll rotation velocity
+		double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
+			TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
+			double res = diff;
+			double lastAngle = point.getAngle(_centroid.x, _centroid.y);
+			double currentAngle = c.getAngle(_centroid.x, _centroid.y);
+			if (lastAngle > currentAngle + 1.5*M_PI)
+				res += currentAngle + (2 * M_PI - lastAngle);
+			else if (currentAngle > lastAngle + 1.5*M_PI)
+				res += (2 * M_PI - currentAngle) + lastAngle;
+			else
+				res += currentAngle - lastAngle;
+			return res;
+		});
+		_vel.localRoll += -rollFactor * _sensitivity.localRoll;
+	}
+	if (_action.pick) { // pick something in the scene as focus node
+
+	}
 }
 
 void TouchInteraction::step(double dt) {
@@ -306,7 +322,6 @@ void TouchInteraction::step(double dt) {
 		_camera->setRotation(globalCamRot * localCamRot);
 	}
 }
-
 
 void TouchInteraction::configSensitivities(double dist) {
 	// Configurates sensitivities to appropriate values when the camera is close to the focus node.

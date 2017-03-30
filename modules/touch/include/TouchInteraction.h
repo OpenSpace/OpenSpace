@@ -30,6 +30,7 @@
 
 #include <openspace/util/camera.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/properties/propertyowner.h>
@@ -83,7 +84,9 @@ class TouchInteraction : public properties::PropertyOwner
 		~TouchInteraction();
 		
 		void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
+		void trace(const std::vector<TUIO::TuioCursor>& list);
 		void interpret(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
+		void accelerate(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void step(double dt);
 		void configSensitivities(double dist);
 		void decelerate();
@@ -102,21 +105,24 @@ class TouchInteraction : public properties::PropertyOwner
 		void setSensitivity(double sensitivity);
 
 	private:
+
+		// could be removed
+		double _baseSensitivity;
+		double _baseFriction;
+		double _minHeightFromSurface;
+
 		Camera* _camera;
 		SceneGraphNode* _focusNode = nullptr;
 		properties::StringProperty _origin;
 		globebrowsing::RenderableGlobe* _globe;
 
-
 		bool _directTouchMode;
 		double _projectionScaleFactor;
 		double _currentRadius;
-		double _minHeightFromSurface;
+		std::vector<std::pair<int, SceneGraphNode*>> _selected;
 		InteractionType _action;
-		double _baseSensitivity;
-		double _baseFriction;
+		
 		glm::dvec3 _centroid;
-
 		VelocityStates _vel;
 		ScaleFactor _friction;
 		ScaleFactor _sensitivity;
