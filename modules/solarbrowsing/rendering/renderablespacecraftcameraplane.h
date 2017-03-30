@@ -30,8 +30,8 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/engine/downloadmanager.h> // Make pointer & forward declare?
+#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 #include <memory>
-#include <valarray>
 
 namespace ghoul { namespace opengl { class Texture; }}
 
@@ -62,7 +62,7 @@ private:
     int _currentActiveTexture;
     // Channels -> Series of images
     std::vector<std::vector<std::unique_ptr<ghoul::opengl::Texture>>> _textures;
-    std::vector<std::vector<std::valarray<float>>> _imageData;
+    std::vector<std::vector<ImageDataObject>> _imageData;
 
     void downloadTextureResource();
     bool initialize() override;

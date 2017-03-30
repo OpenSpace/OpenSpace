@@ -29,19 +29,30 @@
 #include <memory>
 #include <vector>
 #include <valarray>
+#include <unordered_map>
+
+// TODO List:
+// 1. Read headerinfo properly
+// 2. Test with 4k images
+// 3. Colorize
 
 namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
+
+struct ImageDataObject {
+    std::unordered_map<std::string, float> metaData;
+    std::valarray<float> contents;
+};
 
 class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManager> {
     friend class ghoul::Singleton<SpacecraftImageryManager>;
 
 public:
     SpacecraftImageryManager();
-    std::vector<std::valarray<float>> loadImageData(const std::string& path);
-    std::vector<std::unique_ptr<ghoul::opengl::Texture>> loadTextures(std::vector<std::valarray<float>>& imageData);
-    void scaleImageData(std::vector<std::valarray<float>>& _imageData, const std::string& type, const int& channel);
+    std::vector<ImageDataObject> loadImageData(const std::string& path);
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> loadTextures(std::vector<ImageDataObject>& imageData);
+    void scaleImageData(std::vector<ImageDataObject>& _imageData, const std::string& type, const int& channel);
 private:
     void fetchServerImages(std::string type);
     void fillImageryInfo(std::string buffer, std::string type);

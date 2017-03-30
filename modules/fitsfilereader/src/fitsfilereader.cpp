@@ -41,15 +41,15 @@ namespace {
 
 namespace openspace {
 
-std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
+std::unique_ptr<Texture> FitsFileReader::loadTexture(const std::string& path) {
     FITS::setVerboseMode(true);
     std::valarray<float> contents;
     long sizeX;
     long sizeY;
 
     try {
-        const std::auto_ptr<FITS> pInfile(new FITS(path, Read, true));
-        PHDU& image = pInfile->pHDU();
+        FITS infile(path, Read, true);
+        PHDU& image = infile.pHDU();
         image.read(contents);
         sizeX = image.axis(0);
         sizeY = image.axis(1);
@@ -76,12 +76,19 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture(std::string& path) {
                             );
 }
 
-std::valarray<float> FitsFileReader::readImage(std::string& path) {
+std::valarray<float> FitsFileReader::readImage(const std::string& path) {
     FITS::setVerboseMode(true);
 
     try {
-        const std::auto_ptr<FITS> pInfile(new FITS(path, Read, true));
-        PHDU& image = pInfile->pHDU();
+        FITS infile(path, Read, true);
+        PHDU& image = infile.pHDU();
+
+        assert(image.axes() == 2);
+
+        const int sizeX = image.axis(0);
+        const int sizeY = image.axis(1);
+        assert(sizeX % 2 == 0 && sizeY % 2 == 0 && sizeX == sizeY);
+
         std::valarray<float> contents;
         image.read(contents);
         return std::move(contents);
@@ -90,7 +97,7 @@ std::valarray<float> FitsFileReader::readImage(std::string& path) {
     }
 }
 
-std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buffer) {
+std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(const std::string& buffer) {
     fitsfile* infile;
     // Get string adress
     const char* memory = buffer.c_str();
@@ -148,15 +155,28 @@ std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(std::string& buff
     return texture;
 }
 
-ExtHDU& FitsFileReader::readHeader(std::string& path) {
+std::unordered_map<std::string, float> FitsFileReader::readHeader(const std::string& path, std::vector<std::string>& keywords) {
     FITS::setVerboseMode(true);
     std::string SPECTRUM = "SPECTRUM";
 
     try {
-        std::auto_ptr<FITS> pInfile(new FITS(path, Read, std::string("SPECTRUM")));
-        ExtHDU& table = pInfile->extension(SPECTRUM);
-        table.readAllKeys();
-        return table;
+        FITS infile(path, Read, true);
+        PHDU& image = infile.pHDU();
+
+        std::vector<float> values;
+        image.readKeys(keywords, values);
+
+        if (values.size() != keywords.size()) {
+            LERROR("Number of keywords does not match number of values");
+        }
+
+        std::unordered_map<std::string, float> result;
+        std::transform(keywords.begin(), keywords.end(), values.begin(),
+                       std::inserter(result, result.end()),
+                       [](std::string key, float value) {
+            return std::make_pair(key, value);
+        });
+        return result;
     } catch (FitsException& e) {
         LERROR("Could not read FITS header");
     }
