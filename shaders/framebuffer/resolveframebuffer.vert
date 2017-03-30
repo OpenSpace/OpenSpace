@@ -32,7 +32,7 @@ out vec4 worldPosition;
 
 void main() {
     gl_Position = position;
-    texCoord = 0.5 + position.xy / 2.0;
+    texCoord = 0.5 + position.xy * 0.5;
 
     vPosition = position.xyz;
     worldPosition = position;
