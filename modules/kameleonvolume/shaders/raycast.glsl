@@ -22,52 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace {
+uniform float maxStepSize#{id} = 0.02;
+uniform sampler3D volumeTexture_#{id};
+uniform sampler1D transferFunction_#{id};
+uniform int gridType_#{id} = 0;
 
-namespace luascriptfunctions {
+uniform int nClips_#{id};
+uniform vec3 clipNormals_#{id}[8];
+uniform vec2 clipOffsets_#{id}[8];
 
-/**
- * \ingroup LuaScripts
- * show():
- * Shows the console
- */
-int show(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
 
-    OsEng.console().setVisible(true);
-    return 0;
+void sample#{id}(vec3 samplePos,
+             vec3 dir,
+             inout vec3 accumulatedColor,
+             inout vec3 accumulatedAlpha,
+             inout float stepSize) {
+
+    vec3 transformedPos = samplePos;
+    if (gridType_#{id} == 1) {
+        transformedPos = kameleon_cartesianToSpherical(samplePos);
+    }
+
+
+    float clipAlpha = 1.0;
+    vec3 centerToPos = transformedPos - vec3(0.5);
+
+
+    for (int i = 0; i < nClips_#{id} && i < 8; i++) {
+        vec3 clipNormal = clipNormals_#{id}[i];
+        float clipBegin = clipOffsets_#{id}[i].x;
+        float clipEnd = clipBegin + clipOffsets_#{id}[i].y;
+        clipAlpha *= smoothstep(clipBegin, clipEnd, dot(centerToPos, clipNormal));
+    }
+
+    if (clipAlpha > 0) {
+        float val = texture(volumeTexture_#{id}, transformedPos).r;
+        vec4 color = texture(transferFunction_#{id}, val);
+        vec3 backColor = color.rgb;
+        vec3 backAlpha = color.aaa;
+
+        backColor *= stepSize * clipAlpha;
+        backAlpha *= stepSize * clipAlpha;
+
+        backColor = clamp(backColor, 0.0, 1.0);
+        backAlpha = clamp(backAlpha, 0.0, 1.0);
+
+        vec3 oneMinusFrontAlpha = vec3(1.0) - accumulatedAlpha;
+        accumulatedColor += oneMinusFrontAlpha * backColor;
+        accumulatedAlpha += oneMinusFrontAlpha * backAlpha;
+    }
+
+    stepSize = maxStepSize#{id};
 }
 
-/**
- * \ingroup LuaScripts
- * hide():
- * Hides the console
- */
-int hide(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-
-    OsEng.console().setVisible(false);
-    return 0;
+float stepSize#{id}(vec3 samplePos, vec3 dir) {
+    return maxStepSize#{id};
 }
-
-/**
- * \ingroup LuaScripts
- * toggle():
- * Toggles the console
- */
-int toggle(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    if (nArguments != 0)
-        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
-
-    OsEng.console().toggleMode();
-    return 0;
-}
-
-} // namespace luascriptfunctions
-
-} // namespace openspace

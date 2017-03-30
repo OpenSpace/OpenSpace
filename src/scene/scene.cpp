@@ -43,6 +43,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/onscopeexit.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
@@ -58,27 +59,29 @@
 #include "scene_lua.inl"
 
 namespace {
-    const std::string _loggerCat = "Scene";
-    const std::string _moduleExtension = ".mod";
-    const std::string _commonModuleToken = "${COMMON_MODULE}";
+    const char* _loggerCat = "Scene";
+    const char* _moduleExtension = ".mod";
+    const char* _commonModuleToken = "${COMMON_MODULE}";
 
-    const std::string KeyCamera = "Camera";
-    const std::string KeyFocusObject = "Focus";
-    const std::string KeyPositionObject = "Position";
-    const std::string KeyViewOffset = "Offset";
+    const char* KeyCamera = "Camera";
+    const char* KeyFocusObject = "Focus";
+    const char* KeyPositionObject = "Position";
+    const char* KeyViewOffset = "Offset";
 
-    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
-    const std::string PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
-    const std::string PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
-    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
-    const std::string JsFilename = "${OPENSPACE_DATA}/web/properties/script.js";
-    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
-}
+    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
+    const char* PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
+    const char* PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
+    const char* HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const char* JsFilename = "${OPENSPACE_DATA}/web/properties/script.js";
+    const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
+} // namespace
 
 namespace openspace {
 
-Scene::Scene() : _focus(SceneGraphNode::RootNodeName) {}
+Scene::Scene()
+    : _focus(SceneGraphNode::RootNodeName)
+{}
 
 Scene::~Scene() {
     deinitialize();
@@ -226,7 +229,7 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
                 LWARNING(node->name() << " not initialized.");
         }
         catch (const ghoul::RuntimeError& e) {
-            LERRORC(_loggerCat + "(" + e.component + ")", e.what());
+            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
         }
     }
 

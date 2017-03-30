@@ -218,7 +218,7 @@ namespace openspace {
         //=======================================================
         //=========== Adding Textures as Properties =============
         //=======================================================
-        addPropertySubOwner(_geometry);
+        addPropertySubOwner(_geometry.get());
 
         addProperty(_colorTexturePath);
         _colorTexturePath.onChange(std::bind(&RenderablePlanetAtmosphere::loadTexture, this));
@@ -559,7 +559,7 @@ namespace openspace {
     bool RenderablePlanetAtmosphere::deinitialize() {
         if (_geometry) {
             _geometry->deinitialize();
-            delete _geometry;
+            _geometry = nullptr;
         }
 
         RenderEngine& renderEngine = OsEng.renderEngine();

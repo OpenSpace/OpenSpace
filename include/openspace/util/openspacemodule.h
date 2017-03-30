@@ -27,15 +27,15 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
 
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/version.h>
 
 #include <string>
 #include <vector>
 
 namespace openspace {
+namespace documentation {  struct Documentation; }
 
 /**
  * This class is the base class for an OpenSpace module. A module groups functionality
@@ -73,7 +73,7 @@ public:
      * Returns a list of Documentation classes that are valid for this OpenSpaceModule.
      * \return A list of Documentation classes that are valid for this OpenSapceModule
      */
-    virtual std::vector<Documentation> documentations() const;
+    virtual std::vector<documentation::Documentation> documentations() const;
     
     /**
      * Returns the Lua library with functions defined by this OpenSpaceModule. The default
@@ -87,8 +87,7 @@ public:
      * overwritten, it returns an OpenGL version of <code>3.3</code>.
      * \return The minimum required OpenGL version of this OpenSpaceModule
      */
-    virtual ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
-        requiredOpenGLVersion() const;
+    virtual ghoul::systemcapabilities::Version requiredOpenGLVersion() const;
 
 protected:
     /**

@@ -25,35 +25,38 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
+#include <ghoul/misc/dictionary.h>
+
 #include <set>
 
 namespace {
-    // Structure used to make offenses unique
-    struct OffenseCompare {
-        using Offense = openspace::documentation::TestResult::Offense;
-        bool operator()(const Offense& lhs, const Offense& rhs) const {
-            if (lhs.offender != rhs.offender) {
-                return lhs.offender < rhs.offender;
-            }
-            else {
-                return std::underlying_type_t<Offense::Reason>(lhs.reason) <
-                    std::underlying_type_t<Offense::Reason>(rhs.reason);
-            }
-        }
-    };
 
-    struct WarningCompare {
-        using Warning = openspace::documentation::TestResult::Warning;
-        bool operator()(const Warning& lhs, const Warning& rhs) const {
-            if (lhs.offender != rhs.offender) {
-                return lhs.offender < rhs.offender;
-            }
-            else {
-                return std::underlying_type_t<Warning::Reason>(lhs.reason) <
-                    std::underlying_type_t<Warning::Reason>(rhs.reason);
-            }
+// Structure used to make offenses unique
+struct OffenseCompare {
+    using Offense = openspace::documentation::TestResult::Offense;
+    bool operator()(const Offense& lhs, const Offense& rhs) const {
+        if (lhs.offender != rhs.offender) {
+            return lhs.offender < rhs.offender;
         }
-    };
+        else {
+            return std::underlying_type_t<Offense::Reason>(lhs.reason) <
+                std::underlying_type_t<Offense::Reason>(rhs.reason);
+        }
+    }
+};
+
+struct WarningCompare {
+    using Warning = openspace::documentation::TestResult::Warning;
+    bool operator()(const Warning& lhs, const Warning& rhs) const {
+        if (lhs.offender != rhs.offender) {
+            return lhs.offender < rhs.offender;
+        }
+        else {
+            return std::underlying_type_t<Warning::Reason>(lhs.reason) <
+                std::underlying_type_t<Warning::Reason>(rhs.reason);
+        }
+    }
+};
 
 } // namespace
 
@@ -76,6 +79,8 @@ std::string to_string(openspace::documentation::TestResult::Offense::Reason reas
             return "Verification failed";
         case openspace::documentation::TestResult::Offense::Reason::WrongType:
             return "Wrong type";
+        default:
+            ghoul_assert(false, "Missing case label");
     }
 }
     
@@ -83,6 +88,8 @@ std::string to_string(openspace::documentation::TestResult::Warning::Reason reas
     switch (reason) {
         case openspace::documentation::TestResult::Warning::Reason::Deprecated:
             return "Deprecated";
+        default:
+            ghoul_assert(false, "Missing case label");
     }
 }
 

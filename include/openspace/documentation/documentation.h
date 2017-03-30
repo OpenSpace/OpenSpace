@@ -26,12 +26,13 @@
 #define __OPENSPACE_CORE___DOCUMENTATION___H__
 
 #include <ghoul/misc/boolean.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 
 #include <memory>
 #include <string>
 #include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 namespace documentation {
@@ -303,10 +304,6 @@ void testSpecificationAndThrow(const Documentation& documentation,
     const ghoul::Dictionary& dictionary, std::string component);
 
 } // namespace documentation
-
-// We want to make it easier for people to use it, so we pull the Documentation class into
-// the openspace namespace
-using documentation::Documentation;
 
 } // namespace openspace
 

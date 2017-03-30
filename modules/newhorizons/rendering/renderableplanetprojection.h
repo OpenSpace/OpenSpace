@@ -32,6 +32,7 @@
 #include <openspace/properties/stringproperty.h>
 
 namespace openspace {
+namespace documentation { struct Documentation; }
 
 struct Image;
 
@@ -52,7 +53,7 @@ public:
     void update(const UpdateData& data) override;
     ghoul::opengl::Texture& baseTexture() const;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     bool loadTextures();
@@ -74,6 +75,8 @@ private:
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
+
+    properties::BoolProperty _shiftMeridianBy180;
 
     properties::FloatProperty _heightExaggeration;
     properties::FloatProperty _debugProjectionTextureRotation;

@@ -22,36 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYBOARDCONTROLLER___H__
-#define __OPENSPACE_CORE___KEYBOARDCONTROLLER___H__
+#ifndef __OPENSPACE_MODULE_GALAXY___MILKYWAYCONVERSIONTASK___H__
+#define __OPENSPACE_MODULE_GALAXY___MILKYWAYCONVERSIONTASK___H__
 
-#include <openspace/interaction/controller.h>
+#include <openspace/util/task.h>
+#include <string>
+#include <ghoul/glm.h>
+#include <functional>
+#include <modules/volume/textureslicevolumereader.h>
+#include <modules/volume/rawvolumewriter.h>
 
-#include <openspace/util/keys.h>
 
 namespace openspace {
-namespace interaction {
 
-class KeyboardController : public Controller {
+namespace documentation { struct Documentation;  }
+
+/**
+ * Converts a set of exr image slices to a raw volume
+ * with floating point RGBA data (32 bit per channel).
+ */
+class MilkywayConversionTask : public Task {
 public:
-    virtual ~KeyboardController() {};
-    virtual void keyPressed(KeyAction action, Key key, KeyModifier modifier) = 0;
+    MilkywayConversionTask(const ghoul::Dictionary& dictionary);
+    virtual ~MilkywayConversionTask();
+    std::string description() override;
+    void perform(const Task::ProgressCallback& onProgress) override;
+    static documentation::Documentation documentation();
+
+private:
+    std::string _inFilenamePrefix;
+    std::string _inFilenameSuffix;
+    size_t _inFirstIndex;
+    size_t _inNSlices;
+    std::string _outFilename;
+    glm::ivec3 _outDimensions;
 };
 
-class KeyboardControllerFixed : public KeyboardController {
-public:
-    void keyPressed(KeyAction action, Key key, KeyModifier modifier);
-};
+}
 
-class KeyboardControllerLua : public KeyboardController {
-public:
-    void keyPressed(KeyAction action, Key key, KeyModifier modifier);
-
-protected:
-    std::string keyToString(Key key, KeyModifier mod) const;
-};
-
-} // namespace interaction
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___KEYBOARDCONTROLLER___H__
+#endif // __OPENSPACE_MODULE_GALAXY___MILKYWAYCONVERSIONTASK___H__

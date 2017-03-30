@@ -180,7 +180,7 @@ namespace openspace {
 
         properties::FloatProperty _heightExaggeration;
 
-        planetgeometry::PlanetGeometry* _geometry;
+        std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
         planetgeometry::PlanetGeometry* _atmosphereGeometry;
         properties::BoolProperty _performShading;
         properties::IntProperty _rotation;

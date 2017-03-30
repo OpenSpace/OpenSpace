@@ -22,62 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <iostream>
-#include <string>
-#include <ghoul/glm.h>
+#define KAMELEON_PI      3.14159265358979323846  /* pi */
+#define KAMELEON_SQRT1_3 0.57735026919           /* 1/sqrt(3) */
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturereaderdevil.h>
-#include <ghoul/io/texture/texturereaderfreeimage.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/ghoul.h>
+vec3 kameleon_cartesianToSpherical(vec3 zeroToOneCoords) {
+    // Put cartesian in [-1..1] range first
+    const vec3 cartesian = vec3(-1.0,-1.0,-1.0) + zeroToOneCoords * 2.0f;
 
-#include <openspace/util/progressbar.h>
+    const float r = length(cartesian);
+    float theta, phi;
 
-#include <apps/DataConverter/milkywayconversiontask.h>
-#include <apps/DataConverter/milkywaypointsconversiontask.h>
-
-int main(int argc, char** argv) {
-    using namespace openspace;
-    using namespace dataconverter;
-
-    ghoul::initialize();
-
-    #ifdef GHOUL_USE_DEVIL
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
-    #endif // GHOUL_USE_DEVIL
-    #ifdef GHOUL_USE_FREEIMAGE
-        ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
-    #endif // GHOUL_USE_FREEIMAGE
-
-    openspace::ProgressBar pb(100);
-    std::function<void(float)> onProgress = [&](float progress) {
-        pb.print(progress * 100);
-    };
-
-    // TODO: Make the converter configurable using either
-    // config files (json, lua dictionaries),
-    // lua scripts,
-    // or at the very least: a command line interface.
- 
-    MilkyWayConversionTask mwConversionTask(
-        "F:/mw_june2016/volumeslices/img/comp/v003/frames/primary/0100/cam2_main.",
-        ".exr",
-        1385,
-        512,
-        "F:/mw_june2016/mw_512_512_64_june.rawvolume", 
-        glm::vec3(512, 512, 64));
-    
-    //MilkyWayPointsConversionTask mwpConversionTask("F:/mw_june2016/points.off", "F:/mw_june2016/points.off.binary");
-
-
-    mwConversionTask.perform(onProgress);
-    //mwpConversionTask.perform(onProgress);
-
-
-    std::cout << "Done." << std::endl;
-
-    std::cin.get();
-    return 0;
-};
+    if (r == 0.0) {
+        theta = phi = 0.0;
+    } else {
+        theta = acos(cartesian.z/r) / KAMELEON_PI;
+        phi = (KAMELEON_PI + atan(cartesian.y, cartesian.x)) / (2.0*KAMELEON_PI );
+    }
+    return vec3(r * KAMELEON_SQRT1_3, theta, phi);
+}

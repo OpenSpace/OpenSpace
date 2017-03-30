@@ -61,9 +61,10 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             );
         }
             
-        TileProvider* tileProvider = TileProvider::createFromDictionary(providerDict);
-        _levelTileProviders.push_back(std::shared_ptr<TileProvider>(tileProvider));
-            
+        _levelTileProviders.push_back(
+            std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(providerDict))
+        );
+        
         // Ensure we can represent the max level
         if(_providerIndices.size() < maxLevel){
             _providerIndices.resize(maxLevel+1, -1);

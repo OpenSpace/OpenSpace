@@ -35,8 +35,9 @@
 
 #include <ghoul/opengl/textureunit.h>
 
-#include <vector>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace ghoul {
     namespace opengl {
@@ -93,7 +94,7 @@ private:
     
     properties::FloatProperty _heightExaggeration;
 
-    planetgeometry::PlanetGeometry* _geometry;
+    std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     properties::BoolProperty _performShading;
     properties::IntProperty _rotation;
     float _alpha;

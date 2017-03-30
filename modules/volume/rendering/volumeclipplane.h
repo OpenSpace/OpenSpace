@@ -22,44 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
-#define __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANE___H__
+#define __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANE___H__
 
-#include <apps/DataConverter/conversiontask.h>
-#include <string>
-#include <ghoul/glm.h>
-#include <functional>
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/vectorproperty.h>
 
+// Forward declare to minimize dependencies
+namespace ghoul {
+    class Dictionary;
+}
 
 namespace openspace {
-namespace dataconverter {
 
-/**
- * Converts a set of exr image slices to a raw volume
- * with floating point RGBA data (32 bit per channel).
- */
-class MilkyWayConversionTask : public ConversionTask {
+class VolumeClipPlane : public properties::PropertyOwner {
 public:
-    MilkyWayConversionTask(const std::string& inFilenamePrefix,
-                           const std::string& inFilenameSuffix,
-                           size_t inFirstIndex,
-                           size_t inNSlices, 
-                           const std::string& outFilename,
-                           const glm::ivec3& outDimensions);
-    
-    void perform(const std::function<void(float)>& onProgress) override;
+    VolumeClipPlane(const ghoul::Dictionary& dictionary);
+    virtual ~VolumeClipPlane() = default;
+    virtual void initialize();
+    glm::vec3 normal();
+    glm::vec2 offsets();
 private:
-    std::string _inFilenamePrefix;
-    std::string _inFilenameSuffix;
-    size_t _inFirstIndex;
-    size_t _inNSlices;
-    std::string _outFilename;
-    glm::ivec3 _outDimensions;
+    properties::Vec3Property _normal;
+    properties::Vec2Property _offsets;
+
 };
 
-} // namespace dataconverter
-} // namespace openspace
+}  // namespace openspace
 
-#endif // __OPENSPACE_APP_DATACONVERTER___MILKYWAYCONVERSIONTASK___H__
+#endif // __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANE___H__

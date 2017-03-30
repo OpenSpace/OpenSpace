@@ -30,6 +30,7 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
+#include <ghoul/misc/boolean.h>
 
 #include <map>
 #include <memory>

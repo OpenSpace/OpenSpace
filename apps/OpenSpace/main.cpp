@@ -36,6 +36,8 @@
 #include <SGCTOpenVR.h>
 #endif // OPENVR_SUPPORT
 
+#define DEVELOPER_MODE
+
 namespace {
     
 const char* _loggerCat = "main";
@@ -100,7 +102,7 @@ void mainInitFunc() {
             
             // If we have an OpenVRWindow, initialize OpenVR.
             sgct::SGCTOpenVR::initialize(
-                SgctEngine->getNearClippingPlane(), _sgctEngine->getFarClippingPlane()
+                SgctEngine->getNearClippingPlane(), SgctEngine->getFarClippingPlane()
             );
 #else
             LWARNING(
@@ -165,10 +167,10 @@ void mainRenderFunc() {
 
     glm::mat4 projectionMatrix = SgctEngine->getCurrentProjectionMatrix();
 #ifdef OPENVR_SUPPORT
-    bool currentWindowIsHMD = FirstOpenVRWindow == _sgctEngine->getCurrentWindowPtr();
+    bool currentWindowIsHMD = FirstOpenVRWindow == SgctEngine->getCurrentWindowPtr();
     if (sgct::SGCTOpenVR::isHMDActive() && currentWindowIsHMD) {
         projectionMatrix = sgct::SGCTOpenVR::getHMDCurrentViewProjectionMatrix(
-            _sgctEngine->getCurrentFrustumMode()
+            SgctEngine->getCurrentFrustumMode()
         );
     }
 #endif
@@ -395,6 +397,13 @@ int main_main(int argc, char** argv) {
 } // namespace
 
 int main(int argc, char** argv) {
+    // If we are working as a developer, we don't want to catch the exceptions in order to
+    // find the locations where the exceptions are raised.
+    // If we are not in developer mode, we want to catch and at least log the error before
+    // dying
+#ifdef DEVELOPER_MODE
+    return main_main(argc, argv);
+#else
     // We wrap the actual main function in a try catch block so that we can get and print
     // some additional information in case an exception is raised
     try {
@@ -406,7 +415,12 @@ int main(int argc, char** argv) {
         LogMgr.flushLogs();
         return EXIT_FAILURE;
     }
-    catch (const std::exception& e) {
+    catch (const ghoul::AssertionException& e) {
+        // We don't want to catch the assertion exception as we won't be able to add a
+        // breakpoint for debugging
+        LFATALC("Assertion failed", e.what());
+        throw;
+    } catch (const std::exception& e) {
         LFATALC("Exception", e.what());
         LogMgr.flushLogs();
         return EXIT_FAILURE;
@@ -416,4 +430,5 @@ int main(int argc, char** argv) {
         LogMgr.flushLogs();
         return EXIT_FAILURE;
     }
+#endif // DEVELOPER_MODE
 }

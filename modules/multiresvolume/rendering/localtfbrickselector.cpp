@@ -91,7 +91,7 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
         unsigned int brickIndex = bs.brickIndex;
         priorityQueue.pop_back();
         if (bs.splitType == BrickSelection::SplitType::Temporal) {
-            int timeSpanCenter = bs.centerT();
+//            int timeSpanCenter = bs.centerT();
             unsigned int childBrickIndex;
             bool pickRightTimeChild = bs.timestepInRightChild(timestep);
 

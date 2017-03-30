@@ -21,39 +21,28 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+ 
+#version __CONTEXT__
 
-#ifndef __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
-#define __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
+layout(location = 0) in vec3 vertPosition;
 
-#include <apps/DataConverter/conversiontask.h>
-#include <string>
-#include <ghoul/glm.h>
-#include <functional>
-#include <modules/volume/textureslicevolumereader.h>
-#include <modules/volume/rawvolumewriter.h>
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 
+out vec4 positionLocalSpace;
+out vec4 positionCameraSpace;
 
-namespace openspace {
-namespace dataconverter {
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-/**
- * Converts ascii based point data
- * int64_t n
- * (float x, float y, float z, float r, float g, float b) * n
- * to a binary (floating point) representation with the same layout.
- */
-class MilkyWayPointsConversionTask : public ConversionTask {
-public:
-    MilkyWayPointsConversionTask(const std::string& inFilename,
-                                 const std::string& outFilename);
+void main() {
+
+    positionLocalSpace = vec4(vertPosition, 1.0);
+    positionCameraSpace = modelViewTransform * positionLocalSpace;
+
+    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+    vec4 positionScreenSpace = z_normalization(positionClipSpace);
     
-    void perform(const std::function<void(float)>& onProgress) override;
-private:
-    std::string _inFilename;    
-    std::string _outFilename;
-};
-
-} // namespace dataconverter
-} // namespace openspace
-
-#endif // __OPENSPACE_APP_DATACONVERTER___MILKYWAYPOINTSCONVERSIONTASK___H__
+    //positionScreenSpace.z = 1.0;
+    // project the position to view space
+    gl_Position = positionScreenSpace;
+}

@@ -24,6 +24,7 @@
 
 #include <modules/space/rendering/renderablerings.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -43,7 +44,7 @@ namespace {
 
 namespace openspace {
 
-Documentation RenderableRings::Documentation() {
+documentation::Documentation RenderableRings::Documentation() {
     using namespace documentation;
     return {
         "Renderable Rings",
@@ -104,7 +105,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
         "RenderableRings"
     );
 
-    _size = dictionary.value<double>(KeySize);
+    _size = static_cast<float>(dictionary.value<double>(KeySize));
     setBoundingSphere(PowerScaledScalar::CreatePSS(_size));
     addProperty(_size);
     _size.onChange([&]() { _planeIsDirty = true; });

@@ -22,20 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_APP_DATACONVERTER___CONVERSIONTASK___H__
-#define __OPENSPACE_APP_DATACONVERTER___CONVERSIONTASK___H__
+#include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
 
-#include <functional>
+#include <modules/volume/textureslicevolumereader.h>
+#include <modules/volume/rawvolumewriter.h>
+#include <modules/volume/volumesampler.h>
+
+#include <openspace/documentation/documentation.h>
+
+#include <fstream>
+#include <iostream>
+#include <vector>
 
 namespace openspace {
-namespace dataconverter {
 
-class ConversionTask {
-public:
-    virtual void perform(const std::function<void(float)>& onProgress) = 0;
-};
+/*MilkywayPointsConversionTask::MilkywayPointsConversionTask(
+    const std::string& inFilename,
+    const std::string& outFilename)
+    : _inFilename(inFilename)
+    , _outFilename(outFilename) {}*/
 
-} // namespace dataconverter
-} // namespace openspace
+MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary & dictionary) {}
 
-#endif // __OPENSPACE_APP_DATACONVERTER___CONVERSIONTASK___H__
+MilkywayPointsConversionTask::~MilkywayPointsConversionTask() {}
+
+std::string MilkywayPointsConversionTask::description()
+{
+    return std::string();
+}
+
+void MilkywayPointsConversionTask::perform(const Task::ProgressCallback & progressCallback) {
+    std::ifstream in(_inFilename, std::ios::in);
+    std::ofstream out(_outFilename, std::ios::out | std::ios::binary);
+
+    std::string format;
+    int64_t nPoints;
+    in >> format >> nPoints;
+
+    size_t nFloats = nPoints * 7;
+
+    std::vector<float> pointData(nFloats);
+
+    float x, y, z, r, g, b, a;
+    for (size_t i = 0; i < nPoints; ++i) {
+        in >> x >> y >> z >> r >> g >> b >> a;
+        if (in.good()) {
+            pointData[i * 7 + 0] = x;
+            pointData[i * 7 + 1] = y;
+            pointData[i * 7 + 2] = z;
+            pointData[i * 7 + 3] = r;
+            pointData[i * 7 + 4] = g;
+            pointData[i * 7 + 5] = b;
+            pointData[i * 7 + 6] = a;
+            progressCallback(static_cast<float>(i + 1) / nPoints);
+        }
+        else {
+            std::cout << "Failed to convert point data.";
+            return;
+        }
+    }
+
+    out.write(reinterpret_cast<char*>(&nPoints), sizeof(int64_t));
+    out.write(reinterpret_cast<char*>(pointData.data()), nFloats * sizeof(float));
+
+    in.close();
+    out.close();
+}
+
+documentation::Documentation MilkywayPointsConversionTask::documentation()
+{
+    return documentation::Documentation();
+}
+
+}

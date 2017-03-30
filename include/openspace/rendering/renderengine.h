@@ -29,7 +29,9 @@
 
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 #include <openspace/util/syncdata.h>
 
@@ -74,15 +76,12 @@ public:
         FPSAvg
     };
 
-    static const std::string KeyFontMono;
-    static const std::string KeyFontLight;
-    static const std::vector<FrametimeType> FrametimeTypes;
-
     RenderEngine();
     ~RenderEngine();
     
-    bool initialize();
-    bool deinitialize();
+    void initialize();
+    void initializeGL();
+    void deinitialize();
 
     void setSceneGraph(Scene* sceneGraph);
     Scene* scene();
@@ -93,7 +92,6 @@ public:
     RaycasterManager& raycasterManager();
 
     // sgct wrapped functions
-    bool initializeGL();
     
     void updateSceneGraph();
     void updateShaderPrograms();
@@ -106,19 +104,12 @@ public:
     void renderShutdownInformation(float timer, float fullTime);
     void postDraw();
 
-    void takeScreenshot(bool applyWarping = false);
-    void toggleInfoText(bool b);
-
     // Performance measurements
     bool doesPerformanceMeasurements() const;
     performance::PerformanceManager* performanceManager();
 
     float globalBlackOutFactor();
     void setGlobalBlackOutFactor(float factor);
-    void setNAaSamples(int nAaSamples);
-    void setShowFrameNumber(bool enabled);
-
-    void setDisableRenderingOnMaster(bool enabled);
 
     void registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
     void unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s);
@@ -174,9 +165,6 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-    // This is a temporary method to change the origin of the coordinate system ---abock
-    void changeViewPoint(std::string origin);
-
     // Temporary fade functionality
     void startFading(int direction, float fadeDuration);
 
@@ -210,18 +198,21 @@ private:
 
     //FrametimeType _frametimeType;
 
-    bool _showInfo;
-    bool _showLog;
-    bool _takeScreenshot;
-    bool _applyWarping;
-    bool _showFrameNumber;
+    properties::BoolProperty _showInfo;
+    properties::BoolProperty _showLog;
+    
+    properties::TriggerProperty _takeScreenshot;
+    bool _shouldTakeScreenshot;
+    properties::BoolProperty _applyWarping;
+    properties::BoolProperty _showFrameNumber;
+    properties::BoolProperty _disableMasterRendering;
 
     float _globalBlackOutFactor;
     float _fadeDuration;
     float _currentFadeTime;
     int _fadeDirection;
-    int _nAaSamples;
-    unsigned int _frameNumber;
+    properties::IntProperty _nAaSamples;
+    uint64_t _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
     std::vector<std::shared_ptr<ScreenSpaceRenderable>> _screenSpaceRenderables;
@@ -230,8 +221,6 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _fontInfo = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontDate = nullptr;
     std::shared_ptr<ghoul::fontrendering::Font> _fontLog = nullptr;
-
-    bool _disableMasterRendering = false;
 };
 
 } // namespace openspace

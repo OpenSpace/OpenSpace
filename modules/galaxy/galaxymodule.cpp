@@ -27,6 +27,8 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
 #include <modules/galaxy/rendering/renderablegalaxy.h>
+#include <modules/galaxy/tasks/milkywayconversiontask.h>
+#include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
 
 namespace openspace {
 
@@ -36,6 +38,11 @@ void GalaxyModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableGalaxy>("RenderableGalaxy");
+
+    auto fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fRenderable, "No task factory existed");
+    fTask->registerClass<MilkywayConversionTask>("MilkywayConversionTask");
+    fTask->registerClass<MilkywayPointsConversionTask>("MilkywayPointsConversionTask");
 }
  
 } // namespace openspace

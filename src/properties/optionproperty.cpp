@@ -98,6 +98,7 @@ std::string OptionProperty::getDescriptionByValue(int value) {
             return option.description;
         }
     }
+    return "";
 }
 
 std::string OptionProperty::generateAdditionalDescription() const {

@@ -24,66 +24,50 @@
 
 #include <openspace/rendering/renderengine.h> 
 
-#include <openspace/network/parallelconnection.h>
-
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 #include <modules/newhorizons/util/imagesequencer.h>
 #endif
-#include <openspace/mission/missionmanager.h>
 
-#include <openspace/rendering/renderer.h>
+#include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/mission/missionmanager.h>
+#include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
-
-#include <modules/base/rendering/screenspaceimage.h>
-#include <modules/base/rendering/screenspaceframebuffer.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-
-#include <openspace/performance/performancemanager.h>
-
-#include <openspace/documentation/documentationengine.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/interactionhandler.h>
-#include <openspace/scene/scene.h>
+#include <openspace/rendering/renderer.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
-//#include <openspace/rendering/renderablepath.h>
-#include <modules/base/rendering/renderablepath.h>
-#include <openspace/util/syncbuffer.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/sharedmemory.h>
-#include <ghoul/opengl/programobject.h>
-#include <openspace/engine/configurationmanager.h>
-#include <ghoul/systemcapabilities/systemcapabilities.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/font.h>
-#include <ghoul/glm.h>
-#include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/rendering/screenspacerenderable.h>
 
+#include <ghoul/glm.h>
+#include <ghoul/font/font.h>
+#include <ghoul/font/fontmanager.h>
+#include <ghoul/font/fontrenderer.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/io/texture/texturewriter.h>
+#include <ghoul/io/texture/texturereadercmap.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+
 #ifdef GHOUL_USE_DEVIL
 #include <ghoul/io/texture/texturereaderdevil.h>
 #endif //GHOUL_USE_DEVIL
 #ifdef GHOUL_USE_FREEIMAGE
 #include <ghoul/io/texture/texturereaderfreeimage.h>
 #endif // GHOUL_USE_FREEIMAGE
-#include <ghoul/io/texture/texturereadercmap.h>
-#include <ghoul/misc/exception.h>
 
 #ifdef GHOUL_USE_SOIL
 #include <ghoul/io/texture/texturereadersoil.h>
+#include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/io/texture/texturewritersoil.h>
 #endif //GHOUL_USE_SOIL
 
 #include <array>
-#include <fstream>
 #include <stack>
 
 // ABuffer defines
@@ -93,27 +77,23 @@
 #include "renderengine_lua.inl"
 
 namespace {
-    const std::string _loggerCat = "RenderEngine";
+    const char* _loggerCat = "RenderEngine";
 
-    const std::string KeyRenderingMethod = "RenderingMethod";   
-    std::chrono::seconds ScreenLogTimeToLive(15);
-    const std::string DefaultRenderingMethod = "ABuffer";
-    const std::string RenderFsPath = "${SHADERS}/render.frag";
-}
+    const char* KeyRenderingMethod = "RenderingMethod";   
+    const std::chrono::seconds ScreenLogTimeToLive(15);
+    const char* DefaultRenderingMethod = "ABuffer";
+    const char* RenderFsPath = "${SHADERS}/render.frag";
+    
+    const char* KeyFontMono = "Mono";
+    const char* KeyFontLight = "Light";
+} // namespace
 
 
 namespace openspace {
 
-const std::string RenderEngine::KeyFontMono = "Mono";
-const std::string RenderEngine::KeyFontLight = "Light";
-const std::vector<RenderEngine::FrametimeType> RenderEngine::FrametimeTypes({
-    RenderEngine::FrametimeType::DtTimeAvg,
-    RenderEngine::FrametimeType::FPS,
-    RenderEngine::FrametimeType::FPSAvg
-});
-
 RenderEngine::RenderEngine()
-    : _mainCamera(nullptr)
+    : properties::PropertyOwner("RenderEngine")
+    , _mainCamera(nullptr)
     , _raycasterManager(nullptr)
     , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
     , _frametimeType(
@@ -121,24 +101,25 @@ RenderEngine::RenderEngine()
         "Type of the frametime display",
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _showInfo("showInfo", "Show Render Information", true)
+    , _showLog("showLog", "Show the OnScreen log", true)
+    , _nAaSamples("nAaSamples", "Number of Antialiasing samples", 8, 1, 16)
+    , _applyWarping("applyWarpingScreenshot", "Apply Warping to Screenshots", false)
+    , _takeScreenshot("takeScreenshot", "Take Screenshot")
+    , _showFrameNumber("showFrameNumber", "Show Frame Number", false)
+    , _disableMasterRendering("disableMasterRendering", "Disable Master Rendering", false)
+    , _shouldTakeScreenshot(false)
     , _sceneGraph(nullptr)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
     , _performanceManager(nullptr)
     , _log(nullptr)
-    , _showInfo(true)
-    , _showLog(true)
-    , _takeScreenshot(false)
-    , _showFrameNumber(false)
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
     , _frameNumber(0)
-    //, _frametimeType(FrametimeType::DtTimeAvg)
 {
-    setName("RenderEngine");
-
     _performanceMeasurements.onChange([this](){
         if (_performanceMeasurements) {
             if (!_performanceManager) {
@@ -165,6 +146,26 @@ RenderEngine::RenderEngine()
         "Average frames per second"
     );
     addProperty(_frametimeType);
+    
+    addProperty(_showInfo);
+    addProperty(_showLog);
+    
+    _nAaSamples.onChange([this](){
+        if (_renderer) {
+            _renderer->setNAaSamples(_nAaSamples);
+        }
+    });
+    addProperty(_nAaSamples);
+    addProperty(_applyWarping);
+    
+    _takeScreenshot.onChange([this](){
+        _shouldTakeScreenshot = true;
+    });
+    addProperty(_takeScreenshot);
+    
+    addProperty(_showFrameNumber);
+    
+    addProperty(_disableMasterRendering);
 }
 
 RenderEngine::~RenderEngine() {
@@ -175,53 +176,29 @@ RenderEngine::~RenderEngine() {
     delete _raycasterManager;
 }
 
-bool RenderEngine::deinitialize() {
-    for (auto screenspacerenderable : _screenSpaceRenderables) {
-        screenspacerenderable->deinitialize();
-    }
-
-    MissionManager::deinitialize();
-
-    _sceneGraph->clearSceneGraph();
-    return true;
-}
-
-void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
-    _rendererImplementation = rendererFromString(renderingMethod);
-
-    std::unique_ptr<Renderer> newRenderer = nullptr;
-    switch (_rendererImplementation) {
-    case RendererImplementation::Framebuffer:
-        newRenderer = std::make_unique<FramebufferRenderer>();
-        break;
-    case RendererImplementation::ABuffer:
-        newRenderer = std::make_unique<ABufferRenderer>();
-        break;
-    case RendererImplementation::Invalid:
-        LFATAL("Rendering method '" << renderingMethod << "' not among the available "
-               << "rendering methods");
-    }
-
-    setRenderer(std::move(newRenderer));
-}
-
-bool RenderEngine::initialize() {
+void RenderEngine::initialize() {
     _frameNumber = 0;
     std::string renderingMethod = DefaultRenderingMethod;
-    
-    // If the user specified a rendering method that he would like to use, use that
 
-    if (OsEng.configurationManager().hasKeyAndValue<std::string>(KeyRenderingMethod)) {
-        renderingMethod = OsEng.configurationManager().value<std::string>(KeyRenderingMethod);
+    // If the user specified a rendering method that he would like to use, use that
+    auto& confManager = OsEng.configurationManager();
+    if (confManager.hasKeyAndValue<std::string>(KeyRenderingMethod)) {
+        renderingMethod = confManager.value<std::string>(KeyRenderingMethod);
     } else {
-        using Version = ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version;
+        using Version = ghoul::systemcapabilities::Version;
 
         // The default rendering method has a requirement of OpenGL 4.3, so if we are
         // below that, we will fall back to frame buffer operation
-        if (OpenGLCap.openGLVersion() < Version{4,3,0}) {
+        if (OpenGLCap.openGLVersion() < Version{ 4,3,0 }) {
             LINFO("Falling back to framebuffer implementation due to OpenGL limitations");
             renderingMethod = "Framebuffer";
         }
+    }
+    
+    if (confManager.hasKey(ConfigurationManager::KeyDisableMasterRendering)) {
+        _disableMasterRendering = confManager.value<bool>(
+            ConfigurationManager::KeyDisableMasterRendering
+        );
     }
 
     _raycasterManager = new RaycasterManager();
@@ -248,22 +225,20 @@ bool RenderEngine::initialize() {
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderSOIL>());
     ghoul::io::TextureWriter::ref().addWriter(std::make_shared<ghoul::io::TextureWriterSOIL>());
 #endif // GHOUL_USE_SOIL
-  
+
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
 
     MissionManager::initialize();
-
-    return true;
 }
 
-bool RenderEngine::initializeGL() {
+void RenderEngine::initializeGL() {
     // TODO:    Fix the power scaled coordinates in such a way that these 
     //            values can be set to more realistic values
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
     OsEng.windowWrapper().setNearFarClippingPlane(0.001f, 1000.f);
-    
+
     try {
         const float fontSizeBig = 50.f;
         _fontBig = OsEng.fontManager().font(KeyFontMono, fontSizeBig);
@@ -273,83 +248,82 @@ bool RenderEngine::initializeGL() {
         _fontInfo = OsEng.fontManager().font(KeyFontMono, fontSizeMono);
         const float fontSizeLight = 8.f;
         _fontLog = OsEng.fontManager().font(KeyFontLight, fontSizeLight);
-    }
-    catch (const ghoul::fontrendering::Font::FreeTypeException& e) {
+    } catch (const ghoul::fontrendering::Font::FreeTypeException& e) {
         LERROR(e.what());
         throw;
     }
-   
-    
-    
+
+
+
     // ALL OF THIS HAS TO BE CHECKED
     // ---abock
-    
-    
-//    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.001f, 1000.0f);
+
+
+    //    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.001f, 1000.0f);
     // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 30.0f);
 
     // calculating the maximum field of view for the camera, used to
     // determine visibility of objects in the scene graph
-/*    if (sgct::Engine::instance()->getCurrentRenderTarget() == sgct::Engine::NonLinearBuffer) {
-        // fisheye mode, looking upwards to the "dome"
-        glm::vec4 upDirection(0, 1, 0, 0);
+    /*    if (sgct::Engine::instance()->getCurrentRenderTarget() == sgct::Engine::NonLinearBuffer) {
+    // fisheye mode, looking upwards to the "dome"
+    glm::vec4 upDirection(0, 1, 0, 0);
 
-        // get the tilt and rotate the view
-        const float tilt = wPtr->getFisheyeTilt();
-        glm::mat4 tiltMatrix
-            = glm::rotate(glm::mat4(1.0f), tilt, glm::vec3(1.0f, 0.0f, 0.0f));
-        const glm::vec4 viewdir = tiltMatrix * upDirection;
+    // get the tilt and rotate the view
+    const float tilt = wPtr->getFisheyeTilt();
+    glm::mat4 tiltMatrix
+    = glm::rotate(glm::mat4(1.0f), tilt, glm::vec3(1.0f, 0.0f, 0.0f));
+    const glm::vec4 viewdir = tiltMatrix * upDirection;
 
-        // set the tilted view and the FOV
-        _mainCamera->setCameraDirection(glm::vec3(viewdir[0], viewdir[1], viewdir[2]));
-        _mainCamera->setMaxFov(wPtr->getFisheyeFOV());
-        _mainCamera->setLookUpVector(glm::vec3(0.0, 1.0, 0.0));
+    // set the tilted view and the FOV
+    _mainCamera->setCameraDirection(glm::vec3(viewdir[0], viewdir[1], viewdir[2]));
+    _mainCamera->setMaxFov(wPtr->getFisheyeFOV());
+    _mainCamera->setLookUpVector(glm::vec3(0.0, 1.0, 0.0));
     }
     else {*/
-        // get corner positions, calculating the forth to easily calculate center
-        
-  //      glm::vec3 corners[4];
-  //      sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getWindowPtr(0);
-  //      sgct_core::BaseViewport* vp = wPtr->getViewport(0);
-  //      sgct_core::SGCTProjectionPlane* projectionPlane = vp->getProjectionPlane();
+    // get corner positions, calculating the forth to easily calculate center
 
-  //      corners[0] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::LowerLeft));
-  //      corners[1] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::UpperLeft));
-  //      corners[2] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::UpperRight));
-  //      corners[3] = glm::vec3(corners[2][0], corners[0][1], corners[2][2]);
-  //       
-  //      const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3]);
-        ////    
-        //const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getDefaultUserPtr()->getPos();
-        ////// get viewdirection, stores the direction in the camera, used for culling
-        //const glm::vec3 viewdir = glm::normalize(eyePosition - center);
+    //      glm::vec3 corners[4];
+    //      sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getWindowPtr(0);
+    //      sgct_core::BaseViewport* vp = wPtr->getViewport(0);
+    //      sgct_core::SGCTProjectionPlane* projectionPlane = vp->getProjectionPlane();
 
-        //const glm::vec3 upVector = corners[0] - corners[1];
+    //      corners[0] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::LowerLeft));
+    //      corners[1] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::UpperLeft));
+    //      corners[2] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::UpperRight));
+    //      corners[3] = glm::vec3(corners[2][0], corners[0][1], corners[2][2]);
+    //       
+    //      const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3]);
+    ////    
+    //const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getDefaultUserPtr()->getPos();
+    ////// get viewdirection, stores the direction in the camera, used for culling
+    //const glm::vec3 viewdir = glm::normalize(eyePosition - center);
 
-        
+    //const glm::vec3 upVector = corners[0] - corners[1];
 
-        //_mainCamera->setCameraDirection(glm::normalize(-viewdir));
-     //_mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
-        //_mainCamera->setLookUpVector(glm::normalize(upVector));
-        //_mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
 
-        // set the initial fov to be 0.0 which means everything will be culled
-        //float maxFov = 0.0f;
-        float maxFov = std::numeric_limits<float>::max();
 
-        //// for each corner
-        //for (int i = 0; i < 4; ++i) {
-        //    // calculate radians to corner
-        //    glm::vec3 dir = glm::normalize(eyePosition - corners[i]);
-        //    float radsbetween = acos(glm::dot(viewdir, dir))
-        //        / (glm::length(viewdir) * glm::length(dir));
+    //_mainCamera->setCameraDirection(glm::normalize(-viewdir));
+    //_mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
+    //_mainCamera->setLookUpVector(glm::normalize(upVector));
+    //_mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
 
-        //    // the angle to a corner is larger than the current maxima
-        //    if (radsbetween > maxFov) {
-        //        maxFov = radsbetween;
-        //    }
-        //}
-        _mainCamera->setMaxFov(maxFov);
+    // set the initial fov to be 0.0 which means everything will be culled
+    //float maxFov = 0.0f;
+    float maxFov = std::numeric_limits<float>::max();
+
+    //// for each corner
+    //for (int i = 0; i < 4; ++i) {
+    //    // calculate radians to corner
+    //    glm::vec3 dir = glm::normalize(eyePosition - corners[i]);
+    //    float radsbetween = acos(glm::dot(viewdir, dir))
+    //        / (glm::length(viewdir) * glm::length(dir));
+
+    //    // the angle to a corner is larger than the current maxima
+    //    if (radsbetween > maxFov) {
+    //        maxFov = radsbetween;
+    //    }
+    //}
+    _mainCamera->setMaxFov(maxFov);
     //}
 
     LINFO("Initializing Log");
@@ -358,7 +332,35 @@ bool RenderEngine::initializeGL() {
     ghoul::logging::LogManager::ref().addLog(std::move(log));
 
     LINFO("Finished initializing GL");
-    return true;
+}
+
+void RenderEngine::deinitialize() {
+    for (auto screenspacerenderable : _screenSpaceRenderables) {
+        screenspacerenderable->deinitialize();
+    }
+
+    MissionManager::deinitialize();
+
+    _sceneGraph->clearSceneGraph();
+}
+
+void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
+    _rendererImplementation = rendererFromString(renderingMethod);
+
+    std::unique_ptr<Renderer> newRenderer = nullptr;
+    switch (_rendererImplementation) {
+        case RendererImplementation::Framebuffer:
+            newRenderer = std::make_unique<FramebufferRenderer>();
+            break;
+        case RendererImplementation::ABuffer:
+            newRenderer = std::make_unique<ABufferRenderer>();
+            break;
+        case RendererImplementation::Invalid:
+            LFATAL("Rendering method '" << renderingMethod << "' not among the available "
+                   << "rendering methods");
+    }
+
+    setRenderer(std::move(newRenderer));
 }
 
 void RenderEngine::updateSceneGraph() {
@@ -386,7 +388,7 @@ void RenderEngine::updateSceneGraph() {
 }
 
 void RenderEngine::updateShaderPrograms() {
-    for (auto program : _programs) {
+    for (ghoul::opengl::ProgramObject* program : _programs) {
         try {
             if (program->isDirty()) {
                 program->rebuildFromFile();
@@ -413,7 +415,7 @@ void RenderEngine::updateRenderer() {
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
-    for (auto screenspacerenderable : _screenSpaceRenderables) {
+    for (auto& screenspacerenderable : _screenSpaceRenderables) {
         screenspacerenderable->update();
     }
 }
@@ -444,12 +446,13 @@ glm::ivec2 RenderEngine::fontResolution() const {
 
 
 void RenderEngine::updateFade() {
-    //temporary fade funtionality
-    float fadedIn = 1.0;
-    float fadedOut = 0.0;
+    // Temporary fade funtionality
+    const float fadedIn = 1.0;
+    const float fadedOut = 0.0;
     // Don't restart the fade if you've already done it in that direction
-    if ((_fadeDirection > 0 && _globalBlackOutFactor == fadedIn)
-        || (_fadeDirection < 0 && _globalBlackOutFactor == fadedOut)) {
+    const bool isFadedIn = (_fadeDirection > 0 && _globalBlackOutFactor == fadedIn);
+    const bool isFadedOut = (_fadeDirection < 0 && _globalBlackOutFactor == fadedOut);
+    if (isFadedIn || isFadedOut) {
         _fadeDirection = 0;
     }
 
@@ -459,11 +462,23 @@ void RenderEngine::updateFade() {
             _fadeDirection = 0;
         }
         else {
-            if (_fadeDirection < 0)
-                _globalBlackOutFactor = glm::smoothstep(1.f, 0.f, _currentFadeTime / _fadeDuration);
-            else
-                _globalBlackOutFactor = glm::smoothstep(0.f, 1.f, _currentFadeTime / _fadeDuration);
-            _currentFadeTime += static_cast<float>(OsEng.windowWrapper().averageDeltaTime());
+            if (_fadeDirection < 0) {
+                _globalBlackOutFactor = glm::smoothstep(
+                    1.f,
+                    0.f,
+                    _currentFadeTime / _fadeDuration
+                );
+            }
+            else {
+                _globalBlackOutFactor = glm::smoothstep(
+                    0.f,
+                    1.f,
+                    _currentFadeTime / _fadeDuration
+                );
+            }
+            _currentFadeTime += static_cast<float>(
+                OsEng.windowWrapper().averageDeltaTime()
+            );
         }
     }
 }
@@ -495,9 +510,8 @@ void RenderEngine::render(const glm::mat4& viewMatrix, const glm::mat4& projecti
     }
     
     _frameNumber++;
-
     
-    for (auto screenSpaceRenderable : _screenSpaceRenderables) {
+    for (auto& screenSpaceRenderable : _screenSpaceRenderables) {
         if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady()) {
             screenSpaceRenderable->render();
         }
@@ -535,23 +549,16 @@ void RenderEngine::postDraw() {
         Time::ref().setTimeJumped(false);
     }
 
-    if (_takeScreenshot) {
+    if (_shouldTakeScreenshot) {
         OsEng.windowWrapper().takeScreenshot(_applyWarping);
-        _takeScreenshot = false;
+        _shouldTakeScreenshot = false;
     }
 
     if (_performanceManager) {
-        _performanceManager->storeScenePerformanceMeasurements(scene()->allSceneGraphNodes());
+        _performanceManager->storeScenePerformanceMeasurements(
+            scene()->allSceneGraphNodes()
+        );
     }
-}
-
-void RenderEngine::takeScreenshot(bool applyWarping) {
-    _takeScreenshot = true;
-    _applyWarping = applyWarping;
-}
-
-void RenderEngine::toggleInfoText(bool b) {
-    _showInfo = b;
 }
 
 Scene* RenderEngine::scene() {
@@ -597,10 +604,9 @@ void RenderEngine::startFading(int direction, float fadeDuration) {
  * Build a program object for rendering with the used renderer
  */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
-    std::string name,
-    std::string vsPath,
-    std::string fsPath,
-    const ghoul::Dictionary& data) {
+                                                     std::string name, std::string vsPath,
+                                        std::string fsPath, const ghoul::Dictionary& data)
+{
 
     ghoul::Dictionary dict = data;
 
@@ -611,11 +617,13 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // instead of a void main() setting glFragColor, glFragDepth, etc.
     dict.setValue("fragmentPath", fsPath);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
+    using namespace ghoul::opengl;
+    std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         name,
         vsPath,
         RenderFsPath,
-        dict);
+        dict
+    );
 
     if (program) {
         _programs.push_back(program.get());
@@ -627,12 +635,10 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
  * Build a program object for rendering with the used renderer
  */
 std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
-    std::string name,
-    std::string vsPath,
-    std::string fsPath,
-    std::string csPath,
-    const ghoul::Dictionary& data) {
-
+                                                     std::string name, std::string vsPath,
+                                                   std::string fsPath, std::string csPath,
+                                                            const ghoul::Dictionary& data)
+{
     ghoul::Dictionary dict = data;
     dict.setValue("rendererData", _rendererData);
 
@@ -641,12 +647,14 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     // instead of a void main() setting glFragColor, glFragDepth, etc.
     dict.setValue("fragmentPath", fsPath);
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> program = ghoul::opengl::ProgramObject::Build(
+    using namespace ghoul::opengl;
+    std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         name,
         vsPath,
         RenderFsPath,
         csPath,
-        dict);
+        dict
+    );
 
     if (program) {
         _programs.push_back(program.get());
@@ -654,16 +662,18 @@ std::unique_ptr<ghoul::opengl::ProgramObject> RenderEngine::buildRenderProgram(
     return program;
 }
 
-void RenderEngine::removeRenderProgram(const std::unique_ptr<ghoul::opengl::ProgramObject>& program) {
-    if (!program)
+void RenderEngine::removeRenderProgram(
+                             const std::unique_ptr<ghoul::opengl::ProgramObject>& program)
+{
+    if (!program) {
         return;
+    }
 
-    ghoul::opengl::ProgramObject* ptr = program.get();
     auto it = std::find(
         _programs.begin(),
         _programs.end(),
-        ptr
-        );
+        program.get()
+    );
 
     if (it != _programs.end()) {
         _programs.erase(it);
@@ -677,7 +687,7 @@ void RenderEngine::removeRenderProgram(const std::unique_ptr<ghoul::opengl::Prog
  */
 void RenderEngine::setRendererData(const ghoul::Dictionary& data) {
     _rendererData = data;
-    for (auto program : _programs) {
+    for (ghoul::opengl::ProgramObject* program : _programs) {
         ghoul::Dictionary dict = program->dictionary();
         dict.setValue("rendererData", _rendererData);
         program->setDictionary(dict);
@@ -692,7 +702,7 @@ void RenderEngine::setRendererData(const ghoul::Dictionary& data) {
 */
 void RenderEngine::setResolveData(const ghoul::Dictionary& data) {
     _resolveData = data;
-    for (auto program : _programs) {
+    for (ghoul::opengl::ProgramObject* program : _programs) {
         ghoul::Dictionary dict = program->dictionary();
         dict.setValue("resolveData", _resolveData);
         program->setDictionary(dict);
@@ -713,8 +723,6 @@ void RenderEngine::postRaycast(ghoul::opengl::ProgramObject& programObject) {
     _renderer->postRaycast(programObject);
 }
 
-
-
 /**
  * Set renderer
  */
@@ -731,43 +739,15 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
     _renderer->setScene(_sceneGraph);
 }
 
-
-void RenderEngine::setNAaSamples(int nAaSamples) {
-    _nAaSamples = nAaSamples;
-    if (_renderer) {
-        _renderer->setNAaSamples(_nAaSamples);
-    }
-}
-
 scripting::LuaLibrary RenderEngine::luaLibrary() {
     return {
         "",
         {
             {
-                "takeScreenshot",
-                &luascriptfunctions::takeScreenshot,
-                "(optional bool)",
-                "Renders the current image to a file on disk. If the boolean parameter "
-                "is set to 'true', the screenshot will include the blending and the "
-                "meshes. If it is 'false', the straight FBO will be recorded."
-            },
-            {
                 "setRenderer",
                 &luascriptfunctions::setRenderer,
                 "string",
                 "Sets the renderer (ABuffer or FrameBuffer)"
-            },
-            {
-                "setNAaSamples",
-                &luascriptfunctions::setNAaSamples,
-                "int",
-                "Sets the number of anti-aliasing (MSAA) samples"
-            },
-            {
-                "showRenderInformation",
-                &luascriptfunctions::showRenderInformation,
-                "bool",
-                "Toggles the showing of render information on-screen text"
             },
             {
                 "toggleFade",
@@ -812,415 +792,20 @@ performance::PerformanceManager* RenderEngine::performanceManager() {
     return _performanceManager.get();
 }
 
-// This method is temporary and will be removed once the scalegraph is in effect ---abock
-void RenderEngine::changeViewPoint(std::string origin) {
-//    SceneGraphNode* solarSystemBarycenterNode = scene()->sceneGraphNode("SolarSystemBarycenter");
-//    SceneGraphNode* plutoBarycenterNode = scene()->sceneGraphNode("PlutoBarycenter");
-//    SceneGraphNode* newHorizonsNode = scene()->sceneGraphNode("NewHorizons");
-//    SceneGraphNode* newHorizonsPathNodeJ = scene()->sceneGraphNode("NewHorizonsPathJupiter");
-//    SceneGraphNode* newHorizonsPathNodeP = scene()->sceneGraphNode("NewHorizonsPathPluto");
-////    SceneGraphNode* cg67pNode = scene()->sceneGraphNode("67P");
-////    SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
-//
-//    RenderablePath* nhPath;
-//
-//    SceneGraphNode* jupiterBarycenterNode = scene()->sceneGraphNode("JupiterBarycenter");
-//
-//    //SceneGraphNode* newHorizonsGhostNode = scene()->sceneGraphNode("NewHorizonsGhost");
-//    //SceneGraphNode* dawnNode = scene()->sceneGraphNode("Dawn");
-//    //SceneGraphNode* vestaNode = scene()->sceneGraphNode("Vesta");
-//
-//  //  if (solarSystemBarycenterNode == nullptr || plutoBarycenterNode == nullptr || 
-//        //jupiterBarycenterNode == nullptr) {
-//     //   LERROR("Necessary nodes does not exist");
-//        //return;
-//  //  }
-//
-//    if (origin == "Pluto") {
-//        if (newHorizonsPathNodeP) {
-//            Renderable* R = newHorizonsPathNodeP->renderable();
-//            newHorizonsPathNodeP->setParent(plutoBarycenterNode);
-//            nhPath = static_cast<RenderablePath*>(R);
-//            nhPath->calculatePath("PLUTO BARYCENTER");
-//        }
-//
-//        plutoBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-//        plutoBarycenterNode->setEphemeris(new StaticEphemeris);
-//        
-//        solarSystemBarycenterNode->setParent(plutoBarycenterNode);
-//        newHorizonsNode->setParent(plutoBarycenterNode);
-//        //newHorizonsGhostNode->setParent(plutoBarycenterNode);
-//
-//        //dawnNode->setParent(plutoBarycenterNode);
-//        //vestaNode->setParent(plutoBarycenterNode);
-//
-//        //newHorizonsTrailNode->setParent(plutoBarycenterNode);
-//        ghoul::Dictionary solarDictionary =
-//        {
-//            { std::string("Type"), std::string("Spice") },
-//            { std::string("Body"), std::string("SUN") },
-//            { std::string("Reference"), std::string("GALACTIC") },
-//            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-//            { std::string("Kernels"), ghoul::Dictionary() }
-//        };
-//        
-//        ghoul::Dictionary jupiterDictionary =
-//        {
-//            { std::string("Type"), std::string("Spice") },
-//            { std::string("Body"), std::string("JUPITER BARYCENTER") },
-//            { std::string("Reference"), std::string("GALACTIC") },
-//            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-//            { std::string("Kernels"), ghoul::Dictionary() }
-//        };
-//
-//        ghoul::Dictionary newHorizonsDictionary =
-//        {
-//            { std::string("Type"), std::string("Spice") },
-//            { std::string("Body"), std::string("NEW HORIZONS") },
-//            { std::string("Reference"), std::string("GALACTIC") },
-//            { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-//            { std::string("Kernels"), ghoul::Dictionary() }
-//        };
-//
-//        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-//        jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
-//        newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-//        //newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-//
-//
-//        //ghoul::Dictionary dawnDictionary =
-//        //{
-//        //    { std::string("Type"), std::string("Spice") },
-//        //    { std::string("Body"), std::string("DAWN") },
-//        //    { std::string("Reference"), std::string("GALACTIC") },
-//        //    { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-//        //    { std::string("Kernels"), ghoul::Dictionary() }
-//        //};
-//        //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
-//        //
-//        //ghoul::Dictionary vestaDictionary =
-//        //{
-//        //      { std::string("Type"), std::string("Spice") },
-//        //      { std::string("Body"), std::string("VESTA") },
-//        //      { std::string("Reference"), std::string("GALACTIC") },
-//        //      { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-//        //      { std::string("Kernels"), ghoul::Dictionary() }
-//        //};
-//        //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
-//
-//        
-//        //ghoul::Dictionary newHorizonsGhostDictionary =
-//        //{
-//        //    { std::string("Type"), std::string("Spice") },
-//        //    { std::string("Body"), std::string("NEW HORIZONS") },
-//        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
-//        //    { std::string("Reference"), std::string("GALACTIC") },
-//        //    { std::string("Observer"), std::string("PLUTO BARYCENTER") },
-//        //    { std::string("Kernels"), ghoul::Dictionary() }
-//        //};
-//        //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-//        
-//        return;
-//    }
-//    if (origin == "Sun") {
-//        solarSystemBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-//
-//        if (plutoBarycenterNode)
-//            plutoBarycenterNode->setParent(solarSystemBarycenterNode);
-//        jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
-//        if (newHorizonsNode)
-//            newHorizonsNode->setParent(solarSystemBarycenterNode);
-//        //newHorizonsGhostNode->setParent(solarSystemBarycenterNode);
-//
-//        //newHorizonsTrailNode->setParent(solarSystemBarycenterNode);
-//        //dawnNode->setParent(solarSystemBarycenterNode);
-//        //vestaNode->setParent(solarSystemBarycenterNode);
-//
-//        ghoul::Dictionary plutoDictionary =
-//        {
-//            { std::string("Type"), std::string("Spice") },
-//            { std::string("Body"), std::string("PLUTO BARYCENTER") },
-//            { std::string("Reference"), std::string("GALACTIC") },
-//            { std::string("Observer"), std::string("SUN") },
-//            { std::string("Kernels"), ghoul::Dictionary() }
-//        };
-//        ghoul::Dictionary jupiterDictionary =
-//        {
-//            { std::string("Type"), std::string("Spice") },
-//            { std::string("Body"), std::string("JUPITER BARYCENTER") },
-//            { std::string("Reference"), std::string("GALACTIC") },
-//            { std::string("Observer"), std::string("SUN") },
-//            { std::string("Kernels"), ghoul::Dictionary() }
-//        };
-//        
-//        solarSystemBarycenterNode->setEphemeris(new StaticEphemeris);
-//        jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
-//        if (plutoBarycenterNode)
-//            plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
-//
-//        ghoul::Dictionary newHorizonsDictionary =
-//        {
-//            { std::string("Type"), std::string("Spice") },
-//            { std::string("Body"), std::string("NEW HORIZONS") },
-//            { std::string("Reference"), std::string("GALACTIC") },
-//            { std::string("Observer"), std::string("SUN") },
-//            { std::string("Kernels"), ghoul::Dictionary() }
-//        };
-//        if (newHorizonsNode)
-//            newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-//        //newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-//
-//        
-//        //ghoul::Dictionary dawnDictionary =
-//        //{
-//        //    { std::string("Type"), std::string("Spice") },
-//        //    { std::string("Body"), std::string("DAWN") },
-//        //    { std::string("Reference"), std::string("GALACTIC") },
-//        //    { std::string("Observer"), std::string("SUN") },
-//        //    { std::string("Kernels"), ghoul::Dictionary() }
-//        //};
-//        //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
-//        //
-//        //ghoul::Dictionary vestaDictionary =
-//        //{
-//        //    { std::string("Type"), std::string("Spice") },
-//        //    { std::string("Body"), std::string("VESTA") },
-//        //    { std::string("Reference"), std::string("GALACTIC") },
-//        //    { std::string("Observer"), std::string("SUN") },
-//        //    { std::string("Kernels"), ghoul::Dictionary() }
-//        //};
-//        //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
-//        
-//        
-//        //ghoul::Dictionary newHorizonsGhostDictionary =
-//        //{
-//        //    { std::string("Type"), std::string("Spice") },
-//        //    { std::string("Body"), std::string("NEW HORIZONS") },
-//        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
-//        //    { std::string("Reference"), std::string("GALACTIC") },
-//        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-//        //    { std::string("Kernels"), ghoul::Dictionary() }
-//        //};
-//        //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-//        
-//        return;
-//    }
-//    if (origin == "Jupiter") {
-//        if (newHorizonsPathNodeJ) {
-//            Renderable* R = newHorizonsPathNodeJ->renderable();
-//            newHorizonsPathNodeJ->setParent(jupiterBarycenterNode);
-//            nhPath = static_cast<RenderablePath*>(R);
-//            nhPath->calculatePath("JUPITER BARYCENTER");
-//        }
-//
-//        jupiterBarycenterNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-//        jupiterBarycenterNode->setEphemeris(new StaticEphemeris);
-//
-//        solarSystemBarycenterNode->setParent(jupiterBarycenterNode);
-//        if (newHorizonsNode)
-//            newHorizonsNode->setParent(jupiterBarycenterNode);
-//        //newHorizonsTrailNode->setParent(jupiterBarycenterNode);
-//
-//        //dawnNode->setParent(jupiterBarycenterNode);
-//        //vestaNode->setParent(jupiterBarycenterNode);
-//
-//
-//        ghoul::Dictionary solarDictionary =
-//        {
-//            { std::string("Type"), std::string("Spice") },
-//            { std::string("Body"), std::string("SUN") },
-//            { std::string("Reference"), std::string("GALACTIC") },
-//            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-//            { std::string("Kernels"), ghoul::Dictionary() }
-//        };
-//
-//        ghoul::Dictionary plutoDictionary =
-//        {
-//            { std::string("Type"), std::string("Spice") },
-//            { std::string("Body"), std::string("PlUTO BARYCENTER") },
-//            { std::string("Reference"), std::string("GALACTIC") },
-//            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-//            { std::string("Kernels"), ghoul::Dictionary() }
-//        };
-//
-//        ghoul::Dictionary newHorizonsDictionary =
-//        {
-//            { std::string("Type"), std::string("Spice") },
-//            { std::string("Body"), std::string("NEW HORIZONS") },
-//            { std::string("Reference"), std::string("GALACTIC") },
-//            { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-//            { std::string("Kernels"), ghoul::Dictionary() }
-//        };
-//        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-//        if (plutoBarycenterNode)
-//            plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
-//        if (newHorizonsNode)
-//            newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-//        //newHorizonsGhostNode->setParent(jupiterBarycenterNode);
-//        //newHorizonsTrailNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-//
-//
-//        //ghoul::Dictionary dawnDictionary =
-//        //{
-//        //    { std::string("Type"), std::string("Spice") },
-//        //    { std::string("Body"), std::string("DAWN") },
-//        //    { std::string("Reference"), std::string("GALACTIC") },
-//        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-//        //    { std::string("Kernels"), ghoul::Dictionary() }
-//        //};
-//        //dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
-//        //
-//        //ghoul::Dictionary vestaDictionary =
-//        //{
-//        //    { std::string("Type"), std::string("Spice") },
-//        //    { std::string("Body"), std::string("VESTA") },
-//        //    { std::string("Reference"), std::string("GALACTIC") },
-//        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-//        //    { std::string("Kernels"), ghoul::Dictionary() }
-//        //};
-//        //vestaNode->setEphemeris(new SpiceEphemeris(vestaDictionary));
-//
-//
-//        
-//        //ghoul::Dictionary newHorizonsGhostDictionary =
-//        //{
-//        //    { std::string("Type"), std::string("Spice") },
-//        //    { std::string("Body"), std::string("NEW HORIZONS") },
-//        //    { std::string("EphmerisGhosting"), std::string("TRUE") },
-//        //    { std::string("Reference"), std::string("GALACTIC") },
-//        //    { std::string("Observer"), std::string("JUPITER BARYCENTER") },
-//        //    { std::string("Kernels"), ghoul::Dictionary() }
-//        //};
-//        //newHorizonsGhostNode->setEphemeris(new SpiceEphemeris(newHorizonsGhostDictionary));
-//        //newHorizonsGhostNode->setParent(jupiterBarycenterNode);
-//
-//    
-//        return;
-//    }
-//    //if (origin == "Vesta") {
-//    //    
-//    //    vestaNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-//    //    vestaNode->setEphemeris(new StaticEphemeris);
-//    //
-//    //    solarSystemBarycenterNode->setParent(vestaNode);
-//    //    newHorizonsNode->setParent(vestaNode);
-//    //
-//    //    dawnNode->setParent(vestaNode);
-//    //    plutoBarycenterNode->setParent(vestaNode);
-//    //
-//    //
-//    //    ghoul::Dictionary plutoDictionary =
-//    //    {
-//    //        { std::string("Type"), std::string("Spice") },
-//    //        { std::string("Body"), std::string("PLUTO BARYCENTER") },
-//    //        { std::string("Reference"), std::string("GALACTIC") },
-//    //        { std::string("Observer"), std::string("VESTA") },
-//    //        { std::string("Kernels"), ghoul::Dictionary() }
-//    //    };
-//    //    ghoul::Dictionary solarDictionary =
-//    //    {
-//    //        { std::string("Type"), std::string("Spice") },
-//    //        { std::string("Body"), std::string("SUN") },
-//    //        { std::string("Reference"), std::string("GALACTIC") },
-//    //        { std::string("Observer"), std::string("VESTA") },
-//    //        { std::string("Kernels"), ghoul::Dictionary() }
-//    //    };
-//    //
-//    //    ghoul::Dictionary jupiterDictionary =
-//    //    {
-//    //        { std::string("Type"), std::string("Spice") },
-//    //        { std::string("Body"), std::string("JUPITER BARYCENTER") },
-//    //        { std::string("Reference"), std::string("GALACTIC") },
-//    //        { std::string("Observer"), std::string("VESTA") },
-//    //        { std::string("Kernels"), ghoul::Dictionary() }
-//    //    };
-//    //
-//    //    solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-//    //    plutoBarycenterNode->setEphemeris(new SpiceEphemeris(plutoDictionary));
-//    //    jupiterBarycenterNode->setEphemeris(new SpiceEphemeris(jupiterDictionary));
-//    //
-//    //    ghoul::Dictionary newHorizonsDictionary =
-//    //    {
-//    //        { std::string("Type"), std::string("Spice") },
-//    //        { std::string("Body"), std::string("NEW HORIZONS") },
-//    //        { std::string("Reference"), std::string("GALACTIC") },
-//    //        { std::string("Observer"), std::string("VESTA") },
-//    //        { std::string("Kernels"), ghoul::Dictionary() }
-//    //    };
-//    //    newHorizonsNode->setEphemeris(new SpiceEphemeris(newHorizonsDictionary));
-//    //
-//    //    ghoul::Dictionary dawnDictionary =
-//    //    {
-//    //        { std::string("Type"), std::string("Spice") },
-//    //        { std::string("Body"), std::string("DAWN") },
-//    //        { std::string("Reference"), std::string("GALACTIC") },
-//    //        { std::string("Observer"), std::string("VESTA") },
-//    //        { std::string("Kernels"), ghoul::Dictionary() }
-//    //    };
-//    //    dawnNode->setEphemeris(new SpiceEphemeris(dawnDictionary));
-//    //    vestaNode->setEphemeris(new StaticEphemeris);
-//    //
-//    //    return;
-//    //}
-//
-//    if (origin == "67P") {
-//        SceneGraphNode* rosettaNode = scene()->sceneGraphNode("Rosetta");
-//        SceneGraphNode* cgNode = scene()->sceneGraphNode("67P");
-//        //jupiterBarycenterNode->setParent(solarSystemBarycenterNode);
-//        //plutoBarycenterNode->setParent(solarSystemBarycenterNode);
-//        solarSystemBarycenterNode->setParent(cgNode);
-//        rosettaNode->setParent(cgNode);
-//        
-//        ghoul::Dictionary solarDictionary =
-//            {
-//            { std::string("Type"), std::string("Spice") },
-//                { std::string("Body"), std::string("SUN") },
-//                { std::string("Reference"), std::string("GALACTIC") },
-//                { std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
-//                { std::string("Kernels"), ghoul::Dictionary() }
-//            };
-//        solarSystemBarycenterNode->setEphemeris(new SpiceEphemeris(solarDictionary));
-//        
-//        ghoul::Dictionary rosettaDictionary =
-//            {
-//            { std::string("Type"), std::string("Spice") },
-//                { std::string("Body"), std::string("ROSETTA") },
-//                { std::string("Reference"), std::string("GALACTIC") },
-//                { std::string("Observer"), std::string("CHURYUMOV-GERASIMENKO") },
-//                { std::string("Kernels"), ghoul::Dictionary() }
-//            };
-//        
-//        cgNode->setParent(scene()->sceneGraphNode("SolarSystem"));
-//        rosettaNode->setEphemeris(new SpiceEphemeris(rosettaDictionary));
-//        cgNode->setEphemeris(new StaticEphemeris);
-//        
-//        return;
-//        
-//    }
-//
-//    LFATAL("This function is being misused with an argument of '" << origin << "'");
-}
-
-void RenderEngine::setShowFrameNumber(bool enabled){
-    _showFrameNumber = enabled;
-}
-
-void RenderEngine::setDisableRenderingOnMaster(bool enabled) {
-    _disableMasterRendering = enabled;
-}
-
 void RenderEngine::registerScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s)
 {
     s->initialize();
     _screenSpaceRenderables.push_back(s);
 }
 
-void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRenderable> s){
+void RenderEngine::unregisterScreenSpaceRenderable(
+                                                 std::shared_ptr<ScreenSpaceRenderable> s)
+{
     auto it = std::find(
         _screenSpaceRenderables.begin(),
         _screenSpaceRenderables.end(),
         s
-        );
+    );
 
     if (it != _screenSpaceRenderables.end()) {
         s->deinitialize();
@@ -1230,13 +815,16 @@ void RenderEngine::unregisterScreenSpaceRenderable(std::shared_ptr<ScreenSpaceRe
 
 void RenderEngine::unregisterScreenSpaceRenderable(std::string name){
     auto s = screenSpaceRenderable(name);
-    if(s)
+    if (s) {
         unregisterScreenSpaceRenderable(s);
+    }
 }
 
-std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(std::string name){
-    for(auto s : _screenSpaceRenderables){
-        if(s->name() == name){
+std::shared_ptr<ScreenSpaceRenderable> RenderEngine::screenSpaceRenderable(
+                                                                         std::string name)
+{
+    for (auto s : _screenSpaceRenderables) {
+        if (s->name() == name) {
             return s;
         }
     }
@@ -1254,27 +842,33 @@ std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const
     return res;
 }
 
-RenderEngine::RendererImplementation RenderEngine::rendererFromString(const std::string& impl) {
+RenderEngine::RendererImplementation RenderEngine::rendererFromString(
+                                                                  const std::string& impl)
+{
     const std::map<std::string, RenderEngine::RendererImplementation> RenderingMethods = {
         { "ABuffer", RendererImplementation::ABuffer },
         { "Framebuffer", RendererImplementation::Framebuffer }
     };
 
-    if (RenderingMethods.find(impl) != RenderingMethods.end())
+    if (RenderingMethods.find(impl) != RenderingMethods.end()) {
         return RenderingMethods.at(impl);
-    else
+    }
+    else {
         return RendererImplementation::Invalid;
+    }
 }
 
 std::string RenderEngine::progressToStr(int size, double t) {
     std::string progress = "|";
     int g = static_cast<int>((t * (size - 1)) + 1);
     g = std::max(g, 0);
-    for (int i = 0; i < g; i++)
+    for (int i = 0; i < g; i++) {
         progress.append("-");
+    }
     progress.append(">");
-    for (int i = 0; i < size - g; i++)
+    for (int i = 0; i < size - g; i++) {
         progress.append(" ");
+    }
     progress.append("|");
     return progress;
 }
@@ -1293,47 +887,53 @@ void RenderEngine::renderInformation() {
         penPosition.y -= _fontDate->height();
 
         if (_showInfo && _fontDate) {
-            RenderFontCr(*_fontDate,
+            RenderFontCr(
+                *_fontDate,
                 penPosition,
                 "Date: %s",
                 Time::ref().UTC().c_str()
             );
         }
         if (_showInfo && _fontInfo) {
-            RenderFontCr(*_fontInfo,
-                         penPosition,
-                         "Simulation increment (s): %.0f",
-                         Time::ref().deltaTime()
+            RenderFontCr(
+                *_fontInfo,
+                penPosition,
+                "Simulation increment (s): %.3f",
+                Time::ref().deltaTime()
             );
 
             FrametimeType frametimeType = FrametimeType(_frametimeType.value());
             switch (frametimeType) {
                 case FrametimeType::DtTimeAvg:
-                    RenderFontCr(*_fontInfo,
-                                 penPosition,
-                                 "Avg. Frametime: %.5f",
-                                 OsEng.windowWrapper().averageDeltaTime()
+                    RenderFontCr(
+                        *_fontInfo,
+                        penPosition,
+                        "Avg. Frametime: %.5f",
+                        OsEng.windowWrapper().averageDeltaTime()
                     );
                     break;
                 case FrametimeType::FPS:
-                    RenderFontCr(*_fontInfo,
-                                 penPosition,
-                                 "FPS: %3.2f",
-                                 1.0 / OsEng.windowWrapper().deltaTime()
+                    RenderFontCr(
+                        *_fontInfo,
+                        penPosition,
+                        "FPS: %3.2f",
+                        1.0 / OsEng.windowWrapper().deltaTime()
                     );
                     break;
                 case FrametimeType::FPSAvg:
-                    RenderFontCr(*_fontInfo,
-                                 penPosition,
-                                 "Avg. FPS: %3.2f",
-                                 1.0 / OsEng.windowWrapper().averageDeltaTime()
+                    RenderFontCr(
+                        *_fontInfo,
+                        penPosition,
+                        "Avg. FPS: %3.2f",
+                        1.0 / OsEng.windowWrapper().averageDeltaTime()
                     );
                     break;
                 default:
-                    RenderFontCr(*_fontInfo,
-                                 penPosition,
-                                 "Avg. Frametime: %.5f",
-                                 OsEng.windowWrapper().averageDeltaTime()
+                    RenderFontCr(
+                        *_fontInfo,
+                        penPosition,
+                        "Avg. Frametime: %.5f",
+                        OsEng.windowWrapper().averageDeltaTime()
                     );
                     break;
             }
@@ -1349,7 +949,8 @@ void RenderEngine::renderInformation() {
             if (nClients == 1) {
                 connectionInfo = "Hosting session with 1 client";
             } else {
-                connectionInfo = "Hosting session with " + std::to_string(nClients) + " clients";
+                connectionInfo =
+                    "Hosting session with " + std::to_string(nClients) + " clients";
             }
         } else if (status == ParallelConnection::Status::ClientWithHost) {
             nClients--;
@@ -1362,16 +963,19 @@ void RenderEngine::renderInformation() {
             status == ParallelConnection::Status::ClientWithoutHost) {
             connectionInfo += "\n";
             if (nClients > 2) {
-                connectionInfo += "You and " + std::to_string(nClients - 1) + " more clients are tuned in";
+                std::string c = std::to_string(nClients - 1);
+                connectionInfo += "You and " + c + " more clients are tuned in";
             } else if (nClients == 2) {
-                connectionInfo += "You and " + std::to_string(nClients - 1) + " more client are tuned in";
+                std::string c = std::to_string(nClients - 1);
+                connectionInfo += "You and " + c + " more client are tuned in";
             } else if (nClients == 1) {
                 connectionInfo += "You are the only client";
             }
         }
 
         if (connectionInfo != "") {
-            RenderFontCr(*_fontInfo,
+            RenderFontCr(
+                *_fontInfo,
                 penPosition,
                 connectionInfo.c_str()
             );
@@ -1396,7 +1000,6 @@ void RenderEngine::renderInformation() {
 //                const Mission& mission = MissionManager::ref().currentMission();
 
                 if (mission.phases().size() > 0) {
-
                     static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
                     //static const glm::vec4 missionProgressColor(0.4, 1.0, 1.0, 1);
                     static const glm::vec4 currentMissionColor(0.0, 0.5, 0.5, 1);
@@ -1497,6 +1100,8 @@ void RenderEngine::renderInformation() {
                         penPosition.y -= _fontInfo->height();
                     }
                     catch (...) {
+                        // @CLEANUP:  This is bad as it will discard all exceptions
+                        // without telling us about it! ---abock
                     }
                 }
 
@@ -1653,8 +1258,9 @@ void RenderEngine::renderInformation() {
 }
 
 void RenderEngine::renderScreenLog() {
-    if (!_showLog)
+    if (!_showLog) {
         return;
+    }
 
     _log->removeExpiredEntries();
 
@@ -1664,25 +1270,11 @@ void RenderEngine::renderScreenLog() {
     std::chrono::seconds fade(5);
 
     auto entries = _log->entries();
-    auto lastEntries = entries.size() > max ? std::make_pair(entries.rbegin(), entries.rbegin() + max) : std::make_pair(entries.rbegin(), entries.rend());
+    auto lastEntries =
+        entries.size() > max ?
+            std::make_pair(entries.rbegin(), entries.rbegin() + max) :
+            std::make_pair(entries.rbegin(), entries.rend());
 
-    //                if (entries.size() > max)
-
-    //ScreenLog::const_range ScreenLog::last(size_t n) {
-    //    if (_entries.size() > n) {
-    //        return std::make_pair(_entries.rbegin(), _entries.rbegin() + n);
-    //    } else {
-    //        return std::make_pair(_entries.rbegin(), _entries.rend());
-    //    }
-    //}
-
-    //                auto entries = _log->last(max);
-
-    const glm::vec4 white(0.9, 0.9, 0.9, 1);
-    const glm::vec4 red(1, 0, 0, 1);
-    const glm::vec4 yellow(1, 1, 0, 1);
-    const glm::vec4 green(0, 1, 0, 1);
-    const glm::vec4 blue(0, 0, 1, 1);
 
     size_t nr = 1;
     auto now = std::chrono::steady_clock::now();
@@ -1708,26 +1300,44 @@ void RenderEngine::renderScreenLog() {
         const std::string& message = e->message.substr(0, msg_length);
         nr += std::count(message.begin(), message.end(), '\n');
 
-        RenderFont(*_fontLog,
-            glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
-            white * alpha,
-            "%-14s %s%s",                                    // Format
-            e->timeString.c_str(),                            // Time string
-            e->category.substr(0, category_length).c_str(), // Category string (up to category_length)
-            e->category.length() > 20 ? "..." : "");        // Pad category with "..." if exceeds category_length
+        const glm::vec4 White(0.9f, 0.9f, 0.9f, 1.0f);
 
-        glm::vec4 color = white;
-        if (e->level == ghoul::logging::LogLevel::Debug)
-            color = green;
-        if (e->level == ghoul::logging::LogLevel::Warning)
-            color = yellow;
-        if (e->level == ghoul::logging::LogLevel::Error)
-            color = red;
-        if (e->level == ghoul::logging::LogLevel::Fatal)
-            color = blue;
+        RenderFont(
+            *_fontLog,
+            glm::vec2(10.f, _fontLog->pointSize() * nr * 2),
+            White * alpha,
+            "%-14s %s%s",                                   // Format
+            e->timeString.c_str(),                          // Time string
+            e->category.substr(0, category_length).c_str(), // Category string 
+            e->category.length() > 20 ? "..." : "");        // Pad category with "..."
+
+        const glm::vec4 Red(1.f, 0.f, 0.f, 1.f);
+        const glm::vec4 Yellow(1.f, 1.f, 0.f, 1.f);
+        const glm::vec4 Green(0.f, 1.f, 0.f, 1.f);
+        const glm::vec4 Blue(0.f, 0.f, 1.f, 1.f);
+
+        glm::vec4 color(glm::uninitialize);
+        switch (e->level) {
+            case ghoul::logging::LogLevel::Debug:
+                color = Green;
+                break;
+            case ghoul::logging::LogLevel::Warning:
+                color = Yellow;
+                break;
+            case ghoul::logging::LogLevel::Error:
+                color = Red;
+                break;
+            case ghoul::logging::LogLevel::Fatal:
+                color = Blue;
+                break;
+            default:
+                color = White;
+                break;
+        }
 
         //                    const float font_with_light = 5;
-        RenderFont(*_fontLog,
+        RenderFont(
+            *_fontLog,
             glm::vec2(static_cast<float>(10 + 39 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
             color * alpha,
             "%s",                                    // Format
@@ -1735,7 +1345,7 @@ void RenderEngine::renderScreenLog() {
 
         RenderFont(*_fontLog,
             glm::vec2(static_cast<float>(10 + 53 * _fontLog->pointSize()), _fontLog->pointSize() * nr * 2),
-            white * alpha,
+            White * alpha,
             "%s",                                    // Format
             message.c_str());        // Pad category with "..." if exceeds category_length
         ++nr;

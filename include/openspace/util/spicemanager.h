@@ -74,7 +74,7 @@ public:
 
         /**
          * Default constructor initializing the AberrationCorrection to Type::None with a
-         * Drection::Reception
+         * Direction::Reception
          */
         AberrationCorrection() = default;
         
@@ -460,6 +460,33 @@ public:
         const std::string& observer, const std::string& referenceFrame,
         AberrationCorrection aberrationCorrection, double ephemerisTime,
         double& lightTime) const;
+
+    /**
+     * Returns the \p position of a \p target body relative to an \p observer in a
+     * specific \p referenceFrame, optionally corrected for \p lightTime (planetary
+     * aberration) and stellar aberration (\p aberrationCorrection).
+     * \param target The target body name or the target body's NAIF ID
+     * \param observer The observing body name or the observing body's NAIF ID
+     * \param referenceFrame The reference frame of the output position vector
+     * \param aberrationCorrection The aberration correction used for the position
+     * calculation
+     * \param ephemerisTime The time at which the position is to be queried
+     * \return The position of the \p target relative to the \p observer in the specified
+     * \p referenceFrame
+     * \throws SpiceException If the \p target or \p observer do not name a valid
+     * NAIF object, \p referenceFrame does not name a valid reference frame or if there is
+     * not sufficient data available to compute the position or neither the target nor the
+     * observer have coverage.
+     * \pre \p target must not be empty.
+     * \pre \p observer must not be empty.
+     * \pre \p referenceFrame must not be empty.
+     * \post If an exception is thrown, \p lightTime will not be modified.
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkpos_c.html
+     * \sa http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
+     */
+    glm::dvec3 targetPosition(const std::string& target,
+        const std::string& observer, const std::string& referenceFrame,
+        AberrationCorrection aberrationCorrection, double ephemerisTime) const;
 
     /**
      * This method returns the transformation matrix that defines the transformation from

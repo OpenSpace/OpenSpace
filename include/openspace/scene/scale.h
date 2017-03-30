@@ -27,23 +27,24 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/util/updatestructures.h>
 
-#include <ghoul/misc/dictionary.h>
-
+namespace ghoul { class Dictionary; }
 namespace openspace {
+
+namespace documentation { struct Documentation; };
 
 class Scale : public properties::PropertyOwner {
 public:
-    static Scale* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Scale> createFromDictionary(const ghoul::Dictionary& dictionary);
 
+    Scale();
     virtual ~Scale();
     virtual bool initialize();
     virtual double scaleValue() const = 0;
     virtual void update(const UpdateData& data);
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 };
 
 }  // namespace openspace

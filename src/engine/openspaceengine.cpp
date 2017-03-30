@@ -27,7 +27,6 @@
 #include <openspace/openspace.h>
 
 #include <openspace/documentation/core_registration.h>
-#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/downloadmanager.h>
@@ -37,44 +36,32 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/luaconsole.h>
-#include <openspace/mission/missionmanager.h>
 #include <openspace/network/networkengine.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <openspace/scene/translation.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/translation.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/task.h>
+#include <openspace/util/openspacemodule.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/util/syncbuffer.h>
 #include <openspace/util/transformationmanager.h>
 
 #include <ghoul/ghoul.h>
 #include <ghoul/cmdparser/commandlineparser.h>
 #include <ghoul/cmdparser/singlecommand.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/lua/luastate.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/onscopeexit.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
 
-#include <fstream>
-#include <queue>
 
 #if defined(_MSC_VER) && defined(OPENSPACE_ENABLE_VLD)
 #include <vld.h>
@@ -127,7 +114,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _networkEngine(new NetworkEngine)
-    , _syncEngine(std::make_unique<SyncEngine>(new SyncBuffer(4096)))
+    , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
         programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
       ))
@@ -138,15 +125,18 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _downloadManager(nullptr)
     , _parallelConnection(new ParallelConnection)
     , _windowWrapper(std::move(windowWrapper))
-    , _globalPropertyNamespace(new properties::PropertyOwner)
+    , _globalPropertyNamespace(new properties::PropertyOwner(""))
     , _runTime(0.0)
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
 {
     _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
+    
+    // New property subowners also have to be added to the OnScreenGuiModule callback!
     _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
+    _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -164,6 +154,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Scale>>(),
         "Scale"
+    );
+    FactoryManager::ref().addFactory(
+        std::make_unique<ghoul::TemplateFactory<Task>>(),
+        "Task"
     );
 
     SpiceManager::initialize();
@@ -259,6 +253,12 @@ void OpenSpaceEngine::create(int argc, char** argv,
             ConfigurationManager::findConfiguration(configurationFilePath);
     }
     configurationFilePath = absPath(configurationFilePath);
+    
+    if (!FileSys.fileExists(configurationFilePath)) {
+        throw ghoul::FileNotFoundError(
+            "Configuration file '" + configurationFilePath + "' not found"
+        );
+    }
     LINFO("Configuration Path: '" << configurationFilePath << "'");
 
     // Loading configuration from disk
@@ -276,7 +276,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
         }
         throw;
     }
-    catch (const ghoul::RuntimeError& e) {
+    catch (const ghoul::RuntimeError&) {
         LFATAL("Loading of configuration file '" << configurationFilePath << "' failed");
         throw;
     }
@@ -335,7 +335,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
     // Register modules
     _engine->_moduleEngine->initialize();
 
-    registerCoreClasses(DocEng);
     // After registering the modules, the documentations for the available classes
     // can be added as well
     for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
@@ -440,9 +439,9 @@ void OpenSpaceEngine::initialize() {
     SysCap.logCapabilities(verbosity);
 
     // Check the required OpenGL versions of the registered modules
-    ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version version =
+    ghoul::systemcapabilities::Version version =
         _engine->_moduleEngine->requiredOpenGLVersion();
-    LINFO("Required OpenGL version: " << version.toString());
+    LINFO("Required OpenGL version: " << std::to_string(version));
 
     if (OpenGLCap.openGLVersion() < version) {
         throw ghoul::RuntimeError(
@@ -475,17 +474,10 @@ void OpenSpaceEngine::initialize() {
 
     writeDocumentation();
 
-    if (configurationManager().hasKey(ConfigurationManager::KeyDisableMasterRendering)) {
-        const bool disableMasterRendering = configurationManager().value<bool>(
-            ConfigurationManager::KeyDisableMasterRendering
-        );
-        _renderEngine->setDisableRenderingOnMaster(disableMasterRendering);
-    }
-
     if (configurationManager().hasKey(ConfigurationManager::KeyShutdownCountdown)) {
-        _shutdown.waitTime = configurationManager().value<double>(
+        _shutdown.waitTime = static_cast<float>(configurationManager().value<double>(
             ConfigurationManager::KeyShutdownCountdown
-        );
+        ));
     }
 
     if (!commandlineArgumentPlaceholders.sceneName.empty()) {
@@ -810,7 +802,7 @@ void OpenSpaceEngine::initializeGL() {
 
     LINFO("Initializing Rendering Engine");
     // @CLEANUP:  Remove the return statement and replace with exceptions ---abock
-    bool success = _renderEngine->initializeGL();
+    _renderEngine->initializeGL();
     
     for (const auto& func : _moduleCallbacks.initializeGL) {
         func();
@@ -844,7 +836,7 @@ void OpenSpaceEngine::preSynchronization() {
     
     bool master = _windowWrapper->isMaster();
     
-    _syncEngine->presync(master);
+    _syncEngine->preSynchronization(SyncEngine::IsMaster(master));
     if (master) {
         double dt = _windowWrapper->averageDeltaTime();
         _timeManager->preSynchronization(dt);
@@ -876,13 +868,13 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(begin)");
     
     bool master = _windowWrapper->isMaster();
-    _syncEngine->postsync(master);
+    _syncEngine->postSynchronization(SyncEngine::IsMaster(master));
 
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
             _windowWrapper->terminate();
         }
-        _shutdown.timer -= _windowWrapper->averageDeltaTime();
+        _shutdown.timer -= static_cast<float>(_windowWrapper->averageDeltaTime());
     }
 
     _renderEngine->updateSceneGraph();
@@ -934,6 +926,18 @@ void OpenSpaceEngine::render(const glm::mat4& viewMatrix,
         func();
     }
     
+    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
+    // rendered ---abock
+    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    if (showGui && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering()) {
+        _renderEngine->renderScreenLog();
+        _console->render();
+    }
+
+    if (_shutdown.inShutdown) {
+        _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
+    }
+
     LTRACE("OpenSpaceEngine::render(end)");
 }
 
@@ -945,20 +949,7 @@ void OpenSpaceEngine::postDraw() {
     for (const auto& func : _moduleCallbacks.postDraw) {
         func();
     }
-    
-    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
-    // rendered ---abock
-    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
-    if (showGui) {
-        _renderEngine->renderScreenLog();
-        if (_console->isVisible())
-            _console->render();
-    }
-
-    if (_shutdown.inShutdown) {
-        _renderEngine->renderShutdownInformation(_shutdown.timer, _shutdown.waitTime);
-    }
-
+        
     if (_isFirstRenderingFirstFrame) {
         _windowWrapper->setSynchronization(true);
         _isFirstRenderingFirstFrame = false;
@@ -969,25 +960,18 @@ void OpenSpaceEngine::postDraw() {
 
 void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction action) {
     for (const auto& func : _moduleCallbacks.keyboard) {
-        bool consumed = func(key, mod, action);
+        const bool consumed = func(key, mod, action);
         if (consumed) {
             return;
         }
     }
-    
-    // @CLEANUP:  Remove the commandInputButton and replace with a method just based
-    // on Lua by binding a key to the Lua script toggling the console ---abock
-    if (key == _console->commandInputButton()) {
-        if (action == KeyAction::Press) {
-            _console->toggleMode();
-        }
-    } else if (!_console->isVisible()) {
-        // @CLEANUP:  Make the interaction handler return whether a key has been consumed
-        // and then pass it on to the console ---abock
-        _interactionHandler->keyboardCallback(key, mod, action);
-    } else {
-        _console->keyboardCallback(key, mod, action);
+
+    const bool consoleConsumed = _console->keyboardCallback(key, mod, action);
+    if (consoleConsumed) {
+        return;
     }
+
+    _interactionHandler->keyboardCallback(key, mod, action);
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
@@ -998,9 +982,7 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier)
         }
     }
 
-    if (_console->isVisible()) {
-        _console->charCallback(codepoint, modifier);
-    }
+    _console->charCallback(codepoint, modifier);
 }
 
 void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action) {

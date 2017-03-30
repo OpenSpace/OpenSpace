@@ -31,8 +31,6 @@ namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
 
-using namespace ghoul::opengl;    
-
 class SingleImageProvider : public TileProvider {
 public:
     SingleImageProvider(const ghoul::Dictionary& dictionary);

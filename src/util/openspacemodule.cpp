@@ -24,23 +24,23 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/documentation/documentation.h>
+
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logmanager.h>
 
 #include <algorithm>
 
 namespace {
-    const std::string _loggerCat = "OpenSpaceModule";
-    const std::string ModuleBaseToken = "MODULE_";
+    const char* _loggerCat = "OpenSpaceModule";
+    const char* ModuleBaseToken = "MODULE_";
 }
 
 namespace openspace {
 
-OpenSpaceModule::OpenSpaceModule(std::string name) {
-    ghoul_assert(!name.empty(), "Name must not be empty");
-    
-    setName(std::move(name));
-}
+OpenSpaceModule::OpenSpaceModule(std::string name) 
+    : properties::PropertyOwner(std::move(name))
+{}
 
 void OpenSpaceModule::initialize() {
     std::string upperName = name();
@@ -63,7 +63,7 @@ void OpenSpaceModule::deinitialize() {
     internalDeinitialize();
 }
 
-std::vector<Documentation> OpenSpaceModule::documentations() const {
+std::vector<documentation::Documentation> OpenSpaceModule::documentations() const {
     return {};
 }
     
@@ -71,9 +71,7 @@ scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
     return {};
 }
 
-ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
-OpenSpaceModule::requiredOpenGLVersion() const
-{
+ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() const {
     return { 3, 3 };
 }
 

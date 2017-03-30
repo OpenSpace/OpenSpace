@@ -22,65 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__
-#define __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__
+#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__
+#define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__
 
-#include <modules/volume/rendering/renderablevolume.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/task.h>
 
-// Forward declare to minimize dependencies
-namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
-}
+#include <string>
 
 namespace openspace {
 
-class RenderableVolumeGL: public RenderableVolume {
+class KameleonMetadataToJsonTask : public Task {
 public:
-    RenderableVolumeGL(const ghoul::Dictionary& dictionary);
-    ~RenderableVolumeGL();
+    KameleonMetadataToJsonTask(const ghoul::Dictionary& dictionary);
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation documentation();
     
-    bool initialize() override;
-    bool deinitialize() override;
-
-    bool isReady() const override;
-
-    virtual void render(const RenderData& data) override;
-    virtual void update(const UpdateData& data) override;
-
 private:
-    ghoul::Dictionary _hintsDictionary;
-
-    std::string _filename;
-
-    std::string _transferFunctionName;
-    std::string _volumeName;
-
-    std::string _transferFunctionPath;
-    std::string _samplerFilename;
-    
-    ghoul::filesystem::File* _transferFunctionFile;
-
-    ghoul::opengl::Texture* _volume;
-    ghoul::opengl::Texture* _transferFunction;
-
-    GLuint _boxArray; 
-    GLuint _vertexPositionBuffer;
-    ghoul::opengl::ProgramObject* _boxProgram;
-    glm::vec3 _boxScaling;
-    psc _pscOffset;
-    float _w;
-    
-    bool _updateTransferfunction;
-    int _id;
+    std::string _inputPath;
+    std::string _outputPath;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__

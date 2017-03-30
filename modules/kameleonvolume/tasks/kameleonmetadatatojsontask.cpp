@@ -22,58 +22,77 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DEVICEIDENTIFIER___H__
-#define __OPENSPACE_CORE___DEVICEIDENTIFIER___H__
+#include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
 
-// std includes
-#include <array>
-#include <mutex>
-#include <memory>
+#include <modules/kameleonvolume/kameleonvolumereader.h>
+
+#include <openspace/documentation/verifier.h>
+
+#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <ghoul/filesystem/filesystem.h>
+
+#include <fstream>
+
+namespace {
+    const char* KeyInput = "Input";
+    const char* KeyOutput = "Output";
+}
 
 namespace openspace {
 
-#define MAXDEVICES 16
+KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
+                                                      const ghoul::Dictionary& dictionary)
+{
+    openspace::documentation::testSpecificationAndThrow(
+        documentation(),
+        dictionary,
+        "KameleonMetadataToJsonTask"
+    );
 
-enum class InputDevice {NONE, UNKNOWN, SPACENAVIGATOR, XBOX}; 
+    _inputPath = absPath(dictionary.value<std::string>(KeyInput));
+    _outputPath = absPath(dictionary.value<std::string>(KeyOutput));
+}
 
-class DeviceIdentifier {
-public:
-    static DeviceIdentifier& ref();
-    virtual ~DeviceIdentifier();
+std::string KameleonMetadataToJsonTask::description() {
+    return "Extract metadata from cdf-file " + _inputPath +
+        " and write as json to " + _outputPath;
+}
 
-    static void init();
-    static void deinit();
-    static bool isInitialized();
-    
-    void scanDevices();
-    const int numberOfDevices() const;
-    const InputDevice type(const int device) const;
-    
-    void update();
-    void update(const int device);
+void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressCallback) {
+    KameleonVolumeReader reader(_inputPath);
+    ghoul::Dictionary dictionary = reader.readMetaData();
+    progressCallback(0.5f);
 
-    const int getButtons(const int device, unsigned char **buttons = nullptr) const;
-    const int getAxes(const int device, float **axespos = nullptr) const;
-    void get(const int device, unsigned char **buttons, float **axespos) const;
-    
-private:
-    // singleton
-    static DeviceIdentifier* this_;
-    DeviceIdentifier(void);
-    DeviceIdentifier(const DeviceIdentifier& src);
-    DeviceIdentifier& operator=(const DeviceIdentifier& rhs);
+    ghoul::DictionaryJsonFormatter formatter;
+    std::string json = formatter.format(dictionary);
+    std::ofstream output(_outputPath);
+    output << json;
+    progressCallback(1.0f);
+}
 
-
-    // member variables
-    int devices_;
-    std::array<InputDevice, MAXDEVICES> inputDevice_;
-    std::array<int, MAXDEVICES> numberOfAxes_;
-    std::array<int, MAXDEVICES> numberOfButtons_;
-    std::array<float *, MAXDEVICES> axesPos_;
-    std::array<unsigned char *, MAXDEVICES> buttons_;
-
-};
+documentation::Documentation KameleonMetadataToJsonTask::documentation() {
+    using namespace documentation;
+    return {
+        "KameleonMetadataToJsonTask",
+        "kameleon_metadata_to_json_task",
+        {
+            {
+                "Type",
+                new StringEqualVerifier("KameleonMetadataToJsonTask"),
+                "The type of this task"
+            },
+            {
+                KeyInput,
+                new StringAnnotationVerifier("A file path to a cdf file"),
+                "The cdf file to extract data from"
+            },
+            {
+                KeyOutput,
+                new StringAnnotationVerifier("A valid filepath"),
+                "The json file to export data into"
+            }
+        }
+    };
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___DEVICEIDENTIFIER___H__

@@ -33,7 +33,7 @@ template <typename VoxelType>
     , _bufferSize(bufferSize) {}
 
 template <typename VoxelType>
-size_t RawVolumeWriter<VoxelType>::coordsToIndex(const glm::ivec3& cartesian) const {
+size_t RawVolumeWriter<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {
     return volumeutils::coordsToIndex(cartesian, dimensions());
 }
 
@@ -43,21 +43,21 @@ glm::ivec3 RawVolumeWriter<VoxelType>::indexToCoords(size_t linear) const {
 }
 
 template <typename VoxelType>
-    void RawVolumeWriter<VoxelType>::setDimensions(const glm::ivec3& dimensions) {
+void RawVolumeWriter<VoxelType>::setDimensions(const glm::uvec3& dimensions) {
     _dimensions = dimensions;
 }
 
 template <typename VoxelType>
-    glm::ivec3 RawVolumeWriter<VoxelType>::dimensions() const {
+glm::uvec3 RawVolumeWriter<VoxelType>::dimensions() const {
     return _dimensions;
 }
 
 
 template <typename VoxelType>
-void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::ivec3&)>& fn,
+void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::uvec3&)>& fn,
                                        const std::function<void(float t)>& onProgress)
 {
-    glm::ivec3 dims = dimensions();
+    glm::uvec3 dims = dimensions();
 
     size_t size = static_cast<size_t>(dims.x) *
         static_cast<size_t>(dims.y) *
@@ -86,14 +86,11 @@ void RawVolumeWriter<VoxelType>::write(const std::function<VoxelType(const glm::
 
 template <typename VoxelType>    
 void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
-    glm::ivec3 dims = dimensions();
-    ghoul_assert(dims == volume.dims(), "Dimensions of input and output volume must agree");
+    setDimensions(volume.dimensions());
+    reinterpret_cast<const char*>(volume.data());
 
-    const char* buffer = reinterpret_cast<char*>(volume.data());
-    size_t length = static_cast<size_t>(dims.x) *
-        static_cast<size_t>(dims.y) *
-        static_cast<size_t>(dims.z) *
-        sizeof(VoxelType);
+    const char* const buffer = reinterpret_cast<const char*>(volume.data());
+    size_t length = volume.nCells() * sizeof(VoxelType);
     
     std::ofstream file(_path, std::ios::binary);
     file.write(buffer, length);

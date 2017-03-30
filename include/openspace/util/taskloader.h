@@ -22,42 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
-#define __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
+#ifndef __OPENSPACE_CORE___TASKLOADER___H__
+#define __OPENSPACE_CORE___TASKLOADER___H__
 
-// open space includes
-#include <openspace/rendering/renderable.h>
-
-// ghoul includes
-#include <ghoul/io/volume/rawvolumereader.h>
-
-// Forward declare to minimize dependencies
-namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class Texture;
-    }
-}
+#include <string>
+#include <ghoul/misc/dictionary.h>
+#include <openspace/util/task.h>
 
 namespace openspace {
 
-class RenderableVolume: public Renderable {
+class TaskLoader {
 public:
-    // constructors & destructor
-    RenderableVolume(const ghoul::Dictionary& dictionary);
-    ~RenderableVolume();
-    
-protected:
-    ghoul::opengl::Texture* loadVolume(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
-    glm::vec3 getVolumeOffset(const std::string& filepath, const ghoul::Dictionary& hintsDictionary);
-    ghoul::RawVolumeReader::ReadHints readHints(const ghoul::Dictionary& dictionary);
-    ghoul::opengl::Texture* loadTransferFunction(const std::string& filepath);
-
-private:
+    std::vector<std::unique_ptr<Task>> tasksFromDictionary(const ghoul::Dictionary& dictionary);
+    std::vector<std::unique_ptr<Task>> tasksFromFile(const std::string& path);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUME___H__
+#endif // __OPENSPACE_CORE___TASKLOADER___H__

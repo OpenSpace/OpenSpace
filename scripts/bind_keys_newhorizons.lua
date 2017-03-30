@@ -17,7 +17,7 @@ openspace.bindKey(
 )
 openspace.bindKey(
     "s",
-    "openspace.setPropertyValue('Interaction.origin', 'PlutoProjection')",
+    "openspace.setPropertyValue('Interaction.origin', 'Pluto')",
     "Sets the focus of the camera on 'Pluto'"
 )
 openspace.bindKey(
@@ -38,7 +38,7 @@ openspace.bindKey(
 
 openspace.bindKey(
     "F8",
-    "openspace.setPropertyValue('PlutoProjection.renderable.ProjectionComponent.clearAllProjections', true);" ..
+    "openspace.setPropertyValue('Pluto.renderable.ProjectionComponent.clearAllProjections', true);" ..
     "openspace.setPropertyValue('Charon.renderable.ProjectionComponent.clearAllProjections', true);",
     "Removes all image projections from Pluto and Charon."
 )
@@ -46,19 +46,19 @@ openspace.bindKey(
 openspace.bindKey(
     "F9",
     "openspace.time.setTime('2015-07-14T09:00:00.00');" ..
-    "openspace.setPropertyValue('PlutoProjection.renderable.clearAllProjections', true);" ..
+    "openspace.setPropertyValue('Pluto.renderable.clearAllProjections', true);" ..
     "openspace.setPropertyValue('Charon.renderable.clearAllProjections', true);",
     "Jumps to the 14th of July 2015 at 0900 UTC and clears all projections."
 )
 
 openspace.bindKey(
     "KP_8",
-    helper.property.increment('PlutoProjection.renderable.heightExaggeration', 2),
+    helper.property.increment('Pluto.renderable.heightExaggeration', 0.1),
     "Increases the height map exaggeration on Pluto."
 )
 openspace.bindKey(
     "KP_2",
-    helper.property.decrement('PlutoProjection.renderable.heightExaggeration', 2),
+    helper.property.decrement('Pluto.renderable.heightExaggeration', 0.1),
     "Decreases the height map exaggeration on Pluto."
 )
 openspace.bindKey(
@@ -129,7 +129,7 @@ openspace.bindKey("p",
     helper.property.invert('Ganymede.renderable.performProjection') ..
     helper.property.invert('Europa.renderable.performProjection') .. 
     helper.property.invert('Callisto.renderable.performProjection') ..
-    helper.property.invert('PlutoProjection.renderable.performProjection') .. 
+    helper.property.invert('Pluto.renderable.performProjection') .. 
     helper.property.invert('Charon.renderable.performProjection'),
     "Enables or disables the image projection on the different available objects."
 )
