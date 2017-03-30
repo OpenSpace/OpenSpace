@@ -56,6 +56,7 @@ namespace {
     const char* keyFieldlineMaxTraceSteps = "MaximumTracingSteps";
     const char* keyFieldlineShouldMorph = "Morphing";
     const char* keyFieldlineResamples = "NumResamples";
+    const char* keyFieldlineResamplesOption = "ResamplingType";
 
     const char* keySeedPointsFile = "File";
 
@@ -78,7 +79,7 @@ namespace {
     // const char* ValueSphericalGridType = "Spherical";
 }
 
-const float R_E_TO_METER = 6371000.f; // Earth radius
+// const float R_E_TO_METER = 6371000.f; // Earth radius
 
 namespace openspace {
 
@@ -119,10 +120,12 @@ bool RenderableFieldlinesSequence::initialize() {
         LERROR(keySeedPoints << " doesn't specify a '" << keySeedPointsFile << "'" <<
             "\n\tRequires a path to a .txt file containing seed point data." <<
             "Each row should have 3 floats seperated by spaces.");
+        return false;
     } else {
         if (!FieldlinesSequenceManager::ref().getSeedPointsFromFile(pathToSeedPointFile,
                                                                     _seedPoints)) {
             LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
+            return false;
         }
     }
 
@@ -133,7 +136,7 @@ bool RenderableFieldlinesSequence::initialize() {
                 "'\n\tRequires a path to a Directory containing .CDF files. " <<
                 "Files must be of the same model and in sequence!");
         return false;
-    } else {
+    } else { // Everything essential is provided
         std::vector<std::string> validCdfFilePaths;
         if (!FieldlinesSequenceManager::ref().getCdfFilePaths(pathToCdfDirectory,
                                                               validCdfFilePaths)) {
@@ -142,6 +145,7 @@ bool RenderableFieldlinesSequence::initialize() {
             return false;
         }
 
+        // Specify which quantity to trace
         std::string tracingVariable;
         if (!_vectorVolumeInfo.getValue(keyVolumeTracingVariable, tracingVariable)) {
             tracingVariable = "b"; //default: b = magnetic field.
@@ -157,22 +161,31 @@ bool RenderableFieldlinesSequence::initialize() {
                     << ". Using default value: " << f_maxSteps);
         }
 
-        bool shouldMorph;
-        if (!_fieldlineInfo.getValue(keyFieldlineShouldMorph, shouldMorph)) {
-            shouldMorph = false; // Default value
+        if (!_fieldlineInfo.getValue(keyFieldlineShouldMorph, _isMorphing)) {
+            _isMorphing = false; // Default value
             LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph
-                    << ". Using default: " << shouldMorph);
+                    << ". Using default: " << _isMorphing);
         }
 
         float f_numResamples = 2.f * f_maxSteps + 3; // Default value;
-        if (shouldMorph && !_fieldlineInfo.getValue(keyFieldlineResamples, f_numResamples)) {
-            LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph <<
-                     ". Default is set to (@*" << keyFieldlineMaxTraceSteps << "+3) = " <<
+        float f_resamplingOption;
+        if (_isMorphing) {
+            if(!_fieldlineInfo.getValue(keyFieldlineResamples, f_numResamples)) {
+            // f_numResamples = 2.f * f_maxSteps + 3; // Default value;
+            LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineResamples <<
+                     ". Default is set to (2*" << keyFieldlineMaxTraceSteps << "+3) = " <<
                      f_numResamples);
+            }
+            if(!_fieldlineInfo.getValue(keyFieldlineResamplesOption, f_resamplingOption)) {
+           LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineResamplesOption <<
+                     ". Default is set to (2*" << keyFieldlineMaxTraceSteps << "+3) = " <<
+                     f_resamplingOption);
+            }
         }
 
         int maxSteps = static_cast<int>(f_maxSteps);
         int numResamples = static_cast<int>(f_numResamples);
+        int resamplingOption = static_cast<int>(f_resamplingOption);
 
         _numberOfStates = validCdfFilePaths.size();
         _states.reserve(_numberOfStates);
@@ -187,8 +200,9 @@ bool RenderableFieldlinesSequence::initialize() {
                                                                 tracingVariable,
                                                                 _seedPoints,
                                                                 maxSteps,
-                                                                shouldMorph,
+                                                                _isMorphing,
                                                                 numResamples,
+                                                                resamplingOption,
                                                                 _startTimes,
                                                                 _states[i]);
 
@@ -221,11 +235,19 @@ bool RenderableFieldlinesSequence::initialize() {
 
     // TODO if enlil or batsrus etc..
     // TODO if morphing
-    _program = OsEng.renderEngine().buildRenderProgram(
-        "FieldlinesSequence",
-        "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_flow_direction_vs.glsl",
-        "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_flow_direction_fs.glsl"
-    );
+    if (_isMorphing) {
+        _program = OsEng.renderEngine().buildRenderProgram(
+            "FieldlinesSequence",
+            "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_morph_flow_direction_vs.glsl",
+            "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_flow_direction_fs.glsl"
+        );
+    } else {
+        _program = OsEng.renderEngine().buildRenderProgram(
+            "FieldlinesSequence",
+            "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_flow_direction_vs.glsl",
+            "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_flow_direction_fs.glsl"
+        );
+    }
 
     if (!_program) {
         return false;
@@ -244,7 +266,6 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
     if (_shouldRender) {
         _program->activate();
 
-
         glm::dmat4 rotationTransform = glm::dmat4(data.modelTransform.rotation);
         glm::mat4 scaleTransform = glm::mat4(1.0);
         glm::dmat4 modelTransform =
@@ -260,7 +281,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
 
         int testTime = static_cast<int>(OsEng.runTime() * 100) / 5;
         _program->setUniform("time", testTime);
-
+        if (_isMorphing) {
+            _program->setUniform("state_progression", _stateProgress);
+        }
         glDisable(GL_CULL_FACE);
 
         // _program->setUniform("classification", _classification);
@@ -287,16 +310,22 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
     }
 
     // Check if current time in OpenSpace is within sequence interval
-    // TODO clean this up
     if (isWithinSequenceInterval()) {
         // if NOT in the same state as in the previous update..
         if ( _activeStateIndex < 0 ||
              _currentTime < _startTimes[_activeStateIndex] ||
-             // This next line requires seqEndTime to be last position in _startTimes
+             // This next line requires/assumes seqEndTime to be last position in _startTimes
              _currentTime >= _startTimes[_activeStateIndex + 1]) {
             _needsUpdate = true;
-        } // else we're still in same state as previous update (no changes needed)
+        } else if (_isMorphing) {
+            double stateDuration = _startTimes[_activeStateIndex + 1] -
+                                   _startTimes[_activeStateIndex]; // TODO? could be stored
+            double stateTimeElapsed = _currentTime - _startTimes[_activeStateIndex];
+            _stateProgress = static_cast<float>(stateTimeElapsed / stateDuration);
+            // ghoul_assert(_stateProgress >= 0.0f, "_stateProgress is NEGATIVE!!");
+        } // else {we're still in same state as previous update (no changes needed)}
     } else {
+        // Not in interval => set everything to false
         _activeStateIndex = -1;
         _shouldRender = false;
         _needsUpdate = false;
@@ -310,7 +339,11 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
         glBindVertexArray(_vertexArrayObject);
 
         // if (_vertexPositionBuffer == 0) {
-            glGenBuffers(1, &_vertexPositionBuffer);
+            if (_isMorphing) {
+                glGenBuffers(2, &_vertexPositionBuffer);
+            } else {
+                glGenBuffers(1, &_vertexPositionBuffer);
+            }
         // }
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
@@ -323,6 +356,19 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
         glEnableVertexAttribArray(vertexLocation);
         glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);//sizeof(glm::vec3), reinterpret_cast<void*>(0));
 
+        if (_isMorphing) {
+            glBindBuffer(GL_ARRAY_BUFFER, 0); // is this necessary?
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer + 1);
+
+            glBufferData(GL_ARRAY_BUFFER,
+                _states[_activeStateIndex+1]._vertexPositions.size() * sizeof(glm::vec3),
+                &_states[_activeStateIndex+1]._vertexPositions.front(),
+                GL_STATIC_DRAW);
+
+            GLuint morphToLocation = 1;
+            glEnableVertexAttribArray(morphToLocation);
+            glVertexAttribPointer(morphToLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);//(void*)(sizeof(glm::vec3)));
+        }
         // GLuint colorLocation = 1;
         // glEnableVertexAttribArray(colorLocation);
         // glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
@@ -332,14 +378,28 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
 
         _needsUpdate = false;
         _shouldRender = true;
+
+        if (_isMorphing) {
+            double stateDuration = _startTimes[_activeStateIndex + 1] -
+                                       _startTimes[_activeStateIndex]; // TODO? could be stored
+            double stateTimeElapsed = _currentTime - _startTimes[_activeStateIndex];
+            _stateProgress = static_cast<float>(stateTimeElapsed / stateDuration);
+            // ghoul_assert(_stateProgress >= 0.0f, "_stateProgress=NEGATIVE in needsUpdate!!");
+        }
     }
+    // if (_activeStateIndex >= 0) {
+    //     LDEBUG("Interval #" << _activeStateIndex << " progress: " << _stateProgress);
+    // }
 }
 
 bool RenderableFieldlinesSequence::isWithinSequenceInterval() {
     _currentTime = Time::ref().j2000Seconds();
-    return (_currentTime >= _seqStartTime && _currentTime < _seqEndTime);
+    return (_currentTime >= _seqStartTime) &&
+           (_isMorphing ? _currentTime < _startTimes[_numberOfStates-1] // nothing to morph to after last state
+                        : _currentTime < _seqEndTime);
 }
 
+// Assumes we already know that _currentTime is within the sequence interval
 void RenderableFieldlinesSequence::updateActiveStateIndex() {
     auto iter = std::upper_bound(_startTimes.begin(), _startTimes.end(), _currentTime);
     //

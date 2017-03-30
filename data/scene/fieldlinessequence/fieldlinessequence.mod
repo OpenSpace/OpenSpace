@@ -50,6 +50,8 @@ return {
                 -- Stepsize = 1.0,
                 -- Classification = true,
                 Morphing = true,
+                -- NumResamples = 5,
+                ResamplingType = 3, -- 1=length, 2=integral, 3=index
             },
             SeedPoints = {
                 -- Type = "File",
