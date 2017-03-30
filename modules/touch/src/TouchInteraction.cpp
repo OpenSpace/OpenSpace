@@ -89,21 +89,29 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 }
 
 void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
-	//trim OsEng.renderEngine().scene()->allSceneGraphNodes() to only contain visible nodes that make sense
+	
+	//trim list to only contain visible nodes that make sense
+	std::string selectables[30] = { "Sun", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto",
+		"Moon", "Titan", "Rhea", "Mimas", "Iapetus", "Enceladus", "Dione", "Io", "Ganymede", "Europa",
+		"Callisto", "NewHorizons", "Styx", "Nix", "Kerberos", "Hydra", "Charon", "Tethys", "OsirisRex", "Bennu" };
+	std::vector<SceneGraphNode*> selectableNodes;
+	for (SceneGraphNode* node : OsEng.renderEngine().scene()->allSceneGraphNodes())
+		for (std::string name : selectables)
+			if (node->name() == name)
+				selectableNodes.push_back(node);
 
 	glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
 	double aspectRatio = res.x/res.y;
-	std::cout << aspectRatio << ", " << glm::to_string(res) << "\n";
 	glm::dquat camToWorldSpace = _camera->rotationQuaternion();
 	glm::dvec3 camPos = _camera->positionVec3();
 	std::vector<std::pair<int, SceneGraphNode*>> newSelected;
 	for (const TuioCursor& c : list) {
 		double xCo = 2 * (c.getX() - 0.5) * aspectRatio;
 		double yCo = -2 * (c.getY() - 0.5); // normalized -1 to 1 coordinates on screen
-		glm::dvec3 cursorInWorldSpace = camToWorldSpace * glm::dvec3(xCo, yCo, -1.0);
-		for (SceneGraphNode* node : OsEng.renderEngine().scene()->allSceneGraphNodes()) {
+		glm::dvec3 cursorInWorldSpace = camToWorldSpace * glm::dvec3(xCo, yCo, -3.2596558);
+		for (SceneGraphNode* node : selectableNodes) {
 			double boundingSphere = node->boundingSphere().lengthd();
-			glm::dvec3 camToSelectable = node->worldPosition() - camPos;
+			glm::dvec3 camToSelectable = camPos - node->worldPosition();
 			int id = c.getSessionID();
 			double dist = length(glm::cross(cursorInWorldSpace, camToSelectable)) / glm::length(cursorInWorldSpace) - boundingSphere;
 			if (dist < 0.0) {
@@ -127,7 +135,6 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 	/*std::cout << "Dist: " << dist << ", Ray: " << glm::to_string(glm::normalize(cursorInWorldSpace))
 	<< "\nview: " << glm::to_string(_camera->viewDirectionWorldSpace())
 	<< "\ntoFocus: " << glm::to_string(glm::normalize(camToCenter)) << "\n\n";*/
-
 
 	_selected = newSelected; // might want to remember what was selected last frame
 }
