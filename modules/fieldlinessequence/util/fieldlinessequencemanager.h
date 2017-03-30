@@ -71,6 +71,7 @@ public:
                             const int& maxIterations,
                             const bool& shouldResample, //does const bool& make sense?
                             const int& numResamples,
+                            const int& resamplingOption,
                             std::vector<double>& startTimes,
                             FieldlinesState& outFieldlinesStates);
 
@@ -81,11 +82,15 @@ private:
                           const int& maxIterations,
                           const bool& shouldResample,
                           const int& numResamples,
+                          const int& resamplingOption,
                           FieldlinesState& outFieldlinesStates);
 
     void resampleFieldline( const int& numResamples,
-                            const ccmc::Fieldline& line,
+                            const int& resamplingOption,
+                            ccmc::Fieldline& line,
                             FieldlinesState& outFieldlinesState);
+
+    double getTime(ccmc::Kameleon* kameleon);
 };
 
 } //namespace openspace

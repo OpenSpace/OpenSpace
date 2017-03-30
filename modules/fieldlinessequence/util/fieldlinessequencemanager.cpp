@@ -119,27 +119,21 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         const int& maxIterations,
         const bool& shouldResample,
         const int& numResamples,
+        const int& resamplingOption,
         std::vector<double>& startTimes,
         FieldlinesState& outFieldlinesStates) {
 
     std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
     long status = kameleon->open(pathToCdfFile);
     if (status == ccmc::FileReader::OK) {
-        LDEBUG("Successfully created a Kameleon Object from file: " << pathToCdfFile);
-
         // TODO: check model
-        // std::string model = kameleon->getModelName();
-        // == "enlil"; // TODO, specify in Lua and confirm
-        std::string seqStartStr =
-                kameleon->getGlobalAttribute("start_time").getAttributeString();
+        std::string model = kameleon->getModelName();
+        // == "enlil"; // TODO, specify in Lua and confirm?
 
-        double seqStartDbl =
-                Time::ref().convertTime(seqStartStr.substr(0, seqStartStr.length() - 2));
+        LDEBUG("Successfully created a Kameleon Object from file: " << pathToCdfFile <<
+               "\n\tModel: " << model);
 
-        double stateOffset = static_cast<double>(
-                kameleon->getGlobalAttribute(
-                        "elapsed_time_in_seconds").getAttributeFloat());
-        startTimes.push_back(seqStartDbl + stateOffset);
+        startTimes.push_back(getTime(kameleon.get()));
 
         bool status;
         // TODO: check status
@@ -148,6 +142,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                                  inSeedPoints,maxIterations,
                                  shouldResample,
                                  numResamples,
+                                 resamplingOption,
                                  outFieldlinesStates);
     }
 
@@ -161,53 +156,39 @@ bool FieldlinesSequenceManager::traceFieldlines(
         const int& maxIterations,
         const bool& shouldResample,
         const int& numResamples,
+        const int& resamplingOption,
         FieldlinesState& outFieldlinesStates) {
 
     // TODO: depending on model. Scale according to its reference frame
     const float R_E_TO_METER = 6371000.f; // BATSRUS
+
     kameleon->loadVariable(tracingVariable);
     ccmc::Tracer tracer(kameleon);
-    tracer.setMaxIterations(maxIterations); // TODO specify in Lua
-    //     tracer.setInnerBoundary(.1f); // TODO specify in Lua
-    //     std::vector<Line> fieldlines;
+    tracer.setMaxIterations(maxIterations);
+
+    // tracer.setInnerBoundary(1.25f); // TODO specify in Lua
+    // tracer.setUseRegionOfInterest(true);
+    // tracer.setRegionOfInterest(ccmc::Point3f(-20.f, -5.f, -5.f), ccmc::Point3f(20.f, 5.f, 5.f));
+
     int lineStart = 0;
     int lineCount = 0;
     for (glm::vec3 seedPoint : inSeedPoints) {
-        // A ccmc::Fieldline contains much more info than we need here, but might be
-        // needed in future.
+        // A ccmc::Fieldline contains much more info than we need here,
+        // but might be sneeded in future.
         ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(tracingVariable,
                                                                   seedPoint.x,
                                                                   seedPoint.y,
                                                                   seedPoint.z);
 
-
-        LDEBUG("Getting Index");
-        int seedPointIdx = ccmcFieldline.getStartIndex();
-        LDEBUG("\tGot it!"  << seedPointIdx);
-        LDEBUG("\tFieldline size!"  << ccmcFieldline.size());
-        if (ccmcFieldline.size() > 0 && seedPointIdx != 0) {
-            seedPointIdx -= 1;
-        }
-
-        if (ccmcFieldline.size() > 0 && (&ccmcFieldline.getPositions()[seedPointIdx])->component1 != seedPoint.x) {
-            LERROR("Incorrect SeedPoint Index");
-        // } else if ((&ccmcFieldline.getPositions()[seedPointIdx +1 ])->component1 == seedPoint.x) {
-        //     LDEBUG("InCorrect SeedPoint Index!! should be + 1");
-        // } else if ((&ccmcFieldline.getPositions()[seedPointIdx -1 ])->component1 == seedPoint.x) {
-        //     LDEBUG("InCorrect SeedPoint Index!! should be -1");
-        // } else {
-        //     LDEBUG("Nothing was correct!");
-        }
-
         if (shouldResample) {
-            //resampleFieldline
-        } //else {
+            resampleFieldline(numResamples,
+                              resamplingOption,
+                              ccmcFieldline,
+                              outFieldlinesStates);
+        } //else {}
 
         lineCount = static_cast<int>(ccmcFieldline.size());
-        // TODO : remove this if when not needed anymore
-        if (lineCount > maxIterations) {
-            LDEBUG("Number of Line Vertices = " << lineCount);
-        }
+
         outFieldlinesStates._lineStart.push_back(lineStart);
         outFieldlinesStates._lineCount.push_back(lineCount);
         // outFieldlinesStates.reserveSize(lineCount);
@@ -217,6 +198,7 @@ bool FieldlinesSequenceManager::traceFieldlines(
             const ccmc::Point3f* vP = &ccmcFieldline.getPositions()[i];
             // TODO: If I don't want to scale here, then I might be able to use std::move
             // or memmove here?
+            // TODO: This is batsrus specific
             outFieldlinesStates._vertexPositions.push_back(
                     glm::vec3(vP->component1 * R_E_TO_METER,
                               vP->component2 * R_E_TO_METER,
@@ -232,9 +214,88 @@ bool FieldlinesSequenceManager::traceFieldlines(
 
 // Already traced
 void FieldlinesSequenceManager::resampleFieldline(const int& numResamples,
-                                                  const ccmc::Fieldline& line,
+                                                  const int& resamplingOption,
+                                                  ccmc::Fieldline& line,
                                                   FieldlinesState& outFieldlinesState) {
 
+    int numPoints = line.getStartIndex();
+    if (numPoints == numResamples || numPoints <= 0) {
+        return; // Nothing is needed to be done
+    }
+
+    // Resample with the built in functionality in ccmd::Fieldline
+    switch (resamplingOption) {
+        case 1:
+            line.getLength(numPoints);
+            line = line.interpolate(resamplingOption, numResamples);
+            break;
+        case 2:
+            // todo: getIntegral?
+            line.integrate();
+            line = line.interpolate(resamplingOption, numResamples);
+            break;
+        case 3:
+            // todo getSomething?
+            line = line.interpolate(resamplingOption, numResamples);
+            break;
+        default:
+            break;
+    }
+    return;
+
+
+    // int seedPointIdx = line.getStartIndex();
+    // if (seedPointIdx != 0) {
+    //     seedPointIdx -= 1; // For some reason ccmc::Fieldline.getStartIndex() is one off
+    // }
+}
+
+double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
+    // Inspiration from 'void KameleonInterpolator::setEphemTime()' which doesn't seem to
+    // exist in the version of Kameleon that is included in OpenSpace. Alterations
+    // done to fit here.
+
+        std::string seqStartStr;
+        double seqStartDbl;
+        if (kameleon->doesAttributeExist("start_time")){
+            seqStartStr =
+                    kameleon->getGlobalAttribute("start_time").getAttributeString();
+        } else if (kameleon->doesAttributeExist("tim_crstart_cal")) {
+            seqStartStr =
+                    kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
+        } else {
+            LWARNING("No starting time attribute could be found in the .cdf file.\n\t" <<
+                    "Starting time is set to 01.JAN.2000 12:00.");
+            seqStartDbl = 0.0;
+        }
+
+        if (seqStartStr.length() == 19){
+            seqStartStr += ".000Z";
+        }
+
+        if (seqStartStr.length() == 24){
+            seqStartDbl =
+                    Time::ref().convertTime(
+                            seqStartStr.substr(0, seqStartStr.length() - 2));
+        }
+
+        double stateStartOffset;
+
+        if (kameleon->doesAttributeExist("elapsed_time_in_seconds")) {
+            stateStartOffset = static_cast<double>(
+                    kameleon->getGlobalAttribute(
+                            "elapsed_time_in_seconds").getAttributeFloat());
+        } else if (kameleon->doesAttributeExist("time_physical_time")) {
+            stateStartOffset = static_cast<double>(
+                    kameleon->getGlobalAttribute(
+                            "time_physical_time").getAttributeFloat());
+        } else {
+            stateStartOffset = 0.0;
+            LWARNING("No time offset attribute could be found in the .cdf file.\n\t" <<
+                     "The current state starts the same time as the sequence!");
+        }
+
+    return seqStartDbl + stateStartOffset;;
 }
 
 } // namsepace openspace
