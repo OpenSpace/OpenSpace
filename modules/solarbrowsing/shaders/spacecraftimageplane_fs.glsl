@@ -24,6 +24,7 @@
 
 uniform float time;
 uniform sampler2D texture1;
+uniform sampler1D texture2;
 uniform bool additiveBlending;
 
 in vec2 vs_st;
@@ -33,7 +34,25 @@ in vec4 vs_positionScreenSpace;
 
 Fragment getFragment() {
     float intensityScaled = texture(texture1, vs_st).r;
-    vec4 diffuse = vec4(intensityScaled, intensityScaled, intensityScaled, 1.0);
+
+    vec4 diffuse;
+
+    float intensityScaled2 = max(0.0, min(1.0, intensityScaled));
+    float temp = floor(intensityScaled2 == 1.0 ? 255.0 : intensityScaled2 * 256.0);
+
+    const float c0 = temp;
+    const float c1 = sqrt(temp) * sqrt(255.0);
+    const float c2 = pow(temp, 2.0) / 255.0;
+    const float c3 = ( (c1 + c2 / 2.0) * 255.0 / ( 255.0 + 255.0 / 2.0));
+
+    float rr = c2 / 255.0;
+    float rg = c3 / 255.0;
+    float rb = c0 / 255.0;
+
+    // rr = clamp(rr, 0.0, 1.0);
+    // rg = clamp(rg, 0.0, 1.0);
+    // rb = clamp(rb, 0.0, 1.0);
+    diffuse = vec4(rr, rg, rb, 1.0);
 
     if (diffuse.a == 0.0)
         discard;

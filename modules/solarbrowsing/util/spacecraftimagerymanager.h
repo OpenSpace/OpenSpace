@@ -43,6 +43,7 @@ namespace openspace {
 struct ImageDataObject {
     std::unordered_map<std::string, float> metaData;
     std::valarray<float> contents;
+    std::string type; // for debuggning
 };
 
 class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManager> {
@@ -52,6 +53,7 @@ public:
     SpacecraftImageryManager();
     std::vector<ImageDataObject> loadImageData(const std::string& path);
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> loadTextures(std::vector<ImageDataObject>& imageData);
+    std::unique_ptr<ghoul::opengl::Texture> createLUT();
     void scaleImageData(std::vector<ImageDataObject>& _imageData, const std::string& type, const int& channel);
 private:
     void fetchServerImages(std::string type);

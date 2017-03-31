@@ -95,6 +95,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
 
+    _lut = SpacecraftImageryManager::ref().createLUT();
+    _lut->uploadTexture();
+
     _currentActiveChannel.onChange([this]() {
         _textures[_currentActiveChannel][_currentActiveTexture]->uploadTexture();
     });
@@ -123,6 +126,10 @@ bool RenderableSpacecraftCameraPlane::initialize() {
         if (!_shader)
             return false;
     }
+
+    // using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    // _shader->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    // _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     return isReady();
 }
@@ -217,9 +224,15 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
+    ghoul::opengl::TextureUnit unit2;
+
+     unit.activate();
     _textures[_currentActiveChannel][_currentActiveTexture]->bind();
     _shader->setUniform("texture1", unit);
+
+    unit2.activate();
+    _lut->bind();
+    _shader->setUniform("texture2", unit2);
 
     bool usingFramebufferRenderer =
         OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
