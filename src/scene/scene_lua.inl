@@ -46,8 +46,8 @@ const std::string tagToMatch)     {
     properties::PropertyOwner* owner = prop->owner();
     
     if (owner != nullptr) {
-        std::vector<std::string>* tags = (std::vector<std::string>*)owner->getTags();
-        for (std::string currTag : *tags) {
+        std::vector<std::string> tags = (std::vector<std::string>)owner->tags();
+        for (std::string currTag : tags) {
             if (tagToMatch.compare(currTag) == 0) {
                 tagMatchOwner = owner;
                 break;
@@ -67,7 +67,7 @@ void applyRegularExpression(lua_State* L, std::regex regex,
                             std::string groupName = "")                               {
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
-    bool isGroupMode = (groupName.compare("") != 0) ? true : false;
+    bool isGroupMode = (groupName.empty()) ? false : true;
     
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties

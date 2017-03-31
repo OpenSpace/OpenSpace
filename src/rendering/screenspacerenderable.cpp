@@ -47,7 +47,7 @@ namespace {
     const char* KeyScale = "Scale";
     const char* KeyDepth = "Depth";
     const char* KeyAlpha = "Alpha";
-
+    const char* keyTag = "Tag";
     const float PlaneDepth = -2.f;
 }
 
@@ -145,6 +145,11 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     dictionary.getValue(KeyScale, _scale);
     dictionary.getValue(KeyDepth, _depth);
     dictionary.getValue(KeyAlpha, _alpha);
+
+    std::string tagName;
+    dictionary.getValue(keyTag, tagName);
+    if (! tagName.empty())
+        addTag(tagName);
 
     // Setting spherical/euclidean onchange handler
     _useFlatScreen.onChange([this](){   

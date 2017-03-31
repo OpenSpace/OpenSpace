@@ -41,7 +41,6 @@ namespace {
     const char* keyStart = "StartTime";
     const char* keyEnd = "EndTime";
     const char* KeyType = "Type";
-
     const char* keyTag = "Tag";
 }
 
@@ -117,7 +116,6 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     dictionary.getValue(keyTag, tagName);
     if (! tagName.empty())
         addTag(tagName);
-
     if (_startTime != "" && _endTime != "") {
         _hasTimeInterval = true;
     }
