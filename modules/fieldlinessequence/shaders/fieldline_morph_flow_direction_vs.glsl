@@ -56,11 +56,11 @@ void main() {
     // project the position to view space
     //position_meters =  modelViewProjection * position_meters;
     //gl_Position = z_normalization(position_meters);
-    vec3 offset = (in_pos_morph_to - in_position);
+    vec3 offset = (in_pos_morph_to - in_position) * state_progression;// * 0.00001;
 
     float scale = 1.0;//695700000.0;//150000000000.0;//6371000.0;
     //vs_position = vec4(in_position.xyz * scale, 1); // TODO powerscaleify?
-    vec4 position_in_meters = vec4((in_position.xyz + offset * state_progression)*scale, 1);
+    vec4 position_in_meters = vec4((in_position.xyz + offset)*scale, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
     vs_position = z_normalization(positionClipSpace);
     gl_Position = vs_position;

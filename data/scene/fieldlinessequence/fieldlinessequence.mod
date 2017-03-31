@@ -2,6 +2,7 @@ local seedPointsFileBatsrus = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpo
 local seedPointsFileEnlil = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/enlil.txt';
 
 local volumeFolderBatsrus = '${OPENSPACE_DATA}/bats_sequence';
+local volumeFolderEnlil = '${OPENSPACE_DATA}/enlil_sequence';
 local volumeFile1 = '${OPENSPACE_DATA}/bats_sequence/batsrus1.cdf';
 local volumeFile2 = '${OPENSPACE_DATA}/bats_sequence/batsrus2.cdf';
 local volumeFile3 = '${OPENSPACE_DATA}/bats_sequence/batsrus3.cdf';
@@ -46,16 +47,43 @@ return {
                 -- TimeDependent = true,
             },
             Fieldlines = {
-                MaximumTracingSteps = 50.0,
+                MaximumTracingSteps = 1000.0,
                 -- Stepsize = 1.0,
                 -- Classification = true,
                 Morphing = true,
                 -- NumResamples = 5,
-                ResamplingType = 3, -- 1=length, 2=integral, 3=index
+                ResamplingType = 1, -- resampling will depend on: 1=length, 2=integral, 3=index
             },
             SeedPoints = {
                 -- Type = "File",
                 File = seedPointsFileBatsrus,
+            }
+        }
+    },
+    {
+        Name = "SolarFieldlines",
+        Parent = "HNMReferenceFrame",
+        Renderable = {
+            Type = "RenderableFieldlinesSequence",
+            VectorVolume = {
+                -- Type = "VolumeKameleon",
+                Directory = volumeFolderEnlil,
+                -- Model = "BATSRUS",
+                TracingVariable = "b", -- "b" is the variable specifying the magnetic field
+                -- Variables = {"bx", "by", "bz"},
+                -- TimeDependent = true,
+            },
+            Fieldlines = {
+                MaximumTracingSteps = 1000.0,
+                -- Stepsize = 1.0,
+                -- Classification = true,
+                Morphing = true,
+                -- NumResamples = 5,
+                ResamplingType = 1, -- resampling will depend on: 1=length, 2=integral, 3=index
+            },
+            SeedPoints = {
+                -- Type = "File",
+                File = seedPointsFileEnlil,
             }
         }
     },
