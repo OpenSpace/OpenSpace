@@ -63,12 +63,14 @@ void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imag
             const float exptime = metaData["EXPTIME"];
             assert(exptime > 0.f && exptime < 10.f);
 
-            data = data * normtimes[channel] / exptime;
+            data = data * (normtimes[channel] / exptime);
+
             std::for_each(begin(data), end(data), [&cmin, &cmax](float& val) {
-                std::min(cmax, std::max(val, cmin));
+                val = std::min(cmax, std::max(val, cmin));
             });
+
             // Note: No need to set range right now,
-            // glTexImage2D() will clamp all values to [0,1] using GL_RED
+            // glTexImage2D() will clamp all values to [0,1]
             switch (channel) {
                 case 0 ... 2: {
                     data = 0.f; // TODO(mnoven): Remove this
@@ -83,7 +85,7 @@ void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imag
                 }
                 case 4 ... 9: {
                     // TODO(mnoven) : Remove this
-                    if (channel == 4 || channel == 9) data = 0.f;
+                    if (channel == 4 || channel == 9) { data = 0.0f; continue;}
 
                     float alogcmin = log10(cmin), alogcmax = log10(cmax);
                     data = log10(data);
@@ -103,6 +105,29 @@ void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imag
     }
 }
 
+std::unique_ptr<ghoul::opengl::Texture> SpacecraftImageryManager::createLUT() {
+    float* LUT1D = new float[256];
+    for ( int i = 0; i < 256; i++) {
+        LUT1D[i] = i / 255.f;
+    }
+    // unsigned char* colors = new unsigned char[6];
+    // colors[0] = 255, colors[1] = 0, colors[2] = 0; // Red
+    // colors[3] = 0; colors[4] = 0; colors[5] = 255; // Blue
+
+    const glm::size3_t imageSize(256, 1, 1); // TODO(mnoven) : Metadata
+    std::unique_ptr<Texture> t = std::make_unique<Texture>(
+                                    LUT1D,
+                                    imageSize,
+                                    Texture::Red, // Format of the pixeldata
+                                    GL_R32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
+                                    GL_FLOAT, // Type of data
+                                    Texture::FilterMode::Linear,
+                                    Texture::WrappingMode::Repeat
+                                );
+
+    return std::move(t);
+}
+
 std::vector<std::unique_ptr<Texture>> SpacecraftImageryManager::loadTextures(std::vector<ImageDataObject>& imageData) {
     std::vector<std::unique_ptr<Texture>> textures;
     textures.reserve(imageData.size());
@@ -112,6 +137,12 @@ std::vector<std::unique_ptr<Texture>> SpacecraftImageryManager::loadTextures(std
         const glm::size3_t imageSize(1024, 1024, 1); // TODO(mnoven) : Metadata
         const Texture::Format format = ghoul::opengl::Texture::Red;
         const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
+
+        // TODO(mnoven): Remove this
+        for ( int i = 0; i < data.size(); i++) {
+            assert(!(data[i] < 0.f) && !(data[i] > 1.f));
+        }
+
         std::unique_ptr<Texture> t = std::make_unique<Texture>(
                                         &data[0],
                                         imageSize,
@@ -156,6 +187,7 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
                     ImageDataObject im;
                     im.metaData = FitsFileReader::readHeader(relativePath, _headerKeywords);
                     im.contents = FitsFileReader::readImage(relativePath);
+                    im.type = relativePath;
                     imageData.push_back(im);
                 }
             }

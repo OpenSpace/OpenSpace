@@ -64,6 +64,8 @@ private:
     std::vector<std::vector<std::unique_ptr<ghoul::opengl::Texture>>> _textures;
     std::vector<std::vector<ImageDataObject>> _imageData;
 
+    std::unique_ptr<ghoul::opengl::Texture> _lut;
+
     void downloadTextureResource();
     bool initialize() override;
     bool deinitialize() override;

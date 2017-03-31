@@ -42,6 +42,7 @@ public:
 
     static std::valarray<float> readImage(const std::string& path);
     // Fits will throw error if keyword does not exist in header
+    // TODO(mnoven): Make map template and remove float
     static std::unordered_map<std::string, float> readHeader(const std::string& path, std::vector<std::string>& keywords);
 
 private:
