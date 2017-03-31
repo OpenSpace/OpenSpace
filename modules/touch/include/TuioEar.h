@@ -65,15 +65,22 @@ class TuioEar : public TUIO::TuioListener {
 		void refresh(TUIO::TuioTime frameTime);
 
 		std::vector<TUIO::TuioCursor> getInput();
+		bool tap();
+		TUIO::TuioCursor getTap();
 		void clearInput();
 		
 	private:
+		bool _tap;
+		TUIO::TuioCursor _tapCo = TUIO::TuioCursor(-1, -1, -1.0f, -1.0f);
+		std::mutex _mx;
+
 		TUIO::TuioClient *_tuioClient;
 		TUIO::OscReceiver *_oscReceiver;
 
+		
 		std::vector<TUIO::TuioCursor> _list;
 		std::vector<int> _removeList;
-		std::mutex _mx;
+		
 };
 
 #endif // __OPENSPACE_MODULE_TOUCH___TOUCHWRAPPER___H__

@@ -84,6 +84,8 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		_directTouchMode = false;
 
 	trace(list);
+
+
 	interpret(list, lastProcessed);
 	accelerate(list, lastProcessed);
 }
@@ -168,14 +170,23 @@ void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std:
 		}
 	}
 	if (list.size() == 1) {
-		if (!cursor.isMoving())
-			std::cout << "cursor was moving but has now stopped\n";
-
-		_action.rot = true;
-		_action.pinch = false;
-		_action.pan = false;
-		_action.roll = false;
-		_action.pick = false;
+		//std::cout << "Tap: " << cursor.getSessionID() << ". (" << cursor.getX() << "," << cursor.getY() << "), Speed: "
+			//<< cursor.getMotionSpeed() << ", Path: " << cursor.getPath().size() << ", Time: " << cursor.getPath().back().getTuioTime().getTotalMilliseconds()
+			//<< ", lastTime: " << lastProcessed.at(0).second.getTuioTime().getTotalMilliseconds() << "\n";
+		if (!cursor.isMoving() && cursor.getPath().size() == 1) { // tap
+			_action.rot = false;
+			_action.pinch = false;
+			_action.pan = false;
+			_action.roll = false;
+			_action.pick = true;
+		}
+		else {
+			_action.rot = true;
+			_action.pinch = false;
+			_action.pan = false;
+			_action.roll = false;
+			_action.pick = false;
+		}
 	}
 	else {
 		if (std::abs(dist - lastDist)/list.at(0).getMotionSpeed() < 0.01 && list.size() == 2) {
@@ -204,7 +215,7 @@ void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std:
 
 void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
 	TuioCursor cursor = list.at(0);
-	if (!_action.rot) {
+	if (!_action.rot || !_action.pick) {
 		_centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
 		_centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](double y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
 	}
@@ -243,7 +254,19 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 		_vel.localRoll += -rollFactor * _sensitivity.localRoll;
 	}
 	if (_action.pick) { // pick something in the scene as focus node
-
+		if (_selected.size() == 1 && _selected.at(0).second != _focusNode) {
+			_focusNode = _selected.at(0).second; // rotate camera to look at new focus
+			OsEng.interactionHandler().setFocusNode(_focusNode);
+			glm::dvec3 camToFocus = glm::normalize(_camera->positionVec3() - _focusNode->worldPosition());
+			double angleX = glm::orientedAngle(_camera->viewDirectionWorldSpace(), camToFocus, _camera->lookUpVectorWorldSpace());
+			double angleY = glm::orientedAngle(_camera->viewDirectionWorldSpace(), camToFocus, glm::normalize(_camera->rotationQuaternion() * glm::dvec3(1,0,0)));
+			std::cout << "x: " << angleX << ", y: " << angleY << "\n";
+			_vel.localRot = 3.0 * _sensitivity.localRot * glm::dvec2(-angleX, -angleY);
+		}
+		else {
+			_vel.zoom = _sensitivity.zoom * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
+		}
+			
 	}
 }
 

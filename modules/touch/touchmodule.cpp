@@ -71,8 +71,15 @@ bool TouchModule::gotNewInput() {
 		) == list.end(); }),
 		lastProcessed.end());
 
-	// Return true if we got new input
+	// Tap
+	if (list.size() == 0 && lastProcessed.size() == 0 && ear->tap()) {
+		TuioCursor c = ear->getTap();
+		list.push_back(c);
+		lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
+		return true;
+	}
 	
+	// Return true if we got new input
 	if (list.size() == lastProcessed.size() && list.size() > 0) {
 		bool newInput = true;
 		for_each(lastProcessed.begin(), lastProcessed.end(), [this, &newInput](Point& p) {

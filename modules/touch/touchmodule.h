@@ -41,7 +41,6 @@ public:
 
 	bool gotNewInput();
 
-	//TouchInteraction touch;
 	TuioEar* ear;
 	
 
