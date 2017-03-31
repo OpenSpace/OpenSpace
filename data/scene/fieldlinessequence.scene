@@ -9,8 +9,9 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    -- openspace.time.setTime("2015 MAR 14 23:59:00.000") -- BATSRUS time
-    openspace.time.setTime("2010 OCT 16 07:30:00.000") -- ENLIL time
+    -- openspace.time.setTime("2015 MAR 14 23:59:58.000") -- BATSRUS time
+    openspace.time.setTime("2015 JUN 30 09:17:32.000") -- ENLIL time
+    -- openspace.time.setTime("2010 OCT 16 07:30:00.000") -- ENLIL time
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 end
 
@@ -42,7 +43,7 @@ return {
     Camera = {
         Focus = "SolarSystemBarycenter", --"EarthBarycenter",--
         Position = {505370268486.696167, 1089706179272.719116, -890259148524.319458},
-        Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
+        Rotation = {0.0, 0.0, 0.0, 0.0},
     },
     Modules = {
         "sun",
@@ -54,11 +55,11 @@ return {
         -- "saturn",
         -- "uranus",
         --"neptune",
-        "stars",
+        -- "stars",
         "fieldlinessequence",
         -- "stars-denver",
-        "milkyway",
+        -- "milkyway",
         -- "milkyway-eso",
-        "constellationbounds",
+        -- "constellationbounds",
     }
 }
