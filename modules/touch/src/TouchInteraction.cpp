@@ -258,10 +258,10 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 			_focusNode = _selected.at(0).second; // rotate camera to look at new focus
 			OsEng.interactionHandler().setFocusNode(_focusNode);
 			glm::dvec3 camToFocus = glm::normalize(_camera->positionVec3() - _focusNode->worldPosition());
-			double angleX = glm::orientedAngle(_camera->viewDirectionWorldSpace(), camToFocus, _camera->lookUpVectorWorldSpace());
+			double angleX = glm::orientedAngle(_camera->viewDirectionWorldSpace(), camToFocus, glm::normalize(_camera->rotationQuaternion() * _camera->lookUpVectorWorldSpace()));
 			double angleY = glm::orientedAngle(_camera->viewDirectionWorldSpace(), camToFocus, glm::normalize(_camera->rotationQuaternion() * glm::dvec3(1,0,0)));
 			std::cout << "x: " << angleX << ", y: " << angleY << "\n";
-			_vel.localRot = 3.0 * _sensitivity.localRot * glm::dvec2(-angleX, -angleY);
+			_vel.localRot = _sensitivity.localRot * glm::dvec2(-angleX, -angleY);
 		}
 		else {
 			_vel.zoom = _sensitivity.zoom * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
