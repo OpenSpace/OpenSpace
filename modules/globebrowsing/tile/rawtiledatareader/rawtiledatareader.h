@@ -48,7 +48,7 @@ class RawTileDataReader {
 public:
     struct Configuration {
         bool doPreProcessing;
-        int minimumTilePixelSize;
+        int tilePixelSize;
         GLuint dataType = 0; // default = no datatype reinterpretation
     };
 

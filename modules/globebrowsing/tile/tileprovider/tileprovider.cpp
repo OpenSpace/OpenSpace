@@ -59,7 +59,9 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(const ghoul::Di
     return result;
 }
 
-TileProvider::TileProvider() : _initialized(false) {
+TileProvider::TileProvider() :
+    properties::PropertyOwner("tileProvider"),
+    _initialized(false) {
     initialize();
 }
 
@@ -136,15 +138,21 @@ ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize){
     return std::move(chunkTilePile);
 }
 
-void TileProvider::initialize() {
+bool TileProvider::initialize() {
     ghoul_assert(!_initialized, "TileProvider can only be initialized once.");
-    ghoul_assert(_numTileProviders < UINT_MAX, "Too many tile providers initialized.");
     _uniqueIdentifier = _numTileProviders;
     _numTileProviders++;
+    if (_numTileProviders == UINT_MAX) {
+        _numTileProviders--;
+        return false;
+    }
+  
     _initialized = true;
+    return true;
 }
 
 unsigned int TileProvider::uniqueIdentifier() const {
+    ghoul_assert(_initialized, "TileProvider was not initialized.");
     return _uniqueIdentifier;
 }
 

@@ -30,7 +30,7 @@ return {
 
                 },
                 GrayScaleLayers = {
-                    {
+                    --[[{
                         Name = "OnMoonColorGrayscale",
                         FilePath = "map_service_configs/OnMoonColor.xml",
                         Enabled = true,
@@ -46,7 +46,7 @@ return {
                     {
                         Name = "WAC",
                         FilePath = "map_service_configs/Utah/Wac.wms"
-                    }
+                    }]]
                 },
                 NightLayers = {
 
@@ -58,7 +58,7 @@ return {
                     
                 },
                 HeightLayers = {
-                    {
+                    --[[{
                         Name = "OnMoonHeight",
                         FilePath = "map_service_configs/OnMoonHeight.xml",
                         Enabled = true,
@@ -67,7 +67,7 @@ return {
                     {
                         Name = "LolaDem",
                         FilePath = "map_service_configs/Utah/LolaDem.wms"
-                    }
+                    }]]
                 },
             },
         }

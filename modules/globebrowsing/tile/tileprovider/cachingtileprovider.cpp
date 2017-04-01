@@ -38,7 +38,7 @@ namespace {
     const char* _loggerCat = "CachingTileProvider";
 
     const char* KeyDoPreProcessing = "DoPreProcessing";
-    const char* KeyMinimumPixelSize = "MinimumPixelSize";
+    const char* KeyTilePixelSize = "TilePixelSize";
     const char* KeyFilePath = "FilePath";
     const char* KeyFlushInterval = "FlushInterval";
 }
@@ -64,7 +64,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     // 2. Initialize default values for any optional Keys
     RawTileDataReader::Configuration config;
     config.doPreProcessing = false;
-    config.minimumTilePixelSize = 512;
+    config.tilePixelSize = 512;
         
     // getValue does not work for integers
     double minimumPixelSize;
@@ -74,9 +74,9 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     if (dictionary.getValue<bool>(KeyDoPreProcessing, config.doPreProcessing)) {
         LDEBUG("Default doPreProcessing overridden: " << config.doPreProcessing);
     }
-    if (dictionary.getValue<double>(KeyMinimumPixelSize, minimumPixelSize)) {
+    if (dictionary.getValue<double>(KeyTilePixelSize, minimumPixelSize)) {
         LDEBUG("Default minimumPixelSize overridden: " << minimumPixelSize);
-        config.minimumTilePixelSize = static_cast<int>(minimumPixelSize); 
+        config.tilePixelSize = static_cast<int>(minimumPixelSize); 
     }
     if (dictionary.getValue<double>(KeyFlushInterval, framesUntilRequestFlush)) {
         LDEBUG("Default framesUntilRequestFlush overridden: " <<

@@ -36,16 +36,31 @@ return {
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
+                    {
+                        Name = "Viking combo",
+                        Type = "ByLevel",
+                        LevelTileProviders = {
+                            {
+                                MaxLevel = 3, 
+                                TileProvider = { FilePath = "textures/mars.jpg", }, 
+                            },
+                            {
+                                MaxLevel = 22, 
+                                TileProvider = { FilePath = "map_service_configs/MARS_Viking_MDIM21.xml" },
+                            },
+                        },
+                        Enabled = true,
+                    },
                     -- {
                     --     Type = "SingleImage",
                     --     Name = "Debug Tiles",
                     --     FilePath = "../../debugglobe/textures/test_tile.png",
                     -- },
-                    {
-                        Name = "MARS_Viking",
-                        FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
-                        Enabled = true,
-                    },
+                    --{
+                    --    Name = "MARS_Viking",
+                    --    FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
+                    --    Enabled = true,
+                    --},
                     {
                         Name = "MOLA Pseudo Color",
                         FilePath = "map_service_configs/Utah/MolaPseudoColor.xml",
@@ -118,27 +133,27 @@ return {
                         Name = "Mola Elevation [Europe]",
                         FilePath = "map_service_configs/Mola_Elevation.xml",
                         Enabled = true,
-                        MinimumPixelSize = 90,
+                        TilePixelSize = 90,
                         DoPreProcessing = true,
                     },
                     {
                         Name = "Mola Elevation [Utah]",
                         FilePath = "map_service_configs/Utah/Mola_Elevation.xml",
                         Enabled = false,
-                        MinimumPixelSize = 90,
+                        TilePixelSize = 90,
                         DoPreProcessing = true,
                     },
                     {
                         Name = "Mola Elevation CTX",
                         FilePath = "map_service_configs/Utah/MolaCTX_Elevation.xml",
                         -- Enabled = true,
-                        MinimumPixelSize = 90,
+                        TilePixelSize = 90,
                         DoPreProcessing = true,
                     },
                     {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
                         FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt",
-                        MinimumPixelSize = 90,
+                        TilePixelSize = 90,
                         DoPreProcessing = true,
                     },
                     --[[
@@ -146,7 +161,7 @@ return {
                         Name = "Mola Elevation",
                         FilePath = "map_service_configs/Mars_MGS_MOLA_DEM.xml",
                         Enabled = true,
-                        MinimumPixelSize = 64,
+                        TilePixelSize = 64,
                         DoPreProcessing = true,
                     },
 --]]                    
@@ -154,7 +169,7 @@ return {
                         Name = "West Candor Chasma",
                         FilePath = "map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt",
                         --Enabled = true,
-                        MinimumPixelSize = 90,
+                        TilePixelSize = 90,
                         DoPreProcessing = true,
                     },
                     {
