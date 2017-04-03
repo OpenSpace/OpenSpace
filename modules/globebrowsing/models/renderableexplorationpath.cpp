@@ -130,8 +130,9 @@ bool RenderableExplorationPath::deinitialize() {
 	return false;
 }
 
-bool RenderableExplorationPath::isReady() const
-{
+bool RenderableExplorationPath::isReady() const {
+	bool ready = true;
+	ready &= (_pathShader != nullptr);
 	return true;
 }
 
