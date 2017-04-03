@@ -243,6 +243,8 @@ std::string TemporalTileProvider::getGdalDatasetXML(TimeKey timeKey) {
     //size_t numChars = std::string(URL_TIME_PLACEHOLDER).length();
     size_t numChars = strlen(URL_TIME_PLACEHOLDER);
     ghoul_assert(pos != std::string::npos, "Invalid dataset file");
+    // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
+    // commented out ---abock
     std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timeKey);
     return timeSpecifiedXml;
 }
