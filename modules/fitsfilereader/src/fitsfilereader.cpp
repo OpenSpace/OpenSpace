@@ -76,27 +76,6 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture(const std::string& path) {
                             );
 }
 
-std::valarray<float> FitsFileReader::readImage(const std::string& path) {
-    FITS::setVerboseMode(true);
-
-    try {
-        FITS infile(path, Read, true);
-        PHDU& image = infile.pHDU();
-
-        assert(image.axes() == 2);
-
-        const int sizeX = image.axis(0);
-        const int sizeY = image.axis(1);
-        assert(sizeX % 2 == 0 && sizeY % 2 == 0 && sizeX == sizeY);
-
-        std::valarray<float> contents;
-        image.read(contents);
-        return std::move(contents);
-    } catch (FitsException& e){
-        LERROR("Could not read FITS image");
-    }
-}
-
 std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(const std::string& buffer) {
     fitsfile* infile;
     // Get string adress
@@ -155,9 +134,77 @@ std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(const std::string
     return texture;
 }
 
-std::unordered_map<std::string, float> FitsFileReader::readHeader(const std::string& path, std::vector<std::string>& keywords) {
+std::unordered_map<std::string, float> FitsFileReader::readHeaderFromImageTable(const std::string& path,
+                                                    std::vector<std::string>& keywords) {
     FITS::setVerboseMode(true);
-    std::string SPECTRUM = "SPECTRUM";
+
+    try {
+        FITS infile(path, Read, true);
+        ExtHDU& image = infile.extension(1);
+
+        std::vector<float> values;
+        image.readKeys(keywords, values);
+
+        if (values.size() != keywords.size()) {
+            LERROR("Number of keywords does not match number of values");
+        }
+
+        std::unordered_map<std::string, float> result;
+        std::transform(keywords.begin(), keywords.end(), values.begin(),
+                       std::inserter(result, result.end()),
+                       [](std::string key, float value) {
+            return std::make_pair(key, value);
+        });
+        return result;
+    } catch (FitsException& e) {
+        LERROR("Could not read FITS header from table");
+    }
+}
+
+std::valarray<float> FitsFileReader::readImageTable(const std::string& path) {
+    FITS::setVerboseMode(true);
+
+    try {
+        FITS infile(path, Read, true);
+        ExtHDU& image = infile.extension(1);
+
+        assert(image.axes() == 2);
+        const int sizeX = image.axis(0);
+        const int sizeY = image.axis(1);
+        assert(sizeX % 2 == 0 && sizeY % 2 == 0 && sizeX == sizeY);
+
+       // std::cout << image << std::endl;
+        std::valarray<float> contents;
+        image.read(contents);
+        return std::move(contents);
+    } catch (FitsException& e){
+        LERROR("Could not read FITS image from table");
+    }
+}
+
+std::valarray<float> FitsFileReader::readImage(const std::string& path) {
+    FITS::setVerboseMode(true);
+
+    try {
+        FITS infile(path, Read, true);
+        PHDU& image = infile.pHDU();
+
+        assert(image.axes() == 2);
+        const int sizeX = image.axis(0);
+        const int sizeY = image.axis(1);
+        assert(sizeX % 2 == 0 && sizeY % 2 == 0 && sizeX == sizeY);
+
+        std::valarray<float> contents;
+        image.read(contents);
+        return std::move(contents);
+    } catch (FitsException& e){
+        LERROR("Could not read FITS image");
+    }
+}
+
+std::unordered_map<std::string, float> FitsFileReader::readHeader(const std::string& path,
+                                std::vector<std::string>& keywords) {
+    FITS::setVerboseMode(true);
 
     try {
         FITS infile(path, Read, true);

@@ -40,6 +40,9 @@ public:
     static std::unique_ptr<ghoul::opengl::Texture> loadTexture(const std::string& path);
     static std::unique_ptr<ghoul::opengl::Texture> loadTextureFromMemory(const std::string& buffer);
 
+    // TODO(mnoven): Merge table functions with image functions since they do almost the same thing
+    static std::unordered_map<std::string, float> readHeaderFromImageTable(const std::string& path, std::vector<std::string>& keywords);
+    static std::valarray<float> readImageTable(const std::string& path);
     static std::valarray<float> readImage(const std::string& path);
     // Fits will throw error if keyword does not exist in header
     // TODO(mnoven): Make map template and remove float
