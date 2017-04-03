@@ -29,6 +29,7 @@
 // Sun Irradiance
 const float ISun = 40.0;
 
+uniform mat4 inverseTransformMatrix;
 uniform mat4 scaleTransformMatrix;
 uniform mat4 objToWorldTransform;
 uniform mat4 worldToObjectTransform;
@@ -45,6 +46,8 @@ uniform vec4 cameraPositionObjectCoords;
 
 //uniform vec4 campos;
 uniform vec4 objpos;
+uniform vec3 campos;
+uniform mat3 camrot;
 //uniform vec3 sun_pos;
 
 uniform bool _performShading = true;
@@ -660,16 +663,28 @@ void main() {
     // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
     vec4 osEyeCoords = viewToEyeTranform * sgctEyeCoords;
 
+    // Now we execute the transformations with no matrices:
+    vec4 ttmp = inverse(scaleTransformMatrix) * osEyeCoords;
+    vec3 ttmp2 = inverse(camrot) * vec3(ttmp);
+    vec4 ttmp3 = vec4(campos + ttmp2, 1.0);
+    vec4 worldCoords = ttmp3;
+
     // OS Eye to World
-    vec4 worldCoords = eyeToWorldTransform * osEyeCoords;
+    //vec4 worldCoords = eyeToWorldTransform * osEyeCoords;
 
     // World to Object
-    vec4 objectCoords = worldToObjectTransform * worldCoords;
+    //vec4 objectCoords = worldToObjectTransform * worldCoords;
+    // Transformation without matrices
+    vec4 objectCoords = inverseTransformMatrix * vec4(-objpos.xyz + vec3(worldCoords), 1.0);
 
     //double offset = 0.0, maxLength = 0.0;
-    vec4 planetPositionObjectCoords = worldToObjectTransform * objpos;
+    //vec4 planetPositionObjectCoords = worldToObjectTransform * objpos;
     //vec4 planetPositionObjectCoords = vec4(0.0, 0.0, 0.0, 1.0);
-                
+
+    // Transformation without matrices:
+    vec4 planetPositionObjectCoords = inverseTransformMatrix * vec4(-objpos.xyz + objpos.xyz, 1.0);
+
+
     Ray ray;
     ray.origin = cameraPositionObjectCoords;
     ray.direction = vec4(normalize(objectCoords.xyz - cameraPositionObjectCoords.xyz), 0.0);
@@ -698,7 +713,7 @@ void main() {
     //renderTarget = vec4(interpolatedNDCPos.xy*0.5 + vec2(0.5), 0.0, 1.0);
     //renderTarget = vec4(ndcCoords.xy*0.5 + vec2(0.5), 0.0, 1.0);
     //renderTarget = vec4(sgctEyeCoords.xy, 0.0, 1.0);
-    renderTarget = vec4(osEyeCoords.xyz * 0.5 + 0.5, 1.0);
+    //renderTarget = vec4(osEyeCoords.xyz * 0.5 + 0.5, 1.0);
     //vec2 temp = farPlaneObjectPos.xy;
     //vec2 temp = sgctEyeCoords.xy;
     //vec2 temp = osEyeCoords.xy;
