@@ -521,8 +521,6 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
     using namespace glm;
     if (_focusNode && _globe) {
         // Declare variables to use in interaction calculations
-        // Shrink interaction ellipsoid to enable interaction below height = 0
-        double ellipsoidShrinkTerm = _globe->interactionDepthBelowEllipsoid();
         double minHeightAboveGround = _globe->generalProperties().cameraMinHeight;
 
         // Read the current state of the camera and focusnode
@@ -552,12 +550,10 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
                 _globe->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
         dvec3 directionFromSurfaceToCamera =
             dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace;
-        dvec3 centerToEllipsoidSurface = dmat3(modelTransform)  * (_globe->projectOnEllipsoid(cameraPositionModelSpace) -
-            directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
+        dvec3 centerToEllipsoidSurface = dmat3(modelTransform)  * (_globe->projectOnEllipsoid(cameraPositionModelSpace));
         dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
-        double heightToSurface =
-            _globe->getHeight(cameraPositionModelSpace) + ellipsoidShrinkTerm;
+        double heightToSurface = _globe->getHeight(cameraPositionModelSpace);
         
         double distFromCenterToSurface =
             length(centerToEllipsoidSurface);
@@ -640,8 +636,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
                     _globe->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
             directionFromSurfaceToCamera =
                 dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace;
-            centerToEllipsoidSurface = dmat3(modelTransform) * (_globe->projectOnEllipsoid(cameraPositionModelSpace) -
-                directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
+            centerToEllipsoidSurface = dmat3(modelTransform) * _globe->projectOnEllipsoid(cameraPositionModelSpace);
             ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
 
@@ -673,8 +668,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
                 glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
 
             distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
-            double heightToSurface =
-                _globe->getHeight(cameraPositionModelSpace) + ellipsoidShrinkTerm;
+            double heightToSurface = _globe->getHeight(cameraPositionModelSpace);
             double heightToSurfaceAndPadding = heightToSurface + minHeightAboveGround;
             camPos += directionFromSurfaceToCamera *
                 glm::max(heightToSurfaceAndPadding - distFromEllipsoidSurfaceToCamera, 0.0);

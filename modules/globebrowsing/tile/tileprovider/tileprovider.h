@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/cache/lrucache.h>
-
+ 
 #include <openspace/properties/propertyowner.h>
 
 #include <vector>
@@ -71,7 +71,7 @@ public:
     virtual ~TileProvider() { }
 
     virtual bool initialize();
-    virtual bool deinitialize() { };
+    virtual bool deinitialize() { return true; };
 
     /**
      * Method for querying tiles, given a specified <code>TileIndex</code>.
