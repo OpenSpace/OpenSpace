@@ -199,13 +199,13 @@ bool SceneGraphNode::deinitialize() {
 
 void SceneGraphNode::traversePreOrder(std::function<void(SceneGraphNode*)> fn) {
     fn(this);
-    for (auto& child : _children) {
+    for (std::unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePreOrder(fn);
     }
 }
 
 void SceneGraphNode::traversePostOrder(std::function<void(SceneGraphNode*)> fn) {
-    for (auto& child : _children) {
+    for (std::unique_ptr<SceneGraphNode>& child : _children) {
         child->traversePostOrder(fn);
     }
     fn(this);
@@ -672,7 +672,7 @@ SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
     if (this->name() == name)
         return this;
     else
-        for (auto& it : _children) {
+        for (std::unique_ptr<SceneGraphNode>& it : _children) {
             SceneGraphNode* tmp = it->childNode(name);
             if (tmp)
                 return tmp;
