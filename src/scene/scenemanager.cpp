@@ -22,11 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/scene/scenemanager.h>
+#include <openspace/scene/scene.h>
 #include <openspace/scene/sceneloader.h>
+#include <openspace/scene/scenemanager.h>
+
 #include <algorithm>
 #include <memory>
-#include <openspace/scene/scene.h>
 
 namespace openspace {
 

@@ -98,7 +98,7 @@ public:
     void encode();
     void decode();
 
-    void scheduleLoadScene(const std::string& scenePath);
+    void scheduleLoadScene(std::string scenePath);
 
     void enableBarrier();
     void disableBarrier();
@@ -199,7 +199,7 @@ private:
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
     
-    bool _switchScene;
+    bool _scheduledSceneSwitch;
     std::string _scenePath;
 
     struct {

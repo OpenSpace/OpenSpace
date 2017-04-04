@@ -459,7 +459,7 @@ void SceneGraphNode::removeDependency(SceneGraphNode& dependency, UpdateScene up
 }
 
 void SceneGraphNode::clearDependencies(UpdateScene updateScene) {
-    for (auto& dependency : _dependencies) {
+    for (auto dependency : _dependencies) {
         dependency->_dependentNodes.erase(std::remove_if(
             dependency->_dependentNodes.begin(),
             dependency->_dependentNodes.end(),
@@ -479,7 +479,7 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
     clearDependencies(UpdateScene::No);
 
     _dependencies = dependencies;
-    for (auto& dependency : dependencies) {
+    for (auto dependency : dependencies) {
         dependency->_dependentNodes.push_back(this);
     }
 

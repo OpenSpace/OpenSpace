@@ -103,7 +103,7 @@ Camera* Scene::camera() const {
     return _camera.get();
 }
 
-void Scene::addNode(SceneGraphNode* node, Scene::UpdateDependencies updateDeps) {
+void Scene::addNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
     // Add the node and all its children.
     node->traversePreOrder([this](SceneGraphNode* n) {
         _topologicallySortedNodes.push_back(n);
@@ -115,7 +115,7 @@ void Scene::addNode(SceneGraphNode* node, Scene::UpdateDependencies updateDeps) 
     }
 }
 
-void Scene::removeNode(SceneGraphNode* node, Scene::UpdateDependencies updateDeps) {
+void Scene::removeNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
     // Remove the node and all its children.
     node->traversePostOrder([this](SceneGraphNode* node) {
         _topologicallySortedNodes.erase(
@@ -135,7 +135,11 @@ void Scene::updateDependencies() {
 }
 
 void Scene::sortTopologically() {
-    std::copy(_circularNodes.begin(), _circularNodes.end(), std::back_inserter(_topologicallySortedNodes));
+    _topologicallySortedNodes.insert(
+        _topologicallySortedNodes.end(),
+        std::make_move_iterator(_circularNodes.begin()),
+        std::make_move_iterator(_circularNodes.end())
+    );
     _circularNodes.clear();
 
     ghoul_assert(_topologicallySortedNodes.size() == _nodesByName.size(), "Number of scene graph nodes is inconsistent");
@@ -168,7 +172,7 @@ void Scene::sortTopologically() {
         nodes.push_back(node);
         zeroInDegreeNodes.pop();
 
-        for (auto& n : node->dependentNodes()) {
+        for (SceneGraphNode* n : node->dependentNodes()) {
             auto it = inDegrees.find(n);
             it->second -= 1;
             if (it->second == 0) {
@@ -176,7 +180,7 @@ void Scene::sortTopologically() {
                 inDegrees.erase(it);
             }
         }
-        for (auto& n : node->children()) {
+        for (SceneGraphNode* n : node->children()) {
             auto it = inDegrees.find(n);
             it->second -= 1;
             if (it->second == 0) {
@@ -189,7 +193,7 @@ void Scene::sortTopologically() {
         LERROR("The scene contains circular dependencies. " << inDegrees.size() << " nodes will be disabled.");
     }
 
-    for (auto& it : inDegrees) {
+    for (auto it : inDegrees) {
         _circularNodes.push_back(it.first);
     }
     
@@ -212,7 +216,7 @@ void Scene::initialize() {
 }
 
 void Scene::update(const UpdateData& data) {
-    for (auto& node : _topologicallySortedNodes) {
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             LTRACE("Scene::update(begin '" + node->name() + "')");
             node->update(data);
@@ -225,7 +229,7 @@ void Scene::update(const UpdateData& data) {
 }
 
 void Scene::evaluate(Camera* camera) {
-    for (auto& node : _topologicallySortedNodes) {
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             LTRACE("Scene::evaluate(begin '" + node->name() + "')");
             node->evaluate(camera);
@@ -238,7 +242,7 @@ void Scene::evaluate(Camera* camera) {
 }
 
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
-    for (auto& node : _topologicallySortedNodes) {
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             LTRACE("Scene::render(begin '" + node->name() + "')");
             node->render(data, tasks);

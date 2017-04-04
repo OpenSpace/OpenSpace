@@ -34,7 +34,6 @@
 #include <ghoul/misc/onscopeexit.h>
 
 #include <unordered_set>
-#include <memory>
 
 namespace {
     const std::string _loggerCat = "SceneLoader";

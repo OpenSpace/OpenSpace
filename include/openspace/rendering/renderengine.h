@@ -25,17 +25,18 @@
 #ifndef __OPENSPACE_CORE___RENDERENGINE___H__
 #define __OPENSPACE_CORE___RENDERENGINE___H__
 
-#include <openspace/scripting/scriptengine.h>
-
+#include <openspace/performance/performancemanager.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/rendering/renderer.h>
+#include <openspace/properties/triggerproperty.h>
+
 #include <openspace/rendering/raycastermanager.h>
-#include <openspace/performance/performancemanager.h>
+#include <openspace/rendering/renderer.h>
+#include <openspace/rendering/screenspacerenderable.h>
+
+#include <openspace/scripting/scriptengine.h>
 
 #include <openspace/util/syncdata.h>
 

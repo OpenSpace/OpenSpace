@@ -25,14 +25,14 @@
 #ifndef __OPENSPACE_CORE___SCENELOADER___H__
 #define __OPENSPACE_CORE___SCENELOADER___H__
 
-#include <memory>
-#include <string>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/camera.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/ghoul_lua.h>
 
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/camera.h>
+#include <memory>
+#include <string>
 
 namespace openspace {
 
@@ -40,35 +40,6 @@ class Scene;
 
 class SceneLoader {
 public:
-    struct LoadedNode {
-        LoadedNode(
-            const std::string& nodeName,
-            const std::string& parentName,
-            const std::vector<std::string>& deps,
-            std::unique_ptr<SceneGraphNode> n
-        )
-            : name(nodeName)
-            , parent(parentName)
-            , dependencies(deps)
-            , node(std::move(n)) {}
-
-        std::string name;
-        std::string parent;
-        std::vector<std::string> dependencies;
-        std::unique_ptr<SceneGraphNode> node;
-    };
-
-    struct LoadedCamera {
-        LoadedCamera(
-            const std::string& parentName,
-            std::unique_ptr<Camera> c
-        )
-            : parent(parentName)
-            , camera(std::move(c)) {}
-        std::string parent;
-        std::unique_ptr<Camera> camera;
-    };
-
     SceneLoader() = default;
     ~SceneLoader() = default;
 
@@ -88,6 +59,35 @@ public:
     SceneGraphNode* importNodeDictionary(Scene& scene, const ghoul::Dictionary& dictionary);
 
 private:
+    struct LoadedNode {
+        LoadedNode(
+            const std::string& nodeName,
+            const std::string& parentName,
+            const std::vector<std::string>& deps,
+            std::unique_ptr<SceneGraphNode> n
+            )
+            : name(nodeName)
+            , parent(parentName)
+            , dependencies(deps)
+            , node(std::move(n)) {}
+
+        std::string name;
+        std::string parent;
+        std::vector<std::string> dependencies;
+        std::unique_ptr<SceneGraphNode> node;
+    };
+
+    struct LoadedCamera {
+        LoadedCamera(
+            const std::string& parentName,
+            std::unique_ptr<Camera> c
+            )
+            : parent(parentName)
+            , camera(std::move(c)) {}
+        std::string parent;
+        std::unique_ptr<Camera> camera;
+    };
+
     /**
      * Load a scene graph node from a dictionary
      */

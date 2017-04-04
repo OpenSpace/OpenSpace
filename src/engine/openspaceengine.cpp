@@ -135,7 +135,7 @@ OpenSpaceEngine::OpenSpaceEngine(
     , _parallelConnection(new ParallelConnection)
     , _windowWrapper(std::move(windowWrapper))
     , _globalPropertyNamespace(new properties::PropertyOwner(""))
-    , _switchScene(false)
+    , _scheduledSceneSwitch(false)
     , _scenePath("")
     , _runTime(0.0)
     , _shutdown({false, 0.f, 0.f})
@@ -509,13 +509,12 @@ void OpenSpaceEngine::initialize() {
     LINFO("Finished initializing");
 }
 
-void OpenSpaceEngine::scheduleLoadScene(const std::string& scenePath) {
-    _switchScene = true;
-    _scenePath = scenePath;
+void OpenSpaceEngine::scheduleLoadScene(std::string scenePath) {
+    _scheduledSceneSwitch = true;
+    _scenePath = std::move(scenePath);
 }
 
 void OpenSpaceEngine::loadScene(const std::string& scenePath) {
-    
     windowWrapper().setBarrier(false);
     windowWrapper().setSynchronization(false);
     OnExit(
@@ -576,42 +575,43 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     }
 
     // Write keyboard documentation.
-    const std::string KeyboardShortcutsType =
-        ConfigurationManager::KeyKeyboardShortcuts + "." +
-        ConfigurationManager::PartType;
+    {
+        const std::string KeyboardShortcutsType =
+            ConfigurationManager::KeyKeyboardShortcuts + "." +
+            ConfigurationManager::PartType;
 
-    const std::string KeyboardShortcutsFile =
-        ConfigurationManager::KeyKeyboardShortcuts + "." +
-        ConfigurationManager::PartFile;
+        const std::string KeyboardShortcutsFile =
+            ConfigurationManager::KeyKeyboardShortcuts + "." +
+            ConfigurationManager::PartFile;
 
-    std::string type, file;
-    bool hasType = configurationManager().getValue(KeyboardShortcutsType, type);
-    bool hasFile = configurationManager().getValue(KeyboardShortcutsFile, file);
+        std::string type, file;
+        const bool hasType = configurationManager().getValue(KeyboardShortcutsType, type);
+        const bool hasFile = configurationManager().getValue(KeyboardShortcutsFile, file);
 
-    if (hasType && hasFile) {
-        interactionHandler().writeKeyboardDocumentation(type, file);
+        if (hasType && hasFile) {
+            file = absPath(file);
+            interactionHandler().writeKeyboardDocumentation(type, file);
+        }
     }
 
     // If a PropertyDocumentationFile was specified, generate it now.
-    const std::string KeyPropertyDocumentationType =
-        ConfigurationManager::KeyPropertyDocumentation + '.' +
-        ConfigurationManager::PartType;
+    {    
+        const std::string KeyPropertyDocumentationType =
+            ConfigurationManager::KeyPropertyDocumentation + '.' +
+            ConfigurationManager::PartType;
 
-    const std::string KeyPropertyDocumentationFile =
-        ConfigurationManager::KeyPropertyDocumentation + '.' +
-        ConfigurationManager::PartFile;
+        const std::string KeyPropertyDocumentationFile =
+            ConfigurationManager::KeyPropertyDocumentation + '.' +
+            ConfigurationManager::PartFile;
 
-    hasType = configurationManager().hasKey(KeyPropertyDocumentationType);
-    hasFile = configurationManager().hasKey(KeyPropertyDocumentationFile);
+        std::string type, file;
+        const bool hasType = configurationManager().getValue(KeyPropertyDocumentationType, type);
+        const bool hasFile = configurationManager().getValue(KeyPropertyDocumentationFile, file);
 
-    if (hasType && hasFile) {
-        std::string propertyDocumentationType;
-        OsEng.configurationManager().getValue(KeyPropertyDocumentationType, propertyDocumentationType);
-        std::string propertyDocumentationFile;
-        OsEng.configurationManager().getValue(KeyPropertyDocumentationFile, propertyDocumentationFile);
-
-        propertyDocumentationFile = absPath(propertyDocumentationFile);
-        scene->writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType, scenePath);
+        if (hasType && hasFile) {
+            file = absPath(file);
+            scene->writePropertyDocumentation(file, type, scenePath);
+        }
     }
 
     _renderEngine->setGlobalBlackOutFactor(0.0);
@@ -934,9 +934,9 @@ void OpenSpaceEngine::preSynchronization() {
     LTRACE("OpenSpaceEngine::preSynchronization(begin)");
     FileSys.triggerFilesystemEvents();
 
-    if (_switchScene) {
+    if (_scheduledSceneSwitch) {
         loadScene(_scenePath);
-        _switchScene = false;
+        _scheduledSceneSwitch = false;
     }
 
     if (_isFirstRenderingFirstFrame) {
