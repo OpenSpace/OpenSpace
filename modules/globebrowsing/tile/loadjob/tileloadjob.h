@@ -34,7 +34,7 @@ namespace openspace {
 namespace globebrowsing {
 
 class RawTileDataReader;
-class RawTile;
+struct RawTile;
 
 struct TileLoadJob : LoadJob {
     TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,

@@ -160,9 +160,9 @@ Tile CachingTileProvider::getDefaultTile() {
 }
 
 void CachingTileProvider::initTexturesFromLoadedData() {
-    auto rawTiles = _asyncTextureDataProvider->getRawTiles();
-    for (auto rawTile : rawTiles){
-		cache::ProviderTileKey key = { rawTile->tileIndex, uniqueIdentifier() };
+    auto rawTile = _asyncTextureDataProvider->popFinishedRawTile();
+    if (rawTile) {
+        cache::ProviderTileKey key = { rawTile->tileIndex, uniqueIdentifier() };
         Tile tile = createTile(rawTile);
         cache::MemoryAwareTileCache::ref().put(key, tile);
     }

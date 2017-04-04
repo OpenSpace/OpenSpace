@@ -22,64 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/layer/layergroup.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/textureformat.h>
+#include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <modules/globebrowsing/tile/tiledatalayout.h>
+#include <modules/globebrowsing/tile/pixelregion.h>
+
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
+
+#include <gdal.h>
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
 
-LayerGroup::LayerGroup(std::string name)
-    : properties::PropertyOwner(std::move(name))
-    , _levelBlendingEnabled("blendTileLevels", "blend tile levels", false)
-{
-    addProperty(_levelBlendingEnabled);
-}
+struct RawTile;
+class GeodeticPatch;
 
-LayerGroup::LayerGroup(std::string name, const ghoul::Dictionary& dict)
-    : LayerGroup(std::move(name))
-{
-    for (size_t i = 0; i < dict.size(); i++) {
-        std::string dictKey = std::to_string(i + 1);
-        ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(dictKey);
+/**
+ * Interface for reading <code>RawTile</code>s given a <code>TileIndex</code>
+ */
+class TileDataReader {
+public:
+    struct Configuration {
+        bool doPreProcessing;
+        int minimumTilePixelSize;
+        GLuint dataType = 0; // default = no datatype reinterpretation
+    };
 
-        try {
-            _layers.push_back(std::make_shared<Layer>(layerDict));
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-            continue;
-        }
-        //_layers.push_back(std::make_shared<Layer>(layerDict));
-    }
+    virtual TileDataReader(const Configuration& config);
 
-    for (const auto& layer : _layers) {
-        addPropertySubOwner(layer.get());
-    }
-}
+    std::shared_ptr<RawTile> defaultTileData();
+    
+    virtual std::shared_ptr<RawTile> readTileData(TileIndex tileIndex) = 0;
+    virtual int maxChunkLevel() = 0;
+    virtual TileDepthTransform getDepthTransform() = 0;
+    virtual const TileDataLayout& getDataLayout() = 0;
+    virtual void reset() = 0;
+    virtual float noDataValueAsFloat() = 0;
+    virtual size_t rasterXSize() = 0;
+    virtual size_t rasterYSize() = 0;
 
-void LayerGroup::update() {
-    _activeLayers.clear();
+    const static glm::ivec2 tilePixelStartOffset;
+    const static glm::ivec2 tilePixelSizeDifference;
+    const static PixelRegion padding; // same as the two above
+  
+    const static glm::ivec2 tilePixelStartOffset;
+    const static glm::ivec2 tilePixelSizeDifference;
+    const static PixelRegion padding; // same as the two above
 
-    for (const auto& layer : _layers) {
-        if (layer->enabled()) {
-            layer->tileProvider()->update();
-            _activeLayers.push_back(layer);
-        }
-    }
-}
+    static bool logReadErrors;
+protected:
+    Configuration _config;
 
-const std::vector<std::shared_ptr<Layer>>& LayerGroup::layers() const {
-    return _layers;
-}
-
-const std::vector<std::shared_ptr<Layer>>& LayerGroup::activeLayers() const {
-    return _activeLayers;
-}
-
-int LayerGroup::pileSize() const{
-    return _levelBlendingEnabled.value() ? 3 : 1;
-}
+    virtual std::array<double, 6> padfTransform getGeoTransform();
+    PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
+    Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
+};
 
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__

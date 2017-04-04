@@ -33,7 +33,7 @@
 namespace openspace {
 namespace globebrowsing {
     
-class RawTile;
+struct RawTile;
 class RawTileDataReader;
 
 class AsyncTileDataProvider {
@@ -43,7 +43,8 @@ public:
 
     bool enqueueTileIO(const TileIndex& tileIndex);        
     std::vector<std::shared_ptr<RawTile>> getRawTiles();
-        
+    std::shared_ptr<RawTile> popFinishedRawTile();
+
     void reset();
     void clearRequestQueue();
 

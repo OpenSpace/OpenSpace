@@ -87,10 +87,15 @@ return {
                         FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
                     },
                     {
+                        Name = "West Candor Chasma",
+                        FilePath = "map_datasets/CTX/West_Candor_Chasma_longlat_global.vrt",
+                        --Enabled = true,
+                    },
+                    {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
                         FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
                     },
-                    {
+                    --[[{
                         Name = "Themis IR Day",
                         FilePath = "map_service_configs/Utah/ThemisIRDay.xml",
                     },                    
@@ -98,12 +103,7 @@ return {
                         Name = "Themis IR Night",
                         FilePath = "map_service_configs/Utah/ThemisIRNight.xml",
                     },                    
-                    --[[
-                    {
-                        Name = "West Candor Chasma",
-                        FilePath = "map_datasets/CTX/West_Candor_Chasma_longlat_global.vrt",
-                        --Enabled = true,
-                    },
+                    
                     {
                         Name = "MER_Meridianni_Endeavor_Basemap_25cm",
                         FilePath = "map_datasets/Basemap/MER_Meridianni_Endeavor_Basemap_25cm.vrt",
@@ -136,6 +136,7 @@ return {
                         TilePixelSize = 90,
                         DoPreProcessing = true,
                     },
+                    --[[
                     {
                         Name = "Mola Elevation [Utah]",
                         FilePath = "map_service_configs/Utah/Mola_Elevation.xml",
@@ -149,6 +150,13 @@ return {
                         -- Enabled = true,
                         TilePixelSize = 90,
                         DoPreProcessing = true,
+                    },]]   
+                    {
+                        Name = "West Candor Chasma",
+                        FilePath = "map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt",
+                        --Enabled = true,
+                        MinimumPixelSize = 90,
+                        DoPreProcessing = true,
                     },
                     {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
@@ -158,20 +166,13 @@ return {
                     },
                     --[[
                     {
-                        Name = "Mola Elevation",
-                        FilePath = "map_service_configs/Mars_MGS_MOLA_DEM.xml",
-                        Enabled = true,
-                        TilePixelSize = 64,
-                        DoPreProcessing = true,
-                    },
---]]                    
---[[                    {
                         Name = "West Candor Chasma",
                         FilePath = "map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt",
                         --Enabled = true,
                         TilePixelSize = 90,
                         DoPreProcessing = true,
-                    },
+                    },]]              
+                    --[[
                     {
                         Name = "Part of Area Traversed by the Mars Exploration Rover",
                         FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt",

@@ -266,8 +266,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
     dataDest -= io.write.region.start.y * io.write.bytesPerLine;
     dataDest += io.write.region.start.x * _dataLayout.bytesPerPixel;
   
-    CPLErr readError =
-        _dataset->GetRasterBand(rasterBand)->RasterIO(
+    CPLErr readError = _dataset->GetRasterBand(rasterBand)->RasterIO(
         GF_Read,
         io.read.region.start.x,         // Begin read x
         io.read.region.start.y,         // Begin read y
