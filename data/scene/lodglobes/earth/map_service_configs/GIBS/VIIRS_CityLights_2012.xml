@@ -16,6 +16,13 @@
     <BlockSizeX>512</BlockSizeX>
     <BlockSizeY>512</BlockSizeY>
     <BandsCount>4</BandsCount>
+    <MaxConnections>5</MaxConnections>
+    <Cache>
+        <Path>./GDAL_Cache/VIIRS_CityLights_2012</Path>
+        <Depth>4</Depth>
+        <Extension>.jpg</Extension>
+    </Cache>
+    <OfflineMode>false</OfflineMode>      
     <UnsafeSSL>true</UnsafeSSL>
     <ZeroBlockHttpCodes>400</ZeroBlockHttpCodes>
     <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
