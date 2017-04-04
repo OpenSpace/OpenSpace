@@ -103,6 +103,10 @@ namespace openspace {
         _cachedSinMaxFov.isDirty = true;
     }
 
+    void Camera::setParent(SceneGraphNode* parent) {
+        _parent = parent;
+    }
+
     // Relative mutators
     void Camera::rotate(Quat rotation) {
         std::lock_guard<std::mutex> _lock(_mutex);
@@ -165,6 +169,10 @@ namespace openspace {
             _cachedSinMaxFov.isDirty = true;
         }
         return _cachedSinMaxFov.datum;
+    }
+
+    SceneGraphNode * Camera::parent() const {
+        return _parent;
     }
 
     const Camera::Mat4& Camera::viewRotationMatrix() const {

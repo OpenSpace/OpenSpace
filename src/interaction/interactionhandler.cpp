@@ -169,6 +169,7 @@ void InteractionHandler::setFocusNode(SceneGraphNode* node) {
 
 void InteractionHandler::setCamera(Camera* camera) {
     _camera = camera;
+    setFocusNode(_camera->parent());
 }
 
 void InteractionHandler::resetCameraDirection() {

@@ -1,9 +1,0 @@
--- Loading a module with a dependency on the common module
-return {
-    ScenePath = ".",
-    CommonFolder = "common",
-    Modules = {
-        "common-dependency"
-    }
-}
-

@@ -37,9 +37,8 @@
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
-#include <openspace/rendering/renderer.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
+
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
@@ -93,7 +92,7 @@ namespace openspace {
 
 RenderEngine::RenderEngine()
     : properties::PropertyOwner("RenderEngine")
-    , _mainCamera(nullptr)
+    , _camera(nullptr)
     , _raycasterManager(nullptr)
     , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
     , _frametimeType(
@@ -101,6 +100,7 @@ RenderEngine::RenderEngine()
         "Type of the frametime display",
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _scene(nullptr)
     , _showInfo("showInfo", "Show Render Information", true)
     , _showLog("showLog", "Show the OnScreen log", true)
     , _nAaSamples("nAaSamples", "Number of Antialiasing samples", 8, 1, 16)
@@ -109,7 +109,6 @@ RenderEngine::RenderEngine()
     , _showFrameNumber("showFrameNumber", "Show Frame Number", false)
     , _disableMasterRendering("disableMasterRendering", "Disable Master Rendering", false)
     , _shouldTakeScreenshot(false)
-    , _sceneGraph(nullptr)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
     , _performanceManager(nullptr)
@@ -168,12 +167,23 @@ RenderEngine::RenderEngine()
     addProperty(_disableMasterRendering);
 }
 
-RenderEngine::~RenderEngine() {
-    delete _sceneGraph;
-    _sceneGraph = nullptr;
+void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
+    _rendererImplementation = rendererFromString(renderingMethod);
 
-    delete _mainCamera;
-    delete _raycasterManager;
+    std::unique_ptr<Renderer> newRenderer = nullptr;
+    switch (_rendererImplementation) {
+    case RendererImplementation::Framebuffer:
+        newRenderer = std::make_unique<FramebufferRenderer>();
+        break;
+    case RendererImplementation::ABuffer:
+        newRenderer = std::make_unique<ABufferRenderer>();
+        break;
+    case RendererImplementation::Invalid:
+        LFATAL("Rendering method '" << renderingMethod << "' not among the available "
+            << "rendering methods");
+    }
+
+    setRenderer(std::move(newRenderer));
 }
 
 void RenderEngine::initialize() {
@@ -201,19 +211,11 @@ void RenderEngine::initialize() {
         );
     }
 
-    _raycasterManager = new RaycasterManager();
+    _raycasterManager = std::make_unique<RaycasterManager>();
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
 
     LINFO("Seting renderer from string: " << renderingMethod);
     setRendererFromString(renderingMethod);
-
-    // init camera and set temporary position and scaling
-    _mainCamera = new Camera();
-
-    OsEng.interactionHandler().setCamera(_mainCamera);
-    if (_renderer) {
-        _renderer->setCamera(_mainCamera);
-    }
 
 #ifdef GHOUL_USE_DEVIL
     ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
@@ -253,79 +255,6 @@ void RenderEngine::initializeGL() {
         throw;
     }
 
-
-
-    // ALL OF THIS HAS TO BE CHECKED
-    // ---abock
-
-
-    //    sgct::Engine::instance()->setNearAndFarClippingPlanes(0.001f, 1000.0f);
-    // sgct::Engine::instance()->setNearAndFarClippingPlanes(0.1f, 30.0f);
-
-    // calculating the maximum field of view for the camera, used to
-    // determine visibility of objects in the scene graph
-    /*    if (sgct::Engine::instance()->getCurrentRenderTarget() == sgct::Engine::NonLinearBuffer) {
-    // fisheye mode, looking upwards to the "dome"
-    glm::vec4 upDirection(0, 1, 0, 0);
-
-    // get the tilt and rotate the view
-    const float tilt = wPtr->getFisheyeTilt();
-    glm::mat4 tiltMatrix
-    = glm::rotate(glm::mat4(1.0f), tilt, glm::vec3(1.0f, 0.0f, 0.0f));
-    const glm::vec4 viewdir = tiltMatrix * upDirection;
-
-    // set the tilted view and the FOV
-    _mainCamera->setCameraDirection(glm::vec3(viewdir[0], viewdir[1], viewdir[2]));
-    _mainCamera->setMaxFov(wPtr->getFisheyeFOV());
-    _mainCamera->setLookUpVector(glm::vec3(0.0, 1.0, 0.0));
-    }
-    else {*/
-    // get corner positions, calculating the forth to easily calculate center
-
-    //      glm::vec3 corners[4];
-    //      sgct::SGCTWindow* wPtr = sgct::Engine::instance()->getWindowPtr(0);
-    //      sgct_core::BaseViewport* vp = wPtr->getViewport(0);
-    //      sgct_core::SGCTProjectionPlane* projectionPlane = vp->getProjectionPlane();
-
-    //      corners[0] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::LowerLeft));
-    //      corners[1] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::UpperLeft));
-    //      corners[2] = *(projectionPlane->getCoordinatePtr(sgct_core::SGCTProjectionPlane::UpperRight));
-    //      corners[3] = glm::vec3(corners[2][0], corners[0][1], corners[2][2]);
-    //       
-    //      const glm::vec3 center = (corners[0] + corners[1] + corners[2] + corners[3]);
-    ////    
-    //const glm::vec3 eyePosition = sgct_core::ClusterManager::instance()->getDefaultUserPtr()->getPos();
-    ////// get viewdirection, stores the direction in the camera, used for culling
-    //const glm::vec3 viewdir = glm::normalize(eyePosition - center);
-
-    //const glm::vec3 upVector = corners[0] - corners[1];
-
-
-
-    //_mainCamera->setCameraDirection(glm::normalize(-viewdir));
-    //_mainCamera->setCameraDirection(glm::vec3(0.f, 0.f, -1.f));
-    //_mainCamera->setLookUpVector(glm::normalize(upVector));
-    //_mainCamera->setLookUpVector(glm::vec3(0.f, 1.f, 0.f));
-
-    // set the initial fov to be 0.0 which means everything will be culled
-    //float maxFov = 0.0f;
-    float maxFov = std::numeric_limits<float>::max();
-
-    //// for each corner
-    //for (int i = 0; i < 4; ++i) {
-    //    // calculate radians to corner
-    //    glm::vec3 dir = glm::normalize(eyePosition - corners[i]);
-    //    float radsbetween = acos(glm::dot(viewdir, dir))
-    //        / (glm::length(viewdir) * glm::length(dir));
-
-    //    // the angle to a corner is larger than the current maxima
-    //    if (radsbetween > maxFov) {
-    //        maxFov = radsbetween;
-    //    }
-    //}
-    _mainCamera->setMaxFov(maxFov);
-    //}
-
     LINFO("Initializing Log");
     std::unique_ptr<ScreenLog> log = std::make_unique<ScreenLog>(ScreenLogTimeToLive);
     _log = log.get();
@@ -340,32 +269,10 @@ void RenderEngine::deinitialize() {
     }
 
     MissionManager::deinitialize();
-
-    _sceneGraph->clearSceneGraph();
 }
 
-void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
-    _rendererImplementation = rendererFromString(renderingMethod);
-
-    std::unique_ptr<Renderer> newRenderer = nullptr;
-    switch (_rendererImplementation) {
-        case RendererImplementation::Framebuffer:
-            newRenderer = std::make_unique<FramebufferRenderer>();
-            break;
-        case RendererImplementation::ABuffer:
-            newRenderer = std::make_unique<ABufferRenderer>();
-            break;
-        case RendererImplementation::Invalid:
-            LFATAL("Rendering method '" << renderingMethod << "' not among the available "
-                   << "rendering methods");
-    }
-
-    setRenderer(std::move(newRenderer));
-}
-
-void RenderEngine::updateSceneGraph() {
-    LTRACE("RenderEngine::updateSceneGraph(begin)");
-    _sceneGraph->update({
+void RenderEngine::updateScene() {
+    _scene->update({
         glm::dvec3(0),
         glm::dmat3(1),
         1,
@@ -376,13 +283,7 @@ void RenderEngine::updateSceneGraph() {
         _performanceManager != nullptr
     });
 
-    _sceneGraph->evaluate(_mainCamera);
-    
-    //Allow focus node to update camera (enables camera-following)
-    //FIX LATER: THIS CAUSES MASTER NODE TO BE ONE FRAME AHEAD OF SLAVES
-    //if (const SceneGraphNode* node = OsEng.ref().interactionHandler().focusNode()){
-    //node->updateCamera(_mainCamera);
-    //}
+    _scene->evaluate(_camera);
     
     LTRACE("RenderEngine::updateSceneGraph(end)");
 }
@@ -468,8 +369,7 @@ void RenderEngine::updateFade() {
                     0.f,
                     _currentFadeTime / _fadeDuration
                 );
-            }
-            else {
+            } else {
                 _globalBlackOutFactor = glm::smoothstep(
                     0.f,
                     1.f,
@@ -483,11 +383,12 @@ void RenderEngine::updateFade() {
     }
 }
 
-void RenderEngine::render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
-{
+
+
+void RenderEngine::render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
     LTRACE("RenderEngine::render(begin)");
-    _mainCamera->sgctInternal.setViewMatrix(viewMatrix);
-    _mainCamera->sgctInternal.setProjectionMatrix(projectionMatrix);
+    _camera->sgctInternal.setViewMatrix(viewMatrix);
+    _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
     
     WindowWrapper& wrapper = OsEng.windowWrapper();
 
@@ -562,20 +463,29 @@ void RenderEngine::postDraw() {
 }
 
 Scene* RenderEngine::scene() {
-    ghoul_assert(_sceneGraph, "Scenegraph not initialized");
-    return _sceneGraph;
+    return _scene;
 }
 
 RaycasterManager& RenderEngine::raycasterManager() {
     return *_raycasterManager;
 }
 
-void RenderEngine::setSceneGraph(Scene* sceneGraph) {
-    _sceneGraph = sceneGraph;
+void RenderEngine::setScene(Scene* scene) {
+    _scene = scene;
+    if (_renderer) {
+        _renderer->setScene(scene);
+    }
+}
+
+void RenderEngine::setCamera(Camera* camera) {
+    _camera = camera;
+    if (_renderer) {
+        _renderer->setCamera(camera);
+    }
 }
 
 Camera* RenderEngine::camera() const {
-    return _mainCamera;
+    return _camera;
 }
 
 Renderer* RenderEngine::renderer() const {
@@ -735,8 +645,8 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
     _renderer->setResolution(renderingResolution());
     _renderer->setNAaSamples(_nAaSamples);
     _renderer->initialize();
-    _renderer->setCamera(_mainCamera);
-    _renderer->setScene(_sceneGraph);
+    _renderer->setCamera(_camera);
+    _renderer->setScene(_scene);
 }
 
 scripting::LuaLibrary RenderEngine::luaLibrary() {
@@ -983,21 +893,12 @@ void RenderEngine::renderInformation() {
 
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-//<<<<<<< HEAD
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
         double currentTime = Time::ref().j2000Seconds();
 
         if (MissionManager::ref().hasCurrentMission()) {
 
             const Mission& mission = MissionManager::ref().currentMission();
-//=======
-//            bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
-//            double currentTime = Time::ref().currentTime();
-//>>>>>>> develop
-//
-//            if (MissionManager::ref().hasCurrentMission()) {
-//
-//                const Mission& mission = MissionManager::ref().currentMission();
 
                 if (mission.phases().size() > 0) {
                     static const glm::vec4 nextMissionColor(0.7, 0.3, 0.3, 1);
@@ -1353,7 +1254,11 @@ void RenderEngine::renderScreenLog() {
 }
 
 std::vector<Syncable*> RenderEngine::getSyncables(){
-    return _mainCamera->getSyncables();
+    if (_camera) {
+        return _camera->getSyncables();
+    } else {
+        return std::vector<Syncable*>();
+    }
 }
 
 void RenderEngine::sortScreenspaceRenderables() {
