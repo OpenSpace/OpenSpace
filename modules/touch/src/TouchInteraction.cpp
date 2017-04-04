@@ -111,12 +111,13 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 		double xCo = 2 * (c.getX() - 0.5) * aspectRatio;
 		double yCo = -2 * (c.getY() - 0.5); // normalized -1 to 1 coordinates on screen
 		glm::dvec3 cursorInWorldSpace = camToWorldSpace * glm::dvec3(xCo, yCo, -3.2596558);
+		glm::dvec3 normCursor = glm::normalize(cursorInWorldSpace);
 		for (SceneGraphNode* node : selectableNodes) {
 			double boundingSphere = node->boundingSphere().lengthd();
-			glm::dvec3 camToSelectable = camPos - node->worldPosition();
+			glm::dvec3 camToSelectable = node->worldPosition() - camPos;
 			int id = c.getSessionID();
 			double dist = length(glm::cross(cursorInWorldSpace, camToSelectable)) / glm::length(cursorInWorldSpace) - boundingSphere;
-			if (dist < 0.0) {
+			if (dist <= 0.0) {
 				auto found = find_if(newSelected.begin(), newSelected.end(), [id](std::pair<int, SceneGraphNode*> p) { return p.first == id; });
 				if (found != newSelected.end()) {
 					double oldNodeDist = glm::length(found->second->worldPosition() - camPos);
@@ -127,6 +128,16 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 				}
 				else
 					newSelected.push_back(std::make_pair(id, node));
+
+				// finds intersection point between boundingsphere and line in world coordinates, assumes line direction is normalized
+				double d = glm::dot(normCursor, camToSelectable);
+				double root = std::sqrt((std::pow(boundingSphere, 2) - glm::dot(camToSelectable, camToSelectable)) + std::pow(d, 2));
+				if (root > 0) // two intersection points (take the closest one)
+					d -= sqrt(root);
+				glm::dvec3 intersectionPoint = camPos + d * normCursor;
+				//double d2 = d + sqrt(root);
+				//glm::dvec3 intersectionPoint2 = camPos + d2 * normCursor;
+				//std::cout << root << ", " << glm::to_string(intersectionPoint) << ", " << glm::to_string(intersectionPoint2) << "\n";
 			}
 		}
 	}
@@ -231,7 +242,7 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 			return d + p.second.getDistance(_centroid.x, _centroid.y);
 		});
 
-		double zoomFactor = (distance - lastDistance) * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
+		double zoomFactor = (distance - lastDistance) * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()); // make into log space instead
 		_vel.zoom += zoomFactor * _sensitivity.zoom;
 	}
 	if (_action.pan) { // add local rotation velocity
@@ -256,8 +267,8 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 	if (_action.pick) { // pick something in the scene as focus node
 		if (_selected.size() == 1 && _selected.at(0).second != _focusNode) {
 			_focusNode = _selected.at(0).second; // rotate camera to look at new focus
-			OsEng.interactionHandler().setFocusNode(_focusNode);
-			glm::dvec3 camToFocus = glm::normalize(_camera->positionVec3() - _focusNode->worldPosition());
+			OsEng.interactionHandler().setFocusNode(_focusNode); // cant do setFocusNode since TouchInteraction is not subclass of InteractionMode
+			glm::dvec3 camToFocus = glm::normalize(_focusNode->worldPosition() - _camera->positionVec3());
 			double angleX = glm::orientedAngle(_camera->viewDirectionWorldSpace(), camToFocus, glm::normalize(_camera->rotationQuaternion() * _camera->lookUpVectorWorldSpace()));
 			double angleY = glm::orientedAngle(_camera->viewDirectionWorldSpace(), camToFocus, glm::normalize(_camera->rotationQuaternion() * glm::dvec3(1,0,0)));
 			std::cout << "x: " << angleX << ", y: " << angleY << "\n";
@@ -273,7 +284,7 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 void TouchInteraction::step(double dt) {
 	using namespace glm;
 
-	setFocusNode(OsEng.interactionHandler().focusNode());
+	setFocusNode(OsEng.interactionHandler().focusNode()); // since setFocusNode cant be called directly (TouchInteraction not a subclass of InteractionMode)
 	if (_focusNode) {
 		// Create variables from current state
 		dvec3 camPos = _camera->positionVec3();
