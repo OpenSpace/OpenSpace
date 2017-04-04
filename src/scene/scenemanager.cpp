@@ -22,74 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/syncengine.h>
-
-#include <openspace/util/syncdata.h>
-
-#include <ghoul/misc/assert.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/sceneloader.h>
+#include <openspace/scene/scenemanager.h>
 
 #include <algorithm>
+#include <memory>
 
 namespace openspace {
 
-SyncEngine::SyncEngine(unsigned int syncBufferSize) 
-    : _syncBuffer(syncBufferSize)
-{
-    ghoul_assert(syncBufferSize > 0, "syncBufferSize must be bigger than 0");
-}
-
-// should be called on sgct master
-void SyncEngine::encodeSyncables() {
-    for (Syncable* syncable : _syncables) {
-        syncable->encode(&_syncBuffer);
+Scene* SceneManager::loadScene(const std::string& path) {
+    SceneLoader loader;
+    std::unique_ptr<Scene> scene = loader.loadScene(path);
+    Scene* s = scene.get();
+    if (s) {
+        _scenes.push_back(std::move(scene));
     }
-    _syncBuffer.write();
+    return s;
 }
 
-//should be called on sgct slaves
-void SyncEngine::decodeSyncables() {
-    _syncBuffer.read();
-    for (Syncable* syncable : _syncables) {
-        syncable->decode(&_syncBuffer);
-    }
+void SceneManager::unloadScene(Scene& scene) {
+    std::remove_if(_scenes.begin(), _scenes.end(), [&scene] (auto& s) {
+        return s.get() == &scene;
+    });
 }
 
-void SyncEngine::preSynchronization(IsMaster isMaster) {
-    for (Syncable* syncable : _syncables) {
-        syncable->presync(isMaster);
-    }
+void SceneManager::unloadAll() {
+    _scenes.clear();
 }
-
-void SyncEngine::postSynchronization(IsMaster isMaster) {
-    for (Syncable* syncable : _syncables) {
-        syncable->postsync(isMaster);
-    }
 }
-
-void SyncEngine::addSyncable(Syncable* syncable) {
-    ghoul_assert(syncable, "synable must not be nullptr");
-
-    _syncables.push_back(syncable);
-}
-
-void SyncEngine::addSyncables(const std::vector<Syncable*>& syncables) {
-    for (Syncable* syncable : syncables) {
-        ghoul_assert(syncable, "syncables must not contain any nullptr");
-        addSyncable(syncable);
-    }
-}
-
-void SyncEngine::removeSyncable(Syncable* syncable) {
-    _syncables.erase(
-        std::remove(_syncables.begin(), _syncables.end(), syncable),
-        _syncables.end()
-    );
-}
-
-void SyncEngine::removeSyncables(const std::vector<Syncable*>& syncables) {
-    for (const auto& syncable : syncables) {
-        removeSyncable(syncable);
-    }
-}
-
-} // namespace openspace

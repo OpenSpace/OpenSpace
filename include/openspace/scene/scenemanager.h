@@ -22,90 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SYNCENGINE___H__
-#define __OPENSPACE_CORE___SYNCENGINE___H__
-
-#include <openspace/util/syncbuffer.h>
-
-#include <ghoul/misc/boolean.h>
+#ifndef __OPENSPACE_CORE___SCENEMANAGER___H__
+#define __OPENSPACE_CORE___SCENEMANAGER___H__
 
 #include <vector>
 #include <memory>
 
 namespace openspace {
 
-class Syncable;
+class Scene;
 
-/**
- * Manages a collection of <code>Syncable</code>s and ensures they are synchronized
- * over SGCT nodes. Encoding/Decoding order is handles internally.
- */
-class SyncEngine {
+class SceneManager {
 public:
-    using IsMaster = ghoul::Boolean;
-
-    /**
-     * Creates a new SyncEngine which a buffer size of \p syncBufferSize
-     * \pre syncBufferSize must be bigger than 0
-     */
-    SyncEngine(unsigned int syncBufferSize);
-
-    /**
-     * Encodes all added Syncables in the injected <code>SyncBuffer</code>. 
-     * This method is only called on the SGCT master node
-     */
-    void encodeSyncables();
-
-    /**
-     * Decodes the <code>SyncBuffer</code> into the added Syncables.
-     * This method is only called on the SGCT slave nodes
-     */
-    void decodeSyncables();
-
-    /**
-     * Invokes the presync method of all added Syncables
-     */
-    void preSynchronization(IsMaster isMaster);
-
-    /**
-     * Invokes the postsync method of all added Syncables
-     */
-    void postSynchronization(IsMaster isMaster);
-    
-    /**
-     * Add a Syncable to be synchronized over the SGCT cluster.
-     * \pre syncable must not be nullptr
-     */
-    void addSyncable(Syncable* syncable);
-
-    /**
-     * Add multiple Syncables to be synchronized over the SGCT cluster
-     * \pre syncables must not contain any nullptr
-     */
-    void addSyncables(const std::vector<Syncable*>& syncables);
-
-    /**
-     * Remove a Syncable from being synchronized over the SGCT cluster
-     */
-    void removeSyncable(Syncable* syncable);
-
-    /**
-    * Remove multiple Syncables from being synchronized over the SGCT cluster
-    */
-    void removeSyncables(const std::vector<Syncable*>& syncables);
-
+    SceneManager() = default;
+    ~SceneManager() = default;
+    Scene* loadScene(const std::string& path);
+    void unloadScene(Scene& scene);
+    void unloadAll();
 private:
-    /** 
-     * Vector of Syncables. The vectors ensures consistent encode/decode order
-     */
-    std::vector<Syncable*> _syncables;
-
-    /**
-     * Databuffer used in encoding/decoding
-     */
-    SyncBuffer _syncBuffer;
+    std::vector<std::unique_ptr<Scene>> _scenes;
 };
 
-} // namespace openspace
+}
 
-#endif // __OPENSPACE_CORE___SYNCENGINE___H__
+#endif  // __OPENSPACE_CORE___SCENEMANAGER___H__

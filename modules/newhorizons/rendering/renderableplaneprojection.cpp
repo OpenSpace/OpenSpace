@@ -265,8 +265,9 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     if (!_moving) {
         SceneGraphNode* thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_name);
         SceneGraphNode* newParent = OsEng.renderEngine().scene()->sceneGraphNode(_target.node);
-        if (thisNode != nullptr && newParent != nullptr)
-            thisNode->setParent(newParent);
+        if (thisNode && newParent) {
+            thisNode->setParent(*newParent);
+        }   
     }
     
     const GLfloat vertex_data[] = { // square of two triangles drawn within fov in target coordinates
