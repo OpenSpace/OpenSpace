@@ -246,7 +246,13 @@ function (handle_applications)
 
 
                     if (WIN32)
-                        copy_files(${APPLICATION_NAME} "${CURL_ROOT_DIR}/lib/libcurl.dll")
+                        copy_files(
+                            ${APPLICATION_NAME}
+                            "${CURL_ROOT_DIR}/lib/libcurl.dll"
+                            "${CURL_ROOT_DIR}/lib/libeay32.dll"
+                            "${CURL_ROOT_DIR}/lib/ssleay32.dll"
+
+                        )
                         ghl_copy_shared_libraries(${APPLICATION_NAME} ${OPENSPACE_EXT_DIR}/ghoul)
                     endif ()
             endif ()

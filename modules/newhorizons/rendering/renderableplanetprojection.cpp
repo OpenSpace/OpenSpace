@@ -137,7 +137,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "RenderablePlanetProject"
+        "RenderablePlanetProjection"
     );
 
     std::string name;
