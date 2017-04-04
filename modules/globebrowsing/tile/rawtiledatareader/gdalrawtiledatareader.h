@@ -106,7 +106,7 @@ private:
     struct InitData {
         std::string initDirectory;
         std::string datasetFilePath;
-        int minimumPixelSize;
+        int tilePixelSize;
         GLuint dataType;
     } _initData;
 

@@ -32,7 +32,7 @@ return {
                         Name = "Europa Texture",
                         FilePath = "textures/europa.jpg",
                         Enabled = true,
-                        MinimumPixelSize = 256,
+                        TilePixelSize = 256,
                     },
                 },
                 GrayScaleLayers = { },

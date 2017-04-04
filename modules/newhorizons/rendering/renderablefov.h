@@ -28,7 +28,9 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/glm.h>
@@ -44,6 +46,8 @@ class Texture;
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 class RenderableFov : public Renderable {
 public:
     RenderableFov(const ghoul::Dictionary& dictionary);
@@ -55,79 +59,101 @@ public:
 
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
+    
+    static documentation::Documentation Documentation();
 
- private:
-    void loadTexture();
-    void allocateData();
-    void insertPoint(std::vector<float>& arr, glm::vec4 p, glm::vec4 c);
-    void fovSurfaceIntercept(bool H[], std::vector<glm::dvec3> bounds);
-    void determineTarget();
+private:
+    // Checks the field of view of the instrument for the current \p time against all of
+    // the potential targets are returns the first name of the target that is in field of
+    // view, the previous target, or the closest target to the space craft. The second
+    // return value is whether the target is currently in the field of view
+    std::pair<std::string,bool> determineTarget(double time);
+
     void updateGPU();
-    void sendToGPU();
+    void insertPoint(std::vector<float>& arr, glm::vec4 p, glm::vec4 c);
 
+    glm::vec4 squareColor(float t) const {
+        return _colors.active.value() * t + _colors.square.value() * (1 - t);
+    }
 
-    void computeColors();
-    void computeIntercepts(const RenderData& data);
-    psc orthogonalProjection(glm::dvec3 camvec);
-    psc checkForIntercept(glm::dvec3 ray);
-    psc pscInterpolate(psc p0, psc p1, float t);
-    glm::dvec3 interpolate(glm::dvec3 p0, glm::dvec3 p1, float t);
-    glm::dvec3 bisection(glm::dvec3 p1, glm::dvec3 p2);
+    glm::vec4 endColor(float t) const {
+        return _colors.active.value() * t + _colors.intersectionEnd.value() * (1 - t);
+    }
+
+    glm::vec4 fovColor(float t) const {
+        return _colors.active.value() * t + _colors.targetInFieldOfView.value() * (1 - t);
+    }
+
+    void computeIntercepts(const UpdateData& data, const std::string& target , bool inFOV);
+    glm::dvec3 orthogonalProjection(const glm::dvec3& camvec, double time, const std::string& target) const;
+    glm::dvec3 checkForIntercept(const glm::dvec3& ray, double time, const std::string& target) const;
+    //glm::dvec3 bisection(const glm::dvec3& p1, const glm::dvec3& p2, double time, const std::string& target, const glm::dvec3& previousHalf = glm::dvec3(0.0)) const;
 
     // properties
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _drawSolid;
+    properties::DoubleProperty _standOffDistance;
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    ghoul::opengl::Texture* _texture;
-
 
     // instance variables
-    int _nrInserted = 0;
     bool _rebuild = false;
-    bool _interceptTag[8];
-    bool _withinFOV;
-    std::vector<psc> _projectionBounds;
-    psc _interceptVector;
 
-    std::vector<float> _fovBounds;
-    std::vector<float> _fovPlane;
 
-    // spice
-    std::string _spacecraft;
-    std::string _observer;
-    std::string _frame;
-    std::string _instrumentID;
-    SpiceManager::AberrationCorrection _aberrationCorrection;
-    std::string _fovTarget;
-    glm::dvec3 ipoint, ivec;
-    glm::dvec3 _previousHalf;
-    glm::dvec3 _boresight;
-    glm::dmat3 _stateMatrix;
-    glm::mat4 _spacecraftRotation;
-    std::vector<glm::dvec3> _bounds;
-    std::vector<std::string> _potentialTargets;
+    //std::vector<float> _fovBounds;
+    //std::vector<float> _fovPlane;
+
+    std::string _previousTarget;
     bool _drawFOV;
 
-    // GPU 
-    GLuint _fovBoundsVAO;
-    GLuint _fovBoundsVBO;
-    unsigned int _vBoundsSize;
-    GLuint _fovPlaneVAO;
-    GLuint _fovPlaneVBO;
-    unsigned int _vPlaneSize;
-    GLenum _mode;
+    struct {
+        std::string spacecraft;
+        std::string name;
+        std::string referenceFrame;
+        SpiceManager::AberrationCorrection aberrationCorrection;
 
-    // time
-    double _time = 0;
-    double _oldTime = 0;
+        std::vector<glm::dvec3> bounds;
+        glm::dvec3 boresight;
+        std::vector<std::string> potentialTargets;
+    } _instrument;
 
-    // colors
-    glm::vec4 col_sq;      // orthogonal white square
-    glm::vec4 col_project; // color when projections occur
-    glm::vec4 col_start;   // intersection start color
-    glm::vec4 col_end;     // intersection end color
-    glm::vec4 col_blue;    // withinFov color
-    glm::vec4 col_gray;    // no intersection color
+    float _interpolationTime;
+
+    struct RenderInformation {
+        // Differentiating different vertex types 
+        using VertexColorType = int32_t;
+        // This needs to be synced with the fov_vs.glsl shader
+        static const VertexColorType VertexColorTypeDefaultStart = 0;
+        static const VertexColorType VertexColorTypeDefaultEnd = 1;
+        static const VertexColorType VertexColorTypeInFieldOfView = 2;
+        static const VertexColorType VertexColorTypeActive = 3;
+        static const VertexColorType VertexColorTypeIntersectionStart = 4;
+        static const VertexColorType VertexColorTypeIntersectionEnd = 5;
+        static const VertexColorType VertexColorTypeSquare = 6;
+
+        struct VBOData {
+            GLfloat position[3];
+            VertexColorType color;
+        };
+
+        GLuint vao = 0;
+        GLuint vbo = 0;
+        // @SPEEDUP: Add an ibo to reduce the number of vertices drawn
+        std::vector<VBOData> data;
+        bool isDirty = true;
+    };
+
+    RenderInformation _orthogonalPlane;
+    RenderInformation _fieldOfViewBounds;
+
+    struct {
+        properties::Vec4Property defaultStart; // Start color for uninteresting times
+        properties::Vec4Property defaultEnd; // End color for uninteresting times
+        properties::Vec4Property active; // Color use when a field-of-view is projecting
+        properties::Vec4Property targetInFieldOfView; // Color to use for target in fov
+        properties::Vec4Property intersectionStart; // Color at the start of intersection
+        properties::Vec4Property intersectionEnd; // Color at the end of intersection
+        properties::Vec4Property square; // Color for the orthogonal square
+    } _colors;
 };
     
 } // namespace openspace

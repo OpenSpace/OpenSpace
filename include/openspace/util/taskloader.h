@@ -22,65 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__
-#define __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__
+#ifndef __OPENSPACE_CORE___TASKLOADER___H__
+#define __OPENSPACE_CORE___TASKLOADER___H__
 
-#include <modules/volume/rendering/renderablevolume.h>
-#include <openspace/util/powerscaledcoordinate.h>
-
-// Forward declare to minimize dependencies
-namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
-}
+#include <string>
+#include <ghoul/misc/dictionary.h>
+#include <openspace/util/task.h>
 
 namespace openspace {
 
-class RenderableVolumeGL: public RenderableVolume {
+class TaskLoader {
 public:
-    RenderableVolumeGL(const ghoul::Dictionary& dictionary);
-    ~RenderableVolumeGL();
-    
-    bool initialize() override;
-    bool deinitialize() override;
-
-    bool isReady() const override;
-
-    virtual void render(const RenderData& data) override;
-    virtual void update(const UpdateData& data) override;
-
-private:
-    ghoul::Dictionary _hintsDictionary;
-
-    std::string _filename;
-
-    std::string _transferFunctionName;
-    std::string _volumeName;
-
-    std::string _transferFunctionPath;
-    std::string _samplerFilename;
-    
-    ghoul::filesystem::File* _transferFunctionFile;
-
-    ghoul::opengl::Texture* _volume;
-    ghoul::opengl::Texture* _transferFunction;
-
-    GLuint _boxArray; 
-    GLuint _vertexPositionBuffer;
-    ghoul::opengl::ProgramObject* _boxProgram;
-    glm::vec3 _boxScaling;
-    psc _pscOffset;
-    float _w;
-    
-    bool _updateTransferfunction;
-    int _id;
+    std::vector<std::unique_ptr<Task>> tasksFromDictionary(const ghoul::Dictionary& dictionary);
+    std::vector<std::unique_ptr<Task>> tasksFromFile(const std::string& path);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_VOLUME___RENDERABLEVOLUMEGL___H__
+#endif // __OPENSPACE_CORE___TASKLOADER___H__

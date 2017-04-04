@@ -29,6 +29,8 @@
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/cache/lrucache.h>
 
+#include <openspace/properties/propertyowner.h>
+
 #include <vector>
 
 namespace openspace {
@@ -39,7 +41,7 @@ namespace tileprovider {
  * Interface for providing <code>Tile</code>s given a 
  * <code>TileIndex</code>. 
  */
-class TileProvider {
+class TileProvider : public properties::PropertyOwner {
 public:
     /**
      * Factory method for instantiating different implementations of 
@@ -67,6 +69,9 @@ public:
      * clean up.
      */
     virtual ~TileProvider() { }
+
+    virtual bool initialize();
+    virtual bool deinitialize() { };
 
     /**
      * Method for querying tiles, given a specified <code>TileIndex</code>.
@@ -148,12 +153,6 @@ public:
      */
     unsigned int uniqueIdentifier() const;
 
-protected:
-    /**
-     * This function needs to be called in the constructor of a class extending the
-     * TileProvider interface.
-     */
-    void initialize();
 private:
     static unsigned int _numTileProviders;
     unsigned int _uniqueIdentifier;

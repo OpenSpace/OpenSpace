@@ -71,8 +71,8 @@ public:
     void setResolution(glm::ivec2 res) override;
     void setNAaSamples(int nAaSamples) override;
 
-    void preRaycast(ghoul::opengl::ProgramObject& programObject);
-    void postRaycast(ghoul::opengl::ProgramObject& programObject);
+    void preRaycast(const RaycasterTask& raycasterTask);
+    void postRaycast(const RaycasterTask& raycasterTask);
 
     void update();
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
@@ -130,9 +130,6 @@ private:
     GLuint _vertexPositionBuffer;
     int _nAaSamples;
 
-
-    std::unique_ptr<RendererTasks> _rendererTasks;
-    std::unique_ptr<RenderData> _renderData;
     float _blackoutFactor;
 
     ghoul::Dictionary _rendererData;

@@ -42,6 +42,7 @@ namespace tiledatatype {
 GLuint getOpenGLDataType(GDALDataType gdalType);
 GDALDataType getGdalDataType(GLuint glType);
 TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
+TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType);
 size_t getMaximumValue(GDALDataType gdalType);
 size_t numberOfBytes(GDALDataType gdalType);
 float interpretFloat(GDALDataType gdalType, const char* src);

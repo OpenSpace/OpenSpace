@@ -27,7 +27,11 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <ghoul/glm.h>
+
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class RenderableCrawlingLine : public Renderable {
 public:
@@ -41,6 +45,8 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
+
 private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
@@ -48,9 +54,10 @@ private:
     std::string _source;
     std::string _target;
     std::string _referenceFrame;
-    glm::vec3 _lineColor;
+    
+    glm::vec4 _lineColorBegin;
+    glm::vec4 _lineColorEnd;
 
-    psc _positions[2];
     int _frameCounter;
 
     bool _drawLine;

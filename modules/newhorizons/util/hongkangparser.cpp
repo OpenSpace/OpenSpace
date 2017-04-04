@@ -120,6 +120,7 @@ bool HongKangParser::create() {
             if (extension == "txt") { // Hong Kang. pre-parsed playbook
                 std::ifstream file;
                 file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+                file.open(absPath(_fileName));
                 //std::ifstream file(_fileName , std::ios::binary);
                 //if (!file.good()){
                 //    LERROR("Failed to open event file '" << _fileName << "'");
