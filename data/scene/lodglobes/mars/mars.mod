@@ -32,8 +32,7 @@ return {
             Type = "RenderableGlobe",
             Radii = marsEllipsoid,
             CameraMinHeight = 10,
-            InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
-            SegmentsPerPatch = 64,
+            SegmentsPerPatch = 90,
             Layers = {
                 ColorLayers = {
                     {
@@ -82,7 +81,8 @@ return {
                         Name = "CTX Mosaic [Europe]",
                         FilePath = "map_service_configs/CTX_Mosaic.xml",
                         Enabled = true,
-                    },                    {
+                    },
+                    {
                         Name = "CTX Mosaic [Utah]",
                         FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
                     },
