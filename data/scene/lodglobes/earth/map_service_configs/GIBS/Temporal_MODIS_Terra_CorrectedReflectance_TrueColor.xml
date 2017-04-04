@@ -5,7 +5,7 @@
     <OpenSpaceTimeIdFormat>YYYY-MM-DD</OpenSpaceTimeIdFormat>
     <GDAL_WMS>
         <Service name="TMS">
-            <ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Aqua_CorrectedReflectance_TrueColor/default/${OpenSpaceTimeId}/250m/${z}/${y}/${x}.jpg</ServerUrl>
+            <ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/${OpenSpaceTimeId}/250m/${z}/${y}/${x}.jpg</ServerUrl>
         </Service>
         <DataWindow>
             <UpperLeftX>-180.0</UpperLeftX>

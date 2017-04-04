@@ -72,6 +72,10 @@ return {
                         Enabled = true,
                     },
                     {
+                        Name = "ESRI Imagery World",
+                        FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms"
+                    },
+                    {
                         Type = "Temporal",
                         Name = "Temporal VIIRS SNPP",
                         FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
