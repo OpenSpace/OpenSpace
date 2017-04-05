@@ -32,6 +32,7 @@ namespace globebrowsing {
 DistanceSwitch::~DistanceSwitch() {}
 
 bool DistanceSwitch::initialize() {
+    _objectScale = 1.0;
     for (int i = 0; i < _renderables.size(); ++i) {
         _renderables[i]->initialize();
     }
@@ -54,13 +55,13 @@ void DistanceSwitch::render(const RenderData& data) {
     pss pssDistanceToCamera = (data.camera.position() - data.position).length();
     double distanceToCamera = pssDistanceToCamera.lengthd();
 
-    if (distanceToCamera > _maxDistances.back()) {
+    if (distanceToCamera > _maxDistances.back() * _objectScale) {
         return;
     }
 
     // linear search through nodes to find which Renderable to render
     for (int i = 0; i < _renderables.size(); ++i) {
-        if (distanceToCamera < _maxDistances[i]) {
+        if (distanceToCamera < _maxDistances[i] * _objectScale) {
             _renderables[i]->render(data);
             return;
         }
@@ -68,6 +69,7 @@ void DistanceSwitch::render(const RenderData& data) {
 }
 
 void DistanceSwitch::update(const UpdateData& data) {
+    _objectScale = data.modelTransform.scale;
     for (int i = 0; i < _renderables.size(); ++i) {
         _renderables[i]->update(data);
     }
