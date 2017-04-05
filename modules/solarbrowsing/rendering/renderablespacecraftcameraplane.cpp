@@ -56,24 +56,26 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     : RenderablePlane(dictionary)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _target("target", "Target", "Sun")
-    , _currentActiveChannel("activeChannel", "Active Channel", 5, 0, 9)
+    , _currentActiveChannel("activeChannel", "Active Channel", 3, 0, 9)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
         _target = target;
     }
 
+
     // TODO(mnoven): Lua
-    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171",
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171",
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171",
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // OK 0094
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171",
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // OK 0171
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0193", // OK 0193
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0211", // OK 0211
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0304", // OK 0304
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};
+    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 0
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 1
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 2
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/094", // 3
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 4
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 5
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/193", // 6
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/211", // 7
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/304", // 8
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171"};// 9
+
     _type = "SDO";
     const int numChannels = 10;
     _imageData.reserve(numChannels);
@@ -127,9 +129,9 @@ bool RenderableSpacecraftCameraPlane::initialize() {
             return false;
     }
 
-    // using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    // _shader->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    // _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    _shader->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    _shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     return isReady();
 }

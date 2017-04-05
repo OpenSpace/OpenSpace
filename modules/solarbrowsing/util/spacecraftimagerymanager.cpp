@@ -106,23 +106,35 @@ void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imag
 }
 
 std::unique_ptr<ghoul::opengl::Texture> SpacecraftImageryManager::createLUT() {
-    float* LUT1D = new float[256];
-    for ( int i = 0; i < 256; i++) {
-        LUT1D[i] = i / 255.f;
-    }
-    // unsigned char* colors = new unsigned char[6];
-    // colors[0] = 255, colors[1] = 0, colors[2] = 0; // Red
-    // colors[3] = 0; colors[4] = 0; colors[5] = 255; // Blue
+    // Let texture class handle deallocation
+    float* LUT1D = new float[255 * 4];
 
-    const glm::size3_t imageSize(256, 1, 1); // TODO(mnoven) : Metadata
+    for (int i = 0; i < 255; i++) {
+        float c0 = (float)i;
+        float c1 = sqrt(c0) * sqrt(255.f);
+        float c2 = std::pow(c0, 2.0) / 255.f;
+        float c3 = (c1 + c2 / 2.f) * 255.f / (255.f + 255.f / 2.f);
+
+        LUT1D[4*i + 0] = c0 / 255.f; // R
+        LUT1D[4*i + 1] = c1 / 255.f; // G
+        LUT1D[4*i + 2] = c2 / 255.f; // B
+        LUT1D[4*i + 3] = c3 / 255.f; // A
+
+        assert(!(LUT1D[4*i + 0] < 0.f ) && !(LUT1D[4*i + 0] > 1.f));
+        assert(!(LUT1D[4*i + 1] < 0.f ) && !(LUT1D[4*i + 1] > 1.f));
+        assert(!(LUT1D[4*i + 2] < 0.f ) && !(LUT1D[4*i + 2] > 1.f));
+        assert(!(LUT1D[4*i + 3] < 0.f ) && !(LUT1D[4*i + 3] > 1.f));
+    }
+
+    const glm::size3_t imageSize(255, 1, 1); // TODO(mnoven) : Metadata
     std::unique_ptr<Texture> t = std::make_unique<Texture>(
                                     LUT1D,
                                     imageSize,
-                                    Texture::Red, // Format of the pixeldata
-                                    GL_R32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
+                                    Texture::RGBA, // Format of the pixeldata
+                                    GL_RGBA32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
                                     GL_FLOAT, // Type of data
                                     Texture::FilterMode::Linear,
-                                    Texture::WrappingMode::Repeat
+                                    Texture::WrappingMode::ClampToEdge
                                 );
 
     return std::move(t);
@@ -134,7 +146,7 @@ std::vector<std::unique_ptr<Texture>> SpacecraftImageryManager::loadTextures(std
 
     std::transform(imageData.begin(), imageData.end(), std::back_inserter(textures), [](ImageDataObject& dataObject) {
         std::valarray<float>& data = dataObject.contents;
-        const glm::size3_t imageSize(1024, 1024, 1); // TODO(mnoven) : Metadata
+        const glm::size3_t imageSize(4096, 4096, 1); // TODO(mnoven) : Metadata
         const Texture::Format format = ghoul::opengl::Texture::Red;
         const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
 
@@ -175,7 +187,11 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
     imageData.reserve(sequencePaths.size());
 
+    // TODO(mnoven): Remove this
+    int limit = 0;
+
     for (auto path : sequencePaths) {
+        if (limit++ == 1) break;
         if (size_t position = path.find_last_of(".") + 1) {
             if (position != std::string::npos) {
                 ghoul::filesystem::File currentFile(path);
@@ -185,8 +201,8 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
                     // We'll need to scan the header of the fits
                     // and insert in some smart data structure that handles time / mn
                     ImageDataObject im;
-                    im.metaData = FitsFileReader::readHeader(relativePath, _headerKeywords);
-                    im.contents = FitsFileReader::readImage(relativePath);
+                    im.metaData = FitsFileReader::readHeaderFromImageTable(relativePath, _headerKeywords);
+                    im.contents = FitsFileReader::readImageTable(relativePath);
                     im.type = relativePath;
                     imageData.push_back(im);
                 }
