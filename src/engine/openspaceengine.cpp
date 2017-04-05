@@ -504,9 +504,14 @@ void OpenSpaceEngine::initialize() {
 
     _renderEngine->initialize();
 
+    for (const auto& func : _moduleCallbacks.initialize) {
+        func();
+    }
+
     scheduleLoadScene(scenePath);
 
-    LINFO("Finished initializing");
+    LTRACE("OpenSpaceEngine::initialize(end)");
+
 }
 
 void OpenSpaceEngine::scheduleLoadScene(std::string scenePath) {
@@ -515,6 +520,8 @@ void OpenSpaceEngine::scheduleLoadScene(std::string scenePath) {
 }
 
 void OpenSpaceEngine::loadScene(const std::string& scenePath) {
+    LTRACE("OpenSpaceEngine::loadScene(begin)");
+
     windowWrapper().setBarrier(false);
     windowWrapper().setSynchronization(false);
     OnExit(
@@ -531,7 +538,6 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
     }
-
 
     Scene* scene;
     try {
@@ -614,22 +620,11 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         }
     }
 
-    _renderEngine->setGlobalBlackOutFactor(0.0);
-    _renderEngine->startFading(1, 3.0);
-
-    for (const auto& func : _moduleCallbacks.initialize) {
-        func();
-    }
-
-    // Run start up scripts
-    runPreInitializationScripts(scenePath);
-
     _syncEngine->addSyncables(Time::ref().getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
     _syncEngine->addSyncable(_scriptEngine.get());
 
-    LINFO("Finished initializing");
-    LTRACE("OpenSpaceEngine::initialize(end)");
+    LTRACE("OpenSpaceEngine::loadScene(end)");
 }
 
 void OpenSpaceEngine::deinitialize() {
