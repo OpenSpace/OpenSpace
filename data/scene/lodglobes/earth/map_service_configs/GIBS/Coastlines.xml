@@ -19,4 +19,11 @@
     <UnsafeSSL>true</UnsafeSSL>
     <ZeroBlockHttpCodes>400</ZeroBlockHttpCodes>
     <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
+    <MaxConnections>5</MaxConnections>
+    <Cache>
+        <Path>./GDAL_Cache/Coastlines</Path>
+        <Depth>4</Depth>
+        <Extension>.png</Extension>
+    </Cache>
+    <OfflineMode>false</OfflineMode>      
 </GDAL_WMS>
