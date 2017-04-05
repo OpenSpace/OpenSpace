@@ -59,20 +59,22 @@ Fragment getFragment() {
     // float c2 = clamp(c2t / 255.0, 0.0, 1.0);
     // float c3 = clamp(c3t / 255.0, 0.0, 1.0);
 
-    float c0 = clamp(texture(texture2, intensityScaled).r, 0.0, 1.0);
-    float c1 = clamp(texture(texture2, intensityScaled).g, 0.0, 1.0);
-    float c2 = clamp(texture(texture2, intensityScaled).b, 0.0, 1.0);
-    float c3 = clamp(texture(texture2, intensityScaled).a, 0.0, 1.0);
+    // float c0 = clamp(texture(texture2, intensityScaled).r, 0.0, 1.0);
+    // float c1 = clamp(texture(texture2, intensityScaled).g, 0.0, 1.0);
+    // float c2 = clamp(texture(texture2, intensityScaled).b, 0.0, 1.0);
+    // float c3 = clamp(texture(texture2, intensityScaled).a, 0.0, 1.0);
 
-    float r0 = clamp(colormap_red(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
-    float g0 = clamp(colormap_green(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
-    float b0 = clamp(colormap_blue(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
+    // float r0 = clamp(colormap_red(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
+    // float g0 = clamp(colormap_green(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
+    // float b0 = clamp(colormap_blue(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
 
-    float r = c2;
-    float g = c3;
-    float b = c0;
+    // float r = c0;
+    // float g = c1;
+    // float b = c2;
 
-    diffuse = vec4(r, g, b, 1.0);
+    //diffuse = vec4(r, g, b, c3);
+
+    diffuse = texture(texture2, intensityScaled);
 
     if (diffuse.a == 0.0)
         discard;

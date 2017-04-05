@@ -31,6 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/engine/downloadmanager.h> // Make pointer & forward declare?
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
+#include <openspace/rendering/transferfunction.h>
 #include <memory>
 
 namespace ghoul { namespace opengl { class Texture; }}
@@ -64,7 +65,8 @@ private:
     std::vector<std::vector<std::unique_ptr<ghoul::opengl::Texture>>> _textures;
     std::vector<std::vector<ImageDataObject>> _imageData;
 
-    std::unique_ptr<ghoul::opengl::Texture> _lut;
+    //std::unique_ptr<ghoul::opengl::Texture> _lut;
+    std::unique_ptr<TransferFunction> _tf;
 
     void downloadTextureResource();
     bool initialize() override;
