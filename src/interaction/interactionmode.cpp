@@ -549,7 +549,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
            _globe->ellipsoid().geodeticSurfaceNormal(
                 _globe->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
         dvec3 directionFromSurfaceToCamera =
-            dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace;
+            glm::normalize(dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
         dvec3 centerToEllipsoidSurface = dmat3(modelTransform)  * (_globe->projectOnEllipsoid(cameraPositionModelSpace));
         dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
@@ -635,7 +635,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
                 _globe->ellipsoid().geodeticSurfaceNormal(
                     _globe->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
             directionFromSurfaceToCamera =
-                dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace;
+                glm::normalize(dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
             centerToEllipsoidSurface = dmat3(modelTransform) * _globe->projectOnEllipsoid(cameraPositionModelSpace);
             ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
 
