@@ -41,6 +41,7 @@ public:
     std::vector<GLsizei> _lineCount;
     std::vector<glm::vec3> _vertexPositions;
     std::vector<glm::vec4> _vertexColors;
+    std::vector<GLfloat> _quickMorph;
 
     void reserveSize(size_t size);
 private:

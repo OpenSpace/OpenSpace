@@ -51,8 +51,9 @@ return {
                 -- Stepsize = 1.0,
                 -- Classification = true,
                 Morphing = true,
-                -- NumResamples = 5,
-                ResamplingType = 1, -- resampling will depend on: 1=length, 2=integral, 3=index
+                ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
+                NumResamples = 500,
+                QuickMorphDistance = 637100000,
             },
             SeedPoints = {
                 -- Type = "File",
@@ -79,7 +80,7 @@ return {
                 -- Classification = true,
                 Morphing = true,
                 -- NumResamples = 5,
-                ResamplingType = 1, -- resampling will depend on: 1=length, 2=integral, 3=index
+                ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
             },
             SeedPoints = {
                 -- Type = "File",

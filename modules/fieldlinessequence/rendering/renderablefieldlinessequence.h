@@ -60,8 +60,12 @@ private:
     bool _isMorphing;
 
     GLuint _vertexArrayObject;
+
+    // TODO: Make an array instead?
     GLuint _vertexPositionBuffer;
     GLuint _vertexColorBuffer;
+    GLuint _morphToPositionBuffer;
+    GLuint _quickMorphBuffer;
 
     int _activeStateIndex;
     int _numberOfStates;
