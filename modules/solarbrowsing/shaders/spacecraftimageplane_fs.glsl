@@ -32,27 +32,47 @@ in vec4 vs_positionScreenSpace;
 
 #include "fragment.glsl"
 
+float colormap_red(float x) {
+    return 1.448953446096850 * x - 5.02253539008443e-1;
+}
+
+float colormap_green(float x) {
+    return 1.889376646180860 * x - 2.272028094820020e2;
+}
+
+float colormap_blue(float x) {
+    return 3.92613636363636 * x - 7.46528409090909e+2;
+}
+
 Fragment getFragment() {
     float intensityScaled = texture(texture1, vs_st).r;
 
     vec4 diffuse;
 
-    float intensityScaled2 = max(0.0, min(1.0, intensityScaled));
-    float temp = floor(intensityScaled2 == 1.0 ? 255.0 : intensityScaled2 * 256.0);
+    // const float c0t = temp;
+    // const float c1t = sqrt(temp) * sqrt(255.0);
+    // const float c2t = pow(temp, 2.0) / 255.0;
+    // const float c3t = ( ( c1t + c2t / 2.0) * 255.0 / ( 255.0 + 255.0 / 2.0));
 
-    const float c0 = temp;
-    const float c1 = sqrt(temp) * sqrt(255.0);
-    const float c2 = pow(temp, 2.0) / 255.0;
-    const float c3 = ( (c1 + c2 / 2.0) * 255.0 / ( 255.0 + 255.0 / 2.0));
+    // float c0 = clamp(c0t / 255.0, 0.0, 1.0);
+    // float c1 = clamp(c1t / 255.0, 0.0, 1.0);
+    // float c2 = clamp(c2t / 255.0, 0.0, 1.0);
+    // float c3 = clamp(c3t / 255.0, 0.0, 1.0);
 
-    float rr = c2 / 255.0;
-    float rg = c3 / 255.0;
-    float rb = c0 / 255.0;
+    float c0 = clamp(texture(texture2, intensityScaled).r, 0.0, 1.0);
+    float c1 = clamp(texture(texture2, intensityScaled).g, 0.0, 1.0);
+    float c2 = clamp(texture(texture2, intensityScaled).b, 0.0, 1.0);
+    float c3 = clamp(texture(texture2, intensityScaled).a, 0.0, 1.0);
 
-    // rr = clamp(rr, 0.0, 1.0);
-    // rg = clamp(rg, 0.0, 1.0);
-    // rb = clamp(rb, 0.0, 1.0);
-    diffuse = vec4(rr, rg, rb, 1.0);
+    float r0 = clamp(colormap_red(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
+    float g0 = clamp(colormap_green(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
+    float b0 = clamp(colormap_blue(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
+
+    float r = c2;
+    float g = c3;
+    float b = c0;
+
+    diffuse = vec4(r, g, b, 1.0);
 
     if (diffuse.a == 0.0)
         discard;
