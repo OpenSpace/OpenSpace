@@ -66,7 +66,7 @@ private:
     std::vector<std::vector<ImageDataObject>> _imageData;
 
     //std::unique_ptr<ghoul::opengl::Texture> _lut;
-    std::unique_ptr<TransferFunction> _tf;
+    std::vector<std::unique_ptr<TransferFunction>> _transferFunctions;
 
     void downloadTextureResource();
     bool initialize() override;

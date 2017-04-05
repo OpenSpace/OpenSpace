@@ -57,7 +57,6 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _target("target", "Target", "Sun")
     , _currentActiveChannel("activeChannel", "Active Channel", 3, 0, 9)
-    , _tf(nullptr)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
@@ -70,12 +69,24 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
                                       "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 1
                                       "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 2
                                       "/home/noven/workspace/OpenSpace/data/realfitsdata/094", // 3
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 4
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/131", // 4
                                       "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 5
                                       "/home/noven/workspace/OpenSpace/data/realfitsdata/193", // 6
                                       "/home/noven/workspace/OpenSpace/data/realfitsdata/211", // 7
                                       "/home/noven/workspace/OpenSpace/data/realfitsdata/304", // 8
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171"};// 9
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
+
+
+    std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt", // 0
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt", // 1
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt", // 2
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094.txt",   // 3
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0131.txt", // 4
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0171.txt", // 5
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0193.txt", // 6
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0211.txt", // 7
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0304.txt", // 8
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0335.txt"};// 9
 
     _type = "SDO";
     const int numChannels = 10;
@@ -85,6 +96,8 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         _imageData.push_back(SpacecraftImageryManager::ref().loadImageData(paths[i]));
         SpacecraftImageryManager::ref().scaleImageData(_imageData[i], _type, i);
         _textures.push_back(SpacecraftImageryManager::ref().loadTextures(_imageData[i]));
+        _transferFunctions.push_back(std::make_unique<TransferFunction>(tfPaths[i]));
+        _transferFunctions[i]->update();
     }
 
     _currentActiveTexture = -1;
@@ -98,11 +111,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
 
-    _tf = std::make_unique<TransferFunction>(absPath("/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094.txt"));
-    _tf->update();
-
-     _lut = SpacecraftImageryManager::ref().createLUT();
-    // _lut->uploadTexture();
+    // _tf = std::make_unique<TransferFunction>(absPath("/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094.txt"));
+    // _tf->update();
+    //_lut = SpacecraftImageryManager::ref().createLUT();
 
     _currentActiveChannel.onChange([this]() {
         _textures[_currentActiveChannel][_currentActiveTexture]->uploadTexture();
@@ -152,7 +163,6 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
-    _tf = nullptr;
     return true;
 }
 
@@ -238,7 +248,7 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     _shader->setUniform("texture1", imageUnit);
 
     tfUnit.activate();
-    _tf->bind(); // Calls update internally
+    _transferFunctions[_currentActiveChannel]->bind(); // Calls update internally
     _shader->setUniform("texture2", tfUnit);
 
     bool usingFramebufferRenderer =

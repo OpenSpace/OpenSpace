@@ -85,7 +85,7 @@ void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imag
                 }
                 case 4 ... 9: {
                     // TODO(mnoven) : Remove this
-                    if (channel == 4 || channel == 9) { data = 0.0f; continue;}
+                    //if (channel == 9) { data = 0.0f; continue;}
 
                     float alogcmin = log10(cmin), alogcmax = log10(cmax);
                     data = log10(data);
@@ -107,26 +107,28 @@ void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imag
 
 std::unique_ptr<ghoul::opengl::Texture> SpacecraftImageryManager::createLUT() {
     // Let texture class handle deallocation
-    float* LUT1D = new float[255 * 4];
+    float* LUT1D = new float[256 * 4];
 
-    for (int i = 0; i < 255; i++) {
+    for (int i = 0; i < 256; i++) {
         float c0 = (float)i;
         float c1 = sqrt(c0) * sqrt(255.f);
         float c2 = std::pow(c0, 2.0) / 255.f;
-        float c3 = (c1 + c2 / 2.f) * 255.f / (255.f + 255.f / 2.f);
+        float c3 = ((int)c1 + ((int)c2) / 2.f) * 255.f / (255.f + 127.f);
 
-        LUT1D[4*i + 0] = c0 / 255.f; // R
-        LUT1D[4*i + 1] = c1 / 255.f; // G
-        LUT1D[4*i + 2] = c2 / 255.f; // B
-        LUT1D[4*i + 3] = c3 / 255.f; // A
+        LUT1D[4*i + 0] = std::floor(c0) / 255.f; // R
+        LUT1D[4*i + 1] = std::floor(c1) / 255.f; // G
+        LUT1D[4*i + 2] = std::floor(c2) / 255.f; // B
+        LUT1D[4*i + 3] = std::floor(c3) / 255.f; // A
 
         assert(!(LUT1D[4*i + 0] < 0.f ) && !(LUT1D[4*i + 0] > 1.f));
         assert(!(LUT1D[4*i + 1] < 0.f ) && !(LUT1D[4*i + 1] > 1.f));
         assert(!(LUT1D[4*i + 2] < 0.f ) && !(LUT1D[4*i + 2] > 1.f));
         assert(!(LUT1D[4*i + 3] < 0.f ) && !(LUT1D[4*i + 3] > 1.f));
+
+        //std::cout << "mappingkey " << ((float)i/255.f) << " " << (int)c2 << " " << (int)c0 << " " << (int)c1 << " " << "255" << std::endl;
     }
 
-    const glm::size3_t imageSize(255, 1, 1); // TODO(mnoven) : Metadata
+    const glm::size3_t imageSize(256, 1, 1); // TODO(mnoven) : Metadata
     std::unique_ptr<Texture> t = std::make_unique<Texture>(
                                     LUT1D,
                                     imageSize,
@@ -136,7 +138,6 @@ std::unique_ptr<ghoul::opengl::Texture> SpacecraftImageryManager::createLUT() {
                                     Texture::FilterMode::Linear,
                                     Texture::WrappingMode::ClampToEdge
                                 );
-
     return std::move(t);
 }
 
@@ -208,6 +209,7 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
                 }
             }
         }
+        LDEBUG("Finished loading path " << path);
     }
     return std::move(imageData);
 }
