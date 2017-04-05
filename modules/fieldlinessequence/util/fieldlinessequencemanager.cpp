@@ -39,10 +39,6 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
-//#include <glm>
-// #include <ccmc/Tracer.h>
-// #include "ccmc/Point3f.h"
-
 namespace {
     const std::string _loggerCat = "FieldlinesSequenceManager";
     using RawPath = ghoul::filesystem::FileSystem::RawPath;
@@ -123,36 +119,39 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         const std::string& tracingVariable,
         const std::vector<glm::vec3>& inSeedPoints,
         const int& maxIterations,
-        const bool& shouldResample,
+        const bool shouldResample,
         const int& numResamples,
         const int& resamplingOption,
         std::vector<double>& startTimes,
         FieldlinesState& outFieldlinesStates) {
 
+
+    //TODO PREALLOCATE outFieldlinesState._vertexPositions if resampling!!!!!!!!!!
     std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
-    long status = kameleon->open(pathToCdfFile);
-    if (status == ccmc::FileReader::OK) {
-        // TODO: check model
-        // == "enlil"; // TODO, specify in Lua and confirm?
+    long kamStatus = kameleon->open(pathToCdfFile);
 
-        LDEBUG("Successfully created a Kameleon Object from file: " << pathToCdfFile);
-
-        double startTime = getTime(kameleon.get());
-        startTimes.push_back(startTime);
-        LDEBUG("State will start at " << startTime << " (J2000 Time)");
-
-        bool status;
-        // TODO: check status
-        status = traceFieldlines(kameleon.get(),
-                                 tracingVariable,
-                                 inSeedPoints,maxIterations,
-                                 shouldResample,
-                                 numResamples,
-                                 resamplingOption,
-                                 outFieldlinesStates);
+    if (kamStatus != ccmc::FileReader::OK) {
+        return false;
     }
+    // TODO: check model
+    // == "enlil"; // TODO, specify in Lua and confirm?
 
-    return true;
+    LDEBUG("Successfully created a Kameleon Object from file: " << pathToCdfFile);
+
+    double startTime = getTime(kameleon.get());
+    startTimes.push_back(startTime);
+    LDEBUG("State will start at " << startTime << " (J2000 Time)");
+
+    bool status;
+    // TODO: check status
+    status = traceFieldlines(kameleon.get(),
+                             tracingVariable,
+                             inSeedPoints,maxIterations,
+                             shouldResample,
+                             numResamples,
+                             resamplingOption,
+                             outFieldlinesStates);
+    return status;
 }
 
 bool FieldlinesSequenceManager::traceFieldlines(
@@ -160,7 +159,7 @@ bool FieldlinesSequenceManager::traceFieldlines(
         const std::string& tracingVariable,
         const std::vector<glm::vec3>& inSeedPoints,
         const int& maxIterations,
-        const bool& shouldResample,
+        const bool shouldResample,
         const int& numResamples,
         const int& resamplingOption,
         FieldlinesState& outFieldlinesStates) {
@@ -186,7 +185,6 @@ bool FieldlinesSequenceManager::traceFieldlines(
     // tracer.setRegionOfInterest(ccmc::Point3f(-20.f, -5.f, -5.f), ccmc::Point3f(20.f, 5.f, 5.f));
 
     int lineStart = 0;
-    int lineCount = 0;
     for (glm::vec3 seedPoint : inSeedPoints) {
         // A ccmc::Fieldline contains much more info than we need here,
 
@@ -196,41 +194,75 @@ bool FieldlinesSequenceManager::traceFieldlines(
                                                                   seedPoint.y,
                                                                   seedPoint.z);
 
-        // TODO: resample after conversion?
-        if (shouldResample) {
-            if (resamplingOption < 4) {
-                resampleFieldline(numResamples,
-                                  resamplingOption,
-                                  ccmcFieldline,
-                                  outFieldlinesStates);
-            } else if (resamplingOption == 4) {
+        if (!addLineToState(ccmcFieldline,
+                            model,
+                            shouldResample,
+                            numResamples,
+                            resamplingOption,
+                            lineStart,
+                            outFieldlinesStates)) {
+            return false;
+        }
+    }
 
+    // TODO check that everything worked out?
+    return true;
+}
+
+bool FieldlinesSequenceManager::addLineToState(ccmc::Fieldline& ccmcFieldline,
+                                               const std::string& model,
+                                               const bool shouldResample,
+                                               const int& numResamples,
+                                               const int& resamplingOption,
+                                               int& lineStart,
+                                               FieldlinesState& outFieldlinesStates) {
+    int lineCount = 0;
+
+    if (shouldResample) {
+        outFieldlinesStates._vertexPositions.reserve(numResamples);
+        // ResamplingOption = 1, 2 and 3 uses CCMC's built in resampling which requires
+        // the ccmc::Fieldline variable. Resamples before conversion to glm::vec3!
+        // Other options requires the transformation to the correct coordinate system first
+        if (resamplingOption < 4) {
+            if (resamplingOption < 1) {
+                LERROR("Not a valid resampling option! Lowest resampling option = 1.");
+                return false;
             }
-        } //else {}
 
+            if (model == "enlil") {
+                LWARNING("CCMC's fieldline resampling doesn't account for spherical " <<
+                         "coordinates. Consider selecting Resampling Option 4 instead!");
+            }
+            resampleCcmcFieldline(numResamples, resamplingOption, ccmcFieldline);
+        }
+
+        lineCount = numResamples;
+    } else {
         lineCount = static_cast<int>(ccmcFieldline.size());
+    }
 
-        outFieldlinesStates._lineStart.push_back(lineStart);
-        outFieldlinesStates._lineCount.push_back(lineCount);
-        // outFieldlinesStates.reserveSize(lineCount);
+    outFieldlinesStates._lineStart.push_back(lineStart);
+    outFieldlinesStates._lineCount.push_back(lineCount);
 
-        // // TODO clean this ugly $*$& up
-        // for (int i = 0; i < lineCount; ++i) {
-        //     const ccmc::Point3f* vP = &ccmcFieldline.getPositions()[i];
-        //     // TODO: If I don't want to scale here, then I might be able to use std::move
-        //     // or memmove here?
-        //     // TODO: This is batsrus specific
-        //     outFieldlinesStates._vertexPositions.push_back(
-        //             glm::vec3(vP->component1 * R_E_TO_METER,
-        //                       vP->component2 * R_E_TO_METER,
-        //                       vP->component3 * R_E_TO_METER));
-        // }
+    const std::vector<ccmc::Point3f> positions = ccmcFieldline.getPositions();
+    // TODO FIX ALL OF THIS.. works but is ugly code
+    // Add line points to FieldlinesState. Also resample if ResamplingOption == 4
+    if (model == "batsrus") {
+        // Scale all values
+        if (shouldResample && resamplingOption == 4) {
+            std::vector<glm::vec3> tempVec;
+            std::transform(positions.begin(), positions.end(),
+                    std::back_inserter(tempVec),
+                            [&R_E_TO_METER](const ccmc::Point3f& p) {
+                                return glm::vec3(p.component1 * R_E_TO_METER,
+                                                 p.component2 * R_E_TO_METER,
+                                                 p.component3 * R_E_TO_METER);
+                            });
 
-        const std::vector<ccmc::Point3f> positions = ccmcFieldline.getPositions();
-        // auto positions = ccmcFieldline.getPositions();
-        // std::transform(ccmcFieldline.getPositions().begin(), ccmcFieldline.getPositions().end(), std::back_inserter(outFieldlinesStates._vertexPositions), [R_E_TO_METER](ccmc::Point3f& p){
-        if (model == "batsrus") {
-            // Scale all values
+            int seedIndex = ccmcFieldline.getStartIndex();
+            centerSeedPointResampling(numResamples, seedIndex, tempVec,
+                    outFieldlinesStates._vertexPositions);
+        } else {
             std::transform(positions.begin(), positions.end(),
                     std::back_inserter(outFieldlinesStates._vertexPositions),
                             [&R_E_TO_METER](const ccmc::Point3f& p) {
@@ -238,7 +270,26 @@ bool FieldlinesSequenceManager::traceFieldlines(
                                                  p.component2 * R_E_TO_METER,
                                                  p.component3 * R_E_TO_METER);
                             });
-        } else if (model == "enlil") {
+        }
+    } else if (model == "enlil") {
+        if (shouldResample && resamplingOption == 4) {
+            std::vector<glm::vec3> tempVec;
+            std::transform(positions.begin(), positions.end(),
+                    std::back_inserter(tempVec),
+                            [&A_U_TO_METER, &DEG_TO_RAD](const ccmc::Point3f& p) {
+                                float r         = A_U_TO_METER * p.component1;
+                                float lat_rad   = DEG_TO_RAD   * p.component2;
+                                float lon_rad   = DEG_TO_RAD   * p.component3;
+                                float r_cosLat  = r * cos(lat_rad);
+                                return glm::vec3(r_cosLat * cos(lon_rad),
+                                                 r_cosLat * sin(lon_rad),
+                                                 r * sin(lat_rad));
+                            });
+
+            int seedIndex = ccmcFieldline.getStartIndex();
+            centerSeedPointResampling(numResamples, seedIndex, tempVec,
+                    outFieldlinesStates._vertexPositions);
+        } else {
             std::transform(positions.begin(), positions.end(),
                     std::back_inserter(outFieldlinesStates._vertexPositions),
                             [&A_U_TO_METER, &DEG_TO_RAD](const ccmc::Point3f& p) {
@@ -250,31 +301,22 @@ bool FieldlinesSequenceManager::traceFieldlines(
                                                  r_cosLat * sin(lon_rad),
                                                  r * sin(lat_rad));
                             });
-        } else {
-            LERROR("OpenSpace's fieldlines sequence currently only supports the " <<
-                    "BATSRUS and ENLIL models");
-            return false;
         }
-
-        if (shouldResample && resamplingOption == 4) {
-            resampleFieldline(numResamples,
-                              resamplingOption,
-                              ccmcFieldline,
-                              outFieldlinesStates);
-        } //else {}
-
-        lineStart += lineCount; // for next iteration (line)
+    } else {
+        LERROR("OpenSpace's fieldlines sequence currently only supports the " <<
+                "BATSRUS and ENLIL models");
+        return false;
     }
 
-    // TODO check that everything worked out?
+
+    lineStart += lineCount;
     return true;
 }
 
 // Already traced
-void FieldlinesSequenceManager::resampleFieldline(const int& numResamples,
-                                                  const int& resamplingOption,
-                                                  ccmc::Fieldline& line,
-                                                  FieldlinesState& outFieldlinesState) {
+void FieldlinesSequenceManager::resampleCcmcFieldline(const int& numResamples,
+                                                      const int& resamplingOption,
+                                                      ccmc::Fieldline& line) {
 
     int numPoints = line.size();//line.getStartIndex();
     if (numPoints == numResamples || numPoints <= 0) {
@@ -296,93 +338,92 @@ void FieldlinesSequenceManager::resampleFieldline(const int& numResamples,
             // todo getSomething?
             line = line.interpolate(resamplingOption, numResamples);
             break;
-        } case 4: {
-            int seedPointIdx = line.getStartIndex();
-            if (seedPointIdx != 0) {
-                seedPointIdx -= 1; // For some reason ccmc::Fieldline.getStartIndex() is one off
-            }
-            int preSeed  = seedPointIdx;
-            int postSeed = numPoints - seedPointIdx - 1;
-            int n = numResamples / 2; // samples on either side of seedPoint
-            const std::vector<ccmc::Point3f> positions = line.getPositions();
-            ccmc::Fieldline newLine;
-            if (preSeed == 0) {
-                // TODO insert 'n' points before seedPoint (with seedPoint's values)
-                LERROR("NOT IMPLEMENTED YET!!!!!!!!!!");
-            } else {
-                int dif = n - preSeed;
-                int perSegment = dif / preSeed;
-                int extras = dif % preSeed;
-                // Insert before seedPoint
-                // For each value insert
-                for (int i = 0 ; i < seedPointIdx; ++i) {
-                    // Copy/insert existing point to new line
-                    newLine.insertPointData(positions[i], line.getData(i));
-
-                    int numPointsToInsert = perSegment;
-                    if (i < extras) {
-                        perSegment += 1;
-                    }
-
-                    ccmc::Point3f offset = (positions[i+1] - positions[i]) *
-                                           (1.f/static_cast<float>(numPointsToInsert+1));
-
-                    for (float k = 1.0; k < numPointsToInsert + 1.f; k += 1.f) {
-                        newLine.insertPointData(positions[i] + offset * k,
-                                                line.getData(i));
-
-                    }
-                    //TODO UGLY AS F*_$ FIX!!!!!
-                    // std::unique_ptr<ccmc::Point3f> p =
-                    //         std::make_unique<ccmc::Point3f>(positions[i]);
-                }
-            }
-            // newLine.insertPointData(positions[seedPointIdx],
-            //                         line.getValues()[seedPointIdx]);
-            if (postSeed == 0) {
-                // TODO insert 'n' points before seedPoint (with seedPoint's values)
-                LERROR("NOT IMPLEMENTED YET!!!!!!!!!!");
-            } else {
-                int dif = n - postSeed;
-                int perSegment = dif / postSeed;
-                int extras = dif % postSeed;
-                // Insert before seedPoint
-                // For each value insert
-                for (int i = seedPointIdx ; i < numResamples-1; ++i) {
-                    // Copy/insert existing point to new line
-                    newLine.insertPointData(positions[i], line.getData(i));
-
-                    int numPointsToInsert = perSegment;
-                    if (i < extras) {
-                        perSegment += 1;
-                    }
-
-                    ccmc::Point3f offset = (positions[i+1] - positions[i]) *
-                                           (1.f/static_cast<float>(numPointsToInsert+1));
-
-                    for (float k = 1.f; k < numPointsToInsert + 1.f; k += 1.f) {
-                        newLine.insertPointData(positions[i] + offset * k,
-                                                line.getData(i));
-
-                    }
-                    //TODO UGLY AS F*_$ FIX!!!!!
-                    // std::unique_ptr<ccmc::Point3f> p =
-                    //         std::make_unique<ccmc::Point3f>(positions[i]);
-                }
-            }
-            break;
         } default: {
             break;
         }
     }
-    return;
-
-
-    // int seedPointIdx = line.getStartIndex();
 }
 
-void seedPointCenterResampling() {
+void FieldlinesSequenceManager::centerSeedPointResampling(
+                                                const int& numResamples,
+                                                int& seedPointIdx,
+                                                const std::vector<glm::vec3>& line,
+                                                std::vector<glm::vec3>& outPositions) {
 
+    if (seedPointIdx != 0) {
+        seedPointIdx -= 1; // For some reason ccmc::Fieldline.getStartIndex() is one off
+    }
+
+    int numPoints = static_cast<int>(line.size());
+    if (numPoints < 1) {
+        return;
+    }
+
+    const int preSeed  = seedPointIdx;
+    const int postSeed = numPoints - seedPointIdx - 1;
+    const int n = numResamples / 2; // Final number of samples on either side of seedPoint
+
+    auto seedIterator = (line.begin() + seedPointIdx);
+    auto origLineIter = line.begin();
+
+    if (preSeed == 0) {
+        // insert 'n' + 1 copies of seedPoint
+        for (int i = 0 ; i < n ; ++i) {
+            outPositions.push_back(*seedIterator);
+        }
+    } else {
+        const int dif = n - preSeed; // number of points to insert before seedPoint
+        const int pointsPerSegment = dif / preSeed; // minimum number of points to add per segment
+        const int additionalPoints = dif % preSeed; // total number of additional points
+
+        // For each existing line segment, add necessary number of points
+        for (int i = 0; i < preSeed; ++i, ++origLineIter) {
+            outPositions.push_back(*origLineIter);
+
+            int numPointsToInsert = pointsPerSegment;
+            if (i < additionalPoints) {
+                numPointsToInsert += 1;
+            }
+
+            const glm::vec3 offset = ( (*(origLineIter+1)) - (*origLineIter) ) *
+                                     (1.f / static_cast<float>(numPointsToInsert + 1));
+
+            for (int k = 1; k < numPointsToInsert + 1; ++k) {
+                outPositions.push_back(*origLineIter + offset * static_cast<float>(k));
+            }
+        }
+    }
+
+    if (postSeed == 0) {
+        // insert 'n'copies of seedPoint
+        for (int i = 0 ; i < n + 1 ; ++i) {
+            outPositions.push_back(*seedIterator);
+        }
+    } else {
+        const int dif = n - postSeed;
+        const int pointsPerSegment = dif / postSeed;
+        const int additionalPoints = dif % postSeed;
+
+        for (int i = 0 ; i < postSeed; ++i, ++origLineIter) {
+            outPositions.push_back(*origLineIter);
+
+            int numPointsToInsert = pointsPerSegment;
+            if (i >= postSeed - additionalPoints) {
+                numPointsToInsert += 1;
+            }
+
+            const glm::vec3 offset = ( (*(origLineIter+1)) - (*origLineIter) ) *
+                                     (1.f / static_cast<float>(numPointsToInsert + 1));
+
+            for (int k = 1; k < numPointsToInsert + 1; ++k) {
+                outPositions.push_back(*origLineIter + offset * static_cast<float>(k));
+            }
+        }
+        // Push end point to state vector
+        outPositions.push_back(*origLineIter);
+    }
+    // TODO assertion that we've added the correct number of points and that the
+    // seed point is still centered
 }
 
 double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
@@ -431,6 +472,42 @@ double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
         }
 
     return seqStartDbl + stateStartOffset;;
+}
+
+// TODO find a smarter way
+// This is not very elegant but works for now
+void FieldlinesSequenceManager::setQuickMorphBooleans(std::vector<FieldlinesState>& states,
+                                                      const int& pointsPerCurve,
+                                                      const float& threshold) {
+    int numLines = states[0]._lineStart.size();
+    // for each state
+    for (int s = 0; s < states.size()-1; ++s) {
+        // for each line (each state has the same number of lines)
+        for (int l = 0; l < numLines; ++l) {
+            int startIdx = states[s]._lineStart[l];
+            // int startIdx = static_cast<int>(state[s]._lineStart[l]);
+            int endIdx = startIdx + pointsPerCurve - 1;
+
+            // if distance between end points are larger than 'threshold' then quick morph
+            // (QM) should be used
+            bool shouldFirstHalfQM = (glm::length(states[s  ]._vertexPositions[startIdx] -
+                                 states[s+1]._vertexPositions[startIdx] ) > threshold);
+
+            bool shouldSecondHalfQM = (glm::length(states[s  ]._vertexPositions[endIdx] -
+                                 states[s+1]._vertexPositions[endIdx] ) > threshold);
+
+
+            // Should the first half of the line use "quick morph" (unstable) or not?
+            states[s]._quickMorph.insert(states[s]._quickMorph.end(), pointsPerCurve/2,
+                                         shouldFirstHalfQM ? 1.f : 0.f);
+
+            // Should the second half of the line use "quick morph" (unstable) or not?
+            // Line always contains an odd number of points.. hence pointsPerCurve/2+1
+            states[s]._quickMorph.insert(states[s]._quickMorph.end(), pointsPerCurve/2 +1,
+                                         shouldSecondHalfQM ? 1.f : 0.f);
+
+        }
+    }
 }
 
 } // namsepace openspace

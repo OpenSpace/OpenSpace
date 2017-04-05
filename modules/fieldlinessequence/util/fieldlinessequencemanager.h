@@ -69,26 +69,44 @@ public:
                             const std::string& tracingVariable,
                             const std::vector<glm::vec3>& inSeedPoints,
                             const int& maxIterations,
-                            const bool& shouldResample, //does const bool& make sense?
+                            const bool shouldResample, //does const bool& make sense?
                             const int& numResamples,
                             const int& resamplingOption,
                             std::vector<double>& startTimes,
                             FieldlinesState& outFieldlinesStates);
+
+    void setQuickMorphBooleans(std::vector<FieldlinesState>& states,
+                               const int& pointsPerCurve,
+                               const float& threshold);
 
 private:
     bool traceFieldlines( ccmc::Kameleon* kameleon,
                           const std::string& tracingVariable,
                           const std::vector<glm::vec3>& inSeedPoints,
                           const int& maxIterations,
-                          const bool& shouldResample,
+                          const bool shouldResample,
                           const int& numResamples,
                           const int& resamplingOption,
                           FieldlinesState& outFieldlinesStates);
 
-    void resampleFieldline( const int& numResamples,
-                            const int& resamplingOption,
-                            ccmc::Fieldline& line,
-                            FieldlinesState& outFieldlinesState);
+    bool addLineToState( ccmc::Fieldline& ccmcFieldline,
+                         const std::string& model,
+                         const bool shouldResample,
+                         const int& numResamples,
+                         const int& resamplingOption,
+                         int& lineStart,
+                         FieldlinesState& outFieldlinesStates);
+
+    void resampleCcmcFieldline( const int& numResamples,
+                                const int& resamplingOption,
+                                ccmc::Fieldline& line);
+
+    void centerSeedPointResampling( const int& numResamples,
+                                    int& seedPointIdx,
+                                    const std::vector<glm::vec3>& line,
+                                    std::vector<glm::vec3>& outPositions);
+
+
 
     double getTime(ccmc::Kameleon* kameleon);
 };

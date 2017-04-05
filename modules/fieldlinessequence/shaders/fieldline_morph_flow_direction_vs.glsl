@@ -31,6 +31,7 @@ uniform float state_progression;
 
 layout(location = 0) in vec3 in_position; // in meters
 layout(location = 1) in vec3 in_pos_morph_to; // in meters
+layout(location = 2) in float using_quick_morph; // in meters
 // layout(location = 1) in vec4 in_color;
 
 out vec4 vs_color;
@@ -48,20 +49,24 @@ void main() {
         vs_color = vec4(in_color.rgb * 0.99, 0.2);
     }
     // vs_color = in_color;
-    //vec4 tmp = vec4(in_position, 0);
-
-    //vec4 position_meters = pscTransform(tmp, modelTransform);
-    //vs_position = tmp;
-
-    // project the position to view space
-    //position_meters =  modelViewProjection * position_meters;
-    //gl_Position = z_normalization(position_meters);
-    vec3 offset = (in_pos_morph_to - in_position) * state_progression;// * 0.00001;
 
     float scale = 1.0;//695700000.0;//150000000000.0;//6371000.0;
-    //vs_position = vec4(in_position.xyz * scale, 1); // TODO powerscaleify?
+
+    float local_state_progression = state_progression;
+    if (using_quick_morph > 0.99) { // quick_morph is == 1.0 if it should morph
+        if (state_progression > 0.9999) {
+            local_state_progression = (state_progression - 0.9999) / 0.0001;
+        } else {
+            local_state_progression = 0.0;
+        }
+    }
+
+    vec3 offset = (in_pos_morph_to - in_position) * local_state_progression;// * 0.00001;
+
     vec4 position_in_meters = vec4((in_position.xyz + offset)*scale, 1);
+
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
+
     vs_position = z_normalization(positionClipSpace);
     gl_Position = vs_position;
 }
