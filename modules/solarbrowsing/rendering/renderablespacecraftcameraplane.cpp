@@ -57,6 +57,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _target("target", "Target", "Sun")
     , _currentActiveChannel("activeChannel", "Active Channel", 3, 0, 9)
+    , _tf(nullptr)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
@@ -97,8 +98,11 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
 
-    _lut = SpacecraftImageryManager::ref().createLUT();
-    _lut->uploadTexture();
+    _tf = std::make_unique<TransferFunction>(absPath("/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094.txt"));
+    _tf->update();
+
+     _lut = SpacecraftImageryManager::ref().createLUT();
+    // _lut->uploadTexture();
 
     _currentActiveChannel.onChange([this]() {
         _textures[_currentActiveChannel][_currentActiveTexture]->uploadTexture();
@@ -148,6 +152,7 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
         renderEngine.removeRenderProgram(_shader);
         _shader = nullptr;
     }
+    _tf = nullptr;
     return true;
 }
 
@@ -225,16 +230,16 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     _shader->setUniform("modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
 
-    ghoul::opengl::TextureUnit unit;
-    ghoul::opengl::TextureUnit unit2;
+    ghoul::opengl::TextureUnit imageUnit;
+    ghoul::opengl::TextureUnit tfUnit;
 
-     unit.activate();
+    imageUnit.activate();
     _textures[_currentActiveChannel][_currentActiveTexture]->bind();
-    _shader->setUniform("texture1", unit);
+    _shader->setUniform("texture1", imageUnit);
 
-    unit2.activate();
-    _lut->bind();
-    _shader->setUniform("texture2", unit2);
+    tfUnit.activate();
+    _tf->bind(); // Calls update internally
+    _shader->setUniform("texture2", tfUnit);
 
     bool usingFramebufferRenderer =
         OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
