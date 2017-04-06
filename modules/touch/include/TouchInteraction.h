@@ -74,6 +74,11 @@ struct InteractionType {
 	bool roll;
 	bool pick;
 };
+struct SelectedBody { 
+	int id;
+	SceneGraphNode* node;
+	glm::dvec2 coordinates;
+};
 
 using Point = std::pair<int, TUIO::TuioPoint>;
 
@@ -120,7 +125,7 @@ class TouchInteraction : public properties::PropertyOwner
 		bool _directTouchMode;
 		double _projectionScaleFactor;
 		double _currentRadius;
-		std::vector<std::pair<int, SceneGraphNode*>> _selected;
+		std::vector<SelectedBody> _selected;
 		InteractionType _action;
 		
 		glm::dvec3 _centroid;
