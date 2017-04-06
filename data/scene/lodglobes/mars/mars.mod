@@ -33,6 +33,7 @@ return {
             Radii = marsEllipsoid,
             CameraMinHeight = 10,
             SegmentsPerPatch = 90,
+            InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             Layers = {
                 ColorLayers = {
                     {

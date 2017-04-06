@@ -98,6 +98,7 @@ public:
     const DebugProperties& debugProperties() const;
     const GeneralProperties& generalProperties() const;
     const std::shared_ptr<const Camera> savedCamera() const;
+    double interactionDepthBelowEllipsoid();
 
     // Setters
     void setSaveCamera(std::shared_ptr<Camera> camera);    
@@ -111,6 +112,7 @@ private:
     DistanceSwitch _distanceSwitch;
     std::shared_ptr<Camera> _savedCamera;
     
+    double _interactionDepthBelowEllipsoid;
     std::string _frame;
     double _time;
 

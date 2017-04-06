@@ -31,6 +31,7 @@
 namespace {
     const char* keyFrame = "Frame";
     const char* keyRadii = "Radii";
+    const char* keyInteractionDepthBelowEllipsoid = "InteractionDepthBelowEllipsoid";
     const char* keyCameraMinHeight = "CameraMinHeight";
     const char* keySegmentsPerPatch = "SegmentsPerPatch";
     const char* keyLayers = "Layers";
@@ -84,6 +85,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
     int patchSegments = patchSegmentsd;
         
+    if(!dictionary.getValue(keyInteractionDepthBelowEllipsoid,
+        _interactionDepthBelowEllipsoid))
+        _interactionDepthBelowEllipsoid = 0;
     float cameraMinHeight;
     dictionary.getValue(keyCameraMinHeight, cameraMinHeight);
     _generalProperties.cameraMinHeight.set(cameraMinHeight);
@@ -234,6 +238,10 @@ const RenderableGlobe::GeneralProperties&
 
 const std::shared_ptr<const Camera> RenderableGlobe::savedCamera() const {
     return _savedCamera;
+}
+
+double RenderableGlobe::interactionDepthBelowEllipsoid() {
+    return _interactionDepthBelowEllipsoid;
 }
 
 void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) { 
