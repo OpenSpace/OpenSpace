@@ -87,6 +87,7 @@ function (set_common_compile_settings target_name)
 
     if (MSVC)
         target_compile_options(${library_name} PUBLIC
+            "/ZI"       # Enable edit and continue support
             "/MP"       # Enabling multi-threaded compilation
             "/wd4100"   # Unreferenced formal parameter [too frequent in external libs]
             "/wd4127"   # constant conditional expression [used for do/while semicolon swallowing]
