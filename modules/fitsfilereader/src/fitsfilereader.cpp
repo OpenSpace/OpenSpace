@@ -35,21 +35,31 @@ using namespace ghoul::opengl;
 #define FITS_DATA_TYPE_OPENGL GL_FLOAT
 
 namespace {
-    const std::string _loggerCat = "FitsFileReader";
-    bool _printFirst = true;
+    const char* _loggerCat = "FitsFileReader";
+    // Using internal linkage by not declaring these static
+    std::unique_ptr<FITS> thread_local _infile = nullptr;
+    std::pair<int, int> thread_local _imageSize;
 }
 
 namespace openspace {
 
-std::unique_ptr<Texture> FitsFileReader::loadTexture(const std::string& path) {
+void FitsFileReader::open(const std::string& path) {
+    _infile = std::make_unique<FITS>(path, Read, true);
+}
+
+void FitsFileReader::close() {
+    _infile->destroy();
+    _infile = nullptr;
+}
+
+std::unique_ptr<Texture> FitsFileReader::loadTexture() {
     FITS::setVerboseMode(true);
     std::valarray<float> contents;
     long sizeX;
     long sizeY;
 
     try {
-        FITS infile(path, Read, true);
-        PHDU& image = infile.pHDU();
+        PHDU& image = _infile->pHDU();
         image.read(contents);
         sizeX = image.axis(0);
         sizeY = image.axis(1);
@@ -77,25 +87,25 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture(const std::string& path) {
 }
 
 std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(const std::string& buffer) {
-    fitsfile* infile;
+    fitsfile* _infile;
     // Get string adress
     const char* memory = buffer.c_str();
     size_t size = buffer.size() * sizeof(std::string::value_type);
     void* v = const_cast<char*>(memory);
     int status = 0;
-    if (fits_open_memfile(&infile, "", READONLY, &v, &size, 0, NULL, &status)) {
+    if (fits_open_memfile(&_infile, "", READONLY, &v, &size, 0, NULL, &status)) {
         LERROR("Error opening file");
         fits_report_error(stderr, status);
     }
 
     int numAxis = 0;
-    fits_get_img_dim(infile, &numAxis, &status);
+    fits_get_img_dim(_infile, &numAxis, &status);
     if (numAxis != 2) {
         LERROR("Only support images with 2 axes");
     }
 
     long axLengths[2];
-    if (fits_get_img_size(infile, 2, axLengths, &status)) {
+    if (fits_get_img_size(_infile, 2, axLengths, &status)) {
         LERROR("Error in getting image size");
         fits_report_error(stderr, status);
     }
@@ -106,9 +116,9 @@ std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(const std::string
 
     // Allocate space for the image - TODO do this C++ style
     float* imageArray = (float*)calloc(numPixels, sizeof(float));
-    fits_read_pix(infile, TFLOAT, fpixel, numPixels, NULL, imageArray, NULL, &status);
+    fits_read_pix(_infile, TFLOAT, fpixel, numPixels, NULL, imageArray, NULL, &status);
 
-    if (fits_close_file(infile, &status)) {
+    if (fits_close_file(_infile, &status)) {
         LERROR("Error closing file");
         fits_report_error(stderr, status);
     }
@@ -134,98 +144,101 @@ std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(const std::string
     return texture;
 }
 
-std::unordered_map<std::string, float> FitsFileReader::readHeaderFromImageTable(const std::string& path,
-                                                    std::vector<std::string>& keywords) {
-    FITS::setVerboseMode(true);
-
-    try {
-        FITS infile(path, Read, true);
-        ExtHDU& image = infile.extension(1);
-
-        std::vector<float> values;
-        image.readKeys(keywords, values);
-
-        if (values.size() != keywords.size()) {
-            LERROR("Number of keywords does not match number of values");
-        }
-
-        std::unordered_map<std::string, float> result;
-        std::transform(keywords.begin(), keywords.end(), values.begin(),
-                       std::inserter(result, result.end()),
-                       [](std::string key, float value) {
-            return std::make_pair(key, value);
-        });
-        return result;
-    } catch (FitsException& e) {
-        LERROR("Could not read FITS header from table");
-    }
+const std::pair<int, int>& FitsFileReader::getImageSize() {
+    assert(_imageSize.first > 0 && _imageSize.second > 0);
+    return _imageSize;
 }
 
-std::valarray<float> FitsFileReader::readImageTable(const std::string& path) {
-    FITS::setVerboseMode(true);
-
-    try {
-        FITS infile(path, Read, true);
-        ExtHDU& image = infile.extension(1);
-
+const std::valarray<float> FitsFileReader::readImageInternal(ExtHDU& image) {
+   try {
         assert(image.axes() == 2);
         const int sizeX = image.axis(0);
         const int sizeY = image.axis(1);
         assert(sizeX % 2 == 0 && sizeY % 2 == 0 && sizeX == sizeY);
 
-       // std::cout << image << std::endl;
+        _imageSize = std::make_pair(sizeX, sizeY);
         std::valarray<float> contents;
         image.read(contents);
         return std::move(contents);
+    } catch (FitsException& e){
+        LERROR("Could not read FITS image EXTHDU");
+    }
+}
+
+const std::valarray<float> FitsFileReader::readImageInternal(PHDU& image) {
+    try {
+        assert(image.axes() == 2);
+        const int sizeX = image.axis(0);
+        const int sizeY = image.axis(1);
+        assert(sizeX % 2 == 0 && sizeY % 2 == 0 && sizeX == sizeY);
+
+        _imageSize = std::make_pair(sizeX, sizeY);
+        std::valarray<float> contents;
+        image.read(contents);
+        return std::move(contents);
+    } catch (FitsException& e){
+        LERROR("Could not read FITS image PHDU");
+    }
+}
+
+const bool FitsFileReader::isPrimaryHDU() {
+    return _infile->extension().size() == 0;
+}
+
+std::valarray<float> FitsFileReader::readImage() {
+    FITS::setVerboseMode(true);
+
+    try {
+        // Primary HDU Object
+        if (isPrimaryHDU()) {
+            return std::move(readImageInternal(_infile->pHDU()));
+        }
+        // Extension HDU Object
+        return std::move(readImageInternal(_infile->currentExtension()));
     } catch (FitsException& e){
         LERROR("Could not read FITS image from table");
     }
 }
 
-std::valarray<float> FitsFileReader::readImage(const std::string& path) {
+template <typename T>
+const std::unordered_map<std::string, T> FitsFileReader::readHeader(std::vector<std::string>& keywords) {
     FITS::setVerboseMode(true);
 
     try {
-        FITS infile(path, Read, true);
-        PHDU& image = infile.pHDU();
+        HDU* image = isPrimaryHDU() ? static_cast<HDU*>(&_infile->pHDU()) :
+                                      static_cast<HDU*>(&_infile->currentExtension());
 
-        assert(image.axes() == 2);
-        const int sizeX = image.axis(0);
-        const int sizeY = image.axis(1);
-        assert(sizeX % 2 == 0 && sizeY % 2 == 0 && sizeX == sizeY);
-
-        std::valarray<float> contents;
-        image.read(contents);
-        return std::move(contents);
-    } catch (FitsException& e){
-        LERROR("Could not read FITS image");
-    }
-}
-
-std::unordered_map<std::string, float> FitsFileReader::readHeader(const std::string& path,
-                                std::vector<std::string>& keywords) {
-    FITS::setVerboseMode(true);
-
-    try {
-        FITS infile(path, Read, true);
-        PHDU& image = infile.pHDU();
-
-        std::vector<float> values;
-        image.readKeys(keywords, values);
+        std::vector<T> values;
+        image->readKeys(keywords, values);
 
         if (values.size() != keywords.size()) {
             LERROR("Number of keywords does not match number of values");
         }
 
-        std::unordered_map<std::string, float> result;
+        std::unordered_map<std::string, T> result;
         std::transform(keywords.begin(), keywords.end(), values.begin(),
                        std::inserter(result, result.end()),
-                       [](std::string key, float value) {
+                       [](std::string key, T value) {
             return std::make_pair(key, value);
         });
         return result;
     } catch (FitsException& e) {
         LERROR("Could not read FITS header");
+    }
+}
+
+template <typename T>
+const T FitsFileReader::readHeaderValue(const std::string key) {
+    FITS::setVerboseMode(true);
+    try {
+        HDU* image = isPrimaryHDU() ? static_cast<HDU*>(&_infile->pHDU()) :
+                                      static_cast<HDU*>(&_infile->currentExtension());
+
+        T value;
+        image->readKey(key, value);
+        return value;
+    } catch (FitsException& e) {
+        LERROR("Could not read FITS key");
     }
 }
 
@@ -244,4 +257,10 @@ void FitsFileReader::dump(PHDU& image) {
     }
     std::cout << std::endl;
 }
+
+template const std::unordered_map<std::string, float> FitsFileReader::readHeader(std::vector<std::string>& keywords);
+template const std::unordered_map<std::string, std::string> FitsFileReader::readHeader(std::vector<std::string>& keywords);
+
+template const float FitsFileReader::readHeaderValue(const std::string key);
+template const std::string FitsFileReader::readHeaderValue(const std::string key);
 } // namespace openspace

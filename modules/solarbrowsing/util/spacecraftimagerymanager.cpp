@@ -57,10 +57,9 @@ void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imag
         const float cmax = clipmax[channel];
 
         for (auto& dataObject : imageData) {
-            std::unordered_map<std::string, float>& metaData = dataObject.metaData;
             std::valarray<float>& data = dataObject.contents;
 
-            const float exptime = metaData["EXPTIME"];
+            const float& exptime = dataObject.metaData.expTime;
             assert(exptime > 0.f && exptime < 10.f);
 
             data = data * (normtimes[channel] / exptime);
@@ -147,7 +146,11 @@ std::vector<std::unique_ptr<Texture>> SpacecraftImageryManager::loadTextures(std
 
     std::transform(imageData.begin(), imageData.end(), std::back_inserter(textures), [](ImageDataObject& dataObject) {
         std::valarray<float>& data = dataObject.contents;
-        const glm::size3_t imageSize(4096, 4096, 1); // TODO(mnoven) : Metadata
+
+        const int& sizeX = dataObject.metaData.size.first;
+        const int& sizeY = dataObject.metaData.size.second;
+
+        const glm::size3_t imageSize(sizeX, sizeY, 1);
         const Texture::Format format = ghoul::opengl::Texture::Red;
         const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
 
@@ -180,7 +183,7 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
     ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
 
     if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load Label Directory '" << sequenceDir.path() << "'");
+        LERROR("Could not load FITS Directory '" << sequenceDir.path() << "'");
     }
 
     using Recursive = ghoul::filesystem::Directory::RawPath;
@@ -198,14 +201,22 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
                 ghoul::filesystem::File currentFile(path);
                 std::string extension = currentFile.fileExtension();
                 if (extension == "fits" || extension == "fit" || extension == "fts") {
-                    std::string relativePath = FileSys.relativePath(path);
+                    const std::string relativePath = FileSys.relativePath(path);
                     // We'll need to scan the header of the fits
                     // and insert in some smart data structure that handles time / mn
+
+                    FitsFileReader::open(relativePath);
                     ImageDataObject im;
-                    im.metaData = FitsFileReader::readHeaderFromImageTable(relativePath, _headerKeywords);
-                    im.contents = FitsFileReader::readImageTable(relativePath);
-                    im.type = relativePath;
+                    im.contents = FitsFileReader::readImage();
+
+                    ImageMetadata metaData;
+                    metaData.filename = relativePath;
+                    metaData.expTime = FitsFileReader::readHeaderValue<float>(std::string("EXPTIME"));
+                    metaData.size = FitsFileReader::getImageSize();
+                    im.metaData = metaData;
+
                     imageData.push_back(im);
+                    FitsFileReader::close();
                 }
             }
         }

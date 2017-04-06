@@ -40,10 +40,15 @@ namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
 
+struct ImageMetadata {
+    std::string filename;
+    std::pair<int, int> size;
+    float expTime;
+};
+
 struct ImageDataObject {
-    std::unordered_map<std::string, float> metaData;
+    ImageMetadata metaData;
     std::valarray<float> contents;
-    std::string type; // for debuggning
 };
 
 class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManager> {
