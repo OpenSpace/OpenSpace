@@ -62,7 +62,7 @@ TouchInteraction::TouchInteraction()
 	_centroid{ glm::dvec3(0.0) },
 	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.4 }, 
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
-	_directTouchMode{ false }
+	_directTouchMode{ false }, _tap{ false }
 {
 	_origin.onChange([this]() {
 		SceneGraphNode* node = sceneGraphNode(_origin.value());
@@ -111,7 +111,7 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 		double xCo = 2 * (c.getX() - 0.5) * aspectRatio;
 		double yCo = -2 * (c.getY() - 0.5); // normalized -1 to 1 coordinates on screen
 		glm::dvec3 cursorInWorldSpace = camToWorldSpace * glm::dvec3(xCo, yCo, -3.2596558);
-		glm::dvec3 normCursor = glm::normalize(cursorInWorldSpace);
+		glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
 		for (SceneGraphNode* node : selectableNodes) {
 			double boundingSphere = node->boundingSphere().lengthd();
 			glm::dvec3 camToSelectable = node->worldPosition() - camPos;
@@ -130,14 +130,26 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 					newSelected.push_back(std::make_pair(id, node));
 
 				// finds intersection point between boundingsphere and line in world coordinates, assumes line direction is normalized
-				double d = glm::dot(normCursor, camToSelectable);
-				double root = std::sqrt((std::pow(boundingSphere, 2) - glm::dot(camToSelectable, camToSelectable)) + std::pow(d, 2));
+				double d = glm::dot(raytrace, camToSelectable);
+				double root = boundingSphere * boundingSphere - glm::dot(camToSelectable, camToSelectable) + d * d;
 				if (root > 0) // two intersection points (take the closest one)
 					d -= sqrt(root);
-				glm::dvec3 intersectionPoint = camPos + d * normCursor;
+				glm::dvec3 intersectionPoint = camPos + d * raytrace;
 				//double d2 = d + sqrt(root);
-				//glm::dvec3 intersectionPoint2 = camPos + d2 * normCursor;
-				//std::cout << root << ", " << glm::to_string(intersectionPoint) << ", " << glm::to_string(intersectionPoint2) << "\n";
+				//glm::dvec3 intersectionPoint2 = camPos + d2 * raytrace;
+				//std::cout << root << ", " << glm::to_string(intersectionPoint) /*<< ", " << glm::to_string(intersectionPoint2)*/ << "\n";
+
+				std::cout << glm::to_string(raytrace) << "\n";
+
+
+				glm::dvec3 modelVector = node->rotationMatrix() * glm::dvec3(1.0, 0.0, 0.0);
+				// assume raytrace is constant
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+				// in this case raytrace dir in world space differs as we follow the focus nodes rotation with the camera
+#endif
+
+				// f(theta, phi, v) = matrix * modelVector = surfacepointinmodelview
+
 			}
 		}
 	}
@@ -180,24 +192,20 @@ void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std:
 			id = c.getSessionID();
 		}
 	}
-	if (list.size() == 1) {
-		//std::cout << "Tap: " << cursor.getSessionID() << ". (" << cursor.getX() << "," << cursor.getY() << "), Speed: "
-			//<< cursor.getMotionSpeed() << ", Path: " << cursor.getPath().size() << ", Time: " << cursor.getPath().back().getTuioTime().getTotalMilliseconds()
-			//<< ", lastTime: " << lastProcessed.at(0).second.getTuioTime().getTotalMilliseconds() << "\n";
-		if (!cursor.isMoving() && cursor.getPath().size() == 1) { // tap
-			_action.rot = false;
-			_action.pinch = false;
-			_action.pan = false;
-			_action.roll = false;
-			_action.pick = true;
-		}
-		else {
-			_action.rot = true;
-			_action.pinch = false;
-			_action.pan = false;
-			_action.roll = false;
-			_action.pick = false;
-		}
+	if (_tap) {
+		_tap = false;
+		_action.rot = false;
+		_action.pinch = false;
+		_action.pan = false;
+		_action.roll = false;
+		_action.pick = true;
+	}
+	else  if (list.size() == 1) {
+		_action.rot = true;
+		_action.pinch = false;
+		_action.pan = false;
+		_action.roll = false;
+		_action.pick = false;
 	}
 	else {
 		if (std::abs(dist - lastDist)/list.at(0).getMotionSpeed() < 0.01 && list.size() == 2) {
@@ -271,11 +279,11 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 			glm::dvec3 camToFocus = glm::normalize(_focusNode->worldPosition() - _camera->positionVec3());
 			double angleX = glm::orientedAngle(_camera->viewDirectionWorldSpace(), camToFocus, glm::normalize(_camera->rotationQuaternion() * _camera->lookUpVectorWorldSpace()));
 			double angleY = glm::orientedAngle(_camera->viewDirectionWorldSpace(), camToFocus, glm::normalize(_camera->rotationQuaternion() * glm::dvec3(1,0,0)));
-			std::cout << "x: " << angleX << ", y: " << angleY << "\n";
+			//std::cout << "x: " << angleX << ", y: " << angleY << "\n";
 			_vel.localRot = _sensitivity.localRot * glm::dvec2(-angleX, -angleY);
 		}
 		else {
-			_vel.zoom = _sensitivity.zoom * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
+			_vel.zoom = _sensitivity.zoom * (glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) - _focusNode->boundingSphere().lengthd());
 		}
 			
 	}
@@ -376,6 +384,10 @@ void TouchInteraction::configSensitivities(double dist) {
 		//_sensitivity.globalRoll = 0.1;
 		//_sensitivity.localRoll = 0.1;
 	}
+	else if (dist < close) {
+		_sensitivity.zoom = 2.0 * std::max(dist, 100.0) / close;
+		_sensitivity.globalRot = 0.1 * std::max(dist, 100.0) / close;
+	}
 	else {
 		_sensitivity.zoom = 2.0;
 		_sensitivity.globalRot = 0.1;
@@ -403,6 +415,9 @@ void TouchInteraction::clear() {
 	_action.pick = false;
 }
 
+void TouchInteraction::tap() {
+	_tap = true;
+}
 
 // Getters
 Camera* TouchInteraction::getCamera() {

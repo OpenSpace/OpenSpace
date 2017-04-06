@@ -91,7 +91,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void configSensitivities(double dist);
 		void decelerate();
 		void clear();
-
+		void tap();
 
 		// Get & Setters
 		Camera* getCamera();
@@ -116,6 +116,7 @@ class TouchInteraction : public properties::PropertyOwner
 		properties::StringProperty _origin;
 		globebrowsing::RenderableGlobe* _globe;
 
+		bool _tap;
 		bool _directTouchMode;
 		double _projectionScaleFactor;
 		double _currentRadius;

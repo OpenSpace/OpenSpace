@@ -48,6 +48,7 @@ void TuioEar::removeTuioObject(TuioObject *tobj) { }
 
 void TuioEar::addTuioCursor(TuioCursor *tcur) {
 	_mx.lock();
+	_tap = false;
 	// find same id in _list if it exists in _removeList (new input with same ID as a previously stored)
 	int i = tcur->getSessionID();
 	std::vector<int>::iterator foundID = std::find_if(
@@ -87,7 +88,7 @@ void TuioEar::updateTuioCursor(TuioCursor *tcur) {
 // save id to be removed and remove it in clearInput
 void TuioEar::removeTuioCursor(TuioCursor *tcur) {
 	_mx.lock();
-	if (tcur->getPath().size() < 3 && tcur->getMotionSpeed() < 0.03) {
+	if (tcur->getPath().size() < 4 && tcur->getMotionSpeed() < 0.03) {
 		_tapCo = TuioCursor(*tcur);
 		_tap = true;
 	}
@@ -102,7 +103,7 @@ void TuioEar::updateTuioBlob(TuioBlob *tblb) { }
 
 void TuioEar::removeTuioBlob(TuioBlob *tblb) { }
 
-void TuioEar::refresh(TuioTime frameTime) { } // about every 15ms on TuioPad app
+void TuioEar::refresh(TuioTime frameTime) { } // about every 15ms
 
 std::vector<TuioCursor> TuioEar::getInput() {
 	std::lock_guard<std::mutex> lock(_mx);

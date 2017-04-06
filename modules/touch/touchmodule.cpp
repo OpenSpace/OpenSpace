@@ -76,6 +76,7 @@ bool TouchModule::gotNewInput() {
 		TuioCursor c = ear->getTap();
 		list.push_back(c);
 		lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
+		touch->tap();
 		return true;
 	}
 	
@@ -85,7 +86,9 @@ bool TouchModule::gotNewInput() {
 		for_each(lastProcessed.begin(), lastProcessed.end(), [this, &newInput](Point& p) {
 			std::vector<TuioCursor>::iterator cursor = find_if(list.begin(), list.end(), [&p](const TuioCursor& c) { return c.getSessionID() == p.first; });
 			double now = cursor->getPath().back().getTuioTime().getTotalMilliseconds();
-			if (p.second.getTuioTime().getTotalMilliseconds() == now || !cursor->isMoving())
+			if (!cursor->isMoving())
+				newInput = true;
+			else if (p.second.getTuioTime().getTotalMilliseconds() == now)
 				newInput = false;
 		});
 		return newInput;
