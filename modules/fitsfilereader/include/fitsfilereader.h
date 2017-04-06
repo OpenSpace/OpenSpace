@@ -30,27 +30,37 @@
 #include <vector>
 #include <unordered_map>
 
-namespace CCfits { class PHDU; }
+namespace CCfits { class PHDU; class ExtHDU; }
 namespace ghoul { namespace opengl{ class Texture; }}
 
 namespace openspace {
 
 class FitsFileReader {
 public:
-    static std::unique_ptr<ghoul::opengl::Texture> loadTexture(const std::string& path);
-    static std::unique_ptr<ghoul::opengl::Texture> loadTextureFromMemory(const std::string& buffer);
+    static void open(const std::string& path);
+    static void close();
 
-    // TODO(mnoven): Merge table functions with image functions since they do almost the same thing
-    static std::unordered_map<std::string, float> readHeaderFromImageTable(const std::string& path, std::vector<std::string>& keywords);
-    static std::valarray<float> readImageTable(const std::string& path);
-    static std::valarray<float> readImage(const std::string& path);
+    static std::valarray<float> readImage();
     // Fits will throw error if keyword does not exist in header
-    // TODO(mnoven): Make map template and remove float
-    static std::unordered_map<std::string, float> readHeader(const std::string& path, std::vector<std::string>& keywords);
+    template<typename T>
+    static const std::unordered_map<std::string, T> readHeader(std::vector<std::string>& keywords);
+    template<typename T>
+    static const T readHeaderValue(const std::string key);
+
+    //TODO(mnoven): Don't assume that client has read image content already
+    static const std::pair<int, int>& getImageSize();
+
+    static std::unique_ptr<ghoul::opengl::Texture> loadTextureFromMemory(const std::string& buffer);
+    static std::unique_ptr<ghoul::opengl::Texture> loadTexture();
 
 private:
 	// Only for debugging
 	static void dump(CCfits::PHDU& image);
+    // This is pretty annoying, the read method is not derived from the HDU class
+    // in CCfits - need to explicitly cast to the sub classes to access read
+    static const std::valarray<float> readImageInternal(CCfits::PHDU& image);
+    static const std::valarray<float> readImageInternal(CCfits::ExtHDU& image);
+    static const bool isPrimaryHDU();
 };
 
 } // namespace openspace
