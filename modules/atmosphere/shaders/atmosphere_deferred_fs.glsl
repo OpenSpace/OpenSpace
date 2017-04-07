@@ -29,6 +29,7 @@
 // Sun Irradiance
 const float ISun = 40.0;
 
+uniform mat4 sgctProjectionMatrix;
 uniform mat4 inverseTransformMatrix;
 uniform mat4 scaleTransformMatrix;
 uniform mat4 objToWorldTransform;
@@ -58,6 +59,8 @@ uniform float screenX;
 uniform float screenY;
 uniform float screenWIDTH;
 uniform float screenHEIGHT;
+
+uniform vec2 depthrange;
 
 uniform float time;
 
@@ -97,13 +100,13 @@ struct Ellipsoid {
   vec4 size;
 };
 
-bool algebraicIntersecSphere(const Ray ray, const float SphereRadius, const dvec4 SphereCenter, 
-                             out double offset, out double maxLength) 
+bool algebraicIntersecSphere(const Ray ray, const float SphereRadius, const vec4 SphereCenter, 
+                             out float offset, out float maxLength) 
 {
-  dvec3 L = ray.origin.xyz - SphereCenter.xyz;
-  double B = 2 * dot(ray.direction.xyz, L);
-  double C = dot(L, L) - (SphereRadius*SphereRadius);
-  double delta = B*B - 4*C;
+  vec3 L = ray.origin.xyz - SphereCenter.xyz;
+  float B = 2 * dot(ray.direction.xyz, L);
+  float C = dot(L, L) - (SphereRadius*SphereRadius);
+  float delta = B*B - 4*C;
 
   if ( delta < 0.0 ) { // no intersection
     return false;
@@ -111,10 +114,10 @@ bool algebraicIntersecSphere(const Ray ray, const float SphereRadius, const dvec
   else if ( delta == 0.0 ) { // one intersection;
     offset = maxLength = -B/2.0;
   } else {
-    double tmpB = -B * 0.5;
-    double root = sqrt(delta) * 0.5;
-    double t0 = tmpB - root;
-    double t1 = tmpB + root;
+    float tmpB = -B * 0.5;
+    float root = sqrt(delta) * 0.5;
+    float t0 = tmpB - root;
+    float t1 = tmpB + root;
 
     if ( t0 < t1 ) {
       offset = t0;
@@ -269,11 +272,10 @@ bool intersectAtmosphere(const dvec4 planetPos, const dvec3 rayDirection, const 
  *               intersection of the ray with atmosphere when the eye position
  *               is inside atmosphere.
  */
-bool atmosphereIntersection(const vec3 planetPosition, const vec3 rayDirection,
-                            const vec3 rayOrigin, const float atmRadius,
+bool atmosphereIntersection(const vec3 planetPosition, const Ray ray, const float atmRadius,
                             out bool inside, out float offset, out float maxLength ) {
-  vec3  l  = rayOrigin - planetPosition;
-  float s  = dot(l, rayDirection);
+  vec3  l  = planetPosition - ray.origin.xyz;
+  float s  = dot(l, ray.direction.xyz);
   float l2 = dot(l, l);
   float r2 = (atmRadius - EPSILON) *  (atmRadius - EPSILON); // avoiding surface acne
 
@@ -620,6 +622,247 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
   }
 }
 
+/*
+ * Calculates Intersection Ray by walking through
+ * all the graphic pipile transformations in the 
+ * opposite direction.
+ */
+void calculateRay(out Ray ray, out vec4 planetPositionObjectCoords) {
+  
+  // Fragment to window coordinates
+  vec4 windowCoords = vec4(0.0);
+  
+  windowCoords.x = gl_FragCoord.x + 0.5; // +0.5 because the fragment has non-integer coords by default
+  windowCoords.y = screenHEIGHT - gl_FragCoord.y - 0.5; // +0.5 because the fragment has non-integer coords by default
+  windowCoords.z = gl_FragCoord.z; // z can be 0.0 or 1.0. We chose 1.0 to avoid math problems.
+  windowCoords.w = gl_FragCoord.w; // remember: gl_FragCoord.w = 1.0/w_clip
+  
+  // Window to NDC coordinates
+  vec4 viewPort = vec4(screenX, screenY, screenWIDTH, screenHEIGHT);
+  vec4 ndcCoords = vec4(0.0, 0.0, 0.0, 1.0);
+  ndcCoords.xy = (2.0 * (windowCoords.xy - viewPort.xy) / viewPort.zw) - vec2(1.0);
+  
+  // The ndcCoords for z are only need if we want something inside the
+  // view frustum. In this case we just want the position in the
+  // near plane, that is z = -1.0
+  float f_plus_n = gl_DepthRange.far + gl_DepthRange.near;
+  float f_minus_n = gl_DepthRange.far - gl_DepthRange.near;
+  ndcCoords.z = (2.0 * windowCoords.z - f_plus_n) / f_minus_n;
+  
+  // NDC to clip coordinates (gl_FragCoord.w = 1.0/w_clip)
+  vec4 clipCoords = ndcCoords / gl_FragCoord.w;
+  
+  // Clip to SGCT Eye
+  vec4 sgctEyeCoords = inverseSgctProjectionMatrix * clipCoords;
+  
+  // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
+  vec4 osEyeCoords = viewToEyeTranform * sgctEyeCoords;
+  
+  // OS Eye to World
+  vec4 worldCoords = eyeToWorldTransform * osEyeCoords;   
+  
+  // World to Object
+  vec4 objectCoords = worldToObjectTransform * worldCoords;
+  
+  // Planet Position in Object Space
+  planetPositionObjectCoords = worldToObjectTransform * vec4(objpos.xyz, 1.0);
+  
+  // Camera Position in Object Space
+  vec4 cameraPositionObject = worldToObjectTransform * vec4(campos.xyz, 1.0);
+      
+  // ============================
+  // ====== Building Ray ========
+  // Ray in object space
+  ray.origin    = cameraPositionObject;
+  ray.direction = vec4(normalize(objectCoords.xyz - cameraPositionObject.xyz), 0.0); 
+}
+
+/*
+ * Calculates Intersection Ray by walking through
+ * all the graphic pipile transformations in the 
+ * opposite direction.
+ * Instead of passing through all the pipeline,
+ * it starts at NDC from the interpolated
+ * positions from the screen quad.
+ */
+void calculateInterpolatedRay(out Ray ray, out vec4 planetPositionObjectCoords) {
+  // NDC to Clip coords
+  vec4 clipCoords = vec4(interpolatedNDCPos, 1.0) / gl_FragCoord.w;
+    
+  // Clip to SGCT Eye
+  vec4 sgctEyeCoords = inverseSgctProjectionMatrix * clipCoords;
+
+  // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
+  vec4 osEyeCoords = viewToEyeTranform * sgctEyeCoords;
+    
+  // OS Eye to World coords
+  // Now we execute the transformations with no matrices:
+  vec4 ttmp   = inverse(scaleTransformMatrix) * osEyeCoords;
+  vec3 ttmp2  = inverse(camrot) * vec3(ttmp);
+  vec4 ttmp3  = vec4(campos + ttmp2, 1.0);
+
+  vec4 worldCoords = ttmp3;
+
+  // World to Object coords
+  vec4 objectCoords = inverseTransformMatrix * vec4(-objpos.xyz + worldCoords.xyz, 1.0);
+
+  // Planet Position in Object Space
+  planetPositionObjectCoords = inverseTransformMatrix * vec4(-objpos.xyz + objpos.xyz, 1.0);
+
+  // Camera Position in Object Space
+  vec4 cameraPositionInObject = inverseTransformMatrix * vec4(-objpos.xyz + campos.xyz, 1.0);    
+    
+  // ============================
+  // ====== Building Ray ========
+  // Ray in object space
+  ray.origin    = cameraPositionInObject;
+  ray.direction = vec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);    
+}
+
+
+/*
+ * Calculates Intersection Ray by walking through
+ * all the graphic pipile transformations in the 
+ * opposite direction.
+ * This method avoids matrices multiplications
+ * wherever is possible.
+ */
+void calculateRay2(out Ray ray, out vec4 planetPositionObjectCoords) {
+  // ======================================
+  // ======= Avoiding Some Matrices =======
+
+  // NDC to clip coordinates (gl_FragCoord.w = 1.0/w_clip)
+  // Using the interpolated coords:
+  // Assuming Red Book is right: z_ndc e [0, 1] and not [-1, 1]
+  vec4 clipCoords = vec4(interpolatedNDCPos, 1.0) / gl_FragCoord.w;
+ 
+  // Clip to SGCT Eye
+  vec4 sgctEyeCoords = inverseSgctProjectionMatrix * clipCoords;
+  sgctEyeCoords.w = 1.0;
+  
+  // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
+  vec4 osEyeCoords = viewToEyeTranform * sgctEyeCoords;
+    
+  // OS Eye to World coords
+  // Now we execute the transformations with no matrices:
+  vec4 ttmp   = inverse(scaleTransformMatrix) * osEyeCoords;
+  vec3 ttmp2  = inverse(camrot) * vec3(ttmp);
+  vec4 ttmp3  = vec4(campos + ttmp2, 1.0);
+
+  vec4 worldCoords = ttmp3;
+    
+  // World to Object
+  vec4 objectCoords = inverseTransformMatrix * vec4(-objpos.xyz + worldCoords.xyz, 1.0);
+
+  // Planet Position in Object Space
+  planetPositionObjectCoords = inverseTransformMatrix * vec4(-objpos.xyz + objpos.xyz, 1.0);
+
+  // Camera Position in Object Space
+  vec4 cameraPositionInObject = inverseTransformMatrix * vec4(-objpos.xyz + campos, 1.0);
+    
+  // ============================
+  // ====== Building Ray ========
+  // Ray in object space
+  ray.origin    = cameraPositionInObject;
+  ray.direction = vec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);
+
+  renderTarget = vec4(0.5 * interpolatedNDCPos.xyz + vec3(0.5), 1.0);
+}
+
+/*
+ * Calculates Intersection Ray by walking through
+ * all the graphic pipile transformations in the 
+ * opposite direction.
+ * Khornos way.
+ */
+void calculateRay3(out Ray ray, out vec4 planetPositionObjectCoords) {
+
+  vec4 viewPort = vec4(screenX, screenY, screenWIDTH, screenHEIGHT);
+  vec4 ndcPos;
+  ndcPos.xy = ((2.0 * gl_FragCoord.xy) - (2.0 * viewPort.xy)) / (viewPort.zw) - 1;
+  ndcPos.z = (2.0 * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) /
+    (gl_DepthRange.far - gl_DepthRange.near);
+  ndcPos.w = 1.0;
+    
+  vec4 clipPos = ndcPos / gl_FragCoord.w;
+    
+  // Clip to SGCT Eye
+  vec4 sgctEyeCoords = inverseSgctProjectionMatrix * clipPos;
+    
+  // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
+  vec4 osEyeCoords = viewToEyeTranform * sgctEyeCoords;
+    
+  // OS Eye to World
+  vec4 worldCoords = eyeToWorldTransform * osEyeCoords;   
+    
+  // World to Object
+  vec4 objectCoords = worldToObjectTransform * worldCoords;
+
+  // Planet Position in Object Space
+  planetPositionObjectCoords = worldToObjectTransform * vec4(objpos.xyz, 1.0);
+
+  // Camera Position in Object Space
+  vec4 cameraOriginObjectCoords = worldToObjectTransform * vec4(campos.xyz, 1.0);
+
+  // ============================
+  // ====== Building Ray ========
+  // Ray in object space
+  ray.origin = cameraOriginObjectCoords;
+  ray.direction = vec4(normalize(objectCoords.xyz - cameraOriginObjectCoords.xyz), 0.0);    
+}
+
+/*
+ * Calculates Intersection Ray by walking through
+ * all the graphic pipile transformations in the 
+ * opposite direction.
+ * Optimized Khronos way.
+ */
+void calculateRay4(out Ray ray, out vec4 planetPositionObjectCoords) {
+  
+  // ================================
+  // ======== From Kronos ===========
+  vec4 viewPort = vec4(screenX, screenY, screenWIDTH, screenHEIGHT);
+  vec3 ndcPos;
+  ndcPos.xy = ((2.0 * gl_FragCoord.xy) - (2.0 * viewPort.xy)) / (viewPort.zw) - 1;
+  ndcPos.z = (2.0 * gl_FragCoord.z - depthrange.x - depthrange.y) /
+  (depthrange.y - depthrange.x);
+
+  vec4 clipPos;
+  clipPos.w = sgctProjectionMatrix[3][2] / (ndcPos.z - (sgctProjectionMatrix[2][2] / sgctProjectionMatrix[2][3]));
+  clipPos.xyz = ndcPos * clipPos.w;
+
+  // Clip to SGCT Eye
+  vec4 sgctEyeCoords = inverseSgctProjectionMatrix * clipPos;
+  
+  // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
+  vec4 osEyeCoords = viewToEyeTranform * sgctEyeCoords;
+    
+  // OS Eye to World coords
+  // Now we execute the transformations with no matrices:
+  vec4 ttmp   = inverse(scaleTransformMatrix) * osEyeCoords;
+  vec3 ttmp2  = inverse(camrot) * vec3(ttmp);
+  vec4 ttmp3  = vec4(campos + ttmp2, 1.0);
+
+  vec4 worldCoords = ttmp3;
+
+  // World to Object coords
+  vec4 objectCoords = inverseTransformMatrix * vec4(-objpos.xyz + worldCoords.xyz, 1.0);
+
+  // Planet Position in Object Space
+  planetPositionObjectCoords = inverseTransformMatrix * vec4(-objpos.xyz + objpos.xyz, 1.0);
+
+  // Camera Position in Object Space
+  vec4 cameraOriginObjectCoords = inverseTransformMatrix * vec4(-objpos.xyz + campos.xyz, 1.0);    
+    
+  // ============================
+  // ====== Building Ray ========
+  // Ray in object space
+  ray.origin    = cameraOriginObjectCoords;
+  ray.direction = vec4(normalize(objectCoords.xyz - cameraOriginObjectCoords.xyz), 0.0);    
+}
+
+
+
 void main() {
   //vec4 position = vs_position;
   float depth = 0.0;
@@ -628,91 +871,33 @@ void main() {
   // vec4 clouds = texture(cloudsTexture, vs_st);
   
   if (_performShading) {
-    // Fragment to window coordinates
-    vec4 windowCoords = vec4(0.0);
-    windowCoords.x = gl_FragCoord.x + 0.5; // +0.5 because the fragment has non-integer coords by default
-    windowCoords.y = screenHEIGHT - gl_FragCoord.y - 0.5; // +0.5 because the fragment has non-integer coords by default
-    windowCoords.z  = gl_FragCoord.z; // z can be 0.0 or 1.0. We chose 1.0 to avoid math problems.
-    windowCoords.w  = gl_FragCoord.w; // remember: gl_FragCoord.w = 1.0/w_clip
-          
-    // Window to NDC coordinates
-    vec4 viewPort = vec4(screenX, screenY, screenWIDTH, screenHEIGHT);
-    vec4 ndcCoords = vec4(0.0);
-    ndcCoords.xy = (2.0 * (windowCoords.xy - viewPort.xy) / viewPort.zw) - vec2(1.0);
-
-    // The ndcCoords for z are only need if we want something inside the
-    // view frustum. In this case we just want the position in the
-    // near plane, that is z = -1.0
-    //double f_plus_n = gl_DepthRange.far + gl_DepthRange.near;
-    //double f_minus_n = gl_DepthRange.far - gl_DepthRange.near;
-    //ndcCoords.z = (2.0 * windowCoords.z - f_plus_n) / f_minus_n;
     
-    // NDC to clip coordinates (gl_FragCoord.w = 1.0/w_clip)
-    vec4 clipCoords = ndcCoords / gl_FragCoord.w;
-    // Ray pointing forwards
-    clipCoords.z = -1.0f;
-    clipCoords.w = 1.0;
-
-    // From Clip to object space:
-    //vec4 farPlaneObjectPos = inverseCompleteVertexTransform * clipCoords;
-    vec4 farPlaneObjectPos = inverseCompleteVertexTransform * vec4(interpolatedNDCPos.xy, -1.0, 1.0);
-    
-    // Clip to SGCT Eye
-    vec4 sgctEyeCoords = inverseSgctProjectionMatrix * clipCoords;
-
-    // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
-    vec4 osEyeCoords = viewToEyeTranform * sgctEyeCoords;
-
-    // Now we execute the transformations with no matrices:
-    vec4 ttmp = inverse(scaleTransformMatrix) * osEyeCoords;
-    vec3 ttmp2 = inverse(camrot) * vec3(ttmp);
-    vec4 ttmp3 = vec4(campos + ttmp2, 1.0);
-    vec4 worldCoords = ttmp3;
-
-    // OS Eye to World
-    //vec4 worldCoords = eyeToWorldTransform * osEyeCoords;
-
-    // World to Object
-    //vec4 objectCoords = worldToObjectTransform * worldCoords;
-    // Transformation without matrices
-    vec4 objectCoords = inverseTransformMatrix * vec4(-objpos.xyz + vec3(worldCoords), 1.0);
-
-    //double offset = 0.0, maxLength = 0.0;
-    //vec4 planetPositionObjectCoords = worldToObjectTransform * objpos;
-    //vec4 planetPositionObjectCoords = vec4(0.0, 0.0, 0.0, 1.0);
-
-    // Transformation without matrices:
-    vec4 planetPositionObjectCoords = inverseTransformMatrix * vec4(-objpos.xyz + objpos.xyz, 1.0);
-
-
+    // Ray in object space
     Ray ray;
-    ray.origin = cameraPositionObjectCoords;
-    ray.direction = vec4(normalize(objectCoords.xyz - cameraPositionObjectCoords.xyz), 0.0);
-    //ray.direction = vec4(normalize(farPlaneObjectPos.xyz - cameraPositionObjectCoords.xyz), 0.0);
-        
-    // Testing
-    //diffuse = vec4(rayDirection.xyz, 1.0);
+    vec4 planetPositionObjectCoords = vec4(0.0);
+    //calculateRay(ray, planetPositionObjectCoords);
+    calculateRay2(ray, planetPositionObjectCoords);
+    //calculateInterpolatedRay(ray, planetPositionObjectCoords);
+    //calculateRay3(ray, planetPositionObjectCoords);
+    //calculateRay4(ray, planetPositionObjectCoords);
+    
+    bool  insideATM    = false;
+    float offset       = 0.0f;
+    float maxLength    = 0.0f;     
+    bool  intersectATM = atmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt*1000.0,
+                                                insideATM, offset, maxLength );
+    //bool intersectATM = algebraicIntersecSphere(ray, Rt*1000.0, planetPositionObjectCoords, offset, maxLength);
 
-    /* if ( algebraicIntersecSphere(ray, Rt*1000.0, planetPositionObjectCoords, offset, maxLength) ) { */
-    /*   renderTarget = vec4(1.0, 0.0, 0.0, 1.0); */
-    /* }  else { */
-    /*   renderTarget = vec4(0.0, 0.0, 0.0, 1.0); */
-    /* } */
-    bool  insideATM = false;
-    float offset    = 0.0f;
-    float maxLength = 0.0f;
-    bool intersectATM = atmosphereIntersection(planetPositionObjectCoords.xyz, ray.direction.xyz,
-                           ray.origin.xyz, Rt*1000.0, insideATM, offset, maxLength );
-    if ( intersectATM) {
-      renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
-    } else {
-      renderTarget = vec4(0.0, 0.0, 0.0, 1.0);
-    }
+    // if ( intersectATM ) {
+    //   renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
+    // } else {
+    //   renderTarget = vec4(0.0, 0.0, 0.0, 1.0);
+    // }
 
     // Debugging:
     //renderTarget = vec4(interpolatedNDCPos.xy*0.5 + vec2(0.5), 0.0, 1.0);
     //renderTarget = vec4(ndcCoords.xy*0.5 + vec2(0.5), 0.0, 1.0);
-    //renderTarget = vec4(sgctEyeCoords.xy, 0.0, 1.0);
+    //renderTarget = vec4(normalize(sgctEyeCoords.xyz) * 0.5 + vec3(0.5), 1.0);
     //renderTarget = vec4(osEyeCoords.xyz * 0.5 + 0.5, 1.0);
     //vec2 temp = farPlaneObjectPos.xy;
     //vec2 temp = sgctEyeCoords.xy;
@@ -727,6 +912,8 @@ void main() {
     //renderTarget = vec4(ray.direction.xyz, 1.0);
     //  renderTarget = vec4(normalize(sgctEyeCoords).xyz, 1.0);
     //renderTarget = vec4(inverseSgctProjectionMatrix[2][1], 0.0, 0.0, 1.0);
+
+    //renderTarget = vec4(0.5*normalize(worldCoords.xyz) + vec3(0.5), 1.0);
   } else {
     renderTarget = vec4(0.5, 0.5, 0.5, 1.0);
   }

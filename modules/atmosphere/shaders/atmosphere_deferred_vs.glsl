@@ -29,6 +29,7 @@ layout(location = 0) in vec4 in_position;
 
 //#include "PowerScaling/powerScaling_vs.hglsl"
 
+uniform mat4 sgctProjectionMatrix;
 uniform mat4 inverseSgctProjectionMatrix;
 uniform mat4 objToWorldTransform;
 uniform mat4 worldToObjectTransform;
@@ -49,6 +50,6 @@ void main()
 
     //viewDirectionVS = (completeInverse * projInverse * in_position).xyz;
     interpolatedRayDirection = (viewToEyeTranform * vec4((inverseSgctProjectionMatrix * in_position).xyz, 0.0)).xyz;
-    interpolatedNDCPos = in_position.xyz;
-    gl_Position        = in_position;
+    interpolatedNDCPos       = in_position.xyz;
+    gl_Position              = in_position;
 }

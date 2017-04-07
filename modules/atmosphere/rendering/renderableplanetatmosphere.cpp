@@ -996,7 +996,7 @@ namespace openspace {
             // The following scale comes from PSC transformations.
             float fScaleFactor = data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
             //std::cout << "\n Scaling Factor: " << fScaleFactor << std::endl;
-            glm::mat4 fScaleCamTransf = glm::scale(glm::mat4(1.0), glm::vec3(fScaleFactor));
+            glm::mat4 fScaleCamTransf = glm::scale(glm::vec3(fScaleFactor));
             _deferredAtmosphereProgramObject->setUniform("scaleTransformMatrix", fScaleCamTransf);
             //std::cout << "\n fScaleCamTransf: " << glm::to_string(fScaleCamTransf) << std::endl;
 
@@ -1008,7 +1008,7 @@ namespace openspace {
 
             // World to Eye Space in OS
             glm::mat4 world2Eye = fScaleCamTransf * glm::mat4(data.camera.viewRotationMatrix()) *
-                glm::translate(glm::mat4(1.0), -data.camera.position().vec3());
+                glm::translate(-data.camera.position().vec3());
             _deferredAtmosphereProgramObject->setUniform("worldToEyeTransform", world2Eye);
             glm::mat4 eye2World = glm::inverse(world2Eye);
             _deferredAtmosphereProgramObject->setUniform("eyeToWorldTransform", eye2World);
@@ -1032,43 +1032,49 @@ namespace openspace {
             glm::mat4 inverseCompleteVertexTransformations = glm::inverse(completeVertexTransformations);
             _deferredAtmosphereProgramObject->setUniform("inverseCompleteVertexTransform", inverseCompleteVertexTransformations);
 
+            _deferredAtmosphereProgramObject->setUniform("sgctProjectionMatrix", data.camera.projectionMatrix());
             _deferredAtmosphereProgramObject->setUniform("inverseSgctProjectionMatrix", inverseProjection);
             /*std::cout << "\nProjection: " << glm::to_string(data.camera.projectionMatrix()) << std::endl;
             std::cout << "\nInverse Projection: " << glm::to_string(inverseProjection) << std::endl;*/
 
+
+
+
             // Testing Transformations:
-            glm::vec4 planetCenterOrigin = glm::vec4(0.0);
-            std::cout << "Planet Position in OS Object Space: " << glm::to_string(planetCenterOrigin) << std::endl;
-            planetCenterOrigin.w = 1.0;
+            glm::vec4 planetCenterOrigin = glm::vec4(100000.0, 100000.0, 10.0, 1.0);
+            //std::cout << "Planet Position in OS Object Space: " << glm::to_string(planetCenterOrigin) << std::endl;
             glm::vec4 planetCenterTmp = transform * planetCenterOrigin;
             glm::vec4 planetCenterTmpWorld = planetCenterTmp + glm::vec4(data.position.vec3(), 0.0);
-            std::cout << "Planet Position in OS World Space: " << glm::to_string(planetCenterTmpWorld) << std::endl;
-            planetCenterTmp = planetCenterTmpWorld + (-glm::vec4(data.camera.positionVec3(), 0.0));
+            //std::cout << "Planet Position in OS World Space: " << glm::to_string(planetCenterTmpWorld) << std::endl;
+            planetCenterTmp = planetCenterTmpWorld + glm::vec4(-data.camera.positionVec3(), 0.0);
             glm::vec3 tt = glm::mat3(data.camera.viewRotationMatrix()) * glm::vec3(planetCenterTmp);
-            planetCenterTmp.x = tt.x; planetCenterTmp.y = tt.y; planetCenterTmp.z = tt.z;
+            glm::vec4 planetCenterTmpOSEye = glm::vec4(0.0);
+            planetCenterTmpOSEye.x = tt.x; planetCenterTmpOSEye.y = tt.y; planetCenterTmpOSEye.z = tt.z; planetCenterTmpOSEye.w = 1.0;
             float scaleF = data.camera.scaling().x * powf(10.0, data.camera.scaling().y);
-            glm::mat4 scaleM = glm::scale(glm::mat4(1.0), glm::vec3(scaleF));
-            planetCenterTmp = scaleM * planetCenterTmp;
-            std::cout << "Planet Position in OS Eye Space: " << glm::to_string(planetCenterTmp) << std::endl;
-            glm::vec4 planetCenterTmpSGCTEye = data.camera.viewMatrix() * planetCenterTmp;
-            std::cout << "Planet Position in SGCT Eye Space: " << glm::to_string(planetCenterTmpSGCTEye) << std::endl;
+            glm::mat4 scaleM = glm::scale(glm::vec3(scaleF));
+            planetCenterTmpOSEye = scaleM * planetCenterTmpOSEye;
+            //std::cout << "Planet Position in OS Eye Space: " << glm::to_string(planetCenterTmp) << std::endl;
+            glm::vec4 planetCenterTmpSGCTEye = data.camera.viewMatrix() * planetCenterTmpOSEye;
+            //std::cout << "Planet Position in SGCT Eye Space: " << glm::to_string(planetCenterTmpSGCTEye) << std::endl;
             glm::vec4 planetCenterTmpSGCTView = data.camera.projectionMatrix() * planetCenterTmpSGCTEye;
-            std::cout << "Planet Position in SGCT View Space: " << glm::to_string(planetCenterTmpSGCTView) << std::endl;
+            //std::cout << "Planet Position in SGCT View Space: " << glm::to_string(planetCenterTmpSGCTView) << std::endl;
+            
             // Inverse Path:
             std::cout << "------ Inverse Path ------" << std::endl;
             //planetCenterTmpSGCTView /= planetCenterTmpSGCTView.w;
             glm::vec4 inversePlanetCenterTmpSGCTEye = inverseProjection * planetCenterTmpSGCTView;
             //inversePlanetCenterTmpSGCTEye /= inversePlanetCenterTmpSGCTEye.w;
-            std::cout << "Planet Position in SGCT Eye Space: " << glm::to_string(inversePlanetCenterTmpSGCTEye) << std::endl;
+            std::cout << "Planet Position in SGCT Eye Space       : " << glm::to_string(inversePlanetCenterTmpSGCTEye) << std::endl;
             std::cout << "Planet Position in SGCT Eye Space (Orig): " << glm::to_string(planetCenterTmpSGCTEye) << std::endl;
             glm::vec4 inversePlanetCenterTmpOSEye =  glm::inverse(eye2View) * inversePlanetCenterTmpSGCTEye;
             //inversePlanetCenterTmpOSEye /= inversePlanetCenterTmpOSEye.aw;
-            std::cout << "Planet Position in OS Eye Space: " << glm::to_string(inversePlanetCenterTmpOSEye) << std::endl;
-            std::cout << "Planet Position in OS Eye Space (Orig): " << glm::to_string(planetCenterTmp) << std::endl;
+            std::cout << "Planet Position in OS Eye Space         : " << glm::to_string(inversePlanetCenterTmpOSEye) << std::endl;
+            std::cout << "Planet Position in OS Eye Space (Orig)  : " << glm::to_string(planetCenterTmpOSEye) << std::endl;
             glm::vec4 inversePlanetCenterTmpOSWorld = eye2World * inversePlanetCenterTmpOSEye;
             //inversePlanetCenterTmpOSWorld /= inversePlanetCenterTmpOSWorld.w;
-            std::cout << "Planet Position in OS World Space: " << glm::to_string(inversePlanetCenterTmpOSWorld) << std::endl;
-            std::cout << "Planet Position in OS World Space (Orig): " << glm::to_string(planetCenterTmpWorld) << std::endl;
+            std::cout << "Planet Position in OS World Space           : " << glm::to_string(inversePlanetCenterTmpOSWorld) << std::endl;
+            std::cout << "Planet Position in OS World Space (div by w): " << glm::to_string(inversePlanetCenterTmpOSWorld/inversePlanetCenterTmpOSWorld.w) << std::endl;
+            std::cout << "Planet Position in OS World Space (Orig)    : " << glm::to_string(planetCenterTmpWorld) << std::endl;
 
             glm::vec4 ttmp = glm::inverse(scaleM) * inversePlanetCenterTmpOSEye;
             glm::vec3 ttmp2 = glm::inverse(glm::mat3(data.camera.viewRotationMatrix())) * glm::vec3(ttmp);
@@ -1076,18 +1082,29 @@ namespace openspace {
             //glm::vec4 ttmp2 = glm::inverse(data.camera.viewRotationMatrix()) * ttmp;
             //glm::vec4 ttmp3 = glm::inverse(glm::translate(glm::mat4(1.0), -data.camera.position().vec3())) * ttmp2;
             glm::vec4 ttmp3 = glm::vec4(data.camera.position().vec3() + ttmp2, 1.0);
-            std::cout << "Planet Position in OS World Space (hand): " << glm::to_string(ttmp3) << std::endl;
-            std::cout << "Planet Position in OS World Space (Orig): " << glm::to_string(planetCenterTmpWorld) << std::endl;
+            std::cout << "Planet Position in OS World Space (hand)    : " << glm::to_string(ttmp3) << std::endl;
+            std::cout << "Planet Position in OS World Space (Orig)    : " << glm::to_string(planetCenterTmpWorld) << std::endl;
 
             glm::vec4 inversePlanetCenterTmpOrigin = world2Obj * inversePlanetCenterTmpOSWorld;
             //inversePlanetCenterTmpOrigin /= inversePlanetCenterTmpOrigin.w;
-            std::cout << "Planet Position in OS Object Space: " << glm::to_string(inversePlanetCenterTmpOrigin) << std::endl;
+            std::cout << "Planet Position in OS Object Space       : " << glm::to_string(inversePlanetCenterTmpOrigin) << std::endl;
             std::cout << "Planet Position in OS Object Space (Orig): " << glm::to_string(planetCenterOrigin) << std::endl;
 
             //glm::vec4 ttmp4 = glm::inverse(transform) *
             //        glm::inverse(glm::translate(glm::mat4(1.0), data.position.vec3())) * ttmp3;
-            glm::vec4 ttmp4 = glm::inverse(transform) * glm::vec4(-data.position.vec3() + glm::vec3(ttmp3), 1.0);
+            glm::vec4 ttmp4 = glm::inverse(transform) * glm::vec4(glm::vec3(ttmp3) - data.position.vec3(), 1.0);
             std::cout << "Planet Position in OS Object Space (hand): " << glm::to_string(ttmp4) << std::endl;
+            std::cout << "Planet Position in OS Object Space (Orig): " << glm::to_string(planetCenterOrigin) << std::endl;
+
+            std::cout << "Planet Position in OS Object Space (comp): " << glm::to_string(inverseCompleteVertexTransformations * planetCenterTmpSGCTView) << std::endl;
+            std::cout << "Planet Position in OS Object Space (Orig): " << glm::to_string(planetCenterOrigin) << std::endl;
+
+
+            psc pscPlanetPosObjCoords = PowerScaledCoordinate::CreatePowerScaledCoordinate(ttmp3.x, ttmp3.y, ttmp3.z);
+            pscPlanetPosObjCoords = pscPlanetPosObjCoords - data.position;
+            psc psctmp = glm::inverse(glm::mat3(transform)) * glm::vec3(pscPlanetPosObjCoords.vec4());
+            pscPlanetPosObjCoords[0] = psctmp[0]; pscPlanetPosObjCoords[1] = psctmp[1]; pscPlanetPosObjCoords[2] = psctmp[2];
+            std::cout << "Planet Position in OS Object Space  (psc): " << glm::to_string(glm::vec4(pscPlanetPosObjCoords.vec3(),1.0)) << std::endl;
             std::cout << "Planet Position in OS Object Space (Orig): " << glm::to_string(planetCenterOrigin) << std::endl;
 
             /*glm::mat4 invRot = glm::mat4(glm::inverse(glm::mat3(data.camera.viewRotationMatrix())));
@@ -1136,21 +1153,26 @@ namespace openspace {
             // by hand:
             glm::vec4 cameraPosObjecCoords = glm::inverse(transform) * glm::vec4(-data.position.vec3() + glm::vec3(data.camera.positionVec3()), 1.0);
             _deferredAtmosphereProgramObject->setUniform("cameraPositionObjectCoords", cameraPosObjecCoords);
-            std::cout << "\n== Camera position Object Space: " << glm::to_string(cameraPosObjecCoords) << std::endl;
-            std::cout << "\n== Camera position Object Space (other): " << glm::to_string(glm::transpose(glm::mat3(transform)) * (-data.position.vec3() + glm::vec3(data.camera.positionVec3()))) << std::endl;
-            std::cout << "\n== Camera position World Space: " << glm::to_string(data.camera.positionVec3()) << std::endl;
+            std::cout << "\n== Camera position Object Space        : " << glm::to_string(cameraPosObjecCoords) << std::endl;
+            std::cout << "== Camera position Object Space (other): " << glm::to_string(glm::transpose(glm::mat3(transform)) * (-data.position.vec3() + glm::vec3(data.camera.positionVec3()))) << std::endl;
+            std::cout << "== Camera position World Space         : " << glm::to_string(data.camera.positionVec3()) << std::endl;
 
-            std::cout << "\n-- Object position World Space: " << glm::to_string(data.position.vec3()) << std::endl;
+            std::cout << "-- Object position World Space         : " << glm::to_string(data.position.vec3()) << std::endl;
             //std::cout << "\n-- Object position Obj Space: " << glm::to_string(world2Obj * glm::vec4(data.position.vec3(), 1.0)) << std::endl;
 
 
-            std::cout << "\n*** Distance Camera Planet (World): " << glm::distance(glm::vec3(data.camera.positionVec3()), data.position.vec3()) << std::endl;
-            std::cout << "\n*** Distance Camera Planet (Object): " << glm::distance(cameraPosObjecCoords, glm::vec4(0.0, 0.0, 0.0, 1.0)) << std::endl;
+            std::cout << "*** Distance Camera Planet (World)     : " << glm::distance(glm::vec3(data.camera.positionVec3()), data.position.vec3()) << std::endl;
+            std::cout << "*** Distance Camera Planet (Object)    : " << glm::distance(cameraPosObjecCoords, glm::vec4(0.0, 0.0, 0.0, 1.0)) << std::endl;
 
+            float depthParams[2] = {0};
+            glGetFloatv(GL_DEPTH_RANGE, depthParams);
+            _deferredAtmosphereProgramObject->setUniform("depthrange", glm::vec2(depthParams[0], depthParams[1]));
+            std::cout << "~~~~~ Depth Params: " << depthParams[0] << ", " << depthParams[1] << std::endl;
 
             _deferredAtmosphereProgramObject->setUniform("objpos", glm::vec4(data.position.vec3(),1.0));
             _deferredAtmosphereProgramObject->setUniform("campos", data.camera.position().vec3());
             _deferredAtmosphereProgramObject->setUniform("camrot", glm::mat3(data.camera.viewRotationMatrix()));
+            _deferredAtmosphereProgramObject->setUniform("_performShading", _performShading);
 
             ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
             transmittanceTableTextureUnit.activate();

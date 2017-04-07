@@ -251,7 +251,7 @@ bool intersectATM(const vec4 cameraPos, const vec3 rayDirection,
 bool atmosphereIntersection(const vec3 planetPosition, const vec3 rayDirection,
                             const vec3 rayOrigin, const float atmRadius,
                             out bool inside, out float offset, out float maxLength ) {
-  vec3  l  = rayOrigin - planetPosition;
+  vec3  l  = planetPosition - rayOrigin;
   float s  = dot(l, rayDirection);
   float l2 = dot(l, l);
   float r2 = (atmRadius - EPSILON) *  (atmRadius - EPSILON); // avoiding surface acne
