@@ -75,7 +75,12 @@ KeyModifier operator|=(KeyModifier& lhs, KeyModifier rhs) {
 
 KeyWithModifier stringToKey(std::string str) {
     // key only uppercase
-    std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+    std::transform(
+        str.begin(),
+        str.end(),
+        str.begin(),
+        [](char v) { return static_cast<char>(toupper(v)); }
+    );
 
     std::vector<std::string> tokens = ghoul::tokenizeString(str, '+');
 

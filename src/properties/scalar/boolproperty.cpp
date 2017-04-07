@@ -54,6 +54,9 @@ REGISTER_TEMPLATEPROPERTY_SOURCE(BoolProperty, bool, false,
         if (success) {
             return v;
         }
+        else {
+            throw ghoul::RuntimeError("Conversion error for string: " + value);
+        }
     },
     [](std::string& outValue, bool inValue) -> bool {
         outValue = inValue ? "true" : "false";
