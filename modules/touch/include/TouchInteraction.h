@@ -95,7 +95,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void step(double dt);
 		void configSensitivities(double dist);
 		void decelerate();
-		glm::dvec3 TouchInteraction::modelToScreenSpace(SelectedBody sb);
+		glm::dvec3 modelToScreenSpace(SelectedBody sb);
 		void clear();
 		void tap();
 
