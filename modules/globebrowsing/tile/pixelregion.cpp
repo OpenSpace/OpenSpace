@@ -241,6 +241,8 @@ int PixelRegion::edge(Side side) const {
         return start.x + numPixels.x;
     case Side::BOTTOM:
         return start.y + numPixels.y;
+    default:
+        ghoul_assert(false, "Missing case label");
     }
 }
 

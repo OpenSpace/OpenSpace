@@ -313,6 +313,7 @@ double HongKangParser::getETfromMet(double met) {
     } else if (met < _metRef) {
         return referenceET - diff;
     }
+    return 0.0;
 }
 
 double HongKangParser::getMetFromET(double et) {
@@ -321,9 +322,10 @@ double HongKangParser::getMetFromET(double et) {
 
     if (et >= referenceET) {
         return _metRef + (et - referenceET);
-    }else {
+    } else {
         return _metRef - (referenceET - et);
     }
+    return 0.0;
 }
 
 } // namespace openspace

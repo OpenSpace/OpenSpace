@@ -492,7 +492,6 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
     // An early out for when the target is not in field of view
     if (!isInFov) {
         for (size_t i = 0; i < _instrument.bounds.size(); ++i) {
-            const glm::dvec3& bound = _instrument.bounds[i];
             // If none of the points are able to intersect with the target, we can just
             // copy the values from the field-of-view boundary. So we take each second
             // item (the first one is (0,0,0)) and replicate it 'InterpolationSteps' times
