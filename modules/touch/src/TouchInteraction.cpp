@@ -126,8 +126,9 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 					d -= sqrt(root);
 				glm::dvec3 intersectionPoint = camPos + d * raytrace;
 				glm::dvec3 pointInModelView = glm::inverse(node->rotationMatrix()) * (intersectionPoint - node->worldPosition());
+				// spherical coordinates for point on surface, maybe not required
 				double theta = atan(pointInModelView.y / pointInModelView.x);
-				double phi = atan(glm::length(glm::dvec2(pointInModelView.x, pointInModelView.y)) / pointInModelView.z); // spherical coordinates for point on surface
+				double phi = atan(glm::length(glm::dvec2(pointInModelView.x, pointInModelView.y)) / pointInModelView.z);
 
 				// Add id, node and surface coordinates to the selected list
 				auto found = find_if(newSelected.begin(), newSelected.end(), [id](SelectedBody s) { return s.id == id; });
@@ -135,24 +136,47 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 					double oldNodeDist = glm::length(found->node->worldPosition() - camPos);
 					if (glm::length(camToSelectable) < oldNodeDist) { // new node is closer, remove added node and add the new one instead
 						newSelected.pop_back();
-						newSelected.push_back({ id, node, glm::dvec2(theta, phi) });
+						newSelected.push_back({ id, node, pointInModelView });
 					}
 				}
 				else {
-					newSelected.push_back({ id, node, glm::dvec2(theta, phi) });
+					newSelected.push_back({ id, node, pointInModelView });
 				}
 			}
 		}
+		
 	}
+	/*
+	Direct-touch:
+	1, we have the touched position on the surface in spherical coordinates
+	2, we get new input on new pos
+	3, move camera so _selected.coordinates == new pos, cant overwrite _selected then
+
+	Paper:
+	position in screen-space: p = s(x,q) = h(PM(q)x)
+	h = combinedViewMatrix
+	P = projectionmatrix
+	M(q) = parameterized matrix by the vector q which maps x into worldspace, most likely the product of several matrices which are 
+	parameterized by the transform values (e.g., rotation, scaling, translation, etc.)
+	x = position in modelview
+
+	minimize error E = sum( ||s(xi,q)-pi||^2 ) (distance between last point p and current x in screen-space)
+	q is the rotation/translation that is done on the object to match the equation. How do we translate that to camera rot/trans?
+	*/
 
 	//debugging
-	for (auto it : newSelected)
+	for (auto it : newSelected) {
 		std::cout << it.node->name() << " hit with cursor " << it.id << ". Surface Coordinates: " << glm::to_string(it.coordinates) << "\n";
-	/*std::cout << "Dist: " << dist << ", Ray: " << glm::to_string(glm::normalize(cursorInWorldSpace))
-	<< "\nview: " << glm::to_string(_camera->viewDirectionWorldSpace())
-	<< "\ntoFocus: " << glm::to_string(glm::normalize(camToCenter)) << "\n\n";*/
+		glm::dvec3 screenspace = modelToScreenSpace(it);
+	}
+	// 1, check if _selected is initialized
+	// 2, find M(q) that transforms _selected.it->coordinates to newSelected.it->coordinates
+	// 3, find difference in newSelected and _selected in screen-space
+	// 4, calculate minimum error
 
-	_selected = newSelected; // might want to remember what was selected last frame
+
+	_lastSelected = _selected;
+	_selected = newSelected;
 }
 
 void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
@@ -363,6 +387,13 @@ void TouchInteraction::step(double dt) {
 	}
 }
 
+
+glm::dvec3 TouchInteraction::modelToScreenSpace(SelectedBody sb) {
+	glm::dvec3 backToScreenSpace =  glm::inverse(_camera->rotationQuaternion())
+		* glm::normalize(((sb.node->rotationMatrix() * sb.coordinates) + sb.node->worldPosition() - _camera->positionVec3()));
+	return (backToScreenSpace * (-3.2596558 / backToScreenSpace.z));
+}
+
 void TouchInteraction::configSensitivities(double dist) {
 	// Configurates sensitivities to appropriate values when the camera is close to the focus node.
 	std::shared_ptr<interaction::GlobeBrowsingInteractionMode> gbim =
@@ -404,6 +435,9 @@ void TouchInteraction::clear() {
 	_action.pan = false;
 	_action.roll = false;
 	_action.pick = false;
+
+	_selected.clear(); // should clear if no longer have a direct-touch input
+	_lastSelected.clear();
 }
 
 void TouchInteraction::tap() {

@@ -77,7 +77,7 @@ struct InteractionType {
 struct SelectedBody { 
 	int id;
 	SceneGraphNode* node;
-	glm::dvec2 coordinates;
+	glm::dvec3 coordinates;
 };
 
 using Point = std::pair<int, TUIO::TuioPoint>;
@@ -95,6 +95,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void step(double dt);
 		void configSensitivities(double dist);
 		void decelerate();
+		glm::dvec3 TouchInteraction::modelToScreenSpace(SelectedBody sb);
 		void clear();
 		void tap();
 
@@ -126,6 +127,7 @@ class TouchInteraction : public properties::PropertyOwner
 		double _projectionScaleFactor;
 		double _currentRadius;
 		std::vector<SelectedBody> _selected;
+		std::vector<SelectedBody> _lastSelected;
 		InteractionType _action;
 		
 		glm::dvec3 _centroid;
