@@ -87,6 +87,20 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 	trace(list);
 
 
+	/*
+	if (_directTouchMode)
+	assumes all contact points are direct --> if(_selected.size() == list.size())
+	1, check if _selected is initialized
+	2, define s(xi,q): newXi = T(tx,ty,tz)Q(rx,ry,rz)xi, s(xi,q) = modelToScreenSpace(newXi)
+	3, calculate minimum error E = sum( ||s(xi,q)-pi||^2 ) (and define q in the process)
+		* xi is the old modelview position (_selected.at(i).coordinates),
+		* q the 6DOF vector (Trans(x,y,z)Quat(x,y,z)) to be defined that will move xi to a new pos,
+		* pi the current point in screen space (list.at(i).getXY)
+	4, Do the inverse rotation of M(q) on the camera, map interactions to different number of direct touch points
+
+
+	else
+	*/
 	interpret(list, lastProcessed);
 	accelerate(list, lastProcessed);
 }
@@ -119,7 +133,7 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 			int id = c.getSessionID();
 			double dist = length(glm::cross(cursorInWorldSpace, camToSelectable)) / glm::length(cursorInWorldSpace) - boundingSphere;
 			if (dist <= 0.0) {
-				// finds intersection point between boundingsphere and line in world coordinates, assumes line direction is normalized
+				// finds intersection closest point between boundingsphere and line in world coordinates, assumes line direction is normalized
 				double d = glm::dot(raytrace, camToSelectable);
 				double root = boundingSphere * boundingSphere - glm::dot(camToSelectable, camToSelectable) + d * d;
 				if (root > 0) // two intersection points (take the closest one)
@@ -167,15 +181,9 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 	//debugging
 	for (auto it : newSelected) {
 		std::cout << it.node->name() << " hit with cursor " << it.id << ". Surface Coordinates: " << glm::to_string(it.coordinates) << "\n";
-		glm::dvec3 screenspace = modelToScreenSpace(it);
+		//glm::dvec2 screenspace = modelToScreenSpace(it);
 	}
-	// 1, check if _selected is initialized
-	// 2, find M(q) that transforms _selected.it->coordinates to newSelected.it->coordinates
-	// 3, find difference in newSelected and _selected in screen-space
-	// 4, calculate minimum error
 
-
-	_lastSelected = _selected;
 	_selected = newSelected;
 }
 
@@ -266,6 +274,7 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 		});
 
 		double zoomFactor = (distance - lastDistance) * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()); // make into log space instead
+
 		_vel.zoom += zoomFactor * _sensitivity.zoom;
 	}
 	if (_action.pan) { // add local rotation velocity
@@ -297,8 +306,15 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 			//std::cout << "x: " << angleX << ", y: " << angleY << "\n";
 			_vel.localRot = _sensitivity.localRot * glm::dvec2(-angleX, -angleY);
 		}
-		else {
-			_vel.zoom = _sensitivity.zoom * (glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) - _focusNode->boundingSphere().lengthd());
+		else { // should zoom in to current _selected.coordinates position
+			double dist = glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) - _focusNode->boundingSphere().lengthd();
+			double startDecline = _focusNode->boundingSphere().lengthd() / (0.15 * _projectionScaleFactor);
+			double factor = 2.0;
+			if (dist < startDecline) {
+				factor = 1.0 + std::pow(dist / startDecline, 2);
+			}
+			double response = _focusNode->boundingSphere().lengthd() / (factor * _currentRadius * _projectionScaleFactor);
+			_vel.zoom = _sensitivity.zoom * response;
 		}
 			
 	}
@@ -388,10 +404,14 @@ void TouchInteraction::step(double dt) {
 }
 
 
-glm::dvec3 TouchInteraction::modelToScreenSpace(SelectedBody sb) {
+glm::dvec2 TouchInteraction::modelToScreenSpace(SelectedBody sb) { // returns a dvec2 of -1 to 1 ( top left is (0,0), bottom right is (1,1) )
 	glm::dvec3 backToScreenSpace =  glm::inverse(_camera->rotationQuaternion())
 		* glm::normalize(((sb.node->rotationMatrix() * sb.coordinates) + sb.node->worldPosition() - _camera->positionVec3()));
-	return (backToScreenSpace * (-3.2596558 / backToScreenSpace.z));
+	backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
+
+	glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
+	double aspectRatio = res.x / res.y;
+	return glm::dvec2(backToScreenSpace.x / (2 * aspectRatio) + 0.5, -backToScreenSpace.y / 2 + 0.5);
 }
 
 void TouchInteraction::configSensitivities(double dist) {
@@ -437,7 +457,6 @@ void TouchInteraction::clear() {
 	_action.pick = false;
 
 	_selected.clear(); // should clear if no longer have a direct-touch input
-	_lastSelected.clear();
 }
 
 void TouchInteraction::tap() {

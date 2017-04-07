@@ -95,7 +95,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void step(double dt);
 		void configSensitivities(double dist);
 		void decelerate();
-		glm::dvec3 modelToScreenSpace(SelectedBody sb);
+		glm::dvec2 modelToScreenSpace(SelectedBody sb);
 		void clear();
 		void tap();
 
@@ -127,7 +127,6 @@ class TouchInteraction : public properties::PropertyOwner
 		double _projectionScaleFactor;
 		double _currentRadius;
 		std::vector<SelectedBody> _selected;
-		std::vector<SelectedBody> _lastSelected;
 		InteractionType _action;
 		
 		glm::dvec3 _centroid;
