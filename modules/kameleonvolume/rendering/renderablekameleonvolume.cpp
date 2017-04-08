@@ -288,7 +288,12 @@ std::string RenderableKameleonVolume::cacheSuffix() {
 void RenderableKameleonVolume::loadFromPath(const std::string& path) {
     ghoul::filesystem::File file(path);
     std::string extension = file.fileExtension();
-    std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+    std::transform(
+        extension.begin(),
+        extension.end(),
+        extension.begin(),
+        [](char v) { return static_cast<char>(tolower(v)); }
+    );
     if (extension == "cdf") {
         loadCdf(path);
     } else {
