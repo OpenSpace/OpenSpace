@@ -5,7 +5,7 @@
     <OpenSpaceTimeIdFormat>YYYY-MM-DD</OpenSpaceTimeIdFormat>
     <GDAL_WMS>
         <Service name="TMS">
-            <ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/VIIRS_CityLights_2012/default/${OpenSpaceTimeId}/500m/${z}/${y}/${x}.jpg</ServerUrl>
+            <ServerUrl>https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/VIIRS_SNPP_DayNightBand_ENCC/default/${OpenSpaceTimeId}/500m/${z}/${y}/${x}.png</ServerUrl>
         </Service>
         <DataWindow>
             <UpperLeftX>-180.0</UpperLeftX>

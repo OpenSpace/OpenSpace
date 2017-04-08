@@ -108,6 +108,11 @@ return {
                         FilePath = "map_service_configs/GIBS/VIIRS_CityLights_2012.xml",
                         Enabled = true,
                     },
+                    {
+                        Type = "Temporal",
+                        Name = "Temporal Earth at Night",
+                        FilePath = "map_service_configs/GIBS/Temporal_VIIRS_CityLights.xml"
+                    }
                 },
                 WaterMasks = {
                     {
