@@ -592,7 +592,7 @@ void GUI::renderAndUpdatePropertyVisibility() {
 
     // Array is sorted by importance
     std::array<const char*, 4> items = {  "None", "User", "Developer", "All"};
-    ImGui::Combo("PropertyVisibility", &t, items.data(), items.size());
+    ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
 
     _currentVisibility = static_cast<V>(t);
     _globalProperty.setVisibility(_currentVisibility);

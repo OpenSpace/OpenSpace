@@ -172,9 +172,9 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
-    float value = *p;
-    float min = p->minValue();
-    float max = p->maxValue();
+    float value = static_cast<float>(*p);
+    float min = static_cast<float>(p->minValue());
+    float max = static_cast<float>(p->maxValue());
 
     ImGui::SliderFloat(name.c_str(), &value, min, max, "%.5f");
     renderTooltip(prop);
@@ -211,8 +211,8 @@ void renderIVec2Property(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
     
     IVec2Property::ValueType value = *p;
-    float min = std::min(p->minValue().x, p->minValue().y);
-    float max = std::max(p->maxValue().x, p->maxValue().y);
+    int min = std::min(p->minValue().x, p->minValue().y);
+    int max = std::max(p->maxValue().x, p->maxValue().y);
     ImGui::SliderInt2(
         name.c_str(),
         &value.x,
@@ -237,8 +237,8 @@ void renderIVec3Property(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
     
     IVec3Property::ValueType value = *p;
-    float min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
-    float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
+    int min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
+    int max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
     
     ImGui::SliderInt3(
         name.c_str(),
@@ -264,10 +264,10 @@ void renderIVec4Property(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
     
     IVec4Property::ValueType value = *p;
-    float min = std::min(std::min(std::min(
+    int min = std::min(std::min(std::min(
         p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w
     );
-    float max = std::max(std::max(std::max(
+    int max = std::max(std::max(std::max(
         p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w
     );
     
@@ -406,8 +406,8 @@ void renderDVec2Property(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
 
     glm::vec2 value = glm::dvec2(*p);
-    float min = std::min(p->minValue().x, p->minValue().y);
-    float max = std::max(p->maxValue().x, p->maxValue().y);
+    float min = static_cast<float>(std::min(p->minValue().x, p->minValue().y));
+    float max = static_cast<float>(std::max(p->maxValue().x, p->maxValue().y));
     ImGui::SliderFloat2(
         name.c_str(),
         &value.x,
@@ -433,8 +433,12 @@ void renderDVec3Property(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
 
     glm::vec3 value = glm::dvec3(*p);
-    float min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
-    float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
+    float min = static_cast<float>(
+        std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z)
+    );
+    float max = static_cast<float>(
+        std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z)
+    );
 
     bool changed = ImGui::SliderFloat3(
         name.c_str(),
@@ -463,10 +467,16 @@ void renderDVec4Property(Property* prop, const std::string& ownerName) {
     ImGui::PushID((ownerName + "." + name).c_str());
 
     glm::vec4 value = glm::dvec4(*p);
-    float min = std::min(std::min(std::min(
-        p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w);
-    float max = std::max(std::max(std::max(
-        p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w);
+    float min = static_cast<float>(
+        std::min(std::min(std::min(
+            p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w
+        )
+    );
+    float max = static_cast<float>(
+        std::max(std::max(std::max(
+            p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w
+        )
+    );
 
     ImGui::SliderFloat4(
         name.c_str(),
