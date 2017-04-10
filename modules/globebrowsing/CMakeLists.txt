@@ -102,6 +102,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob.h
+	${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob2.h
+	${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/surfacemodelloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
@@ -176,6 +178,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/surfacemodelloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
