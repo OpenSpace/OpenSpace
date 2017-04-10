@@ -40,14 +40,13 @@ struct TileMetaData;
 
 struct RawTile {
 
-    typedef enum
-    {
+    enum class ReadError {
         None = 0,
         Debug = 1,
         Warning = 2,
         Failure = 3,
         Fatal = 4
-    } ReadError;
+    };
 
     RawTile();
 

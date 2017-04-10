@@ -73,8 +73,8 @@ struct PixelRegion {
         
     void scale(const glm::dvec2& s);
     void scale(double s);
-    void downscalePow2(int exponent, PixelCoordinate wrt = {0,0});
-    void upscalePow2(int exponent, PixelCoordinate wrt = { 0,0 });
+    void downscalePow2(int exponent, PixelCoordinate wrt = { 0, 0 });
+    void upscalePow2(int exponent, PixelCoordinate wrt = { 0, 0 });
 
     void move(Side side, int amount);
     void pad(const PixelRegion& padding);
@@ -82,7 +82,7 @@ struct PixelRegion {
 
     void forceNumPixelToDifferByNearestMultipleOf(unsigned int multiple);
     void roundUpNumPixelToNearestMultipleOf(unsigned int multiple);
-	  void roundDownToQuadratic();
+    void roundDownToQuadratic();
 
     PixelRegion globalCut(Side side, int globalPos);
     PixelRegion localCut(Side side, int localPos);

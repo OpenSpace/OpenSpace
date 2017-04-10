@@ -24,7 +24,7 @@
 
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 
-#include <modules/globebrowsing/tile/asynctilereader.h>
+#include <modules/globebrowsing/tile/asynctiledataprovider.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/simplerawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
@@ -49,7 +49,7 @@ namespace tileprovider {
     
 CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
     : _framesSinceLastRequestFlush(0)
-	, _defaultTile(Tile::TileUnavailable)
+    , _defaultTile(Tile::TileUnavailable)
 {
     std::string name = "Name unspecified";
     dictionary.getValue("Name", name);
@@ -106,7 +106,7 @@ CachingTileProvider::CachingTileProvider(
     : _asyncTextureDataProvider(tileReader)
     , _framesUntilRequestFlush(framesUntilFlushRequestQueue)
     , _framesSinceLastRequestFlush(0)
-	, _defaultTile(Tile::TileUnavailable)
+    , _defaultTile(Tile::TileUnavailable)
 {}
 
 CachingTileProvider::~CachingTileProvider(){
@@ -126,7 +126,7 @@ void CachingTileProvider::reset() {
 }
 
 int CachingTileProvider::maxLevel() {
-    return _asyncTextureDataProvider->getTextureDataProvider()->maxChunkLevel();
+    return _asyncTextureDataProvider->getRawTileDataReader()->maxChunkLevel();
 }
 
 Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
@@ -134,7 +134,7 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
         return Tile(nullptr, nullptr, Tile::Status::OutOfRange);
     }
 
-	cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
+    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
     if (cache::MemoryAwareTileCache::ref().exist(key)) {
         return cache::MemoryAwareTileCache::ref().get(key);
@@ -153,14 +153,14 @@ float CachingTileProvider::noDataValueAsFloat() {
 Tile CachingTileProvider::getDefaultTile() {
     if (_defaultTile.texture() == nullptr) {
         _defaultTile = createTile(
-            _asyncTextureDataProvider->getTextureDataProvider()->defaultTileData()
+            _asyncTextureDataProvider->getRawTileDataReader()->defaultTileData()
         );
     }
     return _defaultTile;
 }
 
 void CachingTileProvider::initTexturesFromLoadedData() {
-    auto rawTile = _asyncTextureDataProvider->popFinishedRawTile();
+    std::shared_ptr<RawTile> rawTile = _asyncTextureDataProvider->popFinishedRawTile();
     if (rawTile) {
         cache::ProviderTileKey key = { rawTile->tileIndex, uniqueIdentifier() };
         Tile tile = createTile(rawTile);
@@ -174,12 +174,12 @@ void CachingTileProvider::clearRequestQueue() {
 }
 
 Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
-    auto tileDataset = _asyncTextureDataProvider->getTextureDataProvider();
-    if (tileIndex.level > tileDataset->maxChunkLevel()) {
+    auto rawTileDataReader = _asyncTextureDataProvider->getRawTileDataReader();
+    if (tileIndex.level > rawTileDataReader->maxChunkLevel()) {
         return Tile::Status::OutOfRange;
     }
 
-	cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
+    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
     if (cache::MemoryAwareTileCache::ref().exist(key)) {
         return cache::MemoryAwareTileCache::ref().get(key).status();
@@ -189,7 +189,7 @@ Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
 }
 
 TileDepthTransform CachingTileProvider::depthTransform() {
-    return _asyncTextureDataProvider->getTextureDataProvider()->getDepthTransform();
+    return _asyncTextureDataProvider->getRawTileDataReader()->getDepthTransform();
 }
 
 Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {

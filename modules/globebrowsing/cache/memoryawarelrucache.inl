@@ -36,8 +36,8 @@ MemoryAwareLRUCache<KeyType, ValueType, HasherType>::MemoryAwareLRUCache(size_t 
 
 template<typename KeyType, typename ValueType, typename HasherType>
 void MemoryAwareLRUCache<KeyType, ValueType, HasherType>::clear() {
-    _itemList.erase(_itemList.begin(), _itemList.end());
-    _itemMap.erase(_itemMap.begin(), _itemMap.end());
+    _itemList.clear();
+    _itemMap.clear();
     _cacheSize = 0;
 }
 
@@ -45,12 +45,12 @@ template<typename KeyType, typename ValueType, typename HasherType>
 void MemoryAwareLRUCache<KeyType, ValueType, HasherType>::put(const KeyType& key, const ValueType& value) {
     auto it = _itemMap.find(key);
     if (it != _itemMap.end()) {
-		_cacheSize -= it->second->second.memoryImpact();
+        _cacheSize -= it->second->second.memoryImpact();
         _itemList.erase(it->second);
         _itemMap.erase(it);
     }
-    _itemList.push_front(std::make_pair(key, value));
-    _itemMap.insert(std::make_pair(key, _itemList.begin()));
+    _itemList.emplace_front(key, value);
+    _itemMap.emplace(key, _itemList.begin());
     _cacheSize += _itemList.begin()->second.memoryImpact();
     clean();
 }
@@ -84,11 +84,11 @@ void MemoryAwareLRUCache<KeyType, ValueType, HasherType>::setMaximumSize(size_t 
     _maximumCacheSize = maximumSize;
 }
 
-
 template<typename KeyType, typename ValueType, typename HasherType>
 void MemoryAwareLRUCache<KeyType, ValueType, HasherType>::clean() {
     while (_cacheSize > _maximumCacheSize) {
-        auto last_it = _itemList.end(); last_it--;
+        auto last_it = _itemList.end();
+        last_it--;
         _itemMap.erase(last_it->first);
         _cacheSize -= last_it->second.memoryImpact();
         _itemList.pop_back();

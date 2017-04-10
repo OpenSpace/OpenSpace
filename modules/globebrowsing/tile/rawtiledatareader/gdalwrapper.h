@@ -24,6 +24,7 @@
 
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__
+
 #ifdef GLOBEBROWSING_USE_GDAL
 
 #include <openspace/properties/propertyowner.h>
@@ -41,13 +42,12 @@ namespace globebrowsing {
 /**
  * Function for passing GDAL error messages to the GHOUL logging system.
  */
-static void gdalErrorHandler(CPLErr eErrClass, int errNo, const char *msg);
+static void gdalErrorHandler(CPLErr eErrClass, int errNo, const char* msg);
 
 /**
  * Singleton class interfacing with global GDAL functions.
  */
-class GdalWrapper : public properties::PropertyOwner
-{
+class GdalWrapper : public properties::PropertyOwner {
 public:
     /**
      * Create the singleton. Must be called before the class can be used.
@@ -73,7 +73,8 @@ public:
      */
     static size_t GDALMaximumCacheSize();
 
-    properties::BoolProperty logGdalErrors;
+    bool logGdalErrors() const;
+
 private:
     GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize);
     ~GdalWrapper() = default;
@@ -81,6 +82,7 @@ private:
     void setGdalProxyConfiguration();
     
     properties::IntProperty _gdalMaximumCacheSize;
+    properties::BoolProperty _logGdalErrors;
 
     static GdalWrapper* _singleton;
     static std::mutex _mutexLock;
@@ -90,4 +92,5 @@ private:
 } // namespace openspace
 
 #endif // GLOBEBROWSING_USE_GDAL
+
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_WRAPPER___H__

@@ -24,32 +24,28 @@
 
 #include <modules/globebrowsing/tile/tiledatareader.h>
 
-#include <limits>
-
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h> // abspath
-#include <ghoul/misc/assert.h>
-
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-
 #include <modules/globebrowsing/geometry/angle.h>
-
-#include <float.h>
-#include <sstream>
-#include <algorithm>
-
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/tile/pixelregion.h>
+#include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledatatype.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/pixelregion.h>
-#include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+
+#include <algorithm>
+#include <float.h>
+#include <limits>
+#include <sstream>
 
 namespace {
-    const std::string _loggerCat = "TileDataReader";
+    const char* _loggerCat = "TileDataReader";
 }
 
 namespace openspace {
@@ -62,9 +58,7 @@ std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
 
 TileDataReader::TileDataReader(const Configuration& config)
     : _config(config)
-{
-
-}
+{}
 
 std::shared_ptr<RawTile> TileDataReader::defaultTileData() {
     ensureInitialized();

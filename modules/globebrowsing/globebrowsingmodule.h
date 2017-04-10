@@ -40,8 +40,8 @@ public:
 protected:
     void internalInitialize() override;
 private:
-    std::unique_ptr<properties::IntProperty> _openSpaceMaximumTileCacheSize;
-    std::unique_ptr<properties::TriggerProperty> _clearTileCache;
+    properties::IntProperty _openSpaceMaximumTileCacheSize;
+    properties::TriggerProperty _clearTileCache;
 };
 
 } // namespace openspace

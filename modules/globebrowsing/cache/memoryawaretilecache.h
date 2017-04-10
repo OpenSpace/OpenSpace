@@ -40,9 +40,8 @@ struct ProviderTileKey {
     TileIndex tileIndex;
     unsigned int providerID;
 
-    bool operator==(const ProviderTileKey& r ) const
-    {
-       return (providerID == r.providerID) &&
+    bool operator==(const ProviderTileKey& r) const {
+        return (providerID == r.providerID) &&
             (tileIndex == r.tileIndex);
     }
 };
@@ -59,6 +58,7 @@ struct ProviderTileHasher {
     |     y |  35 - 64   |  29   |  536870912 |
     +-------+------------+-------+------------+
 
+    Bits are then shifted depending on the tile provider used.
     */
     unsigned long long operator()(const ProviderTileKey& t) const {
         unsigned long long key = 0;
@@ -80,20 +80,20 @@ struct ProviderTileHasher {
 /**
  * Singleton class used to cache tiles for all <code>CachingTileProvider</code>s.
  */
-class MemoryAwareTileCache
-{
+class MemoryAwareTileCache {
 public:
     static void create(size_t cacheSize);
     static void destroy();
 
     void clear();
-    bool exist(ProviderTileKey key);
+    bool exist(ProviderTileKey key) const;
     Tile get(ProviderTileKey key);
     void put(ProviderTileKey key, Tile tile);
   
     void setMaximumSize(size_t maximumSize);
 
     static MemoryAwareTileCache& ref();
+
 private:
     /**
      * \param cacheSize is the cache size given in bytes.

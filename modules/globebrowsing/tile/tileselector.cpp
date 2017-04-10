@@ -33,9 +33,11 @@ namespace globebrowsing {
 namespace tileselector {
 
 ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup, const TileIndex& tileIndex) {
-    ChunkTile mostHighResolution;
+    TileUvTransform uvTransform;
+    uvTransform.uvScale.x = 0;
+    ChunkTile mostHighResolution{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
     mostHighResolution.tile = Tile::TileUnavailable;
-    mostHighResolution.uvTransform.uvScale.x = 0;
+    
 
     for (const auto& layer : layerGroup.activeLayers()) {
         ChunkTile chunkTile = layer->tileProvider()->getChunkTile(tileIndex);
@@ -73,22 +75,23 @@ std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup& layer
 
 std::vector<std::pair<ChunkTile, const LayerRenderSettings*> >
 getTilesAndSettingsSortedByHighestResolution(const LayerGroup& layerGroup,
-	const TileIndex& tileIndex)
+    const TileIndex& tileIndex)
 {
-	std::vector<std::pair<ChunkTile, const LayerRenderSettings*> > tilesAndSettings;
-	for (const auto& layer : layerGroup.activeLayers()) {
-		tilesAndSettings.push_back({ layer->tileProvider()->getChunkTile(tileIndex), &layer->renderSettings() });
-	}
-	std::sort(
-		tilesAndSettings.begin(),
-		tilesAndSettings.end(),
-		[](const std::pair<ChunkTile, const LayerRenderSettings*> & lhs,
-			const std::pair<ChunkTile, const LayerRenderSettings*> & rhs) {
-		return lhs.first.uvTransform.uvScale.x > rhs.first.uvTransform.uvScale.x;
-	}
-	);
-	
-	return tilesAndSettings;
+    std::vector<std::pair<ChunkTile, const LayerRenderSettings*> > tilesAndSettings;
+    for (const auto& layer : layerGroup.activeLayers()) {
+        tilesAndSettings.push_back({ layer->tileProvider()->getChunkTile(tileIndex), &layer->renderSettings() });
+    }
+    std::sort(
+        tilesAndSettings.begin(),
+        tilesAndSettings.end(),
+        [](const std::pair<ChunkTile, const LayerRenderSettings*> & lhs,
+            const std::pair<ChunkTile, const LayerRenderSettings*> & rhs)
+        {
+            return lhs.first.uvTransform.uvScale.x > rhs.first.uvTransform.uvScale.x;
+        }
+    );
+    
+    return tilesAndSettings;
 }
 
 void ascendToParent(TileIndex& tileIndex, TileUvTransform& uv) {

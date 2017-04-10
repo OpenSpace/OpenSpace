@@ -24,6 +24,7 @@
 
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_RAW_TILE_DATA_READER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_RAW_TILE_DATA_READER___H__
+
 #ifdef GLOBEBROWSING_USE_GDAL
 
 #include <modules/globebrowsing/tile/textureformat.h>
@@ -118,4 +119,5 @@ private:
 } // namespace openspace
 
 #endif // GLOBEBROWSING_USE_GDAL
+
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_RAW_TILE_DATA_READER___H__

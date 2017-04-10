@@ -25,6 +25,13 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawarecacheable.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawarelrucache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawarelrucache.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.h
+
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/chunklevelevaluator.h
@@ -61,13 +68,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawarelrucache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawarelrucache.inl
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawarecacheable.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.inl
-
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktile.h
@@ -84,7 +84,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.h
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.h
@@ -119,15 +119,15 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.cpp
+
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/availabletiledataevaluator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/distanceevaluator.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunklevelevaluator/projectedareaevaluator.cpp
-    
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/frustumculler.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/culling/horizonculler.cpp
-
 
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/aabb.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.cpp
@@ -147,8 +147,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.cpp
-
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gpuchunktile.cpp
@@ -165,7 +163,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.cpp
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctilereader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp

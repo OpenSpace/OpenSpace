@@ -46,6 +46,7 @@ public:
 	~MemoryAwareCacheable() {};
 
 	size_t memoryImpact() { return _memoryImpact; };
+	
 protected:
 	size_t _memoryImpact;
 };

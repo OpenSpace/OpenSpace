@@ -50,8 +50,6 @@ public:
 
     SimpleRawTileDataReader(const std::string& filePath, const Configuration& config);
 
-    virtual ~SimpleRawTileDataReader() override;
-
     // Public virtual function overloading
     virtual void reset() override;
     virtual int maxChunkLevel() override;

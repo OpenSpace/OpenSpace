@@ -27,20 +27,19 @@
 #include <modules/globebrowsing/tile/pixelregion.h>
 
 namespace {
-    const std::string _loggerCat = "IODescription";
+    const char* _loggerCat = "IODescription";
 }
 
 namespace openspace {
 namespace globebrowsing {
 
-IODescription IODescription::cut(
-    PixelRegion::Side side, int pos) {
+IODescription IODescription::cut(PixelRegion::Side side, int pos) {
     PixelRegion readPreCut = read.region;
     PixelRegion writePreCut = write.region;
 
     glm::dvec2 ratio;
-    ratio.x = write.region.numPixels.x / (double) read.region.numPixels.x;
-    ratio.y = write.region.numPixels.y / (double) read.region.numPixels.y;
+    ratio.x = write.region.numPixels.x / static_cast<double>(read.region.numPixels.x);
+    ratio.y = write.region.numPixels.y / static_cast<double>(read.region.numPixels.y);
 
     IODescription whatCameOff = *this;
     whatCameOff.read.region = read.region.globalCut(side, pos);

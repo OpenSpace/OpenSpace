@@ -41,7 +41,7 @@
 #include <algorithm>
 
 namespace {
-    const std::string _loggerCat = "TileDataType";
+    const char* _loggerCat = "TileDataType";
 }
 
 namespace openspace {
@@ -451,7 +451,6 @@ size_t getMaximumValue(GLuint glType) {
 }
 
 float interpretFloat(GLuint glType, const char* src) {
-
     switch (glType) {
         case GL_UNSIGNED_BYTE:
             return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));

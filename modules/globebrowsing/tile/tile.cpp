@@ -37,22 +37,18 @@ namespace globebrowsing {
 const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavailable);
 
 Tile::Tile(std::shared_ptr<ghoul::opengl::Texture> texture,
-         std::shared_ptr<TileMetaData> metaData,
-         Status status)
-: MemoryAwareCacheable(
-    (sizeof(Tile) +
-    (metaData ? sizeof(TileMetaData) : 0) +
-    (texture ? sizeof(ghoul::opengl::Texture) + texture->expectedPixelDataSize() * 2 : 0))
-    // multiply by 2 because on OSX call to gfxAllocateTextureLevel() is also made for
-    // textures which makes them have double the data size expected. I don't know why but
-    // it seems like a known issue. Need to check the memory allocation on windows and
-    // linux too to see if it also is doubled there. / Kalle
-    / 1000) // Convert from bytes to kilobytes
-, _texture(texture)
-, _metaData(metaData)
-, _status(status) {
-
-}
+    std::shared_ptr<TileMetaData> metaData, Status status)
+    : MemoryAwareCacheable(
+        (sizeof(Tile) +
+        (metaData ? sizeof(TileMetaData) : 0) +
+        (texture ? sizeof(ghoul::opengl::Texture) + texture->expectedPixelDataSize() * 2 : 0))
+        // Multiply by two since double memory is used when creating mip maps.
+        / 1000 // Convert from bytes to kilobytes
+    )
+    , _texture(texture)
+    , _metaData(metaData)
+    , _status(status)
+{}
 
 Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
     using namespace ghoul::opengl;

@@ -77,6 +77,7 @@ public:
     const static PixelRegion padding; // same as the two above
 
     static bool logReadErrors;
+    
 protected:
     Configuration _config;
 

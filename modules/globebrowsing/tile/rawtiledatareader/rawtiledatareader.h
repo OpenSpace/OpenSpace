@@ -25,11 +25,11 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___RAW_TILE_DATA_READER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RAW_TILE_DATA_READER___H__
 
-#include <modules/globebrowsing/tile/textureformat.h>
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
+#include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tiledatalayout.h>
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
@@ -53,14 +53,14 @@ public:
     };
 
     RawTileDataReader(const Configuration& config);
-    virtual ~RawTileDataReader() { };
+    virtual ~RawTileDataReader() = default;
 
     /**
      * Reads data from the current dataset and initializes a <code>RawTile</code>
      * which gets returned.
      */
     std::shared_ptr<RawTile> readTileData(TileIndex tileIndex);
-    TileDepthTransform getDepthTransform();
+    TileDepthTransform getDepthTransform() const;
     
     /**
      * \returns the maximum chunk level available in the dataset. Should be a value
@@ -88,6 +88,7 @@ public:
     
     /// Padding around all tiles to read to make sure edge blending works.
     const static PixelRegion padding; // same as the two above
+
 protected:
 
     /**
