@@ -76,17 +76,28 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
                                       "/home/noven/workspace/OpenSpace/data/realfitsdata/304", // 8
                                       "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
 
+  // std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
+  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 1
+  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 2
+  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // 3 // OK
+  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 4
+  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 5 // OK
+  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0193", // 6 // OK
+  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0211", // 7 // OK
+  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0304", // 8 // OK
+  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};// 9
 
-    std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt", // 0
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt", // 1
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt", // 2
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094.txt",   // 3
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0131.txt", // 4
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0171.txt", // 5
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0193.txt", // 6
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0211.txt", // 7
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0304.txt", // 8
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0335.txt"};// 9
+
+    std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 0
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 1
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 2
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094_new.txt", // 3
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0131_new.txt", // 4
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0171_new.txt", // 5
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0193_new.txt", // 6
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0211_new.txt", // 7
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0304_new.txt", // 8
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0335_new.txt"};// 9
 
     _type = "SDO";
     const int numChannels = 10;
@@ -122,8 +133,6 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     addProperty(_target);
     addProperty(_moveFactor);
 }
-
-
 
 bool RenderableSpacecraftCameraPlane::isReady() const {
     return _shader && !_textures.empty();
