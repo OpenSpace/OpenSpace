@@ -75,7 +75,6 @@ int addVirtualProperty(lua_State* L) {
     const std::string name = lua_tostring(L, -5);
     const std::string identifier = lua_tostring(L, -4);
 
-    // @LEAK: This will leak the Property ---abock
     Property* prop;
     if (type == "BoolProperty") {
         bool v = lua_toboolean(L, -3);
@@ -130,8 +129,6 @@ int removeVirtualProperty(lua_State* L) {
 * Remove all registered virtual properties
 */
 int removeAllVirtualProperties(lua_State* L) {
-    // @LEAK: Right now, we only *not* leak if this method is called at the end ---abock
-
     std::vector<properties::Property*> props = OsEng.virtualPropertyOwner().properties();
     for (properties::Property* p : props) {
         OsEng.virtualPropertyOwner().removeProperty(p);

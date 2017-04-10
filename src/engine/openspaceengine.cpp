@@ -177,6 +177,13 @@ OpenSpaceEngine::OpenSpaceEngine(
     TransformationManager::initialize();
 }
 
+OpenSpaceEngine::~OpenSpaceEngine() {
+    // We know that we own all of the properties in the virtual namespace
+    for (properties::Property* prop : _virtualPropertyNamespace->propertiesRecursive()) {
+        delete prop;
+    }
+}
+
 OpenSpaceEngine& OpenSpaceEngine::ref() {
     ghoul_assert(_engine, "OpenSpaceEngine not created");
     return *_engine;

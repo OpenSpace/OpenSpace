@@ -170,7 +170,7 @@ public:
 private:
     OpenSpaceEngine(std::string programName,
         std::unique_ptr<WindowWrapper> windowWrapper);
-    ~OpenSpaceEngine() = default;
+    ~OpenSpaceEngine();
 
     void loadScene(const std::string& scenePath);
     void gatherCommandlineArguments();
