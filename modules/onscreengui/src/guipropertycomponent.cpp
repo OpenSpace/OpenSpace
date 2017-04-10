@@ -204,7 +204,12 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
     if (v >= propV) {
         auto it = FunctionMapping.find(prop->className());
         if (it != FunctionMapping.end()) {
-            it->second(prop, owner->name());
+            if (owner) {
+                it->second(prop, owner->name());
+            }
+            else {
+                it->second(prop, "");
+            }
         }
     }
 }

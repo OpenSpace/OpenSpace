@@ -122,6 +122,7 @@ public:
     ghoul::fontrendering::FontManager& fontManager();
     interaction::InteractionHandler& interactionHandler();
     properties::PropertyOwner& globalPropertyOwner();
+    properties::PropertyOwner& virtualPropertyOwner();
     scripting::ScriptEngine& scriptEngine();
     scripting::ScriptScheduler& scriptScheduler();
 
@@ -198,6 +199,7 @@ private:
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
+    std::unique_ptr<properties::PropertyOwner> _virtualPropertyNamespace;
     
     bool _scheduledSceneSwitch;
     std::string _scenePath;

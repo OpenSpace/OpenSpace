@@ -108,6 +108,15 @@ std::vector<properties::Property*> allProperties() {
         p.end()
     );
 
+    std::vector<properties::Property*> q =
+        OsEng.virtualPropertyOwner().propertiesRecursive();
+
+    properties.insert(
+        properties.end(),
+        q.begin(),
+        q.end()
+    );
+
     const Scene* graph = sceneGraph();
     std::vector<SceneGraphNode*> nodes = graph->allSceneGraphNodes();
 
@@ -115,8 +124,8 @@ std::vector<properties::Property*> allProperties() {
         std::vector<properties::Property*> props = n->propertiesRecursive();
         properties.insert(
             properties.end(),
-            p.begin(),
-            p.end()
+            props.begin(),
+            props.end()
         );
     }
 

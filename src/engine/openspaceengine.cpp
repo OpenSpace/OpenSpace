@@ -135,6 +135,7 @@ OpenSpaceEngine::OpenSpaceEngine(
     , _parallelConnection(new ParallelConnection)
     , _windowWrapper(std::move(windowWrapper))
     , _globalPropertyNamespace(new properties::PropertyOwner(""))
+    , _virtualPropertyNamespace(new properties::PropertyOwner(""))
     , _scheduledSceneSwitch(false)
     , _scenePath("")
     , _runTime(0.0)
@@ -1313,6 +1314,14 @@ properties::PropertyOwner& OpenSpaceEngine::globalPropertyOwner() {
         "Global Property Namespace must not be nullptr"
     );
     return *_globalPropertyNamespace;
+}
+
+properties::PropertyOwner& OpenSpaceEngine::virtualPropertyOwner() {
+    ghoul_assert(
+        _virtualPropertyNamespace,
+        "Virtual Property Namespace must not be nullptr"
+    );
+    return *_virtualPropertyNamespace;
 }
 
 ScriptEngine& OpenSpaceEngine::scriptEngine() {
