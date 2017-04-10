@@ -26,7 +26,8 @@
 #define __RENDERABLEPLANETATMOSPHERE_H__
 
 // open space includes
-#include <modules/atmosphere/atmosphere.h>
+//#include <modules/atmosphere/atmosphere.h>
+
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
@@ -53,7 +54,8 @@ namespace openspace {
         class PlanetGeometry;
     }
 
-    class RenderablePlanetAtmosphere : public Atmosphere, public Renderable {
+    //class RenderablePlanetAtmosphere : public Atmosphere, public Renderable {
+    class RenderablePlanetAtmosphere : public Renderable {
     public:
         // Shadow structure
         typedef struct {

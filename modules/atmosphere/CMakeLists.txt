@@ -25,7 +25,7 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/atmosphere.h
+  #${CMAKE_CURRENT_SOURCE_DIR}/atmosphere.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atmosphereraycaster.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableatmosphere.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetatmosphere.h

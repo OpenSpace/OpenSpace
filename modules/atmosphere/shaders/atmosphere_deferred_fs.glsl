@@ -35,9 +35,11 @@ uniform mat4 scaleTransformMatrix;
 uniform mat4 objToWorldTransform;
 uniform mat4 worldToObjectTransform;
 uniform mat4 worldToEyeTransform;
-uniform mat4 eyeToWorldTransform;
-uniform mat4 eyeToViewTranform;
-uniform mat4 viewToEyeTranform;
+uniform mat4 eyeToWorldTransform; // OS Eye to World
+uniform mat4 osEye2SGCTEyeTranform; // OS Eye to SGCT Eye
+uniform mat4 sgctEye2OSEyeTranform; // SGCT Eye to OS Eye
+uniform mat4 eyeToViewTranform; // SGCT Eye to SGCT Project Clip
+uniform mat4 viewToEyeTranform; // SGCT Project Clip to SGCT Eye
 uniform mat4 inverseSgctProjectionMatrix;
 
 uniform mat4 completeVertexTransform;
@@ -738,10 +740,11 @@ void calculateRay2(out Ray ray, out vec4 planetPositionObjectCoords) {
  
   // Clip to SGCT Eye
   vec4 sgctEyeCoords = inverseSgctProjectionMatrix * clipCoords;
+  //sgctEyeCoords /= sgctEyeCoords.w;
   sgctEyeCoords.w = 1.0;
   
   // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
-  vec4 osEyeCoords = viewToEyeTranform * sgctEyeCoords;
+  vec4 osEyeCoords = sgctEye2OSEyeTranform * sgctEyeCoords;
     
   // OS Eye to World coords
   // Now we execute the transformations with no matrices:
@@ -766,7 +769,7 @@ void calculateRay2(out Ray ray, out vec4 planetPositionObjectCoords) {
   ray.origin    = cameraPositionInObject;
   ray.direction = vec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);
 
-  renderTarget = vec4(0.5 * interpolatedNDCPos.xyz + vec3(0.5), 1.0);
+  //renderTarget = vec4(0.5 * interpolatedNDCPos.xyz + vec3(0.5), 1.0);
 }
 
 /*
@@ -884,9 +887,9 @@ void main() {
     bool  insideATM    = false;
     float offset       = 0.0f;
     float maxLength    = 0.0f;     
-    bool  intersectATM = atmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt*1000.0,
-                                                insideATM, offset, maxLength );
-    //bool intersectATM = algebraicIntersecSphere(ray, Rt*1000.0, planetPositionObjectCoords, offset, maxLength);
+    //bool  intersectATM = atmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt*1000.0,
+    //                                            insideATM, offset, maxLength );
+    bool intersectATM = algebraicIntersecSphere(ray, Rt*1000.0, planetPositionObjectCoords, offset, maxLength);
 
     // if ( intersectATM ) {
     //   renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
