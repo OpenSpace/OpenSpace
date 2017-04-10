@@ -94,7 +94,9 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
         }
     }
 
-    ImGui::Spacing();
+    if (!subOwners.empty()) {
+        ImGui::Spacing();
+    }
 
     using Properties = std::vector<properties::Property*>;
     std::map<std::string, Properties> propertiesByGroup;
@@ -119,7 +121,9 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
         }
     }
 
-    ImGui::Spacing();
+    if (!propertiesByGroup.empty()) {
+        ImGui::Spacing();
+    }
 
     for (properties::Property* prop : remainingProperies) {
         renderProperty(prop, owner);
@@ -131,8 +135,6 @@ void GuiPropertyComponent::render() {
     bool v = _isEnabled;
     ImGui::Begin(name().c_str(), &v, size, 0.5f);
     _isEnabled = v;
-
-    ImGui::Spacing();
 
     if (_function) {
         std::vector<properties::PropertyOwner*> owners = _function();
@@ -156,10 +158,14 @@ void GuiPropertyComponent::render() {
                     // Create a header in case we have multiple owners
                     return ImGui::CollapsingHeader(pOwner->name().c_str());
                 }
-                else {
-                    // Otherwise, do nothing
+                else if (!pOwner->name().empty()) {
+                    // If the owner has a name, print it first
                     ImGui::Text(pOwner->name().c_str());
                     ImGui::Spacing();
+                    return true;
+                }
+                else {
+                    // Otherwise, do nothing
                     return true;
                 }
             };
