@@ -47,14 +47,13 @@ SpacecraftImageryManager::SpacecraftImageryManager() { }
 
 void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imageData, const std::string& type, const int& channel) {
     if (type == "SDO") {
-        // 1600, 1700, 4500, 94, 131, 171, 193, 211, 304, 335
-        const std::vector<float> normtimes = {2.99911f, 1.00026f, 1.00026f, 4.99803f, 6.99685f, 4.99803f, 2.99950f, 4.99801f, 4.99941f, 6.99734f};
-        const std::vector<float> clipmins = {0.f, 0.f, 0.f, 1.5f, 7.f, 10.f, 120.f, 30.f, 15.f, 3.5f};
-        const std::vector<float> clipmax = {4000.f, 10000.f, 26000.f, 50.f, 1200.f, 12000.f, 12000.f, 13000.f, 3000.f, 1000.f};
-
-        const float normtime = normtimes[channel];
-        const float cmin = clipmins[channel];
-        const float cmax = clipmax[channel];
+        // 1600, 1700, 4500, 94, 131, 171, 193, 211, 304, 335 // (1600, 1700, 4500)
+        //const std::vector<float> normtimes = {2.99911f, 1.00026f, 1.00026f, 4.99803f, 6.99685f, 4.99803f, 2.99950f, 4.99801f, 4.99941f, 6.99734f};
+        //const std::vector<float> clipmins = {0.f, 0.f, 0.f, 1.5f, 7.f, 10.f, 120.f, 30.f, 15.f, 3.5f};
+        //const std::vector<float> clipmax = {4000.f, 10000.f, 26000.f, 50.f, 1200.f, 12000.f, 12000.f, 13000.f, 3000.f, 1000.f};
+        const std::vector<float> clipmins = {20.f, 220.f, 4000.f, 0.1f, 0.7f, 10.f, 20.f, 7.f, 0.2f, 0.4f};
+        const std::vector<float> clipmax = {400.f, 5000.f, 20000.f, 30.f, 500.f, 2000.f, 2500.f, 1500.f, 150.f, 80.f};
+        //const float normtime = normtimes[channel];
 
         for (auto& dataObject : imageData) {
             std::valarray<float>& data = dataObject.contents;
@@ -62,42 +61,49 @@ void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imag
             const float& exptime = dataObject.metaData.expTime;
             assert(exptime > 0.f && exptime < 10.f);
 
-            data = data * (normtimes[channel] / exptime);
+            //data = data * (normtimes[channel] / exptime);
+            data = data / (1.f * exptime);
 
-            std::for_each(begin(data), end(data), [&cmin, &cmax](float& val) {
-                val = std::min(cmax, std::max(val, cmin));
-            });
+            // Just copied from IDL, does this make any sense at all?
+            data[0] = 0.f;
+            data[1] = 500000.f;
 
-            // Note: No need to set range right now,
-            // glTexImage2D() will clamp all values to [0,1]
-            switch (channel) {
-                case 0 ... 2: {
-                    data = 0.f; // TODO(mnoven): Remove this
-                    //data = (data - cmin) / (cmax - cmin);
-                    break;
-                }
-                case 3: {
-                    float sqcmin = sqrt(cmin), sqcmax = sqrt(cmax);
-                    data = sqrt(data);
-                    data = (data - sqcmin) / (sqcmax - sqcmin);
-                    break;
-                }
-                case 4 ... 9: {
-                    // TODO(mnoven) : Remove this
-                    //if (channel == 9) { data = 0.0f; continue;}
+            LDEBUG("Loading channel: " << channel);
+            LDEBUG("Max data: " << data.max());
+            LDEBUG("MIN data: " << data.min());
+            LDEBUG("Exptime " << exptime);
 
-                    float alogcmin = log10(cmin), alogcmax = log10(cmax);
-                    data = log10(data);
-                    data = (data - alogcmin) / (alogcmax - alogcmin);
-                    break;
-                }
-                default: {
-                    LERROR("Wrong channel for SDO");
-                    break;
-                }
-
+            // TODO(mnoven) : Show wavelengths 1700, 4500, 1600? Where to get?
+            if (channel == 0 || channel == 1 || channel == 2) {
+                data = 0.f;
+                return;
             }
+            if (channel == 5) { // 171
+                // TODO(mnoven): Make this prettier and optimize
+                data -= 5;
+                const float datamax = data.max();
+                // TODO(mnoven): Use std::clamp in C++17
+                std::for_each(begin(data), end(data), [&datamax](float& val) {
+                    val = std::min(datamax, std::max(val, 0.01f));
+                });
 
+                data = std::pow(data, 0.35f);
+                std::for_each(begin(data), end(data), [](float& val) {
+                    val = std::min(13.f, std::max(val, 0.01f));
+                });
+            } else {
+                const float cmin = clipmins[channel];
+                const float cmax = clipmax[channel];
+
+                // TODO(mnoven): Use std::clamp in C++17
+                std::for_each(begin(data), end(data), [&cmin, &cmax](float& val) {
+                    val = std::min(cmax, std::max(val, cmin));
+                });
+
+                data = log10(data);
+            }
+            // Scale values to [0, 1]
+            data = (data - data.min()) / (data.max() - data.min());
         }
     } else {
         LERROR("Couldn't find any spacecraft with type " << type);
@@ -166,7 +172,7 @@ std::vector<std::unique_ptr<Texture>> SpacecraftImageryManager::loadTextures(std
                                         GL_R32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
                                         GL_FLOAT, // Type of data
                                         Texture::FilterMode::Linear,
-                                        Texture::WrappingMode::Repeat
+                                        Texture::WrappingMode::ClampToEdge
                                     );
         // Memory is owned by renderable
         t->setDataOwnership(ghoul::Boolean::No);
