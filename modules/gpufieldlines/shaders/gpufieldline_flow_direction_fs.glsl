@@ -22,43 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+in vec4 gs_color;
+in float gs_depth;
 
-uniform mat4 modelViewProjection;
-//uniform mat4 modelTransform;
-uniform int time;
+//uniform bool classification;
+//uniform vec4 fieldLineColor;
 
-layout(location = 0) in vec3 in_position; // in meters
-// layout(location = 1) in vec4 in_color;
+#include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-out vec4 vs_color;
-// out vec4 vs_position;
+Fragment getFragment() {
+    vec4 fragColor;
+  //  if (classification) {
+        fragColor = gs_color;
+        // fragColor = vec4(1.0,0,0,0.5);
+    //} else {
+    //    fragColor = vec4(fieldLineColor.rgb * fieldLineColor.a , 1.0);
+    //}
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+    //float depth = pscDepth(vs_position);
 
-void main() {
-    vec4 in_color = vec4(0.0,1.0,0.0,0.0);
-    // Color every n-th vertex differently to show fieldline flow direction
-    int modulus = (gl_VertexID + time) % 100;
-    if ( modulus > 0 && modulus < 99) {
-        vs_color = vec4(in_color.rgb * 0.99, 1.0);
-    } else {
-        vs_color = vec4(in_color.rgb * 0.99, 1.0);
-    }
-    // vs_color = in_color;
-    //vec4 tmp = vec4(in_position, 0);
-
-    //vec4 position_meters = pscTransform(tmp, modelTransform);
-    //vs_position = tmp;
-
-    // project the position to view space
-    //position_meters =  modelViewProjection * position_meters;
-    //gl_Position = z_normalization(position_meters);
-
-    // float scale = 1.0;//695700000.0;//150000000000.0;//6371000.0;
-    // //vs_position = vec4(in_position.xyz * scale, 1); // TODO powerscaleify?
-    // vec4 position_in_meters = vec4(in_position.xyz * scale, 1);
-    // vec4 positionClipSpace = modelViewProjection * position_in_meters;
-    // gl_Position = z_normalization(positionClipSpace);
-    gl_Position = vec4(in_position,1.0);
+    Fragment frag;
+    frag.depth = gs_depth;
+    frag.color = fragColor;
+    return frag;
 }
