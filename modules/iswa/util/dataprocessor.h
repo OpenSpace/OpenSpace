@@ -37,7 +37,7 @@ class DataProcessor{
     friend class IswaBaseGroup;
 public:
     DataProcessor();
-    ~DataProcessor();
+    virtual ~DataProcessor();
 
     virtual std::vector<std::string> readMetadata(std::string data, glm::size3_t& dimensions) = 0;
     virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) = 0;
@@ -50,6 +50,7 @@ public:
     glm::vec2 filterValues();
 
     void clear();
+
 protected:
     float processDataPoint(float value, int option);
     float normalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));

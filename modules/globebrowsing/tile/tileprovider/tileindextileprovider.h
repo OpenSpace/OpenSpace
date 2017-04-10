@@ -36,6 +36,8 @@ namespace tileprovider {
  */
 class TileIndexTileProvider : public TextTileProvider {
 public:
+    TileIndexTileProvider(const ghoul::Dictionary& dict);
+    
     virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
         const TileIndex& tileIndex) const;
 };

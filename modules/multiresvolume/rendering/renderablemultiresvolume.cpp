@@ -224,7 +224,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     }
 
     addProperty(_selectorName);
-    _selectorName.onChange([&] {
+    _selectorName.onChange([&]() {
         Selector s;
         std::string newSelectorName = _selectorName;
         if (newSelectorName == "simple") {

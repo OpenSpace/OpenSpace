@@ -82,7 +82,12 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
 
 void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& target) {
     //remembto add this lua later... 
-    std::transform(line.begin(), line.end(), line.begin(), toupper);
+    std::transform(
+        line.begin(),
+        line.end(),
+        line.begin(),
+        [](char v) { return static_cast<char>(toupper(v)); }
+    );
     std::vector<std::string> ptarg = _potentialTargets;
     for (const auto& p : ptarg) {
         // loop over all targets and determine from 4th col which target this instrument points to
@@ -120,6 +125,7 @@ bool HongKangParser::create() {
             if (extension == "txt") { // Hong Kang. pre-parsed playbook
                 std::ifstream file;
                 file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+                file.open(absPath(_fileName));
                 //std::ifstream file(_fileName , std::ios::binary);
                 //if (!file.good()){
                 //    LERROR("Failed to open event file '" << _fileName << "'");
@@ -273,12 +279,11 @@ bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft,
     }
 
     for (int i = 0; i < potentialTargets.size(); ++i) {
-        bool _withinFOV = false;
         for (int j = 0; j < image.activeInstruments.size(); ++j) {
             double time = image.timeRange.start;
             for (int k = 0; k < exposureTime; k++) {
                 time += k;
-                _withinFOV = SpiceManager::ref().isTargetInFieldOfView(
+                bool withinFOV = SpiceManager::ref().isTargetInFieldOfView(
                     potentialTargets[i],
                     spacecraft,
                     image.activeInstruments[j],
@@ -287,9 +292,8 @@ bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft,
                     time
                 );
 
-                if (_withinFOV) {
+                if (withinFOV) {
                     image.target = potentialTargets[i];
-                    _withinFOV = false;
                 }
             }
         }
@@ -314,6 +318,7 @@ double HongKangParser::getETfromMet(double met) {
     } else if (met < _metRef) {
         return referenceET - diff;
     }
+    return 0.0;
 }
 
 double HongKangParser::getMetFromET(double et) {
@@ -322,7 +327,7 @@ double HongKangParser::getMetFromET(double et) {
 
     if (et >= referenceET) {
         return _metRef + (et - referenceET);
-    }else {
+    } else {
         return _metRef - (referenceET - et);
     }
 }

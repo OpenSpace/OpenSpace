@@ -29,6 +29,8 @@
 #include <openspace/util/syncdata.h>
 
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/luastate.h>
+#include <ghoul/misc/boolean.h>
 
 #include <map>
 #include <memory>
@@ -93,8 +95,9 @@ public:
     //bool shouldScriptBeSent(const std::string &library, const std::string &function);
     //void cacheScript(const std::string &library, const std::string &function, const std::string &script);
     
+    static std::string OpenSpaceLibraryName;
+    
 private:
-
     bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
     void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
 
@@ -103,7 +106,7 @@ private:
     void addBaseLibrary();
     void remapPrintFunction();
     
-    lua_State* _state = nullptr;
+    ghoul::lua::LuaState _state;
     std::set<LuaLibrary> _registeredLibraries;
     
     //sync variables

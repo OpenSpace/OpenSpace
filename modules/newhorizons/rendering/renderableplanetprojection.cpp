@@ -26,6 +26,7 @@
 
 #include <modules/space/rendering/planetgeometry.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -56,6 +57,7 @@ namespace {
 
     const char* keyGeometry = "Geometry";
     const char* keyProjection = "Projection";
+    const char* keyMeridianShift = "Textures.MeridianShift";
     const char* keyColorTexture = "Textures.Color";
     const char* keyHeightTexture = "Textures.Height";
 
@@ -66,7 +68,7 @@ namespace {
 
 namespace openspace {
 
-Documentation RenderablePlanetProjection::Documentation() {
+documentation::Documentation RenderablePlanetProjection::Documentation() {
     using namespace openspace::documentation;
     return {
         "Renderable Planet Projection",
@@ -89,6 +91,13 @@ Documentation RenderablePlanetProjection::Documentation() {
                 new ReferencingVerifier("newhorizons_projectioncomponent"),
                 "Contains information about projecting onto this planet.",
                 Optional::No
+            },
+            {
+                keyMeridianShift,
+                new BoolVerifier,
+                "Determines whether the meridian of the planet should be shifted by 180 "
+                "degrees. The default value is 'false'",
+                Optional::Yes
             },
             {
                 keyColorTexture,
@@ -117,6 +126,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _heightMapTexturePath("heightMap", "Heightmap Texture")
     , _rotation("rotation", "Rotation", 0, 0, 360)
     , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
+    , _shiftMeridianBy180("shiftMeiridian", "Shift Meridian by 180 deg", false)
     , _debugProjectionTextureRotation("debug.projectionTextureRotation", "Projection Texture Rotation", 0.f, 0.f, 360.f)
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
@@ -127,7 +137,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     documentation::testSpecificationAndThrow(
         Documentation(),
         dictionary,
-        "RenderablePlanetProject"
+        "RenderablePlanetProjection"
     );
 
     std::string name;
@@ -151,14 +161,19 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     // as the requirements are fixed (ab)
     std::string texturePath = "";
     success = dictionary.getValue("Textures.Color", texturePath);
-    if (success){
+    if (success) {
         _colorTexturePath = absPath(texturePath); 
     }
 
     std::string heightMapPath = "";
     success = dictionary.getValue("Textures.Height", heightMapPath);
-    if (success)
+    if (success) {
         _heightMapTexturePath = absPath(heightMapPath);
+    }
+
+    if (dictionary.hasKeyAndValue<bool>(keyMeridianShift)) {
+        _shiftMeridianBy180 = dictionary.value<bool>(keyMeridianShift);
+    }
 
     glm::vec2 radius = glm::vec2(1.0, 9.0);
     dictionary.getValue(keyRadius, radius);
@@ -175,6 +190,8 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     addProperty(_heightExaggeration);
     addProperty(_debugProjectionTextureRotation);
+
+    addProperty(_shiftMeridianBy180);
 }
 
 RenderablePlanetProjection::~RenderablePlanetProjection() {}
@@ -415,7 +432,9 @@ void RenderablePlanetProjection::render(const RenderData& data) {
     //_programObject->setUniform("debug_projectionTextureRotation", glm::radians(_debugProjectionTextureRotation.value()));
 
     //setPscUniforms(*_programObject.get(), data.camera, data.position);
-    
+
+    _programObject->setUniform("shiftMeridian", _shiftMeridianBy180);
+
     ghoul::opengl::TextureUnit unit[3];
     unit[0].activate();
     _baseTexture->bind();
@@ -467,7 +486,9 @@ bool RenderablePlanetProjection::loadTextures() {
     using ghoul::opengl::Texture;
     _baseTexture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(_colorTexturePath);
+        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_colorTexturePath)
+        );
         if (_baseTexture) {
             ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
             _baseTexture->uploadTexture();
@@ -477,7 +498,9 @@ bool RenderablePlanetProjection::loadTextures() {
 
     _heightMapTexture = nullptr;
     if (_heightMapTexturePath.value() != "") {
-        _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(_heightMapTexturePath);
+        _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_heightMapTexturePath)
+        );
         if (_heightMapTexture) {
             ghoul::opengl::convertTextureFormat(*_heightMapTexture, Texture::Format::RGB);
             _heightMapTexture->uploadTexture();

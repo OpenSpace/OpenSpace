@@ -28,6 +28,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/scene/scenegraphnode.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
 #include <ghoul/misc/dictionary.h>
@@ -36,15 +37,15 @@
 #include <ghoul/misc/assert.h>
 
 namespace {
-    const std::string _loggerCat = "Renderable";
-    const std::string keyStart = "StartTime";
-    const std::string keyEnd = "EndTime";
-    const std::string KeyType = "Type";
+    const char* _loggerCat = "Renderable";
+    const char* keyStart = "StartTime";
+    const char* keyEnd = "EndTime";
+    const char* KeyType = "Type";
 }
 
 namespace openspace {
 
-Documentation Renderable::Documentation() {
+documentation::Documentation Renderable::Documentation() {
     using namespace openspace::documentation;
 
     return {
@@ -64,7 +65,9 @@ Documentation Renderable::Documentation() {
     };
 }
 
-Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Renderable> Renderable::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     // The name is passed down from the SceneGraphNode
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -75,7 +78,7 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
     std::string renderableType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<Renderable>();
-    Renderable* result = factory->create(renderableType, dictionary);
+    std::unique_ptr<Renderable> result = factory->create(renderableType, dictionary);
     if (result == nullptr) {
         LERROR("Failed to create a Renderable object of type '" << renderableType << "'");
         return nullptr;
@@ -85,7 +88,8 @@ Renderable* Renderable::createFromDictionary(const ghoul::Dictionary& dictionary
 }
 
 Renderable::Renderable()
-    : _enabled("enabled", "Is Enabled", true)
+    : properties::PropertyOwner("renderable")
+    , _enabled("enabled", "Is Enabled", true)
     , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
@@ -93,17 +97,16 @@ Renderable::Renderable()
 {}
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary)
-    : _enabled("enabled", "Is Enabled", true)
+    : properties::PropertyOwner("renderable")
+    , _enabled("enabled", "Is Enabled", true)
     , _renderBin(RenderBin::Opaque)
     , _startTime("")
     , _endTime("")
     , _hasTimeInterval(false)
 {
-    setName("renderable");
-
     ghoul_assert(
         dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
-        "SceneGraphNode must specify '" << SceneGraphNode::KeyName << "'"
+        std::string("SceneGraphNode must specify '") + SceneGraphNode::KeyName + "'"
     );
 
     dictionary.getValue(keyStart, _startTime);

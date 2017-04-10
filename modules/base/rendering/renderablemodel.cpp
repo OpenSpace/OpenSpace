@@ -85,7 +85,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     if (success)
         _colorTexturePath = absPath(texturePath);
 
-    addPropertySubOwner(_geometry);
+    addPropertySubOwner(_geometry.get());
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
@@ -153,7 +153,6 @@ bool RenderableModel::initialize() {
 bool RenderableModel::deinitialize() {
     if (_geometry) {
         _geometry->deinitialize();
-        delete _geometry;
         _geometry = nullptr;
     }
     _texture = nullptr;
@@ -170,8 +169,6 @@ bool RenderableModel::deinitialize() {
 
 void RenderableModel::render(const RenderData& data) {
     _programObject->activate();
-    
-    double lt;
     
     // Fading
     if (_performFade && _fading > 0.f) {
@@ -226,7 +223,7 @@ void RenderableModel::render(const RenderData& data) {
 void RenderableModel::update(const UpdateData& data) {
     if (_programObject->isDirty())
         _programObject->rebuildFromFile();
-    double _time = data.time;
+//    double _time = data.time;
 
     //if (_isGhost){
     //    futureTime = openspace::ImageSequencer::ref().getNextCaptureTime();
@@ -244,7 +241,6 @@ void RenderableModel::update(const UpdateData& data) {
     //    _time = futureTime;
     //}
 
-    double  lt;
     _sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 }
 

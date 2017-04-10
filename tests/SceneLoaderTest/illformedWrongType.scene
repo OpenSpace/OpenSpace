@@ -1,0 +1,6 @@
+-- Malformed script
+return {
+    ScenePath = ".",
+    Modules = 2
+}
+

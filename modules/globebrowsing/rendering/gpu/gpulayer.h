@@ -51,16 +51,16 @@ public:
      * GPU struct. OBS! Users must ensure bind has been 
      * called before setting using this method.
      */
-    virtual void setValue(ProgramObject* programObject, const Layer& layer,
-                          const TileIndex& tileIndex, int pileSize);
+    virtual void setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
+        const TileIndex& tileIndex, int pileSize);
 
     /** 
      * Binds this object with GLSL variables with identifiers starting 
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
-    virtual void bind(ProgramObject* programObject, const Layer& layer,
-                      const std::string& nameBase, int pileSize);
+    virtual void bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
+        const std::string& nameBase, int pileSize);
 
     /**
     * Deactivates any <code>TextureUnit</code>s assigned by this object.

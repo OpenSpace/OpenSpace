@@ -33,9 +33,6 @@
 
 #include <ghoul/opengl/programobject.h>
 
-#include <openspace/documentation/documentation.h>
-
-
 // Forward declare to minimize dependencies
 namespace ghoul {
     namespace opengl {
@@ -45,6 +42,8 @@ namespace ghoul {
 }
 
 namespace openspace {
+
+namespace documentation { struct Documentation; } 
 
 // Forward declare to minimize dependencies
 
@@ -60,7 +59,7 @@ public:
         Overlay = 8
     };
 
-    static Renderable* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Renderable> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     // constructors & destructor
     Renderable();
@@ -93,7 +92,7 @@ public:
 
     static void setPscUniforms(ghoul::opengl::ProgramObject& program, const Camera& camera, const PowerScaledCoordinate& position);
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     properties::BoolProperty _enabled;

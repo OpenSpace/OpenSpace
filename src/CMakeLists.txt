@@ -40,13 +40,10 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/deviceidentifier.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/interactionmode.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler_lua.inl
-    ${OPENSPACE_BASE_DIR}/src/interaction/keyboardcontroller.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/luaconsole.cpp
-    ${OPENSPACE_BASE_DIR}/src/interaction/luaconsole_lua.inl
     ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager_lua.inl
@@ -127,7 +124,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
-    ${OPENSPACE_BASE_DIR}/src/scene/scenegraph.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/sceneloader.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/scenemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
@@ -135,6 +133,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler.cpp
     ${OPENSPACE_BASE_DIR}/src/scripting/scriptscheduler_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/scripting/systemcapabilitiesbinding.cpp
     ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
@@ -151,6 +150,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/syncbuffer.cpp
     ${OPENSPACE_BASE_DIR}/src/util/syncdata.cpp
     ${OPENSPACE_BASE_DIR}/src/util/histogram.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/task.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/taskloader.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time.cpp
     ${OPENSPACE_BASE_DIR}/src/util/timemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/time_lua.inl
@@ -176,10 +177,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/sgctwindowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/windowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/controller.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/deviceidentifier.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionhandler.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionmode.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyboardcontroller.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/luaconsole.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
@@ -269,12 +268,14 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraph.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/sceneloader.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/lualibrary.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/script_helper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/scriptscheduler.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scripting/systemcapabilitiesbinding.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
@@ -291,6 +292,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/spicemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncbuffer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/syncdata.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/task.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/taskloader.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/time.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/timerange.h

@@ -25,7 +25,7 @@
 #version __CONTEXT__
 
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "floatoperations.glsl"
 #include <#{fragmentPath}>
 
 out vec4 _out_color_;

@@ -24,6 +24,7 @@
 
 #include <modules/base/rotation/staticrotation.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
 namespace {
@@ -32,7 +33,7 @@ namespace {
 
 namespace openspace {
 
-Documentation StaticRotation::Documentation() {
+documentation::Documentation StaticRotation::Documentation() {
     using namespace openspace::documentation;
     return {
         "Static Rotation",

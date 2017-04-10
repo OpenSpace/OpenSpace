@@ -1,0 +1,33 @@
+OpenSpace ecliptic frames:
+Mercury-centric Solar Ecliptic (MERCURYSE) frame
+
+These frames are only defined as helper frames for OpenSpace.
+ 
+ +X is parallel to the geometric planet-sun position vector. 
+ 
+ -Y axis is the normalized component of the planet's orbital vector
+ 
+ +Z axis is parallel to the cross product of the frame's +X axis 
+ and the frame's +Y axis. 
+
+\begindata 
+ 
+ FRAME_MERCURYSE = 4600199 
+ FRAME_4600199_NAME = 'MERCURYSE' 
+ FRAME_4600199_CLASS = 5 
+ FRAME_4600199_CLASS_ID = 4600199 
+ FRAME_4600199_CENTER = 199 
+ FRAME_4600199_RELATIVE = 'J2000' 
+ FRAME_4600199_DEF_STYLE = 'PARAMETERIZED' 
+ FRAME_4600199_FAMILY = 'TWO-VECTOR' 
+ FRAME_4600199_PRI_AXIS = 'X' 
+ FRAME_4600199_PRI_VECTOR_DEF = 'OBSERVER_TARGET_POSITION' 
+ FRAME_4600199_PRI_OBSERVER = 'MERCURY' 
+ FRAME_4600199_PRI_TARGET = 'SUN' 
+ FRAME_4600199_PRI_ABCORR = 'NONE' 
+ FRAME_4600199_SEC_AXIS = 'Y' 
+ FRAME_4600199_SEC_VECTOR_DEF = 'OBSERVER_TARGET_VELOCITY' 
+ FRAME_4600199_SEC_OBSERVER = 'MERCURY' 
+ FRAME_4600199_SEC_TARGET = 'SUN' 
+ FRAME_4600199_SEC_ABCORR = 'NONE' 
+ FRAME_4600199_SEC_FRAME = 'J2000' 

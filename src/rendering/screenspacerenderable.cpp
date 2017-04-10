@@ -24,35 +24,36 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
 
-#include <openspace/documentation/verifier.h>
 
- #ifdef WIN32
- #define _USE_MATH_DEFINES
- #include <math.h>
- #endif
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif
 
 namespace {
-    const std::string _loggerCat = "ScreenSpaceRenderable";
+    const char* _loggerCat = "ScreenSpaceRenderable";
 
-    const std::string KeyType = "Type";
-    const std::string KeyFlatScreen = "FlatScreen";
-    const std::string KeyPosition = "Position";
-    const std::string KeyScale = "Scale";
-    const std::string KeyDepth = "Depth";
-    const std::string KeyAlpha = "Alpha";
+    const char* KeyType = "Type";
+    const char* KeyFlatScreen = "FlatScreen";
+    const char* KeyPosition = "Position";
+    const char* KeyScale = "Scale";
+    const char* KeyDepth = "Depth";
+    const char* KeyAlpha = "Alpha";
 
     const float PlaneDepth = -2.f;
 }
 
 namespace openspace {
 
-Documentation ScreenSpaceRenderable::Documentation() {
+documentation::Documentation ScreenSpaceRenderable::Documentation() {
     using namespace openspace::documentation;
 
     return {
@@ -72,8 +73,8 @@ Documentation ScreenSpaceRenderable::Documentation() {
     };
 }
 
-ScreenSpaceRenderable* ScreenSpaceRenderable::createFromDictionary(
-    const ghoul::Dictionary& dictionary)
+std::unique_ptr<ScreenSpaceRenderable> ScreenSpaceRenderable::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -84,7 +85,7 @@ ScreenSpaceRenderable* ScreenSpaceRenderable::createFromDictionary(
     std::string renderableType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<ScreenSpaceRenderable>();
-    ScreenSpaceRenderable* result = factory->create(renderableType, dictionary);
+    std::unique_ptr<ScreenSpaceRenderable> result = factory->create(renderableType, dictionary);
     if (result == nullptr) {
         LERROR("Failed to create a ScreenSpaceRenderable object of type '" <<
                renderableType << "'"
@@ -95,9 +96,9 @@ ScreenSpaceRenderable* ScreenSpaceRenderable::createFromDictionary(
     return result;
 }
 
-
 ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary)
-    : _enabled("enabled", "Is Enabled", true)
+    : properties::PropertyOwner("")
+    , _enabled("enabled", "Is Enabled", true)
     , _useFlatScreen("flatScreen", "Flat Screen", true)
     , _euclideanPosition(
         "euclideanPosition",
@@ -109,9 +110,9 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _sphericalPosition(
         "sphericalPosition",
         "Spherical coordinates",
-        glm::vec2(0.f, M_PI_2),
-        glm::vec2(-M_PI),
-        glm::vec2(M_PI)
+        glm::vec2(0.f, static_cast<float>(M_PI_2)),
+        glm::vec2(-static_cast<float>(M_PI)),
+        glm::vec2(static_cast<float>(M_PI))
     )
     , _depth("depth", "Depth", 0.f, 0.f, 1.f)
     , _scale("scale", "Scale", 0.25f, 0.f, 2.f)
@@ -130,14 +131,15 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     addProperty(_alpha);
     addProperty(_delete);
 
-
     dictionary.getValue(KeyFlatScreen, _useFlatScreen);
     useEuclideanCoordinates(_useFlatScreen);
     
-    if (_useFlatScreen)
+    if (_useFlatScreen) {
         dictionary.getValue(KeyPosition, _euclideanPosition);
-    else
+    }
+    else {
         dictionary.getValue(KeyPosition, _sphericalPosition);
+    }
 
 
     dictionary.getValue(KeyScale, _scale);
@@ -239,7 +241,7 @@ glm::vec2 ScreenSpaceRenderable::toEuclidean(const glm::vec2& spherical, float r
 
 glm::vec2 ScreenSpaceRenderable::toSpherical(const glm::vec2& euclidean) {
     _radius = -sqrt(pow(euclidean[0],2)+pow(euclidean[1],2)+pow(PlaneDepth,2));
-    float theta = atan2(-PlaneDepth,euclidean[0])-M_PI/2.0;
+    float theta = atan2(-PlaneDepth, euclidean[0]) - static_cast<float>(M_PI_2);
     float phi = acos(euclidean[1]/_radius);
 
     return glm::vec2(theta, phi);

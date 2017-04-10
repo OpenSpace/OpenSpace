@@ -31,16 +31,16 @@
 namespace openspace {
 namespace globebrowsing {
 
-void GPULayerGroup::setValue(ProgramObject* programObject, const LayerGroup& layerGroup,
-                             const TileIndex& tileIndex)
+void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
+                             const LayerGroup& layerGroup, const TileIndex& tileIndex)
 {
     auto& activeLayers = layerGroup.activeLayers();
     ghoul_assert(
-        activeLayers.size() == gpuActiveLayers.size(),
+        activeLayers.size() == _gpuActiveLayers.size(),
         "GPU and CPU active layers must have same size!"
     );
     for (int i = 0; i < activeLayers.size(); ++i) {
-        gpuActiveLayers[i]->setValue(
+        _gpuActiveLayers[i]->setValue(
             programObject,
             *activeLayers[i],
             tileIndex,
@@ -49,19 +49,20 @@ void GPULayerGroup::setValue(ProgramObject* programObject, const LayerGroup& lay
     }
 }
 
-void GPULayerGroup::bind(ProgramObject* programObject, const LayerGroup& layerGroup, 
-                         const std::string& nameBase, int category)
+void GPULayerGroup::bind(ghoul::opengl::ProgramObject* programObject,
+                         const LayerGroup& layerGroup, const std::string& nameBase,
+                         int category)
 {
     auto activeLayers = layerGroup.activeLayers();
-    gpuActiveLayers.resize(activeLayers.size());
+    _gpuActiveLayers.resize(activeLayers.size());
     int pileSize = layerGroup.pileSize();
-    for (size_t i = 0; i < gpuActiveLayers.size(); ++i) {
+    for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
         // should maybe a proper GPULayer factory
-        gpuActiveLayers[i] = (category == LayerManager::HeightLayers) ?
+        _gpuActiveLayers[i] = (category == LayerManager::HeightLayers) ?
             std::make_unique<GPUHeightLayer>() : 
             std::make_unique<GPULayer>();
         std::string nameExtension = "[" + std::to_string(i) + "].";
-        gpuActiveLayers[i]->bind(
+        _gpuActiveLayers[i]->bind(
             programObject,
             *activeLayers[i],
             nameBase + nameExtension,
@@ -71,8 +72,8 @@ void GPULayerGroup::bind(ProgramObject* programObject, const LayerGroup& layerGr
 }
 
 void GPULayerGroup::deactivate() {
-    for (size_t i = 0; i < gpuActiveLayers.size(); ++i) {
-        gpuActiveLayers[i]->deactivate();
+    for (std::unique_ptr<GPULayer>& l : _gpuActiveLayers) {
+        l->deactivate();
     }
 }
     

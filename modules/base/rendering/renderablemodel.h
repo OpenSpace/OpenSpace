@@ -36,6 +36,8 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
+#include <memory>
+
 namespace openspace {
 
 namespace modelgeometry {
@@ -65,7 +67,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    modelgeometry::ModelGeometry* _geometry;
+    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
     
     glm::dmat3 _modelTransform;
 

@@ -29,15 +29,52 @@ if (WIN32)
     set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/OpenSpace/openspace.rc)
 endif ()
 
+##OpenVR section start####################
+option(OPENSPACE_OPENVR_SUPPORT "Build OpenSpace application with OpenVR support" OFF)
+
+if(OPENSPACE_OPENVR_SUPPORT)
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${OPENSPACE_EXT_DIR}/sgct/cmake/modules/")
+    
+    find_package(OpenVR REQUIRED)
+    
+    set(SGCT_OPENVR_DEFINITIONS OPENVR_SUPPORT)
+
+    if(NOT SGCT_OPENVR_INCLUDE_DIRECTORY)
+        if( WIN32 )
+            find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
+                NAMES SGCTOpenVR.h
+                PATHS $ENV{SGCT_ROOT_DIR}/additional_includes/openvr ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr NO_DEFAULT_PATH
+                REQUIRED)
+        else()
+            find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
+                NAMES SGCTOpenVR.h
+                PATH_SUFFIXES SGCTOpenVR
+                PATHS $ENV{SGCT_ROOT_DIR}/additional_includes/openvr ${OPENSPACE_EXT_DIR}/sgct/additional_includes/openvr
+                REQUIRED)
+        endif()
+    else()
+        set(SGCT_OPENVR_FILES ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.h ${SGCT_OPENVR_INCLUDE_DIRECTORY}/SGCTOpenVR.cpp)
+    endif()
+else()
+    set(OPENVR_INCLUDE_DIRS "")
+    set(SGCT_OPENVR_INCLUDE_DIRECTORY "")
+    set(OPENVR_LIBRARY "")
+    set(SGCT_OPENVR_DEFINITIONS "")
+endif()
+##OpenVR section end####################
+
 add_executable(${APPLICATION_NAME}
+    ${SGCT_OPENVR_FILES}
     ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp
     ${RESOURCE_FILE}
 )
-target_include_directories(${APPLICATION_NAME} PUBLIC ${OPENSPACE_BASE_DIR}/include)
-target_link_libraries(${APPLICATION_NAME} libOpenSpace)
+target_include_directories(${APPLICATION_NAME} PUBLIC ${OPENSPACE_BASE_DIR}/include ${OPENVR_INCLUDE_DIRS} ${SGCT_OPENVR_INCLUDE_DIRECTORY})
+target_link_libraries(${APPLICATION_NAME} libOpenSpace ${OPENVR_LIBRARY})
+target_compile_definitions(${APPLICATION_NAME} PUBLIC ${SGCT_OPENVR_DEFINITIONS})
+
 
 if (MSVC)
     set_target_properties(${APPLICATION_NAME} PROPERTIES LINK_FLAGS
         "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
     )
-endif ()
+endif()

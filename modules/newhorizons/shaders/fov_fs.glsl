@@ -22,28 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-/*
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
-
-in vec4 vs_point_position;
-in vec4 vs_point_velocity;
-*/
-
-//out vec4 vs_point_position;
-in vec4 vs_point_velocity;
-in vec4 vs_positionScreenSpace;
-
-
-//out vec4 diffuse;
-
-#include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
+
+in vec4 vs_color;
+in vec4 vs_positionScreenSpace;
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = vs_point_velocity;
+    frag.color = vs_color;
     frag.depth = vs_positionScreenSpace.w;
-
     return frag;
 }

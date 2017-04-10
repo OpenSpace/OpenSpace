@@ -64,13 +64,13 @@ class Property {
 public:
     /**
      * The visibility classes for Property%s. The classes are strictly ordered as
-     * All > Developer > User > None
+     * All > Developer > User > Hidden
      */
     enum class Visibility {
         All = 3,  ///< Visible for all types, no matter what
         Developer = 2, ///< Visible in Developer mode
         User = 1, ///< Visible in User mode
-        None = 0 ///< Never visible
+        Hidden = 0 ///< Never visible
     };
 
     /**
@@ -314,10 +314,10 @@ public:
      * Property::ViewOptions::PowerScaledCoordinate = <code>powerScaledCoordinate</code>.
      */
     struct ViewOptions {
-        static const std::string Color;
-        static const std::string LightPosition;
-        static const std::string PowerScaledScalar;
-        static const std::string PowerScaledCoordinate;
+        static const char* Color;
+        static const char* LightPosition;
+        static const char* PowerScaledScalar;
+        static const char* PowerScaledCoordinate;
     };
 
     /**
@@ -329,10 +329,10 @@ public:
     const ghoul::Dictionary& metaData() const;
 
 protected:
-    static const std::string IdentifierKey;
-    static const std::string NameKey;
-    static const std::string TypeKey;
-    static const std::string MetaDataKey;
+    static const char* IdentifierKey;
+    static const char* NameKey;
+    static const char* TypeKey;
+    static const char* MetaDataKey;
 
     /**
      * Creates the information that is general to every Property and adds the

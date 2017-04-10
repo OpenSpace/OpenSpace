@@ -165,12 +165,12 @@ void PixelRegion::clampTo(const PixelRegion& boundingRegion) {
 void PixelRegion::forceNumPixelToDifferByNearestMultipleOf(unsigned int multiple) {
     ghoul_assert(multiple > 0, "multiple must be 1 or larger");
     int sizeDiff = numPixels.x - numPixels.y;
-    if (std::abs(sizeDiff) > 0) {
+    if (static_cast<int>(std::abs(static_cast<double>(sizeDiff))) > 0) {
         if (sizeDiff > 0) {
             numPixels.y += sizeDiff % multiple;
         }
         else {
-            numPixels.x += std::abs(sizeDiff) % multiple;
+            numPixels.x += static_cast<int>(std::abs(static_cast<double>(sizeDiff))) % multiple;
         }
     }
 }
@@ -241,6 +241,8 @@ int PixelRegion::edge(Side side) const {
         return start.x + numPixels.x;
     case Side::BOTTOM:
         return start.y + numPixels.y;
+    default:
+        ghoul_assert(false, "Missing case label");
     }
 }
 

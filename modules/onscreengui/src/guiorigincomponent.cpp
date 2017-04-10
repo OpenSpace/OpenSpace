@@ -59,7 +59,11 @@ void GuiOriginComponent::render() {
     }
 
     auto iCurrentFocus = std::find(nodes.begin(), nodes.end(), currentFocus);
-    ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
+    if (!nodes.empty()) {
+        // Only check if we found the current focus node if we have any nodes at all
+        // only then it would be a real error
+        ghoul_assert(iCurrentFocus != nodes.end(), "Focus node not found");
+    }
     int currentPosition = static_cast<int>(std::distance(iCurrentFocus, nodes.begin()));
 
     bool hasChanged = ImGui::Combo("Origin", &currentPosition, nodeNames.c_str());

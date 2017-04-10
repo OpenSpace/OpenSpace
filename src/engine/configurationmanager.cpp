@@ -24,20 +24,22 @@
 
 #include <openspace/engine/configurationmanager.h>
 
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/exception.h>
+#include <openspace/documentation/documentation.h>
+
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-
-#include <list>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/lua/luastate.h>
+#include <ghoul/misc/exception.h>
 
 using std::string;
 
 #include "configurationmanager_doc.inl"
 
 namespace {
-    const string _configurationFile = "openspace.cfg";
-    const string _keyBasePath = "BASE_PATH";
+    const char* _configurationFile = "openspace.cfg";
+    const char* _keyBasePath = "BASE_PATH";
+    const char* _initialConfigHelper = "${BASE_PATH}/scripts/configuration_helper.lua";
 }
 
 namespace openspace {
@@ -57,6 +59,7 @@ const string ConfigurationManager::KeyKeyboardShortcuts = "KeyboardShortcuts";
 const string ConfigurationManager::KeyDocumentation = "Documentation";
 const string ConfigurationManager::KeyFactoryDocumentation = "FactoryDocumentation";
 const string ConfigurationManager::KeyConfigScene = "Scene";
+const string ConfigurationManager::KeyConfigTask = "Task";
 
 const string ConfigurationManager::KeyLogging = "Logging";
 const string ConfigurationManager::PartLogLevel = "LogLevel";
@@ -87,15 +90,20 @@ string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
     
     Directory directory = FileSys.currentDirectory();
-    std::string configurationName = _configurationFile;
     
     while (true) {
-        std::string&& fullPath = FileSys.pathByAppendingComponent(directory,
-                                                                  configurationName);
-        bool exists = FileSys.fileExists(fullPath);
-        if (exists)
+        std::string fullPath = FileSys.pathByAppendingComponent(
+            directory,
+            _configurationFile
+        );
+
+        if (FileSys.fileExists(fullPath)) {
+            // We have found the configuration file and can bail out
             return fullPath;
+        }
         
+        // Otherwise, we traverse the directory tree up
+    
         Directory nextDirectory = directory.parentDirectory(
             ghoul::filesystem::Directory::AbsolutePath::Yes
         );
@@ -114,10 +122,9 @@ string ConfigurationManager::findConfiguration(const string& filename) {
 void ConfigurationManager::loadFromFile(const string& filename) {
     using ghoul::filesystem::FileSystem;
     
-    if (!FileSys.fileExists(filename)) {
-        throw ghoul::FileNotFoundError(filename, "ConfigurationManager");
-    }
-
+    ghoul_assert(!filename.empty(), "Filename must not be empty");
+    ghoul_assert(FileSys.fileExists(filename), "File must exist");
+    
     // ${BASE_PATH}
     string basePathToken = FileSystem::TokenOpeningBraces + _keyBasePath
         + FileSystem::TokenClosingBraces;
@@ -126,9 +133,15 @@ void ConfigurationManager::loadFromFile(const string& filename) {
     string absolutePath = FileSys.absolutePath(filename);
     string basePath = ghoul::filesystem::File(absolutePath).directoryName();
     FileSys.registerPathToken(basePathToken, basePath);
+    
+    ghoul::lua::LuaState state;
+    
+    if (FileSys.fileExists(absPath(_initialConfigHelper))) {
+        ghoul::lua::runScriptFile(state, absPath(_initialConfigHelper));
+    }
 
     // Loading the configuration file into ourselves
-    ghoul::lua::loadDictionaryFromFile(filename, *this);
+    ghoul::lua::loadDictionaryFromFile(filename, *this, state);
 
     // Perform testing against the documentation/specification
     openspace::documentation::testSpecificationAndThrow(
@@ -140,63 +153,28 @@ void ConfigurationManager::loadFromFile(const string& filename) {
     // Register all the paths
     ghoul::Dictionary dictionary = value<ghoul::Dictionary>(KeyPaths);
 
-    std::vector<std::string> pathKeys = dictionary.keys();
-    for (std::string key : pathKeys) {
-        std::string p;
-        if (dictionary.getValue(key, p)) {
-            std::string fullKey =
-                FileSystem::TokenOpeningBraces + key + FileSystem::TokenClosingBraces;
-            LDEBUGC("ConfigurationManager", "Registering path " << fullKey << ": " << p);
-            
-            bool override = (basePathToken == fullKey);
-            if (override)
-                LINFOC("ConfigurationManager", "Overriding base path with '" << p << "'");
-
-            using Override = ghoul::filesystem::FileSystem::Override;
-            FileSys.registerPathToken(
-                std::move(fullKey),
-                std::move(p),
-                override ? Override::Yes : Override::No
-            );
+    for (std::string key : dictionary.keys()) {
+        std::string p = dictionary.value<std::string>(key);
+        std::string fullKey =
+            FileSystem::TokenOpeningBraces + key + FileSystem::TokenClosingBraces;
+        LDEBUGC("ConfigurationManager", "Registering path " << fullKey << ": " << p);
+        
+        bool override = (basePathToken == fullKey);
+        if (override) {
+            LINFOC("ConfigurationManager", "Overriding base path with '" << p << "'");
         }
-    }
 
-    bool complete = checkCompleteness();
-    if (!complete) {
-        throw ghoul::RuntimeError(
-            "Configuration file '" + filename + "' was not complete",
-            "ConfigurationManager"
+        using Override = ghoul::filesystem::FileSystem::Override;
+        FileSys.registerPathToken(
+            std::move(fullKey),
+            std::move(p),
+            override ? Override::Yes : Override::No
         );
     }
 
     // Remove the Paths dictionary from the configuration manager as those paths might
     // change later and we don't want to be forced to keep our local copy up to date
     removeKey(KeyPaths);
-}
-
-bool ConfigurationManager::checkCompleteness() const {
-    std::vector<std::string> requiredTokens = {
-        KeyPaths,
-        KeyPaths + "." + KeyCache,
-        KeyFonts,
-        KeyConfigSgct
-    };
-
-    bool totalSuccess = true;
-    for (const std::string& token : requiredTokens) {
-        bool success = hasKey(token);
-
-        if (!success) {
-            LFATALC(
-                "ConfigurationManager",
-                "Configuration file did not contain required key '" << token << "'"
-            );
-        }
-
-        totalSuccess &= success;
-    }
-
-    return totalSuccess;
 }
 
 }  // namespace openspace

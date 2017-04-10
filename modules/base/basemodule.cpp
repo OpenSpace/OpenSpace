@@ -24,6 +24,7 @@
 
 #include <modules/base/basemodule.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
@@ -103,7 +104,7 @@ void BaseModule::internalInitialize() {
     fModelGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
 }
 
-std::vector<Documentation> BaseModule::documentations() const {
+std::vector<documentation::Documentation> BaseModule::documentations() const {
     return {
         StaticScale::Documentation(),
         StaticTranslation::Documentation(),
