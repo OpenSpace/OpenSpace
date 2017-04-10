@@ -25,9 +25,11 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/atmosphere.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atmosphereraycaster.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableatmosphere.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetatmosphere.h
+  #${CMAKE_CURRENT_SOURCE_DIR}/rendering/globebrowsingatmosphere.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -35,6 +37,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atmosphereraycaster.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableatmosphere.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetatmosphere.cpp
+  #${CMAKE_CURRENT_SOURCE_DIR}/rendering/globebrowsingatmosphere.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

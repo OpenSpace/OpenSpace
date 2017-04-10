@@ -1107,6 +1107,29 @@ namespace openspace {
             std::cout << "Planet Position in OS Object Space  (psc): " << glm::to_string(glm::vec4(pscPlanetPosObjCoords.vec3(),1.0)) << std::endl;
             std::cout << "Planet Position in OS Object Space (Orig): " << glm::to_string(planetCenterOrigin) << std::endl;
 
+
+
+            //glm::mat4 tmpTrans = glm::translate(transform, data.position.vec3());
+            glm::mat4 tmpTrans = glm::translate(data.position.vec3());
+            std::cout << "\n******* tmpTrans: " << glm::to_string(tmpTrans) << " *******" << std::endl;
+            float divisor = 1.0;
+            for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) {
+                if (abs(tmpTrans[i][j] > divisor)) divisor = tmpTrans[i][j];
+            }
+            std::cout << "\n******* Divisor: " << divisor << " *******" << std::endl;
+            glm::mat4 scaledModelTransform = tmpTrans / divisor;
+            std::cout << "\n******* scaledModelTrans: " << glm::to_string(scaledModelTransform) << " *******" << std::endl;
+            glm::mat4 inverScaledModelTransformation = glm::translate(glm::vec3(-scaledModelTransform[3][0], -scaledModelTransform[3][1], -scaledModelTransform[3][2]));
+            std::cout << "\n******* scaledModelTrans Inverse: " << glm::to_string(glm::inverse(scaledModelTransform)) << " *******" << std::endl;
+            std::cout << "\n******* scaledModelTrans Inverse2: " << glm::to_string(inverScaledModelTransformation) << " *******" << std::endl;
+            std::cout << "\n******* scaledModelTrans Back: " << glm::to_string(glm::inverse(scaledModelTransform) / divisor ) << " *******" << std::endl;
+            std::cout << "\n******* scaledModelTrans Back2: " << glm::to_string(inverScaledModelTransformation / divisor) << " *******" << std::endl;
+            glm::vec4 modelPos = (glm::inverse(scaledModelTransform) / divisor) * ttmp3;
+            glm::vec4 modelPos2 = (inverScaledModelTransformation / divisor) * ttmp3;
+            std::cout << "Planet Position in OS Object Space (Emil) : " << glm::to_string(modelPos) << std::endl;
+            std::cout << "Planet Position in OS Object Space (Emil2): " << glm::to_string(modelPos2) << std::endl;
+            std::cout << "Planet Position in OS Object Space (Orig) : " << glm::to_string(planetCenterOrigin) << std::endl;
+
             /*glm::mat4 invRot = glm::mat4(glm::inverse(glm::mat3(data.camera.viewRotationMatrix())));
             invRot[3][3] = 1.0;
             glm::mat4 e2oHand = glm::inverse(transform) *
