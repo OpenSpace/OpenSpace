@@ -149,7 +149,7 @@ OpenSpaceEngine::OpenSpaceEngine(
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
-
+    
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Renderable>>(),
@@ -1171,6 +1171,24 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 &luascriptfunctions::writeDocumentation,
                 "",
                 "Writes out documentation files"
+            },
+            {
+                "addVirtualProperty",
+                &luascriptfunctions::addVirtualProperty,
+                "type, name, identifier, [value, minimumValue, maximumValue]",
+                "Adds a virtual property that will set a group of properties"
+            },
+            {
+                "removeVirtualProperty",
+                &luascriptfunctions::removeVirtualProperty,
+                "string",
+                "Removes a previously added virtual property"
+            },
+            {
+                "removeAllVirtualProperties",
+                &luascriptfunctions::removeAllVirtualProperties,
+                "",
+                "Remove all registered virtual properties"
             }
         }
     };
