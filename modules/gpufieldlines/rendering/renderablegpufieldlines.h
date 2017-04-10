@@ -29,6 +29,15 @@
 
 #include <modules/gpufieldlines/util/gpufieldlinesstate.h>
 
+#include <modules/volume/rawvolume.h>
+
+namespace ghoul {
+    namespace opengl {
+        class Texture;
+        class TextureUnit;
+    }
+}
+
 namespace openspace {
 
 class RenderableGpuFieldlines : public Renderable {
@@ -63,6 +72,25 @@ private:
     // TODO: Make an array instead?
     GLuint _vertexPositionBuffer;
     GLuint _vertexColorBuffer;
+
+    std::unique_ptr<RawVolume<float>> _rawVolume;
+    std::unique_ptr<RawVolume<glm::vec3>> _normalizedVolume;
+    std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBx;
+    std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBy;
+    std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBz;
+
+    std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
+    std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBx;
+    std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBy;
+    std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBz;
+
+    std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
+
+    glm::vec3 _bMins;
+    glm::vec3 _bMaxs;
+    glm::vec3 _domainMins;
+    glm::vec3 _domainMaxs;
+    glm::uvec3 _dimensions;
 
     int _activeStateIndex;
     int _numberOfStates;

@@ -23,26 +23,26 @@
  ****************************************************************************************/
 
 #include <modules/gpufieldlines/rendering/renderablegpufieldlines.h>
-#include <modules/gpufieldlines/util/gpufieldlinesmanager.h>
+
+#include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
+
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/raycastermanager.h>
-
-#include <ghoul/glm.h>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/misc/assert.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 
+#include <modules/gpufieldlines/util/gpufieldlinesmanager.h>
+
 // VOLUME
 #include <modules/kameleonvolume/kameleonvolumereader.h>
+
 
 namespace {
     std::string _loggerCat = "GpuRenderableFieldlines";
@@ -201,14 +201,102 @@ bool RenderableGpuFieldlines::initialize() {
 
             glm::vec3 domainBoundsLower = glm::vec3(xMin,yMin,zMin);
             glm::vec3 domainBoundsUpper = glm::vec3(xMax,yMax,zMax);
-            // float bxMin = kvr.minValue("bx");
-            // float bxMax = kvr.maxValue("bx");
 
-            auto bxUniformDistr = kvr.readFloatVolume(glm::uvec3(32,32,32), "bx", domainBoundsLower, domainBoundsUpper);
-            float* p = bxUniformDistr->data();
+            float bxMin = kvr.minValue("bx");
+            float bxMax = kvr.maxValue("bx");
+            float byMin = kvr.minValue("by");
+            float byMax = kvr.maxValue("by");
+            float bzMin = kvr.minValue("bz");
+            float bzMax = kvr.maxValue("bz");
 
+            _dimensions = glm::uvec3(32,32,32);
+
+            auto bxUniformDistr = kvr.readFloatVolume(_dimensions, "bx", domainBoundsLower, domainBoundsUpper);
+            auto byUniformDistr = kvr.readFloatVolume(_dimensions, "by", domainBoundsLower, domainBoundsUpper);
+            auto bzUniformDistr = kvr.readFloatVolume(_dimensions, "bz", domainBoundsLower, domainBoundsUpper);
+            float* bxVol = bxUniformDistr->data();
+            float* byVol = byUniformDistr->data();
+            float* bzVol = bzUniformDistr->data();
+
+            _normalizedVolume = std::make_unique<RawVolume<glm::vec3>>(_dimensions);
+            _normalizedVolumeBx = std::make_unique<RawVolume<GLfloat>>(_dimensions);
+            _normalizedVolumeBy = std::make_unique<RawVolume<GLfloat>>(_dimensions);
+            _normalizedVolumeBz = std::make_unique<RawVolume<GLfloat>>(_dimensions);
+
+            float* inX = bxUniformDistr->data();
+            float* inY = byUniformDistr->data();
+            float* inZ = bzUniformDistr->data();
+
+            glm::vec3* out = _normalizedVolume->data();
+            GLfloat* outX = _normalizedVolumeBx->data();
+            GLfloat* outY = _normalizedVolumeBy->data();
+            GLfloat* outZ = _normalizedVolumeBz->data();
+
+            float bxDiff = bxMax - bxMin;
+            float byDiff = byMax - byMin;
+            float bzDiff = bzMax - bzMin;
+
+            for (size_t i = 0; i < _normalizedVolumeBx->nCells(); ++i) {
+                outX[i] = glm::clamp((inX[i] - bxMin) / bxDiff, 0.0f, 1.0f);
+                outY[i] = glm::clamp((inY[i] - byMin) / byDiff, 0.0f, 1.0f);
+                outZ[i] = glm::clamp((inZ[i] - bzMin) / bzDiff, 0.0f, 1.0f);
+                out[i] = glm::vec3(outX[i],outY[i],outZ[i]);
+            }
+
+            _bMins = glm::vec3(bxMin,byMin,bzMin);
+            _bMaxs = glm::vec3(bxMax,byMax,bzMax);
+            _domainMins = glm::vec3(xMin,yMin,zMin);
+            _domainMaxs = glm::vec3(xMax,yMax,zMax);
+
+            _volumeTextureBx = std::make_unique<ghoul::opengl::Texture>(
+                _dimensions,
+                ghoul::opengl::Texture::Format::Red,
+                GL_RED,
+                GL_FLOAT,
+                ghoul::opengl::Texture::FilterMode::Linear,
+                ghoul::opengl::Texture::WrappingMode::ClampToEdge
+            );
+
+            _volumeTextureBy = std::make_unique<ghoul::opengl::Texture>(
+                _dimensions,
+                ghoul::opengl::Texture::Format::Red,
+                GL_RED,
+                GL_FLOAT,
+                ghoul::opengl::Texture::FilterMode::Linear,
+                ghoul::opengl::Texture::WrappingMode::ClampToEdge
+            );
+
+            _volumeTextureBz = std::make_unique<ghoul::opengl::Texture>(
+                _dimensions,
+                ghoul::opengl::Texture::Format::Red,
+                GL_RED,
+                GL_FLOAT,
+                ghoul::opengl::Texture::FilterMode::Linear,
+                ghoul::opengl::Texture::WrappingMode::ClampToEdge
+            );
+
+            _volumeTexture = std::make_unique<ghoul::opengl::Texture>(
+                _dimensions,
+                ghoul::opengl::Texture::Format::RGB,
+                GL_RGB,
+                GL_FLOAT,
+                ghoul::opengl::Texture::FilterMode::Linear,
+                ghoul::opengl::Texture::WrappingMode::ClampToEdge
+            );
+
+            void* data = reinterpret_cast<void*>(_normalizedVolume->data());
+            void* dataBx = reinterpret_cast<void*>(_normalizedVolumeBx->data());
+            void* dataBy = reinterpret_cast<void*>(_normalizedVolumeBy->data());
+            void* dataBz = reinterpret_cast<void*>(_normalizedVolumeBz->data());
+            _volumeTexture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
+            _volumeTextureBx->setPixelData(dataBx, ghoul::opengl::Texture::TakeOwnership::No);
+            _volumeTextureBy->setPixelData(dataBy, ghoul::opengl::Texture::TakeOwnership::No);
+            _volumeTextureBz->setPixelData(dataBz, ghoul::opengl::Texture::TakeOwnership::No);
+
+            _volumeTexture->uploadTexture();
 
             _states.push_back(GpuFieldlinesState(_seedPoints.size()));
+            _startTimes.push_back(479649600.0); // March 15th 2015 00:00:00.000
 
         }
 
@@ -218,7 +306,7 @@ bool RenderableGpuFieldlines::initialize() {
             double lastStateStart = _startTimes[_numberOfStates-1];
             // double avgTimeOffset = (lastStateStart - _seqStartTime) /
             //                        (static_cast<double>(_numberOfStates) - 1.0);
-            _seqEndTime =  lastStateStart + 99999.9;//avgTimeOffset;
+            _seqEndTime =  lastStateStart + 9999999.9;//avgTimeOffset;
             // Add seqEndTime as the last start time
             // to prevent vector from going out of bounds later.
             _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
@@ -228,9 +316,8 @@ bool RenderableGpuFieldlines::initialize() {
     _program = OsEng.renderEngine().buildRenderProgram(
         "GpuFieldlines",
         "${MODULE_GPUFIELDLINES}/shaders/gpufieldline_flow_direction_vs.glsl",
-        "${MODULE_GPUFIELDLINES}/shaders/gpufieldline_flow_direction_gs.glsl",
-        // "${MODULE_GPUFIELDLINES}/shaders/fieldline_morph_flow_direction_vs.glsl",
-        "${MODULE_GPUFIELDLINES}/shaders/fieldline_flow_direction_fs.glsl"
+        "${MODULE_GPUFIELDLINES}/shaders/gpufieldline_flow_direction_fs.glsl",
+        "${MODULE_GPUFIELDLINES}/shaders/gpufieldline_flow_direction_gs.glsl"
     );
 
     if (!_program) {
@@ -282,6 +369,15 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         int testTime = static_cast<int>(OsEng.runTime() * 100) / 5;
         _program->setUniform("time", testTime);
 
+        _program->setUniform("domainMins", _domainMins);
+        // _program->setUniform("bMaxs", _bMaxs);
+        _program->setUniform("domainDiffs", _domainMaxs - _domainMins);
+
+        _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+        _textureUnit->activate();
+        _volumeTexture->bind();
+        _program->setUniform("volumeTexture", _textureUnit->unitNumber());
+
         glDisable(GL_CULL_FACE);
 
         // _program->setUniform("classification", _classification);
@@ -289,12 +385,13 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         //     _program->setUniform("fieldLineColor", _fieldlineColor);
 
         glBindVertexArray(_vertexArrayObject);
-        glMultiDrawArrays(
-                GL_LINE_STRIP_ADJACENCY,
-                &_states[_activeStateIndex]._lineStart[0],
-                &_states[_activeStateIndex]._lineCount[0],
-                static_cast<GLsizei>(_states[_activeStateIndex]._lineStart.size())
-        );
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>( _seedPoints.size() ) );
+        // glMultiDrawArrays(
+        //         GL_LINE_STRIP_ADJACENCY,
+        //         &_states[_activeStateIndex]._lineStart[0],
+        //         &_states[_activeStateIndex]._lineCount[0],
+        //         static_cast<GLsizei>(_states[_activeStateIndex]._lineStart.size())
+        // );
 
         glBindVertexArray(0);
         glEnable(GL_CULL_FACE);
@@ -336,8 +433,8 @@ void RenderableGpuFieldlines::update(const UpdateData&) {
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
         glBufferData(GL_ARRAY_BUFFER,
-            _states[_activeStateIndex]._vertexPositions.size() * sizeof(glm::vec3),
-            &_states[_activeStateIndex]._vertexPositions.front(),
+            _seedPoints.size() * sizeof(glm::vec3),
+            &_seedPoints.front(),
             GL_STATIC_DRAW);
 
         GLuint vertexLocation = 0;
