@@ -621,11 +621,23 @@ void ParallelConnection::sendFunc(){
                 reinterpret_cast<const char*>(&messageSizeOut),
                 reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t));
 
-            result = send(_clientSocket, header.data(), header.size(), 0);
-            result = send(_clientSocket, message.content.data(), message.content.size(), 0);
+            result = send(
+                _clientSocket,
+                header.data(),
+                static_cast<int>(header.size()),
+                0
+            );
+            result = send(
+                _clientSocket,
+                message.content.data(),
+                static_cast<int>(message.content.size()),
+                0
+            );
 
             if (result == SOCKET_ERROR) {
-                LERROR("Failed to send message.\nError: " << _ERRNO << " detected in connection, disconnecting.");
+                LERROR("Failed to send message.\nError: " <<
+                    _ERRNO << " detected in connection, disconnecting."
+                );
                 signalDisconnect();
             }
 
@@ -826,7 +838,12 @@ void ParallelConnection::listenCommunication() {
 
         // receive the payload
         messageBuffer.resize(messageSize);
-        nBytesRead = receiveData(_clientSocket, messageBuffer, messageSize, 0);
+        nBytesRead = receiveData(
+            _clientSocket,
+            messageBuffer,
+            static_cast<int>(messageSize),
+            0
+        );
 
         if (nBytesRead <= 0) {
             if (!_disconnect) {
@@ -964,7 +981,7 @@ void ParallelConnection::setNConnections(size_t nConnections) {
 }
 
 int ParallelConnection::nConnections() {
-    return _nConnections;
+    return static_cast<int>(_nConnections);
 }
 
 bool ParallelConnection::isHost() {

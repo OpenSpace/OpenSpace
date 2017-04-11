@@ -37,10 +37,12 @@ namespace properties {
 #define DEFAULT_FROM_LUA_LAMBDA(TYPE, DEFAULT_VALUE)                                     \
     [](lua_State* state, bool& success) -> TYPE {                                        \
         success = (lua_isnumber(state, -1) == 1);                                        \
-        if (success)                                                                     \
+        if (success) {                                                                   \
             return static_cast<TYPE>(lua_tonumber(state, -1));                           \
-        else                                                                             \
+        }                                                                                \
+        else {                                                                           \
             return DEFAULT_VALUE;                                                        \
+        }                                                                                \
     }
 
 #define DEFAULT_TO_LUA_LAMBDA(TYPE)                                                      \
@@ -55,8 +57,12 @@ namespace properties {
         TYPE v;                                                                          \
         s >> v;                                                                          \
         success = !s.fail();                                                             \
-        if (success)                                                                     \
+        if (success) {                                                                   \
             return v;                                                                    \
+        }                                                                                \
+        else {                                                                           \
+            throw ghoul::RuntimeError("Conversion error for string: " + value);          \
+        }                                                                                \
     }
 
 #define DEFAULT_TO_STRING_LAMBDA(TYPE)                                                   \

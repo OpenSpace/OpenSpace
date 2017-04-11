@@ -102,7 +102,7 @@ void mainInitFunc() {
             
             // If we have an OpenVRWindow, initialize OpenVR.
             sgct::SGCTOpenVR::initialize(
-                SgctEngine->getNearClippingPlane(), _sgctEngine->getFarClippingPlane()
+                SgctEngine->getNearClippingPlane(), SgctEngine->getFarClippingPlane()
             );
 #else
             LWARNING(
@@ -167,10 +167,10 @@ void mainRenderFunc() {
 
     glm::mat4 projectionMatrix = SgctEngine->getCurrentProjectionMatrix();
 #ifdef OPENVR_SUPPORT
-    bool currentWindowIsHMD = FirstOpenVRWindow == _sgctEngine->getCurrentWindowPtr();
+    bool currentWindowIsHMD = FirstOpenVRWindow == SgctEngine->getCurrentWindowPtr();
     if (sgct::SGCTOpenVR::isHMDActive() && currentWindowIsHMD) {
         projectionMatrix = sgct::SGCTOpenVR::getHMDCurrentViewProjectionMatrix(
-            _sgctEngine->getCurrentFrustumMode()
+            SgctEngine->getCurrentFrustumMode()
         );
     }
 #endif
