@@ -27,7 +27,7 @@
 #include <openspace/util/time.h>
 
 namespace {
-    double SecondsOffTolerance = 0.1;
+    double SecondsOffTolerance = 1;
 }
 
 namespace openspace {
@@ -121,6 +121,7 @@ void TimeManager::consumeKeyframes(double dt) {
 
         time.setDeltaTime(y1Prime);
         time.setTime(y1, false);
+        // std::cout << "Correcting time to " << y1 << ", dt=" << y1Prime << "." << std::endl;
     }
 }
 
@@ -131,6 +132,13 @@ void TimeManager::addKeyframe(const TimeKeyframe& kf) {
     }
     auto iter = std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, &TimeManager::compareKeyframeTimes);
     _keyframes.insert(iter, kf);
+}
+
+void TimeManager::removeKeyframesAfter(double timestamp) {
+    datamessagestructures::TimeKeyframe kf;
+    kf._timestamp = timestamp;
+    auto iter = std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, &TimeManager::compareKeyframeTimes);
+    _keyframes.erase(iter, _keyframes.end());
 }
 
 
@@ -145,8 +153,11 @@ void TimeManager::clearKeyframes() {
     _keyframes.clear();
 }
 
-bool TimeManager::compareKeyframeTimes(const TimeKeyframe& a, const TimeKeyframe& b)
-{
+const std::deque<datamessagestructures::TimeKeyframe>& TimeManager::keyframes() const {
+    return _keyframes;
+}
+
+bool TimeManager::compareKeyframeTimes(const TimeKeyframe& a, const TimeKeyframe& b) {
     return a._timestamp < b._timestamp;
 }
 

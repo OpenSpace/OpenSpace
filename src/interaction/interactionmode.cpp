@@ -35,6 +35,7 @@
 #include <ghoul/logging/logmanager.h>
 
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/globes/renderableglobe.h>
@@ -65,16 +66,21 @@ namespace interaction {
 
     void InputState::addKeyframe(const datamessagestructures::CameraKeyframe &kf) {
         clearOldKeyframes();
+        if (kf._timestamp < OsEng.runTime()) {
+            return;
+        }
+        _keyframes.insert(std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, &InputState::compareKeyframeTimes), kf);
+    }
 
-        auto compareTimestamps = [](const datamessagestructures::CameraKeyframe a,
-            datamessagestructures::CameraKeyframe b) {
-            return a._timestamp < b._timestamp;
-        };
-
+    void InputState::removeKeyframesAfter(double timestamp) {
+        datamessagestructures::CameraKeyframe kf;
+        kf._timestamp = timestamp;
         // Remove keyframes after the inserted keyframe.
-        _keyframes.erase(std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, compareTimestamps), _keyframes.end());
+        _keyframes.erase(std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, &InputState::compareKeyframeTimes), _keyframes.end());
+    }
 
-        _keyframes.push_back(kf);
+    bool InputState::compareKeyframeTimes(const datamessagestructures::CameraKeyframe& a, const datamessagestructures::CameraKeyframe& b) {
+        return a._timestamp < b._timestamp;
     }
 
     void InputState::clearOldKeyframes() {
@@ -169,9 +175,6 @@ namespace interaction {
 
 
 
-
-
-
 InteractionMode::InteractionMode()
     : _rotateToFocusNodeInterpolator(Interpolator<double>([](double t){
         return pow(t, 2);
@@ -241,8 +244,36 @@ void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, d
 
     double t = (now - prevTime) / (nextTime - prevTime);
 
-    camera.setPositionVec3(prevKeyframe->_position * (1 - t) + nextKeyframe->_position * t);
-    camera.setRotation(glm::slerp(prevKeyframe->_rotation, nextKeyframe->_rotation, t));
+    Scene* scene = camera.parent()->scene();
+    SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevKeyframe->_focusNode);
+    SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextKeyframe->_focusNode);
+
+    if (!prevFocusNode || !nextFocusNode) {
+        return;
+    }
+
+//    std::cout << "P: " << glm::to_string(prevKeyframe->_position) << std::endl;
+//    std::cout << "N: " << glm::to_string(nextKeyframe->_position) << std::endl;
+
+    glm::dvec3 prevKeyframeCameraPosition = prevFocusNode->worldPosition() + prevKeyframe->_position;
+    glm::dvec3 nextKeyframeCameraPosition = nextFocusNode->worldPosition() + nextKeyframe->_position;
+
+    glm::dquat prevKeyframeCameraRotation = prevKeyframe->_rotation;
+    if (prevKeyframe->_followNodeRotation) {
+        prevKeyframeCameraRotation = prevFocusNode->worldRotationMatrix() * glm::dmat3(prevKeyframe->_rotation);
+    }
+
+    glm::dquat nextKeyframeCameraRotation = nextKeyframe->_rotation;
+    if (nextKeyframe->_followNodeRotation) {
+        nextFocusNode->worldRotationMatrix() * glm::dmat3(nextKeyframe->_rotation);
+    }
+
+    camera.setPositionVec3(prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t);
+    camera.setRotation(glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t));
+}
+
+bool KeyframeInteractionMode::followingNodeRotation() const {
+    return false;
 }
 
 // OrbitalInteractionMode
@@ -486,6 +517,10 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
     }
 }
 
+bool OrbitalInteractionMode::followingNodeRotation() const {
+    return false;
+}
+
 void OrbitalInteractionMode::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
     _mouseStates->updateMouseStatesFromInput(inputState, deltaTime);
 }
@@ -685,6 +720,10 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         camera.setRotation(globalCameraRotation * localCameraRotation);
     }
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+}
+
+bool GlobeBrowsingInteractionMode::followingNodeRotation() const {
+    return true;
 }
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED

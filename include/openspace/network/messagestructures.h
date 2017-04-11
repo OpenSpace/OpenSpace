@@ -51,16 +51,28 @@ struct CameraKeyframe {
 
     glm::dvec3 _position;
     glm::dquat _rotation;
+    bool _followNodeRotation;
+    std::string _focusNode;
+
     double _timestamp;
                 
     void serialize(std::vector<char> &buffer){
-        //add position
+        // add position
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_position), reinterpret_cast<char*>(&_position) + sizeof(_position));
                     
-        //add orientation
+        // add orientation
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_rotation), reinterpret_cast<char*>(&_rotation) + sizeof(_rotation));
-                    
-        //add timestamp
+        
+        // follow focus node rotation?
+        buffer.insert(buffer.end(), reinterpret_cast<char*>(&_followNodeRotation), reinterpret_cast<char*>(&_followNodeRotation) + sizeof(_followNodeRotation));
+
+        int nodeNameLength = _focusNode.size();
+
+        // add focus node
+        buffer.insert(buffer.end(), reinterpret_cast<char*>(&nodeNameLength), reinterpret_cast<char*>(&nodeNameLength) + sizeof(nodeNameLength));
+        buffer.insert(buffer.end(), _focusNode.data(), _focusNode.data() + nodeNameLength);
+
+        // add timestamp
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
     };
                 
@@ -68,14 +80,28 @@ struct CameraKeyframe {
         int offset = 0;
         int size = 0;
                     
-        //position
+        // position
         size = sizeof(_position);
         memcpy(&_position, buffer.data() + offset, size);
         offset += size;
                     
-        //orientation
+        // orientation
         size = sizeof(_rotation);
         memcpy(&_rotation, buffer.data() + offset, size);
+        offset += size;
+
+        // follow focus node rotation?
+        size = sizeof(_followNodeRotation);
+        memcpy(&_followNodeRotation, buffer.data() + offset, size);
+        offset += size;
+
+        // focus node
+        int nodeNameLength;
+        size = sizeof(int);
+        memcpy(&nodeNameLength, buffer.data() + offset, size);      
+        offset += size;
+        size = nodeNameLength;
+        _focusNode = std::string(buffer.data() + offset, buffer.data() + offset + size);
         offset += size;
                     
         //timestamp
