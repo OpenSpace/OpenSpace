@@ -48,8 +48,8 @@ public:
     void reset();
     void clearRequestQueue();
 
-    std::shared_ptr<RawTileDataReader> getTextureDataProvider() const;
-    float noDataValueAsFloat();
+    std::shared_ptr<RawTileDataReader> getRawTileDataReader() const;
+    float noDataValueAsFloat() const;
 
 protected:
     virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;

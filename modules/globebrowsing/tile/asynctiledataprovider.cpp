@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/asynctilereader.h>
+#include <modules/globebrowsing/tile/asynctiledataprovider.h>
 
 #include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
@@ -31,13 +31,14 @@
 namespace openspace {
 namespace globebrowsing {
 
-AsyncTileDataProvider::AsyncTileDataProvider(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-                                             std::shared_ptr<ThreadPool> pool)
+AsyncTileDataProvider::AsyncTileDataProvider(
+    const std::shared_ptr<RawTileDataReader> rawTileDataReader,
+    std::shared_ptr<ThreadPool> pool)
     : _rawTileDataReader(rawTileDataReader)
     , _concurrentJobManager(pool)
 {}
 
-std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getTextureDataProvider() const {
+std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getRawTileDataReader() const {
     return _rawTileDataReader;
 }
 
@@ -84,7 +85,7 @@ void AsyncTileDataProvider::reset() {
     while (_concurrentJobManager.numFinishedJobs() > 0) {
         _concurrentJobManager.popFinishedJob();
     }
-    getTextureDataProvider()->reset();
+    _rawTileDataReader->reset();
 }
 
 void AsyncTileDataProvider::clearRequestQueue() {
@@ -94,7 +95,7 @@ void AsyncTileDataProvider::clearRequestQueue() {
     _enqueuedTileRequests.clear();
 }
 
-float AsyncTileDataProvider::noDataValueAsFloat() {
+float AsyncTileDataProvider::noDataValueAsFloat() const {
     return _rawTileDataReader->noDataValueAsFloat();
 }
 

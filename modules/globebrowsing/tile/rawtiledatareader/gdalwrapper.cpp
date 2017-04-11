@@ -36,14 +36,14 @@
 #include <gdal_priv.h>
 
 namespace {
-    const std::string _loggerCat = "GdalWrapper";
+    const char* _loggerCat = "GdalWrapper";
 }
 
 namespace openspace {
 namespace globebrowsing {
 
 void gdalErrorHandler(CPLErr eErrClass, int errNo, const char *msg) {
-    if (GdalWrapper::ref().logGdalErrors) {
+    if (GdalWrapper::ref().logGdalErrors()) {
         switch (eErrClass) {
             case CE_None: break;
             case CE_Debug:    LDEBUG  ("GDAL " << msg); break;
@@ -57,8 +57,9 @@ void gdalErrorHandler(CPLErr eErrClass, int errNo, const char *msg) {
 GdalWrapper* GdalWrapper::_singleton = nullptr;
 std::mutex GdalWrapper::_mutexLock;
 
-void GdalWrapper::create(size_t maximumCacheSize, size_t maximumMaximumCacheSize) {
-	std::lock_guard<std::mutex> guard(_mutexLock);
+void GdalWrapper::create(size_t maximumCacheSize,
+                         size_t maximumMaximumCacheSize) {
+    std::lock_guard<std::mutex> guard(_mutexLock);
     _singleton = new GdalWrapper(maximumCacheSize, maximumMaximumCacheSize);
 }
 
@@ -81,17 +82,22 @@ size_t GDALMaximumCacheSize() {
     return GDALGetCacheMax64();
 }
 
-GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize)
-: PropertyOwner("GdalWrapper")
-, logGdalErrors("logGdalErrors", "Log GDAL errors", true)
-, _gdalMaximumCacheSize(
-    "gdalMaximumCacheSize", "GDAL maximum cache size",
-    maximumCacheSize / (1024 * 1024),           // Default
-    0,                                          // Minimum: No caching
-    maximumMaximumCacheSize / (1024 * 1024),    // Maximum
-    1)                                          // Step: One MB
-{
-    addProperty(logGdalErrors);
+bool GdalWrapper::logGdalErrors() const {
+    return _logGdalErrors;
+}
+
+GdalWrapper::GdalWrapper(size_t maximumCacheSize,
+                         size_t maximumMaximumCacheSize)
+    : PropertyOwner("GdalWrapper")
+    , _logGdalErrors("logGdalErrors", "Log GDAL errors", true)
+    , _gdalMaximumCacheSize (
+        "gdalMaximumCacheSize", "GDAL maximum cache size",
+        maximumCacheSize / (1024 * 1024),           // Default
+        0,                                          // Minimum: No caching
+        maximumMaximumCacheSize / (1024 * 1024),    // Maximum
+        1                                           // Step: One MB
+    ) {
+    addProperty(_logGdalErrors);
     addProperty(_gdalMaximumCacheSize);
 
     GDALAllRegister();
@@ -106,7 +112,8 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize
         // MB to Bytes
         GDALSetCacheMax64(
             static_cast<size_t>(_gdalMaximumCacheSize) *
-            1024ULL * 1024ULL);
+            1024ULL * 1024ULL
+        );
     });
 }
 
@@ -116,7 +123,8 @@ void GdalWrapper::setGdalProxyConfiguration() {
         ConfigurationManager::KeyHttpProxy, proxySettings
     );
     if (proxyEnabled) {
-        std::string proxyAddress, proxyPort, proxyUser, proxyPassword, proxyAuth;
+        std::string proxyAddress, proxyPort, proxyUser, proxyPassword,
+            proxyAuth;
 
         bool success = proxySettings.getValue(
             ConfigurationManager::PartHttpProxyAddress,

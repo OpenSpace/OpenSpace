@@ -85,17 +85,21 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
     int patchSegments = patchSegmentsd;
         
-    if(!dictionary.getValue(keyInteractionDepthBelowEllipsoid,
-        _interactionDepthBelowEllipsoid))
+    if (!dictionary.getValue(keyInteractionDepthBelowEllipsoid,
+        _interactionDepthBelowEllipsoid)) {
         _interactionDepthBelowEllipsoid = 0;
+    }
+
     float cameraMinHeight;
     dictionary.getValue(keyCameraMinHeight, cameraMinHeight);
     _generalProperties.cameraMinHeight.set(cameraMinHeight);
 
     // Init layer manager
     ghoul::Dictionary layersDictionary;
-    if (!dictionary.getValue(keyLayers, layersDictionary))
-        throw ghoul::RuntimeError(std::string(keyLayers) + " must be specified specified!");
+    if (!dictionary.getValue(keyLayers, layersDictionary)) {
+        throw ghoul::RuntimeError(
+            std::string(keyLayers) + " must be specified specified!");
+    }
 
     _layerManager = std::make_shared<LayerManager>(layersDictionary);
 

@@ -68,7 +68,7 @@ public:
      * Virtual destructor that subclasses should override to do
      * clean up.
      */
-    virtual ~TileProvider() { }
+    virtual ~TileProvider() = default;
 
     virtual bool initialize();
     virtual bool deinitialize() { return true; };

@@ -52,10 +52,6 @@ SimpleRawTileDataReader::SimpleRawTileDataReader(
     ensureInitialized();
 }
 
-SimpleRawTileDataReader::~SimpleRawTileDataReader() {
-    
-}
-
 void SimpleRawTileDataReader::reset() {
     initialize();
 }
@@ -85,7 +81,6 @@ float SimpleRawTileDataReader::depthScale() const {
 }
 
 IODescription SimpleRawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
-
     IODescription io;
     io.read.overview = 0;
     io.read.region = highestResPixelRegion(tileIndex);
@@ -102,7 +97,9 @@ void SimpleRawTileDataReader::initialize() {
     if (_dataTexture == nullptr) {
         throw ghoul::RuntimeError(
             "Unable to read dataset: " + _datasetFilePath +
-            ".\nCompiling OpenSpace with GDAL will allow for better support for different formats.");
+            ".\nCompiling OpenSpace with GDAL will allow for better support for different"
+            "formats."
+        );
     }
     float exponentX = log2(_dataTexture->dimensions().x);
     float exponentY = log2(_dataTexture->dimensions().y);
@@ -110,7 +107,8 @@ void SimpleRawTileDataReader::initialize() {
        (exponentY - static_cast<int>(exponentY)) > 0.0001 ) {
         throw ghoul::RuntimeError(
             "Unable to read dataset: " + _datasetFilePath +
-            ".\nCurrently only supporting power of 2 textures.");
+            ".\nCurrently only supporting power of 2 textures."
+        );
     }
   
     _cached._maxLevel = 2;

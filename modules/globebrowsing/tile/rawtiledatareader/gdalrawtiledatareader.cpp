@@ -57,6 +57,7 @@ std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
 GdalRawTileDataReader::GdalRawTileDataReader(
     const std::string& filePath, const Configuration& config)
     : RawTileDataReader(config)
+    , _dataset(nullptr)
 {
     _initData = { "",  filePath, config.tilePixelSize, config.dataType };
     _initData.initDirectory = CPLGetCurrentDir();
@@ -66,6 +67,7 @@ GdalRawTileDataReader::GdalRawTileDataReader(
 GdalRawTileDataReader::~GdalRawTileDataReader() {
     if (_dataset != nullptr) {
         GDALClose((GDALDatasetH)_dataset);
+        _dataset = nullptr;
     }
 }
 
@@ -73,6 +75,7 @@ void GdalRawTileDataReader::reset() {
     _cached._maxLevel = -1;
     if (_dataset != nullptr) {
         GDALClose((GDALDatasetH)_dataset);
+        _dataset = nullptr;
     }
     initialize();
 }
@@ -294,7 +297,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
 }
 
 GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath) {
-    GDALDataset* dataset = (GDALDataset *)GDALOpen(filePath.c_str(), GA_ReadOnly);
+    GDALDataset* dataset = static_cast<GDALDataset*>(GDALOpen(filePath.c_str(), GA_ReadOnly));
     if (!dataset) {
         using namespace ghoul::filesystem;
         std::string correctedPath = FileSystem::ref().pathByAppendingComponent(

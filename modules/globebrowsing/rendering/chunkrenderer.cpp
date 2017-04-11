@@ -65,7 +65,8 @@ ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
 
 void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
     // A little arbitrary with 10 but it works
-    if (chunk.owner().debugProperties().onlyModelSpaceRendering || chunk.tileIndex().level < 10) {
+    if (chunk.owner().debugProperties().onlyModelSpaceRendering ||
+        chunk.tileIndex().level < 10) {
         renderChunkGlobally(chunk, data);
     }
     else {
@@ -99,29 +100,25 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     const auto& debugProps = chunk.owner().debugProperties();
     auto& pairs = layeredTexturePreprocessingData.keyValuePairs;
         
-    pairs.push_back(std::make_pair("useAtmosphere",
-        std::to_string(generalProps.atmosphereEnabled)));
-    pairs.push_back(std::make_pair("performShading",
-        std::to_string(generalProps.performShading)));
-    pairs.push_back(std::make_pair("showChunkEdges",
-        std::to_string(debugProps.showChunkEdges)));
-    pairs.push_back(std::make_pair("showHeightResolution",
-        std::to_string(debugProps.showHeightResolution)));
-    pairs.push_back(std::make_pair("showHeightIntensities",
-        std::to_string(debugProps.showHeightIntensities)));
-	pairs.push_back(std::make_pair("defaultHeight",
-		std::to_string(Chunk::DEFAULT_HEIGHT)));
+    pairs.emplace_back("useAtmosphere", std::to_string(generalProps.atmosphereEnabled));
+    pairs.emplace_back("performShading", std::to_string(generalProps.performShading));
+    pairs.emplace_back("showChunkEdges", std::to_string(debugProps.showChunkEdges));
+    pairs.emplace_back("showHeightResolution",
+        std::to_string(debugProps.showHeightResolution));
+    pairs.emplace_back("showHeightIntensities",
+        std::to_string(debugProps.showHeightIntensities));
+	pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
 
-	pairs.push_back(std::make_pair("tilePaddingStart",
+	pairs.emplace_back("tilePaddingStart",
 		"ivec2(" +
 		std::to_string(RawTileDataReader::padding.start.x) + "," +
 		std::to_string(RawTileDataReader::padding.start.y) + ")"
-	));
-	pairs.push_back(std::make_pair("tilePaddingSizeDiff",
+	);
+	pairs.emplace_back("tilePaddingSizeDiff",
 		"ivec2(" +
 		std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
 		std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
-	));
+	);
 
     // Now the shader program can be accessed
     ghoul::opengl::ProgramObject* programObject =

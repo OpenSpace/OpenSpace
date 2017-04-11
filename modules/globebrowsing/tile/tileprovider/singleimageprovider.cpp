@@ -37,7 +37,7 @@ namespace globebrowsing {
 namespace tileprovider {
     
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
-: _tile(nullptr, nullptr, Tile::Status::Unavailable)
+    : _tile(nullptr, nullptr, Tile::Status::Unavailable)
 {
     // Required input
     if (!dictionary.getValue<std::string>(KeyFilePath, _imagePath)) {
@@ -48,8 +48,8 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 }
 
 SingleImageProvider::SingleImageProvider(const std::string& imagePath)
-    : _imagePath(imagePath),
-	_tile(nullptr, nullptr, Tile::Status::Unavailable)
+    : _imagePath(imagePath)
+	, _tile(nullptr, nullptr, Tile::Status::Unavailable)
 {
     reset();
 }

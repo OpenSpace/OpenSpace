@@ -40,6 +40,7 @@ namespace cache {
  * It can for example be given in kilobytes.
  * <code>KeyType</code> needs to be a size comparable type.
  */
+
 template<typename KeyType, typename ValueType, typename HasherType>
 class MemoryAwareLRUCache {
 public:
@@ -64,8 +65,11 @@ public:
 private:
     void clean();
 
-    std::list<std::pair<KeyType, ValueType> > _itemList;
+    using Item = std::pair<KeyType, ValueType>;
+    using Items = std::list<Item>;
+    Items _itemList;
     std::unordered_map<KeyType, decltype(_itemList.begin()), HasherType> _itemMap;
+
     size_t _cacheSize;
     size_t _maximumCacheSize;
 };

@@ -27,7 +27,7 @@
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
 namespace {
-    const std::string _loggerCat = "RawTile";
+    const char* _loggerCat = "RawTile";
 }
 
 namespace openspace {
@@ -56,7 +56,7 @@ RawTile RawTile::createDefaultRes() {
 void RawTile::serializeMetaData(std::ostream& os) {
     os << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
     os << tileIndex.x << " " << tileIndex.y << " " << tileIndex.level << std::endl;
-    os << error << std::endl;
+    os << static_cast<int>(error) << std::endl;
 
     // preprocess data
     os << (tileMetaData != nullptr) << std::endl;

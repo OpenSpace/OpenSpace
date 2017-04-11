@@ -50,12 +50,11 @@
 #include <unordered_map>
 #include <limits>
 
-#ifndef M_PI // This definition is not in the standard
-#define M_PI 3.14159265358979323846
-#endif
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 namespace {
-    const std::string _loggerCat = "RawTileDataReader";
+    const char* _loggerCat = "RawTileDataReader";
 }
 
 namespace openspace {
@@ -72,8 +71,7 @@ const PixelRegion RawTileDataReader::padding = PixelRegion(
 RawTileDataReader::RawTileDataReader(const Configuration& config)
     : _config(config)
     , _hasBeenInitialized(false)
-{
-}
+{}
 
 void RawTileDataReader::ensureInitialized() {
     if (!_hasBeenInitialized) {
@@ -95,8 +93,7 @@ std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() {
         rawTile->dimensions.x * rawTile->dimensions.y * bytesPerPixel;
     rawTile->imageData = new char[rawTile->nBytesImageData];
     rawTile->glType = GL_UNSIGNED_BYTE;
-    rawTile->textureFormat =
-        {ghoul::opengl::Texture::Format::Red, GL_R};
+    rawTile->textureFormat = { ghoul::opengl::Texture::Format::Red, GL_R };
 
     for (size_t i = 0; i < rawTile->nBytesImageData; ++i) {
         rawTile->imageData[i] = 0;
@@ -129,7 +126,7 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex) {
     return rawTile;
 }
 
-TileDepthTransform RawTileDataReader::getDepthTransform() {
+TileDepthTransform RawTileDataReader::getDepthTransform() const {
     return _depthTransform;
 }
 
@@ -151,7 +148,7 @@ std::array<double, 6> RawTileDataReader::getGeoTransform() const {
 }
 
 PixelRegion::PixelCoordinate RawTileDataReader::geodeticToPixel(
-        const Geodetic2& geo) const {
+    const Geodetic2& geo) const {
     std::array<double, 6> padfTransform = getGeoTransform();
         
     double Y = Angle<double>::fromRadians(geo.lat).asDegrees();
@@ -186,7 +183,7 @@ PixelRegion::PixelCoordinate RawTileDataReader::geodeticToPixel(
 }
 
 Geodetic2 RawTileDataReader::pixelToGeodetic(
-        const PixelRegion::PixelCoordinate& p) const {
+    const PixelRegion::PixelCoordinate& p) const {
     std::array<double, 6> padfTransform = getGeoTransform();
     Geodetic2 geodetic;
     // Should be using radians and not degrees?
@@ -206,7 +203,8 @@ PixelRegion RawTileDataReader::highestResPixelRegion(const GeodeticPatch& geodet
 
 RawTile::ReadError RawTileDataReader::repeatedRasterRead(
         int rasterBand, const IODescription& fullIO, char* dataDestination,
-        int depth) const {
+        int depth) const
+{
     RawTile::ReadError worstError = RawTile::ReadError::None;
     
     // NOTE: 
@@ -319,44 +317,38 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
     std::vector<float> noDataValues;
     noDataValues.resize(_dataLayout.numRasters);
 
-    for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-        preprocessData->maxValues[c] = -FLT_MAX;
-        preprocessData->minValues[c] = FLT_MAX;
-        preprocessData->hasMissingData[c] = false;
-        noDataValues[c] = noDataValueAsFloat();
+    for (size_t raster = 0; raster < _dataLayout.numRasters; ++raster) {
+        preprocessData->maxValues[raster] = -FLT_MAX;
+        preprocessData->minValues[raster] = FLT_MAX;
+        preprocessData->hasMissingData[raster] = false;
+        noDataValues[raster] = noDataValueAsFloat();
     }
 
-    for (size_t y = 0; y < region.numPixels.y; y++) {
+    for (size_t y = 0; y < region.numPixels.y; ++y) {
         size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
         size_t i = 0;
-        for (size_t x = 0; x < region.numPixels.x; x++) {
-            for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+        for (size_t x = 0; x < region.numPixels.x; ++x) {
+            for (size_t raster = 0; raster < _dataLayout.numRasters; ++raster) {
                 float noDataValue = noDataValueAsFloat();
                 float val = tiledatatype::interpretFloat(
                     _dataLayout.glType,
                     &(rawTile->imageData[yi + i])
                 );
                 if (val != noDataValue) {
-                    preprocessData->maxValues[c] = std::max(
+                    preprocessData->maxValues[raster] = std::max(
                         val,
-                        preprocessData->maxValues[c]
+                        preprocessData->maxValues[raster]
                     );
-                    preprocessData->minValues[c] = std::min(
+                    preprocessData->minValues[raster] = std::min(
                         val,
-                        preprocessData->minValues[c]
+                        preprocessData->minValues[raster]
                     );
                 }
                 else {
-                    preprocessData->hasMissingData[c] = true;
+                    preprocessData->hasMissingData[raster] = true;
                 }
                 i += _dataLayout.bytesPerDatum;
             }
-        }
-    }
-
-    for (size_t c = 0; c < _dataLayout.numRasters; c++) {
-        if (preprocessData->maxValues[c] > 8800.0f) {
-            //LDEBUG("Bad preprocess data: " << preprocessData->maxValues[c] << " at " << region.tileIndex);
         }
     }
 
@@ -391,23 +383,14 @@ RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
     double missingDataValue = noDataValueAsFloat();
 
     bool hasMissingData = false;
-        
+    
     for (size_t c = 0; c < _dataLayout.numRasters; c++) {
         hasMissingData |= rawTile->tileMetaData->maxValues[c] == missingDataValue;
     }
-        
+    
     bool onHighLevel = rawTile->tileIndex.level > 6;
     if (hasMissingData && onHighLevel) {
         return RawTile::ReadError::Fatal;
-    }
-    // ugly test for heightmap overlay
-    if (_dataLayout.textureFormat.ghoulFormat == ghoul::opengl::Texture::Format::RG) {
-        // check the alpha
-        if (rawTile->tileMetaData->maxValues[1] == 0.0
-            && rawTile->tileMetaData->minValues[1] == 0.0)
-        {
-            //return CE_Warning;
-        }
     }
     return RawTile::ReadError::None;
 }
