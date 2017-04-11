@@ -210,8 +210,8 @@ ScriptScheduler::progressTo(double newTime)
          );
         
         // How many values did we pass over?
-        int n = std::distance(_timings.begin() + prevIndex, it);
-        _currentIndex = prevIndex + n;
+        ptrdiff_t n = std::distance(_timings.begin() + prevIndex, it);
+        _currentIndex = static_cast<int>(prevIndex + n);
         
         // Update the new time
         _currentTime = newTime;
@@ -232,16 +232,15 @@ ScriptScheduler::progressTo(double newTime)
         );
         
         // How many values did we pass over?
-        int n = std::distance(it, _timings.begin() + prevIndex);
-        _currentIndex = prevIndex - n;
+        ptrdiff_t n = std::distance(it, _timings.begin() + prevIndex);
+        _currentIndex = static_cast<int>(prevIndex - n);
         
         // Update the new time
         _currentTime = newTime;
 
-        int size = _timings.size();
         return {
-            _backwardScripts.begin() + (size - prevIndex),
-            _backwardScripts.begin() + (size - _currentIndex)
+            _backwardScripts.begin() + (_timings.size() - prevIndex),
+            _backwardScripts.begin() + (_timings.size() - _currentIndex)
         };
     }
 }

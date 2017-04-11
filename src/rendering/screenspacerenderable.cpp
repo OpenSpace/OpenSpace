@@ -110,9 +110,9 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _sphericalPosition(
         "sphericalPosition",
         "Spherical coordinates",
-        glm::vec2(0.f, M_PI_2),
-        glm::vec2(-M_PI),
-        glm::vec2(M_PI)
+        glm::vec2(0.f, static_cast<float>(M_PI_2)),
+        glm::vec2(-static_cast<float>(M_PI)),
+        glm::vec2(static_cast<float>(M_PI))
     )
     , _depth("depth", "Depth", 0.f, 0.f, 1.f)
     , _scale("scale", "Scale", 0.25f, 0.f, 2.f)
@@ -241,7 +241,7 @@ glm::vec2 ScreenSpaceRenderable::toEuclidean(const glm::vec2& spherical, float r
 
 glm::vec2 ScreenSpaceRenderable::toSpherical(const glm::vec2& euclidean) {
     _radius = -sqrt(pow(euclidean[0],2)+pow(euclidean[1],2)+pow(PlaneDepth,2));
-    float theta = atan2(-PlaneDepth,euclidean[0])-M_PI/2.0;
+    float theta = atan2(-PlaneDepth, euclidean[0]) - static_cast<float>(M_PI_2);
     float phi = acos(euclidean[1]/_radius);
 
     return glm::vec2(theta, phi);

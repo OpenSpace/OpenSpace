@@ -171,7 +171,7 @@ bool BlockPlaneIntersectionGeometry::initialize() {
 void BlockPlaneIntersectionGeometry::render() {
     glBindVertexArray(_vaoId);
     //glDisable(GL_CULL_FACE);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, _vertices.size() / 3);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<GLsizei>(_vertices.size() / 3));
     //glEnable(GL_CULL_FACE);
 }
 

@@ -400,6 +400,12 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
             }
         }
 
+        std::string generationTime;
+        try {
+            generationTime = Time::now().ISO8601();
+        }
+        catch (...) {}
+
         std::stringstream html;
         html << "<!DOCTYPE html>\n"
             << "<html>\n"
@@ -417,7 +423,7 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
             << "var propertyOwners = JSON.parse('" << jsonString << "');\n"
             << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
             << "var sceneFilename = '" << sceneFilename << "';\n"
-            << "var generationTime = '" << Time::now().ISO8601() << "';\n"
+            << "var generationTime = '" << generationTime << "';\n"
             << jsContent << "\n"
             << "\t</script>\n"
             << "\t<style type=\"text/css\">\n"

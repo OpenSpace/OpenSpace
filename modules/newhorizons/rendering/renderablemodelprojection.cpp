@@ -379,7 +379,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
     try {
         SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_projectionComponent.instrumentId());
         boresight = std::move(res.boresightVector);
-    } catch (const SpiceManager::SpiceException& e) {
+    } catch (const SpiceManager::SpiceException&) {
         return;
     }
 

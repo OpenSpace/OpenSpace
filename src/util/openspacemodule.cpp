@@ -44,7 +44,12 @@ OpenSpaceModule::OpenSpaceModule(std::string name)
 
 void OpenSpaceModule::initialize() {
     std::string upperName = name();
-    std::transform(upperName.begin(), upperName.end(), upperName.begin(), toupper);
+    std::transform(
+        upperName.begin(),
+        upperName.end(),
+        upperName.begin(),
+        [](char v) { return static_cast<char>(toupper(v)); }
+    );
     
     std::string moduleToken =
         ghoul::filesystem::FileSystem::TokenOpeningBraces +
@@ -77,7 +82,12 @@ ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() cons
 
 std::string OpenSpaceModule::modulePath() const {
     std::string moduleName = name();
-    std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), tolower);
+    std::transform(
+        moduleName.begin(),
+        moduleName.end(),
+        moduleName.begin(),
+        [](char v) { return static_cast<char>(tolower(v)); }
+    );
 
     if (FileSys.directoryExists("${MODULES}/" + moduleName)) {
         return absPath("${MODULES}/" + moduleName);
