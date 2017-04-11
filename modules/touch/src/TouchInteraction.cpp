@@ -55,16 +55,17 @@ using namespace openspace;
 
 TouchInteraction::TouchInteraction()
 	: properties::PropertyOwner("TouchInteraction"),
-	_origin("origin", "Origin", ""), 
-	_camera{ OsEng.interactionHandler().camera() },
+	_origin("origin", "Origin", ""),
 	_baseSensitivity{ 0.1 }, _baseFriction{ 0.02 },
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
 	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction },
+	_touchScreenSize("normalizer", "Touch Screen Normalizer", glm::vec2(122, 68), glm::vec2(0), glm::vec2(1000)), // glm::vec2(width, height) in cm. (13.81, 6.7) for iphone 6s plus
 	_centroid{ glm::dvec3(0.0) },
 	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.4 }, 
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
 	_directTouchMode{ false }, _tap{ false }
 {
+	addProperty(_touchScreenSize);
 	_origin.onChange([this]() {
 		SceneGraphNode* node = sceneGraphNode(_origin.value());
 		if (!node) {
@@ -73,14 +74,15 @@ TouchInteraction::TouchInteraction()
 		}
 		setFocusNode(node);
 	});
-
 }
 
 TouchInteraction::~TouchInteraction() { }
 
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
-	trace(list);
+	setCamera(OsEng.interactionHandler().camera());
+	setFocusNode(OsEng.interactionHandler().focusNode()); // since functions cant be called directly (TouchInteraction not a subclass of InteractionMode)
 
+	trace(list);
 	if (_currentRadius > 0.3 && _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch
 		_directTouchMode = true;
 	}
@@ -326,8 +328,9 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 void TouchInteraction::step(double dt) {
 	using namespace glm;
 
-	setFocusNode(OsEng.interactionHandler().focusNode()); // since setFocusNode cant be called directly (TouchInteraction not a subclass of InteractionMode)
-	if (_focusNode) {
+	setCamera(OsEng.interactionHandler().camera());
+	setFocusNode(OsEng.interactionHandler().focusNode()); // since functions cant be called directly (TouchInteraction not a subclass of InteractionMode)
+	if (_focusNode && _camera) {
 		// Create variables from current state
 		dvec3 camPos = _camera->positionVec3();
 		dvec3 centerPos = _focusNode->worldPosition();

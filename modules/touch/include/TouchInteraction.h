@@ -34,7 +34,7 @@
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/properties/propertyowner.h>
-
+#include <openspace/properties/vectorproperty.h>
 #include <openspace/network/parallelconnection.h>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
@@ -120,6 +120,7 @@ class TouchInteraction : public properties::PropertyOwner
 		Camera* _camera;
 		SceneGraphNode* _focusNode = nullptr;
 		properties::StringProperty _origin;
+		properties::Vec2Property _touchScreenSize;
 		globebrowsing::RenderableGlobe* _globe;
 
 		bool _tap;
