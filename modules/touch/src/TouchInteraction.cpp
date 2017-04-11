@@ -79,12 +79,15 @@ TouchInteraction::TouchInteraction()
 TouchInteraction::~TouchInteraction() { }
 
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
-	if (_currentRadius > 0.3) // good value to make any planet sufficiently large for direct-touch
-		_directTouchMode = true;
-	else
-		_directTouchMode = false;
-
 	trace(list);
+
+	if (_currentRadius > 0.3 && _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch
+		_directTouchMode = true;
+	}
+	else {
+		_directTouchMode = false;
+	}
+	
 
 
 	/*
@@ -145,9 +148,9 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 				double phi = atan(glm::length(glm::dvec2(pointInModelView.x, pointInModelView.y)) / pointInModelView.z);
 
 				// Add id, node and surface coordinates to the selected list
-				auto found = find_if(newSelected.begin(), newSelected.end(), [id](SelectedBody s) { return s.id == id; });
-				if (found != newSelected.end()) {
-					double oldNodeDist = glm::length(found->node->worldPosition() - camPos);
+				std::vector<SelectedBody>::iterator oldNode = find_if(newSelected.begin(), newSelected.end(), [id](SelectedBody s) { return s.id == id; });
+				if (oldNode != newSelected.end()) {
+					double oldNodeDist = glm::length(oldNode->node->worldPosition() - camPos);
 					if (glm::length(camToSelectable) < oldNodeDist) { // new node is closer, remove added node and add the new one instead
 						newSelected.pop_back();
 						newSelected.push_back({ id, node, pointInModelView });
