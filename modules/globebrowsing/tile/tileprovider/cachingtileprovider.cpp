@@ -48,7 +48,8 @@ namespace globebrowsing {
 namespace tileprovider {
     
 CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
-    : _framesSinceLastRequestFlush(0)
+    : TileProvider(dictionary)
+    , _framesSinceLastRequestFlush(0)
 	, _defaultTile(Tile::TileUnavailable)
 {
     std::string name = "Name unspecified";

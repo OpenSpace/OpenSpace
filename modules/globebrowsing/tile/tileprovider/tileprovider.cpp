@@ -65,7 +65,10 @@ TileProvider::TileProvider() :
     initialize();
 }
 
-TileProvider::TileProvider(const ghoul::Dictionary& dictionary) : _initialized(false) {
+TileProvider::TileProvider(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner("tileProvider")
+    , _initialized(false)
+{
     initialize();
 };
 

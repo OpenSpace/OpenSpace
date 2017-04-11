@@ -83,7 +83,7 @@ size_t GDALMaximumCacheSize() {
 
 GdalWrapper::GdalWrapper(size_t maximumCacheSize, size_t maximumMaximumCacheSize)
 : PropertyOwner("GdalWrapper")
-, logGdalErrors("logGdalErrors", "Log GDAL errors", false)
+, logGdalErrors("logGdalErrors", "Log GDAL errors", true)
 , _gdalMaximumCacheSize(
     "gdalMaximumCacheSize", "GDAL maximum cache size",
     maximumCacheSize / (1024 * 1024),           // Default

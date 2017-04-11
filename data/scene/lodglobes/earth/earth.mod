@@ -63,7 +63,7 @@ return {
                         LevelTileProviders = {
                             {
                                 MaxLevel = 3, 
-                                TileProvider = { FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml", }, 
+                                TileProvider = { Type = "Temporal", FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml", }, 
                             },
                             {
                                 MaxLevel = 22, 
@@ -72,7 +72,6 @@ return {
                         },
                         Enabled = true,
                     },
-                    
                     {
                         Name = "ESRI Imagery World 2D",
                         FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
