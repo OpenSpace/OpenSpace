@@ -65,8 +65,8 @@ ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
 
 void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
     // A little arbitrary with 10 but it works
-    if (chunk.owner().debugProperties().onlyModelSpaceRendering ||
-        chunk.tileIndex().level < 10) {
+    if (chunk.tileIndex().level <
+        chunk.owner().debugProperties().modelSpaceRenderingCutoffLevel) {
         renderChunkGlobally(chunk, data);
     }
     else {
