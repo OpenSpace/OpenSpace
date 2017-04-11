@@ -89,7 +89,7 @@ bool GdalWrapper::logGdalErrors() const {
 GdalWrapper::GdalWrapper(size_t maximumCacheSize,
                          size_t maximumMaximumCacheSize)
     : PropertyOwner("GdalWrapper")
-    , _logGdalErrors("logGdalErrors", "Log GDAL errors", false)
+    , _logGdalErrors("logGdalErrors", "Log GDAL errors", true)
     , _gdalMaximumCacheSize (
         "gdalMaximumCacheSize", "GDAL maximum cache size",
         maximumCacheSize / (1024 * 1024),           // Default

@@ -81,7 +81,7 @@ return {
                     {
                         Name = "CTX Mosaic [Europe]",
                         FilePath = "map_service_configs/CTX_Mosaic.xml",
-                        Enabled = true,
+                        --Enabled = true,
                     },
                     {
                         Name = "CTX Mosaic [Utah]",
