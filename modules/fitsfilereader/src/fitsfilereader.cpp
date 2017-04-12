@@ -39,6 +39,42 @@ namespace {
     // Using internal linkage by not declaring these static
     std::unique_ptr<FITS> thread_local _infile = nullptr;
     std::pair<int, int> thread_local _imageSize;
+
+    // This is pretty annoying, the read method is not derived from the HDU class
+    // in CCfits - need to explicitly cast to the sub classes to access read
+    template<typename T>
+    const std::valarray<T> readImageInternal(ExtHDU& image) {
+       try {
+            assert(image.axes() == 2);
+            const int sizeX = image.axis(0);
+            const int sizeY = image.axis(1);
+            assert(sizeX % 2 == 0 && sizeY % 2 == 0 && sizeX == sizeY);
+
+            _imageSize = std::make_pair(sizeX, sizeY);
+            std::valarray<T> contents;
+            image.read(contents);
+            return std::move(contents);
+        } catch (FitsException& e){
+            LERROR("Could not read FITS image EXTHDU");
+        }
+    }
+
+    template<typename T>
+    const std::valarray<T> readImageInternal(PHDU& image) {
+        try {
+            assert(image.axes() == 2);
+            const int sizeX = image.axis(0);
+            const int sizeY = image.axis(1);
+            assert(sizeX % 2 == 0 && sizeY % 2 == 0 && sizeX == sizeY);
+
+            _imageSize = std::make_pair(sizeX, sizeY);
+            std::valarray<T> contents;
+            image.read(contents);
+            return std::move(contents);
+        } catch (FitsException& e){
+            LERROR("Could not read FITS image PHDU");
+        }
+    }
 }
 
 namespace openspace {
@@ -149,52 +185,21 @@ const std::pair<int, int>& FitsFileReader::getImageSize() {
     return _imageSize;
 }
 
-const std::valarray<float> FitsFileReader::readImageInternal(ExtHDU& image) {
-   try {
-        assert(image.axes() == 2);
-        const int sizeX = image.axis(0);
-        const int sizeY = image.axis(1);
-        assert(sizeX % 2 == 0 && sizeY % 2 == 0 && sizeX == sizeY);
-
-        _imageSize = std::make_pair(sizeX, sizeY);
-        std::valarray<float> contents;
-        image.read(contents);
-        return std::move(contents);
-    } catch (FitsException& e){
-        LERROR("Could not read FITS image EXTHDU");
-    }
-}
-
-const std::valarray<float> FitsFileReader::readImageInternal(PHDU& image) {
-    try {
-        assert(image.axes() == 2);
-        const int sizeX = image.axis(0);
-        const int sizeY = image.axis(1);
-        assert(sizeX % 2 == 0 && sizeY % 2 == 0 && sizeX == sizeY);
-
-        _imageSize = std::make_pair(sizeX, sizeY);
-        std::valarray<float> contents;
-        image.read(contents);
-        return std::move(contents);
-    } catch (FitsException& e){
-        LERROR("Could not read FITS image PHDU");
-    }
-}
-
 const bool FitsFileReader::isPrimaryHDU() {
     return _infile->extension().size() == 0;
 }
 
-std::valarray<float> FitsFileReader::readImage() {
+template <typename T>
+std::valarray<T> FitsFileReader::readImage() {
     FITS::setVerboseMode(true);
 
     try {
         // Primary HDU Object
         if (isPrimaryHDU()) {
-            return std::move(readImageInternal(_infile->pHDU()));
+            return std::move(readImageInternal<T>(_infile->pHDU()));
         }
         // Extension HDU Object
-        return std::move(readImageInternal(_infile->currentExtension()));
+        return std::move(readImageInternal<T>(_infile->currentExtension()));
     } catch (FitsException& e){
         LERROR("Could not read FITS image from table");
     }
@@ -257,6 +262,13 @@ void FitsFileReader::dump(PHDU& image) {
     }
     std::cout << std::endl;
 }
+
+template std::valarray<unsigned long> FitsFileReader::readImage();
+template std::valarray<long> FitsFileReader::readImage();
+template std::valarray<unsigned int> FitsFileReader::readImage();
+template std::valarray<int> FitsFileReader::readImage();
+template std::valarray<double> FitsFileReader::readImage();
+template std::valarray<float> FitsFileReader::readImage();
 
 template const std::unordered_map<std::string, float> FitsFileReader::readHeader(std::vector<std::string>& keywords);
 template const std::unordered_map<std::string, std::string> FitsFileReader::readHeader(std::vector<std::string>& keywords);

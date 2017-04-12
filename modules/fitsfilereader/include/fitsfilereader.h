@@ -40,7 +40,8 @@ public:
     static void open(const std::string& path);
     static void close();
 
-    static std::valarray<float> readImage();
+    template<typename T>
+    static std::valarray<T> readImage();
     // Fits will throw error if keyword does not exist in header
     template<typename T>
     static const std::unordered_map<std::string, T> readHeader(std::vector<std::string>& keywords);
@@ -56,10 +57,6 @@ public:
 private:
 	// Only for debugging
 	static void dump(CCfits::PHDU& image);
-    // This is pretty annoying, the read method is not derived from the HDU class
-    // in CCfits - need to explicitly cast to the sub classes to access read
-    static const std::valarray<float> readImageInternal(CCfits::PHDU& image);
-    static const std::valarray<float> readImageInternal(CCfits::ExtHDU& image);
     static const bool isPrimaryHDU();
 };
 
