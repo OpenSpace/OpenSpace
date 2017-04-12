@@ -25,11 +25,14 @@
 #ifndef __OPENSPACE_MODULE_GPUFIELDLINES___RENDERABLEGPUFIELDLINES___H__
 #define __OPENSPACE_MODULE_GPUFIELDLINES___RENDERABLEGPUFIELDLINES___H__
 
+#include <openspace/properties/scalarproperty.h>
+
 #include <openspace/rendering/renderable.h>
 
 #include <modules/gpufieldlines/util/gpufieldlinesstate.h>
 
 #include <modules/volume/rawvolume.h>
+
 
 namespace ghoul {
     namespace opengl {
@@ -56,6 +59,10 @@ public:
     bool isWithinInterval();
     void updateActiveStateIndex();
 private:
+    // PROPERTIES
+    properties::FloatProperty _stepSize;
+
+    // LUA INFO
     ghoul::Dictionary _vectorVolumeInfo;
     ghoul::Dictionary _fieldlineInfo;
     ghoul::Dictionary _seedPointsInfo;
@@ -63,26 +70,29 @@ private:
     std::vector<glm::vec3> _seedPoints;
     std::vector<GpuFieldlinesState> _states;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _gridProgram;
+
 
     bool _shouldRender; // only temporary
     bool _needsUpdate;
 
     GLuint _vertexArrayObject;
-
-    // TODO: Make an array instead?
     GLuint _vertexPositionBuffer;
     GLuint _vertexColorBuffer;
 
+    GLuint _gridVAO;
+    GLuint _gridVBO;
+
     std::unique_ptr<RawVolume<float>> _rawVolume;
     std::unique_ptr<RawVolume<glm::vec3>> _normalizedVolume;
-    std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBx;
-    std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBy;
-    std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBz;
+    // std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBx;
+    // std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBy;
+    // std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBz;
 
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBx;
-    std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBy;
-    std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBz;
+    // std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBx;
+    // std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBy;
+    // std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBz;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
 
@@ -92,6 +102,10 @@ private:
     glm::vec3 _domainMaxs;
     glm::uvec3 _dimensions;
 
+    std::vector<glm::vec3> _gridVertices;
+    std::vector<GLint> _gridStartPos;
+    std::vector<GLsizei> _gridLineCount;
+
     int _activeStateIndex;
     int _numberOfStates;
     double _seqStartTime; // redundant, but hey.. nice n clear
@@ -100,6 +114,7 @@ private:
     float _stateProgress;
 
     std::vector<double> _startTimes;
+    void generateUniform3DGrid();
 };
 
 } // namespace openspace
