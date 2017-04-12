@@ -276,7 +276,6 @@ glm::dvec3 InteractionHandler::focusNodeToCameraVector() const {
 
 glm::quat InteractionHandler::focusNodeToCameraRotation() const {
     glm::dmat4 invWorldRotation = glm::inverse(focusNode()->worldRotationMatrix());
-    std::cout << glm::to_string(glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion())) << std::endl;
     return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
 }
 

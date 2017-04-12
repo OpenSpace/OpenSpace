@@ -265,7 +265,7 @@ void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, d
 
     glm::dquat nextKeyframeCameraRotation = nextKeyframe->_rotation;
     if (nextKeyframe->_followNodeRotation) {
-        nextFocusNode->worldRotationMatrix() * glm::dmat3(nextKeyframe->_rotation);
+        nextKeyframeCameraRotation = nextFocusNode->worldRotationMatrix() * glm::dmat3(nextKeyframe->_rotation);
     }
 
     camera.setPositionVec3(prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t);
