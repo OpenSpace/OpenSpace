@@ -26,13 +26,14 @@
 #define __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__
 
 #include <modules/onscreengui/include/guicomponent.h>
+#include <modules/onscreengui/include/guipropertycomponent.h>
 
 #include <string>
 
 namespace openspace {
 namespace gui {
 
-class GuiParallelComponent : public GuiComponent {
+class GuiParallelComponent : public GuiPropertyComponent {
 public:
     GuiParallelComponent();
     void render() override;
