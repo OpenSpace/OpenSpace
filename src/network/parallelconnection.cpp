@@ -90,7 +90,7 @@ namespace {
 namespace openspace {
 
 ParallelConnection::ParallelConnection()
-    : properties::PropertyOwner("Parallel connection")
+    : properties::PropertyOwner("ParallelConnection")
     , _password("password", "Password")
     , _hostPassword("hostPassword", "Host Password")
     , _port("port", "Port", "20501")
@@ -323,57 +323,39 @@ void ParallelConnection::establishConnection(addrinfo *info){
         LERROR("Failed to set socket option 'keep alive'. Error code: " << _ERRNO);
 
 
-    //while the connection thread is still running
-    while (_tryConnect.load()){
                 
-        LINFO("Attempting to connect to server "<< _address << " on port " << _port);
+    LINFO("Attempting to connect to server "<< _address << " on port " << _port);
                 
-        //try to connect
-        result = connect(_clientSocket, info->ai_addr, (int)info->ai_addrlen);
+    //try to connect
+    result = connect(_clientSocket, info->ai_addr, (int)info->ai_addrlen);
                 
-        //if the connection was successfull
-        if (result != SOCKET_ERROR)
-        {
+    //if the connection was successfull
+    if (result != SOCKET_ERROR)
+    {
                     
-            LINFO("Connection established with server at ip: "<< _address);
+        LINFO("Connection established with server at ip: "<< _address);
                     
-            //we're connected
-            _isConnected.store(true);
+        //we're connected
+        _isConnected.store(true);
                     
-            //start sending messages
-            _sendThread = std::make_unique<std::thread>(&ParallelConnection::sendFunc, this);
+        //start sending messages
+        _sendThread = std::make_unique<std::thread>(&ParallelConnection::sendFunc, this);
                     
-            //start listening for communication
-            _listenThread = std::make_unique<std::thread>(&ParallelConnection::listenCommunication, this);
+        //start listening for communication
+        _listenThread = std::make_unique<std::thread>(&ParallelConnection::listenCommunication, this);
                     
-            //we no longer need to try to establish connection
-            _tryConnect.store(false);
+        //we no longer need to try to establish connection
+        _tryConnect.store(false);
                     
-            _sendBufferMutex.lock();
-            _sendBuffer.clear();
-            _sendBufferMutex.unlock();
+        _sendBufferMutex.lock();
+        _sendBuffer.clear();
+        _sendBufferMutex.unlock();
 
-            //send authentication
-            sendAuthentication();
-        } else {
-            LINFO("Connection attempt failed.");
-        }
-                
-#ifdef WIN32
-        //on windows: try to connect once per second
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-#else
-        if(!_isConnected.load()){
-            //on unix disconnect and display error message if we're not connected
-            LERROR("Failed to establish a connection with server "<< _address << " on port " << _port<<", terminating connection.");
-                    
-            //signal disconnect
-            signalDisconnect();
-                    
-            //stop loop
-            break;
-        }
-#endif
+        //send authentication
+        sendAuthentication();
+    } else {
+        LINFO("Connection attempt failed.");
+        signalDisconnect();
     }
             
     //cleanup
