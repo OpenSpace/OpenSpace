@@ -60,6 +60,9 @@ namespace properties {
         if (success) {                                                                   \
             return v;                                                                    \
         }                                                                                \
+        else {                                                                           \
+            throw ghoul::RuntimeError("Conversion error for string: " + value);          \
+        }                                                                                \
     }
 
 #define DEFAULT_TO_STRING_LAMBDA(TYPE)                                                   \

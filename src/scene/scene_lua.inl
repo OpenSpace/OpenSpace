@@ -130,8 +130,11 @@ int property_setValueRegex(lua_State* L) {
             lua_type(L, -1)
         );
     }
-    catch (const std::regex_error& e) {
-        LERRORC("property_setValueRegex", "Malformed regular expression: '" << regex << "'");
+    catch (const std::regex_error&) {
+        LERRORC(
+            "property_setValueRegex",
+            "Malformed regular expression: '" << regex << "'"
+        );
     }
 
     return 0;

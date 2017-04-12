@@ -82,7 +82,12 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
 
 void HongKangParser::findPlaybookSpecifiedTarget(std::string line, std::string& target) {
     //remembto add this lua later... 
-    std::transform(line.begin(), line.end(), line.begin(), toupper);
+    std::transform(
+        line.begin(),
+        line.end(),
+        line.begin(),
+        [](char v) { return static_cast<char>(toupper(v)); }
+    );
     std::vector<std::string> ptarg = _potentialTargets;
     for (const auto& p : ptarg) {
         // loop over all targets and determine from 4th col which target this instrument points to
@@ -313,6 +318,7 @@ double HongKangParser::getETfromMet(double met) {
     } else if (met < _metRef) {
         return referenceET - diff;
     }
+    return 0.0;
 }
 
 double HongKangParser::getMetFromET(double et) {
@@ -321,7 +327,7 @@ double HongKangParser::getMetFromET(double et) {
 
     if (et >= referenceET) {
         return _metRef + (et - referenceET);
-    }else {
+    } else {
         return _metRef - (referenceET - et);
     }
 }

@@ -68,23 +68,24 @@ function (set_compile_settings project)
     set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED On)
 
     if (MSVC)
-        target_compile_options(${project} PUBLIC
+        target_compile_options(${project} PRIVATE
             "/MP"       # Multi-threading support
+            "/W4"       # Enable all warnings
             "/ZI"       # Edit and continue support
             "/wd4201"   # Disable "nameless struct" warning
             "/wd4127"   # Disable "conditional expression is constant" warning
         )
         if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(${project} PUBLIC "/WX")
+            target_compile_options(${project} PRIVATE "/WX")
         endif ()
     elseif (APPLE)
-        target_compile_definitions(${project} PUBLIC "__APPLE__")
+        target_compile_definitions(${project} PRIVATE "__APPLE__")
 
         if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(${project} PUBLIC "-Werror")
+            target_compile_options(${project} PRIVATE "-Werror")
         endif ()
 
-        target_compile_options(${project} PUBLIC "-stdlib=libc++")
+        target_compile_options(${project} PRIVATE "-stdlib=libc++")
 
         target_include_directories(${project} PUBLIC "/Developer/Headers/FlatCarbon")
         find_library(COREFOUNDATION_LIBRARY CoreFoundation)
@@ -99,10 +100,10 @@ function (set_compile_settings project)
             ${APP_SERVICES_LIBRARY}
         )
     elseif (UNIX)
-        target_compile_options(${project} PUBLIC "-ggdb" "-Wall" "-Wno-long-long" "-pedantic" "-Wextra")
+        target_compile_options(${project} PRIVATE "-ggdb" "-Wall" "-Wno-long-long" "-pedantic" "-Wextra")
 
         if (OPENSPACE_WARNINGS_AS_ERRORS)
-            target_compile_options(${project} PUBLIC "-Werror")
+            target_compile_options(${project} PRIVATE "-Werror")
         endif ()
     endif ()
 endfunction ()
@@ -131,7 +132,7 @@ function (add_external_dependencies)
     target_link_libraries(
         libOpenSpace
         # sgct
-        sgct_light glew glfw png16_static quat  tinythreadpp tinyxml2static turbojpeg-static
+        sgct_light glew glfw png16_static quat tinythreadpp tinyxml2static turbojpeg-static
         vrpn
         ${GLFW_LIBRARIES}
     )

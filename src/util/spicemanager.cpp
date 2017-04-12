@@ -452,7 +452,7 @@ void SpiceManager::getValue(const std::string& body, const std::string& value,
 {
     ghoul_assert(!v.empty(), "Array for values has to be preallocaed");
 
-    getValueInternal(body, value, v.size(), v.data());
+    getValueInternal(body, value, static_cast<int>(v.size()), v.data());
 }
 
 double SpiceManager::spacecraftClockToET(const std::string& craft, double craftTicks) {

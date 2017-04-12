@@ -853,7 +853,7 @@ void RenderEngine::renderInformation() {
         const std::string& hostName = OsEng.parallelConnection().hostName();
 
         std::string connectionInfo = "";
-        int nClients = nConnections;
+        int nClients = static_cast<int>(nConnections);
         if (status == ParallelConnection::Status::Host) {
             nClients--;
             if (nClients == 1) {
@@ -963,7 +963,7 @@ void RenderEngine::renderInformation() {
                         if (isCurrentPhase || showAllPhases) {
                             // phases are sorted increasingly by start time, and will be popped
                             // last-in-first-out from the stack, so add them in reversed order.
-                            int indexLastPhase = phase->phases().size() - 1;
+                            int indexLastPhase = static_cast<int>(phase->phases().size()) - 1;
                             for (int i = indexLastPhase; 0 <= i; --i) {
                                 S.push({ &phase->phases()[i], depth + 1 });
                             }
@@ -985,11 +985,11 @@ void RenderEngine::renderInformation() {
                         glm::dvec3 p =
                             SpiceManager::ref().targetPosition("PLUTO", "NEW HORIZONS", "GALACTIC", {}, currentTime, lt);
                         psc nhPos = PowerScaledCoordinate::CreatePowerScaledCoordinate(p.x, p.y, p.z);
-                        float a, b, c;
+                        float a, b;
                         glm::dvec3 radii;
                         SpiceManager::ref().getValue("PLUTO", "RADII", radii);
-                        a = radii.x;
-                        b = radii.y;
+                        a = static_cast<float>(radii.x);
+                        b = static_cast<float>(radii.y);
                         float radius = (a + b) / 2.f;
                         float distToSurf = glm::length(nhPos.vec3()) - radius;
 

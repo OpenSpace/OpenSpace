@@ -26,9 +26,11 @@
 
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 
+#include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logmanager.h>
 
 #include "cpl_minixml.h"
+#include <fmt/format.h>
 #include <fstream>
 
 namespace {
@@ -72,7 +74,9 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         (std::istreambuf_iterator<char>())
     );
     _gdalXmlTemplate = consumeTemporalMetaData(xml);
-    _defaultTile = getTileProvider()->getDefaultTile();
+    std::shared_ptr<TileProvider> tileProvider = getTileProvider();
+    ghoul_assert(tileProvider, "No tile provider found");
+    _defaultTile = tileProvider->getDefaultTile();
 }
 
 std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
@@ -227,6 +231,33 @@ std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(TimeKey time
 
 std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
     std::string gdalDatasetXml = getGdalDatasetXML(timekey);
+    try {
+        gdalDatasetXml = absPath(gdalDatasetXml);
+    }
+    catch (ghoul::filesystem::FileSystem::ResolveTokenException& e) {
+        const std::vector<std::string> AllowedToken = {
+            // From: http://www.gdal.org/frmt_wms.html
+            // @FRAGILE:  What happens if a user specifies one of these as path tokens?
+            // ---abock
+            "${x}",
+            "${y}",
+            "${z}",
+            "${version}",
+            "${format}",
+            "${layer}"
+        };
+
+        auto it = std::find(AllowedToken.begin(), AllowedToken.end(), e.token);
+        if (it == AllowedToken.end()) {
+            throw;
+        }
+        LINFOC(
+            "TemporalTileProvider",
+            fmt::format("Ignoring '{}' in absolute path resolve", e.token)
+        );
+    }
+
+
     _initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
     auto tileProvider = std::make_shared<CachingTileProvider>(_initDict);
     return tileProvider;
