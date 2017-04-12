@@ -59,13 +59,15 @@ TouchInteraction::TouchInteraction()
 	_baseSensitivity{ 0.1 }, _baseFriction{ 0.02 },
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
 	_friction{ _baseFriction, _baseFriction/2.0, _baseFriction, _baseFriction, _baseFriction },
-	_touchScreenSize("normalizer", "Touch Screen Normalizer", glm::vec2(122, 68), glm::vec2(0), glm::vec2(1000)), // glm::vec2(width, height) in cm. (13.81, 6.7) for iphone 6s plus
+	_touchScreenSize("TouchScreenSize", "Touch Screen Normalizer", glm::vec2(122, 68), glm::vec2(0), glm::vec2(1000)), // glm::vec2(width, height) in cm. (13.81, 6.7) for iphone 6s plus
 	_centroid{ glm::dvec3(0.0) },
 	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.4 }, 
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
+	_currentRadius{ 1.0 },
 	_directTouchMode{ false }, _tap{ false }
 {
 	addProperty(_touchScreenSize);
+	levmarq_init(&_lmstat);
 	_origin.onChange([this]() {
 		SceneGraphNode* node = sceneGraphNode(_origin.value());
 		if (!node) {
@@ -79,35 +81,64 @@ TouchInteraction::TouchInteraction()
 TouchInteraction::~TouchInteraction() { }
 
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
-	setCamera(OsEng.interactionHandler().camera());
-	setFocusNode(OsEng.interactionHandler().focusNode()); // since functions cant be called directly (TouchInteraction not a subclass of InteractionMode)
-
 	trace(list);
-	if (_currentRadius > 0.3 && _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch
+	if (/*_currentRadius > 0.3 &&*/ _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch, needs better definition
 		_directTouchMode = true;
 	}
 	else {
 		_directTouchMode = false;
 	}
+
+	if (_directTouchMode) {
+		/*
+		1, define s(xi,q): newXi = T(tx,ty,tz)Q(rx,ry,rz)xi, s(xi,q) = modelToScreenSpace(newXi)
+		2, calculate minimum error E = sum( ||s(xi,q)-pi||^2 ) (and define q in the process)
+			* xi is the old modelview position (_selected.at(i).coordinates),
+			* q the 6DOF vector (Trans(x,y,z)Quat(x,y,z)) to be defined that will move xi to a new pos,
+			* pi the current point in screen space (list.at(i).getXY)
+		3, Do the inverse rotation of M(q) on the camera, map interactions to different number of direct touch points
+		*/
+		// define these according to the M(q)
+		auto func = [](double* par, int x, void* fdata) {
+			return par[0] + (par[1] - par[0]) * exp(-par[2] * x);
+		};
+		auto grad = [](double* g, double* par, int x, void* fdata) {
+			g[0] = 1.0 + exp(-par[2] * x);
+			g[1] = exp(-par[2] * x);
+			g[2] = -x * (par[1] - par[0]) * exp(-par[2] * x);
+		};
+
+
+
+		const int nDOF = 6; // 6 degrees of freedom
+		//glm::dquat quat = glm::quat_cast(_selected.at(0).node->rotationMatrix());
+		//glm::dvec3 trans = _sekected.at(0).node->worldPosition();
+		double q[nDOF] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // initial values of q or 0.0? (ie current model or no rotation/translation)
+		const int nFingers = _selected.size() * 2;
+		double* contactPoints = new double[nFingers];
+		double* squaredError = new double[nFingers];
+		int i = 0;
+		for (const SelectedBody& sb : _selected) {
+			glm::dvec2 screenPoint = modelToScreenSpace(sb); // transform to screen-space
+			contactPoints[i] = screenPoint.x;
+			contactPoints[i + 1] = screenPoint.y;
+
+			std::vector<TuioCursor>::const_iterator cursor = find_if(list.begin(), list.end(), [&sb](const TuioCursor& c) { return sb.id == c.getSessionID(); });
+			squaredError[i] = pow(screenPoint.x - cursor->getX(), 2); // squared error to calculate weighted least-square
+			squaredError[i + 1] = pow(screenPoint.y - cursor->getY(), 2);
+
+			i += 2;
+		}
+		levmarq_init(&_lmstat);
+		int nIterations = levmarq(nDOF, q, nFingers, contactPoints, squaredError, func, grad, NULL, &_lmstat);
+		delete[] contactPoints;
+		delete[] squaredError;
+	}
+	//else {
+		interpret(list, lastProcessed);
+		accelerate(list, lastProcessed);
+	//}
 	
-
-
-	/*
-	if (_directTouchMode)
-	assumes all contact points are direct --> if(_selected.size() == list.size())
-	1, check if _selected is initialized
-	2, define s(xi,q): newXi = T(tx,ty,tz)Q(rx,ry,rz)xi, s(xi,q) = modelToScreenSpace(newXi)
-	3, calculate minimum error E = sum( ||s(xi,q)-pi||^2 ) (and define q in the process)
-		* xi is the old modelview position (_selected.at(i).coordinates),
-		* q the 6DOF vector (Trans(x,y,z)Quat(x,y,z)) to be defined that will move xi to a new pos,
-		* pi the current point in screen space (list.at(i).getXY)
-	4, Do the inverse rotation of M(q) on the camera, map interactions to different number of direct touch points
-
-
-	else
-	*/
-	interpret(list, lastProcessed);
-	accelerate(list, lastProcessed);
 }
 
 void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
@@ -132,10 +163,10 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 		double yCo = -2 * (c.getY() - 0.5); // normalized -1 to 1 coordinates on screen
 		glm::dvec3 cursorInWorldSpace = camToWorldSpace * glm::dvec3(xCo, yCo, -3.2596558);
 		glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
+		int id = c.getSessionID();
 		for (SceneGraphNode* node : selectableNodes) {
 			double boundingSphere = node->boundingSphere().lengthd();
 			glm::dvec3 camToSelectable = node->worldPosition() - camPos;
-			int id = c.getSessionID();
 			double dist = length(glm::cross(cursorInWorldSpace, camToSelectable)) / glm::length(cursorInWorldSpace) - boundingSphere;
 			if (dist <= 0.0) {
 				// finds intersection closest point between boundingsphere and line in world coordinates, assumes line direction is normalized
@@ -302,6 +333,7 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 		_vel.localRoll += -rollFactor * _sensitivity.localRoll;
 	}
 	if (_action.pick) { // pick something in the scene as focus node
+		
 		if (_selected.size() == 1 && _selected.at(0).node != _focusNode) {
 			_focusNode = _selected.at(0).node; // rotate camera to look at new focus
 			OsEng.interactionHandler().setFocusNode(_focusNode); // cant do setFocusNode since TouchInteraction is not subclass of InteractionMode
@@ -328,7 +360,6 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 void TouchInteraction::step(double dt) {
 	using namespace glm;
 
-	setCamera(OsEng.interactionHandler().camera());
 	setFocusNode(OsEng.interactionHandler().focusNode()); // since functions cant be called directly (TouchInteraction not a subclass of InteractionMode)
 	if (_focusNode && _camera) {
 		// Create variables from current state
@@ -355,7 +386,7 @@ void TouchInteraction::step(double dt) {
 
 		double distance = std::max(length(centerToCamera) - boundingSphere, 0.0);
 		_currentRadius = boundingSphere / std::max(distance * _projectionScaleFactor, 1.0);
-
+		
 		{ // Roll
 			dquat camRollRot = angleAxis(_vel.localRoll*dt, dvec3(0.0, 0.0, 1.0));
 			localCamRot = localCamRot * camRollRot;

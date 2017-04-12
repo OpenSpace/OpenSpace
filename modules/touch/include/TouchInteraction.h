@@ -27,6 +27,7 @@
 
 #include <modules/touch/include/TuioEar.h>
 #include <modules/touch/touchmodule.h>
+#include <modules/touch/ext/levmarq.h>
 
 #include <openspace/util/camera.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -130,6 +131,7 @@ class TouchInteraction : public properties::PropertyOwner
 		std::vector<SelectedBody> _selected;
 		InteractionType _action;
 		
+		LMstat _lmstat;
 		glm::dvec3 _centroid;
 		VelocityStates _vel;
 		ScaleFactor _friction;

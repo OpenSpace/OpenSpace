@@ -123,6 +123,9 @@ TouchModule::TouchModule()
 	OsEng.registerModuleCallback(
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
+		touch->setCamera(OsEng.interactionHandler().camera());
+		touch->setFocusNode(OsEng.interactionHandler().focusNode());
+
 		if (gotNewInput() && OsEng.windowWrapper().isMaster()) {
 			touch->update(list, lastProcessed);
 
