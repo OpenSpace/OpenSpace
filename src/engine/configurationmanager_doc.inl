@@ -375,7 +375,70 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "This defines the use for a proxy when fetching data over http."
             "No proxy will be used if this is left out.",
             Optional::Yes
-            }
+        },
+        {
+            ConfigurationManager::KeyOpenGLDebugContext,
+            new TableVerifier({
+                {
+                    ConfigurationManager::PartActivate,
+                    new BoolVerifier,
+                    "Determines whether the OpenGL context should be a debug context",
+                    Optional::No
+                },
+                {
+                    ConfigurationManager::PartFilterIdentifier,
+                    new TableVerifier({{
+                        "*",
+                        new TableVerifier({
+                            {
+                                ConfigurationManager::PartFilterIdentifierIdentifier,
+                                new IntVerifier,
+                                "The identifier that is to be filtered",
+                                Optional::No
+                            },
+                            {
+                                ConfigurationManager::PartFilterIdentifierSource,
+                                new StringInListVerifier({
+                                    // Taken from OpenSpaceEngine::initializeGL
+                                    "API", "WINDOW_SYSTEM", "SHADER_COMPILER",
+                                    "THIRD_PARTY", "APPLICATION", "OTHER"
+                                }),
+                                "The source of the identifier to be filtered",
+                                Optional::No
+                            },
+                            {
+                                ConfigurationManager::PartFilterIdentifierType,
+                                new StringInListVerifier({
+                                    // Taken from OpenSpaceEngine::initializeGL
+                                    "ERROR", "DEPRECATED", "UNDEFINED", "PORTABILITY",
+                                    "PERFORMANCE", "MARKER", "PUSH_GROUP", "POP_GROUP",
+                                    "OTHER"
+                                }),
+                                "The type of the identifier to be filtered"
+                            }
+                        }),
+                        "Individual OpenGL debug message identifiers"
+                    }}),
+                    "A list of OpenGL debug messages identifiers that are filtered",
+                    Optional::Yes
+                },
+                {
+                    ConfigurationManager::PartFilterSeverity,
+                    new TableVerifier({
+                        {
+                            "*",
+                            new StringInListVerifier(
+                                {"High", "Medium", "Low", "Notification"}
+                            )
+                        }
+                    }),
+                    "A list of severities that can are filtered out",
+                    Optional::Yes
+                }
+            }),
+            "Determines the settings for the creation of an OpenGL debug context.",
+            Optional::Yes
+        }
         }
     };
 };

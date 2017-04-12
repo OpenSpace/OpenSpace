@@ -899,6 +899,160 @@ void OpenSpaceEngine::configureLogging() {
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
+    const std::string key = ConfigurationManager::KeyOpenGLDebugContext;
+    if (_configurationManager->hasKey(key)) {
+        ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(key);
+        bool debug = dict.value<bool>(ConfigurationManager::PartActivate);
+
+        // Debug output is not available before 4.3
+        const ghoul::systemcapabilities::Version minVersion = { 4, 3, 0 };
+        if (OpenGLCap.openGLVersion() < minVersion) {
+            LINFO("OpenGL Debug context requested, but insufficient version available");
+            debug = false;
+        }
+
+        if (debug) {
+            glEnable(GL_DEBUG_OUTPUT);
+
+            if (dict.hasKey(ConfigurationManager::PartFilterIdentifier)) {
+                ghoul::Dictionary filterDict = dict.value<ghoul::Dictionary>(
+                    ConfigurationManager::PartFilterIdentifier
+                );
+
+                for (int i = 1; i <= filterDict.size(); ++i) {
+                    ghoul::Dictionary id = filterDict.value<ghoul::Dictionary>(
+                        std::to_string(i)
+                    );
+
+                    const GLuint identifier = static_cast<GLuint>(id.value<double>(
+                        ConfigurationManager::PartFilterIdentifierIdentifier
+                    ));
+
+                    static const std::map<std::string, GLenum> Source = {
+                        { "API", GL_DEBUG_SOURCE_API },
+                        { "WINDOW_SYSTEM", GL_DEBUG_SOURCE_WINDOW_SYSTEM },
+                        { "SHADER_COMPILER", GL_DEBUG_SOURCE_SHADER_COMPILER },
+                        { "THIRD_PARTY", GL_DEBUG_SOURCE_THIRD_PARTY },
+                        { "APPLICATION", GL_DEBUG_SOURCE_APPLICATION },
+                        { "OTHER", GL_DEBUG_SOURCE_OTHER }
+                    };
+
+                    static const std::map<std::string, GLenum> Type = {
+                        { "ERROR", GL_DEBUG_TYPE_ERROR },
+                        { "DEPRECATED", GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR },
+                        { "UNDEFINED", GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR },
+                        { "PORTABILITY", GL_DEBUG_TYPE_PORTABILITY },
+                        { "PERFORMANCE", GL_DEBUG_TYPE_PERFORMANCE },
+                        { "MARKER", GL_DEBUG_TYPE_MARKER },
+                        { "PUSH_GROUP", GL_DEBUG_TYPE_PUSH_GROUP },
+                        { "POP_GROUP", GL_DEBUG_TYPE_POP_GROUP },
+                        { "OTHER", GL_DEBUG_TYPE_OTHER }
+                    };
+
+                    const std::string s = id.value<std::string>(
+                        ConfigurationManager::PartFilterIdentifierSource
+                    );
+
+                    const std::string t = id.value<std::string>(
+                        ConfigurationManager::PartFilterIdentifierType
+                    );
+
+                    glDebugMessageControl(
+                        Source.at(s),
+                        Type.at(t),
+                        GL_DONT_CARE,
+                        1,
+                        &identifier,
+                        GL_FALSE
+                    );
+                }
+            }
+
+            if (dict.hasKey(ConfigurationManager::PartFilterSeverity)) {
+                ghoul::Dictionary filterDict = dict.value<ghoul::Dictionary>(
+                    ConfigurationManager::PartFilterIdentifier
+                );
+
+                for (int i = 1; i <= filterDict.size(); ++i) {
+                    static const std::map<std::string, GLenum> Severity = {
+                        { "High", GL_DEBUG_SEVERITY_HIGH },
+                        { "Medium", GL_DEBUG_SEVERITY_MEDIUM },
+                        { "Low", GL_DEBUG_SEVERITY_LOW },
+                        { "Notification", GL_DEBUG_SEVERITY_NOTIFICATION }
+                    };
+
+                    std::string severity = filterDict.value<std::string>(
+                        std::to_string(i)
+                    );
+
+                    glDebugMessageControl(
+                        GL_DONT_CARE,
+                        GL_DONT_CARE,
+                        Severity.at(severity),
+                        0,
+                        nullptr,
+                        GL_FALSE
+                    );
+                }
+            }
+
+            // Maybe not necessary? ---abock
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            auto callback = [](GLenum source, GLenum type, GLuint id, GLenum severity,
+                GLsizei length, const GLchar* message, GLvoid* userParam) -> void
+            {
+                auto convertSource = [](GLenum source) -> std::string {
+                    switch (source) {
+                        case GL_DEBUG_SOURCE_API:               return "API";
+                        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:     return "Window System";
+                        case GL_DEBUG_SOURCE_SHADER_COMPILER:   return "Shader Compiler";
+                        case GL_DEBUG_SOURCE_THIRD_PARTY:       return "Third Party";
+                        case GL_DEBUG_SOURCE_APPLICATION:       return "Application";
+                        case GL_DEBUG_SOURCE_OTHER:             return "Other";
+                        default:                ghoul_assert(false, "Missing case label");
+                    }
+                };
+
+                auto convertType = [](GLenum type) -> std::string {
+                    switch (type) {
+                        case GL_DEBUG_TYPE_ERROR:               return "Error";
+                        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: return "Deprecated";
+                        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  return "Undefined";
+                        case GL_DEBUG_TYPE_PORTABILITY:         return "Portability";
+                        case GL_DEBUG_TYPE_PERFORMANCE:         return "Performance";
+                        case GL_DEBUG_TYPE_MARKER:              return "Marker";
+                        case GL_DEBUG_TYPE_PUSH_GROUP:          return "Push group";
+                        case GL_DEBUG_TYPE_POP_GROUP:           return "Pop group";
+                        case GL_DEBUG_TYPE_OTHER:               return "Other";
+                        default:                ghoul_assert(false, "Missing case label");
+                    }
+                };
+
+                const std::string s = convertSource(source);
+                const std::string t = convertType(type);
+                
+                const std::string category =
+                    "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";
+                switch (severity) {
+                    case GL_DEBUG_SEVERITY_HIGH:
+                        LERRORC(category, std::string(message));
+                        break;
+                    case GL_DEBUG_SEVERITY_MEDIUM:
+                        LWARNINGC(category, std::string(message));
+                        break;
+                    case GL_DEBUG_SEVERITY_LOW:
+                        LINFOC(category, std::string(message));
+                        break;
+                    case GL_DEBUG_SEVERITY_NOTIFICATION:
+                        LDEBUGC(category, std::string(message));
+                        break;
+                }
+            };
+            glDebugMessageCallback(callback, nullptr);
+        }
+    }
+
+
     LINFO("Initializing Rendering Engine");
     // @CLEANUP:  Remove the return statement and replace with exceptions ---abock
     _renderEngine->initializeGL();
