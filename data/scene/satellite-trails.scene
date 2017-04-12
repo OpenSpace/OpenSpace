@@ -22,6 +22,7 @@ function postInitialization()
     ]]--
     openspace.printInfo("Setting default values")
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
     openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 
@@ -38,7 +39,7 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "Stereo Plane",
+        Focus = "SDO Plane",
         Position = {505370268486.696167, 1089706179272.719116, -890259148524.319458},
         Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
     },
@@ -52,12 +53,13 @@ return {
         -- "saturn",
         -- "uranus",
         -- "neptune",
-        -- "stars",
-        -- -- "stars-denver",
+        "stars",
+        -- "stars-denver",
         "milkyway",
         "milkyway-eso",
         "constellationbounds",
-        "missions/stereo",
+        "missions/sdo",
+        --"missions/stereo",
         "missions/soho"
     }
 }
