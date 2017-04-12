@@ -81,10 +81,10 @@
 namespace {
     const uint32_t ProtocolVersion = 2;
     const size_t MaxLatencyDiffs = 64;
-    //const double BroadcastIntervalMilliseconds = 100;
+    // const double BroadcastIntervalMilliseconds = 100;
     const std::string _loggerCat = "ParallelConnection";
-    const int nFrametimesBuffer = 10;
-    //const int nBroadcastIntervalsBuffer = 2;
+    // const int nFrametimesBuffer = 10;
+    // const int nBroadcastIntervalsBuffer = 2;
 }
 
 namespace openspace {
@@ -97,6 +97,10 @@ ParallelConnection::ParallelConnection()
     , _address("address", "Address", "localhost")
     , _name("name", "Connection name", "Anonymous")
     , _bufferTime("bufferTime", "Buffer Time", 1, 0.5, 10)
+    , _timeKeyframeInterval("timeKeyframeInterval", "Time keyframe interval", 0.1, 0, 1)
+    , _cameraKeyframeInterval("cameraKeyframeInterval", "Camera Keyframe interval", 0.1, 0, 1)
+    , _lastTimeKeyframeTimestamp(0)
+    , _lastCameraKeyframeTimestamp(0)
     , _clientSocket(INVALID_SOCKET)
     , _connectionThread(nullptr)
     , _sendThread(nullptr)
@@ -119,6 +123,9 @@ ParallelConnection::ParallelConnection()
     
     addProperty(_password);
     addProperty(_hostPassword);
+
+    addProperty(_timeKeyframeInterval);
+    addProperty(_cameraKeyframeInterval);
 
     _connectionEvent = std::make_shared<ghoul::Event<>>();
     _handlerThread = std::make_unique<std::thread>(&ParallelConnection::threadManagement, this);
@@ -518,6 +525,15 @@ double ParallelConnection::calculateBufferedKeyframeTime(double originalTime) {
     _latencyDiffs.push_back(latencyDiff);
 
     /*
+    double latencyStandardDev = latencyStandardDeviation();
+    double latencyCompensation = std::max(expectedLatencyDiff + 2 * latencyStandardDev, latencyDiff);
+    double frametime = OsEng.windowWrapper().averageDeltaTime();
+    return originalTime + timeDiff + nBroadcastIntervalsBuffer * BroadcastIntervalMilliseconds / 1000 + latencyCompensation + nFrametimesBuffer * frametime;
+    */
+    return originalTime + timeDiff + latencyDiff + _bufferTime;
+}
+
+double ParallelConnection::latencyStandardDeviation() const {
     double accumulatedLatencyDiffSquared = 0;
     double accumulatedLatencyDiff = 0;
     for (double diff : _latencyDiffs) {
@@ -529,19 +545,9 @@ double ParallelConnection::calculateBufferedKeyframeTime(double originalTime) {
 
     // V(X) = E(x^2) - E(x)^2
     double latencyVariance = expectedLatencyDiffSquared - expectedLatencyDiff*expectedLatencyDiff;
-    double latencyStandardDeviation = std::sqrt(latencyVariance);
-
-
-
-    double latencyCompensation = std::max(expectedLatencyDiff + 2 * latencyStandardDeviation, latencyDiff);
-    */
-
-    //double frametime = OsEng.windowWrapper().averageDeltaTime();
-
-    //return originalTime + timeDiff + nBroadcastIntervalsBuffer * BroadcastIntervalMilliseconds / 1000 + latencyCompensation + nFrametimesBuffer * frametime;
-    return originalTime + timeDiff + latencyDiff + _bufferTime;
-
+    return std::sqrt(latencyVariance);
 }
+
 
 void ParallelConnection::dataMessageReceived(const std::vector<char>& messageContent) {
     
@@ -551,10 +557,8 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
  
     switch(static_cast<datamessagestructures::Type>(type)) {
         case datamessagestructures::Type::CameraData: {
-
             datamessagestructures::CameraKeyframe kf(buffer);
             kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
-
 
             OsEng.interactionHandler().removeKeyframesAfter(kf._timestamp);
             OsEng.interactionHandler().addKeyframe(kf);
@@ -566,14 +570,13 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
 
             OsEng.timeManager().removeKeyframesAfter(kf._timestamp);
             OsEng.timeManager().addKeyframe(kf);
-
             break;
         }
         case datamessagestructures::Type::ScriptData: {
             datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
-            OsEng.scriptEngine().queueScript(sm._script, scripting::ScriptEngine::RemoteScripting::No);
-            
+
+            OsEng.scriptEngine().queueScript(sm._script, scripting::ScriptEngine::RemoteScripting::No);         
             break;
         }
         default:{
@@ -962,8 +965,16 @@ void ParallelConnection::preSynchronization(){
         if (Time::ref().timeJumped()) {
             _timeJumped = true;
         }
-        sendCameraKeyframe();
-        sendTimeKeyframe();
+        double now = OsEng.runTime();
+
+        if (_lastCameraKeyframeTimestamp + _cameraKeyframeInterval < now) {
+            sendCameraKeyframe();
+            _lastCameraKeyframeTimestamp = now;
+        }
+        if (_lastTimeKeyframeTimestamp + _timeKeyframeInterval < now) {
+            sendTimeKeyframe();
+            _lastTimeKeyframeTimestamp = now;
+        }
     }
 }
          

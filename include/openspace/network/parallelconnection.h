@@ -115,6 +115,7 @@ class ParallelConnection : public properties::PropertyOwner {
     void preSynchronization();
     void sendScript(std::string script);
     void resetTimeOffset();
+    double latencyStandardDeviation() const;
 
     /**
         * Returns the Lua library that contains all Lua functions available to affect the
@@ -168,6 +169,11 @@ private:
     properties::StringProperty _address;
     properties::StringProperty _name;
     properties::FloatProperty _bufferTime;
+    properties::FloatProperty _timeKeyframeInterval;
+    properties::FloatProperty _cameraKeyframeInterval;
+
+    double _lastTimeKeyframeTimestamp;
+    double _lastCameraKeyframeTimestamp;
             
     _SOCKET _clientSocket;
 
