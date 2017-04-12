@@ -347,7 +347,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
     try {
         _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_projectionComponent.instrumentId(), _destination, time);
     }
-    catch (const SpiceManager::SpiceException& e) {
+    catch (const SpiceManager::SpiceException&) {
         return;
     }
 
