@@ -216,6 +216,19 @@ struct StringListVerifier : public TableVerifier {
     std::string type() const override;
 };
 
+/**
+* A Verifier that checks whether all values contained in a Table are of type \c int.
+*/
+struct IntListVerifier : public TableVerifier {
+    /**
+    * Constructor for a IntListVerifier.
+    * \param elementDocumentation The documentation for each string in the list
+    */
+    IntListVerifier(std::string elementDocumentation = "");
+
+    std::string type() const override;
+};
+
 //----------------------------------------------------------------------------------------
 // Vector verifiers
 //----------------------------------------------------------------------------------------
