@@ -76,7 +76,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/304", // 8
     //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
 
-  std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
+    std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
                                       "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 1
                                       "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 2
                                       "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // 3 // OK
@@ -100,21 +100,29 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
                                         "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0335_new.txt"};// 9
 
     _type = "SDO";
+    int imageSize;
     const int numChannels = 10;
     _imageData.reserve(numChannels);
-    _textures.reserve(numChannels);
     for (int i = 0; i < numChannels; i++) {
-        _imageData.push_back(SpacecraftImageryManager::ref().loadImageData(paths[i]));
+        _imageData.push_back(SpacecraftImageryManager::ref().loadImageData(paths[i], imageSize));
         SpacecraftImageryManager::ref().scaleImageData(_imageData[i], _type, i);
-        _textures.push_back(SpacecraftImageryManager::ref().loadTextures(_imageData[i]));
         _transferFunctions.push_back(std::make_unique<TransferFunction>(tfPaths[i]));
-        _transferFunctions[i]->update();
     }
 
-    _currentActiveTexture = -1;
+    _texture =  std::make_unique<Texture>(
+                    glm::size3_t(imageSize, imageSize, 1),
+                    ghoul::opengl::Texture::Red, // Format of the pixeldata
+                    GL_R32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
+                    GL_FLOAT, // Type of data
+                    Texture::FilterMode::Linear,
+                    Texture::WrappingMode::ClampToEdge
+                );
 
-    assert(_currentActiveChannel < numChannels);
+    _texture->setDataOwnership(ghoul::Boolean::No);
+
+    _currentActiveImage = -1;
     updateTexture();
+    assert(_currentActiveChannel < numChannels);
 
     // Initialize time
     _openSpaceTime = Time::ref().j2000Seconds();
@@ -122,12 +130,10 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
 
-    // _tf = std::make_unique<TransferFunction>(absPath("/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094.txt"));
-    // _tf->update();
-    //_lut = SpacecraftImageryManager::ref().createLUT();
-
     _currentActiveChannel.onChange([this]() {
-        _textures[_currentActiveChannel][_currentActiveTexture]->uploadTexture();
+        std::valarray<float>& contents = _imageData[_currentActiveChannel][_currentActiveImage].contents;
+        _texture->setPixelData(&contents[0], ghoul::Boolean::No);
+        _texture->uploadTexture();
     });
     addProperty(_currentActiveChannel);
     addProperty(_target);
@@ -135,7 +141,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 }
 
 bool RenderableSpacecraftCameraPlane::isReady() const {
-    return _shader && !_textures.empty();
+    return _shader && _texture;
 }
 
 bool RenderableSpacecraftCameraPlane::initialize() {
@@ -177,11 +183,13 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 
 void RenderableSpacecraftCameraPlane::updateTexture() {
     int clockwiseSign = (Time::ref().deltaTime()>0) ? 1 : -1;
-    int newIndex = clockwiseSign + _currentActiveTexture;
-    if (newIndex < _textures[_currentActiveChannel].size() && newIndex >= 0) {
+    int newIndex = clockwiseSign + _currentActiveImage;
+    if (newIndex < _imageData[_currentActiveChannel].size() && newIndex >= 0) {
         LDEBUG("Updating texture to " << newIndex);
-        _currentActiveTexture = newIndex;
-        _textures[_currentActiveChannel][_currentActiveTexture]->uploadTexture();
+        _currentActiveImage = newIndex;
+        std::valarray<float>& contents = _imageData[_currentActiveChannel][_currentActiveImage].contents;
+        _texture->setPixelData(&contents[0], ghoul::Boolean::No);
+        _texture->uploadTexture();
     }
 }
 
@@ -257,7 +265,7 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     ghoul::opengl::TextureUnit tfUnit;
 
     imageUnit.activate();
-    _textures[_currentActiveChannel][_currentActiveTexture]->bind();
+    _texture->bind();
     _shader->setUniform("texture1", imageUnit);
 
     tfUnit.activate();

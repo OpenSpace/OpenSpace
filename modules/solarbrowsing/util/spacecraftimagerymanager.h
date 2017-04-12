@@ -42,7 +42,6 @@ namespace openspace {
 
 struct ImageMetadata {
     std::string filename;
-    std::pair<int, int> size;
     float expTime;
 };
 
@@ -56,7 +55,7 @@ class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManage
 
 public:
     SpacecraftImageryManager();
-    std::vector<ImageDataObject> loadImageData(const std::string& path);
+    std::vector<ImageDataObject> loadImageData(const std::string& path, int& imageSize);
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> loadTextures(std::vector<ImageDataObject>& imageData);
     std::unique_ptr<ghoul::opengl::Texture> createLUT();
     void scaleImageData(std::vector<ImageDataObject>& _imageData, const std::string& type, const int& channel);

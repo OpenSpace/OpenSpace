@@ -60,12 +60,11 @@ private:
     std::chrono::milliseconds _lastUpdateRealTime;
 
     std::string _type;
-    int _currentActiveTexture;
-    // Channels -> Series of images
-    std::vector<std::vector<std::unique_ptr<ghoul::opengl::Texture>>> _textures;
-    std::vector<std::vector<ImageDataObject>> _imageData;
+    int _currentActiveImage;
 
-    //std::unique_ptr<ghoul::opengl::Texture> _lut;
+    // Channels -> DataObjects
+    std::vector<std::vector<ImageDataObject>> _imageData;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::vector<std::unique_ptr<TransferFunction>> _transferFunctions;
 
     void downloadTextureResource();

@@ -146,43 +146,43 @@ std::unique_ptr<ghoul::opengl::Texture> SpacecraftImageryManager::createLUT() {
     return std::move(t);
 }
 
-std::vector<std::unique_ptr<Texture>> SpacecraftImageryManager::loadTextures(std::vector<ImageDataObject>& imageData) {
-    std::vector<std::unique_ptr<Texture>> textures;
-    textures.reserve(imageData.size());
+// std::vector<std::unique_ptr<Texture>> SpacecraftImageryManager::loadTextures(std::vector<ImageDataObject>& imageData) {
+//     std::vector<std::unique_ptr<Texture>> textures;
+//     textures.reserve(imageData.size());
 
-    std::transform(imageData.begin(), imageData.end(), std::back_inserter(textures), [](ImageDataObject& dataObject) {
-        std::valarray<float>& data = dataObject.contents;
+//     std::transform(imageData.begin(), imageData.end(), std::back_inserter(textures), [](ImageDataObject& dataObject) {
+//         std::valarray<float>& data = dataObject.contents;
 
-        const int& sizeX = dataObject.metaData.size.first;
-        const int& sizeY = dataObject.metaData.size.second;
+//         const int& sizeX = dataObject.metaData.size.first;
+//         const int& sizeY = dataObject.metaData.size.second;
 
-        const glm::size3_t imageSize(sizeX, sizeY, 1);
-        const Texture::Format format = ghoul::opengl::Texture::Red;
-        const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
+//         const glm::size3_t imageSize(sizeX, sizeY, 1);
+//         const Texture::Format format = ghoul::opengl::Texture::Red;
+//         const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
 
-        // TODO(mnoven): Remove this
-        for ( int i = 0; i < data.size(); i++) {
-            assert(!(data[i] < 0.f) && !(data[i] > 1.f));
-        }
+//         // TODO(mnoven): Remove this
+//         for ( int i = 0; i < data.size(); i++) {
+//             assert(!(data[i] < 0.f) && !(data[i] > 1.f));
+//         }
 
-        std::unique_ptr<Texture> t = std::make_unique<Texture>(
-                                        &data[0],
-                                        imageSize,
-                                        format, // Format of the pixeldata
-                                        GL_R32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
-                                        GL_FLOAT, // Type of data
-                                        Texture::FilterMode::Linear,
-                                        Texture::WrappingMode::ClampToEdge
-                                    );
-        // Memory is owned by renderable
-        t->setDataOwnership(ghoul::Boolean::No);
-        return t;
-    });
+//         std::unique_ptr<Texture> t = std::make_unique<Texture>(
+//                                         &data[0],
+//                                         imageSize,
+//                                         format, // Format of the pixeldata
+//                                         GL_R32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
+//                                         GL_FLOAT, // Type of data
+//                                         Texture::FilterMode::Linear,
+//                                         Texture::WrappingMode::ClampToEdge
+//                                     );
+//         // Memory is owned by renderable
+//         t->setDataOwnership(ghoul::Boolean::No);
+//         return t;
+//     });
 
-    return std::move(textures);
-}
+//     return std::move(textures);
+// }
 
-std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::string& path) {
+std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::string& path, int& imageSize) {
     std::vector<ImageDataObject> imageData;
 
     using RawPath = ghoul::filesystem::Directory::RawPath;
@@ -218,8 +218,10 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
                     ImageMetadata metaData;
                     metaData.filename = relativePath;
                     metaData.expTime = FitsFileReader::readHeaderValue<float>(std::string("EXPTIME"));
-                    metaData.size = FitsFileReader::getImageSize();
                     im.metaData = metaData;
+
+                    //TODO(mnoven): CCfits has method for loading sequence of images - use that instead
+                    imageSize = FitsFileReader::getImageSize().first;
 
                     imageData.push_back(im);
                     FitsFileReader::close();
