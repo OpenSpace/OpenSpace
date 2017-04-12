@@ -72,6 +72,9 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _vertexArrayObject(0),
       _vertexPositionBuffer(0),
       _vertexColorBuffer(0),
+      _gridVAO(0),
+      _gridVBO(0),
+      _stepSize("stepSize", "Step Size", 1.0, 0.0, 2.0),
       _shouldRender(false),
       _needsUpdate(false),
       _activeStateIndex(-1) {
@@ -100,6 +103,110 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
 
 bool RenderableGpuFieldlines::isReady() const {
     return _program ? true : false;
+}
+
+// FOR DEBUGGING PURPOSES
+void RenderableGpuFieldlines::generateUniform3DGrid() {
+    // bottom vertices of entire volume
+    // glm::vec3 bfl = glm::vec3(_domainMaxs.x, _domainMins.y, _domainMins.z);
+    // glm::vec3 bfr = glm::vec3(_domainMaxs.x, _domainMaxs.y, _domainMins.z);
+    // glm::vec3 bbr = glm::vec3(_domainMins.x, _domainMaxs.y, _domainMins.z);
+    // glm::vec3 bbl = glm::vec3(_domainMins.x, _domainMins.y, _domainMins.z);
+
+    // // top corners of entire volume
+    // // glm::vec3 tfl = glm::vec3(_domainMaxs.x, _domainMins.y, _domainMaxs.z);
+    // glm::vec3 tfr = glm::vec3(_domainMaxs.x, _domainMaxs.y, _domainMaxs.z);
+    // glm::vec3 tbr = glm::vec3(_domainMins.x, _domainMaxs.y, _domainMaxs.z);
+    // glm::vec3 tbl = glm::vec3(_domainMins.x, _domainMins.y, _domainMaxs.z);
+
+    // std::vector<glm::vec3> vertices;
+    // std::vector<int> startPos;
+    // std::vector<int> lineCount;
+
+
+    // ADD VOLUME BOUNDARY VERTICES FOR LINE DRAWING
+      // 1------0 (6)
+      // |      |\
+      // |      | \
+      // 2      5  7
+      //  \      \ |
+      //   \      \|
+      //    3------4 (8)
+
+    // startPos.push_back(0);
+    // vertices.push_back(tbr); // top-back-right (0)
+    // vertices.push_back(tbl); // top-back-left  (1)
+    // vertices.push_back(bbl);
+    // vertices.push_back(bfl); // bottom-front-left
+    // vertices.push_back(bfr);
+    // vertices.push_back(bbr);
+    // vertices.push_back(tbr);
+    // vertices.push_back(tfr);
+    // vertices.push_back(bfr);
+    // lineCount.push_back(9);
+
+    // // ADD MISSING LINE (from 2 to 5)
+    // startPos.push_back(9);
+    // vertices.push_back(bbl);
+    // vertices.push_back(bbr);
+    // lineCount.push_back(2);
+
+    // ADD ALL OTHER LINES
+
+    glm::vec3 deltas = (_domainMaxs - _domainMins) / glm::vec3(
+                                                        static_cast<float>(_dimensions.x),
+                                                        static_cast<float>(_dimensions.y),
+                                                        static_cast<float>(_dimensions.z));
+
+    int lStart = 0;
+    // HORIZONTAL LINES parallel to x axis
+    for (int z = 0; z < _dimensions.z + 1; ++z) {
+        for (int y = 0; y < _dimensions.y + 1; ++y) {
+            _gridStartPos.push_back(lStart);
+            _gridVertices.push_back(glm::vec3(_domainMins.x,
+                                              _domainMins.y + static_cast<float>(y) * deltas.y,
+                                              _domainMins.z + static_cast<float>(z) * deltas.z));
+            _gridVertices.push_back(glm::vec3(_domainMaxs.x,
+                                              _domainMins.y + static_cast<float>(y) * deltas.y,
+                                              _domainMins.z + static_cast<float>(z) * deltas.z));
+            lStart += 2;
+            _gridLineCount.push_back(2);
+        }
+    }
+
+    // HORIZONTAL LINES parallel to y axis
+    for (int z = 0; z < _dimensions.z + 1; ++z) {
+        for (int x = 0; x < _dimensions.x + 1; ++x) {
+            _gridStartPos.push_back(lStart);
+
+            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                                              _domainMins.y,
+                                              _domainMins.z + static_cast<float>(z) * deltas.z));
+            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                                              _domainMaxs.y,
+                                              _domainMins.z + static_cast<float>(z) * deltas.z));
+            lStart += 2;
+            _gridLineCount.push_back(2);
+        }
+    }
+
+
+    // VERTICAL LINES parallel to z axis
+    for (int x = 0; x < _dimensions.x + 1; ++x) {
+        for (int y = 0; y < _dimensions.y + 1; ++y) {
+            _gridStartPos.push_back(lStart);
+
+            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                                              _domainMins.y + static_cast<float>(y) * deltas.y,
+                                              _domainMins.z));
+            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                                              _domainMins.y + static_cast<float>(y) * deltas.y,
+                                              _domainMaxs.z));
+            lStart += 2;
+            _gridLineCount.push_back(2);
+        }
+    }
+
 }
 
 bool RenderableGpuFieldlines::initialize() {
@@ -191,7 +298,7 @@ bool RenderableGpuFieldlines::initialize() {
             // [0] = "README", [1] = "model_name", [2] = "model_type", [3] = "generation_date", [4] = "original_output_file_name", [5] = "generated_by", [6] = "terms_of_usage", [7] = "grid_system_count", [8] = "grid_system_1_number_of_dimensions", [9] = "grid_system_1_dimension_1_size", [10] = "grid_system_1_dimension_2_size", [11] = "grid_system_1_dimension_3_size", [12] = "grid_system_1", [13] = "output_type", [14] = "standard_grid_target", [15] = "grid_1_type", [16] = "start_time", [17] = "end_time", [18] = "run_type", [19] = "kameleon_version", [20] = "elapsed_time_in_seconds", [21] = "number_of_dimensions", [22] = "special_parameter_g", [23] = "special_parameter_c", [24] = "special_parameter_th", [25] = "special_parameter_P1", [26] = "special_parameter_P2", [27] = "special_parameter_P3", [28] = "special_parameter_R", [29] = "special_parameter_NX", [30] = "special_parameter_NY", [31] = "special_parameter_NZ", [32] = "x_dimension_size", [33] = "y_dimension_size", [34] = "z_dimension_size", [35] = "current_iteration_step", [36] = "global_x_min", [37] = "global_x_max", [38] = "global_y_min", [39] = "global_y_max", [40] = "global_z_min", [41] = "global_z_max", [42] = "max_amr_level", [43] = "number_of_cells", [44] = "number_of_blocks", [45] = "smallest_cell_size", [46] = "r_body", [47] = "r_currents", [48] = "dipole_time", [49] = "dipole_update", [50] = "dipole_tilt", [51] = "dipole_tilt_y"}
             std::vector<std::string> gan = kvr.globalAttributeNames();
 
-
+            // Vector volume. Space related (domain)
             float  xMin = kvr.minValue("x");
             float  xMax = kvr.maxValue("x");
             float  yMin = kvr.minValue("y");
@@ -199,9 +306,13 @@ bool RenderableGpuFieldlines::initialize() {
             float  zMin = kvr.minValue("z");
             float  zMax = kvr.maxValue("z");
 
-            glm::vec3 domainBoundsLower = glm::vec3(xMin,yMin,zMin);
-            glm::vec3 domainBoundsUpper = glm::vec3(xMax,yMax,zMax);
+            _domainMins = glm::vec3(xMin,yMin,zMin);
+            _domainMaxs = glm::vec3(xMax,yMax,zMax);
 
+            // New resampled domain dimensions (voxel grid)
+            _dimensions = glm::uvec3(32,32,32);
+
+            // Magnetic min/max values according to CDF "header"
             float bxMin = kvr.minValue("bx");
             float bxMax = kvr.maxValue("bx");
             float byMin = kvr.minValue("by");
@@ -209,71 +320,110 @@ bool RenderableGpuFieldlines::initialize() {
             float bzMin = kvr.minValue("bz");
             float bzMax = kvr.maxValue("bz");
 
-            _dimensions = glm::uvec3(32,32,32);
+            _bMins = glm::vec3(bxMin,byMin,bzMin);
+            _bMaxs = glm::vec3(bxMax,byMax,bzMax);
 
-            auto bxUniformDistr = kvr.readFloatVolume(_dimensions, "bx", domainBoundsLower, domainBoundsUpper);
-            auto byUniformDistr = kvr.readFloatVolume(_dimensions, "by", domainBoundsLower, domainBoundsUpper);
-            auto bzUniformDistr = kvr.readFloatVolume(_dimensions, "bz", domainBoundsLower, domainBoundsUpper);
+            // Actual max/min values after uniform resampling of volume
+            float newBxMin;
+            float newBxMax;
+            float newByMin;
+            float newByMax;
+            float newBzMin;
+            float newBzMax;
+
+            // Uniform resampling of magnetic components within the domain
+            LDEBUG("Creating float volume for variable 'bx'. Dimensions are: " << _dimensions.x << " x " << _dimensions.y << " x " <<_dimensions.z);
+            auto bxUniformDistr = kvr.readFloatVolume(_dimensions, "bx", _domainMins, _domainMaxs, newBxMin, newBxMax);
+
+            LDEBUG("Creating float volume for variable 'by'. Dimensions are: " << _dimensions.x << " x " << _dimensions.y << " x " <<_dimensions.z);
+            auto byUniformDistr = kvr.readFloatVolume(_dimensions, "by", _domainMins, _domainMaxs, newByMin, newByMax);
+
+            LDEBUG("Creating float volume for variable 'bz'. Dimensions are: " << _dimensions.x << " x " << _dimensions.y << " x " <<_dimensions.z);
+            auto bzUniformDistr = kvr.readFloatVolume(_dimensions, "bz", _domainMins, _domainMaxs, newBzMin, newBzMax);
+
+            LDEBUG("Done creating float volumes");
+
+            _bMins = glm::vec3(newBxMin,newByMin,newBzMin);
+            _bMaxs = glm::vec3(newBxMax,newByMax,newBzMax);
+
             float* bxVol = bxUniformDistr->data();
             float* byVol = byUniformDistr->data();
             float* bzVol = bzUniformDistr->data();
 
+            LDEBUG("Creating raw volume!");
             _normalizedVolume = std::make_unique<RawVolume<glm::vec3>>(_dimensions);
-            _normalizedVolumeBx = std::make_unique<RawVolume<GLfloat>>(_dimensions);
-            _normalizedVolumeBy = std::make_unique<RawVolume<GLfloat>>(_dimensions);
-            _normalizedVolumeBz = std::make_unique<RawVolume<GLfloat>>(_dimensions);
+            // _normalizedVolumeBx = std::make_unique<RawVolume<GLfloat>>(_dimensions);
+            // _normalizedVolumeBy = std::make_unique<RawVolume<GLfloat>>(_dimensions);
+            // _normalizedVolumeBz = std::make_unique<RawVolume<GLfloat>>(_dimensions);
 
-            float* inX = bxUniformDistr->data();
-            float* inY = byUniformDistr->data();
-            float* inZ = bzUniformDistr->data();
 
             glm::vec3* out = _normalizedVolume->data();
-            GLfloat* outX = _normalizedVolumeBx->data();
-            GLfloat* outY = _normalizedVolumeBy->data();
-            GLfloat* outZ = _normalizedVolumeBz->data();
+            // GLfloat* outX = _normalizedVolumeBx->data();
+            // GLfloat* outY = _normalizedVolumeBy->data();
+            // GLfloat* outZ = _normalizedVolumeBz->data();
+
+            float newBxDiff = newBxMax - newBxMin;
+            float newByDiff = newByMax - newByMin;
+            float newBzDiff = newBzMax - newBzMin;
 
             float bxDiff = bxMax - bxMin;
             float byDiff = byMax - byMin;
             float bzDiff = bzMax - bzMin;
 
-            for (size_t i = 0; i < _normalizedVolumeBx->nCells(); ++i) {
-                outX[i] = glm::clamp((inX[i] - bxMin) / bxDiff, 0.0f, 1.0f);
-                outY[i] = glm::clamp((inY[i] - byMin) / byDiff, 0.0f, 1.0f);
-                outZ[i] = glm::clamp((inZ[i] - bzMin) / bzDiff, 0.0f, 1.0f);
-                out[i] = glm::vec3(outX[i],outY[i],outZ[i]);
+            // float bMinx = FLT_MAX;
+            // float bMaxx = FLT_MIN;
+
+            LDEBUG("Normalizing!");
+            for (size_t i = 0; i < _normalizedVolume->nCells(); ++i) {
+                // if (bxVol[i] > bMaxx) {
+                //     bMaxx = bxVol[i];
+                // }
+                // if (bxVol[i] < bMinx) {
+                //     bMinx = bxVol[i];
+                // }
+                // outX[i] = (bxVol[i] - bxMin) / bxDiff;
+                // outY[i] = (byVol[i] - byMin) / byDiff;
+                // outZ[i] = (bzVol[i] - bzMin) / bzDiff;
+                // out[i] = glm::vec3(outX[i],outY[i],outZ[i]);
+
+                // outX[i] = (bxVol[i] - newBxMin) / newBxDiff;
+                // outY[i] = (byVol[i] - newByMin) / newByDiff;
+                // outZ[i] = (bzVol[i] - newBzMin) / newBzDiff;
+                // out[i] = glm::vec3(outX[i],outY[i],outZ[i]);
+                float ox = (bxVol[i] - newBxMin) / newBxDiff;
+                float oy = (byVol[i] - newByMin) / newByDiff;
+                float oz = (bzVol[i] - newBzMin) / newBzDiff;
+                out[i] = glm::vec3(ox,oy,oz);
             }
+            LDEBUG("\n\tNormalizing DONE!");
 
-            _bMins = glm::vec3(bxMin,byMin,bzMin);
-            _bMaxs = glm::vec3(bxMax,byMax,bzMax);
-            _domainMins = glm::vec3(xMin,yMin,zMin);
-            _domainMaxs = glm::vec3(xMax,yMax,zMax);
 
-            _volumeTextureBx = std::make_unique<ghoul::opengl::Texture>(
-                _dimensions,
-                ghoul::opengl::Texture::Format::Red,
-                GL_RED,
-                GL_FLOAT,
-                ghoul::opengl::Texture::FilterMode::Linear,
-                ghoul::opengl::Texture::WrappingMode::ClampToEdge
-            );
+            // _volumeTextureBx = std::make_unique<ghoul::opengl::Texture>(
+            //     _dimensions,
+            //     ghoul::opengl::Texture::Format::Red,
+            //     GL_RED,
+            //     GL_FLOAT,
+            //     ghoul::opengl::Texture::FilterMode::Linear,
+            //     ghoul::opengl::Texture::WrappingMode::ClampToEdge
+            // );
 
-            _volumeTextureBy = std::make_unique<ghoul::opengl::Texture>(
-                _dimensions,
-                ghoul::opengl::Texture::Format::Red,
-                GL_RED,
-                GL_FLOAT,
-                ghoul::opengl::Texture::FilterMode::Linear,
-                ghoul::opengl::Texture::WrappingMode::ClampToEdge
-            );
+            // _volumeTextureBy = std::make_unique<ghoul::opengl::Texture>(
+            //     _dimensions,
+            //     ghoul::opengl::Texture::Format::Red,
+            //     GL_RED,
+            //     GL_FLOAT,
+            //     ghoul::opengl::Texture::FilterMode::Linear,
+            //     ghoul::opengl::Texture::WrappingMode::ClampToEdge
+            // );
 
-            _volumeTextureBz = std::make_unique<ghoul::opengl::Texture>(
-                _dimensions,
-                ghoul::opengl::Texture::Format::Red,
-                GL_RED,
-                GL_FLOAT,
-                ghoul::opengl::Texture::FilterMode::Linear,
-                ghoul::opengl::Texture::WrappingMode::ClampToEdge
-            );
+            // _volumeTextureBz = std::make_unique<ghoul::opengl::Texture>(
+            //     _dimensions,
+            //     ghoul::opengl::Texture::Format::Red,
+            //     GL_RED,
+            //     GL_FLOAT,
+            //     ghoul::opengl::Texture::FilterMode::Linear,
+            //     ghoul::opengl::Texture::WrappingMode::ClampToEdge
+            // );
 
             _volumeTexture = std::make_unique<ghoul::opengl::Texture>(
                 _dimensions,
@@ -285,18 +435,22 @@ bool RenderableGpuFieldlines::initialize() {
             );
 
             void* data = reinterpret_cast<void*>(_normalizedVolume->data());
-            void* dataBx = reinterpret_cast<void*>(_normalizedVolumeBx->data());
-            void* dataBy = reinterpret_cast<void*>(_normalizedVolumeBy->data());
-            void* dataBz = reinterpret_cast<void*>(_normalizedVolumeBz->data());
+            // void* dataBx = reinterpret_cast<void*>(_normalizedVolumeBx->data());
+            // void* dataBy = reinterpret_cast<void*>(_normalizedVolumeBy->data());
+            // void* dataBz = reinterpret_cast<void*>(_normalizedVolumeBz->data());
             _volumeTexture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
-            _volumeTextureBx->setPixelData(dataBx, ghoul::opengl::Texture::TakeOwnership::No);
-            _volumeTextureBy->setPixelData(dataBy, ghoul::opengl::Texture::TakeOwnership::No);
-            _volumeTextureBz->setPixelData(dataBz, ghoul::opengl::Texture::TakeOwnership::No);
+            // _volumeTextureBx->setPixelData(dataBx, ghoul::opengl::Texture::TakeOwnership::No);
+            // _volumeTextureBy->setPixelData(dataBy, ghoul::opengl::Texture::TakeOwnership::No);
+            // _volumeTextureBz->setPixelData(dataBz, ghoul::opengl::Texture::TakeOwnership::No);
 
             _volumeTexture->uploadTexture();
 
+            auto data2 = _normalizedVolume->data();
+
             _states.push_back(GpuFieldlinesState(_seedPoints.size()));
             _startTimes.push_back(479649600.0); // March 15th 2015 00:00:00.000
+
+            generateUniform3DGrid();
 
         }
 
@@ -325,6 +479,25 @@ bool RenderableGpuFieldlines::initialize() {
         return false;
     }
 
+    _gridProgram = OsEng.renderEngine().buildRenderProgram(
+        "GpuFieldlinesGrid",
+        "${MODULE_GPUFIELDLINES}/shaders/linedraw_vs.glsl",
+        "${MODULE_GPUFIELDLINES}/shaders/linedraw_fs.glsl"
+    );
+
+    if (!_gridProgram) {
+        LERROR("Shader program failed initialization!");
+        return false;
+    }
+
+    // TODO REMOVE.. ONLY FOR DEBUGGING!!
+    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    _program->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    _program->setIgnoreUniformLocationError(IgnoreError::Yes);
+
+    // ADD PROPERTIES
+    addProperty(_stepSize);
+
     return true;
 }
 
@@ -343,6 +516,10 @@ bool RenderableGpuFieldlines::deinitialize() {
     if (_program) {
         renderEngine.removeRenderProgram(_program);
         _program = nullptr;
+    }
+    if (_gridProgram) {
+        renderEngine.removeRenderProgram(_gridProgram);
+        _gridProgram = nullptr;
     }
 
     return true;
@@ -371,6 +548,7 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
 
         _program->setUniform("domainMins", _domainMins);
         // _program->setUniform("bMaxs", _bMaxs);
+        _program->setUniform("domainMaxs", _domainMaxs);
         _program->setUniform("domainDiffs", _domainMaxs - _domainMins);
 
         _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
@@ -385,7 +563,18 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         //     _program->setUniform("fieldLineColor", _fieldlineColor);
 
         glBindVertexArray(_vertexArrayObject);
+
+        // GEOMETRY SHADER ONLY ALLOWS A RATHER SMALL AMOUNT OF COMPONENTS TO BE OUTPUT
+        // WE THEREFORE SPLIT UP THE TRACING AND RENDERING OF THE FIELDLINES INTO 2 PARTS
+        // THIS ALLOWS US TO GET TWICE AS MUCH
+        // Forward tracing
+        _program->setUniform("stepSize", _stepSize);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>( _seedPoints.size() ) );
+
+        // Backwards tracing
+        _program->setUniform("stepSize", -_stepSize);
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>( _seedPoints.size() ) );
+
         // glMultiDrawArrays(
         //         GL_LINE_STRIP_ADJACENCY,
         //         &_states[_activeStateIndex]._lineStart[0],
@@ -396,12 +585,32 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         glBindVertexArray(0);
         glEnable(GL_CULL_FACE);
         _program->deactivate();
+
+        _gridProgram->activate();
+
+        _gridProgram->setUniform("modelViewProjection",
+                data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+
+        glBindVertexArray(_gridVAO);
+
+        glMultiDrawArrays(
+                GL_LINE_STRIP_ADJACENCY,
+                &_gridStartPos[0],
+                &_gridLineCount[0],
+                static_cast<GLsizei>(_gridStartPos.size())
+        );
+
+        _gridProgram->deactivate();
     }
 }
 
 void RenderableGpuFieldlines::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
+    }
+
+    if (_gridProgram->isDirty()) {
+        _gridProgram->rebuildFromFile();
     }
 
     // Check if current time in OpenSpace is within  interval
@@ -448,6 +657,30 @@ void RenderableGpuFieldlines::update(const UpdateData&) {
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+
+        { //GRID
+            if (_gridVAO == 0) {
+                glGenVertexArrays(1, &_gridVAO);
+            }
+            glBindVertexArray(_gridVAO);
+
+            if (_gridVBO == 0) {
+                glGenBuffers(1, &_gridVBO);
+            }
+            glBindBuffer(GL_ARRAY_BUFFER, _gridVBO);
+
+            glBufferData(GL_ARRAY_BUFFER,
+                _gridVertices.size() * sizeof(glm::vec3),
+                &_gridVertices.front(),
+                GL_STATIC_DRAW);
+
+            GLuint gridVertexPos = 1;
+            glEnableVertexAttribArray(gridVertexPos);
+            glVertexAttribPointer(gridVertexPos, 3, GL_FLOAT, GL_FALSE, 0, 0);//sizeof(glm::vec3), reinterpret_cast<void*>(0));
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+        }
 
         _needsUpdate = false;
         _shouldRender = true;
