@@ -81,15 +81,7 @@ TouchInteraction::TouchInteraction()
 TouchInteraction::~TouchInteraction() { }
 
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
-	trace(list);
-	if (/*_currentRadius > 0.3 &&*/ _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch, needs better definition
-		_directTouchMode = true;
-	}
-	else {
-		_directTouchMode = false;
-	}
-
-	if (_directTouchMode) {
+	if (_directTouchMode) { // should just be a function call
 		/*
 		1, define s(xi,q): newXi = T(tx,ty,tz)Q(rx,ry,rz)xi, s(xi,q) = modelToScreenSpace(newXi)
 		2, calculate minimum error E = sum( ||s(xi,q)-pi||^2 ) (and define q in the process)
@@ -99,8 +91,27 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		3, Do the inverse rotation of M(q) on the camera, map interactions to different number of direct touch points
 		*/
 		// define these according to the M(q)
-		auto func = [](double* par, int x, void* fdata) {
-			return par[0] + (par[1] - par[0]) * exp(-par[2] * x);
+		auto func = [](double* par, int x, void* fdata) { // par is the vector of measurements, x current point par[x], fdata additional data needed by the function
+			// define s(xi, q) : newXi = T(tx, ty, tz)Q(rx, ry, rz)xi, s(xi, q) = modelToScreenSpace(newXi)
+			glm::dvec2 screenPoint;
+			if (x % 2) { // true = par[x] is a y-coord, false = par[x] is an x-coord
+				screenPoint.x = par[x-1];
+				screenPoint.y = par[x];
+			}
+			else {
+				screenPoint.x = par[x];
+				screenPoint.y = par[x+1];
+			}
+			// fdata has to contain aspectRatio, camera and node, 
+			//glm::dvec3 modelPoint = screenToModelSpace(screenPoint);
+			// create transformation matrix M(q)
+			//glm::dmat3 T;
+			//glm::dquat Q;
+			glm::dvec2 newScreenPoint; //= modelToScreenSpace(T * (Q * modelPoint));
+			if (x % 2)
+				return newScreenPoint.y;
+			else
+				return newScreenPoint.x;
 		};
 		auto grad = [](double* g, double* par, int x, void* fdata) {
 			g[0] = 1.0 + exp(-par[2] * x);
@@ -119,7 +130,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		double* squaredError = new double[nFingers];
 		int i = 0;
 		for (const SelectedBody& sb : _selected) {
-			glm::dvec2 screenPoint = modelToScreenSpace(sb); // transform to screen-space
+			glm::dvec2 screenPoint = modelToScreenSpace(sb); // transform to screen-space, old point to correct to current
 			contactPoints[i] = screenPoint.x;
 			contactPoints[i + 1] = screenPoint.y;
 
@@ -130,15 +141,22 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			i += 2;
 		}
 		levmarq_init(&_lmstat);
-		int nIterations = levmarq(nDOF, q, nFingers, contactPoints, squaredError, func, grad, NULL, &_lmstat);
+		int nIterations = levmarq(nDOF, q, nFingers, contactPoints, squaredError, func, grad, NULL, &_lmstat); // NULL should send fdata(camera, node, aspectRatio)
 		delete[] contactPoints;
 		delete[] squaredError;
 	}
 	//else {
+		trace(list);
 		interpret(list, lastProcessed);
 		accelerate(list, lastProcessed);
 	//}
 	
+	if (_currentRadius > 0.3 && _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch, needs better definition
+		_directTouchMode = true;
+	}
+	else {
+		_directTouchMode = false;
+	}
 }
 
 void TouchInteraction::trace(const std::vector<TuioCursor>& list) {

@@ -163,9 +163,9 @@ int levmarq(int npar, double *par, int ny, double *y, double *dysq,
 double error_func(double *par, int ny, double *y, double *dysq,
 		double (*func)(double *, int, void *), void *fdata) {
 	int x;
-	double res,e=0;
+	double res, e = 0;
 
-	for (x=0; x<ny; x++) {
+	for (x = 0; x < ny; x++) {
 		res = func(par, x, fdata) - y[x];
 		if (dysq) // weighted least-squares 
 			e += res*res/dysq[x];
