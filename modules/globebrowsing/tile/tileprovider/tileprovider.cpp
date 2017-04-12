@@ -97,7 +97,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
         maxParents--;
     }
     if(maxParents < 0){
-        return ChunkTile(Tile::TileUnavailable, uvTransform, TileDepthTransform() );
+        return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
     }
     
     // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that 
@@ -106,16 +106,16 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
         Tile tile = getTile(tileIndex);
         if (tile.status() != Tile::Status::OK) {
             if (--maxParents < 0){
-                return ChunkTile(Tile::TileUnavailable, uvTransform, TileDepthTransform());
+                return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
             }
             tileselector::ascendToParent(tileIndex, uvTransform);
         }
         else {
-            return ChunkTile(tile, uvTransform, TileDepthTransform());
+            return ChunkTile{ tile, uvTransform, TileDepthTransform() };
         }
     }
     
-    return ChunkTile(Tile::TileUnavailable, uvTransform, TileDepthTransform());
+    return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
 }
 
 ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize){
