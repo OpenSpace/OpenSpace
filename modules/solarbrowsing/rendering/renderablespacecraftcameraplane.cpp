@@ -121,7 +121,6 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _texture->setDataOwnership(ghoul::Boolean::No);
 
     _currentActiveImage = -1;
-    updateTexture();
     assert(_currentActiveChannel < numChannels);
 
     // Initialize time
@@ -131,10 +130,10 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _lastUpdateRealTime = _realTime;
 
     _currentActiveChannel.onChange([this]() {
-        std::valarray<float>& contents = _imageData[_currentActiveChannel][_currentActiveImage].contents;
-        _texture->setPixelData(&contents[0], ghoul::Boolean::No);
-        _texture->uploadTexture();
+        updateTexture();
     });
+
+    performImageTimestep();
     addProperty(_currentActiveChannel);
     addProperty(_target);
     addProperty(_moveFactor);
@@ -182,14 +181,18 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 }
 
 void RenderableSpacecraftCameraPlane::updateTexture() {
+    std::valarray<float>& contents = _imageData[_currentActiveChannel][_currentActiveImage].contents;
+    _texture->setPixelData(&contents[0], ghoul::Boolean::No);
+    _texture->uploadTexture();
+}
+
+void RenderableSpacecraftCameraPlane::performImageTimestep() {
     int clockwiseSign = (Time::ref().deltaTime()>0) ? 1 : -1;
     int newIndex = clockwiseSign + _currentActiveImage;
     if (newIndex < _imageData[_currentActiveChannel].size() && newIndex >= 0) {
         LDEBUG("Updating texture to " << newIndex);
         _currentActiveImage = newIndex;
-        std::valarray<float>& contents = _imageData[_currentActiveChannel][_currentActiveImage].contents;
-        _texture->setPixelData(&contents[0], ghoul::Boolean::No);
-        _texture->uploadTexture();
+        updateTexture();
     }
 }
 
@@ -212,7 +215,7 @@ void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
 
     // Update texture
     if (timeToUpdateTexture) {
-        updateTexture();
+        performImageTimestep();
         _lastUpdateRealTime = _realTime;
         _lastUpdateOpenSpaceTime =_openSpaceTime;
     }

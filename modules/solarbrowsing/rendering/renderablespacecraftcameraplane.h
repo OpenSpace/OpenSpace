@@ -46,6 +46,7 @@ public:
     void render(const RenderData& data);
     void update(const UpdateData& data);
     void loadTexture();
+    void performImageTimestep();
     void updateTexture();
 
 private:
