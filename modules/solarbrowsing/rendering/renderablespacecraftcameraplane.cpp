@@ -65,27 +65,27 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
 
     // TODO(mnoven): Lua
-    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 0
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 1
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 2
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/094", // 3
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/131", // 4
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 5
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/193", // 6
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/211", // 7
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/304", // 8
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
+    // std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 0
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 1
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 2
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/094", // 3
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/131", // 4
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 5
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/193", // 6
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/211", // 7
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/304", // 8
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
 
-  // std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
-  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 1
-  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 2
-  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // 3 // OK
-  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 4
-  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 5 // OK
-  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0193", // 6 // OK
-  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0211", // 7 // OK
-  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0304", // 8 // OK
-  //                                     "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};// 9
+  std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 1
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 2
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // 3 // OK
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 4
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 5 // OK
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0193", // 6 // OK
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0211", // 7 // OK
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0304", // 8 // OK
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};// 9
 
 
     std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 0
@@ -226,15 +226,19 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     // Activate shader
     _shader->activate();
 
+    SceneGraphNode* parent = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName);
+
+    SceneGraphNode* sun = OsEng.renderEngine().scene()->sceneGraphNode("Sun");
+    glm::dvec3 sunPos = glm::normalize(OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0));
+
     // Model transform and view transform needs to be in double precision
-    glm::dmat4 rotationTransform;
     glm::dvec3 translationTransform;
-    rotationTransform = glm::inverse(glm::dmat4(data.camera.viewRotationMatrix()));
     // Sun's barycenter
     SceneGraphNode* p = OsEng.renderEngine().scene()->sceneGraphNode(_target);
-    glm::dmat4 rotationTransformTangentTrajectory = glm::lookAt(glm::normalize(data.modelTransform.translation),
+    glm::dmat4 rotationTransform = glm::lookAt(glm::normalize(data.modelTransform.translation),
                                          glm::dvec3(p->worldPosition()), data.modelTransform.rotation * glm::dvec3(0.0, 0.0, 1.0));
-    rotationTransform = glm::dmat4(glm::inverse(rotationTransformTangentTrajectory));
+    rotationTransform = glm::dmat4(glm::inverse(rotationTransform));
 
     // Scale vector to sun barycenter to get translation distance
     translationTransform = (p->worldPosition() - data.modelTransform.translation) * _moveFactor.value();
