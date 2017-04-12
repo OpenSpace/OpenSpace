@@ -119,6 +119,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
                 );
 
     _texture->setDataOwnership(ghoul::Boolean::No);
+    _texture->uploadTexture();
 
     _currentActiveImage = -1;
     assert(_currentActiveChannel < numChannels);
@@ -183,7 +184,21 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 void RenderableSpacecraftCameraPlane::updateTexture() {
     std::valarray<float>& contents = _imageData[_currentActiveChannel][_currentActiveImage].contents;
     _texture->setPixelData(&contents[0], ghoul::Boolean::No);
-    _texture->uploadTexture();
+
+    // TODO(mnoven): This should probably be moved to Texture class
+    _texture->bind();
+    const glm::uvec3& dimensions = _texture->dimensions();
+    glTexSubImage2D(
+        _texture->type(),
+        0,
+        0,
+        0,
+        GLsizei(dimensions.x),
+        GLsizei(dimensions.y),
+        GLint(_texture->format()),
+        _texture->dataType(),
+        _texture->pixelData()
+    );
 }
 
 void RenderableSpacecraftCameraPlane::performImageTimestep() {
