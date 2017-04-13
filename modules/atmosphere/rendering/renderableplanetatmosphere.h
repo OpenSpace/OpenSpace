@@ -26,8 +26,6 @@
 #define __RENDERABLEPLANETATMOSPHERE_H__
 
 // open space includes
-//#include <modules/atmosphere/atmosphere.h>
-
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
@@ -54,7 +52,6 @@ namespace openspace {
         class PlanetGeometry;
     }
 
-    //class RenderablePlanetAtmosphere : public Atmosphere, public Renderable {
     class RenderablePlanetAtmosphere : public Renderable {
     public:
         // Shadow structure
@@ -137,6 +134,7 @@ namespace openspace {
             const int width, const int height) const;
         void checkFrameBufferState(const std::string & codePosition) const;
 
+
     private:
         properties::StringProperty _colorTexturePath;
         properties::StringProperty _nightTexturePath;
@@ -198,6 +196,7 @@ namespace openspace {
         properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
         properties::FloatProperty _mieAsymmetricFactorGP;
         properties::FloatProperty _sunIntensityP;
+        properties::FloatProperty _hdrExpositionP;
 
 
         // DEBUG Properties:
@@ -228,6 +227,7 @@ namespace openspace {
         float _mieHeightScale;
         float _miePhaseConstant;
         float _sunRadianceIntensity;
+        float _hdrConstant;
         glm::vec3 _mieExtinctionCoeff;
         glm::vec3 _rayleighScatteringCoeff;
         glm::vec3 _mieScatteringCoeff;

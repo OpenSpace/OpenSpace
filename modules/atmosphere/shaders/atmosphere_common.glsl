@@ -284,8 +284,8 @@ float miePhaseFunction(const float mu) {
   //      ( ( (1.0f - (mieG * mieG) ) * (1.0f + mu * mu) ) / 
   //      ( (2.0f + mieG * mieG) *
   //        pow(1.0f + mieG * mieG - 2.0f * mieG * mu, 3.0f/2.0f) ) );
-  return 1.5f * 1.0f / (4.0f * M_PI) * (1.0f - mieG*mieG) *
-    pow(1.0f + (mieG*mieG) - 2.0f*mieG*mu, -3.0f/2.0f) * (1.0f + mu * mu) / (2.0f + mieG*mieG);
+  return 1.5f * 1.0f / (4.0f * M_PI) * (1.0f - mieG * mieG) *
+    pow(1.0f + (mieG * mieG) - 2.0f * mieG * mu, -3.0f/2.0f) * (1.0f + mu * mu) / (2.0f + mieG*mieG);
 }
 
 // -- Given the height rm view-zenith angle (cosine) mu,
@@ -300,12 +300,13 @@ float miePhaseFunction(const float mu) {
 vec4 texture4D(sampler3D table, const float r, const float mu, 
                 const float muSun, const float nu)
 {
-  float Rg2 = Rg * Rg;
-  float Rt2 = Rt * Rt;
+  float Rg2    = Rg * Rg;
+  float Rt2    = Rt * Rt;
+  float r2     = r * r;
   float H      = sqrt(Rt2 - Rg2);
-  float rho    = sqrt(r * r - Rg2);
+  float rho    = sqrt(r2 - Rg2);
   float rmu    = r * mu;
-  float delta  = rmu * rmu - r * r + Rg2;
+  float delta  = rmu * rmu - r2 + Rg2;
   vec4 cst     = rmu < 0.0f && delta > 0.0f ?
     vec4(1.0f, 0.0f, 0.0f, 0.5f - 0.5f / float(SAMPLES_MU)) :
     vec4(-1.0f, H * H, H, 0.5f + 0.5f / float(SAMPLES_MU));
@@ -314,10 +315,10 @@ vec4 texture4D(sampler3D table, const float r, const float mu,
   float u_mu_s = 0.5f / float(SAMPLES_MU_S) +
     (atan(max(muSun, -0.1975) * tan(1.26f * 1.1f)) / 1.1f + (1.0f - 0.26f)) * 0.5f * (1.0f - 1.0f / float(SAMPLES_MU_S));
   float lerp = (nu + 1.0f) / 2.0f * (float(SAMPLES_NU) - 1.0f);
-  float uNu = floor(lerp);
-  lerp = lerp - uNu;
-  return texture(table, vec3((uNu + u_mu_s) / float(SAMPLES_NU), u_mu, u_r)) * (1.0f - lerp) +
-    texture(table, vec3((uNu + u_mu_s + 1.0f) / float(SAMPLES_NU), u_mu, u_r)) * lerp;
+  float u_nu = floor(lerp);
+  lerp = lerp - u_nu;
+  return texture(table, vec3((u_nu + u_mu_s) / float(SAMPLES_NU), u_mu, u_r)) * (1.0f - lerp) +
+    texture(table, vec3((u_nu + u_mu_s + 1.0f) / float(SAMPLES_NU), u_mu, u_r)) * lerp;
 }
 
 

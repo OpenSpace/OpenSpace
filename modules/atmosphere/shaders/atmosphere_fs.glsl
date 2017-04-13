@@ -537,7 +537,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
 
     // E[L*] at x0
     vec3 irradianceReflected = irradiance(irradianceTexture, r0, muSun);
-
+    
     // Adding clouds texture
     vec4 clouds = vec4(0.85)*texture(cloudsTexture, vs_st);
 
@@ -679,12 +679,14 @@ Fragment getFragment() {
       
       //diffuse = HDR(vec4(sunColor + groundColor + inscatterColor, 1.0));      
       //diffuse = HDR(vec4(sunColor, 1.0)); 
-      //diffuse = HDR(vec4(groundColor, 1.0)); 
+      //diffuse = vec4(HDR(groundColor), 1.0); 
       //diffuse = HDR(vec4(inscatterColor, 1.0)); 
       
       //diffuse = HDR(vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2); 
-      diffuse = HDR((vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2) *
-                    calcShadow(shadowDataArray, vs_posWorld.xyz) ); 
+      vec4 finalRadiance = calcShadow(shadowDataArray, vs_posWorld.xyz) * 
+                            (vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2);
+                     
+      diffuse = vec4(HDR(finalRadiance.xyz), finalRadiance.w); 
     }
     // else
     //     diffuse = HDR(diffuse);

@@ -24,7 +24,7 @@
  
 uniform float exposure;
 
-vec4 HDR(vec4 color) {
+vec3 HDR(vec3 color) {
     color *= exposure;
     
     color.r = color.r < 1.413 ? pow(color.r * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.r);
