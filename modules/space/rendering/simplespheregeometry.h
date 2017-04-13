@@ -46,7 +46,6 @@ public:
     bool initialize(Renderable* parent) override;
     void deinitialize() override;
     void render() override;
-    PowerScaledSphere* _planet;
 
 private:
     void createSphere();
