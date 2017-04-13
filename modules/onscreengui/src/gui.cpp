@@ -227,6 +227,7 @@ GUI::GUI()
     , _globalProperty("Global")
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
+    , _virtualProperty("Virtual Properties")
     , _currentVisibility(properties::Property::Visibility::All)
 {
     addPropertySubOwner(_help);
@@ -235,6 +236,7 @@ GUI::GUI()
     addPropertySubOwner(_globalProperty);
     addPropertySubOwner(_property);
     addPropertySubOwner(_screenSpaceProperty);
+    addPropertySubOwner(_virtualProperty);
     addPropertySubOwner(_time);
     addPropertySubOwner(_iswa);
 }
@@ -312,8 +314,12 @@ void GUI::initialize() {
     style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.0f);
 
     _property.initialize();
+    _property.setHasRegularProperties(true);
     _screenSpaceProperty.initialize();
+    _screenSpaceProperty.setHasRegularProperties(true);
     _globalProperty.initialize();
+    _globalProperty.setHasRegularProperties(true);
+    _virtualProperty.initialize();
     _performance.initialize();
     _help.initialize();
     _iswa.initialize(); 
@@ -327,6 +333,7 @@ void GUI::deinitialize() {
     _performance.deinitialize();
     _globalProperty.deinitialize();
     _screenSpaceProperty.deinitialize();
+    _virtualProperty.deinitialize();
     _property.deinitialize();
 
     delete iniFileBuffer;
@@ -465,6 +472,10 @@ void GUI::endFrame() {
             _screenSpaceProperty.render();
         }
 
+        if (_virtualProperty.isEnabled()) {
+            _virtualProperty.render();
+        }
+
         if (_help.isEnabled()) {
             _help.render();
         }
@@ -493,24 +504,43 @@ bool GUI::mouseWheelCallback(double position) {
 }
 
 bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
-    ImGuiIO& io = ImGui::GetIO();
-    bool consumeEvent = io.WantCaptureKeyboard;
-    if (consumeEvent) {
-        int keyIndex = static_cast<int>(key);
-        if (keyIndex < 0) {
-            LERROR("Pressed key of index '" << keyIndex << "' was negative");
-        }
-        else {
-            if (action == KeyAction::Press)
-                io.KeysDown[keyIndex] = true;
-            if (action == KeyAction::Release)
-                io.KeysDown[keyIndex] = false;
-        }
-
-        io.KeyShift = hasKeyModifier(modifier, KeyModifier::Shift);
-        io.KeyCtrl = hasKeyModifier(modifier, KeyModifier::Control);
-        io.KeyAlt = hasKeyModifier(modifier, KeyModifier::Alt);
+    const int keyIndex = static_cast<int>(key);
+    if (keyIndex < 0) {
+        LERROR("Key of index '" << keyIndex << "' was negative");
+        return false;
     }
+
+    const bool hasShift = hasKeyModifier(modifier, KeyModifier::Shift);
+    const bool hasCtrl = hasKeyModifier(modifier, KeyModifier::Control);
+    const bool hasAlt = hasKeyModifier(modifier, KeyModifier::Alt);
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    const bool consumeEvent = io.WantCaptureKeyboard;
+    if (consumeEvent) {
+        if (action == KeyAction::Press) {
+            io.KeysDown[keyIndex] = true; 
+        }
+        io.KeyShift = hasShift;
+        io.KeyCtrl = hasCtrl;
+        io.KeyAlt = hasAlt;
+    }
+
+    // Even if the event is not consumed,
+    // set keys and modifiers to false when they are released.
+    if (action == KeyAction::Release) {
+        io.KeysDown[keyIndex] = false;
+    }
+    if (!hasShift) {
+        io.KeyShift = false;
+    }
+    if (!hasCtrl) {
+        io.KeyCtrl = false;
+    }
+    if (!hasAlt) {
+        io.KeyAlt = false;
+    }
+
     return consumeEvent;
 }
 
@@ -539,6 +569,10 @@ void GUI::render() {
     bool globalProperty = _globalProperty.isEnabled();
     ImGui::Checkbox("Global Properties", &globalProperty);
     _globalProperty.setEnabled(globalProperty);
+
+    bool virtualProperty = _virtualProperty.isEnabled();
+    ImGui::Checkbox("Virtual Properties", &virtualProperty);
+    _virtualProperty.setEnabled(virtualProperty);
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     bool iswa = _iswa.isEnabled();
@@ -592,12 +626,13 @@ void GUI::renderAndUpdatePropertyVisibility() {
 
     // Array is sorted by importance
     std::array<const char*, 4> items = {  "None", "User", "Developer", "All"};
-    ImGui::Combo("PropertyVisibility", &t, items.data(), items.size());
+    ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
 
     _currentVisibility = static_cast<V>(t);
     _globalProperty.setVisibility(_currentVisibility);
     _property.setVisibility(_currentVisibility);
     _screenSpaceProperty.setVisibility(_currentVisibility);
+    _virtualProperty.setVisibility(_currentVisibility);
 }
 
 

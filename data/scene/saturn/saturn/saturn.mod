@@ -1,6 +1,3 @@
-SaturnRadius = 5.8232E7;
-
-
 return {
     -- Saturn barycenter module
     {
@@ -26,7 +23,7 @@ return {
             Body = "SATURN BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = {SaturnRadius, 0},
+                Radius = 5.8232E7,
                 Segments = 100
             },
             Textures = {

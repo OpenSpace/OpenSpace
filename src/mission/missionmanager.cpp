@@ -64,7 +64,7 @@ void MissionManager::loadMission(const std::string& filename) {
     ghoul_assert(FileSys.fileExists(filename), "filename must exist");
 
     // Changing the values might invalidate the _currentMission iterator
-    std::string currentMission = _currentMission != _missionMap.end() ? _currentMission->first : "";
+    std::string currentMission =  hasCurrentMission() ? _currentMission->first : "";
 
     Mission mission = missionFromFile(filename);
     std::string missionName = mission.name();

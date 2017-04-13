@@ -318,17 +318,4 @@ void RenderablePlaneProjection::setTarget(std::string body) {
     _target.frame = openspace::SpiceManager::ref().frameFromBody(body);
 }
 
-std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
-
-    std::vector<std::string> targets;
-
-    std::vector<SceneGraphNode*> nodes = OsEng.renderEngine().scene()->allSceneGraphNodes();
-    std::string targetBody;
-
-    PowerScaledScalar min = PowerScaledScalar::CreatePSS(REALLY_FAR);
-    PowerScaledScalar distance = PowerScaledScalar::CreatePSS(0.0);
-
-    return targetBody;
-}
-
 } // namespace openspace

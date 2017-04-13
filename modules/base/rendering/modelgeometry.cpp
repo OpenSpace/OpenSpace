@@ -144,7 +144,7 @@ bool ModelGeometry::initialize(Renderable* parent) {
             glm::pow(v.location[1], 2.f) +
             glm::pow(v.location[2], 2.f), maximumDistanceSquared);
     }
-    _parent->setBoundingSphere(PowerScaledScalar(glm::sqrt(maximumDistanceSquared), 0.0));
+    _parent->setBoundingSphere(glm::sqrt(maximumDistanceSquared));
 
     if (_vertices.empty())
         return false;

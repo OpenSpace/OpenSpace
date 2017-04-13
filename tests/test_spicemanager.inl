@@ -46,11 +46,12 @@ protected:
 #define  TYPLEN   32
 #define  SRCLEN   128
 
-const int nrMetaKernels = 9;
-SpiceInt which, handle, count = 0;
-char file[FILLEN], filtyp[TYPLEN], source[SRCLEN];
-double abs_error = 0.00001;
-
+namespace spicemanager_constants {
+    const int nrMetaKernels = 9;
+    SpiceInt which, handle, count = 0;
+    char file[FILLEN], filtyp[TYPLEN], source[SRCLEN];
+    double abs_error = 0.00001;
+} // namespace spicemanager_constants
 
 // In this testclass only a handset of the testfunctions require a single kernel.
 // The remaining methods rely on multiple kernels, loaded as a SPICE 'meta-kernel'.
@@ -132,7 +133,18 @@ TEST_F(SpiceManagerTest, loadSingleKernel) {
     loadLSKKernel();
     // naif0008.tls is a text file, check if loaded.
     SpiceBoolean found;
-    kdata_c(0, "text", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
+    kdata_c(
+        0,
+        "text",
+        FILLEN,
+        TYPLEN,
+        SRCLEN,
+        spicemanager_constants::file,
+        spicemanager_constants::filtyp,
+        spicemanager_constants::source,
+        &spicemanager_constants::handle,
+        &found
+    );
     
     ASSERT_TRUE(found == SPICETRUE) << "Kernel not loaded";
 }
@@ -142,14 +154,36 @@ TEST_F(SpiceManagerTest, unloadKernelString) {
     loadLSKKernel();
     // naif0008.tls is a text file, check if loaded.
     SpiceBoolean found;
-    kdata_c(0, "text", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
+    kdata_c(
+        0,
+        "text",
+        FILLEN,
+        TYPLEN,
+        SRCLEN,
+        spicemanager_constants::file,
+        spicemanager_constants::filtyp,
+        spicemanager_constants::source,
+        &spicemanager_constants::handle,
+        &found
+    );
     ASSERT_TRUE(found == SPICETRUE);
 
     // unload using string keyword
     openspace::SpiceManager::ref().unloadKernel(LSK);
 
     found = SPICEFALSE;
-    kdata_c(0, "text", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
+    kdata_c(
+        0,
+        "text",
+        FILLEN,
+        TYPLEN,
+        SRCLEN,
+        spicemanager_constants::file,
+        spicemanager_constants::filtyp,
+        spicemanager_constants::source,
+        &spicemanager_constants::handle,
+        &found
+    );
     EXPECT_FALSE(found == SPICETRUE);
 }
 
@@ -158,14 +192,36 @@ TEST_F(SpiceManagerTest, unloadKernelInteger) {
     int kernelID = loadLSKKernel();
     // naif0008.tls is a text file, check if loaded.
     SpiceBoolean found;
-    kdata_c(0, "text", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
+    kdata_c(
+        0,
+        "text",
+        FILLEN,
+        TYPLEN,
+        SRCLEN,
+        spicemanager_constants::file,
+        spicemanager_constants::filtyp,
+        spicemanager_constants::source,
+        &spicemanager_constants::handle,
+        &found
+    );
     ASSERT_TRUE(found == SPICETRUE);
 
     // unload using unique int ID
     openspace::SpiceManager::ref().unloadKernel(kernelID);
 
     found = SPICEFALSE;
-    kdata_c(0, "text", FILLEN, TYPLEN, SRCLEN, file, filtyp, source, &handle, &found);
+    kdata_c(
+        0,
+        "text",
+        FILLEN,
+        TYPLEN,
+        SRCLEN,
+        spicemanager_constants::file,
+        spicemanager_constants::filtyp,
+        spicemanager_constants::source,
+        &spicemanager_constants::handle,
+        &found
+    );
     EXPECT_FALSE(found == SPICETRUE) << "One or more kernels still present in kernel-pool";
 }
 

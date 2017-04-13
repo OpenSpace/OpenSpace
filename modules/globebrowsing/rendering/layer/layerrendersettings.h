@@ -37,6 +37,13 @@ struct LayerRenderSettings : public properties::PropertyOwner {
     properties::FloatProperty opacity;
     properties::FloatProperty gamma;
     properties::FloatProperty multiplier;
+
+    /// This function matches the function with the same name in the
+    /// shader code
+    float performLayerSettings(float currentValue) const;
+	/// This function matches the function with the same name in the
+    /// shader code
+    glm::vec4 performLayerSettings(glm::vec4 currentValue) const;
 };
 
 } // namespace globebrowsing

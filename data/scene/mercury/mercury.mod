@@ -1,5 +1,3 @@
-MercuryRadius = 2.4397E6;
-
 return {
     -- Mercury barycenter module
     {
@@ -24,7 +22,7 @@ return {
             Body = "MERCURY",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = {MercuryRadius, 1.0},
+                Radius = 2.4397E6,
                 Segments = 100
             },
             Textures = {

@@ -9,7 +9,7 @@ return {
             Body = "IO",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 1.8213, 6 },
+                Radius = 1.8213E6,
                 Segments = 100
             },
             Textures = {

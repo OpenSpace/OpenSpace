@@ -23,7 +23,7 @@ return {
             Body = "NEPTUNE BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 2.4622 , 7 },
+                Radius = 2.4622E7,
                 Segments = 100
             },
             Textures = {

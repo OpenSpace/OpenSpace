@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/util/powerscaledscalar.h>
 #include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/programobject.h>
@@ -72,8 +71,8 @@ public:
     virtual bool isReady() const = 0;
     bool isEnabled() const;
 
-    void setBoundingSphere(PowerScaledScalar boundingSphere);
-    PowerScaledScalar getBoundingSphere();
+    void setBoundingSphere(float boundingSphere);
+    float boundingSphere() const;
 
     virtual void render(const RenderData& data);
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
@@ -99,7 +98,7 @@ protected:
     
 private:
     RenderBin _renderBin;
-    PowerScaledScalar boundingSphere_;
+    float _boundingSphere;
     std::string _startTime;
     std::string _endTime;
     bool _hasTimeInterval;

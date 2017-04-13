@@ -23,7 +23,7 @@ return {
             Body = "VENUS",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 3.760, 6 },
+                Radius = 3.760E6,
                 Segments = 100
             },
             Textures = {

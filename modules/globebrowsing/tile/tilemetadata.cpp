@@ -24,8 +24,6 @@
 
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
-#include <gdal_priv.h>
-
 namespace openspace {
 namespace globebrowsing {
 

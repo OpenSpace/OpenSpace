@@ -63,6 +63,7 @@ public:
 private:
     std::vector<std::shared_ptr<Renderable>> _renderables;
     std::vector<double> _maxDistances;
+    double _objectScale;
 };
 
 } // namespace globebrowsing

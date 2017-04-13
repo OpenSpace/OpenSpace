@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifdef GLOBEBROWSING_USE_GDAL
+
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
@@ -58,7 +60,6 @@ const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeI
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
     : _initDict(dictionary) 
 {
-
     if (!dictionary.getValue<std::string>(KeyFilePath, _datasetFile)) {
         throw std::runtime_error(std::string("Must define key '") + KeyFilePath + "'");
     }
@@ -74,9 +75,6 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         (std::istreambuf_iterator<char>())
     );
     _gdalXmlTemplate = consumeTemporalMetaData(xml);
-    std::shared_ptr<TileProvider> tileProvider = getTileProvider();
-    ghoul_assert(tileProvider, "No tile provider found");
-    _defaultTile = tileProvider->getDefaultTile();
 }
 
 std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
@@ -168,7 +166,7 @@ Tile TemporalTileProvider::getTile(const TileIndex& tileIndex) {
 }
 
 Tile TemporalTileProvider::getDefaultTile() {
-    return _defaultTile;
+	return getTileProvider()->getDefaultTile();
 }
 
 int TemporalTileProvider::maxLevel() {
@@ -384,3 +382,5 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) const {
 } // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif // GLOBEBROWSING_USE_GDAL

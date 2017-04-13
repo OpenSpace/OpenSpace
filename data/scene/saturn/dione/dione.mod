@@ -8,7 +8,7 @@ return {
             Body = "DIONE",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 0.563, 3 },
+                Radius = 0.563E3,
                 Segments = 50
             },
             Textures = {

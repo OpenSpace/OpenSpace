@@ -22,35 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
-
-#include <modules/globebrowsing/tile/tile.h>
-
-#include <modules/globebrowsing/tile/textureformat.h>
-
-#include <ghoul/opengl/ghoul_gl.h>
-
-#include <gdal.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 namespace globebrowsing {
-namespace tiledatatype {
+namespace cache {
+    
+template<typename KeyType, typename ValueType>
+LRUCache<KeyType, ValueType>::LRUCache(size_t size)
+    : _cacheSize(size)
+{}
 
-GLuint getOpenGLDataType(GDALDataType gdalType);
+template<typename KeyType, typename ValueType>
+void LRUCache<KeyType, ValueType>::clear() {
+    _itemList.erase(_itemList.begin(), _itemList.end());
+    _itemMap.erase(_itemMap.begin(), _itemMap.end());
+}
 
-GDALDataType getGdalDataType(GLuint glType);
+template<typename KeyType, typename ValueType>
+void LRUCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value) {
+    auto it = _itemMap.find(key);
+    if (it != _itemMap.end()) {
+        _itemList.erase(it->second);
+        _itemMap.erase(it);
+    }
+    _itemList.push_front(std::make_pair(key, value));
+    _itemMap.insert(std::make_pair(key, _itemList.begin()));
+    clean();
+}
 
-TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
+template<typename KeyType, typename ValueType>
+bool LRUCache<KeyType, ValueType>::exist(const KeyType& key) const {
+    return _itemMap.count(key) > 0;
+}
 
-size_t getMaximumValue(GDALDataType gdalType);
+template<typename KeyType, typename ValueType>
+ValueType LRUCache<KeyType, ValueType>::get(const KeyType& key) {
+    //ghoul_assert(exist(key), "Key " << key << " must exist");
+    auto it = _itemMap.find(key);
+    // Move list iterator pointing to value
+    _itemList.splice(_itemList.begin(), _itemList, it->second);
+    return it->second->second;
+}
 
-size_t numberOfBytes(GDALDataType gdalType);
+template<typename KeyType, typename ValueType>
+size_t LRUCache<KeyType, ValueType>::size() const {
+    return _itemMap.size();
+}
 
-float interpretFloat(GDALDataType gdalType, const char* src);
+template<typename KeyType, typename ValueType>
+void LRUCache<KeyType, ValueType>::clean() {
+    while (_itemMap.size() > _cacheSize) {
+        auto last_it = _itemList.end(); last_it--;
+        _itemMap.erase(last_it->first);
+        _itemList.pop_back();
+    }
+}
 
-} // namespace tiledatatype
+} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__

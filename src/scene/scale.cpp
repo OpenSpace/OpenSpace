@@ -27,14 +27,14 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const char* _loggerCat = "Scale";
     const char* KeyType = "Type";
-}
+} // namespace
 
 namespace openspace {
 
@@ -68,11 +68,6 @@ std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dict
     auto factory = FactoryManager::ref().factory<Scale>();
     std::unique_ptr<Scale> result = factory->create(scaleType, dictionary);
     result->setName("Scale");
-    if (result == nullptr) {
-        LERROR("Failed creating Scale object of type '" << scaleType << "'");
-        return nullptr;
-    }
-
     return result;
 }
 
@@ -80,8 +75,6 @@ Scale::Scale()
     : properties::PropertyOwner("Scale")
 {}
 
-Scale::~Scale() {}
-    
 bool Scale::initialize() {
     return true;
 }

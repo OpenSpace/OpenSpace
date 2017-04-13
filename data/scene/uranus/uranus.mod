@@ -23,7 +23,7 @@ return {
             Body = "URANUS BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 2.5362 , 7 },
+                Radius = 2.5362E7,
                 Segments = 100
             },
             Textures = {

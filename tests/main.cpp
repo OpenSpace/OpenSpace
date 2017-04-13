@@ -26,7 +26,9 @@
 
 // When running the unit tests we don't want to be asked what to do in the case of an
 // assertion
+#ifndef GHL_THROW_ON_ASSERT
 #define GHL_THROW_ON_ASSERT
+#endif // GHL_THROW_ON_ASSERTGHL_THROW_ON_ASSERT
 
 #include <ghoul/cmdparser/cmdparser>
 #include <ghoul/filesystem/filesystem>

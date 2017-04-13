@@ -402,7 +402,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
         dquat totalRotation = camera.rotationQuaternion();
         dvec3 directionToCenter = normalize(centerPos - camPos);
         dvec3 lookUp = camera.lookUpVectorWorldSpace();
-        double boundingSphere = _focusNode->boundingSphere().lengthf();
+        double boundingSphere = _focusNode->boundingSphere();
         dvec3 camDirection = camera.viewDirectionWorldSpace();
 
         // Declare other variables used in interaction calculations
@@ -552,7 +552,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
            _globe->ellipsoid().geodeticSurfaceNormal(
                 _globe->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
         dvec3 directionFromSurfaceToCamera =
-            dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace;
+            normalize(dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
         dvec3 centerToEllipsoidSurface = dmat3(modelTransform)  * (_globe->projectOnEllipsoid(cameraPositionModelSpace) -
             directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
         dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
@@ -640,7 +640,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
                 _globe->ellipsoid().geodeticSurfaceNormal(
                     _globe->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
             directionFromSurfaceToCamera =
-                dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace;
+              normalize(dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
             centerToEllipsoidSurface = dmat3(modelTransform) * (_globe->projectOnEllipsoid(cameraPositionModelSpace) -
                 directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
             ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
