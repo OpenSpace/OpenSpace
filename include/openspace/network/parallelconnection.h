@@ -116,6 +116,7 @@ class ParallelConnection : public properties::PropertyOwner {
     void sendScript(std::string script);
     void resetTimeOffset();
     double latencyStandardDeviation() const;
+    double timeTolerance() const;
 
     /**
         * Returns the Lua library that contains all Lua functions available to affect the
@@ -171,6 +172,7 @@ private:
     properties::FloatProperty _bufferTime;
     properties::FloatProperty _timeKeyframeInterval;
     properties::FloatProperty _cameraKeyframeInterval;
+    properties::FloatProperty _timeTolerance;
 
     double _lastTimeKeyframeTimestamp;
     double _lastCameraKeyframeTimestamp;
