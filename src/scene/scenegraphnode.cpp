@@ -288,7 +288,17 @@ void SceneGraphNode::update(const UpdateData& data) {
 
     newUpdateData.modelTransform.translation = worldPosition();
     newUpdateData.modelTransform.rotation = worldRotationMatrix();
-    newUpdateData.modelTransform .scale = worldScale();
+    newUpdateData.modelTransform.scale = worldScale();
+
+    glm::dmat4 translation =
+        glm::translate(glm::dmat4(1.0), newUpdateData.modelTransform.translation);
+    glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
+    glm::dmat4 scaling =
+        glm::scale(glm::dmat4(1.0), glm::dvec3(newUpdateData.modelTransform.scale,
+            newUpdateData.modelTransform.scale, newUpdateData.modelTransform.scale));
+
+    _modelTransformCached = translation * rotation * scaling;
+    _inverseModelTransformCached = glm::inverse(_modelTransformCached);
 
     if (_renderable && _renderable->isReady()) {
         if (data.doPerformanceMeasurement) {
@@ -539,6 +549,14 @@ glm::dvec3 SceneGraphNode::worldPosition() const
 const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
 {
     return _worldRotationCached;
+}
+
+glm::dmat4 SceneGraphNode::modelTransform() const {
+    return _modelTransformCached;
+}
+
+glm::dmat4 SceneGraphNode::inverseModelTransform() const {
+    return _inverseModelTransformCached;
 }
 
 double SceneGraphNode::worldScale() const

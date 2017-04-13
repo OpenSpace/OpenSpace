@@ -30,6 +30,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guihelpcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiorigincomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiperformancecomponent.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/guiparallelcomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guipropertycomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guitimecomponent.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/guiiswacomponent.h
@@ -44,6 +45,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guihelpcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiorigincomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiperformancecomponent.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/guiparallelcomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guipropertycomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guitimecomponent.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/guiiswacomponent.cpp

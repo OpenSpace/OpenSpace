@@ -39,6 +39,7 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
+#include <openspace/network/parallelconnection.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
@@ -133,7 +134,7 @@ OpenSpaceEngine::OpenSpaceEngine(
     , _settingsEngine(new SettingsEngine)
     , _timeManager(new TimeManager)
     , _downloadManager(nullptr)
-    , _parallelConnection(new ParallelConnection)
+    , _parallelConnection(std::make_unique<ParallelConnection>())
     , _windowWrapper(std::move(windowWrapper))
     , _globalPropertyNamespace(new properties::PropertyOwner(""))
     , _virtualPropertyManager(new VirtualPropertyManager)
@@ -150,7 +151,8 @@ OpenSpaceEngine::OpenSpaceEngine(
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
-    
+    _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
+
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Renderable>>(),
@@ -369,6 +371,10 @@ void OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
+    if (_engine->parallelConnection().status() != ParallelConnection::Status::Disconnected) {
+        _engine->parallelConnection().signalDisconnect();
+    }
+
     LTRACE("OpenSpaceEngine::destroy(begin)");
     for (const auto& func : _engine->_moduleCallbacks.deinitializeGL) {
         func();
