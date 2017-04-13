@@ -386,6 +386,15 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     Optional::No
                 },
                 {
+                    ConfigurationManager::Synchronous,
+                    new BoolVerifier,
+                    "Determines whether the OpenGL debug callbacks are performed "
+                    "synchronously. If set to <True> the callbacks are in the same thead "
+                    "as the context and in the scope of the OpenGL function that "
+                    "triggered the message. The default value is <True>.",
+                    Optional::Yes
+                },
+                {
                     ConfigurationManager::PartFilterIdentifier,
                     new TableVerifier({{
                         "*",
@@ -399,9 +408,9 @@ documentation::Documentation ConfigurationManager::Documentation() {
                             {
                                 ConfigurationManager::PartFilterIdentifierSource,
                                 new StringInListVerifier({
-                                    // Taken from OpenSpaceEngine::initializeGL
-                                    "API", "WINDOW_SYSTEM", "SHADER_COMPILER",
-                                    "THIRD_PARTY", "APPLICATION", "OTHER"
+                                    // Taken from ghoul::debugcontext.cpp
+                                    "API", "Window System", "Shader Compiler",
+                                    "Third Party", "Application", "Other", "Don't care"
                                 }),
                                 "The source of the identifier to be filtered",
                                 Optional::No
@@ -409,10 +418,10 @@ documentation::Documentation ConfigurationManager::Documentation() {
                             {
                                 ConfigurationManager::PartFilterIdentifierType,
                                 new StringInListVerifier({
-                                    // Taken from OpenSpaceEngine::initializeGL
-                                    "ERROR", "DEPRECATED", "UNDEFINED", "PORTABILITY",
-                                    "PERFORMANCE", "MARKER", "PUSH_GROUP", "POP_GROUP",
-                                    "OTHER"
+                                    // Taken from ghoul::debugcontext.cpp
+                                    "Error", "Deprecated", "Undefined", "Portability",
+                                    "Performance", "Marker", "Push group", "Pop group",
+                                    "Other", "Don't care"
                                 }),
                                 "The type of the identifier to be filtered"
                             }
@@ -428,7 +437,8 @@ documentation::Documentation ConfigurationManager::Documentation() {
                         {
                             "*",
                             new StringInListVerifier(
-                                {"High", "Medium", "Low", "Notification"}
+                                // ghoul::debugcontext.cpp
+                                { "High", "Medium", "Low", "Notification" }
                             )
                         }
                     }),

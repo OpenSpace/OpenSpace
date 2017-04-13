@@ -88,6 +88,7 @@ const string ConfigurationManager::PartHttpProxyPassword = "Password";
 
 const string ConfigurationManager::KeyOpenGLDebugContext = "OpenGLDebugContext";
 const string ConfigurationManager::PartActivate = "Activate";
+const string ConfigurationManager::PartSynchronous = "Synchronous";
 const string ConfigurationManager::PartFilterIdentifier = "FilterIdentifier";
 const string ConfigurationManager::PartFilterIdentifierSource = "Source";
 const string ConfigurationManager::PartFilterIdentifierType = "Type";

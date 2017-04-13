@@ -128,6 +128,8 @@ public:
     static const std::string KeyOpenGLDebugContext;
     /// The part of the key storing whether an OpenGL Debug context should be created
     static const std::string PartActivate;
+    /// The part of the key storing whether the debug callbacks are performed synchronous
+    static const std::string PartSynchronous;
     /// The part of the key storing a list of identifiers that should be filtered out
     static const std::string PartFilterIdentifier;
     /// The part of the key that stores the source of the ignored identifier
