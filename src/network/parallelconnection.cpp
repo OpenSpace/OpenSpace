@@ -73,18 +73,13 @@
 #include <openspace/openspace.h>
 #include <ghoul/logging/logmanager.h>
 
-#include <glm/gtx/string_cast.hpp>
-
 //lua functions
 #include "parallelconnection_lua.inl"
 
 namespace {
     const uint32_t ProtocolVersion = 2;
     const size_t MaxLatencyDiffs = 64;
-    // const double BroadcastIntervalMilliseconds = 100;
     const std::string _loggerCat = "ParallelConnection";
-    // const int nFrametimesBuffer = 10;
-    // const int nBroadcastIntervalsBuffer = 2;
 }
 
 namespace openspace {
@@ -508,12 +503,6 @@ double ParallelConnection::calculateBufferedKeyframeTime(double originalTime) {
     }
     _latencyDiffs.push_back(latencyDiff);
 
-    /*
-    double latencyStandardDev = latencyStandardDeviation();
-    double latencyCompensation = std::max(expectedLatencyDiff + 2 * latencyStandardDev, latencyDiff);
-    double frametime = OsEng.windowWrapper().averageDeltaTime();
-    return originalTime + timeDiff + nBroadcastIntervalsBuffer * BroadcastIntervalMilliseconds / 1000 + latencyCompensation + nFrametimesBuffer * frametime;
-    */
     return originalTime + timeDiff + latencyDiff + _bufferTime;
 }
 

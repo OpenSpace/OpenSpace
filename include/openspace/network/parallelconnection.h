@@ -205,7 +205,6 @@ private:
     double _initialTimeDiff;
 
     std::unique_ptr<std::thread> _connectionThread;
-    // std::unique_ptr<std::thread> _broadcastThread;
     std::unique_ptr<std::thread> _sendThread;
     std::unique_ptr<std::thread> _listenThread;
     std::unique_ptr<std::thread> _handlerThread;

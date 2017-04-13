@@ -373,7 +373,6 @@ void OpenSpaceEngine::destroy() {
         _engine->parallelConnection().signalDisconnect();
     }
 
-
     LTRACE("OpenSpaceEngine::destroy(begin)");
     for (const auto& func : _engine->_moduleCallbacks.deinitializeGL) {
         func();

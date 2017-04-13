@@ -270,7 +270,6 @@ void SceneGraphNode::update(const UpdateData& data) {
     newUpdateData.modelTransform.rotation = worldRotationMatrix();
     newUpdateData.modelTransform.scale = worldScale();
 
-
     glm::dmat4 translation =
         glm::translate(glm::dmat4(1.0), newUpdateData.modelTransform.translation);
     glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);

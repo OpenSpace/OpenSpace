@@ -57,22 +57,22 @@ struct CameraKeyframe {
     double _timestamp;
                 
     void serialize(std::vector<char> &buffer){
-        // add position
+        // Add position
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_position), reinterpret_cast<char*>(&_position) + sizeof(_position));
                     
-        // add orientation
+        // Add orientation
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_rotation), reinterpret_cast<char*>(&_rotation) + sizeof(_rotation));
         
-        // follow focus node rotation?
+        // Follow focus node rotation?
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_followNodeRotation), reinterpret_cast<char*>(&_followNodeRotation) + sizeof(_followNodeRotation));
 
         int nodeNameLength = _focusNode.size();
 
-        // add focus node
+        // Add focus node
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&nodeNameLength), reinterpret_cast<char*>(&nodeNameLength) + sizeof(nodeNameLength));
         buffer.insert(buffer.end(), _focusNode.data(), _focusNode.data() + nodeNameLength);
 
-        // add timestamp
+        // Add timestamp
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
     };
                 
@@ -80,22 +80,22 @@ struct CameraKeyframe {
         int offset = 0;
         int size = 0;
                     
-        // position
+        // Position
         size = sizeof(_position);
         memcpy(&_position, buffer.data() + offset, size);
         offset += size;
-                    
-        // orientation
+
+        // Orientation
         size = sizeof(_rotation);
         memcpy(&_rotation, buffer.data() + offset, size);
         offset += size;
 
-        // follow focus node rotation?
+        // Follow focus node rotation?
         size = sizeof(_followNodeRotation);
         memcpy(&_followNodeRotation, buffer.data() + offset, size);
         offset += size;
 
-        // focus node
+        // Focus node
         int nodeNameLength;
         size = sizeof(int);
         memcpy(&nodeNameLength, buffer.data() + offset, size);      
@@ -104,7 +104,7 @@ struct CameraKeyframe {
         _focusNode = std::string(buffer.data() + offset, buffer.data() + offset + size);
         offset += size;
                     
-        //timestamp
+        // Timestamp
         size = sizeof(_timestamp);
         memcpy(&_timestamp, buffer.data() + offset, size);
     };
@@ -123,19 +123,19 @@ struct TimeKeyframe {
     double _timestamp;
                 
     void serialize(std::vector<char> &buffer){
-        //add current time
+        // Add current time
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_time), reinterpret_cast<char*>(&_time) + sizeof(_time));
                     
-        //add delta time
+        // Add delta time
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_dt), reinterpret_cast<char*>(&_dt) + sizeof(_dt));
                     
-        //add wether time is paused or not
+        // Add whether time is paused or not
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_paused), reinterpret_cast<char*>(&_paused) + sizeof(_paused));
                     
-        //add wether a time jump is necessary (recompute paths etc)
+        // Add whether a time jump is necessary (recompute paths etc)
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_requiresTimeJump), reinterpret_cast<char*>(&_requiresTimeJump) + sizeof(_requiresTimeJump));
 
-        //add timestamp
+        // Add timestamp
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_timestamp), reinterpret_cast<char*>(&_timestamp) + sizeof(_timestamp));
     };
                 
@@ -143,27 +143,27 @@ struct TimeKeyframe {
         int offset = 0;
         int size = 0;
                     
-        //current time
+        // Current time
         size = sizeof(_time);
         memcpy(&_time, buffer.data() + offset, size);
         offset += size;
                     
-        //delta time
+        // Delta time
         size = sizeof(_dt);
         memcpy(&_dt, buffer.data() + offset, size);
         offset += size;
                     
-        //is time paused?
+        // Is time paused?
         size = sizeof(_paused);
         memcpy(&_paused, buffer.data() + offset, size);
         offset += sizeof(_paused);
     
-        //is a time jump required?
+        // Is a time jump required?
         size = sizeof(_requiresTimeJump);
         memcpy(&_requiresTimeJump, buffer.data() + offset, size);
         offset += size;
 
-        // timestamp
+        // Timestamp
         size = sizeof(_timestamp);
         memcpy(&_timestamp, buffer.data() + offset, size);
         offset += size;

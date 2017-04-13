@@ -147,22 +147,17 @@ void GuiParallelComponent::renderHost() {
     size_t nClients = nConnections - 1;
     if (nClients == 1) {
         connectionInfo = "Hosting session with 1 client";
-    }
-    else {
+    } else {
         connectionInfo =
             "Hosting session with " + std::to_string(nClients) + " clients";
     }
 
     ImGui::Text(connectionInfo.c_str());
 
-
     const bool resignHostship = ImGui::Button("Resign hostship");
-
     if (resignHostship) {
         parallel.resignHostship();
     }
-
-
 }
 
 
@@ -189,8 +184,6 @@ void GuiParallelComponent::render() {
     }
 
     GuiPropertyComponent::renderPropertyOwner(&OsEng.parallelConnection());
-
-
     ImGui::End();
 }
 

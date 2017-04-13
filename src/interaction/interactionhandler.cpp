@@ -188,8 +188,7 @@ void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> int
     _currentInteractionMode->setFocusNode(focusNode);
 }
 
-InteractionMode * InteractionHandler::interactionMode()
-{
+InteractionMode * InteractionHandler::interactionMode() {
     return _currentInteractionMode.get();
 }
 

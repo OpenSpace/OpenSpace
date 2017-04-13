@@ -77,7 +77,6 @@ public:
     void clearKeyframes();
     const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
-
     void bindKeyLocal(
         Key key,
         KeyModifier modifier,

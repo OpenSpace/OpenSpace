@@ -35,7 +35,6 @@
 #include <ghoul/logging/logmanager.h>
 
 #include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/globes/renderableglobe.h>
