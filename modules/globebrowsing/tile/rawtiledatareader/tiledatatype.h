@@ -22,61 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
+
+#include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/textureformat.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
+
+#ifdef GLOBEBROWSING_USE_GDAL
+#include <gdal.h>
+#endif // GLOBEBROWSING_USE_GDAL
 
 namespace openspace {
 namespace globebrowsing {
-    
-template<typename KeyType, typename ValueType>
-LRUCache<KeyType, ValueType>::LRUCache(size_t size)
-    : _cacheSize(size)
-{}
+namespace tiledatatype {
 
-template<typename KeyType, typename ValueType>
-void LRUCache<KeyType, ValueType>::clear() {
-    _itemList.erase(_itemList.begin(), _itemList.end());
-    _itemMap.erase(_itemMap.begin(), _itemMap.end());
-}
+#ifdef GLOBEBROWSING_USE_GDAL
+GLuint getOpenGLDataType(GDALDataType gdalType);
+GDALDataType getGdalDataType(GLuint glType);
+TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
+TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType);
+size_t getMaximumValue(GDALDataType gdalType);
+size_t numberOfBytes(GDALDataType gdalType);
+float interpretFloat(GDALDataType gdalType, const char* src);
+#endif // GLOBEBROWSING_USE_GDAL
 
-template<typename KeyType, typename ValueType>
-void LRUCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value) {
-    auto it = _itemMap.find(key);
-    if (it != _itemMap.end()) {
-        _itemList.erase(it->second);
-        _itemMap.erase(it);
-    }
-    _itemList.push_front(std::make_pair(key, value));
-    _itemMap.insert(std::make_pair(key, _itemList.begin()));
-    clean();
-}
+size_t numberOfRasters(ghoul::opengl::Texture::Format format);
+size_t numberOfBytes(GLuint glType);
+size_t getMaximumValue(GLuint glType);
+float interpretFloat(GLuint glType, const char* src);
 
-template<typename KeyType, typename ValueType>
-bool LRUCache<KeyType, ValueType>::exist(const KeyType& key) const {
-    return _itemMap.count(key) > 0;
-}
-
-template<typename KeyType, typename ValueType>
-ValueType LRUCache<KeyType, ValueType>::get(const KeyType& key) {
-    //ghoul_assert(exist(key), "Key " << key << " must exist");
-    auto it = _itemMap.find(key);
-    // Move list iterator pointing to value
-    _itemList.splice(_itemList.begin(), _itemList, it->second);
-    return it->second->second;
-}
-
-template<typename KeyType, typename ValueType>
-size_t LRUCache<KeyType, ValueType>::size() const {
-    return _itemMap.size();
-}
-
-template<typename KeyType, typename ValueType>
-void LRUCache<KeyType, ValueType>::clean() {
-    while (_itemMap.size() > _cacheSize) {
-        auto last_it = _itemList.end(); last_it--;
-        _itemMap.erase(last_it->first);
-        _itemList.pop_back();
-    }
-}
-
+} // namespace tiledatatype
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__

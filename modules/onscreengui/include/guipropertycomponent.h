@@ -53,6 +53,7 @@ public:
     void setSource(SourceFunction func);
 
     void setVisibility(properties::Property::Visibility visibility);
+    void setHasRegularProperties(bool hasOnlyRegularProperties);
 
     void render();
 
@@ -63,6 +64,10 @@ protected:
     properties::Property::Visibility _visibility;
 
     SourceFunction _function;
+    /// This is set to \c true if all properties contained in this GUIPropertyComponent
+    /// are regular, i.e., not containing wildcards, regex, or groups
+    /// This variable only has an impact on which \c setPropertyValue function is called
+    bool _hasOnlyRegularProperties = false;
 };
 
 } // namespace gui

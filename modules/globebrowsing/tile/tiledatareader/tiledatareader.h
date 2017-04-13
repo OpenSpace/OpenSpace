@@ -22,38 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
 
-#include <list>
-#include <unordered_map>
+#include <modules/globebrowsing/tile/textureformat.h>
+#include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tiledepthtransform.h>
+#include <modules/globebrowsing/tile/tiledatalayout.h>
+#include <modules/globebrowsing/tile/pixelregion.h>
+
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
+
+#include <gdal.h>
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
 
-// Templated class implementing a Least-Recently-Used Cache
-template<typename KeyType, typename ValueType>
-class LRUCache {
+struct RawTile;
+class GeodeticPatch;
+
+/**
+ * Interface for reading <code>RawTile</code>s given a <code>TileIndex</code>
+ */
+class TileDataReader {
 public:
-    LRUCache(size_t size);
+    struct Configuration {
+        bool doPreProcessing;
+        int minimumTilePixelSize;
+        GLuint dataType = 0; // default = no datatype reinterpretation
+    };
 
-    void put(const KeyType& key, const ValueType& value);
-    void clear();
-    bool exist(const KeyType& key) const;
-    ValueType get(const KeyType& key);
-    size_t size() const;
+    virtual TileDataReader(const Configuration& config);
 
-private:
-    void clean();
+    std::shared_ptr<RawTile> defaultTileData();
+    
+    virtual std::shared_ptr<RawTile> readTileData(TileIndex tileIndex) = 0;
+    virtual int maxChunkLevel() = 0;
+    virtual TileDepthTransform getDepthTransform() = 0;
+    virtual const TileDataLayout& getDataLayout() = 0;
+    virtual void reset() = 0;
+    virtual float noDataValueAsFloat() = 0;
+    virtual size_t rasterXSize() = 0;
+    virtual size_t rasterYSize() = 0;
 
-    std::list<std::pair<KeyType, ValueType>> _itemList;
-    std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
-    size_t _cacheSize;
+    const static glm::ivec2 tilePixelStartOffset;
+    const static glm::ivec2 tilePixelSizeDifference;
+    const static PixelRegion padding; // same as the two above
+  
+    const static glm::ivec2 tilePixelStartOffset;
+    const static glm::ivec2 tilePixelSizeDifference;
+    const static PixelRegion padding; // same as the two above
+
+    static bool logReadErrors;
+    
+protected:
+    Configuration _config;
+
+    virtual std::array<double, 6> padfTransform getGeoTransform();
+    PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
+    Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#include <modules/globebrowsing/other/lrucache.inl>
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__

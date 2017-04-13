@@ -25,17 +25,16 @@
 #include <modules/globebrowsing/tile/loadjob/diskcachedtileloadjob.h>
 
 #include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tilediskcache.h>
 
 namespace openspace {
 namespace globebrowsing {
 
 DiskCachedTileLoadJob::DiskCachedTileLoadJob(
-                                         std::shared_ptr<TileDataset> textureDataProvider, 
-                                         const TileIndex& tileIndex,
-                                         std::shared_ptr<TileDiskCache> tdc,
-                                         CacheMode m)
+    std::shared_ptr<RawTileDataReader> textureDataProvider,
+    const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc,
+    CacheMode m)
     : TileLoadJob(textureDataProvider, tileIndex)
     , _tileDiskCache(tdc)
     , _mode(m)
@@ -46,26 +45,26 @@ void DiskCachedTileLoadJob::execute() {
 
     switch (_mode) {
         case CacheMode::Disabled: 
-            _rawTile = _tileDataset->readTileData(_chunkIndex); 
+            _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
             break;
 
         case CacheMode::ReadOnly:
             _rawTile = _tileDiskCache->get(_chunkIndex);
             if (_rawTile == nullptr) {
-                _rawTile = _tileDataset->readTileData(_chunkIndex);
+                _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
             }
             break;
 
         case CacheMode::ReadAndWrite:
             _rawTile = _tileDiskCache->get(_chunkIndex);
             if (_rawTile == nullptr) {
-                _rawTile = _tileDataset->readTileData(_chunkIndex);
+                _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
                 _tileDiskCache->put(_chunkIndex, _rawTile);
             }
             break;
 
         case CacheMode::WriteOnly:
-            _rawTile = _tileDataset->readTileData(_chunkIndex);
+            _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
             _tileDiskCache->put(_chunkIndex, _rawTile);
             break;
 

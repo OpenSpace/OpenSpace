@@ -31,7 +31,7 @@ namespace globebrowsing {
 
 LayerGroup::LayerGroup(std::string name)
     : properties::PropertyOwner(std::move(name))
-    , _levelBlendingEnabled("blendTileLevels", "blend tile levels", true)
+    , _levelBlendingEnabled("blendTileLevels", "blend tile levels", false)
 {
     addProperty(_levelBlendingEnabled);
 }

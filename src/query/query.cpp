@@ -25,6 +25,7 @@
 #include <openspace/query/query.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
@@ -106,6 +107,15 @@ std::vector<properties::Property*> allProperties() {
         properties.end(),
         p.begin(),
         p.end()
+    );
+
+    std::vector<properties::Property*> q =
+        OsEng.virtualPropertyManager().propertiesRecursive();
+
+    properties.insert(
+        properties.end(),
+        q.begin(),
+        q.end()
     );
 
     const Scene* graph = sceneGraph();

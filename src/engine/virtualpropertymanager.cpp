@@ -22,45 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
-
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
-
-#include <modules/globebrowsing/tile/tileindex.h>
-
-#include <unordered_map>
+#include <openspace/engine/virtualpropertymanager.h>
 
 namespace openspace {
-namespace globebrowsing {
-    
-class RawTile;
-class TileDataset;
 
-class AsyncTileDataProvider {
-public:
-    AsyncTileDataProvider(std::shared_ptr<TileDataset> textureDataProvider, 
-        std::shared_ptr<ThreadPool> pool);
+VirtualPropertyManager::VirtualPropertyManager()
+    : properties::PropertyOwner("")
+{
 
-    bool enqueueTileIO(const TileIndex& tileIndex);        
-    std::vector<std::shared_ptr<RawTile>> getRawTiles();
-        
-    void reset();
-    void clearRequestQueue();
+}
 
-    std::shared_ptr<TileDataset> getTextureDataProvider() const;
-    float noDataValueAsFloat();
+void VirtualPropertyManager::addProperty(std::unique_ptr<properties::Property> prop) {
+    // PropertyOwner does not take the ownership of the pointer
+    properties::PropertyOwner::addProperty(prop.get());
 
-protected:
-    virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;
+    // So we store the pointer locally instead
+    _properties.push_back(std::move(prop));
+}
 
-private:
-    std::shared_ptr<TileDataset> _tileDataset;
-    ConcurrentJobManager<RawTile> _concurrentJobManager;
-    std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
-};
+void VirtualPropertyManager::removeProperty(properties::Property* prop) {
+    properties::PropertyOwner::removeProperty(prop);
+    _properties.erase(
+        std::remove_if(
+            _properties.begin(),
+            _properties.end(),
+            [prop](const std::unique_ptr<properties::Property>& p) {
+                return p.get() == prop;
+            }
+        ),
+        _properties.end()
+    );
+}
 
-} // namespace globebrowsing
+
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
