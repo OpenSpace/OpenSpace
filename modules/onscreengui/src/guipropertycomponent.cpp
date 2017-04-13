@@ -69,6 +69,10 @@ void GuiPropertyComponent::setVisibility(properties::Property::Visibility visibi
     _visibility = visibility;
 }
 
+void GuiPropertyComponent::setHasRegularProperties(bool hasOnlyRegularProperties) {
+    _hasOnlyRegularProperties = hasOnlyRegularProperties;
+}
+
 void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
     if (owner->propertiesRecursive().empty()) {
         return;
@@ -182,7 +186,7 @@ void GuiPropertyComponent::render() {
 void GuiPropertyComponent::renderProperty(properties::Property* prop,
                                           properties::PropertyOwner* owner)
 {
-    using Func = std::function<void(properties::Property*, const std::string&)>;
+    using Func = std::function<void(properties::Property*, const std::string&, IsRegularProperty)>;
     static const std::map<std::string, Func> FunctionMapping = {
         { "BoolProperty", &renderBoolProperty },
         { "DoubleProperty", &renderDoubleProperty},
@@ -211,10 +215,18 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
         auto it = FunctionMapping.find(prop->className());
         if (it != FunctionMapping.end()) {
             if (owner) {
-                it->second(prop, owner->name());
+                it->second(
+                    prop,
+                    owner->name(),
+                    IsRegularProperty(_hasOnlyRegularProperties)
+                );
             }
             else {
-                it->second(prop, "");
+                it->second(
+                    prop,
+                    "",
+                    IsRegularProperty(_hasOnlyRegularProperties)
+                );
             }
         }
     }

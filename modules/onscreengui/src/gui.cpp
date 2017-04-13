@@ -314,8 +314,11 @@ void GUI::initialize() {
     style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.0f);
 
     _property.initialize();
+    _property.setHasRegularProperties(true);
     _screenSpaceProperty.initialize();
+    _screenSpaceProperty.setHasRegularProperties(true);
     _globalProperty.initialize();
+    _globalProperty.setHasRegularProperties(true);
     _virtualProperty.initialize();
     _performance.initialize();
     _help.initialize();

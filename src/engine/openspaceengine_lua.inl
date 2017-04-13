@@ -75,33 +75,33 @@ int addVirtualProperty(lua_State* L) {
     const std::string name = lua_tostring(L, -5);
     const std::string identifier = lua_tostring(L, -4);
 
-    Property* prop;
+    std::unique_ptr<Property> prop;
     if (type == "BoolProperty") {
         bool v = lua_toboolean(L, -3);
-        prop = new BoolProperty(identifier, name, v);
+        prop = std::make_unique<BoolProperty>(identifier, name, v);
     }
     else if (type == "IntProperty") {
         int v = static_cast<int>(lua_tonumber(L, -3));
         int min = static_cast<int>(lua_tonumber(L, -2));
         int max = static_cast<int>(lua_tonumber(L, -1));
 
-        prop = new IntProperty(identifier, name, v, min, max);
+        prop = std::make_unique<IntProperty>(identifier, name, v, min, max);
     }
     else if (type == "FloatProperty") {
         float v = static_cast<float>(lua_tonumber(L, -3));
         float min = static_cast<float>(lua_tonumber(L, -2));
         float max = static_cast<float>(lua_tonumber(L, -1));
 
-        prop = new FloatProperty(identifier, name, v, min, max);
+        prop = std::make_unique<FloatProperty>(identifier, name, v, min, max);
     }
     else if (type == "TriggerProperty") {
-        prop = new TriggerProperty(identifier, name);
+        prop = std::make_unique<TriggerProperty>(identifier, name);
     }
     else {
         return luaL_error(L, "Unknown property type '%s'", type.c_str());
     }
 
-    OsEng.virtualPropertyOwner().addProperty(prop);
+    OsEng.virtualPropertyManager().addProperty(std::move(prop));
     return 0;
 }
 
@@ -117,9 +117,8 @@ int removeVirtualProperty(lua_State* L) {
     }
 
     const std::string name = lua_tostring(L, -1);
-    properties::Property* p = OsEng.virtualPropertyOwner().property(name);
-    OsEng.virtualPropertyOwner().removeProperty(p);
-    delete p;
+    properties::Property* p = OsEng.virtualPropertyManager().property(name);
+    OsEng.virtualPropertyManager().removeProperty(p);
     return 0;
 }
 
@@ -129,9 +128,9 @@ int removeVirtualProperty(lua_State* L) {
 * Remove all registered virtual properties
 */
 int removeAllVirtualProperties(lua_State* L) {
-    std::vector<properties::Property*> props = OsEng.virtualPropertyOwner().properties();
-    for (properties::Property* p : props) {
-        OsEng.virtualPropertyOwner().removeProperty(p);
+    std::vector<properties::Property*> ps = OsEng.virtualPropertyManager().properties();
+    for (properties::Property* p : ps) {
+        OsEng.virtualPropertyManager().removeProperty(p);
         delete p;
     }
     return 0;

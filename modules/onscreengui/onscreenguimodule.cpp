@@ -28,6 +28,7 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settingsengine.h>
+#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/rendering/renderengine.h>
@@ -83,7 +84,7 @@ OnScreenGUIModule::OnScreenGUIModule()
             gui._virtualProperty.setSource(
                 []() {
                     std::vector<properties::PropertyOwner*> res = {
-                        &(OsEng.virtualPropertyOwner())
+                        &(OsEng.virtualPropertyManager())
                     };
 
                     return res;

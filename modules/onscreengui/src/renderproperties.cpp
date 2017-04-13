@@ -58,9 +58,20 @@ void executeScriptGroup(const std::string& id, const std::string& value) {
     OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::Yes);
 }
 
-#define executeScript executeScriptGroup
+void executeScript(const std::string& id, const std::string& value,
+    IsRegularProperty isRegular)
+{
+    if (isRegular) {
+        executeScriptSingle(id, value);
+    }
+    else {
+        executeScriptGroup(id, value);
+    }
+}
 
-void renderBoolProperty(Property* prop, const std::string& ownerName) {
+void renderBoolProperty(Property* prop, const std::string& ownerName,
+                        IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     BoolProperty* p = static_cast<BoolProperty*>(prop);
     std::string name = p->guiName();
@@ -71,12 +82,14 @@ void renderBoolProperty(Property* prop, const std::string& ownerName) {
     renderTooltip(prop);
 
     if (value != p->value()) {
-        executeScript(p->fullyQualifiedIdentifier(), value ? "true" : "false");
+        executeScript(p->fullyQualifiedIdentifier(), value ? "true" : "false", isRegular);
     }
     ImGui::PopID();
 }
 
-void renderOptionProperty(Property* prop, const std::string& ownerName) {
+void renderOptionProperty(Property* prop, const std::string& ownerName,
+                          IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     OptionProperty* p = static_cast<OptionProperty*>(prop);
     std::string name = p->guiName();
@@ -104,12 +117,14 @@ void renderOptionProperty(Property* prop, const std::string& ownerName) {
     }
     }
     if (value != p->value()) {
-        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value), isRegular);
     }
     ImGui::PopID();
 }
 
-void renderSelectionProperty(Property* prop, const std::string& ownerName) {
+void renderSelectionProperty(Property* prop, const std::string& ownerName,
+                             IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     SelectionProperty* p = static_cast<SelectionProperty*>(prop);
     std::string name = p->guiName();
@@ -141,14 +156,16 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName) {
                 parameters += std::to_string(i) + ",";
             }
             parameters += "}";
-            executeScript(p->fullyQualifiedIdentifier(), parameters);
+            executeScript(p->fullyQualifiedIdentifier(), parameters, isRegular);
         }
         ImGui::TreePop();
     }
     ImGui::PopID();
 }
 
-void renderStringProperty(Property* prop, const std::string& ownerName) {
+void renderStringProperty(Property* prop, const std::string& ownerName,
+                          IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     StringProperty* p = static_cast<StringProperty*>(prop);
     std::string name = p->guiName();
@@ -173,13 +190,19 @@ void renderStringProperty(Property* prop, const std::string& ownerName) {
 
 
     if (hasNewValue) {
-        executeScript(p->fullyQualifiedIdentifier(), "'" + std::string(buffer) + "'");
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "'" + std::string(buffer) + "'",
+            isRegular
+        );
     }
 
     ImGui::PopID();
 }
 
-void renderDoubleProperty(properties::Property* prop, const std::string& ownerName) {
+void renderDoubleProperty(properties::Property* prop, const std::string& ownerName,
+                          IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     DoubleProperty* p = static_cast<DoubleProperty*>(prop);
     std::string name = p->guiName();
@@ -193,13 +216,15 @@ void renderDoubleProperty(properties::Property* prop, const std::string& ownerNa
     renderTooltip(prop);
 
     if (value != static_cast<float>(p->value())) {
-        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value), isRegular);
     }
 
     ImGui::PopID();
 }
 
-void renderIntProperty(Property* prop, const std::string& ownerName) {
+void renderIntProperty(Property* prop, const std::string& ownerName,
+                       IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     IntProperty* p = static_cast<IntProperty*>(prop);
     std::string name = p->guiName();
@@ -213,13 +238,15 @@ void renderIntProperty(Property* prop, const std::string& ownerName) {
     renderTooltip(prop);
 
     if (value != p->value()) {
-        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value), isRegular);
     }
 
     ImGui::PopID();
 }
 
-void renderIVec2Property(Property* prop, const std::string& ownerName) {
+void renderIVec2Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     IVec2Property* p = static_cast<IVec2Property*>(prop);
     std::string name = p->guiName();
@@ -239,14 +266,17 @@ void renderIVec2Property(Property* prop, const std::string& ownerName) {
     if (value != p->value()) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}",
+            isRegular
         );
     }
     
     ImGui::PopID();
 }
 
-void renderIVec3Property(Property* prop, const std::string& ownerName) {
+void renderIVec3Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     IVec3Property* p = static_cast<IVec3Property*>(prop);
     std::string name = p->guiName();
@@ -268,13 +298,16 @@ void renderIVec3Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "," +
-            std::to_string(value.z) + "}"
+            std::to_string(value.z) + "}",
+            isRegular
         );
     }
     ImGui::PopID();
 }
 
-void renderIVec4Property(Property* prop, const std::string& ownerName) {
+void renderIVec4Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     IVec4Property* p = static_cast<IVec4Property*>(prop);
     std::string name = p->guiName();
@@ -300,15 +333,18 @@ void renderIVec4Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +
-            std::to_string(value.y) + "," +
-            std::to_string(value.z) + "," +
-            std::to_string(value.w) + "}"
+                std::to_string(value.y) + "," +
+                std::to_string(value.z) + "," +
+                std::to_string(value.w) + "}",
+            isRegular
         );
     }
     ImGui::PopID();
 }
 
-void renderFloatProperty(Property* prop, const std::string& ownerName) {
+void renderFloatProperty(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     FloatProperty* p = static_cast<FloatProperty*>(prop);
     std::string name = p->guiName();
@@ -321,13 +357,15 @@ void renderFloatProperty(Property* prop, const std::string& ownerName) {
     renderTooltip(prop);
 
     if (value != p->value()) {
-        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value), isRegular);
     }
 
     ImGui::PopID();
 }
 
-void renderVec2Property(Property* prop, const std::string& ownerName) {
+void renderVec2Property(Property* prop, const std::string& ownerName,
+                        IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     Vec2Property* p = static_cast<Vec2Property*>(prop);
     std::string name = p->guiName();
@@ -348,14 +386,17 @@ void renderVec2Property(Property* prop, const std::string& ownerName) {
     if (value != p->value()) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderVec3Property(Property* prop, const std::string& ownerName) {
+void renderVec3Property(Property* prop, const std::string& ownerName,
+                        IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     Vec3Property* p = static_cast<Vec3Property*>(prop);
     std::string name = p->guiName();
@@ -379,15 +420,18 @@ void renderVec3Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +
-            std::to_string(value.y) + "," +
-            std::to_string(value.z) + "}"
+                std::to_string(value.y) + "," +
+                std::to_string(value.z) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderVec4Property(Property* prop, const std::string& ownerName) {
+void renderVec4Property(Property* prop, const std::string& ownerName,
+                        IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     Vec4Property* p = static_cast<Vec4Property*>(prop);
     std::string name = p->guiName();
@@ -412,16 +456,19 @@ void renderVec4Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +
-            std::to_string(value.y) + "," +
-            std::to_string(value.z) + "," +
-            std::to_string(value.w) + "}"
+                std::to_string(value.y) + "," +
+                std::to_string(value.z) + "," +
+                std::to_string(value.w) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderDVec2Property(Property* prop, const std::string& ownerName) {
+void renderDVec2Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     DVec2Property* p = static_cast<DVec2Property*>(prop);
     std::string name = p->guiName();
@@ -442,14 +489,17 @@ void renderDVec2Property(Property* prop, const std::string& ownerName) {
     if (glm::dvec2(value) != p->value()) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderDVec3Property(Property* prop, const std::string& ownerName) {
+void renderDVec3Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     DVec3Property* p = static_cast<DVec3Property*>(prop);
     std::string name = p->guiName();
@@ -476,15 +526,18 @@ void renderDVec3Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +
-            std::to_string(value.y) + "," +
-            std::to_string(value.z) + "}"
+                std::to_string(value.y) + "," +
+                std::to_string(value.z) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderDVec4Property(Property* prop, const std::string& ownerName) {
+void renderDVec4Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     DVec4Property* p = static_cast<DVec4Property*>(prop);
     std::string name = p->guiName();
@@ -515,23 +568,26 @@ void renderDVec4Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +
-            std::to_string(value.y) + "," +
-            std::to_string(value.z) + "," +
-            std::to_string(value.w) + "}"
+                std::to_string(value.y) + "," +
+                std::to_string(value.z) + "," +
+                std::to_string(value.w) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderTriggerProperty(Property* prop, const std::string& ownerName) {
+void renderTriggerProperty(Property* prop, const std::string& ownerName,
+                           IsRegularProperty isRegular)
+{
     ghoul_assert(prop, "prop must not be nullptr");
     std::string name = prop->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     bool pressed = ImGui::Button(name.c_str());
     if (pressed) {
-        executeScript(prop->fullyQualifiedIdentifier(), "nil");
+        executeScript(prop->fullyQualifiedIdentifier(), "nil", isRegular);
     }
     renderTooltip(prop);
 

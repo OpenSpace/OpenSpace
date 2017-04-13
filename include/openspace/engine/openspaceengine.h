@@ -56,6 +56,7 @@ class ParallelConnection;
 class RenderEngine;
 class SettingsEngine;
 class SceneManager;
+class VirtualPropertyManager;
 
 class SyncEngine;
 class TimeManager;
@@ -122,9 +123,9 @@ public:
     ghoul::fontrendering::FontManager& fontManager();
     interaction::InteractionHandler& interactionHandler();
     properties::PropertyOwner& globalPropertyOwner();
-    properties::PropertyOwner& virtualPropertyOwner();
     scripting::ScriptEngine& scriptEngine();
     scripting::ScriptScheduler& scriptScheduler();
+    VirtualPropertyManager& virtualPropertyManager();
 
     
     // This method is only to be called from Modules
@@ -170,7 +171,6 @@ public:
 private:
     OpenSpaceEngine(std::string programName,
         std::unique_ptr<WindowWrapper> windowWrapper);
-    ~OpenSpaceEngine();
 
     void loadScene(const std::string& scenePath);
     void gatherCommandlineArguments();
@@ -196,10 +196,10 @@ private:
     std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
+    std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
-    std::unique_ptr<properties::PropertyOwner> _virtualPropertyNamespace;
     
     bool _scheduledSceneSwitch;
     std::string _scenePath;

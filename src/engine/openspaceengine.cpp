@@ -34,6 +34,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/settingsengine.h>
 #include <openspace/engine/syncengine.h>
+#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/luaconsole.h>
@@ -135,7 +136,7 @@ OpenSpaceEngine::OpenSpaceEngine(
     , _parallelConnection(new ParallelConnection)
     , _windowWrapper(std::move(windowWrapper))
     , _globalPropertyNamespace(new properties::PropertyOwner(""))
-    , _virtualPropertyNamespace(new properties::PropertyOwner(""))
+    , _virtualPropertyManager(new VirtualPropertyManager)
     , _scheduledSceneSwitch(false)
     , _scenePath("")
     , _runTime(0.0)
@@ -175,13 +176,6 @@ OpenSpaceEngine::OpenSpaceEngine(
     SpiceManager::initialize();
     Time::initialize();
     TransformationManager::initialize();
-}
-
-OpenSpaceEngine::~OpenSpaceEngine() {
-    // We know that we own all of the properties in the virtual namespace
-    for (properties::Property* prop : _virtualPropertyNamespace->propertiesRecursive()) {
-        delete prop;
-    }
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
@@ -1341,12 +1335,13 @@ properties::PropertyOwner& OpenSpaceEngine::globalPropertyOwner() {
     return *_globalPropertyNamespace;
 }
 
-properties::PropertyOwner& OpenSpaceEngine::virtualPropertyOwner() {
+VirtualPropertyManager& OpenSpaceEngine::virtualPropertyManager() {
     ghoul_assert(
-        _virtualPropertyNamespace,
-        "Virtual Property Namespace must not be nullptr"
+        _virtualPropertyManager,
+        "Virtual Property Manager must not be nullptr"
     );
-    return *_virtualPropertyNamespace;
+
+    return *_virtualPropertyManager;
 }
 
 ScriptEngine& OpenSpaceEngine::scriptEngine() {
