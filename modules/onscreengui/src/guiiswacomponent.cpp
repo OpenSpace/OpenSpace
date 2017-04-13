@@ -38,8 +38,8 @@
 
 namespace {
     using json = nlohmann::json;
-    const std::string _loggerCat = "iSWAComponent";
-}
+    const ImVec2 size = ImVec2(350, 500);
+} // namespace
 
 namespace openspace {
 namespace gui {
