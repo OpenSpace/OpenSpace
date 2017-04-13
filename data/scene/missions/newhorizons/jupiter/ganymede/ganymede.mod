@@ -9,7 +9,7 @@ return {
             Body = "GANYMEDE",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 1.8213, 6 },
+                Radius = 1.8213E6,
                 Segments = 100
             },
             Textures = {
@@ -58,7 +58,7 @@ return {
         Parent = "Ganymede",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {1.0, 7.4},
+            Size = 1.0E7.4,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Ganymede-Text.png",

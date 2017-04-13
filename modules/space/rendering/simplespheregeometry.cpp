@@ -43,51 +43,47 @@ namespace planetgeometry {
 
 SimpleSphereGeometry::SimpleSphereGeometry(const ghoul::Dictionary& dictionary)
     : PlanetGeometry()
-    , _realRadius("radius", "Radius", glm::vec4(1.f, 1.f, 1.f, 0.f), glm::vec4(-10.f, -10.f, -10.f, -20.f),
-                glm::vec4(10.f, 10.f, 10.f, 20.f))
+    , _radius(
+        "radius",
+        "Radius",
+        glm::vec3(1.f, 1.f, 1.f),
+        glm::vec3(0.f, 0.f, 0.f),
+        glm::vec3(std::pow(10.f, 20.f), std::pow(10.f, 20.f), std::pow(10.f, 20.f)))
     , _segments("segments", "Segments", 20, 1, 5000)
     , _sphere(nullptr)
 {
     using constants::simplespheregeometry::keyRadius;
     using constants::simplespheregeometry::keySegments;
 
-    // The name is passed down from the SceneGraphNode
-    bool success = dictionary.getValue(SceneGraphNode::KeyName, _name);
-    assert(success);
-    
-    glm::vec4 radius;
-    success = dictionary.getValue(keyRadius, _modRadius);
-    if (!success) {
-        LERROR("SimpleSphereGeometry of '" << _name << "' did not provide a key '"
-                                           << keyRadius << "'");
-    }
-    else {
-        radius[0] = _modRadius[0];
-        radius[1] = _modRadius[0];
-        radius[2] = _modRadius[0];
-        radius[3] = _modRadius[1];
-        _realRadius = radius; // In case the kernels does not supply a real
+    float sphereRadius = 0.f;
+    glm::vec3 ellipsoidRadius;
+    if (dictionary.getValue(keyRadius, sphereRadius)) {
+        _radius = { sphereRadius, sphereRadius, sphereRadius };
+    } else if (dictionary.getValue(keyRadius, ellipsoidRadius)) {
+        _radius = ellipsoidRadius;
+    } else {
+        LERROR("SimpleSphereGeometry did not provide a key '"
+            << keyRadius << "'");   
     }
 
-    double segments;
-    success = dictionary.getValue(keySegments, segments);
-    if (!success) {
-        LERROR("SimpleSphereGeometry of '" << _name << "' did not provide a key '"
-                                           << keySegments << "'");
-    }
-    else
+    double segments = 0;
+    if (dictionary.getValue(keySegments, segments)) {
         _segments = static_cast<int>(segments);
+    } else {
+        LERROR("SimpleSphereGeometry did not provide a key '"
+            << keySegments << "'");
+    }
+
     // The shader need the radii values but they are not changeable runtime
     // TODO: Possibly add a scaling property @AA
-    addProperty(_realRadius);
+    addProperty(_radius);
     // Changing the radius/scaling should affect the shader but not the geometry? @AA
-    //_radius.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));
+    _radius.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));
     addProperty(_segments);
     _segments.onChange(std::bind(&SimpleSphereGeometry::createSphere, this));
 }
 
-SimpleSphereGeometry::~SimpleSphereGeometry()
-{
+SimpleSphereGeometry::~SimpleSphereGeometry() {
 }
 
 bool SimpleSphereGeometry::initialize(Renderable* parent)
@@ -97,28 +93,24 @@ bool SimpleSphereGeometry::initialize(Renderable* parent)
     return success;
 }
 
-void SimpleSphereGeometry::deinitialize()
-{
+void SimpleSphereGeometry::deinitialize() {
     if (_sphere)
         delete _sphere;
     _sphere = nullptr;
 }
 
-void SimpleSphereGeometry::render()
-{
+void SimpleSphereGeometry::render() {
     _sphere->render();
 }
 
 void SimpleSphereGeometry::createSphere(){
-    //create the power scaled scalar
-
-    PowerScaledScalar planetSize(_modRadius);
-    _parent->setBoundingSphere(planetSize);
+    const glm::vec3 radius = _radius.value();
+    _parent->setBoundingSphere(std::max(std::max(radius[0], radius[1]), radius[2]));
 
     if(_sphere)
         delete _sphere;
-    //_sphere = new PowerScaledSphere(planetSize, _segments);
-    _sphere = new PowerScaledSphere(_realRadius, _segments, _name);
+
+    _sphere = new PowerScaledSphere(glm::vec4(radius, 0.0), _segments);
     _sphere->initialize();
 }
 

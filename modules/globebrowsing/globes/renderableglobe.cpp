@@ -78,7 +78,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     glm::dvec3 radii;
     dictionary.getValue(keyRadii, radii);
     _ellipsoid = Ellipsoid(radii);
-    setBoundingSphere(pss(_ellipsoid.averageRadius(), 0.0));
+    setBoundingSphere(_ellipsoid.averageRadius());
 
     // Ghoul can't read ints from lua dictionaries...
     double patchSegmentsd;

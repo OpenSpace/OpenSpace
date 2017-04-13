@@ -8,7 +8,7 @@ return {
             Body = "MIMAS",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 0.28, 3 },
+                Radius = 0.28E3,
                 Segments = 50
             },
             Textures = {

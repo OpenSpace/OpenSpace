@@ -177,7 +177,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     glm::vec2 radius = glm::vec2(1.0, 9.0);
     dictionary.getValue(keyRadius, radius);
-    setBoundingSphere(pss(radius));
+    setBoundingSphere(radius[0] * std::pow(10, radius[1]));
 
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
@@ -356,7 +356,7 @@ void RenderablePlanetProjection::attitudeParameters(double time) {
     glm::vec3 cpos = position.vec3();
 
     float distance = glm::length(cpos);
-    float radius = getBoundingSphere().lengthf();
+    float radius = boundingSphere();
 
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
         cpos,

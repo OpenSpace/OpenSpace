@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/other/distanceswitch.h>
-
 #include <openspace/rendering/renderable.h>
 
 namespace openspace {
@@ -52,8 +51,7 @@ void DistanceSwitch::render(const RenderData& data) {
         return;
     }
 
-    pss pssDistanceToCamera = (data.camera.position() - data.position).length();
-    double distanceToCamera = pssDistanceToCamera.lengthd();
+    double distanceToCamera = (data.camera.positionVec3() - data.position.dvec3()).length();
 
     if (distanceToCamera > _maxDistances.back() * _objectScale) {
         return;

@@ -55,7 +55,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _texturePath("texture", "Texture")
     , _billboard("billboard", "Billboard", false)
     , _projectionListener("projectionListener", "DisplayProjections", false)
-    , _size("size", "Size", glm::vec2(1,1), glm::vec2(0.f), glm::vec2(1.f, 25.f))
+    , _size("size", "Size", 10, 0, std::pow(10, 25))
     , _origin(Origin::Center)
     , _shader(nullptr)
     , _textureIsDirty(false)
@@ -64,9 +64,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _quad(0)
     , _vertexPositionBuffer(0)
 {
-    glm::vec2 size;
-    dictionary.getValue("Size", size);
-    _size = size;
+    dictionary.getValue("Size", _size);
 
     if (dictionary.hasKey("Name")) {
         dictionary.getValue("Name", _nodeName);
@@ -127,7 +125,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     //_size.onChange(std::bind(&RenderablePlane::createPlane, this));
     _size.onChange([this](){ _planeIsDirty = true; });
 
-    setBoundingSphere(_size.value());
+    setBoundingSphere(_size);
 }
 
 RenderablePlane::~RenderablePlane() {
@@ -299,16 +297,15 @@ void RenderablePlane::createPlane() {
     // ============================
     //         GEOMETRY (quad)
     // ============================
-    const GLfloat size = _size.value()[0];
-    const GLfloat w = _size.value()[1];
+    const GLfloat size = _size;
     const GLfloat vertex_data[] = {
         //      x      y     z     w     s     t
-        -size, -size, 0.f, w, 0.f, 0.f,
-        size, size, 0.f, w, 1.f, 1.f,
-        -size, size, 0.f, w, 0.f, 1.f,
-        -size, -size, 0.f, w, 0.f, 0.f,
-        size, -size, 0.f, w, 1.f, 0.f,
-        size, size, 0.f, w, 1.f, 1.f,
+        -size, -size, 0.f, 0.f, 0.f, 0.f,
+        size, size, 0.f, 0.f, 1.f, 1.f,
+        -size, size, 0.f, 0.f, 0.f, 1.f,
+        -size, -size, 0.f, 0.f, 0.f, 0.f,
+        size, -size, 0.f, 0.f, 1.f, 0.f,
+        size, size, 0.f, 0.f, 1.f, 1.f,
     };
 
     glBindVertexArray(_quad); // bind array
