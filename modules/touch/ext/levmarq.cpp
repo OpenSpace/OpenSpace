@@ -155,7 +155,7 @@ int levmarq(int npar, double *par, int ny, double *y, double *dysq,
 	delete[] delta;
 	delete[] newpar;
 
-	return it;
+	return (it+1);
 }
 
 
