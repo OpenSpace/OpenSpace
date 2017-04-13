@@ -22,32 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
-#define __OPENSPACE_CORE___TIMEMANAGER___H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__
 
-#include <vector>
-#include <deque>
-#include <openspace/network/messagestructures.h>
+#include <modules/onscreengui/include/guicomponent.h>
+#include <modules/onscreengui/include/guipropertycomponent.h>
+
+#include <string>
 
 namespace openspace {
+namespace gui {
 
-class TimeManager {
+class GuiParallelComponent : public GuiPropertyComponent {
 public:
-    void preSynchronization(double dt);
-    void addKeyframe(const datamessagestructures::TimeKeyframe& kf);
-    void removeKeyframesBefore(double timestamp);
-    void removeKeyframesAfter(double timestamp);
-    void clearKeyframes();
-    const std::deque<datamessagestructures::TimeKeyframe>& keyframes() const;
+    GuiParallelComponent();
+    void render() override;
 private:
-    void consumeKeyframes(double dt);
-    std::deque<datamessagestructures::TimeKeyframe> _keyframes;
-    static bool compareKeyframeTimes(
-        const datamessagestructures::TimeKeyframe& a,
-        const datamessagestructures::TimeKeyframe& b);
-    double _latestConsumedTimestamp;
+    void renderDisconnected();
+    void renderClientWithHost();
+    void renderClientWithoutHost();
+    void renderClientCommon();
+    void renderHost();
 };
 
+} // namespace gui
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___TIMEMANAGER___H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPARALLELCOMPONENT___H__

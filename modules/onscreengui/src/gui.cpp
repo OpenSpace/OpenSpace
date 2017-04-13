@@ -322,6 +322,7 @@ void GUI::initialize() {
     _virtualProperty.initialize();
     _performance.initialize();
     _help.initialize();
+    _parallel.initialize();
     _iswa.initialize(); 
 }
 
@@ -329,6 +330,7 @@ void GUI::deinitialize() {
     ImGui::Shutdown();
 
     _iswa.deinitialize();
+    _parallel.deinitialize();
     _help.deinitialize();
     _performance.deinitialize();
     _globalProperty.deinitialize();
@@ -408,6 +410,7 @@ void GUI::initializeGL() {
     _globalProperty.initializeGL();
     _performance.initializeGL();
     _help.initializeGL();
+    _parallel.initializeGL();
     _iswa.initializeGL();
 }
 
@@ -426,6 +429,7 @@ void GUI::deinitializeGL() {
     }
 
     _iswa.deinitializeGL();
+    _parallel.deinitializeGL();
     _help.deinitializeGL();
     _performance.deinitializeGL();
     _globalProperty.deinitializeGL();
@@ -471,13 +475,14 @@ void GUI::endFrame() {
         if (_screenSpaceProperty.isEnabled()) {
             _screenSpaceProperty.render();
         }
-
         if (_virtualProperty.isEnabled()) {
             _virtualProperty.render();
         }
-
         if (_help.isEnabled()) {
             _help.render();
+        }
+        if (_parallel.isEnabled()) {
+            _parallel.render();
         }
         if (_iswa.isEnabled()) {
             _iswa.render();
@@ -569,6 +574,10 @@ void GUI::render() {
     bool globalProperty = _globalProperty.isEnabled();
     ImGui::Checkbox("Global Properties", &globalProperty);
     _globalProperty.setEnabled(globalProperty);
+
+    bool parallel = _parallel.isEnabled();
+    ImGui::Checkbox("Parallel Connection", &parallel);
+    _parallel.setEnabled(parallel);
 
     bool virtualProperty = _virtualProperty.isEnabled();
     ImGui::Checkbox("Virtual Properties", &virtualProperty);
