@@ -45,6 +45,7 @@
 #endif
 
 #include <list>
+#include <functional>
 
 #define ROT 0
 #define PINCH 1
@@ -79,6 +80,16 @@ struct SelectedBody {
 	int id;
 	SceneGraphNode* node;
 	glm::dvec3 coordinates;
+};
+
+struct FunctionData {
+	Camera* camera;
+	SceneGraphNode* node;
+	double aspectRatio;
+	double* measurements;
+	int nDOF;
+	//std::function<glm::dvec3(glm::dvec2 vec, Camera* cam, SceneGraphNode* node, double aspectRatio)> toScreen;
+	//std::function<glm::dvec2(glm::dvec3 vec, Camera* cam, SceneGraphNode* node, double aspectRatio)> toSurface;
 };
 
 using Point = std::pair<int, TUIO::TuioPoint>;
