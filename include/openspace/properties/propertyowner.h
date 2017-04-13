@@ -212,7 +212,7 @@ public:
      * trying to find a match for a desired batch operation on Properties.
      * \return Pointer to vector of string tags that were assigned to the Property
      */
-    const std::vector<std::string> tags() const;
+    std::vector<std::string> tags() const;
 
     /**
      * Adds a tag to the Property's list of assigned tags. Tags are useful for creating

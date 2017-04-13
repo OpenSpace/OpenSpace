@@ -324,12 +324,12 @@ const std::string& PropertyOwner::name() const {
     return _name;
 }
 
-const std::vector<std::string> PropertyOwner::tags() const {
+std::vector<std::string> PropertyOwner::tags() const {
     return _tags;
 }
 
 void PropertyOwner::addTag(std::string tag) {
-    _tags.push_back(tag);
+    _tags.push_back(std::move(tag));
 }
 
 } // namespace properties

@@ -141,20 +141,21 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
     }
 
     if (dictionary.hasKey(KeyTag)) {
-        std::string tagName;
-        ghoul::Dictionary tagNames;
         if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
-            dictionary.getValue(KeyTag, tagName);
-            if (! tagName.empty())
-                result->addTag(tagName);
+            std::string tagName = dictionary.value<std::string>(KeyTag);
+            if (!tagName.empty()) {
+                result->addTag(std::move(tagName));
+            }
         } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
-        	dictionary.getValue(KeyTag, tagNames);
-        	std::vector<std::string> keys = tagNames.keys();
-        	for (const std::string key : keys) {
-        	    tagNames.getValue(key, tagName);
-                if (! tagName.empty())
-                    result->addTag(tagName);
-        	}
+            ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
+            std::vector<std::string> keys = tagNames.keys();
+            std::string tagName;
+            for (const std::string& key : keys) {
+                tagName = tagNames.value<std::string>(key);
+                if (!tagName.empty()) {
+                    result->addTag(std::move(tagName));
+                }
+            }
         }
     }
 

@@ -383,7 +383,6 @@ protected:
 
     /// The callback function that will be invoked whenever the encapsulated value changes
     std::function<void()> _onChangeCallback;
-
 };
 
 } // namespace properties

@@ -113,19 +113,18 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     dictionary.getValue(keyStart, _startTime);
     dictionary.getValue(keyEnd, _endTime);
 
-    std::string tagName;
-    ghoul::Dictionary tagNames;
     if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
-        dictionary.getValue(KeyTag, tagName);
-        if (! tagName.empty())
-            addTag(tagName);
+        std::string tagName = dictionary.value<std::string>(KeyTag);
+        if (!tagName.empty())
+            addTag(std::move(tagName));
     } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
-    	dictionary.getValue(KeyTag, tagNames);
+        ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
     	std::vector<std::string> keys = tagNames.keys();
-    	for (const std::string key : keys) {
-    	    tagNames.getValue(key, tagName);
-            if (! tagName.empty())
-                addTag(tagName);
+        std::string tagName;
+        for (const std::string& key : keys) {
+            tagName = tagNames.value<std::string>(key);
+            if (!tagName.empty())
+                addTag(std::move(tagName));
     	}
     }
 

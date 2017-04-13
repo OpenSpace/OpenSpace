@@ -41,13 +41,14 @@ void executePropertySet(properties::Property* prop, lua_State* L) {
 
 template <class T>
 properties::PropertyOwner* findPropertyOwnerWithMatchingGroupTag(T* prop,
-const std::string tagToMatch)     {
+                                                           const std::string& tagToMatch)
+{
     properties::PropertyOwner* tagMatchOwner = nullptr;
     properties::PropertyOwner* owner = prop->owner();
     
-    if (owner != nullptr) {
-        std::vector<std::string> tags = (std::vector<std::string>)owner->tags();
-        for (std::string currTag : tags) {
+    if (owner) {
+        std::vector<std::string> tags = owner->tags();
+        for (std::string& currTag : tags) {
             if (tagToMatch.compare(currTag) == 0) {
                 tagMatchOwner = owner;
                 break;
@@ -64,10 +65,11 @@ const std::string tagToMatch)     {
 
 void applyRegularExpression(lua_State* L, std::regex regex,
                             std::vector<properties::Property*> properties, int type,
-                            std::string groupName = "")                               {
+                            std::string groupName = "")
+{
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
-    bool isGroupMode = (groupName.empty()) ? false : true;
+    bool isGroupMode = !groupName.empty();
     
     for (properties::Property* prop : properties) {
         // Check the regular expression for all properties
@@ -77,10 +79,14 @@ void applyRegularExpression(lua_State* L, std::regex regex,
             // If the fully qualified id matches the regular expression, we queue the
             // value change if the types agree
             if (isGroupMode) {
-                properties::PropertyOwner* matchingTaggedOwner = findPropertyOwnerWithMatchingGroupTag(prop,
-                groupName);
-                if (matchingTaggedOwner == nullptr)
+                properties::PropertyOwner* matchingTaggedOwner =
+                    findPropertyOwnerWithMatchingGroupTag(
+                        prop,
+                        groupName
+                    );
+                if (!matchingTaggedOwner) {
                     continue;
+                }
             }
             
             if (type != prop->typeLua()) {
@@ -97,24 +103,19 @@ void applyRegularExpression(lua_State* L, std::regex regex,
     }
 }
 
-bool doesUriContainGroupTag(const std::string command) {
+//Checks to see if URI contains a group tag (with { } around the first term). If so,
+// returns true and sets groupName with the tag
+bool doesUriContainGroupTag(const std::string& command, std::string& groupName) {
     std::string name = command.substr(0, command.find_first_of("."));
-    if (name.front() == '{' && name.back() == '}')
+    if (name.front() == '{' && name.back() == '}') {
+        groupName = name.substr(1, name.length() - 2);
         return true;
-    else
-        return false;
-}
-
-std::string extractGroupNameFromUri(const std::string command) {
-    if (doesUriContainGroupTag(command)) {
-        std::string name = command.substr(0, command.find_first_of("."));
-        return name.substr(1, name.length() - 2);
     } else {
-        return command;
+        return false;
     }
 }
 
-std::string replaceUriGroupNameWith(std::string uri, std::string ownerName) {
+std::string replaceUriWithGroupName(std::string uri, std::string ownerName) {
     size_t pos = uri.find_first_of(".");
     return ownerName + "." + uri.substr(pos);
 }
@@ -123,13 +124,15 @@ std::string extractUriWithoutGroupName(std::string uri) {
     size_t pos = uri.find_first_of(".");
     return uri.substr(pos);
 }
+
 }
 
 
 namespace luascriptfunctions {
 
 int setPropertyCall_single(properties::Property* prop, std::string uri, lua_State* L,
-                           const int type)                                            {
+                           const int type)
+{
     using ghoul::lua::errorLocation;
     using ghoul::lua::luaTypeToString;
     
@@ -169,9 +172,9 @@ int property_setValueSingle(lua_State* L) {
 
     std::string uri = luaL_checkstring(L, -2);
     const int type = lua_type(L, -1);
+    std::string tagToMatch;
     
-    if (doesUriContainGroupTag(uri)) {
-        std::string tagToMatch = extractGroupNameFromUri(uri);
+    if (doesUriContainGroupTag(uri, tagToMatch)) {
         std::string pathRemainderToMatch = extractUriWithoutGroupName(uri);
         for (properties::Property* prop : allProperties()) {
             std::string propFullId = prop->fullyQualifiedIdentifier();
@@ -184,7 +187,7 @@ int property_setValueSingle(lua_State* L) {
                 if (pathRemainderToMatch.compare(thisPropMatchId) == 0)  {
                     properties::PropertyOwner* matchingTaggedOwner
                         = findPropertyOwnerWithMatchingGroupTag(prop, tagToMatch);
-                    if (matchingTaggedOwner != nullptr) {
+                    if (matchingTaggedOwner) {
                         setPropertyCall_single(prop, uri, L, type);
                     }
                 }
@@ -232,11 +235,10 @@ int property_setValue(lua_State* L) {
         startPos = regex.find("*", startPos);
     }
     
-    if (doesUriContainGroupTag(regex)) {
-        groupName = extractGroupNameFromUri(regex);
+    if (doesUriContainGroupTag(regex, groupName)) {
         std::string pathRemainderToMatch = extractUriWithoutGroupName(regex);
         //Remove group name from start of regex and replace with '.*'
-        regex = replaceUriGroupNameWith(regex, ".*");
+        regex = replaceUriWithGroupName(regex, ".*");
     }
     
     applyRegularExpression(
@@ -270,11 +272,10 @@ int property_setValueRegex(lua_State* L) {
     std::string regex = luaL_checkstring(L, -2);
     std::string groupName;
     
-    if (doesUriContainGroupTag(regex)) {
-        groupName = extractGroupNameFromUri(regex);
+    if (doesUriContainGroupTag(regex, groupName)) {
         std::string pathRemainderToMatch = extractUriWithoutGroupName(regex);
         //Remove group name from start of regex and replace with '.*'
-        regex = replaceUriGroupNameWith(regex, ".*");
+        regex = replaceUriWithGroupName(regex, ".*");
     }
     
     try {
