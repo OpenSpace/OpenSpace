@@ -61,7 +61,6 @@
 #include <ws2tcpip.h>
 #endif
 
-//openspace includes
 #include <openspace/network/parallelconnection.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
@@ -71,6 +70,8 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/openspace.h>
+#include <openspace/scripting/script_helper.h>
+
 #include <ghoul/logging/logmanager.h>
 
 //lua functions
@@ -1092,36 +1093,6 @@ scripting::LuaLibrary ParallelConnection::luaLibrary() {
     return {
         "parallel",
         {
-            {
-                "setPort",
-                &luascriptfunctions::setPort,
-                "number",
-                "Set the port for the parallel connection"
-            },
-            {
-                "setAddress",
-                &luascriptfunctions::setAddress,
-                "string",
-                "Set the address for the parallel connection"
-            },
-            {
-                "setPassword",
-                &luascriptfunctions::setPassword,
-                "string",
-                "Set the password for the parallel connection"
-            },
-            {
-                "setHostPassword",
-                &luascriptfunctions::setHostPassword,
-                "string",
-                "Set the password for requesting hostship"
-            },
-            {
-                "setDisplayName",
-                &luascriptfunctions::setDisplayName,
-                "string",
-                "Set your display name for the parallel connection"
-            },
             {
                 "connect",
                 &luascriptfunctions::connect,
