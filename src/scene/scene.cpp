@@ -448,26 +448,38 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "setPropertyValue",
                 &luascriptfunctions::property_setValue,
                 "string, *",
-                "Sets all properties identified by the URI (with potential wildcards) in "
-                "the first argument. The second argument can be any type, but it has to "
-                "match the type that the property (or properties) expect."
+                "Sets all property(s) identified by the URI (with potential wildcards) "
+                "in the first argument. The second argument can be any type, but it has "
+                "to match the type that the property (or properties) expect. If the "
+                "first term (separated by '.') in the uri is bracketed with { }, then "
+                "this term is treated as a group tag name, and the function will "
+                "search through all property owners to find those that are tagged with "
+                "this group name, and set their property values accordingly."
             },
             {
                 "setPropertyValueRegex",
                 &luascriptfunctions::property_setValueRegex,
                 "string, *",
-                "Sets all properties that pass the regular expression in the first "
-                "argument. The second argument can be any type, but it has to match the "
-                "type of the properties that matched the regular expression. The regular "
-                "expression has to be of the ECMAScript grammar."
+                "Sets all property(s) that pass the regular expression in the first "
+                "argument. The second argument can be any type, but it has to match "
+                "the type of the properties that matched the regular expression. "
+                "The regular expression has to be of the ECMAScript grammar. If the "
+                "first term (separated by '.') in the uri is bracketed with { }, then "
+                "this term is treated as a group tag name, and the function will search "
+                "through all property owners to find those that are tagged with this "
+                "group name, and set their property values accordingly."
             },
             {
                 "setPropertyValueSingle",
                 &luascriptfunctions::property_setValueSingle,
                 "string, *",
-                "Sets a property identified by the URI in "
-                "the first argument. The second argument can be any type, but it has to "
-                "match the type that the property expects.",
+                "Sets all property(s) identified by the URI in the first argument to the "
+                "value passed in the second argument. The type of the second argument is "
+                "arbitrary, but it must agree with the type the denoted Property expects."
+                " If the first term (separated by '.') in the uri is bracketed with { }, "
+                " then this term is treated as a group tag name, and the function will "
+                "search through all property owners to find those that are tagged with "
+                "this group name, and set their property values accordingly."
             },
             {
                 "getPropertyValue",
