@@ -24,16 +24,16 @@
 
 #include <openspace/scene/translation.h>
 
+#include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/updatestructures.h>
+
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 
-#include <openspace/documentation/verifier.h>
-
 namespace {
-    const char* _loggerCat = "Translation";
     const char* KeyType = "Type";
-}
+} // namespace
 
 namespace openspace {
 
@@ -61,10 +61,7 @@ documentation::Documentation Translation::Documentation() {
 std::unique_ptr<Translation> Translation::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    if (!dictionary.hasValue<std::string>(KeyType)) {
-        LERROR("Translation did not have key '" << KeyType << "'");
-        return nullptr;
-    }
+    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Translation");
 
     std::string translationType;
     dictionary.getValue(KeyType, translationType);
@@ -72,11 +69,6 @@ std::unique_ptr<Translation> Translation::createFromDictionary(
           = FactoryManager::ref().factory<Translation>();
     std::unique_ptr<Translation> result = factory->create(translationType, dictionary);
     result->setName("Translation");
-    if (result == nullptr) {
-        LERROR("Failed creating Translation object of type '" << translationType << "'");
-        return nullptr;
-    }
-
     return result;
 }
 
@@ -84,8 +76,6 @@ Translation::Translation()
     : properties::PropertyOwner("Translation")
 {}
 
-Translation::~Translation() {}
-    
 bool Translation::initialize() {
     return true;
 }

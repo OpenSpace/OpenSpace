@@ -28,10 +28,9 @@ helper.setCommonKeys = function()
         "openspace.toggleShutdown()",
         "Toggles the shutdown that will stop OpenSpace after a grace period. Press again to cancel the shutdown during this period."
     )
-
     openspace.bindKeyLocal(
         "PRINT_SCREEN",
-        "openspace.takeScreenshot()",
+        "openspace.setPropertyValueSingle('RenderEngine.takeScreenshot', nil)",
         "Saves the contents of the screen to a file in the working directory."
     )
     openspace.bindKey(

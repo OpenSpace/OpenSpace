@@ -22,71 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tiledatalayout.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__
 
-#include <limits>
-
-#include <ogr_featurestyle.h>
-#include <ogr_spatialref.h>
-
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h> // abspath
-#include <ghoul/misc/assert.h>
-
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-
-
-#include <modules/globebrowsing/geometry/angle.h>
-
-#include <float.h>
-#include <sstream>
-#include <algorithm>
-
-#include <gdal_priv.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/configurationmanager.h>
-
-#include <memory>
-#include <set>
-#include <queue>
-#include <iostream>
+#include <list>
 #include <unordered_map>
-
-#include <ghoul/filesystem/file.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/misc/threadpool.h>
-
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledatatype.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/pixelregion.h>
-#include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/tilemetadata.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/geometry/geodeticpatch.h>
-
-namespace {
-    const std::string _loggerCat = "TileDataset";
-}
 
 namespace openspace {
 namespace globebrowsing {
+namespace cache {
 
-TileDataLayout::TileDataLayout() {}
+/**
+ * Templated class implementing a Least-Recently-Used Cache.
+ * <code>KeyType</code> needs to be an enumerable type.
+ */
+template<typename KeyType, typename ValueType>
+class LRUCache {
+public:
+    /**
+     * \param size is the maximum size of the cache given in number of cached items.
+     */
+    LRUCache(size_t size);
 
-TileDataLayout::TileDataLayout(GDALDataset* dataSet, GLuint preferredGlType) {
-    // Assume all raster bands have the same data type
-    gdalType =preferredGlType != 0 ?
-        tiledatatype::getGdalDataType(preferredGlType) :
-        dataSet->GetRasterBand(1)->GetRasterDataType();
+    void put(const KeyType& key, const ValueType& value);
+    void clear();
+    bool exist(const KeyType& key) const;
+    ValueType get(const KeyType& key);
+    size_t size() const;
 
-    glType = tiledatatype::getOpenGLDataType(gdalType);
-    numRasters = dataSet->GetRasterCount();
-    bytesPerDatum = tiledatatype::numberOfBytes(gdalType);
-    bytesPerPixel = bytesPerDatum * numRasters;
-    textureFormat = tiledatatype::getTextureFormat(numRasters, gdalType);
-}
-  
+private:
+    void clean();
+
+    std::list<std::pair<KeyType, ValueType>> _itemList;
+    std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
+    size_t _cacheSize;
+};
+
+} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
+
+#include <modules/globebrowsing/cache/lrucache.inl>
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LRU_CACHE___H__

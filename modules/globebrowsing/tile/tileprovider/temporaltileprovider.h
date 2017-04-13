@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifdef GLOBEBROWSING_USE_GDAL
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
 
@@ -287,8 +288,6 @@ private:
     // Used for creation of time specific instances of CachingTileProvider
     ghoul::Dictionary _initDict;
 
-    Tile _defaultTile;
-
     std::shared_ptr<TileProvider> _currentTileProvider;
         
     TimeFormat* _timeFormat;
@@ -300,3 +299,4 @@ private:
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
+#endif // GLOBEBROWSING_USE_GDAL

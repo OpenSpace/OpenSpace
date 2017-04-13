@@ -29,6 +29,8 @@
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
+
 
 namespace openspace {
 namespace globebrowsing {
@@ -83,6 +85,8 @@ Chunk::Status Chunk::update(const RenderData& data) {
 }
 
 Chunk::BoundingHeights Chunk::getBoundingHeights() const {
+    using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
+
     BoundingHeights boundingHeights {
         0.f, 0.f,
         false
@@ -90,50 +94,58 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
 
     // In the future, this should be abstracted away and more easily queryable.
     // One must also handle how to sample pick one out of multiplte heightmaps
-    auto layerManager = owner().chunkedLodGlobe()->layerManager();
-       
+    std::shared_ptr<LayerManager> layerManager =
+        owner().chunkedLodGlobe()->layerManager();
+
     // The raster of a height map is the first one. We assume that the height map is
     // a single raster image. If it is not we will just use the first raster
     // (that is channel 0).
     const size_t HeightChannel = 0;
     const LayerGroup& heightmaps = layerManager->layerGroup(LayerManager::HeightLayers);
-    std::vector<ChunkTile> chunkTiles = tileselector::getTilesSortedByHighestResolution(
-        heightmaps, _tileIndex
-    );
+    std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
+        tileselector::getTilesAndSettingsSortedByHighestResolution(
+            heightmaps, _tileIndex);
 
     bool lastHadMissingData = true;
-    for (const auto& chunkTile : chunkTiles) {
-        bool goodTile = (chunkTile.tile.status == Tile::Status::OK);
-        bool hasTileMetaData = (chunkTile.tile.metaData != nullptr);
+    for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
+        ChunkTile chunkTile = chunkTileSettingsPair.first;
+        const LayerRenderSettings* settings = chunkTileSettingsPair.second;
+        bool goodTile = (chunkTile.tile.status() == Tile::Status::OK);
+        bool hasTileMetaData = (chunkTile.tile.metaData() != nullptr);
 
         if (goodTile && hasTileMetaData) {
-            auto tileMetaData = chunkTile.tile.metaData;
+            std::shared_ptr<TileMetaData> tileMetaData = chunkTile.tile.metaData();
+
+            float minValue =
+                settings->performLayerSettings(tileMetaData->minValues[HeightChannel]);
+            float maxValue =
+                settings->performLayerSettings(tileMetaData->maxValues[HeightChannel]);
 
             if (!boundingHeights.available) {
                 if (tileMetaData->hasMissingData[HeightChannel]) {
                     boundingHeights.min = std::min(
                         DEFAULT_HEIGHT,
-                        tileMetaData->minValues[HeightChannel]
+                        minValue
                     );
                     boundingHeights.max = std::max(
                         DEFAULT_HEIGHT,
-                        tileMetaData->maxValues[HeightChannel]
+                        maxValue
                     );
                 }
                 else {
-                    boundingHeights.min = tileMetaData->minValues[HeightChannel];
-                    boundingHeights.max = tileMetaData->maxValues[HeightChannel];
+                    boundingHeights.min = minValue;
+                    boundingHeights.max = maxValue;
                 }
                 boundingHeights.available = true;
             }
             else {
                 boundingHeights.min = std::min(
                     boundingHeights.min,
-                    tileMetaData->minValues[HeightChannel]
+                    minValue
                 );
                 boundingHeights.max = std::max(
                     boundingHeights.max,
-                    tileMetaData->maxValues[HeightChannel]
+                    maxValue
                 );
             }
             lastHadMissingData = tileMetaData->hasMissingData[HeightChannel];

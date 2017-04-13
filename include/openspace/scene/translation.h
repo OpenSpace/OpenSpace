@@ -27,13 +27,16 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/util/updatestructures.h>
+#include <ghoul/glm.h>
 
+#include <functional>
 #include <memory>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
+struct UpdateData;
 
 namespace documentation {  struct Documentation; }
 
@@ -42,7 +45,7 @@ public:
     static std::unique_ptr<Translation> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     Translation();
-    virtual ~Translation();
+    virtual ~Translation() = default;
     virtual bool initialize();
 
     virtual glm::dvec3 position() const = 0;

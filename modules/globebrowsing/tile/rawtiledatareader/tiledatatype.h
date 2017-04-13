@@ -22,45 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
 
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
+#include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/textureformat.h>
 
-#include <modules/globebrowsing/tile/tileindex.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
-#include <unordered_map>
+#ifdef GLOBEBROWSING_USE_GDAL
+#include <gdal.h>
+#endif // GLOBEBROWSING_USE_GDAL
 
 namespace openspace {
 namespace globebrowsing {
-    
-class RawTile;
-class TileDataset;
+namespace tiledatatype {
 
-class AsyncTileDataProvider {
-public:
-    AsyncTileDataProvider(std::shared_ptr<TileDataset> textureDataProvider, 
-        std::shared_ptr<ThreadPool> pool);
+#ifdef GLOBEBROWSING_USE_GDAL
+GLuint getOpenGLDataType(GDALDataType gdalType);
+GDALDataType getGdalDataType(GLuint glType);
+TextureFormat getTextureFormat(int rasterCount, GDALDataType gdalType);
+TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType);
+size_t getMaximumValue(GDALDataType gdalType);
+size_t numberOfBytes(GDALDataType gdalType);
+float interpretFloat(GDALDataType gdalType, const char* src);
+#endif // GLOBEBROWSING_USE_GDAL
 
-    bool enqueueTileIO(const TileIndex& tileIndex);        
-    std::vector<std::shared_ptr<RawTile>> getRawTiles();
-        
-    void reset();
-    void clearRequestQueue();
+size_t numberOfRasters(ghoul::opengl::Texture::Format format);
+size_t numberOfBytes(GLuint glType);
+size_t getMaximumValue(GLuint glType);
+float interpretFloat(GLuint glType, const char* src);
 
-    std::shared_ptr<TileDataset> getTextureDataProvider() const;
-    float noDataValueAsFloat();
-
-protected:
-    virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;
-
-private:
-    std::shared_ptr<TileDataset> _tileDataset;
-    ConcurrentJobManager<RawTile> _concurrentJobManager;
-    std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
-};
-
+} // namespace tiledatatype
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_READER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATA_TYPE___H__
