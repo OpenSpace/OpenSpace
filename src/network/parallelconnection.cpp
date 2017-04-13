@@ -99,6 +99,7 @@ ParallelConnection::ParallelConnection()
     , _bufferTime("bufferTime", "Buffer Time", 1, 0.5, 10)
     , _timeKeyframeInterval("timeKeyframeInterval", "Time keyframe interval", 0.1, 0, 1)
     , _cameraKeyframeInterval("cameraKeyframeInterval", "Camera Keyframe interval", 0.1, 0, 1)
+    , _timeTolerance("timeTolerance", "Time tolerance", 1, 0.5, 5)
     , _lastTimeKeyframeTimestamp(0)
     , _lastCameraKeyframeTimestamp(0)
     , _clientSocket(INVALID_SOCKET)
@@ -126,6 +127,7 @@ ParallelConnection::ParallelConnection()
 
     addProperty(_timeKeyframeInterval);
     addProperty(_cameraKeyframeInterval);
+    addProperty(_timeTolerance);
 
     _connectionEvent = std::make_shared<ghoul::Event<>>();
     _handlerThread = std::make_unique<std::thread>(&ParallelConnection::threadManagement, this);
@@ -528,6 +530,10 @@ double ParallelConnection::latencyStandardDeviation() const {
     // V(X) = E(x^2) - E(x)^2
     double latencyVariance = expectedLatencyDiffSquared - expectedLatencyDiff*expectedLatencyDiff;
     return std::sqrt(latencyVariance);
+}
+
+double ParallelConnection::timeTolerance() const {
+    return _timeTolerance;
 }
 
 
@@ -1016,39 +1022,40 @@ const std::string& ParallelConnection::hostName() {
 }
 
 void ParallelConnection::sendCameraKeyframe() {
-    //create a keyframe with current position and orientation of camera
+    SceneGraphNode* focusNode = OsEng.interactionHandler().focusNode();
+    if (!focusNode) {
+        return;
+    }
+
+    // Create a keyframe with current position and orientation of camera
     datamessagestructures::CameraKeyframe kf;
     kf._position = OsEng.interactionHandler().focusNodeToCameraVector();
-//    std::cout << glm::to_string(kf._position) << std::endl;
+
     kf._followNodeRotation = OsEng.interactionHandler().interactionMode()->followingNodeRotation();
     if (kf._followNodeRotation) {
+        kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
         kf._rotation = OsEng.interactionHandler().focusNodeToCameraRotation();
     } else {
         kf._rotation = OsEng.interactionHandler().camera()->rotationQuaternion();
     }
 
-    
-    SceneGraphNode* focusNode = OsEng.interactionHandler().focusNode();
-    if (!focusNode) {
-        return;
-    }
     kf._focusNode = focusNode->name();
 
-    //timestamp as current runtime of OpenSpace instance
+    // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = OsEng.runTime();
 
-    //create a buffer for the keyframe
+    // Create a buffer for the keyframe
     std::vector<char> buffer;
 
-    //fill the keyframe buffer
+    // Fill the keyframe buffer
     kf.serialize(buffer);
 
-    //send message
+    // Send message
     queueOutDataMessage(DataMessage(datamessagestructures::Type::CameraData, buffer));
 }
 
 void ParallelConnection::sendTimeKeyframe() {
-    //create a keyframe with current position and orientation of camera
+    // Create a keyframe with current position and orientation of camera
     datamessagestructures::TimeKeyframe kf;
     
     kf._dt = Time::ref().deltaTime();
@@ -1056,16 +1063,16 @@ void ParallelConnection::sendTimeKeyframe() {
     kf._requiresTimeJump = _timeJumped;
     kf._time = Time::ref().j2000Seconds();
 
-    //timestamp as current runtime of OpenSpace instance
+    // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = OsEng.runTime();
 
-    //create a buffer for the keyframe
+    // Create a buffer for the keyframe
     std::vector<char> buffer;
 
-    //fill the keyframe buffer
+    // Fill the keyframe buffer
     kf.serialize(buffer);
 
-    //send message
+    // Send message
     queueOutDataMessage(DataMessage(datamessagestructures::Type::TimeData, buffer));
     _timeJumped = false;
 }

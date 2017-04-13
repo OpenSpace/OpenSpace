@@ -25,10 +25,7 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/time.h>
-
-namespace {
-    double SecondsOffTolerance = 1;
-}
+#include <openspace/network/parallelconnection.h>
 
 namespace openspace {
 
@@ -96,8 +93,10 @@ void TimeManager::consumeKeyframes(double dt) {
             return;
         }
 
+        const double secondsOffTolerance = OsEng.parallelConnection().timeTolerance();
+
         double predictedTime = time.j2000Seconds() + time.deltaTime() * (next._timestamp - now);
-        bool withinTolerance = std::abs(predictedTime - next._time) < std::abs(next._dt * SecondsOffTolerance);
+        bool withinTolerance = std::abs(predictedTime - next._time) < std::abs(next._dt * secondsOffTolerance);
         
         if (next._dt == time.deltaTime() && withinTolerance) {
             Time::ref().advanceTime(dt);

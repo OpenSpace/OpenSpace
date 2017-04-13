@@ -252,22 +252,26 @@ void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, d
         return;
     }
 
-//    std::cout << "P: " << glm::to_string(prevKeyframe->_position) << std::endl;
-//    std::cout << "N: " << glm::to_string(nextKeyframe->_position) << std::endl;
-
-    glm::dvec3 prevKeyframeCameraPosition = prevFocusNode->worldPosition() + prevKeyframe->_position;
-    glm::dvec3 nextKeyframeCameraPosition = nextFocusNode->worldPosition() + nextKeyframe->_position;
-
+    glm::dvec3 prevKeyframeCameraPosition = prevKeyframe->_position;
+    glm::dvec3 nextKeyframeCameraPosition = nextKeyframe->_position;
     glm::dquat prevKeyframeCameraRotation = prevKeyframe->_rotation;
+    glm::dquat nextKeyframeCameraRotation = nextKeyframe->_rotation;
+
+    // Transform position and rotation based on focus node rotation (if following rotation)
     if (prevKeyframe->_followNodeRotation) {
         prevKeyframeCameraRotation = prevFocusNode->worldRotationMatrix() * glm::dmat3(prevKeyframe->_rotation);
+        prevKeyframeCameraPosition = prevFocusNode->worldRotationMatrix() * prevKeyframeCameraPosition;
     }
-
-    glm::dquat nextKeyframeCameraRotation = nextKeyframe->_rotation;
     if (nextKeyframe->_followNodeRotation) {
         nextKeyframeCameraRotation = nextFocusNode->worldRotationMatrix() * glm::dmat3(nextKeyframe->_rotation);
+        nextKeyframeCameraPosition = nextFocusNode->worldRotationMatrix() * nextKeyframeCameraPosition;
     }
 
+    // Transform position based on focus node position
+    prevKeyframeCameraPosition += prevFocusNode->worldPosition();
+    nextKeyframeCameraPosition += nextFocusNode->worldPosition();
+
+    // Linear interpolation
     camera.setPositionVec3(prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t);
     camera.setRotation(glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t));
 }
