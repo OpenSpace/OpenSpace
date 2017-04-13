@@ -22,55 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
+#ifndef __OPENSPACE_CORE___VIRTUALPROPERTYMANAGER___H__
+#define __OPENSPACE_CORE___VIRTUALPROPERTYMANAGER___H__
 
-#include <modules/onscreengui/include/guicomponent.h>
+#include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/property.h>
 
-#include <functional>
-#include <string>
+#include <memory>
 #include <vector>
 
 namespace openspace {
 
-namespace properties {
-    class Property;
-    class PropertyOwner;
-}
-
-namespace gui {
-
-class GuiPropertyComponent : public GuiComponent {
+class VirtualPropertyManager : public properties::PropertyOwner {
 public:
-    using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
+    VirtualPropertyManager();
 
-    GuiPropertyComponent(std::string name);
+    void addProperty(std::unique_ptr<properties::Property> prop);
+    void removeProperty(properties::Property* prop);
 
-    // This is the function that evaluates to the list of Propertyowners that this
-    // component should render
-    void setSource(SourceFunction func);
-
-    void setVisibility(properties::Property::Visibility visibility);
-    void setHasRegularProperties(bool hasOnlyRegularProperties);
-
-    void render();
-
-protected:
-    void renderPropertyOwner(properties::PropertyOwner* owner);
-    void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
-
-    properties::Property::Visibility _visibility;
-
-    SourceFunction _function;
-    /// This is set to \c true if all properties contained in this GUIPropertyComponent
-    /// are regular, i.e., not containing wildcards, regex, or groups
-    /// This variable only has an impact on which \c setPropertyValue function is called
-    bool _hasOnlyRegularProperties = false;
+private:
+    std::vector<std::unique_ptr<properties::Property>> _properties;
 };
 
-} // namespace gui
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
+#endif // __OPENSPACE_CORE___VIRTUALPROPERTYMANAGER___H__

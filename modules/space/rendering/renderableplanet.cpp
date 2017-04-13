@@ -308,16 +308,7 @@ bool RenderablePlanet::initialize() {
         LERROR(ss.str());
     }
 
-    loadTexture();
-
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        std::stringstream ss;
-        ss << "Error loading textures. OpenGL error: " << errString << std::endl;
-        LERROR(ss.str());
-    }
-    
-    _geometry->initialize(this);    
+    _geometry->initialize(this);
 
     _programObject->deactivate();
 
@@ -325,6 +316,8 @@ bool RenderablePlanet::initialize() {
         const GLubyte * errString = gluErrorString(err);
         LERROR("Shader Programs Creation. OpenGL error: " << errString);
     }
+    
+    loadTexture();
 
     return isReady();
 }
@@ -410,13 +403,13 @@ void RenderablePlanet::render(const RenderData& data) {
     _programObject->setUniform("texture1", dayUnit);
 
     // Bind possible night texture
-    if (_hasNightTexture) {
+    if (_hasNightTexture && _nightTexture) {
         nightUnit.activate();
         _nightTexture->bind();
         _programObject->setUniform("nightTex", nightUnit);
     }
 
-    if (_hasHeightTexture) {
+    if (_hasHeightTexture && _heightMapTexture) {
         heightUnit.activate();
         _heightMapTexture->bind();
         _programObject->setUniform("heightTex", heightUnit);

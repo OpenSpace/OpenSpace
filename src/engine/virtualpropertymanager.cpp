@@ -22,55 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__
-
-#include <modules/onscreengui/include/guicomponent.h>
-
-#include <openspace/properties/property.h>
-
-#include <functional>
-#include <string>
-#include <vector>
+#include <openspace/engine/virtualpropertymanager.h>
 
 namespace openspace {
 
-namespace properties {
-    class Property;
-    class PropertyOwner;
+VirtualPropertyManager::VirtualPropertyManager()
+    : properties::PropertyOwner("")
+{
+
 }
 
-namespace gui {
+void VirtualPropertyManager::addProperty(std::unique_ptr<properties::Property> prop) {
+    // PropertyOwner does not take the ownership of the pointer
+    properties::PropertyOwner::addProperty(prop.get());
 
-class GuiPropertyComponent : public GuiComponent {
-public:
-    using SourceFunction = std::function<std::vector<properties::PropertyOwner*>()>;
+    // So we store the pointer locally instead
+    _properties.push_back(std::move(prop));
+}
 
-    GuiPropertyComponent(std::string name);
+void VirtualPropertyManager::removeProperty(properties::Property* prop) {
+    properties::PropertyOwner::removeProperty(prop);
+    _properties.erase(
+        std::remove_if(
+            _properties.begin(),
+            _properties.end(),
+            [prop](const std::unique_ptr<properties::Property>& p) {
+                return p.get() == prop;
+            }
+        ),
+        _properties.end()
+    );
+}
 
-    // This is the function that evaluates to the list of Propertyowners that this
-    // component should render
-    void setSource(SourceFunction func);
 
-    void setVisibility(properties::Property::Visibility visibility);
-    void setHasRegularProperties(bool hasOnlyRegularProperties);
-
-    void render();
-
-protected:
-    void renderPropertyOwner(properties::PropertyOwner* owner);
-    void renderProperty(properties::Property* prop, properties::PropertyOwner* owner);
-
-    properties::Property::Visibility _visibility;
-
-    SourceFunction _function;
-    /// This is set to \c true if all properties contained in this GUIPropertyComponent
-    /// are regular, i.e., not containing wildcards, regex, or groups
-    /// This variable only has an impact on which \c setPropertyValue function is called
-    bool _hasOnlyRegularProperties = false;
-};
-
-} // namespace gui
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIPROPERTYCOMPONENT___H__

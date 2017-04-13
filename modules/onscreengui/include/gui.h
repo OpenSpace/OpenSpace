@@ -69,6 +69,7 @@ public:
     GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _property;
     GuiPropertyComponent _screenSpaceProperty;
+    GuiPropertyComponent _virtualProperty;
     GuiTimeComponent _time;
     GuiIswaComponent _iswa;
 

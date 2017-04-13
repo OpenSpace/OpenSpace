@@ -37,6 +37,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/settingsengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
@@ -174,6 +175,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/settingsengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/sgctwindowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/windowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/controller.h
