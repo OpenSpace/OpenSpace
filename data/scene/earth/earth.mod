@@ -49,6 +49,7 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
+        Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
@@ -79,7 +80,7 @@ return {
             -- SampleInterval = 3600
             Period = 365.242,
             Resolution = 1000,
-            Tag = "defaultTrails"
+            Tag = {"planetTrail_solarSystem", "planetTrail_terrestrial"}
         },
         GuiName = "/Solar/EarthTrail",
     },

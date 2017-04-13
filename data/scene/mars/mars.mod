@@ -35,11 +35,16 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
+        Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_MARS",
                 DestinationFrame = "GALACTIC",
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
             },
         }
     },
@@ -57,7 +62,7 @@ return {
             Color = { 0.814, 0.305, 0.220 },
             Period = 686.973,
             Resolution = 1000,
-            Tag = "defaultTrails"
+            Tag = {"planetTrail_solarSystem", "planetTrail_terrestrial"}
         }
     }
 }

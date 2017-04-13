@@ -35,6 +35,7 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
+        Tag = "planet_solarSystem",
         Transform = {
             Translation = {
                 Type = "StaticTranslation",
@@ -66,6 +67,6 @@ return {
             Period = 4330.595,
             Resolution = 1000,
         },
-        Tag = "defaultTrails"
+        Tag = "planetTrail_solarSystem"
     }
 }

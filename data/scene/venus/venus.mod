@@ -36,10 +36,17 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
-        Rotation = {
-            Type = "SpiceRotation",
-            Frame = "IAU_VENUS",
-            Reference = "GALACTIC"
+        Tag = {"planet_solarSystem", "planet_terrestrial"},
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_VENUS",
+                DestinationFrame = "GALACTIC"
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
         },
     },
 
@@ -57,7 +64,7 @@ return {
             Color = { 1.0, 0.5, 0.2 },
             Period = 224.695,
             Resolution = 1000,
-            Tag = "defaultTrails"        
+            Tag = {"planetTrail_solarSystem", "planetTrail_terrestrial"}
         }
     }
 }

@@ -37,6 +37,7 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
+        Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
@@ -63,7 +64,7 @@ return {
             Color = {0.6, 0.5, 0.5 },
             Period = 87.968,
             Resolution = 100,
-            Tag = "defaultTrails"
+            Tag = {"planetTrail_solarSystem", "planetTrail_terrestrial"}
         }
     }
 }
