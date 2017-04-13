@@ -22,67 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__
-
-#include <modules/onscreengui/include/guicomponent.h>
-#include <modules/onscreengui/include/guihelpcomponent.h>
-#include <modules/onscreengui/include/guiperformancecomponent.h>
-#include <modules/onscreengui/include/guipropertycomponent.h>
-#include <modules/onscreengui/include/guiorigincomponent.h>
-#include <modules/onscreengui/include/guitimecomponent.h>
-#include <modules/onscreengui/include/guiiswacomponent.h>
-#include <modules/onscreengui/include/guiparallelcomponent.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/properties/property.h>
-
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
+#include <openspace/engine/virtualpropertymanager.h>
 
 namespace openspace {
-namespace gui {
 
-class GUI : public GuiComponent {
-public:
-    GUI();
+VirtualPropertyManager::VirtualPropertyManager()
+    : properties::PropertyOwner("")
+{
 
-    void initialize();
-    void deinitialize();
+}
 
-    void initializeGL();
-    void deinitializeGL();
+void VirtualPropertyManager::addProperty(std::unique_ptr<properties::Property> prop) {
+    // PropertyOwner does not take the ownership of the pointer
+    properties::PropertyOwner::addProperty(prop.get());
 
-    bool mouseButtonCallback(MouseButton button, MouseAction action);
-    bool mouseWheelCallback(double position);
-    bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
-    bool charCallback(unsigned int character, KeyModifier modifier);
+    // So we store the pointer locally instead
+    _properties.push_back(std::move(prop));
+}
 
-    void startFrame(float deltaTime, const glm::vec2& windowSize,
-        const glm::vec2& dpiScaling, const glm::vec2& mousePos, uint32_t mouseButtons);
-    void endFrame();
+void VirtualPropertyManager::removeProperty(properties::Property* prop) {
+    properties::PropertyOwner::removeProperty(prop);
+    _properties.erase(
+        std::remove_if(
+            _properties.begin(),
+            _properties.end(),
+            [prop](const std::unique_ptr<properties::Property>& p) {
+                return p.get() == prop;
+            }
+        ),
+        _properties.end()
+    );
+}
 
-    void render();
 
-//protected:
-    GuiHelpComponent _help;
-    GuiOriginComponent _origin;
-    GuiPerformanceComponent _performance;
-    GuiPropertyComponent _globalProperty;
-    GuiPropertyComponent _property;
-    GuiPropertyComponent _screenSpaceProperty;
-    GuiPropertyComponent _virtualProperty;
-    GuiTimeComponent _time;
-    GuiIswaComponent _iswa;
-    GuiParallelComponent _parallel;
-
-private:
-    void renderAndUpdatePropertyVisibility();
-
-    properties::Property::Visibility _currentVisibility;
-
-};
-
-} // namespace gui
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__

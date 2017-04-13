@@ -34,6 +34,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/settingsengine.h>
 #include <openspace/engine/syncengine.h>
+#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/luaconsole.h>
@@ -136,6 +137,7 @@ OpenSpaceEngine::OpenSpaceEngine(
     , _parallelConnection(std::make_unique<ParallelConnection>())
     , _windowWrapper(std::move(windowWrapper))
     , _globalPropertyNamespace(new properties::PropertyOwner(""))
+    , _virtualPropertyManager(new VirtualPropertyManager)
     , _scheduledSceneSwitch(false)
     , _scenePath("")
     , _runTime(0.0)
@@ -1176,6 +1178,24 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 &luascriptfunctions::writeDocumentation,
                 "",
                 "Writes out documentation files"
+            },
+            {
+                "addVirtualProperty",
+                &luascriptfunctions::addVirtualProperty,
+                "type, name, identifier, [value, minimumValue, maximumValue]",
+                "Adds a virtual property that will set a group of properties"
+            },
+            {
+                "removeVirtualProperty",
+                &luascriptfunctions::removeVirtualProperty,
+                "string",
+                "Removes a previously added virtual property"
+            },
+            {
+                "removeAllVirtualProperties",
+                &luascriptfunctions::removeAllVirtualProperties,
+                "",
+                "Remove all registered virtual properties"
             }
         }
     };
@@ -1319,6 +1339,15 @@ properties::PropertyOwner& OpenSpaceEngine::globalPropertyOwner() {
         "Global Property Namespace must not be nullptr"
     );
     return *_globalPropertyNamespace;
+}
+
+VirtualPropertyManager& OpenSpaceEngine::virtualPropertyManager() {
+    ghoul_assert(
+        _virtualPropertyManager,
+        "Virtual Property Manager must not be nullptr"
+    );
+
+    return *_virtualPropertyManager;
 }
 
 ScriptEngine& OpenSpaceEngine::scriptEngine() {

@@ -25,32 +25,71 @@
 #ifndef __OPENSPACE_MODULE_ONSCREENGUI___RENDERPROPERTIES___H__
 #define __OPENSPACE_MODULE_ONSCREENGUI___RENDERPROPERTIES___H__
 
+#include <ghoul/misc/boolean.h>
+
 #include <string>
 
 namespace openspace {
 
 namespace properties {
     class Property;
-}
+} // namespace properties
 
-void executeScript(const std::string& id, const std::string& value);
-void renderBoolProperty(properties::Property* prop, const std::string& ownerName);
-void renderOptionProperty(properties::Property* prop, const std::string& ownerName);
-void renderSelectionProperty(properties::Property* prop, const std::string& ownerName);
-void renderStringProperty(properties::Property* prop, const std::string& ownerName);
-void renderDoubleProperty(properties::Property* prop, const std::string& ownerName);
-void renderIntProperty(properties::Property* prop, const std::string& ownerName);
-void renderIVec2Property(properties::Property* prop, const std::string& ownerName);
-void renderIVec3Property(properties::Property* prop, const std::string& ownerName);
-void renderIVec4Property(properties::Property* prop, const std::string& ownerName);
-void renderFloatProperty(properties::Property* prop, const std::string& ownerName);
-void renderVec2Property(properties::Property* prop, const std::string& ownerName);
-void renderVec3Property(properties::Property* prop, const std::string& ownerName);
-void renderVec4Property(properties::Property* prop, const std::string& ownerName);
-void renderDVec2Property(properties::Property* prop, const std::string& ownerName);
-void renderDVec3Property(properties::Property* prop, const std::string& ownerName);
-void renderDVec4Property(properties::Property* prop, const std::string& ownerName);
-void renderTriggerProperty(properties::Property* prop, const std::string& ownerName);
+using IsRegularProperty = ghoul::Boolean;
+
+void executeScript(const std::string& id, const std::string& value,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderBoolProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderOptionProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderSelectionProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderStringProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderDoubleProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderIntProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderIVec2Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderIVec3Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderIVec4Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderFloatProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderVec2Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderVec3Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderVec4Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderDVec2Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderDVec3Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderDVec4Property(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
+
+void renderTriggerProperty(properties::Property* prop, const std::string& ownerName,
+    IsRegularProperty isRegular = IsRegularProperty::Yes);
 
 } // namespace openspace
 

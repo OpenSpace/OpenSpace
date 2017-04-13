@@ -64,6 +64,7 @@ const std::string SceneGraphNode::RootNodeName = "Root";
 const std::string SceneGraphNode::KeyName = "Name";
 const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
+const std::string SceneGraphNode::KeyTag = "Tag";
 
 std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary){
     openspace::documentation::testSpecificationAndThrow(
@@ -133,6 +134,25 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
         }
         result->addPropertySubOwner(result->_transform.scale.get());
         LDEBUG("Successfully created scale for '" << result->name() << "'");
+    }
+
+    if (dictionary.hasKey(KeyTag)) {
+        if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
+            std::string tagName = dictionary.value<std::string>(KeyTag);
+            if (!tagName.empty()) {
+                result->addTag(std::move(tagName));
+            }
+        } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+            ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
+            std::vector<std::string> keys = tagNames.keys();
+            std::string tagName;
+            for (const std::string& key : keys) {
+                tagName = tagNames.value<std::string>(key);
+                if (!tagName.empty()) {
+                    result->addTag(std::move(tagName));
+                }
+            }
+        }
     }
 
     LDEBUG("Successfully created SceneGraphNode '"
