@@ -386,7 +386,7 @@ documentation::Documentation ConfigurationManager::Documentation() {
                     Optional::No
                 },
                 {
-                    ConfigurationManager::Synchronous,
+                    ConfigurationManager::PartSynchronous,
                     new BoolVerifier,
                     "Determines whether the OpenGL debug callbacks are performed "
                     "synchronously. If set to <True> the callbacks are in the same thead "
