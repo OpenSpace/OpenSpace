@@ -35,10 +35,23 @@
 using namespace ghoul::opengl;
 
 namespace {
-    static const std::string _loggerCat = "SpacecraftImageryManager";
+    const std::string _loggerCat = "SpacecraftImageryManager";
    // static const std::unordered_set<std::string> _spacecraftTypes = {"SDO"};
     //static std::map<std::string, std::unique_ptr<Texture>> imageFiles; // Spacecraft -> Imagebuffer
-    static std::vector<std::string> _headerKeywords = {"EXPTIME", "BITPIX", "DATAVALS"};
+    std::vector<std::string> _headerKeywords = {"EXPTIME", "BITPIX", "DATAVALS"};
+
+    // const std::unordered_map<int, std::pair<int, int>> SDOclips = {
+    //     {1600, {0.f,   4000.f},
+    //     {1700, {0.f,   10000.f},
+    //     {4500, {0.f,   26000.f},
+    //     {94,   {1.5f,     50.f},
+    //     {131,  {7.f,    1200.f},
+    //     {171,  {10.f,  12000.f},
+    //     {193,  {120.f, 12000.f},
+    //     {211,  {30.f,  13000.f},
+    //     {304,  {15.f,   3000.f},
+    //     {335,  {3.5f,   1000.f}
+    // };
 }
 
 namespace openspace {
@@ -49,61 +62,71 @@ void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imag
     if (type == "SDO") {
         // 1600, 1700, 4500, 94, 131, 171, 193, 211, 304, 335 // (1600, 1700, 4500)
         //const std::vector<float> normtimes = {2.99911f, 1.00026f, 1.00026f, 4.99803f, 6.99685f, 4.99803f, 2.99950f, 4.99801f, 4.99941f, 6.99734f};
-        //const std::vector<float> clipmins = {0.f, 0.f, 0.f, 1.5f, 7.f, 10.f, 120.f, 30.f, 15.f, 3.5f};
+        //const std::vector<float> clipmins =           {0.f, 0.f, 0.f, 1.5f, 7.f, 10.f, 120.f, 30.f, 15.f, 3.5f};
         //const std::vector<float> clipmax = {4000.f, 10000.f, 26000.f, 50.f, 1200.f, 12000.f, 12000.f, 13000.f, 3000.f, 1000.f};
-        const std::vector<float> clipmins = {20.f, 220.f, 4000.f, 0.1f, 0.7f, 10.f, 20.f, 7.f, 0.2f, 0.4f};
-        const std::vector<float> clipmax = {400.f, 5000.f, 20000.f, 30.f, 500.f, 2000.f, 2500.f, 1500.f, 150.f, 80.f};
+        //const std::vector<float> clipmins = {20.f, 220.f, 4000.f, 0.1f, 0.7f, 10.f, 20.f, 7.f, 0.2f, 0.4f};
+        //const std::vector<float> clipmax = {400.f, 5000.f, 20000.f, 30.f, 500.f, 2000.f, 2500.f, 1500.f, 150.f, 80.f};
         //const float normtime = normtimes[channel];
 
         for (auto& dataObject : imageData) {
-            std::valarray<float>& data = dataObject.contents;
+            std::valarray<IMG_PRECISION>& data = dataObject.contents;
 
-            const float& exptime = dataObject.metaData.expTime;
-            assert(exptime > 0.f && exptime < 10.f);
+            // const float& exptime = dataObject.metaData.expTime;
+            // assert(exptime > 0.f && exptime < 10.f);
 
-            //data = data * (normtimes[channel] / exptime);
-            data = data / (1.f * exptime);
+            // //data = data * (normtimes[channel] / exptime);
+            // data = data / (1.f * exptime);
 
-            // Just copied from IDL, does this make any sense at all?
-            data[0] = 0.f;
-            data[1] = 500000.f;
+            // // Just copied from IDL, does this make any sense at all?
+            // data[0] = 0.f;
+            // data[1] = 500000.f;
 
-            LDEBUG("Loading channel: " << channel);
-            LDEBUG("Max data: " << data.max());
-            LDEBUG("MIN data: " << data.min());
-            LDEBUG("Exptime " << exptime);
+            // LDEBUG("Loading channel: " << channel);
+            // LDEBUG("Max data: " << data.max());
+            // LDEBUG("MIN data: " << data.min());
+            // LDEBUG("Exptime " << exptime);
 
-            // TODO(mnoven) : Show wavelengths 1700, 4500, 1600? Where to get?
-            if (channel == 0 || channel == 1 || channel == 2) {
-                data = 0.f;
-                return;
-            }
-            if (channel == 5) { // 171
-                // TODO(mnoven): Make this prettier and optimize
-                data -= 5;
-                const float datamax = data.max();
-                // TODO(mnoven): Use std::clamp in C++17
-                std::for_each(begin(data), end(data), [&datamax](float& val) {
-                    val = std::min(datamax, std::max(val, 0.01f));
-                });
+            // // TODO(mnoven) : Show wavelengths 1700, 4500, 1600? Where to get?
+            // if (channel == 0 || channel == 1 || channel == 2) {
+            //     data = 0.f;
+            //     return;
+            // }
+            // if (channel == 5) { // 171
+            //     // TODO(mnoven): Make this prettier and optimize
+            //     data -= 5;
+            //     const float datamax = data.max();
+            //     // TODO(mnoven): Use std::clamp in C++17
+            //     std::for_each(begin(data), end(data), [&datamax](float& val) {
+            //         val = std::min(datamax, std::max(val, 0.01f));
+            //     });
 
-                data = std::pow(data, 0.35f);
-                std::for_each(begin(data), end(data), [](float& val) {
-                    val = std::min(13.f, std::max(val, 0.01f));
-                });
-            } else {
-                const float cmin = clipmins[channel];
-                const float cmax = clipmax[channel];
+            //     data = std::pow(data, 0.35f);
+            //     std::for_each(begin(data), end(data), [](float& val) {
+            //         val = std::min(13.f, std::max(val, 0.01f));
+            //     });
+            // } else {
+            //     const float cmin = clipmins[channel];
+            //     const float cmax = clipmax[channel];
 
-                // TODO(mnoven): Use std::clamp in C++17
-                std::for_each(begin(data), end(data), [&cmin, &cmax](float& val) {
-                    val = std::min(cmax, std::max(val, cmin));
-                });
+            //     // TODO(mnoven): Use std::clamp in C++17
+            //     std::for_each(begin(data), end(data), [&cmin, &cmax](float& val) {
+            //         val = std::min(cmax, std::max(val, cmin));
+            //     });
 
-                data = log10(data);
-            }
+            //     data = log10(data);
+            // }
             // Scale values to [0, 1]
-            data = (data - data.min()) / (data.max() - data.min());
+           // float min = data.min();
+            //float max = data.max();
+            //data = (data - min) / (max - min);
+
+            LDEBUG("Min fits" << dataObject.metaData.min);
+            LDEBUG("Max fits" << dataObject.metaData.max);
+
+            // TODO(mnoven): Remove
+            assert(data.min() == dataObject.metaData.min);
+            assert(data.max() == dataObject.metaData.max);
+
         }
     } else {
         LERROR("Couldn't find any spacecraft with type " << type);
@@ -213,11 +236,16 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
 
                     FitsFileReader::open(relativePath);
                     ImageDataObject im;
-                    im.contents = FitsFileReader::readImage();
+                    im.contents = FitsFileReader::readImage<IMG_PRECISION>();
 
                     ImageMetadata metaData;
                     metaData.filename = relativePath;
                     metaData.expTime = FitsFileReader::readHeaderValue<float>(std::string("EXPTIME"));
+                    metaData.waveLength = FitsFileReader::readHeaderValue<int>(std::string("WAVELNTH"));
+
+                    metaData.min = FitsFileReader::readHeaderValue<int>(std::string("DATAMIN"));
+                    metaData.max = FitsFileReader::readHeaderValue<int>(std::string("DATAMAX"));
+
                     im.metaData = metaData;
 
                     //TODO(mnoven): CCfits has method for loading sequence of images - use that instead
