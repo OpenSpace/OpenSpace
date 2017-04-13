@@ -915,15 +915,14 @@ void OpenSpaceEngine::initializeGL() {
         }
 
         if (debug) {
+            using namespace ghoul::opengl::debug;
+
             bool synchronous = true;
             if (dict.hasKey(ConfigurationManager::PartSynchronous)) {
                 synchronous = dict.value<bool>(ConfigurationManager::PartSynchronous);
             }
 
-            ghoul::opengl::debug::setDebugOutput(
-                ghoul::opengl::debug::DebugOutput(debug),
-                ghoul::opengl::debug::SynchronousOutput(synchronous)
-            );
+            setDebugOutput(DebugOutput(debug), SynchronousOutput(synchronous));
 
 
             if (dict.hasKey(ConfigurationManager::PartFilterIdentifier)) {
@@ -950,11 +949,11 @@ void OpenSpaceEngine::initializeGL() {
                         ConfigurationManager::PartFilterIdentifierType
                     );
 
-                    ghoul::opengl::debug::setDebugMessageControl(
-                        ghoul::from_string<ghoul::opengl::debug::Source>(s),
-                        ghoul::from_string<ghoul::opengl::debug::Type>(t),
+                    setDebugMessageControl(
+                        ghoul::from_string<Source>(s),
+                        ghoul::from_string<Type>(t),
                         { identifier },
-                        ghoul::opengl::debug::Enabled::No
+                        Enabled::No
                     );
                 }
             }
@@ -969,41 +968,41 @@ void OpenSpaceEngine::initializeGL() {
                         std::to_string(i)
                     );
 
-                    ghoul::opengl::debug::setDebugMessageControl(
-                        ghoul::opengl::debug::Source::DontCare,
-                        ghoul::opengl::debug::Type::DontCare,
-                        ghoul::from_string<ghoul::opengl::debug::Severity>(severity),
-                        ghoul::opengl::debug::Enabled::No
+                    setDebugMessageControl(
+                        Source::DontCare,
+                        Type::DontCare,
+                        ghoul::from_string<Severity>(severity),
+                        Enabled::No
                     );
                 }
             }
 
-            // Maybe not necessary? ---abock
-            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-            auto callback = [](GLenum source, GLenum type, GLuint id, GLenum severity,
-                GLsizei length, const GLchar* message, GLvoid* userParam) -> void
-            {
+            auto callback = [](Source source, Type type, Severity severity,
+                unsigned int id, std::string message) -> void
+            {               
                 const std::string s = std::to_string(source);
                 const std::string t = std::to_string(type);
-                
+
                 const std::string category =
                     "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";
                 switch (severity) {
-                    case GL_DEBUG_SEVERITY_HIGH:
+                    case Severity::High:
                         LERRORC(category, std::string(message));
                         break;
-                    case GL_DEBUG_SEVERITY_MEDIUM:
+                    case Severity::Medium:
                         LWARNINGC(category, std::string(message));
                         break;
-                    case GL_DEBUG_SEVERITY_LOW:
+                    case Severity::Low:
                         LINFOC(category, std::string(message));
                         break;
-                    case GL_DEBUG_SEVERITY_NOTIFICATION:
+                    case Severity::Notification:
                         LDEBUGC(category, std::string(message));
                         break;
+                    default:
+                        ghoul_assert(false, "Missing case label");
                 }
             };
-            glDebugMessageCallback(callback, nullptr);
+            ghoul::opengl::debug::setDebugCallback(callback);
         }
     }
 
