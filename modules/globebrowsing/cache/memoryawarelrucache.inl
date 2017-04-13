@@ -26,57 +26,75 @@
 
 namespace openspace {
 namespace globebrowsing {
+namespace cache {
     
-template<typename KeyType, typename ValueType>
-LRUCache<KeyType, ValueType>::LRUCache(size_t size)
-    : _cacheSize(size)
+template<typename KeyType, typename ValueType, typename HasherType>
+MemoryAwareLRUCache<KeyType, ValueType, HasherType>::MemoryAwareLRUCache(size_t maximumSize)
+    : _maximumCacheSize(maximumSize)
+    , _cacheSize(0)
 {}
 
-template<typename KeyType, typename ValueType>
-void LRUCache<KeyType, ValueType>::clear() {
-    _itemList.erase(_itemList.begin(), _itemList.end());
-    _itemMap.erase(_itemMap.begin(), _itemMap.end());
+template<typename KeyType, typename ValueType, typename HasherType>
+void MemoryAwareLRUCache<KeyType, ValueType, HasherType>::clear() {
+    _itemList.clear();
+    _itemMap.clear();
+    _cacheSize = 0;
 }
 
-template<typename KeyType, typename ValueType>
-void LRUCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value) {
+template<typename KeyType, typename ValueType, typename HasherType>
+void MemoryAwareLRUCache<KeyType, ValueType, HasherType>::put(const KeyType& key, const ValueType& value) {
     auto it = _itemMap.find(key);
     if (it != _itemMap.end()) {
+        _cacheSize -= it->second->second.memoryImpact();
         _itemList.erase(it->second);
         _itemMap.erase(it);
     }
-    _itemList.push_front(std::make_pair(key, value));
-    _itemMap.insert(std::make_pair(key, _itemList.begin()));
+    _itemList.emplace_front(key, value);
+    _itemMap.emplace(key, _itemList.begin());
+    _cacheSize += _itemList.begin()->second.memoryImpact();
     clean();
 }
 
-template<typename KeyType, typename ValueType>
-bool LRUCache<KeyType, ValueType>::exist(const KeyType& key) const {
+template<typename KeyType, typename ValueType, typename HasherType>
+bool MemoryAwareLRUCache<KeyType, ValueType, HasherType>::exist(const KeyType& key) const {
     return _itemMap.count(key) > 0;
 }
 
-template<typename KeyType, typename ValueType>
-ValueType LRUCache<KeyType, ValueType>::get(const KeyType& key) {
+template<typename KeyType, typename ValueType, typename HasherType>
+ValueType MemoryAwareLRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
     //ghoul_assert(exist(key), "Key " << key << " must exist");
-    auto it = _itemMap.find(key);
+    auto it = _itemMap.at(key);
     // Move list iterator pointing to value
-    _itemList.splice(_itemList.begin(), _itemList, it->second);
-    return it->second->second;
+    _itemList.splice(_itemList.begin(), _itemList, it);
+    return it->second;
 }
 
-template<typename KeyType, typename ValueType>
-size_t LRUCache<KeyType, ValueType>::size() const {
-    return _itemMap.size();
+template<typename KeyType, typename ValueType, typename HasherType>
+size_t MemoryAwareLRUCache<KeyType, ValueType, HasherType>::size() const {
+    return _cacheSize;
 }
 
-template<typename KeyType, typename ValueType>
-void LRUCache<KeyType, ValueType>::clean() {
-    while (_itemMap.size() > _cacheSize) {
-        auto last_it = _itemList.end(); last_it--;
+template<typename KeyType, typename ValueType, typename HasherType>
+size_t MemoryAwareLRUCache<KeyType, ValueType, HasherType>::maximumSize() const {
+    return _maximumCacheSize;
+}
+
+template<typename KeyType, typename ValueType, typename HasherType>
+void MemoryAwareLRUCache<KeyType, ValueType, HasherType>::setMaximumSize(size_t maximumSize) {
+    _maximumCacheSize = maximumSize;
+}
+
+template<typename KeyType, typename ValueType, typename HasherType>
+void MemoryAwareLRUCache<KeyType, ValueType, HasherType>::clean() {
+    while (_cacheSize > _maximumCacheSize) {
+        auto last_it = _itemList.end();
+        last_it--;
         _itemMap.erase(last_it->first);
+        _cacheSize -= last_it->second.memoryImpact();
         _itemList.pop_back();
     }
 }
 
+} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace

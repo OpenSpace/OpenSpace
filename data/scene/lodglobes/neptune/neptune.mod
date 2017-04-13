@@ -40,7 +40,7 @@ return {
                         Name = "Texture",
                         FilePath = "textures/neptune.jpg",
                         Enabled = true,
-                        MinimumPixelSize = 256,
+                        TilePixelSize = 256,
                     },
                 },
                 GrayScaleLayers = { },
