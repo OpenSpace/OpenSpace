@@ -227,6 +227,7 @@ GUI::GUI()
     , _globalProperty("Global")
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
+    , _virtualProperty("Virtual Properties")
     , _currentVisibility(properties::Property::Visibility::All)
 {
     addPropertySubOwner(_help);
@@ -235,6 +236,7 @@ GUI::GUI()
     addPropertySubOwner(_globalProperty);
     addPropertySubOwner(_property);
     addPropertySubOwner(_screenSpaceProperty);
+    addPropertySubOwner(_virtualProperty);
     addPropertySubOwner(_time);
     addPropertySubOwner(_iswa);
 }
@@ -312,8 +314,12 @@ void GUI::initialize() {
     style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.0f);
 
     _property.initialize();
+    _property.setHasRegularProperties(true);
     _screenSpaceProperty.initialize();
+    _screenSpaceProperty.setHasRegularProperties(true);
     _globalProperty.initialize();
+    _globalProperty.setHasRegularProperties(true);
+    _virtualProperty.initialize();
     _performance.initialize();
     _help.initialize();
     _iswa.initialize(); 
@@ -327,6 +333,7 @@ void GUI::deinitialize() {
     _performance.deinitialize();
     _globalProperty.deinitialize();
     _screenSpaceProperty.deinitialize();
+    _virtualProperty.deinitialize();
     _property.deinitialize();
 
     delete iniFileBuffer;
@@ -465,6 +472,10 @@ void GUI::endFrame() {
             _screenSpaceProperty.render();
         }
 
+        if (_virtualProperty.isEnabled()) {
+            _virtualProperty.render();
+        }
+
         if (_help.isEnabled()) {
             _help.render();
         }
@@ -559,6 +570,10 @@ void GUI::render() {
     ImGui::Checkbox("Global Properties", &globalProperty);
     _globalProperty.setEnabled(globalProperty);
 
+    bool virtualProperty = _virtualProperty.isEnabled();
+    ImGui::Checkbox("Virtual Properties", &virtualProperty);
+    _virtualProperty.setEnabled(virtualProperty);
+
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     bool iswa = _iswa.isEnabled();
     ImGui::Checkbox("iSWA", &iswa);
@@ -617,6 +632,7 @@ void GUI::renderAndUpdatePropertyVisibility() {
     _globalProperty.setVisibility(_currentVisibility);
     _property.setVisibility(_currentVisibility);
     _screenSpaceProperty.setVisibility(_currentVisibility);
+    _virtualProperty.setVisibility(_currentVisibility);
 }
 
 
