@@ -78,14 +78,14 @@ int unloadKernel(lua_State* L) {
     if (isString) {
         std::string argument = lua_tostring(L, -1);
         SpiceManager::ref().unloadKernel(argument);
-        return 0;
     }
 
     if (isNumber) {
         unsigned int argument = static_cast<unsigned int>(lua_tonumber(L, -1));
         SpiceManager::ref().unloadKernel(argument);
-        return 0;
     }
+
+    return 0;
 }
 
 } // luascriptfunctions

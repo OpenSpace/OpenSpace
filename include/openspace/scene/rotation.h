@@ -27,13 +27,15 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/util/updatestructures.h>
+#include <ghoul/glm.h>
 
 #include <memory>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
+struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
@@ -42,7 +44,7 @@ public:
     static std::unique_ptr<Rotation> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     Rotation(const ghoul::Dictionary& dictionary);
-    virtual ~Rotation();
+    virtual ~Rotation() = default;
     virtual bool initialize();
     const glm::dmat3& matrix() const;
     virtual void update(const UpdateData& data);

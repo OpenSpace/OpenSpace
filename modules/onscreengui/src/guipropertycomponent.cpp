@@ -42,18 +42,18 @@ namespace {
 int nVisibleProperties(const std::vector<properties::Property*>& properties,
     properties::Property::Visibility visibility)
 {
-    return std::count_if(
+    return static_cast<int>(std::count_if(
         properties.begin(),
         properties.end(),
         [visibility](properties::Property* p) {
-        using V = properties::Property::Visibility;
-        return
-            static_cast<std::underlying_type_t<V>>(visibility) >=
-            static_cast<std::underlying_type_t<V>>(p->visibility());
-    }
-    );
+            using V = properties::Property::Visibility;
+            return
+                static_cast<std::underlying_type_t<V>>(visibility) >=
+                static_cast<std::underlying_type_t<V>>(p->visibility());
+        }
+    ));
 }
-}
+} // namespace
 
 namespace gui {
 
