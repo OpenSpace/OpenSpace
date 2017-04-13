@@ -29,8 +29,8 @@ namespace openspace {
 namespace globebrowsing {
 
 struct TileDepthTransform {
-    float depthScale = 1.0f;
-    float depthOffset = 0.0f;
+    float depthScale;
+    float depthOffset;
 };
 
 } // namespace globebrowsing

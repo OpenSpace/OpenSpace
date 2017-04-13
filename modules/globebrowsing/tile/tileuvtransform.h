@@ -31,8 +31,8 @@ namespace openspace {
 namespace globebrowsing {
 
 struct TileUvTransform {
-    glm::vec2 uvOffset = glm::vec2(0.0f, 0.0f);
-    glm::vec2 uvScale = glm::vec2(1.0f, 1.0f);
+    glm::vec2 uvOffset;
+    glm::vec2 uvScale;
 };
 
 } // namespace globebrowsing

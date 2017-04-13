@@ -34,12 +34,6 @@ namespace openspace {
 namespace globebrowsing {
 
 struct ChunkTile {
-  Tile tile = Tile::TileUnavailable;
-  TileUvTransform uvTransform;
-  TileDepthTransform depthTransform;
-};
-/*
-struct ChunkTile {
 	ChunkTile() : tile(Tile::TileUnavailable) {};
 	ChunkTile(Tile tile, TileUvTransform uvTransform, TileDepthTransform depthTransform) :
 		tile(tile),
@@ -50,7 +44,7 @@ struct ChunkTile {
     TileUvTransform uvTransform;
     TileDepthTransform depthTransform;
 };
-*/
+
 using ChunkTilePile = std::vector<ChunkTile>;
 
 } // namespace globebrowsing
