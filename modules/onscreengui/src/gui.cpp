@@ -493,24 +493,43 @@ bool GUI::mouseWheelCallback(double position) {
 }
 
 bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
-    ImGuiIO& io = ImGui::GetIO();
-    bool consumeEvent = io.WantCaptureKeyboard;
-    if (consumeEvent) {
-        int keyIndex = static_cast<int>(key);
-        if (keyIndex < 0) {
-            LERROR("Pressed key of index '" << keyIndex << "' was negative");
-        }
-        else {
-            if (action == KeyAction::Press)
-                io.KeysDown[keyIndex] = true;
-            if (action == KeyAction::Release)
-                io.KeysDown[keyIndex] = false;
-        }
-
-        io.KeyShift = hasKeyModifier(modifier, KeyModifier::Shift);
-        io.KeyCtrl = hasKeyModifier(modifier, KeyModifier::Control);
-        io.KeyAlt = hasKeyModifier(modifier, KeyModifier::Alt);
+    const int keyIndex = static_cast<int>(key);
+    if (keyIndex < 0) {
+        LERROR("Key of index '" << keyIndex << "' was negative");
+        return false;
     }
+
+    const bool hasShift = hasKeyModifier(modifier, KeyModifier::Shift);
+    const bool hasCtrl = hasKeyModifier(modifier, KeyModifier::Control);
+    const bool hasAlt = hasKeyModifier(modifier, KeyModifier::Alt);
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    const bool consumeEvent = io.WantCaptureKeyboard;
+    if (consumeEvent) {
+        if (action == KeyAction::Press) {
+            io.KeysDown[keyIndex] = true; 
+        }
+        io.KeyShift = hasShift;
+        io.KeyCtrl = hasCtrl;
+        io.KeyAlt = hasAlt;
+    }
+
+    // Even if the event is not consumed,
+    // set keys and modifiers to false when they are released.
+    if (action == KeyAction::Release) {
+        io.KeysDown[keyIndex] = false;
+    }
+    if (!hasShift) {
+        io.KeyShift = false;
+    }
+    if (!hasCtrl) {
+        io.KeyCtrl = false;
+    }
+    if (!hasAlt) {
+        io.KeyAlt = false;
+    }
+
     return consumeEvent;
 }
 
@@ -592,7 +611,7 @@ void GUI::renderAndUpdatePropertyVisibility() {
 
     // Array is sorted by importance
     std::array<const char*, 4> items = {  "None", "User", "Developer", "All"};
-    ImGui::Combo("PropertyVisibility", &t, items.data(), items.size());
+    ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
 
     _currentVisibility = static_cast<V>(t);
     _globalProperty.setVisibility(_currentVisibility);

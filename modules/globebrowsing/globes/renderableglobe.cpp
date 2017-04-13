@@ -61,11 +61,12 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty("showHeightIntensities", "show height intensities", false),
         BoolProperty("performFrustumCulling", "perform frustum culling", true),
         BoolProperty("performHorizonCulling", "perform horizon culling", true),
-        BoolProperty("levelByProjectedAreaElseDistance", "level by projected area (else distance)",false),
+        BoolProperty("levelByProjectedAreaElseDistance", "level by projected area (else distance)", true),
         BoolProperty("resetTileProviders", "reset tile providers", false),
         BoolProperty("toggleEnabledEveryFrame", "toggle enabled every frame", false),
         BoolProperty("collectStats", "collect stats", false),
-        BoolProperty("onlyModelSpaceRendering", "Only Model Space Rendering", false)
+        BoolProperty("limitLevelByAvailableData", "Limit level by available data", true),
+        IntProperty("modelSpaceRenderingCutoffLevel", "Model Space Rendering Cutoff Level", 10, 1, 22)
     })
     , _texturePropertyOwner("Textures")
 {
@@ -84,16 +85,21 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
     int patchSegments = patchSegmentsd;
         
-    dictionary.getValue(keyInteractionDepthBelowEllipsoid,
-        _interactionDepthBelowEllipsoid);
+    if (!dictionary.getValue(keyInteractionDepthBelowEllipsoid,
+        _interactionDepthBelowEllipsoid)) {
+        _interactionDepthBelowEllipsoid = 0;
+    }
+
     float cameraMinHeight;
     dictionary.getValue(keyCameraMinHeight, cameraMinHeight);
     _generalProperties.cameraMinHeight.set(cameraMinHeight);
 
     // Init layer manager
     ghoul::Dictionary layersDictionary;
-    if (!dictionary.getValue(keyLayers, layersDictionary))
-        throw ghoul::RuntimeError(std::string(keyLayers) + " must be specified specified!");
+    if (!dictionary.getValue(keyLayers, layersDictionary)) {
+        throw ghoul::RuntimeError(
+            std::string(keyLayers) + " must be specified specified!");
+    }
 
     _layerManager = std::make_shared<LayerManager>(layersDictionary);
 
@@ -127,8 +133,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
     _debugPropertyOwner.addProperty(_debugProperties.collectStats);
-    _debugPropertyOwner.addProperty(_debugProperties.onlyModelSpaceRendering);
-        
+    _debugPropertyOwner.addProperty(_debugProperties.limitLevelByAvailableData);
+    _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
+    
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager.get());
 }

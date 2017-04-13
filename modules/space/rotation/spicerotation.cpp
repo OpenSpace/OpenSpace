@@ -29,6 +29,7 @@
 
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
 
 namespace {
     const char* _loggerCat = "SpiceRotation";

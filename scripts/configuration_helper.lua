@@ -206,29 +206,44 @@ function generateScene(arg)
     if scene == nil then
         return ""
     else
-        local offset = ""
+        local offset = nil
         if scene["offset"] then
             local o = scene["offset"]
             offset = [[<Offset x="]]..o["x"]..[[" y="]]..o["y"]..[[" z="]]..o["z"]..[[" />]]
         end
 
-        local orientation = ""
+        local orientation = nil
         if scene["orientation"] then
             local o = scene["orientation"]
             orientation = [[<Orientation yaw="]]..o["yaw"]..[[" pitch="]]..o["pitch"]..[[" roll="]]..o["roll"]..[[" />]]
         end
 
-        local scale = ""
+        local scale = nil
         if scene["scale"] then
             scale = [[<Scale value="]] .. scene["scale"] .. [[" />]]
         end
 
-        return [[
-        <Scene>
-            ]]..offset..[[
-            ]]..orientation..[[
-            ]]..scale..[[
-        </Scale]]
+        local sceneString = "    <Scene>"
+        if offset then
+            sceneString = sceneString .. "\n        " .. offset .. "\n"
+        end
+        if orientation then
+            sceneString = sceneString .. "\n        " .. orientation .. "\n"
+        end
+        if scale then
+            sceneString = sceneString .. "\n        " .. scale .. "\n"
+        end
+
+        sceneString = sceneString .. "    </Scene>\n"
+
+        return sceneString
+
+    --     return [[
+    -- <Scene>
+    --     ]]..offset..[[
+    --     ]]..orientation..[[
+    --     ]]..scale..[[
+    -- </Scene>]]
     end
 end
 

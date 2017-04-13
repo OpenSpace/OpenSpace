@@ -86,4 +86,10 @@ void SyncEngine::removeSyncable(Syncable* syncable) {
     );
 }
 
+void SyncEngine::removeSyncables(const std::vector<Syncable*>& syncables) {
+    for (const auto& syncable : syncables) {
+        removeSyncable(syncable);
+    }
+}
+
 } // namespace openspace

@@ -25,13 +25,18 @@
 #ifndef __OPENSPACE_CORE___RENDERENGINE___H__
 #define __OPENSPACE_CORE___RENDERENGINE___H__
 
-#include <openspace/scripting/scriptengine.h>
-
+#include <openspace/performance/performancemanager.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/triggerproperty.h>
+
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/renderer.h>
+#include <openspace/rendering/screenspacerenderable.h>
+
+#include <openspace/scripting/scriptengine.h>
 
 #include <openspace/util/syncdata.h>
 
@@ -48,17 +53,11 @@ class SharedMemory;
 
 namespace openspace {
 
-namespace performance {
-class PerformanceManager;
-}
-
 // Forward declare to minimize dependencies
 class Camera;
 class SyncBuffer;
-
 class Scene;
-class Renderer;
-class RaycasterManager;
+class SceneManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
 
@@ -77,14 +76,15 @@ public:
     };
 
     RenderEngine();
-    ~RenderEngine();
+    ~RenderEngine() = default;
     
     void initialize();
     void initializeGL();
     void deinitialize();
 
-    void setSceneGraph(Scene* sceneGraph);
+    void setScene(Scene* scene);
     Scene* scene();
+    void updateScene();
 
     Camera* camera() const;
     Renderer* renderer() const;
@@ -93,7 +93,7 @@ public:
 
     // sgct wrapped functions
     
-    void updateSceneGraph();
+
     void updateShaderPrograms();
     void updateFade();
     void updateRenderer();
@@ -144,6 +144,11 @@ public:
     */
     void postRaycast(ghoul::opengl::ProgramObject& programObject);
 
+    /**
+     * Set the camera to use for rendering
+     */
+    void setCamera(Camera* camera);
+
 
     void setRendererFromString(const std::string& method);
 
@@ -181,9 +186,9 @@ private:
 
     void renderInformation();
 
-    Camera* _mainCamera;
-    Scene* _sceneGraph;
-    RaycasterManager* _raycasterManager;
+    Camera* _camera;
+    Scene* _scene;
+    std::unique_ptr<RaycasterManager> _raycasterManager;
 
     properties::BoolProperty _performanceMeasurements;
     std::unique_ptr<performance::PerformanceManager> _performanceManager;

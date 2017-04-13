@@ -46,9 +46,9 @@ BoxGeometry::~BoxGeometry() {
 
 bool BoxGeometry::initialize() {
     // Initialize and upload to GPU
-    float x = _size.x * 0.5;
-    float y = _size.y * 0.5;
-    float z = _size.z * 0.5;
+    float x = _size.x * 0.5f;
+    float y = _size.y * 0.5f;
+    float z = _size.z * 0.5f;
 
     const GLfloat vertices[] = {
         -x, -y,  z, // blue corner

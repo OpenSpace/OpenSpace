@@ -66,14 +66,14 @@ const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
 const std::string SceneGraphNode::KeyTag = "Tag";
 
-SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary){
+std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary){
     openspace::documentation::testSpecificationAndThrow(
         SceneGraphNode::Documentation(),
         dictionary,
         "SceneGraphNode"
     );
 
-    SceneGraphNode* result = new SceneGraphNode;
+    std::unique_ptr<SceneGraphNode> result = std::make_unique<SceneGraphNode>();
 
     std::string name = dictionary.value<std::string>(KeyName);
     result->setName(name);
@@ -88,7 +88,6 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         if (result->_renderable == nullptr) {
             LERROR("Failed to create renderable for SceneGraphNode '"
                    << result->name() << "'");
-            delete result;
             return nullptr;
         }
         result->addPropertySubOwner(result->_renderable.get());
@@ -103,7 +102,6 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         if (result->_transform.translation == nullptr) {
             LERROR("Failed to create ephemeris for SceneGraphNode '"
                 << result->name() << "'");
-            delete result;
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.translation.get());
@@ -118,7 +116,6 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         if (result->_transform.rotation == nullptr) {
             LERROR("Failed to create rotation for SceneGraphNode '"
                 << result->name() << "'");
-            delete result;
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.rotation.get());
@@ -133,7 +130,6 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
         if (result->_transform.scale == nullptr) {
             LERROR("Failed to create scale for SceneGraphNode '"
                 << result->name() << "'");
-            delete result;
             return nullptr;
         }
         result->addPropertySubOwner(result->_transform.scale.get());
@@ -161,12 +157,13 @@ SceneGraphNode* SceneGraphNode::createFromDictionary(const ghoul::Dictionary& di
 
     LDEBUG("Successfully created SceneGraphNode '"
                    << result->name() << "'");
-    return result;
+    return std::move(result);
 }
 
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner("")
     , _parent(nullptr)
+    , _scene(nullptr)
     , _transform {
         std::make_unique<StaticTranslation>(),
         std::make_unique<StaticRotation>(),
@@ -218,6 +215,20 @@ bool SceneGraphNode::deinitialize() {
     _boundingSphere = PowerScaledScalar(0.0, 0.0);
 
     return true;
+}
+
+void SceneGraphNode::traversePreOrder(std::function<void(SceneGraphNode*)> fn) {
+    fn(this);
+    for (std::unique_ptr<SceneGraphNode>& child : _children) {
+        child->traversePreOrder(fn);
+    }
+}
+
+void SceneGraphNode::traversePostOrder(std::function<void(SceneGraphNode*)> fn) {
+    for (std::unique_ptr<SceneGraphNode>& child : _children) {
+        child->traversePostOrder(fn);
+    }
+    fn(this);
 }
 
 void SceneGraphNode::update(const UpdateData& data) {
@@ -376,35 +387,134 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     //    child->render(newData);
 }
 
+void SceneGraphNode::setParent(SceneGraphNode& parent, UpdateScene updateScene) {
+    ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
+    ghoul_assert(
+        !updateScene || _scene == parent._scene,
+        "For the scene to be updated, this object must belong to the same scene as the parent"
+    );
+    ghoul_assert(
+        !updateScene || _parent->_scene == parent._scene,
+        "Old and new parent cannot belong to separate scenes"
+    );
 
-// not used anymore @AA
-//void SceneGraphNode::addNode(SceneGraphNode* child)
-//{
-//    // add a child node and set this node to be the parent
-//    child->setParent(this);
-//    _children.push_back(child);
-//}
+    parent.attachChild(_parent->detachChild(*this, UpdateScene::No), UpdateScene::No);
 
-void SceneGraphNode::setParent(SceneGraphNode* parent) {
-    _parent = parent;
+    if (_scene && updateScene) {
+        _scene->updateDependencies();
+    }
 }
 
-void SceneGraphNode::addChild(SceneGraphNode* child) {
-    _children.push_back(child);
+void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child, UpdateScene updateScene) {
+    ghoul_assert(child->parent() == nullptr, "Child may not already have a parent");
+
+    child->_parent = this;
+    if (_scene) {
+        child->setScene(_scene);
+    }
+
+   _children.push_back(std::move(child));
+
+   if (_scene && updateScene) {
+       _scene->addNode(child.get());
+   }
 }
 
+std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child, UpdateScene updateScene) {
+    ghoul_assert(child._dependentNodes.empty(), "Nodes cannot depend on a node being detached");
+    ghoul_assert(child._parent != nullptr, "Node must be attached to a parent");
+    
+    // Update of deps is deffered to the removal of the node from the scene
+    clearDependencies(UpdateScene::No);
 
-//not used anymore @AA
-//bool SceneGraphNode::abandonChild(SceneGraphNode* child) {
-//    std::vector < SceneGraphNode* >::iterator it = std::find(_children.begin(), _children.end(), child);
-//
-//    if (it != _children.end()){
-//        _children.erase(it);
-//        return true;
-//    }
-//
-//    return false;
-//}
+    auto iter = std::find_if(
+        _children.begin(),
+        _children.end(),
+        [&child] (const auto& c) {
+            return &child == c.get();
+        }
+    );
+
+    std::unique_ptr<SceneGraphNode> c = std::move(*iter);
+    _children.erase(iter);
+
+    if (_scene && updateScene) {
+        _scene->removeNode(&child);
+    }
+
+    if (_scene) {
+        setScene(nullptr);
+    }
+    return std::move(c);
+}
+
+void SceneGraphNode::addDependency(SceneGraphNode& dependency, UpdateScene updateScene) {
+    dependency._dependentNodes.push_back(this);
+    _dependencies.push_back(&dependency);
+
+    if (_scene && updateScene) {
+        _scene->updateDependencies();
+    }
+}
+
+void SceneGraphNode::removeDependency(SceneGraphNode& dependency, UpdateScene updateScene) {
+    dependency._dependentNodes.erase(std::remove_if(
+        dependency._dependentNodes.begin(),
+        dependency._dependentNodes.end(),
+        [this](const auto& d) {
+            return this == d;
+        }
+    ), dependency._dependentNodes.end());
+    _dependencies.erase(std::remove_if(
+        _dependencies.begin(),
+        _dependencies.end(),
+        [&dependency](const auto& d) {
+            return &dependency == d;
+        }
+    ), _dependencies.end());
+
+    if (_scene && updateScene) {
+        _scene->updateDependencies();
+    }
+}
+
+void SceneGraphNode::clearDependencies(UpdateScene updateScene) {
+    for (auto dependency : _dependencies) {
+        dependency->_dependentNodes.erase(std::remove_if(
+            dependency->_dependentNodes.begin(),
+            dependency->_dependentNodes.end(),
+            [this](const auto& d) {
+                return this == d;
+            }
+        ), dependency->_dependentNodes.end());
+    }
+    _dependencies.clear();
+
+    if (_scene && updateScene) {
+        _scene->updateDependencies();
+    }
+}
+
+void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& dependencies, UpdateScene updateScene) {
+    clearDependencies(UpdateScene::No);
+
+    _dependencies = dependencies;
+    for (auto dependency : dependencies) {
+        dependency->_dependentNodes.push_back(this);
+    }
+
+    if (_scene && updateScene) {
+        _scene->updateDependencies();
+    }
+}
+
+const std::vector<SceneGraphNode*>& SceneGraphNode::dependencies() const {
+    return _dependencies;
+}
+
+const std::vector<SceneGraphNode*>& SceneGraphNode::dependentNodes() const {
+    return _dependentNodes;
+}
 
 glm::dvec3 SceneGraphNode::position() const
 {
@@ -470,15 +580,28 @@ double SceneGraphNode::calculateWorldScale() const {
     }
 }
 
-SceneGraphNode* SceneGraphNode::parent() const
-{
+SceneGraphNode* SceneGraphNode::parent() const {
     return _parent;
 }
-const std::vector<SceneGraphNode*>& SceneGraphNode::children() const{
-    return _children;
+
+Scene* SceneGraphNode::scene() {
+    return _scene;
 }
 
-// bounding sphere
+void SceneGraphNode::setScene(Scene* scene) {
+    traversePreOrder([scene](SceneGraphNode* node) {
+        node->_scene = scene;
+    });
+}
+
+std::vector<SceneGraphNode*> SceneGraphNode::children() const {
+    std::vector<SceneGraphNode*> nodes;
+    for (auto& child : _children) {
+        nodes.push_back(child.get());
+    }
+    return nodes;
+}
+
 PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
     // set the bounding sphere to 0.0
     _boundingSphere = 0.0;
@@ -509,7 +632,6 @@ PowerScaledScalar SceneGraphNode::calculateBoundingSphere(){
         if(renderableBS > _boundingSphere)
             _boundingSphere = renderableBS;
     }
-    //LINFO("Bounding Sphere of '" << name() << "': " << _boundingSphere);
     
     return _boundingSphere;
 }
@@ -532,7 +654,7 @@ Renderable* SceneGraphNode::renderable() {
     return _renderable.get();
 }
 
-// private helper methods
+/*
 bool SceneGraphNode::sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad,
                                          const Camera* camera)
 {
@@ -563,15 +685,16 @@ bool SceneGraphNode::sphereInsideFrustum(const psc& s_pos, const PowerScaledScal
         return false;
     }
 }
+*/
 
 SceneGraphNode* SceneGraphNode::childNode(const std::string& name)
 {
     if (this->name() == name)
         return this;
     else
-        for (SceneGraphNode* it : _children) {
+        for (std::unique_ptr<SceneGraphNode>& it : _children) {
             SceneGraphNode* tmp = it->childNode(name);
-            if (tmp != nullptr)
+            if (tmp)
                 return tmp;
         }
     return nullptr;

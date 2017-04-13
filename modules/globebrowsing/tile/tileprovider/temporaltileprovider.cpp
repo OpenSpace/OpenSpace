@@ -22,13 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifdef GLOBEBROWSING_USE_GDAL
+
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 
+#include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logmanager.h>
 
 #include "cpl_minixml.h"
+#include <fmt/format.h>
 #include <fstream>
 
 namespace {
@@ -56,7 +60,6 @@ const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeI
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
     : _initDict(dictionary) 
 {
-
     if (!dictionary.getValue<std::string>(KeyFilePath, _datasetFile)) {
         throw std::runtime_error(std::string("Must define key '") + KeyFilePath + "'");
     }
@@ -72,7 +75,6 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         (std::istreambuf_iterator<char>())
     );
     _gdalXmlTemplate = consumeTemporalMetaData(xml);
-    _defaultTile = getTileProvider()->getDefaultTile();
 }
 
 std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
@@ -164,7 +166,7 @@ Tile TemporalTileProvider::getTile(const TileIndex& tileIndex) {
 }
 
 Tile TemporalTileProvider::getDefaultTile() {
-    return _defaultTile;
+	return getTileProvider()->getDefaultTile();
 }
 
 int TemporalTileProvider::maxLevel() {
@@ -227,6 +229,33 @@ std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(TimeKey time
 
 std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey timekey) {
     std::string gdalDatasetXml = getGdalDatasetXML(timekey);
+    try {
+        gdalDatasetXml = absPath(gdalDatasetXml);
+    }
+    catch (ghoul::filesystem::FileSystem::ResolveTokenException& e) {
+        const std::vector<std::string> AllowedToken = {
+            // From: http://www.gdal.org/frmt_wms.html
+            // @FRAGILE:  What happens if a user specifies one of these as path tokens?
+            // ---abock
+            "${x}",
+            "${y}",
+            "${z}",
+            "${version}",
+            "${format}",
+            "${layer}"
+        };
+
+        auto it = std::find(AllowedToken.begin(), AllowedToken.end(), e.token);
+        if (it == AllowedToken.end()) {
+            throw;
+        }
+        LINFOC(
+            "TemporalTileProvider",
+            fmt::format("Ignoring '{}' in absolute path resolve", e.token)
+        );
+    }
+
+
     _initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
     auto tileProvider = std::make_shared<CachingTileProvider>(_initDict);
     return tileProvider;
@@ -243,6 +272,8 @@ std::string TemporalTileProvider::getGdalDatasetXML(TimeKey timeKey) {
     //size_t numChars = std::string(URL_TIME_PLACEHOLDER).length();
     size_t numChars = strlen(URL_TIME_PLACEHOLDER);
     ghoul_assert(pos != std::string::npos, "Invalid dataset file");
+    // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
+    // commented out ---abock
     std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timeKey);
     return timeSpecifiedXml;
 }
@@ -351,3 +382,5 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) const {
 } // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif // GLOBEBROWSING_USE_GDAL

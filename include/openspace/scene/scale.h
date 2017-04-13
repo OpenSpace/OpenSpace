@@ -27,10 +27,15 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/util/updatestructures.h>
+#include <ghoul/glm.h>
+
+#include <memory>
 
 namespace ghoul { class Dictionary; }
+
 namespace openspace {
+
+struct UpdateData;
 
 namespace documentation { struct Documentation; };
 
@@ -39,7 +44,7 @@ public:
     static std::unique_ptr<Scale> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     Scale();
-    virtual ~Scale();
+    virtual ~Scale() = default;
     virtual bool initialize();
     virtual double scaleValue() const = 0;
     virtual void update(const UpdateData& data);

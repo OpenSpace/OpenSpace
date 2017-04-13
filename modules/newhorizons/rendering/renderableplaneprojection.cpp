@@ -265,8 +265,9 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     if (!_moving) {
         SceneGraphNode* thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_name);
         SceneGraphNode* newParent = OsEng.renderEngine().scene()->sceneGraphNode(_target.node);
-        if (thisNode != nullptr && newParent != nullptr)
-            thisNode->setParent(newParent);
+        if (thisNode && newParent) {
+            thisNode->setParent(*newParent);
+        }   
     }
     
     const GLfloat vertex_data[] = { // square of two triangles drawn within fov in target coordinates
@@ -312,9 +313,6 @@ void RenderablePlaneProjection::setTarget(std::string body) {
         return;
 
     std::vector<SceneGraphNode*> nodes = OsEng.renderEngine().scene()->allSceneGraphNodes();
-    Renderable* possibleTarget;
-    bool hasBody, found = false;
-    std::string targetBody;
 
     _target.body = body;
     _target.frame = openspace::SpiceManager::ref().frameFromBody(body);
@@ -325,14 +323,10 @@ std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
     std::vector<std::string> targets;
 
     std::vector<SceneGraphNode*> nodes = OsEng.renderEngine().scene()->allSceneGraphNodes();
-    Renderable* possibleTarget;
     std::string targetBody;
-    bool hasBody, found = false;
 
     PowerScaledScalar min = PowerScaledScalar::CreatePSS(REALLY_FAR);
     PowerScaledScalar distance = PowerScaledScalar::CreatePSS(0.0);
-
-
 
     return targetBody;
 }

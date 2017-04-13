@@ -1,0 +1,13 @@
+-- Loading a module without dependencies
+return {
+    ScenePath = ".",
+    Camera = {
+    	Position = {0.0, 0.0, 0.0},
+    	Rotation = {0.0, 0.0, 0.0, 0.0},
+    	Focus = "Root"
+    },    
+    Modules = {
+        "no-dependency"
+    }
+}
+
