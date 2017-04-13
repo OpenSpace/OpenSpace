@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/logging/logmanager.h>
 
 namespace {
     const char* KeyProviders = "LevelTileProviders";
@@ -37,43 +38,56 @@ namespace globebrowsing {
 namespace tileprovider {
 
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
+    std::string name = "Name unspecified";
+    dictionary.getValue("Name", name);
+    const char* _loggerCat = ("TileProviderByLevel" + name).c_str();
+  
     ghoul::Dictionary providers = dictionary.value<ghoul::Dictionary>(KeyProviders);
 
     for (size_t i = 0; i < providers.size(); i++) {
-        std::string dictKey = std::to_string(i + 1);
-        ghoul::Dictionary levelProviderDict = providers.value<ghoul::Dictionary>(
-            dictKey
-        );
-        double floatMaxLevel;
-        int maxLevel = 0;
-        if (!levelProviderDict.getValue<double>(KeyMaxLevel, floatMaxLevel)) {
-            throw std::runtime_error(
-                "Must define key '" + std::string(KeyMaxLevel) + "'"
+        try {
+            std::string dictKey = std::to_string(i + 1);
+            ghoul::Dictionary levelProviderDict = providers.value<ghoul::Dictionary>(
+                dictKey
             );
-        }
-        maxLevel = std::round(floatMaxLevel);
-            
-        ghoul::Dictionary providerDict;
-        if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict))
-        {
-            throw std::runtime_error(
-                "Must define key '" + std::string(KeyTileProvider) + "'"
+            double floatMaxLevel;
+            int maxLevel = 0;
+            if (!levelProviderDict.getValue<double>(KeyMaxLevel, floatMaxLevel)) {
+                throw std::runtime_error(
+                    "Must define key '" + std::string(KeyMaxLevel) + "'"
+                );
+            }
+            maxLevel = std::round(floatMaxLevel);
+                
+            ghoul::Dictionary providerDict;
+            if (!levelProviderDict.getValue<ghoul::Dictionary>(KeyTileProvider, providerDict)) {
+                throw std::runtime_error(
+                    "Must define key '" + std::string(KeyTileProvider) + "'"
+                );
+            }
+                
+            _levelTileProviders.push_back(
+                std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(providerDict))
             );
-        }
             
-        _levelTileProviders.push_back(
-            std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(providerDict))
-        );
-        
-        // Ensure we can represent the max level
-        if(_providerIndices.size() < maxLevel){
-            _providerIndices.resize(maxLevel+1, -1);
+            // Ensure we can represent the max level
+            if(_providerIndices.size() < maxLevel){
+                _providerIndices.resize(maxLevel+1, -1);
+            }
+                
+            // map this level to the tile provider index
+            _providerIndices[maxLevel] = _levelTileProviders.size() - 1;
         }
-            
-        // map this level to the tile provider index
-        _providerIndices[maxLevel] = _levelTileProviders.size() - 1;
+        catch (const ghoul::RuntimeError& e) {
+            LWARNING("Unable to create tile provider: " + std::string(e.what()));
+        }    
     }
-        
+
+    // If all failed
+    if (_levelTileProviders.size() == 0) {
+        throw ghoul::RuntimeError("Failed to create tile provider: " + name);
+    }
+
     // Fill in the gaps (value -1) in provider indices, from back to end
     for(int i = _providerIndices.size() - 2; i >= 0; --i){
         if(_providerIndices[i] == -1){

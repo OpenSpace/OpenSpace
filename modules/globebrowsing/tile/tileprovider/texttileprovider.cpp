@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
 #include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
 #include <openspace/engine/openspaceengine.h>
 
@@ -42,8 +43,7 @@ namespace globebrowsing {
 namespace tileprovider {
     
 TextTileProvider::TextTileProvider(const glm::uvec2& textureSize, size_t fontSize)
-    : _tileCache(500)
-    , _textureSize(textureSize)
+    : _textureSize(textureSize)
     , _fontSize(fontSize)
 {
     _font = OsEng.fontManager().font("Mono", _fontSize);
@@ -59,13 +59,14 @@ TextTileProvider::~TextTileProvider() {
 }
 
 Tile TextTileProvider::getTile(const TileIndex& tileIndex) {
-    TileIndex::TileHashKey key = tileIndex.hashKey();
-        
-    if (!_tileCache.exist(key)) {
-        _tileCache.put(key, createChunkIndexTile(tileIndex));
-    }
+    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
-    return _tileCache.get(key);
+    if (!cache::MemoryAwareTileCache::ref().exist(key)) {
+        cache::MemoryAwareTileCache::ref().put(
+            key, createChunkIndexTile(tileIndex));
+    }
+  
+    return cache::MemoryAwareTileCache::ref().get(key);
 }
 
 Tile TextTileProvider::getDefaultTile() {
@@ -86,7 +87,7 @@ TileDepthTransform TextTileProvider::depthTransform() {
 void TextTileProvider::update() {}
 
 void TextTileProvider::reset() {
-    _tileCache.clear();
+    cache::MemoryAwareTileCache::ref().clear();
 }
 
 Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
@@ -104,14 +105,14 @@ Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        *(tile.texture),
+        *(tile.texture()),
         0
     );
 
     glViewport(
         0, 0,
-        static_cast<GLsizei>(tile.texture->width()),
-        static_cast<GLsizei>(tile.texture->height())
+        static_cast<GLsizei>(tile.texture()->width()),
+        static_cast<GLsizei>(tile.texture()->height())
     );
         
     ghoul_assert(_fontRenderer != nullptr, "_fontRenderer must not be null");

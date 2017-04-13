@@ -22,28 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/asynctilereader.h>
+#include <modules/globebrowsing/tile/asynctiledataprovider.h>
 
 #include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
-#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tilediskcache.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-AsyncTileDataProvider::AsyncTileDataProvider(std::shared_ptr<TileDataset> tileDataset,
-                                             std::shared_ptr<ThreadPool> pool)
-    : _tileDataset(tileDataset)
+AsyncTileDataProvider::AsyncTileDataProvider(
+    const std::shared_ptr<RawTileDataReader> rawTileDataReader,
+    std::shared_ptr<ThreadPool> pool)
+    : _rawTileDataReader(rawTileDataReader)
     , _concurrentJobManager(pool)
 {}
 
-std::shared_ptr<TileDataset> AsyncTileDataProvider::getTextureDataProvider() const {
-    return _tileDataset;
+std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getRawTileDataReader() const {
+    return _rawTileDataReader;
 }
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
     if (satisfiesEnqueueCriteria(tileIndex)) {
-        auto job = std::make_shared<TileLoadJob>(_tileDataset, tileIndex);
+        auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex);
         //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, tileIndex, tileDiskCache, "ReadAndWrite");
         _concurrentJobManager.enqueueJob(job);
         _enqueuedTileRequests[tileIndex.hashKey()] = tileIndex;
@@ -59,6 +60,13 @@ std::vector<std::shared_ptr<RawTile>> AsyncTileDataProvider::getRawTiles() {
         readyResults.push_back(_concurrentJobManager.popFinishedJob()->product());
     }
     return readyResults;
+}   
+
+std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
+    if (_concurrentJobManager.numFinishedJobs() > 0)
+        return _concurrentJobManager.popFinishedJob()->product();
+    else
+        return nullptr;
 }   
 
 bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) const {
@@ -77,7 +85,7 @@ void AsyncTileDataProvider::reset() {
     while (_concurrentJobManager.numFinishedJobs() > 0) {
         _concurrentJobManager.popFinishedJob();
     }
-    getTextureDataProvider()->reset();
+    _rawTileDataReader->reset();
 }
 
 void AsyncTileDataProvider::clearRequestQueue() {
@@ -87,8 +95,8 @@ void AsyncTileDataProvider::clearRequestQueue() {
     _enqueuedTileRequests.clear();
 }
 
-float AsyncTileDataProvider::noDataValueAsFloat() {
-    return _tileDataset->noDataValueAsFloat();
+float AsyncTileDataProvider::noDataValueAsFloat() const {
+    return _rawTileDataReader->noDataValueAsFloat();
 }
 
 } // namespace globebrowsing

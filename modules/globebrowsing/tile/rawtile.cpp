@@ -26,10 +26,8 @@
 
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
-#include <gdal_priv.h>
-
 namespace {
-    const std::string _loggerCat = "Tile";
+    const char* _loggerCat = "RawTile";
 }
 
 namespace openspace {
@@ -40,7 +38,7 @@ RawTile::RawTile()
     , dimensions(0, 0, 0)
     , tileMetaData(nullptr)
     , tileIndex(0, 0, 0)
-    , error(CE_None)
+    , error(ReadError::None)
     , nBytesImageData(0)
 {}
         
@@ -58,7 +56,7 @@ RawTile RawTile::createDefaultRes() {
 void RawTile::serializeMetaData(std::ostream& os) {
     os << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
     os << tileIndex.x << " " << tileIndex.y << " " << tileIndex.level << std::endl;
-    os << error << std::endl;
+    os << static_cast<int>(error) << std::endl;
 
     // preprocess data
     os << (tileMetaData != nullptr) << std::endl;
@@ -73,7 +71,7 @@ RawTile RawTile::deserializeMetaData(std::istream& is) {
     RawTile res;
     is >> res.dimensions.x >> res.dimensions.y >> res.dimensions.z;
     is >> res.tileIndex.x >> res.tileIndex.y >> res.tileIndex.level;
-    int err; is >> err; res.error = (CPLErr) err;
+    int err; is >> err; res.error = static_cast<ReadError>(err);
         
     res.tileMetaData = nullptr;
     bool hastileMetaData; 

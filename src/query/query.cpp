@@ -115,8 +115,8 @@ std::vector<properties::Property*> allProperties() {
         std::vector<properties::Property*> props = n->propertiesRecursive();
         properties.insert(
             properties.end(),
-            p.begin(),
-            p.end()
+            props.begin(),
+            props.end()
         );
     }
 
