@@ -31,6 +31,8 @@
 #include <valarray>
 #include <unordered_map>
 
+#define IMG_PRECISION float
+
 // TODO List:
 // 1. Read headerinfo properly
 // 2. Test with 4k images
@@ -42,12 +44,15 @@ namespace openspace {
 
 struct ImageMetadata {
     std::string filename;
+    int min;
+    int max;
+    int waveLength;
     float expTime;
 };
 
 struct ImageDataObject {
     ImageMetadata metaData;
-    std::valarray<float> contents;
+    std::valarray<IMG_PRECISION> contents;
 };
 
 class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManager> {

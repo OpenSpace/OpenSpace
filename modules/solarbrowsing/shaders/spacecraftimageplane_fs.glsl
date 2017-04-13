@@ -27,54 +27,63 @@ uniform sampler2D texture1;
 uniform sampler1D texture2;
 uniform bool additiveBlending;
 
+uniform int currentActiveChannel;
+uniform int minIntensity;
+uniform int maxIntensity;
+uniform float expTime;
+
 in vec2 vs_st;
 in vec4 vs_positionScreenSpace;
 
+const float clipmins[10] = float[](20.0, 220.0, 4000.0, 0.1, 0.7, 10.0, 20.0, 7.0, 0.2, 0.4);
+const float clipmax[10]  = float[](400.0, 5000.0, 20000.0, 30.0, 500.0, 2000.0, 2500.0, 1500.0, 150.0, 80.0);
+const float log10inv = 1.0 / log(10);
+
 #include "fragment.glsl"
 
-float colormap_red(float x) {
-    return 1.448953446096850 * x - 5.02253539008443e-1;
-}
-
-float colormap_green(float x) {
-    return 1.889376646180860 * x - 2.272028094820020e2;
-}
-
-float colormap_blue(float x) {
-    return 3.92613636363636 * x - 7.46528409090909e+2;
-}
-
 Fragment getFragment() {
-    float intensityScaled = texture(texture1, vs_st).r;
 
-    vec4 diffuse;
+    float intensityOrg = float(texture(texture1, vs_st).r);
+    float outa;
 
-    // const float c0t = temp;
-    // const float c1t = sqrt(temp) * sqrt(255.0);
-    // const float c2t = pow(temp, 2.0) / 255.0;
-    // const float c3t = ( ( c1t + c2t / 2.0) * 255.0 / ( 255.0 + 255.0 / 2.0));
+    float intensity = intensityOrg * (1.0 / expTime);
+    float mini = float(minIntensity) * (1.0 / expTime);
+    float maxi = float(maxIntensity) * (1.0 / expTime);
 
-    // float c0 = clamp(c0t / 255.0, 0.0, 1.0);
-    // float c1 = clamp(c1t / 255.0, 0.0, 1.0);
-    // float c2 = clamp(c2t / 255.0, 0.0, 1.0);
-    // float c3 = clamp(c3t / 255.0, 0.0, 1.0);
+    // Handle 171 differently
+    if (currentActiveChannel == 5) {
+        intensity -= 5;
+        maxi -= 5;
+        mini -= 5;
 
-    // float c0 = clamp(texture(texture2, intensityScaled).r, 0.0, 1.0);
-    // float c1 = clamp(texture(texture2, intensityScaled).g, 0.0, 1.0);
-    // float c2 = clamp(texture(texture2, intensityScaled).b, 0.0, 1.0);
-    // float c3 = clamp(texture(texture2, intensityScaled).a, 0.0, 1.0);
+        intensity = clamp(intensity, 0.01, maxi);
+        mini = clamp(mini, 0.01, maxi);
+        maxi = clamp(maxi, 0.01, maxi); // Remove
 
-    // float r0 = clamp(colormap_red(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
-    // float g0 = clamp(colormap_green(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
-    // float b0 = clamp(colormap_blue(intensityScaled * 255.0) / 255.0, 0.0, 1.0);
+        intensity = pow(intensity, 0.35);
+        mini = pow(mini, 0.35);
+        maxi = pow(maxi, 0.35);
 
-    // float r = c0;
-    // float g = c1;
-    // float b = c2;
+        intensity = clamp(intensity, 0.01, 13.0);
+        mini = clamp(mini, 0.01, 13.0);
+        maxi = clamp(maxi, 0.01, 13.0);
 
-    //diffuse = vec4(r, g, b, c3);
+    } else {
+        const float cmin = clipmins[currentActiveChannel];
+        const float cmax = clipmax[currentActiveChannel];
+        intensity = clamp(intensity, cmin, cmax);
+        mini = clamp(mini, cmin, cmax);
+        maxi = clamp(maxi, cmin, cmax);
 
-    diffuse = texture(texture2, intensityScaled);
+        intensity = log(intensity) / log(10);
+        mini = log(mini) / log(10);
+        maxi = log(maxi)/ log(10);
+    }
+
+    // Normalize
+    intensity = (intensity - mini) / (maxi - mini);
+
+    vec4 diffuse = texture(texture2, intensity);
 
     if (diffuse.a == 0.0)
         discard;

@@ -65,27 +65,27 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
 
     // TODO(mnoven): Lua
-    // std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 0
-    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 1
-    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 2
-    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/094", // 3
-    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/131", // 4
-    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 5
-    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/193", // 6
-    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/211", // 7
-    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/304", // 8
-    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
+    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 0
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 1
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 2
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/094", // 3
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/131", // 4
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 5
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/193", // 6
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/211", // 7
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/304", // 8
+                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
 
-    std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 1
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 2
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // 3 // OK
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 4
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 5 // OK
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0193", // 6 // OK
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0211", // 7 // OK
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0304", // 8 // OK
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};// 9
+    // std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 1
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 2
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // 3 // OK
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 4
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 5 // OK
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0193", // 6 // OK
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0211", // 7 // OK
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0304", // 8 // OK
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};// 9
 
 
     std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 0
@@ -110,6 +110,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     }
 
     _texture =  std::make_unique<Texture>(
+                    nullptr, // Update pixel data later, is this really safe?
                     glm::size3_t(imageSize, imageSize, 1),
                     ghoul::opengl::Texture::Red, // Format of the pixeldata
                     GL_R32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
@@ -182,7 +183,7 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 }
 
 void RenderableSpacecraftCameraPlane::updateTexture() {
-    std::valarray<float>& contents = _imageData[_currentActiveChannel][_currentActiveImage].contents;
+    std::valarray<IMG_PRECISION>& contents = _imageData[_currentActiveChannel][_currentActiveImage].contents;
     _texture->setPixelData(&contents[0], ghoul::Boolean::No);
 
     // TODO(mnoven): This should probably be moved to Texture class
@@ -289,6 +290,11 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     tfUnit.activate();
     _transferFunctions[_currentActiveChannel]->bind(); // Calls update internally
     _shader->setUniform("texture2", tfUnit);
+
+    _shader->setUniform("currentActiveChannel", _currentActiveChannel);
+    _shader->setUniform("minIntensity", _imageData[_currentActiveChannel][_currentActiveImage].metaData.min);
+    _shader->setUniform("maxIntensity", _imageData[_currentActiveChannel][_currentActiveImage].metaData.max);
+    _shader->setUniform("expTime", _imageData[_currentActiveChannel][_currentActiveImage].metaData.expTime);
 
     bool usingFramebufferRenderer =
         OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;

@@ -269,10 +269,12 @@ template std::valarray<unsigned int> FitsFileReader::readImage();
 template std::valarray<int> FitsFileReader::readImage();
 template std::valarray<double> FitsFileReader::readImage();
 template std::valarray<float> FitsFileReader::readImage();
+template std::valarray<unsigned char> FitsFileReader::readImage();
 
 template const std::unordered_map<std::string, float> FitsFileReader::readHeader(std::vector<std::string>& keywords);
 template const std::unordered_map<std::string, std::string> FitsFileReader::readHeader(std::vector<std::string>& keywords);
 
 template const float FitsFileReader::readHeaderValue(const std::string key);
+template const int FitsFileReader::readHeaderValue(const std::string key);
 template const std::string FitsFileReader::readHeaderValue(const std::string key);
 } // namespace openspace
