@@ -81,8 +81,8 @@ TouchInteraction::TouchInteraction()
 TouchInteraction::~TouchInteraction() { }
 
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
-	if (_directTouchMode) { // should just be a function call
-
+	if (_directTouchMode && _selected.size() > 0) { // should just be a function call
+		
 		// Returns the new value of screen point measurements[x] according to the transform M(par)
 		auto func = [](double* par, int x, void* fdata) { // par is the 6DOF vector , x the id of the measurements measurements[x], fdata additional data needed by the function
 			auto toSurface = [](int x, FunctionData* ptr) {
@@ -102,7 +102,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 				double yCo = -2 * (screenPoint.y - 0.5); // normalized -1 to 1 coordinates on screen
 				glm::dvec3 raytrace = glm::normalize(ptr->camera->rotationQuaternion() * glm::dvec3(xCo, yCo, -3.2596558));
 				glm::dvec3 camToSelectable = ptr->node->worldPosition() - camPos;
-				double boundingSphere = ptr->node->boundingSphere().lengthd();
+				double boundingSphere = ptr->node->boundingSphere();
 				double d = glm::dot(raytrace, camToSelectable);
 				double root = boundingSphere * boundingSphere - glm::dot(camToSelectable, camToSelectable) + d * d;
 				if (root > 0) // two intersection points (take the closest one)
@@ -162,7 +162,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 				double yCo = -2 * (screenPoint.y - 0.5); // normalized -1 to 1 coordinates on screen
 				glm::dvec3 raytrace = glm::normalize(ptr->camera->rotationQuaternion() * glm::dvec3(xCo, yCo, -3.2596558));
 				glm::dvec3 camToSelectable = ptr->node->worldPosition() - camPos;
-				double boundingSphere = ptr->node->boundingSphere().lengthd();
+				double boundingSphere = ptr->node->boundingSphere();
 				double d = glm::dot(raytrace, camToSelectable);
 				double root = boundingSphere * boundingSphere - glm::dot(camToSelectable, camToSelectable) + d * d;
 				if (root > 0) // two intersection points (take the closest one)
@@ -233,7 +233,6 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			}
 		};
 
-
 		const int nCoord = _selected.size() * 2;
 		int nDOF = std::min(nCoord, 6);
 		double* par = new double[nDOF]; 
@@ -257,7 +256,14 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		FunctionData fData = { _camera, _selected.at(0).node, res.x / res.y, screenPoints, nDOF };
 		void* dataPtr = reinterpret_cast<void*>(&fData);
 		levmarq_init(&_lmstat);
-		bool success = levmarq(nDOF, par, nCoord, screenPoints, squaredError, func, grad, dataPtr, &_lmstat); // finds best transform values and stores them in par
+		bool nIterations = levmarq(nDOF, par, nCoord, screenPoints, squaredError, func, grad, dataPtr, &_lmstat); // finds best transform values and stores them in par
+
+		
+		std::ostringstream os;
+		for (int i = 0; i < nDOF; ++i) {
+			os << par[i] << ", ";
+		}
+		std::cout << "Levmarq success after " << nIterations << ", Print par[nDOF]: " << os.str() << "\n";
 
 		// cleanup
 		delete[] screenPoints;
@@ -302,7 +308,7 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 		glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
 		int id = c.getSessionID();
 		for (SceneGraphNode* node : selectableNodes) {
-			double boundingSphere = node->boundingSphere().lengthd();
+			double boundingSphere = node->boundingSphere();
 			glm::dvec3 camToSelectable = node->worldPosition() - camPos;
 			double dist = length(glm::cross(cursorInWorldSpace, camToSelectable)) / glm::length(cursorInWorldSpace) - boundingSphere;
 			if (dist <= 0.0) {
@@ -333,24 +339,6 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 		}
 		
 	}
-	/*
-	Direct-touch:
-	1, we have the touched position on the surface in spherical coordinates
-	2, we get new input on new pos
-	3, move camera so _selected.coordinates == new pos, cant overwrite _selected then
-
-	Paper:
-	position in screen-space: p = s(x,q) = h(PM(q)x)
-	h = combinedViewMatrix
-	P = projectionmatrix
-	M(q) = parameterized matrix by the vector q which maps x into worldspace, most likely the product of several matrices which are 
-	parameterized by the transform values (e.g., rotation, scaling, translation, etc.)
-	x = position in modelview
-
-	minimize error E = sum( ||s(xi,q)-pi||^2 ) (distance between last point p and current x in screen-space)
-	q is the rotation/translation that is done on the object to match the equation. How do we translate that to camera rot/trans?
-	*/
-
 	//debugging
 	for (auto it : newSelected) {
 		std::cout << it.node->name() << " hit with cursor " << it.id << ". Surface Coordinates: " << glm::to_string(it.coordinates) << "\n";
@@ -481,13 +469,13 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 			_vel.localRot = _sensitivity.localRot * glm::dvec2(-angleX, -angleY);
 		}
 		else { // should zoom in to current _selected.coordinates position
-			double dist = glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) - _focusNode->boundingSphere().lengthd();
-			double startDecline = _focusNode->boundingSphere().lengthd() / (0.15 * _projectionScaleFactor);
+			double dist = glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) - _focusNode->boundingSphere();
+			double startDecline = _focusNode->boundingSphere() / (0.15 * _projectionScaleFactor);
 			double factor = 2.0;
 			if (dist < startDecline) {
 				factor = 1.0 + std::pow(dist / startDecline, 2);
 			}
-			double response = _focusNode->boundingSphere().lengthd() / (factor * _currentRadius * _projectionScaleFactor);
+			double response = _focusNode->boundingSphere() / (factor * _currentRadius * _projectionScaleFactor);
 			_vel.zoom = _sensitivity.zoom * response;
 		}
 			
@@ -517,7 +505,7 @@ void TouchInteraction::step(double dt) {
 		dquat localCamRot = inverse(globalCamRot) * _camera->rotationQuaternion();
 
 
-		double boundingSphere = _focusNode->boundingSphere().lengthd();
+		double boundingSphere = _focusNode->boundingSphere();
 		double minHeightAboveBoundingSphere = 1;
 		dvec3 centerToBoundingSphere;
 
