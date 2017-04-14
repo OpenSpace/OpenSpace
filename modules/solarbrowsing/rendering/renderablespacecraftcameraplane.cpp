@@ -46,6 +46,7 @@ namespace {
     static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
     static const int _minRealTimeUpdateInterval = 10;
     static const int _minOpenSpaceTimeUpdateInterval = 1; // Should probably be set to real update value of data later
+    static const float FULL_PLANE_SIZE = (1391600000.f * 0.5f) / 0.785f; // Half sun radius divided by magic factor
 }
 
 namespace openspace {
@@ -63,27 +64,27 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     }
 
     // TODO(mnoven): Lua
-    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 0
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 1
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 2
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/094", // 3
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/131", // 4
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 5
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/193", // 6
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/211", // 7
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/304", // 8
-                                      "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
+    // std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 0
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 1
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 2
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/094", // 3
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/131", // 4
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 5
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/193", // 6
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/211", // 7
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/304", // 8
+    //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
 
-    // std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
-    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 1
-    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 2
-    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // 3 // OK
-    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 4
-    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 5 // OK
-    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0193", // 6 // OK
-    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0211", // 7 // OK
-    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0304", // 8 // OK
-    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};// 9
+    std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 1
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 2
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // 3 // OK
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 4
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 5 // OK
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0193", // 6 // OK
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0211", // 7 // OK
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0304", // 8 // OK
+                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};// 9
 
 
     std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 0
@@ -116,7 +117,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, 0, GL_STREAM_DRAW);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-    // TODO(mnoven): Faster to send GL_RGBA32F or GL_BGRA32F? - GPU Pads and Converts anyways?
+    // TODO(mnoven): Faster to send GL_RGBA32F as internal format - GPU Pads anyways?
     _texture =  std::make_unique<Texture>(
                     nullptr, // Update pixel data later, is this really safe?
                     glm::size3_t(imageSize, imageSize, 1),
@@ -143,6 +144,11 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         updateTexture();
     });
 
+    _moveFactor.onChange([this]() {
+        _size.setValue(glm::vec2(_moveFactor.value() * FULL_PLANE_SIZE, 0.f));
+        createPlane();
+    });
+
     performImageTimestep();
     addProperty(_usePBO);
     addProperty(_currentActiveChannel);
@@ -157,6 +163,8 @@ bool RenderableSpacecraftCameraPlane::isReady() const {
 bool RenderableSpacecraftCameraPlane::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+
+    _size.setValue(glm::vec2(FULL_PLANE_SIZE, 0.f));
     createPlane();
 
     if (!_shader) {
@@ -215,7 +223,7 @@ void RenderableSpacecraftCameraPlane::updateTexture() {
 
         const glm::uvec3& dimensions = _texture->dimensions();
         _texture->bind();
-        // Send async to GPU by coping from PBO to texture objectgs
+        // Send async to GPU by coping from PBO to texture objects
         glTexSubImage2D(
             _texture->type(),
             0,

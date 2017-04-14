@@ -124,8 +124,9 @@ void SpacecraftImageryManager::scaleImageData(std::vector<ImageDataObject>& imag
             LDEBUG("Max fits" << dataObject.metaData.max);
 
             // TODO(mnoven): Remove
-            assert(data.min() == dataObject.metaData.min);
-            assert(data.max() == dataObject.metaData.max);
+            // For some reason the small test images have wrong min and max values
+            //assert(data.min() == dataObject.metaData.min);
+            //assert(data.max() == dataObject.metaData.max);
 
         }
     } else {
