@@ -28,6 +28,7 @@
 #include <modules/base/rendering/renderableplane.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/engine/downloadmanager.h> // Make pointer & forward declare?
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
@@ -53,6 +54,7 @@ private:
     properties::DoubleProperty _moveFactor;
     properties::StringProperty _target;
     properties::IntProperty _currentActiveChannel;
+    properties::BoolProperty _usePBO;
 
     double _openSpaceTime;
     double _lastUpdateOpenSpaceTime;
@@ -62,6 +64,8 @@ private:
 
     std::string _type;
     int _currentActiveImage;
+    unsigned int pboSize;
+    GLuint pboHandle;
 
     // Channels -> DataObjects
     std::vector<std::vector<ImageDataObject>> _imageData;

@@ -46,23 +46,21 @@ namespace {
     static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
     static const int _minRealTimeUpdateInterval = 10;
     static const int _minOpenSpaceTimeUpdateInterval = 1; // Should probably be set to real update value of data later
-    //static const std::string _dummyImageUrl = "https://sdo.gsfc.nasa.gov/assets/img/swpc/fitsfiles/0094/AIAsynoptic_20170320_185420_0094.fits";
-    std::vector<std::vector<std::vector<int>>> _map;
 }
 
 namespace openspace {
 
 RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
+    , _currentActiveChannel("activeChannel", "Active Channel", 3, 0, 9)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _target("target", "Target", "Sun")
-    , _currentActiveChannel("activeChannel", "Active Channel", 3, 0, 9)
+    , _usePBO("usePBO", "Use PBO", true)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
         _target = target;
     }
-
 
     // TODO(mnoven): Lua
     std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 0
@@ -109,6 +107,16 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         _transferFunctions.push_back(std::make_unique<TransferFunction>(tfPaths[i]));
     }
 
+    // GPU Needs all channels here
+    pboSize = imageSize * imageSize * 4;
+
+    // Generate PBO
+    glGenBuffers(1, &pboHandle);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, 0, GL_STREAM_DRAW);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+    // TODO(mnoven): Faster to send GL_RGBA32F or GL_BGRA32F? - GPU Pads and Converts anyways?
     _texture =  std::make_unique<Texture>(
                     nullptr, // Update pixel data later, is this really safe?
                     glm::size3_t(imageSize, imageSize, 1),
@@ -136,6 +144,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     });
 
     performImageTimestep();
+    addProperty(_usePBO);
     addProperty(_currentActiveChannel);
     addProperty(_target);
     addProperty(_moveFactor);
@@ -183,23 +192,63 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 }
 
 void RenderableSpacecraftCameraPlane::updateTexture() {
-    std::valarray<IMG_PRECISION>& contents = _imageData[_currentActiveChannel][_currentActiveImage].contents;
-    _texture->setPixelData(&contents[0], ghoul::Boolean::No);
+    if (_usePBO) {
+        // Bind our PBO to texture data source
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle);
 
-    // TODO(mnoven): This should probably be moved to Texture class
-    _texture->bind();
-    const glm::uvec3& dimensions = _texture->dimensions();
-    glTexSubImage2D(
-        _texture->type(),
-        0,
-        0,
-        0,
-        GLsizei(dimensions.x),
-        GLsizei(dimensions.y),
-        GLint(_texture->format()),
-        _texture->dataType(),
-        _texture->pixelData()
-    );
+        // Discard data in PBO - glMapBuffer cases sync issue if we don't and have to wait
+        // for GPU to finish its job
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, 0, GL_STREAM_DRAW);
+        // Map buffer to client memory
+        float* data = static_cast<float*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
+        if (data) {
+            std::valarray<IMG_PRECISION>& contents =
+                    _imageData[_currentActiveChannel][_currentActiveImage].contents;
+            // This is probably still the bottleneck
+            std::memcpy(data, &contents[0], contents.size() * sizeof(float));
+        } else {
+            LERROR("Failed to map PBO to client memory");
+        }
+
+        // Release the mapped buffer
+        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+        const glm::uvec3& dimensions = _texture->dimensions();
+        _texture->bind();
+        // Send async to GPU by coping from PBO to texture objectgs
+        glTexSubImage2D(
+            _texture->type(),
+            0,
+            0,
+            0,
+            GLsizei(dimensions.x),
+            GLsizei(dimensions.y),
+            GLint(_texture->format()),
+            _texture->dataType(),
+            nullptr
+        );
+
+        // Set back to normal texture data source
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    } else {
+        std::valarray<IMG_PRECISION>& contents =
+                    _imageData[_currentActiveChannel][_currentActiveImage].contents;
+        _texture->setPixelData(&contents[0], ghoul::Boolean::No);
+
+        _texture->bind();
+        const glm::uvec3& dimensions = _texture->dimensions();
+        glTexSubImage2D(
+            _texture->type(),
+            0,
+            0,
+            0,
+            GLsizei(dimensions.x),
+            GLsizei(dimensions.y),
+            GLint(_texture->format()),
+            _texture->dataType(),
+            _texture->pixelData()
+        );
+    }
 }
 
 void RenderableSpacecraftCameraPlane::performImageTimestep() {
