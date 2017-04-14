@@ -21,6 +21,7 @@ Rickard Lindtstedt
 Michael Sjöström
 Michael Novén
 Oskar Carlbaum
+Jonathan Bosson
 
 Anteige
 noahdasanaike

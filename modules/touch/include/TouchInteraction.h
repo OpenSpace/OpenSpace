@@ -82,13 +82,12 @@ struct SelectedBody {
 };
 
 struct FunctionData {
+	std::vector<glm::dvec3> selectedPoints;
+	int nDOF;
+	glm::dvec2(*toScreen)(glm::dvec3, Camera*, SceneGraphNode*, double);
 	Camera* camera;
 	SceneGraphNode* node;
 	double aspectRatio;
-	double* measurements;
-	int nDOF;
-	glm::dvec2(*toScreen)(glm::dvec3, Camera*, SceneGraphNode*, double);
-	glm::dvec3(*toSurface)(glm::dvec2, Camera*, SceneGraphNode*, double);
 };
 
 using Point = std::pair<int, TUIO::TuioPoint>;
@@ -106,7 +105,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void step(double dt);
 		void configSensitivities(double dist);
 		void decelerate();
-		glm::dvec2 modelToScreenSpace(SelectedBody sb);
+		glm::dvec2 modelToScreenSpace(glm::dvec3 vec, SceneGraphNode* node);
 		void clear();
 		void tap();
 
