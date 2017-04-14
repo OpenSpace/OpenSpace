@@ -85,40 +85,17 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		
 		// Returns the new value of screen point measurements[x] according to the transform M(par)
 		auto func = [](double* par, int x, void* fdata) { // par is the 6DOF vector , x the id of the measurements measurements[x], fdata additional data needed by the function
-			auto toSurface = [](int x, FunctionData* ptr) {
-				glm::dvec2 screenPoint;
-				if (x % 2) { // true = y[x] is a y-coord, false = y[x] is an x-coord
-					screenPoint.x = ptr->measurements[x - 1];
-					screenPoint.y = ptr->measurements[x];
-				}
-				else {
-					screenPoint.x = ptr->measurements[x];
-					screenPoint.y = ptr->measurements[x + 1];
-				}
-
-				// Find the intersection point in surface coordinates again;
-				glm::dvec3 camPos = ptr->camera->positionVec3();
-				double xCo = 2 * (screenPoint.x - 0.5) * ptr->aspectRatio;
-				double yCo = -2 * (screenPoint.y - 0.5); // normalized -1 to 1 coordinates on screen
-				glm::dvec3 raytrace = glm::normalize(ptr->camera->rotationQuaternion() * glm::dvec3(xCo, yCo, -3.2596558));
-				glm::dvec3 camToSelectable = ptr->node->worldPosition() - camPos;
-				double boundingSphere = ptr->node->boundingSphere();
-				double d = glm::dot(raytrace, camToSelectable);
-				double root = boundingSphere * boundingSphere - glm::dot(camToSelectable, camToSelectable) + d * d;
-				if (root > 0) // two intersection points (take the closest one)
-					d -= sqrt(root);
-				glm::dvec3 intersectionPoint = camPos + d * raytrace;
-				return (glm::inverse(ptr->node->rotationMatrix()) * (intersectionPoint - ptr->node->worldPosition()));
-			};
-			auto toScreen = [](glm::dvec3 vec, FunctionData* ptr) {
-				glm::dvec3 backToScreenSpace = glm::inverse(ptr->camera->rotationQuaternion())
-					* glm::normalize(((ptr->node->rotationMatrix() * vec) + ptr->node->worldPosition() - ptr->camera->positionVec3()));
-				backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
-				return glm::dvec2(backToScreenSpace.x / (2 * ptr->aspectRatio) + 0.5, -backToScreenSpace.y / 2 + 0.5);
-			};
-
 			FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-			glm::dvec3 surfacePoint = toSurface(x, ptr); // get current screen point from the id "x".
+			glm::dvec2 screenPoint;
+			if (x % 2) { // true = y[x] is a y-coord, false = y[x] is an x-coord
+				screenPoint.x = ptr->measurements[x - 1];
+				screenPoint.y = ptr->measurements[x];
+			}
+			else {
+				screenPoint.x = ptr->measurements[x];
+				screenPoint.y = ptr->measurements[x + 1];
+			}
+			glm::dvec3 surfacePoint = ptr->toSurface(screenPoint, ptr->camera, ptr->node, ptr->aspectRatio); // get current screen point from the id "x".
 
 			// Create transformation matrix M(q) and apply transform for newPointInModelView
 			glm::dvec3 T = glm::dvec3(par[0], par[1], 0.0);
@@ -136,7 +113,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			Q.w = sqrt(1 - len);
 			glm::dvec3 newSurfacePoint = T + (Q * surfacePoint);
 
-			glm::dvec2 newScreenPoint = toScreen(newSurfacePoint, ptr); // go back to screen-space
+			glm::dvec2 newScreenPoint = ptr->toScreen(newSurfacePoint, ptr->camera, ptr->node, ptr->aspectRatio); // go back to screen-space
 
 			if (x % 2) // return right variable
 				return newScreenPoint.y;
@@ -145,7 +122,12 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		};
 		// Gradient of func
 		auto grad = [](double* g, double* par, int x, void* fdata) {
-			auto toSurface = [](int x, FunctionData* ptr) {
+			FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
+			g[0] = 1.0;
+			g[1] = 1.0;
+			if (ptr->nDOF > 2) {
+				g[2] = 1.0;
+				// Get current screen point from the id "x".
 				glm::dvec2 screenPoint;
 				if (x % 2) { // true = y[x] is a y-coord, false = y[x] is an x-coord
 					screenPoint.x = ptr->measurements[x - 1];
@@ -155,35 +137,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 					screenPoint.x = ptr->measurements[x];
 					screenPoint.y = ptr->measurements[x + 1];
 				}
-
-				// Find the intersection point in surface coordinates again;
-				glm::dvec3 camPos = ptr->camera->positionVec3();
-				double xCo = 2 * (screenPoint.x - 0.5) * ptr->aspectRatio;
-				double yCo = -2 * (screenPoint.y - 0.5); // normalized -1 to 1 coordinates on screen
-				glm::dvec3 raytrace = glm::normalize(ptr->camera->rotationQuaternion() * glm::dvec3(xCo, yCo, -3.2596558));
-				glm::dvec3 camToSelectable = ptr->node->worldPosition() - camPos;
-				double boundingSphere = ptr->node->boundingSphere();
-				double d = glm::dot(raytrace, camToSelectable);
-				double root = boundingSphere * boundingSphere - glm::dot(camToSelectable, camToSelectable) + d * d;
-				if (root > 0) // two intersection points (take the closest one)
-					d -= sqrt(root);
-				glm::dvec3 intersectionPoint = camPos + d * raytrace;
-				return (glm::inverse(ptr->node->rotationMatrix()) * (intersectionPoint - ptr->node->worldPosition()));
-			};
-			auto toScreen = [](glm::dvec3 vec, FunctionData* ptr) {
-				glm::dvec3 backToScreenSpace = glm::inverse(ptr->camera->rotationQuaternion())
-					* glm::normalize(((ptr->node->rotationMatrix() * vec) + ptr->node->worldPosition() - ptr->camera->positionVec3()));
-				backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
-				return glm::dvec2(backToScreenSpace.x / (2 * ptr->aspectRatio) + 0.5, -backToScreenSpace.y / 2 + 0.5);
-			};
-
-			FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-			g[0] = 1.0;
-			g[1] = 1.0;
-			if (ptr->nDOF > 2) {
-				g[2] = 1.0;
-				// Get current screen point from the id "x".
-				glm::dvec3 surfacePoint = toSurface(x, ptr);
+				glm::dvec3 surfacePoint = ptr->toSurface(screenPoint, ptr->camera, ptr->node, ptr->aspectRatio);
 
 				glm::dquat Q;
 				Q.x = par[3];
@@ -201,7 +155,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 				gradX.y = 2.0 * Q.y * surfacePoint.x + (1.0 - 4.0 * Q.x) * surfacePoint.y + 2.0 * Q.w * surfacePoint.z;
 				gradX.z = 2.0 * Q.z * surfacePoint.x + 2.0 * Q.w * surfacePoint.y + 2.0 * (1.0 - 4.0 * Q.x) * surfacePoint.z;
 
-				glm::dvec2 newSPx = toScreen(gradX, ptr);
+				glm::dvec2 newSPx = ptr->toScreen(gradX, ptr->camera, ptr->node, ptr->aspectRatio);;
 				if (x % 2)
 					g[3] = newSPx.y;
 				else
@@ -218,8 +172,8 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 					gradZ.y = 2.0 * Q.w * surfacePoint.x + (1.0 - 4.0 * Q.z) * surfacePoint.y + 2.0 * Q.y * surfacePoint.z;
 					gradZ.z = 2.0 * Q.x * surfacePoint.x + 2.0 * Q.y * surfacePoint.y + surfacePoint.z;
 
-					glm::dvec2 newSPy = toScreen(gradY, ptr);
-					glm::dvec2 newSPz = toScreen(gradZ, ptr);
+					glm::dvec2 newSPy = ptr->toScreen(gradY, ptr->camera, ptr->node, ptr->aspectRatio);;
+					glm::dvec2 newSPz = ptr->toScreen(gradZ, ptr->camera, ptr->node, ptr->aspectRatio);;
 
 					if (x % 2) {
 						g[4] = newSPy.y;
@@ -253,7 +207,29 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		}
 		glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
 
-		FunctionData fData = { _camera, _selected.at(0).node, res.x / res.y, screenPoints, nDOF };
+		auto toSurface = [](glm::dvec2 screenPoint, Camera* camera, SceneGraphNode* node, double aspectRatio) {
+			// Find the intersection point in surface coordinates again;
+			glm::dvec3 camPos = camera->positionVec3();
+			double xCo = 2 * (screenPoint.x - 0.5) * aspectRatio;
+			double yCo = -2 * (screenPoint.y - 0.5); // normalized -1 to 1 coordinates on screen
+			glm::dvec3 raytrace = glm::normalize(camera->rotationQuaternion() * glm::dvec3(xCo, yCo, -3.2596558));
+			glm::dvec3 camToSelectable = node->worldPosition() - camPos;
+			double boundingSphere = node->boundingSphere();
+			double d = glm::dot(raytrace, camToSelectable);
+			double root = boundingSphere * boundingSphere - glm::dot(camToSelectable, camToSelectable) + d * d;
+			if (root > 0) // two intersection points (take the closest one)
+				d -= sqrt(root);
+			glm::dvec3 intersectionPoint = camPos + d * raytrace;
+			return (glm::inverse(node->rotationMatrix()) * (intersectionPoint - node->worldPosition()));
+		};
+		auto toScreen = [](glm::dvec3 vec, Camera* camera, SceneGraphNode* node, double aspectRatio) {
+			glm::dvec3 backToScreenSpace = glm::inverse(camera->rotationQuaternion())
+				* glm::normalize(((node->rotationMatrix() * vec) + node->worldPosition() - camera->positionVec3()));
+			backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
+			return glm::dvec2(backToScreenSpace.x / (2 * aspectRatio) + 0.5, -backToScreenSpace.y / 2 + 0.5);
+		};
+
+		FunctionData fData = { _camera, _selected.at(0).node, res.x / res.y, screenPoints, nDOF, toScreen, toSurface };
 		void* dataPtr = reinterpret_cast<void*>(&fData);
 		levmarq_init(&_lmstat);
 		bool nIterations = levmarq(nDOF, par, nCoord, screenPoints, squaredError, func, grad, dataPtr, &_lmstat); // finds best transform values and stores them in par
