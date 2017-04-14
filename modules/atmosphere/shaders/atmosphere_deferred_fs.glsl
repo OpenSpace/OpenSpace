@@ -319,6 +319,18 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, const vec3 v, const vec3 s,
     // After removing the initial path from camera pos to top of atmosphere or the
     // current camera position if inside atmosphere, t > 0
     if (t > 0.0) {
+      // Here we must test if we are hitting the ground:
+      bool  insideATM    = false;
+      double offset      = 0.0f;
+      double maxLength   = 0.0f;
+      dRay ray;
+      ray.direction = vec4(v, 0.0);
+      ray.origin = vec4(x, 1.0);     
+      bool  hitGround = dAtmosphereIntersection(vec3(0.0), ray,  Rg,
+                                                insideATM, offset, maxLength);
+      if (hitGround) {
+        t = float(offset); 
+      }
       // Calculate the zenith angles for x0 and v, s:
       vec3  x0     = x + t * v;
       float r0     = length(x0);
@@ -477,10 +489,10 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     float muSun           = dot(n, s);
     // Is direct Sun light arriving at x0? If not, there is no direct light from Sun (shadowed)
     vec3  transmittanceL0 = muSun < -sqrt(1.0f - ((Rg * Rg) / (r0 * r0))) ? vec3(0.0f) : transmittanceLUT(r0, muSun);
-    //return transmittanceL0;
+
     // E[L*] at x0
     vec3 irradianceReflected = irradiance(irradianceTexture, r0, muSun);
-    return irradianceReflected;
+    
     // Adding clouds texture
     //vec4 clouds = vec4(0.85)*texture(cloudsTexture, vs_st);
 
@@ -534,12 +546,13 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
   if (t > 0.0f) {
     return vec3(0.0f);
   } else {
-    vec3  transmittance = (r <= Rt) ? (mu < -sqrt(1.0f - (Rg*Rg)/(r*r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) :
-      vec3(1.0f);
-    float sunRadiance   = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance; 
+    vec3 transmittance = (r <= Rt) ? 
+          (mu < -sqrt(1.0f - (Rg/r)/(Rg/r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) :
+          vec3(1.0f);
+    float sunColor = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance; 
 
-    return transmittance * sunRadiance;
-  }
+    return transmittance * sunColor;
+    }
 }
 
 /*
@@ -654,6 +667,7 @@ void main() {
       //renderTarget = vec4(HDR(inscatterColor), 1.0); 
       //renderTarget = vec4(HDR(groundColor), 1.0); 
       //renderTarget = vec4(groundColor, 1.0); 
+      //renderTarget = vec4(HDR(sunColor), 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
       renderTarget = vec4(HDR(inscatterColor + groundColor + inscatterColor), 1.0);       
       
