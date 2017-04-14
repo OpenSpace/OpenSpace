@@ -100,21 +100,21 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			}
 			double len = Q.x*Q.x + Q.y*Q.y + Q.z*Q.z;
 			Q.w = sqrt(1.0 - len);
-			glm::dvec3 newSurfacePoint = T + (Q * surfacePoint);
+			glm::dvec3 newSurfacePoint = Q * (surfacePoint + T);
 			glm::dvec2 newScreenPoint = ptr->toScreen(newSurfacePoint, ptr->camera, ptr->node, ptr->aspectRatio); // go back to screen-space
-
+			
 			if (x % 2) // return right variable
 				return newScreenPoint.y;
 			else
 				return newScreenPoint.x;
 		};
 		// Gradient of func w.r.t par
-		auto grad = [](double* g, double* par, int x, void* fdata) {
+		auto grad = [](double* g, double* par, int x, void* fdata) { // should g[i] = 1.0 or the derivative -> project to screen -> .x or .y?
 			FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-			// Get current screen point from the id "x".
 			glm::dvec3 surfacePoint = ptr->selectedPoints.at(x / 2);
-			// s(xi,q) = toScreen(T + (Q * xi))
-			// s'(xi,q) = 
+
+			g[0] = 1.0;
+			g[1] = 1.0;
 			std::vector<glm::dvec2> transform;
 			transform.push_back(ptr->toScreen(glm::dvec3(1.0, 0.0, 0.0), ptr->camera, ptr->node, ptr->aspectRatio)); // Tx
 			transform.push_back(ptr->toScreen(glm::dvec3(0.0, 1.0, 0.0), ptr->camera, ptr->node, ptr->aspectRatio)); // Ty
@@ -125,6 +125,9 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 				Q.y = Q.z = 0.0;
 				Q.w = sqrt(1.0 - Q.x*Q.x);
 				transform.push_back(ptr->toScreen(Q * surfacePoint, ptr->camera, ptr->node, ptr->aspectRatio)); // Rx
+
+				g[2] = 1.0;
+				g[3] = 1.0;
 				if (ptr->nDOF > 4) {
 					Q.y = par[4];
 					Q.x = Q.z = 0.0;
@@ -135,21 +138,25 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 					Q.x = Q.y = 0.0;
 					Q.w = sqrt(1.0 - Q.z*Q.z);
 					transform.push_back(ptr->toScreen(Q * surfacePoint, ptr->camera, ptr->node, ptr->aspectRatio)); // Rz
+
+					g[4] = 1.0;
+					g[5] = 1.0;
 				}
 			}
 
-			for (int i = 0; i < ptr->nDOF; ++i) {
+			/*for (int i = 0; i < ptr->nDOF; ++i) {
 				if (x % 2)
 					g[i] = transform.at(i).y;
 				else
 					g[i] = transform.at(i).x;
-			}
+			}*/
 		};
 
 		SceneGraphNode* node = _selected.at(0).node;
 		const int nCoord = list.size() * 2;
 		int nDOF = std::min(nCoord, 6);
 		double* par = new double[nDOF];
+		double tPar[6] = { node->worldPosition().x, node->worldPosition().y, node->worldPosition().z, 0.0, 0.0, 0.0 };
 		for (int i = 0; i < nDOF; ++i) // initial values of q or 0.0? (ie current model or no rotation/translation)
 			par[i] = 0.0;
 		std::vector<glm::dvec3> selectedPoints;
@@ -187,8 +194,6 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		for (int i = 0; i < nDOF; ++i)
 			temp[i] = par[i];
 
-		glm::dmat4 identityMat = glm::mat4(1.0);
-		
 		glm::dvec3 T = glm::dvec3(temp[0], temp[1], temp[2]);
 		glm::dquat Q;
 		Q.x = temp[3]; Q.y = temp[4]; Q.z = temp[5];
@@ -200,10 +205,19 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		for (int i = 0; i < nDOF; ++i) {
 			os << par[i] << ", ";
 		}
-		std::cout << "Levmarq success after " << nIterations << ", Print par[nDOF]: " << os.str() << "\n";
+		std::cout << "Levmarq success after " << nIterations << " iterations, Print par[nDOF]: " << os.str() << "\n";
 
-		_camera->rotate(Q);
-		_camera->setPositionVec3(_camera->positionVec3() + T);
+
+
+		/* Things to test - potential reasons why values are so small
+			* initial values on par
+			* redefine grad to be partial derivative (mostly par[3]-par[5])
+			* change to add rotation on par[0]-par[2] instead
+			* change lmstat init
+		
+		*/
+		_camera->setPositionVec3(_camera->positionVec3() - T);
+		_camera->rotate(glm::inverse(Q));
 
 		// cleanup
 		delete[] screenPoints;
