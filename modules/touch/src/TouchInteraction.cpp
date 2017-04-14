@@ -99,7 +99,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 				}
 			}
 			double len = Q.x*Q.x + Q.y*Q.y + Q.z*Q.z;
-			Q.w = sqrt(1 - len);
+			Q.w = sqrt(1.0 - len);
 			glm::dvec3 newSurfacePoint = T + (Q * surfacePoint);
 			glm::dvec2 newScreenPoint = ptr->toScreen(newSurfacePoint, ptr->camera, ptr->node, ptr->aspectRatio); // go back to screen-space
 
@@ -157,7 +157,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			selectedPoints.push_back(sb.coordinates);
 		}
 		double* screenPoints = new double[nCoord];
-		double* squaredError = new double[nCoord];
+		double* squaredError = new double[nCoord]; // probably not be needed
 		int i = 0;
 		for (const TuioCursor& c : list) {
 			screenPoints[i] = c.getX();
@@ -183,12 +183,27 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		levmarq_init(&_lmstat);
 		int nIterations = levmarq(nDOF, par, nCoord, screenPoints, NULL, func, grad, dataPtr, &_lmstat); // finds best transform values and stores them in par
 
+		double temp[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+		for (int i = 0; i < nDOF; ++i)
+			temp[i] = par[i];
+
+		glm::dmat4 identityMat = glm::mat4(1.0);
+		
+		glm::dvec3 T = glm::dvec3(temp[0], temp[1], temp[2]);
+		glm::dquat Q;
+		Q.x = temp[3]; Q.y = temp[4]; Q.z = temp[5];
+		double len = Q.x*Q.x + Q.y*Q.y + Q.z*Q.z;
+		Q.w = sqrt(1.0 - len);
+
 		// debugging
 		std::ostringstream os;
 		for (int i = 0; i < nDOF; ++i) {
 			os << par[i] << ", ";
 		}
 		std::cout << "Levmarq success after " << nIterations << ", Print par[nDOF]: " << os.str() << "\n";
+
+		_camera->rotate(Q);
+		_camera->setPositionVec3(_camera->positionVec3() + T);
 
 		// cleanup
 		delete[] screenPoints;
@@ -198,7 +213,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 	trace(list);
 	//if (!_directTouchMode) {
 		interpret(list, lastProcessed);
-		accelerate(list, lastProcessed);
+		//accelerate(list, lastProcessed);
 	//}
 	
 	if (_currentRadius > 0.3 && _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch, needs better definition
