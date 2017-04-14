@@ -33,6 +33,7 @@ layout(location = 1) in vec3 in_position; // in meters
 
 // out vec4 vs_color;
 // out vec4 vs_position;
+out float vs_depth;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -60,5 +61,6 @@ void main() {
     vec4 position_in_meters = vec4(in_position.xyz * scale, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
     gl_Position = z_normalization(positionClipSpace);
-    // gl_Position = vs_position;
+    // vs_position = gl_Position;// = vs_position;
+    vs_depth = gl_Position.w;// = vs_position;
 }

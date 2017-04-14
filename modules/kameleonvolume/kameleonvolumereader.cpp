@@ -62,6 +62,20 @@ std::unique_ptr<RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     const glm::vec3 & lowerBound,
     const glm::vec3 & upperBound) const
 {
+    float min, max;
+    return readFloatVolume(dimensions, variable, lowerBound, upperBound, min, max);
+}
+
+std::unique_ptr<RawVolume<float>> KameleonVolumeReader::readFloatVolume(
+    const glm::uvec3 & dimensions,
+    const std::string & variable,
+    const glm::vec3 & lowerBound,
+    const glm::vec3 & upperBound,
+    float& newMinValue,
+    float& newMaxValue) const
+{
+    newMinValue = FLT_MAX;
+    newMaxValue = FLT_MIN;
     auto volume = std::make_unique<RawVolume<float>>(dimensions);
     const glm::vec3 dims = volume->dimensions();
     const glm::vec3 diff = upperBound - lowerBound;
@@ -79,6 +93,13 @@ std::unique_ptr<RawVolume<float>> KameleonVolumeReader::readFloatVolume(
             static_cast<float>(volumeCoords[0]),
             static_cast<float>(volumeCoords[1]),
             static_cast<float>(volumeCoords[2]));
+
+        if (data[index] < newMinValue) {
+            newMinValue = data[index];
+        }
+        if (data[index] > newMaxValue) {
+            newMaxValue = data[index];
+        }
     }
 
     return volume;

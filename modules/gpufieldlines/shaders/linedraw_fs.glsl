@@ -23,7 +23,8 @@
  ****************************************************************************************/
 
 // in vec4 vs_color;
-// in vec4 vs_position;
+in vec4 vs_position;
+in float vs_depth;
 
 //uniform bool classification;
 //uniform vec4 fieldLineColor;
@@ -34,7 +35,7 @@
 Fragment getFragment() {
     vec4 fragColor;
   //  if (classification) {
-        fragColor = vec4(1,1,1,1);
+        fragColor = vec4(1,1,1,0.2);
     //} else {
     //    fragColor = vec4(fieldLineColor.rgb * fieldLineColor.a , 1.0);
     //}
@@ -42,7 +43,8 @@ Fragment getFragment() {
     //float depth = pscDepth(vs_position);
 
     Fragment frag;
-    frag.depth = 1.0;
+    // frag.depth = vs_position.w;
+    frag.depth = vs_depth;
     frag.color = fragColor;
     return frag;
 }
