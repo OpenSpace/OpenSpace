@@ -22,9 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-in vec4 gs_color;
+// in vec4 gs_color;
+// in vec3 gs_color;
 in float gs_depth;
 
+uniform vec4 color;
 //uniform bool classification;
 //uniform vec4 fieldLineColor;
 
@@ -34,7 +36,9 @@ in float gs_depth;
 Fragment getFragment() {
     vec4 fragColor;
   //  if (classification) {
-        fragColor = gs_color;
+        // fragColor = vec4(gs_color,.45);
+        // fragColor = gs_color;
+        fragColor = color;
         // fragColor = vec4(1.0,0,0,0.5);
     //} else {
     //    fragColor = vec4(fieldLineColor.rgb * fieldLineColor.a , 1.0);
@@ -43,6 +47,7 @@ Fragment getFragment() {
     //float depth = pscDepth(vs_position);
 
     Fragment frag;
+    // frag.depth = 1.0;
     frag.depth = gs_depth;
     frag.color = fragColor;
     return frag;

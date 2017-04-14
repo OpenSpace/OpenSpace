@@ -26,6 +26,9 @@
 #define __OPENSPACE_MODULE_GPUFIELDLINES___RENDERABLEGPUFIELDLINES___H__
 
 #include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 
 #include <openspace/rendering/renderable.h>
 
@@ -60,7 +63,19 @@ public:
     void updateActiveStateIndex();
 private:
     // PROPERTIES
+    properties::BoolProperty _showGrid;
+    
     properties::FloatProperty _stepSize;
+    properties::FloatProperty _minLength;
+    properties::FloatProperty _clippingRadius;
+    
+    properties::OptionProperty _integrationMethod;
+
+    properties::Vec2Property _domainWidth;
+    properties::Vec2Property _domainDepth;
+    properties::Vec2Property _domainHeight;
+    
+    properties::Vec4Property _uniformFieldlineColor;
 
     // LUA INFO
     ghoul::Dictionary _vectorVolumeInfo;
@@ -101,6 +116,7 @@ private:
     glm::vec3 _domainMins;
     glm::vec3 _domainMaxs;
     glm::uvec3 _dimensions;
+    bool _updateDomain;
 
     std::vector<glm::vec3> _gridVertices;
     std::vector<GLint> _gridStartPos;
@@ -115,6 +131,7 @@ private:
 
     std::vector<double> _startTimes;
     void generateUniform3DGrid();
+    void updateDomainBounds();
 };
 
 } // namespace openspace

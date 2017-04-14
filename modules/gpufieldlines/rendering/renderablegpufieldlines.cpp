@@ -49,16 +49,18 @@ namespace {
 }
 
 namespace {
-    const char* keyVolume = "VectorVolume";
     const char* keyFieldlines = "Fieldlines";
-    const char* keySeedPoints = "SeedPoints";
+    const char* keyFieldlineMaxTraceSteps = "MaximumTracingSteps";
 
+    const char* keyVolume = "VectorVolume";
     const char* keyVolumeDirectory = "Directory";
     const char* keyVolumeTracingVariable = "TracingVariable";
 
-    const char* keyFieldlineMaxTraceSteps = "MaximumTracingSteps";
-
+    const char* keySeedPoints = "SeedPoints";
     const char* keySeedPointsFile = "File";
+
+    const int integrationSimpleEuler = 0;
+    const int integrationRungeKutta4 = 1;
 
     // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
 }
@@ -74,9 +76,21 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _vertexColorBuffer(0),
       _gridVAO(0),
       _gridVBO(0),
-      _stepSize("stepSize", "Step Size", 1.0, 0.0, 2.0),
+      _stepSize("stepSize", "Step coefficient", 0.2, 0.0001, 3.0),
+      _clippingRadius("clippingRadius", "Clipping Radius", 3.0, 1.0, 5.0),
+      _minLength("minLength", "Min Step Size", 0.0, 0.0, 4.0),
+      _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
+      _showGrid("showGrid", "Show Grid", false),
+      _domainWidth("domainWidth", "Domain Limits 'Sunwards'"),
+      _domainDepth("domainDepth", "Domain Limits 'Orbit'"),
+      _domainHeight("domainHeight", "Domain Limits South-North"),
+      _uniformFieldlineColor("fieldLineColor", "Fieldline Color",
+                             glm::vec4(0.f,1.f,0.f,0.45f),
+                             glm::vec4(0.f),
+                             glm::vec4(1.f)),
       _shouldRender(false),
       _needsUpdate(false),
+      _updateDomain(false),
       _activeStateIndex(-1) {
 
     std::string name;
@@ -99,6 +113,9 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
         LERROR("Renderable does not contain a key for '" << keySeedPoints << "'");
         // deinitialize();
     }
+
+    _integrationMethod.addOption(integrationSimpleEuler, "Simple Euler");
+    _integrationMethod.addOption(integrationRungeKutta4, "Runge-Kutta 4th Order");
 }
 
 bool RenderableGpuFieldlines::isReady() const {
@@ -308,9 +325,12 @@ bool RenderableGpuFieldlines::initialize() {
 
             _domainMins = glm::vec3(xMin,yMin,zMin);
             _domainMaxs = glm::vec3(xMax,yMax,zMax);
+            // _domainMins = glm::vec3(-16.f,-10.f,-10.f);
+            // _domainMaxs = glm::vec3(xMax/2.f,10.f,10.f);
 
             // New resampled domain dimensions (voxel grid)
-            _dimensions = glm::uvec3(32,32,32);
+            _dimensions = glm::uvec3(128,128,128);
+            // _dimensions = glm::uvec3(128,128,128);
 
             // Magnetic min/max values according to CDF "header"
             float bxMin = kvr.minValue("bx");
@@ -390,13 +410,17 @@ bool RenderableGpuFieldlines::initialize() {
                 // outY[i] = (byVol[i] - newByMin) / newByDiff;
                 // outZ[i] = (bzVol[i] - newBzMin) / newBzDiff;
                 // out[i] = glm::vec3(outX[i],outY[i],outZ[i]);
-                float ox = (bxVol[i] - newBxMin) / newBxDiff;
-                float oy = (byVol[i] - newByMin) / newByDiff;
-                float oz = (bzVol[i] - newBzMin) / newBzDiff;
+                float ox = (bxVol[i]);// - newBxMin) / newBxDiff;
+                float oy = (byVol[i]);// - newByMin) / newByDiff;
+                float oz = (bzVol[i]);// - newBzMin) / newBzDiff;
                 out[i] = glm::vec3(ox,oy,oz);
             }
             LDEBUG("\n\tNormalizing DONE!");
 
+            // GEOMETRY SHADER CAN ONLY OUTPUT A SMALL NUMBER OF VERTICES
+            GLint max_vertices, max_components;
+            glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES, &max_vertices);
+            glGetIntegerv(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, &max_components);
 
             // _volumeTextureBx = std::make_unique<ghoul::opengl::Texture>(
             //     _dimensions,
@@ -428,7 +452,7 @@ bool RenderableGpuFieldlines::initialize() {
             _volumeTexture = std::make_unique<ghoul::opengl::Texture>(
                 _dimensions,
                 ghoul::opengl::Texture::Format::RGB,
-                GL_RGB,
+                GL_RGBA32F,
                 GL_FLOAT,
                 ghoul::opengl::Texture::FilterMode::Linear,
                 ghoul::opengl::Texture::WrappingMode::ClampToEdge
@@ -496,9 +520,80 @@ bool RenderableGpuFieldlines::initialize() {
     _program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     // ADD PROPERTIES
+    addProperty(_minLength);
     addProperty(_stepSize);
+    addProperty(_clippingRadius);
+    addProperty(_showGrid);
+    addProperty(_integrationMethod);
+    addProperty(_domainWidth);
+    addProperty(_domainDepth);
+    addProperty(_domainHeight);
+    addProperty(_uniformFieldlineColor);
+    // addProperty(_upperDomainBound);
+
+    _domainWidth.setMinValue(glm::vec2(_domainMins.x,_domainMins.x + 1.f));
+    _domainWidth.setMaxValue(glm::vec2(_domainMaxs.x - 1.f,_domainMaxs.x));
+    _domainWidth.setValue(glm::vec2(_domainMins.x,_domainMaxs.x));
+
+    _domainDepth.setMinValue(glm::vec2(_domainMins.y,_domainMins.y + 1.f));
+    _domainDepth.setMaxValue(glm::vec2(_domainMaxs.y - 1.f,_domainMaxs.y));
+    _domainDepth.setValue(glm::vec2(_domainMins.y,_domainMaxs.y));
+
+    _domainHeight.setMinValue(glm::vec2(_domainMins.z,_domainMins.z + 1.f));
+    _domainHeight.setMaxValue(glm::vec2(_domainMaxs.z - 1.f,_domainMaxs.z));
+    _domainHeight.setValue(glm::vec2(_domainMins.z,_domainMaxs.z));
+    // _domainHeight.setValue(_domainMaxs);
+
+    // _lowerDomainBound.setMinValue(_domainMins);
+    // _lowerDomainBound.setMaxValue(_domainMaxs);
+    // _upperDomainBound.setMinValue(_domainMins);
+    // _upperDomainBound.setMaxValue(_domainMaxs);
+
+    // _lowerDomainBound.setValue(_domainMins);
+    // _upperDomainBound.setValue(_domainMaxs);
+
+    // _lowerDomainBound.onChange([this] {
+    //     updateDomainBounds();
+    // });
+    _domainWidth.onChange([this] {
+        // updateDomainBounds();
+        if (_domainWidth.value()[0] > _domainWidth.value()[1]) {
+            _domainWidth.setValue(glm::vec2(_domainWidth.value()[1],_domainWidth.value()[1]));
+        }
+    });
+    _domainDepth.onChange([this] {
+        // updateDomainBounds();
+        if (_domainDepth.value()[0] > _domainDepth.value()[1]) {
+            _domainDepth.setValue(glm::vec2(_domainDepth.value()[1],_domainDepth.value()[1]));
+        }
+    });
+    _domainHeight.onChange([this] {
+        // updateDomainBounds();
+        if (_domainHeight.value()[0] > _domainHeight.value()[1]) {
+            _domainHeight.setValue(glm::vec2(_domainHeight.value()[1],_domainHeight.value()[1]));
+        }
+    });
 
     return true;
+}
+
+void RenderableGpuFieldlines::updateDomainBounds(/*int axis*/) {
+    // // if (_lowerDomainBound > );
+    LDEBUG("updatedomain!!");
+    // switch (axis) {
+    //     case 2 : {
+        // _updateDomain = true;
+        // if (_domainHeight.value()[0] > _domainHeight.value()[1]) {
+        //     _domainHeight.value()[0] = _domainHeight.value()[1];
+        // }
+        // if (_domainHeight.value()[1] <)
+                // _domainHeight.setMinValue(glm::vec2(_domainMins.z,_domainHeight.value()[0]));
+                // _domainHeight.setMaxValue(glm::vec2(_domainHeight.value()[1],_domainMaxs.z));
+    //         break;
+    //     }
+    //     default :
+    //         break;
+    // }
 }
 
 bool RenderableGpuFieldlines::deinitialize() {
@@ -546,10 +641,18 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         int testTime = static_cast<int>(OsEng.runTime() * 100) / 5;
         _program->setUniform("time", testTime);
 
+        _program->setUniform("clippingRadius", _clippingRadius);
+        _program->setUniform("integrationMethod", _integrationMethod);
+        _program->setUniform("minLength", _minLength);
         _program->setUniform("domainMins", _domainMins);
         // _program->setUniform("bMaxs", _bMaxs);
         _program->setUniform("domainMaxs", _domainMaxs);
+        // _program->setUniform("boundaryMins", _lowerDomainBound);
+        _program->setUniform("domainWidthLimits", _domainWidth);
+        _program->setUniform("domainDepthLimits", _domainDepth);
+        _program->setUniform("domainHeightLimits", _domainHeight);
         _program->setUniform("domainDiffs", _domainMaxs - _domainMins);
+        _program->setUniform("color", _uniformFieldlineColor);
 
         _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
         _textureUnit->activate();
@@ -586,21 +689,23 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         glEnable(GL_CULL_FACE);
         _program->deactivate();
 
-        _gridProgram->activate();
+        if (_showGrid) {
+            _gridProgram->activate();
 
-        _gridProgram->setUniform("modelViewProjection",
-                data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+            _gridProgram->setUniform("modelViewProjection",
+                    data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
 
-        glBindVertexArray(_gridVAO);
+            glBindVertexArray(_gridVAO);
 
-        glMultiDrawArrays(
-                GL_LINE_STRIP_ADJACENCY,
-                &_gridStartPos[0],
-                &_gridLineCount[0],
-                static_cast<GLsizei>(_gridStartPos.size())
-        );
+            glMultiDrawArrays(
+                    GL_LINE_STRIP,
+                    &_gridStartPos[0],
+                    &_gridLineCount[0],
+                    static_cast<GLsizei>(_gridStartPos.size())
+            );
 
-        _gridProgram->deactivate();
+            _gridProgram->deactivate();
+        }
     }
 }
 
