@@ -43,74 +43,74 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileprovider {
 
-    PresentationSlideProvider::PresentationSlideProvider(const ghoul::Dictionary& dictionary) {
-        setName("SlideProvider");
-        ghoul::Dictionary defaultProviderDict = dictionary.value<ghoul::Dictionary>(KeyDefaultProvider);
-        TileProvider* defaultProvider = TileProvider::createFromDictionary(defaultProviderDict);
-        _defaultProvider = std::unique_ptr<TileProvider>(defaultProvider);
+PresentationSlideProvider::PresentationSlideProvider(const ghoul::Dictionary& dictionary)
+    : _slideIndex("slideIndex", "slideIndex", 0, 0, _slideProviders.size() - 1)
+{
+    setName("SlideProvider");
+    ghoul::Dictionary defaultProviderDict = dictionary.value<ghoul::Dictionary>(KeyDefaultProvider);
+    _defaultProvider = TileProvider::createFromDictionary(defaultProviderDict);
 
-        ghoul::Dictionary tileIndexDict = dictionary.value<ghoul::Dictionary>(KeyTileIndex);
-        _tileIndex = TileIndex(tileIndexDict);
+    ghoul::Dictionary tileIndexDict = dictionary.value<ghoul::Dictionary>(KeyTileIndex);
+    _tileIndex = TileIndex(tileIndexDict);
         
-        ghoul::Dictionary slideProvidersDict = dictionary.value<ghoul::Dictionary>(KeySlideProviders);
-        _slideProviders.resize(slideProvidersDict.size());
-        for (size_t i = 0; i < slideProvidersDict.size(); i++) {
-            std::string dictKey = std::to_string(i + 1);
-            ghoul::Dictionary providerDict = slideProvidersDict.value<ghoul::Dictionary>(dictKey);
-            TileProvider* tileProvider = TileProvider::createFromDictionary(providerDict);
-            _slideProviders[i].reset(tileProvider);
-        }
+    ghoul::Dictionary slideProvidersDict = dictionary.value<ghoul::Dictionary>(KeySlideProviders);
+    _slideProviders.resize(slideProvidersDict.size());
+    for (size_t i = 0; i < slideProvidersDict.size(); i++) {
+        std::string dictKey = std::to_string(i + 1);
+        ghoul::Dictionary providerDict = slideProvidersDict.value<ghoul::Dictionary>(dictKey);
+        _slideProviders[i] = TileProvider::createFromDictionary(providerDict);
+    }
         
+    _slideIndex.setMaxValue(_slideProviders.size() - 1);
+    addProperty(_slideIndex);
+}
+
+Tile PresentationSlideProvider::getTile(const TileIndex& tileIndex) {
+    if(tileIndex == _tileIndex){
+        return slideProvider()->getTile(tileIndex);
+    }
+    return Tile::TileUnavailable;
         
-        _slideIndex = std::make_unique<properties::IntProperty>("slideIndex", "slideIndex", 0, 0, _slideProviders.size()-1);
-        addProperty(_slideIndex.get());
-    }
+}
 
-    Tile PresentationSlideProvider::getTile(const TileIndex& tileIndex) {
-        if(tileIndex == _tileIndex){
-            return slideProvider()->getTile(tileIndex);
-        }
-        return Tile::TileUnavailable;
-        
-    }
+Tile PresentationSlideProvider::getDefaultTile() {
+    return _defaultProvider->getDefaultTile();
+}
 
-    Tile PresentationSlideProvider::getDefaultTile() {
-        return _defaultProvider->getDefaultTile();
+Tile::Status PresentationSlideProvider::getTileStatus(const TileIndex& tileIndex) {
+    if(tileIndex == _tileIndex){
+        return slideProvider()->getTileStatus(tileIndex);
     }
+    return Tile::Status::Unavailable;
+}
 
-    Tile::Status PresentationSlideProvider::getTileStatus(const TileIndex& tileIndex) {
-        if(tileIndex == _tileIndex){
-            return slideProvider()->getTileStatus(tileIndex);
-        }
-        return Tile::Status::Unavailable;
-    }
+TileDepthTransform PresentationSlideProvider::depthTransform() {
+    return slideProvider()->depthTransform();
+}
 
-    TileDepthTransform PresentationSlideProvider::depthTransform() {
-        slideProvider()->depthTransform();
-    }
+void PresentationSlideProvider::update() {
+    slideProvider()->update();
+    _defaultProvider->update();
+}
 
-    void PresentationSlideProvider::update() {
-        slideProvider()->update();
-        _defaultProvider->update();
+void PresentationSlideProvider::reset() {
+    for(auto& tp : _slideProviders){
+        tp->reset();
     }
+    _defaultProvider->reset();
+}
 
-    void PresentationSlideProvider::reset() {
-        for(auto& tp : _slideProviders){
-            tp->reset();
-        }
-        _defaultProvider->reset();
-    }
+int PresentationSlideProvider::maxLevel() {
+    return _defaultProvider->maxLevel();
+}
 
-    int PresentationSlideProvider::maxLevel() {
-        return _defaultProvider->maxLevel();
-    }
-
-    TileProvider* PresentationSlideProvider::slideProvider(){
-        int maxIndex = (int)_slideProviders.size() - 1;
-        return _slideProviders[std::max(0, std::min(_slideIndex->value(), maxIndex))].get();
-    }
+TileProvider* PresentationSlideProvider::slideProvider(){
+    int maxIndex = (int)_slideProviders.size() - 1;
+    return _slideProviders[std::max(0, std::min(_slideIndex.value(), maxIndex))].get();
+}
     
-
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace

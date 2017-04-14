@@ -38,34 +38,32 @@
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileprovider {
 
-    using namespace ghoul::opengl;    
+class PresentationSlideProvider : public TileProvider {
+public:
+    PresentationSlideProvider(const ghoul::Dictionary& dictionary);
+    PresentationSlideProvider(const std::string& imagePath);
+    virtual ~PresentationSlideProvider() { }
 
-    class PresentationSlideProvider : public TileProvider {
-    public:
-        
-        PresentationSlideProvider(const ghoul::Dictionary& dictionary);
-        PresentationSlideProvider(const std::string& imagePath);
-        virtual ~PresentationSlideProvider() { }
+    virtual Tile getTile(const TileIndex& tileIndex);
+    virtual Tile getDefaultTile();
+    virtual Tile::Status getTileStatus(const TileIndex& index);
+    virtual TileDepthTransform depthTransform();
+    virtual void update();
+    virtual void reset();
+    virtual int maxLevel();
 
-        virtual Tile getTile(const TileIndex& tileIndex);
-        virtual Tile getDefaultTile();
-        virtual Tile::Status getTileStatus(const TileIndex& index);
-        virtual TileDepthTransform depthTransform();
-        virtual void update();
-        virtual void reset();
-        virtual int maxLevel();
+private:
+    TileProvider* slideProvider();
 
-    private:
-        TileProvider* slideProvider();
+    TileIndex _tileIndex;
+    properties::IntProperty _slideIndex;
+    std::vector<std::unique_ptr<TileProvider>> _slideProviders;
+    std::unique_ptr<TileProvider> _defaultProvider;
+};
 
-
-        TileIndex _tileIndex;
-        std::unique_ptr<properties::IntProperty> _slideIndex;
-        std::vector<std::unique_ptr<TileProvider>> _slideProviders;
-        std::unique_ptr<TileProvider> _defaultProvider;
-    };
-
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
