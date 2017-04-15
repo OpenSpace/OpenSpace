@@ -90,7 +90,7 @@ void GlobeBrowsingModule::internalInitialize() {
             CpuCap.installedMainMemory() * 0.25 * 1024 * 1024); // 25% of total RAM
         addPropertySubOwner(GdalWrapper::ref());
 #endif // GLOBEBROWSING_USE_GDAL
-	});
+    });
   
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&]{
         cache::MemoryAwareTileCache::ref().clear();
@@ -117,9 +117,6 @@ void GlobeBrowsingModule::internalInitialize() {
     fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>("SizeReference");
 
     // Combining Tile Providers
-    fTileProvider->registerClass<tileprovider::TileProviderByLevel>("ByLevel");
-    fTileProvider->registerClass<tileprovider::TileProviderByIndex>("ByIndex");
-
     fTileProvider->registerClass<tileprovider::TileProviderByLevel>("ByLevel");
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>("ByIndex");
     fTileProvider->registerClass<tileprovider::PresentationSlideProvider>("PresentationSlides");
