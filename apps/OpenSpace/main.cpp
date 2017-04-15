@@ -36,17 +36,51 @@
 #include <SGCTOpenVR.h>
 #endif // OPENVR_SUPPORT
 
+#ifdef OPENSPACE_HAS_SPOUT
+#include "SpoutLibrary.h"
+#endif // OPENSPACE_HAS_SPOUT
+
+
 #define DEVELOPER_MODE
 
 namespace {
     
 const char* _loggerCat = "main";
-
 sgct::Engine* SgctEngine;
     
 #ifdef OPENVR_SUPPORT
 sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
 #endif
+
+#ifdef OPENSPACE_HAS_SPOUT
+
+const char* SpoutTag = "Spout";
+
+/**
+* This struct stores all information about a single render window.
+*/
+struct SpoutWindow {
+    struct SpoutData {
+        SPOUTHANDLE handle = nullptr;
+        bool initialized = false;
+    };
+
+    /// The left framebuffer (or main, if there is no stereo rendering)
+    SpoutData leftOrMain;
+
+    /// The right framebuffer
+    SpoutData right;
+
+    /// The window ID of this windows
+    size_t windowId = size_t(-1);
+};
+
+/// The list of all windows with spout senders
+std::vector<SpoutWindow> SpoutWindows;
+
+#endif // OPENSPACE_HAS_SPOUT
+
+
 
 std::pair<int, int> supportedOpenGLVersion() {
     // Just create a window in order to retrieve the available OpenGL version before we
@@ -117,18 +151,69 @@ void mainInitFunc() {
     // Set the clear color for all non-linear projection viewports
     // @CLEANUP:  Why is this necessary?  We can set the clear color in the configuration
     // files --- abock
-    size_t nWindows = SgctEngine->getNumberOfWindows();
+    const size_t nWindows = SgctEngine->getNumberOfWindows();
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::SGCTWindow* w = SgctEngine->getWindowPtr(i);
-        size_t nViewports = w->getNumberOfViewports();
+        const size_t nViewports = w->getNumberOfViewports();
         for (size_t j = 0; j < nViewports; ++j) {
             sgct_core::Viewport* v = w->getViewport(j);
             ghoul_assert(v != nullptr, "Number of reported viewports was incorrect");
             sgct_core::NonLinearProjection* p = v->getNonLinearProjectionPtr();
-            if (p)
+            if (p) {
                 p->setClearColor(glm::vec4(0.f, 0.f, 0.f, 1.f));
+            }
         }
     }
+
+#ifdef OPENSPACE_HAS_SPOUT
+    //SpoutWindows.resize(nWindows);
+    for (size_t i = 0; i < nWindows; ++i) {
+        auto windowPtr = SgctEngine->getWindowPtr(i);
+
+        if (!windowPtr->checkIfTagExists(SpoutTag)) {
+            continue;
+        }
+
+        SpoutWindow w;
+
+        w.windowId = i;
+
+        sgct::SGCTWindow::StereoMode sm = windowPtr->getStereoMode();
+        if (sm != sgct::SGCTWindow::No_Stereo && sm < sgct::SGCTWindow::Side_By_Side_Stereo) {
+            auto& left = w.leftOrMain;
+            left.handle = GetSpout();
+
+            left.initialized = left.handle->CreateSender(
+                (windowPtr->getName() + "_left").c_str(),
+                windowPtr->getXFramebufferResolution(),
+                windowPtr->getYFramebufferResolution()
+            );
+
+            auto& right = w.right;
+            right.handle = GetSpout();
+
+            right.initialized = right.handle->CreateSender(
+                (windowPtr->getName() + "_right").c_str(),
+                windowPtr->getXFramebufferResolution(),
+                windowPtr->getYFramebufferResolution()
+            );
+        }
+        else {
+            auto windowPtr = SgctEngine->getWindowPtr(i);
+
+            auto& main = w.leftOrMain;
+            main.handle = GetSpout();
+
+            main.initialized = main.handle->CreateSender(
+                windowPtr->getName().c_str(),
+                windowPtr->getXFramebufferResolution(),
+                windowPtr->getYFramebufferResolution()
+            );
+        }
+
+        SpoutWindows.push_back(std::move(w));
+    }
+#endif // OPENSPACE_HAS_SPOUT
     LTRACE("main::mainInitFunc(end)");
 }
 
@@ -148,7 +233,7 @@ void mainPostSyncPreDrawFunc() {
         // Update pose matrices for all tracked OpenVR devices once per frame
         sgct::SGCTOpenVR::updatePoses();
     }
-#endif
+#endif // OPENVR_SUPPORT
 
     LTRACE("main::postSynchronizationPreDraw(end)");
 }
@@ -193,9 +278,38 @@ void mainPostDrawFunc() {
         // Copy the first OpenVR window to the HMD
         sgct::SGCTOpenVR::copyWindowToHMD(FirstOpenVRWindow);
     }
-#endif
+#endif // OPENVR_SUPPORT
 
     OsEng.postDraw();
+
+#ifdef OPENSPACE_HAS_SPOUT
+    for (const SpoutWindow& w : SpoutWindows) {
+        sgct::SGCTWindow* window = SgctEngine->getWindowPtr(w.windowId);
+        if (w.leftOrMain.initialized) {
+            GLuint texId = window->getFrameBufferTexture(sgct::Engine::LeftEye);
+            glBindTexture(GL_TEXTURE_2D, texId);
+            w.leftOrMain.handle->SendTexture(
+                texId,
+                GL_TEXTURE_2D,
+                window->getXFramebufferResolution(),
+                window->getYFramebufferResolution()
+            );
+        }
+
+        if (w.right.initialized) {
+            GLuint texId = window->getFrameBufferTexture(sgct::Engine::RightEye);
+            glBindTexture(GL_TEXTURE_2D, texId);
+            w.right.handle->SendTexture(
+                texId,
+                GL_TEXTURE_2D,
+                window->getXFramebufferResolution(),
+                window->getYFramebufferResolution()
+            );
+        }
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+#endif // OPENSPACE_HAS_SPOUT
+
     LTRACE("main::mainPostDrawFunc(end)");
 }
 
@@ -368,6 +482,25 @@ int main_main(int argc, char** argv) {
         
         LDEBUG("Destroying SGCT Engine");
         delete SgctEngine;
+
+
+#ifdef OPENVR_SUPPORT
+        // Clean up OpenVR
+        sgct::SGCTOpenVR::shutdown();
+#endif
+
+#ifdef OPENSPACE_HAS_SPOUT
+        for (SpoutWindow& w : SpoutWindows) {
+            if (w.leftOrMain.handle) {
+                w.leftOrMain.handle->ReleaseReceiver();
+                w.leftOrMain.handle->Release();
+            }
+            if (w.right.handle) {
+                w.right.handle->ReleaseReceiver();
+                w.right.handle->Release();
+            }
+        }
+#endif // OPENSPACE_HAS_SPOUT
     };
     
     bool initSuccess = SgctEngine->init(versionMapping[glVersion]);
@@ -384,11 +517,6 @@ int main_main(int argc, char** argv) {
     LDEBUG("Ending rendering loop");
     
     cleanup();
-    
-#ifdef OPENVR_SUPPORT
-    // Clean up OpenVR
-    sgct::SGCTOpenVR::shutdown();
-#endif
     
     // Exit program
     exit(EXIT_SUCCESS); 
