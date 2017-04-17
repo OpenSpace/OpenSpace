@@ -151,6 +151,15 @@ struct TimeQuantizer {
      */
     bool quantize(Time& t, bool clamp) const;
 
+    /**
+    * Returns a list of quantized Time objects that represent all the valid quantized
+    * Time%s between \p start and \p end.
+    * \param start The start time for the time range quantization
+    * \param end The end time for the time range quantization
+    * \return A list of quantized times between \p start and \end
+    */
+    std::vector<Time> quantized(const Time& start, const Time& end) const;
+
 private:
     TimeRange _timerange;
     double _resolution;
