@@ -28,10 +28,10 @@
 namespace openspace {
 
 namespace distanceconstants {
-	const float EarthRadius = 6371;
-	const float LightYear = 9.4607304725808E15;
-	const float AstronomicalUnit = 1.495978707E11;
-	const float Parsec = 3.0856776E16;
+    const float EarthRadius = 6371;
+    const float LightYear = 9.4607304725808E15;
+    const float AstronomicalUnit = 1.495978707E11;
+    const float Parsec = 3.0856776E16;
 }
 
 }

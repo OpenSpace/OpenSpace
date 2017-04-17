@@ -16,4 +16,9 @@
         <TileCountY>1</TileCountY>
         <YOrigin>top</YOrigin>
     </DataWindow>
+    <Cache>
+        <Path>./GDAL_Cache/OnMoonHeight</Path>
+        <Depth>4</Depth>
+        <Extension>.png</Extension>
+    </Cache>
 </GDAL_WMS>

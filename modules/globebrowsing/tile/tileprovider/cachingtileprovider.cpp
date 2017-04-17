@@ -40,7 +40,9 @@ namespace {
     const char* KeyDoPreProcessing = "DoPreProcessing";
     const char* KeyTilePixelSize = "TilePixelSize";
     const char* KeyFilePath = "FilePath";
+    const char* KeyBasePath = "BasePath";
     const char* KeyFlushInterval = "FlushInterval";
+    const char* KeyPreCacheLevel = "PreCacheLevel";
 }
 
 namespace openspace {
@@ -50,7 +52,7 @@ namespace tileprovider {
 CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
     : TileProvider(dictionary)
     , _framesSinceLastRequestFlush(0)
-	, _defaultTile(Tile::TileUnavailable)
+    , _defaultTile(Tile::TileUnavailable)
 {
     std::string name = "Name unspecified";
     dictionary.getValue("Name", name);
@@ -84,9 +86,12 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
             framesUntilRequestFlush);
     }
 
+    std::string basePath;
+    dictionary.getValue(KeyBasePath, basePath);
+
     // Initialize instance variables
 #ifdef GLOBEBROWSING_USE_GDAL
-    auto tileDataset = std::make_shared<GdalRawTileDataReader>(filePath, config);
+    auto tileDataset = std::make_shared<GdalRawTileDataReader>(filePath, config, basePath);
 #else // GLOBEBROWSING_USE_GDAL
     auto tileDataset = std::make_shared<SimpleRawTileDataReader>(filePath, config);
 #endif // GLOBEBROWSING_USE_GDAL
@@ -99,6 +104,18 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
         tileDataset, threadPool);
     _framesUntilRequestFlush = framesUntilRequestFlush;
+
+    if (dictionary.hasKeyAndValue<double>(KeyPreCacheLevel)) {
+        int preCacheLevel = static_cast<int>(dictionary.value<double>(KeyPreCacheLevel));
+        LDEBUG("Precaching '" << filePath << "' with level '" << preCacheLevel << "'");
+        for (int level = 0; level <= preCacheLevel; ++level) {
+            for (int x = 0; x <= level * 2; ++x) {
+                for (int y = 0; y <= level; ++y) {
+                    _asyncTextureDataProvider->enqueueTileIO({ x, y, level });
+                }
+            }
+        }
+    }
 }
 
 CachingTileProvider::CachingTileProvider(
