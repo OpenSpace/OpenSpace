@@ -32,6 +32,22 @@
 
 #include <sgct.h>
 
+#ifdef WIN32
+
+#include <openspace/openspace.h>
+
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/stacktrace.h>
+
+#include <fmt/format.h>
+
+#include <Windows.h>
+#include <dbghelp.h>
+#include <shellapi.h>
+#include <shlobj.h>
+
+#endif // WIN32
+
 #ifdef OPENVR_SUPPORT
 #include <SGCTOpenVR.h>
 #endif // OPENVR_SUPPORT
@@ -43,6 +59,73 @@ namespace {
 const char* _loggerCat = "main";
 
 sgct::Engine* SgctEngine;
+
+#ifdef WIN32
+
+LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
+    SYSTEMTIME stLocalTime;
+    GetLocalTime(&stLocalTime);
+
+
+    LFATAL("Printing Stack Trace that lead to the crash:");
+    std::vector<std::string> stackTrace = ghoul::stackTrace();
+    for (const std::string& s : stackTrace) {
+        LINFO(s);
+    }
+
+    std::string dumpFile = fmt::format(
+        "OpenSpace_{}_{}_{}-{}-{}-{}-{}-{}-{}--{}--{}.dmp",
+        openspace::OPENSPACE_VERSION_MAJOR,
+        openspace::OPENSPACE_VERSION_MINOR,
+        openspace::OPENSPACE_VERSION_PATCH,
+        stLocalTime.wYear,
+        stLocalTime.wMonth,
+        stLocalTime.wDay,
+        stLocalTime.wHour,
+        stLocalTime.wMinute,
+        stLocalTime.wSecond,
+        GetCurrentProcessId(),
+        GetCurrentThreadId()
+    );
+
+    LINFO("Creating dump file: " << dumpFile);
+
+    HANDLE hDumpFile = CreateFile(
+        dumpFile.c_str(),
+        GENERIC_READ | GENERIC_WRITE,
+        FILE_SHARE_WRITE | FILE_SHARE_READ,
+        0,
+        CREATE_ALWAYS,
+        0,
+        0
+    );
+
+    MINIDUMP_EXCEPTION_INFORMATION exceptionParameter;
+    exceptionParameter.ThreadId = GetCurrentThreadId();
+    exceptionParameter.ExceptionPointers = exceptionPointers;
+    exceptionParameter.ClientPointers = TRUE;
+
+    BOOL success = MiniDumpWriteDump(
+        GetCurrentProcess(),
+        GetCurrentProcessId(),
+        hDumpFile,
+        MiniDumpWithDataSegs,
+        &exceptionParameter,
+        nullptr,
+        nullptr
+    );
+
+    if (success) {
+        LINFO("Created successfully");
+    }
+    else {
+        LERROR("Dumpfile created unsuccessfully");
+    }
+
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
+#endif // WIN32
     
 #ifdef OPENVR_SUPPORT
 sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
@@ -395,6 +478,10 @@ int main_main(int argc, char** argv) {
 } // namespace
 
 int main(int argc, char** argv) {
+#ifdef WIN32
+    SetUnhandledExceptionFilter(generateMiniDump);
+#endif // WIN32
+
     // If we are working as a developer, we don't want to catch the exceptions in order to
     // find the locations where the exceptions are raised.
     // If we are not in developer mode, we want to catch and at least log the error before

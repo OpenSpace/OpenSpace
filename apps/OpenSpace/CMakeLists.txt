@@ -69,7 +69,7 @@ add_executable(${APPLICATION_NAME}
     ${RESOURCE_FILE}
 )
 target_include_directories(${APPLICATION_NAME} PUBLIC ${OPENSPACE_BASE_DIR}/include ${OPENVR_INCLUDE_DIRS} ${SGCT_OPENVR_INCLUDE_DIRECTORY})
-target_link_libraries(${APPLICATION_NAME} libOpenSpace ${OPENVR_LIBRARY})
+target_link_libraries(${APPLICATION_NAME} libOpenSpace ${OPENVR_LIBRARY} Dbghelp.lib)
 target_compile_definitions(${APPLICATION_NAME} PUBLIC ${SGCT_OPENVR_DEFINITIONS})
 
 
