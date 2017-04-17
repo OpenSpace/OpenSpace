@@ -67,6 +67,8 @@ public:
     std::vector<std::string> variableAttributeNames() const;
     std::vector<std::string> globalAttributeNames() const;
 
+    ccmc::Kameleon* getKameleon();
+
 private:
     static void addAttributeToDictionary(ghoul::Dictionary& dictionary, const std::string& key, ccmc::Attribute& attr);
     std::string _path;

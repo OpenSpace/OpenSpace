@@ -75,6 +75,7 @@ public:
                             std::vector<double>& startTimes,
                             GpuFieldlinesState& outGpuFieldlinesStates);
 
+    double getTime(ccmc::Kameleon* kameleon);
 private:
     bool traceGpuFieldlines( ccmc::Kameleon* kameleon,
                           const std::string& tracingVariable,
@@ -109,7 +110,6 @@ private:
                                     GpuFieldlinesState& outGpuFieldlinesStates,
                                     ccmc::Fieldline& fl);
 
-    double getTime(ccmc::Kameleon* kameleon);
 };
 
 } //namespace openspace

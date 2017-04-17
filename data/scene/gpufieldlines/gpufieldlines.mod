@@ -1,7 +1,8 @@
 local seedPointsFileBatsrus = '${OPENSPACE_DATA}/scene/gpufieldlines/seedpoints/BATS_R_US_all_combined.txt';
 local seedPointsFileEnlil = '${OPENSPACE_DATA}/scene/gpufieldlines/seedpoints/enlil.txt';
 
-local volumeFolderBatsrus = '${OPENSPACE_DATA}/bats_sequence';
+local volumeFolderBatsrus = '${OPENSPACE_DATA}/Zihan_Wang_030517_1';
+-- local volumeFolderBatsrus = '${OPENSPACE_DATA}/bats_sequence';
 local volumeFolderEnlil = '${OPENSPACE_DATA}/enlil_sequence';
 local volumeFile1 = '${OPENSPACE_DATA}/bats_sequence/batsrus1.cdf';
 local volumeFile2 = '${OPENSPACE_DATA}/bats_sequence/batsrus2.cdf';

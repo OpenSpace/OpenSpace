@@ -78,9 +78,10 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _gridVBO(0),
       _stepSize("stepSize", "Step coefficient", 0.2, 0.0001, 3.0),
       _clippingRadius("clippingRadius", "Clipping Radius", 3.0, 1.0, 5.0),
-      _minLength("minLength", "Min Step Size", 0.0, 0.0, 4.0),
+      // _minLength("minLength", "Min Step Size", 0.0, 0.0, 4.0),
       _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
       _showGrid("showGrid", "Show Grid", false),
+      _isMorphing("isMorphing", "Morphing", true),
       _domainWidth("domainWidth", "Domain Limits 'Sunwards'"),
       _domainDepth("domainDepth", "Domain Limits 'Orbit'"),
       _domainHeight("domainHeight", "Domain Limits South-North"),
@@ -95,7 +96,7 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
 
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
-
+_isMorphing = true;
     _loggerCat = "RenderableGpuFieldlines [" + name + "]";
 
     // Find VectorVolume, SeedPoint and Fieldlines Info from Lua
@@ -120,110 +121,6 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
 
 bool RenderableGpuFieldlines::isReady() const {
     return _program ? true : false;
-}
-
-// FOR DEBUGGING PURPOSES
-void RenderableGpuFieldlines::generateUniform3DGrid() {
-    // bottom vertices of entire volume
-    // glm::vec3 bfl = glm::vec3(_domainMaxs.x, _domainMins.y, _domainMins.z);
-    // glm::vec3 bfr = glm::vec3(_domainMaxs.x, _domainMaxs.y, _domainMins.z);
-    // glm::vec3 bbr = glm::vec3(_domainMins.x, _domainMaxs.y, _domainMins.z);
-    // glm::vec3 bbl = glm::vec3(_domainMins.x, _domainMins.y, _domainMins.z);
-
-    // // top corners of entire volume
-    // // glm::vec3 tfl = glm::vec3(_domainMaxs.x, _domainMins.y, _domainMaxs.z);
-    // glm::vec3 tfr = glm::vec3(_domainMaxs.x, _domainMaxs.y, _domainMaxs.z);
-    // glm::vec3 tbr = glm::vec3(_domainMins.x, _domainMaxs.y, _domainMaxs.z);
-    // glm::vec3 tbl = glm::vec3(_domainMins.x, _domainMins.y, _domainMaxs.z);
-
-    // std::vector<glm::vec3> vertices;
-    // std::vector<int> startPos;
-    // std::vector<int> lineCount;
-
-
-    // ADD VOLUME BOUNDARY VERTICES FOR LINE DRAWING
-      // 1------0 (6)
-      // |      |\
-      // |      | \
-      // 2      5  7
-      //  \      \ |
-      //   \      \|
-      //    3------4 (8)
-
-    // startPos.push_back(0);
-    // vertices.push_back(tbr); // top-back-right (0)
-    // vertices.push_back(tbl); // top-back-left  (1)
-    // vertices.push_back(bbl);
-    // vertices.push_back(bfl); // bottom-front-left
-    // vertices.push_back(bfr);
-    // vertices.push_back(bbr);
-    // vertices.push_back(tbr);
-    // vertices.push_back(tfr);
-    // vertices.push_back(bfr);
-    // lineCount.push_back(9);
-
-    // // ADD MISSING LINE (from 2 to 5)
-    // startPos.push_back(9);
-    // vertices.push_back(bbl);
-    // vertices.push_back(bbr);
-    // lineCount.push_back(2);
-
-    // ADD ALL OTHER LINES
-
-    glm::vec3 deltas = (_domainMaxs - _domainMins) / glm::vec3(
-                                                        static_cast<float>(_dimensions.x),
-                                                        static_cast<float>(_dimensions.y),
-                                                        static_cast<float>(_dimensions.z));
-
-    int lStart = 0;
-    // HORIZONTAL LINES parallel to x axis
-    for (int z = 0; z < _dimensions.z + 1; ++z) {
-        for (int y = 0; y < _dimensions.y + 1; ++y) {
-            _gridStartPos.push_back(lStart);
-            _gridVertices.push_back(glm::vec3(_domainMins.x,
-                                              _domainMins.y + static_cast<float>(y) * deltas.y,
-                                              _domainMins.z + static_cast<float>(z) * deltas.z));
-            _gridVertices.push_back(glm::vec3(_domainMaxs.x,
-                                              _domainMins.y + static_cast<float>(y) * deltas.y,
-                                              _domainMins.z + static_cast<float>(z) * deltas.z));
-            lStart += 2;
-            _gridLineCount.push_back(2);
-        }
-    }
-
-    // HORIZONTAL LINES parallel to y axis
-    for (int z = 0; z < _dimensions.z + 1; ++z) {
-        for (int x = 0; x < _dimensions.x + 1; ++x) {
-            _gridStartPos.push_back(lStart);
-
-            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                                              _domainMins.y,
-                                              _domainMins.z + static_cast<float>(z) * deltas.z));
-            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                                              _domainMaxs.y,
-                                              _domainMins.z + static_cast<float>(z) * deltas.z));
-            lStart += 2;
-            _gridLineCount.push_back(2);
-        }
-    }
-
-
-    // VERTICAL LINES parallel to z axis
-    for (int x = 0; x < _dimensions.x + 1; ++x) {
-        for (int y = 0; y < _dimensions.y + 1; ++y) {
-            _gridStartPos.push_back(lStart);
-
-            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                                              _domainMins.y + static_cast<float>(y) * deltas.y,
-                                              _domainMins.z));
-            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                                              _domainMins.y + static_cast<float>(y) * deltas.y,
-                                              _domainMaxs.z));
-            lStart += 2;
-            _gridLineCount.push_back(2);
-        }
-    }
-
 }
 
 bool RenderableGpuFieldlines::initialize() {
@@ -251,6 +148,7 @@ bool RenderableGpuFieldlines::initialize() {
                 "Files must be of the same model and in !");
         return false;
     } else { // Everything essential is provided
+        // TODO: remove this else scope? not needed!
         std::vector<std::string> validCdfFilePaths;
         if (!GpuFieldlinesManager::ref().getCdfFilePaths(pathToCdfDirectory,
                                                               validCdfFilePaths)) {
@@ -277,7 +175,7 @@ bool RenderableGpuFieldlines::initialize() {
             maxSteps = static_cast<int>(f_maxSteps);
         }
 
-        _numberOfStates = 1;//validCdfFilePaths.size();
+        _numberOfStates = validCdfFilePaths.size();
         _states.reserve(_numberOfStates);
         _startTimes.reserve(_numberOfStates);
 
@@ -323,11 +221,16 @@ bool RenderableGpuFieldlines::initialize() {
             float  zMin = kvr.minValue("z");
             float  zMax = kvr.maxValue("z");
 
-            _domainMins = glm::vec3(xMin,yMin,zMin);
-            _domainMaxs = glm::vec3(xMax,yMax,zMax);
-            // _domainMins = glm::vec3(-16.f,-10.f,-10.f);
-            // _domainMaxs = glm::vec3(xMax/2.f,10.f,10.f);
-
+            if (i == 0) {
+                _domainMins = glm::vec3(xMin,yMin,zMin);
+                _domainMaxs = glm::vec3(xMax,yMax,zMax);
+                // _domainMins = glm::vec3(-16.f,-10.f,-10.f);
+                // _domainMaxs = glm::vec3(xMax/2.f,10.f,10.f);
+            } else {
+                ghoul_assert(_domainMins == glm::vec3(xMin,yMin,zMin) &&
+                             _domainMaxs == glm::vec3(xMax,yMax,zMax),
+                             "Spatial domains of CDF files are of different dimensions!");
+            }
             // New resampled domain dimensions (voxel grid)
             _dimensions = glm::uvec3(128,128,128);
             // _dimensions = glm::uvec3(128,128,128);
@@ -340,8 +243,8 @@ bool RenderableGpuFieldlines::initialize() {
             float bzMin = kvr.minValue("bz");
             float bzMax = kvr.maxValue("bz");
 
-            _bMins = glm::vec3(bxMin,byMin,bzMin);
-            _bMaxs = glm::vec3(bxMax,byMax,bzMax);
+            // _bMins.push_back(glm::vec3(bxMin, byMin, bzMin));
+            // _bMaxs.push_back(glm::vec3(bxMax, byMax, bzMax));
 
             // Actual max/min values after uniform resampling of volume
             float newBxMin;
@@ -363,8 +266,10 @@ bool RenderableGpuFieldlines::initialize() {
 
             LDEBUG("Done creating float volumes");
 
-            _bMins = glm::vec3(newBxMin,newByMin,newBzMin);
-            _bMaxs = glm::vec3(newBxMax,newByMax,newBzMax);
+            // _bMins = glm::vec3(newBxMin,newByMin,newBzMin);
+            // _bMaxs = glm::vec3(newBxMax,newByMax,newBzMax);
+            _bMins.push_back(glm::vec3(newBxMin,newByMin,newBzMin));
+            _bMaxs.push_back(glm::vec3(newBxMax,newByMax,newBzMax));
 
             float* bxVol = bxUniformDistr->data();
             float* byVol = byUniformDistr->data();
@@ -417,11 +322,6 @@ bool RenderableGpuFieldlines::initialize() {
             }
             LDEBUG("\n\tNormalizing DONE!");
 
-            // GEOMETRY SHADER CAN ONLY OUTPUT A SMALL NUMBER OF VERTICES
-            GLint max_vertices, max_components;
-            glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES, &max_vertices);
-            glGetIntegerv(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, &max_components);
-
             // _volumeTextureBx = std::make_unique<ghoul::opengl::Texture>(
             //     _dimensions,
             //     ghoul::opengl::Texture::Format::Red,
@@ -449,46 +349,56 @@ bool RenderableGpuFieldlines::initialize() {
             //     ghoul::opengl::Texture::WrappingMode::ClampToEdge
             // );
 
-            _volumeTexture = std::make_unique<ghoul::opengl::Texture>(
+            _volumeTexture.push_back(std::make_unique<ghoul::opengl::Texture>(
                 _dimensions,
                 ghoul::opengl::Texture::Format::RGB,
                 GL_RGBA32F,
                 GL_FLOAT,
                 ghoul::opengl::Texture::FilterMode::Linear,
                 ghoul::opengl::Texture::WrappingMode::ClampToEdge
-            );
+            ));
 
             void* data = reinterpret_cast<void*>(_normalizedVolume->data());
             // void* dataBx = reinterpret_cast<void*>(_normalizedVolumeBx->data());
             // void* dataBy = reinterpret_cast<void*>(_normalizedVolumeBy->data());
             // void* dataBz = reinterpret_cast<void*>(_normalizedVolumeBz->data());
-            _volumeTexture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
+            _volumeTexture[i]->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
             // _volumeTextureBx->setPixelData(dataBx, ghoul::opengl::Texture::TakeOwnership::No);
             // _volumeTextureBy->setPixelData(dataBy, ghoul::opengl::Texture::TakeOwnership::No);
             // _volumeTextureBz->setPixelData(dataBz, ghoul::opengl::Texture::TakeOwnership::No);
 
-            _volumeTexture->uploadTexture();
+            // TODO MOVE SOMEWHERE
+            _volumeTexture[i]->uploadTexture();
 
-            auto data2 = _normalizedVolume->data();
+            // auto data2 = _normalizedVolume->data();
 
-            _states.push_back(GpuFieldlinesState(_seedPoints.size()));
-            _startTimes.push_back(479649600.0); // March 15th 2015 00:00:00.000
+            // _states.push_back(GpuFieldlinesState(_seedPoints.size()));
+            // GpuFieldlinesManager::ref().getTime(kvr.getKameleon());
 
-            generateUniform3DGrid();
+            _startTimes.push_back(GpuFieldlinesManager::ref().getTime(kvr.getKameleon())); // March 15th 2015 00:00:00.000
+            // _startTimes.push_back(479649600.0); // March 15th 2015 00:00:00.000
 
+            if (i == 0) {
+                generateUniform3DGrid();
+            }
         }
 
-        // Approximate the end time of last state (and for the  as a whole)
+        // Approximate the end time of last state (and for the sequence as a whole)
         if (_numberOfStates > 0) {
             _seqStartTime = _startTimes[0];
             double lastStateStart = _startTimes[_numberOfStates-1];
-            // double avgTimeOffset = (lastStateStart - _seqStartTime) /
-            //                        (static_cast<double>(_numberOfStates) - 1.0);
-            _seqEndTime =  lastStateStart + 9999999.9;//avgTimeOffset;
+            double avgTimeOffset = (lastStateStart - _seqStartTime) /
+                                   (static_cast<double>(_numberOfStates) - 1.0);
+            _seqEndTime =  lastStateStart + avgTimeOffset;
             // Add seqEndTime as the last start time
             // to prevent vector from going out of bounds later.
             _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
         }
+
+        // GEOMETRY SHADER CAN ONLY OUTPUT A SMALL NUMBER OF VERTICES
+        GLint max_vertices, max_components;
+        glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES, &max_vertices);
+        glGetIntegerv(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, &max_components);
     }
 
     _program = OsEng.renderEngine().buildRenderProgram(
@@ -515,15 +425,16 @@ bool RenderableGpuFieldlines::initialize() {
     }
 
     // TODO REMOVE.. ONLY FOR DEBUGGING!!
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    _program->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    _program->setIgnoreUniformLocationError(IgnoreError::Yes);
+    // using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    // _program->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    // _program->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     // ADD PROPERTIES
-    addProperty(_minLength);
+    // addProperty(_minLength);
     addProperty(_stepSize);
     addProperty(_clippingRadius);
     addProperty(_showGrid);
+    addProperty(_isMorphing);
     addProperty(_integrationMethod);
     addProperty(_domainWidth);
     addProperty(_domainDepth);
@@ -638,26 +549,40 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         _program->setUniform("modelViewProjection",
                 data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
 
-        int testTime = static_cast<int>(OsEng.runTime() * 100) / 5;
-        _program->setUniform("time", testTime);
+        // int testTime = static_cast<int>(OsEng.runTime() * 100) / 5;
+        // _program->setUniform("time", testTime);
 
         _program->setUniform("clippingRadius", _clippingRadius);
         _program->setUniform("integrationMethod", _integrationMethod);
-        _program->setUniform("minLength", _minLength);
-        _program->setUniform("domainMins", _domainMins);
+        // _program->setUniform("minLength", _minLength);
         // _program->setUniform("bMaxs", _bMaxs);
-        _program->setUniform("domainMaxs", _domainMaxs);
+        _program->setUniform("domainMins", _domainMins);
+        // _program->setUniform("domainMaxs", _domainMaxs);
+        _program->setUniform("domainDiffs", _domainMaxs - _domainMins);
         // _program->setUniform("boundaryMins", _lowerDomainBound);
         _program->setUniform("domainWidthLimits", _domainWidth);
         _program->setUniform("domainDepthLimits", _domainDepth);
         _program->setUniform("domainHeightLimits", _domainHeight);
-        _program->setUniform("domainDiffs", _domainMaxs - _domainMins);
         _program->setUniform("color", _uniformFieldlineColor);
 
+        // TODO MOVE THIS TO UPDATE AND CHECK
         _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
         _textureUnit->activate();
-        _volumeTexture->bind();
+        _volumeTexture[_activeStateIndex]->bind();
         _program->setUniform("volumeTexture", _textureUnit->unitNumber());
+
+        _program->setUniform("isMorphing", _isMorphing);
+
+        if (_isMorphing) {
+            _program->setUniform("state_progression", _stateProgress);
+            _textureUnit2 = std::make_unique<ghoul::opengl::TextureUnit>();
+            _textureUnit2->activate();
+            if (_activeStateIndex < _numberOfStates-1) {
+                _volumeTexture[_activeStateIndex+1]->bind();
+            }
+            _program->setUniform("nextVolumeTexture", _textureUnit2->unitNumber());
+        }
+
 
         glDisable(GL_CULL_FACE);
 
@@ -723,10 +648,16 @@ void RenderableGpuFieldlines::update(const UpdateData&) {
         // if NOT in the same state as in the previous update..
         if ( _activeStateIndex < 0 ||
              _currentTime < _startTimes[_activeStateIndex] ||
-             // This next line requires/assumes seqEndTime to be last position in _startTimes
+             // This condition assumes seqEndTime to be last position in _startTimes
              _currentTime >= _startTimes[_activeStateIndex + 1]) {
             _needsUpdate = true;
-        } // else {we're still in same state as previous update (no changes needed)}
+        } else if (_isMorphing) {
+            double stateDuration = _startTimes[_activeStateIndex + 1] -
+                                   _startTimes[_activeStateIndex]; // TODO? could be stored
+            double stateTimeElapsed = _currentTime - _startTimes[_activeStateIndex];
+            _stateProgress = static_cast<float>(stateTimeElapsed / stateDuration);
+            // ghoul_assert(_stateProgress >= 0.0f, "_stateProgress is NEGATIVE!!");
+        }
     } else {
         // Not in interval => set everything to false
         _activeStateIndex = -1;
@@ -734,7 +665,7 @@ void RenderableGpuFieldlines::update(const UpdateData&) {
         _needsUpdate = false;
     }
 
-    if(_needsUpdate) {
+    if(_needsUpdate) { // TODO MOST OF THIS IS JUST IMPORTANT FOR SEED POINT.. which are static/const.. so TODO: fix this .....
         updateActiveStateIndex(); // sets _activeStateIndex
         if (_vertexArrayObject == 0) {
             glGenVertexArrays(1, &_vertexArrayObject);
@@ -794,7 +725,9 @@ void RenderableGpuFieldlines::update(const UpdateData&) {
 
 bool RenderableGpuFieldlines::isWithinInterval() {
     _currentTime = Time::ref().j2000Seconds();
-    return (_currentTime >= _seqStartTime) && (_currentTime <  _seqEndTime);
+    return (_currentTime >= _seqStartTime) &&
+           (_isMorphing ? _currentTime < _startTimes[_numberOfStates-1] // nothing to morph to after last state
+                        : _currentTime < _seqEndTime);
 }
 
 // Assumes we already know that _currentTime is within the  interval
@@ -810,6 +743,110 @@ void RenderableGpuFieldlines::updateActiveStateIndex() {
     } else {
         _activeStateIndex = _numberOfStates - 1;
     }
+}
+
+// FOR DEBUGGING PURPOSES
+void RenderableGpuFieldlines::generateUniform3DGrid() {
+    // bottom vertices of entire volume
+    // glm::vec3 bfl = glm::vec3(_domainMaxs.x, _domainMins.y, _domainMins.z);
+    // glm::vec3 bfr = glm::vec3(_domainMaxs.x, _domainMaxs.y, _domainMins.z);
+    // glm::vec3 bbr = glm::vec3(_domainMins.x, _domainMaxs.y, _domainMins.z);
+    // glm::vec3 bbl = glm::vec3(_domainMins.x, _domainMins.y, _domainMins.z);
+
+    // // top corners of entire volume
+    // // glm::vec3 tfl = glm::vec3(_domainMaxs.x, _domainMins.y, _domainMaxs.z);
+    // glm::vec3 tfr = glm::vec3(_domainMaxs.x, _domainMaxs.y, _domainMaxs.z);
+    // glm::vec3 tbr = glm::vec3(_domainMins.x, _domainMaxs.y, _domainMaxs.z);
+    // glm::vec3 tbl = glm::vec3(_domainMins.x, _domainMins.y, _domainMaxs.z);
+
+    // std::vector<glm::vec3> vertices;
+    // std::vector<int> startPos;
+    // std::vector<int> lineCount;
+
+
+    // ADD VOLUME BOUNDARY VERTICES FOR LINE DRAWING
+      // 1------0 (6)
+      // |      |\
+      // |      | \
+      // 2      5  7
+      //  \      \ |
+      //   \      \|
+      //    3------4 (8)
+
+    // startPos.push_back(0);
+    // vertices.push_back(tbr); // top-back-right (0)
+    // vertices.push_back(tbl); // top-back-left  (1)
+    // vertices.push_back(bbl);
+    // vertices.push_back(bfl); // bottom-front-left
+    // vertices.push_back(bfr);
+    // vertices.push_back(bbr);
+    // vertices.push_back(tbr);
+    // vertices.push_back(tfr);
+    // vertices.push_back(bfr);
+    // lineCount.push_back(9);
+
+    // // ADD MISSING LINE (from 2 to 5)
+    // startPos.push_back(9);
+    // vertices.push_back(bbl);
+    // vertices.push_back(bbr);
+    // lineCount.push_back(2);
+
+    // ADD ALL OTHER LINES
+
+    glm::vec3 deltas = (_domainMaxs - _domainMins) / glm::vec3(
+                                                        static_cast<float>(_dimensions.x),
+                                                        static_cast<float>(_dimensions.y),
+                                                        static_cast<float>(_dimensions.z));
+
+    int lStart = 0;
+    // HORIZONTAL LINES parallel to x axis
+    for (int z = 0; z < _dimensions.z + 1; ++z) {
+        for (int y = 0; y < _dimensions.y + 1; ++y) {
+            _gridStartPos.push_back(lStart);
+            _gridVertices.push_back(glm::vec3(_domainMins.x,
+                                              _domainMins.y + static_cast<float>(y) * deltas.y,
+                                              _domainMins.z + static_cast<float>(z) * deltas.z));
+            _gridVertices.push_back(glm::vec3(_domainMaxs.x,
+                                              _domainMins.y + static_cast<float>(y) * deltas.y,
+                                              _domainMins.z + static_cast<float>(z) * deltas.z));
+            lStart += 2;
+            _gridLineCount.push_back(2);
+        }
+    }
+
+    // HORIZONTAL LINES parallel to y axis
+    for (int z = 0; z < _dimensions.z + 1; ++z) {
+        for (int x = 0; x < _dimensions.x + 1; ++x) {
+            _gridStartPos.push_back(lStart);
+
+            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                                              _domainMins.y,
+                                              _domainMins.z + static_cast<float>(z) * deltas.z));
+            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                                              _domainMaxs.y,
+                                              _domainMins.z + static_cast<float>(z) * deltas.z));
+            lStart += 2;
+            _gridLineCount.push_back(2);
+        }
+    }
+
+
+    // VERTICAL LINES parallel to z axis
+    for (int x = 0; x < _dimensions.x + 1; ++x) {
+        for (int y = 0; y < _dimensions.y + 1; ++y) {
+            _gridStartPos.push_back(lStart);
+
+            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                                              _domainMins.y + static_cast<float>(y) * deltas.y,
+                                              _domainMins.z));
+            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                                              _domainMins.y + static_cast<float>(y) * deltas.y,
+                                              _domainMaxs.z));
+            lStart += 2;
+            _gridLineCount.push_back(2);
+        }
+    }
+
 }
 
 } // namespace openspace
