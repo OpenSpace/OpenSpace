@@ -39,23 +39,23 @@ LayerRenderSettings::LayerRenderSettings()
 }
 
 float LayerRenderSettings::performLayerSettings(float currentValue) const {
-	float newValue = currentValue;
+    float newValue = currentValue;
 
-	newValue = glm::sign(newValue) * glm::pow(glm::abs(newValue), gamma);
-	newValue = newValue * multiplier;
-	newValue = newValue * opacity;
+    newValue = glm::sign(newValue) * glm::pow(glm::abs(newValue), gamma);
+    newValue = newValue * multiplier;
+    newValue = newValue * opacity;
 
-	return newValue;
+    return newValue;
 }
 
 glm::vec4 LayerRenderSettings::performLayerSettings(glm::vec4 currentValue) const {
-	glm::vec4 newValue = glm::vec4(
-		performLayerSettings(currentValue.r),
-		performLayerSettings(currentValue.g),
-		performLayerSettings(currentValue.b),
-		performLayerSettings(currentValue.a));
+    glm::vec4 newValue = glm::vec4(
+        performLayerSettings(currentValue.r),
+        performLayerSettings(currentValue.g),
+        performLayerSettings(currentValue.b),
+        performLayerSettings(currentValue.a));
 
-	return newValue;
+    return newValue;
 }
 
 } // namespace globebrowsing

@@ -112,7 +112,7 @@ documentation::Documentation ProjectionTileProvider::Documentation() {
 ProjectionTileProvider::ProjectionTileProvider(const ghoul::Dictionary& dictionary) 
     : _fboProgramObject(nullptr)
     , _capture(false)
-	, _defaultTile(Tile::TileUnavailable)
+    , _defaultTile(Tile::TileUnavailable)
 {
 
     ghoul::Dictionary geometryDictionary;
