@@ -69,11 +69,12 @@ add_executable(${APPLICATION_NAME}
     ${RESOURCE_FILE}
 )
 target_include_directories(${APPLICATION_NAME} PUBLIC ${OPENSPACE_BASE_DIR}/include ${OPENVR_INCLUDE_DIRS} ${SGCT_OPENVR_INCLUDE_DIRECTORY})
-target_link_libraries(${APPLICATION_NAME} libOpenSpace ${OPENVR_LIBRARY} Dbghelp.lib)
+target_link_libraries(${APPLICATION_NAME} libOpenSpace ${OPENVR_LIBRARY})
 target_compile_definitions(${APPLICATION_NAME} PUBLIC ${SGCT_OPENVR_DEFINITIONS})
 
 
 if (MSVC)
+    target_link_libraries(${APPLICATION_NAME} Dbghelp.lib)
     set_target_properties(${APPLICATION_NAME} PROPERTIES LINK_FLAGS
         "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
     )
