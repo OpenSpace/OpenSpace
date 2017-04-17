@@ -24,22 +24,27 @@
 
 #version __CONTEXT__
 
+uniform bool isMorphing;
+
 uniform float stepSize;
 uniform float minLength;
 uniform float clippingRadius;
+uniform float state_progression;
 
 uniform int integrationMethod;
+uniform int maxComponentOutput;
 
 uniform mat4 modelViewProjection;
 
 uniform sampler3D volumeTexture;
+uniform sampler3D nextVolumeTexture;
 
 uniform vec2 domainWidthLimits;
 uniform vec2 domainDepthLimits;
 uniform vec2 domainHeightLimits;
 
 uniform vec3 domainMins;
-uniform vec3 domainMaxs;
+// uniform vec3 domainMaxs;
 uniform vec3 domainDiffs;
 
 in vec4 vs_color[];
@@ -72,6 +77,13 @@ void addVertex(in vec3 unscaledPos) {
 
 vec3 getFieldVecAtPosition(in vec3 unscaledPos) {
     vec3 normCoords = normalizeCoords(unscaledPos); // gl texture coords (range 0 to 1)
+    if (isMorphing) {
+        vec3 prevMeasurement = texture(volumeTexture, normCoords).xyz;
+        vec3 nextMeasurement = texture(nextVolumeTexture, normCoords).xyz;
+        return prevMeasurement * (1.0 - state_progression) +
+               nextMeasurement * state_progression;
+    }
+
     return texture(volumeTexture, normCoords).xyz; // TODO only vec3?
 }
 

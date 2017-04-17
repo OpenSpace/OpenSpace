@@ -64,17 +64,18 @@ public:
 private:
     // PROPERTIES
     properties::BoolProperty _showGrid;
-    
+    properties::BoolProperty _isMorphing;
+
     properties::FloatProperty _stepSize;
-    properties::FloatProperty _minLength;
+    // properties::FloatProperty _minLength;
     properties::FloatProperty _clippingRadius;
-    
+
     properties::OptionProperty _integrationMethod;
 
     properties::Vec2Property _domainWidth;
     properties::Vec2Property _domainDepth;
     properties::Vec2Property _domainHeight;
-    
+
     properties::Vec4Property _uniformFieldlineColor;
 
     // LUA INFO
@@ -104,15 +105,16 @@ private:
     // std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBy;
     // std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBz;
 
-    std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
+    std::vector<std::shared_ptr<ghoul::opengl::Texture>> _volumeTexture;
     // std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBx;
     // std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBy;
     // std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBz;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
+    std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit2;
 
-    glm::vec3 _bMins;
-    glm::vec3 _bMaxs;
+    std::vector<glm::vec3> _bMins;
+    std::vector<glm::vec3> _bMaxs;
     glm::vec3 _domainMins;
     glm::vec3 _domainMaxs;
     glm::uvec3 _dimensions;
