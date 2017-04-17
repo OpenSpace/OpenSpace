@@ -99,7 +99,57 @@ return {
                     {
                         Name = "BMNG",
                         FilePath = "map_service_configs/Utah/Bmng.wms"
-                    }
+                    },
+                    {
+                        Type = "Temporal",
+                        Name = "aerosol",
+                        FilePath = "${SOS}/aerosol_black_carbon_and_sulfate.xml",
+                        TilePixelSize = 256,
+                        PreCacheLevel = 2,
+                        PreCacheStartTime = "2017 MAR 30 12:30:00",
+                        PreCacheEndTime = "2017 APR 04 11:00:00",
+                        Enabled = true
+                    },
+                    {
+                        Type = "Temporal",
+                        Name = "grace",
+                        FilePath = "${SOS}/grace.xml",
+                        TilePixelSize = 256,
+                        PreCacheLevel = 2,
+                        PreCacheStartTime = "2017 MAR 30 12:30:00",
+                        PreCacheEndTime = "2017 APR 02 21:00:00",
+                        Enabled = true
+                    },
+                    {
+                        Type = "Temporal",
+                        Name = "precip",
+                        FilePath = "${SOS}/precip.xml",
+                        TilePixelSize = 256,
+                        PreCacheLevel = 2,
+                        PreCacheStartTime = "2017 MAR 30 12:30:00",
+                        PreCacheEndTime = "2017 APR 07 10:30:00",
+                        Enabled = true
+                    },
+                    {
+                        Type = "Temporal",
+                        Name = "seawifs",
+                        FilePath = "${SOS}/seawifs.xml",
+                        TilePixelSize = 256,
+                        PreCacheLevel = 2,
+                        PreCacheStartTime = "2017 MAR 30 12:30:00",
+                        PreCacheEndTime = "2017 APR 03 03:30:00",
+                        Enabled = true
+                    },
+                    {
+                        Type = "Temporal",
+                        Name = "temperature",
+                        FilePath = "${SOS}/temperature.xml",
+                        TilePixelSize = 256,
+                        PreCacheLevel = 2,
+                        PreCacheStartTime = "2017 MAR 30 12:30:00",
+                        PreCacheEndTime = "2017 APR 02 20:30:00",
+                        Enabled = true
+                    },
                     -- {
                     --     Type = "Temporal",
                     --     Name = "NOAA RT",

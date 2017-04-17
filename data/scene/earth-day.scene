@@ -1,0 +1,93 @@
+function preInitialization()
+    --[[
+    The scripts in this function are executed after the scene is loaded but before the
+    scene elements have been initialized, thus they should be used to set the time at
+    which the scene should start and other settings that might determine initialization
+    critical objects.
+    ]]--
+
+    --openspace.time.setTime(openspace.time.currentWallTime())
+    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    openspace.setPathToken("${SOS}", "E:/science_on_a_sphere")
+
+    openspace.time.setTime(openspace.time.currentWallTime())
+    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+
+
+    -- Toggle night texture, shading, atmosphere and water
+    openspace.bindKey("s",
+        helper.property.invert('Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.enabled') ..
+        helper.property.invert('Earth.RenderableGlobe.performShading') ..
+        helper.property.invert('Earth.RenderableGlobe.atmosphere') ..
+        helper.property.invert('Earth.RenderableGlobe.Layers.WaterMasks.MODIS_Water_Mask.enabled'),
+        "Toggle night texture, shading, atmosphere, and water for Earth."
+    )
+
+    -- Toggle background
+    openspace.bindKey("b",
+        "openspace.setPropertyValueSingle('MilkyWay.renderable.enabled', false);" ..
+        "openspace.setPropertyValueSingle('Stars.renderable.enabled', false);" ..
+        "openspace.setPropertyValueSingle('Sun.renderable.enabled', false);" ..
+        "openspace.setPropertyValue('*Trail.renderable.enabled', false);",
+        "Toggle background (Stars, Sun, Milkyway, Trails)."
+    )
+
+    openspace.bindKey("n",
+        "openspace.setPropertyValueSingle('MilkyWay.renderable.enabled', true);" ..
+        "openspace.setPropertyValueSingle('Stars.renderable.enabled', true);" ..
+        "openspace.setPropertyValueSingle('Sun.renderable.enabled', true);" ..
+        "openspace.setPropertyValue('*Trail.renderable.enabled', true);",
+        "Toggle background (Stars, Sun, Milkyway, Trails)."
+    )
+
+    openspace.bindKey('F5', 'openspace.time.setTime("2017 MAR 30 12:30:00");')
+
+    openspace.bindKey("KP_1", "openspace.registerScreenSpaceRenderable({Type = 'ScreenSpaceImage', TexturePath = '${SOS}/co2_800k.png' });")
+    openspace.bindKey("KP_2", "openspace.registerScreenSpaceRenderable({Type = 'ScreenSpaceImage', TexturePath = '${SOS}/monthly_ice_09_NH.png' });")
+    openspace.bindKey("KP_3", "openspace.registerScreenSpaceRenderable({Type = 'ScreenSpaceImage', TexturePath = '${SOS}/temp_index.png' });")
+end
+
+function postInitialization()
+    openspace.printInfo("Setting default values")
+
+    openspace.setInteractionMode('GlobeBrowsing')
+
+    openspace.setPropertyValueSingle('Global Properties.GlobeBrowsing.GdalWrapper.logGdalErrors', false)
+
+    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    openspace.setPropertyValue("Sun.renderable.enabled", true)
+    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+    
+    openspace.setPropertyValue("Earth.RenderableGlobe.atmosphere", true)
+    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.settings.gamma", 1.8)
+    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.settings.multiplier", 10)
+
+    openspace.resetCameraDirection()
+
+    openspace.printInfo("Done setting default values")
+end
+
+
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "Earth",
+        Position = {138530625167.228241, 42217005217.825005, -46336405755.934372},
+        Rotation = {0.633883, 0.492158, -0.123913, -0.583625},
+    },
+
+    Modules = {
+        "lodglobes/earth",
+        "lodglobes/moon",
+        "sun",
+        "stars",
+        "milkyway",
+    }
+}
+
