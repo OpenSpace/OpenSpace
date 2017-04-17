@@ -1028,11 +1028,12 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(end)");
 }
 
-void OpenSpaceEngine::render(const glm::mat4& viewMatrix,
+void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
+                             const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
     LTRACE("OpenSpaceEngine::render(begin)");
-    _renderEngine->render(viewMatrix, projectionMatrix);
+    _renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
     
     for (const auto& func : _moduleCallbacks.render) {
         func();

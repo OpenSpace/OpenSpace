@@ -104,6 +104,8 @@ public:
     /// The key that stores whether the master node should perform rendering just function
     /// as a pure manager
     static const std::string KeyDisableMasterRendering;
+    /// The key that stores whether the master node should apply the scene transformation
+    static const std::string KeyDisableSceneOnMaster;
     /// The key that sets the request URL that is used to request additional data to be
     /// downloaded
     static const std::string KeyDownloadRequestURL;

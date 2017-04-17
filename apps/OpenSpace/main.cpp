@@ -175,13 +175,11 @@ void mainRenderFunc() {
     }
 #endif
 
-    if (SgctEngine->isMaster()) {
-        OsEng.render(viewMatrix, projectionMatrix);
-    }
-    else {
-        glm::mat4 sceneMatrix = SgctEngine->getModelMatrix();
-        OsEng.render(viewMatrix * sceneMatrix, projectionMatrix);
-    }
+    OsEng.render(
+        SgctEngine->getModelMatrix(),
+        viewMatrix,
+        projectionMatrix
+    );
     LTRACE("main::mainRenderFunc(end)");
 }
 
