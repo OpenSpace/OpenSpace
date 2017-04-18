@@ -126,7 +126,22 @@ public:
     static const std::string PartHttpProxyUser;
     /// The key that stores the password to use for authentication to access the http proxy
     static const std::string PartHttpProxyPassword;
-
+    /// The key that stores the dictionary containing information about debug contexts
+    static const std::string KeyOpenGLDebugContext;
+    /// The part of the key storing whether an OpenGL Debug context should be created
+    static const std::string PartActivate;
+    /// The part of the key storing whether the debug callbacks are performed synchronous
+    static const std::string PartSynchronous;
+    /// The part of the key storing a list of identifiers that should be filtered out
+    static const std::string PartFilterIdentifier;
+    /// The part of the key that stores the source of the ignored identifier
+    static const std::string PartFilterIdentifierSource;
+    /// The part of the key that stores the type of the ignored identifier
+    static const std::string PartFilterIdentifierType;
+    /// The part of the key that stores the identifier of the ignored identifier
+    static const std::string PartFilterIdentifierIdentifier;
+    /// The part of the key storing a list of severities that should be filtered out
+    static const std::string PartFilterSeverity;
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the

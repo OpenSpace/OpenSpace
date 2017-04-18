@@ -67,6 +67,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/opengl/debugcontext.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
 
 
@@ -906,6 +907,111 @@ void OpenSpaceEngine::configureLogging() {
 
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
+
+    const std::string key = ConfigurationManager::KeyOpenGLDebugContext;
+    if (_configurationManager->hasKey(key)) {
+        ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(key);
+        bool debug = dict.value<bool>(ConfigurationManager::PartActivate);
+
+        // Debug output is not available before 4.3
+        const ghoul::systemcapabilities::Version minVersion = { 4, 3, 0 };
+        if (OpenGLCap.openGLVersion() < minVersion) {
+            LINFO("OpenGL Debug context requested, but insufficient version available");
+            debug = false;
+        }
+
+        if (debug) {
+            using namespace ghoul::opengl::debug;
+
+            bool synchronous = true;
+            if (dict.hasKey(ConfigurationManager::PartSynchronous)) {
+                synchronous = dict.value<bool>(ConfigurationManager::PartSynchronous);
+            }
+
+            setDebugOutput(DebugOutput(debug), SynchronousOutput(synchronous));
+
+
+            if (dict.hasKey(ConfigurationManager::PartFilterIdentifier)) {
+                ghoul::Dictionary filterDict = dict.value<ghoul::Dictionary>(
+                    ConfigurationManager::PartFilterIdentifier
+                );
+
+                for (int i = 1; i <= filterDict.size(); ++i) {
+                    ghoul::Dictionary id = filterDict.value<ghoul::Dictionary>(
+                        std::to_string(i)
+                    );
+
+                    const unsigned int identifier = static_cast<unsigned int>(
+                        id.value<double>(
+                            ConfigurationManager::PartFilterIdentifierIdentifier
+                        )
+                    );
+
+                    const std::string s = id.value<std::string>(
+                        ConfigurationManager::PartFilterIdentifierSource
+                    );
+
+                    const std::string t = id.value<std::string>(
+                        ConfigurationManager::PartFilterIdentifierType
+                    );
+
+                    setDebugMessageControl(
+                        ghoul::from_string<Source>(s),
+                        ghoul::from_string<Type>(t),
+                        { identifier },
+                        Enabled::No
+                    );
+                }
+            }
+
+            if (dict.hasKey(ConfigurationManager::PartFilterSeverity)) {
+                ghoul::Dictionary filterDict = dict.value<ghoul::Dictionary>(
+                    ConfigurationManager::PartFilterIdentifier
+                );
+
+                for (int i = 1; i <= filterDict.size(); ++i) {
+                    std::string severity = filterDict.value<std::string>(
+                        std::to_string(i)
+                    );
+
+                    setDebugMessageControl(
+                        Source::DontCare,
+                        Type::DontCare,
+                        ghoul::from_string<Severity>(severity),
+                        Enabled::No
+                    );
+                }
+            }
+
+            auto callback = [](Source source, Type type, Severity severity,
+                unsigned int id, std::string message) -> void
+            {               
+                const std::string s = std::to_string(source);
+                const std::string t = std::to_string(type);
+
+                const std::string category =
+                    "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";
+                switch (severity) {
+                    case Severity::High:
+                        LERRORC(category, std::string(message));
+                        break;
+                    case Severity::Medium:
+                        LWARNINGC(category, std::string(message));
+                        break;
+                    case Severity::Low:
+                        LINFOC(category, std::string(message));
+                        break;
+                    case Severity::Notification:
+                        LDEBUGC(category, std::string(message));
+                        break;
+                    default:
+                        ghoul_assert(false, "Missing case label");
+                }
+            };
+            ghoul::opengl::debug::setDebugCallback(callback);
+        }
+    }
+
 
     LINFO("Initializing Rendering Engine");
     // @CLEANUP:  Remove the return statement and replace with exceptions ---abock
