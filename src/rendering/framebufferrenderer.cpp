@@ -31,6 +31,8 @@
 #include <openspace/util/camera.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/deferredcaster.h>
+#include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/rendering/raycastermanager.h>
 
@@ -101,6 +103,7 @@ void FramebufferRenderer::initialize() {
     updateResolution();
     updateRendererData();
     updateRaycastData();
+    updateDeferredcastData();
 
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture, 0);
@@ -126,6 +129,7 @@ void FramebufferRenderer::initialize() {
     }
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
+    OsEng.renderEngine().deferredcasterManager().addListener(*this);
 }
 
 void FramebufferRenderer::deinitialize() {
@@ -143,12 +147,20 @@ void FramebufferRenderer::deinitialize() {
     glDeleteVertexArrays(1, &_screenQuad);
 
     OsEng.renderEngine().raycasterManager().removeListener(*this);
+    OsEng.renderEngine().deferredcasterManager().removeListener(*this);
 }
 
 void FramebufferRenderer::raycastersChanged(VolumeRaycaster& raycaster, bool attached) {
     (void) raycaster;
     (void) attached;
     _dirtyRaycastData = true;
+}
+
+void FramebufferRenderer::deferredcastersChanged(Deferredcaster& deferredcaster, bool attached) {
+    // TODO
+    (void) deferredcaster;
+    (void) attached;
+    _dirtyDeferredcastData = true;
 }
 
 void FramebufferRenderer::update() {
@@ -158,6 +170,10 @@ void FramebufferRenderer::update() {
 
     if (_dirtyRaycastData) {
         updateRaycastData();
+    }
+
+    if (_dirtyRaycastData) {
+        updateDeferredcastData();
     }
 
     // If the resolve dictionary changed (or a file changed on disk)
@@ -196,6 +212,16 @@ void FramebufferRenderer::update() {
                 program.second->rebuildFromFile();
             }
             catch (ghoul::RuntimeError e) {
+                LERROR(e.message);
+            }
+        }
+    }
+
+    for (auto &program : _deferredcastPrograms) {
+        if (program.second->isDirty()) {
+            try {
+                program.second->rebuildFromFile();
+            } catch (ghoul::RuntimeError e) {
                 LERROR(e.message);
             }
         }
@@ -318,6 +344,52 @@ void FramebufferRenderer::updateRaycastData() {
     _dirtyRaycastData = false;
 }
 
+void FramebufferRenderer::updateDeferredcastData() {
+    // TODO
+    _deferredcastData.clear();
+    _deferredcastPrograms.clear();
+    
+    const std::vector<Deferredcaster*>& deferredcasters = OsEng.renderEngine().deferredcasterManager().deferredcasters();
+    int nextId = 0;
+    for (auto &deferredcaster : deferredcasters) {
+        DeferredcastData data;
+        data.id = nextId++;
+        data.namespaceName = "HELPER";
+
+        //std::string vsPath = raycaster->getBoundsVsPath();
+        //std::string fsPath = raycaster->getBoundsFsPath();
+
+        ghoul::Dictionary dict;
+        dict.setValue("rendererData", _rendererData);
+        //dict.setValue("fragmentPath", fsPath);
+        dict.setValue("id", data.id);
+        std::string helperPath = deferredcaster->getHelperPath();
+        ghoul::Dictionary helpersDict;
+        if (helperPath != "") {
+            helpersDict.setValue("0", helperPath);
+        }
+        dict.setValue("helperPaths", helpersDict);
+        //dict.setValue("deferredcastPath", deferredcaster->getDeferredcastPath());
+
+        _deferredcastData[deferredcaster] = data;
+
+        try {
+            ghoul::Dictionary outsideDict = dict;
+            //outsideDict.setValue("getEntryPath", GetEntryOutsidePath);
+            //_deferredcastPrograms[deferredcaster] = ghoul::opengl::ProgramObject::Build(
+            //    "Deferred " + std::to_string(data.id) + " raycast",
+            //    vsPath,
+            //    RaycastFragmentShaderPath,
+            //    outsideDict);
+        }
+        catch (ghoul::RuntimeError e) {
+            LERROR(e.message);
+        }
+
+    }
+    _dirtyDeferredcastData = false;
+}
+
 void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
     std::unique_ptr<performance::PerformanceMeasurement> perf;
     if (doPerformanceMeasurements) {
@@ -377,9 +449,16 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             if (raycastProgram == _insideRaycastPrograms[raycaster].get()) {
                 raycastProgram->activate();
                 raycastProgram->setUniform("cameraPosInRaycaster", cameraPosition);
+            } else {
+                raycastProgram = _insideRaycastPrograms[raycaster].get();
+                raycastProgram->activate();
+                raycastProgram->setUniform("cameraPosInRaycaster", cameraPosition);
             }
         } else {
             if (raycastProgram == _raycastPrograms[raycaster].get()) {
+                raycastProgram->activate();
+            } else {
+                raycastProgram = _raycastPrograms[raycaster].get();
                 raycastProgram->activate();
             }
         }
@@ -424,6 +503,50 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             raycastProgram->deactivate();
         } else {
             LWARNING("Raycaster is not attached when trying to perform raycaster task");
+        }
+    }
+
+    for (const DeferredcasterTask& deferredcasterTask : tasks.deferredTasks) {
+        // TODO
+        Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
+
+        glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
+        glm::vec3 cameraPosition;
+        ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
+
+        if (deferredcastProgram == _deferredcastPrograms[deferredcaster].get()) {
+            deferredcastProgram->activate();
+        } else {
+            deferredcastProgram = _deferredcastPrograms[deferredcaster].get();
+            deferredcastProgram->activate();
+        }
+
+        if (deferredcastProgram) {
+            //deferredcaster->preRaycast(_deferredcastData[deferredcaster], *deferredcastProgram);
+
+            ghoul::opengl::TextureUnit mainDepthTextureUnit;
+            mainDepthTextureUnit.activate();
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
+            deferredcastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
+
+            deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
+            deferredcastProgram->setUniform("windowSize", glm::vec2(_resolution));
+
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(false);
+
+            glBindVertexArray(_screenQuad);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glBindVertexArray(0);
+
+            glDepthMask(true);
+            glEnable(GL_DEPTH_TEST);
+
+            //deferredcaster->postRaycast(_deferredcastData[deferredcaster], *deferredcastProgram);
+            deferredcastProgram->deactivate();
+
+        } else {
+            LWARNING("Deferredcaster is not attached when trying to perform raycaster task");
         }
     }
 

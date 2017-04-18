@@ -22,73 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___UPDATESTRUCTURES___H__
-#define __OPENSPACE_CORE___UPDATESTRUCTURES___H__
+#ifndef __OPENSPACE_CORE___DEFERREDCASTERMANAGER___H__
+#define __OPENSPACE_CORE___DEFERREDCASTERMANAGER___H__
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+#include <vector>
 
 namespace openspace {
 
 class Deferredcaster;
-class VolumeRaycaster;
+class DeferredcasterListener;
 
-struct InitializeData {
+class DeferredcasterManager {
+public:
+    DeferredcasterManager();
+    ~DeferredcasterManager();
+    void attachDeferredcaster(Deferredcaster& deferredcaster);
+    void detachDeferredcaster(Deferredcaster& deferredcaster);
+    bool isAttached(Deferredcaster& deferredcaster);
+    const std::vector<Deferredcaster*>& deferredcasters();
 
+    void addListener(DeferredcasterListener& listener);
+    void removeListener(DeferredcasterListener& listener);
+private:
+    std::vector<Deferredcaster*> _deferredcasters;
+    std::vector<DeferredcasterListener*> _listeners;
 };
-
-struct TransformData {
-    glm::dvec3 translation;
-    glm::dmat3 rotation;
-    double scale;
-};
-
-struct UpdateData {
-    TransformData modelTransform;
-    double time;
-    double delta;
-    bool timePaused;
-    bool isTimeJump;
-    bool doPerformanceMeasurement;
-};
-
-
-struct RenderData {
-    const Camera& camera;
-    // psc position to be removed in favor of the double precision position defined in
-    // the translation in transform.
-    psc position;
-    bool doPerformanceMeasurement;
-    int renderBinMask;
-    TransformData modelTransform;
-};
-
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
-
-struct DeferredcasterTask {
-    Deferredcaster* deferredcaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-    std::vector<DeferredcasterTask> deferredTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-struct DeferredcastData {
-    int id;
-    std::string namespaceName;
-};
-
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___UPDATESTRUCTURES___H__
+
+#endif // __OPENSPACE_CORE___DEFERREDCASTERMANAGER___H__

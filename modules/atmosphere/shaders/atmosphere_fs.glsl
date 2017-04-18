@@ -62,7 +62,6 @@ uniform sampler2D nightTex;
 uniform sampler2D cloudsTexture;
 
 uniform sampler2D reflectanceTexture;
-//uniform sampler2D transmittanceTexture;
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
 
@@ -78,6 +77,8 @@ in vec4 vs_posWorld;
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 #include "atmosphere_common.glsl"
+
+layout(location = 1) out vec4 cameraDistanceTextureTarget;
 
 vec4 butterworthFunc(const float d, const float r, const float n) {
     return vec4(vec3(sqrt(r/(r + pow(d, 2*n)))), 1.0);    
@@ -98,73 +99,6 @@ struct Ray {
   vec4 origin;
   vec4 direction;
 };
-
-struct Ellipsoid {
-  vec4 center;
-  vec4 size;
-};
-
-bool intersectEllipsoid(const Ray ray, const Ellipsoid ellipsoid, out float offset, out float maxLength) {
-  vec4 O_C = ray.origin-ellipsoid.center;
-  vec4 dir = normalize(ray.direction);
-
-  offset    = 0.0f;
-  maxLength = 0.0f;
-
-  float a =
-    ((dir.x*dir.x)/(ellipsoid.size.x*ellipsoid.size.x))
-    + ((dir.y*dir.y)/(ellipsoid.size.y*ellipsoid.size.y))
-    + ((dir.z*dir.z)/(ellipsoid.size.z*ellipsoid.size.z));
-  float b =
-    ((2.f*O_C.x*dir.x)/(ellipsoid.size.x*ellipsoid.size.x))
-    + ((2.f*O_C.y*dir.y)/(ellipsoid.size.y*ellipsoid.size.y))
-    + ((2.f*O_C.z*dir.z)/(ellipsoid.size.z*ellipsoid.size.z));
-  float c =
-    ((O_C.x*O_C.x)/(ellipsoid.size.x*ellipsoid.size.x))
-    + ((O_C.y*O_C.y)/(ellipsoid.size.y*ellipsoid.size.y))
-    + ((O_C.z*O_C.z)/(ellipsoid.size.z*ellipsoid.size.z))
-    - 1.f;
-  
-  float d = ((b*b)-(4.f*a*c));
-  if ( d<0.f || a==0.f || b==0.f || c==0.f )
-    return false;
-  
-  d = sqrt(d);
-  
-  float t1 = (-b+d)/(2.f*a);
-  float t2 = (-b-d)/(2.f*a);
-  
-  if( t1<=EPSILON && t2<=EPSILON )
-    return false; // both intersections are behind the ray origin
-
-  // If only one intersection (t>0) then we are inside the ellipsoid and
-  // the intersection is at the back of the ellipsoid
-  bool back = (t1<=EPSILON || t2<=EPSILON); 
-  float t   = 0.f;
-
-  if( t1 <= EPSILON ) {
-    t = t2;
-  } else {
-    if( t2 <= EPSILON )
-      t = t1;
-    else
-      t = (t1 < t2) ? t1 : t2;
-  }
-  if( t < EPSILON ) return false; // Too close to intersection
-
-  vec4 intersection = ray.origin + t*dir;
-  vec4 normal       = intersection - ellipsoid.center;
-
-  normal.x = 2.f*normal.x/(ellipsoid.size.x*ellipsoid.size.x);
-  normal.y = 2.f*normal.y/(ellipsoid.size.y*ellipsoid.size.y);
-  normal.z = 2.f*normal.z/(ellipsoid.size.z*ellipsoid.size.z);
-  
-  normal.w = 0.f;
-  normal  *= (back) ? -1.f : 1.f;
-  normal   = normalize(normal);
-  
-  return true;
-}
 
 bool intersectAtmosphere(const vec4 planetPos, const vec3 rayDirection, const float sphereRadius, 
                          out float offset, out float maxLength) {
@@ -200,125 +134,6 @@ bool intersectAtmosphere(const vec4 planetPos, const vec3 rayDirection, const fl
   }
     
   return false;
-}
-
-bool intersectATM(const vec4 cameraPos, const vec3 rayDirection, 
-                  out float t) {
-  vec3 x = cameraPos.xyz;
-  vec3 v = normalize(rayDirection);
-  
-  float r  = length(x);
-  float mu = dot(x, v) / r;
-  t  = -r * mu - sqrt(r * r * (mu * mu - 1.0) + Rg * Rg);
-  
-  vec3  g    = x - vec3(0.0, 0.0, Rg + 10.0);
-  float a    = v.x * v.x + v.y * v.y - v.z * v.z;
-  float b    = 2.0 * (g.x * v.x + g.y * v.y - g.z * v.z);
-  float c    = g.x * g.x + g.y * g.y - g.z * g.z;
-  float d    = -(b + sqrt(b * b - 4.0 * a * c)) / (2.0 * a);
-  bool  cone = d > 0.0 && abs(x.z + d * v.z - Rg) <= 10.0;
-
-  if (t > 0.0) {
-    if (cone && d < t) {
-      t = d;
-      return true;
-    } else {
-      return false;
-    }    
-  } else if (cone) {
-        t = d;
-  } else {
-    return false;
-  }
-}
-
-/* Function to calculate the initial intersection of the eye (camera) ray
- * with the atmosphere.
- * In (all parameters in the same coordinate system and same units):
- * - planet position
- * - ray direction (normalized)
- * - eye position
- * - atmosphere radius
- * Out: true if an intersection happens, false otherwise
- * - inside: true if the ray origin is inside atmosphere, false otherwise
- * - offset: the initial intersection distance from eye position when 
- *           the eye is outside the atmosphere
- * - maxLength : the second intersection distance from eye position when the
- *               eye is inside the atmosphere or the initial (and only) 
- *               intersection of the ray with atmosphere when the eye position
- *               is inside atmosphere.
- */
-bool atmosphereIntersection(const vec3 planetPosition, const vec3 rayDirection,
-                            const vec3 rayOrigin, const float atmRadius,
-                            out bool inside, out float offset, out float maxLength ) {
-  vec3  l  = planetPosition - rayOrigin;
-  float s  = dot(l, rayDirection);
-  float l2 = dot(l, l);
-  float r2 = (atmRadius - EPSILON) *  (atmRadius - EPSILON); // avoiding surface acne
-
-  // Ray origin (eye position) is behind sphere
-  if ((s < 0.0f) && (l2 > r2)) {
-    inside    = false;
-    offset    = 0.0f;
-    maxLength = 0.0f;
-    return false;
-  }
-
-  float m2 = l2 - s*s;
-
-  // Ray misses atmospere
-  if (m2 > r2) {
-    inside    = false;
-    offset    = 0.0f;
-    maxLength = 0.0f;
-    return false;
-  }
-
-  // We already now the ray hits the atmosphere
-
-  // If q = 0.0f, there is only one intersection
-  float q = sqrt(r2 - m2);
-
-  // If l2 < r2, the ray origin is inside the sphere
-  if (l2 > r2) {
-    inside    = false;
-    offset    = s - q;
-    maxLength = s + q;
-  } else {
-    inside    = true;
-    offset    = 0.0f;
-    maxLength = s + q;
-  }
-  
-  return true;
-}
-
-
-
-float opticalDepth(float H, float r, float mu, float d) {
-  float a = sqrt((0.5/H)*r);
-  vec2 a01 = a*vec2(mu, mu + d / r);
-  vec2 a01s = sign(a01);
-  vec2 a01sq = a01*a01;
-  float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
-  vec2 y = a01s / (2.3193*abs(a01) + sqrt(1.52*a01sq + 4.0)) * vec2(1.0, exp(-d/H*(d/(2.0*r)+mu)));
-  return sqrt((6.2831*H)*r) * exp((Rg-r)/H) * (x + dot(y, vec2(1.0, -1.0)));
-}
-
-vec3 analyticTransmittance(float r, float mu, float d) {
-  return exp(- betaRayleigh * opticalDepth(HR, r, mu, d) -
-             betaMieExtinction * opticalDepth(HM, r, mu, d));
-}
-
-vec2 getIrradianceUV(float r, float muSun) {
-  float uR = (r - Rg) / (Rt - Rg);
-  float uMuS = (muSun + 0.2) / (1.0 + 0.2);
-  return vec2(uMuS, uR);
-}
-
-vec3 irradiance(sampler2D sampler, float r, float muSun) {
-  vec2 uv = getIrradianceUV(r, muSun);
-  return texture(sampler, uv).rgb;
 }
 
 /* 
@@ -645,29 +460,21 @@ Fragment getFragment() {
     vec4 viewport = vec4(screenX, screenY, screenWIDTH, screenHEIGHT);
     vec4 ndcPos;
     ndcPos.xy = ((2.0f * gl_FragCoord.xy) - (2.0f * viewport.xy)) / (viewport.zw) - 1.0f;
-    //ndcPos.x = ((2.0f * gl_FragCoord.x) - (2.0f * viewport.x)) / viewport.z - 1.0f;
-    //ndcPos.y = 1.0f - (2.0f * gl_FragCoord.y) / viewport.w;
     ndcPos.z = (2.0f * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / 
       (gl_DepthRange.far - gl_DepthRange.near);
     ndcPos.w = 1.0f;
     vec4 clipPos = ndcPos / gl_FragCoord.w;
-    //vec4 clipPos = ndcPos;
-    //clipPos.z = -1.0;
-    //clipPos.w = 1.0;
     vec4 projCoords = projInverse * clipPos;
     vec4 viewDirection =  normalize(completeInverse * vec4(projCoords.xyz, 0.0));
     vec3 v = normalize(viewDirection.xyz);
     
     float offset, maxLength;
     vec4 ppos = vec4(0.0);
-    //float t = 0.0f;
-    //if ( intersectATM(cameraPos, v, t) ) {  
+
     if (intersectAtmosphere(ppos, v, Rg, offset, maxLength)) {    
-    //if (true){
       // Following paper nomenclature
       float t  = offset;
-      // float t  = maxLength + offset;
-      vec3  x  = cameraPosObj.xyz;// + offset * v;
+      vec3  x  = cameraPosObj.xyz;
       float r  = length(x);
       float mu = dot(x, v) / r;
       vec3  s  = normalize(sunPositionObj);
@@ -677,39 +484,24 @@ Fragment getFragment() {
       vec3 groundColor = groundColor(x, t, v, s, r, mu, attenuation);
       vec3 sunColor = sunColor(x, t, v, s, r, mu); 
       
-      //diffuse = HDR(vec4(sunColor + groundColor + inscatterColor, 1.0));      
-      //diffuse = HDR(vec4(sunColor, 1.0)); 
+      //diffuse = vec4(HDR(sunColor + groundColor + inscatterColor), 1.0));      
+      //diffuse = vec4(HDR(inscatterColor), 1.0)); 
       //diffuse = vec4(HDR(groundColor), 1.0); 
-      //diffuse = HDR(vec4(inscatterColor, 1.0)); 
+      //diffuse = vec4(HDR(sunColor), 1.0));       
       
       //diffuse = HDR(vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2); 
       vec4 finalRadiance = calcShadow(shadowDataArray, vs_posWorld.xyz) * 
                             (vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2);
                      
       diffuse = vec4(HDR(finalRadiance.xyz), finalRadiance.w); 
-    }
-    // else
-    //     diffuse = HDR(diffuse);
+    }  
   }
 
-  // Testing Uniforms:
-  //diffuse.xyz = vec3(1.0f);
-  //diffuse.xyz = vec3(Rg/6378.1366);
-  //diffuse.xyz = vec3(Rt/6420.0);
-  //diffuse.xyz = vec3(AverageGroundReflectance/0.1f);
-  //diffuse.xyz = vec3(HR/8.0f);
-  //diffuse.xyz = vec3(HM/1.2f);
-  //diffuse.xyz = vec3(mieG/1.0f);
-  //diffuse.xyz = vec3(sunRadiance/50.0f);
-  //diffuse.xyz = vec3(betaRayleigh.x/5.8e-3, betaRayleigh.y/1.35e-2, betaRayleigh.z/3.31e-2);
-  //diffuse.xyz = vec3(betaMieScattering.x/4e-3, betaMieScattering.y/4e-3, betaMieScattering.z/4e-3);
-  //diffuse.xyz = vec3(betaMieExtinction.x/(betaMieScattering.x/0.9), betaMieExtinction.y/(betaMieScattering.y/0.9),
-  //                   betaMieExtinction.z/(betaMieScattering.z/0.9));
-  //diffuse.xyz = vec3(mieG);
-  
   diffuse[3] = transparency;
   frag.color = diffuse;
   frag.depth = depth;
   
+  cameraDistanceTextureTarget = vec4(vec3(0.0), 1.0);
+
   return frag;
 }

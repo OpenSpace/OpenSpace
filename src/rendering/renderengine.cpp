@@ -36,6 +36,7 @@
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -95,6 +96,7 @@ RenderEngine::RenderEngine()
     : properties::PropertyOwner("RenderEngine")
     , _mainCamera(nullptr)
     , _raycasterManager(nullptr)
+    , _deferredcasterManager(nullptr)
     , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
     , _frametimeType(
         "frametimeType",
@@ -174,6 +176,7 @@ RenderEngine::~RenderEngine() {
 
     delete _mainCamera;
     delete _raycasterManager;
+    delete _deferredcasterManager;
 }
 
 void RenderEngine::initialize() {
@@ -202,6 +205,7 @@ void RenderEngine::initialize() {
     }
 
     _raycasterManager = new RaycasterManager();
+    _deferredcasterManager = new DeferredcasterManager();
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
 
     LINFO("Seting renderer from string: " << renderingMethod);
@@ -569,6 +573,11 @@ Scene* RenderEngine::scene() {
 RaycasterManager& RenderEngine::raycasterManager() {
     return *_raycasterManager;
 }
+
+DeferredcasterManager& RenderEngine::deferredcasterManager() {
+    return *_deferredcasterManager;
+}
+
 
 void RenderEngine::setSceneGraph(Scene* sceneGraph) {
     _sceneGraph = sceneGraph;

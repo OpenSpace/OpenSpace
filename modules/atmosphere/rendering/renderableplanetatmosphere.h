@@ -79,16 +79,18 @@ namespace openspace {
 
         const unsigned int DELTA_E_TABLE_WIDTH = 64;
         const unsigned int DELTA_E_TABLE_HEIGHT = 16;
+        
 
-
-        /*const unsigned int TRANSMITTANCE_TABLE_WIDTH = 512;
+        /*
+        const unsigned int TRANSMITTANCE_TABLE_WIDTH = 512;
         const unsigned int TRANSMITTANCE_TABLE_HEIGHT = 128;
 
         const unsigned int IRRADIANCE_TABLE_WIDTH = 128;
         const unsigned int IRRADIANCE_TABLE_HEIGHT = 32;
 
         const unsigned int DELTA_E_TABLE_WIDTH = 128;
-        const unsigned int DELTA_E_TABLE_HEIGHT = 32;*/
+        const unsigned int DELTA_E_TABLE_HEIGHT = 32;
+        */
 
         const unsigned int R_SAMPLES = 32;
         const unsigned int MU_SAMPLES = 128;
@@ -174,6 +176,8 @@ namespace openspace {
         GLuint _atmosphereTexture;
         GLuint _atmosphereDepthTexture;
 
+        GLuint _cameraDistanceTexture;
+
         // Deferred debug rendering
         GLuint _atmosphereFBO;
         GLuint _atmosphereRenderVAO;
@@ -191,6 +195,9 @@ namespace openspace {
         properties::FloatProperty _atmosphereHeightP;
         properties::FloatProperty _groundAverageReflectanceP;
         properties::FloatProperty _rayleighHeightScaleP;
+        properties::FloatProperty _rayleighScatteringCoeffXP;
+        properties::FloatProperty _rayleighScatteringCoeffYP;
+        properties::FloatProperty _rayleighScatteringCoeffZP;
         properties::FloatProperty _mieHeightScaleP;
         properties::FloatProperty _mieScatteringCoefficientP;
         properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;

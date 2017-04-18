@@ -79,6 +79,16 @@ const int SKY_H = 16;
 const int OTHER_TEXTURES_W = 64;
 const int OTHER_TEXTURES_H = 16;
 
+// const int TRANSMITTANCE_W = 512;
+// const int TRANSMITTANCE_H = 128;
+
+// const int SKY_W = 128;
+// const int SKY_H = 32;
+
+// const int OTHER_TEXTURES_W = 128;
+// const int OTHER_TEXTURES_H = 32;
+
+
 // cosines sampling
 const int SAMPLES_R    = 32;
 const int SAMPLES_MU   = 128;
@@ -86,6 +96,28 @@ const int SAMPLES_MU_S = 32;
 const int SAMPLES_NU   = 8;
 
 uniform sampler2D transmittanceTexture;
+
+float opticalDepth(float H, float r, float mu, float d) {
+  float a = sqrt((0.5/H)*r);
+  vec2 a01 = a*vec2(mu, mu + d / r);
+  vec2 a01s = sign(a01);
+  vec2 a01sq = a01*a01;
+  float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
+  vec2 y = a01s / (2.3193*abs(a01) + sqrt(1.52*a01sq + 4.0)) * vec2(1.0, exp(-d/H*(d/(2.0*r)+mu)));
+  return sqrt((6.2831*H)*r) * exp((Rg-r)/H) * (x + dot(y, vec2(1.0, -1.0)));
+}
+
+vec3 analyticTransmittance(float r, float mu, float d) {
+  return exp(- betaRayleigh * opticalDepth(HR, r, mu, d) -
+             betaMieExtinction * opticalDepth(HM, r, mu, d));
+}
+
+vec3 irradiance(sampler2D sampler, const float r, const float muSun) {
+  float u_r     = (r - Rg) / (Rt - Rg);
+  float u_muSun = (muSun + 0.2) / (1.0 + 0.2);
+  return texture(sampler, vec2(u_muSun, u_r)).rgb;
+}
+
 
 //================================================//
 //=============== General Functions ==============//

@@ -58,6 +58,7 @@ class SyncBuffer;
 
 class Scene;
 class Renderer;
+class DeferredcasterManager;
 class RaycasterManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
@@ -90,6 +91,7 @@ public:
     Renderer* renderer() const;
     RendererImplementation rendererImplementation() const;
     RaycasterManager& raycasterManager();
+    DeferredcasterManager& deferredcasterManager();
 
     // sgct wrapped functions
     
@@ -184,6 +186,7 @@ private:
     Camera* _mainCamera;
     Scene* _sceneGraph;
     RaycasterManager* _raycasterManager;
+    DeferredcasterManager* _deferredcasterManager;
 
     properties::BoolProperty _performanceMeasurements;
     std::unique_ptr<performance::PerformanceManager> _performanceManager;

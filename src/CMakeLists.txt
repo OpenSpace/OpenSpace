@@ -112,6 +112,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/query/query.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/abufferrenderer.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/framebufferrenderer.cpp
+    ${OPENSPACE_BASE_DIR}/src/rendering/deferredcastermanager.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/raycastermanager.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine.cpp
@@ -254,6 +255,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/query/query.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/abufferrenderer.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/framebufferrenderer.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcasterlistener.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycasterlistener.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/raycastermanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderable.h
@@ -261,6 +264,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/renderengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volume.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/screenspacerenderable.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/rendering/deferredcaster.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/volumeraycaster.h
     ${OPENSPACE_BASE_DIR}/include/openspace/rendering/transferfunction.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/translation.h

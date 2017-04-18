@@ -22,73 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___UPDATESTRUCTURES___H__
-#define __OPENSPACE_CORE___UPDATESTRUCTURES___H__
+#include <openspace/rendering/deferredcastermanager.h>
+#include <openspace/rendering/deferredcasterlistener.h>
+#include <algorithm>
+#include <string>
 
-#include <openspace/util/camera.h>
-#include <openspace/util/powerscaledcoordinate.h>
+namespace {
+    const std::string _loggerCat = "DeferredcasterManager";
+}
 
 namespace openspace {
 
-class Deferredcaster;
-class VolumeRaycaster;
+DeferredcasterManager::DeferredcasterManager() {}
 
-struct InitializeData {
+DeferredcasterManager::~DeferredcasterManager() {}
 
-};
+void DeferredcasterManager::attachDeferredcaster(Deferredcaster& deferredcaster) {
+    if (!isAttached(deferredcaster)) {
+        _deferredcasters.push_back(&deferredcaster);
+    }
+    for (auto &listener : _listeners) {
+        listener->deferredcastersChanged(deferredcaster, true);
+    }
+}
 
-struct TransformData {
-    glm::dvec3 translation;
-    glm::dmat3 rotation;
-    double scale;
-};
+void DeferredcasterManager::detachDeferredcaster(Deferredcaster& deferredcaster) {
+    auto it = std::find(_deferredcasters.begin(), _deferredcasters.end(), &deferredcaster);
+    if (it != _deferredcasters.end()) {
+        _deferredcasters.erase(it);
+        for (auto &listener : _listeners) {
+            listener->deferredcastersChanged(deferredcaster, false);
+        }
+    }
+}
 
-struct UpdateData {
-    TransformData modelTransform;
-    double time;
-    double delta;
-    bool timePaused;
-    bool isTimeJump;
-    bool doPerformanceMeasurement;
-};
+bool DeferredcasterManager::isAttached(Deferredcaster& deferredcaster) {
+    auto it = std::find(_deferredcasters.begin(), _deferredcasters.end(), &deferredcaster);
+    return it != _deferredcasters.end();
+}
 
+void DeferredcasterManager::addListener(DeferredcasterListener& listener) {
+    auto it = std::find(_listeners.begin(), _listeners.end(), &listener);
+    if (it == _listeners.end()) {
+        _listeners.push_back(&listener);
+    }
+}
 
-struct RenderData {
-    const Camera& camera;
-    // psc position to be removed in favor of the double precision position defined in
-    // the translation in transform.
-    psc position;
-    bool doPerformanceMeasurement;
-    int renderBinMask;
-    TransformData modelTransform;
-};
+void DeferredcasterManager::removeListener(DeferredcasterListener& listener) {
+    auto it = std::find(_listeners.begin(), _listeners.end(), &listener);
+    if (it != _listeners.end()) {
+        _listeners.erase(it);
+    }
+}
 
-struct RaycasterTask {
-    VolumeRaycaster* raycaster;
-    RenderData renderData;
-};
+const std::vector<Deferredcaster*>& DeferredcasterManager::deferredcasters() {
+    return _deferredcasters;
+}
 
-struct DeferredcasterTask {
-    Deferredcaster* deferredcaster;
-    RenderData renderData;
-};
-
-struct RendererTasks {
-    std::vector<RaycasterTask> raycasterTasks;
-    std::vector<DeferredcasterTask> deferredTasks;
-};
-
-struct RaycastData {
-    int id;
-    std::string namespaceName;
-};
-
-struct DeferredcastData {
-    int id;
-    std::string namespaceName;
-};
-
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___UPDATESTRUCTURES___H__
+}

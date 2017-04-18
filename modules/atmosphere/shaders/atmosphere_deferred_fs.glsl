@@ -217,34 +217,6 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
   return true;
 }
 
-
-float opticalDepth(float H, float r, float mu, float d) {
-  float a = sqrt((0.5/H)*r);
-  vec2 a01 = a*vec2(mu, mu + d / r);
-  vec2 a01s = sign(a01);
-  vec2 a01sq = a01*a01;
-  float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
-  vec2 y = a01s / (2.3193*abs(a01) + sqrt(1.52*a01sq + 4.0)) * vec2(1.0, exp(-d/H*(d/(2.0*r)+mu)));
-  return sqrt((6.2831*H)*r) * exp((Rg-r)/H) * (x + dot(y, vec2(1.0, -1.0)));
-}
-
-vec3 analyticTransmittance(float r, float mu, float d) {
-  return exp(- betaRayleigh * opticalDepth(HR, r, mu, d) -
-             betaMieExtinction * opticalDepth(HM, r, mu, d));
-}
-
-// vec2 getIrradianceUV(float r, float muSun) {
-//   float uR = (r - Rg) / (Rt - Rg);
-//   float uMuS = (muSun + 0.2) / (1.0 + 0.2);
-//   return vec2(uMuS, uR);
-// }
-
-vec3 irradiance(sampler2D sampler, const float r, const float muSun) {
-  float u_r     = (r - Rg) / (Rt - Rg);
-  float u_muSun = (muSun + 0.2) / (1.0 + 0.2);
-  return texture(sampler, vec2(u_muSun, u_r)).rgb;
-}
-
 /* 
  * Calculates the light scattering in the view direction comming from other 
  * light rays scattered in the atmosphere.
@@ -255,7 +227,7 @@ vec3 irradiance(sampler2D sampler, const float r, const float muSun) {
  * x := camera position
  * t := ray displacement variable after calculating the intersection with the 
  * atmosphere. It is the distance from the camera to the last intersection with
- * the atmosphere
+ * the atmosphere. If the ray hits the ground, t is updated to the correct value
  * v := view direction (ray's direction) (normalized)
  * s := Sun direction (normalized)
  * r := out of ||x|| inside atmosphere (or top of atmosphere)
@@ -321,8 +293,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, const vec3 v, const vec3 s,
     if (t > 0.0) {
       // Here we must test if we are hitting the ground:
       bool  insideATM    = false;
-      double offset      = 0.0f;
-      double maxLength   = 0.0f;
+      double offset      = 0.0;
+      double maxLength   = 0.0;
       dRay ray;
       ray.direction = vec4(v, 0.0);
       ray.origin = vec4(x, 1.0);     
@@ -619,8 +591,8 @@ void main() {
     //dCalculateInterpolatedRay(ray, planetPositionObjectCoords);
     
     bool  insideATM    = false;
-    double offset      = 0.0f;
-    double maxLength   = 0.0f;     
+    double offset      = 0.0;
+    double maxLength   = 0.0;     
     bool  intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt,
                                                 insideATM, offset, maxLength );
     if ( intersectATM ) {
@@ -664,12 +636,12 @@ void main() {
       vec3 groundColor = groundColor(x, tF, v, s, r, mu, attenuation);
       vec3 sunColor = sunColor(x, tF, v, s, r, mu); 
       
-      //renderTarget = vec4(HDR(inscatterColor), 1.0); 
+      renderTarget = vec4(HDR(inscatterColor), 1.0); 
       //renderTarget = vec4(HDR(groundColor), 1.0); 
       //renderTarget = vec4(groundColor, 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
-      renderTarget = vec4(HDR(inscatterColor + groundColor + inscatterColor), 1.0);       
+      //renderTarget = vec4(HDR(inscatterColor + groundColor + inscatterColor), 1.0);       
       
     } else {
       renderTarget = vec4(0.0, 0.0, 0.0, 1.0);

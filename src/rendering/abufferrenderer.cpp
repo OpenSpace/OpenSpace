@@ -30,6 +30,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/volumeraycaster.h>
+#include <openspace/rendering/deferredcaster.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>

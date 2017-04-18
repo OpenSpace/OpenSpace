@@ -32,6 +32,7 @@
 #include <vector>
 #include <map>
 
+#include <openspace/rendering/deferredcasterlistener.h>
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/renderer.h>
 #include <openspace/util/updatestructures.h>
@@ -54,7 +55,7 @@ class RenderableVolume;
 class Camera;
 class Scene;
     
-class FramebufferRenderer : public Renderer, public RaycasterListener {
+class FramebufferRenderer : public Renderer, public RaycasterListener, public DeferredcasterListener {
 public:
     FramebufferRenderer();
     virtual ~FramebufferRenderer();
@@ -64,6 +65,7 @@ public:
 
     void updateResolution();
     void updateRaycastData();
+    void updateDeferredcastData();
     
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
@@ -80,12 +82,17 @@ public:
     virtual void updateRendererData() override;
 
     virtual void raycastersChanged(VolumeRaycaster& raycaster, bool attached) override;
+    virtual void deferredcastersChanged(Deferredcaster& deferredcaster, bool attached) override;
+
 private:
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _exitPrograms;
     std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _raycastPrograms;
     std::map<VolumeRaycaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _insideRaycastPrograms;
+
+    std::map<Deferredcaster*, DeferredcastData> _deferredcastData;
+    std::map<Deferredcaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _deferredcastPrograms;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
 
@@ -98,6 +105,7 @@ private:
     GLuint _exitDepthTexture;
     GLuint _exitFramebuffer;
 
+    bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
     bool _dirtyResolution;
 
