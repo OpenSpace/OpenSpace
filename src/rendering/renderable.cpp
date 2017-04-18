@@ -137,12 +137,12 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
 Renderable::~Renderable() {}
 
-void Renderable::setBoundingSphere(PowerScaledScalar boundingSphere) {
-    boundingSphere_ = std::move(boundingSphere);
+void Renderable::setBoundingSphere(float boundingSphere) {
+    _boundingSphere = boundingSphere;
 }
 
-PowerScaledScalar Renderable::getBoundingSphere() {
-    return boundingSphere_;
+float Renderable::boundingSphere() const {
+    return _boundingSphere;
 }
 
 void Renderable::update(const UpdateData&) {}

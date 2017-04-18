@@ -91,19 +91,35 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(keyGeometry, geometryDictionary);
-    if (success) {
-        geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 
-        glm::vec2 planetRadiusVec;
-        success = geometryDictionary.getValue(keyRadius, planetRadiusVec);
-        if (success) {
-            _planetRadius = static_cast<float>(
-                planetRadiusVec[0] * glm::pow(10, planetRadiusVec[1])
-            );
+
+    glm::dvec3 radius;
+    bool accutareRadius = false;
+    try {
+        SpiceManager::ref().getValue(name, "RADII", radius);
+        accutareRadius = true;
+    } catch (const SpiceManager::SpiceException& e) {
+        accutareRadius = false;
+    }
+
+    if (accutareRadius) {
+        radius *= 1000.0; // Spice gives radii in KM.
+        std::swap(radius[1], radius[2]); // z is equivalent to y in our coordinate system
+        geometryDictionary.setValue(keyRadius, radius);
+    }
+
+    if (success) {
+        //geometryDictionary.setValue(SceneGraphNode::KeyName, name);
+        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
+ 
+        float planetRadius;
+        if (accutareRadius) {
+            _planetRadius = (radius[0] + radius[1] + radius[2]) / 3.0;
+        } else if (geometryDictionary.getValue(keyRadius, planetRadius)) {
+            _planetRadius = planetRadius;
         }
         else {
-            LWARNING("No Radius value expecified for " << name << " planet.");
+            LWARNING("No Radius value specified for " << name << " planet.");
         }
     }
 
@@ -168,13 +184,13 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
             ss << keyShadowSource << sourceCounter << ".Name";
             success = shadowDictionary.getValue(ss.str(), sourceName);
             if (success) {
-                glm::vec2 sourceRadius;
+                float sourceRadius;
                 ss.str(std::string());
                 ss << keyShadowSource << sourceCounter << ".Radius";
                 success = shadowDictionary.getValue(ss.str(), sourceRadius);
                 if (success) {
                     sourceArray.push_back(std::pair< std::string, float>(
-                        sourceName, sourceRadius[0] * pow(10.f, sourceRadius[1])));
+                        sourceName, sourceRadius));
                 }
                 else {
                     LWARNING("No Radius value expecified for Shadow Source Name " 
@@ -197,13 +213,13 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                 ss << keyShadowCaster << casterCounter << ".Name";
                 success = shadowDictionary.getValue(ss.str(), casterName);
                 if (success) {
-                    glm::vec2 casterRadius;
+                    float casterRadius;
                     ss.str(std::string());
                     ss << keyShadowCaster << casterCounter << ".Radius";
                     success = shadowDictionary.getValue(ss.str(), casterRadius);
                     if (success) {
                         casterArray.push_back(std::pair< std::string, float>(
-                            casterName, casterRadius[0] * pow(10.f, casterRadius[1])));
+                            casterName, casterRadius));
                     }
                     else {
                         LWARNING("No Radius value expecified for Shadow Caster Name "

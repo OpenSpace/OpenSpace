@@ -19,7 +19,7 @@ return {
             Body = "NIX",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 0.45 , 5 },
+                Radius = 0.45E5,
                 Segments = 100
             },
             Textures = {
@@ -46,7 +46,7 @@ return {
         Parent = "Nix",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {1.0, 6.3},
+            Size = 1.0E6.3,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Nix-Text.png"

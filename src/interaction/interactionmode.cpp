@@ -435,7 +435,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
         dquat totalRotation = camera.rotationQuaternion();
         dvec3 directionToCenter = normalize(centerPos - camPos);
         dvec3 lookUp = camera.lookUpVectorWorldSpace();
-        double boundingSphere = _focusNode->boundingSphere().lengthf();
+        double boundingSphere = _focusNode->boundingSphere();
         dvec3 camDirection = camera.viewDirectionWorldSpace();
 
         // Declare other variables used in interaction calculations

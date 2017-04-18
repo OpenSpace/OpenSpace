@@ -95,11 +95,6 @@ public:
     void update(const UpdateData& data);
 
     /**
-     * Evaluate if the SceneGraphNodes are visible to the provided camera.
-     */
-    void evaluate(Camera* camera);
-
-    /**
      * Render visible SceneGraphNodes using the provided camera.
      */
     void render(const RenderData& data, RendererTasks& tasks);

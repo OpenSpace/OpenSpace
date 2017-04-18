@@ -290,8 +290,6 @@ void RenderEngine::updateScene() {
         Time::ref().timeJumped(),
         _performanceManager != nullptr
     });
-
-    _scene->evaluate(_camera);
     
     LTRACE("RenderEngine::updateSceneGraph(end)");
 }
