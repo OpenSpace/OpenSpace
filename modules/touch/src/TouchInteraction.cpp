@@ -85,7 +85,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		// Returns the screen point s(xi,par) dependant the transform M(par) and object point xi
 		auto distToMinimize = [](double* par, int x, void* fdata) {
 			FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-			glm::dvec3 surfacePoint = ptr->selectedPoints.at(x); 
+			glm::dvec3 selectedPoint = ptr->selectedPoints.at(x); 
 
 			// Create transformation matrix M(q) and apply transform for newPointInModelView
 			glm::dvec3 T = glm::dvec3(par[0], par[1], 0.0);
@@ -101,40 +101,31 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			}
 			double len = Q.x*Q.x + Q.y*Q.y + Q.z*Q.z;
 			Q.w = sqrt(1.0 - len);
-			glm::dvec3 newSurfacePoint = (Q * surfacePoint) + T;
-			glm::dvec2 newScreenPoint = ptr->toScreen(newSurfacePoint, ptr->camera, ptr->node, ptr->aspectRatio); // go back to screen-space
+			glm::dvec3 newSurfacePoint = (Q * selectedPoint) + T;
+			glm::dvec3 currentSurfacePoint = ptr->toSurface(ptr->screenPoints.at(x), ptr->camera, ptr->node, ptr->aspectRatio);
 
-			return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
+			return glm::length(currentSurfacePoint - newSurfacePoint);
 		};
 		// Gradient of distToMinimize w.r.t par
 		auto gradient = [](double* g, double* par, int x, void* fdata) { // should g[i] = 1.0 or the derivative -> project to screen -> .x or .y?
 			FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
 			glm::dvec3 surfacePoint = ptr->selectedPoints.at(x);
-			g[0] = glm::length(-ptr->toScreen(glm::dvec3(1.0, 0.0, 0.0), ptr->camera, ptr->node, ptr->aspectRatio)); // Tx
-			//g[0] = 1.0;
-			g[1] = glm::length(-ptr->toScreen(glm::dvec3(0.0, 1.0 , 0.0), ptr->camera, ptr->node, ptr->aspectRatio)); // Ty
-			//g[1] = 1.0;
+			g[0] = -1.0; // Tx
+			g[1] = -1.0; // Ty
 			if (ptr->nDOF > 2) {
-				g[2] = glm::length(-ptr->toScreen(glm::dvec3(0.0, 0.0, 1.0), ptr->camera, ptr->node, ptr->aspectRatio)); // Tz
-				//g[2] = 1.0;
+				g[2] = -1.0; // Tz
 				glm::dquat Q;
 				Q.x = 1.0;
-				Q.y = Q.z = 0.0;
-				Q.w = sqrt(1.0 - Q.x*Q.x);
-				g[3] = glm::length(-ptr->toScreen(Q * surfacePoint, ptr->camera, ptr->node, ptr->aspectRatio)); // Rx
-				//g[3] = 1.0;
+				Q.y = Q.z = Q.w = 0.0;
+				g[3] = -glm::length(Q * surfacePoint); // Rx
 				if (ptr->nDOF > 4) {
 					Q.y = 1.0;
-					Q.x = Q.z = 0.0;
-					Q.w = sqrt(1.0 - Q.y*Q.y);
-					g[4] = glm::length(-ptr->toScreen(Q * surfacePoint, ptr->camera, ptr->node, ptr->aspectRatio)); // Ry
-					//g[4] = 1.0;
+					Q.x = Q.z = Q.w = 0.0;
+					g[4] = -glm::length(Q * surfacePoint); // Rx
 
 					Q.z = 1.0;
-					Q.x = Q.y = 0.0;
-					Q.w = sqrt(1.0 - Q.z*Q.z);
-					g[5] = glm::length(-ptr->toScreen(Q * surfacePoint, ptr->camera, ptr->node, ptr->aspectRatio)); // Rz
-					//g[5] = 1.0;
+					Q.x = Q.y = Q.w = 0.0;
+					g[5] = -glm::length(Q * surfacePoint); // Rx
 				}
 			}
 
@@ -161,19 +152,29 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			squaredError[i] = err*err;
 		}
 		
-		auto toScreen = [](glm::dvec3 vec, Camera* camera, SceneGraphNode* node, double aspectRatio) {
-			glm::dvec3 backToScreenSpace = glm::inverse(camera->rotationQuaternion())
-				* glm::normalize(((node->rotationMatrix() * vec) + node->worldPosition() - camera->positionVec3()));
-			backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
-			return glm::dvec2(backToScreenSpace.x / (2 * aspectRatio) + 0.5, -backToScreenSpace.y / 2 + 0.5);
+
+		auto toSurface = [](glm::dvec2 screenPoint, Camera* camera, SceneGraphNode* node, double aspectRatio) {
+			// Find the intersection point in surface coordinates again;
+			glm::dvec3 camPos = camera->positionVec3();
+			double xCo = 2 * (screenPoint.x - 0.5) * aspectRatio;
+			double yCo = -2 * (screenPoint.y - 0.5); // normalized -1 to 1 coordinates on screen
+			glm::dvec3 raytrace = glm::normalize(camera->rotationQuaternion() * glm::dvec3(xCo, yCo, -3.2596558));
+			glm::dvec3 camToSelectable = node->worldPosition() - camPos;
+			double boundingSphere = node->boundingSphere();
+			double d = glm::dot(raytrace, camToSelectable);
+			double root = boundingSphere * boundingSphere - glm::dot(camToSelectable, camToSelectable) + d * d;
+			if (root > 0) // two intersection points (take the closest one)
+				d -= sqrt(root);
+			glm::dvec3 intersectionPoint = camPos + d * raytrace;
+			return (glm::inverse(node->rotationMatrix()) * (intersectionPoint - node->worldPosition()));
 		};
 
 		glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-		FunctionData fData = { selectedPoints, screenPoints, nDOF, toScreen, _camera, node, res.x / res.y};
+		FunctionData fData = { selectedPoints, screenPoints, nDOF, toSurface, _camera, node, res.x / res.y};
 		void* dataPtr = reinterpret_cast<void*>(&fData);
 
 		levmarq_init(&_lmstat);
-		int nIterations = levmarq(nDOF, par, list.size(), NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
+		int nIterations = levmarq(nDOF, par, nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
 
 		double temp[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 		for (int i = 0; i < nDOF; ++i)
@@ -192,17 +193,8 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		}
 		std::cout << "\nLevmarq success after " << nIterations << " iterations, Print par[nDOF]: " << os.str() << "\n";
 
-
-
-		/* Things to test - potential reasons why values are so small
-			* initial values on par
-			* redefine grad to be partial derivative (mostly par[3]-par[5])
-			* change to add rotation on par[0]-par[2] instead
-			* change lmstat init
-		
-		*/
-		//_camera->setPositionVec3(_camera->positionVec3() - T);
-		//_camera->rotate(glm::inverse(Q));
+		_camera->setPositionVec3(_camera->positionVec3() - T);
+		_camera->rotate(glm::inverse(Q));
 
 		// cleanup
 		delete[] squaredError;

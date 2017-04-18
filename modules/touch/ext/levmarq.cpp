@@ -30,8 +30,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 // set parameters required by levmarq() to default values 
 void levmarq_init(LMstat *lmstat) {
-	lmstat->verbose = 1;
-	lmstat->max_it = 20;
+	lmstat->verbose = 0;
+	lmstat->max_it = 1000;
 	lmstat->init_lambda = 0.0001;
 	lmstat->up_factor = 10;
 	lmstat->down_factor = 10;
@@ -123,7 +123,7 @@ int levmarq(int npar, double *par, int ny, double *dysq,
 				ill = (derr > 0);
 			} 
 			if (verbose) {
-				printf("it = %4d,   lambda = %10g,   err = %10g,   derr = %10g\n", it, lambda, err, derr);
+				printf("it = %4d,   lambda = %10g,   err = %10g,   derr = %10g\n", it, newerr, err, derr);
 				for (i = 0; i < npar; i++) {
 					printf("%f:", par[i]);
 				}
