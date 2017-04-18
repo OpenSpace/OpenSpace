@@ -88,7 +88,8 @@ public:
     void deinitialize();
     void preSynchronization();
     void postSynchronizationPreDraw();
-    void render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
+        const glm::mat4& projectionMatrix);
     void postDraw();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier mod);

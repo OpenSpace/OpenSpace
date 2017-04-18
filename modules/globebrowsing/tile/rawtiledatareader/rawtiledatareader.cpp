@@ -132,9 +132,9 @@ TileDepthTransform RawTileDataReader::getDepthTransform() const {
 
 std::array<double, 6> RawTileDataReader::getGeoTransform() const {
     std::array<double, 6> padfTransform;
-	
+    
     GeodeticPatch globalCoverage(Geodetic2(0,0), Geodetic2(M_PI / 2.0, M_PI));
-	padfTransform[1] = Angle<double>::fromRadians(
+    padfTransform[1] = Angle<double>::fromRadians(
         globalCoverage.size().lon).asDegrees() / rasterXSize();
     padfTransform[5] = -Angle<double>::fromRadians(
         globalCoverage.size().lat).asDegrees() / rasterYSize();

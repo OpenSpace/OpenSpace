@@ -34,7 +34,7 @@ return {
             Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 6.371, 6 },
+                Radius = 6.371E6,
                 Segments = 100
             },
             Textures = {
@@ -90,7 +90,7 @@ return {
         Parent = "Earth",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {3.0, 11.0},
+            Size = 3.0E11,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/marker.png",

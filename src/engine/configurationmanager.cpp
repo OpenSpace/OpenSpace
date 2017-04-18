@@ -73,6 +73,7 @@ const string ConfigurationManager::KeyCapabilitiesVerbosity =
 
 const string ConfigurationManager::KeyShutdownCountdown = "ShutdownCountdown";
 const string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
+const string ConfigurationManager::KeyDisableSceneOnMaster = "DisableSceneOnMaster";
 const string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
 const string ConfigurationManager::KeyPerSceneCache = "PerSceneCache";
 const string ConfigurationManager::KeyRenderingMethod = "RenderingMethod";
@@ -85,6 +86,15 @@ const string ConfigurationManager::PartHttpProxyPort = "Port";
 const string ConfigurationManager::PartHttpProxyAuthentication = "Authentication";
 const string ConfigurationManager::PartHttpProxyUser = "User";
 const string ConfigurationManager::PartHttpProxyPassword = "Password";
+
+const string ConfigurationManager::KeyOpenGLDebugContext = "OpenGLDebugContext";
+const string ConfigurationManager::PartActivate = "Activate";
+const string ConfigurationManager::PartSynchronous = "Synchronous";
+const string ConfigurationManager::PartFilterIdentifier = "FilterIdentifier";
+const string ConfigurationManager::PartFilterIdentifierSource = "Source";
+const string ConfigurationManager::PartFilterIdentifierType = "Type";
+const string ConfigurationManager::PartFilterIdentifierIdentifier = "Identifier";
+const string ConfigurationManager::PartFilterSeverity = "PartFilterSeverity";
 
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;

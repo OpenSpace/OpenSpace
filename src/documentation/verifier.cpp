@@ -206,6 +206,14 @@ std::string StringListVerifier::type() const {
     return "List of strings";
 }
 
+IntListVerifier::IntListVerifier(std::string elementDocumentation)
+    : TableVerifier({ { "*", new IntVerifier, std::move(elementDocumentation) } })
+{}
+
+std::string IntListVerifier::type() const {
+    return "List of ints";
+}
+
 ReferencingVerifier::ReferencingVerifier(std::string id)
     : identifier(std::move(id))
 {

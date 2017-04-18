@@ -22,68 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/other/distanceswitch.h>
-#include <openspace/rendering/renderable.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GDAL___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GDAL___H__
 
-namespace openspace {
-namespace globebrowsing {
+#ifdef WIN32
+#pragma warning(push, 0)
+#endif // WIN32
 
-DistanceSwitch::~DistanceSwitch() {}
+#include <gdal_priv.h>
 
-bool DistanceSwitch::initialize() {
-    _objectScale = 1.0;
-    for (int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->initialize();
-    }
-    return true;
-}
-
-bool DistanceSwitch::deinitialize() {
-    for (int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->deinitialize();
-    }
-    return true;
-}
-
-
-void DistanceSwitch::render(const RenderData& data) {
-    if (_maxDistances.size() == 0) {
-        return;
-    }
-
-    double distanceToCamera = (data.camera.positionVec3() - data.position.dvec3()).length();
-
-    if (distanceToCamera > _maxDistances.back() * _objectScale) {
-        return;
-    }
-
-    // linear search through nodes to find which Renderable to render
-    for (int i = 0; i < _renderables.size(); ++i) {
-        if (distanceToCamera < _maxDistances[i] * _objectScale) {
-            _renderables[i]->render(data);
-            return;
-        }
-    }
-}
-
-void DistanceSwitch::update(const UpdateData& data) {
-    _objectScale = data.modelTransform.scale;
-    for (int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->update(data);
-    }
-}
-
-void DistanceSwitch::addSwitchValue(std::shared_ptr<Renderable> renderable,
-                                    double maxDistance)
-{
-    ghoul_assert(maxDistance > 0, "Renderable must have a positive maxDistance");
-    if (_maxDistances.size() > 0) {
-        ghoul_assert(maxDistance > _maxDistances.back(),
-            "Renderables must be inserted in ascending order wrt distance");
-    }
-    _renderables.push_back(renderable);
-    _maxDistances.push_back(maxDistance);
-}
-
-} // namespace globebrowsing
-} // namespace openspace
+#ifdef WIN32
+#pragma warning(pop)
+#endif // WIN32

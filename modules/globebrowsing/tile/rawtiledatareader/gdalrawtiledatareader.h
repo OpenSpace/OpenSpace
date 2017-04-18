@@ -60,8 +60,10 @@ public:
     *
     * \param filePath, a path to a specific file GDAL can read
     * \param config, Configuration used for initialization
+    * \param baseDirectory, the base directory to use in future loading operations
     */
-    GdalRawTileDataReader(const std::string& filePath, const Configuration& config);
+    GdalRawTileDataReader(const std::string& filePath, const Configuration& config,
+        const std::string& baseDirectory = "");
 
     virtual ~GdalRawTileDataReader() override;
 

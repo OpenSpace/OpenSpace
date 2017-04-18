@@ -228,19 +228,6 @@ void Scene::update(const UpdateData& data) {
     }
 }
 
-void Scene::evaluate(Camera* camera) {
-    for (SceneGraphNode* node : _topologicallySortedNodes) {
-        try {
-            LTRACE("Scene::evaluate(begin '" + node->name() + "')");
-            node->evaluate(camera);
-            LTRACE("Scene::evaluate(end '" + node->name() + "')");
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.what());
-        }
-    }
-}
-
 void Scene::render(const RenderData& data, RendererTasks& tasks) {
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {

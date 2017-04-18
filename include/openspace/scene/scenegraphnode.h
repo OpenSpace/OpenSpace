@@ -74,7 +74,6 @@ public:
     void traversePreOrder(std::function<void(SceneGraphNode*)> fn);
     void traversePostOrder(std::function<void(SceneGraphNode*)> fn);
     void update(const UpdateData& data);
-    void evaluate(const Camera* camera, const psc& parentPosition = psc());
     void render(const RenderData& data, RendererTasks& tasks);
     void updateCamera(Camera* camera) const;
 
@@ -106,8 +105,7 @@ public:
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
 
-    PowerScaledScalar calculateBoundingSphere();
-    PowerScaledScalar boundingSphere() const;
+    float boundingSphere() const;
 
     SceneGraphNode* childNode(const std::string& name);
 
@@ -133,10 +131,6 @@ private:
     PerformanceRecord _performanceRecord;
 
     std::unique_ptr<Renderable> _renderable;
-    bool _renderableVisible;
-
-    bool _boundingSphereVisible;
-    PowerScaledScalar _boundingSphere;
 
     // Transformation defined by ephemeris, rotation and scale
     struct {

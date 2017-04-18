@@ -107,18 +107,18 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
         std::to_string(debugProps.showHeightResolution));
     pairs.emplace_back("showHeightIntensities",
         std::to_string(debugProps.showHeightIntensities));
-	pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
+    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
 
-	pairs.emplace_back("tilePaddingStart",
-		"ivec2(" +
-		std::to_string(RawTileDataReader::padding.start.x) + "," +
-		std::to_string(RawTileDataReader::padding.start.y) + ")"
-	);
-	pairs.emplace_back("tilePaddingSizeDiff",
-		"ivec2(" +
-		std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
-		std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
-	);
+    pairs.emplace_back("tilePaddingStart",
+        "ivec2(" +
+        std::to_string(RawTileDataReader::padding.start.x) + "," +
+        std::to_string(RawTileDataReader::padding.start.y) + ")"
+    );
+    pairs.emplace_back("tilePaddingSizeDiff",
+        "ivec2(" +
+        std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
+        std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
+    );
 
     // Now the shader program can be accessed
     ghoul::opengl::ProgramObject* programObject =

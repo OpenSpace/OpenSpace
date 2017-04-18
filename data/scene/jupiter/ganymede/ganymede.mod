@@ -9,7 +9,7 @@ return {
             Body = "JUPITER BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 2.631, 6},
+                Radius = 2.631E6,
                 Segments = 100
             },
             Textures = {

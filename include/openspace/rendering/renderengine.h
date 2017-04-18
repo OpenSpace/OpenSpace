@@ -98,7 +98,8 @@ public:
     void updateFade();
     void updateRenderer();
     void updateScreenSpaceRenderables();
-    void render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
+        const glm::mat4& projectionMatrix);
 
     void renderScreenLog();
     void renderShutdownInformation(float timer, float fullTime);
@@ -211,6 +212,7 @@ private:
     properties::BoolProperty _applyWarping;
     properties::BoolProperty _showFrameNumber;
     properties::BoolProperty _disableMasterRendering;
+    properties::BoolProperty _disableSceneOnMaster;
 
     float _globalBlackOutFactor;
     float _fadeDuration;

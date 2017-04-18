@@ -46,7 +46,7 @@ return {
         Parent = "Kerberos",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {1.0, 6.3},
+            Size = 1.0E6.3,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Kerberos-Text.png"
