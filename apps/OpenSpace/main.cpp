@@ -64,6 +64,9 @@ namespace {
 const char* _loggerCat = "main";
 sgct::Engine* SgctEngine;
 
+const char* OpenVRTag = "OpenVR";
+const char* SpoutTag = "Spout";
+
 #ifdef WIN32
 
 LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
@@ -136,12 +139,11 @@ sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
 #endif
 
 #ifdef OPENSPACE_HAS_SPOUT
-
-const char* SpoutTag = "Spout";
-
 /**
-* This struct stores all information about a single render window.
-*/
+ * This struct stores all information about a single render window. Depending on the
+ * frame setup, each window can be mono or stereo, the information of which is stored in
+ * the \c leftOrMain and \c right members respectively.
+ */
 struct SpoutWindow {
     struct SpoutData {
         SPOUTHANDLE handle = nullptr;
@@ -213,7 +215,7 @@ void mainInitFunc() {
     // Find if we have at least one OpenVR window
     // Save reference to first OpenVR window, which is the one we will copy to the HMD.
     for (size_t i = 0; i < SgctEngine->getNumberOfWindows(); ++i) {
-        if (SgctEngine->getWindowPtr(i)->checkIfTagExists("OpenVR")) {
+        if (SgctEngine->getWindowPtr(i)->checkIfTagExists(OpenVRTag)) {
 #ifdef OPENVR_SUPPORT
             FirstOpenVRWindow = SgctEngine->getWindowPtr(i);
             
@@ -249,9 +251,8 @@ void mainInitFunc() {
     }
 
 #ifdef OPENSPACE_HAS_SPOUT
-    //SpoutWindows.resize(nWindows);
     for (size_t i = 0; i < nWindows; ++i) {
-        auto windowPtr = SgctEngine->getWindowPtr(i);
+        const sgct::SGCTWindow* windowPtr = SgctEngine->getWindowPtr(i);
 
         if (!windowPtr->checkIfTagExists(SpoutTag)) {
             continue;
@@ -261,20 +262,22 @@ void mainInitFunc() {
 
         w.windowId = i;
 
-        sgct::SGCTWindow::StereoMode sm = windowPtr->getStereoMode();
-        if (sm != sgct::SGCTWindow::No_Stereo && sm < sgct::SGCTWindow::Side_By_Side_Stereo) {
-            auto& left = w.leftOrMain;
-            left.handle = GetSpout();
+        const sgct::SGCTWindow::StereoMode sm = windowPtr->getStereoMode();
+        const bool hasStereo =
+            (sm != sgct::SGCTWindow::No_Stereo) && 
+            (sm < sgct::SGCTWindow::Side_By_Side_Stereo);
 
+        if (hasStereo) {
+            SpoutWindow::SpoutData& left = w.leftOrMain;
+            left.handle = GetSpout();
             left.initialized = left.handle->CreateSender(
                 (windowPtr->getName() + "_left").c_str(),
                 windowPtr->getXFramebufferResolution(),
                 windowPtr->getYFramebufferResolution()
             );
 
-            auto& right = w.right;
+            SpoutWindow::SpoutData& right = w.right;
             right.handle = GetSpout();
-
             right.initialized = right.handle->CreateSender(
                 (windowPtr->getName() + "_right").c_str(),
                 windowPtr->getXFramebufferResolution(),
@@ -282,11 +285,8 @@ void mainInitFunc() {
             );
         }
         else {
-            auto windowPtr = SgctEngine->getWindowPtr(i);
-
-            auto& main = w.leftOrMain;
+            SpoutWindow::SpoutData& main = w.leftOrMain;
             main.handle = GetSpout();
-
             main.initialized = main.handle->CreateSender(
                 windowPtr->getName().c_str(),
                 windowPtr->getXFramebufferResolution(),
