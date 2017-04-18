@@ -30,8 +30,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 // set parameters required by levmarq() to default values 
 void levmarq_init(LMstat *lmstat) {
-	lmstat->verbose = 0;
-	lmstat->max_it = 10000;
+	lmstat->verbose = 1;
+	lmstat->max_it = 20;
 	lmstat->init_lambda = 0.0001;
 	lmstat->up_factor = 10;
 	lmstat->down_factor = 10;
@@ -57,7 +57,7 @@ The arguments are as follows:
 Before calling levmarq, several of the parameters in lmstat must be set.
 For default values, call levmarq_init(lmstat).
 */
-int levmarq(int npar, double *par, int ny, double *y, double *dysq,
+int levmarq(int npar, double *par, int ny, double *dysq,
 	    double (*func)(double *, int, void *),
 	    void (*grad)(double *, double *, int, void *),
 	    void *fdata, LMstat *lmstat) {
@@ -87,7 +87,7 @@ int levmarq(int npar, double *par, int ny, double *y, double *dysq,
 	derr = newerr = 0; // to avoid compiler warnings
 
 	// calculate the initial error ("chi-squared")
-	err = error_func(par, ny, y, dysq, func, fdata);
+	err = error_func(par, ny, dysq, func, fdata);
 
 	// main iteration
 	for (it = 0; it < nit; it++) {
@@ -102,7 +102,7 @@ int levmarq(int npar, double *par, int ny, double *y, double *dysq,
 				weight = 1/dysq[x]; // for weighted least-squares
 			grad(g, par, x, fdata);
 			for (i = 0; i < npar; i++) {
-				d[i] += (y[x] - func(par, x, fdata)) * g[i] * weight;
+				d[i] += func(par, x, fdata) * g[i] * weight; //(y[x] - func(par, x, fdata)) * g[i] * weight;
 				for (j = 0; j <= i; j++)
 					h[i][j] += g[i] * g[j] * weight;
 			}
@@ -110,20 +110,29 @@ int levmarq(int npar, double *par, int ny, double *y, double *dysq,
 		// make a step "delta."  If the step is rejected, increase lambda and try again
 		mult = 1 + lambda;
 		ill = 1; // ill-conditioned?
-		while (ill && (it<nit)) {
-			for (i=0; i<npar; i++)
+		while (ill && (it < nit)) {
+			for (i = 0; i < npar; i++)
 				h[i][i] = h[i][i]*mult;
 			ill = cholesky_decomp(npar, ch, h);
 			if (!ill) {
 				solve_axb_cholesky(npar, ch, delta, d);
 				for (i = 0; i < npar; i++)
 					newpar[i] = par[i] + delta[i];
-				newerr = error_func(newpar, ny, y, dysq, func, fdata);
+				newerr = error_func(newpar, ny, dysq, func, fdata);
 				derr = newerr - err;
 				ill = (derr > 0);
 			} 
-			if (verbose) 
+			if (verbose) {
 				printf("it = %4d,   lambda = %10g,   err = %10g,   derr = %10g\n", it, lambda, err, derr);
+				for (i = 0; i < npar; i++) {
+					printf("%f:", par[i]);
+				}
+				printf("\n");
+				for (i = 0; i < npar; ++i) {
+					printf("%f:", delta[i]);
+				}
+				printf("\n");
+			}
 			if (ill) {
 				mult = (1 + lambda * up) / (1 + lambda);
 				lambda *= up;
@@ -133,9 +142,9 @@ int levmarq(int npar, double *par, int ny, double *y, double *dysq,
 		for (i = 0; i < npar; i++)
 			par[i] = newpar[i];
 		err = newerr;
-		lambda *= down;  
+		lambda *= down;
 
-		if ((!ill) && (-derr<target_derr)) 
+		if ((!ill) && (-derr < target_derr)) 
 			break;
 	}
 
@@ -160,13 +169,13 @@ int levmarq(int npar, double *par, int ny, double *y, double *dysq,
 
 
 // calculate the error function (chi-squared)
-double error_func(double *par, int ny, double *y, double *dysq,
+double error_func(double *par, int ny, double *dysq,
 		double (*func)(double *, int, void *), void *fdata) {
 	int x;
 	double res, e = 0;
 
 	for (x = 0; x < ny; x++) {
-		res = func(par, x, fdata) - y[x];
+		res = func(par, x, fdata);
 		if (dysq) // weighted least-squares 
 			e += res*res/dysq[x];
 		else
@@ -177,7 +186,7 @@ double error_func(double *par, int ny, double *y, double *dysq,
 
 
 // solve Ax=b for a symmetric positive-definite matrix A using the Cholesky decomposition A=LL^T, L is passed in "l", elements above the diagonal are ignored.
-void solve_axb_cholesky(int n, double** l, double* x, double* b) {
+void solve_axb_cholesky(int n, double** l, double* x, double* b) { // n = npar, l = ch, x = delta (solution), b = d (func(par, x, fdata) * g[i]);
 	int i,j;
 	double sum;
 	// solve L*y = b for y (where x[] is used to store y)
@@ -185,7 +194,7 @@ void solve_axb_cholesky(int n, double** l, double* x, double* b) {
 		sum = 0;
 		for (j = 0; j < i; j++)
 			sum += l[i][j] * x[j];
-		x[i] = (b[i] - sum) / l[i][i];      
+		x[i] = (b[i] - sum) / l[i][i]; 
 	}
 	// solve L^T*x = y for x (where x[] is used to store both y and x)
 	for (i = n-1; i >= 0; i--) {
