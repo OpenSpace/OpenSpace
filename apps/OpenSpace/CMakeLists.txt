@@ -74,6 +74,7 @@ target_compile_definitions(${APPLICATION_NAME} PUBLIC ${SGCT_OPENVR_DEFINITIONS}
 
 
 if (MSVC)
+    target_link_libraries(${APPLICATION_NAME} Dbghelp.lib)
     set_target_properties(${APPLICATION_NAME} PROPERTIES LINK_FLAGS
         "/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:LIBCMT.lib"
     )

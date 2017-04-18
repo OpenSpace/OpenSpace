@@ -101,6 +101,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/presentationslideprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/sizereferencetileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.h
@@ -166,6 +167,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.cpp
+
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
@@ -174,6 +176,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/presentationslideprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/sizereferencetileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/temporaltileprovider.cpp

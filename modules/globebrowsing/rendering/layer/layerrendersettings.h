@@ -41,7 +41,7 @@ struct LayerRenderSettings : public properties::PropertyOwner {
     /// This function matches the function with the same name in the
     /// shader code
     float performLayerSettings(float currentValue) const;
-	/// This function matches the function with the same name in the
+    /// This function matches the function with the same name in the
     /// shader code
     glm::vec4 performLayerSettings(glm::vec4 currentValue) const;
 };

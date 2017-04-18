@@ -73,6 +73,7 @@ const string ConfigurationManager::KeyCapabilitiesVerbosity =
 
 const string ConfigurationManager::KeyShutdownCountdown = "ShutdownCountdown";
 const string ConfigurationManager::KeyDisableMasterRendering = "DisableRenderingOnMaster";
+const string ConfigurationManager::KeyDisableSceneOnMaster = "DisableSceneOnMaster";
 const string ConfigurationManager::KeyDownloadRequestURL = "DownloadRequestURL";
 const string ConfigurationManager::KeyPerSceneCache = "PerSceneCache";
 const string ConfigurationManager::KeyRenderingMethod = "RenderingMethod";

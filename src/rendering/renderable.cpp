@@ -119,13 +119,13 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
             addTag(std::move(tagName));
     } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
         ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
-    	std::vector<std::string> keys = tagNames.keys();
+        std::vector<std::string> keys = tagNames.keys();
         std::string tagName;
         for (const std::string& key : keys) {
             tagName = tagNames.value<std::string>(key);
             if (!tagName.empty())
                 addTag(std::move(tagName));
-    	}
+        }
     }
 
     if (_startTime != "" && _endTime != "") {
@@ -137,12 +137,12 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
 Renderable::~Renderable() {}
 
-void Renderable::setBoundingSphere(PowerScaledScalar boundingSphere) {
-    boundingSphere_ = std::move(boundingSphere);
+void Renderable::setBoundingSphere(float boundingSphere) {
+    _boundingSphere = boundingSphere;
 }
 
-PowerScaledScalar Renderable::getBoundingSphere() {
-    return boundingSphere_;
+float Renderable::boundingSphere() const {
+    return _boundingSphere;
 }
 
 void Renderable::update(const UpdateData&) {}

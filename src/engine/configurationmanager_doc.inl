@@ -339,6 +339,16 @@ documentation::Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
+            ConfigurationManager::KeyDisableSceneOnMaster,
+            new BoolVerifier,
+            "Toggles whether a potential scene transformation matrix, for example as "
+            "specified in an SGCT configuration file, should apply to the master node. "
+            "With some configurations, applying such a transformation complicates the "
+            "interaction and it is thus desired to disable the transformation. The "
+            "default is false.",
+            Optional::Yes
+        },
+        {
             ConfigurationManager::KeyHttpProxy,
             new TableVerifier({
                 {

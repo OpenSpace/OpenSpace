@@ -28,7 +28,7 @@
 #include <modules/space/rendering/planetgeometry.h>
 
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
 
@@ -42,19 +42,15 @@ public:
     SimpleSphereGeometry(const ghoul::Dictionary& dictionary);
     ~SimpleSphereGeometry();
 
-
     bool initialize(Renderable* parent) override;
     void deinitialize() override;
     void render() override;
-
 private:
     void createSphere();
 
-    glm::vec2 _modRadius;
-    properties::Vec4Property _realRadius;
+    float _modRadius;
+    properties::Vec3Property _radius;
     properties::IntProperty _segments;
-    std::string _name;
-
     PowerScaledSphere* _sphere;
 };
 

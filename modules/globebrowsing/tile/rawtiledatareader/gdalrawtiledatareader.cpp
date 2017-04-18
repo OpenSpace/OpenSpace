@@ -54,13 +54,16 @@ std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
         ", " << pr.numPixels.y;
 }
 
-GdalRawTileDataReader::GdalRawTileDataReader(
-    const std::string& filePath, const Configuration& config)
+GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
+                                             const Configuration& config,
+                                             const std::string& baseDirectory)
     : RawTileDataReader(config)
     , _dataset(nullptr)
 {
-    _initData = { "",  filePath, config.tilePixelSize, config.dataType };
-    _initData.initDirectory = CPLGetCurrentDir();
+
+    std::string initDir = baseDirectory.empty() ? CPLGetCurrentDir() : baseDirectory;
+
+    _initData = { initDir, filePath, config.tilePixelSize, config.dataType };
     ensureInitialized();
 }
 
@@ -303,6 +306,7 @@ GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath)
         std::string correctedPath = FileSystem::ref().pathByAppendingComponent(
             _initData.initDirectory, filePath
         );
+
         dataset = (GDALDataset *)GDALOpen(correctedPath.c_str(), GA_ReadOnly);
         if (!dataset) {
             throw ghoul::RuntimeError("Failed to load dataset:\n" + filePath);

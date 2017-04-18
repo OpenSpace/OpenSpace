@@ -105,6 +105,10 @@ GdalWrapper::GdalWrapper(size_t maximumCacheSize,
         "GDAL_DATA",
         absPath("${MODULE_GLOBEBROWSING}/gdal_data").c_str()
     );
+    CPLSetConfigOption(
+        "CPL_TMPDIR",
+        absPath("${BASE_PATH}").c_str()
+    );
     setGdalProxyConfiguration();
     CPLSetErrorHandler(gdalErrorHandler);
   

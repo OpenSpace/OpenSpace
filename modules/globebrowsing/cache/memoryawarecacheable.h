@@ -38,17 +38,17 @@ namespace cache {
  */
 class MemoryAwareCacheable {
 public:
-	/**
-	 * \param memoryImpact is the memory impact of the object. Can for example be given
-	 * in kilobytes.
-	 */
-	MemoryAwareCacheable(size_t memoryImpact) : _memoryImpact(memoryImpact) {};
-	~MemoryAwareCacheable() {};
+    /**
+     * \param memoryImpact is the memory impact of the object. Can for example be given
+     * in kilobytes.
+     */
+    MemoryAwareCacheable(size_t memoryImpact) : _memoryImpact(memoryImpact) {};
+    ~MemoryAwareCacheable() {};
 
-	size_t memoryImpact() { return _memoryImpact; };
-	
+    size_t memoryImpact() { return _memoryImpact; };
+    
 protected:
-	size_t _memoryImpact;
+    size_t _memoryImpact;
 };
 
 } // namespace cache
