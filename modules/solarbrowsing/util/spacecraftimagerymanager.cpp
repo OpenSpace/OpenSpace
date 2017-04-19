@@ -224,14 +224,14 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
     // TODO(mnoven): Remove this
     int limit = 0;
 
-    for (auto path : sequencePaths) {
-        if (limit++ == 1) break;
-        if (size_t position = path.find_last_of(".") + 1) {
+    for (auto seqPath : sequencePaths) {
+        if (limit++ == 150) break;
+        if (size_t position = seqPath.find_last_of(".") + 1) {
             if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(path);
+                ghoul::filesystem::File currentFile(seqPath);
                 std::string extension = currentFile.fileExtension();
                 if (extension == "fits" || extension == "fit" || extension == "fts") {
-                    const std::string relativePath = FileSys.relativePath(path);
+                    const std::string relativePath = FileSys.relativePath(seqPath);
                     // We'll need to scan the header of the fits
                     // and insert in some smart data structure that handles time / mn
 
@@ -247,9 +247,15 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
                     metaData.min = FitsFileReader::readHeaderValue<int>(std::string("DATAMIN"));
                     metaData.max = FitsFileReader::readHeaderValue<int>(std::string("DATAMAX"));
 
+
+                    std::string time = FitsFileReader::readHeaderValue<std::string>(std::string("DATE-OBS"));
+                    LDEBUG("Sending in TIME" << time);
+                    LDEBUG("Converted to " << Time::ref().convertTime(time));
+                    metaData.timeObserved = Time::ref().convertTime(time);
+
                     im.metaData = metaData;
 
-                    //TODO(mnoven): CCfits has method for loading sequence of images - use that instead
+                    //TODO(mnoven): Ugly, fix!
                     imageSize = FitsFileReader::getImageSize().first;
 
                     imageData.push_back(im);
@@ -257,7 +263,8 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
                 }
             }
         }
-        LDEBUG("Finished loading path " << path);
+        LDEBUG("Finished loading path " << seqPath);
+        LDEBUG("Count" << limit);
     }
     return std::move(imageData);
 }

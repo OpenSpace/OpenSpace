@@ -48,11 +48,16 @@ struct ImageMetadata {
     int max;
     int waveLength;
     float expTime;
+    double timeObserved;
 };
 
 struct ImageDataObject {
     ImageMetadata metaData;
     std::valarray<IMG_PRECISION> contents;
+
+    bool operator<(const double val) const {
+        return (metaData.timeObserved < val);
+    }
 };
 
 class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManager> {

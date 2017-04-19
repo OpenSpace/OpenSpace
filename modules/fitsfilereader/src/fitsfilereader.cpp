@@ -104,9 +104,6 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture() {
     }
 
     const glm::size3_t imageSize(sizeX, sizeY, 1);
-    const Texture::Format format = ghoul::opengl::Texture::Red;
-    const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
-
     // Let texture take ownership of memory
     float* data = new float[contents.size()];
     std::memmove(data, &contents[0], contents.size() * sizeof(float));
@@ -114,7 +111,7 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture() {
     return std::make_unique<Texture>(
                                 data,
                                 imageSize,
-                                format, // Format of the pixeldata
+                                ghoul::opengl::Texture::Red, // Format of the pixeldata
                                 GL_R32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
                                 FITS_DATA_TYPE_OPENGL, // Type of data
                                 Texture::FilterMode::Linear,
@@ -122,63 +119,63 @@ std::unique_ptr<Texture> FitsFileReader::loadTexture() {
                             );
 }
 
-std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(const std::string& buffer) {
-    fitsfile* _infile;
-    // Get string adress
-    const char* memory = buffer.c_str();
-    size_t size = buffer.size() * sizeof(std::string::value_type);
-    void* v = const_cast<char*>(memory);
-    int status = 0;
-    if (fits_open_memfile(&_infile, "", READONLY, &v, &size, 0, NULL, &status)) {
-        LERROR("Error opening file");
-        fits_report_error(stderr, status);
-    }
+// std::unique_ptr<Texture> FitsFileReader::loadTextureFromMemory(const std::string& buffer) {
+//     fitsfile* _infile;
+//     // Get string adress
+//     const char* memory = buffer.c_str();
+//     size_t size = buffer.size() * sizeof(std::string::value_type);
+//     void* v = const_cast<char*>(memory);
+//     int status = 0;
+//     if (fits_open_memfile(&_infile, "", READONLY, &v, &size, 0, NULL, &status)) {
+//         LERROR("Error opening file");
+//         fits_report_error(stderr, status);
+//     }
 
-    int numAxis = 0;
-    fits_get_img_dim(_infile, &numAxis, &status);
-    if (numAxis != 2) {
-        LERROR("Only support images with 2 axes");
-    }
+//     int numAxis = 0;
+//     fits_get_img_dim(_infile, &numAxis, &status);
+//     if (numAxis != 2) {
+//         LERROR("Only support images with 2 axes");
+//     }
 
-    long axLengths[2];
-    if (fits_get_img_size(_infile, 2, axLengths, &status)) {
-        LERROR("Error in getting image size");
-        fits_report_error(stderr, status);
-    }
+//     long axLengths[2];
+//     if (fits_get_img_size(_infile, 2, axLengths, &status)) {
+//         LERROR("Error in getting image size");
+//         fits_report_error(stderr, status);
+//     }
 
-    int numPixels = axLengths[0] * axLengths[1];
-    // Set up fpixel for a full image read
-    long fpixel[2] = {1, 1};
+//     int numPixels = axLengths[0] * axLengths[1];
+//     // Set up fpixel for a full image read
+//     long fpixel[2] = {1, 1};
 
-    // Allocate space for the image - TODO do this C++ style
-    float* imageArray = (float*)calloc(numPixels, sizeof(float));
-    fits_read_pix(_infile, TFLOAT, fpixel, numPixels, NULL, imageArray, NULL, &status);
+//     // Allocate space for the image - TODO do this C++ style
+//     float* imageArray = (float*)calloc(numPixels, sizeof(float));
+//     fits_read_pix(_infile, TFLOAT, fpixel, numPixels, NULL, imageArray, NULL, &status);
 
-    if (fits_close_file(_infile, &status)) {
-        LERROR("Error closing file");
-        fits_report_error(stderr, status);
-    }
+//     if (fits_close_file(_infile, &status)) {
+//         LERROR("Error closing file");
+//         fits_report_error(stderr, status);
+//     }
 
-    // Still ugly workaround
-    unsigned char* imageData = new unsigned char[numPixels];
-    for (int i = 0; i < numPixels; i++) {
-        imageData[i] = (unsigned char) imageArray[i];
-    }
+//     // Still ugly workaround
+//     unsigned char* imageData = new unsigned char[numPixels];
+//     for (int i = 0; i < numPixels; i++) {
+//         imageData[i] = (unsigned char) imageArray[i];
+//     }
 
-    const glm::size3_t imageSize(axLengths[0], axLengths[1], 1);
-    const Texture::Format format = ghoul::opengl::Texture::RedInt;
-    const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
+//     const glm::size3_t imageSize(axLengths[0], axLengths[1], 1);
+//     const Texture::Format format = ghoul::opengl::Texture::Red;
+//     const Texture::FilterMode filterMode = Texture::FilterMode::Linear;
 
-    std::unique_ptr<Texture> texture = std::make_unique<Texture>(
-                                                            imageData,
-                                                            imageSize,
-                                                            format,
-                                                            static_cast<int>(format),
-                                                            FITS_DATA_TYPE_OPENGL,
-                                                            Texture::FilterMode::Linear
-                                                        );
-    return texture;
-}
+//     std::unique_ptr<Texture> texture = std::make_unique<Texture>(
+//                                                             imageData,
+//                                                             imageSize,
+//                                                             format,
+//                                                             static_cast<int>(format),
+//                                                             FITS_DATA_TYPE_OPENGL,
+//                                                             Texture::FilterMode::Linear
+//                                                         );
+//     return texture;
+// }
 
 const std::pair<int, int>& FitsFileReader::getImageSize() {
     assert(_imageSize.first > 0 && _imageSize.second > 0);

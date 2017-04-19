@@ -69,8 +69,8 @@ Fragment getFragment() {
         maxi = clamp(maxi, 0.01, 13.0);
 
     } else {
-        const float cmin = clipmins[currentActiveChannel];
-        const float cmax = clipmax[currentActiveChannel];
+        const float cmin = clipmins[3];
+        const float cmax = clipmax[3];
         intensity = clamp(intensity, cmin, cmax);
         mini = clamp(mini, cmin, cmax);
         maxi = clamp(maxi, cmin, cmax);
