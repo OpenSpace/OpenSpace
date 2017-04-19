@@ -21,12 +21,28 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-
-#version 400
+#version __CONTEXT__
+//#version 400
 
 #define EPSILON 0.0001f
+#include "floatoperations.glsl"
 
-// Double Precision Versions:
+#include "hdr.glsl"
+#include "atmosphere_common.glsl"
+
+uniform sampler2D reflectanceTexture;
+uniform sampler2D irradianceTexture;
+uniform sampler3D inscatterTexture;
+
+uniform sampler2DMS mainDepthTexture;
+
+uniform int nAaSamples;
+
+//layout(location = 0) out vec4 renderTarget;
+out vec4 renderTarget;
+
+in vec3 interpolatedNDCPos;
+
 //uniform dmat4 dSgctProjectionMatrix;
 uniform dmat4 dInverseTransformMatrix;
 //uniform dmat4 dScaleTransformMatrix;
@@ -48,33 +64,6 @@ uniform dvec3 dCampos;
 
 uniform dvec3 sunDirectionObj;
 
-uniform bool _performShading = true;
-/*
-uniform float transparency;
-uniform int shadows;
-
-uniform float screenX;
-uniform float screenY;
-uniform float screenWIDTH;
-uniform float screenHEIGHT;
-
-uniform vec2 depthrange;
-
-uniform float time;
-*/
-
-
-uniform sampler2D reflectanceTexture;
-uniform sampler2D irradianceTexture;
-uniform sampler3D inscatterTexture;
- 
-#include "hdr.glsl"
-#include "atmosphere_common.glsl"
-
-layout(location = 0) out vec4 renderTarget;
-
-in vec3 interpolatedNDCPos;
-
 
 /*******************************************************************************
  ****** ALL CALCULATIONS FOR ATMOSPHERE ARE KM AND IN OBJECT SPACE SYSTEM ******
@@ -94,67 +83,6 @@ struct Ellipsoid {
   dvec4 center;
   dvec4 size;
 };
-
-bool dIntersectEllipsoid(const dRay ray, const Ellipsoid ellipsoid, out double offset, out double maxLength) {
-  dvec4 O_C = ray.origin - ellipsoid.center;
-  dvec4 dir = normalize(ray.direction);
-
-  offset    = 0.0f;
-  maxLength = 0.0f;
-
-  double a =
-    ((dir.x*dir.x)/(ellipsoid.size.x*ellipsoid.size.x))
-    + ((dir.y*dir.y)/(ellipsoid.size.y*ellipsoid.size.y))
-    + ((dir.z*dir.z)/(ellipsoid.size.z*ellipsoid.size.z));
-  double b =
-    ((2.f*O_C.x*dir.x)/(ellipsoid.size.x*ellipsoid.size.x))
-    + ((2.f*O_C.y*dir.y)/(ellipsoid.size.y*ellipsoid.size.y))
-    + ((2.f*O_C.z*dir.z)/(ellipsoid.size.z*ellipsoid.size.z));
-  double c =
-    ((O_C.x*O_C.x)/(ellipsoid.size.x*ellipsoid.size.x))
-    + ((O_C.y*O_C.y)/(ellipsoid.size.y*ellipsoid.size.y))
-    + ((O_C.z*O_C.z)/(ellipsoid.size.z*ellipsoid.size.z))
-    - 1.f;
-  
-  double d = ((b * b)-(4.0 * a * c));
-  if ( d < 0.f || a == 0.f || b == 0.f || c == 0.f )
-    return false;
-  
-  d = sqrt(d);
-  
-  double t1 = (-b+d) / (2.0 * a);
-  double t2 = (-b-d) / (2.0 * a);
-  
-  if ( t1 <= EPSILON && t2 <= EPSILON )
-    return false; // both intersections are behind the ray origin
-
-  // If only one intersection (t>0) then we are inside the ellipsoid and the intersection is at the back of the ellipsoid
-  bool back = (t1 <= EPSILON || t2 <= EPSILON); 
-  double t  = 0.0;
-  if ( t1 <= EPSILON ) {
-    t = t2;
-  } else {
-    if( t2 <= EPSILON )
-      t = t1;
-    else
-      t = (t1 < t2) ? t1 : t2;
-  }
-
-  if ( t<EPSILON ) 
-    return false; // Too close to intersection
-
-  dvec4 intersection = ray.origin + t * dir;
-  dvec4 normal       = intersection - ellipsoid.center;
-  normal.x = 2.0 * normal.x / (ellipsoid.size.x * ellipsoid.size.x);
-  normal.y = 2.0 * normal.y / (ellipsoid.size.y * ellipsoid.size.y);
-  normal.z = 2.0 * normal.z / (ellipsoid.size.z * ellipsoid.size.z);
-  
-  normal.w = 0.0;
-  normal  *= (back) ? -1.0 : 1.0;
-  normal  = normalize(normal);
-  
-  return true;
-}
 
 /* Function to calculate the initial intersection of the eye (camera) ray
  * with the atmosphere.
@@ -214,6 +142,58 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
   }
   
   return true;
+}
+
+/*
+ * Calculates Intersection Ray by walking through
+ * all the graphic pipile transformations in the 
+ * opposite direction.
+ * Instead of passing through all the pipeline,
+ * it starts at NDC from the interpolated
+ * positions from the screen quad.
+ * This method avoids matrices multiplications
+ * wherever is possible.
+ */
+void dCalculateRay2(out dRay ray, out dvec4 planetPositionObjectCoords) {
+  // ======================================
+  // ======= Avoiding Some Matrices =======
+
+  // NDC to clip coordinates (gl_FragCoord.w = 1.0/w_clip)
+  // Using the interpolated coords:
+  // Assuming Red Book is right: z_ndc e [0, 1] and not [-1, 1]
+  dvec4 clipCoords = dvec4(interpolatedNDCPos, 1.0) / gl_FragCoord.w; 
+  // This next line is needed because OS or SGCT is not inverting Y axis from 
+  // window space. 
+  clipCoords.y = (-interpolatedNDCPos.y) / gl_FragCoord.w;
+ 
+  // Clip to SGCT Eye
+  dvec4 sgctEyeCoords = dInverseSgctProjectionMatrix * clipCoords;
+  //sgctEyeCoords /= sgctEyeCoords.w;
+  sgctEyeCoords.w = 1.0;
+  
+  // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
+  dvec4 osEyeCoords = dSgctEyeToOSEyeTranform * sgctEyeCoords;
+    
+  // OS Eye to World coords
+  // Now we execute the transformations with no matrices:
+  dvec4 ttmp         = dInverseScaleTransformMatrix * osEyeCoords;
+  dvec3 ttmp2        = dmat3(dInverseCamRotTransform) * dvec3(ttmp);
+  dvec4 worldCoords  = dvec4(dCampos + ttmp2, 1.0);
+    
+  // World to Object
+  dvec4 objectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + worldCoords.xyz, 1.0);
+
+  // Planet Position in Object Space
+  planetPositionObjectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + dObjpos.xyz, 1.0);
+
+  // Camera Position in Object Space
+  dvec4 cameraPositionInObject = dInverseTransformMatrix * dvec4(-dObjpos.xyz + dCampos, 1.0);
+    
+  // ============================
+  // ====== Building Ray ========
+  // Ray in object space (in KM)
+  ray.origin    = cameraPositionInObject / dvec4(1000.0, 1000.0, 1000.0, 1.0);
+  ray.direction = dvec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);
 }
 
 /* 
@@ -297,8 +277,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, const vec3 v, const vec3 s,
       dRay ray;
       ray.direction = vec4(v, 0.0);
       ray.origin = vec4(x, 1.0);     
-      bool  hitGround = dAtmosphereIntersection(vec3(0.0), ray,  Rg,
-                                                insideATM, offset, maxLength);
+      bool  hitGround = dAtmosphereIntersection(vec3(0.0), ray,  Rg+3,
+                                               insideATM, offset, maxLength);
       if (hitGround) {
         t = float(offset); 
       }
@@ -526,63 +506,19 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
     }
 }
 
-/*
- * Calculates Intersection Ray by walking through
- * all the graphic pipile transformations in the 
- * opposite direction.
- * Instead of passing through all the pipeline,
- * it starts at NDC from the interpolated
- * positions from the screen quad.
- * This method avoids matrices multiplications
- * wherever is possible.
- */
-void dCalculateRay2(out dRay ray, out dvec4 planetPositionObjectCoords) {
-  // ======================================
-  // ======= Avoiding Some Matrices =======
 
-  // NDC to clip coordinates (gl_FragCoord.w = 1.0/w_clip)
-  // Using the interpolated coords:
-  // Assuming Red Book is right: z_ndc e [0, 1] and not [-1, 1]
-  dvec4 clipCoords = dvec4(interpolatedNDCPos, 1.0) / gl_FragCoord.w; 
-  // This next line is needed because OS or SGCT is not inverting Y axis from 
-  // window space. 
-  clipCoords.y = (-interpolatedNDCPos.y) / gl_FragCoord.w;
- 
-  // Clip to SGCT Eye
-  dvec4 sgctEyeCoords = dInverseSgctProjectionMatrix * clipCoords;
-  //sgctEyeCoords /= sgctEyeCoords.w;
-  sgctEyeCoords.w = 1.0;
-  
-  // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
-  dvec4 osEyeCoords = dSgctEyeToOSEyeTranform * sgctEyeCoords;
-    
-  // OS Eye to World coords
-  // Now we execute the transformations with no matrices:
-  dvec4 ttmp         = dInverseScaleTransformMatrix * osEyeCoords;
-  dvec3 ttmp2        = dmat3(dInverseCamRotTransform) * dvec3(ttmp);
-  dvec4 worldCoords  = dvec4(dCampos + ttmp2, 1.0);
-    
-  // World to Object
-  dvec4 objectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + worldCoords.xyz, 1.0);
-
-  // Planet Position in Object Space
-  planetPositionObjectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + dObjpos.xyz, 1.0);
-
-  // Camera Position in Object Space
-  dvec4 cameraPositionInObject = dInverseTransformMatrix * dvec4(-dObjpos.xyz + dCampos, 1.0);
-    
-  // ============================
-  // ====== Building Ray ========
-  // Ray in object space (in KM)
-  ray.origin    = cameraPositionInObject / dvec4(1000.0, 1000.0, 1000.0, 1.0);
-  ray.direction = dvec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);
-}
-
-// Double Version
 void main() {
-  double depth = 0.0;  
-  if (_performShading) {
-    
+    // Acessing Depth Buffer.
+    float geoDepth = 0.0;
+    for (int i = 0; i < nAaSamples; i++) {
+        geoDepth += denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), i).x);
+    }
+    geoDepth /= nAaSamples;
+
+    //renderTarget = vec4(1.0, 0.0, 0.0, 0.5);
+    //renderTarget = vec4(vec3(interpolatedNDCPos), 0.5);
+    //renderTarget = vec4(vec3(geoDepth/100000000), 0.0);
+
     // Ray in object space
     dRay ray;
     dvec4 planetPositionObjectCoords = dvec4(0.0);
@@ -592,13 +528,9 @@ void main() {
     bool  insideATM    = false;
     double offset      = 0.0;
     double maxLength   = 0.0;     
-    bool  intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt,
-                                                insideATM, offset, maxLength );
+    bool  intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt+10,
+                                                 insideATM, offset, maxLength );
     if ( intersectATM ) {
-      //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);      
-      //renderTarget = vec4(offset/maxLength, offset/maxLength, offset/maxLength, 1.0);
-      //return;
-      
       // Following paper nomenclature      
       double t = 0.0;            
       if ( offset != -1.0 ) {
@@ -640,17 +572,17 @@ void main() {
       //renderTarget = vec4(groundColor, 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
-      vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
+      vec4 finalRadiance = vec4(HDR(inscatterColor), 1.0);
+      //vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
       if ( finalRadiance.xyz == vec3(0.0))
         finalRadiance.w = 0.0;
       renderTarget = finalRadiance;
-      
+
+      //renderTarget = vec4(1.0, 0.0, 0.0, 0.5);      
     } else {
-      renderTarget = vec4(0.0, 0.0, 0.0, 1.0);
+      //renderTarget = vec4(1.0, 1.0, 0.0, 0.5);      
+      renderTarget = vec4(0.0, 0.0, 0.0, 0.0);      
     }
-    
-  } else {
-    renderTarget = vec4(0.5, 0.5, 0.5, 1.0);
-  }
+
 }
 

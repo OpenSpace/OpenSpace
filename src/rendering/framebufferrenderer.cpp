@@ -172,7 +172,7 @@ void FramebufferRenderer::update() {
         updateRaycastData();
     }
 
-    if (_dirtyRaycastData) {
+    if (_dirtyDeferredcastData) {
         updateDeferredcastData();
     }
 
@@ -218,7 +218,7 @@ void FramebufferRenderer::update() {
     }
 
     for (auto &program : _deferredcastPrograms) {
-        if (program.second->isDirty()) {
+        if (program.second && program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
             } catch (ghoul::RuntimeError e) {
@@ -356,8 +356,9 @@ void FramebufferRenderer::updateDeferredcastData() {
         data.id = nextId++;
         data.namespaceName = "HELPER";
 
-        //std::string vsPath = raycaster->getBoundsVsPath();
-        //std::string fsPath = raycaster->getBoundsFsPath();
+        std::string vsPath = deferredcaster->getDeferredcastVSPath();
+        std::string fsPath = deferredcaster->getDeferredcastFSPath();
+        std::string deferredShaderPath = deferredcaster->getDeferredcastPath();
 
         ghoul::Dictionary dict;
         dict.setValue("rendererData", _rendererData);
@@ -374,13 +375,16 @@ void FramebufferRenderer::updateDeferredcastData() {
         _deferredcastData[deferredcaster] = data;
 
         try {
-            ghoul::Dictionary outsideDict = dict;
-            //outsideDict.setValue("getEntryPath", GetEntryOutsidePath);
-            //_deferredcastPrograms[deferredcaster] = ghoul::opengl::ProgramObject::Build(
-            //    "Deferred " + std::to_string(data.id) + " raycast",
-            //    vsPath,
-            //    RaycastFragmentShaderPath,
-            //    outsideDict);
+            ghoul::Dictionary deferredDict = dict;
+            //deferredDict.setValue("getEntryPath", GetEntryOutsidePath);
+            _deferredcastPrograms[deferredcaster] = ghoul::opengl::ProgramObject::Build(
+                "Deferred " + std::to_string(data.id) + " raycast",
+                vsPath,
+                deferredShaderPath,
+                deferredDict);
+            using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+            _deferredcastPrograms[deferredcaster]->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+            _deferredcastPrograms[deferredcaster]->setIgnoreUniformLocationError(IgnoreError::Yes);
         }
         catch (ghoul::RuntimeError e) {
             LERROR(e.message);
@@ -506,12 +510,11 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         }
     }
 
-    for (const DeferredcasterTask& deferredcasterTask : tasks.deferredTasks) {
+    for (const DeferredcasterTask& deferredcasterTask : tasks.deferredcasterTasks) {
         // TODO
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
         glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
-        glm::vec3 cameraPosition;
         ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
 
         if (deferredcastProgram == _deferredcastPrograms[deferredcaster].get()) {
@@ -522,7 +525,9 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         }
 
         if (deferredcastProgram) {
-            //deferredcaster->preRaycast(_deferredcastData[deferredcaster], *deferredcastProgram);
+            deferredcaster->preRaycast(deferredcasterTask.renderData, 
+                                       _deferredcastData[deferredcaster], 
+                                       *deferredcastProgram);
 
             ghoul::opengl::TextureUnit mainDepthTextureUnit;
             mainDepthTextureUnit.activate();
@@ -530,7 +535,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             deferredcastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
-            deferredcastProgram->setUniform("windowSize", glm::vec2(_resolution));
+//            deferredcastProgram->setUniform("windowSize", glm::vec2(_resolution));
 
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
@@ -542,11 +547,13 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             glDepthMask(true);
             glEnable(GL_DEPTH_TEST);
 
-            //deferredcaster->postRaycast(_deferredcastData[deferredcaster], *deferredcastProgram);
+            deferredcaster->postRaycast(deferredcasterTask.renderData,
+                                        _deferredcastData[deferredcaster], 
+                                        *deferredcastProgram);
             deferredcastProgram->deactivate();
 
         } else {
-            LWARNING("Deferredcaster is not attached when trying to perform raycaster task");
+            LWARNING("Deferredcaster is not attached when trying to perform deferred task");
         }
     }
 

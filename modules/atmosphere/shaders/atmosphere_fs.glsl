@@ -78,8 +78,6 @@ in vec4 vs_posWorld;
 #include "fragment.glsl"
 #include "atmosphere_common.glsl"
 
-layout(location = 1) out vec4 cameraDistanceTextureTarget;
-
 vec4 butterworthFunc(const float d, const float r, const float n) {
     return vec4(vec3(sqrt(r/(r + pow(d, 2*n)))), 1.0);    
 }
@@ -457,51 +455,70 @@ Fragment getFragment() {
   // Shading is enabled
   if (_performShading) {
     // atmosphere
-    vec4 viewport = vec4(screenX, screenY, screenWIDTH, screenHEIGHT);
-    vec4 ndcPos;
-    ndcPos.xy = ((2.0f * gl_FragCoord.xy) - (2.0f * viewport.xy)) / (viewport.zw) - 1.0f;
-    ndcPos.z = (2.0f * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / 
-      (gl_DepthRange.far - gl_DepthRange.near);
-    ndcPos.w = 1.0f;
-    vec4 clipPos = ndcPos / gl_FragCoord.w;
-    vec4 projCoords = projInverse * clipPos;
-    vec4 viewDirection =  normalize(completeInverse * vec4(projCoords.xyz, 0.0));
-    vec3 v = normalize(viewDirection.xyz);
+    // vec4 viewport = vec4(screenX, screenY, screenWIDTH, screenHEIGHT);
+    // vec4 ndcPos;
+    // ndcPos.xy = ((2.0f * gl_FragCoord.xy) - (2.0f * viewport.xy)) / (viewport.zw) - 1.0f;
+    // ndcPos.z = (2.0f * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / 
+    //   (gl_DepthRange.far - gl_DepthRange.near);
+    // ndcPos.w = 1.0f;
+    // vec4 clipPos = ndcPos / gl_FragCoord.w;
+    // vec4 projCoords = projInverse * clipPos;
+    // vec4 viewDirection =  normalize(completeInverse * vec4(projCoords.xyz, 0.0));
+    // vec3 v = normalize(viewDirection.xyz);
     
-    float offset, maxLength;
-    vec4 ppos = vec4(0.0);
+    // float offset, maxLength;
+    // vec4 ppos = vec4(0.0);
 
-    if (intersectAtmosphere(ppos, v, Rg, offset, maxLength)) {    
-      // Following paper nomenclature
-      float t  = offset;
-      vec3  x  = cameraPosObj.xyz;
-      float r  = length(x);
-      float mu = dot(x, v) / r;
-      vec3  s  = normalize(sunPositionObj);
+    // if (intersectAtmosphere(ppos, v, Rg, offset, maxLength)) {    
+    //   // Following paper nomenclature
+    //   float t  = offset;
+    //   vec3  x  = cameraPosObj.xyz;
+    //   float r  = length(x);
+    //   float mu = dot(x, v) / r;
+    //   vec3  s  = normalize(sunPositionObj);
       
-      vec3 attenuation;
-      vec3 inscatterColor = inscatterRadiance(x, t, v, s, r, mu, attenuation); 
-      vec3 groundColor = groundColor(x, t, v, s, r, mu, attenuation);
-      vec3 sunColor = sunColor(x, t, v, s, r, mu); 
+    //   vec3 attenuation;
+    //   vec3 inscatterColor = inscatterRadiance(x, t, v, s, r, mu, attenuation); 
+    //   vec3 groundColor = groundColor(x, t, v, s, r, mu, attenuation);
+    //   vec3 sunColor = sunColor(x, t, v, s, r, mu); 
       
-      //diffuse = vec4(HDR(sunColor + groundColor + inscatterColor), 1.0));      
-      //diffuse = vec4(HDR(inscatterColor), 1.0)); 
-      //diffuse = vec4(HDR(groundColor), 1.0); 
-      //diffuse = vec4(HDR(sunColor), 1.0));       
+    //   //diffuse = vec4(HDR(sunColor + groundColor + inscatterColor), 1.0));      
+    //   //diffuse = vec4(HDR(inscatterColor), 1.0)); 
+    //   //diffuse = vec4(HDR(groundColor), 1.0); 
+    //   //diffuse = vec4(HDR(sunColor), 1.0));       
       
-      //diffuse = HDR(vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2); 
-      vec4 finalRadiance = calcShadow(shadowDataArray, vs_posWorld.xyz) * 
-                            (vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2);
+    //   //diffuse = HDR(vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2); 
+    //   vec4 finalRadiance = calcShadow(shadowDataArray, vs_posWorld.xyz) * 
+    //                         (vec4(sunColor + groundColor + inscatterColor, 1.0) + diffuse2);
                      
-      diffuse = vec4(HDR(finalRadiance.xyz), finalRadiance.w); 
-    }  
+    //   diffuse = vec4(HDR(finalRadiance.xyz), finalRadiance.w); 
+    // }
+
+    // directional lighting
+    vec3 origin = vec3(0.0);
+    vec4 spec = vec4(0.0);
+       
+    vec3 n = normalize(vs_normal.xyz);
+    //vec3 e = normalize(camdir);
+    vec3 l_pos = vec3(sun_pos); // sun.
+    vec3 l_dir = normalize(l_pos-objpos.xyz);
+    float intensity = min(max(5*dot(n,l_dir), 0.0), 1);
+    float darkSide  = min(max(5*dot(n,-l_dir), 0.0), 1);
+        
+    float shine = 0.0001;
+
+    vec4 specular = vec4(0.5);
+    vec4 ambient = vec4(0.0,0.0,0.0,transparency);
+        
+    vec4 daytex = max(intensity * diffuse, ambient);
+    vec4 mixtex = mix(diffuse, diffuse2,  (1+dot(n,-l_dir))/2);
+        
+    diffuse = calcShadow(shadowDataArray, vs_posWorld.xyz) * (daytex*2 + mixtex)/3;  
   }
 
   diffuse[3] = transparency;
   frag.color = diffuse;
-  frag.depth = depth;
-  
-  cameraDistanceTextureTarget = vec4(vec3(0.0), 1.0);
+  frag.depth = depth;  
 
   return frag;
 }

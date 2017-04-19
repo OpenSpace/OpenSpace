@@ -25,14 +25,14 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atmosphereraycaster.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atmospheredeferredcaster.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableatmosphere.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetatmosphere.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atmosphereraycaster.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atmospheredeferredcaster.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableatmosphere.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplanetatmosphere.cpp
 )

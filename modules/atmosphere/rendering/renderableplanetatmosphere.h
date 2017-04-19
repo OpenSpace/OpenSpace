@@ -52,6 +52,10 @@ namespace openspace {
         class PlanetGeometry;
     }
 
+    class AtmosphereDeferredcaster;
+    struct RenderData;
+
+
     class RenderablePlanetAtmosphere : public Renderable {
     public:
         // Shadow structure
@@ -79,18 +83,16 @@ namespace openspace {
 
         const unsigned int DELTA_E_TABLE_WIDTH = 64;
         const unsigned int DELTA_E_TABLE_HEIGHT = 16;
-        
 
-        /*
-        const unsigned int TRANSMITTANCE_TABLE_WIDTH = 512;
+
+        /*const unsigned int TRANSMITTANCE_TABLE_WIDTH = 512;
         const unsigned int TRANSMITTANCE_TABLE_HEIGHT = 128;
 
         const unsigned int IRRADIANCE_TABLE_WIDTH = 128;
         const unsigned int IRRADIANCE_TABLE_HEIGHT = 32;
 
         const unsigned int DELTA_E_TABLE_WIDTH = 128;
-        const unsigned int DELTA_E_TABLE_HEIGHT = 32;
-        */
+        const unsigned int DELTA_E_TABLE_HEIGHT = 32;*/
 
         const unsigned int R_SAMPLES = 32;
         const unsigned int MU_SAMPLES = 128;
@@ -110,13 +112,15 @@ namespace openspace {
         bool deinitialize() override;
         bool isReady() const override;
 
-        void render(const RenderData& data) override;
+        void render(const RenderData& data, RendererTasks& tasks) override;
         void update(const UpdateData& data) override;
 
     protected:
         void loadTexture();
 
     private:
+        void computeModelTransformMatrix(glm::mat4 * modelTransform);
+        void computeModelTransformMatrix(glm::dmat4 * modelTransform);
         void loadComputationPrograms();
         void unloadComputationPrograms();
         void createComputationTextures();
@@ -244,6 +248,8 @@ namespace openspace {
 
         unsigned int count;
 
+        // Testing Deferredcast
+        std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
 
     };
 

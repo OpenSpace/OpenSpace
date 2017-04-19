@@ -75,7 +75,7 @@ struct DeferredcasterTask {
 
 struct RendererTasks {
     std::vector<RaycasterTask> raycasterTasks;
-    std::vector<DeferredcasterTask> deferredTasks;
+    std::vector<DeferredcasterTask> deferredcasterTasks;
 };
 
 struct RaycastData {

@@ -39,7 +39,7 @@ namespace ghoul {
 namespace openspace {
 
 struct RenderData;
-struct RaycastData;
+struct DeferredcastData;
 
 class Deferredcaster {
 public:
@@ -48,53 +48,17 @@ public:
      */
     virtual ~Deferredcaster() {};
 
-    /**
-     * Prepare the volume for the ABuffer's resolve step.
-     * Make sure textures are up to date, bind them to texture units, set program uniforms etc.
-     */
-    virtual void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {};
+    virtual void preRaycast(const RenderData & renderData, const const DeferredcastData& deferredData, 
+                            ghoul::opengl::ProgramObject& program) {};
 
-    /**
-     * Clean up for the volume after the ABuffer's resolve step.
-     * Make sure texture units are deinitialized, etc.
-     */
-    virtual void postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {};
+    virtual void postRaycast(const RenderData & renderData, const DeferredcastData& deferredData, 
+                             ghoul::opengl::ProgramObject& program) {};
 
-    /**
-     * Return a path the file to use as vertex shader
-     *
-     * The shader preprocessor will have acceess to
-     *   A #{namespace} variable (unique per helper file)
-     */
-    virtual std::string getBoundsVsPath() const = 0;
+    virtual std::string getDeferredcastPath() const = 0;
 
-    /*
-     * Return a path to a file with the functions, uniforms and fragment shader in variables
-     * required to generate the fragment color and depth.
-     *
-     * Should define the function:
-     * Fragment getFragment()
-     *
-     * The shader preprocessor will have acceess to
-     *   A #{namespace} variable (unique per helper file)
-     */
-    virtual std::string getBoundsFsPath() const = 0 ;
+    virtual std::string getDeferredcastVSPath() const = 0;
 
-    /**
-     * Return a path to a file with all the uniforms, functions etc
-     * required to perform ray casting through this volume.
-     *
-     * The header should define the following two functions:
-     *   vec4 sample#{id}(vec3 samplePos, vec3 dir, float occludingAlpha, inout float maxStepSize)
-     *      (return color of sample)
-     *   float stepSize#{id}(vec3 samplePos, vec3 dir)
-     *      (return the preferred step size at this sample position)
-     *
-     * The shader preprocessor will have acceess to
-     *   An #{id} variable (unique per volume)
-     *   A #{namespace} variable (unique per helper file)
-     */
-    virtual std::string getRaycastPath() const = 0;
+    virtual std::string getDeferredcastFSPath() const = 0;
 
     /**
      * Return a path to a glsl file with helper functions required for the
