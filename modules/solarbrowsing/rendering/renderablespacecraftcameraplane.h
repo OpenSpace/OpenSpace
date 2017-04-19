@@ -52,9 +52,11 @@ public:
 
 private:
     properties::DoubleProperty _moveFactor;
+    properties::IntProperty _minRealTimeUpdateInterval;
     properties::StringProperty _target;
     properties::IntProperty _currentActiveChannel;
     properties::BoolProperty _usePBO;
+    properties::BoolProperty _asyncUploadPBO;
 
     double _openSpaceTime;
     double _lastUpdateOpenSpaceTime;
@@ -67,10 +69,21 @@ private:
     unsigned int pboSize;
     GLuint pboHandle;
 
+    double _startTimeSequence;
+    double _endTimeSequence;
+
+    std::unique_ptr<std::future<void>> _future;
+    bool _initializePBO;
+
+    float* _pboBufferData;
+
     // Channels -> DataObjects
     std::vector<std::vector<ImageDataObject>> _imageData;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::vector<std::unique_ptr<TransferFunction>> _transferFunctions;
+
+    void uploadImageDataToPBO(const int& image);
+    void updateTextureGPU();
 
     void downloadTextureResource();
     bool initialize() override;

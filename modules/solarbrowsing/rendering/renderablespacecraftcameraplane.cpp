@@ -37,6 +37,7 @@
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/util/time.h>
+#include <chrono>
 #include <math.h>
 
 using namespace ghoul::opengl;
@@ -44,7 +45,7 @@ using namespace std::chrono;
 
 namespace {
     static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
-    static const int _minRealTimeUpdateInterval = 10;
+    //static const int _minRealTimeUpdateInterval = 50;
     static const int _minOpenSpaceTimeUpdateInterval = 1; // Should probably be set to real update value of data later
     static const float FULL_PLANE_SIZE = (1391600000.f * 0.5f) / 0.785f; // Half sun radius divided by magic factor
 }
@@ -53,17 +54,19 @@ namespace openspace {
 
 RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary)
     : RenderablePlane(dictionary)
-    , _currentActiveChannel("activeChannel", "Active Channel", 3, 0, 9)
+    , _currentActiveChannel("activeChannel", "Active Channel", 0, 0, 9)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _target("target", "Target", "Sun")
     , _usePBO("usePBO", "Use PBO", true)
+    , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
+    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 50, 0, 100)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
         _target = target;
     }
 
-    // TODO(mnoven): Lua
+    // // TODO(mnoven): Lua
     // std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 0
     //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 1
     //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/171", // 2
@@ -75,38 +78,49 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/304", // 8
     //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
 
-    std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 1
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 2
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // 3 // OK
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 4
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 5 // OK
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0193", // 6 // OK
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0211", // 7 // OK
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0304", // 8 // OK
-                                      "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};// 9
+    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/094"};
+    //std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};
+    std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094_new.txt"};
 
 
-    std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 0
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 1
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 2
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094_new.txt", // 3
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0131_new.txt", // 4
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0171_new.txt", // 5
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0193_new.txt", // 6
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0211_new.txt", // 7
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0304_new.txt", // 8
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0335_new.txt"};// 9
+    // std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 1
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 2
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0094", // 3 // OK
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 4
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 5 // OK
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0193", // 6 // OK
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0211", // 7 // OK
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0304", // 8 // OK
+    //                                   "/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};// 9
+
+
+    // std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 0
+    //                                     "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 1
+    //                                     "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/custom.txt",   // 2
+    //                                     "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094_new.txt", // 3
+    //                                     "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0131_new.txt", // 4
+    //                                     "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0171_new.txt", // 5
+    //                                     "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0193_new.txt", // 6
+    //                                     "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0211_new.txt", // 7
+    //                                     "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0304_new.txt", // 8
+    //                                     "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0335_new.txt"};// 9
 
     _type = "SDO";
     int imageSize;
-    const int numChannels = 10;
-    _imageData.reserve(numChannels);
+    const int numChannels = paths.size();
     for (int i = 0; i < numChannels; i++) {
         _imageData.push_back(SpacecraftImageryManager::ref().loadImageData(paths[i], imageSize));
-        SpacecraftImageryManager::ref().scaleImageData(_imageData[i], _type, i);
+        //SpacecraftImageryManager::ref().scaleImageData(_imageData[i], _type, i);
         _transferFunctions.push_back(std::make_unique<TransferFunction>(tfPaths[i]));
     }
+
+    ImageDataObject& start = _imageData[_currentActiveChannel][0];
+    ImageDataObject& end = _imageData[_currentActiveChannel][ _imageData[_currentActiveChannel].size() - 1];
+    _startTimeSequence = start.metaData.timeObserved;
+    _endTimeSequence = end.metaData.timeObserved;
+
+    Time::ref().setTime(_startTimeSequence - 10);
 
     // GPU Needs all channels here
     pboSize = imageSize * imageSize * 4;
@@ -122,16 +136,25 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
                     nullptr, // Update pixel data later, is this really safe?
                     glm::size3_t(imageSize, imageSize, 1),
                     ghoul::opengl::Texture::Red, // Format of the pixeldata
-                    GL_R32F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
+                    GL_R16F, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
                     GL_FLOAT, // Type of data
                     Texture::FilterMode::Linear,
                     Texture::WrappingMode::ClampToEdge
                 );
 
+
+    float* fdata = new float[imageSize * imageSize];
+
+    for (int i = 0; i < imageSize * imageSize; ++i) {
+        fdata[i] = 0.f;
+    }
+
+    _initializePBO = true;
+    _future = nullptr;
     _texture->setDataOwnership(ghoul::Boolean::No);
     _texture->uploadTexture();
 
-    _currentActiveImage = -1;
+    _currentActiveImage = 0;
     assert(_currentActiveChannel < numChannels);
 
     // Initialize time
@@ -141,7 +164,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _lastUpdateRealTime = _realTime;
 
     _currentActiveChannel.onChange([this]() {
-        updateTexture();
+        updateTextureGPU(); // PASS IN TO NOT USE PBO HERE, OK SYNCHRYOUS
     });
 
     _moveFactor.onChange([this]() {
@@ -149,7 +172,16 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         createPlane();
     });
 
+    // Initialize PBO
+    if (_usePBO) {
+        LDEBUG("Initializing PBO with image " << _currentActiveImage);
+        uploadImageDataToPBO(_currentActiveImage);
+      //  updateTextureGPU();
+    }
+
     performImageTimestep();
+    addProperty(_minRealTimeUpdateInterval);
+    addProperty(_asyncUploadPBO);
     addProperty(_usePBO);
     addProperty(_currentActiveChannel);
     addProperty(_target);
@@ -199,29 +231,44 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
     return true;
 }
 
-void RenderableSpacecraftCameraPlane::updateTexture() {
+void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle);
+    // Orphan data and multithread
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, NULL, GL_STREAM_DRAW);
+    // Map buffer to client memory
+    //_pboBufferData = static_cast<float*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
+    _pboBufferData = static_cast<float*>(glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, pboSize, GL_MAP_WRITE_BIT|GL_MAP_INVALIDATE_BUFFER_BIT));
+
+    std::valarray<IMG_PRECISION>& contents =
+                                _imageData[_currentActiveChannel][image].contents;
+
+    if (!_asyncUploadPBO) {
+        std::memcpy(_pboBufferData, &contents[0], contents.size() * sizeof(IMG_PRECISION));
+    } else {
+        _future = std::make_unique<std::future<void>>(std::async(std::launch::async,
+            [&contents, this]() {
+               std::memcpy(_pboBufferData, &contents[0], contents.size() * sizeof(IMG_PRECISION));
+            }));
+    }
+
+    // Release the mapped buffer
+    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    // Set back to normal texture data source
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+}
+
+void RenderableSpacecraftCameraPlane::updateTextureGPU() {
     if (_usePBO) {
-        // Bind our PBO to texture data source
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle);
 
-        // Discard data in PBO - glMapBuffer cases sync issue if we don't and have to wait
-        // for GPU to finish its job
-        glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, 0, GL_STREAM_DRAW);
-        // Map buffer to client memory
-        float* data = static_cast<float*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-        if (data) {
-            std::valarray<IMG_PRECISION>& contents =
-                    _imageData[_currentActiveChannel][_currentActiveImage].contents;
-            // This is probably still the bottleneck
-            std::memcpy(data, &contents[0], contents.size() * sizeof(float));
-        } else {
-            LERROR("Failed to map PBO to client memory");
+        // Wait for texture data from previous frame
+        if (_future) {
+            _future->wait();
         }
+        _future = nullptr;
 
-        // Release the mapped buffer
-        glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-
-        const glm::uvec3& dimensions = _texture->dimensions();
+        // Bind PBO to texture data source
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle);
+         const glm::uvec3& dimensions = _texture->dimensions();
         _texture->bind();
         // Send async to GPU by coping from PBO to texture objects
         glTexSubImage2D(
@@ -235,8 +282,6 @@ void RenderableSpacecraftCameraPlane::updateTexture() {
             _texture->dataType(),
             nullptr
         );
-
-        // Set back to normal texture data source
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     } else {
         std::valarray<IMG_PRECISION>& contents =
@@ -260,24 +305,39 @@ void RenderableSpacecraftCameraPlane::updateTexture() {
 }
 
 void RenderableSpacecraftCameraPlane::performImageTimestep() {
-    int clockwiseSign = (Time::ref().deltaTime()>0) ? 1 : -1;
-    int newIndex = clockwiseSign + _currentActiveImage;
-    if (newIndex < _imageData[_currentActiveChannel].size() && newIndex >= 0) {
-        LDEBUG("Updating texture to " << newIndex);
-        _currentActiveImage = newIndex;
-        updateTexture();
+    const double osTime = Time::ref().j2000Seconds();
+    const auto& imageList = _imageData[_currentActiveChannel];
+
+    //TODO(mnoven): Do NOT perform this log(n) lookup every frame - check if
+    // still inside current interval => No need to check
+    const auto& low = std::lower_bound(imageList.begin(), imageList.end(), osTime);
+
+    int currentActiveImageLast = _currentActiveImage;
+    _currentActiveImage = low - imageList.begin();
+
+    if (_currentActiveImage == _imageData[_currentActiveChannel].size()) {
+        _currentActiveImage = _currentActiveImage - 1;
+    }
+
+    if (currentActiveImageLast != _currentActiveImage || _initializePBO){
+        LDEBUG("Updating texture to " << _currentActiveImage);
+        updateTextureGPU();
+        _initializePBO = false;
+        //uploadImageDataToPBOAsync();
+        // AFTER LUNCH MAKE UPLOADIMAGEDATA TAKE CURRENTIMAGE AND CURRENTCHANEL AS VARIABLE
+        int clockwiseSign = (Time::ref().deltaTime()>0) ? 1 : -1;
+        int newIndex = clockwiseSign + _currentActiveImage;
+        if (newIndex < _imageData[_currentActiveChannel].size() && newIndex >= 0) {
+            uploadImageDataToPBO(newIndex);
+        }
     }
 }
 
 void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
-    _openSpaceTime = Time::ref().j2000Seconds();
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-
     float realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
-    float openspaceDiff = abs(_openSpaceTime-_lastUpdateOpenSpaceTime);
 
-    bool timeToUpdateTexture = (openspaceDiff >= _minOpenSpaceTimeUpdateInterval) &&
-                               (realTimeDiff > _minRealTimeUpdateInterval);
+    bool timeToUpdateTexture = realTimeDiff > _minRealTimeUpdateInterval;
 
     // Future ready, push to texture vector
     // if (_imageData.valid() && DownloadManager::futureReady(_imageData)) {
