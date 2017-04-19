@@ -920,8 +920,7 @@ namespace openspace {
         //=============================================================================
         //================== Atmosphere Rendering and Uniforms Loading ================
         //=============================================================================
-        //if (_atmosphereEnabled) {
-        if (false) {
+        if (_atmosphereEnabled) {        
             // Object Space (in Km)
             glm::mat4 obj2World = glm::translate(glm::mat4(1.0), data.position.vec3() / 1000.0f);
 

@@ -22,14 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-//#version __CONTEXT__
-#version 400
+#version __CONTEXT__
+//#version 400
 
 layout(location = 0) in vec4 in_position;
 
 out vec3 interpolatedNDCPos;
-out vec4 vertexPosObjVS;
-out vec3 interpolatedRayDirection;
 
 void main()
 {

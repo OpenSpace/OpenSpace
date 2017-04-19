@@ -277,8 +277,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, const vec3 v, const vec3 s,
       dRay ray;
       ray.direction = vec4(v, 0.0);
       ray.origin = vec4(x, 1.0);     
-      bool  hitGround = dAtmosphereIntersection(vec3(0.0), ray,  Rg+3,
-                                               insideATM, offset, maxLength);
+      bool  hitGround = dAtmosphereIntersection(vec3(0.0), ray,  Rg+1,
+                                                insideATM, offset, maxLength);
       if (hitGround) {
         t = float(offset); 
       }
@@ -287,11 +287,11 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, const vec3 v, const vec3 s,
       float r0     = length(x0);
       float mu0    = dot(x0, v) / r0;
       float muSun0 = dot(x0, s) / r0;
-
+      
       // Transmittance from point r, direction mu, distance t
       // By Analytical calculation
       attenuation = analyticTransmittance(r, mu, t);
-
+      
       // By Texture Access
       //attenuation = transmittance(r, mu, v, x0);
       
@@ -370,7 +370,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, const vec3 v, const vec3 s,
   } else {
     // No intersection with atmosphere
     // The ray is traveling on space
-    radiance = vec3(0.0f);
+    radiance = vec3(0.0, 0.0, 0.0f);
   }
   
   
@@ -497,12 +497,13 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
   if (t > 0.0f) {
     return vec3(0.0f);
   } else {
-    vec3 transmittance = (r <= Rt) ? 
-          (mu < -sqrt(1.0f - (Rg/r)/(Rg/r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) :
-          vec3(1.0f);
-    float sunColor = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance; 
+    // vec3 transmittance = (r <= Rt) ? 
+    //       (mu < -sqrt(1.0f - (Rg/r)/(Rg/r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) :
+    //       vec3(1.0f);
+    float sunFinalColor = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance; 
 
-    return transmittance * sunColor;
+    //return transmittance * sunFinalColor;
+    return vec3(sunFinalColor);
     }
 }
 
@@ -549,6 +550,9 @@ void main() {
 
       //renderTarget =  vec4(analyticTransmittance(r, mu, tF).xyz, 1.0);      
       //renderTarget = vec4(s, 1.0);
+      //renderTarget = vec4(x/100000, 1.0);
+      //renderTarget = vec4(v/1, 1.0);
+      //renderTarget = vec4(vec3(abs(mu)/2), 1.0);
       //renderTarget = HDR(vec4(abs(mu*mu), abs(mu*mu), abs(mu*mu), 1.0));
       //renderTarget = HDR(vec4(abs(Rt*Rt), abs(Rt*Rt), abs(Rt*Rt), 1.0));
       //renderTarget = HDR(vec4(abs(Rg*Rg), abs(Rg*Rg), abs(Rg*Rg), 1.0));
@@ -572,16 +576,19 @@ void main() {
       //renderTarget = vec4(groundColor, 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
-      vec4 finalRadiance = vec4(HDR(inscatterColor), 1.0);
+      vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
+      //vec4 finalRadiance = vec4(inscatterColor, 1.0);
+      //vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
       //vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
       if ( finalRadiance.xyz == vec3(0.0))
-        finalRadiance.w = 0.0;
+         finalRadiance.w = 0.0;
       renderTarget = finalRadiance;
 
-      //renderTarget = vec4(1.0, 0.0, 0.0, 0.5);      
+      //renderTarget = vec4(1.0, 0.0, 0.0, 0.5);
+      //renderTarget = vec4(0.0);            
     } else {
       //renderTarget = vec4(1.0, 1.0, 0.0, 0.5);      
-      renderTarget = vec4(0.0, 0.0, 0.0, 0.0);      
+      renderTarget = vec4(1.0, 0.0, 0.0, 0.0);      
     }
 
 }

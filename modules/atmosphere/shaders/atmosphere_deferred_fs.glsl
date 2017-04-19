@@ -286,7 +286,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, const vec3 v, const vec3 s,
     
     // S[L](x,s,v)
     vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);
-    
+    return inscatterRadiance.xyz;
     // After removing the initial path from camera pos to top of atmosphere or the
     // current camera position if inside atmosphere, t > 0
     if (t > 0.0) {
@@ -617,6 +617,8 @@ void main() {
 
       //renderTarget =  vec4(analyticTransmittance(r, mu, tF).xyz, 1.0);      
       //renderTarget = vec4(s, 1.0);
+      //renderTarget vec4(vec3(mu), 1.0);
+      //renderTarget = vec4(vec3(abs(mu)/2), 1.0);
       //renderTarget = HDR(vec4(abs(mu*mu), abs(mu*mu), abs(mu*mu), 1.0));
       //renderTarget = HDR(vec4(abs(Rt*Rt), abs(Rt*Rt), abs(Rt*Rt), 1.0));
       //renderTarget = HDR(vec4(abs(Rg*Rg), abs(Rg*Rg), abs(Rg*Rg), 1.0));
@@ -641,10 +643,10 @@ void main() {
       //renderTarget = vec4(HDR(sunColor), 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
       vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
+      //vec4 finalRadiance = vec4(HDR(inscatterColor), 1.0);
       if ( finalRadiance.xyz == vec3(0.0))
         finalRadiance.w = 0.0;
-      renderTarget = finalRadiance;
-      
+      renderTarget = finalRadiance;           
     } else {
       renderTarget = vec4(0.0, 0.0, 0.0, 1.0);
     }
