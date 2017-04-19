@@ -68,6 +68,8 @@ private:
     int _currentActiveImage;
     unsigned int pboSize;
     GLuint pboHandle;
+    GLuint pboHandles[2];
+    unsigned int _currentPBO;
 
     double _startTimeSequence;
     double _endTimeSequence;

@@ -126,8 +126,10 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     pboSize = imageSize * imageSize * 4;
 
     // Generate PBO
-    glGenBuffers(1, &pboHandle);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle);
+    glGenBuffers(2, pboHandles);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[0]);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, 0, GL_STREAM_DRAW);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[1]);
     glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, 0, GL_STREAM_DRAW);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
@@ -156,6 +158,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
     _currentActiveImage = 0;
     assert(_currentActiveChannel < numChannels);
+    _currentPBO = 0;
 
     // Initialize time
     _openSpaceTime = Time::ref().j2000Seconds();
@@ -175,7 +178,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     // Initialize PBO
     if (_usePBO) {
         LDEBUG("Initializing PBO with image " << _currentActiveImage);
-        uploadImageDataToPBO(_currentActiveImage);
+        uploadImageDataToPBO(_currentActiveImage); // Begin fill PBO 1
       //  updateTextureGPU();
     }
 
@@ -232,9 +235,11 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 }
 
 void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[1 - _currentPBO]);
+
     // Orphan data and multithread
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, NULL, GL_STREAM_DRAW);
+    //glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, NULL, GL_STREAM_DRAW);
+
     // Map buffer to client memory
     //_pboBufferData = static_cast<float*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
     _pboBufferData = static_cast<float*>(glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, pboSize, GL_MAP_WRITE_BIT|GL_MAP_INVALIDATE_BUFFER_BIT));
@@ -267,7 +272,7 @@ void RenderableSpacecraftCameraPlane::updateTextureGPU() {
         _future = nullptr;
 
         // Bind PBO to texture data source
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandle);
+        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[_currentPBO]);
          const glm::uvec3& dimensions = _texture->dimensions();
         _texture->bind();
         // Send async to GPU by coping from PBO to texture objects
@@ -321,15 +326,12 @@ void RenderableSpacecraftCameraPlane::performImageTimestep() {
 
     if (currentActiveImageLast != _currentActiveImage || _initializePBO){
         LDEBUG("Updating texture to " << _currentActiveImage);
+        _currentPBO = 1 - _currentPBO;
         updateTextureGPU();
-        _initializePBO = false;
-        //uploadImageDataToPBOAsync();
-        // AFTER LUNCH MAKE UPLOADIMAGEDATA TAKE CURRENTIMAGE AND CURRENTCHANEL AS VARIABLE
-        int clockwiseSign = (Time::ref().deltaTime()>0) ? 1 : -1;
-        int newIndex = clockwiseSign + _currentActiveImage;
-        if (newIndex < _imageData[_currentActiveChannel].size() && newIndex >= 0) {
-            uploadImageDataToPBO(newIndex);
+        if (_usePBO) {
+            uploadImageDataToPBO(_currentActiveImage);
         }
+        _initializePBO = false;
     }
 }
 
