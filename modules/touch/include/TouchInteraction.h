@@ -85,7 +85,8 @@ struct FunctionData {
 	std::vector<glm::dvec3> selectedPoints;
 	std::vector<glm::dvec2> screenPoints;
 	int nDOF;
-	glm::dvec3(*toSurface)(glm::dvec2, Camera*, SceneGraphNode*, double);
+	glm::dvec2(*toScreen)(glm::dvec3, Camera*, SceneGraphNode*, double);
+	double(*distToMinimize)(double* par, int x, void* fdata);
 	Camera* camera;
 	SceneGraphNode* node;
 	double aspectRatio;

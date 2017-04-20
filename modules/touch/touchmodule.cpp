@@ -156,7 +156,7 @@ TouchModule::TouchModule()
 			os.clear();
 
 		}
-		else
+		else if (list.size() == 0)
 			touch->clear();
 
 		// update lastProcessed

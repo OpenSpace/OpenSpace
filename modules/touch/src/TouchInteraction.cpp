@@ -90,7 +90,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			// Create transformation matrix M(q) and apply transform for newPointInModelView
 			glm::dvec3 T = glm::dvec3(par[0], par[1], 0.0);
 			glm::dquat Q;
-			Q.x = Q.y = Q.z = 0.0;
+			Q.x = Q.y = Q.z = Q.w = 0.0;
 			if (ptr->nDOF > 2) { // need to check how many DOF we can handle (+2 DOF per finger down up to 6)
 				T.z = par[2];
 				Q.x = par[3];
@@ -99,36 +99,30 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 					Q.z = par[5];
 				}
 			}
-			double len = Q.x*Q.x + Q.y*Q.y + Q.z*Q.z;
-			Q.w = sqrt(1.0 - len);
+			Q.w = sqrt(1.0 - std::min(glm::length(Q), 0.99999)); // if check is not done Q.w becomes NAN. Do we need a better definition of Q.w?
+			
 			glm::dvec3 newSurfacePoint = (Q * selectedPoint) + T;
-			glm::dvec3 currentSurfacePoint = ptr->toSurface(ptr->screenPoints.at(x), ptr->camera, ptr->node, ptr->aspectRatio);
+			glm::dvec2 newScreenPoint = ptr->toScreen(newSurfacePoint, ptr->camera, ptr->node, ptr->aspectRatio);
 
-			return glm::length(currentSurfacePoint - newSurfacePoint);
+			return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
 		};
-		// Gradient of distToMinimize w.r.t par
+		// Gradient (finite derivative) of distToMinimize w.r.t par
 		auto gradient = [](double* g, double* par, int x, void* fdata) { // should g[i] = 1.0 or the derivative -> project to screen -> .x or .y?
 			FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-			glm::dvec3 surfacePoint = ptr->selectedPoints.at(x);
-			g[0] = -1.0; // Tx
-			g[1] = -1.0; // Ty
-			if (ptr->nDOF > 2) {
-				g[2] = -1.0; // Tz
-				glm::dquat Q;
-				Q.x = 1.0;
-				Q.y = Q.z = Q.w = 0.0;
-				g[3] = -glm::length(Q * surfacePoint); // Rx
-				if (ptr->nDOF > 4) {
-					Q.y = 1.0;
-					Q.x = Q.z = Q.w = 0.0;
-					g[4] = -glm::length(Q * surfacePoint); // Rx
+			double f0 = ptr->distToMinimize(par, x, fdata);
+			double f1, h = 1e-4;
+			double* dPar = new double[ptr->nDOF];
 
-					Q.z = 1.0;
-					Q.x = Q.y = Q.w = 0.0;
-					g[5] = -glm::length(Q * surfacePoint); // Rx
+			for (int i = 0; i < ptr->nDOF; ++i) {
+				for (int j = 0; j < ptr->nDOF; ++j) {
+					dPar[j] = par[j];
 				}
-			}
 
+				dPar[i] += h;
+				f1 = ptr->distToMinimize(dPar, x, fdata);
+				g[i] = (f1 - f0) / h;
+			}
+			delete[] dPar;
 		};
 
 		SceneGraphNode* node = _selected.at(0).node;
@@ -149,7 +143,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		double* squaredError = new double[nFingers]; // probably not needed
 		for (int i = 0; i < nFingers; ++i) {
 			double err = glm::length(screenPoints.at(i) - modelToScreenSpace(selectedPoints.at(i), node));
-			squaredError[i] = err*err;
+			squaredError[i] = err;
 		}
 		
 
@@ -169,12 +163,19 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			return (glm::inverse(node->rotationMatrix()) * (intersectionPoint - node->worldPosition()));
 		};
 
+		auto toScreen = [](glm::dvec3 vec, Camera* camera, SceneGraphNode* node, double aspectRatio) {
+			glm::dvec3 backToScreenSpace = glm::inverse(camera->rotationQuaternion())
+				* glm::normalize(((node->rotationMatrix() * vec) + node->worldPosition() - camera->positionVec3()));
+			backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
+			return glm::dvec2(backToScreenSpace.x / (2 * aspectRatio) + 0.5, -backToScreenSpace.y / 2 + 0.5);
+		};
+
 		glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-		FunctionData fData = { selectedPoints, screenPoints, nDOF, toSurface, _camera, node, res.x / res.y};
+		FunctionData fData = { selectedPoints, screenPoints, nDOF, toScreen, distToMinimize, _camera, node, res.x / res.y};
 		void* dataPtr = reinterpret_cast<void*>(&fData);
 
 		levmarq_init(&_lmstat);
-		int nIterations = levmarq(nDOF, par, nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
+		int nIterations = levmarq(nDOF, par, nFingers, squaredError, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
 
 		double temp[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 		for (int i = 0; i < nDOF; ++i)
@@ -194,7 +195,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		std::cout << "\nLevmarq success after " << nIterations << " iterations, Print par[nDOF]: " << os.str() << "\n";
 
 		_camera->setPositionVec3(_camera->positionVec3() - T);
-		_camera->rotate(glm::inverse(Q));
+		//_camera->rotate(glm::inverse(Q));
 
 		// cleanup
 		delete[] squaredError;
@@ -548,7 +549,7 @@ void TouchInteraction::clear() {
 	_action.pick = false;
 
 	//_directTouchMode = false;
-	//_selected.clear(); // should clear if no longer have a direct-touch input
+	_selected.clear(); // should clear if no longer have a direct-touch input
 }
 
 void TouchInteraction::tap() {

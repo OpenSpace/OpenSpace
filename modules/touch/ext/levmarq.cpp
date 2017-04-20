@@ -30,9 +30,9 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 // set parameters required by levmarq() to default values 
 void levmarq_init(LMstat *lmstat) {
-	lmstat->verbose = 0;
-	lmstat->max_it = 1000;
-	lmstat->init_lambda = 0.0001;
+	lmstat->verbose = 1;
+	lmstat->max_it = 5000;
+	lmstat->init_lambda = 1e-6;
 	lmstat->up_factor = 10;
 	lmstat->down_factor = 10;
 	lmstat->target_derr = 1e-12;
@@ -57,7 +57,7 @@ The arguments are as follows:
 Before calling levmarq, several of the parameters in lmstat must be set.
 For default values, call levmarq_init(lmstat).
 */
-int levmarq(int npar, double *par, int ny, double *dysq,
+int levmarq(int npar, double *par, int ny, double* y, double *dysq,
 	    double (*func)(double *, int, void *),
 	    void (*grad)(double *, double *, int, void *),
 	    void *fdata, LMstat *lmstat) {
@@ -102,7 +102,7 @@ int levmarq(int npar, double *par, int ny, double *dysq,
 				weight = 1/dysq[x]; // for weighted least-squares
 			grad(g, par, x, fdata);
 			for (i = 0; i < npar; i++) {
-				d[i] += func(par, x, fdata) * g[i] * weight; //(y[x] - func(par, x, fdata)) * g[i] * weight;
+				d[i] += (y[i] - func(par, x, fdata)) * g[i] * weight; //(y[x] - func(par, x, fdata)) * g[i] * weight;
 				for (j = 0; j <= i; j++)
 					h[i][j] += g[i] * g[j] * weight;
 			}
@@ -123,7 +123,7 @@ int levmarq(int npar, double *par, int ny, double *dysq,
 				ill = (derr > 0);
 			} 
 			if (verbose) {
-				printf("it = %4d,   lambda = %10g,   err = %10g,   derr = %10g\n", it, newerr, err, derr);
+				printf("it = %4d,   newerror = %10g,   err = %10g,   derr = %10g\n", it, newerr, err, derr);
 				for (i = 0; i < npar; i++) {
 					printf("%f:", par[i]);
 				}
