@@ -101,13 +101,16 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			}
 			Q.w = sqrt(1.0 - std::min(glm::length(Q), 0.99999)); // if check is not done Q.w becomes NAN. Do we need a better definition of Q.w?
 			
-			glm::dmat4 rot = glm::toMat4(Q);
-			glm::dmat4 trans = glm::translate(glm::dmat4(1.0f), T);
-			glm::dmat4 final = rot * trans;
+			/*glm::dmat4 rotate = glm::toMat4(Q);
+			glm::dmat4 translate = glm::translate(glm::dmat4(1.0f), T);
+			glm::dmat4 transform = rotate * translate;*/
 
-			glm::dvec3 newSurfacePoint = final * glm::dvec4(selectedPoint, 1.0); // maybe opposite, maybe use Quat as par 0-2
-			glm::dvec2 newScreenPoint = ptr->toScreen(newSurfacePoint, ptr->camera, ptr->node, ptr->aspectRatio);
+			glm::dvec3 pointInCamSpace = glm::inverse(ptr->camera->rotationQuaternion()) * (ptr->node->rotationMatrix() * selectedPoint);
+			glm::dvec3 newWorldSP = Q * (pointInCamSpace + T); // cam space around origin
+			//glm::dvec3 newWorldSP = transform * glm::dvec4(pointInCamSpace, 1.0); // cam space around origin
 
+
+			glm::dvec2 newScreenPoint = ptr->castToScreen(newWorldSP, ptr->camera, ptr->node, ptr->aspectRatio);
 			return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
 		};
 		// Gradient (finite derivative) of distToMinimize w.r.t par
@@ -150,15 +153,18 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			squaredError[i] = err;
 		}
 		
-		auto toScreen = [](glm::dvec3 vec, Camera* camera, SceneGraphNode* node, double aspectRatio) {
-			glm::dvec3 backToScreenSpace = glm::inverse(camera->rotationQuaternion())
-				* glm::normalize(((node->rotationMatrix() * vec) + node->worldPosition() - camera->positionVec3()));
-			backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
-			return glm::dvec2(backToScreenSpace.x / (2 * aspectRatio) + 0.5, -backToScreenSpace.y / 2 + 0.5);
+		auto castToScreen = [](glm::dvec3 camVec, Camera* camera, SceneGraphNode* node, double aspectRatio) {
+			glm::dvec3 vecInWorldSpace = camera->rotationQuaternion() * camVec;
+			glm::dvec3 rayFromCamToPoint = glm::normalize(vecInWorldSpace + node->worldPosition() - camera->positionVec3());
+
+			glm::dvec3 pointInNDC = glm::inverse(camera->rotationQuaternion()) * rayFromCamToPoint;
+			pointInNDC *= (-3.2596558 / pointInNDC.z);
+
+			return glm::dvec2(pointInNDC.x / (2 * aspectRatio) + 0.5, -pointInNDC.y / 2 + 0.5); // returns [0,0] - [1,1] point
 		};
 
 		glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-		FunctionData fData = { selectedPoints, screenPoints, nDOF, toScreen, distToMinimize, _camera, node, res.x / res.y };
+		FunctionData fData = { selectedPoints, screenPoints, nDOF, castToScreen, distToMinimize, _camera, node, res.x / res.y };
 		void* dataPtr = reinterpret_cast<void*>(&fData);
 
 		levmarq_init(&_lmstat);
@@ -174,22 +180,18 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		double len = Q.x*Q.x + Q.y*Q.y + Q.z*Q.z;
 		Q.w = sqrt(1.0 - len);
 
+		/*glm::dmat4 rotate = glm::toMat4(Q);
+		glm::dmat4 translate = glm::translate(glm::dmat4(1.0f), T);
+		glm::dmat4 transform = rotate * translate;*/
 
-		glm::dmat4 rot = glm::toMat4(Q);
-		glm::dmat4 trans = glm::translate(glm::dmat4(1.0f), T);
-		glm::dmat4 finalTransform = (static_cast<glm::dmat4>(node->rotationMatrix()) * (rot * trans));
+		glm::dquat worldQ = Q;
+		glm::dvec3 worldT = _camera->rotationQuaternion() * T; // glm::dvec3(transform[3][0], transform[3][1], transform[3][2]);
 
-
-		// newWorldPoint = node->rotationMatrix() * ((M(q) * selectedPoint)) (+ node->worldPosition())
-
-		glm::dquat camQ = glm::inverse(Q);
-		glm::dvec3 camT = glm::dvec3(finalTransform[3][0], finalTransform[3][1], finalTransform[3][2]); //node->rotationMatrix() * T;
-
-		//_camera->rotate(camQ);
-		_camera->setPositionVec3(_camera->positionVec3() - camT);
+		_camera->rotate(worldQ);
+		_camera->setPositionVec3(_camera->positionVec3() - worldT);
 
 		// debugging
-		std::cout << "Levmarq success after " << nIterations << " iterations. Camera T: " << glm::to_string(camT) << ", Q: " << glm::to_string(camQ) << ", " << glm::to_string(finalTransform) << "\n";
+		std::cout << "Levmarq success after " << nIterations << " iterations. Camera T: " << glm::to_string(worldT) << ", Q: " << glm::to_string(Q) << "\n";
 
 		// cleanup
 		delete[] squaredError;
