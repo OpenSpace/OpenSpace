@@ -101,7 +101,11 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			}
 			Q.w = sqrt(1.0 - std::min(glm::length(Q), 0.99999)); // if check is not done Q.w becomes NAN. Do we need a better definition of Q.w?
 			
-			glm::dvec3 newSurfacePoint = (Q * selectedPoint) + T;
+			glm::dmat4 rot = glm::toMat4(Q);
+			glm::dmat4 trans = glm::translate(glm::dmat4(1.0f), T);
+			glm::dmat4 final = rot * trans;
+
+			glm::dvec3 newSurfacePoint = final * glm::dvec4(selectedPoint, 1.0); // maybe opposite, maybe use Quat as par 0-2
 			glm::dvec2 newScreenPoint = ptr->toScreen(newSurfacePoint, ptr->camera, ptr->node, ptr->aspectRatio);
 
 			return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
@@ -127,7 +131,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 
 		SceneGraphNode* node = _selected.at(0).node;
 		const int nFingers = list.size();
-		int nDOF = std::min(static_cast<int>(list.size() * 2), 6);
+		int nDOF = std::min(nFingers * 2, 6);
 		double* par = new double[nDOF];
 		double tPar[6] = { node->worldPosition().x, node->worldPosition().y, node->worldPosition().z, 0.0, 0.0, 0.0 };
 		for (int i = 0; i < nDOF; ++i) // initial values of q or 0.0? (ie current model or no rotation/translation)
@@ -146,23 +150,6 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			squaredError[i] = err;
 		}
 		
-
-		auto toSurface = [](glm::dvec2 screenPoint, Camera* camera, SceneGraphNode* node, double aspectRatio) {
-			// Find the intersection point in surface coordinates again;
-			glm::dvec3 camPos = camera->positionVec3();
-			double xCo = 2 * (screenPoint.x - 0.5) * aspectRatio;
-			double yCo = -2 * (screenPoint.y - 0.5); // normalized -1 to 1 coordinates on screen
-			glm::dvec3 raytrace = glm::normalize(camera->rotationQuaternion() * glm::dvec3(xCo, yCo, -3.2596558));
-			glm::dvec3 camToSelectable = node->worldPosition() - camPos;
-			double boundingSphere = node->boundingSphere();
-			double d = glm::dot(raytrace, camToSelectable);
-			double root = boundingSphere * boundingSphere - glm::dot(camToSelectable, camToSelectable) + d * d;
-			if (root > 0) // two intersection points (take the closest one)
-				d -= sqrt(root);
-			glm::dvec3 intersectionPoint = camPos + d * raytrace;
-			return (glm::inverse(node->rotationMatrix()) * (intersectionPoint - node->worldPosition()));
-		};
-
 		auto toScreen = [](glm::dvec3 vec, Camera* camera, SceneGraphNode* node, double aspectRatio) {
 			glm::dvec3 backToScreenSpace = glm::inverse(camera->rotationQuaternion())
 				* glm::normalize(((node->rotationMatrix() * vec) + node->worldPosition() - camera->positionVec3()));
@@ -171,7 +158,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		};
 
 		glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-		FunctionData fData = { selectedPoints, screenPoints, nDOF, toScreen, distToMinimize, _camera, node, res.x / res.y};
+		FunctionData fData = { selectedPoints, screenPoints, nDOF, toScreen, distToMinimize, _camera, node, res.x / res.y };
 		void* dataPtr = reinterpret_cast<void*>(&fData);
 
 		levmarq_init(&_lmstat);
@@ -187,15 +174,22 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		double len = Q.x*Q.x + Q.y*Q.y + Q.z*Q.z;
 		Q.w = sqrt(1.0 - len);
 
-		// debugging
-		std::ostringstream os;
-		for (int i = 0; i < nDOF; ++i) {
-			os << par[i] << ", ";
-		}
-		std::cout << "\nLevmarq success after " << nIterations << " iterations, Print par[nDOF]: " << os.str() << "\n";
 
-		_camera->setPositionVec3(_camera->positionVec3() - T);
-		//_camera->rotate(glm::inverse(Q));
+		glm::dmat4 rot = glm::toMat4(Q);
+		glm::dmat4 trans = glm::translate(glm::dmat4(1.0f), T);
+		glm::dmat4 finalTransform = (static_cast<glm::dmat4>(node->rotationMatrix()) * (rot * trans));
+
+
+		// newWorldPoint = node->rotationMatrix() * ((M(q) * selectedPoint)) (+ node->worldPosition())
+
+		glm::dquat camQ = glm::inverse(Q);
+		glm::dvec3 camT = glm::dvec3(finalTransform[3][0], finalTransform[3][1], finalTransform[3][2]); //node->rotationMatrix() * T;
+
+		//_camera->rotate(camQ);
+		_camera->setPositionVec3(_camera->positionVec3() - camT);
+
+		// debugging
+		std::cout << "Levmarq success after " << nIterations << " iterations. Camera T: " << glm::to_string(camT) << ", Q: " << glm::to_string(camQ) << ", " << glm::to_string(finalTransform) << "\n";
 
 		// cleanup
 		delete[] squaredError;

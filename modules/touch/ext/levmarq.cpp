@@ -30,7 +30,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 // set parameters required by levmarq() to default values 
 void levmarq_init(LMstat *lmstat) {
-	lmstat->verbose = 1;
+	lmstat->verbose = 0;
 	lmstat->max_it = 5000;
 	lmstat->init_lambda = 1e-6;
 	lmstat->up_factor = 10;
@@ -102,7 +102,7 @@ int levmarq(int npar, double *par, int ny, double* y, double *dysq,
 				weight = 1/dysq[x]; // for weighted least-squares
 			grad(g, par, x, fdata);
 			for (i = 0; i < npar; i++) {
-				d[i] += (y[i] - func(par, x, fdata)) * g[i] * weight; //(y[x] - func(par, x, fdata)) * g[i] * weight;
+				d[i] += (0.0 - func(par, x, fdata)) * g[i] * weight; //(y[x] - func(par, x, fdata)) * g[i] * weight;
 				for (j = 0; j <= i; j++)
 					h[i][j] += g[i] * g[j] * weight;
 			}
