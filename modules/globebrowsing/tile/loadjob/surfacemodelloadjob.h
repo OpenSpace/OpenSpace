@@ -27,27 +27,32 @@
 
 #include <modules/globebrowsing/tile/loadjob/loadjob2.h>
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
+#include <modules/globebrowsing/models/model.h>
 #include <ghoul/misc/dictionary.h>
 
 #include <modules/base/rendering/modelgeometry.h>
 
 namespace openspace {
 namespace globebrowsing {
+
+	class modelgeometry::ModelGeometry;
 	
 struct SurfaceModelLoadJob : LoadJob2 {
-	SurfaceModelLoadJob(const ghoul::Dictionary& dictionary)
+	SurfaceModelLoadJob(const ghoul::Dictionary& dictionary, std::shared_ptr<Model> model)
 		: _dictionary(dictionary)
+		, _model(model)
 	{}
 	
 	virtual ~SurfaceModelLoadJob() = default;
  	
 	virtual void execute() override;
 
-	virtual std::shared_ptr<modelgeometry::ModelGeometry> product() const override;
+	virtual std::shared_ptr<Model> product() const override;
 
 protected:
 	ghoul::Dictionary _dictionary;
-	std::shared_ptr<modelgeometry::ModelGeometry> _model;
+	std::shared_ptr<modelgeometry::ModelGeometry> _modelGeometry;
+	std::shared_ptr<Model> _model;
 };
 
 } // globebrowsing

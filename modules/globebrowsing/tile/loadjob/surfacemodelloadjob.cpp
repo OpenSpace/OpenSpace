@@ -24,17 +24,23 @@
 
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
 
+namespace {
+	const std::string _loggerCat = "SurfaceModelLoadJob";
+
+}
 namespace openspace {
 namespace globebrowsing {
 
 void SurfaceModelLoadJob::execute() {
 	std::unique_ptr<modelgeometry::ModelGeometry> tempModel;
 	tempModel = modelgeometry::ModelGeometry::createFromDictionary(_dictionary);
-	_model = std::shared_ptr<modelgeometry::ModelGeometry>(std::move(tempModel));
+	_modelGeometry = std::shared_ptr<modelgeometry::ModelGeometry>(std::move(tempModel));
 }
 
-std::shared_ptr<modelgeometry::ModelGeometry> SurfaceModelLoadJob::product() const
-{
+std::shared_ptr<Model> SurfaceModelLoadJob::product() const {
+	// Set the the model's ModelGeometry
+	_model->geometry = _modelGeometry;
+
 	return _model;
 }
 

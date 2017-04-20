@@ -27,17 +27,20 @@
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/base/rendering/modelgeometry.h>
+#include <modules/globebrowsing/models/model.h>
+
 
 #include <memory>
 
 namespace openspace {
 namespace globebrowsing {
 
+	class Model;
 	class modelgeometry::ModelGeometry;
 
-struct LoadJob2 : public Job<modelgeometry::ModelGeometry> {
+struct LoadJob2 : public Job<Model> {
 	virtual void execute() = 0;
-	virtual std::shared_ptr<modelgeometry::ModelGeometry> product() const = 0;
+	virtual std::shared_ptr<Model> product() const = 0;
 };
 
 } // namespace globebrowsing
