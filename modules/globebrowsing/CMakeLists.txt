@@ -54,6 +54,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
 
+	${CMAKE_CURRENT_SOURCE_DIR}/models/asyncsurfacemodelprovider.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/cachingsurfacemodelprovider.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/model.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableroversurface.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.h
@@ -143,7 +146,10 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
 
+	${CMAKE_CURRENT_SOURCE_DIR}/models/asyncsurfacemodelprovider.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/cachingsurfacemodelprovider.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableroversurface.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/model.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/surfacemodelrenderingselector.cpp
