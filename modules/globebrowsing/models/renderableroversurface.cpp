@@ -1,4 +1,3 @@
-#include "renderableroversurface.h"
 /*****************************************************************************************
 *                                                                                       *
 * OpenSpace                                                                             *
@@ -24,6 +23,28 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/models/renderableroversurface.h>
+#include <ghoul/logging/logmanager.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <openspace/engine/openspaceengine.h>
+#include <modules/globebrowsing/chunk/chunknode.h>
+
+#include <fstream>
+#include <gdal_priv.h>
+#include "ogrsf_frmts.h"
+
+namespace {
+	const std::string _loggerCat		= "RenderableRoverSurface";
+	const char* keyRoverLocationPath	= "RoverLocationPath";
+	const char* keyTextFilePath			= "TextFilePath";
+	const char* keyModelPath			= "ModelPath";
+	const char* keyTexturePath			= "TexturePath";
+	const char* keyGeometryFile			= "GeometryFile";
+	const char* keyRenderable			= "Renderable";
+	const char* keyType					= "Type";
+	const char* keyMultiModelGeometry	= "MultiModelGeometry";
+	const char* keyName = "Name";
+}
 
 namespace openspace {
 
@@ -36,31 +57,170 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 	_generalProperties({
 		BoolProperty("enabled", "enabled", false)
 	})
-	{
+{
+	if (!dictionary.getValue(keyRoverLocationPath, _roverLocationPath))
+		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
 
+	if (!dictionary.getValue(keyTextFilePath, _textFilePath))
+		throw ghoul::RuntimeError(std::string(keyTextFilePath) + " must be specified!");
+
+	if (!dictionary.getValue(keyModelPath, _modelPath))
+		throw ghoul::RuntimeError(std::string(keyModelPath) + " must be specified!");
+
+	if (!dictionary.getValue(keyTexturePath, _texturePath))
+		throw ghoul::RuntimeError(std::string(keyTexturePath) + " must be specified!");
+
+	std::string name;
+	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
+	ghoul_assert(success, "Name was not passed to RenderableSite");
+
+	// Extract all coordinates from the GDAL dataset
+	extractCoordinates();
+
+	_absModelPath = absPath(_modelPath);
+
+	_cachingProvider = std::make_shared<CachingSurfaceModelProvider>();
+}
+
+bool RenderableRoverSurface::initialize() {
+	std::string name = owner()->name();
+	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(name)->parent();
+
+	_globe = (globebrowsing::RenderableGlobe*)parent->renderable();
+	_chunkedLodGlobe = _globe->chunkedLodGlobe();
+
+	return true;
+}
+
+bool RenderableRoverSurface::deinitialize() {
+	return false;
+}
+
+bool RenderableRoverSurface::isReady() const {
+	return true;
+}
+
+void RenderableRoverSurface::render(const RenderData & data) {
+}
+
+void RenderableRoverSurface::update(const UpdateData & data) {
+	_cachingProvider->update();
+	_pathChunks.clear();
+	for (auto i : _subSites) {
+		Geodetic2 geodetic2 = Geodetic2{ i.lat, i.lon } / 180 * glm::pi<double>();
+		Chunk chunk = _chunkedLodGlobe->findChunkNode(geodetic2).getChunk();
+		double chunkLevel = chunk.surfacePatch().maximumTileLevel();
+		if(chunkLevel == 18) { 
+			if(chunk.isVisible()) {
+
+				ghoul::Dictionary modelDictionary;
+				std::string modelFilePath;
+
+				uint64_t hashKey = chunk.tileIndex().hashKey();
+				auto search = _pathChunks.find(hashKey);
+
+				if(i.site == std::to_string(48) && i.drive == std::to_string(1570)){
+					std::string testing = "MultiModelGeometry";
+
+					std::string txtFilePath = i.site + "/" + i.drive + "/" + "modelFiles.txt";
+					std::vector<std::string> fileNames = extractFileNames(txtFilePath);
+
+					for (auto fileName : fileNames) {					
+						std::string test2 = _modelPath + i.site + "/" + i.drive + "/" + fileName + ".obj";
+						modelDictionary.setValue(keyGeometryFile, test2);
+						modelDictionary.setValue(keyType, testing);
+						modelDictionary.setValue(keyName, fileName);
+
+
+						Model model;
+
+						model.fileName = fileName;
+						model.tileHashKey = hashKey;
+
+						std::shared_ptr<Model> theModel = std::make_shared<Model>(model);
+
+						_cachingProvider->getModel(modelDictionary, theModel);
+					}
+				}
+
+				/*if (search != _pathChunks.end()) {
+					search->second.push_back(tempPos);
+				}
+				else {
+					std::vector<glm::dvec3> tempVector;
+					tempVector.push_back(tempPos);
+					_pathChunks.insert(std::make_pair(hashKey, tempVector));
+				}*/
+			}
+		}
+	}
+}
+
+std::vector<glm::dvec3> RenderableRoverSurface::pathChunkVector(const TileIndex& tileIndex) const {
+	std::vector<glm::dvec3> pathVector = _pathChunks.find(tileIndex.hashKey())->second;
+
+	return pathVector;
+}
+
+void RenderableRoverSurface::extractCoordinates() {
+	std::fstream in(_roverLocationPath.c_str());
+
+	if (!in.is_open())
+		throw ghoul::FileNotFoundError(_roverLocationPath);
+
+	GDALDataset *poDS;
+	poDS = (GDALDataset*)GDALOpenEx(_roverLocationPath.c_str(), GDAL_OF_VECTOR, NULL, NULL, NULL);
+	if (poDS == NULL) {
+		LERROR("Could not open .shp file");
 	}
 
-bool RenderableRoverSurface::initialize()
-{
-	return false;
+	OGRLayer *poLayer = poDS->GetLayerByName("rover_locations");
+
+	OGRFeature *poFeature;
+	poLayer->ResetReading();
+
+	while ((poFeature = poLayer->GetNextFeature()) != NULL) {
+
+		// Extract coordinates from OGR
+		std::string frame = poFeature->GetFieldAsString("frame");
+		std::string site = poFeature->GetFieldAsString("site");
+		std::string drive = poFeature->GetFieldAsString("drive");
+		double lat = poFeature->GetFieldAsDouble("plcl");
+		double lon = poFeature->GetFieldAsDouble("longitude");
+
+		// Saves all coordinates for rendering the path and only site coordinates for rendering sites.
+		// GetFieldAsDouble resturns zero (0) if field is empty.
+		if (lat != 0 && lon != 0) {
+			SubSite subSite;
+			subSite.site = site;
+			subSite.drive = drive;
+			subSite.lat = lat;
+			subSite.lon = lon;
+
+			_coordinates.push_back(glm::fvec2(lat, lon));
+			_subSites.push_back(subSite);
+		}
+		OGRFeature::DestroyFeature(poFeature);
+	}
+	GDALClose(poDS);
 }
 
-bool RenderableRoverSurface::deinitialize()
-{
-	return false;
-}
+std::vector<std::string> RenderableRoverSurface::extractFileNames(const std::string filePath) {
 
-bool RenderableRoverSurface::isReady() const
-{
-	return false;
-}
+	std::string path = _absModelPath + filePath;
+	std::ifstream myfile(path);
+	
+	std::vector<std::string> fileNames;
+	if (myfile.is_open()) {
+		while (std::getline(myfile, _textFilePath)) {
+			fileNames.push_back(_textFilePath);
+		}
+		myfile.close();
+	}
+	else
+		LERROR("Could not open .txt file");
 
-void RenderableRoverSurface::render(const RenderData & data)
-{
-}
-
-void RenderableRoverSurface::update(const UpdateData & data)
-{
+	return fileNames;
 }
 
 } // namespace globebrowsing

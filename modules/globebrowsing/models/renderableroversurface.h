@@ -26,14 +26,22 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEROVERSURFACE___H__
 
 #include <openspace/rendering/renderable.h>
+#include <modules/globebrowsing/models/surfacemodelrenderingselector.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/models/cachingsurfacemodelprovider.h>
 
 namespace openspace {
-
 namespace globebrowsing {
 
 class RenderableRoverSurface : public Renderable {
-public: 
+public:
+	struct SubSite {
+		std::string site, drive;
+		double lat, lon;
+	};
 
 	struct GeneralProperties {
 		properties::BoolProperty isEnabled;
@@ -48,12 +56,37 @@ public:
 
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
+	
+	std::vector<glm::dvec3> pathChunkVector(const TileIndex& tileIndex) const;
 
 private:
-	GeneralProperties _generalProperties;
-};
-}
+	void extractCoordinates();
+	std::vector<std::string> extractFileNames(const std::string filePath);
 
-}
+	std::vector<std::string> _fileNames;
+	std::vector<glm::fvec2> _coordinates;
+	std::vector<SubSite> _subSites;
+
+	GeneralProperties _generalProperties;
+
+
+	std::string _roverLocationPath;
+	std::string _textFilePath;
+	std::string _modelPath;
+	std::string _texturePath;
+	std::string _absModelPath;
+
+	globebrowsing::RenderableGlobe* _globe;
+	std::shared_ptr<globebrowsing::ChunkedLodGlobe> _chunkedLodGlobe;
+	std::unordered_map <uint64_t, std::vector<glm::dvec3 >> _pathChunks;
+
+	std::shared_ptr<CachingSurfaceModelProvider> _cachingProvider;
+	bool loadedOnce = true;
+
+	//SurfaceModelRenderingSelector _surfaceModelRenderingSelector;
+};
+
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEROVERSURFACE___H__
