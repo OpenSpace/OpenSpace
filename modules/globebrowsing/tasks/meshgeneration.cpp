@@ -24,10 +24,12 @@
 
 #include <modules/globebrowsing/tasks/meshgeneration.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <fstream>
+#include <modules/globebrowsing/tasks/imgreader.h>
+#include <modules/globebrowsing/tasks/meshwriter.h>
 
 #include <ghoul\glm.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h>
 
 #include <pcl/point_types.h>
 #include <pcl/io/obj_io.h>
@@ -35,32 +37,30 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/surface/gp3.h>
 
-template<typename Out>
-static void split(const std::string &s, char delim, Out result) {
-	std::stringstream ss;
-	ss.str(s);
-	std::string item;
-	while (std::getline(ss, item, delim)) {
-		*(result++) = item;
-	}
-}
-
-
-static std::vector<std::string> split(const std::string &s, char delim) {
-	std::vector<std::string> elems;
-	split(s, delim, std::back_inserter(elems));
-	return elems;
-}
+#include <fstream>
 
 namespace {
-	const std::string _loggerCat = "MeshGenerator";
+	const std::string _loggerCat = "MeshGeneration";
 }
 
 namespace openspace {
 namespace globebrowsing {
-	void MeshGeneration::generateMeshFromBinary(const std::string binary_path, std::string output_path) {
+	void MeshGeneration::generateMeshFromBinary(ghoul::Dictionary dictionary) {
+		//const std::string binary_path, std::string output_path
+		std::string binary_path;
+		dictionary.getValue("BinaryPath", binary_path);
+
+		std::string output_path;
+		dictionary.getValue("OutputPath", output_path);
+
+		ghoul::Dictionary extensions; 
+		dictionary.getValue("Extension", extensions);
+
+		std::string texture_extension;
+		extensions.getValue("TextureExtension", texture_extension);
+
 		ghoul_assert(!binary_path.empty(), "Filename must not be empty");
-	
+
 		// Create filename without path and extension
 		std::string file_name_no_extension = binary_path.substr(0, binary_path.find_last_of("."));
 		// Strip path
@@ -70,15 +70,18 @@ namespace globebrowsing {
 		const clock_t begin_time = clock();
 
 		output_path = correctPath(file_name_stripped, output_path);
+		
+		if (!FileSys.directoryExists(output_path)) {
+			ghoul::Boolean k(true);
+			FileSys.createDirectory(output_path, k);
+		}
 
-		LERROR(output_path);
-
-		PointCloudInfo mInfo = readBinaryHeader(binary_path);
+		ImgReader::PointCloudInfo mInfo = ImgReader::readBinaryHeader(binary_path);
 		
 		std::vector<std::vector<float>> xyz;
 
-		readBinaryData(binary_path, xyz, mInfo);
-
+		ImgReader::readBinaryData(binary_path, xyz, mInfo);
+		
 		writeTxtFile(file_name_stripped, output_path);
 
 		int uvTeller = 0;
@@ -453,7 +456,7 @@ namespace globebrowsing {
 		std::stringstream tex_name;
 		tex_name << "material_" << 0;
 		tex_name >> tx1.tex_name;
-		tx1.tex_file = texture_filename + ".png";
+		tx1.tex_file = texture_filename + texture_extension;
 		
 		tx1.tex_Ka.r = 0.2f;
 		tx1.tex_Ka.g = 0.2f;
@@ -473,325 +476,39 @@ namespace globebrowsing {
 
 		// texture coordinates
 		texMesh.tex_coordinates.push_back(texture_map_tmp);
-				
-		writeObjFile(file_name_stripped, output_path, texMesh);
 		
-		writeMtlFile(file_name_stripped, output_path, texMesh);
+		MeshWriter::writeObjFile(file_name_stripped, output_path, texMesh);
+
+		//writeObjFile(file_name_stripped, output_path, texMesh);
+		
+		MeshWriter::writeMtlFile(file_name_stripped, output_path, texMesh);
+
+		//writeMtlFile(file_name_stripped, output_path, texMesh);
 
 		//LINFO("FINISHED IN : " << float(clock() - begin_time) / CLOCKS_PER_SEC);
 
 	}
 
-	void MeshGeneration::writeObjFile(const std::string filename, std::string output_path, pcl::TextureMesh texMesh) {
-		std::string obj_path = output_path + filename + ".obj";
-		//LERROR("Obj path: " << obj_path);
-
-		unsigned precision = 5;
-		// Open file
-		std::ofstream fs;
-		fs.precision(precision);
-		fs.open(obj_path.c_str());
-
-		/* Write 3D information */
-		// number of points
-		unsigned nr_points = texMesh.cloud.width * texMesh.cloud.height;
-		unsigned point_size2 = static_cast<unsigned> (texMesh.cloud.data.size() / nr_points);
-
-		// Mesh size
-		unsigned nr_meshes = static_cast<unsigned> (texMesh.tex_polygons.size());
-		// Number of faces for header
-		unsigned nr_faces = 0;
-		for (unsigned m = 0; m < nr_meshes; ++m)
-			nr_faces += static_cast<unsigned> (texMesh.tex_polygons[m].size());
-
-		// Define material file
-		std::string mtl_file_name = filename.substr(0, filename.find_last_of(".")) + ".mtl";
-		// Strip path for "mtllib" command
-		std::string mtl_file_name_nopath = mtl_file_name;
-		mtl_file_name_nopath.erase(0, mtl_file_name.find_last_of('/') + 1);
-
-		// Write the header information
-		fs << "####" << '\n';
-		fs << "# OBJ dataFile simple version. File name: " << filename << '\n';
-		fs << "# Vertices: " << nr_points << '\n';
-		fs << "# Faces: " << nr_faces << '\n';
-		fs << "# Material information:" << '\n';
-		fs << "mtllib " << mtl_file_name_nopath << '\n';
-		fs << "####" << '\n';
-
-		// Write vertex coordinates
-		fs << "# Vertices" << '\n';
-		for (unsigned i = 0; i < nr_points; ++i) {
-			int xyz = 0;
-			// Only write "v " once
-			bool v_written = false;
-			for (size_t d = 0; d < texMesh.cloud.fields.size(); ++d) {
-				int c = 0;
-				// Adding vertex
-				if ((texMesh.cloud.fields[d].datatype == pcl::PCLPointField::FLOAT32) && (
-					texMesh.cloud.fields[d].name == "x" ||
-					texMesh.cloud.fields[d].name == "y" ||
-					texMesh.cloud.fields[d].name == "z")) {
-					if (!v_written) {
-						// Write vertices beginning with v
-						fs << "v ";
-						v_written = true;
-					}
-					float value;
-					memcpy(&value, &texMesh.cloud.data[i * point_size2 + texMesh.cloud.fields[d].offset + c * sizeof(float)], sizeof(float));
-
-					fs << value;
-					if (++xyz == 3)
-						break;
-					fs << " ";
-				}
-			}
-			if (xyz != 3) {
-				LERROR("Input point cloud has no XYZ data!");
-			}
-			fs << '\n';
-		}
-		fs << "# " << nr_points << " vertices" << '\n';
-
-		// Write vertex normals
-		for (unsigned i = 0; i < nr_points; ++i) {
-			int xyz = 0;
-			// Only write "vn " once
-			bool v_written = false;
-			for (size_t d = 0; d < texMesh.cloud.fields.size(); ++d) {
-				int c = 0;
-				// Adding vertex
-				if ((texMesh.cloud.fields[d].datatype == pcl::PCLPointField::FLOAT32) && (
-					texMesh.cloud.fields[d].name == "normal_x" ||
-					texMesh.cloud.fields[d].name == "normal_y" ||
-					texMesh.cloud.fields[d].name == "normal_z")) {
-					if (!v_written) {
-						// Write vertices beginning with vn
-						fs << "vn ";
-						v_written = true;
-					}
-					float value;
-					memcpy(&value, &texMesh.cloud.data[i * point_size2 + texMesh.cloud.fields[d].offset + c * sizeof(float)], sizeof(float));
-					fs << value;
-					if (++xyz == 3)
-						break;
-					fs << " ";
-				}
-			}
-			if (xyz != 3) {
-				LERROR("Input point cloud has no normals");
-			}
-			fs << '\n';
-		}
-
-		// Write vertex texture with "vt"
-		for (unsigned m = 0; m < nr_meshes; ++m) {
-			fs << "# " << texMesh.tex_coordinates[m].size() << " vertex textures in submesh " << m << '\n';
-			for (size_t i = 0; i < texMesh.tex_coordinates[m].size(); ++i) {
-				fs << "vt ";
-				fs << texMesh.tex_coordinates[m][i][0] << " " << texMesh.tex_coordinates[m][i][1] << '\n';
-			}
-		}
-
-		unsigned f_idx = 0;
-		for (unsigned m = 0; m < nr_meshes; ++m) {
-			if (m > 0) f_idx += static_cast<unsigned> (texMesh.tex_polygons[m - 1].size());
-
-			fs << "# The material will be used for mesh " << m << '\n';
-			fs << "usemtl " << texMesh.tex_materials[m].tex_name << '\n';
-			fs << "# Faces" << '\n';
-
-			for (size_t i = 0; i < texMesh.tex_polygons[m].size(); ++i) {
-				// Write faces with "f"
-				fs << "f";
-				size_t j = 0;
-				// There's one UV per vertex per face, i.e., the same vertex can have
-				// different UV depending on the face.
-				for (j = 0; j < texMesh.tex_polygons[m][i].vertices.size(); ++j) {
-					// + 1 since obj file format starts with 1 and not 0
-					uint32_t idx = texMesh.tex_polygons[m][i].vertices[j] + 1;
-					fs << " " << idx
-						<< "/" << texMesh.tex_polygons[m][i].vertices.size() * (i + f_idx) + j + 1
-						<< "/" << idx;
-				}
-				fs << '\n';
-			}
-			fs << "# " << texMesh.tex_polygons[m].size() << " faces in mesh " << m << '\n';
-		}
-		fs << "# End of File" << std::flush;
-
-		// Close obj file
-		fs.close();
-	}
-
-	void MeshGeneration::writeMtlFile(const std::string filename, const std::string output_path, pcl::TextureMesh texMesh) {
-		unsigned precision = 5;
-		unsigned nr_meshes = static_cast<unsigned> (texMesh.tex_polygons.size());
-		// Write mtl file for the corresponding obj file
-		// Not necessary atm since Openspace cannot handle mtl files
-		// If this will become useful, the uv coordinates calculation needs to be changed(?)
-		std::string mtl_path = output_path + filename + ".mtl";
-
-		//LERROR("mtl file path : " << mtl_path);
-
-		// Open file
-		std::ofstream m_fs;
-		m_fs.precision(precision);
-		m_fs.open(mtl_path.c_str());
-
-		// default
-		m_fs << "#" << '\n';
-		m_fs << "# Wavefront material file" << '\n';
-		m_fs << "#" << '\n';
-		for (unsigned m = 0; m < nr_meshes; ++m) {
-			m_fs << "newmtl " << texMesh.tex_materials[m].tex_name << '\n';
-			m_fs << "Ka " << texMesh.tex_materials[m].tex_Ka.r << " " << texMesh.tex_materials[m].tex_Ka.g << " " << texMesh.tex_materials[m].tex_Ka.b << '\n'; // defines the ambient color of the material to be (r,g,b).
-			m_fs << "Kd " << texMesh.tex_materials[m].tex_Kd.r << " " << texMesh.tex_materials[m].tex_Kd.g << " " << texMesh.tex_materials[m].tex_Kd.b << '\n'; // defines the diffuse color of the material to be (r,g,b).
-			m_fs << "Ks " << texMesh.tex_materials[m].tex_Ks.r << " " << texMesh.tex_materials[m].tex_Ks.g << " " << texMesh.tex_materials[m].tex_Ks.b << '\n'; // defines the specular color of the material to be (r,g,b). This color shows up in highlights.
-			m_fs << "d " << texMesh.tex_materials[m].tex_d << '\n'; // defines the transparency of the material to be alpha.
-			m_fs << "Ns " << texMesh.tex_materials[m].tex_Ns << '\n'; // defines the shininess of the material to be s.
-			m_fs << "illum " << texMesh.tex_materials[m].tex_illum << '\n'; // denotes the illumination model used by the material.
-																			// illum = 1 indicates a flat material with no specular highlights, so the value of Ks is not used.
-																			// illum = 2 denotes the presence of specular highlights, and so a specification for Ks is required.
-			m_fs << "map_Kd " << texMesh.tex_materials[m].tex_file << '\n';
-			m_fs << "###" << '\n';
-		}
-		m_fs.close();
-	}
-
 	void MeshGeneration::writeTxtFile(const std::string filename, std::string output_path) {
 		std::string txt_path = output_path + "filenames.txt";
-		// Open file
+
+		if (FileSys.fileExists(txt_path)) {
+			std::ifstream txtFile;
+			txtFile.open(txt_path.c_str());
+			std::string line;
+			while (std::getline(txtFile, line)) {
+				if (filename == line) {
+					return;
+				}
+			}
+		}
+
+		// Open file and add entry
 		std::ofstream fs;
 		fs.open(txt_path.c_str(), std::ios_base::app);
 
 		fs << filename << "\n";
 		fs.close();
-	}
-
-	MeshGeneration::PointCloudInfo MeshGeneration::readBinaryHeader(const std::string filename) {
-		std::ifstream header(filename);
-
-		PointCloudInfo mInfo;
-		char delimiter = '=';
-
-		std::string line;
-		std::string block = "";
-		glm::dvec3 originOffset;
-
-		//TODO: Use openinventor for this part
-		//Reading header part of binary file
-		while (std::getline(header, line)) {
-			line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-			if (line.length() == 0 || line.find(delimiter) == std::string::npos) continue;
-			if (line == "END") break; //End of "header"
-			std::vector<std::string> s = split(line, delimiter);
-			
-			if (s.at(0) == "OBJECT" && s.at(1) == "IMAGE") block = "IMAGE";
-			else if (s.at(0) == "END_OBJECT" && s.at(1) == "IMAGE") block = "";
-
-
-			if (s.at(0) == "OBJECT" && s.at(1) == "IMAGE_HEADER") block = "IMAGE_HEADER";
-			else if (s.at(0) == "END_OBJECT" && s.at(1) == "IMAGE_HEADER") block = "";
-
-
-			if (s.at(0) == "GROUP" && s.at(1) == "ROVER_COORDINATE_SYSTEM") block = "ROVER_COORDINATE_SYSTEM";
-			else if (s.at(0) == "END_GROUP" && s.at(1) == "ROVER_COORDINATE_SYSTEM") block = "";
-
-			if (block == "IMAGE_HEADER") {
-				if (s.at(0) == "BYTES") mInfo._bytes = std::stoi(s.at(1));
-			}
-			else if (block == "ROVER_COORDINATE_SYSTEM") {
-				if (s.at(0) == "ORIGIN_ROTATION_QUATERNION") {
-					std::vector<std::string> temp = split(s.at(1), ',');
-
-					mInfo._roverOrigin.push_back(std::stod(split(temp.at(0), '(').at(1)));
-					mInfo._roverOrigin.push_back(std::stod(temp.at(1)));
-					mInfo._roverOrigin.push_back(std::stod(temp.at(2)));
-
-					//This is because after like 1000 sols they 
-					//start writing the fourth quaternion on new line...
-					//All of this should probably be done in another way...
-					if (temp.size() == 3) {
-						mInfo._roverOrigin.push_back(std::stod(split(temp.at(3), ')').at(0)));
-					}
-					else {
-						std::getline(header, line); 
-						line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
-						line.erase(std::remove(line.begin(), line.end(), ','), line.end());
-//						mInfo._roverOrigin.push_back(std::stod(line));
-					}
-
-					
-				}
-			}
-			else if (block == "IMAGE") {
-				if (s.at(0) == "LINES") {
-					mInfo._lines = std::stoi(s.at(1));
-				}
-				else if (s.at(0) == "LINE_SAMPLES") {
-					mInfo._cols = std::stoi(s.at(1));
-				}
-				else if (s.at(0) == "BANDS") {
-					mInfo._bands = std::stoi(s.at(1));
-				}
-			}
-		}
-
-		header.close();
-
-		return mInfo;
-	}
-
-	void MeshGeneration::readBinaryData(const std::string filename, std::vector<std::vector<float>>& xyz, const MeshGeneration::PointCloudInfo pci) {
-		unsigned char bytes[4];
-		FILE *fileID = fopen(filename.c_str(), "rb");
-		bool firstIsFound = false;
-		float f;
-
-		// Reading the header until the image data is found
-		while (!firstIsFound && fread((void*)(&f), sizeof(f), 1, fileID)) {
-			float cf;
-			char *floatToConvert = (char*)& f;
-			char *floatConverted = (char*)& cf;
-
-			// Read as big endian
-			floatConverted[0] = floatToConvert[3];
-			floatConverted[1] = floatToConvert[2];
-			floatConverted[2] = floatToConvert[1];
-			floatConverted[3] = floatToConvert[0];
-
-			if (cf == 0.0) {
-				// According to the SIS-pdf, the first data value is a zero
-				firstIsFound = true;
-			}
-		}
-
-		// Iterate over all bands
-		for (int band = 0; band < pci._bands; ++band) {
-			std::vector<float> lines;
-			xyz.push_back(lines);
-			// Iterate over all pixels
-			for (int j = 0; j < pci._cols; ++j) {
-				for (int k = 0; k < pci._lines; ++k) {
-					float f;
-					fread((void*)(&f), sizeof(f), 1, fileID);
-
-					float cf;
-					char *floatToConvert = (char*)& f;
-					char *floatConverted = (char*)& cf;
-
-					floatConverted[0] = floatToConvert[3];
-					floatConverted[1] = floatToConvert[2];
-					floatConverted[2] = floatToConvert[1];
-					floatConverted[3] = floatToConvert[0];
-
-					xyz.at(band).push_back(cf);
-				}
-			}
-		}
-
-		fclose(fileID);
 	}
 
 	std::string MeshGeneration::correctPath(const std::string filename, std::string output_path) {
