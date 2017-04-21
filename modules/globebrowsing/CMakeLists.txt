@@ -60,8 +60,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableroversurface.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/surfacemodelrenderingselector.h
-	
+
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
@@ -152,7 +151,6 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/models/model.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/surfacemodelrenderingselector.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
