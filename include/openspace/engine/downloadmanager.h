@@ -85,9 +85,19 @@ public:
     DownloadManager(std::string requestURL, int applicationVersion,
         bool useMultithreadedDownload = true);
 
-    // callbacks happen on a different thread
-    std::shared_ptr<FileFuture> downloadFile(const std::string& url, const ghoul::filesystem::File& file,
+    //downloadFile
+    // url - specifies the target of the download
+    // file - specifies path to local saved file
+    // overrideFile - if true, overrides existing file of same name
+    // failOnError - if true, http codes >= 400 (client/server errors) result in fail
+    // timeout_secs - timeout in seconds before giving up on download (0 = no timeout)
+    // finishedCallback - callback when download finished (happens on different thread)
+    // progressCallback - callback for status during (happens on different thread)
+    std::shared_ptr<FileFuture> downloadFile(const std::string& url,
+        const ghoul::filesystem::File& file,
         bool overrideFile = true,
+        bool failOnError = false,
+        unsigned int timeout_secs = 0,
         DownloadFinishedCallback finishedCallback = DownloadFinishedCallback(),
         DownloadProgressCallback progressCallback = DownloadProgressCallback()
     );
