@@ -37,7 +37,7 @@ CachingSurfaceModelProvider::CachingSurfaceModelProvider()
 {
 	double cacheSize = 512;
 
-	auto threadPool = std::make_shared<ThreadPool>(4);
+	auto threadPool = std::make_shared<ThreadPool>(2);
 	_asyncSurfaceModelProvider = std::make_shared<AsyncSurfaceModelProvider>(threadPool);
 	_modelCache = std::make_shared<ModelCache>(static_cast<size_t>(cacheSize));
 }
