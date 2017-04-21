@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE___MESH_GENERATION___H__
 #define __OPENSPACE___MESH_GENERATION___H__
 
+#include <ghoul/misc/dictionary.h>
+
 #include <vector>
 
 #include <pcl/TextureMesh.h>
@@ -45,16 +47,12 @@ namespace globebrowsing {
 			std::vector<double> _roverOrigin;
 		};
 
-		static void generateMeshFromBinary(const std::string binary_path, std::string output_path);
+		static std::string correctPath(const std::string filename, std::string output_path);
+
+		static void generateMeshFromBinary(ghoul::Dictionary);
 
 	private: 
-		//void writeObjFile();
-		static void writeObjFile(const std::string filename, std::string output_path, const pcl::TextureMesh texMesh);
-		static void writeMtlFile(const std::string filename, const std::string output_path, const pcl::TextureMesh texMesh);
-		static MeshGeneration::PointCloudInfo readBinaryHeader(const std::string filename);
-		static void readBinaryData(const std::string filename, std::vector<std::vector<float>> &xyz, const MeshGeneration::PointCloudInfo pci);
 		static void writeTxtFile(const std::string filename, std::string output_path);
-		static std::string correctPath(const std::string filename, std::string output_path);
 	};
 }
 }

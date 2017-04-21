@@ -35,7 +35,7 @@
 #include <modules/globebrowsing/tasks/meshgeneration.h>
 
 namespace {
-	const std::string _loggerCat = "Meshgeneration";
+	const std::string _loggerCat = "MeshgenerationTask";
 	const std::string _solname = "Name";
 	const std::string _inputPath = "InputPath";
 	const std::string _urlToPDS = "https://pds-imaging.jpl.nasa.gov/data/msl/MSLNAV_1XXX/DATA/";
@@ -65,10 +65,28 @@ namespace globebrowsing {
 		const clock_t begin_time = clock();
 		progressCallback(0.0f);
 		int k = 0;
+		
+		ghoul::Dictionary extensions;
+		std::string extension;
+
+		std::string solNr = _inputSol.substr(3,_inputSol.size());
+		// NASA changed the fileformat from jpg to png around 450 sols
+		extension = std::stoi(solNr) > 450 ? ".png" : ".jpg";
+
+		extensions.setValue("TextureExtension", extension);
+		extensions.setValue("ModelFile", ".obj");
+		extensions.setValue("BinaryFile", ".IMG");
+
 		for (auto f : _filenames) {
 			std::string binary_path = _root + "/binaryfiles/" + _inputSol + "/" + f + ".IMG";
 			std::string output_path = _root + "models/";
-			
+			std::string obj_path = MeshGeneration::correctPath(f, output_path) + f + ".obj";
+
+			if (FileSys.fileExists(obj_path)) {
+				LERROR("THIS FILE ALREADY EXISTS");
+				continue;
+			}
+
 			if (!FileSys.fileExists(binary_path)) {
 				LINFO("Downloading file " << f);
 
@@ -78,7 +96,13 @@ namespace globebrowsing {
 				LINFO("File found locally, using that one instead: " << f);
 			}
 
-			MeshGeneration::generateMeshFromBinary(binary_path, output_path);
+			ghoul::Dictionary meshDic;
+
+			meshDic.setValue("BinaryPath", binary_path);
+			meshDic.setValue("OutputPath", output_path);
+			meshDic.setValue("Extension", extensions);
+
+			MeshGeneration::generateMeshFromBinary(meshDic);
 
 			//modelgeometry::ModelGeometry::createFromDictionary(model_dic);
 			k++;
