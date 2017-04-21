@@ -85,7 +85,7 @@ struct FunctionData {
 	std::vector<glm::dvec3> selectedPoints;
 	std::vector<glm::dvec2> screenPoints;
 	int nDOF;
-	glm::dvec2(*castToScreen)(glm::dvec3, Camera*, SceneGraphNode*, double);
+	glm::dvec2(*castToScreen)(glm::dvec3, Camera&, SceneGraphNode*, double);
 	double(*distToMinimize)(double* par, int x, void* fdata);
 	Camera* camera;
 	SceneGraphNode* node;
@@ -107,7 +107,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void step(double dt);
 		void configSensitivities(double dist);
 		void decelerate();
-		glm::dvec2 modelToScreenSpace(glm::dvec3 vec, SceneGraphNode* node);
+		glm::dvec2 modelToScreenSpace(glm::dvec3 vec, SceneGraphNode* node, double aspectRatio);
 		void clear();
 		void tap();
 

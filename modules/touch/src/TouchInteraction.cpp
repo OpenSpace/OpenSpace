@@ -86,9 +86,71 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		// Returns the screen point s(xi,par) dependant the transform M(par) and object point xi
 		auto distToMinimize = [](double* par, int x, void* fdata) {
 			FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-			glm::dvec3 selectedPoint = ptr->selectedPoints.at(x); 
-			glm::dvec3 pointInCamSpace = glm::inverse(ptr->camera->rotationQuaternion()) * (ptr->node->rotationMatrix() * selectedPoint);
+			glm::dvec3 selectedPoint = ptr->selectedPoints.at(x);
+			glm::dvec3 pointInWorld = (ptr->node->rotationMatrix() * selectedPoint) + ptr->node->worldPosition();
 
+			// Apply transform to camera and find the new screen point of the updated camera state
+			double vel[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // { vec2 globalRot, zoom, roll, vec2 localRot }
+			for (int i = 0; i < ptr->nDOF; ++i)
+				vel[i] = par[i];
+
+			using namespace glm;
+			// Create variables from current state
+			dvec3 camPos = ptr->camera->positionVec3();
+			dvec3 centerPos = ptr->node->worldPosition();
+
+			dvec3 directionToCenter = normalize(centerPos - camPos);
+			dvec3 centerToCamera = camPos - centerPos;
+			dvec3 lookUp = ptr->camera->lookUpVectorWorldSpace();
+			dvec3 camDirection = ptr->camera->viewDirectionWorldSpace();
+
+			// Make a representation of the rotation quaternion with local and global rotations
+			dmat4 lookAtMat = lookAt(
+				dvec3(0, 0, 0),
+				directionToCenter,
+				normalize(camDirection + lookUp)); // To avoid problem with lookup in up direction
+			dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
+			dquat localCamRot = inverse(globalCamRot) * ptr->camera->rotationQuaternion();
+
+			{ // Roll
+				dquat camRollRot = angleAxis(vel[3], dvec3(0.0, 0.0, 1.0));
+				localCamRot = localCamRot * camRollRot;
+			}
+			{ // Panning (local rotation)
+				dvec3 eulerAngles(vel[5], vel[4], 0);
+				dquat rotationDiff = dquat(eulerAngles);
+				localCamRot = localCamRot * rotationDiff;
+			}
+			{ // Orbit (global rotation)
+				dvec3 eulerAngles(par[1], par[0], 0);
+				dquat rotationDiffCamSpace = dquat(eulerAngles);
+
+				dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace * inverse(globalCamRot);
+				dvec3 rotationDiffVec3 = centerToCamera * rotationDiffWorldSpace - centerToCamera;
+				camPos += rotationDiffVec3;
+
+				dvec3 centerToCamera = camPos - centerPos;
+				directionToCenter = normalize(-centerToCamera);
+				dvec3 lookUpWhenFacingCenter = globalCamRot * dvec3(ptr->camera->lookUpVectorCameraSpace());
+				dmat4 lookAtMat = lookAt(
+					dvec3(0, 0, 0),
+					directionToCenter,
+					lookUpWhenFacingCenter);
+				globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
+			}
+			{ // Zooming
+				camPos += directionToCenter * vel[2];
+			}
+
+			// Update the camera state
+			Camera cam = *(ptr->camera);
+			cam.setPositionVec3(camPos);
+			cam.setRotation(globalCamRot * localCamRot);
+			
+			// we now have a new position and orientation of camera, project surfacePoint to the new screen and minimize distance
+			glm::dvec2 newScreenPoint = ptr->castToScreen(selectedPoint, cam, ptr->node, ptr->aspectRatio);
+			
+			/* 2 DOF = trans in XY, 4DOF = trans XYZ + roll case
 			// Create transformation matrix M(q) and apply transform for newPointInModelView
 			glm::dvec3 T = glm::dvec3(par[0], par[1], 0.0);
 			glm::dvec3 eulerAngles(0.0, 0.0, 0.0);
@@ -102,15 +164,15 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 				}
 			}
 			glm::dquat Q = glm::normalize(glm::dquat(eulerAngles));
-			
+			glm::dvec3 pointInCamSpace = glm::inverse(ptr->camera->rotationQuaternion()) * (ptr->node->rotationMatrix() * selectedPoint);
 			glm::dvec3 newWorldSP = (Q * pointInCamSpace) + T; // cam space around origin
-			//glm::dvec3 newWorldSP = transform * glm::dvec4(pointInCamSpace, 1.0); // cam space around origin
 
-			glm::dvec2 newScreenPoint = ptr->castToScreen(newWorldSP, ptr->camera, ptr->node, ptr->aspectRatio);
+			glm::dvec2 newScreenPoint = ptr->castToScreen(newWorldSP, ptr->camera, ptr->node, ptr->aspectRatio);*/
+
 			return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
 		};
 		// Gradient (finite derivative) of distToMinimize w.r.t par
-		auto gradient = [](double* g, double* par, int x, void* fdata) { // should g[i] = 1.0 or the derivative -> project to screen -> .x or .y?
+		auto gradient = [](double* g, double* par, int x, void* fdata) {
 			FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
 			double f0 = ptr->distToMinimize(par, x, fdata);
 			double f1, h = 1e-4;
@@ -129,10 +191,11 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		};
 
 		SceneGraphNode* node = _selected.at(0).node;
+		glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
+		double aspectRatio = res.x / res.y;
 		const int nFingers = list.size();
 		int nDOF = std::min(nFingers * 2, 6);
 		double* par = new double[nDOF];
-		double tPar[6] = { node->worldPosition().x, node->worldPosition().y, node->worldPosition().z, 0.0, 0.0, 0.0 };
 		for (int i = 0; i < nDOF; ++i) // initial values of q or 0.0? (ie current model or no rotation/translation)
 			par[i] = 0.0;
 		std::vector<glm::dvec3> selectedPoints;
@@ -141,26 +204,27 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			selectedPoints.push_back(sb.coordinates);
 
 			std::vector<TuioCursor>::const_iterator c = find_if(list.begin(), list.end(), [&sb](const TuioCursor& c) { return c.getSessionID() == sb.id; });
-			screenPoints.push_back(glm::dvec2(c->getX(), c->getY()));
+			double xCo = 2 * (c->getX() - 0.5);
+			double yCo = -2 * (c->getY() - 0.5); // normalized -1 to 1 coordinates on screen
+			screenPoints.push_back(glm::dvec2(xCo, yCo));
 		}
 		double* squaredError = new double[nFingers]; // probably not needed
 		for (int i = 0; i < nFingers; ++i) {
-			double err = glm::length(screenPoints.at(i) - modelToScreenSpace(selectedPoints.at(i), node));
+			double err = glm::length(screenPoints.at(i) - modelToScreenSpace(selectedPoints.at(i), node, aspectRatio));
 			squaredError[i] = err;
 		}
 		
-		auto castToScreen = [](glm::dvec3 camVec, Camera* camera, SceneGraphNode* node, double aspectRatio) {
-			glm::dvec3 vecInWorldSpace = camera->rotationQuaternion() * camVec;
-			glm::dvec3 rayFromCamToPoint = glm::normalize(vecInWorldSpace + node->worldPosition() - camera->positionVec3());
+		auto castToScreen = [](glm::dvec3 vec, Camera& camera, SceneGraphNode* node, double aspectRatio) {
+			glm::dvec3 backToScreenSpace = glm::inverse(camera.rotationQuaternion())
+				* glm::normalize(((node->rotationMatrix() * vec) + node->worldPosition() - camera.positionVec3()));
+			backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
+			backToScreenSpace.x /= aspectRatio;
 
-			glm::dvec3 pointInNDC = glm::inverse(camera->rotationQuaternion()) * rayFromCamToPoint;
-			pointInNDC *= (-3.2596558 / pointInNDC.z);
-
-			return glm::dvec2(pointInNDC.x / (2 * aspectRatio) + 0.5, -pointInNDC.y / 2 + 0.5); // returns [0,0] - [1,1] point
+			return glm::dvec2(backToScreenSpace);
 		};
 
-		glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-		FunctionData fData = { selectedPoints, screenPoints, nDOF, castToScreen, distToMinimize, _camera, node, res.x / res.y };
+		
+		FunctionData fData = { selectedPoints, screenPoints, nDOF, castToScreen, distToMinimize, _camera, node, aspectRatio };
 		void* dataPtr = reinterpret_cast<void*>(&fData);
 
 		levmarq_init(&_lmstat);
@@ -169,24 +233,21 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		double temp[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 		for (int i = 0; i < nDOF; ++i)
 			temp[i] = par[i];
-
-		glm::dvec3 T = glm::dvec3(temp[0], temp[1], temp[2]);
-		double twoPi = 2.0 * M_PI;
-		glm::dvec3 eulerAngles(fmod(temp[5], twoPi), fmod(temp[4], twoPi), fmod(temp[3], twoPi));
-		glm::dquat Q = glm::normalize(glm::dquat(eulerAngles));
-		/*glm::dmat4 rotate = glm::toMat4(Q);
-		glm::dmat4 translate = glm::translate(glm::dmat4(1.0f), T);
-		glm::dmat4 transform = rotate * translate;*/
-
-		glm::dquat worldQ = Q;
-		glm::dvec3 worldT = _camera->rotationQuaternion() * T; // glm::dvec3(transform[3][0], transform[3][1], transform[3][2]);
 		
-		_camera->setPositionVec3(_camera->positionVec3() - worldT);
-		_camera->rotate(worldQ);
-		
+		// Set the new camera state
+		_vel.globalRot = glm::dvec2(temp[0], temp[1]);
+		_vel.zoom = temp[2];
+		_vel.localRoll = temp[3];
+		_vel.localRot = glm::dvec2(temp[4], temp[5]);
+		step(1);
+
 
 		// debugging
-		std::cout << "Levmarq success after " << nIterations << " iterations. Camera T: " << glm::to_string(worldT) << ", Q: " << glm::to_string(worldQ) << "\n";
+		std::ostringstream os;
+		for (int i = 0; i < nDOF; ++i) {
+			os << temp[i] << ", ";
+		}
+		std::cout << "Levmarq success after " << nIterations << " iterations. Values: " << os.str() << "\n";
 
 		// cleanup
 		delete[] squaredError;
@@ -477,7 +538,8 @@ void TouchInteraction::step(double dt) {
 			camPos += -directionToCenter * max(minHeightAboveBoundingSphere - distFromSphereSurfaceToCamera, 0.0);
 		}
 		
-		configSensitivities(length(camPos - (centerPos + centerToBoundingSphere)));
+		 if (!_directTouchMode)
+			configSensitivities(length(camPos - (centerPos + centerToBoundingSphere)));
 		decelerate();
 
 		// Update the camera state
@@ -487,14 +549,13 @@ void TouchInteraction::step(double dt) {
 }
 
 
-glm::dvec2 TouchInteraction::modelToScreenSpace(glm::dvec3 vec, SceneGraphNode* node) { // probably not needed, if squaredError isnt
+glm::dvec2 TouchInteraction::modelToScreenSpace(glm::dvec3 vec, SceneGraphNode* node, double aspectRatio) { // probably not needed, if squaredError isnt
 	glm::dvec3 backToScreenSpace =  glm::inverse(_camera->rotationQuaternion())
 		* glm::normalize(((node->rotationMatrix() * vec) + node->worldPosition() - _camera->positionVec3()));
 	backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
+	backToScreenSpace.x /= aspectRatio;
 
-	glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-	double aspectRatio = res.x / res.y;
-	return glm::dvec2(backToScreenSpace.x / (2 * aspectRatio) + 0.5, -backToScreenSpace.y / 2 + 0.5);
+	return glm::dvec2(backToScreenSpace);
 }
 
 void TouchInteraction::configSensitivities(double dist) {
@@ -525,6 +586,12 @@ void TouchInteraction::configSensitivities(double dist) {
 }
 
 void TouchInteraction::decelerate() {
+	if (_directTouchMode) {
+		_vel.globalRot = glm::dvec2(0.0, 0.0);
+		_vel.zoom = 0.0;
+		_vel.localRoll = 0.0;
+		_vel.localRot = glm::dvec2(0.0, 0.0);
+	}
 	_vel.zoom *= (1 - _friction.zoom);
 	_vel.globalRot *= (1 - _friction.globalRot);
 	_vel.localRot *= (1 - _friction.localRot);
