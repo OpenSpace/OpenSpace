@@ -44,6 +44,7 @@
 #endif
 
 #include <cmath>
+#include <functional>
 #include <glm/ext.hpp>
 
 namespace {
@@ -86,29 +87,24 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		auto distToMinimize = [](double* par, int x, void* fdata) {
 			FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
 			glm::dvec3 selectedPoint = ptr->selectedPoints.at(x); 
+			glm::dvec3 pointInCamSpace = glm::inverse(ptr->camera->rotationQuaternion()) * (ptr->node->rotationMatrix() * selectedPoint);
 
 			// Create transformation matrix M(q) and apply transform for newPointInModelView
 			glm::dvec3 T = glm::dvec3(par[0], par[1], 0.0);
-			glm::dquat Q;
-			Q.x = Q.y = Q.z = Q.w = 0.0;
+			glm::dvec3 eulerAngles(0.0, 0.0, 0.0);
+			double twoPi = 2.0 * M_PI;
 			if (ptr->nDOF > 2) { // need to check how many DOF we can handle (+2 DOF per finger down up to 6)
 				T.z = par[2];
-				Q.x = par[3];
+				eulerAngles.z = fmod(par[3], twoPi);
 				if (ptr->nDOF > 4) {
-					Q.y = par[4];
-					Q.z = par[5];
+					eulerAngles.y = fmod(par[4], twoPi);
+					eulerAngles.x = fmod(par[5], twoPi);
 				}
 			}
-			Q.w = sqrt(1.0 - std::min(glm::length(Q), 0.99999)); // if check is not done Q.w becomes NAN. Do we need a better definition of Q.w?
+			glm::dquat Q = glm::normalize(glm::dquat(eulerAngles));
 			
-			/*glm::dmat4 rotate = glm::toMat4(Q);
-			glm::dmat4 translate = glm::translate(glm::dmat4(1.0f), T);
-			glm::dmat4 transform = rotate * translate;*/
-
-			glm::dvec3 pointInCamSpace = glm::inverse(ptr->camera->rotationQuaternion()) * (ptr->node->rotationMatrix() * selectedPoint);
-			glm::dvec3 newWorldSP = Q * (pointInCamSpace + T); // cam space around origin
+			glm::dvec3 newWorldSP = (Q * pointInCamSpace) + T; // cam space around origin
 			//glm::dvec3 newWorldSP = transform * glm::dvec4(pointInCamSpace, 1.0); // cam space around origin
-
 
 			glm::dvec2 newScreenPoint = ptr->castToScreen(newWorldSP, ptr->camera, ptr->node, ptr->aspectRatio);
 			return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
@@ -175,23 +171,22 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			temp[i] = par[i];
 
 		glm::dvec3 T = glm::dvec3(temp[0], temp[1], temp[2]);
-		glm::dquat Q;
-		Q.x = temp[3]; Q.y = temp[4]; Q.z = temp[5];
-		double len = Q.x*Q.x + Q.y*Q.y + Q.z*Q.z;
-		Q.w = sqrt(1.0 - len);
-
+		double twoPi = 2.0 * M_PI;
+		glm::dvec3 eulerAngles(fmod(temp[5], twoPi), fmod(temp[4], twoPi), fmod(temp[3], twoPi));
+		glm::dquat Q = glm::normalize(glm::dquat(eulerAngles));
 		/*glm::dmat4 rotate = glm::toMat4(Q);
 		glm::dmat4 translate = glm::translate(glm::dmat4(1.0f), T);
 		glm::dmat4 transform = rotate * translate;*/
 
 		glm::dquat worldQ = Q;
 		glm::dvec3 worldT = _camera->rotationQuaternion() * T; // glm::dvec3(transform[3][0], transform[3][1], transform[3][2]);
-
-		_camera->rotate(worldQ);
+		
 		_camera->setPositionVec3(_camera->positionVec3() - worldT);
+		_camera->rotate(worldQ);
+		
 
 		// debugging
-		std::cout << "Levmarq success after " << nIterations << " iterations. Camera T: " << glm::to_string(worldT) << ", Q: " << glm::to_string(Q) << "\n";
+		std::cout << "Levmarq success after " << nIterations << " iterations. Camera T: " << glm::to_string(worldT) << ", Q: " << glm::to_string(worldQ) << "\n";
 
 		// cleanup
 		delete[] squaredError;
