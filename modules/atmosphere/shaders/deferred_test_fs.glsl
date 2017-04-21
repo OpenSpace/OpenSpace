@@ -35,6 +35,7 @@ uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
 
 uniform sampler2DMS mainDepthTexture;
+uniform sampler2DMS mainColorTexture;
 
 uniform int nAaSamples;
 
@@ -164,7 +165,7 @@ void dCalculateRay2(out dRay ray, out dvec4 planetPositionObjectCoords) {
   dvec4 clipCoords = dvec4(interpolatedNDCPos, 1.0) / gl_FragCoord.w; 
   // This next line is needed because OS or SGCT is not inverting Y axis from 
   // window space. 
-  clipCoords.y = (-interpolatedNDCPos.y) / gl_FragCoord.w;
+  //clipCoords.y = (-interpolatedNDCPos.y) / gl_FragCoord.w;
  
   // Clip to SGCT Eye
   dvec4 sgctEyeCoords = dInverseSgctProjectionMatrix * clipCoords;
@@ -494,16 +495,17 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
  * attenuation := transmittance T(x,x0)
  */
 vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r, const float mu) {
+  //vec3 transmittance = transmittanceLUT(Rg+10, 0.6);  
+  //vec3 transmittance =  texture(transmittanceTexture, vec2(1.0, 1.0)).rgb;
+  //return transmittance;
   if (t > 0.0f) {
     return vec3(0.0f);
   } else {
-    // vec3 transmittance = (r <= Rt) ? 
-    //       (mu < -sqrt(1.0f - (Rg/r)/(Rg/r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) :
-    //       vec3(1.0f);
+    vec3 transmittance = (r <= Rt) ? ( mu < -sqrt(1.0f - (Rg*Rg)/(r*r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);    
     float sunFinalColor = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance; 
 
-    //return transmittance * sunFinalColor;
-    return vec3(sunFinalColor);
+    return transmittance * sunFinalColor;
+    //return vec3(sunFinalColor);    
     }
 }
 
@@ -511,14 +513,13 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
 void main() {
     // Acessing Depth Buffer.
     float geoDepth = 0.0;
+    //vec4 colorMean = vec4(0.0);
     for (int i = 0; i < nAaSamples; i++) {
         geoDepth += denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), i).x);
+        //colorMean += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
     }
     geoDepth /= nAaSamples;
-
-    //renderTarget = vec4(1.0, 0.0, 0.0, 0.5);
-    //renderTarget = vec4(vec3(interpolatedNDCPos), 0.5);
-    //renderTarget = vec4(vec3(geoDepth/100000000), 0.0);
+    //colorMean /= nAaSamples;
 
     // Ray in object space
     dRay ray;
@@ -576,19 +577,24 @@ void main() {
       //renderTarget = vec4(groundColor, 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
-      vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
-      //vec4 finalRadiance = vec4(inscatterColor, 1.0);
       //vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
+      //vec4 finalRadiance = vec4(inscatterColor, 1.0);
+      vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
+      //vec4 finalRadiance = vec4(HDR(sunColor), 1.0);
+      //vec4 finalRadiance = vec4(sunColor, 1.0);
       //vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
       if ( finalRadiance.xyz == vec3(0.0))
          finalRadiance.w = 0.0;
+    
+      //renderTarget = finalRadiance + colorMean;
       renderTarget = finalRadiance;
 
       //renderTarget = vec4(1.0, 0.0, 0.0, 0.5);
       //renderTarget = vec4(0.0);            
     } else {
       //renderTarget = vec4(1.0, 1.0, 0.0, 0.5);      
-      renderTarget = vec4(1.0, 0.0, 0.0, 0.0);      
+      renderTarget = vec4(0.0);      
+      //renderTarget = colorMean;
     }
 
 }

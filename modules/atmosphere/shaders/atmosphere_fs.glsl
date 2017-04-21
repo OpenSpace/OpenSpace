@@ -130,10 +130,10 @@ bool intersectAtmosphere(const vec4 planetPos, const vec3 rayDirection, const fl
       return true;
     }
   }
-    
+  
   return false;
 }
-
+ 
 /* 
  * Calculates the light scattering in the view direction comming from other 
  * light rays scattered in the atmosphere.

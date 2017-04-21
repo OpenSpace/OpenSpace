@@ -327,7 +327,6 @@ vec4 texture4D(sampler3D table, const float r, const float mu,
     texture(table, vec3((u_nu + u_mu_s + 1.0f) / float(SAMPLES_NU), u_mu, u_r)) * lerp;
 }
 
-
 // -- Given the irradiance texture table, the cosine of zenith sun vector
 // and the height of the observer (ray's stating point x), calculates the
 // mapping for u_r and u_muSun and returns the value in the LUT. --

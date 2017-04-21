@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014-2016                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,58 +21,17 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#version 330
 
-#ifndef __OPENSPACE_CORE___DEFERREDCASTER___H
-#define __OPENSPACE_CORE___DEFERREDCASTER___H
+#include "atmosphere_common.glsl"
 
-#include <string>
-#include <vector>
-#include <openspace/util/updatestructures.h>
+out vec4 renderTableColor;
 
-namespace ghoul {
-    namespace opengl {
-        class Texture;
-        class ProgramObject;
-    }
+uniform sampler2D deltaETexture;
+
+void main(void) {   
+  vec2 uv = gl_FragCoord.xy / vec2(OTHER_TEXTURES_W, OTHER_TEXTURES_H);
+
+  // Update texture E with E plus deltaE textures.
+  renderTableColor = texture(deltaETexture, uv);   
 }
-
-namespace openspace {
-
-struct RenderData;
-struct DeferredcastData;
-
-class Deferredcaster {
-public:
-    /**
-     * Destructor
-     */
-    virtual ~Deferredcaster() {};
-
-    virtual void preRaycast(const RenderData & renderData, const DeferredcastData& deferredData, 
-                            ghoul::opengl::ProgramObject& program) {};
-
-    virtual void postRaycast(const RenderData & renderData, const DeferredcastData& deferredData, 
-                             ghoul::opengl::ProgramObject& program) {};
-
-    virtual std::string getDeferredcastPath() const = 0;
-
-    virtual std::string getDeferredcastVSPath() const = 0;
-
-    virtual std::string getDeferredcastFSPath() const = 0;
-
-    /**
-     * Return a path to a glsl file with helper functions required for the
-     * transformation and raycast steps.
-     * This file will be included once per shader program generated,
-     * regardless of how many volumes say they require the file.
-     * Ideal to avoid redefinitions of helper functions.
-     *
-     * The shader preprocessor will have access to the #{namespace} variable (unique per helper file)
-     * which should be a prefix to all symbols defined by the helper
-     */
-    virtual std::string getHelperPath() const = 0;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___DEFERREDCASTER___H__

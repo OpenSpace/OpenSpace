@@ -2130,6 +2130,7 @@ namespace openspace {
         saveTextureToPPMFile(GL_COLOR_ATTACHMENT1, std::string("deltaS_mie_texture.ppm"),
             MU_S_SAMPLES * NU_SAMPLES, MU_SAMPLES);
 #endif
+        // Release the texture attached to the second color buffer
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
         glDrawBuffers(1, drawBuffers);
 

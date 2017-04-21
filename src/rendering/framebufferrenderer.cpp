@@ -534,6 +534,11 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
             deferredcastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
+//            ghoul::opengl::TextureUnit mainColorTextureUnit;
+//            mainColorTextureUnit.activate();
+//            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+//            deferredcastProgram->setUniform("mainColorTexture", mainColorTextureUnit);
+
             deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
 //            deferredcastProgram->setUniform("windowSize", glm::vec2(_resolution));
 

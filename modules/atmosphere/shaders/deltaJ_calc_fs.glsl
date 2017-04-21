@@ -31,7 +31,6 @@ out vec4 renderTarget1;
 uniform float r;
 uniform vec4 dhdH;
 
-//uniform sampler2D transmittanceTexture;
 uniform sampler2D deltaETexture;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
