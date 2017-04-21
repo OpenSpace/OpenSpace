@@ -54,8 +54,13 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
 
+	${CMAKE_CURRENT_SOURCE_DIR}/models/asyncsurfacemodelprovider.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/cachingsurfacemodelprovider.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/model.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableroversurface.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/surfacemodelrenderingselector.h
 	
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
@@ -101,6 +106,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob.h
+	${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob2.h
+	${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/surfacemodelloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
@@ -139,8 +146,13 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
 
+	${CMAKE_CURRENT_SOURCE_DIR}/models/asyncsurfacemodelprovider.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/cachingsurfacemodelprovider.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableroversurface.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/model.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/surfacemodelrenderingselector.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
@@ -174,6 +186,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/surfacemodelloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
