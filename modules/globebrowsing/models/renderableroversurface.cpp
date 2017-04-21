@@ -74,12 +74,15 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	ghoul_assert(success, "Name was not passed to RenderableSite");
 
+	_multiModelGeometry = "MultiModelGeometry";
+
 	// Extract all coordinates from the GDAL dataset
 	extractCoordinates();
 
+	// Save the abspath because it changes when leaving the constructor.
 	_absModelPath = absPath(_modelPath);
 
-	_cachingProvider = std::make_shared<CachingSurfaceModelProvider>();
+	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>();
 }
 
 bool RenderableRoverSurface::initialize() {
@@ -104,55 +107,57 @@ void RenderableRoverSurface::render(const RenderData & data) {
 }
 
 void RenderableRoverSurface::update(const UpdateData & data) {
-	_cachingProvider->update();
-	_pathChunks.clear();
+	_cachingModelProvider->update();
+	//_pathChunks.clear();
+
+	// Loop through all subsites.
 	for (auto i : _subSites) {
+
+		// Check which chunk each subsite corresponds to. Also extract the chunk hashkey to use it for
+		// caching when loading models.
 		Geodetic2 geodetic2 = Geodetic2{ i.lat, i.lon } / 180 * glm::pi<double>();
 		Chunk chunk = _chunkedLodGlobe->findChunkNode(geodetic2).getChunk();
 		double chunkLevel = chunk.surfacePatch().maximumTileLevel();
+		uint64_t hashKey = chunk.tileIndex().hashKey();
+		//auto search = _pathChunks.find(hashKey);
+
+		// Only load models if the camera is so close to the surface so that there will be no further chunking.
 		if(chunkLevel == 18) { 
 			if(chunk.isVisible()) {
 
-				ghoul::Dictionary modelDictionary;
-				std::string modelFilePath;
+				// Load file names.
+				std::string txtFilePath = "site" + i.site + "/" + "drive" + i.drive + "/" + "filenames.txt";
+				std::vector<std::string> fileNames = extractFileNames(txtFilePath);
 
-				uint64_t hashKey = chunk.tileIndex().hashKey();
-				auto search = _pathChunks.find(hashKey);
+				// Loop through all file names and ask the caching model provider to return all available models \
+				// for that chunk.
+				for (auto fileName : fileNames) {
+					ghoul::Dictionary modelDictionary;
+					std::string pathToGeometry = _modelPath + "site" + i.site + "/" + "drive" + i.drive + "/" + fileName + ".obj";
+					modelDictionary.setValue(keyGeometryFile, pathToGeometry);
+					modelDictionary.setValue(keyType, _multiModelGeometry);
+					modelDictionary.setValue(keyName, fileName);
 
-				if(i.site == std::to_string(48) && i.drive == std::to_string(1570)){
-					std::string testing = "MultiModelGeometry";
+					Model model;
+					model.fileName = fileName;
+					model.tileHashKey = hashKey;
+					std::shared_ptr<Model> theModel = std::make_shared<Model>(model);
 
-					std::string txtFilePath = i.site + "/" + i.drive + "/" + "modelFiles.txt";
-					std::vector<std::string> fileNames = extractFileNames(txtFilePath);
-
-					for (auto fileName : fileNames) {					
-						std::string test2 = _modelPath + i.site + "/" + i.drive + "/" + fileName + ".obj";
-						modelDictionary.setValue(keyGeometryFile, test2);
-						modelDictionary.setValue(keyType, testing);
-						modelDictionary.setValue(keyName, fileName);
-
-
-						Model model;
-
-						model.fileName = fileName;
-						model.tileHashKey = hashKey;
-
-						std::shared_ptr<Model> theModel = std::make_shared<Model>(model);
-
-						_cachingProvider->getModel(modelDictionary, theModel);
-					}
+					_cachingModelProvider->getModel(modelDictionary, theModel);
 				}
-
-				/*if (search != _pathChunks.end()) {
-					search->second.push_back(tempPos);
-				}
-				else {
-					std::vector<glm::dvec3> tempVector;
-					tempVector.push_back(tempPos);
-					_pathChunks.insert(std::make_pair(hashKey, tempVector));
-				}*/
 			}
 		}
+
+		/*glm::dvec3 tempPos = glm::dvec3(1.0, 1.0, 1.0);
+		if (search != _pathChunks.end()) {
+			search->second.push_back(tempPos);
+		}
+		else {
+			std::vector<glm::dvec3> tempVector;
+			tempVector.push_back(tempPos);
+			_pathChunks.insert(std::make_pair(hashKey, tempVector));
+		}*/
+
 	}
 }
 
@@ -217,8 +222,6 @@ std::vector<std::string> RenderableRoverSurface::extractFileNames(const std::str
 		}
 		myfile.close();
 	}
-	else
-		LERROR("Could not open .txt file");
 
 	return fileNames;
 }

@@ -69,21 +69,19 @@ private:
 
 	GeneralProperties _generalProperties;
 
-
 	std::string _roverLocationPath;
 	std::string _textFilePath;
 	std::string _modelPath;
 	std::string _texturePath;
 	std::string _absModelPath;
+	std::string _multiModelGeometry;
 
 	globebrowsing::RenderableGlobe* _globe;
 	std::shared_ptr<globebrowsing::ChunkedLodGlobe> _chunkedLodGlobe;
-	std::unordered_map <uint64_t, std::vector<glm::dvec3 >> _pathChunks;
+	std::unordered_map <uint64_t, std::vector<glm::dvec3>> _pathChunks;
 
-	std::shared_ptr<CachingSurfaceModelProvider> _cachingProvider;
+	std::shared_ptr<CachingSurfaceModelProvider> _cachingModelProvider;
 	bool loadedOnce = true;
-
-	//SurfaceModelRenderingSelector _surfaceModelRenderingSelector;
 };
 
 } // namespace globebrowsing
