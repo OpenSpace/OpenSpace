@@ -259,7 +259,6 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     inScatteringTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
     program.setUniform("inscatterTexture", inScatteringTableTextureUnit);
-
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData & renderData, const DeferredcastData& deferredData,

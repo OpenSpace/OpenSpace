@@ -55,8 +55,7 @@ return {
                 AtmoshereRadius = 6420,
                 --AtmoshereRadius = 6390,
                 --PlanetRadius    = 6371,
-                PlanetRadius    = 6360,
-                --PlanetRadius    = 6378.1366,
+                PlanetRadius    = 6378.1366,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
                     Coefficients = {

@@ -76,7 +76,7 @@ return {
         "sun",
         "atmosphereearth",
         --"moon",
-        --"atmospheremars",
+        "atmospheremars",
         --"toyvolume",
         --"earth",
         --"stars",
