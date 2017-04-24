@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACE_MODEL_PROVIDER__H_
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACE_MODEL_PROVIDER__H_
 
-#include <modules/globebrowsing/other/lrucache.h>
+#include <modules/globebrowsing/cache/lrucache.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/other/threadpool.h>
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>

@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_SURFACE_MODEL_PROVIDER__H_
 
 #include <modules/globebrowsing/models/asyncsurfacemodelprovider.h>
-#include <modules/globebrowsing/other/lrucache.h>
+#include <modules/globebrowsing/cache/lrucache.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/models/model.h>
 
@@ -35,7 +35,7 @@
 namespace openspace {
 namespace globebrowsing {
 
-using ModelCache = LRUCache<TileIndex::TileHashKey, std::vector<std::shared_ptr<Model>>>;
+using ModelCache = cache::LRUCache<TileIndex::TileHashKey, std::vector<std::shared_ptr<Model>>>;
 
 class CachingSurfaceModelProvider {
 public:
@@ -52,7 +52,6 @@ private:
 
 	void initModelsFromLoadedData();
 	void clearRequestQueue();
-
 };
 
 } // namespace globebrowsing

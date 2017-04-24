@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEROVERSURFACE___H__
 
 #include <openspace/rendering/renderable.h>
-#include <modules/globebrowsing/models/surfacemodelrenderingselector.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/tile/tileindex.h>
