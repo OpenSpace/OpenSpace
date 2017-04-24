@@ -39,7 +39,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
 #include <modules/globebrowsing/models/renderablesite.h>
 #include <modules/globebrowsing/tile/tileprovider/presentationslideprovider.h>
-#include <modules/globebrowsing/tasks/meshgenerationtask.h>
+//#include <modules/globebrowsing/tasks/meshgenerationtask.h>
 
 
 #include <openspace/engine/openspaceengine.h>
@@ -116,26 +116,6 @@ void GlobeBrowsingModule::internalInitialize() {
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
 	fRenderable->registerClass<globebrowsing::RenderableSite>("RenderableSite");
-
-
-	auto fTask = FactoryManager::ref().factory<Task>();
-	ghoul_assert(fTask, "No task factory existed");
-	fTask->registerClass<globebrowsing::MeshGenerationTask>("MeshGenerationTask");
-
-	std::string lib_path = "C:/Users/openspace/Documents/develop/OpenSpace/data/tasks/meshgenerationtask2.task";
-	TaskLoader tl;
-	std::vector<std::unique_ptr<Task>> task = tl.tasksFromFile(lib_path);
-
-	ProgressBar pBar(100);
-	auto onProgress = [&pBar](float progress) {
-		pBar.print(progress * 100);
-	};
-
-	for (int i = 0; i < task.size(); ++i) {
-		task.at(i)->perform(onProgress);
-	}
-
-
 
     // add Tile Provider factory
     auto fTileProvider = std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
