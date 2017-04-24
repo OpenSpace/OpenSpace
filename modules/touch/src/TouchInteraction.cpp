@@ -86,8 +86,6 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		// Returns the screen point s(xi,par) dependant the transform M(par) and object point xi
 		auto distToMinimize = [](double* par, int x, void* fdata) {
 			FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-			glm::dvec3 selectedPoint = ptr->selectedPoints.at(x);
-			glm::dvec3 pointInWorld = (ptr->node->rotationMatrix() * selectedPoint) + ptr->node->worldPosition();
 
 			// Apply transform to camera and find the new screen point of the updated camera state
 			double vel[6] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }; // { vec2 globalRot, zoom, roll, vec2 localRot }
@@ -122,7 +120,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 				localCamRot = localCamRot * rotationDiff;
 			}
 			{ // Orbit (global rotation)
-				dvec3 eulerAngles(par[1], par[0], 0);
+				dvec3 eulerAngles(vel[1], vel[0], 0);
 				dquat rotationDiffCamSpace = dquat(eulerAngles);
 
 				dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace * inverse(globalCamRot);
@@ -148,7 +146,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			cam.setRotation(globalCamRot * localCamRot);
 			
 			// we now have a new position and orientation of camera, project surfacePoint to the new screen and minimize distance
-			glm::dvec2 newScreenPoint = ptr->castToScreen(selectedPoint, cam, ptr->node, ptr->aspectRatio);
+			glm::dvec2 newScreenPoint = ptr->castToNDC(ptr->selectedPoints.at(x), cam, ptr->node, ptr->aspectRatio);
 			
 			/* 2 DOF = trans in XY, 4DOF = trans XYZ + roll case
 			// Create transformation matrix M(q) and apply transform for newPointInModelView
@@ -182,7 +180,6 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 				for (int j = 0; j < ptr->nDOF; ++j) {
 					dPar[j] = par[j];
 				}
-
 				dPar[i] += h;
 				f1 = ptr->distToMinimize(dPar, x, fdata);
 				g[i] = (f1 - f0) / h;
@@ -193,6 +190,16 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		SceneGraphNode* node = _selected.at(0).node;
 		glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
 		double aspectRatio = res.x / res.y;
+		auto castToNDC = [](glm::dvec3 vec, Camera& camera, SceneGraphNode* node, double aspectRatio) {
+			glm::dvec3 backToScreenSpace = glm::inverse(camera.rotationQuaternion())
+				* glm::normalize(((node->rotationMatrix() * vec) + node->worldPosition() - camera.positionVec3()));
+			backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
+			backToScreenSpace.x /= aspectRatio;
+
+			return glm::dvec2(backToScreenSpace);
+		};
+
+
 		const int nFingers = list.size();
 		int nDOF = std::min(nFingers * 2, 6);
 		double* par = new double[nDOF];
@@ -210,21 +217,11 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		}
 		double* squaredError = new double[nFingers]; // probably not needed
 		for (int i = 0; i < nFingers; ++i) {
-			double err = glm::length(screenPoints.at(i) - modelToScreenSpace(selectedPoints.at(i), node, aspectRatio));
+			double err = glm::length(screenPoints.at(i) - castToNDC(selectedPoints.at(i), *_camera, node, aspectRatio));
 			squaredError[i] = err;
 		}
 		
-		auto castToScreen = [](glm::dvec3 vec, Camera& camera, SceneGraphNode* node, double aspectRatio) {
-			glm::dvec3 backToScreenSpace = glm::inverse(camera.rotationQuaternion())
-				* glm::normalize(((node->rotationMatrix() * vec) + node->worldPosition() - camera.positionVec3()));
-			backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
-			backToScreenSpace.x /= aspectRatio;
-
-			return glm::dvec2(backToScreenSpace);
-		};
-
-		
-		FunctionData fData = { selectedPoints, screenPoints, nDOF, castToScreen, distToMinimize, _camera, node, aspectRatio };
+		FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, node, aspectRatio };
 		void* dataPtr = reinterpret_cast<void*>(&fData);
 
 		levmarq_init(&_lmstat);
@@ -254,10 +251,10 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		delete[] par;
 	}
 	trace(list);
-	//if (!_directTouchMode) {
+	if (!_directTouchMode) {
 		interpret(list, lastProcessed);
-		//accelerate(list, lastProcessed);
-	//}
+		accelerate(list, lastProcessed);
+	}
 	
 	if (_currentRadius > 0.3 && _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch, needs better definition
 		_directTouchMode = true;
@@ -546,16 +543,6 @@ void TouchInteraction::step(double dt) {
 		_camera->setPositionVec3(camPos);
 		_camera->setRotation(globalCamRot * localCamRot);
 	}
-}
-
-
-glm::dvec2 TouchInteraction::modelToScreenSpace(glm::dvec3 vec, SceneGraphNode* node, double aspectRatio) { // probably not needed, if squaredError isnt
-	glm::dvec3 backToScreenSpace =  glm::inverse(_camera->rotationQuaternion())
-		* glm::normalize(((node->rotationMatrix() * vec) + node->worldPosition() - _camera->positionVec3()));
-	backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
-	backToScreenSpace.x /= aspectRatio;
-
-	return glm::dvec2(backToScreenSpace);
 }
 
 void TouchInteraction::configSensitivities(double dist) {
