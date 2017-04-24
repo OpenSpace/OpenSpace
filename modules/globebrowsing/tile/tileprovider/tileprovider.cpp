@@ -34,8 +34,6 @@
 #include <climits>
 
 namespace {
-    const std::string _loggerCat = "TileProvider";
-
     const char* KeyType = "Type";
 }
 
@@ -50,18 +48,13 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(const ghoul::Di
     dictionary.getValue(KeyType, type);
     auto factory = FactoryManager::ref().factory<TileProvider>();
     std::unique_ptr<TileProvider> result = factory->create(type, dictionary);
-
-    if (result == nullptr) {
-        LERROR("Failed creating TileProvider of type '" << type << "'");
-        return nullptr;
-    }
-
     return result;
 }
 
-TileProvider::TileProvider() :
-    properties::PropertyOwner("tileProvider"),
-    _initialized(false) {
+TileProvider::TileProvider()
+    : properties::PropertyOwner("tileProvider")
+    , _initialized(false)
+{
     initialize();
 }
 

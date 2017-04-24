@@ -77,10 +77,6 @@ return {
 						Name = "ESRI",
 					},
                     {
-                        Name = "ESRI Imagery World 2D",
-                        FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms",
-                    },
-                    {
                         Name = "ESRI Imagery World",
                         FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms"
                     },
@@ -94,6 +90,11 @@ return {
                         Name = "Temporal_GHRSST_L4_MUR_Sea_Surface_Temperature",
                         FilePath = "map_service_configs/GIBS/Temporal_GHRSST_L4_MUR_Sea_Surface_Temperature.xml",
                     },
+                    {
+                        Type = "Temporal",
+                        Name = "Temporal_AMSR2_GCOM_W1_Sea_Ice_Concentration",
+                        FilePath = "map_service_configs/GIBS/Temporal_AMSR2_GCOM_W1_Sea_Ice_Concentration.xml",
+                    },                    
                     -- {
                     --     Type = "SingleImage",
                     --     Name = "Debug Tiles",
@@ -120,7 +121,7 @@ return {
                     {
                         Type = "Temporal",
                         Name = "Temporal Earth at Night",
-                        FilePath = "map_service_configs/GIBS/Temporal_VIIRS_CityLights.xml"
+                        FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_DayNightBand_ENCC.xml"
                     }
                 },
                 WaterMasks = {

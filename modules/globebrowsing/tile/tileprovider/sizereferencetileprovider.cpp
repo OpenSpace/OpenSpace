@@ -46,7 +46,7 @@ namespace {
 }
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
-	: _backgroundTile(Tile::TileUnavailable)
+    : _backgroundTile(Tile::TileUnavailable)
 {
     _fontSize = 50;
     _font = OsEng.fontManager().font("Mono", _fontSize);
@@ -58,9 +58,9 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
     _ellipsoid = Ellipsoid(radii);
 
     auto backgroundTileStatus = Tile::Status::Unavailable;
-	std::shared_ptr<ghoul::opengl::Texture> backgroundTileTexture;
+    std::shared_ptr<ghoul::opengl::Texture> backgroundTileTexture;
 
-	std::string backgroundImagePath;
+    std::string backgroundImagePath;
     if (dictionary.getValue(KeyBackgroundImagePath, backgroundImagePath)) {
         using namespace ghoul::io;
         std::string imgAbsPath = absPath(backgroundImagePath);
@@ -69,7 +69,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
         backgroundTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         backgroundTileStatus = Tile::Status::OK;
     }
-	_backgroundTile = Tile(backgroundTileTexture, nullptr, backgroundTileStatus);
+    _backgroundTile = Tile(backgroundTileTexture, nullptr, backgroundTileStatus);
 }
 
 void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRenderer&

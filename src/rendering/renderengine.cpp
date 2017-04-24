@@ -108,6 +108,7 @@ RenderEngine::RenderEngine()
     , _takeScreenshot("takeScreenshot", "Take Screenshot")
     , _showFrameNumber("showFrameNumber", "Show Frame Number", false)
     , _disableMasterRendering("disableMasterRendering", "Disable Master Rendering", false)
+    , _disableSceneOnMaster("disableSceneOnMaster", "Disable Scene on Master", false)
     , _shouldTakeScreenshot(false)
     , _renderer(nullptr)
     , _rendererImplementation(RendererImplementation::Invalid)
@@ -165,6 +166,7 @@ RenderEngine::RenderEngine()
     addProperty(_showFrameNumber);
     
     addProperty(_disableMasterRendering);
+    addProperty(_disableSceneOnMaster);
 }
 
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
@@ -208,6 +210,12 @@ void RenderEngine::initialize() {
     if (confManager.hasKey(ConfigurationManager::KeyDisableMasterRendering)) {
         _disableMasterRendering = confManager.value<bool>(
             ConfigurationManager::KeyDisableMasterRendering
+        );
+    }
+
+    if (confManager.hasKey(ConfigurationManager::KeyDisableSceneOnMaster)) {
+        _disableSceneOnMaster = confManager.value<bool>(
+            ConfigurationManager::KeyDisableSceneOnMaster
         );
     }
 
@@ -383,12 +391,20 @@ void RenderEngine::updateFade() {
 
 
 
-void RenderEngine::render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
+                          const glm::mat4& projectionMatrix)
+{
     LTRACE("RenderEngine::render(begin)");
-    _camera->sgctInternal.setViewMatrix(viewMatrix);
+    WindowWrapper& wrapper = OsEng.windowWrapper();
+
+    if (_disableSceneOnMaster && wrapper.isMaster()) {
+        _camera->sgctInternal.setViewMatrix(viewMatrix);
+    }
+    else {
+        _camera->sgctInternal.setViewMatrix(viewMatrix * sceneMatrix);
+    }
     _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
     
-    WindowWrapper& wrapper = OsEng.windowWrapper();
 
     if (!(wrapper.isMaster() && _disableMasterRendering) && !wrapper.isGuiWindow()) {
         _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);

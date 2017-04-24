@@ -22,32 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
-#define __OPENSPACE_CORE___TIMEMANAGER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GDAL___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GDAL___H__
 
-#include <vector>
-#include <deque>
-#include <openspace/network/messagestructures.h>
+#ifdef WIN32
+#pragma warning(push, 0)
+#endif // WIN32
 
-namespace openspace {
+#include <gdal_priv.h>
 
-class TimeManager {
-public:
-    void preSynchronization(double dt);
-    void addKeyframe(const datamessagestructures::TimeKeyframe& kf);
-    void removeKeyframesBefore(double timestamp);
-    void removeKeyframesAfter(double timestamp);
-    void clearKeyframes();
-    const std::deque<datamessagestructures::TimeKeyframe>& keyframes() const;
-private:
-    void consumeKeyframes(double dt);
-    std::deque<datamessagestructures::TimeKeyframe> _keyframes;
-    static bool compareKeyframeTimes(
-        const datamessagestructures::TimeKeyframe& a,
-        const datamessagestructures::TimeKeyframe& b);
-    double _latestConsumedTimestamp;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___TIMEMANAGER___H__
+#ifdef WIN32
+#pragma warning(pop)
+#endif // WIN32

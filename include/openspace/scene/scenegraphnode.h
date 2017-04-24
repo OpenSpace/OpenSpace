@@ -61,6 +61,7 @@ public:
     static const std::string KeyName;
     static const std::string KeyParentName;
     static const std::string KeyDependencies;
+    static const std::string KeyTag;
     
     SceneGraphNode();
     ~SceneGraphNode();
@@ -97,6 +98,8 @@ public:
 
     glm::dvec3 worldPosition() const;
     const glm::dmat3& worldRotationMatrix() const;
+    glm::dmat4 modelTransform() const;
+    glm::dmat4 inverseModelTransform() const;
     double worldScale() const;
 
     SceneGraphNode* parent() const;
@@ -140,6 +143,9 @@ private:
     glm::dvec3 _worldPositionCached;
     glm::dmat3 _worldRotationCached;
     double _worldScaleCached;
+
+    glm::dmat4 _modelTransformCached;
+    glm::dmat4 _inverseModelTransformCached;
 };
 
 } // namespace openspace

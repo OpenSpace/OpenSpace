@@ -64,6 +64,7 @@ const std::string SceneGraphNode::RootNodeName = "Root";
 const std::string SceneGraphNode::KeyName = "Name";
 const std::string SceneGraphNode::KeyParentName = "Parent";
 const std::string SceneGraphNode::KeyDependencies = "Dependencies";
+const std::string SceneGraphNode::KeyTag = "Tag";
 
 std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul::Dictionary& dictionary){
     openspace::documentation::testSpecificationAndThrow(
@@ -133,6 +134,25 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
         }
         result->addPropertySubOwner(result->_transform.scale.get());
         LDEBUG("Successfully created scale for '" << result->name() << "'");
+    }
+
+    if (dictionary.hasKey(KeyTag)) {
+        if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
+            std::string tagName = dictionary.value<std::string>(KeyTag);
+            if (!tagName.empty()) {
+                result->addTag(std::move(tagName));
+            }
+        } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+            ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
+            std::vector<std::string> keys = tagNames.keys();
+            std::string tagName;
+            for (const std::string& key : keys) {
+                tagName = tagNames.value<std::string>(key);
+                if (!tagName.empty()) {
+                    result->addTag(std::move(tagName));
+                }
+            }
+        }
     }
 
     LDEBUG("Successfully created SceneGraphNode '"
@@ -263,7 +283,17 @@ void SceneGraphNode::update(const UpdateData& data) {
 
     newUpdateData.modelTransform.translation = worldPosition();
     newUpdateData.modelTransform.rotation = worldRotationMatrix();
-    newUpdateData.modelTransform .scale = worldScale();
+    newUpdateData.modelTransform.scale = worldScale();
+
+    glm::dmat4 translation =
+        glm::translate(glm::dmat4(1.0), newUpdateData.modelTransform.translation);
+    glm::dmat4 rotation = glm::dmat4(newUpdateData.modelTransform.rotation);
+    glm::dmat4 scaling =
+        glm::scale(glm::dmat4(1.0), glm::dvec3(newUpdateData.modelTransform.scale,
+            newUpdateData.modelTransform.scale, newUpdateData.modelTransform.scale));
+
+    _modelTransformCached = translation * rotation * scaling;
+    _inverseModelTransformCached = glm::inverse(_modelTransformCached);
 
     if (_renderable && _renderable->isReady()) {
         if (data.doPerformanceMeasurement) {
@@ -474,6 +504,14 @@ glm::dvec3 SceneGraphNode::worldPosition() const
 const glm::dmat3& SceneGraphNode::worldRotationMatrix() const
 {
     return _worldRotationCached;
+}
+
+glm::dmat4 SceneGraphNode::modelTransform() const {
+    return _modelTransformCached;
+}
+
+glm::dmat4 SceneGraphNode::inverseModelTransform() const {
+    return _inverseModelTransformCached;
 }
 
 double SceneGraphNode::worldScale() const

@@ -49,7 +49,7 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
 
 SingleImageProvider::SingleImageProvider(const std::string& imagePath)
     : _imagePath(imagePath)
-	, _tile(nullptr, nullptr, Tile::Status::Unavailable)
+    , _tile(nullptr, nullptr, Tile::Status::Unavailable)
 {
     reset();
 }
@@ -87,7 +87,7 @@ void SingleImageProvider::reset() {
     tileTexture->uploadTexture();
     tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
-	_tile = Tile(tileTexture, tileMetaData, tileStatus);
+    _tile = Tile(tileTexture, tileMetaData, tileStatus);
 }
 
 int SingleImageProvider::maxLevel() {

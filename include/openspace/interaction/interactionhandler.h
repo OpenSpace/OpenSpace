@@ -65,6 +65,7 @@ public:
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
     void setInteractionMode(const std::string& interactionModeKey);
+    InteractionMode* interactionMode();
     
     void goToChunk(int x, int y, int level);
     void goToGeo(double latitude, double longitude);
@@ -72,7 +73,9 @@ public:
     void resetKeyBindings();
 
     void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
+    void removeKeyframesAfter(double timestamp);
     void clearKeyframes();
+    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
     void bindKeyLocal(
         Key key,
@@ -96,6 +99,8 @@ public:
     // Accessors
     ghoul::Dictionary getCameraStateDictionary();
     SceneGraphNode* const focusNode() const;
+    glm::dvec3 focusNodeToCameraVector() const;
+    glm::quat focusNodeToCameraRotation() const;
     Camera* const camera() const;
 	std::shared_ptr<InteractionMode> interactionmode();
     const InputState& inputState() const;

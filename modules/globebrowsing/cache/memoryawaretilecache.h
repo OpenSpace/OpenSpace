@@ -103,7 +103,7 @@ private:
     
     static MemoryAwareTileCache* _singleton;
     MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher> _tileCache;
-	static std::mutex _mutexLock;
+    static std::mutex _mutexLock;
 };
 
 } // namespace cache

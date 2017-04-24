@@ -39,6 +39,7 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
+#include <openspace/network/parallelconnection.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
@@ -66,6 +67,7 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/opengl/debugcontext.h>
 #include <ghoul/systemcapabilities/systemcapabilities>
 
 
@@ -133,7 +135,7 @@ OpenSpaceEngine::OpenSpaceEngine(
     , _settingsEngine(new SettingsEngine)
     , _timeManager(new TimeManager)
     , _downloadManager(nullptr)
-    , _parallelConnection(new ParallelConnection)
+    , _parallelConnection(std::make_unique<ParallelConnection>())
     , _windowWrapper(std::move(windowWrapper))
     , _globalPropertyNamespace(new properties::PropertyOwner(""))
     , _virtualPropertyManager(new VirtualPropertyManager)
@@ -150,7 +152,8 @@ OpenSpaceEngine::OpenSpaceEngine(
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
-    
+    _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
+
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
         std::make_unique<ghoul::TemplateFactory<Renderable>>(),
@@ -369,6 +372,10 @@ void OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
+    if (_engine->parallelConnection().status() != ParallelConnection::Status::Disconnected) {
+        _engine->parallelConnection().signalDisconnect();
+    }
+
     LTRACE("OpenSpaceEngine::destroy(begin)");
     for (const auto& func : _engine->_moduleCallbacks.deinitializeGL) {
         func();
@@ -901,6 +908,111 @@ void OpenSpaceEngine::configureLogging() {
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
+    const std::string key = ConfigurationManager::KeyOpenGLDebugContext;
+    if (_configurationManager->hasKey(key)) {
+        ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(key);
+        bool debug = dict.value<bool>(ConfigurationManager::PartActivate);
+
+        // Debug output is not available before 4.3
+        const ghoul::systemcapabilities::Version minVersion = { 4, 3, 0 };
+        if (OpenGLCap.openGLVersion() < minVersion) {
+            LINFO("OpenGL Debug context requested, but insufficient version available");
+            debug = false;
+        }
+
+        if (debug) {
+            using namespace ghoul::opengl::debug;
+
+            bool synchronous = true;
+            if (dict.hasKey(ConfigurationManager::PartSynchronous)) {
+                synchronous = dict.value<bool>(ConfigurationManager::PartSynchronous);
+            }
+
+            setDebugOutput(DebugOutput(debug), SynchronousOutput(synchronous));
+
+
+            if (dict.hasKey(ConfigurationManager::PartFilterIdentifier)) {
+                ghoul::Dictionary filterDict = dict.value<ghoul::Dictionary>(
+                    ConfigurationManager::PartFilterIdentifier
+                );
+
+                for (int i = 1; i <= filterDict.size(); ++i) {
+                    ghoul::Dictionary id = filterDict.value<ghoul::Dictionary>(
+                        std::to_string(i)
+                    );
+
+                    const unsigned int identifier = static_cast<unsigned int>(
+                        id.value<double>(
+                            ConfigurationManager::PartFilterIdentifierIdentifier
+                        )
+                    );
+
+                    const std::string s = id.value<std::string>(
+                        ConfigurationManager::PartFilterIdentifierSource
+                    );
+
+                    const std::string t = id.value<std::string>(
+                        ConfigurationManager::PartFilterIdentifierType
+                    );
+
+                    setDebugMessageControl(
+                        ghoul::from_string<Source>(s),
+                        ghoul::from_string<Type>(t),
+                        { identifier },
+                        Enabled::No
+                    );
+                }
+            }
+
+            if (dict.hasKey(ConfigurationManager::PartFilterSeverity)) {
+                ghoul::Dictionary filterDict = dict.value<ghoul::Dictionary>(
+                    ConfigurationManager::PartFilterIdentifier
+                );
+
+                for (int i = 1; i <= filterDict.size(); ++i) {
+                    std::string severity = filterDict.value<std::string>(
+                        std::to_string(i)
+                    );
+
+                    setDebugMessageControl(
+                        Source::DontCare,
+                        Type::DontCare,
+                        ghoul::from_string<Severity>(severity),
+                        Enabled::No
+                    );
+                }
+            }
+
+            auto callback = [](Source source, Type type, Severity severity,
+                unsigned int id, std::string message) -> void
+            {               
+                const std::string s = std::to_string(source);
+                const std::string t = std::to_string(type);
+
+                const std::string category =
+                    "OpenGL (" + s + ") [" + t + "] {" + std::to_string(id) + "}";
+                switch (severity) {
+                    case Severity::High:
+                        LERRORC(category, std::string(message));
+                        break;
+                    case Severity::Medium:
+                        LWARNINGC(category, std::string(message));
+                        break;
+                    case Severity::Low:
+                        LINFOC(category, std::string(message));
+                        break;
+                    case Severity::Notification:
+                        LDEBUGC(category, std::string(message));
+                        break;
+                    default:
+                        ghoul_assert(false, "Missing case label");
+                }
+            };
+            ghoul::opengl::debug::setDebugCallback(callback);
+        }
+    }
+
+
     LINFO("Initializing Rendering Engine");
     // @CLEANUP:  Remove the return statement and replace with exceptions ---abock
     _renderEngine->initializeGL();
@@ -1025,11 +1137,12 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     LTRACE("OpenSpaceEngine::postSynchronizationPreDraw(end)");
 }
 
-void OpenSpaceEngine::render(const glm::mat4& viewMatrix,
+void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
+                             const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
     LTRACE("OpenSpaceEngine::render(begin)");
-    _renderEngine->render(viewMatrix, projectionMatrix);
+    _renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
     
     for (const auto& func : _moduleCallbacks.render) {
         func();

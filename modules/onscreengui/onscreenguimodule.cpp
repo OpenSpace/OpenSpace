@@ -31,6 +31,7 @@
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/network/parallelconnection.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
@@ -59,7 +60,8 @@ OnScreenGUIModule::OnScreenGUIModule()
                         &(OsEng.windowWrapper()),
                         &(OsEng.settingsEngine()),
                         &(OsEng.interactionHandler()),
-                        &(OsEng.renderEngine())
+                        &(OsEng.renderEngine()),
+                        &(OsEng.parallelConnection())
                     };
                     return res;
                 }
@@ -118,11 +120,14 @@ OnScreenGUIModule::OnScreenGUIModule()
     );
 
     OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Render,
+        // This is done in the PostDraw phase so that it will render it on top of
+        // everything else in the case of fisheyes. With this being in the Render callback
+        // the GUI would be rendered on top of each of the cube faces
+        OpenSpaceEngine::CallbackOption::PostDraw,
         [](){
             WindowWrapper& wrapper = OsEng.windowWrapper();
             bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
-            if (wrapper.isMaster() && wrapper.isRegularRendering() && showGui ) {
+            if (wrapper.isMaster() && showGui ) {
                 glm::vec2 mousePosition = wrapper.mousePosition();
                 //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
                 glm::ivec2 windowSize = wrapper.currentWindowSize();

@@ -37,6 +37,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
+#include <modules/globebrowsing/tile/tileprovider/presentationslideprovider.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
@@ -89,7 +90,7 @@ void GlobeBrowsingModule::internalInitialize() {
             CpuCap.installedMainMemory() * 0.25 * 1024 * 1024); // 25% of total RAM
         addPropertySubOwner(GdalWrapper::ref());
 #endif // GLOBEBROWSING_USE_GDAL
-	});
+    });
   
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&]{
         cache::MemoryAwareTileCache::ref().clear();
@@ -118,7 +119,7 @@ void GlobeBrowsingModule::internalInitialize() {
     // Combining Tile Providers
     fTileProvider->registerClass<tileprovider::TileProviderByLevel>("ByLevel");
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>("ByIndex");
-
+    fTileProvider->registerClass<tileprovider::PresentationSlideProvider>("PresentationSlides");
     FactoryManager::ref().addFactory(std::move(fTileProvider));
 }
 

@@ -25,6 +25,7 @@
 #include <openspace/interaction/luaconsole.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/network/parallelconnection.h>
 
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -57,19 +58,13 @@ namespace openspace {
 LuaConsole::LuaConsole()
     : properties::PropertyOwner("LuaConsole")
     , _isVisible("isVisible", "Is Visible", false)
-    , _remoteScripting(true)
+    , _remoteScripting("remoteScripting", "Remote scripting", false)
     , _inputPosition(0)
     , _activeCommand(0)
     , _autoCompleteInfo({NoAutoComplete, false, ""})
 {
-    _isVisible.onChange([this](){
-        if (_isVisible) {
-            _remoteScripting = false;
-        } else {
-            _remoteScripting = OsEng.parallelConnection().isHost();
-        }
-    });
     addProperty(_isVisible);
+    addProperty(_remoteScripting);
 }
 
 void LuaConsole::initialize() {
@@ -164,7 +159,19 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     if (key == CommandInputButton) {
         // Button left of 1 and above TAB
         // How to deal with different keyboard languages? ---abock
-        _isVisible = !_isVisible;
+        if (_isVisible) {
+            if (_remoteScripting) {
+                _remoteScripting = false;
+            } else {
+                _isVisible = false;
+            }
+        } else {
+            _isVisible = true;
+            if (OsEng.parallelConnection().status() == ParallelConnection::Status::Host) {
+                _remoteScripting = true;
+            }
+        }
+        
         return true;
     }
 
