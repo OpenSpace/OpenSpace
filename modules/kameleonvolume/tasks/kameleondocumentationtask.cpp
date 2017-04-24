@@ -109,7 +109,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     file.exceptions(~std::ofstream::goodbit);
     file.open(_outputPath);
 
- 	std::stringstream html;
+     std::stringstream html;
         html << "<!DOCTYPE html>\n"
             << "<html>\n"
             << "\t<head>\n"

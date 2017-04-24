@@ -333,7 +333,9 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
                         }
                         
                         if (beforeDist < 1.0 || nextDist < 1.0) {
-                            toDelete.push_back(std::distance(captures.begin(), it));
+                            toDelete.push_back(
+                                static_cast<int>(std::distance(captures.begin(), it))
+                            );
                         }
                     }
                 }
@@ -341,7 +343,7 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
                 for (size_t i = 0; i < toDelete.size(); ++i) {
                     // We have to subtract i here as we already have deleted i value
                     // before this and we need to adjust the location
-                    int v = toDelete[i] - i;
+                    int v = toDelete[i] - static_cast<int>(i);
                     captures.erase(captures.begin() + v);
                 }
 

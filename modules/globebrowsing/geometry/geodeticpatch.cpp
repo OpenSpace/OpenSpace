@@ -27,6 +27,8 @@
 #include <modules/globebrowsing/geometry/angle.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 
+#include <ghoul/misc/assert.h>
+
 namespace openspace {
 namespace globebrowsing {
 
@@ -90,6 +92,7 @@ Geodetic2 GeodeticPatch::getCorner(Quad q) const {
         case NORTH_EAST: return Geodetic2(maxLat(), maxLon());// northEastCorner();
         case SOUTH_WEST: return Geodetic2(minLat(), minLon());// southWestCorner();
         case SOUTH_EAST: return Geodetic2(minLat(), maxLon());// southEastCorner();
+        default:         ghoul_assert(false, "Missing case label");
     }
 }
 

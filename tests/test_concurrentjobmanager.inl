@@ -151,7 +151,4 @@ TEST_F(ConcurrentJobManagerTest, JobCreation) {
     {
         auto product = finishedJob->product();
     }
-    
-    int a;
 }
-

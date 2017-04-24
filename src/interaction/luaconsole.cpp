@@ -25,6 +25,7 @@
 #include <openspace/interaction/luaconsole.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/network/parallelconnection.h>
 
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -42,6 +43,13 @@ namespace {
 
     const int NoAutoComplete = -1;
 
+    // A high number is chosen since we didn't have a version number before
+    // any small number might also be equal to the console history length
+
+    // @CPP17
+    //const uint64_t CurrentVersion = 0xFEEE'FEEE'0000'0001;
+    const uint64_t CurrentVersion = 0xFEEEFEEE00000001;
+
     const openspace::Key CommandInputButton = openspace::Key::GraveAccent;
 } // namespace
 
@@ -50,19 +58,13 @@ namespace openspace {
 LuaConsole::LuaConsole()
     : properties::PropertyOwner("LuaConsole")
     , _isVisible("isVisible", "Is Visible", false)
-    , _remoteScripting(true)
+    , _remoteScripting("remoteScripting", "Remote scripting", false)
     , _inputPosition(0)
     , _activeCommand(0)
     , _autoCompleteInfo({NoAutoComplete, false, ""})
 {
-    _isVisible.onChange([this](){
-        if (_isVisible) {
-            _remoteScripting = false;
-        } else {
-            _remoteScripting = OsEng.parallelConnection().isHost();
-        }
-    });
     addProperty(_isVisible);
+    addProperty(_remoteScripting);
 }
 
 void LuaConsole::initialize() {
@@ -71,27 +73,43 @@ void LuaConsole::initialize() {
         "",
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
+   
+    try {
+        if (FileSys.fileExists(filename)) {
+            std::ifstream file;
+            file.exceptions(std::ofstream::badbit);
+            file.open(filename, std::ios::binary | std::ios::in);
 
-    if (FileSys.fileExists(filename)) {
-        std::ifstream file;
-        file.exceptions(std::ofstream::badbit);
-        file.open(filename, std::ios::binary | std::ios::in);
+            // Read the number of commands from the history
+            uint64_t version;
+            file.read(reinterpret_cast<char*>(&version), sizeof(uint64_t));
 
-        // Read the number of commands from the history
-        int64_t nCommands;
-        file.read(reinterpret_cast<char*>(&nCommands), sizeof(int64_t));
+            if (version != CurrentVersion) {
+                LWARNINGC(
+                    "LuaConsole",
+                    "Outdated console history version: " << version
+                );
+            }
+            else {
+                int64_t nCommands;
+                file.read(reinterpret_cast<char*>(&nCommands), sizeof(int64_t));
 
-        for (int64_t i = 0; i < nCommands; ++i) {
-            int64_t length;
-            file.read(reinterpret_cast<char*>(&length), sizeof(int64_t));
+                // @TODO: Add an upper limit on the number of commands so that the history
+                // can't grow without bounds
+                for (int64_t i = 0; i < nCommands; ++i) {
+                    int64_t length;
+                    file.read(reinterpret_cast<char*>(&length), sizeof(int64_t));
 
-            std::vector<char> tmp(length);
-            file.read(tmp.data(), length);
-            //tmp[length] = '\0';
-            _commandsHistory.emplace_back(std::string(tmp.begin(), tmp.end()));
+                    std::vector<char> tmp(length);
+                    file.read(tmp.data(), length);
+                    _commandsHistory.emplace_back(std::string(tmp.begin(), tmp.end()));
+                }
+            }
+            file.close();
         }
-
-        file.close();
+    }
+    catch (std::exception& e) {
+        LERRORC("LuaConsole", e.what());
     }
 
     _commands = _commandsHistory;
@@ -117,6 +135,9 @@ void LuaConsole::deinitialize() {
 
     std::ofstream file(filename);
 
+    uint64_t version = CurrentVersion;
+    file.write(reinterpret_cast<const char*>(&version), sizeof(uint64_t));
+
     int64_t nCommands = _commandsHistory.size();
     file.write(reinterpret_cast<const char*>(&nCommands), sizeof(int64_t));
 
@@ -138,7 +159,19 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     if (key == CommandInputButton) {
         // Button left of 1 and above TAB
         // How to deal with different keyboard languages? ---abock
-        _isVisible = !_isVisible;
+        if (_isVisible) {
+            if (_remoteScripting) {
+                _remoteScripting = false;
+            } else {
+                _isVisible = false;
+            }
+        } else {
+            _isVisible = true;
+            if (OsEng.parallelConnection().status() == ParallelConnection::Status::Host) {
+                _remoteScripting = true;
+            }
+        }
+        
         return true;
     }
 
@@ -297,7 +330,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             std::transform(
                 command.begin(), command.end(),
                 std::back_inserter(commandLowerCase),
-                ::tolower
+                [](char v) { return static_cast<char>(tolower(v)); }
             );
                 
             std::string initialValueLowerCase;
@@ -305,7 +338,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
                 _autoCompleteInfo.initialValue.begin(),
                 _autoCompleteInfo.initialValue.end(),
                 std::back_inserter(initialValueLowerCase),
-                ::tolower
+                [](char v) { return static_cast<char>(tolower(v)); }
             );
     
             bool correctCommand =

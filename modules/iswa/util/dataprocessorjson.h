@@ -32,7 +32,7 @@ namespace openspace {
 class DataProcessorJson : public DataProcessor {
 public:
     DataProcessorJson();
-    ~DataProcessorJson();
+    virtual ~DataProcessorJson();
 
     virtual std::vector<std::string> readMetadata(std::string data, glm::size3_t& dimensions) override;
     virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) override;

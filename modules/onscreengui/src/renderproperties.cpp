@@ -46,13 +46,33 @@ void renderTooltip(Property* prop) {
     }
 }
 
-void executeScript(const std::string& id, const std::string& value) {
+void executeScriptSingle(const std::string& id, const std::string& value) {
     std::string script =
         "openspace.setPropertyValueSingle('" + id + "', " + value + ");";
     OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::Yes);
 }
 
-void renderBoolProperty(Property* prop, const std::string& ownerName) {
+void executeScriptGroup(const std::string& id, const std::string& value) {
+    std::string script =
+        "openspace.setPropertyValue('" + id + "', " + value + ");";
+    OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::Yes);
+}
+
+void executeScript(const std::string& id, const std::string& value,
+    IsRegularProperty isRegular)
+{
+    if (isRegular) {
+        executeScriptSingle(id, value);
+    }
+    else {
+        executeScriptGroup(id, value);
+    }
+}
+
+void renderBoolProperty(Property* prop, const std::string& ownerName,
+                        IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     BoolProperty* p = static_cast<BoolProperty*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
@@ -62,12 +82,15 @@ void renderBoolProperty(Property* prop, const std::string& ownerName) {
     renderTooltip(prop);
 
     if (value != p->value()) {
-        executeScript(p->fullyQualifiedIdentifier(), value ? "true" : "false");
+        executeScript(p->fullyQualifiedIdentifier(), value ? "true" : "false", isRegular);
     }
     ImGui::PopID();
 }
 
-void renderOptionProperty(Property* prop, const std::string& ownerName) {
+void renderOptionProperty(Property* prop, const std::string& ownerName,
+                          IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     OptionProperty* p = static_cast<OptionProperty*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
@@ -94,12 +117,15 @@ void renderOptionProperty(Property* prop, const std::string& ownerName) {
     }
     }
     if (value != p->value()) {
-        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value), isRegular);
     }
     ImGui::PopID();
 }
 
-void renderSelectionProperty(Property* prop, const std::string& ownerName) {
+void renderSelectionProperty(Property* prop, const std::string& ownerName,
+                             IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     SelectionProperty* p = static_cast<SelectionProperty*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
@@ -130,14 +156,17 @@ void renderSelectionProperty(Property* prop, const std::string& ownerName) {
                 parameters += std::to_string(i) + ",";
             }
             parameters += "}";
-            executeScript(p->fullyQualifiedIdentifier(), parameters);
+            executeScript(p->fullyQualifiedIdentifier(), parameters, isRegular);
         }
         ImGui::TreePop();
     }
     ImGui::PopID();
 }
 
-void renderStringProperty(Property* prop, const std::string& ownerName) {
+void renderStringProperty(Property* prop, const std::string& ownerName,
+                          IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     StringProperty* p = static_cast<StringProperty*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
@@ -161,32 +190,42 @@ void renderStringProperty(Property* prop, const std::string& ownerName) {
 
 
     if (hasNewValue) {
-        executeScript(p->fullyQualifiedIdentifier(), "'" + std::string(buffer) + "'");
+        executeScript(
+            p->fullyQualifiedIdentifier(),
+            "'" + std::string(buffer) + "'",
+            isRegular
+        );
     }
 
     ImGui::PopID();
 }
 
-void renderDoubleProperty(properties::Property* prop, const std::string& ownerName) {
+void renderDoubleProperty(properties::Property* prop, const std::string& ownerName,
+                          IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     DoubleProperty* p = static_cast<DoubleProperty*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
-    float value = *p;
-    float min = p->minValue();
-    float max = p->maxValue();
+    float value = static_cast<float>(*p);
+    float min = static_cast<float>(p->minValue());
+    float max = static_cast<float>(p->maxValue());
 
     ImGui::SliderFloat(name.c_str(), &value, min, max, "%.5f");
     renderTooltip(prop);
 
     if (value != static_cast<float>(p->value())) {
-        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value), isRegular);
     }
 
     ImGui::PopID();
 }
 
-void renderIntProperty(Property* prop, const std::string& ownerName) {
+void renderIntProperty(Property* prop, const std::string& ownerName,
+                       IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     IntProperty* p = static_cast<IntProperty*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
@@ -199,20 +238,23 @@ void renderIntProperty(Property* prop, const std::string& ownerName) {
     renderTooltip(prop);
 
     if (value != p->value()) {
-        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value), isRegular);
     }
 
     ImGui::PopID();
 }
 
-void renderIVec2Property(Property* prop, const std::string& ownerName) {
+void renderIVec2Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     IVec2Property* p = static_cast<IVec2Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
     
     IVec2Property::ValueType value = *p;
-    float min = std::min(p->minValue().x, p->minValue().y);
-    float max = std::max(p->maxValue().x, p->maxValue().y);
+    int min = std::min(p->minValue().x, p->minValue().y);
+    int max = std::max(p->maxValue().x, p->maxValue().y);
     ImGui::SliderInt2(
         name.c_str(),
         &value.x,
@@ -224,21 +266,25 @@ void renderIVec2Property(Property* prop, const std::string& ownerName) {
     if (value != p->value()) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}",
+            isRegular
         );
     }
     
     ImGui::PopID();
 }
 
-void renderIVec3Property(Property* prop, const std::string& ownerName) {
+void renderIVec3Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     IVec3Property* p = static_cast<IVec3Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
     
     IVec3Property::ValueType value = *p;
-    float min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
-    float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
+    int min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
+    int max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
     
     ImGui::SliderInt3(
         name.c_str(),
@@ -252,22 +298,26 @@ void renderIVec3Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "," +
-            std::to_string(value.z) + "}"
+            std::to_string(value.z) + "}",
+            isRegular
         );
     }
     ImGui::PopID();
 }
 
-void renderIVec4Property(Property* prop, const std::string& ownerName) {
+void renderIVec4Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     IVec4Property* p = static_cast<IVec4Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
     
     IVec4Property::ValueType value = *p;
-    float min = std::min(std::min(std::min(
+    int min = std::min(std::min(std::min(
         p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w
     );
-    float max = std::max(std::max(std::max(
+    int max = std::max(std::max(std::max(
         p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w
     );
     
@@ -283,15 +333,19 @@ void renderIVec4Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +
-            std::to_string(value.y) + "," +
-            std::to_string(value.z) + "," +
-            std::to_string(value.w) + "}"
+                std::to_string(value.y) + "," +
+                std::to_string(value.z) + "," +
+                std::to_string(value.w) + "}",
+            isRegular
         );
     }
     ImGui::PopID();
 }
 
-void renderFloatProperty(Property* prop, const std::string& ownerName) {
+void renderFloatProperty(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     FloatProperty* p = static_cast<FloatProperty*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
@@ -303,13 +357,16 @@ void renderFloatProperty(Property* prop, const std::string& ownerName) {
     renderTooltip(prop);
 
     if (value != p->value()) {
-        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value));
+        executeScript(p->fullyQualifiedIdentifier(), std::to_string(value), isRegular);
     }
 
     ImGui::PopID();
 }
 
-void renderVec2Property(Property* prop, const std::string& ownerName) {
+void renderVec2Property(Property* prop, const std::string& ownerName,
+                        IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     Vec2Property* p = static_cast<Vec2Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
@@ -329,14 +386,18 @@ void renderVec2Property(Property* prop, const std::string& ownerName) {
     if (value != p->value()) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderVec3Property(Property* prop, const std::string& ownerName) {
+void renderVec3Property(Property* prop, const std::string& ownerName,
+                        IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     Vec3Property* p = static_cast<Vec3Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
@@ -359,15 +420,19 @@ void renderVec3Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +
-            std::to_string(value.y) + "," +
-            std::to_string(value.z) + "}"
+                std::to_string(value.y) + "," +
+                std::to_string(value.z) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderVec4Property(Property* prop, const std::string& ownerName) {
+void renderVec4Property(Property* prop, const std::string& ownerName,
+                        IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     Vec4Property* p = static_cast<Vec4Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
@@ -391,23 +456,27 @@ void renderVec4Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +
-            std::to_string(value.y) + "," +
-            std::to_string(value.z) + "," +
-            std::to_string(value.w) + "}"
+                std::to_string(value.y) + "," +
+                std::to_string(value.z) + "," +
+                std::to_string(value.w) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderDVec2Property(Property* prop, const std::string& ownerName) {
+void renderDVec2Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     DVec2Property* p = static_cast<DVec2Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     glm::vec2 value = glm::dvec2(*p);
-    float min = std::min(p->minValue().x, p->minValue().y);
-    float max = std::max(p->maxValue().x, p->maxValue().y);
+    float min = static_cast<float>(std::min(p->minValue().x, p->minValue().y));
+    float max = static_cast<float>(std::max(p->maxValue().x, p->maxValue().y));
     ImGui::SliderFloat2(
         name.c_str(),
         &value.x,
@@ -420,21 +489,29 @@ void renderDVec2Property(Property* prop, const std::string& ownerName) {
     if (glm::dvec2(value) != p->value()) {
         executeScript(
             p->fullyQualifiedIdentifier(),
-            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}"
+            "{" + std::to_string(value.x) + "," + std::to_string(value.y) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderDVec3Property(Property* prop, const std::string& ownerName) {
+void renderDVec3Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     DVec3Property* p = static_cast<DVec3Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     glm::vec3 value = glm::dvec3(*p);
-    float min = std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z);
-    float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
+    float min = static_cast<float>(
+        std::min(std::min(p->minValue().x, p->minValue().y), p->minValue().z)
+    );
+    float max = static_cast<float>(
+        std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z)
+    );
 
     bool changed = ImGui::SliderFloat3(
         name.c_str(),
@@ -449,24 +526,34 @@ void renderDVec3Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +
-            std::to_string(value.y) + "," +
-            std::to_string(value.z) + "}"
+                std::to_string(value.y) + "," +
+                std::to_string(value.z) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderDVec4Property(Property* prop, const std::string& ownerName) {
+void renderDVec4Property(Property* prop, const std::string& ownerName,
+                         IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     DVec4Property* p = static_cast<DVec4Property*>(prop);
     std::string name = p->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     glm::vec4 value = glm::dvec4(*p);
-    float min = std::min(std::min(std::min(
-        p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w);
-    float max = std::max(std::max(std::max(
-        p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w);
+    float min = static_cast<float>(
+        std::min(std::min(std::min(
+            p->minValue().x, p->minValue().y), p->minValue().z), p->minValue().w
+        )
+    );
+    float max = static_cast<float>(
+        std::max(std::max(std::max(
+            p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w
+        )
+    );
 
     ImGui::SliderFloat4(
         name.c_str(),
@@ -481,22 +568,26 @@ void renderDVec4Property(Property* prop, const std::string& ownerName) {
         executeScript(
             p->fullyQualifiedIdentifier(),
             "{" + std::to_string(value.x) + "," +
-            std::to_string(value.y) + "," +
-            std::to_string(value.z) + "," +
-            std::to_string(value.w) + "}"
+                std::to_string(value.y) + "," +
+                std::to_string(value.z) + "," +
+                std::to_string(value.w) + "}",
+            isRegular
         );
     }
 
     ImGui::PopID();
 }
 
-void renderTriggerProperty(Property* prop, const std::string& ownerName) {
+void renderTriggerProperty(Property* prop, const std::string& ownerName,
+                           IsRegularProperty isRegular)
+{
+    ghoul_assert(prop, "prop must not be nullptr");
     std::string name = prop->guiName();
     ImGui::PushID((ownerName + "." + name).c_str());
 
     bool pressed = ImGui::Button(name.c_str());
     if (pressed) {
-        executeScript(prop->fullyQualifiedIdentifier(), "nil");
+        executeScript(prop->fullyQualifiedIdentifier(), "nil", isRegular);
     }
     renderTooltip(prop);
 

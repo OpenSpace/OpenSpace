@@ -339,6 +339,16 @@ documentation::Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
+            ConfigurationManager::KeyDisableSceneOnMaster,
+            new BoolVerifier,
+            "Toggles whether a potential scene transformation matrix, for example as "
+            "specified in an SGCT configuration file, should apply to the master node. "
+            "With some configurations, applying such a transformation complicates the "
+            "interaction and it is thus desired to disable the transformation. The "
+            "default is false.",
+            Optional::Yes
+        },
+        {
             ConfigurationManager::KeyHttpProxy,
             new TableVerifier({
                 {
@@ -375,7 +385,80 @@ documentation::Documentation ConfigurationManager::Documentation() {
             "This defines the use for a proxy when fetching data over http."
             "No proxy will be used if this is left out.",
             Optional::Yes
-            }
+        },
+        {
+            ConfigurationManager::KeyOpenGLDebugContext,
+            new TableVerifier({
+                {
+                    ConfigurationManager::PartActivate,
+                    new BoolVerifier,
+                    "Determines whether the OpenGL context should be a debug context",
+                    Optional::No
+                },
+                {
+                    ConfigurationManager::PartSynchronous,
+                    new BoolVerifier,
+                    "Determines whether the OpenGL debug callbacks are performed "
+                    "synchronously. If set to <True> the callbacks are in the same thead "
+                    "as the context and in the scope of the OpenGL function that "
+                    "triggered the message. The default value is <True>.",
+                    Optional::Yes
+                },
+                {
+                    ConfigurationManager::PartFilterIdentifier,
+                    new TableVerifier({{
+                        "*",
+                        new TableVerifier({
+                            {
+                                ConfigurationManager::PartFilterIdentifierIdentifier,
+                                new IntVerifier,
+                                "The identifier that is to be filtered",
+                                Optional::No
+                            },
+                            {
+                                ConfigurationManager::PartFilterIdentifierSource,
+                                new StringInListVerifier({
+                                    // Taken from ghoul::debugcontext.cpp
+                                    "API", "Window System", "Shader Compiler",
+                                    "Third Party", "Application", "Other", "Don't care"
+                                }),
+                                "The source of the identifier to be filtered",
+                                Optional::No
+                            },
+                            {
+                                ConfigurationManager::PartFilterIdentifierType,
+                                new StringInListVerifier({
+                                    // Taken from ghoul::debugcontext.cpp
+                                    "Error", "Deprecated", "Undefined", "Portability",
+                                    "Performance", "Marker", "Push group", "Pop group",
+                                    "Other", "Don't care"
+                                }),
+                                "The type of the identifier to be filtered"
+                            }
+                        }),
+                        "Individual OpenGL debug message identifiers"
+                    }}),
+                    "A list of OpenGL debug messages identifiers that are filtered",
+                    Optional::Yes
+                },
+                {
+                    ConfigurationManager::PartFilterSeverity,
+                    new TableVerifier({
+                        {
+                            "*",
+                            new StringInListVerifier(
+                                // ghoul::debugcontext.cpp
+                                { "High", "Medium", "Low", "Notification" }
+                            )
+                        }
+                    }),
+                    "A list of severities that can are filtered out",
+                    Optional::Yes
+                }
+            }),
+            "Determines the settings for the creation of an OpenGL debug context.",
+            Optional::Yes
+        }
         }
     };
 };

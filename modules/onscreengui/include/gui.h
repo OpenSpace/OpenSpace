@@ -32,6 +32,7 @@
 #include <modules/onscreengui/include/guiorigincomponent.h>
 #include <modules/onscreengui/include/guitimecomponent.h>
 #include <modules/onscreengui/include/guiiswacomponent.h>
+#include <modules/onscreengui/include/guiparallelcomponent.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/properties/property.h>
 
@@ -69,8 +70,10 @@ public:
     GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _property;
     GuiPropertyComponent _screenSpaceProperty;
+    GuiPropertyComponent _virtualProperty;
     GuiTimeComponent _time;
     GuiIswaComponent _iswa;
+    GuiParallelComponent _parallel;
 
 private:
     void renderAndUpdatePropertyVisibility();
