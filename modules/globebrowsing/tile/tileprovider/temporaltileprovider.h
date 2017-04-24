@@ -22,9 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifdef GLOBEBROWSING_USE_GDAL
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
+
+#ifdef GLOBEBROWSING_USE_GDAL
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
@@ -315,5 +316,6 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
 #endif // GLOBEBROWSING_USE_GDAL
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
