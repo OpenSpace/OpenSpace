@@ -29,6 +29,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <modules/globebrowsing/chunk/chunknode.h>
 
+#include <ghoul/io/texture/texturereader.h>
+
 #include <fstream>
 #include <gdal_priv.h>
 #include "ogrsf_frmts.h"
@@ -43,7 +45,8 @@ namespace {
 	const char* keyRenderable			= "Renderable";
 	const char* keyType					= "Type";
 	const char* keyMultiModelGeometry	= "MultiModelGeometry";
-	const char* keyName = "Name";
+	const char* keyName					= "Name";
+	const char* keyPathToTexture		= "PathToTexture";
 }
 
 namespace openspace {
@@ -81,8 +84,7 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 
 	// Save the abspath because it changes when leaving the constructor.
 	_absModelPath = absPath(_modelPath);
-
-	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>();
+	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
 }
 
 bool RenderableRoverSurface::initialize() {
@@ -91,6 +93,11 @@ bool RenderableRoverSurface::initialize() {
 
 	_globe = (globebrowsing::RenderableGlobe*)parent->renderable();
 	_chunkedLodGlobe = _globe->chunkedLodGlobe();
+
+	RenderEngine& renderEngine = OsEng.renderEngine();
+	_programObject = renderEngine.buildRenderProgram("RenderableRoverSurface",
+		"${MODULE_BASE}/shaders/model_vs.glsl",
+		"${MODULE_BASE}/shaders/model_fs.glsl");
 
 	return true;
 }
@@ -104,12 +111,52 @@ bool RenderableRoverSurface::isReady() const {
 }
 
 void RenderableRoverSurface::render(const RenderData & data) {
+	for (auto model : _models) {
+		//if(model->_programObject != nullptr) {
+
+			//const clock_t begin_time = clock();
+
+				_programObject->activate();
+
+				glm::dmat4 globeTransform = _globe->modelTransform();
+				glm::dvec3 positionWorldSpace = globeTransform * glm::dvec4(model->cartesianPosition, 1.0);
+
+				glm::dmat4 modelTransform =
+					glm::translate(glm::dmat4(1.0), positionWorldSpace) *
+					glm::dmat4(data.modelTransform.rotation);
+
+				glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+				glm::vec3 directionToSun = glm::normalize(_sunPos - positionWorldSpace);
+				glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
+
+				_programObject->setUniform("transparency", 1.0f);
+				_programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
+				_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+				_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+				_programObject->setUniform("performShading", false);
+				_programObject->setUniform("fading", 1.0f);			
+
+				model->geometry->setUniforms(*_programObject);
+
+				ghoul::opengl::TextureUnit unit;
+				unit.activate();
+				model->texture->bind();
+				_programObject->setUniform("texture1", unit);
+				model->geometry->render();
+
+				_programObject->deactivate();
+			
+		//}
+	}
+
 }
 
 void RenderableRoverSurface::update(const UpdateData & data) {
-	_cachingModelProvider->update();
+	_cachingModelProvider->update(this);
 	//_pathChunks.clear();
 
+	_models.clear();
+	_sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 	// Loop through all subsites.
 	for (auto i : _subSites) {
 
@@ -134,16 +181,41 @@ void RenderableRoverSurface::update(const UpdateData & data) {
 				for (auto fileName : fileNames) {
 					ghoul::Dictionary modelDictionary;
 					std::string pathToGeometry = _modelPath + "site" + i.site + "/" + "drive" + i.drive + "/" + fileName + ".obj";
+
+					std::string tempFileName = fileName;
+					tempFileName[13] = 'R';
+					tempFileName[14] = 'A';
+					tempFileName[15] = 'S';
+
+					std::string pathToTexture = _absModelPath + "textures\\" + "site" + i.site + "\\" + "drive" + i.drive +
+						"\\" + tempFileName + ".png";
+
 					modelDictionary.setValue(keyGeometryFile, pathToGeometry);
 					modelDictionary.setValue(keyType, _multiModelGeometry);
 					modelDictionary.setValue(keyName, fileName);
+					modelDictionary.setValue(keyPathToTexture, pathToTexture);
 
 					Model model;
 					model.fileName = fileName;
 					model.tileHashKey = hashKey;
-					std::shared_ptr<Model> theModel = std::make_shared<Model>(model);
+					model.lat = i.lat;
+					model.lon = i.lon;
+					std::shared_ptr<Model> theModel = std::make_shared<Model>(std::move(model));
 
-					_cachingModelProvider->getModel(modelDictionary, theModel);
+					std::vector<std::shared_ptr<Model>> models = _cachingModelProvider->getModels(modelDictionary, theModel);
+
+					//createProgramObjects(models);
+					calculateSurfacePosition(models);
+
+					for (auto i : models) {
+						//i->geometry->initialize(this);
+
+						_models.push_back(i);
+							
+					}
+
+
+					
 				}
 			}
 		}
@@ -208,6 +280,39 @@ void RenderableRoverSurface::extractCoordinates() {
 		OGRFeature::DestroyFeature(poFeature);
 	}
 	GDALClose(poDS);
+}
+
+void RenderableRoverSurface::createProgramObjects(std::vector<std::shared_ptr<Model>> models) {
+
+	for (auto model : models) {
+		model->geometry->initialize(this);
+		
+		/*if (model->_programObject) {
+			OsEng.renderEngine().removeRenderProgram(model->_programObject);
+			model->_programObject = nullptr;
+		}*/
+		//const clock_t begin_time = clock();
+
+		if(model->_programObject == nullptr) {
+			RenderEngine& renderEngine = OsEng.renderEngine();
+			model->_programObject = renderEngine.buildRenderProgram("RenderableRoverSurface",
+				"${MODULE_BASE}/shaders/model_vs.glsl",
+				"${MODULE_BASE}/shaders/model_fs.glsl");
+		}
+		//LERROR("FINISHED IN : " << float(clock() - begin_time) / CLOCKS_PER_SEC);
+
+	}
+}
+
+void RenderableRoverSurface::calculateSurfacePosition(std::vector<std::shared_ptr<Model>> models) {
+	for (auto i : models) {
+		globebrowsing::Geodetic2 geoTemp = globebrowsing::Geodetic2{ i->lat, i->lon } / 180 * glm::pi<double>();
+		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geoTemp);
+		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
+
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geoTemp, heightToSurface + 2.0 };
+		i->cartesianPosition  = _globe->ellipsoid().cartesianPosition(geo3);
+	}
 }
 
 std::vector<std::string> RenderableRoverSurface::extractFileNames(const std::string filePath) {
