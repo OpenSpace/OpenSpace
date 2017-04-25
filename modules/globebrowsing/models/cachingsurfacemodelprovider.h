@@ -39,19 +39,21 @@ using ModelCache = cache::LRUCache<TileIndex::TileHashKey, std::vector<std::shar
 
 class CachingSurfaceModelProvider {
 public:
-	CachingSurfaceModelProvider();
+	CachingSurfaceModelProvider(Renderable* parent);
 
-	std::vector<std::shared_ptr<Model>> getModel(const ghoul::Dictionary& dictionary, const std::shared_ptr<Model> model);
+	std::vector<std::shared_ptr<Model>> getModels(const ghoul::Dictionary& dictionary, const std::shared_ptr<Model> model);
 
-	void update();
+	void update(Renderable* parent);
 	void reset();
 
 private:
 	std::shared_ptr<AsyncSurfaceModelProvider> _asyncSurfaceModelProvider;
 	std::shared_ptr<ModelCache> _modelCache;
 
-	void initModelsFromLoadedData();
+	void initModelsFromLoadedData(Renderable* parent);
 	void clearRequestQueue();
+	
+	Renderable* _parent;
 };
 
 } // namespace globebrowsing
