@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTION_TILE_PROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTION_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <ghoul/opengl/programobject.h>
@@ -118,4 +118,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTION_TILE_PROVIDER___H__

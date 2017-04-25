@@ -46,7 +46,7 @@ return {
         Parent = "Nix",
         Renderable = {
             Type = "RenderablePlane",
-            Size = 1.0E6.3,
+            Size = 10^6.3,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Nix-Text.png"

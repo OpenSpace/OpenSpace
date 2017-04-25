@@ -58,7 +58,7 @@ return {
         Parent = "Callisto",
         Renderable = {
             Type = "RenderablePlane",
-            Size = 1.0E7.4,
+            Size = 10^7.4,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Callisto-Text.png",
