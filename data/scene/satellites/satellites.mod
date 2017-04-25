@@ -33,8 +33,15 @@ function getNumLinesInFile(filename)
   return ctr
 end
 
+function isEmpty(s)
+  return s == nil or s == ''
+end
+
 --Check format of a set of 3 TLE file lines and return nonzero if there is a format error
 function checkTleFileFormat(lineArr)
+  if isEmpty(lineArr[1]) or isEmpty(lineArr[2]) or isEmpty(lineArr[3]) then
+    return -1
+  end
   if string.sub(lineArr[2], 1, 2) ~= "1 " then
     return -1
   end
@@ -168,13 +175,17 @@ for sOrbit in values(satelliteGroups) do
         table.insert(modElements, getSatTrail(filenameSansExt .. "_" .. title,
                      pathFromScenegraphParent, n, per, sOrbit.trailColor))
       else
-        fileErr = fileErr .. filename .. " " .. n .. ","
+        fileErr = " TLE file syntax error on line " .. n .. ": " .. sOrbit.path
+        break
       end
     end
   else
-    fileErr = fileErr .. " Invalid file " .. sOrbit.path .. ","
+    fileErr = " File not found: " .. sOrbit.path
+    break
   end
 end
+assert(fileErr == "", fileErr)
+
 
 if (fileErr == "") then
   return modElements
