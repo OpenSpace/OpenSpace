@@ -128,36 +128,11 @@ TouchModule::TouchModule()
 
 		if (gotNewInput() && OsEng.windowWrapper().isMaster()) {
 			touch->update(list, lastProcessed);
-
-			// for debugging
-			//std::this_thread::sleep_for(std::chrono::seconds(1));
-			std::ostringstream os;
-			for (const TuioCursor &j : list) { // go through each item
-				std::list<TuioPoint> path = j.getPath();
-
-				TuioTime lastTime = find_if(
-					lastProcessed.begin(),
-					lastProcessed.end(),
-					[&j](const Point& p) { return p.first == j.getSessionID(); }
-				)->second.getTuioTime();
-
-				std::list<TuioPoint>::iterator lastPoint = find_if(
-					path.begin(),
-					path.end(),
-					[&lastTime](const TuioPoint& c) { return lastTime == c.getTuioTime();  });
-
-				int count = -1;
-				for (; lastPoint != path.end(); ++lastPoint) // here we can access all elements that are to be processed
-					count++;
-
-				os << ", Id: " << j.getCursorID() << ", path size: " << j.getPath().size() << ", To Process: " << count;
-			}
-			//LINFO("List size: " << list.size() << os.str() << "\n");
-			os.clear();
-
+			//std::this_thread::sleep_for(std::chrono::seconds(1)); // for debugging
 		}
-		else if (list.size() == 0)
+		else if (list.size() == 0) {
 			touch->clear();
+		}
 
 		// update lastProcessed
 		lastProcessed.clear();

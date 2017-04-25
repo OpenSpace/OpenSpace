@@ -30,7 +30,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 // set parameters required by levmarq() to default values 
 void levmarq_init(LMstat *lmstat) {
-	lmstat->verbose = 0;
+	lmstat->verbose = 1;
 	lmstat->max_it = 5000;
 	lmstat->init_lambda = 1e-6;
 	lmstat->up_factor = 10;
@@ -57,7 +57,7 @@ The arguments are as follows:
 Before calling levmarq, several of the parameters in lmstat must be set.
 For default values, call levmarq_init(lmstat).
 */
-int levmarq(int npar, double *par, int ny, double* y, double *dysq,
+bool levmarq(int npar, double *par, int ny, double *dysq,
 	    double (*func)(double *, int, void *),
 	    void (*grad)(double *, double *, int, void *),
 	    void *fdata, LMstat *lmstat) {
@@ -123,15 +123,7 @@ int levmarq(int npar, double *par, int ny, double* y, double *dysq,
 				ill = (derr > 0);
 			} 
 			if (verbose) {
-				printf("it = %4d,   newerror = %10g,   err = %10g,   derr = %10g\n", it, newerr, err, derr);
-				for (i = 0; i < npar; i++) {
-					printf("%f:", par[i]);
-				}
-				printf("\n");
-				for (i = 0; i < npar; ++i) {
-					printf("%f:", delta[i]);
-				}
-				printf("\n");
+				printf("it = %4d,   lambda = %10g,   err = %10g,   derr = %10g (%d)\n", it, lambda, err, derr, !(newerr > err));
 			}
 			if (ill) {
 				mult = (1 + lambda * up) / (1 + lambda);
@@ -164,7 +156,7 @@ int levmarq(int npar, double *par, int ny, double* y, double *dysq,
 	delete[] delta;
 	delete[] newpar;
 
-	return it;
+	return (it != lmstat->max_it);
 }
 
 
