@@ -45,8 +45,8 @@ struct TransformData {
 
 struct UpdateData {
     TransformData modelTransform;
-    Time time;
-    bool doPerformanceMeasurement;
+    const Time time;
+    const bool doPerformanceMeasurement;
 };
 
 
@@ -55,7 +55,7 @@ struct RenderData {
     // psc position to be removed in favor of the double precision position defined in
     // the translation in transform.
     psc position;
-    Time time;
+    const Time time;
     bool doPerformanceMeasurement;
     int renderBinMask;
     TransformData modelTransform;
