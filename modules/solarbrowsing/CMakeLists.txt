@@ -26,7 +26,9 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcameraplane.h
+    # Openjpeg stuff
     ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
     ${OPENJPEG_BINARY_DIR}/src/bin/common
     ${OPENJPEG_SOURCE_DIR}/src/lib/openjp2
@@ -41,6 +43,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcameraplane.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
@@ -50,5 +53,6 @@ set(MODULE_NAME openspace-module-solarbrowsing)
 set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
 add_subdirectory(${OPENJPEG_ROOT_DIR})
 
+target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${HEADER_FILES})
 # Link to openjpeg
 target_link_libraries(${MODULE_NAME} openjp2)
