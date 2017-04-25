@@ -46,13 +46,13 @@ TEST_F(TimelineTest, QueryKeyframes) {
 
     ASSERT_EQ(timeline.nKeyframes(), 2);
 
-    ASSERT_EQ(timeline.firstKeyframeAfter(0.0)->payload, 1.f) << "Incorrect keyframe returned";
-    ASSERT_EQ(timeline.firstKeyframeAfter(0.0, false)->payload, 1.f) << "Incorrect keyframe returned";
-    ASSERT_EQ(timeline.firstKeyframeAfter(0.0, true)->payload, 0.f) << "Incorrect keyframe returned";
+    ASSERT_EQ(timeline.firstKeyframeAfter(0.0)->data, 1.f) << "Incorrect keyframe returned";
+    ASSERT_EQ(timeline.firstKeyframeAfter(0.0, false)->data, 1.f) << "Incorrect keyframe returned";
+    ASSERT_EQ(timeline.firstKeyframeAfter(0.0, true)->data, 0.f) << "Incorrect keyframe returned";
 
-    ASSERT_EQ(timeline.lastKeyframeBefore(1.0)->payload, 0.f) << "Incorrect keyframe returned";
-    ASSERT_EQ(timeline.lastKeyframeBefore(1.0, false)->payload, 0.f) << "Incorrect keyframe returned";
-    ASSERT_EQ(timeline.lastKeyframeBefore(1.0, true)->payload, 1.f) << "Incorrect keyframe returned";
+    ASSERT_EQ(timeline.lastKeyframeBefore(1.0)->data, 0.f) << "Incorrect keyframe returned";
+    ASSERT_EQ(timeline.lastKeyframeBefore(1.0, false)->data, 0.f) << "Incorrect keyframe returned";
+    ASSERT_EQ(timeline.lastKeyframeBefore(1.0, true)->data, 1.f) << "Incorrect keyframe returned";
 }
 
 TEST_F(TimelineTest, RemoveKeyframes) {

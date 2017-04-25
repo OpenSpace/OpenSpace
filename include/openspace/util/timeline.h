@@ -63,7 +63,7 @@ class Timeline {
 public:
     Timeline();
     virtual ~Timeline();
-    void addKeyframe(double time, T payload);
+    void addKeyframe(double time, T data);
     void clearKeyframes();
     void removeKeyframe(size_t id);
     void removeKeyframesBefore(double timestamp, bool inclusive = false);
