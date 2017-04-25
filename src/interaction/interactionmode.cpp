@@ -202,12 +202,12 @@ void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, d
         prevTime = nextTime;
         prevKeyframe = nextKeyframe;
         t = 1;
-	}
+    }
 
     _cameraPoseTimeline.removeKeyframesBefore(prevTime);
 
-    const CameraPose& prevPose = prevKeyframe->payload;
-    const CameraPose& nextPose = nextKeyframe->payload;
+    const CameraPose& prevPose = prevKeyframe->data;
+    const CameraPose& nextPose = nextKeyframe->data;
 	
     Scene* scene = camera.parent()->scene();
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);

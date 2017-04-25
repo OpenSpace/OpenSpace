@@ -48,14 +48,14 @@ void TimeManager::consumeKeyframes(double dt) {
     auto firstFutureKeyframe = std::lower_bound(keyframes.begin(), keyframes.end(), now, &compareKeyframeTimeWithTime);
 
     bool consumingTimeJump = std::find_if(keyframes.begin(), firstFutureKeyframe, [] (const Keyframe<Time>& f) {
-        return f.payload.timeJumped();
+        return f.data.timeJumped();
     }) != firstFutureKeyframe;
 
     if (firstFutureKeyframe == keyframes.end()) {
         // All keyframes are in the past.
         // Consume the latest one.
         const Keyframe<Time>& current = keyframes.back();
-        const Time& currentTime = current.payload;
+        const Time& currentTime = current.data;
         time().setTime(currentTime.j2000Seconds(), consumingTimeJump);
         time().setDeltaTime(currentTime.deltaTime());
         time().setPause(currentTime.paused());
@@ -63,11 +63,11 @@ void TimeManager::consumeKeyframes(double dt) {
     }
     else {
         const Keyframe<Time>& next = *firstFutureKeyframe;
-        const Time& nextTime = next.payload;
+        const Time& nextTime = next.data;
 
         if (firstFutureKeyframe != keyframes.begin()) {
             const Keyframe<Time>& latest = *(firstFutureKeyframe - 1);
-            const Time& latestTime = latest.payload;
+            const Time& latestTime = latest.data;
             // In case of unconsumed passed keyframes, let the last one
             // determine whether the time should be paused or not.
             // If there was a time jump or time is paused, apply it directly.

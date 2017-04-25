@@ -29,10 +29,12 @@ Timeline<T>::Timeline()
     : _nextKeyframeId(1)
 {}
 
+template <typename T>
+Timeline<T>::~Timeline() {}
 
 template <typename T>
-void Timeline<T>::addKeyframe(double timestamp, T payload) {
-    Keyframe<T> keyframe(++_nextKeyframeId, timestamp, payload);
+void Timeline<T>::addKeyframe(double timestamp, T data) {
+    Keyframe<T> keyframe(++_nextKeyframeId, timestamp, data);
     auto iter = std::upper_bound(_keyframes.begin(), _keyframes.end(), keyframe, &compareKeyframeTimes);
     _keyframes.insert(iter, keyframe);
 }

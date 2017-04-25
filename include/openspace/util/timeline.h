@@ -31,6 +31,9 @@
 
 namespace openspace {
 
+/**
+* Base class for keyframes
+*/
 struct KeyframeBase {
     KeyframeBase(size_t i, double t)
         : id(i)
@@ -40,19 +43,26 @@ struct KeyframeBase {
     double timestamp;
 };
 
+/**
+* Templated class for keyframes containing data
+*/
 template <typename T>
 struct Keyframe : public KeyframeBase {
     Keyframe(size_t i, double t, T p)
         : KeyframeBase(i, t)
-        , payload(p)
+        , data(p)
     {}
-    T payload;
+    T data;
 };
 
+/**
+* Templated class for timelines
+*/
 template <typename T>
 class Timeline {
 public:
     Timeline();
+    virtual ~Timeline();
     void addKeyframe(double time, T payload);
     void clearKeyframes();
     void removeKeyframe(size_t id);
@@ -68,10 +78,19 @@ private:
     std::deque<Keyframe<T>> _keyframes;
 };
 
+/**
+* Return true if the timestamp of a is smaller the timestamp of b.
+*/
 bool compareKeyframeTimes(const KeyframeBase& a, const KeyframeBase& b);
 
+/**
+* Return true if a is smaller than the timestamp of b.
+*/
 bool compareTimeWithKeyframeTime(double a, const KeyframeBase& b);
 
+/**
+* Return true if the timestamp of a is smaller than b.
+*/
 bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b);
 
 } // namespace openspace

@@ -27,15 +27,15 @@
 namespace openspace {
 
 bool compareKeyframeTimes(const KeyframeBase& a, const KeyframeBase& b) {
-	return a.timestamp < b.timestamp;
+    return a.timestamp < b.timestamp;
 }
 
 bool compareTimeWithKeyframeTime(double a, const KeyframeBase& b) {
-	return a < b.timestamp;
+    return a < b.timestamp;
 }
 
 bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b) {
-	return a.timestamp < b;
+    return a.timestamp < b;
 }
 
-}
+} // namespace
