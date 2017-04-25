@@ -39,8 +39,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
 #include <modules/globebrowsing/models/renderablesite.h>
 #include <modules/globebrowsing/tile/tileprovider/presentationslideprovider.h>
-//#include <modules/globebrowsing/tasks/meshgenerationtask.h>
-
+#include <modules/globebrowsing/models/renderableroversurface.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
@@ -116,6 +115,7 @@ void GlobeBrowsingModule::internalInitialize() {
     ghoul_assert(fRenderable, "Renderable factory was not created");
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
 	fRenderable->registerClass<globebrowsing::RenderableSite>("RenderableSite");
+	fRenderable->registerClass<globebrowsing::RenderableRoverSurface>("RenderableRoverSurface");
 
     // add Tile Provider factory
     auto fTileProvider = std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
