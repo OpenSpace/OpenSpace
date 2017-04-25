@@ -1101,6 +1101,12 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 &luascriptfunctions::writeDocumentation,
                 "",
                 "Writes out documentation files"
+            },
+            {
+                "downloadFile",
+                &luascriptfunctions::downloadFile,
+                "",
+                "Downloads a file from Lua scope"
             }
         }
     };

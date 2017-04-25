@@ -1,7 +1,4 @@
-SOCKET = true
-if SOCKET then
-  http = require("socket.http")
-end
+DOWNLOAD = true
 
 function dirListing(dirname)
   f = io.popen('ls ' .. dirname)
@@ -146,16 +143,14 @@ fileErr = ""
 for sOrbit in values(satelliteGroups) do
   filename = sOrbit.url:match("([^/]+)$")
   filenameSansExt = filename:gsub(filename:match "(%.%w+)$", "")
-  sOrbit.path = "../satellites/tle/" .. filename
-  pathFromScenegraphParent = "./" .. sOrbit.path
-  if SOCKET then
-    local body, code = http.request(sOrbit.url)
-    if not body then error(code) end
-    local f = assert(io.open(sOrbit.path, 'w'))
-    f:write(body)
-    f:close()
+  sOrbit.path = "satellites/tle/" .. filename
+ 
+  if DOWNLOAD then
+    openspace.downloadFile(sOrbit.url, sOrbit.path)
   end
-
+  sOrbit.path = "../" .. sOrbit.path
+  pathFromScenegraphParent = "./" .. sOrbit.path
+  
   line = {} 
   myfile = io.open(sOrbit.path, "r")
   lines = getNumLinesInFile(sOrbit.path)
