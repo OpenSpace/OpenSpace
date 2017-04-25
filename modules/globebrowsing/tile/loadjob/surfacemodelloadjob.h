@@ -51,7 +51,6 @@ struct SurfaceModelLoadJob : LoadJob2 {
 
 protected:
 	ghoul::Dictionary _dictionary;
-	std::shared_ptr<modelgeometry::ModelGeometry> _modelGeometry;
 	std::shared_ptr<Model> _model;
 };
 

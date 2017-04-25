@@ -23,24 +23,25 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
+#include <ghoul/io/texture/texturereader.h>
 
 namespace {
 	const std::string _loggerCat = "SurfaceModelLoadJob";
-
+	const char* keyPathToTexture = "PathToTexture";
 }
 namespace openspace {
 namespace globebrowsing {
 
 void SurfaceModelLoadJob::execute() {
+	std::string pathToTexture;
+	_dictionary.getValue(keyPathToTexture, pathToTexture);
+	_model->texture = std::move(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
+	
 	std::unique_ptr<modelgeometry::ModelGeometry> tempModel;
-	tempModel = modelgeometry::ModelGeometry::createFromDictionary(_dictionary);
-	_modelGeometry = std::shared_ptr<modelgeometry::ModelGeometry>(std::move(tempModel));
+	_model->geometry = std::move(modelgeometry::ModelGeometry::createFromDictionary(_dictionary));
 }
 
 std::shared_ptr<Model> SurfaceModelLoadJob::product() const {
-	// Set the the model's ModelGeometry
-	_model->geometry = _modelGeometry;
-
 	return _model;
 }
 
