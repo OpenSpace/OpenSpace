@@ -115,6 +115,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         _transferFunctions.push_back(std::make_unique<TransferFunction>(tfPaths[i]));
     }
 
+    //const std::string jpath = "/home/noven/workspace/OpenSpace/data/realj2kdata/094";
+    //SpacecraftImageryManager::ref().ConvertTileJ2kImages(jpath);
+
     ImageDataObject& start = _imageData[_currentActiveChannel][0];
     ImageDataObject& end = _imageData[_currentActiveChannel][ _imageData[_currentActiveChannel].size() - 1];
     _startTimeSequence = start.metaData.timeObserved;
