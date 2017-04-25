@@ -51,6 +51,7 @@ protected:
 
     std::string _url;
     bool _downloadImage;
+    bool _textureIsDirty;
     std::future<DownloadManager::MemoryFile> _futureImage;
     
 private:
@@ -59,6 +60,8 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> loadFromMemory();
 
     properties::StringProperty _texturePath;
+
+
 };
 
 } // namespace openspace
