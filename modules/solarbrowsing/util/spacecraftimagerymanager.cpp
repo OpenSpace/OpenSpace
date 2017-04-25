@@ -31,6 +31,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem>
+#include <modules/solarbrowsing/util/simplej2kcodec.h>
 
 using namespace ghoul::opengl;
 
@@ -206,6 +207,40 @@ std::unique_ptr<ghoul::opengl::Texture> SpacecraftImageryManager::createLUT() {
 //     return std::move(textures);
 // }
 
+void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path) {
+    using RawPath = ghoul::filesystem::Directory::RawPath;
+    using Recursive = ghoul::filesystem::Directory::RawPath;
+    using Sort = ghoul::filesystem::Directory::Sort;
+    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
+    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::Yes);
+    SimpleJ2kCodec j2c;
+
+     for (auto seqPath : sequencePaths) {
+        if (size_t position = seqPath.find_last_of(".") + 1) {
+            if (position != std::string::npos) {
+                ghoul::filesystem::File currentFile(seqPath);
+                std::string extension = currentFile.fileExtension();
+                if (extension == "j2k" || extension == "jp2") {
+                    const std::string relativePath = FileSys.relativePath(seqPath);
+                    const std::string outPath = FileSys.relativePath(path + "/converted/" + currentFile.filename()).c_str();
+
+                    j2c.CreateInfileStream(relativePath);
+                    auto decodedImg = j2c.Decode();
+                    j2c.EncodeAsTiles(outPath.c_str(),
+                                      decodedImg->data,
+                                      decodedImg->w,
+                                      decodedImg->h,
+                                      /*tileWidth=*/512,
+                                      /*tileHeight=*/512,
+                                      /*numComps=*/1,
+                                      /*compPrec=*/8);
+                }
+            }
+        }
+        LDEBUG("Finished decoding " << seqPath);
+    }
+}
+
 std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::string& path, int& imageSize) {
     std::vector<ImageDataObject> imageData;
 
@@ -225,7 +260,7 @@ std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::
     int limit = 0;
 
     for (auto seqPath : sequencePaths) {
-        if (limit++ == 150) break;
+        if (limit++ == 2) break;
         if (size_t position = seqPath.find_last_of(".") + 1) {
             if (position != std::string::npos) {
                 ghoul::filesystem::File currentFile(seqPath);

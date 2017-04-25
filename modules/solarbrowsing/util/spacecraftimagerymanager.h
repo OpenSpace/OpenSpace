@@ -65,6 +65,7 @@ class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManage
 
 public:
     SpacecraftImageryManager();
+    void ConvertTileJ2kImages(const std::string& path);
     std::vector<ImageDataObject> loadImageData(const std::string& path, int& imageSize);
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> loadTextures(std::vector<ImageDataObject>& imageData);
     std::unique_ptr<ghoul::opengl::Texture> createLUT();
