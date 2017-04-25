@@ -30,11 +30,11 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 // set parameters required by levmarq() to default values 
 void levmarq_init(LMstat *lmstat) {
-	lmstat->verbose = 1;
+	lmstat->verbose = 0;
 	lmstat->max_it = 5000;
 	lmstat->init_lambda = 1e-6;
-	lmstat->up_factor = 10;
-	lmstat->down_factor = 10;
+	lmstat->up_factor = 5;
+	lmstat->down_factor = 5;
 	lmstat->target_derr = 1e-12;
 }
 

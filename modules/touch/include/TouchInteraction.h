@@ -101,6 +101,7 @@ class TouchInteraction : public properties::PropertyOwner
 		~TouchInteraction();
 		
 		void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
+		void manipulate(const std::vector<TUIO::TuioCursor>& list);
 		void trace(const std::vector<TUIO::TuioCursor>& list);
 		void interpret(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void accelerate(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
