@@ -31,10 +31,20 @@ using namespace openspace;
 
 class TimelineTest : public testing::Test {};
 
-TEST_F(TimelineTest, Basic) {
+TEST_F(TimelineTest, AddAndCountKeyframes) {
+    Timeline<Time> timeline;
+    timeline.addKeyframe(0.0, Time::now());
+    timeline.addKeyframe(1.0, Time::now());
+
+    ASSERT_EQ(timeline.nKeyframes(), 2);
+}
+
+TEST_F(TimelineTest, QueryKeyframes) {
     Timeline<float> timeline;
     timeline.addKeyframe(0.0, 0.f);
     timeline.addKeyframe(1.0, 1.f);
+
+    ASSERT_EQ(timeline.nKeyframes(), 2);
 
     ASSERT_EQ(timeline.firstKeyframeAfter(0.0)->payload, 1.f) << "Incorrect keyframe returned";
     ASSERT_EQ(timeline.firstKeyframeAfter(0.0, false)->payload, 1.f) << "Incorrect keyframe returned";
@@ -43,6 +53,12 @@ TEST_F(TimelineTest, Basic) {
     ASSERT_EQ(timeline.lastKeyframeBefore(1.0)->payload, 0.f) << "Incorrect keyframe returned";
     ASSERT_EQ(timeline.lastKeyframeBefore(1.0, false)->payload, 0.f) << "Incorrect keyframe returned";
     ASSERT_EQ(timeline.lastKeyframeBefore(1.0, true)->payload, 1.f) << "Incorrect keyframe returned";
+}
+
+TEST_F(TimelineTest, RemoveKeyframes) {
+    Timeline<float> timeline;
+    timeline.addKeyframe(0.0, 0.f);
+    timeline.addKeyframe(1.0, 1.f);
 
     timeline.removeKeyframesBefore(0.0);
     ASSERT_EQ(timeline.nKeyframes(), 2);
@@ -63,8 +79,22 @@ TEST_F(TimelineTest, Basic) {
     ASSERT_EQ(timeline.nKeyframes(), 0);
 }
 
-TEST_F(TimelineTest, Time) {
-    Timeline<Time> timeline;
-    timeline.addKeyframe(0.0, Time::now());
-    timeline.addKeyframe(1.0, Time::now());
+TEST_F(TimelineTest, RemoveKeyframesInRange) {
+    Timeline<float> timeline;
+    timeline.addKeyframe(0.0, 0.f);
+    timeline.addKeyframe(1.0, 1.f);
+    timeline.addKeyframe(2.0, 2.f);
+    timeline.addKeyframe(3.0, 3.f);
+
+    timeline.removeKeyframesBetween(1.0, 2.0);
+    ASSERT_EQ(timeline.nKeyframes(), 4);
+
+    timeline.removeKeyframesBetween(1.0, 2.0, false, true);
+    ASSERT_EQ(timeline.nKeyframes(), 3);
+
+    timeline.removeKeyframesBetween(1.0, 2.0, true, true);
+    ASSERT_EQ(timeline.nKeyframes(), 2);
+
+    timeline.removeKeyframesBetween(-1.0, 4.0);
+    ASSERT_EQ(timeline.nKeyframes(), 0);
 }

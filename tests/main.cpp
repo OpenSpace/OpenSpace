@@ -115,7 +115,5 @@ int main(int argc, char** argv) {
     e << error;
 #endif
 
-    std::cin.get();
-
     return b;
 }

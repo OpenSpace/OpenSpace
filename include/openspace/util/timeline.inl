@@ -58,12 +58,12 @@ void Timeline<T>::removeKeyframesBefore(double timestamp, bool inclusive) {
 template <typename T>
 void Timeline<T>::removeKeyframesBetween(double begin, double end, bool inclusiveBegin, bool inclusiveEnd) {
     auto beginIter = inclusiveBegin
-        ? std::lower_bound(_keyframes.begin(), _keyframes.end(), timestamp, &compareKeyframeTimeWithTime)
-        : std::upper_bound(_keyframes.begin(), _keyframes.end(), timestamp, &compareTimeWithKeyframeTime);
+        ? std::lower_bound(_keyframes.begin(), _keyframes.end(), begin, &compareKeyframeTimeWithTime)
+        : std::upper_bound(_keyframes.begin(), _keyframes.end(), begin, &compareTimeWithKeyframeTime);
 
     auto endIter = inclusiveEnd
-        ? std::upper_bound(beginIter, _keyframes.end(), timestamp, &compareTimeWithKeyframeTime)
-        : std::lower_bound(beginIter, _keyframes.end(), timestamp, &compareKeyframeTimeWithTime);
+        ? std::upper_bound(beginIter, _keyframes.end(), end, &compareTimeWithKeyframeTime)
+        : std::lower_bound(beginIter, _keyframes.end(), end, &compareKeyframeTimeWithTime);
 
     _keyframes.erase(beginIter, endIter);
 }
