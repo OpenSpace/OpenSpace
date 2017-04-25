@@ -33,16 +33,18 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-CachingSurfaceModelProvider::CachingSurfaceModelProvider()
+CachingSurfaceModelProvider::CachingSurfaceModelProvider(Renderable* parent)
+	: _parent(parent)
 {
+	//_parent = parent;
 	double cacheSize = 512;
 
-	auto threadPool = std::make_shared<ThreadPool>(2);
+	auto threadPool = std::make_shared<ThreadPool>(1);
 	_asyncSurfaceModelProvider = std::make_shared<AsyncSurfaceModelProvider>(threadPool);
 	_modelCache = std::make_shared<ModelCache>(static_cast<size_t>(cacheSize));
 }
 
-std::vector<std::shared_ptr<Model>> CachingSurfaceModelProvider::getModel(const ghoul::Dictionary& dictionary,
+std::vector<std::shared_ptr<Model>> CachingSurfaceModelProvider::getModels(const ghoul::Dictionary& dictionary,
 	std::shared_ptr<Model> model) {
 
 	// Check if the chunk is already in the cache. If it is in the cache, loop through the corresponding vector
@@ -68,16 +70,21 @@ std::vector<std::shared_ptr<Model>> CachingSurfaceModelProvider::getModel(const 
 	return tempVector;
 }
 
-void CachingSurfaceModelProvider::update() {
-	initModelsFromLoadedData();
+void CachingSurfaceModelProvider::update(Renderable* parent) {
+	initModelsFromLoadedData(parent);
 }
 
-void CachingSurfaceModelProvider::initModelsFromLoadedData() {
+void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 	std::vector<std::shared_ptr<Model>> models =
 		_asyncSurfaceModelProvider->getLoadedModels();
 
 	for (auto model : models) {
+		model->geometry->initialize(parent);
+		model->texture->uploadTexture();
+		model->texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+
 		uint64_t hashKey = model->tileHashKey;
+
 		if (_modelCache->exist(hashKey)){
 			std::vector<std::shared_ptr<Model>> tempModels = _modelCache->get(hashKey);
 			tempModels.push_back(model);

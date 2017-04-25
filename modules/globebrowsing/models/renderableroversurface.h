@@ -60,11 +60,14 @@ public:
 
 private:
 	void extractCoordinates();
+	void createProgramObjects(std::vector<std::shared_ptr<Model>> models);
+	void calculateSurfacePosition(std::vector<std::shared_ptr<Model>> models);
 	std::vector<std::string> extractFileNames(const std::string filePath);
 
 	std::vector<std::string> _fileNames;
 	std::vector<glm::fvec2> _coordinates;
 	std::vector<SubSite> _subSites;
+	std::vector<std::shared_ptr<Model>> _models;
 
 	GeneralProperties _generalProperties;
 
@@ -79,8 +82,12 @@ private:
 	std::shared_ptr<globebrowsing::ChunkedLodGlobe> _chunkedLodGlobe;
 	std::unordered_map <uint64_t, std::vector<glm::dvec3>> _pathChunks;
 
+	std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+
 	std::shared_ptr<CachingSurfaceModelProvider> _cachingModelProvider;
-	bool loadedOnce = true;
+	bool visitedOnce = true;
+
+	glm::dvec3 _sunPos;
 };
 
 } // namespace globebrowsing
