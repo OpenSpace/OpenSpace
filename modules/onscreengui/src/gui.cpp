@@ -64,10 +64,11 @@ static void RenderDrawLists(ImDrawData* drawData) {
     // Avoid rendering when minimized, scale coordinates for retina displays
     // (screen coordinates != framebuffer coordinates)
     ImGuiIO& io = ImGui::GetIO();
-    int fb_width = (int)(io.DisplaySize.x * io.DisplayFramebufferScale.x);
-    int fb_height = (int)(io.DisplaySize.y * io.DisplayFramebufferScale.y);
-    if (fb_width == 0 || fb_height == 0)
+    int fb_width = static_cast<int>(io.DisplaySize.x * io.DisplayFramebufferScale.x);
+    int fb_height = static_cast<int>(io.DisplaySize.y * io.DisplayFramebufferScale.y);
+    if (fb_width == 0 || fb_height == 0) {
         return;
+    }
     drawData->ScaleClipRects(io.DisplayFramebufferScale);
 
     // Setup render state:
@@ -86,7 +87,7 @@ static void RenderDrawLists(ImDrawData* drawData) {
     // Setup orthographic projection matrix
     const float width = ImGui::GetIO().DisplaySize.x;
     const float height = ImGui::GetIO().DisplaySize.y;
-    glViewport(0, 0, (GLsizei)fb_width, (GLsizei)fb_height);
+    glViewport(0, 0, static_cast<GLsizei>(fb_width), static_cast<GLsizei>(fb_height));
     const glm::mat4 ortho(
         2.f / width, 0.0f, 0.0f, 0.f,
         0.0f, 2.0f / -height, 0.0f, 0.f,
@@ -107,16 +108,16 @@ static void RenderDrawLists(ImDrawData* drawData) {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
-            (GLsizeiptr)cmdList->VtxBuffer.size() * sizeof(ImDrawVert),
-            (GLvoid*)&cmdList->VtxBuffer.front(),
+            static_cast<GLsizeiptr>(cmdList->VtxBuffer.size() * sizeof(ImDrawVert)),
+            reinterpret_cast<const GLvoid*>(&cmdList->VtxBuffer.front()),
             GL_STREAM_DRAW
         );
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboElements);
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
-            (GLsizeiptr)cmdList->IdxBuffer.size() * sizeof(ImDrawIdx),
-            (GLvoid*)&cmdList->IdxBuffer.front(),
+            static_cast<GLsizeiptr>(cmdList->IdxBuffer.size() * sizeof(ImDrawIdx)),
+            reinterpret_cast<const GLvoid*>(&cmdList->IdxBuffer.front()),
             GL_STREAM_DRAW
         );
 
@@ -127,14 +128,14 @@ static void RenderDrawLists(ImDrawData* drawData) {
             else {
                 glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
                 glScissor(
-                    (int)pcmd->ClipRect.x,
-                    (int)(fb_height - pcmd->ClipRect.w),
-                    (int)(pcmd->ClipRect.z - pcmd->ClipRect.x),
-                    (int)(pcmd->ClipRect.w - pcmd->ClipRect.y)
+                    static_cast<int>(pcmd->ClipRect.x),
+                    static_cast<int>(fb_height - pcmd->ClipRect.w),
+                    static_cast<int>(pcmd->ClipRect.z - pcmd->ClipRect.x),
+                    static_cast<int>(pcmd->ClipRect.w - pcmd->ClipRect.y)
                 );
                 glDrawElements(
                     GL_TRIANGLES,
-                    (GLsizei)pcmd->ElemCount,
+                    static_cast<GLsizei>(pcmd->ElemCount),
                     sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
                     indexBufferOffset
                 );
@@ -363,7 +364,7 @@ void GUI::initializeGL() {
     _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
     _fontTexture->uploadTexture();
     GLuint id = *_fontTexture;
-    ImGui::GetIO().Fonts->TexID = (void*)(intptr_t)id;
+    ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(id);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -492,7 +493,7 @@ void GUI::endFrame() {
     ImGui::Render();
 }
 
-bool GUI::mouseButtonCallback(MouseButton button, MouseAction action) {
+bool GUI::mouseButtonCallback(MouseButton, MouseAction) {
     ImGuiIO& io = ImGui::GetIO();
     bool consumeEvent = io.WantCaptureMouse;
     return consumeEvent;
@@ -549,7 +550,7 @@ bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
     return consumeEvent;
 }
 
-bool GUI::charCallback(unsigned int character, KeyModifier modifier) {
+bool GUI::charCallback(unsigned int character, KeyModifier) {
     ImGuiIO& io = ImGui::GetIO();
     bool consumeEvent = io.WantCaptureKeyboard;
 
@@ -634,7 +635,7 @@ void GUI::renderAndUpdatePropertyVisibility() {
     int t = static_cast<std::underlying_type_t<V>>(_currentVisibility);
 
     // Array is sorted by importance
-    std::array<const char*, 4> items = {  "None", "User", "Developer", "All"};
+    std::array<const char*, 4> items = { "None", "User", "Developer", "All"};
     ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
 
     _currentVisibility = static_cast<V>(t);

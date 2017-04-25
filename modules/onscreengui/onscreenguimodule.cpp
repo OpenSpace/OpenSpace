@@ -131,7 +131,6 @@ OnScreenGUIModule::OnScreenGUIModule()
                 glm::vec2 mousePosition = wrapper.mousePosition();
                 //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
                 glm::ivec2 windowSize = wrapper.currentWindowSize();
-                glm::ivec2 renderingSize = wrapper.currentWindowResolution();
                 uint32_t mouseButtons = wrapper.mouseButtons(2);
                 
                 double dt = std::max(wrapper.averageDeltaTime(), 0.0);

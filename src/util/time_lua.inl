@@ -28,7 +28,6 @@
 #include <ctime>
 
 namespace openspace {
-
 namespace luascriptfunctions {
 
 /**
@@ -51,8 +50,12 @@ int time_setDeltaTime(lua_State* L) {
         return 0;
     }
     else {
-        const char* msg = lua_pushfstring(L, "%s expected, got %s",
-                                lua_typename(L, LUA_TNUMBER), luaL_typename(L, -1));
+        const char* msg = lua_pushfstring(
+            L,
+            "%s expected, got %s",
+            lua_typename(L, LUA_TNUMBER),
+            luaL_typename(L, -1)
+        );
         return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
 
@@ -74,6 +77,11 @@ int time_deltaTime(lua_State* L) {
  * Toggles a pause functionm i.e. setting the delta time to 0 and restoring it afterwards
  */
 int time_togglePause(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
+
     openspace::Time::ref().togglePause();
     return 0;
 }
@@ -85,8 +93,9 @@ int time_togglePause(lua_State* L) {
  */
 int time_setPause(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     bool pause = lua_toboolean(L, -1) == 1;
     openspace::Time::ref().setPause(pause);

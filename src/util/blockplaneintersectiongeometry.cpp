@@ -31,10 +31,8 @@
 #include <algorithm>
 
 namespace {
-const std::string _loggerCat = "BlockPlaneIntersectionGeometry";
-}
-
-
+    const char* _loggerCat = "BlockPlaneIntersectionGeometry";
+} // namespace
 
 namespace openspace {
 

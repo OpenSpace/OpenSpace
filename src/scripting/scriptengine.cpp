@@ -830,7 +830,7 @@ void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     }
 }
 
-void ScriptEngine::postsync(bool isMaster) {
+void ScriptEngine::postsync(bool) {
     std::vector<std::string> scripts;
 
     _mutex.lock();

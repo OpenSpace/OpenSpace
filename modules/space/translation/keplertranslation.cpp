@@ -31,6 +31,8 @@
 
 #include <glm/gtx/transform.hpp>
 
+#include <math.h>
+
 namespace {
     const char* KeyEccentricity = "Eccentricity";
     const char* KeySemiMajorAxis = "SemiMajorAxis";
@@ -50,7 +52,7 @@ T solveIteration(Func function, T x0, const T& err = 0.0, int maxIterations = 10
     for (int i = 0; i < maxIterations; ++i) {
         x = x2;
         x2 = function(x);
-        if (abs(x2 - x) < err) {
+        if (std::abs(x2 - x) < err) {
             return x2;
         }
     }
@@ -250,7 +252,7 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
             double f = x - s - meanAnomaly;
             double f1 = 1 - c;
             double f2 = s;
-            return x + (-5 * f / (f1 + sign(f1) * sqrt(abs(16 * f1 * f1 - 20 * f * f2))));
+            return x + (-5 * f / (f1 + sign(f1) * sqrt(std::abs(16 * f1 * f1 - 20 * f * f2))));
         };
         return solveIteration(solver, e, 0.0, 8);
     }

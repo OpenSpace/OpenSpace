@@ -79,6 +79,6 @@ bool Scale::initialize() {
     return true;
 }
     
-void Scale::update(const UpdateData& data) {}
+void Scale::update(const UpdateData&) {}
 
 } // namespace openspace

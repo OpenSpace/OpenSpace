@@ -212,11 +212,11 @@ KeyframeInteractionMode::~KeyframeInteractionMode() {
 
 }
 
-void KeyframeInteractionMode::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
+void KeyframeInteractionMode::updateMouseStatesFromInput(const InputState& inputState, double) {
     _keyframes = inputState.keyframes();
 }
 
-void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, double deltaTime) {
+void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, double) {
     if (_keyframes.size() == 0) {
         return;
     }
@@ -285,10 +285,9 @@ OrbitalInteractionMode::MouseStates::MouseStates(double sensitivity, double velo
     , _globalRotationMouseState(velocityScaleFactor)
     , _localRotationMouseState(velocityScaleFactor)
     , _truckMovementMouseState(velocityScaleFactor)
+    , _localRollMouseState(velocityScaleFactor)
     , _globalRollMouseState(velocityScaleFactor)
-    , _localRollMouseState(velocityScaleFactor) {
-
-}
+{}
 
 void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
     glm::dvec2 mousePosition = inputState.getMousePosition();

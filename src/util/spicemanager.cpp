@@ -874,7 +874,7 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
              numberOfTerminatorPoints,
              &res.targetEphemerisTime,
              glm::value_ptr(res.observerPosition),
-             (double(*)[3])res.terminatorPoints.data()
+             reinterpret_cast<double(*)[3]>(res.terminatorPoints.data())
     );
     throwOnSpiceError(format(
         "Error getting terminator ellipse for target '{}' from observer '{}' in frame "

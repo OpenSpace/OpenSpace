@@ -28,7 +28,6 @@
 #include <openspace/documentation/verifier.h>
 
 namespace {
-    const char* _loggerCat = "StaticScale";
     const char* KeyValue = "Scale";
 }
 

@@ -164,7 +164,7 @@ void GuiPropertyComponent::render() {
                 }
                 else if (!pOwner->name().empty()) {
                     // If the owner has a name, print it first
-                    ImGui::Text(pOwner->name().c_str());
+                    ImGui::Text("%s", pOwner->name().c_str());
                     ImGui::Spacing();
                     return true;
                 }

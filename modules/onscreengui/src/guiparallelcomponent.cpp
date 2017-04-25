@@ -79,7 +79,7 @@ void GuiParallelComponent::renderClientWithHost() {
         connectionInfo += "You are the only client";
     }
 
-    ImGui::Text(connectionInfo.c_str());
+    ImGui::Text("%s", connectionInfo.c_str());
     renderClientCommon();
 
     const std::deque<datamessagestructures::TimeKeyframe> timeKeyframes = OsEng.timeManager().keyframes();
@@ -95,9 +95,9 @@ void GuiParallelComponent::renderClientWithHost() {
         parallel.resetTimeOffset();
     }
 
-    ImGui::Text(timeKeyframeInfo.c_str());
-    ImGui::Text(cameraKeyframeInfo.c_str());
-    ImGui::Text(latencyStandardDeviation.c_str());
+    ImGui::Text("%s", timeKeyframeInfo.c_str());
+    ImGui::Text("%s", cameraKeyframeInfo.c_str());
+    ImGui::Text("%s", latencyStandardDeviation.c_str());
 }
 
 void GuiParallelComponent::renderClientWithoutHost() {
@@ -118,7 +118,7 @@ void GuiParallelComponent::renderClientWithoutHost() {
         connectionInfo += "You are the only one here";
     }
 
-    ImGui::Text(connectionInfo.c_str());
+    ImGui::Text("%s", connectionInfo.c_str());
 
     renderClientCommon();
 
@@ -152,7 +152,7 @@ void GuiParallelComponent::renderHost() {
             "Hosting session with " + std::to_string(nClients) + " clients";
     }
 
-    ImGui::Text(connectionInfo.c_str());
+    ImGui::Text("%s", connectionInfo.c_str());
 
     const bool resignHostship = ImGui::Button("Resign hostship");
     if (resignHostship) {

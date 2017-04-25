@@ -132,7 +132,10 @@ int TileProviderByLevel::maxLevel() {
 }
 
 int TileProviderByLevel::providerIndex(int level) const {
-    int clampedLevel = std::max(0, std::min(level, (int)_providerIndices.size()-1));
+    int clampedLevel = std::max(
+        0,
+        std::min(level, static_cast<int>(_providerIndices.size()-1))
+    );
     return _providerIndices[clampedLevel];
 }
 

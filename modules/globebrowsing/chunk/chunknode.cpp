@@ -33,9 +33,9 @@ namespace openspace {
 namespace globebrowsing {
 
 ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
-    : _chunk(chunk)
-    , _parent(parent)
+    : _parent(parent)
     , _children({ nullptr, nullptr, nullptr, nullptr })
+    , _chunk(chunk)
 {}
 
 bool ChunkNode::isRoot() const {
@@ -159,20 +159,20 @@ const ChunkNode& ChunkNode::getChild(Quad quad) const {
 void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
         for (size_t i = 0; i < _children.size(); ++i) {
-            Chunk chunk(_chunk.owner(), _chunk.tileIndex().child((Quad)i));
+            Chunk chunk(_chunk.owner(), _chunk.tileIndex().child(static_cast<Quad>(i)));
             _children[i] = std::make_unique<ChunkNode>(chunk, this);
         }
     }
 
     if (depth - 1 > 0) {
-        for (int i = 0; i < _children.size(); ++i) {
+        for (size_t i = 0; i < _children.size(); ++i) {
             _children[i]->split(depth - 1);
         }
     }
 }
 
 void ChunkNode::merge() {
-    for (int i = 0; i < _children.size(); ++i) {
+    for (size_t i = 0; i < _children.size(); ++i) {
         if (_children[i] != nullptr) {
             _children[i]->merge();
         }

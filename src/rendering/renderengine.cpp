@@ -93,31 +93,31 @@ namespace openspace {
 RenderEngine::RenderEngine()
     : properties::PropertyOwner("RenderEngine")
     , _camera(nullptr)
+    , _scene(nullptr)
     , _raycasterManager(nullptr)
     , _performanceMeasurements("performanceMeasurements", "Performance Measurements")
+    , _performanceManager(nullptr)
+    , _renderer(nullptr)
+    , _rendererImplementation(RendererImplementation::Invalid)
+    , _log(nullptr)
     , _frametimeType(
         "frametimeType",
         "Type of the frametime display",
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , _scene(nullptr)
     , _showInfo("showInfo", "Show Render Information", true)
     , _showLog("showLog", "Show the OnScreen log", true)
-    , _nAaSamples("nAaSamples", "Number of Antialiasing samples", 8, 1, 16)
-    , _applyWarping("applyWarpingScreenshot", "Apply Warping to Screenshots", false)
     , _takeScreenshot("takeScreenshot", "Take Screenshot")
+    , _shouldTakeScreenshot(false)
+    , _applyWarping("applyWarpingScreenshot", "Apply Warping to Screenshots", false)
     , _showFrameNumber("showFrameNumber", "Show Frame Number", false)
     , _disableMasterRendering("disableMasterRendering", "Disable Master Rendering", false)
     , _disableSceneOnMaster("disableSceneOnMaster", "Disable Scene on Master", false)
-    , _shouldTakeScreenshot(false)
-    , _renderer(nullptr)
-    , _rendererImplementation(RendererImplementation::Invalid)
-    , _performanceManager(nullptr)
-    , _log(nullptr)
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
+    , _nAaSamples("nAaSamples", "Number of Antialiasing samples", 8, 1, 16)
     , _frameNumber(0)
 {
     _performanceMeasurements.onChange([this](){
@@ -281,9 +281,7 @@ void RenderEngine::deinitialize() {
 
 void RenderEngine::updateScene() {
     _scene->update({
-        glm::dvec3(0),
-        glm::dmat3(1),
-        1,
+        { glm::dvec3(0), glm::dmat3(1), 1.0 },
         Time::ref().j2000Seconds(),
         Time::ref().deltaTime(),
         Time::ref().paused(),
@@ -799,7 +797,6 @@ std::string RenderEngine::progressToStr(int size, double t) {
 
 void RenderEngine::renderInformation() {
     // TODO: Adjust font_size properly when using retina screen
-    using Font = ghoul::fontrendering::Font;
     using ghoul::fontrendering::RenderFont;
 
     if (_fontDate) {

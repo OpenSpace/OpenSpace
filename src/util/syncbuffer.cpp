@@ -54,7 +54,7 @@ void SyncBuffer::write() {
 
 void SyncBuffer::read() {
     sgct::SharedData::instance()->readVector(_synchronizationBuffer.get());
-    _dataStream = std::move(_synchronizationBuffer->getVal());
+    _dataStream = _synchronizationBuffer->getVal();
     _encodeOffset = 0;
     _decodeOffset = 0;
 }

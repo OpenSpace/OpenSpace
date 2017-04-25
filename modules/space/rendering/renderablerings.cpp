@@ -260,12 +260,12 @@ void RenderableRings::createPlane() {
     };
     
     VertexData data[] = {
-        -size, -size, 0.f, 0.f,
-        size, size, 1.f, 1.f,
-        -size, size, 0.f, 1.f,
-        -size, -size, 0.f, 0.f,
-        size, -size, 1.f, 0.f,
-        size, size, 1.f, 1.f,
+        { -size, -size, 0.f, 0.f },
+        {  size,  size, 1.f, 1.f },
+        { -size,  size, 0.f, 1.f },
+        { -size, -size, 0.f, 0.f },
+        {  size, -size, 1.f, 0.f },
+        {  size,  size, 1.f, 1.f },
     };
 
     glBindVertexArray(_quad);
