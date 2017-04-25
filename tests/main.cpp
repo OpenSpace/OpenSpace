@@ -40,6 +40,7 @@
 #include <test_common.inl>
 #include <test_spicemanager.inl>
 #include <test_sceneloader.inl>
+#include <test_timeline.inl>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 //#include <test_chunknode.inl>
@@ -113,6 +114,8 @@ int main(int argc, char** argv) {
     std::ofstream e("error.txt");
     e << error;
 #endif
+
+    std::cin.get();
 
     return b;
 }

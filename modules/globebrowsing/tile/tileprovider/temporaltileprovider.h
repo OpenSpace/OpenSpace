@@ -27,8 +27,10 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <openspace/engine/openspaceengine.h>
 
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/timerange.h>
 
 #include <ghoul/misc/dictionary.h>
@@ -196,7 +198,7 @@ public:
 
     typedef std::string TimeKey;
 
-    std::shared_ptr<TileProvider> getTileProvider(Time t = Time::ref());
+    std::shared_ptr<TileProvider> getTileProvider(Time t = OsEng.timeManager().time());
     std::shared_ptr<TileProvider> getTileProvider(TimeKey timekey);
 
 private:

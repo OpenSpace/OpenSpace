@@ -104,10 +104,13 @@ InteractionHandler::InteractionHandler()
             "GlobeBrowsing",
             std::make_shared<GlobeBrowsingInteractionMode>(_mouseStates)
             ));
+
+    _keyframeInteractionMode = std::make_shared<KeyframeInteractionMode>();
+
     _interactionModes.insert(
         std::pair<std::string, std::shared_ptr<InteractionMode>>(
             "Keyframe",
-            std::make_shared<KeyframeInteractionMode>()
+            _keyframeInteractionMode
             ));
 
     // Set the interactionMode
@@ -630,20 +633,32 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
     };
 }
 
-void InteractionHandler::addKeyframe(const datamessagestructures::CameraKeyframe &kf) {
-    _inputState->addKeyframe(kf);
+void InteractionHandler::addKeyframe(double timestamp, KeyframeInteractionMode::CameraPose pose) {
+    if (!_keyframeInteractionMode) {
+        return;
+    }
+    _keyframeInteractionMode->timeline().addKeyframe(timestamp, pose);
 }
 
 void InteractionHandler::removeKeyframesAfter(double timestamp) {
-    _inputState->removeKeyframesAfter(timestamp);
+    if (!_keyframeInteractionMode) {
+        return;
+    }
+    _keyframeInteractionMode->timeline().removeKeyframesAfter(timestamp);
 }
 
 void InteractionHandler::clearKeyframes() {
-    _inputState->clearKeyframes();
+    if (!_keyframeInteractionMode) {
+        return;
+    }
+    _keyframeInteractionMode->timeline().clearKeyframes();
 }
 
-const std::vector<datamessagestructures::CameraKeyframe>& InteractionHandler::keyframes() const {
-    return _inputState->keyframes();
+size_t InteractionHandler::nKeyframes() const {
+    if (!_keyframeInteractionMode) {
+        return 0;
+    }
+    return _keyframeInteractionMode->timeline().keyframes().size();
 }
 
 } // namespace interaction

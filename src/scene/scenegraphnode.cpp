@@ -317,6 +317,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     RenderData newData = {
         data.camera,
         thisPositionPSC,
+        data.time,
         data.doPerformanceMeasurement,
         data.renderBinMask,
         _worldPositionCached,

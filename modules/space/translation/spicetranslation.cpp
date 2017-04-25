@@ -166,7 +166,7 @@ glm::dvec3 SpiceTranslation::position() const {
 void SpiceTranslation::update(const UpdateData& data) {
     double lightTime = 0.0;
     _position = SpiceManager::ref().targetPosition(
-        _target, _origin, _frame, {}, data.time, lightTime
+        _target, _origin, _frame, {}, data.time.j2000Seconds(), lightTime
     ) * glm::pow(10.0, 3.0);
 }
 

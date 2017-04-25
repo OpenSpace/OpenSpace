@@ -72,9 +72,10 @@ public:
     
     void resetKeyBindings();
 
-    void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
+    void addKeyframe(double timestamp, KeyframeInteractionMode::CameraPose pose);
     void removeKeyframesAfter(double timestamp);
     void clearKeyframes();
+    size_t nKeyframes() const;
     const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
     void bindKeyLocal(
@@ -145,6 +146,8 @@ private:
 
     std::map<std::string, std::shared_ptr<InteractionMode>> _interactionModes;
     std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
+
+    std::shared_ptr<KeyframeInteractionMode> _keyframeInteractionMode;
 
     // Properties
     properties::StringProperty _origin;

@@ -24,6 +24,7 @@
 
 #include <openspace/network/networkengine.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 
@@ -95,11 +96,13 @@ void NetworkEngine::publishStatusMessage() {
     // 8 bytes: delta time as double
     // Total: 40
 
+    Time& currentTime = OsEng.timeManager().time();
+
     uint16_t messageSize = 0;
     
-    double time = Time::ref().j2000Seconds();
-    std::string timeString = Time::ref().UTC();
-    double delta = Time::ref().deltaTime();
+    double time = currentTime.j2000Seconds();
+    std::string timeString = currentTime.UTC();
+    double delta = currentTime.deltaTime();
 
     messageSize += sizeof(time);
     messageSize += static_cast<uint16_t>(timeString.length());

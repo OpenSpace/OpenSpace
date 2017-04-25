@@ -60,16 +60,16 @@ TEST_F(ScriptSchedulerTest, SimpleForward) {
         { "BackwardScript", "BackwardScript1"s }
     };
     
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     scheduler.loadScripts({
         { "1", testDictionary }
     });
     
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 02"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     ASSERT_EQ(res.first, res.second);
     
     res = scheduler.progressTo(
-        openspace::Time::ref().convertTime("2000 JAN 03")
+        openspace::Time::convertTime("2000 JAN 03")
     );
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
@@ -94,20 +94,20 @@ TEST_F(ScriptSchedulerTest, MultipleForwardSingleJump) {
     
     ScriptScheduler scheduler;
 
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     scheduler.loadScripts({
         { "1", testDictionary1 },
         { "2", testDictionary2 }
     });
 
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 02"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     ASSERT_EQ(res.first, res.second);
     
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 04"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
     
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 06"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript2", *(res.first));
 }
@@ -130,16 +130,16 @@ TEST_F(ScriptSchedulerTest, MultipleForwardOrdering) {
     
     ScriptScheduler scheduler;
 
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     scheduler.loadScripts({
         { "1", testDictionary1 },
         { "2", testDictionary2 }
     });
     
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 02"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     ASSERT_EQ(res.first, res.second);
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 06"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     ASSERT_EQ(2, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
     EXPECT_EQ("ForwardScript2", *(std::next(res.first)));
@@ -157,15 +157,15 @@ TEST_F(ScriptSchedulerTest, SimpleBackward) {
         { "BackwardScript", "BackwardScript1"s }
     };
     
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 05"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 05"));
     scheduler.loadScripts({
         { "1", testDictionary }
     });
     
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 04"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     ASSERT_EQ(res.first, res.second);
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 02"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript1", *(res.first));
 }
@@ -188,20 +188,20 @@ TEST_F(ScriptSchedulerTest, MultipleBackwardSingleJump) {
         { "BackwardScript", "BackwardScript2"s }
     };
     
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 07"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     scheduler.loadScripts({
         { "1", testDictionary1 },
         { "2", testDictionary2 }
     });
     
-    auto res =  scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 06"));
+    auto res =  scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     ASSERT_EQ(res.first, res.second);
     
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 04"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript2", *(res.first));
     
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript1", *(res.first));
 }
@@ -224,16 +224,16 @@ TEST_F(ScriptSchedulerTest, MultipleBackwardOrdering) {
         { "BackwardScript", "BackwardScript2"s }
     };
     
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 07"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     scheduler.loadScripts({
         { "1", testDictionary1 },
         { "2", testDictionary2 }
     });
     
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 06"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     ASSERT_EQ(res.first, res.second);
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     ASSERT_EQ(2, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript2", *(res.first));
     EXPECT_EQ("BackwardScript1", *(std::next(res.first)));
@@ -280,24 +280,24 @@ TEST_F(ScriptSchedulerTest, ForwardBackwards) {
         { "BackwardScript", "BackwardScript2"s }
     };
     
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     scheduler.loadScripts({
         { "1", testDictionary1 },
         { "2", testDictionary2 }
     });
     
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 04"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
     
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript1", *(res.first));
     
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 07"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     ASSERT_EQ(2, std::distance(res.first, res.second));
     
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 04"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript2", *(res.first));
 }
@@ -320,18 +320,18 @@ TEST_F(ScriptSchedulerTest, Rewind) {
         { "BackwardScript", "BackwardScript2"s }
     };
     
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     scheduler.loadScripts({
         { "1", testDictionary1 },
         { "2", testDictionary2 }
     });
     
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 07"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     ASSERT_EQ(2, std::distance(res.first, res.second));
     
     scheduler.rewind();
     
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 04"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
 }
@@ -406,23 +406,23 @@ TEST_F(ScriptSchedulerTest, JumpEqual) {
     });
 
     auto res = scheduler.progressTo(
-        openspace::Time::ref().convertTime("2000 JAN 03 11:00:00")
+        openspace::Time::convertTime("2000 JAN 03 11:00:00")
     );
     ASSERT_EQ(res.first, res.second);
 
     res = scheduler.progressTo(
-        openspace::Time::ref().convertTime("2000 JAN 03 12:00:00")
+        openspace::Time::convertTime("2000 JAN 03 12:00:00")
     );
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
 
     res = scheduler.progressTo(
-        openspace::Time::ref().convertTime("2000 JAN 03 12:01:00")
+        openspace::Time::convertTime("2000 JAN 03 12:01:00")
     );
     ASSERT_EQ(res.first, res.second);
 
     res = scheduler.progressTo(
-        openspace::Time::ref().convertTime("2000 JAN 03 12:00:00")
+        openspace::Time::convertTime("2000 JAN 03 12:00:00")
     );
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript1", *(res.first));
@@ -445,13 +445,13 @@ TEST_F(ScriptSchedulerTest, SameTime) {
     });
 
     auto res = scheduler.progressTo(
-        openspace::Time::ref().convertTime("2000 JAN 03 12:00:00")
+        openspace::Time::convertTime("2000 JAN 03 12:00:00")
     );
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
 
     res = scheduler.progressTo(
-        openspace::Time::ref().convertTime("2000 JAN 03 12:00:00")
+        openspace::Time::convertTime("2000 JAN 03 12:00:00")
     );
     ASSERT_EQ(res.first, res.second);
 }
@@ -473,23 +473,23 @@ TEST_F(ScriptSchedulerTest, MultiInnerJump) {
     });
 
     auto res = scheduler.progressTo(
-        openspace::Time::ref().convertTime("2000 JAN 03 10:00:00")
+        openspace::Time::convertTime("2000 JAN 03 10:00:00")
     );
     ASSERT_EQ(res.first, res.second);
 
     res = scheduler.progressTo(
-        openspace::Time::ref().convertTime("2000 JAN 03 11:00:00")
+        openspace::Time::convertTime("2000 JAN 03 11:00:00")
     );
     ASSERT_EQ(res.first, res.second);
 
     res = scheduler.progressTo(
-        openspace::Time::ref().convertTime("2000 JAN 03 13:00:00")
+        openspace::Time::convertTime("2000 JAN 03 13:00:00")
     );
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
 
     res = scheduler.progressTo(
-        openspace::Time::ref().convertTime("2000 JAN 03 12:30:00")
+        openspace::Time::convertTime("2000 JAN 03 12:30:00")
     );
     ASSERT_EQ(res.first, res.second);
 }
@@ -513,7 +513,7 @@ TEST_F(ScriptSchedulerTest, MultipleForwardSingleJumpMultipleLoad) {
 
     ScriptScheduler scheduler;
 
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     scheduler.loadScripts({
         { "1", testDictionary1 }
     });
@@ -522,14 +522,14 @@ TEST_F(ScriptSchedulerTest, MultipleForwardSingleJumpMultipleLoad) {
         { "1", testDictionary2 }
     });
 
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 02"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     ASSERT_EQ(res.first, res.second);
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 04"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 06"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript2", *(res.first));
 }
@@ -552,7 +552,7 @@ TEST_F(ScriptSchedulerTest, MultipleForwardOrderingMultipleLoad) {
 
     ScriptScheduler scheduler;
 
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     scheduler.loadScripts({
         { "1", testDictionary1 }
     });
@@ -560,10 +560,10 @@ TEST_F(ScriptSchedulerTest, MultipleForwardOrderingMultipleLoad) {
         { "1", testDictionary2 }
     });
 
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 02"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 02"));
     ASSERT_EQ(res.first, res.second);
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 06"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     ASSERT_EQ(2, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
     EXPECT_EQ("ForwardScript2", *(std::next(res.first)));
@@ -587,7 +587,7 @@ TEST_F(ScriptSchedulerTest, MultipleBackwardSingleJumpMultipleLoad) {
         { "BackwardScript", "BackwardScript2"s }
     };
 
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 07"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     scheduler.loadScripts({
         { "1", testDictionary1 }
     });
@@ -595,14 +595,14 @@ TEST_F(ScriptSchedulerTest, MultipleBackwardSingleJumpMultipleLoad) {
         { "1", testDictionary2 }
     });
 
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 06"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     ASSERT_EQ(res.first, res.second);
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 04"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript2", *(res.first));
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript1", *(res.first));
 }
@@ -625,7 +625,7 @@ TEST_F(ScriptSchedulerTest, MultipleBackwardOrderingMultipleLoad) {
         { "BackwardScript", "BackwardScript2"s }
     };
 
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 07"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     scheduler.loadScripts({
         { "1", testDictionary1 }
     });
@@ -633,10 +633,10 @@ TEST_F(ScriptSchedulerTest, MultipleBackwardOrderingMultipleLoad) {
         { "1", testDictionary2 }
     });
 
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 06"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 06"));
     ASSERT_EQ(res.first, res.second);
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     ASSERT_EQ(2, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript2", *(res.first));
     EXPECT_EQ("BackwardScript1", *(std::next(res.first)));
@@ -660,7 +660,7 @@ TEST_F(ScriptSchedulerTest, ForwardBackwardsMultipleLoad) {
         { "BackwardScript", "BackwardScript2"s }
     };
 
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     scheduler.loadScripts({
         { "1", testDictionary1 }
     });
@@ -668,18 +668,18 @@ TEST_F(ScriptSchedulerTest, ForwardBackwardsMultipleLoad) {
         { "1", testDictionary2 }
     });
 
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 04"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript1", *(res.first));
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 07"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     ASSERT_EQ(2, std::distance(res.first, res.second));
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 04"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("BackwardScript2", *(res.first));
 }
@@ -702,7 +702,7 @@ TEST_F(ScriptSchedulerTest, RewindMultipleLoad) {
         { "BackwardScript", "BackwardScript2"s }
     };
 
-    scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 01"));
+    scheduler.progressTo(openspace::Time::convertTime("2000 JAN 01"));
     scheduler.loadScripts({
         { "1", testDictionary1 }
     });
@@ -710,12 +710,12 @@ TEST_F(ScriptSchedulerTest, RewindMultipleLoad) {
         { "1", testDictionary2 }
     });
 
-    auto res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 07"));
+    auto res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 07"));
     ASSERT_EQ(2, std::distance(res.first, res.second));
 
     scheduler.rewind();
 
-    res = scheduler.progressTo(openspace::Time::ref().convertTime("2000 JAN 04"));
+    res = scheduler.progressTo(openspace::Time::convertTime("2000 JAN 04"));
     ASSERT_EQ(1, std::distance(res.first, res.second));
     EXPECT_EQ("ForwardScript1", *(res.first));
 }

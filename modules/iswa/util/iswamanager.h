@@ -35,6 +35,8 @@
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 #include <ccmc/Kameleon.h>
 #endif
+
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/downloadmanager.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/rendering/renderable.h>
@@ -43,6 +45,7 @@
 #include <openspace/util/spicemanager.h>
 #include <openspace/properties/selectionproperty.h>
 #include <modules/iswa/ext/json/json.hpp>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
 
 
@@ -92,7 +95,7 @@ public:
 
     std::future<DownloadManager::MemoryFile> fetchImageCygnet(int id, double timestamp);
     std::future<DownloadManager::MemoryFile> fetchDataCygnet(int id, double timestamp);
-    std::string iswaUrl(int id, double timestamp = Time::ref().j2000Seconds(), std::string type = "image");
+    std::string iswaUrl(int id, double timestamp = OsEng.timeManager().time().j2000Seconds(), std::string type = "image");
 
     std::shared_ptr<IswaBaseGroup> iswaGroup(std::string name);
     

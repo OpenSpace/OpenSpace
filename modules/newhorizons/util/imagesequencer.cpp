@@ -28,6 +28,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/directory.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/engine/openspaceengine.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <modules/newhorizons/util/decoder.h>
 
@@ -83,14 +85,10 @@ bool ImageSequencer::isReady() {
     return _hasData;
 }
 
-void ImageSequencer::updateSequencer(double time) {
-    if (Time::ref().timeJumped() && Time::ref().deltaTime() == 0) {
-        Time::ref().setDeltaTime(0.1);
-    } // Time is not properly updated when time jump with dt = 0 
-
-    if (_currentTime != time) {
+void ImageSequencer::updateSequencer(const Time& time) {
+    if (_currentTime != time.j2000Seconds()) {
         _previousTime = _currentTime;
-        _currentTime = time;
+        _currentTime = time.j2000Seconds();
     }
 }
 
@@ -279,7 +277,7 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
 
     // check if this instance is either in range or 
     // a valid candidate to recieve data 
-    if (!instrumentActive(instrumentRequest) && !Time::ref().timeJumped()) return false;
+    if (!instrumentActive(instrumentRequest) && !OsEng.timeManager().time().timeJumped()) return false;
 
 
     //if (!Time::ref().timeJumped() && projectee == getCurrentTarget().second)

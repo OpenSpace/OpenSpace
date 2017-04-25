@@ -32,7 +32,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -465,7 +464,7 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
 
     _projectionComponent.update();
 
-    _time = Time::ref().j2000Seconds();
+    _time = data.time.j2000Seconds();
     _capture = false;
 
     if (openspace::ImageSequencer::ref().isReady()){

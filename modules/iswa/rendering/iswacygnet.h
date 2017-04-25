@@ -34,6 +34,9 @@
 #include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/transferfunction.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
 
 #include <modules/iswa/rendering/iswabasegroup.h>
@@ -115,7 +118,7 @@ protected:
      * this should be the data file.
      * @return true if update was successfull
      */
-    virtual bool downloadTextureResource(double timestamp = Time::ref().j2000Seconds()) = 0;
+    virtual bool downloadTextureResource(double timestamp = OsEng.timeManager().time().j2000Seconds()) = 0;
     virtual bool readyToRender() const = 0;
      /**
      * should set all uniforms needed to render

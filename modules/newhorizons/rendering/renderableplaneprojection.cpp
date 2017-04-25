@@ -159,7 +159,7 @@ void RenderablePlaneProjection::render(const RenderData& data) {
 }
 
 void RenderablePlaneProjection::update(const UpdateData& data) {
-    double time = data.time;
+    double time = data.time.j2000Seconds();
     const Image img = openspace::ImageSequencer::ref().getLatestImageForInstrument(_instrument);
     
     if (img.path == "")

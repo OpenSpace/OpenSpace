@@ -41,6 +41,7 @@
 
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
 
@@ -280,14 +281,12 @@ void RenderEngine::deinitialize() {
 }
 
 void RenderEngine::updateScene() {
+	const Time& currentTime = OsEng.timeManager().time();
     _scene->update({
         glm::dvec3(0),
-        glm::dmat3(1),
-        1,
-        Time::ref().j2000Seconds(),
-        Time::ref().deltaTime(),
-        Time::ref().paused(),
-        Time::ref().timeJumped(),
+		glm::dmat3(1),
+		1,
+		currentTime,
         _performanceManager != nullptr
     });
     
@@ -460,8 +459,9 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 }
 
 void RenderEngine::postDraw() {
-    if (Time::ref().timeJumped()) {
-        Time::ref().setTimeJumped(false);
+	Time& currentTime = OsEng.timeManager().time();
+    if (currentTime.timeJumped()) {
+		currentTime.setTimeJumped(false);
     }
 
     if (_shouldTakeScreenshot) {
@@ -815,7 +815,7 @@ void RenderEngine::renderInformation() {
                 *_fontDate,
                 penPosition,
                 "Date: %s",
-                Time::ref().UTC().c_str()
+                OsEng.timeManager().time().UTC().c_str()
             );
         }
         if (_showInfo && _fontInfo) {
@@ -823,7 +823,7 @@ void RenderEngine::renderInformation() {
                 *_fontInfo,
                 penPosition,
                 "Simulation increment (s): %.3f",
-                Time::ref().deltaTime()
+                OsEng.timeManager().time().deltaTime()
             );
 
             FrametimeType frametimeType = FrametimeType(_frametimeType.value());
@@ -908,7 +908,7 @@ void RenderEngine::renderInformation() {
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
-        double currentTime = Time::ref().j2000Seconds();
+        double currentTime = OsEng.timeManager().time().j2000Seconds();
 
         if (MissionManager::ref().hasCurrentMission()) {
 

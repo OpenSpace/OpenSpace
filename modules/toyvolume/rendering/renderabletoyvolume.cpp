@@ -121,7 +121,7 @@ void RenderableToyVolume::update(const UpdateData& data) {
         _raycaster->setColor(_color);
         _raycaster->setStepSize(_stepSize);
         _raycaster->setModelTransform(transform);
-        _raycaster->setTime(data.time);
+        _raycaster->setTime(data.time.j2000Seconds());
     }
 }
 

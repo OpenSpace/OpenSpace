@@ -140,7 +140,7 @@ bool RenderablePath::isReady() const {
 }
 
 void RenderablePath::render(const RenderData& data) {
-    double time = openspace::Time::ref().j2000Seconds();
+    double time = data.time.j2000Seconds();
     if (_start > time || _stop < time)
         return;
 
@@ -182,7 +182,7 @@ void RenderablePath::render(const RenderData& data) {
 }
 
 void RenderablePath::update(const UpdateData& data) {
-    if (data.isTimeJump)
+    if (data.time.timeJumped())
         _needsSweep = true;
 
     if (_needsSweep) {

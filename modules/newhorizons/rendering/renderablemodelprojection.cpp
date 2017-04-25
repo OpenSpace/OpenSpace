@@ -276,7 +276,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
     if (_depthFboProgramObject->isDirty())
         _depthFboProgramObject->rebuildFromFile();
 
-    _time = data.time;
+    _time = data.time.j2000Seconds();
 
     if (openspace::ImageSequencer::ref().isReady()) {
         openspace::ImageSequencer::ref().updateSequencer(_time);

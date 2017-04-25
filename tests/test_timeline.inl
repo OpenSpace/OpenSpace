@@ -22,32 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/include/guitimecomponent.h>
+#include "gtest/gtest.h"
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/util/timemanager.h>
+#include <openspace/util/timeline.h>
 #include <openspace/util/time.h>
 
-#include "imgui.h"
+using namespace openspace;
 
-namespace openspace {
-namespace gui {
+class TimelineTest : public testing::Test {};
 
-GuiTimeComponent::GuiTimeComponent()
-    : GuiComponent("Time")
-{}
+TEST_F(TimelineTest, Basic) {
+    Timeline<float> timeline;
+    timeline.addKeyframe(0.0, 0.f);
+    timeline.addKeyframe(1.0, 1.f);
 
-void GuiTimeComponent::render() {
-    float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
-    
-    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -50000.f, 50000.f);
-    if (changed) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
+    ASSERT_EQ(timeline.firstKeyframeAfter(0.0)->payload, 1.f) << "Incorrect keyframe returned";
+    ASSERT_EQ(timeline.firstKeyframeAfter(0.0, false)->payload, 1.f) << "Incorrect keyframe returned";
+    ASSERT_EQ(timeline.firstKeyframeAfter(0.0, true)->payload, 0.f) << "Incorrect keyframe returned";
+
+    ASSERT_EQ(timeline.lastKeyframeBefore(1.0)->payload, 0.f) << "Incorrect keyframe returned";
+    ASSERT_EQ(timeline.lastKeyframeBefore(1.0, false)->payload, 0.f) << "Incorrect keyframe returned";
+    ASSERT_EQ(timeline.lastKeyframeBefore(1.0, true)->payload, 1.f) << "Incorrect keyframe returned";
+
+    timeline.removeKeyframesBefore(0.0);
+    ASSERT_EQ(timeline.nKeyframes(), 2);
+
+    timeline.removeKeyframesBefore(0.0, false);
+    ASSERT_EQ(timeline.nKeyframes(), 2);
+
+    timeline.removeKeyframesBefore(0.0, true);
+    ASSERT_EQ(timeline.nKeyframes(), 1);
+
+    timeline.removeKeyframesAfter(1.0);
+    ASSERT_EQ(timeline.nKeyframes(), 1);
+
+    timeline.removeKeyframesAfter(1.0, false);
+    ASSERT_EQ(timeline.nKeyframes(), 1);
+
+    timeline.removeKeyframesAfter(1.0, true);
+    ASSERT_EQ(timeline.nKeyframes(), 0);
 }
 
-} // gui
-} // openspace
+TEST_F(TimelineTest, Time) {
+    Timeline<Time> timeline;
+    timeline.addKeyframe(0.0, Time::now());
+    timeline.addKeyframe(1.0, Time::now());
+}

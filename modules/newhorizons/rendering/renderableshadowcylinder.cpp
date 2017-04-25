@@ -137,11 +137,11 @@ void RenderableShadowCylinder::render(const RenderData& data){
 }
 
 void RenderableShadowCylinder::update(const UpdateData& data) {
-    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, data.time);
+    _stateMatrix = SpiceManager::ref().positionTransformMatrix(_bodyFrame, _mainFrame, data.time.j2000Seconds());
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
     }
-    createCylinder(data.time);
+    createCylinder(data.time.j2000Seconds());
 }
 
 glm::vec4 psc_addition(glm::vec4 v1, glm::vec4 v2) {
