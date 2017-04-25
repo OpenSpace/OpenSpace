@@ -94,10 +94,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgenerationtask.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgeneration.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/imgreader.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshwriter.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.h
@@ -191,11 +187,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.cpp
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgenerationtask.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgeneration.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/imgreader.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshwriter.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.cpp
