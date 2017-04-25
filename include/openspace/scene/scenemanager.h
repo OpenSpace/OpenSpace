@@ -43,6 +43,6 @@ private:
     std::vector<std::unique_ptr<Scene>> _scenes;
 };
 
-}
+} // namespace
 
-#endif  // __OPENSPACE_CORE___SCENEMANAGER___H__
+#endif // __OPENSPACE_CORE___SCENEMANAGER___H__
