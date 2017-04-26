@@ -70,6 +70,8 @@ private:
     // properties::FloatProperty _minLength;
     properties::FloatProperty _clippingRadius;
 
+    properties::IntProperty _maximumVertices;
+
     properties::OptionProperty _integrationMethod;
 
     properties::Vec2Property _domainX;

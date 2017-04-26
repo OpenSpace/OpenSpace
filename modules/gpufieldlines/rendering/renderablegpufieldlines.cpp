@@ -80,6 +80,7 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _clippingRadius("clippingRadius", "Clipping Radius", 3.0, 1.0, 5.0),
       // _minLength("minLength", "Min Step Size", 0.0, 0.0, 4.0),
       _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
+      _maximumVertices("numMaxVertices", "Max Number Of Vertices", 1, 1, 10),
       _showGrid("showGrid", "Show Grid", false),
       _isMorphing("isMorphing", "Morphing", true),
       _domainX("domainX", "Domain Limits X-axis"),
@@ -117,6 +118,14 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
 
     _integrationMethod.addOption(integrationSimpleEuler, "Simple Euler");
     _integrationMethod.addOption(integrationRungeKutta4, "Runge-Kutta 4th Order");
+
+    // GEOMETRY SHADER CAN ONLY OUTPUT A SMALL NUMBER OF VERTICES
+    GLint max_vertices, max_components;
+    glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES, &max_vertices);
+    glGetIntegerv(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, &max_components);
+    const int NUM_GS_OUTPUT_COMPONENTS_PER_VERTEX = 5; // Output components per vertex from Geometry Shader.. TODO: change this const if GS outputs are changed!
+    _maximumVertices.setMaxValue(max_components / NUM_GS_OUTPUT_COMPONENTS_PER_VERTEX);
+    _maximumVertices.setValue(max_components / NUM_GS_OUTPUT_COMPONENTS_PER_VERTEX);
 }
 
 bool RenderableGpuFieldlines::isReady() const {
@@ -394,11 +403,6 @@ bool RenderableGpuFieldlines::initialize() {
             // to prevent vector from going out of bounds later.
             _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
         }
-
-        // GEOMETRY SHADER CAN ONLY OUTPUT A SMALL NUMBER OF VERTICES
-        GLint max_vertices, max_components;
-        glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES, &max_vertices);
-        glGetIntegerv(GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS, &max_components);
     }
 
     _program = OsEng.renderEngine().buildRenderProgram(
@@ -436,6 +440,7 @@ bool RenderableGpuFieldlines::initialize() {
     addProperty(_showGrid);
     addProperty(_isMorphing);
     addProperty(_integrationMethod);
+    addProperty(_maximumVertices);
     addProperty(_domainX);
     addProperty(_domainY);
     addProperty(_domainZ);
@@ -520,6 +525,7 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
 
         _program->setUniform("clippingRadius", _clippingRadius);
         _program->setUniform("integrationMethod", _integrationMethod);
+        _program->setUniform("maxVertices", _maximumVertices);
         // _program->setUniform("minLength", _minLength);
         // _program->setUniform("bMaxs", _bMaxs);
         _program->setUniform("domainMins", _domainMins);
