@@ -76,9 +76,9 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _vertexColorBuffer(0),
       _gridVAO(0),
       _gridVBO(0),
-      _stepSize("stepSize", "Step coefficient", 0.2, 0.0001, 3.0),
-      _clippingRadius("clippingRadius", "Clipping Radius", 3.0, 1.0, 5.0),
-      // _minLength("minLength", "Min Step Size", 0.0, 0.0, 4.0),
+      _stepSize("stepSize", "Step Coefficient", 0.2, 0.0001, 1.0),
+      _stepMultiplier("stepMultiplier", "Step Multiplier", 1, 1, 100000),
+      _clippingRadius("clippingRadius", "Clipping Radius", 0.1, 0.0, 5.0),
       _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
       _maximumVertices("numMaxVertices", "Max Number Of Vertices", 1, 1, 10),
       _showGrid("showGrid", "Show Grid", false),
@@ -374,6 +374,7 @@ bool RenderableGpuFieldlines::initialize() {
     addProperty(_showSeedPoints);
     addProperty(_seedPointSize);
     addProperty(_clippingRadius);
+    addProperty(_stepMultiplier);
     addProperty(_showGrid);
     addProperty(_isMorphing);
     addProperty(_integrationMethod);
@@ -506,11 +507,11 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         // WE THEREFORE SPLIT UP THE TRACING AND RENDERING OF THE FIELDLINES INTO 2 PARTS
         // THIS ALLOWS US TO GET TWICE AS MUCH
         // Forward tracing
-        _program->setUniform("stepSize", _stepSize);
+        _program->setUniform("stepSize", _stepSize*_stepMultiplier);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>( _seedPoints.size() ) );
 
         // Backwards tracing
-        _program->setUniform("stepSize", -_stepSize);
+        _program->setUniform("stepSize", -_stepSize*_stepMultiplier);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>( _seedPoints.size() ) );
 
         _program->deactivate();
