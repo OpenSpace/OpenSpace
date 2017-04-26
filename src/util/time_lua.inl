@@ -78,7 +78,7 @@ int time_deltaTime(lua_State* L) {
  */
 int time_togglePause(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 1) {
+    if (nArguments != 0) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 

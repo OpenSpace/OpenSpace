@@ -512,7 +512,6 @@ bool GUI::mouseWheelCallback(double position) {
 bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
     const int keyIndex = static_cast<int>(key);
     if (keyIndex < 0) {
-        LERROR("Key of index '" << keyIndex << "' was negative");
         return false;
     }
 
