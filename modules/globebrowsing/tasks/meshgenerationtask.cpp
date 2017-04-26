@@ -44,17 +44,19 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 	MeshGenerationTask::MeshGenerationTask(const ghoul::Dictionary & dictionary) {
-		ghoul_assert(dictionary.getValue(_solname, _inputSol), "Need to specify Name");
-		ghoul_assert(dictionary.getValue(_inputPath, _root), "Need to specify path to models");
+		dictionary.getValue(_solname, _inputSol);
+		dictionary.getValue(_inputPath, _root);
+
+		ghoul_assert(_inputSol.empty(), "Need to specify Name");
+		ghoul_assert(_root.empty(), "Need to specify path to models");
 
 		std::transform(_inputSol.begin(), _inputSol.end(), _inputSol.begin(), ::tolower);
-
+		
 		_inputTxt = _root + "/binaryfiles/" + _inputSol + "/" + _inputSol + ".txt";
-			
+		
 		_filenames = readFilenames(_inputTxt);
 		
 		_outputPath = _root + "/models/" + _inputSol;
-
 	}
 
 	std::string MeshGenerationTask::description() {
@@ -76,24 +78,21 @@ namespace globebrowsing {
 		extensions.setValue("TextureExtension", extension);
 		extensions.setValue("ModelFile", ".obj");
 		extensions.setValue("BinaryFile", ".IMG");
-
 		for (auto f : _filenames) {
-			std::string binary_path = _root + "/binaryfiles/" + _inputSol + "/" + f + ".IMG";
+
+			bool couldDownload = true;
+			std::string binary_path = _root + "binaryfiles/" + _inputSol + "/" + f + ".IMG";
 			std::string output_path = _root + "models/";
 			std::string obj_path = MeshGeneration::correctPath(f, output_path) + f + ".obj";
 
 			if (FileSys.fileExists(obj_path)) {
-				LERROR("THIS FILE ALREADY EXISTS");
+				// Obj file already exists
 				continue;
 			}
 
 			if (!FileSys.fileExists(binary_path)) {
-				LINFO("Downloading file " << f);
-
-				downloadBinaryFile(f, binary_path);
-			}
-			else {
-				LINFO("File found locally, using that one instead: " << f);
+				// Downloading the file from the PDS-server
+				couldDownload = downloadBinaryFile(f, binary_path);
 			}
 
 			ghoul::Dictionary meshDic;
@@ -102,7 +101,11 @@ namespace globebrowsing {
 			meshDic.setValue("OutputPath", output_path);
 			meshDic.setValue("Extension", extensions);
 
-			MeshGeneration::generateMeshFromBinary(meshDic);
+			if (couldDownload) {
+				MeshGeneration::generateMeshFromBinary(meshDic);
+			} else {
+				LERROR("Obj file not created");
+			}
 
 			//modelgeometry::ModelGeometry::createFromDictionary(model_dic);
 			k++;
@@ -115,6 +118,7 @@ namespace globebrowsing {
 
 	std::vector<std::string> MeshGenerationTask::readFilenames(const std::string filename) {
 		ghoul_assert(!filename.empty(), "Filename not present");
+		
 		std::vector<std::string> filenames;
 		std::ifstream fs(filename.c_str());
 		std::string line;
