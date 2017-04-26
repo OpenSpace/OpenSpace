@@ -144,6 +144,8 @@ class TouchInteraction : public properties::PropertyOwner
 		
 		LMstat _lmstat;
 		glm::dvec3 _centroid;
+		glm::dquat _toSlerp;
+		double _time;
 		VelocityStates _vel;
 		ScaleFactor _friction;
 		ScaleFactor _sensitivity;

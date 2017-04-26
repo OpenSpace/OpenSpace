@@ -33,8 +33,8 @@ void levmarq_init(LMstat *lmstat) {
 	lmstat->verbose = 0;
 	lmstat->max_it = 5000;
 	lmstat->init_lambda = 1e-6;
-	lmstat->up_factor = 5;
-	lmstat->down_factor = 5;
+	lmstat->up_factor = 10;
+	lmstat->down_factor = 10;
 	lmstat->target_derr = 1e-12;
 }
 

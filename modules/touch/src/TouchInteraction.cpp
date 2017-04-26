@@ -65,6 +65,7 @@ TouchInteraction::TouchInteraction()
 	_sensitivity{ 2.0, 0.1, 0.1, 0.1, 0.4 }, 
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
 	_currentRadius{ 1.0 },
+	_time{ 0.0 },
 	_directTouchMode{ false }, _tap{ false }
 {
 	addProperty(_touchScreenSize);
@@ -169,24 +170,26 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 
 		return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
 	};
-	// Gradient (finite derivative) of distToMinimize w.r.t par
+	// Gradient of distToMinimize w.r.t par (using central difference)
 	auto gradient = [](double* g, double* par, int x, void* fdata) {
 		FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
 		double f0 = ptr->distToMinimize(par, x, fdata);
-		double f1, der, minStep = 1e-11;
+		double f1, f2, der, minStep = 1e-11;
 		glm::dvec3 camPos = ptr->camera->positionVec3();
 		glm::dvec3 selectedPoint = (ptr->node->rotationMatrix() * ptr->selectedPoints.at(x)) + ptr->node->worldPosition();
 		double h = minStep * glm::distance(camPos, selectedPoint);
 		double* dPar = new double[ptr->nDOF];
+		for (int i = 0; i < ptr->nDOF; ++i) {
+			dPar[i] = par[i];
+		}
 
 		for (int i = 0; i < ptr->nDOF; ++i) {
-			for (int j = 0; j < ptr->nDOF; ++j) {
-				dPar[j] = par[j];
-			}
 			h = (i == 2) ? 1e-4 : h; // the 'zoom'-DOF is so big a smaller step creates NAN
 			dPar[i] += h;
 			f1 = ptr->distToMinimize(dPar, x, fdata);
+			dPar[i] -= h;
 			der = (f1 - f0) / h;
+
 			g[i] = (i > 1 && i < 4) ? der : der / abs(der);
 		}
 		delete[] dPar;
@@ -357,14 +360,14 @@ void TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std:
 		_action.pick = false;
 	}
 	else {
-		if (std::abs(dist - lastDist)/list.at(0).getMotionSpeed() < 0.01 && list.size() == 2) {
+		if (std::abs(dist - lastDist)/list.at(0).getMotionSpeed() < 0.01 && list.size() == 3) {
 			_action.rot = false;
 			_action.pinch = false;
 			_action.pan = true;
 			_action.roll = false;
 			_action.pick = false;
 		}
-		else if (list.size() > 2 && std::abs(minDiff) < 0.0008) {
+		else if (list.size() > 1 && std::abs(minDiff) < 0.0008) { // if one finger is still and another moving, we have roll
 			_action.rot = false;
 			_action.pinch = false;
 			_action.pan = false;
@@ -428,33 +431,19 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 		if (_selected.size() == 1 && _selected.at(0).node != _focusNode) {
 			_focusNode = _selected.at(0).node; // rotate camera to look at new focus
 			OsEng.interactionHandler().setFocusNode(_focusNode); // cant do setFocusNode since TouchInteraction is not subclass of InteractionMode
-			glm::dvec3 camToFocus = glm::normalize(_focusNode->worldPosition() - _camera->positionVec3());
-			glm::dvec3 camForward = glm::normalize(_camera->viewDirectionWorldSpace());
+			glm::dvec3 camToFocus = _focusNode->worldPosition() - _camera->positionVec3();
 			glm::dvec3 camUp = glm::normalize(_camera->lookUpVectorWorldSpace());
-			glm::dvec3 camRight = glm::normalize(glm::cross(camUp, camForward));
-			
-			
-			glm::dvec2 angles = glm::dvec2(0.0);
+			glm::dvec3 camForward = glm::normalize(_camera->viewDirectionWorldSpace());
 
-
-			glm::dvec3 directionToCenter = normalize(_focusNode->worldPosition() - _camera->positionVec3());
-			glm::dvec3 lookUp = _camera->lookUpVectorWorldSpace();
-			glm::dvec3 camDirection = _camera->viewDirectionWorldSpace();
-
-			// Make a representation of the rotation quaternion with local and global rotations
-			glm::dmat4 lookAtMat = lookAt(
-				glm::dvec3(0, 0, 0),
-				directionToCenter,
-				glm::normalize(camDirection + lookUp)); // To avoid problem with lookup in up direction
-			glm::dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
-			glm::dquat localCamRot = inverse(globalCamRot) * _camera->rotationQuaternion() * glm::dquat(glm::dvec3(angles.y, angles.x, 0.0));
-
-			_camera->setRotation(globalCamRot * localCamRot);
-			///
-
-
+			double angle = glm::angle(camForward, camToFocus);
+			glm::dvec3 axis = glm::normalize(glm::cross(camForward, camToFocus));
+			_toSlerp.x = axis.x * sin(angle / 2.0);
+			_toSlerp.y = axis.y * sin(angle / 2.0);
+			_toSlerp.z = axis.z * sin(angle / 2.0);
+			_toSlerp.w = cos(angle / 2.0);
+			_time = 0.0;
 		}
-		else { // should zoom in to current _selected.coordinates position
+		else { // should zoom in to current _selected.coordinates position but not further than _directTouchMode activation
 			double dist = glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) - _focusNode->boundingSphere();
 			double startDecline = _focusNode->boundingSphere() / (0.15 * _projectionScaleFactor);
 			double factor = 2.0;
@@ -507,6 +496,12 @@ void TouchInteraction::step(double dt) {
 			dvec3 eulerAngles(_vel.localRot.y*dt, _vel.localRot.x*dt, 0);
 			dquat rotationDiff = dquat(eulerAngles);
 			localCamRot = localCamRot * rotationDiff;
+
+			// if we have chosen a new focus node
+			if (_time < 1) {
+				_time += 0.5 * dt;
+				localCamRot = slerp(localCamRot, _toSlerp, _time);
+			}
 		}
 		{ // Orbit (global rotation)
 			dvec3 eulerAngles(_vel.globalRot.y*dt, _vel.globalRot.x*dt, 0);
