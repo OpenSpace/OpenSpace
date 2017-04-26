@@ -43,6 +43,7 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gpufieldline_flow_direction_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gpufieldline_flow_direction_gs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/gpufieldline_flow_direction_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/seedpoint_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/linedraw_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/linedraw_fs.glsl
 )
