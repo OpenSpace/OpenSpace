@@ -24,6 +24,7 @@
 
 #version __CONTEXT__
 
+uniform bool isSpherical;
 uniform mat4 modelViewProjection;
 //uniform mat4 modelTransform;
 // uniform int time;
@@ -56,7 +57,12 @@ void main() {
     //position_meters =  modelViewProjection * position_meters;
     //gl_Position = z_normalization(position_meters);
 
-    float scale = 6371000.0;//695700000.0;//150000000000.0;//6371000.0;
+    float scale; // = 1.0;//6371000.0;//695700000.0;//150000000000.0;//6371000.0;
+    if (isSpherical) {
+        scale = 149597871000.0;
+    } else {
+        scale = 6371000.0;
+    }
     //vs_position = vec4(in_position.xyz * scale, 1); // TODO powerscaleify?
     vec4 position_in_meters = vec4(in_position.xyz * scale, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;

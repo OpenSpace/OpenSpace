@@ -123,6 +123,7 @@ private:
     float _stateProgress;
 
     std::vector<double> _startTimes;
+    void generateUniformSphericalGrid();
     void generateUniformCartesian3DGrid();
 };
 

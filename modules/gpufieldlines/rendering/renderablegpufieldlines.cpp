@@ -300,7 +300,12 @@ bool RenderableGpuFieldlines::initialize() {
             // _startTimes.push_back(479649600.0); // March 15th 2015 00:00:00.000
 
             if (i == 0) {
-                generateUniformCartesian3DGrid();
+                // TODO:
+                // if (model == "batsrus") {
+                    generateUniformCartesian3DGrid();
+                // } else if (model == "enlil") {
+                    // generateUniformSphericalGrid();
+                // }
             }
         }
 
@@ -485,6 +490,9 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         if (_showGrid) {
             _gridProgram->activate();
 
+            // TODO:
+            // if enlil its supposed to be true.. implement an _isSpherical variable
+            _gridProgram->setUniform("isSpherical", false);
             _gridProgram->setUniform("modelViewProjection",
                     data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
 
@@ -613,7 +621,93 @@ void RenderableGpuFieldlines::updateActiveStateIndex() {
     }
 }
 
+// TODO MOVE SOMEWHERE
+glm::vec3 rLonLatToCartesian(glm::vec3 p) {
+    float r         = p.x;
+    float lat_rad   = DEG_TO_RAD   * p.y;
+    float lon_rad   = DEG_TO_RAD   * p.z;
+    float r_cosLat  = r * cos(lat_rad);
+    return glm::vec3(r_cosLat * cos(lon_rad),
+                     r_cosLat * sin(lon_rad),
+                     r * sin(lat_rad));
+}
+
 // FOR DEBUGGING PURPOSES
+void RenderableGpuFieldlines::generateUniformSphericalGrid() {
+
+    glm::vec3 deltas = (_domainMaxs - _domainMins) / glm::vec3(
+                                                        static_cast<float>(_dimensions.x),
+                                                        static_cast<float>(_dimensions.y),
+                                                        static_cast<float>(_dimensions.z));
+
+    int segmentResolution = 1;
+    int lStart = 0;
+    // LINES parallel to x axis (radius, r)
+    for (int z = 0; z < _dimensions.z; ++z) {
+        for (int y = 0; y < _dimensions.y + 1; ++y) {
+            _gridStartPos.push_back(lStart);
+            _gridVertices.push_back(rLonLatToCartesian(glm::vec3(_domainMins.x,
+                                              _domainMins.y + static_cast<float>(y) * deltas.y,
+                                              _domainMins.z + static_cast<float>(z) * deltas.z)));
+            _gridVertices.push_back(rLonLatToCartesian(glm::vec3(_domainMaxs.x,
+                                              _domainMins.y + static_cast<float>(y) * deltas.y,
+                                              _domainMins.z + static_cast<float>(z) * deltas.z)));
+            lStart += 2;
+            _gridLineCount.push_back(2);
+        }
+    }
+
+    // RINGS (latitude, theta)
+    for (int x = 0; x < _dimensions.x + 1; ++x) {
+        for (int z = 0; z < _dimensions.z + 1; ++z) {
+            _gridStartPos.push_back(lStart);
+            int count = 0;
+            for (int y = 0; y < _dimensions.y + 1; ++y) {
+                // for (int s = 0; s < segmentResolution + 1; ++s) {
+
+                    _gridVertices.push_back(rLonLatToCartesian(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                                                      _domainMins.y + static_cast<float>(y) * deltas.y /*+ s / segmentResolution*/,
+                                                      _domainMins.z + static_cast<float>(z) * deltas.z)));
+                    // _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                    //                                   _domainMins.y,
+                    //                                   _domainMins.z + static_cast<float>(z) * deltas.z));
+                    // _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                    //                                   _domainMaxs.y,
+                    //                                   _domainMins.z + static_cast<float>(z) * deltas.z));
+                    ++lStart;// += 2+segmentResolution;
+               ++count;
+                // }
+            }
+            _gridLineCount.push_back(count);
+        }
+    }
+
+    // // RINGS (longitude, phi)
+    for (int x = 0; x < _dimensions.x + 1; ++x) {
+        for (int y = 0; y < _dimensions.y + 1; ++y) {
+            _gridStartPos.push_back(lStart);
+            int count = 0;
+            for (int z = 0; z < _dimensions.z + 1; ++z) {
+                // for (int s = 0; s < segmentResolution + 1; ++s) {
+
+                _gridVertices.push_back(rLonLatToCartesian(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                    _domainMins.y + static_cast<float>(y) * deltas.y,
+                    _domainMins.z + static_cast<float>(z) * deltas.z /*+ s / segmentResolution*/)));
+                // _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                //                                   _domainMins.y,
+                //                                   _domainMins.z + static_cast<float>(z) * deltas.z));
+                // _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
+                //                                   _domainMaxs.y,
+                //                                   _domainMins.z + static_cast<float>(z) * deltas.z));
+                ++lStart;// += 2+segmentResolution;
+                ++count;
+                // }
+            }
+            _gridLineCount.push_back(count);
+        }
+    }
+}
+
 void RenderableGpuFieldlines::generateUniformCartesian3DGrid() {
 
     glm::vec3 deltas = (_domainMaxs - _domainMins) / glm::vec3(
