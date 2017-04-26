@@ -54,6 +54,7 @@ KameleonVolumeReader::KameleonVolumeReader(const std::string& path)
 
     _model = _kameleon.model;
     _interpolator = std::unique_ptr<ccmc::Interpolator>(_model->createNewInterpolator());
+    _kameleonInterpolator = _kameleon.createNewInterpolator();
 }
 
 std::unique_ptr<RawVolume<float>> KameleonVolumeReader::readFloatVolume(
@@ -103,6 +104,84 @@ std::unique_ptr<RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     }
 
     return volume;
+}
+
+std::unique_ptr<RawVolume<glm::vec3>> KameleonVolumeReader::readVec3Volume(
+    const glm::uvec3 & dimensions,
+    const std::vector<std::string> & variables,
+    const glm::vec3 & lowerBound,
+    const glm::vec3 & upperBound) const
+{
+    glm::vec3 min, max;
+    return readVec3Volume(dimensions, variables, lowerBound, upperBound, min, max);
+}
+
+std::unique_ptr<RawVolume<glm::vec3>> KameleonVolumeReader::readVec3Volume(
+    const glm::uvec3 & dimensions,
+    const std::vector<std::string> & variables,
+    const glm::vec3 & lowerBound,
+    const glm::vec3 & upperBound,
+    glm::vec3& newMinValues,
+    glm::vec3& newMaxValues) const
+{
+    newMinValues = glm::vec3(FLT_MAX);
+    newMaxValues = glm::vec3(FLT_MIN);
+    auto volume = std::make_unique<RawVolume<glm::vec3>>(dimensions);
+    const glm::vec3 dims = volume->dimensions();
+    const glm::vec3 diff = upperBound - lowerBound;
+
+    _model->loadVariable(variables[0]);
+    _model->loadVariable(variables[1]);
+    _model->loadVariable(variables[2]);
+
+    glm::vec3* data = volume->data();
+
+    for (size_t index = 0; index < volume->nCells(); index++) {
+        glm::vec3 coords = volume->indexToCoords(index);
+        glm::vec3 coordsZeroToOne = coords / dims;
+        glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
+        float dx, dy, dz;
+
+        data[index].x = _kameleonInterpolator->interpolate(
+            variables[0],
+            volumeCoords[0],
+            volumeCoords[1],
+            volumeCoords[2],
+            dx, dy, dz);
+
+        data[index].y = _kameleonInterpolator->interpolate(
+            variables[1],
+            volumeCoords[0],
+            volumeCoords[1],
+            volumeCoords[2]);
+
+        data[index].z = _kameleonInterpolator->interpolate(
+            variables[2],
+            volumeCoords[0],
+            volumeCoords[1],
+            volumeCoords[2]);
+
+        if (data[index].x < newMinValues.x) {
+            newMinValues.x = data[index].x;
+        }
+        if (data[index].x > newMaxValues.x) {
+            newMaxValues.x = data[index].x;
+        }
+        if (data[index].y < newMinValues.y) {
+            newMinValues.y = data[index].y;
+        }
+        if (data[index].y > newMaxValues.y) {
+            newMaxValues.y = data[index].y;
+        }
+        if (data[index].z < newMinValues.z) {
+            newMinValues.z = data[index].z;
+        }
+        if (data[index].z > newMaxValues.z) {
+            newMaxValues.z = data[index].z;
+        }
+    }
+
+    return std::move(volume);
 }
 
 std::vector<std::string> KameleonVolumeReader::gridVariableNames() const {

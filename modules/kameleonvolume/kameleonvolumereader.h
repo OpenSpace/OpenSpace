@@ -31,10 +31,10 @@
 #include <ghoul/misc/dictionary.h>
 
 #include <ccmc/Kameleon.h>
-#include <ccmc/Interpolator.h>
 
 namespace ccmc {
     class Model;
+    class Interpolator;
 }
 
 namespace openspace {
@@ -57,6 +57,20 @@ public:
         float& newMinValue,
         float& newMaxValue) const;
 
+    std::unique_ptr<RawVolume<glm::vec3>> readVec3Volume(
+        const glm::uvec3& dimensions,
+        const std::vector<std::string> & variables,
+        const glm::vec3& lowerBound,
+        const glm::vec3& upperBound) const;
+
+    std::unique_ptr<RawVolume<glm::vec3>> readVec3Volume(
+        const glm::uvec3& dimensions,
+        const std::vector<std::string> & variables,
+        const glm::vec3& lowerBound,
+        const glm::vec3& upperBound,
+        glm::vec3& newMinValue,
+        glm::vec3& newMaxValue) const;
+
     ghoul::Dictionary readMetaData() const;
     float minValue(const std::string& variable) const;
     float maxValue(const std::string& variable) const;
@@ -75,7 +89,7 @@ private:
     ccmc::Kameleon _kameleon;
     ccmc::Model* _model;
     std::unique_ptr<ccmc::Interpolator> _interpolator;
-
+    ccmc::Interpolator* _kameleonInterpolator;
 };
 
 } // namespace openspace

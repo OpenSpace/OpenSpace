@@ -238,6 +238,15 @@ bool RenderableGpuFieldlines::initialize() {
             float zMin = kvr.minValue(gvn[2]);
             float zMax = kvr.maxValue(gvn[2]);
 
+            // Variable names of magnetic components.
+            // BATSRUS => bx, by    , bz
+            // ENLIL   => br, btheta, bphi
+            // TODO: Let user specify the 'b' variable in LUA?
+            std::vector<std::string> magVars{"b" + gvn[0],
+                                             "b" + gvn[1],
+                                             "b" + gvn[2]};
+
+            // TODO FIX DOMAIN IF ENLIL
             if (i == 0) {
                 _domainMins = glm::vec3(xMin,yMin,zMin);
                 _domainMaxs = glm::vec3(xMax,yMax,zMax);
@@ -251,44 +260,15 @@ bool RenderableGpuFieldlines::initialize() {
             _dimensions = glm::uvec3(4,4,4);
             // _dimensions = glm::uvec3(128,128,128);
 
-            // Actual max/min values after uniform resampling of volume
-            float newBxMin;
-            float newBxMax;
-            float newByMin;
-            float newByMax;
-            float newBzMin;
-            float newBzMax;
-
             // Uniform resampling of magnetic components within the domain
              LDEBUG("Creating glm::vec3 volume for variables " << magVars[0] << ", " << magVars[1] << " & " << magVars[2] << ". Dimensions are: " << _dimensions.x << " x " << _dimensions.y << " x " <<_dimensions.z);
-            // _uniformMagDistr = kvr.readVec3Volume(_dimensions,
-            // deltaVolume = std::make_unique<RawVolume<glm::vec3>>(glm::uvec3(_dimensions[0],1,1));
+
             _normalizedVolume = kvr.readVec3Volume(_dimensions,
                                                    magVars,
                                                    _domainMins,
-                                                   _domainMaxs,
-                                                   newMagMins,
-                                                   newMagMaxs);
+                                                   _domainMaxs);
 
             LDEBUG("Done creating volumes");
-
-            float* bxVol = bxUniformDistr->data();
-            float* byVol = byUniformDistr->data();
-            float* bzVol = bzUniformDistr->data();
-
-            LDEBUG("Creating raw volume!");
-            _normalizedVolume = std::make_unique<RawVolume<glm::vec3>>(_dimensions);
-
-            glm::vec3* out = _normalizedVolume->data();
-
-            LDEBUG("Normalizing!");
-            for (size_t i = 0; i < _normalizedVolume->nCells(); ++i) {
-                float ox = bxVol[i];
-                float oy = byVol[i];
-                float oz = bzVol[i];
-                out[i] = glm::vec3(ox,oy,oz);
-            }
-            LDEBUG("\n\tNormalizing DONE!");
 
             _volumeTexture.push_back(std::make_unique<ghoul::opengl::Texture>(
                 _dimensions,
@@ -323,9 +303,15 @@ bool RenderableGpuFieldlines::initialize() {
         if (_numberOfStates > 0) {
             _seqStartTime = _startTimes[0];
             double lastStateStart = _startTimes[_numberOfStates-1];
-            double avgTimeOffset = (lastStateStart - _seqStartTime) /
+            if (_numberOfStates > 1) {
+                double avgTimeOffset = (lastStateStart - _seqStartTime) /
                                    (static_cast<double>(_numberOfStates) - 1.0);
-            _seqEndTime =  lastStateStart + avgTimeOffset;
+                _seqEndTime =  lastStateStart + avgTimeOffset;
+            } else {
+                _seqEndTime = 631108800.f; // January 1st 2020
+                // _seqEndTime = FLT_MAX;
+            }
+
             // Add seqEndTime as the last start time
             // to prevent vector from going out of bounds later.
             _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
@@ -434,6 +420,10 @@ bool RenderableGpuFieldlines::deinitialize() {
     if (_program) {
         renderEngine.removeRenderProgram(_program);
         _program = nullptr;
+    }
+    if (_seedPointProgram) {
+        renderEngine.removeRenderProgram(_seedPointProgram);
+        _seedPointProgram = nullptr;
     }
     if (_gridProgram) {
         renderEngine.removeRenderProgram(_gridProgram);
