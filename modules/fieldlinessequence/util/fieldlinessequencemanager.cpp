@@ -45,11 +45,7 @@ namespace {
     using FileSystem = ghoul::filesystem::FileSystem;
     using Sort = ghoul::filesystem::Directory::Sort;
 
-    const float R_E_TO_METER = 6371000.f; // Earth radius
-    const float R_S_TO_METER = 695700000.f; // Sun radius
-    const float A_U_TO_METER = 149597871000.f; // Astronomical Units
-    // const float A_U_TO_KM    = 149597871.f; // Astronomical Units
-    const float DEG_TO_RAD   = 3.14159265359f / 180.f;
+
 }
 
 namespace openspace {
@@ -243,6 +239,11 @@ bool FieldlinesSequenceManager::addLineToState(ccmc::Fieldline& ccmcFieldline,
 
     outFieldlinesStates._lineStart.push_back(lineStart);
     outFieldlinesStates._lineCount.push_back(lineCount);
+
+    const float R_E_TO_METER = 6371000.f; // Earth radius
+    const float R_S_TO_METER = 695700000.f; // Sun radius
+    const float A_U_TO_METER = 149597871000.f; // Astronomical Units
+    const float DEG_TO_RAD = 3.14159265359f / 180.f;
 
     const std::vector<ccmc::Point3f> positions = ccmcFieldline.getPositions();
     // TODO FIX ALL OF THIS.. works but is ugly code
