@@ -67,7 +67,6 @@ private:
     properties::BoolProperty _isMorphing;
 
     properties::FloatProperty _stepSize;
-    // properties::FloatProperty _minLength;
     properties::FloatProperty _clippingRadius;
 
     properties::IntProperty _maximumVertices;
@@ -90,7 +89,6 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     std::unique_ptr<ghoul::opengl::ProgramObject> _gridProgram;
 
-
     bool _shouldRender; // only temporary
     bool _needsUpdate;
 
@@ -103,24 +101,15 @@ private:
 
     std::unique_ptr<RawVolume<float>> _rawVolume;
     std::unique_ptr<RawVolume<glm::vec3>> _normalizedVolume;
-    // std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBx;
-    // std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBy;
-    // std::unique_ptr<RawVolume<GLfloat>> _normalizedVolumeBz;
 
     std::vector<std::shared_ptr<ghoul::opengl::Texture>> _volumeTexture;
-    // std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBx;
-    // std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBy;
-    // std::shared_ptr<ghoul::opengl::Texture> _volumeTextureBz;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit2;
 
-    std::vector<glm::vec3> _bMins;
-    std::vector<glm::vec3> _bMaxs;
     glm::vec3 _domainMins;
     glm::vec3 _domainMaxs;
     glm::uvec3 _dimensions;
-    bool _updateDomain;
 
     std::vector<glm::vec3> _gridVertices;
     std::vector<GLint> _gridStartPos;
