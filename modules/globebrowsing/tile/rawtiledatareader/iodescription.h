@@ -57,6 +57,12 @@ struct IODescription {
     IODescription cut(PixelRegion::Side side, int pos);
 };
 
+struct TileWriteDataDescription {
+	PixelRegion region;
+	size_t bytesPerLine;
+	size_t totalNumBytes;
+};
+
 } // namespace globebrowsing
 } // namespace openspace
 

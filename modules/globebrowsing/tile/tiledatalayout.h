@@ -47,6 +47,8 @@ struct TileDataLayout {
     size_t numRastersAvailable;
     size_t bytesPerPixel;
 
+    size_t totalNumBytesPerTile;
+
     TextureFormat textureFormat;
 };
 

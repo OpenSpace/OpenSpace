@@ -59,8 +59,9 @@ public:
      * Reads data from the current dataset and initializes a <code>RawTile</code>
      * which gets returned.
      */
-    std::shared_ptr<RawTile> readTileData(TileIndex tileIndex);
+    std::shared_ptr<RawTile> readTileData(TileIndex tileIndex, char* dataDestination);
     TileDepthTransform getDepthTransform() const;
+    const TileDataLayout& dataLayout() const;
     
     /**
      * \returns the maximum chunk level available in the dataset. Should be a value
@@ -77,6 +78,7 @@ public:
     virtual int rasterYSize() const = 0;
     virtual float depthOffset() const;
     virtual float depthScale() const;
+    virtual TileWriteDataDescription getWriteDataDescription() const = 0;
 
     /**
      * Returns a single channeled empty <code>RawTile</code> of size 16 * 16 pixels.
@@ -114,8 +116,8 @@ protected:
      * \param <code>worstError</code> should be set to the error code returned when
      * reading the data.
      */
-    virtual char* readImageData(
-        IODescription& io, RawTile::ReadError& worstError) const = 0;
+    virtual void readImageData(
+        IODescription& io, RawTile::ReadError& worstError, char* dst) const = 0;
 
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const = 0;

@@ -38,7 +38,7 @@ struct RawTile;
 
 struct TileLoadJob : LoadJob {
     TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-        const TileIndex& tileIndex);
+        const TileIndex& tileIndex, char* dataDestination);
 
     virtual ~TileLoadJob() = default;
 
@@ -50,6 +50,7 @@ protected:
     TileIndex _chunkIndex;
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
     std::shared_ptr<RawTile> _rawTile;
+    char* _dataDestination;
 };
 
 } // namespace globebrowsing

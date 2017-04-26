@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#if 0
+
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
 
@@ -90,3 +92,5 @@ protected:
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
+
+#endif

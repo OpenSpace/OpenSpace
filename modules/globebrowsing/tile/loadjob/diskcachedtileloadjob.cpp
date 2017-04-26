@@ -35,7 +35,7 @@ DiskCachedTileLoadJob::DiskCachedTileLoadJob(
     std::shared_ptr<RawTileDataReader> textureDataProvider,
     const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc,
     CacheMode m)
-    : TileLoadJob(textureDataProvider, tileIndex)
+    : TileLoadJob(textureDataProvider, tileIndex, nullptr)
     , _tileDiskCache(tdc)
     , _mode(m)
 {}
@@ -45,26 +45,26 @@ void DiskCachedTileLoadJob::execute() {
 
     switch (_mode) {
         case CacheMode::Disabled: 
-            _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
+            _rawTile = _rawTileDataReader->readTileData(_chunkIndex, nullptr);
             break;
 
         case CacheMode::ReadOnly:
             _rawTile = _tileDiskCache->get(_chunkIndex);
             if (_rawTile == nullptr) {
-                _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
+                _rawTile = _rawTileDataReader->readTileData(_chunkIndex, nullptr);
             }
             break;
 
         case CacheMode::ReadAndWrite:
             _rawTile = _tileDiskCache->get(_chunkIndex);
             if (_rawTile == nullptr) {
-                _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
+                _rawTile = _rawTileDataReader->readTileData(_chunkIndex, nullptr);
                 _tileDiskCache->put(_chunkIndex, _rawTile);
             }
             break;
 
         case CacheMode::WriteOnly:
-            _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
+            _rawTile = _rawTileDataReader->readTileData(_chunkIndex, nullptr);
             _tileDiskCache->put(_chunkIndex, _rawTile);
             break;
 

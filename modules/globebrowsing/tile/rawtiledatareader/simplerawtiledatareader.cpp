@@ -92,6 +92,15 @@ IODescription SimpleRawTileDataReader::getIODescription(const TileIndex& tileInd
     return io;
 }
 
+TileWriteDataDescription SimpleRawTileDataReader::getWriteDataDescription() const {
+    TileWriteDataDescription writeDesc;
+    writeDesc.region = PixelRegion({0, 0}, { rasterXSize(), rasterYSize() });
+    writeDesc.bytesPerLine = _dataTexture->bytesPerPixel() * writeDesc.region.numPixels.x;
+    writeDesc.totalNumBytes = writeDesc.bytesPerLine * writeDesc.region.numPixels.y;
+    
+    return writeDesc;
+}
+
 void SimpleRawTileDataReader::initialize() {
     _dataTexture = ghoul::io::TextureReader::ref().loadTexture(_datasetFilePath);
     if (_dataTexture == nullptr) {
@@ -124,28 +133,23 @@ void SimpleRawTileDataReader::initialize() {
     _depthTransform = {depthScale(), depthOffset()};
 }
 
-char* SimpleRawTileDataReader::readImageData(
-    IODescription& io, RawTile::ReadError& worstError) const {
-    // allocate memory for the image
-    char* imageData = new char[io.write.totalNumBytes];
-
+void SimpleRawTileDataReader::readImageData( 
+    IODescription& io, RawTile::ReadError& worstError, char* dst) const {
     // In case there are extra channels not existing in the dataset
     // we set the bytes to 255 (for example an extra alpha channel that)
     // needs to be 1.
     if (_dataLayout.numRasters > _dataLayout.numRastersAvailable) {
-        memset(imageData, 255, io.write.totalNumBytes);
+        memset(dst, 255, io.write.totalNumBytes);
     }
     
     // Modify to match OpenGL texture layout:
     IODescription modifiedIO = io;
     modifiedIO.read.region.start.y = modifiedIO.read.fullRegion.numPixels.y - modifiedIO.read.region.numPixels.y - modifiedIO.read.region.start.y;
   
-    RawTile::ReadError err = repeatedRasterRead(0, modifiedIO, imageData);
+    RawTile::ReadError err = repeatedRasterRead(0, modifiedIO, dst);
 
     // None = 0, Debug = 1, Warning = 2, Failure = 3, Fatal = 4
     worstError = std::max(worstError, err);
-
-    return imageData;
 }
 
 RawTile::ReadError SimpleRawTileDataReader::rasterRead(

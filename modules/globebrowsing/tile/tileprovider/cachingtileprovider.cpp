@@ -162,8 +162,8 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
     }
         
     return Tile::TileUnavailable;
-}
 
+}
 float CachingTileProvider::noDataValueAsFloat() {
     return _asyncTextureDataProvider->noDataValueAsFloat();
 }
@@ -221,15 +221,17 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
     // The texture should take ownership of the data
     using ghoul::opengl::Texture;
     std::shared_ptr<Texture> texture = std::make_shared<Texture>(
-        rawTile->imageData,
         rawTile->dimensions,
         rawTile->textureFormat.ghoulFormat,
         rawTile->textureFormat.glFormat,
         rawTile->glType,
         Texture::FilterMode::Linear,
         Texture::WrappingMode::ClampToEdge);
+
+    //texture->setPixelData(rawTile->imageData, Texture::TakeOwnership::No);
         
-    texture->uploadTexture();
+    //texture->uploadTexture();
+    texture->uploadTextureFromPBO(_asyncTextureDataProvider->pbo());
 
     // AnisotropicMipMap must be set after texture is uploaded
     texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);

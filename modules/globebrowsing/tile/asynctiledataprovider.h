@@ -28,6 +28,8 @@
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 
+#include <ghoul\opengl\ghoul_gl.h>
+
 #include <unordered_map>
 
 namespace openspace {
@@ -51,6 +53,8 @@ public:
     std::shared_ptr<RawTileDataReader> getRawTileDataReader() const;
     float noDataValueAsFloat() const;
 
+    GLuint pbo() const { return _pbo; };
+
 protected:
     virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;
 
@@ -58,6 +62,11 @@ private:
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
     ConcurrentJobManager<RawTile> _concurrentJobManager;
     std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
+
+    // PBO
+    GLuint _pbo;
+    size_t _pboNumBytes;
+    size_t _numJobsRunning;
 };
 
 } // namespace globebrowsing

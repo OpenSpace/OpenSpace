@@ -30,12 +30,14 @@ namespace openspace {
 namespace globebrowsing {
 
 TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-    const TileIndex& tileIndex)
+    const TileIndex& tileIndex, char* dataDestination)
     : _rawTileDataReader(rawTileDataReader)
-    , _chunkIndex(tileIndex) {}
+    , _chunkIndex(tileIndex)
+    , _dataDestination(dataDestination)
+{ }
 
 void TileLoadJob::execute() {
-    _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
+    _rawTile = _rawTileDataReader->readTileData(_chunkIndex, _dataDestination);
 }
 
 std::shared_ptr<RawTile> TileLoadJob::product() const {

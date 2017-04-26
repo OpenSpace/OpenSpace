@@ -36,47 +36,78 @@ AsyncTileDataProvider::AsyncTileDataProvider(
     std::shared_ptr<ThreadPool> pool)
     : _rawTileDataReader(rawTileDataReader)
     , _concurrentJobManager(pool)
-{}
+{
+    // PBO
+    _pboNumBytes = rawTileDataReader->getWriteDataDescription().totalNumBytes;
+    glGenBuffers(1, &_pbo);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pbo);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, _pboNumBytes, 0, GL_STREAM_DRAW);
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    _numJobsRunning = 0;
+
+}
 
 std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getRawTileDataReader() const {
     return _rawTileDataReader;
 }
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
-    if (satisfiesEnqueueCriteria(tileIndex)) {
-        auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex);
-        //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, tileIndex, tileDiskCache, "ReadAndWrite");
-        _concurrentJobManager.enqueueJob(job);
-        _enqueuedTileRequests[tileIndex.hashKey()] = tileIndex;
+    if (satisfiesEnqueueCriteria(tileIndex) && _numJobsRunning == 0) {
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pbo);
+		char* pboBufferData = static_cast<char*>(glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, _pboNumBytes, GL_MAP_WRITE_BIT));
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-        return true;
+		if (pboBufferData)
+		{
+			//char* dataDestination = new char[_pboNumBytes];
+			auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex, pboBufferData);
+			//auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, tileIndex, tileDiskCache, "ReadAndWrite");
+			_concurrentJobManager.enqueueJob(job);
+            _numJobsRunning++;
+			_enqueuedTileRequests[tileIndex.hashKey()] = tileIndex;
+
+			return true;
+		}
     }
     return false;
 }
 
 std::vector<std::shared_ptr<RawTile>> AsyncTileDataProvider::getRawTiles() {
     std::vector<std::shared_ptr<RawTile>> readyResults;
-    while (_concurrentJobManager.numFinishedJobs() > 0) {
+    /*
+	while (_concurrentJobManager.numFinishedJobs() > 0) {
         readyResults.push_back(_concurrentJobManager.popFinishedJob()->product());
+
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pbo);
+		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+		_numJobsRunning--;
     }
+	*/
     return readyResults;
 }   
 
 std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
-    if (_concurrentJobManager.numFinishedJobs() > 0)
+    if (_concurrentJobManager.numFinishedJobs() > 0) {
+
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pbo);
+		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        _numJobsRunning--;
+        
         return _concurrentJobManager.popFinishedJob()->product();
+	}
     else
         return nullptr;
 }   
 
 bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) const {
     // only allow tile to be enqueued if it's not already enqueued
-    //return _futureTileIOResults.find(tileIndex.hashKey()) == _futureTileIOResults.end();
     return _enqueuedTileRequests.find(tileIndex.hashKey()) == _enqueuedTileRequests.end();
-
 }
 
 void AsyncTileDataProvider::reset() {
+	/*
     //_futureTileIOResults.clear();
     //_threadPool->stop(ghoul::ThreadPool::RunRemainingTasks::No);
     //_threadPool->start();
@@ -84,15 +115,25 @@ void AsyncTileDataProvider::reset() {
     _concurrentJobManager.reset();
     while (_concurrentJobManager.numFinishedJobs() > 0) {
         _concurrentJobManager.popFinishedJob();
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pbo);
+		glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+		_numJobsRunning--;
     }
     _rawTileDataReader->reset();
+	*/
+
 }
 
 void AsyncTileDataProvider::clearRequestQueue() {
+	/*
     //_threadPool->clearRemainingTasks();
     //_futureTileIOResults.clear();
     _concurrentJobManager.clearEnqueuedJobs();
     _enqueuedTileRequests.clear();
+
+    _numJobsRunning = 0;
+	*/
 }
 
 float AsyncTileDataProvider::noDataValueAsFloat() const {
