@@ -62,10 +62,10 @@ namespace {
     const int integrationSimpleEuler = 0;
     const int integrationRungeKutta4 = 1;
 
+    const float DEG_TO_RAD   = 3.14159265359f / 180.f;
+
     // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
 }
-
-// const float R_E_TO_METER = 6371000.f; // Earth radius
 
 namespace openspace {
 
@@ -198,7 +198,7 @@ bool RenderableGpuFieldlines::initialize() {
 
         // TODO this could be done in manager
         for (int i = 0; i < _numberOfStates; ++i) {
-            LDEBUG(validCdfFilePaths[i] << " is now being traced.");
+            LDEBUG("\t" << validCdfFilePaths[i] << " is now being traced.");
 
             KameleonVolumeReader kvr(validCdfFilePaths[i]);
 
@@ -228,13 +228,15 @@ bool RenderableGpuFieldlines::initialize() {
             //      [0] = "README", [1] = "model_name", [2] = "model_type", [3] = "generation_date", [4] = "original_output_file_name", [5] = "generated_by", [6] = "terms_of_usage", [7] = "grid_system_count", [8] = "grid_system_1_number_of_dimensions", [9] = "grid_system_1_dimension_1_size", [10] = "grid_system_1_dimension_2_size", [11] = "grid_system_1_dimension_3_size", [12] = "grid_system_1", [13] = "output_type", [14] = "standard_grid_target", [15] = "grid_1_type", [16] = "start_time", [17] = "end_time", [18] = "run_type", [19] = "kameleon_version", [20] = "elapsed_time_in_seconds", [21] = "number_of_dimensions", [22] = "special_parameter_g", [23] = "special_parameter_c", [24] = "special_parameter_th", [25] = "special_parameter_P1", [26] = "special_parameter_P2", [27] = "special_parameter_P3", [28] = "special_parameter_R", [29] = "special_parameter_NX", [30] = "special_parameter_NY", [31] = "special_parameter_NZ", [32] = "x_dimension_size", [33] = "y_dimension_size", [34] = "z_dimension_size", [35] = "current_iteration_step", [36] = "global_x_min", [37] = "global_x_max", [38] = "global_y_min", [39] = "global_y_max", [40] = "global_z_min", [41] = "global_z_max", [42] = "max_amr_level", [43] = "number_of_cells", [44] = "number_of_blocks", [45] = "smallest_cell_size", [46] = "r_body", [47] = "r_currents", [48] = "dipole_time", [49] = "dipole_update", [50] = "dipole_tilt", [51] = "dipole_tilt_y"}
             std::vector<std::string> gan = kvr.globalAttributeNames();
 
+            std::string modelName = kvr.getKameleon()->getModelName();
+
             // Vector volume. Space related (domain)
-            float  xMin = kvr.minValue("x");
-            float  xMax = kvr.maxValue("x");
-            float  yMin = kvr.minValue("y");
-            float  yMax = kvr.maxValue("y");
-            float  zMin = kvr.minValue("z");
-            float  zMax = kvr.maxValue("z");
+            float xMin = kvr.minValue(gvn[0]);
+            float xMax = kvr.maxValue(gvn[0]);
+            float yMin = kvr.minValue(gvn[1]);
+            float yMax = kvr.maxValue(gvn[1]);
+            float zMin = kvr.minValue(gvn[2]);
+            float zMax = kvr.maxValue(gvn[2]);
 
             if (i == 0) {
                 _domainMins = glm::vec3(xMin,yMin,zMin);
@@ -258,16 +260,17 @@ bool RenderableGpuFieldlines::initialize() {
             float newBzMax;
 
             // Uniform resampling of magnetic components within the domain
-            LDEBUG("Creating float volume for variable 'bx'. Dimensions are: " << _dimensions.x << " x " << _dimensions.y << " x " <<_dimensions.z);
-            auto bxUniformDistr = kvr.readFloatVolume(_dimensions, "bx", _domainMins, _domainMaxs, newBxMin, newBxMax);
+             LDEBUG("Creating glm::vec3 volume for variables " << magVars[0] << ", " << magVars[1] << " & " << magVars[2] << ". Dimensions are: " << _dimensions.x << " x " << _dimensions.y << " x " <<_dimensions.z);
+            // _uniformMagDistr = kvr.readVec3Volume(_dimensions,
+            // deltaVolume = std::make_unique<RawVolume<glm::vec3>>(glm::uvec3(_dimensions[0],1,1));
+            _normalizedVolume = kvr.readVec3Volume(_dimensions,
+                                                   magVars,
+                                                   _domainMins,
+                                                   _domainMaxs,
+                                                   newMagMins,
+                                                   newMagMaxs);
 
-            LDEBUG("Creating float volume for variable 'by'. Dimensions are: " << _dimensions.x << " x " << _dimensions.y << " x " <<_dimensions.z);
-            auto byUniformDistr = kvr.readFloatVolume(_dimensions, "by", _domainMins, _domainMaxs, newByMin, newByMax);
-
-            LDEBUG("Creating float volume for variable 'bz'. Dimensions are: " << _dimensions.x << " x " << _dimensions.y << " x " <<_dimensions.z);
-            auto bzUniformDistr = kvr.readFloatVolume(_dimensions, "bz", _domainMins, _domainMaxs, newBzMin, newBzMax);
-
-            LDEBUG("Done creating float volumes");
+            LDEBUG("Done creating volumes");
 
             float* bxVol = bxUniformDistr->data();
             float* byVol = byUniformDistr->data();
