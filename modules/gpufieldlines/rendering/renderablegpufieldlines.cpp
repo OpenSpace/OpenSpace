@@ -82,9 +82,9 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
       _showGrid("showGrid", "Show Grid", false),
       _isMorphing("isMorphing", "Morphing", true),
-      _domainWidth("domainWidth", "Domain Limits 'Sunwards'"),
-      _domainDepth("domainDepth", "Domain Limits 'Orbit'"),
-      _domainHeight("domainHeight", "Domain Limits South-North"),
+      _domainX("domainX", "Domain Limits X-axis"),
+      _domainY("domainY", "Domain Limits Y-axis"),
+      _domainZ("domainZ", "Domain Limits Z-axis"),
       _uniformFieldlineColor("fieldLineColor", "Fieldline Color",
                              glm::vec4(0.f,1.f,0.f,0.45f),
                              glm::vec4(0.f),
@@ -96,7 +96,7 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
 
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
-_isMorphing = true;
+
     _loggerCat = "RenderableGpuFieldlines [" + name + "]";
 
     // Find VectorVolume, SeedPoint and Fieldlines Info from Lua
@@ -436,75 +436,41 @@ bool RenderableGpuFieldlines::initialize() {
     addProperty(_showGrid);
     addProperty(_isMorphing);
     addProperty(_integrationMethod);
-    addProperty(_domainWidth);
-    addProperty(_domainDepth);
-    addProperty(_domainHeight);
+    addProperty(_domainX);
+    addProperty(_domainY);
+    addProperty(_domainZ);
     addProperty(_uniformFieldlineColor);
     // addProperty(_upperDomainBound);
 
-    _domainWidth.setMinValue(glm::vec2(_domainMins.x,_domainMins.x + 1.f));
-    _domainWidth.setMaxValue(glm::vec2(_domainMaxs.x - 1.f,_domainMaxs.x));
-    _domainWidth.setValue(glm::vec2(_domainMins.x,_domainMaxs.x));
+    _domainX.setMinValue(glm::vec2(_domainMins.x, _domainMins.x));
+    _domainX.setMaxValue(glm::vec2(_domainMaxs.x, _domainMaxs.x));
+    _domainX.setValue(   glm::vec2(_domainMins.x, _domainMaxs.x));
 
-    _domainDepth.setMinValue(glm::vec2(_domainMins.y,_domainMins.y + 1.f));
-    _domainDepth.setMaxValue(glm::vec2(_domainMaxs.y - 1.f,_domainMaxs.y));
-    _domainDepth.setValue(glm::vec2(_domainMins.y,_domainMaxs.y));
+    _domainY.setMinValue(glm::vec2(_domainMins.y, _domainMins.y));
+    _domainY.setMaxValue(glm::vec2(_domainMaxs.y, _domainMaxs.y));
+    _domainY.setValue(   glm::vec2(_domainMins.y, _domainMaxs.y));
 
-    _domainHeight.setMinValue(glm::vec2(_domainMins.z,_domainMins.z + 1.f));
-    _domainHeight.setMaxValue(glm::vec2(_domainMaxs.z - 1.f,_domainMaxs.z));
-    _domainHeight.setValue(glm::vec2(_domainMins.z,_domainMaxs.z));
-    // _domainHeight.setValue(_domainMaxs);
+    _domainZ.setMinValue(glm::vec2(_domainMins.z, _domainMins.z));
+    _domainZ.setMaxValue(glm::vec2(_domainMaxs.z, _domainMaxs.z));
+    _domainZ.setValue(   glm::vec2(_domainMins.z, _domainMaxs.z));
 
-    // _lowerDomainBound.setMinValue(_domainMins);
-    // _lowerDomainBound.setMaxValue(_domainMaxs);
-    // _upperDomainBound.setMinValue(_domainMins);
-    // _upperDomainBound.setMaxValue(_domainMaxs);
-
-    // _lowerDomainBound.setValue(_domainMins);
-    // _upperDomainBound.setValue(_domainMaxs);
-
-    // _lowerDomainBound.onChange([this] {
-    //     updateDomainBounds();
-    // });
-    _domainWidth.onChange([this] {
-        // updateDomainBounds();
-        if (_domainWidth.value()[0] > _domainWidth.value()[1]) {
-            _domainWidth.setValue(glm::vec2(_domainWidth.value()[1],_domainWidth.value()[1]));
+    _domainX.onChange([this] {
+        if (_domainX.value()[0] > _domainX.value()[1]) {
+            _domainX.setValue(glm::vec2(_domainX.value()[1],_domainX.value()[1]));
         }
     });
-    _domainDepth.onChange([this] {
-        // updateDomainBounds();
-        if (_domainDepth.value()[0] > _domainDepth.value()[1]) {
-            _domainDepth.setValue(glm::vec2(_domainDepth.value()[1],_domainDepth.value()[1]));
+    _domainY.onChange([this] {
+        if (_domainY.value()[0] > _domainY.value()[1]) {
+            _domainY.setValue(glm::vec2(_domainY.value()[1],_domainY.value()[1]));
         }
     });
-    _domainHeight.onChange([this] {
-        // updateDomainBounds();
-        if (_domainHeight.value()[0] > _domainHeight.value()[1]) {
-            _domainHeight.setValue(glm::vec2(_domainHeight.value()[1],_domainHeight.value()[1]));
+    _domainZ.onChange([this] {
+        if (_domainZ.value()[0] > _domainZ.value()[1]) {
+            _domainZ.setValue(glm::vec2(_domainZ.value()[1],_domainZ.value()[1]));
         }
     });
 
     return true;
-}
-
-void RenderableGpuFieldlines::updateDomainBounds(/*int axis*/) {
-    // // if (_lowerDomainBound > );
-    LDEBUG("updatedomain!!");
-    // switch (axis) {
-    //     case 2 : {
-        // _updateDomain = true;
-        // if (_domainHeight.value()[0] > _domainHeight.value()[1]) {
-        //     _domainHeight.value()[0] = _domainHeight.value()[1];
-        // }
-        // if (_domainHeight.value()[1] <)
-                // _domainHeight.setMinValue(glm::vec2(_domainMins.z,_domainHeight.value()[0]));
-                // _domainHeight.setMaxValue(glm::vec2(_domainHeight.value()[1],_domainMaxs.z));
-    //         break;
-    //     }
-    //     default :
-    //         break;
-    // }
 }
 
 bool RenderableGpuFieldlines::deinitialize() {
@@ -560,9 +526,9 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         // _program->setUniform("domainMaxs", _domainMaxs);
         _program->setUniform("domainDiffs", _domainMaxs - _domainMins);
         // _program->setUniform("boundaryMins", _lowerDomainBound);
-        _program->setUniform("domainWidthLimits", _domainWidth);
-        _program->setUniform("domainDepthLimits", _domainDepth);
-        _program->setUniform("domainHeightLimits", _domainHeight);
+        _program->setUniform("domainXLimits", _domainX);
+        _program->setUniform("domainYLimits", _domainY);
+        _program->setUniform("domainZLimits", _domainZ);
         _program->setUniform("color", _uniformFieldlineColor);
 
         // TODO MOVE THIS TO UPDATE AND CHECK

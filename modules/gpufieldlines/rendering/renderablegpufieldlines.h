@@ -72,9 +72,9 @@ private:
 
     properties::OptionProperty _integrationMethod;
 
-    properties::Vec2Property _domainWidth;
-    properties::Vec2Property _domainDepth;
-    properties::Vec2Property _domainHeight;
+    properties::Vec2Property _domainX;
+    properties::Vec2Property _domainY;
+    properties::Vec2Property _domainZ;
 
     properties::Vec4Property _uniformFieldlineColor;
 
