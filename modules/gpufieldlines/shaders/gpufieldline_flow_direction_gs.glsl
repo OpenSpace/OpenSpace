@@ -39,9 +39,9 @@ uniform mat4 modelViewProjection;
 uniform sampler3D volumeTexture;
 uniform sampler3D nextVolumeTexture;
 
-uniform vec2 domainWidthLimits;
-uniform vec2 domainDepthLimits;
-uniform vec2 domainHeightLimits;
+uniform vec2 domainXLimits;
+uniform vec2 domainYLimits;
+uniform vec2 domainZLimits;
 
 uniform vec3 domainMins;
 // uniform vec3 domainMaxs;
@@ -135,9 +135,9 @@ bool validateLine(in vec3 prevUnscaledPos, in vec3 newUnscaledPos) {
 
 bool validatePoint(in vec3 newUnscaledPoint) {
     // Check if inside voxel grid (domain) and outside of clipping radius
-    if (newUnscaledPoint.x < domainWidthLimits.x  || newUnscaledPoint.x > domainWidthLimits.y  ||
-        newUnscaledPoint.y < domainDepthLimits.x  || newUnscaledPoint.y > domainDepthLimits.y  ||
-        newUnscaledPoint.z < domainHeightLimits.x || newUnscaledPoint.z > domainHeightLimits.y ||
+    if (newUnscaledPoint.x < domainXLimits.x || newUnscaledPoint.x > domainXLimits.y ||
+        newUnscaledPoint.y < domainYLimits.x || newUnscaledPoint.y > domainYLimits.y ||
+        newUnscaledPoint.z < domainZLimits.x || newUnscaledPoint.z > domainZLimits.y ||
         sqrt(pow(newUnscaledPoint.x,2) + pow(newUnscaledPoint.y,2) + pow(newUnscaledPoint.z,2)) < clippingRadius  ) {
         return false;
     }
