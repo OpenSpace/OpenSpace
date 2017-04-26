@@ -32,7 +32,8 @@ uniform float clippingRadius;
 uniform float state_progression;
 
 uniform int integrationMethod;
-uniform int maxComponentOutput;
+uniform int maxVertices;
+// uniform int maxComponentOutput;
 
 uniform mat4 modelViewProjection;
 
@@ -177,8 +178,7 @@ void traceFieldline(in vec3 unscaledSeedPoint) {
 
     vec3 unscaledPos = unscaledSeedPoint;
 
-    // TODO range of loop should be specified as a uniform (depends on GL_MAX_GEOMETRY_VERTICES)
-    for (int i = 0 ; i < 203 ; ++i) {
+    for (int i = 0 ; i < maxVertices-1 ; ++i) {
         bool isValidPoint = findNextPoint(unscaledPos);
         if (!isValidPoint) {
             break;
