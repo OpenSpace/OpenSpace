@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/tasks/imgreader.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/logging/logmanager.h>
 
 #include <fstream>
 #include <iterator>
@@ -45,6 +46,10 @@ static std::vector<std::string> split(const std::string &s, char delim) {
 	std::vector<std::string> elems;
 	split(s, delim, std::back_inserter(elems));
 	return elems;
+}
+
+namespace {
+	std::string _loggerCat = "ImgReader";
 }
 
 namespace openspace {
@@ -85,24 +90,22 @@ namespace globebrowsing {
 				if (s.at(0) == "ORIGIN_ROTATION_QUATERNION") {
 					std::vector<std::string> temp = split(s.at(1), ',');
 
-					mInfo._roverOrigin.push_back(std::stod(split(temp.at(0), '(').at(1)));
-					mInfo._roverOrigin.push_back(std::stod(temp.at(1)));
-					mInfo._roverOrigin.push_back(std::stod(temp.at(2)));
-
+					mInfo._roverQuat.push_back(std::stod(split(temp.at(0), '(').at(1)));
+					mInfo._roverQuat.push_back(std::stod(temp.at(1)));
+					mInfo._roverQuat.push_back(std::stod(temp.at(2)));
+					LERROR("HERE I AM " << temp.size());
 					//This is because after like 1000 sols they 
 					//start writing the fourth quaternion on new line...
 					//All of this should probably be done in another way...
-					if (temp.size() == 3) {
-						mInfo._roverOrigin.push_back(std::stod(split(temp.at(3), ')').at(0)));
+					if (temp.size() > 3) {
+						mInfo._roverQuat.push_back(std::stod(split(temp.at(3), ')').at(0)));
 					}
 					else {
 						std::getline(header, line);
 						line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
 						line.erase(std::remove(line.begin(), line.end(), ','), line.end());
-						//						mInfo._roverOrigin.push_back(std::stod(line));
+						mInfo._roverQuat.push_back(std::stod(line));
 					}
-
-
 				}
 			}
 			else if (block == "IMAGE") {

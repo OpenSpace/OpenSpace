@@ -36,7 +36,7 @@ namespace globebrowsing {
 			int _cols;
 			int _bands;
 			int _bytes;
-			std::vector<double> _roverOrigin;
+			std::vector<double> _roverQuat;
 
 		};
 
