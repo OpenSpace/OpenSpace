@@ -82,6 +82,8 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
       _maximumVertices("numMaxVertices", "Max Number Of Vertices", 1, 1, 10),
       _showGrid("showGrid", "Show Grid", false),
+      _showSeedPoints("showSeedPoints", "Show Seed Points", true),
+      _seedPointSize("seedPointSize", "Seed Point Size", 4.0, 0.0, 20.0),
       _isMorphing("isMorphing", "Morphing", true),
       _domainX("domainX", "Domain Limits X-axis"),
       _domainY("domainY", "Domain Limits Y-axis"),
@@ -90,8 +92,13 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
                              glm::vec4(0.f,1.f,0.f,0.45f),
                              glm::vec4(0.f),
                              glm::vec4(1.f)),
+      _uniformSeedPointColor("seedPointColor", "SeedPoint Color",
+                             glm::vec4(1.f,0.33f,0.f,0.85f),
+                             glm::vec4(0.f),
+                             glm::vec4(1.f)),
       _shouldRender(false),
       _needsUpdate(false),
+      _isSpherical(false),
       _activeStateIndex(-1) {
 
     std::string name;
@@ -330,9 +337,21 @@ bool RenderableGpuFieldlines::initialize() {
     );
 
     if (!_program) {
-        LERROR("Shader program failed initialization!");
+        LERROR("Fieldlines Shader program failed initialization!");
         return false;
     }
+
+    _seedPointProgram = OsEng.renderEngine().buildRenderProgram(
+        "GpuFieldlinesSeeds",
+        "${MODULE_GPUFIELDLINES}/shaders/seedpoint_vs.glsl",
+        "${MODULE_GPUFIELDLINES}/shaders/gpufieldline_flow_direction_fs.glsl"
+    );
+
+    if (!_seedPointProgram) {
+        LERROR("SeedPoint Shader program failed initialization!");
+        return false;
+    }
+
 
     _gridProgram = OsEng.renderEngine().buildRenderProgram(
         "GpuFieldlinesGrid",
@@ -341,7 +360,7 @@ bool RenderableGpuFieldlines::initialize() {
     );
 
     if (!_gridProgram) {
-        LERROR("Shader program failed initialization!");
+        LERROR("Grid Shader program failed initialization!");
         return false;
     }
 
@@ -352,6 +371,8 @@ bool RenderableGpuFieldlines::initialize() {
 
     // ADD PROPERTIES
     addProperty(_stepSize);
+    addProperty(_showSeedPoints);
+    addProperty(_seedPointSize);
     addProperty(_clippingRadius);
     addProperty(_showGrid);
     addProperty(_isMorphing);
@@ -361,6 +382,7 @@ bool RenderableGpuFieldlines::initialize() {
     addProperty(_domainY);
     addProperty(_domainZ);
     addProperty(_uniformFieldlineColor);
+    addProperty(_uniformSeedPointColor);
 
     _domainX.setMinValue(glm::vec2(_domainMins.x, _domainMins.x));
     _domainX.setMaxValue(glm::vec2(_domainMaxs.x, _domainMaxs.x));
@@ -444,11 +466,19 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         _program->setUniform("domainZLimits", _domainZ);
         _program->setUniform("color", _uniformFieldlineColor);
         _program->setUniform("isMorphing", _isMorphing);
+        _program->setUniform("isSpherical", _isSpherical);
 
         // TODO MOVE THIS TO UPDATE AND CHECK
         _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
         _textureUnit->activate();
+
         _volumeTexture[_activeStateIndex]->bind();
+
+        // TODO: only if ENLIL => change wrapping mode to repeat for third component
+        if (_isSpherical) {
+            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+        }
+
         _program->setUniform("volumeTexture", _textureUnit->unitNumber());
 
         if (_isMorphing) {
@@ -483,16 +513,28 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         _program->setUniform("stepSize", -_stepSize);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>( _seedPoints.size() ) );
 
+        _program->deactivate();
+        _seedPointProgram->activate();
+
+        if (_showSeedPoints) {
+            _seedPointProgram->setUniform("color", _uniformSeedPointColor);
+            _seedPointProgram->setUniform("isSpherical", _isSpherical);
+            _seedPointProgram->setUniform("modelViewProjection",
+                data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+            glPointSize(_seedPointSize);
+            glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>( _seedPoints.size() ) );
+        }
+
         glBindVertexArray(0);
         glEnable(GL_CULL_FACE);
-        _program->deactivate();
+        _seedPointProgram->deactivate();
 
         if (_showGrid) {
             _gridProgram->activate();
 
             // TODO:
             // if enlil its supposed to be true.. implement an _isSpherical variable
-            _gridProgram->setUniform("isSpherical", false);
+            _gridProgram->setUniform("isSpherical", _isSpherical);
             _gridProgram->setUniform("modelViewProjection",
                     data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
 

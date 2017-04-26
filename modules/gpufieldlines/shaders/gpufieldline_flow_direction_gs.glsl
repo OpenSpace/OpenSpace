@@ -25,6 +25,7 @@
 #version __CONTEXT__
 
 uniform bool isMorphing;
+uniform bool isSpherical;
 
 uniform float stepSize;
 uniform float minLength;
@@ -61,6 +62,8 @@ out float gs_depth;
 // uniform float scale;
 // out vec4 gs_color;
 // out vec3 gs_color;
+const float AU_TO_METERS = 149597870700.0; // Astronomical Units
+const float E_R_TO_METERS = 6371000.0; // EARTH RADII IN METERS
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 

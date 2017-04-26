@@ -65,8 +65,10 @@ private:
     // PROPERTIES
     properties::BoolProperty _showGrid;
     properties::BoolProperty _isMorphing;
+    properties::BoolProperty _showSeedPoints;
 
     properties::FloatProperty _stepSize;
+    properties::FloatProperty _seedPointSize;
     properties::FloatProperty _clippingRadius;
 
     properties::IntProperty _maximumVertices;
@@ -78,6 +80,7 @@ private:
     properties::Vec2Property _domainZ;
 
     properties::Vec4Property _uniformFieldlineColor;
+    properties::Vec4Property _uniformSeedPointColor;
 
     // LUA INFO
     ghoul::Dictionary _vectorVolumeInfo;
@@ -88,9 +91,11 @@ private:
     std::vector<GpuFieldlinesState> _states;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     std::unique_ptr<ghoul::opengl::ProgramObject> _gridProgram;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _seedPointProgram;
 
     bool _shouldRender; // only temporary
     bool _needsUpdate;
+    bool _isSpherical;
 
     GLuint _vertexArrayObject;
     GLuint _vertexPositionBuffer;
