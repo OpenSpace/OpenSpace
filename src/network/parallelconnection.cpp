@@ -1060,7 +1060,7 @@ void ParallelConnection::sendTimeKeyframe() {
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::TimeKeyframe kf;
     
-	Time& time = OsEng.timeManager().time();
+    Time& time = OsEng.timeManager().time();
 
     kf._dt = time.deltaTime();
     kf._paused = time.paused();

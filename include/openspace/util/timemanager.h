@@ -27,7 +27,6 @@
 
 #include <vector>
 #include <deque>
-#include <openspace/network/messagestructures.h>
 #include <openspace/util/timeline.h>
 #include <openspace/util/time.h>
 #include <openspace/util/syncdata.h>
@@ -46,7 +45,7 @@ public:
     size_t nKeyframes() const;
 private:
     Timeline<Time> _timeline;
-	SyncData<Time> _currentTime;
+    SyncData<Time> _currentTime;
     void consumeKeyframes(double dt);
     double _latestConsumedTimestamp;
 };
