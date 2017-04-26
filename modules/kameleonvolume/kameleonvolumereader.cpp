@@ -106,6 +106,7 @@ std::unique_ptr<RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     return volume;
 }
 
+// TODO: rename to Traceable3DVolume or similar?
 std::unique_ptr<RawVolume<glm::vec3>> KameleonVolumeReader::readVec3Volume(
     const glm::uvec3 & dimensions,
     const std::vector<std::string> & variables,

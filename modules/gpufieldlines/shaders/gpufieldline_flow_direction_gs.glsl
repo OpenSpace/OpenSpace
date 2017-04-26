@@ -63,7 +63,8 @@ out float gs_depth;
 // out vec4 gs_color;
 // out vec3 gs_color;
 const float AU_TO_METERS = 149597870700.0; // Astronomical Units
-const float E_R_TO_METERS = 6371000.0; // EARTH RADII IN METERS
+const float R_E_TO_METERS = 6371000.0; // EARTH RADII IN METERS
+float scale;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -73,10 +74,24 @@ vec3 normalizeCoords(in vec3 unscaledPos) {
 }
 
 void addVertex(in vec3 unscaledPos) {
-    vec4 position_meters = vec4(unscaledPos * 6371000.0, 1.0); // Scale by 1 earth radii TODO change to input scale uniform
+    vec4 position_meters = vec4(unscaledPos * scale, 1.0); // Scale by 1 earth radii TODO change to input scale uniform
     gl_Position = z_normalization(modelViewProjection * position_meters.xyzw);
     gs_depth = gl_Position.w;
     EmitVertex();
+}
+
+vec3 convertSphericalToCartesian(in vec3 sphericalPoint) {
+    // TODO change to input scale uniform?
+    // float radiusInMeters = sphericalPoint.x; // * scale??
+    float lat_rad = radians(sphericalPoint.y);
+    float lon_rad = radians(sphericalPoint.z);
+    float rad_x_sinLat = sphericalPoint.x * cos(lat_rad); // cos(x) = sin(90-x)
+    // float rad_x_sinLat = radiusInMeters * sin(radians(90.0 - sphericalPoint.y)); //sin(90-x) == cos(x)
+
+    vec3 cartesian = vec3(rad_x_sinLat * cos(lon_rad),
+                          rad_x_sinLat * sin(lon_rad),
+                          sphericalPoint.x * sin(lat_rad));
+    return cartesian;
 }
 
 vec3 getFieldVecAtPosition(in vec3 unscaledPos) {
@@ -95,29 +110,55 @@ vec3 eulerStep(in vec3 unscaledPos) {
     return unscaledPos + stepSize * normalize(getFieldVecAtPosition(unscaledPos));
 }
 
+vec3 eulerStepSpherical(in vec3 sphericalPoint) {
+    // TODO in kameleon they do some magic here!
+    vec3 vectorValue = getFieldVecAtPosition(sphericalPoint);
+    float magnitude = sqrt(sphericalPoint.x * sphericalPoint.x +
+                           sphericalPoint.y * sphericalPoint.y +
+                           sphericalPoint.z * sphericalPoint.z);
+    // float magnitude = length(sphericalPoint);
+    if (magnitude < 1e-5) {
+        magnitude =  1e-5;
+    }
+
+    // vec3 normalizedVec = normalize(getFieldVecAtPosition(sphericalPoint));
+    vec3 normalizedVec = vectorValue / magnitude;
+    float rsinth = abs(sphericalPoint.x * cos(radians(sphericalPoint.y)));
+    vec3 addition = /* // TODO: dt * */ stepSize * vec3(normalizedVec.x,
+                                    normalizedVec.y / radians(sphericalPoint.x), // TODO WHY CONVERT Astronomical units to radians as if they were degrees?
+                                    normalizedVec.z / radians(rsinth));
+
+    if (isnan(addition.x) || abs(addition.x - 0.0) < 1e-20) {
+        addition.x = 1e-20;
+    }
+    if (isnan(addition.y) || abs(addition.y - 0.0) < 1e-20) {
+        addition.y = 1e-20;
+    }
+    if (isnan(addition.z) || abs(addition.z - 0.0) < 1e-20) {
+        addition.z = 1e-20;
+    }
+
+    return addition;//normalizedVec;
+    // return sphericalPoint + stepSize * normalize(getFieldVecAtPosition(sphericalPoint));
+}
+
 vec3 rk4(in vec3 unscaledPos) {
     vec3 k1 = stepSize * normalize(getFieldVecAtPosition(unscaledPos));
     vec3 k2 = stepSize * normalize(getFieldVecAtPosition(unscaledPos + k1 / 2.0));
     vec3 k3 = stepSize * normalize(getFieldVecAtPosition(unscaledPos + k2 / 2.0));
     vec3 k4 = stepSize * normalize(getFieldVecAtPosition(unscaledPos + k3));
 
-    // vec3 normCoords = normalizeCoords(unscaledPos);
-    // vec4 interpTexVal = texture(volumeTexture, normCoords); // TODO only vec3?
-    // vec3 k1 = stepSize * normalize(interpTexVal.xyz);
-
-    // normCoords = normalizeCoords(unscaledPos + k1 / 2.0);
-    // interpTexVal = texture(volumeTexture, normCoords);
-    // vec3 k2 = stepSize * normalize(interpTexVal.xyz);
-
-    // normCoords = normalizeCoords(unscaledPos + k2 / 2.0);
-    // interpTexVal = texture(volumeTexture, normCoords);
-    // vec3 k3 = stepSize * normalize(interpTexVal.xyz);
-
-    // normCoords = normalizeCoords(unscaledPos + k3);
-    // interpTexVal = texture(volumeTexture, normCoords);
-    // vec3 k4 = stepSize * normalize(interpTexVal.xyz);
-
     return unscaledPos + (1.0/6.0) * (k1 + 2.0*k2 + 2.0*k3 + k4);
+}
+
+
+vec3 rk4Spherical(in vec3 unscaledPos) {
+    vec3 k1 = /* stepSize * */ eulerStepSpherical(unscaledPos);
+    vec3 k2 = /* stepSize * */ eulerStepSpherical(unscaledPos + k1 / 2.0);
+    vec3 k3 = /* stepSize * */ eulerStepSpherical(unscaledPos + k2 / 2.0);
+    vec3 k4 = /* stepSize * */ eulerStepSpherical(unscaledPos + k3);
+
+    return (1.0/6.0) * (k1 + 2.0*k2 + 2.0*k3 + k4);
 }
 
 // Assumes GSM frame
@@ -125,8 +166,32 @@ vec3 rk4(in vec3 unscaledPos) {
 bool validateLine(in vec3 prevUnscaledPos, in vec3 newUnscaledPos) {
     vec3 diff = newUnscaledPos - prevUnscaledPos;
     float a = diff.x*diff.x + diff.y*diff.y + diff.z*diff.z;
-    float b = 2.0*(diff.x*newUnscaledPos.x + diff.y*newUnscaledPos.y + diff.z*newUnscaledPos.z); // PROVIDED GSM REFERENCE FRAME (EARTH IS AT (0,0,0))
-    float c = newUnscaledPos.x*newUnscaledPos.x + newUnscaledPos.y*newUnscaledPos.y + newUnscaledPos.z*newUnscaledPos.z - clippingRadius*clippingRadius /* - 2.0*(0.0) */ ;
+    float b = 2.0 * (diff.x * newUnscaledPos.x +
+                     diff.y * newUnscaledPos.y +
+                     diff.z * newUnscaledPos.z); // PROVIDED GSM REFERENCE FRAME (EARTH IS AT (0,0,0))
+    float c = newUnscaledPos.x * newUnscaledPos.x +
+              newUnscaledPos.y * newUnscaledPos.y +
+              newUnscaledPos.z * newUnscaledPos.z -
+              clippingRadius * clippingRadius /* - 2.0*(0.0) */;
+
+    // Larger than zero implies collision with sphere => not valid
+    if (b*b-4.0*a*c > 0) {
+        return false;
+    }
+
+    return true;
+}
+
+bool validateSphericalLine(in vec3 prevUnscaledPos, in vec3 newUnscaledPos) {
+    vec3 diff = newUnscaledPos - prevUnscaledPos;
+    float a = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
+    float b = 2.0 * (diff.x * newUnscaledPos.x +
+                     diff.y * newUnscaledPos.y +
+                     diff.z * newUnscaledPos.z); // PROVIDED GSM REFERENCE FRAME (EARTH IS AT (0,0,0))
+    float c = newUnscaledPos.x * newUnscaledPos.x +
+              newUnscaledPos.y * newUnscaledPos.y +
+              newUnscaledPos.z * newUnscaledPos.z -
+              clippingRadius * clippingRadius /* - 2.0*(0.0) */;
 
     // Larger than zero implies collision with sphere => not valid
     if (b*b-4.0*a*c > 0) {
@@ -142,9 +207,37 @@ bool validatePoint(in vec3 newUnscaledPoint) {
     if (newUnscaledPoint.x < domainXLimits.x || newUnscaledPoint.x > domainXLimits.y ||
         newUnscaledPoint.y < domainYLimits.x || newUnscaledPoint.y > domainYLimits.y ||
         newUnscaledPoint.z < domainZLimits.x || newUnscaledPoint.z > domainZLimits.y ||
-        sqrt(pow(newUnscaledPoint.x,2) + pow(newUnscaledPoint.y,2) + pow(newUnscaledPoint.z,2)) < clippingRadius  ) {
+        sqrt(pow(newUnscaledPoint.x,2) +
+             pow(newUnscaledPoint.y,2) +
+             pow(newUnscaledPoint.z,2)) < clippingRadius  ) {
         return false;
     }
+    return true;
+}
+
+bool validateSphericalPoint(inout vec3 newUnscaledPoint) {
+    // The z component belongs to [0,360]
+    // if (newUnscaledPoint.z == 0) {
+    //     newUnscaledPoint.z = 0.00000001;
+    // } else if (newUnscaledPoint.z < 0 ) {
+    //     newUnscaledPoint.z += 360;
+    // } else if (newUnscaledPoint.z > 360 ) {
+    //     newUnscaledPoint.z -= 360;
+    // } else if (newUnscaledPoint.z == 0) {
+    //     newUnscaledPoint.z = 359.99999999;
+    // }
+
+    if (newUnscaledPoint.x < domainXLimits.x ||
+        newUnscaledPoint.x > domainXLimits.y ||
+        newUnscaledPoint.y < domainYLimits.x ||
+        newUnscaledPoint.y > domainYLimits.y ||
+        // newUnscaledPoint.z < domainZLimits.x ||
+        // newUnscaledPoint.z > domainZLimits.y ||
+        newUnscaledPoint.x < clippingRadius) {
+
+        return false;
+    }
+
     return true;
 }
 
@@ -175,6 +268,34 @@ bool findNextPoint(inout vec3 unscaledPos) {
     return true;
 }
 
+bool findNextSphericalPoint(inout vec3 sphericalPoint) {
+    vec3 newSphericalPoint;
+    switch (integrationMethod) {
+        case 0 :
+            newSphericalPoint = sphericalPoint + eulerStepSpherical(sphericalPoint);
+            break;
+        case 1 :
+            // newSphericalPoint = eulerStep(sphericalPoint);
+            newSphericalPoint = sphericalPoint + rk4Spherical(sphericalPoint);
+            break;
+        default :
+            return false;
+    }
+
+    if (!validateSphericalPoint(newSphericalPoint)) {
+        return false;
+    }
+
+    // Make sure line is not crossing the clipping sphere
+    // if (!validateSphericalLine(sphericalPoint, newSphericalPoint)) {
+    //     return false;
+    // }
+
+    sphericalPoint = newSphericalPoint;
+
+    return true;
+}
+
 void traceFieldline(in vec3 unscaledSeedPoint) {
 
     addVertex(unscaledSeedPoint);
@@ -190,12 +311,45 @@ void traceFieldline(in vec3 unscaledSeedPoint) {
     }
 }
 
+void sphericalFieldlineTrace(in vec3 sphericalSeedPoint) {
+
+    vec3 prevPointCartesian = convertSphericalToCartesian(sphericalSeedPoint);
+    addVertex(prevPointCartesian);
+
+    vec3 sphericalPoint = sphericalSeedPoint;
+    // vec3 textureCoords = normalizeCoords(sphericalSeedPoint);
+
+    // TODO range of loop should be specified as a uniform (depends on GL_MAX_GEOMETRY_VERTICES)
+    for (int i = 0 ; i <  maxVertices-1 ; ++i) {
+        bool isValidSphericalPoint = findNextSphericalPoint(sphericalPoint);
+        if (!isValidSphericalPoint) {
+            break;
+        }
+        vec3 newPointCartesian = convertSphericalToCartesian(sphericalPoint);
+
+        if (!validateSphericalLine(prevPointCartesian, newPointCartesian)) {
+            break;
+        }
+
+        addVertex(newPointCartesian);
+        prevPointCartesian = newPointCartesian;
+    }
+}
+
 void main() {
     vec3 unscaledSeedPoint = gl_in[0].gl_Position.xyz;
     // Check that seed point is valid
-    if (validatePoint(unscaledSeedPoint)) {
-        // Seed point is valid, trace line in one direction! (depends on stepSize)
-        traceFieldline(unscaledSeedPoint);
+    if (!isSpherical) {
+        if (validatePoint(unscaledSeedPoint)) {
+            scale = R_E_TO_METERS; // BATS-R-US scale factor. EARTH RADII TO METERS
+            // Seed point is valid, trace line in one direction! (depends on stepSize)
+            traceFieldline(unscaledSeedPoint);
+        }
+    } else {
+        if (validateSphericalPoint(unscaledSeedPoint)) {
+            scale = AU_TO_METERS; // ENLIL scale factor. ASTRONIMICAL UNITS TO METERS
+            sphericalFieldlineTrace(unscaledSeedPoint);
+        }
     }
     EndPrimitive();
 }
