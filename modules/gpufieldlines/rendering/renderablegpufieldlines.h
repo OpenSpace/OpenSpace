@@ -134,8 +134,7 @@ private:
     float _stateProgress;
 
     std::vector<double> _startTimes;
-    void generateUniform3DGrid();
-    void updateDomainBounds();
+    void generateUniformCartesian3DGrid();
 };
 
 } // namespace openspace

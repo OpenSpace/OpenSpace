@@ -388,7 +388,7 @@ bool RenderableGpuFieldlines::initialize() {
             // _startTimes.push_back(479649600.0); // March 15th 2015 00:00:00.000
 
             if (i == 0) {
-                generateUniform3DGrid();
+                generateUniformCartesian3DGrid();
             }
         }
 
@@ -718,7 +718,7 @@ void RenderableGpuFieldlines::updateActiveStateIndex() {
 }
 
 // FOR DEBUGGING PURPOSES
-void RenderableGpuFieldlines::generateUniform3DGrid() {
+void RenderableGpuFieldlines::generateUniformCartesian3DGrid() {
     // bottom vertices of entire volume
     // glm::vec3 bfl = glm::vec3(_domainMaxs.x, _domainMins.y, _domainMins.z);
     // glm::vec3 bfr = glm::vec3(_domainMaxs.x, _domainMaxs.y, _domainMins.z);
