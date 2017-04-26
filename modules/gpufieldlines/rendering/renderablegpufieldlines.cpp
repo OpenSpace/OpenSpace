@@ -62,7 +62,10 @@ namespace {
     const int integrationSimpleEuler = 0;
     const int integrationRungeKutta4 = 1;
 
+    const float R_E_TO_METER = 6371000.f; // Earth radius
+    const float A_U_TO_METER = 149597870700.f; // Astronomical Units
     const float DEG_TO_RAD   = 3.14159265359f / 180.f;
+    const float RAD_TO_DEG   = 180.f / 3.14159265359f;
 
     // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
 }
@@ -77,7 +80,7 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _gridVAO(0),
       _gridVBO(0),
       _stepSize("stepSize", "Step Coefficient", 0.2, 0.0001, 1.0),
-      _stepMultiplier("stepMultiplier", "Step Multiplier", 1, 1, 100000),
+      _stepMultiplier("stepMultiplier", "Step Multiplier", 1, 1, 1000),
       _clippingRadius("clippingRadius", "Clipping Radius", 0.1, 0.0, 5.0),
       _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
       _maximumVertices("numMaxVertices", "Max Number Of Vertices", 1, 1, 10),
@@ -196,72 +199,143 @@ bool RenderableGpuFieldlines::initialize() {
 
         LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
 
-        // TODO this could be done in manager
+        std::vector<std::string> magVars;
+
         for (int i = 0; i < _numberOfStates; ++i) {
             LDEBUG("\t" << validCdfFilePaths[i] << " is now being traced.");
 
             KameleonVolumeReader kvr(validCdfFilePaths[i]);
-
-            ghoul::Dictionary md = kvr.readMetaData();
-
-            // FOR ENLIL AND BATSRUS: std::vector of length 3, capacity 3
-            // {'r', 'theta', 'phi'} or {'x', 'y', 'z'}
-            std::vector<std::string> gvn = kvr.gridVariableNames();
-
-            // FOR ENLIL: std::vector of length 13, capacity 16
-            //      [0] = "r",  [1] = "theta",  [2]  = "phi",    [3] = "rho", [4] = "T",  [5] = "ur",     [6]  = "utheta", [7] = "uphi"
-            //      [8] = "br", [9] = "btheta", [10] = "bphi",   [11] = "dp", [12] = "bp", [13] = "b1r", [14] = "b1theta", [15] = "b1phi"
-            // FOR BATSRUS: std::vector of length 40, capacity 64
-            //      [0] = "x", [1] = "y", [2] = "z"
-            //      [3] = "bx", [4] = "by", [5] = "bz", [6] = "b1x", [7] = "b1y", [8] = "b1z", [9] = "ux", [10] = "uy", [11] = "uz", [12] = "jx", [13] = "jy", [14] = "jz", [15] = "rho", [16] = "p", [17] = "e", [18] = "block_amr_levels", [19] = "block_x_min", [20] = "block_x_max", [21] = "block_y_min", [22] = "block_y_max", [23] = "block_z_min", [24] = "block_z_max", [25] = "block_x_center", [26] = "block_y_center", [27] = "block_z_center", [28] = "block_at_amr_level", [29] = "block_parent_id", [30] = "block_child_count", [31] = "block_child_id_1", [32] = "block_child_id_2", [33] = "block_child_id_3", [34] = "block_child_id_4", [35] = "block_child_id_5", [36] = "block_child_id_6", [37] = "block_child_id_7", [38] = "block_child_id_8", [39] = "status"}
-            std::vector<std::string> vn = kvr.variableNames();
-
-            // FOR ENLIL: std::vector of length 13, capacity 16
-            //      [0] = "valid_min", [1] = "valid_max", [2] = "units", [3] = "grid_system", [4] = "mask", [5] = "description", [6] = "is_vector_components", [7] = "position_grid_system", [8] = "data_grid_system", [9] = "actual_min", [10] = "actual_max", [11] = "Original Name", [12] = "long_name"}
-            // FOR BATSRUS: std::vector of length 11, capacity 16
-            //      [0] = "valid_min", [1] = "valid_max", [2] = "units", [3] = "grid_system", [4] = "mask", [5] = "description", [6] = "is_vector_component", [7] = "position_grid_system", [8] = "data_grid_system", [9] = "actual_min", [10] = "actual_max"}
-            std::vector<std::string> van = kvr.variableAttributeNames();
-
-            // FOR ENLIL: std::vector of length 55, capacity 64
-            //      [0] = "README", [1] = "model_type", [2] = "grid_system_count", [3] = "model_name", [4] = "output_type", [5] = "grid_system_1", [6] = "grid_1_type", [7] = "run_type", [8] = "standard_grid_target", [9] = "original_output_file_name", [10] = "run_registration_number", [11] = "terms_of_usage", [12] = "tim_type", [13] = "tim_title", [14] = "tim_program", [15] = "tim_version", [16] = "tim_project", [17] = "tim_code", [18] = "tim_model", [19] = "tim_geometry", [20] = "tim_grid", [21] = "tim_coordinates", [22] = "tim_rotation", [23] = "tim_case", [24] = "tim_cordata", [25] = "tim_observatory", [26] = "tim_corona", [27] = "tim_crpos", [28] = "tim_shift_deg", [29] = "tim_boundary", [30] = "tim_run", [31] = "tim_parameters", [32] = "tim_boundary_old", [33] = "tim_obsdate_mjd", [34] = "tim_obsdate_cal", [35] = "tim_crstart_mjd", [36] = "tim_crstart_cal", [37] = "tim_rundate_mjd", [38] = "tim_rundate_cal", [39] = "tim_rbnd", [40] = "tim_gamma", [41] = "tim_xalpha", [42] = "tim_mevo", [43] = "tim_mfld", [44] = "tim_mslc", [45] = "tim_mtim", [46] = "tim_creation", [47] = "grid_system_1_dimension_1_size", [48] = "grid_system_1_dimension_2_size", [49] = "grid_system_1_dimension_3_size", [50] = "grid_system_1_number_of_dimensions", [51] = "time_physical_time", [52] = "time_physical_time_step", [53] = "time_numerical_time_step", [54] = "Conversion Time"}
-            // FOR BATSRUS: std::vector of length 52, capacity 64
-            //      [0] = "README", [1] = "model_name", [2] = "model_type", [3] = "generation_date", [4] = "original_output_file_name", [5] = "generated_by", [6] = "terms_of_usage", [7] = "grid_system_count", [8] = "grid_system_1_number_of_dimensions", [9] = "grid_system_1_dimension_1_size", [10] = "grid_system_1_dimension_2_size", [11] = "grid_system_1_dimension_3_size", [12] = "grid_system_1", [13] = "output_type", [14] = "standard_grid_target", [15] = "grid_1_type", [16] = "start_time", [17] = "end_time", [18] = "run_type", [19] = "kameleon_version", [20] = "elapsed_time_in_seconds", [21] = "number_of_dimensions", [22] = "special_parameter_g", [23] = "special_parameter_c", [24] = "special_parameter_th", [25] = "special_parameter_P1", [26] = "special_parameter_P2", [27] = "special_parameter_P3", [28] = "special_parameter_R", [29] = "special_parameter_NX", [30] = "special_parameter_NY", [31] = "special_parameter_NZ", [32] = "x_dimension_size", [33] = "y_dimension_size", [34] = "z_dimension_size", [35] = "current_iteration_step", [36] = "global_x_min", [37] = "global_x_max", [38] = "global_y_min", [39] = "global_y_max", [40] = "global_z_min", [41] = "global_z_max", [42] = "max_amr_level", [43] = "number_of_cells", [44] = "number_of_blocks", [45] = "smallest_cell_size", [46] = "r_body", [47] = "r_currents", [48] = "dipole_time", [49] = "dipole_update", [50] = "dipole_tilt", [51] = "dipole_tilt_y"}
-            std::vector<std::string> gan = kvr.globalAttributeNames();
-
             std::string modelName = kvr.getKameleon()->getModelName();
-
-            // Vector volume. Space related (domain)
-            float xMin = kvr.minValue(gvn[0]);
-            float xMax = kvr.maxValue(gvn[0]);
-            float yMin = kvr.minValue(gvn[1]);
-            float yMax = kvr.maxValue(gvn[1]);
-            float zMin = kvr.minValue(gvn[2]);
-            float zMax = kvr.maxValue(gvn[2]);
-
-            // Variable names of magnetic components.
-            // BATSRUS => bx, by    , bz
-            // ENLIL   => br, btheta, bphi
-            // TODO: Let user specify the 'b' variable in LUA?
-            std::vector<std::string> magVars{"b" + gvn[0],
-                                             "b" + gvn[1],
-                                             "b" + gvn[2]};
 
             // TODO FIX DOMAIN IF ENLIL
             if (i == 0) {
-                _domainMins = glm::vec3(xMin,yMin,zMin);
-                _domainMaxs = glm::vec3(xMax,yMax,zMax);
+                _modelName = modelName;
+
+                // FOR ENLIL AND BATSRUS: std::vector of length 3, capacity 3
+                // {'r', 'theta', 'phi'} or {'x', 'y', 'z'}
+                std::vector<std::string> gvn = kvr.gridVariableNames();
+
+                // FOR ENLIL: std::vector of length 13, capacity 16
+                //      [0] = "r",  [1] = "theta",  [2]  = "phi",    [3] = "rho", [4] = "T",  [5] = "ur",     [6]  = "utheta", [7] = "uphi"
+                //      [8] = "br", [9] = "btheta", [10] = "bphi",   [11] = "dp", [12] = "bp", [13] = "b1r", [14] = "b1theta", [15] = "b1phi"
+                // FOR BATSRUS: std::vector of length 40, capacity 64
+                //      [0] = "x", [1] = "y", [2] = "z"
+                //      [3] = "bx", [4] = "by", [5] = "bz", [6] = "b1x", [7] = "b1y", [8] = "b1z", [9] = "ux", [10] = "uy", [11] = "uz", [12] = "jx", [13] = "jy", [14] = "jz", [15] = "rho", [16] = "p", [17] = "e", [18] = "block_amr_levels", [19] = "block_x_min", [20] = "block_x_max", [21] = "block_y_min", [22] = "block_y_max", [23] = "block_z_min", [24] = "block_z_max", [25] = "block_x_center", [26] = "block_y_center", [27] = "block_z_center", [28] = "block_at_amr_level", [29] = "block_parent_id", [30] = "block_child_count", [31] = "block_child_id_1", [32] = "block_child_id_2", [33] = "block_child_id_3", [34] = "block_child_id_4", [35] = "block_child_id_5", [36] = "block_child_id_6", [37] = "block_child_id_7", [38] = "block_child_id_8", [39] = "status"}
+                std::vector<std::string> vn = kvr.variableNames();
+
+                // FOR ENLIL: std::vector of length 13, capacity 16
+                //      [0] = "valid_min", [1] = "valid_max", [2] = "units", [3] = "grid_system", [4] = "mask", [5] = "description", [6] = "is_vector_components", [7] = "position_grid_system", [8] = "data_grid_system", [9] = "actual_min", [10] = "actual_max", [11] = "Original Name", [12] = "long_name"}
+                // FOR BATSRUS: std::vector of length 11, capacity 16
+                //      [0] = "valid_min", [1] = "valid_max", [2] = "units", [3] = "grid_system", [4] = "mask", [5] = "description", [6] = "is_vector_component", [7] = "position_grid_system", [8] = "data_grid_system", [9] = "actual_min", [10] = "actual_max"}
+                std::vector<std::string> van = kvr.variableAttributeNames();
+
+                // FOR ENLIL: std::vector of length 55, capacity 64
+                //      [0] = "README", [1] = "model_type", [2] = "grid_system_count", [3] = "model_name", [4] = "output_type", [5] = "grid_system_1", [6] = "grid_1_type", [7] = "run_type", [8] = "standard_grid_target", [9] = "original_output_file_name", [10] = "run_registration_number", [11] = "terms_of_usage", [12] = "tim_type", [13] = "tim_title", [14] = "tim_program", [15] = "tim_version", [16] = "tim_project", [17] = "tim_code", [18] = "tim_model", [19] = "tim_geometry", [20] = "tim_grid", [21] = "tim_coordinates", [22] = "tim_rotation", [23] = "tim_case", [24] = "tim_cordata", [25] = "tim_observatory", [26] = "tim_corona", [27] = "tim_crpos", [28] = "tim_shift_deg", [29] = "tim_boundary", [30] = "tim_run", [31] = "tim_parameters", [32] = "tim_boundary_old", [33] = "tim_obsdate_mjd", [34] = "tim_obsdate_cal", [35] = "tim_crstart_mjd", [36] = "tim_crstart_cal", [37] = "tim_rundate_mjd", [38] = "tim_rundate_cal", [39] = "tim_rbnd", [40] = "tim_gamma", [41] = "tim_xalpha", [42] = "tim_mevo", [43] = "tim_mfld", [44] = "tim_mslc", [45] = "tim_mtim", [46] = "tim_creation", [47] = "grid_system_1_dimension_1_size", [48] = "grid_system_1_dimension_2_size", [49] = "grid_system_1_dimension_3_size", [50] = "grid_system_1_number_of_dimensions", [51] = "time_physical_time", [52] = "time_physical_time_step", [53] = "time_numerical_time_step", [54] = "Conversion Time"}
+                // FOR BATSRUS: std::vector of length 52, capacity 64
+                //      [0] = "README", [1] = "model_name", [2] = "model_type", [3] = "generation_date", [4] = "original_output_file_name", [5] = "generated_by", [6] = "terms_of_usage", [7] = "grid_system_count", [8] = "grid_system_1_number_of_dimensions", [9] = "grid_system_1_dimension_1_size", [10] = "grid_system_1_dimension_2_size", [11] = "grid_system_1_dimension_3_size", [12] = "grid_system_1", [13] = "output_type", [14] = "standard_grid_target", [15] = "grid_1_type", [16] = "start_time", [17] = "end_time", [18] = "run_type", [19] = "kameleon_version", [20] = "elapsed_time_in_seconds", [21] = "number_of_dimensions", [22] = "special_parameter_g", [23] = "special_parameter_c", [24] = "special_parameter_th", [25] = "special_parameter_P1", [26] = "special_parameter_P2", [27] = "special_parameter_P3", [28] = "special_parameter_R", [29] = "special_parameter_NX", [30] = "special_parameter_NY", [31] = "special_parameter_NZ", [32] = "x_dimension_size", [33] = "y_dimension_size", [34] = "z_dimension_size", [35] = "current_iteration_step", [36] = "global_x_min", [37] = "global_x_max", [38] = "global_y_min", [39] = "global_y_max", [40] = "global_z_min", [41] = "global_z_max", [42] = "max_amr_level", [43] = "number_of_cells", [44] = "number_of_blocks", [45] = "smallest_cell_size", [46] = "r_body", [47] = "r_currents", [48] = "dipole_time", [49] = "dipole_update", [50] = "dipole_tilt", [51] = "dipole_tilt_y"}
+                std::vector<std::string> gan = kvr.globalAttributeNames();
+
+                // Variable names of magnetic components.
+                // BATSRUS => bx, by    , bz
+                // ENLIL   => br, btheta, bphi
+                // TODO: Let user specify the 'b' variable in LUA?
+                magVars.push_back("b" + gvn[0]);
+                magVars.push_back("b" + gvn[1]);
+                magVars.push_back("b" + gvn[2]);
+
+                // Vector volume. Space related (domain)
+                float xMin = kvr.minValue(gvn[0]);
+                float xMax = kvr.maxValue(gvn[0]);
+                float yMin = kvr.minValue(gvn[1]);
+                float yMax = kvr.maxValue(gvn[1]);
+                float zMin = kvr.minValue(gvn[2]);
+                float zMax = kvr.maxValue(gvn[2]);
+
+                // New resampled domain dimensions (voxel grid)
+                // TODO: DIMENSIONS NEED TO BE MORE ACCURATE!!!!!!!
+                // TODO: LET USER SPECIFY DIMENSIONS IN LUA.. IF LARGER THEN THE ACTUAL.. SET ACTUAL
+                if (modelName == "batsrus") {
+                    _isSpherical = false;
+
+                    std::string gridDimPrefix = "grid_system_1_dimension_";
+                    _dimensions = glm::uvec3(kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "1_size").getAttributeInt(),
+                                             kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "2_size").getAttributeInt(),
+                                             kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "3_size").getAttributeInt());
+
+                    if (_dimensions.x * _dimensions.y * _dimensions.z > 2^22) {
+                        LWARNING("BATSRUS GRID DIMENSIONS ARE TOO LARGE. REDUCING TO 128^3");
+                        _dimensions = glm::uvec3(128,128,128);
+                    }
+
+                    _domainMins = glm::vec3(xMin,yMin,zMin);
+                    _domainMaxs = glm::vec3(xMax,yMax,zMax);
+
+                    generateUniformCartesian3DGrid();
+
+                } else if (modelName == "enlil") {
+                    _isSpherical = true;
+
+                    std::string gridDimPrefix = "grid_system_1_dimension_";
+                    _dimensions = glm::uvec3(kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "1_size").getAttributeInt(),
+                                             kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "2_size").getAttributeInt(),
+                                             1 + kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "3_size").getAttributeInt());
+
+                    if (_dimensions.x > 1024) {
+                        LWARNING("ENLIL GRID DIMENSION 'R' IS TOO LARGE. REDUCING TO 1024");
+                        _dimensions.x = 1024;
+                    }
+
+                    // CORRECT THE VARIABLE UNITS
+
+                    // ENLIL STORES RADIUS IN METERS
+                    // INTERPOLATOR EXPECTS RADIUS IN AU
+                    // METERES TO ASTRONOMICAL UNITS
+                    xMin /= A_U_TO_METER;
+                    xMax /= A_U_TO_METER;
+
+                    // ENLIL STORES THETA IN INTERVAL [0,pi] radians.
+                    //          0 at north pole, pi at south pole
+                    // INTERPOLATOR EXPECTS [-90,90] degrees
+                    //          -90 at south pole and +90 the north pole
+                    float temp = yMin;
+                    yMin = 90.f - yMax * RAD_TO_DEG;
+                    yMax = 90.f - temp * RAD_TO_DEG;
+
+                    // ENLIL STORES PHI IN INTERVAL [0,2pi] radians.
+                    // INTERPOLATOR EXPECTS [0,360] degrees
+                    zMin = 0.f;
+                    zMax = 360.f;
+                    // NOTE..!!
+                    // The actual min and max of phi are something like 2 and 358 = (360 - 2)
+                    // But to be able to use a texture and get proper interpolation we need
+                    // it to wrap all the way around! Note also the extra cell added to
+                    // _dimensions.z for this reason!
+
+                    _domainMins = glm::vec3(xMin,yMin,zMin);
+                    _domainMaxs = glm::vec3(xMax,yMax,zMax);
+
+                    generateUniformSphericalGrid();
+
+                } else { //REMOVE THIS ENTIRE NODE. MODEL IS UN RECOGNIZED!
+                    LERROR("CANNOT RECOGNIZE MODEL OF .CDF");
+                }
+
+
             } else {
-                ghoul_assert(_domainMins == glm::vec3(xMin,yMin,zMin) &&
-                             _domainMaxs == glm::vec3(xMax,yMax,zMax),
-                             "Spatial domains of CDF files are of different dimensions!");
+                // ghoul_assert(_domainMins == glm::vec3(xMin,yMin,zMin) &&
+                //              _domainMaxs == glm::vec3(xMax,yMax,zMax),
+                //              "Spatial domains of CDF files are of different dimensions!");
+                if (modelName != _modelName) {
+                    LERROR("Looks like the spcified folder contains .CDF files created"
+                            << " from different models! Same model is required!");
+                }
             }
 
-            // New resampled domain dimensions (voxel grid)
-            _dimensions = glm::uvec3(4,4,4);
-            // _dimensions = glm::uvec3(128,128,128);
-
             // Uniform resampling of magnetic components within the domain
-             LDEBUG("Creating glm::vec3 volume for variables " << magVars[0] << ", " << magVars[1] << " & " << magVars[2] << ". Dimensions are: " << _dimensions.x << " x " << _dimensions.y << " x " <<_dimensions.z);
+             LDEBUG("Creating glm::vec3 volume for variables "
+                    << magVars[0] << ", " << magVars[1] << " & " << magVars[2]
+                    << ". Dimensions are: "
+                    << _dimensions.x << " x " << _dimensions.y << " x " <<_dimensions.z);
 
             _normalizedVolume = kvr.readVec3Volume(_dimensions,
                                                    magVars,
@@ -288,15 +362,6 @@ bool RenderableGpuFieldlines::initialize() {
 
             _startTimes.push_back(GpuFieldlinesManager::ref().getTime(kvr.getKameleon())); // March 15th 2015 00:00:00.000
             // _startTimes.push_back(479649600.0); // March 15th 2015 00:00:00.000
-
-            if (i == 0) {
-                // TODO:
-                // if (model == "batsrus") {
-                    generateUniformCartesian3DGrid();
-                // } else if (model == "enlil") {
-                    // generateUniformSphericalGrid();
-                // }
-            }
         }
 
         // Approximate the end time of last state (and for the sequence as a whole)
@@ -304,17 +369,19 @@ bool RenderableGpuFieldlines::initialize() {
             _seqStartTime = _startTimes[0];
             double lastStateStart = _startTimes[_numberOfStates-1];
             if (_numberOfStates > 1) {
+                _isMorphing = true;
                 double avgTimeOffset = (lastStateStart - _seqStartTime) /
                                    (static_cast<double>(_numberOfStates) - 1.0);
                 _seqEndTime =  lastStateStart + avgTimeOffset;
             } else {
-                _seqEndTime = 631108800.f; // January 1st 2020
-                // _seqEndTime = FLT_MAX;
+                _isMorphing = false;
+                // _seqEndTime = 631108800.f; // January 1st 2020
+                _seqEndTime = FLT_MAX; // UNTIL THE END OF DAYS!
             }
 
             // Add seqEndTime as the last start time
             // to prevent vector from going out of bounds later.
-            _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
+            _startTimes.push_back(_seqEndTime);
         }
     }
 
@@ -469,9 +536,9 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         _volumeTexture[_activeStateIndex]->bind();
 
         // TODO: only if ENLIL => change wrapping mode to repeat for third component
-        if (_isSpherical) {
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-        }
+        // if (_isSpherical) {
+            // glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+        // }
 
         _program->setUniform("volumeTexture", _textureUnit->unitNumber());
 
@@ -484,9 +551,6 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
             }
             _program->setUniform("nextVolumeTexture", _textureUnit2->unitNumber());
         }
-
-        // int testTime = static_cast<int>(OsEng.runTime() * 100) / 5;
-        // _program->setUniform("time", testTime);
 
         glDisable(GL_CULL_FACE);
 

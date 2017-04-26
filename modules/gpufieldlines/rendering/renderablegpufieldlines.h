@@ -127,6 +127,7 @@ private:
     double _seqEndTime;
     double _currentTime;
     float _stateProgress;
+    std::string _modelName;
 
     std::vector<double> _startTimes;
     void generateUniformSphericalGrid();
