@@ -26,6 +26,9 @@
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEFIELDLINESSEQUENCE___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/vector/vec4property.h>
+
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
@@ -51,13 +54,23 @@ private:
     ghoul::Dictionary _fieldlineInfo;
     ghoul::Dictionary _seedPointsInfo;
 
+    // Properties
+    properties::BoolProperty _isMorphing;
+
+    properties::IntProperty _timeMultiplier;
+    properties::IntProperty _fieldlineParticleSize;
+    properties::IntProperty _modulusDivider;
+
+    properties::Vec4Property _fieldlineColor;
+    properties::Vec4Property _fieldlineParticleColor;
+
     std::vector<glm::vec3> _seedPoints;
     std::vector<FieldlinesState> _states;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 
     bool _shouldRender; // only temporary
     bool _needsUpdate;
-    bool _isMorphing;
+    // bool _isMorphing;
 
     GLuint _vertexArrayObject;
 
