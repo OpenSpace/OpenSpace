@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/models/cachingsurfacemodelprovider.h>
 #include <modules/globebrowsing/other/threadpool.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/io/texture/texturereader.h>
 
 namespace {
 	const std::string _loggerCat = "CachingSurfaceModelProvider";
@@ -36,7 +37,6 @@ namespace globebrowsing {
 CachingSurfaceModelProvider::CachingSurfaceModelProvider(Renderable* parent)
 	: _parent(parent)
 {
-	//_parent = parent;
 	double cacheSize = 512;
 
 	auto threadPool = std::make_shared<ThreadPool>(1);
@@ -49,7 +49,7 @@ std::vector<std::shared_ptr<Model>> CachingSurfaceModelProvider::getModels(const
 
 	// Check if the chunk is already in the cache. If it is in the cache, loop through the corresponding vector
 	// and look if the model is already loaded. If the model is already loaded, return the vector. If the model is
-	// not alreadu loaded, enqueue the model.
+	// not already loaded, enqueue the model.
 	if (_modelCache->exist(model->tileHashKey)) {
 		std::vector<std::shared_ptr<Model>> models = _modelCache->get(model->tileHashKey);
 
@@ -80,6 +80,25 @@ void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 
 	for (auto model : models) {
 		model->geometry->initialize(parent);
+		
+		// Must create a new texture because the texture created in the load job 
+		// is given the id zero (0). In this way the texture gets a unique id.
+		void* pixelData = new char[model->texture->expectedPixelDataSize()];
+		memcpy(pixelData, model->texture->pixelData(), model->texture->expectedPixelDataSize());
+
+		std::shared_ptr<ghoul::opengl::Texture> tempTexture = std::make_shared<ghoul::opengl::Texture>(
+			pixelData,
+			model->texture->dimensions(),
+			model->texture->format(),
+			model->texture->internalFormat(),
+			model->texture->dataType(),
+			model->texture->filter(),
+			model->texture->wrapping()
+			);
+
+		model->texture = tempTexture;
+
+		// Upoad to GPU and set filter
 		model->texture->uploadTexture();
 		model->texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 

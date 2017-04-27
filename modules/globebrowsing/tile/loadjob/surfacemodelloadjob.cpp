@@ -33,12 +33,13 @@ namespace openspace {
 namespace globebrowsing {
 
 void SurfaceModelLoadJob::execute() {
+	// Load the model geometry
+	_model->geometry = std::move(modelgeometry::ModelGeometry::createFromDictionary(_dictionary));
+
+	// Load the texture
 	std::string pathToTexture;
 	_dictionary.getValue(keyPathToTexture, pathToTexture);
 	_model->texture = std::move(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
-	
-	std::unique_ptr<modelgeometry::ModelGeometry> tempModel;
-	_model->geometry = std::move(modelgeometry::ModelGeometry::createFromDictionary(_dictionary));
 }
 
 std::shared_ptr<Model> SurfaceModelLoadJob::product() const {
