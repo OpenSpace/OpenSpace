@@ -3,10 +3,11 @@ local seedPointsFileEnlil = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoin
 
 local volumeFolderBatsrus = '${OPENSPACE_DATA}/bats_sequence';
 local volumeFolderEnlil = '${OPENSPACE_DATA}/enlil_sequence';
+-- local volumeFolderEnlil = '${OPENSPACE_DATA}/Ailsa';
 local volumeFile1 = '${OPENSPACE_DATA}/bats_sequence/batsrus1.cdf';
 local volumeFile2 = '${OPENSPACE_DATA}/bats_sequence/batsrus2.cdf';
 local volumeFile3 = '${OPENSPACE_DATA}/bats_sequence/batsrus3.cdf';
-local volumeFileEnlil = '${OPENSPACE_DATA}/Ailsa_Prise_101414_SH_1.enlil.0001.cdf';
+local volumeFileEnlil = '${OPENSPACE_DATA}/Ailsa/Ailsa_Prise_101414_SH_1.enlil.0001.cdf';
 
 return {
     {
@@ -33,36 +34,36 @@ return {
             },
         },
     },
+    -- {
+    --     Name = "EarthsMagnetosphereFieldlines",
+    --     Parent = "GSMReferenceFrame",
+    --     Renderable = {
+    --         Type = "RenderableFieldlinesSequence",
+    --         VectorVolume = {
+    --             -- Type = "VolumeKameleon",
+    --             Directory = volumeFolderBatsrus,
+    --             -- Model = "BATSRUS",
+    --             TracingVariable = "b", -- "b" is the variable specifying the magnetic field
+    --             -- Variables = {"bx", "by", "bz"},
+    --             -- TimeDependent = true,
+    --         },
+    --         Fieldlines = {
+    --             MaximumTracingSteps = 1000.0,
+    --             -- Stepsize = 1.0,
+    --             -- Classification = true,
+    --             Morphing = true,
+    --             ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
+    --             NumResamples = 500,
+    --             QuickMorphDistance = 637100000,
+    --         },
+    --         SeedPoints = {
+    --             -- Type = "File",
+    --             File = seedPointsFileBatsrus,
+    --         }
+    --     }
+    -- },
     {
-        Name = "EarthsMagnetosphereFieldlines",
-        Parent = "GSMReferenceFrame",
-        Renderable = {
-            Type = "RenderableFieldlinesSequence",
-            VectorVolume = {
-                -- Type = "VolumeKameleon",
-                Directory = volumeFolderBatsrus,
-                -- Model = "BATSRUS",
-                TracingVariable = "b", -- "b" is the variable specifying the magnetic field
-                -- Variables = {"bx", "by", "bz"},
-                -- TimeDependent = true,
-            },
-            Fieldlines = {
-                MaximumTracingSteps = 1000.0,
-                -- Stepsize = 1.0,
-                -- Classification = true,
-                Morphing = true,
-                ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
-                NumResamples = 500,
-                QuickMorphDistance = 637100000,
-            },
-            SeedPoints = {
-                -- Type = "File",
-                File = seedPointsFileBatsrus,
-            }
-        }
-    },
-    {
-        Name = "SolarFieldlines",
+        Name = "ENLILFieldlinesSequence",
         Parent = "HNMReferenceFrame",
         Renderable = {
             Type = "RenderableFieldlinesSequence",
@@ -75,7 +76,7 @@ return {
                 -- TimeDependent = true,
             },
             Fieldlines = {
-                MaximumTracingSteps = 1000.0,
+                MaximumTracingSteps = 100000.0,
                 -- Stepsize = 1.0,
                 -- Classification = true,
                 Morphing = true,
