@@ -508,9 +508,6 @@ void TouchInteraction::step(double dt) {
 			if (length(_vel.zoom*dt) < distToSurface && length(centerToCamera + directionToCenter*_vel.zoom*dt) > length(centerToBoundingSphere)) {
 				camPos += directionToCenter * _vel.zoom * dt;
 			}
-			else if (_directTouchMode) {
-				camPos += directionToCenter * _vel.zoom * dt;
-			}
 			else {
 				_vel.zoom = 0.0;
 			}
@@ -536,7 +533,7 @@ void TouchInteraction::decelerate() {
 		_vel.localRot = glm::dvec2(0.0, 0.0);
 	}
 	else {
-		if (!_directTouchMode && _currentRadius > 0.3) {
+		if (!_directTouchMode && _currentRadius > 0.3 && _vel.zoom > _focusNode->boundingSphere()) { // check for velocity speed too
 			_vel.zoom *= (1 - 2*_friction.zoom);
 		}
 		_vel.zoom *= (1 - _friction.zoom);
