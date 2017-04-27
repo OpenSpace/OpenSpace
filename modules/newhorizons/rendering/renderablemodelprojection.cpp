@@ -423,9 +423,8 @@ void RenderableModelProjection::project() {
 bool RenderableModelProjection::loadTextures() {
     _baseTexture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _baseTexture = std::move(
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath))
-        );
+        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath))
+        ;
         if (_baseTexture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _baseTexture->uploadTexture();

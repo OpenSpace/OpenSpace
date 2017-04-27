@@ -51,8 +51,7 @@ namespace {
     const char* KeyName = "Name";
     const char* KeyTarget = "DefaultTarget";
     const char* GalacticFrame = "GALACTIC";
-    const double REALLY_FAR = 99999999999;
-}
+} // namespace
 
 namespace openspace {
 
@@ -65,8 +64,8 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
     , _texture(nullptr)
     , _quad(0)
     , _vertexPositionBuffer(0)
-    , _name("ImagePlane")
     , _previousTime(0)
+    , _name("ImagePlane")
     , _moving(false)
     , _hasImage(false)
 {
@@ -169,7 +168,7 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_target.frame, GalacticFrame, time);
     
-    double timePast = abs(img.timeRange.start - _previousTime);
+    double timePast = std::abs(img.timeRange.start - _previousTime);
     
     std::string tex = _texturePath;
     if (_moving || _planeIsDirty)
@@ -249,7 +248,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     );
     // The apparent position, CN+S, makes image align best with target
 
-    for (int j = 0; j < bounds.size(); ++j) {
+    for (size_t j = 0; j < bounds.size(); ++j) {
         bounds[j] = SpiceManager::ref().frameTransformationMatrix(frame, GalacticFrame, currentTime) * bounds[j];
         glm::dvec3 cornerPosition = glm::proj(vecToTarget, bounds[j]);
 

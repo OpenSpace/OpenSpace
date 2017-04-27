@@ -126,6 +126,11 @@ int removeVirtualProperty(lua_State* L) {
 * Remove all registered virtual properties
 */
 int removeAllVirtualProperties(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
+    
     std::vector<properties::Property*> ps = OsEng.virtualPropertyManager().properties();
     for (properties::Property* p : ps) {
         OsEng.virtualPropertyManager().removeProperty(p);

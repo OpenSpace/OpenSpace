@@ -261,7 +261,7 @@ void RenderablePlane::render(const RenderData& data) {
     _shader->deactivate();
 }
 
-void RenderablePlane::update(const UpdateData& data) {
+void RenderablePlane::update(const UpdateData&) {
     if (_shader->isDirty())
         _shader->rebuildFromFile();
 

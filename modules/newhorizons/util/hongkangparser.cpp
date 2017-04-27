@@ -47,8 +47,8 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
                                std::string spacecraft,
                                ghoul::Dictionary translationDictionary,
                                std::vector<std::string> potentialTargets)
-    : _name(std::move(name))
-    , _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png"))
+    : _defaultCaptureImage(absPath("${OPENSPACE_DATA}/scene/common/textures/placeholder.png"))
+    , _name(std::move(name))
     , _fileName(std::move(fileName))
     , _spacecraft(std::move(spacecraft))
     , _potentialTargets(std::move(potentialTargets))
@@ -56,7 +56,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
     //get the different instrument types
     const std::vector<std::string>& decoders = translationDictionary.keys();
     //for each decoder (assuming might have more if hong makes changes)
-    for (int i = 0; i < decoders.size(); ++i) {
+    for (size_t i = 0; i < decoders.size(); ++i) {
         //create dictionary containing all {playbookKeys , spice IDs}
         if (decoders[i] == "Instrument") {
             ghoul::Dictionary typeDictionary;
@@ -64,7 +64,7 @@ HongKangParser::HongKangParser(std::string name, std::string fileName,
             //for each playbook call -> create a Decoder object
             const std::vector<std::string>& keys = typeDictionary.keys();
             //std::string abort = decoders[i] + "." + keyStopCommand;
-            for (int j = 0; j < keys.size(); ++j) {
+            for (size_t j = 0; j < keys.size(); ++j) {
                 std::string currentKey = decoders[i] + "." + keys[j];
                 
                 ghoul::Dictionary decoderDictionary;
@@ -278,8 +278,8 @@ bool HongKangParser::augmentWithSpice(Image& image, std::string spacecraft,
         exposureTime = 1;
     }
 
-    for (int i = 0; i < potentialTargets.size(); ++i) {
-        for (int j = 0; j < image.activeInstruments.size(); ++j) {
+    for (size_t i = 0; i < potentialTargets.size(); ++i) {
+        for (size_t j = 0; j < image.activeInstruments.size(); ++j) {
             double time = image.timeRange.start;
             for (int k = 0; k < exposureTime; k++) {
                 time += k;

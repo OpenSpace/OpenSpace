@@ -73,7 +73,7 @@ Tile TextTileProvider::getDefaultTile() {
     return Tile::TileUnavailable;
 }
 
-Tile::Status TextTileProvider::getTileStatus(const TileIndex& index) {
+Tile::Status TextTileProvider::getTileStatus(const TileIndex&) {
     return Tile::Status::OK;
 }
 
@@ -133,7 +133,7 @@ TileIndex::TileHashKey TextTileProvider::toHash(const TileIndex& tileIndex) cons
     return tileIndex.hashKey();
 }
 
-Tile TextTileProvider::backgroundTile(const TileIndex& tileIndex) const {
+Tile TextTileProvider::backgroundTile(const TileIndex&) const {
     glm::uvec4 color = { 0, 0, 0, 0 };
     return Tile::createPlainTile(_textureSize, color);
 }

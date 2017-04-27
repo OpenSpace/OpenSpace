@@ -151,12 +151,11 @@ void Renderable::render(const RenderData& data, RendererTasks&) {
     render(data);
 }
 
-void Renderable::render(const RenderData& data) {}
+void Renderable::render(const RenderData&) {}
 
-void Renderable::setPscUniforms(
-    ghoul::opengl::ProgramObject& program, 
-    const Camera& camera,
-    const PowerScaledCoordinate& position) 
+void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,
+                                const Camera& camera,
+                                const PowerScaledCoordinate& position)
 {
     program.setUniform("campos", camera.position().vec4());
     program.setUniform("objpos", position.vec4());

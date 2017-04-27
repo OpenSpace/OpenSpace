@@ -178,7 +178,7 @@ void RenderableSphere::render(const RenderData& data) {
     _shader->deactivate();
 }
 
-void RenderableSphere::update(const UpdateData& data) {
+void RenderableSphere::update(const UpdateData&) {
     if (_shader->isDirty())
         _shader->rebuildFromFile();
 

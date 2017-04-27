@@ -35,8 +35,6 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    const char* _loggerCat = "CachingTileProvider";
-
     const char* KeyDoPreProcessing = "DoPreProcessing";
     const char* KeyTilePixelSize = "TilePixelSize";
     const char* KeyFilePath = "FilePath";

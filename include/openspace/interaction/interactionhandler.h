@@ -99,10 +99,10 @@ public:
 
     // Accessors
     ghoul::Dictionary getCameraStateDictionary();
-    SceneGraphNode* const focusNode() const;
+    SceneGraphNode* focusNode() const;
     glm::dvec3 focusNodeToCameraVector() const;
     glm::quat focusNodeToCameraRotation() const;
-    Camera* const camera() const;
+    Camera* camera() const;
     const InputState& inputState() const;
 
     /**

@@ -135,7 +135,7 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
 
     scene->setCamera(std::move(loadedCamera.camera));
 
-    return std::move(scene);
+    return scene;
 }
 
 std::vector<SceneGraphNode*> SceneLoader::importDirectory(Scene& scene, const std::string& path) {
@@ -358,14 +358,14 @@ std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vect
         auto& badNode = badNodes[i];
         for (auto c : badNode->children()) {
             visited.insert(c);
-            badNodes.push_back(std::move(badNode->detachChild(*c, SceneGraphNode::UpdateScene::No)));
+            badNodes.push_back(badNode->detachChild(*c, SceneGraphNode::UpdateScene::No));
         }
         for (auto& d : badNode->dependentNodes()) {
             SceneGraphNode* parent = d->parent();
             if (visited.count(d) == 0) {
                 visited.insert(d);
                 if (parent) {
-                    badNodes.push_back(std::move(parent->detachChild(*d, SceneGraphNode::UpdateScene::No)));
+                    badNodes.push_back(parent->detachChild(*d, SceneGraphNode::UpdateScene::No));
                 }
             }
         }

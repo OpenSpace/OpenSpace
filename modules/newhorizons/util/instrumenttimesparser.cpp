@@ -56,13 +56,12 @@ namespace {
 
 namespace openspace {
 
-InstrumentTimesParser::InstrumentTimesParser(
-    const std::string& name,
-    const std::string& sequenceSource,
-    ghoul::Dictionary& inputDict)
-    : _name(name)
-    , _fileName(sequenceSource) 
-    , _pattern("\"(.{23})\" \"(.{23})\"")
+InstrumentTimesParser::InstrumentTimesParser(const std::string& name,
+                                             const std::string& sequenceSource,
+                                             ghoul::Dictionary& inputDict)
+    : _pattern("\"(.{23})\" \"(.{23})\"")
+    , _name(name)
+    , _fileName(sequenceSource)
     , _target("")
     , _detectorType("CAMERA")
 {
@@ -73,18 +72,16 @@ InstrumentTimesParser::InstrumentTimesParser(
     for (const auto& instrumentKey : instruments.keys()) {
         ghoul::Dictionary instrument = instruments.value<ghoul::Dictionary>(instrumentKey);
         ghoul::Dictionary files = instrument.value<ghoul::Dictionary>(KeyInstrumentFiles);
-        _fileTranslation[instrumentKey] = std::move(Decoder::createFromDictionary(instrument, KeyInstrument));
-        for (int i = 0; i < files.size(); i++) {
+        _fileTranslation[instrumentKey] = Decoder::createFromDictionary(instrument, KeyInstrument);
+        for (size_t i = 0; i < files.size(); i++) {
             std::string filename = files.value<std::string>(std::to_string(i + 1));
             _instrumentFiles[instrumentKey].push_back(filename);
         }
     }
 }
 
-
-
 bool InstrumentTimesParser::create() {
-    auto imageComparer = [](const Image &a, const Image &b)->bool{
+    auto imageComparer = [](const Image& a, const Image& b) -> bool{
         return a.timeRange.start < b.timeRange.start;
     };
     auto targetComparer = [](const std::pair<double, std::string> &a,

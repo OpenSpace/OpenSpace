@@ -32,7 +32,6 @@ namespace openspace {
 namespace properties {
 
 namespace {
-    const char* _loggerCat = "Property";
     const char* MetaDataKeyGuiName = "guiName";
     const char* MetaDataKeyGroup = "Group";
     const char* MetaDataKeyVisibility = "Visibility";
@@ -85,13 +84,13 @@ ghoul::any Property::get() const {
     return ghoul::any();
 }
 
-bool Property::getLuaValue(lua_State* state) const {
+bool Property::getLuaValue(lua_State*) const {
     return false;
 }
 
-void Property::set(ghoul::any value) {}
+void Property::set(ghoul::any) {}
 
-bool Property::setLuaValue(lua_State* state) {
+bool Property::setLuaValue(lua_State*) {
     return false;
 }
 
@@ -103,11 +102,11 @@ int Property::typeLua() const {
     return LUA_TNIL;
 }
 
-bool Property::getStringValue(std::string& value) const {
+bool Property::getStringValue(std::string&) const {
     return false;
 }
 
-bool Property::setStringValue(std::string value) {
+bool Property::setStringValue(std::string) {
     return false;
 }
 

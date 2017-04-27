@@ -250,7 +250,6 @@ void mainInitFunc() {
         }
     }
 
-#ifdef OPENSPACE_HAS_SPOUT
     for (size_t i = 0; i < nWindows; ++i) {
         const sgct::SGCTWindow* windowPtr = SgctEngine->getWindowPtr(i);
 
@@ -258,6 +257,7 @@ void mainInitFunc() {
             continue;
         }
 
+#ifdef OPENSPACE_HAS_SPOUT
         SpoutWindow w;
 
         w.windowId = i;
@@ -295,8 +295,13 @@ void mainInitFunc() {
         }
 
         SpoutWindows.push_back(std::move(w));
-    }
+#else
+        LWARNING(
+            "Spout was requested, but OpenSpace was compiled without Spout support."
+        );
+        
 #endif // OPENSPACE_HAS_SPOUT
+    }
     LTRACE("main::mainInitFunc(end)");
 }
 
@@ -431,7 +436,7 @@ void mainMousePosCallback(double x, double y) {
     }
 }
 
-void mainMouseScrollCallback(double posX, double posY) {
+void mainMouseScrollCallback(double, double posY) {
     LTRACE("main::mainMouseScrollCallback(begin");
     if (SgctEngine->isMaster()) {
         OsEng.mouseScrollWheelCallback(posY);

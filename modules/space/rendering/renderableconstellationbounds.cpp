@@ -158,10 +158,6 @@ bool RenderableConstellationBounds::isReady() const {
 void RenderableConstellationBounds::render(const RenderData& data) {
     _program->activate();
 
-    //glm::mat4 modelMatrix      = data.camera.modelMatrix();
-    glm::mat4 viewMatrix       = data.camera.viewMatrix();
-    glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-
     setPscUniforms(*_program.get(), data.camera, data.position);
 
     _program->setUniform("exponent", _distance);
@@ -323,7 +319,7 @@ bool RenderableConstellationBounds::loadConstellationFile() {
 void RenderableConstellationBounds::fillSelectionProperty() {
     // Each constellation is associated with its position in the array as this is unique
     // and will be constant during the runtime
-    for (int i = 0 ; i < _constellationBounds.size(); ++i) {
+    for (int i = 0 ; i < static_cast<int>(_constellationBounds.size()); ++i) {
         const ConstellationBound& bound = _constellationBounds[i];
         _constellationSelection.addOption( { i, bound.constellationFullName } );
     }

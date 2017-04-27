@@ -62,12 +62,6 @@ bool MultiModelGeometry::loadModel(const std::string& filename)  {
          
     _vertices.reserve(vertices.size());
     for (const auto & v : vertices) {
-        psc p = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-            v.location[0],
-            v.location[1],
-            v.location[2]
-        );
-
         Vertex vv;
         memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
         vv.location[3] = 1.0;

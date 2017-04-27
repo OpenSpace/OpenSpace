@@ -107,8 +107,8 @@ RenderableCrawlingLine::RenderableCrawlingLine(const ghoul::Dictionary& dictiona
     , _program(nullptr)
     , _imageSequenceTime(-1.f)
     , _vao(0)
-    , _vbo(0)
     , _frameCounter(0)
+    , _vbo(0)
     , _drawLine(false)
 {
     documentation::testSpecificationAndThrow(
@@ -150,7 +150,7 @@ bool RenderableCrawlingLine::initialize() {
     glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(VBOData), NULL, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VBOData), (void*)0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VBOData), nullptr);
 
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
@@ -267,7 +267,7 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
     VBOData vboData[2] = {
         {
             { 0.f, 0.f, 0.f },
-            _lineColorBegin.r, _lineColorBegin.g, _lineColorBegin.b, _lineColorBegin.a
+            { _lineColorBegin.r, _lineColorBegin.g, _lineColorBegin.b, _lineColorBegin.a }
         },
         {
             { target.x * powf(10, target.w), target.y * powf(10, target.w), target.z * powf(10, target.w) },

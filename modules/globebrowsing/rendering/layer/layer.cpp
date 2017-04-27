@@ -51,7 +51,7 @@ Layer::Layer(const ghoul::Dictionary& layerDict)
 }
 
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
-    return std::move(_tileProvider->getChunkTilePile(tileIndex, pileSize));
+    return _tileProvider->getChunkTilePile(tileIndex, pileSize);
 }
 
 } // namespace globebrowsing

@@ -26,10 +26,6 @@
 
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
-namespace {
-    const char* _loggerCat = "RawTile";
-}
-
 namespace openspace {
 namespace globebrowsing {
 
@@ -50,7 +46,7 @@ RawTile RawTile::createDefaultRes() {
     defaultRes.nBytesImageData = w * h * 1 * 3 * 4; // assume max 3 channels, max 4 bytes per pixel
     defaultRes.imageData = new char[defaultRes.nBytesImageData];
     std::fill_n((char*)defaultRes.imageData, defaultRes.nBytesImageData, 0);
-    return std::move(defaultRes);
+    return defaultRes;
 }
 
 void RawTile::serializeMetaData(std::ostream& os) {
@@ -87,7 +83,7 @@ RawTile RawTile::deserializeMetaData(std::istream& is) {
     is >> binaryDataSeparator; // not used
         
 //    char* buffer = new char[res.nBytesImageData]();
-    return std::move(res);
+    return res;
 }
 
 } // namespace globebrowsing
