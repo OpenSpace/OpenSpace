@@ -60,8 +60,7 @@ public:
 
 private:
 	void extractCoordinates();
-	void createProgramObjects(std::vector<std::shared_ptr<Model>> models);
-	void calculateSurfacePosition(std::vector<std::shared_ptr<Model>> models);
+	void calculateSurfacePosition();
 	std::vector<std::string> extractFileNames(const std::string filePath);
 
 	std::vector<std::string> _fileNames;
@@ -85,7 +84,6 @@ private:
 	std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
 	std::shared_ptr<CachingSurfaceModelProvider> _cachingModelProvider;
-	bool visitedOnce = true;
 
 	glm::dvec3 _sunPos;
 };

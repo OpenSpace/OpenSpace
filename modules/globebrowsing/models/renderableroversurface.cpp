@@ -111,44 +111,35 @@ bool RenderableRoverSurface::isReady() const {
 }
 
 void RenderableRoverSurface::render(const RenderData & data) {
+	_programObject->activate();
 	for (auto model : _models) {
-		//if(model->_programObject != nullptr) {
+		glm::dmat4 globeTransform = _globe->modelTransform();
+		glm::dvec3 positionWorldSpace = globeTransform * glm::dvec4(model->cartesianPosition, 1.0);
 
-			//const clock_t begin_time = clock();
+		glm::dmat4 modelTransform =
+			glm::translate(glm::dmat4(1.0), positionWorldSpace) *
+			glm::dmat4(data.modelTransform.rotation);
 
-				_programObject->activate();
+		glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+		glm::vec3 directionToSun = glm::normalize(_sunPos - positionWorldSpace);
+		glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
 
-				glm::dmat4 globeTransform = _globe->modelTransform();
-				glm::dvec3 positionWorldSpace = globeTransform * glm::dvec4(model->cartesianPosition, 1.0);
+		_programObject->setUniform("transparency", 1.0f);
+		_programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
+		_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+		_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+		_programObject->setUniform("performShading", false);
+		_programObject->setUniform("fading", 1.0f);
 
-				glm::dmat4 modelTransform =
-					glm::translate(glm::dmat4(1.0), positionWorldSpace) *
-					glm::dmat4(data.modelTransform.rotation);
+		model->geometry->setUniforms(*_programObject);
 
-				glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-				glm::vec3 directionToSun = glm::normalize(_sunPos - positionWorldSpace);
-				glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
-
-				_programObject->setUniform("transparency", 1.0f);
-				_programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
-				_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-				_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
-				_programObject->setUniform("performShading", false);
-				_programObject->setUniform("fading", 1.0f);			
-
-				model->geometry->setUniforms(*_programObject);
-
-				ghoul::opengl::TextureUnit unit;
-				unit.activate();
-				model->texture->bind();
-				_programObject->setUniform("texture1", unit);
-				model->geometry->render();
-
-				_programObject->deactivate();
-			
-		//}
+		ghoul::opengl::TextureUnit unit;
+		unit.activate();
+		model->texture->bind();
+		_programObject->setUniform("texture1", unit);
+		model->geometry->render();		
 	}
-
+	_programObject->deactivate();
 }
 
 void RenderableRoverSurface::update(const UpdateData & data) {
@@ -202,20 +193,9 @@ void RenderableRoverSurface::update(const UpdateData & data) {
 					model.lon = i.lon;
 					std::shared_ptr<Model> theModel = std::make_shared<Model>(std::move(model));
 
-					std::vector<std::shared_ptr<Model>> models = _cachingModelProvider->getModels(modelDictionary, theModel);
+					_models = _cachingModelProvider->getModels(modelDictionary, theModel);
 
-					//createProgramObjects(models);
-					calculateSurfacePosition(models);
-
-					for (auto i : models) {
-						//i->geometry->initialize(this);
-
-						_models.push_back(i);
-							
-					}
-
-
-					
+					calculateSurfacePosition();
 				}
 			}
 		}
@@ -282,30 +262,8 @@ void RenderableRoverSurface::extractCoordinates() {
 	GDALClose(poDS);
 }
 
-void RenderableRoverSurface::createProgramObjects(std::vector<std::shared_ptr<Model>> models) {
-
-	for (auto model : models) {
-		model->geometry->initialize(this);
-		
-		/*if (model->_programObject) {
-			OsEng.renderEngine().removeRenderProgram(model->_programObject);
-			model->_programObject = nullptr;
-		}*/
-		//const clock_t begin_time = clock();
-
-		if(model->_programObject == nullptr) {
-			RenderEngine& renderEngine = OsEng.renderEngine();
-			model->_programObject = renderEngine.buildRenderProgram("RenderableRoverSurface",
-				"${MODULE_BASE}/shaders/model_vs.glsl",
-				"${MODULE_BASE}/shaders/model_fs.glsl");
-		}
-		//LERROR("FINISHED IN : " << float(clock() - begin_time) / CLOCKS_PER_SEC);
-
-	}
-}
-
-void RenderableRoverSurface::calculateSurfacePosition(std::vector<std::shared_ptr<Model>> models) {
-	for (auto i : models) {
+void RenderableRoverSurface::calculateSurfacePosition() {
+	for (auto i : _models) {
 		globebrowsing::Geodetic2 geoTemp = globebrowsing::Geodetic2{ i->lat, i->lon } / 180 * glm::pi<double>();
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geoTemp);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
