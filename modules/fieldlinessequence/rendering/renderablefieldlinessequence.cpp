@@ -221,9 +221,15 @@ bool RenderableFieldlinesSequence::initialize() {
         if (_numberOfStates > 0) {
             _seqStartTime = _startTimes[0];
             double lastStateStart = _startTimes[_numberOfStates-1];
-            double avgTimeOffset = (lastStateStart - _seqStartTime) /
-                                   (static_cast<double>(_numberOfStates) - 1.0);
-            _seqEndTime =  lastStateStart + avgTimeOffset;
+            if (_numberOfStates > 1) {
+                double avgTimeOffset = (lastStateStart - _seqStartTime) /
+                                       (static_cast<double>(_numberOfStates) - 1.0);
+                _seqEndTime =  lastStateStart + avgTimeOffset;
+            } else {
+                _isMorphing = false;
+                // _seqEndTime = 631108800.f; // January 1st 2020
+                _seqEndTime = FLT_MAX; // UNTIL THE END OF DAYS!
+            }
             // Add seqEndTime as the last start time
             // to prevent vector from going out of bounds later.
             _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
