@@ -203,9 +203,6 @@ void GdalRawTileDataReader::initialize() {
 
 void GdalRawTileDataReader::readImageData(
     IODescription& io, RawTile::ReadError& worstError, char* imageDataDest) const {
-    // allocate memory for the image
-    //char* imageDataDest = new char[io.write.totalNumBytes];
-
     // In case there are extra channels not existing in the GDAL dataset
     // we set the bytes to 255 (for example an extra alpha channel that)
     // needs to be 1.

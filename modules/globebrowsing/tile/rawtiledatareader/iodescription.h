@@ -58,9 +58,9 @@ struct IODescription {
 };
 
 struct TileWriteDataDescription {
-    PixelRegion region;
-    size_t bytesPerLine;
-    size_t totalNumBytes;
+	PixelRegion region;
+	size_t bytesPerLine;
+	size_t totalNumBytes;
 };
 
 } // namespace globebrowsing

@@ -38,6 +38,16 @@ TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
 	_hasOwnershipOfData = true;
 }
 
+
+TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
+    const TileIndex& tileIndex, char* pboDataPtr)
+    : _rawTileDataReader(rawTileDataReader)
+    , _chunkIndex(tileIndex)
+{
+	_dataDestination = pboDataPtr;
+	_hasOwnershipOfData = false;
+}
+
 TileLoadJob::~TileLoadJob() {
 	if (_hasOwnershipOfData) {
 		delete _dataDestination;

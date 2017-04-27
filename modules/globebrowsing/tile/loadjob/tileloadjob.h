@@ -39,6 +39,8 @@ struct RawTile;
 struct TileLoadJob : LoadJob {
     TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
         const TileIndex& tileIndex, size_t dataSize);
+    TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
+        const TileIndex& tileIndex, char* pboDataPtr);
 
     ~TileLoadJob();
 

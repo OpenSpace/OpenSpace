@@ -28,7 +28,65 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tilediskcache.h>
 
+#include <ghoul/logging/logmanager.h>
+
 namespace openspace {
+
+namespace {
+    const char* _loggerCat = "PixelBuffer";
+}
+
+PixelBuffer::PixelBuffer(size_t numBytes, Usage usage)
+    : _numBytes(numBytes)
+    , _usage(usage)
+{
+    glGenBuffers(1, &_id);
+    bind();
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, _numBytes, 0, static_cast<GLenum>(_usage));
+    unbind();
+}
+
+PixelBuffer::~PixelBuffer() {
+    glDeleteBuffers(1, &_id);
+}
+
+void* PixelBuffer::mapBuffer(GLbitfield access) {
+    void* dataPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, _numBytes, access);
+    _isMapped = dataPtr ? true : false;
+    return dataPtr;
+}
+
+void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access) {
+    void* dataPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset, length, access);
+    _isMapped = dataPtr ? true : false;
+    return dataPtr;
+}
+
+bool PixelBuffer::unMapBuffer() {
+    bool success = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    if (!success) {
+        LERROR("Unable to unmap pixel buffer, data may be corrupt!");
+    }
+    _isMapped = false;
+    return success;
+}
+
+void PixelBuffer::bind() {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _id);
+}
+
+void PixelBuffer::unbind() {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+}
+
+bool PixelBuffer::isMapped() {
+    return _isMapped;
+}
+
+PixelBuffer::operator GLuint() {
+    return _id;
+}
+
 namespace globebrowsing {
 
 AsyncTileDataProvider::AsyncTileDataProvider(
@@ -36,48 +94,67 @@ AsyncTileDataProvider::AsyncTileDataProvider(
     std::shared_ptr<ThreadPool> pool)
     : _rawTileDataReader(rawTileDataReader)
     , _concurrentJobManager(pool)
-{}
+{
+    // PBO
+    size_t pboNumBytes = rawTileDataReader->getWriteDataDescription().totalNumBytes;
+
+    _pbo = std::make_unique<PixelBuffer>(pboNumBytes, PixelBuffer::Usage::STREAM_DRAW);
+}
 
 std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getRawTileDataReader() const {
     return _rawTileDataReader;
 }
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
-    if (satisfiesEnqueueCriteria(tileIndex)) {
-		size_t numBytes = _rawTileDataReader->getWriteDataDescription().totalNumBytes;
-        auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex, numBytes);
-        //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, tileIndex, tileDiskCache, "ReadAndWrite");
-        _concurrentJobManager.enqueueJob(job);
-        _enqueuedTileRequests[tileIndex.hashKey()] = tileIndex;
+    if (satisfiesEnqueueCriteria(tileIndex) && !_pbo->isMapped()) {
+		//size_t numBytes = _rawTileDataReader->getWriteDataDescription().totalNumBytes;
+		_pbo->bind();
+        char* dataPtr = static_cast<char*>(_pbo->mapBuffer(GL_MAP_WRITE_BIT));
+		_pbo->unbind();
+        if (dataPtr) {
+            auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex, dataPtr);
+            //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, tileIndex, tileDiskCache, "ReadAndWrite");
+            _concurrentJobManager.enqueueJob(job);
+            _enqueuedTileRequests[tileIndex.hashKey()] = tileIndex;
 
-        return true;
+            return true;
+        }
     }
     return false;
 }
 
 std::vector<std::shared_ptr<RawTile>> AsyncTileDataProvider::getRawTiles() {
     std::vector<std::shared_ptr<RawTile>> readyResults;
+    /*
     while (_concurrentJobManager.numFinishedJobs() > 0) {
         readyResults.push_back(_concurrentJobManager.popFinishedJob()->product());
     }
+    */
     return readyResults;
 }   
 
 std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
-    if (_concurrentJobManager.numFinishedJobs() > 0)
+    if (_concurrentJobManager.numFinishedJobs() > 0) {
+
+		_pbo->bind();
+        if (_pbo->isMapped()) {
+            _pbo->unMapBuffer();
+        }
+		_pbo->unbind();
+
         return _concurrentJobManager.popFinishedJob()->product();
+	}
     else
         return nullptr;
 }   
 
 bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) const {
     // only allow tile to be enqueued if it's not already enqueued
-    //return _futureTileIOResults.find(tileIndex.hashKey()) == _futureTileIOResults.end();
     return _enqueuedTileRequests.find(tileIndex.hashKey()) == _enqueuedTileRequests.end();
-
 }
 
 void AsyncTileDataProvider::reset() {
+    /*
     //_futureTileIOResults.clear();
     //_threadPool->stop(ghoul::ThreadPool::RunRemainingTasks::No);
     //_threadPool->start();
@@ -87,13 +164,16 @@ void AsyncTileDataProvider::reset() {
         delete _concurrentJobManager.popFinishedJob()->product()->imageData;
     }
     _rawTileDataReader->reset();
+    */
 }
 
 void AsyncTileDataProvider::clearRequestQueue() {
+    /*
     //_threadPool->clearRemainingTasks();
     //_futureTileIOResults.clear();
 	_enqueuedTileRequests.clear();
     _concurrentJobManager.clearEnqueuedJobs();
+    */
 }
 
 float AsyncTileDataProvider::noDataValueAsFloat() const {

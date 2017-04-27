@@ -61,6 +61,7 @@ public:
      */
     std::shared_ptr<RawTile> readTileData(TileIndex tileIndex, char* dataDestination);
     TileDepthTransform getDepthTransform() const;
+    const TileDataLayout& dataLayout() const;
     
     /**
      * \returns the maximum chunk level available in the dataset. Should be a value
@@ -77,13 +78,12 @@ public:
     virtual int rasterYSize() const = 0;
     virtual float depthOffset() const;
     virtual float depthScale() const;
+    virtual TileWriteDataDescription getWriteDataDescription() const = 0;
 
     /**
      * Returns a single channeled empty <code>RawTile</code> of size 16 * 16 pixels.
      */
     std::shared_ptr<RawTile> defaultTileData();
-
-    virtual TileWriteDataDescription getWriteDataDescription() const = 0;
     
     const static glm::ivec2 tilePixelStartOffset;
     const static glm::ivec2 tilePixelSizeDifference;

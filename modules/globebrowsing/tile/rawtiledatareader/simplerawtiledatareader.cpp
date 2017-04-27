@@ -102,7 +102,6 @@ TileWriteDataDescription SimpleRawTileDataReader::getWriteDataDescription() cons
     return writeDesc;
 }
 
-
 void SimpleRawTileDataReader::initialize() {
     _dataTexture = ghoul::io::TextureReader::ref().loadTexture(_datasetFilePath);
     if (_dataTexture == nullptr) {
@@ -137,9 +136,6 @@ void SimpleRawTileDataReader::initialize() {
 
 void SimpleRawTileDataReader::readImageData(
     IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const {
-    // allocate memory for the image
-    //char* imageData = new char[io.write.totalNumBytes];
-
     // In case there are extra channels not existing in the dataset
     // we set the bytes to 255 (for example an extra alpha channel that)
     // needs to be 1.

@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#if 0
+
 #include <modules/globebrowsing/tile/tiledatareader.h>
 
 #include <modules/globebrowsing/geometry/angle.h>
@@ -148,3 +150,5 @@ Geodetic2 TileDataReader::pixelToGeodetic(const PixelRegion::PixelCoordinate& p)
 
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif
