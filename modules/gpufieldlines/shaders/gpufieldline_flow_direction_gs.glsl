@@ -34,6 +34,7 @@ uniform float state_progression;
 
 uniform int integrationMethod;
 uniform int maxVertices;
+uniform int vertexSkipping;
 // uniform int maxComponentOutput;
 
 uniform mat4 modelViewProjection;
@@ -65,6 +66,7 @@ out float gs_depth;
 const float AU_TO_METERS = 149597870700.0; // Astronomical Units
 const float R_E_TO_METERS = 6371000.0; // EARTH RADII IN METERS
 float scale;
+int vertexSkipCounter;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -78,6 +80,7 @@ void addVertex(in vec3 unscaledPos) {
     gl_Position = z_normalization(modelViewProjection * position_meters.xyzw);
     gs_depth = gl_Position.w;
     EmitVertex();
+    vertexSkipCounter = 0;
 }
 
 vec3 convertSphericalToCartesian(in vec3 sphericalPoint) {
@@ -307,7 +310,12 @@ void traceFieldline(in vec3 unscaledSeedPoint) {
         if (!isValidPoint) {
             break;
         }
-        addVertex(unscaledPos);
+        if (vertexSkipCounter == vertexSkipping) {
+            addVertex(unscaledPos);
+        } else {
+            ++vertexSkipCounter;
+            --i;
+        }
     }
 }
 
@@ -330,8 +338,12 @@ void sphericalFieldlineTrace(in vec3 sphericalSeedPoint) {
         if (!validateSphericalLine(prevPointCartesian, newPointCartesian)) {
             break;
         }
-
-        addVertex(newPointCartesian);
+        if (vertexSkipCounter == vertexSkipping) {
+            addVertex(newPointCartesian);
+        } else {
+            ++vertexSkipCounter;
+            --i;
+        }
         prevPointCartesian = newPointCartesian;
     }
 }

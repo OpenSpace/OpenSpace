@@ -80,6 +80,7 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _gridVAO(0),
       _gridVBO(0),
       _stepSize("stepSize", "Step Coefficient", 0.2, 0.0001, 1.0),
+      _vertexSkipping("traceVertexSkipping", "Num vertices skipped", 0, 0, 500),
       _stepMultiplier("stepMultiplier", "Step Multiplier", 1, 1, 1000),
       _clippingRadius("clippingRadius", "Clipping Radius", 0.1, 0.0, 5.0),
       _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
@@ -440,6 +441,7 @@ bool RenderableGpuFieldlines::initialize() {
     addProperty(_domainZ);
     addProperty(_uniformFieldlineColor);
     addProperty(_uniformSeedPointColor);
+    addProperty(_vertexSkipping);
 
     _domainX.setMinValue(glm::vec2(_domainMins.x, _domainMins.x));
     _domainX.setMaxValue(glm::vec2(_domainMaxs.x, _domainMaxs.x));
@@ -528,6 +530,7 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         _program->setUniform("color", _uniformFieldlineColor);
         _program->setUniform("isMorphing", _isMorphing);
         _program->setUniform("isSpherical", _isSpherical);
+        _program->setUniform("vertexSkipping", _vertexSkipping);
 
         // TODO MOVE THIS TO UPDATE AND CHECK
         _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();

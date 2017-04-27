@@ -72,6 +72,7 @@ private:
     properties::FloatProperty _clippingRadius;
 
     properties::IntProperty _maximumVertices;
+    properties::IntProperty _vertexSkipping;
     properties::IntProperty _stepMultiplier;
 
     properties::OptionProperty _integrationMethod;
