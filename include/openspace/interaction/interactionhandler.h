@@ -64,7 +64,6 @@ public:
 
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
-    void setInteractionMode(const std::string& interactionModeKey);
     InteractionMode* interactionMode();
     
     void goToChunk(int x, int y, int level);
@@ -133,7 +132,7 @@ private:
         std::string documentation;
     };
 
-    void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
+    void setInteractionMode(InteractionMode* interactionMode);
 
     bool _cameraUpdatedFromScript = false;
 
@@ -142,16 +141,18 @@ private:
     std::unique_ptr<InputState> _inputState;
     Camera* _camera;
 
-    std::shared_ptr<InteractionMode> _currentInteractionMode;
+    InteractionMode* _currentInteractionMode;
 
-    std::map<std::string, std::shared_ptr<InteractionMode>> _interactionModes;
     std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
 
-    std::shared_ptr<KeyframeInteractionMode> _keyframeInteractionMode;
+    std::unique_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
+    std::unique_ptr<GlobeBrowsingInteractionMode> _globeBrowsingInteractionMode;
+    std::unique_ptr<KeyframeInteractionMode> _keyframeInteractionMode;
 
     // Properties
     properties::StringProperty _origin;
-
+    properties::OptionProperty _interactionModeOption;
+    
     properties::BoolProperty _rotationalFriction;
     properties::BoolProperty _horizontalFriction;
     properties::BoolProperty _verticalFriction;
