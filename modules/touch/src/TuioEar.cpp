@@ -88,12 +88,12 @@ void TuioEar::updateTuioCursor(TuioCursor *tcur) {
 // save id to be removed and remove it in clearInput
 void TuioEar::removeTuioCursor(TuioCursor *tcur) {
 	_mx.lock();
-	if (tcur->getPath().size() < 4 && tcur->getMotionSpeed() < 0.03) {
+	_removeList.push_back(tcur->getSessionID());
+
+	if (tcur->getPath().size() < 4 && tcur->getMotionSpeed() < 0.03 && _list.size() == _removeList.size() == 1) {
 		_tapCo = TuioCursor(*tcur);
 		_tap = true;
 	}
-		
-	_removeList.push_back(tcur->getSessionID());
 	_mx.unlock();
 }
 

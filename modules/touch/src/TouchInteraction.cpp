@@ -57,7 +57,7 @@ using namespace openspace;
 TouchInteraction::TouchInteraction()
 	: properties::PropertyOwner("TouchInteraction"),
 	_origin("origin", "Origin", ""),
-	_touchScreenSize("TouchScreenSize", "Normalizes _sensitivity with screen size given in inches.", 55.0f, 5.5f, 150.0f), // (5.5f) for iphone 6s plus, 4.7f smaller
+	_touchScreenSize("TouchScreenSize", "Normalizes _sensitivity with screen size given in inches.", 55.0f, 5.5f, 150.0f),
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
 	_friction{ 0.02, 0.01, 0.02, 1, 0.02 },
 	_sensitivity{ 2.0 * 55.0, 0.1, 0.1, 1, 0.4 * 55.0 },
@@ -404,7 +404,7 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 					res += currentAngle - lastAngle;
 				return res;
 			});
-			_vel.localRoll += -rollFactor * _sensitivity.localRoll / _touchScreenSize.value(); // _sensitivity could be 0.4 = x * (_touchScreenSize.value().x * _touchScreenSize.value().y)
+			_vel.localRoll += -rollFactor * _sensitivity.localRoll / _touchScreenSize.value();
 			break;
 		}
 		case PAN: { // add local rotation velocity
@@ -433,7 +433,7 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 					factor = 1.0 + std::pow(dist / startDecline, 2);
 				}
 				double response = _focusNode->boundingSphere() / (factor * _currentRadius * _projectionScaleFactor);
-				_vel.zoom = (_sensitivity.zoom / 55) * response; // _sensitivity could be 2.0 = x * (_touchScreenSize.value().x * _touchScreenSize.value().y)
+				_vel.zoom = (_sensitivity.zoom / 55) * response;
 			}
 			break;
 		}
@@ -467,10 +467,6 @@ void TouchInteraction::step(double dt) {
 		dvec3 centerToBoundingSphere;
 		double distance = std::max(length(centerToCamera) - boundingSphere, 0.0);
 		_currentRadius = boundingSphere / std::max(distance * _projectionScaleFactor, 1.0);
-
-		/*if (!_directTouchMode && _currentRadius > 0.3) {
-			_vel.zoom *= _friction.zoom;
-		}*/
 		
 		{ // Roll
 			dquat camRollRot = angleAxis(_vel.localRoll*dt, dvec3(0.0, 0.0, 1.0));
@@ -509,10 +505,10 @@ void TouchInteraction::step(double dt) {
 			dvec3 centerToCamera = camPos - centerPos;
 			double distToSurface = length(centerToCamera - centerToBoundingSphere);
 
-			if (_directTouchMode) {
+			if (length(_vel.zoom*dt) < distToSurface && length(centerToCamera + directionToCenter*_vel.zoom*dt) > length(centerToBoundingSphere)) {
 				camPos += directionToCenter * _vel.zoom * dt;
 			}
-			else if (length(_vel.zoom*dt) < distToSurface && length(centerToCamera + directionToCenter*_vel.zoom*dt) > length(centerToBoundingSphere)) {
+			else if (_directTouchMode) {
 				camPos += directionToCenter * _vel.zoom * dt;
 			}
 			else {
@@ -540,6 +536,9 @@ void TouchInteraction::decelerate() {
 		_vel.localRot = glm::dvec2(0.0, 0.0);
 	}
 	else {
+		if (!_directTouchMode && _currentRadius > 0.3) {
+			_vel.zoom *= (1 - 2*_friction.zoom);
+		}
 		_vel.zoom *= (1 - _friction.zoom);
 		_vel.globalRot *= (1 - _friction.globalRot);
 		_vel.localRot *= (1 - _friction.localRot);
