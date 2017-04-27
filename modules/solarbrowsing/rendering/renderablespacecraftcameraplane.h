@@ -34,6 +34,7 @@
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <memory>
+#include <modules/solarbrowsing/util/simplej2kcodec.h>
 
 namespace ghoul { namespace opengl { class Texture; }}
 
@@ -57,6 +58,7 @@ private:
     properties::IntProperty _currentActiveChannel;
     properties::BoolProperty _usePBO;
     properties::BoolProperty _asyncUploadPBO;
+    properties::IntProperty _resolutionLevel;
 
     double _openSpaceTime;
     double _lastUpdateOpenSpaceTime;
@@ -74,10 +76,17 @@ private:
     double _startTimeSequence;
     double _endTimeSequence;
 
+    bool _updateResGPU = false;
+
     std::unique_ptr<std::future<void>> _future;
     bool _initializePBO;
 
     IMG_PRECISION* _pboBufferData;
+
+    unsigned int _imageSize;
+    bool _resChanged;
+
+    SimpleJ2kCodec j2c;
 
     // Channels -> DataObjects
     //std::vector<std::vector<ImageDataObject>> _imageData;

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 // uniform float time;
-uniform isampler2D texture1;
+uniform sampler2D texture1;
 uniform sampler1D texture2;
 uniform bool additiveBlending;
 
@@ -43,7 +43,7 @@ in vec4 vs_positionScreenSpace;
 
 Fragment getFragment() {
 
-    float intensityOrg = float(texture(texture1, vs_st).r) / 255.0;
+    float intensityOrg = float(texture(texture1, vs_st).r);
     vec4 outColor = texture(texture2, intensityOrg);
 
 

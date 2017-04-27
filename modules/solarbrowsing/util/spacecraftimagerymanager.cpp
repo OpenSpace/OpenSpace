@@ -207,7 +207,10 @@ SpacecraftImageryManager::SpacecraftImageryManager() { }
 //     return std::move(textures);
 // }
 
-void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path) {
+void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
+                                                    const unsigned int tileWidth,
+                                                    const unsigned int tileHeight)
+{
     using RawPath = ghoul::filesystem::Directory::RawPath;
     using Recursive = ghoul::filesystem::Directory::RawPath;
     using Sort = ghoul::filesystem::Directory::Sort;
@@ -230,14 +233,14 @@ void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path) {
                                       decodedImg->data,
                                       decodedImg->w,
                                       decodedImg->h,
-                                      /*tileWidth=*/512,
-                                      /*tileHeight=*/512,
+                                      /*tileWidth=*/tileWidth,
+                                      /*tileHeight=*/tileHeight,
                                       /*numComps=*/1,
                                       /*compPrec=*/8);
                 }
             }
         }
-        LDEBUG("Finished decoding " << seqPath);
+        LDEBUG("Finished converting " << seqPath);
     }
 }
 
@@ -259,7 +262,7 @@ std::vector<ImageMetadata> SpacecraftImageryManager::loadImageMetadata(const std
     // TODO(mnoven): Remove this
     int limit = 0;
     for (auto seqPath : sequencePaths) {
-        if (limit++ == 10) break;
+       // if (limit++ == 1000) break;
         if (size_t position = seqPath.find_last_of(".") + 1) {
             if (position != std::string::npos) {
                 ghoul::filesystem::File currentFile(seqPath);

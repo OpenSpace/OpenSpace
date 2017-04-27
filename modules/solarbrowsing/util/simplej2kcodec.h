@@ -21,6 +21,7 @@ public:
   std::unique_ptr<ImageData> Decode();
   // Decode into a predefined buffer
   void DecodeIntoBuffer(int32_t*& buffer);
+  void DecodeTileIntoBuffer(const int& tileId, unsigned char*& buffer);
   // Encodes current loaded file
   void EncodeAsTiles(const char* outfile,
                      const int32_t* data,
@@ -32,11 +33,11 @@ public:
                      const unsigned int compPrec);
   void CreateInfileStream(const std::string& filename);
   void SetResolutionFactor(const int resolution);
+  void SetupDecoder();
 
 private:
   const int GetInfileFormat(const char* fname);
   void Destroy();
-  void SetupDecoder();
   void SetupEncoder();
 
   bool _isFileLoaded;
