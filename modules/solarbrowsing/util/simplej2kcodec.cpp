@@ -9,11 +9,12 @@
 #define JP2_MAGIC "\x0d\x0a\x87\x0a"
 #define J2K_CODESTREAM_MAGIC "\xff\x4f\xff\x51"
 
-SimpleJ2kCodec::SimpleJ2kCodec()
+SimpleJ2kCodec::SimpleJ2kCodec(bool verboseMode)
     : _isFileLoaded(false),
       _infileStream(nullptr),
       _decoder(nullptr),
       _image(nullptr),
+      _verboseMode(verboseMode),
       _codestreamInfo(nullptr) {}
 
 SimpleJ2kCodec::~SimpleJ2kCodec() {
@@ -106,7 +107,9 @@ void SimpleJ2kCodec::SetResolutionFactor(const int res) {
 }
 
 void SimpleJ2kCodec::Destroy() {
-  std::cerr << "Destroying..\n";
+  if (_verboseMode) {
+    std::cerr << "Destroying..\n";
+  }
   opj_stream_destroy(_infileStream);
   if (_codestreamInfo) {
     opj_destroy_cstr_info(&_codestreamInfo);
@@ -192,19 +195,21 @@ void SimpleJ2kCodec::EncodeAsTiles(const char* outfile,
   // l_param.tp_on = 0;
   // l_param.tp_flag = 0;
 
-  // Catch events using our callbacks and give a local context
-  opj_set_info_handler(_encoder, [](const char* msg, void* client_data) {
-                        (void)client_data;
-                        std::clog << "[INFO]" << msg;
-                      }, 00);
-  opj_set_warning_handler(_encoder, [](const char* msg, void* client_data) {
-                        (void)client_data;
-                        std::cerr << "[WARNING]" << msg;
-                      }, 00);
-  opj_set_error_handler(_encoder, [](const char* msg, void* client_data) {
-                        (void)client_data;
-                        std::cerr << "[ERROR]" << msg;
-                      }, 00);
+  //Catch events using our callbacks and give a local context
+  if (_verboseMode) {
+    opj_set_info_handler(_encoder, [](const char* msg, void* client_data) {
+                          (void)client_data;
+                          std::clog << "[INFO]" << msg;
+                        }, 00);
+    opj_set_warning_handler(_encoder, [](const char* msg, void* client_data) {
+                          (void)client_data;
+                          std::cerr << "[WARNING]" << msg;
+                        }, 00);
+    opj_set_error_handler(_encoder, [](const char* msg, void* client_data) {
+                          (void)client_data;
+                          std::cerr << "[ERROR]" << msg;
+                        }, 00);
+  }
 
   _outImage = opj_image_tile_create(numComps, l_params, OPJ_CLRSPC_GRAY);
   if (!_outImage) {
@@ -297,6 +302,7 @@ void SimpleJ2kCodec::SetupDecoder() {
   opj_set_default_decoder_parameters(&_decoderParams);
   strcpy(_decoderParams.infile, _infileName);
   _decoderParams.decod_format = GetInfileFormat(_decoderParams.infile);
+  //_decoderParams.m_verbose = false;
 
   switch (_decoderParams.decod_format) {
     case J2K_CFMT: { // JPEG-2000 codestream
@@ -332,21 +338,23 @@ void SimpleJ2kCodec::SetupDecoder() {
 
   // Extract some info from the code stream
   _codestreamInfo = opj_get_cstr_info(_decoder);
-  fprintf(stdout, "The file contains %dx%d tiles\n", _codestreamInfo->tw, _codestreamInfo->th);
 
-  // Catch events using our callbacks and give a local context
-  opj_set_info_handler(_decoder, [](const char* msg, void* client_data) {
-                        (void)client_data;
-                        std::clog << "[INFO]" << msg;
-                      }, 00);
-  opj_set_warning_handler(_decoder, [](const char* msg, void* client_data) {
-                        (void)client_data;
-                        std::cerr << "[WARNING]" << msg;
-                      }, 00);
-  opj_set_error_handler(_decoder, [](const char* msg, void* client_data) {
-                        (void)client_data;
-                        std::cerr << "[ERROR]" << msg;
-                      }, 00);
+  if (_verboseMode) {
+    fprintf(stdout, "The file contains %dx%d tiles\n", _codestreamInfo->tw, _codestreamInfo->th);
+    //Catch events using our callbacks and give a local context
+    opj_set_info_handler(_decoder, [](const char* msg, void* client_data) {
+                          (void)client_data;
+                          std::clog << "[INFO]" << msg;
+                        }, 00);
+    opj_set_warning_handler(_decoder, [](const char* msg, void* client_data) {
+                          (void)client_data;
+                          std::cerr << "[WARNING]" << msg;
+                        }, 00);
+    opj_set_error_handler(_decoder, [](const char* msg, void* client_data) {
+                          (void)client_data;
+                          std::cerr << "[ERROR]" << msg;
+                        }, 00);
+  }
 }
 
 const int SimpleJ2kCodec::GetInfileFormat(const char *fname) {

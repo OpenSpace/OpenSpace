@@ -13,7 +13,7 @@ struct ImageData {
 
 class SimpleJ2kCodec {
 public:
-  SimpleJ2kCodec();
+  SimpleJ2kCodec(bool verboseMode = false);
   ~SimpleJ2kCodec();
   // Decode tile from current loaded file
   std::unique_ptr<ImageData> DecodeTile(const int& tileId);
@@ -41,6 +41,7 @@ private:
 
   bool _isFileLoaded;
   bool _isDecoderSetup;
+  bool _verboseMode;
   char _infileName[OPJ_PATH_LEN];
 
   // Decoding will happen frequently - store the setup
