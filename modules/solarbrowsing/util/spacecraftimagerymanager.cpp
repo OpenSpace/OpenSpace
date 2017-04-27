@@ -267,10 +267,20 @@ std::vector<ImageMetadata> SpacecraftImageryManager::loadImageMetadata(const std
                 if (extension == "jp2" || extension == "j2k") {
                     const std::string relativePath = FileSys.relativePath(seqPath);
 
+                    // TODO(mnoven): Prettify or read metadata instead
+                    std::vector<std::string> tokens;
+                    std::stringstream ss;
+                    ss.str(currentFile.filename());
+                    std:: string item;
+                    while (std::getline(ss, item, '_')) {
+                        tokens.push_back(item);
+                    }
+                    std::string time = tokens[0] + "-" + tokens[1] + "-" +
+                                       tokens[2] + "T" + tokens[4] + ":" +
+                                       tokens[5] + ":" + tokens[6] + "." + tokens[7];
                     ImageMetadata metadata;
                     metadata.filename = seqPath;
-                    // TODO: Read correct time
-                    metadata.timeObserved = Time::ref().j2000Seconds() + (double)limit * 100000000.0;
+                    metadata.timeObserved = Time::ref().convertTime(time);
                     imageSequenceMetadata.push_back(metadata);
                 }
             }
