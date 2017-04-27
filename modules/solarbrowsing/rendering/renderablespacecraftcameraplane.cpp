@@ -34,7 +34,6 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-#include <modules/solarbrowsing/util/simplej2kcodec.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <openspace/util/time.h>
@@ -59,6 +58,8 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _target("target", "Target", "Sun")
     , _usePBO("usePBO", "Use PBO", true)
+    , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
+    , _resChanged(false)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 50, 0, 100)
 {
@@ -80,10 +81,11 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
 
     //std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/094"};
-    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realj2kdata/094"};
+    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/solarflarej2k/171",
+                                      "/home/noven/workspace/OpenSpace/data/solarflarej2k/094"};
     //std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};
-    std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094_new.txt"};
-
+    std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0171_new.txt",
+                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094_new.txt"};
 
 
     // std::vector<std::string> paths =   {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171", // 0
@@ -120,7 +122,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     }
 
     //const std::string jpath = "/home/noven/workspace/OpenSpace/data/realj2kdata/094";
-    //SpacecraftImageryManager::ref().ConvertTileJ2kImages(jpath);
+    //SpacecraftImageryManager::ref().ConvertTileJ2kImages(jpath, 1024, 1024);
 
     // Have to figure out the times of the whole interval first
     ImageMetadata& start = _imageMetadata[_currentActiveChannel][0];
@@ -131,9 +133,8 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
     Time::ref().setTime(_startTimeSequence - 10);
 
-    // Remove
-    const unsigned int imageSize = 4096;
-    pboSize = imageSize * imageSize * sizeof(int32_t);
+     pboSize = (4096 * 4096 * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
+    _imageSize = 4096 / (pow(2, _resolutionLevel));
 
     // Generate PBO
     glGenBuffers(2, pboHandles);
@@ -146,10 +147,10 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     // TODO(mnoven): Faster to send GL_RGBA32F as internal format - GPU Pads anyways?
     _texture =  std::make_unique<Texture>(
                     nullptr, // Update pixel data later, is this really safe?
-                    glm::size3_t(imageSize, imageSize, 1),
-                    ghoul::opengl::Texture::RedInt, // Format of the pixeldata
-                    GL_R16UI, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
-                    GL_INT, // Type of data
+                    glm::size3_t(_imageSize, _imageSize, 1),
+                    ghoul::opengl::Texture::Red, // Format of the pixeldata
+                    GL_R16, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
+                    GL_UNSIGNED_BYTE, // Type of data
                     Texture::FilterMode::Nearest,
                     Texture::WrappingMode::ClampToEdge
                 );
@@ -173,6 +174,10 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         updateTextureGPU(); // PASS IN TO NOT USE PBO HERE, OK SYNCHRYOUS
     });
 
+    _resolutionLevel.onChange([this]() {
+        _resChanged = true;
+    });
+
     _moveFactor.onChange([this]() {
         _size.setValue(glm::vec2(_moveFactor.value() * FULL_PLANE_SIZE, 0.f));
         createPlane();
@@ -186,6 +191,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     }
 
     performImageTimestep();
+    addProperty(_resolutionLevel);
     addProperty(_minRealTimeUpdateInterval);
     addProperty(_asyncUploadPBO);
     addProperty(_usePBO);
@@ -240,26 +246,33 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[1 - _currentPBO]);
 
-    // Orphan data and multithread
-    //glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, NULL, GL_STREAM_DRAW);
+    // TODO(mnoven): Res will depend on distance to camera or something like that
+    if (_resChanged) {
+        pboSize = (4096 * 4096 * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
+        _imageSize = 4096 / (pow(2, _resolutionLevel));
+        _resChanged = false;
+        _updateResGPU = true;
+    }
 
+    // Orphan data and multithread
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, NULL, GL_STREAM_DRAW);
     // Map buffer to client memory
     //_pboBufferData = static_cast<float*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
     _pboBufferData = static_cast<IMG_PRECISION*>(glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, pboSize, GL_MAP_WRITE_BIT|GL_MAP_INVALIDATE_BUFFER_BIT));
     std::string& currentFilename = _imageMetadata[_currentActiveChannel][image].filename;
 
     if (!_asyncUploadPBO) {
-        SimpleJ2kCodec j2c;
         j2c.CreateInfileStream(currentFilename);
-        j2c.DecodeIntoBuffer(_pboBufferData);
-
-        //std::memcpy(_pboBufferData, decodedImg->data,  decodedImg->w * decodedImg->h * sizeof(unsigned char));
+        j2c.SetupDecoder();
+        j2c.SetResolutionFactor(_resolutionLevel);
+        j2c.DecodeTileIntoBuffer(0, _pboBufferData);
     } else {
         _future = std::make_unique<std::future<void>>(std::async(std::launch::async,
             [this, &currentFilename]() {
-                SimpleJ2kCodec j2c;
                 j2c.CreateInfileStream(currentFilename);
-                j2c.DecodeIntoBuffer(_pboBufferData);
+                j2c.SetupDecoder();
+                j2c.SetResolutionFactor(_resolutionLevel);
+                j2c.DecodeTileIntoBuffer(0, _pboBufferData);
             }));
     }
 
@@ -283,21 +296,37 @@ void RenderableSpacecraftCameraPlane::updateTextureGPU() {
          const glm::uvec3& dimensions = _texture->dimensions();
         _texture->bind();
         // Send async to GPU by coping from PBO to texture objects
-        glTexSubImage2D(
-            _texture->type(),
-            0,
-            0,
-            0,
-            GLsizei(dimensions.x),
-            GLsizei(dimensions.y),
-            GLint(_texture->format()),
-            _texture->dataType(),
-            nullptr
-        );
+        // Res updated - recreate texture
+        if (_updateResGPU) {
+            glTexImage2D(
+                _texture->type(),
+                0,
+                _texture->internalFormat(),
+                _imageSize,
+                _imageSize,
+                0,
+                GLint(_texture->format()),
+                _texture->dataType(),
+                nullptr
+            );
+            _updateResGPU = false;
+        } else {
+            glTexSubImage2D(
+                _texture->type(),
+                0,
+                0,
+                0,
+                _imageSize,
+                _imageSize,
+                GLint(_texture->format()),
+                _texture->dataType(),
+                nullptr
+            );
+        }
+
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     } else {
-
-        // TODO: Get this to work
+        // TODO: Get this to work for performance measurements
         // std::string& currentFilename = _imageMetadata[_currentActiveChannel][_currentActiveImage].filename;
         // SimpleJ2kCodec j2c;
 
@@ -333,9 +362,10 @@ void RenderableSpacecraftCameraPlane::performImageTimestep() {
     }
 
     if (currentActiveImageLast != _currentActiveImage || _initializePBO){
-        LDEBUG("Updating texture to " << _currentActiveImage);
+      //  LDEBUG("Updating texture to " << _currentActiveImage);
         _currentPBO = 1 - _currentPBO;
         updateTextureGPU();
+
         if (_usePBO /*&& !_initializePBO*/) {
             uploadImageDataToPBO(_currentActiveImage);
         }

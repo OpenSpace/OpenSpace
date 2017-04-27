@@ -27,10 +27,10 @@ void SimpleJ2kCodec::DecodeIntoBuffer(int32_t*& buffer) {
     return;
   }
 
-  if (!_isDecoderSetup) {
-    SetupDecoder();
-    _isDecoderSetup = true;
-  }
+  // if (!_isDecoderSetup) {
+  //   SetupDecoder();
+  //   _isDecoderSetup = true;
+  // }
 
   if (!opj_decode(_decoder, _infileStream, _image)) {
     std::cerr << "Could not decode image\n";
@@ -57,10 +57,10 @@ std::unique_ptr<ImageData> SimpleJ2kCodec::Decode() {
     return nullptr;
   }
 
-  if (!_isDecoderSetup) {
-    SetupDecoder();
-    _isDecoderSetup = true;
-  }
+  // if (!_isDecoderSetup) {
+  //   SetupDecoder();
+  //   _isDecoderSetup = true;
+  // }
 
   if (!opj_decode(_decoder, _infileStream, _image)) {
     std::cerr << "Could not decode image\n";
@@ -78,16 +78,38 @@ std::unique_ptr<ImageData> SimpleJ2kCodec::Decode() {
   return std::make_unique<ImageData>(im);
 }
 
+void SimpleJ2kCodec::DecodeTileIntoBuffer(const int& tileId, unsigned char*& buffer) {
+  if (!_isFileLoaded) {
+    std::cerr << "File needs to be set up before decoding tiles\n";
+    return;
+  }
+
+  // if (!_isDecoderSetup) {
+  //   SetupDecoder();
+  //   _isDecoderSetup = true;
+  // }
+
+  if (!opj_get_decoded_tile(_decoder, _infileStream, _image, tileId)) {
+    std::cerr << "Could not decode tile\n";
+    Destroy();
+    return;
+  }
+
+  std::copy(_image->comps[0].data, _image->comps[0].data + _image->comps[0].w * _image->comps[0].h, buffer);
+  //std::swap(buffer, _image->comps[0].data);
+  //std::memcpy(buffer, _image->comps[0].data, _image->comps[0].w * _image->comps[0].h * sizeof(int32_t));
+}
+
 std::unique_ptr<ImageData> SimpleJ2kCodec::DecodeTile(const int& tileId) {
   if (!_isFileLoaded) {
     std::cerr << "File needs to be set up before decoding tiles\n";
     return nullptr;
   }
 
-  if (!_isDecoderSetup) {
-    SetupDecoder();
-    _isDecoderSetup = true;
-  }
+  // if (!_isDecoderSetup) {
+  //   SetupDecoder();
+  //   _isDecoderSetup = true;
+  // }
 
   if (!opj_get_decoded_tile(_decoder, _infileStream, _image, tileId)) {
     std::cerr << "Could not decode tile\n";

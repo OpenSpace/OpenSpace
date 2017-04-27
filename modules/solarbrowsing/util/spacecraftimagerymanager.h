@@ -31,7 +31,7 @@
 #include <valarray>
 #include <unordered_map>
 
-#define IMG_PRECISION int32_t
+#define IMG_PRECISION unsigned char
 
 // TODO List:
 // 1. Read headerinfo properly
@@ -75,8 +75,10 @@ class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManage
 
 public:
     SpacecraftImageryManager();
-    void ConvertTileJ2kImages(const std::string& path);
-   // std::vector<ImageDataObject> loadImageData(const std::string& path, int& imageSize);
+    void ConvertTileJ2kImages(const std::string& path, const unsigned int tileWidth,
+                              const unsigned int tileHeight);
+    // std::vector<ImageDataObject> loadImageData(const std::string& path, int&
+    // imageSize);
     std::vector<ImageMetadata> loadImageMetadata(const std::string& path);
    // std::vector<std::unique_ptr<ghoul::opengl::Texture>> loadTextures(std::vector<ImageDataObject>& imageData);
     std::unique_ptr<ghoul::opengl::Texture> createLUT();
