@@ -46,7 +46,7 @@ struct TestJob : public openspace::globebrowsing::Job<int> {
         std::cout << "Finished job" << std::endl;
     }
 
-    virtual std::shared_ptr<int> product() const {
+    virtual std::shared_ptr<int> product() {
         return std::make_shared<int>(prod);
     }
 
@@ -117,7 +117,7 @@ struct VerboseJob : public openspace::globebrowsing::Job<VerboseProduct>{
         std::cout << " ** Finished job" << std::endl;
     }
 
-    virtual std::shared_ptr<VerboseProduct> product() const {
+    virtual std::shared_ptr<VerboseProduct> product() {
         return _product;
     }
 

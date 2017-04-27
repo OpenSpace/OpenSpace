@@ -36,7 +36,7 @@ struct RawTile;
 
 struct LoadJob : public Job<RawTile> {
     virtual void execute() = 0;
-    virtual std::shared_ptr<RawTile> product() const = 0;
+    virtual std::shared_ptr<RawTile> product() = 0;
 };
 
 } // namespace globebrowsing

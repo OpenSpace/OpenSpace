@@ -67,12 +67,5 @@ size_t ConcurrentJobManager<P>::numFinishedJobs() const {
     return _finishedJobs.size();
 }
 
-template<typename P>
-void ConcurrentJobManager<P>::reset() {
-    //threadPool->clearRemainingTasks();
-    threadPool->clearTasks();
-}
-
-
 } // namespace globebrowsing
 } // namespace openspace

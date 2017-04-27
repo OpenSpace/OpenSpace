@@ -59,7 +59,7 @@ public:
      * Reads data from the current dataset and initializes a <code>RawTile</code>
      * which gets returned.
      */
-    std::shared_ptr<RawTile> readTileData(TileIndex tileIndex);
+    std::shared_ptr<RawTile> readTileData(TileIndex tileIndex, char* dataDestination);
     TileDepthTransform getDepthTransform() const;
     
     /**
@@ -82,6 +82,8 @@ public:
      * Returns a single channeled empty <code>RawTile</code> of size 16 * 16 pixels.
      */
     std::shared_ptr<RawTile> defaultTileData();
+
+    virtual TileWriteDataDescription getWriteDataDescription() const = 0;
     
     const static glm::ivec2 tilePixelStartOffset;
     const static glm::ivec2 tilePixelSizeDifference;
@@ -114,8 +116,8 @@ protected:
      * \param <code>worstError</code> should be set to the error code returned when
      * reading the data.
      */
-    virtual char* readImageData(
-        IODescription& io, RawTile::ReadError& worstError) const = 0;
+    virtual void readImageData(
+        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const = 0;
 
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const = 0;

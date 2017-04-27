@@ -39,7 +39,7 @@ struct Job {
     virtual ~Job();
 
     virtual void execute() = 0;
-    virtual std::shared_ptr<P> product() const = 0;
+    virtual std::shared_ptr<P> product() = 0;
 };
 
 /* 
@@ -58,8 +58,6 @@ public:
     std::shared_ptr<Job<P>> popFinishedJob();
 
     size_t numFinishedJobs() const;
-
-    void reset();
 
 private:
     ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;

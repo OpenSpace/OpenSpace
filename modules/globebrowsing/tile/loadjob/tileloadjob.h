@@ -38,18 +38,25 @@ struct RawTile;
 
 struct TileLoadJob : LoadJob {
     TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-        const TileIndex& tileIndex);
+        const TileIndex& tileIndex, size_t dataSize);
 
-    virtual ~TileLoadJob() = default;
+    ~TileLoadJob();
 
     virtual void execute() override;
 
-    virtual std::shared_ptr<RawTile> product() const override;
+	/**
+	* Marks the job as finised and releases ownership of the data.
+	* Unless the job is marked as finished, the pixel data will be deallocated
+	* when the job is deleted.
+	*/
+    virtual std::shared_ptr<RawTile> product() override;
 
 protected:
     TileIndex _chunkIndex;
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
     std::shared_ptr<RawTile> _rawTile;
+    char* _dataDestination;
+	bool _hasOwnershipOfData;
 };
 
 } // namespace globebrowsing

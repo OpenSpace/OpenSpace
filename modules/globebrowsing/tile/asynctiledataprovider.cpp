@@ -44,7 +44,8 @@ std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getRawTileDataReader()
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
     if (satisfiesEnqueueCriteria(tileIndex)) {
-        auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex);
+		size_t numBytes = _rawTileDataReader->getWriteDataDescription().totalNumBytes;
+        auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex, numBytes);
         //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, tileIndex, tileDiskCache, "ReadAndWrite");
         _concurrentJobManager.enqueueJob(job);
         _enqueuedTileRequests[tileIndex.hashKey()] = tileIndex;
@@ -81,9 +82,9 @@ void AsyncTileDataProvider::reset() {
     //_threadPool->stop(ghoul::ThreadPool::RunRemainingTasks::No);
     //_threadPool->start();
     _enqueuedTileRequests.clear();
-    _concurrentJobManager.reset();
+	_concurrentJobManager.clearEnqueuedJobs();
     while (_concurrentJobManager.numFinishedJobs() > 0) {
-        _concurrentJobManager.popFinishedJob();
+        delete _concurrentJobManager.popFinishedJob()->product()->imageData;
     }
     _rawTileDataReader->reset();
 }
@@ -91,8 +92,8 @@ void AsyncTileDataProvider::reset() {
 void AsyncTileDataProvider::clearRequestQueue() {
     //_threadPool->clearRemainingTasks();
     //_futureTileIOResults.clear();
+	_enqueuedTileRequests.clear();
     _concurrentJobManager.clearEnqueuedJobs();
-    _enqueuedTileRequests.clear();
 }
 
 float AsyncTileDataProvider::noDataValueAsFloat() const {

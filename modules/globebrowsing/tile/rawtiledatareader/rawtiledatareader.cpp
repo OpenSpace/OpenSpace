@@ -103,14 +103,15 @@ std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() {
     return rawTile;
 }
 
-std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex) {
+std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex, char* dataDestination) {
     ensureInitialized();
     IODescription io = getIODescription(tileIndex);
     RawTile::ReadError worstError = RawTile::ReadError::None;
 
     // Build the RawTile from the data we querred
     std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
-    rawTile->imageData = readImageData(io, worstError);
+    rawTile->imageData = dataDestination;
+    readImageData(io, worstError, rawTile->imageData);
     rawTile->error = worstError;
     rawTile->tileIndex = tileIndex;
     rawTile->dimensions = glm::uvec3(io.write.region.numPixels, 1);
