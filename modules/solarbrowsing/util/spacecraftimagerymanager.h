@@ -31,7 +31,7 @@
 #include <valarray>
 #include <unordered_map>
 
-#define IMG_PRECISION float
+#define IMG_PRECISION int32_t
 
 // TODO List:
 // 1. Read headerinfo properly
@@ -42,23 +42,33 @@ namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
 
-struct ImageMetadata {
-    std::string filename;
-    int min;
-    int max;
-    int waveLength;
-    float expTime;
-    double timeObserved;
-};
+// struct ImageMetadata {
+//     std::string filename;
+//     int min;
+//     int max;
+//     int waveLength;
+//     float expTime;
+//     double timeObserved;
+// };
 
-struct ImageDataObject {
-    ImageMetadata metaData;
-    std::valarray<IMG_PRECISION> contents;
+// struct ImageDataObject {
+//     ImageMetadata metaData;
+//     std::valarray<IMG_PRECISION> contents;
+
+//     bool operator<(const double val) const {
+//         return (metaData.timeObserved < val);
+//     }
+// };
+
+struct ImageMetadata {
+    double timeObserved;
+    std::string filename;
 
     bool operator<(const double val) const {
-        return (metaData.timeObserved < val);
+        return timeObserved < val;
     }
 };
+
 
 class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManager> {
     friend class ghoul::Singleton<SpacecraftImageryManager>;
@@ -66,10 +76,11 @@ class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManage
 public:
     SpacecraftImageryManager();
     void ConvertTileJ2kImages(const std::string& path);
-    std::vector<ImageDataObject> loadImageData(const std::string& path, int& imageSize);
-    std::vector<std::unique_ptr<ghoul::opengl::Texture>> loadTextures(std::vector<ImageDataObject>& imageData);
+   // std::vector<ImageDataObject> loadImageData(const std::string& path, int& imageSize);
+    std::vector<ImageMetadata> loadImageMetadata(const std::string& path);
+   // std::vector<std::unique_ptr<ghoul::opengl::Texture>> loadTextures(std::vector<ImageDataObject>& imageData);
     std::unique_ptr<ghoul::opengl::Texture> createLUT();
-    void scaleImageData(std::vector<ImageDataObject>& _imageData, const std::string& type, const int& channel);
+    //void scaleImageData(std::vector<ImageDataObject>& _imageData, const std::string& type, const int& channel);
 private:
     void fetchServerImages(std::string type);
     void fillImageryInfo(std::string buffer, std::string type);

@@ -77,12 +77,14 @@ private:
     std::unique_ptr<std::future<void>> _future;
     bool _initializePBO;
 
-    float* _pboBufferData;
+    IMG_PRECISION* _pboBufferData;
 
     // Channels -> DataObjects
-    std::vector<std::vector<ImageDataObject>> _imageData;
+    //std::vector<std::vector<ImageDataObject>> _imageData;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::vector<std::unique_ptr<TransferFunction>> _transferFunctions;
+
+    std::vector<std::vector<ImageMetadata>> _imageMetadata;
 
     void uploadImageDataToPBO(const int& image);
     void updateTextureGPU();

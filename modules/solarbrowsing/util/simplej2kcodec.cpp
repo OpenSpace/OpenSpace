@@ -20,9 +20,39 @@ SimpleJ2kCodec::~SimpleJ2kCodec() {
   Destroy();
 }
 
+void SimpleJ2kCodec::DecodeIntoBuffer(int32_t*& buffer) {
+  if (!_isFileLoaded) {
+    std::cerr << "File needs to be set up before decoding\n";
+    return;
+  }
+
+  if (!_isDecoderSetup) {
+    SetupDecoder();
+    _isDecoderSetup = true;
+  }
+
+  if (!opj_decode(_decoder, _infileStream, _image)) {
+    std::cerr << "Could not decode image\n";
+    Destroy();
+    return;
+  }
+
+  if (!opj_end_decompress(_decoder, _infileStream)) {
+    std::cerr << "Could not end decompression\n";
+    Destroy();
+    return;
+  }
+
+  // TODO(mnoven): This MIGHT be faster and just keep buffer in unsigned char since we know
+  // that all values in img are bytes. Why can't we specify decode precision in openjpeg??
+  // - For now just keep the PBO buffer in the same size
+  //std::copy(_image->comps[0].data, _image->comps[0].data + _image->comps[0].w * _image->comps[0].h, buffer);
+  std::memcpy(buffer, _image->comps[0].data, _image->comps[0].w * _image->comps[0].h * sizeof(int32_t));
+}
+
 std::unique_ptr<ImageData> SimpleJ2kCodec::Decode() {
   if (!_isFileLoaded) {
-    std::cerr << "File needs to be set up before reading tiles\n";
+    std::cerr << "File needs to be set up before decoding\n";
     return nullptr;
   }
 
@@ -49,7 +79,7 @@ std::unique_ptr<ImageData> SimpleJ2kCodec::Decode() {
 
 std::unique_ptr<ImageData> SimpleJ2kCodec::DecodeTile(const int& tileId) {
   if (!_isFileLoaded) {
-    std::cerr << "File needs to be set up before reading tiles\n";
+    std::cerr << "File needs to be set up before decoding tiles\n";
     return nullptr;
   }
 
@@ -84,15 +114,15 @@ void SimpleJ2kCodec::Destroy() {
   opj_destroy_codec(_decoder);
   opj_image_destroy(_image);
   _isDecoderSetup = false;
+  _isFileLoaded = false;
 }
 
 void SimpleJ2kCodec::CreateInfileStream(const std::string& filename) {
-  Destroy();
   strcpy(_infileName, filename.c_str());
 
   _infileStream = opj_stream_create_default_file_stream(_infileName, 1);
   if (!_infileStream){
-    std::cerr << "Failed to create stream from file " << _decoderParams.infile;
+    std::cerr << "Failed to create stream from file " << _infileName << "\n";
     return;
   }
 
@@ -257,6 +287,10 @@ void SimpleJ2kCodec::EncodeAsTiles(const char* outfile,
     Destroy();
     return;
   }
+
+  opj_image_destroy(_outImage);
+  opj_stream_destroy(outStream);
+  opj_destroy_codec(_encoder);
 }
 
 void SimpleJ2kCodec::SetupDecoder() {
