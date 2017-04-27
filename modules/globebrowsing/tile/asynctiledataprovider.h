@@ -33,6 +33,44 @@
 #include <unordered_map>
 
 namespace openspace {
+
+
+class PixelBuffer
+{
+public:
+	enum class Usage {
+		STREAM_DRAW = GL_STREAM_DRAW,
+		STREAM_READ = GL_STREAM_READ,
+		STREAM_COPY = GL_STREAM_COPY,
+		STATIC_DRAW = GL_STATIC_DRAW,
+		STATIC_READ = GL_STATIC_READ,
+		STATIC_COPY = GL_STATIC_COPY,
+		DYNAMIC_DRAW = GL_DYNAMIC_DRAW,
+		DYNAMIC_READ = GL_DYNAMIC_READ,
+		DYNAMIC_COPY = GL_DYNAMIC_COPY
+	};
+
+    PixelBuffer(size_t numBytes, Usage usage);
+    ~PixelBuffer();
+    
+    void* mapBuffer(GLbitfield access);
+    void* mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access);
+    bool unMapBuffer();
+
+    void bind();
+    void unbind();
+
+    bool isMapped();
+
+    operator GLuint();
+
+private:
+    GLuint _id;
+    const size_t _numBytes;
+    const Usage _usage;
+    bool _isMapped;
+};
+
 namespace globebrowsing {
     
 struct RawTile;
@@ -53,7 +91,7 @@ public:
     std::shared_ptr<RawTileDataReader> getRawTileDataReader() const;
     float noDataValueAsFloat() const;
 
-    GLuint pbo() const { return _pbo; };
+    //GLuint pbo() const { return *_pbo; };
 
 protected:
     virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;
@@ -63,10 +101,7 @@ private:
     ConcurrentJobManager<RawTile> _concurrentJobManager;
     std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
 
-    // PBO
-    GLuint _pbo;
-    size_t _pboNumBytes;
-    size_t _numJobsRunning;
+    //std::unique_ptr<PixelBuffer> _pbo;
 };
 
 } // namespace globebrowsing

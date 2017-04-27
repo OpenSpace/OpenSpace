@@ -208,7 +208,7 @@ void GdalRawTileDataReader::readImageData(
     // we set the bytes to 255 (for example an extra alpha channel that)
     // needs to be 1.
     if (_dataLayout.numRasters > _dataLayout.numRastersAvailable) {
-        //memset(dst, 255, io.write.totalNumBytes);
+        memset(dst, 255, io.write.totalNumBytes);
     }
     
     if (_dataLayout.numRastersAvailable == 3) // RGB -> BGR
@@ -419,11 +419,6 @@ TileDataLayout GdalRawTileDataReader::getTileDataLayout(GLuint preferredGlType) 
     layout.bytesPerDatum = tiledatatype::numberOfBytes(_gdalType);
     layout.bytesPerPixel = layout.bytesPerDatum * layout.numRasters;
     layout.textureFormat = tiledatatype::getTextureFormatOptimized(layout.numRasters, _gdalType);
-
-    layout.totalNumBytesPerTile =
-        (_config.tilePixelSize + padding.numPixels.x) *
-        (_config.tilePixelSize + padding.numPixels.y) *
-        layout.bytesPerPixel;
 
     return layout;
 }
