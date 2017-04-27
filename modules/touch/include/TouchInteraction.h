@@ -68,19 +68,11 @@ struct ScaleFactor {
 	double globalRoll;
 	double localRoll;
 };
-struct InteractionType {
-	bool rot;
-	bool pinch;
-	bool pan;
-	bool roll;
-	bool pick;
-};
 struct SelectedBody { 
 	int id;
 	SceneGraphNode* node;
 	glm::dvec3 coordinates;
 };
-
 struct FunctionData {
 	std::vector<glm::dvec3> selectedPoints;
 	std::vector<glm::dvec2> screenPoints;
@@ -91,6 +83,12 @@ struct FunctionData {
 	SceneGraphNode* node;
 	double aspectRatio;
 };
+
+#define ROT 0
+#define PINCH 1
+#define ROLL 2
+#define PAN 3
+#define PICK 4
 
 using Point = std::pair<int, TUIO::TuioPoint>;
 
@@ -103,10 +101,11 @@ class TouchInteraction : public properties::PropertyOwner
 		void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
 		void manipulate(const std::vector<TUIO::TuioCursor>& list);
 		void trace(const std::vector<TUIO::TuioCursor>& list);
-		void interpret(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
+		int interpret(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void accelerate(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
+
 		void step(double dt);
-		void configSensitivities(double dist);
+
 		void decelerate();
 		void clear();
 		void tap();
@@ -114,42 +113,29 @@ class TouchInteraction : public properties::PropertyOwner
 		// Get & Setters
 		Camera* getCamera();
 		SceneGraphNode* getFocusNode();
-		double getFriction();
-		double getSensitivity();
-
 		void setFocusNode(SceneGraphNode* focusNode);
 		void setCamera(Camera* cam);
-		void setFriction(double friction);
-		void setSensitivity(double sensitivity);
 
 	private:
-
-		// could be removed
-		double _baseSensitivity;
-		double _baseFriction;
-		double _minHeightFromSurface;
-
 		Camera* _camera;
 		SceneGraphNode* _focusNode = nullptr;
-		properties::StringProperty _origin;
-		properties::Vec2Property _touchScreenSize;
-		globebrowsing::RenderableGlobe* _globe;
 
-		bool _tap;
-		bool _directTouchMode;
-		double _projectionScaleFactor;
-		double _currentRadius;
-		std::vector<SelectedBody> _selected;
-		InteractionType _action;
-		
-		LMstat _lmstat;
-		glm::dvec3 _centroid;
-		glm::dquat _toSlerp;
-		double _time;
+		properties::StringProperty _origin;
 		VelocityStates _vel;
 		ScaleFactor _friction;
 		ScaleFactor _sensitivity;
-
+		glm::dvec3 _centroid;
+		int _action;
+		double _projectionScaleFactor;
+		double _currentRadius;
+		double _time;
+		bool _directTouchMode;
+		bool _tap;
+		properties::Vec2Property _touchScreenSize;
+		
+		std::vector<SelectedBody> _selected;
+		LMstat _lmstat;
+		glm::dquat _toSlerp;
 };
 
 } // openspace namespace
