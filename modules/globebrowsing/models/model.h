@@ -33,8 +33,7 @@ namespace openspace {
 namespace globebrowsing {
 
 struct Model {
-	std::unique_ptr<ghoul::opengl::ProgramObject> _programObject = nullptr;
-	std::unique_ptr<modelgeometry::ModelGeometry> geometry = nullptr;
+	std::unique_ptr<modelgeometry::ModelGeometry> geometry;
 	std::shared_ptr<ghoul::opengl::Texture> texture;
 
 	std::vector<float> rotation;
