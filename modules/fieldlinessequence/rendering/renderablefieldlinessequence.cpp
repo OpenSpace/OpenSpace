@@ -70,6 +70,17 @@ namespace openspace {
 
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
+      _isMorphing("isMorphing", "Morphing", false),
+      _fieldlineColor("fieldlineColor", "Fieldline Color", glm::vec4(0.f,1.f,0.f,0.45f),
+                                                           glm::vec4(0.f),
+                                                           glm::vec4(1.f)),
+      _fieldlineParticleSize("fieldlineParticleSize", "FL Particle Size", 20, 0, 1000),
+      _timeMultiplier("fieldlineParticleSpeed", "FL Particle Speed", 20, 1, 1000),
+      _modulusDivider("fieldlineParticleFrequency", "FL Particle Frequency (reversed)", 100, 1, 10000),
+      _fieldlineParticleColor("fieldlineParticleColor", "FL Particle Color",
+                                                           glm::vec4(1.f,0.f,1.f,0.75f),
+                                                           glm::vec4(0.f),
+                                                           glm::vec4(1.f)),
       _vertexArrayObject(0),
       _vertexPositionBuffer(0),
       _morphToPositionBuffer(0),
@@ -156,10 +167,13 @@ bool RenderableFieldlinesSequence::initialize() {
             maxSteps = static_cast<int>(f_maxSteps);
         }
 
-        if (!_fieldlineInfo.getValue(keyFieldlineShouldMorph, _isMorphing)) {
+        bool userWantsMorphing;
+        if (!_fieldlineInfo.getValue(keyFieldlineShouldMorph, userWantsMorphing)) {
             _isMorphing = false; // Default value
             LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph
                     << ". Using default: " << _isMorphing);
+        } else {
+            _isMorphing = true;
         }
 
         int resamplingOption = 4; // Default
@@ -256,6 +270,7 @@ bool RenderableFieldlinesSequence::initialize() {
             "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_morph_flow_direction_vs.glsl",
             "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_flow_direction_fs.glsl"
         );
+        addProperty(_isMorphing);
     } else {
         _program = OsEng.renderEngine().buildRenderProgram(
             "FieldlinesSequence",
@@ -268,6 +283,15 @@ bool RenderableFieldlinesSequence::initialize() {
         LERROR("Shader program failed initialization!");
         return false;
     }
+
+    // TODO: IT MAY BE BENEFICIAL IF SOME OF THESE PROPERTIES WERE DEPENDENT ON THE
+    // NUMBER OF MAX TRACING STEPS THAT THE USER DEFINED IN LUA!
+    // The fieldlineParticleSize and modulusDivider espacially
+    addProperty(_fieldlineParticleSize);
+    addProperty(_timeMultiplier);
+    addProperty(_modulusDivider);
+    addProperty(_fieldlineColor);
+    addProperty(_fieldlineParticleColor);
 
     return true;
 }
@@ -317,9 +341,14 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
                 data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
 
         int testTime = static_cast<int>(OsEng.runTime() * 100) / 5;
-        _program->setUniform("time", testTime);
+        _program->setUniform("time", testTime * _timeMultiplier);
+        _program->setUniform("flParticleSize", _fieldlineParticleSize);
+        _program->setUniform("modulusDivider", _modulusDivider);
+        _program->setUniform("fieldlineColor", _fieldlineColor);
+        _program->setUniform("fieldlineParticleColor", _fieldlineParticleColor);
         if (_isMorphing) {
             _program->setUniform("state_progression", _stateProgress);
+            _program->setUniform("isMorphing", _isMorphing);
         }
         glDisable(GL_CULL_FACE);
 

@@ -27,6 +27,11 @@
 uniform mat4 modelViewProjection;
 //uniform mat4 modelTransform;
 uniform int time;
+uniform int flParticleSize;
+uniform int modulusDivider;
+
+uniform vec4 fieldlineColor;
+uniform vec4 fieldlineParticleColor;
 
 layout(location = 0) in vec3 in_position; // in meters
 // layout(location = 1) in vec4 in_color;
@@ -37,13 +42,13 @@ out vec4 vs_position;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-    vec4 in_color = vec4(1.0,1.0,0.0,0.0);
+    // vec4 in_color = vec4(1.0,1.0,0.0,0.0);
     // Color every n-th vertex differently to show fieldline flow direction
-    int modulus = (gl_VertexID + time) % 100;
-    if ( modulus > 0 && modulus < 99) {
-        vs_color = vec4(in_color.rgb * 0.99, 0.25);
+    int modulus = (gl_VertexID + time) % modulusDivider;
+    if ( modulus > 0 && modulus < flParticleSize) {
+        vs_color = fieldlineParticleColor;//vec4(in_color.rgb * 0.99, 0.25);
     } else {
-        vs_color = vec4(in_color.rgb * 0.99, 0.40);
+        vs_color = fieldlineColor;//vec4(in_color.rgb * 0.99, 0.40);
     }
     // vs_color = in_color;
     //vec4 tmp = vec4(in_position, 0);
