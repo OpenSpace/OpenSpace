@@ -58,15 +58,15 @@ struct VelocityStates {
 	double zoom;
 	glm::dvec2 globalRot;
 	glm::dvec2 localRot;
-	double globalRoll;
-	double localRoll;
+	double globalRoll; // never used
+	double localRoll; 
 };
 struct ScaleFactor {
 	double zoom;
 	double globalRot;
-	double localRot;
-	double globalRoll;
-	double localRoll;
+	double localRot; // pan
+	double globalRoll; // never used
+	double localRoll; // roll
 };
 struct SelectedBody { 
 	int id;
@@ -121,6 +121,7 @@ class TouchInteraction : public properties::PropertyOwner
 		SceneGraphNode* _focusNode = nullptr;
 
 		properties::StringProperty _origin;
+		properties::FloatProperty _touchScreenSize;
 		VelocityStates _vel;
 		ScaleFactor _friction;
 		ScaleFactor _sensitivity;
@@ -131,7 +132,7 @@ class TouchInteraction : public properties::PropertyOwner
 		double _time;
 		bool _directTouchMode;
 		bool _tap;
-		properties::Vec2Property _touchScreenSize;
+		
 		
 		std::vector<SelectedBody> _selected;
 		LMstat _lmstat;
