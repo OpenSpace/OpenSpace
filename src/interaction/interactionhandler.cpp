@@ -214,7 +214,7 @@ InteractionMode * InteractionHandler::interactionMode() {
 void InteractionHandler::goToChunk(int x, int y, int level) {
     if (_currentInteractionMode == _globeBrowsingInteractionMode.get()) {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        gbim->goToChunk(*_camera, globebrowsing::TileIndex(x,y,level), glm::vec2(0.5,0.5), true);
+        _globeBrowsingInteractionMode->goToChunk(*_camera, globebrowsing::TileIndex(x,y,level), glm::vec2(0.5,0.5), true);
 #endif
     } else {
         LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
@@ -224,7 +224,7 @@ void InteractionHandler::goToChunk(int x, int y, int level) {
 void InteractionHandler::goToGeo(double latitude, double longitude) {
     if (_currentInteractionMode == _globeBrowsingInteractionMode.get()) {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        gbim->goToGeodetic2(
+        _globeBrowsingInteractionMode->goToGeodetic2(
             *_camera,
             globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(), true
         );
