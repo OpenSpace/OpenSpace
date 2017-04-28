@@ -268,7 +268,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
         j2c.CreateInfileStream(currentFilename);
         j2c.SetupDecoder();
         j2c.SetResolutionFactor(_resolutionLevel);
-        j2c.DecodeTileIntoBuffer(0, _pboBufferData);
+        j2c.DecodeTileIntoBuffer(/*tileid=*/0, _pboBufferData, /*numthreads*/4);
     } else {
         _future = std::make_unique<std::future<void>>(std::async(std::launch::async,
             [this, &currentFilename]() {
@@ -276,7 +276,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
                 j2c.CreateInfileStream(currentFilename);
                 j2c.SetupDecoder();
                 j2c.SetResolutionFactor(_resolutionLevel);
-                j2c.DecodeTileIntoBuffer(0, _pboBufferData);
+                j2c.DecodeTileIntoBuffer(/*tileid=*/0, _pboBufferData, /*numthreads*/4);
             }));
     }
 

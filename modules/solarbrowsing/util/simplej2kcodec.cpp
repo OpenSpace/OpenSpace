@@ -81,46 +81,49 @@ std::unique_ptr<ImageData> SimpleJ2kCodec::Decode() {
   return std::make_unique<ImageData>(im);
 }
 
-void SimpleJ2kCodec::DecodeTileIntoBuffer(const int& tileId, unsigned char*& buffer) {
-  if (!_isFileLoaded) {
-    std::cerr << "File needs to be set up before decoding tiles\n";
-    return;
-  }
+void SimpleJ2kCodec::DecodeTileIntoBuffer(const int& tileId, unsigned char*& buffer,
+                                          int numThreads)
+{
+    if (!_isFileLoaded) {
+        std::cerr << "File needs to be set up before decoding tiles\n";
+        return;
+    }
 
-  // if (!_isDecoderSetup) {
-  //   SetupDecoder();
-  //   _isDecoderSetup = true;
-  // }
+    opj_codec_set_threads(_decoder, numThreads);
+    // if (!_isDecoderSetup) {
+    //   SetupDecoder();
+    //   _isDecoderSetup = true;
+    // }
 
-  auto t1 = Clock::now();
-  // if (!opj_get_decoded_tile(_decoder, _infileStream, _image, tileId)) {
-  //   std::cerr << "Could not decode tile\n";
-  //   Destroy();
-  //   return;
-  // }
-  OPJ_UINT32 l_data_size;
-  OPJ_INT32 l_current_tile_x0,l_current_tile_y0,l_current_tile_x1,l_current_tile_y1;
-  OPJ_UINT32 l_nb_comps=0 ;
-  OPJ_BOOL l_go_on = OPJ_TRUE;
-  OPJ_UINT32 l_tile_index;
-  if (!opj_read_tile_header(_decoder, _infileStream, &l_tile_index, &l_data_size,
-                            &l_current_tile_x0, &l_current_tile_y0, &l_current_tile_x1,
-                            &l_current_tile_y1, &l_nb_comps, &l_go_on)) {
-      std::cerr << "Could not read tile header" << std::endl;
-      return;
-  }
-  if (!opj_decode_tile_data(_decoder, l_tile_index, buffer,
-                            l_data_size, _infileStream)) {
-      std::cerr << "Could not decode tile\n";
-      return;
-  }
+    auto t1 = Clock::now();
+    // if (!opj_get_decoded_tile(_decoder, _infileStream, _image, tileId)) {
+    //   std::cerr << "Could not decode tile\n";
+    //   Destroy();
+    //   return;
+    // }
+    OPJ_UINT32 l_data_size;
+    OPJ_INT32 l_current_tile_x0, l_current_tile_y0, l_current_tile_x1, l_current_tile_y1;
+    OPJ_UINT32 l_nb_comps = 0;
+    OPJ_BOOL l_go_on = OPJ_TRUE;
+    OPJ_UINT32 l_tile_index;
+    if (!opj_read_tile_header(_decoder, _infileStream, &l_tile_index, &l_data_size,
+                              &l_current_tile_x0, &l_current_tile_y0, &l_current_tile_x1,
+                              &l_current_tile_y1, &l_nb_comps, &l_go_on)) {
+        std::cerr << "Could not read tile header" << std::endl;
+        return;
+    }
+    if (!opj_decode_tile_data(_decoder, l_tile_index, buffer, l_data_size,
+                              _infileStream)) {
+        std::cerr << "Could not decode tile\n";
+        return;
+    }
 
-  auto t2 = Clock::now();
-  std::cout << "Decode tile time "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
-            << " ms" << std::endl;
+    auto t2 = Clock::now();
+    std::cout << "Decode tile time "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+              << " ms" << std::endl;
 
-  //std::copy(_image->comps[0].data,
+    // std::copy(_image->comps[0].data,
     //        _image->comps[0].data + _image->comps[0].w * _image->comps[0].h, buffer);
 }
 
