@@ -217,7 +217,9 @@ void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
     ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::Yes);
 
+    int limit=0;
      for (auto seqPath : sequencePaths) {
+        if(limit++ == 10) break;
         if (size_t position = seqPath.find_last_of(".") + 1) {
             if (position != std::string::npos) {
                 ghoul::filesystem::File currentFile(seqPath);
@@ -228,6 +230,7 @@ void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
 
                     SimpleJ2kCodec j2c;
                     j2c.CreateInfileStream(relativePath);
+                    j2c.SetupDecoder();
                     auto decodedImg = j2c.Decode();
                     j2c.EncodeAsTiles(outPath.c_str(),
                                       decodedImg->data,
