@@ -4,6 +4,9 @@
 #include <memory>
 #include <vector>
 #include <cstring>
+#include <chrono>
+
+typedef std::chrono::high_resolution_clock Clock;
 
 #define JP2_RFC3745_MAGIC "\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
 #define JP2_MAGIC "\x0d\x0a\x87\x0a"
@@ -89,13 +92,22 @@ void SimpleJ2kCodec::DecodeTileIntoBuffer(const int& tileId, unsigned char*& buf
   //   _isDecoderSetup = true;
   // }
 
+
+  auto t1 = Clock::now();
   if (!opj_get_decoded_tile(_decoder, _infileStream, _image, tileId)) {
     std::cerr << "Could not decode tile\n";
     Destroy();
     return;
   }
 
-  std::copy(_image->comps[0].data, _image->comps[0].data + _image->comps[0].w * _image->comps[0].h, buffer);
+  auto t2 = Clock::now();
+  std::cout << "Decode tile time "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+            << " ms" << std::endl;
+
+  std::copy(_image->comps[0].data,
+            _image->comps[0].data + _image->comps[0].w * _image->comps[0].h, buffer);
+
   //std::swap(buffer, _image->comps[0].data);
   //std::memcpy(buffer, _image->comps[0].data, _image->comps[0].w * _image->comps[0].h * sizeof(int32_t));
 }
@@ -325,6 +337,7 @@ void SimpleJ2kCodec::SetupDecoder() {
   strcpy(_decoderParams.infile, _infileName);
   _decoderParams.decod_format = GetInfileFormat(_decoderParams.infile);
   //_decoderParams.m_verbose = false;
+  _decoderParams.cp_layer = 1;
 
   switch (_decoderParams.decod_format) {
     case J2K_CFMT: { // JPEG-2000 codestream
