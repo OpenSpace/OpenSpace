@@ -100,6 +100,10 @@ void FramebufferRenderer::initialize() {
     glGenTextures(1, &_exitDepthTexture);
     glGenFramebuffers(1, &_exitFramebuffer);
 
+    // Deferred framebuffer
+    glGenTextures(1, &_deferredColorTexture);
+    glGenFramebuffers(1, &_deferredFramebuffer);
+
     updateResolution();
     updateRendererData();
     updateRaycastData();
@@ -109,13 +113,26 @@ void FramebufferRenderer::initialize() {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture, 0);
 
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Main framebuffer is not complete");
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _exitColorTexture, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _exitDepthTexture, 0);
 
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LERROR("Main framebuffer is not complete");
+        LERROR("Exit framebuffer is not complete");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _deferredFramebuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _deferredColorTexture, 0);
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Deferred framebuffer is not complete");
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
@@ -137,11 +154,13 @@ void FramebufferRenderer::deinitialize() {
 
     glDeleteFramebuffers(1, &_mainFramebuffer);
     glDeleteFramebuffers(1, &_exitFramebuffer);
+    glDeleteFramebuffers(1, &_deferredFramebuffer);
 
     glDeleteTextures(1, &_mainColorTexture);
     glDeleteTextures(1, &_mainDepthTexture);
     glDeleteTextures(1, &_exitColorTexture);
     glDeleteTextures(1, &_exitDepthTexture);
+    glDeleteTextures(1, &_deferredColorTexture);
 
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
@@ -274,6 +293,21 @@ void FramebufferRenderer::updateResolution() {
         0,
         GL_DEPTH_COMPONENT,
         GL_FLOAT,
+        nullptr);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glBindTexture(GL_TEXTURE_2D, _deferredColorTexture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA32F,
+        GLsizei(_resolution.x),
+        GLsizei(_resolution.y),
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_SHORT,
         nullptr);
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -515,6 +549,9 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         Deferredcaster* deferredcaster = deferredcasterTask.deferredcaster;
 
         glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
+        //glBindFramebuffer(GL_FRAMEBUFFER, _deferredFramebuffer);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
 
         if (deferredcastProgram == _deferredcastPrograms[deferredcaster].get()) {
@@ -529,10 +566,10 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
                                        _deferredcastData[deferredcaster], 
                                        *deferredcastProgram);
 
-            ghoul::opengl::TextureUnit mainDepthTextureUnit;
-            mainDepthTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
-            deferredcastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
+//            ghoul::opengl::TextureUnit mainDepthTextureUnit;
+//            mainDepthTextureUnit.activate();
+//            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
+//            deferredcastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
 //            ghoul::opengl::TextureUnit mainColorTextureUnit;
 //            mainColorTextureUnit.activate();

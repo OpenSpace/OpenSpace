@@ -139,7 +139,6 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _deltaJProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _atmosphereProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _deferredAtmosphereProgramObject;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _cleanTextureProgramObject;
 
     GLuint _transmittanceTableTexture;
     GLuint _irradianceTableTexture;

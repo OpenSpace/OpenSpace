@@ -72,38 +72,6 @@ namespace openspace {
             bool isShadowing;
         };
 
-        // See: Precomputed Atmospheric Scattering from Bruneton et al. 
-        // for explanation of the following parameters.
-
-        const unsigned int TRANSMITTANCE_TABLE_WIDTH = 256;
-        const unsigned int TRANSMITTANCE_TABLE_HEIGHT = 64;
-
-        const unsigned int IRRADIANCE_TABLE_WIDTH = 64;
-        const unsigned int IRRADIANCE_TABLE_HEIGHT = 16;
-
-        const unsigned int DELTA_E_TABLE_WIDTH = 64;
-        const unsigned int DELTA_E_TABLE_HEIGHT = 16;
-
-
-        /*const unsigned int TRANSMITTANCE_TABLE_WIDTH = 512;
-        const unsigned int TRANSMITTANCE_TABLE_HEIGHT = 128;
-
-        const unsigned int IRRADIANCE_TABLE_WIDTH = 128;
-        const unsigned int IRRADIANCE_TABLE_HEIGHT = 32;
-
-        const unsigned int DELTA_E_TABLE_WIDTH = 128;
-        const unsigned int DELTA_E_TABLE_HEIGHT = 32;*/
-
-        const unsigned int R_SAMPLES = 32;
-        const unsigned int MU_SAMPLES = 128;
-        const unsigned int MU_S_SAMPLES = 32;
-        const unsigned int NU_SAMPLES = 8;
-
-        /*const unsigned int R_SAMPLES = 64;
-        const unsigned int MU_SAMPLES = 256;
-        const unsigned int MU_S_SAMPLES = 64;
-        const unsigned int NU_SAMPLES = 16;*/
-
     public:
         explicit RenderablePlanetAtmosphere(const ghoul::Dictionary& dictionary);
         ~RenderablePlanetAtmosphere();
@@ -121,23 +89,8 @@ namespace openspace {
     private:
         void computeModelTransformMatrix(glm::mat4 * modelTransform);
         void computeModelTransformMatrix(glm::dmat4 * modelTransform);
-        void loadComputationPrograms();
-        void unloadComputationPrograms();
-        void createComputationTextures();
-        void deleteComputationTextures();
-        void deleteUnusedComputationTextures();
         void updateAtmosphereParameters();
-        void loadAtmosphereDataIntoShaderProgram(std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg);
-        void executeCalculations(const GLuint quadCalcVAO, const GLenum drawBuffers[1], const GLsizei vertexSize);
-        void preCalculateAtmosphereParam();
         void resetAtmosphereTextures(const GLuint vao, const GLenum drawBuffers[1], const GLsizei vertexSize);
-        void createAtmosphereFBO();
-        void createRenderQuad(GLuint * vao, GLuint * vbo, const GLfloat size);
-        void renderQuadForCalc(const GLuint vao, const GLsizei numberOfVertices);
-        void step3DTexture(std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg,
-            const int layer, const bool doCalc = true);
-        void saveTextureToPPMFile(const GLenum color_buffer_attachment, const std::string & fileName,
-            const int width, const int height) const;
         void checkFrameBufferState(const std::string & codePosition) const;
 
 
@@ -145,52 +98,16 @@ namespace openspace {
         properties::StringProperty _colorTexturePath;
         properties::StringProperty _nightTexturePath;
         properties::StringProperty _heightMapTexturePath;
-        properties::StringProperty _cloudsTexturePath;
-        properties::StringProperty _reflectanceTexturePath;
 
         std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceSupTermsProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceFinalProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _inScatteringProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _inScatteringSupTermsProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _deltaEProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _deltaSProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _deltaSSupTermsProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _deltaJProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _atmosphereProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _deferredAtmosphereProgramObject;
-        std::unique_ptr<ghoul::opengl::ProgramObject> _cleanTextureProgramObject;
-        
+
         std::unique_ptr<ghoul::opengl::Texture> _texture;
         std::unique_ptr<ghoul::opengl::Texture> _nightTexture;
-        std::unique_ptr<ghoul::opengl::Texture> _reflectanceTexture;
         std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
-        std::unique_ptr<ghoul::opengl::Texture> _cloudsTexture;
-        
-        GLuint _transmittanceTableTexture;
-        GLuint _irradianceTableTexture;
-        GLuint _inScatteringTableTexture;
-        GLuint _deltaETableTexture;
-        GLuint _deltaSRayleighTableTexture;
-        GLuint _deltaSMieTableTexture;
-        GLuint _deltaJTableTexture;
-        GLuint _dummyTexture;
-        GLuint _atmosphereTexture;
-        GLuint _atmosphereDepthTexture;
-
-        GLuint _cameraDistanceTexture;
-
-        // Deferred debug rendering
-        GLuint _atmosphereFBO;
-        GLuint _atmosphereRenderVAO;
-        GLuint _atmosphereRenderVBO;
 
         properties::FloatProperty _heightExaggeration;
 
         std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
-        planetgeometry::PlanetGeometry* _atmosphereGeometry;
         properties::BoolProperty _performShading;
         properties::IntProperty _rotation;
 
@@ -209,11 +126,6 @@ namespace openspace {
         properties::FloatProperty _sunIntensityP;
         properties::FloatProperty _hdrExpositionP;
 
-
-        // DEBUG Properties:
-        properties::BoolProperty _saveDeferredFramebuffer;
-
-
         float _alpha;
         std::vector< ShadowConf > _shadowConfArray;
         float _planetRadius;
@@ -222,14 +134,11 @@ namespace openspace {
         std::string _frame;
         std::string _target;
         bool _hasNightTexture;
-        bool _hasReflectanceTexture;
         bool _hasHeightTexture;
-        bool _hasCloudsTexture;
         bool _shadowEnabled;
         double _time;
 
         // Atmosphere Data
-        bool _atmosphereCalculated;
         bool _atmosphereEnabled;
         float _atmosphereRadius;
         float _atmospherePlanetRadius;
@@ -242,11 +151,6 @@ namespace openspace {
         glm::vec3 _mieExtinctionCoeff;
         glm::vec3 _rayleighScatteringCoeff;
         glm::vec3 _mieScatteringCoeff;
-
-
-        bool tempPic;
-
-        unsigned int count;
 
         // Testing Deferredcast
         std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;

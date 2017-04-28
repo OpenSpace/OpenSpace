@@ -72,12 +72,12 @@ const int SAMPLES_NU   = 8;
 uniform sampler2D transmittanceTexture;
 
 float opticalDepth(float H, float r, float mu, float d) {
-  float a = sqrt((0.5/H)*r);
-  vec2 a01 = a*vec2(mu, mu + d / r);
-  vec2 a01s = sign(a01);
+  float a    = sqrt((0.5/H)*r);
+  vec2 a01   = a*vec2(mu, mu + d / r);
+  vec2 a01s  = sign(a01);
   vec2 a01sq = a01*a01;
-  float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
-  vec2 y = a01s / (2.3193*abs(a01) + sqrt(1.52*a01sq + 4.0)) * vec2(1.0, exp(-d/H*(d/(2.0*r)+mu)));
+  float x    = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
+  vec2 y     = a01s / (2.3193*abs(a01) + sqrt(1.52*a01sq + 4.0)) * vec2(1.0, exp(-d/H*(d/(2.0*r)+mu)));
   return sqrt((6.2831*H)*r) * exp((Rg-r)/H) * (x + dot(y, vec2(1.0, -1.0)));
 }
 

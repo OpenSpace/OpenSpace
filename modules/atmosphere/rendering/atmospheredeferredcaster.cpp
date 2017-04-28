@@ -52,10 +52,7 @@
 namespace {
     const std::string _loggerCat       = "AtmosphereDeferredcaster";
     const char* GlslDeferredcastPath   = "${MODULES}/atmosphere/shaders/deferred_test_fs.glsl";
-    //const char* GlslDeferredcastFSPath = "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
-    //const char* GlslDeferredcastFSPath = "${MODULES}/atmosphere/shaders/atmosphere_fs.glsl";
-    //const char* GlslDeferredcastFSPath = "";
-    const char* GlslDeferredcastFSPath   = "${MODULES}/atmosphere/shaders/deferred_test_fs.glsl";
+    const char* GlslDeferredcastFSPath = "${MODULES}/atmosphere/shaders/deferred_test_fs.glsl";
     const char* GlslDeferredcastVsPath = "${MODULES}/atmosphere/shaders/atmosphere_deferred_vs.glsl";
 }
 
@@ -73,7 +70,6 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _deltaSProgramObject(nullptr)
     , _deltaSSupTermsProgramObject(nullptr)
     , _deltaJProgramObject(nullptr)
-    , _cleanTextureProgramObject(nullptr)
     , _atmosphereProgramObject(nullptr)
     , _transmittanceTableTexture(0)
     , _irradianceTableTexture(0)
@@ -107,9 +103,7 @@ AtmosphereDeferredcaster::~AtmosphereDeferredcaster() {}
 void AtmosphereDeferredcaster::initialize()
 {
     if (!_atmosphereCalculated) {
-        LWARNING("Executing Atmosphere Calculations in Deferredcaster.");
         preCalculateAtmosphereParam();
-        LWARNING("Atmosphere Calculations in Deferredcaster done.");
     }
 }
 
@@ -159,10 +153,6 @@ void AtmosphereDeferredcaster::deinitialize()
         _deltaJProgramObject = nullptr;
     }
 
-    if (_cleanTextureProgramObject) {
-        _cleanTextureProgramObject = nullptr;
-    }
-
     glDeleteTextures(1, &_transmittanceTableTexture);
     glDeleteTextures(1, &_irradianceTableTexture);
     glDeleteTextures(1, &_inScatteringTableTexture);
@@ -188,6 +178,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     program.setUniform("mieG", _miePhaseConstant);
     program.setUniform("sunRadiance", _sunRadianceIntensity);
     program.setUniform("exposure", _hdrConstant);
+
+    program.setUniform("ModelTransformMatrix", glm::dmat4(_modelTransform));
 
     // Object Space
     //program.setUniform("inverseTransformMatrix", glm::inverse(_modelTransform));
@@ -239,11 +231,6 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     //program.setUniform("sunPositionObj", sunPosObj);
     program.setUniform("sunDirectionObj", glm::normalize(glm::dvec3(sunPosObj)));
     //program.setUniform("_performShading", _performShading);
-
-    // Otherwise the transmittance is not correctly loaded. ???????
-    // What about the main texture?
-    ghoul::opengl::TextureUnit dummyUnit;
-    dummyUnit.activate();
 
     ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
     transmittanceTableTextureUnit.activate();
@@ -696,73 +683,6 @@ void AtmosphereDeferredcaster::loadComputationPrograms() {
     }
     _deltaJProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _deltaJProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
-
-    //============== Clean Texture Program =================
-    if (_cleanTextureProgramObject == nullptr) {
-        // shadow program
-        _cleanTextureProgramObject = ghoul::opengl::ProgramObject::Build(
-            "cleanTextureProgram",
-            "${MODULE_ATMOSPHERE}/shaders/texture_clean_vs.glsl",
-            "${MODULE_ATMOSPHERE}/shaders/texture_clean_fs.glsl");
-        if (!_cleanTextureProgramObject) {
-            if (_transmittanceProgramObject) {
-                _transmittanceProgramObject.reset();
-                _transmittanceProgramObject = nullptr;
-            }
-
-            if (_irradianceProgramObject) {
-                _irradianceProgramObject.reset();
-                _irradianceProgramObject = nullptr;
-            }
-
-            if (_irradianceSupTermsProgramObject) {
-                _irradianceSupTermsProgramObject.reset();
-                _irradianceSupTermsProgramObject = nullptr;
-            }
-
-            if (_inScatteringProgramObject) {
-                _inScatteringProgramObject.reset();
-                _inScatteringProgramObject = nullptr;
-            }
-
-            if (_inScatteringSupTermsProgramObject) {
-                _inScatteringSupTermsProgramObject.reset();
-                _inScatteringSupTermsProgramObject = nullptr;
-            }
-
-            if (_deltaEProgramObject) {
-                _deltaEProgramObject.reset();
-                _deltaEProgramObject = nullptr;
-            }
-
-            if (_irradianceFinalProgramObject) {
-                _irradianceFinalProgramObject.reset();
-                _irradianceFinalProgramObject = nullptr;
-            }
-
-            if (_deltaSProgramObject) {
-                _deltaSProgramObject.reset();
-                _deltaSProgramObject = nullptr;
-            }
-
-            if (_deltaSSupTermsProgramObject) {
-                _deltaSSupTermsProgramObject.reset();
-                _deltaSSupTermsProgramObject = nullptr;
-            }
-
-            if (_deltaJProgramObject) {
-                _deltaJProgramObject.reset();
-                _deltaEProgramObject = nullptr;
-            }
-
-            return;
-        }
-
-    }
-    _cleanTextureProgramObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    _cleanTextureProgramObject->setIgnoreUniformLocationError(IgnoreError::Yes);
-
-
 }
 
 void AtmosphereDeferredcaster::unloadComputationPrograms() {
@@ -817,11 +737,6 @@ void AtmosphereDeferredcaster::unloadComputationPrograms() {
     if (_deltaJProgramObject) {
         _deltaJProgramObject.reset();
         _deltaJProgramObject = nullptr;
-    }
-
-    if (_cleanTextureProgramObject) {
-        _cleanTextureProgramObject.reset();
-        _cleanTextureProgramObject = nullptr;
     }
 }
 
@@ -1163,15 +1078,15 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
             _deltaJProgramObject->setUniform("firstIteraction", 0);
         transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
+        _deltaJProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
         deltaETableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _deltaETableTexture);
+        _deltaJProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
         deltaSRayleighTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
+        _deltaJProgramObject->setUniform("deltaSRTexture", deltaSRayleighTableTextureUnit);
         deltaSMieTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
-        _deltaJProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
-        _deltaJProgramObject->setUniform("deltaETexture", deltaETableTextureUnit);
-        _deltaJProgramObject->setUniform("deltaSRTexture", deltaSRayleighTableTextureUnit);
         _deltaJProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_deltaJProgramObject);
         for (int layer = 0; layer < R_SAMPLES; ++layer) {
@@ -1201,12 +1116,12 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
             _irradianceSupTermsProgramObject->setUniform("firstIteraction", (int)0);
         transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
+        _irradianceSupTermsProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
         deltaSRayleighTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSRayleighTableTexture);
+        _irradianceSupTermsProgramObject->setUniform("deltaSRTexture", deltaSRayleighTableTextureUnit);
         deltaSMieTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_3D, _deltaSMieTableTexture);
-        _irradianceSupTermsProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
-        _irradianceSupTermsProgramObject->setUniform("deltaSRTexture", deltaSRayleighTableTextureUnit);
         _irradianceSupTermsProgramObject->setUniform("deltaSMTexture", deltaSMieTableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_irradianceSupTermsProgramObject);
         renderQuadForCalc(quadCalcVAO, vertexSize);
@@ -1233,9 +1148,9 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
             _inScatteringSupTermsProgramObject->setUniform("firstIteraction", (int)0);*/
         transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-        deltaJTableTextureUnit.activate();
-        glBindTexture(GL_TEXTURE_3D, _deltaJTableTexture);
         _inScatteringSupTermsProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
+        deltaJTableTextureUnit.activate();
+        glBindTexture(GL_TEXTURE_3D, _deltaJTableTexture);        
         _inScatteringSupTermsProgramObject->setUniform("deltaJTexture", deltaJTableTextureUnit);
         loadAtmosphereDataIntoShaderProgram(_inScatteringSupTermsProgramObject);
         for (int layer = 0; layer < R_SAMPLES; ++layer) {

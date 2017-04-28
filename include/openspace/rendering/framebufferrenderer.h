@@ -104,6 +104,8 @@ private:
     GLuint _mainFramebuffer;
     GLuint _exitDepthTexture;
     GLuint _exitFramebuffer;
+    GLuint _deferredFramebuffer;
+    GLuint _deferredColorTexture;
 
     bool _dirtyDeferredcastData;
     bool _dirtyRaycastData;
