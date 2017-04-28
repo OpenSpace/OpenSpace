@@ -55,6 +55,9 @@ namespace {
     const char* keyVolume = "VectorVolume";
     const char* keyVolumeDirectory = "Directory";
     const char* keyVolumeTracingVariable = "TracingVariable";
+    const char* keyVolumeRegionOfInterestMins = "RegionOfInterestMins";
+    const char* keyVolumeRegionOfInterestMaxs = "RegionOfInterestMaxs";
+    const char* keyVoxelGridDimensions = "VoxelGridDimensions";
 
     const char* keySeedPoints = "SeedPoints";
     const char* keySeedPointsFile = "File";
@@ -80,7 +83,7 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _gridVAO(0),
       _gridVBO(0),
       _stepSize("stepSize", "Step Coefficient", 0.2, 0.0001, 1.0),
-      _vertexSkipping("traceVertexSkipping", "Num vertices skipped", 0, 0, 500),
+      _vertexSkipping("traceVertexSkipping", "Num vertices skipped (FPS will drop)", 0, 0, 30),
       _stepMultiplier("stepMultiplier", "Step Multiplier", 1, 1, 1000),
       _clippingRadius("clippingRadius", "Clipping Radius", 0.1, 0.0, 5.0),
       _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
@@ -240,9 +243,9 @@ bool RenderableGpuFieldlines::initialize() {
                 // BATSRUS => bx, by    , bz
                 // ENLIL   => br, btheta, bphi
                 // TODO: Let user specify the 'b' variable in LUA?
-                magVars.push_back("b" + gvn[0]);
-                magVars.push_back("b" + gvn[1]);
-                magVars.push_back("b" + gvn[2]);
+                magVars.push_back(tracingVariable + gvn[0]);
+                magVars.push_back(tracingVariable + gvn[1]);
+                magVars.push_back(tracingVariable + gvn[2]);
 
                 // Vector volume. Space related (domain)
                 float xMin = kvr.minValue(gvn[0]);
@@ -252,35 +255,82 @@ bool RenderableGpuFieldlines::initialize() {
                 float zMin = kvr.minValue(gvn[2]);
                 float zMax = kvr.maxValue(gvn[2]);
 
+                std::string dimPrefix = "grid_system_1_dimension_";
+                _dimensions = glm::uvec3(kvr.getKameleon()->getGlobalAttribute(dimPrefix +
+                                                            "1_size").getAttributeInt(),
+                                         kvr.getKameleon()->getGlobalAttribute(dimPrefix +
+                                                            "2_size").getAttributeInt(),
+                                         kvr.getKameleon()->getGlobalAttribute(dimPrefix +
+                                                            "3_size").getAttributeInt());
+
+                if (modelName == "enlil") {
+                    // For Enlil the z dimension is sequential. 0-2pi
+                    _dimensions.z += 1;
+                }
+
+                glm::vec3 voxelGridDimensions;
+                if (!_vectorVolumeInfo.getValue(keyVoxelGridDimensions,
+                                                voxelGridDimensions)) {
+                    LWARNING(keyVolume << " isn't specifying " <<
+                             keyVoxelGridDimensions << ". Using values from .CDF file: {"
+                             << _dimensions.x << ", " << _dimensions.y << ", "
+                             << _dimensions.z << " }");
+                } else {
+                    // Makes no sense to over sample the volume. Set to lowest!
+                    if (voxelGridDimensions.x < _dimensions.x) {
+                        _dimensions.x = voxelGridDimensions.x;
+                    } else {
+                        LWARNING(keyVoxelGridDimensions << ".x = "<< voxelGridDimensions.x
+                            << " is larger than the grid dimension of the .CDF file ( "
+                            << _dimensions.x << " ). Using that value instead!");
+                    }
+
+                    if (voxelGridDimensions.y < _dimensions.y) {
+                        _dimensions.y = voxelGridDimensions.y;
+                    } else {
+                        LWARNING(keyVoxelGridDimensions << ".y = "<< voxelGridDimensions.y
+                            << " is larger than the grid dimension of the .CDF file ( "
+                            << _dimensions.y << " ). Using that value instead!");
+                    }
+
+                    if (voxelGridDimensions.z < _dimensions.z) {
+                        _dimensions.z = voxelGridDimensions.z;
+                    } else {
+                        LWARNING(keyVoxelGridDimensions << ".z = "<< voxelGridDimensions.z
+                            << " is larger than the grid dimension of the .CDF file ( "
+                            << _dimensions.z << " ). Using that value instead!");
+                    }
+                }
+
+                // TODO: find a upper MAX_NUM_CELLS limit that makes sense!
+                const uint MAX_NUM_CELLS = pow(2,22);
+                // Just some control to not create a MASSIVE grid!
+                if (_dimensions.x * _dimensions.y * _dimensions.z > MAX_NUM_CELLS) {
+                    uint defaultDim = 32;
+                    LWARNING("Voxel Grid Dimensions: { " << _dimensions.x << ", "
+                            << _dimensions.y << ", " << _dimensions.z << " }"
+                            << " are too big. Setting dimensions to {" << defaultDim
+                            << ", " << defaultDim << ", " << defaultDim <<"}"
+                            << "\nConsider specifying custom _dimensions in .mod file!"
+                            << " Max limit is " << MAX_NUM_CELLS << " cells in grid!");
+                    _dimensions = glm::uvec3(defaultDim);
+                }
+
+                LDEBUG("Voxel Grid Dimensions: { " << _dimensions.x << ", "
+                                                   << _dimensions.y << ", "
+                                                   << _dimensions.z << " }");
+
                 // New resampled domain dimensions (voxel grid)
                 // TODO: DIMENSIONS NEED TO BE MORE ACCURATE!!!!!!!
                 // TODO: LET USER SPECIFY DIMENSIONS IN LUA.. IF LARGER THEN THE ACTUAL.. SET ACTUAL
                 if (modelName == "batsrus") {
                     _isSpherical = false;
-
-                    std::string gridDimPrefix = "grid_system_1_dimension_";
-                    _dimensions = glm::uvec3(kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "1_size").getAttributeInt(),
-                                             kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "2_size").getAttributeInt(),
-                                             kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "3_size").getAttributeInt());
-
-                    if (_dimensions.x * _dimensions.y * _dimensions.z > 2^22) {
-                        LWARNING("BATSRUS GRID DIMENSIONS ARE TOO LARGE. REDUCING TO 128^3");
-                        _dimensions = glm::uvec3(128,128,128);
-                    }
-
-                    _domainMins = glm::vec3(xMin,yMin,zMin);
-                    _domainMaxs = glm::vec3(xMax,yMax,zMax);
-
-                    generateUniformCartesian3DGrid();
+                    _clippingRadius = 3.0f;
 
                 } else if (modelName == "enlil") {
                     _isSpherical = true;
 
-                    std::string gridDimPrefix = "grid_system_1_dimension_";
-                    _dimensions = glm::uvec3(kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "1_size").getAttributeInt(),
-                                             kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "2_size").getAttributeInt(),
-                                             1 + kvr.getKameleon()->getGlobalAttribute(gridDimPrefix + "3_size").getAttributeInt());
-
+                    // TODO: FIX THIS
                     if (_dimensions.x > 1024) {
                         LWARNING("ENLIL GRID DIMENSION 'R' IS TOO LARGE. REDUCING TO 1024");
                         _dimensions.x = 1024;
@@ -312,23 +362,106 @@ bool RenderableGpuFieldlines::initialize() {
                     // it to wrap all the way around! Note also the extra cell added to
                     // _dimensions.z for this reason!
 
-                    _domainMins = glm::vec3(xMin,yMin,zMin);
-                    _domainMaxs = glm::vec3(xMax,yMax,zMax);
-
-                    generateUniformSphericalGrid();
+                    _clippingRadius = 0.1f;
 
                 } else { //REMOVE THIS ENTIRE NODE. MODEL IS UN RECOGNIZED!
-                    LERROR("CANNOT RECOGNIZE MODEL OF .CDF");
+                    LERROR("CANNOT RECOGNIZE MODEL! ONLY BATSRUS & ENLIL ARE SUPORTED");
+                    return false;
                 }
 
+                glm::vec3 interestRegionMins;
+                if (!_vectorVolumeInfo.getValue(keyVolumeRegionOfInterestMins,
+                                                interestRegionMins)) {
+                    LWARNING(keyVolume << " isn't specifying "
+                            << keyVolumeRegionOfInterestMins
+                            << ". Using default values provided by .CDF file!" );
+                } else {
+                    if (interestRegionMins.x > xMin) {
+                        xMin = interestRegionMins.x;
+                    } else {
+                        LWARNING(keyVolumeRegionOfInterestMins << ".x = "
+                            << interestRegionMins.x << " is smaller than the min value ("
+                            << xMin << ") given by .CDF file. Using that value instead!");
+                    }
 
-            } else {
+                    if (interestRegionMins.y > yMin) {
+                        yMin = interestRegionMins.y;
+                    } else {
+                        LWARNING(keyVolumeRegionOfInterestMins << ".y = "
+                            << interestRegionMins.y << " is smaller than the min value ("
+                            << yMin << ") given by .CDF file. Using that value instead!");
+                    }
+
+                    if (modelName != "enlil") {
+                        if (interestRegionMins.z > zMin) {
+                            zMin = interestRegionMins.z;
+                        } else {
+                            LWARNING(keyVolumeRegionOfInterestMins << ".z = "
+                                << interestRegionMins.z << " is smaller than the min value ("
+                                << xMin << ") given by .CDF file. Using that value instead!");
+                        }
+                    } else {
+                        LWARNING("The ENLIL model requires that the third component (phi)"
+                                << " is sequential and in range [0, 360]. "
+                                << "No custom values allowed!");
+                    }
+                }
+
+                glm::vec3 interestRegionMaxs;
+                if (!_vectorVolumeInfo.getValue(keyVolumeRegionOfInterestMaxs,
+                                                interestRegionMaxs)) {
+                    LWARNING(keyVolume << " isn't specifying "
+                            << keyVolumeRegionOfInterestMaxs
+                            << ". Using default values provided by .CDF file!" );
+                } else {
+                    if (interestRegionMaxs.x < xMax) {
+                        xMax = interestRegionMaxs.x;
+                    } else {
+                        LWARNING(keyVolumeRegionOfInterestMaxs << ".x = "
+                            << interestRegionMaxs.x << " is larger than the max value ("
+                            << xMax << ") given by .CDF file. Using that value instead!");
+                    }
+                    if (interestRegionMaxs.y < yMax) {
+                        yMax = interestRegionMaxs.y;
+                    } else {
+                        LWARNING(keyVolumeRegionOfInterestMaxs << ".y = "
+                            << interestRegionMaxs.y << " is larger than the max value ("
+                            << yMax << ") given by .CDF file. Using that value instead!");
+                    }
+                    if (modelName != "enlil") {
+                        if (interestRegionMaxs.z < zMax) {
+                            zMax = interestRegionMaxs.z;
+                        } else {
+                            LWARNING(keyVolumeRegionOfInterestMaxs << ".z = "
+                                << interestRegionMaxs.z << " is larger than the max value ("
+                                << xMin << ") given by .CDF file. Using that value instead!");
+                        }
+                    } else {
+                        LWARNING("The ENLIL model requires that the third component (phi)"
+                                << " is sequential and in range [0, 360]. "
+                                << "No custom values allowed!");
+                    }
+                }
+
+                _domainMins = glm::vec3(xMin,yMin,zMin);
+                _domainMaxs = glm::vec3(xMax,yMax,zMax);
+
+                LDEBUG("Region of interest: "
+                        << gvn[0] << " ∈ [" << xMin << ", " << xMax << "], "
+                        << gvn[1] << " ∈ [" << yMin << ", " << yMax << "], "
+                        << gvn[2] << " ∈ [" << zMin << ", " << zMax << "]");
+
+                generateUniformVoxelGrid(_domainMins, _domainMaxs,
+                                         _dimensions, _isSpherical);
+
+            } else { // i != 0
                 // ghoul_assert(_domainMins == glm::vec3(xMin,yMin,zMin) &&
                 //              _domainMaxs == glm::vec3(xMax,yMax,zMax),
                 //              "Spatial domains of CDF files are of different dimensions!");
                 if (modelName != _modelName) {
                     LERROR("Looks like the spcified folder contains .CDF files created"
                             << " from different models! Same model is required!");
+                    return false;
                 }
             }
 
@@ -375,9 +508,10 @@ bool RenderableGpuFieldlines::initialize() {
                                    (static_cast<double>(_numberOfStates) - 1.0);
                 _seqEndTime =  lastStateStart + avgTimeOffset;
             } else {
+                // THERES ONLY ONE FILE => NO INTERPOLATION CAN BE DONE & NO END TIME AVAILALBE!
                 _isMorphing = false;
                 // _seqEndTime = 631108800.f; // January 1st 2020
-                _seqEndTime = FLT_MAX; // UNTIL THE END OF DAYS!
+                _seqEndTime = DBL_MAX; // UNTIL THE END OF DAYS!
             }
 
             // Add seqEndTime as the last start time
@@ -618,6 +752,10 @@ void RenderableGpuFieldlines::update(const UpdateData&) {
         _program->rebuildFromFile();
     }
 
+    if (_seedPointProgram->isDirty()) {
+        _seedPointProgram->rebuildFromFile();
+    }
+
     if (_gridProgram->isDirty()) {
         _gridProgram->rebuildFromFile();
     }
@@ -736,47 +874,63 @@ glm::vec3 rLonLatToCartesian(glm::vec3 p) {
 }
 
 // FOR DEBUGGING PURPOSES
-void RenderableGpuFieldlines::generateUniformSphericalGrid() {
+// TODO MOVE TO SOME UTILITY/HELPER CLASS/FOLDER etc..
+// TODO ADD INPUT/OUTPUT VERTEX AND START POS VECTORS
+void RenderableGpuFieldlines::generateUniformVoxelGrid(const glm::vec3& domainMins,
+                                                       const glm::vec3& domainMaxs,
+                                                       const glm::uvec3& dimensions,
+                                                       const bool isSpherical) {
+    if (isSpherical) {
+        generateUniformSphericalGrid(domainMins,domainMaxs,dimensions);
+    } else {
+        generateUniformCartesianGrid(domainMins,domainMaxs,dimensions);
+    }
 
-    glm::vec3 deltas = (_domainMaxs - _domainMins) / glm::vec3(
-                                                        static_cast<float>(_dimensions.x),
-                                                        static_cast<float>(_dimensions.y),
-                                                        static_cast<float>(_dimensions.z));
+}
+
+void RenderableGpuFieldlines::generateUniformSphericalGrid(const glm::vec3& domainMins,
+                                                           const glm::vec3& domainMaxs,
+                                                           const glm::uvec3& dimensions) {
+
+    glm::vec3 deltas = (domainMaxs - domainMins) / glm::vec3(
+                                                        static_cast<float>(dimensions.x),
+                                                        static_cast<float>(dimensions.y),
+                                                        static_cast<float>(dimensions.z));
 
     int segmentResolution = 1;
     int lStart = 0;
     // LINES parallel to x axis (radius, r)
-    for (int z = 0; z < _dimensions.z; ++z) {
-        for (int y = 0; y < _dimensions.y + 1; ++y) {
+    for (int z = 0; z < dimensions.z; ++z) {
+        for (int y = 0; y < dimensions.y + 1; ++y) {
             _gridStartPos.push_back(lStart);
-            _gridVertices.push_back(rLonLatToCartesian(glm::vec3(_domainMins.x,
-                                              _domainMins.y + static_cast<float>(y) * deltas.y,
-                                              _domainMins.z + static_cast<float>(z) * deltas.z)));
-            _gridVertices.push_back(rLonLatToCartesian(glm::vec3(_domainMaxs.x,
-                                              _domainMins.y + static_cast<float>(y) * deltas.y,
-                                              _domainMins.z + static_cast<float>(z) * deltas.z)));
+            _gridVertices.push_back(rLonLatToCartesian(glm::vec3(domainMins.x,
+                                              domainMins.y + static_cast<float>(y) * deltas.y,
+                                              domainMins.z + static_cast<float>(z) * deltas.z)));
+            _gridVertices.push_back(rLonLatToCartesian(glm::vec3(domainMaxs.x,
+                                              domainMins.y + static_cast<float>(y) * deltas.y,
+                                              domainMins.z + static_cast<float>(z) * deltas.z)));
             lStart += 2;
             _gridLineCount.push_back(2);
         }
     }
 
     // RINGS (latitude, theta)
-    for (int x = 0; x < _dimensions.x + 1; ++x) {
-        for (int z = 0; z < _dimensions.z + 1; ++z) {
+    for (int x = 0; x < dimensions.x + 1; ++x) {
+        for (int z = 0; z < dimensions.z + 1; ++z) {
             _gridStartPos.push_back(lStart);
             int count = 0;
-            for (int y = 0; y < _dimensions.y + 1; ++y) {
+            for (int y = 0; y < dimensions.y + 1; ++y) {
                 // for (int s = 0; s < segmentResolution + 1; ++s) {
 
-                    _gridVertices.push_back(rLonLatToCartesian(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                                                      _domainMins.y + static_cast<float>(y) * deltas.y /*+ s / segmentResolution*/,
-                                                      _domainMins.z + static_cast<float>(z) * deltas.z)));
-                    // _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                    //                                   _domainMins.y,
-                    //                                   _domainMins.z + static_cast<float>(z) * deltas.z));
-                    // _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                    //                                   _domainMaxs.y,
-                    //                                   _domainMins.z + static_cast<float>(z) * deltas.z));
+                    _gridVertices.push_back(rLonLatToCartesian(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
+                                                      domainMins.y + static_cast<float>(y) * deltas.y /*+ s / segmentResolution*/,
+                                                      domainMins.z + static_cast<float>(z) * deltas.z)));
+                    // _gridVertices.push_back(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
+                    //                                   domainMins.y,
+                    //                                   domainMins.z + static_cast<float>(z) * deltas.z));
+                    // _gridVertices.push_back(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
+                    //                                   domainMaxs.y,
+                    //                                   domainMins.z + static_cast<float>(z) * deltas.z));
                     ++lStart;// += 2+segmentResolution;
                ++count;
                 // }
@@ -786,22 +940,22 @@ void RenderableGpuFieldlines::generateUniformSphericalGrid() {
     }
 
     // // RINGS (longitude, phi)
-    for (int x = 0; x < _dimensions.x + 1; ++x) {
-        for (int y = 0; y < _dimensions.y + 1; ++y) {
+    for (int x = 0; x < dimensions.x + 1; ++x) {
+        for (int y = 0; y < dimensions.y + 1; ++y) {
             _gridStartPos.push_back(lStart);
             int count = 0;
-            for (int z = 0; z < _dimensions.z + 1; ++z) {
+            for (int z = 0; z < dimensions.z + 1; ++z) {
                 // for (int s = 0; s < segmentResolution + 1; ++s) {
 
-                _gridVertices.push_back(rLonLatToCartesian(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                    _domainMins.y + static_cast<float>(y) * deltas.y,
-                    _domainMins.z + static_cast<float>(z) * deltas.z /*+ s / segmentResolution*/)));
-                // _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                //                                   _domainMins.y,
-                //                                   _domainMins.z + static_cast<float>(z) * deltas.z));
-                // _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                //                                   _domainMaxs.y,
-                //                                   _domainMins.z + static_cast<float>(z) * deltas.z));
+                _gridVertices.push_back(rLonLatToCartesian(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
+                    domainMins.y + static_cast<float>(y) * deltas.y,
+                    domainMins.z + static_cast<float>(z) * deltas.z /*+ s / segmentResolution*/)));
+                // _gridVertices.push_back(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
+                //                                   domainMins.y,
+                //                                   domainMins.z + static_cast<float>(z) * deltas.z));
+                // _gridVertices.push_back(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
+                //                                   domainMaxs.y,
+                //                                   domainMins.z + static_cast<float>(z) * deltas.z));
                 ++lStart;// += 2+segmentResolution;
                 ++count;
                 // }
@@ -811,56 +965,58 @@ void RenderableGpuFieldlines::generateUniformSphericalGrid() {
     }
 }
 
-void RenderableGpuFieldlines::generateUniformCartesian3DGrid() {
+void RenderableGpuFieldlines::generateUniformCartesianGrid(const glm::vec3& domainMins,
+                                                             const glm::vec3& domainMaxs,
+                                                             const glm::uvec3& dimensions) {
 
-    glm::vec3 deltas = (_domainMaxs - _domainMins) / glm::vec3(
-                                                        static_cast<float>(_dimensions.x),
-                                                        static_cast<float>(_dimensions.y),
-                                                        static_cast<float>(_dimensions.z));
+    glm::vec3 deltas = (domainMaxs - domainMins) / glm::vec3(
+                                                        static_cast<float>(dimensions.x),
+                                                        static_cast<float>(dimensions.y),
+                                                        static_cast<float>(dimensions.z));
 
     int lStart = 0;
     // HORIZONTAL LINES parallel to x axis
-    for (int z = 0; z < _dimensions.z + 1; ++z) {
-        for (int y = 0; y < _dimensions.y + 1; ++y) {
+    for (int z = 0; z < dimensions.z + 1; ++z) {
+        for (int y = 0; y < dimensions.y + 1; ++y) {
             _gridStartPos.push_back(lStart);
-            _gridVertices.push_back(glm::vec3(_domainMins.x,
-                                              _domainMins.y + static_cast<float>(y) * deltas.y,
-                                              _domainMins.z + static_cast<float>(z) * deltas.z));
-            _gridVertices.push_back(glm::vec3(_domainMaxs.x,
-                                              _domainMins.y + static_cast<float>(y) * deltas.y,
-                                              _domainMins.z + static_cast<float>(z) * deltas.z));
+            _gridVertices.push_back(glm::vec3(domainMins.x,
+                                              domainMins.y + static_cast<float>(y) * deltas.y,
+                                              domainMins.z + static_cast<float>(z) * deltas.z));
+            _gridVertices.push_back(glm::vec3(domainMaxs.x,
+                                              domainMins.y + static_cast<float>(y) * deltas.y,
+                                              domainMins.z + static_cast<float>(z) * deltas.z));
             lStart += 2;
             _gridLineCount.push_back(2);
         }
     }
 
     // HORIZONTAL LINES parallel to y axis
-    for (int z = 0; z < _dimensions.z + 1; ++z) {
-        for (int x = 0; x < _dimensions.x + 1; ++x) {
+    for (int z = 0; z < dimensions.z + 1; ++z) {
+        for (int x = 0; x < dimensions.x + 1; ++x) {
             _gridStartPos.push_back(lStart);
 
-            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                                              _domainMins.y,
-                                              _domainMins.z + static_cast<float>(z) * deltas.z));
-            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                                              _domainMaxs.y,
-                                              _domainMins.z + static_cast<float>(z) * deltas.z));
+            _gridVertices.push_back(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
+                                              domainMins.y,
+                                              domainMins.z + static_cast<float>(z) * deltas.z));
+            _gridVertices.push_back(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
+                                              domainMaxs.y,
+                                              domainMins.z + static_cast<float>(z) * deltas.z));
             lStart += 2;
             _gridLineCount.push_back(2);
         }
     }
 
     // VERTICAL LINES parallel to z axis
-    for (int x = 0; x < _dimensions.x + 1; ++x) {
-        for (int y = 0; y < _dimensions.y + 1; ++y) {
+    for (int x = 0; x < dimensions.x + 1; ++x) {
+        for (int y = 0; y < dimensions.y + 1; ++y) {
             _gridStartPos.push_back(lStart);
 
-            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                                              _domainMins.y + static_cast<float>(y) * deltas.y,
-                                              _domainMins.z));
-            _gridVertices.push_back(glm::vec3(_domainMins.x + static_cast<float>(x) * deltas.x,
-                                              _domainMins.y + static_cast<float>(y) * deltas.y,
-                                              _domainMaxs.z));
+            _gridVertices.push_back(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
+                                              domainMins.y + static_cast<float>(y) * deltas.y,
+                                              domainMins.z));
+            _gridVertices.push_back(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
+                                              domainMins.y + static_cast<float>(y) * deltas.y,
+                                              domainMaxs.z));
             lStart += 2;
             _gridLineCount.push_back(2);
         }
