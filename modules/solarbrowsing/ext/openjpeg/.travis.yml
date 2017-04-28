@@ -10,6 +10,9 @@ matrix:
       env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_CI_INCLUDE_IF_DEPLOY=1
     - os: linux
       compiler: gcc
+      env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_NUM_THREADS=2
+    - os: linux
+      compiler: gcc
       env: OPJ_CI_ARCH=i386 OPJ_CI_BUILD_CONFIGURATION=Release
       addons:
         apt:

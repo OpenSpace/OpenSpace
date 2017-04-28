@@ -40,8 +40,6 @@ NR-DEC-issue205.jp2-253-decode-md5
 NR-DEC-issue236-ESYCC-CDEF.jp2-254-decode-md5
 NR-DEC-issue559-eci-090-CIELab.jp2-255-decode-md5
 NR-DEC-issue559-eci-091-CIELab.jp2-256-decode-md5
-ETS-C1P0-p0_12.j2k-compare2ref
-NR-C1P0-p0_12.j2k-compare2base
 NR-DEC-kodak_2layers_lrcp.j2c-31-decode-md5
 NR-DEC-kodak_2layers_lrcp.j2c-32-decode-md5
 NR-DEC-issue135.j2k-68-decode-md5

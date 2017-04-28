@@ -63,10 +63,11 @@ OPJ_BOOL opj_dwt_encode(opj_tcd_tilecomp_t * tilec);
 /**
 Inverse 5-3 wavelet transform in 2-D.
 Apply a reversible inverse DWT transform to a component of an image.
+@param tp Thread pool
 @param tilec Tile component information (current tile)
 @param numres Number of resolution levels to decode
 */
-OPJ_BOOL opj_dwt_decode(opj_tcd_tilecomp_t* tilec, OPJ_UINT32 numres);
+OPJ_BOOL opj_dwt_decode(opj_thread_pool_t* tp, opj_tcd_tilecomp_t* tilec, OPJ_UINT32 numres);
 
 /**
 Get the gain of a subband for the reversible 5-3 DWT.

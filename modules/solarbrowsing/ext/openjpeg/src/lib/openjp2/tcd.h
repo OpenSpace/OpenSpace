@@ -70,7 +70,7 @@ typedef struct opj_tcd_pass {
 	OPJ_UINT32 rate;
 	OPJ_FLOAT64 distortiondec;
 	OPJ_UINT32 len;
-	OPJ_UINT32 term : 1;
+	OPJ_BITFIELD term : 1;
 } opj_tcd_pass_t;
 
 /**
@@ -219,7 +219,9 @@ typedef struct opj_tcd
 	/** current encoded/decoded tile */
 	OPJ_UINT32 tcd_tileno;
 	/** tell if the tcd is a decoder. */
-	OPJ_UINT32 m_is_decoder : 1;
+    OPJ_BITFIELD m_is_decoder : 1;
+    /** Thread pool */
+    opj_thread_pool_t* thread_pool;
 } opj_tcd_t;
 
 /** @name Exported functions */
@@ -249,12 +251,14 @@ void opj_tcd_destroy(opj_tcd_t *tcd);
  * @param	p_tcd		TCD handle.
  * @param	p_image		raw image.
  * @param	p_cp		coding parameters.
+ * @param   p_tp        thread pool
  *
  * @return true if the encoding values could be set (false otherwise).
 */
 OPJ_BOOL opj_tcd_init(	opj_tcd_t *p_tcd,
 						opj_image_t * p_image,
-						opj_cp_t * p_cp );
+						opj_cp_t * p_cp,
+                        opj_thread_pool_t* p_tp);
 
 /**
  * Allocates memory for decoding a specific tile.

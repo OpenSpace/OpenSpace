@@ -54,6 +54,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <assert.h>
+#include <limits.h>
 
 /*
   Use fseeko() and ftello() if they are available since they use
@@ -183,6 +184,9 @@ static INLINE long opj_lrintf(float f) {
 #	pragma intrinsic(__emul)
 #endif
 
+/* Type to use for bit-fields in internal headers */
+typedef unsigned int OPJ_BITFIELD;
+
 #include "opj_inttypes.h"
 #include "opj_clock.h"
 #include "opj_malloc.h"
@@ -190,6 +194,9 @@ static INLINE long opj_lrintf(float f) {
 #include "function_list.h"
 #include "bio.h"
 #include "cio.h"
+
+#include "thread.h"
+#include "tls_keys.h"
 
 #include "image.h"
 #include "invert.h"

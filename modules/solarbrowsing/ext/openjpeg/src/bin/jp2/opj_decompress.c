@@ -43,6 +43,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 #ifdef _WIN32
 #include "windirent.h"
@@ -150,6 +151,8 @@ typedef struct opj_decompress_params
 	int upsample;
 	/* split output components to different files */
 	int split_pnm;
+    /** number of threads */
+    int num_threads;
 }opj_decompress_parameters;
 
 /* -------------------------------------------------------------------------- */
@@ -224,8 +227,11 @@ static void decode_help_display(void) {
 	               "  -upsample\n"
 	               "    Downsampled components will be upsampled to image size\n"
 	               "  -split-pnm\n"
-	               "    Split output components to different files when writing to PNM\n"
-	               "\n");
+	               "    Split output components to different files when writing to PNM\n");
+	if( opj_has_thread_support() ) {
+	  fprintf(stdout,"  -threads <num_threads>\n"
+					"    Number of threads to use for decoding.\n");
+	}
 /* UniPG>> */
 #ifdef USE_JPWL
 	fprintf(stdout,"  -W <options>\n"
@@ -520,7 +526,8 @@ int parse_cmdline_decoder(int argc, char **argv, opj_decompress_parameters *para
 		{"OutFor",    REQ_ARG, NULL,'O'},
 		{"force-rgb", NO_ARG,  NULL, 1},
 		{"upsample",  NO_ARG,  NULL, 1},
-		{"split-pnm", NO_ARG,  NULL, 1}
+		{"split-pnm", NO_ARG,  NULL, 1},
+		{"threads",   REQ_ARG, NULL, 'T'}
 	};
 
 	const char optlist[] = "i:o:r:l:x:d:t:p:"
@@ -808,6 +815,22 @@ int parse_cmdline_decoder(int argc, char **argv, opj_decompress_parameters *para
 			break;	
 #endif /* USE_JPWL */
 /* <<UniPG */            
+				
+				/* ----------------------------------------------------- */
+			case 'T':  /* Number of threads */
+				{
+					if( strcmp(opj_optarg, "ALL_CPUS") == 0 )
+					{
+						parameters->num_threads = opj_get_num_cpus();
+						if( parameters->num_threads == 1 )
+							parameters->num_threads = 0;
+					}
+					else
+					{
+					  sscanf(opj_optarg, "%d", &parameters->num_threads);
+					}
+				}
+				break;
 
 				/* ----------------------------------------------------- */
 			
@@ -885,17 +908,22 @@ OPJ_FLOAT64 opj_clock(void) {
     /* t is the high resolution performance counter (see MSDN) */
     QueryPerformanceCounter ( & t ) ;
 	return freq.QuadPart ? (t.QuadPart / (OPJ_FLOAT64)freq.QuadPart) : 0;
+#elif defined(__linux)
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	return( (OPJ_FLOAT64)ts.tv_sec + (OPJ_FLOAT64)ts.tv_nsec * 1e-9 );
 #else
-	/* Unix or Linux: use resource usage */
-    struct rusage t;
-    OPJ_FLOAT64 procTime;
-    /* (1) Get the rusage data structure at this moment (man getrusage) */
-    getrusage(0,&t);
-    /* (2) What is the elapsed time ? - CPU time = User time + System time */
+	/* Unix : use resource usage */
+	/* FIXME: this counts the total CPU time, instead of the user perceived time */
+	struct rusage t;
+	OPJ_FLOAT64 procTime;
+	/* (1) Get the rusage data structure at this moment (man getrusage) */
+	getrusage(0,&t);
+	/* (2) What is the elapsed time ? - CPU time = User time + System time */
 	/* (2a) Get the seconds */
-    procTime = (OPJ_FLOAT64)(t.ru_utime.tv_sec + t.ru_stime.tv_sec);
-    /* (2b) More precisely! Get the microseconds part ! */
-    return ( procTime + (OPJ_FLOAT64)(t.ru_utime.tv_usec + t.ru_stime.tv_usec) * 1e-6 ) ;
+	procTime = (OPJ_FLOAT64)(t.ru_utime.tv_sec + t.ru_stime.tv_sec);
+	/* (2b) More precisely! Get the microseconds part ! */
+	return ( procTime + (OPJ_FLOAT64)(t.ru_utime.tv_usec + t.ru_stime.tv_usec) * 1e-6 ) ;
 #endif
 }
 
@@ -1306,7 +1334,13 @@ int main(int argc, char **argv)
 			opj_destroy_codec(l_codec);
 			failed = 1; goto fin;
 		}
-
+		
+		if( parameters.num_threads >= 1 && !opj_codec_set_threads(l_codec, parameters.num_threads) ) {
+			fprintf(stderr, "ERROR -> opj_decompress: failed to set number of threads\n");
+			opj_stream_destroy(l_stream);
+			opj_destroy_codec(l_codec);
+			failed = 1; goto fin;
+		}
 
 		/* Read the main header of the codestream and if necessary the JP2 boxes*/
 		if(! opj_read_header(l_stream, l_codec, &image)){

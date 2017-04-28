@@ -1777,6 +1777,11 @@ void opj_jp2_setup_decoder(opj_jp2_t *jp2, opj_dparameters_t *parameters)
 	jp2->ignore_pclr_cmap_cdef = parameters->flags & OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG;
 }
 
+OPJ_BOOL opj_jp2_set_threads(opj_jp2_t *jp2, OPJ_UINT32 num_threads)
+{
+     return opj_j2k_set_threads(jp2->j2k, num_threads);
+}
+
 /* ----------------------------------------------------------------------- */
 /* JP2 encoder interface                                             */
 /* ----------------------------------------------------------------------- */

@@ -239,6 +239,9 @@ opj_codec_t* OPJ_CALLCONV opj_create_decompress(OPJ_CODEC_FORMAT p_format)
 									OPJ_UINT32 res_factor,
 									struct opj_event_mgr * p_manager)) opj_j2k_set_decoded_resolution_factor;
 
+            l_codec->opj_set_threads = 
+                    (OPJ_BOOL (*) ( void * p_codec, OPJ_UINT32 num_threads )) opj_j2k_set_threads;
+
 			l_codec->m_codec = opj_j2k_create_decompress();
 
 			if (! l_codec->m_codec) {
@@ -315,6 +318,9 @@ opj_codec_t* OPJ_CALLCONV opj_create_decompress(OPJ_CODEC_FORMAT p_format)
 						    		OPJ_UINT32 res_factor,
 							    	opj_event_mgr_t * p_manager)) opj_jp2_set_decoded_resolution_factor;
 
+            l_codec->opj_set_threads = 
+                    (OPJ_BOOL (*) ( void * p_codec, OPJ_UINT32 num_threads )) opj_jp2_set_threads;
+
 			l_codec->m_codec = opj_jp2_create(OPJ_TRUE);
 
 			if (! l_codec->m_codec) {
@@ -352,6 +358,18 @@ void OPJ_CALLCONV opj_set_default_decoder_parameters(opj_dparameters_t *paramete
 #endif /* USE_JPWL */
 /* <<UniPG */
 	}
+}
+
+
+OPJ_BOOL OPJ_CALLCONV opj_codec_set_threads(opj_codec_t *p_codec,
+                                                    int num_threads)
+{
+	if (p_codec && (num_threads >= 0)) {
+		opj_codec_private_t * l_codec = (opj_codec_private_t *) p_codec;
+
+		return l_codec->opj_set_threads(l_codec->m_codec, (OPJ_UINT32)num_threads);
+	}
+	return OPJ_FALSE;
 }
 
 OPJ_BOOL OPJ_CALLCONV opj_setup_decoder(opj_codec_t *p_codec,

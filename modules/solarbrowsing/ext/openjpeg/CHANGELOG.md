@@ -39,7 +39,7 @@
 - Add sanity check for tile coordinates [\#823](https://github.com/uclouvain/openjpeg/pull/823) ([mayeut](https://github.com/mayeut))
 - Add test for PR 818 [\#822](https://github.com/uclouvain/openjpeg/pull/822) ([mayeut](https://github.com/mayeut))
 - Update to libpng 1.6.25 [\#821](https://github.com/uclouvain/openjpeg/pull/821) ([mayeut](https://github.com/mayeut))
-- fix incrementing of "l\_tcp-\>m\_nb\_mcc\_records" in opj\_j2k\_read\_mcc [\#820](https://github.com/uclouvain/openjpeg/pull/820) ([mayeut](https://github.com/mayeut))
+- CVE-2016-8332: fix incrementing of "l\_tcp-\>m\_nb\_mcc\_records" in opj\_j2k\_read\_mcc [\#820](https://github.com/uclouvain/openjpeg/pull/820) ([mayeut](https://github.com/mayeut))
 - Add overflow check in opj\_tcd\_init\_tile [\#819](https://github.com/uclouvain/openjpeg/pull/819) ([mayeut](https://github.com/mayeut))
 - Fix leak & invalid behavior of opj\_jp2\_read\_ihdr [\#818](https://github.com/uclouvain/openjpeg/pull/818) ([mayeut](https://github.com/mayeut))
 - Add overflow check in opj\_j2k\_update\_image\_data [\#817](https://github.com/uclouvain/openjpeg/pull/817) ([mayeut](https://github.com/mayeut))
