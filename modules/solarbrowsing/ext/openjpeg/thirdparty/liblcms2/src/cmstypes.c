@@ -30,7 +30,7 @@
 // This file implements every single tag and tag type as described in the ICC spec. Some types
 // have been deprecated, like ncl and Data. There is no implementation for those types as there
 // are no profiles holding them. The programmer can also extend this list by defining his own types
-// by using the appropiate plug-in. There are three types of plug ins regarding that. First type
+// by using the appropriate plug-in. There are three types of plug ins regarding that. First type
 // allows to define new tags using any existing type. Next plug-in type allows to define new types
 // and the third one is very specific: allows to extend the number of elements in the multiprocessing
 // elements special type.
@@ -113,7 +113,7 @@ cmsTagTypeHandler* GetHandler(cmsTagTypeSignature sig, _cmsTagTypeLinkedList* Pl
 }
 
 
-// Auxiliar to convert UTF-32 to UTF-16 in some cases
+// Auxiliary to convert UTF-32 to UTF-16 in some cases
 static
 cmsBool _cmsWriteWCharArray(cmsIOHANDLER* io, cmsUInt32Number n, const wchar_t* Array)
 {
@@ -129,7 +129,7 @@ cmsBool _cmsWriteWCharArray(cmsIOHANDLER* io, cmsUInt32Number n, const wchar_t* 
     return TRUE;
 }
 
-// Auxiliar to read an array of wchar_t
+// Auxiliary to read an array of wchar_t
 static
 cmsBool _cmsReadWCharArray(cmsIOHANDLER* io, cmsUInt32Number n, wchar_t* Array)
 {
@@ -160,7 +160,7 @@ typedef cmsBool (* PositionTableEntryFn)(struct _cms_typehandler_struct* self,
                                              cmsUInt32Number n,
                                              cmsUInt32Number SizeOfTag);
 
-// Helper function to deal with position tables as decribed in ICC spec 4.3
+// Helper function to deal with position tables as described in ICC spec 4.3
 // A table of n elements is readed, where first comes n records containing offsets and sizes and
 // then a block containing the data itself. This allows to reuse same data in more than one entry
 static
@@ -994,7 +994,7 @@ cmsBool  Type_Text_Description_Write(struct _cms_typehandler_struct* self, cmsIO
     }
 
     // Tell the real text len including the null terminator and padding
-    len_text = strlen(Text) + 1;
+    len_text = (cmsUInt32Number) strlen(Text) + 1;
     // Compute an total tag size requirement
     len_tag_requirement = (8+4+len_text+4+4+2*len_text+2+1+67);
     len_aligned = _cmsALIGNLONG(len_tag_requirement);
@@ -1474,7 +1474,7 @@ void *Type_MLU_Read(struct _cms_typehandler_struct* self, cmsIOHANDLER* io, cmsU
             LargestPosition = EndOfThisString;
     }
 
-    // Now read the remaining of tag and fill all strings. Substract the directory
+    // Now read the remaining of tag and fill all strings. Subtract the directory
     SizeOfTag   = (LargestPosition * sizeof(wchar_t)) / sizeof(cmsUInt16Number);
     if (SizeOfTag == 0)
     {
@@ -3609,7 +3609,7 @@ country varies for each element:
 
 
 
-// Auxiliar, read an string specified as count + string
+// Auxiliary, read an string specified as count + string
 static
 cmsBool  ReadCountAndSting(struct _cms_typehandler_struct* self, cmsIOHANDLER* io, cmsMLU* mlu, cmsUInt32Number* SizeOfTag, const char* Section)
 {
@@ -4312,13 +4312,13 @@ Error:
 static
 cmsBool  Type_MPEclut_Write(struct _cms_typehandler_struct* self, cmsIOHANDLER* io, void* Ptr, cmsUInt32Number nItems)
 {
-    cmsUInt8Number Dimensions8[16];
+    cmsUInt8Number Dimensions8[16];  // 16 because the spec says 16 and not max number of channels
     cmsUInt32Number i;
     cmsStage* mpe = (cmsStage*) Ptr;
     _cmsStageCLutData* clut = (_cmsStageCLutData*) mpe ->Data;
 
-    // Check for maximum number of channels
-    if (mpe -> InputChannels > 15) return FALSE;
+    // Check for maximum number of channels supported by lcms
+    if (mpe -> InputChannels > MAX_INPUT_DIMENSIONS) return FALSE;
 
     // Only floats are supported in MPE
     if (clut ->HasFloatValues == FALSE) return FALSE;

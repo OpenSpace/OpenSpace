@@ -113,6 +113,7 @@ typedef struct opj_codec_private
             OPJ_BOOL (*opj_set_decoded_resolution_factor) ( void * p_codec,
                                                             OPJ_UINT32 res_factor,
                                                             opj_event_mgr_t * p_manager);
+
         } m_decompression;
 
         /**
@@ -157,6 +158,9 @@ typedef struct opj_codec_private
     void (*opj_dump_codec) (void * p_codec, OPJ_INT32 info_flag, FILE* output_stream);
     opj_codestream_info_v2_t* (*opj_get_codec_info)(void* p_codec);
     opj_codestream_index_t* (*opj_get_codec_index)(void* p_codec);
+
+    /** Set number of threads */
+    OPJ_BOOL (*opj_set_threads) ( void * p_codec, OPJ_UINT32 num_threads );
 }
 opj_codec_private_t;
 

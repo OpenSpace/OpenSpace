@@ -50,48 +50,74 @@ in T1.C are used by some function in TCD.C.
 /* ----------------------------------------------------------------------- */
 #define T1_NMSEDEC_BITS 7
 
-#define T1_SIG_NE 0x0001	/**< Context orientation : North-East direction */
-#define T1_SIG_SE 0x0002	/**< Context orientation : South-East direction */
-#define T1_SIG_SW 0x0004	/**< Context orientation : South-West direction */
-#define T1_SIG_NW 0x0008	/**< Context orientation : North-West direction */
-#define T1_SIG_N 0x0010		/**< Context orientation : North direction */
-#define T1_SIG_E 0x0020		/**< Context orientation : East direction */
-#define T1_SIG_S 0x0040		/**< Context orientation : South direction */
-#define T1_SIG_W 0x0080		/**< Context orientation : West direction */
+/* CAUTION: the value of those constants must not be changed, otherwise the */
+/* optimization of opj_t1_updateflags() will break! */
+/* BEGINNING of flags that apply to opj_flag_t */
+#define T1_SIG_NE 0x0001U /**< Context orientation : North-East direction */
+#define T1_SIG_SE 0x0002U /**< Context orientation : South-East direction */
+#define T1_SIG_SW 0x0004U /**< Context orientation : South-West direction */
+#define T1_SIG_NW 0x0008U /**< Context orientation : North-West direction */
+#define T1_SIG_N 0x0010U  /**< Context orientation : North direction */
+#define T1_SIG_E 0x0020U  /**< Context orientation : East direction */
+#define T1_SIG_S 0x0040U  /**< Context orientation : South direction */
+#define T1_SIG_W 0x0080U  /**< Context orientation : West direction */
 #define T1_SIG_OTH (T1_SIG_N|T1_SIG_NE|T1_SIG_E|T1_SIG_SE|T1_SIG_S|T1_SIG_SW|T1_SIG_W|T1_SIG_NW)
 #define T1_SIG_PRIM (T1_SIG_N|T1_SIG_E|T1_SIG_S|T1_SIG_W)
 
-#define T1_SGN_N 0x0100
-#define T1_SGN_E 0x0200
-#define T1_SGN_S 0x0400
-#define T1_SGN_W 0x0800
+#define T1_SGN_N 0x0100U
+#define T1_SGN_E 0x0200U
+#define T1_SGN_S 0x0400U
+#define T1_SGN_W 0x0800U
 #define T1_SGN (T1_SGN_N|T1_SGN_E|T1_SGN_S|T1_SGN_W)
 
-#define T1_SIG 0x1000
-#define T1_REFINE 0x2000
-#define T1_VISIT 0x4000
+#define T1_SIG    0x1000U /**< No longer used by decoder */
+#define T1_REFINE 0x2000U /**< No longer used by decoder */
+#define T1_VISIT  0x4000U /**< No longer used by decoder */
+/* END of flags that apply to opj_flag_t */
 
-#define T1_NUMCTXS_ZC 9
-#define T1_NUMCTXS_SC 5
+#define T1_NUMCTXS_ZC  9
+#define T1_NUMCTXS_SC  5
 #define T1_NUMCTXS_MAG 3
 #define T1_NUMCTXS_AGG 1
 #define T1_NUMCTXS_UNI 1
 
-#define T1_CTXNO_ZC 0
-#define T1_CTXNO_SC (T1_CTXNO_ZC+T1_NUMCTXS_ZC)
+#define T1_CTXNO_ZC  0
+#define T1_CTXNO_SC  (T1_CTXNO_ZC+T1_NUMCTXS_ZC)
 #define T1_CTXNO_MAG (T1_CTXNO_SC+T1_NUMCTXS_SC)
 #define T1_CTXNO_AGG (T1_CTXNO_MAG+T1_NUMCTXS_MAG)
 #define T1_CTXNO_UNI (T1_CTXNO_AGG+T1_NUMCTXS_AGG)
-#define T1_NUMCTXS (T1_CTXNO_UNI+T1_NUMCTXS_UNI)
+#define T1_NUMCTXS   (T1_CTXNO_UNI+T1_NUMCTXS_UNI)
 
 #define T1_NMSEDEC_FRACBITS (T1_NMSEDEC_BITS-1)
 
 #define T1_TYPE_MQ 0	/**< Normal coding using entropy coder */
 #define T1_TYPE_RAW 1	/**< No encoding the information is store under raw format in codestream (mode switch RAW)*/
 
+/* Those flags are used by opj_colflag_t */
+#define T1_COLFLAG_RBS              4U /* RBS = Row Bit Shift */
+#define T1_COLFLAG_SIG_OTHER_ROW_0 (1U << 0U)  /**< This sample has at least one significant neighbour */
+#define T1_COLFLAG_SIG_ROW_0       (1U << 1U)  /**< This sample is significant */
+#define T1_COLFLAG_VISIT_ROW_0     (1U << 2U)  /**< This sample has been visited */
+#define T1_COLFLAG_REFINE_ROW_0    (1U << 3U)  /**< This sample has been refined */
+#define T1_COLFLAG_SIG_OTHER_ROW_1 (T1_COLFLAG_SIG_OTHER_ROW_0 << (1U * T1_COLFLAG_RBS))
+#define T1_COLFLAG_SIG_ROW_1       (T1_COLFLAG_SIG_ROW_0       << (1U * T1_COLFLAG_RBS))
+#define T1_COLFLAG_VISIT_ROW_1     (T1_COLFLAG_VISIT_ROW_0     << (1U * T1_COLFLAG_RBS))
+#define T1_COLFLAG_REFINE_ROW_1    (T1_COLFLAG_REFINE_ROW_0    << (1U * T1_COLFLAG_RBS))
+#define T1_COLFLAG_SIG_OTHER_ROW_2 (T1_COLFLAG_SIG_OTHER_ROW_0 << (2U * T1_COLFLAG_RBS))
+#define T1_COLFLAG_SIG_ROW_2       (T1_COLFLAG_SIG_ROW_0       << (2U * T1_COLFLAG_RBS))
+#define T1_COLFLAG_VISIT_ROW_2     (T1_COLFLAG_VISIT_ROW_0     << (2U * T1_COLFLAG_RBS))
+#define T1_COLFLAG_REFINE_ROW_2    (T1_COLFLAG_REFINE_ROW_0    << (2U * T1_COLFLAG_RBS))
+#define T1_COLFLAG_SIG_OTHER_ROW_3 (T1_COLFLAG_SIG_OTHER_ROW_0 << (3U * T1_COLFLAG_RBS))
+#define T1_COLFLAG_SIG_ROW_3       (T1_COLFLAG_SIG_ROW_0       << (3U * T1_COLFLAG_RBS))
+#define T1_COLFLAG_VISIT_ROW_3     (T1_COLFLAG_VISIT_ROW_0     << (3U * T1_COLFLAG_RBS))
+#define T1_COLFLAG_REFINE_ROW_3    (T1_COLFLAG_REFINE_ROW_0    << (3U * T1_COLFLAG_RBS))
+
 /* ----------------------------------------------------------------------- */
 
-typedef OPJ_INT16 opj_flag_t;
+typedef OPJ_UINT16 opj_flag_t;
+
+/** Flags for 4 consecutive rows of a column */
+typedef OPJ_UINT16 opj_colflag_t;
 
 /**
 Tier-1 coding (coding of code-block coefficients)
@@ -105,11 +131,17 @@ typedef struct opj_t1 {
 
 	OPJ_INT32  *data;
 	opj_flag_t *flags;
+	/** Addition flag array such that colflags[1+0] is for state of col=0,row=0..3,
+	   colflags[1+1] for col=1, row=0..3, colflags[1+flags_stride] for col=0,row=4..7, ... 
+	   This array avoids too much cache trashing when processing by 4 vertical samples
+	   as done in the various decoding steps. */
+	opj_colflag_t* colflags;
 	OPJ_UINT32 w;
 	OPJ_UINT32 h;
 	OPJ_UINT32 datasize;
 	OPJ_UINT32 flagssize;
 	OPJ_UINT32 flags_stride;
+	OPJ_UINT32 colflags_size;
 	OPJ_UINT32 data_stride;
 	OPJ_BOOL   encoder;
 } opj_t1_t;
@@ -140,7 +172,8 @@ Decode the code-blocks of a tile
 @param tilec The tile to decode
 @param tccp Tile coding parameters
 */
-OPJ_BOOL opj_t1_decode_cblks(   opj_t1_t* t1,
+void opj_t1_decode_cblks(   opj_thread_pool_t* tp,
+                                volatile OPJ_BOOL* pret,
                                 opj_tcd_tilecomp_t* tilec,
                                 opj_tccp_t* tccp);
 

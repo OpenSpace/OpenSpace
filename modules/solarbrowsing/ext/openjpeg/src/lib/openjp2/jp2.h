@@ -243,6 +243,8 @@ Decoding parameters are returned in jp2->j2k->cp.
 */
 void opj_jp2_setup_decoder(opj_jp2_t *jp2, opj_dparameters_t *parameters);
 
+OPJ_BOOL opj_jp2_set_threads(opj_jp2_t *jp2, OPJ_UINT32 num_threads);
+
 /**
  * Decode an image from a JPEG-2000 file stream
  * @param jp2 JP2 decompressor handle

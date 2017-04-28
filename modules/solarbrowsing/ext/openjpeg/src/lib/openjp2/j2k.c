@@ -5948,6 +5948,35 @@ void opj_j2k_setup_decoder(opj_j2k_t *j2k, opj_dparameters_t *parameters)
         }
 }
 
+OPJ_BOOL opj_j2k_set_threads(opj_j2k_t *j2k, OPJ_UINT32 num_threads)
+{
+        if( opj_has_thread_support() )
+        {
+            opj_thread_pool_destroy(j2k->m_tp);
+            j2k->m_tp = NULL;
+            if (num_threads <= (OPJ_UINT32)INT_MAX ) {
+                j2k->m_tp = opj_thread_pool_create((int)num_threads);
+            }
+            if( j2k->m_tp == NULL )
+            {
+                j2k->m_tp = opj_thread_pool_create(0);
+                return OPJ_FALSE;
+            }
+            return OPJ_TRUE;
+        }
+        return OPJ_FALSE;
+}
+
+static int opj_j2k_get_default_thread_count()
+{
+    const char* num_threads = getenv("OPJ_NUM_THREADS");
+    if( num_threads == NULL || !opj_has_thread_support() )
+        return 0;
+    if( strcmp(num_threads, "ALL_CPUS") == 0 )
+        return opj_get_num_cpus();
+    return atoi(num_threads);
+}
+
 /* ----------------------------------------------------------------------- */
 /* J2K encoder interface                                                       */
 /* ----------------------------------------------------------------------- */
@@ -5983,6 +6012,17 @@ opj_j2k_t* opj_j2k_create_compress(void)
         if (! l_j2k->m_procedure_list) {
                 opj_j2k_destroy(l_j2k);
                 return NULL;
+        }
+
+        l_j2k->m_tp = opj_thread_pool_create(opj_j2k_get_default_thread_count());
+        if( !l_j2k->m_tp )
+        {
+            l_j2k->m_tp = opj_thread_pool_create(0);
+        }
+        if( !l_j2k->m_tp )
+        {
+            opj_j2k_destroy(l_j2k);
+            return NULL;
         }
 
         return l_j2k;
@@ -7490,7 +7530,7 @@ static OPJ_BOOL opj_j2k_copy_default_tcp_and_create_tcd (       opj_j2k_t * p_j2
                 return OPJ_FALSE;
         }
 
-        if ( !opj_tcd_init(p_j2k->m_tcd, l_image, &(p_j2k->m_cp)) ) {
+        if ( !opj_tcd_init(p_j2k->m_tcd, l_image, &(p_j2k->m_cp), p_j2k->m_tp) ) {
                 opj_tcd_destroy(p_j2k->m_tcd);
                 p_j2k->m_tcd = 00;
                 opj_event_msg(p_manager, EVT_ERROR, "Cannot decode tile, memory error\n");
@@ -7570,6 +7610,9 @@ void opj_j2k_destroy (opj_j2k_t *p_j2k)
 
         opj_image_destroy(p_j2k->m_output_image);
         p_j2k->m_output_image = NULL;
+
+        opj_thread_pool_destroy(p_j2k->m_tp);
+        p_j2k->m_tp = NULL;
 
         opj_free(p_j2k);
 }
@@ -8666,6 +8709,17 @@ opj_j2k_t* opj_j2k_create_decompress(void)
         if (! l_j2k->m_procedure_list) {
                 opj_j2k_destroy(l_j2k);
                 return 00;
+        }
+
+        l_j2k->m_tp = opj_thread_pool_create(opj_j2k_get_default_thread_count());
+        if( !l_j2k->m_tp )
+        {
+            l_j2k->m_tp = opj_thread_pool_create(0);
+        }
+        if( !l_j2k->m_tp )
+        {
+            opj_j2k_destroy(l_j2k);
+            return NULL;
         }
 
         return l_j2k;
@@ -10944,7 +10998,7 @@ static OPJ_BOOL opj_j2k_create_tcd(     opj_j2k_t *p_j2k,
                 return OPJ_FALSE;
         }
 
-        if (!opj_tcd_init(p_j2k->m_tcd,p_j2k->m_private_image,&p_j2k->m_cp)) {
+        if (!opj_tcd_init(p_j2k->m_tcd,p_j2k->m_private_image,&p_j2k->m_cp, p_j2k->m_tp)) {
                 opj_tcd_destroy(p_j2k->m_tcd);
                 p_j2k->m_tcd = 00;
                 return OPJ_FALSE;

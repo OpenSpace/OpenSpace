@@ -57,6 +57,9 @@ foreach(exe opj_decompress opj_compress opj_dump)
   # On unix you need to link to the math library:
   if(UNIX)
     target_link_libraries(${exe} m)
+    IF("${CMAKE_SYSTEM_NAME}" MATCHES "Linux")
+      target_link_libraries(${exe} rt)
+    endif()
   endif()
   # Install exe
   install(TARGETS ${exe}
