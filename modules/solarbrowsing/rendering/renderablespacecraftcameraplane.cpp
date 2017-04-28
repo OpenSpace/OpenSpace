@@ -43,6 +43,8 @@
 using namespace ghoul::opengl;
 using namespace std::chrono;
 
+typedef std::chrono::high_resolution_clock Clock;
+
 namespace {
     static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
     //static const int _minRealTimeUpdateInterval = 50;
@@ -258,10 +260,11 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
     glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, NULL, GL_STREAM_DRAW);
     // Map buffer to client memory
     //_pboBufferData = static_cast<float*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-    _pboBufferData = static_cast<IMG_PRECISION*>(glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, pboSize, GL_MAP_WRITE_BIT|GL_MAP_INVALIDATE_BUFFER_BIT));
+    _pboBufferData = static_cast<IMG_PRECISION*>(glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, NULL, pboSize, GL_MAP_WRITE_BIT|GL_MAP_INVALIDATE_BUFFER_BIT));
     std::string& currentFilename = _imageMetadata[_currentActiveChannel][image].filename;
 
     if (!_asyncUploadPBO) {
+        SimpleJ2kCodec j2c;
         j2c.CreateInfileStream(currentFilename);
         j2c.SetupDecoder();
         j2c.SetResolutionFactor(_resolutionLevel);
@@ -269,6 +272,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
     } else {
         _future = std::make_unique<std::future<void>>(std::async(std::launch::async,
             [this, &currentFilename]() {
+                SimpleJ2kCodec j2c;
                 j2c.CreateInfileStream(currentFilename);
                 j2c.SetupDecoder();
                 j2c.SetResolutionFactor(_resolutionLevel);
@@ -285,10 +289,16 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
 void RenderableSpacecraftCameraPlane::updateTextureGPU() {
     if (_usePBO) {
 
+        auto t1 = Clock::now();
         // Wait for texture data from previous frame
         if (_future) {
             _future->wait();
         }
+        auto t2 = Clock::now();
+        std::cout << "Waiting time for promise: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+              << " ms" << std::endl;
+
         _future = nullptr;
 
         // Bind PBO to texture data source

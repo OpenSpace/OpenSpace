@@ -86,8 +86,6 @@ private:
     unsigned int _imageSize;
     bool _resChanged;
 
-    SimpleJ2kCodec j2c;
-
     // Channels -> DataObjects
     //std::vector<std::vector<ImageDataObject>> _imageData;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
