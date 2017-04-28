@@ -131,8 +131,21 @@ private:
     std::string _modelName;
 
     std::vector<double> _startTimes;
-    void generateUniformSphericalGrid();
-    void generateUniformCartesian3DGrid();
+
+    // TODO MOVE ELSEWHERE
+    // TODO ADD INPUT& vector for gridVertices and gridStart (make const)
+    void generateUniformVoxelGrid(const glm::vec3& domainMins,
+                                  const glm::vec3& domainMaxs,
+                                  const glm::uvec3& dimensions,
+                                  const bool isSpherical);
+
+    void generateUniformSphericalGrid(const glm::vec3& domainMins,
+                                      const glm::vec3& domainMaxs,
+                                      const glm::uvec3& dimensions);
+
+    void generateUniformCartesianGrid(const glm::vec3& domainMins,
+                                      const glm::vec3& domainMaxs,
+                                      const glm::uvec3& dimensions);
 };
 
 } // namespace openspace
