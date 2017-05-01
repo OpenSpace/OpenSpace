@@ -37,7 +37,7 @@ namespace globebrowsing {
  * This class is based largely on the Ellipsoid class defined in the book
  * "3D Engine Design for Virtual Globes". Most planets or planetary objects are better
  * described using ellipsoids than spheres. All inputs and outputs to this class is
- * based on the WGS84 standard coordinate system where the x-axis points towards geographic
+ * based on the WGS84 standard coordinate system where the x-`axis points towards geographic
  * (lat = 0, lon = 0), the y-axis points towards (lat = 0, lon = 90deg) and the
  * z-axis points towards the north pole. For other globes than earth of course the radii
  * can differ.
@@ -66,7 +66,8 @@ public:
     glm::dvec3 geodeticSurfaceProjection(const glm::dvec3& p) const;
 
     glm::dvec3 geodeticSurfaceNormalForGeocentricallyProjectedPoint(const glm::dvec3& p) const;
-    glm::dvec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const;
+    glm::dvec3 geodeticSurfaceNormal(Geodetic2 geodetic2) const; 
+	glm::dvec3 geodeticSurfaceNorthPoleTangent(glm::dvec3 positionWorldSpace) const;
     
     const glm::dvec3& radii() const;
     const glm::dvec3& radiiSquared() const;
