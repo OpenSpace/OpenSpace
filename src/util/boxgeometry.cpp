@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,9 +46,9 @@ BoxGeometry::~BoxGeometry() {
 
 bool BoxGeometry::initialize() {
     // Initialize and upload to GPU
-    float x = _size.x * 0.5;
-    float y = _size.y * 0.5;
-    float z = _size.z * 0.5;
+    float x = _size.x * 0.5f;
+    float y = _size.y * 0.5f;
+    float z = _size.z * 0.5f;
 
     const GLfloat vertices[] = {
         -x, -y,  z, // blue corner

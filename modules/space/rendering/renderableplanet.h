@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,8 +35,9 @@
 
 #include <ghoul/opengl/textureunit.h>
 
-#include <vector>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace ghoul {
     namespace opengl {
@@ -93,7 +94,7 @@ private:
     
     properties::FloatProperty _heightExaggeration;
 
-    planetgeometry::PlanetGeometry* _geometry;
+    std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     properties::BoolProperty _performShading;
     properties::IntProperty _rotation;
     float _alpha;
@@ -111,6 +112,6 @@ private:
     bool tempPic;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__
+#endif // __OPENSPACE_MODULE_SPACE___RENDERABLEPLANET___H__

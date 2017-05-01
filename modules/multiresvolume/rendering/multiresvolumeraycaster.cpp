@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,7 @@
 #include <memory>
 
 #include <modules/multiresvolume/rendering/multiresvolumeraycaster.h>
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/bufferbinding.h>
 
@@ -47,7 +47,8 @@ namespace {
 
 namespace openspace {
 
-MultiresVolumeRaycaster::MultiresVolumeRaycaster(std::shared_ptr<TSP> tsp,
+MultiresVolumeRaycaster::MultiresVolumeRaycaster(
+    std::shared_ptr<TSP> tsp,
     std::shared_ptr<AtlasManager> atlasManager,
     std::shared_ptr<TransferFunction> transferFunction)
     : _tsp(tsp)
@@ -112,11 +113,9 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl:
     _atlasManager->textureAtlas().bind();
     program.setUniform("textureAtlas_" + id, _atlasUnit->unitNumber());
 
-    
     _atlasMapBinding = std::make_unique<ghoul::opengl::BufferBinding<ghoul::opengl::bufferbinding::Buffer::ShaderStorage>>();
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, _atlasMapBinding->bindingNumber(), _atlasManager->atlasMapBuffer());
     program.setSsboBinding("atlasMapBlock_" + id, _atlasMapBinding->bindingNumber());
-
     
     program.setUniform("gridType_" + id, static_cast<int>(_tsp->header().gridType_));
     program.setUniform("maxNumBricksPerAxis_" + id, static_cast<unsigned int>(_tsp->header().xNumBricks_));
@@ -155,7 +154,8 @@ bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data, glm::vec3& 
 }
 
 void MultiresVolumeRaycaster::postRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) {
-    // For example: release texture units
+    _atlasUnit = nullptr;
+    _tfUnit = nullptr;
 }
     
 std::string MultiresVolumeRaycaster::getBoundsVsPath() const {

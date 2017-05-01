@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,13 +25,22 @@
 #ifndef __OPENSPACE_CORE___MODULEENGINE___H__
 #define __OPENSPACE_CORE___MODULEENGINE___H__
 
-#include <openspace/util/openspacemodule.h>
-#include <openspace/scripting/scriptengine.h>
-
 #include <memory>
 #include <vector>
 
+#include <openspace/util/openspacemodule.h>
+
+namespace ghoul {
+namespace systemcapabilities {
+
+struct Version;
+
+} // namespace systemcapabilities
+} // namespace ghoul
+
 namespace openspace {
+
+namespace scripting { struct LuaLibrary; }
 
 /**
  * The ModuleEngine is the central repository for registering and accessing
@@ -80,8 +89,7 @@ public:
      * version of all registered modules' OpenGL versions.
      * \return The combined minimum OpenGL version
      */
-    ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
-        requiredOpenGLVersion() const;
+    ghoul::systemcapabilities::Version requiredOpenGLVersion() const;
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the

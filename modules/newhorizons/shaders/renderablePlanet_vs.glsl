@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,9 +44,16 @@ uniform mat4 modelViewProjectionTransform;
 uniform bool _hasHeightMap;
 uniform float _heightExaggeration;
 uniform sampler2D heightTexture;
+uniform bool shiftMeridian;
 
 void main() {
     vs_st = in_st;
+
+    vec2 st = in_st;
+    if (shiftMeridian) {
+        st.s += 0.5;
+    }
+
     vec4 tmp = in_position;
     
     // this is wrong for the normal. 
@@ -55,7 +62,7 @@ void main() {
     
 
     if (_hasHeightMap) {
-        float height = texture(heightTexture, in_st).r;
+        float height = texture(heightTexture, st).s;
         vec3 displacementDirection = (normalize(tmp.xyz));
         float displacementFactor = height * _heightExaggeration / 750.0;
         tmp.xyz = tmp.xyz + displacementDirection * displacementFactor;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,9 +36,11 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-#include <openspace/documentation/documentation.h>
+#include <memory>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 /**
  * The base class for screen space images and screen space framebuffers.
@@ -49,7 +51,7 @@ namespace openspace {
  */
 class ScreenSpaceRenderable : public properties::PropertyOwner {
 public:
-    static ScreenSpaceRenderable* createFromDictionary(
+    static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
@@ -66,7 +68,7 @@ public:
     glm::vec3 sphericalPosition() const;
     float depth() const;
     
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     void createPlane();

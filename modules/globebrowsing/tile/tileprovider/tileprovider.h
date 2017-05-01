@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,18 +27,21 @@
 
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/other/lrucache.h>
+#include <modules/globebrowsing/cache/lrucache.h>
+ 
+#include <openspace/properties/propertyowner.h>
 
 #include <vector>
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileprovider {
     
 /**
  * Interface for providing <code>Tile</code>s given a 
  * <code>TileIndex</code>. 
  */
-class TileProvider {
+class TileProvider : public properties::PropertyOwner {
 public:
     /**
      * Factory method for instantiating different implementations of 
@@ -46,12 +49,12 @@ public:
      * define a key specifying what implementation of TileProvider
      * to be instantiated.
      */
-    static TileProvider* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<TileProvider> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     /** 
-     * Empty default constructor 
+     * Default constructor. 
      */
-    TileProvider() = default;
+    TileProvider();
 
     /**
      * Implementations of the TileProvider interface must implement 
@@ -65,7 +68,10 @@ public:
      * Virtual destructor that subclasses should override to do
      * clean up.
      */
-    virtual ~TileProvider() { }
+    virtual ~TileProvider() = default;
+
+    virtual bool initialize();
+    virtual bool deinitialize() { return true; };
 
     /**
      * Method for querying tiles, given a specified <code>TileIndex</code>.
@@ -139,11 +145,22 @@ public:
      * \returns the no data value for the dataset. Default is the minimum float avalue.
      */
     virtual float noDataValueAsFloat();
+
+    /**
+     * \returns a unique identifier for the <code>TileProvider<\code>. All
+     * <code>TileProviders<\code> have an ID starting at 0 from the first created.
+     * The maximum number of unique identifiers is UINT_MAX 
+     */
+    unsigned int uniqueIdentifier() const;
+
+private:
+    static unsigned int _numTileProviders;
+    unsigned int _uniqueIdentifier;
+    bool _initialized;
 };
 
-using TileCache = LRUCache<TileHashKey, Tile>;
-
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/openspaceengine.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <memory>
 #include <ostream>
 
@@ -111,7 +111,7 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(clippingSpacePoints[0]), 0);
 
     // Draw the vertices
-    glDrawArrays(mode, 0, clippingSpacePoints.size());
+    glDrawArrays(mode, 0, static_cast<GLsizei>(clippingSpacePoints.size()));
 
     // Check for errors
     GLenum error = glGetError();
@@ -200,7 +200,7 @@ void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& ot
                                         RGBA rgba) const
 {
     using namespace glm;
-    dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
+//    dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
     dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
     dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
 
@@ -266,7 +266,7 @@ const DebugRenderer::Vertices DebugRenderer::verticesFor(
 
         vertices[i] = glm::vec4(x, y, z, 1);
     }
-    return std::move(vertices);
+    return vertices;
 }
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 

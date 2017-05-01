@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 
 namespace ghoul { namespace opengl {
 class ProgramObject;
-}}
+} }
 
 namespace openspace {
 namespace globebrowsing {
@@ -46,7 +46,6 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
     
 private:
     const RenderableGlobe& _owner;
@@ -59,4 +58,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___POINTGLOBE___H__

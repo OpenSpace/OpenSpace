@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <modules/globebrowsing/other/distanceswitch.h>
 
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -64,7 +65,8 @@ public:
         properties::BoolProperty resetTileProviders;
         properties::BoolProperty toggleEnabledEveryFrame;
         properties::BoolProperty collectStats;
-        properties::BoolProperty onlyModelSpaceRendering;
+        properties::BoolProperty limitLevelByAvailableData;
+        properties::IntProperty modelSpaceRenderingCutoffLevel;
     };
     
     struct GeneralProperties {
@@ -128,4 +130,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__

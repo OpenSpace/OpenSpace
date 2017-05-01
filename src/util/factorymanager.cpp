@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,15 +30,16 @@
 
 #include <iterator>
 #include <fstream>
+#include <sstream>
 
 namespace {
-    const std::string MainTemplateFilename = "${OPENSPACE_DATA}/web/factories/main.hbs";
-    const std::string FactoryTemplateFilename = "${OPENSPACE_DATA}/web/factories/factory.hbs";
-    const std::string HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
-    const std::string JsFilename = "${OPENSPACE_DATA}/web/factories/script.js";
-    const std::string BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const std::string CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
-}
+    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/factories/main.hbs";
+    const char* FactoryTemplateFilename = "${OPENSPACE_DATA}/web/factories/factory.hbs";
+    const char* HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
+    const char* JsFilename = "${OPENSPACE_DATA}/web/factories/script.js";
+    const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
+    const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
+} // namespace
 
 namespace openspace {
 

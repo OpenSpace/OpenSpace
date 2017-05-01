@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,7 @@ class DataProcessor{
     friend class IswaBaseGroup;
 public:
     DataProcessor();
-    ~DataProcessor();
+    virtual ~DataProcessor();
 
     virtual std::vector<std::string> readMetadata(std::string data, glm::size3_t& dimensions) = 0;
     virtual void addDataValues(std::string data, properties::SelectionProperty& dataOptions) = 0;
@@ -50,6 +50,7 @@ public:
     glm::vec2 filterValues();
 
     void clear();
+
 protected:
     float processDataPoint(float value, int option);
     float normalizeWithStandardScore(float value, float mean, float sd, glm::vec2 normalizationValues = glm::vec2(1.0f, 1.0f));
@@ -78,4 +79,4 @@ protected:
 
 } // namespace openspace
 
-#endif //__OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__
+#endif // __OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__

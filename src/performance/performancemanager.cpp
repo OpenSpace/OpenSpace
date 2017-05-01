@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -242,7 +242,7 @@ void PerformanceManager::storeScenePerformanceMeasurements(
     _performanceMemory->acquireLock();
     
     int nNodes = static_cast<int>(sceneNodes.size());
-    layout->nScaleGraphEntries = nNodes;
+    layout->nScaleGraphEntries = static_cast<int16_t>(nNodes);
     for (int i = 0; i < nNodes; ++i) {
         SceneGraphNode* node = sceneNodes[i];
 

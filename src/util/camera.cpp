@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2016                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2017                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 // open space includes
 #include <openspace/util/camera.h>
@@ -47,8 +47,8 @@ namespace openspace {
     const Camera::Vec3 Camera::_LOOKUP_VECTOR_CAMERA_SPACE = Camera::Vec3(0, 1, 0);
 
     Camera::Camera()
-        : _maxFov(0.f)
-        , _focusPosition()
+        : _focusPosition()
+        , _maxFov(0.f)
     {
 
         _scaling = glm::vec2(1.f, 0.f);
@@ -59,16 +59,16 @@ namespace openspace {
 
     Camera::Camera(const Camera& o)
         : sgctInternal(o.sgctInternal)
-        , _focusPosition(o._focusPosition)
-        , _cachedViewDirection(o._cachedViewDirection)
-        , _cachedLookupVector(o._cachedLookupVector)
         , _position(o._position)
         , _rotation(o._rotation)
         , _scaling(o._scaling)
+        , _focusPosition(o._focusPosition)
         , _maxFov(o._maxFov)
-    { }
+        , _cachedViewDirection(o._cachedViewDirection)
+        , _cachedLookupVector(o._cachedLookupVector)
+    {}
 
-    Camera::~Camera() { }
+    Camera::~Camera() {}
 
     // Mutators
     void Camera::setPositionVec3(Vec3 pos) {
@@ -103,10 +103,14 @@ namespace openspace {
         _cachedSinMaxFov.isDirty = true;
     }
 
+    void Camera::setParent(SceneGraphNode* parent) {
+        _parent = parent;
+    }
+
     // Relative mutators
     void Camera::rotate(Quat rotation) {
         std::lock_guard<std::mutex> _lock(_mutex);
-        _rotation = rotation * (glm::dquat)_rotation;
+        _rotation = rotation * static_cast<glm::dquat>(_rotation);
       
         _cachedViewDirection.isDirty = true;
         _cachedLookupVector.isDirty = true;
@@ -130,7 +134,7 @@ namespace openspace {
     const Camera::Vec3& Camera::viewDirectionWorldSpace() const {
         if (_cachedViewDirection.isDirty) {
             _cachedViewDirection.datum =
-                (glm::dquat)_rotation * Vec3(_VIEW_DIRECTION_CAMERA_SPACE);
+                static_cast<glm::dquat>(_rotation) * Vec3(_VIEW_DIRECTION_CAMERA_SPACE);
             _cachedViewDirection.datum = glm::normalize(_cachedViewDirection.datum);
             _cachedViewDirection.isDirty = true;
         }
@@ -144,7 +148,7 @@ namespace openspace {
     const Camera::Vec3& Camera::lookUpVectorWorldSpace() const {
         if (_cachedLookupVector.isDirty) {
             _cachedLookupVector.datum =
-               (glm::dquat)_rotation * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE);
+               static_cast<glm::dquat>(_rotation) * Vec3(_LOOKUP_VECTOR_CAMERA_SPACE);
             _cachedLookupVector.datum = glm::normalize(_cachedLookupVector.datum);
             _cachedLookupVector.isDirty = true;
         }
@@ -167,9 +171,13 @@ namespace openspace {
         return _cachedSinMaxFov.datum;
     }
 
+    SceneGraphNode * Camera::parent() const {
+        return _parent;
+    }
+
     const Camera::Mat4& Camera::viewRotationMatrix() const {
         if (_cachedViewRotationMatrix.isDirty) {
-            _cachedViewRotationMatrix.datum = glm::mat4_cast(glm::inverse((glm::dquat)_rotation));
+            _cachedViewRotationMatrix.datum = glm::mat4_cast(glm::inverse(static_cast<glm::dquat>(_rotation)));
         }
         return _cachedViewRotationMatrix.datum;
     }
@@ -181,7 +189,7 @@ namespace openspace {
     const Camera::Mat4& Camera::combinedViewMatrix() const {
         if (_cachedCombinedViewMatrix.isDirty) {
             Mat4 cameraTranslation =
-                glm::inverse(glm::translate(Mat4(1.0), (Vec3)_position));
+                glm::inverse(glm::translate(Mat4(1.0), static_cast<Vec3>(_position)));
             _cachedCombinedViewMatrix.datum =
                 Mat4(sgctInternal.viewMatrix()) *
                 Mat4(viewRotationMatrix()) *
@@ -266,11 +274,11 @@ namespace openspace {
     }
 
     psc Camera::position() const {
-        return psc((Vec3)_position);
+        return psc(static_cast<Vec3>(_position));
     }
 
     psc Camera::unsynchedPosition() const {
-        return psc((Vec3)_position);
+        return psc(static_cast<Vec3>(_position));
     }
 
     psc Camera::focusPosition() const {

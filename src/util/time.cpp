@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,8 +78,9 @@ Time Time::now() {
     Time now;
     time_t secondsSince1970;
     secondsSince1970 = time(nullptr);
-    time_t secondsInAYear = 365.25 * 24 * 60 * 60;
-    double secondsSince2000 = (double)(secondsSince1970 - 30*secondsInAYear);
+
+    const time_t secondsInAYear = static_cast<time_t>(365.25 * 24 * 60 * 60);
+    double secondsSince2000 = static_cast<double>(secondsSince1970 - 30 * secondsInAYear);
     now.setTime(secondsSince2000);
     return now;
 }

@@ -1,26 +1,26 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2016                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2017                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <modules/newhorizons/rendering/renderableplaneprojection.h>
 
@@ -51,8 +51,7 @@ namespace {
     const char* KeyName = "Name";
     const char* KeyTarget = "DefaultTarget";
     const char* GalacticFrame = "GALACTIC";
-    const double REALLY_FAR = 99999999999;
-}
+} // namespace
 
 namespace openspace {
 
@@ -65,8 +64,8 @@ RenderablePlaneProjection::RenderablePlaneProjection(const ghoul::Dictionary& di
     , _texture(nullptr)
     , _quad(0)
     , _vertexPositionBuffer(0)
-    , _name("ImagePlane")
     , _previousTime(0)
+    , _name("ImagePlane")
     , _moving(false)
     , _hasImage(false)
 {
@@ -169,7 +168,7 @@ void RenderablePlaneProjection::update(const UpdateData& data) {
 
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(_target.frame, GalacticFrame, time);
     
-    double timePast = abs(img.timeRange.start - _previousTime);
+    double timePast = std::abs(img.timeRange.start - _previousTime);
     
     std::string tex = _texturePath;
     if (_moving || _planeIsDirty)
@@ -249,7 +248,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     );
     // The apparent position, CN+S, makes image align best with target
 
-    for (int j = 0; j < bounds.size(); ++j) {
+    for (size_t j = 0; j < bounds.size(); ++j) {
         bounds[j] = SpiceManager::ref().frameTransformationMatrix(frame, GalacticFrame, currentTime) * bounds[j];
         glm::dvec3 cornerPosition = glm::proj(vecToTarget, bounds[j]);
 
@@ -265,8 +264,9 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     if (!_moving) {
         SceneGraphNode* thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_name);
         SceneGraphNode* newParent = OsEng.renderEngine().scene()->sceneGraphNode(_target.node);
-        if (thisNode != nullptr && newParent != nullptr)
-            thisNode->setParent(newParent);
+        if (thisNode && newParent) {
+            thisNode->setParent(*newParent);
+        }   
     }
     
     const GLfloat vertex_data[] = { // square of two triangles drawn within fov in target coordinates
@@ -312,29 +312,9 @@ void RenderablePlaneProjection::setTarget(std::string body) {
         return;
 
     std::vector<SceneGraphNode*> nodes = OsEng.renderEngine().scene()->allSceneGraphNodes();
-    Renderable* possibleTarget;
-    bool hasBody, found = false;
-    std::string targetBody;
 
     _target.body = body;
     _target.frame = openspace::SpiceManager::ref().frameFromBody(body);
-}
-
-std::string RenderablePlaneProjection::findClosestTarget(double currentTime) {
-
-    std::vector<std::string> targets;
-
-    std::vector<SceneGraphNode*> nodes = OsEng.renderEngine().scene()->allSceneGraphNodes();
-    Renderable* possibleTarget;
-    std::string targetBody;
-    bool hasBody, found = false;
-
-    PowerScaledScalar min = PowerScaledScalar::CreatePSS(REALLY_FAR);
-    PowerScaledScalar distance = PowerScaledScalar::CreatePSS(0.0);
-
-
-
-    return targetBody;
 }
 
 } // namespace openspace

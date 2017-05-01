@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,9 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/tile.h>
 
-#include <gdal_priv.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+#include <modules/globebrowsing/tile/tilemetadata.h>
 
 namespace {
     const std::string _loggerCat = "Tile";
@@ -33,92 +34,22 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-void TileMetaData::serialize(std::ostream& os) {
-    os << maxValues.size() << std::endl;
-    for (float f : maxValues) {
-        os << f << " ";
-    }
-    os << std::endl;
-    for (float f : minValues) {
-        os << f << " ";
-    }
-    os << std::endl;
-}
+const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavailable);
 
-TileMetaData TileMetaData::deserialize(std::istream& is) {
-    TileMetaData res;
-    int n; is >> n;
-    res.maxValues.resize(n);
-    for (int i = 0; i < n; i++) {
-        is >> res.maxValues[i];
-    }
-    res.minValues.resize(n);
-    for (int i = 0; i < n; i++) {
-        is >> res.minValues[i];
-    }
-
-    return std::move(res);
-}
-
-RawTile::RawTile()
-    : imageData(nullptr)
-    , dimensions(0, 0, 0)
-    , tileMetaData(nullptr)
-    , tileIndex(0, 0, 0)
-    , error(CE_None)
-    , nBytesImageData(0)
+Tile::Tile(std::shared_ptr<ghoul::opengl::Texture> texture,
+    std::shared_ptr<TileMetaData> metaData, Status status)
+    : MemoryAwareCacheable(
+        (sizeof(Tile) +
+        (metaData ? sizeof(TileMetaData) : 0) +
+        (texture ? sizeof(ghoul::opengl::Texture) + texture->expectedPixelDataSize() * 2 : 0))
+        // Multiply by two since double memory is used when creating mip maps.
+        / 1000 // Convert from bytes to kilobytes
+    )
+    , _texture(texture)
+    , _metaData(metaData)
+    , _status(status)
 {}
-        
-RawTile RawTile::createDefaultRes() {
-    RawTile defaultRes;
-    int w = 8;
-    int h = 8;
-    defaultRes.dimensions = glm::uvec3(w, h, 1);
-    defaultRes.nBytesImageData = w * h * 1 * 3 * 4; // assume max 3 channels, max 4 bytes per pixel
-    defaultRes.imageData = new char[defaultRes.nBytesImageData];
-    std::fill_n((char*)defaultRes.imageData, defaultRes.nBytesImageData, 0);
-    return std::move(defaultRes);
-}
 
-void RawTile::serializeMetaData(std::ostream& os) {
-    os << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
-    os << tileIndex.x << " " << tileIndex.y << " " << tileIndex.level << std::endl;
-    os << error << std::endl;
-
-    // preprocess data
-    os << (tileMetaData != nullptr) << std::endl;
-    if (tileMetaData != nullptr) {    
-        tileMetaData->serialize(os);
-    }
-        
-    os << nBytesImageData << std::endl;
-}
-
-RawTile RawTile::deserializeMetaData(std::istream& is) {
-    RawTile res;
-    is >> res.dimensions.x >> res.dimensions.y >> res.dimensions.z;
-    is >> res.tileIndex.x >> res.tileIndex.y >> res.tileIndex.level;
-    int err; is >> err; res.error = (CPLErr) err;
-        
-    res.tileMetaData = nullptr;
-    bool hastileMetaData; 
-    is >> hastileMetaData;
-    if (hastileMetaData) {
-        TileMetaData tileMetaData = TileMetaData::deserialize(is);
-        res.tileMetaData = std::make_shared<TileMetaData>(tileMetaData);
-    }
-        
-    is >> res.nBytesImageData;
-
-    char binaryDataSeparator;
-    is >> binaryDataSeparator; // not used
-        
-    char* buffer = new char[res.nBytesImageData]();
-    return std::move(res);
-}
-
-const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
-    
 Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
     using namespace ghoul::opengl;
         
@@ -142,13 +73,9 @@ Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
     texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
     // Create tile
-    Tile tile;
-    tile.status = Tile::Status::OK;
-    tile.metaData = nullptr;
-    tile.texture = texture;
-
+    Tile tile(texture, nullptr, Tile::Status::OK);
     return tile;
-}
+} 
 
 glm::vec2 Tile::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
                                                 glm::uvec2 resolution, glm::vec2 tileUV)
@@ -160,13 +87,13 @@ glm::vec2 Tile::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2
     return tileUV;
 }
 
-glm::vec2 Tile::TileUvToTextureSamplePosition(const TileUvTransform uvTransform,
+glm::vec2 Tile::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
                                               glm::vec2 tileUV, glm::uvec2 resolution)
 {
     glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
     uv = compensateSourceTextureSampling(
-        TileDataset::tilePixelStartOffset,
-        TileDataset::tilePixelSizeDifference,
+        RawTileDataReader::tilePixelStartOffset,
+        RawTileDataReader::tilePixelSizeDifference,
         resolution,
         uv);
     return uv;

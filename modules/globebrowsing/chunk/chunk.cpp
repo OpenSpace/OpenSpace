@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,11 @@
 
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileselector.h>
+#include <modules/globebrowsing/tile/tilemetadata.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
+
 
 namespace openspace {
 namespace globebrowsing {
@@ -58,84 +61,94 @@ bool Chunk::isVisible() const {
 }
 
 Chunk::Status Chunk::update(const RenderData& data) {
-    auto savedCamera = _owner.savedCamera();
+    const auto& savedCamera = _owner.savedCamera();
     const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
     RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
 
     _isVisible = true;
     if (_owner.chunkedLodGlobe()->testIfCullable(*this, myRenderData)) {
         _isVisible = false;
-        return Status::WANT_MERGE;
+        return Status::WantMerge;
     }
 
     int desiredLevel = _owner.chunkedLodGlobe()->getDesiredLevel(*this, myRenderData);
 
     if (desiredLevel < _tileIndex.level) {
-        return Status::WANT_MERGE;
+        return Status::WantMerge;
     }
     else if (_tileIndex.level < desiredLevel) {
-        return Status::WANT_SPLIT;
+        return Status::WantSplit;
     }
     else {
-        return Status::DO_NOTHING;
+        return Status::DoNothing;
     }
 }
 
 Chunk::BoundingHeights Chunk::getBoundingHeights() const {
-    BoundingHeights boundingHeights;
-    boundingHeights.max = 0;
-    boundingHeights.min = 0;
-    boundingHeights.available = false;
+    using ChunkTileSettingsPair = std::pair<ChunkTile, const LayerRenderSettings*>;
+
+    BoundingHeights boundingHeights {
+        0.f, 0.f,
+        false
+    };
 
     // In the future, this should be abstracted away and more easily queryable.
     // One must also handle how to sample pick one out of multiplte heightmaps
-    auto layerManager = owner().chunkedLodGlobe()->layerManager();
-       
+    std::shared_ptr<LayerManager> layerManager =
+        owner().chunkedLodGlobe()->layerManager();
+
     // The raster of a height map is the first one. We assume that the height map is
     // a single raster image. If it is not we will just use the first raster
     // (that is channel 0).
-    size_t HEIGHT_CHANNEL = 0;
+    const size_t HeightChannel = 0;
     const LayerGroup& heightmaps = layerManager->layerGroup(LayerManager::HeightLayers);
-    std::vector<ChunkTile> chunkTiles = TileSelector::getTilesSortedByHighestResolution(
-        heightmaps, _tileIndex
-    );
+    std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
+        tileselector::getTilesAndSettingsSortedByHighestResolution(
+            heightmaps, _tileIndex);
 
     bool lastHadMissingData = true;
-    for (auto chunkTile : chunkTiles) {
-        bool goodTile = chunkTile.tile.status == Tile::Status::OK;
-        bool hastileMetaData = chunkTile.tile.metaData != nullptr;
+    for (const ChunkTileSettingsPair& chunkTileSettingsPair : chunkTileSettingPairs) {
+        ChunkTile chunkTile = chunkTileSettingsPair.first;
+        const LayerRenderSettings* settings = chunkTileSettingsPair.second;
+        bool goodTile = (chunkTile.tile.status() == Tile::Status::OK);
+        bool hasTileMetaData = (chunkTile.tile.metaData() != nullptr);
 
-        if (goodTile && hastileMetaData) {
-            auto tileMetaData = chunkTile.tile.metaData;
+        if (goodTile && hasTileMetaData) {
+            std::shared_ptr<TileMetaData> tileMetaData = chunkTile.tile.metaData();
+
+            float minValue =
+                settings->performLayerSettings(tileMetaData->minValues[HeightChannel]);
+            float maxValue =
+                settings->performLayerSettings(tileMetaData->maxValues[HeightChannel]);
 
             if (!boundingHeights.available) {
-                if (tileMetaData->hasMissingData[HEIGHT_CHANNEL]) {
+                if (tileMetaData->hasMissingData[HeightChannel]) {
                     boundingHeights.min = std::min(
                         DEFAULT_HEIGHT,
-                        tileMetaData->minValues[HEIGHT_CHANNEL]
+                        minValue
                     );
                     boundingHeights.max = std::max(
                         DEFAULT_HEIGHT,
-                        tileMetaData->maxValues[HEIGHT_CHANNEL]
+                        maxValue
                     );
                 }
                 else {
-                    boundingHeights.min = tileMetaData->minValues[HEIGHT_CHANNEL];
-                    boundingHeights.max = tileMetaData->maxValues[HEIGHT_CHANNEL];
+                    boundingHeights.min = minValue;
+                    boundingHeights.max = maxValue;
                 }
                 boundingHeights.available = true;
             }
             else {
                 boundingHeights.min = std::min(
                     boundingHeights.min,
-                    tileMetaData->minValues[HEIGHT_CHANNEL]
+                    minValue
                 );
                 boundingHeights.max = std::max(
                     boundingHeights.max,
-                    tileMetaData->maxValues[HEIGHT_CHANNEL]
+                    maxValue
                 );
             }
-            lastHadMissingData = tileMetaData->hasMissingData[HEIGHT_CHANNEL];
+            lastHadMissingData = tileMetaData->hasMissingData[HeightChannel];
         }
 
         // Allow for early termination
@@ -192,7 +205,7 @@ std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
     double latDiff = latCloseToEquator - pGeodetic.lat;
 
     for (size_t i = 0; i < 8; ++i) {
-        Quad q = (Quad)(i % 4);
+        Quad q = static_cast<Quad>(i % 4);
         double cornerHeight = i < 4 ? minCornerHeight : maxCornerHeight;
         Geodetic3 cornerGeodetic = { patch.getCorner(q), cornerHeight };
             
@@ -204,6 +217,7 @@ std::vector<glm::dvec4> Chunk::getBoundingPolyhedronCorners() const {
 
         corners[i] = glm::dvec4(ellipsoid.cartesianPosition(cornerGeodetic), 1);
     }
+
     return corners;
 }
 

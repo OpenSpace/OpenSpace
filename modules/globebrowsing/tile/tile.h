@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,92 +26,68 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__
 
 #include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/globebrowsing/tile/tileuvtransform.h>
 
-#include <ghoul/opengl/texture.h>
+#include <modules/globebrowsing/cache/memoryawarecacheable.h>
 
-#include <cpl_error.h>
 #include <memory>
-#include <vector>
+
+namespace ghoul { namespace opengl {
+    class Texture;
+}}
 
 namespace openspace {
 namespace globebrowsing {
 
-struct TileMetaData {
-    std::vector<float> maxValues;
-    std::vector<float> minValues;
-    std::vector<bool> hasMissingData;
-
-    void serialize(std::ostream& s);
-    static TileMetaData deserialize(std::istream& s);
-};
-
-struct TextureFormat {
-    ghoul::opengl::Texture::Format ghoulFormat;
-    GLuint glFormat;
-};
-    
-using namespace ghoul::opengl;
-    
-struct RawTile {
-    RawTile();
-
-    char* imageData;
-    glm::uvec3 dimensions;
-    std::shared_ptr<TileMetaData> tileMetaData;
-    TileIndex tileIndex;
-    CPLErr error;
-    size_t nBytesImageData;
-
-    void serializeMetaData(std::ostream& s);
-    static RawTile deserializeMetaData(std::istream& s);
-   
-    static RawTile createDefaultRes();
-};
-
-struct TileUvTransform {
-    glm::vec2 uvOffset;
-    glm::vec2 uvScale;
-};
+struct TileMetaData;
+struct TileUvTransform;
 
 /**
  * Defines a status and may have a Texture and TileMetaData
  */
-struct Tile {
-    std::shared_ptr<Texture> texture;
-    std::shared_ptr<TileMetaData> metaData;
-
-    /**
+class Tile : public cache::MemoryAwareCacheable {
+public:
+     /**
      * Describe if this Tile is good for usage (OK) or otherwise
      * the reason why it is not.
      */
-    enum class Status { 
-        /** 
-         * E.g when texture data is not currently in memory. 
+    enum class Status {
+        /**
+         * E.g when texture data is not currently in memory.
          * texture and tileMetaData are both null
          */
-        Unavailable, 
+        Unavailable,
 
         /**
-         * Can be set by <code>TileProvider</code>s if the requested 
-         * <code>TileIndex</code> is undefined for that particular 
-         * provider. 
+         * Can be set by <code>TileProvider</code>s if the requested
+         * <code>TileIndex</code> is undefined for that particular
+         * provider.
          * texture and metaData are both null
          */
-        OutOfRange, 
+        OutOfRange,
 
         /**
          * An IO Error happend
          * texture and metaData are both null
          */
-        IOError, 
+        IOError,
 
         /**
          * The Texture is uploaded to the GPU and good for usage.
          * texture is defined. metaData may be defined.
          */
-        OK 
-    } status;
-        
+        OK
+    };
+    
+    Tile(std::shared_ptr<ghoul::opengl::Texture> texture,
+         std::shared_ptr<TileMetaData> metaData,
+         Status status);
+    ~Tile() = default;
+
+    std::shared_ptr<TileMetaData> metaData() const { return _metaData; };
+    Status status() const { return _status; };
+    std::shared_ptr<ghoul::opengl::Texture> texture() const { return _texture; };
+
     /**
      * Instantiates a new tile with a single color. 
      * 
@@ -122,22 +98,24 @@ struct Tile {
      * with the requested size and color
      */
     static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
-
     static glm::vec2 compensateSourceTextureSampling(glm::vec2 startOffset, 
         glm::vec2 sizeDiff, glm::uvec2 resolution, glm::vec2 tileUV);
-
-    static glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform uvTransform,
+    static glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
         glm::vec2 tileUV, glm::uvec2 resolution);
-
     /**
-     * A tile with status unavailable that any user can return to 
-     * indicate that a tile was unavailable.
-     */
+    * A tile with status unavailable that any user can return to
+    * indicate that a tile was unavailable.
+    */
     static const Tile TileUnavailable;
+
+private:
+    std::shared_ptr<ghoul::opengl::Texture> _texture;
+    std::shared_ptr<TileMetaData> _metaData;
+    Status _status;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE___H__

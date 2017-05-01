@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,11 @@
 #ifndef __OPENSPACE_CORE___TIMERANGE___H__
 #define __OPENSPACE_CORE___TIMERANGE___H__
 
-#include <openspace/documentation/documentation.h>
-
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 struct TimeRange {
 
@@ -70,7 +70,7 @@ struct TimeRange {
 
     bool includes(const TimeRange& o) const;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
     double start;
     double end;
@@ -78,4 +78,4 @@ struct TimeRange {
 
 } // namespace openspace
 
-#endif //__OPENSPACE_CORE___TIMERANGE___H__
+#endif // __OPENSPACE_CORE___TIMERANGE___H__

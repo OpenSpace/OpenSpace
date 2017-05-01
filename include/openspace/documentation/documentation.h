@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,13 @@
 #define __OPENSPACE_CORE___DOCUMENTATION___H__
 
 #include <ghoul/misc/boolean.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 
 #include <memory>
 #include <string>
 #include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 namespace documentation {
@@ -304,10 +305,6 @@ void testSpecificationAndThrow(const Documentation& documentation,
 
 } // namespace documentation
 
-// We want to make it easier for people to use it, so we pull the Documentation class into
-// the openspace namespace
-using documentation::Documentation;
-
 } // namespace openspace
 
 // Make the overload for std::to_string available for the Offense::Reason for easier
@@ -316,6 +313,7 @@ using documentation::Documentation;
 namespace std {
 
 std::string to_string(openspace::documentation::TestResult::Offense::Reason reason);
+std::string to_string(openspace::documentation::TestResult::Warning::Reason reason);
 
 } // namespace std
 

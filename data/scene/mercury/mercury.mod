@@ -22,7 +22,7 @@ return {
             Body = "MERCURY",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 2.440, 6 },
+                Radius = 2.4397E6,
                 Segments = 100
             },
             Textures = {
@@ -35,6 +35,7 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
+        Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
@@ -60,7 +61,8 @@ return {
             },
             Color = {0.6, 0.5, 0.5 },
             Period = 87.968,
-            Resolution = 100
+            Resolution = 100,
+            Tag = {"planetTrail_solarSystem", "planetTrail_terrestrial"}
         }
     }
 }

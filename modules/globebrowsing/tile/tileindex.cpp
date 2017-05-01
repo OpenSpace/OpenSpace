@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 
 #include <ghoul/misc/dictionary.h>
+
+#include <sstream>
 
 namespace {
     const char* KeyLevel = "Level";
@@ -122,7 +124,7 @@ Creates a hash which can be used as key in hash maps.
 +-------+------------+-------+------------+
      
 */
-TileHashKey TileIndex::hashKey() const {
+TileIndex::TileHashKey TileIndex::hashKey() const {
     TileHashKey key = 0LL;
     key |= level;
     key |= x << 5;

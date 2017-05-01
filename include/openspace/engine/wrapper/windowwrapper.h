@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___WINDOWWRAPPER___H__
 #define __OPENSPACE_CORE___WINDOWWRAPPER___H__
 
+#include <openspace/properties/propertyowner.h>
+
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
 
@@ -42,8 +44,11 @@ namespace scripting { struct LuaLibrary; }
  * Every new windowing framework needs to have its own WindowWrapper subclass exposing the
  * required features.
  */
-class WindowWrapper {
+class WindowWrapper : public properties::PropertyOwner {
 public:
+    /// Default constructor
+    WindowWrapper();
+
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
     * windowing system.
@@ -175,6 +180,13 @@ public:
      * \return Whether the current rendering window is GUI-only
      */
     virtual bool isGuiWindow() const;
+    
+    /**
+     * Returns <code>true</code> if this application is the master for a clustered
+     * environment.
+     * \return Whether this applicaiton is the master for a clustered environment.
+     */
+    virtual bool isMaster() const;
 
     /**
     * Returns <code>true</code> if the current rendering window is using swap groups.

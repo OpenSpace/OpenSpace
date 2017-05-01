@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2015                                                                    *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,7 @@ class Histogram {
 public:
     Histogram();
     Histogram(float minValue, float maxValue, int numBins);
-    Histogram(float minValue, float maxValue, int numBins, float *data);
+    Histogram(float minValue, float maxValue, int numBins, float* data);
     Histogram(Histogram&& other);
     ~Histogram();
 
@@ -90,4 +90,4 @@ private:
 
 }  // namespace openspace
 
-#endif //__OPENSPACE_CORE___HISTOGRAM___H__
+#endif // __OPENSPACE_CORE___HISTOGRAM___H__

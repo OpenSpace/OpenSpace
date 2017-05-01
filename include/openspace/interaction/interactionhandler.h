@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 #define __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 
-#include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/propertyowner.h>
@@ -66,6 +65,7 @@ public:
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
     void setInteractionMode(const std::string& interactionModeKey);
+    InteractionMode* interactionMode();
     
     void goToChunk(int x, int y, int level);
     void goToGeo(double latitude, double longitude);
@@ -73,7 +73,9 @@ public:
     void resetKeyBindings();
 
     void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
+    void removeKeyframesAfter(double timestamp);
     void clearKeyframes();
+    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
     void bindKeyLocal(
         Key key,
@@ -96,8 +98,10 @@ public:
 
     // Accessors
     ghoul::Dictionary getCameraStateDictionary();
-    SceneGraphNode* const focusNode() const;
-    Camera* const camera() const;
+    SceneGraphNode* focusNode() const;
+    glm::dvec3 focusNodeToCameraVector() const;
+    glm::quat focusNodeToCameraRotation() const;
+    Camera* camera() const;
     const InputState& inputState() const;
 
     /**
@@ -144,7 +148,6 @@ private:
 
     // Properties
     properties::StringProperty _origin;
-    properties::StringProperty _coordinateSystem;
 
     properties::BoolProperty _rotationalFriction;
     properties::BoolProperty _horizontalFriction;

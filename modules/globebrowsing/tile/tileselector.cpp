@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,23 +24,25 @@
 
 #include <modules/globebrowsing/tile/tileselector.h>
 
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
 namespace openspace {
 namespace globebrowsing {
+namespace tileselector {
 
-ChunkTile TileSelector::getHighestResolutionTile(const LayerGroup& layerGroup,
-                                                 TileIndex tileIndex)
-{
-    ChunkTile mostHighResolution;
+ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup, const TileIndex& tileIndex) {
+    TileUvTransform uvTransform;
+    uvTransform.uvScale.x = 0;
+    ChunkTile mostHighResolution{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
     mostHighResolution.tile = Tile::TileUnavailable;
-    mostHighResolution.uvTransform.uvScale.x = 0;
+    
 
     for (const auto& layer : layerGroup.activeLayers()) {
         ChunkTile chunkTile = layer->tileProvider()->getChunkTile(tileIndex);
-        bool tileIsOk = chunkTile.tile.status == Tile::Status::OK;
-        bool tileHasMetaData = chunkTile.tile.metaData != nullptr;
+        bool tileIsOk = chunkTile.tile.status() == Tile::Status::OK;
+        bool tileHasMetaData = chunkTile.tile.metaData() != nullptr;
         bool tileIsHigherResolution =
             chunkTile.uvTransform.uvScale.x > mostHighResolution.uvTransform.uvScale.x;
         if (tileIsOk && tileHasMetaData && tileIsHigherResolution) {
@@ -51,9 +53,8 @@ ChunkTile TileSelector::getHighestResolutionTile(const LayerGroup& layerGroup,
     return mostHighResolution;
 }
 
-std::vector<ChunkTile> TileSelector::getTilesSortedByHighestResolution(
-                                                             const LayerGroup& layerGroup,
-                                                               const TileIndex& tileIndex)
+std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup& layerGroup,
+                                                         const TileIndex& tileIndex)
 {
     std::vector<ChunkTile> tiles;
     for (const auto& layer : layerGroup.activeLayers()) {
@@ -71,7 +72,29 @@ std::vector<ChunkTile> TileSelector::getTilesSortedByHighestResolution(
     return tiles;
 }
 
-void TileSelector::ascendToParent(TileIndex& tileIndex, TileUvTransform& uv) {
+
+std::vector<std::pair<ChunkTile, const LayerRenderSettings*> >
+getTilesAndSettingsSortedByHighestResolution(const LayerGroup& layerGroup,
+    const TileIndex& tileIndex)
+{
+    std::vector<std::pair<ChunkTile, const LayerRenderSettings*> > tilesAndSettings;
+    for (const auto& layer : layerGroup.activeLayers()) {
+        tilesAndSettings.push_back({ layer->tileProvider()->getChunkTile(tileIndex), &layer->renderSettings() });
+    }
+    std::sort(
+        tilesAndSettings.begin(),
+        tilesAndSettings.end(),
+        [](const std::pair<ChunkTile, const LayerRenderSettings*> & lhs,
+            const std::pair<ChunkTile, const LayerRenderSettings*> & rhs)
+        {
+            return lhs.first.uvTransform.uvScale.x > rhs.first.uvTransform.uvScale.x;
+        }
+    );
+    
+    return tilesAndSettings;
+}
+
+void ascendToParent(TileIndex& tileIndex, TileUvTransform& uv) {
     uv.uvOffset *= 0.5;
     uv.uvScale *= 0.5;
 
@@ -80,5 +103,6 @@ void TileSelector::ascendToParent(TileIndex& tileIndex, TileUvTransform& uv) {
     --tileIndex;
 }
 
+} // namespace tileselector¢
 } // namespace globebrowsing
 } // namespace openspace

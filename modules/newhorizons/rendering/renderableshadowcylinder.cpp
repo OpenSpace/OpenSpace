@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,8 +34,6 @@
 
 
 namespace {
-    const std::string _loggerCat      = "RenderablePlane";
-    
     const char* KeyType        = "TerminatorType";
     const char* KeyLightSource = "LightSource";
     const char* KeyObserver    = "Observer";
@@ -50,7 +48,7 @@ namespace openspace {
 RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _numberOfPoints("amountOfPoints", "Points", 190, 1, 300)
-    , _shadowLength("shadowLength", "Shadow Length", 0.1, 0.0, 0.5)
+    , _shadowLength("shadowLength", "Shadow Length", 0.1f, 0.0f, 0.5f)
     , _shadowColor("shadowColor", "Shadow Color",
                    glm::vec4(1.f, 1.f, 1.f, 0.25f), glm::vec4(0.f), glm::vec4(1.f))
     , _shader(nullptr)

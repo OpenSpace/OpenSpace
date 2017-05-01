@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,6 @@
 
 #include <modules/newhorizons/util/projectioncomponent.h>
 
-#include <openspace/documentation/documentation.h>
 #include <modules/newhorizons/util/imagesequencer.h>
 
 #include <openspace/properties/stringproperty.h>
@@ -43,6 +42,7 @@ class Texture;
 }
 
 namespace openspace {
+namespace documentation { struct Documentation; } 
 
 struct RenderData;
 struct UpdateData;
@@ -66,7 +66,7 @@ public:
 
     ghoul::opengl::Texture& baseTexture() const;
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     bool loadTextures();
@@ -110,4 +110,4 @@ private:
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEMODELPROJECTION___H__
+#endif // __OPENSPACE_MODULE_NEWHORIZONS___RENDERABLEMODELPROJECTION___H__

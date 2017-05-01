@@ -1,41 +1,38 @@
 /*****************************************************************************************
-*                                                                                       *
-* OpenSpace                                                                             *
-*                                                                                       *
-* Copyright (c) 2014-2016                                                               *
-*                                                                                       *
-* Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
-* software and associated documentation files (the "Software"), to deal in the Software *
-* without restriction, including without limitation the rights to use, copy, modify,    *
-* merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
-* permit persons to whom the Software is furnished to do so, subject to the following   *
-* conditions:                                                                           *
-*                                                                                       *
-* The above copyright notice and this permission notice shall be included in all copies *
-* or substantial portions of the Software.                                              *
-*                                                                                       *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
-* INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
-* PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
-* CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
-* OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
-****************************************************************************************/
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2017                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
 
 #include <openspace/util/timemanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/time.h>
-
-namespace {
-    double SecondsOffTolerance = 0.1;
-}
+#include <openspace/network/parallelconnection.h>
 
 namespace openspace {
 
 using datamessagestructures::TimeKeyframe;
 
 void TimeManager::preSynchronization(double dt) {
-    double now = OsEng.runTime();
+//    double now = OsEng.runTime();
     removeKeyframesBefore(_latestConsumedTimestamp);
     if (_keyframes.size() == 0) {
         Time::ref().advanceTime(dt);
@@ -96,8 +93,10 @@ void TimeManager::consumeKeyframes(double dt) {
             return;
         }
 
+        const double secondsOffTolerance = OsEng.parallelConnection().timeTolerance();
+
         double predictedTime = time.j2000Seconds() + time.deltaTime() * (next._timestamp - now);
-        bool withinTolerance = std::abs(predictedTime - next._time) < std::abs(next._dt * SecondsOffTolerance);
+        bool withinTolerance = std::abs(predictedTime - next._time) < std::abs(next._dt * secondsOffTolerance);
         
         if (next._dt == time.deltaTime() && withinTolerance) {
             Time::ref().advanceTime(dt);
@@ -121,6 +120,7 @@ void TimeManager::consumeKeyframes(double dt) {
 
         time.setDeltaTime(y1Prime);
         time.setTime(y1, false);
+        // std::cout << "Correcting time to " << y1 << ", dt=" << y1Prime << "." << std::endl;
     }
 }
 
@@ -131,6 +131,13 @@ void TimeManager::addKeyframe(const TimeKeyframe& kf) {
     }
     auto iter = std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, &TimeManager::compareKeyframeTimes);
     _keyframes.insert(iter, kf);
+}
+
+void TimeManager::removeKeyframesAfter(double timestamp) {
+    datamessagestructures::TimeKeyframe kf;
+    kf._timestamp = timestamp;
+    auto iter = std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, &TimeManager::compareKeyframeTimes);
+    _keyframes.erase(iter, _keyframes.end());
 }
 
 
@@ -145,8 +152,11 @@ void TimeManager::clearKeyframes() {
     _keyframes.clear();
 }
 
-bool TimeManager::compareKeyframeTimes(const TimeKeyframe& a, const TimeKeyframe& b)
-{
+const std::deque<datamessagestructures::TimeKeyframe>& TimeManager::keyframes() const {
+    return _keyframes;
+}
+
+bool TimeManager::compareKeyframeTimes(const TimeKeyframe& a, const TimeKeyframe& b) {
     return a._timestamp < b._timestamp;
 }
 

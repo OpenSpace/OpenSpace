@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,15 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
 namespace openspace {
 namespace globebrowsing {
 
 class AsyncTileDataProvider;
+struct RawTile;
+    
+namespace tileprovider {
 
 /**
 * Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
@@ -41,8 +45,7 @@ public:
     CachingTileProvider(const ghoul::Dictionary& dictionary);
 
     CachingTileProvider(
-        std::shared_ptr<AsyncTileDataProvider> tileReader, 
-        std::shared_ptr<TileCache> tileCache,
+        std::shared_ptr<AsyncTileDataProvider> tileReader,
         int framesUntilFlushRequestQueue);
 
     virtual ~CachingTileProvider();
@@ -84,7 +87,7 @@ private:
     void clearRequestQueue();
 
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    std::shared_ptr<TileCache> _tileCache;
+    //std::shared_ptr<TileCache> _tileCache;
 
     int _framesSinceLastRequestFlush;
     int _framesUntilRequestFlush;
@@ -92,7 +95,8 @@ private:
     Tile _defaultTile;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__

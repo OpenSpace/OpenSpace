@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,6 +45,9 @@ int loadKernel(lua_State* L) {
     }
 
     std::string argument = lua_tostring(L, -1);
+    if (!FileSys.fileExists(argument)) {
+        return luaL_error(L, "Kernel file '%s' did not exist", argument.c_str());
+    }
     unsigned int result = SpiceManager::ref().loadKernel(argument);
 
     lua_pushnumber(L, result);
@@ -75,13 +78,14 @@ int unloadKernel(lua_State* L) {
     if (isString) {
         std::string argument = lua_tostring(L, -1);
         SpiceManager::ref().unloadKernel(argument);
-        return 0;
     }
 
     if (isNumber) {
         unsigned int argument = static_cast<unsigned int>(lua_tonumber(L, -1));
         SpiceManager::ref().unloadKernel(argument);
     }
+
+    return 0;
 }
 
 } // luascriptfunctions

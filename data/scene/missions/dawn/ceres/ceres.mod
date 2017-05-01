@@ -10,7 +10,7 @@ return {
             Body = "CERES",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 6.390, 5 },
+                Radius = 6.390E5,
                 Segments = 100
             },
             Textures = {

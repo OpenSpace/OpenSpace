@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -92,6 +92,8 @@ public:
 private:
     /// The list of all Documentation%s that are stored by the DocumentationEngine
     std::vector<Documentation> _documentations;
+
+    static DocumentationEngine* _instance;
 };
 
 } // namespace documentation

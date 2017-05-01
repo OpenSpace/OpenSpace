@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014                                                                    *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,8 @@
 // Must match the values in tiledataset.cpp
 // (could be set as shader preprocessing data so that multiple definitions
 // are not needed)
-#define TILE_PIXEL_START_OFFSET ivec2(-2)
-#define TILE_PIXEL_SIZE_DIFFERENCE ivec2(4)
+#define TILE_PIXEL_START_OFFSET #{tilePaddingStart}
+#define TILE_PIXEL_SIZE_DIFFERENCE #{tilePaddingSizeDiff}
 
 vec4 patchBorderOverlay(vec2 uv, vec3 borderColor, float borderSize) {
 	vec2 uvOffset = uv - vec2(0.5);
@@ -87,7 +87,7 @@ vec2 compensateSourceTextureSampling(vec2 startOffset, vec2 sizeDiff, const Chun
 
 vec2 TileUVToTextureSamplePosition(const ChunkTile chunkTile, vec2 tileUV){
 	vec2 uv = chunkTile.uvTransform.uvOffset + chunkTile.uvTransform.uvScale * tileUV;
-	uv = compensateSourceTextureSampling(vec2(-2), vec2(4), chunkTile, uv);
+	uv = compensateSourceTextureSampling(TILE_PIXEL_START_OFFSET, TILE_PIXEL_SIZE_DIFFERENCE, chunkTile, uv);
 	return uv;
 }
 

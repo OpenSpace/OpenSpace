@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <modules/onscreengui/include/guiorigincomponent.h>
 #include <modules/onscreengui/include/guitimecomponent.h>
 #include <modules/onscreengui/include/guiiswacomponent.h>
+#include <modules/onscreengui/include/guiparallelcomponent.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/properties/property.h>
 
@@ -44,7 +45,6 @@ namespace gui {
 class GUI : public GuiComponent {
 public:
     GUI();
-    ~GUI();
 
     void initialize();
     void deinitialize();
@@ -70,8 +70,10 @@ public:
     GuiPropertyComponent _globalProperty;
     GuiPropertyComponent _property;
     GuiPropertyComponent _screenSpaceProperty;
+    GuiPropertyComponent _virtualProperty;
     GuiTimeComponent _time;
     GuiIswaComponent _iswa;
+    GuiParallelComponent _parallel;
 
 private:
     void renderAndUpdatePropertyVisibility();

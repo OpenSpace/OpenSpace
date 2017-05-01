@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2015                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -77,7 +77,7 @@ void TransferFunction::setPath(const std::string& filepath) {
     _filepath = f;
     _file = std::make_unique<ghoul::filesystem::File>(filepath, ghoul::filesystem::File::RawPath::Yes);
     _needsUpdate = true;
-    _file->setCallback([this](const ghoul::filesystem::File& file) {
+    _file->setCallback([this](const ghoul::filesystem::File&) {
         _needsUpdate = true;
     });
 }

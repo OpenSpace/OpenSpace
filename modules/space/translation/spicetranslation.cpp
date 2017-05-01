@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,12 +24,13 @@
 
 #include <modules/space/translation/spicetranslation.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/filesystem/filesystem.h>
-
-#include <openspace/documentation/verifier.h>
 
 namespace {
     const char* KeyBody = "Body";
@@ -38,11 +39,11 @@ namespace {
     const char* KeyKernels = "Kernels";
 
     const char* DefaultReferenceFrame = "GALACTIC";
-}
+} // namespace
 
 namespace openspace {
     
-Documentation SpiceTranslation::Documentation() {
+documentation::Documentation SpiceTranslation::Documentation() {
     using namespace openspace::documentation;
 
     return{

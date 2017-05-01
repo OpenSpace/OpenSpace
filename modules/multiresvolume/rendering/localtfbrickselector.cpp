@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -91,7 +91,7 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
         unsigned int brickIndex = bs.brickIndex;
         priorityQueue.pop_back();
         if (bs.splitType == BrickSelection::SplitType::Temporal) {
-            int timeSpanCenter = bs.centerT();
+//            int timeSpanCenter = bs.centerT();
             unsigned int childBrickIndex;
             bool pickRightTimeChild = bs.timestepInRightChild(timestep);
 

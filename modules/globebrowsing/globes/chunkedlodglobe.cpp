@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,19 +25,27 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 #include <modules/globebrowsing/chunk/chunk.h>
-#include <modules/globebrowsing/chunk/chunklevelevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/chunklevelevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/availabletiledataevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/distanceevaluator.h>
+#include <modules/globebrowsing/chunk/chunklevelevaluator/projectedareaevaluator.h>
 #include <modules/globebrowsing/chunk/chunknode.h>
-#include <modules/globebrowsing/chunk/culling.h>
+#include <modules/globebrowsing/chunk/culling/chunkculler.h>
+#include <modules/globebrowsing/chunk/culling/frustumculler.h>
+#include <modules/globebrowsing/chunk/culling/horizonculler.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/meshes/skirtedgrid.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/rendering/chunkrenderer.h>
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/debugging/rendering/debugrenderer.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 
 #include <openspace/util/time.h>
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/texture.h>
 
 #include <math.h>
 
@@ -66,17 +74,17 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
         TriangleSoup::Normals::No
     );
 
-    _chunkCullers.push_back(std::make_unique<HorizonCuller>());
-    _chunkCullers.push_back(std::make_unique<FrustumCuller>(
+    _chunkCullers.push_back(std::make_unique<culling::HorizonCuller>());
+    _chunkCullers.push_back(std::make_unique<culling::FrustumCuller>(
         AABB3(glm::vec3(-1, -1, 0), glm::vec3(1, 1, 1e35)))
     );
 
     _chunkEvaluatorByAvailableTiles = 
-        std::make_unique<EvaluateChunkLevelByAvailableTileData>();
+        std::make_unique<chunklevelevaluator::AvailableTileData>();
     _chunkEvaluatorByProjectedArea =
-        std::make_unique<EvaluateChunkLevelByProjectedArea>();
+    std::make_unique<chunklevelevaluator::ProjectedArea>();
     _chunkEvaluatorByDistance =
-        std::make_unique<EvaluateChunkLevelByDistance>();
+    std::make_unique<chunklevelevaluator::Distance>();
 
     _renderer = std::make_unique<ChunkRenderer>(geometry, layerManager);
 }
@@ -135,7 +143,8 @@ int ChunkedLodGlobe::getDesiredLevel(
     int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
         chunk, renderData
     );
-    if (desiredLevelByAvailableData != ChunkLevelEvaluator::UNKNOWN_DESIRED_LEVEL) {
+    if (desiredLevelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel &&
+        _owner.debugProperties().limitLevelByAvailableData) {
         desiredLevel = glm::min(desiredLevel, desiredLevelByAvailableData);
     }
 
@@ -166,20 +175,20 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
     const auto& heightMapLayers = _layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
         
     for (const auto& layer : heightMapLayers) {
-        TileProvider* tileProvider = layer->tileProvider();
+        tileprovider::TileProvider* tileProvider = layer->tileProvider();
         // Transform the uv coordinates to the current tile texture
         ChunkTile chunkTile = tileProvider->getChunkTile(tileIndex);
         const auto& tile = chunkTile.tile;
         const auto& uvTransform = chunkTile.uvTransform;
         const auto& depthTransform = tileProvider->depthTransform();
-        if (tile.status != Tile::Status::OK) {
+        if (tile.status() != Tile::Status::OK) {
             return 0;
         }
 
         glm::vec2 transformedUv = Tile::TileUvToTextureSamplePosition(
             uvTransform,
             patchUV,
-            glm::uvec2(tile.texture->dimensions())
+            glm::uvec2(tile.texture()->dimensions())
         );
 
         // Sample and do linear interpolation
@@ -187,7 +196,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
         // Suggestion: a function in ghoul::opengl::Texture that takes uv coordinates
         // in range [0,1] and uses the set interpolation method and clamping.
 
-        glm::uvec3 dimensions = tile.texture->dimensions();
+        glm::uvec3 dimensions = tile.texture()->dimensions();
             
         glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
         glm::uvec2 samplePos00 = samplePos;
@@ -211,10 +220,10 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             glm::uvec2(dimensions) - glm::uvec2(1)
         );
 
-        float sample00 = tile.texture->texelAsFloat(samplePos00).x;
-        float sample10 = tile.texture->texelAsFloat(samplePos10).x;
-        float sample01 = tile.texture->texelAsFloat(samplePos01).x;
-        float sample11 = tile.texture->texelAsFloat(samplePos11).x;
+        float sample00 = tile.texture()->texelAsFloat(samplePos00).x;
+        float sample10 = tile.texture()->texelAsFloat(samplePos10).x;
+        float sample01 = tile.texture()->texelAsFloat(samplePos01).x;
+        float sample11 = tile.texture()->texelAsFloat(samplePos11).x;
 
         // In case the texture has NaN or no data values don't use this height map.
         bool anySampleIsNaN =
@@ -240,6 +249,10 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
 
         // Perform depth transform to get the value in meters
         height = depthTransform.depthOffset + depthTransform.depthScale * sample;
+        // Make sure that the height value follows the layer settings.
+        // For example if the multiplier is set to a value bigger than one,
+        // the sampled height should be modified as well.
+        height = layer->renderSettings().performLayerSettings(height);
     }
     // Return the result
     return height;
@@ -268,7 +281,6 @@ void ChunkedLodGlobe::render(const RenderData& data) {
             stats.i["leafs chunk nodes"]++;
             if (chunk.isVisible()) {
                 stats.i["rendered chunks"]++;
-                double t0 = Time::now().j2000Seconds();
                 _renderer->renderChunk(chunkNode.getChunk(), data);
                 debugRenderChunk(chunk, mvp);
             }

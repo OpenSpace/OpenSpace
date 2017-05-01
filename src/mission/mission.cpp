@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,15 +30,15 @@
 #include <ghoul/lua/lua_helper.h>
 
 namespace {
-    const std::string KeyName = "Name";
-    const std::string KeyDescription = "Description";
-    const std::string KeyPhases = "Phases";
-    const std::string KeyTimeRange = "TimeRange";
+    const char* KeyName = "Name";
+    const char* KeyDescription = "Description";
+    const char* KeyPhases = "Phases";
+    const char* KeyTimeRange = "TimeRange";
 }
 
 namespace openspace {
 
-Documentation MissionPhase::Documentation() {
+documentation::Documentation MissionPhase::Documentation() {
     using namespace documentation;
 
     return {
@@ -159,7 +159,7 @@ MissionPhase::Trace MissionPhase::phaseTrace(double time, int maxDepth) const {
         trace.push_back(std::cref(*this));
         phaseTrace(time, trace, maxDepth);
     }
-    return std::move(trace);
+    return trace;
 }
 
 void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
@@ -188,7 +188,11 @@ Mission missionFromFile(std::string filename) {
     ghoul::Dictionary missionDict;
     ghoul::lua::loadDictionaryFromFile(filename, missionDict);
 
-    documentation::testSpecificationAndThrow(Documentation(), missionDict, "Mission");
+    documentation::testSpecificationAndThrow(
+        MissionPhase::Documentation(),
+        missionDict,
+        "Mission"
+    );
 
     return MissionPhase(missionDict);
 }

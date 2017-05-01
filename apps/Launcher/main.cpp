@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -82,18 +82,17 @@ QCheckBox::indicator {
 }
 QCheckBox::indicator::unchecked {
     border: 1px solid #5A5A5A;
-    background: transparent;
+    background: #A0A0A0;
 }
 QCheckBox::indicator:unchecked:hover {
     border: 1px solid #DDDDDD;
 }
 QCheckBox::indicator::checked {
-    border: 1px solid #AAAAAA;
-    background: #666666;
+    border: 1px solid #5A5A5A;
+    background: #5AB65A;
 }
 QCheckBox::indicator:checked:hover {
     border: 1px solid #DDDDDD;
-    background: #555555;
 }
 QGroupBox, QScrollArea {
     border: 0px;

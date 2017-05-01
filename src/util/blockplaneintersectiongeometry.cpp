@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,15 +26,13 @@
 
 #include <ghoul/logging/logmanager.h>
 
-#include <glm/glm.hpp>
+#include <ghoul/glm.h>
 #include <vector>
 #include <algorithm>
 
 namespace {
-const std::string _loggerCat = "BlockPlaneIntersectionGeometry";
-}
-
-
+    const char* _loggerCat = "BlockPlaneIntersectionGeometry";
+} // namespace
 
 namespace openspace {
 
@@ -171,7 +169,7 @@ bool BlockPlaneIntersectionGeometry::initialize() {
 void BlockPlaneIntersectionGeometry::render() {
     glBindVertexArray(_vaoId);
     //glDisable(GL_CULL_FACE);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, _vertices.size() / 3);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<GLsizei>(_vertices.size() / 3));
     //glEnable(GL_CULL_FACE);
 }
 

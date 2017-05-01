@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,27 +24,32 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <openspace/documentation/documentation.h>
+
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logmanager.h>
 
 #include <algorithm>
 
 namespace {
-    const std::string _loggerCat = "OpenSpaceModule";
-    const std::string ModuleBaseToken = "MODULE_";
+    const char* _loggerCat = "OpenSpaceModule";
+    const char* ModuleBaseToken = "MODULE_";
 }
 
 namespace openspace {
 
-OpenSpaceModule::OpenSpaceModule(std::string name) {
-    ghoul_assert(!name.empty(), "Name must not be empty");
-    
-    setName(name);
-}
+OpenSpaceModule::OpenSpaceModule(std::string name) 
+    : properties::PropertyOwner(std::move(name))
+{}
 
 void OpenSpaceModule::initialize() {
     std::string upperName = name();
-    std::transform(upperName.begin(), upperName.end(), upperName.begin(), toupper);
+    std::transform(
+        upperName.begin(),
+        upperName.end(),
+        upperName.begin(),
+        [](char v) { return static_cast<char>(toupper(v)); }
+    );
     
     std::string moduleToken =
         ghoul::filesystem::FileSystem::TokenOpeningBraces +
@@ -63,22 +68,30 @@ void OpenSpaceModule::deinitialize() {
     internalDeinitialize();
 }
 
-std::vector<Documentation> OpenSpaceModule::documentations() const {
+std::vector<documentation::Documentation> OpenSpaceModule::documentations() const {
+    return {};
+}
+    
+scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
     return {};
 }
 
-ghoul::systemcapabilities::OpenGLCapabilitiesComponent::Version
-OpenSpaceModule::requiredOpenGLVersion() const
-{
-    return { 3, 3 };
+ghoul::systemcapabilities::Version OpenSpaceModule::requiredOpenGLVersion() const {
+    return { 3, 3, 0 };
 }
 
 std::string OpenSpaceModule::modulePath() const {
     std::string moduleName = name();
-    std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), tolower);
+    std::transform(
+        moduleName.begin(),
+        moduleName.end(),
+        moduleName.begin(),
+        [](char v) { return static_cast<char>(tolower(v)); }
+    );
 
-    if (FileSys.directoryExists("${MODULES}/" + moduleName))
+    if (FileSys.directoryExists("${MODULES}/" + moduleName)) {
         return absPath("${MODULES}/" + moduleName);
+    }
 
 #ifdef EXTERNAL_MODULES_PATHS
 

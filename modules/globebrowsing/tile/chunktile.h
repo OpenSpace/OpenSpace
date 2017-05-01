@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,16 +34,20 @@ namespace openspace {
 namespace globebrowsing {
 
 struct ChunkTile {
+    ChunkTile() : tile(Tile::TileUnavailable) {};
+    ChunkTile(Tile tile, TileUvTransform uvTransform, TileDepthTransform depthTransform) :
+        tile(tile),
+        uvTransform(uvTransform),
+        depthTransform(depthTransform) {};
+
     Tile tile;
     TileUvTransform uvTransform;
     TileDepthTransform depthTransform;
 };
 
-struct ChunkTilePile {
-    std::vector<ChunkTile> chunkTiles;
-};
+using ChunkTilePile = std::vector<ChunkTile>;
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKTILE___H__

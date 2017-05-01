@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,25 +25,31 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUME___H__
 #define __OPENSPACE_MODULE_VOLUME___RAWVOLUME___H__
 
+#include <ghoul/glm.h>
+#include <functional>
+#include <vector>
+
 namespace openspace {
 
 template <typename Voxel>
 class RawVolume {
 public:
     typedef Voxel VoxelType;
-    RawVolume(const glm::ivec3& dimensions);
-    glm::ivec3 dimensions() const;
-    void setDimensions(const glm::ivec3& dimensions);
-    VoxelType get(const glm::ivec3& coordinates) const;
+    RawVolume(const glm::uvec3& dimensions);
+    glm::uvec3 dimensions() const;
+    void setDimensions(const glm::uvec3& dimensions);
+    size_t nCells() const;
+    VoxelType get(const glm::uvec3& coordinates) const;
     VoxelType get(const size_t index) const;
-    void set(const glm::ivec3& coordinates, const VoxelType& value);
+    void set(const glm::uvec3& coordinates, const VoxelType& value);
     void set(size_t index, const VoxelType& value);
-    void forEachVoxel(const std::function<void(const glm::ivec3&, const VoxelType&)>& fn);
+    void forEachVoxel(const std::function<void(const glm::uvec3&, const VoxelType&)>& fn);
+    const VoxelType* data() const;
+    size_t coordsToIndex(const glm::uvec3& cartesian) const;
+    glm::uvec3 indexToCoords(size_t linear) const;
     VoxelType* data();
 private:
-    size_t coordsToIndex(const glm::ivec3& cartesian) const;
-    glm::ivec3 indexToCoords(size_t linear) const;
-    glm::ivec3 _dimensions;
+    glm::uvec3 _dimensions;
     std::vector<VoxelType> _data;
 };
 

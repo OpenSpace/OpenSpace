@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,8 +23,10 @@
  ****************************************************************************************/
 
 #include <modules/space/rendering/planetgeometry.h>
+
 #include <openspace/util/factorymanager.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
 namespace {
@@ -35,7 +37,7 @@ namespace {
 namespace openspace {
 namespace planetgeometry {
 
-Documentation PlanetGeometry::Documentation() {
+documentation::Documentation PlanetGeometry::Documentation() {
     using namespace documentation;
     return {
         "Planet Geometry",
@@ -51,7 +53,7 @@ Documentation PlanetGeometry::Documentation() {
     };
 }
 
-PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
+std::unique_ptr<PlanetGeometry> PlanetGeometry::createFromDictionary(const ghoul::Dictionary& dictionary)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -62,7 +64,7 @@ PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& di
     std::string geometryType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<PlanetGeometry>();
 
-    PlanetGeometry* result = factory->create(geometryType, dictionary);
+    std::unique_ptr<PlanetGeometry> result = factory->create(geometryType, dictionary);
     if (result == nullptr) {
         throw ghoul::RuntimeError(
             "Failed to create a PlanetGeometry object of type '" + geometryType + "'"
@@ -72,10 +74,9 @@ PlanetGeometry* PlanetGeometry::createFromDictionary(const ghoul::Dictionary& di
 }
 
 PlanetGeometry::PlanetGeometry()
-    : _parent(nullptr)
-{
-    setName("PlanetGeometry");
-}
+    : properties::PropertyOwner("PlanetGeometry")
+    , _parent(nullptr)
+{}
 
 PlanetGeometry::~PlanetGeometry() {}
 

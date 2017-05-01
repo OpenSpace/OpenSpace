@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,14 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
 
+#ifdef GLOBEBROWSING_USE_GDAL
+
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <openspace/util/time.h>
 #include <openspace/util/timerange.h>
+
+#include <ghoul/misc/dictionary.h>
 
 #include <memory>
 #include <string>
@@ -38,7 +42,8 @@ struct CPLXMLNode;
 
 namespace openspace {
 namespace globebrowsing {
-
+namespace tileprovider {
+    
 /**
  * Interface for stringifying OpenSpace Time instances.
  *
@@ -59,6 +64,14 @@ struct TimeFormat {
  * Example: 2016-09-08
  */
 struct YYYY_MM_DD : public TimeFormat {
+    virtual std::string stringify(const Time& t) const;
+};
+
+/**
+* Stringifies OpenSpace to the format "YYYYMMDD_hhmmss"
+* Example: 20160908_230505
+*/
+struct YYYYMMDD_hhmmss : public TimeFormat {
     virtual std::string stringify(const Time& t) const;
 };
 
@@ -138,6 +151,15 @@ struct TimeQuantizer {
      * \returns wether or not time was quantized
      */
     bool quantize(Time& t, bool clamp) const;
+
+    /**
+    * Returns a list of quantized Time objects that represent all the valid quantized
+    * Time%s between \p start and \p end.
+    * \param start The start time for the time range quantization
+    * \param end The end time for the time range quantization
+    * \return A list of quantized times between \p start and \end
+    */
+    std::vector<Time> quantized(const Time& start, const Time& end) const;
 
 private:
     TimeRange _timerange;
@@ -284,15 +306,16 @@ private:
     // Used for creation of time specific instances of CachingTileProvider
     ghoul::Dictionary _initDict;
 
-    Tile _defaultTile;
-
     std::shared_ptr<TileProvider> _currentTileProvider;
         
     TimeFormat* _timeFormat;
     TimeQuantizer _timeQuantizer;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__
+#endif // GLOBEBROWSING_USE_GDAL
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEMPORAL_TILE_PROVIDER___H__

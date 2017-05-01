@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -79,6 +79,9 @@ TEST_F(DocumentationTest, Constructor) {
     doc.entries.emplace_back("NotInListDouble", new DoubleNotInListVerifier({ 0.0, 1.0 }));
     doc.entries.emplace_back("NotInListInt", new IntNotInListVerifier({ 0, 1 }));
     doc.entries.emplace_back("NotInListString", new StringNotInListVerifier({ "", "a" }));
+
+    doc.entries.emplace_back("StringListVerifier", new StringListVerifier);
+    doc.entries.emplace_back("IntListVerifier", new IntListVerifier);
 
     // Range Verifiers
     doc.entries.emplace_back("InListDouble", new DoubleInRangeVerifier({ 0.0, 1.0 }));
@@ -390,6 +393,63 @@ TEST_F(DocumentationTest, StringListVerifierType) {
     EXPECT_FALSE(negativeRes.success);
     ASSERT_EQ(1, negativeRes.offenses.size());
     EXPECT_EQ("StringList", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
+}
+
+TEST_F(DocumentationTest, IntListVerifierType) {
+    using namespace openspace::documentation;
+    using namespace std::string_literals;
+
+    Documentation doc {
+        { { "IntList", new IntListVerifier } }
+    };
+
+    ghoul::Dictionary positive {
+        {
+            "IntList",
+            ghoul::Dictionary{
+                { "1", 1 },
+                { "2", 2 },
+                { "3", 3 }
+    }
+        }
+    };
+    TestResult positiveRes = testSpecification(doc, positive);
+    EXPECT_TRUE(positiveRes.success);
+    EXPECT_EQ(0, positiveRes.offenses.size());
+
+    ghoul::Dictionary negative{
+        { "IntList", 0 }
+    };
+    TestResult negativeRes = testSpecification(doc, negative);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("IntList", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negative2 {
+        {
+            "IntList",
+            ghoul::Dictionary{
+                { "1", "a"s },
+                { "2", 1 },
+                { "3", 2 }
+    }
+        }
+    };
+    negativeRes = testSpecification(doc, negative2);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("IntList.1", negativeRes.offenses[0].offender);
+    EXPECT_EQ(TestResult::Offense::Reason::WrongType, negativeRes.offenses[0].reason);
+
+    ghoul::Dictionary negativeExist {
+        { "IntList2", ghoul::Dictionary{} }
+    };
+    negativeRes = testSpecification(doc, negativeExist);
+    EXPECT_FALSE(negativeRes.success);
+    ASSERT_EQ(1, negativeRes.offenses.size());
+    EXPECT_EQ("IntList", negativeRes.offenses[0].offender);
     EXPECT_EQ(TestResult::Offense::Reason::MissingKey, negativeRes.offenses[0].reason);
 }
 

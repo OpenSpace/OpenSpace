@@ -23,19 +23,24 @@ return {
             Body = "NEPTUNE BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 2.4622 , 7 },
+                Radius = 2.4622E7,
                 Segments = 100
             },
             Textures = {
                 Type = "simple",
                 Color = "textures/neptune.jpg",
-            },
+            }
         },
-        Translation = {
+        Tag = "planet_solarSystem",
+        Transform = {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_NEPTUNE",
                 DestinationFrame = "GALACTIC"
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
             },
         }
     },
@@ -52,7 +57,8 @@ return {
             },
             Color = {0.2, 0.5, 1.0 },
             Period  = 60200,
-            Resolution = 1000
-        },
+            Resolution = 1000,
+            Tag = "planetTrail_solarSystem"
+        }
     }
 }

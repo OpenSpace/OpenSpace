@@ -45,7 +45,7 @@ return {
                         Name = "Venus Texture",
                         FilePath = "textures/venus.jpg",
                         Enabled = true,
-                        MinimumPixelSize = 256,
+                        TilePixelSize = 256,
                     },
                 },
                 GrayScaleLayers = { },

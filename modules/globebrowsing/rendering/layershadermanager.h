@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014-2017                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_SHADER_MANAGER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_SHADER_MANAGER___H__
 
-#include <modules/globebrowsing/rendering/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 
 #include <array>
 #include <string>
@@ -35,40 +35,41 @@ namespace opengl {
 class ProgramObject;
 }
 }
+
 namespace openspace {
 namespace globebrowsing {
-
-/**
- * Settings per texture group that contains shader preprocessing information.
- */
-struct LayerGroupPreprocessingData {
-    int lastLayerIdx;
-    bool layerBlendingEnabled;
-    bool operator==(const LayerGroupPreprocessingData& other) const;
-};
-
-/**
- * Data needed for shader preprocessing before compiling a layered texture shader
- * program.
- *
- * If a <code>LayerShaderPreprocessingData</code> is compared with another it can
- * be determined wheter or not a <code>LayerShaderManager</code> needs to
- * recompile its shader program. For each <code>TextureGroup</code> there is
- * information about how many layers it has and whether or not to blend the texture
- * levels.
- */
-struct LayerShaderPreprocessingData {
-    std::array<LayerGroupPreprocessingData, LayerManager::NUM_LAYER_GROUPS>
-        layeredTextureInfo;
-    std::vector<std::pair<std::string, std::string> > keyValuePairs;
-    bool operator==(const LayerShaderPreprocessingData& other) const;
-};
 
 /**
  * This class has ownership of an updated shader program for rendering tiles.
  */
 class LayerShaderManager {
 public:
+    /**
+     * Data needed for shader preprocessing before compiling a layered texture shader
+     * program.
+     *
+     * If a <code>LayerShaderPreprocessingData</code> is compared with another it can
+     * be determined wheter or not a <code>LayerShaderManager</code> needs to
+     * recompile its shader program. For each <code>TextureGroup</code> there is
+     * information about how many layers it has and whether or not to blend the texture
+     * levels.
+     */
+    struct LayerShaderPreprocessingData {
+        /**
+         * Settings per texture group that contains shader preprocessing information.
+         */
+        struct LayerGroupPreprocessingData {
+            int lastLayerIdx;
+            bool layerBlendingEnabled;
+            bool operator==(const LayerGroupPreprocessingData& other) const;
+        };
+        
+        std::array<LayerGroupPreprocessingData, LayerManager::NUM_LAYER_GROUPS>
+        layeredTextureInfo;
+        std::vector<std::pair<std::string, std::string> > keyValuePairs;
+        bool operator==(const LayerShaderPreprocessingData& other) const;
+    };
+    
     LayerShaderManager(
         const std::string& shaderName,
         const std::string& vsPath,
@@ -82,7 +83,7 @@ public:
      * from the last time this function was called the shader program will be
      * recompiled before returned.
      */
-    ProgramObject* programObject(
+    ghoul::opengl::ProgramObject* programObject(
         LayerShaderPreprocessingData preprocessingData);
 
     bool updatedOnLastCall();
@@ -91,7 +92,7 @@ private:
         
     void recompileShaderProgram(LayerShaderPreprocessingData preprocessingData);
 
-    std::unique_ptr<ProgramObject> _programObject;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     LayerShaderPreprocessingData _preprocessingData;
 
     const std::string _shaderName;
@@ -104,4 +105,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_SHADER_MANAGER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_SHADER_MANAGER___H__
