@@ -241,8 +241,15 @@ void RenderableRoverSurface::update(const UpdateData & data) {
 					tempFileName[14] = 'A';
 					tempFileName[15] = 'S';
 
+					int siteNumber = std::stoi(i.site);
+					std::string fileFormat;
+					if (siteNumber <= 21)
+						fileFormat = ".jpg";
+					else if (siteNumber > 21)
+						fileFormat = ".png";
+
 					std::string pathToTexture = _absTexturePath + "site" + i.site + "\\" + "drive" + i.drive +
-						"\\" + tempFileName + ".png";
+						"\\" + tempFileName + fileFormat;
 
 					modelDictionary.setValue(keyGeometryFile, pathToGeometry);
 					modelDictionary.setValue(keyType, _multiModelGeometry);
