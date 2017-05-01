@@ -61,26 +61,29 @@ namespace {
 
     const char* keySeedPointsFile = "File";
 
+    const float R_E_TO_METER = 6371000.f; // Earth radius
+    const float A_U_TO_METER = 149597870700.f; // Astronomical Units
     // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
 }
 
-// const float R_E_TO_METER = 6371000.f; // Earth radius
 
 namespace openspace {
 
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
       _isMorphing("isMorphing", "Morphing", false),
-      _fieldlineColor("fieldlineColor", "Fieldline Color", glm::vec4(0.f,1.f,0.f,0.45f),
+      _show3DLines("show3DLines", "3D Lines", false),
+      _fieldlineColor("fieldlineColor", "Fieldline Color", glm::vec4(0.7f,0.f,0.7f,0.3f),
                                                            glm::vec4(0.f),
                                                            glm::vec4(1.f)),
       _fieldlineParticleSize("fieldlineParticleSize", "FL Particle Size", 20, 0, 1000),
       _timeMultiplier("fieldlineParticleSpeed", "FL Particle Speed", 20, 1, 1000),
       _modulusDivider("fieldlineParticleFrequency", "FL Particle Frequency (reversed)", 100, 1, 10000),
       _fieldlineParticleColor("fieldlineParticleColor", "FL Particle Color",
-                                                           glm::vec4(1.f,0.f,1.f,0.75f),
+                                                           glm::vec4(1.f,0.f,1.f,0.5f),
                                                            glm::vec4(0.f),
                                                            glm::vec4(1.f)),
+      _lineWidth("fieldlineWidth", "Fieldline Width", 20, 0, 1000),
       _vertexArrayObject(0),
       _vertexPositionBuffer(0),
       _morphToPositionBuffer(0),
@@ -173,7 +176,7 @@ bool RenderableFieldlinesSequence::initialize() {
             LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph
                     << ". Using default: " << _isMorphing);
         } else {
-            _isMorphing = true;
+            _isMorphing = userWantsMorphing;
         }
 
         int resamplingOption = 4; // Default
@@ -252,7 +255,7 @@ bool RenderableFieldlinesSequence::initialize() {
             LDEBUG("Optimising morphing!");
             float quickMorphDist;
             if(!_fieldlineInfo.getValue(keyFieldlineQuickMorphDistance, quickMorphDist)) {
-                quickMorphDist = 20.f * 6371000.f; // 2 times Earth's radius
+                quickMorphDist = 20.f * R_E_TO_METER; // 2 times Earth's radius
                 LWARNING(keyFieldlines << " isn't specifying " <<
                          keyFieldlineQuickMorphDistance <<
                          ". Default is set to 20 Earth radii.");
@@ -278,12 +281,30 @@ bool RenderableFieldlinesSequence::initialize() {
             "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_flow_direction_fs.glsl"
         );
     }
+    _ropeProgram = OsEng.renderEngine().buildRenderProgram(
+        "FieldlinesSequenceRope",
+        "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_rope_flow_direction_vs.glsl",
+        "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_rope_fs.glsl",
+        "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_rope_gs.glsl"
+    );
 
     if (!_program) {
         LERROR("Shader program failed initialization!");
         return false;
     }
 
+    _activeProgramPtr = &*_program;
+
+    if (!_ropeProgram) {
+        LERROR("Shader program 'ropeProgram' failed initialization!");
+    } else {
+        addProperty(_show3DLines);
+        addProperty(_lineWidth);
+        _show3DLines.onChange([this] {
+            // TOGGLE ACTIVE SHADER PROGRAM
+            _activeProgramPtr = (_activeProgramPtr == _program.get()) ? &*_ropeProgram : &*_program;
+        });
+    }
     // TODO: IT MAY BE BENEFICIAL IF SOME OF THESE PROPERTIES WERE DEPENDENT ON THE
     // NUMBER OF MAX TRACING STEPS THAT THE USER DEFINED IN LUA!
     // The fieldlineParticleSize and modulusDivider espacially
@@ -319,13 +340,18 @@ bool RenderableFieldlinesSequence::deinitialize() {
         _program = nullptr;
     }
 
+    if (_ropeProgram) {
+        renderEngine.removeRenderProgram(_ropeProgram);
+        _ropeProgram = nullptr;
+    }
+
     return true;
 }
 
 void RenderableFieldlinesSequence::render(const RenderData& data) {
     // if (_isWithinTimeInterval) {
     if (_shouldRender) {
-        _program->activate();
+        _activeProgramPtr->activate();
 
         glm::dmat4 rotationTransform = glm::dmat4(data.modelTransform.rotation);
         glm::mat4 scaleTransform = glm::mat4(1.0); // TODO remove if no use
@@ -336,25 +362,36 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
                 glm::dmat4(scaleTransform);
         glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-        // Set uniforms for shaders
-        _program->setUniform("modelViewProjection",
-                data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
-
         int testTime = static_cast<int>(OsEng.runTime() * 100) / 5;
-        _program->setUniform("time", testTime * _timeMultiplier);
-        _program->setUniform("flParticleSize", _fieldlineParticleSize);
-        _program->setUniform("modulusDivider", _modulusDivider);
-        _program->setUniform("fieldlineColor", _fieldlineColor);
-        _program->setUniform("fieldlineParticleColor", _fieldlineParticleColor);
-        if (_isMorphing) {
-            _program->setUniform("state_progression", _stateProgress);
-            _program->setUniform("isMorphing", _isMorphing);
+
+        // Set uniforms for shaders
+        _activeProgramPtr->setUniform("time", testTime * _timeMultiplier);
+        _activeProgramPtr->setUniform("flParticleSize", _fieldlineParticleSize);
+        _activeProgramPtr->setUniform("modulusDivider", _modulusDivider);
+        _activeProgramPtr->setUniform("fieldlineColor", _fieldlineColor);
+        _activeProgramPtr->setUniform("fieldlineParticleColor", _fieldlineParticleColor);
+        if (_show3DLines) {
+            _activeProgramPtr->setUniform("width", _lineWidth * R_E_TO_METER);
+            // _activeProgramPtr->setUniform("camDirection",
+            //                             glm::vec3(data.camera.viewDirectionWorldSpace()));
+            // _activeProgramPtr->setUniform("modelTransform", modelTransform);
+            // _activeProgramPtr->setUniform("viewTransform", data.camera.combinedViewMatrix());
+            _activeProgramPtr->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+            _activeProgramPtr->setUniform("projectionTransform", data.camera.projectionMatrix());
+        } else {
+            glLineWidth(_lineWidth);
+            _activeProgramPtr->setUniform("modelViewProjection",
+                    data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+            if (_isMorphing) { // TODO ALLOW MORPHING AND 3D LINES/ROPES
+                _activeProgramPtr->setUniform("state_progression", _stateProgress);
+                _activeProgramPtr->setUniform("isMorphing", _isMorphing);
+            }
         }
         glDisable(GL_CULL_FACE);
 
-        // _program->setUniform("classification", _classification);
+        // _activeProgramPtr->setUniform("classification", _classification);
         // if (!_classification)
-        //     _program->setUniform("fieldLineColor", _fieldlineColor);
+        //     _activeProgramPtr->setUniform("fieldLineColor", _fieldlineColor);
 
         glBindVertexArray(_vertexArrayObject);
         glMultiDrawArrays(
@@ -366,13 +403,13 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
 
         glBindVertexArray(0);
         glEnable(GL_CULL_FACE);
-        _program->deactivate();
+        _activeProgramPtr->deactivate();
     }
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData&) {
-    if (_program->isDirty()) {
-        _program->rebuildFromFile();
+    if (_activeProgramPtr->isDirty()) {
+        _activeProgramPtr->rebuildFromFile();
     }
 
     // Check if current time in OpenSpace is within sequence interval
