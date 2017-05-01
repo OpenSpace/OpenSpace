@@ -64,6 +64,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _resChanged(false)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 50, 0, 100)
+    , _sphere(nullptr)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
@@ -83,8 +84,8 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     //                                   "/home/noven/workspace/OpenSpace/data/realfitsdata/335"};// 9
 
     //std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/realfitsdata/094"};
-    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/solarflarej2k/171",
-                                      "/home/noven/workspace/OpenSpace/data/solarflarej2k/094"};
+    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/solarflarej2k/171/",
+                                      "/home/noven/workspace/OpenSpace/data/solarflarej2k/094/"};
     //std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/smallfitsseq/sdoseq0171"};
     std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0171_new.txt",
                                         "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094_new.txt"};
@@ -151,7 +152,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
                     nullptr, // Update pixel data later, is this really safe?
                     glm::size3_t(_imageSize, _imageSize, 1),
                     ghoul::opengl::Texture::Red, // Format of the pixeldata
-                    GL_R16, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
+                    GL_R8, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
                     GL_UNSIGNED_BYTE, // Type of data
                     Texture::FilterMode::Nearest,
                     Texture::WrappingMode::ClampToEdge
@@ -203,7 +204,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 }
 
 bool RenderableSpacecraftCameraPlane::isReady() const {
-    return _shader && _texture;
+    return _shader && _texture && _sphere;
 }
 
 bool RenderableSpacecraftCameraPlane::initialize() {
@@ -219,12 +220,28 @@ bool RenderableSpacecraftCameraPlane::initialize() {
             "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl",
             "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl"
             );
-        if (!_shader)
+        if (!_shader) {
             return false;
+        }
     }
 
-    using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-   // _shader->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    if (!_sphereShader) {
+        RenderEngine& renderEngine = OsEng.renderEngine();
+        _sphereShader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
+            "${MODULE_SOLARBROWSING}/shaders/spacecraftimagesphere_vs.glsl",
+            "${MODULE_SOLARBROWSING}/shaders/spacecraftimagesphere_fs.glsl"
+            );
+        if (!_sphereShader) {
+            return false;
+        }
+    }
+
+     PowerScaledScalar planetSize(glm::vec2(4.8f, 9.f));
+    _sphere = std::make_unique<PowerScaledSphere>(PowerScaledSphere(planetSize, 100));
+    _sphere->initialize();
+
+    // using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
+    // _shader->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     //_shader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     return isReady();
@@ -268,7 +285,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
         j2c.CreateInfileStream(currentFilename);
         j2c.SetupDecoder();
         j2c.SetResolutionFactor(_resolutionLevel);
-        j2c.DecodeTileIntoBuffer(/*tileid=*/0, _pboBufferData, /*numthreads*/4);
+        j2c.DecodeTileIntoBuffer(/*tileid=*/1, _pboBufferData, /*numthreads*/16);
     } else {
         _future = std::make_unique<std::future<void>>(std::async(std::launch::async,
             [this, &currentFilename]() {
@@ -276,7 +293,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
                 j2c.CreateInfileStream(currentFilename);
                 j2c.SetupDecoder();
                 j2c.SetResolutionFactor(_resolutionLevel);
-                j2c.DecodeTileIntoBuffer(/*tileid=*/0, _pboBufferData, /*numthreads*/4);
+                j2c.DecodeTileIntoBuffer(/*tileid=*/1, _pboBufferData, /*numthreads*/16);
             }));
     }
 
@@ -406,6 +423,9 @@ void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     if (_shader->isDirty())
         _shader->rebuildFromFile();
 
+    if (_sphereShader->isDirty())
+        _sphereShader->rebuildFromFile();
+
     if (_planeIsDirty)
         createPlane();
 }
@@ -488,6 +508,21 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     }
 
     _shader->deactivate();
+    _sphereShader->activate();
+
+    modelTransform =
+        glm::translate(glm::dmat4(1.0), sun->worldPosition()) * // Translation
+        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+    modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+
+    _sphereShader->setUniform(
+        "modelViewProjectionTransform",
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
+    );
+
+    _sphere->render();
+    _sphereShader->deactivate();
 }
 
 } // namespace openspace
