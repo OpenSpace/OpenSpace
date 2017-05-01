@@ -84,6 +84,7 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 
 	// Save the abspath because it changes when leaving the constructor.
 	_absModelPath = absPath(_modelPath);
+	_absTexturePath = absPath(_texturePath);
 	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
 }
 
@@ -178,7 +179,7 @@ void RenderableRoverSurface::update(const UpdateData & data) {
 					tempFileName[14] = 'A';
 					tempFileName[15] = 'S';
 
-					std::string pathToTexture = _absModelPath + "textures\\" + "site" + i.site + "\\" + "drive" + i.drive +
+					std::string pathToTexture = _absTexturePath + "site" + i.site + "\\" + "drive" + i.drive +
 						"\\" + tempFileName + ".png";
 
 					modelDictionary.setValue(keyGeometryFile, pathToGeometry);
@@ -248,9 +249,11 @@ void RenderableRoverSurface::extractCoordinates() {
 		// Saves all coordinates for rendering the path and only site coordinates for rendering sites.
 		// GetFieldAsDouble resturns zero (0) if field is empty.
 		if (lat != 0 && lon != 0) {
+			std::string type = "site";
 			SubSite subSite;
-			subSite.site = site;
-			subSite.drive = drive;
+			subSite.site = convertString(site, type);
+			type = "drive";
+			subSite.drive = convertString(drive, type);
 			subSite.lat = lat;
 			subSite.lon = lon;
 
@@ -284,9 +287,38 @@ std::vector<std::string> RenderableRoverSurface::extractFileNames(const std::str
 			fileNames.push_back(_textFilePath);
 		}
 		myfile.close();
-	}
+	} 
 
 	return fileNames;
+}
+
+std::string RenderableRoverSurface::convertString(std::string sitenr, std::string type) {
+	int k = std::stoi(sitenr);
+	
+	std::string temp;
+	if (type == "site") {
+		if (k < 10) {
+			temp = "00" + std::to_string(k);
+		}
+		else if (k < 100) {
+			temp = "0" + std::to_string(k);
+		}
+	} 
+	else if (type == "drive") {
+		if (k < 10) {
+			temp = "000" + std::to_string(k);
+		}
+		else if (k < 100) {
+			temp = "00" + std::to_string(k);
+		}
+		else if (k < 1000){
+			temp = "0" + std::to_string(k);
+		}
+		else {
+			temp = std::to_string(k);
+		}
+	}
+	return temp;
 }
 
 } // namespace globebrowsing

@@ -62,6 +62,7 @@ private:
 	void extractCoordinates();
 	void calculateSurfacePosition();
 	std::vector<std::string> extractFileNames(const std::string filePath);
+	std::string convertString(std::string sitenr, std::string type);
 
 	std::vector<std::string> _fileNames;
 	std::vector<glm::fvec2> _coordinates;
@@ -75,6 +76,7 @@ private:
 	std::string _modelPath;
 	std::string _texturePath;
 	std::string _absModelPath;
+	std::string _absTexturePath;
 	std::string _multiModelGeometry;
 
 	globebrowsing::RenderableGlobe* _globe;
