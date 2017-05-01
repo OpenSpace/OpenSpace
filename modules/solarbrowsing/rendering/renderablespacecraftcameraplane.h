@@ -36,6 +36,8 @@
 #include <memory>
 #include <modules/solarbrowsing/util/simplej2kcodec.h>
 
+#include <openspace/util/powerscaledsphere.h>
+
 namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
@@ -65,6 +67,9 @@ private:
 
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
+
+    std::unique_ptr<PowerScaledSphere> _sphere;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _sphereShader;
 
     std::string _type;
     int _currentActiveImage;
