@@ -42,6 +42,9 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_spherical_flow_direction_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_flow_direction_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_flow_direction_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_rope_flow_direction_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_rope_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_rope_gs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

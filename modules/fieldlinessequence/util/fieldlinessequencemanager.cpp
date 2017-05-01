@@ -45,7 +45,9 @@ namespace {
     using FileSystem = ghoul::filesystem::FileSystem;
     using Sort = ghoul::filesystem::Directory::Sort;
 
-
+    const float R_E_TO_METER = 6371000.f; // Earth radius
+    const float R_S_TO_METER = 695700000.f; // Sun radius
+    const float A_U_TO_METER = 149597870700.f; // Astronomical Units
 }
 
 namespace openspace {
@@ -240,24 +242,22 @@ bool FieldlinesSequenceManager::addLineToState(ccmc::Fieldline& ccmcFieldline,
     outFieldlinesStates._lineStart.push_back(lineStart);
     outFieldlinesStates._lineCount.push_back(lineCount);
 
-    const float R_E_TO_METER = 6371000.f; // Earth radius
-    const float R_S_TO_METER = 695700000.f; // Sun radius
-    const float A_U_TO_METER = 149597871000.f; // Astronomical Units
-    const float DEG_TO_RAD = 3.14159265359f / 180.f;
+    float scalingFactor;
 
     const std::vector<ccmc::Point3f> positions = ccmcFieldline.getPositions();
     // TODO FIX ALL OF THIS.. works but is ugly code
     // Add line points to FieldlinesState. Also resample if ResamplingOption == 4
     if (model == "batsrus") {
+        scalingFactor = R_E_TO_METER;
         // Scale all values
         if (shouldResample && resamplingOption == 4) {
             std::vector<glm::vec3> tempVec;
             std::transform(positions.begin(), positions.end(),
                     std::back_inserter(tempVec),
-                            [&R_E_TO_METER](const ccmc::Point3f& p) {
-                                return glm::vec3(p.component1 * R_E_TO_METER,
-                                                 p.component2 * R_E_TO_METER,
-                                                 p.component3 * R_E_TO_METER);
+                            [&scalingFactor](const ccmc::Point3f& p) {
+                                return glm::vec3(p.component1 * scalingFactor,
+                                                 p.component2 * scalingFactor,
+                                                 p.component3 * scalingFactor);
                             });
 
             int seedIndex = ccmcFieldline.getStartIndex();
@@ -266,21 +266,22 @@ bool FieldlinesSequenceManager::addLineToState(ccmc::Fieldline& ccmcFieldline,
         } else {
             std::transform(positions.begin(), positions.end(),
                     std::back_inserter(outFieldlinesStates._vertexPositions),
-                            [&R_E_TO_METER](const ccmc::Point3f& p) {
-                                return glm::vec3(p.component1 * R_E_TO_METER,
-                                                 p.component2 * R_E_TO_METER,
-                                                 p.component3 * R_E_TO_METER);
+                            [&scalingFactor](const ccmc::Point3f& p) {
+                                return glm::vec3(p.component1 * scalingFactor,
+                                                 p.component2 * scalingFactor,
+                                                 p.component3 * scalingFactor);
                             });
         }
     } else if (model == "enlil") {
+        scalingFactor = A_U_TO_METER;
         if (shouldResample && resamplingOption == 4) {
             std::vector<glm::vec3> tempVec;
             std::transform(positions.begin(), positions.end(),
                     std::back_inserter(tempVec),
-                            [&A_U_TO_METER, &DEG_TO_RAD](const ccmc::Point3f& p) {
-                                float r         = A_U_TO_METER * p.component1;
-                                float lat_rad   = DEG_TO_RAD   * p.component2;
-                                float lon_rad   = DEG_TO_RAD   * p.component3;
+                            [&scalingFactor](const ccmc::Point3f& p) {
+                                float r         = scalingFactor * p.component1;
+                                float lat_rad   = glm::radians(p.component2);
+                                float lon_rad   = glm::radians(p.component3);
                                 float r_cosLat  = r * cos(lat_rad);
                                 return glm::vec3(r_cosLat * cos(lon_rad),
                                                  r_cosLat * sin(lon_rad),
@@ -293,10 +294,10 @@ bool FieldlinesSequenceManager::addLineToState(ccmc::Fieldline& ccmcFieldline,
         } else {
             std::transform(positions.begin(), positions.end(),
                     std::back_inserter(outFieldlinesStates._vertexPositions),
-                            [&A_U_TO_METER, &DEG_TO_RAD](const ccmc::Point3f& p) {
-                                float r         = A_U_TO_METER * p.component1;
-                                float lat_rad   = DEG_TO_RAD   * p.component2;
-                                float lon_rad   = DEG_TO_RAD   * p.component3;
+                            [&scalingFactor](const ccmc::Point3f& p) {
+                                float r         = scalingFactor * p.component1;
+                                float lat_rad   = glm::radians(p.component2);
+                                float lon_rad   = glm::radians(p.component3);
                                 float r_cosLat  = r * cos(lat_rad);
                                 return glm::vec3(r_cosLat * cos(lon_rad),
                                                  r_cosLat * sin(lon_rad),

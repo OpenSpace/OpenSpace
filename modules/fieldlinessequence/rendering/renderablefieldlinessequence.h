@@ -56,6 +56,9 @@ private:
 
     // Properties
     properties::BoolProperty _isMorphing;
+    properties::BoolProperty _show3DLines;
+
+    properties::FloatProperty _lineWidth;
 
     properties::IntProperty _timeMultiplier;
     properties::IntProperty _fieldlineParticleSize;
@@ -67,6 +70,8 @@ private:
     std::vector<glm::vec3> _seedPoints;
     std::vector<FieldlinesState> _states;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _ropeProgram;
+    ghoul::opengl::ProgramObject* _activeProgramPtr;
 
     bool _shouldRender; // only temporary
     bool _needsUpdate;
