@@ -35,7 +35,6 @@
 namespace openspace {
 namespace globebrowsing {
 
-	class Model;
 	class modelgeometry::ModelGeometry;
 
 struct LoadJob2 : public Job<Model> {
