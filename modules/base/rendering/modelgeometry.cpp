@@ -102,7 +102,22 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     bool success = dictionary.getValue(keyName, name);
     ghoul_assert(success, "Name tag was not present");
 
-    _file = absPath(dictionary.value<std::string>(keyGeomModelFile));
+	std::string tempString;
+	dictionary.getValue(keyGeomModelFile, tempString);
+
+	if(tempString.substr(0,6) == "models") {
+		std::string map1 = tempString.substr(7, tempString.find("j"));
+
+		
+		_file = "C:\\Users\\openspace\\Documents\\develop\\OpenSpace\\data\\scene\\models\\models\\" + map1;
+	}
+	/*if (tempString.substr(0, 6) == "models") {
+		std::string site = tempString.substr(7, tempString.find("/"));
+		LERROR("Site: " << site);
+	}*/
+
+	else
+		_file = absPath(dictionary.value<std::string>(keyGeomModelFile));
 }
 
 double ModelGeometry::boundingRadius() const {
@@ -188,7 +203,7 @@ bool ModelGeometry::loadObj(const std::string& filename) {
 
     bool hasCachedFile = FileSys.fileExists(cachedFile);
     if (hasCachedFile) {
-        LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "'");
+        //LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "'");
 
         bool success = loadCachedFile(cachedFile);
         if (success)
@@ -199,16 +214,16 @@ bool ModelGeometry::loadObj(const std::string& filename) {
         // file for the next run
     }
     else {
-        LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "' not found");
+        //LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "' not found");
     }
 
-    LINFO("Loading Model file '" << filename << "'");
+    //LINFO("Loading Model file '" << filename << "'");
     bool success = loadModel(filename);
 
     if (!success)
         return false;
 
-    LINFO("Saving cache");
+    //LINFO("Saving cache");
     success = saveCachedFile(cachedFile);
 
     return success;
