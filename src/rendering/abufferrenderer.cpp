@@ -54,23 +54,22 @@ namespace {
     const int MaxRaycasters = 32;
     const int MaxLayers = 32;
     const int MaxAverageLayers = 8;
-}
+} // namespace
 
 namespace openspace {
 
-
 ABufferRenderer::ABufferRenderer()
-        : _camera(nullptr)
-        , _scene(nullptr)
-        , _resolution(glm::ivec2(0))
-        , _dirtyResolution(true)
-        , _dirtyRaycastData(true)
-        , _dirtyRendererData(true)
-        , _dirtyResolveDictionary(true)
-        , _resolveProgram(nullptr) { }
+    : _camera(nullptr)
+    , _scene(nullptr)
+    , _resolution(glm::ivec2(0))
+    , _dirtyResolution(true)
+    , _dirtyRaycastData(true)
+    , _dirtyRendererData(true)
+    , _dirtyResolveDictionary(true)
+    , _resolveProgram(nullptr)
+{}
 
 ABufferRenderer::~ABufferRenderer() {}
-
 
 void ABufferRenderer::initialize() {
     LINFO("Initializing ABufferRenderer");
@@ -299,14 +298,14 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     float gamma = 1.0;
     glm::vec3 cameraPos = data.camera.position().vec3();
     float maxComponent = std::max(std::max(std::abs(cameraPos.x), std::abs(cameraPos.y)), std::abs(cameraPos.z));
-    float logDistance = std::log(glm::length(cameraPos / maxComponent) * maxComponent) / std::log(10);
+    float logDistance = std::log(glm::length(cameraPos / maxComponent) * maxComponent) / std::log(10.f);
 
     float minLogDist = 15;
     float maxLogDist = 20;
 
     float t = (logDistance - minLogDist) / (maxLogDist - minLogDist);
     t = glm::clamp(t, 0.0f, 1.0f);
-    gamma = 1.0 * (1 - t) + 2.2 * t;
+    gamma = 1.f * (1.f - t) + 2.2f * t;
 
     _resolveProgram->setUniform("gamma", gamma);
 
@@ -504,7 +503,7 @@ void ABufferRenderer::updateRaycastData() {
 
     for (auto &raycaster : raycasters) {
         if (nextId > MaxRaycasters) {
-            int nIgnored = MaxRaycasters - raycasters.size();
+            int nIgnored = MaxRaycasters - static_cast<int>(raycasters.size());
             LWARNING("ABufferRenderer does not support more than 32 raycasters. Ignoring " << nIgnored << " raycasters");
             break;
         }

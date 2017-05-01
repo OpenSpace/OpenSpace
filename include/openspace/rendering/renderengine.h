@@ -25,13 +25,19 @@
 #ifndef __OPENSPACE_CORE___RENDERENGINE___H__
 #define __OPENSPACE_CORE___RENDERENGINE___H__
 
-#include <openspace/scripting/scriptengine.h>
-
+#include <openspace/performance/performancemanager.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/triggerproperty.h>
+
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/deferredcastermanager.h>
+#include <openspace/rendering/renderer.h>
+#include <openspace/rendering/screenspacerenderable.h>
+
+#include <openspace/scripting/scriptengine.h>
 
 #include <openspace/util/syncdata.h>
 
@@ -48,18 +54,11 @@ class SharedMemory;
 
 namespace openspace {
 
-namespace performance {
-class PerformanceManager;
-}
-
 // Forward declare to minimize dependencies
 class Camera;
 class SyncBuffer;
-
 class Scene;
-class Renderer;
-class DeferredcasterManager;
-class RaycasterManager;
+class SceneManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
 
@@ -78,14 +77,15 @@ public:
     };
 
     RenderEngine();
-    ~RenderEngine();
+    ~RenderEngine() = default;
     
     void initialize();
     void initializeGL();
     void deinitialize();
 
-    void setSceneGraph(Scene* sceneGraph);
+    void setScene(Scene* scene);
     Scene* scene();
+    void updateScene();
 
     Camera* camera() const;
     Renderer* renderer() const;
@@ -95,12 +95,13 @@ public:
 
     // sgct wrapped functions
     
-    void updateSceneGraph();
+
     void updateShaderPrograms();
     void updateFade();
     void updateRenderer();
     void updateScreenSpaceRenderables();
-    void render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
+        const glm::mat4& projectionMatrix);
 
     void renderScreenLog();
     void renderShutdownInformation(float timer, float fullTime);
@@ -146,6 +147,11 @@ public:
     */
     void postRaycast(ghoul::opengl::ProgramObject& programObject);
 
+    /**
+     * Set the camera to use for rendering
+     */
+    void setCamera(Camera* camera);
+
 
     void setRendererFromString(const std::string& method);
 
@@ -183,10 +189,10 @@ private:
 
     void renderInformation();
 
-    Camera* _mainCamera;
-    Scene* _sceneGraph;
-    RaycasterManager* _raycasterManager;
-    DeferredcasterManager* _deferredcasterManager;
+    Camera* _camera;
+    Scene* _scene;
+    std::unique_ptr<RaycasterManager> _raycasterManager;
+    std::unique_ptr<DeferredcasterManager> _deferredcasterManager;
 
     properties::BoolProperty _performanceMeasurements;
     std::unique_ptr<performance::PerformanceManager> _performanceManager;
@@ -209,6 +215,7 @@ private:
     properties::BoolProperty _applyWarping;
     properties::BoolProperty _showFrameNumber;
     properties::BoolProperty _disableMasterRendering;
+    properties::BoolProperty _disableSceneOnMaster;
 
     float _globalBlackOutFactor;
     float _fadeDuration;

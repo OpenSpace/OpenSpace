@@ -40,8 +40,8 @@ namespace properties {
         __TYPE__ result;                                                                 \
         lua_pushnil(state);                                                              \
         for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
-            int success = lua_next(state, -2);                                           \
-            if (success != 1) {                                                          \
+            int hasNext = lua_next(state, -2);                                           \
+            if (hasNext != 1) {                                                          \
                 success = false;                                                         \
                 return __TYPE__(0);                                                      \
             }                                                                            \
@@ -73,7 +73,7 @@ namespace properties {
     [](std::string value, bool& success) -> __TYPE__ {                                   \
         __TYPE__ result;                                                                 \
         std::vector<std::string> tokens = ghoul::tokenizeString(value, ',');             \
-        if (tokens.size() != result.length()) {                                          \
+        if (tokens.size() != static_cast<size_t>(result.length())) {                     \
             success = false;                                                             \
             return result;                                                               \
         }                                                                                \
@@ -85,8 +85,9 @@ namespace properties {
                     success = false;                                                     \
                     return result;                                                       \
                 }                                                                        \
-                else                                                                     \
+                else {                                                                   \
                     result[i] = v;                                                       \
+                }                                                                        \
         }                                                                                \
         success = true;                                                                  \
         return result;                                                                   \
@@ -95,8 +96,9 @@ namespace properties {
 #define DEFAULT_TO_STRING_LAMBDA(__TYPE__)                                               \
     [](std::string& outValue, __TYPE__ inValue) -> bool {                                \
         outValue = "{";                                                                  \
-        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i)       \
+        for (glm::length_t i = 0; i < ghoul::glm_components<__TYPE__>::value; ++i) {     \
             outValue += std::to_string(inValue[i]) + ",";                                \
+        }                                                                                \
         outValue.pop_back();                                                             \
         outValue += "}";                                                                 \
         return true;                                                                     \

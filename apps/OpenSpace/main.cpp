@@ -32,21 +32,140 @@
 
 #include <sgct.h>
 
+#ifdef WIN32
+
+#include <openspace/openspace.h>
+
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/stacktrace.h>
+
+#include <fmt/format.h>
+
+#include <Windows.h>
+#include <dbghelp.h>
+#include <shellapi.h>
+#include <shlobj.h>
+
+#endif // WIN32
+
 #ifdef OPENVR_SUPPORT
 #include <SGCTOpenVR.h>
 #endif // OPENVR_SUPPORT
+
+#ifdef OPENSPACE_HAS_SPOUT
+#include "SpoutLibrary.h"
+#endif // OPENSPACE_HAS_SPOUT
+
 
 #define DEVELOPER_MODE
 
 namespace {
     
 const char* _loggerCat = "main";
-
 sgct::Engine* SgctEngine;
+
+const char* OpenVRTag = "OpenVR";
+const char* SpoutTag = "Spout";
+
+#ifdef WIN32
+
+LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
+    SYSTEMTIME stLocalTime;
+    GetLocalTime(&stLocalTime);
+
+
+    LFATAL("Printing Stack Trace that lead to the crash:");
+    std::vector<std::string> stackTrace = ghoul::stackTrace();
+    for (const std::string& s : stackTrace) {
+        LINFO(s);
+    }
+
+    std::string dumpFile = fmt::format(
+        "OpenSpace_{}_{}_{}-{}-{}-{}-{}-{}-{}--{}--{}.dmp",
+        openspace::OPENSPACE_VERSION_MAJOR,
+        openspace::OPENSPACE_VERSION_MINOR,
+        openspace::OPENSPACE_VERSION_PATCH,
+        stLocalTime.wYear,
+        stLocalTime.wMonth,
+        stLocalTime.wDay,
+        stLocalTime.wHour,
+        stLocalTime.wMinute,
+        stLocalTime.wSecond,
+        GetCurrentProcessId(),
+        GetCurrentThreadId()
+    );
+
+    LINFO("Creating dump file: " << dumpFile);
+
+    HANDLE hDumpFile = CreateFile(
+        dumpFile.c_str(),
+        GENERIC_READ | GENERIC_WRITE,
+        FILE_SHARE_WRITE | FILE_SHARE_READ,
+        0,
+        CREATE_ALWAYS,
+        0,
+        0
+    );
+
+    MINIDUMP_EXCEPTION_INFORMATION exceptionParameter;
+    exceptionParameter.ThreadId = GetCurrentThreadId();
+    exceptionParameter.ExceptionPointers = exceptionPointers;
+    exceptionParameter.ClientPointers = TRUE;
+
+    BOOL success = MiniDumpWriteDump(
+        GetCurrentProcess(),
+        GetCurrentProcessId(),
+        hDumpFile,
+        MiniDumpWithDataSegs,
+        &exceptionParameter,
+        nullptr,
+        nullptr
+    );
+
+    if (success) {
+        LINFO("Created successfully");
+    }
+    else {
+        LERROR("Dumpfile created unsuccessfully");
+    }
+
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
+#endif // WIN32
     
 #ifdef OPENVR_SUPPORT
 sgct::SGCTWindow* FirstOpenVRWindow = nullptr;
 #endif
+
+#ifdef OPENSPACE_HAS_SPOUT
+/**
+ * This struct stores all information about a single render window. Depending on the
+ * frame setup, each window can be mono or stereo, the information of which is stored in
+ * the \c leftOrMain and \c right members respectively.
+ */
+struct SpoutWindow {
+    struct SpoutData {
+        SPOUTHANDLE handle = nullptr;
+        bool initialized = false;
+    };
+
+    /// The left framebuffer (or main, if there is no stereo rendering)
+    SpoutData leftOrMain;
+
+    /// The right framebuffer
+    SpoutData right;
+
+    /// The window ID of this windows
+    size_t windowId = size_t(-1);
+};
+
+/// The list of all windows with spout senders
+std::vector<SpoutWindow> SpoutWindows;
+
+#endif // OPENSPACE_HAS_SPOUT
+
+
 
 std::pair<int, int> supportedOpenGLVersion() {
     // Just create a window in order to retrieve the available OpenGL version before we
@@ -96,7 +215,7 @@ void mainInitFunc() {
     // Find if we have at least one OpenVR window
     // Save reference to first OpenVR window, which is the one we will copy to the HMD.
     for (size_t i = 0; i < SgctEngine->getNumberOfWindows(); ++i) {
-        if (SgctEngine->getWindowPtr(i)->checkIfTagExists("OpenVR")) {
+        if (SgctEngine->getWindowPtr(i)->checkIfTagExists(OpenVRTag)) {
 #ifdef OPENVR_SUPPORT
             FirstOpenVRWindow = SgctEngine->getWindowPtr(i);
             
@@ -117,17 +236,71 @@ void mainInitFunc() {
     // Set the clear color for all non-linear projection viewports
     // @CLEANUP:  Why is this necessary?  We can set the clear color in the configuration
     // files --- abock
-    size_t nWindows = SgctEngine->getNumberOfWindows();
+    const size_t nWindows = SgctEngine->getNumberOfWindows();
     for (size_t i = 0; i < nWindows; ++i) {
         sgct::SGCTWindow* w = SgctEngine->getWindowPtr(i);
-        size_t nViewports = w->getNumberOfViewports();
+        const size_t nViewports = w->getNumberOfViewports();
         for (size_t j = 0; j < nViewports; ++j) {
             sgct_core::Viewport* v = w->getViewport(j);
             ghoul_assert(v != nullptr, "Number of reported viewports was incorrect");
             sgct_core::NonLinearProjection* p = v->getNonLinearProjectionPtr();
-            if (p)
+            if (p) {
                 p->setClearColor(glm::vec4(0.f, 0.f, 0.f, 1.f));
+            }
         }
+    }
+
+    for (size_t i = 0; i < nWindows; ++i) {
+        const sgct::SGCTWindow* windowPtr = SgctEngine->getWindowPtr(i);
+
+        if (!windowPtr->checkIfTagExists(SpoutTag)) {
+            continue;
+        }
+
+#ifdef OPENSPACE_HAS_SPOUT
+        SpoutWindow w;
+
+        w.windowId = i;
+
+        const sgct::SGCTWindow::StereoMode sm = windowPtr->getStereoMode();
+        const bool hasStereo =
+            (sm != sgct::SGCTWindow::No_Stereo) && 
+            (sm < sgct::SGCTWindow::Side_By_Side_Stereo);
+
+        if (hasStereo) {
+            SpoutWindow::SpoutData& left = w.leftOrMain;
+            left.handle = GetSpout();
+            left.initialized = left.handle->CreateSender(
+                (windowPtr->getName() + "_left").c_str(),
+                windowPtr->getXFramebufferResolution(),
+                windowPtr->getYFramebufferResolution()
+            );
+
+            SpoutWindow::SpoutData& right = w.right;
+            right.handle = GetSpout();
+            right.initialized = right.handle->CreateSender(
+                (windowPtr->getName() + "_right").c_str(),
+                windowPtr->getXFramebufferResolution(),
+                windowPtr->getYFramebufferResolution()
+            );
+        }
+        else {
+            SpoutWindow::SpoutData& main = w.leftOrMain;
+            main.handle = GetSpout();
+            main.initialized = main.handle->CreateSender(
+                windowPtr->getName().c_str(),
+                windowPtr->getXFramebufferResolution(),
+                windowPtr->getYFramebufferResolution()
+            );
+        }
+
+        SpoutWindows.push_back(std::move(w));
+#else
+        LWARNING(
+            "Spout was requested, but OpenSpace was compiled without Spout support."
+        );
+        
+#endif // OPENSPACE_HAS_SPOUT
     }
     LTRACE("main::mainInitFunc(end)");
 }
@@ -148,7 +321,7 @@ void mainPostSyncPreDrawFunc() {
         // Update pose matrices for all tracked OpenVR devices once per frame
         sgct::SGCTOpenVR::updatePoses();
     }
-#endif
+#endif // OPENVR_SUPPORT
 
     LTRACE("main::postSynchronizationPreDraw(end)");
 }
@@ -175,13 +348,11 @@ void mainRenderFunc() {
     }
 #endif
 
-    if (SgctEngine->isMaster()) {
-        OsEng.render(viewMatrix, projectionMatrix);
-    }
-    else {
-        glm::mat4 sceneMatrix = SgctEngine->getModelMatrix();
-        OsEng.render(viewMatrix * sceneMatrix, projectionMatrix);
-    }
+    OsEng.render(
+        SgctEngine->getModelMatrix(),
+        viewMatrix,
+        projectionMatrix
+    );
     LTRACE("main::mainRenderFunc(end)");
 }
 
@@ -193,9 +364,38 @@ void mainPostDrawFunc() {
         // Copy the first OpenVR window to the HMD
         sgct::SGCTOpenVR::copyWindowToHMD(FirstOpenVRWindow);
     }
-#endif
+#endif // OPENVR_SUPPORT
 
     OsEng.postDraw();
+
+#ifdef OPENSPACE_HAS_SPOUT
+    for (const SpoutWindow& w : SpoutWindows) {
+        sgct::SGCTWindow* window = SgctEngine->getWindowPtr(w.windowId);
+        if (w.leftOrMain.initialized) {
+            GLuint texId = window->getFrameBufferTexture(sgct::Engine::LeftEye);
+            glBindTexture(GL_TEXTURE_2D, texId);
+            w.leftOrMain.handle->SendTexture(
+                texId,
+                GL_TEXTURE_2D,
+                window->getXFramebufferResolution(),
+                window->getYFramebufferResolution()
+            );
+        }
+
+        if (w.right.initialized) {
+            GLuint texId = window->getFrameBufferTexture(sgct::Engine::RightEye);
+            glBindTexture(GL_TEXTURE_2D, texId);
+            w.right.handle->SendTexture(
+                texId,
+                GL_TEXTURE_2D,
+                window->getXFramebufferResolution(),
+                window->getYFramebufferResolution()
+            );
+        }
+    }
+    glBindTexture(GL_TEXTURE_2D, 0);
+#endif // OPENSPACE_HAS_SPOUT
+
     LTRACE("main::mainPostDrawFunc(end)");
 }
 
@@ -236,7 +436,7 @@ void mainMousePosCallback(double x, double y) {
     }
 }
 
-void mainMouseScrollCallback(double posX, double posY) {
+void mainMouseScrollCallback(double, double posY) {
     LTRACE("main::mainMouseScrollCallback(begin");
     if (SgctEngine->isMaster()) {
         OsEng.mouseScrollWheelCallback(posY);
@@ -368,6 +568,25 @@ int main_main(int argc, char** argv) {
         
         LDEBUG("Destroying SGCT Engine");
         delete SgctEngine;
+
+
+#ifdef OPENVR_SUPPORT
+        // Clean up OpenVR
+        sgct::SGCTOpenVR::shutdown();
+#endif
+
+#ifdef OPENSPACE_HAS_SPOUT
+        for (SpoutWindow& w : SpoutWindows) {
+            if (w.leftOrMain.handle) {
+                w.leftOrMain.handle->ReleaseReceiver();
+                w.leftOrMain.handle->Release();
+            }
+            if (w.right.handle) {
+                w.right.handle->ReleaseReceiver();
+                w.right.handle->Release();
+            }
+        }
+#endif // OPENSPACE_HAS_SPOUT
     };
     
     bool initSuccess = SgctEngine->init(versionMapping[glVersion]);
@@ -385,11 +604,6 @@ int main_main(int argc, char** argv) {
     
     cleanup();
     
-#ifdef OPENVR_SUPPORT
-    // Clean up OpenVR
-    sgct::SGCTOpenVR::shutdown();
-#endif
-    
     // Exit program
     exit(EXIT_SUCCESS); 
 }
@@ -397,6 +611,10 @@ int main_main(int argc, char** argv) {
 } // namespace
 
 int main(int argc, char** argv) {
+#ifdef WIN32
+    SetUnhandledExceptionFilter(generateMiniDump);
+#endif // WIN32
+
     // If we are working as a developer, we don't want to catch the exceptions in order to
     // find the locations where the exceptions are raised.
     // If we are not in developer mode, we want to catch and at least log the error before

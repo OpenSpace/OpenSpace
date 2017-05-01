@@ -24,7 +24,6 @@
 
 // open space includes
 #include <openspace/util/powerscaledsphere.h>
-#include <openspace/util/spicemanager.h>
 #include <ghoul/logging/logmanager.h>
 
 #define _USE_MATH_DEFINES
@@ -126,7 +125,7 @@ PowerScaledSphere::PowerScaledSphere(const PowerScaledScalar& radius, int segmen
 }
 
 // Alternative Constructor for using accurate triaxial ellipsoid 
-PowerScaledSphere::PowerScaledSphere(properties::Vec4Property &radius, int segments, std::string planetName)
+PowerScaledSphere::PowerScaledSphere(glm::vec3 radius, int segments)
     : _vaoID(0)
     , _vBufferID(0)
     , _iBufferID(0)
@@ -137,42 +136,7 @@ PowerScaledSphere::PowerScaledSphere(properties::Vec4Property &radius, int segme
 {
     static_assert(sizeof(Vertex) == 64,
         "The size of the Vertex needs to be 64 for performance");
-
-    float a, b, c, powerscale;
-    bool accutareRadius;
-    try {
-        glm::dvec3 radii;
-        SpiceManager::ref().getValue(planetName, "RADII", radii);
-        a = radii.x;
-        b = radii.y;
-        c = radii.z;
-        accutareRadius = true;
-    }
-    catch (const SpiceManager::SpiceException& e) {
-        //LINFO("Could not find radius for body " << planetName);
-        accutareRadius = false;
-    }
-    
-    if (accutareRadius) {
-        PowerScaledCoordinate powerScaledRadii = psc::CreatePowerScaledCoordinate(a, b, c);
-        powerScaledRadii[3] += 3; // SPICE returns radii in km
-        
-        std::swap(powerScaledRadii[1], powerScaledRadii[2]); // c is equivalent to y in our coordinate system
-        radius.set(powerScaledRadii.vec4());
-        a = powerScaledRadii[0];
-        b = powerScaledRadii[1];
-        c = powerScaledRadii[2];
-        powerscale = powerScaledRadii[3];
-    }
-    else {
-        ghoul::any r = radius.get();
-        glm::vec4 modRadius = ghoul::any_cast<glm::vec4>(r);
-        a = modRadius[0];
-        b = modRadius[1];
-        c = modRadius[2];
-        powerscale = modRadius[3];
-    }
-
+ 
     int nr = 0;
     const float fsegments = static_cast<float>(segments);
 
@@ -186,14 +150,14 @@ PowerScaledSphere::PowerScaledSphere(properties::Vec4Property &radius, int segme
             // azimuth angle (east to west)
             const float phi = fj * float(M_PI) * 2.0f / fsegments;  // 0 -> 2*PI
 
-            const float x = a * sin(phi) * sin(theta);  //
-            const float y = b * cos(theta);             // up
-            const float z = c * cos(phi) * sin(theta);  //
+            const float x = radius[0] * sin(phi) * sin(theta);  //
+            const float y = radius[1] * cos(theta);             // up
+            const float z = radius[2] * cos(phi) * sin(theta);  //
 
             _varray[nr].location[0] = x;
             _varray[nr].location[1] = y;
             _varray[nr].location[2] = z;
-            _varray[nr].location[3] = powerscale;
+            _varray[nr].location[3] = 0.0;
 
             glm::vec3 normal = glm::vec3(x, y, z);
             if (!(x == 0.f && y == 0.f && z == 0.f))

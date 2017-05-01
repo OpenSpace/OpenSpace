@@ -32,6 +32,7 @@
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/sceneloader.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
 #include <openspace/util/time.h>
@@ -54,6 +55,8 @@
 #include <numeric>
 #include <fstream>
 #include <string>
+#include <stack>
+#include <unordered_map>
 
 #include "scene_doc.inl"
 #include "scene_lua.inl"
@@ -79,148 +82,126 @@ namespace {
 
 namespace openspace {
 
-Scene::Scene()
-    : _focus(SceneGraphNode::RootNodeName)
-{}
+Scene::Scene() {}
 
-Scene::~Scene() {
-    deinitialize();
+Scene::~Scene() {}
+
+void Scene::setRoot(std::unique_ptr<SceneGraphNode> root) {
+    if (_root) {
+        removeNode(_root.get());
+    }
+    _root = std::move(root);
+    _root->setScene(this);
+    addNode(_root.get());
 }
 
-bool Scene::initialize() {
-    LDEBUG("Initializing SceneGraph");   
-    return true;
+void Scene::setCamera(std::unique_ptr<Camera> camera) {
+    _camera = std::move(camera);
 }
 
-bool Scene::deinitialize() {
-    clearSceneGraph();
-    return true;
+Camera* Scene::camera() const {
+    return _camera.get();
 }
 
-void Scene::update(const UpdateData& data) {
-    if (!_sceneGraphToLoad.empty()) {
-        OsEng.renderEngine().scene()->clearSceneGraph();
-        try {          
-            loadSceneInternal(_sceneGraphToLoad);
+void Scene::addNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
+    // Add the node and all its children.
+    node->traversePreOrder([this](SceneGraphNode* n) {
+        _topologicallySortedNodes.push_back(n);
+        _nodesByName[n->name()] = n;
+    });
+    
+    if (updateDeps) {
+        updateDependencies();
+    }
+}
 
-            // Reset the InteractionManager to Orbital/default mode
-            // TODO: Decide if it belongs in the scene and/or how it gets reloaded
-            //OsEng.interactionHandler().setInteractionMode("Orbital");
+void Scene::removeNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
+    // Remove the node and all its children.
+    node->traversePostOrder([this](SceneGraphNode* node) {
+        _topologicallySortedNodes.erase(
+            std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), node),
+            _topologicallySortedNodes.end()
+        );
+        _nodesByName.erase(node->name());
+    });
+    
+    if (updateDeps) {
+        updateDependencies();
+    }
+}
 
-            // After loading the scene, the keyboard bindings have been set
-            const std::string KeyboardShortcutsType =
-                ConfigurationManager::KeyKeyboardShortcuts + "." +
-                ConfigurationManager::PartType;
+void Scene::updateDependencies() {
+    sortTopologically();
+}
 
-            const std::string KeyboardShortcutsFile =
-                ConfigurationManager::KeyKeyboardShortcuts + "." +
-                ConfigurationManager::PartFile;
+void Scene::sortTopologically() {
+    _topologicallySortedNodes.insert(
+        _topologicallySortedNodes.end(),
+        std::make_move_iterator(_circularNodes.begin()),
+        std::make_move_iterator(_circularNodes.end())
+    );
+    _circularNodes.clear();
 
+    ghoul_assert(_topologicallySortedNodes.size() == _nodesByName.size(), "Number of scene graph nodes is inconsistent");
+    
+    if (_topologicallySortedNodes.empty())
+        return;
 
-            std::string type;
-            std::string file;
-            bool hasType = OsEng.configurationManager().getValue(
-                KeyboardShortcutsType, type
-            );
-            
-            bool hasFile = OsEng.configurationManager().getValue(
-                KeyboardShortcutsFile, file
-            );
-            
-            if (hasType && hasFile) {
-                OsEng.interactionHandler().writeKeyboardDocumentation(type, file);
+    // Only the Root node can have an in-degree of 0
+    SceneGraphNode* root = _nodesByName[SceneGraphNode::RootNodeName];
+    if (!root) {
+        throw Scene::InvalidSceneError("No root node found");
+    }
+    
+    std::unordered_map<SceneGraphNode*, size_t> inDegrees;
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        size_t inDegree = node->dependencies().size();
+        if (node->parent() != nullptr) {
+            inDegree++;
+            inDegrees[node] = inDegree;
+        }
+    }
+
+    std::stack<SceneGraphNode*> zeroInDegreeNodes;
+    zeroInDegreeNodes.push(root);
+    
+    std::vector<SceneGraphNode*> nodes;
+    nodes.reserve(_topologicallySortedNodes.size());
+    while (!zeroInDegreeNodes.empty()) {
+        SceneGraphNode* node = zeroInDegreeNodes.top();
+        nodes.push_back(node);
+        zeroInDegreeNodes.pop();
+
+        for (SceneGraphNode* n : node->dependentNodes()) {
+            auto it = inDegrees.find(n);
+            it->second -= 1;
+            if (it->second == 0) {
+                zeroInDegreeNodes.push(n);
+                inDegrees.erase(it);
             }
-
-            LINFO("Loaded " << _sceneGraphToLoad);
-            _sceneGraphToLoad = "";
         }
-        catch (const ghoul::RuntimeError& e) {
-            LERROR(e.what());
-            _sceneGraphToLoad = "";
-            return;
-        }
-    }
-
-    for (SceneGraphNode* node : _graph.nodes()) {
-        try {
-            LTRACE("Scene::update(begin '" + node->name() + "')");
-            node->update(data);
-            LTRACE("Scene::update(end '" + node->name() + "')");
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.what());
+        for (SceneGraphNode* n : node->children()) {
+            auto it = inDegrees.find(n);
+            it->second -= 1;
+            if (it->second == 0) {
+                zeroInDegreeNodes.push(n);
+                inDegrees.erase(it);
+            }
         }
     }
-}
-
-void Scene::evaluate(Camera* camera) {
-    for (SceneGraphNode* node : _graph.nodes())
-        node->evaluate(camera);
-    //_root->evaluate(camera);
-}
-
-void Scene::render(const RenderData& data, RendererTasks& tasks) {
-    for (SceneGraphNode* node : _graph.nodes()) {
-        LTRACE("Scene::render(begin '" + node->name() + "')");
-        node->render(data, tasks);
-        LTRACE("Scene::render(end '" + node->name() + "')");
+    if (inDegrees.size() > 0) {
+        LERROR("The scene contains circular dependencies. " << inDegrees.size() << " nodes will be disabled.");
     }
+
+    for (auto it : inDegrees) {
+        _circularNodes.push_back(it.first);
+    }
+    
+    _topologicallySortedNodes = nodes;
 }
 
-void Scene::scheduleLoadSceneFile(const std::string& sceneDescriptionFilePath) {
-    _sceneGraphToLoad = sceneDescriptionFilePath;
-}
-
-void Scene::clearSceneGraph() {
-    LINFO("Clearing current scene graph");
-    // deallocate the scene graph. Recursive deallocation will occur
-    _graph.clear();
-    //if (_root) {
-    //    _root->deinitialize();
-    //    delete _root;
-    //    _root = nullptr;
-    //}
-
- //   _nodes.erase(_nodes.begin(), _nodes.end());
- //   _allNodes.erase(_allNodes.begin(), _allNodes.end());
-
-    _focus.clear();
-}
-
-bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
-    ghoul::Dictionary dictionary;
-    
-    OsEng.windowWrapper().setSynchronization(false);
-    OnExit(
-        [](){ OsEng.windowWrapper().setSynchronization(true); }
-    );
-    
-    lua_State* state = ghoul::lua::createNewLuaState();
-    OnExit(
-           // Delete the Lua state at the end of the scope, no matter what
-           [state](){ ghoul::lua::destroyLuaState(state); }
-           );
-    
-    OsEng.scriptEngine().initializeLuaState(state);
-
-    ghoul::lua::loadDictionaryFromFile(
-        sceneDescriptionFilePath,
-        dictionary,
-        state
-    );
-
-    // Perform testing against the documentation/specification
-    openspace::documentation::testSpecificationAndThrow(
-        Scene::Documentation(),
-        dictionary,
-        "Scene"
-    );
-
-
-    _graph.loadFromFile(sceneDescriptionFilePath);
-
-    // Initialize all nodes
-    for (SceneGraphNode* node : _graph.nodes()) {
+void Scene::initialize() {
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             bool success = node->initialize();
             if (success)
@@ -232,221 +213,57 @@ bool Scene::loadSceneInternal(const std::string& sceneDescriptionFilePath) {
             LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
         }
     }
-
-    // update the position of all nodes
-    // TODO need to check this; unnecessary? (ab)
-    for (SceneGraphNode* node : _graph.nodes()) {
-        try {
-            node->update({
-                glm::dvec3(0),
-                glm::dmat3(1),
-                1,
-                Time::ref().j2000Seconds() });
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-        }
-    }
-
-    for (auto it = _graph.nodes().rbegin(); it != _graph.nodes().rend(); ++it)
-        (*it)->calculateBoundingSphere();
-
-    // Read the camera dictionary and set the camera state
-    ghoul::Dictionary cameraDictionary;
-    if (dictionary.getValue(KeyCamera, cameraDictionary)) {
-        OsEng.interactionHandler().setCameraStateFromDictionary(cameraDictionary);
-    }
-
-    // If a PropertyDocumentationFile was specified, generate it now
-    const std::string KeyPropertyDocumentationType =
-        ConfigurationManager::KeyPropertyDocumentation + '.' +
-        ConfigurationManager::PartType;
-
-    const std::string KeyPropertyDocumentationFile =
-        ConfigurationManager::KeyPropertyDocumentation + '.' +
-        ConfigurationManager::PartFile;
-
-    const bool hasType = OsEng.configurationManager().hasKey(KeyPropertyDocumentationType);
-    const bool hasFile = OsEng.configurationManager().hasKey(KeyPropertyDocumentationFile);
-    if (hasType && hasFile) {
-        std::string propertyDocumentationType;
-        OsEng.configurationManager().getValue(KeyPropertyDocumentationType, propertyDocumentationType);
-        std::string propertyDocumentationFile;
-        OsEng.configurationManager().getValue(KeyPropertyDocumentationFile, propertyDocumentationFile);
-
-        propertyDocumentationFile = absPath(propertyDocumentationFile);
-        writePropertyDocumentation(propertyDocumentationFile, propertyDocumentationType, sceneDescriptionFilePath);
-    }
-
-
-    OsEng.runPostInitializationScripts(sceneDescriptionFilePath);
-
-    OsEng.enableBarrier();
-
-    return true;
 }
 
-//void Scene::loadModules(
-//    const std::string& directory, 
-//    const ghoul::Dictionary& dictionary) 
-//{
-//    // Struct containing dependencies and nodes
-//    LoadMaps m;
-//
-//    // Get the common directory
-//    std::string commonDirectory(_defaultCommonDirectory);
-//    dictionary.getValue(constants::scenegraph::keyCommonFolder, commonDirectory);
-//    FileSys.registerPathToken(_commonModuleToken, commonDirectory);
-//
-//    lua_State* state = ghoul::lua::createNewLuaState();
-//    OsEng.scriptEngine()->initializeLuaState(state);
-//
-//    LDEBUG("Loading common module folder '" << commonDirectory << "'");
-//    // Load common modules into LoadMaps struct
-//    loadModule(m, FileSys.pathByAppendingComponent(directory, commonDirectory), state);
-//
-//    // Load the rest of the modules into LoadMaps struct
-//    ghoul::Dictionary moduleDictionary;
-//    if (dictionary.getValue(constants::scenegraph::keyModules, moduleDictionary)) {
-//        std::vector<std::string> keys = moduleDictionary.keys();
-//        std::sort(keys.begin(), keys.end());
-//        for (const std::string& key : keys) {
-//            std::string moduleFolder;
-//            if (moduleDictionary.getValue(key, moduleFolder)) {
-//                loadModule(m, FileSys.pathByAppendingComponent(directory, moduleFolder), state);
-//            }
-//        }
-//    }
-//
-//    // Load and construct scenegraphnodes from LoadMaps struct
-//    loadNodes(SceneGraphNode::RootNodeName, m);
-//
-//    // Remove loaded nodes from dependency list
-//    for(const auto& name: m.loadedNodes) {
-//        m.dependencies.erase(name);
-//    }
-//
-//    // Check to see what dependencies are not resolved.
-//    for(auto& node: m.dependencies) {
-//        LWARNING(
-//            "'" << node.second << "'' not loaded, parent '" 
-//            << node.first << "' not defined!");
-//    }
-//}
+void Scene::update(const UpdateData& data) {
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        try {
+            LTRACE("Scene::update(begin '" + node->name() + "')");
+            node->update(data);
+            LTRACE("Scene::update(end '" + node->name() + "')");
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.what());
+        }
+    }
+}
 
-//void Scene::loadModule(LoadMaps& m,const std::string& modulePath, lua_State* state) {
-//    auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
-//    if (pos == modulePath.npos) {
-//        LERROR("Bad format for module path: " << modulePath);
-//        return;
-//    }
-//
-//    std::string fullModule = modulePath + modulePath.substr(pos) + _moduleExtension;
-//    LDEBUG("Loading nodes from: " << fullModule);
-//
-//    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
-//    FileSys.setCurrentDirectory(modulePath);
-//
-//    ghoul::Dictionary moduleDictionary;
-//    ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary, state);
-//    std::vector<std::string> keys = moduleDictionary.keys();
-//    for (const std::string& key : keys) {
-//        if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
-//            LERROR("SceneGraphElement '" << key << "' is not a table in module '"
-//                                         << fullModule << "'");
-//            continue;
-//        }
-//        
-//        ghoul::Dictionary element;
-//        std::string nodeName;
-//        std::string parentName;
-//
-//        moduleDictionary.getValue(key, element);
-//        element.setValue(constants::scenegraph::keyPathModule, modulePath);
-//
-//        element.getValue(constants::scenegraphnode::keyName, nodeName);
-//        element.getValue(constants::scenegraphnode::keyParentName, parentName);
-//
-//        m.nodes[nodeName] = element;
-//        m.dependencies.emplace(parentName,nodeName);
-//    }
-//
-//    FileSys.setCurrentDirectory(oldDirectory);
-//}
+void Scene::render(const RenderData& data, RendererTasks& tasks) {
+    for (SceneGraphNode* node : _topologicallySortedNodes) {
+        try {
+            LTRACE("Scene::render(begin '" + node->name() + "')");
+            node->render(data, tasks);
+            LTRACE("Scene::render(end '" + node->name() + "')");
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.what());
+        }
+    }
+}
 
-//void Scene::loadNodes(const std::string& parentName, LoadMaps& m) {
-//    auto eqRange = m.dependencies.equal_range(parentName);
-//    for (auto it = eqRange.first; it != eqRange.second; ++it) {
-//        auto node = m.nodes.find((*it).second);
-//        loadNode(node->second);
-//        loadNodes((*it).second, m);
-//    }
-//    m.loadedNodes.emplace_back(parentName);
-//}
-//
-//void Scene::loadNode(const ghoul::Dictionary& dictionary) {
-//    SceneGraphNode* node = SceneGraphNode::createFromDictionary(dictionary);
-//    if(node) {
-//        _allNodes.emplace(node->name(), node);
-//        _nodes.push_back(node);
-//    }
-//}
+void Scene::clear() {
+    LINFO("Clearing current scene graph");
+    _root = nullptr;
+}
 
-//void SceneGraph::loadModule(const std::string& modulePath) {
-//    auto pos = modulePath.find_last_of(ghoul::filesystem::FileSystem::PathSeparator);
-//    if (pos == modulePath.npos) {
-//        LERROR("Bad format for module path: " << modulePath);
-//        return;
-//    }
-//
-//    std::string fullModule = modulePath + modulePath.substr(pos) + _moduleExtension;
-//    LDEBUG("Loading modules from: " << fullModule);
-//
-//    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
-//    FileSys.setCurrentDirectory(modulePath);
-//
-//    ghoul::Dictionary moduleDictionary;
-//    ghoul::lua::loadDictionaryFromFile(fullModule, moduleDictionary);
-//    std::vector<std::string> keys = moduleDictionary.keys();
-//    for (const std::string& key : keys) {
-//        if (!moduleDictionary.hasValue<ghoul::Dictionary>(key)) {
-//            LERROR("SceneGraphElement '" << key << "' is not a table in module '"
-//                                         << fullModule << "'");
-//            continue;
-//        }
-//        
-//        ghoul::Dictionary element;
-//        moduleDictionary.getValue(key, element);
-//
-//        element.setValue(constants::scenegraph::keyPathModule, modulePath);
-//
-//        //each element in this new dictionary becomes a scenegraph node. 
-//        SceneGraphNode* node = SceneGraphNode::createFromDictionary(element);
-//
-//        _allNodes.emplace(node->name(), node);
-//        _nodes.push_back(node);
-//    }
-//
-//    FileSys.setCurrentDirectory(oldDirectory);
-//
-//    // Print the tree
-//    //printTree(_root);
-//}
+const std::map<std::string, SceneGraphNode*>& Scene::nodesByName() const {
+    return _nodesByName;
+}
 
 SceneGraphNode* Scene::root() const {
-    return _graph.rootNode();
+    return _root.get();
 }
     
 SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
-    return _graph.sceneGraphNode(name);
+    auto it = _nodesByName.find(name);
+    if (it != _nodesByName.end()) {
+        return it->second;
+    }
+    return nullptr;
 }
 
-std::vector<SceneGraphNode*> Scene::allSceneGraphNodes() const {
-    return _graph.nodes();
-}
-
-SceneGraph& Scene::sceneGraph() {
-    return _graph;
+const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
+    return _topologicallySortedNodes;
 }
 
 void Scene::writePropertyDocumentation(const std::string& filename, const std::string& type, const std::string& sceneFilename) {
@@ -457,7 +274,7 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
         file.open(filename);
 
         using properties::Property;
-        for (SceneGraphNode* node : _graph.nodes()) {
+        for (SceneGraphNode* node : allSceneGraphNodes()) {
             std::vector<Property*> properties = node->propertiesRecursive();
             if (!properties.empty()) {
                 file << node->name() << std::endl;
@@ -547,7 +364,7 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
 
         std::stringstream json;
         json << "[";
-        std::vector<SceneGraphNode*> nodes = _graph.nodes();
+        std::vector<SceneGraphNode*> nodes = allSceneGraphNodes();
         if (!nodes.empty()) {
             json << std::accumulate(
                 std::next(nodes.begin()),
@@ -570,6 +387,12 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
             }
         }
 
+        std::string generationTime;
+        try {
+            generationTime = Time::now().ISO8601();
+        }
+        catch (...) {}
+
         std::stringstream html;
         html << "<!DOCTYPE html>\n"
             << "<html>\n"
@@ -587,7 +410,7 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
             << "var propertyOwners = JSON.parse('" << jsonString << "');\n"
             << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
             << "var sceneFilename = '" << sceneFilename << "';\n"
-            << "var generationTime = '" << Time::now().ISO8601() << "';\n"
+            << "var generationTime = '" << generationTime << "';\n"
             << jsContent << "\n"
             << "\t</script>\n"
             << "\t<style type=\"text/css\">\n"
@@ -598,45 +421,6 @@ void Scene::writePropertyDocumentation(const std::string& filename, const std::s
             << "\t<body>\n"
             << "\t<body>\n"
             << "</html>\n";
-
-        /*
-
-        html << "<html>\n"
-             << "\t<head>\n"
-             << "\t\t<title>Properties</title>\n"
-             << "\t</head>\n"
-             << "<body>\n"
-             << "<table cellpadding=3 cellspacing=0 border=1>\n"
-             << "\t<caption>Properties</caption>\n\n"
-             << "\t<thead>\n"
-             << "\t\t<tr>\n"
-             << "\t\t\t<th>ID</th>\n"
-             << "\t\t\t<th>Type</th>\n"
-             << "\t\t\t<th>Description</th>\n"
-             << "\t\t</tr>\n"
-             << "\t</thead>\n"
-             << "\t<tbody>\n";
-
-        for (SceneGraphNode* node : _graph.nodes()) {
-            for (properties::Property* p : node->propertiesRecursive()) {
-                html << "\t\t<tr>\n"
-                     << "\t\t\t<td>" << p->fullyQualifiedIdentifier() << "</td>\n"
-                     << "\t\t\t<td>" << p->className() << "</td>\n"
-                     << "\t\t\t<td>" << p->guiName() << "</td>\n"
-                     << "\t\t</tr>\n";
-            }
-
-            if (!node->propertiesRecursive().empty()) {
-                html << "\t<tr><td style=\"line-height: 10px;\" colspan=3></td></tr>\n";
-            }
-
-        }
-
-        html << "\t</tbody>\n"
-             << "</table>\n"
-             << "</html>;";
-
-        */
         file << html.str();
     }
     else
@@ -651,26 +435,38 @@ scripting::LuaLibrary Scene::luaLibrary() {
                 "setPropertyValue",
                 &luascriptfunctions::property_setValue,
                 "string, *",
-                "Sets all properties identified by the URI (with potential wildcards) in "
-                "the first argument. The second argument can be any type, but it has to "
-                "match the type that the property (or properties) expect."
+                "Sets all property(s) identified by the URI (with potential wildcards) "
+                "in the first argument. The second argument can be any type, but it has "
+                "to match the type that the property (or properties) expect. If the "
+                "first term (separated by '.') in the uri is bracketed with { }, then "
+                "this term is treated as a group tag name, and the function will "
+                "search through all property owners to find those that are tagged with "
+                "this group name, and set their property values accordingly."
             },
             {
                 "setPropertyValueRegex",
                 &luascriptfunctions::property_setValueRegex,
                 "string, *",
-                "Sets all properties that pass the regular expression in the first "
-                "argument. The second argument can be any type, but it has to match the "
-                "type of the properties that matched the regular expression. The regular "
-                "expression has to be of the ECMAScript grammar."
+                "Sets all property(s) that pass the regular expression in the first "
+                "argument. The second argument can be any type, but it has to match "
+                "the type of the properties that matched the regular expression. "
+                "The regular expression has to be of the ECMAScript grammar. If the "
+                "first term (separated by '.') in the uri is bracketed with { }, then "
+                "this term is treated as a group tag name, and the function will search "
+                "through all property owners to find those that are tagged with this "
+                "group name, and set their property values accordingly."
             },
             {
                 "setPropertyValueSingle",
                 &luascriptfunctions::property_setValueSingle,
                 "string, *",
-                "Sets a property identified by the URI in "
-                "the first argument. The second argument can be any type, but it has to "
-                "match the type that the property expects.",
+                "Sets all property(s) identified by the URI in the first argument to the "
+                "value passed in the second argument. The type of the second argument is "
+                "arbitrary, but it must agree with the type the denoted Property expects."
+                " If the first term (separated by '.') in the uri is bracketed with { }, "
+                " then this term is treated as a group tag name, and the function will "
+                "search through all property owners to find those that are tagged with "
+                "this group name, and set their property values accordingly."
             },
             {
                 "getPropertyValue",
@@ -702,5 +498,9 @@ scripting::LuaLibrary Scene::luaLibrary() {
         }
     };
 }
+
+Scene::InvalidSceneError::InvalidSceneError(const std::string& error, const std::string& comp)
+    : ghoul::RuntimeError(error, comp)
+{}
 
 }  // namespace openspace

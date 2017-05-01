@@ -44,15 +44,7 @@ using namespace properties;
 namespace globebrowsing {
     
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-    : _generalProperties({
-        BoolProperty("enabled", "Enabled", true),
-        BoolProperty("performShading", "perform shading", true),
-        BoolProperty("atmosphere", "atmosphere", false),
-        FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
-        FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f)
-    })
-    , _debugPropertyOwner("Debug")
-    , _debugProperties({
+    : _debugProperties({
         BoolProperty("saveOrThrowCamera", "save or throw camera", false),
         BoolProperty("showChunkEdges", "show chunk edges", false),
         BoolProperty("showChunkBounds", "show chunk bounds", false),
@@ -61,12 +53,21 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty("showHeightIntensities", "show height intensities", false),
         BoolProperty("performFrustumCulling", "perform frustum culling", true),
         BoolProperty("performHorizonCulling", "perform horizon culling", true),
-        BoolProperty("levelByProjectedAreaElseDistance", "level by projected area (else distance)",false),
+        BoolProperty("levelByProjectedAreaElseDistance", "level by projected area (else distance)", true),
         BoolProperty("resetTileProviders", "reset tile providers", false),
         BoolProperty("toggleEnabledEveryFrame", "toggle enabled every frame", false),
         BoolProperty("collectStats", "collect stats", false),
-        BoolProperty("onlyModelSpaceRendering", "Only Model Space Rendering", false)
+        BoolProperty("limitLevelByAvailableData", "Limit level by available data", true),
+        IntProperty("modelSpaceRenderingCutoffLevel", "Model Space Rendering Cutoff Level", 10, 1, 22)
     })
+    , _generalProperties({
+        BoolProperty("enabled", "Enabled", true),
+        BoolProperty("performShading", "perform shading", true),
+        BoolProperty("atmosphere", "atmosphere", false),
+        FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
+        FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f)
+    })
+    , _debugPropertyOwner("Debug")
     , _texturePropertyOwner("Textures")
 {
     setName("RenderableGlobe");
@@ -77,23 +78,28 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     glm::dvec3 radii;
     dictionary.getValue(keyRadii, radii);
     _ellipsoid = Ellipsoid(radii);
-    setBoundingSphere(pss(_ellipsoid.averageRadius(), 0.0));
+    setBoundingSphere(_ellipsoid.averageRadius());
 
     // Ghoul can't read ints from lua dictionaries...
     double patchSegmentsd;
     dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
     int patchSegments = patchSegmentsd;
         
-    dictionary.getValue(keyInteractionDepthBelowEllipsoid,
-        _interactionDepthBelowEllipsoid);
+    if (!dictionary.getValue(keyInteractionDepthBelowEllipsoid,
+        _interactionDepthBelowEllipsoid)) {
+        _interactionDepthBelowEllipsoid = 0;
+    }
+
     float cameraMinHeight;
     dictionary.getValue(keyCameraMinHeight, cameraMinHeight);
     _generalProperties.cameraMinHeight.set(cameraMinHeight);
 
     // Init layer manager
     ghoul::Dictionary layersDictionary;
-    if (!dictionary.getValue(keyLayers, layersDictionary))
-        throw ghoul::RuntimeError(std::string(keyLayers) + " must be specified specified!");
+    if (!dictionary.getValue(keyLayers, layersDictionary)) {
+        throw ghoul::RuntimeError(
+            std::string(keyLayers) + " must be specified specified!");
+    }
 
     _layerManager = std::make_shared<LayerManager>(layersDictionary);
 
@@ -127,8 +133,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.toggleEnabledEveryFrame);
     _debugPropertyOwner.addProperty(_debugProperties.collectStats);
-    _debugPropertyOwner.addProperty(_debugProperties.onlyModelSpaceRendering);
-        
+    _debugPropertyOwner.addProperty(_debugProperties.limitLevelByAvailableData);
+    _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
+    
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager.get());
 }

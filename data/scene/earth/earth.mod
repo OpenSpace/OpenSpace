@@ -34,7 +34,7 @@ return {
             Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 6.371, 6 },
+                Radius = 6.371E6,
                 Segments = 100
             },
             Textures = {
@@ -49,6 +49,7 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
+        Tag = {"planet_solarSystem", "planet_terrestrial"},
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
@@ -78,9 +79,10 @@ return {
             -- EndTime = "2017 JAN 01 12:00:00.000",
             -- SampleInterval = 3600
             Period = 365.242,
-            Resolution = 1000
+            Resolution = 1000,
+            Tag = {"planetTrail_solarSystem", "planetTrail_terrestrial"}
         },
-        GuiName = "/Solar/EarthTrail"
+        GuiName = "/Solar/EarthTrail",
     },
     --[[
     {
@@ -88,7 +90,7 @@ return {
         Parent = "Earth",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {3.0, 11.0},
+            Size = 3.0E11,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/marker.png",

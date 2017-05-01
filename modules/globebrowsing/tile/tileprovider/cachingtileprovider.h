@@ -26,12 +26,13 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
 namespace openspace {
 namespace globebrowsing {
 
 class AsyncTileDataProvider;
-class RawTile;
+struct RawTile;
     
 namespace tileprovider {
 
@@ -44,8 +45,7 @@ public:
     CachingTileProvider(const ghoul::Dictionary& dictionary);
 
     CachingTileProvider(
-        std::shared_ptr<AsyncTileDataProvider> tileReader, 
-        std::shared_ptr<TileCache> tileCache,
+        std::shared_ptr<AsyncTileDataProvider> tileReader,
         int framesUntilFlushRequestQueue);
 
     virtual ~CachingTileProvider();
@@ -87,7 +87,7 @@ private:
     void clearRequestQueue();
 
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    std::shared_ptr<TileCache> _tileCache;
+    //std::shared_ptr<TileCache> _tileCache;
 
     int _framesSinceLastRequestFlush;
     int _framesUntilRequestFlush;

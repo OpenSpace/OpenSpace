@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___TIMEMANAGER___H__
 #define __OPENSPACE_CORE___TIMEMANAGER___H__
 
+#include <vector>
 #include <deque>
 #include <openspace/network/messagestructures.h>
 
@@ -35,7 +36,9 @@ public:
     void preSynchronization(double dt);
     void addKeyframe(const datamessagestructures::TimeKeyframe& kf);
     void removeKeyframesBefore(double timestamp);
+    void removeKeyframesAfter(double timestamp);
     void clearKeyframes();
+    const std::deque<datamessagestructures::TimeKeyframe>& keyframes() const;
 private:
     void consumeKeyframes(double dt);
     std::deque<datamessagestructures::TimeKeyframe> _keyframes;

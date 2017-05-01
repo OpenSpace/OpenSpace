@@ -8,7 +8,7 @@ return {
             Body = "TITAN",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 0.2575, 4 },
+                Radius = 0.2575E4,
                 Segments = 50
             },
             Textures = {

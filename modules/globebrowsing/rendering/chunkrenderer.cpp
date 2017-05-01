@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/rendering/layershadermanager.h>
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
 namespace {
     const char* keyFrame = "Frame";
@@ -64,7 +65,8 @@ ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
 
 void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
     // A little arbitrary with 10 but it works
-    if (chunk.owner().debugProperties().onlyModelSpaceRendering || chunk.tileIndex().level < 10) {
+    if (chunk.tileIndex().level <
+        chunk.owner().debugProperties().modelSpaceRenderingCutoffLevel) {
         renderChunkGlobally(chunk, data);
     }
     else {
@@ -98,18 +100,25 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     const auto& debugProps = chunk.owner().debugProperties();
     auto& pairs = layeredTexturePreprocessingData.keyValuePairs;
         
-    pairs.push_back(std::make_pair("useAtmosphere",
-        std::to_string(generalProps.atmosphereEnabled)));
-    pairs.push_back(std::make_pair("performShading",
-        std::to_string(generalProps.performShading)));
-    pairs.push_back(std::make_pair("showChunkEdges",
-        std::to_string(debugProps.showChunkEdges)));
-    pairs.push_back(std::make_pair("showHeightResolution",
-        std::to_string(debugProps.showHeightResolution)));
-    pairs.push_back(std::make_pair("showHeightIntensities",
-        std::to_string(debugProps.showHeightIntensities)));
-    pairs.push_back(std::make_pair("defaultHeight",
-        std::to_string(Chunk::DEFAULT_HEIGHT)));
+    pairs.emplace_back("useAtmosphere", std::to_string(generalProps.atmosphereEnabled));
+    pairs.emplace_back("performShading", std::to_string(generalProps.performShading));
+    pairs.emplace_back("showChunkEdges", std::to_string(debugProps.showChunkEdges));
+    pairs.emplace_back("showHeightResolution",
+        std::to_string(debugProps.showHeightResolution));
+    pairs.emplace_back("showHeightIntensities",
+        std::to_string(debugProps.showHeightIntensities));
+    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
+
+    pairs.emplace_back("tilePaddingStart",
+        "ivec2(" +
+        std::to_string(RawTileDataReader::padding.start.x) + "," +
+        std::to_string(RawTileDataReader::padding.start.y) + ")"
+    );
+    pairs.emplace_back("tilePaddingSizeDiff",
+        "ivec2(" +
+        std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
+        std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
+    );
 
     // Now the shader program can be accessed
     ghoul::opengl::ProgramObject* programObject =
@@ -194,7 +203,6 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
             glm::normalize(-data.modelTransform.translation);
         glm::vec3 directionToSunCameraSpace =
             (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
-        data.modelTransform.translation;
         programObject->setUniform("modelViewTransform", modelViewTransform);
         programObject->setUniform(
             "lightDirectionCameraSpace", -directionToSunCameraSpace);
@@ -276,7 +284,6 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
             glm::normalize(-data.modelTransform.translation);
         glm::vec3 directionToSunCameraSpace =
             (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
-        data.modelTransform.translation;
         programObject->setUniform(
             "lightDirectionCameraSpace", -directionToSunCameraSpace);
     }

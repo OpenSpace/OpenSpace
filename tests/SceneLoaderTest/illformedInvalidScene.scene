@@ -1,0 +1,7 @@
+-- Malformed script
+return {
+    ScenePath = 1337,
+    Modules = {
+    }
+}
+

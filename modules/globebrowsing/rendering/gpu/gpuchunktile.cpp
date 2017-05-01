@@ -33,7 +33,7 @@ namespace globebrowsing {
 void GPUChunkTile::setValue(ghoul::opengl::ProgramObject* programObject,
                             const ChunkTile& chunkTile)
 {
-    gpuTexture.setValue(programObject, chunkTile.tile.texture);
+    gpuTexture.setValue(programObject, chunkTile.tile.texture());
     gpuTileUvTransform.setValue(programObject, chunkTile.uvTransform);
 }
 

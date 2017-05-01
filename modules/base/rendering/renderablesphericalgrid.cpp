@@ -27,6 +27,7 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/spicemanager.h>
+#include <ghoul/glm.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -39,11 +40,9 @@ namespace {
     const char* KeyGridSegments = "GridSegments";
     const char* KeyGridRadius = "GridRadius";
     const char* KeyGridParentsRotation = "ParentsRotation";
+    const glm::vec2 GridRadius = { 1.f, 20.f };
 }
 namespace openspace {
-
-// needs to be set from dictionary - REMEMBER
-const PowerScaledScalar radius = PowerScaledScalar(1.f, 20.f);
 
 RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictionary)  
     : Renderable(dictionary)
@@ -78,7 +77,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
 
     int nr = 0;
     const float fsegments = static_cast<float>(_segments);
-    const float r = static_cast<float>(radius[0]);
+    const float r = static_cast<float>(GridRadius[0]);
 
     //int nr2 = 0;
 
@@ -117,7 +116,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
                 _varray[nr].location[i]  = tmp[i];
                 _varray[nr].normal[i] = normal[i];
             }
-            _varray[nr].location[3] = static_cast<GLfloat>(radius[1]);            
+            _varray[nr].location[3] = static_cast<GLfloat>(GridRadius[1]);
             ++nr;
         }
     }

@@ -25,7 +25,7 @@ return {
             Body = "PLUTO",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 1.173 , 6 },
+                Radius = 1.173E6,
                 Segments = 100
             },
             Textures = {
@@ -61,7 +61,7 @@ return {
             Body = "CHARON",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 6.035 , 5 },
+                Radius = 6.035E5,
                 Segments = 100
             },
             Textures = {

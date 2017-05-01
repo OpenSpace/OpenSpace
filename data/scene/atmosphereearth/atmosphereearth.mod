@@ -23,23 +23,23 @@ return {
             Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 6.3781366, 6 },
-                --Radius = { 6.420, 6 },                  
+                Radius = 6.3781366E6,
+                --Radius = 6.420E6,                  
                 Segments = 100
             },
             Shadow_Group = {
                 Source1 = {
                     Name = "Sun",
                     -- All radius in meters
-                    Radius = {696.0, 6}
+                    Radius = 696.3E6
                 },
-                --Source2 = { Name = "Monolith", Radius = {0.01, 6} },
+                --Source2 = { Name = "Monolith", Radius = 0.01E6 },
                 Caster1 = { 
                     Name = "Moon",
                     -- All radius in meters
-                    Radius = {1.737, 6}
+                    Radius = 1.737E6
                 },
-                --Caster2 = { Name = "Independency Day Ship", Radius = {0.0, 0.0} }
+                --Caster2 = { Name = "Independency Day Ship", Radius = 0 }
             },
             Textures = {
                 Type = "simple",
@@ -148,7 +148,7 @@ return {
         Parent = "Earth",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {3.0, 11.0},
+            Size = 3.0E11.0,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/marker.png",
@@ -167,7 +167,7 @@ return {
     --     Renderable = {
     --         Type = "RenderablePlane",
     --         Billboard = true,
-    --         Size = { 6.371, 6 },
+    --         Size = 6.371E6,
     --         Texture = "textures/graph.jpg",
     --         Atmosphere = {
     --             Type = "Nishita", -- for example, values missing etc etc

@@ -58,23 +58,23 @@
 namespace {
     const std::string _loggerCat = "RenderablePlanetAtmosphere";
 
-    const std::string keyFrame                    = "Frame";
-    const std::string keyGeometry                 = "Geometry";
-    const std::string keyRadius                   = "Radius";
-    const std::string keyShading                  = "PerformShading";
-    const std::string keyShadowGroup              = "Shadow_Group";
-    const std::string keyShadowSource             = "Source";
-    const std::string keyShadowCaster             = "Caster";
-    const std::string keyAtmosphere               = "Atmosphere";
-    const std::string keyAtmosphereRadius         = "AtmoshereRadius";
-    const std::string keyPlanetRadius             = "PlanetRadius";
+    const std::string keyFrame = "Frame";
+    const std::string keyGeometry = "Geometry";
+    const std::string keyRadius = "Radius";
+    const std::string keyShading = "PerformShading";
+    const std::string keyShadowGroup = "Shadow_Group";
+    const std::string keyShadowSource = "Source";
+    const std::string keyShadowCaster = "Caster";
+    const std::string keyAtmosphere = "Atmosphere";
+    const std::string keyAtmosphereRadius = "AtmoshereRadius";
+    const std::string keyPlanetRadius = "PlanetRadius";
     const std::string keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
-    const std::string keyRayleigh                 = "Rayleigh";
-    const std::string keyRayleighHeightScale      = "H_R";
-    const std::string keyMie                      = "Mie";
-    const std::string keyMieHeightScale           = "H_M";
-    const std::string keyMiePhaseConstant         = "G";
-    const std::string keyBody                     = "Body";
+    const std::string keyRayleigh = "Rayleigh";
+    const std::string keyRayleighHeightScale = "H_R";
+    const std::string keyMie = "Mie";
+    const std::string keyMieHeightScale = "H_M";
+    const std::string keyMiePhaseConstant = "G";
+    const std::string keyBody = "Body";
 }
 
 namespace openspace {
@@ -125,25 +125,46 @@ namespace openspace {
     {
         std::string name;
         bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-        ghoul_assert(success,
-            "RenderablePlanetAtmosphere need the '" + SceneGraphNode::KeyName + "' be specified");
+        ghoul_assert(
+            success,
+            std::string("RenderablePlanetAtmosphere need the '") + SceneGraphNode::KeyName +
+            "' be specified"
+        );
 
         //=======================================================
         //======== Reads Geometry Entries in mod file =============
         //=======================================================
         ghoul::Dictionary geometryDictionary;
         success = dictionary.getValue(keyGeometry, geometryDictionary);
+        glm::dvec3 radius;
+        bool accutareRadius = false;
+        try {
+            SpiceManager::ref().getValue(name, "RADII", radius);
+            accutareRadius = true;
+        }
+        catch (const SpiceManager::SpiceException& e) {
+            accutareRadius = false;
+        }
+
+        if (accutareRadius) {
+            radius *= 1000.0; // Spice gives radii in KM.
+            std::swap(radius[1], radius[2]); // z is equivalent to y in our coordinate system
+            geometryDictionary.setValue(keyRadius, radius);
+        }
+
         if (success) {
-            geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-            //geometryDictionary.setValue(constants::scenegraph::keyPathModule, path);
             _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 
-            glm::vec2 planetRadiusVec;
-            success = geometryDictionary.getValue(keyRadius, planetRadiusVec);
-            if (success)
-                _planetRadius = planetRadiusVec[0] * glm::pow(10, planetRadiusVec[1]);
-            else
-                LWARNING("No Radius value expecified for " << name << " planet.");
+            float planetRadius;
+            if (accutareRadius) {
+                _planetRadius = (radius[0] + radius[1] + radius[2]) / 3.0;
+            }
+            else if (geometryDictionary.getValue(keyRadius, planetRadius)) {
+                _planetRadius = planetRadius;
+            }
+            else {
+                LWARNING("No Radius value specified for " << name << " planet.");
+            }
         }
 
         //===============================================================
@@ -223,13 +244,13 @@ namespace openspace {
                 ss << keyShadowSource << sourceCounter << ".Name";
                 success = shadowDictionary.getValue(ss.str(), sourceName);
                 if (success) {
-                    glm::vec2 sourceRadius;
+                    float sourceRadius;
                     ss.str(std::string());
                     ss << keyShadowSource << sourceCounter << ".Radius";
                     success = shadowDictionary.getValue(ss.str(), sourceRadius);
                     if (success) {
                         sourceArray.push_back(std::pair< std::string, float>(
-                            sourceName, sourceRadius[0] * pow(10.f, sourceRadius[1])));
+                            sourceName, sourceRadius));
                     }
                     else {
                         LWARNING("No Radius value expecified for Shadow Source Name "
@@ -252,13 +273,13 @@ namespace openspace {
                     ss << keyShadowCaster << casterCounter << ".Name";
                     success = shadowDictionary.getValue(ss.str(), casterName);
                     if (success) {
-                        glm::vec2 casterRadius;
+                        float casterRadius;
                         ss.str(std::string());
                         ss << keyShadowCaster << casterCounter << ".Radius";
                         success = shadowDictionary.getValue(ss.str(), casterRadius);
                         if (success) {
                             casterArray.push_back(std::pair< std::string, float>(
-                                casterName, casterRadius[0] * pow(10.f, casterRadius[1])));
+                                casterName, casterRadius));
                         }
                         else {
                             LWARNING("No Radius value expecified for Shadow Caster Name "
@@ -448,7 +469,6 @@ namespace openspace {
                 "shadowNightProgram",
                 "${MODULE_ATMOSPHERE}/shaders/shadow_nighttexture_vs.glsl",
                 "${MODULE_ATMOSPHERE}/shaders/shadow_nighttexture_fs.glsl");
-            std::cout << "Building shadow night..." << std::endl;
             if (!_programObject)
                 return false;
         }
@@ -458,7 +478,6 @@ namespace openspace {
                 "shadowProgram",
                 "${MODULE_ATMOSPHERE}/shaders/shadow_vs.glsl",
                 "${MODULE_ATMOSPHERE}/shaders/shadow_fs.glsl");
-            std::cout << "Building shadow..." << std::endl;
             if (!_programObject)
                 return false;
         }
@@ -468,7 +487,6 @@ namespace openspace {
                 "nightTextureProgram",
                 "${MODULE_ATMOSPHERE}/shaders/nighttexture_vs.glsl",
                 "${MODULE_ATMOSPHERE}/shaders/nighttexture_fs.glsl");
-            std::cout << "Building night..." << std::endl;
             if (!_programObject)
                 return false;
         }
@@ -478,7 +496,6 @@ namespace openspace {
                 "pscstandard",
                 "${MODULE_ATMOSPHERE}/shaders/renderableplanet_vs.glsl",
                 "${MODULE_ATMOSPHERE}/shaders/renderableplanet_fs.glsl");
-            std::cout << "Building renderableplanet..." << std::endl;
             if (!_programObject)
                 return false;
         }
@@ -491,6 +508,15 @@ namespace openspace {
             LERROR("Error after loading shading programs. OpenGL error: " << errString);
         }
 
+
+        //========================================================================
+        //======== Initialize the current geometry (SimpleSphereGeometry) ========
+        //========================================================================
+        _geometry->initialize(this);
+
+        // Deactivate any previously activated shader program.
+        _programObject->deactivate();
+
         //===================================================================
         //=========== Load textures defined in mod file to GPU ==============
         //===================================================================
@@ -500,14 +526,6 @@ namespace openspace {
             const GLubyte * errString = gluErrorString(err);
             LERROR("Error loading textures. OpenGL error: " << errString);
         }
-
-        //========================================================================
-        //======== Initialize the current geometry (SimpleSphereGeometry) ========
-        //========================================================================
-        _geometry->initialize(this);
-
-        // Deactivate any previously activated shader program.
-        _programObject->deactivate();
 
         // Testing Deferredcaster
         _deferredcaster = std::make_unique<AtmosphereDeferredcaster>();
@@ -615,10 +633,6 @@ namespace openspace {
     }
 
     void RenderablePlanetAtmosphere::render(const RenderData& data, RendererTasks& tasks) {
-
-        GLint defaultFBO;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);        
-
         // activate shader
         _programObject->activate();
 
@@ -629,20 +643,20 @@ namespace openspace {
         computeModelTransformMatrix(&transform);
 
         // setup the data to the shader
-        double  lt;
-        glm::dvec3 sunPosFromPlanet =
-            SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
-        sunPosFromPlanet *= 1000.0; // from Km to m
-        psc sunPosFromPlanetPSC = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-            sunPosFromPlanet.x, sunPosFromPlanet.y, sunPosFromPlanet.z);
+        //        double  lt;
+        //        glm::dvec3 sunPosFromPlanet =
+        //            SpiceManager::ref().targetPosition("SUN", _target, "GALACTIC", {}, _time, lt);
+        //        sunPosFromPlanet *= 1000.0; // from Km to m
+        //        psc sunPosFromPlanetPSC = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+        //            sunPosFromPlanet.x, sunPosFromPlanet.y, sunPosFromPlanet.z);
 
-        glm::dvec3 planetPosFromSun =
-            SpiceManager::ref().targetPosition(_target, "SUN", "GALACTIC", {}, _time, lt);
-        psc planetPosFronSunPSC = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-            planetPosFromSun.x, planetPosFromSun.y, planetPosFromSun.z);
+        //        glm::dvec3 planetPosFromSun =
+        //            SpiceManager::ref().targetPosition(_target, "SUN", "GALACTIC", {}, _time, lt);
+        //        psc planetPosFronSunPSC = PowerScaledCoordinate::CreatePowerScaledCoordinate(
+        //            planetPosFromSun.x, planetPosFromSun.y, planetPosFromSun.z);
 
-        // Camera direction (vector)
-        glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - planetPosFronSunPSC.vec3());
+        //        // Camera direction (vector)
+        //        glm::vec3 cam_dir = glm::normalize(data.camera.position().vec3() - planetPosFronSunPSC.vec3());
 
         _programObject->setUniform("transparency", _alpha);
         _programObject->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
@@ -698,6 +712,7 @@ namespace openspace {
         //============= Eclipse Shadow Calculations and Uniforms Loading ==============
         //=============================================================================
         // TODO: Move Calculations to VIEW SPACE (let's avoid precision problems...)
+        double lt;
         if (!_shadowConfArray.empty()) {
             std::vector<ShadowRenderingStruct> shadowDataArray;
             shadowDataArray.reserve(_shadowConfArray.size());
@@ -768,7 +783,7 @@ namespace openspace {
                 }
                 counter++;
             }
-        }        
+        }
 
         // render
         _geometry->render();
@@ -784,7 +799,8 @@ namespace openspace {
 
     void RenderablePlanetAtmosphere::update(const UpdateData& data) {
         // set spice-orientation in accordance to timestamp
-        _stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
+        //_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
+        _stateMatrix = data.modelTransform.rotation;
         _time = data.time;
 
         if (_programObject && _programObject->isDirty())
@@ -795,7 +811,7 @@ namespace openspace {
             glm::dmat4 modelTransform;
             computeModelTransformMatrix(&modelTransform);
             _deferredcaster->setModelTransform(modelTransform);
-        }       
+        }
     }
 
     void RenderablePlanetAtmosphere::loadTexture() {
@@ -857,17 +873,17 @@ namespace openspace {
     }
 
     void RenderablePlanetAtmosphere::updateAtmosphereParameters() {
-        _atmosphereRadius               = _atmospherePlanetRadius + _atmosphereHeightP;
+        _atmosphereRadius = _atmospherePlanetRadius + _atmosphereHeightP;
         _planetAverageGroundReflectance = _groundAverageReflectanceP;
-        _rayleighHeightScale            = _rayleighHeightScaleP;
-        _rayleighScatteringCoeff        = glm::vec3(_rayleighScatteringCoeffXP * 0.001f, _rayleighScatteringCoeffYP * 0.001f,
-                                                    _rayleighScatteringCoeffZP * 0.001f);
-        _mieHeightScale                 = _mieHeightScaleP;
-        _mieScatteringCoeff             = glm::vec3(_mieScatteringCoefficientP * 0.001f);
-        _mieExtinctionCoeff             = _mieScatteringCoeff * (1.0f / static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
-        _miePhaseConstant               = _mieAsymmetricFactorGP;
-        _sunRadianceIntensity           = _sunIntensityP;
-        _hdrConstant                    = _hdrExpositionP;
+        _rayleighHeightScale = _rayleighHeightScaleP;
+        _rayleighScatteringCoeff = glm::vec3(_rayleighScatteringCoeffXP * 0.001f, _rayleighScatteringCoeffYP * 0.001f,
+            _rayleighScatteringCoeffZP * 0.001f);
+        _mieHeightScale = _mieHeightScaleP;
+        _mieScatteringCoeff = glm::vec3(_mieScatteringCoefficientP * 0.001f);
+        _mieExtinctionCoeff = _mieScatteringCoeff * (1.0f / static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
+        _miePhaseConstant = _mieAsymmetricFactorGP;
+        _sunRadianceIntensity = _sunIntensityP;
+        _hdrConstant = _hdrExpositionP;
 
         if (_deferredcaster) {
             _deferredcaster->setAtmosphereRadius(_atmosphereRadius);

@@ -40,7 +40,7 @@ return {
                         Name = "Saturn Texture",
                         FilePath = "textures/saturn.jpg",
                         Enabled = true,
-                        MinimumPixelSize = 256,
+                        TilePixelSize = 256,
                     },
                 },
                 GrayScaleLayers = { },

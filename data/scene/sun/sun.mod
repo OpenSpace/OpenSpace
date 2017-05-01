@@ -1,4 +1,9 @@
 return {
+    -- Solar system module
+    {
+        Name = "SolarSystem",
+        Parent = "Root"
+    },
     -- Sun barycenter module
     {
         Name = "SolarSystemBarycenter",
@@ -15,7 +20,8 @@ return {
             Body = "SUN", 
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 2.783200, 9 },
+                --Radius = 2.783200E9,
+                Radius = 6.957E8,
                 Segments = 100
             },
             Textures = {
@@ -44,7 +50,7 @@ return {
         Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {1.3, 10.5},
+            Size = 1.3*10^10.5,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/sun-glare.png",
@@ -65,7 +71,7 @@ return {
         Parent = "Sun",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {3.0, 11.0},
+            Size = 3.0E11,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/marker.png",

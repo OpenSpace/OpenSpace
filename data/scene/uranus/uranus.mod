@@ -23,7 +23,7 @@ return {
             Body = "URANUS BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 2.5362 , 7 },
+                Radius = 2.5362E7,
                 Segments = 100
             },
             Textures = {
@@ -36,12 +36,17 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
+        Tag = "planet_solarSystem",
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
                 SourceFrame = "IAU_URANUS",
                 DestinationFrame = "ECLIPJ2000",
-            }
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
         },
     },
 
@@ -58,7 +63,8 @@ return {
             },
             Color = {0.60, 0.95, 1.00 },
             Period = 30588.740,
-            Resolution = 1000
-        },
+            Resolution = 1000,
+            Tag = "planetTrail_solarSystem"
+        }
     }
 }

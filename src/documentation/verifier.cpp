@@ -125,7 +125,7 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
                                    const std::string & key) const {
     if (dict.hasKeyAndValue<int>(key)) {
         // We we have a key and the value is int, we are done
-        return{ true, {} };
+        return { true, {}, {} };
     }
     else {
         if (dict.hasKey(key)) {
@@ -135,19 +135,23 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
                 double intPart;
                 bool isInt = modf(value, &intPart) == 0.0;
                 if (isInt) {
-                    return{ true,{} };
+                    return { true, {}, {} };
                 }
                 else {
-                    return{ false, { { key, TestResult::Offense::Reason::WrongType } } };
+                    return {
+                        false,
+                        { { key, TestResult::Offense::Reason::WrongType } },
+                        {}
+                    };
                 }
             }
             else {
                 // If we don't have a double value, we cannot have an int value
-                return{ false, { { key, TestResult::Offense::Reason::WrongType } } };
+                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
             }
         }
         else {
-            return{ false, { {key, TestResult::Offense::Reason::MissingKey }} };
+            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
         }
     }
 }
@@ -185,11 +189,11 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
     }
     else {
         if (dict.hasKey(key)) {
-            return { false, { { key, TestResult::Offense::Reason::WrongType } } };
+            return { false, { { key, TestResult::Offense::Reason::WrongType } }, {} };
 
         }
         else {
-            return { false, { { key, TestResult::Offense::Reason::MissingKey } } };
+            return { false, { { key, TestResult::Offense::Reason::MissingKey } }, {} };
         }
     }
 }
@@ -204,6 +208,14 @@ StringListVerifier::StringListVerifier(std::string elementDocumentation)
 
 std::string StringListVerifier::type() const {
     return "List of strings";
+}
+
+IntListVerifier::IntListVerifier(std::string elementDocumentation)
+    : TableVerifier({ { "*", new IntVerifier, std::move(elementDocumentation) } })
+{}
+
+std::string IntListVerifier::type() const {
+    return "List of ints";
 }
 
 ReferencingVerifier::ReferencingVerifier(std::string id)
@@ -279,10 +291,10 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
     TestResult resRhs = rhs->operator()(dict, key);
 
     if (resLhs.success && resRhs.success) {
-        return { true, {} };
+        return { true, {}, {} };
     }
     else {
-        return { false, { { key, TestResult::Offense::Reason::Verification } } };
+        return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
     }
 }
 
@@ -313,10 +325,10 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dict,
     TestResult resB = rhs->operator()(dict, key);
 
     if (resA.success || resB.success) {
-        return { true, {} };
+        return { true, {}, {} };
     }
     else {
-        return { false, { { key, TestResult::Offense::Reason::Verification } } };
+        return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
     }
 }
 

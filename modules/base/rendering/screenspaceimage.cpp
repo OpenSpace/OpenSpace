@@ -33,8 +33,6 @@
 #include <ghoul/filesystem/filesystem>
 
 namespace {
-    const std::string _loggerCat = "ScreenSpaceImage";
-
     const char* KeyName = "Name";
     const char* KeyTexturePath = "TexturePath";
     const char* KeyUrl = "URL";
@@ -44,8 +42,9 @@ namespace openspace {
 
 ScreenSpaceImage::ScreenSpaceImage(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
-    , _texturePath("texturePath", "Texture path", "")
     , _downloadImage(false)
+    , _textureIsDirty(false)
+    , _texturePath("texturePath", "Texture path", "")
 {
     std::string name;
     if (dictionary.getValue(KeyName, name)) {
@@ -61,7 +60,7 @@ ScreenSpaceImage::ScreenSpaceImage(const ghoul::Dictionary& dictionary)
     std::string texturePath;
     if (dictionary.getValue(KeyTexturePath, texturePath)) {
         _texturePath = texturePath;
-        _texturePath.onChange([this](){ loadTexture(); });
+        _texturePath.onChange([this]() { _textureIsDirty = true; });
     }
 
     if (dictionary.getValue(KeyUrl, _url)) {
@@ -82,7 +81,6 @@ bool ScreenSpaceImage::initialize() {
 }
 
 bool ScreenSpaceImage::deinitialize() {
-
     glDeleteVertexArrays(1, &_quad);
     _quad = 0;
 
@@ -106,7 +104,7 @@ void ScreenSpaceImage::render() {
 
 void ScreenSpaceImage::update() {
     bool download = _downloadImage ? (_futureImage.valid() && DownloadManager::futureReady(_futureImage)) : true;
-    if (download) {
+    if (download && _textureIsDirty) {
         loadTexture();
     }
 }
@@ -118,9 +116,9 @@ bool ScreenSpaceImage::isReady() const {
 void ScreenSpaceImage::loadTexture() {
     std::unique_ptr<ghoul::opengl::Texture> texture = nullptr;
     if (!_downloadImage)
-        texture = std::move(loadFromDisk());
+        texture = loadFromDisk();
     else
-        texture = std::move(loadFromMemory());
+        texture = loadFromMemory();
 
     if (texture) {
         // LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
@@ -130,6 +128,7 @@ void ScreenSpaceImage::loadTexture() {
         texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
         _texture = std::move(texture);
+        _textureIsDirty = false;
     }
 }
 
@@ -175,15 +174,21 @@ void ScreenSpaceImage::updateTexture() {
 std::future<DownloadManager::MemoryFile> ScreenSpaceImage::downloadImageToMemory(
     std::string url)
 {
-    return std::move(OsEng.downloadManager().fetchFile(
+    return OsEng.downloadManager().fetchFile(
         url,
-        [url](const DownloadManager::MemoryFile& file) {
-            LDEBUG("Download to memory finished for screen space image");
+        [url](const DownloadManager::MemoryFile&) {
+            LDEBUGC(
+                "ScreenSpaceImage",
+                "Download to memory finished for screen space image"
+            );
         },
         [url](const std::string& err) {
-            LDEBUG("Download to memory failer for screen space image: " +err);
+            LDEBUGC(
+                "ScreenSpaceImage",
+                "Download to memory failer for screen space image: " + err
+            );
         }
-    ));
+    );
 }
 
 } // namespace openspace

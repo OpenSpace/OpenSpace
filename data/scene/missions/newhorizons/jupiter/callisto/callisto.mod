@@ -9,7 +9,7 @@ return {
             Body = "CALLISTO",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 1.8213, 6 },
+                Radius = 1.8213E6,
                 Segments = 100
             },
             Textures = {
@@ -58,7 +58,7 @@ return {
         Parent = "Callisto",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {1.0, 7.4},
+            Size = 10^7.4,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Callisto-Text.png",

@@ -196,8 +196,8 @@ void ProjectionComponent::initialize(const ghoul::Dictionary& dictionary) {
     _instrumentID = dictionary.value<std::string>(keyInstrument);
     _projectorID = dictionary.value<std::string>(keyProjObserver);
     _projecteeID = dictionary.value<std::string>(keyProjTarget);
-    _fovy = dictionary.value<double>(keyInstrumentFovy);
-    _aspectRatio = dictionary.value<double>(keyInstrumentAspect);
+    _fovy = static_cast<float>(dictionary.value<double>(keyInstrumentFovy));
+    _aspectRatio = static_cast<float>(dictionary.value<double>(keyInstrumentAspect));
 
     _aberration = SpiceManager::AberrationCorrection(
         dictionary.value<std::string>(keyProjAberration)

@@ -1,9 +1,0 @@
--- Circular Dependencies
-return {
-    ScenePath = ".",
-    Modules = {
-        "common",
-        "circular-dependency"
-    }
-}
-

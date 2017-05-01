@@ -107,11 +107,14 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
 
         LuaLibrary merged = *it;
         for (const LuaLibrary::Function& fun : library.functions) {
-            auto it = std::find_if(merged.functions.begin(), merged.functions.end(),
+            auto itf = std::find_if(
+                merged.functions.begin(),
+                merged.functions.end(),
                 [&fun](const LuaLibrary::Function& function) {
                     return fun.name == function.name;
-            });
-            if (it != merged.functions.end()) {
+                }
+            );
+            if (itf != merged.functions.end()) {
                 // the function with the desired name is already present, but we don't
                 // want to overwrite it
                 LERROR("Lua function '" << fun.name << "' in library '" << library.name <<
@@ -827,7 +830,7 @@ void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     }
 }
 
-void ScriptEngine::postsync(bool isMaster) {
+void ScriptEngine::postsync(bool) {
     std::vector<std::string> scripts;
 
     _mutex.lock();

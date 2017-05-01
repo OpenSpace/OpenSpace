@@ -39,8 +39,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
 
-
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/geometry/geodetic2.h>
@@ -169,6 +169,7 @@ void InteractionHandler::setFocusNode(SceneGraphNode* node) {
 
 void InteractionHandler::setCamera(Camera* camera) {
     _camera = camera;
+    setFocusNode(_camera->parent());
 }
 
 void InteractionHandler::resetCameraDirection() {
@@ -185,6 +186,10 @@ void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> int
 
     // Update the focusnode for the new interaction mode
     _currentInteractionMode->setFocusNode(focusNode);
+}
+
+InteractionMode * InteractionHandler::interactionMode() {
+    return _currentInteractionMode.get();
 }
 
 void InteractionHandler::setInteractionMode(const std::string& interactionModeKey) {
@@ -260,11 +265,20 @@ void InteractionHandler::updateCamera(double deltaTime) {
     }
 }
 
-SceneGraphNode* const InteractionHandler::focusNode() const {
+SceneGraphNode* InteractionHandler::focusNode() const {
     return _currentInteractionMode->focusNode();
 }
 
-Camera* const InteractionHandler::camera() const {
+glm::dvec3 InteractionHandler::focusNodeToCameraVector() const {
+    return _camera->positionVec3() - focusNode()->worldPosition();
+}
+
+glm::quat InteractionHandler::focusNodeToCameraRotation() const {
+    glm::dmat4 invWorldRotation = glm::inverse(focusNode()->worldRotationMatrix());
+    return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
+}
+
+Camera* InteractionHandler::camera() const {
     return _camera;
 }
 
@@ -496,6 +510,11 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type,
             }
         }
 
+        std::string generationTime;
+        try {
+            generationTime = Time::now().ISO8601();
+        }
+        catch (...) {}
 
         std::stringstream html;
         html << "<!DOCTYPE html>\n"
@@ -510,7 +529,7 @@ void InteractionHandler::writeKeyboardDocumentation(const std::string& type,
             << "\t<script>\n"
             << "var keybindings = JSON.parse('" << jsonString << "');\n"
             << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
-            << "var generationTime = '" << Time::now().ISO8601() << "';\n"
+            << "var generationTime = '" << generationTime << "';\n"
             << jsContent << "\n"
             << "\t</script>\n"
             << "\t<style type=\"text/css\">\n"
@@ -615,8 +634,16 @@ void InteractionHandler::addKeyframe(const datamessagestructures::CameraKeyframe
     _inputState->addKeyframe(kf);
 }
 
+void InteractionHandler::removeKeyframesAfter(double timestamp) {
+    _inputState->removeKeyframesAfter(timestamp);
+}
+
 void InteractionHandler::clearKeyframes() {
     _inputState->clearKeyframes();
+}
+
+const std::vector<datamessagestructures::CameraKeyframe>& InteractionHandler::keyframes() const {
+    return _inputState->keyframes();
 }
 
 } // namespace interaction

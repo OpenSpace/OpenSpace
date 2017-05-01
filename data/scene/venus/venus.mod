@@ -23,7 +23,7 @@ return {
             Body = "VENUS",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 3.760, 6 },
+                Radius = 3.760E6,
                 Segments = 100
             },
             Textures = {
@@ -36,10 +36,17 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
-        Rotation = {
-            Type = "SpiceRotation",
-            Frame = "IAU_VENUS",
-            Reference = "GALACTIC"
+        Tag = {"planet_solarSystem", "planet_terrestrial"},
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                SourceFrame = "IAU_VENUS",
+                DestinationFrame = "GALACTIC"
+            },
+            Scale = {
+                Type = "StaticScale",
+                Scale = 1,
+            },
         },
     },
 
@@ -56,7 +63,8 @@ return {
             },
             Color = { 1.0, 0.5, 0.2 },
             Period = 224.695,
-            Resolution = 1000
+            Resolution = 1000,
+            Tag = {"planetTrail_solarSystem", "planetTrail_terrestrial"}
         }
     }
 }
