@@ -27,6 +27,7 @@
 
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/base/rendering/modelgeometry.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
 #include <memory>
 
 namespace openspace {
@@ -39,6 +40,7 @@ struct Model {
 	std::vector<float> rotation;
 	float lat, lon;
 	glm::dvec3 cartesianPosition;
+	Geodetic2 siteCoordinate;
 	
 	uint64_t tileHashKey;
 	std::string fileName;

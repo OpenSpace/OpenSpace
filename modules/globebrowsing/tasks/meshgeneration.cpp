@@ -36,6 +36,7 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/surface/gp3.h>
+#include <pcl/common/transforms.h>
 
 #include <fstream>
 
@@ -77,7 +78,8 @@ namespace globebrowsing {
 		}
 
 		ImgReader::PointCloudInfo mInfo = ImgReader::readBinaryHeader(binary_path);
-		
+
+		LINFO("POINTS BEFORE DECIMATION: ");
 		std::vector<std::vector<float>> xyz;
 
 		ImgReader::readBinaryData(binary_path, xyz, mInfo);
@@ -96,9 +98,9 @@ namespace globebrowsing {
 
 				// Extract points, the coordinate system for the binary file is the same as rover
 				// Invert so that we get z up, too keep right handed coordinate system swap(x, y)
-				float x = xyz.at(1).at(uvTeller);
-				float y = xyz.at(0).at(uvTeller);
-				float z = -xyz.at(2).at(uvTeller);
+				float x = xyz.at(0).at(uvTeller);
+				float y = xyz.at(1).at(uvTeller);
+				float z = xyz.at(2).at(uvTeller);
 
 				pcl::PointXYZ depthPoint;
 				depthPoint.x = x;
@@ -130,7 +132,7 @@ namespace globebrowsing {
 			}
 		}
 
-		//LINFO("POINTS BEFORE DECIMATION: " << cloud->points.size());
+		LINFO("POINTS BEFORE DECIMATION: " << cloud->points.size());
 
 		// Create a VoxelGrid for the model
 		// Used to simplify the model
@@ -141,7 +143,7 @@ namespace globebrowsing {
 		voxel_grid.filter(*cloud);
 
 
-		//LINFO("POINTS AFTER DECIMATION: " << cloud->points.size());
+		LINFO("POINTS AFTER DECIMATION: " << cloud->points.size());
 
 		// Normal estimation
 		pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
@@ -157,11 +159,46 @@ namespace globebrowsing {
 		pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
 		pcl::concatenateFields(*cloud, *normals, *cloud_with_normals);
 
-		//LINFO("DONE CALCULATING THE NORMALS");
+		LINFO("DONE CALCULATING THE NORMALS");
 		
 		// Create search tree
 		pcl::search::KdTree<pcl::PointNormal>::Ptr tree2(new pcl::search::KdTree<pcl::PointNormal>);
 		tree2->setInputCloud(cloud_with_normals);
+
+		//Rotation from IMG:
+		//Eigen::Quaternionf q(0.33207, -0.0762275, -0.0618002, 0.938136); //997
+		//Eigen::Quaternionf q(0.988066, -0.126849, -0.0448321, 0.0750038);	//1360
+		//Eigen::Quaternionf q(0.216139, -0.00939972, -0.0569706, 0.974654); //1044
+		//Mickes:
+		//Eigen::Quaternionf q(0.33207, 0.0618002, -0.938136, -0.0762275);
+		
+		//Eigen::Quaternionf q(0.33207, -0.0762275, -0.0618002, 0.938136);
+
+		//Eigen::Quaternionf q(-0.753, 0.447, -0.480, -0.046);
+		//q = q.inverse();
+
+
+		Eigen::Quaternionf q(mInfo._roverQuat.at(0), mInfo._roverQuat.at(1), mInfo._roverQuat.at(2), mInfo._roverQuat.at(3));
+
+		Eigen::Matrix4f rotation = Eigen::Matrix4f::Identity();
+
+		rotation.block(0, 0, 3, 3) = q.toRotationMatrix();
+
+		typename pcl::PointCloud<pcl::PointNormal>::Ptr originalCloudTransformed(new pcl::PointCloud<pcl::PointNormal>);
+		typename pcl::PointCloud<pcl::PointNormal>::Ptr originalCloudTransformed2(new pcl::PointCloud<pcl::PointNormal>);
+
+		pcl::transformPointCloud(*cloud_with_normals, *originalCloudTransformed2, rotation);
+
+		Eigen::AngleAxisf rollAngle(-M_PI / 2.0, Eigen::Vector3f::UnitZ());
+		Eigen::AngleAxisf yawAngle(M_PI, Eigen::Vector3f::UnitY());
+		Eigen::AngleAxisf pitchAngle(0, Eigen::Vector3f::UnitX());
+
+		Eigen::Quaternionf q2 = pitchAngle * yawAngle * rollAngle;
+
+		Eigen::Matrix4f rotationMatrix = Eigen::Matrix4f::Identity();
+		rotationMatrix.block(0, 0, 3, 3) = q2.toRotationMatrix();
+
+		pcl::transformPointCloud(*originalCloudTransformed2, *originalCloudTransformed, rotationMatrix);
 
 		// Greedy projection triangulation algorithm
 		pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
@@ -176,7 +213,7 @@ namespace globebrowsing {
 		gp3.setMaximumAngle(2 * M_PI / 3); // 120 degrees
 		gp3.setNormalConsistency(false);
 
-		gp3.setInputCloud(cloud_with_normals);
+		gp3.setInputCloud(originalCloudTransformed);
 		gp3.setSearchMethod(tree2);
 		gp3.reconstruct(triangles);
 
@@ -194,9 +231,9 @@ namespace globebrowsing {
 		for (size_t i = 0; i < triangles.polygons.size(); ++i) {
 			pcl::Vertices v1 = triangles.polygons.at(i);
 
-			pcl::PointNormal pt = cloud_with_normals->points[v1.vertices.at(0)];
-			pcl::PointNormal pt2 = cloud_with_normals->points[v1.vertices.at(1)];
-			pcl::PointNormal pt3 = cloud_with_normals->points[v1.vertices.at(2)];
+			pcl::PointNormal pt = originalCloudTransformed->points[v1.vertices.at(0)];
+			pcl::PointNormal pt2 = originalCloudTransformed->points[v1.vertices.at(1)];
+			pcl::PointNormal pt3 = originalCloudTransformed->points[v1.vertices.at(2)];
 
 			// Edges on triangle
 			glm::fvec3 one = glm::normalize(glm::fvec3(pt.x, pt.y, pt.z) - glm::fvec3(pt3.x, pt3.y, pt3.z));
@@ -237,12 +274,18 @@ namespace globebrowsing {
 		int nrOfFound = 0;
 		int nrOfClosest = 0;
 
-		pcl::PointXYZ pt;
+		pcl::PointNormal pt;
 		size_t idx;
 		float maxMinDist = 0.0f;
 
+		typename pcl::PointCloud<pcl::PointNormal>::Ptr uvCloudTransformed(new pcl::PointCloud<pcl::PointNormal>);
+		typename pcl::PointCloud<pcl::PointNormal>::Ptr uvCloudTransformed2(new pcl::PointCloud<pcl::PointNormal>);
+
+		pcl::transformPointCloud(*uvCloud, *uvCloudTransformed2, rotation);
+		pcl::transformPointCloud(*uvCloudTransformed2, *uvCloudTransformed, rotationMatrix);
+		
 		pcl::search::KdTree<pcl::PointNormal>::Ptr tree5(new pcl::search::KdTree<pcl::PointNormal>);
-		tree5->setInputCloud(uvCloud);
+		tree5->setInputCloud(uvCloudTransformed);
 		int K = 1;
 		std::vector<int> pointIdxNKNSearch(K);
 		std::vector<float> pointNKNSquaredDistance(K);
@@ -258,7 +301,7 @@ namespace globebrowsing {
 			{
 				// Get point
 				idx = texMesh.tex_polygons[0][i].vertices[j];
-				pt = originalCloud->points[idx];
+				pt = originalCloudTransformed->points[idx];
 
 				// Point in mesh cloud
 				glm::fvec3 meshPoint;
@@ -279,8 +322,8 @@ namespace globebrowsing {
 					nrOfFound++;
 
 					// Get the pixel index from the uvCloud
-					float indexi = uvCloud->points[pointIdxNKNSearch[0]].normal_x;
-					float indexk = uvCloud->points[pointIdxNKNSearch[0]].normal_y;
+					float indexi = uvCloudTransformed->points[pointIdxNKNSearch[0]].normal_x;
+					float indexk = uvCloudTransformed->points[pointIdxNKNSearch[0]].normal_y;
 					if (minDist > pointNKNSquaredDistance[0]) {
 						minDist = pointNKNSquaredDistance[0];
 					}

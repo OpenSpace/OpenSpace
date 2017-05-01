@@ -34,6 +34,7 @@
 #include <fstream>
 #include <gdal_priv.h>
 #include "ogrsf_frmts.h"
+#include <glm/gtx/quaternion.hpp>
 
 namespace {
 	const std::string _loggerCat		= "RenderableRoverSurface";
@@ -60,6 +61,7 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 	_generalProperties({
 		BoolProperty("enabled", "enabled", false)
 	})
+	, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
 {
 	if (!dictionary.getValue(keyRoverLocationPath, _roverLocationPath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -81,6 +83,8 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 
 	// Extract all coordinates from the GDAL dataset
 	extractCoordinates();
+
+	addProperty(_debugModelRotation);
 
 	// Save the abspath because it changes when leaving the constructor.
 	_absModelPath = absPath(_modelPath);
@@ -115,11 +119,65 @@ void RenderableRoverSurface::render(const RenderData & data) {
 	_programObject->activate();
 	for (auto model : _models) {
 		glm::dmat4 globeTransform = _globe->modelTransform();
+		
 		glm::dvec3 positionWorldSpace = globeTransform * glm::dvec4(model->cartesianPosition, 1.0);
+
+		// debug rotation controlled from GUI
+		glm::mat4 unitMat4(1);
+		glm::vec3 debugEulerRot = glm::radians(_debugModelRotation.value());
+
+		//debugEulerRot.x = glm::radians(146.f);
+		//debugEulerRot.y = glm::radians(341.f);
+		//debugEulerRot.z = glm::radians(79.f);
+
+		glm::mat4 rotX = glm::rotate(unitMat4, debugEulerRot.x, glm::vec3(1, 0, 0));
+		glm::mat4 rotY = glm::rotate(unitMat4, debugEulerRot.y, glm::vec3(0, 1, 0));
+		glm::mat4 rotZ = glm::rotate(unitMat4, debugEulerRot.z, glm::vec3(0, 0, 1));
+
+		glm::dmat4 debugModelRotation = rotX * rotY * rotZ;
+
+		// Rotation to make model up become normal of position on ellipsoid
+		glm::dvec3 surfaceNormal = _globe->ellipsoid().geodeticSurfaceNormal(model->siteCoordinate);
+
+		surfaceNormal = glm::normalize(surfaceNormal);
+		float cosTheta = dot(glm::dvec3(0, 0, 1), surfaceNormal);
+		glm::dvec3 rotationAxis;
+
+		rotationAxis = cross(glm::dvec3(0, 0, 1), surfaceNormal);
+
+		float s = sqrt((1 + cosTheta) * 2);
+		float invs = 1 / s;
+
+		glm::dquat rotationMatrix = glm::dquat(s * 0.5f, rotationAxis.x * invs, rotationAxis.y * invs, rotationAxis.z * invs);
+
+		glm::dvec3 xAxis = _globe->ellipsoid().geodeticSurfaceNorthPoleTangent(positionWorldSpace);
+
+		if (xAxis.x == 0 && xAxis.y == 0 && xAxis.z == 0) {
+			LERROR("PLANE AND LINE HAS SAME");
+		}
+		
+		glm::dvec4 test = glm::rotate(rotationMatrix, glm::dvec4(0, -1, 0, 1));
+		
+		glm::dvec3 testa = glm::dvec3(test.x, test.y, test.z);
+
+		float cosTheta2 = dot(testa, xAxis);
+		glm::dvec3 rotationAxis2;
+
+		rotationAxis2 = cross(testa, xAxis);
+
+		float s2 = sqrt((1 + cosTheta2) * 2);
+		float invs2 = 1 / s2;
+
+		glm::quat rotationMatrix2 = glm::quat(s2 * 0.5f, rotationAxis2.x * invs2, rotationAxis2.y * invs2, rotationAxis2.z * invs2);
 
 		glm::dmat4 modelTransform =
 			glm::translate(glm::dmat4(1.0), positionWorldSpace) *
-			glm::dmat4(data.modelTransform.rotation);
+			glm::dmat4(data.modelTransform.rotation) *
+			glm::dmat4(glm::toMat4(rotationMatrix2)) *
+			glm::dmat4(glm::toMat4(rotationMatrix)) *
+			debugModelRotation;
+
+		//glDisable(GL_CULL_FACE);
 
 		glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 		glm::vec3 directionToSun = glm::normalize(_sunPos - positionWorldSpace);
@@ -150,8 +208,12 @@ void RenderableRoverSurface::update(const UpdateData & data) {
 	_models.clear();
 	_sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 	// Loop through all subsites.
-	for (auto i : _subSites) {
 
+	globebrowsing::Geodetic2 temp;
+	for (auto i : _subSites) {
+		if (i.frame == "SITE") {
+			temp = globebrowsing::Geodetic2{ i.lat, i.lon } / 180 * glm::pi<double>();
+		}
 		// Check which chunk each subsite corresponds to. Also extract the chunk hashkey to use it for
 		// caching when loading models.
 		Geodetic2 geodetic2 = Geodetic2{ i.lat, i.lon } / 180 * glm::pi<double>();
@@ -192,6 +254,7 @@ void RenderableRoverSurface::update(const UpdateData & data) {
 					model.tileHashKey = hashKey;
 					model.lat = i.lat;
 					model.lon = i.lon;
+					model.siteCoordinate = temp;
 					std::shared_ptr<Model> theModel = std::make_shared<Model>(std::move(model));
 
 					_models = _cachingModelProvider->getModels(modelDictionary, theModel);
@@ -256,6 +319,7 @@ void RenderableRoverSurface::extractCoordinates() {
 			subSite.drive = convertString(drive, type);
 			subSite.lat = lat;
 			subSite.lon = lon;
+			subSite.frame = frame;
 
 			_coordinates.push_back(glm::fvec2(lat, lon));
 			_subSites.push_back(subSite);

@@ -38,7 +38,7 @@ namespace globebrowsing {
 class RenderableRoverSurface : public Renderable {
 public:
 	struct SubSite {
-		std::string site, drive;
+		std::string site, drive, frame;
 		double lat, lon;
 	};
 
@@ -78,6 +78,9 @@ private:
 	std::string _absModelPath;
 	std::string _absTexturePath;
 	std::string _multiModelGeometry;
+
+
+	properties::Vec3Property _debugModelRotation;
 
 	globebrowsing::RenderableGlobe* _globe;
 	std::shared_ptr<globebrowsing::ChunkedLodGlobe> _chunkedLodGlobe;
