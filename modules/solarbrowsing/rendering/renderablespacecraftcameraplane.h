@@ -81,7 +81,8 @@ private:
     double _startTimeSequence;
     double _endTimeSequence;
 
-    bool _updateResGPU = false;
+    bool _updatingCurrentActiveChannel = false;
+    bool _updatingCurrentLevelOfResolution = false;
 
     std::unique_ptr<std::future<void>> _future;
     bool _initializePBO;
