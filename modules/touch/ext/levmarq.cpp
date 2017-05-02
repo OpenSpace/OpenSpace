@@ -144,6 +144,13 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 	lmstat->final_err = err;
 	lmstat->final_derr = derr;
 
+	if (verbose) {
+		for (int i = 0; i < npar; ++i) {
+			printf("g[%d] = %g, ", i, g[i]);
+		}
+		printf("\n");
+	}
+
 	// deallocate the arrays
 	for (int i = 0; i < npar; i++) {
 		delete[] h[i];
