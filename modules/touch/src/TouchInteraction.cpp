@@ -61,11 +61,9 @@ TouchInteraction::TouchInteraction()
 	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
 	_friction{ 0.02, 0.01, 0.02, 1, 0.02 },
 	_sensitivity{ 2.0 * 55.0, 0.1, 0.1, 1, 0.4 * 55.0 },
-	_centroid{ glm::dvec3(0.0) },
-	_action{ -1 },
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
 	_currentRadius{ 1.0 }, _time{ 1.0 },
-	_directTouchMode{ false }, _tap{ false }, _levSuccess{ true }
+	_directTouchMode{ false }, _tap{ false }, _levSuccess{ true }, _guiON{ false }
 {
 	addProperty(_touchScreenSize);
 	levmarq_init(&_lmstat);
@@ -83,22 +81,29 @@ TouchInteraction::~TouchInteraction() { }
 
 // Called each frame if there is any input
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
-	if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
-		manipulate(list);
+	// check if tapped in corner to activate gui mode
+	glm::dvec2 pos = glm::dvec2(list.at(0).getX(), list.at(0).getY());
+	if (_tap && list.size() == 1 && pos.x < 0.0001 && pos.y < 0.0001 /*|| check if showGUI*/) {
+		// if !showGUI press F1, 
+		_guiON = !_guiON;
 	}
-	if (_levSuccess)
-		trace(list);
-	if (!_directTouchMode) {
-		_action = interpret(list, lastProcessed);
-		accelerate(list, lastProcessed);
-	}
-	
-	// evaluates if current frame is in directTouchMode (will if so be used next frame)
-	if (_currentRadius > 0.3 && _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch, needs better definition
-		_directTouchMode = true;
-	}
-	else {
-		_directTouchMode = false;
+	else if (!_guiON) {
+		if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
+			manipulate(list);
+		}
+		if (_levSuccess)
+			trace(list);
+		if (!_directTouchMode) {
+			accelerate(list, lastProcessed);
+		}
+
+		// evaluates if current frame is in directTouchMode (will if so be used next frame)
+		if (_currentRadius > 0.3 && _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch, needs better definition
+			_directTouchMode = true;
+		}
+		else {
+			_directTouchMode = false;
+		}
 	}
 }
 
@@ -363,28 +368,31 @@ int TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::
 		else {
 			return PINCH;
 		}
-	}	
+	}
 }
 
 // Calculate how much interpreted interaction should change the camera state (based on _vel)
 void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
 	TuioCursor cursor = list.at(0);
-	if (_action != ROT || _action != PICK) {
-		_centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
-		_centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](double y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
+	glm::dvec3 centroid;
+	int action = interpret(list, lastProcessed);
+
+	if (action != ROT || action != PICK) {
+		centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
+		centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](double y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
 	}
 
-	switch (_action) {
+	switch (action) {
 		case ROT: { // add rotation velocity
 			_vel.globalRot += glm::dvec2(cursor.getXSpeed(), cursor.getYSpeed()) * _sensitivity.globalRot;
 			break;
 		}
 		case PINCH: { // add zooming velocity
 			double distance = std::accumulate(list.begin(), list.end(), 0.0, [&](double d, const TuioCursor& c) {
-				return d + c.getDistance(_centroid.x, _centroid.y);
+				return d + c.getDistance(centroid.x, centroid.y);
 			});
 			double lastDistance = std::accumulate(lastProcessed.begin(), lastProcessed.end(), 0.0f, [&](float d, const Point& p) {
-				return d + p.second.getDistance(_centroid.x, _centroid.y);
+				return d + p.second.getDistance(centroid.x, centroid.y);
 			});
 
 			double zoomFactor = (distance - lastDistance) * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
@@ -395,8 +403,8 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 			double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
 				TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
 				double res = diff;
-				double lastAngle = point.getAngle(_centroid.x, _centroid.y);
-				double currentAngle = c.getAngle(_centroid.x, _centroid.y);
+				double lastAngle = point.getAngle(centroid.x, centroid.y);
+				double currentAngle = c.getAngle(centroid.x, centroid.y);
 				if (lastAngle > currentAngle + 1.5 * M_PI)
 					res += currentAngle + (2 * M_PI - lastAngle);
 				else if (currentAngle > lastAngle + 1.5 * M_PI)
@@ -556,6 +564,9 @@ void TouchInteraction::tap() {
 	_tap = true;
 }
 
+bool TouchInteraction::guiON() {
+	return _guiON;
+}
 // Get & Setters
 Camera* TouchInteraction::getCamera() {
 	return _camera;

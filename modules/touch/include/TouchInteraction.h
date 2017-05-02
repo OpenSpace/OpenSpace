@@ -109,6 +109,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void decelerate();
 		void clear();
 		void tap();
+		bool guiON();
 
 		// Get & Setters
 		Camera* getCamera();
@@ -125,14 +126,13 @@ class TouchInteraction : public properties::PropertyOwner
 		VelocityStates _vel;
 		ScaleFactor _friction;
 		ScaleFactor _sensitivity;
-		glm::dvec3 _centroid;
-		int _action;
 		double _projectionScaleFactor;
 		double _currentRadius;
 		double _time;
 		bool _directTouchMode;
 		bool _tap;
 		bool _levSuccess;
+		bool _guiON;
 		
 		
 		std::vector<SelectedBody> _selected;
