@@ -132,6 +132,7 @@ class TouchInteraction : public properties::PropertyOwner
 		double _time;
 		bool _directTouchMode;
 		bool _tap;
+		bool _levSuccess;
 		
 		
 		std::vector<SelectedBody> _selected;

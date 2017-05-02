@@ -65,7 +65,7 @@ TouchInteraction::TouchInteraction()
 	_action{ -1 },
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
 	_currentRadius{ 1.0 }, _time{ 1.0 },
-	_directTouchMode{ false }, _tap{ false }
+	_directTouchMode{ false }, _tap{ false }, _levSuccess{ true }
 {
 	addProperty(_touchScreenSize);
 	levmarq_init(&_lmstat);
@@ -86,7 +86,8 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 	if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
 		manipulate(list);
 	}
-	trace(list);
+	if (_levSuccess)
+		trace(list);
 	if (!_directTouchMode) {
 		_action = interpret(list, lastProcessed);
 		accelerate(list, lastProcessed);
@@ -190,7 +191,7 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 			f1 = ptr->distToMinimize(dPar, x, fdata);
 			dPar[i] -= h;
 			der = (f1 - f0) / h;
-
+			
 			g[i] = (i > 1 && i < 4) ? der : der / abs(der);
 		}
 		delete[] dPar;
@@ -241,11 +242,11 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 	}
 
 	// debugging
-	/*std::ostringstream os;
+	std::ostringstream os;
 	for (int i = 0; i < nDOF; ++i) {
 	os << par[i] << ", ";
 	}
-	std::cout << "Levmarq success after " << _lmstat.final_it << " iterations. Values: " << os.str() << "\n";*/
+	std::cout << "Levmarq success after " << _lmstat.final_it << " iterations. Values: " << os.str() << "\n";
 
 	// cleanup
 	delete[] par;
@@ -547,6 +548,7 @@ void TouchInteraction::decelerate() {
 // Called if all fingers are off the screen
 void TouchInteraction::clear() {
 	//_directTouchMode = false;
+	_levSuccess = true;
 	_selected.clear(); // should clear if no longer have a direct-touch input
 }
 
