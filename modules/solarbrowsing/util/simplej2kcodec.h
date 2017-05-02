@@ -20,7 +20,7 @@ public:
   // Decode whole image from current loaded file
   std::unique_ptr<ImageData> Decode();
   // Decode into a predefined buffer
-  void DecodeIntoBuffer(int32_t*& buffer);
+  void DecodeIntoBuffer(unsigned char*& buffer, const int numThreads);
   void DecodeTileIntoBuffer(const int& tileId, unsigned char*& buffer, int numThreads);
   // Encodes current loaded file
   void EncodeAsTiles(const char* outfile,
@@ -33,7 +33,7 @@ public:
                      const unsigned int compPrec);
   void CreateInfileStream(const std::string& filename);
   void SetResolutionFactor(const int resolution);
-  void SetupDecoder();
+  void SetupDecoder(const int resolutionLevel);
 
 private:
   const int GetInfileFormat(const char* fname);
@@ -43,7 +43,8 @@ private:
   bool _isFileLoaded;
   bool _isDecoderSetup;
   bool _verboseMode;
-  char _infileName[OPJ_PATH_LEN];
+  //char _infileName[OPJ_PATH_LEN];
+  std::string _infileName;
 
   // Decoding will happen frequently - store the setup
   opj_stream_t* _infileStream;

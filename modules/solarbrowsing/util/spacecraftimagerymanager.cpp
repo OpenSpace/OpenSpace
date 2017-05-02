@@ -230,7 +230,7 @@ void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
 
                     SimpleJ2kCodec j2c;
                     j2c.CreateInfileStream(relativePath);
-                    j2c.SetupDecoder();
+                    j2c.SetupDecoder(0);
                     auto decodedImg = j2c.Decode();
                     j2c.EncodeAsTiles(outPath.c_str(),
                                       decodedImg->data,
