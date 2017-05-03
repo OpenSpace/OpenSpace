@@ -85,12 +85,15 @@ private:
     GLuint _morphToPositionBuffer;
     GLuint _quickMorphBuffer;
 
+    GLfloat _maxLineWidthOpenGl;
+
     int _activeStateIndex;
     int _numberOfStates;
     double _seqStartTime; // redundant, but hey.. nice n clear
     double _seqEndTime;
     double _currentTime;
     float _stateProgress;
+    float _widthScaling;
 
     std::vector<double> _startTimes;
 };

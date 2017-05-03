@@ -120,200 +120,185 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         const bool shouldResample,
         const int& numResamples,
         const int& resamplingOption,
+        std::vector<std::string>& colorizingFloatVars,
         std::vector<double>& startTimes,
         FieldlinesState& outFieldlinesStates) {
 
-
-    //TODO PREALLOCATE outFieldlinesState._vertexPositions if resampling!!!!!!!!!!
+    // --------------------- CREATE KAMELEON OBJECT AND DEPENDENCIES ---------------------
     std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
     long kamStatus = kameleon->open(pathToCdfFile);
 
     if (kamStatus != ccmc::FileReader::OK) {
+        LERROR("Failed to create a Kameleon Object from file: " << pathToCdfFile);
         return false;
     }
-    // TODO: check model
-    // == "enlil"; // TODO, specify in Lua and confirm?
-
-    LDEBUG("Successfully created a Kameleon Object from file: " << pathToCdfFile);
-
-    double startTime = getTime(kameleon.get());
-    startTimes.push_back(startTime);
-    LDEBUG("State will start at " << startTime << " (J2000 Time)");
-
-    bool status;
-    // TODO: check status
-    status = traceFieldlines(kameleon.get(),
-                             tracingVariable,
-                             inSeedPoints,maxIterations,
-                             shouldResample,
-                             numResamples,
-                             resamplingOption,
-                             outFieldlinesStates);
-    return status;
-}
-
-bool FieldlinesSequenceManager::traceFieldlines(
-        ccmc::Kameleon* kameleon,
-        const std::string& tracingVariable,
-        const std::vector<glm::vec3>& inSeedPoints,
-        const int& maxIterations,
-        const bool shouldResample,
-        const int& numResamples,
-        const int& resamplingOption,
-        FieldlinesState& outFieldlinesStates) {
 
     const std::string model = kameleon->getModelName();
-    kameleon->loadVariable(tracingVariable);
+    outFieldlinesStates._modelName = model;
+    bool status = kameleon->loadVariable(tracingVariable);
+    if (!status) {
+        LERROR("FAILED TO LOAD TRACING VARIABLE: " << tracingVariable);
+        return false;
+    }
 
-    ccmc::Tracer tracer(kameleon);
-
+    // IMPORTANT!: Remember to delete interpolator if creating it here!
+    // ccmc::Interpolator* interpolator = kameleon->createNewInterpolator();
+    // ccmc::Tracer tracer(kameleon.get(), interpolator);
+    ccmc::Tracer tracer(kameleon.get());
     tracer.setMaxIterations(maxIterations);
+
+    // ----------------- CHECK CDF MODEL AND SETUP VARIABLES ACCORDINGLY -----------------
+    float scalingFactor;
+    bool convertToCartesian = false;
 
     if (model == "batsrus") {
         tracer.setInnerBoundary(1.1f); // TODO specify in Lua
+        scalingFactor = R_E_TO_METER;
+
     } else if (model == "enlil") {
         tracer.setInnerBoundary(0.11f); // TODO specify in Lua
+        scalingFactor = A_U_TO_METER;
+        convertToCartesian = true;
+
     } else {
         LERROR("OpenSpace's fieldlines sequence currently only supports the " <<
-                "BATSRUS and ENLIL models");
+                "BATSRUS and ENLIL models. No support for " << model << "!" );
         return false;
     }
 
-    // tracer.setUseRegionOfInterest(true);
-    // tracer.setRegionOfInterest(ccmc::Point3f(-20.f, -5.f, -5.f), ccmc::Point3f(20.f, 5.f, 5.f));
+    // --- DETERMINE HOW AND WHEN TO CONVERT FROM CCMC::FIELDLINE IN MODEL COORDINATES ---
+    // ---            TO GLM::VEC3 IN PROPERLY SCALED CARTESIAN COORDINATES            ---
+    // ResamplingOption = 1, 2 and 3 uses CCMC's built in resampling which requires
+    // the ccmc::Fieldline variable. Resample before conversion to glm::vec3! Other
+    // options (4) requires the transformation to the correct coordinate system first
+    bool preConversionResampling = false;
+    bool postConversionResampling = false;
 
+    if (shouldResample) {
+        // TODO Make this check less hardcoded
+        // Check if resamplingOption is valid
+        if (resamplingOption < 5 && resamplingOption > 0) {
+
+            outFieldlinesStates._vertexPositions.reserve(numResamples);
+            if (resamplingOption < 4) {
+                preConversionResampling = true;
+                if (model == "enlil") {
+                    LWARNING("CCMC's fieldline resampling doesn't account for spherical "
+                       << "coordinates. Consider selecting Resampling Option 4 instead!");
+                }
+            } else { // resamplingOption == 4
+                postConversionResampling = true;
+            }
+
+        } else {
+            LERROR("NOT A VALID RESAMPLING OPTION! Only 1, 2, 3 & 4 are valid options!");
+            return 0;
+        }
+    }
+
+    // ---- DETERMINE WETHER OR NOT TO SAMPLE EXTRA QUANTITIES AT FIELDLINE VERTICES ----
+    // ----------------- IF SO LOAD THEM, ELSE DELETE STRING FROM VECTOR -----------------
+    bool sampleExtraQuantities = false;
+    for (std::string str : colorizingFloatVars) {
+        status =  kameleon->loadVariable(str);
+        if (!status) {
+            LWARNING("FAILED TO LOAD EXTRA VARIABLE: '" << str << "'. Ignoring it!");
+            colorizingFloatVars.erase(std::remove(colorizingFloatVars.begin(),
+                                                  colorizingFloatVars.end(), str),
+                                                  colorizingFloatVars.end());
+        } else {
+            sampleExtraQuantities = true;
+        }
+    }
+
+    // ------ LOOP THROUGH THE SEED POINTS, TRACE AND CONVERT TO THE DESIRED FORMAT ------
     int lineStart = 0;
     for (glm::vec3 seedPoint : inSeedPoints) {
         // A ccmc::Fieldline contains much more info than we need here,
-
-        // but might be sneeded in future.
+        // but might be needed in future.
         ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(tracingVariable,
                                                                   seedPoint.x,
                                                                   seedPoint.y,
                                                                   seedPoint.z);
 
-        if (!addLineToState(ccmcFieldline,
-                            model,
-                            shouldResample,
-                            numResamples,
-                            resamplingOption,
-                            lineStart,
-                            outFieldlinesStates)) {
-            return false;
-        }
-    }
+        outFieldlinesStates._lineStart.push_back(lineStart);
+        int lineCount = 0;
 
-    // TODO check that everything worked out?
-    return true;
-}
-
-bool FieldlinesSequenceManager::addLineToState(ccmc::Fieldline& ccmcFieldline,
-                                               const std::string& model,
-                                               const bool shouldResample,
-                                               const int& numResamples,
-                                               const int& resamplingOption,
-                                               int& lineStart,
-                                               FieldlinesState& outFieldlinesStates) {
-    int lineCount = 0;
-
-    if (shouldResample) {
-        outFieldlinesStates._vertexPositions.reserve(numResamples);
-        // ResamplingOption = 1, 2 and 3 uses CCMC's built in resampling which requires
-        // the ccmc::Fieldline variable. Resamples before conversion to glm::vec3!
-        // Other options requires the transformation to the correct coordinate system first
-        if (resamplingOption < 4) {
-            if (resamplingOption < 1) {
-                LERROR("Not a valid resampling option! Lowest resampling option = 1.");
-                return false;
-            }
-
-            if (model == "enlil") {
-                LWARNING("CCMC's fieldline resampling doesn't account for spherical " <<
-                         "coordinates. Consider selecting Resampling Option 4 instead!");
-            }
+        if (preConversionResampling) {
             resampleCcmcFieldline(numResamples, resamplingOption, ccmcFieldline);
         }
 
-        lineCount = numResamples;
-    } else {
-        lineCount = static_cast<int>(ccmcFieldline.size());
-    }
+        const std::vector<ccmc::Point3f> positions = ccmcFieldline.getPositions();
 
-    outFieldlinesStates._lineStart.push_back(lineStart);
-    outFieldlinesStates._lineCount.push_back(lineCount);
+        if ( (!preConversionResampling && !postConversionResampling)
+                || preConversionResampling ) {
 
-    float scalingFactor;
 
-    const std::vector<ccmc::Point3f> positions = ccmcFieldline.getPositions();
-    // TODO FIX ALL OF THIS.. works but is ugly code
-    // Add line points to FieldlinesState. Also resample if ResamplingOption == 4
-    if (model == "batsrus") {
-        scalingFactor = R_E_TO_METER;
-        // Scale all values
-        if (shouldResample && resamplingOption == 4) {
-            std::vector<glm::vec3> tempVec;
-            std::transform(positions.begin(), positions.end(),
-                    std::back_inserter(tempVec),
-                            [&scalingFactor](const ccmc::Point3f& p) {
-                                return glm::vec3(p.component1 * scalingFactor,
-                                                 p.component2 * scalingFactor,
-                                                 p.component3 * scalingFactor);
-                            });
-
-            int seedIndex = ccmcFieldline.getStartIndex();
-            centerSeedPointResampling(numResamples, seedIndex, tempVec,
-                    outFieldlinesStates._vertexPositions);
-        } else {
-            std::transform(positions.begin(), positions.end(),
-                    std::back_inserter(outFieldlinesStates._vertexPositions),
-                            [&scalingFactor](const ccmc::Point3f& p) {
-                                return glm::vec3(p.component1 * scalingFactor,
-                                                 p.component2 * scalingFactor,
-                                                 p.component3 * scalingFactor);
-                            });
-        }
-    } else if (model == "enlil") {
-        scalingFactor = A_U_TO_METER;
-        if (shouldResample && resamplingOption == 4) {
-            std::vector<glm::vec3> tempVec;
-            std::transform(positions.begin(), positions.end(),
-                    std::back_inserter(tempVec),
-                            [&scalingFactor](const ccmc::Point3f& p) {
-                                float r         = scalingFactor * p.component1;
-                                float lat_rad   = glm::radians(p.component2);
-                                float lon_rad   = glm::radians(p.component3);
-                                float r_cosLat  = r * cos(lat_rad);
-                                return glm::vec3(r_cosLat * cos(lon_rad),
-                                                 r_cosLat * sin(lon_rad),
-                                                 r * sin(lat_rad));
-                            });
+            for (ccmc::Point3f p : positions) {
+                glm::vec3 gPos = glm::vec3(p.component1, p.component2, p.component3);
+                if (sampleExtraQuantities) {
+                    LDEBUG("TODO: SAMPLE EXTRA PROPERTIES FOR COLORIZING LINES AT gPos");
+                }
+                if (convertToCartesian) {
+                    // LDEBUG("TODO: CONVERT gPos TO CARTESIAN");
+                    convertLatLonToCartesian(gPos);
+                }
+                // LDEBUG("TODO: SCALE AND STORE gPos IN STATE");
+                outFieldlinesStates._vertexPositions.push_back(gPos * scalingFactor);
+            }
+            lineCount = positions.size();
+        } else /*if (postConversionResampling)*/ {
+            std::vector<glm::vec3> glmPositions;
+            for (ccmc::Point3f p : positions) {
+                glm::vec3 gPos = glm::vec3(p.component1, p.component2, p.component3);
+                if (convertToCartesian) {
+                    // LDEBUG("TODO: CONVERT glmPositions TO CARTESIAN");
+                    convertLatLonToCartesian(gPos);
+                }
+                glmPositions.push_back(gPos);
+            }
 
             int seedIndex = ccmcFieldline.getStartIndex();
-            centerSeedPointResampling(numResamples, seedIndex, tempVec,
-                    outFieldlinesStates._vertexPositions);
-        } else {
-            std::transform(positions.begin(), positions.end(),
-                    std::back_inserter(outFieldlinesStates._vertexPositions),
-                            [&scalingFactor](const ccmc::Point3f& p) {
-                                float r         = scalingFactor * p.component1;
-                                float lat_rad   = glm::radians(p.component2);
-                                float lon_rad   = glm::radians(p.component3);
-                                float r_cosLat  = r * cos(lat_rad);
-                                return glm::vec3(r_cosLat * cos(lon_rad),
-                                                 r_cosLat * sin(lon_rad),
-                                                 r * sin(lat_rad));
-                            });
+
+            std::vector<glm::vec3> tmpvec;
+            centerSeedPointResampling(numResamples, seedIndex, glmPositions, tmpvec);
+
+            if (convertToCartesian) {
+                // LDEBUG("TODO: SCALE AND STORE tmpvec IN STATE");
+                for (glm::vec3 p : tmpvec) {
+                    outFieldlinesStates._vertexPositions.push_back(p * scalingFactor);
+                }
+                if (sampleExtraQuantities) {
+                    LDEBUG("TODO: CONVERT glmPositions BACK TO SPHERICAL (lon lat)");
+                    LDEBUG("TODO: SAMPLE EXTRA PROPERTIES FOR COLORIZING LINES AT gPos");
+                }
+            } else {
+                if (sampleExtraQuantities) {
+                    LDEBUG("TODO: SAMPLE EXTRA PROPERTIES FOR COLORIZING LINES AT gPos");
+                }
+                // LDEBUG("TODO: SCALE AND STORE glmPositions IN STATE");
+                for (glm::vec3 p : tmpvec) {
+                    outFieldlinesStates._vertexPositions.push_back(p * scalingFactor);
+                }
+            }
+
+            lineCount = tmpvec.size();
         }
-    } else {
-        LERROR("OpenSpace's fieldlines sequence currently only supports the " <<
-                "BATSRUS and ENLIL models");
-        return false;
+        outFieldlinesStates._lineCount.push_back(lineCount);
+        lineStart += lineCount;
     }
 
+    // ------------------------ MAKE SURE STATE HAS A START TIME ------------------------
+    double startTime = getTime(kameleon.get());
+    startTimes.push_back(startTime);
+    LDEBUG("State will start at " << startTime << " (J2000 Time)");
 
-    lineStart += lineCount;
-    return true;
+    // delete interpolator;
+    return status;
 }
+
+
+
 
 // Already traced
 void FieldlinesSequenceManager::resampleCcmcFieldline(const int& numResamples,
@@ -324,6 +309,37 @@ void FieldlinesSequenceManager::resampleCcmcFieldline(const int& numResamples,
     if (numPoints == numResamples || numPoints <= 0) {
         return; // Nothing is needed to be done
     }
+
+    // auto test = line.getPosition(0);
+    // auto testCoord = test.getCoordinates();
+
+    // if (testCoord == 0) {
+    //     LDEBUG("TODO: CONVERT EACH POINT TO CARTESIAN");
+
+    //     const std::vector<ccmc::Point3f> positions = line.getPositions();
+    //     const std::vector<float> values = line.getData();
+
+    //     ccmc::Fieldline newLine;
+    //     int i = 0;
+    //     for (ccmc::Point3f p : positions) {
+    //         // if (p.component3 > 360.f || p.component3 < 0.f) {
+    //         //     LERROR("third component is out of domain");
+    //         // }
+    //         // if (p.component2 > 90.f || p.component2 < -90.f) {
+    //         //     LERROR("second component is out of domain");
+    //         // }
+    //         // ccmc::Point3f cartPoint = p.getCartesian();
+    //         glm::vec3 pn = glm::vec3(p.component1, p.component2, p.component3);
+    //         convertLatLonToCartesian(pn);
+    //         ccmc::Point3f cartPoint(pn.x,pn.y,pn.z);
+    //         // cartPoint.setCoordinates(ccmc::Point3f::CARTESIAN);
+    //         newLine.insertPointData(cartPoint, values[i]);
+    //         ++i;
+    //     }
+    //     line = newLine;
+    // } else {
+    //     LERROR("THIS SHUOLDNT BE REACHED NOW!");
+    // }
 
     // Resample with the built in functionality in ccmd::Fieldline
     switch (resamplingOption) {
@@ -426,6 +442,31 @@ void FieldlinesSequenceManager::centerSeedPointResampling(
     }
     // TODO assertion that we've added the correct number of points and that the
     // seed point is still centered
+}
+
+//bool FieldlinesSequenceManager::addVelocityMagnitudesToState(
+//            const ccmc::Kameleon* kameleon,
+//            const std::vector<glm::vec3>& samplePositions,
+//            FieldlinesState& outFieldlinesStates) {
+//
+//    outFieldlinesStates._velocityMagnitudes.reserve(samplePositions.size());
+//
+//    
+//
+//    return false;
+//}
+
+// Converts spherical coordinates expressed in (r, lat, lon) to cartesian
+// where lat belongs to interval [-90,90] and lon to [0,360]
+void FieldlinesSequenceManager::convertLatLonToCartesian(glm::vec3& p) {
+    float r         = p.x;
+    float lat_rad   = glm::radians(p.y);
+    float lon_rad   = glm::radians(p.z);
+    float r_cosLat  = r * cos(lat_rad);
+
+    p = glm::vec3(r_cosLat * cos(lon_rad),
+                  r_cosLat * sin(lon_rad),
+                  r * sin(lat_rad));
 }
 
 double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
