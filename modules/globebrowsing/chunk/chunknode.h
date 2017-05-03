@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNKNODE___H__
 
 #include <modules/globebrowsing/chunk/chunk.h>
+#include <modules/globebrowsing/models/renderableroversurface.h>
 
 #include <array>
 #include <functional>
@@ -63,7 +64,7 @@ public:
     const ChunkNode& find(const Geodetic2& location) const;
     const ChunkNode& getChild(Quad quad) const;
     const Chunk& getChunk() const;
-
+	const std::vector<SubSite> getSubSites() const;
     /**
      * Updates all children recursively. If this ChunkNode wants to split it will,
      * otherwise check if the children wants to merge. If all children wants to merge
@@ -73,9 +74,13 @@ public:
     */
     bool updateChunkTree(const RenderData& data);
 
+	void addSites(std::vector<SubSite> subSites);
+
 private:
     ChunkNode* _parent;
     std::array<std::unique_ptr<ChunkNode>, 4> _children;
+
+	std::vector<SubSite> _subSites;
 
     Chunk _chunk;
 };

@@ -73,6 +73,10 @@ bool ChunkNode::updateChunkTree(const RenderData& data) {
     }
 }
 
+void ChunkNode::addSites(std::vector<SubSite> subSites) {
+	_subSites = subSites;
+}
+
 void ChunkNode::depthFirst(const std::function<void(const ChunkNode&)>& f) const {
     f(*this);
     if (!isLeaf()) {
@@ -160,7 +164,19 @@ void ChunkNode::split(int depth) {
     if (depth > 0 && isLeaf()) {
         for (size_t i = 0; i < _children.size(); ++i) {
             Chunk chunk(_chunk.owner(), _chunk.tileIndex().child((Quad)i));
-            _children[i] = std::make_unique<ChunkNode>(chunk, this);
+			globebrowsing::GeodeticPatch patch = chunk.surfacePatch();
+			std::vector<SubSite> tempSites;
+			std::unique_ptr<ChunkNode> temp = std::make_unique<ChunkNode>(chunk, this);
+			if (this != nullptr) {
+				for (int k = 0; k < this->_subSites.size(); ++k) {
+					globebrowsing::Geodetic2 temp = globebrowsing::Geodetic2{ this->_subSites.at(k).lat, this->_subSites.at(k).lon } / 180.0f * glm::pi<double>();
+					if (patch.contains(temp)) {
+						tempSites.push_back(this->_subSites.at(k));
+					}
+				}
+				temp->addSites(tempSites);
+			}
+			_children[i] = std::move(temp);
         }
     }
 
@@ -184,6 +200,10 @@ void ChunkNode::merge() {
 
 const Chunk& ChunkNode::getChunk() const {
     return _chunk;
+}
+
+const std::vector<SubSite> ChunkNode::getSubSites() const {
+	return _subSites;
 }
 
 } // namespace globebrowsing
