@@ -43,6 +43,8 @@ public:
     std::vector<glm::vec4> _vertexColors;
     std::vector<GLfloat> _quickMorph;
 
+    std::string _modelName;
+
     void reserveSize(size_t size);
 private:
 };

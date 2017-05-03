@@ -62,6 +62,7 @@ namespace {
     const char* keySeedPointsFile = "File";
 
     const float R_E_TO_METER = 6371000.f; // Earth radius
+    const float R_S_TO_METER = 695700000.f; // Sun radius
     const float A_U_TO_METER = 149597870700.f; // Astronomical Units
     // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
 }
@@ -83,7 +84,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
                                                            glm::vec4(1.f,0.f,1.f,0.5f),
                                                            glm::vec4(0.f),
                                                            glm::vec4(1.f)),
-      _lineWidth("fieldlineWidth", "Fieldline Width", 20, 0, 1000),
+      _lineWidth("fieldlineWidth", "Fieldline Width", 0.005, 0, 10.0),
       _vertexArrayObject(0),
       _vertexPositionBuffer(0),
       _morphToPositionBuffer(0),
@@ -91,7 +92,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _vertexColorBuffer(0),
       _shouldRender(false),
       _needsUpdate(false),
-      _activeStateIndex(-1) {
+      _activeStateIndex(-1),
+      _widthScaling(R_E_TO_METER) {
 
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -145,8 +147,10 @@ bool RenderableFieldlinesSequence::initialize() {
         return false;
     } else { // Everything essential is provided
         std::vector<std::string> validCdfFilePaths;
-        if (!FieldlinesSequenceManager::ref().getCdfFilePaths(pathToCdfDirectory,
-                                                              validCdfFilePaths)) {
+        if (!FieldlinesSequenceManager::ref().getCdfFilePaths(
+                pathToCdfDirectory, validCdfFilePaths) ||
+                validCdfFilePaths.empty() ) {
+
             LERROR("Failed to get valid .cdf file paths from '"
                     << pathToCdfDirectory << "'" );
             return false;
@@ -219,6 +223,7 @@ bool RenderableFieldlinesSequence::initialize() {
         LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
 
         // TODO this could be done in manager
+        std::vector<std::string> bla;
         for (int i = 0; i < _numberOfStates; ++i) {
             LDEBUG(validCdfFilePaths[i] << " is now being traced.");
             _states.push_back(FieldlinesState(_seedPoints.size()));
@@ -229,6 +234,7 @@ bool RenderableFieldlinesSequence::initialize() {
                                                                 _isMorphing,
                                                                 numResamples,
                                                                 resamplingOption,
+                                                                bla,
                                                                 _startTimes,
                                                                 _states[i]);
 
@@ -237,6 +243,13 @@ bool RenderableFieldlinesSequence::initialize() {
         // Approximate the end time of last state (and for the sequence as a whole)
         if (_numberOfStates > 0) {
             _seqStartTime = _startTimes[0];
+            std::string model = _states[0]._modelName;
+            if (model == "enlil") {
+                _widthScaling = R_S_TO_METER;
+            } else if (model == "batsrus") {
+                _widthScaling = R_E_TO_METER;
+            }
+
             double lastStateStart = _startTimes[_numberOfStates-1];
             if (_numberOfStates > 1) {
                 double avgTimeOffset = (lastStateStart - _seqStartTime) /
@@ -250,7 +263,11 @@ bool RenderableFieldlinesSequence::initialize() {
             // Add seqEndTime as the last start time
             // to prevent vector from going out of bounds later.
             _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
+        } else {
+            LERROR("Couldn't create any states!");
+            return false;
         }
+
         if (_isMorphing) {
             LDEBUG("Optimising morphing!");
             float quickMorphDist;
@@ -266,6 +283,11 @@ bool RenderableFieldlinesSequence::initialize() {
                                                                    quickMorphDist);
         }
     }
+
+    // glGetFloatv(GL_LINE_WIDTH, &_maxLineWidthOpenGl);
+    // glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, &_maxLineWidthOpenGl);
+    // glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, &_maxLineWidthOpenGl);
+    // glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &_maxLineWidthOpenGl);
 
     if (_isMorphing) {
         _program = OsEng.renderEngine().buildRenderProgram(
@@ -371,7 +393,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
         _activeProgramPtr->setUniform("fieldlineColor", _fieldlineColor);
         _activeProgramPtr->setUniform("fieldlineParticleColor", _fieldlineParticleColor);
         if (_show3DLines) {
-            _activeProgramPtr->setUniform("width", _lineWidth * R_E_TO_METER);
+            _activeProgramPtr->setUniform("width", _lineWidth * _widthScaling);
             // _activeProgramPtr->setUniform("camDirection",
             //                             glm::vec3(data.camera.viewDirectionWorldSpace()));
             // _activeProgramPtr->setUniform("modelTransform", modelTransform);

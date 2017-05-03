@@ -72,6 +72,8 @@ public:
                             const bool shouldResample, //does const bool& make sense?
                             const int& numResamples,
                             const int& resamplingOption,
+                            std::vector<std::string>& colorizingFloatVars,
+                            // std::vector<string>& colorizingVec3MagnitudeVars, TODO
                             std::vector<double>& startTimes,
                             FieldlinesState& outFieldlinesStates);
 
@@ -80,22 +82,6 @@ public:
                                const float& threshold);
 
 private:
-    bool traceFieldlines( ccmc::Kameleon* kameleon,
-                          const std::string& tracingVariable,
-                          const std::vector<glm::vec3>& inSeedPoints,
-                          const int& maxIterations,
-                          const bool shouldResample,
-                          const int& numResamples,
-                          const int& resamplingOption,
-                          FieldlinesState& outFieldlinesStates);
-
-    bool addLineToState( ccmc::Fieldline& ccmcFieldline,
-                         const std::string& model,
-                         const bool shouldResample,
-                         const int& numResamples,
-                         const int& resamplingOption,
-                         int& lineStart,
-                         FieldlinesState& outFieldlinesStates);
 
     void resampleCcmcFieldline( const int& numResamples,
                                 const int& resamplingOption,
@@ -106,9 +92,14 @@ private:
                                     const std::vector<glm::vec3>& line,
                                     std::vector<glm::vec3>& outPositions);
 
-
+    void ccmcFieldlineToDesiredFormat(const int& numResamples,
+                                      int& seedPointIdx,
+                                      const std::vector<glm::vec3>& line,
+                                      std::vector<glm::vec3>& outPositions);
 
     double getTime(ccmc::Kameleon* kameleon);
+
+    void convertLatLonToCartesian(glm::vec3& p);
 };
 
 } //namespace openspace
