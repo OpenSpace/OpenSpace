@@ -68,6 +68,7 @@ private:
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
 
+    std::unique_ptr<ghoul::opengl::ProgramObject> _frustumShader;
     std::unique_ptr<PowerScaledSphere> _sphere;
     std::unique_ptr<ghoul::opengl::ProgramObject> _sphereShader;
 
@@ -75,6 +76,9 @@ private:
     int _currentActiveImage;
     unsigned int pboSize;
     GLuint pboHandle;
+    GLuint _frustum;
+    GLuint _frustumPositionBuffer;
+
     GLuint pboHandles[2];
     unsigned int _currentPBO;
 
@@ -90,17 +94,16 @@ private:
     IMG_PRECISION* _pboBufferData;
 
     unsigned int _imageSize;
-    bool _resChanged;
 
     // Channels -> DataObjects
     //std::vector<std::vector<ImageDataObject>> _imageData;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::vector<std::unique_ptr<TransferFunction>> _transferFunctions;
-
     std::vector<std::vector<ImageMetadata>> _imageMetadata;
 
     void uploadImageDataToPBO(const int& image);
     void updateTextureGPU();
+    void createFrustum();
 
     void downloadTextureResource();
     bool initialize() override;
