@@ -108,6 +108,8 @@ std::vector<SubSite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictio
 }
 
 std::vector<SubSite> RoverPathFileReader::extractSubsitesWithModels(const ghoul::Dictionary dictionary) {
+
+	// Make sure the dictionary includes the necessary keys
 	std::string roverLocationFilePath;
 	if (!dictionary.getValue(keyRoverLocationPath, roverLocationFilePath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -116,17 +118,24 @@ std::vector<SubSite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 	if (!dictionary.getValue(keyModelPath, surfaceModelFilePath))
 		throw ghoul::RuntimeError(std::string(keyModelPath) + " must be specified!");
 
+	// Extract all subsites in the data set given the path to the file
 	ghoul::Dictionary tempDictionary;
 	tempDictionary.setValue(keyRoverLocationPath, roverLocationFilePath);
 	std::vector<SubSite> allSubsites = extractAllSubsites(tempDictionary);
 
+
 	std::vector<SubSite> subsitesWithModels;
 	for (auto subsite : allSubsites) {
 		std::string pathToDriveFolder;
+
+		// Convert the site and drive string to match the folder structure
 		std::string site = convertString(subsite.site, "site");
 		std::string drive = convertString(subsite.drive, "drive");
 		pathToDriveFolder = surfaceModelFilePath + "site" + site + "/" + "drive" + drive;
 
+		// If the folder exists it means there are models for this subsite, then check if that
+		// specific site/drive combination has already been added. If the models haven't already been 
+		// added, loop through the text file with file names and add those to the subsite.
 		bool pathExists = FileSys.directoryExists(pathToDriveFolder);
 		bool modelExists = false;
 		if(pathExists) {
