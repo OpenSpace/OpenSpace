@@ -27,10 +27,17 @@
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec4property.h>
-
+#include <openspace/rendering/transferfunction.h>
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
+
+namespace ghoul {
+    namespace opengl {
+        class TextureUnit;
+    }
+}
 
 namespace openspace {
 
@@ -50,55 +57,74 @@ public:
     bool isWithinSequenceInterval();
     void updateActiveStateIndex();
 private:
+    // -------------------- MAIN VARIABLES, STATE & TIME --------------------
+    bool _needsUpdate;  // If still in same state as previous frame _needsUpdate == false
+    bool _shouldRender; // only temporary, unnecessary?
+
+    std::vector<glm::vec3> _seedPoints; // TODO: no need to store these here?
+
+    // State variables
+    std::vector<FieldlinesState> _states;
+
+    int _activeStateIndex;
+    int _numberOfStates;
+
+    // Time variables
+                                     // Sorted vector of each state's start time.
+    std::vector<double> _startTimes; // Last item is == _seqEndTime (unnecessary?)
+
+    double _currentTime;
+    double _seqStartTime; // redundant, but hey.. nice n clear
+    double _seqEndTime;
+
+    float _stateProgress; // Time progression of active state. Range: 0 to 1
+
+
+    // ------------------------- LUA .mod file info -------------------------
     ghoul::Dictionary _vectorVolumeInfo;
     ghoul::Dictionary _fieldlineInfo;
     ghoul::Dictionary _seedPointsInfo;
 
-    // Properties
-    properties::BoolProperty _isMorphing;
-    properties::BoolProperty _show3DLines;
+    // ----------------------------- Properties -----------------------------
+    properties::BoolProperty _isMorphing;           // Time interpolation/morphing
+    properties::BoolProperty _show3DLines;          // 3D "ropes". Billboards
 
-    properties::FloatProperty _lineWidth;
+    properties::FloatProperty _lineWidth;           // Interactive Line Width
 
-    properties::IntProperty _timeMultiplier;
-    properties::IntProperty _fieldlineParticleSize;
-    properties::IntProperty _modulusDivider;
+    properties::IntProperty _fieldlineParticleSize; // Size of simulated line particles
+    properties::IntProperty _modulusDivider;        // Related to simulated line particles
+    properties::IntProperty _timeMultiplier;        // Related to simulated line particles
 
-    properties::OptionProperty _colorMethod;
+    properties::OptionProperty _colorMethod;        // How to colorize the fieldlines
 
-    properties::Vec4Property _fieldlineColor;
-    properties::Vec4Property _fieldlineParticleColor;
+    properties::StringProperty _transferFunctionPath; // Color table for unit coloring
 
-    std::vector<glm::vec3> _seedPoints;
-    std::vector<FieldlinesState> _states;
+    properties::Vec4Property _fieldlineColor;         // Uniform fieldline color
+    properties::Vec4Property _fieldlineParticleColor; // Simulated line particles' color
+
+    // -------- Colorize fieldline depending on additional variables --------
+    bool _hasUnitColoring;
+
+    std::shared_ptr<TransferFunction> _transferFunction;
+    std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
+
+    // --------------------------- OpenGL Related ----------------------------
+    // shader program related
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     std::unique_ptr<ghoul::opengl::ProgramObject> _ropeProgram;
     ghoul::opengl::ProgramObject* _activeProgramPtr;
 
-    bool _shouldRender; // only temporary
-    bool _needsUpdate;
-    bool _hasUnitColoring;
-    // bool _isMorphing;
-
+    // Vertex Array Object
     GLuint _vertexArrayObject;
 
-    // TODO: Make an array instead?
+    // Buffers // TODO: Make an array instead?
     GLuint _vertexPositionBuffer;
     GLuint _vertexColorBuffer;
     GLuint _morphToPositionBuffer;
     GLuint _quickMorphBuffer;
 
-    GLfloat _maxLineWidthOpenGl;
-
-    int _activeStateIndex;
-    int _numberOfStates;
-    double _seqStartTime; // redundant, but hey.. nice n clear
-    double _seqEndTime;
-    double _currentTime;
-    float _stateProgress;
-    float _widthScaling;
-
-    std::vector<double> _startTimes;
+    GLfloat _maxLineWidthOpenGl; // hardware related variable?
+    float _widthScaling; // Line width scaling for 3D "ropes", depends on cdf model
 };
 
 } // namespace openspace
