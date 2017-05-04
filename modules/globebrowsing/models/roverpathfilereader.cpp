@@ -24,20 +24,22 @@
 
 #include <modules/globebrowsing/models/roverpathfilereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/filesystem/filesystem.h>
 
 #include <fstream>
 #include <gdal_priv.h>
 #include "ogrsf_frmts.h"
 
 namespace {
-	const std::string _loggerCat = "RoverPathFileReader";
-	const char* keyRoverLocationPath = "RoverLocationPath";
+	const std::string _loggerCat		= "RoverPathFileReader";
+	const char* keyRoverLocationPath	= "RoverLocationPath";
+	const char* keyModelPath			= "ModelPath";
 }
 
 namespace openspace {
 namespace globebrowsing {
 	
-std::vector<SubSite> RoverPathFileReader::extractAllCoordinates(const ghoul::Dictionary dictionary) {
+std::vector<SubSite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictionary dictionary) {
 	std::string roverLocationFilePath;
 	if (!dictionary.getValue(keyRoverLocationPath, roverLocationFilePath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -98,6 +100,36 @@ std::vector<SubSite> RoverPathFileReader::extractAllCoordinates(const ghoul::Dic
 	GDALClose(poDS);
 
 	return subSites;
+}
+
+std::vector<SubSite> RoverPathFileReader::extractSubsitesWithModels(const ghoul::Dictionary dictionary) {
+	std::string roverLocationFilePath;
+	if (!dictionary.getValue(keyRoverLocationPath, roverLocationFilePath))
+		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
+
+	std::string surfaceModelFilePath;
+	if (!dictionary.getValue(keyModelPath, surfaceModelFilePath))
+		throw ghoul::RuntimeError(std::string(keyModelPath) + " must be specified!");
+
+	ghoul::Dictionary tempDictionary;
+	tempDictionary.setValue(keyRoverLocationPath, roverLocationFilePath);
+	std::vector<SubSite> allSubsites = extractAllSubsites(tempDictionary);
+
+	std::vector<SubSite> subSitesWithModels;
+
+	int counter = 0;
+	for (auto subSite : allSubsites) {
+		std::string pathToDriveFolder;
+		std::string site = convertString(subSite.site, "site");
+		std::string drive = convertString(subSite.drive, "drive");
+		pathToDriveFolder = surfaceModelFilePath + "site" + site + "/" + "drive" + drive;
+		bool exists = FileSys.directoryExists(pathToDriveFolder);
+		if(exists) {
+			subSitesWithModels.push_back(subSite);
+		}
+	}
+
+	return subSitesWithModels;
 }
 
 std::string RoverPathFileReader::convertString(const std::string sitenr, const std::string type) {
