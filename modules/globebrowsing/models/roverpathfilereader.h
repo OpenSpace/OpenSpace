@@ -36,6 +36,8 @@ public:
 
 private:
 	static std::string RoverPathFileReader::convertString(const std::string sitenr, const std::string type);
+	static std::vector<std::string> RoverPathFileReader::extractFileNames(const std::string filePath);
+
 };
 } // namespace globebrowsing
 } // namespace openspace

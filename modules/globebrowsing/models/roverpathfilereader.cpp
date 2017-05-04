@@ -126,8 +126,8 @@ std::vector<SubSite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 		std::string site = convertString(subsite.site, "site");
 		std::string drive = convertString(subsite.drive, "drive");
 		pathToDriveFolder = surfaceModelFilePath + "site" + site + "/" + "drive" + drive;
-		bool pathExists = FileSys.directoryExists(pathToDriveFolder);
 
+		bool pathExists = FileSys.directoryExists(pathToDriveFolder);
 		bool modelExists = false;
 		if(pathExists) {
 			for (auto controlSubsite : subsitesWithModels) {
@@ -137,6 +137,10 @@ std::vector<SubSite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 				}
 			}
 			if(!modelExists) {
+				std::string pathToFilenamesTextFile = pathToDriveFolder + "/filenames.txt";
+				std::vector<std::string> fileNames = extractFileNames(pathToFilenamesTextFile);
+
+				subsite.fileNames = fileNames;
 				subsitesWithModels.push_back(subsite);
 			}
 		}
@@ -171,6 +175,21 @@ std::string RoverPathFileReader::convertString(const std::string sitenr, const s
 		}
 	}
 	return temp;
+}
+
+std::vector<std::string> RoverPathFileReader::extractFileNames(const std::string filePath) {
+	std::string path = absPath(filePath);
+	std::ifstream myfile(path);
+
+	std::string fileName;
+	std::vector<std::string> fileNames;
+	if (myfile.is_open()) {
+		while (std::getline(myfile, fileName)) {
+			fileNames.push_back(fileName);
+		}
+		myfile.close();
+	}
+	return fileNames;
 }
 
 } // namespace globebrowsing
