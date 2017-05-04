@@ -93,7 +93,12 @@ std::vector<SubSite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictio
 			subSite.siteLat = siteLat;
 			subSite.siteLon = siteLon;
 
-			subSites.push_back(subSite);
+			// All features with the the frame is "Site" will have "Drive" that is -1. 
+			// The feature right after each site frame has the same coordinates as the site frame.
+			// E.g. feature 1: "Frame = SITE, Site = 6, Drive = -1, Lat = -4.7000, Lon = 137.4000"
+			//		feature 2: "Frame = ROVER, Site = 6, Drive = 0, Lat = -4.7000, Lon = 137.4000"
+			if(drive != "-1")
+				subSites.push_back(subSite);
 		}
 		OGRFeature::DestroyFeature(poFeature);
 	}
@@ -115,21 +120,28 @@ std::vector<SubSite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 	tempDictionary.setValue(keyRoverLocationPath, roverLocationFilePath);
 	std::vector<SubSite> allSubsites = extractAllSubsites(tempDictionary);
 
-	std::vector<SubSite> subSitesWithModels;
-
-	int counter = 0;
-	for (auto subSite : allSubsites) {
+	std::vector<SubSite> subsitesWithModels;
+	for (auto subsite : allSubsites) {
 		std::string pathToDriveFolder;
-		std::string site = convertString(subSite.site, "site");
-		std::string drive = convertString(subSite.drive, "drive");
+		std::string site = convertString(subsite.site, "site");
+		std::string drive = convertString(subsite.drive, "drive");
 		pathToDriveFolder = surfaceModelFilePath + "site" + site + "/" + "drive" + drive;
-		bool exists = FileSys.directoryExists(pathToDriveFolder);
-		if(exists) {
-			subSitesWithModels.push_back(subSite);
+		bool pathExists = FileSys.directoryExists(pathToDriveFolder);
+
+		bool modelExists = false;
+		if(pathExists) {
+			for (auto controlSubsite : subsitesWithModels) {
+				if (subsite.site == controlSubsite.site && subsite.drive == controlSubsite.drive) {
+					modelExists = true;
+					break;
+				}
+			}
+			if(!modelExists) {
+				subsitesWithModels.push_back(subsite);
+			}
 		}
 	}
-
-	return subSitesWithModels;
+	return subsitesWithModels;
 }
 
 std::string RoverPathFileReader::convertString(const std::string sitenr, const std::string type) {
