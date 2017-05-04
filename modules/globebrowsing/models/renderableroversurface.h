@@ -31,16 +31,21 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/models/cachingsurfacemodelprovider.h>
+#include <modules/globebrowsing/models/roverpathfilereader.h>
 
 namespace openspace {
 namespace globebrowsing {
 
+struct SubSite {
+	std::string site, drive, frame;
+	double lat, lon;
+	double siteLat, siteLon;
+	int tileHashKey;
+	std::vector<std::string> fileNames;
+};
+
 class RenderableRoverSurface : public Renderable {
 public:
-	struct SubSite {
-		std::string site, drive, frame;
-		double lat, lon;
-	};
 
 	struct GeneralProperties {
 		properties::BoolProperty isEnabled;
@@ -56,13 +61,9 @@ public:
 	void render(const RenderData& data) override;
 	void update(const UpdateData& data) override;
 	
-	std::vector<glm::dvec3> pathChunkVector(const TileIndex& tileIndex) const;
-
 private:
-	void extractCoordinates();
 	void calculateSurfacePosition();
 	std::vector<std::string> extractFileNames(const std::string filePath);
-	std::string convertString(std::string sitenr, std::string type);
 
 	std::vector<std::string> _fileNames;
 	std::vector<glm::fvec2> _coordinates;
@@ -72,13 +73,11 @@ private:
 	GeneralProperties _generalProperties;
 
 	std::string _roverLocationPath;
-	std::string _textFilePath;
 	std::string _modelPath;
 	std::string _texturePath;
 	std::string _absModelPath;
 	std::string _absTexturePath;
 	std::string _multiModelGeometry;
-
 
 	properties::Vec3Property _debugModelRotation;
 

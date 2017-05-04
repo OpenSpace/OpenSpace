@@ -39,7 +39,6 @@
 namespace {
 	const std::string _loggerCat		= "RenderableRoverSurface";
 	const char* keyRoverLocationPath	= "RoverLocationPath";
-	const char* keyTextFilePath			= "TextFilePath";
 	const char* keyModelPath			= "ModelPath";
 	const char* keyTexturePath			= "TexturePath";
 	const char* keyGeometryFile			= "GeometryFile";
@@ -66,9 +65,6 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 	if (!dictionary.getValue(keyRoverLocationPath, _roverLocationPath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
 
-	if (!dictionary.getValue(keyTextFilePath, _textFilePath))
-		throw ghoul::RuntimeError(std::string(keyTextFilePath) + " must be specified!");
-
 	if (!dictionary.getValue(keyModelPath, _modelPath))
 		throw ghoul::RuntimeError(std::string(keyModelPath) + " must be specified!");
 
@@ -81,8 +77,11 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 
 	_multiModelGeometry = "MultiModelGeometry";
 
-	// Extract all coordinates from the GDAL dataset
-	extractCoordinates();
+	// Extract all subsites that has models
+	ghoul::Dictionary tempDic;
+	tempDic.setValue(keyRoverLocationPath, _roverLocationPath);
+	tempDic.setValue(keyModelPath, _modelPath);
+	_subSites = RoverPathFileReader::extractSubsitesWithModels(tempDic);
 
 	addProperty(_debugModelRotation);
 
@@ -98,6 +97,8 @@ bool RenderableRoverSurface::initialize() {
 
 	_globe = (globebrowsing::RenderableGlobe*)parent->renderable();
 	_chunkedLodGlobe = _globe->chunkedLodGlobe();
+
+	_chunkedLodGlobe->addSites(_subSites);
 
 	RenderEngine& renderEngine = OsEng.renderEngine();
 	_programObject = renderEngine.buildRenderProgram("RenderableRoverSurface",
@@ -116,10 +117,80 @@ bool RenderableRoverSurface::isReady() const {
 }
 
 void RenderableRoverSurface::render(const RenderData & data) {
+
+	_models.clear();
+
+	std::vector<std::vector<SubSite>> subSitesVector = _chunkedLodGlobe->subSites();
+
+	for (auto subSites : subSitesVector) {
+		
+		if(subSites.size() > 0) {
+			SubSite i;
+
+			SubSite ss = subSites.at(0);
+			i = ss;
+			Geodetic2 geodetic2 = Geodetic2{ i.lat, i.lon } / 180 * glm::pi<double>();
+			Chunk chunk = _chunkedLodGlobe->findChunkNode(geodetic2).getChunk();
+			double chunkLevel = chunk.surfacePatch().maximumTileLevel();
+			if(chunkLevel >= 17) {						
+				// Loop through all file names and ask the caching model provider to return all available models \
+				// for that chunk.
+				for (auto fileName : ss.fileNames) {
+
+					ghoul::Dictionary modelDictionary;
+					std::string pathToGeometry = _modelPath + "site" + i.site + "/" + "drive" + i.drive + "/" + fileName + ".obj";
+
+					std::string tempFileName = fileName;
+					tempFileName[13] = 'R';
+					tempFileName[14] = 'A';
+					tempFileName[15] = 'S';
+
+					int siteNumber = std::stoi(i.site);
+					std::string fileFormat;
+					if (siteNumber <= 21)
+						fileFormat = ".jpg";
+					else if (siteNumber > 21)
+						fileFormat = ".png";
+
+					std::string pathToTexture = _absTexturePath + "site" + i.site + "\\" + "drive" + i.drive +
+						"\\" + tempFileName + fileFormat;
+
+					modelDictionary.setValue(keyGeometryFile, pathToGeometry);
+					modelDictionary.setValue(keyType, _multiModelGeometry);
+					modelDictionary.setValue(keyName, fileName);
+					modelDictionary.setValue(keyPathToTexture, pathToTexture);
+
+					Model model;
+					model.fileName = fileName;
+					model.tileHashKey = i.tileHashKey;
+					model.lat = i.lat;
+					model.lon = i.lon;
+					model.siteCoordinate = Geodetic2{ i.siteLat, i.siteLon } / 180 * glm::pi<double>();
+					std::shared_ptr<Model> theModel = std::make_shared<Model>(std::move(model));
+
+					std::vector<std::shared_ptr<Model>> models = _cachingModelProvider->getModels(modelDictionary, theModel);
+							
+					for (auto model1 : models) {
+						bool exists = false;
+						for (auto model2 : _models) {
+							if (model1->fileName == model2->fileName) {
+								exists = true;
+								break;
+							}
+						}
+						if (!exists)
+							_models.push_back(model1);
+					}
+					calculateSurfacePosition();
+				}												
+			}
+		}
+	}
+
 	_programObject->activate();
 	for (auto model : _models) {
 		glm::dmat4 globeTransform = _globe->modelTransform();
-		
+
 		glm::dvec3 positionWorldSpace = globeTransform * glm::dvec4(model->cartesianPosition, 1.0);
 
 		// debug rotation controlled from GUI
@@ -155,9 +226,9 @@ void RenderableRoverSurface::render(const RenderData & data) {
 		if (xAxis.x == 0 && xAxis.y == 0 && xAxis.z == 0) {
 			LERROR("PLANE AND LINE HAS SAME");
 		}
-		
+
 		glm::dvec4 test = glm::rotate(rotationMatrix, glm::dvec4(0, -1, 0, 1));
-		
+
 		glm::dvec3 testa = glm::dvec3(test.x, test.y, test.z);
 
 		float cosTheta2 = dot(testa, xAxis);
@@ -177,8 +248,6 @@ void RenderableRoverSurface::render(const RenderData & data) {
 			glm::dmat4(glm::toMat4(rotationMatrix)) *
 			debugModelRotation;
 
-		//glDisable(GL_CULL_FACE);
-
 		glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 		glm::vec3 directionToSun = glm::normalize(_sunPos - positionWorldSpace);
 		glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
@@ -196,144 +265,14 @@ void RenderableRoverSurface::render(const RenderData & data) {
 		unit.activate();
 		model->texture->bind();
 		_programObject->setUniform("texture1", unit);
-		model->geometry->render();		
+		model->geometry->render();
 	}
 	_programObject->deactivate();
 }
 
 void RenderableRoverSurface::update(const UpdateData & data) {
 	_cachingModelProvider->update(this);
-	//_pathChunks.clear();
-
-	_models.clear();
 	_sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
-	// Loop through all subsites.
-
-	globebrowsing::Geodetic2 temp;
-	for (auto i : _subSites) {
-		if (i.frame == "SITE") {
-			temp = globebrowsing::Geodetic2{ i.lat, i.lon } / 180 * glm::pi<double>();
-		}
-		// Check which chunk each subsite corresponds to. Also extract the chunk hashkey to use it for
-		// caching when loading models.
-		Geodetic2 geodetic2 = Geodetic2{ i.lat, i.lon } / 180 * glm::pi<double>();
-		Chunk chunk = _chunkedLodGlobe->findChunkNode(geodetic2).getChunk();
-		double chunkLevel = chunk.surfacePatch().maximumTileLevel();
-		uint64_t hashKey = chunk.tileIndex().hashKey();
-		//auto search = _pathChunks.find(hashKey);
-
-		// Only load models if the camera is so close to the surface so that there will be no further chunking.
-		if(chunkLevel == 18) { 
-			if(chunk.isVisible()) {
-
-				// Load file names.
-				std::string txtFilePath = "site" + i.site + "/" + "drive" + i.drive + "/" + "filenames.txt";
-				std::vector<std::string> fileNames = extractFileNames(txtFilePath);
-
-				// Loop through all file names and ask the caching model provider to return all available models \
-				// for that chunk.
-				for (auto fileName : fileNames) {
-					ghoul::Dictionary modelDictionary;
-					std::string pathToGeometry = _modelPath + "site" + i.site + "/" + "drive" + i.drive + "/" + fileName + ".obj";
-
-					std::string tempFileName = fileName;
-					tempFileName[13] = 'R';
-					tempFileName[14] = 'A';
-					tempFileName[15] = 'S';
-
-					int siteNumber = std::stoi(i.site);
-					std::string fileFormat;
-					if (siteNumber <= 21)
-						fileFormat = ".jpg";
-					else if (siteNumber > 21)
-						fileFormat = ".png";
-
-					std::string pathToTexture = _absTexturePath + "site" + i.site + "\\" + "drive" + i.drive +
-						"\\" + tempFileName + fileFormat;
-
-					modelDictionary.setValue(keyGeometryFile, pathToGeometry);
-					modelDictionary.setValue(keyType, _multiModelGeometry);
-					modelDictionary.setValue(keyName, fileName);
-					modelDictionary.setValue(keyPathToTexture, pathToTexture);
-
-					Model model;
-					model.fileName = fileName;
-					model.tileHashKey = hashKey;
-					model.lat = i.lat;
-					model.lon = i.lon;
-					model.siteCoordinate = temp;
-					std::shared_ptr<Model> theModel = std::make_shared<Model>(std::move(model));
-
-					_models = _cachingModelProvider->getModels(modelDictionary, theModel);
-
-					calculateSurfacePosition();
-				}
-			}
-		}
-
-		/*glm::dvec3 tempPos = glm::dvec3(1.0, 1.0, 1.0);
-		if (search != _pathChunks.end()) {
-			search->second.push_back(tempPos);
-		}
-		else {
-			std::vector<glm::dvec3> tempVector;
-			tempVector.push_back(tempPos);
-			_pathChunks.insert(std::make_pair(hashKey, tempVector));
-		}*/
-
-	}
-}
-
-std::vector<glm::dvec3> RenderableRoverSurface::pathChunkVector(const TileIndex& tileIndex) const {
-	std::vector<glm::dvec3> pathVector = _pathChunks.find(tileIndex.hashKey())->second;
-
-	return pathVector;
-}
-
-void RenderableRoverSurface::extractCoordinates() {
-	std::fstream in(_roverLocationPath.c_str());
-
-	if (!in.is_open())
-		throw ghoul::FileNotFoundError(_roverLocationPath);
-
-	GDALDataset *poDS;
-	poDS = (GDALDataset*)GDALOpenEx(_roverLocationPath.c_str(), GDAL_OF_VECTOR, NULL, NULL, NULL);
-	if (poDS == NULL) {
-		LERROR("Could not open .shp file");
-	}
-
-	OGRLayer *poLayer = poDS->GetLayerByName("rover_locations");
-
-	OGRFeature *poFeature;
-	poLayer->ResetReading();
-
-	while ((poFeature = poLayer->GetNextFeature()) != NULL) {
-
-		// Extract coordinates from OGR
-		std::string frame = poFeature->GetFieldAsString("frame");
-		std::string site = poFeature->GetFieldAsString("site");
-		std::string drive = poFeature->GetFieldAsString("drive");
-		double lat = poFeature->GetFieldAsDouble("plcl");
-		double lon = poFeature->GetFieldAsDouble("longitude");
-
-		// Saves all coordinates for rendering the path and only site coordinates for rendering sites.
-		// GetFieldAsDouble resturns zero (0) if field is empty.
-		if (lat != 0 && lon != 0) {
-			std::string type = "site";
-			SubSite subSite;
-			subSite.site = convertString(site, type);
-			type = "drive";
-			subSite.drive = convertString(drive, type);
-			subSite.lat = lat;
-			subSite.lon = lon;
-			subSite.frame = frame;
-
-			_coordinates.push_back(glm::fvec2(lat, lon));
-			_subSites.push_back(subSite);
-		}
-		OGRFeature::DestroyFeature(poFeature);
-	}
-	GDALClose(poDS);
 }
 
 void RenderableRoverSurface::calculateSurfacePosition() {
@@ -345,51 +284,6 @@ void RenderableRoverSurface::calculateSurfacePosition() {
 		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geoTemp, heightToSurface + 2.0 };
 		i->cartesianPosition  = _globe->ellipsoid().cartesianPosition(geo3);
 	}
-}
-
-std::vector<std::string> RenderableRoverSurface::extractFileNames(const std::string filePath) {
-
-	std::string path = _absModelPath + filePath;
-	std::ifstream myfile(path);
-	
-	std::vector<std::string> fileNames;
-	if (myfile.is_open()) {
-		while (std::getline(myfile, _textFilePath)) {
-			fileNames.push_back(_textFilePath);
-		}
-		myfile.close();
-	} 
-
-	return fileNames;
-}
-
-std::string RenderableRoverSurface::convertString(std::string sitenr, std::string type) {
-	int k = std::stoi(sitenr);
-	
-	std::string temp;
-	if (type == "site") {
-		if (k < 10) {
-			temp = "00" + std::to_string(k);
-		}
-		else if (k < 100) {
-			temp = "0" + std::to_string(k);
-		}
-	} 
-	else if (type == "drive") {
-		if (k < 10) {
-			temp = "000" + std::to_string(k);
-		}
-		else if (k < 100) {
-			temp = "00" + std::to_string(k);
-		}
-		else if (k < 1000){
-			temp = "0" + std::to_string(k);
-		}
-		else {
-			temp = std::to_string(k);
-		}
-	}
-	return temp;
 }
 
 } // namespace globebrowsing
