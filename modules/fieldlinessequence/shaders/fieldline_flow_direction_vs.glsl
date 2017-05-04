@@ -29,26 +29,55 @@ uniform mat4 modelViewProjection;
 uniform int time;
 uniform int flParticleSize;
 uniform int modulusDivider;
+uniform int colorMethod;
 
 uniform vec4 fieldlineColor;
 uniform vec4 fieldlineParticleColor;
 
 layout(location = 0) in vec3 in_position; // in meters
 // layout(location = 1) in vec4 in_color;
+layout(location = 3) in float unitIntensity;
+
 
 out vec4 vs_color;
 out float vs_depth;
 
+const int UNIFORM_COLOR = 0;
+const int UNIT_DEPENDENT_COLOR = 1;
+const int CLASSIFIED_COLOR = 2;
+
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
+    // TODO: only temporary until transfer function
+    float threshold = 1000;
+    vec3 warm = vec3(1.0,0.15,0.0);
+    vec3 cold = vec3(0.0,1.0,1.0);
     // vec4 in_color = vec4(1.0,1.0,0.0,0.0);
     // Color every n-th vertex differently to show fieldline flow direction
     int modulus = (gl_VertexID + time) % modulusDivider;
     if ( modulus > 0 && modulus < flParticleSize) {
-        vs_color = fieldlineParticleColor;//vec4(in_color.rgb * 0.99, 0.25);
+        if (colorMethod == UNIT_DEPENDENT_COLOR) {
+            // TODO: FIX THIS. Its just temporary, until texture is provided
+            if (unitIntensity < threshold) {
+                vs_color = vec4(cold,fieldlineParticleColor.a);
+            } else {
+                vs_color = vec4(warm,fieldlineParticleColor.a);
+            }
+        } else /*if (colorMethod == UNIFORM_COLOR)*/ {
+            vs_color = fieldlineParticleColor;
+        }
     } else {
-        vs_color = fieldlineColor;//vec4(in_color.rgb * 0.99, 0.40);
+        if (colorMethod == UNIT_DEPENDENT_COLOR) {
+            // TODO: FIX THIS. Its just temporary, until texture is provided
+            if (unitIntensity < threshold) {
+                vs_color = vec4(cold,fieldlineColor.a);
+            } else {
+                vs_color = vec4(warm,fieldlineColor.a);
+            }
+        } else /*if (colorMethod == UNIFORM_COLOR)*/ {
+            vs_color = fieldlineColor;
+        }
     }
     // vs_color = in_color;
     //vec4 tmp = vec4(in_position, 0);

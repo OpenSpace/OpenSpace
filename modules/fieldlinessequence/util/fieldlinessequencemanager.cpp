@@ -142,9 +142,9 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     }
 
     // IMPORTANT!: Remember to delete interpolator if creating it here!
-    // ccmc::Interpolator* interpolator = kameleon->createNewInterpolator();
-    // ccmc::Tracer tracer(kameleon.get(), interpolator);
-    ccmc::Tracer tracer(kameleon.get());
+    ccmc::Interpolator* interpolator = kameleon->createNewInterpolator();
+    ccmc::Tracer tracer(kameleon.get(), interpolator);
+    // ccmc::Tracer tracer(kameleon.get());
     tracer.setMaxIterations(maxIterations);
 
     // ----------------- CHECK CDF MODEL AND SETUP VARIABLES ACCORDINGLY -----------------
@@ -212,6 +212,8 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     }
 
     // ------ LOOP THROUGH THE SEED POINTS, TRACE AND CONVERT TO THE DESIRED FORMAT ------
+    // TODO CREATE MORE VECTORS
+    std::vector<float> xtraVarVec;
     int lineStart = 0;
     for (glm::vec3 seedPoint : inSeedPoints) {
         // A ccmc::Fieldline contains much more info than we need here,
@@ -233,11 +235,13 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         if ( (!preConversionResampling && !postConversionResampling)
                 || preConversionResampling ) {
 
+            lineCount = positions.size();
 
             for (ccmc::Point3f p : positions) {
                 glm::vec3 gPos = glm::vec3(p.component1, p.component2, p.component3);
                 if (sampleExtraQuantities) {
-                    LDEBUG("TODO: SAMPLE EXTRA PROPERTIES FOR COLORIZING LINES AT gPos");
+                    // LDEBUG("TODO: SAMPLE EXTRA PROPERTIES FOR COLORIZING LINES AT gPos");
+                    xtraVarVec.push_back(interpolator->interpolate(colorizingFloatVars[0], gPos.x, gPos.y, gPos.z));
                 }
                 if (convertToCartesian) {
                     // LDEBUG("TODO: CONVERT gPos TO CARTESIAN");
@@ -246,7 +250,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                 // LDEBUG("TODO: SCALE AND STORE gPos IN STATE");
                 outFieldlinesStates._vertexPositions.push_back(gPos * scalingFactor);
             }
-            lineCount = positions.size();
+
         } else /*if (postConversionResampling)*/ {
             std::vector<glm::vec3> glmPositions;
             for (ccmc::Point3f p : positions) {
@@ -287,13 +291,16 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         outFieldlinesStates._lineCount.push_back(lineCount);
         lineStart += lineCount;
     }
+    if (sampleExtraQuantities) {
+        outFieldlinesStates._extraVariables.push_back(xtraVarVec);
+    }
 
     // ------------------------ MAKE SURE STATE HAS A START TIME ------------------------
     double startTime = getTime(kameleon.get());
     startTimes.push_back(startTime);
     LDEBUG("State will start at " << startTime << " (J2000 Time)");
 
-    // delete interpolator;
+    delete interpolator;
     return status;
 }
 

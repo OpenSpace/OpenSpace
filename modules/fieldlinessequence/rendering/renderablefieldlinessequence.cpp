@@ -65,6 +65,11 @@ namespace {
     const float R_S_TO_METER = 695700000.f; // Sun radius
     const float A_U_TO_METER = 149597870700.f; // Astronomical Units
     // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
+
+    const enum colorMethod{UNIFORM, UNIT_DEPENDENT, CLASSIFIED};
+    // const int colorUniform = 0;
+    // const int colorUnitDependent = 1;
+    // const int colorClassified = 2;
 }
 
 
@@ -74,6 +79,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     : Renderable(dictionary),
       _isMorphing("isMorphing", "Morphing", false),
       _show3DLines("show3DLines", "3D Lines", false),
+      _colorMethod("fieldlineColorMethod", "Color Method", properties::OptionProperty::DisplayType::Dropdown),
       _fieldlineColor("fieldlineColor", "Fieldline Color", glm::vec4(0.7f,0.f,0.7f,0.3f),
                                                            glm::vec4(0.f),
                                                            glm::vec4(1.f)),
@@ -145,145 +151,153 @@ bool RenderableFieldlinesSequence::initialize() {
                 "'\n\tRequires a path to a Directory containing .CDF files. " <<
                 "Files must be of the same model and in sequence!");
         return false;
-    } else { // Everything essential is provided
-        std::vector<std::string> validCdfFilePaths;
-        if (!FieldlinesSequenceManager::ref().getCdfFilePaths(
-                pathToCdfDirectory, validCdfFilePaths) ||
-                validCdfFilePaths.empty() ) {
+    }
+    // Everything essential is provided
+    std::vector<std::string> validCdfFilePaths;
+    if (!FieldlinesSequenceManager::ref().getCdfFilePaths(
+            pathToCdfDirectory, validCdfFilePaths) ||
+            validCdfFilePaths.empty() ) {
 
-            LERROR("Failed to get valid .cdf file paths from '"
-                    << pathToCdfDirectory << "'" );
-            return false;
-        }
+        LERROR("Failed to get valid .cdf file paths from '"
+                << pathToCdfDirectory << "'" );
+        return false;
+    }
 
-        // Specify which quantity to trace
-        std::string tracingVariable;
-        if (!_vectorVolumeInfo.getValue(keyVolumeTracingVariable, tracingVariable)) {
-            tracingVariable = "b"; //default: b = magnetic field.
-            LWARNING(keyVolume << " isn't specifying a " <<
-                     keyVolumeTracingVariable << ". Using default value: '" <<
-                     tracingVariable << "' for magnetic field.");
-        }
+    // Specify which quantity to trace
+    std::string tracingVariable;
+    if (!_vectorVolumeInfo.getValue(keyVolumeTracingVariable, tracingVariable)) {
+        tracingVariable = "b"; //default: b = magnetic field.
+        LWARNING(keyVolume << " isn't specifying a " <<
+                 keyVolumeTracingVariable << ". Using default value: '" <<
+                 tracingVariable << "' for magnetic field.");
+    }
 
-        int maxSteps = 1000; // Default value
-        float f_maxSteps;
-        if (!_fieldlineInfo.getValue(keyFieldlineMaxTraceSteps, f_maxSteps)) {
-            LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineMaxTraceSteps
-                    << ". Using default value: " << maxSteps);
+    int maxSteps = 1000; // Default value
+    float f_maxSteps;
+    if (!_fieldlineInfo.getValue(keyFieldlineMaxTraceSteps, f_maxSteps)) {
+        LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineMaxTraceSteps
+                << ". Using default value: " << maxSteps);
+    } else {
+        maxSteps = static_cast<int>(f_maxSteps);
+    }
+
+    bool userWantsMorphing;
+    if (!_fieldlineInfo.getValue(keyFieldlineShouldMorph, userWantsMorphing)) {
+        _isMorphing = false; // Default value
+        LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph
+                << ". Using default: " << _isMorphing);
+    } else {
+        _isMorphing = userWantsMorphing;
+    }
+
+    int resamplingOption = 4; // Default
+    int numResamples = 2 * maxSteps + 3; // Default
+    if (_isMorphing) {
+
+        float f_resamplingOption;
+
+        if(!_fieldlineInfo.getValue(keyFieldlineResampleOption, f_resamplingOption)) {
+            LWARNING(keyFieldlines << " isn't specifying " <<
+                     keyFieldlineResampleOption << ". Default is set to " <<
+                     resamplingOption);
         } else {
-            maxSteps = static_cast<int>(f_maxSteps);
+            resamplingOption = static_cast<int>(f_resamplingOption);
         }
 
-        bool userWantsMorphing;
-        if (!_fieldlineInfo.getValue(keyFieldlineShouldMorph, userWantsMorphing)) {
-            _isMorphing = false; // Default value
-            LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph
-                    << ". Using default: " << _isMorphing);
+        float f_numResamples;
+
+        if(_fieldlineInfo.getValue(keyFieldlineResamples, f_numResamples)) {
+            if (resamplingOption == 4) {
+                LWARNING(keyFieldlineResampleOption << " 4 does not allow a custom" <<
+                         " value for " << keyFieldlineResamples <<". Using (2 * " <<
+                         keyFieldlineMaxTraceSteps <<" + 3) = " << numResamples);
+            } else {
+                numResamples = static_cast<int>(f_numResamples);
+            }
         } else {
-            _isMorphing = userWantsMorphing;
-        }
-
-        int resamplingOption = 4; // Default
-        int numResamples = 2 * maxSteps + 3; // Default
-        if (_isMorphing) {
-
-            float f_resamplingOption;
-
-            if(!_fieldlineInfo.getValue(keyFieldlineResampleOption, f_resamplingOption)) {
+            if (resamplingOption != 4) {
                 LWARNING(keyFieldlines << " isn't specifying " <<
-                         keyFieldlineResampleOption << ". Default is set to " <<
-                         resamplingOption);
-            } else {
-                resamplingOption = static_cast<int>(f_resamplingOption);
+                         keyFieldlineResamples << ". Default is set to (2*" <<
+                         keyFieldlineMaxTraceSteps << "+3) = " << numResamples);
             }
-
-            float f_numResamples;
-
-            if(_fieldlineInfo.getValue(keyFieldlineResamples, f_numResamples)) {
-                if (resamplingOption == 4) {
-                    LWARNING(keyFieldlineResampleOption << " 4 does not allow a custom" <<
-                             " value for " << keyFieldlineResamples <<". Using (2 * " <<
-                             keyFieldlineMaxTraceSteps <<" + 3) = " << numResamples);
-                } else {
-                    numResamples = static_cast<int>(f_numResamples);
-                }
-            } else {
-                if (resamplingOption != 4) {
-                    LWARNING(keyFieldlines << " isn't specifying " <<
-                             keyFieldlineResamples << ". Default is set to (2*" <<
-                             keyFieldlineMaxTraceSteps << "+3) = " << numResamples);
-                }
-            }
-        }
-
-        _numberOfStates = validCdfFilePaths.size();
-        _states.reserve(_numberOfStates);
-        _startTimes.reserve(_numberOfStates);
-
-        LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
-
-        // TODO this could be done in manager
-        std::vector<std::string> bla;
-        for (int i = 0; i < _numberOfStates; ++i) {
-            LDEBUG(validCdfFilePaths[i] << " is now being traced.");
-            _states.push_back(FieldlinesState(_seedPoints.size()));
-            FieldlinesSequenceManager::ref().getFieldlinesState(validCdfFilePaths[i],
-                                                                tracingVariable,
-                                                                _seedPoints,
-                                                                maxSteps,
-                                                                _isMorphing,
-                                                                numResamples,
-                                                                resamplingOption,
-                                                                bla,
-                                                                _startTimes,
-                                                                _states[i]);
-
-        }
-
-        // Approximate the end time of last state (and for the sequence as a whole)
-        if (_numberOfStates > 0) {
-            _seqStartTime = _startTimes[0];
-            std::string model = _states[0]._modelName;
-            if (model == "enlil") {
-                _widthScaling = R_S_TO_METER;
-            } else if (model == "batsrus") {
-                _widthScaling = R_E_TO_METER;
-            }
-
-            double lastStateStart = _startTimes[_numberOfStates-1];
-            if (_numberOfStates > 1) {
-                double avgTimeOffset = (lastStateStart - _seqStartTime) /
-                                       (static_cast<double>(_numberOfStates) - 1.0);
-                _seqEndTime =  lastStateStart + avgTimeOffset;
-            } else {
-                _isMorphing = false;
-                // _seqEndTime = 631108800.f; // January 1st 2020
-                _seqEndTime = FLT_MAX; // UNTIL THE END OF DAYS!
-            }
-            // Add seqEndTime as the last start time
-            // to prevent vector from going out of bounds later.
-            _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
-        } else {
-            LERROR("Couldn't create any states!");
-            return false;
-        }
-
-        if (_isMorphing) {
-            LDEBUG("Optimising morphing!");
-            float quickMorphDist;
-            if(!_fieldlineInfo.getValue(keyFieldlineQuickMorphDistance, quickMorphDist)) {
-                quickMorphDist = 20.f * R_E_TO_METER; // 2 times Earth's radius
-                LWARNING(keyFieldlines << " isn't specifying " <<
-                         keyFieldlineQuickMorphDistance <<
-                         ". Default is set to 20 Earth radii.");
-            }
-
-            FieldlinesSequenceManager::ref().setQuickMorphBooleans(_states,
-                                                                   numResamples,
-                                                                   quickMorphDist);
         }
     }
 
+    _numberOfStates = validCdfFilePaths.size();
+    _states.reserve(_numberOfStates);
+    _startTimes.reserve(_numberOfStates);
+
+    LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
+
+    // TODO this could be done in manager
+    std::string xtraVar = "T";
+    std::vector<std::string> colorizingVars;
+    colorizingVars.push_back(xtraVar);
+
+    for (int i = 0; i < _numberOfStates; ++i) {
+        LDEBUG(validCdfFilePaths[i] << " is now being traced.");
+        _states.push_back(FieldlinesState(_seedPoints.size()));
+        FieldlinesSequenceManager::ref().getFieldlinesState(validCdfFilePaths[i],
+                                                            tracingVariable,
+                                                            _seedPoints,
+                                                            maxSteps,
+                                                            _isMorphing,
+                                                            numResamples,
+                                                            resamplingOption,
+                                                            colorizingVars,
+                                                            _startTimes,
+                                                            _states[i]);
+    }
+
+    bool allowUnitColoring = false;
+    if (_numberOfStates > 0) {
+        // Approximate the end time of last state (and for the sequence as a whole)
+        _seqStartTime = _startTimes[0];
+
+        double lastStateStart = _startTimes[_numberOfStates-1];
+        if (_numberOfStates > 1) {
+            double avgTimeOffset = (lastStateStart - _seqStartTime) /
+                                   (static_cast<double>(_numberOfStates) - 1.0);
+            _seqEndTime =  lastStateStart + avgTimeOffset;
+        } else {
+            _isMorphing = false;
+            // _seqEndTime = 631108800.f; // January 1st 2020
+            _seqEndTime = FLT_MAX; // UNTIL THE END OF DAYS!
+        }
+        // Add seqEndTime as the last start time
+        // to prevent vector from going out of bounds later.
+        _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
+
+        std::string model = _states[0]._modelName;
+        if (model == "enlil") {
+            _widthScaling = R_S_TO_METER;
+        } else if (model == "batsrus") {
+            _widthScaling = R_E_TO_METER;
+        }
+
+        allowUnitColoring = (_states[0]._extraVariables[0].size() > 0) ? true : false;
+
+    } else {
+        LERROR("Couldn't create any states!");
+        return false;
+    }
+
+    if (_isMorphing) {
+        LDEBUG("Optimising morphing!");
+        float quickMorphDist;
+        if(!_fieldlineInfo.getValue(keyFieldlineQuickMorphDistance, quickMorphDist)) {
+            quickMorphDist = 20.f * R_E_TO_METER; // 2 times Earth's radius
+            LWARNING(keyFieldlines << " isn't specifying " <<
+                     keyFieldlineQuickMorphDistance <<
+                     ". Default is set to 20 Earth radii.");
+        }
+
+        FieldlinesSequenceManager::ref().setQuickMorphBooleans(_states,
+                                                               numResamples,
+                                                               quickMorphDist);
+    }
+
+    // GL_LINE width related constants dependent on hardware..
     // glGetFloatv(GL_LINE_WIDTH, &_maxLineWidthOpenGl);
     // glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, &_maxLineWidthOpenGl);
     // glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, &_maxLineWidthOpenGl);
@@ -295,7 +309,6 @@ bool RenderableFieldlinesSequence::initialize() {
             "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_morph_flow_direction_vs.glsl",
             "${MODULE_FIELDLINESSEQUENCE}/shaders/fieldline_flow_direction_fs.glsl"
         );
-        addProperty(_isMorphing);
     } else {
         _program = OsEng.renderEngine().buildRenderProgram(
             "FieldlinesSequence",
@@ -335,6 +348,16 @@ bool RenderableFieldlinesSequence::initialize() {
     addProperty(_modulusDivider);
     addProperty(_fieldlineColor);
     addProperty(_fieldlineParticleColor);
+
+    if (_isMorphing) {
+        addProperty(_isMorphing);
+    }
+
+    if (allowUnitColoring) {
+        _colorMethod.addOption(colorMethod::UNIFORM, "Uniform Color");
+        _colorMethod.addOption(colorMethod::UNIT_DEPENDENT, "Unit Dependent");
+        addProperty(_colorMethod);
+    }
 
     return true;
 }
@@ -390,6 +413,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
         _activeProgramPtr->setUniform("time", testTime * _timeMultiplier);
         _activeProgramPtr->setUniform("flParticleSize", _fieldlineParticleSize);
         _activeProgramPtr->setUniform("modulusDivider", _modulusDivider);
+        _activeProgramPtr->setUniform("colorMethod", _colorMethod);
         _activeProgramPtr->setUniform("fieldlineColor", _fieldlineColor);
         _activeProgramPtr->setUniform("fieldlineParticleColor", _fieldlineParticleColor);
         if (_show3DLines) {
@@ -470,6 +494,13 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
                 glGenBuffers(1, &_quickMorphBuffer);
             }
         }
+
+        // Set color buffer if state has values for it
+        _hasUnitColoring = (_states[_activeStateIndex]._extraVariables.size() > 0) ? true : false;
+        if (_vertexColorBuffer == 0) {
+            glGenBuffers(1, &_vertexColorBuffer);
+        }
+
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
         glBufferData(GL_ARRAY_BUFFER,
@@ -508,9 +539,17 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
         }
 
         // TODO fix colors
-        // GLuint colorLocation = 1;
-        // glEnableVertexAttribArray(colorLocation);
-        // glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(LinePoint), (void*)(sizeof(glm::vec3)));
+        if (_hasUnitColoring) {
+            glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
+
+            //TODO: fix this hardcoded 0
+            glBufferData(GL_ARRAY_BUFFER, _states[_activeStateIndex]._extraVariables[0].size() * sizeof(float),
+                    &_states[_activeStateIndex]._extraVariables[0].front(), GL_STATIC_DRAW);
+
+            GLuint extraAttribute = 3;
+            glEnableVertexAttribArray(extraAttribute);
+            glVertexAttribPointer(extraAttribute, 1, GL_FLOAT, GL_FALSE, 0, 0);
+        }
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
