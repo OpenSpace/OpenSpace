@@ -99,6 +99,7 @@ class TouchInteraction : public properties::PropertyOwner
 		~TouchInteraction();
 		
 		void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
+		bool gui(const std::vector<TUIO::TuioCursor>& list);
 		void manipulate(const std::vector<TUIO::TuioCursor>& list);
 		void trace(const std::vector<TUIO::TuioCursor>& list);
 		int interpret(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
@@ -109,7 +110,6 @@ class TouchInteraction : public properties::PropertyOwner
 		void decelerate();
 		void clear();
 		void tap();
-		bool guiON();
 
 		// Get & Setters
 		Camera* getCamera();

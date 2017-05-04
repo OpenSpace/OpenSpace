@@ -24,6 +24,7 @@
 
 
 #include <modules/touch/include/TouchInteraction.h>
+#include <modules/onscreengui/onscreenguimodule.h>
 
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/engine/openspaceengine.h>
@@ -82,17 +83,14 @@ TouchInteraction::~TouchInteraction() { }
 // Called each frame if there is any input
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
 	// check if tapped in corner to activate gui mode
-	glm::dvec2 pos = glm::dvec2(list.at(0).getX(), list.at(0).getY());
-	if (_tap && list.size() == 1 && pos.x < 0.0001 && pos.y < 0.0001 /*|| check if showGUI*/) {
-		// if !showGUI press F1, 
-		_guiON = !_guiON;
-	}
-	else if (!_guiON) {
+	
+	if (!gui(list)) {
 		if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
 			manipulate(list);
 		}
-		if (_levSuccess)
+		if (_levSuccess) {
 			trace(list);
+		}
 		if (!_directTouchMode) {
 			accelerate(list, lastProcessed);
 		}
@@ -105,6 +103,40 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 			_directTouchMode = false;
 		}
 	}
+}
+
+bool TouchInteraction::gui(const std::vector<TuioCursor>& list) {
+	WindowWrapper& wrapper = OsEng.windowWrapper();
+	bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
+	glm::ivec2 res = wrapper.currentWindowSize();
+	glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenX(res.y)); // mouse pixel position
+	glm::vec2 button = glm::vec2(36, 64); // pixel size
+	if (_tap && list.size() == 1 && pos.x < button.x && pos.y < button.y) { // pressed invisible button
+		_tap = false;
+		_guiON = !_guiON;
+		OnScreenGUIModule::gui.setEnabled(_guiON);
+
+		std::string mode = (_guiON) ? "" : "de";
+		LINFO("GUI mode is " << mode << "activated. Inside box by: (" <<
+			static_cast<int>(100 * (pos.x / button.x)) << "%, " << static_cast<int>(100 * (pos.y / button.y)) << "%)\n");
+	}
+	else if (_guiON) { // emulate mouse
+		int action = (_tap) ? 0 : 1;
+		LINFO("Pos: " << glm::to_string(pos) << ", Button: " << action << "_tap: " << _tap << "\n");
+		interaction::InputState().mousePositionCallback(pos.x, pos.y);
+		interaction::InputState().mouseButtonCallback(openspace::MouseButton(0), openspace::MouseAction(action));
+
+		double dt = std::max(wrapper.averageDeltaTime(), 0.0);
+		OnScreenGUIModule::gui.startFrame(static_cast<float>(dt),
+			wrapper.currentWindowSize(),
+			wrapper.dpiScaling(),
+			pos,
+			action);
+		OnScreenGUIModule::gui.endFrame();
+		
+		 
+	}
+	return _guiON;
 }
 
 // Sets _vel to update _camera according to direct-manipulation (L2 error)
@@ -205,7 +237,7 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 	SceneGraphNode* node = _selected.at(0).node;
 	auto castToNDC = [](glm::dvec3 vec, Camera& camera, SceneGraphNode* node, double aspectRatio) {
 		glm::dvec3 backToScreenSpace = glm::inverse(camera.rotationQuaternion())
-			* glm::normalize(((node->rotationMatrix() * vec) + node->worldPosition() - camera.positionVec3()));
+			* glm::normalize(((node->rotationMatrix() * vec) + (node->worldPosition() - camera.positionVec3()) ));
 		backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
 		backToScreenSpace.x /= aspectRatio;
 
@@ -228,8 +260,8 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 		double yCo = -2 * (c->getY() - 0.5); // normalized -1 to 1 coordinates on screen
 		screenPoints.push_back(glm::dvec2(xCo, yCo));
 	}
-	glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-	FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, node, res.x / res.y };
+	//glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
+	FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, node, 1.88 };
 	void* dataPtr = reinterpret_cast<void*>(&fData);
 
 	bool success = levmarq(nDOF, par, nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
@@ -247,11 +279,11 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 	}
 
 	// debugging
-	std::ostringstream os;
+	/*std::ostringstream os;
 	for (int i = 0; i < nDOF; ++i) {
 	os << par[i] << ", ";
 	}
-	std::cout << "Levmarq success after " << _lmstat.final_it << " iterations. Values: " << os.str() << "\n";
+	std::cout << "Levmarq success after " << _lmstat.final_it << " iterations. Values: " << os.str() << "\n";*/
 
 	// cleanup
 	delete[] par;
@@ -270,8 +302,8 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 			if (node->name() == name)
 				selectableNodes.push_back(node);
 
-	glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-	double aspectRatio = res.x/res.y;
+	//glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
+	double aspectRatio = 1.88; //res.x/res.y;
 	glm::dquat camToWorldSpace = _camera->rotationQuaternion();
 	glm::dvec3 camPos = _camera->positionVec3();
 	std::vector<SelectedBody> newSelected;
@@ -280,6 +312,8 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 		double yCo = -2 * (c.getY() - 0.5); // normalized -1 to 1 coordinates on screen
 		glm::dvec3 cursorInWorldSpace = camToWorldSpace * glm::dvec3(xCo, yCo, -3.2596558);
 		glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
+
+
 		int id = c.getSessionID();
 		for (SceneGraphNode* node : selectableNodes) {
 			double boundingSphere = node->boundingSphere();
@@ -293,9 +327,8 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 					d -= sqrt(root);
 				glm::dvec3 intersectionPoint = camPos + d * raytrace;
 				glm::dvec3 pointInModelView = glm::inverse(node->rotationMatrix()) * (intersectionPoint - node->worldPosition());
-				// spherical coordinates for point on surface, maybe not required
-				double theta = atan(pointInModelView.y / pointInModelView.x);
-				double phi = atan(glm::length(glm::dvec2(pointInModelView.x, pointInModelView.y)) / pointInModelView.z);
+				//double theta = atan(pointInModelView.y / pointInModelView.x);
+				//double phi = atan(glm::length(glm::dvec2(pointInModelView.x, pointInModelView.y)) / pointInModelView.z);
 
 				// Add id, node and surface coordinates to the selected list
 				std::vector<SelectedBody>::iterator oldNode = find_if(newSelected.begin(), newSelected.end(), [id](SelectedBody s) { return s.id == id; });
@@ -313,12 +346,12 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 		}
 		
 	}
+	_selected = newSelected;
+
 	//debugging
 	for (auto it : newSelected) {
 		//std::cout << it.node->name() << " hit with cursor " << it.id << ". Surface Coordinates: " << glm::to_string(it.coordinates) << "\n";
 	}
-
-	_selected = newSelected;
 }
 
 // Interprets the input gesture to a specific interaction
@@ -530,6 +563,8 @@ void TouchInteraction::step(double dt) {
 		// Update the camera state
 		_camera->setPositionVec3(camPos);
 		_camera->setRotation(globalCamRot * localCamRot);
+
+		_tap = false;
 	}
 }
 
@@ -556,6 +591,7 @@ void TouchInteraction::decelerate() {
 // Called if all fingers are off the screen
 void TouchInteraction::clear() {
 	//_directTouchMode = false;
+	//_tap = false;
 	_levSuccess = true;
 	_selected.clear(); // should clear if no longer have a direct-touch input
 }
@@ -564,9 +600,6 @@ void TouchInteraction::tap() {
 	_tap = true;
 }
 
-bool TouchInteraction::guiON() {
-	return _guiON;
-}
 // Get & Setters
 Camera* TouchInteraction::getCamera() {
 	return _camera;

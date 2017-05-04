@@ -89,8 +89,7 @@ void TuioEar::updateTuioCursor(TuioCursor *tcur) {
 void TuioEar::removeTuioCursor(TuioCursor *tcur) {
 	_mx.lock();
 	_removeList.push_back(tcur->getSessionID());
-
-	if (tcur->getPath().size() < 4 && tcur->getMotionSpeed() < 0.03 && _list.size() == _removeList.size() == 1) {
+	if (tcur->getPath().size() < 4 && tcur->getMotionSpeed() < 0.03 && _list.size() == _removeList.size() == 1) { // maybe take away motionspeed
 		_tapCo = TuioCursor(*tcur);
 		_tap = true;
 	}
@@ -121,6 +120,7 @@ bool TuioEar::tap() {
 }
 
 TuioCursor TuioEar::getTap() {
+	std::lock_guard<std::mutex> lock(_mx);
 	return _tapCo;
 }
 
