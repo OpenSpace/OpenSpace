@@ -7,9 +7,9 @@ return {
             Translation = {
                 Type = "SpiceTranslation",
                 Frame = "J2000",
-                Body = "-123456789",
+                Body = "-136395",
                 Observer = "EARTH",
-                Kernels = "${OPENSPACE_DATA}/spice/SDO_EPHEM_2017064.bsp"
+                Kernels = "${OPENSPACE_DATA}/spice/SDO_EPHEM_2010123_2017104_new.bsp"
             },
             Color = { 1.0, 1.0, 1.0 },
             Period = 0.997319,
@@ -24,9 +24,9 @@ return {
             Translation = {
                 Type = "SpiceTranslation",
                 Frame = "J2000",
-                Body = "-123456789",
+                Body = "-136395",
                 Observer = "EARTH",
-                Kernels = "${OPENSPACE_DATA}/spice/SDO_EPHEM_2017064.bsp"
+                Kernels = "${OPENSPACE_DATA}/spice/SDO_EPHEM_2010123_2017104_new.bsp"
             },
         }
     },
@@ -66,5 +66,5 @@ return {
             -- Dummy texture
             Texture = "images/stereo2.png",
         },
-    }
+    },
 }
