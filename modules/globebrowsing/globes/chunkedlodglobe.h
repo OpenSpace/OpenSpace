@@ -50,6 +50,7 @@ class ChunkRenderer;
 struct Geodetic2;
 class LayerManager;
 class RenderableGlobe;
+struct SubSite;
 
 class ChunkedLodGlobe : public Renderable {
 public:
@@ -105,6 +106,11 @@ public:
      * cartesian model space.
      * \returns the height from the reference ellipsoid to the globe surface.
      */
+
+	void ChunkedLodGlobe::addSites(const std::vector<SubSite> subsites);
+
+	std::vector<std::vector<SubSite>> ChunkedLodGlobe::subSites();
+
     float getHeight(glm::dvec3 position) const;
 
     const int minSplitDepth;
@@ -113,6 +119,8 @@ public:
     std::shared_ptr<LayerManager> layerManager() const;
 
     StatsCollector stats;
+
+	std::vector<std::vector<SubSite>> _subSites;
     
 private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;

@@ -49,6 +49,10 @@
 
 #include <math.h>
 
+namespace {
+	const std::string _loggerCat = "ChunkedLodGlobe";
+}
+
 namespace openspace {
 namespace globebrowsing {
 
@@ -107,6 +111,11 @@ bool ChunkedLodGlobe::isReady() const {
 
 std::shared_ptr<LayerManager> ChunkedLodGlobe::layerManager() const {
     return _layerManager;
+}
+
+void ChunkedLodGlobe::addSites(const std::vector<SubSite> subSites) {
+	_leftRoot->addSites(subSites);
+	_rightRoot->addSites(subSites);
 }
 
 bool ChunkedLodGlobe::testIfCullable(const Chunk& chunk,
@@ -260,7 +269,6 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
 
 void ChunkedLodGlobe::render(const RenderData& data) {
     stats.startNewRecord();
-        
     auto duration = std::chrono::system_clock::now().time_since_epoch();
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
     stats.i["time"] = millis;
@@ -273,6 +281,8 @@ void ChunkedLodGlobe::render(const RenderData& data) {
     glm::dmat4 vp = glm::dmat4(data.camera.projectionMatrix()) * viewTransform;
     glm::dmat4 mvp = vp * _owner.modelTransform();
 
+	_subSites.clear();
+
     // Render function
     auto renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
         stats.i["chunks nodes"]++;
@@ -284,6 +294,7 @@ void ChunkedLodGlobe::render(const RenderData& data) {
                 double t0 = Time::now().j2000Seconds();
                 _renderer->renderChunk(chunkNode.getChunk(), data);
                 debugRenderChunk(chunk, mvp);
+				_subSites.push_back(chunkNode.getSubSites());
             }
         }
     };
@@ -334,6 +345,10 @@ void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 
 void ChunkedLodGlobe::update(const UpdateData& data) {
     _renderer->update();
+}
+
+std::vector<std::vector<SubSite>> ChunkedLodGlobe::subSites() {
+	return _subSites;
 }
     
 } // namespace globebrowsing
