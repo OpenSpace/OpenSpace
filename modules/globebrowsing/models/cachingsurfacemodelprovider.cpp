@@ -50,24 +50,27 @@ std::vector<std::shared_ptr<Model>> CachingSurfaceModelProvider::getModels(const
 	// Check if the chunk is already in the cache. If it is in the cache, loop through the corresponding vector
 	// and look if the model is already loaded. If the model is already loaded, return the vector. If the model is
 	// not already loaded, enqueue the model.
+	std::vector<std::shared_ptr<Model>> models;
+	bool modelIsInCache = true;
 	if (_modelCache->exist(model->tileHashKey)) {
-		std::vector<std::shared_ptr<Model>> models = _modelCache->get(model->tileHashKey);
+		models = _modelCache->get(model->tileHashKey);
 
 		for (auto i : models) {
 			std::string tempName = i->fileName;
-			if (i->fileName == model->fileName)
+			if (i->fileName == model->fileName) {
 				return models;
-			else {
-				_asyncSurfaceModelProvider->enqueueModelIO(dictionary, model);
 			}
 		}
-		return models;
+		modelIsInCache = false;
+		if(!modelIsInCache) {
+			_asyncSurfaceModelProvider->enqueueModelIO(dictionary, model);
+		}
 	}
-	else
+	else {
 		_asyncSurfaceModelProvider->enqueueModelIO(dictionary, model);
+	}
 
-	std::vector<std::shared_ptr<Model>> tempVector;
-	return tempVector;
+	return models;
 }
 
 void CachingSurfaceModelProvider::update(Renderable* parent) {
