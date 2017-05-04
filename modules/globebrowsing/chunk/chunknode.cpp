@@ -29,6 +29,10 @@
 #include <stack>
 #include <queue>
 
+namespace {
+	const std::string _loggerCat = "ChunkNode";
+}
+
 namespace openspace {
 namespace globebrowsing {
 
@@ -169,8 +173,9 @@ void ChunkNode::split(int depth) {
 			std::unique_ptr<ChunkNode> temp = std::make_unique<ChunkNode>(chunk, this);
 			if (this != nullptr) {
 				for (int k = 0; k < this->_subSites.size(); ++k) {
-					globebrowsing::Geodetic2 temp = globebrowsing::Geodetic2{ this->_subSites.at(k).lat, this->_subSites.at(k).lon } / 180.0f * glm::pi<double>();
+					globebrowsing::Geodetic2 temp = globebrowsing::Geodetic2{ this->_subSites.at(k).lat, this->_subSites.at(k).lon } / 180.0 * glm::pi<double>();
 					if (patch.contains(temp)) {
+						_subSites[k].tileHashKey = chunk.tileIndex().hashKey();
 						tempSites.push_back(this->_subSites.at(k));
 					}
 				}
