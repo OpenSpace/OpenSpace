@@ -36,6 +36,8 @@ uniform int flParticleSize;
 uniform int modulusDivider;
 uniform int colorMethod;
 
+uniform sampler1D colorMap;
+
 uniform vec4 fieldlineColor;
 uniform vec4 fieldlineParticleColor;
 
@@ -48,30 +50,23 @@ const int CLASSIFIED_COLOR = 2;
 
 void main() {
     // Only a temp variable until proper transfer function
-    float threshold = 10000;
-    vec3 warm = vec3(1.0,0.15,0.0);
-    vec3 cold = vec3(0.0,1.0,1.0);
+    float mini = 500.0;
+    float maxi = 100000.0;
+
+    float lookUpValue = (unitIntensity - mini ) / (maxi-mini);
+    vec4 color = texture(colorMap, lookUpValue);
+
     // Color every n-th vertex differently to show fieldline flow direction
     int modulus = (gl_VertexID + time) % modulusDivider;
     if ( modulus > 0 && modulus < flParticleSize) {
-                if (colorMethod == UNIT_DEPENDENT_COLOR) {
-            // TODO: FIX THIS. Its just temporary, until texture is provided
-            if (unitIntensity < threshold) {
-                vs_color = vec4(cold,fieldlineParticleColor.a);
-            } else {
-                vs_color = vec4(warm,fieldlineParticleColor.a);
-            }
+        if (colorMethod == UNIT_DEPENDENT_COLOR) {
+            vs_color = vec4(color.xyz,fieldlineParticleColor.a);
         } else /*if (colorMethod == UNIFORM_COLOR)*/ {
             vs_color = fieldlineParticleColor;
         }
     } else {
         if (colorMethod == UNIT_DEPENDENT_COLOR) {
-            // TODO: FIX THIS. Its just temporary, until texture is provided
-            if (unitIntensity < threshold) {
-                vs_color = vec4(cold,fieldlineColor.a);
-            } else {
-                vs_color = vec4(warm,fieldlineColor.a);
-            }
+            vs_color = vec4(color.xyz,fieldlineColor.a);
         } else /*if (colorMethod == UNIFORM_COLOR)*/ {
             vs_color = fieldlineColor;
         }

@@ -29,17 +29,15 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
-
-#include <ghoul/glm.h>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/misc/assert.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
+
+#include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/textureunit.h>
+
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace {
     std::string _loggerCat = "RenderableFieldlinesSequence";
@@ -66,7 +64,7 @@ namespace {
     const float A_U_TO_METER = 149597870700.f; // Astronomical Units
     // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
 
-    const enum colorMethod{UNIFORM, UNIT_DEPENDENT, CLASSIFIED};
+    enum colorMethod{UNIFORM, UNIT_DEPENDENT, CLASSIFIED};
     // const int colorUniform = 0;
     // const int colorUnitDependent = 1;
     // const int colorClassified = 2;
@@ -90,7 +88,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
                                                            glm::vec4(1.f,0.f,1.f,0.5f),
                                                            glm::vec4(0.f),
                                                            glm::vec4(1.f)),
-      _lineWidth("fieldlineWidth", "Fieldline Width", 0.005, 0, 10.0),
+      _lineWidth("fieldlineWidth", "Fieldline Width", 1.f, 0.f, 10.f),
+      _transferFunctionPath("transferFunctionPath", "Transfer Function Path"),
       _vertexArrayObject(0),
       _vertexPositionBuffer(0),
       _morphToPositionBuffer(0),
@@ -121,6 +120,10 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
         LERROR("Renderable does not contain a key for '" << keySeedPoints << "'");
         // deinitialize();
     }
+
+    // TODO: REMOVE HARDCODED PATH
+    _transferFunctionPath = "/home/ccarlbau/workspace/OpenSpace/data/colortables/uniform_heatmap_bcgyr.txt";
+    _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 }
 
 bool RenderableFieldlinesSequence::isReady() const {
@@ -357,6 +360,11 @@ bool RenderableFieldlinesSequence::initialize() {
         _colorMethod.addOption(colorMethod::UNIFORM, "Uniform Color");
         _colorMethod.addOption(colorMethod::UNIT_DEPENDENT, "Unit Dependent");
         addProperty(_colorMethod);
+        addProperty(_transferFunctionPath);
+        _transferFunctionPath.onChange([this] {
+            // TOGGLE ACTIVE SHADER PROGRAM
+            _transferFunction->setPath(_transferFunctionPath);
+        });
     }
 
     return true;
@@ -433,6 +441,15 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
                 _activeProgramPtr->setUniform("isMorphing", _isMorphing);
             }
         }
+
+        if (_colorMethod == colorMethod::UNIT_DEPENDENT) {
+            // TODO MOVE THIS TO UPDATE AND CHECK
+            _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+            _textureUnit->activate();
+            _transferFunction->bind(); // Calls update internally
+            _activeProgramPtr->setUniform("colorMap", _textureUnit->unitNumber());
+        }
+
         glDisable(GL_CULL_FACE);
 
         // _activeProgramPtr->setUniform("classification", _classification);
