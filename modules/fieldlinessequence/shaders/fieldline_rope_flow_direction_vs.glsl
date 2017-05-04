@@ -27,12 +27,14 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec3 in_position;
+layout(location = 3) in float unitIntensity;
 
 out vec4 vs_color;
 
 uniform int time;
 uniform int flParticleSize;
 uniform int modulusDivider;
+uniform int colorMethod;
 
 uniform vec4 fieldlineColor;
 uniform vec4 fieldlineParticleColor;
@@ -40,14 +42,39 @@ uniform vec4 fieldlineParticleColor;
 uniform mat4 modelViewTransform;
 // uniform mat4 modelTransform;
 
+const int UNIFORM_COLOR = 0;
+const int UNIT_DEPENDENT_COLOR = 1;
+const int CLASSIFIED_COLOR = 2;
 
 void main() {
+    // Only a temp variable until proper transfer function
+    float threshold = 10000;
+    vec3 warm = vec3(1.0,0.15,0.0);
+    vec3 cold = vec3(0.0,1.0,1.0);
     // Color every n-th vertex differently to show fieldline flow direction
     int modulus = (gl_VertexID + time) % modulusDivider;
     if ( modulus > 0 && modulus < flParticleSize) {
-        vs_color = fieldlineParticleColor;
+                if (colorMethod == UNIT_DEPENDENT_COLOR) {
+            // TODO: FIX THIS. Its just temporary, until texture is provided
+            if (unitIntensity < threshold) {
+                vs_color = vec4(cold,fieldlineParticleColor.a);
+            } else {
+                vs_color = vec4(warm,fieldlineParticleColor.a);
+            }
+        } else /*if (colorMethod == UNIFORM_COLOR)*/ {
+            vs_color = fieldlineParticleColor;
+        }
     } else {
-        vs_color = fieldlineColor;
+        if (colorMethod == UNIT_DEPENDENT_COLOR) {
+            // TODO: FIX THIS. Its just temporary, until texture is provided
+            if (unitIntensity < threshold) {
+                vs_color = vec4(cold,fieldlineColor.a);
+            } else {
+                vs_color = vec4(warm,fieldlineColor.a);
+            }
+        } else /*if (colorMethod == UNIFORM_COLOR)*/ {
+            vs_color = fieldlineColor;
+        }
     }
 
     // FROM MODEL SPACE TO CAMERA SPACE

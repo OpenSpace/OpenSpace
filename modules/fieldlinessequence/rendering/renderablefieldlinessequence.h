@@ -64,6 +64,8 @@ private:
     properties::IntProperty _fieldlineParticleSize;
     properties::IntProperty _modulusDivider;
 
+    properties::OptionProperty _colorMethod;
+
     properties::Vec4Property _fieldlineColor;
     properties::Vec4Property _fieldlineParticleColor;
 
@@ -75,6 +77,7 @@ private:
 
     bool _shouldRender; // only temporary
     bool _needsUpdate;
+    bool _hasUnitColoring;
     // bool _isMorphing;
 
     GLuint _vertexArrayObject;

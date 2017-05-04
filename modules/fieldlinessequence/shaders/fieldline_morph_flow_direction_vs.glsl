@@ -31,6 +31,7 @@ uniform bool isMorphing;
 uniform int time;
 uniform int flParticleSize;
 uniform int modulusDivider;
+uniform int colorMethod;
 
 uniform vec4 fieldlineColor;
 uniform vec4 fieldlineParticleColor;
@@ -40,10 +41,15 @@ uniform float state_progression;
 layout(location = 0) in vec3 in_position; // in meters
 layout(location = 1) in vec3 in_pos_morph_to; // in meters
 layout(location = 2) in float using_quick_morph; // in meters
+layout(location = 3) in float unitIntensity;
 // layout(location = 1) in vec4 in_color;
 
 out vec4 vs_color;
 out float vs_depth;
+
+const int UNIFORM_COLOR = 0;
+const int UNIT_DEPENDENT_COLOR = 1;
+const int CLASSIFIED_COLOR = 2;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -52,10 +58,23 @@ void main() {
     // Color every n-th vertex differently to show fieldline flow direction
     int modulus = (gl_VertexID + time) % modulusDivider;//5000;
     if ( modulus > 0 && modulus < flParticleSize) {
-        vs_color = fieldlineParticleColor;//vec4(in_color.rgb * 1.0, 0.25);
+        if (colorMethod == UNIT_DEPENDENT_COLOR) {
+            // TODO: FIX THIS. Its just temporary, until texture is provided
+            if (unitIntensity < threshold) {
+                vs_color = vec4(1.0,0.15,0.0,fieldlineParticleColor.a);
+            }
+        } else /*if (colorMethod == UNIFORM_COLOR)*/ {
+            vs_color = fieldlineParticleColor;
+        }
     } else {
-        vs_color = fieldlineColor;//vec4(in_color.rgb * 0.15, 0.85);
-        // vs_color = vec4(in_color.rgb * 0.5, 0.85);
+        if (colorMethod == UNIT_DEPENDENT_COLOR) {
+            // TODO: FIX THIS. Its just temporary, until texture is provided
+            if (unitIntensity < threshold) {
+                vs_color = vec4(0.0,1.0,1.0,fieldlineParticleColor.a);
+            }
+        } else /*if (colorMethod == UNIFORM_COLOR)*/ {
+            vs_color = fieldlineColor;
+        }
     }
     // vs_color = in_color;
 
