@@ -68,6 +68,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/roverpathfilereader.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/subsite.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
@@ -167,6 +168,7 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/roverpathfilereader.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/subsite.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
