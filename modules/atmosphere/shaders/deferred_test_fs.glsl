@@ -323,11 +323,11 @@ vec3 inscatterNoTestRadiance(inout vec3 x, inout float t, const vec3 v, const ve
       
       // Transmittance from point r, direction mu, distance t
       // By Analytical calculation
-      //attenuation = analyticTransmittance(r, mu, t);
+      attenuation = analyticTransmittance(r, mu, t);
       //return attenuation.xyz;
       
       // By Texture Access
-      attenuation = transmittanceLUT(r, mu);//, v, x0);
+      //attenuation = transmittanceLUT(r, mu);//, v, x0);
       
       //The following Code is generating surface acne on atmosphere. JCC
       // We need a better acne avoidance constant (0.01). Done!! Adaptive from distance to x
@@ -340,7 +340,6 @@ vec3 inscatterNoTestRadiance(inout vec3 x, inout float t, const vec3 v, const ve
         // Here we use the idea of S[L](a->b) = S[L](b->a), and get the S[L](x0, v, s)
         // Then we calculate S[L] = S[L]|x - T(x, x0)*S[L]|x0
         inscatterRadiance = max(inscatterRadiance - attenuation.rgbr * texture4D(inscatterTexture, r0, mu0, muSun0, nu), 0.0);
-        //inscatterRadiance = inscatterRadiance - attenuation.rgbr * texture4D(inscatterTexture, r0, mu0, muSun0, nu);                                 
         
         // cos(PI-thetaH) = dist/r
         // cos(thetaH) = - dist/r
@@ -406,7 +405,7 @@ vec3 inscatterNoTestRadiance(inout vec3 x, inout float t, const vec3 v, const ve
   } else {
     // No intersection with atmosphere
     // The ray is traveling on space
-    radiance = vec3(1.0, 0.0, 0.0f);
+    radiance = vec3(0.0, 0.0, 0.0f);
   }
   
   
@@ -724,8 +723,7 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
     vec3 transmittance = (r <= Rt) ? ( mu < -sqrt(1.0f - (Rg*Rg)/(r*r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);    
     float sunFinalColor = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance; 
 
-    return transmittance * sunFinalColor;
-    //return vec3(sunFinalColor);    
+    return transmittance * sunFinalColor;    
     }
 }
 
@@ -752,7 +750,7 @@ void main() {
     bool  insideATM    = false;
     double offset      = 0.0;
     double maxLength   = 0.0;     
-    bool  intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt+EPSILON,
+    bool  intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt-10*EPSILON,
                                                 insideATM, offset, maxLength );
 
     //bool  intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rg,
@@ -817,12 +815,13 @@ void main() {
       //renderTarget = vec4(groundColor, 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
-      vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
+      //vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
       //vec4 finalRadiance = vec4(inscatterColor, 1.0);
+      //vec4 finalRadiance = vec4(HDR(groundColor), 1.0);
       //vec4 finalRadiance = vec4(HDR(inscatterColor), 1.0);
       //vec4 finalRadiance = vec4(HDR(sunColor), 1.0);
       //vec4 finalRadiance = vec4(sunColor, 1.0);
-      //vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
+      vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
       //if ( finalRadiance.xyz == vec3(0.0))
       //   finalRadiance.w = 0.0;
     

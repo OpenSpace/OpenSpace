@@ -786,7 +786,7 @@ namespace openspace {
         }
 
         // render
-        _geometry->render();
+        //_geometry->render();
 
         // disable shader
         _programObject->deactivate();
@@ -873,6 +873,10 @@ namespace openspace {
     }
 
     void RenderablePlanetAtmosphere::updateAtmosphereParameters() {
+        bool executeComputation = true;
+        if (_sunRadianceIntensity != _sunIntensityP ||
+            _hdrConstant != _hdrExpositionP)
+            executeComputation = false;
         _atmosphereRadius               = _atmospherePlanetRadius + _atmosphereHeightP;
         _planetAverageGroundReflectance = _groundAverageReflectanceP;
         _rayleighHeightScale            = _rayleighHeightScaleP;
@@ -898,7 +902,8 @@ namespace openspace {
             _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
             _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
 
-            _deferredcaster->preCalculateAtmosphereParam();
+            if (executeComputation)
+                _deferredcaster->preCalculateAtmosphereParam();
         }
     }
 
