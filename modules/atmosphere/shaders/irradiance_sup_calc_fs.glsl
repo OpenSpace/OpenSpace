@@ -47,7 +47,7 @@ void main(void) {
   // to mapped coordinates
   unmappingRAndMuSunIrradiance(r, muSun);
 
-  // We now that muSun = cos(sigma) = s.z/||s||
+  // We know that muSun = cos(sigma) = s.z/||s||
   // But, ||s|| = 1, so s.z = muSun. Also,
   // ||s|| = 1, so s.x = sin(sigma) = sqrt(1-muSun^2) and s.y = 0.0f
   vec3 s = vec3(max(sqrt(1.0f - muSun * muSun), 0.0f), 0.0f, muSun);

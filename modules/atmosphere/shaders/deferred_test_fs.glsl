@@ -668,10 +668,10 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     // Adding clouds texture
     //vec4 clouds = vec4(0.85)*texture(cloudsTexture, vs_st);
 
-    // R[L0] + R[L*]
     //vec3 groundRadiance = (reflectance.rgb + clouds.rgb) * 
     //  (max(muSun, 0.0) * transmittanceL0 + irradianceReflected) * sunRadiance / M_PI;
 
+    // R[L0] + R[L*]
     vec3 groundRadiance = reflectance.rgb * 
       (max(muSun, 0.0) * transmittanceL0 + irradianceReflected) * sunRadiance / M_PI;
     
@@ -759,7 +759,7 @@ void main() {
     //                                            insideATM, offset, maxLength );                                                
     // Ellipsoid ellipsoid;
     // ellipsoid.center = dvec4(0.0);
-    // ellipsoid.size = dvec3(6378.1, 6356.8, 6378.1);    
+    // ellipsoid.size = dvec3(6378.1366, 6356.7519, 6378.1366);    
     // bool intersectATM = dIntersectEllipsoid(ray, ellipsoid, offset, maxLength);
 
     // Instead of ray-ellipsoid intersection lets transform the ray to a sphere:
@@ -767,18 +767,18 @@ void main() {
     // transfRay.origin = ray.origin;
     // transfRay.direction = ray.direction;
 
-    // transfRay.origin.x *= 1.0/6378.1;
-    // transfRay.direction.x *= 1.0/6378.1;        
-    // transfRay.origin.y *= 1.0/6356.8;
-    // transfRay.direction.y *= 1.0/6356.8;    
-    // transfRay.origin.z *= 1.0/1.0/6378.1;
-    // transfRay.direction.z *= 1.0/1.0/6378.1;
+    // transfRay.origin.x *= 1.0/6378.1366;
+    // transfRay.direction.x *= 1.0/6378.1366;        
+    // transfRay.origin.z *= 1.0/6356.7519;
+    // transfRay.direction.z *= 1.0/6356.7519;    
+    // transfRay.origin.y *= 1.0/1.0/6378.1366;
+    // transfRay.direction.y *= 1.0/1.0/6378.1366;
     // transfRay.direction.xyz = normalize(transfRay.direction.xyz);
-    // bool  intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay, 1.0,
+    // bool  intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay, 1.0 + 15,
     //                                              insideATM, offset, maxLength );
 
-    // bool  intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay,  Rt+EPSILON,
-    //                                              insideATM, offset, maxLength );
+    //bool  intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay,  Rt+EPSILON,
+    //                                             insideATM, offset, maxLength );
 
     if ( intersectATM ) {
       //renderTarget += vec4(1.0, 1.0, 1.0, 0.5);

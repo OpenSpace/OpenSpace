@@ -41,5 +41,5 @@ void main(void) {
 
     // See Bruneton and Neyret paper, "Angular Precision" paragraph to understanding why we are
     // dividing the S[L*] by the Rayleigh phase function.
-    renderTarget1 = vec4(texture(deltaSTexture, uvw).rgb / rayleighPhaseFunction(nu), 1.0f);
+    renderTarget1 = vec4(texture(deltaSTexture, uvw).rgb / rayleighPhaseFunction(nu), 0.0f);
  }

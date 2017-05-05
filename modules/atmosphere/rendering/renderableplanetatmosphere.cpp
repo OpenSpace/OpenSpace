@@ -58,23 +58,23 @@
 namespace {
     const std::string _loggerCat = "RenderablePlanetAtmosphere";
 
-    const std::string keyFrame = "Frame";
-    const std::string keyGeometry = "Geometry";
-    const std::string keyRadius = "Radius";
-    const std::string keyShading = "PerformShading";
-    const std::string keyShadowGroup = "Shadow_Group";
-    const std::string keyShadowSource = "Source";
-    const std::string keyShadowCaster = "Caster";
-    const std::string keyAtmosphere = "Atmosphere";
-    const std::string keyAtmosphereRadius = "AtmoshereRadius";
-    const std::string keyPlanetRadius = "PlanetRadius";
+    const std::string keyFrame                    = "Frame";
+    const std::string keyGeometry                 = "Geometry";
+    const std::string keyRadius                   = "Radius";
+    const std::string keyShading                  = "PerformShading";
+    const std::string keyShadowGroup              = "Shadow_Group";
+    const std::string keyShadowSource             = "Source";
+    const std::string keyShadowCaster             = "Caster";
+    const std::string keyAtmosphere               = "Atmosphere";
+    const std::string keyAtmosphereRadius         = "AtmoshereRadius";
+    const std::string keyPlanetRadius             = "PlanetRadius";
     const std::string keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
-    const std::string keyRayleigh = "Rayleigh";
-    const std::string keyRayleighHeightScale = "H_R";
-    const std::string keyMie = "Mie";
-    const std::string keyMieHeightScale = "H_M";
-    const std::string keyMiePhaseConstant = "G";
-    const std::string keyBody = "Body";
+    const std::string keyRayleigh                 = "Rayleigh";
+    const std::string keyRayleighHeightScale      = "H_R";
+    const std::string keyMie                      = "Mie";
+    const std::string keyMieHeightScale           = "H_M";
+    const std::string keyMiePhaseConstant         = "G";
+    const std::string keyBody                     = "Body";
 }
 
 namespace openspace {
@@ -115,13 +115,13 @@ namespace openspace {
         , _rayleighScatteringCoeffXP("rayleighScatteringCoeffX", "Rayleigh Scattering Coeff X (x10e-3)", 1.0f, 0.01f, 100.0f)
         , _rayleighScatteringCoeffYP("rayleighScatteringCoeffY", "Rayleigh Scattering Coeff Y (x10e-3)", 1.0f, 0.01f, 100.0f)
         , _rayleighScatteringCoeffZP("rayleighScatteringCoeffZ", "Rayleigh Scattering Coeff Z (x10e-3)", 1.0f, 0.01f, 100.0f)
-        , _mieHeightScaleP("mieHeightScale", "Mie Height Scale (KM)", 1.2f, 0.1f, 5.0f)
-        , _mieScatteringCoefficientP("mieScatteringCoefficient", "Mie Scattering Coefficient (x10e-3)", 4.0f, 1.0f, 20.0f)
+        , _mieHeightScaleP("mieHeightScale", "Mie Height Scale (KM)", 1.2f, 0.1f, 20.0f)
+        , _mieScatteringCoefficientP("mieScatteringCoefficient", "Mie Scattering Coefficient (x10e-3)", 4.0f, 0.01f, 1000.0f)
         , _mieScatteringExtinctionPropCoefficientP("mieScatteringExtinctionPropCoefficient",
-            "Mie Scattering/Extinction Proportion Coefficient (%)", 0.9f, 0.1f, 1.0f)
-        , _mieAsymmetricFactorGP("mieAsymmetricFactorG", "Mie Asymmetric Factor G", 1.0f, -1.0f, 1.0f)
-        , _sunIntensityP("sunIntensity", "Sun Intensity", 50.0f, 0.1f, 200.0f)
-        , _hdrExpositionP("hdrExposition", "HDR", 0.0f, 0.05f, 5.0f)
+            "Mie Scattering/Extinction Proportion Coefficient (%)", 0.9f, 0.01f, 1.0f)
+        , _mieAsymmetricFactorGP("mieAsymmetricFactorG", "Mie Asymmetric Factor G", 0.85f, -1.0f, 1.0f)
+        , _sunIntensityP("sunIntensity", "Sun Intensity", 50.0f, 0.1f, 1000.0f)
+        , _hdrExpositionP("hdrExposition", "HDR", 0.4f, 0.01f, 5.0f)
     {
         std::string name;
         bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -873,17 +873,17 @@ namespace openspace {
     }
 
     void RenderablePlanetAtmosphere::updateAtmosphereParameters() {
-        _atmosphereRadius = _atmospherePlanetRadius + _atmosphereHeightP;
+        _atmosphereRadius               = _atmospherePlanetRadius + _atmosphereHeightP;
         _planetAverageGroundReflectance = _groundAverageReflectanceP;
-        _rayleighHeightScale = _rayleighHeightScaleP;
-        _rayleighScatteringCoeff = glm::vec3(_rayleighScatteringCoeffXP * 0.001f, _rayleighScatteringCoeffYP * 0.001f,
-            _rayleighScatteringCoeffZP * 0.001f);
-        _mieHeightScale = _mieHeightScaleP;
-        _mieScatteringCoeff = glm::vec3(_mieScatteringCoefficientP * 0.001f);
-        _mieExtinctionCoeff = _mieScatteringCoeff * (1.0f / static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
-        _miePhaseConstant = _mieAsymmetricFactorGP;
-        _sunRadianceIntensity = _sunIntensityP;
-        _hdrConstant = _hdrExpositionP;
+        _rayleighHeightScale            = _rayleighHeightScaleP;
+        _rayleighScatteringCoeff        = glm::vec3(_rayleighScatteringCoeffXP * 0.001f, _rayleighScatteringCoeffYP * 0.001f,
+                                                    _rayleighScatteringCoeffZP * 0.001f);
+        _mieHeightScale                 = _mieHeightScaleP;
+        _mieScatteringCoeff             = glm::vec3(_mieScatteringCoefficientP * 0.001f);
+        _mieExtinctionCoeff             = _mieScatteringCoeff * (1.0f / static_cast<float>(_mieScatteringExtinctionPropCoefficientP));
+        _miePhaseConstant               = _mieAsymmetricFactorGP;
+        _sunRadianceIntensity           = _sunIntensityP;
+        _hdrConstant                    = _hdrExpositionP;
 
         if (_deferredcaster) {
             _deferredcaster->setAtmosphereRadius(_atmosphereRadius);

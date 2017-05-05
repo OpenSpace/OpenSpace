@@ -111,7 +111,7 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 radianceJ) {
       // AverageGroundReflectance e [0,1]
       groundReflectance = AverageGroundReflectance / M_PI;
       // From cosine law: Rg*Rg = r*r + distanceToGround*distanceToGround - 2*r*distanceToGround*cos(PI-theta)
-      distanceToGround = -r * cosineTheta - sqrt(r2 * (cosineTheta * cosineTheta - 1.0f) + Rg2);
+      distanceToGround = -r * cosineTheta - sqrt(r2 * (cosineTheta2 - 1.0f) + Rg2);
       //               |
       //               | theta
       //               |
@@ -124,10 +124,10 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 radianceJ) {
       // So cos(alpha) = ((vec(x)+vec(dg)) dot -vec(distG))/(||(vec(x)+vec(distG))|| * ||vec(distG)||)
       //    cos(alpha) = (-r*distG*cos(theta) - distG*distG)/(Rg*distG)
       //      muGround = -(r*cos(theta) + distG)/Rg
-      //float muGround = -(r * cosineTheta + distanceToGround) / Rg;
+      float muGround = -(r * cosineTheta + distanceToGround) / Rg;
       // We can use the same triangle in calculate the distanceToGround to calculate the cosine of the
       // angle between the ground touching point at height Rg and the zenith angle
-      float muGround = (r2 - distanceToGround*distanceToGround - Rg2)/(2*distanceToGround*Rg);
+      //float muGround = (r2 - distanceToGround*distanceToGround - Rg2)/(2*distanceToGround*Rg);
       // Acesss the Transmittance LUT in order to calculate the transmittance from the ground point Rg,
       // thorugh the atmosphere, at a distance: distanceToGround
       groundTransmittance = transmittance(Rg, muGround, distanceToGround);

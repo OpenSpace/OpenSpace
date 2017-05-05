@@ -36,14 +36,14 @@ uniform sampler3D deltaSMTexture;
 void main(void) {
   // First we convert the window's fragment coordinate to
   // texel coordinates
-  vec3 uvw = vec3(gl_FragCoord.xy, float(layer) + 0.5f) /
+  vec3 rst = vec3(gl_FragCoord.xy, float(layer) + 0.5f) /
     vec3(ivec3(SAMPLES_MU_S * SAMPLES_NU, SAMPLES_MU, SAMPLES_R));
   
-  vec4 ray = texture(deltaSRTexture, uvw);
-  vec4 mie = texture(deltaSMTexture, uvw);
+  vec4 rayleighInscattering0 = texture(deltaSRTexture, rst);
+  vec4 mieInscattering0      = texture(deltaSMTexture, rst);
   
   // We are using only the red component of the Mie scattering
   // See the Precomputed Atmosphere Scattering paper for details about
   // the angular precision. 
-  renderTarget1 = vec4(ray.rgb, mie.r); 
+  renderTarget1 = vec4(rayleighInscattering0.rgb, mieInscattering0.r); 
 }
