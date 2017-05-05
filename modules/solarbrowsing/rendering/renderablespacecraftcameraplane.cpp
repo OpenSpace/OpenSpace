@@ -225,7 +225,14 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     });
 
     _moveFactor.onChange([this]() {
-        _size.setValue(glm::vec2(_moveFactor.value() * FULL_PLANE_SIZE, 0.f));
+        double move = _moveFactor.value();
+        const double a = 1;
+        const double b = 0;
+        const double c = 0.31622776601; // sqrt(0.1)
+        // TODO(mnoven) : Redundant calculations
+        move = a * exp(-(pow( (move - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)) );
+
+        _size.setValue(glm::vec2(move * FULL_PLANE_SIZE, 0.f));
         createPlane();
         createFrustum();
     });
@@ -554,9 +561,16 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
                                          glm::dvec3(p->worldPosition()), data.modelTransform.rotation * glm::dvec3(0.0, 0.0, 1.0));
     rotationTransform = glm::dmat4(glm::inverse(rotationTransform));
 
+    double move = _moveFactor.value();
+    const double a = 1;
+    const double b = 0;
+    const double c = 0.31622776601;  // sqrt(0.1)
+    // TODO(mnoven) : Redundant calculations
+    move = a * exp(-(pow((move - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)));
+
     // Scale vector to sun barycenter to get translation distance
     glm::dvec3 sunDir = p->worldPosition() - data.modelTransform.translation;
-    glm::dvec3 translationTransform = sunDir * _moveFactor.value();
+    glm::dvec3 translationTransform = sunDir * move;
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation + translationTransform) *
