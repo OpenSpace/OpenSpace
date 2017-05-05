@@ -42,14 +42,15 @@ void ConnectionPool::listen(
     _socketServer.listen(address, port);
 
     _serverThread = std::make_unique<std::thread>([this]() {
-        handleIncomingConnections();
+        handleConnections();
     });
 }
 
-void ConnectionPool::handleIncomingConnections() {
+void ConnectionPool::handleConnections() {
     while (_listening) {
+        removeDisconnectedSockets();
         std::shared_ptr<ghoul::io::TcpSocket> socket = _socketServer.awaitPendingConnection();
-        if (!socket || !socket->connected()) {
+        if (!socket || !socket->isConnected()) {
             continue;
         }
         std::lock_guard<std::mutex> lock(_connectionMutex);
@@ -59,30 +60,29 @@ void ConnectionPool::handleIncomingConnections() {
                 // Pass control to `_handleSocket`
                 // Close the socket once the function returns.
                 _handleSocket(socket);
-                disconnectSocket(socket);
+                std::lock_guard<std::mutex> lock(_connectionMutex);
+                if (socket->isConnected()) {
+                    socket->disconnect();
+                }
             })
         };
         _connections.emplace(socket->socketId(), std::move(connection));
     }
 }
 
-void ConnectionPool::disconnectSocket(std::shared_ptr<ghoul::io::TcpSocket> socket) {
+void ConnectionPool::removeDisconnectedSockets() {
     std::lock_guard<std::mutex> lock(_connectionMutex);
-
-    if (socket->connected()) {
-        socket->disconnect();
+    for (auto it = _connections.begin(); it != _connections.end();) {
+        if (!it->second.socket->isConnected()) {
+            if (it->second.thread && it->second.thread->joinable()) {
+                it->second.thread->join();
+            }
+            it->second.thread = nullptr;
+            _connections.erase(it);
+        } else {
+            ++it;
+        }
     }
-    int socketId = socket->socketId();
-    auto it = _connections.find(socketId);
-
-    if (it == _connections.end()) {
-        return;
-    }
-
-    Connection& connection = it->second;
-    connection.thread->join();
-
-    _connections.erase(it);
 }
 
 void ConnectionPool::close() {
@@ -92,7 +92,7 @@ void ConnectionPool::close() {
 
 void ConnectionPool::disconnectAllConnections() {
     for (auto& it : _connections) {
-        if (it.second.socket->connected()) {
+        if (it.second.socket->isConnected()) {
             it.second.socket->disconnect();
         }
         it.second.thread->join();

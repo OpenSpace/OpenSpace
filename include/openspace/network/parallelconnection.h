@@ -37,6 +37,7 @@
 
 //ghoul includes
 #include <ghoul/designpattern/event.h>
+#include <ghoul/io/socket/tcpsocket.h>
 
 //std includes
 #include <string>
@@ -48,23 +49,13 @@
 #include <map>
 #include <condition_variable>
 
-
-
-#if defined(WIN32) || defined(__MING32__) || defined(__MING64__)
-typedef size_t _SOCKET;
-#else
-typedef int _SOCKET;
-#include <netdb.h>
-#endif
-
-struct addrinfo;
-
 namespace openspace {
 
 class ParallelConnection : public properties::PropertyOwner {
     public:
     enum class Status : uint32_t {
         Disconnected = 0,
+        Connecting,
         ClientWithoutHost,
         ClientWithHost,
         Host
@@ -102,7 +93,7 @@ class ParallelConnection : public properties::PropertyOwner {
 
     ParallelConnection();
     ~ParallelConnection();
-    void clientConnect();
+    void connect();
     void setPort(std::string port);
     void setAddress(std::string address);
     void setName(std::string name);
@@ -112,7 +103,7 @@ class ParallelConnection : public properties::PropertyOwner {
     void resignHostship();
     void setPassword(std::string password);
     void setHostPassword(std::string hostPassword);
-    void signalDisconnect();
+    void disconnect();
     void preSynchronization();
     void sendScript(std::string script);
     void resetTimeOffset();
@@ -136,17 +127,12 @@ class ParallelConnection : public properties::PropertyOwner {
 private:
     //@TODO change this into the ghoul hasher for client AND server
     uint32_t hash(const std::string &val);
-    void queueOutMessage(const Message& message);
-    void queueOutDataMessage(const DataMessage& dataMessage);
+    void sendDataMessage(const DataMessage& dataMessage);
+    void sendMessage(const Message& message);
     void queueInMessage(const Message& message);
-
-    void disconnect();
-    void closeSocket();
-    bool initNetworkAPI();
-    void establishConnection(addrinfo *info);
+   
     void sendAuthentication();
-    void listenCommunication();
-    int receiveData(_SOCKET & socket, std::vector<char> &buffer, int length, int flags);
+    void handleCommunication();
 
     void handleMessage(const Message&);
     void dataMessageReceived(const std::vector<char>& messageContent);
@@ -155,9 +141,6 @@ private:
 
     void sendCameraKeyframe();
     void sendTimeKeyframe();
-
-    void sendFunc();
-    void threadManagement();
 
     void setStatus(Status status);
     void setHostName(const std::string& hostName);
@@ -178,24 +161,12 @@ private:
     double _lastTimeKeyframeTimestamp;
     double _lastCameraKeyframeTimestamp;
             
-    _SOCKET _clientSocket;
-
-    std::atomic<bool> _isConnected;
-    std::atomic<bool> _isRunning;
-    std::atomic<bool> _tryConnect;
-    std::atomic<bool> _disconnect;
-    std::atomic<bool> _initializationTimejumpRequired;
+    std::unique_ptr<ghoul::io::TcpSocket> _socket;
+    std::atomic<bool> _shouldDisconnect;
 
     std::atomic<size_t> _nConnections;
     std::atomic<Status> _status;
     std::string _hostName;
-
-    std::condition_variable _disconnectCondition;
-    std::mutex _disconnectMutex;
-            
-    std::condition_variable _sendCondition;
-    std::deque<Message> _sendBuffer;
-    std::mutex _sendBufferMutex;
 
     std::deque<Message> _receiveBuffer;
     std::mutex _receiveBufferMutex;
@@ -205,10 +176,7 @@ private:
     std::deque<double> _latencyDiffs;
     double _initialTimeDiff;
 
-    std::unique_ptr<std::thread> _connectionThread;
-    std::unique_ptr<std::thread> _sendThread;
-    std::unique_ptr<std::thread> _listenThread;
-    std::unique_ptr<std::thread> _handlerThread;
+    std::unique_ptr<std::thread> _receiveThread;
     std::shared_ptr<ghoul::Event<>> _connectionEvent;
 };
 

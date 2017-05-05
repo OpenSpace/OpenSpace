@@ -51,11 +51,11 @@ private:
         std::unique_ptr<std::thread> thread;
     };
 
-    void handleIncomingConnections();
+    void handleConnections();
     void closeServer();
     void disconnectAllConnections();
     std::mutex _connectionMutex;
-    void disconnectSocket(std::shared_ptr<ghoul::io::TcpSocket> socket);
+    void removeDisconnectedSockets();
     ghoul::io::TcpSocketServer _socketServer;
 
     std::atomic<bool> _listening;

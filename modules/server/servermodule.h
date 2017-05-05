@@ -57,7 +57,7 @@ protected:
     void internalInitialize() override;
 private:
     ConnectionPool _connectionPool;
-    ghoul::TemplateFactory<ChannelHandler> factory;
+    //ghoul::TemplateFactory<ChannelHandler> factory;
 
     void handleSocket(std::shared_ptr<ghoul::io::TcpSocket> socket);
    
