@@ -40,6 +40,7 @@ RawTile::RawTile()
     , tileIndex(0, 0, 0)
     , error(ReadError::None)
     , nBytesImageData(0)
+    , pbo(0)
 {}
         
 RawTile RawTile::createDefaultRes() {

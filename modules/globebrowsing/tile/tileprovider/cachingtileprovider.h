@@ -29,6 +29,9 @@
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
 namespace openspace {
+
+class PixelBuffer;
+
 namespace globebrowsing {
 
 class AsyncTileDataProvider;
@@ -92,7 +95,18 @@ private:
     int _framesSinceLastRequestFlush;
     int _framesUntilRequestFlush;
 
+    std::unique_ptr<PixelBuffer> _pbo;
+
     Tile _defaultTile;
+
+
+
+
+
+
+    int _freeTexture;
+    std::vector<std::shared_ptr<ghoul::opengl::Texture> > _textureCache;
+
 };
 
 } // namespace tileprovider

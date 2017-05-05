@@ -35,6 +35,7 @@
 
 namespace {
     const char* KeyType = "Type";
+    const char* KeyName = "Name";
 }
 
 namespace openspace {

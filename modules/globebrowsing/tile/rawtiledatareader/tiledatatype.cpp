@@ -471,6 +471,93 @@ float interpretFloat(GLuint glType, const char* src) {
     }
 }
 
+GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
+    switch (format) {
+        case ghoul::opengl::Texture::Format::Red:
+            switch (glType) {
+                case GL_BYTE:
+                    return GL_R8;
+                case GL_UNSIGNED_BYTE:
+                    return GL_R8UI;
+                case GL_INT:
+                    return GL_R32I;
+                case GL_UNSIGNED_INT:
+                    return GL_R32UI;
+                case GL_FLOAT:
+                    return GL_R32F;
+                default:
+                    ghoul_assert(false, "glType data type unknown: " + glType);
+                    LERROR("glType data type unknown: " << glType);
+                    return 0;
+            }
+            break;
+        case ghoul::opengl::Texture::Format::RG:
+            switch (glType) {
+                case GL_BYTE:
+                    return GL_RG8;
+                case GL_UNSIGNED_BYTE:
+                    return GL_RG8UI;
+                case GL_INT:
+                    return GL_RG32I;
+                case GL_UNSIGNED_INT:
+                    return GL_RG32UI;
+                case GL_FLOAT:
+                    return GL_RG32F;
+                default:
+                    ghoul_assert(false, "glType data type unknown: " + glType);
+                    LERROR("glType data type unknown: " << glType);
+                    return 0;
+            }
+            break;
+        case ghoul::opengl::Texture::Format::RGB:
+            switch (glType) {
+                case GL_BYTE:
+                    return GL_RGB8;
+                case GL_UNSIGNED_BYTE:
+                    return GL_RGB8UI;
+                case GL_INT:
+                    return GL_RGB32I;
+                case GL_UNSIGNED_INT:
+                    return GL_RGB32UI;
+                case GL_FLOAT:
+                    return GL_RGB32F;
+                default:
+                    ghoul_assert(false, "glType data type unknown: " + glType);
+                    LERROR("glType data type unknown: " << glType);
+                    return 0;
+            }
+            break;
+        case ghoul::opengl::Texture::Format::RGBA:
+            switch (glType) {
+                case GL_BYTE:
+                    return GL_RGBA8;
+                case GL_UNSIGNED_BYTE:
+                    return GL_RGBA8UI;
+                case GL_INT:
+                    return GL_RGBA32I;
+                case GL_UNSIGNED_INT:
+                    return GL_RGBA32UI;
+                case GL_FLOAT:
+                    return GL_RGBA32F;
+                default:
+                    ghoul_assert(false, "glType data type unknown: " + glType);
+                    LERROR("glType data type unknown: " << glType);
+                    return 0;
+            }
+            break;
+        case ghoul::opengl::Texture::Format::BGR:
+			return GL_BGR;
+            break;
+        case ghoul::opengl::Texture::Format::BGRA:
+			return GL_BGRA;
+            break;
+        default:
+            LERROR("Unknown format for OpenGL texture: " << format);
+            return 0;
+            break;
+    }
+}
+
 } // namespace tiledatatype
 } // namespace globebrowsing
 } // namespace openspace

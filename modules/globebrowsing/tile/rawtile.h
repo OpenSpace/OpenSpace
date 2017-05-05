@@ -58,6 +58,7 @@ struct RawTile {
     size_t nBytesImageData;
     GLuint glType;
     TextureFormat textureFormat;
+    GLuint pbo;
 
     void serializeMetaData(std::ostream& s);
     static RawTile deserializeMetaData(std::istream& s);

@@ -70,6 +70,17 @@ ValueType MemoryAwareLRUCache<KeyType, ValueType, HasherType>::get(const KeyType
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
+ValueType MemoryAwareLRUCache<KeyType, ValueType, HasherType>::popLRU() {
+    auto last_it = _itemList.end();
+    last_it--;
+    _itemMap.erase(last_it->first);
+    _cacheSize -= last_it->second.memoryImpact();
+	ValueType toReturn = _itemList.back().second;
+	_itemList.pop_back();
+	return toReturn;
+}
+
+template<typename KeyType, typename ValueType, typename HasherType>
 size_t MemoryAwareLRUCache<KeyType, ValueType, HasherType>::size() const {
     return _cacheSize;
 }

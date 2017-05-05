@@ -153,6 +153,8 @@ public:
      */
     unsigned int uniqueIdentifier() const;
 
+protected:
+    std::string _name;
 private:
     static unsigned int _numTileProviders;
     unsigned int _uniqueIdentifier;

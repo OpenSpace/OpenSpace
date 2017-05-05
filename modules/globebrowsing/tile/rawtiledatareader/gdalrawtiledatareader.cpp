@@ -165,6 +165,12 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
         io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
     }
 
+
+
+    TileTextureInitData initData(512 + 4, 512 + 4, GL_UNSIGNED_BYTE,
+        ghoul::opengl::Texture::Format::RGBA);
+
+
     return io;
 }
 
@@ -187,6 +193,9 @@ TileWriteDataDescription GdalRawTileDataReader::getWriteDataDescription() const 
         writeDesc.bytesPerLine = _dataLayout.bytesPerPixel * writeDesc.region.numPixels.x;
         writeDesc.totalNumBytes = writeDesc.bytesPerLine * writeDesc.region.numPixels.y;
     }
+
+    writeDesc.glType = _dataLayout.glType;
+    writeDesc.textureFormat = _dataLayout.textureFormat;
 
     return writeDesc;
 }
@@ -404,7 +413,7 @@ TileDataLayout GdalRawTileDataReader::getTileDataLayout(GLuint preferredGlType) 
 
     layout.glType = tiledatatype::getOpenGLDataType(_gdalType);
     layout.numRastersAvailable = _dataset->GetRasterCount();
-    layout.numRasters = layout.numRastersAvailable;
+    layout.numRasters = 4;// layout.numRastersAvailable;
     
     // This is to avoid corrupted textures that can appear when the number of
     // bytes per row is not a multiplie of 4. 

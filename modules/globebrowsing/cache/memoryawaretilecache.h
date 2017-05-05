@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/cache/memoryawarelrucache.h>
+#include <modules/globebrowsing/tile/rawtile.h>
 
 #include <memory>
 #include <mutex>
@@ -89,6 +90,7 @@ public:
     bool exist(ProviderTileKey key) const;
     Tile get(ProviderTileKey key);
     void put(ProviderTileKey key, Tile tile);
+    void createTileAndPut(ProviderTileKey key, std::shared_ptr<RawTile> rawTile);
   
     void setMaximumSize(size_t maximumSize);
 
@@ -102,7 +104,12 @@ private:
     ~MemoryAwareTileCache() = default;
     
     static MemoryAwareTileCache* _singleton;
+    /// Tiles are saved in an LRU cache
     MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher> _tileCache;
+    
+    /// All textures are contained in a vector
+    std::vector<std::shared_ptr<ghoul::opengl::Texture>> _textureContainer;
+    size_t _freeTexture;
     static std::mutex _mutexLock;
 };
 

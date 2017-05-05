@@ -86,7 +86,9 @@ public:
 
     std::shared_ptr<TileMetaData> metaData() const { return _metaData; };
     Status status() const { return _status; };
-    std::shared_ptr<ghoul::opengl::Texture> texture() const { return _texture; };
+    std::shared_ptr<ghoul::opengl::Texture> texture() const {
+        return _texture;
+    };
 
     /**
      * Instantiates a new tile with a single color. 

@@ -28,6 +28,10 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/rendering/layer/layer.h>
+#include <modules/globebrowsing/tile/textureformat.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
+
 #include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace {

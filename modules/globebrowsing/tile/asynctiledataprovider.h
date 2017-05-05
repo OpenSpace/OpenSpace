@@ -31,6 +31,7 @@
 #include <ghoul\opengl\ghoul_gl.h>
 
 #include <unordered_map>
+#include <map>
 
 namespace openspace {
 
@@ -53,7 +54,7 @@ public:
     PixelBuffer(size_t numBytes, Usage usage);
     ~PixelBuffer();
     
-    void* mapBuffer(GLbitfield access);
+    void* mapBuffer(GLenum access);
     void* mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access);
     bool unMapBuffer();
 
@@ -70,6 +71,166 @@ private:
     const Usage _usage;
     bool _isMapped;
 };
+
+
+
+
+
+template <class KeyType>
+class PixelBufferContainer
+{
+public:
+    PixelBufferContainer(size_t numBytesPerBuffer, PixelBuffer::Usage usage,
+        size_t numPixelBuffers = 0);
+    ~PixelBufferContainer() = default;
+
+    void addBuffers(size_t numPixelBuffers);
+
+    void* mapBuffer(KeyType key, GLenum  access);
+    void* mapBufferRange(KeyType key, GLintptr offset, GLsizeiptr length, GLbitfield access);
+
+    bool resetMappedBuffers();
+
+    bool unMapBuffer(KeyType key);
+    GLuint idOfMappedBuffer(KeyType key);
+private:
+    const PixelBuffer::Usage _usage;
+
+    std::vector<std::unique_ptr<PixelBuffer>> _pixelBuffers;
+    // Maps from KeyType to index of mapped buffers
+    std::map<KeyType, int> _indexMap;
+};
+
+
+
+
+
+
+
+
+
+template <class KeyType>
+PixelBufferContainer<KeyType>::PixelBufferContainer(size_t numBytesPerBuffer,
+    PixelBuffer::Usage usage, size_t numPixelBuffers)
+    : _usage(usage)
+{
+    for (int i = 0; i < numPixelBuffers; ++i) {
+        _pixelBuffers.push_back(std::make_unique<PixelBuffer>(numBytesPerBuffer, _usage));
+    }
+}
+
+template <class KeyType>
+void PixelBufferContainer<KeyType>::addBuffers(size_t numPixelBuffers) {
+    for (int i = 0; i < numPixelBuffers; ++i) {
+        _pixelBuffers.push_back(std::make_unique<PixelBuffer>(numBytesPerBuffer, _usage));
+    }
+}
+
+template <class KeyType>
+void* PixelBufferContainer<KeyType>::mapBuffer(KeyType key, GLenum access) {
+	std::map<KeyType, int>::iterator iter = _indexMap.find(key);
+	bool notFoundAmongMappedBuffers = iter == _indexMap.end();
+
+	if (!notFoundAmongMappedBuffers) { // This PBO is already mapped
+		ghoul_assert(_pixelBuffers[iter->second], "Incorrect index map");
+		return nullptr;
+	}
+
+    // Find a pixel buffer that is unmapped
+	for (int i = 0; i < _pixelBuffers.size(); ++i) {
+		bool bufferIsMapped = _pixelBuffers[i]->isMapped();
+        if (!_pixelBuffers[i]->isMapped()) {
+            _pixelBuffers[i]->bind();
+            void* dataPtr = _pixelBuffers[i]->mapBuffer(access);
+            _pixelBuffers[i]->unbind();
+            if (dataPtr) { // Success in mapping
+                // Add this index to the map of mapped pixel buffers
+                _indexMap.emplace(key, i);
+                return dataPtr;
+            }
+        }
+    }
+	return nullptr;
+}
+
+template <class KeyType>
+void* PixelBufferContainer<KeyType>::mapBufferRange(KeyType key, GLintptr offset,
+    GLsizeiptr length, GLbitfield access)
+{
+    std::map<KeyType, int>::iterator iter = _indexMap.find(key);
+    bool notFoundAmongMappedBuffers = iter == _indexMap.end();
+	
+	if (!notFoundAmongMappedBuffers) { // This PBO is already mapped
+		ghoul_assert(_pixelBuffers[iter->second], "Incorrect index map");
+		return nullptr;
+	}
+
+    // Find a pixel buffer that is unmapped
+    for (int i = 0; i < _pixelBuffers.size(), ++i) {
+        bool bufferIsMapped = _pixelBuffers[i]->isMapped();
+        if (!bufferIsMapped) {
+            _pixelBuffers[i]->bind();
+            void* dataPtr = _pixelBuffers[i]->mapBufferRange(offset, length, access);
+            _pixelBuffers[i]->unbind();
+            if (dataPtr) { // Success in mapping
+                _indexMap.emplace(key, i);
+                return dataPtr;
+            }
+        }
+    }
+    return nullptr
+}
+
+template <class KeyType>
+bool PixelBufferContainer<KeyType>::resetMappedBuffers() {
+    bool success = true;
+	for (auto iter = _indexMap.begin(); iter != _indexMap.end(); iter++) {
+        int index = iter->second; // Index where the mapped buffer is stored
+        _pixelBuffers[index]->bind();
+        success &= _pixelBuffers[index]->unMapBuffer();
+        _pixelBuffers[index]->unbind();
+        _indexMap.erase(iter); // This key should no longer be among the mapped buffers
+    }
+    return success;
+}
+
+template <class KeyType>
+bool PixelBufferContainer<KeyType>::unMapBuffer(KeyType key) {
+    bool success = false;
+    std::map<KeyType, int>::iterator iter = _indexMap.find(key);
+    if (iter != _indexMap.end()) { // Found a mapped pixel buffer
+        int index = iter->second; // Index where the mapped buffer is stored
+        _pixelBuffers[index]->bind();
+        success = _pixelBuffers[index]->unMapBuffer();
+        _pixelBuffers[index]->unbind();
+        _indexMap.erase(iter); // This key should no longer be among the mapped buffers
+    }
+    return success;
+}
+
+template <class KeyType>
+GLuint PixelBufferContainer<KeyType>::idOfMappedBuffer(KeyType key) {
+    std::map<KeyType, int>::iterator iter = _indexMap.find(key);
+    if (iter != _indexMap.end()) { // Found a mapped pixel buffer
+        int index = iter->second; // Index where the mapped buffer is stored
+        return *_pixelBuffers[index];
+    }
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 namespace globebrowsing {
     
@@ -91,17 +252,16 @@ public:
     std::shared_ptr<RawTileDataReader> getRawTileDataReader() const;
     float noDataValueAsFloat() const;
 
-    GLuint pbo() const { return *_pbo; };
-
 protected:
     virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;
 
 private:
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
     ConcurrentJobManager<RawTile> _concurrentJobManager;
-    std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
-
+    
     std::unique_ptr<PixelBuffer> _pbo;
+    std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer;
+    std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
 };
 
 } // namespace globebrowsing

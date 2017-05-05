@@ -57,6 +57,7 @@ public:
     void clear();
     bool exist(const KeyType& key) const;
     ValueType get(const KeyType& key);
+    ValueType popLRU();
     size_t size() const;
     size_t maximumSize() const;
 

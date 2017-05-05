@@ -31,6 +31,7 @@
 #include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/rawtile.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -61,7 +62,66 @@ struct TileWriteDataDescription {
 	PixelRegion region;
 	size_t bytesPerLine;
 	size_t totalNumBytes;
+    GLuint glType;
+    TextureFormat textureFormat;
 };
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * All information needed to create a texture.
+     */
+    class TileTextureInitData
+    {
+    public:
+        TileTextureInitData(size_t width, size_t height, GLuint glType,
+            ghoul::opengl::Texture::Format textureFormat)
+            : _dimensions(width, height, 1)
+            , _glType(glType)
+            , _ghoulTextureFormat (textureFormat)
+        {
+            size_t nRasters = tiledatatype::numberOfRasters(_ghoulTextureFormat);
+            size_t nBytesPerDatum = tiledatatype::numberOfBytes(glType);
+            size_t nBytesPerPixel = nRasters * nBytesPerDatum;
+            _bytesPerLine = nBytesPerPixel * _dimensions.x;
+            _totalNumBytes = _bytesPerLine * _dimensions.y;
+            _glTextureFormat = tiledatatype::glTextureFormat(_glType,
+                _ghoulTextureFormat);
+        };
+        ~TileTextureInitData() = default;
+
+        glm::ivec3 dimensions() { return _dimensions; };
+        size_t bytesPerLine() { return _bytesPerLine; };
+        size_t totalNumBytes() { return _totalNumBytes; };
+        GLuint glType() { return _glType; };
+        ghoul::opengl::Texture::Format ghoulTextureFormat() {
+            return _ghoulTextureFormat;
+        };
+        GLint glTextureFormat() {
+            return _glTextureFormat;
+        };
+
+    private:
+        glm::ivec3 _dimensions;
+        GLuint _glType;
+        ghoul::opengl::Texture::Format _ghoulTextureFormat;
+        GLint _glTextureFormat;
+        size_t _bytesPerLine;
+        size_t _totalNumBytes;
+    };
+
+
+
+
+
 
 } // namespace globebrowsing
 } // namespace openspace
