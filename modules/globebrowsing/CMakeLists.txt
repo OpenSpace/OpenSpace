@@ -49,25 +49,25 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic3.h
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.h
-	${CMAKE_CURRENT_SOURCE_DIR}/geometry/spheregeometry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/spheregeometry.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.h
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablepanoramic.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/renderablepanoramic.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.h
 
-	${CMAKE_CURRENT_SOURCE_DIR}/models/asyncsurfacemodelprovider.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/cachingsurfacemodelprovider.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/model.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableroversurface.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/roverpathfilereader.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/asyncsurfacemodelprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/cachingsurfacemodelprovider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/model.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/renderableroversurface.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/roverpathfilereader.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
@@ -94,6 +94,11 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.h
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgenerationtask.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgeneration.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshwriter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/imgreader.h
+
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/chunktile.h
@@ -110,8 +115,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob.h
-	${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob2.h
-	${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/surfacemodelloadjob.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob2.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/surfacemodelloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/presentationslideprovider.h
@@ -148,25 +153,25 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/ellipsoid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodetic2.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/geometry/geodeticpatch.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/geometry/spheregeometry.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry/spheregeometry.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/chunkedlodglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/pointglobe.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/globes/renderableglobe.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablepanoramic.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/renderablepanoramic.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/basicgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/grid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/skirtedgrid.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
 
-	${CMAKE_CURRENT_SOURCE_DIR}/models/asyncsurfacemodelprovider.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/cachingsurfacemodelprovider.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableroversurface.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/model.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/roverpathfilereader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/asyncsurfacemodelprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/cachingsurfacemodelprovider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/renderableroversurface.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/model.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/renderablesite.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/roverpathfilereader.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
@@ -188,6 +193,11 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.cpp
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgenerationtask.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgeneration.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshwriter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/imgreader.cpp
+
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/pixelregion.cpp
@@ -199,7 +209,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/surfacemodelloadjob.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/surfacemodelloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/presentationslideprovider.cpp
@@ -230,10 +240,10 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/localchunkedlodpatch_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointglobe_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/pointglobe_fs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/roverpath_vs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/roverpath_fs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/roversite_vs.glsl
-	${CMAKE_CURRENT_SOURCE_DIR}/shaders/roversite_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/roverpath_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/roverpath_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/roversite_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/roversite_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/texturetilemapping.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tile.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilefragcolor.hglsl
@@ -281,3 +291,27 @@ if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
     endif () # WIN32
     target_compile_definitions(openspace-module-globebrowsing PRIVATE GLOBEBROWSING_USE_GDAL)
 endif () # OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL
+
+# Find Packages
+find_package( PCL 1.8 REQUIRED )
+
+if( PCL_FOUND )
+  # Additional Include Directories
+  # [C/C++]>[General]>[Additional Include Directories]
+  include_directories( ${PCL_INCLUDE_DIRS} )
+
+  # Preprocessor Definitions
+  # [C/C++]>[Preprocessor]>[Preprocessor Definitions]
+  add_definitions( ${PCL_DEFINITIONS} )
+  #add_definitions( -DPCL_NO_PRECOMPILE )
+
+  # Additional Library Directories
+  # [Linker]>[General]>[Additional Library Directories]
+  link_directories( ${PCL_LIBRARY_DIRS} )
+
+  target_include_directories(openspace-module-globebrowsing SYSTEM PUBLIC ${PCL_INCLUDE_DIRS})
+
+  # Additional Dependencies
+  # [Linker]>[Input]>[Additional Dependencies]
+  target_link_libraries( openspace-module-globebrowsing ${PCL_LIBRARIES} )
+endif()
