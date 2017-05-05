@@ -201,7 +201,7 @@ bool dAtmosphereIntersection(const dvec3 planetPosition, const dRay ray, const d
     maxLength = s + q;
   } else {
     inside    = true;
-    offset    = -1.0;
+    offset    = 0.0;
     maxLength = s + q;
   }
   
@@ -298,6 +298,10 @@ vec3 inscatterNoTestRadiance(inout vec3 x, inout float t, const vec3 v, const ve
     float miePhase          = miePhaseFunction(nu);
     
     // S[L](x,s,v)
+    // I.e. the next line has the scattering light for the "infinite" ray passing 
+    // through the atmosphere. If this ray hits something inside the atmosphere,
+    // we will subtract the attenuated scattering light from that path in the
+    // current path.
     vec4 inscatterRadiance = max(texture4D(inscatterTexture, r, mu, muSun, nu), 0.0);    
     
     // After removing the initial path from camera pos to top of atmosphere or the
@@ -310,11 +314,11 @@ vec3 inscatterNoTestRadiance(inout vec3 x, inout float t, const vec3 v, const ve
       dRay ray;
       ray.direction = vec4(v, 0.0);
       ray.origin = vec4(x, 1.0);     
-      bool  hitGround = dAtmosphereIntersection(vec3(0.0), ray,  Rg,
-                                                insideATM, offset, maxLength);
-      if (hitGround) {
+      bool hitGround = dAtmosphereIntersection(vec3(0.0), ray,  Rg - EPSILON,
+                                               insideATM, offset, maxLength);
+      if (hitGround) 
         t = float(offset); 
-      }
+                
       // Calculate the zenith angles for x0 and v, s:
       vec3  x0     = x + t * v;
       float r0     = length(x0);
@@ -338,7 +342,9 @@ vec3 inscatterNoTestRadiance(inout vec3 x, inout float t, const vec3 v, const ve
       
       if (r0 > Rg + (0.01f)) {
         // Here we use the idea of S[L](a->b) = S[L](b->a), and get the S[L](x0, v, s)
-        // Then we calculate S[L] = S[L]|x - T(x, x0)*S[L]|x0
+        // Then we calculate S[L] = S[L]|x - T(x, x0)*S[L]|x0        
+        // The "infinite" ray hist something inside the atmosphere, so we need to remove
+        // the unsused contribution to the final radiance.
         inscatterRadiance = max(inscatterRadiance - attenuation.rgbr * texture4D(inscatterTexture, r0, mu0, muSun0, nu), 0.0);
         
         // cos(PI-thetaH) = dist/r
@@ -625,8 +631,8 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
 {
   vec3 reflectedRadiance = vec3(0.0f);
 
-  float d = length(x + t*v);
-  float x_0 = sqrt(r*r + d*d - 2*r*d*mu);
+  float d   = length(x + t * v);
+  float x_0 = sqrt(r * r + d * d - 2 * r * d * mu);
   
   // Ray hits planet's surface
   //if (t > 0.0f) {    
@@ -714,9 +720,6 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
  * attenuation := transmittance T(x,x0)
  */
 vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r, const float mu) {
-  //vec3 transmittance = transmittanceLUT(Rg+10, 0.6);  
-  //vec3 transmittance =  texture(transmittanceTexture, vec2(1.0, 1.0)).rgb;
-  //return transmittance;
   if (t > 0.0f) {
     return vec3(0.0f);
   } else {
@@ -779,32 +782,30 @@ void main() {
     //                                             insideATM, offset, maxLength );
 
     if ( intersectATM ) {
+      // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
+      // in the depth buffer is less than the distance to the atmosphere then the atmosphere
+      // is occluded
+      // if (pixelDepth < offset) {        
+      //   return pixelColorFromOriginalColorBuffer;
+      // }
+
       //renderTarget += vec4(1.0, 1.0, 1.0, 0.5);
       // Following paper nomenclature      
-      double t = 0.0;            
-      if ( offset != -1.0 ) {
-        // Camera is inside Atmosphere
-        t = offset;
-      }
-      
-      vec3 attenuation;
-
-      // vec3  x  = vec3(ray.origin.xyz);
-      // float r  = length(x);
-      // vec3  v  = vec3(ray.direction.xyz);
-      // float mu = dot(x, v) / r;
-      // vec3  s  = vec3(sunDirectionObj);
-      
-      // float tF = float(maxLength);        
-      //vec3 inscatterColor = inscatterRadiance(x, tF, v, s, r, mu, attenuation); 
+      double t = offset;                  
+      vec3 attenuation;     
 
       // Moving observer from camera location to top atmosphere
-      vec3  x  = vec3(ray.origin.xyz + offset*ray.direction.xyz);
-      float r  = length(x);
+      vec3  x  = vec3(ray.origin.xyz + t*ray.direction.xyz);
+      float r  = 0.0;//length(x);
       vec3  v  = vec3(ray.direction.xyz);
-      float mu = dot(x, v) / r;
+      float mu = 0.0;//dot(x, v) / r;
       vec3  s  = vec3(sunDirectionObj);
-      float tF = float(maxLength - offset);
+      float tF = float(maxLength - t);
+
+      // Because we may move the camera origin to the top of atmosphere 
+      // we also need to adjust the pixelDepth for this offset so the
+      // next comparison with the planet's ground make sense:
+      //pixelDepth -= offset;
 
       vec3 inscatterColor = inscatterNoTestRadiance(x, tF, v, s, r, mu, attenuation); 
       vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation);
@@ -815,13 +816,13 @@ void main() {
       //renderTarget = vec4(groundColor, 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
       //renderTarget = vec4(HDR(sunColor), 1.0); 
-      //vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
+      vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
       //vec4 finalRadiance = vec4(inscatterColor, 1.0);
       //vec4 finalRadiance = vec4(HDR(groundColor), 1.0);
       //vec4 finalRadiance = vec4(HDR(inscatterColor), 1.0);
       //vec4 finalRadiance = vec4(HDR(sunColor), 1.0);
       //vec4 finalRadiance = vec4(sunColor, 1.0);
-      vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
+      //vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
       //if ( finalRadiance.xyz == vec3(0.0))
       //   finalRadiance.w = 0.0;
     
