@@ -63,8 +63,8 @@ TouchInteraction::TouchInteraction()
 	_friction{ 0.02, 0.01, 0.02, 1, 0.02 },
 	_sensitivity{ 2.0 * 55.0, 0.1, 0.1, 1, 0.4 * 55.0 },
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
-	_currentRadius{ 1.0 }, _time{ 1.0 },
-	_directTouchMode{ false }, _tap{ false }, _levSuccess{ true }, 
+	_currentRadius{ 1.0 }, _slerpTime{ 1.0 },
+	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _levSuccess{ true },
 	_guiON("Gui On", "Show GUI", false)
 {
 	addProperty(_touchScreenSize);
@@ -79,13 +79,21 @@ TouchInteraction::TouchInteraction()
 		setFocusNode(node);
 	});
 	OnScreenGUIModule::touchInput = { false, glm::vec2(0), 0 };
+	_time.initSession();
 }
 
 TouchInteraction::~TouchInteraction() { }
 
 // Called each frame if there is any input
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
-	// check if tapped in corner to activate gui mode
+	if (_tap) { // check for doubletap
+		if (_time.getSessionTime().getTotalMilliseconds() < maxTapTime) {
+			_doubleTap = true;
+			_tap = false;
+		}
+		_time.initSession();
+	}
+	
 	
 	if (!gui(list)) {
 		if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
@@ -110,12 +118,12 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 
 bool TouchInteraction::gui(const std::vector<TuioCursor>& list) {
 	WindowWrapper& wrapper = OsEng.windowWrapper();
-	bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
 	glm::ivec2 res = wrapper.currentWindowSize();
 	glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenY(res.y)); // mouse pixel position
 	glm::vec2 button = glm::vec2(36, 64); // pixel size
+	_guiON = OnScreenGUIModule::gui.isEnabled();
+
 	if (_tap && list.size() == 1 && pos.x < button.x && pos.y < button.y) { // pressed invisible button
-		_tap = false;
 		_guiON = !_guiON;
 		OnScreenGUIModule::gui.setEnabled(_guiON);
 
@@ -375,8 +383,7 @@ int TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::
 		}
 	}
 
-	if (_tap) {
-		_tap = false;
+	if (_doubleTap) {
 		return PICK;
 	}
 	else  if (list.size() == 1) {
@@ -456,7 +463,7 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 				_toSlerp.y = axis.y * sin(angle / 2.0);
 				_toSlerp.z = axis.z * sin(angle / 2.0);
 				_toSlerp.w = cos(angle / 2.0);
-				_time = 0.0;
+				_slerpTime = 0.0;
 			}
 			else { // should zoom in to current but not too much
 				double dist = glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) - _focusNode->boundingSphere();
@@ -511,9 +518,9 @@ void TouchInteraction::step(double dt) {
 			localCamRot = localCamRot * rotationDiff;
 
 			// if we have chosen a new focus node
-			if (_time < 1) {
-				_time += 0.25 * dt;
-				localCamRot = slerp(localCamRot, _toSlerp, _time);
+			if (_slerpTime < 1) {
+				_slerpTime += 0.25 * dt;
+				localCamRot = slerp(localCamRot, _toSlerp, _slerpTime);
 			}
 		}
 		{ // Orbit (global rotation)
@@ -556,6 +563,7 @@ void TouchInteraction::step(double dt) {
 		_camera->setRotation(globalCamRot * localCamRot);
 
 		_tap = false;
+		_doubleTap = false;
 	}
 }
 
@@ -581,8 +589,6 @@ void TouchInteraction::decelerate() {
 
 // Called if all fingers are off the screen
 void TouchInteraction::clear() {
-	//_directTouchMode = false;
-	//_tap = false;
 	_levSuccess = true;
 	if (_guiON) {
 		bool activeLastFrame = false;

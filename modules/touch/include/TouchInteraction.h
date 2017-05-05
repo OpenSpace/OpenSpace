@@ -90,6 +90,7 @@ struct FunctionData {
 #define ROLL 2
 #define PAN 3
 #define PICK 4
+#define maxTapTime 300
 
 using Point = std::pair<int, TUIO::TuioPoint>;
 
@@ -129,9 +130,11 @@ class TouchInteraction : public properties::PropertyOwner
 		ScaleFactor _sensitivity;
 		double _projectionScaleFactor;
 		double _currentRadius;
-		double _time;
+		double _slerpTime;
+		TUIO::TuioTime _time;
 		bool _directTouchMode;
 		bool _tap;
+		bool _doubleTap;
 		bool _levSuccess;
 		properties::BoolProperty _guiON;
 		
