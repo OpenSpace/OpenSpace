@@ -64,9 +64,11 @@ TouchInteraction::TouchInteraction()
 	_sensitivity{ 2.0 * 55.0, 0.1, 0.1, 1, 0.4 * 55.0 },
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
 	_currentRadius{ 1.0 }, _time{ 1.0 },
-	_directTouchMode{ false }, _tap{ false }, _levSuccess{ true }, _guiON{ false }
+	_directTouchMode{ false }, _tap{ false }, _levSuccess{ true }, 
+	_guiON("Gui On", "Show GUI", false)
 {
 	addProperty(_touchScreenSize);
+	addProperty(_guiON);
 	levmarq_init(&_lmstat);
 	_origin.onChange([this]() {
 		SceneGraphNode* node = sceneGraphNode(_origin.value());
@@ -76,6 +78,7 @@ TouchInteraction::TouchInteraction()
 		}
 		setFocusNode(node);
 	});
+	OnScreenGUIModule::touchInput = { false, glm::vec2(0), 0 };
 }
 
 TouchInteraction::~TouchInteraction() { }
@@ -109,7 +112,7 @@ bool TouchInteraction::gui(const std::vector<TuioCursor>& list) {
 	WindowWrapper& wrapper = OsEng.windowWrapper();
 	bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
 	glm::ivec2 res = wrapper.currentWindowSize();
-	glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenX(res.y)); // mouse pixel position
+	glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenY(res.y)); // mouse pixel position
 	glm::vec2 button = glm::vec2(36, 64); // pixel size
 	if (_tap && list.size() == 1 && pos.x < button.x && pos.y < button.y) { // pressed invisible button
 		_tap = false;
@@ -120,23 +123,11 @@ bool TouchInteraction::gui(const std::vector<TuioCursor>& list) {
 		LINFO("GUI mode is " << mode << "activated. Inside box by: (" <<
 			static_cast<int>(100 * (pos.x / button.x)) << "%, " << static_cast<int>(100 * (pos.y / button.y)) << "%)\n");
 	}
-	else if (_guiON) { // emulate mouse
-		int action = (_tap) ? 0 : 1;
-		LINFO("Pos: " << glm::to_string(pos) << ", Button: " << action << "_tap: " << _tap << "\n");
-		interaction::InputState().mousePositionCallback(pos.x, pos.y);
-		interaction::InputState().mouseButtonCallback(openspace::MouseButton(0), openspace::MouseAction(action));
-
-		double dt = std::max(wrapper.averageDeltaTime(), 0.0);
-		OnScreenGUIModule::gui.startFrame(static_cast<float>(dt),
-			wrapper.currentWindowSize(),
-			wrapper.dpiScaling(),
-			pos,
-			action);
-		OnScreenGUIModule::gui.endFrame();
-		
-		 
+	else if (_guiON) {
+		uint32_t action = (_tap) ? 0 : 1;
+		OnScreenGUIModule::touchInput = { _guiON, pos, action };
 	}
-	return _guiON;
+	return _guiON; // return if consumed
 }
 
 // Sets _vel to update _camera according to direct-manipulation (L2 error)
@@ -593,6 +584,17 @@ void TouchInteraction::clear() {
 	//_directTouchMode = false;
 	//_tap = false;
 	_levSuccess = true;
+	if (_guiON) {
+		bool activeLastFrame = false;
+		if (OnScreenGUIModule::touchInput.action) {
+			activeLastFrame = true;
+		}
+		OnScreenGUIModule::touchInput.active = false;
+		if (activeLastFrame) {
+			OnScreenGUIModule::touchInput.active = true;
+			OnScreenGUIModule::touchInput.action = 0;
+		}
+	}
 	_selected.clear(); // should clear if no longer have a direct-touch input
 }
 

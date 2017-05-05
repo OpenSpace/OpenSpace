@@ -36,6 +36,7 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/network/parallelconnection.h>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
@@ -132,7 +133,7 @@ class TouchInteraction : public properties::PropertyOwner
 		bool _directTouchMode;
 		bool _tap;
 		bool _levSuccess;
-		bool _guiON;
+		properties::BoolProperty _guiON;
 		
 		
 		std::vector<SelectedBody> _selected;
