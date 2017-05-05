@@ -94,6 +94,7 @@ private:
     IMG_PRECISION* _pboBufferData;
 
     unsigned int _imageSize;
+    double _move = 0.0;
 
     // Channels -> DataObjects
     //std::vector<std::vector<ImageDataObject>> _imageData;
@@ -104,6 +105,7 @@ private:
     void uploadImageDataToPBO(const int& image);
     void updateTextureGPU();
     void createFrustum();
+    void updatePlaneMoveFactor();
 
     void downloadTextureResource();
     bool initialize() override;
