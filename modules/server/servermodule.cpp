@@ -74,7 +74,7 @@ void ServerModule::handleSocket(std::shared_ptr<ghoul::io::TcpSocket> socket) {
         }
 
         auto it = channelHandlers.find(channelId);
-
+        /*
         switch (channelAction) {
         case ChannelAction::Initialize:
             if (it != channelHandlers.end()) {
@@ -100,7 +100,7 @@ void ServerModule::handleSocket(std::shared_ptr<ghoul::io::TcpSocket> socket) {
             break;
         default:
             LWARNING("Unsupported channel action.");
-        }
+        }*/
     }
 }
 

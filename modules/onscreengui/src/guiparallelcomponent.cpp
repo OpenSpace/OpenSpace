@@ -55,7 +55,17 @@ void GuiParallelComponent::renderDisconnected() {
     const bool connect = ImGui::Button("Connect");
 
     if (connect) {
-        OsEng.parallelConnection().clientConnect();
+        OsEng.parallelConnection().connect();
+    }
+}
+
+void GuiParallelComponent::renderConnecting() {
+    ImGui::Text("Connecting...");
+
+    const bool cancel = ImGui::Button("Cancel connection");
+
+    if (cancel) {
+        OsEng.parallelConnection().disconnect();
     }
 }
 
@@ -135,7 +145,7 @@ void GuiParallelComponent::renderClientCommon() {
     }
 
     if (disconnect) {
-        parallel.signalDisconnect();
+        parallel.disconnect();
     }
 }
 
@@ -171,6 +181,9 @@ void GuiParallelComponent::render() {
     switch (status) {
     case ParallelConnection::Status::Disconnected:
         renderDisconnected();
+        break;
+    case ParallelConnection::Status::Connecting:
+        renderConnecting();
         break;
     case ParallelConnection::Status::ClientWithHost:
         renderClientWithHost();
