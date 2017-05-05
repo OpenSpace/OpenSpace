@@ -73,15 +73,17 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     }
 
     // // TODO(mnoven): Lua
-    std::vector<std::string> paths = {"/home/noven/workspace/OpenSpace/data/solarflarej2k/171/",
-                                      //"/home/noven/workspace/OpenSpace/data/solarflarej2k/094/",
-                                      "/home/noven/workspace/OpenSpace/data/solarflarej2k/304/",
-                                      "/home/noven/workspace/OpenSpace/data/solarflarej2k/193/"};
+    std::vector<std::string> paths
+          = {"/home/noven/workspace/OpenSpace/data/solarflarej2k/HMIC/",
+             "/home/noven/workspace/OpenSpace/data/solarflarej2k/171/",
+             "/home/noven/workspace/OpenSpace/data/solarflarej2k/304/",
+             "/home/noven/workspace/OpenSpace/data/solarflarej2k/193/"};
 
-    std::vector<std::string> tfPaths = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0171_new.txt",
-                                        //"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0094_new.txt",
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0304_new.txt",
-                                        "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0193_new.txt"};
+    std::vector<std::string> tfPaths
+          = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/continuum.txt",
+             "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0171_new.txt",
+             "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0304_new.txt",
+             "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0193_new.txt"};
 
     _type = "SDO";
    // int imageSize;
@@ -330,10 +332,10 @@ bool RenderableSpacecraftCameraPlane::initialize() {
         }
     }
 
-     PowerScaledScalar planetSize(glm::vec2(4.8f, 9.f));
+    // Fake sun
+     PowerScaledScalar planetSize(glm::vec2(6.96701f, 8.f)); // 6.95701f
     _sphere = std::make_unique<PowerScaledSphere>(PowerScaledSphere(planetSize, 100));
-
- //   _sphere->initialize();
+    _sphere->initialize();
 
     // using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     // _shader->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
@@ -553,7 +555,8 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     rotationTransform = glm::dmat4(glm::inverse(rotationTransform));
 
     // Scale vector to sun barycenter to get translation distance
-    glm::dvec3 translationTransform = (p->worldPosition() - data.modelTransform.translation) * _moveFactor.value();
+    glm::dvec3 sunDir = p->worldPosition() - data.modelTransform.translation;
+    glm::dvec3 translationTransform = sunDir * _moveFactor.value();
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation + translationTransform) *
@@ -622,20 +625,32 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     glDrawArrays(GL_LINES, 0, 16);
     _frustumShader->deactivate();
 
+    _sphereShader->activate();
+    glm::dmat4 modelTransformSphere =
+        glm::translate(glm::dmat4(1.0), sun->worldPosition()) * // Translation
+        rotationTransform *  // Spice rotation
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+    glm::dmat4 modelViewTransformNew = data.camera.combinedViewMatrix() * modelTransformSphere;
 
-    // _sphereShader->activate();
-    // modelTransform =
-    //     glm::translate(glm::dmat4(1.0), sun->worldPosition()) * // Translation
-    //     glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-    //     glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
-    // modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+    _sphereShader->setUniform(
+        "modelViewProjectionTransform",
+        data.camera.projectionMatrix() * glm::mat4(modelViewTransformNew)
+    );
 
-    // _sphereShader->setUniform(
-    //     "modelViewProjectionTransform",
-    //     data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
-    // );
-    // _sphere->render();
-    // _sphereShader->deactivate();
+    _sphereShader->setUniform("sunDir", glm::vec3(sunDir));
+    _sphereShader->setUniform("translationTransform", glm::vec3( data.modelTransform.translation +translationTransform));
+
+    imageUnit.activate();
+    _texture->bind();
+    _sphereShader->setUniform("texture1", imageUnit);
+
+    tfUnit.activate();
+    _transferFunctions[_currentActiveChannel]->bind(); // Calls update internally
+
+    _sphereShader->setUniform("texture2", tfUnit);
+
+    _sphere->render();
+    _sphereShader->deactivate();
 }
 
 } // namespace openspace
