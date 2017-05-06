@@ -190,9 +190,6 @@ float CachingTileProvider::noDataValueAsFloat() {
 }
 
 Tile CachingTileProvider::getDefaultTile() {
-
-	return Tile::TileUnavailable;
-
     if (_defaultTile.status() != Tile::Status::OK) {
         _defaultTile = createTile(
             _asyncTextureDataProvider->getRawTileDataReader()->defaultTileData()
@@ -206,7 +203,12 @@ void CachingTileProvider::initTexturesFromLoadedData() {
     if (rawTile) {
         cache::ProviderTileKey key = { rawTile->tileIndex, uniqueIdentifier() };
         //Tile tile = createTile(rawTile);
-        cache::MemoryAwareTileCache::ref().createTileAndPut(key, rawTile);
+        if (!cache::MemoryAwareTileCache::ref().exist(key)) {
+            cache::MemoryAwareTileCache::ref().createTileAndPut(key, rawTile);
+        }
+        else {
+            delete [] rawTile->imageData;
+        }
     }
 }
 
@@ -244,7 +246,7 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
         
     // The texture should take ownership of the data
     using ghoul::opengl::Texture;
-    /*
+    
     std::shared_ptr<Texture> texture = std::make_shared<Texture>(
         rawTile->dimensions,
         rawTile->textureFormat.ghoulFormat,
@@ -252,15 +254,25 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
         rawTile->glType,
         Texture::FilterMode::Linear,
         Texture::WrappingMode::ClampToEdge);
-    */
+    
+    Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
+    return tile;
 
 
+
+
+
+
+
+
+
+    /*
     std::shared_ptr<Texture> texture = _textureCache[_freeTexture];
     _freeTexture++;
     if (_freeTexture == _textureCache.size()){
         _freeTexture = 0;
     }
-
+    */
 
     /*
     _pbo->bind();
@@ -290,8 +302,8 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
     // AnisotropicMipMap must be set after texture is uploaded
     //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-    Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
-    return tile;
+    //Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
+    //return tile;
 }
 
 } // namespace tileprovider

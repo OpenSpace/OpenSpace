@@ -40,10 +40,6 @@ ConcurrentJobManager<P>::ConcurrentJobManager(std::shared_ptr<ThreadPool> pool) 
 
 template<typename P>
 void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
-    //threadPool->queue([this, job]() {
-    //    job->execute();
-    //    _finishedJobs.push(job);
-    //});
     threadPool->enqueue([this, job]() {
         job->execute();
         _finishedJobs.push(job);
@@ -52,7 +48,6 @@ void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
 
 template<typename P>
 void ConcurrentJobManager<P>::clearEnqueuedJobs() {
-    //threadPool->clearRemainingTasks();
     threadPool->clearTasks();
 }
 

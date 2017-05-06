@@ -28,10 +28,11 @@
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 
-#include <ghoul\opengl\ghoul_gl.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 #include <unordered_map>
 #include <map>
+#include <set>
 
 namespace openspace {
 
@@ -84,8 +85,6 @@ public:
         size_t numPixelBuffers = 0);
     ~PixelBufferContainer() = default;
 
-    void addBuffers(size_t numPixelBuffers);
-
     void* mapBuffer(KeyType key, GLenum  access);
     void* mapBufferRange(KeyType key, GLintptr offset, GLsizeiptr length, GLbitfield access);
 
@@ -114,21 +113,14 @@ PixelBufferContainer<KeyType>::PixelBufferContainer(size_t numBytesPerBuffer,
     PixelBuffer::Usage usage, size_t numPixelBuffers)
     : _usage(usage)
 {
-    for (int i = 0; i < numPixelBuffers; ++i) {
-        _pixelBuffers.push_back(std::make_unique<PixelBuffer>(numBytesPerBuffer, _usage));
-    }
-}
-
-template <class KeyType>
-void PixelBufferContainer<KeyType>::addBuffers(size_t numPixelBuffers) {
-    for (int i = 0; i < numPixelBuffers; ++i) {
+    for (size_t i = 0; i < numPixelBuffers; ++i) {
         _pixelBuffers.push_back(std::make_unique<PixelBuffer>(numBytesPerBuffer, _usage));
     }
 }
 
 template <class KeyType>
 void* PixelBufferContainer<KeyType>::mapBuffer(KeyType key, GLenum access) {
-	std::map<KeyType, int>::iterator iter = _indexMap.find(key);
+	typename std::map<KeyType, int>::iterator iter = _indexMap.find(key);
 	bool notFoundAmongMappedBuffers = iter == _indexMap.end();
 
 	if (!notFoundAmongMappedBuffers) { // This PBO is already mapped
@@ -157,16 +149,16 @@ template <class KeyType>
 void* PixelBufferContainer<KeyType>::mapBufferRange(KeyType key, GLintptr offset,
     GLsizeiptr length, GLbitfield access)
 {
-    std::map<KeyType, int>::iterator iter = _indexMap.find(key);
+    typename std::map<KeyType, int>::iterator iter = _indexMap.find(key);
     bool notFoundAmongMappedBuffers = iter == _indexMap.end();
 	
 	if (!notFoundAmongMappedBuffers) { // This PBO is already mapped
 		ghoul_assert(_pixelBuffers[iter->second], "Incorrect index map");
 		return nullptr;
 	}
-
+  
     // Find a pixel buffer that is unmapped
-    for (int i = 0; i < _pixelBuffers.size(), ++i) {
+    for (int i = 0; i < _pixelBuffers.size(); ++i) {
         bool bufferIsMapped = _pixelBuffers[i]->isMapped();
         if (!bufferIsMapped) {
             _pixelBuffers[i]->bind();
@@ -178,7 +170,7 @@ void* PixelBufferContainer<KeyType>::mapBufferRange(KeyType key, GLintptr offset
             }
         }
     }
-    return nullptr
+    return nullptr;
 }
 
 template <class KeyType>
@@ -197,7 +189,7 @@ bool PixelBufferContainer<KeyType>::resetMappedBuffers() {
 template <class KeyType>
 bool PixelBufferContainer<KeyType>::unMapBuffer(KeyType key) {
     bool success = false;
-    std::map<KeyType, int>::iterator iter = _indexMap.find(key);
+   typename  std::map<KeyType, int>::iterator iter = _indexMap.find(key);
     if (iter != _indexMap.end()) { // Found a mapped pixel buffer
         int index = iter->second; // Index where the mapped buffer is stored
         _pixelBuffers[index]->bind();
@@ -210,7 +202,7 @@ bool PixelBufferContainer<KeyType>::unMapBuffer(KeyType key) {
 
 template <class KeyType>
 GLuint PixelBufferContainer<KeyType>::idOfMappedBuffer(KeyType key) {
-    std::map<KeyType, int>::iterator iter = _indexMap.find(key);
+    typename std::map<KeyType, int>::iterator iter = _indexMap.find(key);
     if (iter != _indexMap.end()) { // Found a mapped pixel buffer
         int index = iter->second; // Index where the mapped buffer is stored
         return *_pixelBuffers[index];
@@ -261,7 +253,7 @@ private:
     
     std::unique_ptr<PixelBuffer> _pbo;
     std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer;
-    std::unordered_map<TileIndex::TileHashKey, TileIndex> _enqueuedTileRequests;
+    std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
 };
 
 } // namespace globebrowsing

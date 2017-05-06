@@ -68,12 +68,14 @@ void GlobeBrowsingModule::internalInitialize() {
         _openSpaceMaximumTileCacheSize.setMaxValue(CpuCap.installedMainMemory() * 0.25);
         
         // Convert from MB to KB
-        cache::MemoryAwareTileCache::create(_openSpaceMaximumTileCacheSize * 1024);
+        cache::MemoryAwareTileCache::create(/*_openSpaceMaximumTileCacheSize * 1024*/);
         _openSpaceMaximumTileCacheSize.onChange(
         [&]{
+        /*
             // Convert from MB to KB
             cache::MemoryAwareTileCache::ref().setMaximumSize(
                 _openSpaceMaximumTileCacheSize * 1024);
+                */
         });
         _clearTileCache.onChange(
         [&]{

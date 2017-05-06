@@ -30,8 +30,8 @@ namespace cache {
     
 template<typename KeyType, typename ValueType, typename HasherType>
 MemoryAwareLRUCache<KeyType, ValueType, HasherType>::MemoryAwareLRUCache(size_t maximumSize)
-    : _maximumCacheSize(maximumSize)
-    , _cacheSize(0)
+    : _cacheSize(0)
+    , _maximumCacheSize(maximumSize)
 {}
 
 template<typename KeyType, typename ValueType, typename HasherType>

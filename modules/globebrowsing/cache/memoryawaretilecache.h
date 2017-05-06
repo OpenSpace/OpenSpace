@@ -32,6 +32,7 @@
 
 #include <memory>
 #include <mutex>
+#include <vector>
 
 namespace openspace {
 namespace globebrowsing {
@@ -83,7 +84,7 @@ struct ProviderTileHasher {
  */
 class MemoryAwareTileCache {
 public:
-    static void create(size_t cacheSize);
+    static void create();
     static void destroy();
 
     void clear();
@@ -92,7 +93,7 @@ public:
     void put(ProviderTileKey key, Tile tile);
     void createTileAndPut(ProviderTileKey key, std::shared_ptr<RawTile> rawTile);
   
-    void setMaximumSize(size_t maximumSize);
+    //void setMaximumSize(size_t maximumSize);
 
     static MemoryAwareTileCache& ref();
 
@@ -100,7 +101,7 @@ private:
     /**
      * \param cacheSize is the cache size given in bytes.
      */
-    MemoryAwareTileCache(size_t cacheSize);
+    MemoryAwareTileCache();
     ~MemoryAwareTileCache() = default;
     
     static MemoryAwareTileCache* _singleton;

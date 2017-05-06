@@ -35,9 +35,9 @@ namespace cache {
 MemoryAwareTileCache* MemoryAwareTileCache::_singleton = nullptr;
 std::mutex MemoryAwareTileCache::_mutexLock;
 
-void MemoryAwareTileCache::create(size_t cacheSize) {
+void MemoryAwareTileCache::create() {
     std::lock_guard<std::mutex> guard(_mutexLock);
-    _singleton = new MemoryAwareTileCache(cacheSize);
+    _singleton = new MemoryAwareTileCache();
 }
 
 void MemoryAwareTileCache::destroy() {
@@ -71,52 +71,58 @@ void MemoryAwareTileCache::put(ProviderTileKey key, Tile tile) {
     _tileCache.put(key, tile);
 }
 
-void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, std::shared_ptr<RawTile> rawTile) {
-	using Texture = ghoul::opengl::Texture;
-	std::lock_guard<std::mutex> guard(_mutexLock);
+void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
+    std::shared_ptr<RawTile> rawTile)
+{
+    using ghoul::opengl::Texture;
     
-    std::shared_ptr<Texture> texture;
-    // First option, there exists unused textures
-    if (_freeTexture < _textureContainer.size()) {
-         texture = _textureContainer[_freeTexture];
-        _freeTexture++;
-    }
-    // Second option. No more textures available. Pop from the LRU cache
-    else {
-        Tile oldTile = _tileCache.popLRU();
-        // Use the old tiles texture
-        texture = oldTile.texture();
-    }
-
-    // Re-upload texture, either using PBO or by using RAM data
-    if (rawTile->pbo != 0) {
-        texture->reUploadTextureFromPBO(rawTile->pbo);
+    if (rawTile->error != RawTile::ReadError::None) {
+        return;
     }
     else {
-        texture->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
-        size_t expectedDataSize = texture->expectedPixelDataSize();
-        ghoul_assert(expectedDataSize == rawTile->nBytesImageData,
-            "Pixel data size is incorrect");
-        texture->reUploadTexture();
+        std::shared_ptr<Texture> texture;
+        // First option, there exists unused textures
+        if (_freeTexture < _textureContainer.size()) {
+             texture = _textureContainer[_freeTexture];
+            _freeTexture++;
+        }
+        // Second option. No more textures available. Pop from the LRU cache
+        else {
+            Tile oldTile = _tileCache.popLRU();
+            // Use the old tiles texture
+            texture = oldTile.texture();
+        }
+        
+        // Re-upload texture, either using PBO or by using RAM data
+        if (rawTile->pbo != 0) {
+            texture->reUploadTextureFromPBO(rawTile->pbo);
+        }
+        else {
+            texture->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
+            size_t expectedDataSize = texture->expectedPixelDataSize();
+            ghoul_assert(expectedDataSize == rawTile->nBytesImageData, "Pixel data size is incorrect");
+            texture->reUploadTexture();
+        }
+        Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
+        _tileCache.put(key, tile);
     }
-
-    // Create and put tile in cache
-    Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
-    _tileCache.put(key, tile);
+    return;
 }
 
+/*
 void MemoryAwareTileCache::setMaximumSize(size_t maximumSize) {
     std::lock_guard<std::mutex> guard(_mutexLock);
   _tileCache.setMaximumSize(maximumSize);
 }
+*/
 
-MemoryAwareTileCache::MemoryAwareTileCache(size_t cacheSize)
-    : _tileCache(cacheSize)
+MemoryAwareTileCache::MemoryAwareTileCache()
+    : _tileCache(std::numeric_limits<std::size_t>::max()) // Unlimited size
     , _freeTexture(0) // Set the first texture to be "free"
 {
     TileTextureInitData initData(512 + 4, 512 + 4, GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::Format::RGBA);
-    for (int i = 0; i < 100; ++i)
+        ghoul::opengl::Texture::Format::BGRA);
+    for (int i = 0; i < 50; ++i)
     {
         _textureContainer.push_back(std::make_shared<ghoul::opengl::Texture>(
             initData.dimensions(),
