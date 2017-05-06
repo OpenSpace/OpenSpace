@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___THREAD_POOL___H__
 
+#include <modules/globebrowsing/cache/lrucache.h>
+
 #include <condition_variable>
 #include <functional>
 #include <mutex>
@@ -67,6 +69,129 @@ private:
 
     bool stop;
 };
+
+
+template<typename KeyType>
+class LRUThreadPool;
+
+template<typename KeyType>
+class LRUThreadPoolWorker {
+public: 
+    LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool);
+    void operator()();
+private:
+    LRUThreadPool<KeyType>& _pool;
+};
+
+/**
+ * The <code>LRUThreadPool</code> will only enqueue a certain number of tasks. The most
+ * recently enqueued task is the one that will be executed first. This class is templated
+ * on a key type which used as an identifier to determine wheter or not a task with the
+ * given key has been enqueued or not. This means that a task can be enqueued several
+ * times. The user must ensure that an enqueued task with a given key should be
+ * equal in outcome to a second enqueued task with the same key. This is because a second
+ * enqueued task with the same key will simply be bumped and prioritised before other
+ * enqueued tasks. The given task will be ignored.
+ */
+template<typename KeyType>
+class LRUThreadPool {
+public:
+    LRUThreadPool(size_t numThreads, size_t queueSize);
+    ~LRUThreadPool();
+
+    void enqueue(std::function<void()> f, KeyType key);
+    void clearTasks();
+
+private:
+    friend class LRUThreadPoolWorker<KeyType>;
+
+    std::vector<std::thread> _workers;
+    cache::LRUCache<KeyType, std::function<void()>> _tasks;
+    std::mutex _queue_mutex;
+    std::condition_variable _condition;
+
+    bool _stop;
+};
+
+
+
+template<typename KeyType>
+LRUThreadPoolWorker<KeyType>::LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool)
+    : _pool(pool)
+{}
+
+template<typename KeyType>
+void LRUThreadPoolWorker<KeyType>::operator()() {
+    std::function<void()> task;
+    while (true) {
+        // acquire lock
+        {
+            std::unique_lock<std::mutex> lock(_pool._queue_mutex);
+
+            // look for a work item
+            while (!_pool._stop && _pool._tasks.isEmpty()) {
+                // if there are none wait for notification
+                _pool._condition.wait(lock);
+            }
+
+            if (_pool._stop) { // exit if the pool is stopped
+                return;
+            }
+
+            // get the task from the queue
+            task = _pool._tasks.popMRU();
+            
+        }// release lock
+
+        // execute the task
+        task();
+    }
+}
+
+template<typename KeyType>
+LRUThreadPool<KeyType>::LRUThreadPool(size_t numThreads, size_t queueSize)
+    : _stop(false)
+    , _tasks(queueSize)
+{
+    for (size_t i = 0; i < numThreads; ++i) {
+        _workers.push_back(std::thread(LRUThreadPoolWorker<KeyType>(*this)));
+    }
+}
+
+// the destructor joins all threads
+template<typename KeyType>
+LRUThreadPool<KeyType>::~LRUThreadPool() {
+    // Stop all threads
+    _stop = true;
+    _condition.notify_all();
+
+    // join them
+    for (size_t i = 0; i < _workers.size(); ++i) {
+        _workers[i].join();
+    }
+}
+
+// add new work item to the pool
+template<typename KeyType>
+void LRUThreadPool<KeyType>::enqueue(std::function<void()> f, KeyType key) {
+    { // acquire lock
+        std::unique_lock<std::mutex> lock(_queue_mutex);
+
+        // add the task
+        _tasks.put(key, f);
+    } // release lock
+
+    // wake up one thread
+    _condition.notify_one();
+}
+
+template<typename KeyType>
+void LRUThreadPool<KeyType>::clearTasks() {
+    { // acquire lock
+        std::unique_lock<std::mutex> lock(_queue_mutex);
+        _tasks.clear();
+    } // release lock
+}
 
 } // namespace globebrowsing
 } // namespace openspace

@@ -96,7 +96,7 @@ namespace globebrowsing {
 
 AsyncTileDataProvider::AsyncTileDataProvider(
     const std::shared_ptr<RawTileDataReader> rawTileDataReader,
-    std::shared_ptr<ThreadPool> pool)
+    std::shared_ptr<LRUThreadPool<TileIndex::TileHashKey>> pool)
     : _rawTileDataReader(rawTileDataReader)
     , _concurrentJobManager(pool)
 {
@@ -116,14 +116,14 @@ std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getRawTileDataReader()
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
     if (satisfiesEnqueueCriteria(tileIndex)) {
-		size_t numBytes = _rawTileDataReader->getWriteDataDescription().totalNumBytes;
+		//size_t numBytes = _rawTileDataReader->getWriteDataDescription().totalNumBytes;
         char* dataPtr = static_cast<char*>(_pboContainer->mapBuffer(tileIndex.hashKey(),
             GL_WRITE_ONLY));
         if (dataPtr) {
             auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex,
 				dataPtr);
             //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, tileIndex, tileDiskCache, "ReadAndWrite");
-            _concurrentJobManager.enqueueJob(job);
+            _concurrentJobManager.enqueueJob(job, tileIndex.hashKey());
             _enqueuedTileRequests.insert(tileIndex.hashKey());
 
             return true;
@@ -190,12 +190,14 @@ void AsyncTileDataProvider::reset() {
 }
 
 void AsyncTileDataProvider::clearRequestQueue() {
-    
-    //_threadPool->clearRemainingTasks();
-    //_futureTileIOResults.clear();
-  
-    //_enqueuedTileRequests.clear();
-    //_concurrentJobManager.clearEnqueuedJobs();
+    /*
+    // Unmap all buffers that are enqueued
+    for (auto enqueuedRequest : _enqueuedTileRequests) {
+        _pboContainer->unMapBuffer(enqueuedRequest);
+    }
+    _enqueuedTileRequests.clear();
+    _concurrentJobManager.clearEnqueuedJobs();
+    */
 }
 
 float AsyncTileDataProvider::noDataValueAsFloat() const {

@@ -47,7 +47,10 @@ public:
     void put(const KeyType& key, const ValueType& value);
     void clear();
     bool exist(const KeyType& key) const;
+    bool isEmpty() const;
     ValueType get(const KeyType& key);
+    ValueType popMRU();
+    ValueType popLRU();
     size_t size() const;
 
 private:

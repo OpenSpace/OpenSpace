@@ -57,12 +57,40 @@ bool LRUCache<KeyType, ValueType>::exist(const KeyType& key) const {
 }
 
 template<typename KeyType, typename ValueType>
+bool LRUCache<KeyType, ValueType>::isEmpty() const {
+    return _itemMap.size() == 0;
+}
+
+template<typename KeyType, typename ValueType>
 ValueType LRUCache<KeyType, ValueType>::get(const KeyType& key) {
     //ghoul_assert(exist(key), "Key " << key << " must exist");
     auto it = _itemMap.find(key);
     // Move list iterator pointing to value
     _itemList.splice(_itemList.begin(), _itemList, it->second);
     return it->second->second;
+}
+
+template<typename KeyType, typename ValueType>
+ValueType LRUCache<KeyType, ValueType>::popMRU() {
+    ghoul_assert(_itemList.size() > 0,
+        "Can not pop from LRU cache. Ensure cache is not empty.");
+    auto first_it = _itemList.begin();
+    _itemMap.erase(first_it->first);
+    ValueType toReturn = _itemList.front().second;
+    _itemList.pop_front();
+    return toReturn;
+}
+
+template<typename KeyType, typename ValueType>
+ValueType LRUCache<KeyType, ValueType>::popLRU() {
+    ghoul_assert(_itemList.size() > 0,
+        "Can not pop from LRU cache. Ensure cache is not empty.");
+    auto last_it = _itemList.end();
+    last_it--;
+    _itemMap.erase(last_it->first);
+    ValueType toReturn = _itemList.back().second;
+    _itemList.pop_back();
+    return toReturn;
 }
 
 template<typename KeyType, typename ValueType>

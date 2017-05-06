@@ -232,7 +232,7 @@ class RawTileDataReader;
 class AsyncTileDataProvider {
 public:
     AsyncTileDataProvider(std::shared_ptr<RawTileDataReader> textureDataProvider,
-        std::shared_ptr<ThreadPool> pool);
+        std::shared_ptr<LRUThreadPool<TileIndex::TileHashKey>> pool);
 
     bool enqueueTileIO(const TileIndex& tileIndex);        
     std::vector<std::shared_ptr<RawTile>> getRawTiles();
@@ -249,8 +249,9 @@ protected:
 
 private:
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
-    ConcurrentJobManager<RawTile> _concurrentJobManager;
-    
+    //ConcurrentJobManager<RawTile> _concurrentJobManager;
+    PrioritizingConcurrentJobManager<RawTile, TileIndex::TileHashKey> _concurrentJobManager;
+
     std::unique_ptr<PixelBuffer> _pbo;
     std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer;
     std::set<TileIndex::TileHashKey> _enqueuedTileRequests;

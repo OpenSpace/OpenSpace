@@ -102,7 +102,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     // only one thread per provider supported atm
     // (GDAL does not handle multiple threads for a single dataset very well
     // currently)
-    auto threadPool = std::make_shared<ThreadPool>(1);
+    auto threadPool = std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 10);
 
     _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
         tileDataset, threadPool);
@@ -207,7 +207,7 @@ void CachingTileProvider::initTexturesFromLoadedData() {
             cache::MemoryAwareTileCache::ref().createTileAndPut(key, rawTile);
         }
         else {
-            delete [] rawTile->imageData;
+            //delete [] rawTile->imageData;
         }
     }
 }

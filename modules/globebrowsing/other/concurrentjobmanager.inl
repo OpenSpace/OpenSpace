@@ -34,9 +34,9 @@ template<typename P>
 Job<P>::~Job() {}
 
 template<typename P>
-ConcurrentJobManager<P>::ConcurrentJobManager(std::shared_ptr<ThreadPool> pool) : threadPool(pool) {
-
-}
+ConcurrentJobManager<P>::ConcurrentJobManager(std::shared_ptr<ThreadPool> pool)
+    : threadPool(pool)
+{ }
 
 template<typename P>
 void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
@@ -59,6 +59,40 @@ std::shared_ptr<Job<P>> ConcurrentJobManager<P>::popFinishedJob() {
 
 template<typename P>
 size_t ConcurrentJobManager<P>::numFinishedJobs() const {
+    return _finishedJobs.size();
+}
+
+
+
+template<typename P, typename KeyType>
+PrioritizingConcurrentJobManager<P, KeyType>::PrioritizingConcurrentJobManager(
+    std::shared_ptr<LRUThreadPool<KeyType>> pool)
+    : _threadPool(pool)
+{ }
+
+template<typename P, typename KeyType>
+void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Job<P>> job,
+    KeyType key)
+{
+    _threadPool->enqueue([this, job]() {
+        job->execute();
+        _finishedJobs.push(job);
+    }, key);
+}
+
+template<typename P, typename KeyType>
+void PrioritizingConcurrentJobManager<P, KeyType>::clearEnqueuedJobs() {
+    _threadPool->clearTasks();
+}
+
+template<typename P, typename KeyType>
+std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishedJob() {
+    ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
+    return _finishedJobs.pop();
+}
+
+template<typename P, typename KeyType>
+size_t PrioritizingConcurrentJobManager<P, KeyType>::numFinishedJobs() const {
     return _finishedJobs.size();
 }
 

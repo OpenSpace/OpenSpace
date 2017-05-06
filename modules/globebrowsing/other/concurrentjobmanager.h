@@ -64,6 +64,25 @@ private:
     std::shared_ptr<ThreadPool> threadPool;
 };
 
+
+template<typename P, typename KeyType>
+class PrioritizingConcurrentJobManager {
+public:
+    PrioritizingConcurrentJobManager(std::shared_ptr<LRUThreadPool<KeyType>> pool);
+
+    void enqueueJob(std::shared_ptr<Job<P>> job, KeyType key);
+
+    void clearEnqueuedJobs();
+
+    std::shared_ptr<Job<P>> popFinishedJob();
+
+    size_t numFinishedJobs() const;
+
+private:
+    ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
+    std::shared_ptr<LRUThreadPool<KeyType>> _threadPool;
+};
+
 } // namespace globebrowsing
 } // namespace openspace
 
