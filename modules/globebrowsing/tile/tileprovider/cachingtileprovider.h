@@ -87,20 +87,8 @@ private:
     void clearRequestQueue();
 
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    //std::shared_ptr<TileCache> _tileCache;
-
-    std::unique_ptr<PixelBuffer> _pbo;
 
     Tile _defaultTile;
-
-
-
-
-
-
-    int _freeTexture;
-    std::vector<std::shared_ptr<ghoul::opengl::Texture> > _textureCache;
-
 };
 
 } // namespace tileprovider

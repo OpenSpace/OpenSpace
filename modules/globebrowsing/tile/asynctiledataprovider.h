@@ -239,7 +239,6 @@ public:
     std::shared_ptr<RawTile> popFinishedRawTile();
 
     void reset();
-    void clearRequestQueue();
 
     std::shared_ptr<RawTileDataReader> getRawTileDataReader() const;
     float noDataValueAsFloat() const;
