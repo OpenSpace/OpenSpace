@@ -80,12 +80,6 @@ private:
     */
     Tile createTile(std::shared_ptr<RawTile> res);
 
-    /**
-    * Deletes all enqueued, but not yet started async downloads of textures.
-    * Note that this does not cancel any currently ongoing async downloads.
-    */
-    void clearRequestQueue();
-
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
 
     Tile _defaultTile;
