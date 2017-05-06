@@ -46,10 +46,7 @@ namespace tileprovider {
 class CachingTileProvider : public TileProvider {
 public:
     CachingTileProvider(const ghoul::Dictionary& dictionary);
-
-    CachingTileProvider(
-        std::shared_ptr<AsyncTileDataProvider> tileReader,
-        int framesUntilFlushRequestQueue);
+    CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader);
 
     virtual ~CachingTileProvider();
         
@@ -91,9 +88,6 @@ private:
 
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
     //std::shared_ptr<TileCache> _tileCache;
-
-    int _framesSinceLastRequestFlush;
-    int _framesUntilRequestFlush;
 
     std::unique_ptr<PixelBuffer> _pbo;
 

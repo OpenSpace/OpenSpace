@@ -189,17 +189,6 @@ void AsyncTileDataProvider::reset() {
     
 }
 
-void AsyncTileDataProvider::clearRequestQueue() {
-    /*
-    // Unmap all buffers that are enqueued
-    for (auto enqueuedRequest : _enqueuedTileRequests) {
-        _pboContainer->unMapBuffer(enqueuedRequest);
-    }
-    _enqueuedTileRequests.clear();
-    _concurrentJobManager.clearEnqueuedJobs();
-    */
-}
-
 float AsyncTileDataProvider::noDataValueAsFloat() const {
     return _rawTileDataReader->noDataValueAsFloat();
 }

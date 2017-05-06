@@ -51,7 +51,6 @@ namespace tileprovider {
     
 CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
     : TileProvider(dictionary)
-    , _framesSinceLastRequestFlush(0)
     , _defaultTile(Tile::TileUnavailable)
 {
     _name = "Name unspecified";
@@ -72,7 +71,6 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
 
     // getValue does not work for integers
     double minimumPixelSize;
-    double framesUntilRequestFlush = 60;
 
     // 3. Check for used spcified optional keys
     if (dictionary.getValue<bool>(KeyDoPreProcessing, config.doPreProcessing)) {
@@ -84,10 +82,6 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
         config.tilePixelSize = static_cast<int>(minimumPixelSize); 
     }
     */
-    if (dictionary.getValue<double>(KeyFlushInterval, framesUntilRequestFlush)) {
-        LDEBUG("Default framesUntilRequestFlush overridden: " <<
-            framesUntilRequestFlush);
-    }
 
     std::string basePath;
     dictionary.getValue(KeyBasePath, basePath);
@@ -106,7 +100,6 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
 
     _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
         tileDataset, threadPool);
-    _framesUntilRequestFlush = framesUntilRequestFlush;
 
     if (dictionary.hasKeyAndValue<double>(KeyPreCacheLevel)) {
         int preCacheLevel = static_cast<int>(dictionary.value<double>(KeyPreCacheLevel));
@@ -140,23 +133,16 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
 }
 
 CachingTileProvider::CachingTileProvider(
-                                        std::shared_ptr<AsyncTileDataProvider> tileReader, 
-                                        int framesUntilFlushRequestQueue)
+    std::shared_ptr<AsyncTileDataProvider> tileReader)
     : _asyncTextureDataProvider(tileReader)
-    , _framesUntilRequestFlush(framesUntilFlushRequestQueue)
-    , _framesSinceLastRequestFlush(0)
     , _defaultTile(Tile::TileUnavailable)
-{}
+{ }
 
-CachingTileProvider::~CachingTileProvider(){
-    clearRequestQueue();
-}
+CachingTileProvider::~CachingTileProvider()
+{ }
 
 void CachingTileProvider::update() {
     initTexturesFromLoadedData();
-    if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
-        clearRequestQueue();
-    }
 }
 
 void CachingTileProvider::reset() {
@@ -214,7 +200,6 @@ void CachingTileProvider::initTexturesFromLoadedData() {
 
 void CachingTileProvider::clearRequestQueue() {
     _asyncTextureDataProvider->clearRequestQueue();
-    _framesSinceLastRequestFlush = 0;
 }
 
 Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
