@@ -45,8 +45,14 @@ public:
     LRUCache(size_t size);
 
     void put(const KeyType& key, const ValueType& value);
+    std::vector<std::pair<KeyType, ValueType>> putAndFetchPopped(const KeyType& key, const ValueType& value);
     void clear();
     bool exist(const KeyType& key) const;
+    /**
+     * If value exists, the value is bumped to the front of the queue.
+     * \returns true if value of this key exists.
+     */
+    bool touch(const KeyType& key);
     bool isEmpty() const;
     ValueType get(const KeyType& key);
     ValueType popMRU();
@@ -54,7 +60,9 @@ public:
     size_t size() const;
 
 private:
+    void putWithoutCleaning(const KeyType& key, const ValueType& value);
     void clean();
+    std::vector<std::pair<KeyType, ValueType>> cleanAndFetchPopped();
 
     std::list<std::pair<KeyType, ValueType>> _itemList;
     std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;

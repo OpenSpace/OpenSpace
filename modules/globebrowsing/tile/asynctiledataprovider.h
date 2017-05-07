@@ -244,7 +244,7 @@ public:
     float noDataValueAsFloat() const;
 
 protected:
-    virtual bool satisfiesEnqueueCriteria(const TileIndex&) const;
+    virtual bool satisfiesEnqueueCriteria(const TileIndex&);
 
 private:
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
@@ -253,7 +253,7 @@ private:
 
     std::unique_ptr<PixelBuffer> _pbo;
     std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer;
-    std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
+    //std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
 };
 
 } // namespace globebrowsing

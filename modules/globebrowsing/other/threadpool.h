@@ -100,13 +100,16 @@ public:
     ~LRUThreadPool();
 
     void enqueue(std::function<void()> f, KeyType key);
-    void clearTasks();
+    bool touch(KeyType key);
+    std::vector<KeyType> getUnqueuedTasksKeys();
+    //void clearTasks();
 
 private:
     friend class LRUThreadPoolWorker<KeyType>;
 
     std::vector<std::thread> _workers;
-    cache::LRUCache<KeyType, std::function<void()>> _tasks;
+    cache::LRUCache<KeyType, std::function<void()>> _queuedTasks;
+    std::vector<KeyType> _unqueuedTasks;
     std::mutex _queue_mutex;
     std::condition_variable _condition;
 
@@ -129,7 +132,7 @@ void LRUThreadPoolWorker<KeyType>::operator()() {
             std::unique_lock<std::mutex> lock(_pool._queue_mutex);
 
             // look for a work item
-            while (!_pool._stop && _pool._tasks.isEmpty()) {
+            while (!_pool._stop && _pool._queuedTasks.isEmpty()) {
                 // if there are none wait for notification
                 _pool._condition.wait(lock);
             }
@@ -139,7 +142,7 @@ void LRUThreadPoolWorker<KeyType>::operator()() {
             }
 
             // get the task from the queue
-            task = _pool._tasks.popMRU();
+            task = _pool._queuedTasks.popMRU();
             
         }// release lock
 
@@ -151,7 +154,7 @@ void LRUThreadPoolWorker<KeyType>::operator()() {
 template<typename KeyType>
 LRUThreadPool<KeyType>::LRUThreadPool(size_t numThreads, size_t queueSize)
     : _stop(false)
-    , _tasks(queueSize)
+    , _queuedTasks(queueSize)
 {
     for (size_t i = 0; i < numThreads; ++i) {
         _workers.push_back(std::thread(LRUThreadPoolWorker<KeyType>(*this)));
@@ -178,7 +181,12 @@ void LRUThreadPool<KeyType>::enqueue(std::function<void()> f, KeyType key) {
         std::unique_lock<std::mutex> lock(_queue_mutex);
 
         // add the task
-        _tasks.put(key, f);
+        //_queuedTasks.put(key, f);
+        std::vector<std::pair<KeyType, std::function<void()>>> unfinishedTasks =
+            _queuedTasks.putAndFetchPopped(key, f);
+        for (auto unfinishedTask : unfinishedTasks) {
+            _unqueuedTasks.push_back(unfinishedTask.first);
+        }
     } // release lock
 
     // wake up one thread
@@ -186,12 +194,31 @@ void LRUThreadPool<KeyType>::enqueue(std::function<void()> f, KeyType key) {
 }
 
 template<typename KeyType>
+bool LRUThreadPool<KeyType>::touch(KeyType key) {
+    std::unique_lock<std::mutex> lock(_queue_mutex);
+    return _queuedTasks.touch(key);
+}
+
+
+template<typename KeyType>
+std::vector<KeyType> LRUThreadPool<KeyType>::getUnqueuedTasksKeys() {
+    std::vector<KeyType> toReturn = _unqueuedTasks;
+    {
+        std::unique_lock<std::mutex> lock(_queue_mutex);
+        _unqueuedTasks.clear();
+    }
+    return toReturn;
+}
+
+/*
+template<typename KeyType>
 void LRUThreadPool<KeyType>::clearTasks() {
     { // acquire lock
         std::unique_lock<std::mutex> lock(_queue_mutex);
-        _tasks.clear();
+        _queuedTasks.clear();
     } // release lock
 }
+*/
 
 } // namespace globebrowsing
 } // namespace openspace

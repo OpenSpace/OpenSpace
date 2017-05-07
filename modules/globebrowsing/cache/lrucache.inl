@@ -41,19 +41,39 @@ void LRUCache<KeyType, ValueType>::clear() {
 
 template<typename KeyType, typename ValueType>
 void LRUCache<KeyType, ValueType>::put(const KeyType& key, const ValueType& value) {
-    auto it = _itemMap.find(key);
-    if (it != _itemMap.end()) {
-        _itemList.erase(it->second);
-        _itemMap.erase(it);
-    }
-    _itemList.push_front(std::make_pair(key, value));
-    _itemMap.insert(std::make_pair(key, _itemList.begin()));
+    putWithoutCleaning(key, value);
     clean();
+}
+
+template<typename KeyType, typename ValueType>
+std::vector<std::pair<KeyType, ValueType>>
+LRUCache<KeyType, ValueType>::putAndFetchPopped(const KeyType& key,
+    const ValueType& value)
+{
+    putWithoutCleaning(key, value);
+    return cleanAndFetchPopped();
 }
 
 template<typename KeyType, typename ValueType>
 bool LRUCache<KeyType, ValueType>::exist(const KeyType& key) const {
     return _itemMap.count(key) > 0;
+}
+
+template<typename KeyType, typename ValueType>
+bool LRUCache<KeyType, ValueType>::touch(const KeyType& key) {
+    auto it = _itemMap.find(key);
+    if (it != _itemMap.end()) { // Found in cache
+        ValueType value = it->second->second;
+        // Remove from current position
+        _itemList.erase(it->second);
+        _itemMap.erase(it);
+        // Bump to front
+        _itemList.push_front(std::make_pair(key, value));
+        _itemMap.insert(std::make_pair(key, _itemList.begin()));
+        return true;
+    } else {
+        return false;
+    }
 }
 
 template<typename KeyType, typename ValueType>
@@ -99,12 +119,39 @@ size_t LRUCache<KeyType, ValueType>::size() const {
 }
 
 template<typename KeyType, typename ValueType>
+void LRUCache<KeyType, ValueType>::putWithoutCleaning(const KeyType& key,
+    const ValueType& value)
+{
+    auto it = _itemMap.find(key);
+    if (it != _itemMap.end()) {
+        _itemList.erase(it->second);
+        _itemMap.erase(it);
+    }
+    _itemList.push_front(std::make_pair(key, value));
+    _itemMap.insert(std::make_pair(key, _itemList.begin()));
+}
+
+template<typename KeyType, typename ValueType>
 void LRUCache<KeyType, ValueType>::clean() {
     while (_itemMap.size() > _cacheSize) {
         auto last_it = _itemList.end(); last_it--;
         _itemMap.erase(last_it->first);
         _itemList.pop_back();
     }
+}
+
+template<typename KeyType, typename ValueType>
+std::vector<std::pair<KeyType, ValueType>>
+LRUCache<KeyType, ValueType>::cleanAndFetchPopped()
+{
+    std::vector<std::pair<KeyType, ValueType>> toReturn;
+    while (_itemMap.size() > _cacheSize) {
+        auto last_it = _itemList.end(); last_it--;
+        _itemMap.erase(last_it->first);
+        toReturn.push_back(_itemList.back());
+        _itemList.pop_back();
+    }
+    return toReturn;
 }
 
 } // namespace cache

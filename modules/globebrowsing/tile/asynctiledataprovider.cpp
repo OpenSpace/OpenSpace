@@ -124,7 +124,7 @@ bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
 				dataPtr);
             //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, tileIndex, tileDiskCache, "ReadAndWrite");
             _concurrentJobManager.enqueueJob(job, tileIndex.hashKey());
-            _enqueuedTileRequests.insert(tileIndex.hashKey());
+            //_enqueuedTileRequests.insert(tileIndex.hashKey());
 
             return true;
         }
@@ -143,6 +143,13 @@ std::vector<std::shared_ptr<RawTile>> AsyncTileDataProvider::getRawTiles() {
 }   
 
 std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
+    // First remove all unfinished jobs
+    std::vector<TileIndex::TileHashKey> unfinishedJobs = _concurrentJobManager.getKeysToUnfinishedJobs();
+    for (auto unfinishedJob : unfinishedJobs) {
+        // Unmap unfinished jobs
+        _pboContainer->unMapBuffer(unfinishedJob);
+    }
+    // Now take the first finished job
     if (_concurrentJobManager.numFinishedJobs() > 0) {
 
         // Now the tile load job looses ownerwhip of the data pointer
@@ -157,7 +164,7 @@ std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
         _pboContainer->unMapBuffer(key);
       
         // No longer enqueued. Remove from set of enqueued tiles
-        _enqueuedTileRequests.erase(key);
+        //_enqueuedTileRequests.erase(key);
 
         return product;
 	}
@@ -165,14 +172,17 @@ std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
         return nullptr;
 }   
 
-bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) const {
+bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex) {
     // only allow tile to be enqueued if it's not already enqueued
-    return _enqueuedTileRequests.find(tileIndex.hashKey()) ==
-        _enqueuedTileRequests.end();
+    //return _enqueuedTileRequests.find(tileIndex.hashKey()) ==
+    //    _enqueuedTileRequests.end();
+
+    // Only satisfies if it is not already enqueued. Also bumps the request to the top.
+    return !_concurrentJobManager.touch(tileIndex.hashKey());
 }
 
 void AsyncTileDataProvider::reset() {
-    
+    /*
     //_futureTileIOResults.clear();
     //_threadPool->stop(ghoul::ThreadPool::RunRemainingTasks::No);
     //_threadPool->start();
@@ -185,6 +195,7 @@ void AsyncTileDataProvider::reset() {
         _pboContainer->unMapBuffer(key);
     }
     _rawTileDataReader->reset();
+    */
     
     
 }

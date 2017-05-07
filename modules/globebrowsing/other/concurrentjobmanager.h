@@ -72,7 +72,11 @@ public:
 
     void enqueueJob(std::shared_ptr<Job<P>> job, KeyType key);
 
-    void clearEnqueuedJobs();
+    std::vector<KeyType> getKeysToUnfinishedJobs();
+
+    bool touch(KeyType key);
+
+    //void clearEnqueuedJobs();
 
     std::shared_ptr<Job<P>> popFinishedJob();
 
