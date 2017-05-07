@@ -58,127 +58,120 @@ struct IODescription {
     IODescription cut(PixelRegion::Side side, int pos);
 };
 
-struct TileWriteDataDescription {
-	PixelRegion region;
-	size_t bytesPerLine;
-	size_t totalNumBytes;
-    GLuint glType;
-    TextureFormat textureFormat;
-};
 
 
 
 
 
+/**
+ * All information needed to create a texture.
+ */
+class TileTextureInitData
+{
+public:
+    using HashKey = unsigned long long;
 
-
-
-
-
-
-    /**
-     * All information needed to create a texture.
-     */
-    class TileTextureInitData
+    TileTextureInitData(size_t width, size_t height, GLuint glType,
+        ghoul::opengl::Texture::Format textureFormat)
+        : _glType(glType)
+        , _ghoulTextureFormat (textureFormat)
     {
-    public:
-        using HashKey = unsigned long long;
-
-        TileTextureInitData(size_t width, size_t height, GLuint glType,
-            ghoul::opengl::Texture::Format textureFormat)
-            : _glType(glType)
-            , _ghoulTextureFormat (textureFormat)
-        {
-            _dimensionsWithoutPadding = glm::ivec3(width, height, 1);
-            _dimensionsWithPadding = glm::ivec3(
-                width + tilePixelSizeDifference.x, height + tilePixelSizeDifference.y, 1);
-            size_t nRasters = tiledatatype::numberOfRasters(_ghoulTextureFormat);
-            size_t nBytesPerDatum = tiledatatype::numberOfBytes(glType);
-            size_t nBytesPerPixel = nRasters * nBytesPerDatum;
-            _bytesPerLine = nBytesPerPixel * _dimensionsWithPadding.x;
-            _totalNumBytes = _bytesPerLine * _dimensionsWithPadding.y;
-            _glTextureFormat = tiledatatype::glTextureFormat(_glType,
-                _ghoulTextureFormat);
-            calculateHashKey();
-        };
-
-        TileTextureInitData(const TileTextureInitData& original)
-            : TileTextureInitData(
-                original.dimensionsWithoutPadding().x,
-                original.dimensionsWithoutPadding().y,
-                original.glType(),
-                original.ghoulTextureFormat())
-        { }
-
-        ~TileTextureInitData() = default;
-
-        glm::ivec3 dimensionsWithPadding() const { return _dimensionsWithPadding; };
-        glm::ivec3 dimensionsWithoutPadding() const { return _dimensionsWithoutPadding; };
-        size_t bytesPerLine() const { return _bytesPerLine; };
-        size_t totalNumBytes() const { return _totalNumBytes; };
-        GLuint glType() const { return _glType; };
-        ghoul::opengl::Texture::Format ghoulTextureFormat() const {
-            return _ghoulTextureFormat;
-        };
-        GLint glTextureFormat() const {
-            return _glTextureFormat;
-        };
-        HashKey hashKey() const { return _hashKey; };
-
-        const static glm::ivec2 tilePixelStartOffset;
-        const static glm::ivec2 tilePixelSizeDifference;
-
-    private:
-        void calculateHashKey() {
-            ghoul_assert(_dimensionsWithoutPadding.x > 0, "Incorrect dimension");
-            ghoul_assert(_dimensionsWithoutPadding.y > 0, "Incorrect dimension");
-            ghoul_assert(_dimensionsWithoutPadding.x <= 1024, "Incorrect dimension");
-            ghoul_assert(_dimensionsWithoutPadding.y <= 1024, "Incorrect dimension");
-            ghoul_assert(_dimensionsWithoutPadding.z == 1, "Incorrect dimension");
-            unsigned int format = getUniqueIdFromTextureFormat(_ghoulTextureFormat);
-            ghoul_assert(format < 256, "Incorrect format");
-
-            _hashKey = 0LL;
-
-            _hashKey |= _dimensionsWithoutPadding.x;
-            _hashKey |= _dimensionsWithoutPadding.y << 10;
-            _hashKey |= _glType << (10 + 16);
-            _hashKey |= format << (10 + 16 + 4);
-        };
-
-        unsigned int getUniqueIdFromTextureFormat(
-            ghoul::opengl::Texture::Format textureFormat)
-        {
-            using Format = ghoul::opengl::Texture::Format;
-            switch (textureFormat) {
-                case Format::Red:
-                    return 0;
-                case Format::RG:
-                    return 1;
-                case Format::RGB:
-                    return 2;
-                case Format::BGR:
-                    return 3;
-                case Format::RGBA:
-                    return 4;
-                case Format::BGRA:
-                    return 5;
-                case Format::DepthComponent:
-                    return 6;
-                default:
-                    ghoul_assert(false, "Unknown texture format");
-            }
-        }
-
-        HashKey _hashKey;
-        glm::ivec3 _dimensionsWithPadding;
-        glm::ivec3 _dimensionsWithoutPadding;
-        GLuint _glType;
-        ghoul::opengl::Texture::Format _ghoulTextureFormat;
-        GLint _glTextureFormat;
-        size_t _bytesPerLine;
-        size_t _totalNumBytes;
+        _dimensionsWithoutPadding = glm::ivec3(width, height, 1);
+        _dimensionsWithPadding = glm::ivec3(
+            width + tilePixelSizeDifference.x, height + tilePixelSizeDifference.y, 1);
+        _nRasters = tiledatatype::numberOfRasters(_ghoulTextureFormat);
+        _bytesPerDatum = tiledatatype::numberOfBytes(glType);
+        _bytesPerPixel = _nRasters * _bytesPerDatum;
+        _bytesPerLine = _bytesPerPixel * _dimensionsWithPadding.x;
+        _totalNumBytes = _bytesPerLine * _dimensionsWithPadding.y;
+        _glTextureFormat = tiledatatype::glTextureFormat(_glType,
+            _ghoulTextureFormat);
+        calculateHashKey();
     };
+
+    TileTextureInitData(const TileTextureInitData& original)
+        : TileTextureInitData(
+            original.dimensionsWithoutPadding().x,
+            original.dimensionsWithoutPadding().y,
+            original.glType(),
+            original.ghoulTextureFormat())
+    { }
+
+    ~TileTextureInitData() = default;
+
+    glm::ivec3 dimensionsWithPadding() const { return _dimensionsWithPadding; };
+    glm::ivec3 dimensionsWithoutPadding() const { return _dimensionsWithoutPadding; };
+    size_t nRasters() const { return _nRasters; };
+    size_t bytesPerDatum() const { return _bytesPerDatum; };
+    size_t bytesPerPixel() const { return _bytesPerPixel; };
+    size_t bytesPerLine() const { return _bytesPerLine; };
+    size_t totalNumBytes() const { return _totalNumBytes; };
+    GLuint glType() const { return _glType; };
+    ghoul::opengl::Texture::Format ghoulTextureFormat() const {
+        return _ghoulTextureFormat;
+    };
+    GLint glTextureFormat() const {
+        return _glTextureFormat;
+    };
+    HashKey hashKey() const { return _hashKey; };
+
+    const static glm::ivec2 tilePixelStartOffset;
+    const static glm::ivec2 tilePixelSizeDifference;
+
+private:
+    void calculateHashKey() {
+        ghoul_assert(_dimensionsWithoutPadding.x > 0, "Incorrect dimension");
+        ghoul_assert(_dimensionsWithoutPadding.y > 0, "Incorrect dimension");
+        ghoul_assert(_dimensionsWithoutPadding.x <= 1024, "Incorrect dimension");
+        ghoul_assert(_dimensionsWithoutPadding.y <= 1024, "Incorrect dimension");
+        ghoul_assert(_dimensionsWithoutPadding.z == 1, "Incorrect dimension");
+        unsigned int format = getUniqueIdFromTextureFormat(_ghoulTextureFormat);
+        ghoul_assert(format < 256, "Incorrect format");
+
+        _hashKey = 0LL;
+
+        _hashKey |= _dimensionsWithoutPadding.x;
+        _hashKey |= _dimensionsWithoutPadding.y << 10;
+        _hashKey |= _glType << (10 + 16);
+        _hashKey |= format << (10 + 16 + 4);
+    };
+
+    unsigned int getUniqueIdFromTextureFormat(
+        ghoul::opengl::Texture::Format textureFormat)
+    {
+        using Format = ghoul::opengl::Texture::Format;
+        switch (textureFormat) {
+            case Format::Red:
+                return 0;
+            case Format::RG:
+                return 1;
+            case Format::RGB:
+                return 2;
+            case Format::BGR:
+                return 3;
+            case Format::RGBA:
+                return 4;
+            case Format::BGRA:
+                return 5;
+            case Format::DepthComponent:
+                return 6;
+            default:
+                ghoul_assert(false, "Unknown texture format");
+        }
+    }
+
+    HashKey _hashKey;
+    glm::ivec3 _dimensionsWithPadding;
+    glm::ivec3 _dimensionsWithoutPadding;
+    GLuint _glType;
+    ghoul::opengl::Texture::Format _ghoulTextureFormat;
+    GLint _glTextureFormat;
+    size_t _nRasters;
+    size_t _bytesPerDatum;
+    size_t _bytesPerPixel;
+    size_t _bytesPerLine;
+    size_t _totalNumBytes;
+};
 
 
 

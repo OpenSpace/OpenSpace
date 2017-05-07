@@ -80,7 +80,7 @@ public:
     virtual int rasterYSize() const override;
     virtual float depthOffset() const override;
     virtual float depthScale() const override;
-    virtual TileWriteDataDescription getWriteDataDescription() const override;
+    //virtual TileWriteDataDescription getWriteDataDescription() const override;
 
 protected:
 

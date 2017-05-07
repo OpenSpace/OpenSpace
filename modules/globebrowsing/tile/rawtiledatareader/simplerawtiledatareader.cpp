@@ -93,16 +93,6 @@ IODescription SimpleRawTileDataReader::getIODescription(const TileIndex& tileInd
     return io;
 }
 
-TileWriteDataDescription SimpleRawTileDataReader::getWriteDataDescription() const {
-    TileWriteDataDescription writeDesc;
-
-    writeDesc.region = PixelRegion({0, 0}, {rasterXSize(), rasterYSize()});
-    writeDesc.bytesPerLine = _dataTexture->bytesPerPixel() * writeDesc.region.numPixels.x;
-    writeDesc.totalNumBytes = writeDesc.bytesPerLine * writeDesc.region.numPixels.y;
-
-    return writeDesc;
-}
-
 void SimpleRawTileDataReader::initialize() {
     _dataTexture = ghoul::io::TextureReader::ref().loadTexture(_datasetFilePath);
     if (_dataTexture == nullptr) {

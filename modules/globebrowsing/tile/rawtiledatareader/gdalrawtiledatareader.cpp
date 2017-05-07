@@ -173,32 +173,6 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
     return io;
 }
 
-TileWriteDataDescription GdalRawTileDataReader::getWriteDataDescription() const {
-    TileWriteDataDescription writeDesc;
-    
-    // write region starts in origin
-    writeDesc.region.start = PixelRegion::PixelCoordinate(0, 0);
-    writeDesc.region.numPixels = PixelRegion::PixelCoordinate(_initData.dimensionsWithoutPadding().x, _initData.dimensionsWithoutPadding().y);
-        
-    writeDesc.region.pad(padding);
-    writeDesc.region.start = PixelRegion::PixelCoordinate(0, 0);
-    
-    writeDesc.bytesPerLine = _dataLayout.bytesPerPixel * writeDesc.region.numPixels.x;
-    writeDesc.totalNumBytes = writeDesc.bytesPerLine * writeDesc.region.numPixels.y;
-
-    // OpenGL does not like if the number of bytes per line is not 4
-    if (writeDesc.bytesPerLine % 4 != 0) {
-        writeDesc.region.roundUpNumPixelToNearestMultipleOf(4);
-        writeDesc.bytesPerLine = _dataLayout.bytesPerPixel * writeDesc.region.numPixels.x;
-        writeDesc.totalNumBytes = writeDesc.bytesPerLine * writeDesc.region.numPixels.y;
-    }
-
-    writeDesc.glType = _dataLayout.glType;
-    writeDesc.textureFormat = _dataLayout.textureFormat;
-
-    return writeDesc;
-}
-
 void GdalRawTileDataReader::initialize() {
     _dataset = openGdalDataset(_datasetFilePath);
 

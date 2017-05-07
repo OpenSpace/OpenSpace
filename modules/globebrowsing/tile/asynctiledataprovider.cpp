@@ -101,7 +101,7 @@ AsyncTileDataProvider::AsyncTileDataProvider(
     , _concurrentJobManager(pool)
 {
     // PBO
-    size_t pboNumBytes = rawTileDataReader->getWriteDataDescription().totalNumBytes;
+    size_t pboNumBytes = rawTileDataReader->tileTextureInitData().totalNumBytes();
 
     _pboContainer = std::make_unique<PixelBufferContainer<TileIndex::TileHashKey>>(
             pboNumBytes, PixelBuffer::Usage::STREAM_DRAW, 10

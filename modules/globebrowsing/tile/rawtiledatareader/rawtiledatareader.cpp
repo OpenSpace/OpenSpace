@@ -121,6 +121,10 @@ const TileDataLayout& RawTileDataReader::dataLayout() const {
     return _dataLayout;
 }
 
+const TileTextureInitData& RawTileDataReader::tileTextureInitData() const {
+    return _initData;
+}
+
 std::array<double, 6> RawTileDataReader::getGeoTransform() const {
     std::array<double, 6> padfTransform;
     
