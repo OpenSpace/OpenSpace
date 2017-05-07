@@ -102,12 +102,12 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::ID id,
         case layergroupid::ID::ColorLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA);
+                ghoul::opengl::Texture::Format::RGBA);
         }
         case layergroupid::ID::ColorOverlays: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA);
+                ghoul::opengl::Texture::Format::RGBA);
         }
         case layergroupid::ID::GrayScaleLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
@@ -117,12 +117,12 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::ID id,
         case layergroupid::ID::GrayScaleColorOverlays: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::RGBA);
+                ghoul::opengl::Texture::Format::RG);
         }
         case layergroupid::ID::NightLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::BGRA);
+                ghoul::opengl::Texture::Format::RGBA);
         }
         case layergroupid::ID::WaterMasks: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
@@ -134,6 +134,15 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::ID id,
         }
     }
 }
+
+bool LayerManager::shouldPerformPreProcessingOnLayergroup(layergroupid::ID id) {
+    // Only preprocess height layers by default
+    switch (id) {
+        case layergroupid::ID::HeightLayers: return true;
+        default: return false;
+    }
+}
+
 
 } // namespace globebrowsing
 } // namespace openspace

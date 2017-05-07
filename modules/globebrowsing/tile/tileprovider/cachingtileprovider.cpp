@@ -41,7 +41,7 @@
 namespace {
     const char* _loggerCat = "CachingTileProvider";
 
-    const char* KeyDoPreProcessing = "DoPreProcessing";
+    const char* KeyPerformPreProcessing = "PerformPreProcessing";
     const char* KeyTilePixelSize = "TilePixelSize";
     const char* KeyFilePath = "FilePath";
     const char* KeyBasePath = "BasePath";
@@ -72,6 +72,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
         ghoul_assert(false, "Unknown layer group id");
     }
 
+    // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
     double pixelSize = 0.0;
     int tilePixelSize = 0;
@@ -80,30 +81,26 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
         tilePixelSize = static_cast<int>(pixelSize); 
     }
     
-    // 2. Initialize default values for any optional Keys
-    TileTextureInitData initData(LayerManager::getTileTextureInitData(layerGroupID, tilePixelSize));
+    TileTextureInitData initData(LayerManager::getTileTextureInitData(
+        layerGroupID, tilePixelSize));
   
-
-    /*
-    // 3. Check for used spcified optional keys
-    if (dictionary.getValue<bool>(KeyDoPreProcessing, config.doPreProcessing)) {
-        LDEBUG("Default doPreProcessing overridden: " << config.doPreProcessing);
+    bool performPreProcessing =
+        LayerManager::shouldPerformPreProcessingOnLayergroup(layerGroupID);
+    if (dictionary.getValue<bool>(KeyPerformPreProcessing, performPreProcessing)) {
+        LDEBUG("Default PerformPreProcessing overridden: " << performPreProcessing);
     }
+    RawTileDataReader::PerformPreprocessing preprocess =
+        performPreProcessing ? RawTileDataReader::PerformPreprocessing::Yes :
+        RawTileDataReader::PerformPreprocessing::No;
     
-    if (dictionary.getValue<double>(KeyTilePixelSize, minimumPixelSize)) {
-        LDEBUG("Default minimumPixelSize overridden: " << minimumPixelSize);
-        config.tilePixelSize = static_cast<int>(minimumPixelSize); 
-    }
-    */
-
     std::string basePath;
     dictionary.getValue(KeyBasePath, basePath);
 
     // Initialize instance variables
 #ifdef GLOBEBROWSING_USE_GDAL
-    auto tileDataset = std::make_shared<GdalRawTileDataReader>(filePath, initData, basePath);
+    auto tileDataset = std::make_shared<GdalRawTileDataReader>(filePath, initData, basePath, preprocess);
 #else // GLOBEBROWSING_USE_GDAL
-    auto tileDataset = std::make_shared<SimpleRawTileDataReader>(filePath, initData);
+    auto tileDataset = std::make_shared<SimpleRawTileDataReader>(filePath, initData, preprocess);
 #endif // GLOBEBROWSING_USE_GDAL
 
     // only one thread per provider supported atm

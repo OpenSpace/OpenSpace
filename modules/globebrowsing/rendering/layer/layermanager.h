@@ -56,6 +56,8 @@ public:
     static TileTextureInitData getTileTextureInitData(layergroupid::ID id,
         size_t preferredTileSize = 0);
 
+    static bool shouldPerformPreProcessingOnLayergroup(layergroupid::ID id);
+
 private:
     std::vector<std::shared_ptr<LayerGroup>> _layerGroups;
 };
