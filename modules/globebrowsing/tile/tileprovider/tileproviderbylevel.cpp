@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
@@ -31,6 +32,7 @@ namespace {
     const char* KeyProviders = "LevelTileProviders";
     const char* KeyMaxLevel = "MaxLevel";
     const char* KeyTileProvider = "TileProvider";
+    const char* KeyLayerGroupID = "LayerGroupID";
 }
 
 namespace openspace {
@@ -40,6 +42,9 @@ namespace tileprovider {
 TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
     std::string name = "Name unspecified";
     dictionary.getValue("Name", name);
+  
+    layergroupid::ID layerGroupID;
+    dictionary.getValue(KeyLayerGroupID, layerGroupID);
     const char* _loggerCat = ("TileProviderByLevel" + name).c_str();
   
     ghoul::Dictionary providers = dictionary.value<ghoul::Dictionary>(KeyProviders);
@@ -65,6 +70,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
                     "Must define key '" + std::string(KeyTileProvider) + "'"
                 );
             }
+            providerDict.setValue(KeyLayerGroupID, layerGroupID);
                 
             _levelTileProviders.push_back(
                 std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(providerDict))
