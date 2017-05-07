@@ -163,7 +163,7 @@ std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
         // Now we are finished with the mapping of this pbo
         _pboContainer->unMapBuffer(key);
       
-        // No longer enqueued. Remove from set of enqueued tiles
+        // No longer enqueued. Remove from set of enqueued tilces
         //_enqueuedTileRequests.erase(key);
 
         return product;

@@ -81,6 +81,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/gpu/gputileuvtransform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroup.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layergroupid.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layermanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layer/layerrendersettings.h
 

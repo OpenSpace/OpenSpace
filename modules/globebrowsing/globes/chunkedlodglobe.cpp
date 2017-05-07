@@ -172,7 +172,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
     );
 
     // Get the tile providers for the height maps
-    const auto& heightMapLayers = _layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
+    const auto& heightMapLayers = _layerManager->layerGroup(layergroupid::HeightLayers).activeLayers();
         
     for (const auto& layer : heightMapLayers) {
         tileprovider::TileProvider* tileProvider = layer->tileProvider();

@@ -26,8 +26,10 @@
 
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
 #include <ghoul/filesystem/filesystem.h>
+
 
 #include <fstream>
 
@@ -67,8 +69,8 @@ std::shared_ptr<RawTile> TileDiskCache::get(const TileIndex& tileIndex) {
         // read data
         std::ifstream ifsData;
         ifsData.open(dataFile.path(), std::ifstream::binary);
-        char * buffer = new char[res.nBytesImageData];
-        ifsData.read(buffer, res.nBytesImageData);
+        char * buffer = new char[res.textureInitData->totalNumBytes()];
+        ifsData.read(buffer, res.textureInitData->totalNumBytes());
         res.imageData = buffer;
 
         return std::make_shared<RawTile>(res);
@@ -88,7 +90,7 @@ bool TileDiskCache::put(const TileIndex& tileIndex, std::shared_ptr<RawTile> raw
         File dataFile = getDataFile(tileIndex);
         ofsData.open(dataFile.path(), std::ofstream::binary);
         char* data = (char*)rawTile->imageData;
-        ofsData.write(data, rawTile->nBytesImageData);
+        ofsData.write(data, rawTile->textureInitData->totalNumBytes());
         ofsData.close();
         return true;
     }

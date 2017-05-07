@@ -24,12 +24,14 @@
 
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/simplerawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -65,11 +67,22 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
         throw std::runtime_error(std::string("Must define key '") + KeyFilePath + "'");
     }
 
-    // 2. Initialize default values for any optional Keys
-    TileTextureInitData initData(512, 512, GL_UNSIGNED_BYTE, ghoul::opengl::Texture::Format::BGRA);
-  
+    layergroupid::ID layerGroupID;
+    if (!dictionary.getValue<layergroupid::ID>("LayerGroupID", layerGroupID)) {
+        ghoul_assert(false, "Unknown layer group id");
+    }
+
     // getValue does not work for integers
-    double minimumPixelSize;
+    double pixelSize = 0.0;
+    int tilePixelSize = 0;
+    if (dictionary.getValue<double>(KeyTilePixelSize, pixelSize)) {
+        LDEBUG("Default pixel size overridden: " << pixelSize);
+        tilePixelSize = static_cast<int>(pixelSize); 
+    }
+    
+    // 2. Initialize default values for any optional Keys
+    TileTextureInitData initData(LayerManager::getTileTextureInitData(layerGroupID, tilePixelSize));
+  
 
     /*
     // 3. Check for used spcified optional keys
@@ -205,10 +218,10 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
     using ghoul::opengl::Texture;
     
     std::shared_ptr<Texture> texture = std::make_shared<Texture>(
-        rawTile->dimensions,
-        rawTile->textureFormat.ghoulFormat,
-        rawTile->textureFormat.glFormat,
-        rawTile->glType,
+        rawTile->textureInitData->dimensionsWithPadding(),
+        rawTile->textureInitData->ghoulTextureFormat(),
+        rawTile->textureInitData->glTextureFormat(),
+        rawTile->textureInitData->glType(),
         Texture::FilterMode::Linear,
         Texture::WrappingMode::ClampToEdge);
 
@@ -218,7 +231,8 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
     else {
         texture->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
         size_t expectedDataSize = texture->expectedPixelDataSize();
-        ghoul_assert(expectedDataSize == rawTile->nBytesImageData,
+        size_t nBytes = rawTile->textureInitData->totalNumBytes();
+        ghoul_assert(expectedDataSize == nBytes,
             "Pixel data size is incorrect");
         texture->reUploadTexture();
     }

@@ -34,6 +34,7 @@
 #include <memory>
 #include <mutex>
 #include <vector>
+#include <unordered_map>
 
 namespace openspace {
 namespace globebrowsing {
@@ -91,7 +92,7 @@ public:
     void clear();
     bool exist(ProviderTileKey key) const;
     Tile get(ProviderTileKey key);
-    void put(ProviderTileKey key, Tile tile);
+    //void put(ProviderTileKey key, Tile tile);
     void createTileAndPut(ProviderTileKey key, std::shared_ptr<RawTile> rawTile);
   
     //void setMaximumSize(size_t maximumSize);
@@ -134,19 +135,19 @@ private:
         const TileTextureInitData _initData;
     };
 
-    /**
-     * \param cacheSize is the cache size given in bytes.
-     */
     MemoryAwareTileCache();
     ~MemoryAwareTileCache() = default;
     
     static MemoryAwareTileCache* _singleton;
     /// Tiles are saved in an LRU cache
-    MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher> _tileCache;
+    using TileCache = MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher>;
+    using TextureContainerTileCache =
+        std::pair<std::unique_ptr<TextureContainer>, std::unique_ptr<TileCache>>;
+    using TextureContainerMap = std::unordered_map<TileTextureInitData::HashKey,
+        TextureContainerTileCache>;
+
+    TextureContainerMap _textureContainerMap;
     
-    /// All textures are contained in a vector
-    TextureContainer _textureContainer;
-    size_t _freeTexture;
     static std::mutex _mutexLock;
 };
 

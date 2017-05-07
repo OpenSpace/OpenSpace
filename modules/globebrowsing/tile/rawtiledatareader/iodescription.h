@@ -82,6 +82,8 @@ struct TileWriteDataDescription {
     class TileTextureInitData
     {
     public:
+        using HashKey = unsigned long long;
+
         TileTextureInitData(size_t width, size_t height, GLuint glType,
             ghoul::opengl::Texture::Format textureFormat)
             : _glType(glType)
@@ -97,7 +99,17 @@ struct TileWriteDataDescription {
             _totalNumBytes = _bytesPerLine * _dimensionsWithPadding.y;
             _glTextureFormat = tiledatatype::glTextureFormat(_glType,
                 _ghoulTextureFormat);
+            calculateHashKey();
         };
+
+        TileTextureInitData(const TileTextureInitData& original)
+            : TileTextureInitData(
+                original.dimensionsWithoutPadding().x,
+                original.dimensionsWithoutPadding().y,
+                original.glType(),
+                original.ghoulTextureFormat())
+        { }
+
         ~TileTextureInitData() = default;
 
         glm::ivec3 dimensionsWithPadding() const { return _dimensionsWithPadding; };
@@ -111,11 +123,54 @@ struct TileWriteDataDescription {
         GLint glTextureFormat() const {
             return _glTextureFormat;
         };
+        HashKey hashKey() const { return _hashKey; };
 
         const static glm::ivec2 tilePixelStartOffset;
         const static glm::ivec2 tilePixelSizeDifference;
 
     private:
+        void calculateHashKey() {
+            ghoul_assert(_dimensionsWithoutPadding.x > 0, "Incorrect dimension");
+            ghoul_assert(_dimensionsWithoutPadding.y > 0, "Incorrect dimension");
+            ghoul_assert(_dimensionsWithoutPadding.x <= 1024, "Incorrect dimension");
+            ghoul_assert(_dimensionsWithoutPadding.y <= 1024, "Incorrect dimension");
+            ghoul_assert(_dimensionsWithoutPadding.z == 1, "Incorrect dimension");
+            unsigned int format = getUniqueIdFromTextureFormat(_ghoulTextureFormat);
+            ghoul_assert(format < 256, "Incorrect format");
+
+            _hashKey = 0LL;
+
+            _hashKey |= _dimensionsWithoutPadding.x;
+            _hashKey |= _dimensionsWithoutPadding.y << 10;
+            _hashKey |= _glType << (10 + 16);
+            _hashKey |= format << (10 + 16 + 4);
+        };
+
+        unsigned int getUniqueIdFromTextureFormat(
+            ghoul::opengl::Texture::Format textureFormat)
+        {
+            using Format = ghoul::opengl::Texture::Format;
+            switch (textureFormat) {
+                case Format::Red:
+                    return 0;
+                case Format::RG:
+                    return 1;
+                case Format::RGB:
+                    return 2;
+                case Format::BGR:
+                    return 3;
+                case Format::RGBA:
+                    return 4;
+                case Format::BGRA:
+                    return 5;
+                case Format::DepthComponent:
+                    return 6;
+                default:
+                    ghoul_assert(false, "Unknown texture format");
+            }
+        }
+
+        HashKey _hashKey;
         glm::ivec3 _dimensionsWithPadding;
         glm::ivec3 _dimensionsWithoutPadding;
         GLuint _glType;
@@ -124,9 +179,6 @@ struct TileWriteDataDescription {
         size_t _bytesPerLine;
         size_t _totalNumBytes;
     };
-
-
-
 
 
 

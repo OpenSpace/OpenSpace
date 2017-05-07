@@ -80,26 +80,7 @@ void RawTileDataReader::ensureInitialized() {
 }
 
 std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() {
-    PixelRegion pixelRegion = {
-        PixelRegion::PixelCoordinate(0, 0),
-        PixelRegion::PixelRange(16, 16)
-    };
-    int bytesPerPixel = 1; // GL_R -> 1 bpp
-    std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
-    rawTile->tileIndex = { 0, 0, 0 };
-    rawTile->dimensions = glm::uvec3(pixelRegion.numPixels, 1);
-    rawTile->nBytesImageData =
-        rawTile->dimensions.x * rawTile->dimensions.y * bytesPerPixel;
-    rawTile->imageData = new char[rawTile->nBytesImageData];
-    rawTile->glType = GL_UNSIGNED_BYTE;
-    rawTile->textureFormat = { ghoul::opengl::Texture::Format::Red, GL_R };
-
-    for (size_t i = 0; i < rawTile->nBytesImageData; ++i) {
-        rawTile->imageData[i] = 0;
-    }
-    rawTile->error = RawTile::ReadError::None;
-
-    return rawTile;
+    return std::make_shared<RawTile>(RawTile::createDefault(_initData));
 }
 
 std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
@@ -115,10 +96,14 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
     readImageData(io, worstError, rawTile->imageData);
     rawTile->error = worstError;
     rawTile->tileIndex = tileIndex;
-    rawTile->dimensions = glm::uvec3(io.write.region.numPixels, 1);
-    rawTile->nBytesImageData = io.write.totalNumBytes;
-    rawTile->glType = _dataLayout.glType;
-    rawTile->textureFormat = _dataLayout.textureFormat;
+
+    rawTile->textureInitData = std::make_shared<TileTextureInitData>(_initData);
+
+
+    //rawTile->dimensions = glm::uvec3(io.write.region.numPixels, 1);
+    //rawTile->nBytesImageData = io.write.totalNumBytes;
+    //rawTile->glType = _dataLayout.glType;
+    //rawTile->textureFormat = _dataLayout.textureFormat;
 
     if (_preprocess == PerformPreprocessing::Yes) {
         rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);

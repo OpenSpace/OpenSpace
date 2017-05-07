@@ -29,12 +29,17 @@
 namespace openspace {
 namespace globebrowsing {
 
-Layer::Layer(const ghoul::Dictionary& layerDict)
+Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     : properties::PropertyOwner(layerDict.value<std::string>("Name"))
     , _enabled(properties::BoolProperty("enabled", "enabled", false))
 {
+    // We add the id to the dictionary since it needs to be known by
+    // the tile provider
+    ghoul::Dictionary newLayerDict = layerDict;
+    newLayerDict.setValue("LayerGroupID", id);
+  
     _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
-        tileprovider::TileProvider::createFromDictionary(layerDict));
+        tileprovider::TileProvider::createFromDictionary(newLayerDict));
         
     // Something else went wrong and no exception was thrown
     if (_tileProvider == nullptr) {

@@ -30,32 +30,22 @@
 namespace openspace {
 namespace globebrowsing {
 
-const char* LayerManager::LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
-    "HeightLayers",
-    "ColorLayers",
-    "ColorOverlays",
-    "GrayScaleLayers",
-    "GrayScaleColorOverlays",
-    "NightLayers",
-    "WaterMasks"
-};
-
 LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict) 
     : properties::PropertyOwner("Layers")
 {
-    if (NUM_LAYER_GROUPS != layerGroupsDict.size()) {
+    if (layergroupid::NUM_LAYER_GROUPS != layerGroupsDict.size()) {
         throw ghoul::RuntimeError(
-            "Number of Layer Groups must be equal to " + NUM_LAYER_GROUPS);
+            "Number of Layer Groups must be equal to " + layergroupid::NUM_LAYER_GROUPS);
     }
 
     // Create all the categories of tile providers
     for (size_t i = 0; i < layerGroupsDict.size(); i++) {
-        std::string groupName = LayerManager::LAYER_GROUP_NAMES[i];
+        std::string groupName = layergroupid::LAYER_GROUP_NAMES[i];
         ghoul::Dictionary layerGroupDict = 
             layerGroupsDict.value<ghoul::Dictionary>(groupName);
 
         _layerGroups.push_back(
-            std::make_shared<LayerGroup>(groupName, layerGroupDict));
+            std::make_shared<LayerGroup>( static_cast<layergroupid::ID>(i), layerGroupDict));
     }
         
     for (const auto& layerGroup : _layerGroups) {
@@ -67,7 +57,7 @@ const LayerGroup& LayerManager::layerGroup(size_t groupId) {
     return *_layerGroups[groupId];
 }
 
-const LayerGroup& LayerManager::layerGroup(LayerGroupId groupId) {
+const LayerGroup& LayerManager::layerGroup(layergroupid::ID groupId) {
     return *_layerGroups[groupId];
 }
 
@@ -96,6 +86,51 @@ void LayerManager::reset(bool includeDisabled) {
             if (layer->enabled() || includeDisabled) {
                 layer->tileProvider()->reset();
             }
+        }
+    }
+}
+
+TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::ID id,
+    size_t preferredTileSize)
+{
+    switch (id) {
+        case layergroupid::ID::HeightLayers: {
+            size_t tileSize = preferredTileSize ? preferredTileSize : 64;
+            return TileTextureInitData(tileSize, tileSize, GL_FLOAT,
+                ghoul::opengl::Texture::Format::Red);
+        }
+        case layergroupid::ID::ColorLayers: {
+            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA);
+        }
+        case layergroupid::ID::ColorOverlays: {
+            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA);
+        }
+        case layergroupid::ID::GrayScaleLayers: {
+            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::RG);
+        }
+        case layergroupid::ID::GrayScaleColorOverlays: {
+            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::RGBA);
+        }
+        case layergroupid::ID::NightLayers: {
+            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::BGRA);
+        }
+        case layergroupid::ID::WaterMasks: {
+            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
+            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
+                ghoul::opengl::Texture::Format::RG);
+        }
+        default: {
+            ghoul_assert(false, "Unknown layer group ID");
         }
     }
 }

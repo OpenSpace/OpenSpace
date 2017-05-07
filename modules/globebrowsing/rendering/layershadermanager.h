@@ -64,7 +64,7 @@ public:
             bool operator==(const LayerGroupPreprocessingData& other) const;
         };
         
-        std::array<LayerGroupPreprocessingData, LayerManager::NUM_LAYER_GROUPS>
+        std::array<LayerGroupPreprocessingData, layergroupid::NUM_LAYER_GROUPS>
         layeredTextureInfo;
         std::vector<std::pair<std::string, std::string> > keyValuePairs;
         bool operator==(const LayerShaderPreprocessingData& other) const;

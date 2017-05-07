@@ -87,7 +87,7 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 
     LayerShaderManager::LayerShaderPreprocessingData layeredTexturePreprocessingData;
         
-    for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; i++) {
+    for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; i++) {
         LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData layeredTextureInfo;
         auto layerGroup = _layerManager->layerGroup(i);
         layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
@@ -193,9 +193,9 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     programObject->setUniform("radiiSquared", glm::vec3(ellipsoid.radiiSquared()));
 
     if (_layerManager->layerGroup(
-            LayerManager::NightLayers).activeLayers().size() > 0 ||
+            layergroupid::NightLayers).activeLayers().size() > 0 ||
         _layerManager->layerGroup(
-            LayerManager::WaterMasks).activeLayers().size() > 0 ||
+            layergroupid::WaterMasks).activeLayers().size() > 0 ||
         chunk.owner().generalProperties().atmosphereEnabled ||
         chunk.owner().generalProperties().performShading) {
         // This code temporary until real light sources can be implemented.
@@ -275,9 +275,9 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
     if (_layerManager->layerGroup(
-            LayerManager::NightLayers).activeLayers().size() > 0 ||
+            layergroupid::NightLayers).activeLayers().size() > 0 ||
         _layerManager->layerGroup(
-            LayerManager::WaterMasks).activeLayers().size() > 0 ||
+            layergroupid::WaterMasks).activeLayers().size() > 0 ||
         chunk.owner().generalProperties().atmosphereEnabled ||
         chunk.owner().generalProperties().performShading)
     {

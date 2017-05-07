@@ -22,55 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 
-#include <openspace/properties/propertyowner.h>
-
-#include <modules/globebrowsing/rendering/layer/layer.h>
-#include <modules/globebrowsing/rendering/layer/layergroupid.h>
-#include <modules/globebrowsing/tile/textureformat.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
-#include <modules/globebrowsing/cache/memoryawaretilecache.h>
-
-#include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
+namespace layergroupid  {
 
-namespace tileprovider {
-    class TileProvider;
-}
-
-/**
- * Convenience class for dealing with multiple <code>Layer</code>s.
- */
-struct LayerGroup : public properties::PropertyOwner {
-    LayerGroup(std::string name);
-    LayerGroup(layergroupid::ID id, const ghoul::Dictionary& dict);
-
-    /// Updates all layers tile providers within this group
-    void update();
-
-    /// @returns const vector of all layers
-    const std::vector<std::shared_ptr<Layer>>& layers() const;
-
-    /// @returns const vector of all active layers
-    const std::vector<std::shared_ptr<Layer>>& activeLayers() const;
-
-    /// @returns the size of the pile to be used in rendering of this layer
-    int pileSize() const;
-
-    bool layerBlendingEnabled() const { return _levelBlendingEnabled.value(); }
-
-private:
-    std::vector<std::shared_ptr<Layer>> _layers;
-    std::vector<std::shared_ptr<Layer>> _activeLayers;
-
-    properties::BoolProperty _levelBlendingEnabled;
+static const int NUM_LAYER_GROUPS = 7;
+static const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
+    "HeightLayers",
+    "ColorLayers",
+    "ColorOverlays",
+    "GrayScaleLayers",
+    "GrayScaleColorOverlays",
+    "NightLayers",
+    "WaterMasks"
 };
 
+enum ID {
+    HeightLayers,
+    ColorLayers,
+    ColorOverlays,
+    GrayScaleLayers,
+    GrayScaleColorOverlays,
+    NightLayers,
+    WaterMasks
+};
+
+} // namespace layergroupid
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__

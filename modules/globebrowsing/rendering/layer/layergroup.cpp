@@ -36,15 +36,15 @@ LayerGroup::LayerGroup(std::string name)
     addProperty(_levelBlendingEnabled);
 }
 
-LayerGroup::LayerGroup(std::string name, const ghoul::Dictionary& dict)
-    : LayerGroup(std::move(name))
+LayerGroup::LayerGroup(layergroupid::ID id, const ghoul::Dictionary& dict)
+    : LayerGroup(layergroupid::LAYER_GROUP_NAMES[id])
 {
     for (size_t i = 0; i < dict.size(); i++) {
         std::string dictKey = std::to_string(i + 1);
         ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(dictKey);
 
         try {
-            _layers.push_back(std::make_shared<Layer>(layerDict));
+            _layers.push_back(std::make_shared<Layer>(id, layerDict));
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);

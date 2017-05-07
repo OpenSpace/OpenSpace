@@ -71,7 +71,7 @@ void DiskCachedTileLoadJob::execute() {
         case CacheMode::CacheHitsOnly:
             _rawTile = _tileDiskCache->get(_chunkIndex);
             if (_rawTile == nullptr) {
-                RawTile res = RawTile::createDefaultRes();
+                RawTile res = RawTile::createDefault(TileTextureInitData(8,8,GL_UNSIGNED_BYTE, ghoul::opengl::Texture::Format::Red));
                 res.tileIndex = _chunkIndex;
                 _rawTile = std::make_shared<RawTile>(res);
             }

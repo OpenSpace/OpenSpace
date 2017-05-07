@@ -53,24 +53,36 @@ MemoryAwareTileCache& MemoryAwareTileCache::ref() {
 
 void MemoryAwareTileCache::clear() {
     std::lock_guard<std::mutex> guard(_mutexLock);
-    _tileCache.clear();
+    for (TextureContainerMap::iterator it = _textureContainerMap.begin(); it != _textureContainerMap.end(); it++) {
+        it->second.second->clear();
+    }
 }
 
 bool MemoryAwareTileCache::exist(ProviderTileKey key) const {
     std::lock_guard<std::mutex> guard(_mutexLock);
-    return _tileCache.exist(key);
+    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin(); it != _textureContainerMap.cend(); it++) {
+        if(it->second.second->exist(key)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 Tile MemoryAwareTileCache::get(ProviderTileKey key) {
     std::lock_guard<std::mutex> guard(_mutexLock);
-    return _tileCache.get(key);
+    for (TextureContainerMap::iterator it = _textureContainerMap.begin(); it != _textureContainerMap.end(); it++) {
+        if(it->second.second->exist(key)) {
+            return it->second.second->get(key);
+        }
+    }
+    ghoul_assert(false, "");
 }
-
+/*
 void MemoryAwareTileCache::put(ProviderTileKey key, Tile tile) {
     std::lock_guard<std::mutex> guard(_mutexLock);
     _tileCache.put(key, tile);
 }
-
+*/
 void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
     std::shared_ptr<RawTile> rawTile)
 {
@@ -81,12 +93,26 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
     }
     else {
         std::shared_ptr<Texture> texture;
-        // First option, there exists unused textures
-        texture = _textureContainer.getTextureIfFree();
+        // if this texture type does not exist among the texture containers
+        // it needs to be created
+        TileTextureInitData initData = *rawTile->textureInitData;
+        TileTextureInitData::HashKey initDataKey = initData.hashKey();
+        if (_textureContainerMap.find(initDataKey) == _textureContainerMap.end()) {
+            // For now create 50 textures of this type
+            _textureContainerMap.emplace(initDataKey,
+                TextureContainerTileCache(
+                    std::make_unique<TextureContainer>(initData, 50),
+                    std::make_unique<TileCache>(std::numeric_limits<std::size_t>::max())
+                    )
+                );
+        }
+        // Now we know that the texture container exists,
+        // check if there are any unused textures
+        texture = _textureContainerMap[initDataKey].first->getTextureIfFree();
         // Second option. No more textures available. Pop from the LRU cache
         if (!texture) {
-            Tile oldTile = _tileCache.popLRU();
-            // Use the old tiles texture
+            Tile oldTile = _textureContainerMap[initDataKey].second->popLRU();
+            // Use the old tile's texture
             texture = oldTile.texture();
         }
         
@@ -97,11 +123,12 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
         else {
             texture->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
             size_t expectedDataSize = texture->expectedPixelDataSize();
-            ghoul_assert(expectedDataSize == rawTile->nBytesImageData, "Pixel data size is incorrect");
+            size_t numBytes = rawTile->textureInitData->totalNumBytes();
+            ghoul_assert(expectedDataSize == numBytes, "Pixel data size is incorrect");
             texture->reUploadTexture();
         }
         Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
-        _tileCache.put(key, tile);
+        _textureContainerMap[initDataKey].second->put(key, tile);
     }
     return;
 }
@@ -114,10 +141,6 @@ void MemoryAwareTileCache::setMaximumSize(size_t maximumSize) {
 */
 
 MemoryAwareTileCache::MemoryAwareTileCache()
-    : _tileCache(std::numeric_limits<std::size_t>::max()) // Unlimited size
-    , _freeTexture(0) // Set the first texture to be "free"
-    , _textureContainer(TileTextureInitData(512, 512, GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::Format::BGRA), 50)
 { }
 
 } // namespace cache

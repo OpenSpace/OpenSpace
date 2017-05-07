@@ -27,8 +27,9 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 #include <modules/globebrowsing/tile/chunktile.h>
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
+#include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 
@@ -46,7 +47,7 @@ namespace tileprovider {
  */
 class Layer : public properties::PropertyOwner {
 public:
-    Layer(const ghoul::Dictionary& layerDict);
+    Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict);
 
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
 

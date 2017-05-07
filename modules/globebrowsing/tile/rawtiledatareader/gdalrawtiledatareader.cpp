@@ -409,10 +409,11 @@ TileDataLayout GdalRawTileDataReader::getTileDataLayout(GLuint preferredGlType) 
     _gdalType = preferredGlType != 0 ?
         tiledatatype::getGdalDataType(preferredGlType) :
         _dataset->GetRasterBand(1)->GetRasterDataType();
+    GDALDataType actualType = _dataset->GetRasterBand(1)->GetRasterDataType();
 
     layout.glType = tiledatatype::getOpenGLDataType(_gdalType);
     layout.numRastersAvailable = _dataset->GetRasterCount();
-    layout.numRasters = 4;// layout.numRastersAvailable;
+    layout.numRasters = layout.numRastersAvailable;
     
     // This is to avoid corrupted textures that can appear when the number of
     // bytes per row is not a multiplie of 4. 

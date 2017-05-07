@@ -101,7 +101,7 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
     // a single raster image. If it is not we will just use the first raster
     // (that is channel 0).
     const size_t HeightChannel = 0;
-    const LayerGroup& heightmaps = layerManager->layerGroup(LayerManager::HeightLayers);
+    const LayerGroup& heightmaps = layerManager->layerGroup(layergroupid::HeightLayers);
     std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
         tileselector::getTilesAndSettingsSortedByHighestResolution(
             heightmaps, _tileIndex);

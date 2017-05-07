@@ -62,8 +62,8 @@ Tile TextTileProvider::getTile(const TileIndex& tileIndex) {
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
     if (!cache::MemoryAwareTileCache::ref().exist(key)) {
-        cache::MemoryAwareTileCache::ref().put(
-            key, createChunkIndexTile(tileIndex));
+        //cache::MemoryAwareTileCache::ref().put(
+        //    key, createChunkIndexTile(tileIndex));
     }
   
     return cache::MemoryAwareTileCache::ref().get(key);
