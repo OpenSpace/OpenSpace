@@ -46,13 +46,13 @@ class GeodeticPatch;
 
 class RawTileDataReader {
 public:
-    struct Configuration {
-        bool doPreProcessing;
-        int tilePixelSize;
-        GLuint dataType = 0; // default = no datatype reinterpretation
+    enum class PerformPreprocessing {
+        Yes,
+        No
     };
 
-    RawTileDataReader(const Configuration& config);
+    RawTileDataReader(const TileTextureInitData& initData,
+        PerformPreprocessing preprocess = PerformPreprocessing::No);
     virtual ~RawTileDataReader() = default;
 
     /**
@@ -84,9 +84,6 @@ public:
      * Returns a single channeled empty <code>RawTile</code> of size 16 * 16 pixels.
      */
     std::shared_ptr<RawTile> defaultTileData();
-    
-    const static glm::ivec2 tilePixelStartOffset;
-    const static glm::ivec2 tilePixelSizeDifference;
     
     /// Padding around all tiles to read to make sure edge blending works.
     const static PixelRegion padding; // same as the two above
@@ -168,7 +165,8 @@ protected:
         int _maxLevel = -1;
         double _tileLevelDifference;
     } _cached;
-    const Configuration _config;
+    const TileTextureInitData _initData;
+    PerformPreprocessing _preprocess;
     TileDataLayout _dataLayout;
     TileDepthTransform _depthTransform;
 

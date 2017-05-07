@@ -44,9 +44,10 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-SimpleRawTileDataReader::SimpleRawTileDataReader(
-    const std::string& filePath, const Configuration& config)
-    : RawTileDataReader(config)
+SimpleRawTileDataReader::SimpleRawTileDataReader(const std::string& filePath,
+        const TileTextureInitData& initData,
+        RawTileDataReader::PerformPreprocessing preprocess)
+    : RawTileDataReader(initData, preprocess)
 {
     _datasetFilePath = filePath;
     ensureInitialized();

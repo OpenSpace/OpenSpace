@@ -55,15 +55,14 @@ std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
 }
 
 GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
-                                             const Configuration& config,
-                                             const std::string& baseDirectory)
-    : RawTileDataReader(config)
+        const TileTextureInitData& initData,
+        const std::string& baseDirectory,
+        RawTileDataReader::PerformPreprocessing preprocess)
+    : RawTileDataReader(initData, preprocess)
     , _dataset(nullptr)
 {
-
-    std::string initDir = baseDirectory.empty() ? CPLGetCurrentDir() : baseDirectory;
-
-    _initData = { initDir, filePath, config.tilePixelSize, config.dataType };
+    _initDirectory = baseDirectory.empty() ? CPLGetCurrentDir() : baseDirectory;
+    _datasetFilePath = filePath;
     ensureInitialized();
 }
 
@@ -137,7 +136,7 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
     
     // write region starts in origin
     io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
-    io.write.region.numPixels = PixelRegion::PixelCoordinate(_initData.tilePixelSize, _initData.tilePixelSize);
+    io.write.region.numPixels = PixelRegion::PixelCoordinate(_initData.dimensionsWithoutPadding().x, _initData.dimensionsWithoutPadding().y);
     
     io.read.overview = 0;
     io.read.fullRegion = gdalPixelRegion(
@@ -179,7 +178,7 @@ TileWriteDataDescription GdalRawTileDataReader::getWriteDataDescription() const 
     
     // write region starts in origin
     writeDesc.region.start = PixelRegion::PixelCoordinate(0, 0);
-    writeDesc.region.numPixels = PixelRegion::PixelCoordinate(_initData.tilePixelSize, _initData.tilePixelSize);
+    writeDesc.region.numPixels = PixelRegion::PixelCoordinate(_initData.dimensionsWithoutPadding().x, _initData.dimensionsWithoutPadding().y);
         
     writeDesc.region.pad(padding);
     writeDesc.region.start = PixelRegion::PixelCoordinate(0, 0);
@@ -201,13 +200,13 @@ TileWriteDataDescription GdalRawTileDataReader::getWriteDataDescription() const 
 }
 
 void GdalRawTileDataReader::initialize() {
-    _dataset = openGdalDataset(_initData.datasetFilePath);
+    _dataset = openGdalDataset(_datasetFilePath);
 
     //Do any other initialization needed for the GdalRawTileDataReader
-    _dataLayout = getTileDataLayout(_initData.dataType);
+    _dataLayout = getTileDataLayout(_initData.glType());
     _depthTransform = calculateTileDepthTransform();
     _cached._tileLevelDifference =
-        calculateTileLevelDifference(_initData.tilePixelSize);
+        calculateTileLevelDifference(_initData.dimensionsWithoutPadding().x);
 }
 
 void GdalRawTileDataReader::readImageData(
@@ -330,7 +329,7 @@ GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath)
     if (!dataset) {
         using namespace ghoul::filesystem;
         std::string correctedPath = FileSystem::ref().pathByAppendingComponent(
-            _initData.initDirectory, filePath
+            _initDirectory, filePath
         );
 
         dataset = (GDALDataset *)GDALOpen(correctedPath.c_str(), GA_ReadOnly);

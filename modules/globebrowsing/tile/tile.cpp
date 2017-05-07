@@ -92,8 +92,8 @@ glm::vec2 Tile::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform
 {
     glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
     uv = compensateSourceTextureSampling(
-        RawTileDataReader::tilePixelStartOffset,
-        RawTileDataReader::tilePixelSizeDifference,
+        TileTextureInitData::tilePixelStartOffset,
+        TileTextureInitData::tilePixelSizeDifference,
         resolution,
         uv);
     return uv;

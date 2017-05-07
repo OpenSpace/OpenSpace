@@ -60,16 +60,15 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-const glm::ivec2 RawTileDataReader::tilePixelStartOffset = glm::ivec2(-2);
-const glm::ivec2 RawTileDataReader::tilePixelSizeDifference = glm::ivec2(4);
-
 const PixelRegion RawTileDataReader::padding = PixelRegion(
-    tilePixelStartOffset,
-    tilePixelSizeDifference
+    TileTextureInitData::tilePixelStartOffset,
+    TileTextureInitData::tilePixelSizeDifference
 );
     
-RawTileDataReader::RawTileDataReader(const Configuration& config)
-    : _config(config)
+RawTileDataReader::RawTileDataReader(const TileTextureInitData& initData,
+        PerformPreprocessing preprocess)
+    : _initData(initData)
+    , _preprocess(preprocess)
     , _hasBeenInitialized(false)
 {}
 
@@ -121,7 +120,7 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
     rawTile->glType = _dataLayout.glType;
     rawTile->textureFormat = _dataLayout.textureFormat;
 
-    if (_config.doPreProcessing) {
+    if (_preprocess == PerformPreprocessing::Yes) {
         rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);
         rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile, io));
     }

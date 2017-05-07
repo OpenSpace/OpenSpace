@@ -62,8 +62,13 @@ public:
     * \param config, Configuration used for initialization
     * \param baseDirectory, the base directory to use in future loading operations
     */
-    GdalRawTileDataReader(const std::string& filePath, const Configuration& config,
-        const std::string& baseDirectory = "");
+    GdalRawTileDataReader(const std::string& filePath,
+        const TileTextureInitData& initData,
+        const std::string& baseDirectory = "",
+        RawTileDataReader::PerformPreprocessing preprocess =
+            RawTileDataReader::PerformPreprocessing::No
+        );
+
 
     virtual ~GdalRawTileDataReader() override;
 
@@ -107,13 +112,9 @@ private:
     TileDataLayout getTileDataLayout(GLuint prefferedGLType);
 
     // Member variables
-    struct InitData {
-        std::string initDirectory;
-        std::string datasetFilePath;
-        int tilePixelSize;
-        GLuint dataType;
-    } _initData;
-
+    std::string _initDirectory;
+    std::string _datasetFilePath;
+  
     GDALDataset* _dataset;
     GDALDataType _gdalType; // The type to reinterpret to when reading
 };

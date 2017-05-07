@@ -120,12 +120,12 @@ MemoryAwareTileCache::MemoryAwareTileCache()
     : _tileCache(std::numeric_limits<std::size_t>::max()) // Unlimited size
     , _freeTexture(0) // Set the first texture to be "free"
 {
-    TileTextureInitData initData(512 + 4, 512 + 4, GL_UNSIGNED_BYTE,
+    TileTextureInitData initData(512, 512, GL_UNSIGNED_BYTE,
         ghoul::opengl::Texture::Format::BGRA);
     for (int i = 0; i < 50; ++i)
     {
         _textureContainer.push_back(std::make_shared<ghoul::opengl::Texture>(
-            initData.dimensions(),
+            initData.dimensionsWithPadding(),
             initData.ghoulTextureFormat(),
             initData.glTextureFormat(),
             initData.glType(),

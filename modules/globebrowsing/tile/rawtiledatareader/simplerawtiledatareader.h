@@ -48,7 +48,10 @@ class GeodeticPatch;
 class SimpleRawTileDataReader : public RawTileDataReader {
 public:
 
-    SimpleRawTileDataReader(const std::string& filePath, const Configuration& config);
+    SimpleRawTileDataReader(const std::string& filePath,
+        const TileTextureInitData& initData,
+        RawTileDataReader::PerformPreprocessing preprocess =
+            RawTileDataReader::PerformPreprocessing::No);
 
     // Public virtual function overloading
     virtual void reset() override;

@@ -30,9 +30,11 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
     const char* _loggerCat = "CachingTileProvider";
@@ -64,19 +66,17 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     }
 
     // 2. Initialize default values for any optional Keys
-    RawTileDataReader::Configuration config;
-    config.doPreProcessing = false;
-    config.tilePixelSize = 512;    
-    config.dataType = GL_UNSIGNED_BYTE;
-
+    TileTextureInitData initData(512, 512, GL_UNSIGNED_BYTE, ghoul::opengl::Texture::Format::BGRA);
+  
     // getValue does not work for integers
     double minimumPixelSize;
 
+    /*
     // 3. Check for used spcified optional keys
     if (dictionary.getValue<bool>(KeyDoPreProcessing, config.doPreProcessing)) {
         LDEBUG("Default doPreProcessing overridden: " << config.doPreProcessing);
     }
-    /*
+    
     if (dictionary.getValue<double>(KeyTilePixelSize, minimumPixelSize)) {
         LDEBUG("Default minimumPixelSize overridden: " << minimumPixelSize);
         config.tilePixelSize = static_cast<int>(minimumPixelSize); 
@@ -88,15 +88,15 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
 
     // Initialize instance variables
 #ifdef GLOBEBROWSING_USE_GDAL
-    auto tileDataset = std::make_shared<GdalRawTileDataReader>(filePath, config, basePath);
+    auto tileDataset = std::make_shared<GdalRawTileDataReader>(filePath, initData, basePath);
 #else // GLOBEBROWSING_USE_GDAL
-    auto tileDataset = std::make_shared<SimpleRawTileDataReader>(filePath, config);
+    auto tileDataset = std::make_shared<SimpleRawTileDataReader>(filePath, initData);
 #endif // GLOBEBROWSING_USE_GDAL
 
     // only one thread per provider supported atm
     // (GDAL does not handle multiple threads for a single dataset very well
     // currently)
-    auto threadPool = std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 5);
+    auto threadPool = std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 10);
 
     _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
         tileDataset, threadPool);
