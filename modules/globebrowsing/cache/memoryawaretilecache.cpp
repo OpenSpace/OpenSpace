@@ -82,12 +82,9 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
     else {
         std::shared_ptr<Texture> texture;
         // First option, there exists unused textures
-        if (_freeTexture < _textureContainer.size()) {
-             texture = _textureContainer[_freeTexture];
-            _freeTexture++;
-        }
+        texture = _textureContainer.getTextureIfFree();
         // Second option. No more textures available. Pop from the LRU cache
-        else {
+        if (!texture) {
             Tile oldTile = _tileCache.popLRU();
             // Use the old tiles texture
             texture = oldTile.texture();
@@ -119,22 +116,9 @@ void MemoryAwareTileCache::setMaximumSize(size_t maximumSize) {
 MemoryAwareTileCache::MemoryAwareTileCache()
     : _tileCache(std::numeric_limits<std::size_t>::max()) // Unlimited size
     , _freeTexture(0) // Set the first texture to be "free"
-{
-    TileTextureInitData initData(512, 512, GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::Format::BGRA);
-    for (int i = 0; i < 50; ++i)
-    {
-        _textureContainer.push_back(std::make_shared<ghoul::opengl::Texture>(
-            initData.dimensionsWithPadding(),
-            initData.ghoulTextureFormat(),
-            initData.glTextureFormat(),
-            initData.glType(),
-            ghoul::opengl::Texture::FilterMode::Linear,
-            ghoul::opengl::Texture::WrappingMode::ClampToEdge
-        ));
-        _textureContainer.back()->uploadTexture();
-    }
-}
+    , _textureContainer(TileTextureInitData(512, 512, GL_UNSIGNED_BYTE,
+        ghoul::opengl::Texture::Format::BGRA), 50)
+{ }
 
 } // namespace cache
 } // namespace globebrowsing

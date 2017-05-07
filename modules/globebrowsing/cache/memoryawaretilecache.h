@@ -29,6 +29,7 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/cache/memoryawarelrucache.h>
 #include <modules/globebrowsing/tile/rawtile.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
 #include <memory>
 #include <mutex>
@@ -98,6 +99,41 @@ public:
     static MemoryAwareTileCache& ref();
 
 private:
+    class TextureContainer
+    {
+    public:
+        TextureContainer(TileTextureInitData initData, size_t numTextures)
+            : _initData(initData)
+            , _freeTexture(0)
+        {
+            for (size_t i = 0; i < numTextures; ++i)
+            {
+                _textures.push_back(std::make_shared<ghoul::opengl::Texture>(
+                    _initData.dimensionsWithPadding(),
+                    _initData.ghoulTextureFormat(),
+                    _initData.glTextureFormat(),
+                    _initData.glType(),
+                    ghoul::opengl::Texture::FilterMode::Linear,
+                    ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                ));
+                _textures.back()->uploadTexture();
+            }
+        }
+        ~TextureContainer() = default;
+        std::shared_ptr<ghoul::opengl::Texture> getTextureIfFree() {
+            std::shared_ptr<ghoul::opengl::Texture> texture = nullptr;
+            if (_freeTexture < _textures.size()) {
+                 texture = _textures[_freeTexture];
+                _freeTexture++;
+            }
+            return texture;
+        }
+    private:
+        std::vector<std::shared_ptr<ghoul::opengl::Texture>> _textures;
+        size_t _freeTexture;
+        const TileTextureInitData _initData;
+    };
+
     /**
      * \param cacheSize is the cache size given in bytes.
      */
@@ -109,7 +145,7 @@ private:
     MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher> _tileCache;
     
     /// All textures are contained in a vector
-    std::vector<std::shared_ptr<ghoul::opengl::Texture>> _textureContainer;
+    TextureContainer _textureContainer;
     size_t _freeTexture;
     static std::mutex _mutexLock;
 };
