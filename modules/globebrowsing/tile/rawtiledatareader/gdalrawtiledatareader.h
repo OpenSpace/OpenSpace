@@ -30,7 +30,6 @@
 #include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 
@@ -109,7 +108,6 @@ private:
     int gdalOverview(const TileIndex& tileIndex) const;
     int gdalVirtualOverview(const TileIndex& tileIndex) const;
     PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
-    TileDataLayout getTileDataLayout(GLuint prefferedGLType);
 
     // Member variables
     std::string _initDirectory;

@@ -27,7 +27,6 @@
 
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/rawtile.h>
@@ -61,7 +60,6 @@ public:
      */
     std::shared_ptr<RawTile> readTileData(TileIndex tileIndex, char* dataDestination);
     TileDepthTransform getDepthTransform() const;
-    const TileDataLayout& dataLayout() const;
     const TileTextureInitData& tileTextureInitData() const;
     
     /**
@@ -167,7 +165,6 @@ protected:
     } _cached;
     const TileTextureInitData _initData;
     PerformPreprocessing _preprocess;
-    TileDataLayout _dataLayout;
     TileDepthTransform _depthTransform;
 
 private:

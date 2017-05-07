@@ -115,24 +115,11 @@ void SimpleRawTileDataReader::initialize() {
     _cached._maxLevel = 2;
     _cached._tileLevelDifference = 0;
 
-    _dataLayout.glType = _dataTexture->dataType();
-    _dataLayout.bytesPerDatum = tiledatatype::numberOfBytes(_dataLayout.glType);
-    _dataLayout.numRasters = tiledatatype::numberOfRasters(_dataTexture->format());
-    _dataLayout.numRastersAvailable = _dataLayout.numRasters;
-    _dataLayout.bytesPerPixel = _dataLayout.bytesPerDatum * _dataLayout.numRasters;
-    _dataLayout.textureFormat = {_dataTexture->format(), _dataTexture->internalFormat()};
-
     _depthTransform = {depthScale(), depthOffset()};
 }
 
 void SimpleRawTileDataReader::readImageData(
     IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const {
-    // In case there are extra channels not existing in the dataset
-    // we set the bytes to 255 (for example an extra alpha channel that)
-    // needs to be 1.
-    if (_dataLayout.numRasters > _dataLayout.numRastersAvailable) {
-        memset(dataDestination, 255, io.write.totalNumBytes);
-    }
     
     // Modify to match OpenGL texture layout:
     IODescription modifiedIO = io;

@@ -102,7 +102,7 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
 
     //rawTile->dimensions = glm::uvec3(io.write.region.numPixels, 1);
     //rawTile->nBytesImageData = io.write.totalNumBytes;
-    //rawTile->glType = _dataLayout.glType;
+    //rawTile->glType = _initData.glType();
     //rawTile->textureFormat = _dataLayout.textureFormat;
 
     if (_preprocess == PerformPreprocessing::Yes) {
@@ -115,10 +115,6 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
 
 TileDepthTransform RawTileDataReader::getDepthTransform() const {
     return _depthTransform;
-}
-
-const TileDataLayout& RawTileDataReader::dataLayout() const {
-    return _dataLayout;
 }
 
 const TileTextureInitData& RawTileDataReader::tileTextureInitData() const {
@@ -302,17 +298,17 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
     std::shared_ptr<RawTile> rawTile, const PixelRegion& region)
 {
     ensureInitialized();
-    size_t bytesPerLine = _dataLayout.bytesPerPixel * region.numPixels.x;
+    size_t bytesPerLine = _initData.bytesPerPixel() * region.numPixels.x;
 
     TileMetaData* preprocessData = new TileMetaData();
-    preprocessData->maxValues.resize(_dataLayout.numRasters);
-    preprocessData->minValues.resize(_dataLayout.numRasters);
-    preprocessData->hasMissingData.resize(_dataLayout.numRasters);
+    preprocessData->maxValues.resize(_initData.nRasters());
+    preprocessData->minValues.resize(_initData.nRasters());
+    preprocessData->hasMissingData.resize(_initData.nRasters());
         
     std::vector<float> noDataValues;
-    noDataValues.resize(_dataLayout.numRasters);
+    noDataValues.resize(_initData.nRasters());
 
-    for (size_t raster = 0; raster < _dataLayout.numRasters; ++raster) {
+    for (size_t raster = 0; raster < _initData.nRasters(); ++raster) {
         preprocessData->maxValues[raster] = -FLT_MAX;
         preprocessData->minValues[raster] = FLT_MAX;
         preprocessData->hasMissingData[raster] = false;
@@ -323,10 +319,10 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
         size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
         size_t i = 0;
         for (size_t x = 0; x < region.numPixels.x; ++x) {
-            for (size_t raster = 0; raster < _dataLayout.numRasters; ++raster) {
+            for (size_t raster = 0; raster < _initData.nRasters(); ++raster) {
                 float noDataValue = noDataValueAsFloat();
                 float val = tiledatatype::interpretFloat(
-                    _dataLayout.glType,
+                    _initData.glType(),
                     &(rawTile->imageData[yi + i])
                 );
                 if (val != noDataValue) {
@@ -342,7 +338,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
                 else {
                     preprocessData->hasMissingData[raster] = true;
                 }
-                i += _dataLayout.bytesPerDatum;
+                i += _initData.bytesPerDatum();
             }
         }
     }
@@ -360,9 +356,9 @@ float RawTileDataReader::depthScale() const {
 
 TileDepthTransform RawTileDataReader::calculateTileDepthTransform() {
     bool isFloat =
-        (_dataLayout.glType == GL_FLOAT || _dataLayout.glType == GL_DOUBLE);
+        (_initData.glType() == GL_FLOAT || _initData.glType() == GL_DOUBLE);
     double maximumValue =
-        isFloat ? 1.0 : tiledatatype::getMaximumValue(_dataLayout.glType);
+        isFloat ? 1.0 : tiledatatype::getMaximumValue(_initData.glType());
 
     TileDepthTransform transform;
     transform.depthOffset = depthOffset();
@@ -379,7 +375,7 @@ RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
 
     bool hasMissingData = false;
     
-    for (size_t c = 0; c < _dataLayout.numRasters; c++) {
+    for (size_t c = 0; c < _initData.nRasters(); c++) {
         hasMissingData |= rawTile->tileMetaData->maxValues[c] == missingDataValue;
     }
     

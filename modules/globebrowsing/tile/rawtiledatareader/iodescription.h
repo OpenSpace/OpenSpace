@@ -28,7 +28,6 @@
 #include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
@@ -137,7 +136,7 @@ private:
     };
 
     unsigned int getUniqueIdFromTextureFormat(
-        ghoul::opengl::Texture::Format textureFormat)
+        ghoul::opengl::Texture::Format textureFormat) const
     {
         using Format = ghoul::opengl::Texture::Format;
         switch (textureFormat) {
