@@ -49,11 +49,10 @@ struct Subsite {
 	// The file names of the .obj models and textures for this subsite
 	std::vector<std::string> fileNames;
 
-	Subsite(const Geodetic2& subsitePoint, const Geodetic2& sitePoint,
-		const std::string site, const std::string drive, const std::string frame,
-			const std::vector<std::string> fileNames);
+	std::string pathToGeometryFolder;
+	std::string pathToTextureFolder;
 
-	SubsiteHashKey hashKey() const;
+	SubsiteHashKey hashKey(const int level) const;
 };
 
 } // namespace globebrowsing

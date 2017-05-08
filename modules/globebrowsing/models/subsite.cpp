@@ -28,23 +28,16 @@
 namespace openspace {
 namespace globebrowsing {
 
-Subsite::Subsite(const Geodetic2& subsitePoint, const Geodetic2& sitePoint,
-	const std::string site, const std::string drive, const std::string frame,
-		const std::vector<std::string> fileNames)
-			: site(site), drive(drive), frame(frame), fileNames(fileNames)
-{ 
-	lat = subsitePoint.lat;
-	lon = subsitePoint.lon;
-	siteLat = sitePoint.lat;
-	siteLon = sitePoint.lon;
-}
-
-Subsite::SubsiteHashKey Subsite::hashKey() const {
-	SubsiteHashKey key = 0LL;
+Subsite::SubsiteHashKey Subsite::hashKey(const int level) const {
+	uint64_t key = 0LL;
 	int siteNumber = std::stoi(site);
 	int driveNumber = std::stoi(drive);
 
-	return SubsiteHashKey();
+	key |= level;
+	key |= siteNumber << 5;
+	key |= ((uint64_t)driveNumber) << 35;
+
+	return key;
 }
 
 } // namespace globebrowsing
