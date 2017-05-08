@@ -102,7 +102,7 @@ private:
     std::vector<std::vector<ImageMetadata>> _imageMetadata;
 
     void uploadImageDataToPBO(const int& image);
-    void updateTextureGPU();
+    void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
 
     void createFrustum();
     void createPlane();

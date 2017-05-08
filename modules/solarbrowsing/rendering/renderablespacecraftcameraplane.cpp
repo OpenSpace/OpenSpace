@@ -135,28 +135,17 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
     _currentActiveChannel.onChange([this]() {
         LDEBUG("Updating current acive channel");
-        const double osTime = Time::ref().j2000Seconds();
+        _updatingCurrentActiveChannel = true;
+        const double& osTime = Time::ref().j2000Seconds();
         const auto& imageList = _imageMetadata[_currentActiveChannel];
         const auto& low = std::lower_bound(imageList.begin(), imageList.end(), osTime);
         _currentActiveImage = low - imageList.begin();
         if (_currentActiveImage == _imageMetadata[_currentActiveChannel].size()) {
             _currentActiveImage = _currentActiveImage - 1;
         }
-
-        if (_future) {
-            _future->wait();
-        }
-        _future = nullptr;
-        _updatingCurrentActiveChannel = true;
-
-        _texture->bind();
-        std::string& currentFilename
-              = _imageMetadata[_currentActiveChannel][_currentActiveImage].filename;
-        unsigned char* data = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
-        decode(data, currentFilename, 0);
-        glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
-                        GLint(_texture->format()), _texture->dataType(), data);
-        delete[] data;
+        updateTextureGPU(/*asyncUpload=*/false);
+        uploadImageDataToPBO(_currentActiveImage);
+        _updatingCurrentActiveChannel = false;
     });
 
     _resolutionLevel.onChange([this]() {
@@ -164,24 +153,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         _updatingCurrentLevelOfResolution = true;
         _pboSize = (4096 * 4096 * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
         _imageSize = 4096 / (pow(2, _resolutionLevel));
-
-        if (_future) {
-            _future->wait();
-        }
-        _future = nullptr;
-
-        _texture->bind();
-        std::string& currentFilename
-              = _imageMetadata[_currentActiveChannel][_currentActiveImage].filename;
-
-        unsigned char* data
-              = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
-
-        decode(data, currentFilename, 0);
-        glTexImage2D(_texture->type(), 0, _texture->internalFormat(), _imageSize,
-                     _imageSize, 0, GLint(_texture->format()), _texture->dataType(),
-                     data);
-        delete[] data;
+        updateTextureGPU(/*asyncUpload=*/false, /*resChanged=*/true);
+        uploadImageDataToPBO(_currentActiveImage);
+        _updatingCurrentLevelOfResolution = false;
     });
 
     _moveFactor.onChange([this]() {
@@ -376,19 +350,20 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-void RenderableSpacecraftCameraPlane::updateTextureGPU() {
-    if (_usePBO) {
+void RenderableSpacecraftCameraPlane::updateTextureGPU(bool asyncUpload, bool resChanged) {
+    if (_future) {
+        _future->wait();
+    }
+    _future = nullptr;
+
+    if (_usePBO && asyncUpload) {
         //auto t1 = Clock::now();
        // Wait for texture data from previous frame
-        if (_future) {
-            _future->wait();
-        }
         //  auto t2 = Clock::now();
         // std::cout << "Waiting time for promise: "
         //       << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
         //       << " ms" << std::endl;
 
-        _future = nullptr;
         // Bind PBO to texture data source
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[0]);
         _texture->bind();
@@ -403,8 +378,15 @@ void RenderableSpacecraftCameraPlane::updateTextureGPU() {
               = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
         decode(data, currentFilename, 0);
         _texture->bind();
-        glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
-                        GLint(_texture->format()), _texture->dataType(), data);
+
+        if (!resChanged) {
+            glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
+                            GLint(_texture->format()), _texture->dataType(), data);
+        } else {
+            glTexImage2D(_texture->type(), 0, _texture->internalFormat(), _imageSize,
+                         _imageSize, 0, GLint(_texture->format()), _texture->dataType(),
+                         data);
+        }
         delete[] data;
     }
 }
@@ -433,20 +415,10 @@ void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime)
         _currentActiveImage = _currentActiveImage - 1;
     }
     // TODO(mnoven): Clean this up
-    if (currentActiveImageLast != _currentActiveImage || _initializePBO
-        || _updatingCurrentActiveChannel || _updatingCurrentLevelOfResolution) {
+    if (currentActiveImageLast != _currentActiveImage || _initializePBO) {
         //  LDEBUG("Updating texture to " << _currentActiveImage);
         //_currentPBO = 1 - _currentPBO;
-
-        // Instant update on current active channel, no need to update from old PBO
-        if (!_updatingCurrentActiveChannel && !_updatingCurrentLevelOfResolution) {
-            updateTextureGPU();
-        } else if (_updatingCurrentActiveChannel) {
-            _updatingCurrentActiveChannel = false;
-        } else if (_updatingCurrentLevelOfResolution) {
-            _updatingCurrentLevelOfResolution = false;
-        }
-
+        updateTextureGPU();
         // Refill PBO
         if (_usePBO /*&& !_initializePBO*/) {
             uploadImageDataToPBO(_currentActiveImage);
@@ -462,7 +434,8 @@ void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     bool timeToUpdateTexture = realTimeDiff > _minRealTimeUpdateInterval;
 
     // Update texture
-    if (timeToUpdateTexture) {
+    if (timeToUpdateTexture && !_updatingCurrentLevelOfResolution
+        && !_updatingCurrentActiveChannel) {
         performImageTimestep(data.time);
         _lastUpdateRealTime = _realTime;
     }
@@ -501,7 +474,8 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     const glm::dvec3 nTargetWorld = glm::normalize(targetPositionWorld);
 
     // We don't normalize sun's position since its in the origin
-    glm::dmat4 rotationTransform = glm::lookAt(nPositionWorld, glm::dvec3(target->worldPosition()), upWorld);
+    glm::dmat4 rotationTransform
+          = glm::lookAt(nPositionWorld, glm::dvec3(target->worldPosition()), upWorld);
     rotationTransform = glm::dmat4(glm::inverse(rotationTransform));
 
     // Scale vector to sun barycenter to get translation distance
@@ -542,7 +516,8 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     _frustumShader->activate();
     _frustumShader->setUniform("modelViewProjectionTransform",
         projectionMatrix * glm::mat4(viewMatrix * spacecraftModelTransform));
-    _frustumShader->setUniform("modelViewProjectionTransformPlane", projectionMatrix * glm::mat4(modelViewTransform));
+    _frustumShader->setUniform("modelViewProjectionTransformPlane",
+                               projectionMatrix * glm::mat4(modelViewTransform));
     glBindVertexArray(_frustum);
     glDrawArrays(GL_LINES, 0, 16);
     _frustumShader->deactivate();
