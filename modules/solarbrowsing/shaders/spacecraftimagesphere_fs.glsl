@@ -31,9 +31,9 @@ in vec3 rawPos;
 
 uniform mat4 trans;
 uniform vec3 sunDir;
-uniform sampler2D texture1;
-uniform sampler1D texture2;
-uniform vec3 translationTransform;
+uniform sampler2D imageryTexture;
+uniform sampler1D lut;
+uniform vec3 planePosition;
 
 // TODO(mnoven): Uniform
 const float FULL_PLANE_SIZE = (1391600000 * 0.5) / 0.785;
@@ -43,18 +43,19 @@ const float FULL_PLANE_SIZE = (1391600000 * 0.5) / 0.785;
 Fragment getFragment() {
     vec4 outColor;
 
-    const vec3 unitSpacecraftDir = normalize(-sunDir);
-    const vec3 positionModelspace = normalize(posModel.xyz);
+    vec3 unitSpacecraftDir = normalize(-sunDir);
+    vec3 positionModelspace = normalize(posModel.xyz);
     float product = dot(unitSpacecraftDir, positionModelspace);
 
-    if (product < 0 || translationTransform.z > rawPos.z) {
+    if (planePosition.z > rawPos.z) {
         discard;
+        //outColor = vec4(1.0, 0.0, 0.0, 0.0);
     } else {
         vec2 uv = rawPos.xy;
         uv /= (FULL_PLANE_SIZE * 2);
         uv += 0.5;
-        const float intensityOrg = float(texture(texture1, uv).r);
-        outColor =  texture(texture2, intensityOrg);
+        float intensityOrg = float(texture(imageryTexture, uv).r);
+        outColor =  texture(lut, intensityOrg);
     }
 
     Fragment frag;

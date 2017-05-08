@@ -42,7 +42,7 @@ namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
 
-class RenderableSpacecraftCameraPlane : public RenderablePlane {
+class RenderableSpacecraftCameraPlane : public Renderable {
 
 public:
     RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary);
@@ -50,32 +50,29 @@ public:
     void render(const RenderData& data);
     void update(const UpdateData& data);
     void loadTexture();
-    void performImageTimestep();
+    void performImageTimestep(const double& osTime);
     void updateTexture();
 
 private:
-    properties::DoubleProperty _moveFactor;
-    properties::IntProperty _minRealTimeUpdateInterval;
-    properties::StringProperty _target;
-    properties::IntProperty _currentActiveChannel;
-    properties::BoolProperty _usePBO;
     properties::BoolProperty _asyncUploadPBO;
+    properties::IntProperty _currentActiveChannel;
+    properties::IntProperty _minRealTimeUpdateInterval;
+    properties::DoubleProperty _moveFactor;
     properties::IntProperty _resolutionLevel;
-
-    double _openSpaceTime;
-    double _lastUpdateOpenSpaceTime;
+    properties::StringProperty _target;
+    properties::BoolProperty _usePBO;
 
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
+    std::unique_ptr<PowerScaledSphere> _sphere;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _frustumShader;
-    std::unique_ptr<PowerScaledSphere> _sphere;
     std::unique_ptr<ghoul::opengl::ProgramObject> _sphereShader;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _planeShader;
 
     std::string _type;
-    int _currentActiveImage;
-    unsigned int pboSize;
-    GLuint pboHandle;
+    size_t _currentActiveImage;
+    unsigned int _pboSize;
     GLuint _frustum;
     GLuint _frustumPositionBuffer;
 
@@ -93,20 +90,26 @@ private:
 
     IMG_PRECISION* _pboBufferData;
 
+    float _size;
+    GLuint _quad;
+    GLuint _vertexPositionBuffer;
+
     unsigned int _imageSize;
     double _move = 0.0;
 
-    // Channels -> DataObjects
-    //std::vector<std::vector<ImageDataObject>> _imageData;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::vector<std::unique_ptr<TransferFunction>> _transferFunctions;
     std::vector<std::vector<ImageMetadata>> _imageMetadata;
 
     void uploadImageDataToPBO(const int& image);
     void updateTextureGPU();
-    void createFrustum();
-    void updatePlaneMoveFactor();
 
+    void createFrustum();
+    void createPlane();
+    void updatePlane();
+
+    void decode(unsigned char* buffer, const std::string& fileame,
+                const int numThreads);
     void downloadTextureResource();
     bool initialize() override;
     bool deinitialize() override;

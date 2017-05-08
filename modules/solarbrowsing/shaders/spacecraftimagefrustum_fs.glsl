@@ -26,7 +26,7 @@ in vec4 vs_positionScreenSpace;
 #include "fragment.glsl"
 
 Fragment getFragment() {
-    vec4 diffuse = vec4(1.0, 1.0, 1.0, 0.6);
+    vec4 diffuse = vec4(1.0, 1.0, 1.0, 0.8);
 
     if (diffuse.a == 0.0)
         discard;
