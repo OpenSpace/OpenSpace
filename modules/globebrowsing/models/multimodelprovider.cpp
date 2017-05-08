@@ -34,14 +34,16 @@ namespace openspace {
 namespace globebrowsing {
 MultiModelProvider::MultiModelProvider(const ghoul::Dictionary& dictionary) 
 	: ModelProvider(dictionary) {
-	LERROR("CREATING MULTIMODEL");
 }
 
-std::vector<SubSite> MultiModelProvider::calculate() {
-	SubSite s;
+std::vector<SubSite> MultiModelProvider::calculate(const std::vector<std::vector<SubSite>> subsites) {
 	std::vector<SubSite> ss;
+	for (auto subSites : subsites) {
+		if (subSites.size() > 0) {
+			ss.push_back(subSites.at(0));
 
-	ss.push_back(s);
+		}
+	}
 	return ss;
 }
 

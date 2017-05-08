@@ -34,7 +34,7 @@ class MultiModelProvider : public ModelProvider {
 public: 
 	MultiModelProvider(const ghoul::Dictionary& dictionary);
 
-	virtual std::vector<SubSite> calculate();
+	virtual std::vector<SubSite> calculate(const std::vector<std::vector<SubSite>> subsites);
 
 	virtual bool initialize();
 };
