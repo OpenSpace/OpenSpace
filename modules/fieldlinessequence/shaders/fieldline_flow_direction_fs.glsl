@@ -32,6 +32,9 @@ in float vs_depth;
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 Fragment getFragment() {
+    if (vs_color.a == 0) {
+        discard;
+    }
     vec4 fragColor;
   //  if (classification) {
         fragColor = vs_color;

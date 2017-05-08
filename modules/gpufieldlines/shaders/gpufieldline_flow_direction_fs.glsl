@@ -35,6 +35,9 @@ uniform vec4 color;
 
 Fragment getFragment() {
     vec4 fragColor;
+    if (color.a == 0) {
+        discard;
+    }
   //  if (classification) {
         // fragColor = vec4(gs_color,.45);
         // fragColor = gs_color;
