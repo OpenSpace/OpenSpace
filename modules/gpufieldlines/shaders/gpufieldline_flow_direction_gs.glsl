@@ -116,10 +116,10 @@ vec3 eulerStep(in vec3 unscaledPos) {
 vec3 eulerStepSpherical(in vec3 sphericalPoint) {
     // TODO in kameleon they do some magic here!
     vec3 vectorValue = getFieldVecAtPosition(sphericalPoint);
-    float magnitude = sqrt(sphericalPoint.x * sphericalPoint.x +
-                           sphericalPoint.y * sphericalPoint.y +
-                           sphericalPoint.z * sphericalPoint.z);
-    // float magnitude = length(sphericalPoint);
+    float magnitude = sqrt(vectorValue.x * vectorValue.x +
+                           vectorValue.y * vectorValue.y +
+                           vectorValue.z * vectorValue.z);
+    // float magnitude = length(vectorValue);
     if (magnitude < 1e-5) {
         magnitude =  1e-5;
     }
