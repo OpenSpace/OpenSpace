@@ -62,12 +62,14 @@ return {
             Type = "RenderableSpacecraftCameraPlane",
             Target = "Sun",
             -- Will recursively find all instruments that match array instruments
-            RootPath = "/Volumes/Untitled/solarflare/aia/2015/",
-            Instruments = {
-                "94",
-                "131",
-                "171",
-            },
+            RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
+            -- Optional filter on instruments, otherwise get all
+            -- Instruments = {
+            --     "AIA_AIA_94",
+            --     "AIA_AIA_131",
+            -- },
+            -- Path to transferfunctions whose name must match the instrument
+            TransferfunctionPath = "/home/noven/workspace/OpenSpace/data/sdotransferfunctions"
         },
     },
 }

@@ -42,6 +42,8 @@ namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
 
+class TransferFunction;
+
 // struct ImageMetadata {
 //     std::string filename;
 //     int min;
@@ -79,12 +81,15 @@ public:
                               const unsigned int tileHeight);
     // std::vector<ImageDataObject> loadImageData(const std::string& path, int&
     // imageSize);
+    void loadTransferFunctions(
+    const std::string& path,
+    std::unordered_map<std::string, std::unique_ptr<TransferFunction>>& _tfMap);
     std::vector<ImageMetadata> loadImageMetadata(const std::string& path);
-    std::vector<std::vector<ImageMetadata>> loadImageMetadata(
+    void loadImageMetadata(
           const std::string& path,
-          const std::vector<std::string>&
-                instruments);  // std::vector<std::unique_ptr<ghoul::opengl::Texture>>
-                               // loadTextures(std::vector<ImageDataObject>& imageData);
+          std::unordered_map<std::string, std::vector<ImageMetadata>>&
+                _imageMetadataMap);  // std::vector<std::unique_ptr<ghoul::opengl::Texture>>
+    // loadTextures(std::vector<ImageDataObject>& imageData);
     std::unique_ptr<ghoul::opengl::Texture> createLUT();
     //void scaleImageData(std::vector<ImageDataObject>& _imageData, const std::string& type, const int& channel);
 private:

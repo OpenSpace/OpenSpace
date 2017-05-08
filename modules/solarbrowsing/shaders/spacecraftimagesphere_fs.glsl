@@ -47,7 +47,7 @@ Fragment getFragment() {
     vec3 positionModelspace = normalize(posModel.xyz);
     float product = dot(unitSpacecraftDir, positionModelspace);
 
-    if (planePosition.z > rawPos.z) {
+    if (product < 0.0 || planePosition.z > rawPos.z) {
         discard;
         //outColor = vec4(1.0, 0.0, 0.0, 0.0);
     } else {

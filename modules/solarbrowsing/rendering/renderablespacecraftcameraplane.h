@@ -25,9 +25,11 @@
 #ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
 #define __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
 
+// TODO(mnoven): A-Z
 #include <modules/base/rendering/renderableplane.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/engine/downloadmanager.h> // Make pointer & forward declare?
@@ -35,6 +37,7 @@
 #include <openspace/rendering/transferfunction.h>
 #include <memory>
 #include <modules/solarbrowsing/util/simplej2kcodec.h>
+#include <unordered_set>
 
 #include <openspace/util/powerscaledsphere.h>
 
@@ -55,7 +58,7 @@ public:
 
 private:
     properties::BoolProperty _asyncUploadPBO;
-    properties::IntProperty _currentActiveChannel;
+    properties::OptionProperty _activeInstrument;
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
     properties::IntProperty _resolutionLevel;
@@ -99,7 +102,13 @@ private:
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::vector<std::unique_ptr<TransferFunction>> _transferFunctions;
+    std::unordered_map<std::string, std::unique_ptr<TransferFunction>> _tfMap;
+
     std::vector<std::vector<ImageMetadata>> _imageMetadata;
+
+    std::unordered_map<int, std::string> _optionToInstrument;
+    std::unordered_map<std::string, std::vector<ImageMetadata>> _imageMetadataMap;
+    std::unordered_set<std::string> _instrumentFilter;
 
     void uploadImageDataToPBO(const int& image);
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
