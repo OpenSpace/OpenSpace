@@ -67,6 +67,27 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         _target = target;
     }
 
+    std::string rootPath;
+    if (!dictionary.getValue("RootPath", rootPath)) {
+        throw ghoul::RuntimeError("RootPath has to be specified");
+    }
+
+    std::vector<std::string> allInstruments;
+    if (dictionary.hasKeyAndValue<ghoul::Dictionary>("Instruments")) {
+        ghoul::Dictionary instruments = dictionary.value<ghoul::Dictionary>("Instruments");
+        for (size_t i = 1; i <= instruments.size(); ++i) {
+            if (!instruments.hasKeyAndValue<std::string>(std::to_string(i))) {
+                throw ghoul::RuntimeError("Instruments has to be an array-style table");
+            }
+            std::string instrument = instruments.value<std::string>(std::to_string(i));
+            allInstruments.push_back(instrument);
+        }
+    } else {
+        throw ghoul::RuntimeError("Instruments has to be specified");
+    }
+
+    SpacecraftImageryManager::ref().loadImageMetadata(rootPath, allInstruments);
+
     // // TODO(mnoven): Lua
     std::vector<std::string> paths
           = {"/Volumes/Untitled/solarflare/aia/2015/03/01/131",
