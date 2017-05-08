@@ -84,8 +84,6 @@ namespace globebrowsing {
 
 		ImgReader::readBinaryData(binary_path, xyz, mInfo);
 		
-		writeTxtFile(file_name_stripped, output_path);
-
 		int uvTeller = 0;
 
 		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
@@ -134,6 +132,10 @@ namespace globebrowsing {
 
 		LINFO("POINTS BEFORE DECIMATION: " << cloud->points.size());
 
+		if (cloud->points.size() == 0) return;
+
+		writeTxtFile(file_name_stripped, output_path);
+
 		// Create a VoxelGrid for the model
 		// Used to simplify the model
 		pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
@@ -141,7 +143,6 @@ namespace globebrowsing {
 		voxel_grid.setInputCloud(cloud);
 		voxel_grid.setLeafSize(0.15, 0.15, 0.15);
 		voxel_grid.filter(*cloud);
-
 
 		LINFO("POINTS AFTER DECIMATION: " << cloud->points.size());
 
@@ -216,7 +217,6 @@ namespace globebrowsing {
 		gp3.setInputCloud(originalCloudTransformed);
 		gp3.setSearchMethod(tree2);
 		gp3.reconstruct(triangles);
-
 
 		// Create mesh from point cloud
 		// TODO: Make this into TextureMeshPtr
