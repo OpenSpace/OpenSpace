@@ -64,6 +64,8 @@ namespace globebrowsing {
 	}
 
 	void MeshGenerationTask::perform(const Task::ProgressCallback &progressCallback) {
+		if (_filenames.empty()) return;
+
 		const clock_t begin_time = clock();
 		progressCallback(0.0f);
 		int k = 0;
@@ -123,7 +125,8 @@ namespace globebrowsing {
 		std::ifstream fs(filename.c_str());
 		std::string line;
 		if (!fs.is_open()) {
-			throw std::runtime_error(std::string("File " + filename + " could not be opened"));
+			//throw std::runtime_error(std::string("File " + filename + " could not be opened"));
+			return filenames;
 		}
 		else {
 			while (std::getline(fs, line)) {
