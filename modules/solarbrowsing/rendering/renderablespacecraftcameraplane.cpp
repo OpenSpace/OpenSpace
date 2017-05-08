@@ -47,25 +47,20 @@ typedef std::chrono::high_resolution_clock Clock;
 
 namespace {
     static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
-    //static const int _minRealTimeUpdateInterval = 50;
-    static const int _minOpenSpaceTimeUpdateInterval = 1; // Should probably be set to real update value of data later
     static const float FULL_PLANE_SIZE = (1391600000.f * 0.5f) / 0.785f; // Half sun radius divided by magic factor
 }
 
 namespace openspace {
 
 RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary)
-    : RenderablePlane(dictionary)
+    : Renderable(dictionary)
+    , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _currentActiveChannel("activeChannel", "Active Channel", 0, 0, 9)
+    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 75, 0, 300)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
+    , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
     , _target("target", "Target", "Sun")
     , _usePBO("usePBO", "Use PBO", true)
-    , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
-    , _frustum(0)
-    , _frustumPositionBuffer(0)
-    , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
-    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 75, 0, 300)
-    , _sphere(nullptr)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
@@ -74,49 +69,44 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
     // // TODO(mnoven): Lua
     std::vector<std::string> paths
-          = {"/home/noven/workspace/OpenSpace/data/solarflarej2k/HMIC/",
-             "/home/noven/workspace/OpenSpace/data/solarflarej2k/171/",
-             "/home/noven/workspace/OpenSpace/data/solarflarej2k/304/",
-             "/home/noven/workspace/OpenSpace/data/solarflarej2k/193/"};
+          = {"/Volumes/Untitled/solarflare/aia/2015/03/01/131",
+             "/Volumes/Untitled/solarflare/aia/2015/03/01/171",
+             /*"/home/noven/workspace/OpenSpace/data/solarflarej2k/304/",
+             "/home/noven/workspace/OpenSpace/data/solarflarej2k/193/"*/};
 
     std::vector<std::string> tfPaths
-          = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/continuum.txt",
-             "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0171_new.txt",
-             "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0304_new.txt",
-             "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0193_new.txt"};
+          = {"/Users/michaelnoven/workspace/OpenSpace/data/sdotransferfunctions/0131_new.txt",
+             "/Users/michaelnoven/workspace/OpenSpace/data/sdotransferfunctions/0171_new.txt",
+             /*"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0304_new.txt",
+             "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0193_new.txt"*/};
 
-    _type = "SDO";
-   // int imageSize;
     const int numChannels = paths.size();
     for (int i = 0; i < numChannels; i++) {
-        //_imageData.push_back(SpacecraftImageryManager::ref().loadImageData(paths[i], imageSize));
-        //SpacecraftImageryManager::ref().scaleImageData(_imageData[i], _type, i);
         _imageMetadata.push_back(SpacecraftImageryManager::ref().loadImageMetadata(paths[i]));
         _transferFunctions.push_back(std::make_unique<TransferFunction>(tfPaths[i]));
     }
-    //const std::string jpath = "/home/noven/workspace/OpenSpace/data/realj2kdata/094";
-    //SpacecraftImageryManager::ref().ConvertTileJ2kImages(jpath, 1024, 1024);
-
     _currentActiveChannel.setMaxValue(_imageMetadata.size() - 1);
 
     // Have to figure out the times of the whole interval first
     ImageMetadata& start = _imageMetadata[_currentActiveChannel][0];
-    ImageMetadata& end = _imageMetadata[_currentActiveChannel][ _imageMetadata[_currentActiveChannel].size() - 1];
+    //ImageMetadata& end = _imageMetadata[_currentActiveChannel][ _imageMetadata[_currentActiveChannel].size() - 1];
 
     _startTimeSequence = start.timeObserved;
-    _endTimeSequence = end.timeObserved;
+    //_endTimeSequence = end.timeObserved;
 
+    //TODO(mnoven): Can't assume 1 plane
     Time::ref().setTime(_startTimeSequence - 10);
 
-     pboSize = (4096 * 4096 * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
+    //TODO(mnoven): Remove hardcode, not always 4096
+    _pboSize = (4096 * 4096 * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
     _imageSize = 4096 / (pow(2, _resolutionLevel));
 
     // Generate PBO
     glGenBuffers(2, pboHandles);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[0]);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, 0, GL_STREAM_DRAW);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, _pboSize, 0, GL_STREAM_DRAW);
     // glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[1]);
-    // glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, 0, GL_STREAM_DRAW);
+    // glBufferData(GL_PIXEL_UNPACK_BUFFER, _pboSize, 0, GL_STREAM_DRAW);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     // TODO(mnoven): Faster to send GL_RGBA32F as internal format - GPU Pads anyways?
@@ -140,12 +130,11 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _currentPBO = 0;
 
     // Initialize time
-    _openSpaceTime = Time::ref().j2000Seconds();
-    _lastUpdateOpenSpaceTime = 0.0;
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
 
     _currentActiveChannel.onChange([this]() {
+        LDEBUG("Updating current acive channel");
         const double osTime = Time::ref().j2000Seconds();
         const auto& imageList = _imageMetadata[_currentActiveChannel];
         const auto& low = std::lower_bound(imageList.begin(), imageList.end(), osTime);
@@ -154,43 +143,26 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
             _currentActiveImage = _currentActiveImage - 1;
         }
 
-          if (_future) {
+        if (_future) {
             _future->wait();
         }
         _future = nullptr;
-
-
-        LDEBUG("Updating currentactivechannel " << _currentActiveChannel );
         _updatingCurrentActiveChannel = true;
 
         _texture->bind();
         std::string& currentFilename
               = _imageMetadata[_currentActiveChannel][_currentActiveImage].filename;
-
-        //std::unique_ptr<unsigned char*> data = std::make_unique<unsigned char*>(_imageSize * _imageSize * sizeof(IMG_PRECISION));
-        SimpleJ2kCodec j2c;
-        j2c.CreateInfileStream(currentFilename);
-        j2c.SetupDecoder(_resolutionLevel);
         unsigned char* data = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
-        j2c.DecodeIntoBuffer(data, 0);
-        glTexSubImage2D(
-            _texture->type(),
-            0,
-            0,
-            0,
-            _imageSize,
-            _imageSize,
-            GLint(_texture->format()),
-            _texture->dataType(),
-           data
-        );
+        decode(data, currentFilename, 0);
+        glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
+                        GLint(_texture->format()), _texture->dataType(), data);
         delete[] data;
     });
 
     _resolutionLevel.onChange([this]() {
         LDEBUG("Updating level of resolution");
         _updatingCurrentLevelOfResolution = true;
-        pboSize = (4096 * 4096 * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
+        _pboSize = (4096 * 4096 * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
         _imageSize = 4096 / (pow(2, _resolutionLevel));
 
         if (_future) {
@@ -198,46 +170,31 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         }
         _future = nullptr;
 
-
         _texture->bind();
         std::string& currentFilename
               = _imageMetadata[_currentActiveChannel][_currentActiveImage].filename;
 
         unsigned char* data
               = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
-        SimpleJ2kCodec j2c;
-        j2c.CreateInfileStream(currentFilename);
-        j2c.SetupDecoder(_resolutionLevel);
-        j2c.DecodeIntoBuffer(data, 0);
 
-        glTexImage2D(
-            _texture->type(),
-            0,
-            _texture->internalFormat(),
-            _imageSize,
-            _imageSize,
-            0,
-            GLint(_texture->format()),
-            _texture->dataType(),
-            data
-        );
+        decode(data, currentFilename, 0);
+        glTexImage2D(_texture->type(), 0, _texture->internalFormat(), _imageSize,
+                     _imageSize, 0, GLint(_texture->format()), _texture->dataType(),
+                     data);
         delete[] data;
     });
 
     _moveFactor.onChange([this]() {
-        updatePlaneMoveFactor();
-        createPlane();
-        createFrustum();
+        updatePlane();
     });
 
     // Initialize PBO
     if (_usePBO) {
         LDEBUG("Initializing PBO with image " << _currentActiveImage);
         uploadImageDataToPBO(_currentActiveImage); // Begin fill PBO 1
-      //  updateTextureGPU();
     }
 
-    performImageTimestep();
+    performImageTimestep(Time::ref().j2000Seconds());
     addProperty(_resolutionLevel);
     addProperty(_minRealTimeUpdateInterval);
     addProperty(_asyncUploadPBO);
@@ -247,50 +204,73 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     addProperty(_moveFactor);
 }
 
-void RenderableSpacecraftCameraPlane::updatePlaneMoveFactor() {
+void RenderableSpacecraftCameraPlane::createPlane() {
+    // ============================
+    //         GEOMETRY (quad)
+    // ============================
+    const GLfloat size = _size;
+    const GLfloat vertex_data[] = {
+        //      x      y     z     w     s     t
+        -size, -size, 0.f, 0.f, 0.f, 0.f,
+        size, size, 0.f, 0.f, 1.f, 1.f,
+        -size, size, 0.f, 0.f, 0.f, 1.f,
+        -size, -size, 0.f, 0.f, 0.f, 0.f,
+        size, -size, 0.f, 0.f, 1.f, 0.f,
+        size, size, 0.f, 0.f, 1.f, 1.f,
+    };
+
+    glBindVertexArray(_quad); // bind array
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6,
+                          reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6,
+                          reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+}
+
+void RenderableSpacecraftCameraPlane::updatePlane() {
     //const double a = 1;
     //const double b = 0;
     //const double c = 0.31622776601; // sqrt(0.1)
     //_move = a * exp(-(pow((_moveFactor.value() - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)));
     _move = /*a **/ exp(-(pow((_moveFactor.value() - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
-    _size.setValue(glm::vec2(_move * FULL_PLANE_SIZE, 0.f));
+    _size = _move * FULL_PLANE_SIZE;
     createPlane();
     createFrustum();
 }
 
 bool RenderableSpacecraftCameraPlane::isReady() const {
-    return _shader && _texture && _sphere;
+    return _planeShader && _sphereShader && _frustumShader && _texture && _sphere;
 }
 
 void RenderableSpacecraftCameraPlane::createFrustum() {
-    const GLfloat size = _size.value()[0];
-    const GLfloat w = _size.value()[1];
-
     // Vertex orders x, y, z, w
     // Where w indicates if vertex should be drawn in spacecraft
     // or planes coordinate system
     const GLfloat vertex_data[] = {
         0.f, 0.f, 0.f, 0.0,
-        size, size, 0.f , 1.0,
+        _size, _size, 0.f , 1.0,
         0.f, 0.f, 0.f, 0.0,
-        -size, -size, 0.f , 1.0,
+        -_size, -_size, 0.f , 1.0,
         0.f, 0.f, 0.f, 0.0,
-        size, -size, 0.f , 1.0,
+        _size, -_size, 0.f , 1.0,
         0.f, 0.f, 0.f, 0.0,
-        -size, size, 0.f , 1.0,
+        -_size, _size, 0.f , 1.0,
         // Borders
         // Left
-        -size, -size, 0.f, 1.0,
-        -size, size, 0.f, 1.0,
+        -_size, -_size, 0.f, 1.0,
+        -_size, _size, 0.f, 1.0,
         // Top
-        -size, size, 0.f, 1.0,
-        size, size, 0.f, 1.0,
+        -_size, _size, 0.f, 1.0,
+        _size, _size, 0.f, 1.0,
         // Right
-        size, size, 0.f, 1.0,
-        size, -size, 0.f, 1.0,
+        _size, _size, 0.f, 1.0,
+        _size, -_size, 0.f, 1.0,
         // Bottom
-        size, -size, 0.f, 1.0,
-        -size, -size, 0.f, 1.0,
+        _size, -_size, 0.f, 1.0,
+        -_size, -_size, 0.f, 1.0,
     };
 
     glGenVertexArrays(1, &_frustum);
@@ -307,15 +287,15 @@ bool RenderableSpacecraftCameraPlane::initialize() {
     glGenVertexArrays(1, &_quad); // generate array
     glGenBuffers(1, &_vertexPositionBuffer);
     //_size.setValue(glm::vec2(FULL_PLANE_SIZE, 0.f));
-    updatePlaneMoveFactor();
+    updatePlane();
 
-    if (!_shader) {
+    if (!_planeShader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
+        _planeShader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
             "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl",
             "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl"
             );
-        if (!_shader) {
+        if (!_planeShader) {
             return false;
         }
     }
@@ -348,8 +328,8 @@ bool RenderableSpacecraftCameraPlane::initialize() {
     _sphere->initialize();
 
     // using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    // _shader->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    //_shader->setIgnoreUniformLocationError(IgnoreError::Yes);
+    // _planeShader->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    //_planeShader->setIgnoreUniformLocationError(IgnoreError::Yes);
 
     return isReady();
 }
@@ -362,9 +342,9 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
     _vertexPositionBuffer = 0;
 
     RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_shader) {
-        renderEngine.removeRenderProgram(_shader);
-        _shader = nullptr;
+    if (_planeShader) {
+        renderEngine.removeRenderProgram(_planeShader);
+        _planeShader = nullptr;
     }
     return true;
 }
@@ -372,36 +352,22 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[0]); // 1 - _currentPBO
     // Orphan data and multithread
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, pboSize, NULL, GL_STREAM_DRAW);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, _pboSize, NULL, GL_STREAM_DRAW);
     // Map buffer to client memory
     //_pboBufferData = static_cast<float*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
-    _pboBufferData = static_cast<IMG_PRECISION*>(glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, NULL, pboSize, GL_MAP_WRITE_BIT|GL_MAP_INVALIDATE_BUFFER_BIT));
-    std::string& currentFilename = _imageMetadata[_currentActiveChannel][image].filename;
-
-   // LDEBUG("Updating PBO data " << _currentActiveChannel );
+    _pboBufferData = static_cast<IMG_PRECISION*>(
+          glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, NULL, _pboSize,
+                           GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
+    const std::string& currentFilename
+          = _imageMetadata[_currentActiveChannel][image].filename;
 
     if (!_asyncUploadPBO) {
-        SimpleJ2kCodec j2c;
-        j2c.CreateInfileStream(currentFilename);
-        j2c.SetupDecoder(_resolutionLevel);
-        j2c.DecodeIntoBuffer(_pboBufferData, 8);
-        //j2c.SetResolutionFactor(_resolutionLevel);
-        //j2c.DecodeTileIntoBuffer(/*tileid=*/1, _pboBufferData, /*numthreads*/8);
+        decode(_pboBufferData, currentFilename, 16);
     } else {
-        // if (_future) {
-        //     _future->wait();
-        // }
-        // _future = nullptr;
-
-        _future = std::make_unique<std::future<void>>(std::async(std::launch::async,
-            [this, &currentFilename]() {
-                SimpleJ2kCodec j2c;
-                j2c.CreateInfileStream(currentFilename);
-                j2c.SetupDecoder(_resolutionLevel);
-                j2c.DecodeIntoBuffer(_pboBufferData, 16); // TODO(mnoven): future crashes sometimes if this is multi threaded
-                //j2c.SetResolutionFactor(_resolutionLevel);
-               // j2c.DecodeTileIntoBuffer(/*tileid=*/1, _pboBufferData, /*numthreads*/8);
-            }));
+        _future = std::make_unique<std::future<void>>(
+              std::async(std::launch::async, [this, &currentFilename]() {
+                  decode(_pboBufferData, currentFilename, 16);
+              }));
     }
 
     // Release the mapped buffer
@@ -411,14 +377,13 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
 }
 
 void RenderableSpacecraftCameraPlane::updateTextureGPU() {
-   // LDEBUG("Uploading to GPU... " << _currentActiveChannel );
     if (_usePBO) {
         //auto t1 = Clock::now();
        // Wait for texture data from previous frame
         if (_future) {
             _future->wait();
         }
-      //  auto t2 = Clock::now();
+        //  auto t2 = Clock::now();
         // std::cout << "Waiting time for promise: "
         //       << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
         //       << " ms" << std::endl;
@@ -426,60 +391,42 @@ void RenderableSpacecraftCameraPlane::updateTextureGPU() {
         _future = nullptr;
         // Bind PBO to texture data source
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[0]);
-         const glm::uvec3& dimensions = _texture->dimensions();
         _texture->bind();
         // Send async to GPU by coping from PBO to texture objects
-        glTexSubImage2D(
-            _texture->type(),
-            0,
-            0,
-            0,
-            _imageSize,
-            _imageSize,
-            GLint(_texture->format()),
-            _texture->dataType(),
-            nullptr
-        );
+        glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
+                        GLint(_texture->format()), _texture->dataType(), nullptr);
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     } else {
-        std::string& currentFilename
+        const std::string& currentFilename
               = _imageMetadata[_currentActiveChannel][_currentActiveImage].filename;
-
-        unsigned char* data = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
-        SimpleJ2kCodec j2c;
-        j2c.CreateInfileStream(currentFilename);
-        j2c.SetupDecoder(_resolutionLevel);
-        j2c.DecodeIntoBuffer(data, 0);
-
-        //j2c.SetResolutionFactor(_resolutionLevel);
-        //j2c.DecodeTileIntoBuffer(/*tileid=*/1, data, /*numthreads*/8);
-
+        unsigned char* data
+              = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
+        decode(data, currentFilename, 0);
         _texture->bind();
-        const glm::uvec3& dimensions = _texture->dimensions();
-        glTexSubImage2D(
-            _texture->type(),
-            0,
-            0,
-            0,
-            _imageSize,
-            _imageSize,
-            GLint(_texture->format()),
-            _texture->dataType(),
-           data
-        );
+        glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
+                        GLint(_texture->format()), _texture->dataType(), data);
         delete[] data;
     }
 }
 
-void RenderableSpacecraftCameraPlane::performImageTimestep() {
-    const double osTime = Time::ref().j2000Seconds();
+void RenderableSpacecraftCameraPlane::decode(unsigned char* buffer,
+                                             const std::string& filename,
+                                             const int numThreads)
+{
+    SimpleJ2kCodec j2c;
+    j2c.CreateInfileStream(filename);
+    j2c.SetupDecoder(_resolutionLevel);
+    j2c.DecodeIntoBuffer(buffer, numThreads);
+}
+
+void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime) {
     const auto& imageList = _imageMetadata[_currentActiveChannel];
 
-    //TODO(mnoven): Do NOT perform this log(n) lookup every frame - check if
+    //TODO(mnoven): Do NOT perform this log(n) lookup every update - check if
     // still inside current interval => No need to check
     const auto& low = std::lower_bound(imageList.begin(), imageList.end(), osTime);
 
-    int currentActiveImageLast = _currentActiveImage;
+    size_t currentActiveImageLast = _currentActiveImage;
     _currentActiveImage = low - imageList.begin();
 
     if (_currentActiveImage == _imageMetadata[_currentActiveChannel].size()) {
@@ -514,31 +461,23 @@ void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
 
     bool timeToUpdateTexture = realTimeDiff > _minRealTimeUpdateInterval;
 
-    // Future ready, push to texture vector
-    // if (_imageData.valid() && DownloadManager::futureReady(_imageData)) {
-    //     std::string textureResource = _imageData.get().buffer;
-    //     _texture = FitsFileReader::loadTextureFromMemory(textureResource);
-    //    // _texture->uploadTexture();
-    // }
-
     // Update texture
     if (timeToUpdateTexture) {
-        performImageTimestep();
+        performImageTimestep(data.time);
         _lastUpdateRealTime = _realTime;
-        _lastUpdateOpenSpaceTime =_openSpaceTime;
     }
 
-    if (_shader->isDirty())
-        _shader->rebuildFromFile();
+    if (_planeShader->isDirty()) {
+        _planeShader->rebuildFromFile();
+    }
 
-    if (_sphereShader->isDirty())
+    if (_sphereShader->isDirty()) {
         _sphereShader->rebuildFromFile();
+    }
 
-    if (_frustumShader->isDirty())
-        _sphereShader->rebuildFromFile();
-
-    if (_planeIsDirty)
-        createPlane();
+    if (_frustumShader->isDirty()) {
+        _frustumShader->rebuildFromFile();
+    }
 }
 
 void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
@@ -546,118 +485,90 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
         return;
     }
 
-    glm::mat4 scaleTransform = glm::mat4(1.0);
+    const glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
+    const glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
     // Activate shader
-    _shader->activate();
-
-    SceneGraphNode* parent = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName);
-
-    SceneGraphNode* sun = OsEng.renderEngine().scene()->sceneGraphNode("Sun");
-    glm::dvec3 sunPos = glm::normalize(OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldRotationMatrix() * glm::dvec3(0.0, 0.0, 1.0));
+    _planeShader->activate();
 
     // Model transform and view transform needs to be in double precision
-    // Sun's barycenter
-    SceneGraphNode* p = OsEng.renderEngine().scene()->sceneGraphNode(_target);
-    glm::dmat4 rotationTransform = glm::lookAt(glm::normalize(data.modelTransform.translation),
-                                         glm::dvec3(p->worldPosition()), data.modelTransform.rotation * glm::dvec3(0.0, 0.0, 1.0));
+    const SceneGraphNode* target = OsEng.renderEngine().scene()->sceneGraphNode(_target);
+    const glm::dvec3 positionWorld = data.modelTransform.translation;
+    const glm::dvec3 targetPositionWorld = target->worldPosition();
+
+    const glm::dvec3 upWorld = data.modelTransform.rotation * glm::dvec3(0.0, 0.0, 1.0);
+    const glm::dvec3 nPositionWorld = glm::normalize(positionWorld);
+    const glm::dvec3 nTargetWorld = glm::normalize(targetPositionWorld);
+
+    // We don't normalize sun's position since its in the origin
+    glm::dmat4 rotationTransform = glm::lookAt(nPositionWorld, glm::dvec3(target->worldPosition()), upWorld);
     rotationTransform = glm::dmat4(glm::inverse(rotationTransform));
 
     // Scale vector to sun barycenter to get translation distance
-    glm::dvec3 sunDir = p->worldPosition() - data.modelTransform.translation;
-    glm::dvec3 translationTransform = sunDir * _move;
+    glm::dvec3 sunDir = targetPositionWorld - positionWorld;
+    glm::dvec3 offset = sunDir * _move;
 
     glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation + translationTransform) *
+        glm::translate(glm::dmat4(1.0), positionWorld + offset) *
         rotationTransform *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
-        glm::dmat4(scaleTransform);
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+        glm::dmat4(1.0);
+    glm::dmat4 modelViewTransform = viewMatrix * modelTransform;
 
     glm::dmat4 spacecraftModelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::translate(glm::dmat4(1.0), positionWorld) *
         rotationTransform *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
-        glm::dmat4(scaleTransform);
+        glm::dmat4(1.0);
 
-    _shader->setUniform("modelViewProjectionTransform",
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+    _planeShader->setUniform("modelViewProjectionTransform",
+        projectionMatrix * glm::mat4(modelViewTransform));
 
     ghoul::opengl::TextureUnit imageUnit;
-    ghoul::opengl::TextureUnit tfUnit;
-
     imageUnit.activate();
     _texture->bind();
-    _shader->setUniform("texture1", imageUnit);
+    _planeShader->setUniform("imageryTexture", imageUnit);
 
+    ghoul::opengl::TextureUnit tfUnit;
     tfUnit.activate();
     _transferFunctions[_currentActiveChannel]->bind(); // Calls update internally
-
-    _shader->setUniform("texture2", tfUnit);
-    //_shader->setUniform("currentActiveChannel", _currentActiveChannel);
-    //_shader->setUniform("minIntensity", _imageData[_currentActiveChannel][_currentActiveImage].metaData.min);
-    //_shader->setUniform("maxIntensity", _imageData[_currentActiveChannel][_currentActiveImage].metaData.max);
-    //_shader->setUniform("expTime", _imageData[_currentActiveChannel][_currentActiveImage].metaData.expTime);
-
-    bool usingFramebufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::Framebuffer;
-
-    bool usingABufferRenderer =
-        OsEng.renderEngine().rendererImplementation() == RenderEngine::RendererImplementation::ABuffer;
-
-    if (usingABufferRenderer) {
-        _shader->setUniform("additiveBlending", _blendMode == BlendMode::Additive);
-    }
-
-    bool additiveBlending = _blendMode == BlendMode::Additive && usingFramebufferRenderer;
-    if (additiveBlending) {
-        glDepthMask(false);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    }
+    _planeShader->setUniform("lut", tfUnit);
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    if (additiveBlending) {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glDepthMask(true);
-    }
-    _shader->deactivate();
+    _planeShader->deactivate();
 
     _frustumShader->activate();
-
     _frustumShader->setUniform("modelViewProjectionTransform",
-        data.camera.projectionMatrix() * glm::mat4(data.camera.combinedViewMatrix() * spacecraftModelTransform));
-    _frustumShader->setUniform("modelViewProjectionTransformPlane",data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
-
+        projectionMatrix * glm::mat4(viewMatrix * spacecraftModelTransform));
+    _frustumShader->setUniform("modelViewProjectionTransformPlane", projectionMatrix * glm::mat4(modelViewTransform));
     glBindVertexArray(_frustum);
     glDrawArrays(GL_LINES, 0, 16);
     _frustumShader->deactivate();
 
     _sphereShader->activate();
     glm::dmat4 modelTransformSphere =
-        glm::translate(glm::dmat4(1.0), sun->worldPosition()) * // Translation
+        glm::translate(glm::dmat4(1.0), target->worldPosition()) * // Translation
         rotationTransform *  // Spice rotation
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
-    glm::dmat4 modelViewTransformNew = data.camera.combinedViewMatrix() * modelTransformSphere;
-
-    _sphereShader->setUniform(
-        "modelViewProjectionTransform",
-        data.camera.projectionMatrix() * glm::mat4(modelViewTransformNew)
-    );
+    glm::dmat4 modelViewTransformSphere
+          = viewMatrix * modelTransformSphere;
 
     _sphereShader->setUniform("sunDir", glm::vec3(sunDir));
-    _sphereShader->setUniform("translationTransform", glm::vec3( data.modelTransform.translation +translationTransform));
+    _sphereShader->setUniform("planePosition", glm::vec3(positionWorld + offset));
+    _sphereShader->setUniform(
+        "modelViewProjectionTransform",
+        projectionMatrix * glm::mat4(modelViewTransformSphere)
+    );
 
     imageUnit.activate();
     _texture->bind();
-    _sphereShader->setUniform("texture1", imageUnit);
+    _sphereShader->setUniform("imageryTexture", imageUnit);
 
     tfUnit.activate();
     _transferFunctions[_currentActiveChannel]->bind(); // Calls update internally
-
-    _sphereShader->setUniform("texture2", tfUnit);
+    _sphereShader->setUniform("lut", tfUnit);
 
     _sphere->render();
     _sphereShader->deactivate();

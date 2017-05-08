@@ -61,6 +61,6 @@ return {
       --  "constellationbounds",
         "missions/sdo",
         --"missions/stereo",
-        "missions/soho"
+       -- "missions/soho"
     }
 }

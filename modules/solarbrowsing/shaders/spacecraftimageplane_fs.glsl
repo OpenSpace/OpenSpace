@@ -23,8 +23,8 @@
  ****************************************************************************************/
 
 // uniform float time;
-uniform sampler2D texture1;
-uniform sampler1D texture2;
+uniform sampler2D imageryTexture;
+uniform sampler1D lut;
 uniform bool additiveBlending;
 
 // uniform int currentActiveChannel;
@@ -43,8 +43,8 @@ in vec4 vs_positionScreenSpace;
 
 Fragment getFragment() {
 
-    float intensityOrg = float(texture(texture1, vs_st).r);
-    vec4 outColor = texture(texture2, intensityOrg);
+    float intensityOrg = float(texture(imageryTexture, vs_st).r);
+    vec4 outColor = texture(lut, intensityOrg);
 
 
     // float outa;
