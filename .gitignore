@@ -11,6 +11,7 @@ tmp/
 /documentation
 /doc
 /ext/SGCT
+/ext/cef
 
 *.gglsl
 *.GhoulGenerated.glsl
