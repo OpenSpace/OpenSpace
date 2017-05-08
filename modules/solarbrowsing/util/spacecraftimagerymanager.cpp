@@ -247,6 +247,59 @@ void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
     }
 }
 
+std::vector<std::vector<ImageMetadata>>
+      SpacecraftImageryManager::loadImageMetadata(const std::string& path,
+                                                  const std::vector<std::   string>& instruments)
+{
+    std::vector<ImageMetadata> imageSequenceMetadata;
+
+    using RawPath = ghoul::filesystem::Directory::RawPath;
+    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
+
+    if (!FileSys.directoryExists(sequenceDir)) {
+        LERROR("Could not load directory '" << sequenceDir.path() << "'");
+    }
+
+    using Recursive = ghoul::filesystem::Directory::RawPath;
+    using Sort = ghoul::filesystem::Directory::Sort;
+    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
+    imageSequenceMetadata.reserve(sequencePaths.size());
+
+    // TODO(mnoven): Remove this
+    int limit = 0;
+    for (auto seqPath : sequencePaths) {
+        LDEBUG("seqPAth" <<  seqPath);
+       // if (limit++ == 1000) break;
+        if (size_t position = seqPath.find_last_of(".") + 1) {
+            if (position != std::string::npos) {
+                ghoul::filesystem::File currentFile(seqPath);
+                std::string extension = currentFile.fileExtension();
+                if (extension == "jp2" || extension == "j2k") {
+                    const std::string relativePath = FileSys.relativePath(seqPath);
+
+                    // TODO(mnoven): Prettify or read metadata instead
+                    std::vector<std::string> tokens;
+                    std::stringstream ss;
+                    ss.str(currentFile.filename());
+                    std:: string item;
+                    while (std::getline(ss, item, '_')) {
+                        tokens.push_back(item);
+                    }
+                    std::string time = tokens[0] + "-" + tokens[1] + "-" +
+                                       tokens[2] + "T" + tokens[4] + ":" +
+                                       tokens[5] + ":" + tokens[6] + "." + tokens[7];
+                    ImageMetadata metadata;
+                    metadata.filename = seqPath;
+                    metadata.timeObserved = Time::ref().convertTime(time);
+                    imageSequenceMetadata.push_back(metadata);
+                }
+            }
+        }
+        LDEBUG("Finished loading path " << seqPath);
+    }
+    //return std::move(imageSequenceMetadata);
+}
+
 std::vector<ImageMetadata> SpacecraftImageryManager::loadImageMetadata(const std::string& path) {
     std::vector<ImageMetadata> imageSequenceMetadata;
 

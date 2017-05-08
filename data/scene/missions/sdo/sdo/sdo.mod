@@ -61,10 +61,13 @@ return {
         Renderable = {
             Type = "RenderableSpacecraftCameraPlane",
             Target = "Sun",
-           -- Size = {20.619, 10.220},
-            Origin = "Center",
-            -- Dummy texture
-            Texture = "images/stereo2.png",
+            -- Will recursively find all instruments that match array instruments
+            RootPath = "/Volumes/Untitled/solarflare/aia/2015/",
+            Instruments = {
+                "94",
+                "131",
+                "171",
+            },
         },
     },
 }
