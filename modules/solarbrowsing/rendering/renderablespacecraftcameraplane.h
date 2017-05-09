@@ -58,7 +58,7 @@ public:
 
 private:
     properties::BoolProperty _asyncUploadPBO;
-    properties::OptionProperty _activeInstrument;
+    properties::OptionProperty _activeInstruments;
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
     properties::IntProperty _resolutionLevel;
@@ -99,6 +99,8 @@ private:
 
     unsigned int _imageSize;
     double _move = 0.0;
+
+    std::string _currentActiveInstrument;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::vector<std::unique_ptr<TransferFunction>> _transferFunctions;
