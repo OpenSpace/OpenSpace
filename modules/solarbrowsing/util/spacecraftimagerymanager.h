@@ -34,34 +34,11 @@
 
 #define IMG_PRECISION unsigned char
 
-// TODO List:
-// 1. Read headerinfo properly
-// 2. Test with 4k images
-// 3. Colorize
-
 namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
 
 class TransferFunction;
-
-// struct ImageMetadata {
-//     std::string filename;
-//     int min;
-//     int max;
-//     int waveLength;
-//     float expTime;
-//     double timeObserved;
-// };
-
-// struct ImageDataObject {
-//     ImageMetadata metaData;
-//     std::valarray<IMG_PRECISION> contents;
-
-//     bool operator<(const double val) const {
-//         return (metaData.timeObserved < val);
-//     }
-// };
 
 struct ImageMetadata {
     double timeObserved;
@@ -80,8 +57,6 @@ public:
     SpacecraftImageryManager();
     void ConvertTileJ2kImages(const std::string& path, const unsigned int tileWidth,
                               const unsigned int tileHeight);
-    // std::vector<ImageDataObject> loadImageData(const std::string& path, int&
-    // imageSize);
     void loadTransferFunctions(
           const std::string& path,
           std::unordered_map<std::string, std::unique_ptr<TransferFunction>>& _tfMap,
@@ -93,15 +68,9 @@ public:
           const std::unordered_set<std::string>&
                 _filter);
     std::unique_ptr<ghoul::opengl::Texture> createLUT();
-    //void scaleImageData(std::vector<ImageDataObject>& _imageData, const std::string& type, const int& channel);
 private:
     void fetchServerImages(std::string type);
     void fillImageryInfo(std::string buffer, std::string type);
-    //void fetchLatestImage(std::string& url);
-    //fetchLocalPlaneTexturesAndStoreInMap();
-    //preProcessImageData();
-    //postProcessTexture();
-    //startFetchingCycle();
 };
 
 } //namespace openspace
