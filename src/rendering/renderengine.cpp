@@ -105,6 +105,7 @@ RenderEngine::RenderEngine()
         "Type of the frametime display",
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _showDate("showDate", "Show Date Information", true)
     , _showInfo("showInfo", "Show Render Information", true)
     , _showLog("showLog", "Show the OnScreen log", true)
     , _takeScreenshot("takeScreenshot", "Take Screenshot")
@@ -112,7 +113,11 @@ RenderEngine::RenderEngine()
     , _applyWarping("applyWarpingScreenshot", "Apply Warping to Screenshots", false)
     , _showFrameNumber("showFrameNumber", "Show Frame Number", false)
     , _disableMasterRendering("disableMasterRendering", "Disable Master Rendering", false)
-    , _disableSceneOnMaster("disableSceneOnMaster", "Disable Scene on Master", false)
+    , _disableSceneTranslationOnMaster(
+        "disableSceneTranslationOnMaster",
+        "Disable Scene Translation on Master",
+        false
+    )
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
@@ -147,6 +152,7 @@ RenderEngine::RenderEngine()
     );
     addProperty(_frametimeType);
     
+    addProperty(_showDate);
     addProperty(_showInfo);
     addProperty(_showLog);
     
@@ -165,8 +171,8 @@ RenderEngine::RenderEngine()
     
     addProperty(_showFrameNumber);
     
+    addProperty(_disableSceneTranslationOnMaster);
     addProperty(_disableMasterRendering);
-    addProperty(_disableSceneOnMaster);
 }
 
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
@@ -214,7 +220,7 @@ void RenderEngine::initialize() {
     }
 
     if (confManager.hasKey(ConfigurationManager::KeyDisableSceneOnMaster)) {
-        _disableSceneOnMaster = confManager.value<bool>(
+        _disableSceneTranslationOnMaster = confManager.value<bool>(
             ConfigurationManager::KeyDisableSceneOnMaster
         );
     }
@@ -395,7 +401,7 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
     LTRACE("RenderEngine::render(begin)");
     WindowWrapper& wrapper = OsEng.windowWrapper();
 
-    if (_disableSceneOnMaster && wrapper.isMaster()) {
+    if (_disableSceneTranslationOnMaster && wrapper.isMaster()) {
         _camera->sgctInternal.setViewMatrix(viewMatrix);
     }
     else {
@@ -805,15 +811,18 @@ void RenderEngine::renderInformation() {
             fontResolution().y
             //OsEng.windowWrapper().viewportPixelCoordinates().w
         );
-        penPosition.y -= _fontDate->height();
 
-        if (_showInfo && _fontDate) {
+        if (_showDate && _fontDate) {
+            penPosition.y -= _fontDate->height();
             RenderFontCr(
                 *_fontDate,
                 penPosition,
                 "Date: %s",
                 Time::ref().UTC().c_str()
             );
+        }
+        else {
+            penPosition.y -= _fontInfo->height();
         }
         if (_showInfo && _fontInfo) {
             RenderFontCr(
