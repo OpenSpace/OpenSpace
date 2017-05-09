@@ -720,16 +720,11 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
  * attenuation := transmittance T(x,x0)
  */
 vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r, const float mu) {
-  if (t > 0.0f) {
-    return vec3(0.0f);
-  } else {
-    vec3 transmittance = (r <= Rt) ? ( mu < -sqrt(1.0f - (Rg*Rg)/(r*r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);    
-    float sunFinalColor = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance; 
+  vec3 transmittance = (r <= Rt) ? ( mu < -sqrt(1.0f - (Rg*Rg)/(r*r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);    
+  float sunFinalColor = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance; 
 
-    return transmittance * sunFinalColor;    
-    }
+  return transmittance * sunFinalColor;      
 }
-
 
 void main() {
     // Acessing Depth Buffer.
