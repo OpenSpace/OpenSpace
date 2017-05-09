@@ -31,6 +31,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/documented.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
@@ -48,8 +49,7 @@ class SceneGraphNode;
 namespace interaction {
 
 
-class InteractionHandler : public properties::PropertyOwner
-{
+class InteractionHandler : public properties::PropertyOwner, public Documented {
 public:
     InteractionHandler();
     ~InteractionHandler();
@@ -121,7 +121,7 @@ public:
 
     void saveCameraStateToFile(const std::string& filepath);
     void restoreCameraStateFromFile(const std::string& filepath);
-    void writeKeyboardDocumentation(const std::string& type, const std::string& file);
+//    void writeKeyboardDocumentation(const std::string& type, const std::string& file);
 
 private:
     using Synchronized = ghoul::Boolean;
@@ -131,6 +131,8 @@ private:
         Synchronized synchronization;
         std::string documentation;
     };
+    
+    std::string generateJson()  const override;
 
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
 

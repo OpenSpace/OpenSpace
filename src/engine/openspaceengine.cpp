@@ -604,7 +604,8 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 
         if (hasType && hasFile) {
             file = absPath(file);
-            interactionHandler().writeKeyboardDocumentation(type, file);
+            interactionHandler().writeDocumentation(file);
+//            interactionHandler().writeKeyboardDocumentation(type, file);
         }
     }
 
