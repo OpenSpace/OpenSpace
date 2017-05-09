@@ -55,7 +55,7 @@ namespace openspace {
 RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
-    , _activeInstrument("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
+    , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
     , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 75, 0, 300)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
@@ -77,74 +77,44 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         throw ghoul::RuntimeError("RootPath has to be specified");
     }
 
-    // SpacecraftImageryManager::ref().loadImageMetadata(
-    //       rootPath, _optionToInstrument, _imageMetadataMap);
-
-    //std::vector<std::string> allInstruments;
-   // std::unordered_map<int, std::vector<ImageMetadata>> _imageMetadataMap;
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>("Instruments")) {
         ghoul::Dictionary instrumentDic = dictionary.value<ghoul::Dictionary>("Instruments");
-
         for (size_t i = 1; i <= instrumentDic.size(); ++i) {
             if (!instrumentDic.hasKeyAndValue<std::string>(std::to_string(i))) {
                 throw ghoul::RuntimeError("Instruments has to be an array-style table");
             }
-            const std::string& instrument = instrumentDic.value<std::string>(std::to_string(i));
-           // const std::string& tfPath = tfDic.value<std::string>(std::to_string(i));
-           // const int instrumentKey = i;
-
-            //allInstruments.push_back(instrument);
-          //  _activeInstrument.addOption(instrumentKey, instrument); // String (GUI) -> Int
-           // _optionToInstrument.insert({instrumentKey, instrument}); // Int -> String
-            //_imageMetadataMap[instrument] = {}; // String -> Empty Metadata
-
+            std::string instrument = instrumentDic.value<std::string>(std::to_string(i));
+            std::transform(instrument.begin(), instrument.end(), instrument.begin(),
+                           ::tolower);
             _instrumentFilter.insert(instrument);
-          //  std::unique_ptr<TransferFunction> tf = std::make_unique<TransferFunction>(tfPath);
-            //_tfMap[instrument] = std::make_unique<TransferFunction>(tfPath);
-            //_tfMap.insert({instrument, std::move(tf)});
         }
-    } else {
-        throw ghoul::RuntimeError(
-              "Instruments and Transferfunctions have to be specified");
     }
 
-    //assert(_optionToInstrument.size() == _imageMetadataMap.size() == 2);
+    SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap, _instrumentFilter);
+    SpacecraftImageryManager::ref().loadTransferFunctions(tfRootPath, _tfMap, _instrumentFilter);
 
-    SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap);
-    SpacecraftImageryManager::ref().loadTransferFunctions(tfRootPath, _tfMap);
+    // Some sanity checks
+    if (_imageMetadataMap.size() == 0) {
+        if (_instrumentFilter.size() > 0) {
+            LERROR("Could not find any instruments that match specified filter");
+            for (auto& filter : _instrumentFilter) {
+                LERROR(filter);
+            }
+        } else {
+            LERROR("Images map is empty! Check your path");
+        }
+    }
 
     unsigned int i = 0;
-    for ( auto& el : _imageMetadataMap) {
-        // std::string tfPath = "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/AIA_304.txt";
-        // _tfMap[el.first] = std::make_unique<TransferFunction>(tfPath);
-
-        // LDEBUG("Adding" << el.first);
-        _activeInstrument.addOption(i++, el.first);
+    for (auto& el : _imageMetadataMap) {
+        _activeInstruments.addOption(i++, el.first);
     }
 
-    // // TODO(mnoven): Lua
-    // std::vector<std::string> paths
-    //       = {/*"/Volumes/Untitled/solarflare/aia/2015/03/01/131",
-    //          "/Volumes/Untitled/solarflare/aia/2015/03/01/171",*/
-    //          "/home/noven/workspace/OpenSpace/data/solarflarej2k/304/",
-    //          "/home/noven/workspace/OpenSpace/data/solarflarej2k/193/"};
-
-    // std::vector<std::string> tfPaths
-    //       = {"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0304_new.txt",
-    //          "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0193_new.txt",
-    //          /*"/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0304_new.txt",
-    //          "/home/noven/workspace/OpenSpace/data/sdotransferfunctions/0193_new.txt"*/};
-
-    // const int numChannels = paths.size();
-    // for (int i = 0; i < numChannels; i++) {
-    //     //_imageMetadata.push_back(SpacecraftImageryManager::ref().loadImageMetadata(paths[i]));
-    //     _transferFunctions.push_back(std::make_unique<TransferFunction>(tfPaths[i]));
-    // }
-    // _currentActiveChannel.setMaxValue(_imageMetadata.size() - 1);
+    _currentActiveInstrument
+          = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
 
     // Have to figure out the times of the whole interval first
-    ImageMetadata& start =_imageMetadataMap[_activeInstrument.getDescriptionByValue(_activeInstrument.value())][0];
-    //ImageMetadata& end = _imageMetadata[_currentActiveChannel][ _imageMetadata[_currentActiveChannel].size() - 1];
+    ImageMetadata& start =_imageMetadataMap[_currentActiveInstrument][0];
 
     _startTimeSequence = start.timeObserved;
     //_endTimeSequence = end.timeObserved;
@@ -187,14 +157,17 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
 
-    _activeInstrument.onChange([this]() {
-        LDEBUG("Updating current acive channel");
+    _activeInstruments.onChange([this]() {
+        _currentActiveInstrument
+              = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
+
+        LDEBUG("Updating current active instrument" << _currentActiveInstrument);
         _updatingCurrentActiveChannel = true;
         const double& osTime = Time::ref().j2000Seconds();
-        const auto& imageList = _imageMetadataMap[_activeInstrument.getDescriptionByValue(_activeInstrument.value())];/*_imageMetadata[_currentActiveChannel]*/
+        const auto& imageList = _imageMetadataMap[_activeInstruments.getDescriptionByValue(_activeInstruments.value())];/*_imageMetadata[_currentActiveChannel]*/
         const auto& low = std::lower_bound(imageList.begin(), imageList.end(), osTime);
         _currentActiveImage = low - imageList.begin();
-        if (_currentActiveImage == _imageMetadataMap[_activeInstrument.getDescriptionByValue(_activeInstrument.value())].size()) {
+        if (_currentActiveImage == _imageMetadataMap[_activeInstruments.getDescriptionByValue(_activeInstruments.value())].size()) {
             _currentActiveImage = _currentActiveImage - 1;
         }
         updateTextureGPU(/*asyncUpload=*/false);
@@ -203,7 +176,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     });
 
     _resolutionLevel.onChange([this]() {
-        LDEBUG("Updating level of resolution");
+        LDEBUG("Updating level of resolution" << _resolutionLevel);
         _updatingCurrentLevelOfResolution = true;
         _pboSize = (4096 * 4096 * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
         _imageSize = 4096 / (pow(2, _resolutionLevel));
@@ -223,7 +196,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     }
 
     performImageTimestep(Time::ref().j2000Seconds());
-    addProperty(_activeInstrument);
+    addProperty(_activeInstruments);
     addProperty(_resolutionLevel);
     addProperty(_minRealTimeUpdateInterval);
     addProperty(_asyncUploadPBO);
@@ -387,7 +360,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
           glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, NULL, _pboSize,
                            GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
     const std::string& currentFilename
-          = _imageMetadataMap[_activeInstrument.getDescriptionByValue(_activeInstrument.value())][image].filename;
+          = _imageMetadataMap[_currentActiveInstrument][image].filename;
 
 
     if (!_asyncUploadPBO) {
@@ -428,7 +401,7 @@ void RenderableSpacecraftCameraPlane::updateTextureGPU(bool asyncUpload, bool re
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     } else {
         const std::string& currentFilename
-              = _imageMetadataMap[_activeInstrument.getDescriptionByValue(_activeInstrument.value())][_currentActiveImage].filename;
+              = _imageMetadataMap[_currentActiveInstrument][_currentActiveImage].filename;
         unsigned char* data
               = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
         decode(data, currentFilename, 0);
@@ -457,7 +430,7 @@ void RenderableSpacecraftCameraPlane::decode(unsigned char* buffer,
 }
 
 void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime) {
-    const auto& imageList = _imageMetadataMap[_activeInstrument.getDescriptionByValue(_activeInstrument.value())];
+    const auto& imageList = _imageMetadataMap[_currentActiveInstrument];
 
     //TODO(mnoven): Do NOT perform this log(n) lookup every update - check if
     // still inside current interval => No need to check
@@ -466,7 +439,7 @@ void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime)
     size_t currentActiveImageLast = _currentActiveImage;
     _currentActiveImage = low - imageList.begin();
 
-    if (_currentActiveImage == _imageMetadataMap[_activeInstrument.getDescriptionByValue(_activeInstrument.value())].size()) {
+    if (_currentActiveImage == _imageMetadataMap[_currentActiveInstrument].size()) {
         _currentActiveImage = _currentActiveImage - 1;
     }
     // TODO(mnoven): Clean this up
@@ -562,7 +535,7 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     tfUnit.activate();
 //    _transferFunctions[_currentActiveChannel]->bind();
 
-    _tfMap[_activeInstrument.getDescriptionByValue(_activeInstrument.value())]->bind(); // Calls update internally
+    _tfMap[_currentActiveInstrument]->bind(); // Calls update internally
     _planeShader->setUniform("lut", tfUnit);
 
     glBindVertexArray(_quad);
@@ -600,7 +573,7 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
 
     tfUnit.activate();
     //_transferFunctions[_currentActiveChannel]->bind(); // Calls update internally
-    _tfMap[_activeInstrument.getDescriptionByValue(_activeInstrument.value())]->bind(); // Calls update internally
+    _tfMap[_currentActiveInstrument]->bind(); // Calls update internally
     _sphereShader->setUniform("lut", tfUnit);
 
     _sphere->render();

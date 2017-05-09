@@ -248,13 +248,11 @@ void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
     }
 }
 
-
 void SpacecraftImageryManager::loadTransferFunctions(
     const std::string& path,
-    std::unordered_map<std::string, std::unique_ptr<TransferFunction>>& _tfMap)
+    std::unordered_map<std::string, std::unique_ptr<TransferFunction>>& _tfMap,
+    const std::unordered_set<std::string>& _filter)
 {
-    // std::vector<ImageMetadata> imageSequenceMetadata;
-
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
 
@@ -273,54 +271,26 @@ void SpacecraftImageryManager::loadTransferFunctions(
                 std::string extension = currentFile.fileExtension();
                 if (extension == "txt") {
                     std::string key = currentFile.baseName();
-                    _tfMap[key] = std::make_unique<TransferFunction>(seqPath);
+                    std::string filterKey = key;
+                    std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
+                                   ::tolower);
 
-                    // // TODO(mnoven): Prettify or read metadata instead
-                  //   std::string fileName = currentFile.filename();
-                  //   size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
-                  //   std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
-
-                  //   // Name
-                  //   size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
-                  //   std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
-                  //   //LDEBUG("Satellite NAME: " << satelliteName);
-
-                  //   // Instrument
-                  //   size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
-                  //   std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
-                  //   size_t dot = instrumentName.rfind(".");
-                  //   instrumentName = instrumentName.substr(0, dot);
-                  //   //LDEBUG("Instrument NAME: " << instrumentName);
-
-                  //   // Time
-                  //   std::vector<std::string> tokens;
-                  //   std::stringstream ss;
-                  //   ss.str(currentFile.filename());
-                  //   std:: string item;
-                  //   while (std::getline(ss, item, '_')) {
-                  //       tokens.push_back(item);
-                  //   }
-                  //   std::string time = tokens[0] + "-" + tokens[1] + "-" +
-                  //                      tokens[2] + "T" + tokens[4] + ":" +
-                  //                      tokens[5] + ":" + tokens[6] + "." + tokens[7];
-                  //   ImageMetadata metadata;
-                  //   metadata.filename = seqPath;
-                  //   metadata.timeObserved = Time::ref().convertTime(time);
-                  // //  imageSequenceMetadata.push_back(metadata);
-                  //   _imageMetadataMap[instrumentName].push_back(metadata);
+                    // If filter is empty or value exist
+                    if (_filter.size() == 0
+                        || _filter.find(filterKey) != _filter.end()) {
+                        _tfMap[key] = std::make_unique<TransferFunction>(seqPath);
+                    }
                 }
             }
         }
-        //LDEBUG("Finished loading path " << seqPath);
     }
-    //return std::move(imageSequenceMetadata);
 }
 
 void SpacecraftImageryManager::loadImageMetadata(
       const std::string& path,
-      std::unordered_map<std::string, std::vector<ImageMetadata>>& _imageMetadataMap)
+      std::unordered_map<std::string, std::vector<ImageMetadata>>& _imageMetadataMap,
+      const std::unordered_set<std::string>& _filter)
 {
-    // std::vector<ImageMetadata> imageSequenceMetadata;
 
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
@@ -329,42 +299,11 @@ void SpacecraftImageryManager::loadImageMetadata(
         LERROR("Could not load directory '" << sequenceDir.path() << "'");
     }
 
-    // if (!dictionary.hasKeyAndValue<ghoul::Dictionary>("Instruments")) {
-    //     LERROR("Instruments has to be specified");
-    // }
-
-    // ghoul::Dictionary instrumentDic = dictionary.value<ghoul::Dictionary>("Instruments");
-
     using Recursive = ghoul::filesystem::Directory::RawPath;
     using Sort = ghoul::filesystem::Directory::Sort;
     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
-   // imageSequenceMetadata.reserve(sequencePaths.size());
-    std::string currentInstrument;
-  //  std::vector<ImageMetadata> imageMetadataContainer;
 
-    // TODO(mnoven): Remove this
-    //int limit = 0;
     for (auto seqPath : sequencePaths) {
-
-        // Begin push to instrument
-        // if (seqPath == instrument)
-        size_t pos = seqPath.find_last_of(FileSys.PathSeparator);
-        std::string currentFolder = seqPath.substr(pos + 1);
-
-        if (_imageMetadataMap.find(currentFolder) != _imageMetadataMap.end()) {
-            currentInstrument = currentFolder;
-        }
-
-        // if (!instruments.hasKeyAndValue<std::string>(std::to_string(i))) {
-        //     throw ghoul::RuntimeError("Instruments has to be an array-style table");
-        // }
-        // std::string instrument = instruments.value<std::string>(std::to_string(i));
-
-        // if (_imageMetadataMap.find(currentFolder) != _imageMetadataMap.end()) {
-        //     currentInstrument = currentFolder;
-        // }
-
-        // if (limit++ == 1000) break;
         if (size_t position = seqPath.find_last_of(".") + 1) {
             if (position != std::string::npos) {
                 ghoul::filesystem::File currentFile(seqPath);
@@ -386,30 +325,34 @@ void SpacecraftImageryManager::loadImageMetadata(
                     std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
                     size_t dot = instrumentName.rfind(".");
                     instrumentName = instrumentName.substr(0, dot);
-                    //LDEBUG("Instrument NAME: " << instrumentName);
+                    std::string filterKey = instrumentName;
+                    std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
+                                   ::tolower);
 
-                    // Time
-                    std::vector<std::string> tokens;
-                    std::stringstream ss;
-                    ss.str(currentFile.filename());
-                    std:: string item;
-                    while (std::getline(ss, item, '_')) {
-                        tokens.push_back(item);
+                    // If filter is empty or value exist
+                    if (_filter.size() == 0
+                        || _filter.find(filterKey) != _filter.end()) {
+                        // Time
+                        std::vector<std::string> tokens;
+                        std::stringstream ss;
+                        ss.str(currentFile.filename());
+                        std:: string item;
+                        while (std::getline(ss, item, '_')) {
+                            tokens.push_back(item);
+                        }
+                        std::string time = tokens[0] + "-" + tokens[1] + "-" +
+                                           tokens[2] + "T" + tokens[4] + ":" +
+                                           tokens[5] + ":" + tokens[6] + "." + tokens[7];
+                        ImageMetadata metadata;
+                        metadata.filename = seqPath;
+                        metadata.timeObserved = Time::ref().convertTime(time);
+                        _imageMetadataMap[instrumentName].push_back(metadata);
                     }
-                    std::string time = tokens[0] + "-" + tokens[1] + "-" +
-                                       tokens[2] + "T" + tokens[4] + ":" +
-                                       tokens[5] + ":" + tokens[6] + "." + tokens[7];
-                    ImageMetadata metadata;
-                    metadata.filename = seqPath;
-                    metadata.timeObserved = Time::ref().convertTime(time);
-                  //  imageSequenceMetadata.push_back(metadata);
-                    _imageMetadataMap[instrumentName].push_back(metadata);
                 }
             }
         }
         //LDEBUG("Finished loading path " << seqPath);
     }
-    //return std::move(imageSequenceMetadata);
 }
 
 std::vector<ImageMetadata> SpacecraftImageryManager::loadImageMetadata(const std::string& path) {

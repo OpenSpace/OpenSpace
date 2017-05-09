@@ -30,6 +30,7 @@
 #include <vector>
 #include <valarray>
 #include <unordered_map>
+#include <unordered_set>
 
 #define IMG_PRECISION unsigned char
 
@@ -82,14 +83,15 @@ public:
     // std::vector<ImageDataObject> loadImageData(const std::string& path, int&
     // imageSize);
     void loadTransferFunctions(
-    const std::string& path,
-    std::unordered_map<std::string, std::unique_ptr<TransferFunction>>& _tfMap);
+          const std::string& path,
+          std::unordered_map<std::string, std::unique_ptr<TransferFunction>>& _tfMap,
+          const std::unordered_set<std::string>& _filter);
     std::vector<ImageMetadata> loadImageMetadata(const std::string& path);
     void loadImageMetadata(
           const std::string& path,
-          std::unordered_map<std::string, std::vector<ImageMetadata>>&
-                _imageMetadataMap);  // std::vector<std::unique_ptr<ghoul::opengl::Texture>>
-    // loadTextures(std::vector<ImageDataObject>& imageData);
+          std::unordered_map<std::string, std::vector<ImageMetadata>>& _imageMetadataMap,
+          const std::unordered_set<std::string>&
+                _filter);
     std::unique_ptr<ghoul::opengl::Texture> createLUT();
     //void scaleImageData(std::vector<ImageDataObject>& _imageData, const std::string& type, const int& channel);
 private:

@@ -65,8 +65,7 @@ return {
             RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
             -- Optional filter on instruments, otherwise get all
             -- Instruments = {
-            --     "AIA_AIA_94",
-            --     "AIA_AIA_131",
+            --     "aia_aia_94",
             -- },
             -- Path to transferfunctions whose name must match the instrument
             TransferfunctionPath = "/home/noven/workspace/OpenSpace/data/sdotransferfunctions"
