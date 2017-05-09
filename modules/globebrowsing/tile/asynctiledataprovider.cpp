@@ -103,9 +103,9 @@ AsyncTileDataProvider::AsyncTileDataProvider(
     // PBO
     size_t pboNumBytes = rawTileDataReader->tileTextureInitData().totalNumBytes();
 
-    _pboContainer = std::make_unique<PixelBufferContainer<TileIndex::TileHashKey>>(
-            pboNumBytes, PixelBuffer::Usage::STREAM_DRAW, 10
-        );
+    //_pboContainer = std::make_unique<PixelBufferContainer<TileIndex::TileHashKey>>(
+    //        pboNumBytes, PixelBuffer::Usage::STREAM_DRAW, 10
+    //    );
 
     //_pbo = std::make_unique<PixelBuffer>(pboNumBytes, PixelBuffer::Usage::STREAM_DRAW);
 }
@@ -116,18 +116,18 @@ std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getRawTileDataReader()
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
     if (satisfiesEnqueueCriteria(tileIndex)) {
-		//size_t numBytes = _rawTileDataReader->getWriteDataDescription().totalNumBytes;
-        char* dataPtr = static_cast<char*>(_pboContainer->mapBuffer(tileIndex.hashKey(),
-            GL_WRITE_ONLY));
-        if (dataPtr) {
+		size_t numBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
+        //char* dataPtr = static_cast<char*>(_pboContainer->mapBuffer(tileIndex.hashKey(),
+        //    GL_WRITE_ONLY));
+        //if (dataPtr) {
             auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex,
-				dataPtr);
+				numBytes);
             //auto job = std::make_shared<DiskCachedTileLoadJob>(_tileDataset, tileIndex, tileDiskCache, "ReadAndWrite");
             _concurrentJobManager.enqueueJob(job, tileIndex.hashKey());
-            //_enqueuedTileRequests.insert(tileIndex.hashKey());
+            _enqueuedTileRequests.insert(tileIndex.hashKey());
 
             return true;
-        }
+        //}
     }
     return false;
 }
@@ -147,7 +147,7 @@ std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
     std::vector<TileIndex::TileHashKey> unfinishedJobs = _concurrentJobManager.getKeysToUnfinishedJobs();
     for (auto unfinishedJob : unfinishedJobs) {
         // Unmap unfinished jobs
-        _pboContainer->unMapBuffer(unfinishedJob);
+        //_pboContainer->unMapBuffer(unfinishedJob);
     }
     // Now take the first finished job
     if (_concurrentJobManager.numFinishedJobs() > 0) {
@@ -155,16 +155,16 @@ std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
         // Now the tile load job looses ownerwhip of the data pointer
         std::shared_ptr<RawTile> product =
             _concurrentJobManager.popFinishedJob()->product();
-
+      
         TileIndex::TileHashKey key = product->tileIndex.hashKey();
         // Pbo is still mapped. Set the id for the raw tile
-        product->pbo = _pboContainer->idOfMappedBuffer(key);
+        product->pbo = 0;// _pboContainer->idOfMappedBuffer(key);
 
         // Now we are finished with the mapping of this pbo
-        _pboContainer->unMapBuffer(key);
+        //_pboContainer->unMapBuffer(key);
       
         // No longer enqueued. Remove from set of enqueued tilces
-        //_enqueuedTileRequests.erase(key);
+        _enqueuedTileRequests.erase(key);
 
         return product;
 	}
@@ -178,7 +178,7 @@ bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex)
     //    _enqueuedTileRequests.end();
 
     // Only satisfies if it is not already enqueued. Also bumps the request to the top.
-    return !_concurrentJobManager.touch(tileIndex.hashKey());
+    return !_concurrentJobManager.touch(tileIndex.hashKey()) && _enqueuedTileRequests.find(tileIndex.hashKey()) == _enqueuedTileRequests.end();
 }
 
 void AsyncTileDataProvider::reset() {

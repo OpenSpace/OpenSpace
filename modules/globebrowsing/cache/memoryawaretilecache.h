@@ -117,6 +117,8 @@ private:
                     ghoul::opengl::Texture::FilterMode::Linear,
                     ghoul::opengl::Texture::WrappingMode::ClampToEdge
                 ));
+                _textures.back()->setDataOwnership(
+                    ghoul::opengl::Texture::TakeOwnership::Yes);
                 _textures.back()->uploadTexture();
             }
         }

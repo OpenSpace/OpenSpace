@@ -121,6 +121,8 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
             texture->reUploadTextureFromPBO(rawTile->pbo);
         }
         else {
+            ghoul_assert(texture->dataOwnership(),
+                "Texture must have ownership of old data to avoid leaks");
             texture->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
             size_t expectedDataSize = texture->expectedPixelDataSize();
             size_t numBytes = rawTile->textureInitData->totalNumBytes();
