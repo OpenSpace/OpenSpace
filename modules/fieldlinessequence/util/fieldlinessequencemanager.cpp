@@ -141,24 +141,21 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         return false;
     }
 
-    // IMPORTANT!: Remember to delete interpolator if creating it here!
-    ccmc::Interpolator* interpolator = kameleon->createNewInterpolator();
-    ccmc::Tracer tracer(kameleon.get(), interpolator);
-    // ccmc::Tracer tracer(kameleon.get());
-    tracer.setMaxIterations(maxIterations);
 
     // ----------------- CHECK CDF MODEL AND SETUP VARIABLES ACCORDINGLY -----------------
     float scalingFactor;
+    float innerBoundaryLimit;
     bool convertToCartesian = false;
 
     if (model == "batsrus") {
-        tracer.setInnerBoundary(1.1f); // TODO specify in Lua
+        innerBoundaryLimit = 2.5f; // TODO specify in Lua
         scalingFactor = R_E_TO_METER;
 
     } else if (model == "enlil") {
-        tracer.setInnerBoundary(0.11f); // TODO specify in Lua
+        innerBoundaryLimit = 0.11f; // TODO specify in Lua
         scalingFactor = A_U_TO_METER;
         convertToCartesian = true;
+        // tracer.setDn(0.2f);
 
     } else {
         LERROR("OpenSpace's fieldlines sequence currently only supports the " <<
@@ -216,6 +213,18 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     std::vector<float> xtraVarVec;
     int lineStart = 0;
     for (glm::vec3 seedPoint : inSeedPoints) {
+        //--------------------------------------------------------------------------//
+        // We have to create a new tracer (or actually a new interpolator) for each //
+        // new line, otherwise some issues occur                                    //
+        //--------------------------------------------------------------------------//
+
+        // IMPORTANT!: Remember to delete interpolator if creating it here!
+        ccmc::Interpolator* interpolator = kameleon->createNewInterpolator();
+        ccmc::Tracer tracer(kameleon.get(), interpolator);
+        // ccmc::Tracer tracer(kameleon.get());
+        tracer.setMaxIterations(maxIterations);
+        tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua
+
         // A ccmc::Fieldline contains much more info than we need here,
         // but might be needed in future.
         ccmc::Fieldline ccmcFieldline = tracer.bidirectionalTrace(tracingVariable,
@@ -290,6 +299,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         }
         outFieldlinesStates._lineCount.push_back(lineCount);
         lineStart += lineCount;
+        delete interpolator;
     }
     if (sampleExtraQuantities) {
         outFieldlinesStates._extraVariables.push_back(xtraVarVec);
@@ -300,12 +310,8 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     startTimes.push_back(startTime);
     LDEBUG("State will start at " << startTime << " (J2000 Time)");
 
-    delete interpolator;
     return status;
 }
-
-
-
 
 // Already traced
 void FieldlinesSequenceManager::resampleCcmcFieldline(const int& numResamples,
