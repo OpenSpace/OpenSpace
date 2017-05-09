@@ -31,6 +31,7 @@
 
 #include <openspace/util/camera.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/interaction/interactionhandler.h>
@@ -126,6 +127,7 @@ class TouchInteraction : public properties::PropertyOwner
 		properties::StringProperty _origin;
 		properties::FloatProperty _touchScreenSize;
 		VelocityStates _vel;
+		VelocityStates _lastVel;
 		ScaleFactor _friction;
 		ScaleFactor _sensitivity;
 		double _projectionScaleFactor;
@@ -135,7 +137,7 @@ class TouchInteraction : public properties::PropertyOwner
 		bool _directTouchMode;
 		bool _tap;
 		bool _doubleTap;
-		bool _levSuccess;
+		bool _lmSuccess;
 		properties::BoolProperty _guiON;
 		
 		

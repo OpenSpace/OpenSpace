@@ -64,7 +64,7 @@ TouchInteraction::TouchInteraction()
 	_sensitivity{ 2.0 * 55.0, 0.1, 0.1, 1, 0.4 * 55.0 },
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
 	_currentRadius{ 1.0 }, _slerpTime{ 1.0 },
-	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _levSuccess{ true },
+	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true },
 	_guiON("Gui On", "Show GUI", false)
 {
 	addProperty(_touchScreenSize);
@@ -99,7 +99,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
 			manipulate(list);
 		}
-		if (_levSuccess) {
+		if (_lmSuccess) {
 			trace(list);
 		}
 		if (!_directTouchMode) {
@@ -133,6 +133,13 @@ bool TouchInteraction::gui(const std::vector<TuioCursor>& list) {
 	}
 	else if (_guiON) {
 		uint32_t action = (_tap) ? 0 : 1;
+		
+		/*for (const auto& func :  _moduleCallbacks.mouseButton) {
+			bool consumed = func(0, action);
+			if (consumed) {
+				OnScreenGUIModule::touchInput = { _guiON, pos, action };
+			}
+		}*/
 		OnScreenGUIModule::touchInput = { _guiON, pos, action };
 	}
 	return _guiON; // return if consumed
@@ -263,9 +270,9 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 	FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, node, 1.88 };
 	void* dataPtr = reinterpret_cast<void*>(&fData);
 
-	bool success = levmarq(nDOF, par, nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
+	_lmSuccess = levmarq(nDOF, par, nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
 
-	if (success) { // if good values were found set new camera state
+	if (_lmSuccess) { // if good values were found set new camera state
 		_vel.globalRot = glm::dvec2(par[0], par[1]);
 		if (nDOF > 2) {
 			_vel.zoom = par[2];
@@ -275,6 +282,11 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 			}
 		}
 		step(1);
+		_lastVel = _vel;
+		_vel.globalRot = glm::dvec2(0.0, 0.0);
+		_vel.zoom = 0.0;
+		_vel.localRoll = 0.0;
+		_vel.localRot = glm::dvec2(0.0, 0.0);
 	}
 
 	// debugging
@@ -558,6 +570,7 @@ void TouchInteraction::step(double dt) {
 		}
 
 		decelerate();
+
 		// Update the camera state
 		_camera->setPositionVec3(camPos);
 		_camera->setRotation(globalCamRot * localCamRot);
@@ -569,27 +582,28 @@ void TouchInteraction::step(double dt) {
 
 // Decelerate velocities (set 0 for directTouch)
 void TouchInteraction::decelerate() {
-	if (_directTouchMode) {
-		_vel.globalRot = glm::dvec2(0.0, 0.0);
-		_vel.zoom = 0.0;
-		_vel.localRoll = 0.0;
-		_vel.localRot = glm::dvec2(0.0, 0.0);
+	if (!_directTouchMode && _currentRadius > 0.3 && _vel.zoom > _focusNode->boundingSphere()) { // check for velocity speed too
+		_vel.zoom *= (1 - 2*_friction.zoom);
 	}
-	else {
-		if (!_directTouchMode && _currentRadius > 0.3 && _vel.zoom > _focusNode->boundingSphere()) { // check for velocity speed too
-			_vel.zoom *= (1 - 2*_friction.zoom);
-		}
-		_vel.zoom *= (1 - _friction.zoom);
-		_vel.globalRot *= (1 - _friction.globalRot);
-		_vel.localRot *= (1 - _friction.localRot);
-		_vel.globalRoll *= (1 - _friction.globalRoll);
-		_vel.localRoll *= (1 - _friction.localRoll);
-	}
+	_vel.zoom *= (1 - _friction.zoom);
+	_vel.globalRot *= (1 - _friction.globalRot);
+	_vel.localRot *= (1 - _friction.localRot);
+	_vel.globalRoll *= (1 - _friction.globalRoll);
+	_vel.localRoll *= (1 - _friction.localRoll);
 }
 
 // Called if all fingers are off the screen
 void TouchInteraction::clear() {
-	_levSuccess = true;
+	_lmSuccess = true;
+	if (_directTouchMode && _selected.size() > 0) {
+		double fps = 0.25 / OsEng.windowWrapper().averageDeltaTime();
+		if (glm::length(_lastVel.localRot) > 0.004) { // might not be desired
+			_vel.localRot = _lastVel.localRot * fps;
+		}
+		else if (glm::length(_lastVel.globalRot) > 0.038) { // good value to activate "spinning"
+			_vel.globalRot = _lastVel.globalRot * fps;
+		}
+	}
 	if (_guiON) {
 		bool activeLastFrame = false;
 		if (OnScreenGUIModule::touchInput.action) {
