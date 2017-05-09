@@ -39,7 +39,7 @@
 #include "parallelconnection_lua.inl"
 
 namespace {
-    const uint32_t ProtocolVersion = 2;
+    const uint32_t ProtocolVersion = 3;
     const size_t MaxLatencyDiffs = 64;
     const char* _loggerCat = "ParallelConnection";
 } // namespace
@@ -99,7 +99,7 @@ ParallelConnection::~ParallelConnection(){
 
 void ParallelConnection::connect() {
     disconnect();
-    _shouldDisconnect = false;
+
     setStatus(Status::Connecting);
     std::string port = _port;
     _socket = std::make_unique<ghoul::io::TcpSocket>(_address, atoi(port.c_str()));
@@ -119,6 +119,7 @@ void ParallelConnection::disconnect(){
         _receiveThread->join();
         _receiveThread = nullptr;
     }
+    _shouldDisconnect = false;
     _socket = nullptr;
     setStatus(Status::Disconnected);
 }
@@ -411,7 +412,6 @@ void ParallelConnection::handleCommunication() {
     while (!_shouldDisconnect && _socket && _socket->isConnected()) {
         // Receive the header data
         if (!_socket->get(headerBuffer.data(), headerSize)) {
-            LERROR("Error " << _ERRNO << " detected in connection when reading header, disconnecting!");
             _shouldDisconnect = true;
             break;
         }
@@ -440,7 +440,6 @@ void ParallelConnection::handleCommunication() {
         // Receive the payload
         messageBuffer.resize(messageSize);
         if (!_socket->get(messageBuffer.data(), messageSize)) {
-            LERROR("Error " << _ERRNO << " detected in connection when reading message, disconnecting!");
             _shouldDisconnect = true;
             break;
         }
@@ -530,6 +529,9 @@ void ParallelConnection::preSynchronization() {
             sendTimeKeyframe();
             _lastTimeKeyframeTimestamp = now;
         }
+    }
+    if (_shouldDisconnect) {
+        disconnect();
     }
 }
          
