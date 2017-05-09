@@ -449,8 +449,8 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     );
 
     glm::vec2 penPosition = glm::vec2(
-        OsEng.windowWrapper().viewportPixelCoordinates().y - size.boundingBox.x,
-        OsEng.windowWrapper().viewportPixelCoordinates().w - size.boundingBox.y
+        fontResolution().x - size.boundingBox.x - 10,
+        fontResolution().y - size.boundingBox.y
     );
     penPosition.y -= _fontDate->height();
 
