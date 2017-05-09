@@ -28,22 +28,65 @@
 namespace {
 	const std::string _loggerCat = "SurfaceModelLoadJob";
 	const char* keyPathToTexture = "PathToTexture";
+	const char* keyMultiModelGeometry = "MultiModelGeometry";
+	const char* keyGeometryFile = "GeometryFile";
+	const char* keyType = "Type";
 }
+
 namespace openspace {
 namespace globebrowsing {
 
 void SurfaceModelLoadJob::execute() {
-	// Load the model geometry
-	_model->geometry = std::move(modelgeometry::ModelGeometry::createFromDictionary(_dictionary));
+	std::string pathToGeometryFolder = _subsite.pathToGeometryFolder;
+	std::string pathToTextureFolder = _subsite.pathToTextureFolder;
+	std::string multiModelGeometry = "MultiModelGeometry";
 
-	// Load the texture
-	std::string pathToTexture;
-	_dictionary.getValue(keyPathToTexture, pathToTexture);
-	_model->texture = std::move(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
+	_subsiteModels->site = _subsite.site;
+	_subsiteModels->drive = _subsite.drive;
+	_subsiteModels->subsiteCoordinate = Geodetic2{ _subsite.lat, _subsite.lon };
+	_subsiteModels->siteCoordinate = Geodetic2{ _subsite.siteLat, _subsite.siteLon };
+	_subsiteModels->level = _level;
+
+	for (auto fileName : _subsite.fileNames) {
+		// Set up a dictionary to load the model
+		ghoul::Dictionary dictionary;
+		std::string pathToGeometry = pathToGeometryFolder + "site" + _subsite.site +
+			"//" + "drive" + _subsite.drive + "//" +  fileName + ".obj";
+		dictionary.setValue(keyGeometryFile, pathToGeometry);
+		dictionary.setValue(keyType, multiModelGeometry);
+
+		// Create modelgeometry from dictionary
+		Model model;
+		model.geometry = std::move(modelgeometry::ModelGeometry::createFromDictionary(dictionary));
+
+		// Load the corresponding texture;
+		std::string tempFileName = fileName;
+		tempFileName[13] = 'R';
+		tempFileName[14] = 'A';
+		tempFileName[15] = 'S';
+
+		std::string textureFormat = SurfaceModelLoadJob::textureFormat(_subsite.site);
+		std::string pathToTexture = pathToTextureFolder + "site" + _subsite.site +
+			"//" + "drive" + _subsite.drive + "//" + tempFileName + textureFormat;
+		model.texture = std::move(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
+
+		_subsiteModels->models.push_back(std::make_shared<Model>(std::move(model)));
+	}
 }
 
-std::shared_ptr<Model> SurfaceModelLoadJob::product() const {
-	return _model;
+std::shared_ptr<SubsiteModels> SurfaceModelLoadJob::product() const {
+	return _subsiteModels;
+}
+
+std::string SurfaceModelLoadJob::textureFormat(const std::string site) {
+	int siteNumber = std::stoi(site);
+	std::string textureFormat;
+	if (siteNumber <= 21)
+		textureFormat = ".jpg";
+	else if (siteNumber > 21)
+		textureFormat = ".png";
+
+	return textureFormat;
 }
 
 } // globebrowsing
