@@ -31,7 +31,6 @@
 
 #include <openspace/util/camera.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/interaction/interactionhandler.h>

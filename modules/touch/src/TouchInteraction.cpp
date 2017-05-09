@@ -133,13 +133,6 @@ bool TouchInteraction::gui(const std::vector<TuioCursor>& list) {
 	}
 	else if (_guiON) {
 		uint32_t action = (_tap) ? 0 : 1;
-		
-		/*for (const auto& func :  _moduleCallbacks.mouseButton) {
-			bool consumed = func(0, action);
-			if (consumed) {
-				OnScreenGUIModule::touchInput = { _guiON, pos, action };
-			}
-		}*/
 		OnScreenGUIModule::touchInput = { _guiON, pos, action };
 	}
 	return _guiON; // return if consumed
