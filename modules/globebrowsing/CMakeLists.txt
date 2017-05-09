@@ -69,6 +69,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/models/renderableexplorationpath.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/roverpathfilereader.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/subsite.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/subsitemodels.h	
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
