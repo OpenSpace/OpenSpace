@@ -59,6 +59,8 @@ return {
         Name = "SDO Plane",
         Parent = "SDOCoordinatesystem",
         Renderable = {
+            -- Resolution of imagery, will be moved to metadata later
+            Resolution = 4096,
             Type = "RenderableSpacecraftCameraPlane",
             Target = "Sun",
             -- Will recursively find all instruments that match array instruments

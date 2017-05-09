@@ -77,6 +77,13 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         throw ghoul::RuntimeError("RootPath has to be specified");
     }
 
+    //TODO(mnoven): Can't pass in an int to dictionary?
+    float tmp;
+    if (!dictionary.getValue("Resolution", tmp)){
+        throw ghoul::RuntimeError("Resolution has to be specified");
+    }
+    _fullResolution = static_cast<unsigned int>(tmp);
+
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>("Instruments")) {
         ghoul::Dictionary instrumentDic = dictionary.value<ghoul::Dictionary>("Instruments");
         for (size_t i = 1; i <= instrumentDic.size(); ++i) {
@@ -122,9 +129,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     //TODO(mnoven): Can't assume 1 plane
     Time::ref().setTime(_startTimeSequence - 10);
 
-    //TODO(mnoven): Remove hardcode, not always 4096
-    _pboSize = (4096 * 4096 * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
-    _imageSize = 4096 / (pow(2, _resolutionLevel));
+    _pboSize = (_fullResolution * _fullResolution * sizeof(IMG_PRECISION))
+               / (pow(4, _resolutionLevel));
+    _imageSize = _fullResolution / (pow(2, _resolutionLevel));
 
     // Generate PBO
     glGenBuffers(2, pboHandles);
@@ -178,8 +185,8 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _resolutionLevel.onChange([this]() {
         LDEBUG("Updating level of resolution" << _resolutionLevel);
         _updatingCurrentLevelOfResolution = true;
-        _pboSize = (4096 * 4096 * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
-        _imageSize = 4096 / (pow(2, _resolutionLevel));
+        _pboSize = (_fullResolution * _fullResolution * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
+        _imageSize = _fullResolution / (pow(2, _resolutionLevel));
         updateTextureGPU(/*asyncUpload=*/false, /*resChanged=*/true);
         uploadImageDataToPBO(_currentActiveImage);
         _updatingCurrentLevelOfResolution = false;

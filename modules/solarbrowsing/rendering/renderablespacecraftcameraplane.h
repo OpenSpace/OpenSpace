@@ -98,6 +98,7 @@ private:
     GLuint _vertexPositionBuffer;
 
     unsigned int _imageSize;
+    unsigned int _fullResolution;
     double _move = 0.0;
 
     std::string _currentActiveInstrument;
