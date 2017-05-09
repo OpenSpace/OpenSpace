@@ -28,20 +28,21 @@
 #include <modules/globebrowsing/models/asyncsurfacemodelprovider.h>
 #include <modules/globebrowsing/cache/lrucache.h>
 #include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/models/model.h>
+#include <modules/globebrowsing/models/subsitemodels.h>
+#include <modules/globebrowsing/models/subsite.h>
 
 #include <memory>
 
 namespace openspace {
 namespace globebrowsing {
 
-using ModelCache = cache::LRUCache<TileIndex::TileHashKey, std::vector<std::shared_ptr<Model>>>;
+using ModelCache = cache::LRUCache<uint64_t, std::shared_ptr<SubsiteModels>>;
 
 class CachingSurfaceModelProvider {
 public:
 	CachingSurfaceModelProvider(Renderable* parent);
 
-	std::vector<std::shared_ptr<Model>> getModels(const ghoul::Dictionary& dictionary, const std::shared_ptr<Model> model);
+	std::vector<std::shared_ptr<SubsiteModels>> getModels(const std::vector<Subsite> Subsites, const int level);
 
 	void update(Renderable* parent);
 	void reset();
@@ -52,6 +53,8 @@ private:
 
 	void initModelsFromLoadedData(Renderable* parent);
 	void clearRequestQueue();
+
+	uint64_t hashKey(const std::string site, const std::string drive, const int level);
 	
 	Renderable* _parent;
 };

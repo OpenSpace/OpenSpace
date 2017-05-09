@@ -29,8 +29,8 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/other/threadpool.h>
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
-#include <modules/globebrowsing/models/model.h>
-
+#include <modules/globebrowsing/models/subsitemodels.h>
+#include <modules/globebrowsing/models/subsite.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -39,15 +39,15 @@ class AsyncSurfaceModelProvider {
 public:
 	AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> pool);
 
-	bool enqueueModelIO(const ghoul::Dictionary& dictionary, const std::shared_ptr<Model> model);
-	std::vector<std::shared_ptr<Model>> getLoadedModels();
+	bool enqueueModelIO(const Subsite subsite, const int level);
+	std::vector<std::shared_ptr<SubsiteModels>> getLoadedModels();
 
 protected:
-	virtual bool satisfiesEnqueueCriteria(const std::string fileName) const;
+	virtual bool satisfiesEnqueueCriteria(const uint64_t hashKey) const;
 
 private:
-	ConcurrentJobManager<Model> _concurrentJobManager;
-	std::unordered_map <std::string, std::string> _enqueuedTileRequests;
+	ConcurrentJobManager<SubsiteModels> _concurrentJobManager;
+	std::unordered_map <uint64_t, Subsite> _enqueuedTileRequests;
 };
 
 } // namespace globebrowsing
