@@ -232,17 +232,27 @@ void RenderEngine::initialize() {
     setRendererFromString(renderingMethod);
 
 #ifdef GHOUL_USE_DEVIL
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderDevIL>()
+    );
 #endif // GHOUL_USE_DEVIL
 #ifdef GHOUL_USE_FREEIMAGE
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderFreeImage>()
+    );
 #endif // GHOUL_USE_FREEIMAGE
 #ifdef GHOUL_USE_SOIL
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderSOIL>());
-    ghoul::io::TextureWriter::ref().addWriter(std::make_shared<ghoul::io::TextureWriterSOIL>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderSOIL>()
+    );
+    ghoul::io::TextureWriter::ref().addWriter(
+        std::make_shared<ghoul::io::TextureWriterSOIL>()
+    );
 #endif // GHOUL_USE_SOIL
 
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderCMAP>()
+    );
 
     MissionManager::initialize();
 }
@@ -278,8 +288,8 @@ void RenderEngine::initializeGL() {
 }
 
 void RenderEngine::deinitialize() {
-    for (auto screenspacerenderable : _screenSpaceRenderables) {
-        screenspacerenderable->deinitialize();
+    for (std::shared_ptr<ScreenSpaceRenderable> ssr : _screenSpaceRenderables) {
+        ssr->deinitialize();
     }
 
     MissionManager::deinitialize();
@@ -326,8 +336,8 @@ void RenderEngine::updateRenderer() {
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
-    for (auto& screenspacerenderable : _screenSpaceRenderables) {
-        screenspacerenderable->update();
+    for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+        ssr->update();
     }
 }
 
@@ -393,8 +403,6 @@ void RenderEngine::updateFade() {
     }
 }
 
-
-
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {
@@ -419,20 +427,20 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         renderInformation();
     }
 
-    glm::vec2 penPosition = glm::vec2(
-        OsEng.windowWrapper().viewportPixelCoordinates().y / 2 - 50,
-        OsEng.windowWrapper().viewportPixelCoordinates().w / 3
-        );
-
     if (_showFrameNumber) {
-        RenderFontCr(*_fontBig, penPosition, "%i", _frameNumber);
+        const glm::vec2 penPosition = glm::vec2(
+            fontResolution().x / 2 - 50,
+            fontResolution().y / 3
+        );
+        
+        RenderFont(*_fontBig, penPosition, "%i", _frameNumber);
     }
     
     _frameNumber++;
     
-    for (auto& screenSpaceRenderable : _screenSpaceRenderables) {
-        if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady()) {
-            screenSpaceRenderable->render();
+    for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+        if (ssr->isEnabled() && ssr->isReady()) {
+            ssr->render();
         }
     }
     LTRACE("RenderEngine::render(end)");
@@ -742,7 +750,7 @@ void RenderEngine::unregisterScreenSpaceRenderable(
 }
 
 void RenderEngine::unregisterScreenSpaceRenderable(std::string name){
-    auto s = screenSpaceRenderable(name);
+    std::shared_ptr<ScreenSpaceRenderable> s = screenSpaceRenderable(name);
     if (s) {
         unregisterScreenSpaceRenderable(s);
     }
@@ -1285,7 +1293,9 @@ void RenderEngine::sortScreenspaceRenderables() {
     std::sort(
         _screenSpaceRenderables.begin(),
         _screenSpaceRenderables.end(),
-        [](auto j, auto i) {
+        [](const std::shared_ptr<ScreenSpaceRenderable>& j,
+           const std::shared_ptr<ScreenSpaceRenderable>& i)
+        {
             return i->depth() > j->depth();
         }
     );
