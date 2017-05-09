@@ -77,8 +77,8 @@ bool ChunkNode::updateChunkTree(const RenderData& data) {
     }
 }
 
-void ChunkNode::addSites(std::vector<SubSite> subSites) {
-	_subSites = subSites;
+void ChunkNode::addSites(std::vector<Subsite> subSites) {
+	_subsites = subSites;
 }
 
 void ChunkNode::depthFirst(const std::function<void(const ChunkNode&)>& f) const {
@@ -169,14 +169,13 @@ void ChunkNode::split(int depth) {
         for (size_t i = 0; i < _children.size(); ++i) {
             Chunk chunk(_chunk.owner(), _chunk.tileIndex().child((Quad)i));
 			globebrowsing::GeodeticPatch patch = chunk.surfacePatch();
-			std::vector<SubSite> tempSites;
+			std::vector<Subsite> tempSites;
 			std::unique_ptr<ChunkNode> temp = std::make_unique<ChunkNode>(chunk, this);
 			if (this != nullptr) {
-				for (int k = 0; k < this->_subSites.size(); ++k) {
-					globebrowsing::Geodetic2 temp = globebrowsing::Geodetic2{ this->_subSites.at(k).lat, this->_subSites.at(k).lon } / 180.0 * glm::pi<double>();
+				for (int k = 0; k < this->_subsites.size(); ++k) {
+					globebrowsing::Geodetic2 temp = globebrowsing::Geodetic2{ this->_subsites.at(k).lat, this->_subsites.at(k).lon } / 180.0 * glm::pi<double>();
 					if (patch.contains(temp)) {
-						_subSites[k].tileHashKey = chunk.tileIndex().hashKey();
-						tempSites.push_back(this->_subSites.at(k));
+						tempSites.push_back(this->_subsites.at(k));
 					}
 				}
 				temp->addSites(tempSites);
@@ -207,8 +206,8 @@ const Chunk& ChunkNode::getChunk() const {
     return _chunk;
 }
 
-const std::vector<SubSite> ChunkNode::getSubSites() const {
-	return _subSites;
+const std::vector<Subsite> ChunkNode::getSubsites() const {
+	return _subsites;
 }
 
 } // namespace globebrowsing
