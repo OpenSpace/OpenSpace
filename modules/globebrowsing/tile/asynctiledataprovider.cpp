@@ -148,6 +148,7 @@ std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
     for (auto unfinishedJob : unfinishedJobs) {
         // Unmap unfinished jobs
         //_pboContainer->unMapBuffer(unfinishedJob);
+        _enqueuedTileRequests.erase(unfinishedJob);
     }
     // Now take the first finished job
     if (_concurrentJobManager.numFinishedJobs() > 0) {

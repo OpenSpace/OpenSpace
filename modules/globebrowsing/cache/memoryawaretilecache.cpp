@@ -101,7 +101,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
             // For now create 50 textures of this type
             _textureContainerMap.emplace(initDataKey,
                 TextureContainerTileCache(
-                    std::make_unique<TextureContainer>(initData, 50),
+                    std::make_unique<TextureContainer>(initData, 500),
                     std::make_unique<TileCache>(std::numeric_limits<std::size_t>::max())
                     )
                 );
