@@ -88,10 +88,17 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
                                                            glm::vec4(1.f,0.f,1.f,0.5f),
                                                            glm::vec4(0.f),
                                                            glm::vec4(1.f)),
+      _uniformSeedPointColor("seedPointColor", "SeedPoint Color",
+                             glm::vec4(1.f,0.33f,0.f,0.85f),
+                             glm::vec4(0.f),
+                             glm::vec4(1.f)),
       _lineWidth("fieldlineWidth", "Fieldline Width", 1.f, 0.f, 10.f),
       _transferFunctionPath("transferFunctionPath", "Transfer Function Path"),
+      _showSeedPoints("showSeedPoints", "Show Seed Points", true),
+      _seedPointSize("seedPointSize", "Seed Point Size", 4.0, 0.0, 20.0),
       _vertexArrayObject(0),
       _vertexPositionBuffer(0),
+      _seedPositionBuffer(0),
       _morphToPositionBuffer(0),
       _quickMorphBuffer(0),
       _vertexColorBuffer(0),
@@ -306,6 +313,17 @@ bool RenderableFieldlinesSequence::initialize() {
     // glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, &_maxLineWidthOpenGl);
     // glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &_maxLineWidthOpenGl);
 
+    _seedPointProgram = OsEng.renderEngine().buildRenderProgram(
+        "FieldlinesSequenceSeeds",
+        "${MODULE_FIELDLINESSEQUENCE}/shaders/seedpoint_vs.glsl",
+        "${MODULE_FIELDLINESSEQUENCE}/shaders/seedpoint_fs.glsl"
+    );
+
+    if (!_seedPointProgram) {
+        LERROR("SeedPoint Shader program failed initialization!");
+        return false;
+    }
+
     if (_isMorphing) {
         _program = OsEng.renderEngine().buildRenderProgram(
             "FieldlinesSequence",
@@ -351,6 +369,9 @@ bool RenderableFieldlinesSequence::initialize() {
     addProperty(_modulusDivider);
     addProperty(_fieldlineColor);
     addProperty(_fieldlineParticleColor);
+    addProperty(_showSeedPoints);
+    addProperty(_seedPointSize);
+    addProperty(_uniformSeedPointColor);
 
     if (_isMorphing) {
         addProperty(_isMorphing);
@@ -465,14 +486,32 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
         );
 
         glBindVertexArray(0);
-        glEnable(GL_CULL_FACE);
         _activeProgramPtr->deactivate();
+
+        glBindVertexArray(_seedArrayObject);
+        _seedPointProgram->activate();
+
+        if (_showSeedPoints) {
+            _seedPointProgram->setUniform("color", _uniformSeedPointColor);
+            _seedPointProgram->setUniform("modelViewProjection",
+                data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+            glPointSize(_seedPointSize);
+            glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>( _seedPoints.size() ) );
+        }
+
+        glBindVertexArray(0);
+        _seedPointProgram->deactivate();
+        glEnable(GL_CULL_FACE);
     }
 }
 
 void RenderableFieldlinesSequence::update(const UpdateData&) {
     if (_activeProgramPtr->isDirty()) {
         _activeProgramPtr->rebuildFromFile();
+    }
+
+    if (_seedPointProgram->isDirty()) {
+        _seedPointProgram->rebuildFromFile();
     }
 
     // Check if current time in OpenSpace is within sequence interval
@@ -501,6 +540,20 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
         updateActiveStateIndex(); // sets _activeStateIndex
         if (_vertexArrayObject == 0) {
             glGenVertexArrays(1, &_vertexArrayObject);
+
+            glGenVertexArrays(1, &_seedArrayObject);
+            glBindVertexArray(_seedArrayObject);
+            glGenBuffers(1, &_seedPositionBuffer);
+
+            glBindBuffer(GL_ARRAY_BUFFER, _seedPositionBuffer);
+            glBufferData(GL_ARRAY_BUFFER,
+                _seedPoints.size() * sizeof(glm::vec3),
+                &_seedPoints.front(),
+                GL_STATIC_DRAW);
+            GLuint seedLocation = 0;
+            glEnableVertexAttribArray(seedLocation);
+            glVertexAttribPointer(seedLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
         }
         glBindVertexArray(_vertexArrayObject);
 
