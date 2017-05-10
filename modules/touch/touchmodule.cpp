@@ -37,8 +37,6 @@
 #include <sstream>
 #include <string>
 #include <iostream>
-#include <thread>         // std::this_thread::sleep_for
-#include <chrono>         // std::chrono::seconds
 
 using namespace TUIO;
 
@@ -128,7 +126,6 @@ TouchModule::TouchModule()
 
 		if (gotNewInput() && OsEng.windowWrapper().isMaster()) {
 			touch->update(list, lastProcessed);
-			//std::this_thread::sleep_for(std::chrono::seconds(1)); // for debugging
 		}
 		else if (list.size() == 0) {
 			touch->clear();

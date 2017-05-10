@@ -116,6 +116,7 @@ class TouchInteraction : public properties::PropertyOwner
 
 		// Property variables
 		properties::StringProperty _origin;
+		properties::BoolProperty _lmVerbose;
 		properties::IntProperty _maxTapTime;
 		properties::FloatProperty _touchScreenSize;
 		properties::FloatProperty _nodeRadiusThreshold;

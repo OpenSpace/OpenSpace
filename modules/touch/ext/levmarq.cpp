@@ -30,7 +30,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 // set parameters required by levmarq() to default values 
 void levmarq_init(LMstat *lmstat) {
-	lmstat->verbose = 0;
+	lmstat->verbose = true;
 	lmstat->max_it = 5000;
 	lmstat->init_lambda = 1e-6;
 	lmstat->up_factor = 10;
@@ -62,7 +62,9 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 	    void (*grad)(double *, double *, int, void *),
 	    void *fdata, LMstat *lmstat) {
 
-	int x, i, j, it, nit, ill, verbose;
+	int x, i, j, it, nit, ill;
+	bool verbose;
+	std::string data = "";
 	double lambda, up, down, mult, weight, err, newerr, derr, target_derr;
 
 	// allocate the arrays
@@ -85,6 +87,10 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 	target_derr = lmstat->target_derr;
 	weight = 1;
 	derr = newerr = 0; // to avoid compiler warnings
+
+	if (verbose) {
+		data = "it,err,derr,q,g,d\n";
+	}
 
 	// calculate the initial error ("chi-squared")
 	err = error_func(par, ny, dysq, func, fdata);
@@ -123,7 +129,27 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 				ill = (derr > 0);
 			} 
 			if (verbose) {
-				printf("it = %4d,   lambda = %10g,   err = %10g,   derr = %10g (%d)\n", it, lambda, err, derr, !(newerr > err));
+				/*printf("it = %4d,   lambda = %10g,   err = %10g,   derr = %10g (%d)\n", it, lambda, err, derr, !(newerr > err));
+				for (int i = 0; i < npar; ++i) {
+					printf("g[%d] = %g, ", i, g[i]);
+				}
+				printf("\n");*/
+
+				//std::ostringstream gString;
+				std::ostringstream gString, qString, dString, os;
+				for (int i = 0; i < npar; ++i) {
+					gString << g[i];
+					qString << par[i];
+					dString << d[i];
+					if (i + 1 < npar) {
+						gString << " ";
+						qString << " ";
+						dString << " ";
+					}
+				}
+				os << it << "," << err << "," << derr << "," << qString.str() << "," << gString.str() << "," << dString.str() << "\n";
+				data.append(os.str());
+				// store iteration, error, gradient, step
 			}
 			if (ill) {
 				mult = (1 + lambda * up) / (1 + lambda);
@@ -143,13 +169,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 	lmstat->final_it = it;
 	lmstat->final_err = err;
 	lmstat->final_derr = derr;
-
-	if (verbose) {
-		for (int i = 0; i < npar; ++i) {
-			printf("g[%d] = %g, ", i, g[i]);
-		}
-		printf("\n");
-	}
+	lmstat->data = data;
 
 	// deallocate the arrays
 	for (int i = 0; i < npar; i++) {

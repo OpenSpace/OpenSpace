@@ -58,6 +58,7 @@ using namespace openspace;
 TouchInteraction::TouchInteraction()
 	: properties::PropertyOwner("TouchInteraction"),
 	_origin("origin", "Origin", ""),
+	_lmVerbose("LM verbose", "Save data from LM algorithm", true),
 	_maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000),
 	_touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f),
 	_nodeRadiusThreshold("Activate direct-manipulation", "Radius a planet has to have to activate direct-manipulation", 0.3f, 0.0f, 1.0f),
@@ -76,6 +77,7 @@ TouchInteraction::TouchInteraction()
 	_currentRadius{ 1.0 }, _slerpdT{ 1000 },
 	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true }, _guiON{ false }
 {
+	addProperty(_lmVerbose);
 	addProperty(_maxTapTime);
 	addProperty(_touchScreenSize);
 	addProperty(_nodeRadiusThreshold);
@@ -141,7 +143,7 @@ bool TouchInteraction::gui(const std::vector<TuioCursor>& list) {
 	glm::ivec2 res = wrapper.currentWindowSize();
 	glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenY(res.y)); // mouse pixel position
 	_guiON = OnScreenGUIModule::gui.isEnabled();
-
+	_lmstat.verbose = _lmVerbose;
 	if (_tap && list.size() == 1 && pos.x < _guiButton.value().x && pos.y < _guiButton.value().y) { // pressed invisible button
 		_guiON = !_guiON;
 		OnScreenGUIModule::gui.setEnabled(_guiON);
@@ -302,11 +304,14 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 	}
 
 	// debugging
-	/*std::ostringstream os;
-	for (int i = 0; i < nDOF; ++i) {
-	os << par[i] << ", ";
+	if (_lmVerbose) {
+		/*std::ostringstream os;
+		for (int i = 0; i < nDOF; ++i) {
+			os << par[i] << ", ";
+		}
+		std::cout << "Levmarq success after " << _lmstat.final_it << " iterations. Values: " << os.str() << "\n";*/
+		std::cout << _lmstat.data;
 	}
-	std::cout << "Levmarq success after " << _lmstat.final_it << " iterations. Values: " << os.str() << "\n";*/
 
 	// cleanup
 	delete[] par;

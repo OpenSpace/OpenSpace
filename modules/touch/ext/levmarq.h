@@ -23,9 +23,12 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 */
+#include <iostream>
+#include <sstream>
 
 typedef struct {
-	int verbose;
+	bool verbose;
+	std::string data;
 	int max_it;
 	double init_lambda;
 	double up_factor;
