@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GPUFIELDLINES___RENDERABLEGPUFIELDLINES___H__
 
 #include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
@@ -63,19 +64,21 @@ public:
     void updateActiveStateIndex();
 private:
     // PROPERTIES
-    properties::BoolProperty _showGrid;
     properties::BoolProperty _isMorphing;
+    properties::BoolProperty _showGrid;
     properties::BoolProperty _showSeedPoints;
 
-    properties::FloatProperty _stepSize;
-    properties::FloatProperty _seedPointSize;
     properties::FloatProperty _clippingRadius;
+    properties::FloatProperty _seedPointSize;
+    properties::FloatProperty _stepSize;
 
     properties::IntProperty _maximumVertices;
-    properties::IntProperty _vertexSkipping;
     properties::IntProperty _stepMultiplier;
+    properties::IntProperty _vertexSkipping;
 
     properties::OptionProperty _integrationMethod;
+
+    // properties::StringProperty _seedPointSourceFile;
 
     properties::Vec2Property _domainX;
     properties::Vec2Property _domainY;
@@ -95,16 +98,20 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _gridProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _seedPointProgram;
 
-    bool _shouldRender; // only temporary
-    bool _needsUpdate;
-    bool _isSpherical;
+    bool _shouldRender       = false; // only temporary
+    bool _needsUpdate        = false;
+    bool _isSpherical        = false;
 
-    GLuint _vertexArrayObject;
-    GLuint _vertexPositionBuffer;
-    GLuint _vertexColorBuffer;
+    bool _seedPointsAreDirty;
 
-    GLuint _gridVAO;
-    GLuint _gridVBO;
+    std::unique_ptr<ghoul::filesystem::File> _seedPointFile;
+
+    GLuint _vertexArrayObject    = 0;
+    GLuint _vertexPositionBuffer = 0;
+    GLuint _vertexColorBuffer    = 0;
+
+    GLuint _gridVAO              = 0;
+    GLuint _gridVBO              = 0;
 
     std::unique_ptr<RawVolume<float>> _rawVolume;
     std::unique_ptr<RawVolume<glm::vec3>> _normalizedVolume;
@@ -122,7 +129,7 @@ private:
     std::vector<GLint> _gridStartPos;
     std::vector<GLsizei> _gridLineCount;
 
-    int _activeStateIndex;
+    int _activeStateIndex = -1;
     int _numberOfStates;
     double _seqStartTime; // redundant, but hey.. nice n clear
     double _seqEndTime;

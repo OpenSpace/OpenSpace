@@ -79,14 +79,20 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     : Renderable(dictionary),
       _isMorphing("isMorphing", "Morphing", false),
       _show3DLines("show3DLines", "3D Lines", false),
+      _showSeedPoints("showSeedPoints", "Show Seed Points", true),
+      _lineWidth("fieldlineWidth", "Fieldline Width", 1.f, 0.f, 10.f),
+      _seedPointSize("seedPointSize", "Seed Point Size", 4.0, 0.0, 20.0),
+      _fieldlineParticleSize("fieldlineParticleSize", "FL Particle Size", 0, 0, 1000),
+      _modulusDivider("fieldlineParticleFrequency", "FL Particle Frequency (reversed)", 100, 1, 10000),
+      _timeMultiplier("fieldlineParticleSpeed", "FL Particle Speed", 20, 1, 1000),
       _colorMethod("fieldlineColorMethod", "Color Method", properties::OptionProperty::DisplayType::Radio),
       _colorizingQuantity("fieldlineColorQuantity", "Quantity", properties::OptionProperty::DisplayType::Dropdown),
+      _transferFunctionPath("transferFunctionPath", "Transfer Function Path"),
+      _transferFunctionMinVal("transferFunctionLimit1", "TF minimum", "0"),
+      _transferFunctionMaxVal("transferFunctionLimit2", "TF maximum", "1"),
       _fieldlineColor("fieldlineColor", "Fieldline Color", glm::vec4(0.7f,0.f,0.7f,0.75f),
                                                            glm::vec4(0.f),
                                                            glm::vec4(1.f)),
-      _fieldlineParticleSize("fieldlineParticleSize", "FL Particle Size", 0, 0, 1000),
-      _timeMultiplier("fieldlineParticleSpeed", "FL Particle Speed", 20, 1, 1000),
-      _modulusDivider("fieldlineParticleFrequency", "FL Particle Frequency (reversed)", 100, 1, 10000),
       _fieldlineParticleColor("fieldlineParticleColor", "FL Particle Color",
                                                            glm::vec4(1.f,0.f,1.f,0.5f),
                                                            glm::vec4(0.f),
@@ -94,24 +100,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _uniformSeedPointColor("seedPointColor", "SeedPoint Color",
                              glm::vec4(1.f,0.33f,0.f,0.85f),
                              glm::vec4(0.f),
-                             glm::vec4(1.f)),
-      _lineWidth("fieldlineWidth", "Fieldline Width", 1.f, 0.f, 10.f),
-      _transferFunctionPath("transferFunctionPath", "Transfer Function Path"),
-      _transferFunctionMinVal("transferFunctionLimit1", "TF minimum", "0"),
-      _transferFunctionMaxVal("transferFunctionLimit2", "TF maximum", "1"),
-      _showSeedPoints("showSeedPoints", "Show Seed Points", true),
-      _seedPointSize("seedPointSize", "Seed Point Size", 4.0, 0.0, 20.0),
-      _vertexArrayObject(0),
-      _vertexPositionBuffer(0),
-      _seedPositionBuffer(0),
-      _morphToPositionBuffer(0),
-      _quickMorphBuffer(0),
-      _vertexColorBuffer(0),
-      _shouldRender(false),
-      _needsUpdate(false),
-      _updateColorBuffer(false),
-      _activeStateIndex(-1),
-      _widthScaling(R_E_TO_METER) {
+                             glm::vec4(1.f)) {
 
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -294,9 +283,14 @@ bool RenderableFieldlinesSequence::initialize() {
 
         std::string model = _states[0]._modelName;
         if (model == "enlil") {
-            _widthScaling = R_S_TO_METER;
+            _scalingFactor = R_S_TO_METER;
         } else if (model == "batsrus") {
-            _widthScaling = R_E_TO_METER;
+            _scalingFactor = R_E_TO_METER;
+        } else {
+            LERROR("OpenSpace's RenderableFieldlinesSequence class can only support the "
+                << " batsrus and enlil models for the time being! CDF contains the "
+                << model << " model.");
+            return false;
         }
 
         numQuanityColorVariables = _states[0]._extraVariables.size();
@@ -398,13 +392,13 @@ bool RenderableFieldlinesSequence::initialize() {
         _colorMethod.addOption(colorMethod::UNIFORM, "Uniform Color");
         _colorMethod.addOption(colorMethod::QUANTITY_DEPENDENT, "Quantity Dependent");
 
-        for (int i = 0; i < colorizingFloatVars.size(); i++) {
+        for (unsigned int i = 0; i < colorizingFloatVars.size(); i++) {
             _colorizingQuantity.addOption(i, colorizingFloatVars[i]);
         }
 
         int offset = colorizingFloatVars.size();
 
-        for (int i = 0; i < colorizingMagVars.size(); i += 3) {
+        for (unsigned int i = 0; i < colorizingMagVars.size(); i += 3) {
             std::string displayName = "Magnitude of variables ("
                                     + colorizingMagVars[i]   + ", "
                                     + colorizingMagVars[i+1] + ", "
@@ -413,7 +407,7 @@ bool RenderableFieldlinesSequence::initialize() {
             _colorizingQuantity.addOption(i+offset, displayName);
         }
 
-        for (int i = 0; i < _states[0]._extraVariables.size(); i++) {
+        for (unsigned int i = 0; i < _states[0]._extraVariables.size(); i++) {
             std::vector<float>& quantityVec = _states[0]._extraVariables[i];
         // for (std::vector<float>& quantityVec : _states[0]._extraVariables) {
             auto minMaxPos = std::minmax_element(quantityVec.begin(), quantityVec.end());
@@ -516,17 +510,17 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
         _activeProgramPtr->setUniform("fieldlineColor", _fieldlineColor);
         _activeProgramPtr->setUniform("fieldlineParticleColor", _fieldlineParticleColor);
         if (_show3DLines) {
-            _activeProgramPtr->setUniform("width", _lineWidth * _widthScaling);
+            _activeProgramPtr->setUniform("width", _lineWidth * _scalingFactor);
             // _activeProgramPtr->setUniform("camDirection",
             //                             glm::vec3(data.camera.viewDirectionWorldSpace()));
             // _activeProgramPtr->setUniform("modelTransform", modelTransform);
             // _activeProgramPtr->setUniform("viewTransform", data.camera.combinedViewMatrix());
             _activeProgramPtr->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-            _activeProgramPtr->setUniform("projectionTransform", data.camera.projectionMatrix());
+            _activeProgramPtr->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
         } else {
             glLineWidth(_lineWidth);
             _activeProgramPtr->setUniform("modelViewProjection",
-                    data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+                    data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewTransform));
             if (_isMorphing) { // TODO ALLOW MORPHING AND 3D LINES/ROPES
                 _activeProgramPtr->setUniform("state_progression", _stateProgress);
                 _activeProgramPtr->setUniform("isMorphing", _isMorphing);
@@ -566,7 +560,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
         if (_showSeedPoints) {
             _seedPointProgram->setUniform("color", _uniformSeedPointColor);
             _seedPointProgram->setUniform("modelViewProjection",
-                data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+                data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewTransform));
             glPointSize(_seedPointSize);
             glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>( _seedPoints.size() ) );
         }

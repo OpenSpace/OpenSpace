@@ -77,21 +77,17 @@ namespace openspace {
 
 RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
-      _vertexArrayObject(0),
-      _vertexPositionBuffer(0),
-      _vertexColorBuffer(0),
-      _gridVAO(0),
-      _gridVBO(0),
-      _stepSize("stepSize", "Step Coefficient", 0.2, 0.0001, 1.0),
-      _vertexSkipping("traceVertexSkipping", "Num vertices skipped (FPS will drop)", 0, 0, 30),
-      _stepMultiplier("stepMultiplier", "Step Multiplier", 1, 1, 1000),
-      _clippingRadius("clippingRadius", "Clipping Radius", 0.1, 0.0, 5.0),
-      _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
-      _maximumVertices("numMaxVertices", "Max Number Of Vertices", 1, 1, 10),
+      _isMorphing("isMorphing", "Morphing", true),
       _showGrid("showGrid", "Show Grid", false),
       _showSeedPoints("showSeedPoints", "Show Seed Points", true),
+      _clippingRadius("clippingRadius", "Clipping Radius", 0.1, 0.0, 5.0),
       _seedPointSize("seedPointSize", "Seed Point Size", 4.0, 0.0, 20.0),
-      _isMorphing("isMorphing", "Morphing", true),
+      _stepSize("stepSize", "Step Coefficient", 0.2, 0.0001, 1.0),
+      _maximumVertices("numMaxVertices", "Max Number Of Vertices", 1, 1, 10),
+      _stepMultiplier("stepMultiplier", "Step Multiplier", 1, 1, 1000),
+      _vertexSkipping("traceVertexSkipping", "Num vertices skipped (FPS will drop)", 0, 0, 30),
+      _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
+      // _seedPointSourceFile("sourceFile", "SeedPoint File"),
       _domainX("domainX", "Domain Limits X-axis"),
       _domainY("domainY", "Domain Limits Y-axis"),
       _domainZ("domainZ", "Domain Limits Z-axis"),
@@ -102,11 +98,7 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _uniformSeedPointColor("seedPointColor", "SeedPoint Color",
                              glm::vec4(1.f,0.33f,0.f,0.85f),
                              glm::vec4(0.f),
-                             glm::vec4(1.f)),
-      _shouldRender(false),
-      _needsUpdate(false),
-      _isSpherical(false),
-      _activeStateIndex(-1) {
+                             glm::vec4(1.f)) {
 
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -303,10 +295,10 @@ bool RenderableGpuFieldlines::initialize() {
                 }
 
                 // TODO: find a upper MAX_NUM_CELLS limit that makes sense!
-                const uint MAX_NUM_CELLS = pow(2,22);
+                const unsigned int MAX_NUM_CELLS = pow(2,24);
                 // Just some control to not create a MASSIVE grid!
                 if (_dimensions.x * _dimensions.y * _dimensions.z > MAX_NUM_CELLS) {
-                    uint defaultDim = 32;
+                    unsigned int defaultDim = 32;
                     LWARNING("Voxel Grid Dimensions: { " << _dimensions.x << ", "
                             << _dimensions.y << ", " << _dimensions.z << " }"
                             << " are too big. Setting dimensions to {" << defaultDim
@@ -652,7 +644,7 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
 
         // Set uniforms for shaders
         _program->setUniform("modelViewProjection",
-                data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+                data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewTransform));
         _program->setUniform("clippingRadius", _clippingRadius);
         _program->setUniform("integrationMethod", _integrationMethod);
         _program->setUniform("maxVertices", _maximumVertices);
@@ -715,7 +707,7 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
             _seedPointProgram->setUniform("color", _uniformSeedPointColor);
             _seedPointProgram->setUniform("isSpherical", _isSpherical);
             _seedPointProgram->setUniform("modelViewProjection",
-                data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+                data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewTransform));
             glPointSize(_seedPointSize);
             glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>( _seedPoints.size() ) );
         }
@@ -731,7 +723,7 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
             // if enlil its supposed to be true.. implement an _isSpherical variable
             _gridProgram->setUniform("isSpherical", _isSpherical);
             _gridProgram->setUniform("modelViewProjection",
-                    data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
+                    data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewTransform));
 
             glBindVertexArray(_gridVAO);
 
@@ -897,11 +889,11 @@ void RenderableGpuFieldlines::generateUniformSphericalGrid(const glm::vec3& doma
                                                         static_cast<float>(dimensions.y),
                                                         static_cast<float>(dimensions.z));
 
-    int segmentResolution = 1;
+    // int segmentResolution = 1;
     int lStart = 0;
     // LINES parallel to x axis (radius, r)
-    for (int z = 0; z < dimensions.z; ++z) {
-        for (int y = 0; y < dimensions.y + 1; ++y) {
+    for (unsigned int z = 0; z < dimensions.z; ++z) {
+        for (unsigned int y = 0; y < dimensions.y + 1; ++y) {
             _gridStartPos.push_back(lStart);
             _gridVertices.push_back(rLonLatToCartesian(glm::vec3(domainMins.x,
                                               domainMins.y + static_cast<float>(y) * deltas.y,
@@ -915,11 +907,11 @@ void RenderableGpuFieldlines::generateUniformSphericalGrid(const glm::vec3& doma
     }
 
     // RINGS (latitude, theta)
-    for (int x = 0; x < dimensions.x + 1; ++x) {
-        for (int z = 0; z < dimensions.z + 1; ++z) {
+    for (unsigned int x = 0; x < dimensions.x + 1; ++x) {
+        for (unsigned int z = 0; z < dimensions.z + 1; ++z) {
             _gridStartPos.push_back(lStart);
             int count = 0;
-            for (int y = 0; y < dimensions.y + 1; ++y) {
+            for (unsigned int y = 0; y < dimensions.y + 1; ++y) {
                 // for (int s = 0; s < segmentResolution + 1; ++s) {
 
                     _gridVertices.push_back(rLonLatToCartesian(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
@@ -940,11 +932,11 @@ void RenderableGpuFieldlines::generateUniformSphericalGrid(const glm::vec3& doma
     }
 
     // // RINGS (longitude, phi)
-    for (int x = 0; x < dimensions.x + 1; ++x) {
-        for (int y = 0; y < dimensions.y + 1; ++y) {
+    for (unsigned int x = 0; x < dimensions.x + 1; ++x) {
+        for (unsigned int y = 0; y < dimensions.y + 1; ++y) {
             _gridStartPos.push_back(lStart);
             int count = 0;
-            for (int z = 0; z < dimensions.z + 1; ++z) {
+            for (unsigned int z = 0; z < dimensions.z + 1; ++z) {
                 // for (int s = 0; s < segmentResolution + 1; ++s) {
 
                 _gridVertices.push_back(rLonLatToCartesian(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
@@ -976,8 +968,8 @@ void RenderableGpuFieldlines::generateUniformCartesianGrid(const glm::vec3& doma
 
     int lStart = 0;
     // HORIZONTAL LINES parallel to x axis
-    for (int z = 0; z < dimensions.z + 1; ++z) {
-        for (int y = 0; y < dimensions.y + 1; ++y) {
+    for (unsigned int z = 0; z < dimensions.z + 1; ++z) {
+        for (unsigned int y = 0; y < dimensions.y + 1; ++y) {
             _gridStartPos.push_back(lStart);
             _gridVertices.push_back(glm::vec3(domainMins.x,
                                               domainMins.y + static_cast<float>(y) * deltas.y,
@@ -991,8 +983,8 @@ void RenderableGpuFieldlines::generateUniformCartesianGrid(const glm::vec3& doma
     }
 
     // HORIZONTAL LINES parallel to y axis
-    for (int z = 0; z < dimensions.z + 1; ++z) {
-        for (int x = 0; x < dimensions.x + 1; ++x) {
+    for (unsigned int z = 0; z < dimensions.z + 1; ++z) {
+        for (unsigned int x = 0; x < dimensions.x + 1; ++x) {
             _gridStartPos.push_back(lStart);
 
             _gridVertices.push_back(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
@@ -1007,8 +999,8 @@ void RenderableGpuFieldlines::generateUniformCartesianGrid(const glm::vec3& doma
     }
 
     // VERTICAL LINES parallel to z axis
-    for (int x = 0; x < dimensions.x + 1; ++x) {
-        for (int y = 0; y < dimensions.y + 1; ++y) {
+    for (unsigned int x = 0; x < dimensions.x + 1; ++x) {
+        for (unsigned int y = 0; y < dimensions.y + 1; ++y) {
             _gridStartPos.push_back(lStart);
 
             _gridVertices.push_back(glm::vec3(domainMins.x + static_cast<float>(x) * deltas.x,
