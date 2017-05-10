@@ -26,24 +26,22 @@
 
 uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelTransform;
-//uniform mat4 planeMod;
+uniform dmat4 sunToSpacecraftReferenceFrame;
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 
 out vec2 vs_st;
 out vec4 vs_positionScreenSpace;
-out vec4 posModel;
 out vec4 clipSpace;
-out vec3 rawPos;
+out vec3 vUv;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
     // Transform the damn psc to homogenous coordinate
     vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
-    rawPos =  position.xyz;
-    posModel = modelTransform * position;
+    vUv = vec3(sunToSpacecraftReferenceFrame * dvec4(position)).xyz;
     vec4 positionClipSpace = modelViewProjectionTransform * position;
     clipSpace = positionClipSpace;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
