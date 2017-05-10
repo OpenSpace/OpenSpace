@@ -121,10 +121,11 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         const int& numResamples,
         const int& resamplingOption,
         std::vector<std::string>& colorizingFloatVars,
+        std::vector<std::string>& colorizingMagVars,
         std::vector<double>& startTimes,
         FieldlinesState& outFieldlinesStates) {
 
-    // --------------------- CREATE KAMELEON OBJECT AND DEPENDENCIES ---------------------
+    // ----------------------------- CREATE KAMELEON OBJECT -----------------------------
     std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
     long kamStatus = kameleon->open(pathToCdfFile);
 
@@ -140,7 +141,6 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         LERROR("FAILED TO LOAD TRACING VARIABLE: " << tracingVariable);
         return false;
     }
-
 
     // ----------------- CHECK CDF MODEL AND SETUP VARIABLES ACCORDINGLY -----------------
     float scalingFactor;
@@ -196,21 +196,63 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     // ---- DETERMINE WETHER OR NOT TO SAMPLE EXTRA QUANTITIES AT FIELDLINE VERTICES ----
     // ----------------- IF SO LOAD THEM, ELSE DELETE STRING FROM VECTOR -----------------
     bool sampleExtraQuantities = false;
-    for (std::string str : colorizingFloatVars) {
-        status =  kameleon->loadVariable(str);
+    for (int i = 0; i < colorizingFloatVars.size(); i++) {
+        std::string str = colorizingFloatVars[i];
+        status = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!status) {
-            LWARNING("FAILED TO LOAD EXTRA VARIABLE: '" << str << "'. Ignoring it!");
+            LWARNING("FAILED TO LOAD COLORIZING VARIABLE: '" << str << "'. Ignoring it!");
             colorizingFloatVars.erase(std::remove(colorizingFloatVars.begin(),
                                                   colorizingFloatVars.end(), str),
                                                   colorizingFloatVars.end());
+            --i;
         } else {
             sampleExtraQuantities = true;
+            LDEBUG("Color depending on variable " << str << " is allowed!");
         }
     }
 
+    if (colorizingMagVars.size() % 3 == 0) {
+        for (int i = 0; i < colorizingMagVars.size(); i += 3) {
+            std::string str1 = colorizingMagVars[i];
+            std::string str2 = colorizingMagVars[i+1];
+            std::string str3 = colorizingMagVars[i+2];
+            status = kameleon->doesVariableExist(str1) &&
+                     kameleon->doesVariableExist(str2) &&
+                     kameleon->doesVariableExist(str3) &&
+                     kameleon->loadVariable(str1) &&
+                     kameleon->loadVariable(str2) &&
+                     kameleon->loadVariable(str3);
+            if (!status) {
+                LWARNING("FAILED TO LOAD AT LEAST ONE OF THE MAGNITUDE VARIABLES: "
+                        << str1 << ", " << str2 <<  " & " << str3
+                        << ". Removing ability to colorize by corresponding magnitude!");
+                colorizingMagVars.erase(colorizingMagVars.begin() + i,
+                                        colorizingMagVars.begin() + i + 3);
+                i -= 3;
+            } else {
+                sampleExtraQuantities = true;
+                LDEBUG("Color depending on magnitude of variables "
+                        << str1 << ", " << str2 <<  " & " << str3 << " is allowed!");
+            }
+        }
+    } else {
+        LWARNING("Wrong number of variables provided for magnitude colorization. "
+                << "Expects multiple of 3, but " << colorizingMagVars.size()
+                << " are provided! E.g to colorize by velocity provide : "
+                << "ux, uy, uz (for BATSRUS) or ur, utheta, uphi (for ENLIL!)\n\t"
+                << "To allow coloring by multiple magnitudes make sure to provide "
+                << "variables in blocks of three! E.g: {'ux','uy','uz','jx','jy','jz'}");
+    }
+
+    int numValidFloatQuantities = colorizingFloatVars.size();
+    int numValidMagnitudeQuantities = colorizingMagVars.size() / 3;
+
+    std::vector<std::vector<float>> colorizingVariables;
+    colorizingVariables.resize(numValidFloatQuantities + numValidMagnitudeQuantities);
+
     // ------ LOOP THROUGH THE SEED POINTS, TRACE AND CONVERT TO THE DESIRED FORMAT ------
     // TODO CREATE MORE VECTORS
-    std::vector<float> xtraVarVec;
+    // std::vector<float> xtraVarVec;
     int lineStart = 0;
     for (glm::vec3 seedPoint : inSeedPoints) {
         //--------------------------------------------------------------------------//
@@ -250,7 +292,21 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                 glm::vec3 gPos = glm::vec3(p.component1, p.component2, p.component3);
                 if (sampleExtraQuantities) {
                     // LDEBUG("TODO: SAMPLE EXTRA PROPERTIES FOR COLORIZING LINES AT gPos");
-                    xtraVarVec.push_back(interpolator->interpolate(colorizingFloatVars[0], gPos.x, gPos.y, gPos.z));
+                    for (int i = 0; i < numValidFloatQuantities; i++) {
+                        colorizingVariables[i].push_back(
+                                interpolator->interpolate(colorizingFloatVars[i],
+                                                          gPos.x, gPos.y, gPos.z));
+                    }
+                    for (int i = 0; i < numValidMagnitudeQuantities; i += 3) {
+                        float xVal = interpolator->interpolate(colorizingMagVars[i],
+                                                               gPos.x, gPos.y, gPos.z);
+                        float yVal = interpolator->interpolate(colorizingMagVars[i+1],
+                                                               gPos.x, gPos.y, gPos.z);
+                        float zVal = interpolator->interpolate(colorizingMagVars[i+2],
+                                                               gPos.x, gPos.y, gPos.z);
+                        colorizingVariables[i + numValidFloatQuantities].push_back(
+                                sqrt(xVal*xVal + yVal*yVal + zVal*zVal));
+                    }
                 }
                 if (convertToCartesian) {
                     // LDEBUG("TODO: CONVERT gPos TO CARTESIAN");
@@ -302,7 +358,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         delete interpolator;
     }
     if (sampleExtraQuantities) {
-        outFieldlinesStates._extraVariables.push_back(xtraVarVec);
+        outFieldlinesStates._extraVariables = std::move(colorizingVariables);
     }
 
     // ------------------------ MAKE SURE STATE HAS A START TIME ------------------------
