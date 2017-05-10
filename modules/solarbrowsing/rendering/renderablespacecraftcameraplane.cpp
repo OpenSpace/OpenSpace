@@ -509,9 +509,9 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     const glm::dvec3 nTargetWorld = glm::normalize(targetPositionWorld);
 
     // We don't normalize sun's position since its in the origin
-    glm::dmat4 rotationTransform
+    glm::dmat4 rotationTransformSpacecraft
           = glm::lookAt(nPositionWorld, glm::dvec3(target->worldPosition()), upWorld);
-    rotationTransform = glm::dmat4(glm::inverse(rotationTransform));
+    glm::dmat4 rotationTransformWorld = glm::inverse(rotationTransformSpacecraft);
 
     // Scale vector to sun barycenter to get translation distance
     glm::dvec3 sunDir = targetPositionWorld - positionWorld;
@@ -519,14 +519,14 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), positionWorld + offset) *
-        rotationTransform *
+        rotationTransformWorld *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
         glm::dmat4(1.0);
     glm::dmat4 modelViewTransform = viewMatrix * modelTransform;
 
     glm::dmat4 spacecraftModelTransform =
         glm::translate(glm::dmat4(1.0), positionWorld) *
-        rotationTransform *
+        rotationTransformWorld *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
         glm::dmat4(1.0);
 
@@ -562,13 +562,18 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     _sphereShader->activate();
     glm::dmat4 modelTransformSphere =
         glm::translate(glm::dmat4(1.0), target->worldPosition()) * // Translation
-        rotationTransform *  // Spice rotation
+        glm::dmat4(target->worldRotationMatrix()) *  // Spice rotation
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
     glm::dmat4 modelViewTransformSphere
           = viewMatrix * modelTransformSphere;
 
-    _sphereShader->setUniform("sunDir", glm::vec3(sunDir));
-    _sphereShader->setUniform("planePosition", glm::vec3(positionWorld + offset));
+    //const glm::dmat4 worldToSpacecraft = glm::inverse(rotationTransform);
+    _sphereShader->setUniform("planePositionSpacecraft",
+                              glm::dvec3(rotationTransformSpacecraft
+                                    * glm::dvec4(positionWorld + offset, 1.0)));
+    _sphereShader->setUniform("sunToSpacecraftReferenceFrame",
+                              rotationTransformSpacecraft * glm::dmat4(target->rotationMatrix()));
+
     _sphereShader->setUniform(
         "modelViewProjectionTransform",
         projectionMatrix * glm::mat4(modelViewTransformSphere)
