@@ -55,15 +55,15 @@ public:
     void update(const UpdateData& data) override;
 private:
     // -------------------- MAIN VARIABLES, STATE & TIME --------------------
-    bool _needsUpdate;  // If still in same state as previous frame _needsUpdate == false
-    bool _shouldRender; // only temporary, unnecessary?
+    bool _needsUpdate  = false; // If still in same state as previous frame == false
+    bool _shouldRender = false; // only temporary, unnecessary?
 
     std::vector<glm::vec3> _seedPoints; // TODO: no need to store these here?
 
     // State variables
     std::vector<FieldlinesState> _states;
 
-    int _activeStateIndex;
+    int _activeStateIndex = -1;
     int _numberOfStates;
 
     // Time variables
@@ -107,7 +107,7 @@ private:
 
     // -------- Colorize fieldline depending on additional variables --------
     bool _hasUnitColoring;
-    bool _updateColorBuffer;
+    bool _updateColorBuffer = false;
 
     std::vector<glm::vec2> _transferFunctionLimits; // .x corresponds to 0 in tf, .y to 1
 
@@ -123,15 +123,15 @@ private:
     ghoul::opengl::ProgramObject* _activeProgramPtr;
 
     // Vertex Array Object
-    GLuint _vertexArrayObject;
-    GLuint _seedArrayObject;
+    GLuint _vertexArrayObject       = 0;
+    GLuint _seedArrayObject         = 0;
 
     // Buffers // TODO: Make an array instead?
-    GLuint _vertexPositionBuffer;
-    GLuint _seedPositionBuffer;
-    GLuint _vertexColorBuffer;
-    GLuint _morphToPositionBuffer;
-    GLuint _quickMorphBuffer;
+    GLuint _vertexPositionBuffer    = 0;
+    GLuint _seedPositionBuffer      = 0;
+    GLuint _vertexColorBuffer       = 0;
+    GLuint _morphToPositionBuffer   = 0;
+    GLuint _quickMorphBuffer        = 0;
 
     GLuint _vertAttrVertexPos       = 0;
     GLuint _vertAttrMorphToPos      = 1;
@@ -139,7 +139,7 @@ private:
     GLuint _vertAttrColorQuantity   = 3;
 
     GLfloat _maxLineWidthOpenGl; // hardware related variable?
-    float _widthScaling; // Line width scaling for 3D "ropes", depends on cdf model
+    float _scalingFactor;
 
     bool isWithinSequenceInterval();
     void updateActiveStateIndex();
