@@ -109,7 +109,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     auto threadPool = std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 10);
 
     _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
-        tileDataset, threadPool);
+        tileDataset, threadPool, AsyncTileDataProvider::UsePBO::Yes);
 
     if (dictionary.hasKeyAndValue<double>(KeyPreCacheLevel)) {
         int preCacheLevel = static_cast<int>(dictionary.value<double>(KeyPreCacheLevel));

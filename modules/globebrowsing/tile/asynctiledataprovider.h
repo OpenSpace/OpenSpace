@@ -231,8 +231,14 @@ class RawTileDataReader;
 
 class AsyncTileDataProvider {
 public:
+    enum class UsePBO {
+        Yes,
+        No
+    };
+
     AsyncTileDataProvider(std::shared_ptr<RawTileDataReader> textureDataProvider,
-        std::shared_ptr<LRUThreadPool<TileIndex::TileHashKey>> pool);
+        std::shared_ptr<LRUThreadPool<TileIndex::TileHashKey>> pool,
+        UsePBO usePbo = UsePBO::No);
 
     bool enqueueTileIO(const TileIndex& tileIndex);        
     std::vector<std::shared_ptr<RawTile>> getRawTiles();
@@ -251,7 +257,6 @@ private:
     //ConcurrentJobManager<RawTile> _concurrentJobManager;
     PrioritizingConcurrentJobManager<RawTile, TileIndex::TileHashKey> _concurrentJobManager;
 
-    std::unique_ptr<PixelBuffer> _pbo;
     std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer;
     std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
 };
