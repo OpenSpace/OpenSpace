@@ -49,7 +49,7 @@ namespace {
 namespace openspace {
 
 	TuioEar TouchModule::*ear;
-	TouchInteraction *touch;
+	TouchInteraction* touch;
 
 bool TouchModule::gotNewInput() {
 	// Get new input from listener

@@ -58,18 +58,36 @@ using namespace openspace;
 TouchInteraction::TouchInteraction()
 	: properties::PropertyOwner("TouchInteraction"),
 	_origin("origin", "Origin", ""),
-	_touchScreenSize("TouchScreenSize", "Normalizes _sensitivity with screen size given in inches.", 55.0f, 5.5f, 150.0f),
-	_vel{ 0.0, glm::dvec2(0.0), glm::dvec2(0.0), 0.0, 0.0 },
-	_friction{ 0.02, 0.01, 0.02, 1, 0.02 },
-	_sensitivity{ 2.0 * 55.0, 0.1, 0.1, 1, 0.4 * 55.0 },
+	_maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000),
+	_touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f),
+	_nodeRadiusThreshold("Activate direct-manipulation", "Radius a planet has to have to activate direct-manipulation", 0.3f, 0.0f, 1.0f),
+	_orbitSpeedThreshold("Activate orbit spinning", "Threshold to activate orbit spinning in direct-manipulation", 0.038f, 0.0f, 0.1f),
+	_panSpeedThreshold("Activate pan spinning", "Threshold to activate pan spinning in direct-manipulation", 0.004f, 0.0, 0.01),
+	_spinSensitivity("Sensitivity of Spinning", "Sensitivity of spinning in direct-manipulation", 0.25f, 0, 1),
+	_inputStillThreshold("Input still", "Threshold for interpreting input as still", 0.0008f, 0, 0.001),
+	_interpretPan("Pan delta distance", "Delta distance between fingers allowed for interpreting pan interaction", 0.01f, 0, 0.1),
+	_slerpTime("Time to slerp", "Time to slerp in seconds to new orientation with new node picking", 6, 0, 20),
+	_guiButton("GUI Button", "GUI button size in pixels.", glm::ivec2(32, 64), glm::ivec2(8, 16), glm::ivec2(128, 256)),
+	_friction("Friction", "Friction for different interactions (orbit, zoom, roll, pan)", glm::vec4(0.01, 0.02, 0.02, 0.02), glm::vec4(0.0), glm::vec4(0.2)), 
+	
+	_vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) },
+	_sensitivity{glm::dvec2(0.1, 0.1778), 110, 22, glm::dvec2(0.1, 0.1778) },
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
-	_currentRadius{ 1.0 }, _slerpTime{ 1.0 },
-	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true },
-	_guiON("Gui On", "Show GUI", false)
+	_currentRadius{ 1.0 }, _slerpdT{ 1000 },
+	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true }, _guiON{ false }
 {
+	addProperty(_maxTapTime);
 	addProperty(_touchScreenSize);
-	addProperty(_guiON);
-	levmarq_init(&_lmstat);
+	addProperty(_nodeRadiusThreshold);
+	addProperty(_orbitSpeedThreshold);
+	addProperty(_panSpeedThreshold);
+	addProperty(_spinSensitivity);
+	addProperty(_inputStillThreshold);
+	addProperty(_interpretPan);
+	addProperty(_slerpTime);
+	addProperty(_guiButton);
+	addProperty(_friction);
+	
 	_origin.onChange([this]() {
 		SceneGraphNode* node = sceneGraphNode(_origin.value());
 		if (!node) {
@@ -78,6 +96,8 @@ TouchInteraction::TouchInteraction()
 		}
 		setFocusNode(node);
 	});
+
+	levmarq_init(&_lmstat);
 	OnScreenGUIModule::touchInput = { false, glm::vec2(0), 0 };
 	_time.initSession();
 }
@@ -87,7 +107,7 @@ TouchInteraction::~TouchInteraction() { }
 // Called each frame if there is any input
 void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
 	if (_tap) { // check for doubletap
-		if (_time.getSessionTime().getTotalMilliseconds() < maxTapTime) {
+		if (_time.getSessionTime().getTotalMilliseconds() < _maxTapTime) {
 			_doubleTap = true;
 			_tap = false;
 		}
@@ -107,7 +127,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		}
 
 		// evaluates if current frame is in directTouchMode (will if so be used next frame)
-		if (_currentRadius > 0.3 && _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch, needs better definition
+		if (_currentRadius > _nodeRadiusThreshold && _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch, needs better definition
 			_directTouchMode = true;
 		}
 		else {
@@ -120,16 +140,15 @@ bool TouchInteraction::gui(const std::vector<TuioCursor>& list) {
 	WindowWrapper& wrapper = OsEng.windowWrapper();
 	glm::ivec2 res = wrapper.currentWindowSize();
 	glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenY(res.y)); // mouse pixel position
-	glm::vec2 button = glm::vec2(36, 64); // pixel size
 	_guiON = OnScreenGUIModule::gui.isEnabled();
 
-	if (_tap && list.size() == 1 && pos.x < button.x && pos.y < button.y) { // pressed invisible button
+	if (_tap && list.size() == 1 && pos.x < _guiButton.value().x && pos.y < _guiButton.value().y) { // pressed invisible button
 		_guiON = !_guiON;
 		OnScreenGUIModule::gui.setEnabled(_guiON);
 
 		std::string mode = (_guiON) ? "" : "de";
 		LINFO("GUI mode is " << mode << "activated. Inside box by: (" <<
-			static_cast<int>(100 * (pos.x / button.x)) << "%, " << static_cast<int>(100 * (pos.y / button.y)) << "%)\n");
+			static_cast<int>(100 * (pos.x / _guiButton.value().x)) << "%, " << static_cast<int>(100 * (pos.y / _guiButton.value().y)) << "%)\n");
 	}
 	else if (_guiON) {
 		uint32_t action = (_tap) ? 0 : 1;
@@ -266,20 +285,20 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 	_lmSuccess = levmarq(nDOF, par, nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
 
 	if (_lmSuccess) { // if good values were found set new camera state
-		_vel.globalRot = glm::dvec2(par[0], par[1]);
+		_vel.orbit = glm::dvec2(par[0], par[1]);
 		if (nDOF > 2) {
 			_vel.zoom = par[2];
-			_vel.localRoll = par[3];
+			_vel.roll = par[3];
 			if (nDOF > 4) {
-				_vel.localRot = glm::dvec2(par[4], par[5]);
+				_vel.pan = glm::dvec2(par[4], par[5]);
 			}
 		}
 		step(1);
 		_lastVel = _vel;
-		_vel.globalRot = glm::dvec2(0.0, 0.0);
+		_vel.orbit = glm::dvec2(0.0, 0.0);
 		_vel.zoom = 0.0;
-		_vel.localRoll = 0.0;
-		_vel.localRot = glm::dvec2(0.0, 0.0);
+		_vel.roll = 0.0;
+		_vel.pan = glm::dvec2(0.0, 0.0);
 	}
 
 	// debugging
@@ -395,10 +414,10 @@ int TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::
 		return ROT;
 	}
 	else {
-		if (std::abs(dist - lastDist) / list.at(0).getMotionSpeed() < 0.01 && list.size() == 3) { // if distance between fingers is constant we have panning
+		if (std::abs(dist - lastDist) / list.at(0).getMotionSpeed() < _interpretPan && list.size() == 3) { // if distance between fingers is constant we have panning
 			return PAN;
 		}
-		else if (list.size() > 1 && std::abs(minDiff) < 0.0008) { // if one finger is 'still' (0.0008 works as epsilon) and another moving, we have roll
+		else if (list.size() > 1 && std::abs(minDiff) < _inputStillThreshold) { // if one finger is 'still' (epsilon) and another moving, we have roll
 			return ROLL;
 		}
 		else {
@@ -420,7 +439,7 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 
 	switch (action) {
 		case ROT: { // add rotation velocity
-			_vel.globalRot += glm::dvec2(cursor.getXSpeed(), cursor.getYSpeed()) * _sensitivity.globalRot;
+			_vel.orbit += glm::dvec2(cursor.getXSpeed() * _sensitivity.orbit.x, cursor.getYSpeed() * _sensitivity.orbit.y);
 			break;
 		}
 		case PINCH: { // add zooming velocity
@@ -449,26 +468,28 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 					res += currentAngle - lastAngle;
 				return res;
 			});
-			_vel.localRoll += -rollFactor * _sensitivity.localRoll / _touchScreenSize.value();
+			_vel.roll += -rollFactor * _sensitivity.roll / _touchScreenSize.value();
 			break;
 		}
 		case PAN: { // add local rotation velocity
-			_vel.localRot += glm::dvec2(cursor.getXSpeed(), cursor.getYSpeed()) * _sensitivity.localRot;
+			_vel.pan += glm::dvec2(cursor.getXSpeed() * _sensitivity.pan.x, cursor.getYSpeed() * _sensitivity.pan.y);
 			break;
 		}
 		case PICK: { // pick something in the scene as focus node
 			if (_selected.size() == 1 && _selected.at(0).node != _focusNode) {
 				setFocusNode(_selected.at(0).node);
 				OsEng.interactionHandler().setFocusNode(_focusNode); // cant do setFocusNode since TouchInteraction is not subclass of InteractionMode
+
+				// rotate camera to look at new focus
 				glm::dvec3 camToFocus = _focusNode->worldPosition() - _camera->positionVec3();
 				glm::dvec3 camForward = glm::normalize(_camera->viewDirectionWorldSpace());
 				double angle = glm::angle(camForward, camToFocus);
 				glm::dvec3 axis = glm::normalize(glm::cross(camForward, camToFocus));
-				_toSlerp.x = axis.x * sin(angle / 2.0); // rotate camera to look at new focus
+				_toSlerp.x = axis.x * sin(angle / 2.0); 
 				_toSlerp.y = axis.y * sin(angle / 2.0);
 				_toSlerp.z = axis.z * sin(angle / 2.0);
 				_toSlerp.w = cos(angle / 2.0);
-				_slerpTime = 0.0;
+				_slerpdT = 0.0;
 			}
 			else { // should zoom in to current but not too much
 				double dist = glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) - _focusNode->boundingSphere();
@@ -478,7 +499,7 @@ void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std
 					factor = 1.0 + std::pow(dist / startDecline, 2);
 				}
 				double response = _focusNode->boundingSphere() / (factor * _currentRadius * _projectionScaleFactor);
-				_vel.zoom = (_sensitivity.zoom / 55) * response;
+				_vel.zoom = (_sensitivity.zoom / _touchScreenSize.value()) * response;
 			}
 			break;
 		}
@@ -514,22 +535,22 @@ void TouchInteraction::step(double dt) {
 		_currentRadius = boundingSphere / std::max(distance * _projectionScaleFactor, 1.0);
 		
 		{ // Roll
-			dquat camRollRot = angleAxis(_vel.localRoll*dt, dvec3(0.0, 0.0, 1.0));
+			dquat camRollRot = angleAxis(_vel.roll*dt, dvec3(0.0, 0.0, 1.0));
 			localCamRot = localCamRot * camRollRot;
 		}
 		{ // Panning (local rotation)
-			dvec3 eulerAngles(_vel.localRot.y*dt, _vel.localRot.x*dt, 0);
+			dvec3 eulerAngles(_vel.pan.y*dt, _vel.pan.x*dt, 0);
 			dquat rotationDiff = dquat(eulerAngles);
 			localCamRot = localCamRot * rotationDiff;
 
 			// if we have chosen a new focus node
-			if (_slerpTime < 1) {
-				_slerpTime += 0.25 * dt;
-				localCamRot = slerp(localCamRot, _toSlerp, _slerpTime);
+			if (_slerpdT < _slerpTime) {
+				_slerpdT += dt;
+				localCamRot = slerp(localCamRot, _toSlerp, _slerpdT / _slerpTime);
 			}
 		}
 		{ // Orbit (global rotation)
-			dvec3 eulerAngles(_vel.globalRot.y*dt, _vel.globalRot.x*dt, 0);
+			dvec3 eulerAngles(_vel.orbit.y*dt, _vel.orbit.x*dt, 0);
 			dquat rotationDiffCamSpace = dquat(eulerAngles);
 
 			dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace * inverse(globalCamRot);
@@ -557,13 +578,8 @@ void TouchInteraction::step(double dt) {
 				_vel.zoom = 0.0;
 			}
 		}
-		{ // Roll around sphere normal - is this something we ever want to do?
-			dquat camRollRot = angleAxis(_vel.globalRoll*dt, -directionToCenter);
-			globalCamRot = camRollRot * globalCamRot;
-		}
 
 		decelerate();
-
 		// Update the camera state
 		_camera->setPositionVec3(camPos);
 		_camera->setRotation(globalCamRot * localCamRot);
@@ -575,26 +591,25 @@ void TouchInteraction::step(double dt) {
 
 // Decelerate velocities (set 0 for directTouch)
 void TouchInteraction::decelerate() {
-	if (!_directTouchMode && _currentRadius > 0.3 && _vel.zoom > _focusNode->boundingSphere()) { // check for velocity speed too
-		_vel.zoom *= (1 - 2*_friction.zoom);
+	if (!_directTouchMode && _currentRadius > _nodeRadiusThreshold && _vel.zoom > _focusNode->boundingSphere()) { // check for velocity speed too
+		_vel.zoom *= (1 - 2*_friction.value().y);
 	}
-	_vel.zoom *= (1 - _friction.zoom);
-	_vel.globalRot *= (1 - _friction.globalRot);
-	_vel.localRot *= (1 - _friction.localRot);
-	_vel.globalRoll *= (1 - _friction.globalRoll);
-	_vel.localRoll *= (1 - _friction.localRoll);
+	_vel.orbit *= (1 - _friction.value().x);
+	_vel.zoom *= (1 - _friction.value().y);
+	_vel.roll *= (1 - _friction.value().z);
+	_vel.pan *= (1 - _friction.value().w);
 }
 
 // Called if all fingers are off the screen
 void TouchInteraction::clear() {
 	_lmSuccess = true;
 	if (_directTouchMode && _selected.size() > 0) {
-		double fps = 0.25 / OsEng.windowWrapper().averageDeltaTime();
-		if (glm::length(_lastVel.localRot) > 0.004) { // might not be desired
-			_vel.localRot = _lastVel.localRot * fps;
+		double spinDelta = _spinSensitivity / OsEng.windowWrapper().averageDeltaTime();
+		if (glm::length(_lastVel.pan) > _panSpeedThreshold) { // might not be desired
+			_vel.pan = _lastVel.pan * spinDelta;
 		}
-		else if (glm::length(_lastVel.globalRot) > 0.038) { // good value to activate "spinning"
-			_vel.globalRot = _lastVel.globalRot * fps;
+		else if (glm::length(_lastVel.orbit) > _orbitSpeedThreshold) { // good value to activate "spinning"
+			_vel.orbit = _lastVel.orbit * spinDelta;
 		}
 	}
 	if (_guiON) {

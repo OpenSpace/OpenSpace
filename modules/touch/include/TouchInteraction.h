@@ -56,18 +56,10 @@
 namespace openspace {
 
 struct VelocityStates {
+	glm::dvec2 orbit;
 	double zoom;
-	glm::dvec2 globalRot;
-	glm::dvec2 localRot;
-	double globalRoll; // never used
-	double localRoll; 
-};
-struct ScaleFactor {
-	double zoom;
-	double globalRot;
-	double localRot; // pan
-	double globalRoll; // never used
-	double localRoll; // roll
+	double roll;
+	glm::dvec2 pan;
 };
 struct SelectedBody { 
 	int id;
@@ -90,7 +82,6 @@ struct FunctionData {
 #define ROLL 2
 #define PAN 3
 #define PICK 4
-#define maxTapTime 300
 
 using Point = std::pair<int, TUIO::TuioPoint>;
 
@@ -123,23 +114,34 @@ class TouchInteraction : public properties::PropertyOwner
 		Camera* _camera;
 		SceneGraphNode* _focusNode = nullptr;
 
+		// Property variables
 		properties::StringProperty _origin;
+		properties::IntProperty _maxTapTime;
 		properties::FloatProperty _touchScreenSize;
+		properties::FloatProperty _nodeRadiusThreshold;
+		properties::FloatProperty _orbitSpeedThreshold;
+		properties::FloatProperty _panSpeedThreshold;
+		properties::FloatProperty _spinSensitivity;
+		properties::FloatProperty _inputStillThreshold;
+		properties::FloatProperty _interpretPan;
+		properties::FloatProperty _slerpTime;
+		properties::IVec2Property _guiButton;
+		properties::Vec4Property _friction;
+
+		// Class variables
 		VelocityStates _vel;
 		VelocityStates _lastVel;
-		ScaleFactor _friction;
-		ScaleFactor _sensitivity;
+		VelocityStates _sensitivity;
+
 		double _projectionScaleFactor;
 		double _currentRadius;
-		double _slerpTime;
+		double _slerpdT;
 		TUIO::TuioTime _time;
 		bool _directTouchMode;
 		bool _tap;
 		bool _doubleTap;
 		bool _lmSuccess;
-		properties::BoolProperty _guiON;
-		
-		
+		bool _guiON;
 		std::vector<SelectedBody> _selected;
 		LMstat _lmstat;
 		glm::dquat _toSlerp;
