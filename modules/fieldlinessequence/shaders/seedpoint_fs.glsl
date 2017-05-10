@@ -31,18 +31,11 @@ uniform vec4 color;
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 Fragment getFragment() {
-    // if (color.a == 0) {
-    //     discard;
-    // }
+    if (color.a == 0) {
+        discard;
+    }
     vec4 fragColor;
-  //  if (classification) {
-        fragColor = color;
-    //} else {
-    //    fragColor = vec4(fieldLineColor.rgb * fieldLineColor.a , 1.0);
-    //}
-
-    //float depth = pscDepth(vs_position);
-
+    fragColor = color;
     Fragment frag;
     frag.depth = vs_depth;
     frag.color = fragColor;

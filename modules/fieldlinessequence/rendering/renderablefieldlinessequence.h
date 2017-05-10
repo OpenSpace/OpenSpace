@@ -88,8 +88,10 @@ private:
     // ----------------------------- Properties -----------------------------
     properties::BoolProperty _isMorphing;           // Time interpolation/morphing
     properties::BoolProperty _show3DLines;          // 3D "ropes". Billboards
+    properties::BoolProperty _showSeedPoints;
 
     properties::FloatProperty _lineWidth;           // Interactive Line Width
+    properties::FloatProperty _seedPointSize;       // Interactive Seed Point Size
 
     properties::IntProperty _fieldlineParticleSize; // Size of simulated line particles
     properties::IntProperty _modulusDivider;        // Related to simulated line particles
@@ -101,6 +103,7 @@ private:
 
     properties::Vec4Property _fieldlineColor;         // Uniform fieldline color
     properties::Vec4Property _fieldlineParticleColor; // Simulated line particles' color
+    properties::Vec4Property _uniformSeedPointColor;
 
     // -------- Colorize fieldline depending on additional variables --------
     bool _hasUnitColoring;
@@ -110,15 +113,18 @@ private:
 
     // --------------------------- OpenGL Related ----------------------------
     // shader program related
+    std::unique_ptr<ghoul::opengl::ProgramObject> _seedPointProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     std::unique_ptr<ghoul::opengl::ProgramObject> _ropeProgram;
     ghoul::opengl::ProgramObject* _activeProgramPtr;
 
     // Vertex Array Object
     GLuint _vertexArrayObject;
+    GLuint _seedArrayObject;
 
     // Buffers // TODO: Make an array instead?
     GLuint _vertexPositionBuffer;
+    GLuint _seedPositionBuffer;
     GLuint _vertexColorBuffer;
     GLuint _morphToPositionBuffer;
     GLuint _quickMorphBuffer;
