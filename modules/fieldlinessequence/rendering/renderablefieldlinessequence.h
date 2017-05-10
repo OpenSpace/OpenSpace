@@ -53,9 +53,6 @@ public:
 
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
-
-    bool isWithinSequenceInterval();
-    void updateActiveStateIndex();
 private:
     // -------------------- MAIN VARIABLES, STATE & TIME --------------------
     bool _needsUpdate;  // If still in same state as previous frame _needsUpdate == false
@@ -97,9 +94,12 @@ private:
     properties::IntProperty _modulusDivider;        // Related to simulated line particles
     properties::IntProperty _timeMultiplier;        // Related to simulated line particles
 
-    properties::OptionProperty _colorMethod;        // How to colorize the fieldlines
+    properties::OptionProperty _colorMethod;        // Uniform/transfer function/topology?
+    properties::OptionProperty _colorizingQuantity; // Which quantity to use in tf
 
-    properties::StringProperty _transferFunctionPath; // Color table for unit coloring
+    properties::StringProperty _transferFunctionPath;   // Color table for unit coloring
+    properties::StringProperty _transferFunctionMinVal; // Value corresponding to 0 in tf
+    properties::StringProperty _transferFunctionMaxVal; // Value corresponding to 1 in tf
 
     properties::Vec4Property _fieldlineColor;         // Uniform fieldline color
     properties::Vec4Property _fieldlineParticleColor; // Simulated line particles' color
@@ -107,8 +107,12 @@ private:
 
     // -------- Colorize fieldline depending on additional variables --------
     bool _hasUnitColoring;
+    bool _updateColorBuffer;
 
-    std::shared_ptr<TransferFunction> _transferFunction;
+    std::vector<glm::vec2> _transferFunctionLimits; // .x corresponds to 0 in tf, .y to 1
+
+    std::shared_ptr<TransferFunction> _transferFunction;        // Transfer funtion (tf)
+
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
 
     // --------------------------- OpenGL Related ----------------------------
@@ -129,8 +133,19 @@ private:
     GLuint _morphToPositionBuffer;
     GLuint _quickMorphBuffer;
 
+    GLuint _vertAttrVertexPos       = 0;
+    GLuint _vertAttrMorphToPos      = 1;
+    GLuint _vertAttrMorphQuick      = 2;
+    GLuint _vertAttrColorQuantity   = 3;
+
     GLfloat _maxLineWidthOpenGl; // hardware related variable?
     float _widthScaling; // Line width scaling for 3D "ropes", depends on cdf model
+
+    bool isWithinSequenceInterval();
+    void updateActiveStateIndex();
+    void updateColorBuffer();
+    void updateMorphingBuffers();
+    void updateVertexPosBuffer();
 };
 
 } // namespace openspace

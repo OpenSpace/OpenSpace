@@ -73,7 +73,7 @@ public:
                             const int& numResamples,
                             const int& resamplingOption,
                             std::vector<std::string>& colorizingFloatVars,
-                            // std::vector<string>& colorizingVec3MagnitudeVars, TODO
+                            std::vector<std::string>& colorizingMagnitudeVars,
                             std::vector<double>& startTimes,
                             FieldlinesState& outFieldlinesStates);
 

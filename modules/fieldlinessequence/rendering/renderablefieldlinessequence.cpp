@@ -39,6 +39,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <algorithm>
+
 namespace {
     std::string _loggerCat = "RenderableFieldlinesSequence";
 }
@@ -64,7 +66,7 @@ namespace {
     const float A_U_TO_METER = 149597870700.f; // Astronomical Units
     // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
 
-    enum colorMethod{UNIFORM, UNIT_DEPENDENT, CLASSIFIED};
+    enum colorMethod{UNIFORM, QUANTITY_DEPENDENT, CLASSIFIED};
     // const int colorUniform = 0;
     // const int colorUnitDependent = 1;
     // const int colorClassified = 2;
@@ -77,11 +79,12 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     : Renderable(dictionary),
       _isMorphing("isMorphing", "Morphing", false),
       _show3DLines("show3DLines", "3D Lines", false),
-      _colorMethod("fieldlineColorMethod", "Color Method", properties::OptionProperty::DisplayType::Dropdown),
-      _fieldlineColor("fieldlineColor", "Fieldline Color", glm::vec4(0.7f,0.f,0.7f,0.3f),
+      _colorMethod("fieldlineColorMethod", "Color Method", properties::OptionProperty::DisplayType::Radio),
+      _colorizingQuantity("fieldlineColorQuantity", "Quantity", properties::OptionProperty::DisplayType::Dropdown),
+      _fieldlineColor("fieldlineColor", "Fieldline Color", glm::vec4(0.7f,0.f,0.7f,0.75f),
                                                            glm::vec4(0.f),
                                                            glm::vec4(1.f)),
-      _fieldlineParticleSize("fieldlineParticleSize", "FL Particle Size", 20, 0, 1000),
+      _fieldlineParticleSize("fieldlineParticleSize", "FL Particle Size", 0, 0, 1000),
       _timeMultiplier("fieldlineParticleSpeed", "FL Particle Speed", 20, 1, 1000),
       _modulusDivider("fieldlineParticleFrequency", "FL Particle Frequency (reversed)", 100, 1, 10000),
       _fieldlineParticleColor("fieldlineParticleColor", "FL Particle Color",
@@ -94,6 +97,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
                              glm::vec4(1.f)),
       _lineWidth("fieldlineWidth", "Fieldline Width", 1.f, 0.f, 10.f),
       _transferFunctionPath("transferFunctionPath", "Transfer Function Path"),
+      _transferFunctionMinVal("transferFunctionLimit1", "TF minimum", "0"),
+      _transferFunctionMaxVal("transferFunctionLimit2", "TF maximum", "1"),
       _showSeedPoints("showSeedPoints", "Show Seed Points", true),
       _seedPointSize("seedPointSize", "Seed Point Size", 4.0, 0.0, 20.0),
       _vertexArrayObject(0),
@@ -104,6 +109,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _vertexColorBuffer(0),
       _shouldRender(false),
       _needsUpdate(false),
+      _updateColorBuffer(false),
       _activeStateIndex(-1),
       _widthScaling(R_E_TO_METER) {
 
@@ -238,12 +244,18 @@ bool RenderableFieldlinesSequence::initialize() {
     _startTimes.reserve(_numberOfStates);
 
     LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
+    for (std::string str : validCdfFilePaths) {
+        LDEBUG("\t" << str);
+    }
+
+    // TODO: This should be specified in LUA .mod file!
+    std::vector<std::string> colorizingFloatVars{"T", "dp", "rho"};
+    std::vector<std::string> colorizingMagVars{"jx", "jy", "jz",
+                                               "jr", "jtheta", "jphi",
+                                               // "br", "btheta", "bphi",
+                                               "ur", "utheta", "uphi"};
 
     // TODO this could be done in manager
-    std::string xtraVar = "T";
-    std::vector<std::string> colorizingVars;
-    colorizingVars.push_back(xtraVar);
-
     for (int i = 0; i < _numberOfStates; ++i) {
         LDEBUG(validCdfFilePaths[i] << " is now being traced.");
         _states.push_back(FieldlinesState(_seedPoints.size()));
@@ -254,12 +266,14 @@ bool RenderableFieldlinesSequence::initialize() {
                                                             _isMorphing,
                                                             numResamples,
                                                             resamplingOption,
-                                                            colorizingVars,
+                                                            colorizingFloatVars,
+                                                            colorizingMagVars,
                                                             _startTimes,
                                                             _states[i]);
     }
 
     bool allowUnitColoring = false;
+    int numQuanityColorVariables = 0;
     if (_numberOfStates > 0) {
         // Approximate the end time of last state (and for the sequence as a whole)
         _seqStartTime = _startTimes[0];
@@ -285,7 +299,10 @@ bool RenderableFieldlinesSequence::initialize() {
             _widthScaling = R_E_TO_METER;
         }
 
-        allowUnitColoring = (_states[0]._extraVariables[0].size() > 0) ? true : false;
+        numQuanityColorVariables = _states[0]._extraVariables.size();
+        if (numQuanityColorVariables > 0) {
+            allowUnitColoring = (_states[0]._extraVariables[0].size() > 0) ? true : false;
+        }
 
     } else {
         LERROR("Couldn't create any states!");
@@ -379,13 +396,66 @@ bool RenderableFieldlinesSequence::initialize() {
 
     if (allowUnitColoring) {
         _colorMethod.addOption(colorMethod::UNIFORM, "Uniform Color");
-        _colorMethod.addOption(colorMethod::UNIT_DEPENDENT, "Unit Dependent");
-        addProperty(_colorMethod);
-        addProperty(_transferFunctionPath);
+        _colorMethod.addOption(colorMethod::QUANTITY_DEPENDENT, "Quantity Dependent");
+
+        for (int i = 0; i < colorizingFloatVars.size(); i++) {
+            _colorizingQuantity.addOption(i, colorizingFloatVars[i]);
+        }
+
+        int offset = colorizingFloatVars.size();
+
+        for (int i = 0; i < colorizingMagVars.size(); i += 3) {
+            std::string displayName = "Magnitude of variables ("
+                                    + colorizingMagVars[i]   + ", "
+                                    + colorizingMagVars[i+1] + ", "
+                                    + colorizingMagVars[i+2] + ")";
+
+            _colorizingQuantity.addOption(i+offset, displayName);
+        }
+
+        for (int i = 0; i < _states[0]._extraVariables.size(); i++) {
+            std::vector<float>& quantityVec = _states[0]._extraVariables[i];
+        // for (std::vector<float>& quantityVec : _states[0]._extraVariables) {
+            auto minMaxPos = std::minmax_element(quantityVec.begin(), quantityVec.end());
+            float minVal = *minMaxPos.first;
+            float maxVal = *minMaxPos.second;
+            _transferFunctionLimits.push_back(glm::vec2(minVal, maxVal));
+        }
+
+        _transferFunctionMinVal = std::to_string(_transferFunctionLimits[0].x);
+        _transferFunctionMaxVal = std::to_string(_transferFunctionLimits[0].y);
+
+        _colorizingQuantity.onChange([this] {
+            LDEBUG("CHANGED COLORIZING QUANTITY");
+            _updateColorBuffer = true;
+            _transferFunctionMinVal = std::to_string(_transferFunctionLimits[_colorizingQuantity].x);
+            _transferFunctionMaxVal = std::to_string(_transferFunctionLimits[_colorizingQuantity].y);
+        });
+
         _transferFunctionPath.onChange([this] {
             // TOGGLE ACTIVE SHADER PROGRAM
             _transferFunction->setPath(_transferFunctionPath);
         });
+
+        _transferFunctionMinVal.onChange([this] {
+            LDEBUG("CHANGED MIN VALUE");
+            // CHECK IF VALID NUMBER!
+            // _updateTransferFunctionMin = true;
+            _transferFunctionLimits[_colorizingQuantity].x = std::stof(_transferFunctionMinVal);
+        });
+
+        _transferFunctionMaxVal.onChange([this] {
+            LDEBUG("CHANGED MAX VALUE");
+            // CHECK IF VALID NUMBER!
+            // _updateTransferFunctionMin = true;
+            _transferFunctionLimits[_colorizingQuantity].y = std::stof(_transferFunctionMaxVal);
+        });
+
+        addProperty(_colorMethod);
+        addProperty(_colorizingQuantity);
+        addProperty(_transferFunctionPath);
+        addProperty(_transferFunctionMinVal);
+        addProperty(_transferFunctionMaxVal);
     }
 
     return true;
@@ -463,11 +533,13 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
             }
         }
 
-        if (_colorMethod == colorMethod::UNIT_DEPENDENT) {
+        if (_colorMethod == colorMethod::QUANTITY_DEPENDENT) {
             // TODO MOVE THIS TO UPDATE AND CHECK
             _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
             _textureUnit->activate();
             _transferFunction->bind(); // Calls update internally
+            LDEBUG(_transferFunctionLimits[_colorizingQuantity].x << ", " << _transferFunctionLimits[_colorizingQuantity].y);
+            _activeProgramPtr->setUniform("transferFunctionLimits", _transferFunctionLimits[_colorizingQuantity]);
             _activeProgramPtr->setUniform("colorMap", _textureUnit->unitNumber());
         }
 
@@ -565,62 +637,24 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
             }
         }
 
-        // Set color buffer if state has values for it
-        _hasUnitColoring = (_states[_activeStateIndex]._extraVariables.size() > 0) ? true : false;
         if (_vertexColorBuffer == 0) {
             glGenBuffers(1, &_vertexColorBuffer);
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-
-        glBufferData(GL_ARRAY_BUFFER,
-            _states[_activeStateIndex]._vertexPositions.size() * sizeof(glm::vec3),
-            &_states[_activeStateIndex]._vertexPositions.front(),
-            GL_STATIC_DRAW);
-
-        GLuint vertexLocation = 0;
-        glEnableVertexAttribArray(vertexLocation);
-        glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);//sizeof(glm::vec3), reinterpret_cast<void*>(0));
+        updateVertexPosBuffer();
 
         if (_isMorphing) {
-            // glBindBuffer(GL_ARRAY_BUFFER, 0); // is this necessary?
-            glBindBuffer(GL_ARRAY_BUFFER, _morphToPositionBuffer);
-
-            glBufferData(GL_ARRAY_BUFFER,
-                _states[_activeStateIndex+1]._vertexPositions.size() * sizeof(glm::vec3),
-                &_states[_activeStateIndex+1]._vertexPositions.front(),
-                GL_STATIC_DRAW);
-
-            GLuint morphToLocation = 1;
-            glEnableVertexAttribArray(morphToLocation);
-            glVertexAttribPointer(morphToLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);//(void*)(sizeof(glm::vec3)));
-
-            // glBindBuffer(GL_ARRAY_BUFFER, 0); // is this necessary?
-            glBindBuffer(GL_ARRAY_BUFFER, _quickMorphBuffer);
-
-            glBufferData(GL_ARRAY_BUFFER,
-                    _states[_activeStateIndex]._quickMorph.size() * sizeof(GLfloat),
-                    &_states[_activeStateIndex]._quickMorph.front(),
-                    GL_STATIC_DRAW);
-
-            GLuint useQuickMorph = 2;
-            glEnableVertexAttribArray(useQuickMorph);
-            glVertexAttribPointer(useQuickMorph, 1, GL_FLOAT, GL_FALSE, 0, 0);
+            updateMorphingBuffers();
         }
 
-        // TODO fix colors
+        // TODO fix colors -- color classification, etc
+        // Set color buffer if state has values for it
+        _hasUnitColoring = (_states[_activeStateIndex]._extraVariables.size() > 0) ? true : false;
         if (_hasUnitColoring) {
-            glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
-
-            //TODO: fix this hardcoded 0
-            glBufferData(GL_ARRAY_BUFFER, _states[_activeStateIndex]._extraVariables[0].size() * sizeof(float),
-                    &_states[_activeStateIndex]._extraVariables[0].front(), GL_STATIC_DRAW);
-
-            GLuint extraAttribute = 3;
-            glEnableVertexAttribArray(extraAttribute);
-            glVertexAttribPointer(extraAttribute, 1, GL_FLOAT, GL_FALSE, 0, 0);
+            _updateColorBuffer = true;
         }
 
+        // UNBIND
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
@@ -633,6 +667,11 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
             double stateTimeElapsed = _currentTime - _startTimes[_activeStateIndex];
             _stateProgress = static_cast<float>(stateTimeElapsed / stateDuration);
         }
+    }
+
+    if (_updateColorBuffer) {
+        _updateColorBuffer = false;
+        updateColorBuffer();
     }
 }
 
@@ -656,6 +695,54 @@ void RenderableFieldlinesSequence::updateActiveStateIndex() {
     } else {
         _activeStateIndex = _numberOfStates - 1;
     }
+}
+
+void RenderableFieldlinesSequence::updateColorBuffer() {
+    glBindVertexArray(_vertexArrayObject);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
+
+    auto& quantityVec = _states[_activeStateIndex]._extraVariables[_colorizingQuantity];
+
+    glBufferData(GL_ARRAY_BUFFER, quantityVec.size() * sizeof(float),
+            &quantityVec.front(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(_vertAttrColorQuantity);
+    glVertexAttribPointer(_vertAttrColorQuantity, 1, GL_FLOAT, GL_FALSE, 0, 0);
+}
+
+void RenderableFieldlinesSequence::updateMorphingBuffers() {
+    /// TODO SWAP BUFFERING IF MORPHING BUFFER CONTAINS THE POINT OF THE NEW _activeIndex
+    glBindBuffer(GL_ARRAY_BUFFER, _morphToPositionBuffer);
+
+    glBufferData(GL_ARRAY_BUFFER,
+        _states[_activeStateIndex+1]._vertexPositions.size() * sizeof(glm::vec3),
+        &_states[_activeStateIndex+1]._vertexPositions.front(),
+        GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(_vertAttrMorphToPos);
+    glVertexAttribPointer(_vertAttrMorphToPos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, _quickMorphBuffer);
+
+    glBufferData(GL_ARRAY_BUFFER,
+            _states[_activeStateIndex]._quickMorph.size() * sizeof(GLfloat),
+            &_states[_activeStateIndex]._quickMorph.front(),
+            GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(_vertAttrMorphQuick);
+    glVertexAttribPointer(_vertAttrMorphQuick, 1, GL_FLOAT, GL_FALSE, 0, 0);
+}
+
+void RenderableFieldlinesSequence::updateVertexPosBuffer() {
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+
+    auto& vertexPosVec = _states[_activeStateIndex]._vertexPositions;
+
+    glBufferData(GL_ARRAY_BUFFER, vertexPosVec.size() * sizeof(glm::vec3),
+            &vertexPosVec.front(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(_vertAttrVertexPos);
+    glVertexAttribPointer(_vertAttrVertexPos, 3, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
 } // namespace openspace

@@ -31,15 +31,15 @@ uniform int flParticleSize;
 uniform int modulusDivider;
 uniform int colorMethod;
 
+uniform vec2 transferFunctionLimits;
+
 uniform sampler1D colorMap;
 
 uniform vec4 fieldlineColor;
 uniform vec4 fieldlineParticleColor;
 
 layout(location = 0) in vec3 in_position; // in meters
-// layout(location = 1) in vec4 in_color;
 layout(location = 3) in float unitIntensity;
-
 
 out vec4 vs_color;
 out float vs_depth;
@@ -51,47 +51,31 @@ const int CLASSIFIED_COLOR = 2;
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-    // TODO: only temporary until transfer function
-    float mini = 500.0;
-    float maxi = 100000.0;
 
-    float lookUpValue = (unitIntensity - mini ) / (maxi-mini);
-    vec4 color = texture(colorMap, lookUpValue);
-
-    float threshold = 5000;
-    vec3 warm = vec3(1.0,0.15,0.0);
-    vec3 cold = vec3(0.0,1.0,1.0);
-    // vec4 in_color = vec4(1.0,1.0,0.0,0.0);
     // Color every n-th vertex differently to show fieldline flow direction
     int modulus = (gl_VertexID + time) % modulusDivider;
     if ( modulus > 0 && modulus < flParticleSize) {
         if (colorMethod == UNIT_DEPENDENT_COLOR) {
+            float lookUpValue = (unitIntensity - transferFunctionLimits.x )
+                    / (transferFunctionLimits.y - transferFunctionLimits.x);
+            vec4 color = texture(colorMap, lookUpValue);
             vs_color = vec4(color.xyz,fieldlineParticleColor.a);
         } else /*if (colorMethod == UNIFORM_COLOR)*/ {
             vs_color = fieldlineParticleColor;
         }
     } else {
         if (colorMethod == UNIT_DEPENDENT_COLOR) {
+            float lookUpValue = (unitIntensity - transferFunctionLimits.x)
+                    / (transferFunctionLimits.y - transferFunctionLimits.x);
+            vec4 color = texture(colorMap, lookUpValue);
             vs_color = vec4(color.xyz,fieldlineColor.a);
         } else /*if (colorMethod == UNIFORM_COLOR)*/ {
             vs_color = fieldlineColor;
         }
     }
-    // vs_color = in_color;
-    //vec4 tmp = vec4(in_position, 0);
 
-    //vec4 position_meters = pscTransform(tmp, modelTransform);
-    //vs_position = tmp;
-
-    // project the position to view space
-    //position_meters =  modelViewProjection * position_meters;
-    //gl_Position = z_normalization(position_meters);
-
-    float scale = 1.0;//695700000.0;//150000000000.0;//6371000.0;
-    //vs_position = vec4(in_position.xyz * scale, 1); // TODO powerscaleify?
-    vec4 position_in_meters = vec4(in_position.xyz * scale, 1);
+    vec4 position_in_meters = vec4(in_position.xyz, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
     gl_Position = z_normalization(positionClipSpace);
     vs_depth = gl_Position.w;
-    // gl_Position = vs_position;
 }
