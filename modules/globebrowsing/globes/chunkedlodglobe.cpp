@@ -113,7 +113,7 @@ std::shared_ptr<LayerManager> ChunkedLodGlobe::layerManager() const {
     return _layerManager;
 }
 
-void ChunkedLodGlobe::addSites(const std::vector<SubSite> subSites) {
+void ChunkedLodGlobe::addSites(const std::vector<Subsite> subSites) {
 	_leftRoot->addSites(subSites);
 	_rightRoot->addSites(subSites);
 }
@@ -281,7 +281,7 @@ void ChunkedLodGlobe::render(const RenderData& data) {
     glm::dmat4 vp = glm::dmat4(data.camera.projectionMatrix()) * viewTransform;
     glm::dmat4 mvp = vp * _owner.modelTransform();
 
-	_subSites.clear();
+	_subsites.clear();
 
     // Render function
     auto renderJob = [this, &data, &mvp](const ChunkNode& chunkNode) {
@@ -294,7 +294,7 @@ void ChunkedLodGlobe::render(const RenderData& data) {
                 double t0 = Time::now().j2000Seconds();
                 _renderer->renderChunk(chunkNode.getChunk(), data);
                 debugRenderChunk(chunk, mvp);
-				_subSites.push_back(chunkNode.getSubSites());
+				_subsites.push_back(chunkNode.getSubsites());
             }
         }
     };
@@ -347,8 +347,8 @@ void ChunkedLodGlobe::update(const UpdateData& data) {
     _renderer->update();
 }
 
-std::vector<std::vector<SubSite>> ChunkedLodGlobe::subSites() {
-	return _subSites;
+std::vector<std::vector<Subsite>> ChunkedLodGlobe::subsites() {
+	return _subsites;
 }
     
 } // namespace globebrowsing

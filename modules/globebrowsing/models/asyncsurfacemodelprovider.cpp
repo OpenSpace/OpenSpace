@@ -27,7 +27,6 @@
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
 #include <ghoul/filesystem/filesystem.h>
 
-
 namespace {
 	const std::string _loggerCat = "AsyncSurfaceModelProvider";
 }
@@ -37,25 +36,22 @@ namespace globebrowsing {
 
 AsyncSurfaceModelProvider::AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> pool)
 	: _concurrentJobManager(pool)
-{
+{}
 
-}
-
-bool AsyncSurfaceModelProvider::enqueueModelIO(const ghoul::Dictionary& dictionary, const std::shared_ptr<Model> model) {
-	// TODO: Check if allready enqued.
-	if (satisfiesEnqueueCriteria(model->fileName)) {
-		auto job = std::make_shared<SurfaceModelLoadJob>(dictionary, model);
+bool AsyncSurfaceModelProvider::enqueueModelIO(const Subsite subsite, const int level) {
+	if (satisfiesEnqueueCriteria(subsite.hashKey(level))) {
+		auto job = std::make_shared<SurfaceModelLoadJob>(subsite, level);
 		_concurrentJobManager.enqueueJob(job);
 
-		_enqueuedTileRequests[model->fileName] = "faaan";
+		_enqueuedTileRequests[subsite.hashKey(level)] = subsite;
 
 		return true;
 	}
 	return false;
 }
 
-std::vector<std::shared_ptr<Model>> AsyncSurfaceModelProvider::getLoadedModels() {
-	std::vector<std::shared_ptr<Model>> loadedModels;
+std::vector<std::shared_ptr<SubsiteModels>> AsyncSurfaceModelProvider::getLoadedModels() {
+	std::vector<std::shared_ptr<SubsiteModels>> loadedModels;
 
 	if (_concurrentJobManager.numFinishedJobs() > 0) {
 		loadedModels.push_back(_concurrentJobManager.popFinishedJob()->product());
@@ -63,9 +59,8 @@ std::vector<std::shared_ptr<Model>> AsyncSurfaceModelProvider::getLoadedModels()
 	return loadedModels;
 }
 
-bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const std::string fileName) const
-{
-	return _enqueuedTileRequests.find(fileName) == _enqueuedTileRequests.end();
+bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const uint64_t hashKey) const {
+	return _enqueuedTileRequests.find(hashKey) == _enqueuedTileRequests.end();
 }
 
 

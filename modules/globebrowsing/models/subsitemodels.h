@@ -22,32 +22,49 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#include <modules/globebrowsing/models/multimodelprovider.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SUBSITEMODELS__H_
+#define __OPENSPACE_MODULE_GLOBEBROWSING___SUBSITEMODELS__H_
 
-#include <ghoul/logging/logmanager.h>
+#include <modules/globebrowsing/tile/tileindex.h>
+#include <modules/base/rendering/modelgeometry.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/models/model.h>
 
-namespace {
-	const std::string _loggerCat = "MultiModelProvider";
-}
+#include <memory>
 
 namespace openspace {
 namespace globebrowsing {
-MultiModelProvider::MultiModelProvider(const ghoul::Dictionary& dictionary) 
-	: ModelProvider(dictionary) {
-}
 
-std::vector<Subsite> MultiModelProvider::calculate(const std::vector<std::vector<Subsite>> subsites) {
-	std::vector<Subsite> ss;
-	for (auto subSites : subsites) {
-		if (subSites.size() > 0) {
-			ss.push_back(subSites.at(0));
-		}
+struct SubsiteModels {
+	using SubsiteHashKey = uint64_t;
+
+	std::vector<std::shared_ptr<Model>> models;
+
+	glm::dvec3 cartesianPosition;
+
+	Geodetic2 subsiteCoordinate;
+	Geodetic2 siteCoordinate;
+
+	uint64_t tileHashKey;
+	std::string site;
+	std::string drive;
+	int level;
+
+	bool status = false;
+
+	SubsiteModels() {
+		cartesianPosition = glm::dvec3(0.0, 0.0, 0.0);
+		subsiteCoordinate = Geodetic2{ 0.0, 0.0 };
+		siteCoordinate = Geodetic2{ 0.0, 0.0 };
+		tileHashKey = 7367823;
+		site = "0";
+		drive = "0";
+		level = 0;
+		status = true;
 	}
-	return ss;
-}
+};
 
-bool MultiModelProvider::initialize() {
-	return true;
-}
-}
-}
+} // namespace globebrowsing
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SUBSITEMODELS__H_

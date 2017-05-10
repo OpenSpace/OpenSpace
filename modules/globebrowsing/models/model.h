@@ -36,17 +36,6 @@ namespace globebrowsing {
 struct Model {
 	std::unique_ptr<modelgeometry::ModelGeometry> geometry;
 	std::shared_ptr<ghoul::opengl::Texture> texture;
-
-	std::vector<float> rotation;
-	float lat, lon;
-	glm::dvec3 cartesianPosition;
-	Geodetic2 siteCoordinate;
-	
-	uint64_t tileHashKey;
-	std::string fileName;
-
-	bool status = false;
-
 };
 
 } // namespace globebrowsing

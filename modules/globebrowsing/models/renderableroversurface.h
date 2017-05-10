@@ -67,7 +67,7 @@ private:
 
 	std::vector<std::string> _fileNames;
 	std::vector<glm::fvec2> _coordinates;
-	std::vector<SubSite> _subSites;
+	std::vector<Subsite> _subSites;
 	std::vector<std::shared_ptr<Model>> _models;
 
 	GeneralProperties _generalProperties;

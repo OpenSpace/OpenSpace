@@ -27,7 +27,8 @@
 
 #include <modules/globebrowsing/tile/loadjob/loadjob2.h>
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <modules/globebrowsing/models/model.h>
+#include <modules/globebrowsing/models/subsitemodels.h>
+#include <modules/globebrowsing/models/subsite.h>
 #include <ghoul/misc/dictionary.h>
 
 #include <modules/base/rendering/modelgeometry.h>
@@ -35,23 +36,29 @@
 namespace openspace {
 namespace globebrowsing {
 
-	class modelgeometry::ModelGeometry;
+class modelgeometry::ModelGeometry;
 	
 struct SurfaceModelLoadJob : LoadJob2 {
-	SurfaceModelLoadJob(const ghoul::Dictionary& dictionary, std::shared_ptr<Model> model)
-		: _dictionary(dictionary)
-		, _model(model)
-	{}
+	SurfaceModelLoadJob(const Subsite& subsite, const int level)
+		: _subsite(subsite)
+		, _level(level)
+	{
+		_subsiteModels = std::make_shared<SubsiteModels>();
+	}
 	
 	virtual ~SurfaceModelLoadJob() = default;
  	
 	virtual void execute() override;
 
-	virtual std::shared_ptr<Model> product() const override;
+	virtual std::shared_ptr<SubsiteModels> product() const override;
 
 protected:
-	ghoul::Dictionary _dictionary;
-	std::shared_ptr<Model> _model;
+	Subsite _subsite;
+	int _level;
+	std::shared_ptr<SubsiteModels> _subsiteModels;
+
+private:
+	std::string textureFormat(const std::string site);
 };
 
 } // globebrowsing

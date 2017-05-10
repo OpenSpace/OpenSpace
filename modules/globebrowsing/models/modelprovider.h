@@ -36,7 +36,7 @@ public:
 
 	ModelProvider(const ghoul::Dictionary& dictionary);
 
-	virtual std::vector<SubSite> calculate(const std::vector<std::vector<SubSite>> subsites) = 0;
+	virtual std::vector<Subsite> calculate(const std::vector<std::vector<Subsite>> subsites) = 0;
 
 	virtual bool initialize() = 0;
 };

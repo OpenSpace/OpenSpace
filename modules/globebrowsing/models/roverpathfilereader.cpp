@@ -39,7 +39,7 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 	
-std::vector<SubSite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictionary dictionary) {
+std::vector<Subsite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictionary dictionary) {
 	std::string roverLocationFilePath;
 	if (!dictionary.getValue(keyRoverLocationPath, roverLocationFilePath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -63,7 +63,7 @@ std::vector<SubSite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictio
 	int currentSite = 0;
 	double siteLat;
 	double siteLon;
-	std::vector<SubSite> subSites;
+	std::vector<Subsite> subsites;
 
 	while ((poFeature = poLayer->GetNextFeature()) != NULL) {
 
@@ -83,31 +83,31 @@ std::vector<SubSite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictio
 			}
 
 			std::string type = "site";
-			SubSite subSite;
-			subSite.site = convertString(site, type);
+			Subsite subsite;
+			subsite.site = convertString(site, type);
 			type = "drive";
-			subSite.drive = convertString(drive, type);
-			subSite.lat = lat;
-			subSite.lon = lon;
-			subSite.frame = frame;
-			subSite.siteLat = siteLat;
-			subSite.siteLon = siteLon;
+			subsite.drive = convertString(drive, type);
+			subsite.lat = lat;
+			subsite.lon = lon;
+			subsite.frame = frame;
+			subsite.siteLat = siteLat;
+			subsite.siteLon = siteLon;
 
 			// All features with the the frame is "Site" will have "Drive" that is -1. 
 			// The feature right after each site frame has the same coordinates as the site frame.
 			// E.g. feature 1: "Frame = SITE, Site = 6, Drive = -1, Lat = -4.7000, Lon = 137.4000"
 			//		feature 2: "Frame = ROVER, Site = 6, Drive = 0, Lat = -4.7000, Lon = 137.4000"
 			if(drive != "-1")
-				subSites.push_back(subSite);
+				subsites.push_back(subsite);
 		}
 		OGRFeature::DestroyFeature(poFeature);
 	}
 	GDALClose(poDS);
 
-	return subSites;
+	return subsites;
 }
 
-std::vector<SubSite> RoverPathFileReader::extractSubsitesWithModels(const ghoul::Dictionary dictionary) {
+std::vector<Subsite> RoverPathFileReader::extractSubsitesWithModels(const ghoul::Dictionary dictionary) {
 
 	// Make sure the dictionary includes the necessary keys
 	std::string roverLocationFilePath;
@@ -121,10 +121,9 @@ std::vector<SubSite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 	// Extract all subsites in the data set given the path to the file
 	ghoul::Dictionary tempDictionary;
 	tempDictionary.setValue(keyRoverLocationPath, roverLocationFilePath);
-	std::vector<SubSite> allSubsites = extractAllSubsites(tempDictionary);
+	std::vector<Subsite> allSubsites = extractAllSubsites(tempDictionary);
 
-
-	std::vector<SubSite> subsitesWithModels;
+	std::vector<Subsite> subsitesWithModels;
 	for (auto subsite : allSubsites) {
 		std::string pathToDriveFolder;
 

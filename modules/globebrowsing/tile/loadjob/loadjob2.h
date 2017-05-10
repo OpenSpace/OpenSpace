@@ -27,7 +27,7 @@
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/base/rendering/modelgeometry.h>
-#include <modules/globebrowsing/models/model.h>
+#include <modules/globebrowsing/models/subsitemodels.h>
 
 
 #include <memory>
@@ -37,9 +37,9 @@ namespace globebrowsing {
 
 	class modelgeometry::ModelGeometry;
 
-struct LoadJob2 : public Job<Model> {
+struct LoadJob2 : public Job<SubsiteModels> {
 	virtual void execute() = 0;
-	virtual std::shared_ptr<Model> product() const = 0;
+	virtual std::shared_ptr<SubsiteModels> product() const = 0;
 };
 
 } // namespace globebrowsing

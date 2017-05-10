@@ -73,6 +73,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/models/modelprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/models/multimodelprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/models/singlemodelprovider.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/subsitemodels.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
