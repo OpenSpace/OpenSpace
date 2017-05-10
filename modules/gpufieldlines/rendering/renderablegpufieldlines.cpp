@@ -24,6 +24,9 @@
 
 #include <modules/gpufieldlines/rendering/renderablegpufieldlines.h>
 
+#include <functional>
+
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -67,13 +70,23 @@ namespace {
 
     const float R_E_TO_METER = 6371000.f; // Earth radius
     const float A_U_TO_METER = 149597870700.f; // Astronomical Units
+    // TODO use GLM instead!
     const float DEG_TO_RAD   = 3.14159265359f / 180.f;
     const float RAD_TO_DEG   = 180.f / 3.14159265359f;
 
     // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
+
+    // std::function<void (openspace::RenderableGpuFieldlines*)>  = print_num;
 }
 
 namespace openspace {
+
+void RenderableGpuFieldlines::updateSeedPointFile(const ghoul::filesystem::File& file) {
+    _needsUpdate = true;
+    _shouldRender = false;
+    _seedPoints.clear();
+    loadSeedPoints(file.path());
+}
 
 RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
@@ -87,7 +100,7 @@ RenderableGpuFieldlines::RenderableGpuFieldlines(const ghoul::Dictionary& dictio
       _stepMultiplier("stepMultiplier", "Step Multiplier", 1, 1, 1000),
       _vertexSkipping("traceVertexSkipping", "Num vertices skipped (FPS will drop)", 0, 0, 30),
       _integrationMethod("integrationMethod", "Integration Method", properties::OptionProperty::DisplayType::Radio),
-      // _seedPointSourceFile("sourceFile", "SeedPoint File"),
+      _seedPointSourcePath("sourceFile", "SeedPoint File"),
       _domainX("domainX", "Domain Limits X-axis"),
       _domainY("domainY", "Domain Limits Y-axis"),
       _domainZ("domainZ", "Domain Limits Z-axis"),
@@ -147,11 +160,41 @@ bool RenderableGpuFieldlines::initialize() {
             "Each row should have 3 floats seperated by spaces.");
         return false;
     } else {
-        if (!GpuFieldlinesManager::ref().getSeedPointsFromFile(pathToSeedPointFile,
-                                                                    _seedPoints)) {
-            LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
-            return false;
+
+        bool successful = loadSeedPoints(pathToSeedPointFile);
+
+        if (!successful) {
+            LERROR("Please enter a valid file path to a file containing seed points!");
+            // TODO No need to return false here...
+            _seedPointSourcePath = "NOT A VALID PATH: " + absPath(pathToSeedPointFile);
+        } else {
+            _seedPointSourcePath = absPath(pathToSeedPointFile);
         }
+
+        // TODO THESE NEEDS CLEANING UP
+        _seedPointFile = std::make_unique<ghoul::filesystem::File>(
+                pathToSeedPointFile,
+                ghoul::filesystem::File::RawPath::No,
+                [this] (const ghoul::filesystem::File&) {
+                    _seedPointsAreDirty = true;
+                });
+
+        // TODO THESE NEEDS CLEANING UP
+        _seedPointSourcePath.onChange(
+                [this] {
+                           // _seedPoints.clear();
+                           LDEBUG("Seed point file path changed!");
+                           auto tmp = std::make_unique<ghoul::filesystem::File>(
+                               _seedPointSourcePath,
+                               ghoul::filesystem::File::RawPath::No,
+                               [this] (const ghoul::filesystem::File&) {
+                                   _seedPointsAreDirty = true;
+                                });
+                           // Swap tmp and _seedPointFile -> old file will be removed!
+                           _seedPointFile.swap(tmp);
+                           _seedPointsAreDirty = true;
+                             // this->loadSeedPoints();
+                        });
     }
 
     // VectorVolume Info. Needs a folder containing .CDF files
@@ -556,6 +599,7 @@ bool RenderableGpuFieldlines::initialize() {
     addProperty(_stepSize);
     addProperty(_showSeedPoints);
     addProperty(_seedPointSize);
+    addProperty(_seedPointSourcePath);
     addProperty(_clippingRadius);
     addProperty(_stepMultiplier);
     addProperty(_showGrid);
@@ -634,7 +678,7 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
         _program->activate();
 
         glm::dmat4 rotationTransform = glm::dmat4(data.modelTransform.rotation);
-        glm::mat4 scaleTransform = glm::mat4(1.0); // TODO remove if no use
+        glm::mat4 scaleTransform = glm::mat4(1.0); // TODO SET SCALING DEPENDING ON MODEL
         glm::dmat4 modelTransform =
                 glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
                 rotationTransform *
@@ -750,6 +794,17 @@ void RenderableGpuFieldlines::update(const UpdateData&) {
 
     if (_gridProgram->isDirty()) {
         _gridProgram->rebuildFromFile();
+    }
+
+    if (_seedPointsAreDirty) {
+        _shouldRender = false;
+        _needsUpdate = true;
+        _seedPoints.clear();
+        bool successful = loadSeedPoints(_seedPointFile->path());
+        // if (successful) {
+        //     // _seedPoints.clear();
+        // }
+        _seedPointsAreDirty = false;
     }
 
     // Check if current time in OpenSpace is within  interval
@@ -1014,5 +1069,15 @@ void RenderableGpuFieldlines::generateUniformCartesianGrid(const glm::vec3& doma
         }
     }
 }
+
+bool RenderableGpuFieldlines::loadSeedPoints(const std::string& path) {
+    if (!GpuFieldlinesManager::ref().getSeedPointsFromFile(path, _seedPoints)) {
+        LERROR("Failed to find seed points in'" << path << "'");
+        return false;
+    }
+    // LDEBUG("FOUND SEED POINT FILE! " << _seedPoints.size() << " seed points are provided!");
+    return true;
+}
+
 
 } // namespace openspace
