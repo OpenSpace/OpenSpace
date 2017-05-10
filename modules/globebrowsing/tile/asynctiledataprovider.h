@@ -244,6 +244,7 @@ public:
     std::vector<std::shared_ptr<RawTile>> getRawTiles();
     std::shared_ptr<RawTile> popFinishedRawTile();
 
+    void update();
     void reset();
 
     std::shared_ptr<RawTileDataReader> getRawTileDataReader() const;
@@ -251,14 +252,16 @@ public:
 
 protected:
     virtual bool satisfiesEnqueueCriteria(const TileIndex&);
+    void endUnfinishedJobs();
 
 private:
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
-    //ConcurrentJobManager<RawTile> _concurrentJobManager;
     PrioritizingConcurrentJobManager<RawTile, TileIndex::TileHashKey> _concurrentJobManager;
 
     std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer;
     std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
+
+    bool _shouldReset;
 };
 
 } // namespace globebrowsing

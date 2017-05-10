@@ -91,12 +91,10 @@ bool PrioritizingConcurrentJobManager<P, KeyType>::touch(KeyType key) {
     return _threadPool->touch(key);
 }
 
-/*
 template<typename P, typename KeyType>
 void PrioritizingConcurrentJobManager<P, KeyType>::clearEnqueuedJobs() {
-    _threadPool->clearTasks();
+    _threadPool->clearEnqueuedTasks();
 }
-*/
 
 template<typename P, typename KeyType>
 std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishedJob() {

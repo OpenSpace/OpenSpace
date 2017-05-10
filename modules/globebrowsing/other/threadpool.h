@@ -102,7 +102,7 @@ public:
     void enqueue(std::function<void()> f, KeyType key);
     bool touch(KeyType key);
     std::vector<KeyType> getUnqueuedTasksKeys();
-    //void clearTasks();
+    void clearEnqueuedTasks();
 
 private:
     friend class LRUThreadPoolWorker<KeyType>;
@@ -210,15 +210,13 @@ std::vector<KeyType> LRUThreadPool<KeyType>::getUnqueuedTasksKeys() {
     return toReturn;
 }
 
-/*
 template<typename KeyType>
-void LRUThreadPool<KeyType>::clearTasks() {
+void LRUThreadPool<KeyType>::clearEnqueuedTasks() {
     { // acquire lock
         std::unique_lock<std::mutex> lock(_queue_mutex);
         _queuedTasks.clear();
     } // release lock
 }
-*/
 
 } // namespace globebrowsing
 } // namespace openspace

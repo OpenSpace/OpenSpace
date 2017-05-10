@@ -76,7 +76,7 @@ public:
 
     bool touch(KeyType key);
 
-    //void clearEnqueuedJobs();
+    void clearEnqueuedJobs();
 
     std::shared_ptr<Job<P>> popFinishedJob();
 
