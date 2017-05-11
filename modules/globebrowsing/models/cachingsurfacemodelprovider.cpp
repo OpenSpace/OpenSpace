@@ -78,6 +78,8 @@ void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 		for (auto model : theModels) {
 			model->geometry->initialize(parent);
 
+			// Must create a new texture because the texture created in the load job 
+			// is given the id zero (0). In this way the texture gets a unique id.
 			void* pixelData = new char[model->texture->expectedPixelDataSize()];
 			memcpy(pixelData, model->texture->pixelData(), model->texture->expectedPixelDataSize());
 
@@ -100,8 +102,6 @@ void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 		}
 		subsiteModels->models = theModels;
 		
-		// Must create a new texture because the texture created in the load job 
-		// is given the id zero (0). In this way the texture gets a unique id.
 		uint64_t key = CachingSurfaceModelProvider::hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level);
 
 		_modelCache->put(key, subsiteModels);

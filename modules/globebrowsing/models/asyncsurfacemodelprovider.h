@@ -48,6 +48,8 @@ protected:
 private:
 	ConcurrentJobManager<SubsiteModels> _concurrentJobManager;
 	std::unordered_map <uint64_t, Subsite> _enqueuedTileRequests;
+
+	uint64_t hashKey(const std::string site, const std::string drive, const int level);
 };
 
 } // namespace globebrowsing
