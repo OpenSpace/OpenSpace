@@ -128,7 +128,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         std::vector<std::string>& colorizingFloatVars,
         std::vector<std::string>& colorizingMagVars,
         std::vector<double>& startTimes,
-        FieldlinesState& outFieldlinesStates) {
+        FieldlinesState& outFieldlinesState) {
 
     // ----------------------------- CREATE KAMELEON OBJECT -----------------------------
     std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
@@ -140,7 +140,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     }
 
     const std::string model = kameleon->getModelName();
-    outFieldlinesStates._modelName = model;
+    outFieldlinesState._modelName = model;
     bool status = kameleon->loadVariable(tracingVariable);
     if (!status) {
         LERROR("FAILED TO LOAD TRACING VARIABLE: " << tracingVariable);
@@ -181,7 +181,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         // Check if resamplingOption is valid
         if (resamplingOption < 5 && resamplingOption > 0) {
 
-            outFieldlinesStates._vertexPositions.reserve(numResamples);
+            outFieldlinesState._vertexPositions.reserve(numResamples);
             if (resamplingOption < 4) {
                 preConversionResampling = true;
                 if (model == "enlil") {
@@ -292,7 +292,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                                                                   seedPoint.y,
                                                                   seedPoint.z);
 
-        outFieldlinesStates._lineStart.push_back(lineStart);
+        outFieldlinesState._lineStart.push_back(lineStart);
         int lineCount = 0;
 
         if (preConversionResampling) {
@@ -343,7 +343,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                     convertLatLonToCartesian(gPos);
                 }
                 // LDEBUG("TODO: SCALE AND STORE gPos IN STATE");
-                outFieldlinesStates._vertexPositions.push_back(gPos * scalingFactor);
+                outFieldlinesState._vertexPositions.push_back(gPos * scalingFactor);
             }
 
         } else /*if (postConversionResampling)*/ {
@@ -365,7 +365,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
             if (convertToCartesian) {
                 // LDEBUG("TODO: SCALE AND STORE tmpvec IN STATE");
                 for (glm::vec3 p : tmpvec) {
-                    outFieldlinesStates._vertexPositions.push_back(p * scalingFactor);
+                    outFieldlinesState._vertexPositions.push_back(p * scalingFactor);
                 }
                 if (sampleExtraQuantities) {
                     LDEBUG("TODO: CONVERT glmPositions BACK TO SPHERICAL (lon lat)");
@@ -377,18 +377,18 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                 }
                 // LDEBUG("TODO: SCALE AND STORE glmPositions IN STATE");
                 for (glm::vec3 p : tmpvec) {
-                    outFieldlinesStates._vertexPositions.push_back(p * scalingFactor);
+                    outFieldlinesState._vertexPositions.push_back(p * scalingFactor);
                 }
             }
 
             lineCount = tmpvec.size();
         }
-        outFieldlinesStates._lineCount.push_back(lineCount);
+        outFieldlinesState._lineCount.push_back(lineCount);
         lineStart += lineCount;
         delete interpolator;
     }
     if (sampleExtraQuantities) {
-        outFieldlinesStates._extraVariables = std::move(colorizingVariables);
+        outFieldlinesState._extraVariables = std::move(colorizingVariables);
     }
 
     // ------------------------ MAKE SURE STATE HAS A START TIME ------------------------
@@ -546,9 +546,9 @@ void FieldlinesSequenceManager::centerSeedPointResampling(
 //bool FieldlinesSequenceManager::addVelocityMagnitudesToState(
 //            const ccmc::Kameleon* kameleon,
 //            const std::vector<glm::vec3>& samplePositions,
-//            FieldlinesState& outFieldlinesStates) {
+//            FieldlinesState& outFieldlinesState) {
 //
-//    outFieldlinesStates._velocityMagnitudes.reserve(samplePositions.size());
+//    outFieldlinesState._velocityMagnitudes.reserve(samplePositions.size());
 //
 //    
 //
@@ -621,11 +621,11 @@ double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
 void FieldlinesSequenceManager::setQuickMorphBooleans(std::vector<FieldlinesState>& states,
                                                       const int& pointsPerCurve,
                                                       const float& threshold) {
-    int numLines = states[0]._lineStart.size();
+    unsigned int numLines = states[0]._lineStart.size();
     // for each state
-    for (int s = 0; s < states.size()-1; ++s) {
+    for (unsigned int s = 0; s < states.size()-1; ++s) {
         // for each line (each state has the same number of lines)
-        for (int l = 0; l < numLines; ++l) {
+        for (unsigned int l = 0; l < numLines; ++l) {
             int startIdx = states[s]._lineStart[l];
             // int startIdx = static_cast<int>(state[s]._lineStart[l]);
             int endIdx = startIdx + pointsPerCurve - 1;
