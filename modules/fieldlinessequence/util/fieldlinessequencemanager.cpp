@@ -48,6 +48,7 @@ namespace {
     const float R_E_TO_METER = 6371000.f; // Earth radius
     const float R_S_TO_METER = 695700000.f; // Sun radius
     const float A_U_TO_METER = 149597870700.f; // Astronomical Units
+    const std::string TEMPERATURE_P_OVER_RHO = "T = p/rho";
 }
 
 namespace openspace {
@@ -196,11 +197,24 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     // ---- DETERMINE WETHER OR NOT TO SAMPLE EXTRA QUANTITIES AT FIELDLINE VERTICES ----
     // ----------------- IF SO LOAD THEM, ELSE DELETE STRING FROM VECTOR -----------------
     bool sampleExtraQuantities = false;
-    for (int i = 0; i < colorizingFloatVars.size(); i++) {
+    for (int i = 0; i < static_cast<int>(colorizingFloatVars.size()); i++) {
         std::string str = colorizingFloatVars[i];
         status = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
+        // TODO this is not good looking code.. needs refactoring
+        // BATSRUS doesn't contain variable T for temperature but it can be calculated
+        // using density and pressure!
+        if (!status &&
+           (str == TEMPERATURE_P_OVER_RHO || (str == "T" && model == "batsrus" ))) {
+                std::string p = "p", r = "rho";
+                status = kameleon->doesVariableExist(p) && kameleon->loadVariable(p)
+                      && kameleon->doesVariableExist(r) && kameleon->loadVariable(r);
+                colorizingFloatVars[i] = str = TEMPERATURE_P_OVER_RHO;
+                LWARNING("BATSRUS doesn't contain variable T for temperature. Trying to "
+                        << "calculate it using the ideal gas law instead: "
+                        << "T = pressure/density");
+        }
         if (!status) {
-            LWARNING("FAILED TO LOAD COLORIZING VARIABLE: '" << str << "'. Ignoring it!");
+            LWARNING("FAILED TO LOAD COLOR VARIABLE: '" << str << "'. Ignoring it!");
             colorizingFloatVars.erase(std::remove(colorizingFloatVars.begin(),
                                                   colorizingFloatVars.end(), str),
                                                   colorizingFloatVars.end());
@@ -293,9 +307,15 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                 if (sampleExtraQuantities) {
                     // LDEBUG("TODO: SAMPLE EXTRA PROPERTIES FOR COLORIZING LINES AT gPos");
                     for (int i = 0; i < numValidFloatQuantities; i++) {
-                        colorizingVariables[i].push_back(
-                                interpolator->interpolate(colorizingFloatVars[i],
-                                                          gPos.x, gPos.y, gPos.z));
+                        float val;
+                        if (colorizingFloatVars[i] == TEMPERATURE_P_OVER_RHO) {
+                            val = interpolator->interpolate("p", gPos.x, gPos.y, gPos.z);
+                            val /= interpolator->interpolate("rho", gPos.x, gPos.y, gPos.z);
+                        } else {
+                            val = interpolator->interpolate(colorizingFloatVars[i],
+                                                          gPos.x, gPos.y, gPos.z);
+                        }
+                        colorizingVariables[i].push_back(val);
                     }
                     for (int i = 0; i < numValidMagnitudeQuantities; i += 3) {
                         float xVal = interpolator->interpolate(colorizingMagVars[i],
