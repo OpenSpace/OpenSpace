@@ -1,0 +1,12 @@
+#include "opj_config_private.h"
+
+/* create opj_apps_config.h for CMake */
+
+#cmakedefine OPJ_HAVE_LIBPNG @HAVE_LIBPNG@
+#cmakedefine OPJ_HAVE_PNG_H @HAVE_PNG_H@
+#cmakedefine OPJ_HAVE_LIBTIFF @HAVE_LIBTIFF@
+#cmakedefine OPJ_HAVE_TIFF_H @HAVE_TIFF_H@
+
+#cmakedefine OPJ_HAVE_LIBLCMS
+
+

@@ -24,20 +24,23 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
+set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/grok/")
+add_subdirectory(${OPENJPEG_ROOT_DIR})
+
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcameraplane.h
     # Openjpeg stuff
-    ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
-    ${OPENJPEG_BINARY_DIR}/src/bin/common
-    ${OPENJPEG_SOURCE_DIR}/src/lib/openjp2
-    ${OPENJPEG_SOURCE_DIR}/src/bin/jp2
-    ${OPENJPEG_SOURCE_DIR}/src/bin/common
+    ${OPENSPACE_BASE_DIR}/build/modules/solarbrowsing/ext/grok/src/lib/openjp2
+    ${OPENJPEG_ROOT_DIR}/src/bin/common
+    ${OPENJPEG_ROOT_DIR}/src/lib/openjp2
+    ${OPENJPEG_ROOT_DIR}/src/bin/jp2
+    ${OPENJPEG_ROOT_DIR}/src/bin/common
     ${Z_INCLUDE_DIRNAME}
     ${PNG_INCLUDE_DIRNAME}
     ${TIFF_INCLUDE_DIRNAME}
-    ${CMAKE_SOURCE_DIR}/include
+    # Other
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcameraplane.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -50,9 +53,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 create_new_module("SolarBrowsing" solarbrowsing_module ${HEADER_FILES} ${SOURCE_FILES})
 set(MODULE_NAME openspace-module-solarbrowsing)
-set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
-add_subdirectory(${OPENJPEG_ROOT_DIR})
 
 target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${HEADER_FILES})
 # Link to openjpeg
 target_link_libraries(${MODULE_NAME} openjp2)
+#target_link_libraries(${MODULE_NAME} ${GROK_LIBRARY_NAME} ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
