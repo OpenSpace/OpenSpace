@@ -48,6 +48,10 @@ namespace {
     const float R_E_TO_METER = 6371000.f; // Earth radius
     const float R_S_TO_METER = 695700000.f; // Sun radius
     const float A_U_TO_METER = 149597870700.f; // Astronomical Units
+
+    // For conversion from pressure[nPa]/density[amu/cm^3] to temperature in Kelvin [K]
+    // const float NPA_PER_AMU_PER_CM3_TO_K = 1.f; // <-- * [nPa]/[amu/cm^3] => K
+    const float NPA_PER_AMU_PER_CM3_TO_K = 72429735.6984f; // <-- * [nPa]/[amu/cm^3] => K
     const std::string TEMPERATURE_P_OVER_RHO = "T = p/rho";
 }
 
@@ -310,6 +314,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                         float val;
                         if (colorizingFloatVars[i] == TEMPERATURE_P_OVER_RHO) {
                             val = interpolator->interpolate("p", gPos.x, gPos.y, gPos.z);
+                            val *= NPA_PER_AMU_PER_CM3_TO_K;
                             val /= interpolator->interpolate("rho", gPos.x, gPos.y, gPos.z);
                         } else {
                             val = interpolator->interpolate(colorizingFloatVars[i],
