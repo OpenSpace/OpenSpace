@@ -40,10 +40,45 @@
 #include <unordered_set>
 
 #include <openspace/util/powerscaledsphere.h>
+#include <modules/globebrowsing/other/concurrentjobmanager.h>
 
 namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
+
+struct BufferObject {
+    unsigned char* data;
+};
+
+// TODO(mnoven) : Move to separate class
+class DecodeJob : public globebrowsing::Job<BufferObject>{
+public:
+    DecodeJob(const int& imageSize, const std::string& path, const int& resolutionLevel) { _imageSize = imageSize; _path = path; _resolutionLevel = resolutionLevel;}
+
+    virtual void execute() override {
+        BufferObject b;
+        b.data = new unsigned char[_imageSize * _imageSize];
+        SimpleJ2kCodec j2c;
+        j2c.CreateInfileStream(_path);
+        j2c.SetupDecoder(_resolutionLevel);
+        j2c.DecodeIntoBuffer(b.data, 0);
+        _bufferObject = std::make_shared<BufferObject>(b);
+
+        // SimpleJ2kCodec j2c;
+        // j2c.CreateInfileStream(_path);
+        // j2c.SetupDecoder(_resolutionLevel);
+        // auto img = j2c.Decode();
+    }
+    virtual std::shared_ptr<BufferObject> product() const override {
+        return std::move(_bufferObject);
+    }
+
+protected:
+    std::shared_ptr<BufferObject> _bufferObject;
+    std::string _path;
+    int _resolutionLevel;
+    int _imageSize;
+};
 
 class RenderableSpacecraftCameraPlane : public Renderable {
 
@@ -57,6 +92,8 @@ public:
     void updateTexture();
 
 private:
+    globebrowsing::ConcurrentJobManager<BufferObject> _concurrentJobManager;
+
     properties::BoolProperty _asyncUploadPBO;
     properties::OptionProperty _activeInstruments;
     properties::IntProperty _minRealTimeUpdateInterval;
@@ -74,10 +111,12 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _planeShader;
 
     std::string _type;
-    size_t _currentActiveImage;
+    int _currentActiveImage;
     unsigned int _pboSize;
     GLuint _frustum;
     GLuint _frustumPositionBuffer;
+
+    int _bufferSize = 100;
 
     GLuint pboHandles[2];
     unsigned int _currentPBO;
@@ -90,6 +129,8 @@ private:
 
     std::unique_ptr<std::future<void>> _future;
     bool _initializePBO;
+    bool _bufferingForwardInTime = true;
+    bool _pboIsDirty = false;
 
     IMG_PRECISION* _pboBufferData;
 
@@ -119,6 +160,7 @@ private:
     void createFrustum();
     void createPlane();
     void updatePlane();
+    void fillBuffer();
 
     void decode(unsigned char* buffer, const std::string& fileame,
                 const int numThreads);

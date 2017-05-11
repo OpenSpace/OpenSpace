@@ -24,7 +24,7 @@ SimpleJ2kCodec::~SimpleJ2kCodec() {
   Destroy();
 }
 
-void SimpleJ2kCodec::DecodeIntoBuffer(unsigned char*& buffer, const int numThreads) {
+void SimpleJ2kCodec::DecodeIntoBuffer(unsigned char* buffer, const int numThreads) {
   if (!_isFileLoaded) {
     std::cerr << "File needs to be set up before decoding\n";
     return;
@@ -75,6 +75,8 @@ std::unique_ptr<ImageData> SimpleJ2kCodec::Decode() {
     return nullptr;
   }
 
+  auto t1 = Clock::now();
+
   // if (!_isDecoderSetup) {
   //   SetupDecoder();
   //   _isDecoderSetup = true;
@@ -91,6 +93,12 @@ std::unique_ptr<ImageData> SimpleJ2kCodec::Decode() {
       Destroy();
       return nullptr;
   }
+
+
+  // auto t2 = Clock::now();
+  // std::cout << "Decode time "
+  //           << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+  //           << " ms" << std::endl;
 
   ImageData im = {_image->comps[0].data, _image->comps[0].w, _image->comps[0].h};
   return std::make_unique<ImageData>(im);
