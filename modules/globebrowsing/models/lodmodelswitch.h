@@ -44,6 +44,12 @@ namespace globebrowsing {
 
 	private:
 		RenderableGlobe* _owner;
+
+		bool _firstLow;
+		bool _firstHigh;
+		bool _firstClose;
+
+		glm::dvec3 _prevCam;
 	};
 }
 }

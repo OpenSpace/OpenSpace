@@ -32,17 +32,12 @@
 #include <modules/globebrowsing/globes/chunkedlodglobe.h>
 #include <modules/globebrowsing/models/cachingsurfacemodelprovider.h>
 #include <modules/globebrowsing/models/roverpathfilereader.h>
+#include <modules/globebrowsing/models/lodmodelswitch.h>
+#include <modules/globebrowsing/models/modelprovider.h>
+#include <modules/globebrowsing/models/subsite.h>
 
 namespace openspace {
 namespace globebrowsing {
-
-struct SubSite {
-	std::string site, drive, frame;
-	double lat, lon;
-	double siteLat, siteLon;
-	int tileHashKey;
-	std::vector<std::string> fileNames;
-};
 
 class RenderableRoverSurface : public Renderable {
 public:
@@ -62,7 +57,7 @@ public:
 	void update(const UpdateData& data) override;
 	
 private:
-	void calculateSurfacePosition();
+	std::vector<std::shared_ptr<SubsiteModels>> calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector);
 	std::vector<std::string> extractFileNames(const std::string filePath);
 
 	std::vector<std::string> _fileNames;
@@ -90,6 +85,9 @@ private:
 	std::shared_ptr<CachingSurfaceModelProvider> _cachingModelProvider;
 
 	glm::dvec3 _sunPos;
+
+	LodModelSwitch _modelSwitch;
+
 };
 
 } // namespace globebrowsing

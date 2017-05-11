@@ -25,6 +25,8 @@
 #include <modules/globebrowsing/models/singlemodelprovider.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/glm.h>
 
@@ -38,19 +40,28 @@ namespace globebrowsing {
 		: ModelProvider(dictionary) {
 	}
 
-	std::vector<Subsite> SingleModelProvider::calculate(const std::vector<std::vector<Subsite>> subsites) {
+	std::vector<Subsite> SingleModelProvider::calculate(const std::vector<std::vector<Subsite>> subsites, const RenderData& data) {
 		std::vector<Subsite> ss;
-		float minDist = 100000000;
+		float minDist = 1000000000000000;
 		int minIdx1 = 0, minIdx2 = 0;
 		Subsite smallest;
-		glm::dvec2 cameraPos = glm::dvec2(-4.668293194, 137.370020299);
-		Geodetic2 cameraPosOnSurface = Geodetic2{ -4.668266198 , 137.370017922 } / 180.0f * glm::pi<double>();
-
+		SceneGraphNode* _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
+		RenderableGlobe* rg = (RenderableGlobe*)_parent->renderable();
+		
+		double ellipsoidShrinkTerm = rg->interactionDepthBelowEllipsoid();
+		glm::dvec3 center = _parent->worldPosition();
+		glm::dmat4 globeModelTransform = rg->modelTransform();
+		glm::dmat4 globeModelInverseTransform = rg->inverseModelTransform();
+		glm::dvec3 cameraPos = data.camera.positionVec3();
+		glm::dvec4 cameraPositionModelSpace = globeModelInverseTransform * glm::dvec4(cameraPos, 1.0);
+		glm::dvec3 cameraPositionProjected = rg->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
+		
 		for (auto s : subsites) {
 			for (auto s1 : s) {
-				glm::dvec2 temp = glm::dvec2(s1.lat, s1.lon);
-				if (glm::distance(cameraPos, temp) < minDist) {
-					minDist = glm::distance(cameraPos, temp);
+				Geodetic2 coord = Geodetic2{ s1.lat, s1.lon } / 180.0 * glm::pi<double>();
+				glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ coord, 0 });
+				if (glm::distance(cameraPositionProjected, temp) < minDist) {
+					minDist = glm::distance(cameraPositionProjected, temp);
 					smallest = s1;
 				}
 			}

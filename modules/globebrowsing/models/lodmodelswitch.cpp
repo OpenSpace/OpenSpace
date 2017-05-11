@@ -24,7 +24,9 @@
 
 #include <modules/globebrowsing/models/lodmodelswitch.h>
 #include <ghoul/logging/logmanager.h>
-
+#include <glm/gtx/matrix_decompose.hpp>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scene/scenegraphnode.h>
 
 namespace {
 	const std::string _loggerCat = "LodModelSwitch";
@@ -39,31 +41,35 @@ namespace globebrowsing {
 
 
 LodModelSwitch::Mode LodModelSwitch::getLevel(const RenderData& data) {
-	glm::dvec3 centerPosition = data.position.dvec3();
+	double ellipsoidShrinkTerm = _owner->interactionDepthBelowEllipsoid();
+	SceneGraphNode*_parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars")->parent();
+	glm::dvec3 center = _parent->worldPosition();
+	glm::dmat4 globeModelTransform = _owner->modelTransform();
+	glm::dmat4 globeModelInverseTransform = _owner->inverseModelTransform();
+	glm::dvec3 cameraPos = data.camera.positionVec3();
+	glm::dvec4 cameraPositionModelSpace = globeModelInverseTransform * glm::dvec4(cameraPos, 1.0);
 
-	glm::dvec3 cameraPosition = data.camera.positionVec3();
-	glm::dmat4 inverseModelTransform = _owner->inverseModelTransform();
-	glm::dvec3 cameraPositionModelSpace = glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1));
+	glm::dvec3 directionFromSurfaceToCameraModelSpace =
+		_owner->ellipsoid().geodeticSurfaceNormal(
+			_owner->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
 
-	glm::dvec3 centerToEllipsoidSurface = glm::dmat3(_owner->modelTransform())  * (_owner->projectOnEllipsoid(cameraPositionModelSpace));
-	glm::dvec3 ellipsoidSurfaceToCamera = cameraPosition - (centerPosition + centerToEllipsoidSurface);
+	glm::dvec3 centerToEllipsoidSurface = glm::dmat3(globeModelTransform)  * (_owner->projectOnEllipsoid(cameraPositionModelSpace) -
+		directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
+
+	glm::dvec3 ellipsoidSurfaceToCamera = cameraPos - (center + centerToEllipsoidSurface);
+	double distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
 
 	double heightToSurface =
-		_owner->getHeight(cameraPositionModelSpace);
+		_owner->getHeight(cameraPositionModelSpace) + ellipsoidShrinkTerm;
 
-	glm::dvec3 posDiff = cameraPosition - centerPosition;
+	double distFromSurfaceToCamera = glm::abs(heightToSurface - distFromEllipsoidSurfaceToCamera);
 
-	double distFromCenterToSurface =
-		length(centerToEllipsoidSurface);
-	double distFromEllipsoidSurfaceToCamera = length(ellipsoidSurfaceToCamera);
-	double distFromCenterToCamera = length(posDiff);
-	double distFromSurfaceToCamera =
-		distFromEllipsoidSurfaceToCamera - heightToSurface;
-
-	if (distFromSurfaceToCamera > 100000) {
+	if (distFromSurfaceToCamera > 1000 && distFromSurfaceToCamera < 5000) {
+		return Mode::Low;
+	}
+	else if (distFromSurfaceToCamera >= 5000) {
 		return Mode::High;
 	}
-
 	return Mode::Close;
 }
 }
