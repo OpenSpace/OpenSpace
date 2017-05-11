@@ -1,0 +1,34 @@
+{
+   <libstdc++_mem_pool>
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   obj:/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+   fun:call_init.part.0
+   fun:call_init
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:__stpcpy_sse2_unaligned
+   obj:/usr/bin/jpylyzer
+   obj:/usr/bin/jpylyzer
+   fun:(below main)
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:strcpy
+   obj:/usr/bin/jpylyzer
+   obj:/usr/bin/jpylyzer
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Param
+   execve(filename)
+   fun:execve
+   fun:execvpe
+   obj:/usr/bin/jpylyzer
+   obj:/usr/bin/jpylyzer
+   fun:(below main)
+}

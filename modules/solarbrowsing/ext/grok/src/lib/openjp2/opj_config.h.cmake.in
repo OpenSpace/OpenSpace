@@ -1,0 +1,12 @@
+/* create opj_config.h for CMake */
+#cmakedefine OPJ_HAVE_STDINT_H 		@OPJ_HAVE_STDINT_H@
+
+/*--------------------------------------------------------------------------*/
+/* OpenJPEG Versioning                                                      */
+
+/* Version number. */
+#define OPJ_VERSION_MAJOR @GROK_VERSION_MAJOR@
+#define OPJ_VERSION_MINOR @GROK_VERSION_MINOR@
+#define OPJ_VERSION_BUILD @GROK_VERSION_BUILD@
+
+#define GROK_PLUGIN_NAME  "@GROK_PLUGIN_NAME@" 

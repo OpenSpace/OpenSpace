@@ -130,6 +130,8 @@ void SpacecraftImageryManager::loadImageMetadata(
       const std::unordered_set<std::string>& _filter)
 {
 
+    LDEBUG("Begin loading imagery metadata");
+
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
 
@@ -137,6 +139,7 @@ void SpacecraftImageryManager::loadImageMetadata(
         LERROR("Could not load directory '" << sequenceDir.path() << "'");
     }
 
+    unsigned int count = 0;
     using Recursive = ghoul::filesystem::Directory::RawPath;
     using Sort = ghoul::filesystem::Directory::Sort;
     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
@@ -147,7 +150,6 @@ void SpacecraftImageryManager::loadImageMetadata(
                 ghoul::filesystem::File currentFile(seqPath);
                 std::string extension = currentFile.fileExtension();
                 if (extension == "jp2" || extension == "j2k") {
-
                     // // TODO(mnoven): Prettify or read metadata instead
                     std::string fileName = currentFile.filename();
                     size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
@@ -170,6 +172,7 @@ void SpacecraftImageryManager::loadImageMetadata(
                     // If filter is empty or value exist
                     if (_filter.size() == 0
                         || _filter.find(filterKey) != _filter.end()) {
+                        count++;
                         // Time
                         std::vector<std::string> tokens;
                         std::stringstream ss;
@@ -189,8 +192,11 @@ void SpacecraftImageryManager::loadImageMetadata(
                 }
             }
         }
-        //LDEBUG("Finished loading path " << seqPath);
+        LDEBUG("Finished loading path " << seqPath);
     }
+
+    LDEBUG("Finish loading imagery metadata");
+    LDEBUG(count << " Images loaded");
 }
 
 std::vector<ImageMetadata> SpacecraftImageryManager::loadImageMetadata(const std::string& path) {

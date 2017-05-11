@@ -1,0 +1,21 @@
+version: 2.1.1.{build}
+branches:
+  except:
+  - coverity_scan
+skip_tags: true
+clone_depth: 50
+environment:
+  matrix:
+  - OPJ_CI_ARCH: x86
+    OPJ_CI_VSCOMNTOOLS: $(VS140COMNTOOLS)
+  - OPJ_CI_ARCH: x64
+    OPJ_CI_VSCOMNTOOLS: $(VS140COMNTOOLS)
+install:
+- cmd: c:\cygwin\bin\bash ./tools/travis-ci/install.sh
+build_script:
+- cmd: >-
+    "%OPJ_CI_VSCOMNTOOLS%..\..\VC\vcvarsall.bat" %OPJ_CI_ARCH%
+
+    bash ./tools/travis-ci/run.sh
+test: off
+deploy: off
