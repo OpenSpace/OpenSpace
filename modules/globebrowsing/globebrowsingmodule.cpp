@@ -40,6 +40,9 @@
 #include <modules/globebrowsing/models/renderablesite.h>
 #include <modules/globebrowsing/tile/tileprovider/presentationslideprovider.h>
 #include <modules/globebrowsing/models/renderableroversurface.h>
+#include <modules/globebrowsing/models/modelprovider.h>
+#include <modules/globebrowsing/models/multimodelprovider.h>
+#include <modules/globebrowsing/models/singlemodelprovider.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
@@ -134,6 +137,13 @@ void GlobeBrowsingModule::internalInitialize() {
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>("ByIndex");
     fTileProvider->registerClass<tileprovider::PresentationSlideProvider>("PresentationSlides");
     FactoryManager::ref().addFactory(std::move(fTileProvider));
+
+	auto fModelProvider = std::make_unique<ghoul::TemplateFactory<ModelProvider>>();
+	
+	fModelProvider->registerClass<MultiModelProvider>("MultiModelProvider");
+	fModelProvider->registerClass<SingleModelProvider>("SingleModelProvider");
+
+	FactoryManager::ref().addFactory(std::move(fModelProvider));
 }
 
 } // namespace openspace
