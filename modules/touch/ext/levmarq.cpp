@@ -128,14 +128,13 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 				derr = newerr - err;
 				ill = (derr > 0);
 			} 
-			if (verbose) {
+			if (verbose) { // store iteration, error, gradient, step
 				/*printf("it = %4d,   lambda = %10g,   err = %10g,   derr = %10g (%d)\n", it, lambda, err, derr, !(newerr > err));
 				for (int i = 0; i < npar; ++i) {
 					printf("g[%d] = %g, ", i, g[i]);
 				}
 				printf("\n");*/
 
-				//std::ostringstream gString;
 				std::ostringstream gString, qString, dString, os;
 				for (int i = 0; i < npar; ++i) {
 					gString << g[i];
@@ -149,7 +148,6 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 				}
 				os << it << "," << err << "," << derr << "," << qString.str() << "," << gString.str() << "," << dString.str() << "\n";
 				data.append(os.str());
-				// store iteration, error, gradient, step
 			}
 			if (ill) {
 				mult = (1 + lambda * up) / (1 + lambda);

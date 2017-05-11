@@ -136,6 +136,7 @@ TouchModule::TouchModule()
 		for (const TuioCursor& c : list) {
 			lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
 		}
+		touch->unitTest();
 		touch->step(OsEng.windowWrapper().deltaTime());
 	}
 	);

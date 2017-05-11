@@ -99,6 +99,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void accelerate(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 
 		void step(double dt);
+		void unitTest();
 
 		void decelerate();
 		void clear();
@@ -117,6 +118,7 @@ class TouchInteraction : public properties::PropertyOwner
 		// Property variables
 		properties::StringProperty _origin;
 		properties::BoolProperty _lmVerbose;
+		properties::BoolProperty _unitTest;
 		properties::IntProperty _maxTapTime;
 		properties::FloatProperty _touchScreenSize;
 		properties::FloatProperty _nodeRadiusThreshold;
@@ -137,6 +139,7 @@ class TouchInteraction : public properties::PropertyOwner
 		double _projectionScaleFactor;
 		double _currentRadius;
 		double _slerpdT;
+		int _numOfTests;
 		TUIO::TuioTime _time;
 		bool _directTouchMode;
 		bool _tap;

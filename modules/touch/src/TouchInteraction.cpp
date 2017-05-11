@@ -46,6 +46,7 @@
 
 #include <cmath>
 #include <functional>
+#include <fstream>
 #include <glm/ext.hpp>
 
 namespace {
@@ -59,6 +60,7 @@ TouchInteraction::TouchInteraction()
 	: properties::PropertyOwner("TouchInteraction"),
 	_origin("origin", "Origin", ""),
 	_lmVerbose("LM verbose", "Save data from LM algorithm", true),
+	_unitTest("Click to take a unit test", "Take a unit test saving the LM data into file", false),
 	_maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000),
 	_touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f),
 	_nodeRadiusThreshold("Activate direct-manipulation", "Radius a planet has to have to activate direct-manipulation", 0.3f, 0.0f, 1.0f),
@@ -74,10 +76,11 @@ TouchInteraction::TouchInteraction()
 	_vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) },
 	_sensitivity{glm::dvec2(0.1, 0.1778), 110, 22, glm::dvec2(0.1, 0.1778) },
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
-	_currentRadius{ 1.0 }, _slerpdT{ 1000 },
+	_currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 },
 	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true }, _guiON{ false }
 {
 	addProperty(_lmVerbose);
+	addProperty(_unitTest);
 	addProperty(_maxTapTime);
 	addProperty(_touchScreenSize);
 	addProperty(_nodeRadiusThreshold);
@@ -115,7 +118,6 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		}
 		_time.initSession();
 	}
-	
 	
 	if (!gui(list)) {
 		if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
@@ -286,7 +288,7 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 
 	_lmSuccess = levmarq(nDOF, par, nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
 
-	if (_lmSuccess) { // if good values were found set new camera state
+	if (_lmSuccess && !_unitTest) { // if good values were found set new camera state
 		_vel.orbit = glm::dvec2(par[0], par[1]);
 		if (nDOF > 2) {
 			_vel.zoom = par[2];
@@ -305,16 +307,14 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 
 	// debugging
 	if (_lmVerbose) {
-		/*std::ostringstream os;
+		/*std::cout << _lmstat.data;
+		std::ostringstream os;
 		for (int i = 0; i < nDOF; ++i) {
 			os << par[i] << ", ";
 		}
 		std::cout << "Levmarq success after " << _lmstat.final_it << " iterations. Values: " << os.str() << "\n";*/
-		std::cout << _lmstat.data;
 	}
-
-	// cleanup
-	delete[] par;
+	delete[] par; // cleanup
 }
 
 // Traces the touch input into the scene and finds the surface coordinates of touched planets (if occuring)
@@ -378,7 +378,8 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 
 	//debugging
 	for (auto it : newSelected) {
-		//std::cout << it.node->name() << " hit with cursor " << it.id << ". Surface Coordinates: " << glm::to_string(it.coordinates) << "\n";
+		//std::cout << it.node->name() << " hit with cursor " << it.id << ". Surface Coordinates: " << glm::to_string(it.coordinates) << 
+			//", Node at:" << glm::to_string(it.node->worldPosition()) << ", Camera at: " << glm::to_string(_camera->positionVec3()) << "\n";
 	}
 }
 
@@ -591,6 +592,57 @@ void TouchInteraction::step(double dt) {
 
 		_tap = false;
 		_doubleTap = false;
+	}
+}
+
+void TouchInteraction::unitTest() {
+	if (_unitTest) {
+		_lmVerbose = true;
+		// time set and paused in .scene file
+		//openspace.time.setTime("2016 SEP 8 23:00:00.500")
+		//openspace.time.togglePause()
+
+		using namespace glm;
+		// set camera pos and rot
+		glm::dvec3 camPos = dvec3(26974419543.178154, 76302892465.068359, -127116625827.843369); // chosen world location that fits
+		_camera->setPositionVec3(camPos);
+
+		glm::dvec3 camToFocus = _focusNode->worldPosition() - _camera->positionVec3();
+		glm::dvec3 camForward = glm::normalize(_camera->viewDirectionWorldSpace());
+		double angle = glm::angle(camForward, camToFocus);
+		glm::dvec3 axis = glm::normalize(glm::cross(camForward, camToFocus));
+		dquat Q;
+		Q.x = axis.x * sin(angle / 2.0);
+		Q.y = axis.y * sin(angle / 2.0);
+		Q.z = axis.z * sin(angle / 2.0);
+		Q.w = cos(angle / 2.0);
+		dmat4 lookAtMat = lookAt(
+			dvec3(0, 0, 0),
+			normalize(camToFocus),
+			normalize(_camera->viewDirectionWorldSpace() + _camera->lookUpVectorWorldSpace())); // To avoid problem with lookup in up direction
+		dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
+		_camera->setRotation(globalCamRot * Q);
+
+		// set _selected pos and new pos (on screen)
+		std::vector<TuioCursor> lastFrame;
+		lastFrame.push_back(TuioCursor(0, 1, 0.2, 0.5)); // session id, cursor id, x, y
+		std::vector<TuioCursor> currFrame;
+		currFrame.push_back(TuioCursor(0, 1, 0.8, 0.5));
+
+		// call update
+		trace(lastFrame);
+		manipulate(currFrame);
+
+		// save lmstats.data into a file and clear it
+		char buffer[32];
+		snprintf(buffer, sizeof(char) * 32, "lmdata%i.csv", _numOfTests);
+		_numOfTests++;
+		std::ofstream file(buffer);
+		file << _lmstat.data;
+
+		// clear everything
+		_selected.clear();
+		_unitTest = false;
 	}
 }
 
