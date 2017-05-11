@@ -23,33 +23,35 @@
  ****************************************************************************************/
 
 #include <modules/server/connectionpool.h>
+#include <ghoul/io/socket/socket.h>
 
 namespace openspace {
 
-ConnectionPool::ConnectionPool()
-    : _listening(false)
-    , _handleSocket(nullptr)
-    , _serverThread(nullptr)
+ConnectionPool::ConnectionPool(std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket)
+    : _handleSocket(std::move(handleSocket))
 {}
 
-void ConnectionPool::listen(
-    std::string address,
-    int port,
-    std::function<void(std::shared_ptr<ghoul::io::TcpSocket> socket)> handleSocket)
-{
-    _handleSocket = std::move(handleSocket);
-    _listening = true;
-    _socketServer.listen(address, port);
-
-    _serverThread = std::make_unique<std::thread>([this]() {
-        handleConnections();
+void ConnectionPool::addServer(std::shared_ptr<ghoul::io::SocketServer> server) {
+    _socketServers.push_back(Server{
+        server,
+        std::thread([this, server]() {
+            handleConnections(server);
+        })
     });
 }
 
-void ConnectionPool::handleConnections() {
-    while (_listening) {
+void ConnectionPool::removeServer(std::shared_ptr<ghoul::io::SocketServer> server) {
+    // TODO.
+}
+
+void ConnectionPool::clearServers() {
+    _socketServers.clear();
+}
+
+void ConnectionPool::handleConnections(std::shared_ptr<ghoul::io::SocketServer> server) {
+    while (server->isListening()) {
         removeDisconnectedSockets();
-        std::shared_ptr<ghoul::io::TcpSocket> socket = _socketServer.awaitPendingConnection();
+        std::shared_ptr<ghoul::io::Socket> socket = server->awaitPendingSocket();
         if (!socket || !socket->isConnected()) {
             continue;
         }
@@ -87,7 +89,6 @@ void ConnectionPool::removeDisconnectedSockets() {
 
 void ConnectionPool::close() {
     disconnectAllConnections();
-    closeServer();
 }
 
 void ConnectionPool::disconnectAllConnections() {
@@ -100,11 +101,5 @@ void ConnectionPool::disconnectAllConnections() {
     _connections.clear();
 }
 
-void ConnectionPool::closeServer() {
-    if (!_listening) return;
-    _listening = false;
-    _socketServer.close();
-    _serverThread->join();
-}
 
 } // namespace openspace
