@@ -126,6 +126,7 @@ void RenderableRoverSurface::render(const RenderData & data) {
 	std::vector<Subsite> ss;
 	ghoul::Dictionary modelDic;
 	std::unique_ptr<ModelProvider>_modelProvider;
+	int level;
 
 	switch (_modelSwitch.getLevel(data)) {
 		case LodModelSwitch::Mode::Low :	
@@ -133,16 +134,19 @@ void RenderableRoverSurface::render(const RenderData & data) {
 			modelDic.setValue("Type", "MultiModelProvider");
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
 			ss = _modelProvider->calculate(subSitesVector, data);
+			level = 2;
 			break;
 		case LodModelSwitch::Mode::Close :
 			//Close
 			modelDic.setValue("Type", "SingleModelProvider");
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
 			ss = _modelProvider->calculate(subSitesVector, data);
+			level = 3;
 			break;
 
 		default: 
 			//High up
+			level = 1;
 			return;
 	}
 
@@ -157,7 +161,7 @@ void RenderableRoverSurface::render(const RenderData & data) {
 	
 	_programObject->activate();
 
-	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels = _cachingModelProvider->getModels(ss1, 1);
+	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels = _cachingModelProvider->getModels(ss1, level);
 	
 	_subsiteModels = calculateSurfacePosition(_subsiteModels);
 

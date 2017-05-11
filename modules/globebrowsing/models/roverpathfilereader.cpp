@@ -130,7 +130,7 @@ std::vector<Subsite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 		// Convert the site and drive string to match the folder structure
 		std::string site = convertString(subsite.site, "site");
 		std::string drive = convertString(subsite.drive, "drive");
-		pathToDriveFolder = surfaceModelFilePath + "site" + site + "/" + "drive" + drive;
+		pathToDriveFolder = surfaceModelFilePath + "/level1/" + "site" + site + "/" + "drive" + drive;
 
 		// If the folder exists it means there are models for this subsite, then check if that
 		// specific site/drive combination has already been added. If the models haven't already been 
