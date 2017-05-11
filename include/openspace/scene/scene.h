@@ -25,13 +25,14 @@
 #ifndef __OPENSPACE_CORE___SCENE___H__
 #define __OPENSPACE_CORE___SCENE___H__
 
+#include <openspace/documentation/documentationgenerator.h>
+
 #include <vector>
 #include <map>
 #include <set>
 #include <mutex>
 
 #include <openspace/util/camera.h>
-#include <openspace/util/documented.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/opengl/programobject.h>
@@ -46,7 +47,7 @@ class SceneGraphNode;
 
 // Notifications:
 // SceneGraphFinishedLoading
-class Scene : public Documented {
+class Scene : public DocumentationGenerator {
 public:
 
     using UpdateDependencies = ghoul::Boolean;

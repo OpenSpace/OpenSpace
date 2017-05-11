@@ -26,10 +26,9 @@
 #define __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 
 #include <openspace/documentation/documentation.h>
-
-#include <openspace/util/documented.h>
-
+#include <openspace/documentation/documentationgenerator.h>
 #include <ghoul/designpattern/singleton.h>
+
 #include <ghoul/misc/exception.h>
 
 namespace openspace {
@@ -41,7 +40,7 @@ namespace documentation {
  * consumption.
  */
 class DocumentationEngine : public ghoul::Singleton<DocumentationEngine>
-                          , public Documented
+                          , public DocumentationGenerator
 {
 public:
     /**

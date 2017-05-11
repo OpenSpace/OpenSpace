@@ -25,13 +25,14 @@
 #ifndef __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 #define __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 
+#include <openspace/documentation/documentationgenerator.h>
+#include <openspace/properties/propertyowner.h>
+
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/network/parallelconnection.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/util/documented.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
 
@@ -48,8 +49,8 @@ class SceneGraphNode;
 
 namespace interaction {
 
-
-class InteractionHandler : public properties::PropertyOwner, public Documented {
+class InteractionHandler : public properties::PropertyOwner, public DocumentationGenerator
+{
 public:
     InteractionHandler();
     ~InteractionHandler();

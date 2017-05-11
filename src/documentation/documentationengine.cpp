@@ -62,7 +62,7 @@ DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationExce
 {}
 
 DocumentationEngine::DocumentationEngine()
-    : Documented(
+    : DocumentationGenerator(
         "Documentation",
         "documentation",
         {

@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___FACTORYMANAGER___H__
 #define __OPENSPACE_CORE___FACTORYMANAGER___H__
 
-#include <openspace/util/documented.h>
+#include <openspace/documentation/documentationgenerator.h>
 
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/templatefactory.h>
@@ -39,7 +39,7 @@ namespace openspace {
  * them available through the #addFactory and #factory methods. Each
  * ghoul::TemplateFactory can only be added once and can be accessed by its type.
  */
-class FactoryManager : public Documented {
+class FactoryManager : public DocumentationGenerator {
 public:
     /// This exception is thrown if the ghoul::TemplateFactory could not be found in the
     /// #factory method

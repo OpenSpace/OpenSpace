@@ -66,7 +66,7 @@ namespace {
 std::string ScriptEngine::OpenSpaceLibraryName = "openspace";
 
 ScriptEngine::ScriptEngine()
-    : Documented(
+    : DocumentationGenerator(
         "Script Documentation",
         "scripting",
         {

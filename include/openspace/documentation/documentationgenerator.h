@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DOCUMENTED___H__
-#define __OPENSPACE_CORE___DOCUMENTED___H__
+#ifndef __OPENSPACE_CORE___DOCUMENTATIONGENERATOR___H__
+#define __OPENSPACE_CORE___DOCUMENTATIONGENERATOR___H__
 
 #include <string>
 #include <vector>
@@ -44,7 +44,7 @@ namespace openspace {
  * method, and the Javascript file that contains additional logic is passed in the
  * constructor.
  */
-class Documented {
+class DocumentationGenerator {
 public:
     /// This struct contains a single Handlebar template, with the name and the filename
     struct HandlebarTemplate {
@@ -66,12 +66,12 @@ public:
      * \pre Each handlebarTemplates' \c name must not be empty and \c filename must exist
      * \pre javascriptFilename must not be empty must exist
      */
-    Documented(std::string name, std::string jsonName,
+    DocumentationGenerator(std::string name, std::string jsonName,
         std::vector<HandlebarTemplate> handlebarTemplates,
         std::string javascriptFilename);
 
     /// Default constructor
-    virtual ~Documented() = default;
+    virtual ~DocumentationGenerator() = default;
     
     /**
      * Create the documentation into the provided filename. Any existing file will be
@@ -85,11 +85,11 @@ public:
 protected:
     /**
      * This abstract method is used by concrete subclasses to provide the actual data that
-     * is used in the documentation written by this Documented method. The JSON string
-     * returned by this function will be stored in the variable with the \c jsonName as
-     * passed in the constructor.
+     * is used in the documentation written by this DocumentationGenerator class. The JSON
+     * string returned by this function will be stored in the variable with the
+     * \c jsonName as passed in the constructor.
      * \return A JSON script that is parsed and stored in the variable passed in the
-     * Documented constructor
+     * DocumentationGenerator constructor
      */
     virtual std::string generateJson() const = 0;
     
@@ -102,4 +102,4 @@ private:
     
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___DOCUMENTED___H__
+#endif // __OPENSPACE_CORE___DOCUMENTATIONGENERATOR___H__

@@ -83,7 +83,7 @@ namespace {
 namespace openspace {
 
 Scene::Scene()
-    : Documented(
+    : DocumentationGenerator(
         "Documented",
         "propertyOwners",
         {

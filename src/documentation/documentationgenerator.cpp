@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/documented.h>
+#include <openspace/documentation/documentationgenerator.h>
 
 #include <openspace/openspace.h>
 #include <openspace/util/time.h>
@@ -40,10 +40,10 @@ namespace {
 
 namespace openspace {
 
-Documented::Documented(std::string name,
-                       std::string jsonName,
-                       std::vector<HandlebarTemplate> handlebarTemplates,
-                       std::string javascriptFilename)
+DocumentationGenerator::DocumentationGenerator(std::string name,
+                                               std::string jsonName,
+                                        std::vector<HandlebarTemplate> handlebarTemplates,
+                                               std::string javascriptFilename)
     : _name(std::move(name))
     , _jsonName(std::move(jsonName))
     , _handlebarTemplates(std::move(handlebarTemplates))
@@ -63,7 +63,7 @@ Documented::Documented(std::string name,
     );
 }
     
-void Documented::writeDocumentation(const std::string& filename) {
+void DocumentationGenerator::writeDocumentation(const std::string& filename) {
     std::ifstream handlebarsInput(absPath(HandlebarsFilename));
     std::ifstream jsInput(absPath(_javascriptFile));
     

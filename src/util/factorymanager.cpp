@@ -53,7 +53,7 @@ FactoryManager::FactoryNotFoundError::FactoryNotFoundError(std::string t)
 }
 
 FactoryManager::FactoryManager()
-    : Documented(
+    : DocumentationGenerator(
         "Factory Documentation",
         "factories",
         {

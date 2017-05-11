@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_CORE___SCRIPTENGINE___H__
 #define __OPENSPACE_CORE___SCRIPTENGINE___H__
 
-#include <openspace/scripting/lualibrary.h>
-#include <openspace/util/documented.h>
+#include <openspace/documentation/documentationgenerator.h>
 #include <openspace/util/syncdata.h>
+
+#include <openspace/scripting/lualibrary.h>
 
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
@@ -51,7 +52,7 @@ namespace scripting {
  * <code>openspace</code> namespac prefix in Lua. The same functions can be exposed to
  * other Lua states by passing them to the #initializeLuaState method.
  */
-class ScriptEngine : public Syncable, public Documented {
+class ScriptEngine : public Syncable, public DocumentationGenerator {
 public:
     using RemoteScripting = ghoul::Boolean;
 

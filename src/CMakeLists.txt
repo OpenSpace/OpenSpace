@@ -27,6 +27,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/documentation/core_registration.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/documentation.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/documentationengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/documentation/documentationgenerator.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
@@ -138,7 +139,6 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
-    ${OPENSPACE_BASE_DIR}/src/util/documented.cpp
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
     ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
@@ -167,6 +167,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationgenerator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configurationmanager.h
@@ -282,7 +283,6 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/util/documented.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h

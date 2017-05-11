@@ -73,7 +73,7 @@ namespace interaction {
 // InteractionHandler
 InteractionHandler::InteractionHandler()
     : properties::PropertyOwner("Interaction")
-    , Documented(
+    , DocumentationGenerator(
         "Documentation",
         "keybindings",
         {
