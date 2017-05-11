@@ -96,6 +96,7 @@ private:
 
     properties::BoolProperty _asyncUploadPBO;
     properties::OptionProperty _activeInstruments;
+    properties::IntProperty _bufferSize;
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
     properties::IntProperty _resolutionLevel;
@@ -115,8 +116,6 @@ private:
     unsigned int _pboSize;
     GLuint _frustum;
     GLuint _frustumPositionBuffer;
-
-    int _bufferSize = 100;
 
     GLuint pboHandles[2];
     unsigned int _currentPBO;

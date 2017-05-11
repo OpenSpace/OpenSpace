@@ -56,12 +56,13 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     : Renderable(dictionary)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
+    , _bufferSize("bufferSize", "Buffer Size", 20, 1, 100)
     , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 0, 0, 300)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 2, 0, 5)
     , _target("target", "Target", "Sun")
     , _usePBO("usePBO", "Use PBO", true)
-    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
+    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(6))
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
@@ -220,6 +221,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
     performImageTimestep(Time::ref().j2000Seconds());
     addProperty(_activeInstruments);
+    addProperty(_bufferSize);
     addProperty(_resolutionLevel);
     addProperty(_minRealTimeUpdateInterval);
     addProperty(_asyncUploadPBO);
@@ -446,7 +448,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
             _initializePBO = false;
             _pboIsDirty = true;
         } else {
-           // LWARNING("Nothing to update, buffer is not ready");
+            LWARNING("Nothing to update, buffer is not ready");
             _pboBufferData = nullptr;
         }
     }
