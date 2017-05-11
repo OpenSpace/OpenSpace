@@ -226,7 +226,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     }
 
     if (colorizingMagVars.size() % 3 == 0) {
-        for (int i = 0; i < colorizingMagVars.size(); i += 3) {
+        for (int i = 0; i < static_cast<int>(colorizingMagVars.size()); i += 3) {
             std::string str1 = colorizingMagVars[i];
             std::string str2 = colorizingMagVars[i+1];
             std::string str3 = colorizingMagVars[i+2];
@@ -317,13 +317,18 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                         }
                         colorizingVariables[i].push_back(val);
                     }
-                    for (int i = 0; i < numValidMagnitudeQuantities; i += 3) {
-                        float xVal = interpolator->interpolate(colorizingMagVars[i],
-                                                               gPos.x, gPos.y, gPos.z);
-                        float yVal = interpolator->interpolate(colorizingMagVars[i+1],
-                                                               gPos.x, gPos.y, gPos.z);
-                        float zVal = interpolator->interpolate(colorizingMagVars[i+2],
-                                                               gPos.x, gPos.y, gPos.z);
+                    for (int i = 0; i < numValidMagnitudeQuantities; ++i) {
+                        int firstIdx = i*3;
+
+                        float xVal = interpolator->interpolate(
+                                colorizingMagVars[firstIdx], gPos.x, gPos.y, gPos.z);
+
+                        float yVal = interpolator->interpolate(
+                                colorizingMagVars[firstIdx+1], gPos.x, gPos.y, gPos.z);
+
+                        float zVal = interpolator->interpolate(
+                                colorizingMagVars[firstIdx+2], gPos.x, gPos.y, gPos.z);
+
                         colorizingVariables[i + numValidFloatQuantities].push_back(
                                 sqrt(xVal*xVal + yVal*yVal + zVal*zVal));
                     }
