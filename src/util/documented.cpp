@@ -51,11 +51,16 @@ Documented::Documented(std::string name,
 {
     ghoul_precondition(!_name.empty(), "name must not be empty");
     ghoul_precondition(!_jsonName.empty(), "jsonName must not be empty");
-    ghoul_precondition(
-        !_handlebarTemplates.empty(),
-        "handlebarTemplates must not be empty"
-    );
+    for (const HandlebarTemplate& t : _handlebarTemplates) {
+        ghoul_precondition(!t.name.empty(), "name must not be empty");
+        ghoul_precondition(!t.filename.empty(), "filename must not be empty");
+        ghoul_precondition(FileSys.fileExists(t.filename), "filename must exist");
+    }
     ghoul_precondition(!_javascriptFile.empty(), "javascriptFilename must not be empty");
+    ghoul_precondition(
+        FileSys.fileExists(_javascriptFile),
+        "javascriptFilename must exist"
+    );
 }
     
 void Documented::writeDocumentation(const std::string& filename) {
