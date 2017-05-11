@@ -121,7 +121,6 @@ public:
 
     void saveCameraStateToFile(const std::string& filepath);
     void restoreCameraStateFromFile(const std::string& filepath);
-//    void writeKeyboardDocumentation(const std::string& type, const std::string& file);
 
 private:
     using Synchronized = ghoul::Boolean;
@@ -132,7 +131,7 @@ private:
         std::string documentation;
     };
     
-    std::string generateJson()  const override;
+    std::string generateJson() const override;
 
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
 

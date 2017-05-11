@@ -31,6 +31,7 @@
 #include <mutex>
 
 #include <openspace/util/camera.h>
+#include <openspace/util/documented.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/opengl/programobject.h>
@@ -45,7 +46,7 @@ class SceneGraphNode;
 
 // Notifications:
 // SceneGraphFinishedLoading
-class Scene {
+class Scene : public Documented {
 public:
 
     using UpdateDependencies = ghoul::Boolean;
@@ -61,7 +62,6 @@ public:
 
     // constructors & destructor
     Scene();
-    ~Scene();
 
     /**
      * Initalizes the SceneGraph
@@ -136,11 +136,6 @@ public:
     const std::map<std::string, SceneGraphNode*>& nodesByName() const;
 
     /**
-     * Output property documentation to a file.
-     */
-    void writePropertyDocumentation(const std::string& filename, const std::string& type, const std::string& sceneFilename);
-
-    /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph. The functions contained are
      * - openspace::luascriptfunctions::property_setValue
@@ -152,7 +147,9 @@ public:
 
     static documentation::Documentation Documentation();
 
-private:  
+private:
+    std::string generateJson() const override;
+
     void sortTopologically();
 
     std::unique_ptr<SceneGraphNode> _root;

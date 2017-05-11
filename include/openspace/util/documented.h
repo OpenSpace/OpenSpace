@@ -37,8 +37,11 @@ public:
         std::string filename;
     };
     
-    Documented(std::string name, std::string jsonName, std::vector<HandlebarTemplate> handlebarTemplates,
+    Documented(std::string name, std::string jsonName,
+        std::vector<HandlebarTemplate> handlebarTemplates,
         std::string javascriptFilename);
+
+    virtual ~Documented() = default;
     
     void writeDocumentation(const std::string& filename);
     

@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SCRIPTENGINE___H__
 
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/util/documented.h>
 #include <openspace/util/syncdata.h>
 
 #include <ghoul/lua/ghoul_lua.h>
@@ -50,9 +51,12 @@ namespace scripting {
  * <code>openspace</code> namespac prefix in Lua. The same functions can be exposed to
  * other Lua states by passing them to the #initializeLuaState method.
  */
-class ScriptEngine : public Syncable {
+class ScriptEngine : public Syncable, public Documented {
 public:
     using RemoteScripting = ghoul::Boolean;
+
+    ScriptEngine();
+
     /**
      * Initializes the internal Lua state and registers a common set of library functions
      * \throw LuaRuntimeException If the creation of the new Lua state fails
@@ -72,8 +76,6 @@ public:
     
     bool runScript(const std::string& script);
     bool runScriptFile(const std::string& filename);
-
-    void writeDocumentation(const std::string& filename, const std::string& type) const;
 
     bool writeLog(const std::string& script);
 
@@ -106,6 +108,8 @@ private:
     void addBaseLibrary();
     void remapPrintFunction();
     
+    std::string generateJson() const override;
+
     ghoul::lua::LuaState _state;
     std::set<LuaLibrary> _registeredLibraries;
     

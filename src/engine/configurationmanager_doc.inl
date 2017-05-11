@@ -141,143 +141,49 @@ documentation::Documentation ConfigurationManager::Documentation() {
         },
         {
             ConfigurationManager::KeyLuaDocumentation,
-            new TableVerifier({
-                {
-                    ConfigurationManager::PartType,
-                    new StringInListVerifier(
-                        // List from ScriptEngine::writeDocumentation
-                        { "text", "html" }
-                    ),
-                    "The type of documentation that will be written."
-                },
-                {
-                    ConfigurationManager::PartFile,
-                    new StringVerifier,
-                    "The filename that will be created on startup containing the "
-                    "documentation of available Lua functions. Any existing file "
-                    "will be silently overwritten."
-                }
-            }),
-            "Descriptions of whether and where to create a documentation file that "
-            "describes the available Lua functions that can be executed in scene "
-            "files or per console.",
+            new StringVerifier,
+            "The filename that will be created on startup containing the documentation "
+            "of available Lua functions that can be executed in scene files or per "
+            "console. Any existing file will be silently overwritten.",
             Optional::Yes
         },
         {
             ConfigurationManager::KeyPropertyDocumentation,
-            new TableVerifier({
-                {
-                    ConfigurationManager::PartType,
-                    new StringInListVerifier(
-                        // List taken from Scene::writePropertyDocumentation
-                        { "text", "html" }
-                    ),
-                    "The type of property documentation file that is created."
-                },
-                {
-                    ConfigurationManager::PartFile,
-                    new StringVerifier,
-                    "The file that will be created on startup containing a list of "
-                    "all properties in the scene. Any existing file will be silently "
-                    "overwritten."
-                }
-            }),
-            "Descriptions of whether and where to create a list of all properties "
-            "that were created in the current scene.",
+            new StringVerifier,
+            "The file that will be created on startup containing a list of all "
+            "properties in the scene. Any existing file will be silently overwritten.",
             Optional::Yes
         },
         {
             ConfigurationManager::KeyScriptLog,
-            new TableVerifier({
-                {
-                    ConfigurationManager::PartType,
-                    new StringInListVerifier(
-                        // List taken from ScriptEngine::writeLog
-                        { "text" }
-                        ),
-                        "The type of logfile that will be created."
-                },
-                {
-                    ConfigurationManager::PartFile,
-                    new StringVerifier,
-                    "The file that will be created on startup containing the log of "
-                    "all Lua scripts that are executed. Any existing file (including "
-                    "the results from previous runs) will be silently overwritten."
-                }
-            }),
-            "Contains a log of all Lua scripts that were executed in the last "
-            "session.",
+            new StringVerifier,
+            "The file that will be created on startup containing the log of all Lua "
+            "scripts that are executed in the last session. Any existing file (including "
+            "the results from previous runs) will be silently overwritten.",
             Optional::Yes
         },
         {
             ConfigurationManager::KeyKeyboardShortcuts,
-            new TableVerifier({
-                {
-                    ConfigurationManager::PartType,
-                    new StringInListVerifier(
-                        // List from InteractionHandler::writeKeyboardDocumentation
-                        { "text", "html" }
-                    ),
-                    "The type of keyboard binding documentation that should be "
-                    "written."
-                },
-                {
-                    ConfigurationManager::PartFile,
-                    new StringVerifier,
-                    "The file that will be created on startup containing the list of "
-                    "all keyboard bindings with their respective Lua scripts. Any "
-                    "previous file in this location will be silently overritten."
-                }
-            }),
-            "Contains the collection of all keyboard shortcuts that were collected "
-            "during startup. For each key, it mentions which scripts will be "
-            "executed in the current session.",
+            new StringVerifier,
+            "The file that will be created on startup containing the list of all "
+            "keyboard bindings with their respective Lua scripts. For each key, it "
+            "mentions which scripts will be executed in the current session.",
             Optional::Yes
         },
         {
             ConfigurationManager::KeyDocumentation,
-            new TableVerifier({
-                {
-                    ConfigurationManager::PartType,
-                    new StringInListVerifier(
-                        // List from DocumentationEngine::writeDocumentation
-                        { "text", "html" }
-                    ),
-                    "The type of documentation that should be written."
-                },
-                {
-                    ConfigurationManager::PartFile,
-                    new StringVerifier,
-                    "The file that will be created on startup containing this "
-                    "documentation. Any previous file in this location will be silently "
-                    "overritten."
-                }
-            }),
-            "This defines the location and type of this documentation file.",
+            new StringVerifier,
+            "The file that will be created on startup containing this documentation. Any "
+            "previous file in this location will be silently overwritten.",
             Optional::Yes
         },
         {
             ConfigurationManager::KeyFactoryDocumentation,
-            new TableVerifier({
-                {
-                    ConfigurationManager::PartType,
-                    new StringInListVerifier(
-                        // List from FactoryManager::writeDocumentation
-                        { "text", "html" }
-                    ),
-                    "The type of documentation that should be written."
-                },
-                {
-                    ConfigurationManager::PartFile,
-                    new StringVerifier,
-                    "The file that will be created on startup containing the factory "
-                    "documentation. Any previous file in this location will be silently "
-                    "overritten."
-                }
-            }),
-            "This defines the location and type of the factory documentation file, which "
-            "shows the different types of objects that can be created in the current "
-            "application configuration.",
+            new StringVerifier,
+            "The file that will be created on startup containing the factory "
+            "documentation which shows the different types of objects that can be "
+            "created in the current application configuration. Any previous file in this "
+            "location will be silently overritten.",
             Optional::Yes
         },
         {

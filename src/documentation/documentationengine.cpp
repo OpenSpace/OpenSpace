@@ -61,6 +61,19 @@ DocumentationEngine::DuplicateDocumentationException::DuplicateDocumentationExce
     , documentation(std::move(documentation))
 {}
 
+DocumentationEngine::DocumentationEngine()
+    : Documented(
+        "Documentation",
+        "documentation",
+        {
+            { "mainTemplate", MainTemplateFilename },
+            { "documentationTemplate", DocumentationTemplateFilename }
+        },
+        JsFilename
+    )
+{}
+
+
 DocumentationEngine& DocumentationEngine::ref() {
     if (_instance == nullptr) {
         _instance = new DocumentationEngine;
@@ -256,125 +269,151 @@ std::string generateHtmlDocumentation(const Documentation& d) {
     return html.str();
 }
 
-void DocumentationEngine::writeDocumentation(const std::string& f, const std::string& t) {
-    if (t == "text") {
-        std::ofstream file;
-        file.exceptions(~std::ofstream::goodbit);
-        file.open(f);
+std::string DocumentationEngine::generateJson() const {
+    std::stringstream json;
+    json << "[";
 
-        for (const Documentation& d : _documentations) {
-            int indent = 0;
-            file << documentation::generateTextDocumentation(d, indent) << "\n\n";
+    for (const Documentation& d : _documentations) {
+        json << generateJsonDocumentation(d);
+        if (&d != &_documentations.back()) {
+            json << ", ";
         }
     }
-    else if (t == "html") {
-        std::ifstream handlebarsInput(absPath(HandlebarsFilename));
-        std::ifstream jsInput(absPath(JsFilename));
 
-        std::string jsContent;
-        std::back_insert_iterator<std::string> jsInserter(jsContent);
+    json << "]";
 
-        std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
-        std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
-
-        std::ifstream bootstrapInput(absPath(BootstrapFilename));
-        std::ifstream cssInput(absPath(CssFilename));
-
-        std::string cssContent;
-        std::back_insert_iterator<std::string> cssInserter(cssContent);
-
-        std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
-        std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
-
-        std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
-        std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
-            std::istreambuf_iterator<char>{}};
-
-        std::ifstream documentationTemplateInput(absPath(DocumentationTemplateFilename));
-        std::string documentationTemplateContent{ std::istreambuf_iterator<char>{documentationTemplateInput},
-            std::istreambuf_iterator<char>{} };
-
-        std::ofstream file;
-        file.exceptions(~std::ofstream::goodbit);
-        file.open(f);
-
-        std::stringstream json;
-        json << "[";
-
-        for (const Documentation& d : _documentations) {
-            json << generateJsonDocumentation(d);
-            if (&d != &_documentations.back()) {
-                json << ", ";
-            }
+    std::string jsonString = "";
+    for (const char& c : json.str()) {
+        if (c == '\'') {
+            jsonString += "\\'";
         }
-
-        json << "]";
-
-        std::string jsonString = "";
-        for (const char& c : json.str()) {
-            if (c == '\'') {
-                jsonString += "\\'";
-            } else {
-                jsonString += c;
-            }
+        else {
+            jsonString += c;
         }
-
-        std::stringstream html;
-        html << "<!DOCTYPE html>\n"
-            << "<html>\n"
-            << "\t<head>\n"
-            << "\t\t<script id=\"mainTemplate\" type=\"text/x-handlebars-template\">\n"
-            << mainTemplateContent << "\n"
-            << "\t\t</script>\n"
-            << "\t\t<script id=\"documentationTemplate\" type=\"text/x-handlebars-template\">\n"
-            << documentationTemplateContent << "\n"
-            << "\t\t</script>\n"
-            << "\t<script>\n"
-            << "var documentation = JSON.parse('" << jsonString << "');\n"
-            << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
-            << jsContent << "\n"
-            << "\t</script>\n"
-            << "\t<style type=\"text/css\">\n"
-            << cssContent << "\n"
-            << "\t</style>\n"
-            << "\t\t<title>Documentation</title>\n"
-            << "\t</head>\n"
-            << "\t<body>\n"
-            << "\t<body>\n"
-            << "</html>\n";
-
-        file << html.str();
-
-/*
-        Use this for generating documentation in raw html:
-
-        html << "<table>\n"
-            << "\t<caption>Documentation</caption>\n\n"
-            << "\t<thead>\n"
-            << "\t\t<tr>\n"
-            << "\t\t\t<th rowspan=2>Name</th>\n"
-            << "\t\t</tr>\n"
-            << "\t\t<tr>\n"
-            << "\t\t\t<th>Key</th>\n"
-            << "\t\t\t<th>Optional</th>\n"
-            << "\t\t\t<th>Type</th>\n"
-            << "\t\t\t<th>Restrictions</th>\n"
-            << "\t\t\t<th>Documentation</th>\n"
-            << "\t\t</tr>\n"
-            << "\t</thead>\n"
-            << "\t<tbody>\n";
-
-        for (const Documentation& d : _documentations) {
-            html << generateHtmlDocumentation(d);
-
-            html << "\t<tr><td style=\"line-height: 50px;\" colspan=6></br></td></tr>\n";
-        }
-
-        html << "\t</tbody>\n"
-            << "</table>\n";
-*/
     }
+
+    return jsonString;
 }
+
+//void DocumentationEngine::writeDocumentation(const std::string& f, const std::string& t) {
+//    if (t == "text") {
+//        std::ofstream file;
+//        file.exceptions(~std::ofstream::goodbit);
+//        file.open(f);
+//
+//        for (const Documentation& d : _documentations) {
+//            int indent = 0;
+//            file << documentation::generateTextDocumentation(d, indent) << "\n\n";
+//        }
+//    }
+//    else if (t == "html") {
+//        std::ifstream handlebarsInput(absPath(HandlebarsFilename));
+//        std::ifstream jsInput(absPath(JsFilename));
+//
+//        std::string jsContent;
+//        std::back_insert_iterator<std::string> jsInserter(jsContent);
+//
+//        std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
+//        std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
+//
+//        std::ifstream bootstrapInput(absPath(BootstrapFilename));
+//        std::ifstream cssInput(absPath(CssFilename));
+//
+//        std::string cssContent;
+//        std::back_insert_iterator<std::string> cssInserter(cssContent);
+//
+//        std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
+//        std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
+//
+//        std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
+//        std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
+//            std::istreambuf_iterator<char>{}};
+//
+//        std::ifstream documentationTemplateInput(absPath(DocumentationTemplateFilename));
+//        std::string documentationTemplateContent{ std::istreambuf_iterator<char>{documentationTemplateInput},
+//            std::istreambuf_iterator<char>{} };
+//
+//        std::ofstream file;
+//        file.exceptions(~std::ofstream::goodbit);
+//        file.open(f);
+//
+//        std::stringstream json;
+//        json << "[";
+//
+//        for (const Documentation& d : _documentations) {
+//            json << generateJsonDocumentation(d);
+//            if (&d != &_documentations.back()) {
+//                json << ", ";
+//            }
+//        }
+//
+//        json << "]";
+//
+//        std::string jsonString = "";
+//        for (const char& c : json.str()) {
+//            if (c == '\'') {
+//                jsonString += "\\'";
+//            } else {
+//                jsonString += c;
+//            }
+//        }
+//
+//        std::stringstream html;
+//        html << "<!DOCTYPE html>\n"
+//            << "<html>\n"
+//            << "\t<head>\n"
+//            << "\t\t<script id=\"mainTemplate\" type=\"text/x-handlebars-template\">\n"
+//            << mainTemplateContent << "\n"
+//            << "\t\t</script>\n"
+//            << "\t\t<script id=\"documentationTemplate\" type=\"text/x-handlebars-template\">\n"
+//            << documentationTemplateContent << "\n"
+//            << "\t\t</script>\n"
+//            << "\t<script>\n"
+//            << "var documentation = JSON.parse('" << jsonString << "');\n"
+//            << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
+//            << jsContent << "\n"
+//            << "\t</script>\n"
+//            << "\t<style type=\"text/css\">\n"
+//            << cssContent << "\n"
+//            << "\t</style>\n"
+//            << "\t\t<title>Documentation</title>\n"
+//            << "\t</head>\n"
+//            << "\t<body>\n"
+//            << "\t<body>\n"
+//            << "</html>\n";
+//
+//        file << html.str();
+//
+///*
+//        Use this for generating documentation in raw html:
+//
+//        html << "<table>\n"
+//            << "\t<caption>Documentation</caption>\n\n"
+//            << "\t<thead>\n"
+//            << "\t\t<tr>\n"
+//            << "\t\t\t<th rowspan=2>Name</th>\n"
+//            << "\t\t</tr>\n"
+//            << "\t\t<tr>\n"
+//            << "\t\t\t<th>Key</th>\n"
+//            << "\t\t\t<th>Optional</th>\n"
+//            << "\t\t\t<th>Type</th>\n"
+//            << "\t\t\t<th>Restrictions</th>\n"
+//            << "\t\t\t<th>Documentation</th>\n"
+//            << "\t\t</tr>\n"
+//            << "\t</thead>\n"
+//            << "\t<tbody>\n";
+//
+//        for (const Documentation& d : _documentations) {
+//            html << generateHtmlDocumentation(d);
+//
+//            html << "\t<tr><td style=\"line-height: 50px;\" colspan=6></br></td></tr>\n";
+//        }
+//
+//        html << "\t</tbody>\n"
+//            << "</table>\n";
+//*/
+//    }
+//}
 
 void DocumentationEngine::addDocumentation(Documentation doc) {
     for (const DocumentationEntry& e : doc.entries) {
