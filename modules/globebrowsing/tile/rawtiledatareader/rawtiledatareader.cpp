@@ -133,6 +133,10 @@ const TileTextureInitData& RawTileDataReader::tileTextureInitData() const {
     return _initData;
 }
 
+const PixelRegion::PixelRange RawTileDataReader::fullPixelSize() const {
+    return glm::uvec2(geodeticToPixel(Geodetic2(90, 180)));
+}
+
 std::array<double, 6> RawTileDataReader::getGeoTransform() const {
     std::array<double, 6> padfTransform;
     

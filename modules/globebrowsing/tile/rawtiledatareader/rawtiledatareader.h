@@ -62,6 +62,7 @@ public:
         char* dataDestination, char* pboMappedDataDestination);
     TileDepthTransform getDepthTransform() const;
     const TileTextureInitData& tileTextureInitData() const;
+    const PixelRegion::PixelRange fullPixelSize() const;
     
     /**
      * \returns the maximum chunk level available in the dataset. Should be a value

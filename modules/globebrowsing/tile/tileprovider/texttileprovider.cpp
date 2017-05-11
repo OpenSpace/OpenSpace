@@ -45,6 +45,7 @@ namespace tileprovider {
 TextTileProvider::TextTileProvider(const glm::uvec2& textureSize, size_t fontSize)
     : _textureSize(textureSize)
     , _fontSize(fontSize)
+	, _tileCache(1000)
 {
     _font = OsEng.fontManager().font("Mono", _fontSize);
         
@@ -59,14 +60,13 @@ TextTileProvider::~TextTileProvider() {
 }
 
 Tile TextTileProvider::getTile(const TileIndex& tileIndex) {
-    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
+    TileIndex::TileHashKey key = tileIndex.hashKey();
 
-    if (!cache::MemoryAwareTileCache::ref().exist(key)) {
-        //cache::MemoryAwareTileCache::ref().put(
-        //    key, createChunkIndexTile(tileIndex));
+    if (!_tileCache.exist(key)) {
+		_tileCache.put(key, createChunkIndexTile(tileIndex));
     }
   
-    return cache::MemoryAwareTileCache::ref().get(key);
+    return _tileCache.get(key);
 }
 
 Tile TextTileProvider::getDefaultTile() {
@@ -87,7 +87,7 @@ TileDepthTransform TextTileProvider::depthTransform() {
 void TextTileProvider::update() {}
 
 void TextTileProvider::reset() {
-    cache::MemoryAwareTileCache::ref().clear();
+	_tileCache.clear();
 }
 
 Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {

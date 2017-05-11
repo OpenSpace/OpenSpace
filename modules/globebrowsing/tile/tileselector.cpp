@@ -90,8 +90,19 @@ getTilesAndSettingsSortedByHighestResolution(const LayerGroup& layerGroup,
             return lhs.first.uvTransform.uvScale.x > rhs.first.uvTransform.uvScale.x;
         }
     );
-    
     return tilesAndSettings;
+}
+
+std::vector<std::pair<ChunkTile, const LayerRenderSettings*> >
+getTilesAndSettingsUnSorted(const LayerGroup& layerGroup,
+	const TileIndex& tileIndex)
+{
+	std::vector<std::pair<ChunkTile, const LayerRenderSettings*> > tilesAndSettings;
+	for (const auto& layer : layerGroup.activeLayers()) {
+		tilesAndSettings.push_back({ layer->tileProvider()->getChunkTile(tileIndex), &layer->renderSettings() });
+	}
+	std::reverse(tilesAndSettings.begin(), tilesAndSettings.end());
+	return tilesAndSettings;
 }
 
 void ascendToParent(TileIndex& tileIndex, TileUvTransform& uv) {

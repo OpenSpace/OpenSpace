@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TEXT_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/cache/lrucache.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -94,6 +95,8 @@ protected:
 private:
     Tile createChunkIndexTile(const TileIndex& tileIndex);
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+	
+	cache::LRUCache<TileIndex::TileHashKey, Tile> _tileCache;
 
     GLuint _fbo;
 };

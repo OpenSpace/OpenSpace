@@ -97,7 +97,7 @@ int GdalRawTileDataReader::maxChunkLevel() {
 float GdalRawTileDataReader::noDataValueAsFloat() const {
     float noDataValue;
     if (_dataset && _dataset->GetRasterBand(1)) {
-        noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();;
+        noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
     }
     else {
         noDataValue = std::numeric_limits<float>::min();

@@ -38,18 +38,8 @@ return {
             Layers = {
                 ColorLayers = {
                     {
-                        Name = "Viking combo",
-                        Type = "ByLevel",
-                        LevelTileProviders = {
-                            {
-                                MaxLevel = 3, 
-                                TileProvider = { FilePath = "textures/mars.jpg", }, 
-                            },
-                            {
-                                MaxLevel = 22, 
-                                TileProvider = { FilePath = "map_service_configs/MARS_Viking_MDIM21.xml" },
-                            },
-                        },
+                        Name = "Viking",
+                        FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
                         Enabled = true,
                     },
                     -- {
@@ -157,7 +147,7 @@ return {
                         Name = "West Candor Chasma",
                         FilePath = "map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt",
                         --Enabled = true,
-                        MinimumPixelSize = 90,
+                        TilePixelSize = 90,
                         DoPreProcessing = true,
                     },
                     {
