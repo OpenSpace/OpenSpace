@@ -90,6 +90,10 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _transferFunctionPath("transferFunctionPath", "Transfer Function Path"),
       _transferFunctionMinVal("transferFunctionLimit1", "TF minimum", "0"),
       _transferFunctionMaxVal("transferFunctionLimit2", "TF maximum", "1"),
+      _domainLimR("domainLimitsRadial", "Domain Limits Radial"),
+      _domainLimX("domainLimitsX", "Domain Limits X"),
+      _domainLimY("domainLimitsY", "Domain Limits Y"),
+      _domainLimZ("domainLimitsZ", "Domain Limits Z"),
       _fieldlineColor("fieldlineColor", "Fieldline Color", glm::vec4(0.7f,0.f,0.7f,0.75f),
                                                            glm::vec4(0.f),
                                                            glm::vec4(1.f)),
@@ -281,17 +285,51 @@ bool RenderableFieldlinesSequence::initialize() {
         // to prevent vector from going out of bounds later.
         _startTimes.push_back(_seqEndTime); // =  lastStateStart + avgTimeOffset;
 
+        float rmin, rmax, xmin, xmax, ymin, ymax, zmin, zmax;
+
         std::string model = _states[0]._modelName;
         if (model == "enlil") {
-            _scalingFactor = R_S_TO_METER;
+            _scalingFactor          = A_U_TO_METER;
+            _scalingFactorLineWidth = R_S_TO_METER;
+            _scalingFactorUnit = "AU";
+            // TODO: change these hardcoded limits to something that makes sense
+            // or allow user to specify in LUA
+            rmin =  0.09f;
+            xmin = ymin = zmin = -40.f;
+            xmax = ymax = zmax = 40.f;
+            rmax = std::max(xmax, std::max(ymax,zmax));
         } else if (model == "batsrus") {
-            _scalingFactor = R_E_TO_METER;
+            _scalingFactor          = R_E_TO_METER;
+            _scalingFactorLineWidth = R_E_TO_METER;
+            _scalingFactorUnit = "RE";
+            // TODO: change these hardcoded limits to something that makes sense
+            // or allow user to specify in LUA
+            rmin =  1.0f;
+            xmin = -50.f;
+            ymin = zmin = -150.f;
+            xmax = 250.f;
+            ymax = zmax = 150.f;
+            rmax = std::max(xmax, std::max(ymax,zmax));
         } else {
             LERROR("OpenSpace's RenderableFieldlinesSequence class can only support the "
                 << " batsrus and enlil models for the time being! CDF contains the "
                 << model << " model.");
             return false;
         }
+
+        _domainLimR.setMinValue(glm::vec2(rmin));
+        _domainLimR.setMaxValue(glm::vec2(rmax));
+        _domainLimX.setMinValue(glm::vec2(xmin));
+        _domainLimX.setMaxValue(glm::vec2(xmax));
+        _domainLimY.setMinValue(glm::vec2(ymin));
+        _domainLimY.setMaxValue(glm::vec2(ymax));
+        _domainLimZ.setMinValue(glm::vec2(zmin));
+        _domainLimZ.setMaxValue(glm::vec2(zmax));
+
+        _domainLimR.setValue(glm::vec2(rmin,rmax));
+        _domainLimX.setValue(glm::vec2(xmin,xmax));
+        _domainLimY.setValue(glm::vec2(ymin,ymax));
+        _domainLimZ.setValue(glm::vec2(zmin,zmax));
 
         numQuanityColorVariables = _states[0]._extraVariables.size();
         if (numQuanityColorVariables > 0) {
@@ -375,6 +413,10 @@ bool RenderableFieldlinesSequence::initialize() {
     // TODO: IT MAY BE BENEFICIAL IF SOME OF THESE PROPERTIES WERE DEPENDENT ON THE
     // NUMBER OF MAX TRACING STEPS THAT THE USER DEFINED IN LUA!
     // The fieldlineParticleSize and modulusDivider espacially
+    addProperty(_domainLimR);
+    addProperty(_domainLimX);
+    addProperty(_domainLimY);
+    addProperty(_domainLimZ);
     addProperty(_fieldlineParticleSize);
     addProperty(_timeMultiplier);
     addProperty(_modulusDivider);
@@ -433,14 +475,14 @@ bool RenderableFieldlinesSequence::initialize() {
 
         _transferFunctionMinVal.onChange([this] {
             LDEBUG("CHANGED MIN VALUE");
-            // CHECK IF VALID NUMBER!
+            // TODO CHECK IF VALID NUMBER!
             // _updateTransferFunctionMin = true;
             _transferFunctionLimits[_colorizingQuantity].x = std::stof(_transferFunctionMinVal);
         });
 
         _transferFunctionMaxVal.onChange([this] {
             LDEBUG("CHANGED MAX VALUE");
-            // CHECK IF VALID NUMBER!
+            // TODO CHECK IF VALID NUMBER!
             // _updateTransferFunctionMin = true;
             _transferFunctionLimits[_colorizingQuantity].y = std::stof(_transferFunctionMaxVal);
         });
@@ -509,8 +551,12 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
         _activeProgramPtr->setUniform("colorMethod", _colorMethod);
         _activeProgramPtr->setUniform("fieldlineColor", _fieldlineColor);
         _activeProgramPtr->setUniform("fieldlineParticleColor", _fieldlineParticleColor);
+        _activeProgramPtr->setUniform("domainLimR", _domainLimR.value() * _scalingFactor);
+        _activeProgramPtr->setUniform("domainLimX", _domainLimX.value() * _scalingFactor);
+        _activeProgramPtr->setUniform("domainLimY", _domainLimY.value() * _scalingFactor);
+        _activeProgramPtr->setUniform("domainLimZ", _domainLimZ.value() * _scalingFactor);
         if (_show3DLines) {
-            _activeProgramPtr->setUniform("width", _lineWidth * _scalingFactor);
+            _activeProgramPtr->setUniform("width", _lineWidth * _scalingFactorLineWidth);
             // _activeProgramPtr->setUniform("camDirection",
             //                             glm::vec3(data.camera.viewDirectionWorldSpace()));
             // _activeProgramPtr->setUniform("modelTransform", modelTransform);
@@ -532,7 +578,6 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
             _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
             _textureUnit->activate();
             _transferFunction->bind(); // Calls update internally
-            LDEBUG(_transferFunctionLimits[_colorizingQuantity].x << ", " << _transferFunctionLimits[_colorizingQuantity].y);
             _activeProgramPtr->setUniform("transferFunctionLimits", _transferFunctionLimits[_colorizingQuantity]);
             _activeProgramPtr->setUniform("colorMap", _textureUnit->unitNumber());
         }

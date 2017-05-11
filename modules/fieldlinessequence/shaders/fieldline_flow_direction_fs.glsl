@@ -24,25 +24,19 @@
 
 in vec4 vs_color;
 in float vs_depth;
-
-//uniform bool classification;
-//uniform vec4 fieldLineColor;
+in flat float fragment_discard;
 
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
 
 Fragment getFragment() {
-    if (vs_color.a == 0) {
+    if (vs_color.a == 0 || fragment_discard == 0.0) {
         discard;
     }
     vec4 fragColor;
-  //  if (classification) {
-        fragColor = vs_color;
-    //} else {
-    //    fragColor = vec4(fieldLineColor.rgb * fieldLineColor.a , 1.0);
-    //}
 
-    //float depth = pscDepth(vs_position);
+    fragColor = vs_color;
+
 
     Fragment frag;
     frag.depth = vs_depth;

@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
 
@@ -101,6 +102,11 @@ private:
     properties::StringProperty _transferFunctionMinVal; // Value corresponding to 0 in tf
     properties::StringProperty _transferFunctionMaxVal; // Value corresponding to 1 in tf
 
+    properties::Vec2Property _domainLimR;        // Radial domain in which to render
+    properties::Vec2Property _domainLimX;        // Cartesian domain limits in which to
+    properties::Vec2Property _domainLimY;        // render. The x component corresponds
+    properties::Vec2Property _domainLimZ;        // to min value and y component to max
+
     properties::Vec4Property _fieldlineColor;         // Uniform fieldline color
     properties::Vec4Property _fieldlineParticleColor; // Simulated line particles' color
     properties::Vec4Property _uniformSeedPointColor;
@@ -140,6 +146,9 @@ private:
 
     GLfloat _maxLineWidthOpenGl; // hardware related variable?
     float _scalingFactor;
+    float _scalingFactorLineWidth;
+
+    std::string _scalingFactorUnit;
 
     bool isWithinSequenceInterval();
     void updateActiveStateIndex();
