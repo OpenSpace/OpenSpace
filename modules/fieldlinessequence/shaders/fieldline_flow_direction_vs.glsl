@@ -32,6 +32,10 @@ uniform int modulusDivider;
 uniform int colorMethod;
 
 uniform vec2 transferFunctionLimits;
+uniform vec2 domainLimR;
+uniform vec2 domainLimX;
+uniform vec2 domainLimY;
+uniform vec2 domainLimZ;
 
 uniform sampler1D colorMap;
 
@@ -43,14 +47,26 @@ layout(location = 3) in float unitIntensity;
 
 out vec4 vs_color;
 out float vs_depth;
+out flat float fragment_discard;
 
 const int UNIFORM_COLOR = 0;
 const int UNIT_DEPENDENT_COLOR = 1;
 const int CLASSIFIED_COLOR = 2;
 
+
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
+
+    float radius = length(in_position);
+    fragment_discard = 1.0;
+
+    if ((in_position.x < domainLimX.x) || (in_position.x > domainLimX.y) ||
+        (in_position.y < domainLimY.x) || (in_position.y > domainLimY.y) ||
+        (in_position.z < domainLimZ.x) || (in_position.z > domainLimZ.y) ||
+        (radius        < domainLimR.x) || (radius        > domainLimR.y)) {
+        fragment_discard = 0.0;
+    }
 
     // Color every n-th vertex differently to show fieldline flow direction
     int modulus = (gl_VertexID + time) % modulusDivider;
