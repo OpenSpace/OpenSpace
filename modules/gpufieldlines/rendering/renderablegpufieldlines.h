@@ -33,6 +33,8 @@
 
 #include <openspace/rendering/renderable.h>
 
+// #include <ghoul/filesystem/file.h>
+
 #include <modules/gpufieldlines/util/gpufieldlinesstate.h>
 
 #include <modules/volume/rawvolume.h>
@@ -78,7 +80,7 @@ private:
 
     properties::OptionProperty _integrationMethod;
 
-    // properties::StringProperty _seedPointSourceFile;
+    properties::StringProperty _seedPointSourcePath;
 
     properties::Vec2Property _domainX;
     properties::Vec2Property _domainY;
@@ -102,7 +104,7 @@ private:
     bool _needsUpdate        = false;
     bool _isSpherical        = false;
 
-    bool _seedPointsAreDirty;
+    bool _seedPointsAreDirty = false;
 
     std::unique_ptr<ghoul::filesystem::File> _seedPointFile;
 
@@ -138,6 +140,10 @@ private:
     std::string _modelName;
 
     std::vector<double> _startTimes;
+
+    bool loadSeedPoints(const std::string& path);
+
+    void updateSeedPointFile(const ghoul::filesystem::File& file);
 
     // TODO MOVE ELSEWHERE
     // TODO ADD INPUT& vector for gridVertices and gridStart (make const)
