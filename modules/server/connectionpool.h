@@ -25,42 +25,52 @@
 #ifndef __OPENSPACE_MODULE_SERVER___CONNECTIONPOOL___H__
 #define __OPENSPACE_MODULE_SERVER___CONNECTIONPOOL___H__
 
-#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/io/socket/socketserver.h>
+
 
 #include <memory>
 #include <thread>
 #include <mutex>
 #include <map>
 #include <functional>
+#include <vector>
+#include <atomic>
 
 namespace openspace {
 
 
 class ConnectionPool {
 public:
-    ConnectionPool();
-    void listen(
+    ConnectionPool(std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket);
+    void addServer(std::shared_ptr<ghoul::io::SocketServer> server);
+    void removeServer(std::shared_ptr<ghoul::io::SocketServer> server);
+    void clearServers();
+
+    /*void listen(
         std::string address,
         int port,
-        std::function<void(std::shared_ptr<ghoul::io::TcpSocket> socket)> handleSocket);
+        std::function<void(std::shared_ptr<ghoul::io::TcpSocket> socket)> handleSocket);*/
     void close();
 
 private:
     struct Connection {
-        std::shared_ptr<ghoul::io::TcpSocket> socket;
+        std::shared_ptr<ghoul::io::Socket> socket;
         std::unique_ptr<std::thread> thread;
     };
 
-    void handleConnections();
-    void closeServer();
+    struct Server {
+        std::shared_ptr<ghoul::io::SocketServer> socketServer;
+        std::thread thread;
+    };
+
+    void handleConnections(std::shared_ptr<ghoul::io::SocketServer> socketServer);
     void disconnectAllConnections();
     std::mutex _connectionMutex;
     void removeDisconnectedSockets();
-    ghoul::io::TcpSocketServer _socketServer;
+    std::vector<Server> _socketServers;
 
-    std::atomic<bool> _listening;
-    std::function<void(std::shared_ptr<ghoul::io::TcpSocket>)> _handleSocket;
-    std::unique_ptr<std::thread> _serverThread;
+    std::function<void(std::shared_ptr<ghoul::io::Socket>)> _handleSocket;
+        
     std::map<int, Connection> _connections;
 };
 

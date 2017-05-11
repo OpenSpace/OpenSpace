@@ -25,6 +25,7 @@
 
 #include <modules/server/servermodule.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/io/socket/websocketserver.h>
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -38,24 +39,37 @@ namespace openspace {
 
 ServerModule::ServerModule()
     : OpenSpaceModule("Server")
+    , _connectionPool([this](std::shared_ptr<ghoul::io::Socket> socket) {
+        handleSocket(socket);
+    })
 {}
 
+ServerModule::~ServerModule() {
+    _connectionPool.clearServers();
+}
+
 void ServerModule::internalInitialize() {
-    _connectionPool.listen(
+    /*_connectionPool.listen(
         "localhost",
         80800,
         [this](std::shared_ptr<ghoul::io::TcpSocket> socket) {
             handleSocket(socket);
         }
-    );
+    );*/
    
+    std::shared_ptr<ghoul::io::SocketServer> tcpServer = std::static_pointer_cast<ghoul::io::SocketServer>(std::make_shared<ghoul::io::TcpSocketServer>());
+    std::shared_ptr<ghoul::io::SocketServer> wsServer = std::static_pointer_cast<ghoul::io::SocketServer>(std::make_shared<ghoul::io::WebSocketServer>());
+
+    _connectionPool.addServer(wsServer);
+    _connectionPool.addServer(tcpServer);
+
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Deinitialize,
         [this]() { _connectionPool.close(); }
     );
 }
 
-void ServerModule::handleSocket(std::shared_ptr<ghoul::io::TcpSocket> socket) {
+void ServerModule::handleSocket(std::shared_ptr<ghoul::io::Socket> socket) {
     bool disconnect = false;
     std::vector<char> messageBuffer;
     std::map<uint32_t, std::unique_ptr<ChannelHandler>> channelHandlers;

@@ -52,15 +52,14 @@ enum class ChannelAction : uint8_t {
 class ServerModule : public OpenSpaceModule {
 public:
     ServerModule();
-    virtual ~ServerModule() = default;
+    virtual ~ServerModule();
 protected:
     void internalInitialize() override;
 private:
     ConnectionPool _connectionPool;
     //ghoul::TemplateFactory<ChannelHandler> factory;
 
-    void handleSocket(std::shared_ptr<ghoul::io::TcpSocket> socket);
-   
+    void handleSocket(std::shared_ptr<ghoul::io::Socket> socket);
 };
 
 } // namespace openspace
