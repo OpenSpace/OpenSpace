@@ -6,11 +6,14 @@ function preInitialization()
     critical objects.
     ]]--
 
-    --openspace.time.setTime(openspace.time.currentWallTime())
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    openspace.time.setTime(openspace.time.currentWallTime())
+    -- For unit test
+    openspace.time.setTime("2016 SEP 8 23:00:00.500")
+    openspace.time.togglePause()
+
+    --openspace.time.setTime(openspace.time.currentWallTime())
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 
 
