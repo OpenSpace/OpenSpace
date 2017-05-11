@@ -164,7 +164,7 @@ bool TouchInteraction::gui(const std::vector<TuioCursor>& list) {
 // Sets _vel to update _camera according to direct-manipulation (L2 error)
 void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 	// Returns the screen point s(xi,par) dependant the transform M(par) and object point xi
-	auto distToMinimize = [](double* par, int x, void* fdata) {
+	auto distToMinimize = [](double* par, int x, void* fdata, LMstat* lmstat) {
 		FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
 
 		// Apply transform to camera and find the new screen point of the updated camera state
@@ -228,13 +228,13 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 
 		// we now have a new position and orientation of camera, project surfacePoint to the new screen to get distance to minimize
 		glm::dvec2 newScreenPoint = ptr->castToNDC(ptr->selectedPoints.at(x), cam, ptr->node, ptr->aspectRatio);
-
+		lmstat->pos.push_back(newScreenPoint);
 		return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
 	};
 	// Gradient of distToMinimize w.r.t par (using forward difference)
-	auto gradient = [](double* g, double* par, int x, void* fdata) {
+	auto gradient = [](double* g, double* par, int x, void* fdata, LMstat* lmstat) {
 		FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-		double f0 = ptr->distToMinimize(par, x, fdata);
+		double f0 = ptr->distToMinimize(par, x, fdata, lmstat);
 		double f1, der, minStep = 1e-11;
 		glm::dvec3 camPos = ptr->camera->positionVec3();
 		glm::dvec3 selectedPoint = (ptr->node->rotationMatrix() * ptr->selectedPoints.at(x)) + ptr->node->worldPosition();
@@ -247,7 +247,7 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 		for (int i = 0; i < ptr->nDOF; ++i) {
 			h = (i == 2) ? 1e-4 : h; // the 'zoom'-DOF is so big a smaller step creates NAN
 			dPar[i] += h;
-			f1 = ptr->distToMinimize(dPar, x, fdata);
+			f1 = ptr->distToMinimize(dPar, x, fdata, lmstat);
 			dPar[i] -= h;
 			der = (f1 - f0) / h;
 			
@@ -283,7 +283,7 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 		screenPoints.push_back(glm::dvec2(xCo, yCo));
 	}
 	//glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-	FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, node, 1.88 };
+	FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, node, 1.88, _lmstat };
 	void* dataPtr = reinterpret_cast<void*>(&fData);
 
 	_lmSuccess = levmarq(nDOF, par, nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
@@ -625,9 +625,11 @@ void TouchInteraction::unitTest() {
 
 		// set _selected pos and new pos (on screen)
 		std::vector<TuioCursor> lastFrame;
-		lastFrame.push_back(TuioCursor(0, 1, 0.2, 0.5)); // session id, cursor id, x, y
+		lastFrame.push_back(TuioCursor(0, 10, 0.45, 0.4)); // session id, cursor id, x, y
+		lastFrame.push_back(TuioCursor(1, 11, 0.55, 0.6)); 
 		std::vector<TuioCursor> currFrame;
-		currFrame.push_back(TuioCursor(0, 1, 0.8, 0.5));
+		currFrame.push_back(TuioCursor(0, 10, 0.2, 0.6)); // (-0.6,0)
+		currFrame.push_back(TuioCursor(1, 11, 0.8, 0.4)); // (0.6, 0)
 
 		// call update
 		trace(lastFrame);

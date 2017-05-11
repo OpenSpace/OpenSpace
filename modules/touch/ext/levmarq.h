@@ -25,10 +25,13 @@ OTHER DEALINGS IN THE SOFTWARE.
 */
 #include <iostream>
 #include <sstream>
+#include <vector>
+#include <glm/glm.hpp>
 
 typedef struct {
 	bool verbose;
 	std::string data;
+	std::vector<glm::dvec2> pos;
 	int max_it;
 	double init_lambda;
 	double up_factor;
@@ -42,12 +45,12 @@ typedef struct {
 void levmarq_init(LMstat *lmstat);
 
 bool levmarq(int npar, double *par, int ny, double *dysq,
-	double (*func)(double *, int, void *),
-	void (*grad)(double *, double *, int, void *),
+	double (*func)(double *, int, void *, LMstat*),
+	void (*grad)(double *, double *, int, void *, LMstat*),
 	void *fdata, LMstat *lmstat);
 
 double error_func(double *par, int ny, double *dysq,
-	double (*func)(double *, int, void *), void *fdata);
+	double (*func)(double *, int, void *, LMstat*), void *fdata, LMstat* lmstat);
 
 void solve_axb_cholesky(int n, double** l, double* x, double* b);
 

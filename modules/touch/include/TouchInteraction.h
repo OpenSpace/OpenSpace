@@ -71,10 +71,11 @@ struct FunctionData {
 	std::vector<glm::dvec2> screenPoints;
 	int nDOF;
 	glm::dvec2(*castToNDC)(glm::dvec3, Camera&, SceneGraphNode*, double);
-	double(*distToMinimize)(double* par, int x, void* fdata);
+	double(*distToMinimize)(double* par, int x, void* fdata, LMstat* lmstat);
 	Camera* camera;
 	SceneGraphNode* node;
 	double aspectRatio;
+	LMstat stats;
 };
 
 #define ROT 0

@@ -58,8 +58,8 @@ Before calling levmarq, several of the parameters in lmstat must be set.
 For default values, call levmarq_init(lmstat).
 */
 bool levmarq(int npar, double *par, int ny, double *dysq,
-	    double (*func)(double *, int, void *),
-	    void (*grad)(double *, double *, int, void *),
+	    double (*func)(double *, int, void *, LMstat*),
+	    void (*grad)(double *, double *, int, void *, LMstat*),
 	    void *fdata, LMstat *lmstat) {
 
 	int x, i, j, it, nit, ill;
@@ -89,11 +89,36 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 	derr = newerr = 0; // to avoid compiler warnings
 
 	if (verbose) {
-		data = "it,err,derr,q,g,d\n";
+		std::ostringstream qs, gs, ds, ps, oss;
+		for (int i = 0; i < npar; ++i) {
+			qs << "q" << i;
+			gs << "g" << i;
+			ds << "q" << i;
+			if (i + 1 < npar) {
+				qs << ",";
+				gs << ",";
+				ds << ",";
+			}
+		}
+		int k = 1;
+		for (int i = 0; i < ny; ++i) {
+			for (int j = 0; j < ny; ++j) {
+				ps << "pos" << i << j;
+				if (j + 1 < ny) {
+					ps << ",";
+				}
+			}
+			if (i + 1 < ny) {
+				ps << ",";
+			}
+		}
+		oss << "it,err,derr," << qs.str() << "," << gs.str() << "," << ds.str() << "," << ps.str() << "\n";
+		data = oss.str();
 	}
 
 	// calculate the initial error ("chi-squared")
-	err = error_func(par, ny, dysq, func, fdata);
+	lmstat->pos.clear();
+	err = error_func(par, ny, dysq, func, fdata, lmstat);
 
 	// main iteration
 	for (it = 0; it < nit; it++) {
@@ -106,9 +131,9 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 		for (x = 0; x < ny; x++) {
 			if (dysq) 
 				weight = 1/dysq[x]; // for weighted least-squares
-			grad(g, par, x, fdata);
+			grad(g, par, x, fdata, lmstat);
 			for (i = 0; i < npar; i++) {
-				d[i] += (0.0 - func(par, x, fdata)) * g[i] * weight; //(y[x] - func(par, x, fdata)) * g[i] * weight;
+				d[i] += (0.0 - func(par, x, fdata, lmstat)) * g[i] * weight; //(y[x] - func(par, x, fdata)) * g[i] * weight;
 				for (j = 0; j <= i; j++)
 					h[i][j] += g[i] * g[j] * weight;
 			}
@@ -124,7 +149,8 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 				solve_axb_cholesky(npar, ch, delta, d);
 				for (i = 0; i < npar; i++)
 					newpar[i] = par[i] + delta[i];
-				newerr = error_func(newpar, ny, dysq, func, fdata);
+				lmstat->pos.clear();
+				newerr = error_func(newpar, ny, dysq, func, fdata, lmstat);
 				derr = newerr - err;
 				ill = (derr > 0);
 			} 
@@ -135,18 +161,24 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 				}
 				printf("\n");*/
 
-				std::ostringstream gString, qString, dString, os;
+				std::ostringstream gString, qString, dString, pString, os;
 				for (int i = 0; i < npar; ++i) {
 					gString << g[i];
 					qString << par[i];
 					dString << d[i];
 					if (i + 1 < npar) {
-						gString << " ";
-						qString << " ";
-						dString << " ";
+						gString << ",";
+						qString << ",";
+						dString << ",";
 					}
 				}
-				os << it << "," << err << "," << derr << "," << qString.str() << "," << gString.str() << "," << dString.str() << "\n";
+				for (int i = 0; i < ny; ++i) {
+					pString << lmstat->pos.at(i).x << "," << lmstat->pos.at(i).y;
+					if (i + 1 < ny) {
+						pString << ",";
+					}
+				}
+				os << it << "," << err << "," << derr << "," << qString.str() << "," << gString.str() << "," << dString.str() << "," << pString.str() << "\n";
 				data.append(os.str());
 			}
 			if (ill) {
@@ -187,12 +219,12 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 
 // calculate the error function (chi-squared)
 double error_func(double *par, int ny, double *dysq,
-		double (*func)(double *, int, void *), void *fdata) {
+		double (*func)(double *, int, void *, LMstat*), void *fdata, LMstat *lmstat) {
 	int x;
 	double res, e = 0;
 
 	for (x = 0; x < ny; x++) {
-		res = func(par, x, fdata);
+		res = func(par, x, fdata, lmstat);
 		if (dysq) // weighted least-squares 
 			e += res*res/dysq[x];
 		else
