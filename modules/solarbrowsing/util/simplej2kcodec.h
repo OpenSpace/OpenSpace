@@ -20,7 +20,7 @@ public:
   // Decode whole image from current loaded file
   std::unique_ptr<ImageData> Decode();
   // Decode into a predefined buffer
-  void DecodeIntoBuffer(unsigned char*& buffer, const int numThreads);
+  void DecodeIntoBuffer(unsigned char* buffer, const int numThreads);
   void DecodeTileIntoBuffer(const int& tileId, unsigned char*& buffer, int numThreads);
   // Encodes current loaded file
   void EncodeAsTiles(const char* outfile,

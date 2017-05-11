@@ -41,6 +41,11 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcameraplane.h
+
+    # This should be moved to global util
+    ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/threadpool.h
+    ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.h
+    ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.inl
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -48,6 +53,9 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcameraplane.cpp
+
+    # This should be moved to global util
+    ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/threadpool.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
