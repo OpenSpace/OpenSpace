@@ -54,33 +54,42 @@ DocumentationGenerator::DocumentationGenerator(std::string name,
     for (const HandlebarTemplate& t : _handlebarTemplates) {
         ghoul_precondition(!t.name.empty(), "name must not be empty");
         ghoul_precondition(!t.filename.empty(), "filename must not be empty");
-        ghoul_precondition(FileSys.fileExists(t.filename), "filename must exist");
     }
     ghoul_precondition(!_javascriptFile.empty(), "javascriptFilename must not be empty");
-    ghoul_precondition(
-        FileSys.fileExists(_javascriptFile),
-        "javascriptFilename must exist"
-    );
 }
     
 void DocumentationGenerator::writeDocumentation(const std::string& filename) {
-    std::ifstream handlebarsInput(absPath(HandlebarsFilename));
-    std::ifstream jsInput(absPath(_javascriptFile));
-    
-    std::string jsContent;
-    std::back_insert_iterator<std::string> jsInserter(jsContent);
-    
-    std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
-    std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
-    
-    std::ifstream bootstrapInput(absPath(BootstrapFilename));
-    std::ifstream cssInput(absPath(CssFilename));
+    std::ifstream handlebarsInput;
+    handlebarsInput.exceptions(~std::ofstream::goodbit);
+    handlebarsInput.open(absPath(HandlebarsFilename));
+    const std::string handlebarsContent = std::string(
+        std::istreambuf_iterator<char>(handlebarsInput),
+        std::istreambuf_iterator<char>()
+    );
 
-    std::string cssContent;
-    std::back_insert_iterator<std::string> cssInserter(cssContent);
-    
-    std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
-    std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
+    std::ifstream jsInput;
+    jsInput.exceptions(~std::ofstream::goodbit);
+    jsInput.open(absPath(_javascriptFile));
+    const std::string jsContent = std::string(
+        std::istreambuf_iterator<char>(jsInput),
+        std::istreambuf_iterator<char>()
+    );
+
+    std::ifstream bootstrapInput;
+    bootstrapInput.exceptions(~std::ofstream::goodbit);
+    bootstrapInput.open(absPath(BootstrapFilename));
+    const std::string bootstrapContent = std::string(
+        std::istreambuf_iterator<char>(bootstrapInput),
+        std::istreambuf_iterator<char>()
+    );
+
+    std::ifstream cssInput;
+    cssInput.exceptions(~std::ofstream::goodbit);
+    cssInput.open(absPath(CssFilename));
+    const std::string cssContent = std::string(
+        std::istreambuf_iterator<char>(cssInput),
+        std::istreambuf_iterator<char>()
+    );
 
     std::ofstream file;
     file.exceptions(~std::ofstream::goodbit);
@@ -126,10 +135,12 @@ void DocumentationGenerator::writeDocumentation(const std::string& filename) {
          << "\t\t" << "var " << _jsonName << " = JSON.parse('" << json << "');"   << '\n'
          << "\t\t" << "var version = " << Version << ";"                          << '\n'
          << "\t\t" << "var generationTime = '" << generationTime << "';"          << '\n'
+         << "\t\t" << handlebarsContent                                           << '\n'
          << "\t\t" << jsContent                                                   << '\n'
          << "\t"   << "</script>"                                                 << '\n'
          << "\t"   << "<style type=\"text/css\">"                                 << '\n'
          << "\t\t" << cssContent                                                  << '\n'
+         << "\t\t" << bootstrapContent                                            << '\n' 
          << "\t"   << "</style>"                                                  << '\n'
          << "\t\t" << "<title>" << _name << "</title>"                            << '\n'
          << "\t"   << "</head>"                                                   << '\n'

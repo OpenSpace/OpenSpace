@@ -63,8 +63,8 @@ public:
      * documentation and that can contain additional functionality
      * \pre name must not be empty
      * \pre jsonName must not be empty
-     * \pre Each handlebarTemplates' \c name must not be empty and \c filename must exist
-     * \pre javascriptFilename must not be empty must exist
+     * \pre Each handlebarTemplates' \c name must not be empty
+     * \pre javascriptFilename must not be empty
      */
     DocumentationGenerator(std::string name, std::string jsonName,
         std::vector<HandlebarTemplate> handlebarTemplates,

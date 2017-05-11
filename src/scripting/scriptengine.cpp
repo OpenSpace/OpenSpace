@@ -41,27 +41,21 @@
 #include "scriptengine_lua.inl"
 
 namespace {
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/main.hbs";
-    const char* ScriptingTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/scripting.hbs";
-    const char* HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
-    const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
-}
-
-namespace openspace {
-
-namespace scripting {
-
-namespace {
     const std::string _loggerCat = "ScriptEngine";
-    
+
     const char* LuaGlobalNamespace = "_G";
     const char* PrintFunctionName = "print";
     //const lua_CFunction _printFunctionReplacement = luascriptfunctions::printInfo;
-    
+
     const int TableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
-}
+
+    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/main.hbs";
+    const char* ScriptingTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/scripting.hbs";
+    const char* JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
+} // namespace
+
+namespace openspace {
+namespace scripting {
 
 std::string ScriptEngine::OpenSpaceLibraryName = "openspace";
 

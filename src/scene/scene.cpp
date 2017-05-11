@@ -74,10 +74,7 @@ namespace {
     const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
     const char* PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
     const char* PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
-    const char* HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
     const char* JsFilename = "${OPENSPACE_DATA}/web/properties/script.js";
-    const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
 } // namespace
 
 namespace openspace {
