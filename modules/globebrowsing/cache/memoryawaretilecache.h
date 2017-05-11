@@ -107,6 +107,8 @@ private:
             : _initData(initData)
             , _freeTexture(0)
         {
+            ghoul::opengl::Texture::AllocateData allocate =
+                _initData.shouldAllocateDataOnCPU() ? ghoul::opengl::Texture::AllocateData::Yes : ghoul::opengl::Texture::AllocateData::No;
             for (size_t i = 0; i < numTextures; ++i)
             {
                 _textures.push_back(std::make_shared<ghoul::opengl::Texture>(
@@ -115,7 +117,8 @@ private:
                     _initData.glTextureFormat(),
                     _initData.glType(),
                     ghoul::opengl::Texture::FilterMode::Linear,
-                    ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                    ghoul::opengl::Texture::WrappingMode::ClampToEdge,
+                    allocate
                 ));
                 _textures.back()->setDataOwnership(
                     ghoul::opengl::Texture::TakeOwnership::Yes);

@@ -52,14 +52,10 @@ struct RawTile {
     RawTile();
 
     char* imageData;
-    //glm::uvec3 dimensions;
     std::shared_ptr<TileMetaData> tileMetaData;
     std::shared_ptr<TileTextureInitData> textureInitData;
     TileIndex tileIndex;
     ReadError error;
-    //size_t nBytesImageData;
-    //GLuint glType;
-    //TextureFormat textureFormat;
     GLuint pbo;
 
     void serializeMetaData(std::ostream& s);

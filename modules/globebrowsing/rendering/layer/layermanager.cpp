@@ -97,7 +97,7 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::ID id,
         case layergroupid::ID::HeightLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 64;
             return TileTextureInitData(tileSize, tileSize, GL_FLOAT,
-                ghoul::opengl::Texture::Format::Red);
+                ghoul::opengl::Texture::Format::Red, TileTextureInitData::ShouldAllocateDataOnCPU::Yes);
         }
         case layergroupid::ID::ColorLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;

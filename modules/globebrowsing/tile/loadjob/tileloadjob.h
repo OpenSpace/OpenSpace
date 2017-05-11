@@ -37,13 +37,34 @@ class RawTileDataReader;
 struct RawTile;
 
 struct TileLoadJob : LoadJob {
+    /**
+     * Allocates enough data for one tile. When calling <code>product()</code>, the
+     * ownership of this data will be released. If <code>product()</code> has not been
+     * called before the TileLoadJob is finished, the data will be deleted as it has not
+     * been exposed outside of this object.
+     */
     TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-        const TileIndex& tileIndex, size_t dataSize);
+        const TileIndex& tileIndex);
+    
+    /**
+     * No data is allocated unless specified so by the TileTextureInitData of
+     * rawTileDataReader but it is assumed that pboDataPtr is a mapped pointer to a pixel
+     * buffer object. 
+     */
     TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
         const TileIndex& tileIndex, char* pboDataPtr);
 
+    /**
+     * Destroys the allocated data pointer if it has been allocated and the TileLoadJob
+     * has ownership of it.
+     */
     ~TileLoadJob();
 
+    /**
+     * If the TileLoadJob has been created using PBO, this is the address that the
+     * RawTileDataReader will read to. In case specified so in the TileTextureInitData
+     * of RawTileDataReader, the data will also be written to CPU memory.
+     */
     virtual void execute() override;
 
 	/**
@@ -57,7 +78,7 @@ protected:
     TileIndex _chunkIndex;
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
     std::shared_ptr<RawTile> _rawTile;
-    char* _dataDestination;
+    char* _pboMappedDataDestination;
 	bool _hasOwnershipOfData;
 };
 

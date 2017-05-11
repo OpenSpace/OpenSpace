@@ -84,7 +84,7 @@ std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() {
 }
 
 std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
-    char* dataDestination)
+    char* dataDestination, char* pboMappedDataDestination)
 {
     ensureInitialized();
     IODescription io = getIODescription(tileIndex);
@@ -92,24 +92,36 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
 
     // Build the RawTile from the data we querred
     std::shared_ptr<RawTile> rawTile = std::make_shared<RawTile>();
+    
+    if (dataDestination && !pboMappedDataDestination) {
+        // Write only to cpu data destination
+        readImageData(io, worstError, dataDestination);
+    }
+    else if (!dataDestination && pboMappedDataDestination) {
+        // Write only to pbo mapped data destination
+        readImageData(io, worstError, pboMappedDataDestination);
+    }
+    else if (dataDestination && pboMappedDataDestination) {
+        // Write to both data destinations
+        readImageData(io, worstError, dataDestination);
+        size_t numBytes = _initData.totalNumBytes();
+        memcpy(pboMappedDataDestination, dataDestination, numBytes);
+    }
+    else {
+        ghoul_assert(false, "Need to specify a data destination");
+    }
+
     rawTile->imageData = dataDestination;
-    readImageData(io, worstError, rawTile->imageData);
     rawTile->error = worstError;
     rawTile->tileIndex = tileIndex;
 
     rawTile->textureInitData = std::make_shared<TileTextureInitData>(_initData);
 
-
-    //rawTile->dimensions = glm::uvec3(io.write.region.numPixels, 1);
-    //rawTile->nBytesImageData = io.write.totalNumBytes;
-    //rawTile->glType = _initData.glType();
-    //rawTile->textureFormat = _dataLayout.textureFormat;
-
     if (_preprocess == PerformPreprocessing::Yes) {
         rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);
         rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile, io));
     }
-  
+
     return rawTile;
 }
 

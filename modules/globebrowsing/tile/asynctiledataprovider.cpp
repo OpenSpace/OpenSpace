@@ -132,8 +132,7 @@ bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
         }
         else {
             size_t numBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
-            auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex,
-                numBytes);
+            auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex);
             _concurrentJobManager.enqueueJob(job, tileIndex.hashKey());
             _enqueuedTileRequests.insert(tileIndex.hashKey());
         }
@@ -183,7 +182,7 @@ bool AsyncTileDataProvider::satisfiesEnqueueCriteria(const TileIndex& tileIndex)
     // Only satisfies if it is not already enqueued. Also bumps the request to the top.
     bool alreadyEnqueued = _concurrentJobManager.touch(tileIndex.hashKey());
     bool notFoundAmongEnqueued =
-        _enqueuedTileRequests.find(tileIndex.hashKey()) ==_enqueuedTileRequests.end();
+        _enqueuedTileRequests.find(tileIndex.hashKey()) == _enqueuedTileRequests.end();
 
     return !alreadyEnqueued && notFoundAmongEnqueued;
 }

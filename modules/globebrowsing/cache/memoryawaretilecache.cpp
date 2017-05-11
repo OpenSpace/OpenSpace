@@ -95,7 +95,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
         std::shared_ptr<Texture> texture;
         // if this texture type does not exist among the texture containers
         // it needs to be created
-        TileTextureInitData initData = *rawTile->textureInitData;
+        const TileTextureInitData& initData = *rawTile->textureInitData;
         TileTextureInitData::HashKey initDataKey = initData.hashKey();
         if (_textureContainerMap.find(initDataKey) == _textureContainerMap.end()) {
             // For now create 50 textures of this type
@@ -119,6 +119,10 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
         // Re-upload texture, either using PBO or by using RAM data
         if (rawTile->pbo != 0) {
             texture->reUploadTextureFromPBO(rawTile->pbo);
+            if (initData.shouldAllocateDataOnCPU()) {
+                texture->setPixelData(rawTile->imageData,
+                    Texture::TakeOwnership::Yes);
+            }
         }
         else {
             ghoul_assert(texture->dataOwnership(),

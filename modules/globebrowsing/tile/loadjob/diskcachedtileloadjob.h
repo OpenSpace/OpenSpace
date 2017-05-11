@@ -29,7 +29,7 @@
 
 namespace openspace {
 namespace globebrowsing {
-
+/*
 class TileDiskCache;
 
 struct DiskCachedTileLoadJob : public TileLoadJob {
@@ -51,7 +51,7 @@ protected:
     std::shared_ptr<TileDiskCache> _tileDiskCache;
     CacheMode _mode;
 };
-
+*/
 } // namespace globebrowsing
 } // namespace openspace
 

@@ -58,7 +58,8 @@ public:
      * Reads data from the current dataset and initializes a <code>RawTile</code>
      * which gets returned.
      */
-    std::shared_ptr<RawTile> readTileData(TileIndex tileIndex, char* dataDestination);
+    std::shared_ptr<RawTile> readTileData(TileIndex tileIndex,
+        char* dataDestination, char* pboMappedDataDestination);
     TileDepthTransform getDepthTransform() const;
     const TileTextureInitData& tileTextureInitData() const;
     

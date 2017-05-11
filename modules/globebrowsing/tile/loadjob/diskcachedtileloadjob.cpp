@@ -30,7 +30,7 @@
 
 namespace openspace {
 namespace globebrowsing {
-
+/*
 DiskCachedTileLoadJob::DiskCachedTileLoadJob(
     std::shared_ptr<RawTileDataReader> textureDataProvider,
     const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc,
@@ -78,6 +78,6 @@ void DiskCachedTileLoadJob::execute() {
             break;
     }
 }
-
+*/
 } // namespace globebrowsing
 } // namespace openspace

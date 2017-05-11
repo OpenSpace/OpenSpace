@@ -30,32 +30,40 @@ namespace openspace {
 namespace globebrowsing {
 
 TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-    const TileIndex& tileIndex, size_t dataSize)
+    const TileIndex& tileIndex)
     : _rawTileDataReader(rawTileDataReader)
     , _chunkIndex(tileIndex)
-{
-	_dataDestination = new char[dataSize];
-	_hasOwnershipOfData = true;
-}
+    , _pboMappedDataDestination(nullptr)
+    , _hasOwnershipOfData(false)
+{ }
 
 
 TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
     const TileIndex& tileIndex, char* pboDataPtr)
     : _rawTileDataReader(rawTileDataReader)
     , _chunkIndex(tileIndex)
-{
-	_dataDestination = pboDataPtr;
-	_hasOwnershipOfData = false;
-}
+    , _pboMappedDataDestination(pboDataPtr)
+    , _hasOwnershipOfData(false)
+{ }
 
 TileLoadJob::~TileLoadJob() {
 	if (_hasOwnershipOfData) {
-		delete _dataDestination;
+		ghoul_assert(_rawTile->imageData, "Image data must exist");
+		delete [] _rawTile->imageData;
 	}
 }
 
 void TileLoadJob::execute() {
-    _rawTile = _rawTileDataReader->readTileData(_chunkIndex, _dataDestination);
+    size_t numBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
+    char* dataPtr = nullptr;
+    if (_rawTileDataReader->tileTextureInitData().shouldAllocateDataOnCPU() ||
+    	!_pboMappedDataDestination)
+    {
+    	dataPtr = new char[numBytes];
+    	_hasOwnershipOfData = true;
+    }
+    _rawTile = _rawTileDataReader->readTileData(
+    	_chunkIndex, dataPtr, _pboMappedDataDestination);
 }
 
 std::shared_ptr<RawTile> TileLoadJob::product() {

@@ -69,11 +69,14 @@ class TileTextureInitData
 {
 public:
     using HashKey = unsigned long long;
+    using ShouldAllocateDataOnCPU = ghoul::Boolean;
+    using Format = ghoul::opengl::Texture::Format;
 
-    TileTextureInitData(size_t width, size_t height, GLuint glType,
-        ghoul::opengl::Texture::Format textureFormat)
+    TileTextureInitData(size_t width, size_t height, GLuint glType, Format textureFormat,
+        ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No)
         : _glType(glType)
-        , _ghoulTextureFormat (textureFormat)
+        , _ghoulTextureFormat(textureFormat)
+        , _shouldAllocateDataOnCPU(shouldAllocateDataOnCPU)
     {
         _dimensionsWithoutPadding = glm::ivec3(width, height, 1);
         _dimensionsWithPadding = glm::ivec3(
@@ -93,8 +96,9 @@ public:
             original.dimensionsWithoutPadding().x,
             original.dimensionsWithoutPadding().y,
             original.glType(),
-            original.ghoulTextureFormat())
-    { }
+            original.ghoulTextureFormat(),
+            original.shouldAllocateDataOnCPU() ? ShouldAllocateDataOnCPU::Yes : ShouldAllocateDataOnCPU::No)
+    { };
 
     ~TileTextureInitData() = default;
 
@@ -106,12 +110,9 @@ public:
     size_t bytesPerLine() const { return _bytesPerLine; };
     size_t totalNumBytes() const { return _totalNumBytes; };
     GLuint glType() const { return _glType; };
-    ghoul::opengl::Texture::Format ghoulTextureFormat() const {
-        return _ghoulTextureFormat;
-    };
-    GLint glTextureFormat() const {
-        return _glTextureFormat;
-    };
+    Format ghoulTextureFormat() const { return _ghoulTextureFormat; };
+    GLint glTextureFormat() const { return _glTextureFormat; };
+    bool shouldAllocateDataOnCPU() const { return _shouldAllocateDataOnCPU; }
     HashKey hashKey() const { return _hashKey; };
 
     const static glm::ivec2 tilePixelStartOffset;
@@ -136,9 +137,9 @@ private:
     };
 
     unsigned int getUniqueIdFromTextureFormat(
-        ghoul::opengl::Texture::Format textureFormat) const
+        Format textureFormat) const
     {
-        using Format = ghoul::opengl::Texture::Format;
+        using Format = Format;
         switch (textureFormat) {
             case Format::Red:
                 return 0;
@@ -163,13 +164,14 @@ private:
     glm::ivec3 _dimensionsWithPadding;
     glm::ivec3 _dimensionsWithoutPadding;
     GLuint _glType;
-    ghoul::opengl::Texture::Format _ghoulTextureFormat;
+    Format _ghoulTextureFormat;
     GLint _glTextureFormat;
     size_t _nRasters;
     size_t _bytesPerDatum;
     size_t _bytesPerPixel;
     size_t _bytesPerLine;
     size_t _totalNumBytes;
+    bool _shouldAllocateDataOnCPU;
 };
 
 

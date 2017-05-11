@@ -134,6 +134,7 @@ CachingTileProvider::~CachingTileProvider()
 { }
 
 void CachingTileProvider::update() {
+    _asyncTextureDataProvider->update();
     initTexturesFromLoadedData();
 }
 

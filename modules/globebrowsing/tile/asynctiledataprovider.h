@@ -30,9 +30,9 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-#include <unordered_map>
 #include <map>
 #include <set>
+#include <unordered_map>
 
 namespace openspace {
 
