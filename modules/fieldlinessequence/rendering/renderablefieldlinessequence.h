@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___RENDERABLEFIELDLINESSEQUENCE___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
@@ -97,6 +98,11 @@ private:
 
     properties::OptionProperty _colorMethod;        // Uniform/transfer function/topology?
     properties::OptionProperty _colorizingQuantity; // Which quantity to use in tf
+
+    properties::PropertyOwner _colorGroup;
+    properties::PropertyOwner _domainGroup;
+    properties::PropertyOwner _particleGroup;
+    properties::PropertyOwner _seedGroup;
 
     properties::StringProperty _transferFunctionPath;   // Color table for unit coloring
     properties::StringProperty _transferFunctionMinVal; // Value corresponding to 0 in tf

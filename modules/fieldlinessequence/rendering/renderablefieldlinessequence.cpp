@@ -87,6 +87,10 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _timeMultiplier("fieldlineParticleSpeed", "FL Particle Speed", 20, 1, 1000),
       _colorMethod("fieldlineColorMethod", "Color Method", properties::OptionProperty::DisplayType::Radio),
       _colorizingQuantity("fieldlineColorQuantity", "Quantity", properties::OptionProperty::DisplayType::Dropdown),
+      _colorGroup("Color"),
+      _domainGroup("Domain Limits"),
+      _particleGroup("Particles"),
+      _seedGroup("Seed Points"),
       _transferFunctionPath("transferFunctionPath", "Transfer Function Path"),
       _transferFunctionMinVal("transferFunctionLimit1", "TF minimum", "0"),
       _transferFunctionMaxVal("transferFunctionLimit2", "TF maximum", "1"),
@@ -413,18 +417,22 @@ bool RenderableFieldlinesSequence::initialize() {
     // TODO: IT MAY BE BENEFICIAL IF SOME OF THESE PROPERTIES WERE DEPENDENT ON THE
     // NUMBER OF MAX TRACING STEPS THAT THE USER DEFINED IN LUA!
     // The fieldlineParticleSize and modulusDivider espacially
-    addProperty(_domainLimR);
-    addProperty(_domainLimX);
-    addProperty(_domainLimY);
-    addProperty(_domainLimZ);
-    addProperty(_fieldlineParticleSize);
-    addProperty(_timeMultiplier);
-    addProperty(_modulusDivider);
-    addProperty(_fieldlineColor);
-    addProperty(_fieldlineParticleColor);
-    addProperty(_showSeedPoints);
-    addProperty(_seedPointSize);
-    addProperty(_uniformSeedPointColor);
+    addPropertySubOwner(_domainGroup);
+    _domainGroup.addProperty(_domainLimR);
+    _domainGroup.addProperty(_domainLimX);
+    _domainGroup.addProperty(_domainLimY);
+    _domainGroup.addProperty(_domainLimZ);
+
+    addPropertySubOwner(_particleGroup);
+    _particleGroup.addProperty(_fieldlineParticleColor);
+    _particleGroup.addProperty(_fieldlineParticleSize);
+    _particleGroup.addProperty(_modulusDivider);
+    _particleGroup.addProperty(_timeMultiplier);
+
+    addPropertySubOwner(_seedGroup);
+    _seedGroup.addProperty(_seedPointSize);
+    _seedGroup.addProperty(_showSeedPoints);
+    _seedGroup.addProperty(_uniformSeedPointColor);
 
     if (_isMorphing) {
         addProperty(_isMorphing);
@@ -487,11 +495,19 @@ bool RenderableFieldlinesSequence::initialize() {
             _transferFunctionLimits[_colorizingQuantity].y = std::stof(_transferFunctionMaxVal);
         });
 
-        addProperty(_colorMethod);
-        addProperty(_colorizingQuantity);
-        addProperty(_transferFunctionPath);
-        addProperty(_transferFunctionMinVal);
-        addProperty(_transferFunctionMaxVal);
+        // _colorGroup.setPropertyGroupName(0,"FieldlineColorRelated");
+        addPropertySubOwner(_colorGroup);
+
+        _colorGroup.addProperty(_colorMethod);
+        _colorGroup.addProperty(_colorizingQuantity);
+        _colorGroup.addProperty(_transferFunctionPath);
+        _colorGroup.addProperty(_transferFunctionMinVal);
+        _colorGroup.addProperty(_transferFunctionMaxVal);
+        _colorGroup.addProperty(_fieldlineColor);
+
+    } else {
+        addProperty(_fieldlineColor);
+
     }
 
     return true;
