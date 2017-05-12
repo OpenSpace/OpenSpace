@@ -48,6 +48,7 @@ namespace openspace {
 
 struct BufferObject {
     unsigned char* data;
+    std::string name;
 };
 
 // TODO(mnoven) : Move to separate class
@@ -57,6 +58,7 @@ public:
 
     virtual void execute() override {
         BufferObject b;
+        b.name = _path;
         b.data = new unsigned char[_imageSize * _imageSize];
         SimpleJ2kCodec j2c;
         j2c.CreateInfileStream(_path);
@@ -142,6 +144,8 @@ private:
     unsigned int _imageSize;
     unsigned int _fullResolution;
     double _move = 0.0;
+    double _deltaTimeLast = 0.0;
+    double _realTimeDiff;
 
     std::string _currentActiveInstrument;
 
@@ -161,7 +165,7 @@ private:
     void createFrustum();
     void createPlane();
     void updatePlane();
-    void fillBuffer();
+    void fillBuffer(const double& dt);
 
     void decode(unsigned char* buffer, const std::string& fileame,
                 const int numThreads);

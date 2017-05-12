@@ -48,6 +48,7 @@ typedef std::chrono::high_resolution_clock Clock;
 namespace {
     static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
     double HALF_SUN_RADIUS = (1391600000.0 * 0.50); // Half sun radius divided by magic factor
+    const double EPSILON = std::numeric_limits<double>::epsilon();
 }
 
 namespace openspace {
@@ -56,15 +57,15 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     : Renderable(dictionary)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
-    , _bufferSize("bufferSize", "Buffer Size", 1, 1, 100)
-    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 40, 0, 300)
+    , _bufferSize("bufferSize", "Buffer Size", 5, 1, 100)
+    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 50, 0, 300)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
-    , _resolutionLevel("resolutionlevel", "Level of detail", 2, 0, 5)
+    , _resolutionLevel("resolutionlevel", "Level of detail", 1, 0, 5)
     , _target("target", "Target", "Sun")
     , _usePBO("usePBO", "Use PBO", true)
     , _magicFactor("magicfactor", "Full Plane Size", 0.785, 0.0, 1.0)
     , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
-    , _verboseMode("verboseMode", "Verbose Mode", false)
+    , _verboseMode("verboseMode", "Verbose Mode", true)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
@@ -190,7 +191,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
         _initializePBO = true;
        // uploadImageDataToPBO(_currentActiveImage);
-        fillBuffer();
+        fillBuffer(Time::ref().deltaTime());
         _updatingCurrentActiveChannel = false;
     });
 
@@ -207,7 +208,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
             _concurrentJobManager.popFinishedJob();
         }
 
-        fillBuffer();
+        fillBuffer(Time::ref().deltaTime());
         _initializePBO = true;
        // uploadImageDataToPBO(_currentActiveImage);
         _updatingCurrentLevelOfResolution = false;
@@ -217,7 +218,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         updatePlane();
     });
 
-    fillBuffer();
+    _deltaTimeLast = 1.0;
+
+    fillBuffer(1.0);
 
     // Initialize PBO - not needed since buffer is filled async anyways
     // if (_usePBO) {
@@ -238,24 +241,37 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     addProperty(_verboseMode);
 }
 
-void RenderableSpacecraftCameraPlane::fillBuffer() {
-    if (_bufferingForwardInTime) {
-        for (int i = 0; i < _bufferSize && (i + _currentActiveImage) < _imageMetadataMap[_currentActiveInstrument].size(); ++i) {
-            std::string& currentFilename = _imageMetadataMap[_currentActiveInstrument][_currentActiveImage + i].filename;
-            auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename, _resolutionLevel);
-            _concurrentJobManager.enqueueJob(job);
-            if (_verboseMode) {
-                LDEBUG("Enqueueing " << currentFilename);
-            }
+void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
+    if (_verboseMode) {
+        LDEBUG("Refilling Buffer. dt: " << dt);
+    }
+    const auto& imageList = _imageMetadataMap[_activeInstruments.getDescriptionByValue(_activeInstruments.value())];/*_imageMetadata[_currentActiveChannel]*/
+    const double& osTime = Time::ref().j2000Seconds();
+
+    for (int i = 0; i < _bufferSize; i++) {
+        const auto& low = std::lower_bound(
+              imageList.begin(), imageList.end(),
+              osTime + (dt * i) * ((_minRealTimeUpdateInterval) / 1000));
+
+        int nextImageIndex = low - imageList.begin();
+
+        if (nextImageIndex == _imageMetadataMap[_currentActiveInstrument].size()) {
+            nextImageIndex = nextImageIndex - 1;
         }
-    } else {
-        for (int i = 0; i < _bufferSize && (_currentActiveImage - i) >= 0; ++i) {
-            std::string& currentFilename = _imageMetadataMap[_currentActiveInstrument][_currentActiveImage - i].filename;
-            const auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename, _resolutionLevel);
-            _concurrentJobManager.enqueueJob(job);
-            if (_verboseMode) {
-                LDEBUG("Enqueueing " << currentFilename);
-            }
+
+        const std::string& currentFilename
+              = _imageMetadataMap[_currentActiveInstrument][nextImageIndex].filename;
+        auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename,
+                                               _resolutionLevel);
+        _concurrentJobManager.enqueueJob(job);
+        if (_verboseMode) {
+            LDEBUG("Enqueueing " << currentFilename);
+        }
+    }
+
+    while (_concurrentJobManager.numFinishedJobs() < _bufferSize) {
+        if (_verboseMode) {
+            LDEBUG("Buffering .... ");
         }
     }
 }
@@ -406,14 +422,6 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
 }
 
 void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
-    if (_bufferingForwardInTime && (image + _bufferSize >= _imageMetadataMap[_currentActiveInstrument].size())) {
-        return;
-    }
-
-    if (!_bufferingForwardInTime && (image - _bufferSize) < 0) {
-        return;
-    }
-
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[0]); // 1 - _currentPBO
     // Orphan data and multithread
     glBufferData(GL_PIXEL_UNPACK_BUFFER, _pboSize, NULL, GL_STREAM_DRAW);
@@ -423,13 +431,6 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
           glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, NULL, _pboSize,
                            GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
 
-    std::string currentFilename;
-
-    if (_bufferingForwardInTime)
-        currentFilename = _imageMetadataMap[_currentActiveInstrument][image + _bufferSize].filename;
-    else
-        currentFilename =  _imageMetadataMap[_currentActiveInstrument][image - _bufferSize].filename;
-
     if (!_asyncUploadPBO) {
        // decode(_pboBufferData, currentFilename, 16);
     } else {
@@ -438,26 +439,45 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
         //           decode(_pboBufferData, currentFilename, 16);
         //       }));
 
-       // LDEBUG("Updating from buffer, queueing new job: " << image);
         if (_concurrentJobManager.numFinishedJobs() > 0) {
-
-            //LDEBUG("we had a finished job still");
-
             std::shared_ptr<BufferObject> b = _concurrentJobManager.popFinishedJob()->product();
             unsigned char* data = b->data;
-            //auto t1 = Clock::now();
+
+            if (_verboseMode) {
+                LDEBUG("Popped image" << b->name);
+            }
+            auto t1 = Clock::now();
             std::memcpy(_pboBufferData, data, _imageSize * _imageSize * sizeof(unsigned char));
+            auto t2 = Clock::now();
 
-            // auto t2 = Clock::now();
-            // LDEBUG("Memcpy time "
-            //        << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
-            //                 .count()
-            //        << " ms" << std::endl);
+            if (_verboseMode) {
+                LDEBUG("Memcpy time "
+                       << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
+                                .count()
+                       << " ms" << std::endl);
+            }
 
+            const auto& imageList = _imageMetadataMap[_currentActiveInstrument];
+            const double& osTime = Time::ref().j2000Seconds();
+            double time = osTime + Time::ref().deltaTime() * ((_minRealTimeUpdateInterval )/ 1000 );
+
+            const auto& low = std::lower_bound(imageList.begin(), imageList.end(), time);
+            int nextImageIndex = low - imageList.begin();
+
+            if (nextImageIndex
+                == _imageMetadataMap[_currentActiveInstrument].size()) {
+                nextImageIndex = nextImageIndex - 1;
+            }
+
+            std::string currentFilename =  _imageMetadataMap[_currentActiveInstrument][nextImageIndex].filename;
             auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename, _resolutionLevel);
             _concurrentJobManager.enqueueJob(job);
             _initializePBO = false;
             _pboIsDirty = true;
+
+            if (_verboseMode)  {
+                LDEBUG("Adding work from PBO " << currentFilename);
+            }
         } else {
             if (_verboseMode) {
                 LWARNING("Nothing to update, buffer is not ready");
@@ -478,17 +498,18 @@ void RenderableSpacecraftCameraPlane::updateTextureGPU(bool asyncUpload, bool re
     // }
     // _future = nullptr;
 
+    if (_usePBO && asyncUpload) {
+        if (_pboBufferData) {
+            // Bind PBO to texture data source
+            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[0]);
+            _texture->bind();
+            // Send async to GPU by coping from PBO to texture objects
+            glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
+                            GLint(_texture->format()), _texture->dataType(), nullptr);
+            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-    if (_usePBO && asyncUpload && _pboBufferData) {
-        // Bind PBO to texture data source
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[0]);
-        _texture->bind();
-        // Send async to GPU by coping from PBO to texture objects
-        glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
-                        GLint(_texture->format()), _texture->dataType(), nullptr);
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-        _pboIsDirty = false;
+            _pboIsDirty = false;
+        }
 
     } else {
         const std::string& currentFilename
@@ -539,6 +560,8 @@ void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime)
     }
 
     // TODO(mnoven): Clean this up
+
+    // Time to pop from buffer !!! - And refill with buffer offset
     if (currentActiveImageLast != _currentActiveImage || _initializePBO) {
         //  LDEBUG("Updating texture to " << _currentActiveImage);
         //_currentPBO = 1 - _currentPBO;
@@ -553,21 +576,35 @@ void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime)
 
 void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
-    float realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
+    _realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
 
-    int clockwiseSign = (Time::ref().deltaTime() < 0) ? -1 : 1;
+    // int clockwiseSign = (Time::ref().deltaTime() < 0) ? -1 : 1;
 
-    if ((clockwiseSign == -1 && _bufferingForwardInTime)
-        || (clockwiseSign == 1 && !_bufferingForwardInTime)) {
-        _bufferingForwardInTime = (clockwiseSign == 1);
-         _concurrentJobManager.reset();
+    // if ((clockwiseSign == -1 && _bufferingForwardInTime)
+    //     || (clockwiseSign == 1 && !_bufferingForwardInTime)) {
+    //     _bufferingForwardInTime = (clockwiseSign == 1);
+    //      _concurrentJobManager.reset();
+    //     while (_concurrentJobManager.numFinishedJobs() > 0) {
+    //         _concurrentJobManager.popFinishedJob();
+    //     }
+    //     fillBuffer();
+    // }
+    //double j2000 = Time::ref().j2000Seconds();
+    double dt = Time::ref().deltaTime();
+
+    // Delta time changed, need to refill buffer
+    if ((abs(_deltaTimeLast - dt)) > EPSILON) {
+        _concurrentJobManager.reset();
         while (_concurrentJobManager.numFinishedJobs() > 0) {
             _concurrentJobManager.popFinishedJob();
         }
-        fillBuffer();
+        _concurrentJobManager.reset();
+        _pboIsDirty = false;
+        fillBuffer(dt);
     }
+    _deltaTimeLast = dt;
 
-    bool timeToUpdateTexture = realTimeDiff > _minRealTimeUpdateInterval;
+    bool timeToUpdateTexture = _realTimeDiff > _minRealTimeUpdateInterval;
 
     // Update texture
     // The bool blockers might probably not be needed now
