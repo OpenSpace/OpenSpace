@@ -2403,14 +2403,14 @@ bool grk_jp2_setup_encoder(	grk_jp2_t *jp2,
 
 	//transfer buffer to uuid
 	if (image->iptc_len && image->iptc_buf ) {
-		jp2->uuids[jp2->numUuids++] = grk_jp2_uuid_t(IPTC_UUID, image->iptc_buf, image->iptc_len);
+		jp2->uuids[jp2->numUuids++] = grk_jp2_uuid_t(IPTC_UUID, image->iptc_buf, image->iptc_len,true);
 		image->iptc_buf = nullptr;
 		image->iptc_len = 0;
 	}
 
 	//transfer buffer to uuid
 	if (image->xmp_len && image->xmp_buf) {
-		jp2->uuids[jp2->numUuids++] = grk_jp2_uuid_t(XMP_UUID, image->xmp_buf, image->xmp_len);
+		jp2->uuids[jp2->numUuids++] = grk_jp2_uuid_t(XMP_UUID, image->xmp_buf, image->xmp_len,true);
 		image->xmp_buf = nullptr;
 		image->xmp_len = 0;
 	}
@@ -3193,6 +3193,9 @@ bool grk_jp2_read_header(	grk_stream_private_t *p_stream,
 	if (header_info) {
 		header_info->enumcs = jp2->enumcs;
 		header_info->color = jp2->color;
+
+		header_info->xml_data		= jp2->xml.buffer;
+		header_info->xml_data_len	= jp2->xml.len;
 	}
 
     bool rc =  grk_j2k_read_header(	p_stream,
