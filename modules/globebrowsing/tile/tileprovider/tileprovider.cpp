@@ -31,37 +31,47 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
 
-namespace {
-    const std::string _loggerCat = "TileProvider";
+#include <climits>
 
+namespace {
     const char* KeyType = "Type";
 }
 
 namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
-    
+
+unsigned int TileProvider::_numTileProviders = 0;
+
 std::unique_ptr<TileProvider> TileProvider::createFromDictionary(const ghoul::Dictionary& dictionary) {
     std::string type = "LRUCaching";
     dictionary.getValue(KeyType, type);
     auto factory = FactoryManager::ref().factory<TileProvider>();
     std::unique_ptr<TileProvider> result = factory->create(type, dictionary);
-
-    if (result == nullptr) {
-        LERROR("Failed creating TileProvider of type '" << type << "'");
-        return nullptr;
-    }
-
     return result;
 }
 
-TileProvider::TileProvider(const ghoul::Dictionary& dictionary) {};
+TileProvider::TileProvider()
+    : properties::PropertyOwner("tileProvider")
+    , _initialized(false)
+{
+    initialize();
+}
+
+TileProvider::TileProvider(const ghoul::Dictionary&)
+    : properties::PropertyOwner("tileProvider")
+    , _initialized(false)
+{
+    initialize();
+};
 
 float TileProvider::noDataValueAsFloat() {
+    ghoul_assert(_initialized, "TileProvider was not initialized.");
     return std::numeric_limits<float>::min();
 }
 
 ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxParents) {
+    ghoul_assert(_initialized, "TileProvider was not initialized.");
     TileUvTransform uvTransform;
     uvTransform.uvOffset = glm::vec2(0, 0);
     uvTransform.uvScale = glm::vec2(1, 1);
@@ -80,34 +90,35 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
         maxParents--;
     }
     if(maxParents < 0){
-        return { Tile::TileUnavailable, uvTransform };
+        return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
     }
     
     // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that 
     //         has a loaded tile ready to use. 
     while (tileIndex.level > 1) {
         Tile tile = getTile(tileIndex);
-        if (tile.status != Tile::Status::OK) {
+        if (tile.status() != Tile::Status::OK) {
             if (--maxParents < 0){
-                return{ Tile::TileUnavailable, uvTransform };
+                return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
             }
             tileselector::ascendToParent(tileIndex, uvTransform);
         }
         else {
-            return { tile, uvTransform };
+            return ChunkTile{ tile, uvTransform, TileDepthTransform() };
         }
     }
     
-    return { Tile::TileUnavailable, uvTransform };
+    return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
 }
 
-ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize){
+ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize) {
+    ghoul_assert(_initialized, "TileProvider was not initialized.");
     ghoul_assert(pileSize >= 0, "pileSize must be positive");
     ChunkTilePile chunkTilePile;
     chunkTilePile.resize(pileSize);
     for (size_t i = 0; i < pileSize; ++i) {
         chunkTilePile[i] = getChunkTile(tileIndex, i);
-        if (chunkTilePile[i].tile.status == Tile::Status::Unavailable) {
+        if (chunkTilePile[i].tile.status() == Tile::Status::Unavailable) {
             if (i>0) {
                 chunkTilePile[i].tile = chunkTilePile[i-1].tile;
                 chunkTilePile[i].uvTransform.uvOffset = chunkTilePile[i-1].uvTransform.uvOffset;
@@ -120,7 +131,25 @@ ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize){
             }
         }
     }
-    return std::move(chunkTilePile);
+    return chunkTilePile;
+}
+
+bool TileProvider::initialize() {
+    ghoul_assert(!_initialized, "TileProvider can only be initialized once.");
+    _uniqueIdentifier = _numTileProviders;
+    _numTileProviders++;
+    if (_numTileProviders == UINT_MAX) {
+        _numTileProviders--;
+        return false;
+    }
+  
+    _initialized = true;
+    return true;
+}
+
+unsigned int TileProvider::uniqueIdentifier() const {
+    ghoul_assert(_initialized, "TileProvider was not initialized.");
+    return _uniqueIdentifier;
 }
 
 } // namespace tileprovider

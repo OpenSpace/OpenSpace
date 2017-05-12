@@ -8,7 +8,7 @@ return {
             Body = "IAPETUS",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 0.746, 3 },
+                Radius = 0.746E3,
                 Segments = 50
             },
             Textures = {

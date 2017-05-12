@@ -66,7 +66,7 @@ int Distance::getDesiredLevel(const Chunk& chunk, const RenderData& data) const 
     double scaleFactor =
         globe.generalProperties().lodScaleFactor * ellipsoid.minimumRadius();
     double projectedScaleFactor = scaleFactor / distance;
-    int desiredLevel = ceil(log2(projectedScaleFactor));
+    int desiredLevel = static_cast<int>(ceil(log2(projectedScaleFactor)));
     return desiredLevel;
 }
 

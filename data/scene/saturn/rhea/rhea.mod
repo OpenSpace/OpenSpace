@@ -8,7 +8,7 @@ return {
             Body = "RHEA",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 0.765, 3 },
+                Radius = 0.765E3,
                 Segments = 50
             },
             Textures = {

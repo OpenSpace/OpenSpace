@@ -27,6 +27,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/documentation/core_registration.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/documentation.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/documentationengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/documentation/documentationgenerator.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
@@ -37,6 +38,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/settingsengine.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/engine/virtualpropertymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/sgctwindowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/wrapper/windowwrapper.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/controller.cpp
@@ -124,7 +126,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/scene/scene.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scene_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scene/scene_lua.inl
-    ${OPENSPACE_BASE_DIR}/src/scene/scenegraph.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/sceneloader.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/scenemanager.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/scenegraphnode_doc.inl
     ${OPENSPACE_BASE_DIR}/src/scripting/lualibrary.cpp
@@ -164,6 +167,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationgenerator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configurationmanager.h
@@ -173,6 +177,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/settingsengine.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/sgctwindowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/wrapper/windowwrapper.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/controller.h
@@ -267,7 +272,8 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/rotation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scale.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scene.h
-    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraph.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/sceneloader.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenemanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scene/scenegraphnode.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/lualibrary.h
     ${OPENSPACE_BASE_DIR}/include/openspace/scripting/script_helper.h

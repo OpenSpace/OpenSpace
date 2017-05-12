@@ -1,4 +1,4 @@
--- Helper functions that are useful to customize the openspace.cfg loading
+-- shared: Determines whether the contents of the window should be shared using the SPOUT library [example: shared=true] {default: false}-- Helper functions that are useful to customize the openspace.cfg loading
 
 --[[
 ########################################################################################## 
@@ -24,9 +24,11 @@ function sgct.makeConfig(config) end
 -- fullScreen: Whether the application should run in exclusive full screen [example: fullScreen=true] {default: false}
 -- border: Whether the application should have window decorations (aka. border) [example: border=false] {default: true}
 -- monitor: Determines the monitor on which the application is started [example: monitor=2] {default: 0}
+-- shared: Determines whether the contents of the window should be shared using the SPOUT library [example: shared=true] {default: false}
 
 -- Expert settings:
--- name: The name of the window [example: window="Foobar"] {defualt: "OpenSpace"}
+-- name: The name of the window [example: window="Foobar"] {default: "OpenSpace"}
+-- tags: A list of string tags that are passed to the window [example: tags ={"GUI"}] {default: {}}
 -- vsync: Whether the rendering speed is locked to the refreshrate [example: vsync=true] {default: false}
 -- refreshRate: If vsync is enabled, this is the target framerate [example: refreshRate=30] {default: infinity}
 -- stereo: Select the stereo rendering mode as supported by SGCT [example: stereo='anaglyph_red_cyan'] {default: 'none'}
@@ -56,9 +58,11 @@ function sgct.config.single(arg) end
 -- fullScreen: Whether the application should run in exclusive full screen [example: fullScreen=true] {default: false}
 -- border: Whether the application should have window decorations (aka. border) [example: border=false] {default: true}
 -- monitor: Determines the monitor on which the application is started [example: monitor=2] {default: 0}
+-- shared: Determines whether the contents of the window should be shared using the SPOUT library [example: shared=true] {default: false}
 
 -- Expert settings:
--- name: The name of the window [example: window="Foobar"] {defualt: "OpenSpace"}
+-- name: The name of the window [example: window="Foobar"] {default: "OpenSpace"}
+-- tags: A list of string tags that are passed to the window [example: tags ={"GUI"}] {default: {}}
 -- vsync: Whether the rendering speed is locked to the refreshrate [example: vsync=true] {default: false}
 -- refreshRate: If vsync is enabled, this is the target framerate [example: refreshRate=30] {default: infinity}
 -- stereo: Select the stereo rendering mode as supported by SGCT [example: stereo='anaglyph_red_cyan'] {default: 'none'}
@@ -81,13 +85,16 @@ function sgct.config.single(arg) end
 -- sgct.config.fisheye(msaa=1) -> 1280x720 resolution without multisampling
 function sgct.config.fisheye(arg) end
 
+function sgct.config.cube(arg) end
+
+
 --[[
 ########################################################################################## 
                             Internal helper functions
 ########################################################################################## 
 ]]--
 
-function generateSingleViewport(down, up, left, right)
+function generateSingleViewportFOV(down, up, left, right)
     return
 [[
 <Viewport>
@@ -97,6 +104,23 @@ function generateSingleViewport(down, up, left, right)
         <FOV down="]]..down..[[" left="]]..left..[[" right="]]..right..[[" up="]]..up..[[" />
         <Orientation heading="0.0" pitch="0.0" roll="0.0" />
     </PlanarProjection>
+</Viewport>
+]]
+end
+
+
+
+function generateSingleViewport(lowerLeft, upperLeft, upperRight)
+    return
+[[
+<Viewport>
+    <Pos x="0.0" y="0.0" />
+    <Size x="1.0" y="1.0" />
+    <Projectionplane>
+        <Pos x="]] .. lowerLeft[1] .. [[" y="]] .. lowerLeft[2] .. [[" z="]] .. lowerLeft[3] .. [[" />
+        <Pos x="]] .. upperLeft[1] .. [[" y="]] .. upperLeft[2] .. [[" z="]] .. upperLeft[3] .. [[" />
+        <Pos x="]] .. upperRight[1] .. [[" y="]] .. upperRight[2] .. [[" z="]] .. upperRight[3] .. [[" />
+    </Projectionplane>
 </Viewport>
 ]]
 end
@@ -163,6 +187,12 @@ function generateWindow(arg)
 ]]
     end
 
+    local tags = ""
+    if arg["tags"] then
+        tags = table.concat(arg["tags"], ",")
+    end
+
+
     return
 [[
     <Window 
@@ -171,6 +201,7 @@ function generateWindow(arg)
         border="]] .. tostring(arg["border"]) .. [["
         name="]] .. arg["name"] .. [["
         monitor="]] .. arg["monitor"] .. [["
+        tags="]] .. tags .. [["
     >
         <Stereo type="]] .. arg["stereo"] .. [[" />
         <Size x="]] .. arg["windowSize"][1] .. [[" y="]] .. arg["windowSize"][2] .. [[" />
@@ -206,29 +237,44 @@ function generateScene(arg)
     if scene == nil then
         return ""
     else
-        local offset = ""
+        local offset = nil
         if scene["offset"] then
             local o = scene["offset"]
             offset = [[<Offset x="]]..o["x"]..[[" y="]]..o["y"]..[[" z="]]..o["z"]..[[" />]]
         end
 
-        local orientation = ""
+        local orientation = nil
         if scene["orientation"] then
             local o = scene["orientation"]
             orientation = [[<Orientation yaw="]]..o["yaw"]..[[" pitch="]]..o["pitch"]..[[" roll="]]..o["roll"]..[[" />]]
         end
 
-        local scale = ""
+        local scale = nil
         if scene["scale"] then
             scale = [[<Scale value="]] .. scene["scale"] .. [[" />]]
         end
 
-        return [[
-        <Scene>
-            ]]..offset..[[
-            ]]..orientation..[[
-            ]]..scale..[[
-        </Scale]]
+        local sceneString = "    <Scene>"
+        if offset then
+            sceneString = sceneString .. "\n        " .. offset .. "\n"
+        end
+        if orientation then
+            sceneString = sceneString .. "\n        " .. orientation .. "\n"
+        end
+        if scale then
+            sceneString = sceneString .. "\n        " .. scale .. "\n"
+        end
+
+        sceneString = sceneString .. "    </Scene>\n"
+
+        return sceneString
+
+    --     return [[
+    -- <Scene>
+    --     ]]..offset..[[
+    --     ]]..orientation..[[
+    --     ]]..scale..[[
+    -- </Scene>]]
     end
 end
 
@@ -299,13 +345,13 @@ function generateCluster(arg)
     externalControlPort="20500"
     debug="]] .. tostring(arg["sgctDebug"]) .. [["
 >
-]]..arg["settings"]..[[
-]]..arg["scene"]..[[
+]] .. (arg["settings"] or "") .. [[
+]] .. (arg["scene"] or "") .. [[
     <Node address="localhost" port="20401">
-]].. arg["window"] ..[[
+]] .. arg["window"] ..[[
     </Node>
 ]] .. arg["user"] .. [[
-]] .. arg["capture"] .. [[
+]] .. (arg["capture"] or "") .. [[
 </Cluster>
 ]]
 end
@@ -330,6 +376,21 @@ function generateSingleWindowConfig(arg)
     if (type(arg["res"]) == "table") then
         assert(type(arg["res"][1]) == "number", "res[1] must be a number")
         assert(type(arg["res"][2]) == "number", "res[2] must be a number")
+    end
+
+    assert(
+        type(arg["shared"]) == "boolean" or type(arg["shared"]) == "nil",
+        "shared must be a boolean or nil"
+    )
+
+    assert(
+        type(arg["tags"]) == "table" or type(arg["tags"]) == "nil",
+        "tags must be a table or nil"
+    )
+    if (type(arg["tags"]) == "table") and (next(arg["tags"]) ~= nil) then
+        for index, value in ipairs(arg["tags"]) do
+            assert(type(value) == "string", "Each tag must be a string")
+        end
     end
 
     assert(
@@ -490,6 +551,10 @@ function generateSingleWindowConfig(arg)
     if arg["monitor"] == nil then
         arg["monitor"] = 0
     end
+    
+    if arg["tags"] == nil then
+        arg["tags"] = {}
+    end
 
     if arg["msaa"] == nil then
         arg["msaa"] = 8
@@ -497,6 +562,11 @@ function generateSingleWindowConfig(arg)
 
     if arg["border"] == nil then
         arg["border"] = true
+    end
+
+     if arg["shared"] then
+        local t = arg["tags"]
+        t[#t + 1] = "Spout"
     end
 
     if arg["name"] == nil then
@@ -568,7 +638,7 @@ function sgct.config.single(arg)
     end
     
     arg["fov"] = arg["fov"] or { down = 16.875, up = 16.875, left = 30.0, right = 30.0 }
-    arg["viewport"] = generateSingleViewport(
+    arg["viewport"] = generateSingleViewportFOV(
         arg["fov"]["down"],
         arg["fov"]["up"], 
         arg["fov"]["left"],
@@ -664,4 +734,79 @@ function sgct.config.fisheye(arg)
     )
 
     return sgct.makeConfig(generateSingleWindowConfig(arg))
+end
+
+
+
+function sgct.config.cube(arg)
+    function getCubeWindow(location, res, size)
+        local pos
+        local lowerLeft
+        local upperLeft
+        local upperRight
+        if location == 'left' then
+            pos = { 0, size[2] }
+            lowerLeft =     { -1, -1,  1 }
+            upperLeft =     { -1,  1,  1 }
+            upperRight =    { -1,  1, -1 }
+        elseif location == 'right' then
+            pos = { 2 * size[1], size[2] }
+            lowerLeft =     {  1, -1, -1 }
+            upperLeft =     {  1,  1, -1 }
+            upperRight =    {  1,  1,  1 }
+        elseif location == 'up' then
+            pos = { size[1], 0 }
+            lowerLeft =     {  1,  1, -1 }
+            upperLeft =     {  1,  1,  1 }
+            upperRight =    { -1,  1,  1 }
+        elseif location == 'down' then
+            pos = { size[1], 2 * size[2] }
+            lowerLeft =     { -1, -1,  1 }
+            upperLeft =     { -1, -1, -1 }
+            upperRight =    {  1, -1, -1 }
+        elseif location == 'back' then
+            pos = { 2 * size[1], 2 * size[2] }
+            lowerLeft =     {  1, -1,  1 }
+            upperLeft =     {  1,  1,  1 }
+            upperRight =    { -1,  1,  1 }
+        elseif location == 'front' then
+            pos = { size[1], size[2] }
+            lowerLeft =     { -1, -1, -1 }
+            upperLeft =     { -1,  1, -1 }
+            upperRight =    {  1,  1, -1 }
+        end
+
+        arg = {}
+        arg["msaa"] = 8
+        arg["border"] = false
+        arg["name"] = "OpenSpace_" .. location
+        arg["tags"] = { "Spout" }
+        arg["windowSize"] = size
+        arg["windowPos"] = pos
+        arg["res"] = { res, res }
+        arg["viewport"] = generateSingleViewport(lowerLeft, upperLeft, upperRight)
+
+        return generateWindow(arg)
+    end
+
+    function getControlWindow(down, up, left, right)
+        arg = {}
+        arg["viewport"] = generateSingleViewportFOV(down, up, left, right)
+        return generateWindow(arg)
+    end
+
+
+    res = 1024
+    size = {640, 360}
+    
+    arg["scene"] = generateScene(arg)
+    arg["settings"] = generateSettings(arg)
+    arg["window"] = getControlWindow(16.875, 16.875, 30.0, 30.0) .. getCubeWindow('front', res, size) .. getCubeWindow('back', res, size) .. 
+        getCubeWindow('left', res, size) .. getCubeWindow('right', res, size) .. 
+        getCubeWindow('up', res, size) .. getCubeWindow('down', res, size)
+
+    arg["user"] = generateUser(arg)
+    arg["capture"] = generateCapture(arg)
+
+    return sgct.makeConfig(generateCluster(arg))
 end

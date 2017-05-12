@@ -24,7 +24,7 @@ return {
             Type = "RenderablePlanetProjection",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 6.035 , 5 },
+                Radius = 6.035E5,
                 Segments = 100
             },
             Textures = {
@@ -72,7 +72,7 @@ return {
         Parent = "Charon",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {1.0, 6.3},
+            Size = 10^6.3,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Charon-Text.png",

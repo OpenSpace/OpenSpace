@@ -32,7 +32,7 @@ return {
                         Name = "Ganymede Texture",
                         FilePath = "textures/ganymede.jpg",
                         Enabled = true,
-                        MinimumPixelSize = 112,
+                        TilePixelSize = 112,
                     },
                 },
                 GrayScaleLayers = { },

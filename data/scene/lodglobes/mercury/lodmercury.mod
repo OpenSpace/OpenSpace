@@ -42,7 +42,7 @@ return {
                         Name = "Simple Texture",
                         FilePath = "textures/mercury.jpg",
                         Enabled = true,
-                        MinimumPixelSize = 256,
+                        TilePixelSize = 256,
                     },
                     {
                         Name = "Messenger_Mosaic",

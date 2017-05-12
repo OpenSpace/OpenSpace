@@ -32,7 +32,7 @@
 namespace openspace {
 namespace globebrowsing {
 
-class RawTile;
+struct RawTile;
 
 struct LoadJob : public Job<RawTile> {
     virtual void execute() = 0;

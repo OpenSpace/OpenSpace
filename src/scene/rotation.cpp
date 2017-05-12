@@ -28,13 +28,12 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
 
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
-    const char* _loggerCat = "Rotation";
     const char* KeyType = "Type";
-}
+} // namespace
 
 namespace openspace {
 
@@ -64,11 +63,6 @@ std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary
     std::string rotationType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<Rotation>();
     std::unique_ptr<Rotation> result = factory->create(rotationType, dictionary);
-    if (result == nullptr) {
-        LERROR("Failed creating Rotation object of type '" << rotationType << "'");
-        return nullptr;
-    }
-
     return result;
 }
 
@@ -76,11 +70,9 @@ Rotation::Rotation()
     : properties::PropertyOwner("Rotation")
 {}
     
-Rotation::Rotation(const ghoul::Dictionary& dictionary)
+Rotation::Rotation(const ghoul::Dictionary&)
     : properties::PropertyOwner("Rotation")
 {}
-    
-Rotation::~Rotation() {}
     
 bool Rotation::initialize() {
     return true;
@@ -90,6 +82,6 @@ const glm::dmat3& Rotation::matrix() const {
     return _matrix;
 }
 
-void Rotation::update(const UpdateData& data) {}
+void Rotation::update(const UpdateData&) {}
 
 } // namespace openspace

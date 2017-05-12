@@ -9,7 +9,7 @@ return {
             Body = "EUROPA",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 1.561, 6},
+                Radius = 1.561E6,
                 Segments = 100
             },
             Textures = {

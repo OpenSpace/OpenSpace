@@ -29,7 +29,7 @@ namespace openspace {
 std::string licenseText() {
     return "OpenSpace\n\
 \n\
-Copyright (c) 2014-2016\n\
+Copyright (c) 2014-2017\n\
 \n\
 Permission is hereby granted, free of charge, to any person obtaining a copy of this\n\
 software and associated documentation files (the \"Software\"), to deal in the Software\n\

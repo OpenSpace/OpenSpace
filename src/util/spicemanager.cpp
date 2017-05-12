@@ -452,7 +452,7 @@ void SpiceManager::getValue(const std::string& body, const std::string& value,
 {
     ghoul_assert(!v.empty(), "Array for values has to be preallocaed");
 
-    getValueInternal(body, value, v.size(), v.data());
+    getValueInternal(body, value, static_cast<int>(v.size()), v.data());
 }
 
 double SpiceManager::spacecraftClockToET(const std::string& craft, double craftTicks) {
@@ -874,7 +874,7 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
              numberOfTerminatorPoints,
              &res.targetEphemerisTime,
              glm::value_ptr(res.observerPosition),
-             (double(*)[3])res.terminatorPoints.data()
+             reinterpret_cast<double(*)[3]>(res.terminatorPoints.data())
     );
     throwOnSpiceError(format(
         "Error getting terminator ellipse for target '{}' from observer '{}' in frame "

@@ -32,10 +32,10 @@ namespace openspace {
 std::string licenseText();
     
 const int OPENSPACE_VERSION_MAJOR = 0;
-const int OPENSPACE_VERSION_MINOR = 7;
+const int OPENSPACE_VERSION_MINOR = 8;
 const int OPENSPACE_VERSION_PATCH = 0;
     
-const std::string OPENSPACE_VERSION_STRING = "prerelease-12 (NAOJ)";
+const std::string OPENSPACE_VERSION_STRING = "prerelease-13 (Earth Day)";
 
 } // namespace openspace
 

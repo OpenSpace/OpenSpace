@@ -37,8 +37,8 @@ namespace {
 namespace openspace {
 
 SGCTWindowWrapper::SGCTWindowWrapper()
-    : _showStatsGraph("showStatsGraph", "Show Stats Graph", false)
-    , _eyeSeparation("eyeSeparation", "Eye Separation", 0.f, 0.f, 10.f)
+    : _eyeSeparation("eyeSeparation", "Eye Separation", 0.f, 0.f, 10.f)
+    , _showStatsGraph("showStatsGraph", "Show Stats Graph", false)
 {
     _showStatsGraph.onChange([this](){
         sgct::Engine::instance()->setStatsGraphVisibility(_showStatsGraph);
@@ -156,13 +156,12 @@ int SGCTWindowWrapper::currentNumberOfAaSamples() const {
 } 
     
 bool SGCTWindowWrapper::isRegularRendering() const {
-    // TODO: Needs to implement the nonlinear rendering check ---abock
-    
-    // sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
-    // !w->isUsingFisheyeRendering() does not exist anymore ---abock
-    //        if (_isMaster && !w->isUsingFisheyeRendering() && _console->isVisible()) {
-
-    return true;
+    sgct::SGCTWindow* w = sgct::Engine::instance()->getCurrentWindowPtr();
+    std::size_t nViewports = w->getNumberOfViewports();
+    ghoul_assert(nViewports > 0, "At least one viewport must exist at this time");
+    sgct_core::Viewport* vp = w->getViewport(0);
+    sgct_core::NonLinearProjection* nlp = vp->getNonLinearProjectionPtr();
+    return nlp == nullptr;
 }
 
 bool SGCTWindowWrapper::hasGuiWindow() const {

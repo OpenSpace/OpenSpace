@@ -89,6 +89,11 @@ public:
      */
     void removeSyncable(Syncable* syncable);
 
+    /**
+    * Remove multiple Syncables from being synchronized over the SGCT cluster
+    */
+    void removeSyncables(const std::vector<Syncable*>& syncables);
+
 private:
     /** 
      * Vector of Syncables. The vectors ensures consistent encode/decode order

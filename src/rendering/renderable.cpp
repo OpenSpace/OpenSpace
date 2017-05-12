@@ -41,6 +41,7 @@ namespace {
     const char* keyStart = "StartTime";
     const char* keyEnd = "EndTime";
     const char* KeyType = "Type";
+    const char* KeyTag = "Tag";
 }
 
 namespace openspace {
@@ -112,6 +113,21 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
     dictionary.getValue(keyStart, _startTime);
     dictionary.getValue(keyEnd, _endTime);
 
+    if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
+        std::string tagName = dictionary.value<std::string>(KeyTag);
+        if (!tagName.empty())
+            addTag(std::move(tagName));
+    } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+        ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
+        std::vector<std::string> keys = tagNames.keys();
+        std::string tagName;
+        for (const std::string& key : keys) {
+            tagName = tagNames.value<std::string>(key);
+            if (!tagName.empty())
+                addTag(std::move(tagName));
+        }
+    }
+
     if (_startTime != "" && _endTime != "") {
         _hasTimeInterval = true;
     }
@@ -121,12 +137,12 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
 Renderable::~Renderable() {}
 
-void Renderable::setBoundingSphere(PowerScaledScalar boundingSphere) {
-    boundingSphere_ = std::move(boundingSphere);
+void Renderable::setBoundingSphere(float boundingSphere) {
+    _boundingSphere = boundingSphere;
 }
 
-PowerScaledScalar Renderable::getBoundingSphere() {
-    return boundingSphere_;
+float Renderable::boundingSphere() const {
+    return _boundingSphere;
 }
 
 void Renderable::update(const UpdateData&) {}
@@ -135,12 +151,11 @@ void Renderable::render(const RenderData& data, RendererTasks&) {
     render(data);
 }
 
-void Renderable::render(const RenderData& data) {}
+void Renderable::render(const RenderData&) {}
 
-void Renderable::setPscUniforms(
-    ghoul::opengl::ProgramObject& program, 
-    const Camera& camera,
-    const PowerScaledCoordinate& position) 
+void Renderable::setPscUniforms(ghoul::opengl::ProgramObject& program,
+                                const Camera& camera,
+                                const PowerScaledCoordinate& position)
 {
     program.setUniform("campos", camera.position().vec4());
     program.setUniform("objpos", position.vec4());

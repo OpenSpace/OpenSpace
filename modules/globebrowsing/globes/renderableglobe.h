@@ -31,6 +31,7 @@
 #include <modules/globebrowsing/other/distanceswitch.h>
 
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -64,7 +65,8 @@ public:
         properties::BoolProperty resetTileProviders;
         properties::BoolProperty toggleEnabledEveryFrame;
         properties::BoolProperty collectStats;
-        properties::BoolProperty onlyModelSpaceRendering;
+        properties::BoolProperty limitLevelByAvailableData;
+        properties::IntProperty modelSpaceRenderingCutoffLevel;
     };
     
     struct GeneralProperties {

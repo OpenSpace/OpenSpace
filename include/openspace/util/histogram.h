@@ -34,7 +34,7 @@ class Histogram {
 public:
     Histogram();
     Histogram(float minValue, float maxValue, int numBins);
-    Histogram(float minValue, float maxValue, int numBins, float *data);
+    Histogram(float minValue, float maxValue, int numBins, float* data);
     Histogram(Histogram&& other);
     ~Histogram();
 

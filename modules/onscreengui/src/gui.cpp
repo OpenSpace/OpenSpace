@@ -64,10 +64,11 @@ static void RenderDrawLists(ImDrawData* drawData) {
     // Avoid rendering when minimized, scale coordinates for retina displays
     // (screen coordinates != framebuffer coordinates)
     ImGuiIO& io = ImGui::GetIO();
-    int fb_width = (int)(io.DisplaySize.x * io.DisplayFramebufferScale.x);
-    int fb_height = (int)(io.DisplaySize.y * io.DisplayFramebufferScale.y);
-    if (fb_width == 0 || fb_height == 0)
+    int fb_width = static_cast<int>(io.DisplaySize.x * io.DisplayFramebufferScale.x);
+    int fb_height = static_cast<int>(io.DisplaySize.y * io.DisplayFramebufferScale.y);
+    if (fb_width == 0 || fb_height == 0) {
         return;
+    }
     drawData->ScaleClipRects(io.DisplayFramebufferScale);
 
     // Setup render state:
@@ -86,7 +87,7 @@ static void RenderDrawLists(ImDrawData* drawData) {
     // Setup orthographic projection matrix
     const float width = ImGui::GetIO().DisplaySize.x;
     const float height = ImGui::GetIO().DisplaySize.y;
-    glViewport(0, 0, (GLsizei)fb_width, (GLsizei)fb_height);
+    glViewport(0, 0, static_cast<GLsizei>(fb_width), static_cast<GLsizei>(fb_height));
     const glm::mat4 ortho(
         2.f / width, 0.0f, 0.0f, 0.f,
         0.0f, 2.0f / -height, 0.0f, 0.f,
@@ -107,16 +108,16 @@ static void RenderDrawLists(ImDrawData* drawData) {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
-            (GLsizeiptr)cmdList->VtxBuffer.size() * sizeof(ImDrawVert),
-            (GLvoid*)&cmdList->VtxBuffer.front(),
+            static_cast<GLsizeiptr>(cmdList->VtxBuffer.size() * sizeof(ImDrawVert)),
+            reinterpret_cast<const GLvoid*>(&cmdList->VtxBuffer.front()),
             GL_STREAM_DRAW
         );
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboElements);
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
-            (GLsizeiptr)cmdList->IdxBuffer.size() * sizeof(ImDrawIdx),
-            (GLvoid*)&cmdList->IdxBuffer.front(),
+            static_cast<GLsizeiptr>(cmdList->IdxBuffer.size() * sizeof(ImDrawIdx)),
+            reinterpret_cast<const GLvoid*>(&cmdList->IdxBuffer.front()),
             GL_STREAM_DRAW
         );
 
@@ -127,14 +128,14 @@ static void RenderDrawLists(ImDrawData* drawData) {
             else {
                 glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
                 glScissor(
-                    (int)pcmd->ClipRect.x,
-                    (int)(fb_height - pcmd->ClipRect.w),
-                    (int)(pcmd->ClipRect.z - pcmd->ClipRect.x),
-                    (int)(pcmd->ClipRect.w - pcmd->ClipRect.y)
+                    static_cast<int>(pcmd->ClipRect.x),
+                    static_cast<int>(fb_height - pcmd->ClipRect.w),
+                    static_cast<int>(pcmd->ClipRect.z - pcmd->ClipRect.x),
+                    static_cast<int>(pcmd->ClipRect.w - pcmd->ClipRect.y)
                 );
                 glDrawElements(
                     GL_TRIANGLES,
-                    (GLsizei)pcmd->ElemCount,
+                    static_cast<GLsizei>(pcmd->ElemCount),
                     sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT,
                     indexBufferOffset
                 );
@@ -227,6 +228,7 @@ GUI::GUI()
     , _globalProperty("Global")
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
+    , _virtualProperty("Virtual Properties")
     , _currentVisibility(properties::Property::Visibility::All)
 {
     addPropertySubOwner(_help);
@@ -235,6 +237,7 @@ GUI::GUI()
     addPropertySubOwner(_globalProperty);
     addPropertySubOwner(_property);
     addPropertySubOwner(_screenSpaceProperty);
+    addPropertySubOwner(_virtualProperty);
     addPropertySubOwner(_time);
     addPropertySubOwner(_iswa);
 }
@@ -312,10 +315,15 @@ void GUI::initialize() {
     style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.52f, 0.52f, 0.52f, 1.0f);
 
     _property.initialize();
+    _property.setHasRegularProperties(true);
     _screenSpaceProperty.initialize();
+    _screenSpaceProperty.setHasRegularProperties(true);
     _globalProperty.initialize();
+    _globalProperty.setHasRegularProperties(true);
+    _virtualProperty.initialize();
     _performance.initialize();
     _help.initialize();
+    _parallel.initialize();
     _iswa.initialize(); 
 }
 
@@ -323,10 +331,12 @@ void GUI::deinitialize() {
     ImGui::Shutdown();
 
     _iswa.deinitialize();
+    _parallel.deinitialize();
     _help.deinitialize();
     _performance.deinitialize();
     _globalProperty.deinitialize();
     _screenSpaceProperty.deinitialize();
+    _virtualProperty.deinitialize();
     _property.deinitialize();
 
     delete iniFileBuffer;
@@ -354,7 +364,7 @@ void GUI::initializeGL() {
     _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
     _fontTexture->uploadTexture();
     GLuint id = *_fontTexture;
-    ImGui::GetIO().Fonts->TexID = (void*)(intptr_t)id;
+    ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(id);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -401,6 +411,7 @@ void GUI::initializeGL() {
     _globalProperty.initializeGL();
     _performance.initializeGL();
     _help.initializeGL();
+    _parallel.initializeGL();
     _iswa.initializeGL();
 }
 
@@ -419,6 +430,7 @@ void GUI::deinitializeGL() {
     }
 
     _iswa.deinitializeGL();
+    _parallel.deinitializeGL();
     _help.deinitializeGL();
     _performance.deinitializeGL();
     _globalProperty.deinitializeGL();
@@ -464,9 +476,14 @@ void GUI::endFrame() {
         if (_screenSpaceProperty.isEnabled()) {
             _screenSpaceProperty.render();
         }
-
+        if (_virtualProperty.isEnabled()) {
+            _virtualProperty.render();
+        }
         if (_help.isEnabled()) {
             _help.render();
+        }
+        if (_parallel.isEnabled()) {
+            _parallel.render();
         }
         if (_iswa.isEnabled()) {
             _iswa.render();
@@ -476,7 +493,7 @@ void GUI::endFrame() {
     ImGui::Render();
 }
 
-bool GUI::mouseButtonCallback(MouseButton button, MouseAction action) {
+bool GUI::mouseButtonCallback(MouseButton, MouseAction) {
     ImGuiIO& io = ImGui::GetIO();
     bool consumeEvent = io.WantCaptureMouse;
     return consumeEvent;
@@ -493,28 +510,46 @@ bool GUI::mouseWheelCallback(double position) {
 }
 
 bool GUI::keyCallback(Key key, KeyModifier modifier, KeyAction action) {
-    ImGuiIO& io = ImGui::GetIO();
-    bool consumeEvent = io.WantCaptureKeyboard;
-    if (consumeEvent) {
-        int keyIndex = static_cast<int>(key);
-        if (keyIndex < 0) {
-            LERROR("Pressed key of index '" << keyIndex << "' was negative");
-        }
-        else {
-            if (action == KeyAction::Press)
-                io.KeysDown[keyIndex] = true;
-            if (action == KeyAction::Release)
-                io.KeysDown[keyIndex] = false;
-        }
-
-        io.KeyShift = hasKeyModifier(modifier, KeyModifier::Shift);
-        io.KeyCtrl = hasKeyModifier(modifier, KeyModifier::Control);
-        io.KeyAlt = hasKeyModifier(modifier, KeyModifier::Alt);
+    const int keyIndex = static_cast<int>(key);
+    if (keyIndex < 0) {
+        return false;
     }
+
+    const bool hasShift = hasKeyModifier(modifier, KeyModifier::Shift);
+    const bool hasCtrl = hasKeyModifier(modifier, KeyModifier::Control);
+    const bool hasAlt = hasKeyModifier(modifier, KeyModifier::Alt);
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    const bool consumeEvent = io.WantCaptureKeyboard;
+    if (consumeEvent) {
+        if (action == KeyAction::Press) {
+            io.KeysDown[keyIndex] = true; 
+        }
+        io.KeyShift = hasShift;
+        io.KeyCtrl = hasCtrl;
+        io.KeyAlt = hasAlt;
+    }
+
+    // Even if the event is not consumed,
+    // set keys and modifiers to false when they are released.
+    if (action == KeyAction::Release) {
+        io.KeysDown[keyIndex] = false;
+    }
+    if (!hasShift) {
+        io.KeyShift = false;
+    }
+    if (!hasCtrl) {
+        io.KeyCtrl = false;
+    }
+    if (!hasAlt) {
+        io.KeyAlt = false;
+    }
+
     return consumeEvent;
 }
 
-bool GUI::charCallback(unsigned int character, KeyModifier modifier) {
+bool GUI::charCallback(unsigned int character, KeyModifier) {
     ImGuiIO& io = ImGui::GetIO();
     bool consumeEvent = io.WantCaptureKeyboard;
 
@@ -539,6 +574,14 @@ void GUI::render() {
     bool globalProperty = _globalProperty.isEnabled();
     ImGui::Checkbox("Global Properties", &globalProperty);
     _globalProperty.setEnabled(globalProperty);
+
+    bool parallel = _parallel.isEnabled();
+    ImGui::Checkbox("Parallel Connection", &parallel);
+    _parallel.setEnabled(parallel);
+
+    bool virtualProperty = _virtualProperty.isEnabled();
+    ImGui::Checkbox("Virtual Properties", &virtualProperty);
+    _virtualProperty.setEnabled(virtualProperty);
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     bool iswa = _iswa.isEnabled();
@@ -591,13 +634,14 @@ void GUI::renderAndUpdatePropertyVisibility() {
     int t = static_cast<std::underlying_type_t<V>>(_currentVisibility);
 
     // Array is sorted by importance
-    std::array<const char*, 4> items = {  "None", "User", "Developer", "All"};
-    ImGui::Combo("PropertyVisibility", &t, items.data(), items.size());
+    std::array<const char*, 4> items = { "None", "User", "Developer", "All"};
+    ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
 
     _currentVisibility = static_cast<V>(t);
     _globalProperty.setVisibility(_currentVisibility);
     _property.setVisibility(_currentVisibility);
     _screenSpaceProperty.setVisibility(_currentVisibility);
+    _virtualProperty.setVisibility(_currentVisibility);
 }
 
 

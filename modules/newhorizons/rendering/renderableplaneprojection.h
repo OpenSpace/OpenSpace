@@ -68,7 +68,6 @@ public:
 private:
     void loadTexture();
     void updatePlane(const Image& img, double currentTime);
-    std::string findClosestTarget(double currentTime);
     void setTarget(std::string body);
 
     std::string _texturePath;

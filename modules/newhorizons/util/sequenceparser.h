@@ -52,6 +52,7 @@ struct ImageSubset {
 
 class SequenceParser {
 public:
+    virtual ~SequenceParser() = default;
     virtual bool create() = 0;
     virtual std::map<std::string, ImageSubset> getSubsetMap() final;
     virtual std::vector<std::pair<std::string, TimeRange>> getInstrumentTimes() final;

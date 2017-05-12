@@ -258,7 +258,6 @@ int saveCameraStateToFile(lua_State* L) {
 
 int resetCameraDirection(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.resetCameraDirection";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 0) {

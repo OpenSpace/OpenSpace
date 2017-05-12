@@ -106,7 +106,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     );
 
     _size = static_cast<float>(dictionary.value<double>(KeySize));
-    setBoundingSphere(PowerScaledScalar::CreatePSS(_size));
+    setBoundingSphere(_size);
     addProperty(_size);
     _size.onChange([&]() { _planeIsDirty = true; });
 
@@ -260,12 +260,12 @@ void RenderableRings::createPlane() {
     };
     
     VertexData data[] = {
-        -size, -size, 0.f, 0.f,
-        size, size, 1.f, 1.f,
-        -size, size, 0.f, 1.f,
-        -size, -size, 0.f, 0.f,
-        size, -size, 1.f, 0.f,
-        size, size, 1.f, 1.f,
+        { -size, -size, 0.f, 0.f },
+        {  size,  size, 1.f, 1.f },
+        { -size,  size, 0.f, 1.f },
+        { -size, -size, 0.f, 0.f },
+        {  size, -size, 1.f, 0.f },
+        {  size,  size, 1.f, 1.f },
     };
 
     glBindVertexArray(_quad);

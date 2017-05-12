@@ -55,6 +55,9 @@ class NetworkEngine;
 class ParallelConnection;
 class RenderEngine;
 class SettingsEngine;
+class SceneManager;
+class VirtualPropertyManager;
+
 class SyncEngine;
 class TimeManager;
 class WindowWrapper;
@@ -85,7 +88,8 @@ public:
     void deinitialize();
     void preSynchronization();
     void postSynchronizationPreDraw();
-    void render(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+    void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
+        const glm::mat4& projectionMatrix);
     void postDraw();
     void keyboardCallback(Key key, KeyModifier mod, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier mod);
@@ -95,7 +99,9 @@ public:
     void externalControlCallback(const char* receivedChars, int size, int clientId);
     void encode();
     void decode();
-    
+
+    void scheduleLoadScene(std::string scenePath);
+
     void enableBarrier();
     void disableBarrier();
     
@@ -120,6 +126,7 @@ public:
     properties::PropertyOwner& globalPropertyOwner();
     scripting::ScriptEngine& scriptEngine();
     scripting::ScriptScheduler& scriptScheduler();
+    VirtualPropertyManager& virtualPropertyManager();
 
     
     // This method is only to be called from Modules
@@ -165,8 +172,8 @@ public:
 private:
     OpenSpaceEngine(std::string programName,
         std::unique_ptr<WindowWrapper> windowWrapper);
-    ~OpenSpaceEngine() = default;
 
+    void loadScene(const std::string& scenePath);
     void gatherCommandlineArguments();
     void loadFonts();
     void runPreInitializationScripts(const std::string& sceneDescription);
@@ -174,6 +181,7 @@ private:
     
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
+    std::unique_ptr<SceneManager> _sceneManager;
     std::unique_ptr<DownloadManager> _downloadManager;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;
@@ -189,10 +197,14 @@ private:
     std::unique_ptr<interaction::InteractionHandler> _interactionHandler;
     std::unique_ptr<scripting::ScriptEngine> _scriptEngine;
     std::unique_ptr<scripting::ScriptScheduler> _scriptScheduler;
+    std::unique_ptr<VirtualPropertyManager> _virtualPropertyManager;
 
     // Others
     std::unique_ptr<properties::PropertyOwner> _globalPropertyNamespace;
     
+    bool _scheduledSceneSwitch;
+    std::string _scenePath;
+
     struct {
         std::vector<std::function<void()>> initialize;
         std::vector<std::function<void()>> deinitialize;

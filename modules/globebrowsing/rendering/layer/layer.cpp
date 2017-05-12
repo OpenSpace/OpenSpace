@@ -47,10 +47,11 @@ Layer::Layer(const ghoul::Dictionary& layerDict)
     addProperty(_enabled);
 
     addPropertySubOwner(_renderSettings);
+    addPropertySubOwner(*_tileProvider);
 }
 
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
-    return std::move(_tileProvider->getChunkTilePile(tileIndex, pileSize));
+    return _tileProvider->getChunkTilePile(tileIndex, pileSize);
 }
 
 } // namespace globebrowsing

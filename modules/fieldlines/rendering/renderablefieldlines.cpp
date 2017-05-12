@@ -121,7 +121,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
     }
 
     // @TODO a non-magic number perhaps ---abock
-    setBoundingSphere(PowerScaledScalar::CreatePSS(250.f*6371000.f));
+    setBoundingSphere(250.f*6371000.f);
 
     _seedPointSource.addOption(SeedPointSourceFile, "File");
     _seedPointSource.addOption(SeedPointSourceTable, "Lua Table");

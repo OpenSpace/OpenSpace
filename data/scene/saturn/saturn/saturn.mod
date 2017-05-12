@@ -1,6 +1,3 @@
-SaturnRadius = 5.8232E7;
-
-
 return {
     -- Saturn barycenter module
     {
@@ -26,7 +23,7 @@ return {
             Body = "SATURN BARYCENTER",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = {SaturnRadius, 0},
+                Radius = 5.8232E7,
                 Segments = 100
             },
             Textures = {
@@ -39,6 +36,7 @@ return {
                 MieColor = {1.0, 1.0, 1.0}
             }
         },
+        Tag = "planet_solarSystem",
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
@@ -76,7 +74,8 @@ return {
             },
             Color = {0.85,0.75,0.51 },
             Period = 10746.94,
-            Resolution = 1000
+            Resolution = 1000,
+            Tag = "planetTrail_solarSystem"
         },
     }
 }

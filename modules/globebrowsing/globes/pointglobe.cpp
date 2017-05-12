@@ -117,7 +117,5 @@ void PointGlobe::render(const RenderData& data) {
     _programObject->deactivate();
 }
 
-void PointGlobe::update(const UpdateData& data) {}
-
 } // namespace globebrowsing
 } // namespace openspace

@@ -47,7 +47,7 @@ namespace {
     const char* KeyScale = "Scale";
     const char* KeyDepth = "Depth";
     const char* KeyAlpha = "Alpha";
-
+    const char* KeyTag = "Tag";
     const float PlaneDepth = -2.f;
 }
 
@@ -110,9 +110,9 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     , _sphericalPosition(
         "sphericalPosition",
         "Spherical coordinates",
-        glm::vec2(0.f, M_PI_2),
-        glm::vec2(-M_PI),
-        glm::vec2(M_PI)
+        glm::vec2(0.f, static_cast<float>(M_PI_2)),
+        glm::vec2(-static_cast<float>(M_PI)),
+        glm::vec2(static_cast<float>(M_PI))
     )
     , _depth("depth", "Depth", 0.f, 0.f, 1.f)
     , _scale("scale", "Scale", 0.25f, 0.f, 2.f)
@@ -145,6 +145,21 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     dictionary.getValue(KeyScale, _scale);
     dictionary.getValue(KeyDepth, _depth);
     dictionary.getValue(KeyAlpha, _alpha);
+
+    if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
+        std::string tagName = dictionary.value<std::string>(KeyTag);
+        if (!tagName.empty())
+            addTag(std::move(tagName));
+    } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
+        ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
+        std::vector<std::string> keys = tagNames.keys();
+        std::string tagName;
+        for (const std::string& key : keys) {
+            tagName = tagNames.value<std::string>(key);
+            if (!tagName.empty())
+                addTag(std::move(tagName));
+        }
+    }
 
     // Setting spherical/euclidean onchange handler
     _useFlatScreen.onChange([this](){   
@@ -241,7 +256,7 @@ glm::vec2 ScreenSpaceRenderable::toEuclidean(const glm::vec2& spherical, float r
 
 glm::vec2 ScreenSpaceRenderable::toSpherical(const glm::vec2& euclidean) {
     _radius = -sqrt(pow(euclidean[0],2)+pow(euclidean[1],2)+pow(PlaneDepth,2));
-    float theta = atan2(-PlaneDepth,euclidean[0])-M_PI/2.0;
+    float theta = atan2(-PlaneDepth, euclidean[0]) - static_cast<float>(M_PI_2);
     float phi = acos(euclidean[1]/_radius);
 
     return glm::vec2(theta, phi);

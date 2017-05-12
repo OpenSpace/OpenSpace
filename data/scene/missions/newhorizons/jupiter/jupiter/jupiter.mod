@@ -22,7 +22,7 @@ return {
             Body = "JUPITER",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 0.71492, 8 },
+                Radius = 0.71492E8,
                 Segments = 200,
             },
             Textures = {
@@ -101,7 +101,7 @@ return {
         Parent = "JupiterProjection",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {1.0, 7.5},
+            Size = 10^7.5,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Jupiter-text.png",

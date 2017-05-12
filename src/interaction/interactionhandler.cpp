@@ -39,8 +39,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
 
-
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/geometry/geodetic2.h>
@@ -59,10 +59,7 @@ namespace {
 
     const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/main.hbs";
     const char* KeybindingTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs";
-    const char* HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
     const char* JsFilename = "${OPENSPACE_DATA}/web/keybindings/script.js";
-    const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
 } // namespace
 
 #include "interactionhandler_lua.inl"
@@ -73,6 +70,15 @@ namespace interaction {
 // InteractionHandler
 InteractionHandler::InteractionHandler()
     : properties::PropertyOwner("Interaction")
+    , DocumentationGenerator(
+        "Documentation",
+        "keybindings",
+        {
+            { "keybindingTemplate",  KeybindingTemplateFilename },
+            { "mainTemplate", MainTemplateFilename }
+        },
+        JsFilename
+    )
     , _origin("origin", "Origin", "")
     , _rotationalFriction("rotationalFriction", "Rotational Friction", true)
     , _horizontalFriction("horizontalFriction", "Horizontal Friction", true)
@@ -169,6 +175,7 @@ void InteractionHandler::setFocusNode(SceneGraphNode* node) {
 
 void InteractionHandler::setCamera(Camera* camera) {
     _camera = camera;
+    setFocusNode(_camera->parent());
 }
 
 void InteractionHandler::resetCameraDirection() {
@@ -185,6 +192,10 @@ void InteractionHandler::setInteractionMode(std::shared_ptr<InteractionMode> int
 
     // Update the focusnode for the new interaction mode
     _currentInteractionMode->setFocusNode(focusNode);
+}
+
+InteractionMode * InteractionHandler::interactionMode() {
+    return _currentInteractionMode.get();
 }
 
 void InteractionHandler::setInteractionMode(const std::string& interactionModeKey) {
@@ -260,11 +271,20 @@ void InteractionHandler::updateCamera(double deltaTime) {
     }
 }
 
-SceneGraphNode* const InteractionHandler::focusNode() const {
+SceneGraphNode* InteractionHandler::focusNode() const {
     return _currentInteractionMode->focusNode();
 }
 
-Camera* const InteractionHandler::camera() const {
+glm::dvec3 InteractionHandler::focusNodeToCameraVector() const {
+    return _camera->positionVec3() - focusNode()->worldPosition();
+}
+
+glm::quat InteractionHandler::focusNodeToCameraRotation() const {
+    glm::dmat4 invWorldRotation = glm::inverse(focusNode()->worldRotationMatrix());
+    return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
+}
+
+Camera* InteractionHandler::camera() const {
     return _camera;
 }
 
@@ -419,128 +439,36 @@ void InteractionHandler::bindKey(Key key, KeyModifier modifier,
 }
 
     
-void InteractionHandler::writeKeyboardDocumentation(const std::string& type,
-                                                    const std::string& file)
-{
-    if (type == "text") {
-        std::ofstream f;
-        f.exceptions(~std::ofstream::goodbit);
-        f.open(absPath(file));
-        
-        for (const auto& p : _keyLua) {
-            std::string remoteScriptingInfo;
-            bool remoteScripting = p.second.synchronization;
-
-            if (!remoteScripting) {
-                remoteScriptingInfo = " (LOCAL)";
-            }
-            f << std::to_string(p.first) << ": "
-              << p.second.command << remoteScriptingInfo << '\n'
-              << p.second.documentation << '\n';
+std::string InteractionHandler::generateJson() const {
+    std::stringstream json;
+    json << "[";
+    bool first = true;
+    for (const auto& p : _keyLua) {
+        if (!first) {
+            json << ",";
+        }
+        first = false;
+        json << "{";
+        json << "\"key\": \"" << std::to_string(p.first) << "\",";
+        json << "\"script\": \"" << p.second.command << "\",";
+        json << "\"remoteScripting\": " << (p.second.synchronization ? "true," : "false,");
+        json << "\"documentation\": \"" << p.second.documentation << "\"";
+        json << "}";
+    }
+    json << "]";
+    
+    std::string jsonString = "";
+    for (const char& c : json.str()) {
+        if (c == '\'') {
+            jsonString += "\\'";
+        } else {
+            jsonString += c;
         }
     }
-    else if (type == "html") {
-        std::ofstream f;
-        f.exceptions(~std::ofstream::goodbit);
-        f.open(absPath(file));
 
-        std::ifstream handlebarsInput(absPath(HandlebarsFilename));
-        std::ifstream jsInput(absPath(JsFilename));
-
-        std::string jsContent;
-        std::back_insert_iterator<std::string> jsInserter(jsContent);
-
-        std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
-        std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
-
-        std::ifstream bootstrapInput(absPath(BootstrapFilename));
-        std::ifstream cssInput(absPath(CssFilename));
-
-        std::string cssContent;
-        std::back_insert_iterator<std::string> cssInserter(cssContent);
-
-        std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
-        std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
-
-        std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
-        std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
-            std::istreambuf_iterator<char>{} };
-
-        std::ifstream keybindingTemplateInput(absPath(KeybindingTemplateFilename));
-        std::string keybindingTemplateContent{ std::istreambuf_iterator<char>{keybindingTemplateInput},
-            std::istreambuf_iterator<char>{} };
-
-        std::stringstream json;
-        json << "[";
-        bool first = true;
-        for (const auto& p : _keyLua) {
-            if (!first) {
-                json << ",";
-            }
-            first = false;
-            json << "{";
-            json << "\"key\": \"" << std::to_string(p.first) << "\",";
-            json << "\"script\": \"" << p.second.command << "\",";
-            json << "\"remoteScripting\": " << (p.second.synchronization ? "true," : "false,");
-            json << "\"documentation\": \"" << p.second.documentation << "\"";
-            json << "}";
-        }
-        json << "]";
-
-        std::string jsonString = "";
-        for (const char& c : json.str()) {
-            if (c == '\'') {
-                jsonString += "\\'";
-            } else {
-                jsonString += c;
-            }
-        }
-
-
-        std::stringstream html;
-        html << "<!DOCTYPE html>\n"
-            << "<html>\n"
-            << "\t<head>\n"
-            << "\t\t<script id=\"mainTemplate\" type=\"text/x-handlebars-template\">\n"
-            << mainTemplateContent << "\n"
-            << "\t\t</script>\n"
-            << "\t\t<script id=\"keybindingTemplate\" type=\"text/x-handlebars-template\">\n"
-            << keybindingTemplateContent << "\n"
-            << "\t\t</script>\n"
-            << "\t<script>\n"
-            << "var keybindings = JSON.parse('" << jsonString << "');\n"
-            << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
-            << "var generationTime = '" << Time::now().ISO8601() << "';\n"
-            << jsContent << "\n"
-            << "\t</script>\n"
-            << "\t<style type=\"text/css\">\n"
-            << cssContent << "\n"
-            << "\t</style>\n"
-            << "\t\t<title>Documentation</title>\n"
-            << "\t</head>\n"
-            << "\t<body>\n"
-            << "\t<body>\n"
-            << "</html>\n";
-
-        f << html.str();
-
-
-        /*
-        for (const auto& p : _keyLua) {
-            html << "\t\t<tr>\n"
-                 << "\t\t\t<td>" << std::to_string(p.first) << "</td>\n"
-                 << "\t\t\t<td>" << p.second.first << "</td>\n"
-                 << "\t\t\t<td>" << (p.second.second ? "Yes" : "No") << "</td>\n"
-                 << "\t\t</tr>\n";
-        }*/
-    }
-    else {
-        throw ghoul::RuntimeError(
-            "Unsupported keyboard documentation type '" + type + "'",
-            "InteractionHandler"
-        );
-    }
+    return jsonString;
 }
+    
 
 scripting::LuaLibrary InteractionHandler::luaLibrary() {
     return{
@@ -615,8 +543,16 @@ void InteractionHandler::addKeyframe(const datamessagestructures::CameraKeyframe
     _inputState->addKeyframe(kf);
 }
 
+void InteractionHandler::removeKeyframesAfter(double timestamp) {
+    _inputState->removeKeyframesAfter(timestamp);
+}
+
 void InteractionHandler::clearKeyframes() {
     _inputState->clearKeyframes();
+}
+
+const std::vector<datamessagestructures::CameraKeyframe>& InteractionHandler::keyframes() const {
+    return _inputState->keyframes();
 }
 
 } // namespace interaction

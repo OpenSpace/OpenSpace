@@ -62,4 +62,10 @@
     </DataWindow>
     <BlockSizeX>512</BlockSizeX>
     <BlockSizeY>512</BlockSizeY>
+
+    <Cache>
+        <Path>./GDAL_Cache/OnMoonColor</Path>
+        <Depth>4</Depth>
+        <Extension>.png</Extension>
+    </Cache>    
 </GDAL_WMS>

@@ -20,8 +20,9 @@ return {
             Type = "RenderableGlobe",
             Radii = {1738140, 1738140, 1735970}, -- Moons's radius
             CameraMinHeight = 300,
-            InteractionDepthBelowEllipsoid = 5000, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
+            -- Allows camera to go down 10000 meters below the reference ellipsoid
+            InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             Layers = {
                 ColorLayers = {
 
@@ -63,10 +64,13 @@ return {
                         FilePath = "map_service_configs/OnMoonHeight.xml",
                         Enabled = true,
                         DoPreProcessing = true,
+                        TileSize = 64,
                     },
                     {
                         Name = "LolaDem",
-                        FilePath = "map_service_configs/Utah/LolaDem.wms"
+                        FilePath = "map_service_configs/Utah/LolaDem.wms",
+                        DoPreProcessing = true,
+                        TileSize = 64,
                     }
                 },
             },

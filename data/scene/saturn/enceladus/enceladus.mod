@@ -8,7 +8,7 @@ return {
             Body = "ENCELADUS",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 0.257, 3 },
+                Radius = 0.257E3,
                 Segments = 50
             },
             Textures = {

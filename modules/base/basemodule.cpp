@@ -97,7 +97,7 @@ void BaseModule::internalInitialize() {
     auto fScale = FactoryManager::ref().factory<Scale>();
     ghoul_assert(fScale, "Scale factory was not created");
 
-    fScale->registerClass <StaticScale> ("StaticScale");
+    fScale->registerClass<StaticScale>("StaticScale");
 
     auto fModelGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fModelGeometry, "Model geometry factory was not created");
@@ -106,6 +106,10 @@ void BaseModule::internalInitialize() {
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {
     return {
+        RenderableModel::Documentation(),
+        ScreenSpaceFramebuffer::Documentation(),
+        ScreenSpaceImage::Documentation(),
+        StaticRotation::Documentation(),
         StaticScale::Documentation(),
         StaticTranslation::Documentation(),
         RenderableTrailOrbit::Documentation(),

@@ -337,14 +337,14 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     // This might become a bigger issue if we are starting to look at very short time
     // intervals
     const double Epsilon = 1e-7;
-    if (abs(delta) < Epsilon) {
+    if (std::abs(delta) < Epsilon) {
         return { false, 0 };
     }
 
     if (delta > 0.0) {
         // Check whether we need to drop a new permanent point. This is only the case if
         // enough (> secondsPerPoint) time has passed since the last permanent point
-        if (abs(delta) < secondsPerPoint) {
+        if (std::abs(delta) < secondsPerPoint) {
             return { false, 0 };
         }
 

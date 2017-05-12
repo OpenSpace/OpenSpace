@@ -89,9 +89,9 @@ void GuiPerformanceComponent::render() {
     }
         
     if (_sceneGraphIsEnabled) {
-        bool v = _sceneGraphIsEnabled;
-        ImGui::Begin("SceneGraph", &v);
-        _sceneGraphIsEnabled = v;
+        bool sge = _sceneGraphIsEnabled;
+        ImGui::Begin("SceneGraph", &sge);
+        _sceneGraphIsEnabled = sge;
         
         // The indices correspond to the index into the average array further below
         ImGui::Text("Sorting");
@@ -399,9 +399,9 @@ void GuiPerformanceComponent::render() {
     }
         
     if (_functionsIsEnabled) {
-        bool v = _functionsIsEnabled;
-        ImGui::Begin("Functions", &v);
-        _functionsIsEnabled = v;
+        bool fe = _functionsIsEnabled;
+        ImGui::Begin("Functions", &fe);
+        _functionsIsEnabled = fe;
         using namespace performance;
             
         for (int i = 0; i < layout->nFunctionEntries; ++i) {
@@ -421,9 +421,6 @@ void GuiPerformanceComponent::render() {
                 std::begin(layout->functionEntries[i].time),
                 std::end(layout->functionEntries[i].time)
             );
-                
-            const PerformanceLayout::FunctionPerformanceLayout& f =
-                layout->functionEntries[i];
                 
             std::string renderTime = std::to_string(
                 entry.time[PerformanceLayout::NumberValues - 1]
