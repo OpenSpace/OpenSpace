@@ -25,9 +25,8 @@
 #ifndef __OPENSPACE_TOUCH___INTERACTION___H__
 #define __OPENSPACE_TOUCH___INTERACTION___H__
 
-#include <modules/touch/include/TuioEar.h>
-#include <modules/touch/touchmodule.h>
 #include <modules/touch/ext/levmarq.h>
+#include <modules/touch/include/TuioEar.h>
 
 #include <openspace/util/camera.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -47,75 +46,44 @@
 
 #include <list>
 
-// @COMMENT  It's better to use strongly-typed enums here:
-// enum class Type { Rot = 0, Pinch, Pan, Roll, Pick };
-// #define's leak into other parts of the program, especially if they are defined in header files
-#define ROT 0
-#define PINCH 1
-#define PAN 2
-#define ROLL 3
-#define PICK 4
-
 namespace openspace {
-
-// @COMMENT  These structs are defined in the openspace namespace;  it would be better to place that in either
-// a subnamespace or in the Touchinteraction class
-struct VelocityStates {
-	glm::dvec2 orbit;
-	double zoom;
-	double roll;
-	glm::dvec2 pan;
-};
-struct SelectedBody { 
-	int id;
-	SceneGraphNode* node;
-	glm::dvec3 coordinates;
-};
-struct FunctionData {
-	std::vector<glm::dvec3> selectedPoints;
-	std::vector<glm::dvec2> screenPoints;
-	int nDOF;
-	glm::dvec2(*castToNDC)(glm::dvec3, Camera&, SceneGraphNode*, double);
-	double(*distToMinimize)(double* par, int x, void* fdata, LMstat* lmstat);
-	Camera* camera;
-	SceneGraphNode* node;
-	double aspectRatio;
-	LMstat stats;
-};
-
-// @COMMENT  Double definition
-#define ROT 0
-#define PINCH 1
-#define ROLL 2
-#define PAN 3
-#define PICK 4
-
-// @COMMENT  This is also polluting the openspace namespace
-using Point = std::pair<int, TUIO::TuioPoint>;
 
 class TouchInteraction : public properties::PropertyOwner
 {
+	using Point = std::pair<int, TUIO::TuioPoint>;
+
 	public:
 		TouchInteraction();
-        // @COMMENT  The destructor doesn't do anything, so it could be deleted
-		~TouchInteraction();
-		
-        // @COMMENT  How many of these functions have to be public, and could be made private instead?
 
-        void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
-        // @COMMENT  all of the function names here are not very descriptive. Especially
-        // when it comes to the return values
-        bool gui(const std::vector<TUIO::TuioCursor>& list);
-		void manipulate(const std::vector<TUIO::TuioCursor>& list);
-		void trace(const std::vector<TUIO::TuioCursor>& list);
-		int interpret(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
-		void accelerate(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
+		enum Type { ROT = 0, PINCH, PAN, ROLL, PICK };
 
+		struct VelocityStates {
+			glm::dvec2 orbit;
+			double zoom;
+			double roll;
+			glm::dvec2 pan;
+		};
+		struct SelectedBody {
+			int id;
+			SceneGraphNode* node;
+			glm::dvec3 coordinates;
+		};
+		struct FunctionData {
+			std::vector<glm::dvec3> selectedPoints;
+			std::vector<glm::dvec2> screenPoints;
+			int nDOF;
+			glm::dvec2(*castToNDC)(glm::dvec3, Camera&, SceneGraphNode*, double);
+			double(*distToMinimize)(double* par, int x, void* fdata, LMstat* lmstat);
+			Camera* camera;
+			SceneGraphNode* node;
+			double aspectRatio;
+			LMstat stats;
+		};
+
+		void updateStateFromInput(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
 		void step(double dt);
 		void unitTest();
-
-		void decelerate();
-		void clear();
+		void resetAfterInput();
 		void tap();
 
 		// Get & Setters
@@ -125,6 +93,13 @@ class TouchInteraction : public properties::PropertyOwner
 		void setCamera(Camera* cam);
 
 	private:
+		bool guiMode(const std::vector<TUIO::TuioCursor>& list);
+		void directControl(const std::vector<TUIO::TuioCursor>& list);
+		void findSelectedNode(const std::vector<TUIO::TuioCursor>& list);
+		int interpretInteraction(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
+		void computeVelocities(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
+		void decelerate();
+
 		Camera* _camera;
 		SceneGraphNode* _focusNode = nullptr;
 

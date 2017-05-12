@@ -35,7 +35,6 @@
 #include <ghoul/logging/logmanager.h>
 
 using namespace TUIO;
-
 namespace {
 	const std::string _loggerCat = "TuioEar";
 }
@@ -66,9 +65,9 @@ void TuioEar::addTuioCursor(TuioCursor *tcur) {
 		})->update(tcur);
 		_removeList.erase(foundID);
 	}
-	else
+	else {
 		_list.push_back(TuioCursor(*tcur));
-
+	}
 	_mx.unlock();
 }
 
@@ -115,8 +114,9 @@ bool TuioEar::tap() {
 		_tap = false;
 		return !_tap;
 	}
-	else
+	else {
 		return _tap;
+	}
 }
 
 TuioCursor TuioEar::getTap() {

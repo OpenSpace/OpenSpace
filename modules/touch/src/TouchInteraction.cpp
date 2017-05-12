@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #include <modules/touch/include/TouchInteraction.h>
 #include <modules/onscreengui/onscreenguimodule.h>
 
@@ -54,8 +53,7 @@ namespace {
 }
 
 using namespace TUIO;
-// @COMMENT  Instead of using namespace openspace, it's better to just open the namespace instead
-using namespace openspace;
+namespace openspace {
 
 TouchInteraction::TouchInteraction()
 	: properties::PropertyOwner("TouchInteraction"),
@@ -108,10 +106,8 @@ TouchInteraction::TouchInteraction()
 	_time.initSession();
 }
 
-TouchInteraction::~TouchInteraction() { }
-
 // Called each frame if there is any input
-void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
+void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
 	if (_tap) { // check for doubletap
 		if (_time.getSessionTime().getTotalMilliseconds() < _maxTapTime) {
 			_doubleTap = true;
@@ -120,19 +116,19 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 		_time.initSession();
 	}
 	
-	if (!gui(list)) {
+	if (!guiMode(list)) {
 		if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
-			manipulate(list);
+			directControl(list);
 		}
 		if (_lmSuccess) {
-			trace(list);
+			findSelectedNode(list);
 		}
 		if (!_directTouchMode) {
-			accelerate(list, lastProcessed);
+			computeVelocities(list, lastProcessed);
 		}
 
 		// evaluates if current frame is in directTouchMode (will if so be used next frame)
-		if (_currentRadius > _nodeRadiusThreshold && _selected.size() == list.size()) { // good value to make any planet sufficiently large for direct-touch, needs better definition
+		if (_currentRadius > _nodeRadiusThreshold && _selected.size() == list.size()) { // needs better definition?
 			_directTouchMode = true;
 		}
 		else {
@@ -141,7 +137,7 @@ void TouchInteraction::update(const std::vector<TuioCursor>& list, std::vector<P
 	}
 }
 
-bool TouchInteraction::gui(const std::vector<TuioCursor>& list) {
+bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
 	WindowWrapper& wrapper = OsEng.windowWrapper();
 	glm::ivec2 res = wrapper.currentWindowSize();
 	glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenY(res.y)); // mouse pixel position
@@ -163,7 +159,7 @@ bool TouchInteraction::gui(const std::vector<TuioCursor>& list) {
 }
 
 // Sets _vel to update _camera according to direct-manipulation (L2 error)
-void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
+void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 	// Returns the screen point s(xi,par) dependant the transform M(par) and object point xi
 	auto distToMinimize = [](double* par, int x, void* fdata, LMstat* lmstat) {
 		FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
@@ -236,27 +232,20 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 	// Gradient of distToMinimize w.r.t par (using forward difference)
 	auto gradient = [](double* g, double* par, int x, void* fdata, LMstat* lmstat) {
 		FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-		double f0 = ptr->distToMinimize(par, x, fdata, lmstat);
-		double f1, der, minStep = 1e-11;
 		glm::dvec3 camPos = ptr->camera->positionVec3();
 		glm::dvec3 selectedPoint = (ptr->node->rotationMatrix() * ptr->selectedPoints.at(x)) + ptr->node->worldPosition();
-		double h = minStep * glm::distance(camPos, selectedPoint);
-        // @COMMENT  Is it necessary to make the allication every time?  It might better to only allocate the memory once (preferrably on the heap)
-		double* dPar = new double[ptr->nDOF];
-		for (int i = 0; i < ptr->nDOF; ++i) {
-			dPar[i] = par[i];
-		}
+		double h = 1e-11 * glm::distance(camPos, selectedPoint);
+		double der, f1, f0 = ptr->distToMinimize(par, x, fdata, lmstat);
 
 		for (int i = 0; i < ptr->nDOF; ++i) {
 			h = (i == 2) ? 1e-4 : h; // the 'zoom'-DOF is so big a smaller step creates NAN
-			dPar[i] += h;
-			f1 = ptr->distToMinimize(dPar, x, fdata, lmstat);
-			dPar[i] -= h;
+			par[i] += h;
+			f1 = ptr->distToMinimize(par, x, fdata, lmstat);
+			par[i] -= h;
 			der = (f1 - f0) / h;
 			
 			g[i] = (i > 1 && i < 4) ? der : der / abs(der);
 		}
-		delete[] dPar;
 	};
 
 	SceneGraphNode* node = _selected.at(0).node;
@@ -271,34 +260,28 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 
 	const int nFingers = list.size();
 	int nDOF = std::min(nFingers * 2, 6);
-    // @COMMENT  Better to use a std::vector<double>(nDOF, 0.0) here and use par.data() where you need to pass the * to other functions. Then you can remove the next for loop, too
-	double* par = new double[nDOF];
-	for (int i = 0; i < nDOF; ++i) { // initial values of q or 0.0? (ie current model or no rotation/translation)
-		par[i] = 0.0;
-	}
+    std::vector<double> par(nDOF, 0.0);
 	std::vector<glm::dvec3> selectedPoints;
 	std::vector<glm::dvec2> screenPoints;
 	for (const SelectedBody& sb : _selected) {
 		selectedPoints.push_back(sb.coordinates);
 
 		std::vector<TuioCursor>::const_iterator c = find_if(list.begin(), list.end(), [&sb](const TuioCursor& c) { return c.getSessionID() == sb.id; });
-		double xCo = 2 * (c->getX() - 0.5);
-		double yCo = -2 * (c->getY() - 0.5); // normalized -1 to 1 coordinates on screen
-		screenPoints.push_back(glm::dvec2(xCo, yCo));
+		screenPoints.push_back(glm::dvec2(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5))); // normalized -1 to 1 coordinates on screen
 	}
 	//glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
 	FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, node, 1.88, _lmstat };
 	void* dataPtr = reinterpret_cast<void*>(&fData);
 
-	_lmSuccess = levmarq(nDOF, par, nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
+	_lmSuccess = levmarq(nDOF, par.data(), nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
 
 	if (_lmSuccess && !_unitTest) { // if good values were found set new camera state
-		_vel.orbit = glm::dvec2(par[0], par[1]);
+		_vel.orbit = glm::dvec2(par.at(0), par.at(1));
 		if (nDOF > 2) {
-			_vel.zoom = par[2];
-			_vel.roll = par[3];
+			_vel.zoom = par.at(2);
+			_vel.roll = par.at(3);
 			if (nDOF > 4) {
-				_vel.pan = glm::dvec2(par[4], par[5]);
+				_vel.pan = glm::dvec2(par.at(4), par.at(5));
 			}
 		}
 		step(1);
@@ -318,11 +301,10 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 		}
 		std::cout << "Levmarq success after " << _lmstat.final_it << " iterations. Values: " << os.str() << "\n";*/
 	}
-	delete[] par; // cleanup
 }
 
 // Traces the touch input into the scene and finds the surface coordinates of touched planets (if occuring)
-void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
+void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
 	
 	//trim list to only contain visible nodes that make sense
 	std::string selectables[30] = { "Sun", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto",
@@ -389,7 +371,7 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 }
 
 // Interprets the input gesture to a specific interaction
-int TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
+int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
     // @COMMENT  #include <ghoul/misc/invariants.h>  Then you can use ghoul_precondition as an assertion to check if, for example, list is not empty
 	double dist = 0;
 	double lastDist = 0;
@@ -439,10 +421,10 @@ int TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::
 }
 
 // Calculate how much interpreted interaction should change the camera state (based on _vel)
-void TouchInteraction::accelerate(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
+void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
 	TuioCursor cursor = list.at(0);
 	glm::dvec3 centroid;
-	int action = interpret(list, lastProcessed);
+	int action = interpretInteraction(list, lastProcessed);
 
 	if (action != ROT || action != PICK) {
 		centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
@@ -630,21 +612,18 @@ void TouchInteraction::unitTest() {
 		_camera->setRotation(globalCamRot * Q);
 
 		// set _selected pos and new pos (on screen)
-		std::vector<TuioCursor> lastFrame;
-		lastFrame.push_back(TuioCursor(0, 10, 0.45, 0.4)); // session id, cursor id, x, y
-		lastFrame.push_back(TuioCursor(1, 11, 0.55, 0.6)); 
-        // @COMMENT  Alternative way of specifying:
-        // std::vector<TuioCursor> lastFrame = {
-        //  { (0, 10, 0.45, 0.4 },
-        //  { (1, 11, 0.55, 0.6 }
-        // };
-		std::vector<TuioCursor> currFrame;
-		currFrame.push_back(TuioCursor(0, 10, 0.2, 0.6)); // (-0.6,0)
-		currFrame.push_back(TuioCursor(1, 11, 0.8, 0.4)); // (0.6, 0)
+		std::vector<TuioCursor> lastFrame = {
+			{ TuioCursor(0, 10, 0.45, 0.4) }, // session id, cursor id, x, y
+			{ TuioCursor(1, 11, 0.55, 0.6) }
+		};
+		std::vector<TuioCursor> currFrame = {
+			{ TuioCursor(0, 10, 0.2, 0.6) }, // (-0.6,-0.2)
+			{ TuioCursor(1, 11, 0.8, 0.4) } // (0.6, 0.2)
+		};
 
 		// call update
-		trace(lastFrame);
-		manipulate(currFrame);
+		findSelectedNode(lastFrame);
+		directControl(currFrame);
 
 		// save lmstats.data into a file and clear it
 		char buffer[32];
@@ -672,7 +651,7 @@ void TouchInteraction::decelerate() {
 }
 
 // Called if all fingers are off the screen
-void TouchInteraction::clear() {
+void TouchInteraction::resetAfterInput() {
 	_lmSuccess = true;
 	if (_directTouchMode && _selected.size() > 0) {
 		double spinDelta = _spinSensitivity / OsEng.windowWrapper().averageDeltaTime();
@@ -715,3 +694,4 @@ void TouchInteraction::setFocusNode(SceneGraphNode* focusNode) {
 	_focusNode = focusNode;
 }
 
+} // openspace namespace
