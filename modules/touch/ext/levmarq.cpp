@@ -93,7 +93,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 		for (int i = 0; i < npar; ++i) {
 			qs << "q" << i;
 			gs << "g" << i;
-			ds << "q" << i;
+			ds << "d" << i;
 			if (i + 1 < npar) {
 				qs << ",";
 				gs << ",";
@@ -102,7 +102,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 		}
 		int k = 1;
 		for (int i = 0; i < ny; ++i) {
-			for (int j = 0; j < ny; ++j) {
+			for (int j = 0; j < 2; ++j) {
 				ps << "pos" << i << j;
 				if (j + 1 < ny) {
 					ps << ",";
