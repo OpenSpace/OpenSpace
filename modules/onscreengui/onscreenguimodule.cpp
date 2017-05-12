@@ -28,10 +28,14 @@
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settingsengine.h>
+#include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/network/parallelconnection.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -43,7 +47,7 @@ OnScreenGUIModule::OnScreenGUIModule()
     : OpenSpaceModule("OnScreenGUI")
 {
     addPropertySubOwner(gui);
-    
+
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::Initialize,
         [](){
@@ -53,9 +57,11 @@ OnScreenGUIModule::OnScreenGUIModule()
             gui._globalProperty.setSource(
                 []() {
                     std::vector<properties::PropertyOwner*> res = {
+                        &(OsEng.windowWrapper()),
                         &(OsEng.settingsEngine()),
                         &(OsEng.interactionHandler()),
-                        &(OsEng.renderEngine())
+                        &(OsEng.renderEngine()),
+                        &(OsEng.parallelConnection())
                     };
                     return res;
                 }
@@ -63,15 +69,27 @@ OnScreenGUIModule::OnScreenGUIModule()
             
             gui._screenSpaceProperty.setSource(
                 []() {
-                   const auto& ssr = OsEng.renderEngine().screenSpaceRenderables();
+                   const std::vector<ScreenSpaceRenderable*>& ssr =
+                       OsEng.renderEngine().screenSpaceRenderables();
                    return std::vector<properties::PropertyOwner*>(ssr.begin(), ssr.end());
                 }
             );
             
             gui._property.setSource(
                 []() {
-                    const auto& nodes = OsEng.renderEngine().scene()->allSceneGraphNodes();
+                    const std::vector<SceneGraphNode*>& nodes =
+                        OsEng.renderEngine().scene()->allSceneGraphNodes();
                     return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
+                }
+            );
+
+            gui._virtualProperty.setSource(
+                []() {
+                    std::vector<properties::PropertyOwner*> res = {
+                        &(OsEng.virtualPropertyManager())
+                    };
+
+                    return res;
                 }
             );
         }
@@ -102,18 +120,23 @@ OnScreenGUIModule::OnScreenGUIModule()
     );
 
     OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::PostSyncPreDraw,
+        // This is done in the PostDraw phase so that it will render it on top of
+        // everything else in the case of fisheyes. With this being in the Render callback
+        // the GUI would be rendered on top of each of the cube faces
+        OpenSpaceEngine::CallbackOption::PostDraw,
         [](){
             WindowWrapper& wrapper = OsEng.windowWrapper();
-            if (OsEng.isMaster() && wrapper.isRegularRendering()) {
+            bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
+            if (wrapper.isMaster() && showGui ) {
                 glm::vec2 mousePosition = wrapper.mousePosition();
                 //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
                 glm::ivec2 windowSize = wrapper.currentWindowSize();
-                glm::ivec2 renderingSize = wrapper.currentWindowResolution();
                 uint32_t mouseButtons = wrapper.mouseButtons(2);
                 
                 double dt = std::max(wrapper.averageDeltaTime(), 0.0);
                 
+                // We don't do any collection of immediate mode user interface, so it is
+                // fine to open and close a frame immediately
                 gui.startFrame(
                     static_cast<float>(dt),
                     glm::vec2(windowSize),
@@ -121,16 +144,7 @@ OnScreenGUIModule::OnScreenGUIModule()
                     mousePosition,
                     mouseButtons
                 );
-            }
-        }
-    );
-    
-    OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::PostDraw,
-        [](){
-            WindowWrapper& wrapper = OsEng.windowWrapper();
-            bool showGui = wrapper.hasGuiWindow() ? wrapper.isGuiWindow() : true;
-            if (OsEng.isMaster() && wrapper.isRegularRendering() && showGui) {
+
                 gui.endFrame();
             }
         }

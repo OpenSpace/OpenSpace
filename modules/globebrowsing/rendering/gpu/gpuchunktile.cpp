@@ -30,12 +30,16 @@
 namespace openspace {
 namespace globebrowsing {
 
-void GPUChunkTile::setValue(ProgramObject* programObject, const ChunkTile& chunkTile) {
-    gpuTexture.setValue(programObject, chunkTile.tile.texture);
+void GPUChunkTile::setValue(ghoul::opengl::ProgramObject* programObject,
+                            const ChunkTile& chunkTile)
+{
+    gpuTexture.setValue(programObject, chunkTile.tile.texture());
     gpuTileUvTransform.setValue(programObject, chunkTile.uvTransform);
 }
 
-void GPUChunkTile::bind(ProgramObject* programObject, const std::string& nameBase) {
+void GPUChunkTile::bind(ghoul::opengl::ProgramObject* programObject,
+                        const std::string& nameBase)
+{
     gpuTexture.bind(programObject, nameBase + "textureSampler");
     gpuTileUvTransform.bind(programObject, nameBase + "uvTransform.");
 }

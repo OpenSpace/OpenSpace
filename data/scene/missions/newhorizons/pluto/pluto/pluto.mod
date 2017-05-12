@@ -30,15 +30,15 @@ return {
             },
         },
     },
-    -- PlutoProjection module
+    -- Pluto module
     {   
-        Name = "PlutoProjection",
+        Name = "Pluto",
         Parent = "PlutoBarycenter",
         Renderable = {
             Type = "RenderablePlanetProjection",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 1.173 , 6 },
+                Radius = 1.173E6,
                 Segments = 100
             },
             Textures = {
@@ -173,7 +173,7 @@ return {
        Renderable = {
            Type = "RenderablePlane",
            Billboard = true,
-           Size = { 5, 4 },
+           Size = 5E4,
            Texture = "textures/barycenter.png",
            Atmosphere = {
                Type = "Nishita", -- for example, values missing etc etc
@@ -184,10 +184,10 @@ return {
     },
     {
         Name = "PlutoText",
-        Parent = "PlutoProjection",
+        Parent = "Pluto",
         Renderable = {
             Type = "RenderablePlane",
-            Size = {1.0, 6.3},
+            Size = 10^6.3,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Pluto-Text.png",
@@ -202,7 +202,7 @@ return {
     },
     {
         Name = "PlutoTexture",
-        Parent = "PlutoProjection",
+        Parent = "Pluto",
         Renderable = {
             Type = "RenderablePlane",
             Size = {1.0, 6.4},
@@ -220,7 +220,7 @@ return {
     },
     {
         Name = "PlutoShadow",
-        Parent = "PlutoProjection",
+        Parent = "Pluto",
         Renderable = {
             Type = "RenderableShadowCylinder",
             TerminatorType = "PENUMBRAL", 

@@ -29,8 +29,6 @@
 
 #include <ghoul/misc/assert.h>
 
-#include <modules/volume/rendering/renderablevolumegl.h>
-
 namespace openspace {
 
 VolumeModule::VolumeModule() 
@@ -38,8 +36,7 @@ VolumeModule::VolumeModule()
 {}
 
 void VolumeModule::internalInitialize() {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+
 }
 
 } // namespace openspace

@@ -26,10 +26,6 @@
 
 #include <ghoul/misc/assert.h>
 
-namespace {
-    const char*_loggerCat = "SkirtedGrid";
-}
-
 namespace openspace {
 namespace globebrowsing {
 

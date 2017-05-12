@@ -30,12 +30,9 @@ namespace openspace {
 namespace globebrowsing {
 
 Layer::Layer(const ghoul::Dictionary& layerDict)
-    : _enabled(properties::BoolProperty("enabled", "enabled", false))
+    : properties::PropertyOwner(layerDict.value<std::string>("Name"))
+    , _enabled(properties::BoolProperty("enabled", "enabled", false))
 {
-    std::string layerName = "error!";
-    layerDict.getValue("Name", layerName);
-    setName(layerName);
-        
     _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
         tileprovider::TileProvider::createFromDictionary(layerDict));
         
@@ -50,10 +47,11 @@ Layer::Layer(const ghoul::Dictionary& layerDict)
     addProperty(_enabled);
 
     addPropertySubOwner(_renderSettings);
+    addPropertySubOwner(*_tileProvider);
 }
 
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
-    return std::move(_tileProvider->getChunkTilePile(tileIndex, pileSize));
+    return _tileProvider->getChunkTilePile(tileIndex, pileSize);
 }
 
 } // namespace globebrowsing

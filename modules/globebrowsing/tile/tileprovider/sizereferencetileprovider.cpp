@@ -46,6 +46,7 @@ namespace {
 }
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
+    : _backgroundTile(Tile::TileUnavailable)
 {
     _fontSize = 50;
     _font = OsEng.fontManager().font("Mono", _fontSize);
@@ -56,16 +57,19 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
     }
     _ellipsoid = Ellipsoid(radii);
 
-    _backgroundTile.status = Tile::Status::Unavailable;
+    auto backgroundTileStatus = Tile::Status::Unavailable;
+    std::shared_ptr<ghoul::opengl::Texture> backgroundTileTexture;
+
     std::string backgroundImagePath;
     if (dictionary.getValue(KeyBackgroundImagePath, backgroundImagePath)) {
         using namespace ghoul::io;
         std::string imgAbsPath = absPath(backgroundImagePath);
-        _backgroundTile.texture = TextureReader::ref().loadTexture(imgAbsPath);
-        _backgroundTile.texture->uploadTexture();
-        _backgroundTile.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        _backgroundTile.status = Tile::Status::OK;
+        backgroundTileTexture = TextureReader::ref().loadTexture(imgAbsPath);
+        backgroundTileTexture->uploadTexture();
+        backgroundTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+        backgroundTileStatus = Tile::Status::OK;
     }
+    _backgroundTile = Tile(backgroundTileTexture, nullptr, backgroundTileStatus);
 }
 
 void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
@@ -124,12 +128,11 @@ TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIn
 }
 
 Tile SizeReferenceTileProvider::backgroundTile(const TileIndex& tileIndex) const {
-    if (_backgroundTile.status == Tile::Status::OK) {
-        Tile tile;
-        auto t = _backgroundTile.texture;
+    if (_backgroundTile.status() == Tile::Status::OK) {
+        auto t = _backgroundTile.texture();
         void* pixelData = new char[t->expectedPixelDataSize()];
         memcpy(pixelData, t->pixelData(), t->expectedPixelDataSize());
-        tile.texture = std::make_shared<ghoul::opengl::Texture>(
+        auto tileTexture = std::make_shared<ghoul::opengl::Texture>(
             pixelData,
             t->dimensions(),
             t->format(),
@@ -138,10 +141,10 @@ Tile SizeReferenceTileProvider::backgroundTile(const TileIndex& tileIndex) const
             t->filter(),
             t->wrapping()
         );
-        tile.texture->uploadTexture();
-        tile.texture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::Yes);
-        tile.status = Tile::Status::OK;
-        return tile;
+        tileTexture->uploadTexture();
+        tileTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::Yes);
+        auto tileStatus = Tile::Status::OK;
+        return Tile(tileTexture, nullptr, tileStatus);
     }
     else {
         // use default background

@@ -24,15 +24,14 @@
 
 #include <modules/space/rotation/spicerotation.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
 
 namespace {
-    const std::string _loggerCat = "SpiceRotation";
-    //const std::string keyGhosting = "EphmerisGhosting";
-
     const char* KeySourceFrame = "SourceFrame";
     const char* KeyDestinationFrame = "DestinationFrame";
     const char* KeyKernels = "Kernels";
@@ -40,7 +39,7 @@ namespace {
 
 namespace openspace {
     
-Documentation SpiceRotation::Documentation() {
+documentation::Documentation SpiceRotation::Documentation() {
     using namespace openspace::documentation;
     return {
         "Spice Rotation",
@@ -123,7 +122,7 @@ void SpiceRotation::update(const UpdateData& data) {
             data.time
         );
     }
-    catch (...) {
+    catch (const SpiceManager::SpiceException&) {
         _matrix = glm::dmat3(1.0);
     }
 }

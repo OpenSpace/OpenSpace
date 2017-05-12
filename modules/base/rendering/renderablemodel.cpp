@@ -24,6 +24,8 @@
 
 #include <modules/base/rendering/renderablemodel.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 #include <openspace/rendering/renderengine.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <openspace/engine/configurationmanager.h>
@@ -34,6 +36,7 @@
 #include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/util/time.h>
+#include <ghoul/misc/invariants.h>
 
 #include <openspace/engine/openspaceengine.h>
 
@@ -42,18 +45,43 @@
 
 namespace { 
     const std::string _loggerCat     = "RenderableModel";
-    const char* keyGeometry    = "Geometry";
+
+    const char* KeyGeometry = "Geometry";
+    const char* KeyTexture = "Textures.Color";
+
+
     const char* keyBody        = "Body";
     const char* keyStart       = "StartTime";
     const char* keyEnd         = "EndTime";
     const char* keyFading      = "Shading.Fadeable";
     
     const char* keyModelTransform = "Rotation.ModelTransform";
-    //const std::string keyGhosting      = "Shading.Ghosting";
-
-}
+} // namespace
 
 namespace openspace {
+
+documentation::Documentation RenderableModel::Documentation() {
+    using namespace documentation;
+    return {
+        "RenderableModel",
+        "base_renderable_model",
+        {
+            {
+                KeyGeometry,
+                new ReferencingVerifier("base_geometry_model"),
+                "This specifies the model that is rendered by the Renderable.",
+                Optional::No
+            },
+            {
+                KeyTexture,
+                new StringVerifier,
+                "A color texture that can be applied to the model specified bny the "
+                "Geometry.",
+                Optional::Yes
+            }
+        }
+    };
+}
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -65,44 +93,45 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _texture(nullptr)
     , _geometry(nullptr)
     , _alpha(1.f)
-    //, _isGhost(false)
     , _performShading("performShading", "Perform Shading", true)
     , _frameCount(0)
 {
-    std::string name;
-    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(success, "Name was not passed to RenderableModel");
+    ghoul_precondition(
+        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
+        "Name was not passed to RenderableModel"
+    );
 
-    ghoul::Dictionary geometryDictionary;
-    success = dictionary.getValue(keyGeometry, geometryDictionary);
-    if (success) {
-        geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        _geometry = modelgeometry::ModelGeometry::createFromDictionary(geometryDictionary);
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableModel"
+    );
+
+
+    if (dictionary.hasKey(KeyGeometry)) {
+        std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
+        ghoul::Dictionary dict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
+        dict.setValue(SceneGraphNode::KeyName, name);
+        _geometry = modelgeometry::ModelGeometry::createFromDictionary(dict);
     }
 
-    std::string texturePath = "";
-    success = dictionary.getValue("Textures.Color", texturePath);
-    if (success)
-        _colorTexturePath = absPath(texturePath);
+    if (dictionary.hasKey(KeyTexture)) {
+        _colorTexturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    }
 
-    addPropertySubOwner(_geometry);
+    addPropertySubOwner(_geometry.get());
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderableModel::loadTexture, this));
 
     addProperty(_debugModelRotation);
 
-    //dictionary.getValue(keySource, _source);
-    //dictionary.getValue(keyDestination, _destination);
-    if (dictionary.hasKeyAndValue<glm::dmat3>(keyModelTransform))
+    if (dictionary.hasKeyAndValue<glm::dmat3>(keyModelTransform)) {
         dictionary.getValue(keyModelTransform, _modelTransform);
-    else
+    }
+    else {
         _modelTransform = glm::dmat3(1.f);
-    dictionary.getValue(keyBody, _target);
-
-    //openspace::SpiceManager::ref().addFrame(_target, _source);
-
-    //setBoundingSphere(pss(1.f, 9.f));
+    }
     addProperty(_performShading);
 
     if (dictionary.hasKeyAndValue<bool>(keyFading)) {
@@ -111,12 +140,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         _performFade = fading;
     }
     addProperty(_performFade);
-
-    //if (dictionary.hasKeyAndValue<bool>(keyGhosting)) {
-    //    bool ghosting;
-    //    dictionary.getValue(keyGhosting, ghosting);
-    //    _isGhost = ghosting;
-    //}
 }
 
 bool RenderableModel::isReady() const {
@@ -153,7 +176,6 @@ bool RenderableModel::initialize() {
 bool RenderableModel::deinitialize() {
     if (_geometry) {
         _geometry->deinitialize();
-        delete _geometry;
         _geometry = nullptr;
     }
     _texture = nullptr;
@@ -170,8 +192,6 @@ bool RenderableModel::deinitialize() {
 
 void RenderableModel::render(const RenderData& data) {
     _programObject->activate();
-    
-    double lt;
     
     // Fading
     if (_performFade && _fading > 0.f) {
@@ -224,9 +244,10 @@ void RenderableModel::render(const RenderData& data) {
 }
 
 void RenderableModel::update(const UpdateData& data) {
-    if (_programObject->isDirty())
+    if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
-    double _time = data.time;
+    }
+//    double _time = data.time;
 
     //if (_isGhost){
     //    futureTime = openspace::ImageSequencer::ref().getNextCaptureTime();
@@ -244,14 +265,13 @@ void RenderableModel::update(const UpdateData& data) {
     //    _time = futureTime;
     //}
 
-    double  lt;
     _sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 }
 
 void RenderableModel::loadTexture() {
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
+        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
         if (_texture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _texture->uploadTexture();

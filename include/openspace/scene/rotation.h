@@ -27,24 +27,29 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/util/updatestructures.h>
+#include <ghoul/glm.h>
 
-#include <ghoul/misc/dictionary.h>
+#include <memory>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+struct UpdateData;
+
+namespace documentation { struct Documentation; }
+
 class Rotation : public properties::PropertyOwner {
 public:
-    static Rotation* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Rotation> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     Rotation(const ghoul::Dictionary& dictionary);
-    virtual ~Rotation();
+    virtual ~Rotation() = default;
     virtual bool initialize();
     const glm::dmat3& matrix() const;
     virtual void update(const UpdateData& data);
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     Rotation();

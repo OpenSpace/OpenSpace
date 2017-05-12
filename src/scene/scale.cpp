@@ -23,19 +23,22 @@
  ****************************************************************************************/
 
 #include <openspace/scene/scale.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/logging/logmanager.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
-    const std::string _loggerCat = "Scale";
-    const std::string KeyType = "Type";
-}
+    const char* KeyType = "Type";
+} // namespace
 
 namespace openspace {
 
-Documentation Scale::Documentation() {
+documentation::Documentation Scale::Documentation() {
     using namespace openspace::documentation;
 
     return {
@@ -57,28 +60,25 @@ Documentation Scale::Documentation() {
 }
 
 
-Scale* Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Scale> Scale::createFromDictionary(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Scale");
 
     std::string scaleType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<Scale>();
-    Scale* result = factory->create(scaleType, dictionary);
+    std::unique_ptr<Scale> result = factory->create(scaleType, dictionary);
     result->setName("Scale");
-    if (result == nullptr) {
-        LERROR("Failed creating Scale object of type '" << scaleType << "'");
-        return nullptr;
-    }
-
     return result;
 }
 
-Scale::~Scale() {}
-    
+Scale::Scale()
+    : properties::PropertyOwner("Scale")
+{}
+
 bool Scale::initialize() {
     return true;
 }
     
-void Scale::update(const UpdateData& data) {}
+void Scale::update(const UpdateData&) {}
 
 } // namespace openspace

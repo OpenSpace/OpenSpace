@@ -26,6 +26,7 @@
 
 #include <modules/base/rendering/modelgeometry.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -41,7 +42,7 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    const std::string _loggerCat = "RenderableModelProjection";
+    const char* _loggerCat = "RenderableModelProjection";
     const char* keySource = "Rotation.Source";
     const char* keyDestination = "Rotation.Destination";
     const char* keyGeometry = "Geometry";
@@ -55,7 +56,7 @@ namespace {
 
 namespace openspace {
 
-Documentation RenderableModelProjection::Documentation() {
+documentation::Documentation RenderableModelProjection::Documentation() {
     using namespace documentation;
 
     return {
@@ -142,7 +143,7 @@ RenderableModelProjection::RenderableModelProjection(const ghoul::Dictionary& di
     
     float boundingSphereRadius = 1.0e9;
     dictionary.getValue(keyBoundingSphereRadius, boundingSphereRadius);
-    setBoundingSphere(PowerScaledScalar::CreatePSS(boundingSphereRadius));
+    setBoundingSphere(boundingSphereRadius);
 
     Renderable::addProperty(_performShading);
     Renderable::addProperty(_rotation);
@@ -186,7 +187,7 @@ bool RenderableModelProjection::initialize() {
     completeSuccess &= loadTextures();
     completeSuccess &= _projectionComponent.initializeGL();
 
-    auto bs = getBoundingSphere();
+    float bs = boundingSphere();
     completeSuccess &= _geometry->initialize(this);
     setBoundingSphere(bs); // ignore bounding sphere set by geometry.
 
@@ -346,7 +347,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
     try {
         _instrumentMatrix = SpiceManager::ref().positionTransformMatrix(_projectionComponent.instrumentId(), _destination, time);
     }
-    catch (const SpiceManager::SpiceException& e) {
+    catch (const SpiceManager::SpiceException&) {
         return;
     }
 
@@ -378,7 +379,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
     try {
         SpiceManager::FieldOfViewResult res = SpiceManager::ref().fieldOfView(_projectionComponent.instrumentId());
         boresight = std::move(res.boresightVector);
-    } catch (const SpiceManager::SpiceException& e) {
+    } catch (const SpiceManager::SpiceException&) {
         return;
     }
 
@@ -396,7 +397,7 @@ void RenderableModelProjection::attitudeParameters(double time) {
     glm::vec3 cpos = position.vec3();
 
     float distance = glm::length(cpos);
-    float radius = getBoundingSphere().lengthf();
+    float radius = boundingSphere();
 
     _projectorMatrix = _projectionComponent.computeProjectorMatrix(
         cpos, boresight, _up, _instrumentMatrix,
@@ -422,9 +423,8 @@ void RenderableModelProjection::project() {
 bool RenderableModelProjection::loadTextures() {
     _baseTexture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _baseTexture = std::move(
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath))
-        );
+        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath))
+        ;
         if (_baseTexture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _baseTexture->uploadTexture();

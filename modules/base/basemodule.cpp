@@ -24,6 +24,7 @@
 
 #include <modules/base/basemodule.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
@@ -96,15 +97,19 @@ void BaseModule::internalInitialize() {
     auto fScale = FactoryManager::ref().factory<Scale>();
     ghoul_assert(fScale, "Scale factory was not created");
 
-    fScale->registerClass <StaticScale> ("StaticScale");
+    fScale->registerClass<StaticScale>("StaticScale");
 
     auto fModelGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fModelGeometry, "Model geometry factory was not created");
     fModelGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
 }
 
-std::vector<Documentation> BaseModule::documentations() const {
+std::vector<documentation::Documentation> BaseModule::documentations() const {
     return {
+        RenderableModel::Documentation(),
+        ScreenSpaceFramebuffer::Documentation(),
+        ScreenSpaceImage::Documentation(),
+        StaticRotation::Documentation(),
         StaticScale::Documentation(),
         StaticTranslation::Documentation(),
         RenderableTrailOrbit::Documentation(),

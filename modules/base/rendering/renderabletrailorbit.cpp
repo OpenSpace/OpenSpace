@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/renderabletrailorbit.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 
@@ -83,9 +84,9 @@ namespace {
 
 namespace openspace {
 
-openspace::Documentation RenderableTrailOrbit::Documentation() {
+documentation::Documentation RenderableTrailOrbit::Documentation() {
     using namespace documentation;
-    openspace::Documentation doc{
+    documentation::Documentation doc {
         "RenderableTrailOrbit",
         "base_renderable_renderabletrailorbit",
         {
@@ -118,7 +119,7 @@ openspace::Documentation RenderableTrailOrbit::Documentation() {
 
     // Insert the parents documentation entries until we have a verifier that can deal
     // with class hierarchy
-    openspace::Documentation parentDoc = RenderableTrail::Documentation();
+    documentation::Documentation parentDoc = RenderableTrail::Documentation();
     doc.entries.insert(
         doc.entries.end(),
         parentDoc.entries.begin(),
@@ -131,7 +132,7 @@ openspace::Documentation RenderableTrailOrbit::Documentation() {
 RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     : RenderableTrail(dictionary)
     , _period("period", "Period in days", 0.0, 0.0, 1e9)
-    , _resolution("resolution", "Number of Samples along Orbit", 10000, 1, 1e6)
+    , _resolution("resolution", "Number of Samples along Orbit", 10000, 1, 1000000)
     , _needsFullSweep(true)
     , _indexBufferDirty(true)
 {
@@ -147,7 +148,7 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
 
     // Period is in days
     using namespace std::chrono;
-    int factor = duration_cast<seconds>(hours(24)).count();
+    long long factor = duration_cast<seconds>(hours(24)).count();
     _period = dictionary.value<double>(KeyPeriod) * factor;
     _period.onChange([&] { _needsFullSweep = true; _indexBufferDirty = true; });
     addProperty(_period);
@@ -336,19 +337,19 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     // This might become a bigger issue if we are starting to look at very short time
     // intervals
     const double Epsilon = 1e-7;
-    if (abs(delta) < Epsilon) {
+    if (std::abs(delta) < Epsilon) {
         return { false, 0 };
     }
 
     if (delta > 0.0) {
         // Check whether we need to drop a new permanent point. This is only the case if
         // enough (> secondsPerPoint) time has passed since the last permanent point
-        if (abs(delta) < secondsPerPoint) {
+        if (std::abs(delta) < secondsPerPoint) {
             return { false, 0 };
         }
 
         // See how many points we need to drop
-        int nNewPoints = floor(delta / secondsPerPoint);
+        int nNewPoints = static_cast<int>(floor(delta / secondsPerPoint));
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
@@ -383,7 +384,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     else {
         // See how many new points needs to be generated. Delta is negative, so we need
         // to invert the ratio
-        int nNewPoints = -(floor(delta / secondsPerPoint));
+        int nNewPoints = -(static_cast<int>(floor(delta / secondsPerPoint)));
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array

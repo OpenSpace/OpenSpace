@@ -24,8 +24,6 @@
 
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
-#include <gdal_priv.h>
-
 namespace openspace {
 namespace globebrowsing {
 
@@ -53,7 +51,7 @@ TileMetaData TileMetaData::deserialize(std::istream& is) {
         is >> res.minValues[i];
     }
 
-    return std::move(res);
+    return res;
 }
 
 } // namespace globebrowsing

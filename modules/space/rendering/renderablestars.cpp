@@ -24,6 +24,7 @@
 
 #include <modules/space/rendering/renderablestars.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/openspaceengine.h>
@@ -82,7 +83,7 @@ namespace {
 
 namespace openspace {
 
-openspace::Documentation RenderableStars::Documentation() {
+documentation::Documentation RenderableStars::Documentation() {
     using namespace documentation;
     return {
         "RenderableStars",
@@ -284,7 +285,7 @@ void RenderableStars::render(const RenderData& data) {
     glDepthMask(true);
 }
 
-void RenderableStars::update(const UpdateData& data) {
+void RenderableStars::update(const UpdateData&) {
     if (_dataIsDirty) {
         const int value = _colorOption;
         LDEBUG("Regenerating data");
@@ -368,15 +369,14 @@ void RenderableStars::update(const UpdateData& data) {
         LDEBUG("Reloading Point Spread Function texture");
         _pointSpreadFunctionTexture = nullptr;
         if (_pointSpreadFunctionTexturePath.value() != "") {
-            _pointSpreadFunctionTexture = std::move(
-                ghoul::io::TextureReader::ref().loadTexture(
-                    absPath(_pointSpreadFunctionTexturePath)
-                )
+            _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
+                absPath(_pointSpreadFunctionTexturePath)
             );
             
             if (_pointSpreadFunctionTexture) {
                 LDEBUG("Loaded texture from '" <<
-                       absPath(_pointSpreadFunctionTexturePath) << "'");
+                    absPath(_pointSpreadFunctionTexturePath) << "'"
+               );
                 _pointSpreadFunctionTexture->uploadTexture();
             }
             _pointSpreadFunctionTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
@@ -397,7 +397,7 @@ void RenderableStars::update(const UpdateData& data) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (_colorTexturePath.value() != "") {
-            _colorTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
+            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
             if (_colorTexture) {
                 LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
                 _colorTexture->uploadTexture();
@@ -466,7 +466,7 @@ bool RenderableStars::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line = "";
     while (true) {
-        std::ifstream::streampos position = file.tellg();
+        std::streampos position = file.tellg();
         std::getline(file, line);
 
         if (line[0] == '#' || line.empty()) {

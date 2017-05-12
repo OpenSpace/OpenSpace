@@ -33,11 +33,12 @@
 #include <ghoul/opengl/texture.h>
  
 namespace openspace {
+    
+namespace documentation { struct Documentation; }
 
 class ScreenSpaceImage : public ScreenSpaceRenderable {
 public:
     ScreenSpaceImage(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceImage();
 
     bool initialize() override;
     bool deinitialize() override;
@@ -45,12 +46,15 @@ public:
     void update() override;
     bool isReady() const override;
 
+    static documentation::Documentation Documentation();
+
 protected:
     void loadTexture();
     void updateTexture();
 
     std::string _url;
     bool _downloadImage;
+    bool _textureIsDirty;
     std::future<DownloadManager::MemoryFile> _futureImage;
     
 private:
@@ -59,6 +63,8 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> loadFromMemory();
 
     properties::StringProperty _texturePath;
+
+
 };
 
 } // namespace openspace

@@ -4,18 +4,14 @@
         <Window fullScreen="false">
             <Pos x="0" y="300" />
             <!-- 16:9 aspect ratio -->
-            <Size x="640" y="360" />
+            <Size x="1280" y="720" />
             <Viewport>
                 <Pos x="0.0" y="0.0" />
                 <Size x="1.0" y="1.0" />
-                <Viewplane>
-                    <!-- Lower left -->
-                    <Pos x="-1.778" y="-1.0" z="0.0" />
-                    <!-- Upper left -->
-                    <Pos x="-1.778" y="1.0" z="0.0" />
-                    <!-- Upper right -->
-                    <Pos x="1.778" y="1.0" z="0.0" />
-                </Viewplane>
+                <PlanarProjection>
+                    <FOV down="16.875" left="30.0" right="30.0" up="16.875" />
+                    <Orientation heading="0.0" pitch="0.0" roll="0.0" />
+                </PlanarProjection>
             </Viewport>
         </Window>
     </Node>
@@ -23,18 +19,14 @@
         <Window fullScreen="false">
             <Pos x="640" y="300" />
             <!-- 16:9 aspect ratio -->
-            <Size x="640" y="360" />
+            <Size x="1280" y="720" />
             <Viewport>
                 <Pos x="0.0" y="0.0" />
                 <Size x="1.0" y="1.0" />
-                <Viewplane>
-                    <!-- Lower left -->
-                    <Pos x="-1.778" y="-1.0" z="0.0" />
-                    <!-- Upper left -->
-                    <Pos x="-1.778" y="1.0" z="0.0" />
-                    <!-- Upper right -->
-                    <Pos x="1.778" y="1.0" z="0.0" />
-                </Viewplane>
+                <PlanarProjection>
+                    <FOV down="16.875" left="30.0" right="30.0" up="16.875" />
+                    <Orientation heading="0.0" pitch="0.0" roll="0.0" />
+                </PlanarProjection>
             </Viewport>
         </Window>
     </Node>

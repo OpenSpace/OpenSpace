@@ -36,7 +36,11 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 
+#include <memory>
+
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 namespace modelgeometry {
 class ModelGeometry;
@@ -54,6 +58,7 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
 
 protected:
     void loadTexture();
@@ -65,18 +70,12 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    modelgeometry::ModelGeometry* _geometry;
+    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
     
     glm::dmat3 _modelTransform;
 
     float _alpha;
-    //glm::dmat3 _stateMatrix; 
 
-    //std::string _source;
-    //std::string _destination;
-    std::string _target;
-
-    //bool _isGhost;
     int _frameCount;
 
     glm::dvec3 _sunPos;

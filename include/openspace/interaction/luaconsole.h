@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_CORE___LUACONSOLE___H__
 #define __OPENSPACE_CORE___LUACONSOLE___H__
 
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/network/parallelconnection.h>
-
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
 
 #include <string>
@@ -35,50 +36,35 @@
 
 namespace openspace {
 
-class LuaConsole {
+class LuaConsole : public properties::PropertyOwner {
 public:
     LuaConsole();
 
     void initialize();
     void deinitialize();
 
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    bool keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier modifier);
 
     void render();
 
-    Key commandInputButton();
-
-    bool isVisible() const;
-    void setVisible(bool visible);
-    bool isRemoteScripting() const;
-    void setRemoteScripting(bool remoteScripting);
-
-    void toggleMode();
-        
-    static scripting::LuaLibrary luaLibrary();
-
-
 private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
     void addToCommand(std::string c);
-    std::string UnicodeToUTF8(unsigned int codepoint);
+
+    properties::BoolProperty _isVisible;
+    properties::BoolProperty _remoteScripting;
 
     size_t _inputPosition;
     std::vector<std::string> _commandsHistory;
     size_t _activeCommand;
     std::vector<std::string> _commands;
 
-    std::string _filename;
-
     struct {
         int lastIndex;
         bool hasInitialValue;
         std::string initialValue;
     } _autoCompleteInfo;
-
-    bool _isVisible;
-    bool _remoteScripting;
 };
 
 } // namespace openspace

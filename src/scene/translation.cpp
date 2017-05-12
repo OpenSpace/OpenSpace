@@ -24,20 +24,21 @@
 
 #include <openspace/scene/translation.h>
 
-#include <openspace/util/factorymanager.h>
-#include <ghoul/logging/logmanager.h>
-
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
-    const std::string _loggerCat = "Translation";
-    const std::string KeyType = "Type";
-}
+    const char* KeyType = "Type";
+} // namespace
 
 namespace openspace {
 
-Documentation Translation::Documentation() {
-    using namespace openspace::documentation;
+documentation::Documentation Translation::Documentation() {
+    using namespace documentation;
 
     return {
         "Transformation Translation",
@@ -57,39 +58,36 @@ Documentation Translation::Documentation() {
     };
 }
 
-Translation* Translation::createFromDictionary(const ghoul::Dictionary& dictionary) {
-    if (!dictionary.hasValue<std::string>(KeyType)) {
-        LERROR("Translation did not have key '" << KeyType << "'");
-        return nullptr;
-    }
+std::unique_ptr<Translation> Translation::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
+    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Translation");
 
     std::string translationType;
     dictionary.getValue(KeyType, translationType);
     ghoul::TemplateFactory<Translation>* factory
           = FactoryManager::ref().factory<Translation>();
-    Translation* result = factory->create(translationType, dictionary);
+    std::unique_ptr<Translation> result = factory->create(translationType, dictionary);
     result->setName("Translation");
-    if (result == nullptr) {
-        LERROR("Failed creating Translation object of type '" << translationType << "'");
-        return nullptr;
-    }
-
     return result;
 }
 
-Translation::~Translation() {}
-    
+Translation::Translation()
+    : properties::PropertyOwner("Translation")
+{}
+
 bool Translation::initialize() {
     return true;
 }
     
-void Translation::update(const UpdateData& data) {}
+void Translation::update(const UpdateData&) {}
 
 glm::dvec3 Translation::position(double time) {
     update({
         {},
         time,
         1.0,
+        false,
         false,
         false
     });

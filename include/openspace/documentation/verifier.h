@@ -27,6 +27,8 @@
 
 #include <openspace/documentation/documentation.h>
 
+#include <ghoul/glm.h>
+
 #include <functional>
 #include <type_traits>
 
@@ -42,6 +44,8 @@ namespace documentation {
  * description of the Verifier subclass and what it tests for.
  */
 struct Verifier {
+    virtual ~Verifier() = default;
+
     /**
      * This method tests whether the \p key contained in the \p dictionary adheres to
      * whatever the concrete Verifer needs to test. The actual testing depends on the
@@ -208,6 +212,19 @@ struct StringListVerifier : public TableVerifier {
      * \param elementDocumentation The documentation for each string in the list
      */
     StringListVerifier(std::string elementDocumentation = "");
+
+    std::string type() const override;
+};
+
+/**
+* A Verifier that checks whether all values contained in a Table are of type \c int.
+*/
+struct IntListVerifier : public TableVerifier {
+    /**
+    * Constructor for a IntListVerifier.
+    * \param elementDocumentation The documentation for each string in the list
+    */
+    IntListVerifier(std::string elementDocumentation = "");
 
     std::string type() const override;
 };

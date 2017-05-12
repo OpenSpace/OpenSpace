@@ -198,9 +198,9 @@ int goToChunk(lua_State* L) {
     if (nArguments != 3)
     return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
     
-    int x = lua_tonumber(L, 1);
-    int y = lua_tonumber(L, 2);
-    int level = lua_tonumber(L, 3);
+    int x = static_cast<int>(lua_tonumber(L, 1));
+    int y = static_cast<int>(lua_tonumber(L, 2));
+    int level = static_cast<int>(lua_tonumber(L, 3));
 
     OsEng.interactionHandler().goToChunk(x, y, level);
 
@@ -214,8 +214,8 @@ int goToGeo(lua_State* L) {
     if (nArguments != 2)
     return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
     
-    double latitude = lua_tonumber(L, 1);
-    double longitude = lua_tonumber(L, 2);
+    double latitude = static_cast<int>(lua_tonumber(L, 1));
+    double longitude = static_cast<int>(lua_tonumber(L, 2));
     
     OsEng.interactionHandler().goToGeo(latitude, longitude);
     
@@ -224,7 +224,6 @@ int goToGeo(lua_State* L) {
 
 int restoreCameraStateFromFile(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.restoreCameraStateFromFile";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 1)
@@ -232,8 +231,9 @@ int restoreCameraStateFromFile(lua_State* L) {
 
     std::string cameraStateFilePath = luaL_checkstring(L, -1);
 
-    if (cameraStateFilePath.empty())
+    if (cameraStateFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
+    }
 
     OsEng.interactionHandler().restoreCameraStateFromFile(cameraStateFilePath);
     return 0;
@@ -241,7 +241,6 @@ int restoreCameraStateFromFile(lua_State* L) {
 
 int saveCameraStateToFile(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.setCameraPosition";
 
     int nArguments = lua_gettop(L);
     if (nArguments != 1)
@@ -249,21 +248,24 @@ int saveCameraStateToFile(lua_State* L) {
 
     std::string cameraStateFilePath = luaL_checkstring(L, -1);
 
-    if (cameraStateFilePath.empty())
+    if (cameraStateFilePath.empty()) {
         return luaL_error(L, "filepath string is empty");
+    }
 
     OsEng.interactionHandler().saveCameraStateToFile(cameraStateFilePath);
+    return 0;
 }
 
 int resetCameraDirection(lua_State* L) {
     using ghoul::lua::luaTypeToString;
-    const std::string _loggerCat = "lua.resetCameraDirection";
 
     int nArguments = lua_gettop(L);
-    if (nArguments != 0)
+    if (nArguments != 0) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
 
     OsEng.interactionHandler().resetCameraDirection();
+    return 0;
 }
 
 

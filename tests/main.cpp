@@ -24,6 +24,12 @@
 
 #include "gtest/gtest.h"
 
+// When running the unit tests we don't want to be asked what to do in the case of an
+// assertion
+#ifndef GHL_THROW_ON_ASSERT
+#define GHL_THROW_ON_ASSERT
+#endif // GHL_THROW_ON_ASSERTGHL_THROW_ON_ASSERT
+
 #include <ghoul/cmdparser/cmdparser>
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logging>
@@ -33,7 +39,7 @@
 // test files
 #include <test_common.inl>
 #include <test_spicemanager.inl>
-#include <test_scenegraphloader.inl>
+#include <test_sceneloader.inl>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 //#include <test_chunknode.inl>
@@ -83,7 +89,8 @@ namespace {
 
 int main(int argc, char** argv) {
     std::vector<std::string> args;
-    openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args);
+    bool close;
+    openspace::OpenSpaceEngine::create(argc, argv, std::make_unique<openspace::WindowWrapper>(), args, close);
 
     testing::InitGoogleTest(&argc, argv);
 

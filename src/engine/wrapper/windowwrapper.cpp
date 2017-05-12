@@ -52,6 +52,10 @@ WindowWrapper::WindowWrapperException::WindowWrapperException(const std::string&
     : ghoul::RuntimeError(msg, "WindowWrapper")
 {}
 
+WindowWrapper::WindowWrapper()
+    : properties::PropertyOwner("WindowWrapper")
+{}
+
 scripting::LuaLibrary WindowWrapper::luaLibrary() {
     return {
         "cluster",
@@ -75,7 +79,7 @@ void WindowWrapper::setBarrier(bool) {}
 
 void WindowWrapper::setSynchronization(bool) {}
     
-void WindowWrapper::clearAllWindows(const glm::vec4& clearColor) {}
+void WindowWrapper::clearAllWindows(const glm::vec4&) {}
 
 bool WindowWrapper::windowHasResized() const {
     return false;
@@ -93,7 +97,7 @@ glm::vec2 WindowWrapper::mousePosition() const {
     return glm::vec2(0.f);
 }
     
-uint32_t WindowWrapper::mouseButtons(int maxNumber) const {
+uint32_t WindowWrapper::mouseButtons(int) const {
     return uint32_t(0);
 }
     
@@ -129,6 +133,10 @@ bool WindowWrapper::isGuiWindow() const {
     return false;
 }
 
+bool WindowWrapper::isMaster() const {
+    return false;
+}
+
 bool WindowWrapper::isSwapGroupMaster() const {
     return false;
 }
@@ -146,9 +154,9 @@ glm::mat4 WindowWrapper::modelMatrix() const {
     return glm::mat4(1.f);
 }
     
-void WindowWrapper::setNearFarClippingPlane(float near, float far) {}
+void WindowWrapper::setNearFarClippingPlane(float, float) {}
 
-void WindowWrapper::setEyeSeparationDistance(float distance) {}
+void WindowWrapper::setEyeSeparationDistance(float) {}
     
 glm::ivec4 WindowWrapper::viewportPixelCoordinates() const {
     return glm::ivec4(
@@ -164,7 +172,7 @@ bool WindowWrapper::isExternalControlConnected() const {
     return false;
 }
     
-void WindowWrapper::sendMessageToExternalControl(const std::vector<char>& message) const {
+void WindowWrapper::sendMessageToExternalControl(const std::vector<char>&) const {
 }
     
 bool WindowWrapper::isSimpleRendering() const {

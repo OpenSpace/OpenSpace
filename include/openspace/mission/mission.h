@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___MISSION___H__
 #define __OPENSPACE_CORE___MISSION___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/util/timerange.h>
 
 #include <functional>
@@ -35,6 +34,7 @@
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
+namespace documentation {  struct Documentation; }
 
 /**
  * Used to represent a named period of time within a mission. Allows nested phases, i.e.
@@ -62,26 +62,25 @@ public:
      * Returns the name of the MissionPhase.
      * \return The name of the MissionPhase
      */
-    const std::string& name() const;
+    std::string name() const;
 
     /**
      * Returns the TimeRange of the MissionPhase.
      * \return The TimeRange of the MissionPhase
      */
-    const TimeRange& timeRange() const;
+    TimeRange timeRange() const;
 
     /**
      * Returns the description of the MissionPhase.
      * \return The description of the MissionPhase
      */
-    const std::string& description() const;
+    std::string description() const;
 
     /**
      * Returns all subphases sorted by start time.
      * \return All subphases sorted by start time
      */
-    const std::vector<MissionPhase>& phases() const;
-
+    std::vector<MissionPhase> phases() const;
 
     using Trace = std::vector<std::reference_wrapper<const MissionPhase>>;
 
@@ -101,7 +100,7 @@ public:
      * MissionPhase can be constructed from.
      * \return The Documentation that describes the required structure for a Dictionary
      */
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     /**
@@ -111,6 +110,7 @@ protected:
      * \param time The time which the subphases have to cover to be added to the \p trace
      * \param trace The list of MissionPhase%s that are active during the time \p time
      * \param maxDepth The maximum depth of levels that will be considered
+     * \pre maxDepth must not be negative
      */
     void phaseTrace(double time, Trace& trace, int maxDepth) const;
     
@@ -139,7 +139,7 @@ using Mission = MissionPhase;
  * \pre \p filename must not contain tokens
  * \pre \p filename must exist
  */
-Mission missionFromFile(std::string filename);
+Mission missionFromFile(const std::string& filename);
 
 } // namespace openspace
 

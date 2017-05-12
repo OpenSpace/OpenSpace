@@ -23,19 +23,21 @@
  ****************************************************************************************/
 
 #include <openspace/scene/rotation.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/logging/logmanager.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/factorymanager.h>
+
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
-    const std::string _loggerCat = "Rotation";
-    const std::string KeyType = "Type";
-}
+    const char* KeyType = "Type";
+} // namespace
 
 namespace openspace {
 
-Documentation Rotation::Documentation() {
+documentation::Documentation Rotation::Documentation() {
     using namespace openspace::documentation;
 
     return {
@@ -55,27 +57,22 @@ Documentation Rotation::Documentation() {
     };
 }
 
-Rotation* Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<Rotation> Rotation::createFromDictionary(const ghoul::Dictionary& dictionary) {
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Rotation");
 
     std::string rotationType = dictionary.value<std::string>(KeyType);
     auto factory = FactoryManager::ref().factory<Rotation>();
-    Rotation* result = factory->create(rotationType, dictionary);
-    if (result == nullptr) {
-        LERROR("Failed creating Rotation object of type '" << rotationType << "'");
-        return nullptr;
-    }
-
+    std::unique_ptr<Rotation> result = factory->create(rotationType, dictionary);
     return result;
 }
 
-Rotation::Rotation() {
-    setName("Rotation");
-}
+Rotation::Rotation() 
+    : properties::PropertyOwner("Rotation")
+{}
     
-Rotation::Rotation(const ghoul::Dictionary& dictionary) {}
-    
-Rotation::~Rotation() {}
+Rotation::Rotation(const ghoul::Dictionary&)
+    : properties::PropertyOwner("Rotation")
+{}
     
 bool Rotation::initialize() {
     return true;
@@ -85,6 +82,6 @@ const glm::dmat3& Rotation::matrix() const {
     return _matrix;
 }
 
-void Rotation::update(const UpdateData& data) {}
+void Rotation::update(const UpdateData&) {}
 
 } // namespace openspace

@@ -33,6 +33,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <fstream>
 #include <iterator>
@@ -58,13 +59,13 @@ namespace openspace {
 LabelParser::LabelParser(std::string name, std::string fileName,
                          const ghoul::Dictionary& translationDictionary)
     : _name(std::move(name))
-    , _badDecoding(false)
     , _fileName(std::move(fileName))
+    , _badDecoding(false)
 {
     //get the different instrument types
     const std::vector<std::string>& decoders = translationDictionary.keys();
     //for each decoder (assuming might have more if hong makes changes)
-    for (int i = 0; i < decoders.size(); ++i) {
+    for (size_t i = 0; i < decoders.size(); ++i) {
         ghoul::Dictionary typeDictionary;
         translationDictionary.getValue(decoders[i], typeDictionary);
 
@@ -72,7 +73,7 @@ LabelParser::LabelParser(std::string name, std::string fileName,
         if (decoders[i] == "Instrument") {
             //for each playbook call -> create a Decoder object
             std::vector<std::string> keys = typeDictionary.keys();
-            for (int j = 0; j < keys.size(); ++j){
+            for (size_t j = 0; j < keys.size(); ++j) {
                 std::string currentKey = decoders[i] + "." + keys[j];
 
                 ghoul::Dictionary decoderDictionary =
@@ -89,7 +90,7 @@ LabelParser::LabelParser(std::string name, std::string fileName,
             typeDictionary.getValue(keySpecs, specsOfInterestDictionary);
 
             _specsOfInterest.resize(specsOfInterestDictionary.size());
-            for (int n = 0; n < _specsOfInterest.size(); ++n) {
+            for (size_t n = 0; n < _specsOfInterest.size(); ++n) {
                 std::string readMe;
                 specsOfInterestDictionary.getValue(std::to_string(n + 1), readMe);
                 _specsOfInterest[n] = readMe;
@@ -98,7 +99,7 @@ LabelParser::LabelParser(std::string name, std::string fileName,
             typeDictionary.getValue(keyConvert, convertDictionary);
 
             const std::vector<std::string>& keys = convertDictionary.keys();
-            for (int j = 0; j < keys.size(); j++){
+            for (size_t j = 0; j < keys.size(); j++){
                 ghoul::Dictionary itemDictionary;
                 convertDictionary.getValue(keys[j], itemDictionary);
                 auto decoder = Decoder::createFromDictionary(itemDictionary, decoders[i]);
@@ -184,11 +185,12 @@ bool LabelParser::create() {
                     do {
                         std::getline(file, line);
 
-                        std::string read = line.substr(0, line.find_first_of(" "));
 
                         line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
                         line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
                         line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+
+                        std::string read = line.substr(0, line.find_first_of("="));
 
                         _detectorType = "CAMERA"; //default value
 
@@ -217,15 +219,19 @@ bool LabelParser::create() {
 
                         
                         if (read == "START_TIME"){
-                            std::string start = line.substr(line.find("=") + 2);
+                            std::string start = line.substr(line.find("=") + 1);
                             start.erase(std::remove(start.begin(), start.end(), ' '), start.end());
                             startTime = SpiceManager::ref().ephemerisTimeFromDate(start);
                             count++;
 
                             getline(file, line);
-                            read = line.substr(0, line.find_first_of(" "));
+                            line.erase(std::remove(line.begin(), line.end(), '"'), line.end());
+                            line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
+                            line.erase(std::remove(line.begin(), line.end(), '\r'), line.end());
+
+                            read = line.substr(0, line.find_first_of("="));
                             if (read == "STOP_TIME"){
-                                std::string stop = line.substr(line.find("=") + 2);
+                                std::string stop = line.substr(line.find("=") + 1);
                                 stop.erase(
                                     std::remove_if(
                                         stop.begin(),
@@ -242,7 +248,7 @@ bool LabelParser::create() {
                                 LINFO("Please make sure input data adheres to format https://pds.jpl.nasa.gov/documents/qs/labels.html");
                             }
                         }
-                        if (count == _specsOfInterest.size()) {
+                        if (count == static_cast<int>(_specsOfInterest.size())) {
                             using ghoul::io::TextureReader;
                             auto extensions = TextureReader::ref().supportedExtensions();
 

@@ -38,7 +38,7 @@
 #include "SpiceZpr.h"
 
 namespace {
-    const std::string _loggerCat = "SpiceManager";
+    const char* _loggerCat = "SpiceManager";
     
     // The value comes from
     // http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/getmsg_c.html
@@ -74,6 +74,8 @@ namespace {
                 return "ELLIPSOID";
             case openspace::SpiceManager::FieldOfViewMethod::Point:
                 return "POINT";
+            default:
+                ghoul_assert(false, "Missing case label");
         }
     }
     
@@ -83,6 +85,8 @@ namespace {
                 return "UMBRAL";
             case openspace::SpiceManager::TerminatorType::Penumbral:
                 return "PENUMBRAL";
+            default:
+                ghoul_assert(false, "Missing case label");
         }
     }
 }
@@ -143,6 +147,8 @@ SpiceManager::AberrationCorrection::operator const char*() const {
             return (direction == Direction::Reception) ? "CN" : "XCN";
         case Type::ConvergedNewtonianStellar:
             return (direction == Direction::Reception) ? "CN+S" : "XCN+S";
+        default:
+            ghoul_assert(false, "Missing case label");
     }
 }
     
@@ -446,7 +452,7 @@ void SpiceManager::getValue(const std::string& body, const std::string& value,
 {
     ghoul_assert(!v.empty(), "Array for values has to be preallocaed");
 
-    getValueInternal(body, value, v.size(), v.data());
+    getValueInternal(body, value, static_cast<int>(v.size()), v.data());
 }
 
 double SpiceManager::spacecraftClockToET(const std::string& craft, double craftTicks) {
@@ -557,6 +563,21 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
                 lightTime
             );
         }
+}
+
+glm::dvec3 SpiceManager::targetPosition(const std::string& target,
+    const std::string& observer, const std::string& referenceFrame,
+    AberrationCorrection aberrationCorrection, double ephemerisTime) const
+{
+    double unused = 0.0;
+    return targetPosition(
+        target,
+        observer,
+        referenceFrame,
+        aberrationCorrection,
+        ephemerisTime,
+        unused
+    );
 }
 
 glm::dmat3 SpiceManager::frameTransformationMatrix(const std::string& from,
@@ -853,7 +874,7 @@ SpiceManager::TerminatorEllipseResult SpiceManager::terminatorEllipse(
              numberOfTerminatorPoints,
              &res.targetEphemerisTime,
              glm::value_ptr(res.observerPosition),
-             (double(*)[3])res.terminatorPoints.data()
+             reinterpret_cast<double(*)[3]>(res.terminatorPoints.data())
     );
     throwOnSpiceError(format(
         "Error getting terminator ellipse for target '{}' from observer '{}' in frame "

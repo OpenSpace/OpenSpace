@@ -60,6 +60,9 @@ namespace properties {
         if (success) {                                                                   \
             return v;                                                                    \
         }                                                                                \
+        else {                                                                           \
+            throw ghoul::RuntimeError("Conversion error for string: " + value);          \
+        }                                                                                \
     }
 
 #define DEFAULT_TO_STRING_LAMBDA(TYPE)                                                   \
@@ -68,15 +71,12 @@ namespace properties {
         return true;                                                                     \
     }
 
-REGISTER_NUMERICALPROPERTY_SOURCE(UShortProperty, unsigned short, (unsigned short)(0),
+REGISTER_NUMERICALPROPERTY_SOURCE(UShortProperty, unsigned short, 0,
                                   numeric_limits<unsigned short>::lowest(),
-                                  numeric_limits<unsigned short>::max(),
-                                  (unsigned short)1,
-                                  DEFAULT_FROM_LUA_LAMBDA(unsigned short,
-                                                          (unsigned short)(0)),
+                                  numeric_limits<unsigned short>::max(), 1,
+                                  DEFAULT_FROM_LUA_LAMBDA(unsigned short, 0),
                                   DEFAULT_TO_LUA_LAMBDA(unsigned short),
-                                  DEFAULT_FROM_STRING_LAMBDA(unsigned short,
-                                                          (unsigned short)(0)),
+                                  DEFAULT_FROM_STRING_LAMBDA(unsigned short, 0),
                                   DEFAULT_TO_STRING_LAMBDA(unsigned short),
                                   LUA_TNUMBER);
 

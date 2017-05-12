@@ -26,8 +26,9 @@
 #define __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__
 
 #include <openspace/documentation/documentation.h>
-
+#include <openspace/documentation/documentationgenerator.h>
 #include <ghoul/designpattern/singleton.h>
+
 #include <ghoul/misc/exception.h>
 
 namespace openspace {
@@ -38,7 +39,9 @@ namespace documentation {
  * produced in the application an write them out as a documentation file for human
  * consumption.
  */
-class DocumentationEngine : public ghoul::Singleton<DocumentationEngine> {
+class DocumentationEngine : public ghoul::Singleton<DocumentationEngine>
+                          , public DocumentationGenerator
+{
 public:
     /**
      * This exception is thrown by the addDocumentation method if a provided Documentation
@@ -57,16 +60,7 @@ public:
         Documentation documentation;
     };
 
-    /**
-     * Write the collected Documentation%s to disk at the \p filename in the specified
-     * \p type. A new file is created and silently overwritten in the location that
-     * \p filename is pointed to.
-     * \param filename The file that is to be created containing all the Documentation 
-     * information.
-     * \param type The type of documentation that is written. Currently allowed values are
-     * \c text and \c html
-     */
-    void writeDocumentation(const std::string& filename, const std::string& type);
+    DocumentationEngine();
 
     /**
      * Adds the \p documentation to the list of Documentation%s that are written to a 
@@ -90,8 +84,12 @@ public:
     static DocumentationEngine& ref();
 
 private:
+    std::string generateJson() const override;
+
     /// The list of all Documentation%s that are stored by the DocumentationEngine
     std::vector<Documentation> _documentations;
+
+    static DocumentationEngine* _instance;
 };
 
 } // namespace documentation

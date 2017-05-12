@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___INTERACTIONMODE___H__
 #define __OPENSPACE_CORE___INTERACTIONMODE___H__
 
-#include <openspace/interaction/keyboardcontroller.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
@@ -83,8 +82,11 @@ namespace interaction {
 
         // Mutators
         void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
+        void removeKeyframesAfter(double timestamp);
         void clearKeyframes();
         void clearOldKeyframes();
+
+        static bool compareKeyframeTimes(const datamessagestructures::CameraKeyframe& a, const datamessagestructures::CameraKeyframe& b);
 
         // Accessors
         const std::list<std::pair<Key, KeyModifier> >& getPressedKeys() const;
@@ -109,11 +111,10 @@ namespace interaction {
 
 
 
-class InteractionMode
-{
+class InteractionMode {
 public:
     InteractionMode();
-    ~InteractionMode();
+    virtual ~InteractionMode();
 
     // Mutators
     virtual void setFocusNode(SceneGraphNode* focusNode);
@@ -121,6 +122,7 @@ public:
     // Accessors
     SceneGraphNode* focusNode();
     Interpolator<double>& rotateToFocusNodeInterpolator();
+    virtual bool followingNodeRotation() const = 0;
     
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime) = 0;
     virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime) = 0;
@@ -197,6 +199,7 @@ public:
 
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
     virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+    bool followingNodeRotation() const override;
 
 private:
     std::vector<datamessagestructures::CameraKeyframe> _keyframes;
@@ -247,6 +250,7 @@ public:
 
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
     virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+    bool followingNodeRotation() const override;
 
 protected:
     //void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
@@ -262,6 +266,7 @@ public:
     virtual void setFocusNode(SceneGraphNode* focusNode);
     //virtual void update(Camera& camera, const InputState& inputState, double deltaTime);
     virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+    bool followingNodeRotation() const override;
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
                    bool resetCameraDirection);

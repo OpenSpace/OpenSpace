@@ -30,15 +30,15 @@
 #include <ghoul/lua/lua_helper.h>
 
 namespace {
-    const std::string KeyName = "Name";
-    const std::string KeyDescription = "Description";
-    const std::string KeyPhases = "Phases";
-    const std::string KeyTimeRange = "TimeRange";
+    const char* KeyName = "Name";
+    const char* KeyDescription = "Description";
+    const char* KeyPhases = "Phases";
+    const char* KeyTimeRange = "TimeRange";
 }
 
 namespace openspace {
 
-Documentation MissionPhase::Documentation() {
+documentation::Documentation MissionPhase::Documentation() {
     using namespace documentation;
 
     return {
@@ -137,19 +137,19 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     }
 }
 
-const std::string & MissionPhase::name() const {
+std::string MissionPhase::name() const {
     return _name;
 }
 
-const TimeRange & MissionPhase::timeRange() const {
+TimeRange MissionPhase::timeRange() const {
     return _timeRange;
 }
 
-const std::string & MissionPhase::description() const {
+std::string MissionPhase::description() const {
     return _description;
 }
 
-const std::vector<MissionPhase>& MissionPhase::phases() const {
+std::vector<MissionPhase> MissionPhase::phases() const {
     return _subphases;
 }
 
@@ -159,10 +159,12 @@ MissionPhase::Trace MissionPhase::phaseTrace(double time, int maxDepth) const {
         trace.push_back(std::cref(*this));
         phaseTrace(time, trace, maxDepth);
     }
-    return std::move(trace);
+    return trace;
 }
 
 void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
+    ghoul_assert(maxDepth >= 0, "maxDepth must not be negative");
+    
     if (maxDepth == 0) {
         return;
     }
@@ -180,7 +182,7 @@ void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
     }
 }
 
-Mission missionFromFile(std::string filename) {
+Mission missionFromFile(const std::string& filename) {
     ghoul_assert(!filename.empty(), "filename must not be empty");
     ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
     ghoul_assert(FileSys.fileExists(filename), "filename must exist");
@@ -188,7 +190,11 @@ Mission missionFromFile(std::string filename) {
     ghoul::Dictionary missionDict;
     ghoul::lua::loadDictionaryFromFile(filename, missionDict);
 
-    documentation::testSpecificationAndThrow(Documentation(), missionDict, "Mission");
+    documentation::testSpecificationAndThrow(
+        MissionPhase::Documentation(),
+        missionDict,
+        "Mission"
+    );
 
     return MissionPhase(missionDict);
 }

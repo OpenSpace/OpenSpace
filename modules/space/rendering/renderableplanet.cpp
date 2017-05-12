@@ -57,7 +57,7 @@ namespace {
     const char* keyShadowGroup                   = "Shadow_Group";
     const char* keyShadowSource                  = "Source";
     const char* keyShadowCaster                  = "Caster";
-    const char* keyPlanetRadius                  = "PlanetRadius";
+//    const char* keyPlanetRadius                  = "PlanetRadius";
     const char* keyBody                          = "Body";
 }
 
@@ -68,10 +68,10 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _colorTexturePath("colorTexture", "Color Texture")
     , _nightTexturePath("nightTexture", "Night Texture")
     , _heightMapTexturePath("heightMap", "Heightmap Texture")
-    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 10.f)
     , _programObject(nullptr)
     , _texture(nullptr)
     , _nightTexture(nullptr)
+    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 10.f)
     , _geometry(nullptr)
     , _performShading("performShading", "Perform Shading", true)
     , _rotation("rotation", "Rotation", 0, 0, 360)
@@ -83,21 +83,44 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 {
     std::string name;
     bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(success,
-            "RenderablePlanet need the '" << SceneGraphNode::KeyName<<"' be specified");
+    ghoul_assert(
+        success,
+        std::string("RenderablePlanet need the '") + SceneGraphNode::KeyName +
+            "' be specified"
+    );
 
     ghoul::Dictionary geometryDictionary;
     success = dictionary.getValue(keyGeometry, geometryDictionary);
-    if (success) {
-        geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
 
-        glm::vec2 planetRadiusVec;
-        success = geometryDictionary.getValue(keyRadius, planetRadiusVec);
-        if (success)
-            _planetRadius = planetRadiusVec[0] * glm::pow(10, planetRadiusVec[1]);
-        else
-            LWARNING("No Radius value expecified for " << name << " planet.");
+
+    glm::dvec3 radius;
+    bool accutareRadius = false;
+    try {
+        SpiceManager::ref().getValue(name, "RADII", radius);
+        accutareRadius = true;
+    } catch (const SpiceManager::SpiceException& e) {
+        accutareRadius = false;
+    }
+
+    if (accutareRadius) {
+        radius *= 1000.0; // Spice gives radii in KM.
+        std::swap(radius[1], radius[2]); // z is equivalent to y in our coordinate system
+        geometryDictionary.setValue(keyRadius, radius);
+    }
+
+    if (success) {
+        //geometryDictionary.setValue(SceneGraphNode::KeyName, name);
+        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
+ 
+        float planetRadius;
+        if (accutareRadius) {
+            _planetRadius = (radius[0] + radius[1] + radius[2]) / 3.0;
+        } else if (geometryDictionary.getValue(keyRadius, planetRadius)) {
+            _planetRadius = planetRadius;
+        }
+        else {
+            LWARNING("No Radius value specified for " << name << " planet.");
+        }
     }
 
     dictionary.getValue(keyFrame, _frame);
@@ -125,7 +148,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
         _heightMapTexturePath = absPath(heightMapTexturePath);
     }
 
-    addPropertySubOwner(_geometry);
+    addPropertySubOwner(_geometry.get());
 
     addProperty(_colorTexturePath);
     _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
@@ -161,13 +184,13 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
             ss << keyShadowSource << sourceCounter << ".Name";
             success = shadowDictionary.getValue(ss.str(), sourceName);
             if (success) {
-                glm::vec2 sourceRadius;
+                float sourceRadius;
                 ss.str(std::string());
                 ss << keyShadowSource << sourceCounter << ".Radius";
                 success = shadowDictionary.getValue(ss.str(), sourceRadius);
                 if (success) {
                     sourceArray.push_back(std::pair< std::string, float>(
-                        sourceName, sourceRadius[0] * pow(10.f, sourceRadius[1])));
+                        sourceName, sourceRadius));
                 }
                 else {
                     LWARNING("No Radius value expecified for Shadow Source Name " 
@@ -190,13 +213,13 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
                 ss << keyShadowCaster << casterCounter << ".Name";
                 success = shadowDictionary.getValue(ss.str(), casterName);
                 if (success) {
-                    glm::vec2 casterRadius;
+                    float casterRadius;
                     ss.str(std::string());
                     ss << keyShadowCaster << casterCounter << ".Radius";
                     success = shadowDictionary.getValue(ss.str(), casterRadius);
                     if (success) {
                         casterArray.push_back(std::pair< std::string, float>(
-                            casterName, casterRadius[0] * pow(10.f, casterRadius[1])));
+                            casterName, casterRadius));
                     }
                     else {
                         LWARNING("No Radius value expecified for Shadow Caster Name "
@@ -285,16 +308,7 @@ bool RenderablePlanet::initialize() {
         LERROR(ss.str());
     }
 
-    loadTexture();
-
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        std::stringstream ss;
-        ss << "Error loading textures. OpenGL error: " << errString << std::endl;
-        LERROR(ss.str());
-    }
-    
-    _geometry->initialize(this);    
+    _geometry->initialize(this);
 
     _programObject->deactivate();
 
@@ -302,6 +316,8 @@ bool RenderablePlanet::initialize() {
         const GLubyte * errString = gluErrorString(err);
         LERROR("Shader Programs Creation. OpenGL error: " << errString);
     }
+    
+    loadTexture();
 
     return isReady();
 }
@@ -309,7 +325,7 @@ bool RenderablePlanet::initialize() {
 bool RenderablePlanet::deinitialize() {
     if(_geometry) {
         _geometry->deinitialize();
-        delete _geometry;
+        _geometry = nullptr;
     }
 
     RenderEngine& renderEngine = OsEng.renderEngine();
@@ -366,8 +382,8 @@ void RenderablePlanet::render(const RenderData& data) {
     float scaleFactor = data.camera.scaling().x * powf(10.0, data.camera.scaling().y);
     glm::mat4 scaleCamTrans = glm::scale(glm::mat4(1.0), glm::vec3(scaleFactor));
 
-    glm::mat4 ModelViewTrans = data.camera.viewMatrix() * scaleCamTrans *
-        translateCamTrans * translateObjTrans * glm::mat4(modelTransform);
+//    glm::mat4 ModelViewTrans = data.camera.viewMatrix() * scaleCamTrans *
+//        translateCamTrans * translateObjTrans * glm::mat4(modelTransform);
     
     setPscUniforms(*_programObject.get(), data.camera, data.position);
     
@@ -387,13 +403,13 @@ void RenderablePlanet::render(const RenderData& data) {
     _programObject->setUniform("texture1", dayUnit);
 
     // Bind possible night texture
-    if (_hasNightTexture) {
+    if (_hasNightTexture && _nightTexture) {
         nightUnit.activate();
         _nightTexture->bind();
         _programObject->setUniform("nightTex", nightUnit);
     }
 
-    if (_hasHeightTexture) {
+    if (_hasHeightTexture && _heightMapTexture) {
         heightUnit.activate();
         _heightMapTexture->bind();
         _programObject->setUniform("heightTex", heightUnit);
@@ -429,7 +445,7 @@ void RenderablePlanet::render(const RenderData& data) {
             float xp_test               = shadowConf.caster.second * sc_length / (shadowConf.source.second + shadowConf.caster.second);
             float rp_test               = shadowConf.caster.second * (glm::length(planetCaster_proj) + xp_test) / xp_test;
                         
-            float casterDistSun = glm::length(casterPos);
+            double casterDistSun = glm::length(casterPos);
             float planetDistSun = glm::length(data.position.vec3());
 
             ShadowRenderingStruct shadowData;
@@ -497,7 +513,7 @@ void RenderablePlanet::update(const UpdateData& data) {
 void RenderablePlanet::loadTexture() {
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
+        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
         if (_texture) {
             if (_texture->numberOfChannels() == 1) {
                 _texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_RED });
@@ -522,7 +538,7 @@ void RenderablePlanet::loadTexture() {
     if (_hasNightTexture) {
         _nightTexture = nullptr;
         if (_nightTexturePath.value() != "") {
-            _nightTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath)));
+            _nightTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_nightTexturePath));
             if (_nightTexture) {
                 LDEBUG("Loaded texture from '" << _nightTexturePath << "'");
                 _nightTexture->uploadTexture();
@@ -540,7 +556,7 @@ void RenderablePlanet::loadTexture() {
     if (_hasHeightTexture) {
         _heightMapTexture = nullptr;
         if (_heightMapTexturePath.value() != "") {
-            _heightMapTexture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_heightMapTexturePath)));
+            _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_heightMapTexturePath));
             if (_heightMapTexture) {
                 LDEBUG("Loaded texture from '" << _heightMapTexturePath << "'");
                 _heightMapTexture->uploadTexture();

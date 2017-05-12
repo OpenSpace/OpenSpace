@@ -27,11 +27,12 @@
 
 #include <modules/base/rendering/renderabletrail.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 /**
  * This concrete implementation of a RenderableTrail renders an updated trail behind an
@@ -52,7 +53,7 @@ public:
 
     void update(const UpdateData& data) override;
     
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     /**

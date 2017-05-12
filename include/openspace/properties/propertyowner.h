@@ -25,13 +25,14 @@
 #ifndef __OPENSPACE_CORE___PROPERTYOWNER___H__
 #define __OPENSPACE_CORE___PROPERTYOWNER___H__
 
-#include <openspace/properties/property.h>
 #include <map>
 #include <string>
 #include <vector>
 
 namespace openspace {
 namespace properties {
+
+class Property;
 
 /**
  * A PropertyOwner can own Propertys or other PropertyOwner and provide access to both in
@@ -53,7 +54,7 @@ public:
     static const char URISeparator = '.';
     
     /// The constructor initializing the PropertyOwner's name to <code>""</code>
-    PropertyOwner();
+    PropertyOwner(std::string name = "");
 
     /**
      * The destructor will remove all Propertys and PropertyOwners it owns along with
@@ -206,6 +207,20 @@ public:
     /// \see PropertyOwner::removePropertySubOwner(PropertyOwner*)
     void removePropertySubOwner(PropertyOwner& owner);
 
+    /**
+     * Returns a list of all tags that have been assigned to the Property. Useful for
+     * trying to find a match for a desired batch operation on Properties.
+     * \return Pointer to vector of string tags that were assigned to the Property
+     */
+    std::vector<std::string> tags() const;
+
+    /**
+     * Adds a tag to the Property's list of assigned tags. Tags are useful for creating
+     * groups of Properties that can be used in batch operations.
+     * \param tag The string that is to be assigned to the Property
+     */
+    void addTag(std::string tag);
+
 private:
     /// The name of this PropertyOwner
     std::string _name;
@@ -217,6 +232,8 @@ private:
     std::vector<PropertyOwner*> _subOwners;
     /// The associations between group identifiers of Property's and human-readable names
     std::map<std::string, std::string> _groupNames;
+    /// Collection of string tag(s) assigned to this property
+    std::vector<std::string> _tags;
 };
 
 }  // namespace properties

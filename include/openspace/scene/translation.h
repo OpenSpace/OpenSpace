@@ -27,18 +27,25 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/util/updatestructures.h>
+#include <ghoul/glm.h>
 
-#include <ghoul/misc/dictionary.h>
+#include <functional>
+#include <memory>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+struct UpdateData;
+
+namespace documentation {  struct Documentation; }
+
 class Translation : public properties::PropertyOwner {
 public:
-    static Translation* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<Translation> createFromDictionary(const ghoul::Dictionary& dictionary);
 
-    virtual ~Translation();
+    Translation();
+    virtual ~Translation() = default;
     virtual bool initialize();
 
     virtual glm::dvec3 position() const = 0;
@@ -50,7 +57,7 @@ public:
     // invalidates potentially stored points, for example in trails
     void onParameterChange(std::function<void()> callback);
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 protected:
     void notifyObservers();

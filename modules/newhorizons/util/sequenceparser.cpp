@@ -29,6 +29,8 @@
 
 #include <ghoul/logging/logmanager.h>
 
+#include <cstring>
+
 namespace {
     const std::string _loggerCat = "SequenceParser";
     const char* keyTranslation = "DataInputTranslation";

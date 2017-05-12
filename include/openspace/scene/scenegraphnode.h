@@ -25,9 +25,6 @@
 #ifndef __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 #define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
-// open space includes
-#include <openspace/documentation/documentation.h>
-
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/rotation.h>
@@ -35,19 +32,23 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/scene/scene.h>
-#include <ghoul/misc/dictionary.h>
 #include <openspace/util/updatestructures.h>
 
-// std includes
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class SceneGraphNode : public properties::PropertyOwner {
 public:
+    using UpdateScene = ghoul::Boolean;
+
     struct PerformanceRecord {
         long long renderTime;  // time in ns
         long long updateTimeRenderable;  // time in ns
@@ -60,25 +61,36 @@ public:
     static const std::string KeyName;
     static const std::string KeyParentName;
     static const std::string KeyDependencies;
+    static const std::string KeyTag;
     
     SceneGraphNode();
     ~SceneGraphNode();
 
-    static SceneGraphNode* createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<SceneGraphNode> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     bool initialize();
     bool deinitialize();
 
+    void traversePreOrder(std::function<void(SceneGraphNode*)> fn);
+    void traversePostOrder(std::function<void(SceneGraphNode*)> fn);
     void update(const UpdateData& data);
-    void evaluate(const Camera* camera, const psc& parentPosition = psc());
     void render(const RenderData& data, RendererTasks& tasks);
     void updateCamera(Camera* camera) const;
 
-    //void addNode(SceneGraphNode* child);
+    void attachChild(std::unique_ptr<SceneGraphNode> child, UpdateScene updateScene = UpdateScene::Yes);
+    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child, UpdateScene updateScene = UpdateScene::Yes);
+    void setParent(SceneGraphNode& parent, UpdateScene updateScene = UpdateScene::Yes);
 
-    void addChild(SceneGraphNode* child);
-    void setParent(SceneGraphNode* parent);
-    //bool abandonChild(SceneGraphNode* child);
+    void addDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
+    void removeDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
+    void clearDependencies(UpdateScene updateScene = UpdateScene::Yes);
+    void setDependencies(const std::vector<SceneGraphNode*>& dependencies, UpdateScene updateScene = UpdateScene::Yes);
+
+    const std::vector<SceneGraphNode*>& dependencies() const;
+    const std::vector<SceneGraphNode*>& dependentNodes() const;
+
+    Scene* scene();
+    void setScene(Scene* scene);
 
     glm::dvec3 position() const;
     const glm::dmat3& rotationMatrix() const;
@@ -86,41 +98,39 @@ public:
 
     glm::dvec3 worldPosition() const;
     const glm::dmat3& worldRotationMatrix() const;
+    glm::dmat4 modelTransform() const;
+    glm::dmat4 inverseModelTransform() const;
     double worldScale() const;
 
     SceneGraphNode* parent() const;
-    const std::vector<SceneGraphNode*>& children() const;
+    std::vector<SceneGraphNode*> children() const;
 
-    PowerScaledScalar calculateBoundingSphere();
-    PowerScaledScalar boundingSphere() const;
+    float boundingSphere() const;
 
     SceneGraphNode* childNode(const std::string& name);
 
     const PerformanceRecord& performanceRecord() const { return _performanceRecord; }
 
-    void setRenderable(Renderable* renderable);
+    void setRenderable(std::unique_ptr<Renderable> renderable);
     const Renderable* renderable() const;
     Renderable* renderable();
 
     static documentation::Documentation Documentation();
 
 private:
-    bool sphereInsideFrustum(const psc& s_pos, const PowerScaledScalar& s_rad, const Camera* camera);
-
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
     double calculateWorldScale() const;
 
-    std::vector<SceneGraphNode*> _children;
+    std::vector<std::unique_ptr<SceneGraphNode>> _children;
     SceneGraphNode* _parent;
+    std::vector<SceneGraphNode*> _dependencies;
+    std::vector<SceneGraphNode*> _dependentNodes;
+    Scene* _scene;
 
     PerformanceRecord _performanceRecord;
 
-    Renderable* _renderable;
-    bool _renderableVisible;
-
-    bool _boundingSphereVisible;
-    PowerScaledScalar _boundingSphere;
+    std::unique_ptr<Renderable> _renderable;
 
     // Transformation defined by ephemeris, rotation and scale
     struct {
@@ -133,6 +143,9 @@ private:
     glm::dvec3 _worldPositionCached;
     glm::dmat3 _worldRotationCached;
     double _worldScaleCached;
+
+    glm::dmat4 _modelTransformCached;
+    glm::dmat4 _inverseModelTransformCached;
 };
 
 } // namespace openspace

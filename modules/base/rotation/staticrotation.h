@@ -27,17 +27,18 @@
 
 #include <openspace/scene/rotation.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/matrix/dmat3property.h>
 
 namespace openspace {
+    
+namespace documentation { struct Documentation; }
     
 class StaticRotation : public Rotation {
 public:
     StaticRotation();
     StaticRotation(const ghoul::Dictionary& dictionary);
 
-    static openspace::Documentation Documentation();
+    static documentation::Documentation Documentation();
 
 private:
     properties::DMat3Property _rotationMatrix;

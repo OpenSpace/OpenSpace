@@ -32,24 +32,23 @@ namespace openspace {
 namespace properties {
 
 namespace {
-    const std::string _loggerCat = "Property";
-    const std::string MetaDataKeyGuiName = "guiName";
-    const std::string MetaDataKeyGroup = "Group";
-    const std::string MetaDataKeyVisibility = "Visibility";
-    const std::string MetaDataKeyReadOnly = "isReadOnly";
+    const char* MetaDataKeyGuiName = "guiName";
+    const char* MetaDataKeyGroup = "Group";
+    const char* MetaDataKeyVisibility = "Visibility";
+    const char* MetaDataKeyReadOnly = "isReadOnly";
 
-    const std::string _metaDataKeyViewPrefix = "view.";
+    const char* _metaDataKeyViewPrefix = "view.";
 }
 
-const std::string Property::ViewOptions::Color = "color";
-const std::string Property::ViewOptions::LightPosition = "lightPosition";
-const std::string Property::ViewOptions::PowerScaledCoordinate = "powerScaledCoordinate";
-const std::string Property::ViewOptions::PowerScaledScalar = "powerScaledScalar";
+const char* Property::ViewOptions::Color = "color";
+const char* Property::ViewOptions::LightPosition = "lightPosition";
+const char* Property::ViewOptions::PowerScaledCoordinate = "powerScaledCoordinate";
+const char* Property::ViewOptions::PowerScaledScalar = "powerScaledScalar";
 
-const std::string Property::IdentifierKey = "Identifier";
-const std::string Property::NameKey = "Name";
-const std::string Property::TypeKey = "Type";
-const std::string Property::MetaDataKey = "MetaData";
+const char* Property::IdentifierKey = "Identifier";
+const char* Property::NameKey = "Name";
+const char* Property::TypeKey = "Type";
+const char* Property::MetaDataKey = "MetaData";
 
 Property::Property(std::string identifier, std::string guiName, Visibility visibility)
     : _owner(nullptr)
@@ -85,13 +84,13 @@ ghoul::any Property::get() const {
     return ghoul::any();
 }
 
-bool Property::getLuaValue(lua_State* state) const {
+bool Property::getLuaValue(lua_State*) const {
     return false;
 }
 
-void Property::set(ghoul::any value) {}
+void Property::set(ghoul::any) {}
 
-bool Property::setLuaValue(lua_State* state) {
+bool Property::setLuaValue(lua_State*) {
     return false;
 }
 
@@ -103,11 +102,11 @@ int Property::typeLua() const {
     return LUA_TNIL;
 }
 
-bool Property::getStringValue(std::string& value) const {
+bool Property::getStringValue(std::string&) const {
     return false;
 }
 
-bool Property::setStringValue(std::string value) {
+bool Property::setStringValue(std::string) {
     return false;
 }
 
@@ -181,7 +180,7 @@ void Property::notifyListener() {
 
 std::string Property::generateBaseDescription() const {
     return
-        TypeKey + " = \"" + className() + "\", " +
+        std::string(TypeKey) + " = \"" + className() + "\", " +
         IdentifierKey + " = \"" + fullyQualifiedIdentifier() + "\", " +
         NameKey + " = \"" + guiName() + "\", " +
         generateMetaDataDescription() + ", " + 
@@ -193,7 +192,7 @@ std::string Property::generateMetaDataDescription() const {
         { Visibility::All, "All" },
         { Visibility::Developer, "Developer" },
         { Visibility::User, "User" },
-        { Visibility::None, "None" }
+        { Visibility::Hidden, "Hidden" }
     };
     Visibility visibility = _metaData.value<Visibility>(MetaDataKeyVisibility);
     bool isReadOnly = _metaData.value<bool>(MetaDataKeyReadOnly);
@@ -201,7 +200,7 @@ std::string Property::generateMetaDataDescription() const {
     std::string vis = VisibilityConverter.at(visibility);
 
     return
-        MetaDataKey + " = {" +
+        std::string(MetaDataKey) + " = {" +
         MetaDataKeyGroup +   " = '" + groupIdentifier() + "'," +
         MetaDataKeyVisibility + " = " + vis + "," +
         MetaDataKeyReadOnly +" = " + (isReadOnly ? "true" : "false") + "}";

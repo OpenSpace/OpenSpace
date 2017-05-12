@@ -143,7 +143,8 @@ int ChunkedLodGlobe::getDesiredLevel(
     int desiredLevelByAvailableData = _chunkEvaluatorByAvailableTiles->getDesiredLevel(
         chunk, renderData
     );
-    if (desiredLevelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel) {
+    if (desiredLevelByAvailableData != chunklevelevaluator::Evaluator::UnknownDesiredLevel &&
+        _owner.debugProperties().limitLevelByAvailableData) {
         desiredLevel = glm::min(desiredLevel, desiredLevelByAvailableData);
     }
 
@@ -180,14 +181,14 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
         const auto& tile = chunkTile.tile;
         const auto& uvTransform = chunkTile.uvTransform;
         const auto& depthTransform = tileProvider->depthTransform();
-        if (tile.status != Tile::Status::OK) {
+        if (tile.status() != Tile::Status::OK) {
             return 0;
         }
 
         glm::vec2 transformedUv = Tile::TileUvToTextureSamplePosition(
             uvTransform,
             patchUV,
-            glm::uvec2(tile.texture->dimensions())
+            glm::uvec2(tile.texture()->dimensions())
         );
 
         // Sample and do linear interpolation
@@ -195,7 +196,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
         // Suggestion: a function in ghoul::opengl::Texture that takes uv coordinates
         // in range [0,1] and uses the set interpolation method and clamping.
 
-        glm::uvec3 dimensions = tile.texture->dimensions();
+        glm::uvec3 dimensions = tile.texture()->dimensions();
             
         glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
         glm::uvec2 samplePos00 = samplePos;
@@ -219,10 +220,10 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             glm::uvec2(dimensions) - glm::uvec2(1)
         );
 
-        float sample00 = tile.texture->texelAsFloat(samplePos00).x;
-        float sample10 = tile.texture->texelAsFloat(samplePos10).x;
-        float sample01 = tile.texture->texelAsFloat(samplePos01).x;
-        float sample11 = tile.texture->texelAsFloat(samplePos11).x;
+        float sample00 = tile.texture()->texelAsFloat(samplePos00).x;
+        float sample10 = tile.texture()->texelAsFloat(samplePos10).x;
+        float sample01 = tile.texture()->texelAsFloat(samplePos01).x;
+        float sample11 = tile.texture()->texelAsFloat(samplePos11).x;
 
         // In case the texture has NaN or no data values don't use this height map.
         bool anySampleIsNaN =
@@ -248,6 +249,10 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
 
         // Perform depth transform to get the value in meters
         height = depthTransform.depthOffset + depthTransform.depthScale * sample;
+        // Make sure that the height value follows the layer settings.
+        // For example if the multiplier is set to a value bigger than one,
+        // the sampled height should be modified as well.
+        height = layer->renderSettings().performLayerSettings(height);
     }
     // Return the result
     return height;
@@ -276,7 +281,6 @@ void ChunkedLodGlobe::render(const RenderData& data) {
             stats.i["leafs chunk nodes"]++;
             if (chunk.isVisible()) {
                 stats.i["rendered chunks"]++;
-                double t0 = Time::now().j2000Seconds();
                 _renderer->renderChunk(chunkNode.getChunk(), data);
                 debugRenderChunk(chunk, mvp);
             }

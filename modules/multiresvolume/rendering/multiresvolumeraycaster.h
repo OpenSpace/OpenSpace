@@ -48,7 +48,7 @@ namespace ghoul {
 
 namespace openspace {
 
-class RenderData;
+struct RenderData;
 class RaycastData;
 
 class MultiresVolumeRaycaster : public VolumeRaycaster {

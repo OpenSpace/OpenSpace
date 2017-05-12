@@ -28,12 +28,13 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
 
 #include <fstream>
 
 namespace {
-    const std::string _loggerCat = "ModelGeometry";
-    const std::string keyGeomModelFile = "GeometryFile";
+    const char* _loggerCat = "ModelGeometry";
+    const char* keyGeomModelFile = "GeometryFile";
     const int8_t CurrentCacheVersion = 3;
     const char* keyType = "Type";
     const char* keyName = "Name";
@@ -42,7 +43,7 @@ namespace {
 namespace openspace {
 namespace modelgeometry {
 
-Documentation ModelGeometry::Documentation() {
+documentation:: Documentation ModelGeometry::Documentation() {
     using namespace documentation;
     return {
         "Model Geometry",
@@ -67,7 +68,9 @@ Documentation ModelGeometry::Documentation() {
 }
 
 
-ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dictionary) {
+std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
+                                                      const ghoul::Dictionary& dictionary)
+{
     if (!dictionary.hasKeyAndValue<std::string>(keyType)) {
         throw ghoul::RuntimeError("Dictionary did not contain a key 'Type'");
     }
@@ -75,7 +78,7 @@ ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dict
     std::string geometryType = dictionary.value<std::string>(keyType);
     auto factory = FactoryManager::ref().factory<ModelGeometry>();
 
-    ModelGeometry* result = factory->create(geometryType, dictionary);
+    std::unique_ptr<ModelGeometry> result = factory->create(geometryType, dictionary);
     if (result == nullptr) {
         throw ghoul::RuntimeError(
             "Failed to create a ModelGeometry object of type '" + geometryType + "'"
@@ -85,7 +88,8 @@ ModelGeometry* ModelGeometry::createFromDictionary(const ghoul::Dictionary& dict
 }
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
-    : _parent(nullptr)
+    : properties::PropertyOwner("ModelGeometry")
+    , _parent(nullptr)
     , _mode(GL_TRIANGLES)
 {
     documentation::testSpecificationAndThrow(
@@ -93,8 +97,6 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
         dictionary,
         "ModelGeometry"
     );
-
-    setName("ModelGeometry");
 
     std::string name;
     bool success = dictionary.getValue(keyName, name);
@@ -142,7 +144,7 @@ bool ModelGeometry::initialize(Renderable* parent) {
             glm::pow(v.location[1], 2.f) +
             glm::pow(v.location[2], 2.f), maximumDistanceSquared);
     }
-    _parent->setBoundingSphere(PowerScaledScalar(glm::sqrt(maximumDistanceSquared), 0.0));
+    _parent->setBoundingSphere(glm::sqrt(maximumDistanceSquared));
 
     if (_vertices.empty())
         return false;
@@ -285,8 +287,7 @@ bool ModelGeometry::getIndices(std::vector<int>* indexList) {
     return !(indexList->empty());
 }
 
-void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject& program) {
-}
+void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject&) {}
 
 }  // namespace modelgeometry
 }  // namespace openspace

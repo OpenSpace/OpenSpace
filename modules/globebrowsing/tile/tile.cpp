@@ -22,9 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tiledataset.h>
+#include <modules/globebrowsing/tile/tile.h>
 
-#include <gdal_priv.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+#include <modules/globebrowsing/tile/tilemetadata.h>
 
 namespace {
     const std::string _loggerCat = "Tile";
@@ -33,8 +34,22 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-const Tile Tile::TileUnavailable = {nullptr, nullptr, Tile::Status::Unavailable };
-    
+const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavailable);
+
+Tile::Tile(std::shared_ptr<ghoul::opengl::Texture> texture,
+    std::shared_ptr<TileMetaData> metaData, Status status)
+    : MemoryAwareCacheable(
+        (sizeof(Tile) +
+        (metaData ? sizeof(TileMetaData) : 0) +
+        (texture ? sizeof(ghoul::opengl::Texture) + texture->expectedPixelDataSize() * 2 : 0))
+        // Multiply by two since double memory is used when creating mip maps.
+        / 1000 // Convert from bytes to kilobytes
+    )
+    , _texture(texture)
+    , _metaData(metaData)
+    , _status(status)
+{}
+
 Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
     using namespace ghoul::opengl;
         
@@ -58,13 +73,9 @@ Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
     texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
     // Create tile
-    Tile tile;
-    tile.status = Tile::Status::OK;
-    tile.metaData = nullptr;
-    tile.texture = texture;
-
+    Tile tile(texture, nullptr, Tile::Status::OK);
     return tile;
-}
+} 
 
 glm::vec2 Tile::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
                                                 glm::uvec2 resolution, glm::vec2 tileUV)
@@ -81,8 +92,8 @@ glm::vec2 Tile::TileUvToTextureSamplePosition(const TileUvTransform& uvTransform
 {
     glm::vec2 uv = uvTransform.uvOffset + uvTransform.uvScale * tileUV;
     uv = compensateSourceTextureSampling(
-        TileDataset::tilePixelStartOffset,
-        TileDataset::tilePixelSizeDifference,
+        RawTileDataReader::tilePixelStartOffset,
+        RawTileDataReader::tilePixelSizeDifference,
         resolution,
         uv);
     return uv;

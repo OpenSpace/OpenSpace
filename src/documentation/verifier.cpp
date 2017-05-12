@@ -125,7 +125,7 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
                                    const std::string & key) const {
     if (dict.hasKeyAndValue<int>(key)) {
         // We we have a key and the value is int, we are done
-        return{ true, {} };
+        return { true, {}, {} };
     }
     else {
         if (dict.hasKey(key)) {
@@ -135,19 +135,23 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary & dict,
                 double intPart;
                 bool isInt = modf(value, &intPart) == 0.0;
                 if (isInt) {
-                    return{ true,{} };
+                    return { true, {}, {} };
                 }
                 else {
-                    return{ false, { { key, TestResult::Offense::Reason::WrongType } } };
+                    return {
+                        false,
+                        { { key, TestResult::Offense::Reason::WrongType } },
+                        {}
+                    };
                 }
             }
             else {
                 // If we don't have a double value, we cannot have an int value
-                return{ false, { { key, TestResult::Offense::Reason::WrongType } } };
+                return { false, {{ key, TestResult::Offense::Reason::WrongType }}, {} };
             }
         }
         else {
-            return{ false, { {key, TestResult::Offense::Reason::MissingKey }} };
+            return { false, {{ key, TestResult::Offense::Reason::MissingKey }}, {} };
         }
     }
 }
@@ -185,11 +189,11 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dict,
     }
     else {
         if (dict.hasKey(key)) {
-            return { false, { { key, TestResult::Offense::Reason::WrongType } } };
+            return { false, { { key, TestResult::Offense::Reason::WrongType } }, {} };
 
         }
         else {
-            return { false, { { key, TestResult::Offense::Reason::MissingKey } } };
+            return { false, { { key, TestResult::Offense::Reason::MissingKey } }, {} };
         }
     }
 }
@@ -206,6 +210,14 @@ std::string StringListVerifier::type() const {
     return "List of strings";
 }
 
+IntListVerifier::IntListVerifier(std::string elementDocumentation)
+    : TableVerifier({ { "*", new IntVerifier, std::move(elementDocumentation) } })
+{}
+
+std::string IntListVerifier::type() const {
+    return "List of ints";
+}
+
 ReferencingVerifier::ReferencingVerifier(std::string id)
     : identifier(std::move(id))
 {
@@ -217,33 +229,42 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
 {
     TestResult res = TableVerifier::operator()(dictionary, key);
     if (res.success) {
-        std::vector<Documentation> documentations = DocEng.documentations();
+        std::vector<Documentation> docs = DocEng.documentations();
 
         auto it = std::find_if(
-            documentations.begin(),
-            documentations.end(),
+            docs.begin(),
+            docs.end(),
             [this](const Documentation& doc) { return doc.id == identifier; }
         );
 
-        if (it == documentations.end()) {
-            return { false, { { key, TestResult::Offense::Reason::UnknownIdentifier } } };
-        }
-        else {
-            ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
-            TestResult res = testSpecification(*it, d);
-
-            // Add the 'key' as a prefix to make the offender a fully qualified identifer
-            for (TestResult::Offense& s : res.offenses) {
-                s.offender = key + "." + s.offender;
-            }
-
-            // Add the 'key' as a prefix to make the warning a fully qualified identifer
-            for (TestResult::Warning& w : res.warnings) {
-                w.offender = key + "." + w.offender;
-            }
-
+        if (it == docs.end()) {
+            res.offenses.push_back({
+                key,
+                TestResult::Offense::Reason::UnknownIdentifier
+            });
+            res.success = false;
             return res;
         }
+
+        //ghoul_assert(
+        //    it != docs.end(),
+        //    "Did not find referencing identifier '" + identifier + "'"
+        //);
+
+        ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
+        TestResult r = testSpecification(*it, d);
+
+        // Add the 'key' as a prefix to make the offender a fully qualified identifer
+        for (TestResult::Offense& s : r.offenses) {
+            s.offender = key + "." + s.offender;
+        }
+
+        // Add the 'key' as a prefix to make the warning a fully qualified identifer
+        for (TestResult::Warning& w : r.warnings) {
+            w.offender = key + "." + w.offender;
+        }
+
+        return r;
     }
     else {
         return res;
@@ -270,10 +291,10 @@ TestResult AndVerifier::operator()(const ghoul::Dictionary& dict,
     TestResult resRhs = rhs->operator()(dict, key);
 
     if (resLhs.success && resRhs.success) {
-        return { true, {} };
+        return { true, {}, {} };
     }
     else {
-        return { false, { { key, TestResult::Offense::Reason::Verification } } };
+        return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
     }
 }
 
@@ -304,10 +325,10 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dict,
     TestResult resB = rhs->operator()(dict, key);
 
     if (resA.success || resB.success) {
-        return { true, {} };
+        return { true, {}, {} };
     }
     else {
-        return { false, { { key, TestResult::Offense::Reason::Verification } } };
+        return { false, { { key, TestResult::Offense::Reason::Verification } }, {} };
     }
 }
 

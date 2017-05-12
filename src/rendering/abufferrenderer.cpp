@@ -53,23 +53,22 @@ namespace {
     const int MaxRaycasters = 32;
     const int MaxLayers = 32;
     const int MaxAverageLayers = 8;
-}
+} // namespace
 
 namespace openspace {
 
-
 ABufferRenderer::ABufferRenderer()
-        : _camera(nullptr)
-        , _scene(nullptr)
-        , _resolution(glm::ivec2(0))
-        , _dirtyResolution(true)
-        , _dirtyRaycastData(true)
-        , _dirtyRendererData(true)
-        , _dirtyResolveDictionary(true)
-        , _resolveProgram(nullptr) { }
+    : _camera(nullptr)
+    , _scene(nullptr)
+    , _resolution(glm::ivec2(0))
+    , _dirtyResolution(true)
+    , _dirtyRaycastData(true)
+    , _dirtyRendererData(true)
+    , _dirtyResolveDictionary(true)
+    , _resolveProgram(nullptr)
+{}
 
 ABufferRenderer::~ABufferRenderer() {}
-
 
 void ABufferRenderer::initialize() {
     LINFO("Initializing ABufferRenderer");
@@ -268,9 +267,6 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     RenderData data{ *_camera, psc(), doPerformanceMeasurements, renderBinMask };
     RendererTasks tasks;
     _scene->render(data, tasks);
-
-    _rendererTasks = std::make_unique<RendererTasks>(tasks);
-    _renderData = std::make_unique<RenderData>(data);
     _blackoutFactor = blackoutFactor;
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
@@ -301,23 +297,34 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
     float gamma = 1.0;
     glm::vec3 cameraPos = data.camera.position().vec3();
     float maxComponent = std::max(std::max(std::abs(cameraPos.x), std::abs(cameraPos.y)), std::abs(cameraPos.z));
-    float logDistance = std::log(glm::length(cameraPos / maxComponent) * maxComponent) / std::log(10);
+    float logDistance = std::log(glm::length(cameraPos / maxComponent) * maxComponent) / std::log(10.f);
 
     float minLogDist = 15;
     float maxLogDist = 20;
 
     float t = (logDistance - minLogDist) / (maxLogDist - minLogDist);
     t = glm::clamp(t, 0.0f, 1.0f);
-    gamma = 1.0 * (1 - t) + 2.2 * t;
+    gamma = 1.f * (1.f - t) + 2.2f * t;
 
     _resolveProgram->setUniform("gamma", gamma);
 
     // END TEMPORARY GAMMA CORRECTION.
 
-    preRaycast(*_resolveProgram);
+    _resolveProgram->setUniform("mainColorTexture", _mainColorTextureUnit->unitNumber());
+    _resolveProgram->setUniform("mainDepthTexture", _mainDepthTextureUnit->unitNumber());
+    _resolveProgram->setUniform("blackoutFactor", _blackoutFactor);
+    _resolveProgram->setUniform("nAaSamples", _nAaSamples);
+
+    for (const RaycasterTask& raycasterTask : tasks.raycasterTasks) {
+        preRaycast(raycasterTask);
+    }
+
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    postRaycast(*_resolveProgram);
+
+    for (const RaycasterTask& raycasterTask : tasks.raycasterTasks) {
+        postRaycast(raycasterTask);
+    }
 
     _resolveProgram->deactivate();
 
@@ -326,32 +333,27 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
 }
 
 
-void ABufferRenderer::preRaycast(ghoul::opengl::ProgramObject& program) {
+void ABufferRenderer::preRaycast(const RaycasterTask& raycasterTask) {
+    VolumeRaycaster& raycaster = *raycasterTask.raycaster;
+    const RaycastData& raycastData = _raycastData[&raycaster];
+    const RenderData& renderData = raycasterTask.renderData;
 
-    program.setUniform("mainColorTexture", _mainColorTextureUnit->unitNumber());
-    program.setUniform("mainDepthTexture", _mainDepthTextureUnit->unitNumber());
-    
-    for (const auto& raycastData : _raycastData) {
-        raycastData.first->preRaycast(raycastData.second, program);
+    raycaster.preRaycast(raycastData, *_resolveProgram);
 
-        glm::vec3 localCameraPosition;
-        bool cameraIsInside = raycastData.first->cameraIsInside(*_renderData, localCameraPosition);
-        int uniformIndex = raycastData.second.id + 1; // uniforms are indexed from 1 (not from 0)
-        program.setUniform("insideRaycaster" + std::to_string(uniformIndex), cameraIsInside);
-        if (cameraIsInside) {
-            program.setUniform("cameraPosInRaycaster" + std::to_string(uniformIndex), localCameraPosition);
-        }
+    glm::vec3 localCameraPosition;
+    bool cameraIsInside = raycaster.cameraIsInside(renderData, localCameraPosition);
+    int uniformIndex = raycastData.id + 1; // uniforms are indexed from 1 (not from 0)
+    _resolveProgram->setUniform("insideRaycaster" + std::to_string(uniformIndex), cameraIsInside);
+    if (cameraIsInside) {
+        _resolveProgram->setUniform("cameraPosInRaycaster" + std::to_string(uniformIndex), localCameraPosition);
     }
-
-    // 3b: Set "global" uniforms, and start the resolve pass.
-    program.setUniform("blackoutFactor", _blackoutFactor);
-    program.setUniform("nAaSamples", _nAaSamples);
 }
 
-void ABufferRenderer::postRaycast(ghoul::opengl::ProgramObject& program) {
-    for (const auto& raycastData : _raycastData) {
-        raycastData.first->postRaycast(raycastData.second, program);
-    }
+void ABufferRenderer::postRaycast(const RaycasterTask& raycasterTask) {
+    VolumeRaycaster& raycaster = *raycasterTask.raycaster;
+    const RaycastData& raycastData = _raycastData[&raycaster];
+
+    raycaster.postRaycast(raycastData, *_resolveProgram);
 }
 
 void ABufferRenderer::setScene(Scene* scene) {
@@ -500,7 +502,7 @@ void ABufferRenderer::updateRaycastData() {
 
     for (auto &raycaster : raycasters) {
         if (nextId > MaxRaycasters) {
-            int nIgnored = MaxRaycasters - raycasters.size();
+            int nIgnored = MaxRaycasters - static_cast<int>(raycasters.size());
             LWARNING("ABufferRenderer does not support more than 32 raycasters. Ignoring " << nIgnored << " raycasters");
             break;
         }

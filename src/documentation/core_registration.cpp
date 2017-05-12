@@ -26,11 +26,11 @@
 
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configurationmanager.h>
+#include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/renderable.h>
@@ -42,6 +42,7 @@
 #include <openspace/scene/translation.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/scripting/systemcapabilitiesbinding.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timerange.h>
@@ -49,6 +50,7 @@
 namespace openspace {
 
 void registerCoreClasses(documentation::DocumentationEngine& engine) {
+    engine.addDocumentation(LogFactoryDocumentation());
     engine.addDocumentation(ConfigurationManager::Documentation());
     engine.addDocumentation(Mission::Documentation());
     engine.addDocumentation(Renderable::Documentation());
@@ -68,12 +70,14 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
     engine.addLibrary(interaction::InteractionHandler::luaLibrary());
-    engine.addLibrary(LuaConsole::luaLibrary());
     engine.addLibrary(ParallelConnection::luaLibrary());
     engine.addLibrary(ModuleEngine::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());
     engine.addLibrary(WindowWrapper::luaLibrary());
     engine.addLibrary(MissionManager::luaLibrary());
+    
+    engine.addLibrary(scripting::generalSystemCapabilities());
+    engine.addLibrary(scripting::openglSystemCapabilities());
 }
 
 } // namespace openspace

@@ -9,17 +9,17 @@ return {
             Body = "MOON",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 1.737, 6},
+                Radius = 1.737E6,
                 Segments = 100
             },
             Shadow_Group = {
                 Source1 = {
                     Name = "Sun",
-                    Radius = {696.3, 6}
+                    Radius = 696.3E6
                 },
                 Caster1 = { 
                     Name = "Earth",
-                    Radius = {6.371, 6}
+                    Radius = 6.371E6
                 },
             },
             Textures = {

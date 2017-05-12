@@ -24,6 +24,7 @@
 
 #include <modules/base/rendering/renderabletrail.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -56,8 +57,8 @@ namespace {
 
 namespace openspace {
 
-Documentation RenderableTrail::Documentation() {
-using namespace documentation;
+documentation::Documentation RenderableTrail::Documentation() {
+    using namespace documentation;
     return {
         "RenderableTrail",
         "base_renderable_renderabletrail",
@@ -154,17 +155,17 @@ RenderableTrail::RenderableTrail(const ghoul::Dictionary& dictionary)
     addProperty(_useLineFade);
 
     if (dictionary.hasKeyAndValue<double>(KeyFade)) {
-        _lineFade = dictionary.value<double>(KeyFade);
+        _lineFade = static_cast<float>(dictionary.value<double>(KeyFade));
     }
     addProperty(_lineFade);
 
     if (dictionary.hasKeyAndValue<double>(KeyLineWidth)) {
-        _lineWidth = dictionary.value<double>(KeyLineWidth);
+        _lineWidth = static_cast<float>(dictionary.value<double>(KeyLineWidth));
     }
     addProperty(_lineWidth);
 
     if (dictionary.hasKeyAndValue<double>(KeyPointSize)) {
-        _pointSize = dictionary.value<double>(KeyPointSize);
+        _pointSize = static_cast<int>(dictionary.value<double>(KeyPointSize));
     }
     addProperty(_pointSize);
 
@@ -246,12 +247,12 @@ void RenderableTrail::render(const RenderData & data) {
     }
 
     bool renderLines =
-        _renderingModes == RenderingModeLines |
-        _renderingModes == RenderingModeLinesPoints;
+        (_renderingModes == RenderingModeLines) |
+        (_renderingModes == RenderingModeLinesPoints);
 
     bool renderPoints =
-        _renderingModes == RenderingModePoints |
-        _renderingModes == RenderingModeLinesPoints;
+        (_renderingModes == RenderingModePoints) |
+        (_renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
         glLineWidth(_lineWidth);

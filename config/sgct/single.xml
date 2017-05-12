@@ -4,7 +4,7 @@
         <Display swapInterval="0" />
     </Settings>
     <Node address="localhost" port="20401">
-        <Window fullScreen="false"  fxaa="false" numberOfSamples="8" name="OpenSpace">
+        <Window fullScreen="false" fxaa="false" numberOfSamples="8" name="OpenSpace">
             <Stereo type="none" />
             <Size x="1280" y="720" />
             <Pos x="50" y="50" />

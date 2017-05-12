@@ -26,12 +26,6 @@
 
 #include <modules/globebrowsing/tile/tilemetadata.h>
 
-#include <gdal_priv.h>
-
-namespace {
-    const std::string _loggerCat = "Tile";
-}
-
 namespace openspace {
 namespace globebrowsing {
 
@@ -40,7 +34,7 @@ RawTile::RawTile()
     , dimensions(0, 0, 0)
     , tileMetaData(nullptr)
     , tileIndex(0, 0, 0)
-    , error(CE_None)
+    , error(ReadError::None)
     , nBytesImageData(0)
 {}
         
@@ -52,13 +46,13 @@ RawTile RawTile::createDefaultRes() {
     defaultRes.nBytesImageData = w * h * 1 * 3 * 4; // assume max 3 channels, max 4 bytes per pixel
     defaultRes.imageData = new char[defaultRes.nBytesImageData];
     std::fill_n((char*)defaultRes.imageData, defaultRes.nBytesImageData, 0);
-    return std::move(defaultRes);
+    return defaultRes;
 }
 
 void RawTile::serializeMetaData(std::ostream& os) {
     os << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
     os << tileIndex.x << " " << tileIndex.y << " " << tileIndex.level << std::endl;
-    os << error << std::endl;
+    os << static_cast<int>(error) << std::endl;
 
     // preprocess data
     os << (tileMetaData != nullptr) << std::endl;
@@ -73,7 +67,7 @@ RawTile RawTile::deserializeMetaData(std::istream& is) {
     RawTile res;
     is >> res.dimensions.x >> res.dimensions.y >> res.dimensions.z;
     is >> res.tileIndex.x >> res.tileIndex.y >> res.tileIndex.level;
-    int err; is >> err; res.error = (CPLErr) err;
+    int err; is >> err; res.error = static_cast<ReadError>(err);
         
     res.tileMetaData = nullptr;
     bool hastileMetaData; 
@@ -88,8 +82,8 @@ RawTile RawTile::deserializeMetaData(std::istream& is) {
     char binaryDataSeparator;
     is >> binaryDataSeparator; // not used
         
-    char* buffer = new char[res.nBytesImageData]();
-    return std::move(res);
+//    char* buffer = new char[res.nBytesImageData]();
+    return res;
 }
 
 } // namespace globebrowsing

@@ -242,7 +242,7 @@ void PerformanceManager::storeScenePerformanceMeasurements(
     _performanceMemory->acquireLock();
     
     int nNodes = static_cast<int>(sceneNodes.size());
-    layout->nScaleGraphEntries = nNodes;
+    layout->nScaleGraphEntries = static_cast<int16_t>(nNodes);
     for (int i = 0; i < nNodes; ++i) {
         SceneGraphNode* node = sceneNodes[i];
 

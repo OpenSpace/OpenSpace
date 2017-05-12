@@ -24,7 +24,7 @@
 
 #include "gtest/gtest.h"
 
-#include <modules/globebrowsing/other/lrucache.h>
+#include <modules/globebrowsing/cache/lrucache.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -33,14 +33,14 @@
 class LRUCacheTest : public testing::Test {};
 
 TEST_F(LRUCacheTest, Get) {
-    openspace::globebrowsing::LRUCache<int, std::string> lru(4);
+    openspace::globebrowsing::cache::LRUCache<int, std::string> lru(4);
     lru.put(1, "hej");
     lru.put(12, "san");
     ASSERT_STREQ(lru.get(1).c_str(), "hej") << "testing get";
 }
 
 TEST_F(LRUCacheTest, CleaningCache) {
-    openspace::globebrowsing::LRUCache<int, double> lru(4);
+    openspace::globebrowsing::cache::LRUCache<int, double> lru(4);
     lru.put(1, 1.2);
     lru.put(12, 2.3);
     lru.put(123, 33.4);
@@ -72,7 +72,7 @@ namespace std {
 }
 
 TEST_F(LRUCacheTest, StructKey) {
-    openspace::globebrowsing::LRUCache<MyKey, std::string> lru(4);
+    openspace::globebrowsing::cache::LRUCache<MyKey, std::string> lru(4);
 
     // These two custom keys should be treated as equal
     MyKey key1 = { 2, 3 };

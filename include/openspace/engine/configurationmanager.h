@@ -25,11 +25,10 @@
 #ifndef __OPENSPACE_CORE___CONFIGURATIONMANAGER___H__
 #define __OPENSPACE_CORE___CONFIGURATIONMANAGER___H__
 
-#include <openspace/documentation/documentation.h>
-
 #include <ghoul/misc/dictionary.h>
 
 namespace openspace {
+namespace documentation {  struct Documentation; }
 
 /**
  * The ConfigurationManager takes care of loading the major configuration file
@@ -69,6 +68,8 @@ public:
     static const std::string KeyFactoryDocumentation;
     /// The key that stores the location of the scene file that is initially loaded
     static const std::string KeyConfigScene;
+    /// The key that stores the location of the tasks file that is initially loaded
+    static const std::string KeyConfigTask;
     /// The key that stores the subdirectory containing a list of all startup scripts to
     /// be executed on application start before the scene file is loaded
     static const std::string KeyStartupScript;
@@ -105,6 +106,8 @@ public:
     /// The key that stores whether the master node should perform rendering just function
     /// as a pure manager
     static const std::string KeyDisableMasterRendering;
+    /// The key that stores whether the master node should apply the scene transformation
+    static const std::string KeyDisableSceneOnMaster;
     /// The key that sets the request URL that is used to request additional data to be
     /// downloaded
     static const std::string KeyDownloadRequestURL;
@@ -125,7 +128,22 @@ public:
     static const std::string PartHttpProxyUser;
     /// The key that stores the password to use for authentication to access the http proxy
     static const std::string PartHttpProxyPassword;
-
+    /// The key that stores the dictionary containing information about debug contexts
+    static const std::string KeyOpenGLDebugContext;
+    /// The part of the key storing whether an OpenGL Debug context should be created
+    static const std::string PartActivate;
+    /// The part of the key storing whether the debug callbacks are performed synchronous
+    static const std::string PartSynchronous;
+    /// The part of the key storing a list of identifiers that should be filtered out
+    static const std::string PartFilterIdentifier;
+    /// The part of the key that stores the source of the ignored identifier
+    static const std::string PartFilterIdentifierSource;
+    /// The part of the key that stores the type of the ignored identifier
+    static const std::string PartFilterIdentifierType;
+    /// The part of the key that stores the identifier of the ignored identifier
+    static const std::string PartFilterIdentifierIdentifier;
+    /// The part of the key storing a list of severities that should be filtered out
+    static const std::string PartFilterSeverity;
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the
@@ -144,27 +162,17 @@ public:
      * that are specified in the configuration file will automatically be registered in
      * the ghoul::filesystem::FileSystem.
      * \param filename The filename to be loaded
-     * \throw ghoul::FileNotFoundException If the \p filename did not exist
-     * \throw ghoul::RuntimeError If the configuration file was not complete (i.e., did
+     * \throw SpecificationError If the configuration file was not complete (i.e., did
      * not specify the necessary keys KeyPaths, KeyPaths.KeyCache, KeyFonts, and
      * KeyConfigSgct)
      * \throw ghoul::lua::LuaRuntimeException If there was Lua-based error loading the
      * configuration file
      * \pre \p filename must not be empty
+     * \pre \p filename must exist
      */
     void loadFromFile(const std::string& filename);
 
-    static openspace::Documentation Documentation();
-
-private:
-    /**
-     * Checks whether the loaded configuration file is complete, that is specifying the
-     * necessary keys KeyPaths, KeyPaths.KeyCache, KeyFonts, and KeyConfigSgct. The method
-     * will log fatal errors if a key is missing.
-     * \return <code>true</code> if the configuration file was complete;
-     * <code>false</code> otherwise
-     */
-    bool checkCompleteness() const;
+    static documentation::Documentation Documentation();
 };
 
 } // namespace openspace

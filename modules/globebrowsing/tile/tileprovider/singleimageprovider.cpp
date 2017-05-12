@@ -36,7 +36,9 @@ namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
     
-SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary) {
+SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
+    : _tile(nullptr, nullptr, Tile::Status::Unavailable)
+{
     // Required input
     if (!dictionary.getValue<std::string>(KeyFilePath, _imagePath)) {
         throw std::runtime_error(std::string("Must define key '") + KeyFilePath + "'");
@@ -47,6 +49,7 @@ SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary) {
 
 SingleImageProvider::SingleImageProvider(const std::string& imagePath)
     : _imagePath(imagePath)
+    , _tile(nullptr, nullptr, Tile::Status::Unavailable)
 {
     reset();
 }
@@ -60,7 +63,7 @@ Tile SingleImageProvider::getDefaultTile() {
 }
 
 Tile::Status SingleImageProvider::getTileStatus(const TileIndex& index) {
-    return _tile.status;
+    return _tile.status();
 }
 
 TileDepthTransform SingleImageProvider::depthTransform() {
@@ -75,13 +78,16 @@ void SingleImageProvider::update() {
 }
 
 void SingleImageProvider::reset() {
-    _tile = Tile();
-    _tile.texture = std::shared_ptr<Texture>(ghoul::io::TextureReader::ref().loadTexture(_imagePath).release());
-    _tile.status = _tile.texture != nullptr ? Tile::Status::OK : Tile::Status::IOError;
-    _tile.metaData = nullptr;
+    auto tileTexture = std::shared_ptr<ghoul::opengl::Texture>(
+        ghoul::io::TextureReader::ref().loadTexture(_imagePath)
+    );
+    auto tileStatus = tileTexture != nullptr ? Tile::Status::OK : Tile::Status::IOError;
+    auto tileMetaData = nullptr;
 
-    _tile.texture->uploadTexture();
-    _tile.texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    tileTexture->uploadTexture();
+    tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+
+    _tile = Tile(tileTexture, tileMetaData, tileStatus);
 }
 
 int SingleImageProvider::maxLevel() {

@@ -28,15 +28,34 @@ namespace openspace {
 namespace globebrowsing {
 
 LayerRenderSettings::LayerRenderSettings()
-    : opacity(properties::FloatProperty("opacity", "opacity", 1.f, 0.f, 1.f))    
+    : properties::PropertyOwner("Settings")
+    , opacity(properties::FloatProperty("opacity", "opacity", 1.f, 0.f, 1.f))    
     , gamma(properties::FloatProperty("gamma", "gamma", 1, 0, 5))
     , multiplier(properties::FloatProperty("multiplier", "multiplier", 1.f, 0.f, 20.f))
 {
-    setName("settings");
-
     addProperty(opacity);
     addProperty(gamma);
     addProperty(multiplier);
+}
+
+float LayerRenderSettings::performLayerSettings(float currentValue) const {
+    float newValue = currentValue;
+
+    newValue = glm::sign(newValue) * glm::pow(glm::abs(newValue), gamma);
+    newValue = newValue * multiplier;
+    newValue = newValue * opacity;
+
+    return newValue;
+}
+
+glm::vec4 LayerRenderSettings::performLayerSettings(glm::vec4 currentValue) const {
+    glm::vec4 newValue = glm::vec4(
+        performLayerSettings(currentValue.r),
+        performLayerSettings(currentValue.g),
+        performLayerSettings(currentValue.b),
+        performLayerSettings(currentValue.a));
+
+    return newValue;
 }
 
 } // namespace globebrowsing

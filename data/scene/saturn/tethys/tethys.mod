@@ -8,7 +8,7 @@ return {
             Body = "TETHYS",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = { 0.538, 3 },
+                Radius = 0.538E3,
                 Segments = 50
             },
             Textures = {
