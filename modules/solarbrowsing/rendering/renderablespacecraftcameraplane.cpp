@@ -58,6 +58,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
     , _bufferSize("bufferSize", "Buffer Size", 5, 1, 100)
+    , _displayTimers("displayTimers", "Display Timers", false)
     , _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
     , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 50, 0, 300)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
@@ -66,7 +67,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _usePBO("usePBO", "Use PBO", true)
     , _magicFactor("magicfactor", "Full Plane Size", 0.785, 0.0, 1.0)
     , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
-    , _verboseMode("verboseMode", "Verbose Mode", true)
+    , _verboseMode("verboseMode", "Verbose Mode", false)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
@@ -232,6 +233,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     performImageTimestep(Time::ref().j2000Seconds());
     addProperty(_activeInstruments);
     addProperty(_bufferSize);
+    addProperty(_displayTimers);
     addProperty(_magicFactor);
     addProperty(_resolutionLevel);
     addProperty(_lazyBuffering);
@@ -454,7 +456,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
             std::memcpy(_pboBufferData, data, _imageSize * _imageSize * sizeof(unsigned char));
             auto t2 = Clock::now();
 
-            if (_verboseMode) {
+            if (_displayTimers) {
                 LDEBUG("Memcpy time "
                        << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
                                 .count()
@@ -550,7 +552,16 @@ void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime)
 
     //TODO(mnoven): Do NOT perform this log(n) lookup every update - check if
     // still inside current interval => No need to check
+
+    auto t1 = Clock::now();
     const auto& low = std::lower_bound(imageList.begin(), imageList.end(), osTime);
+    auto t2 = Clock::now();
+
+    if (_displayTimers) {
+        LDEBUG("log(n) find metadata "
+               << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+               << " ms" << std::endl);
+    }
 
     size_t currentActiveImageLast = _currentActiveImage;
     _currentActiveImage = low - imageList.begin();

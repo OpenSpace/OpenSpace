@@ -99,6 +99,7 @@ private:
     properties::BoolProperty _asyncUploadPBO;
     properties::OptionProperty _activeInstruments;
     properties::IntProperty _bufferSize;
+    properties::BoolProperty _displayTimers;
     properties::BoolProperty _lazyBuffering;
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
