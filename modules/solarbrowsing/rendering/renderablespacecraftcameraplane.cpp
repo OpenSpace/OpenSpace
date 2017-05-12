@@ -47,7 +47,7 @@ typedef std::chrono::high_resolution_clock Clock;
 
 namespace {
     static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
-    static const float FULL_PLANE_SIZE = (1391600000.f * 0.5f) / 0.785f; // Half sun radius divided by magic factor
+    double HALF_SUN_RADIUS = (1391600000.0 * 0.50); // Half sun radius divided by magic factor
 }
 
 namespace openspace {
@@ -56,13 +56,15 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     : Renderable(dictionary)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
-    , _bufferSize("bufferSize", "Buffer Size", 20, 1, 100)
-    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 0, 0, 300)
+    , _bufferSize("bufferSize", "Buffer Size", 1, 1, 100)
+    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 40, 0, 300)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 2, 0, 5)
     , _target("target", "Target", "Sun")
     , _usePBO("usePBO", "Use PBO", true)
-    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(6))
+    , _magicFactor("magicfactor", "Full Plane Size", 0.785, 0.0, 1.0)
+    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
+    , _verboseMode("verboseMode", "Verbose Mode", false)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
@@ -169,7 +171,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _activeInstruments.onChange([this]() {
         _currentActiveInstrument
               = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
-        LDEBUG("Updating current active instrument" << _currentActiveInstrument);
+        if (_verboseMode) {
+            LDEBUG("Updating current active instrument" << _currentActiveInstrument);
+        }
         _updatingCurrentActiveChannel = true;
         const double& osTime = Time::ref().j2000Seconds();
         const auto& imageList = _imageMetadataMap[_activeInstruments.getDescriptionByValue(_activeInstruments.value())];/*_imageMetadata[_currentActiveChannel]*/
@@ -191,7 +195,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     });
 
     _resolutionLevel.onChange([this]() {
-        LDEBUG("Updating level of resolution " << _resolutionLevel);
+        if (_verboseMode) {
+            LDEBUG("Updating level of resolution " << _resolutionLevel);
+        }
         _updatingCurrentLevelOfResolution = true;
         _pboSize = (_fullResolution * _fullResolution * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
         _imageSize = _fullResolution / (pow(2, _resolutionLevel));
@@ -222,27 +228,34 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     performImageTimestep(Time::ref().j2000Seconds());
     addProperty(_activeInstruments);
     addProperty(_bufferSize);
+    addProperty(_magicFactor);
     addProperty(_resolutionLevel);
     addProperty(_minRealTimeUpdateInterval);
     addProperty(_asyncUploadPBO);
     addProperty(_usePBO);
     addProperty(_target);
     addProperty(_moveFactor);
+    addProperty(_verboseMode);
 }
 
 void RenderableSpacecraftCameraPlane::fillBuffer() {
-    LDEBUG("Refilling buffer");
     if (_bufferingForwardInTime) {
         for (int i = 0; i < _bufferSize && (i + _currentActiveImage) < _imageMetadataMap[_currentActiveInstrument].size(); ++i) {
             std::string& currentFilename = _imageMetadataMap[_currentActiveInstrument][_currentActiveImage + i].filename;
             auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename, _resolutionLevel);
             _concurrentJobManager.enqueueJob(job);
+            if (_verboseMode) {
+                LDEBUG("Enqueueing " << currentFilename);
+            }
         }
     } else {
         for (int i = 0; i < _bufferSize && (_currentActiveImage - i) >= 0; ++i) {
             std::string& currentFilename = _imageMetadataMap[_currentActiveInstrument][_currentActiveImage - i].filename;
             const auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename, _resolutionLevel);
             _concurrentJobManager.enqueueJob(job);
+            if (_verboseMode) {
+                LDEBUG("Enqueueing " << currentFilename);
+            }
         }
     }
 }
@@ -279,7 +292,7 @@ void RenderableSpacecraftCameraPlane::updatePlane() {
     //const double c = 0.31622776601; // sqrt(0.1)
     //_move = a * exp(-(pow((_moveFactor.value() - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)));
     _move = /*a **/ exp(-(pow((_moveFactor.value() - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
-    _size = _move * FULL_PLANE_SIZE;
+    _size = _move * HALF_SUN_RADIUS / _magicFactor;
     createPlane();
     createFrustum();
 }
@@ -432,23 +445,23 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
 
             std::shared_ptr<BufferObject> b = _concurrentJobManager.popFinishedJob()->product();
             unsigned char* data = b->data;
-
-            auto t1 = Clock::now();
-
+            //auto t1 = Clock::now();
             std::memcpy(_pboBufferData, data, _imageSize * _imageSize * sizeof(unsigned char));
 
-            auto t2 = Clock::now();
-            LDEBUG("Memcpy time "
-                   << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
-                            .count()
-                   << " ms" << std::endl);
+            // auto t2 = Clock::now();
+            // LDEBUG("Memcpy time "
+            //        << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
+            //                 .count()
+            //        << " ms" << std::endl);
 
             auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename, _resolutionLevel);
             _concurrentJobManager.enqueueJob(job);
             _initializePBO = false;
             _pboIsDirty = true;
         } else {
-            LWARNING("Nothing to update, buffer is not ready");
+            if (_verboseMode) {
+                LWARNING("Nothing to update, buffer is not ready");
+            }
             _pboBufferData = nullptr;
         }
     }

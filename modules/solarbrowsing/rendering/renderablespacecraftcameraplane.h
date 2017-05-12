@@ -99,9 +99,11 @@ private:
     properties::IntProperty _bufferSize;
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
+    properties::DoubleProperty _magicFactor;
     properties::IntProperty _resolutionLevel;
     properties::StringProperty _target;
     properties::BoolProperty _usePBO;
+    properties::BoolProperty _verboseMode;
 
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
