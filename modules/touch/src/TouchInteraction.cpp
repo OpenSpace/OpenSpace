@@ -60,7 +60,7 @@ using namespace openspace;
 TouchInteraction::TouchInteraction()
 	: properties::PropertyOwner("TouchInteraction"),
 	_origin("origin", "Origin", ""),
-	_lmVerbose("LM verbose", "Save data from LM algorithm", true),
+	_lmVerbose("LM verbose", "Save data from LM algorithm", false),
 	_unitTest("Click to take a unit test", "Take a unit test saving the LM data into file", false),
 	_maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000),
 	_touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f),
@@ -603,7 +603,7 @@ void TouchInteraction::step(double dt) {
 
 void TouchInteraction::unitTest() {
 	if (_unitTest) {
-		_lmVerbose = true;
+		_lmVerbose = _lmstat.verbose = true;
 		// time set and paused in .scene file
 		//openspace.time.setTime("2016 SEP 8 23:00:00.500")
 		//openspace.time.togglePause()
@@ -656,6 +656,7 @@ void TouchInteraction::unitTest() {
 		// clear everything
 		_selected.clear();
 		_unitTest = false;
+		_lmVerbose = false;
 	}
 }
 
