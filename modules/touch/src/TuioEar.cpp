@@ -88,17 +88,14 @@ void TuioEar::updateTuioCursor(TuioCursor *tcur) {
 void TuioEar::removeTuioCursor(TuioCursor *tcur) {
 	_mx.lock();
 	_removeList.push_back(tcur->getSessionID());
-
-	if (!_list.empty()) {
-		double dist = 0;
-		for (const TuioPoint& p : tcur->getPath()) {
-			dist += glm::length(glm::dvec2(p.getX(), p.getY()) - glm::dvec2(tcur->getX(), tcur->getY()));
-		}
-		dist /= tcur->getPath().size();
-		if (tcur->getPath().size() < 7 && dist < 0.0004 && _list.size() == 1 && _removeList.size() == 1) {
-			_tapCo = TuioCursor(*tcur);
-			_tap = true;
-		}
+	double dist = 0;
+	for (const TuioPoint& p : tcur->getPath()) {
+		dist += glm::length(glm::dvec2(p.getX(), p.getY()) - glm::dvec2(tcur->getX(), tcur->getY()));
+	}
+	dist /= tcur->getPath().size();
+	if (tcur->getPath().size() < 7 && dist < 0.0004 && _list.size() == 1 && _removeList.size() == 1) {
+		_tapCo = TuioCursor(*tcur);
+		_tap = true;
 	}
 	_mx.unlock();
 }

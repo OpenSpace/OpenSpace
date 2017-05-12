@@ -129,6 +129,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 
 		// evaluates if current frame is in directTouchMode (will if so be used next frame)
 		if (_currentRadius > _nodeRadiusThreshold && _selected.size() == list.size()) { // needs better definition?
+			_vel.pan = glm::dvec2(0.0, 0.0);
 			_directTouchMode = true;
 		}
 		else {
