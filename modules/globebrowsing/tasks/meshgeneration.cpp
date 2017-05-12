@@ -27,7 +27,7 @@
 #include <modules/globebrowsing/tasks/imgreader.h>
 #include <modules/globebrowsing/tasks/meshwriter.h>
 
-#include <ghoul\glm.h>
+#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
@@ -35,8 +35,10 @@
 #include <pcl/io/obj_io.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/features/normal_3d.h>
-#include <pcl/surface/gp3.h>
 #include <pcl/common/transforms.h>
+#include <pcl/surface/gp3.h>
+#include <pcl/surface/vtk_smoothing/vtk_mesh_subdivision.h>
+#include <glm/gtx/quaternion.hpp>
 
 #include <fstream>
 
@@ -141,9 +143,9 @@ namespace globebrowsing {
 		pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
 		voxel_grid.setDownsampleAllData(false);
 		voxel_grid.setInputCloud(cloud);
-		voxel_grid.setLeafSize(0.15, 0.15, 0.15);
+		voxel_grid.setLeafSize(0.18, 0.18, 0.18);
 		voxel_grid.filter(*cloud);
-
+		
 		LINFO("POINTS AFTER DECIMATION: " << cloud->points.size());
 
 		// Normal estimation
@@ -165,19 +167,6 @@ namespace globebrowsing {
 		// Create search tree
 		pcl::search::KdTree<pcl::PointNormal>::Ptr tree2(new pcl::search::KdTree<pcl::PointNormal>);
 		tree2->setInputCloud(cloud_with_normals);
-
-		//Rotation from IMG:
-		//Eigen::Quaternionf q(0.33207, -0.0762275, -0.0618002, 0.938136); //997
-		//Eigen::Quaternionf q(0.988066, -0.126849, -0.0448321, 0.0750038);	//1360
-		//Eigen::Quaternionf q(0.216139, -0.00939972, -0.0569706, 0.974654); //1044
-		//Mickes:
-		//Eigen::Quaternionf q(0.33207, 0.0618002, -0.938136, -0.0762275);
-		
-		//Eigen::Quaternionf q(0.33207, -0.0762275, -0.0618002, 0.938136);
-
-		//Eigen::Quaternionf q(-0.753, 0.447, -0.480, -0.046);
-		//q = q.inverse();
-
 
 		Eigen::Quaternionf q(mInfo._roverQuat.at(0), mInfo._roverQuat.at(1), mInfo._roverQuat.at(2), mInfo._roverQuat.at(3));
 
@@ -204,20 +193,38 @@ namespace globebrowsing {
 		// Greedy projection triangulation algorithm
 		pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
 		pcl::PolygonMesh triangles;
-
+		LINFO("RECONSTRUCTING MESH");
 		// Set the maximum distance between connected points (maximum edge length)
-		gp3.setSearchRadius(0.75);
+		gp3.setSearchRadius(1.0);
 		gp3.setMu(2.5);
-		gp3.setMaximumNearestNeighbors(150);
-		gp3.setMaximumSurfaceAngle(M_PI / 4); // 45 degrees
-		gp3.setMinimumAngle(M_PI / 18); // 10 degrees
-		gp3.setMaximumAngle(2 * M_PI / 3); // 120 degrees
-		gp3.setNormalConsistency(false);
+		gp3.setMaximumNearestNeighbors(250);
+		gp3.setMaximumSurfaceAngle(M_PI); // 45 degrees
+		gp3.setMinimumAngle(0); // 10 degrees
+		gp3.setMaximumAngle(M_PI); // 120 degrees
+		gp3.setNormalConsistency(true);
 
 		gp3.setInputCloud(originalCloudTransformed);
 		gp3.setSearchMethod(tree2);
 		gp3.reconstruct(triangles);
 
+		LINFO("RECONSTRUCTION IS DONE");
+		/*
+		pcl::PolygonMesh::Ptr triangles = pcl::PolygonMesh::Ptr(new pcl::PolygonMesh);
+		triangles->cloud = triangles2.cloud;
+		triangles->header = triangles2.header;
+		for (size_t i = 0; i < triangles2.polygons.size(); ++i) {
+			triangles->polygons.push_back(triangles2.polygons.at(i));
+		}
+
+		pcl::PolygonMeshConstPtr constMeshPtr = pcl::PolygonMeshConstPtr(triangles);
+
+		pcl::MeshSubdivisionVTK k;
+		pcl::PolygonMesh pm;
+
+		k.setInputMesh(triangles);
+		k.setFilterType(pcl::MeshSubdivisionVTK::LINEAR);
+		k.process(pm);
+		*/
 		// Create mesh from point cloud
 		// TODO: Make this into TextureMeshPtr
 		pcl::TextureMesh texMesh;
@@ -292,7 +299,90 @@ namespace globebrowsing {
 
 		float minDist = 10000.0f;
 		float maxDist = 0.0f;
+		LINFO("BEFORE UV POINT POSITIONING");
+		
+		glm::quat q3(mInfo._roverQuat.at(0), mInfo._roverQuat.at(1), mInfo._roverQuat.at(2), mInfo._roverQuat.at(3));
+		
+		glm::dmat4 rot = glm::dmat4(glm::toMat4(q3));
 
+		glm::dvec3 angle = glm::dvec3(0, M_PI, -M_PI / 2.0);
+
+		glm::dmat4 unitMat4(1);
+
+		glm::dmat4 rotX = glm::rotate(unitMat4, angle.x, glm::dvec3(1, 0, 0));
+		glm::dmat4 rotY = glm::rotate(unitMat4, angle.y, glm::dvec3(0, 1, 0));
+		glm::dmat4 rotZ = glm::rotate(unitMat4, angle.z, glm::dvec3(0, 0, 1));
+
+		glm::dmat4 debugModelRotation = rotX * rotY * rotZ;
+
+		glm::dvec3 center = debugModelRotation * rot * glm::dvec4(mInfo._cameraCenter, 1);
+		glm::dvec3 axis = debugModelRotation * rot * glm::dvec4(mInfo._cameraAxis, 1);
+		glm::dvec3 horizontal = debugModelRotation * rot * glm::dvec4(mInfo._cameraHorizontal, 1);
+		glm::dvec3 vector = debugModelRotation * rot * glm::dvec4(mInfo._cameraVector, 1);
+		
+		LERROR("ROTATIONMATRIX TO ROVERSPACE : ");
+		glm::dmat4 totRot = debugModelRotation * rot;
+		//LERROR(totRot[0][0] << ", " << totRot[1][0] << ", " << totRot[2][0], << ", " << totRot[3][0]);
+		//LERROR(totRot[0][1] << ", " << totRot[1][1] << ", " << totRot[2][1], << ", " << totRot[3][1]);
+		//LERROR(totRot[0][2] << ", " << totRot[1][2] << ", " << totRot[2][2], << ", " << totRot[3][2]);
+		//LERROR(totRot[0][3] << ", " << totRot[1][3] << ", " << totRot[2][3], << ", " << totRot[3][3]);
+		
+		//LERROR("ROTATED: ");
+		//LERROR(mInfo._cameraCenter.x << ", " << mInfo._cameraCenter.y << ", " << mInfo._cameraCenter.z);
+		//LERROR(mInfo._cameraAxis.x << ", " << mInfo._cameraAxis.y << ", " << mInfo._cameraAxis.z);
+		//LERROR(mInfo._cameraHorizontal.x << ", " << mInfo._cameraHorizontal.y << ", " << mInfo._cameraHorizontal.z);
+		//LERROR(mInfo._cameraVector.x << ", " << mInfo._cameraVector.y << ", " << mInfo._cameraVector.z);
+
+
+		glm::dvec3 center2 = debugModelRotation * rot * glm::dvec4(0.9151621, 0.6070837, -1.969376, 1);
+		glm::dvec3 axis2 = debugModelRotation * rot * glm::dvec4(0.4535986, -0.7205702, 0.5244301, 1);
+		glm::dvec3 horizontal2 = debugModelRotation * rot * glm::dvec4(11893.36, 6845.262, 402.5473, 1);
+		glm::dvec3 vector2 = debugModelRotation * rot * glm::dvec4(-3605.031, 5617.956, 11992.82, 1);
+
+		//LERROR(center2.x << ", " << center2.y << ", " << center2.z);
+		//LERROR(axis2.x << ", " << axis2.y << ", " << axis2.z);
+		//LERROR(horizontal2.x << ", " << horizontal2.y << ", " << horizontal2.z);
+		//LERROR(vector2.x << ", " << vector2.y << ", " << vector2.z);
+
+
+		//With x = y, y = x, z = -z 
+		//glm::dvec3 center = glm::dvec3(0.324755, 0.80963, 1.8358);
+		//glm::dvec3 axis = glm::dvec3(-0.239133, 0.562503, -0.791447);
+		//glm::dvec3 horizontal = glm::dvec3(1006.26, 763.497, -401.87);
+		//glm::dvec3 vector = glm::dvec3(258.049, -609.992, -1146.34);
+
+		for (size_t i = 0; i < texMesh.tex_polygons[0].size(); ++i) {
+			Eigen::Vector2f tmp_VT;
+			// For each point of this face
+			for (size_t j = 0; j < texMesh.tex_polygons[0][i].vertices.size(); ++j) {
+
+				// Get point in scene
+				idx = texMesh.tex_polygons[0][i].vertices[j];
+				pt = originalCloudTransformed->points[idx];
+
+				glm::dvec3 meshPoint;
+				meshPoint.x = pt.x;
+				meshPoint.y = pt.y;
+				meshPoint.z = pt.z;
+
+				double floor = glm::dot((meshPoint - center), axis);
+
+				double xRoof = glm::dot((meshPoint - center), horizontal);
+				double yRoof = glm::dot((meshPoint - center), vector);
+
+				int x = xRoof / floor;
+				int y = yRoof / floor;
+
+				glm::dvec2 tc1 = glm::dvec2((1.0 / mInfo._lines) * x, 1.0 - (1.0 / mInfo._cols) * y);
+				
+				tmp_VT[0] = tc1.x;
+				tmp_VT[1] = tc1.y;
+
+				texture_map_tmp.push_back(tmp_VT);
+			}
+		}
+
+		/*
 		for (size_t i = 0; i < texMesh.tex_polygons[0].size(); ++i)
 		{
 			Eigen::Vector2f tmp_VT;
@@ -376,7 +466,7 @@ namespace globebrowsing {
 							<< " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
 					}*/
 					
-				}
+				//}
 				/* Slow way of finding nearest neighbour
 				// Iterate through uv cloud to find the best match
 				while (!found && index < uvCloud->size()) {
@@ -487,9 +577,9 @@ namespace globebrowsing {
 
 					index++;
 				}*/
-			}
-		}
-
+		
+		//	}
+		//}
 		std::size_t pos = file_name_stripped.find("XYR");
 		std::string texture_filename = file_name_stripped.substr(0, pos) + "RAS" + file_name_stripped.substr(pos + 3);
 
@@ -499,15 +589,15 @@ namespace globebrowsing {
 		std::stringstream tex_name;
 		tex_name << "material_" << 0;
 		tex_name >> tx1.tex_name;
-		tx1.tex_file = texture_filename + texture_extension;
+		tx1.tex_file = correctPath(texture_filename, "D:/textures/") + texture_filename + texture_extension;
 		
-		tx1.tex_Ka.r = 0.2f;
-		tx1.tex_Ka.g = 0.2f;
-		tx1.tex_Ka.b = 0.2f;
+		tx1.tex_Ka.r = 0.0f;
+		tx1.tex_Ka.g = 0.0f;
+		tx1.tex_Ka.b = 0.0f;
 
-		tx1.tex_Kd.r = 0.8f;
-		tx1.tex_Kd.g = 0.8f;
-		tx1.tex_Kd.b = 0.8f;
+		tx1.tex_Kd.r = 0.0f;
+		tx1.tex_Kd.g = 0.0f;
+		tx1.tex_Kd.b = 0.0f;
 
 		tx1.tex_Ks.r = 1.0f;
 		tx1.tex_Ks.g = 1.0f;
@@ -519,9 +609,9 @@ namespace globebrowsing {
 
 		// texture coordinates
 		texMesh.tex_coordinates.push_back(texture_map_tmp);
-		
+				
 		MeshWriter::writeObjFile(file_name_stripped, output_path, texMesh);
-
+		
 		//writeObjFile(file_name_stripped, output_path, texMesh);
 		
 		MeshWriter::writeMtlFile(file_name_stripped, output_path, texMesh);
