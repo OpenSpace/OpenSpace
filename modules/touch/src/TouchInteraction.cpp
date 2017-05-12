@@ -54,6 +54,7 @@ namespace {
 }
 
 using namespace TUIO;
+// @COMMENT  Instead of using namespace openspace, it's better to just open the namespace instead
 using namespace openspace;
 
 TouchInteraction::TouchInteraction()
@@ -222,6 +223,7 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 		}
 
 		// Update the camera state
+        // @COMMENT  Do you have to make a copy of the camera object here?  You are not using it afterwards
 		Camera cam = *(ptr->camera);
 		cam.setPositionVec3(camPos);
 		cam.setRotation(globalCamRot * localCamRot);
@@ -239,6 +241,7 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 		glm::dvec3 camPos = ptr->camera->positionVec3();
 		glm::dvec3 selectedPoint = (ptr->node->rotationMatrix() * ptr->selectedPoints.at(x)) + ptr->node->worldPosition();
 		double h = minStep * glm::distance(camPos, selectedPoint);
+        // @COMMENT  Is it necessary to make the allication every time?  It might better to only allocate the memory once (preferrably on the heap)
 		double* dPar = new double[ptr->nDOF];
 		for (int i = 0; i < ptr->nDOF; ++i) {
 			dPar[i] = par[i];
@@ -268,6 +271,7 @@ void TouchInteraction::manipulate(const std::vector<TuioCursor>& list) {
 
 	const int nFingers = list.size();
 	int nDOF = std::min(nFingers * 2, 6);
+    // @COMMENT  Better to use a std::vector<double>(nDOF, 0.0) here and use par.data() where you need to pass the * to other functions. Then you can remove the next for loop, too
 	double* par = new double[nDOF];
 	for (int i = 0; i < nDOF; ++i) { // initial values of q or 0.0? (ie current model or no rotation/translation)
 		par[i] = 0.0;
@@ -331,6 +335,7 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 				selectableNodes.push_back(node);
 
 	//glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
+    // @COMMENT  ^_^
 	double aspectRatio = 1.88; //res.x/res.y;
 	glm::dquat camToWorldSpace = _camera->rotationQuaternion();
 	glm::dvec3 camPos = _camera->positionVec3();
@@ -385,6 +390,7 @@ void TouchInteraction::trace(const std::vector<TuioCursor>& list) {
 
 // Interprets the input gesture to a specific interaction
 int TouchInteraction::interpret(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
+    // @COMMENT  #include <ghoul/misc/invariants.h>  Then you can use ghoul_precondition as an assertion to check if, for example, list is not empty
 	double dist = 0;
 	double lastDist = 0;
 	TuioCursor cursor = list.at(0);
@@ -627,6 +633,11 @@ void TouchInteraction::unitTest() {
 		std::vector<TuioCursor> lastFrame;
 		lastFrame.push_back(TuioCursor(0, 10, 0.45, 0.4)); // session id, cursor id, x, y
 		lastFrame.push_back(TuioCursor(1, 11, 0.55, 0.6)); 
+        // @COMMENT  Alternative way of specifying:
+        // std::vector<TuioCursor> lastFrame = {
+        //  { (0, 10, 0.45, 0.4 },
+        //  { (1, 11, 0.55, 0.6 }
+        // };
 		std::vector<TuioCursor> currFrame;
 		currFrame.push_back(TuioCursor(0, 10, 0.2, 0.6)); // (-0.6,0)
 		currFrame.push_back(TuioCursor(1, 11, 0.8, 0.4)); // (0.6, 0)

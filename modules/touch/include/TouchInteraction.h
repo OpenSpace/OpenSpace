@@ -47,6 +47,9 @@
 
 #include <list>
 
+// @COMMENT  It's better to use strongly-typed enums here:
+// enum class Type { Rot = 0, Pinch, Pan, Roll, Pick };
+// #define's leak into other parts of the program, especially if they are defined in header files
 #define ROT 0
 #define PINCH 1
 #define PAN 2
@@ -55,6 +58,8 @@
 
 namespace openspace {
 
+// @COMMENT  These structs are defined in the openspace namespace;  it would be better to place that in either
+// a subnamespace or in the Touchinteraction class
 struct VelocityStates {
 	glm::dvec2 orbit;
 	double zoom;
@@ -78,22 +83,29 @@ struct FunctionData {
 	LMstat stats;
 };
 
+// @COMMENT  Double definition
 #define ROT 0
 #define PINCH 1
 #define ROLL 2
 #define PAN 3
 #define PICK 4
 
+// @COMMENT  This is also polluting the openspace namespace
 using Point = std::pair<int, TUIO::TuioPoint>;
 
 class TouchInteraction : public properties::PropertyOwner
 {
 	public:
 		TouchInteraction();
+        // @COMMENT  The destructor doesn't do anything, so it could be deleted
 		~TouchInteraction();
 		
-		void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
-		bool gui(const std::vector<TUIO::TuioCursor>& list);
+        // @COMMENT  How many of these functions have to be public, and could be made private instead?
+
+        void update(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
+        // @COMMENT  all of the function names here are not very descriptive. Especially
+        // when it comes to the return values
+        bool gui(const std::vector<TUIO::TuioCursor>& list);
 		void manipulate(const std::vector<TUIO::TuioCursor>& list);
 		void trace(const std::vector<TUIO::TuioCursor>& list);
 		int interpret(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);

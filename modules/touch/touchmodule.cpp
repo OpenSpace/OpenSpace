@@ -46,7 +46,10 @@ namespace {
 
 namespace openspace {
 
+    // @COMMENT  What does this do?
 	TuioEar TouchModule::*ear;
+
+    // @COMMENT  Definining this globally makes it potentially dangerous.  Is it necessary or better to put into the class?
 	TouchInteraction* touch;
 
 bool TouchModule::gotNewInput() {
@@ -73,14 +76,18 @@ bool TouchModule::gotNewInput() {
 	if (list.size() == 0 && lastProcessed.size() == 0 && ear->tap()) {
 		TuioCursor c = ear->getTap();
 		list.push_back(c);
+        // @COMMENT  You can use:
+        // lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
 		lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
 		touch->tap();
 		return true;
 	}
 	
 	// Return true if we got new input
+    // @COMMENT  You can use !list.empty()
 	if (list.size() == lastProcessed.size() && list.size() > 0) {
 		bool newInput = true;
+        // @COMMENT  Why can you use for_each without std:: ?  It seems like there is a using namespace std somewhere
 		for_each(lastProcessed.begin(), lastProcessed.end(), [this, &newInput](Point& p) {
 			std::vector<TuioCursor>::iterator cursor = find_if(list.begin(), list.end(), [&p](const TuioCursor& c) { return c.getSessionID() == p.first; });
 			double now = cursor->getPath().back().getTuioTime().getTotalMilliseconds();
@@ -98,7 +105,9 @@ bool TouchModule::gotNewInput() {
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
 {
-
+    // @COMMENT  If TuioEar and TouchInteraction don't have any dependencies and if they
+    // can be initialized immediately and you don't need to register a callback
+    // Even better would be to not even use pointers but direct member instances instead
 	OsEng.registerModuleCallback(
 		OpenSpaceEngine::CallbackOption::Initialize,
 		[&]() {
@@ -134,6 +143,8 @@ TouchModule::TouchModule()
 		// update lastProcessed
 		lastProcessed.clear();
 		for (const TuioCursor& c : list) {
+            // @COMMENT  You can use:
+            // lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
 			lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
 		}
 		touch->unitTest();

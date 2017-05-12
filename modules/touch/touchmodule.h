@@ -33,18 +33,22 @@
 
 namespace openspace {
 
+// @COMMENT  This is defined in global namespace, maybe place in separate namespace or inside the TouchModule?
 using Point = std::pair<int, TUIO::TuioPoint>;
 
 class TouchModule : public OpenSpaceModule {
 public:
     TouchModule();
 
+    // @COMMENT  better name: hasNewInput
 	bool gotNewInput();
 
+    // @COMMENT  Does it makes sense to make this available as a public variable?
 	TuioEar* ear;
 	
 
 private:
+    // @COMMENT  list is a very undescriptive name
 	std::vector<TUIO::TuioCursor> list;
 	std::vector<Point> lastProcessed; // contains an id and the TuioPoint that was processed last frame
 
