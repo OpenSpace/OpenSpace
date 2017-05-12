@@ -37,7 +37,9 @@ namespace openspace {
 namespace globebrowsing {
 
 void SurfaceModelLoadJob::execute() {
-	std::string pathToGeometryFolder = _subsite.pathToGeometryFolder;
+	std::string levelString = std::to_string(_level);
+	std::string pathToGeometryFolder = _subsite.pathToGeometryFolder + "level" + levelString + "//" + "site" + _subsite.site +
+		"//" + "drive" + _subsite.drive + "//";
 	std::string pathToTextureFolder = _subsite.pathToTextureFolder;
 	std::string multiModelGeometry = "MultiModelGeometry";
 
@@ -50,8 +52,8 @@ void SurfaceModelLoadJob::execute() {
 	for (auto fileName : _subsite.fileNames) {
 		// Set up a dictionary to load the model
 		ghoul::Dictionary dictionary;
-		std::string pathToGeometry = pathToGeometryFolder + "site" + _subsite.site +
-			"//" + "drive" + _subsite.drive + "//" +  fileName + ".obj";
+		std::string pathToGeometry = pathToGeometryFolder + "//" + fileName + ".obj";
+
 		dictionary.setValue(keyGeometryFile, pathToGeometry);
 		dictionary.setValue(keyType, multiModelGeometry);
 

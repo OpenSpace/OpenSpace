@@ -37,18 +37,18 @@ namespace openspace {
 namespace globebrowsing {
 	class RenderableSite;
 
-class RenderableExplorationPath : public Renderable {
+class RenderableExplorationPath{
 public:
 
-	RenderableExplorationPath(const RenderableSite& owner, std::vector<glm::dvec2> coordinates);
+	RenderableExplorationPath();
 	~RenderableExplorationPath();
 	
-	bool initialize() override;
-	bool deinitialize() override;
-	bool isReady() const override;
+	bool initialize(RenderableGlobe* globe, std::vector<glm::dvec2> coordinates);
+	bool deinitialize();
+	bool isReady() const;
 
-	void render(const RenderData& data) override;
-	void update(const UpdateData& data) override;
+	void render(const RenderData& data);
+	void update(const UpdateData& data);
 
 private:
 	void calculatePathModelCoordinates();
@@ -72,7 +72,7 @@ private:
 	bool _hasLoopedOnce;
 	bool _isCloseEnough;
 
-	const RenderableSite& _owner;
+	//RenderableGlobe& _globe;
 
 };
 }

@@ -54,13 +54,27 @@ std::vector<std::shared_ptr<SubsiteModels>> AsyncSurfaceModelProvider::getLoaded
 	std::vector<std::shared_ptr<SubsiteModels>> loadedModels;
 
 	if (_concurrentJobManager.numFinishedJobs() > 0) {
-		loadedModels.push_back(_concurrentJobManager.popFinishedJob()->product());
+		std::shared_ptr<SubsiteModels> subsiteModels = _concurrentJobManager.popFinishedJob()->product();
+		loadedModels.push_back(subsiteModels);
+		_enqueuedTileRequests.erase(hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level));
 	}
 	return loadedModels;
 }
 
 bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const uint64_t hashKey) const {
 	return _enqueuedTileRequests.find(hashKey) == _enqueuedTileRequests.end();
+}
+
+uint64_t AsyncSurfaceModelProvider::hashKey(const std::string site, const std::string drive, const int level) {
+	uint64_t key = 0LL;
+	int siteNumber = std::stoi(site);
+	int driveNumber = std::stoi(drive);
+
+	key |= level;
+	key |= siteNumber << 5;
+	key |= ((uint64_t)driveNumber) << 35;
+
+	return key;
 }
 
 

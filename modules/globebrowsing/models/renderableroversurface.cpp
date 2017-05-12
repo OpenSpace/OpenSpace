@@ -55,13 +55,13 @@ namespace openspace {
 using namespace properties;
 
 namespace globebrowsing {
-RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & dictionary)
-	: Renderable(dictionary),
-	_generalProperties({
-		BoolProperty("enabled", "enabled", false)
+	RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & dictionary)
+		: Renderable(dictionary),
+		_generalProperties({
+			BoolProperty("enabled", "enabled", false)
 	})
-	, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
-	, _modelSwitch(nullptr)
+		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
+		, _modelSwitch(nullptr)
 {
 	if (!dictionary.getValue(keyRoverLocationPath, _roverLocationPath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -82,7 +82,13 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 	ghoul::Dictionary tempDic;
 	tempDic.setValue(keyRoverLocationPath, _roverLocationPath);
 	tempDic.setValue(keyModelPath, _modelPath);
-	_subSites = RoverPathFileReader::extractSubsitesWithModels(tempDic);
+	_subSitesWithModels = RoverPathFileReader::extractSubsitesWithModels(tempDic);
+
+	// Extract all subsites
+	ghoul::Dictionary tempDic2;
+	tempDic2.setValue(keyRoverLocationPath, _roverLocationPath);
+	tempDic2.setValue(keyModelPath, _modelPath);
+	_subSites = RoverPathFileReader::extractAllSubsites(tempDic2);
 
 	addProperty(_debugModelRotation);
 
@@ -90,18 +96,27 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 	_absModelPath = absPath(_modelPath);
 	_absTexturePath = absPath(_texturePath);
 	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
+	_renderableExplorationPath = std::make_shared<RenderableExplorationPath>();
 }
 
 bool RenderableRoverSurface::initialize() {
-	std::string name = owner()->name();
-	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(name)->parent();
+	std::vector<glm::dvec2> coordinates;
+	for (auto subsite : _subSites) {
+		coordinates.push_back(glm::dvec2(subsite.lat, subsite.lon));
+	}
+
+	std::string ownerName = owner()->name();
+	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(ownerName)->parent();
 
 	_globe = (globebrowsing::RenderableGlobe*)parent->renderable();
+
+	_renderableExplorationPath->initialize(_globe, coordinates);
+
 	_chunkedLodGlobe = _globe->chunkedLodGlobe();
 
 	_modelSwitch = LodModelSwitch(_globe);
 
-	_chunkedLodGlobe->addSites(_subSites);
+	_chunkedLodGlobe->addSites(_subSitesWithModels);
 
 	RenderEngine& renderEngine = OsEng.renderEngine();
 	_programObject = renderEngine.buildRenderProgram("RenderableRoverSurface",
@@ -120,12 +135,14 @@ bool RenderableRoverSurface::isReady() const {
 }
 
 void RenderableRoverSurface::render(const RenderData & data) {
+	_renderableExplorationPath->render(data);
 	_models.clear();
 
 	std::vector<std::vector<Subsite>> subSitesVector = _chunkedLodGlobe->subsites();
 	std::vector<Subsite> ss;
 	ghoul::Dictionary modelDic;
 	std::unique_ptr<ModelProvider>_modelProvider;
+	int level;
 
 	switch (_modelSwitch.getLevel(data)) {
 		case LodModelSwitch::Mode::Low :	
@@ -133,16 +150,19 @@ void RenderableRoverSurface::render(const RenderData & data) {
 			modelDic.setValue("Type", "MultiModelProvider");
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
 			ss = _modelProvider->calculate(subSitesVector, data);
+			level = 2;
 			break;
 		case LodModelSwitch::Mode::Close :
 			//Close
 			modelDic.setValue("Type", "SingleModelProvider");
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
 			ss = _modelProvider->calculate(subSitesVector, data);
+			level = 3;
 			break;
 
 		default: 
 			//High up
+			level = 1;
 			return;
 	}
 
@@ -154,12 +174,12 @@ void RenderableRoverSurface::render(const RenderData & data) {
 		s1.pathToTextureFolder = _absTexturePath;
 		ss1.push_back(s1);
 	}
-	
-	_programObject->activate();
 
-	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels = _cachingModelProvider->getModels(ss1, 1);
+	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels = _cachingModelProvider->getModels(ss1, level);
 	
 	_subsiteModels = calculateSurfacePosition(_subsiteModels);
+
+	_programObject->activate();
 
 	for (auto subsiteModels : _subsiteModels) {
 		for (auto model : subsiteModels->models) {
@@ -249,6 +269,7 @@ void RenderableRoverSurface::render(const RenderData & data) {
 }
 
 void RenderableRoverSurface::update(const UpdateData & data) {
+	_renderableExplorationPath->update(data);
 	_cachingModelProvider->update(this);
 	_sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 }
