@@ -67,11 +67,11 @@
 #define ENC_FLAGS(x, y) (t1->flags[(x) + 1 + (((y) >> 2) + 1) * t1->flags_stride])
 #define ENC_FLAGS_ADDRESS(x, y) (t1->flags + ((x) + 1 + (((y) >> 2) + 1) * t1->flags_stride))
 
-static inline uint8_t		grk_t1_getctxno_zc_opt(uint32_t f, uint32_t orient);
-static inline uint8_t		grk_t1_getctxno_sc_opt(uint32_t fX, uint32_t pfX, uint32_t nfX, uint32_t ci);
-static inline uint32_t		grk_t1_getctxno_mag_opt(uint32_t f);
-static inline uint8_t		grk_t1_getspb_opt(uint32_t fX, uint32_t pfX, uint32_t nfX, uint32_t ci);
-static inline void			grk_t1_updateflags_opt(opj_flag_opt_t *flagsp, uint32_t ci, uint32_t s, uint32_t stride);
+static inline uint8_t		grk_t1_getctxno_zc(uint32_t f, uint32_t orient);
+static inline uint8_t		grk_t1_getctxno_sc(uint32_t fX, uint32_t pfX, uint32_t nfX, uint32_t ci3);
+static inline uint32_t		grk_t1_getctxno_mag(uint32_t f);
+static inline uint8_t		grk_t1_getspb(uint32_t fX, uint32_t pfX, uint32_t nfX, uint32_t ci3);
+static inline void			grk_t1_updateflags(opj_flag_opt_t *flagsp, uint32_t ci3, uint32_t s, uint32_t stride);
 
 /**
 Encode significant pass
@@ -189,12 +189,12 @@ void grk_t1_opt_destroy(grk_t1_opt_t *p_t1){
     grk_free(p_t1);
 }
 
-static inline uint8_t grk_t1_getctxno_zc_opt(uint32_t f, uint32_t orient){
+static inline uint8_t grk_t1_getctxno_zc(uint32_t f, uint32_t orient){
     return lut_ctxno_zc_opt[(orient << 9) | (f & T1_SIGMA_NEIGHBOURS)];
 }
 
 
-static uint8_t grk_t1_getctxno_sc_opt(uint32_t fX, uint32_t pfX, uint32_t nfX, uint32_t ci){
+static uint8_t grk_t1_getctxno_sc(uint32_t fX, uint32_t pfX, uint32_t nfX, uint32_t ci3){
     /*
     0 pfX T1_CHI_THIS           T1_LUT_CTXNO_SGN_W
     1 tfX T1_SIGMA_1            T1_LUT_CTXNO_SIG_N
@@ -206,26 +206,26 @@ static uint8_t grk_t1_getctxno_sc_opt(uint32_t fX, uint32_t pfX, uint32_t nfX, u
     7 tfX T1_SIGMA_7            T1_LUT_CTXNO_SIG_S
     */
 
-    uint32_t lu = (fX >> (ci * 3)) & (T1_SIGMA_1 | T1_SIGMA_3 | T1_SIGMA_5 | T1_SIGMA_7);
+    uint32_t lu = (fX >> ci3) & (T1_SIGMA_1 | T1_SIGMA_3 | T1_SIGMA_5 | T1_SIGMA_7);
 
-    lu |= (pfX >> (T1_CHI_THIS_I + (ci * 3U))) & (1U << 0);
-    lu |= (nfX >> (T1_CHI_THIS_I - 2U + (ci * 3U))) & (1U << 2);
-    if (ci == 0U) {
+    lu |= (pfX >> (T1_CHI_THIS_I + ci3)) & (1U << 0);
+    lu |= (nfX >> (T1_CHI_THIS_I - 2U + ci3)) & (1U << 2);
+    if (ci3 == 0U) {
         lu |= (fX >> (T1_CHI_0_I - 4U)) & (1U << 4);
     } else {
-        lu |= (fX >> (T1_CHI_1_I - 4U + ((ci - 1U) * 3U))) & (1U << 4);
+        lu |= (fX >> (T1_CHI_1_I - 4U + (ci3 -3))) & (1U << 4);
     }
-    lu |= (fX >> (T1_CHI_2_I - 6U + (ci * 3U))) & (1U << 6);
+    lu |= (fX >> (T1_CHI_2_I - 6U + ci3)) & (1U << 6);
 
     return lut_ctxno_sc_opt[lu];
 }
 
 
-static inline uint32_t grk_t1_getctxno_mag_opt(uint32_t f){
+static inline uint32_t grk_t1_getctxno_mag(uint32_t f){
     return (f & T1_MU_THIS) ? (T1_CTXNO_MAG + 2) : ((f & T1_SIGMA_NEIGHBOURS) ? T1_CTXNO_MAG + 1 : T1_CTXNO_MAG);
 }
 
-static uint8_t grk_t1_getspb_opt(uint32_t fX, uint32_t pfX, uint32_t nfX, uint32_t ci)
+static uint8_t grk_t1_getspb(uint32_t fX, uint32_t pfX, uint32_t nfX, uint32_t ci3)
 {
     /*
     0 pfX T1_CHI_THIS           T1_LUT_SGN_W
@@ -238,31 +238,31 @@ static uint8_t grk_t1_getspb_opt(uint32_t fX, uint32_t pfX, uint32_t nfX, uint32
     7 tfX T1_SIGMA_7            T1_LUT_SIG_S
     */
 
-    uint32_t lu = (fX >> (ci * 3U)) & (T1_SIGMA_1 | T1_SIGMA_3 | T1_SIGMA_5 | T1_SIGMA_7);
+    uint32_t lu = (fX >> ci3) & (T1_SIGMA_1 | T1_SIGMA_3 | T1_SIGMA_5 | T1_SIGMA_7);
 
-    lu |= (pfX >> (T1_CHI_THIS_I + (ci * 3U))) & (1U << 0);
-    lu |= (nfX >> (T1_CHI_THIS_I - 2U + (ci * 3U))) & (1U << 2);
-    if (ci == 0U) {
+    lu |= (pfX >> (T1_CHI_THIS_I + ci3)) & (1U << 0);
+    lu |= (nfX >> (T1_CHI_THIS_I - 2U + ci3)) & (1U << 2);
+    if (ci3 == 0U) {
         lu |= (fX >> (T1_CHI_0_I - 4U)) & (1U << 4);
     } else {
-        lu |= (fX >> (T1_CHI_1_I - 4U + ((ci - 1U) * 3U))) & (1U << 4);
+        lu |= (fX >> (T1_CHI_1_I - 4U + (ci3 -3))) & (1U << 4);
     }
-    lu |= (fX >> (T1_CHI_2_I - 6U + (ci * 3U))) & (1U << 6);
+    lu |= (fX >> (T1_CHI_2_I - 6U + ci3)) & (1U << 6);
 
     return lut_spb_opt[lu];
 }
 
-static void grk_t1_updateflags_opt(opj_flag_opt_t *flagsp, uint32_t ci, uint32_t s, uint32_t stride)
+static void grk_t1_updateflags(opj_flag_opt_t *flagsp, uint32_t ci3, uint32_t s, uint32_t stride)
 {
     /* set up to point to the north and south data points' flags words, if required */
     opj_flag_opt_t* north = NULL;
     opj_flag_opt_t* south = NULL;
 
     /* mark target as significant */
-    *flagsp |= T1_SIGMA_THIS << (3U * ci);
+    *flagsp |= T1_SIGMA_THIS << ci3;
 
     /* north-west, north, north-east */
-    if (ci == 0U) {
+    if (ci3 == 0U) {
         north = flagsp - stride;
         *north |= T1_SIGMA_16;
         north[-1] |= T1_SIGMA_17;
@@ -270,7 +270,7 @@ static void grk_t1_updateflags_opt(opj_flag_opt_t *flagsp, uint32_t ci, uint32_t
     }
 
     /* south-west, south, south-east */
-    if (ci == 3U) {
+    if (ci3 == 9) {
         south = flagsp + stride;
         *south |= T1_SIGMA_1;
         south[-1] |= T1_SIGMA_2;
@@ -278,25 +278,25 @@ static void grk_t1_updateflags_opt(opj_flag_opt_t *flagsp, uint32_t ci, uint32_t
     }
 
     /* east */
-    flagsp[-1] |= T1_SIGMA_5 << (3U * ci);
+    flagsp[-1] |= T1_SIGMA_5 << ci3;
 
     /* west */
-    flagsp[1] |= T1_SIGMA_3 << (3U * ci);
+    flagsp[1] |= T1_SIGMA_3 << ci3;
 
     if (s) {
-        switch (ci) {
+        switch (ci3) {
         case 0U: {
             *flagsp |= T1_CHI_1;
             *north |= T1_CHI_5;
             break;
         }
-        case 1:
+        case 3:
             *flagsp |= T1_CHI_2;
             break;
-        case 2:
+        case 6:
             *flagsp |= T1_CHI_3;
             break;
-        case 3: {
+        case 9: {
             *flagsp |= T1_CHI_4;
             *south |= T1_CHI_0;
             break;
@@ -315,30 +315,28 @@ static void  grk_t1_enc_sigpass_step(   grk_t1_opt_t *t1,
                                         int32_t *nmsedec)
 {
     uint32_t v;
-    uint32_t ci;
-
     grk_mqc_t *mqc = t1->mqc;
     if (*flagsp == 0U) {
         return;  /* Nothing to do for any of the 4 data points */
     }
-    for (ci = 0U; ci < 4U; ++ci) {
-        uint32_t const shift_flags = *flagsp >> (ci * 3U);
+    for (uint32_t ci3 = 0U; ci3 < 12U; ci3+=3) {
+		uint32_t const shift_flags = *flagsp >> ci3;
         /* if location is not significant, has not been coded in significance pass, and is in preferred neighbourhood,
         then code in this pass: */
         if ((shift_flags & (T1_SIGMA_THIS | T1_PI_THIS)) == 0U && (shift_flags & T1_SIGMA_NEIGHBOURS) != 0U) {
             v = (*datap >> one) & 1;
-            grk_mqc_setcurctx(mqc, grk_t1_getctxno_zc_opt(shift_flags, orient));
+            grk_mqc_setcurctx(mqc, grk_t1_getctxno_zc(shift_flags, orient));
             grk_mqc_encode(mqc, v);
             if (v) {
                 /* sign bit */
                 v = *datap >> T1_DATA_SIGN_BIT_INDEX;
                 *nmsedec += grk_t1_getnmsedec_sig(*datap, (uint32_t)bpno);
-                grk_mqc_setcurctx(mqc, grk_t1_getctxno_sc_opt(*flagsp, flagsp[-1], flagsp[1], ci));
-                grk_mqc_encode(mqc, v ^ grk_t1_getspb_opt(*flagsp, flagsp[-1], flagsp[1], ci));
-                grk_t1_updateflags_opt(flagsp, ci, v, t1->flags_stride);
+                grk_mqc_setcurctx(mqc, grk_t1_getctxno_sc(*flagsp, flagsp[-1], flagsp[1], ci3));
+                grk_mqc_encode(mqc, v ^ grk_t1_getspb(*flagsp, flagsp[-1], flagsp[1], ci3));
+                grk_t1_updateflags(flagsp, ci3, v, t1->flags_stride);
             }
             /* set propagation pass bit for this location */
-            *flagsp |= T1_PI_THIS << (ci * 3U);
+            *flagsp |= T1_PI_THIS << ci3;
         }
         datap += t1->w;
     }
@@ -387,8 +385,6 @@ static void grk_t1_enc_refpass_step(   grk_t1_opt_t *t1,
                                        int32_t *nmsedec)
 {
     uint32_t v;
-    uint32_t ci;
-
     grk_mqc_t *mqc = t1->mqc;
 
     if ((*flagsp & (T1_SIGMA_4 | T1_SIGMA_7 | T1_SIGMA_10 | T1_SIGMA_13)) == 0) {
@@ -400,16 +396,16 @@ static void grk_t1_enc_refpass_step(   grk_t1_opt_t *t1,
         return;
     }
 
-    for (ci = 0U; ci < 4U; ++ci) {
-        uint32_t shift_flags = *flagsp >> (ci * 3U);
+    for (uint32_t ci3 = 0U; ci3 < 12U; ci3+=3) {
+        uint32_t shift_flags = *flagsp >> ci3;
         /* if location is significant, but has not been coded in significance propagation pass, then code in this pass: */
         if ((shift_flags & (T1_SIGMA_THIS | T1_PI_THIS)) == T1_SIGMA_THIS) {
             *nmsedec += grk_t1_getnmsedec_ref(*datap, (uint32_t)bpno);
             v = (*datap >> one) & 1;
-            grk_mqc_setcurctx(mqc, grk_t1_getctxno_mag_opt(shift_flags));
+            grk_mqc_setcurctx(mqc, grk_t1_getctxno_mag(shift_flags));
             grk_mqc_encode(mqc, v);
             /* flip magnitude refinement bit*/
-            *flagsp |= T1_MU_THIS << (ci * 3U);
+            *flagsp |= T1_MU_THIS << ci3;
         }
         datap += t1->w;
     }
@@ -457,7 +453,6 @@ static void grk_t1_enc_clnpass_step(   grk_t1_opt_t *t1,
 										uint32_t y)
 {
     uint32_t v;
-    uint32_t ci;
     grk_mqc_t *mqc = t1->mqc;
 
     uint32_t lim;
@@ -475,31 +470,31 @@ static void grk_t1_enc_clnpass_step(   grk_t1_opt_t *t1,
         }
         return;
     }
-
-    lim = 4U < (t1->h - y) ? 4U : (t1->h - y);
-    for (ci = runlen; ci < lim; ++ci) {
+	runlen *= 3;
+    lim = 4U < (t1->h - y) ? 12U : 3*(t1->h - y);
+    for (uint32_t ci3 = runlen; ci3 < lim; ci3+=3) {
         opj_flag_opt_t shift_flags;
-        if ((agg != 0) && (ci == runlen)) {
+        if ((agg != 0) && (ci3 == runlen)) {
             goto LABEL_PARTIAL;
         }
 
-        shift_flags = *flagsp >> (ci * 3U);
+        shift_flags = *flagsp >> ci3;
 
         if (!(shift_flags & (T1_SIGMA_THIS | T1_PI_THIS))) {
-            grk_mqc_setcurctx(mqc, grk_t1_getctxno_zc_opt(shift_flags, orient));
+            grk_mqc_setcurctx(mqc, grk_t1_getctxno_zc(shift_flags, orient));
             v = (*datap >> one) & 1;
             grk_mqc_encode(mqc, v);
             if (v) {
 LABEL_PARTIAL:
                 *nmsedec += grk_t1_getnmsedec_sig(*datap, (uint32_t)bpno);
-                grk_mqc_setcurctx(mqc, grk_t1_getctxno_sc_opt(*flagsp, flagsp[-1], flagsp[1], ci));
+                grk_mqc_setcurctx(mqc, grk_t1_getctxno_sc(*flagsp, flagsp[-1], flagsp[1], ci3));
                 /* sign bit */
                 v = *datap >> T1_DATA_SIGN_BIT_INDEX;
-                grk_mqc_encode(mqc, v ^ grk_t1_getspb_opt(*flagsp, flagsp[-1], flagsp[1], ci));
-                grk_t1_updateflags_opt(flagsp, ci, v, t1->flags_stride);
+                grk_mqc_encode(mqc, v ^ grk_t1_getspb(*flagsp, flagsp[-1], flagsp[1], ci3));
+                grk_t1_updateflags(flagsp, ci3, v, t1->flags_stride);
             }
         }
-        *flagsp &= ~(T1_PI_0 << (3U * ci));
+        *flagsp &= ~(T1_PI_0 << ci3);
         datap += t1->w;
     }
 }
@@ -566,7 +561,7 @@ bool grk_t1_opt_allocate_buffers(   grk_t1_opt_t *t1,
     }
     if (!t1->flags) {
 		auto flags_stride = cblkw + 2;
-		auto flags_height = (cblkh + 3U) / 4U;
+		auto flags_height = (cblkh + 3U) >> 2;
 		auto flagssize = flags_stride * (flags_height + 2);
         t1->flags = (opj_flag_opt_t*)grk_aligned_malloc(flagssize * sizeof(opj_flag_opt_t));
         if (!t1->flags) {
@@ -586,7 +581,7 @@ void grk_t1_opt_init_buffers(grk_t1_opt_t *t1,
 		memset(t1->data, 0, w*h * sizeof(int32_t));
 
 	t1->flags_stride = w + 2;
-	auto flags_height = (h + 3U) / 4U;
+	auto flags_height = (h + 3U) >>2;
 	auto flagssize = t1->flags_stride * (flags_height + 2);
 	memset(t1->flags, 0, flagssize * sizeof(opj_flag_opt_t)); /* Shall we keep memset for encoder ? */
 
@@ -603,16 +598,17 @@ void grk_t1_opt_init_buffers(grk_t1_opt_t *t1,
 		*p++ = (T1_PI_0 | T1_PI_1 | T1_PI_2 | T1_PI_3);
 	}
 
-	if (h % 4) {
+	unsigned char hMod4 = h & 3;
+	if (hMod4) {
 		uint32_t v = 0;
 		p = &t1->flags[((flags_height)* t1->flags_stride)];
-		if (h % 4 == 1) {
+		if (hMod4 == 1) {
 			v |= T1_PI_1 | T1_PI_2 | T1_PI_3;
 		}
-		else if (h % 4 == 2) {
+		else if (hMod4 == 2) {
 			v |= T1_PI_2 | T1_PI_3;
 		}
-		else if (h % 4 == 3) {
+		else if (hMod4 == 3) {
 			v |= T1_PI_3;
 		}
 		for (x = 0; x < t1->flags_stride; ++x) {

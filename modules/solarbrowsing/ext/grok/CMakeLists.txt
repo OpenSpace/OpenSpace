@@ -282,8 +282,8 @@ if(BUILD_TESTING)
 
     # Search Grok data needed for the tests
     # They could be found via git on the Grok GitHub code project
-    find_path(GROK_DATA_ROOT README-OPJ-Data
-      PATHS $ENV{GROK_DATA_ROOT} ${CMAKE_SOURCE_DIR}/../data
+    find_path(GROK_DATA_ROOT README-OPJ-DATA
+      PATHS $ENV{GROK_DATA_ROOT} ${CMAKE_SOURCE_DIR}/../grok-test-data
       NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
       )
 

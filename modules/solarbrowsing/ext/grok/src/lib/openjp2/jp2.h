@@ -122,26 +122,29 @@ struct grk_jp2_comps_t {
 
 
 struct grk_jp2_buffer_t {
-	grk_jp2_buffer_t(uint8_t* buf, size_t size) : buffer(buf), len(size) 
+	grk_jp2_buffer_t(uint8_t* buf, size_t size, bool owns) : buffer(buf), len(size), ownsData(owns)
 	{
 	}
 	bool alloc(size_t len) {
 		dealloc();
 		buffer = (uint8_t*)grk_malloc(len);
+		ownsData = buffer != nullptr;
 		return buffer ? true : false;
 	}
 	void dealloc() {
-		if (buffer)
+		if (ownsData && buffer)
 			grk_free(buffer);
 		buffer = nullptr;
+		ownsData = false;
 	}
 	uint8_t* buffer;
 	size_t len;
+	bool ownsData;
 };
 
 
 struct grk_jp2_uuid_t : public grk_jp2_buffer_t {
-	grk_jp2_uuid_t(const uint8_t myuuid[16], uint8_t* buf, size_t size) :grk_jp2_buffer_t(buf,size) {
+	grk_jp2_uuid_t(const uint8_t myuuid[16], uint8_t* buf, size_t size, bool owns) :grk_jp2_buffer_t(buf,size,owns) {
 		for (int i = 0; i < 16; ++i) {
 			uuid[i] = myuuid[i];
 		}

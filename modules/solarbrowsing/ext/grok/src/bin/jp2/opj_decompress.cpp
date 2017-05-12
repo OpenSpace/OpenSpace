@@ -240,7 +240,8 @@ static void decode_help_display(void)
 			"  [-c | -compression]\n"
 			"    Compression format for output file. Currently, only zip is supported for TIFF output (set parameter to 8)\n"
             "\n");
-
+	fprintf(stdout, "  [-X | -XML]\n"
+		"    Store XML metadata to file. File name will be set to \"output file name\" + \".xml\"\n");
     fprintf(stdout,"\n");
 }
 
@@ -599,6 +600,8 @@ int parse_cmdline_decoder(int argc,
 			"Device ID",
 			false, 0, "integer", cmd);
 
+		SwitchArg xmlArg("X", "XML",
+			"XML metadata",cmd);
 
 		// Kernel build flags:
 		// 1 indicates build binary, otherwise load binary
@@ -615,6 +618,8 @@ int parse_cmdline_decoder(int argc,
 			"Verbose", cmd);
 		
 		cmd.parse(argc, argv);
+
+		parameters->serialize_xml = xmlArg.isSet();
 
 		if (forceRgbArg.isSet()) {
 			parameters->force_rgb = true;
@@ -1413,7 +1418,7 @@ int plugin_main(int argc, char **argv, DecompressInitParams* initParams)
 		}
 
 		//1. try to decode using plugin
-		int rc = opj_plugin_decode(&initParams->parameters, plugin_pre_decode_callback, plugin_post_decode_callback);
+		rc = opj_plugin_decode(&initParams->parameters, plugin_pre_decode_callback, plugin_post_decode_callback);
 
 		//2. fallback
 		if (rc == -1 || rc == EXIT_FAILURE) {
@@ -1460,20 +1465,22 @@ int plugin_pre_decode_callback(opj_plugin_decode_callback_info_t* info) {
 	/*
 	auto fp = fopen(parameters->infile, "rb");
 	if (!fp) {
-		printf("unable to open file %s for reading", parameters->infile);
+		fprintf(stderr, "ERROR -> opj_decompress: unable to open file %s for reading", parameters->infile);
 		failed = 1;
 		goto cleanup;
 	}
 
 	auto rc = fseek(fp, 0, SEEK_END);
 	if (rc == -1) {
-		printf("unable to seek on file %s", parameters->infile);
+		fprintf(stderr, "ERROR -> opj_decompress: unable to seek on file %s", parameters->infile);
+		fclose(fp);
 		failed = 1;
 		goto cleanup;
 	}
 	auto lengthOfFile = ftell(fp);
 	if (lengthOfFile <= 0) {
-		printf("Zero or negative length for file %s", parameters->infile);
+		fprintf(stderr, "ERROR -> opj_decompress: Zero or negative length for file %s", parameters->infile);
+		fclose(fp);
 		failed = 1;
 		goto cleanup;
 	}
@@ -1486,7 +1493,7 @@ int plugin_pre_decode_callback(opj_plugin_decode_callback_info_t* info) {
 	}
 	fclose(fp);
 	if (totalBytes != lengthOfFile) {
-		printf("Unable to read full length of file %s", parameters->infile);
+		fprintf(stderr, "ERROR -> opj_decompress: Unable to read full length of file %s", parameters->infile);
 		failed = 1;
 		goto cleanup;
 	}
@@ -1550,12 +1557,30 @@ int plugin_pre_decode_callback(opj_plugin_decode_callback_info_t* info) {
 		goto cleanup;
 	}
 
+	// store XML to file
+	if (header_info.xml_data && header_info.xml_data_len && parameters->serialize_xml) {
+		std::string xmlFile = std::string(parameters->outfile) + ".xml";
+		auto fp = fopen(xmlFile.c_str(), "wb");
+		if (!fp) {
+			fprintf(stderr, "ERROR -> opj_decompress: unable to open file %s for writing", xmlFile.c_str());
+			failed = 1;
+			goto cleanup;
+		}
+		if (fwrite(header_info.xml_data, 1, header_info.xml_data_len, fp) != header_info.xml_data_len) {
+			fprintf(stderr, "ERROR -> opj_decompress: unable to write all data to file file %s for writing", xmlFile.c_str());
+			fclose(fp);
+			failed = 1;
+			goto cleanup;
+		}
+		fclose(fp);
+	}
+
 	info->image = image;
 
 	// limit to 16 bit precision
 	for (uint32_t i = 0; i < image->numcomps; ++i) {
 		if (image->comps[i].prec > 16) {
-			fprintf(stderr, "Precision = %d not supported:\n", image->comps[i].prec);
+			fprintf(stderr, "ERROR -> opj_decompress: Precision = %d not supported:\n", image->comps[i].prec);
 			failed = 1;
 			goto cleanup;
 		}
