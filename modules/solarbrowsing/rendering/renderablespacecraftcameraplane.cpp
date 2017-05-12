@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 #include <modules/solarbrowsing/rendering/renderablespacecraftcameraplane.h>
+#include <modules/solarbrowsing/rendering/renderablespacecraftcamerasphere.h>
 #include <openspace/engine/openspaceengine.h>
 
 #include <openspace/scene/scenegraphnode.h>
@@ -83,6 +84,12 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     if (!dictionary.getValue("TransferfunctionPath", tfRootPath)) {
         throw ghoul::RuntimeError("RootPath has to be specified");
     }
+
+    float id;
+    if (!dictionary.getValue("Id", id)) {
+        throw ghoul::RuntimeError("RootPath has to be specified");
+    }
+    _id = static_cast<unsigned int>(id);
 
     //TODO(mnoven): Can't pass in an int to dictionary?
     float tmp;
@@ -320,7 +327,7 @@ void RenderableSpacecraftCameraPlane::updatePlane() {
 }
 
 bool RenderableSpacecraftCameraPlane::isReady() const {
-    return _planeShader && _sphereShader && _frustumShader && _texture && _sphere;
+    return _planeShader && _frustumShader && _texture;
 }
 
 void RenderableSpacecraftCameraPlane::createFrustum() {
@@ -389,21 +396,21 @@ bool RenderableSpacecraftCameraPlane::initialize() {
         }
     }
 
-    if (!_sphereShader) {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _sphereShader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
-            "${MODULE_SOLARBROWSING}/shaders/spacecraftimagesphere_vs.glsl",
-            "${MODULE_SOLARBROWSING}/shaders/spacecraftimagesphere_fs.glsl"
-            );
-        if (!_sphereShader) {
-            return false;
-        }
-    }
+    // if (!_sphereShader) {
+    //     RenderEngine& renderEngine = OsEng.renderEngine();
+    //     _sphereShader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
+    //         "${MODULE_SOLARBROWSING}/shaders/spacecraftimagesphere_vs.glsl",
+    //         "${MODULE_SOLARBROWSING}/shaders/spacecraftimagesphere_fs.glsl"
+    //         );
+    //     if (!_sphereShader) {
+    //         return false;
+    //     }
+    // }
 
     // Fake sun
-     PowerScaledScalar planetSize(glm::vec2(6.96701f, 8.f)); // 6.95701f
-    _sphere = std::make_unique<PowerScaledSphere>(PowerScaledSphere(planetSize, 100));
-    _sphere->initialize();
+    //  PowerScaledScalar planetSize(glm::vec2(6.96701f, 8.f)); // 6.95701f
+    // _sphere = std::make_unique<PowerScaledSphere>(PowerScaledSphere(planetSize, 100));
+    // _sphere->initialize();
 
     // using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     // _planeShader->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
@@ -633,9 +640,9 @@ void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
         _planeShader->rebuildFromFile();
     }
 
-    if (_sphereShader->isDirty()) {
-        _sphereShader->rebuildFromFile();
-    }
+    // if (_sphereShader->isDirty()) {
+    //     _sphereShader->rebuildFromFile();
+    // }
 
     if (_frustumShader->isDirty()) {
         _frustumShader->rebuildFromFile();
@@ -713,7 +720,13 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     glDrawArrays(GL_LINES, 0, 16);
     _frustumShader->deactivate();
 
-    _sphereShader->activate();
+    const SceneGraphNode* targetSphere = OsEng.renderEngine().scene()->sceneGraphNode("Sun Imagery");
+    const auto* renderableSphere = reinterpret_cast<const RenderableSpacecraftCameraSphere*>(
+          targetSphere->renderable());
+
+    const auto& sphereShader = renderableSphere->_shader;
+
+    sphereShader->activate();
     glm::dmat4 modelTransformSphere =
         glm::translate(glm::dmat4(1.0), target->worldPosition()) * // Translation
         glm::dmat4(target->worldRotationMatrix()) *  // Spice rotation
@@ -722,28 +735,29 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
           = viewMatrix * modelTransformSphere;
 
     //const glm::dmat4 worldToSpacecraft = glm::inverse(rotationTransform);
-    _sphereShader->setUniform("planePositionSpacecraft",
+    sphereShader->setUniform("planePositionSpacecraft[" + std::to_string(_id) + "]",
                               glm::dvec3(rotationTransformSpacecraft
                                     * glm::dvec4(positionWorld + offset, 1.0)));
-    _sphereShader->setUniform("sunToSpacecraftReferenceFrame",
+    sphereShader->setUniform("sunToSpacecraftReferenceFrame[" + std::to_string(_id) + "]",
                               rotationTransformSpacecraft * glm::dmat4(target->rotationMatrix()));
 
-    _sphereShader->setUniform(
-        "modelViewProjectionTransform",
+    sphereShader->setUniform(
+        "modelViewProjectionTransform[" + std::to_string(_id) + "]",
         projectionMatrix * glm::mat4(modelViewTransformSphere)
     );
 
     imageUnit.activate();
     _texture->bind();
-    _sphereShader->setUniform("imageryTexture", imageUnit);
 
     tfUnit.activate();
     //_transferFunctions[_currentActiveChannel]->bind(); // Calls update internally
     _tfMap[_currentActiveInstrument]->bind(); // Calls update internally
-    _sphereShader->setUniform("lut", tfUnit);
+    sphereShader->setUniform("lut[" + std::to_string(_id) + "]", tfUnit);
 
-    _sphere->render();
-    _sphereShader->deactivate();
+    sphereShader->deactivate();
+
+    // _sphere->render();
+    // _sphereShader->deactivate();
 }
 
 } // namespace openspace

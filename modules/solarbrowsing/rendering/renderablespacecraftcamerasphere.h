@@ -22,37 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/solarbrowsing/solarbrowsingmodule.h>
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERASPHERE___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERASPHERE___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/engine/openspaceengine.h>
 
-#include <ghoul/misc/assert.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/powerscaledsphere.h>
 
-#include <modules/solarbrowsing/rendering/renderablespacecraftcameraplane.h>
-#include <modules/solarbrowsing/rendering/renderablespacecraftcamerasphere.h>
-#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
+#include <ghoul/opengl/textureunit.h>
+
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace ghoul {
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    }
+}
 
 namespace openspace {
 
-SolarBrowsingModule::SolarBrowsingModule()
-    : OpenSpaceModule("SolarBrowsing")
-{
-	OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Initialize,
-        [](){
-            SpacecraftImageryManager::initialize();
-        }
-    );
+namespace planetgeometry {
+class PlanetGeometry;
 }
 
-void SolarBrowsingModule::internalInitialize(){
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
+class RenderableSpacecraftCameraSphere : public Renderable {
+public:
+    RenderableSpacecraftCameraSphere(const ghoul::Dictionary& dictionary);
 
-    fRenderable->registerClass<RenderableSpacecraftCameraPlane>("RenderableSpacecraftCameraPlane");
-    fRenderable->registerClass<RenderableSpacecraftCameraSphere>("RenderableSpacecraftCameraSphere");
-}
+    bool initialize() override;
+    bool deinitialize() override;
+    bool isReady() const override;
+
+    void render(const RenderData& data) override;
+    void update(const UpdateData& data) override;
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+private:
+    void loadTexture();
+
+    std::unique_ptr<PowerScaledSphere> _sphere;
+    //std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
+    //properties::BoolProperty _performShading;
+    //properties::FloatProperty _planetRadius;
+    float _planetRadius;
+
+    glm::dmat3 _stateMatrix;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERASPHERE___H__

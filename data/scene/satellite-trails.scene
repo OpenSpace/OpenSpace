@@ -46,6 +46,7 @@ return {
     },
     Modules = {
         "sun",
+        "sun-imagery",
         -- "mercury",
         -- "venus",
          "earth",
@@ -59,8 +60,8 @@ return {
         "milkyway",
         "milkyway-eso",
       --  "constellationbounds",
-        "missions/sdo",
-        --"missions/stereo",
+         "missions/sdo",
+         "missions/stereo",
        -- "missions/soho"
     }
 }

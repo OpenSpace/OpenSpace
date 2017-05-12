@@ -24,9 +24,9 @@
 
 #version __CONTEXT__
 
-uniform mat4 modelViewProjectionTransform;
+uniform mat4 modelViewProjectionTransform[2];
 uniform mat4 modelTransform;
-uniform dmat4 sunToSpacecraftReferenceFrame;
+uniform dmat4 sunToSpacecraftReferenceFrame[2];
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
@@ -41,8 +41,8 @@ out vec3 vUv;
 void main() {
     // Transform the damn psc to homogenous coordinate
     vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
-    vUv = vec3(sunToSpacecraftReferenceFrame * dvec4(position)).xyz;
-    vec4 positionClipSpace = modelViewProjectionTransform * position;
+    vUv = vec3(sunToSpacecraftReferenceFrame[1] * dvec4(position)).xyz;
+    vec4 positionClipSpace = modelViewProjectionTransform[1] * position;
     clipSpace = positionClipSpace;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
     gl_Position = vs_positionScreenSpace;

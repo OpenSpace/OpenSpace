@@ -114,7 +114,7 @@ private:
     std::unique_ptr<PowerScaledSphere> _sphere;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _frustumShader;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _sphereShader;
+    //std::unique_ptr<ghoul::opengl::ProgramObject> _sphereShader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _planeShader;
 
     std::string _type;
@@ -128,6 +128,7 @@ private:
 
     double _startTimeSequence;
     double _endTimeSequence;
+    int _id;
 
     bool _updatingCurrentActiveChannel = false;
     bool _updatingCurrentLevelOfResolution = false;
