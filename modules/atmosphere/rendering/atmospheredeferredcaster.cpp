@@ -47,7 +47,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-#define _SAVE_ATMOSPHERE_TEXTURES
+//#define _SAVE_ATMOSPHERE_TEXTURES
 
 namespace {
     const std::string _loggerCat       = "AtmosphereDeferredcaster";
@@ -94,6 +94,7 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _mieExtinctionCoeff(glm::vec3(0.f))
     , _rayleighScatteringCoeff(glm::vec3(0.f))
     , _mieScatteringCoeff(glm::vec3(0.f))
+    , _ellipsoidRadii(glm::dvec3(0.0))
     , _sunRadianceIntensity(50.0f)
     , _hdrConstant(0.4f)
 {}
@@ -228,6 +229,8 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
         SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
     glm::dvec4 sunPosObj = glm::inverse(_modelTransform) * glm::dvec4(sunPosWorld - renderData.position.dvec3(), 1.0);
 
+    program.setUniform("ellipsoidRadii", _ellipsoidRadii);
+
     //program.setUniform("sunPositionObj", sunPosObj);
     program.setUniform("sunDirectionObj", glm::normalize(glm::dvec3(sunPosObj)));
     //program.setUniform("_performShading", _performShading);
@@ -248,10 +251,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     program.setUniform("inscatterTexture", inScatteringTableTextureUnit);
 
     // DEBUG:
-    glm::dvec3 objP = glm::dvec3(renderData.position[0] * pow(10, renderData.position[3]), 
-        renderData.position[1] * pow(10, renderData.position[3]), renderData.position[2] * pow(10, renderData.position[3]));
-    glm::dvec4 cameraP = glm::inverse(glm::dmat4(_modelTransform)) * glm::dvec4(-objP + renderData.camera.positionVec3(), 1.0);
-    std::cout << "====== Distance from Planet's ground in KM: " << glm::length(glm::dvec3(cameraP / glm::dvec4(1000.0, 1000.0, 1000.0, 1.0))) - _atmospherePlanetRadius << " =======" << std::endl;
+    //glm::dvec3 objP = glm::dvec3(renderData.position[0] * pow(10, renderData.position[3]), 
+    //    renderData.position[1] * pow(10, renderData.position[3]), renderData.position[2] * pow(10, renderData.position[3]));
+    //glm::dvec4 cameraP = glm::inverse(glm::dmat4(_modelTransform)) * glm::dvec4(-objP + renderData.camera.positionVec3(), 1.0);
+    //std::cout << "====== Distance from Planet's ground in KM: " << glm::length(glm::dvec3(cameraP / glm::dvec4(1000.0, 1000.0, 1000.0, 1.0))) - _atmospherePlanetRadius << " =======" << std::endl;
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData & renderData, const DeferredcastData& deferredData,
@@ -326,6 +329,9 @@ void AtmosphereDeferredcaster::setMieExtinctionCoefficients(const glm::vec3 & mi
     _mieExtinctionCoeff = mieExtCoeff;
 }
 
+void AtmosphereDeferredcaster::setEllipsoidRadii(const glm::dvec3 & radii) {
+    _ellipsoidRadii = radii;
+}
 
 void AtmosphereDeferredcaster::loadComputationPrograms() {
 

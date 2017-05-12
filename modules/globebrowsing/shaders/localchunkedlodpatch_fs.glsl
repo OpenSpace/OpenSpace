@@ -27,11 +27,16 @@
 
 Fragment getFragment() {
     Fragment frag;
-    frag.color = getTileFragColor();
+    // Final Color of a Fragment
+    frag.color = getTileFragColor();    
 
 #if SHOW_CHUNK_EDGES
     frag.color += patchBorderOverlay(fs_uv, vec3(1,0,0), 0.005);
 #endif // SHOW_CHUNK_EDGES
+
+    // frag.gColor    = frag.color;
+    // frag.gNormal   = normal;
+    // frag.gPosition = p;
 
     frag.depth = fs_position.w;
     return frag;

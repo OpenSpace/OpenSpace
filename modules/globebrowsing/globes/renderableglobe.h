@@ -34,6 +34,11 @@
 #include <openspace/properties/scalar/intproperty.h>
 
 namespace openspace {
+
+#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+    class AtmosphereDeferredcaster;
+#endif
+
 namespace globebrowsing {
 
 class ChunkedLodGlobe;
@@ -76,6 +81,25 @@ public:
         properties::FloatProperty lodScaleFactor;
         properties::FloatProperty cameraMinHeight;
     };
+
+#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+    struct AtmosphereProperties {
+        properties::FloatProperty atmosphereHeightP;
+        properties::FloatProperty groundAverageReflectanceP;
+        properties::FloatProperty rayleighHeightScaleP;
+        properties::FloatProperty rayleighScatteringCoeffXP;
+        properties::FloatProperty rayleighScatteringCoeffYP;
+        properties::FloatProperty rayleighScatteringCoeffZP;
+        properties::FloatProperty mieHeightScaleP;
+        properties::FloatProperty mieScatteringCoefficientP;
+        properties::FloatProperty mieScatteringExtinctionPropCoefficientP;
+        properties::FloatProperty mieAsymmetricFactorGP;
+        properties::FloatProperty sunIntensityP;
+        properties::FloatProperty hdrExpositionP;
+    };
+
+    const AtmosphereProperties& atmosphereProperties() const;
+#endif
     
     RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() = default;
@@ -84,7 +108,7 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
     // Getters that perform calculations
@@ -125,6 +149,33 @@ private:
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
     properties::PropertyOwner _texturePropertyOwner;
+
+#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+    // Atmosphere Data
+    bool _atmosphereEnabled;
+    float _atmosphereRadius;
+    float _atmospherePlanetRadius;
+    float _planetAverageGroundReflectance;
+    float _rayleighHeightScale;
+    float _mieHeightScale;
+    float _miePhaseConstant;
+    float _sunRadianceIntensity;
+    float _hdrConstant;
+    glm::vec3 _mieExtinctionCoeff;
+    glm::vec3 _rayleighScatteringCoeff;
+    glm::vec3 _mieScatteringCoeff;
+
+    AtmosphereProperties _atmosphereProperties;
+    properties::PropertyOwner _atmospherePropertyOwner;
+
+    // Deferred ATM Rendering
+    std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
+#endif
+
+private:
+#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+    void updateAtmosphereParameters();
+#endif
 };
 
 } // namespace globebrowsing

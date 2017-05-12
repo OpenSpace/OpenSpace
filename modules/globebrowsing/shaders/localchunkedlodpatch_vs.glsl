@@ -85,6 +85,9 @@ void main() {
 
     vec4 positionClippingSpace = projectionTransform * vec4(p, 1);
     
+    // p is in SGCT View space.
+    //p_obj = Model <- InverseCameraCombined <- p
+
     // Write output
     fs_uv = in_uv;
     fs_position = z_normalization(positionClippingSpace);

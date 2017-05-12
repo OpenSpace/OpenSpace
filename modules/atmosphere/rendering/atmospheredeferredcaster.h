@@ -104,6 +104,7 @@ public:
     void setRayleighScatteringCoefficients(const glm::vec3 & rayScattCoeff);
     void setMieScatteringCoefficients(const glm::vec3 & mieScattCoeff);
     void setMieExtinctionCoefficients(const glm::vec3 & mieExtCoeff);
+    void setEllipsoidRadii(const glm::dvec3 & radii);
 
 private:
     void loadComputationPrograms();
@@ -124,8 +125,7 @@ private:
     void renderQuadForCalc(const GLuint vao, const GLsizei numberOfVertices);
     void saveTextureToPPMFile(const GLenum color_buffer_attachment,
                               const std::string & fileName,
-                              const int width, const int height) const;
-
+                              const int width, const int height) const;    
 private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _transmittanceProgramObject;
     std::unique_ptr<ghoul::opengl::ProgramObject> _irradianceProgramObject;
@@ -165,6 +165,7 @@ private:
     glm::vec3 _mieExtinctionCoeff;
     glm::vec3 _rayleighScatteringCoeff;
     glm::vec3 _mieScatteringCoeff;
+    glm::dvec3 _ellipsoidRadii;
 
     // Atmosphere Texture Data Geometry
     GLuint _atmosphereFBO;

@@ -33,6 +33,10 @@ Fragment getFragment() {
     frag.color += patchBorderOverlay(fs_uv, vec3(0,1,0), 0.02);
 #endif // SHOW_CHUNK_EDGES
 
+    // frag.gColor    = frag.color;
+    // frag.gNormal   = normal;
+    // frag.gPosition = p;
+    
     frag.depth = fs_position.w;
     return frag;
 }

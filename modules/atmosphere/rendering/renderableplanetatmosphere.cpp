@@ -471,6 +471,7 @@ namespace openspace {
                 "${MODULE_ATMOSPHERE}/shaders/shadow_nighttexture_fs.glsl");
             if (!_programObject)
                 return false;
+            std::cout << "-- Running ShadowNightProgram --" << std::endl;
         }
         else if (_programObject == nullptr && _shadowEnabled) {
             // shadow program
@@ -480,6 +481,7 @@ namespace openspace {
                 "${MODULE_ATMOSPHERE}/shaders/shadow_fs.glsl");
             if (!_programObject)
                 return false;
+            std::cout << "-- Running ShadowProgram --" << std::endl;
         }
         else if (_programObject == nullptr && _hasNightTexture) {
             // Night texture program
@@ -489,6 +491,7 @@ namespace openspace {
                 "${MODULE_ATMOSPHERE}/shaders/nighttexture_fs.glsl");
             if (!_programObject)
                 return false;
+            std::cout << "-- Running NightTextureProgram --" << std::endl;
         }
         else if (_programObject == nullptr) {
             // pscstandard
@@ -498,6 +501,7 @@ namespace openspace {
                 "${MODULE_ATMOSPHERE}/shaders/renderableplanet_fs.glsl");
             if (!_programObject)
                 return false;
+            std::cout << "-- Running PSCStandard --" << std::endl;
         }
         using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
         _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
@@ -786,7 +790,7 @@ namespace openspace {
         }
 
         // render
-        //_geometry->render();
+        _geometry->render();
 
         // disable shader
         _programObject->deactivate();

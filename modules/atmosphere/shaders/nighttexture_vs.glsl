@@ -35,6 +35,7 @@ layout(location = 2) in vec3 in_normal;
 out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
+out vec4 vs_gPosition;
 
 uniform mat4 ModelTransform;
 uniform mat4 modelViewProjectionTransform;
@@ -52,7 +53,14 @@ void main() {
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
     // vs_normal = vec4(in_normal, 0.0);
     
+    // The tmp is now in the OS eye space (camera rig space)
+    // and wrtitten using PSC coords.
+    // position is in the same space, i.e., OS eye space but 
+    // in meters (no PSC coords).
     vec4 position = vec4(tmp.xyz * pow(10, tmp. w), 1.0);
+
+    // G-Buffer
+    vs_gPosition = position;
 
     if (_hasHeightMap) {
         float height = texture(heightTex, in_st).r;
@@ -62,7 +70,10 @@ void main() {
     }
     
     position = modelViewProjectionTransform * position;
-    vs_position = z_normalization(position);
 
+    // The depth position will be handle later by the fragment shader,
+    // so the z coordinate here is set to 0 (zero) to avoid precision problems
+    vs_position = z_normalization(position);
+    
     gl_Position =  vs_position;
 }

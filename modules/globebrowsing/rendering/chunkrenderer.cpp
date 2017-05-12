@@ -161,11 +161,12 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     }
 
     const Ellipsoid& ellipsoid = chunk.owner().ellipsoid();
-
+    
     if (_layerManager->hasAnyBlendingLayersEnabled()) {
         // Calculations are done in the reference frame of the globe. Hence, the
         // camera position needs to be transformed with the inverse model matrix
         glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
+        // Send the matrix inverse (already calculated) to the fragment for the global and local shader (JCC)
         glm::dvec3 cameraPosition = glm::dvec3(
             inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
         float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor *
@@ -190,6 +191,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
         "modelViewProjectionTransform", modelViewProjectionTransform);
     programObject->setUniform("minLatLon", glm::vec2(swCorner.toLonLatVec2()));
     programObject->setUniform("lonLatScalingFactor", glm::vec2(patchSize.toLonLatVec2()));
+    // Ellipsoid Radius (Model Space)
     programObject->setUniform("radiiSquared", glm::vec3(ellipsoid.radiiSquared()));
 
     if (_layerManager->layerGroup(
@@ -246,6 +248,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     }
 
     // Calculate other uniform variables needed for rendering
+    // Send the matrix inverse to the fragment for the global and local shader (JCC)
     dmat4 modelTransform = chunk.owner().modelTransform();
     dmat4 viewTransform = data.camera.combinedViewMatrix();
     dmat4 modelViewTransform = viewTransform * modelTransform;

@@ -344,7 +344,7 @@ vec4 calculateGrayScaleOverlay(
 
 	return color;
 }
-
+// Get the Reflectance from Here (JCC)
 vec4 calculateWater(
 	const vec4 currentColor,
 	const vec2 uv,

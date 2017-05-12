@@ -146,6 +146,7 @@ vec4 getTileFragColor(){
 #endif // USE_COLORTEXTURE
 
 #if USE_WATERMASK
+	// Change to get water reflectance (JCC) (alpha channel)
 	color = calculateWater(
 		color,
 		fs_uv,

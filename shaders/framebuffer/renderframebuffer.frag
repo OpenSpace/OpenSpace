@@ -25,10 +25,16 @@
 #include "floatoperations.glsl"
 #include <#{fragmentPath}>
 
-out vec4 _out_color_;
+layout(location = 0) out vec4 _out_color_;
+layout(location = 1) out vec4 gColor;
+layout(location = 2) out vec4 gPosition;
+layout(location = 3) out vec4 gNormalReflectance;
 
 void main() {
      Fragment f = getFragment();
      _out_color_ = f.color;
+     gPosition = f.gPosition;
+     gNormalReflectance = f.gNormalReflectance;
+     gColor = f.gColor;
      gl_FragDepth = normalizeFloat(f.depth);
 }

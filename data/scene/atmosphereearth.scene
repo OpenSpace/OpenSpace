@@ -51,9 +51,11 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
-    openspace.resetCameraDirection()
+    --openspace.resetCameraDirection()
     
     openspace.printInfo("Done setting default values")
+
+    --openspace.setInteractionMode('GlobeBrowsing')
 
     if openspace.modules.isLoaded("ISWA") then
         openspace.iswa.addCdfFiles("${OPENSPACE_DATA}/cdflist.json");
@@ -73,12 +75,19 @@ return {
         --Rotation = {0.243724, 0.002268, 0.964416, 0.102449},
         Position = {-21235464763.652920, -75191278487.585068, 126294839057.346405},
         Rotation = {0.224913, -0.096227, 0.939918, 0.238136},
+
+        -- Mars Position
+        Position = {113807010618.012451, -93349316388.687042, 190403814045.631592},
+        Rotation = {0.527685, 0.455945, -0.495623, 0.517707},
     },
     Modules = {
         "sun",
         "atmosphereearth",
+        --"lodglobes/earth",
+        --"lodglobes/moon",
         --"moon",
-        "atmospheremars",
+        --"atmospheremars",
+        "lodglobes/mars",
         --"toyvolume",
         --"earth",
         --"stars",
