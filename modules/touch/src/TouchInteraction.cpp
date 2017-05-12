@@ -68,7 +68,7 @@ TouchInteraction::TouchInteraction()
 	_spinSensitivity("Sensitivity of Spinning", "Sensitivity of spinning in direct-manipulation", 0.25f, 0, 1),
 	_inputStillThreshold("Input still", "Threshold for interpreting input as still", 0.0008f, 0, 0.001),
 	_interpretPan("Pan delta distance", "Delta distance between fingers allowed for interpreting pan interaction", 0.01f, 0, 0.1),
-	_slerpTime("Time to slerp", "Time to slerp in seconds to new orientation with new node picking", 6, 0, 20),
+	_slerpTime("Time to slerp", "Time to slerp in seconds to new orientation with new node picking", 4, 0, 20),
 	_guiButton("GUI Button", "GUI button size in pixels.", glm::ivec2(32, 64), glm::ivec2(8, 16), glm::ivec2(128, 256)),
 	_friction("Friction", "Friction for different interactions (orbit, zoom, roll, pan)", glm::vec4(0.01, 0.02, 0.02, 0.02), glm::vec4(0.0), glm::vec4(0.2)), 
 	
@@ -470,7 +470,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list, co
 			break;
 		}
 		case PICK: { // pick something in the scene as focus node
-			if (_selected.size() == 1 && _selected.at(0).node != _focusNode) {
+			if (_selected.size() == 1 && _selected.at(0).node) {
 				setFocusNode(_selected.at(0).node);
 				OsEng.interactionHandler().setFocusNode(_focusNode); // cant do setFocusNode since TouchInteraction is not subclass of InteractionMode
 
