@@ -65,57 +65,71 @@ void ServerModule::internalInitialize() {
 
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::PreSync,
-        [this]() { _connectionPool.updateConnections(); }
+        [this]() {
+            _connectionPool.updateConnections();
+            consumeMessages();
+        }
     );
 }
 
 
 void ServerModule::handleSocket(std::shared_ptr<ghoul::io::Socket> socket) {
-    bool disconnect = false;
-    std::vector<char> messageBuffer;
-    std::map<uint32_t, std::unique_ptr<ChannelHandler>> channelHandlers;
-    while (!disconnect) {
+    while (true) {
         uint32_t channelId;
-        ChannelAction channelAction;
-        uint32_t messageSize;
-        
         if (!socket->get<uint32_t>(&channelId)) {
             LERROR("Failed to read channel id from socket.");
             return;
         }
+
+        ChannelAction channelAction;
         if (!socket->get<ChannelAction>(&channelAction)) {
             LERROR("Failed to read channel action from socket.");
             return;
         }
-
-        auto it = channelHandlers.find(channelId);
-        /*
+      
         switch (channelAction) {
         case ChannelAction::Initialize:
-            if (it != channelHandlers.end()) {
-                std::unique_ptr<ChannelHandler> channelHandler = factory.create();
-                channelHandlers.insert(channelHandler);
-            }
+        case ChannelAction::Deinitialize: {
+            std::lock_guard<std::mutex> lock(_messageQueueMutex);
+            _messageQueue.push_back(Message({
+                socket,
+                channelId,
+                channelAction,
+                std::vector<char>()
+            }));
             break;
-        case ChannelAction::Deinitialize:
-            if (it != channelHandlers.end()) {
-                it->deinitialize();
-                channelHandlers.erase(it);
+        }
+        case ChannelAction::Data: {
+            uint32_t messageSize;
+            if (!socket->get<uint32_t>(&messageSize)) {
+                LERROR("Failed to read message size from socket.");
+                return;
             }
-            break;
-        case ChannelAction::Data:
-            if (!socket->get<uint32_t>(&messageSize)) return;
-            messageBuffer.resize(messageSize);
-            if (!socket->get<char>(messageBuffer.data(), messageSize)) return;
-
-            if (it != channelHandlers.end()) {
-                it->handleData(messageBuffer.data(), messageSize);
-                channelHandlers.erase(it);
+            std::vector<char> messageBuffer(messageSize);
+            if (!socket->get<char>(messageBuffer.data(), messageSize)) {
+                LERROR("Failed to read message body from socket.");
+                return;
             }
+            std::lock_guard<std::mutex> lock(_messageQueueMutex);
+            _messageQueue.push_back(Message({
+                socket,
+                channelId,
+                channelAction,
+                std::move(messageBuffer)
+            }));
             break;
+        }
         default:
-            LWARNING("Unsupported channel action.");
-        }*/
+            LERROR("Unsupported channel action.");
+            return;
+        }
+    }
+}
+
+void ServerModule::consumeMessages() {
+    std::lock_guard<std::mutex> lock(_messageQueueMutex);
+    while (_messageQueue.size() > 0) {
+        // todo...
     }
 }
 
