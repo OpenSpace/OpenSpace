@@ -26,6 +26,7 @@
 #define __OPENSPACE___IMG_READER___H__
 
 #include <vector>
+#include <ghoul/glm.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -37,6 +38,10 @@ namespace globebrowsing {
 			int _bands;
 			int _bytes;
 			std::vector<double> _roverQuat;
+			glm::dvec3 _cameraCenter;
+			glm::dvec3 _cameraAxis;
+			glm::dvec3 _cameraHorizontal;
+			glm::dvec3 _cameraVector;
 
 		};
 

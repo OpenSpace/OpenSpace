@@ -63,7 +63,7 @@ namespace globebrowsing {
 		std::string line;
 		std::string block = "";
 		glm::dvec3 originOffset;
-
+		int counter = 1;
 		//TODO: Use openinventor for this part
 		//Reading header part of binary file
 		while (std::getline(header, line)) {
@@ -75,13 +75,15 @@ namespace globebrowsing {
 			if (s.at(0) == "OBJECT" && s.at(1) == "IMAGE") block = "IMAGE";
 			else if (s.at(0) == "END_OBJECT" && s.at(1) == "IMAGE") block = "";
 
-
 			if (s.at(0) == "OBJECT" && s.at(1) == "IMAGE_HEADER") block = "IMAGE_HEADER";
 			else if (s.at(0) == "END_OBJECT" && s.at(1) == "IMAGE_HEADER") block = "";
 
-
 			if (s.at(0) == "GROUP" && s.at(1) == "ROVER_COORDINATE_SYSTEM") block = "ROVER_COORDINATE_SYSTEM";
 			else if (s.at(0) == "END_GROUP" && s.at(1) == "ROVER_COORDINATE_SYSTEM") block = "";
+
+			if (s.at(0) == "GROUP" && s.at(1) == "GEOMETRIC_CAMERA_MODEL") block = "CAMERA_MODEL";
+			else if (s.at(0) == "END_GROUP" && s.at(1) == "GEOMETRIC_CAMERA_MODEL") block = "";
+
 
 			if (block == "IMAGE_HEADER") {
 				if (s.at(0) == "BYTES") mInfo._bytes = std::stoi(s.at(1));
@@ -93,7 +95,6 @@ namespace globebrowsing {
 					mInfo._roverQuat.push_back(std::stod(split(temp.at(0), '(').at(1)));
 					mInfo._roverQuat.push_back(std::stod(temp.at(1)));
 					mInfo._roverQuat.push_back(std::stod(temp.at(2)));
-					LERROR("HERE I AM " << temp.size());
 					//This is because after like 1000 sols they 
 					//start writing the fourth quaternion on new line...
 					//All of this should probably be done in another way...
@@ -117,6 +118,40 @@ namespace globebrowsing {
 				}
 				else if (s.at(0) == "BANDS") {
 					mInfo._bands = std::stoi(s.at(1));
+				}
+			}
+			else if (block == "CAMERA_MODEL") {
+				if (s.at(0) == "MODEL_COMPONENT_1") {
+					std::vector<std::string> temp = split(s.at(1), ',');
+					mInfo._cameraCenter.x = (std::stod(split(temp.at(0), '(').at(1)));
+					mInfo._cameraCenter.y = (std::stod(temp.at(1)));
+					mInfo._cameraCenter.z = (std::stod(split(temp.at(2), ')').at(0)));
+					
+					counter++;
+				}
+				if (s.at(0) == "MODEL_COMPONENT_2") {
+					std::vector<std::string> temp = split(s.at(1), ',');
+					mInfo._cameraAxis.x = (std::stod(split(temp.at(0), '(').at(1)));
+					mInfo._cameraAxis.y = (std::stod(temp.at(1)));
+					mInfo._cameraAxis.z = (std::stod(split(temp.at(2), ')').at(0)));
+					
+					counter++;
+				}
+				if (s.at(0) == "MODEL_COMPONENT_3") {
+					std::vector<std::string> temp = split(s.at(1), ',');
+					mInfo._cameraHorizontal.x = (std::stod(split(temp.at(0), '(').at(1)));
+					mInfo._cameraHorizontal.y = (std::stod(temp.at(1)));
+					mInfo._cameraHorizontal.z = (std::stod(split(temp.at(2), ')').at(0)));
+
+					counter++;
+				}
+				if (s.at(0) == "MODEL_COMPONENT_4") {
+					std::vector<std::string> temp = split(s.at(1), ',');
+					mInfo._cameraVector.x = (std::stod(split(temp.at(0), '(').at(1)));
+					mInfo._cameraVector.y = (std::stod(temp.at(1)));
+					mInfo._cameraVector.z = (std::stod(split(temp.at(2), ')').at(0)));
+
+					counter++;
 				}
 			}
 		}
