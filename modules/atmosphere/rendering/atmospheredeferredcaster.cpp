@@ -229,7 +229,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
         SpiceManager::ref().targetPosition("SUN", "SUN", "GALACTIC", {}, _time, lt);
     glm::dvec4 sunPosObj = glm::inverse(_modelTransform) * glm::dvec4(sunPosWorld - renderData.position.dvec3(), 1.0);
 
-    program.setUniform("ellipsoidRadii", _ellipsoidRadii);
+    program.setUniform("ellipsoidRadii", _ellipsoidRadii);    
 
     //program.setUniform("sunPositionObj", sunPosObj);
     program.setUniform("sunDirectionObj", glm::normalize(glm::dvec3(sunPosObj)));
@@ -248,13 +248,18 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     ghoul::opengl::TextureUnit inScatteringTableTextureUnit;
     inScatteringTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
-    program.setUniform("inscatterTexture", inScatteringTableTextureUnit);
+    program.setUniform("inscatterTexture", inScatteringTableTextureUnit); 
 
     // DEBUG:
-    //glm::dvec3 objP = glm::dvec3(renderData.position[0] * pow(10, renderData.position[3]), 
-    //    renderData.position[1] * pow(10, renderData.position[3]), renderData.position[2] * pow(10, renderData.position[3]));
-    //glm::dvec4 cameraP = glm::inverse(glm::dmat4(_modelTransform)) * glm::dvec4(-objP + renderData.camera.positionVec3(), 1.0);
+    glm::dvec3 objP = glm::dvec3(renderData.position[0] * pow(10, renderData.position[3]), 
+        renderData.position[1] * pow(10, renderData.position[3]), renderData.position[2] * pow(10, renderData.position[3]));
+    glm::dvec4 cameraP = glm::inverse(glm::dmat4(_modelTransform)) * glm::dvec4(-objP + renderData.camera.positionVec3(), 1.0);
+    //std::cout << "====== Planet's position in KM: " << glm::to_string( objP/glm::dvec3(1000.0, 1000.0, 1000.0) ) << " =======" << std::endl;
+    
+    //std::cout << "====== ModelTransform: " << glm::to_string(_modelTransform) << std::endl;
     //std::cout << "====== Distance from Planet's ground in KM: " << glm::length(glm::dvec3(cameraP / glm::dvec4(1000.0, 1000.0, 1000.0, 1.0))) - _atmospherePlanetRadius << " =======" << std::endl;
+    //std::cout << "====== Camera Position: " << glm::to_string(renderData.camera.positionVec3()) << " =====" << std::endl;
+    //std::cout << "--- Ellipsoid Radii: " << glm::to_string(_ellipsoidRadii) << " ----" << std::endl;
 }
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData & renderData, const DeferredcastData& deferredData,

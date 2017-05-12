@@ -767,29 +767,29 @@ void main() {
 
     bool  intersectATM = false;
 
-    if ( ellipsoidRadii.x != 0.0 || ellipsoidRadii.y != 0.0 || ellipsoidRadii.z != 0.0) {
-      // Instead of ray-ellipsoid intersection lets transform the ray to a sphere:
-      dRay transfRay;
-      transfRay.origin = ray.origin;
-      transfRay.direction = ray.direction;
+    // if ( ellipsoidRadii.x != 0.0 || ellipsoidRadii.y != 0.0 || ellipsoidRadii.z != 0.0) {
+    //   // Instead of ray-ellipsoid intersection lets transform the ray to a sphere:
+    //   dRay transfRay;
+    //   transfRay.origin = ray.origin;
+    //   transfRay.direction = ray.direction;
 
-      transfRay.origin.x *= 1000.0/ellipsoidRadii.x;
-      transfRay.direction.x *= 1000.0/ellipsoidRadii.x;        
-      transfRay.origin.z *= 1000.0/ellipsoidRadii.y;
-      transfRay.direction.z *= 1000.0/ellipsoidRadii.y;    
-      transfRay.origin.y *= 1000.0/ellipsoidRadii.z;
-      transfRay.direction.y *= 1000.0/ellipsoidRadii.z;
-      transfRay.direction.xyz = normalize(transfRay.direction.xyz);
+    //   transfRay.origin.x *= 1000.0/ellipsoidRadii.x;
+    //   transfRay.direction.x *= 1000.0/ellipsoidRadii.x;        
+    //   transfRay.origin.y *= 1000.0/ellipsoidRadii.y;
+    //   transfRay.direction.y *= 1000.0/ellipsoidRadii.y;    
+    //   transfRay.origin.z *= 1000.0/ellipsoidRadii.z;
+    //   transfRay.direction.z *= 1000.0/ellipsoidRadii.z;
+    //   transfRay.direction.xyz = normalize(transfRay.direction.xyz);
 
-      // intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay, 1.0 + EPSILON,
-      //                                              insideATM, offset, maxLength );
+    //   intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay, 1.0,
+    //                                                insideATM, offset, maxLength );
 
-      intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay,  Rt+EPSILON,
-                                            insideATM, offset, maxLength );
-    } else {
-      intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt-10*EPSILON,
+    //   //intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay,  Rt+EPSILON,
+    //   //                                      insideATM, offset, maxLength );
+    // } else {
+       intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt-10*EPSILON,
                                              insideATM, offset, maxLength );
-    }
+    //}
 
     if ( intersectATM ) {
       // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
