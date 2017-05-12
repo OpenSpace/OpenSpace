@@ -58,7 +58,6 @@ protected:
 private:
     ConnectionPool _connectionPool;
     //ghoul::TemplateFactory<ChannelHandler> factory;
-
     void handleSocket(std::shared_ptr<ghoul::io::Socket> socket);
 };
 

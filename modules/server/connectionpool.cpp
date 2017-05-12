@@ -25,79 +25,71 @@
 #include <modules/server/connectionpool.h>
 #include <ghoul/io/socket/socket.h>
 
+#include <vector>
+#include <algorithm>
+
+
 namespace openspace {
 
 ConnectionPool::ConnectionPool(std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket)
     : _handleSocket(std::move(handleSocket))
 {}
 
-void ConnectionPool::addServer(std::shared_ptr<ghoul::io::SocketServer> server) {
-    _socketServers.push_back(Server{
-        server,
-        std::thread([this, server]() {
-            handleConnections(server);
-        })
-    });
+ConnectionPool::~ConnectionPool() {
+    disconnectAllConnections();
 }
 
-void ConnectionPool::removeServer(std::shared_ptr<ghoul::io::SocketServer> server) {
-    // TODO.
+void ConnectionPool::addServer(std::shared_ptr<ghoul::io::SocketServer> server) {
+    _socketServers.push_back(server);
+}
+
+void ConnectionPool::removeServer(ghoul::io::SocketServer* server) {
+    std::remove_if(_socketServers.begin(), _socketServers.end(), [server](const auto& s) {
+        return s.get() == server;
+    });
 }
 
 void ConnectionPool::clearServers() {
     _socketServers.clear();
 }
 
-void ConnectionPool::handleConnections(std::shared_ptr<ghoul::io::SocketServer> server) {
-    while (server->isListening()) {
-        removeDisconnectedSockets();
-        std::shared_ptr<ghoul::io::Socket> socket = server->awaitPendingSocket();
-        if (!socket || !socket->isConnected()) {
-            continue;
-        }
-        std::lock_guard<std::mutex> lock(_connectionMutex);
-        Connection connection = {
-            socket,
-            std::make_unique<std::thread>([this, socket]() {
+void ConnectionPool::updateConnections() {
+    removeDisconnectedSockets();
+    acceptNewSockets();
+}
+
+void ConnectionPool::acceptNewSockets() {
+    for (auto& server : _socketServers) {
+        std::shared_ptr<ghoul::io::Socket> socket;
+        while (socket = server->nextPendingSocket()) {
+            std::thread connectionThread([this, socket]() {
                 // Pass control to `_handleSocket`
                 // Close the socket once the function returns.
                 _handleSocket(socket);
-                std::lock_guard<std::mutex> lock(_connectionMutex);
                 if (socket->isConnected()) {
                     socket->disconnect();
                 }
-            })
-        };
-        _connections.emplace(socket->socketId(), std::move(connection));
+            });
+            _connections.push_back({
+                std::move(connectionThread),
+                socket
+            });
+        }
     }
 }
 
 void ConnectionPool::removeDisconnectedSockets() {
-    std::lock_guard<std::mutex> lock(_connectionMutex);
-    for (auto it = _connections.begin(); it != _connections.end();) {
-        if (!it->second.socket->isConnected()) {
-            if (it->second.thread && it->second.thread->joinable()) {
-                it->second.thread->join();
-            }
-            it->second.thread = nullptr;
-            _connections.erase(it);
-        } else {
-            ++it;
+    for (auto& connection : _connections) {
+        if ((!connection.second || !connection.second->isConnected()) && connection.first.joinable()) {
+            connection.first.join();
         }
     }
-}
-
-void ConnectionPool::close() {
-    disconnectAllConnections();
+    std::remove_if(_connections.begin(), _connections.end(), [](const Connection& connection) {
+        return !connection.second || !connection.second->isConnected();
+    });
 }
 
 void ConnectionPool::disconnectAllConnections() {
-    for (auto& it : _connections) {
-        if (it.second.socket->isConnected()) {
-            it.second.socket->disconnect();
-        }
-        it.second.thread->join();
-    }
     _connections.clear();
 }
 

@@ -36,42 +36,29 @@
 #include <vector>
 #include <atomic>
 
-namespace openspace {
 
+namespace openspace {
 
 class ConnectionPool {
 public:
     ConnectionPool(std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket);
+    ~ConnectionPool();
     void addServer(std::shared_ptr<ghoul::io::SocketServer> server);
-    void removeServer(std::shared_ptr<ghoul::io::SocketServer> server);
+    void removeServer(ghoul::io::SocketServer* server);
     void clearServers();
-
-    /*void listen(
-        std::string address,
-        int port,
-        std::function<void(std::shared_ptr<ghoul::io::TcpSocket> socket)> handleSocket);*/
-    void close();
-
+    void updateConnections();
+    
 private:
-    struct Connection {
-        std::shared_ptr<ghoul::io::Socket> socket;
-        std::unique_ptr<std::thread> thread;
-    };
+    using Connection = std::pair<std::thread, std::shared_ptr<ghoul::io::Socket>>;
 
-    struct Server {
-        std::shared_ptr<ghoul::io::SocketServer> socketServer;
-        std::thread thread;
-    };
-
-    void handleConnections(std::shared_ptr<ghoul::io::SocketServer> socketServer);
     void disconnectAllConnections();
     std::mutex _connectionMutex;
     void removeDisconnectedSockets();
-    std::vector<Server> _socketServers;
-
+    void acceptNewSockets();
+    
     std::function<void(std::shared_ptr<ghoul::io::Socket>)> _handleSocket;
-        
-    std::map<int, Connection> _connections;
+    std::vector<std::shared_ptr<ghoul::io::SocketServer>> _socketServers;
+    std::vector<Connection> _connections;
 };
 
 } // namespace openspace

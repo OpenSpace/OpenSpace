@@ -49,25 +49,26 @@ ServerModule::~ServerModule() {
 }
 
 void ServerModule::internalInitialize() {
-    /*_connectionPool.listen(
-        "localhost",
-        80800,
-        [this](std::shared_ptr<ghoul::io::TcpSocket> socket) {
-            handleSocket(socket);
-        }
-    );*/
-   
-    std::shared_ptr<ghoul::io::SocketServer> tcpServer = std::static_pointer_cast<ghoul::io::SocketServer>(std::make_shared<ghoul::io::TcpSocketServer>());
-    std::shared_ptr<ghoul::io::SocketServer> wsServer = std::static_pointer_cast<ghoul::io::SocketServer>(std::make_shared<ghoul::io::WebSocketServer>());
+    using namespace ghoul::io;
+
+    std::shared_ptr<SocketServer> tcpServer =
+        std::static_pointer_cast<SocketServer>(std::make_shared<TcpSocketServer>());
+    std::shared_ptr<ghoul::io::SocketServer> wsServer =
+        std::static_pointer_cast<SocketServer>(std::make_shared<WebSocketServer>());
+
+    // Temporary hard coded addresses and ports.
+    tcpServer->listen("localhost", 8000);
+    wsServer->listen("localhost", 8001);
 
     _connectionPool.addServer(wsServer);
     _connectionPool.addServer(tcpServer);
 
     OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Deinitialize,
-        [this]() { _connectionPool.close(); }
+        OpenSpaceEngine::CallbackOption::PreSync,
+        [this]() { _connectionPool.updateConnections(); }
     );
 }
+
 
 void ServerModule::handleSocket(std::shared_ptr<ghoul::io::Socket> socket) {
     bool disconnect = false;
