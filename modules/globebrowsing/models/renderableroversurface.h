@@ -35,6 +35,7 @@
 #include <modules/globebrowsing/models/lodmodelswitch.h>
 #include <modules/globebrowsing/models/modelprovider.h>
 #include <modules/globebrowsing/models/subsite.h>
+#include <modules/globebrowsing/models/renderableexplorationpath.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -58,11 +59,11 @@ public:
 	
 private:
 	std::vector<std::shared_ptr<SubsiteModels>> calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector);
-	std::vector<std::string> extractFileNames(const std::string filePath);
 
 	std::vector<std::string> _fileNames;
 	std::vector<glm::fvec2> _coordinates;
 	std::vector<Subsite> _subSites;
+	std::vector<Subsite> _subSitesWithModels;
 	std::vector<std::shared_ptr<Model>> _models;
 
 	GeneralProperties _generalProperties;
@@ -88,6 +89,7 @@ private:
 
 	LodModelSwitch _modelSwitch;
 
+	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
 };
 
 } // namespace globebrowsing

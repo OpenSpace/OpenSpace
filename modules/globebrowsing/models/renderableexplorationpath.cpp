@@ -40,12 +40,9 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-RenderableExplorationPath::RenderableExplorationPath(const RenderableSite& owner, std::vector<glm::dvec2> coordinates)
-	: _owner(owner)
-	, _latLonCoordinates(coordinates)
-	, _pathShader(nullptr)
+RenderableExplorationPath::RenderableExplorationPath()
+	: _pathShader(nullptr)
 	, _siteShader(nullptr)
-	, _globe(nullptr)
 	, _fading(1.0)
 	, _vertexBufferID(0)
 	, _vaioID(0)
@@ -58,11 +55,10 @@ RenderableExplorationPath::RenderableExplorationPath(const RenderableSite& owner
 
 RenderableExplorationPath::~RenderableExplorationPath() {}
 
-bool RenderableExplorationPath::initialize() {
-	
-	// Getting the parent renderable to calculate rover model coordinates to world coordinates
-	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(_owner.owner()->name())->parent();
-	_globe = (globebrowsing::RenderableGlobe *)parent->renderable();
+bool RenderableExplorationPath::initialize(RenderableGlobe* globe, std::vector<glm::dvec2> coordinates) {
+
+	_globe = globe;
+	_latLonCoordinates = coordinates;
 
 	// Shaders for the path (GL_LINES)
 	if (_pathShader == nullptr) {
@@ -213,16 +209,16 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 	if(_isCloseEnough == true && _hasLoopedOnce == false) {
 		// Clear old coordinates values.
 		_stationPointsModelCoordinates.clear();
-			for (auto i : _latLonCoordinates) {
+		for (auto i : _latLonCoordinates) {
 
-				globebrowsing::Geodetic2 geoTemp = globebrowsing::Geodetic2{ i.x, i.y } / 180 * glm::pi<double>();
-				glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geoTemp);
-				double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
+			globebrowsing::Geodetic2 geoTemp = globebrowsing::Geodetic2{ i.x, i.y } / 180 * glm::pi<double>();
+			glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geoTemp);
+			double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-				globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geoTemp, heightToSurface + 2.0 };
-				glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
-				_stationPointsModelCoordinates.push_back(glm::dvec4(tempPos2, 1.0));
-			}
+			globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geoTemp, heightToSurface + 1.0 };
+			glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
+			_stationPointsModelCoordinates.push_back(glm::dvec4(tempPos2, 1.0));
+		}
 		
 		_hasLoopedOnce = true;
 
