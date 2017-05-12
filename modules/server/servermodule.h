@@ -29,7 +29,7 @@
 #include <modules/server/connectionpool.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 
-
+#include <deque>
 #include <memory>
 #include <thread>
 #include <mutex>
@@ -48,6 +48,12 @@ enum class ChannelAction : uint8_t {
     Deinitialize = 2
 };
 
+struct Message {
+    std::shared_ptr<ghoul::io::Socket> socket;
+    uint32_t channelId;
+    ChannelAction action;
+    std::vector<char> data;
+};
 
 class ServerModule : public OpenSpaceModule {
 public:
@@ -56,9 +62,12 @@ public:
 protected:
     void internalInitialize() override;
 private:
-    ConnectionPool _connectionPool;
-    //ghoul::TemplateFactory<ChannelHandler> factory;
     void handleSocket(std::shared_ptr<ghoul::io::Socket> socket);
+    void consumeMessages();
+
+    ConnectionPool _connectionPool;
+    std::mutex _messageQueueMutex;
+    std::deque<Message> _messageQueue;
 };
 
 } // namespace openspace
