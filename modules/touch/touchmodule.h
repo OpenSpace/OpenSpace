@@ -32,8 +32,8 @@
 namespace openspace {
 
 	class TouchModule : public OpenSpaceModule {
-	public:
 		using Point = std::pair<int, TUIO::TuioPoint>;
+	public:
 		TouchModule();
 
 	private:
