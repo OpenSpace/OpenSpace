@@ -40,7 +40,8 @@ namespace opengl {
 } // namespace ghoul
 
 namespace openspace {
-namespace documentation { struct Documentation; }
+
+    namespace documentation { struct Documentation; }
 
 class RenderableStars : public Renderable {
 public:
