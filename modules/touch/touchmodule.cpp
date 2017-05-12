@@ -46,16 +46,10 @@ namespace {
 
 namespace openspace {
 
-    // @COMMENT  What does this do?
-	TuioEar TouchModule::*ear;
-
-    // @COMMENT  Definining this globally makes it potentially dangerous.  Is it necessary or better to put into the class?
-	TouchInteraction* touch;
-
-bool TouchModule::gotNewInput() {
+bool TouchModule::hasNewInput() {
 	// Get new input from listener
-	list = ear->getInput();
-	ear->clearInput();
+	listOfContactPoints = ear.getInput();
+	ear.clearInput();
 
 	// Erase old input id's that no longer exists
 	lastProcessed.erase(
@@ -64,91 +58,70 @@ bool TouchModule::gotNewInput() {
 			lastProcessed.end(),
 			[this](const Point& point) {
 		return std::find_if(
-			list.begin(),
-			list.end(),
+			listOfContactPoints.begin(),
+			listOfContactPoints.end(),
 			[&point](const TuioCursor& c) {
 			return point.first == c.getSessionID();
 		}
-		) == list.end(); }),
+		) == listOfContactPoints.end(); }),
 		lastProcessed.end());
 
 	// Tap
-	if (list.size() == 0 && lastProcessed.size() == 0 && ear->tap()) {
-		TuioCursor c = ear->getTap();
-		list.push_back(c);
-        // @COMMENT  You can use:
-        // lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
-		lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
-		touch->tap();
+	if (listOfContactPoints.empty() && lastProcessed.empty() && ear.tap()) {
+		TuioCursor c = ear.getTap();
+		listOfContactPoints.push_back(c);
+        lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
+		touch.tap();
 		return true;
 	}
 	
 	// Return true if we got new input
-    // @COMMENT  You can use !list.empty()
-	if (list.size() == lastProcessed.size() && list.size() > 0) {
+	if (listOfContactPoints.size() == lastProcessed.size() && !listOfContactPoints.empty()) {
 		bool newInput = true;
         // @COMMENT  Why can you use for_each without std:: ?  It seems like there is a using namespace std somewhere
-		for_each(lastProcessed.begin(), lastProcessed.end(), [this, &newInput](Point& p) {
-			std::vector<TuioCursor>::iterator cursor = find_if(list.begin(), list.end(), [&p](const TuioCursor& c) { return c.getSessionID() == p.first; });
+		std::for_each(lastProcessed.begin(), lastProcessed.end(), [this, &newInput](Point& p) {
+			std::vector<TuioCursor>::iterator cursor = find_if(listOfContactPoints.begin(), listOfContactPoints.end(), 
+				[&p](const TuioCursor& c) { return c.getSessionID() == p.first; });
 			double now = cursor->getPath().back().getTuioTime().getTotalMilliseconds();
-			if (!cursor->isMoving())
+			if (!cursor->isMoving()) {
 				newInput = true;
-			else if (p.second.getTuioTime().getTotalMilliseconds() == now)
+			}
+			else if (p.second.getTuioTime().getTotalMilliseconds() == now) {
 				newInput = false;
+			}
 		});
 		return newInput;
 	}		
-	else
+	else {
 		return false;
+	}
 }
 
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
 {
-    // @COMMENT  If TuioEar and TouchInteraction don't have any dependencies and if they
-    // can be initialized immediately and you don't need to register a callback
-    // Even better would be to not even use pointers but direct member instances instead
-	OsEng.registerModuleCallback(
-		OpenSpaceEngine::CallbackOption::Initialize,
-		[&]() {
-		LDEBUGC("TouchModule", "Initializing TuioEar");
-		ear = new TuioEar();
-		touch = new TouchInteraction();
-		addPropertySubOwner(touch);
-	}
-	);
-
-	OsEng.registerModuleCallback(
-		OpenSpaceEngine::CallbackOption::Deinitialize,
-		[&]() {
-		LDEBUGC("TouchModule", "Deinitialize TuioEar");
-		delete ear;
-		delete touch;
-	}
-	);
+	addPropertySubOwner(touch);
 	
 	OsEng.registerModuleCallback(
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
-		touch->setCamera(OsEng.interactionHandler().camera());
-		touch->setFocusNode(OsEng.interactionHandler().focusNode());
+		touch.setCamera(OsEng.interactionHandler().camera());
+		touch.setFocusNode(OsEng.interactionHandler().focusNode());
 
-		if (gotNewInput() && OsEng.windowWrapper().isMaster()) {
-			touch->update(list, lastProcessed);
+		if (hasNewInput() && OsEng.windowWrapper().isMaster()) {
+			touch.updateStateFromInput(listOfContactPoints, lastProcessed);
 		}
-		else if (list.size() == 0) {
-			touch->clear();
+		else if (listOfContactPoints.empty()) {
+			touch.resetAfterInput();
 		}
 
 		// update lastProcessed
 		lastProcessed.clear();
-		for (const TuioCursor& c : list) {
-            // @COMMENT  You can use:
-            // lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
-			lastProcessed.push_back(std::make_pair(c.getSessionID(), c.getPath().back()));
+		for (const TuioCursor& c : listOfContactPoints) {
+            lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
 		}
-		touch->unitTest();
-		touch->step(OsEng.windowWrapper().deltaTime());
+		touch.unitTest();
+		touch.step(OsEng.windowWrapper().deltaTime());
 	}
 	);
 	
