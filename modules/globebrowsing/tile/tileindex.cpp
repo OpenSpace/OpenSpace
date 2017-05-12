@@ -149,10 +149,6 @@ std::string TileIndex::toString() const {
     return ss.str();
 }
 
-bool TileIndex::operator==(const TileIndex& other) const {
-    return x == other.x && y == other.y && level == other.level;
-}
-
 std::ostream& operator<<(std::ostream& os, const TileIndex& ci) {
     os << "{ x = " << ci.x << ", y = " << ci.y << ", level = " << ci.level << " }";
     return os;

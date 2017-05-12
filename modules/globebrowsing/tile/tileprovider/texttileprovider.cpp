@@ -134,8 +134,12 @@ TileIndex::TileHashKey TextTileProvider::toHash(const TileIndex& tileIndex) cons
 }
 
 Tile TextTileProvider::backgroundTile(const TileIndex& tileIndex) const {
+	/*
     glm::uvec4 color = { 0, 0, 0, 0 };
     return Tile::createPlainTile(_textureSize, color);
+	*/
+	return Tile(nullptr, nullptr, Tile::Status::Unavailable);
+
 }
 
 } // namespace tileprovider

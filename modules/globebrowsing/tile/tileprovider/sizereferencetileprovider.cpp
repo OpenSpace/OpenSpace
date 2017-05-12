@@ -48,6 +48,7 @@ namespace {
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
     : _backgroundTile(Tile::TileUnavailable)
 {
+	/*
     _fontSize = 50;
     _font = OsEng.fontManager().font("Mono", _fontSize);
 
@@ -70,6 +71,7 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
         backgroundTileStatus = Tile::Status::OK;
     }
     _backgroundTile = Tile(backgroundTileTexture, nullptr, backgroundTileStatus);
+	*/
 }
 
 void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
@@ -128,6 +130,7 @@ TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIn
 }
 
 Tile SizeReferenceTileProvider::backgroundTile(const TileIndex& tileIndex) const {
+	/*
     if (_backgroundTile.status() == Tile::Status::OK) {
         auto t = _backgroundTile.texture();
         void* pixelData = new char[t->expectedPixelDataSize()];
@@ -150,6 +153,8 @@ Tile SizeReferenceTileProvider::backgroundTile(const TileIndex& tileIndex) const
         // use default background
         return TextTileProvider::backgroundTile(tileIndex);
     }
+	*/
+	return Tile(nullptr, nullptr, Tile::Status::Unavailable);
 }
 
 } // namespace tileprovider

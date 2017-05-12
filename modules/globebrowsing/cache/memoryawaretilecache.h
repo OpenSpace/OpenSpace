@@ -111,7 +111,7 @@ private:
                 _initData.shouldAllocateDataOnCPU() ? ghoul::opengl::Texture::AllocateData::Yes : ghoul::opengl::Texture::AllocateData::No;
             for (size_t i = 0; i < numTextures; ++i)
             {
-                _textures.push_back(std::make_shared<ghoul::opengl::Texture>(
+                _textures.push_back(std::make_unique<ghoul::opengl::Texture>(
                     _initData.dimensionsWithPadding(),
                     _initData.ghoulTextureFormat(),
                     _initData.glTextureFormat(),
@@ -123,19 +123,20 @@ private:
                 _textures.back()->setDataOwnership(
                     ghoul::opengl::Texture::TakeOwnership::Yes);
                 _textures.back()->uploadTexture();
+				_textures.back()->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             }
         }
         ~TextureContainer() = default;
-        std::shared_ptr<ghoul::opengl::Texture> getTextureIfFree() {
-            std::shared_ptr<ghoul::opengl::Texture> texture = nullptr;
+        ghoul::opengl::Texture* getTextureIfFree() {
+            ghoul::opengl::Texture* texture = nullptr;
             if (_freeTexture < _textures.size()) {
-                 texture = _textures[_freeTexture];
+                 texture = _textures[_freeTexture].get();
                 _freeTexture++;
             }
             return texture;
         }
     private:
-        std::vector<std::shared_ptr<ghoul::opengl::Texture>> _textures;
+        std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
         size_t _freeTexture;
         const TileTextureInitData _initData;
     };

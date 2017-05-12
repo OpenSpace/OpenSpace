@@ -36,7 +36,7 @@ namespace globebrowsing {
 
 const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavailable);
 
-Tile::Tile(std::shared_ptr<ghoul::opengl::Texture> texture,
+Tile::Tile(ghoul::opengl::Texture* texture,
     std::shared_ptr<TileMetaData> metaData, Status status)
     : MemoryAwareCacheable(
         (sizeof(Tile) +
@@ -49,7 +49,7 @@ Tile::Tile(std::shared_ptr<ghoul::opengl::Texture> texture,
     , _metaData(metaData)
     , _status(status)
 {}
-
+/*
 Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
     using namespace ghoul::opengl;
         
@@ -76,7 +76,7 @@ Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
     Tile tile(texture, nullptr, Tile::Status::OK);
     return tile;
 } 
-
+*/
 glm::vec2 Tile::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
                                                 glm::uvec2 resolution, glm::vec2 tileUV)
 {

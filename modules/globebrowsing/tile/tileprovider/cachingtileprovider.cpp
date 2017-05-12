@@ -109,7 +109,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     auto threadPool = std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 10);
 
     _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
-        tileDataset, threadPool, AsyncTileDataProvider::UsePBO::Yes);
+        tileDataset, threadPool, AsyncTileDataProvider::UsePBO::No);
 
     if (dictionary.hasKeyAndValue<double>(KeyPreCacheLevel)) {
         int preCacheLevel = static_cast<int>(dictionary.value<double>(KeyPreCacheLevel));
@@ -210,6 +210,7 @@ TileDepthTransform CachingTileProvider::depthTransform() {
 }
 
 Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
+	/*
     if (rawTile->error != RawTile::ReadError::None) {
         return Tile(nullptr, nullptr, Tile::Status::IOError);
     }
@@ -239,6 +240,9 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
 
     Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
     return tile;
+	*/
+	return Tile(nullptr, nullptr, Tile::Status::Unavailable);
+
 }
 
 } // namespace tileprovider

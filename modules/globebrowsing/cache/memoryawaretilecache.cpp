@@ -92,7 +92,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
         return;
     }
     else {
-        std::shared_ptr<Texture> texture;
+        Texture* texture;
         // if this texture type does not exist among the texture containers
         // it needs to be created
         const TileTextureInitData& initData = *rawTile->textureInitData;
@@ -133,6 +133,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
             ghoul_assert(expectedDataSize == numBytes, "Pixel data size is incorrect");
             texture->reUploadTexture();
         }
+        texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
         _textureContainerMap[initDataKey].second->put(key, tile);
     }

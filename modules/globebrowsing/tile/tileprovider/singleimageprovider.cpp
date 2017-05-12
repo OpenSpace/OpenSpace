@@ -78,6 +78,7 @@ void SingleImageProvider::update() {
 }
 
 void SingleImageProvider::reset() {
+	/*
     auto tileTexture = std::shared_ptr<ghoul::opengl::Texture>(
         std::move(ghoul::io::TextureReader::ref().loadTexture(_imagePath))
     );
@@ -88,6 +89,7 @@ void SingleImageProvider::reset() {
     tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
 
     _tile = Tile(tileTexture, tileMetaData, tileStatus);
+	*/
 }
 
 int SingleImageProvider::maxLevel() {
