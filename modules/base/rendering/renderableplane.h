@@ -42,13 +42,12 @@ namespace ghoul {
 }
 
 namespace openspace {
-    struct LinePoint;
+
+namespace documentation { struct Documentation; }
+
+struct LinePoint;
 
 class RenderablePlane : public Renderable {
-
-    enum class Origin {
-        LowerLeft, LowerRight, UpperLeft, UpperRight, Center
-    };
 
 public:
     enum class BlendMode : int {
@@ -67,17 +66,15 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
+
 private:
     void loadTexture();
     void createPlane();
 
     properties::StringProperty _texturePath;
     properties::BoolProperty _billboard;
-    properties::BoolProperty _projectionListener;
     properties::FloatProperty _size;
-
-    Origin _origin;
-    std::string _nodeName;
 
     bool _planeIsDirty;
 

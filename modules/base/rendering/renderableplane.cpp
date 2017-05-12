@@ -22,8 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/configurationmanager.h>
 #include <modules/base/rendering/renderableplane.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
+#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/powerscaledcoordinate.h>
 
@@ -38,7 +41,11 @@
 #include <ghoul/opengl/textureunit.h>
 
 namespace {
-    static const std::string _loggerCat = "RenderablePlane";
+    const char* KeySize = "Size";
+    const char* KeyBillboard = "Billboard";
+    const char* KeyBlendMode = "BlendMode";
+    const char* KeyTexture = "Texture";
+
 
     const char* keyFieldlines = "Fieldlines";
     const char* keyFilename = "File";
@@ -46,17 +53,54 @@ namespace {
     const char* keyShaders = "Shaders";
     const char* keyVertexShader = "VertexShader";
     const char* keyFragmentShader = "FragmentShader";
-}
+} // namespace
 
 namespace openspace {
+
+documentation::Documentation RenderablePlane::Documentation() {
+    using namespace documentation;
+    return {
+        "Renderable Plane",
+        "base_renderable_plane",
+        {
+            {
+                KeySize,
+                new DoubleVerifier,
+                "Specifies the size of the square plane in meters.",
+                Optional::No
+            },
+            {
+                KeyBillboard,
+                new BoolVerifier,
+                "Specifies whether the plane is a billboard, which means that it is "
+                "always facing the camera. If this is false, it can be oriented using "
+                "other transformations. The default is 'false'.",
+                Optional::Yes
+            },
+            {
+                KeyBlendMode,
+                new StringInListVerifier({ "Normal", "Additive" }),
+                "Specifies the blend mode that is applied to this plane. The default "
+                "value is 'Normal'.",
+                Optional::Yes
+            },
+            {
+                KeyTexture,
+                new StringVerifier,
+                "Specifies the texture that is applied to this plane. This image has to "
+                "be a square image.",
+                Optional::No
+            }
+        }
+    };
+}
+
 
 RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _texturePath("texture", "Texture")
     , _billboard("billboard", "Billboard", false)
-    , _projectionListener("projectionListener", "DisplayProjections", false)
     , _size("size", "Size", 10, 0, std::pow(10, 25))
-    , _origin(Origin::Center)
     , _shader(nullptr)
     , _textureIsDirty(false)
     , _texture(nullptr)
@@ -64,65 +108,39 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _quad(0)
     , _vertexPositionBuffer(0)
 {
-    dictionary.getValue("Size", _size);
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderablePlane"
+    );
 
-    if (dictionary.hasKey("Name")) {
-        dictionary.getValue("Name", _nodeName);
+    _size = dictionary.value<double>(KeySize);
+
+    if (dictionary.hasKey(KeyBillboard)) {
+        _billboard = dictionary.value<bool>(KeyBillboard);
     }
 
-    std::string origin;
-    if (dictionary.getValue("Origin", origin)) {
-        if (origin == "LowerLeft") {
-            _origin = Origin::LowerLeft;
+    if (dictionary.hasKey(KeyBlendMode)) {
+        const std::string v = dictionary.value<std::string>(KeyBlendMode);
+        if (v == "Normal") {
+            _blendMode = BlendMode::Normal;
         }
-        else if (origin == "LowerRight") {
-            _origin = Origin::LowerRight;
-        }
-        else if (origin == "UpperLeft") {
-            _origin = Origin::UpperLeft;
-        }
-        else if (origin == "UpperRight") {
-            _origin = Origin::UpperRight;
-        }
-        else if (origin == "Center") {
-            _origin = Origin::Center;
-        }
-    }
-
-    // Attempt to get the billboard value
-    bool billboard = false;
-    if (dictionary.getValue("Billboard", billboard)) {
-        _billboard = billboard;
-    }
-    if (dictionary.hasKey("ProjectionListener")){
-        bool projectionListener = false;
-        if (dictionary.getValue("ProjectionListener", projectionListener)) {
-            _projectionListener = projectionListener;
-        }
-    }
-
-    std::string blendMode;
-    if (dictionary.getValue("BlendMode", blendMode)) {
-        if (blendMode == "Additive") {
+        else if (v == "Additive") {
             _blendMode = BlendMode::Additive;
             setRenderBin(Renderable::RenderBin::Transparent);
         }
     }
-
-    std::string texturePath = "";
-    bool success = dictionary.getValue("Texture", texturePath);
-    if (success) {
-        _texturePath = absPath(texturePath);
-        _textureFile = new ghoul::filesystem::File(_texturePath);
-    }
+    _texturePath = absPath(dictionary.value<std::string>(KeyTexture));
+    _textureFile = new ghoul::filesystem::File(_texturePath);
 
     addProperty(_billboard);
     addProperty(_texturePath);
-    _texturePath.onChange(std::bind(&RenderablePlane::loadTexture, this));
-    _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
+    _texturePath.onChange([this]() {loadTexture(); });
+    _textureFile->setCallback(
+        [this](const ghoul::filesystem::File&) { _textureIsDirty = true; }
+    );
 
     addProperty(_size);
-    //_size.onChange(std::bind(&RenderablePlane::createPlane, this));
     _size.onChange([this](){ _planeIsDirty = true; });
 
     setBoundingSphere(_size);
@@ -134,12 +152,7 @@ RenderablePlane::~RenderablePlane() {
 }
 
 bool RenderablePlane::isReady() const {
-    bool ready = true;
-    if (!_shader)
-        ready &= false;
-    if(!_texture)
-        ready &= false;
-    return ready;
+    return _shader && _texture;
 }
 
 bool RenderablePlane::initialize() {
@@ -147,17 +160,10 @@ bool RenderablePlane::initialize() {
     glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
-    if (_shader == nullptr) {
-        // Plane Program
-
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _shader = renderEngine.buildRenderProgram("PlaneProgram",
-            "${MODULE_BASE}/shaders/plane_vs.glsl",
-            "${MODULE_BASE}/shaders/plane_fs.glsl"
-            );
-        if (!_shader)
-            return false;
-    }
+    _shader = OsEng.renderEngine().buildRenderProgram("PlaneProgram",
+        "${MODULE_BASE}/shaders/plane_vs.glsl",
+        "${MODULE_BASE}/shaders/plane_fs.glsl"
+        );
 
     loadTexture();
 
@@ -171,15 +177,8 @@ bool RenderablePlane::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
-    if (!_projectionListener){
-        // its parents job to kill texture
-        // iff projectionlistener 
-        _texture = nullptr;
-    }
-
     delete _textureFile;
     _textureFile = nullptr;
-
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
@@ -195,25 +194,27 @@ void RenderablePlane::render(const RenderData& data) {
     
     // Activate shader
     _shader->activate();
-    if (_projectionListener){
-        //get parent node-texture and set with correct dimensions  
-        SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
-        if (textureNode != nullptr){
-            RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
-            _texture = std::unique_ptr<ghoul::opengl::Texture>(&(t->baseTexture()));
-            unsigned int h = _texture->height();
-            unsigned int w = _texture->width();
-            float scale = static_cast<float>(h) / static_cast<float>(w);
-            scaleTransform = glm::scale(glm::mat4(1.0), glm::vec3(1.f, scale, 1.f));
-        }
-    }
+    //if (_projectionListener){
+    //    //get parent node-texture and set with correct dimensions  
+    //    SceneGraphNode* textureNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->parent();
+    //    if (textureNode != nullptr){
+    //        RenderablePlanetProjection* t = static_cast<RenderablePlanetProjection*>(textureNode->renderable());
+    //        _texture = std::unique_ptr<ghoul::opengl::Texture>(&(t->baseTexture()));
+    //        unsigned int h = _texture->height();
+    //        unsigned int w = _texture->width();
+    //        float scale = static_cast<float>(h) / static_cast<float>(w);
+    //        scaleTransform = glm::scale(glm::mat4(1.0), glm::vec3(1.f, scale, 1.f));
+    //    }
+    //}
 
     // Model transform and view transform needs to be in double precision
     glm::dmat4 rotationTransform;
-    if (_billboard)
+    if (_billboard) {
         rotationTransform = glm::inverse(glm::dmat4(data.camera.viewRotationMatrix()));
-    else
+    }
+    else {
         rotationTransform = glm::dmat4(data.modelTransform.rotation);
+    }
 
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
@@ -276,9 +277,14 @@ void RenderablePlane::update(const UpdateData&) {
 
 void RenderablePlane::loadTexture() {
     if (_texturePath.value() != "") {
-        std::unique_ptr<ghoul::opengl::Texture> texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+        std::unique_ptr<ghoul::opengl::Texture> texture =
+            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+
         if (texture) {
-            LDEBUG("Loaded texture from '" << absPath(_texturePath) << "'");
+            LDEBUGC(
+                "RenderablePlane",
+                "Loaded texture from '" << absPath(_texturePath) << "'"
+            );
             texture->uploadTexture();
 
             // Textures of planets looks much smoother with AnisotropicMipMap rather than linear

@@ -35,10 +35,11 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <openspace/util/powerscaledsphere.h>
 
 namespace openspace {
 
-class PowerScaledSphere;
+namespace documentation { struct Documentation; }
 
 class RenderableSphere : public Renderable {
 public:
@@ -52,13 +53,15 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
+
 private:
     void loadTexture();
 
     properties::StringProperty _texturePath;
     properties::OptionProperty _orientation;
 
-    properties::Vec2Property _size;
+    properties::FloatProperty _size;
     properties::IntProperty _segments;
 
     properties::FloatProperty _transparency;
@@ -66,7 +69,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    PowerScaledSphere* _sphere;
+    std::unique_ptr<PowerScaledSphere> _sphere;
 
     bool _sphereIsDirty;
 };

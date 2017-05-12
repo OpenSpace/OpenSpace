@@ -61,7 +61,8 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
         staticGrid = dictionary.getValue(KeyGridParentsRotation, _parentsRotation);
     }
     
-    dictionary.getValue(KeyGridSegments, _segments);
+    _segments = static_cast<int>(dictionary.value<double>(KeyGridSegments));
+    //dictionary.getValue(KeyGridSegments, _segments);
 
 
     /*glm::vec2 radius;
