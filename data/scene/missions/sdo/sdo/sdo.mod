@@ -59,22 +59,20 @@ return {
         Name = "SDO Plane",
         Parent = "SDOCoordinatesystem",
         Renderable = {
+            Id = 0,
             -- Resolution of imagery, will be moved to metadata later
             Resolution = 4096,
             Type = "RenderableSpacecraftCameraPlane",
             Target = "Sun",
             -- Will recursively find all instruments that match array instruments
-            RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
-            --RootPath = "/media/noven/BE23-1097/solarflare/SDO",
+            --RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
+            RootPath = "/media/noven/BE23-1097/solarflare/SDO/2012/07/12",
             -- Optional filter on instruments, otherwise get all
             Instruments = {
                 "aia_aia_94",
                 "aia_aia_193",
                 "aia_aia_304",
                 "aia_aia_171",
-                "aia_aia_193",
-                "aia_aia_211",
-                "aia_aia_335"
             },
             -- Path to transferfunctions whose name must match the instrument
             TransferfunctionPath = "/home/noven/workspace/OpenSpace/data/sdotransferfunctions"

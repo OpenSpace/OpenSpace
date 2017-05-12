@@ -71,12 +71,23 @@ return {
         Name = "Stereo Plane",
         Parent = "StereoA",
         Renderable = {
+            Id = 1,
+            -- Resolution of imagery, will be moved to metadata later
+            Resolution = 2048,
             Type = "RenderableSpacecraftCameraPlane",
             Target = "Sun",
-            Size = {23.454, 9.949},
-            Origin = "Center",
-            -- Dummy texture
-            Texture = "images/stereo2.png",
+            -- Will recursively find all instruments that match array instruments
+            --RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
+            RootPath = "/media/noven/BE23-1097/solarflare/STEREOA/EUVI-A/2012/07/",
+            -- Optional filter on instruments, otherwise get all
+            -- Instruments = {
+            --     "aia_aia_94",
+            --     "aia_aia_193",
+            --     "aia_aia_304",
+            --     "aia_aia_171",
+            -- },
+            -- Path to transferfunctions whose name must match the instrument
+            TransferfunctionPath = "/home/noven/workspace/OpenSpace/data/stereotransferfunctions"
         },
         -- Transform = {
         --     Translation = {

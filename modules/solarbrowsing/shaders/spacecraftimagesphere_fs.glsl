@@ -27,26 +27,26 @@ in vec4 vs_positionScreenSpace;
 in vec4 clipSpace;
 in vec3 vUv;
 
-uniform dvec3 planePositionSpacecraft;
-uniform sampler2D imageryTexture;
-uniform sampler1D lut;
+uniform dvec3 planePositionSpacecraft[2];
+uniform sampler2D imageryTexture[2];
+uniform sampler1D lut[2];
 
 // TODO(mnoven): Uniform
-const float FULL_PLANE_SIZE = (1391600000 * 0.5) / 0.785;
+const float FULL_PLANE_SIZE = (1391600000 * 0.5) / 0.785; // / 0.61877
 
 #include "fragment.glsl"
 
 Fragment getFragment() {
     vec4 outColor;
 
-    if (planePositionSpacecraft.z > vUv.z) {
+    if (planePositionSpacecraft[1].z > vUv.z) {
         discard;
     } else {
         vec2 uv = vUv.xy;
         uv /= (FULL_PLANE_SIZE * 2);
         uv += 0.5;
-        float intensityOrg = float(texture(imageryTexture, uv).r);
-        outColor =  texture(lut, intensityOrg);
+        float intensityOrg = float(texture(imageryTexture[0], vec2(uv.x  /* +  ( (1024.0 - 1021.81 ) / 2048 ) */, uv.y /*  +    ((1024.0 - 926.171) / 2048) */)).r);
+        outColor =  texture(lut[1], intensityOrg);
     }
 
     Fragment frag;

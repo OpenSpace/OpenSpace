@@ -61,11 +61,11 @@ void SimpleJ2kCodec::DecodeIntoBuffer(unsigned char* buffer, const int numThread
   // - For now just keep the PBO buffer in the same size
   std::copy(_image->comps[0].data, _image->comps[0].data + _image->comps[0].w * _image->comps[0].h, buffer);
 
-  auto t2 = Clock::now();
+ /* auto t2 = Clock::now();
   std::cout << "Decode time "
             << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
             << " ms" << std::endl;
-
+*/
   //std::memcpy(buffer, _image->comps[0].data, _image->comps[0].w * _image->comps[0].h * sizeof(int32_t));
 }
 

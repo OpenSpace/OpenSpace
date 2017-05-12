@@ -192,7 +192,7 @@ void SpacecraftImageryManager::loadImageMetadata(
                 }
             }
         }
-        LDEBUG("Finished loading path " << seqPath);
+        //LDEBUG("Finished loading path " << seqPath);
     }
 
     LDEBUG("Finish loading imagery metadata");
