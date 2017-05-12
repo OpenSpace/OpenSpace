@@ -58,6 +58,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
     , _bufferSize("bufferSize", "Buffer Size", 5, 1, 100)
+    , _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
     , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 50, 0, 300)
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 1, 0, 5)
@@ -233,6 +234,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     addProperty(_bufferSize);
     addProperty(_magicFactor);
     addProperty(_resolutionLevel);
+    addProperty(_lazyBuffering);
     addProperty(_minRealTimeUpdateInterval);
     addProperty(_asyncUploadPBO);
     addProperty(_usePBO);
@@ -269,9 +271,11 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
         }
     }
 
-    while (_concurrentJobManager.numFinishedJobs() < _bufferSize) {
-        if (_verboseMode) {
-            LDEBUG("Buffering .... ");
+    if (!_lazyBuffering) {
+        while (_concurrentJobManager.numFinishedJobs() < _bufferSize) {
+            if (_verboseMode) {
+                LDEBUG("Buffering .... ");
+            }
         }
     }
 }
