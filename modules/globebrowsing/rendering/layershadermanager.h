@@ -87,8 +87,7 @@ public:
      * from the last time this function was called the shader program will be
      * recompiled before returned.
      */
-    ghoul::opengl::ProgramObject* programObject(
-        LayerShaderPreprocessingData preprocessingData);
+    ghoul::opengl::ProgramObject* programObject();
 
     bool updatedOnLastCall();
     

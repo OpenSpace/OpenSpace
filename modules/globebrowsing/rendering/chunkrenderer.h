@@ -25,10 +25,6 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CHUNK_RENDERER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___CHUNK_RENDERER___H__
 
-#include <ghoul/designpattern/event.h>
-
-#include <modules/globebrowsing/rendering/layershadermanager.h>
-
 #include <memory>
 
 namespace ghoul { namespace opengl {
@@ -45,6 +41,8 @@ class Chunk;
 class Grid;
 class GPULayerManager;
 class LayerManager;
+class LayerShaderManager;
+class RenderableGlobe;
 
 class ChunkRenderer {
 public:
@@ -57,6 +55,8 @@ public:
     */
     void renderChunk(const Chunk& chunk, const RenderData& data);
     void update();
+
+    void recompileShaders(const RenderableGlobe& globe);
 
 private:
     /**
@@ -98,9 +98,6 @@ private:
     // Layered texture uniforms are chached in the uniform ID handles.
     std::shared_ptr<GPULayerManager> _globalGpuLayerManager;
     std::shared_ptr<GPULayerManager> _localGpuLayerManager;
-
-    ghoul::Event<LayerShaderManager::LayerShaderPreprocessingData>
-        _recompileShadersEvent;
 };
 
 } // namespace globebrowsing

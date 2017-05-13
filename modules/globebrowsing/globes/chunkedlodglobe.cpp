@@ -65,6 +65,7 @@ ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPe
     , maxSplitDepth(22)
     , _layerManager(layerManager)
     , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
+    , _shadersNeedRecompilation(true)
 {
     auto geometry = std::make_shared<SkirtedGrid>(
         static_cast<unsigned int>(segmentsPerPatch),
@@ -258,8 +259,16 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
     return height;
 }
 
+void ChunkedLodGlobe::notifyShaderRecompilation() {
+    _shadersNeedRecompilation = true;
+}
+
 void ChunkedLodGlobe::render(const RenderData& data) {
     stats.startNewRecord();
+    if (_shadersNeedRecompilation) {
+        _renderer->recompileShaders(_owner);
+        _shadersNeedRecompilation = false;
+    }
         
     auto duration = std::chrono::system_clock::now().time_since_epoch();
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();

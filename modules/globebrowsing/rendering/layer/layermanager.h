@@ -63,6 +63,8 @@ public:
     void update();
     void reset(bool includingDisabled = false);
 
+    void onChange(std::function<void(void)> callback);
+
 private:
     std::vector<std::shared_ptr<LayerGroup>> _layerGroups;
 };

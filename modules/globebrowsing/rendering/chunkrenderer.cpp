@@ -60,13 +60,6 @@ ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
 
     _globalGpuLayerManager = std::make_shared<GPULayerManager>();
     _localGpuLayerManager = std::make_shared<GPULayerManager>();
-
-    _recompileShadersEvent.subscribe("Recompile Shaders", "RecompileShaders",
-        [&](LayerShaderManager::LayerShaderPreprocessingData preprocessingData){
-            _globalLayerShaderManager->recompileShaderProgram(preprocessingData);
-            _localLayerShaderManager->recompileShaderProgram(preprocessingData);
-        });
-
 }
 
 void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
@@ -84,6 +77,13 @@ void ChunkRenderer::update() {
     // unused atm. Could be used for caching or precalculating
 }
 
+void ChunkRenderer::recompileShaders(const RenderableGlobe& globe) {
+    LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
+        LayerShaderManager::LayerShaderPreprocessingData::get(globe);
+    _globalLayerShaderManager->recompileShaderProgram(preprocessingData);
+    _localLayerShaderManager->recompileShaderProgram(preprocessingData);
+}
+
 ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     std::shared_ptr<LayerShaderManager> layeredShaderManager,
     std::shared_ptr<GPULayerManager> gpuLayerManager,
@@ -91,13 +91,8 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 {
     const TileIndex& tileIndex = chunk.tileIndex();
 
-    LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
-        LayerShaderManager::LayerShaderPreprocessingData::get(chunk.owner());
-
     // Now the shader program can be accessed
-    ghoul::opengl::ProgramObject* programObject =
-        layeredShaderManager->programObject(
-            preprocessingData);
+    ghoul::opengl::ProgramObject* programObject = layeredShaderManager->programObject();
         
     if (layeredShaderManager->updatedOnLastCall()) {
         gpuLayerManager->bind(programObject, *_layerManager);

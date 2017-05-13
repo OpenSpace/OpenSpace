@@ -107,6 +107,8 @@ public:
      */
     float getHeight(glm::dvec3 position) const;
 
+    void notifyShaderRecompilation();
+
     const int minSplitDepth;
     const int maxSplitDepth;
 
@@ -139,6 +141,7 @@ private:
     std::shared_ptr<LayerManager> _layerManager;
 
     const RenderableGlobe& _owner;
+    bool _shadersNeedRecompilation;
 };
 
 } // namespace globebrowsing

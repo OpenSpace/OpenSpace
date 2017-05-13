@@ -54,6 +54,8 @@ public:
     tileprovider::TileProvider* tileProvider() const { return _tileProvider.get(); }
     const LayerRenderSettings& renderSettings() const { return _renderSettings; }
 
+    void onChange(std::function<void(void)> callback);
+
 private:
     properties::BoolProperty _enabled;
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;

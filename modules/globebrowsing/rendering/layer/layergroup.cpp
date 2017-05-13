@@ -81,5 +81,12 @@ int LayerGroup::pileSize() const{
     return _levelBlendingEnabled.value() ? 3 : 1;
 }
 
+void LayerGroup::onChange(std::function<void(void)> callback) {
+    _onChangeCallback = callback;
+    for (const auto& layer : _layers) {
+        layer->onChange(callback);
+    }
+}
+
 } // namespace globebrowsing
 } // namespace openspace

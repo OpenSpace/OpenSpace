@@ -123,14 +123,8 @@ LayerShaderManager::~LayerShaderManager() {
     }
 }
 
-ghoul::opengl::ProgramObject* LayerShaderManager::programObject(
-                                           LayerShaderPreprocessingData preprocessingData)
-{
-    _updatedOnLastCall = false;
-    if (!(preprocessingData == _preprocessingData) || _programObject == nullptr) {
-        recompileShaderProgram(preprocessingData);
-        _updatedOnLastCall = true;
-    }
+ghoul::opengl::ProgramObject* LayerShaderManager::programObject() {
+    ghoul_assert(_programObject, "Program does not exist. Needs to be compiled!");
     return _programObject.get();
 }
 
@@ -180,6 +174,7 @@ void LayerShaderManager::recompileShaderProgram(
     ghoul_assert(_programObject != nullptr, "Failed to initialize programObject!");
     using IgnoreError = ghoul::opengl::ProgramObject::ProgramObject::IgnoreError;
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    _updatedOnLastCall = true;
 }
 
 bool LayerShaderManager::updatedOnLastCall() {

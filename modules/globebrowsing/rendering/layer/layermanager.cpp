@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -40,7 +41,7 @@ const char* LayerManager::LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
     "WaterMasks"
 };
 
-LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict) 
+LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
     : properties::PropertyOwner("Layers")
 {
     if (NUM_LAYER_GROUPS != layerGroupsDict.size()) {
@@ -97,6 +98,12 @@ void LayerManager::reset(bool includeDisabled) {
                 layer->tileProvider()->reset();
             }
         }
+    }
+}
+
+void LayerManager::onChange(std::function<void(void)> callback) {
+    for (auto& layerGroup : _layerGroups) {
+        layerGroup->onChange(callback);
     }
 }
 

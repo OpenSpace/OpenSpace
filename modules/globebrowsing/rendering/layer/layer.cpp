@@ -44,6 +44,7 @@ Layer::Layer(const ghoul::Dictionary& layerDict)
     bool enabled = false; // defaults to false if unspecified
     layerDict.getValue("Enabled", enabled);
     _enabled.setValue(enabled);
+    
     addProperty(_enabled);
 
     addPropertySubOwner(_renderSettings);
@@ -52,6 +53,11 @@ Layer::Layer(const ghoul::Dictionary& layerDict)
 
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
     return _tileProvider->getChunkTilePile(tileIndex, pileSize);
+}
+
+
+void Layer::onChange(std::function<void(void)> callback) {
+    _enabled.onChange(callback);
 }
 
 } // namespace globebrowsing
