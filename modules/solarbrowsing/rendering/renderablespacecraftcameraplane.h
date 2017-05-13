@@ -105,6 +105,7 @@ private:
     properties::DoubleProperty _magicFactor;
     properties::IntProperty _resolutionLevel;
     properties::StringProperty _target;
+    properties::BoolProperty _useBuffering;
     properties::BoolProperty _usePBO;
     properties::BoolProperty _verboseMode;
 
@@ -169,8 +170,7 @@ private:
     void updatePlane();
     void fillBuffer(const double& dt);
 
-    void decode(unsigned char* buffer, const std::string& fileame,
-                const int numThreads);
+    void decode(unsigned char* buffer, const std::string& fileame);
     void downloadTextureResource();
     bool initialize() override;
     bool deinitialize() override;
