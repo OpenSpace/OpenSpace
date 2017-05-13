@@ -61,6 +61,12 @@ ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
     _globalGpuLayerManager = std::make_shared<GPULayerManager>();
     _localGpuLayerManager = std::make_shared<GPULayerManager>();
 
+    _recompileShadersEvent.subscribe("Recompile Shaders", "RecompileShaders",
+        [&](LayerShaderManager::LayerShaderPreprocessingData preprocessingData){
+            _globalLayerShaderManager->recompileShaderProgram(preprocessingData);
+            _localLayerShaderManager->recompileShaderProgram(preprocessingData);
+        });
+
 }
 
 void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
@@ -85,45 +91,13 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 {
     const TileIndex& tileIndex = chunk.tileIndex();
 
-    LayerShaderManager::LayerShaderPreprocessingData layeredTexturePreprocessingData;
-        
-    for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; i++) {
-        LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData layeredTextureInfo;
-        auto layerGroup = _layerManager->layerGroup(i);
-        layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
-        layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
-
-        layeredTexturePreprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
-    }
-        
-    const auto& generalProps = chunk.owner().generalProperties();
-    const auto& debugProps = chunk.owner().debugProperties();
-    auto& pairs = layeredTexturePreprocessingData.keyValuePairs;
-        
-    pairs.emplace_back("useAtmosphere", std::to_string(generalProps.atmosphereEnabled));
-    pairs.emplace_back("performShading", std::to_string(generalProps.performShading));
-    pairs.emplace_back("showChunkEdges", std::to_string(debugProps.showChunkEdges));
-    pairs.emplace_back("showHeightResolution",
-        std::to_string(debugProps.showHeightResolution));
-    pairs.emplace_back("showHeightIntensities",
-        std::to_string(debugProps.showHeightIntensities));
-    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
-
-    pairs.emplace_back("tilePaddingStart",
-        "ivec2(" +
-        std::to_string(RawTileDataReader::padding.start.x) + "," +
-        std::to_string(RawTileDataReader::padding.start.y) + ")"
-    );
-    pairs.emplace_back("tilePaddingSizeDiff",
-        "ivec2(" +
-        std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
-        std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
-    );
+    LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
+        LayerShaderManager::LayerShaderPreprocessingData::get(chunk.owner());
 
     // Now the shader program can be accessed
     ghoul::opengl::ProgramObject* programObject =
         layeredShaderManager->programObject(
-            layeredTexturePreprocessingData);
+            preprocessingData);
         
     if (layeredShaderManager->updatedOnLastCall()) {
         gpuLayerManager->bind(programObject, *_layerManager);

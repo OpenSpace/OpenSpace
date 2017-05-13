@@ -23,6 +23,12 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/rendering/layershadermanager.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/chunk/chunk.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -54,6 +60,50 @@ bool LayerShaderManager::LayerShaderPreprocessingData::operator==(
         }
         return equal;
     }
+}
+
+LayerShaderManager::LayerShaderPreprocessingData
+    LayerShaderManager::LayerShaderPreprocessingData::get(
+    const RenderableGlobe& globe)
+{
+    LayerShaderManager::LayerShaderPreprocessingData preprocessingData;
+
+    std::shared_ptr<LayerManager> layerManager = globe.chunkedLodGlobe()->layerManager();
+    for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; i++) {
+        LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData
+            layeredTextureInfo;
+        auto layerGroup = layerManager->layerGroup(i);
+        layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
+        layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
+
+        preprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
+    }
+        
+    const auto& generalProps = globe.generalProperties();
+    const auto& debugProps = globe.debugProperties();
+    auto& pairs = preprocessingData.keyValuePairs;
+        
+    pairs.emplace_back("useAtmosphere", std::to_string(generalProps.atmosphereEnabled));
+    pairs.emplace_back("performShading", std::to_string(generalProps.performShading));
+    pairs.emplace_back("showChunkEdges", std::to_string(debugProps.showChunkEdges));
+    pairs.emplace_back("showHeightResolution",
+        std::to_string(debugProps.showHeightResolution));
+    pairs.emplace_back("showHeightIntensities",
+        std::to_string(debugProps.showHeightIntensities));
+    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
+
+    pairs.emplace_back("tilePaddingStart",
+        "ivec2(" +
+        std::to_string(RawTileDataReader::padding.start.x) + "," +
+        std::to_string(RawTileDataReader::padding.start.y) + ")"
+    );
+    pairs.emplace_back("tilePaddingSizeDiff",
+        "ivec2(" +
+        std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
+        std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
+    );
+
+    return preprocessingData;
 }
 
 LayerShaderManager::LayerShaderManager(const std::string& shaderName,
