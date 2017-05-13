@@ -61,7 +61,7 @@ return {
         "milkyway-eso",
       --  "constellationbounds",
          "missions/sdo",
-         "missions/stereo",
+        -- "missions/stereo",
        -- "missions/soho"
     }
 }

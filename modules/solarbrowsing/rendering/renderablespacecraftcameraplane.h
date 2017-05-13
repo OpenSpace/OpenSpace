@@ -54,24 +54,22 @@ struct BufferObject {
 // TODO(mnoven) : Move to separate class
 class DecodeJob : public globebrowsing::Job<BufferObject>{
 public:
-    DecodeJob(const int& imageSize, const std::string& path, const int& resolutionLevel) { _imageSize = imageSize; _path = path; _resolutionLevel = resolutionLevel;}
-
-    virtual void execute() override {
-        BufferObject b;
-        b.name = _path;
-        b.data = new unsigned char[_imageSize * _imageSize];
-        SimpleJ2kCodec j2c;
-        j2c.CreateInfileStream(_path);
-        j2c.SetupDecoder(_resolutionLevel);
-        j2c.DecodeIntoBuffer(b.data, 0);
-        _bufferObject = std::make_shared<BufferObject>(b);
-
-        // SimpleJ2kCodec j2c;
-        // j2c.CreateInfileStream(_path);
-        // j2c.SetupDecoder(_resolutionLevel);
-        // auto img = j2c.Decode();
+    DecodeJob(const int& imageSize, const std::string& path, const int& resolutionLevel, const bool& verboseMode)
+        : _imageSize(imageSize)
+        , _path(path)
+        , _resolutionLevel(resolutionLevel)
+        , _verboseMode(verboseMode)
+    {
     }
-    virtual std::shared_ptr<BufferObject> product() const override {
+
+    virtual void execute() final {
+        BufferObject b = {new unsigned char[_imageSize * _imageSize], _path};
+        SimpleJ2kCodec j2c(_verboseMode);
+        j2c.DecodeIntoBuffer(b.name, b.data, _resolutionLevel);
+        _bufferObject = std::make_shared<BufferObject>(b);
+    }
+
+    virtual std::shared_ptr<BufferObject> product() const final {
         return std::move(_bufferObject);
     }
 
@@ -80,6 +78,7 @@ protected:
     std::string _path;
     int _resolutionLevel;
     int _imageSize;
+    bool _verboseMode;
 };
 
 class RenderableSpacecraftCameraPlane : public Renderable {

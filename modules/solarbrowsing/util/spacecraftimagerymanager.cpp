@@ -68,9 +68,7 @@ void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
                     const std::string outPath = FileSys.relativePath(path + "/converted/" + currentFile.filename()).c_str();
 
                     SimpleJ2kCodec j2c;
-                    j2c.CreateInfileStream(relativePath);
-                    j2c.SetupDecoder(0);
-                    auto decodedImg = j2c.Decode();
+                    auto decodedImg = j2c.Decode(relativePath, 0);
                     j2c.EncodeAsTiles(outPath.c_str(),
                                       decodedImg->data,
                                       decodedImg->w,

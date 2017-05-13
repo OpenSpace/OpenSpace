@@ -82,12 +82,12 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
     std::string tfRootPath;
     if (!dictionary.getValue("TransferfunctionPath", tfRootPath)) {
-        throw ghoul::RuntimeError("RootPath has to be specified");
+        throw ghoul::RuntimeError("TransferfunctionPath has to be specified");
     }
 
     float id;
     if (!dictionary.getValue("Id", id)) {
-        throw ghoul::RuntimeError("RootPath has to be specified");
+        throw ghoul::RuntimeError("Id (to be removed) has to be specified");
     }
     _id = static_cast<unsigned int>(id);
 
@@ -273,7 +273,7 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
         const std::string& currentFilename
               = _imageMetadataMap[_currentActiveInstrument][nextImageIndex].filename;
         auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename,
-                                               _resolutionLevel);
+                                               _resolutionLevel, _verboseMode);
         _concurrentJobManager.enqueueJob(job);
         if (_verboseMode) {
             LDEBUG("Enqueueing " << currentFilename);
@@ -483,7 +483,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
             }
 
             std::string currentFilename =  _imageMetadataMap[_currentActiveInstrument][nextImageIndex].filename;
-            auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename, _resolutionLevel);
+            auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename, _resolutionLevel, _verboseMode);
             _concurrentJobManager.enqueueJob(job);
             _initializePBO = false;
             _pboIsDirty = true;
@@ -548,10 +548,8 @@ void RenderableSpacecraftCameraPlane::decode(unsigned char* buffer,
                                              const std::string& filename,
                                              const int numThreads)
 {
-    SimpleJ2kCodec j2c;
-    j2c.CreateInfileStream(filename);
-    j2c.SetupDecoder(_resolutionLevel);
-    j2c.DecodeIntoBuffer(buffer, numThreads);
+    SimpleJ2kCodec j2c(_verboseMode);
+    j2c.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
 }
 
 void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime) {
