@@ -30,7 +30,7 @@ return {
             },
         }
     },
-    -- Intermediate step - can't go from J2000 directly to ECLIPJ2000 for some reason
+    -- Intermediate step - can't go from J2000 directly to ECLIPJ2000os for some reason
     {
         Name = "SDOGalacticIntermediateNode",
         Parent = "SDO",
@@ -66,7 +66,8 @@ return {
             Target = "Sun",
             -- Will recursively find all instruments that match array instruments
             --RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
-            RootPath = "/media/noven/BE23-1097/solarflare/SDO/2012/07/12",
+            --RootPath = "/media/noven/BE23-1097/solarflare/SDO/2012/07/12",
+            RootPath = "/Volumes/Untitled/solarflare/SDO/2012/07/12",
             -- Optional filter on instruments, otherwise get all
             Instruments = {
                 "aia_aia_94",
@@ -75,7 +76,8 @@ return {
                 "aia_aia_171",
             },
             -- Path to transferfunctions whose name must match the instrument
-            TransferfunctionPath = "/home/noven/workspace/OpenSpace/data/sdotransferfunctions"
+            TransferfunctionPath = "/Users/michaelnoven/workspace/OpenSpace/data/sdotransferfunctions"
+            --TransferfunctionPath = "/home/noven/workspace/OpenSpace/data/sdotransferfunctions"
         },
     },
 }
