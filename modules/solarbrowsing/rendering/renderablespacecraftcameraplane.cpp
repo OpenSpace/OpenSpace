@@ -68,7 +68,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _useBuffering("useBuffering", "Use Buffering", false)
     , _usePBO("usePBO", "Use PBO", true)
     , _magicFactor("magicfactor", "Full Plane Size", 0.785, 0.0, 1.0)
-    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
+    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(2))
     , _verboseMode("verboseMode", "Verbose Mode", false)
 {
     std::string target;
@@ -167,7 +167,6 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
                     Texture::WrappingMode::ClampToEdge
                 );
 
-    _initializePBO = true;
     _future = nullptr;
     _texture->setDataOwnership(ghoul::Boolean::No);
     _texture->uploadTexture();
@@ -200,7 +199,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         }
 
         if (_useBuffering) {
-            _initializePBO = true;
+           // _initializePBO = true;
             fillBuffer(Time::ref().deltaTime());
         } else {
             uploadImageDataToPBO(_currentActiveImage);
@@ -222,7 +221,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         }
 
         if (_useBuffering) {
-            _initializePBO = true;
+            //_initializePBO = true;
             fillBuffer(Time::ref().deltaTime());
         } else {
             uploadImageDataToPBO(_currentActiveImage);
@@ -239,6 +238,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     if (_useBuffering) {
         fillBuffer(1.0);
     }
+
+    // If no buffer is used this is needed
+    _initializePBO = true;
 
     // Initialize PBO - not needed since buffer is filled async anyways
     // if (_usePBO) {
@@ -275,10 +277,10 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
               imageList.begin(), imageList.end(),
               osTime + (dt * i) * ((_minRealTimeUpdateInterval) / 1000));
 
-        int nextImageIndex = low - imageList.begin();
+        const int nextImageIndex = low - imageList.begin();
 
         if (nextImageIndex == _imageMetadataMap[_currentActiveInstrument].size()) {
-            nextImageIndex = nextImageIndex - 1;
+            break;
         }
 
         const std::string& currentFilename
@@ -289,6 +291,7 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
         if (_verboseMode) {
             LDEBUG("Enqueueing " << currentFilename);
         }
+        _currentActiveImage = nextImageIndex;
     }
 
     if (!_lazyBuffering) {
@@ -298,6 +301,7 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
             }
         }
     }
+    _initializePBO = true;
 }
 
 void RenderableSpacecraftCameraPlane::createPlane() {
@@ -487,20 +491,20 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
                            << " ms" << std::endl);
                 }
 
-                const auto& imageList = _imageMetadataMap[_currentActiveInstrument];
-                const double& osTime = Time::ref().j2000Seconds();
-                double time = osTime + Time::ref().deltaTime() * ((_minRealTimeUpdateInterval )/ 1000 );
+                // const auto& imageList = _imageMetadataMap[_currentActiveInstrument];
+                // const double& osTime = Time::ref().j2000Seconds();
+                // double time = osTime + Time::ref().deltaTime() * ((_minRealTimeUpdateInterval )/ 1000 );
+                // const auto& low = std::lower_bound(imageList.begin(), imageList.end(), time);
+                // int nextImageIndex = low - imageList.begin();
+                // if (nextImageIndex
+                //     == _imageMetadataMap[_currentActiveInstrument].size()) {
+                //     nextImageIndex = nextImageIndex - 1;
+                // }
 
-                const auto& low = std::lower_bound(imageList.begin(), imageList.end(), time);
-                int nextImageIndex = low - imageList.begin();
-
-                if (nextImageIndex
-                    == _imageMetadataMap[_currentActiveInstrument].size()) {
-                    nextImageIndex = nextImageIndex - 1;
-                }
-
-                std::string currentFilename =  _imageMetadataMap[_currentActiveInstrument][nextImageIndex].filename;
-                auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename, _resolutionLevel, _verboseMode);
+                std::string currentFilename
+                      = _imageMetadataMap[_currentActiveInstrument][image].filename;
+                auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename,
+                                                       _resolutionLevel, _verboseMode);
                 _concurrentJobManager.enqueueJob(job);
                 _initializePBO = false;
                 _pboIsDirty = true;
