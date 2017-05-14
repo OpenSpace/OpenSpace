@@ -32,13 +32,16 @@
 #include <ghoul/opengl/textureunit.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/openspaceengine.h>
+#include <modules/fitsfilereader/include/fitsfilereader.h>
 
 #include <memory>
 #include <fstream>
+#include <limits>
+
+using namespace ghoul::opengl;
 
 namespace {
     static const std::string _loggerCat = "RendearbleSpacecraftCameraSphere";
-    const char* keyGeometry = "Geometry";
     const char* keyRadius = "Radius";
 }
 
@@ -52,6 +55,27 @@ RenderableSpacecraftCameraSphere::RenderableSpacecraftCameraSphere(
 }
 
 bool RenderableSpacecraftCameraSphere::initialize() {
+
+    std::string path = "/Users/michaelnoven/workspace/OpenSpace/data/hmimap1.fits";
+    FitsFileReader::open(path);
+    std::valarray<float> imageData = FitsFileReader::readImage<float>();
+    FitsFileReader::close();
+
+    float* data = new float[imageData.size()];
+    std::memmove(data, &imageData[0], imageData.size() * sizeof(float));
+
+    //const glm::size3_t imageSize(sizeX, sizeY, 1);
+    _magnetogramTexture = std::make_unique<Texture>(
+        data,
+        glm::size3_t(3600, 1440, 1),
+        ghoul::opengl::Texture::Red,
+        GL_R32F,
+        GL_FLOAT,
+        Texture::FilterMode::Linear,
+        Texture::WrappingMode::ClampToEdge
+    );
+    _magnetogramTexture->uploadTexture();
+
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
         _shader = renderEngine.buildRenderProgram("SpacecraftImageSphereProgram",
@@ -80,7 +104,7 @@ bool RenderableSpacecraftCameraSphere::deinitialize() {
 }
 
 bool RenderableSpacecraftCameraSphere::isReady() const {
-    return _shader && _sphere;
+    return _shader && _sphere && _magnetogramTexture;;
 }
 
 void RenderableSpacecraftCameraSphere::update(const UpdateData& data) {
@@ -90,20 +114,24 @@ void RenderableSpacecraftCameraSphere::update(const UpdateData& data) {
 }
 
 void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
-    _shader->activate();
-
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
+    _shader->activate();
     _shader->setUniform(
         "modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
 
+    ghoul::opengl::TextureUnit imageUnit;
+    imageUnit.activate();
+    _magnetogramTexture->bind();
+    _shader->setUniform("magnetogram", imageUnit);
     _sphere->render();
+    //_sphereUnit.setZeroUnit();
     _shader->deactivate();
 }
 

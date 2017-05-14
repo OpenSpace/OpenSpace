@@ -41,8 +41,8 @@ out vec3 vUv;
 void main() {
     // Transform the damn psc to homogenous coordinate
     vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
-    vUv = vec3(sunToSpacecraftReferenceFrame[1] * dvec4(position)).xyz;
-    vec4 positionClipSpace = modelViewProjectionTransform[1] * position;
+    vUv = vec3(sunToSpacecraftReferenceFrame[0] * dvec4(position)).xyz;
+    vec4 positionClipSpace = modelViewProjectionTransform[0] * position;
     clipSpace = positionClipSpace;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
     gl_Position = vs_positionScreenSpace;

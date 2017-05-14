@@ -45,12 +45,9 @@ namespace ghoul {
         class Texture;
     }
 }
+namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
-
-namespace planetgeometry {
-class PlanetGeometry;
-}
 
 class RenderableSpacecraftCameraSphere : public Renderable {
 public:
@@ -67,13 +64,9 @@ public:
 private:
     void loadTexture();
 
+    std::unique_ptr<ghoul::opengl::Texture> _magnetogramTexture;
     std::unique_ptr<PowerScaledSphere> _sphere;
-    //std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
-    //properties::BoolProperty _performShading;
-    //properties::FloatProperty _planetRadius;
     float _planetRadius;
-
-    glm::dmat3 _stateMatrix;
 };
 
 } // namespace openspace
