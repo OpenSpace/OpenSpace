@@ -152,6 +152,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
     _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
+    _globalPropertyNamespace->addPropertySubOwner(_console.get());
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -346,7 +347,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
     FileSys.createCacheManager(
         absPath("${" + ConfigurationManager::KeyCache + "}"), CacheVersion
     );
-    _engine->_console->initialize();
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
@@ -842,6 +842,8 @@ void OpenSpaceEngine::configureLogging() {
 
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
+
+    _engine->_console->initialize();
 
     const std::string key = ConfigurationManager::KeyOpenGLDebugContext;
     if (_configurationManager->hasKey(key)) {

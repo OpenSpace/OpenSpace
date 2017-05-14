@@ -25,6 +25,7 @@
 #include <openspace/interaction/luaconsole.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/network/parallelconnection.h>
 
 #include <ghoul/filesystem/cachemanager.h>
@@ -34,6 +35,9 @@
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/clipboard.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
+
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <fstream>
 #include <string>
@@ -42,6 +46,8 @@ namespace {
     const char* HistoryFile = "ConsoleHistory";
 
     const int NoAutoComplete = -1;
+
+    const int MaximumHistoryLength = 1000;
 
     // A high number is chosen since we didn't have a version number before
     // any small number might also be equal to the console history length
@@ -59,27 +65,32 @@ LuaConsole::LuaConsole()
     : properties::PropertyOwner("LuaConsole")
     , _isVisible("isVisible", "Is Visible", false)
     , _remoteScripting("remoteScripting", "Remote scripting", false)
+    , _width("width", "Width", 0.75f, 0.f, 1.f)
+    , _heightRetracted("heightRetracted", "Height when retracted", 0.04f, 0.f, 1.f)
+    , _heightExtended("heightExtended", "Height when extended", 0.5f, 0.f, 1.f)
     , _inputPosition(0)
     , _activeCommand(0)
     , _autoCompleteInfo({NoAutoComplete, false, ""})
 {
     addProperty(_isVisible);
     addProperty(_remoteScripting);
+
+    addProperty(_width);
+    addProperty(_heightRetracted);
+    addProperty(_heightExtended);
 }
 
 void LuaConsole::initialize() {
-    std::string filename = FileSys.cacheManager()->cachedFilename(
+    const std::string filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
         "",
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
-   
-    try {
-        if (FileSys.fileExists(filename)) {
-            std::ifstream file;
-            file.exceptions(std::ofstream::badbit);
-            file.open(filename, std::ios::binary | std::ios::in);
 
+    if (FileSys.fileExists(filename)) {
+        std::ifstream file(filename, std::ios::binary | std::ios::in);
+
+        if (file.good()) {
             // Read the number of commands from the history
             uint64_t version;
             file.read(reinterpret_cast<char*>(&version), sizeof(uint64_t));
@@ -94,8 +105,6 @@ void LuaConsole::initialize() {
                 int64_t nCommands;
                 file.read(reinterpret_cast<char*>(&nCommands), sizeof(int64_t));
 
-                // @TODO: Add an upper limit on the number of commands so that the history
-                // can't grow without bounds
                 for (int64_t i = 0; i < nCommands; ++i) {
                     int64_t length;
                     file.read(reinterpret_cast<char*>(&length), sizeof(int64_t));
@@ -105,16 +114,46 @@ void LuaConsole::initialize() {
                     _commandsHistory.emplace_back(std::string(tmp.begin(), tmp.end()));
                 }
             }
-            file.close();
         }
-    }
-    catch (std::exception& e) {
-        LERRORC("LuaConsole", e.what());
     }
 
     _commands = _commandsHistory;
     _commands.push_back("");
     _activeCommand = _commands.size() - 1;
+
+    _program = ghoul::opengl::ProgramObject::Build(
+        "Console",
+        "${SHADERS}/luaconsole.vert",
+        "${SHADERS}/luaconsole.frag"
+    );
+
+    GLfloat data[] = {
+        0.f, 0.f,
+        1.f, 1.f,
+        0.f, 1.f,
+
+        0.f, 0.f,
+        1.f, 0.f,
+        1.f, 1.f
+    };
+
+    glGenVertexArrays(1, &_vao);
+    glBindVertexArray(_vao);
+    glGenBuffers(1, &_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+        0,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        2 * sizeof(GLfloat),
+        reinterpret_cast<void*>(0)
+    );
+
+    glBindVertexArray(0);
 
     OsEng.parallelConnection().connectionEvent()->subscribe(
         "luaConsole",
@@ -127,26 +166,38 @@ void LuaConsole::initialize() {
 }
 
 void LuaConsole::deinitialize() {
-    std::string filename = FileSys.cacheManager()->cachedFilename(
+    const std::string filename = FileSys.cacheManager()->cachedFilename(
         HistoryFile,
         "",
         ghoul::filesystem::CacheManager::Persistent::Yes
     );
 
-    std::ofstream file(filename);
-
-    uint64_t version = CurrentVersion;
-    file.write(reinterpret_cast<const char*>(&version), sizeof(uint64_t));
-
-    int64_t nCommands = _commandsHistory.size();
-    file.write(reinterpret_cast<const char*>(&nCommands), sizeof(int64_t));
-
-    for (const std::string& s : _commandsHistory) {
-        int64_t length = s.length();
-        file.write(reinterpret_cast<const char*>(&length), sizeof(int64_t));
-        // We don't write the \0 at the end on purpose
-        file.write(s.c_str(), length);
+    // We want to limit the command history to a realistic value, so that it doesn't
+    // grow without bounds
+    if (_commandsHistory.size() > MaximumHistoryLength) {
+        _commandsHistory = std::vector<std::string>(
+            _commandsHistory.end() - MaximumHistoryLength,
+            _commandsHistory.end()
+        );
     }
+
+    std::ofstream file(filename, std::ios::binary);
+    if (file.good()) {
+        uint64_t version = CurrentVersion;
+        file.write(reinterpret_cast<const char*>(&version), sizeof(uint64_t));
+
+        int64_t nCommands = _commandsHistory.size();
+        file.write(reinterpret_cast<const char*>(&nCommands), sizeof(int64_t));
+
+        for (const std::string& s : _commandsHistory) {
+            int64_t length = s.length();
+            file.write(reinterpret_cast<const char*>(&length), sizeof(int64_t));
+            // We don't write the \0 at the end on purpose
+            file.write(s.c_str(), length);
+        }
+    }
+
+    _program = nullptr;
 
     OsEng.parallelConnection().connectionEvent()->unsubscribe("luaConsole");
 }
@@ -202,8 +253,6 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
 
     // Go to the next character
     if (key == Key::Right) {
-        //&& _inputPosition < _commands.at(_activeCommand).length())
-        //++_inputPosition;
         _inputPosition = std::min(
             _inputPosition + 1,
             _commands.at(_activeCommand).length()
@@ -259,34 +308,27 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     }
 
     if (key == Key::Enter) {
-        // SHIFT+ENTER == new line
-        if (modifierShift) {
-            addToCommand("\n");
-        }
-        // ENTER == run lua script
-        else {
-            std::string cmd = _commands.at(_activeCommand);
-            if (cmd != "") {
-                using RemoteScripting = scripting::ScriptEngine::RemoteScripting;
-                OsEng.scriptEngine().queueScript(
-                    cmd,
-                    _remoteScripting ? RemoteScripting::Yes : RemoteScripting::No
-                );
+        std::string cmd = _commands.at(_activeCommand);
+        if (cmd != "") {
+            using RemoteScripting = scripting::ScriptEngine::RemoteScripting;
+            OsEng.scriptEngine().queueScript(
+                cmd,
+                _remoteScripting ? RemoteScripting::Yes : RemoteScripting::No
+            );
                     
-                // Only add the current command to the history if it hasn't been
-                // executed before. We don't want two of the same commands in a row
-                if (_commandsHistory.empty() || (cmd != _commandsHistory.back())) {
-                    _commandsHistory.push_back(_commands.at(_activeCommand));
-                }
+            // Only add the current command to the history if it hasn't been
+            // executed before. We don't want two of the same commands in a row
+            if (_commandsHistory.empty() || (cmd != _commandsHistory.back())) {
+                _commandsHistory.push_back(_commands.at(_activeCommand));
             }
-                
-            // Some clean up after the execution of the command
-            _commands = _commandsHistory;
-            _commands.push_back("");
-            _activeCommand = _commands.size() - 1;
-            _inputPosition = 0;
-            _isVisible = false;
         }
+                
+        // Some clean up after the execution of the command
+        _commands = _commandsHistory;
+        _commands.push_back("");
+        _activeCommand = _commands.size() - 1;
+        _inputPosition = 0;
+        _isVisible = false;
         return true;
     }
 
@@ -421,97 +463,180 @@ void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
 }
 
 void LuaConsole::render() {
-    const float FontSize = 10.0f;
-
     if (!_isVisible) {
         return;
     }
-    
-    const int ySize = OsEng.renderEngine().fontResolution().y;
 
-    const float startY =
-        static_cast<float>(ySize) - 2.0f * FontSize - FontSize * 15.0f * 2.0f;;
+    if (_program->isDirty()) {
+        _program->rebuildFromFile();
+    }
+
+    // Render background
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+
+    _program->activate();
+
+    glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
+    const glm::mat4 projection = glm::ortho(
+        0.f,
+        static_cast<float>(res.x),
+        0.f,
+        static_cast<float>(res.y)
+    );
+
+    _program->setUniform("res", res);
+    _program->setUniform("width", _width);
+    _program->setUniform("height", _heightExtended);
+    _program->setUniform("ortho", projection);
+
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    _program->deactivate();
+
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+
+
+    // Render text
+    const float FontSize = 10.0f;
+    const int ySize = OsEng.renderEngine().fontResolution().y;
 
     const glm::vec4 red(1, 0, 0, 1);
     const glm::vec4 lightBlue(0.4, 0.4, 1, 1);
     const glm::vec4 green(0, 1, 0, 1);
     const glm::vec4 white(1, 1, 1, 1);
+    
     std::shared_ptr<ghoul::fontrendering::Font> font = OsEng.fontManager().font(
         "Mono", FontSize
     );
+    
+    glm::vec2 inputLocation = glm::vec2(
+        res.x / 2.f - _width * res.x / 2.f + FontSize / 2.f,
+        res.y - _heightExtended * res.y + FontSize / 2.f
+    );
 
-    using ghoul::fontrendering::RenderFont;
+    RenderFont(
+        *font, 
+        inputLocation,
+        white,
+        "> %s",
+        _commands.at(_activeCommand).c_str()
+    );
+
+    auto locationForRightJustifiedText = [&](const std::string& text) {
+        using namespace ghoul::fontrendering;
+        auto bbox = FontRenderer::defaultRenderer().boundingBox(*font, text.c_str());
+        return glm::vec2(
+            inputLocation.x + _width * res.x - bbox.boundingBox.x - 10.f,
+            inputLocation.y
+        );
+    };
 
     if (_remoteScripting) {
         int nClients = OsEng.parallelConnection().nConnections() - 1;
         if (nClients == 1) {
+            const glm::vec2 loc = locationForRightJustifiedText(
+                "Broadcasting script to 1 client"
+            );
+
             RenderFont(
                 *font,
-                glm::vec2(15.f, startY + 20.0f),
+                loc,
                 red,
                 "Broadcasting script to 1 client"
             );
-        } else {
+        }
+        else {
+            const glm::vec2 loc = locationForRightJustifiedText(
+                "Broadcasting script to " + std::to_string(nClients) + " clients"
+            );
+
             RenderFont(
                 *font,
-                glm::vec2(15.f, startY + 20.0f),
+                loc,
                 red,
                 ("Broadcasting script to " + std::to_string(nClients) + " clients").c_str()
             );
         }
-        RenderFont(*font, glm::vec2(15.f, startY), red, "$");
     }
     else {
         if (OsEng.parallelConnection().isHost()) {
+            const glm::vec2 loc = locationForRightJustifiedText(
+                "Local script execution"
+            );
+
             RenderFont(
                 *font,
-                glm::vec2(15.f, startY + 20.0f),
+                loc,
                 lightBlue,
                 "Local script execution"
             );
         }
-        RenderFont(*font, glm::vec2(15.f, startY), lightBlue, "$");
-    }
-    RenderFont(
-        *font,
-        glm::vec2(15.f + FontSize, startY),
-        white,
-        "%s",
-        _commands.at(_activeCommand).c_str()
-    );
-    
-    const size_t n = std::count(
-        _commands.at(_activeCommand).begin(),
-        _commands.at(_activeCommand).begin() + _inputPosition,
-        '\n'
-    );
-    size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
-    size_t linepos = _inputPosition;
-
-    if (n > 0) {
-        if (p == _inputPosition) {
-            p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition - 1);
-            if (p != std::string::npos) {
-                linepos -= p + 1;
-            }
-            else {
-                linepos = _inputPosition - 1;
-            }
-        }
-        else {
-            linepos -= p + 1;
-        }
     }
 
-    std::stringstream ss;
-    ss << "%" << linepos + 1 << "s";
-    RenderFont(
-        *font,
-        glm::vec2(15.f + FontSize * 0.5f, startY - (FontSize) * (n + 1) * 3.0f / 2.0f),
-        green,
-        ss.str().c_str(),
-        "^"
-    );
+
+
+
+
+
+
+    //const float startY =
+    //    static_cast<float>(ySize) - 2.0f * FontSize - FontSize * 15.0f * 2.0f;
+
+    //const glm::vec4 red(1, 0, 0, 1);
+    //const glm::vec4 lightBlue(0.4, 0.4, 1, 1);
+    //const glm::vec4 green(0, 1, 0, 1);
+    //const glm::vec4 white(1, 1, 1, 1);
+    //std::shared_ptr<ghoul::fontrendering::Font> font = OsEng.fontManager().font(
+    //    "Mono", FontSize
+    //);
+
+    //using ghoul::fontrendering::RenderFont;
+
+
+    //RenderFont(
+    //    *font,
+    //    glm::vec2(15.f + FontSize, startY),
+    //    white,
+    //    "%s",
+    //    _commands.at(_activeCommand).c_str()
+    //);
+    //
+    //const size_t n = std::count(
+    //    _commands.at(_activeCommand).begin(),
+    //    _commands.at(_activeCommand).begin() + _inputPosition,
+    //    '\n'
+    //);
+    //size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
+    //size_t linepos = _inputPosition;
+
+    //if (n > 0) {
+    //    if (p == _inputPosition) {
+    //        p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition - 1);
+    //        if (p != std::string::npos) {
+    //            linepos -= p + 1;
+    //        }
+    //        else {
+    //            linepos = _inputPosition - 1;
+    //        }
+    //    }
+    //    else {
+    //        linepos -= p + 1;
+    //    }
+    //}
+
+    //std::stringstream ss;
+    //ss << "%" << linepos + 1 << "s";
+    ////RenderFont(
+    ////    *font, 
+    ////    glm::vec2(15.f + FontSize * 0.5f, startY - (FontSize) * (n + 1) * 3.0f / 2.0f),
+    ////    green,
+    ////    ss.str().c_str(),
+    ////    "^"
+    ////);
 }
 
 void LuaConsole::addToCommand(std::string c) {

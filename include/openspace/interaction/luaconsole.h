@@ -34,6 +34,12 @@
 #include <string>
 #include <vector>
 
+namespace ghoul {
+namespace opengl {
+    class ProgramObject;
+} // namespace opengl
+} // namespace ghoul
+
 namespace openspace {
 
 class LuaConsole : public properties::PropertyOwner {
@@ -55,6 +61,10 @@ private:
     properties::BoolProperty _isVisible;
     properties::BoolProperty _remoteScripting;
 
+    properties::FloatProperty _width;
+    properties::FloatProperty _heightRetracted;
+    properties::FloatProperty _heightExtended;
+
     size_t _inputPosition;
     std::vector<std::string> _commandsHistory;
     size_t _activeCommand;
@@ -65,6 +75,11 @@ private:
         bool hasInitialValue;
         std::string initialValue;
     } _autoCompleteInfo;
+
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    GLuint _vao;
+    GLuint _vbo;
 };
 
 } // namespace openspace
