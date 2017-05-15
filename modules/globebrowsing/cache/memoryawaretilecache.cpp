@@ -140,6 +140,34 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
     return;
 }
 
+size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {
+    size_t dataSize = 0;
+    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
+            it != _textureContainerMap.cend(); it++)
+    {
+        const TextureContainer& textureContainer = *it->second.first;
+        size_t bytesPerTexture = textureContainer.tileTextureInitData().totalNumBytes();
+        dataSize += bytesPerTexture * textureContainer.size();
+    }
+    return dataSize;
+}
+
+size_t MemoryAwareTileCache::getCPUAllocatedDataSize() const {
+    size_t dataSize = 0;
+    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
+            it != _textureContainerMap.cend(); it++)
+    {
+        const TextureContainer& textureContainer = *it->second.first;
+        const TileTextureInitData& initData = textureContainer.tileTextureInitData();
+        if (initData.shouldAllocateDataOnCPU()) {
+            size_t bytesPerTexture = initData.totalNumBytes();
+            dataSize += bytesPerTexture * textureContainer.size();
+        }
+    }
+    return dataSize;
+}
+
+
 /*
 void MemoryAwareTileCache::setMaximumSize(size_t maximumSize) {
     std::lock_guard<std::mutex> guard(_mutexLock);

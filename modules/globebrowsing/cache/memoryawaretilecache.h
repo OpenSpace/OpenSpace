@@ -95,6 +95,9 @@ public:
     //void put(ProviderTileKey key, Tile tile);
     void createTileAndPut(ProviderTileKey key, std::shared_ptr<RawTile> rawTile);
   
+    size_t getGPUAllocatedDataSize() const;
+    size_t getCPUAllocatedDataSize() const;
+
     //void setMaximumSize(size_t maximumSize);
 
     static MemoryAwareTileCache& ref();
@@ -135,6 +138,9 @@ private:
             }
             return texture;
         }
+
+        const TileTextureInitData& tileTextureInitData() const { return _initData; };
+        size_t size() const { return _textures.size(); };
     private:
         std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
         size_t _freeTexture;
