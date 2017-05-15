@@ -62,8 +62,7 @@ private:
     properties::BoolProperty _remoteScripting;
 
     properties::FloatProperty _width;
-    properties::FloatProperty _heightRetracted;
-    properties::FloatProperty _heightExtended;
+    //properties::FloatProperty _height;
 
     size_t _inputPosition;
     std::vector<std::string> _commandsHistory;
@@ -76,6 +75,7 @@ private:
         std::string initialValue;
     } _autoCompleteInfo;
 
+    float _currentHeight;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     GLuint _vao;

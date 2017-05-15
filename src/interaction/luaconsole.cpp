@@ -66,18 +66,17 @@ LuaConsole::LuaConsole()
     , _isVisible("isVisible", "Is Visible", false)
     , _remoteScripting("remoteScripting", "Remote scripting", false)
     , _width("width", "Width", 0.75f, 0.f, 1.f)
-    , _heightRetracted("heightRetracted", "Height when retracted", 0.04f, 0.f, 1.f)
-    , _heightExtended("heightExtended", "Height when extended", 0.5f, 0.f, 1.f)
+    //, _height("height", "Height", 0.04f, 0.f, 1.f)
     , _inputPosition(0)
     , _activeCommand(0)
     , _autoCompleteInfo({NoAutoComplete, false, ""})
+    , _currentHeight(0.f)
 {
     addProperty(_isVisible);
     addProperty(_remoteScripting);
 
+    //addProperty(_height);
     addProperty(_width);
-    addProperty(_heightRetracted);
-    addProperty(_heightExtended);
 }
 
 void LuaConsole::initialize() {
@@ -463,13 +462,22 @@ void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
 }
 
 void LuaConsole::render() {
+    static const float FontSize = 13.0f;
+    
     if (!_isVisible) {
+        _currentHeight = 0.f;
         return;
     }
 
     if (_program->isDirty()) {
         _program->rebuildFromFile();
     }
+
+    glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
+    const float frametime = static_cast<float>(OsEng.windowWrapper().deltaTime());
+    static const float Delta = 0.15f;
+    _currentHeight = std::min(_currentHeight + Delta * frametime, FontSize * 2.5f / res.y);
+
 
     // Render background
     glDisable(GL_CULL_FACE);
@@ -479,7 +487,6 @@ void LuaConsole::render() {
 
     _program->activate();
 
-    glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
     const glm::mat4 projection = glm::ortho(
         0.f,
         static_cast<float>(res.x),
@@ -489,7 +496,7 @@ void LuaConsole::render() {
 
     _program->setUniform("res", res);
     _program->setUniform("width", _width);
-    _program->setUniform("height", _heightExtended);
+    _program->setUniform("height", _currentHeight);
     _program->setUniform("ortho", projection);
 
     glBindVertexArray(_vao);
@@ -501,7 +508,6 @@ void LuaConsole::render() {
 
 
     // Render text
-    const float FontSize = 10.0f;
     const int ySize = OsEng.renderEngine().fontResolution().y;
 
     const glm::vec4 red(1, 0, 0, 1);
@@ -515,7 +521,7 @@ void LuaConsole::render() {
     
     glm::vec2 inputLocation = glm::vec2(
         res.x / 2.f - _width * res.x / 2.f + FontSize / 2.f,
-        res.y - _heightExtended * res.y + FontSize / 2.f
+        res.y - _currentHeight * res.y + FontSize / 2.f
     );
 
     RenderFont(
