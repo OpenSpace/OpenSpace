@@ -22,37 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LRU_THREAD_POOL___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LRU_THREAD_POOL___H__
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/cache/lrucache.h>
+
+#include <condition_variable>
+#include <functional>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
+
+// Implementatin based on http://progsch.net/wordpress/?p=81
 
 namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace globebrowsing {    
 
-class TileProviderByLevel : public TileProvider {
-public:
-    TileProviderByLevel(const ghoul::Dictionary& dictionary);
-    TileProviderByLevel(const std::string& imagePath);
-    virtual ~TileProviderByLevel() = default;
+template<typename KeyType>
+class LRUThreadPool;
 
-    virtual Tile getTile(const TileIndex& tileIndex) override;
-    virtual Tile::Status getTileStatus(const TileIndex& index) override;
-    virtual TileDepthTransform depthTransform() override;
-    virtual void update() override;
-    virtual void reset() override;
-    virtual int maxLevel() override;
+template<typename KeyType>
+class LRUThreadPoolWorker {
+public: 
+    LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool);
+    void operator()();
 private:
-    inline int providerIndex(int level) const;
-    inline TileProvider* levelProvider(int level) const;
-
-    std::vector<int> _providerIndices;
-    std::vector<std::shared_ptr<TileProvider>> _levelTileProviders;
+    LRUThreadPool<KeyType>& _pool;
 };
 
-} // namespace tileprovider
+/**
+ * The <code>LRUThreadPool</code> will only enqueue a certain number of tasks. The most
+ * recently enqueued task is the one that will be executed first. This class is templated
+ * on a key type which used as an identifier to determine wheter or not a task with the
+ * given key has been enqueued or not. This means that a task can be enqueued several
+ * times. The user must ensure that an enqueued task with a given key should be
+ * equal in outcome to a second enqueued task with the same key. This is because a second
+ * enqueued task with the same key will simply be bumped and prioritised before other
+ * enqueued tasks. The given task will be ignored.
+ */
+template<typename KeyType>
+class LRUThreadPool {
+public:
+    LRUThreadPool(size_t numThreads, size_t queueSize);
+    ~LRUThreadPool();
+
+    void enqueue(std::function<void()> f, KeyType key);
+    bool touch(KeyType key);
+    std::vector<KeyType> getUnqueuedTasksKeys();
+    void clearEnqueuedTasks();
+
+private:
+    friend class LRUThreadPoolWorker<KeyType>;
+
+    std::vector<std::thread> _workers;
+    cache::LRUCache<KeyType, std::function<void()>> _queuedTasks;
+    std::vector<KeyType> _unqueuedTasks;
+    std::mutex _queueMutex;
+    std::condition_variable _condition;
+
+    bool _stop;
+};
+
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
+#include "lruthreadpool.inl"
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LRU_THREAD_POOL___H__

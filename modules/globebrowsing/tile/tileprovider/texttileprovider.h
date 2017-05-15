@@ -51,16 +51,15 @@ public:
      * Default constructor with default values for texture and font size
      */
     TextTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
-    virtual ~TextTileProvider();
+    virtual ~TextTileProvider() override;
 
     // The TileProvider interface below is implemented in this class
-    virtual Tile getTile(const TileIndex& tileIndex);
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& index);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
+    virtual Tile getTile(const TileIndex& tileIndex) override;
+    virtual Tile::Status getTileStatus(const TileIndex& index) override;
+    virtual TileDepthTransform depthTransform() override;
+    virtual void update() override;
+    virtual void reset() override;
+    virtual int maxLevel() override;
 
     /**
      * Returns the tile which will be used to draw text onto. 

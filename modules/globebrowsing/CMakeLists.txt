@@ -31,6 +31,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawarelrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawarelrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/texturecontainer.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.h
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.h
@@ -61,12 +62,19 @@ set(HEADER_FILES
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentqueue.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffercontainer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffercontainer.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/lruthreadpool.inl
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/chunkrenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/layershadermanager.h
@@ -92,14 +100,11 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/textureformat.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiledepthtransform.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileuvtransform.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/loadjob.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/presentationslideprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.h
@@ -110,6 +115,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbyindex.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbylevel.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiletextureinitdata.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/rawtiledatareader.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/gdalrawtiledatareader.h
@@ -121,6 +127,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/cache/texturecontainer.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunk.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/chunk/chunknode.cpp
@@ -145,6 +152,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/meshes/trianglesoup.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/threadpool.cpp
 
@@ -169,12 +177,10 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtile.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tile.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilediskcache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tilemetadata.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileselector.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/diskcachedtileloadjob.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tile/loadjob/tileloadjob.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileloadjob.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/cachingtileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/presentationslideprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/singleimageprovider.cpp
@@ -185,6 +191,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbyindex.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/tileprovider/tileproviderbylevel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tile/tiletextureinitdata.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/rawtiledatareader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/rawtiledatareader/gdalrawtiledatareader.cpp

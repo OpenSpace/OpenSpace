@@ -69,10 +69,6 @@ Tile TextTileProvider::getTile(const TileIndex& tileIndex) {
     return _tileCache.get(key);
 }
 
-Tile TextTileProvider::getDefaultTile() {
-    return Tile::TileUnavailable;
-}
-
 Tile::Status TextTileProvider::getTileStatus(const TileIndex& index) {
     return Tile::Status::OK;
 }

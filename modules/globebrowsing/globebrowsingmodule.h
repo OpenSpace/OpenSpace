@@ -40,7 +40,6 @@ public:
 protected:
     void internalInitialize() override;
 private:
-    properties::IntProperty _openSpaceMaximumTileCacheSize;
     properties::IntProperty _tileCacheSizeCPU;
     properties::IntProperty _tileCacheSizeGPU;
     properties::TriggerProperty _clearTileCache;

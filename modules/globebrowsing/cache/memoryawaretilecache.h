@@ -25,14 +25,14 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
 
+#include <modules/globebrowsing/cache/memoryawarelrucache.h>
+#include <modules/globebrowsing/cache/texturecontainer.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/cache/memoryawarelrucache.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
 #include <memory>
-#include <mutex>
 #include <vector>
 #include <unordered_map>
 
@@ -80,78 +80,31 @@ struct ProviderTileHasher {
     }
 };
 
-
 /**
  * Singleton class used to cache tiles for all <code>CachingTileProvider</code>s.
  */
 class MemoryAwareTileCache {
 public:
+    
     static void create();
     static void destroy();
 
     void clear();
     bool exist(ProviderTileKey key) const;
     Tile get(ProviderTileKey key);
-    //void put(ProviderTileKey key, Tile tile);
     void createTileAndPut(ProviderTileKey key, std::shared_ptr<RawTile> rawTile);
   
     size_t getGPUAllocatedDataSize() const;
     size_t getCPUAllocatedDataSize() const;
 
-    //void setMaximumSize(size_t maximumSize);
-
     static MemoryAwareTileCache& ref();
 
 private:
-    class TextureContainer
-    {
-    public:
-        TextureContainer(TileTextureInitData initData, size_t numTextures)
-            : _initData(initData)
-            , _freeTexture(0)
-        {
-            ghoul::opengl::Texture::AllocateData allocate =
-                _initData.shouldAllocateDataOnCPU() ? ghoul::opengl::Texture::AllocateData::Yes : ghoul::opengl::Texture::AllocateData::No;
-            for (size_t i = 0; i < numTextures; ++i)
-            {
-                _textures.push_back(std::make_unique<ghoul::opengl::Texture>(
-                    _initData.dimensionsWithPadding(),
-                    _initData.ghoulTextureFormat(),
-                    _initData.glTextureFormat(),
-                    _initData.glType(),
-                    ghoul::opengl::Texture::FilterMode::Linear,
-                    ghoul::opengl::Texture::WrappingMode::ClampToEdge,
-                    allocate
-                ));
-                _textures.back()->setDataOwnership(
-                    ghoul::opengl::Texture::TakeOwnership::Yes);
-                _textures.back()->uploadTexture();
-				_textures.back()->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-            }
-        }
-        ~TextureContainer() = default;
-        ghoul::opengl::Texture* getTextureIfFree() {
-            ghoul::opengl::Texture* texture = nullptr;
-            if (_freeTexture < _textures.size()) {
-                 texture = _textures[_freeTexture].get();
-                _freeTexture++;
-            }
-            return texture;
-        }
-
-        const TileTextureInitData& tileTextureInitData() const { return _initData; };
-        size_t size() const { return _textures.size(); };
-    private:
-        std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
-        size_t _freeTexture;
-        const TileTextureInitData _initData;
-    };
 
     MemoryAwareTileCache();
     ~MemoryAwareTileCache() = default;
     
     static MemoryAwareTileCache* _singleton;
-    /// Tiles are saved in an LRU cache
     using TileCache = MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher>;
     using TextureContainerTileCache =
         std::pair<std::unique_ptr<TextureContainer>, std::unique_ptr<TileCache>>;
@@ -159,8 +112,6 @@ private:
         TextureContainerTileCache>;
 
     TextureContainerMap _textureContainerMap;
-    
-    static std::mutex _mutexLock;
 };
 
 } // namespace cache

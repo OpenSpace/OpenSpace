@@ -62,50 +62,5 @@ size_t ConcurrentJobManager<P>::numFinishedJobs() const {
     return _finishedJobs.size();
 }
 
-
-
-template<typename P, typename KeyType>
-PrioritizingConcurrentJobManager<P, KeyType>::PrioritizingConcurrentJobManager(
-    std::shared_ptr<LRUThreadPool<KeyType>> pool)
-    : _threadPool(pool)
-{ }
-
-template<typename P, typename KeyType>
-void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Job<P>> job,
-    KeyType key)
-{
-    _threadPool->enqueue([this, job]() {
-        job->execute();
-        _finishedJobs.push(job);
-    }, key);
-}
-
-template<typename P, typename KeyType>
-std::vector<KeyType>
-PrioritizingConcurrentJobManager<P, KeyType>::getKeysToUnfinishedJobs() {
-    return _threadPool->getUnqueuedTasksKeys();
-}
-
-template<typename P, typename KeyType>
-bool PrioritizingConcurrentJobManager<P, KeyType>::touch(KeyType key) {
-    return _threadPool->touch(key);
-}
-
-template<typename P, typename KeyType>
-void PrioritizingConcurrentJobManager<P, KeyType>::clearEnqueuedJobs() {
-    _threadPool->clearEnqueuedTasks();
-}
-
-template<typename P, typename KeyType>
-std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishedJob() {
-    ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
-    return _finishedJobs.pop();
-}
-
-template<typename P, typename KeyType>
-size_t PrioritizingConcurrentJobManager<P, KeyType>::numFinishedJobs() const {
-    return _finishedJobs.size();
-}
-
 } // namespace globebrowsing
 } // namespace openspace

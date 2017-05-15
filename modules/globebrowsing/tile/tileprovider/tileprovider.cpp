@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
 #include <modules/globebrowsing/tile/tileselector.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 #include <openspace/util/factorymanager.h>
 
@@ -55,6 +56,7 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(const ghoul::Di
 TileProvider::TileProvider()
     : properties::PropertyOwner("tileProvider")
     , _initialized(false)
+    , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
 {
     initialize();
 }
@@ -62,6 +64,7 @@ TileProvider::TileProvider()
 TileProvider::TileProvider(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner("tileProvider")
     , _initialized(false)
+    , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
 {
     initialize();
 };
@@ -132,11 +135,31 @@ ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize){
             }
         }
     }
-    return std::move(chunkTilePile);
+    return chunkTilePile;
 }
 
 bool TileProvider::initialize() {
     ghoul_assert(!_initialized, "TileProvider can only be initialized once.");
+
+    using namespace ghoul::opengl;
+        
+    // Create pixel data
+    TileTextureInitData initData(8, 8, GL_UNSIGNED_BYTE, Texture::Format::RGBA,
+        TileTextureInitData::ShouldAllocateDataOnCPU::Yes);
+    int numBytes = initData.totalNumBytes();
+    char* pixels = new char[numBytes];
+    memset(pixels, numBytes, 0);
+
+    // Create ghoul texture
+    _defaultTileTexture = std::make_unique<Texture>(initData.dimensionsWithPadding());
+    _defaultTileTexture->setDataOwnership(Texture::TakeOwnership::Yes);
+    _defaultTileTexture->setPixelData(pixels);
+    _defaultTileTexture->uploadTexture();
+    _defaultTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+
+    // Create tile
+    _defaultTile = Tile(_defaultTileTexture.get(), nullptr, Tile::Status::OK);
+
     _uniqueIdentifier = _numTileProviders;
     _numTileProviders++;
     if (_numTileProviders == UINT_MAX) {
@@ -151,6 +174,10 @@ bool TileProvider::initialize() {
 unsigned int TileProvider::uniqueIdentifier() const {
     ghoul_assert(_initialized, "TileProvider was not initialized.");
     return _uniqueIdentifier;
+}
+
+Tile TileProvider::getDefaultTile() const {
+    return _defaultTile;
 }
 
 } // namespace tileprovider

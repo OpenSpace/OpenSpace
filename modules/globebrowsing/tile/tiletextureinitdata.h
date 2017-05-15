@@ -22,54 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__
 
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
+
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
 
-TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-    const TileIndex& tileIndex)
-    : _rawTileDataReader(rawTileDataReader)
-    , _chunkIndex(tileIndex)
-    , _pboMappedDataDestination(nullptr)
-    , _hasOwnershipOfData(false)
-{ }
+/**
+ * All information needed to create a texture used for a Tile.
+ */
+class TileTextureInitData
+{
+public:
+    using HashKey = unsigned long long;
+    using ShouldAllocateDataOnCPU = ghoul::Boolean;
+    using Format = ghoul::opengl::Texture::Format;
 
+    TileTextureInitData(size_t width, size_t height, GLuint glType, Format textureFormat,
+        ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
 
-TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-    const TileIndex& tileIndex, char* pboDataPtr)
-    : _rawTileDataReader(rawTileDataReader)
-    , _chunkIndex(tileIndex)
-    , _pboMappedDataDestination(pboDataPtr)
-    , _hasOwnershipOfData(false)
-{ }
+    TileTextureInitData(const TileTextureInitData& original);
 
-TileLoadJob::~TileLoadJob() {
-	if (_hasOwnershipOfData) {
-		ghoul_assert(_rawTile->imageData, "Image data must exist");
-		delete [] _rawTile->imageData;
-	}
-}
+    ~TileTextureInitData() = default;
 
-void TileLoadJob::execute() {
-    size_t numBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
-    char* dataPtr = nullptr;
-    if (_rawTileDataReader->tileTextureInitData().shouldAllocateDataOnCPU() ||
-    	!_pboMappedDataDestination)
-    {
-    	dataPtr = new char[numBytes];
-    	_hasOwnershipOfData = true;
-    }
-    _rawTile = _rawTileDataReader->readTileData(
-    	_chunkIndex, dataPtr, _pboMappedDataDestination);
-}
+    glm::ivec3 dimensionsWithPadding() const;
+    glm::ivec3 dimensionsWithoutPadding() const;
+    size_t nRasters() const;
+    size_t bytesPerDatum() const;
+    size_t bytesPerPixel() const;
+    size_t bytesPerLine() const;
+    size_t totalNumBytes() const;
+    GLuint glType() const;
+    Format ghoulTextureFormat() const;
+    GLint glTextureFormat() const;
+    bool shouldAllocateDataOnCPU() const;
+    HashKey hashKey() const;
 
-std::shared_ptr<RawTile> TileLoadJob::product() {
-	_hasOwnershipOfData = false;
-    return _rawTile;
-}
+    const static glm::ivec2 tilePixelStartOffset;
+    const static glm::ivec2 tilePixelSizeDifference;
+
+private:
+    void calculateHashKey();
+    unsigned int getUniqueIdFromTextureFormat(Format textureFormat) const;
+
+    HashKey _hashKey;
+    glm::ivec3 _dimensionsWithPadding;
+    glm::ivec3 _dimensionsWithoutPadding;
+    GLuint _glType;
+    Format _ghoulTextureFormat;
+    GLint _glTextureFormat;
+    size_t _nRasters;
+    size_t _bytesPerDatum;
+    size_t _bytesPerPixel;
+    size_t _bytesPerLine;
+    size_t _totalNumBytes;
+    bool _shouldAllocateDataOnCPU;
+};
 
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__

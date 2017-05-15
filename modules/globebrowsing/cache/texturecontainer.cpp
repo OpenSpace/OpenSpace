@@ -22,24 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LOADJOB___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LOADJOB___H__
+#include <modules/globebrowsing/cache/texturecontainer.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
+using namespace openspace::globebrowsing::cache;
 
-#include <memory>
+TextureContainer::TextureContainer(TileTextureInitData initData, size_t numTextures)
+    : _initData(initData)
+    , _freeTexture(0)
+{
+    ghoul::opengl::Texture::AllocateData allocate =
+        _initData.shouldAllocateDataOnCPU() ?
+        ghoul::opengl::Texture::AllocateData::Yes :
+        ghoul::opengl::Texture::AllocateData::No;
+    for (size_t i = 0; i < numTextures; ++i)
+    {
+        _textures.push_back(std::make_unique<ghoul::opengl::Texture>(
+            _initData.dimensionsWithPadding(),
+            _initData.ghoulTextureFormat(),
+            _initData.glTextureFormat(),
+            _initData.glType(),
+            ghoul::opengl::Texture::FilterMode::Linear,
+            ghoul::opengl::Texture::WrappingMode::ClampToEdge,
+            allocate
+        ));
+        _textures.back()->setDataOwnership(
+            ghoul::opengl::Texture::TakeOwnership::Yes);
+        _textures.back()->uploadTexture();
+        _textures.back()->setFilter(
+            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+    }
+}
 
-namespace openspace {
-namespace globebrowsing {
+ghoul::opengl::Texture* TextureContainer::getTextureIfFree() {
+    ghoul::opengl::Texture* texture = nullptr;
+    if (_freeTexture < _textures.size()) {
+         texture = _textures[_freeTexture].get();
+        _freeTexture++;
+    }
+    return texture;
+}
 
-struct RawTile;
-
-struct LoadJob : public Job<RawTile> {
-    virtual void execute() = 0;
-    virtual std::shared_ptr<RawTile> product() = 0;
+const openspace::globebrowsing::TileTextureInitData& TextureContainer::tileTextureInitData() const {
+    return _initData;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LOADJOB___H__
+size_t TextureContainer::size() const {
+    return _textures.size();
+};

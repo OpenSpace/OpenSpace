@@ -24,82 +24,23 @@
 
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
 
-#include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
+#include <modules/globebrowsing/other/lruthreadpool.h>
+
+#include <modules/globebrowsing/tile/tileloadjob.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
-#include <modules/globebrowsing/tile/tilediskcache.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 #include <ghoul/logging/logmanager.h>
 
 namespace openspace {
-
-namespace {
-    const char* _loggerCat = "PixelBuffer";
-}
-
-PixelBuffer::PixelBuffer(size_t numBytes, Usage usage)
-    : _numBytes(numBytes)
-    , _usage(usage)
-	, _isMapped(false)
-{
-    glGenBuffers(1, &_id);
-    bind();
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, _numBytes, 0, static_cast<GLenum>(_usage));
-    unbind();
-}
-
-PixelBuffer::~PixelBuffer() {
-    glDeleteBuffers(1, &_id);
-}
-
-void* PixelBuffer::mapBuffer(GLenum access) {
-    void* dataPtr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, access);
-    _isMapped = dataPtr ? true : false;
-    return dataPtr;
-}
-
-void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access) {
-    void* dataPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset, length, access);
-    _isMapped = dataPtr ? true : false;
-    return dataPtr;
-}
-
-bool PixelBuffer::unMapBuffer() {
-    bool success = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    if (!success) {
-        LERROR("Unable to unmap pixel buffer, data may be corrupt!");
-    }
-    _isMapped = false;
-    return success;
-}
-
-void PixelBuffer::bind() {
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _id);
-}
-
-void PixelBuffer::unbind() {
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-}
-
-bool PixelBuffer::isMapped() {
-    return _isMapped;
-}
-
-PixelBuffer::operator GLuint() {
-    return _id;
-}
-
-
-
-
-
 namespace globebrowsing {
 
 AsyncTileDataProvider::AsyncTileDataProvider(
     const std::shared_ptr<RawTileDataReader> rawTileDataReader,
-    std::shared_ptr<LRUThreadPool<TileIndex::TileHashKey>> pool,
     UsePBO usePbo)
     : _rawTileDataReader(rawTileDataReader)
-    , _concurrentJobManager(pool)
+    , _concurrentJobManager(
+        std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 10))
     , _pboContainer(nullptr)
     , _shouldReset(false)
 {
@@ -153,12 +94,13 @@ std::vector<std::shared_ptr<RawTile>> AsyncTileDataProvider::getRawTiles() {
 
 std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
     if (_concurrentJobManager.numFinishedJobs() > 0) {
-
         // Now the tile load job looses ownerwhip of the data pointer
         std::shared_ptr<RawTile> product =
             _concurrentJobManager.popFinishedJob()->product();
       
         TileIndex::TileHashKey key = product->tileIndex.hashKey();
+        // No longer enqueued. Remove from set of enqueued tiles
+        _enqueuedTileRequests.erase(key);
         // Pbo is still mapped. Set the id for the raw tile
         if (_pboContainer) {
             product->pbo = _pboContainer->idOfMappedBuffer(key);
@@ -167,10 +109,11 @@ std::shared_ptr<RawTile> AsyncTileDataProvider::popFinishedRawTile() {
         }
         else {
             product->pbo = 0;
+            if (product->error != RawTile::ReadError::None) {
+                delete [] product->imageData;
+                return nullptr;
+            }
         }
-        
-        // No longer enqueued. Remove from set of enqueued tiles
-        _enqueuedTileRequests.erase(key);
 
         return product;
     }
@@ -195,6 +138,7 @@ void AsyncTileDataProvider::endUnfinishedJobs() {
         if (_pboContainer) {
             _pboContainer->unMapBuffer(unfinishedJob);
         }
+        // When erasing the job before
         _enqueuedTileRequests.erase(unfinishedJob);
     }
 }
@@ -206,7 +150,8 @@ void AsyncTileDataProvider::update() {
     if (_shouldReset && _enqueuedTileRequests.size() == 0) {
         while (_concurrentJobManager.numFinishedJobs() > 0) {
             // When calling product, the job releases ownership of the data and it must
-            // be deleted if not using PBO
+            // be deleted if not using PBO. If PBO is used, the imageData pointer is
+            // GPU DMA and should not be deleted.
             std::shared_ptr<RawTile> product =
                 _concurrentJobManager.popFinishedJob()->product();
             if (_pboContainer) {

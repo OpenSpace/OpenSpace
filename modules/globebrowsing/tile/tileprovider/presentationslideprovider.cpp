@@ -75,10 +75,6 @@ Tile PresentationSlideProvider::getTile(const TileIndex& tileIndex) {
         
 }
 
-Tile PresentationSlideProvider::getDefaultTile() {
-    return _defaultProvider->getDefaultTile();
-}
-
 Tile::Status PresentationSlideProvider::getTileStatus(const TileIndex& tileIndex) {
     if(tileIndex == _tileIndex){
         return slideProvider()->getTileStatus(tileIndex);

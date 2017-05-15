@@ -22,41 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__
-
-#include <ghoul/filesystem/directory.h>
-#include <ghoul/filesystem/file.h>
-
-#include <memory>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-struct TileIndex;
-struct RawTile;
+template<typename P, typename KeyType>
+PrioritizingConcurrentJobManager<P, KeyType>::PrioritizingConcurrentJobManager(
+    std::shared_ptr<LRUThreadPool<KeyType>> pool)
+    : _threadPool(pool)
+{ }
 
-class TileDiskCache {
-public:
-    TileDiskCache(const std::string& name);
-        
-    std::shared_ptr<RawTile> get(const TileIndex& tileIndex);
-    bool has(const TileIndex& tileIndex) const;
-    bool put(const TileIndex& tileIndex, std::shared_ptr<RawTile> rawTile);
-        
-    static const std::string CACHE_ROOT;
-    
-private:
-    const std::string _name;
-        
-    ghoul::filesystem::Directory _cacheDir;
-        
-    std::string getFilePath(const TileIndex& tileIndex) const;
-    ghoul::filesystem::File getMetaDataFile(const TileIndex& tileIndex) const;
-    ghoul::filesystem::File getDataFile(const TileIndex& tileIndex) const;
-};
+template<typename P, typename KeyType>
+void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Job<P>> job,
+    KeyType key)
+{
+    _threadPool->enqueue([this, job]() {
+        job->execute();
+        _finishedJobs.push(job);
+    }, key);
+}
+
+template<typename P, typename KeyType>
+std::vector<KeyType>
+PrioritizingConcurrentJobManager<P, KeyType>::getKeysToUnfinishedJobs() {
+    return _threadPool->getUnqueuedTasksKeys();
+}
+
+template<typename P, typename KeyType>
+bool PrioritizingConcurrentJobManager<P, KeyType>::touch(KeyType key) {
+    return _threadPool->touch(key);
+}
+
+template<typename P, typename KeyType>
+void PrioritizingConcurrentJobManager<P, KeyType>::clearEnqueuedJobs() {
+    _threadPool->clearEnqueuedTasks();
+}
+
+template<typename P, typename KeyType>
+std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishedJob() {
+    ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
+    return _finishedJobs.pop();
+}
+
+template<typename P, typename KeyType>
+size_t PrioritizingConcurrentJobManager<P, KeyType>::numFinishedJobs() const {
+    return _finishedJobs.size();
+}
 
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__

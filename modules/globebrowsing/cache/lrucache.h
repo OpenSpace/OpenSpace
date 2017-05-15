@@ -55,7 +55,15 @@ public:
     bool touch(const KeyType& key);
     bool isEmpty() const;
     ValueType get(const KeyType& key);
+
+    /**
+     * Pops the front of the queue.
+     */
     ValueType popMRU();
+    
+    /**
+     * Pops the back of the queue.
+     */
     ValueType popLRU();
     size_t size() const;
 

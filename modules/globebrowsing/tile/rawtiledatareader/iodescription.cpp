@@ -66,9 +66,5 @@ IODescription IODescription::cut(PixelRegion::Side side, int pos) {
     return whatCameOff;
 }
 
-const glm::ivec2 TileTextureInitData::tilePixelStartOffset = glm::ivec2(-2);
-const glm::ivec2 TileTextureInitData::tilePixelSizeDifference = glm::ivec2(4);
-
-
 } // namespace globebrowsing
 } // namespace openspace

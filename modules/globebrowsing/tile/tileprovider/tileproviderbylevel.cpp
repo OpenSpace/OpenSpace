@@ -106,10 +106,6 @@ Tile TileProviderByLevel::getTile(const TileIndex& tileIndex) {
     return levelProvider(tileIndex.level)->getTile(tileIndex);
 }
 
-Tile TileProviderByLevel::getDefaultTile() {
-    return levelProvider(0)->getDefaultTile();
-}
-
 Tile::Status TileProviderByLevel::getTileStatus(const TileIndex& index) {
     return levelProvider(index.level)->getTileStatus(index);
 }

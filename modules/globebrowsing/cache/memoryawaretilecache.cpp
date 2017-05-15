@@ -33,33 +33,27 @@ namespace globebrowsing {
 namespace cache {
 
 MemoryAwareTileCache* MemoryAwareTileCache::_singleton = nullptr;
-std::mutex MemoryAwareTileCache::_mutexLock;
 
 void MemoryAwareTileCache::create() {
-    std::lock_guard<std::mutex> guard(_mutexLock);
     _singleton = new MemoryAwareTileCache();
 }
 
 void MemoryAwareTileCache::destroy() {
-    std::lock_guard<std::mutex> guard(_mutexLock);
     delete _singleton;
 }
 
 MemoryAwareTileCache& MemoryAwareTileCache::ref() {
-    std::lock_guard<std::mutex> guard(_mutexLock);
     ghoul_assert(_singleton, "MemoryAwareTileCache not created");
     return *_singleton;
 }
 
 void MemoryAwareTileCache::clear() {
-    std::lock_guard<std::mutex> guard(_mutexLock);
     for (TextureContainerMap::iterator it = _textureContainerMap.begin(); it != _textureContainerMap.end(); it++) {
         it->second.second->clear();
     }
 }
 
 bool MemoryAwareTileCache::exist(ProviderTileKey key) const {
-    std::lock_guard<std::mutex> guard(_mutexLock);
     for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin(); it != _textureContainerMap.cend(); it++) {
         if(it->second.second->exist(key)) {
             return true;
@@ -69,7 +63,6 @@ bool MemoryAwareTileCache::exist(ProviderTileKey key) const {
 }
 
 Tile MemoryAwareTileCache::get(ProviderTileKey key) {
-    std::lock_guard<std::mutex> guard(_mutexLock);
     for (TextureContainerMap::iterator it = _textureContainerMap.begin(); it != _textureContainerMap.end(); it++) {
         if(it->second.second->exist(key)) {
             return it->second.second->get(key);
@@ -77,12 +70,7 @@ Tile MemoryAwareTileCache::get(ProviderTileKey key) {
     }
     ghoul_assert(false, "");
 }
-/*
-void MemoryAwareTileCache::put(ProviderTileKey key, Tile tile) {
-    std::lock_guard<std::mutex> guard(_mutexLock);
-    _tileCache.put(key, tile);
-}
-*/
+
 void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
     std::shared_ptr<RawTile> rawTile)
 {
@@ -98,7 +86,7 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
         const TileTextureInitData& initData = *rawTile->textureInitData;
         TileTextureInitData::HashKey initDataKey = initData.hashKey();
         if (_textureContainerMap.find(initDataKey) == _textureContainerMap.end()) {
-            // For now create 50 textures of this type
+            // For now create 500 textures of this type
             _textureContainerMap.emplace(initDataKey,
                 TextureContainerTileCache(
                     std::make_unique<TextureContainer>(initData, 500),
@@ -166,14 +154,6 @@ size_t MemoryAwareTileCache::getCPUAllocatedDataSize() const {
     }
     return dataSize;
 }
-
-
-/*
-void MemoryAwareTileCache::setMaximumSize(size_t maximumSize) {
-    std::lock_guard<std::mutex> guard(_mutexLock);
-  _tileCache.setMaximumSize(maximumSize);
-}
-*/
 
 MemoryAwareTileCache::MemoryAwareTileCache()
 { }

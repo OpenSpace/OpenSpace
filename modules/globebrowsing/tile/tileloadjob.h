@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
 
-#include <modules/globebrowsing/tile/loadjob/loadjob.h>
-
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/tile/tile.h>
 
@@ -36,7 +34,7 @@ namespace globebrowsing {
 class RawTileDataReader;
 struct RawTile;
 
-struct TileLoadJob : LoadJob {
+struct TileLoadJob : public Job<RawTile> {
     /**
      * Allocates enough data for one tile. When calling <code>product()</code>, the
      * ownership of this data will be released. If <code>product()</code> has not been
@@ -65,14 +63,22 @@ struct TileLoadJob : LoadJob {
      * RawTileDataReader will read to. In case specified so in the TileTextureInitData
      * of RawTileDataReader, the data will also be written to CPU memory.
      */
-    virtual void execute() override;
+    void execute() override;
 
 	/**
 	* Marks the job as finised and releases ownership of the data.
 	* Unless the job is marked as finished, the pixel data will be deallocated
 	* when the job is deleted.
 	*/
-    virtual std::shared_ptr<RawTile> product() override;
+    std::shared_ptr<RawTile> product() override;
+
+    /**
+     * Get the data ownership. if any data has been allocated (ie if the job was created
+     * using the CPU constructor not taking a PBO data pointer) this function is
+     * equivalent with asking if the job is unfinished. If the job has ownership of data,
+     * the data will be deleted once the job is deleted.
+     */
+    bool hasOwnershipOfData() const;
 
 protected:
     TileIndex _chunkIndex;

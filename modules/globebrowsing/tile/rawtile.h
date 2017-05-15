@@ -57,9 +57,6 @@ struct RawTile {
     TileIndex tileIndex;
     ReadError error;
     GLuint pbo;
-
-    void serializeMetaData(std::ostream& s);
-    static RawTile deserializeMetaData(std::istream& s);
    
     static RawTile createDefault(const TileTextureInitData& initData);
 };

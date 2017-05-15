@@ -31,6 +31,8 @@
  
 #include <openspace/properties/propertyowner.h>
 
+#include <ghoul/opengl/texture.h>
+
 #include <vector>
 
 namespace openspace {
@@ -98,14 +100,7 @@ public:
 
     virtual ChunkTilePile getChunkTilePile(TileIndex tileIndex, int pileSize);
 
-    /**
-     * TileProviders must be able to provide a defualt
-     * <code>Tile</code> which may be used by clients in cases when
-     * requested tiles were unavailable.
-     *
-     * \returns A default tile
-     */
-    virtual Tile getDefaultTile() = 0;
+    Tile getDefaultTile() const;
 
     /**
      * Returns the status of a <code>Tile</code>. The <code>Tile::Status</code>
@@ -159,6 +154,9 @@ private:
     static unsigned int _numTileProviders;
     unsigned int _uniqueIdentifier;
     bool _initialized;
+  
+    std::unique_ptr<ghoul::opengl::Texture> _defaultTileTexture;
+    Tile _defaultTile;
 };
 
 } // namespace tileprovider

@@ -429,6 +429,7 @@ size_t numberOfBytes(GLuint glType) {
         case GL_SHORT: return sizeof(GLshort);
         case GL_UNSIGNED_INT: return sizeof(GLuint);
         case GL_INT: return sizeof(GLint);
+        case GL_HALF_FLOAT: return sizeof(GLhalf);
         case GL_FLOAT: return sizeof(GLfloat);
         case GL_DOUBLE: return sizeof(GLdouble);
         default:
@@ -465,6 +466,8 @@ float interpretFloat(GLuint glType, const char* src) {
             return static_cast<float>(*reinterpret_cast<const GLuint*>(src));
         case GL_INT:
             return static_cast<float>(*reinterpret_cast<const GLint*>(src));
+        case GL_HALF_FLOAT:
+            return static_cast<float>(*reinterpret_cast<const GLhalf*>(src));
         case GL_FLOAT:
             return static_cast<float>(*reinterpret_cast<const GLfloat*>(src));
         case GL_DOUBLE:
@@ -488,6 +491,8 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                     return GL_R32UI;
                 case GL_FLOAT:
                     return GL_R32F;
+                case GL_HALF_FLOAT:
+                    return GL_R16F;
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
@@ -506,6 +511,8 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                     return GL_RG32UI;
                 case GL_FLOAT:
                     return GL_RG32F;
+                case GL_HALF_FLOAT:
+                    return GL_RG16F;
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
@@ -524,6 +531,8 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                     return GL_RGB32UI;
                 case GL_FLOAT:
                     return GL_RGB32F;
+                case GL_HALF_FLOAT:
+                    return GL_RGB16F;
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
@@ -542,6 +551,8 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                     return GL_RGBA32UI;
                 case GL_FLOAT:
                     return GL_RGBA32F;
+                case GL_HALF_FLOAT:
+                    return GL_RGBA16F;
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
@@ -560,6 +571,8 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                     return GL_RGB32UI;
                 case GL_FLOAT:
                     return GL_RGB32F;
+                case GL_HALF_FLOAT:
+                    return GL_RGB16F;
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
@@ -578,6 +591,8 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                     return GL_RGBA32UI;
                 case GL_FLOAT:
                     return GL_RGBA32F;
+                case GL_HALF_FLOAT:
+                    return GL_RGBA16F;
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);

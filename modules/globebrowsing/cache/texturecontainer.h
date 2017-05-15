@@ -22,37 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEXTURE_CONTAINER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TEXTURE_CONTAINER___H__
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
+
+#include <memory>
+#include <vector>
 
 namespace openspace {
 namespace globebrowsing {
-namespace tileprovider {
+namespace cache {
 
-class TileProviderByLevel : public TileProvider {
+/**
+ * Owner of texture data used for tiles. Instead of dynamically allocating textures one
+ * by one, they are created once and reused.
+ */
+class TextureContainer
+{
 public:
-    TileProviderByLevel(const ghoul::Dictionary& dictionary);
-    TileProviderByLevel(const std::string& imagePath);
-    virtual ~TileProviderByLevel() = default;
+    /**
+     * \param initData is the description of the texture type.
+     * \param numTextures is the number of textures to allocate.
+     */
+    TextureContainer(TileTextureInitData initData, size_t numTextures);
 
-    virtual Tile getTile(const TileIndex& tileIndex) override;
-    virtual Tile::Status getTileStatus(const TileIndex& index) override;
-    virtual TileDepthTransform depthTransform() override;
-    virtual void update() override;
-    virtual void reset() override;
-    virtual int maxLevel() override;
+    ~TextureContainer() = default;
+    
+    /**
+     * \returns a pointer to a texture if there is one texture never used before.
+     * If there are no textures left, nullptr is returned. TextureContainer still owns
+     * the texture so no delete should be called on the raw pointer.
+     */
+    ghoul::opengl::Texture* getTextureIfFree();
+
+    const TileTextureInitData& tileTextureInitData() const;
+    
+    /**
+     * \returns the number of textures in this TextureContainer
+     */
+    size_t size() const;
+
 private:
-    inline int providerIndex(int level) const;
-    inline TileProvider* levelProvider(int level) const;
-
-    std::vector<int> _providerIndices;
-    std::vector<std::shared_ptr<TileProvider>> _levelTileProviders;
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+    size_t _freeTexture;
+    const TileTextureInitData _initData;
 };
 
-} // namespace tileprovider
+} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEXTURE_CONTAINER___H__

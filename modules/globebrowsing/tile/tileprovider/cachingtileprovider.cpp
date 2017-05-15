@@ -103,13 +103,8 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     auto tileDataset = std::make_shared<SimpleRawTileDataReader>(filePath, initData, preprocess);
 #endif // GLOBEBROWSING_USE_GDAL
 
-    // only one thread per provider supported atm
-    // (GDAL does not handle multiple threads for a single dataset very well
-    // currently)
-    auto threadPool = std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 10);
-
     _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
-        tileDataset, threadPool, AsyncTileDataProvider::UsePBO::No);
+        tileDataset, AsyncTileDataProvider::UsePBO::No);
 
     if (dictionary.hasKeyAndValue<double>(KeyPreCacheLevel)) {
         int preCacheLevel = static_cast<int>(dictionary.value<double>(KeyPreCacheLevel));
@@ -168,6 +163,7 @@ float CachingTileProvider::noDataValueAsFloat() {
     return _asyncTextureDataProvider->noDataValueAsFloat();
 }
 
+/*
 Tile CachingTileProvider::getDefaultTile() {
     if (_defaultTile.status() != Tile::Status::OK) {
         _defaultTile = createTile(
@@ -176,6 +172,7 @@ Tile CachingTileProvider::getDefaultTile() {
     }
     return _defaultTile;
 }
+*/
 
 void CachingTileProvider::initTexturesFromLoadedData() {
     std::shared_ptr<RawTile> rawTile = _asyncTextureDataProvider->popFinishedRawTile();
@@ -209,8 +206,9 @@ TileDepthTransform CachingTileProvider::depthTransform() {
     return _asyncTextureDataProvider->getRawTileDataReader()->getDepthTransform();
 }
 
+/*
 Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
-	/*
+	
     if (rawTile->error != RawTile::ReadError::None) {
         return Tile(nullptr, nullptr, Tile::Status::IOError);
     }
@@ -240,10 +238,11 @@ Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
 
     Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
     return tile;
-	*/
+	
 	return Tile(nullptr, nullptr, Tile::Status::Unavailable);
 
 }
+*/
 
 } // namespace tileprovider
 } // namespace globebrowsing

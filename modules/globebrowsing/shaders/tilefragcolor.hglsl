@@ -122,6 +122,7 @@ vec4 getTileFragColor(){
 #if USE_COLORTEXTURE
 
 	color = calculateColor(
+		color,
 		fs_uv,
 		levelWeights,
 		ColorLayers);

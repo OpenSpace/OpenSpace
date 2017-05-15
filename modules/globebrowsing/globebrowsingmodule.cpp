@@ -52,12 +52,6 @@ namespace openspace {
 
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule("GlobeBrowsing")
-    , _openSpaceMaximumTileCacheSize(
-        "maximumTileCacheSize", "Maximum tile cache size",
-        512,    // Default: 512 MB
-        0,      // Minimum: No caching
-        1024,   // Maximum: 1024 MB
-        1)      // Step: One MB
     , _tileCacheSizeCPU(
         "tileCacheSizeCPU", "Tile cache size CPU",
         0,  // Default
@@ -76,19 +70,8 @@ void GlobeBrowsingModule::internalInitialize() {
     using namespace globebrowsing;
 
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&] {
-        // Set maximum cache size to 25% of total RAM
-        _openSpaceMaximumTileCacheSize.setMaxValue(CpuCap.installedMainMemory() * 0.25);
-        
         // Convert from MB to KB
-        cache::MemoryAwareTileCache::create(/*_openSpaceMaximumTileCacheSize * 1024*/);
-        _openSpaceMaximumTileCacheSize.onChange(
-        [&]{
-        /*
-            // Convert from MB to KB
-            cache::MemoryAwareTileCache::ref().setMaximumSize(
-                _openSpaceMaximumTileCacheSize * 1024);
-                */
-        });
+        cache::MemoryAwareTileCache::create();
         _clearTileCache.onChange(
         [&]{
             cache::MemoryAwareTileCache::ref().clear();
@@ -97,7 +80,6 @@ void GlobeBrowsingModule::internalInitialize() {
         _tileCacheSizeCPU.setReadOnly(true);
         _tileCacheSizeGPU.setReadOnly(true);
 
-        addProperty(_openSpaceMaximumTileCacheSize);
         addProperty(_clearTileCache);
         addProperty(_tileCacheSizeCPU);
         addProperty(_tileCacheSizeGPU);

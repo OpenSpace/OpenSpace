@@ -146,11 +146,12 @@ float calculateHeight(
 }
 
 vec4 calculateColor(
+	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
 	const Layer ColorLayers[NUMLAYERS_COLORTEXTURE]) {
 
-	vec4 color = vec4(0);
+	vec4 color = currentColor;
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0

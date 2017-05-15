@@ -22,37 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___DISKCACHEDTILELOADJOB___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___DISKCACHEDTILELOADJOB___H__
+#include <modules/globebrowsing/tile/tileloadjob.h>
 
-#include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
 namespace openspace {
 namespace globebrowsing {
-/*
-class TileDiskCache;
 
-struct DiskCachedTileLoadJob : public TileLoadJob {
-    enum CacheMode {
-        Disabled,
-        ReadOnly,
-        ReadAndWrite,
-        WriteOnly,
-        CacheHitsOnly,
-    };
-        
-    DiskCachedTileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-        const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc, 
-        CacheMode cacheMode = CacheMode::ReadOnly);
+TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
+    const TileIndex& tileIndex)
+    : _rawTileDataReader(rawTileDataReader)
+    , _chunkIndex(tileIndex)
+    , _pboMappedDataDestination(nullptr)
+    , _hasOwnershipOfData(false)
+{ }
 
-    void execute() override;
 
-protected:
-    std::shared_ptr<TileDiskCache> _tileDiskCache;
-    CacheMode _mode;
-};
-*/
+TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
+    const TileIndex& tileIndex, char* pboDataPtr)
+    : _rawTileDataReader(rawTileDataReader)
+    , _chunkIndex(tileIndex)
+    , _pboMappedDataDestination(pboDataPtr)
+    , _hasOwnershipOfData(false)
+{ }
+
+TileLoadJob::~TileLoadJob() {
+	if (_hasOwnershipOfData) {
+		ghoul_assert(_rawTile->imageData, "Image data must exist");
+		delete [] _rawTile->imageData;
+	}
+}
+
+void TileLoadJob::execute() {
+    size_t numBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
+    char* dataPtr = nullptr;
+    if (_rawTileDataReader->tileTextureInitData().shouldAllocateDataOnCPU() ||
+    	!_pboMappedDataDestination)
+    {
+    	dataPtr = new char[numBytes];
+    	_hasOwnershipOfData = true;
+    }
+    _rawTile = _rawTileDataReader->readTileData(
+    	_chunkIndex, dataPtr, _pboMappedDataDestination);
+}
+
+std::shared_ptr<RawTile> TileLoadJob::product() {
+	_hasOwnershipOfData = false;
+    return _rawTile;
+}
+
+bool TileLoadJob::hasOwnershipOfData() const {
+	return _hasOwnershipOfData;
+}
+
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___DISKCACHEDTILELOADJOB___H__

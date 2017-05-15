@@ -22,62 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/loadjob/diskcachedtileloadjob.h>
+#include <modules/globebrowsing/other/pixelbuffer.h>
+#include <ghoul/logging/logmanager.h>
 
-#include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
-#include <modules/globebrowsing/tile/tilediskcache.h>
+namespace {
+    const char* _loggerCat = "PixelBuffer";
+};
 
-namespace openspace {
-namespace globebrowsing {
-/*
-DiskCachedTileLoadJob::DiskCachedTileLoadJob(
-    std::shared_ptr<RawTileDataReader> textureDataProvider,
-    const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc,
-    CacheMode m)
-    : TileLoadJob(textureDataProvider, tileIndex, nullptr)
-    , _tileDiskCache(tdc)
-    , _mode(m)
-{}
+using namespace openspace::globebrowsing;
 
-void DiskCachedTileLoadJob::execute() {
-    _rawTile = nullptr;
-
-    switch (_mode) {
-        case CacheMode::Disabled: 
-            _rawTile = _rawTileDataReader->readTileData(_chunkIndex, nullptr);
-            break;
-
-        case CacheMode::ReadOnly:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                _rawTile = _rawTileDataReader->readTileData(_chunkIndex, nullptr);
-            }
-            break;
-
-        case CacheMode::ReadAndWrite:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                _rawTile = _rawTileDataReader->readTileData(_chunkIndex, nullptr);
-                _tileDiskCache->put(_chunkIndex, _rawTile);
-            }
-            break;
-
-        case CacheMode::WriteOnly:
-            _rawTile = _rawTileDataReader->readTileData(_chunkIndex, nullptr);
-            _tileDiskCache->put(_chunkIndex, _rawTile);
-            break;
-
-        case CacheMode::CacheHitsOnly:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                RawTile res = RawTile::createDefault(TileTextureInitData(8,8,GL_UNSIGNED_BYTE, ghoul::opengl::Texture::Format::Red));
-                res.tileIndex = _chunkIndex;
-                _rawTile = std::make_shared<RawTile>(res);
-            }
-            break;
-    }
+PixelBuffer::PixelBuffer(size_t numBytes, Usage usage)
+    : _numBytes(numBytes)
+    , _usage(usage)
+    , _isMapped(false)
+{
+    glGenBuffers(1, &_id);
+    bind();
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, _numBytes, 0, static_cast<GLenum>(_usage));
+    unbind();
 }
-*/
-} // namespace globebrowsing
-} // namespace openspace
+
+PixelBuffer::~PixelBuffer() {
+    glDeleteBuffers(1, &_id);
+}
+
+void* PixelBuffer::mapBuffer(GLenum access) {
+    void* dataPtr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, access);
+    _isMapped = dataPtr ? true : false;
+    return dataPtr;
+}
+
+void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access) {
+    void* dataPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset, length, access);
+    _isMapped = dataPtr ? true : false;
+    return dataPtr;
+}
+
+bool PixelBuffer::unMapBuffer() {
+    bool success = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    if (!success) {
+        LERROR("Unable to unmap pixel buffer, data may be corrupt!");
+    }
+    _isMapped = false;
+    return success;
+}
+
+void PixelBuffer::bind() {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _id);
+}
+
+void PixelBuffer::unbind() {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+}
+
+bool PixelBuffer::isMapped() {
+    return _isMapped;
+}
+
+PixelBuffer::operator GLuint() {
+    return _id;
+}

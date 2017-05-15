@@ -27,8 +27,8 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/tiledatatype.h>
 
 #include <modules/globebrowsing/tile/tile.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/rawtile.h>
@@ -372,7 +372,7 @@ float RawTileDataReader::depthScale() const {
 
 TileDepthTransform RawTileDataReader::calculateTileDepthTransform() {
     bool isFloat =
-        (_initData.glType() == GL_FLOAT || _initData.glType() == GL_DOUBLE);
+        (_initData.glType() == GL_HALF_FLOAT || _initData.glType() == GL_FLOAT || _initData.glType() == GL_DOUBLE);
     double maximumValue =
         isFloat ? 1.0 : tiledatatype::getMaximumValue(_initData.glType());
 

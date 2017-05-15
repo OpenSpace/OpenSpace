@@ -192,10 +192,6 @@ Tile TemporalTileProvider::getTile(const TileIndex& tileIndex) {
     return _currentTileProvider->getTile(tileIndex);
 }
 
-Tile TemporalTileProvider::getDefaultTile() {
-    return getTileProvider()->getDefaultTile();
-}
-
 int TemporalTileProvider::maxLevel() {
     ensureUpdated();
     return _currentTileProvider->maxLevel();

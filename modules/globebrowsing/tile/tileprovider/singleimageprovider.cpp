@@ -58,10 +58,6 @@ Tile SingleImageProvider::getTile(const TileIndex& tileIndex) {
     return _tile;
 }
 
-Tile SingleImageProvider::getDefaultTile() {
-    return _tile;
-}
-
 Tile::Status SingleImageProvider::getTileStatus(const TileIndex& index) {
     return _tile.status();
 }

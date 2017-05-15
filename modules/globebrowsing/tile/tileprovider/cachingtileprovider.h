@@ -48,22 +48,22 @@ public:
     CachingTileProvider(const ghoul::Dictionary& dictionary);
     CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader);
 
-    virtual ~CachingTileProvider();
+    virtual ~CachingTileProvider() override;
         
     /**
     * \returns a Tile with status OK iff it exists in in-memory 
     * cache. If not, it may enqueue some IO operations on a 
     * separate thread.
     */
-    virtual Tile getTile(const TileIndex& tileIndex);
+    virtual Tile getTile(const TileIndex& tileIndex) override;
 
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& tileIndex);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
-    virtual float noDataValueAsFloat();
+    //virtual Tile getDefaultTile() override;
+    virtual Tile::Status getTileStatus(const TileIndex& tileIndex) override;
+    virtual TileDepthTransform depthTransform() override;
+    virtual void update() override;
+    virtual void reset() override;
+    virtual int maxLevel() override;
+    virtual float noDataValueAsFloat() override;
 
 private:
     /**
@@ -78,7 +78,7 @@ private:
     * \returns A tile with <code>Tile::Status::OK</code> if no errors
     * occured, a tile with <code>Tile::Status::IOError</code> otherwise
     */
-    Tile createTile(std::shared_ptr<RawTile> res);
+    //Tile createTile(std::shared_ptr<RawTile> res);
 
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
 

@@ -29,7 +29,7 @@
 
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
 #include <modules/globebrowsing/tile/chunktile.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 namespace openspace {
 namespace globebrowsing {
