@@ -24,12 +24,15 @@
 
 #include <modules/newhorizons/rendering/renderablecrawlingline.h>
 
+#include <modules/newhorizons/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
-#include <modules/newhorizons/util/imagesequencer.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/glm.h>
 
 namespace {
     const char* KeySource = "Source";

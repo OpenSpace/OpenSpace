@@ -26,6 +26,7 @@
 
 #include <modules/globebrowsing/chunk/chunk.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
+#include <openspace/util/updatestructures.h>
 
 namespace openspace {
 namespace globebrowsing {

@@ -29,34 +29,29 @@
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/util/updatestructures.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace ghoul {
-    namespace filesystem {
-        class File;
-    }
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
-    }
+namespace filesystem { class File; }
+
+namespace opengl {
+    class ProgramObject;
+    class Texture;
 }
+} // namespace ghoul
 
 namespace openspace {
+
+struct RenderData;
+struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
 struct LinePoint;
 
 class RenderablePlane : public Renderable {
-
 public:
-    enum class BlendMode : int {
-        Normal = 0,
-        Additive
-    };
-
     RenderablePlane(const ghoul::Dictionary& dictionary);
-    ~RenderablePlane();
 
     bool initialize() override;
     bool deinitialize() override;
@@ -69,6 +64,11 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    enum class BlendMode : int {
+        Normal = 0,
+        Additive
+    };
+
     void loadTexture();
     void createPlane();
 
@@ -76,15 +76,17 @@ private:
     properties::BoolProperty _billboard;
     properties::FloatProperty _size;
 
-    bool _planeIsDirty;
-
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    bool _textureIsDirty;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
+    std::unique_ptr<ghoul::filesystem::File> _textureFile;
+
     BlendMode _blendMode;
-    ghoul::filesystem::File* _textureFile;
+
     GLuint _quad;
     GLuint _vertexPositionBuffer;
+
+    bool _planeIsDirty;
+    bool _textureIsDirty;
 };
 
 } // namespace openspace

@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/tile/tileselector.h>
 #include <modules/globebrowsing/tile/tilemetadata.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
+#include <openspace/util/updatestructures.h>
 
 
 namespace openspace {

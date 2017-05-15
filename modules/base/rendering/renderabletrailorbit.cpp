@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
+#include <openspace/util/updatestructures.h>
 
 #include <numeric>
 

@@ -29,6 +29,7 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <openspace/util/updatestructures.h>
 
 namespace openspace {
 namespace globebrowsing {

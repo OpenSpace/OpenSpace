@@ -29,6 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/translation.h>
+#include <openspace/util/updatestructures.h>
 
 namespace {
     const char* KeyTranslation = "Translation";

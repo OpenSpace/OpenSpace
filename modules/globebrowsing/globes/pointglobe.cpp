@@ -29,6 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
 
 namespace openspace {
 namespace globebrowsing {

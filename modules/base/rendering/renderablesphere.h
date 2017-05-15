@@ -26,18 +26,24 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLESPHERE___H__
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/updatestructures.h>
 
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <openspace/util/powerscaledsphere.h>
+
+namespace ghoul {
+namespace opengl {
+    class ProgramObject;
+    class Texture;
+} 
+} // namespace ghoul
 
 namespace openspace {
+
+class PowerScaledSphere;
+struct RenderData;
+struct UpdateData;
 
 namespace documentation { struct Documentation; }
 

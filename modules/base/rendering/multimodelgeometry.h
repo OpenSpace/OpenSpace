@@ -38,9 +38,6 @@ class MultiModelGeometry : public ModelGeometry {
 public:
     MultiModelGeometry(const ghoul::Dictionary& dictionary);
 
-    bool initialize(Renderable* parent) override;
-    void deinitialize() override;
-
 private:
     bool loadModel(const std::string& filename);
 };

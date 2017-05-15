@@ -27,6 +27,7 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
 
 #define _USE_MATH_DEFINES

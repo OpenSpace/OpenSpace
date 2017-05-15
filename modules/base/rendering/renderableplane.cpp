@@ -26,13 +26,10 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/util/powerscaledcoordinate.h>
-
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/rendering/renderengine.h>
-#include <modules/newhorizons/rendering/renderableplanetprojection.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
@@ -45,14 +42,6 @@ namespace {
     const char* KeyBillboard = "Billboard";
     const char* KeyBlendMode = "BlendMode";
     const char* KeyTexture = "Texture";
-
-
-    const char* keyFieldlines = "Fieldlines";
-    const char* keyFilename = "File";
-    const char* keyHints = "Hints";
-    const char* keyShaders = "Shaders";
-    const char* keyVertexShader = "VertexShader";
-    const char* keyFragmentShader = "FragmentShader";
 } // namespace
 
 namespace openspace {
@@ -102,11 +91,12 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     , _billboard("billboard", "Billboard", false)
     , _size("size", "Size", 10, 0, std::pow(10, 25))
     , _shader(nullptr)
-    , _textureIsDirty(false)
     , _texture(nullptr)
     , _blendMode(BlendMode::Normal)
     , _quad(0)
     , _vertexPositionBuffer(0)
+    , _planeIsDirty(false)
+    , _textureIsDirty(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -131,7 +121,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
         }
     }
     _texturePath = absPath(dictionary.value<std::string>(KeyTexture));
-    _textureFile = new ghoul::filesystem::File(_texturePath);
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
 
     addProperty(_billboard);
     addProperty(_texturePath);
@@ -144,11 +134,6 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     _size.onChange([this](){ _planeIsDirty = true; });
 
     setBoundingSphere(_size);
-}
-
-RenderablePlane::~RenderablePlane() {
-    delete _textureFile;
-    _textureFile = nullptr;
 }
 
 bool RenderablePlane::isReady() const {
@@ -177,7 +162,6 @@ bool RenderablePlane::deinitialize() {
     glDeleteBuffers(1, &_vertexPositionBuffer);
     _vertexPositionBuffer = 0;
 
-    delete _textureFile;
     _textureFile = nullptr;
 
     RenderEngine& renderEngine = OsEng.renderEngine();
@@ -190,9 +174,6 @@ bool RenderablePlane::deinitialize() {
 }
 
 void RenderablePlane::render(const RenderData& data) {
-    glm::mat4 scaleTransform = glm::mat4(1.0);
-    
-    // Activate shader
     _shader->activate();
     //if (_projectionListener){
     //    //get parent node-texture and set with correct dimensions  
@@ -208,28 +189,20 @@ void RenderablePlane::render(const RenderData& data) {
     //}
 
     // Model transform and view transform needs to be in double precision
-    glm::dmat4 rotationTransform;
-    if (_billboard) {
-        rotationTransform = glm::inverse(glm::dmat4(data.camera.viewRotationMatrix()));
-    }
-    else {
-        rotationTransform = glm::dmat4(data.modelTransform.rotation);
-    }
+    const glm::dmat4 rotationTransform = _billboard ?
+        glm::inverse(glm::dmat4(data.camera.viewRotationMatrix())) :
+        glm::dmat4(data.modelTransform.rotation);
 
-    glm::dmat4 modelTransform =
+    const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         rotationTransform *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
-        glm::dmat4(scaleTransform);
-    glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+        glm::dmat4(1.0);
+    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _shader->setUniform("modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform));
     
-    //_shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    //_shader->setUniform("ModelTransform", transform);
-    //setPscUniforms(*_shader.get(), data.camera, data.position);
-
     ghoul::opengl::TextureUnit unit;
     unit.activate();
     _texture->bind();
@@ -292,19 +265,15 @@ void RenderablePlane::loadTexture() {
 
             _texture = std::move(texture);
 
-            delete _textureFile;
-            _textureFile = new ghoul::filesystem::File(_texturePath);
+            _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
             _textureFile->setCallback([&](const ghoul::filesystem::File&) { _textureIsDirty = true; });
         }
     }
 }
 
 void RenderablePlane::createPlane() {
-    // ============================
-    //         GEOMETRY (quad)
-    // ============================
     const GLfloat size = _size;
-    const GLfloat vertex_data[] = {
+    const GLfloat vertexData[] = {
         //      x      y     z     w     s     t
         -size, -size, 0.f, 0.f, 0.f, 0.f,
         size, size, 0.f, 0.f, 1.f, 1.f,
@@ -314,13 +283,28 @@ void RenderablePlane::createPlane() {
         size, size, 0.f, 0.f, 1.f, 1.f,
     };
 
-    glBindVertexArray(_quad); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glBindVertexArray(_quad);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(0)
+    );
+    
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, reinterpret_cast<void*>(sizeof(GLfloat) * 4));
+    glVertexAttribPointer(
+        1, 
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 6,
+        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+    );
 }
 
 } // namespace openspace

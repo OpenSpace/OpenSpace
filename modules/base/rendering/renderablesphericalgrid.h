@@ -32,6 +32,7 @@
 #include <ghoul/opengl/texture.h>
 
 namespace openspace {
+
 class RenderableSphericalGrid : public Renderable{
 public:
     RenderableSphericalGrid(const ghoul::Dictionary& dictionary);

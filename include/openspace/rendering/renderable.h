@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/programobject.h>
 
@@ -41,6 +40,10 @@ namespace ghoul {
 }
 
 namespace openspace {
+
+struct RenderData;
+struct UpdateData;
+struct RendererTasks;
 
 namespace documentation { struct Documentation; } 
 
