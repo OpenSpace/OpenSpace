@@ -52,6 +52,7 @@ namespace {
 
     const char* keyVolumeDirectory = "Directory";
     const char* keyVolumeTracingVariable = "TracingVariable";
+    const char* keyMaxNumVolumes         = "NumVolumes";
 
     const char* keyFieldlineMaxTraceSteps = "MaximumTracingSteps";
     const char* keyFieldlineShouldMorph = "Morphing";
@@ -167,13 +168,34 @@ bool RenderableFieldlinesSequence::initialize() {
     }
     // Everything essential is provided
     std::vector<std::string> validCdfFilePaths;
-    if (!FieldlinesSequenceManager::ref().getCdfFilePaths(
-            pathToCdfDirectory, validCdfFilePaths) ||
+    const std::string fileExt = "cdf";
+    // const std::string fileExt = ".cdf";
+    if (!FieldlinesSequenceManager::ref().getAllFilePathsOfType(
+            pathToCdfDirectory, fileExt, validCdfFilePaths) ||
             validCdfFilePaths.empty() ) {
 
-        LERROR("Failed to get valid .cdf file paths from '"
+        LERROR("Failed to get valid "<< fileExt << " file paths from '"
                 << pathToCdfDirectory << "'" );
         return false;
+    }
+
+    // Only choose n number of volumes
+    float f_maxStates;
+    int numMaxStates = 0;
+    int numValidPaths = static_cast<int>(validCdfFilePaths.size());
+
+    if (!_vectorVolumeInfo.getValue(keyMaxNumVolumes, f_maxStates)) {
+        numMaxStates = numValidPaths;
+        LWARNING(keyVolume << " isn't specifying a " <<
+                 keyMaxNumVolumes << ". Using all valid paths found.");
+    } else {
+        numMaxStates = static_cast<int>(f_maxStates);
+        if (numMaxStates >= numValidPaths || numMaxStates == 0) {
+            numMaxStates = numValidPaths;
+        } else {
+            validCdfFilePaths.erase(validCdfFilePaths.begin() + numMaxStates,
+                                    validCdfFilePaths.end());
+        }
     }
 
     // Specify which quantity to trace
