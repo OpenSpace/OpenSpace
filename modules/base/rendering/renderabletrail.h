@@ -73,6 +73,8 @@ class Translation;
  */
 class RenderableTrail : public Renderable {
 public:
+    ~RenderableTrail() = default;
+
     bool initialize() override;
     bool deinitialize() override;
 

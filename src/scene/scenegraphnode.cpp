@@ -24,9 +24,21 @@
 
 #include <openspace/scene/scenegraphnode.h>
 
+#include <modules/base/translation/statictranslation.h>
+#include <modules/base/rotation/staticrotation.h>
+#include <modules/base/scale/staticscale.h>
+
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/query/query.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/translation.h>
+#include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
@@ -35,13 +47,6 @@
 #include <ghoul/opengl/shadermanager.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/shaderobject.h>
-
-#include <modules/base/translation/statictranslation.h>
-#include <modules/base/rotation/staticrotation.h>
-#include <modules/base/scale/staticscale.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/util/factorymanager.h>
 
 #include <cctype>
 #include <chrono>

@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 

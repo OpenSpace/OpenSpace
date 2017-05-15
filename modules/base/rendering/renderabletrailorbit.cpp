@@ -29,6 +29,8 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/opengl/programobject.h>
+
 #include <numeric>
 
 // This class is using a VBO ring buffer + a constantly updated point as follows:

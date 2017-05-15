@@ -31,6 +31,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/opengl/programobject.h>
+
 namespace openspace {
 namespace globebrowsing {
 

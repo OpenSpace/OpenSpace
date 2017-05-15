@@ -33,6 +33,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/scene/scene.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>

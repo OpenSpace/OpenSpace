@@ -34,6 +34,7 @@
 #include <openspace/util/spicemanager.h>
 
 #include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul {
 namespace opengl {

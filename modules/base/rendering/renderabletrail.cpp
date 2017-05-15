@@ -31,6 +31,8 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
 
+#include <ghoul/opengl/programobject.h>
+
 namespace {
     const char* KeyTranslation = "Translation";
     const char* KeyColor = "Color";

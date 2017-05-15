@@ -30,6 +30,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <modules/iswa/util/dataprocessortext.h>
 
+#include <ghoul/opengl/programobject.h>
+
 namespace {
     const std::string _loggerCat = "DataCygnet";
 }
