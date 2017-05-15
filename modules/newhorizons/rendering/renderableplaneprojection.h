@@ -27,6 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 #include <memory>
 
 namespace ghoul {

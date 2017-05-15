@@ -28,7 +28,6 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepath.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.h
@@ -47,7 +46,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/modelgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multimodelgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemodel.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablepath.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderableplane.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphere.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesphericalgrid.cpp

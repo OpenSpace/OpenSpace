@@ -28,6 +28,10 @@
 #include <openspace/util/time.h>
 #include <openspace/util/transformationmanager.h>
 #include <modules/iswa/rendering/iswabasegroup.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/opengl/programobject.h>
 
 namespace {
     const std::string _loggerCat = "IswaCygnet";

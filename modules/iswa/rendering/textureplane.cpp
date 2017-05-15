@@ -26,6 +26,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/programobject.h>
 
 namespace {
     const std::string _loggerCat = "TexturePlane";
