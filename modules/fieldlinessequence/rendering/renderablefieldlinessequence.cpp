@@ -324,6 +324,8 @@ bool RenderableFieldlinesSequence::initialize() {
             xmin = ymin = zmin = -40.f;
             xmax = ymax = zmax = 40.f;
             rmax = std::max(xmax, std::max(ymax,zmax));
+
+            _isSpherical = true;
         } else if (model == "batsrus") {
             _scalingFactor          = R_E_TO_METER;
             _scalingFactorLineWidth = R_E_TO_METER;
@@ -331,11 +333,13 @@ bool RenderableFieldlinesSequence::initialize() {
             // TODO: change these hardcoded limits to something that makes sense
             // or allow user to specify in LUA
             rmin =  1.0f;
-            xmin = -50.f;
+            xmin = -250.f;
             ymin = zmin = -150.f;
-            xmax = 250.f;
+            xmax = 50.f;
             ymax = zmax = 150.f;
             rmax = std::max(xmax, std::max(ymax,zmax));
+
+            _isSpherical = false;
         } else {
             LERROR("OpenSpace's RenderableFieldlinesSequence class can only support the "
                 << " batsrus and enlil models for the time being! CDF contains the "
@@ -642,6 +646,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
 
         if (_showSeedPoints) {
             _seedPointProgram->setUniform("color", _uniformSeedPointColor);
+            _seedPointProgram->setUniform("isSpherical", _isSpherical);
+            _seedPointProgram->setUniform("scaleFactor", _scalingFactor);
             _seedPointProgram->setUniform("modelViewProjection",
                 data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewTransform));
             glPointSize(_seedPointSize);

@@ -119,6 +119,7 @@ private:
 
     // -------- Colorize fieldline depending on additional variables --------
     bool _hasUnitColoring;
+    bool _isSpherical;
     bool _updateColorBuffer = false;
 
     std::vector<glm::vec2> _transferFunctionLimits; // .x corresponds to 0 in tf, .y to 1

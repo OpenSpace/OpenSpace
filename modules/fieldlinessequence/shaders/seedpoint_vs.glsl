@@ -24,46 +24,25 @@
 
 #version __CONTEXT__
 
-uniform mat4 modelViewProjection;
-// uniform bool isSpherical;
-//uniform mat4 modelTransform;
-// uniform int time;
+uniform bool    isSpherical;
+uniform float   scaleFactor;
+uniform mat4    modelViewProjection;
 
+// as provided in seed point files! Needs conversion to render properly in OpenSpace
+layout(location = 0) in vec3 in_position;
 
-layout(location = 0) in vec3 in_position; // in meters
-// layout(location = 1) in vec4 in_color;
-
-// out vec4 vs_color;
-// out vec4 vs_position;
 out float vs_depth;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 void main() {
-    // vec4 in_color = vec4(0.0,1.0,0.0,0.0);
-    // // Color every n-th vertex differently to show fieldline flow direction
-    // int modulus = (gl_VertexID + time) % 100;
-    // if ( modulus > 0 && modulus < 99) {
-    //     vs_color = vec4(in_color.rgb * 0.99, 1.0);
-    // } else {
-    //     vs_color = vec4(in_color.rgb * 0.99, 1.0);
-    // }
-    // vs_color = in_color;
-    //vec4 tmp = vec4(in_position, 0);
-
-    //vec4 position_meters = pscTransform(tmp, modelTransform);
-    //vs_position = tmp;
-
-    // project the position to view space
-    //position_meters =  modelViewProjection * position_meters;
-    //gl_Position = z_normalization(position_meters);
+    
     vec4 position_in_meters;
-    float scale = 1.0;//695700000.0;//150000000000.0;//6371000.0;
-    // if (!isSpherical) {
-    //     scale = 6371000.0;
-    //     position_in_meters = vec4(in_position.xyz * scale, 1);
-    // } else {
-        float radiusInMeters = in_position.x * 149597870700.0; // AU to METERS
+    if (!isSpherical) {
+        position_in_meters = vec4(in_position.xyz * scaleFactor, 1);
+    } else {
+        // TODO MOVE CONVERTION FROM SPHERICAL TO CARTESIAN TO A SHADER UTILS FILE!
+        float radiusInMeters = in_position.x * scaleFactor; // AU to METERS
         float rad_x_sinLat = radiusInMeters * cos(radians(in_position.y));
         // float rad_x_sinLat = radiusInMeters * sin(radians(90.0 - sphericalPoint.y)); sin(90-x) == cos(x)
 
@@ -71,11 +50,9 @@ void main() {
                                   rad_x_sinLat * sin(radians(in_position.z)),
                                   radiusInMeters * sin(radians(in_position.y)),
                                   1.0);
-    // }
-    // //vs_position = vec4(in_position.xyz * scale, 1); // TODO powerscaleify?
-    // vec4 position_in_meters = vec4(in_position.xyz * scale, 1);
+    }
+
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
     gl_Position = z_normalization(positionClipSpace);
     vs_depth = gl_Position.w;
-    // gl_Position = vec4(in_position,1.0);
 }
