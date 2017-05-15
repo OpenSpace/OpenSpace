@@ -166,7 +166,6 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
         // Calculations are done in the reference frame of the globe. Hence, the
         // camera position needs to be transformed with the inverse model matrix
         glm::dmat4 inverseModelTransform = chunk.owner().inverseModelTransform();
-        // Send the matrix inverse (already calculated) to the fragment for the global and local shader (JCC)
         glm::dvec3 cameraPosition = glm::dvec3(
             inverseModelTransform * glm::dvec4(data.camera.positionVec3(), 1));
         float distanceScaleFactor = chunk.owner().generalProperties().lodScaleFactor *

@@ -47,6 +47,13 @@ class DeferredcastData;
 class AtmosphereDeferredcaster : public Deferredcaster
 {
 public:
+    enum AtmospherRenderableClass {
+        NoRenderableClass = 0,
+        RenderablePlanet = 1,
+        RenderableGlobe = 2
+    };
+
+public:
     // See: Precomputed Atmospheric Scattering from Bruneton et al.
     // for explanation of the following parameters.
     /*
@@ -105,6 +112,7 @@ public:
     void setMieScatteringCoefficients(const glm::vec3 & mieScattCoeff);
     void setMieExtinctionCoefficients(const glm::vec3 & mieExtCoeff);
     void setEllipsoidRadii(const glm::dvec3 & radii);
+    void setRenderableClass(const AtmosphereDeferredcaster::AtmospherRenderableClass rc);
 
 private:
     void loadComputationPrograms();
@@ -175,6 +183,8 @@ private:
     glm::mat4 _modelTransform;
     float _stepSize;
     double _time;
+
+    AtmospherRenderableClass _renderableClass;
 
 };
 

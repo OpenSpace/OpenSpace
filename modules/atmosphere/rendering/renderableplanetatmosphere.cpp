@@ -545,6 +545,7 @@ namespace openspace {
             _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
             _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
             _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
+            _deferredcaster->setRenderableClass(AtmosphereDeferredcaster::RenderablePlanet);
 
             _deferredcaster->initialize();
         }
@@ -905,6 +906,7 @@ namespace openspace {
             _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
             _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
             _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
+            _deferredcaster->setRenderableClass(AtmosphereDeferredcaster::RenderablePlanet);
 
             if (executeComputation)
                 _deferredcaster->preCalculateAtmosphereParam();

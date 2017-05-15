@@ -350,6 +350,7 @@ bool RenderableGlobe::initialize() {
         _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
         _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
         _deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
+        _deferredcaster->setRenderableClass(AtmosphereDeferredcaster::RenderableGlobe);
         _deferredcaster->initialize();
     }
 
@@ -528,6 +529,7 @@ void RenderableGlobe::updateAtmosphereParameters() {
         _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
         _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
         _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
+        _deferredcaster->setRenderableClass(AtmosphereDeferredcaster::RenderableGlobe);
 
         if (executeComputation)
             _deferredcaster->preCalculateAtmosphereParam();
