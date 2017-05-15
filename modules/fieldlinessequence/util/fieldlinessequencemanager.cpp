@@ -39,6 +39,9 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
+// JSON PARSER IS FROM THE ISWA MODULE
+#include <modules/iswa/ext/json/json.hpp>
+
 namespace {
     const std::string _loggerCat = "FieldlinesSequenceManager";
     using RawPath = ghoul::filesystem::FileSystem::RawPath;
@@ -53,6 +56,8 @@ namespace {
     // const float NPA_PER_AMU_PER_CM3_TO_K = 1.f; // <-- * [nPa]/[amu/cm^3] => K
     const float NPA_PER_AMU_PER_CM3_TO_K = 72429735.6984f; // <-- * [nPa]/[amu/cm^3] => K
     const std::string TEMPERATURE_P_OVER_RHO = "T = p/rho";
+
+    using json = nlohmann::json;
 }
 
 namespace openspace {
@@ -91,31 +96,65 @@ bool FieldlinesSequenceManager::getSeedPointsFromFile(
     return true;
 }
 
-bool FieldlinesSequenceManager::getCdfFilePaths(
-        const std::string& pathToCdfDirectory,
-        std::vector<std::string>& outCdfFilePaths) {
+
+// Todo move to other util file
+bool FieldlinesSequenceManager::getAllFilePathsOfType(
+        const std::string& pathToDirectory,
+        const std::string& fileExtension,
+        std::vector<std::string>& outFilePaths) {
 
     std::string absFolderPath;
-    absFolderPath = absPath(pathToCdfDirectory);
+    absFolderPath = absPath(pathToDirectory);
 
     if ( !FileSys.directoryExists(absFolderPath) ) {
         LERROR("The folder '" << absFolderPath << "' could not be found!");
         return false;
     }
 
-    // Get absolute path to
-    ghoul::filesystem::Directory cdfDirectory(absFolderPath, RawPath::Yes);
-    outCdfFilePaths = cdfDirectory.read(FileSystem::Recursive::Yes, Sort::Yes);
+    std::string extension;
 
-    outCdfFilePaths.erase(std::remove_if(
-            outCdfFilePaths.begin(), outCdfFilePaths.end(), [](std::string s) {
-                    std::string sub = s.substr(s.length()-4, 4);
+    // Add dot if included fileExtension doesn't start with one
+    if (fileExtension[0] == '.') {
+        extension = fileExtension;
+    } else {
+        extension = "." + fileExtension;
+    }
+
+    int extLength = static_cast<int>(extension.length());
+
+    // Get absolute path to
+    ghoul::filesystem::Directory dir(absFolderPath, RawPath::Yes);
+    outFilePaths = dir.read(FileSystem::Recursive::Yes, Sort::Yes);
+
+    outFilePaths.erase(std::remove_if(
+            outFilePaths.begin(), outFilePaths.end(), [extLength, extension](std::string s) {
+                    std::string sub = s.substr(s.length() - extLength, extLength);
                     std::transform(sub.begin(), sub.end(), sub.begin(), ::tolower);
-                    return sub != ".cdf";
-                }), outCdfFilePaths.end());
+                    return sub != extension;
+                }), outFilePaths.end());
 
     return true;
 }
+
+
+
+/** READ PRECALCULATED FIELDLINE STATES FROM .JSON FILES AND STORE AS A FIELDLINE STATE
+ *
+ *
+ */
+bool FieldlinesSequenceManager::getFieldlinesState(
+        const std::string& pathToJsonFile,
+        const bool shouldResample, //does const bool& make sense?
+        const int& numResamples,
+        const int& resamplingOption,
+        std::vector<double>& startTimes,
+        FieldlinesState& outFieldlinesStates) {
+
+
+
+    return false;
+}
+
 
 bool FieldlinesSequenceManager::getFieldlinesState(
         const std::string& pathToCdfFile,

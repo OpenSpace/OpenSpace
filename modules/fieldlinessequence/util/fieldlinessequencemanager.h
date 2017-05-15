@@ -62,8 +62,16 @@ public:
 
     bool getSeedPointsFromFile(const std::string& path, std::vector<glm::vec3>& outVec);
 
-    bool getCdfFilePaths(const std::string& pathToCdfDirectory,
-                         std::vector<std::string>& outCdfFilePaths);
+    bool getAllFilePathsOfType(const std::string& pathToDirectory,
+                               const std::string& fileExtension,
+                               std::vector<std::string>& outFilePaths);
+
+    bool getFieldlinesState(const std::string& pathToJsonFile,
+                            const bool shouldResample, //does const bool& make sense?
+                            const int& numResamples,
+                            const int& resamplingOption,
+                            std::vector<double>& startTimes,
+                            FieldlinesState& outFieldlinesStates);
 
     bool getFieldlinesState(const std::string& pathToCdfFile,
                             const std::string& tracingVariable,
