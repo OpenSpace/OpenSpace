@@ -62,9 +62,9 @@ private:
     properties::BoolProperty _isVisible;
     properties::BoolProperty _remoteScripting;
 
-    properties::FloatProperty _width;
     properties::Vec4Property _backgroundColor;
     properties::Vec4Property _highlightColor;
+    properties::Vec4Property _separatorColor;
     properties::IntProperty _historyLength;
 
     size_t _inputPosition;
@@ -79,6 +79,9 @@ private:
     } _autoCompleteInfo;
 
     float _currentHeight;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::shared_ptr<ghoul::fontrendering::Font> _historyFont;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     GLuint _vao;
