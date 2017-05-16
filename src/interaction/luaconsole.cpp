@@ -65,7 +65,22 @@ LuaConsole::LuaConsole()
     : properties::PropertyOwner("LuaConsole")
     , _isVisible("isVisible", "Is Visible", false)
     , _remoteScripting("remoteScripting", "Remote scripting", false)
-    , _width("width", "Width", 0.75f, 0.f, 1.f)
+    , _width("width", "Width", 1.f, 0.f, 1.f)
+    , _backgroundColor(
+        "backgroundColor",
+        "Background Color",
+        glm::vec4(0.f, 60.f / 255.f, 102.f / 255.f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _highlightColor(
+        "highlightColor",
+        "Highlight Color",
+        glm::vec4(1.f, 1.f, 1.f, 0.8f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _historyLength("historyLength", "History Length", 13, 0, 100)
     //, _height("height", "Height", 0.04f, 0.f, 1.f)
     , _inputPosition(0)
     , _activeCommand(0)
@@ -77,6 +92,11 @@ LuaConsole::LuaConsole()
 
     //addProperty(_height);
     addProperty(_width);
+    _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_backgroundColor);
+    _highlightColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_highlightColor);
+    addProperty(_historyLength);
 }
 
 void LuaConsole::initialize() {
@@ -453,18 +473,20 @@ void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
     }
 #endif
 
-    // Disallow all non ASCII characters for now
-    if (codepoint > 0x7f) {
-        return;
-    }
+// Disallow all non ASCII characters for now
+if (codepoint > 0x7f) {
+    return;
+}
 
-    addToCommand(std::string(1, static_cast<const char>(codepoint)));
+addToCommand(std::string(1, static_cast<const char>(codepoint)));
 }
 
 void LuaConsole::render() {
-    static const float FontSize = 13.0f;
-    
+    static const float EntryFontSize = 13.0f;
+    static const float HistoryFontSize = 10.0f;
+
     if (!_isVisible) {
+        // When we toggle the console back to visible, we want to start at 0 height
         _currentHeight = 0.f;
         return;
     }
@@ -473,10 +495,26 @@ void LuaConsole::render() {
         _program->rebuildFromFile();
     }
 
+    std::shared_ptr<ghoul::fontrendering::Font> font = OsEng.fontManager().font(
+        "Inconsolata", EntryFontSize
+    );
+    std::shared_ptr<ghoul::fontrendering::Font> historyFont = OsEng.fontManager().font(
+        "Inconsolata", HistoryFontSize
+    );
+
     glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
-    const float frametime = static_cast<float>(OsEng.windowWrapper().deltaTime());
-    static const float Delta = 0.15f;
-    _currentHeight = std::min(_currentHeight + Delta * frametime, FontSize * 2.5f / res.y);
+
+    // Update the current height
+    const float frametime = static_cast<float>(OsEng.windowWrapper().averageDeltaTime());
+    static const float Delta = 2.f; // Speed at which the console opens up
+
+    auto bbox = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+        *historyFont,
+        std::string(_historyLength, '\n').c_str()
+    );
+
+    const float MaximumHeight = bbox.boundingBox.y + 2 * EntryFontSize;
+    _currentHeight = std::min(_currentHeight + Delta * frametime, MaximumHeight / res.y);
 
 
     // Render background
@@ -496,11 +534,16 @@ void LuaConsole::render() {
 
     _program->setUniform("res", res);
     _program->setUniform("width", _width);
+    _program->setUniform("color", _backgroundColor);
     _program->setUniform("height", _currentHeight);
     _program->setUniform("ortho", projection);
 
     glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    _program->setUniform("color", _highlightColor);
+    glDrawArrays(GL_LINES, 1, 4);
+
     _program->deactivate();
 
     glEnable(GL_CULL_FACE);
@@ -514,23 +557,50 @@ void LuaConsole::render() {
     const glm::vec4 lightBlue(0.4, 0.4, 1, 1);
     const glm::vec4 green(0, 1, 0, 1);
     const glm::vec4 white(1, 1, 1, 1);
-    
-    std::shared_ptr<ghoul::fontrendering::Font> font = OsEng.fontManager().font(
-        "Mono", FontSize
-    );
-    
+
+
+
     glm::vec2 inputLocation = glm::vec2(
-        res.x / 2.f - _width * res.x / 2.f + FontSize / 2.f,
-        res.y - _currentHeight * res.y + FontSize / 2.f
+        res.x / 2.f - _width * res.x / 2.f + EntryFontSize / 2.f,
+        res.y - _currentHeight * res.y + EntryFontSize / 2.f
     );
 
     RenderFont(
-        *font, 
+        *font,
         inputLocation,
         white,
         "> %s",
         _commands.at(_activeCommand).c_str()
     );
+
+    glm::vec2 historyInputLocation = glm::vec2(
+        res.x / 2.f - _width * res.x / 2.f + HistoryFontSize / 2.f,
+        res.y - HistoryFontSize * 1.5f
+    );
+
+    // @CPP17: Replace with array_view
+    std::vector<std::string> commandSubset;
+    if (_commandsHistory.size() < _historyLength) {
+        commandSubset = _commandsHistory;
+    }
+    else {
+        commandSubset = std::vector<std::string>(
+            _commandsHistory.end() - _historyLength,
+            _commandsHistory.end()
+        );
+    }
+
+    for (const std::string& cmd : commandSubset) {
+    //for (size_t i = 0; i < _historyLength; ++i) {
+        RenderFontCr(
+            *historyFont,
+            historyInputLocation,
+            white,
+            cmd.c_str()
+        );
+    }
+
+
 
     auto locationForRightJustifiedText = [&](const std::string& text) {
         using namespace ghoul::fontrendering;
@@ -582,67 +652,6 @@ void LuaConsole::render() {
             );
         }
     }
-
-
-
-
-
-
-
-    //const float startY =
-    //    static_cast<float>(ySize) - 2.0f * FontSize - FontSize * 15.0f * 2.0f;
-
-    //const glm::vec4 red(1, 0, 0, 1);
-    //const glm::vec4 lightBlue(0.4, 0.4, 1, 1);
-    //const glm::vec4 green(0, 1, 0, 1);
-    //const glm::vec4 white(1, 1, 1, 1);
-    //std::shared_ptr<ghoul::fontrendering::Font> font = OsEng.fontManager().font(
-    //    "Mono", FontSize
-    //);
-
-    //using ghoul::fontrendering::RenderFont;
-
-
-    //RenderFont(
-    //    *font,
-    //    glm::vec2(15.f + FontSize, startY),
-    //    white,
-    //    "%s",
-    //    _commands.at(_activeCommand).c_str()
-    //);
-    //
-    //const size_t n = std::count(
-    //    _commands.at(_activeCommand).begin(),
-    //    _commands.at(_activeCommand).begin() + _inputPosition,
-    //    '\n'
-    //);
-    //size_t p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition);
-    //size_t linepos = _inputPosition;
-
-    //if (n > 0) {
-    //    if (p == _inputPosition) {
-    //        p = _commands.at(_activeCommand).find_last_of('\n', _inputPosition - 1);
-    //        if (p != std::string::npos) {
-    //            linepos -= p + 1;
-    //        }
-    //        else {
-    //            linepos = _inputPosition - 1;
-    //        }
-    //    }
-    //    else {
-    //        linepos -= p + 1;
-    //    }
-    //}
-
-    //std::stringstream ss;
-    //ss << "%" << linepos + 1 << "s";
-    ////RenderFont(
-    ////    *font, 
-    ////    glm::vec2(15.f + FontSize * 0.5f, startY - (FontSize) * (n + 1) * 3.0f / 2.0f),
-    ////    green,
-    ////    ss.str().c_str(),
-    ////    "^"
-    ////);
 }
 
 void LuaConsole::addToCommand(std::string c) {

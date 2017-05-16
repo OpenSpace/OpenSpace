@@ -28,6 +28,7 @@
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/keys.h>
 
@@ -62,7 +63,9 @@ private:
     properties::BoolProperty _remoteScripting;
 
     properties::FloatProperty _width;
-    //properties::FloatProperty _height;
+    properties::Vec4Property _backgroundColor;
+    properties::Vec4Property _highlightColor;
+    properties::IntProperty _historyLength;
 
     size_t _inputPosition;
     std::vector<std::string> _commandsHistory;
