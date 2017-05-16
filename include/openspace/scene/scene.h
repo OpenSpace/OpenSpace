@@ -34,6 +34,7 @@
 
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/opengl/programobject.h>
 
@@ -42,8 +43,6 @@ namespace ghoul { class Dictionary; }
 namespace openspace {
 
 namespace documentation { struct Documentation; }
-
-class SceneGraphNode;
 
 // Notifications:
 // SceneGraphFinishedLoading
