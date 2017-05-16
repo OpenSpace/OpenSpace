@@ -31,6 +31,8 @@
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
+#include <functional>
+
 namespace openspace {
 namespace globebrowsing {
     
