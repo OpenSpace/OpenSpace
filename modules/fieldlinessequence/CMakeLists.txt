@@ -28,7 +28,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinessequencemanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.h
-    ${OPENSPACE_BASE_DIR}/modules/iswa/ext/json/json.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ext/nlohmann/json/json.hpp
+    # ${OPENSPACE_BASE_DIR}/modules/iswa/ext/json/json.hpp
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 

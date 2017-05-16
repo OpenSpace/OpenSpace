@@ -33,15 +33,19 @@ namespace openspace {
 
 class FieldlinesState {
 public:
+    FieldlinesState() {}
     FieldlinesState(size_t numLines);
     // ~FieldlinesState();
 
     // TODO: MOVE TO PRIVATE
-    std::vector<GLint> _lineStart;
-    std::vector<GLsizei> _lineCount;
-    std::vector<glm::vec3> _vertexPositions;
-    std::vector<glm::vec4> _vertexColors;
-    std::vector<GLfloat> _quickMorph;
+    std::vector<glm::vec3>  _vertexPositions;
+    std::vector<glm::vec4>  _vertexColors;
+
+    std::vector<GLfloat>    _quickMorph;
+    std::vector<GLint>      _lineStart;
+    std::vector<GLsizei>    _lineCount;
+
+    // TODO: start/trigger time as double in j2000 time
 
     std::vector<std::vector< float > > _extraVariables;
 
