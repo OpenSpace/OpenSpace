@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/solarbrowsing/rendering/renderablespacecraftcamerasphere.h>
+#include <modules/solarbrowsing/rendering/renderablespacecraftcameraplane.h>
 #include <modules/space/rendering/planetgeometry.h>
 #include <openspace/util/time.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -52,11 +53,17 @@ RenderableSpacecraftCameraSphere::RenderableSpacecraftCameraSphere(
     , _shader(nullptr)
     , _sphere(nullptr)
 {
+    if (!dictionary.getValue("Name", _nodeName)) {
+        throw ghoul::RuntimeError("Nodename has to be specified");
+    }
 }
 
 bool RenderableSpacecraftCameraSphere::initialize() {
+    _planeDependencies
+          = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
 
-    std::string path = "/Users/michaelnoven/workspace/OpenSpace/data/hmimap1.fits";
+    //std::string path = "/Users/michaelnoven/workspace/OpenSpace/data/hmimap1.fits";
+    std::string path = "/home/noven/workspace/OpenSpace/data/hmimap1.fits";
     FitsFileReader::open(path);
     std::valarray<float> imageData = FitsFileReader::readImage<float>();
     FitsFileReader::close();
@@ -114,6 +121,7 @@ void RenderableSpacecraftCameraSphere::update(const UpdateData& data) {
 }
 
 void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
+
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -126,12 +134,42 @@ void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
 
+    const int numPlanes = _planeDependencies.size();
+
+    ghoul::opengl::TextureUnit txUnits[numPlanes];
+    ghoul::opengl::TextureUnit tfUnits[numPlanes];
+
+    for (int i = 0; i < numPlanes; ++i) {
+        auto* plane = static_cast<RenderableSpacecraftCameraPlane*>(
+              _planeDependencies[i]->renderable());
+
+        _shader->setUniform("sunToSpacecraftReferenceFrame[" + std::to_string(i) + "]",
+                        plane->_sunToSpacecraftTransform);
+        _shader->setUniform("planePositionSpacecraft[" + std::to_string(i) + "]",
+                            plane->_planePosSpacecraftRefFrame);
+
+        // Imagery texture
+        txUnits[i].activate();
+        plane->_texture->bind();
+        _shader->setUniform("imageryTexture[" + std::to_string(i) + "]", txUnits[i]);
+
+        tfUnits[i].activate();
+        plane->_lut->bind();
+        _shader->setUniform("lut[" + std::to_string(i) + "]", tfUnits[i]);
+    }
+
+
+
     ghoul::opengl::TextureUnit imageUnit;
     imageUnit.activate();
     _magnetogramTexture->bind();
     _shader->setUniform("magnetogram", imageUnit);
-    _sphere->render();
-    //_sphereUnit.setZeroUnit();
+
+    //  int numPlanes = 1;
+    // LDEBUG("NUM PLANES " << numPlanes);
+    _shader->setUniform("numSpacecraftCameraPlanes", numPlanes);
+
+    _sphere->render();;
     _shader->deactivate();
 }
 

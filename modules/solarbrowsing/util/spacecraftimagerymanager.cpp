@@ -86,7 +86,7 @@ void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
 
 void SpacecraftImageryManager::loadTransferFunctions(
     const std::string& path,
-    std::unordered_map<std::string, std::unique_ptr<TransferFunction>>& _tfMap,
+    std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap,
     const std::unordered_set<std::string>& _filter)
 {
     using RawPath = ghoul::filesystem::Directory::RawPath;
@@ -114,7 +114,7 @@ void SpacecraftImageryManager::loadTransferFunctions(
                     // If filter is empty or value exist
                     if (_filter.size() == 0
                         || _filter.find(filterKey) != _filter.end()) {
-                        _tfMap[key] = std::make_unique<TransferFunction>(seqPath);
+                        _tfMap[key] = std::make_shared<TransferFunction>(seqPath);
                     }
                 }
             }
