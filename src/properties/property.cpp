@@ -42,8 +42,6 @@ namespace {
 
 const char* Property::ViewOptions::Color = "color";
 const char* Property::ViewOptions::LightPosition = "lightPosition";
-const char* Property::ViewOptions::PowerScaledCoordinate = "powerScaledCoordinate";
-const char* Property::ViewOptions::PowerScaledScalar = "powerScaledScalar";
 
 const char* Property::IdentifierKey = "Identifier";
 const char* Property::NameKey = "Name";
@@ -154,6 +152,12 @@ void Property::setViewOption(std::string option, bool value) {
         value,
         ghoul::Dictionary::CreateIntermediate::Yes
     );
+}
+
+bool Property::viewOption(const std::string& option, bool defaultValue) const {
+    bool v = defaultValue;
+    _metaData.getValue(_metaDataKeyViewPrefix + option, v);
+    return v;
 }
 
 const ghoul::Dictionary& Property::metaData() const {
