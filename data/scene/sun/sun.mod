@@ -30,7 +30,7 @@ return {
             },
             PerformShading = false,
         },
-        Transformation = {
+        Transform = {
             Translation = {
                 Type = "SpiceTranslation",
                 Body = "SUN",
@@ -56,7 +56,7 @@ return {
             Texture = "textures/sun-glare.png",
             BlendMode = "Additive"
         },
-        Transformation = {
+        Transform = {
             Translation = {
                 Type = "SpiceTranslation",
                 Body = "SUN",

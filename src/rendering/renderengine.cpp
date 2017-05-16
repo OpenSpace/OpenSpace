@@ -105,6 +105,7 @@ RenderEngine::RenderEngine()
         "Type of the frametime display",
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _showDate("showDate", "Show Date Information", true)
     , _showInfo("showInfo", "Show Render Information", true)
     , _showLog("showLog", "Show the OnScreen log", true)
     , _takeScreenshot("takeScreenshot", "Take Screenshot")
@@ -112,7 +113,11 @@ RenderEngine::RenderEngine()
     , _applyWarping("applyWarpingScreenshot", "Apply Warping to Screenshots", false)
     , _showFrameNumber("showFrameNumber", "Show Frame Number", false)
     , _disableMasterRendering("disableMasterRendering", "Disable Master Rendering", false)
-    , _disableSceneOnMaster("disableSceneOnMaster", "Disable Scene on Master", false)
+    , _disableSceneTranslationOnMaster(
+        "disableSceneTranslationOnMaster",
+        "Disable Scene Translation on Master",
+        false
+    )
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
@@ -147,6 +152,7 @@ RenderEngine::RenderEngine()
     );
     addProperty(_frametimeType);
     
+    addProperty(_showDate);
     addProperty(_showInfo);
     addProperty(_showLog);
     
@@ -165,8 +171,8 @@ RenderEngine::RenderEngine()
     
     addProperty(_showFrameNumber);
     
+    addProperty(_disableSceneTranslationOnMaster);
     addProperty(_disableMasterRendering);
-    addProperty(_disableSceneOnMaster);
 }
 
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
@@ -214,7 +220,7 @@ void RenderEngine::initialize() {
     }
 
     if (confManager.hasKey(ConfigurationManager::KeyDisableSceneOnMaster)) {
-        _disableSceneOnMaster = confManager.value<bool>(
+        _disableSceneTranslationOnMaster = confManager.value<bool>(
             ConfigurationManager::KeyDisableSceneOnMaster
         );
     }
@@ -226,17 +232,27 @@ void RenderEngine::initialize() {
     setRendererFromString(renderingMethod);
 
 #ifdef GHOUL_USE_DEVIL
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderDevIL>()
+    );
 #endif // GHOUL_USE_DEVIL
 #ifdef GHOUL_USE_FREEIMAGE
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderFreeImage>()
+    );
 #endif // GHOUL_USE_FREEIMAGE
 #ifdef GHOUL_USE_SOIL
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderSOIL>());
-    ghoul::io::TextureWriter::ref().addWriter(std::make_shared<ghoul::io::TextureWriterSOIL>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderSOIL>()
+    );
+    ghoul::io::TextureWriter::ref().addWriter(
+        std::make_shared<ghoul::io::TextureWriterSOIL>()
+    );
 #endif // GHOUL_USE_SOIL
 
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderCMAP>()
+    );
 
     MissionManager::initialize();
 }
@@ -272,8 +288,8 @@ void RenderEngine::initializeGL() {
 }
 
 void RenderEngine::deinitialize() {
-    for (auto screenspacerenderable : _screenSpaceRenderables) {
-        screenspacerenderable->deinitialize();
+    for (std::shared_ptr<ScreenSpaceRenderable> ssr : _screenSpaceRenderables) {
+        ssr->deinitialize();
     }
 
     MissionManager::deinitialize();
@@ -320,8 +336,8 @@ void RenderEngine::updateRenderer() {
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
-    for (auto& screenspacerenderable : _screenSpaceRenderables) {
-        screenspacerenderable->update();
+    for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+        ssr->update();
     }
 }
 
@@ -387,15 +403,13 @@ void RenderEngine::updateFade() {
     }
 }
 
-
-
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {
     LTRACE("RenderEngine::render(begin)");
     WindowWrapper& wrapper = OsEng.windowWrapper();
 
-    if (_disableSceneOnMaster && wrapper.isMaster()) {
+    if (_disableSceneTranslationOnMaster && wrapper.isMaster()) {
         _camera->sgctInternal.setViewMatrix(viewMatrix);
     }
     else {
@@ -413,20 +427,20 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         renderInformation();
     }
 
-    glm::vec2 penPosition = glm::vec2(
-        OsEng.windowWrapper().viewportPixelCoordinates().y / 2 - 50,
-        OsEng.windowWrapper().viewportPixelCoordinates().w / 3
-        );
-
     if (_showFrameNumber) {
-        RenderFontCr(*_fontBig, penPosition, "%i", _frameNumber);
+        const glm::vec2 penPosition = glm::vec2(
+            fontResolution().x / 2 - 50,
+            fontResolution().y / 3
+        );
+        
+        RenderFont(*_fontBig, penPosition, "%i", _frameNumber);
     }
     
     _frameNumber++;
     
-    for (auto& screenSpaceRenderable : _screenSpaceRenderables) {
-        if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady()) {
-            screenSpaceRenderable->render();
+    for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+        if (ssr->isEnabled() && ssr->isReady()) {
+            ssr->render();
         }
     }
     LTRACE("RenderEngine::render(end)");
@@ -443,8 +457,8 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     );
 
     glm::vec2 penPosition = glm::vec2(
-        OsEng.windowWrapper().viewportPixelCoordinates().y - size.boundingBox.x,
-        OsEng.windowWrapper().viewportPixelCoordinates().w - size.boundingBox.y
+        fontResolution().x - size.boundingBox.x - 10,
+        fontResolution().y - size.boundingBox.y
     );
     penPosition.y -= _fontDate->height();
 
@@ -736,7 +750,7 @@ void RenderEngine::unregisterScreenSpaceRenderable(
 }
 
 void RenderEngine::unregisterScreenSpaceRenderable(std::string name){
-    auto s = screenSpaceRenderable(name);
+    std::shared_ptr<ScreenSpaceRenderable> s = screenSpaceRenderable(name);
     if (s) {
         unregisterScreenSpaceRenderable(s);
     }
@@ -805,15 +819,18 @@ void RenderEngine::renderInformation() {
             fontResolution().y
             //OsEng.windowWrapper().viewportPixelCoordinates().w
         );
-        penPosition.y -= _fontDate->height();
 
-        if (_showInfo && _fontDate) {
+        if (_showDate && _fontDate) {
+            penPosition.y -= _fontDate->height();
             RenderFontCr(
                 *_fontDate,
                 penPosition,
                 "Date: %s",
                 Time::ref().UTC().c_str()
             );
+        }
+        else {
+            penPosition.y -= _fontInfo->height();
         }
         if (_showInfo && _fontInfo) {
             RenderFontCr(
@@ -1276,7 +1293,9 @@ void RenderEngine::sortScreenspaceRenderables() {
     std::sort(
         _screenSpaceRenderables.begin(),
         _screenSpaceRenderables.end(),
-        [](auto j, auto i) {
+        [](const std::shared_ptr<ScreenSpaceRenderable>& j,
+           const std::shared_ptr<ScreenSpaceRenderable>& i)
+        {
             return i->depth() > j->depth();
         }
     );

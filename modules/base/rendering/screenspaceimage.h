@@ -33,17 +33,20 @@
 #include <ghoul/opengl/texture.h>
  
 namespace openspace {
+    
+namespace documentation { struct Documentation; }
 
 class ScreenSpaceImage : public ScreenSpaceRenderable {
 public:
     ScreenSpaceImage(const ghoul::Dictionary& dictionary);
-    ~ScreenSpaceImage();
 
     bool initialize() override;
     bool deinitialize() override;
     void render() override;
     void update() override;
     bool isReady() const override;
+
+    static documentation::Documentation Documentation();
 
 protected:
     void loadTexture();

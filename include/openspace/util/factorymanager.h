@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___FACTORYMANAGER___H__
 #define __OPENSPACE_CORE___FACTORYMANAGER___H__
 
+#include <openspace/documentation/documentationgenerator.h>
+
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/templatefactory.h>
 
@@ -37,7 +39,7 @@ namespace openspace {
  * them available through the #addFactory and #factory methods. Each
  * ghoul::TemplateFactory can only be added once and can be accessed by its type.
  */
-class FactoryManager {
+class FactoryManager : public DocumentationGenerator {
 public:
     /// This exception is thrown if the ghoul::TemplateFactory could not be found in the
     /// #factory method
@@ -55,6 +57,8 @@ public:
         /// The type describing the ghoul::TemplateFactory that could not be found
         std::string type;
     };
+
+    FactoryManager();
     
     /**
      * Static initializer that initializes the static member. This needs to be done before
@@ -104,17 +108,9 @@ public:
     template <class T>
     ghoul::TemplateFactory<T>* factory() const;
 
-    /**
-     * Writes a documentation for the FactoryMananger that contains all of the registered
-     * factories and for each factory all registered class names.
-     * \param file The file to which the documentation will be written
-     * \param type The type of documentation that will be written
-     * \pre \p file must not be empty
-     * \pre \p type must not be empty
-     */
-    void writeDocumentation(const std::string& file, const std::string& type);
-
 private:
+    std::string generateJson() const override;
+
     /// Singleton member for the Factory Manager
     static FactoryManager* _manager;
 

@@ -40,6 +40,8 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 namespace modelgeometry {
 class ModelGeometry;
 }
@@ -56,6 +58,7 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 
+    static documentation::Documentation Documentation();
 
 protected:
     void loadTexture();
@@ -72,13 +75,7 @@ private:
     glm::dmat3 _modelTransform;
 
     float _alpha;
-    //glm::dmat3 _stateMatrix; 
 
-    //std::string _source;
-    //std::string _destination;
-    std::string _target;
-
-    //bool _isGhost;
     int _frameCount;
 
     glm::dvec3 _sunPos;

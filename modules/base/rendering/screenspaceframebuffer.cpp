@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/screenspaceframebuffer.h>
+
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/camera.h>
@@ -34,11 +36,27 @@
 
 namespace openspace {
 
+documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
+    using namespace documentation;
+    return {
+        "ScreenSpace Framebuffer",
+        "base_screenspace_framebuffer",
+        {},
+        Exhaustive::Yes
+    };
+}
+
 ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary) 
     : ScreenSpaceRenderable(dictionary)
     , _size("size", "Size", glm::vec4(0), glm::vec4(0), glm::vec4(2000))
     , _framebuffer(nullptr)
 {
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "ScreenSpaceFramebuffer"
+    );
+
     _id = id();
     setName("ScreenSpaceFramebuffer" + std::to_string(_id));
 
