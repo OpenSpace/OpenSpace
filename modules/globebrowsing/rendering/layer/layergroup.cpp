@@ -83,6 +83,7 @@ int LayerGroup::pileSize() const{
 
 void LayerGroup::onChange(std::function<void(void)> callback) {
     _onChangeCallback = callback;
+    _levelBlendingEnabled.onChange(callback);
     for (const auto& layer : _layers) {
         layer->onChange(callback);
     }

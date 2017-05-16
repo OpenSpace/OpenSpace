@@ -55,7 +55,6 @@ namespace tileprovider {
     
 CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
     : TileProvider(dictionary)
-    , _defaultTile(Tile::TileUnavailable)
 {
     _name = "Name unspecified";
     dictionary.getValue("Name", _name);
@@ -122,7 +121,6 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
 CachingTileProvider::CachingTileProvider(
     std::shared_ptr<AsyncTileDataProvider> tileReader)
     : _asyncTextureDataProvider(tileReader)
-    , _defaultTile(Tile::TileUnavailable)
 { }
 
 CachingTileProvider::~CachingTileProvider()
@@ -135,7 +133,7 @@ void CachingTileProvider::update() {
 
 void CachingTileProvider::reset() {
     cache::MemoryAwareTileCache::ref().clear();
-    //_asyncTextureDataProvider->reset();
+    _asyncTextureDataProvider->reset();
 }
 
 int CachingTileProvider::maxLevel() {
@@ -162,17 +160,6 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
 float CachingTileProvider::noDataValueAsFloat() {
     return _asyncTextureDataProvider->noDataValueAsFloat();
 }
-
-/*
-Tile CachingTileProvider::getDefaultTile() {
-    if (_defaultTile.status() != Tile::Status::OK) {
-        _defaultTile = createTile(
-            _asyncTextureDataProvider->getRawTileDataReader()->defaultTileData()
-        );
-    }
-    return _defaultTile;
-}
-*/
 
 void CachingTileProvider::initTexturesFromLoadedData() {
     std::shared_ptr<RawTile> rawTile = _asyncTextureDataProvider->popFinishedRawTile();
@@ -205,44 +192,6 @@ Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
 TileDepthTransform CachingTileProvider::depthTransform() {
     return _asyncTextureDataProvider->getRawTileDataReader()->getDepthTransform();
 }
-
-/*
-Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
-	
-    if (rawTile->error != RawTile::ReadError::None) {
-        return Tile(nullptr, nullptr, Tile::Status::IOError);
-    }
-    using ghoul::opengl::Texture;
-    
-    std::shared_ptr<Texture> texture = std::make_shared<Texture>(
-        rawTile->textureInitData->dimensionsWithPadding(),
-        rawTile->textureInitData->ghoulTextureFormat(),
-        rawTile->textureInitData->glTextureFormat(),
-        rawTile->textureInitData->glType(),
-        Texture::FilterMode::Linear,
-        Texture::WrappingMode::ClampToEdge);
-
-    if (rawTile->pbo != 0) {
-        texture->uploadTextureFromPBO(rawTile->pbo);
-    }
-    else {
-        texture->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
-        size_t expectedDataSize = texture->expectedPixelDataSize();
-        size_t nBytes = rawTile->textureInitData->totalNumBytes();
-        ghoul_assert(expectedDataSize == nBytes,
-            "Pixel data size is incorrect");
-        texture->reUploadTexture();
-    }
-
-    texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-    Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
-    return tile;
-	
-	return Tile(nullptr, nullptr, Tile::Status::Unavailable);
-
-}
-*/
 
 } // namespace tileprovider
 } // namespace globebrowsing

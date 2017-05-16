@@ -51,7 +51,8 @@ public:
      * define a key specifying what implementation of TileProvider
      * to be instantiated.
      */
-    static std::unique_ptr<TileProvider> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<TileProvider> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     /** 
      * Default constructor. 
@@ -151,6 +152,8 @@ public:
 protected:
     std::string _name;
 private:
+    void initializeDefaultTile();
+
     static unsigned int _numTileProviders;
     unsigned int _uniqueIdentifier;
     bool _initialized;

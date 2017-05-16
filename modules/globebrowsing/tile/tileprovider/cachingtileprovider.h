@@ -81,8 +81,6 @@ private:
     //Tile createTile(std::shared_ptr<RawTile> res);
 
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-
-    Tile _defaultTile;
 };
 
 } // namespace tileprovider
