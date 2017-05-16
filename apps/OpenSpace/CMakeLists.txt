@@ -90,11 +90,21 @@ endif ()
 #  Spout section  end  #
 ########################
 
-add_executable(${APPLICATION_NAME}
-    ${SGCT_OPENVR_FILES}
-    ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp
-    ${RESOURCE_FILE}
-)
+# Building on MacOS? Bundle it!
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+    add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
+        ${SGCT_OPENVR_FILES}
+        ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp
+        ${RESOURCE_FILE}
+    )
+else ()
+    add_executable(${APPLICATION_NAME}
+        ${SGCT_OPENVR_FILES}
+        ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp
+        ${RESOURCE_FILE}
+    )
+endif ()
+
 if (OPENSPACE_SPOUT_SUPPORT)
     ghl_copy_files(
         ${APPLICATION_NAME}
