@@ -61,11 +61,13 @@ public:
     void update(const UpdateData& data) override;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+    std::unique_ptr<PowerScaledSphere> _sphere;
 private:
     void loadTexture();
 
+    std::vector<SceneGraphNode*> _planeDependencies;
+    std::string _nodeName;
     std::unique_ptr<ghoul::opengl::Texture> _magnetogramTexture;
-    std::unique_ptr<PowerScaledSphere> _sphere;
     float _planetRadius;
 };
 

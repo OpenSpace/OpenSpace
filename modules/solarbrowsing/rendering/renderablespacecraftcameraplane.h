@@ -92,6 +92,12 @@ public:
     void performImageTimestep(const double& osTime);
     void updateTexture();
 
+    // TODO(mnoven): Getters
+    glm::dvec3 _planePosSpacecraftRefFrame;
+    glm::dmat4 _sunToSpacecraftTransform;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    TransferFunction* _lut;
+
 private:
     globebrowsing::ConcurrentJobManager<BufferObject> _concurrentJobManager;
 
@@ -150,12 +156,10 @@ private:
     double _deltaTimeLast = 0.0;
     double _realTimeDiff;
 
-    std::string _currentActiveInstrument;
-
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::vector<std::unique_ptr<TransferFunction>> _transferFunctions;
-    std::unordered_map<std::string, std::unique_ptr<TransferFunction>> _tfMap;
+    std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
 
+    std::string _currentActiveInstrument;
     std::vector<std::vector<ImageMetadata>> _imageMetadata;
 
     std::unordered_map<int, std::string> _optionToInstrument;

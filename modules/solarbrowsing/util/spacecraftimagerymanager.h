@@ -59,7 +59,7 @@ public:
                               const unsigned int tileHeight);
     void loadTransferFunctions(
           const std::string& path,
-          std::unordered_map<std::string, std::unique_ptr<TransferFunction>>& _tfMap,
+          std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap,
           const std::unordered_set<std::string>& _filter);
     std::vector<ImageMetadata> loadImageMetadata(const std::string& path);
     void loadImageMetadata(

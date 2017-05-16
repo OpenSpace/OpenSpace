@@ -65,7 +65,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
     , _target("target", "Target", "Sun")
-    , _useBuffering("useBuffering", "Use Buffering", false)
+    , _useBuffering("useBuffering", "Use Buffering", true)
     , _usePBO("usePBO", "Use PBO", true)
     , _magicFactor("magicfactor", "Full Plane Size", 0.785, 0.0, 1.0)
     , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(2))
@@ -656,6 +656,8 @@ void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
         _lastUpdateRealTime = _realTime;
     }
 
+    _lut = _tfMap[_currentActiveInstrument].get();
+
     if (_planeShader->isDirty()) {
         _planeShader->rebuildFromFile();
     }
@@ -717,8 +719,8 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
 
     ghoul::opengl::TextureUnit tfUnit;
     tfUnit.activate();
-
-    _tfMap[_currentActiveInstrument]->bind(); // Calls update internally
+    //_tfMap[_currentActiveInstrument]->bind(); // Calls update internally
+    _lut->bind();
     _planeShader->setUniform("lut", tfUnit);
 
     glBindVertexArray(_quad);
@@ -735,41 +737,8 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     glDrawArrays(GL_LINES, 0, 16);
     _frustumShader->deactivate();
 
-    const SceneGraphNode* targetSphere = OsEng.renderEngine().scene()->sceneGraphNode("Sun Imagery");
-    const auto* renderableSphere = reinterpret_cast<const RenderableSpacecraftCameraSphere*>(
-          targetSphere->renderable());
-
-    const auto& sphereShader = renderableSphere->_shader;
-
-    sphereShader->activate();
-    glm::dmat4 modelTransformSphere =
-        glm::translate(glm::dmat4(1.0), target->worldPosition()) * // Translation
-        glm::dmat4(target->worldRotationMatrix()) *  // Spice rotation
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
-    glm::dmat4 modelViewTransformSphere
-          = viewMatrix * modelTransformSphere;
-
-    //const glm::dmat4 worldToSpacecraft = glm::inverse(rotationTransform);
-    sphereShader->setUniform("planePositionSpacecraft[" + std::to_string(_id) + "]",
-                              glm::dvec3(rotationTransformSpacecraft
-                                    * glm::dvec4(positionWorld + offset, 1.0)));
-    sphereShader->setUniform("sunToSpacecraftReferenceFrame[" + std::to_string(_id) + "]",
-                              rotationTransformSpacecraft * glm::dmat4(target->rotationMatrix()));
-
-    sphereShader->setUniform(
-        "modelViewProjectionTransform[" + std::to_string(_id) + "]",
-        projectionMatrix * glm::mat4(modelViewTransformSphere)
-    );
-
-    imageUnit.activate();
-    _texture->bind();
-
-    tfUnit.activate();
-    _tfMap[_currentActiveInstrument]->bind(); // Calls update internally
-    sphereShader->setUniform("lut[" + std::to_string(_id) + "]", tfUnit);
-
-    sphereShader->deactivate();
-
+    _planePosSpacecraftRefFrame = glm::dvec3(rotationTransformSpacecraft * glm::dvec4(positionWorld + offset, 1.0));
+    _sunToSpacecraftTransform = rotationTransformSpacecraft * glm::dmat4(target->rotationMatrix());
 }
 
 } // namespace openspace
