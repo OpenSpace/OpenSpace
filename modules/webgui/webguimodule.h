@@ -22,18 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+/**
+ * Structure:
+ * WebGUIModule  - handles connection between all classes in module
+ * Interface     - handle connections and business logic
+                 - handle
+ * Renderer      - Handle rendering CEF in GL env
+ *               - resizing
+ * BrowserClient - Handle CEF setup and processes
+ */
+
 #ifndef __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 #define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include "include/cef_app.h"
+// #include "include/cef_app.h"
 
 namespace openspace {
 
 class WebGUIModule : public OpenSpaceModule {
 public:
-    WebGUI();
-    virtual ~WebGUI() = default;
+    WebGUIModule();
+    virtual ~WebGUIModule() = default;
 
     // void lifeCheck() { std::cout << "i'm alive" << endl; }
 };

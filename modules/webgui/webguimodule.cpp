@@ -23,3 +23,11 @@
  ****************************************************************************************/
 
 #include "modules/webgui/webguimodule.h"
+
+namespace openspace {
+
+WebGUIModule::WebGUIModule()
+    : OpenSpaceModule("WebGUI")
+{}
+
+}
