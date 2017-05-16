@@ -68,7 +68,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _useBuffering("useBuffering", "Use Buffering", true)
     , _usePBO("usePBO", "Use PBO", true)
     , _magicFactor("magicfactor", "Full Plane Size", 0.785, 0.0, 1.0)
-    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(2))
+    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
     , _verboseMode("verboseMode", "Verbose Mode", false)
 {
     std::string target;
@@ -491,18 +491,18 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
                            << " ms" << std::endl);
                 }
 
-                // const auto& imageList = _imageMetadataMap[_currentActiveInstrument];
-                // const double& osTime = Time::ref().j2000Seconds();
-                // double time = osTime + Time::ref().deltaTime() * ((_minRealTimeUpdateInterval )/ 1000 );
-                // const auto& low = std::lower_bound(imageList.begin(), imageList.end(), time);
-                // int nextImageIndex = low - imageList.begin();
-                // if (nextImageIndex
-                //     == _imageMetadataMap[_currentActiveInstrument].size()) {
-                //     nextImageIndex = nextImageIndex - 1;
-                // }
+                const auto& imageList = _imageMetadataMap[_currentActiveInstrument];
+                const double& osTime = Time::ref().j2000Seconds();
+                double time = osTime + _bufferSize * (Time::ref().deltaTime() * ((_minRealTimeUpdateInterval )/ 1000 ) );
+                const auto& low = std::lower_bound(imageList.begin(), imageList.end(), time);
+                int nextImageIndex = low - imageList.begin();
+                if (nextImageIndex
+                    == _imageMetadataMap[_currentActiveInstrument].size()) {
+                    nextImageIndex = nextImageIndex - 1;
+                }
 
                 std::string currentFilename
-                      = _imageMetadataMap[_currentActiveInstrument][image].filename;
+                      = _imageMetadataMap[_currentActiveInstrument][nextImageIndex].filename;
                 auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename,
                                                        _resolutionLevel, _verboseMode);
                 _concurrentJobManager.enqueueJob(job);
