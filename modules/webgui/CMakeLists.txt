@@ -24,6 +24,7 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(WEBGUI_MODULE_NAME WebGUI)
+set(WEBGUI_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBGUI_MODULE_PATH")
 
 # wanted by CEF
 set(PROJECT_ARCH "x86_64")
@@ -70,6 +71,80 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 ##########################################################################################
 # Add CEF client files
 
+set(WEBGUI_SOURCES
+  webguimodule.cpp
+  )
+set(WEBGUI_SOURCES_LINUX
+  )
+set(WEBGUI_SOURCES_MACOSX
+  )
+set(WEBGUI_SOURCES_WINDOWS
+  )
+APPEND_PLATFORM_SOURCES(WEBGUI_SOURCES)
+source_group(WebGUI FILES ${WEBGUI_SOURCES})
+
+set(WEBGUI_RESOURCES_SOURCES_WINDOWS
+  )
+APPEND_PLATFORM_SOURCES(WEBGUI_RESOURCES_SOURCES)
+source_group(WebGUI\\\\res FILES ${WEBGUI_RESOURCES_SOURCES})
+
+set(WEBGUI_SOURCES
+  ${WEBGUI_SOURCES}
+  ${WEBGUI_RESOURCES_SOURCES}
+  )
+
+# CEF helper sources
+set(WEBGUI_HELPER_SOURCES_MACOSX
+  process_helper_mac.cc
+  )
+APPEND_PLATFORM_SOURCES(WEBGUI_HELPER_SOURCES)
+source_group(WebGUI FILES ${WEBGUI_HELPER_SOURCES})
+
+set(WEBGUI_RESOURCES_MAC_SOURCES_MACOSX
+  mac/Info.plist
+  mac/webgui.icns
+  )
+APPEND_PLATFORM_SOURCES(WEBGUI_RESOURCES_MAC_SOURCES)
+source_group(WebGUI\\\\mac FILES ${WEBGUI_RESOURCES_MAC_SOURCES})
+
+set(WEBGUI_RESOURCES_MAC_ENGLISH_LPROJ_SRCS_MACOSX
+  mac/English.lproj/InfoPlist.strings
+  mac/English.lproj/MainMenu.xib
+  )
+APPEND_PLATFORM_SOURCES(WEBGUI_RESOURCES_MAC_ENGLISH_LPROJ_SRCS)
+source_group(cefsimple\\\\mac\\\\English.lproj FILES ${WEBGUI_RESOURCES_MAC_ENGLISH_LPROJ_SRCS})
+
+set(WEBGUI_RESOURCES_SRCS
+  ${WEBGUI_RESOURCES_MAC_SOURCES}
+  ${WEBGUI_RESOURCES_MAC_ENGLISH_LPROJ_SRCS}
+  )
+
+# Helper target (only needed my MacOS)
+if(OS_MACOSX)
+  set(CEF_HELPER_TARGET "webgui_cef_helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+endif()
+
+#
+# Shared CEF config
+#
+
+# MacOS helper target config
+if(OS_MACOSX)
+  # set global CEF helper app target
+  set(CEF_HELPER_APP "${CEF_TARGET_OUT_DIR}/${CEF_HELPER_TARGET}.app" CACHE INTERNAL "CEF_HELPER_APP")
+
+  # Helper executable target.
+  add_executable(${CEF_HELPER_TARGET} MACOSX_BUNDLE ${WEBGUI_HELPER_SOURCES})
+  SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
+  add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
+  target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+  set_target_properties(${CEF_HELPER_TARGET} PROPERTIES
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
+    )
+
+  # Fix the framework rpath in the helper executable.
+  FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
+endif()
 
 
 ##########################################################################################
