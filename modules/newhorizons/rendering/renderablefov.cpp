@@ -30,6 +30,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/programobject.h>
 

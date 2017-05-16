@@ -41,6 +41,8 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <ghoul/opengl/programobject.h>
+
 #include <fstream>
 
 

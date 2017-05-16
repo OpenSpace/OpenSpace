@@ -31,7 +31,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
-
+#include <openspace/scripting/scriptengine.h>
 
 #ifdef WIN32
 #define _USE_MATH_DEFINES

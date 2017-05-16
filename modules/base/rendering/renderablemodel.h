@@ -31,14 +31,20 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/updatestructures.h>
-
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
 
 #include <memory>
 
+namespace ghoul {
+namespace opengl {
+    class ProgramObject; 
+    class Texture;
+} // namespace opengl
+} // namespace ghoul
+
 namespace openspace {
+
+struct RenderData;
+struct UpdateData;
 
 namespace documentation { struct Documentation; }
 
@@ -64,24 +70,18 @@ protected:
     void loadTexture();
 
 private:
+    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
+
     properties::StringProperty _colorTexturePath;
     properties::BoolProperty _performFade;
+    properties::BoolProperty _performShading;
     properties::FloatProperty _fading;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
-    std::unique_ptr<modelgeometry::ModelGeometry> _geometry;
-    
     glm::dmat3 _modelTransform;
-
-    float _alpha;
-
-    int _frameCount;
-
     glm::dvec3 _sunPos;
-
-    properties::BoolProperty _performShading;
-    properties::Vec3Property _debugModelRotation;
 };
 
 }  // namespace openspace

@@ -28,6 +28,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
+#include <openspace/scene/scene.h>
 
 #include <ghoul/lua/lua_helper.h>
 #include <fstream>
