@@ -74,18 +74,19 @@ void SingleImageProvider::update() {
 }
 
 void SingleImageProvider::reset() {
-	/*
-    auto tileTexture = std::shared_ptr<ghoul::opengl::Texture>(
-        ghoul::io::TextureReader::ref().loadTexture(_imagePath)
-    );
-    auto tileStatus = tileTexture != nullptr ? Tile::Status::OK : Tile::Status::IOError;
+    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_imagePath);
+    auto tileStatus = _tileTexture ? Tile::Status::OK : Tile::Status::IOError;
     auto tileMetaData = nullptr;
 
-    tileTexture->uploadTexture();
-    tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
+    if (!_tileTexture) {
+        throw std::runtime_error(std::string("Unable to load texture '")
+            + _imagePath + "'");
+    }
+ 
+    _tileTexture->uploadTexture();
+    _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-    _tile = Tile(tileTexture, tileMetaData, tileStatus);
-	*/
+    _tile = Tile(_tileTexture.get(), tileMetaData, tileStatus);
 }
 
 int SingleImageProvider::maxLevel() {
