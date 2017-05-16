@@ -34,7 +34,9 @@ ScreenLog::ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel)
     : _timeToLive(std::move(timeToLive))
     , _logLevel(logLevel)
 {}
-    
+
+ScreenLog::~ScreenLog() {}
+
 void ScreenLog::removeExpiredEntries() {
     auto t = std::chrono::steady_clock::now();
     auto ttl = _timeToLive;

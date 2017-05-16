@@ -73,7 +73,7 @@ public:
     };
 
     RenderEngine();
-    ~RenderEngine() = default;
+    ~RenderEngine();
     
     void initialize();
     void initializeGL();
