@@ -95,14 +95,17 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
     
     if (dataDestination && !pboMappedDataDestination) {
         // Write only to cpu data destination
+        memset(dataDestination, 255, _initData.totalNumBytes());
         readImageData(io, worstError, dataDestination);
     }
     else if (!dataDestination && pboMappedDataDestination) {
         // Write only to pbo mapped data destination
+        memset(pboMappedDataDestination, 255, _initData.totalNumBytes());
         readImageData(io, worstError, pboMappedDataDestination);
     }
     else if (dataDestination && pboMappedDataDestination) {
         // Write to both data destinations
+        memset(dataDestination, 255, _initData.totalNumBytes());
         readImageData(io, worstError, dataDestination);
         size_t numBytes = _initData.totalNumBytes();
         memcpy(pboMappedDataDestination, dataDestination, numBytes);
@@ -120,6 +123,10 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
     if (_preprocess == PerformPreprocessing::Yes) {
         rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);
         rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile, io));
+    }
+  
+    if (rawTile->error != RawTile::ReadError::None) {
+        int hej = 0;
     }
 
     return rawTile;
@@ -341,7 +348,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
                     _initData.glType(),
                     &(rawTile->imageData[yi + i])
                 );
-                if (val != noDataValue) {
+                if (val != noDataValue && val == val) {
                     preprocessData->maxValues[raster] = std::max(
                         val,
                         preprocessData->maxValues[raster]
@@ -387,7 +394,7 @@ RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
 {
     ensureInitialized();
 
-    double missingDataValue = noDataValueAsFloat();
+    float missingDataValue = noDataValueAsFloat();
 
     bool hasMissingData = false;
     

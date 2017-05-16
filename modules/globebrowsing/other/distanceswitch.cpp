@@ -51,7 +51,7 @@ void DistanceSwitch::render(const RenderData& data) {
         return;
     }
 
-    double distanceToCamera = (data.camera.positionVec3() - data.position.dvec3()).length();
+    double distanceToCamera = distance(data.camera.positionVec3(), data.modelTransform.translation);
 
     if (distanceToCamera > _maxDistances.back() * _objectScale) {
         return;

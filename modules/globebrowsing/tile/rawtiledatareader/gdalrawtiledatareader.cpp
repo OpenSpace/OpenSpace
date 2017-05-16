@@ -42,6 +42,8 @@
 
 #include <gdal_priv.h>
 
+#include <algorithm>
+
 namespace {
     const std::string _loggerCat = "GdalRawTileDataReader";
 }
@@ -156,6 +158,9 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
     io.write.bytesPerLine = _initData.bytesPerLine();
     io.write.totalNumBytes = _initData.totalNumBytes();
 
+    ghoul_assert(io.write.region.numPixels.x == io.write.region.numPixels.y, "");
+    ghoul_assert(io.write.region.numPixels.x == _initData.dimensionsWithPadding().x, "");
+
     return io;
 }
 
@@ -175,17 +180,19 @@ void GdalRawTileDataReader::readImageData(
     // In case there are extra channels not existing in the GDAL dataset
     // we set the bytes to 255 (for example an extra alpha channel that)
     // needs to be 1.
-    if (_initData.nRasters() > _dataset->GetRasterCount()) {
-        memset(imageDataDest, 255, io.write.totalNumBytes);
-    }
-    
+    //if (_initData.nRasters() > _dataset->GetRasterCount()) {
+    //    memset(imageDataDest, 255, io.write.totalNumBytes);
+    //}
+  
+    int nRastersToRead = std::min(_dataset->GetRasterCount(), static_cast<int>(_initData.nRasters()));
+
     switch (_initData.ghoulTextureFormat()) {
         case ghoul::opengl::Texture::Format::Red:
         case ghoul::opengl::Texture::Format::RG:
         case ghoul::opengl::Texture::Format::RGB:
         case ghoul::opengl::Texture::Format::RGBA: {
             // Read the data (each rasterband is a separate channel)
-            for (int i = 0; i < _dataset->GetRasterCount(); i++) {
+            for (int i = 0; i < nRastersToRead; i++) {
                 // The final destination pointer is offsetted by one datum byte size
                 // for every raster (or data channel, i.e. R in RGB)
                 char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
@@ -199,7 +206,7 @@ void GdalRawTileDataReader::readImageData(
         }
         case ghoul::opengl::Texture::Format::BGR: {
             // Read the data (each rasterband is a separate channel)
-            for (int i = 0; i < 3 && i < _dataset->GetRasterCount(); i++) {
+            for (int i = 0; i < 3 && i < nRastersToRead; i++) {
                 // The final destination pointer is offsetted by one datum byte size
                 // for every raster (or data channel, i.e. R in RGB)
                 char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
@@ -212,7 +219,7 @@ void GdalRawTileDataReader::readImageData(
             break;
         }
         case ghoul::opengl::Texture::Format::BGRA: {
-            for (int i = 0; i < 3 && i < _dataset->GetRasterCount(); i++) {
+            for (int i = 0; i < 3 && i < nRastersToRead; i++) {
                 // The final destination pointer is offsetted by one datum byte size
                 // for every raster (or data channel, i.e. R in RGB)
                 char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
@@ -222,7 +229,7 @@ void GdalRawTileDataReader::readImageData(
                 // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
                 worstError = std::max(worstError, err);
             }
-            if (_dataset->GetRasterCount() > 3) { // Alpha channel exists
+            if (nRastersToRead > 3) { // Alpha channel exists
                 // Last read is the alpha channel
                 char* dataDestination = imageDataDest + (3 * _initData.bytesPerDatum());
                 RawTile::ReadError err = repeatedRasterRead(4, io, dataDestination);
@@ -265,7 +272,8 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
     dataDest -= io.write.region.start.y * io.write.bytesPerLine;
     dataDest += io.write.region.start.x * _initData.bytesPerPixel();
   
-    CPLErr readError = _dataset->GetRasterBand(rasterBand)->RasterIO(
+    GDALRasterBand* gdalRasterBand = _dataset->GetRasterBand(rasterBand);
+    CPLErr readError = gdalRasterBand->RasterIO(
         GF_Read,
         io.read.region.start.x,         // Begin read x
         io.read.region.start.y,         // Begin read y

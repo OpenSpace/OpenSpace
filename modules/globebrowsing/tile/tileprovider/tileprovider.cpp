@@ -148,7 +148,7 @@ bool TileProvider::initialize() {
         TileTextureInitData::ShouldAllocateDataOnCPU::Yes);
     int numBytes = initData.totalNumBytes();
     char* pixels = new char[numBytes];
-    memset(pixels, numBytes, 0);
+    memset(pixels, 0, numBytes);
 
     // Create ghoul texture
     _defaultTileTexture = std::make_unique<Texture>(initData.dimensionsWithPadding());

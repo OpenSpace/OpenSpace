@@ -48,35 +48,8 @@ Tile::Tile(ghoul::opengl::Texture* texture,
     , _texture(texture)
     , _metaData(metaData)
     , _status(status)
-{}
-/*
-Tile Tile::createPlainTile(const glm::uvec2& size, const glm::uvec4& color) {
-    using namespace ghoul::opengl;
-        
-    // Create pixel data
-    int numBytes = size.x * size.y * 4 * 1;
-    char* pixels = new char[numBytes];
-    size_t numPixels = size.x * size.y;
-    size_t i = 0;
-    for (size_t p = 0; p < numPixels; p++){
-        pixels[i++] = color.r;
-        pixels[i++] = color.g;
-        pixels[i++] = color.b;
-        pixels[i++] = color.a;
-    }
+{ }
 
-    // Create ghoul texture
-    auto texture = std::make_shared<Texture>(glm::uvec3(size, 1));
-    texture->setDataOwnership(Texture::TakeOwnership::Yes);
-    texture->setPixelData(pixels);
-    texture->uploadTexture();
-    texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-
-    // Create tile
-    Tile tile(texture, nullptr, Tile::Status::OK);
-    return tile;
-} 
-*/
 glm::vec2 Tile::compensateSourceTextureSampling(glm::vec2 startOffset, glm::vec2 sizeDiff,
                                                 glm::uvec2 resolution, glm::vec2 tileUV)
 {

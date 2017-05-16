@@ -97,7 +97,8 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::ID id,
         case layergroupid::ID::HeightLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 64;
             return TileTextureInitData(tileSize, tileSize, GL_FLOAT,
-                ghoul::opengl::Texture::Format::Red, TileTextureInitData::ShouldAllocateDataOnCPU::Yes);
+                ghoul::opengl::Texture::Format::Red,
+                TileTextureInitData::ShouldAllocateDataOnCPU::Yes);
         }
         case layergroupid::ID::ColorLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
@@ -127,7 +128,7 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::ID id,
         case layergroupid::ID::WaterMasks: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::RG);
+                ghoul::opengl::Texture::Format::RGBA);
         }
         default: {
             ghoul_assert(false, "Unknown layer group ID");
