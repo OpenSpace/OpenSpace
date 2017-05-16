@@ -157,22 +157,21 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(const ghoul
 
     LDEBUG("Successfully created SceneGraphNode '"
                    << result->name() << "'");
-    return std::move(result);
+    return result;
 }
 
 SceneGraphNode::SceneGraphNode()
     : properties::PropertyOwner("")
     , _parent(nullptr)
     , _scene(nullptr)
+    , _performanceRecord({0, 0, 0, 0, 0})
+    , _renderable(nullptr)
     , _transform {
         std::make_unique<StaticTranslation>(),
         std::make_unique<StaticRotation>(),
         std::make_unique<StaticScale>()
     }
-    , _performanceRecord({0, 0, 0})
-    , _renderable(nullptr)
-{
-}
+{}
 
 SceneGraphNode::~SceneGraphNode() {
     deinitialize();
@@ -319,9 +318,8 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
         thisPositionPSC,
         data.doPerformanceMeasurement,
         data.renderBinMask,
-        _worldPositionCached,
-        _worldRotationCached,
-        _worldScaleCached};
+        { _worldPositionCached, _worldRotationCached, _worldScaleCached }
+    };
 
     //_performanceRecord.renderTime = 0;
 
@@ -410,7 +408,7 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& chil
     if (_scene) {
         setScene(nullptr);
     }
-    return std::move(c);
+    return c;
 }
 
 void SceneGraphNode::addDependency(SceneGraphNode& dependency, UpdateScene updateScene) {

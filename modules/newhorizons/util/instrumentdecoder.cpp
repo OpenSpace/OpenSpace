@@ -59,7 +59,7 @@ InstrumentDecoder::InstrumentDecoder(const ghoul::Dictionary& dictionary)
 
 
     _spiceIDs.resize(spiceDictionary.size());
-    for (int i = 0; i < _spiceIDs.size(); ++i) {
+    for (size_t i = 0; i < _spiceIDs.size(); ++i) {
         std::string id;
         spiceDictionary.getValue(std::to_string(i + 1), id);
         _spiceIDs[i] = id;

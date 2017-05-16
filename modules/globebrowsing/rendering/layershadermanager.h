@@ -39,6 +39,8 @@ class ProgramObject;
 namespace openspace {
 namespace globebrowsing {
 
+class RenderableGlobe;
+
 /**
  * This class has ownership of an updated shader program for rendering tiles.
  */
@@ -68,6 +70,8 @@ public:
         layeredTextureInfo;
         std::vector<std::pair<std::string, std::string> > keyValuePairs;
         bool operator==(const LayerShaderPreprocessingData& other) const;
+
+        static LayerShaderPreprocessingData get(const RenderableGlobe&);
     };
     
     LayerShaderManager(
@@ -83,15 +87,14 @@ public:
      * from the last time this function was called the shader program will be
      * recompiled before returned.
      */
-    ghoul::opengl::ProgramObject* programObject(
-        LayerShaderPreprocessingData preprocessingData);
+    ghoul::opengl::ProgramObject* programObject();
 
     bool updatedOnLastCall();
-        
-private:
-        
+    
     void recompileShaderProgram(LayerShaderPreprocessingData preprocessingData);
 
+private:
+        
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
     LayerShaderPreprocessingData _preprocessingData;
 

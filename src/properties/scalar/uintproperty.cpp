@@ -71,14 +71,12 @@ namespace properties {
         return true;                                                                     \
     }
 
-REGISTER_NUMERICALPROPERTY_SOURCE(UCharProperty, unsigned int, (unsigned int)0,
+REGISTER_NUMERICALPROPERTY_SOURCE(UCharProperty, unsigned int, 0,
                                   numeric_limits<unsigned int>::lowest(),
-                                  numeric_limits<unsigned int>::max(), (unsigned int)1,
-                                  DEFAULT_FROM_LUA_LAMBDA(unsigned int,
-                                                          (unsigned int)(0)),
+                                  numeric_limits<unsigned int>::max(), 1,
+                                  DEFAULT_FROM_LUA_LAMBDA(unsigned int, 0),
                                   DEFAULT_TO_LUA_LAMBDA(unsigned int),
-                                  DEFAULT_FROM_STRING_LAMBDA(unsigned int,
-                                                             (unsigned int)(0)),
+                                  DEFAULT_FROM_STRING_LAMBDA(unsigned int, 0),
                                   DEFAULT_TO_STRING_LAMBDA(unsigned int),
                                   LUA_TNUMBER);
 

@@ -49,6 +49,7 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     bool enabled = false; // defaults to false if unspecified
     layerDict.getValue("Enabled", enabled);
     _enabled.setValue(enabled);
+    
     addProperty(_enabled);
 
     addPropertySubOwner(_renderSettings);
@@ -56,7 +57,12 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
 }
 
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
-    return std::move(_tileProvider->getChunkTilePile(tileIndex, pileSize));
+    return _tileProvider->getChunkTilePile(tileIndex, pileSize);
+}
+
+
+void Layer::onChange(std::function<void(void)> callback) {
+    _enabled.onChange(callback);
 }
 
 } // namespace globebrowsing

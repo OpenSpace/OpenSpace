@@ -69,7 +69,7 @@ Tile TextTileProvider::getTile(const TileIndex& tileIndex) {
     return _tileCache.get(key);
 }
 
-Tile::Status TextTileProvider::getTileStatus(const TileIndex& index) {
+Tile::Status TextTileProvider::getTileStatus(const TileIndex&) {
     return Tile::Status::OK;
 }
 

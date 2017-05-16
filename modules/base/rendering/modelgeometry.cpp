@@ -287,8 +287,7 @@ bool ModelGeometry::getIndices(std::vector<int>* indexList) {
     return !(indexList->empty());
 }
 
-void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject& program) {
-}
+void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject&) {}
 
 }  // namespace modelgeometry
 }  // namespace openspace

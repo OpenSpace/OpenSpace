@@ -27,10 +27,6 @@
 #include <modules/globebrowsing/tile/tilemetadata.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
-namespace {
-    const char* _loggerCat = "RawTile";
-}
-
 namespace openspace {
 namespace globebrowsing {
 
@@ -49,6 +45,7 @@ RawTile RawTile::createDefault(const TileTextureInitData& initData) {
     defaultRes.imageData = new char[initData.totalNumBytes()];
     std::fill_n(static_cast<char*>(defaultRes.imageData), initData.totalNumBytes(), 0);
     return defaultRes;
+
 }
 
 } // namespace globebrowsing

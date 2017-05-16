@@ -221,8 +221,9 @@ void RenderableModel::render(const RenderData& data) {
 }
 
 void RenderableModel::update(const UpdateData& data) {
-    if (_programObject->isDirty())
+    if (_programObject->isDirty()) {
         _programObject->rebuildFromFile();
+    }
 //    double _time = data.time;
 
     //if (_isGhost){
@@ -247,7 +248,7 @@ void RenderableModel::update(const UpdateData& data) {
 void RenderableModel::loadTexture() {
     _texture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _texture = std::move(ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath)));
+        _texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath));
         if (_texture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _texture->uploadTexture();

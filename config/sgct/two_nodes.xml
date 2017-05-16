@@ -5,6 +5,7 @@
             <Pos x="0" y="300" />
             <!-- 16:9 aspect ratio -->
             <Size x="1280" y="720" />
+            <Viewport>
                 <Pos x="0.0" y="0.0" />
                 <Size x="1.0" y="1.0" />
                 <PlanarProjection>

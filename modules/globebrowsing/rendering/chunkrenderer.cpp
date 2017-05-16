@@ -60,7 +60,6 @@ ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
 
     _globalGpuLayerManager = std::make_shared<GPULayerManager>();
     _localGpuLayerManager = std::make_shared<GPULayerManager>();
-
 }
 
 void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
@@ -78,6 +77,13 @@ void ChunkRenderer::update() {
     // unused atm. Could be used for caching or precalculating
 }
 
+void ChunkRenderer::recompileShaders(const RenderableGlobe& globe) {
+    LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
+        LayerShaderManager::LayerShaderPreprocessingData::get(globe);
+    _globalLayerShaderManager->recompileShaderProgram(preprocessingData);
+    _localLayerShaderManager->recompileShaderProgram(preprocessingData);
+}
+
 ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     std::shared_ptr<LayerShaderManager> layeredShaderManager,
     std::shared_ptr<GPULayerManager> gpuLayerManager,
@@ -85,45 +91,8 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 {
     const TileIndex& tileIndex = chunk.tileIndex();
 
-    LayerShaderManager::LayerShaderPreprocessingData layeredTexturePreprocessingData;
-        
-    for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; i++) {
-        LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData layeredTextureInfo;
-        auto layerGroup = _layerManager->layerGroup(i);
-        layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
-        layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
-
-        layeredTexturePreprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
-    }
-        
-    const auto& generalProps = chunk.owner().generalProperties();
-    const auto& debugProps = chunk.owner().debugProperties();
-    auto& pairs = layeredTexturePreprocessingData.keyValuePairs;
-        
-    pairs.emplace_back("useAtmosphere", std::to_string(generalProps.atmosphereEnabled));
-    pairs.emplace_back("performShading", std::to_string(generalProps.performShading));
-    pairs.emplace_back("showChunkEdges", std::to_string(debugProps.showChunkEdges));
-    pairs.emplace_back("showHeightResolution",
-        std::to_string(debugProps.showHeightResolution));
-    pairs.emplace_back("showHeightIntensities",
-        std::to_string(debugProps.showHeightIntensities));
-    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
-
-    pairs.emplace_back("tilePaddingStart",
-        "ivec2(" +
-        std::to_string(RawTileDataReader::padding.start.x) + "," +
-        std::to_string(RawTileDataReader::padding.start.y) + ")"
-    );
-    pairs.emplace_back("tilePaddingSizeDiff",
-        "ivec2(" +
-        std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
-        std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
-    );
-
     // Now the shader program can be accessed
-    ghoul::opengl::ProgramObject* programObject =
-        layeredShaderManager->programObject(
-            layeredTexturePreprocessingData);
+    ghoul::opengl::ProgramObject* programObject = layeredShaderManager->programObject();
         
     if (layeredShaderManager->updatedOnLastCall()) {
         gpuLayerManager->bind(programObject, *_layerManager);
@@ -203,7 +172,6 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
             glm::normalize(-data.modelTransform.translation);
         glm::vec3 directionToSunCameraSpace =
             (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
-        data.modelTransform.translation;
         programObject->setUniform("modelViewTransform", modelViewTransform);
         programObject->setUniform(
             "lightDirectionCameraSpace", -directionToSunCameraSpace);
@@ -285,7 +253,6 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
             glm::normalize(-data.modelTransform.translation);
         glm::vec3 directionToSunCameraSpace =
             (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
-        data.modelTransform.translation;
         programObject->setUniform(
             "lightDirectionCameraSpace", -directionToSunCameraSpace);
     }

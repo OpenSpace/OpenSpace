@@ -265,7 +265,7 @@ void InteractionHandler::updateCamera(double deltaTime) {
     }
 }
 
-SceneGraphNode* const InteractionHandler::focusNode() const {
+SceneGraphNode* InteractionHandler::focusNode() const {
     return _currentInteractionMode->focusNode();
 }
 
@@ -278,7 +278,7 @@ glm::quat InteractionHandler::focusNodeToCameraRotation() const {
     return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
 }
 
-Camera* const InteractionHandler::camera() const {
+Camera* InteractionHandler::camera() const {
     return _camera;
 }
 

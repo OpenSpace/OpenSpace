@@ -323,13 +323,13 @@ bool ImageSequencer::getImagePaths(std::vector<Image>& captures,
                         double beforeDist = std::numeric_limits<double>::max();
                         if (it != captures.begin()) {
                             auto before = std::prev(it);
-                            beforeDist = abs(before->timeRange.start - it->timeRange.start);
+                            beforeDist = std::abs(before->timeRange.start - it->timeRange.start);
                         }
                         
                         double nextDist = std::numeric_limits<double>::max();
                         if (it != captures.end() - 1) {
                             auto next = std::next(it);
-                            nextDist = abs(next->timeRange.start - it->timeRange.start);
+                            nextDist = std::abs(next->timeRange.start - it->timeRange.start);
                         }
                         
                         if (beforeDist < 1.0 || nextDist < 1.0) {
@@ -413,7 +413,7 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
                 double min = 10;                
                 auto findMin = [&](std::vector<Image> &vector)->double{
                     for (int i = 1; i < vector.size(); i++){
-                        double e = abs(vector[i].timeRange.start - vector[i - 1].timeRange.start);
+                        double e = std::abs(vector[i].timeRange.start - vector[i - 1].timeRange.start);
                         if (e < min){
                             min = e;
                         }
@@ -432,7 +432,7 @@ void ImageSequencer::runSequenceParser(SequenceParser* parser){
                 // 'predicted event file' (mission-playbook)
                 for (int i = 0; i < source.size(); i++){
                     for (int j = 0; j < destination.size(); j++){
-                        double diff = abs(source[i].timeRange.start - destination[j].timeRange.start);
+                        double diff = std::abs(source[i].timeRange.start - destination[j].timeRange.start);
                         if (diff < epsilon){
                             source.erase(source.begin() + i);
                         }

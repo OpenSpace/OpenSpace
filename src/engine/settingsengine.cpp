@@ -38,11 +38,6 @@
 
 #include <string>
 
-
-namespace {
-    const char* _loggerCat = "SettingsEngine";
-}
-
 namespace openspace {
 
 SettingsEngine::SettingsEngine()

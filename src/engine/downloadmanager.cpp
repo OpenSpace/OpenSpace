@@ -65,10 +65,12 @@ namespace {
 
     size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp){
         size_t realsize = size * nmemb;
-        openspace::DownloadManager::MemoryFile *mem = (openspace::DownloadManager::MemoryFile *)userp;
+        auto mem = static_cast<openspace::DownloadManager::MemoryFile *>(userp);
 
-        mem->buffer = (char*)realloc(mem->buffer, mem->size + realsize + 1);
-        if(mem->buffer == NULL) {
+        mem->buffer = reinterpret_cast<char*>(
+            realloc(mem->buffer, mem->size + realsize + 1)
+        );
+        if (!mem->buffer) {
             /* out of memory! */ 
             printf("not enough memory (realloc returned NULL)\n");
             return 0;
@@ -81,8 +83,8 @@ namespace {
         return realsize;
     }
 
-    int xferinfo(void* p, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal,
-                 curl_off_t ulnow)
+    int xferinfo(void* p, curl_off_t dltotal, curl_off_t dlnow, curl_off_t,
+                 curl_off_t)
     {
         if (dltotal == 0)
             return 0;
@@ -239,7 +241,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
     
     auto downloadFunction = [url, successCallback, errorCallback]() {
         DownloadManager::MemoryFile file;
-        file.buffer = (char*)malloc(1);
+        file.buffer = reinterpret_cast<char*>(malloc(1));
         file.size = 0;
         file.corrupted = false;
 
@@ -250,18 +252,18 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
 
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&file);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, reinterpret_cast<void*>(&file));
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
         // Will fail when response status is 400 or above
         curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
             
         CURLcode res = curl_easy_perform(curl);
-        if(res == CURLE_OK){
+        if (res == CURLE_OK){
             // ask for the content-type
             char *ct;
             res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
-            if(res == CURLE_OK){
+            if (res == CURLE_OK){
                 std::string extension = std::string(ct);
                 std::stringstream ss(extension);
                 getline(ss, extension ,'/');
@@ -272,7 +274,7 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             }
             successCallback(file);
             curl_easy_cleanup(curl);
-            return std::move(file);
+            return file;
         } else {
             std::string err = curl_easy_strerror(res);
             errorCallback(err);
@@ -283,11 +285,11 @@ std::future<DownloadManager::MemoryFile> DownloadManager::fetchFile(
             // or set a boolean variable in MemoryFile to determine if it is valid/corrupted or not.
             // Return MemoryFile even if it is not valid, and check if it is after future.get() call.
             file.corrupted = true;
-            return std::move(file);
+            return file;
         }
     };
 
-    return std::move( std::async(std::launch::async, downloadFunction) );
+    return std::async(std::launch::async, downloadFunction);
 }
 
 std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downloadRequestFiles(

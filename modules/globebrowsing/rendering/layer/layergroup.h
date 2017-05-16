@@ -38,6 +38,7 @@
 namespace openspace {
 namespace globebrowsing {
 
+
 namespace tileprovider {
     class TileProvider;
 }
@@ -63,11 +64,14 @@ struct LayerGroup : public properties::PropertyOwner {
 
     bool layerBlendingEnabled() const { return _levelBlendingEnabled.value(); }
 
+    void onChange(std::function<void(void)> callback);
+
 private:
     std::vector<std::shared_ptr<Layer>> _layers;
     std::vector<std::shared_ptr<Layer>> _activeLayers;
 
     properties::BoolProperty _levelBlendingEnabled;
+    std::function<void(void)> _onChangeCallback;
 };
 
 } // namespace globebrowsing

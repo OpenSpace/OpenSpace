@@ -61,7 +61,7 @@ TileProvider::TileProvider()
     initialize();
 }
 
-TileProvider::TileProvider(const ghoul::Dictionary& dictionary)
+TileProvider::TileProvider(const ghoul::Dictionary&)
     : properties::PropertyOwner("tileProvider")
     , _initialized(false)
     , _defaultTile(nullptr, nullptr, Tile::Status::Unavailable)
@@ -115,7 +115,7 @@ ChunkTile TileProvider::getChunkTile(TileIndex tileIndex, int parents, int maxPa
     return ChunkTile{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
 }
 
-ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize){
+ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize) {
     ghoul_assert(_initialized, "TileProvider was not initialized.");
     ghoul_assert(pileSize >= 0, "pileSize must be positive");
     ChunkTilePile chunkTilePile;

@@ -26,11 +26,12 @@
 
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict) 
+LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
     : properties::PropertyOwner("Layers")
 {
     if (layergroupid::NUM_LAYER_GROUPS != layerGroupsDict.size()) {
@@ -144,6 +145,11 @@ bool LayerManager::shouldPerformPreProcessingOnLayergroup(layergroupid::ID id) {
     }
 }
 
+void LayerManager::onChange(std::function<void(void)> callback) {
+    for (auto& layerGroup : _layerGroups) {
+        layerGroup->onChange(callback);
+    }
+}
 
 } // namespace globebrowsing
 } // namespace openspace

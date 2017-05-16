@@ -57,6 +57,7 @@ public:
         size_t preferredTileSize = 0);
 
     static bool shouldPerformPreProcessingOnLayergroup(layergroupid::ID id);
+    void onChange(std::function<void(void)> callback);
 
 private:
     std::vector<std::shared_ptr<LayerGroup>> _layerGroups;

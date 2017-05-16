@@ -53,23 +53,22 @@ namespace {
     const int MaxRaycasters = 32;
     const int MaxLayers = 32;
     const int MaxAverageLayers = 8;
-}
+} // namespace
 
 namespace openspace {
 
-
 ABufferRenderer::ABufferRenderer()
-        : _camera(nullptr)
-        , _scene(nullptr)
-        , _resolution(glm::ivec2(0))
-        , _dirtyResolution(true)
-        , _dirtyRaycastData(true)
-        , _dirtyRendererData(true)
-        , _dirtyResolveDictionary(true)
-        , _resolveProgram(nullptr) { }
+    : _camera(nullptr)
+    , _scene(nullptr)
+    , _resolution(glm::ivec2(0))
+    , _dirtyResolution(true)
+    , _dirtyRaycastData(true)
+    , _dirtyRendererData(true)
+    , _dirtyResolveDictionary(true)
+    , _resolveProgram(nullptr)
+{}
 
 ABufferRenderer::~ABufferRenderer() {}
-
 
 void ABufferRenderer::initialize() {
     LINFO("Initializing ABufferRenderer");

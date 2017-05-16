@@ -159,7 +159,7 @@ MissionPhase::Trace MissionPhase::phaseTrace(double time, int maxDepth) const {
         trace.push_back(std::cref(*this));
         phaseTrace(time, trace, maxDepth);
     }
-    return std::move(trace);
+    return trace;
 }
 
 void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
