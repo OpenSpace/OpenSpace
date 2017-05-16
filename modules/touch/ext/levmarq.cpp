@@ -103,7 +103,8 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 		int k = 1;
 		for (int i = 0; i < ny; ++i) {
 			for (int j = 0; j < 2; ++j) {
-				ps << "pos" << i << j;
+				std::string s = (j == 0) ? "x" : "y";
+				ps << "p" << i << s;
 				if (j + 1 < ny) {
 					ps << ",";
 				}
