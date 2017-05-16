@@ -32,7 +32,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/keys.h>
-
+#include <ghoul/misc/invariants.h>
 #include <ghoul/logging/logmanager.h>
 
 #include <glm/gtx/quaternion.hpp>
@@ -60,9 +60,10 @@ TouchInteraction::TouchInteraction()
 	_origin("origin", "Origin", ""),
 	_lmVerbose("LM verbose", "Save data from LM algorithm", false),
 	_unitTest("Click to take a unit test", "Take a unit test saving the LM data into file", false),
+	_onlyPan("Toggle Panning Mode", "Toggle pan interaction on direct-manipulation three finger case (FOR FEEDBACK)", false), // temp
 	_maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000),
 	_touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f),
-	_nodeRadiusThreshold("Activate direct-manipulation", "Radius a planet has to have to activate direct-manipulation", 0.3f, 0.0f, 1.0f),
+	_nodeRadiusThreshold("Activate direct-manipulation", "Radius a planet has to have to activate direct-manipulation", 0.2f, 0.0f, 1.0f),
 	_orbitSpeedThreshold("Activate orbit spinning", "Threshold to activate orbit spinning in direct-manipulation", 0.038f, 0.0f, 0.1f),
 	_panSpeedThreshold("Activate pan spinning", "Threshold to activate pan spinning in direct-manipulation", 0.004f, 0.0, 0.01),
 	_spinSensitivity("Sensitivity of Spinning", "Sensitivity of spinning in direct-manipulation", 0.25f, 0, 1),
@@ -80,6 +81,7 @@ TouchInteraction::TouchInteraction()
 {
 	addProperty(_lmVerbose);
 	addProperty(_unitTest);
+	addProperty(_onlyPan); // temp
 	addProperty(_maxTapTime);
 	addProperty(_touchScreenSize);
 	addProperty(_nodeRadiusThreshold);
@@ -108,6 +110,7 @@ TouchInteraction::TouchInteraction()
 
 // Called each frame if there is any input
 void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
+	ghoul_precondition(!list.empty(), "List must not be empty");
 	if (_tap) { // check for doubletap
 		if (_time.getSessionTime().getTotalMilliseconds() < _maxTapTime) {
 			_doubleTap = true;
@@ -129,7 +132,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 
 		// evaluates if current frame is in directTouchMode (will if so be used next frame)
 		if (_currentRadius > _nodeRadiusThreshold && _selected.size() == list.size()) { // needs better definition?
-			_vel.pan = glm::dvec2(0.0, 0.0);
+			//_vel.pan = glm::dvec2(0.0, 0.0);
 			_directTouchMode = true;
 		}
 		else {
@@ -144,7 +147,7 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
 	glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenY(res.y)); // mouse pixel position
 	_guiON = OnScreenGUIModule::gui.isEnabled();
 	_lmstat.verbose = _lmVerbose;
-	if (_tap && list.size() == 1 && pos.x < _guiButton.value().x && pos.y < _guiButton.value().y) { // pressed invisible button
+	if (_tap && list.size() == 1 && std::abs(pos.x) < _guiButton.value().x && std::abs(pos.y) < _guiButton.value().y) { // pressed invisible button
 		_guiON = !_guiON;
 		OnScreenGUIModule::gui.setEnabled(_guiON);
 
@@ -161,6 +164,12 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
 
 // Sets _vel to update _camera according to direct-manipulation (L2 error)
 void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
+	// Reset old velocities upon new interaction
+	_vel.orbit = glm::dvec2(0.0, 0.0);
+	_vel.zoom = 0.0;
+	_vel.roll = 0.0;
+	_vel.pan = glm::dvec2(0.0, 0.0);
+
 	// Returns the screen point s(xi,par) dependant the transform M(par) and object point xi
 	auto distToMinimize = [](double* par, int x, void* fdata, LMstat* lmstat) {
 		FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
@@ -220,7 +229,6 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		}
 
 		// Update the camera state
-        // @COMMENT  Do you have to make a copy of the camera object here?  You are not using it afterwards
 		Camera cam = *(ptr->camera);
 		cam.setPositionVec3(camPos);
 		cam.setRotation(globalCamRot * localCamRot);
@@ -245,7 +253,23 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 			par[i] -= h;
 			der = (f1 - f0) / h;
 			
-			g[i] = (i > 1 && i < 4) ? der : der / abs(der);
+			g[i] = der;
+		}
+		if (ptr->nDOF == 2) {
+			for (int i = 0; i < 2; ++i) {
+				g[i] = g[i]/std::abs(g[i]);
+			}
+		}
+		else if (ptr->nDOF == 6) {
+			for (int i = 0; i < ptr->nDOF; ++i) { // 3 finger case
+				//g[i] = (i > 1 && i < 4) ? g[i] : g[i] / std::abs(g[i]); // like it used to be
+				if (ptr->onlyPan) { // temp for feedback
+					g[i] = g[i] / std::abs(g[i]); // no zoom, weird roll sometimes, otherwise only pan
+				}
+				else {
+					// do nothing - fits fingers well, but is difficult to control
+				}	
+			}
 		}
 	};
 
@@ -271,7 +295,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		screenPoints.push_back(glm::dvec2(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5))); // normalized -1 to 1 coordinates on screen
 	}
 	//glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-	FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, node, 1.88, _lmstat };
+	FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, node, 1.88, _lmstat, _onlyPan };
 	void* dataPtr = reinterpret_cast<void*>(&fData);
 
 	_lmSuccess = levmarq(nDOF, par.data(), nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
@@ -285,7 +309,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 				_vel.pan = glm::dvec2(par.at(4), par.at(5));
 			}
 		}
-		step(1);
+		step(1.0);
 		_lastVel = _vel;
 		_vel.orbit = glm::dvec2(0.0, 0.0);
 		_vel.zoom = 0.0;
@@ -373,7 +397,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
 
 // Interprets the input gesture to a specific interaction
 int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
-    // @COMMENT  #include <ghoul/misc/invariants.h>  Then you can use ghoul_precondition as an assertion to check if, for example, list is not empty
+	ghoul_precondition(!list.empty(), "List must not be empty");
 	double dist = 0;
 	double lastDist = 0;
 	TuioCursor cursor = list.at(0);
@@ -591,26 +615,9 @@ void TouchInteraction::unitTest() {
 		//openspace.time.setTime("2016 SEP 8 23:00:00.500")
 		//openspace.time.togglePause()
 
-		using namespace glm;
 		// set camera pos and rot
-		glm::dvec3 camPos = dvec3(26974419543.178154, 76302892465.068359, -127116625827.843369); // chosen world location that fits
-		_camera->setPositionVec3(camPos);
-
-		glm::dvec3 camToFocus = _focusNode->worldPosition() - _camera->positionVec3();
-		glm::dvec3 camForward = glm::normalize(_camera->viewDirectionWorldSpace());
-		double angle = glm::angle(camForward, camToFocus);
-		glm::dvec3 axis = glm::normalize(glm::cross(camForward, camToFocus));
-		dquat Q;
-		Q.x = axis.x * sin(angle / 2.0);
-		Q.y = axis.y * sin(angle / 2.0);
-		Q.z = axis.z * sin(angle / 2.0);
-		Q.w = cos(angle / 2.0);
-		dmat4 lookAtMat = lookAt(
-			dvec3(0, 0, 0),
-			normalize(camToFocus),
-			normalize(_camera->viewDirectionWorldSpace() + _camera->lookUpVectorWorldSpace())); // To avoid problem with lookup in up direction
-		dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
-		_camera->setRotation(globalCamRot * Q);
+		//_camera->setPositionVec3(glm::dvec3(26974419543.178154, 76302892465.068359, -127116625827.843369));
+		//_camera->setRotation(glm::dquat(0.791502, -0.576456, -0.001228, -0.203029));
 
 		// set _selected pos and new pos (on screen)
 		std::vector<TuioCursor> lastFrame = {
@@ -635,8 +642,15 @@ void TouchInteraction::unitTest() {
 
 		// clear everything
 		_selected.clear();
+		_vel.orbit = glm::dvec2(0.0, 0.0);
+		_vel.zoom = 0.0;
+		_vel.roll = 0.0;
+		_vel.pan = glm::dvec2(0.0, 0.0);
+		_lastVel = _vel;
 		_unitTest = false;
 		_lmVerbose = false;
+
+		// could be the camera copy in func
 	}
 }
 
@@ -653,7 +667,9 @@ void TouchInteraction::decelerate() {
 
 // Called if all fingers are off the screen
 void TouchInteraction::resetAfterInput() {
+	ghoul_postcondition(_selected.empty(), "Selected list must be empty after reset");
 	_lmSuccess = true;
+	//_directTouchMode = false;
 	if (_directTouchMode && _selected.size() > 0) {
 		double spinDelta = _spinSensitivity / OsEng.windowWrapper().averageDeltaTime();
 		if (glm::length(_lastVel.pan) > _panSpeedThreshold) { // might not be desired
