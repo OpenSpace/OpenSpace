@@ -74,6 +74,10 @@ return {
             Id = 1,
             -- Resolution of imagery, will be moved to metadata later
             Resolution = 2048,
+            StartResolutionLevel = 2,
+            -- Temp
+            MagicOffsetFromCenter = {0.001069336, 0.047768066},
+            MagicPlaneFactor = 0.61877,
             Type = "RenderableSpacecraftCameraPlane",
             Target = "Sun",
             -- Will recursively find all instruments that match array instruments

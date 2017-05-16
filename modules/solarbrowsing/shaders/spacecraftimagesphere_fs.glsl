@@ -34,9 +34,12 @@ uniform sampler2D imageryTexture[MAX_SPACECRAFT_OBSERVATORY];
 uniform sampler2D magnetogram;
 uniform int numSpacecraftCameraPlanes;
 
+uniform dvec2 magicPlaneOffset[MAX_SPACECRAFT_OBSERVATORY];
+uniform float magicPlaneFactor[MAX_SPACECRAFT_OBSERVATORY];
+
 // TODO(mnoven): Uniform
-const float FULL_PLANE_SIZE = (1391600000 * 0.5) / 0.785; // / 0.61877
-const float FULL_PLANE_SIZE_STEREO = (1391600000 * 0.5) / 0.61877;
+const float FULL_PLANE_SIZE = (1391600000 * 0.5) / magicPlaneFactor[0]; 
+const float FULL_PLANE_SIZE_STEREO = (1391600000 * 0.5) / magicPlaneFactor[1];
 // TODO(mnoven): Metadata
 const float magnetogramMin = -2265.132812;
 const float magnetogramMax = 2417.483887;
@@ -64,13 +67,13 @@ Fragment getFragment() {
         vec2 uv1 = vUv[0].xy;
         uv1 /= (FULL_PLANE_SIZE * 2);
         uv1 += 0.5;
-        float intensityOrg1 = texture(imageryTexture[0], vec2(uv1.x, uv1.y)).r;
+        float intensityOrg1 = texture(imageryTexture[0], vec2(uv1.x  + magicPlaneOffset[0].x, uv1.y + magicPlaneOffset[0].y)).r;
         vec4 outColor1 = texture(lut[0], intensityOrg1);
 
         vec2 uv2 = vUv[1].xy;
         uv2 /= (FULL_PLANE_SIZE_STEREO * 2);
         uv2 += 0.5;
-        float intensityOrg2 = texture(imageryTexture[1], vec2(uv2.x  +  ( (1024.0 - 1021.81 ) / 2048 ), uv2.y +  ((1024.0 - 926.171) / 2048))).r;
+        float intensityOrg2 = texture(imageryTexture[1], vec2(uv2.x + magicPlaneOffset[1].x, uv2.y + magicPlaneOffset[1].y)).r;
         vec4 outColor2 = texture(lut[1], intensityOrg2);
 
         outColor = mix(outColor1, outColor2, 0.5);
@@ -78,14 +81,14 @@ Fragment getFragment() {
         vec2 uv = vUv[0].xy;
         uv /= (FULL_PLANE_SIZE * 2);
         uv += 0.5;
-        float intensityOrg = texture(imageryTexture[0], vec2(uv.x, uv.y)).r;
+        float intensityOrg = texture(imageryTexture[0], vec2(uv.x + magicPlaneOffset[0].x, uv.y  + magicPlaneOffset[0].x)).r;
         outColor = texture(lut[0], intensityOrg);
         //outColor = vec4(intensityOrg,intensityOrg,intensityOrg, 1.0 );
     } else if (planePositionSpacecraft[1].z < vUv[1].z) {
         vec2 uv = vUv[1].xy;
         uv /= (FULL_PLANE_SIZE_STEREO * 2);
         uv += 0.5;
-        float intensityOrg = texture(imageryTexture[1], vec2(uv.x  +  ( (1024.0 - 1021.81 ) / 2048 ), uv.y + ((1024.0 - 926.171) / 2048))).r;
+        float intensityOrg = texture(imageryTexture[1], vec2(uv.x  + magicPlaneOffset[1].x, uv.y + magicPlaneOffset[1].y)).r;
         outColor = texture(lut[1], intensityOrg);
     } else {
         float intensity = texture(magnetogram, vs_st).r;

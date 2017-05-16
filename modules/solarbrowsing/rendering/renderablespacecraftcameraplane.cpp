@@ -67,13 +67,26 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _target("target", "Target", "Sun")
     , _useBuffering("useBuffering", "Use Buffering", true)
     , _usePBO("usePBO", "Use PBO", true)
-    , _magicFactor("magicfactor", "Full Plane Size", 0.785, 0.0, 1.0)
     , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
     , _verboseMode("verboseMode", "Verbose Mode", false)
 {
     std::string target;
     if (dictionary.getValue("Target", target)) {
         _target = target;
+    }
+
+    glm::dvec2 magicPlaneOffset;
+    if (dictionary.getValue("MagicOffsetFromCenter", magicPlaneOffset)) {
+        _magicPlaneOffset = magicPlaneOffset;
+    }
+
+    float tmpStartResolutionLevel;
+    if (dictionary.getValue("StartResolutionLevel", tmpStartResolutionLevel)) {
+        _resolutionLevel = static_cast<int>(tmpStartResolutionLevel);
+    }
+
+    if (!dictionary.getValue("MagicPlaneFactor", _magicPlaneFactor)) {
+        throw ghoul::RuntimeError("Plane must at the moment have a magic factor");
     }
 
     std::string rootPath;
@@ -93,11 +106,11 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _id = static_cast<unsigned int>(id);
 
     //TODO(mnoven): Can't pass in an int to dictionary?
-    float tmp;
-    if (!dictionary.getValue("Resolution", tmp)){
+    float tmpResolution;
+    if (!dictionary.getValue("Resolution", tmpResolution)){
         throw ghoul::RuntimeError("Resolution has to be specified");
     }
-    _fullResolution = static_cast<unsigned int>(tmp);
+    _fullResolution = static_cast<unsigned int>(tmpResolution);
 
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>("Instruments")) {
         ghoul::Dictionary instrumentDic = dictionary.value<ghoul::Dictionary>("Instruments");
@@ -252,7 +265,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     addProperty(_activeInstruments);
     addProperty(_bufferSize);
     addProperty(_displayTimers);
-    addProperty(_magicFactor);
+   // addProperty(_magicFactor);
     addProperty(_resolutionLevel);
     addProperty(_lazyBuffering);
     addProperty(_minRealTimeUpdateInterval);
@@ -336,7 +349,7 @@ void RenderableSpacecraftCameraPlane::updatePlane() {
     //const double c = 0.31622776601; // sqrt(0.1)
     //_move = a * exp(-(pow((_moveFactor.value() - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)));
     _move = /*a **/ exp(-(pow((_moveFactor.value() - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
-    _size = _move * HALF_SUN_RADIUS / _magicFactor;
+    _size = _move * HALF_SUN_RADIUS / _magicPlaneFactor;
     createPlane();
     createFrustum();
 }
@@ -711,6 +724,9 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
 
     _planeShader->setUniform("modelViewProjectionTransform",
         projectionMatrix * glm::mat4(modelViewTransform));
+
+    //_planeShader->setUniform("magicPlaneFactor", _magicPlaneFactor);
+    _planeShader->setUniform("magicPlaneOffset", _magicPlaneOffset);
 
     ghoul::opengl::TextureUnit imageUnit;
     imageUnit.activate();
