@@ -63,6 +63,7 @@ public:
 
     // constructors & destructor
     Scene();
+    ~Scene();
 
     /**
      * Initalizes the SceneGraph
