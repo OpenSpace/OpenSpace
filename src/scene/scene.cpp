@@ -92,6 +92,9 @@ Scene::Scene()
     )
 {}
 
+Scene::~Scene(){
+}
+    
 void Scene::setRoot(std::unique_ptr<SceneGraphNode> root) {
     if (_root) {
         removeNode(_root.get());
