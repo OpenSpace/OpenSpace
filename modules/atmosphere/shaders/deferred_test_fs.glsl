@@ -311,7 +311,7 @@ void dCalculateRayRenderablePlanet(out dRay ray, out dvec4 planetPositionObjectC
   dvec4 objectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + worldCoords.xyz, 1.0);
 
   // Planet Position in Object Space
-  planetPositionObjectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + dObjpos.xyz, 1.0);
+  planetPositionObjectCoords =  dvec4(0.0,0.0,0.0,1.0);//dInverseTransformMatrix * dvec4(-dObjpos.xyz + dObjpos.xyz, 1.0);
 
   // Camera Position in Object Space
   cameraPositionInObject = dInverseTransformMatrix * dvec4(-dObjpos.xyz + dCampos, 1.0);
@@ -801,8 +801,8 @@ void main() {
     vec4 meanNormal = vec4(0.0);
     vec4 meanPosition = vec4(0.0);
     for (int i = 0; i < nAaSamples; i++) {
-      meanNormal += texelFetch(mainNormalReflectanceTexture, ivec2(gl_FragCoord), i);
-      meanColor  += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
+      meanNormal   += texelFetch(mainNormalReflectanceTexture, ivec2(gl_FragCoord), i);
+      meanColor    += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
       meanPosition += texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
       //     geoDepth += denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), i).x);
     }
@@ -833,9 +833,10 @@ void main() {
         // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
         // in the depth buffer is less than the distance to the atmosphere then the atmosphere
         // is occluded
-
+        // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
+        // when using their positions later, one must convert them to the planet's coords 
         dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * meanPosition);
-        dvec4 fragWorldCoords  = dvec4(dCampos + tmpPos, 1.0);
+        dvec4 fragWorldCoords  = dvec4(dCampos + tmpPos, 1.0); // Fragment in World Coords
         dvec4 fragObjectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + fragWorldCoords.xyz, 1.0);
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
         
@@ -909,15 +910,23 @@ void main() {
         // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
         // in the depth buffer is less than the distance to the atmosphere then the atmosphere
         // is occluded
+        // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
+        // when using their positions later, one must convert them to the planet's coords 
+        
+        // OS Eye to World coords
+        dvec4 tmpRInv = dInverseCamRotTransform * meanPosition;
+        dvec4 fragWorldCoords= dvec4(dvec3(tmpRInv) + dCampos, 1.0);
+  
+        // World to Object
+        dvec4 fragObjectCoords = dInverseTransformMatrix * fragWorldCoords;
 
-        dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * meanPosition);
-        dvec4 fragWorldCoords  = dvec4(dCampos + tmpPos, 1.0);
-        dvec4 fragObjectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + fragWorldCoords.xyz, 1.0);
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
         
-        if (pixelDepth < offset) {        
-          renderTarget = meanColor;         
-        } else {
+        // TODO: Write the correct values in G-Buffer
+        // if (pixelDepth < offset) {        
+        //   renderTarget = meanColor;         
+        // } else {
+        {
           // Following paper nomenclature      
           double t = offset;                  
           vec3 attenuation;     

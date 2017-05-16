@@ -1,4 +1,5 @@
-earthEllipsoid = {6378137.0, 6378137.0, 6356752.314245} -- Earth's radii
+--earthEllipsoid = {6378137.0, 6378137.0, 6356752.314245} -- Earth's radii
+earthEllipsoid = {6378137.0, 6378137.0, 6378137.0} -- Earth's radii
 return {
     -- Earth barycenter module
     {
@@ -54,6 +55,55 @@ return {
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
+            Atmosphere = {
+                -- Atmosphere radius in Km
+                AtmoshereRadius = 6420,
+                PlanetRadius    = 6378.1366,
+                PlanetAverageGroundReflectance = 0.1,
+                Rayleigh = {
+                    Coefficients = {
+                        -- Wavelengths are given in 10^-9m
+                        Wavelengths = {680, 550, 440},
+                        -- Reflection coefficients are given in km^-1
+                        Scattering = {5.8E-3, 13.5E-3, 33.1E-3},
+                        -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
+                    },
+                    -- Thichkness of atmosphere if its density were uniform, in Km
+                    H_R = 8.0,
+                },
+                -- Default
+                Mie = {
+                    Coefficients = {
+                        -- Reflection coefficients are given in km^-1
+                        Scattering = {4.0e-3, 4.0e-3, 4.0e-3},
+                        --Scattering = {2.0e-5, 2.0e-5, 2.0e-5},
+                        -- Extinction coefficients are a fraction of the Scattering coefficients
+                        Extinction = {4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9}
+                        -- Height scale (atmosphere thickness for constant density) in Km
+                    },
+                    H_M = 1.2,
+                    -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
+                    G = 0.85
+                },
+                -- Clear Sky
+                -- Mie = {
+                --     Coefficients = {
+                --         Scattering = {20e-3, 20e-3, 20e-3},
+                --         Extinction = 1.0/0.9,
+                --      }
+                --     H_M = 1.2,
+                --     G = 0.76,
+                -- },
+                -- Cloudy
+                -- Mie = {
+                --     Coefficients = {
+                --         Scattering = {3e-3, 3e-3, 3e-3},
+                --         Extinction = 1.0/0.9,
+                --      }
+                --     H_M = 3.0,
+                --     G = 0.65,
+                -- },                
+            },
             Layers = {
                 ColorLayers = {
                 
