@@ -250,13 +250,15 @@ void dCalculateRayRenderableGlobe(out dRay ray, out dvec4 planetPositionObjectCo
   sgctEyeCoords.w = 1.0;
   
   // OS Eye to World coords
-  dvec4 worldCoords = dInverseSgctEyeToWorldTranform * sgctEyeCoords;
-    
+  dvec4 tOSEyeCoordsInv = dSgctEyeToOSEyeTranform * sgctEyeCoords;
+  dvec4 tmpRInv = dInverseCamRotTransform * tOSEyeCoordsInv;
+  dvec4 worldCoords= dvec4(dvec3(tmpRInv) + dCampos, 1.0);
+  
   // World to Object
   dvec4 objectCoords = dInverseTransformMatrix * worldCoords;
 
   // Planet Position in Object Space
-  planetPositionObjectCoords = dInverseTransformMatrix * dvec4(dObjpos.xyz, 1.0);
+  planetPositionObjectCoords = dvec4(0.0,0.0,0.0,1.0);//dInverseTransformMatrix * dvec4(dObjpos.xyz, 1.0);
 
   // Camera Position in Object Space
   cameraPositionInObject = dInverseTransformMatrix * dvec4(dCampos, 1.0);
@@ -886,12 +888,12 @@ void main() {
       transfRay.origin = ray.origin;
       transfRay.direction = ray.direction;
 
-      // transfRay.origin.x *= 1000.0/ellipsoidRadii.x;
-      // transfRay.direction.x *= 1000.0/ellipsoidRadii.x;        
-      // transfRay.origin.y *= 1000.0/ellipsoidRadii.y;
-      // transfRay.direction.y *= 1000.0/ellipsoidRadii.y;    
-      // transfRay.origin.z *= 1000.0/ellipsoidRadii.z;
-      // transfRay.direction.z *= 1000.0/ellipsoidRadii.z;
+      // transfRay.origin.z *= 1000.0/ellipsoidRadii.x;
+      // transfRay.direction.z *= 1000.0/ellipsoidRadii.x;        
+      // transfRay.origin.x *= 1000.0/ellipsoidRadii.y;
+      // transfRay.direction.x *= 1000.0/ellipsoidRadii.y;    
+      // transfRay.origin.y *= 1000.0/ellipsoidRadii.z;
+      // transfRay.direction.y *= 1000.0/ellipsoidRadii.z;
       // transfRay.direction.xyz = normalize(transfRay.direction.xyz);
 
       // intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay, 1.0,
@@ -950,11 +952,12 @@ void main() {
           //vec4 finalRadiance = vec4(HDR(inscatterColor), 1.0);
           //vec4 finalRadiance = vec4(HDR(sunColor), 1.0);
           //vec4 finalRadiance = vec4(sunColor, 1.0);
-          vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
+          //vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
+          vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor + meanColor.xyz), 1.0);
           //if ( finalRadiance.xyz == vec3(0.0))
           //   finalRadiance.w = 0.0;
         
-          //renderTarget = finalRadiance + colorMean;
+          //renderTarget = finalRadiance + meanColor;
           renderTarget = finalRadiance;
           //renderTarget = vec4(normalize(meanNormal.xyz), 1.0);
           dvec4 ttmp         = dInverseScaleTransformMatrix * meanPosition;
@@ -964,7 +967,7 @@ void main() {
           //renderTarget = vec4(positionInObject.xyz, 1.0);
           //renderTarget = vec4(meanColor.xyz, 1.0);
           //renderTarget = meanColor;      
-          renderTarget = vec4(0.5, 0.0, 0.0, 0.5);
+          //renderTarget = vec4(0.5, 0.0, 0.0, 0.5);
           //renderTarget = vec4(0.0);
         }      
       } else {

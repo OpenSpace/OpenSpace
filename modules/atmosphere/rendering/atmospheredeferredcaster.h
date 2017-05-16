@@ -41,8 +41,8 @@ namespace ghoul {
 
 namespace openspace {
 
-class RenderData;
-class DeferredcastData;
+struct RenderData;
+struct DeferredcastData;
 
 class AtmosphereDeferredcaster : public Deferredcaster
 {
@@ -98,7 +98,7 @@ public:
 
     void preCalculateAtmosphereParam();
 
-    void setModelTransform(const glm::mat4 &transform);
+    void setModelTransform(const glm::dmat4 &transform);
     void setTime(const double time);
     void setAtmosphereRadius(const float atmRadius);
     void setPlanetRadius(const float planetRadius);
@@ -180,7 +180,7 @@ private:
     GLuint _atmosphereRenderVAO;
     GLuint _atmosphereRenderVBO;
 
-    glm::mat4 _modelTransform;
+    glm::dmat4 _modelTransform;
     float _stepSize;
     double _time;
 

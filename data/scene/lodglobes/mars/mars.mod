@@ -45,11 +45,11 @@ return {
                         -- Wavelengths are given in 10^-9m
                         Wavelengths = {680, 550, 440},
                         -- Reflection coefficients are given in km^-1
-                        Scattering = {5.8e-3, 1.35e-2, 3.31e-2},
+                        Scattering = {19.918E-3, 13.57E-3, 5.75E-3},
                         -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
                     },
                     -- Thichkness of atmosphere if its density were uniform, in Km
-                    H_R = 8.0,
+                    H_R = 11.0,
                 },
                 -- Default
                 Mie = {
