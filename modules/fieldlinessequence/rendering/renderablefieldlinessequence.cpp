@@ -46,6 +46,17 @@ namespace {
 }
 
 namespace {
+    const char* keyTracingMethod            = "TracingMethod";
+    // TODO CHOOSE METHODS BASED ON INTEGERS INSTEAD?
+    const char* keyTracingMethodPreTraced   = "PreTraced";
+    const char* keyTracingMethodPreProcess  = "PreProcess";
+    const char* keyTracingMethodLiveTrace   = "LiveTrace";
+
+    const char* keyVertexListDirectory      = "VertexListDirectory";
+    const char* keyVertexListFileType       = "FileType";
+    const char* keyVertexListFileTypeJson   = "Json";
+    const char* keyVertexListFileTypeBinary = "Binary";
+
     const char* keyVolume = "VectorVolume";
     const char* keyFieldlines = "Fieldlines";
     const char* keySeedPoints = "SeedPoints";
@@ -80,7 +91,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     : Renderable(dictionary),
       _isMorphing("isMorphing", "Morphing", false),
       _show3DLines("show3DLines", "3D Lines", false),
-      _showSeedPoints("showSeedPoints", "Show Seed Points", true),
+      _showSeedPoints("showSeedPoints", "Show Seed Points", false),
       _lineWidth("fieldlineWidth", "Fieldline Width", 1.f, 0.f, 10.f),
       _seedPointSize("seedPointSize", "Seed Point Size", 4.0, 0.0, 20.0),
       _fieldlineParticleSize("fieldlineParticleSize", "FL Particle Size", 0, 0, 1000),
@@ -116,6 +127,11 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
 
     _loggerCat = "RenderableFieldlines [" + name + "]";
 
+    if (!dictionary.getValue(keyTracingMethod, _tracingMethod)) {
+        LERROR("Renderable does not contain a key for '" << keyTracingMethod << "'");
+        // deinitialize();
+    }
+
     // Find VectorVolume, SeedPoint and Fieldlines Info from Lua
     if (!dictionary.getValue(keyVolume, _vectorVolumeInfo)) {
         LERROR("Renderable does not contain a key for '" << keyVolume << "'");
@@ -142,153 +158,202 @@ bool RenderableFieldlinesSequence::isReady() const {
 }
 
 bool RenderableFieldlinesSequence::initialize() {
-    // SeedPoints Info. Needs a .txt file containing seed points.
-    // Each row should have 3 floats seperated by spaces
-    std::string pathToSeedPointFile;
-    if (!_seedPointsInfo.getValue(keySeedPointsFile, pathToSeedPointFile)) {
-        LERROR(keySeedPoints << " doesn't specify a '" << keySeedPointsFile << "'" <<
-            "\n\tRequires a path to a .txt file containing seed point data." <<
-            "Each row should have 3 floats seperated by spaces.");
-        return false;
-    } else {
-        if (!FieldlinesSequenceManager::ref().getSeedPointsFromFile(pathToSeedPointFile,
-                                                                    _seedPoints)) {
-            LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
+    int numResamples;
+    std::vector<std::string> colorizingFloatVars;
+    std::vector<std::string> colorizingMagVars;
+    bool allowSeedPoints = false;
+
+    if (_tracingMethod == keyTracingMethodPreProcess) {
+        allowSeedPoints = true;
+        // SeedPoints Info. Needs a .txt file containing seed points.
+        // Each row should have 3 floats seperated by spaces
+        std::string pathToSeedPointFile;
+        if (!_seedPointsInfo.getValue(keySeedPointsFile, pathToSeedPointFile)) {
+            LERROR(keySeedPoints << " doesn't specify a '" << keySeedPointsFile << "'" <<
+                "\n\tRequires a path to a .txt file containing seed point data." <<
+                "Each row should have 3 floats seperated by spaces.");
+            return false;
+        } else {
+            if (!FieldlinesSequenceManager::ref().getSeedPointsFromFile(pathToSeedPointFile,
+                                                                        _seedPoints)) {
+                LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
+                return false;
+            }
+        }
+
+        // VectorVolume Info. Needs a folder containing .CDF files
+        std::string pathToCdfDirectory;
+        if (!_vectorVolumeInfo.getValue(keyVolumeDirectory, pathToCdfDirectory)) {
+            LERROR(keyVolume << " doesn't specify a '" << keyVolumeDirectory <<
+                    "'\n\tRequires a path to a Directory containing .CDF files. " <<
+                    "Files must be of the same model and in sequence!");
             return false;
         }
-    }
+        // Everything essential is provided
+        std::vector<std::string> validCdfFilePaths;
+        const std::string fileExt = "cdf";
+        // const std::string fileExt = ".cdf";
+        if (!FieldlinesSequenceManager::ref().getAllFilePathsOfType(
+                pathToCdfDirectory, fileExt, validCdfFilePaths) ||
+                validCdfFilePaths.empty() ) {
 
-    // VectorVolume Info. Needs a folder containing .CDF files
-    std::string pathToCdfDirectory;
-    if (!_vectorVolumeInfo.getValue(keyVolumeDirectory, pathToCdfDirectory)) {
-        LERROR(keyVolume << " doesn't specify a '" << keyVolumeDirectory <<
-                "'\n\tRequires a path to a Directory containing .CDF files. " <<
-                "Files must be of the same model and in sequence!");
-        return false;
-    }
-    // Everything essential is provided
-    std::vector<std::string> validCdfFilePaths;
-    const std::string fileExt = "cdf";
-    // const std::string fileExt = ".cdf";
-    if (!FieldlinesSequenceManager::ref().getAllFilePathsOfType(
-            pathToCdfDirectory, fileExt, validCdfFilePaths) ||
-            validCdfFilePaths.empty() ) {
+            LERROR("Failed to get valid "<< fileExt << " file paths from '"
+                    << pathToCdfDirectory << "'" );
+            return false;
+        }
 
-        LERROR("Failed to get valid "<< fileExt << " file paths from '"
-                << pathToCdfDirectory << "'" );
-        return false;
-    }
+        // Only choose n number of volumes
+        float f_maxStates;
+        int numMaxStates = 0;
+        int numValidPaths = static_cast<int>(validCdfFilePaths.size());
 
-    // Only choose n number of volumes
-    float f_maxStates;
-    int numMaxStates = 0;
-    int numValidPaths = static_cast<int>(validCdfFilePaths.size());
-
-    if (!_vectorVolumeInfo.getValue(keyMaxNumVolumes, f_maxStates)) {
-        numMaxStates = numValidPaths;
-        LWARNING(keyVolume << " isn't specifying a " <<
-                 keyMaxNumVolumes << ". Using all valid paths found.");
-    } else {
-        numMaxStates = static_cast<int>(f_maxStates);
-        if (numMaxStates >= numValidPaths || numMaxStates == 0) {
+        if (!_vectorVolumeInfo.getValue(keyMaxNumVolumes, f_maxStates)) {
             numMaxStates = numValidPaths;
+            LWARNING(keyVolume << " isn't specifying a " <<
+                     keyMaxNumVolumes << ". Using all valid paths found.");
         } else {
-            validCdfFilePaths.erase(validCdfFilePaths.begin() + numMaxStates,
-                                    validCdfFilePaths.end());
-        }
-    }
-
-    // Specify which quantity to trace
-    std::string tracingVariable;
-    if (!_vectorVolumeInfo.getValue(keyVolumeTracingVariable, tracingVariable)) {
-        tracingVariable = "b"; //default: b = magnetic field.
-        LWARNING(keyVolume << " isn't specifying a " <<
-                 keyVolumeTracingVariable << ". Using default value: '" <<
-                 tracingVariable << "' for magnetic field.");
-    }
-
-    int maxSteps = 1000; // Default value
-    float f_maxSteps;
-    if (!_fieldlineInfo.getValue(keyFieldlineMaxTraceSteps, f_maxSteps)) {
-        LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineMaxTraceSteps
-                << ". Using default value: " << maxSteps);
-    } else {
-        maxSteps = static_cast<int>(f_maxSteps);
-    }
-
-    bool userWantsMorphing;
-    if (!_fieldlineInfo.getValue(keyFieldlineShouldMorph, userWantsMorphing)) {
-        _isMorphing = false; // Default value
-        LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph
-                << ". Using default: " << _isMorphing);
-    } else {
-        _isMorphing = userWantsMorphing;
-    }
-
-    int resamplingOption = 4; // Default
-    int numResamples = 2 * maxSteps + 3; // Default
-    if (_isMorphing) {
-
-        float f_resamplingOption;
-
-        if(!_fieldlineInfo.getValue(keyFieldlineResampleOption, f_resamplingOption)) {
-            LWARNING(keyFieldlines << " isn't specifying " <<
-                     keyFieldlineResampleOption << ". Default is set to " <<
-                     resamplingOption);
-        } else {
-            resamplingOption = static_cast<int>(f_resamplingOption);
-        }
-
-        float f_numResamples;
-
-        if(_fieldlineInfo.getValue(keyFieldlineResamples, f_numResamples)) {
-            if (resamplingOption == 4) {
-                LWARNING(keyFieldlineResampleOption << " 4 does not allow a custom" <<
-                         " value for " << keyFieldlineResamples <<". Using (2 * " <<
-                         keyFieldlineMaxTraceSteps <<" + 3) = " << numResamples);
+            numMaxStates = static_cast<int>(f_maxStates);
+            if (numMaxStates >= numValidPaths || numMaxStates == 0) {
+                numMaxStates = numValidPaths;
             } else {
-                numResamples = static_cast<int>(f_numResamples);
-            }
-        } else {
-            if (resamplingOption != 4) {
-                LWARNING(keyFieldlines << " isn't specifying " <<
-                         keyFieldlineResamples << ". Default is set to (2*" <<
-                         keyFieldlineMaxTraceSteps << "+3) = " << numResamples);
+                validCdfFilePaths.erase(validCdfFilePaths.begin() + numMaxStates,
+                                        validCdfFilePaths.end());
             }
         }
-    }
 
-    _numberOfStates = validCdfFilePaths.size();
-    _states.reserve(_numberOfStates);
-    _startTimes.reserve(_numberOfStates);
+        // Specify which quantity to trace
+        std::string tracingVariable;
+        if (!_vectorVolumeInfo.getValue(keyVolumeTracingVariable, tracingVariable)) {
+            tracingVariable = "b"; //default: b = magnetic field.
+            LWARNING(keyVolume << " isn't specifying a " <<
+                     keyVolumeTracingVariable << ". Using default value: '" <<
+                     tracingVariable << "' for magnetic field.");
+        }
 
-    LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
-    for (std::string str : validCdfFilePaths) {
-        LDEBUG("\t" << str);
-    }
+        int maxSteps = 1000; // Default value
+        float f_maxSteps;
+        if (!_fieldlineInfo.getValue(keyFieldlineMaxTraceSteps, f_maxSteps)) {
+            LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineMaxTraceSteps
+                    << ". Using default value: " << maxSteps);
+        } else {
+            maxSteps = static_cast<int>(f_maxSteps);
+        }
 
-    // TODO: This should be specified in LUA .mod file!
-    std::vector<std::string> colorizingFloatVars{"T", "dp", "rho"};
-    std::vector<std::string> colorizingMagVars{"jx", "jy", "jz",
-                                               "jr", "jtheta", "jphi",
-                                               // "br", "btheta", "bphi",
-                                               "ur", "utheta", "uphi"};
+        bool userWantsMorphing;
+        if (!_fieldlineInfo.getValue(keyFieldlineShouldMorph, userWantsMorphing)) {
+            _isMorphing = false; // Default value
+            LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph
+                    << ". Using default: " << _isMorphing);
+        } else {
+            _isMorphing = userWantsMorphing;
+        }
 
-    // TODO this could be done in manager
-    for (int i = 0; i < _numberOfStates; ++i) {
-        LDEBUG(validCdfFilePaths[i] << " is now being traced.");
-        _states.push_back(FieldlinesState(_seedPoints.size()));
-        FieldlinesSequenceManager::ref().getFieldlinesState(validCdfFilePaths[i],
-                                                            tracingVariable,
-                                                            _seedPoints,
-                                                            maxSteps,
+        int resamplingOption = 4; // Default
+        numResamples = 2 * maxSteps + 3; // Default
+        if (_isMorphing) {
+
+            float f_resamplingOption;
+
+            if(!_fieldlineInfo.getValue(keyFieldlineResampleOption, f_resamplingOption)) {
+                LWARNING(keyFieldlines << " isn't specifying " <<
+                         keyFieldlineResampleOption << ". Default is set to " <<
+                         resamplingOption);
+            } else {
+                resamplingOption = static_cast<int>(f_resamplingOption);
+            }
+
+            float f_numResamples;
+
+            if(_fieldlineInfo.getValue(keyFieldlineResamples, f_numResamples)) {
+                if (resamplingOption == 4) {
+                    LWARNING(keyFieldlineResampleOption << " 4 does not allow a custom" <<
+                             " value for " << keyFieldlineResamples <<". Using (2 * " <<
+                             keyFieldlineMaxTraceSteps <<" + 3) = " << numResamples);
+                } else {
+                    numResamples = static_cast<int>(f_numResamples);
+                }
+            } else {
+                if (resamplingOption != 4) {
+                    LWARNING(keyFieldlines << " isn't specifying " <<
+                             keyFieldlineResamples << ". Default is set to (2*" <<
+                             keyFieldlineMaxTraceSteps << "+3) = " << numResamples);
+                }
+            }
+        }
+
+        LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
+        for (std::string str : validCdfFilePaths) {
+            LDEBUG("\t" << str);
+        }
+
+        // TODO: This should be specified in LUA .mod file!
+        colorizingFloatVars.insert(colorizingFloatVars.end(), {
+                                                                 "T",
+                                                                 "dp",
+                                                                 "rho"
+                                                              });
+
+        colorizingMagVars.insert(colorizingMagVars.end(), {
+                                                              "jx", "jy", "jz",
+                                                              "jr", "jtheta", "jphi",
+                                                              // "br", "btheta", "bphi",
+                                                              "ur", "utheta", "uphi"
+                                                          });
+
+        // TODO this could be done in manager
+        _numberOfStates = validCdfFilePaths.size();
+        _states.reserve(_numberOfStates);
+        _startTimes.reserve(_numberOfStates);
+
+        for (int i = 0; i < _numberOfStates; ++i) {
+           LDEBUG(validCdfFilePaths[i] << " is now being traced.");
+           _states.push_back(FieldlinesState(_seedPoints.size()));
+           FieldlinesSequenceManager::ref().getFieldlinesState(validCdfFilePaths[i],
+                                                               tracingVariable,
+                                                               _seedPoints,
+                                                               maxSteps,
+                                                               _isMorphing,
+                                                               numResamples,
+                                                               resamplingOption,
+                                                               colorizingFloatVars,
+                                                               colorizingMagVars,
+                                                               _startTimes,
+                                                               _states[i]);
+        }
+    } else if (_tracingMethod == keyTracingMethodPreTraced) {
+        allowSeedPoints = false;
+        // TODO: DON'T HARDCODE.. GET FROM LUA
+        std::vector<std::string> validJsonFilePaths{"C:/Users/oskar/Develop/workspace/OpenSpace/data/scene/fieldlinessequence/precalculatedjson/fieldline_samples.json "};
+        LDEBUG("JSON PATHS: " << validJsonFilePaths[0]);
+
+        LERROR("TODO: allow Morphing for provided vertex lists!");
+        _isMorphing = false;
+        int resamplingOption = 0;   // TODO: implement morphing
+        numResamples = 0;       // TODO: implement morphing
+
+        FieldlinesState tmpState;
+        _states.push_back(tmpState);
+        FieldlinesSequenceManager::ref().getFieldlinesState(validJsonFilePaths[0],
                                                             _isMorphing,
                                                             numResamples,
                                                             resamplingOption,
-                                                            colorizingFloatVars,
-                                                            colorizingMagVars,
                                                             _startTimes,
-                                                            _states[i]);
+                                                            _states[0]);
+
+        _numberOfStates = validJsonFilePaths.size();
+        _states.reserve(_numberOfStates);
+        _startTimes.reserve(_numberOfStates);
+
+    } else if (_tracingMethod == keyTracingMethodLiveTrace) {
+        LERROR("NOT YET INCORPORATED INTO THIS CLASS! TODO, TODO TODO!");
+        allowSeedPoints = true;
+        return false;
+    } else {
+        LERROR(keyTracingMethod << " isn't specifying a valid tracing method.\n\t"
+                << "Valid methods are: " << keyTracingMethodPreTraced << ", "
+                                         << keyTracingMethodPreProcess << " and "
+                                         << keyTracingMethodPreTraced);
+        return false;
     }
 
     bool allowUnitColoring = false;
@@ -392,15 +457,17 @@ bool RenderableFieldlinesSequence::initialize() {
     // glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, &_maxLineWidthOpenGl);
     // glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &_maxLineWidthOpenGl);
 
-    _seedPointProgram = OsEng.renderEngine().buildRenderProgram(
-        "FieldlinesSequenceSeeds",
-        "${MODULE_FIELDLINESSEQUENCE}/shaders/seedpoint_vs.glsl",
-        "${MODULE_FIELDLINESSEQUENCE}/shaders/seedpoint_fs.glsl"
-    );
+    if (allowSeedPoints) {
+        _seedPointProgram = OsEng.renderEngine().buildRenderProgram(
+            "FieldlinesSequenceSeeds",
+            "${MODULE_FIELDLINESSEQUENCE}/shaders/seedpoint_vs.glsl",
+            "${MODULE_FIELDLINESSEQUENCE}/shaders/seedpoint_fs.glsl"
+        );
 
-    if (!_seedPointProgram) {
-        LERROR("SeedPoint Shader program failed initialization!");
-        return false;
+        if (!_seedPointProgram) {
+            LERROR("SeedPoint Shader program failed initialization!");
+            return false;
+        }
     }
 
     if (_isMorphing) {
@@ -455,10 +522,12 @@ bool RenderableFieldlinesSequence::initialize() {
     _particleGroup.addProperty(_modulusDivider);
     _particleGroup.addProperty(_timeMultiplier);
 
-    addPropertySubOwner(_seedGroup);
-    _seedGroup.addProperty(_seedPointSize);
-    _seedGroup.addProperty(_showSeedPoints);
-    _seedGroup.addProperty(_uniformSeedPointColor);
+    if (allowSeedPoints) {
+        addPropertySubOwner(_seedGroup);
+        _seedGroup.addProperty(_seedPointSize);
+        _seedGroup.addProperty(_showSeedPoints);
+        _seedGroup.addProperty(_uniformSeedPointColor);
+    }
 
     if (_isMorphing) {
         addProperty(_isMorphing);
@@ -567,6 +636,11 @@ bool RenderableFieldlinesSequence::deinitialize() {
         _ropeProgram = nullptr;
     }
 
+    if (_seedPointProgram) {
+        renderEngine.removeRenderProgram(_seedPointProgram);
+        _seedPointProgram = nullptr;
+    }
+
     return true;
 }
 
@@ -641,10 +715,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
         glBindVertexArray(0);
         _activeProgramPtr->deactivate();
 
-        glBindVertexArray(_seedArrayObject);
-        _seedPointProgram->activate();
-
         if (_showSeedPoints) {
+            glBindVertexArray(_seedArrayObject);
+            _seedPointProgram->activate();
             _seedPointProgram->setUniform("color", _uniformSeedPointColor);
             _seedPointProgram->setUniform("isSpherical", _isSpherical);
             _seedPointProgram->setUniform("scaleFactor", _scalingFactor);
@@ -652,10 +725,11 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
                 data.camera.sgctInternal.projectionMatrix() * glm::mat4(modelViewTransform));
             glPointSize(_seedPointSize);
             glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>( _seedPoints.size() ) );
+
+            glBindVertexArray(0);
+            _seedPointProgram->deactivate();
         }
 
-        glBindVertexArray(0);
-        _seedPointProgram->deactivate();
         glEnable(GL_CULL_FACE);
     }
 }
@@ -665,8 +739,10 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
         _activeProgramPtr->rebuildFromFile();
     }
 
-    if (_seedPointProgram->isDirty()) {
-        _seedPointProgram->rebuildFromFile();
+    if (_showSeedPoints) {
+        if (_seedPointProgram->isDirty()) {
+            _seedPointProgram->rebuildFromFile();
+        }
     }
 
     // Check if current time in OpenSpace is within sequence interval
@@ -696,19 +772,20 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
         if (_vertexArrayObject == 0) {
             glGenVertexArrays(1, &_vertexArrayObject);
 
-            glGenVertexArrays(1, &_seedArrayObject);
-            glBindVertexArray(_seedArrayObject);
-            glGenBuffers(1, &_seedPositionBuffer);
+            if (_seedPoints.size() > 0) {
+                glGenVertexArrays(1, &_seedArrayObject);
+                glBindVertexArray(_seedArrayObject);
+                glGenBuffers(1, &_seedPositionBuffer);
 
-            glBindBuffer(GL_ARRAY_BUFFER, _seedPositionBuffer);
-            glBufferData(GL_ARRAY_BUFFER,
-                _seedPoints.size() * sizeof(glm::vec3),
-                &_seedPoints.front(),
-                GL_STATIC_DRAW);
-            GLuint seedLocation = 0;
-            glEnableVertexAttribArray(seedLocation);
-            glVertexAttribPointer(seedLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
+                glBindBuffer(GL_ARRAY_BUFFER, _seedPositionBuffer);
+                glBufferData(GL_ARRAY_BUFFER,
+                    _seedPoints.size() * sizeof(glm::vec3),
+                    &_seedPoints.front(),
+                    GL_STATIC_DRAW);
+                GLuint seedLocation = 0;
+                glEnableVertexAttribArray(seedLocation);
+                glVertexAttribPointer(seedLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
+            }
         }
         glBindVertexArray(_vertexArrayObject);
 

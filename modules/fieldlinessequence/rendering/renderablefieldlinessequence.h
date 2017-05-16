@@ -62,6 +62,8 @@ private:
 
     std::vector<glm::vec3> _seedPoints; // TODO: no need to store these here?
 
+    std::string _tracingMethod;
+
     // State variables
     std::vector<FieldlinesState> _states;
 

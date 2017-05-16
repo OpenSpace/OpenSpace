@@ -38,9 +38,10 @@
 #include <ccmc/Kameleon.h>
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
+#include <modules/fieldlinessequence/ext/nlohmann/json/json.hpp>
 
 // JSON PARSER IS FROM THE ISWA MODULE
-#include <modules/iswa/ext/json/json.hpp>
+// #include <modules/iswa/ext/json/json.hpp>
 
 namespace {
     const std::string _loggerCat = "FieldlinesSequenceManager";
@@ -137,7 +138,26 @@ bool FieldlinesSequenceManager::getAllFilePathsOfType(
 }
 
 
-
+// in the current json file I have, fieldline data is structured like this:
+// {
+//   "0": {
+//     "y": [value0, value1, value2],
+//     "x": [value0, value1, value2],
+//     "z": [value0, value1, value2],
+//     "arclength": [value0, value1, value2],
+//     "topology": "solar_wind"
+//   },
+//   "1": {
+//     "y": [value0, value1, value2],
+//     "x": [value0, value1, value2],
+//     "z": [value0, value1, value2],
+//     "arclength": [value0, value1, value2],
+//     "topology": "closed"
+//   }
+// }
+//
+// where "0" and "1" contains data for one fieldline each
+//
 /** READ PRECALCULATED FIELDLINE STATES FROM .JSON FILES AND STORE AS A FIELDLINE STATE
  *
  *
@@ -148,13 +168,70 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         const int& numResamples,
         const int& resamplingOption,
         std::vector<double>& startTimes,
-        FieldlinesState& outFieldlinesStates) {
+        FieldlinesState& outFieldlinesState) {
 
+    // TODO, this should be included either in the JSON file or in LUA (.mod)
+    // when specifying which folders to get JSON files from
+    const std::string model = "batsrus";
+    outFieldlinesState._modelName = model;
 
+    std::ifstream ifs(pathToJsonFile);
+    if (!ifs.is_open()) {
+        LERROR("FAILED TO OPEN FILE: " << pathToJsonFile);
+        return false;
+    }
+    json jfile;// = json::parse(ifs);
+    ifs >> jfile;
 
-    return false;
+    size_t numLines = jfile.size();
+
+    // Check if the json file contains a trigger time
+    if (jfile.find("trigger_time") != jfile.end()) {
+      // there is an entry for key "trigger_time"
+        startTimes.push_back(jfile["trigger_time"]);
+    } else {
+        // LWARNING("JSON FILE DOESN'T CONTAIN A TRIGGER TIME. USING DEFAULT: July 12th 2012 at 00:00:00:000");
+        // startTimes.push_back(395323200.0);
+
+        LWARNING("JSON FILE DOESN'T CONTAIN A TRIGGER TIME. USING DEFAULT: March 15th 2015 at 00:00:00:000");
+        startTimes.push_back(479649600.0);
+    }
+
+    // iterate through each line
+    for (json::iterator fieldlineIt = jfile.begin(); fieldlineIt != jfile.end(); ++fieldlineIt) {
+        json fieldline = *fieldlineIt;
+
+        int status = fieldline.count("x") + fieldline.count("y") + fieldline.count("z");
+
+        if (status != 3) {
+            LERROR("Couldn't find the needed variables in JSON object!");
+            return false;
+        }
+
+        std::vector<float> xVars = fieldline["x"];
+        std::vector<float> yVars = fieldline["y"];
+        std::vector<float> zVars = fieldline["z"];
+
+        size_t pointCount = xVars.size();
+        size_t lineStart = outFieldlinesState._vertexPositions.size();
+
+        // TODO: assert!
+        // ghoul_assert(length(x) == length(y) == length(z), "ERRORORORORORO");
+
+        auto xIt = xVars.begin(),
+             yIt = yVars.begin(),
+             zIt = zVars.begin();
+
+        for ( ; xIt != xVars.end(); ++xIt, ++yIt, ++zIt) {
+            outFieldlinesState._vertexPositions.push_back(R_E_TO_METER * glm::vec3(*xIt,*yIt,*zIt));
+        }
+        // TODO: assert (pointCount == std::distance(xVars.begin(), xIt))
+        outFieldlinesState._lineCount.push_back(static_cast<GLsizei>(pointCount));
+        outFieldlinesState._lineStart.push_back(static_cast<GLint>(lineStart));
+    }
+
+    return true;
 }
-
 
 bool FieldlinesSequenceManager::getFieldlinesState(
         const std::string& pathToCdfFile,
