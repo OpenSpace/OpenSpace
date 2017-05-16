@@ -139,9 +139,14 @@ void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
     ghoul::opengl::TextureUnit txUnits[numPlanes];
     ghoul::opengl::TextureUnit tfUnits[numPlanes];
 
+
+
     for (int i = 0; i < numPlanes; ++i) {
         auto* plane = static_cast<RenderableSpacecraftCameraPlane*>(
               _planeDependencies[i]->renderable());
+
+        _shader->setUniform("magicPlaneFactor[" + std::to_string(i) + "]", plane->_magicPlaneFactor);
+        _shader->setUniform("magicPlaneOffset[" + std::to_string(i) + "]", plane->_magicPlaneOffset);
 
         _shader->setUniform("sunToSpacecraftReferenceFrame[" + std::to_string(i) + "]",
                         plane->_sunToSpacecraftTransform);
@@ -157,7 +162,6 @@ void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
         plane->_lut->bind();
         _shader->setUniform("lut[" + std::to_string(i) + "]", tfUnits[i]);
     }
-
 
 
     ghoul::opengl::TextureUnit imageUnit;

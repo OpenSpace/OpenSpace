@@ -98,6 +98,10 @@ public:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     TransferFunction* _lut;
 
+    float _magicPlaneFactor = 0;
+    glm::dvec2 _magicPlaneOffset = glm::dvec2();
+
+
 private:
     globebrowsing::ConcurrentJobManager<BufferObject> _concurrentJobManager;
 
@@ -108,7 +112,6 @@ private:
     properties::BoolProperty _lazyBuffering;
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
-    properties::DoubleProperty _magicFactor;
     properties::IntProperty _resolutionLevel;
     properties::StringProperty _target;
     properties::BoolProperty _useBuffering;
