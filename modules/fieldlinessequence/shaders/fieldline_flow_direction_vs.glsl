@@ -50,10 +50,9 @@ out vec4 vs_color;
 out float vs_depth;
 out flat float fragment_discard;
 
-const int UNIFORM_COLOR = 0;
-const int UNIT_DEPENDENT_COLOR = 1;
-const int CLASSIFIED_COLOR = 2;
-
+const int UNIFORM_COLOR         = 0;
+const int UNIT_DEPENDENT_COLOR  = 1;
+const int CLASSIFIED_COLOR      = 2;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 

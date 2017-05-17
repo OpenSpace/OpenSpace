@@ -118,9 +118,9 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
                                                            glm::vec4(0.f),
                                                            glm::vec4(1.f)),
       _uniformSeedPointColor("seedPointColor", "SeedPoint Color",
-                             glm::vec4(1.f,0.33f,0.f,0.85f),
-                             glm::vec4(0.f),
-                             glm::vec4(1.f)) {
+                                                           glm::vec4(1.f,0.33f,0.f,0.85f),
+                                                           glm::vec4(0.f),
+                                                           glm::vec4(1.f)) {
 
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -135,17 +135,14 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     // Find VectorVolume, SeedPoint and Fieldlines Info from Lua
     if (!dictionary.getValue(keyVolume, _vectorVolumeInfo)) {
         LERROR("Renderable does not contain a key for '" << keyVolume << "'");
-        // deinitialize();
     }
 
     if (!dictionary.getValue(keyFieldlines, _fieldlineInfo)) {
         LERROR("Renderable does not contain a key for '" << keyFieldlines << "'");
-        // deinitialize();
     }
 
     if (!dictionary.getValue(keySeedPoints, _seedPointsInfo)) {
         LERROR("Renderable does not contain a key for '" << keySeedPoints << "'");
-        // deinitialize();
     }
 
     // TODO: REMOVE HARDCODED PATH
