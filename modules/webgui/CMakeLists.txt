@@ -95,7 +95,7 @@ set(WEBGUI_SOURCES
 
 # CEF helper sources
 set(WEBGUI_HELPER_SOURCES_MACOSX
-  process_helper_mac.cc
+  process_helper_mac.cpp
   )
 APPEND_PLATFORM_SOURCES(WEBGUI_HELPER_SOURCES)
 source_group(WebGUI FILES ${WEBGUI_HELPER_SOURCES})
