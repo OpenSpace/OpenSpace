@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/other/distanceswitch.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/util/updatestructures.h>
 
 namespace openspace {
 namespace globebrowsing {

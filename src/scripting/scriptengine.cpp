@@ -547,23 +547,17 @@ std::string ScriptEngine::generateJson() const {
 }
 
 bool ScriptEngine::writeLog(const std::string& script) {
-    const std::string KeyScriptLogType =
-        ConfigurationManager::KeyScriptLog + '.' + ConfigurationManager::PartType;
-    const std::string KeyScriptLogFile =
-        ConfigurationManager::KeyScriptLog + '.' + ConfigurationManager::PartFile;
-
     // Check that logging is enabled and initialize if necessary
     if (!_logFileExists) {
         // If a ScriptLogFile was specified, generate it now
-        const bool hasType = OsEng.configurationManager()
-            .hasKey(KeyScriptLogType);
-        const bool hasFile = OsEng.configurationManager()
-            .hasKey(KeyScriptLogFile);
-        if (hasType && hasFile) {
-            OsEng.configurationManager()
-                .getValue(KeyScriptLogType, _logType);
-            OsEng.configurationManager()
-                .getValue(KeyScriptLogFile, _logFilename);
+        const bool hasFile = OsEng.configurationManager().hasKey(
+            ConfigurationManager::KeyScriptLog
+        );
+        if (hasFile) {
+            OsEng.configurationManager().getValue(
+                ConfigurationManager::KeyScriptLog,
+                _logFilename
+            );
 
             _logFilename = absPath(_logFilename);
             _logFileExists = true;
@@ -581,31 +575,20 @@ bool ScriptEngine::writeLog(const std::string& script) {
                 return false;
             }
         } else {
-            LDEBUG("No script log specified in 'openspace.cfg.' To log, set '"
-                   << KeyScriptLogType << " and "
-                   << KeyScriptLogFile
-                   << " in configuration table.");
             _logScripts = false;
             return false;
         }
     }
 
-    if (_logType == "text") {
-        // Simple text output to logfile
-        std::ofstream file(_logFilename, std::ofstream::app);
-        if (!file.good()) {
-            LERROR("Could not open file '" << _logFilename << "' for logging scripts");
-            return false;
-        }
-
-        file << script << std::endl;
-        file.close();
-    }
-    else {
-        LERROR("Undefined type '" << _logType << "' for script documentation");
-        _logScripts = false;
+    // Simple text output to logfile
+    std::ofstream file(_logFilename, std::ofstream::app);
+    if (!file.good()) {
+        LERROR("Could not open file '" << _logFilename << "' for logging scripts");
         return false;
     }
+
+    file << script << std::endl;
+    file.close();
 
     return true;
 }

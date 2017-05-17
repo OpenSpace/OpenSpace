@@ -28,6 +28,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/updatestructures.h>
 
 // This class creates the entire trajectory at once and keeps it in memory the entire
 // time. This means that there is no need for updating the trail at runtime, but also that
