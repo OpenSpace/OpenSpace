@@ -306,6 +306,9 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 			_vel.zoom = par.at(2);
 			_vel.roll = par.at(3);
 			if (nDOF > 4) {
+				if (_onlyPan) {
+					_vel.roll = 0.0;
+				}
 				_vel.pan = glm::dvec2(par.at(4), par.at(5));
 			}
 		}
