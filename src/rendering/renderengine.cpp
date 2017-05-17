@@ -181,6 +181,9 @@ RenderEngine::RenderEngine()
     addProperty(_disableMasterRendering);
 }
 
+RenderEngine::~RenderEngine()
+{ }
+
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
     _rendererImplementation = rendererFromString(renderingMethod);
 
