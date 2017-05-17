@@ -682,10 +682,12 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
                 glm::dmat4(scaleTransform);
         glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-        int testTime = static_cast<int>(OsEng.runTime() * 100) / 5;
+        int testTime = static_cast<int>(Time::ref().deltaTime() * OsEng.runTime() * 100) / 5;
+        // double testTime = _;
 
         // Set uniforms for shaders
-        _activeProgramPtr->setUniform("time", testTime * _timeMultiplier);
+        // _activeProgramPtr->setUniform("time", testTime * _timeMultiplier);
+        _activeProgramPtr->setUniform("timeD", _currentTime * _timeMultiplier);
         _activeProgramPtr->setUniform("flParticleSize", _fieldlineParticleSize);
         _activeProgramPtr->setUniform("modulusDivider", _modulusDivider);
         _activeProgramPtr->setUniform("colorMethod", _colorMethod);

@@ -26,7 +26,8 @@
 
 uniform mat4 modelViewProjection;
 //uniform mat4 modelTransform;
-uniform int time;
+// uniform int time;
+uniform double timeD;
 uniform int flParticleSize;
 uniform int modulusDivider;
 uniform int colorMethod;
@@ -69,7 +70,8 @@ void main() {
     }
 
     // Color every n-th vertex differently to show fieldline flow direction
-    int modulus = (gl_VertexID + time) % modulusDivider;
+    int modulus = (gl_VertexID + int(timeD)) % modulusDivider;
+    // int modulus = (gl_VertexID + time) % modulusDivider;
     if ( modulus > 0 && modulus < flParticleSize) {
         if (colorMethod == UNIT_DEPENDENT_COLOR) {
             float lookUpValue = (unitIntensity - transferFunctionLimits.x )
