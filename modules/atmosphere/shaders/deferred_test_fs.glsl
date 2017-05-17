@@ -962,10 +962,10 @@ void main() {
           //vec4 finalRadiance = vec4(HDR(sunColor), 1.0);
           //vec4 finalRadiance = vec4(sunColor, 1.0);
           //vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
-          vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor + meanColor.xyz), 1.0);
-          //if ( finalRadiance.xyz == vec3(0.0))
-          //   finalRadiance.w = 0.0;
-        
+          
+          // The meanColor is temporary here
+          vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor + meanColor.xyz), 1.0);          
+          
           //renderTarget = finalRadiance + meanColor;
           renderTarget = finalRadiance;
           //renderTarget = vec4(normalize(meanNormal.xyz), 1.0);

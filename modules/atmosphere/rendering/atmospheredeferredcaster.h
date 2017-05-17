@@ -159,6 +159,10 @@ private:
     GLuint _atmosphereTexture;
     GLuint _atmosphereDepthTexture;
 
+    ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
+    ghoul::opengl::TextureUnit _irradianceTableTextureUnit;
+    ghoul::opengl::TextureUnit _inScatteringTableTextureUnit;
+
     // Atmosphere Data
     bool _atmosphereCalculated;
     bool _atmosphereEnabled;

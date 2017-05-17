@@ -248,20 +248,17 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     program.setUniform("sunDirectionObj", glm::normalize(glm::dvec3(sunPosObj)));
     //program.setUniform("_performShading", _performShading);
 
-    ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
-    transmittanceTableTextureUnit.activate();
+    _transmittanceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
-    program.setUniform("transmittanceTexture", transmittanceTableTextureUnit);
+    program.setUniform("transmittanceTexture", _transmittanceTableTextureUnit);
 
-    ghoul::opengl::TextureUnit irradianceTableTextureUnit;
-    irradianceTableTextureUnit.activate();
+    _irradianceTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
-    program.setUniform("irradianceTexture", irradianceTableTextureUnit);
+    program.setUniform("irradianceTexture", _irradianceTableTextureUnit);
 
-    ghoul::opengl::TextureUnit inScatteringTableTextureUnit;
-    inScatteringTableTextureUnit.activate();
+    _inScatteringTableTextureUnit.activate();
     glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
-    program.setUniform("inscatterTexture", inScatteringTableTextureUnit); 
+    program.setUniform("inscatterTexture", _inScatteringTableTextureUnit); 
 
     // DEBUG:
     if (_renderableClass == RenderablePlanet) {
@@ -378,7 +375,12 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
 
 void AtmosphereDeferredcaster::postRaycast(const RenderData & renderData, const DeferredcastData& deferredData,
                                            ghoul::opengl::ProgramObject& program)
-{}
+{
+    // Deactivate the texture units 
+    /*_transmittanceTableTextureUnit.activate();
+    _irradianceTableTextureUnit.activate();
+    _inScatteringTableTextureUnit.activate();*/
+}
 
 std::string AtmosphereDeferredcaster::getDeferredcastPath() const {
     return GlslDeferredcastPath;
