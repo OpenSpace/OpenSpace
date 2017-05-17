@@ -60,12 +60,12 @@ namespace {
 
     const char* FontName = "Console";
     const float EntryFontSize = 14.0f;
-    const float HistoryFontSize = 10.0f;
+    const float HistoryFontSize = 11.0f;
 
     // Additional space between the entry text and the history (in pixels)
-    const float SeparatorSpace = 20.f;
+    const float SeparatorSpace = 30.f;
 
-    // Determines at which speed the console opens (in pixels/second
+    // Determines at which speed the console opens (in pixels/second)
     const float ConsoleOpenSpeed = 500.f;
 
 } // namespace
@@ -93,7 +93,21 @@ LuaConsole::LuaConsole()
     , _separatorColor(
         "separatorColor",
         "Separator Color",
-        glm::vec4(0.5f, 0.5f, 0.5f, 1.f),
+        glm::vec4(0.4f, 0.4f, 0.4f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _entryTextColor(
+        "entryTextColor",
+        "Entry Text Color",
+        glm::vec4(1.f, 1.f, 1.f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _historyTextColor(
+        "historyTextColor",
+        "History Text Color",
+        glm::vec4(0.65f, 0.65f, 0.65f, 1.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -114,6 +128,10 @@ LuaConsole::LuaConsole()
     addProperty(_highlightColor);
     _separatorColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_separatorColor);
+    _entryTextColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_entryTextColor);
+    _historyTextColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_historyTextColor);
 }
 
 void LuaConsole::initialize() {
@@ -511,12 +529,13 @@ void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
     addToCommand(std::string(1, static_cast<const char>(codepoint)));
 }
 
-void renderQuad(const glm::vec2& pos, const glm::vec2& size) {
-
-}
-
 void LuaConsole::render() {
     using namespace ghoul::fontrendering;
+
+    // The scrolling of the window is done by offsetting the entire rendering's y
+    // coordinate upwards and slowly decreasing that value. Since the rendering is going
+    // to be clipped, we don't need to take care about not rendering parts that are off
+    // screen
 
     if (!_isVisible) {
         // When we toggle the console back to visible, we want to start at 0 height
@@ -578,7 +597,7 @@ void LuaConsole::render() {
 
     // Draw the separator between the current entry box and the history
     _program->setUniform("color", _separatorColor);
-    _program->setUniform("height", MaximumHeight / res.y - 1.75f * EntryFontSize / res.y);
+    _program->setUniform("height", MaximumHeight / res.y - 2.5f * EntryFontSize / res.y);
     glDrawArrays(GL_LINES, 1, 2);
 
     _program->deactivate();
@@ -589,37 +608,31 @@ void LuaConsole::render() {
     // Render text on top of the background
     const int ySize = OsEng.renderEngine().fontResolution().y;
 
-    const glm::vec4 gray(0.75f, 0.75f, 0.75f, 1);
-    const glm::vec4 white(1, 1, 1, 1);
-
-    const glm::vec2 inputLocation = glm::vec2(
+    glm::vec2 inputLocation = glm::vec2(
         EntryFontSize / 2.f,
-        res.y - MaximumHeight + EntryFontSize / 2.f
+        res.y - MaximumHeight + EntryFontSize + h
     );
 
-    RenderFont(
+    // Render the current command
+    RenderFontCr(
         *_font,
-        inputLocation + glm::vec2(0.f, h),
-        white,
+        inputLocation,
+        _entryTextColor,
         "> %s",
         _commands.at(_activeCommand).c_str()
     );
+    
+    // Just offset the ^ marker slightly for a nicer look
+    inputLocation.y += 3;
 
-    // Render cursor
-    auto cursorLocation = FontRenderer::defaultRenderer().boundingBox(
+    // Render the ^ marker below the text to show where the current entry point is
+    RenderFont(
         *_font,
-        ("> " + _commands.back().substr(0, _inputPosition)).c_str()
+        inputLocation,
+        _entryTextColor,
+        (std::string(_inputPosition + 2, ' ') + "^").c_str()
     );
-    auto charWidth = FontRenderer::defaultRenderer().boundingBox(
-        *_font,
-        "m"
-    );
-
-
-
-
-
-
+    
     glm::vec2 historyInputLocation = glm::vec2(
         HistoryFontSize / 2.f,
         res.y - HistoryFontSize * 1.5f + h
@@ -641,20 +654,25 @@ void LuaConsole::render() {
         RenderFontCr(
             *_historyFont,
             historyInputLocation,
-            gray,
+            _historyTextColor,
             "%s",
             cmd.c_str()
         );
     }
 
-
-
+    // Computes the location for right justified text on the same y height as the entry
     auto locationForRightJustifiedText = [&](const std::string& text) {
         using namespace ghoul::fontrendering;
+
+        glm::vec2 loc = glm::vec2(
+            EntryFontSize / 2.f,
+            res.y - MaximumHeight + EntryFontSize + h
+        );
+
         auto bbox = FontRenderer::defaultRenderer().boundingBox(*_font, text.c_str());
         return glm::vec2(
-            inputLocation.x + res.x - bbox.boundingBox.x - 10.f,
-            inputLocation.y
+            loc.x + res.x - bbox.boundingBox.x - 10.f,
+            loc.y
         );
     };
 

@@ -59,14 +59,14 @@ private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
     void addToCommand(std::string c);
 
-    void renderQuad(const glm::vec2& pos, const glm::vec2& size);
-
     properties::BoolProperty _isVisible;
     properties::BoolProperty _remoteScripting;
 
     properties::Vec4Property _backgroundColor;
     properties::Vec4Property _highlightColor;
     properties::Vec4Property _separatorColor;
+    properties::Vec4Property _entryTextColor;
+    properties::Vec4Property _historyTextColor;
     properties::IntProperty _historyLength;
 
     
