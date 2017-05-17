@@ -705,8 +705,7 @@ void LuaConsole::render() {
     }
 }
 
-float LuaConsole::currentHeight() const
-{
+float LuaConsole::currentHeight() const {
     return _currentHeight;
 }
 
