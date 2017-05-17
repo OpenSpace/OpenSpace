@@ -144,9 +144,6 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     unsigned int i = 0;
     for (auto& el : _imageMetadataMap) {
         _activeInstruments.addOption(i++, el.first);
-        // if (tfMap.find(e.first) == tfMap.end()) {
-        //     tfMap[e.first] =
-        // }
     }
 
     _currentActiveInstrument
@@ -739,17 +736,16 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     _planeShader->setUniform("imageryTexture", imageUnit);
 
     //_tfMap[_currentActiveInstrument]->bind(); // Calls update internally
+    ghoul::opengl::TextureUnit tfUnit;
+    tfUnit.activate();
     if (_lut) {
-        ghoul::opengl::TextureUnit tfUnit;
-        tfUnit.activate();
         _lut->bind();
-        _planeShader->setUniform("lut", tfUnit);
-        _planeShader->setUniform("hasLut", 1);
+        _planeShader->setUniform("hasLut", true);
     } else {
-        ghoul::opengl::TextureUnit tfUnit;
-        tfUnit.activate();
-        _planeShader->setUniform("hasLut", 0);
+        _planeShader->setUniform("hasLut", false);
     }
+    // Must bind all sampler2D, otherwise undefined behaviour
+    _planeShader->setUniform("lut", tfUnit);
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);

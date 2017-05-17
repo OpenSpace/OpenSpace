@@ -135,9 +135,11 @@ void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
     );
 
     const int numPlanes = _planeDependencies.size();
+    const int MAX_SPACECRAFT_OBSERVATORY = 6;
+    int planeCount = 0;
 
-    ghoul::opengl::TextureUnit txUnits[numPlanes];
-    ghoul::opengl::TextureUnit tfUnits[numPlanes];
+    ghoul::opengl::TextureUnit txUnits[MAX_SPACECRAFT_OBSERVATORY];
+    ghoul::opengl::TextureUnit tfUnits[MAX_SPACECRAFT_OBSERVATORY];
 
     for (int i = 0; i < numPlanes; ++i) {
         auto* plane = static_cast<RenderableSpacecraftCameraPlane*>(
@@ -155,15 +157,27 @@ void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
         txUnits[i].activate();
         plane->_texture->bind();
         _shader->setUniform("imageryTexture[" + std::to_string(i) + "]", txUnits[i]);
+        //txUnits[i].setZeroUnit();
 
+        tfUnits[i].activate();
+       // tfUnits[i].setZeroUnit();
         if (plane->_lut) {
-            tfUnits[i].activate();
             plane->_lut->bind();
-            _shader->setUniform("lut[" + std::to_string(i) + "]", tfUnits[i]);
-            _shader->setUniform("hasLut", 1);
+            _shader->setUniform("hasLut[" + std::to_string(i) + "]", true);
         } else {
-            _shader->setUniform("hasLut", 0);
+            _shader->setUniform("hasLut[" + std::to_string(i) + "]", false);
         }
+        // Must bind all sampler2D, otherwise undefined behaviour
+        _shader->setUniform("lut[" + std::to_string(i) + "]", tfUnits[i]);
+        planeCount++;
+    }
+
+    // Set the rest of the texture units for well defined behaviour
+    for (int i = planeCount; i < MAX_SPACECRAFT_OBSERVATORY; ++i) {
+        txUnits[i].activate();
+        _shader->setUniform("imageryTexture[" + std::to_string(i) + "]", txUnits[i]);
+        tfUnits[i].activate();
+        _shader->setUniform("lut[" + std::to_string(i) + "]", tfUnits[i]);
     }
 
 
