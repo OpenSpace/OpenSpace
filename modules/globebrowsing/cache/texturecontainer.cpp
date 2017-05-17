@@ -33,12 +33,19 @@ namespace cache {
 TextureContainer::TextureContainer(TileTextureInitData initData, size_t numTextures)
 	: _initData(initData)
 	, _freeTexture(0)
+	, _numTextures(numTextures)
 {
+	reset();
+}
+
+void TextureContainer::reset() {
+	_textures.clear();
+	_freeTexture = 0;
 	ghoul::opengl::Texture::AllocateData allocate =
 		_initData.shouldAllocateDataOnCPU() ?
 		ghoul::opengl::Texture::AllocateData::Yes :
 		ghoul::opengl::Texture::AllocateData::No;
-	for (size_t i = 0; i < numTextures; ++i)
+	for (size_t i = 0; i < _numTextures; ++i)
 	{
 		_textures.push_back(std::make_unique<ghoul::opengl::Texture>(
 			_initData.dimensionsWithPadding(),

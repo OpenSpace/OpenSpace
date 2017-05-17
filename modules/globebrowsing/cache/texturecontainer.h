@@ -48,6 +48,8 @@ public:
     TextureContainer(TileTextureInitData initData, size_t numTextures);
 
     ~TextureContainer() = default;
+
+    void reset();
     
     /**
      * \returns a pointer to a texture if there is one texture never used before.
@@ -67,6 +69,7 @@ private:
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
     size_t _freeTexture;
     const TileTextureInitData _initData;
+    const size_t _numTextures;
 };
 
 } // namespace cache

@@ -112,6 +112,7 @@ private:
         TextureContainerTileCache>;
 
     TextureContainerMap _textureContainerMap;
+    size_t _numTextureBytesAllocatedOnCPU;
 };
 
 } // namespace cache

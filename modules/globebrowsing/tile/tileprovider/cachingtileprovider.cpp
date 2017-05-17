@@ -155,8 +155,8 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
     }
         
     return Tile::TileUnavailable;
-
 }
+
 float CachingTileProvider::noDataValueAsFloat() {
     return _asyncTextureDataProvider->noDataValueAsFloat();
 }

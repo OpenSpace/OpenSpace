@@ -48,10 +48,12 @@ MemoryAwareTileCache& MemoryAwareTileCache::ref() {
 }
 
 void MemoryAwareTileCache::clear() {
+    _numTextureBytesAllocatedOnCPU = 0;
     for (TextureContainerMap::iterator it = _textureContainerMap.begin();
         it != _textureContainerMap.end();
         it++)
     {
+        it->second.first->reset();
         it->second.second->clear();
     }
 }
@@ -117,17 +119,22 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
         if (rawTile->pbo != 0) {
             texture->reUploadTextureFromPBO(rawTile->pbo);
             if (initData.shouldAllocateDataOnCPU()) {
+                if (!texture->dataOwnership()) {
+                    _numTextureBytesAllocatedOnCPU += initData.totalNumBytes();
+                }
                 texture->setPixelData(rawTile->imageData,
                     Texture::TakeOwnership::Yes);
             }
         }
         else {
+            size_t previousExpectedDataSize = texture->expectedPixelDataSize();
             ghoul_assert(texture->dataOwnership(),
                 "Texture must have ownership of old data to avoid leaks");
             texture->setPixelData(rawTile->imageData, Texture::TakeOwnership::Yes);
             size_t expectedDataSize = texture->expectedPixelDataSize();
             size_t numBytes = rawTile->textureInitData->totalNumBytes();
             ghoul_assert(expectedDataSize == numBytes, "Pixel data size is incorrect");
+            _numTextureBytesAllocatedOnCPU += numBytes - previousExpectedDataSize;
             texture->reUploadTexture();
         }
         texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
@@ -161,10 +168,11 @@ size_t MemoryAwareTileCache::getCPUAllocatedDataSize() const {
             dataSize += bytesPerTexture * textureContainer.size();
         }
     }
-    return dataSize;
+    return dataSize + _numTextureBytesAllocatedOnCPU;
 }
 
 MemoryAwareTileCache::MemoryAwareTileCache()
+    : _numTextureBytesAllocatedOnCPU(0)
 { }
 
 } // namespace cache
