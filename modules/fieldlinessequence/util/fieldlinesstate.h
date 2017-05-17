@@ -46,10 +46,14 @@ public:
     std::vector<GLsizei>    _lineCount;
 
     // TODO: start/trigger time as double in j2000 time
+    double _triggerTime = -1.0;
 
-    std::vector<std::vector< float > > _extraVariables;
+    //TODO bool _isMorphable = false;
 
-    std::string _modelName;
+    std::vector<std::vector<float>> _extraVariables;
+    std::vector<std::string> _extraVariableNames;
+
+    std::string _modelName = "";
 
     void reserveSize(size_t size);
 private:

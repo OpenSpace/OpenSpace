@@ -66,14 +66,22 @@ public:
                                const std::string& fileExtension,
                                std::vector<std::string>& outFilePaths);
 
-    bool getFieldlinesState(const std::string& pathToJsonFile,
+    bool saveFieldlinesStateAsJson(const FieldlinesState& state,
+                                   const std::string& directoryPath,
+                                   const bool isAbsPath,
+                                   const std::string& prefix    = "",
+                                   const bool stateDataInName   = true, // if false prefix is needed
+                                   const std::string& separator = "_",
+                                   const int& prettyIndentation = 1);
+
+    bool getFieldlinesState/*Json*/(const std::string& pathToJsonFile,
                             const bool shouldResample, //does const bool& make sense?
                             const int& numResamples,
                             const int& resamplingOption,
                             std::vector<double>& startTimes,
                             FieldlinesState& outFieldlinesStates);
 
-    bool getFieldlinesState(const std::string& pathToCdfFile,
+    bool getFieldlinesState/*Cdf*/(const std::string& pathToCdfFile,
                             const std::string& tracingVariable,
                             const std::vector<glm::vec3>& inSeedPoints,
                             const int& maxIterations,

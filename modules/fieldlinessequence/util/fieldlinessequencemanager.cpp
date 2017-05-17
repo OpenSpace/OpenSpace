@@ -24,6 +24,7 @@
 
 #include <modules/fieldlinessequence/util/fieldlinessequencemanager.h>
 
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 
 #include <ghoul/filesystem/filesystem.h>
@@ -59,7 +60,23 @@ namespace {
     const std::string TEMPERATURE_P_OVER_RHO = "T = p/rho";
 
     using json = nlohmann::json;
-}
+
+} // namespace (empty)
+
+// json specific
+namespace nlohmann {
+    // Tell json library how to handle glm::vec3
+    template <>
+    struct adl_serializer<glm::vec3> {
+        static void to_json(json& j, const glm::vec3& vec3) {
+            j = { vec3.x, vec3.y, vec3.z};
+        }
+
+        static void from_json(const json& j, glm::vec3& vec3) {
+            vec3 = glm::vec3(j[0], j[1], j[2]);
+        }
+    };
+} // namespace nlohmann
 
 namespace openspace {
 
@@ -137,6 +154,106 @@ bool FieldlinesSequenceManager::getAllFilePathsOfType(
     return true;
 }
 
+// TODO - MOVE ALL JSON HANDLING TO ITS OWN FILE!!!!!!!
+bool FieldlinesSequenceManager::saveFieldlinesStateAsJson(const FieldlinesState& state,
+                                                          const std::string& directoryPath,
+                                                          const bool isAbsPath,
+                                                          const std::string& prefix    /* = ""   */,
+                                                          const bool stateDataInName   /* = true */,
+                                                          const std::string& separator /* = "_"  */,
+                                                          const int& prettyIndentation /* = 1    */) {
+
+    size_t numExtras = state._extraVariables.size();
+    size_t numLines = state._lineStart.size();
+    size_t numPoints = state._vertexPositions.size();
+
+    std::string fileName;
+
+    // if prefix is empty -> force the use of stateData in filename!
+    if (stateDataInName || prefix == "") {
+        fileName = prefix + separator + state._modelName;
+        if (state._triggerTime >= 0) {
+            // _triggerTime has been initialized -> convert to UT time string
+            std::string timeString = SpiceManager::ref().dateFromEphemerisTime(state._triggerTime);
+            // replace specified chars with '-'
+            std::replace_if(timeString.begin(), timeString.end(), [](char c){ return (c == ' ' ||
+                                                                                      c == '.' ||
+                                                                                      c == ':');}, '-');
+            fileName += separator + timeString;
+        }
+
+        fileName += separator + std::to_string(numLines) + "Lines";
+        fileName += separator + std::to_string(numPoints) + "Points";
+
+        if (numExtras > 0) {
+            std::string s = "";
+            if (numExtras > 1) {
+                s = "s";
+            }
+
+            if (state._extraVariableNames.size() == numExtras) {
+                fileName += separator + "ColorVar" + s;
+                for (size_t i = 0; i < numExtras; ++i) {
+                    std::string temp = state._extraVariableNames[i];
+                    temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
+                    fileName += separator + temp;
+                }
+            } else {
+                fileName += separator + std::to_string(numExtras) + "UnknownColorVar" + s;
+            }
+        }
+    } else {
+        fileName = prefix;
+    }
+
+    fileName += ".json";
+
+    // Create main json object
+    json jfile = {
+        // Create meta data
+        {"0. _meta", {
+            {"0. _triggerTime", state._triggerTime},
+            {"1. _modelName", state._modelName},
+            {"2. numLines", numLines},
+            {"3. numPoints", numPoints},
+            // push_back number of extraVars
+            {"4. numExtras", numExtras}
+        }}
+    };
+
+    // add entire arrays
+    jfile["1. _lineStart"] = state._lineStart;
+    jfile["2. _lineCount"] = state._lineCount;
+    jfile["3. _vertexPositions"] = state._vertexPositions;
+
+    // TODO this needs to be checked if actually correct!
+    json jExtras;
+    for (size_t i = 0; i < numExtras; ++i) {
+       std::string key = std::to_string(i);
+       if (state._extraVariableNames.size() == numExtras) {
+           key += ". " + state._extraVariableNames[i];
+       }
+       jExtras[key] = state._extraVariables[i];
+    }
+
+    jfile["4. colorizingVariables"] = jExtras;
+
+    // TODO: VALIDATE THAT FOLDER EXISTS FIRST?
+    std::string fullPath;
+    if (!isAbsPath) {
+        fullPath = absPath(directoryPath);
+    }
+    fullPath += fileName;
+    std::ofstream ofs(fullPath);
+    if (!ofs.is_open()) {
+        LERROR("FAILED TO OPEN FILE TO WRITE TO");
+        return false;
+    }
+
+    ofs << std::setw(prettyIndentation) << jfile << std::endl;
+
+    return true;
+}
 
 // in the current json file I have, fieldline data is structured like this:
 // {
@@ -510,6 +627,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     // ------------------------ MAKE SURE STATE HAS A START TIME ------------------------
     double startTime = getTime(kameleon.get());
     startTimes.push_back(startTime);
+    outFieldlinesState._triggerTime = startTime;
     LDEBUG("State will start at " << startTime << " (J2000 Time)");
 
     return status;

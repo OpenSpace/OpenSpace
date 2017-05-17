@@ -305,6 +305,12 @@ bool RenderableFieldlinesSequence::initialize() {
         _states.reserve(_numberOfStates);
         _startTimes.reserve(_numberOfStates);
 
+        // TODO specify saveJsonState in LUA;
+        std::string folder = "${OPENSPACE_DATA}/scene/fieldlinessequence/json_new/";
+        // std::string prefix = "";
+        // std::string separator = "-";
+        // int indentations = 1;
+
         for (int i = 0; i < _numberOfStates; ++i) {
            LDEBUG(validCdfFilePaths[i] << " is now being traced.");
            _states.push_back(FieldlinesState(_seedPoints.size()));
@@ -319,6 +325,16 @@ bool RenderableFieldlinesSequence::initialize() {
                                                                colorizingMagVars,
                                                                _startTimes,
                                                                _states[i]);
+
+           FieldlinesSequenceManager::ref().saveFieldlinesStateAsJson(_states[i],
+                                                                      folder,
+                                                                      false//,
+                                                                      ,"0",true,"_",0
+                                                                      // prefix,
+                                                                      // true,
+                                                                      // separator,
+                                                                      // indentations
+                                                                      );
         }
     } else if (_tracingMethod == keyTracingMethodPreTraced) {
         allowSeedPoints = false;
@@ -343,6 +359,20 @@ bool RenderableFieldlinesSequence::initialize() {
         _numberOfStates = validJsonFilePaths.size();
         _states.reserve(_numberOfStates);
         _startTimes.reserve(_numberOfStates);
+
+        // TODO specify saveJsonState in LUA;
+        std::string folder = "${OPENSPACE_DATA}/scene/fieldlinessequence/json_new/";
+        std::string prefix = "jsonConv";
+        std::string separator = "-";
+        int indentations = 1;
+
+        FieldlinesSequenceManager::ref().saveFieldlinesStateAsJson(_states[0],
+                                                                   folder,
+                                                                   false,
+                                                                   prefix,
+                                                                   true,
+                                                                   separator,
+                                                                   indentations);
 
     } else if (_tracingMethod == keyTracingMethodLiveTrace) {
         LERROR("NOT YET INCORPORATED INTO THIS CLASS! TODO, TODO TODO!");
