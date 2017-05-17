@@ -92,8 +92,11 @@ public:
     void clear();
     bool exist(ProviderTileKey key) const;
     Tile get(ProviderTileKey key);
+    ghoul::opengl::Texture* getTexture(const TileTextureInitData& initData);
     void createTileAndPut(ProviderTileKey key, std::shared_ptr<RawTile> rawTile);
-  
+    void put(const ProviderTileKey& key,
+        const TileTextureInitData::HashKey& initDataKey, Tile tile);
+
     size_t getGPUAllocatedDataSize() const;
     size_t getCPUAllocatedDataSize() const;
 

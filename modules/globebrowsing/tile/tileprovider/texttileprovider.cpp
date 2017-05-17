@@ -42,16 +42,16 @@ namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
     
-TextTileProvider::TextTileProvider(const glm::uvec2& textureSize, size_t fontSize)
-    : _textureSize(textureSize)
+TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t fontSize)
+    : _initData(initData)
     , _fontSize(fontSize)
 	, _tileCache(1000)
 {
     _font = OsEng.fontManager().font("Mono", _fontSize);
         
     _fontRenderer = std::unique_ptr<FontRenderer>(FontRenderer::createDefault());
-    _fontRenderer->setFramebufferSize(textureSize);
-
+    _fontRenderer->setFramebufferSize(_initData.dimensionsWithPadding());
+    
     glGenFramebuffers(1, &_fbo);
 }
 
@@ -60,13 +60,16 @@ TextTileProvider::~TextTileProvider() {
 }
 
 Tile TextTileProvider::getTile(const TileIndex& tileIndex) {
-    TileIndex::TileHashKey key = tileIndex.hashKey();
+    cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
-    if (!_tileCache.exist(key)) {
-		_tileCache.put(key, createChunkIndexTile(tileIndex));
+    if (cache::MemoryAwareTileCache::ref().exist(key)) {
+        return cache::MemoryAwareTileCache::ref().get(key);
     }
-  
-    return _tileCache.get(key);
+    else {
+        Tile tile = TextTileProvider::createChunkIndexTile(tileIndex);
+        cache::MemoryAwareTileCache::ref().put(key, _initData.hashKey(), tile);
+        return tile;
+    }
 }
 
 Tile::Status TextTileProvider::getTileStatus(const TileIndex&) {
@@ -87,7 +90,9 @@ void TextTileProvider::reset() {
 }
 
 Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
-    Tile tile = backgroundTile(tileIndex);
+    //Tile tile = backgroundTile(tileIndex);
+    ghoul::opengl::Texture* texture =
+        cache::MemoryAwareTileCache::ref().getTexture(_initData);
 
     // Keep track of defaultFBO and viewport to be able to reset state when done
     GLint defaultFBO;
@@ -101,15 +106,18 @@ Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        *(tile.texture()),
+        *texture,
         0
     );
 
     glViewport(
         0, 0,
-        static_cast<GLsizei>(tile.texture()->width()),
-        static_cast<GLsizei>(tile.texture()->height())
+        static_cast<GLsizei>(texture->width()),
+        static_cast<GLsizei>(texture->height())
     );
+
+    glClearColor(0,0,0,0);
+    glClear(GL_COLOR_BUFFER_BIT);
         
     ghoul_assert(_fontRenderer != nullptr, "_fontRenderer must not be null");
     renderText(*_fontRenderer, tileIndex);
@@ -118,7 +126,7 @@ Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
-    return tile;
+    return Tile(texture, nullptr, Tile::Status::OK);
 }
 
 int TextTileProvider::maxLevel() {
@@ -127,15 +135,6 @@ int TextTileProvider::maxLevel() {
 
 TileIndex::TileHashKey TextTileProvider::toHash(const TileIndex& tileIndex) const {
     return tileIndex.hashKey();
-}
-
-Tile TextTileProvider::backgroundTile(const TileIndex& tileIndex) const {
-	/*
-    glm::uvec4 color = { 0, 0, 0, 0 };
-    return Tile::createPlainTile(_textureSize, color);
-	*/
-	return Tile(nullptr, nullptr, Tile::Status::Unavailable);
-
 }
 
 } // namespace tileprovider

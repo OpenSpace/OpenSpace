@@ -27,6 +27,7 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/cache/lrucache.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -50,7 +51,7 @@ public:
     /**
      * Default constructor with default values for texture and font size
      */
-    TextTileProvider(const glm::uvec2& textureSize = {512, 512}, size_t fontSize = 48);
+    TextTileProvider(const TileTextureInitData& initData, size_t fontSize = 48);
     virtual ~TextTileProvider() override;
 
     // The TileProvider interface below is implemented in this class
@@ -60,12 +61,6 @@ public:
     virtual void update() override;
     virtual void reset() override;
     virtual int maxLevel() override;
-
-    /**
-     * Returns the tile which will be used to draw text onto. 
-     * Default implementation returns a tile with a plain transparent texture.
-     */
-    virtual Tile backgroundTile(const TileIndex& tileIndex) const;
 
     /**
      * Allow overriding of hash function. 
@@ -87,12 +82,13 @@ public:
         const TileIndex& tileIndex) const = 0;
 
 protected:
+    const TileTextureInitData _initData;
     std::shared_ptr<ghoul::fontrendering::Font> _font;
-    glm::uvec2 _textureSize;
     size_t _fontSize;
 
 private:
-    Tile createChunkIndexTile(const TileIndex& tileIndex);
+    Tile
+        createChunkIndexTile(const TileIndex& tileIndex);
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
 	
 	cache::LRUCache<TileIndex::TileHashKey, Tile> _tileCache;

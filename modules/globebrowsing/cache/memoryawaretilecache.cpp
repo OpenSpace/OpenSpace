@@ -82,6 +82,32 @@ Tile MemoryAwareTileCache::get(ProviderTileKey key) {
     ghoul_assert(false, "");
 }
 
+ghoul::opengl::Texture* MemoryAwareTileCache::getTexture(const TileTextureInitData& initData) {
+    ghoul::opengl::Texture* texture;
+    // if this texture type does not exist among the texture containers
+    // it needs to be created
+    TileTextureInitData::HashKey initDataKey = initData.hashKey();
+    if (_textureContainerMap.find(initDataKey) == _textureContainerMap.end()) {
+        // For now create 500 textures of this type
+        _textureContainerMap.emplace(initDataKey,
+            TextureContainerTileCache(
+                std::make_unique<TextureContainer>(initData, 500),
+                std::make_unique<TileCache>(std::numeric_limits<std::size_t>::max())
+                )
+            );
+    }
+    // Now we know that the texture container exists,
+    // check if there are any unused textures
+    texture = _textureContainerMap[initDataKey].first->getTextureIfFree();
+    // Second option. No more textures available. Pop from the LRU cache
+    if (!texture) {
+        Tile oldTile = _textureContainerMap[initDataKey].second->popLRU();
+        // Use the old tile's texture
+        texture = oldTile.texture();
+    }
+    return texture;
+}
+
 void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
     std::shared_ptr<RawTile> rawTile)
 {
@@ -91,29 +117,8 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
         return;
     }
     else {
-        Texture* texture;
-        // if this texture type does not exist among the texture containers
-        // it needs to be created
         const TileTextureInitData& initData = *rawTile->textureInitData;
-        TileTextureInitData::HashKey initDataKey = initData.hashKey();
-        if (_textureContainerMap.find(initDataKey) == _textureContainerMap.end()) {
-            // For now create 500 textures of this type
-            _textureContainerMap.emplace(initDataKey,
-                TextureContainerTileCache(
-                    std::make_unique<TextureContainer>(initData, 500),
-                    std::make_unique<TileCache>(std::numeric_limits<std::size_t>::max())
-                    )
-                );
-        }
-        // Now we know that the texture container exists,
-        // check if there are any unused textures
-        texture = _textureContainerMap[initDataKey].first->getTextureIfFree();
-        // Second option. No more textures available. Pop from the LRU cache
-        if (!texture) {
-            Tile oldTile = _textureContainerMap[initDataKey].second->popLRU();
-            // Use the old tile's texture
-            texture = oldTile.texture();
-        }
+        Texture* texture = getTexture(initData);
         
         // Re-upload texture, either using PBO or by using RAM data
         if (rawTile->pbo != 0) {
@@ -139,8 +144,17 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
         }
         texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         Tile tile(texture, rawTile->tileMetaData, Tile::Status::OK);
+        TileTextureInitData::HashKey initDataKey = initData.hashKey();
         _textureContainerMap[initDataKey].second->put(key, tile);
     }
+    return;
+}
+
+
+void MemoryAwareTileCache::put(const ProviderTileKey& key,
+        const TileTextureInitData::HashKey& initDataKey, Tile tile)
+{
+    _textureContainerMap[initDataKey].second->put(key, tile);
     return;
 }
 

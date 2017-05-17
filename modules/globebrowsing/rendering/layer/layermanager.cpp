@@ -46,7 +46,8 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
             layerGroupsDict.value<ghoul::Dictionary>(groupName);
 
         _layerGroups.push_back(
-            std::make_shared<LayerGroup>( static_cast<layergroupid::ID>(i), layerGroupDict));
+            std::make_shared<LayerGroup>(
+                static_cast<layergroupid::ID>(i), layerGroupDict));
     }
         
     for (const auto& layerGroup : _layerGroups) {
