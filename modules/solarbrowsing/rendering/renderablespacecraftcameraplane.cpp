@@ -67,7 +67,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _target("target", "Target", "Sun")
     , _useBuffering("useBuffering", "Use Buffering", true)
     , _usePBO("usePBO", "Use PBO", true)
-    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
+    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(16))
     , _verboseMode("verboseMode", "Verbose Mode", false)
 {
     std::string target;
@@ -92,11 +92,6 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     std::string rootPath;
     if (!dictionary.getValue("RootPath", rootPath)) {
         throw ghoul::RuntimeError("RootPath has to be specified");
-    }
-
-    std::string tfRootPath;
-    if (!dictionary.getValue("TransferfunctionPath", tfRootPath)) {
-        throw ghoul::RuntimeError("TransferfunctionPath has to be specified");
     }
 
     float id;
@@ -126,7 +121,13 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     }
 
     SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap, _instrumentFilter);
-    SpacecraftImageryManager::ref().loadTransferFunctions(tfRootPath, _tfMap, _instrumentFilter);
+
+
+    std::string tfRootPath;
+    if (dictionary.getValue("TransferfunctionPath", tfRootPath)) {
+        SpacecraftImageryManager::ref().loadTransferFunctions(tfRootPath, _tfMap, _instrumentFilter);
+        //throw ghoul::RuntimeError("TransferfunctionPath has to be specified");
+    }
 
     // Some sanity checks
     if (_imageMetadataMap.size() == 0) {
@@ -143,6 +144,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     unsigned int i = 0;
     for (auto& el : _imageMetadataMap) {
         _activeInstruments.addOption(i++, el.first);
+        // if (tfMap.find(e.first) == tfMap.end()) {
+        //     tfMap[e.first] =
+        // }
     }
 
     _currentActiveInstrument
@@ -688,9 +692,6 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     const glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
     const glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
-    // Activate shader
-    _planeShader->activate();
-
     // Model transform and view transform needs to be in double precision
     const SceneGraphNode* target = OsEng.renderEngine().scene()->sceneGraphNode(_target);
     const glm::dvec3 positionWorld = data.modelTransform.translation;
@@ -722,6 +723,10 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
         glm::dmat4(1.0);
 
+
+    // Activate shader
+    _planeShader->activate();
+
     _planeShader->setUniform("modelViewProjectionTransform",
         projectionMatrix * glm::mat4(modelViewTransform));
 
@@ -733,11 +738,18 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     _texture->bind();
     _planeShader->setUniform("imageryTexture", imageUnit);
 
-    ghoul::opengl::TextureUnit tfUnit;
-    tfUnit.activate();
     //_tfMap[_currentActiveInstrument]->bind(); // Calls update internally
-    _lut->bind();
-    _planeShader->setUniform("lut", tfUnit);
+    if (_lut) {
+        ghoul::opengl::TextureUnit tfUnit;
+        tfUnit.activate();
+        _lut->bind();
+        _planeShader->setUniform("lut", tfUnit);
+        _planeShader->setUniform("hasLut", 1);
+    } else {
+        ghoul::opengl::TextureUnit tfUnit;
+        tfUnit.activate();
+        _planeShader->setUniform("hasLut", 0);
+    }
 
     glBindVertexArray(_quad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
