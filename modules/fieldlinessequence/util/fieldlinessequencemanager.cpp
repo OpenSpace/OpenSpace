@@ -211,7 +211,7 @@ bool FieldlinesSequenceManager::saveFieldlinesStateAsJson(const FieldlinesState&
     // Create main json object
     json jfile = {
         // Create meta data
-        {"0. _meta", {
+        {"0. meta", {
             {"0. _triggerTime", state._triggerTime},
             {"1. _modelName", state._modelName},
             {"2. numLines", numLines},
@@ -255,26 +255,7 @@ bool FieldlinesSequenceManager::saveFieldlinesStateAsJson(const FieldlinesState&
     return true;
 }
 
-// in the current json file I have, fieldline data is structured like this:
-// {
-//   "0": {
-//     "y": [value0, value1, value2],
-//     "x": [value0, value1, value2],
-//     "z": [value0, value1, value2],
-//     "arclength": [value0, value1, value2],
-//     "topology": "solar_wind"
-//   },
-//   "1": {
-//     "y": [value0, value1, value2],
-//     "x": [value0, value1, value2],
-//     "z": [value0, value1, value2],
-//     "arclength": [value0, value1, value2],
-//     "topology": "closed"
-//   }
-// }
-//
-// where "0" and "1" contains data for one fieldline each
-//
+
 /** READ PRECALCULATED FIELDLINE STATES FROM .JSON FILES AND STORE AS A FIELDLINE STATE
  *
  *
@@ -287,10 +268,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         std::vector<double>& startTimes,
         FieldlinesState& outFieldlinesState) {
 
-    // TODO, this should be included either in the JSON file or in LUA (.mod)
-    // when specifying which folders to get JSON files from
-    const std::string model = "batsrus";
-    outFieldlinesState._modelName = model;
+
 
     std::ifstream ifs(pathToJsonFile);
     if (!ifs.is_open()) {
@@ -302,50 +280,122 @@ bool FieldlinesSequenceManager::getFieldlinesState(
 
     size_t numLines = jfile.size();
 
-    // Check if the json file contains a trigger time
-    if (jfile.find("trigger_time") != jfile.end()) {
-      // there is an entry for key "trigger_time"
-        startTimes.push_back(jfile["trigger_time"]);
+    // if the JSON file contains the key "0. meta" it is in fieldline state format
+    if (jfile.find("0. meta") != jfile.end()) {
+        // check my format
+
+        // Objects in jfile
+            //jfile["0. meta"];
+            //jfile["1. _lineStart"];
+            //jfile["2. _lineCount"];
+            //jfile["3. _vertexPositions"];
+            //jfile["4. colorizingVariables"];
+
+        // jfile["0. meta"] has the following keys and corresponding value types
+            // "0. _triggerTime", double
+            // "1. _modelName"  , std::string
+            // "2. numLines"    , size_t,
+            // "3. numPoints"   , size_t,
+            // "4. numExtras"   , size_t
+        outFieldlinesState._triggerTime = jfile["0. meta"]["0. _triggerTime"];
+        outFieldlinesState._modelName   = jfile["0. meta"]["1. _modelName"];
+        size_t numLines                 = jfile["0. meta"]["2. numLines"];
+        size_t numPoints                = jfile["0. meta"]["3. numPoints"];
+        size_t numExtras                = jfile["0. meta"]["4. numExtras"];
+
+        // jfile["1. _lineStart"] stores an array of 'GLuint's
+        // jfile["2. _lineCount"] stores an array of 'GLsizei's
+        outFieldlinesState._lineStart = jfile["1. _lineStart"];
+        outFieldlinesState._lineCount = jfile["2. _lineCount"];
+
+        // jfile["3. _vertexPositions"] stores an array of 'glm::vec3's
+        for (auto it = jfile["3. _vertexPositions"].begin(); it != jfile["3. _vertexPositions"].end(); ++it) {
+            outFieldlinesState._vertexPositions.push_back(glm::vec3(it.value()[0], it.value()[1], it.value()[2]));
+        }
+
+        // jfile["4. colorizingVariables"] stores arrays of 'float's and each array's key describes what unit it holds
+        for (auto it = jfile["4. colorizingVariables"].begin(); it != jfile["4. colorizingVariables"].end(); ++it) {
+            outFieldlinesState._extraVariableNames.push_back(it.key());
+            outFieldlinesState._extraVariables.push_back(it.value());
+        }
+
+        // TODO: startTime should not be set here!
+        startTimes.push_back(outFieldlinesState._triggerTime);
+
     } else {
-        // LWARNING("JSON FILE DOESN'T CONTAIN A TRIGGER TIME. USING DEFAULT: July 12th 2012 at 00:00:00:000");
-        // startTimes.push_back(395323200.0);
+        // in the json file I have gotten from CCMC, fieldline data is structured like this:
+        // {
+        //   "0": {
+        //     "y": [value0, value1, value2],
+        //     "x": [value0, value1, value2],
+        //     "z": [value0, value1, value2],
+        //     "arclength": [value0, value1, value2],
+        //     "topology": "solar_wind"
+        //   },
+        //   "1": {
+        //     "y": [value0, value1, value2],
+        //     "x": [value0, value1, value2],
+        //     "z": [value0, value1, value2],
+        //     "arclength": [value0, value1, value2],
+        //     "topology": "closed"
+        //   }
+        // }
+        //
+        // where "0" and "1" contains data for one fieldline each
+        //
 
-        LWARNING("JSON FILE DOESN'T CONTAIN A TRIGGER TIME. USING DEFAULT: March 15th 2015 at 00:00:00:000");
-        startTimes.push_back(479649600.0);
-    }
+        // TODO, this should be included either in the JSON file or in LUA (.mod)
+        // when specifying which folders to get JSON files from
+        const std::string model = "batsrus";
+        outFieldlinesState._modelName = model;
 
-    // iterate through each line
-    for (json::iterator fieldlineIt = jfile.begin(); fieldlineIt != jfile.end(); ++fieldlineIt) {
-        json fieldline = *fieldlineIt;
+        // Check if the json file contains a trigger time
+        if (jfile.find("_triggerTime") != jfile.end()) {
+          // there is an entry for key "trigger_time"
+            startTimes.push_back(jfile["_triggerTime"]);
+        } else {
+            // LWARNING("JSON FILE DOESN'T CONTAIN A TRIGGER TIME. USING DEFAULT: July 12th 2012 at 00:00:00:000");
+            // startTimes.push_back(395323200.0);
 
-        int status = fieldline.count("x") + fieldline.count("y") + fieldline.count("z");
-
-        if (status != 3) {
-            LERROR("Couldn't find the needed variables in JSON object!");
-            return false;
+            LWARNING("JSON FILE DOESN'T CONTAIN A TRIGGER TIME. USING DEFAULT: March 15th 2015 at 00:00:00:000");
+            startTimes.push_back(479649600.0);
         }
 
-        std::vector<float> xVars = fieldline["x"];
-        std::vector<float> yVars = fieldline["y"];
-        std::vector<float> zVars = fieldline["z"];
+        // iterate through each line
+        for (json::iterator fieldlineIt = jfile.begin(); fieldlineIt != jfile.end(); ++fieldlineIt) {
+            json fieldline = *fieldlineIt;
 
-        size_t pointCount = xVars.size();
-        size_t lineStart = outFieldlinesState._vertexPositions.size();
+            int status = fieldline.count("x") + fieldline.count("y") + fieldline.count("z");
 
-        // TODO: assert!
-        // ghoul_assert(length(x) == length(y) == length(z), "ERRORORORORORO");
+            if (status != 3) {
+                LERROR("Couldn't find the needed variables in JSON object!");
+                return false;
+            }
 
-        auto xIt = xVars.begin(),
-             yIt = yVars.begin(),
-             zIt = zVars.begin();
+            std::vector<float> xVars = fieldline["x"];
+            std::vector<float> yVars = fieldline["y"];
+            std::vector<float> zVars = fieldline["z"];
 
-        for ( ; xIt != xVars.end(); ++xIt, ++yIt, ++zIt) {
-            outFieldlinesState._vertexPositions.push_back(R_E_TO_METER * glm::vec3(*xIt,*yIt,*zIt));
+            size_t pointCount = xVars.size();
+            size_t lineStart = outFieldlinesState._vertexPositions.size();
+
+            // TODO: assert!
+            // ghoul_assert(length(x) == length(y) == length(z), "ERRORORORORORO");
+
+            auto xIt = xVars.begin(),
+                 yIt = yVars.begin(),
+                 zIt = zVars.begin();
+
+            for ( ; xIt != xVars.end(); ++xIt, ++yIt, ++zIt) {
+                outFieldlinesState._vertexPositions.push_back(R_E_TO_METER * glm::vec3(*xIt,*yIt,*zIt));
+            }
+            // TODO: assert (pointCount == std::distance(xVars.begin(), xIt))
+            outFieldlinesState._lineCount.push_back(static_cast<GLsizei>(pointCount));
+            outFieldlinesState._lineStart.push_back(static_cast<GLint>(lineStart));
         }
-        // TODO: assert (pointCount == std::distance(xVars.begin(), xIt))
-        outFieldlinesState._lineCount.push_back(static_cast<GLsizei>(pointCount));
-        outFieldlinesState._lineStart.push_back(static_cast<GLint>(lineStart));
+
     }
+
 
     return true;
 }
@@ -459,6 +509,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         } else {
             sampleExtraQuantities = true;
             LDEBUG("Color depending on variable " << str << " is allowed!");
+            outFieldlinesState._extraVariableNames.push_back(str);
         }
     }
 
@@ -484,6 +535,10 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                 sampleExtraQuantities = true;
                 LDEBUG("Color depending on magnitude of variables "
                         << str1 << ", " << str2 <<  " & " << str3 << " is allowed!");
+                outFieldlinesState._extraVariableNames.push_back("Magnitude of ("
+                                                                + str1 + ", "
+                                                                + str2 + ", "
+                                                                + str3 + ")");
             }
         }
     } else {
