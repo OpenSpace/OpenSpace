@@ -269,12 +269,14 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		}
 		else if (ptr->nDOF == 6) {
 			for (int i = 0; i < ptr->nDOF; ++i) { // 3 finger case
-				//g[i] = (i > 1 && i < 4) ? g[i] : g[i] / std::abs(g[i]); // like it used to be
+				
+				
 				if (ptr->onlyPan) { // temp for feedback
 					g[i] = g[i] / std::abs(g[i]); // no zoom, weird roll sometimes, otherwise only pan
 				}
 				else {
 					// do nothing - fits fingers well, but is difficult to control
+					//g[i] = (i < 4) ? g[i] : g[i] / std::abs(g[i]); // like it used to be, mute roll or not?
 				}	
 			}
 		}
@@ -539,7 +541,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list, co
 			}
 			else { // should zoom in to current but not too much
 				double dist = glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) - _focusNode->boundingSphere();
-				_vel.zoom = (_sensitivity.zoom * std::max(_touchScreenSize.value() * 0.1, 1.0)) * _tapZoomFactor * dist;
+				_vel.zoom = (_sensitivity.zoom * std::max(_touchScreenSize.value() * 0.1, 1.0)) * _tapZoomFactor * dist; // this should not be based on dt
 			}
 			break;
 		}
@@ -586,7 +588,7 @@ void TouchInteraction::step(double dt) {
 			// if we have chosen a new focus node
 			if (_slerpdT < _slerpTime) {
 				_slerpdT += dt;
-				localCamRot = slerp(localCamRot, _toSlerp, _slerpdT / _slerpTime * 0.018);
+				localCamRot = slerp(localCamRot, _toSlerp, _slerpdT / _slerpTime * 0.025);
 			}
 		}
 		{ // Orbit (global rotation)
