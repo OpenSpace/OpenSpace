@@ -203,7 +203,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 	lmstat->data = data;
 
 	// deallocate the arrays
-	for (int i = 0; i < npar; i++) {
+	for (i = 0; i < npar; i++) {
 		delete[] h[i];
 		delete[] ch[i];
 	}
@@ -237,7 +237,7 @@ double error_func(double *par, int ny, double *dysq,
 
 // solve Ax=b for a symmetric positive-definite matrix A using the Cholesky decomposition A=LL^T, L is passed in "l", elements above the diagonal are ignored.
 void solve_axb_cholesky(int n, double** l, double* x, double* b) { // n = npar, l = ch, x = delta (solution), b = d (func(par, x, fdata) * g[i]);
-	int i,j;
+	int i, j;
 	double sum;
 	// solve L*y = b for y (where x[] is used to store y)
 	for (i = 0; i < n; i++) {
@@ -259,7 +259,7 @@ void solve_axb_cholesky(int n, double** l, double* x, double* b) { // n = npar, 
 
 // symmetric, positive-definite matrix "a" and returns its (lower-triangular) Cholesky factor in "l", if l=a the decomposition is performed in place, elements above the diagonal are ignored.
 int cholesky_decomp(int n, double** l, double** a) {
-	int i,j,k;
+	int i, j, k;
 	double sum;
 	for (i = 0; i < n; i++) {
 		for (j = 0; j < i; j++) {
