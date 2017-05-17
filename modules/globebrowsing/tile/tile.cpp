@@ -38,14 +38,7 @@ const Tile Tile::TileUnavailable = Tile(nullptr, nullptr, Tile::Status::Unavaila
 
 Tile::Tile(ghoul::opengl::Texture* texture,
     std::shared_ptr<TileMetaData> metaData, Status status)
-    : MemoryAwareCacheable(
-        (sizeof(Tile) +
-        (metaData ? sizeof(TileMetaData) : 0) +
-        (texture ? sizeof(ghoul::opengl::Texture) + texture->expectedPixelDataSize() * 2 : 0))
-        // Multiply by two since double memory is used when creating mip maps.
-        / 1000 // Convert from bytes to kilobytes
-    )
-    , _texture(texture)
+    : _texture(texture)
     , _metaData(metaData)
     , _status(status)
 { }

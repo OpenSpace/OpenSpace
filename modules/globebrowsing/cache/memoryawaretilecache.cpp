@@ -131,7 +131,9 @@ Tile MemoryAwareTileCache::get(ProviderTileKey key) {
     ghoul_assert(false, "");
 }
 
-ghoul::opengl::Texture* MemoryAwareTileCache::getTexture(const TileTextureInitData& initData) {
+ghoul::opengl::Texture* MemoryAwareTileCache::getTexture(
+    const TileTextureInitData& initData)
+{
     ghoul::opengl::Texture* texture;
     // if this texture type does not exist among the texture containers
     // it needs to be created

@@ -73,10 +73,16 @@ public:
     void clearEnqueuedTasks();
 
 private:
+    
+    struct DefaultHasher {
+        unsigned long long operator()(const KeyType& key) const {
+            return static_cast<unsigned long long>(key);
+        }
+    };
     friend class LRUThreadPoolWorker<KeyType>;
 
     std::vector<std::thread> _workers;
-    cache::LRUCache<KeyType, std::function<void()>> _queuedTasks;
+    cache::LRUCache<KeyType, std::function<void()>, DefaultHasher> _queuedTasks;
     std::vector<KeyType> _unqueuedTasks;
     std::mutex _queueMutex;
     std::condition_variable _condition;

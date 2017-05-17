@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
 
-#include <modules/globebrowsing/cache/memoryawarelrucache.h>
+#include <modules/globebrowsing/cache/lrucache.h>
 #include <modules/globebrowsing/cache/texturecontainer.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tileindex.h>
@@ -113,7 +113,7 @@ private:
     void resetTextureContainerSize(size_t numTexturesPerTextureType);
     
     static MemoryAwareTileCache* _singleton;
-    using TileCache = MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher>;
+    using TileCache = LRUCache<ProviderTileKey, Tile, ProviderTileHasher>;
     using TextureContainerTileCache =
         std::pair<std::unique_ptr<TextureContainer>, std::unique_ptr<TileCache>>;
     using TextureContainerMap = std::unordered_map<TileTextureInitData::HashKey,

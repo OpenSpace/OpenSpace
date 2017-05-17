@@ -45,7 +45,6 @@ namespace tileprovider {
 TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t fontSize)
     : _initData(initData)
     , _fontSize(fontSize)
-	, _tileCache(1000)
 {
     _font = OsEng.fontManager().font("Mono", _fontSize);
         
@@ -86,11 +85,10 @@ TileDepthTransform TextTileProvider::depthTransform() {
 void TextTileProvider::update() {}
 
 void TextTileProvider::reset() {
-	_tileCache.clear();
+    cache::MemoryAwareTileCache::ref().clear();
 }
 
 Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
-    //Tile tile = backgroundTile(tileIndex);
     ghoul::opengl::Texture* texture =
         cache::MemoryAwareTileCache::ref().getTexture(_initData);
 

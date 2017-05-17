@@ -36,7 +36,7 @@ namespace cache {
  * Templated class implementing a Least-Recently-Used Cache.
  * <code>KeyType</code> needs to be an enumerable type.
  */
-template<typename KeyType, typename ValueType>
+template<typename KeyType, typename ValueType, typename HasherType>
 class LRUCache {
 public:
     /**
@@ -72,9 +72,12 @@ private:
     void clean();
     std::vector<std::pair<KeyType, ValueType>> cleanAndFetchPopped();
 
-    std::list<std::pair<KeyType, ValueType>> _itemList;
-    std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
-    size_t _cacheSize;
+    using Item = std::pair<KeyType, ValueType>;
+    using Items = std::list<Item>;
+    Items _itemList;
+    std::unordered_map<KeyType, decltype(_itemList.begin()), HasherType> _itemMap;
+
+    size_t _maximumCacheSize;
 };
 
 } // namespace cache
