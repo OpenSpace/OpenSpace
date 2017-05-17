@@ -70,7 +70,7 @@ TouchInteraction::TouchInteraction()
 	_spinSensitivity("Sensitivity of Spinning", "Sensitivity of spinning in direct-manipulation", 0.25f, 0, 1),
 	_inputStillThreshold("Input still", "Threshold for interpreting input as still", 0.0005f, 0, 0.001),
 	_interpretPan("Pan delta distance", "Delta distance between fingers allowed for interpreting pan interaction", 0.01f, 0, 0.1),
-	_slerpTime("Time to slerp", "Time to slerp in seconds to new orientation with new node picking", 4, 0, 20),
+	_slerpTime("Time to slerp", "Time to slerp in seconds to new orientation with new node picking", 1, 0, 5),
 	_guiButton("GUI Button", "GUI button size in pixels.", glm::ivec2(32, 64), glm::ivec2(8, 16), glm::ivec2(128, 256)),
 	_friction("Friction", "Friction for different interactions (orbit, zoom, roll, pan)", glm::vec4(0.01, 0.02, 0.02, 0.02), glm::vec4(0.0), glm::vec4(0.2)), 
 	
@@ -306,7 +306,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 	void* dataPtr = reinterpret_cast<void*>(&fData);
 
 	_lmSuccess = levmarq(nDOF, par.data(), nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
-	std::cout << node->boundingSphere() << "\n";
+
 	if (_lmSuccess && !_unitTest) { // if good values were found set new camera state
 		_vel.orbit = glm::dvec2(par.at(0), par.at(1));
 		if (nDOF > 2) {
@@ -585,8 +585,9 @@ void TouchInteraction::step(double dt) {
 
 			// if we have chosen a new focus node
 			if (_slerpdT < _slerpTime) {
+				std::cout << "Time it should take: " << _slerpTime << ", slerped time: " << _slerpdT << ", interpolation: " << _slerpdT / _slerpTime << "\n";
 				_slerpdT += dt;
-				localCamRot = slerp(localCamRot, _toSlerp, _slerpdT / _slerpTime);
+				localCamRot = slerp(localCamRot, _toSlerp, _slerpdT / _slerpTime * 0.018);
 			}
 		}
 		{ // Orbit (global rotation)
