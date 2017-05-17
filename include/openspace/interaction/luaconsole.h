@@ -53,7 +53,9 @@ public:
     bool keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier modifier);
 
+    void update();
     void render();
+    float currentHeight() const;
 
 private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
@@ -81,7 +83,9 @@ private:
         std::string initialValue;
     } _autoCompleteInfo;
 
+    float _targetHeight;
     float _currentHeight;
+    float _fullHeight;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
     std::shared_ptr<ghoul::fontrendering::Font> _historyFont;

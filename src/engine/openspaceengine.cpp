@@ -1075,17 +1075,24 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
                              const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
+
+    bool isGuiWindow = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    bool showOverlay = isGuiWindow && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering();
+    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
+    // rendered ---abock
+
+    if (showOverlay) {
+        _console->update();
+    }
+
     LTRACE("OpenSpaceEngine::render(begin)");
     _renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
     
     for (const auto& func : _moduleCallbacks.render) {
         func();
     }
-    
-    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
-    // rendered ---abock
-    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
-    if (showGui && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering()) {
+
+    if (showOverlay) {
         _renderEngine->renderScreenLog();
         _console->render();
     }

@@ -65,8 +65,8 @@ namespace {
     // Additional space between the entry text and the history (in pixels)
     const float SeparatorSpace = 30.f;
 
-    // Determines at which speed the console opens (in pixels/second)
-    const float ConsoleOpenSpeed = 500.f;
+    // Determines at which speed the console opens.
+     const float ConsoleOpenSpeed = 0.5;
 
 } // namespace
 
@@ -79,21 +79,21 @@ LuaConsole::LuaConsole()
     , _backgroundColor(
         "backgroundColor",
         "Background Color",
-        glm::vec4(41.f / 255.f, 41.f / 255.f, 41.f / 255.f, 1.f),
+        glm::vec4(21.f / 255.f, 23.f / 255.f, 28.f / 255.f, 0.8f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
     , _highlightColor(
         "highlightColor",
         "Highlight Color",
-        glm::vec4(1.f, 1.f, 1.f, 0.8f),
+        glm::vec4(1.f, 1.f, 1.f, 0.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
     , _separatorColor(
         "separatorColor",
         "Separator Color",
-        glm::vec4(0.4f, 0.4f, 0.4f, 1.f),
+        glm::vec4(0.4f, 0.4f, 0.4f, 0.f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -107,7 +107,7 @@ LuaConsole::LuaConsole()
     , _historyTextColor(
         "historyTextColor",
         "History Text Color",
-        glm::vec4(0.65f, 0.65f, 0.65f, 1.f),
+        glm::vec4(1.0f, 1.0f, 1.0f, 0.65f),
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
@@ -116,6 +116,8 @@ LuaConsole::LuaConsole()
     , _activeCommand(0)
     , _autoCompleteInfo({NoAutoComplete, false, ""})
     , _currentHeight(0.f)
+    , _targetHeight(0.f)
+    , _fullHeight(0.f)
 {
     addProperty(_isVisible);
     addProperty(_remoteScripting);
@@ -529,17 +531,38 @@ void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
     addToCommand(std::string(1, static_cast<const char>(codepoint)));
 }
 
+void LuaConsole::update() {
+    // Compute the height by simulating _historyFont number of lines and checking
+    // what the bounding box for that text would be.
+    using namespace ghoul::fontrendering;
+    size_t nLines = std::min(static_cast<size_t>(_historyLength), _commandsHistory.size());
+    const auto bbox = FontRenderer::defaultRenderer().boundingBox(
+        *_historyFont,
+        std::string(nLines, '\n').c_str()
+    );
+
+    // Update the full height and the target height.
+    // Add the height of the entry line and space for a separator.
+    _fullHeight = (bbox.boundingBox.y + EntryFontSize + SeparatorSpace);
+    _targetHeight = _isVisible ? _fullHeight : 0;
+
+    const float frametime = static_cast<float>(OsEng.windowWrapper().averageDeltaTime());
+
+    // Update the current height.
+    // The current height is the offset that is used to slide
+    // the console in from the top.
+    const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
+    _currentHeight += (_targetHeight - _currentHeight)*std::pow(0.98, 1.0 / (ConsoleOpenSpeed * frametime));
+    _currentHeight = std::max(0.0f, _currentHeight);
+    _currentHeight = std::min(static_cast<float>(res.y), _currentHeight);
+}
+
+
 void LuaConsole::render() {
     using namespace ghoul::fontrendering;
 
-    // The scrolling of the window is done by offsetting the entire rendering's y
-    // coordinate upwards and slowly decreasing that value. Since the rendering is going
-    // to be clipped, we don't need to take care about not rendering parts that are off
-    // screen
-
-    if (!_isVisible) {
-        // When we toggle the console back to visible, we want to start at 0 height
-        _currentHeight = 0.f;
+    // Don't render the console if it's collapsed.
+    if (_currentHeight < 1.0f) {
         return;
     }
 
@@ -548,26 +571,6 @@ void LuaConsole::render() {
     }
 
     const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
-
-    // Compute the maximum height by simulating _historyFont number of lines and checking
-    // what the bounding box for that text would be 
-    const auto bbox = FontRenderer::defaultRenderer().boundingBox(
-        *_historyFont,
-        std::string(_historyLength, '\n').c_str()
-    );
-
-    // Add the height of the entry line and space for a separator
-    const float MaximumHeight = (bbox.boundingBox.y + EntryFontSize + SeparatorSpace);
-
-    // Update the current height. The current height is the offset that is used to slide
-    // the console in from the top
-    const float frametime = static_cast<float>(OsEng.windowWrapper().averageDeltaTime());
-    _currentHeight += ConsoleOpenSpeed * frametime;
-    _currentHeight = std::min(_currentHeight, MaximumHeight);
-
-    // Since _currentHeight is going from [0, MaximumHeight], we invert it here so the 
-    // rendering initially starts outside the frame and blends in
-    const float h = MaximumHeight - _currentHeight;
 
     // Render background
     glDisable(GL_CULL_FACE);
@@ -579,12 +582,12 @@ void LuaConsole::render() {
 
     _program->setUniform("res", res);
     _program->setUniform("color", _backgroundColor);
-    _program->setUniform("height", MaximumHeight / res.y);
+    _program->setUniform("height", _currentHeight / res.y);
     _program->setUniform(
         "ortho",
         glm::ortho(
             0.f, static_cast<float>(res.x), 0.f, static_cast<float>(res.y)
-        ) * glm::translate(glm::mat4(1.f), glm::vec3(0.f, h, 0.f))
+        )
     );
 
     // Draw the background color
@@ -597,7 +600,7 @@ void LuaConsole::render() {
 
     // Draw the separator between the current entry box and the history
     _program->setUniform("color", _separatorColor);
-    _program->setUniform("height", MaximumHeight / res.y - 2.5f * EntryFontSize / res.y);
+    _program->setUniform("height", _currentHeight / res.y - 2.5f * EntryFontSize / res.y);
     glDrawArrays(GL_LINES, 1, 2);
 
     _program->deactivate();
@@ -610,7 +613,7 @@ void LuaConsole::render() {
 
     glm::vec2 inputLocation = glm::vec2(
         EntryFontSize / 2.f,
-        res.y - MaximumHeight + EntryFontSize + h
+        res.y - _currentHeight + EntryFontSize
     );
 
     // Render the current command
@@ -635,7 +638,7 @@ void LuaConsole::render() {
     
     glm::vec2 historyInputLocation = glm::vec2(
         HistoryFontSize / 2.f,
-        res.y - HistoryFontSize * 1.5f + h
+        res.y - HistoryFontSize * 1.5f + _fullHeight - _currentHeight
     );
 
     // @CPP17: Replace with array_view
@@ -666,7 +669,7 @@ void LuaConsole::render() {
 
         glm::vec2 loc = glm::vec2(
             EntryFontSize / 2.f,
-            res.y - MaximumHeight + EntryFontSize + h
+            res.y - _currentHeight + EntryFontSize
         );
 
         auto bbox = FontRenderer::defaultRenderer().boundingBox(*_font, text.c_str());
@@ -679,47 +682,32 @@ void LuaConsole::render() {
     if (_remoteScripting) {
         const glm::vec4 red(1, 0, 0, 1);
 
-        int nClients = OsEng.parallelConnection().nConnections() - 1;
+        int nClients = 0;
+        if (OsEng.parallelConnection().status() != ParallelConnection::Status::Disconnected) {
+            OsEng.parallelConnection().nConnections() - 1;
+        }
+
+        std::string nClientsText;
         if (nClients == 1) {
-            const glm::vec2 loc = locationForRightJustifiedText(
-                "Broadcasting script to 1 client"
-            );
-
-            RenderFont(
-                *_font,
-                loc,
-                red,
-                "Broadcasting script to 1 client"
-            );
+            nClientsText = "Broadcasting script to 1 client";
+        } else {
+            nClientsText = "Broadcasting script to " + std::to_string(nClients) + " clients";
         }
-        else {
-            const glm::vec2 loc = locationForRightJustifiedText(
-                "Broadcasting script to " + std::to_string(nClients) + " clients"
-            );
 
-            RenderFont(
-                *_font,
-                loc,
-                red,
-                ("Broadcasting script to " + std::to_string(nClients) + " clients").c_str()
-            );
-        }
+        const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
+        RenderFont(*_font, loc, red, nClientsText.c_str());
+    } else if (OsEng.parallelConnection().isHost()) {
+        const glm::vec4 lightBlue(0.4, 0.4, 1, 1);
+
+        const std::string localExecutionText = "Local script execution";
+        const glm::vec2 loc = locationForRightJustifiedText(localExecutionText);
+        RenderFont(*_font, loc, lightBlue, localExecutionText.c_str());
     }
-    else {
-        if (OsEng.parallelConnection().isHost()) {
-            const glm::vec4 lightBlue(0.4, 0.4, 1, 1);
-            const glm::vec2 loc = locationForRightJustifiedText(
-                "Local script execution"
-            );
+}
 
-            RenderFont(
-                *_font,
-                loc,
-                lightBlue,
-                "Local script execution"
-            );
-        }
-    }
+float LuaConsole::currentHeight() const
+{
+    return _currentHeight;
 }
 
 void LuaConsole::addToCommand(std::string c) {
