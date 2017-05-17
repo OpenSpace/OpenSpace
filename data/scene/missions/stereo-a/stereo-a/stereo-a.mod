@@ -26,7 +26,7 @@ return {
     -- },
     -- Stereo A Trail
     {
-        Name = "StereoA",
+        Name = "Stereo A",
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
@@ -46,7 +46,7 @@ return {
                 Type = "SpiceRotation",
                 SourceFrame = "ECLIPJ2000",
                 DestinationFrame = "GALACTIC",
-                Kernels = "${OPENSPACE_DATA}/spice/stereo_rtn.tf"
+                --Kernels = "${OPENSPACE_DATA}/spice/stereo_rtn.tf"
             },
         }
     },
@@ -68,10 +68,9 @@ return {
     },
     -- Plane in front of STEREO
     {
-        Name = "Stereo Plane",
-        Parent = "StereoA",
+        Name = "Stereo A Plane",
+        Parent = "Stereo A",
         Renderable = {
-            Id = 1,
             -- Resolution of imagery, will be moved to metadata later
             Resolution = 2048,
             StartResolutionLevel = 2,
