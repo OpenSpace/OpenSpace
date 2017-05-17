@@ -59,6 +59,8 @@ private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
     void addToCommand(std::string c);
 
+    void renderQuad(const glm::vec2& pos, const glm::vec2& size);
+
     properties::BoolProperty _isVisible;
     properties::BoolProperty _remoteScripting;
 
@@ -67,6 +69,7 @@ private:
     properties::Vec4Property _separatorColor;
     properties::IntProperty _historyLength;
 
+    
     size_t _inputPosition;
     std::vector<std::string> _commandsHistory;
     size_t _activeCommand;

@@ -59,11 +59,14 @@ namespace {
     const openspace::Key CommandInputButton = openspace::Key::GraveAccent;
 
     const char* FontName = "Console";
-    static const float EntryFontSize = 14.0f;
-    static const float HistoryFontSize = 10.0f;
+    const float EntryFontSize = 14.0f;
+    const float HistoryFontSize = 10.0f;
 
-    // Determines at which speed the console opens
-    static const float ConsoleOpenSpeed = 2.5f;
+    // Additional space between the entry text and the history (in pixels)
+    const float SeparatorSpace = 20.f;
+
+    // Determines at which speed the console opens (in pixels/second
+    const float ConsoleOpenSpeed = 500.f;
 
 } // namespace
 
@@ -254,6 +257,8 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
             }
             else {
                 _isVisible = false;
+                _commands.back() = "";
+                _inputPosition = 0;
             }
         }
         else {
@@ -471,6 +476,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         }
     }
 
+    // We want to ignore the function keys as they don't translate to text anyway
     if (key >= Key::F1 && key <= Key::F25) {
         return false;
     }
@@ -505,7 +511,13 @@ void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
     addToCommand(std::string(1, static_cast<const char>(codepoint)));
 }
 
+void renderQuad(const glm::vec2& pos, const glm::vec2& size) {
+
+}
+
 void LuaConsole::render() {
+    using namespace ghoul::fontrendering;
+
     if (!_isVisible) {
         // When we toggle the console back to visible, we want to start at 0 height
         _currentHeight = 0.f;
@@ -518,19 +530,25 @@ void LuaConsole::render() {
 
     const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
 
-    // Compute the maximum height
-    const auto bbox = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+    // Compute the maximum height by simulating _historyFont number of lines and checking
+    // what the bounding box for that text would be 
+    const auto bbox = FontRenderer::defaultRenderer().boundingBox(
         *_historyFont,
         std::string(_historyLength, '\n').c_str()
     );
 
-    const float MaximumHeight = (bbox.boundingBox.y + 2.5f * EntryFontSize) / res.y;
+    // Add the height of the entry line and space for a separator
+    const float MaximumHeight = (bbox.boundingBox.y + EntryFontSize + SeparatorSpace);
 
-    // Update the current height
+    // Update the current height. The current height is the offset that is used to slide
+    // the console in from the top
     const float frametime = static_cast<float>(OsEng.windowWrapper().averageDeltaTime());
     _currentHeight += ConsoleOpenSpeed * frametime;
     _currentHeight = std::min(_currentHeight, MaximumHeight);
 
+    // Since _currentHeight is going from [0, MaximumHeight], we invert it here so the 
+    // rendering initially starts outside the frame and blends in
+    const float h = MaximumHeight - _currentHeight;
 
     // Render background
     glDisable(GL_CULL_FACE);
@@ -538,18 +556,16 @@ void LuaConsole::render() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
 
-    const glm::mat4 projection = glm::ortho(
-        0.f, static_cast<float>(res.x), 0.f, static_cast<float>(res.y)
-    );
-
     _program->activate();
 
     _program->setUniform("res", res);
     _program->setUniform("color", _backgroundColor);
-    _program->setUniform("height", _currentHeight);
+    _program->setUniform("height", MaximumHeight / res.y);
     _program->setUniform(
         "ortho",
-        projection
+        glm::ortho(
+            0.f, static_cast<float>(res.x), 0.f, static_cast<float>(res.y)
+        ) * glm::translate(glm::mat4(1.f), glm::vec3(0.f, h, 0.f))
     );
 
     // Draw the background color
@@ -562,7 +578,7 @@ void LuaConsole::render() {
 
     // Draw the separator between the current entry box and the history
     _program->setUniform("color", _separatorColor);
-    _program->setUniform("height", _currentHeight - 1.75f * EntryFontSize / res.y);
+    _program->setUniform("height", MaximumHeight / res.y - 1.75f * EntryFontSize / res.y);
     glDrawArrays(GL_LINES, 1, 2);
 
     _program->deactivate();
@@ -578,20 +594,35 @@ void LuaConsole::render() {
 
     const glm::vec2 inputLocation = glm::vec2(
         EntryFontSize / 2.f,
-        res.y - _currentHeight * res.y + EntryFontSize / 2.f
+        res.y - MaximumHeight + EntryFontSize / 2.f
     );
 
     RenderFont(
         *_font,
-        inputLocation,
+        inputLocation + glm::vec2(0.f, h),
         white,
         "> %s",
         _commands.at(_activeCommand).c_str()
     );
 
+    // Render cursor
+    auto cursorLocation = FontRenderer::defaultRenderer().boundingBox(
+        *_font,
+        ("> " + _commands.back().substr(0, _inputPosition)).c_str()
+    );
+    auto charWidth = FontRenderer::defaultRenderer().boundingBox(
+        *_font,
+        "m"
+    );
+
+
+
+
+
+
     glm::vec2 historyInputLocation = glm::vec2(
         HistoryFontSize / 2.f,
-        res.y - HistoryFontSize * 1.5f
+        res.y - HistoryFontSize * 1.5f + h
     );
 
     // @CPP17: Replace with array_view
@@ -607,15 +638,13 @@ void LuaConsole::render() {
     }
 
     for (const std::string& cmd : commandSubset) {
-        if (historyInputLocation.y / float(res.y) >= 1.f - (_currentHeight - 1.75f * EntryFontSize / res.y)) {
-            RenderFontCr(
-                *_historyFont,
-                historyInputLocation,
-                gray,
-                "%s",
-                cmd.c_str()
-            );
-        }
+        RenderFontCr(
+            *_historyFont,
+            historyInputLocation,
+            gray,
+            "%s",
+            cmd.c_str()
+        );
     }
 
 
