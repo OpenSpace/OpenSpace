@@ -32,6 +32,8 @@ uniform dvec2 magicPlaneOffset;
 in vec2 vs_st;
 in vec4 vs_positionScreenSpace;
 
+//float intensityOrg = texture(imageryTexture, vec2(vs_st.x /* +  ( (1024.0 - 1021.81 ) / 2048  )*/ , vs_st.y /* + (  (1024.0 - 926.171) / 2048) */)).r;
+
 #include "fragment.glsl"
 
 Fragment getFragment() {
@@ -44,7 +46,7 @@ Fragment getFragment() {
     } else {
         outColor = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);
     }
-    
+
     Fragment frag;
     frag.color = outColor;
     frag.depth = vs_positionScreenSpace.w;

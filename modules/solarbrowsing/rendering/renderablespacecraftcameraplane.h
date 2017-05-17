@@ -117,6 +117,7 @@ private:
     properties::BoolProperty _useBuffering;
     properties::BoolProperty _usePBO;
     properties::BoolProperty _verboseMode;
+    properties::DoubleProperty _planeSize;
 
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;

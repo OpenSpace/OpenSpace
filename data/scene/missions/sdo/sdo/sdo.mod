@@ -30,7 +30,7 @@ return {
             },
         }
     },
-    -- Intermediate step - can't go from J2000 directly to ECLIPJ2000os for some reason
+    -- Intermediate step - can't go from J2000 directly to ECLIPJ2000 for some reason
     {
         Name = "SDOGalacticIntermediateNode",
         Parent = "SDO",
@@ -59,7 +59,6 @@ return {
         Name = "SDO Plane",
         Parent = "SDOCoordinatesystem",
         Renderable = {
-            Id = 0,
             -- Resolution of imagery, will be moved to metadata later
             Resolution = 4096,
             Type = "RenderableSpacecraftCameraPlane",

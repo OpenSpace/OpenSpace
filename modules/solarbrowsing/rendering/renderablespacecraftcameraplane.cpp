@@ -58,16 +58,17 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     : Renderable(dictionary)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
-    , _bufferSize("bufferSize", "Buffer Size", 5, 1, 100)
+    , _bufferSize("bufferSize", "Buffer Size", 10, 1, 100)
     , _displayTimers("displayTimers", "Display Timers", false)
     , _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
-    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 50, 0, 300)
-    , _moveFactor("movefactor", "Move Factor" , 0.5, 0.0, 1.0)
+    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 75, 0, 300)
+    , _moveFactor("movefactor", "Move Factor" , 1.0, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
     , _target("target", "Target", "Sun")
     , _useBuffering("useBuffering", "Use Buffering", true)
     , _usePBO("usePBO", "Use PBO", true)
-    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(16))
+    , _planeSize("planeSize", "Plane Size", 50.0, 0.0, 1.0)
+    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(10))
     , _verboseMode("verboseMode", "Verbose Mode", false)
 {
     std::string target;
@@ -93,12 +94,6 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     if (!dictionary.getValue("RootPath", rootPath)) {
         throw ghoul::RuntimeError("RootPath has to be specified");
     }
-
-    float id;
-    if (!dictionary.getValue("Id", id)) {
-        throw ghoul::RuntimeError("Id (to be removed) has to be specified");
-    }
-    _id = static_cast<unsigned int>(id);
 
     //TODO(mnoven): Can't pass in an int to dictionary?
     float tmpResolution;
@@ -266,7 +261,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     addProperty(_activeInstruments);
     addProperty(_bufferSize);
     addProperty(_displayTimers);
-   // addProperty(_magicFactor);
+    addProperty(_planeSize);
     addProperty(_resolutionLevel);
     addProperty(_lazyBuffering);
     addProperty(_minRealTimeUpdateInterval);
@@ -351,6 +346,7 @@ void RenderableSpacecraftCameraPlane::updatePlane() {
     //_move = a * exp(-(pow((_moveFactor.value() - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)));
     _move = /*a **/ exp(-(pow((_moveFactor.value() - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
     _size = _move * HALF_SUN_RADIUS / _magicPlaneFactor;
+   // _size = _move * HALF_SUN_RADIUS / _planeSize;
     createPlane();
     createFrustum();
 }
@@ -632,7 +628,7 @@ void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime)
 void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
-
+    //updatePlane();
     // int clockwiseSign = (Time::ref().deltaTime() < 0) ? -1 : 1;
 
     // if ((clockwiseSign == -1 && _bufferingForwardInTime)
