@@ -29,11 +29,17 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 
+
 #include <ghoul/logging/logmanager.h>
 #include <cstdint>
 
 namespace {
+    using Json = nlohmann::json;
     const char* _loggerCat = "ServerModule";
+
+    const char* MessageKeyType = "type";
+    const char* MessageKeyPayload = "payload";
+    const char* MessageKeySubject = "subject";
 }
 
 namespace openspace {
@@ -78,30 +84,23 @@ void ServerModule::handleSocket(std::shared_ptr<ghoul::io::Socket> socket) {
     _messageQueue.push_back(Message({
         socket,
         SocketAction::Open,
-        std::vector<char>()
+        ""
     }));
 
-    while (true) {
-        uint32_t messageSize;
-        if (!socket->get<uint32_t>(&messageSize)) {
-            break;
-        }
-        std::vector<char> messageBuffer(messageSize);
-        if (!socket->get<char>(messageBuffer.data(), messageSize)) {
-            break;
-        }
+    std::string messageString;
+    while (socket->getMessage(messageString)) {
         std::lock_guard<std::mutex> lock(_messageQueueMutex);
         _messageQueue.push_back(Message({
             socket,
             SocketAction::Data,
-            std::move(messageBuffer)
+            std::move(messageString)
         }));
     }
 
     _messageQueue.push_back(Message({
         socket,
         SocketAction::Close,
-        std::vector<char>()
+        ""
     }));
 }
 
@@ -122,7 +121,7 @@ void ServerModule::consumeMessages() {
         case SocketAction::Data: {
             auto connection = std::find_if(_connections.begin(), _connections.end(), isActiveSocket);
             if (connection != _connections.end()) {
-                connection->handleMessage(m.data.data(), m.data.size());
+                connection->handleMessage(m.messageString);
             }
             break;
         }
@@ -134,41 +133,51 @@ void ServerModule::consumeMessages() {
     }
 }
 
-void Connection::handleMessage(const char* data, uint32_t size) {
-    if (size < 2 * sizeof(uint32_t)) {
+void Connection::handleMessage(std::string message) {
+    try {
+        Json j = Json::parse(message);
+        handleJson(j);
+    } catch (...) {
+        LERROR("Json parse error");
+    }
+}
+
+void Connection::handleJson(Json j) {
+    auto keyJson = j.find(MessageKeyType);
+    if (keyJson == j.end() || !keyJson->is_string()) {
+        LERROR("Expected string key");
         return;
     }
 
-    uint32_t channelId = *(reinterpret_cast<const uint32_t*>(data));
-    data += sizeof(uint32_t);
-    size -= sizeof(uint32_t);
+    auto payloadJson = j.find(MessageKeyPayload);
+    if (payloadJson == j.end() || !payloadJson->is_object()) {
+        LERROR("Expected object payload");
+        return;
+    }
 
-    ChannelAction channelAction = *(reinterpret_cast<const ChannelAction*> (data));
-    data += sizeof(uint32_t);
-    size -= sizeof(uint32_t);
+    auto subjectJson = j.find(MessageKeySubject);
+    if (keyJson == j.end() || !subjectJson->is_number_integer()) {
+        LERROR("Expected integer subject");
+        return;
+    }
 
-    auto channel = _channels.find(channelId);
-    if (channel == _channels.end()) {
-        if (channelAction == ChannelAction::Initialize) {
-            std::unique_ptr<Channel> c = std::make_unique<Channel>(channelId, this);
-            c->initialize(data, size);
-            _channels.emplace(channelId, std::move(c));
-            
-        } else {
-            // Error: Channel needs to be initialized before it receives data or is deinitialized.
-        }
-    } else {
-        if (channelAction == ChannelAction::Data) {
-            channel->second->handleData(data, size);
-        } else if (channelAction == ChannelAction::Deinitialize) {
-            channel->second->deinitialize(data, size);
-            _channels.erase(channel);
-        } else { // channelAction == ChannelAction::Initialize
-            // Error: Channel needs to be deinitialized before it can be initialized.
-        }
-    }  
+    std::string key = *keyJson;
+    int subject = *subjectJson;
+    
+    std::cout << key << std::to_string(subject) << subjectJson->dump();
+
 }
 
+void Connection::sendMessage(const std::string& message) {
+    _socket->putMessage(message);
+}
+
+void Connection::sendJson(const Json& j) {
+    sendMessage(j.dump());
+}
+
+
+/*
 void Channel::initialize(const char* data, uint32_t size) {
     const char* instructionEnd = std::find(data, data + size, '\n');
     std::string instruction(data, instructionEnd);
@@ -205,11 +214,7 @@ std::unique_ptr<DataHandler> Channel::createDataHandler(std::string instruction)
 }
 
 
-void Connection::sendMessage(const char* data, uint32_t size, uint32_t channelId) {
-    _socket->put<uint32_t>(&size + sizeof(uint32_t));
-    _socket->put<uint32_t>(&channelId);
-    _socket->put<char>(data, size);
-}
+
 
 DataHandler::DataHandler(Channel* channel)
     : _channel(channel)
@@ -230,6 +235,7 @@ void ExecutionHandler::handleData(const char* data, uint32_t size) {
 void ExecutionHandler::deinitialize(const char* data, uint32_t size) {
     // Do nothing.
 }
+*/
 
 
 } // namespace openspace
