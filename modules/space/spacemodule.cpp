@@ -82,9 +82,12 @@ void SpaceModule::internalInitialize() {
 
 std::vector<documentation::Documentation> SpaceModule::documentations() const {
     return {
+        RenderableConstellationBounds::Documentation(),
+        RenderablePlanet::Documentation(),
+        RenderableRings::Documentation(),
+        RenderableStars::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        RenderableRings::Documentation(),
         planetgeometry::PlanetGeometry::Documentation()
     };
 }
