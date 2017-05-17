@@ -25,6 +25,8 @@ uniform sampler2D imageryTexture;
 uniform sampler1D lut;
 uniform bool additiveBlending;
 
+uniform int hasLut;
+
 uniform dvec2 magicPlaneOffset;
 
 in vec2 vs_st;
@@ -35,7 +37,23 @@ in vec4 vs_positionScreenSpace;
 Fragment getFragment() {
 
     float intensityOrg = texture(imageryTexture, vec2(vs_st.x + magicPlaneOffset.x, vs_st.y + magicPlaneOffset.y)).r;
-    vec4 outColor = texture(lut, intensityOrg);
+
+    vec4 outColor;
+    if (hasLut == 1) {
+        outColor = texture(lut, intensityOrg);
+      //  outColor = vec4(1.0, 0.0, 0.0, 1.0);
+    } else {
+        outColor = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);
+    }
+
+    //utColor = texture(lut, intensityOrg);
+   // outColor = clamp(outColor + intensityOrg, 0.0, 1.0);
+
+    // if (hasLut) {
+    //     outColor = vec4(1.0, 0.0, 0.0, 1.0);
+    // } else {
+    //     outColor = vec4(1.0, 1.0, 1.0, 1.0);
+    // }
 
     Fragment frag;
     frag.color = outColor;
