@@ -48,13 +48,19 @@ MemoryAwareTileCache& MemoryAwareTileCache::ref() {
 }
 
 void MemoryAwareTileCache::clear() {
-    for (TextureContainerMap::iterator it = _textureContainerMap.begin(); it != _textureContainerMap.end(); it++) {
+    for (TextureContainerMap::iterator it = _textureContainerMap.begin();
+        it != _textureContainerMap.end();
+        it++)
+    {
         it->second.second->clear();
     }
 }
 
 bool MemoryAwareTileCache::exist(ProviderTileKey key) const {
-    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin(); it != _textureContainerMap.cend(); it++) {
+    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
+        it != _textureContainerMap.cend();
+        it++)
+    {
         if(it->second.second->exist(key)) {
             return true;
         }
@@ -63,7 +69,10 @@ bool MemoryAwareTileCache::exist(ProviderTileKey key) const {
 }
 
 Tile MemoryAwareTileCache::get(ProviderTileKey key) {
-    for (TextureContainerMap::iterator it = _textureContainerMap.begin(); it != _textureContainerMap.end(); it++) {
+    for (TextureContainerMap::iterator it = _textureContainerMap.begin();
+        it != _textureContainerMap.end();
+        it++)
+    {
         if(it->second.second->exist(key)) {
             return it->second.second->get(key);
         }

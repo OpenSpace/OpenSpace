@@ -58,7 +58,7 @@ void SimpleRawTileDataReader::reset() {
 }
 
 int SimpleRawTileDataReader::maxChunkLevel() {
-    return _cached._maxLevel;
+    return 2;
 }
 
 float SimpleRawTileDataReader::noDataValueAsFloat() const {
@@ -111,9 +111,6 @@ void SimpleRawTileDataReader::initialize() {
             ".\nCurrently only supporting power of 2 textures."
         );
     }
-  
-    _cached._maxLevel = 2;
-    _cached._tileLevelDifference = 0;
 
     _depthTransform = {depthScale(), depthOffset()};
 }

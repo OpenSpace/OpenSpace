@@ -147,7 +147,8 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
     // For correct sampling in dataset, we need to pad the texture tile
     
     PixelRegion scaledPadding = padding;
-    double scale = io.read.region.numPixels.x / static_cast<double>(io.write.region.numPixels.x);
+    double scale =
+        io.read.region.numPixels.x / static_cast<double>(io.write.region.numPixels.x);
     scaledPadding.numPixels *= scale;
     scaledPadding.start *= scale;
 
@@ -177,14 +178,10 @@ void GdalRawTileDataReader::initialize() {
 
 void GdalRawTileDataReader::readImageData(
     IODescription& io, RawTile::ReadError& worstError, char* imageDataDest) const {
-    // In case there are extra channels not existing in the GDAL dataset
-    // we set the bytes to 255 (for example an extra alpha channel that)
-    // needs to be 1.
-    //if (_initData.nRasters() > _dataset->GetRasterCount()) {
-    //    memset(imageDataDest, 255, io.write.totalNumBytes);
-    //}
   
-    int nRastersToRead = std::min(_dataset->GetRasterCount(), static_cast<int>(_initData.nRasters()));
+    // Only read the minimum number of rasters
+    int nRastersToRead = std::min(_dataset->GetRasterCount(),
+        static_cast<int>(_initData.nRasters()));
 
     switch (_initData.ghoulTextureFormat()) {
         case ghoul::opengl::Texture::Format::Red:
@@ -301,7 +298,8 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
 }
 
 GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath) {
-    GDALDataset* dataset = static_cast<GDALDataset*>(GDALOpen(filePath.c_str(), GA_ReadOnly));
+    GDALDataset* dataset = static_cast<GDALDataset*>(
+        GDALOpen(filePath.c_str(), GA_ReadOnly));
     if (!dataset) {
         using namespace ghoul::filesystem;
         std::string correctedPath = FileSystem::ref().pathByAppendingComponent(

@@ -79,7 +79,6 @@ public:
     virtual int rasterYSize() const override;
     virtual float depthOffset() const override;
     virtual float depthScale() const override;
-    //virtual TileWriteDataDescription getWriteDataDescription() const override;
 
 protected:
 
@@ -95,8 +94,8 @@ protected:
 private:
     // Private virtual function overloading
     virtual void initialize() override;
-    virtual void readImageData(
-        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const override;
+    virtual void readImageData(IODescription& io, RawTile::ReadError& worstError,
+        char* dataDestination) const override;
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const override;
 
@@ -114,7 +113,7 @@ private:
     std::string _datasetFilePath;
   
     GDALDataset* _dataset;
-    GDALDataType _gdalType; // The type to reinterpret to when reading
+    GDALDataType _gdalType;
 };
 
 } // namespace globebrowsing

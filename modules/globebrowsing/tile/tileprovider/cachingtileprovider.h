@@ -57,7 +57,6 @@ public:
     */
     virtual Tile getTile(const TileIndex& tileIndex) override;
 
-    //virtual Tile getDefaultTile() override;
     virtual Tile::Status getTileStatus(const TileIndex& tileIndex) override;
     virtual TileDepthTransform depthTransform() override;
     virtual void update() override;
