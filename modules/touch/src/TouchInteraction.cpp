@@ -669,6 +669,7 @@ void TouchInteraction::decelerate() {
 void TouchInteraction::resetAfterInput() {
 	ghoul_postcondition(_selected.empty(), "Selected list must be empty after reset");
 	_lmSuccess = true;
+	_guiON = OnScreenGUIModule::gui.isEnabled();
 	//_directTouchMode = false;
 	if (_directTouchMode && _selected.size() > 0) {
 		double spinDelta = _spinSensitivity / OsEng.windowWrapper().averageDeltaTime();
