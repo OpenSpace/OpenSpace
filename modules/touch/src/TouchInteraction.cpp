@@ -245,11 +245,16 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
 		glm::dvec3 camPos = ptr->camera->positionVec3();
 		glm::dvec3 selectedPoint = (ptr->node->rotationMatrix() * ptr->selectedPoints.at(x)) + ptr->node->worldPosition();
-		double h = 1e-11 * glm::distance(camPos, selectedPoint);
+		double h = 1e-11 * glm::distance(camPos, selectedPoint), hZoom = 1e-4;
 		double der, f1, f0 = ptr->distToMinimize(par, x, fdata, lmstat);
+		double planetScale = ptr->node->boundingSphere() / 1e7;
+		if (planetScale > 1.0) {
+			hZoom *= planetScale;
+			h *= (planetScale / std::pow(10, fmod(planetScale,10.0) / 2.0));
+		}
 
 		for (int i = 0; i < ptr->nDOF; ++i) {
-			h = (i == 2) ? 1e-4 : h; // the 'zoom'-DOF is so big a smaller step creates NAN
+			h = (i == 2) ? hZoom : h; // the 'zoom'-DOF is so big a smaller step creates NAN
 			par[i] += h;
 			f1 = ptr->distToMinimize(par, x, fdata, lmstat);
 			par[i] -= h;
@@ -301,7 +306,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 	void* dataPtr = reinterpret_cast<void*>(&fData);
 
 	_lmSuccess = levmarq(nDOF, par.data(), nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
-
+	std::cout << node->boundingSphere() << "\n";
 	if (_lmSuccess && !_unitTest) { // if good values were found set new camera state
 		_vel.orbit = glm::dvec2(par.at(0), par.at(1));
 		if (nDOF > 2) {
