@@ -181,6 +181,18 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
             VERBATIM
             )
 
+        # copy dynamic libraries
+        file(GLOB LIBRARIES_TO_COPY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/*.dylib")
+        foreach (lib_file ${LIBRARIES_TO_COPY})
+            get_filename_component(file_name "${lib_file}" NAME)
+            add_custom_command(
+                TARGET ${CEF_TARGET} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${lib_file}"
+                "${CEF_FINAL_APP}/Contents/${file_name}"
+                )
+        endforeach ()
+
         # Fix the framework rpath in the main executable.
         FIX_MACOSX_MAIN_FRAMEWORK_RPATH(${CEF_TARGET})
 
@@ -188,7 +200,7 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
             # Manually process and copy over resource files.
             # The Xcode generator handles this via the set_target_properties RESOURCE directive.
             set(PREFIXES "mac/")  # Remove these prefixes from input file paths.
-            COPY_MACOSX_RESOURCES("${WEBGUI_RESOURCES_SOURCES}" "${PREFIXES}" "${CEF_TARGET}" "${WEBGUI_MODULE_PATH}" "${CEF_APP}")
+            COPY_MACOSX_RESOURCES("${WEBGUI_RESOURCES_SOURCES}" "${PREFIXES}" "${CEF_TARGET}" "${WEBGUI_MODULE_PATH}" "${CEF_FINAL_APP}")
         endif()
     else()
         message(STATUS "NOT MACOS!")
