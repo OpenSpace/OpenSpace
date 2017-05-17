@@ -90,7 +90,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 
 	if (verbose) {
 		std::ostringstream qs, gs, ds, ps, oss;
-		for (int i = 0; i < npar; ++i) {
+		for (i = 0; i < npar; ++i) {
 			qs << "q" << i;
 			gs << "g" << i;
 			ds << "d" << i;
@@ -101,8 +101,8 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 			}
 		}
 		int k = 1;
-		for (int i = 0; i < ny; ++i) {
-			for (int j = 0; j < 2; ++j) {
+		for (i = 0; i < ny; ++i) {
+			for (j = 0; j < 2; ++j) {
 				std::string s = (j == 0) ? "x" : "y";
 				ps << "p" << i << s;
 				if (j + 1 < ny) {
@@ -163,7 +163,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 				printf("\n");*/
 
 				std::ostringstream gString, qString, dString, pString, os;
-				for (int i = 0; i < npar; ++i) {
+				for (i = 0; i < npar; ++i) {
 					gString << g[i];
 					qString << par[i];
 					dString << d[i];
@@ -173,7 +173,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 						dString << ",";
 					}
 				}
-				for (int i = 0; i < ny; ++i) {
+				for (i = 0; i < ny; ++i) {
 					pString << lmstat->pos.at(i).x << "," << lmstat->pos.at(i).y;
 					if (i + 1 < ny) {
 						pString << ",";
