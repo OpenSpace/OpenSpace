@@ -90,6 +90,16 @@ void ConnectionPool::removeDisconnectedSockets() {
 }
 
 void ConnectionPool::disconnectAllConnections() {
+    for (auto& connection : _connections) {
+        ghoul::io::Socket* socket = connection.second.get();
+        std::thread& thread = connection.first;
+        if (socket && socket->isConnected()) {
+            socket->disconnect();
+        }
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
     _connections.clear();
 }
 
