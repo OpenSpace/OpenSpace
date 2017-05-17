@@ -90,6 +90,7 @@ public:
     static void destroy();
 
     void clear();
+    void setSizeEstimated(size_t estimatedSize);
     bool exist(ProviderTileKey key) const;
     Tile get(ProviderTileKey key);
     ghoul::opengl::Texture* getTexture(const TileTextureInitData& initData);
@@ -106,6 +107,10 @@ private:
 
     MemoryAwareTileCache();
     ~MemoryAwareTileCache() = default;
+
+    void createDefaultTextureContainers();
+    void assureTextureContainerExists(const TileTextureInitData& initData);
+    void resetTextureContainerSize(size_t numTexturesPerTextureType);
     
     static MemoryAwareTileCache* _singleton;
     using TileCache = MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher>;

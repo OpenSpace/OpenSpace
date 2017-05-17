@@ -64,6 +64,11 @@ void TextureContainer::reset() {
 	}
 }
 
+void TextureContainer::reset(size_t numTextures) {
+	_numTextures = numTextures;
+	reset();
+}
+
 ghoul::opengl::Texture* TextureContainer::getTextureIfFree() {
 	ghoul::opengl::Texture* texture = nullptr;
 	if (_freeTexture < _textures.size()) {

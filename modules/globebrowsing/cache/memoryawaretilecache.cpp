@@ -24,7 +24,9 @@
 
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
-#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+
 #include <ghoul/ghoul.h>
 #include <ghoul/logging/consolelog.h>
 
@@ -58,6 +60,53 @@ void MemoryAwareTileCache::clear() {
     }
 }
 
+void MemoryAwareTileCache::createDefaultTextureContainers() {
+    for (int id = 0; id < layergroupid::NUM_LAYER_GROUPS; id++) {
+        TileTextureInitData initData = LayerManager::getTileTextureInitData(layergroupid::ID(id));
+        assureTextureContainerExists(initData);
+    }
+}
+
+void MemoryAwareTileCache::assureTextureContainerExists(
+    const TileTextureInitData& initData)
+{
+    TileTextureInitData::HashKey initDataKey = initData.hashKey();
+    if (_textureContainerMap.find(initDataKey) == _textureContainerMap.end()) {
+        // For now create 500 textures of this type
+        _textureContainerMap.emplace(initDataKey,
+            TextureContainerTileCache(
+                std::make_unique<TextureContainer>(initData, 500),
+                std::make_unique<TileCache>(std::numeric_limits<std::size_t>::max())
+            )
+        );
+    }
+}
+
+void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
+    ghoul_assert(_textureContainerMap.size() > 0, "Texture containers must exist.");
+    size_t sumTextureTypeSize = 0;
+    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
+        it != _textureContainerMap.cend();
+        it++)
+    {
+        sumTextureTypeSize +=
+            it->second.first->tileTextureInitData().totalNumBytes();
+    }
+    size_t numTexturesPerType = estimatedSize / sumTextureTypeSize;
+    resetTextureContainerSize(numTexturesPerType);
+}
+
+void MemoryAwareTileCache::resetTextureContainerSize(size_t numTexturesPerTextureType) {
+    _numTextureBytesAllocatedOnCPU = 0;
+    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
+        it != _textureContainerMap.cend();
+        it++)
+    {
+        it->second.first->reset(numTexturesPerTextureType);
+        it->second.second->clear();
+    }
+}
+
 bool MemoryAwareTileCache::exist(ProviderTileKey key) const {
     for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
         it != _textureContainerMap.cend();
@@ -87,15 +136,7 @@ ghoul::opengl::Texture* MemoryAwareTileCache::getTexture(const TileTextureInitDa
     // if this texture type does not exist among the texture containers
     // it needs to be created
     TileTextureInitData::HashKey initDataKey = initData.hashKey();
-    if (_textureContainerMap.find(initDataKey) == _textureContainerMap.end()) {
-        // For now create 500 textures of this type
-        _textureContainerMap.emplace(initDataKey,
-            TextureContainerTileCache(
-                std::make_unique<TextureContainer>(initData, 500),
-                std::make_unique<TileCache>(std::numeric_limits<std::size_t>::max())
-                )
-            );
-    }
+    assureTextureContainerExists(initData);
     // Now we know that the texture container exists,
     // check if there are any unused textures
     texture = _textureContainerMap[initDataKey].first->getTextureIfFree();
@@ -187,7 +228,9 @@ size_t MemoryAwareTileCache::getCPUAllocatedDataSize() const {
 
 MemoryAwareTileCache::MemoryAwareTileCache()
     : _numTextureBytesAllocatedOnCPU(0)
-{ }
+{
+    createDefaultTextureContainers();
+}
 
 } // namespace cache
 } // namespace globebrowsing

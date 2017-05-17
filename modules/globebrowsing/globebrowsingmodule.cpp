@@ -52,18 +52,25 @@ namespace openspace {
 
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule("GlobeBrowsing")
-    , _tileCacheSizeCPU(
-        "tileCacheSizeCPU", "Tile cache size CPU",
-        0,  // Default
-        0,  // Minimum
-        1024,  // Maximum
-        1)  // Step: One MB
-    , _tileCacheSizeGPU(
-        "tileCacheSizeGPU", "Tile cache size GPU",
-        0,  // Default
-        0,  // Minimum
-        1024,  // Maximum
-        1)  // Step: One MB
+    , _cpuAllocatedTileData(
+        "cpuAllocatedTileData", "CPU allocated tile data (MB)",
+        1024,      // Default
+        128,      // Minimum
+        2048,   // Maximum
+        1)      // Step: One MB
+    , _gpuAllocatedTileData(
+        "gpuAllocatedTileData", "GPU allocated tile data (MB)",
+        1024,      // Default
+        128,      // Minimum
+        2048,   // Maximum
+        1)      // Step: One MB
+    , _tileCacheSize(
+        "tileCacheSize", "Tile cache size",
+        1024,    // Default
+        128,    // Minimum
+        2048,   // Maximum
+        1)      // Step: One MB
+    , _applyTileCacheSize("applyTileCacheSize", "Apply tile cache size")
     , _clearTileCache("clearTileCache", "Clear tile cache") {}
 
 void GlobeBrowsingModule::internalInitialize() {
@@ -76,13 +83,29 @@ void GlobeBrowsingModule::internalInitialize() {
         [&]{
             cache::MemoryAwareTileCache::ref().clear();
         });
-        
-        _tileCacheSizeCPU.setReadOnly(true);
-        _tileCacheSizeGPU.setReadOnly(true);
+        _applyTileCacheSize.onChange(
+        [&]{
+            cache::MemoryAwareTileCache::ref().setSizeEstimated(
+                _tileCacheSize * 1024 * 1024);
+        });
+        _cpuAllocatedTileData.setMaxValue(
+            CpuCap.installedMainMemory() * 0.25);
+        _gpuAllocatedTileData.setMaxValue(
+            CpuCap.installedMainMemory() * 0.25);
+        _tileCacheSize.setMaxValue(
+            CpuCap.installedMainMemory() * 0.25);
+      
+        cache::MemoryAwareTileCache::ref().setSizeEstimated(
+            _tileCacheSize * 1024 * 1024);
+      
+        _cpuAllocatedTileData.setReadOnly(true);
+        _gpuAllocatedTileData.setReadOnly(true);
 
         addProperty(_clearTileCache);
-        addProperty(_tileCacheSizeCPU);
-        addProperty(_tileCacheSizeGPU);
+        addProperty(_applyTileCacheSize);
+        addProperty(_cpuAllocatedTileData);
+        addProperty(_gpuAllocatedTileData);
+        addProperty(_tileCacheSize);
       
 #ifdef GLOBEBROWSING_USE_GDAL
         // Convert from MB to Bytes
@@ -96,8 +119,8 @@ void GlobeBrowsingModule::internalInitialize() {
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Render, [&]{
         size_t dataSizeCPU = cache::MemoryAwareTileCache::ref().getCPUAllocatedDataSize();
         size_t dataSizeGPU = cache::MemoryAwareTileCache::ref().getGPUAllocatedDataSize();
-        _tileCacheSizeCPU.setValue(dataSizeCPU / 1024 / 1024);
-        _tileCacheSizeGPU.setValue(dataSizeGPU / 1024 / 1024);
+        _cpuAllocatedTileData.setValue(dataSizeCPU / 1024 / 1024);
+        _gpuAllocatedTileData.setValue(dataSizeGPU / 1024 / 1024);
     });
 
   

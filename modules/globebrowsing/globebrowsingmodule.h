@@ -40,8 +40,10 @@ public:
 protected:
     void internalInitialize() override;
 private:
-    properties::IntProperty _tileCacheSizeCPU;
-    properties::IntProperty _tileCacheSizeGPU;
+    properties::IntProperty _cpuAllocatedTileData;
+    properties::IntProperty _gpuAllocatedTileData;
+    properties::IntProperty _tileCacheSize;
+    properties::TriggerProperty _applyTileCacheSize;
     properties::TriggerProperty _clearTileCache;
 };
 
