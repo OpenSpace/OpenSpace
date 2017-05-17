@@ -58,33 +58,36 @@ namespace openspace {
 TouchInteraction::TouchInteraction()
 	: properties::PropertyOwner("TouchInteraction"),
 	_origin("origin", "Origin", ""),
-	_lmVerbose("LM verbose", "Save data from LM algorithm", false),
 	_unitTest("Click to take a unit test", "Take a unit test saving the LM data into file", false),
 	_onlyPan("Toggle Panning Mode", "Toggle pan interaction on direct-manipulation three finger case (FOR FEEDBACK)", false), // temp
 	_maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000),
 	_touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f),
+	_tapZoomFactor("Tap zoom factor","Scaling distance travelled on tap", 0.2, 0.0, 1.0),
 	_nodeRadiusThreshold("Activate direct-manipulation", "Radius a planet has to have to activate direct-manipulation", 0.2f, 0.0f, 1.0f),
+	_rollAngleThreshold("Interpret roll", "Threshold for min angle for roll interpret", 0.019f, 0.0f, 0.05f),
 	_orbitSpeedThreshold("Activate orbit spinning", "Threshold to activate orbit spinning in direct-manipulation", 0.038f, 0.0f, 0.1f),
 	_panSpeedThreshold("Activate pan spinning", "Threshold to activate pan spinning in direct-manipulation", 0.004f, 0.0, 0.01),
 	_spinSensitivity("Sensitivity of Spinning", "Sensitivity of spinning in direct-manipulation", 0.25f, 0, 1),
-	_inputStillThreshold("Input still", "Threshold for interpreting input as still", 0.0008f, 0, 0.001),
+	_inputStillThreshold("Input still", "Threshold for interpreting input as still", 0.0005f, 0, 0.001),
 	_interpretPan("Pan delta distance", "Delta distance between fingers allowed for interpreting pan interaction", 0.01f, 0, 0.1),
 	_slerpTime("Time to slerp", "Time to slerp in seconds to new orientation with new node picking", 4, 0, 20),
 	_guiButton("GUI Button", "GUI button size in pixels.", glm::ivec2(32, 64), glm::ivec2(8, 16), glm::ivec2(128, 256)),
 	_friction("Friction", "Friction for different interactions (orbit, zoom, roll, pan)", glm::vec4(0.01, 0.02, 0.02, 0.02), glm::vec4(0.0), glm::vec4(0.2)), 
 	
 	_vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) },
-	_sensitivity{glm::dvec2(0.1, 0.1778), 110, 22, glm::dvec2(0.1, 0.1778) },
+	_sensitivity{glm::dvec2(0.0808181818181818, 0.0454545454545455), 4.0, 2.75, glm::dvec2(0.0808181818181818, 0.0454545454545455) },
+	_centroid{ glm::dvec3(0.0) },
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
 	_currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 },
 	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true }, _guiON{ false }
 {
-	addProperty(_lmVerbose);
 	addProperty(_unitTest);
 	addProperty(_onlyPan); // temp
 	addProperty(_maxTapTime);
 	addProperty(_touchScreenSize);
+	addProperty(_tapZoomFactor);
 	addProperty(_nodeRadiusThreshold);
+	addProperty(_rollAngleThreshold);
 	addProperty(_orbitSpeedThreshold);
 	addProperty(_panSpeedThreshold);
 	addProperty(_spinSensitivity);
@@ -110,7 +113,7 @@ TouchInteraction::TouchInteraction()
 
 // Called each frame if there is any input
 void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list, std::vector<Point>& lastProcessed) {
-	ghoul_precondition(!list.empty(), "List must not be empty");
+	//ghoul_precondition(!list.empty(), "List must not be empty");
 	if (_tap) { // check for doubletap
 		if (_time.getSessionTime().getTotalMilliseconds() < _maxTapTime) {
 			_doubleTap = true;
@@ -146,7 +149,6 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
 	glm::ivec2 res = wrapper.currentWindowSize();
 	glm::dvec2 pos = glm::vec2(list.at(0).getScreenX(res.x), list.at(0).getScreenY(res.y)); // mouse pixel position
 	_guiON = OnScreenGUIModule::gui.isEnabled();
-	_lmstat.verbose = _lmVerbose;
 	if (_tap && list.size() == 1 && std::abs(pos.x) < _guiButton.value().x && std::abs(pos.y) < _guiButton.value().y) { // pressed invisible button
 		_guiON = !_guiON;
 		OnScreenGUIModule::gui.setEnabled(_guiON);
@@ -321,7 +323,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 	}
 
 	// debugging
-	if (_lmVerbose) {
+	if (_lmstat.verbose) {
 		/*std::cout << _lmstat.data;
 		std::ostringstream os;
 		for (int i = 0; i < nDOF; ++i) {
@@ -400,7 +402,11 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
 
 // Interprets the input gesture to a specific interaction
 int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
-	ghoul_precondition(!list.empty(), "List must not be empty");
+	//ghoul_precondition(!list.empty(), "List must not be empty");
+	_centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
+	_centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](double y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
+
+	// see if the distance between fingers changed
 	double dist = 0;
 	double lastDist = 0;
 	TuioCursor cursor = list.at(0);
@@ -413,7 +419,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
 		lastDist += glm::length(glm::dvec2(p.second.getX(), p.second.getY()) - glm::dvec2(point.getX(), point.getY()));
 		point = p.second;
 	}
-
+	// find the slowest moving finger
 	double minDiff = 1000;
 	int id = 0;
 	for (const TuioCursor& c : list) {
@@ -428,6 +434,23 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
 			id = c.getSessionID();
 		}
 	}
+	// find if all fingers angles are high
+	double rollOn = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
+		TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
+		double res = 0.0;
+		double lastAngle = point.getAngle(_centroid.x, _centroid.y);
+		double currentAngle = c.getAngle(_centroid.x, _centroid.y);
+		if (lastAngle > currentAngle + 1.5 * M_PI)
+			res = currentAngle + (2 * M_PI - lastAngle);
+		else if (currentAngle > lastAngle + 1.5 * M_PI)
+			res = (2 * M_PI - currentAngle) + lastAngle;
+		else
+			res = currentAngle - lastAngle;
+		if (std::abs(res) < _rollAngleThreshold)
+			return 1000.0;
+		else
+			return (diff + res);
+	});
 
 	if (_doubleTap) {
 		return PICK;
@@ -439,8 +462,8 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
 		if (std::abs(dist - lastDist) / list.at(0).getMotionSpeed() < _interpretPan && list.size() == 3) { // if distance between fingers is constant we have panning
 			return PAN;
 		}
-		else if (list.size() > 1 && std::abs(minDiff) < _inputStillThreshold) { // if one finger is 'still' (epsilon) and another moving, we have roll
-			return ROLL;
+		else if (std::abs(minDiff) < _inputStillThreshold || std::abs(rollOn) < 100.0) { // if one finger is 'still' (epsilon) and another moving, we have roll
+			return ROLL; // also interpret if angles are high
 		}
 		else {
 			return PINCH;
@@ -451,13 +474,8 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
 // Calculate how much interpreted interaction should change the camera state (based on _vel)
 void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
 	TuioCursor cursor = list.at(0);
-	glm::dvec3 centroid;
 	int action = interpretInteraction(list, lastProcessed);
 
-	if (action != ROT || action != PICK) {
-		centroid.x = std::accumulate(list.begin(), list.end(), 0.0f, [](double x, const TuioCursor& c) { return x + c.getX(); }) / list.size();
-		centroid.y = std::accumulate(list.begin(), list.end(), 0.0f, [](double y, const TuioCursor& c) { return y + c.getY(); }) / list.size();
-	}
 
 	switch (action) {
 		case ROT: { // add rotation velocity
@@ -466,22 +484,22 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list, co
 		}
 		case PINCH: { // add zooming velocity
 			double distance = std::accumulate(list.begin(), list.end(), 0.0, [&](double d, const TuioCursor& c) {
-				return d + c.getDistance(centroid.x, centroid.y);
-			});
+				return d + c.getDistance(_centroid.x, _centroid.y);
+			}) / list.size();
 			double lastDistance = std::accumulate(lastProcessed.begin(), lastProcessed.end(), 0.0f, [&](float d, const Point& p) {
-				return d + p.second.getDistance(centroid.x, centroid.y);
-			});
+				return d + p.second.getDistance(_centroid.x, _centroid.y);
+			}) / lastProcessed.size();
 
-			double zoomFactor = (distance - lastDistance) * glm::distance(_camera->positionVec3(), _camera->focusPositionVec3());
-			_vel.zoom += zoomFactor * _sensitivity.zoom / _touchScreenSize.value();
+			double zoomFactor = (distance - lastDistance) * (glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) - _focusNode->boundingSphere());
+			_vel.zoom += zoomFactor * _sensitivity.zoom * std::max(_touchScreenSize.value() * 0.1, 1.0);
 			break;
 		}
 		case ROLL: { // add global roll rotation velocity
 			double rollFactor = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
 				TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
 				double res = diff;
-				double lastAngle = point.getAngle(centroid.x, centroid.y);
-				double currentAngle = c.getAngle(centroid.x, centroid.y);
+				double lastAngle = point.getAngle(_centroid.x, _centroid.y);
+				double currentAngle = c.getAngle(_centroid.x, _centroid.y);
 				if (lastAngle > currentAngle + 1.5 * M_PI)
 					res += currentAngle + (2 * M_PI - lastAngle);
 				else if (currentAngle > lastAngle + 1.5 * M_PI)
@@ -489,8 +507,9 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list, co
 				else
 					res += currentAngle - lastAngle;
 				return res;
-			});
-			_vel.roll += -rollFactor * _sensitivity.roll / _touchScreenSize.value();
+			}) / list.size();
+
+			_vel.roll += -rollFactor * _sensitivity.roll;
 			break;
 		}
 		case PAN: { // add local rotation velocity
@@ -515,13 +534,7 @@ void TouchInteraction::computeVelocities(const std::vector<TuioCursor>& list, co
 			}
 			else { // should zoom in to current but not too much
 				double dist = glm::distance(_camera->positionVec3(), _camera->focusPositionVec3()) - _focusNode->boundingSphere();
-				double startDecline = _focusNode->boundingSphere() / (0.15 * _projectionScaleFactor);
-				double factor = 2.0;
-				if (dist < startDecline) { // double-check this
-					factor = 1.0 + std::pow(dist / startDecline, 2);
-				}
-				double response = _focusNode->boundingSphere() / (factor * _currentRadius * _projectionScaleFactor);
-				_vel.zoom = (_sensitivity.zoom / _touchScreenSize.value()) * response;
+				_vel.zoom = (_sensitivity.zoom * std::max(_touchScreenSize.value() * 0.1, 1.0)) * _tapZoomFactor * dist;
 			}
 			break;
 		}
@@ -613,7 +626,7 @@ void TouchInteraction::step(double dt) {
 
 void TouchInteraction::unitTest() {
 	if (_unitTest) {
-		_lmVerbose = _lmstat.verbose = true;
+		_lmstat.verbose = true;
 		// time set and paused in .scene file
 		//openspace.time.setTime("2016 SEP 8 23:00:00.500")
 		//openspace.time.togglePause()
@@ -651,7 +664,6 @@ void TouchInteraction::unitTest() {
 		_vel.pan = glm::dvec2(0.0, 0.0);
 		_lastVel = _vel;
 		_unitTest = false;
-		_lmVerbose = false;
 
 		// could be the camera copy in func
 	}
@@ -670,7 +682,7 @@ void TouchInteraction::decelerate() {
 
 // Called if all fingers are off the screen
 void TouchInteraction::resetAfterInput() {
-	ghoul_postcondition(_selected.empty(), "Selected list must be empty after reset");
+	//ghoul_postcondition(_selected.empty(), "Selected list must be empty after reset");
 	_lmSuccess = true;
 	_guiON = OnScreenGUIModule::gui.isEnabled();
 	//_directTouchMode = false;

@@ -106,12 +106,13 @@ class TouchInteraction : public properties::PropertyOwner
 
 		// Property variables
 		properties::StringProperty _origin;
-		properties::BoolProperty _lmVerbose;
 		properties::BoolProperty _unitTest;
 		properties::BoolProperty _onlyPan; // temp
 		properties::IntProperty _maxTapTime;
 		properties::FloatProperty _touchScreenSize;
+		properties::FloatProperty _tapZoomFactor;
 		properties::FloatProperty _nodeRadiusThreshold;
+		properties::FloatProperty _rollAngleThreshold;
 		properties::FloatProperty _orbitSpeedThreshold;
 		properties::FloatProperty _panSpeedThreshold;
 		properties::FloatProperty _spinSensitivity;
@@ -139,6 +140,8 @@ class TouchInteraction : public properties::PropertyOwner
 		std::vector<SelectedBody> _selected;
 		LMstat _lmstat;
 		glm::dquat _toSlerp;
+		glm::dvec3 _centroid;
+
 };
 
 } // openspace namespace
