@@ -902,7 +902,7 @@ double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
                      "The current state starts the same time as the sequence!");
         }
 
-    return seqStartDbl + stateStartOffset;;
+    return seqStartDbl + stateStartOffset;
 }
 
 // TODO find a smarter way
