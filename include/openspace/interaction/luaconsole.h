@@ -83,8 +83,8 @@ private:
         std::string initialValue;
     } _autoCompleteInfo;
 
-    float _targetHeight;
     float _currentHeight;
+    float _targetHeight;
     float _fullHeight;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
