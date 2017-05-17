@@ -36,7 +36,6 @@
 #define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-// #include "include/cef_app.h"
 
 namespace openspace {
 
