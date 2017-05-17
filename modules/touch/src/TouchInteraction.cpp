@@ -585,7 +585,6 @@ void TouchInteraction::step(double dt) {
 
 			// if we have chosen a new focus node
 			if (_slerpdT < _slerpTime) {
-				std::cout << "Time it should take: " << _slerpTime << ", slerped time: " << _slerpdT << ", interpolation: " << _slerpdT / _slerpTime << "\n";
 				_slerpdT += dt;
 				localCamRot = slerp(localCamRot, _toSlerp, _slerpdT / _slerpTime * 0.018);
 			}
