@@ -48,8 +48,8 @@ uniform sampler2DMS mainColorTexture;
 
 uniform int nAaSamples;
 
-layout(location = 0) out vec4 renderTarget;
-//out vec4 renderTarget;
+//layout(location = 0) out vec4 renderTarget;
+out vec4 renderTarget;
 
 in vec3 interpolatedNDCPos;
 

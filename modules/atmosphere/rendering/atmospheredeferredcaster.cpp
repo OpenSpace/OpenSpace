@@ -377,9 +377,9 @@ void AtmosphereDeferredcaster::postRaycast(const RenderData & renderData, const 
                                            ghoul::opengl::ProgramObject& program)
 {
     // Deactivate the texture units 
-    /*_transmittanceTableTextureUnit.activate();
-    _irradianceTableTextureUnit.activate();
-    _inScatteringTableTextureUnit.activate();*/
+    _transmittanceTableTextureUnit.deactivate();
+    _irradianceTableTextureUnit.deactivate();
+    _inScatteringTableTextureUnit.deactivate();
 }
 
 std::string AtmosphereDeferredcaster::getDeferredcastPath() const {

@@ -336,36 +336,38 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
 bool RenderableGlobe::initialize() {
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
-    _deferredcaster = std::make_unique<AtmosphereDeferredcaster>();
-    if (_deferredcaster) {
-        _deferredcaster->setAtmosphereRadius(_atmosphereRadius);
-        _deferredcaster->setPlanetRadius(_atmospherePlanetRadius);
-        _deferredcaster->setPlanetAverageGroundReflectance(_planetAverageGroundReflectance);
-        _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
-        _deferredcaster->setMieHeightScale(_mieHeightScale);
-        _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
-        _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
-        _deferredcaster->setHDRConstant(_hdrConstant);
-        _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
-        _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
-        _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
-        _deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
-        _deferredcaster->setRenderableClass(AtmosphereDeferredcaster::RenderableGlobe);
-        _deferredcaster->initialize();
+    if (_atmosphereEnabled) {
+        _deferredcaster = std::make_unique<AtmosphereDeferredcaster>();
+        if (_deferredcaster) {
+            _deferredcaster->setAtmosphereRadius(_atmosphereRadius);
+            _deferredcaster->setPlanetRadius(_atmospherePlanetRadius);
+            _deferredcaster->setPlanetAverageGroundReflectance(_planetAverageGroundReflectance);
+            _deferredcaster->setRayleighHeightScale(_rayleighHeightScale);
+            _deferredcaster->setMieHeightScale(_mieHeightScale);
+            _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
+            _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
+            _deferredcaster->setHDRConstant(_hdrConstant);
+            _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
+            _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
+            _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
+            _deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
+            _deferredcaster->setRenderableClass(AtmosphereDeferredcaster::RenderableGlobe);
+            _deferredcaster->initialize();
+        }
+
+        OsEng.renderEngine().deferredcasterManager().attachDeferredcaster(*_deferredcaster.get());
+
+        std::function<void(bool)> onChange = [&](bool enabled) {
+            if (enabled) {
+                OsEng.renderEngine().deferredcasterManager().attachDeferredcaster(*_deferredcaster.get());
+            }
+            else {
+                OsEng.renderEngine().deferredcasterManager().detachDeferredcaster(*_deferredcaster.get());
+            }
+        };
+
+        onEnabledChange(onChange);
     }
-
-    OsEng.renderEngine().deferredcasterManager().attachDeferredcaster(*_deferredcaster.get());
-
-    std::function<void(bool)> onChange = [&](bool enabled) {
-        if (enabled) {
-            OsEng.renderEngine().deferredcasterManager().attachDeferredcaster(*_deferredcaster.get());
-        }
-        else {
-            OsEng.renderEngine().deferredcasterManager().detachDeferredcaster(*_deferredcaster.get());
-        }
-    };
-
-    onEnabledChange(onChange);
 #endif
 
     return _distanceSwitch.initialize();
@@ -413,8 +415,10 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& tasks) {
     }
 
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
-    DeferredcasterTask task{ _deferredcaster.get(), data };
-    tasks.deferredcasterTasks.push_back(task);
+    if (_atmosphereEnabled) {
+        DeferredcasterTask task{ _deferredcaster.get(), data };
+        tasks.deferredcasterTasks.push_back(task);
+    }
 #endif
 }
 

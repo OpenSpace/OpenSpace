@@ -607,7 +607,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
 
         if (deferredcastProgram != _deferredcastPrograms[deferredcaster].get()) {
-            deferredcastProgram = _deferredcastPrograms[deferredcaster].get();
+            deferredcastProgram = _deferredcastPrograms[deferredcaster].get();            
         }
 
         deferredcastProgram->activate();
@@ -638,22 +638,10 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
             deferredcastProgram->setUniform("nAaSamples", _nAaSamples);
 
-//            deferredcastProgram->setUniform("windowSize", glm::vec2(_resolution));
-
             deferredcaster->preRaycast(deferredcasterTask.renderData, 
                                        _deferredcastData[deferredcaster], 
                                        *deferredcastProgram);
-
-            // DEBUG: Temporary until fix problem in architecture.
-            ghoul::opengl::TextureUnit dummyTextureUnit;
-            dummyTextureUnit.activate();
-            ghoul::opengl::TextureUnit dummyTextureUnit1;
-            dummyTextureUnit1.activate();
-            ghoul::opengl::TextureUnit dummyTextureUnit2;
-            dummyTextureUnit2.activate();
-            ghoul::opengl::TextureUnit dummyTextureUnit3;
-            dummyTextureUnit3.activate();
-
+            
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
 
@@ -663,11 +651,12 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
             glDepthMask(true);
             glEnable(GL_DEPTH_TEST);
-
+            
             deferredcaster->postRaycast(deferredcasterTask.renderData,
-                                        _deferredcastData[deferredcaster], 
-                                        *deferredcastProgram);
-            deferredcastProgram->deactivate();
+                _deferredcastData[deferredcaster],
+                *deferredcastProgram);
+
+            deferredcastProgram->deactivate();            
 
         } else {
             LWARNING("Deferredcaster is not attached when trying to perform deferred task");
