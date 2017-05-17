@@ -159,8 +159,6 @@ bool RenderableFieldlinesSequence::isReady() const {
 
 bool RenderableFieldlinesSequence::initialize() {
     int numResamples;
-    std::vector<std::string> colorizingFloatVars;
-    std::vector<std::string> colorizingMagVars;
     bool allowSeedPoints = false;
 
     if (_tracingMethod == keyTracingMethodPreProcess) {
@@ -287,6 +285,8 @@ bool RenderableFieldlinesSequence::initialize() {
         }
 
         // TODO: This should be specified in LUA .mod file!
+        std::vector<std::string> colorizingFloatVars;
+        std::vector<std::string> colorizingMagVars;
         colorizingFloatVars.insert(colorizingFloatVars.end(), {
                                                                  "T",
                                                                  "dp",
@@ -339,7 +339,8 @@ bool RenderableFieldlinesSequence::initialize() {
     } else if (_tracingMethod == keyTracingMethodPreTraced) {
         allowSeedPoints = false;
         // TODO: DON'T HARDCODE.. GET FROM LUA
-        std::vector<std::string> validJsonFilePaths{"C:/Users/oskar/Develop/workspace/OpenSpace/data/scene/fieldlinessequence/precalculatedjson/fieldline_samples.json "};
+        std::vector<std::string> validJsonFilePaths{"C:/Users/oskar/Develop/workspace/OpenSpace/data/scene/fieldlinessequence/json_new/0_batsrus_1574Lines_888443Points_3UnknownColorVars.json "};
+        // std::vector<std::string> validJsonFilePaths{"C:/Users/oskar/Develop/workspace/OpenSpace/data/scene/fieldlinessequence/precalculatedjson/fieldline_samples.json "};
         LDEBUG("JSON PATHS: " << validJsonFilePaths[0]);
 
         LERROR("TODO: allow Morphing for provided vertex lists!");
@@ -567,22 +568,15 @@ bool RenderableFieldlinesSequence::initialize() {
         _colorMethod.addOption(colorMethod::UNIFORM, "Uniform Color");
         _colorMethod.addOption(colorMethod::QUANTITY_DEPENDENT, "Quantity Dependent");
 
-        for (unsigned int i = 0; i < colorizingFloatVars.size(); i++) {
-            _colorizingQuantity.addOption(i, colorizingFloatVars[i]);
+        // ASSUMING ALL STATES HAVE THE SAME COLOR VARIABLES
+        for (size_t i = 0; i < _states[0]._extraVariableNames.size(); ++i) {
+            _colorizingQuantity.addOption(i, _states[0]._extraVariableNames[i]);
         }
 
-        int offset = colorizingFloatVars.size();
-
-        for (unsigned int i = 0; i < colorizingMagVars.size(); i += 3) {
-            std::string displayName = "Magnitude of variables ("
-                                    + colorizingMagVars[i]   + ", "
-                                    + colorizingMagVars[i+1] + ", "
-                                    + colorizingMagVars[i+2] + ")";
-
-            _colorizingQuantity.addOption(i+offset, displayName);
-        }
-
-        for (unsigned int i = 0; i < _states[0]._extraVariables.size(); i++) {
+        // Set tranferfunction min/max to min/max in the given range
+        // TODO: this should probably be determined some other way..
+        // TODO: set in LUA when tracing variables are set there! Requires state to store min/max
+        for (size_t i = 0; i < _states[0]._extraVariables.size(); i++) {
             std::vector<float>& quantityVec = _states[0]._extraVariables[i];
         // for (std::vector<float>& quantityVec : _states[0]._extraVariables) {
             auto minMaxPos = std::minmax_element(quantityVec.begin(), quantityVec.end());
