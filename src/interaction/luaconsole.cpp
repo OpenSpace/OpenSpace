@@ -569,8 +569,11 @@ void LuaConsole::render() {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
     }
-
-    const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
+  
+    glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
+  
+    const glm::ivec2 res = glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
+  
 
     // Render background
     glDisable(GL_CULL_FACE);
@@ -609,8 +612,6 @@ void LuaConsole::render() {
     glEnable(GL_DEPTH_TEST);
 
     // Render text on top of the background
-    const int ySize = OsEng.renderEngine().fontResolution().y;
-
     glm::vec2 inputLocation = glm::vec2(
         EntryFontSize / 2.f,
         res.y - _currentHeight + EntryFontSize
@@ -626,7 +627,7 @@ void LuaConsole::render() {
     );
     
     // Just offset the ^ marker slightly for a nicer look
-    inputLocation.y += 3;
+    inputLocation.y += 3 * dpiScaling.y;
 
     // Render the ^ marker below the text to show where the current entry point is
     RenderFont(
@@ -670,7 +671,7 @@ void LuaConsole::render() {
         glm::vec2 loc = glm::vec2(
             EntryFontSize / 2.f,
             res.y - _currentHeight + EntryFontSize
-        );
+        ) * 2.0f;
 
         auto bbox = FontRenderer::defaultRenderer().boundingBox(*_font, text.c_str());
         return glm::vec2(
