@@ -575,8 +575,9 @@ void LuaConsole::update() {
     // The current height is the offset that is used to slide
     // the console in from the top.
     const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
+    const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
     _currentHeight += (_targetHeight - _currentHeight) *
-        std::pow(0.98, 1.0 / (ConsoleOpenSpeed * frametime));
+        std::pow(0.98, 1.0 / (ConsoleOpenSpeed / dpiScaling.y * frametime));
 
     _currentHeight = std::max(0.0f, _currentHeight);
     _currentHeight = std::min(static_cast<float>(res.y), _currentHeight);
@@ -669,7 +670,7 @@ void LuaConsole::render() {
 
     // @CPP17: Replace with array_view
     std::vector<std::string> commandSubset;
-    if (_commandsHistory.size() < _historyLength) {
+    if (_commandsHistory.size() < static_cast<size_t>(_historyLength)) {
         commandSubset = _commandsHistory;
     }
     else {
