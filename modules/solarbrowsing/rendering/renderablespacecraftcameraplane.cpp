@@ -61,14 +61,14 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     , _bufferSize("bufferSize", "Buffer Size", 10, 1, 100)
     , _displayTimers("displayTimers", "Display Timers", false)
     , _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
-    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 75, 0, 300)
+    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 80, 0, 300)
     , _moveFactor("movefactor", "Move Factor" , 1.0, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
     , _target("target", "Target", "Sun")
     , _useBuffering("useBuffering", "Use Buffering", true)
     , _usePBO("usePBO", "Use PBO", true)
     , _planeSize("planeSize", "Plane Size", 50.0, 0.0, 1.0)
-    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(10))
+    , _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
     , _verboseMode("verboseMode", "Verbose Mode", false)
 {
     std::string target;
@@ -172,7 +172,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
                     ghoul::opengl::Texture::Red, // Format of the pixeldata
                     GL_R8, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
                     GL_UNSIGNED_BYTE, // Type of data
-                    Texture::FilterMode::Nearest,
+                    Texture::FilterMode::Linear,
                     Texture::WrappingMode::ClampToEdge
                 );
 
@@ -284,7 +284,7 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
     for (int i = 0; i < _bufferSize; i++) {
         const auto& low = std::lower_bound(
               imageList.begin(), imageList.end(),
-              osTime + (dt * i) * ((_minRealTimeUpdateInterval) / 1000));
+              osTime + (dt * i) * ((static_cast<double>(_minRealTimeUpdateInterval)) / 1000.0));
 
         const int nextImageIndex = low - imageList.begin();
 
@@ -503,7 +503,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
 
                 const auto& imageList = _imageMetadataMap[_currentActiveInstrument];
                 const double& osTime = Time::ref().j2000Seconds();
-                double time = osTime + _bufferSize * (Time::ref().deltaTime() * ((_minRealTimeUpdateInterval )/ 1000 ) );
+                double time = osTime + (_bufferSize + 1) * (Time::ref().deltaTime() * ( static_cast<double>(_minRealTimeUpdateInterval )/ 1000.0 ) );
                 const auto& low = std::lower_bound(imageList.begin(), imageList.end(), time);
                 int nextImageIndex = low - imageList.begin();
                 if (nextImageIndex
@@ -618,6 +618,9 @@ void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime)
         //_currentPBO = 1 - _currentPBO;
         //updateTextureGPU();
         // Refill PBO
+        if (_verboseMode) {
+            LDEBUG("Time to update image! ");
+        }
         if (_usePBO /*&& !_initializePBO*/) {
             uploadImageDataToPBO(_currentActiveImage);
         }
@@ -754,7 +757,7 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     _frustumShader->setUniform("modelViewProjectionTransformPlane",
                                projectionMatrix * glm::mat4(modelViewTransform));
     glBindVertexArray(_frustum);
-    glDrawArrays(GL_LINES, 0, 16);
+    glDrawArrays(GL_LINES, 8, 8);
     _frustumShader->deactivate();
 
     _planePosSpacecraftRefFrame = glm::dvec3(rotationTransformSpacecraft * glm::dvec4(positionWorld + offset, 1.0));

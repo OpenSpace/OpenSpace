@@ -73,7 +73,7 @@ return {
         Renderable = {
             -- Resolution of imagery, will be moved to metadata later
             Resolution = 2048,
-            StartResolutionLevel = 2,
+            StartResolutionLevel = 1,
             -- Temp
             MagicOffsetFromCenter = {0.001069336, 0.047768066},
             MagicPlaneFactor = 0.61877,
