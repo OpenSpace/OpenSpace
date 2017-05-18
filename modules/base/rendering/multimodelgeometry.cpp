@@ -26,6 +26,8 @@
 
 #include "ghoul/io/model/modelreadermultiformat.h"
 
+#include <string.h>
+
 namespace openspace {
 namespace modelgeometry {
 
