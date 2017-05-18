@@ -22,8 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// open space includes
 #include <modules/space/rendering/renderableplanet.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
@@ -39,6 +41,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/misc/invariants.h>
 
 #include <memory>
 #include <fstream>
@@ -48,20 +51,75 @@
 
 
 namespace {
+    const char* KeyGeometry = "Geometry";
+    const char* KeyRadius = "Radius";
+    const char* KeyColorTexture = "Textures.Color";
+    const char* KeyNightTexture = "Textures.Night";
+    const char* KeyHeightTexture = "Textures.Height";
+    const char* KeyShading = "PerformShading";
+
+    
+    
     static const std::string _loggerCat = "RenderablePlanet";
 
     const char* keyFrame                         = "Frame";
-    const char* keyGeometry                      = "Geometry";
-    const char* keyRadius                        = "Radius";
-    const char* keyShading                       = "PerformShading";
     const char* keyShadowGroup                   = "Shadow_Group";
     const char* keyShadowSource                  = "Source";
     const char* keyShadowCaster                  = "Caster";
-//    const char* keyPlanetRadius                  = "PlanetRadius";
     const char* keyBody                          = "Body";
-}
+} // namespace
 
 namespace openspace {
+
+documentation::Documentation RenderablePlanet::Documentation() {
+    using namespace documentation;
+    return {
+        "RenderablePlanet",
+        "space_renderable_planet",
+        {
+            {
+                KeyGeometry,
+                new ReferencingVerifier("space_geometry_planet"),
+                "Specifies the planet geometry that is used for this RenderablePlanet.",
+                Optional::No
+            },
+            {
+                KeyRadius,
+                new DoubleVerifier,
+                "Specifies the radius of the planet. If this value is not specified, it "
+                "will try to query the SPICE library for radius values.",
+                Optional::Yes
+            },
+            {
+                KeyColorTexture,
+                new StringVerifier,
+                "Specifies the color texture that is used for this RenderablePlanet.",
+                Optional::Yes
+            },
+            {
+                KeyHeightTexture,
+                new StringVerifier,
+                "Specifies the height texture that is used for this RenderablePlanet.",
+                Optional::Yes
+            },
+            {
+                KeyNightTexture,
+                new StringVerifier,
+                "Specifies the texture that is used for the night side of this "
+                "RenderablePlanet.",
+                Optional::Yes
+            },
+            {
+                KeyShading,
+                new BoolVerifier,
+                "Specifies whether the planet should be rendered shaded by the Sun. If "
+                "this value is 'false', any existing night texture will not be used. "
+                "This value defaults to 'true'.",
+                Optional::Yes
+            }
+        }
+    };
+}
 
 RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -74,118 +132,85 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 10.f)
     , _geometry(nullptr)
     , _performShading("performShading", "Perform Shading", true)
-    , _rotation("rotation", "Rotation", 0, 0, 360)
     , _alpha(1.f)
     , _planetRadius(0.f)
     , _hasNightTexture(false)
     , _hasHeightTexture(false)
     , _shadowEnabled(false)
 {
-    std::string name;
-    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(
-        success,
-        std::string("RenderablePlanet need the '") + SceneGraphNode::KeyName +
-            "' be specified"
+    ghoul_precondition(
+        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
+        "RenderablePlanet needs the name to be specified"
     );
 
-    ghoul::Dictionary geometryDictionary;
-    success = dictionary.getValue(keyGeometry, geometryDictionary);
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderablePlanet"
+    );
 
+    const std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
 
-    glm::dvec3 radius;
-    bool accutareRadius = false;
-    try {
-        SpiceManager::ref().getValue(name, "RADII", radius);
-        accutareRadius = true;
-    } catch (const SpiceManager::SpiceException& e) {
-        accutareRadius = false;
+    ghoul::Dictionary geomDict = dictionary.value<ghoul::Dictionary>(KeyGeometry);
+
+    if (dictionary.hasKey(KeyRadius)) {
+        // If the user specified a radius, we want to use this
+        _planetRadius = dictionary.value<double>(KeyRadius);
     }
-
-    if (accutareRadius) {
+    else if (SpiceManager::ref().hasValue(name, "RADII") ) {
+        // If the user didn't specfify a radius, but Spice has a radius, we can use this
+        glm::dvec3 radius;
+        SpiceManager::ref().getValue(name, "RADII", radius);
         radius *= 1000.0; // Spice gives radii in KM.
         std::swap(radius[1], radius[2]); // z is equivalent to y in our coordinate system
-        geometryDictionary.setValue(keyRadius, radius);
+        geomDict.setValue(KeyRadius, radius);
+
+        _planetRadius = (radius.x + radius.y + radius.z) / 3.0;
+    }
+    else {
+        LERRORC("RenderablePlanet", "Missing radius specification");
     }
 
-    if (success) {
-        //geometryDictionary.setValue(SceneGraphNode::KeyName, name);
-        _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geometryDictionary);
- 
-        float planetRadius;
-        if (accutareRadius) {
-            _planetRadius = (radius[0] + radius[1] + radius[2]) / 3.0;
-        } else if (geometryDictionary.getValue(keyRadius, planetRadius)) {
-            _planetRadius = planetRadius;
-        }
-        else {
-            LWARNING("No Radius value specified for " << name << " planet.");
-        }
+    _geometry = planetgeometry::PlanetGeometry::createFromDictionary(geomDict);
+
+    if (dictionary.hasKey(KeyColorTexture)) {
+        _colorTexturePath = absPath(dictionary.value<std::string>(KeyColorTexture));
     }
 
-    //===============================================================
-    //======== Reads Body and Frame Entries in mod file =============
-    //===============================================================
-    dictionary.getValue(keyFrame, _frame);
-    dictionary.getValue(keyBody, _target);
-
-
-    //============================================================
-    //======== Reads the Texture Entries in mod file =============
-    //============================================================
-    // TODO: textures need to be replaced by a good system similar to the geometry as soon
-    // as the requirements are fixed (ab)
-    std::string texturePath = "";
-    success = dictionary.getValue("Textures.Color", texturePath);
-    if (success)
-        _colorTexturePath = absPath(texturePath);
-
-    std::string nightTexturePath = "";
-    dictionary.getValue("Textures.Night", nightTexturePath);
-    if (nightTexturePath != ""){
+    if (dictionary.hasKey(KeyNightTexture)) {
         _hasNightTexture = true;
-        _nightTexturePath = absPath(nightTexturePath);
+        _nightTexturePath = absPath(dictionary.value<std::string>(KeyNightTexture));
     }
-    
-    std::string heightMapTexturePath = "";
-    dictionary.getValue("Textures.Height", heightMapTexturePath);
-    if (heightMapTexturePath != "") {
+
+    if (dictionary.hasKey(KeyHeightTexture)) {
         _hasHeightTexture = true;
-        _heightMapTexturePath = absPath(heightMapTexturePath);
+        _heightMapTexturePath = absPath(dictionary.value<std::string>(KeyHeightTexture));
+    }
+
+    if (dictionary.hasKey(KeyShading)) {
+        _performShading = dictionary.value<bool>(KeyShading);
     }
 
     addPropertySubOwner(_geometry.get());
 
+    auto loadTextureCallback = [this]() {loadTexture(); };
     addProperty(_colorTexturePath);
-    _colorTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
+    _colorTexturePath.onChange(loadTextureCallback);
 
     addProperty(_nightTexturePath);
-    _nightTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
+    _nightTexturePath.onChange(loadTextureCallback);
 
     addProperty(_heightMapTexturePath);
-    _heightMapTexturePath.onChange(std::bind(&RenderablePlanet::loadTexture, this));
+    _heightMapTexturePath.onChange(loadTextureCallback);
 
     addProperty(_heightExaggeration);
-
-
-    //=========================================================
-    //======== Shading and Rotation as Properties =============
-    //=========================================================
-    if (dictionary.hasKeyAndValue<bool>(keyShading)) {
-        bool shading;
-        dictionary.getValue(keyShading, shading);
-        _performShading = shading;
-    }
-
     addProperty(_performShading);
-    // Mainly for debugging purposes @AA
-    addProperty(_rotation);
 
     //================================================================
     //======== Reads Shadow (Eclipses) Entries in mod file ===========
     //================================================================
     ghoul::Dictionary shadowDictionary;
-    success = dictionary.getValue(keyShadowGroup, shadowDictionary);
+    bool success = dictionary.getValue(keyShadowGroup, shadowDictionary);
     bool disableShadows = false;
     if (success) {
         std::vector< std::pair<std::string, float > > sourceArray;
@@ -259,9 +284,6 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     }
 }
 
-RenderablePlanet::~RenderablePlanet() {
-}
-
 bool RenderablePlanet::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
 
@@ -280,8 +302,6 @@ bool RenderablePlanet::initialize() {
             "shadowNightProgram",
             "${MODULE_SPACE}/shaders/shadow_nighttexture_vs.glsl",
             "${MODULE_SPACE}/shaders/shadow_nighttexture_fs.glsl");
-        if (!_programObject)
-            return false;
     } 
     else if (_programObject == nullptr && _shadowEnabled) {
         // shadow program
@@ -289,8 +309,6 @@ bool RenderablePlanet::initialize() {
             "shadowProgram",
             "${MODULE_SPACE}/shaders/shadow_vs.glsl",
             "${MODULE_SPACE}/shaders/shadow_fs.glsl");
-        if (!_programObject)
-            return false;
     } 
     else if (_programObject == nullptr && _hasNightTexture) {
         // Night texture program
@@ -298,8 +316,6 @@ bool RenderablePlanet::initialize() {
             "nightTextureProgram",
             "${MODULE_SPACE}/shaders/nighttexture_vs.glsl",
             "${MODULE_SPACE}/shaders/nighttexture_fs.glsl");
-        if (!_programObject) 
-            return false;
     }
     else if (_programObject == nullptr) {
         // pscstandard
@@ -307,8 +323,6 @@ bool RenderablePlanet::initialize() {
             "pscstandard",
             "${MODULE_SPACE}/shaders/renderableplanet_vs.glsl",
             "${MODULE_SPACE}/shaders/renderableplanet_fs.glsl");
-        if (!_programObject)
-            return false;
     }
 
     using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
@@ -336,7 +350,7 @@ bool RenderablePlanet::initialize() {
 }
 
 bool RenderablePlanet::deinitialize() {
-    if(_geometry) {
+    if (_geometry) {
         _geometry->deinitialize();
         _geometry = nullptr;
     }
@@ -347,9 +361,9 @@ bool RenderablePlanet::deinitialize() {
         _programObject = nullptr;
     }
 
-    _geometry                   = nullptr;
-    _texture                    = nullptr;
-    _nightTexture               = nullptr;
+    _geometry = nullptr;
+    _texture = nullptr;
+    _nightTexture = nullptr;
 
     return true;
 }

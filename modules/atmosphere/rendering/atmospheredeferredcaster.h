@@ -29,12 +29,13 @@
 #include <string>
 #include <vector>
 #include <openspace/rendering/deferredcaster.h>
+#include <ghoul/opengl/textureunit.h>
 
 //#include <ghoul/opengl/textureunit.h>
 
 namespace ghoul {
     namespace opengl {
-        class Texture;
+        class Texture;        
         class ProgramObject;
     }
 }

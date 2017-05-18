@@ -31,6 +31,7 @@
 #include <modules/globebrowsing/rendering/gpu/gpulayermanager.h>
 #include <modules/globebrowsing/rendering/layer/layergroup.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+#include <openspace/util/updatestructures.h>
 
 namespace {
     const char* keyFrame = "Frame";

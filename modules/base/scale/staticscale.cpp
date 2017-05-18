@@ -38,11 +38,13 @@ documentation::Documentation StaticScale::Documentation() {
     return {
         "Static Scaling",
         "base_scale_static",
-        {{
-            KeyValue,
-            new DoubleVerifier,
-            "The scaling factor by which the scenegraph node is scaled."
-        }}
+        {
+            {
+                KeyValue,
+                new DoubleVerifier,
+                "The scaling factor by which the scenegraph node is scaled."
+            }
+        }
     };
 }
 

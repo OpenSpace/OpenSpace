@@ -589,43 +589,21 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     }
 
     // Write keyboard documentation.
-    {
-        const std::string KeyboardShortcutsType =
-            ConfigurationManager::KeyKeyboardShortcuts + "." +
-            ConfigurationManager::PartType;
-
-        const std::string KeyboardShortcutsFile =
-            ConfigurationManager::KeyKeyboardShortcuts + "." +
-            ConfigurationManager::PartFile;
-
-        std::string type, file;
-        const bool hasType = configurationManager().getValue(KeyboardShortcutsType, type);
-        const bool hasFile = configurationManager().getValue(KeyboardShortcutsFile, file);
-
-        if (hasType && hasFile) {
-            file = absPath(file);
-            interactionHandler().writeKeyboardDocumentation(type, file);
-        }
+    if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
+        interactionHandler().writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyKeyboardShortcuts
+            ))
+        );
     }
 
     // If a PropertyDocumentationFile was specified, generate it now.
-    {    
-        const std::string KeyPropertyDocumentationType =
-            ConfigurationManager::KeyPropertyDocumentation + '.' +
-            ConfigurationManager::PartType;
-
-        const std::string KeyPropertyDocumentationFile =
-            ConfigurationManager::KeyPropertyDocumentation + '.' +
-            ConfigurationManager::PartFile;
-
-        std::string type, file;
-        const bool hasType = configurationManager().getValue(KeyPropertyDocumentationType, type);
-        const bool hasFile = configurationManager().getValue(KeyPropertyDocumentationFile, file);
-
-        if (hasType && hasFile) {
-            file = absPath(file);
-            scene->writePropertyDocumentation(file, type, scenePath);
-        }
+    if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
+        scene->writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyPropertyDocumentation
+            ))
+        );
     }
 
     _syncEngine->addSyncables(Time::ref().getSyncables());
@@ -646,72 +624,30 @@ void OpenSpaceEngine::deinitialize() {
 
 void OpenSpaceEngine::writeDocumentation() {
     // If a LuaDocumentationFile was specified, generate it now
-    const std::string LuaDocumentationType =
-        ConfigurationManager::KeyLuaDocumentation + "." + ConfigurationManager::PartType;
-    const std::string LuaDocumentationFile =
-        ConfigurationManager::KeyLuaDocumentation + "." + ConfigurationManager::PartFile;
-
-    const bool hasLuaDocType = configurationManager().hasKey(LuaDocumentationType);
-    const bool hasLuaDocFile = configurationManager().hasKey(LuaDocumentationFile);
-    if (hasLuaDocType && hasLuaDocFile) {
-        std::string luaDocumentationType = configurationManager().value<std::string>(
-            LuaDocumentationType
-        );
-        std::string luaDocumentationFile = configurationManager().value<std::string>(
-            LuaDocumentationFile
-        );
-
+    if (configurationManager().hasKey(ConfigurationManager::KeyLuaDocumentation)) {
         _scriptEngine->writeDocumentation(
-            absPath(luaDocumentationFile),
-            luaDocumentationType
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyLuaDocumentation
+            ))
         );
     }
 
     // If a general documentation was specified, generate it now
-    const std::string DocumentationType =
-        ConfigurationManager::KeyDocumentation + '.' + ConfigurationManager::PartType;
-    const std::string DocumentationFile =
-        ConfigurationManager::KeyDocumentation + '.' + ConfigurationManager::PartFile;
-
-    const bool hasDocumentationType = configurationManager().hasKey(DocumentationType);
-    const bool hasDocumentationFile = configurationManager().hasKey(DocumentationFile);
-    if (hasDocumentationType && hasDocumentationFile) {
-        std::string documentationType = configurationManager().value<std::string>(
-            DocumentationType
-        );
-        std::string documentationFile = configurationManager().value<std::string>(
-            DocumentationFile
-        );
-
+    if (configurationManager().hasKey(ConfigurationManager::KeyDocumentation)) {
         DocEng.writeDocumentation(
-            absPath(documentationFile),
-            documentationType
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyDocumentation
+            ))
         );
     }
 
-    const std::string FactoryDocumentationType =
-        ConfigurationManager::KeyFactoryDocumentation + '.' +
-        ConfigurationManager::PartType;
-
-    const std::string FactoryDocumentationFile =
-        ConfigurationManager::KeyFactoryDocumentation + '.' +
-        ConfigurationManager::PartFile;
-    
-    bool hasFactoryDocumentationType = configurationManager().hasKey(
-        FactoryDocumentationType
-    );
-    bool hasFactoryDocumentationFile = configurationManager().hasKey(
-        FactoryDocumentationFile
-    );
-    if (hasFactoryDocumentationType && hasFactoryDocumentationFile) {
-        std::string type = configurationManager().value<std::string>(
-            FactoryDocumentationType
+    // If a factory documentation was specified, generate it now
+    if (configurationManager().hasKey(ConfigurationManager::KeyFactoryDocumentation)) {
+        FactoryManager::ref().writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyFactoryDocumentation
+            ))
         );
-        std::string file = configurationManager().value<std::string>(
-            FactoryDocumentationFile
-        );
-
-        FactoryManager::ref().writeDocumentation(absPath(file), type);
     }
 }
 
