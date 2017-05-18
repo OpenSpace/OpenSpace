@@ -34,13 +34,14 @@
 
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/opengl/programobject.h>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
+class SceneGraphNode;
 
 namespace documentation { struct Documentation; }
 
@@ -62,6 +63,7 @@ public:
 
     // constructors & destructor
     Scene();
+    ~Scene();
 
     /**
      * Initalizes the SceneGraph
