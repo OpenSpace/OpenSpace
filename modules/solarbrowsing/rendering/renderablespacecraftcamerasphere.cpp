@@ -153,6 +153,11 @@ void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
         _shader->setUniform("planePositionSpacecraft[" + std::to_string(i) + "]",
                             plane->_planePosSpacecraftRefFrame);
 
+        _shader->setUniform("imageSize[" + std::to_string(i) + "]" , plane->_imageSize);
+        _shader->setUniform("sharpenValue[" + std::to_string(i) + "]", plane->_sharpenValue);
+        _shader->setUniform("gammaValue[" + std::to_string(i) + "]", plane->_gammaValue);
+        _shader->setUniform("contrastValue[" + std::to_string(i) + "]", plane->_contrastValue);
+
         // Imagery texture
         txUnits[i].activate();
         plane->_texture->bind();

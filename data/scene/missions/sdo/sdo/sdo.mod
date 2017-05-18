@@ -61,10 +61,12 @@ return {
         Renderable = {
             -- Resolution of imagery, will be moved to metadata later
             Resolution = 4096,
+            StartResolutionLevel = 2,
             Type = "RenderableSpacecraftCameraPlane",
             Target = "Sun",
             -- Temp
             MagicPlaneFactor = 0.785,
+            MagicPlaneOffset = {0.0, 0.0},
             -- Will recursively find all instruments that match array instruments
             --RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
             RootPath = "/media/noven/BE23-1097/solarflare/SDO/2012/07/12",
@@ -75,6 +77,7 @@ return {
                 "aia_aia_193",
                 "aia_aia_304",
                 "aia_aia_171",
+                "aia_aia_335",
             },
             -- Path to transferfunctions whose name must match the instrument
            -- TransferfunctionPath = "/Users/michaelnoven/workspace/OpenSpace/data/sdotransferfunctions"
