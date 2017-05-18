@@ -58,10 +58,10 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     : Renderable(dictionary)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
-    , _bufferSize("bufferSize", "Buffer Size", 10, 1, 100)
+    , _bufferSize("bufferSize", "Buffer Size", 15, 1, 100)
     , _displayTimers("displayTimers", "Display Timers", false)
     , _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
-    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 80, 0, 300)
+    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 85, 0, 300)
     , _moveFactor("movefactor", "Move Factor" , 1.0, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
     , _target("target", "Target", "Sun")
@@ -82,9 +82,10 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     }
 
     float tmpStartResolutionLevel;
-    if (dictionary.getValue("StartResolutionLevel", tmpStartResolutionLevel)) {
-        _resolutionLevel = static_cast<int>(tmpStartResolutionLevel);
+    if (!dictionary.getValue("StartResolutionLevel", tmpStartResolutionLevel)) {
+        throw ghoul::RuntimeError("Plane must have a starting resolution level");
     }
+    _resolutionLevel = static_cast<int>(tmpStartResolutionLevel);
 
     if (!dictionary.getValue("MagicPlaneFactor", _magicPlaneFactor)) {
         throw ghoul::RuntimeError("Plane must at the moment have a magic factor");
