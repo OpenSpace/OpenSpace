@@ -182,6 +182,11 @@ RenderEngine::RenderEngine()
     addProperty(_disableMasterRendering);
 }
 
+/**
+ * Destructor
+ */
+RenderEngine::~RenderEngine() {}
+
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
     _rendererImplementation = rendererFromString(renderingMethod);
 
