@@ -688,7 +688,7 @@ void LuaConsole::render() {
         glm::vec2 loc = glm::vec2(
             EntryFontSize / 2.f,
             res.y - _currentHeight + EntryFontSize
-        ) * 2.0f;
+        );
 
         auto bbox = FontRenderer::defaultRenderer().boundingBox(*_font, text.c_str());
         return glm::vec2(
