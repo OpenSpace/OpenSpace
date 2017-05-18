@@ -299,25 +299,42 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     const bool modifierShift = (modifier == KeyModifier::Shift);
 
     // Paste from clipboard
-    if (modifierControl && (key == Key::V)) {
+    if (modifierControl && (key == Key::V || key == Key::Y)) {
         addToCommand(ghoul::clipboardText());
         return true;
     }
 
     // Copy to clipboard
-    if (modifierControl && (key == Key::C)) {
+    if (modifierControl && key == Key::C) {
         ghoul::setClipboardText(_commands.at(_activeCommand));
         return true;
     }
 
+    // Cut to clipboard
+    if (modifierControl && key == Key::X) {
+        ghoul::setClipboardText(_commands.at(_activeCommand));
+        _commands.at(_activeCommand).clear();
+        _inputPosition = 0;
+    }
+
+    // Cut part after cursor to clipboard ("Kill")
+    if (modifierControl && key == Key::K) {
+        auto here = _commands.at(_activeCommand).begin() + _inputPosition;
+        auto end = _commands.at(_activeCommand).end();
+        ghoul::setClipboardText(std::string(here, end));
+        _commands.at(_activeCommand).erase(here, end);
+    }
+
     // Go to the previous character
-    if ((key == Key::Left) && (_inputPosition > 0)) {
-        --_inputPosition;
+    if (key == Key::Left || (modifierControl && key == Key::B)) {
+        if (_inputPosition > 0) {
+            --_inputPosition;
+        }
         return true;
     }
 
     // Go to the next character
-    if (key == Key::Right) {
+    if (key == Key::Right || (modifierControl && key == Key::F)) {
         _inputPosition = std::min(
             _inputPosition + 1,
             _commands.at(_activeCommand).length()
@@ -361,13 +378,13 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
     }
 
     // Go to the beginning of command string
-    if (key == Key::Home) {
+    if (key == Key::Home || (modifierControl && key == Key::A)) {
         _inputPosition = 0;
         return true;
     }
 
     // Go to the end of command string
-    if (key == Key::End) {
+    if (key == Key::End || (modifierControl && key == Key::E)) {
         _inputPosition = _commands.at(_activeCommand).size();
         return true;
     }
