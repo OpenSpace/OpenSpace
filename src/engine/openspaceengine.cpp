@@ -152,6 +152,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
     _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
+    _globalPropertyNamespace->addPropertySubOwner(_console.get());
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -346,7 +347,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
     FileSys.createCacheManager(
         absPath("${" + ConfigurationManager::KeyCache + "}"), CacheVersion
     );
-    _engine->_console->initialize();
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
@@ -843,6 +843,8 @@ void OpenSpaceEngine::configureLogging() {
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
+    _engine->_console->initialize();
+
     const std::string key = ConfigurationManager::KeyOpenGLDebugContext;
     if (_configurationManager->hasKey(key)) {
         ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(key);
@@ -1073,17 +1075,24 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
                              const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
+
+    bool isGuiWindow = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    bool showOverlay = isGuiWindow && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering();
+    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
+    // rendered ---abock
+
+    if (showOverlay) {
+        _console->update();
+    }
+
     LTRACE("OpenSpaceEngine::render(begin)");
     _renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
     
     for (const auto& func : _moduleCallbacks.render) {
         func();
     }
-    
-    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
-    // rendered ---abock
-    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
-    if (showGui && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering()) {
+
+    if (showOverlay) {
         _renderEngine->renderScreenLog();
         _console->render();
     }
