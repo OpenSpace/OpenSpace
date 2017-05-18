@@ -226,9 +226,9 @@ std::shared_ptr<ImageData>
 // }
 
 void SimpleJ2kCodec::Destroy() {
-  if (_verboseMode) {
-    std::cerr << "Destroying..\n";
-  }
+  // if (_verboseMode) {
+  //   std::cerr << "Destroying..\n";
+  // }
   opj_stream_destroy(_infileStream);
   if (_codestreamInfo) {
     opj_destroy_cstr_info(&_codestreamInfo);
@@ -309,20 +309,20 @@ void SimpleJ2kCodec::EncodeAsTiles(const char* outfile,
   }
 
   //Catch events using our callbacks and give a local context
-  if (_verboseMode) {
-    opj_set_info_handler(_encoder, [](const char* msg, void* client_data) {
-                          (void)client_data;
-                          std::clog << "[INFO]" << msg;
-                        }, 00);
-    opj_set_warning_handler(_encoder, [](const char* msg, void* client_data) {
-                          (void)client_data;
-                          std::cerr << "[WARNING]" << msg;
-                        }, 00);
-    opj_set_error_handler(_encoder, [](const char* msg, void* client_data) {
-                          (void)client_data;
-                          std::cerr << "[ERROR]" << msg;
-                        }, 00);
-  }
+  // if (_verboseMode) {
+  //   opj_set_info_handler(_encoder, [](const char* msg, void* client_data) {
+  //                         (void)client_data;
+  //                         std::clog << "[INFO]" << msg;
+  //                       }, 00);
+  //   opj_set_warning_handler(_encoder, [](const char* msg, void* client_data) {
+  //                         (void)client_data;
+  //                         std::cerr << "[WARNING]" << msg;
+  //                       }, 00);
+  //   opj_set_error_handler(_encoder, [](const char* msg, void* client_data) {
+  //                         (void)client_data;
+  //                         std::cerr << "[ERROR]" << msg;
+  //                       }, 00);
+  // }
 
   _outImage = opj_image_tile_create(numComps, l_params, OPJ_CLRSPC_GRAY);
   if (!_outImage) {
