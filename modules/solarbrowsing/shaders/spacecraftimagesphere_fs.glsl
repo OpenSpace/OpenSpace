@@ -35,6 +35,12 @@ uniform sampler2D magnetogram;
 uniform int numSpacecraftCameraPlanes;
 uniform bool hasLut[MAX_SPACECRAFT_OBSERVATORY];
 
+uniform float sharpenValue[MAX_SPACECRAFT_OBSERVATORY];
+uniform float contrastValue[MAX_SPACECRAFT_OBSERVATORY];
+uniform float opacityValue[MAX_SPACECRAFT_OBSERVATORY];
+uniform float gammaValue[MAX_SPACECRAFT_OBSERVATORY];
+uniform float imageSize[MAX_SPACECRAFT_OBSERVATORY];
+
 uniform dvec2 magicPlaneOffset[MAX_SPACECRAFT_OBSERVATORY];
 uniform float magicPlaneFactor[MAX_SPACECRAFT_OBSERVATORY];
 
@@ -48,6 +54,51 @@ const float magnetogramMin = -2265.132812;
 const float magnetogramMax = 2417.483887;
 
 #include "fragment.glsl"
+
+/* shapen 5x5 filter
+  0  -4  -6  -4  0  14
+ -4 -16 -24 -16 -4  64
+ -6 -24 220 -24 -6  60
+ -4 -16 -24 -16 -4  64
+  0  -4  -6  -4  0  14
+  */
+float sharpen(vec2 texPos, int i) {
+    float x = 1.0 / (imageSize[i]);
+    float y = 1.0 / (imageSize[i]);
+
+    float accumulator = 0.0;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(-  x, -y-y)).r * 4;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(   0, -y-y)).r * 6;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(   x, -y-y)).r * 4;
+
+    accumulator -= texture(imageryTexture[i],texPos + vec2(-x-x,   -y)).r * 4;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(-  x,   -y)).r * 16;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(   0,   -y)).r * 24;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(   x,   -y)).r * 16;
+    accumulator -= texture(imageryTexture[i],texPos + vec2( x+x,   -y)).r * 4;
+
+    accumulator -= texture(imageryTexture[i],texPos + vec2(-x-x,    0)).r * 6;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(-  x,    0)).r * 24;
+    accumulator += texture(imageryTexture[i],texPos + vec2(   0,    0)).r * 220;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(   x,    0)).r * 24;
+    accumulator -= texture(imageryTexture[i],texPos + vec2( x+x,    0)).r * 6;
+
+    accumulator -= texture(imageryTexture[i],texPos + vec2(-x-x,    y)).r * 4;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(-  x,    y)).r * 16;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(   0,    y)).r * 24;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(   x,    y)).r * 16;
+    accumulator -= texture(imageryTexture[i],texPos + vec2( x+x,    y)).r * 4;
+
+    accumulator -= texture(imageryTexture[i],texPos + vec2(-  x,  y+y)).r * 4;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(   0,  y+y)).r * 6;
+    accumulator -= texture(imageryTexture[i],texPos + vec2(   x,  y+y)).r * 4;
+
+    return clamp(texture(imageryTexture[i],texPos).r + (accumulator / 30.0) * sharpenValue[i], 0.0, 1.0);
+}
+
+float contrast(float intensity, int i) {
+    return min(clamp(0.5 + (intensity - 0.5) * (1 + contrastValue[i]/10.0), 0.0, 1.0), sqrt(intensity) + intensity);
+}
 
 Fragment getFragment() {
     vec4 outColor = vec4(0);
@@ -71,7 +122,9 @@ Fragment getFragment() {
             vec2 uv = vUv[i].xy;
             uv /= ( (HALF_SUN_RADIUS / magicPlaneFactor[i]) * 2);
             uv += 0.5;
-            float intensityOrg = texture(imageryTexture[i], vec2(uv.x  + magicPlaneOffset[i].x, uv.y + magicPlaneOffset[i].y)).r;
+            //float intensityOrg = texture(imageryTexture[i], vec2(uv.x  + magicPlaneOffset[i].x, uv.y + magicPlaneOffset[i].y)).r;
+            float intensityOrg = sharpen(vec2(uv.x + magicPlaneOffset[i].x, uv.y + magicPlaneOffset[i].y), i);
+            intensityOrg = contrast(intensityOrg, i);
 
             vec4 res;
             if (hasLut[i]) {
@@ -79,6 +132,10 @@ Fragment getFragment() {
             } else {
                 res = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);
             }
+
+            res.r = pow(res.r, gammaValue[i]);
+            res.g = pow(res.g, gammaValue[i]);
+            res.b = pow(res.b, gammaValue[i]);
 
             if (outColor == vec4(0)) {
                 outColor = res;

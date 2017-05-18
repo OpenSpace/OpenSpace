@@ -101,6 +101,10 @@ public:
     float _magicPlaneFactor = 0;
     glm::dvec2 _magicPlaneOffset = glm::dvec2();
 
+    properties::FloatProperty _sharpenValue;
+    properties::FloatProperty _contrastValue;
+    properties::FloatProperty _gammaValue;
+    unsigned int _imageSize;
 
 private:
     globebrowsing::ConcurrentJobManager<BufferObject> _concurrentJobManager;
@@ -108,6 +112,11 @@ private:
     properties::BoolProperty _asyncUploadPBO;
     properties::OptionProperty _activeInstruments;
     properties::IntProperty _bufferSize;
+
+    properties::FloatProperty _planeOpacity;
+    properties::BoolProperty _disableBorder;
+
+    properties::BoolProperty _disableFrustum;
     properties::BoolProperty _displayTimers;
     properties::BoolProperty _lazyBuffering;
     properties::IntProperty _minRealTimeUpdateInterval;
@@ -154,7 +163,6 @@ private:
     GLuint _quad;
     GLuint _vertexPositionBuffer;
 
-    unsigned int _imageSize;
     unsigned int _fullResolution;
     double _move = 0.0;
     double _deltaTimeLast = 0.0;

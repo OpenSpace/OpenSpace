@@ -56,6 +56,12 @@ namespace openspace {
 
 RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
+    , _sharpenValue("sharpenValue", "Sharpen", 0.0, 0.0, 1.0)
+    , _contrastValue("contrastValue", "Contrast", 0.0, -15.0, 15.0)
+    , _planeOpacity("planeOpacity", "Plane Opacity", 1.0, 0.0, 1.0)
+    , _disableFrustum("disableFrustum", "Disable Frustum", true)
+    , _disableBorder("disableBorder", "Disable Border", true)
+    , _gammaValue("gammaValue", "Gamma", 0.9, 0.1, 10.0)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
     , _bufferSize("bufferSize", "Buffer Size", 15, 1, 100)
@@ -259,7 +265,14 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     // }
 
     performImageTimestep(Time::ref().j2000Seconds());
+
+    addProperty(_planeOpacity);
+    addProperty(_disableBorder);
+    addProperty(_disableFrustum);
     addProperty(_activeInstruments);
+    addProperty(_sharpenValue);
+    addProperty(_gammaValue);
+    addProperty(_contrastValue);
     addProperty(_bufferSize);
     addProperty(_displayTimers);
     addProperty(_planeSize);
@@ -724,10 +737,16 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     // Activate shader
     _planeShader->activate();
 
+   /// _planeShader->setUniform("planeSize", _size);
+    _planeShader->setUniform("imageSize", _imageSize);
+    _planeShader->setUniform("planeOpacity", _planeOpacity);
+    _planeShader->setUniform("sharpenValue", _sharpenValue);
+    _planeShader->setUniform("gammaValue", _gammaValue);
+    _planeShader->setUniform("contrastValue", _contrastValue);
     _planeShader->setUniform("modelViewProjectionTransform",
         projectionMatrix * glm::mat4(modelViewTransform));
 
-    //_planeShader->setUniform("magicPlaneFactor", _magicPlaneFactor);
+   // _planeShader->setUniform("magicPlaneFactor", _magicPlaneFactor);
     _planeShader->setUniform("magicPlaneOffset", _magicPlaneOffset);
 
     ghoul::opengl::TextureUnit imageUnit;
@@ -748,6 +767,7 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     _planeShader->setUniform("lut", tfUnit);
 
     glBindVertexArray(_quad);
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     _planeShader->deactivate();
@@ -758,7 +778,15 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     _frustumShader->setUniform("modelViewProjectionTransformPlane",
                                projectionMatrix * glm::mat4(modelViewTransform));
     glBindVertexArray(_frustum);
-    glDrawArrays(GL_LINES, 8, 8);
+
+    if (!_disableBorder && !_disableFrustum) {
+        glDrawArrays(GL_LINES, 0, 16);
+    } else if (_disableBorder && !_disableFrustum) {
+        glDrawArrays(GL_LINES, 0, 8);
+    } else if (_disableFrustum && !_disableBorder) {
+        glDrawArrays(GL_LINES, 8, 16);
+    }
+
     _frustumShader->deactivate();
 
     _planePosSpacecraftRefFrame = glm::dvec3(rotationTransformSpacecraft * glm::dvec4(positionWorld + offset, 1.0));
