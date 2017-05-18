@@ -66,7 +66,7 @@ namespace {
     const float SeparatorSpace = 30.f;
 
     // Determines at which speed the console opens.
-     const float ConsoleOpenSpeed = 0.5;
+     const float ConsoleOpenSpeed = 2.5;
 
 } // namespace
 
@@ -295,6 +295,12 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return false;
     }
 
+    if (key == Key::Escape) {
+        _isVisible = false;
+        return true;
+    }
+
+
     const bool modifierControl = (modifier == KeyModifier::Control);
     const bool modifierShift = (modifier == KeyModifier::Shift);
 
@@ -389,7 +395,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return true;
     }
 
-    if (key == Key::Enter) {
+    if (key == Key::Enter || key == Key::KeypadEnter) {
         std::string cmd = _commands.at(_activeCommand);
         if (cmd != "") {
             using RemoteScripting = scripting::ScriptEngine::RemoteScripting;
@@ -563,13 +569,15 @@ void LuaConsole::update() {
     _fullHeight = (bbox.boundingBox.y + EntryFontSize + SeparatorSpace);
     _targetHeight = _isVisible ? _fullHeight : 0;
 
-    const float frametime = static_cast<float>(OsEng.windowWrapper().averageDeltaTime());
+    const float frametime = static_cast<float>(OsEng.windowWrapper().deltaTime());
 
     // Update the current height.
     // The current height is the offset that is used to slide
     // the console in from the top.
     const glm::ivec2 res = OsEng.windowWrapper().currentWindowResolution();
-    _currentHeight += (_targetHeight - _currentHeight)*std::pow(0.98, 1.0 / (ConsoleOpenSpeed * frametime));
+    _currentHeight += (_targetHeight - _currentHeight) *
+        std::pow(0.98, 1.0 / (ConsoleOpenSpeed * frametime));
+
     _currentHeight = std::max(0.0f, _currentHeight);
     _currentHeight = std::min(static_cast<float>(res.y), _currentHeight);
 }
@@ -587,9 +595,9 @@ void LuaConsole::render() {
         _program->rebuildFromFile();
     }
   
-    glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
-  
-    const glm::ivec2 res = glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
+    const glm::vec2 dpiScaling = OsEng.windowWrapper().dpiScaling();
+    const glm::ivec2 res =
+        glm::vec2(OsEng.windowWrapper().currentWindowResolution()) / dpiScaling;
   
 
     // Render background
@@ -685,12 +693,14 @@ void LuaConsole::render() {
     auto locationForRightJustifiedText = [&](const std::string& text) {
         using namespace ghoul::fontrendering;
 
-        glm::vec2 loc = glm::vec2(
+        const glm::vec2 loc = glm::vec2(
             EntryFontSize / 2.f,
             res.y - _currentHeight + EntryFontSize
         );
 
-        auto bbox = FontRenderer::defaultRenderer().boundingBox(*_font, text.c_str());
+        const auto bbox = FontRenderer::defaultRenderer().boundingBox(
+            *_font, text.c_str()
+        );
         return glm::vec2(
             loc.x + res.x - bbox.boundingBox.x - 10.f,
             loc.y
@@ -700,17 +710,16 @@ void LuaConsole::render() {
     if (_remoteScripting) {
         const glm::vec4 red(1, 0, 0, 1);
 
-        int nClients = 0;
-        if (OsEng.parallelConnection().status() != ParallelConnection::Status::Disconnected) {
-            OsEng.parallelConnection().nConnections() - 1;
-        }
+        ParallelConnection::Status status = OsEng.parallelConnection().status();
+        const int nClients =
+            status != ParallelConnection::Status::Disconnected ?
+            OsEng.parallelConnection().nConnections() - 1 :
+            0;
 
-        std::string nClientsText;
-        if (nClients == 1) {
-            nClientsText = "Broadcasting script to 1 client";
-        } else {
-            nClientsText = "Broadcasting script to " + std::to_string(nClients) + " clients";
-        }
+        const std::string nClientsText =
+            nClients == 1 ?
+            "Broadcasting script to 1 client" :
+            "Broadcasting script to " + std::to_string(nClients) + " clients";
 
         const glm::vec2 loc = locationForRightJustifiedText(nClientsText);
         RenderFont(*_font, loc, red, nClientsText.c_str());
