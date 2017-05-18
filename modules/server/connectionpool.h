@@ -49,7 +49,6 @@ public:
     void updateConnections();
     
 private:
-    using Connection = std::pair<std::thread, std::shared_ptr<ghoul::io::Socket>>;
 
     void disconnectAllConnections();
     std::mutex _connectionMutex;
@@ -58,7 +57,7 @@ private:
     
     std::function<void(std::shared_ptr<ghoul::io::Socket>)> _handleSocket;
     std::vector<std::shared_ptr<ghoul::io::SocketServer>> _socketServers;
-    std::vector<Connection> _connections;
+    std::vector<std::shared_ptr<ghoul::io::Socket>> _sockets;
 };
 
 } // namespace openspace

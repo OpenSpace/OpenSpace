@@ -46,62 +46,97 @@ namespace openspace {
 
 ServerModule::ServerModule()
     : OpenSpaceModule("Server")
-    , _connectionPool([this](std::shared_ptr<ghoul::io::Socket> socket) {
-        handleSocket(socket);
-    })
+    //, _connectionPool([this](std::shared_ptr<ghoul::io::Socket> socket) {
+    //    std::thread thread([this, socket] () {
+    //        handleSocket(socket);
+    //    });
+    //})
 {}
 
 ServerModule::~ServerModule() {
-    _connectionPool.clearServers();
+    disconnectAll();
+    cleanUpFinishedThreads();
 }
 
 void ServerModule::internalInitialize() {
     using namespace ghoul::io;
 
-    std::shared_ptr<SocketServer> tcpServer =
-        std::static_pointer_cast<SocketServer>(std::make_shared<TcpSocketServer>());
-    std::shared_ptr<ghoul::io::SocketServer> wsServer =
-        std::static_pointer_cast<SocketServer>(std::make_shared<WebSocketServer>());
+    std::unique_ptr<SocketServer> tcpServer = std::make_unique<TcpSocketServer>();
+    std::unique_ptr<SocketServer> wsServer = std::make_unique<WebSocketServer>();
 
     // Temporary hard coded addresses and ports.
     tcpServer->listen("localhost", 8000);
     wsServer->listen("localhost", 8001);
 
-    _connectionPool.addServer(wsServer);
-    _connectionPool.addServer(tcpServer);
+    _servers.push_back(std::move(tcpServer));
+    _servers.push_back(std::move(wsServer));
+    
+    //_connectionPool.addServer(wsServer);
+    //_connectionPool.addServer(tcpServer);
 
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::PreSync,
         [this]() {
-            _connectionPool.updateConnections();
-            consumeMessages();
+            preSync();
         }
     );
 }
 
+void ServerModule::preSync() {
+    // Set up new connections.
+    for (auto& server : _servers) {
+        std::shared_ptr<ghoul::io::Socket> socket;
+        while ((socket = server->nextPendingSocket())) {
+            std::unique_ptr<Connection> conneciton = std::make_unique<Connection>(socket, std::thread());
+            Connection* c = conneciton.get();
+            conneciton->thread = std::thread([this, c] () { handleConnection(c); });
+            _connections.push_back(std::move(conneciton));
+        }
+    }
 
-void ServerModule::handleSocket(std::shared_ptr<ghoul::io::Socket> socket) {
-    _messageQueue.push_back(Message({
-        socket,
-        SocketAction::Open,
-        ""
-    }));
-
+    // Consume all messages put into the message queue by the socket threads.
+    consumeMessages();
+    
+    // Join threads for sockets that disconnected.
+    cleanUpFinishedThreads();
+}
+                               
+void ServerModule::cleanUpFinishedThreads() {
+    for (auto& connection : _connections) {
+        if (!connection->socket || !connection->socket->isConnected()) {
+            if (connection->thread.joinable()) {
+                connection->thread.join();
+                connection->active = false;
+            }
+        }
+    }
+    std::remove_if(
+        _connections.begin(),
+        _connections.end(),
+        [](const auto& connection) {
+            return !connection->active;
+        }
+    );
+}
+    
+void ServerModule::disconnectAll() {
+    for (auto& connection : _connections) {
+        if (connection->socket && connection->socket->isConnected()) {
+            connection->socket->disconnect();
+        }
+    }
+}
+    
+    
+void ServerModule::handleConnection(Connection* connection) {
     std::string messageString;
-    while (socket->getMessage(messageString)) {
+    while (connection->socket->getMessage(messageString)) {
         std::lock_guard<std::mutex> lock(_messageQueueMutex);
         _messageQueue.push_back(Message({
-            socket,
-            SocketAction::Data,
+            connection,
             std::move(messageString)
         }));
     }
-
-    _messageQueue.push_back(Message({
-        socket,
-        SocketAction::Close,
-        ""
-    }));
 }
 
 void ServerModule::consumeMessages() {
@@ -109,27 +144,7 @@ void ServerModule::consumeMessages() {
     while (_messageQueue.size() > 0) {
         Message m = _messageQueue.front();
         _messageQueue.pop_front();
-
-        auto isActiveSocket = [&m](const Connection& c) {
-            return c.socket() == m.socket.get();
-        };
-        switch (m.action) {
-        case SocketAction::Open: {
-            _connections.push_back(Connection(m.socket));
-            break;
-        }
-        case SocketAction::Data: {
-            auto connection = std::find_if(_connections.begin(), _connections.end(), isActiveSocket);
-            if (connection != _connections.end()) {
-                connection->handleMessage(m.messageString);
-            }
-            break;
-        }
-        case SocketAction::Close: {
-            std::remove_if(_connections.begin(), _connections.end(), isActiveSocket);
-            break;
-        }
-        }
+        m.conneciton->handleMessage(m.messageString);
     }
 }
 
@@ -169,7 +184,7 @@ void Connection::handleJson(Json j) {
 }
 
 void Connection::sendMessage(const std::string& message) {
-    _socket->putMessage(message);
+    socket->putMessage(message);
 }
 
 void Connection::sendJson(const Json& j) {

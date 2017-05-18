@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <modules/server/connectionpool.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 
 #include <deque>
@@ -45,31 +44,27 @@ enum class SocketAction : uint32_t {
     Close = 2
 };
 
-
-struct Message {
-    std::shared_ptr<ghoul::io::Socket> socket;
-    SocketAction action;
-    std::string messageString;
-};
-
-
-class Connection {
+struct Connection {
 public:
-    Connection(std::shared_ptr<ghoul::io::Socket> socket) {
-        _socket = socket;
-    }
-
-    const ghoul::io::Socket* socket() const {
-        return _socket.get();
-    }
+    Connection(std::shared_ptr<ghoul::io::Socket> s, std::thread t)
+        : socket(s)
+        , thread(std::move(t))
+        , active(true)
+    {}
 
     void handleMessage(std::string message);
     void sendMessage(const std::string& message);
     void handleJson(nlohmann::json json);
     void sendJson(const nlohmann::json& json);
+
+    std::shared_ptr<ghoul::io::Socket> socket;
+    std::thread thread;
+    bool active;
+};
     
-private:
-    std::shared_ptr<ghoul::io::Socket> _socket;
+struct Message {
+    Connection* conneciton;
+    std::string messageString;
 };
 
 
@@ -80,14 +75,17 @@ public:
 protected:
     void internalInitialize() override;
 private:
-    void handleSocket(std::shared_ptr<ghoul::io::Socket> socket);
+    void handleConnection(Connection* socket);
+    void cleanUpFinishedThreads();
     void consumeMessages();
+    void disconnectAll();
+    void preSync();
 
-    ConnectionPool _connectionPool;
     std::mutex _messageQueueMutex;
     std::deque<Message> _messageQueue;
 
-    std::vector<Connection> _connections;
+    std::vector<std::unique_ptr<Connection>> _connections;
+    std::vector<std::unique_ptr<ghoul::io::SocketServer>> _servers;
 };
 
 } // namespace openspace

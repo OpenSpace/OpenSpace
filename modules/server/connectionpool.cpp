@@ -62,45 +62,25 @@ void ConnectionPool::acceptNewSockets() {
     for (auto& server : _socketServers) {
         std::shared_ptr<ghoul::io::Socket> socket;
         while (socket = server->nextPendingSocket()) {
-            std::thread connectionThread([this, socket]() {
-                // Pass control to `_handleSocket`
-                // Close the socket once the function returns.
-                _handleSocket(socket);
-                if (socket->isConnected()) {
-                    socket->disconnect();
-                }
-            });
-            _connections.push_back({
-                std::move(connectionThread),
-                socket
-            });
+            _handleSocket(socket);
+            _sockets.push_back(socket);
         }
     }
 }
 
 void ConnectionPool::removeDisconnectedSockets() {
-    for (auto& connection : _connections) {
-        if ((!connection.second || !connection.second->isConnected()) && connection.first.joinable()) {
-            connection.first.join();
-        }
-    }
-    std::remove_if(_connections.begin(), _connections.end(), [](const Connection& connection) {
-        return !connection.second || !connection.second->isConnected();
+    std::remove_if(_sockets.begin(), _sockets.end(), [](const std::shared_ptr<ghoul::io::Socket> socket) {
+        return !socket || !socket->isConnected();
     });
 }
 
 void ConnectionPool::disconnectAllConnections() {
-    for (auto& connection : _connections) {
-        ghoul::io::Socket* socket = connection.second.get();
-        std::thread& thread = connection.first;
+    for (auto& socket : _sockets) {
         if (socket && socket->isConnected()) {
             socket->disconnect();
         }
-        if (thread.joinable()) {
-            thread.join();
-        }
     }
-    _connections.clear();
+    _sockets.clear();
 }
 
 
