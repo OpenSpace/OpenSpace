@@ -3,6 +3,7 @@ local seedPointsFileEnlil = '${OPENSPACE_DATA}/scene/gpufieldlines/seedpoints/en
 
 -- local volumeFolderBatsrus = '${OPENSPACE_DATA}/Zihan_Wang_030517_1';
 local volumeFolderBatsrus = '${OPENSPACE_DATA}/bats_sequence';
+local volumeFolderBatsrus = '${OPENSPACE_DATA}/new_bats';
 -- local volumeFolderEnlil = '${OPENSPACE_DATA}/enlil_sequence';
 local volumeFolderEnlil = '${OPENSPACE_DATA}/Ailsa';
 local volumeFile1 = '${OPENSPACE_DATA}/bats_sequence/batsrus1.cdf';
@@ -35,38 +36,14 @@ return {
             },
         },
     },
-    -- {
-    --     Name = "EarthsMagnetosphereGPUFieldlines",
-    --     Parent = "GSMReferenceFrame",
-    --     Renderable = {
-    --         Type = "RenderableGpuFieldlines",
-    --         VectorVolume = {
-    --             -- Type = "VolumeKameleon",
-    --             Directory = volumeFolderBatsrus,
-    --             -- Model = "BATSRUS",
-    --             -- TracingVariable = "b", -- "b" is the variable specifying the magnetic field
-    --             -- Variables = {"bx", "by", "bz"},
-    --             -- TimeDependent = true,
-    --         },
-    --         Fieldlines = {
-    --             -- MaximumTracingSteps = 1000.0,
-    --             -- Stepsize = 1.0,
-    --             -- Classification = true,
-    --         },
-    --         SeedPoints = {
-    --             -- Type = "File",
-    --             File = seedPointsFileBatsrus,
-    --         }
-    --     }
-    -- },
     {
-        Name = "EnlilGPUFieldlines",
-        Parent = "HNMReferenceFrame",
+        Name = "EarthsMagnetosphereGPUFieldlines",
+        Parent = "GSMReferenceFrame",
         Renderable = {
             Type = "RenderableGpuFieldlines",
             VectorVolume = {
                 -- Type = "VolumeKameleon",
-                Directory = volumeFolderEnlil,
+                Directory = volumeFolderBatsrus,
                 -- Model = "BATSRUS",
                 -- TracingVariable = "b", -- "b" is the variable specifying the magnetic field
                 -- Variables = {"bx", "by", "bz"},
@@ -76,16 +53,40 @@ return {
                 -- MaximumTracingSteps = 1000.0,
                 -- Stepsize = 1.0,
                 -- Classification = true,
-                -- Morphing = true,
-                -- NumResamples = 5,
-                -- ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
             },
             SeedPoints = {
                 -- Type = "File",
-                File = seedPointsFileEnlil,
+                File = seedPointsFileBatsrus,
             }
         }
     },
+    -- {
+    --     Name = "EnlilGPUFieldlines",
+    --     Parent = "HNMReferenceFrame",
+    --     Renderable = {
+    --         Type = "RenderableGpuFieldlines",
+    --         VectorVolume = {
+    --             -- Type = "VolumeKameleon",
+    --             Directory = volumeFolderEnlil,
+    --             -- Model = "BATSRUS",
+    --             -- TracingVariable = "b", -- "b" is the variable specifying the magnetic field
+    --             -- Variables = {"bx", "by", "bz"},
+    --             -- TimeDependent = true,
+    --         },
+    --         Fieldlines = {
+    --             -- MaximumTracingSteps = 1000.0,
+    --             -- Stepsize = 1.0,
+    --             -- Classification = true,
+    --             -- Morphing = true,
+    --             -- NumResamples = 5,
+    --             -- ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
+    --         },
+    --         SeedPoints = {
+    --             -- Type = "File",
+    --             File = seedPointsFileEnlil,
+    --         }
+    --     }
+    -- },
     -- {
     --     Name = "EMF",
     --     Parent = "GSMReferenceFrame",
