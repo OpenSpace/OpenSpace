@@ -100,6 +100,12 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
         ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp
         ${RESOURCE_FILE}
     )
+elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    add_executable(${APPLICATION_NAME} WIN32
+        ${SGCT_OPENVR_FILES}
+        ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp
+        ${RESOURCE_FILE}
+    )
 else ()
     add_executable(${APPLICATION_NAME}
         ${SGCT_OPENVR_FILES}
@@ -109,7 +115,7 @@ else ()
 endif ()
 
 if (OPENSPACE_SPOUT_SUPPORT)
-    ghl_copy_files(
+    copy_files(
         ${APPLICATION_NAME}
         ${OPENSPACE_APPS_DIR}/OpenSpace/ext/spout/SpoutLibrary.dll
     )
@@ -181,7 +187,7 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
             VERBATIM
             )
 
-        # copy dynamic libraries
+        # copy dynamic libraries to bundle
         file(GLOB LIBRARIES_TO_COPY "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/*.dylib")
         foreach (lib_file ${LIBRARIES_TO_COPY})
             get_filename_component(file_name "${lib_file}" NAME)
@@ -202,12 +208,32 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
             set(PREFIXES "mac/")  # Remove these prefixes from input file paths.
             COPY_MACOSX_RESOURCES("${WEBGUI_RESOURCES_SOURCES}" "${PREFIXES}" "${CEF_TARGET}" "${WEBGUI_MODULE_PATH}" "${CEF_FINAL_APP}")
         endif()
-    else()
-        message(STATUS "NOT MACOS!")
-    endif()
+    endif (OS_MACOSX)
+
+	if (OS_WINDOWS)
+		# Executable target.
+		add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
+		SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_TARGET})
+		target_link_libraries(${CEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+
+		if(USE_SANDBOX)
+			# Logical target used to link the cef_sandbox library.
+			ADD_LOGICAL_TARGET("cef_sandbox_lib" "${CEF_SANDBOX_LIB_DEBUG}" "${CEF_SANDBOX_LIB_RELEASE}")
+			target_link_libraries(${CEF_TARGET} cef_sandbox_lib ${CEF_SANDBOX_STANDARD_LIBS})
+		endif()
+
+		# Add the custom manifest files to the executable.
+		ADD_WINDOWS_MANIFEST("${WEBGUI_MODULE_PATH}" "${CEF_TARGET}" "exe")
+
+		# Copy binary and resource files to the target output directory.
+		# COPY_FILES("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
+		# COPY_FILES("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "${CEF_TARGET_OUT_DIR}")
+	endif (OS_WINDOWS)
 elseif(OPENSPACE_MODULE_WEBGUI)
     message(WARNING "WebGUI configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()
+
+
 
 target_compile_definitions(${APPLICATION_NAME} PUBLIC
     ${SGCT_OPENVR_DEFINITIONS}

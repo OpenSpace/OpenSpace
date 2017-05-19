@@ -79,6 +79,11 @@ set(WEBGUI_SOURCES_LINUX
 set(WEBGUI_SOURCES_MACOSX
   )
 set(WEBGUI_SOURCES_WINDOWS
+  cefsimple.exe.manifest
+  cefsimple.rc
+  cefsimple_win.cc
+  resource.h
+  simple_handler_win.cc
   )
 APPEND_PLATFORM_SOURCES(WEBGUI_SOURCES)
 source_group(WebGUI FILES ${WEBGUI_SOURCES})
@@ -94,11 +99,14 @@ set(WEBGUI_SOURCES
   )
 
 # CEF helper sources
-set(WEBGUI_HELPER_SOURCES_MACOSX
-  process_helper_mac.cpp
-  )
+set(WEBGUI_HELPER_SOURCES_MACOSX	
+	process_helper_mac.cpp
+	)
+set(WEBGUI_HELPER_SOURCES_WINDOWS	
+	process_helper_windows.cpp
+	)
 APPEND_PLATFORM_SOURCES(WEBGUI_HELPER_SOURCES)
-source_group(WebGUI FILES ${WEBGUI_HELPER_SOURCES})
+source_group(cefsimple FILES ${WEBGUI_HELPER_SOURCES})
 
 set(WEBGUI_RESOURCES_MAC_SOURCES_MACOSX
   mac/Info.plist
@@ -118,17 +126,14 @@ set(WEBGUI_RESOURCES_SRCS
   ${WEBGUI_RESOURCES_MAC_SOURCES}
   ${WEBGUI_RESOURCES_MAC_ENGLISH_LPROJ_SRCS}
   )
-
-# Helper target (only needed my MacOS)
-if(OS_MACOSX)
-  set(CEF_HELPER_TARGET "webgui_cef_helper" CACHE INTERNAL "CEF_HELPER_TARGET")
-endif()
+ 
+# place helper in separate executable
+set(CEF_HELPER_TARGET "webgui_cef_helper" CACHE INTERNAL "CEF_HELPER_TARGET")
 
 #
-# Shared CEF config
+# CEF platform-specific config
 #
 
-# MacOS helper target config
 if(OS_MACOSX)
   # set global CEF helper app target
   set(CEF_HELPER_APP "${CEF_TARGET_OUT_DIR}/${CEF_HELPER_TARGET}.app" CACHE INTERNAL "CEF_HELPER_APP")
@@ -145,6 +150,13 @@ if(OS_MACOSX)
   # Fix the framework rpath in the helper executable.
   FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
 endif()
+
+if (OS_WINDOWS)
+  add_executable(${CEF_HELPER_TARGET} ${WEBGUI_HELPER_SOURCES})
+  SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
+  add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
+  target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+endif (OS_WINDOWS)
 
 
 ##########################################################################################
