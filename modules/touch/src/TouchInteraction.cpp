@@ -61,6 +61,7 @@ TouchInteraction::TouchInteraction()
 	_unitTest("Click to take a unit test", "Take a unit test saving the LM data into file", false),
 	_onlyPan("Toggle Panning Mode", "Toggle pan interaction on direct-manipulation three finger case (FOR FEEDBACK)", true), // temp
 	_touchActive("TouchEvents", "True if we have a touch event", false, properties::Property::Visibility::Hidden),
+	_reset("Default Values", "Reset all properties to default", false),
 	_maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000),
 	_deceleratesPerSecond("Decelerates per second", "Deceleration rate of velocity, times per second", 240, 60, 300),
 	_touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f),
@@ -83,10 +84,11 @@ TouchInteraction::TouchInteraction()
 	_currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 }, _timeSlack { 0.0 },
 	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true }, _guiON{ false }
 {
-	addProperty(_touchActive); // hide
+	addProperty(_touchActive); // how do i hide this?
 
 	addProperty(_unitTest);
 	addProperty(_onlyPan); // temp
+	addProperty(_reset);
 	addProperty(_maxTapTime);
 	addProperty(_deceleratesPerSecond);
 	addProperty(_touchScreenSize);
@@ -630,6 +632,9 @@ void TouchInteraction::step(double dt) {
 
 		_tap = false;
 		_doubleTap = false;
+		if (_reset) {
+			resetToDefault();
+		}
 	}
 }
 
@@ -720,6 +725,26 @@ void TouchInteraction::resetAfterInput() {
 		}
 	}
 	_selected.clear(); // should clear if no longer have a direct-touch input
+}
+
+void TouchInteraction::resetToDefault() {
+	_unitTest.set(false);
+	_onlyPan.set(true); // temp
+	_reset.set(false);
+	_maxTapTime.set(300);
+	_deceleratesPerSecond.set(240);
+	_touchScreenSize.set(55.0f);
+	_tapZoomFactor.set(0.1f);
+	_nodeRadiusThreshold.set(0.2f);
+	_rollAngleThreshold.set(0.019f);
+	_orbitSpeedThreshold.set(0.038f);
+	_panSpeedThreshold.set(0.004f);
+	_spinSensitivity.set(0.25f);
+	_inputStillThreshold.set(0.0005f);
+	_interpretPan.set(0.01f);
+	_slerpTime.set(1.0f);
+	_guiButton.set(glm::ivec2(32, 64));
+	_friction.set(glm::vec4(0.01, 0.02, 0.02, 0.02));
 }
 
 void TouchInteraction::tap() {

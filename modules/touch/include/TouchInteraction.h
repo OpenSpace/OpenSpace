@@ -101,6 +101,7 @@ class TouchInteraction : public properties::PropertyOwner
 		int interpretInteraction(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void computeVelocities(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void decelerate(double dt);
+		void resetToDefault();
 
 		Camera* _camera;
 		SceneGraphNode* _focusNode = nullptr;
@@ -110,6 +111,7 @@ class TouchInteraction : public properties::PropertyOwner
 		properties::BoolProperty _unitTest;
 		properties::BoolProperty _onlyPan; // temp
 		properties::BoolProperty _touchActive;
+		properties::BoolProperty _reset;
 		properties::IntProperty _maxTapTime;
 		properties::IntProperty _deceleratesPerSecond;
 		properties::FloatProperty _touchScreenSize;
