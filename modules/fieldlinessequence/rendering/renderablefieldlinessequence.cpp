@@ -286,11 +286,14 @@ bool RenderableFieldlinesSequence::initialize() {
         std::vector<std::string> colorizingMagVars;
         colorizingFloatVars.insert(colorizingFloatVars.end(), {
                                                                  "T",
-                                                                 "dp",
-                                                                 "rho"
+                                                                 // "dp",
+                                                                 "rho",
+                                                                 // "p",
+                                                                 "status"
                                                               });
 
         colorizingMagVars.insert(colorizingMagVars.end(), {
+                                                              "ux", "uy", "uz",
                                                               "jx", "jy", "jz",
                                                               "jr", "jtheta", "jphi",
                                                               // "br", "btheta", "bphi",
@@ -336,41 +339,59 @@ bool RenderableFieldlinesSequence::initialize() {
     } else if (_tracingMethod == keyTracingMethodPreTraced) {
         allowSeedPoints = false;
         // TODO: DON'T HARDCODE.. GET FROM LUA
-        std::vector<std::string> validJsonFilePaths{"C:/Users/oskar/Develop/workspace/OpenSpace/data/scene/fieldlinessequence/json_new/0_batsrus_1574Lines_888443Points_3UnknownColorVars.json "};
+        std::string jsonFolder = "${OPENSPACE_DATA}/scene/fieldlinessequence/enlilMarch2015/";
+        std::vector<std::string> validJsonFilePaths;
+        FieldlinesSequenceManager::ref().getAllFilePathsOfType(jsonFolder,
+                                                               "json",
+                                                               validJsonFilePaths);
+        // std::vector<std::string> validJsonFilePaths{"${OPENSPACE_DATA}/scene/fieldlinessequence/json_new1/"};
         // std::vector<std::string> validJsonFilePaths{"C:/Users/oskar/Develop/workspace/OpenSpace/data/scene/fieldlinessequence/precalculatedjson/fieldline_samples.json "};
-        LDEBUG("JSON PATHS: " << validJsonFilePaths[0]);
+
+
+        // Only choose n number of volumes
+        // int numMaxStates = 20;
+        // int numValidPaths = static_cast<int>(validJsonFilePaths.size());
+        // validJsonFilePaths.erase(validJsonFilePaths.begin() + numMaxStates,
+        //                                 validJsonFilePaths.end());
+
+        LDEBUG("Found the following valid .json files in " << jsonFolder);
+        for (std::string str : validJsonFilePaths) {
+            LDEBUG("\t" << str);
+        }
 
         LERROR("TODO: allow Morphing for provided vertex lists!");
         _isMorphing = false;
         int resamplingOption = 0;   // TODO: implement morphing
         numResamples = 0;       // TODO: implement morphing
-
-        FieldlinesState tmpState;
-        _states.push_back(tmpState);
-        FieldlinesSequenceManager::ref().getFieldlinesState(validJsonFilePaths[0],
-                                                            _isMorphing,
-                                                            numResamples,
-                                                            resamplingOption,
-                                                            _startTimes,
-                                                            _states[0]);
-
         _numberOfStates = validJsonFilePaths.size();
         _states.reserve(_numberOfStates);
         _startTimes.reserve(_numberOfStates);
 
-        // TODO specify saveJsonState in LUA;
-        std::string folder = "${OPENSPACE_DATA}/scene/fieldlinessequence/json_new/";
-        std::string prefix = "jsonConv";
-        std::string separator = "-";
-        int indentations = 1;
+        for (int i = 0; i < _numberOfStates; ++i) {
+            LDEBUG(validJsonFilePaths[i] << " is now being processed.");
+            FieldlinesState tmpState;
+            _states.push_back(tmpState);
+            FieldlinesSequenceManager::ref().getFieldlinesState(validJsonFilePaths[i],
+                                                               _isMorphing,
+                                                               numResamples,
+                                                               resamplingOption,
+                                                               _startTimes,
+                                                               _states[i]);
+        }
 
-        FieldlinesSequenceManager::ref().saveFieldlinesStateAsJson(_states[0],
-                                                                   folder,
-                                                                   false,
-                                                                   prefix,
-                                                                   true,
-                                                                   separator,
-                                                                   indentations);
+        // TODO specify saveJsonState in LUA;
+        // std::string folder = "${OPENSPACE_DATA}/scene/fieldlinessequence/json_new/";
+        // std::string prefix = "jsonConv";
+        // std::string separator = "-";
+        // int indentations = 1;
+
+        // FieldlinesSequenceManager::ref().saveFieldlinesStateAsJson(_states[0],
+        //                                                            folder,
+        //                                                            false,
+        //                                                            prefix,
+        //                                                            true,
+        //                                                            separator,
+        //                                                            indentations);
 
     } else if (_tracingMethod == keyTracingMethodLiveTrace) {
         LERROR("NOT YET INCORPORATED INTO THIS CLASS! TODO, TODO TODO!");
