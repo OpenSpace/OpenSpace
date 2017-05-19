@@ -51,7 +51,6 @@ namespace globebrowsing {
 
 		static void generateMeshFromBinary(ghoul::Dictionary);
 
-	private: 
 		static void writeTxtFile(const std::string filename, std::string output_path);
 	};
 }
