@@ -453,7 +453,23 @@ bool RenderableFieldlinesSequence::initialize() {
             ymin = zmin = -150.f;
             xmax = 50.f;
             ymax = zmax = 150.f;
-            rmax = std::max(xmax, std::max(ymax,zmax));
+
+            // All corners of volume
+            std::vector<glm::vec3> corners{glm::vec3(xmax, ymin, zmin),
+                                           glm::vec3(xmax, ymin, zmax),
+                                           glm::vec3(xmax, ymax, zmax),
+                                           glm::vec3(xmax, ymax, zmax),
+                                           glm::vec3(xmin, ymin, zmin),
+                                           glm::vec3(xmin, ymin, zmax),
+                                           glm::vec3(xmin, ymax, zmax),
+                                           glm::vec3(xmin, ymax, zmin)};
+            rmax = 0;
+            for (glm::vec3 vec : corners) {
+                float length = glm::length(vec);
+                if (length > rmax) {
+                    rmax = length;
+                }
+            }
 
             _isSpherical = false;
         } else {
