@@ -65,7 +65,7 @@ return {
             Type = "RenderableSpacecraftCameraPlane",
             Target = "Sun",
             -- Temp
-            MagicPlaneFactor = 0.785,
+            MagicPlaneFactor = 0.7675,
             MagicPlaneOffset = {0.0, 0.0},
             -- Will recursively find all instruments that match array instruments
             --RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
