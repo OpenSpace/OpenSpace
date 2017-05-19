@@ -407,13 +407,22 @@ void renderVec3Property(Property* prop, const std::string& ownerName,
     float max = std::max(std::max(p->maxValue().x, p->maxValue().y), p->maxValue().z);
 
 
-    ImGui::SliderFloat3(
-        name.c_str(),
-        glm::value_ptr(value),
-        min,
-        max,
-        "%.5f"
-    );
+
+    if (prop->viewOption(Property::ViewOptions::Color)) {
+        ImGui::ColorEdit3(
+            name.c_str(),
+            glm::value_ptr(value)
+        );
+    }
+    else {
+        ImGui::SliderFloat3(
+            name.c_str(),
+            glm::value_ptr(value),
+            min,
+            max,
+            "%.5f"
+        );
+    }
     renderTooltip(prop);
 
     if (value != p->value()) {
@@ -443,13 +452,22 @@ void renderVec4Property(Property* prop, const std::string& ownerName,
     float max = std::max(std::max(std::max(
         p->maxValue().x, p->maxValue().y), p->maxValue().z), p->maxValue().w);
 
-    ImGui::SliderFloat4(
-        name.c_str(),
-        &value.x,
-        min,
-        max,
-        "%.5f"
-    );
+    if (prop->viewOption(Property::ViewOptions::Color)) {
+        ImGui::ColorEdit4(
+            name.c_str(),
+            glm::value_ptr(value)
+        );
+    }
+    else {
+        ImGui::SliderFloat4(
+            name.c_str(),
+            glm::value_ptr(value),
+            min,
+            max,
+            "%.5f"
+        );
+    }
+
     renderTooltip(prop);
 
     if (value != p->value()) {

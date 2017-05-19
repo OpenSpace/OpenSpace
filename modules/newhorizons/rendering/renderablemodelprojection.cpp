@@ -31,6 +31,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
@@ -423,9 +424,8 @@ void RenderableModelProjection::project() {
 bool RenderableModelProjection::loadTextures() {
     _baseTexture = nullptr;
     if (_colorTexturePath.value() != "") {
-        _baseTexture = std::move(
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath))
-        );
+        _baseTexture = ghoul::io::TextureReader::ref().loadTexture(absPath(_colorTexturePath))
+        ;
         if (_baseTexture) {
             LDEBUG("Loaded texture from '" << absPath(_colorTexturePath) << "'");
             _baseTexture->uploadTexture();

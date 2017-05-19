@@ -106,7 +106,7 @@ template <>
 bool PropertyDelegate<TemplateProperty<std::vector<int>>>::toLuaValue(lua_State* state, std::vector<int> value) {
     //@NOTE Untested ---abock
     lua_newtable(state);
-    for (int i = 0; i < value.size(); ++i) {
+    for (size_t i = 0; i < value.size(); ++i) {
         int v = value[i];
         lua_pushinteger(state, v);
         lua_setfield(state, -2, std::to_string(i).c_str());
@@ -129,6 +129,7 @@ std::vector<int> PropertyDelegate<TemplateProperty<std::vector<int>>>::fromStrin
         result.push_back(std::stoi(token));
         value.erase(0, pos + Delimiter.length());
     }
+    success = true;
     return result;
 }
 

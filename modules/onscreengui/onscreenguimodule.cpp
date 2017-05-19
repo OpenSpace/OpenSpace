@@ -31,6 +31,7 @@
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -62,7 +63,8 @@ OnScreenGUIModule::OnScreenGUIModule()
                         &(OsEng.settingsEngine()),
                         &(OsEng.interactionHandler()),
                         &(OsEng.renderEngine()),
-                        &(OsEng.parallelConnection())
+                        &(OsEng.parallelConnection()),
+                        &(OsEng.console())
                     };
                     return res;
                 }
@@ -132,7 +134,6 @@ OnScreenGUIModule::OnScreenGUIModule()
                 glm::vec2 mousePosition = wrapper.mousePosition();
                 //glm::ivec2 drawBufferResolution = _windowWrapper->currentDrawBufferResolution();
                 glm::ivec2 windowSize = wrapper.currentWindowSize();
-                glm::ivec2 renderingSize = wrapper.currentWindowResolution();
                 uint32_t mouseButtons = wrapper.mouseButtons(2);
                 
                 double dt = std::max(wrapper.averageDeltaTime(), 0.0);

@@ -27,7 +27,8 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/spicemanager.h>
-#include <glm/glm.hpp>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/glm.h>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -61,7 +62,8 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
         staticGrid = dictionary.getValue(KeyGridParentsRotation, _parentsRotation);
     }
     
-    dictionary.getValue(KeyGridSegments, _segments);
+    _segments = static_cast<int>(dictionary.value<double>(KeyGridSegments));
+    //dictionary.getValue(KeyGridSegments, _segments);
 
 
     /*glm::vec2 radius;

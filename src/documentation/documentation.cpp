@@ -117,8 +117,8 @@ DocumentationEntry::DocumentationEntry(std::string k, std::shared_ptr<Verifier> 
                                        std::string doc, Optional opt)
     : key(std::move(k))
     , verifier(std::move(v))
-    , documentation(std::move(doc))
     , optional(opt)
+    , documentation(std::move(doc))
 {
     ghoul_assert(!key.empty(), "Key must not be empty");
     ghoul_assert(verifier, "Verifier must not be nullptr");

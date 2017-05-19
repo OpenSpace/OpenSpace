@@ -73,7 +73,7 @@ namespace properties {
     [](std::string value, bool& success) -> __TYPE__ {                                   \
         __TYPE__ result;                                                                 \
         std::vector<std::string> tokens = ghoul::tokenizeString(value, ',');             \
-        if (tokens.size() != result.length()) {                                          \
+        if (tokens.size() != static_cast<size_t>(result.length())) {                     \
             success = false;                                                             \
             return result;                                                               \
         }                                                                                \

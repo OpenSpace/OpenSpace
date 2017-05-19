@@ -30,6 +30,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/programobject.h>
 
@@ -40,7 +41,7 @@
 namespace {
     const char* KeyBody                 = "Body";
     const char* KeyFrame                = "Frame";
-    const char* KeyColor                = "RGB";
+//    const char* KeyColor                = "RGB";
 
     const char* KeyInstrument           = "Instrument";
     const char* KeyInstrumentName       = "Name";
@@ -131,6 +132,8 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
     , _drawSolid("solidDraw", "Draw as Quads", false)
     , _standOffDistance("standOffDistance", "Standoff Distance", 0.9999, 0.99, 1.0, 0.000001)
+    , _programObject(nullptr)
+    , _drawFOV(false)
     , _colors({
         {
             "colors.defaultStart",
@@ -168,8 +171,6 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
             glm::vec4(0.85f, 0.85f, 0.85f, 1.f)
         }
     })
-    , _programObject(nullptr)
-    , _drawFOV(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -192,7 +193,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
     ghoul::Dictionary pt = dictionary.value<ghoul::Dictionary>(KeyPotentialTargets);
     _instrument.potentialTargets.reserve(pt.size());
-    for (int i = 1; i <= pt.size(); ++i) {
+    for (size_t i = 1; i <= pt.size(); ++i) {
         std::string target = pt.value<std::string>(std::to_string(i));
         _instrument.potentialTargets.push_back(target);
     }
@@ -401,7 +402,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
         // Regardless of what happens next, the position of every second element is going
         // to be the same. Only the color attribute might change
         first = {
-            0.f, 0.f, 0.f,
+            { 0.f, 0.f, 0.f },
             RenderInformation::VertexColorTypeDefaultStart
         };
 
@@ -411,7 +412,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
             glm::vec3 o = orthogonalProjection(bound, data.time, target);
 
             second = {
-                o.x, o.y, o.z,
+                { o.x, o.y, o.z },
                 RenderInformation::VertexColorTypeDefaultEnd // This had a different color (0.4) before ---abock
             };
         }
@@ -453,7 +454,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                 srfVec *= _standOffDistance;
 
                 second = {
-                    srfVec.x, srfVec.y, srfVec.z,
+                    { srfVec.x, srfVec.y, srfVec.z },
                     RenderInformation::VertexColorTypeIntersectionEnd
                 };
             }
@@ -461,7 +462,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                 // This point did not intersect the target though others did
                 glm::vec3 o = orthogonalProjection(bound, data.time, target);
                 second = {
-                    o.x, o.y, o.z,
+                    { o.x, o.y, o.z },
                     RenderInformation::VertexColorTypeInFieldOfView
                 };
             }
@@ -555,7 +556,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                 if (intercepts(tBound)) {
                     const glm::vec3 icpt = interceptVector(tBound);
                     _orthogonalPlane.data[indexForBounds(i) + m] = {
-                        icpt.x, icpt.y, icpt.z,
+                        { icpt.x, icpt.y, icpt.z },
                         RenderInformation::VertexColorTypeSquare
                     };
                 }
@@ -563,7 +564,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     const glm::vec3 o = orthogonalProjection(tBound, data.time, target);
 
                     _orthogonalPlane.data[indexForBounds(i) + m] = {
-                        o.x, o.y, o.z,
+                        { o.x, o.y, o.z },
                         RenderInformation::VertexColorTypeSquare
                     };
                 }

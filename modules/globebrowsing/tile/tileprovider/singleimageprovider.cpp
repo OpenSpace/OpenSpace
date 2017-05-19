@@ -79,7 +79,7 @@ void SingleImageProvider::update() {
 
 void SingleImageProvider::reset() {
     auto tileTexture = std::shared_ptr<ghoul::opengl::Texture>(
-        std::move(ghoul::io::TextureReader::ref().loadTexture(_imagePath))
+        ghoul::io::TextureReader::ref().loadTexture(_imagePath)
     );
     auto tileStatus = tileTexture != nullptr ? Tile::Status::OK : Tile::Status::IOError;
     auto tileMetaData = nullptr;

@@ -25,16 +25,12 @@
 #ifndef __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 #define __OPENSPACE_CORE___SCENEGRAPHNODE___H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/scene/translation.h>
-#include <openspace/scene/rotation.h>
-#include <openspace/scene/scale.h>
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/scene/scene.h>
-#include <openspace/util/updatestructures.h>
+#include <ghoul/glm.h>
+#include <ghoul/misc/boolean.h>
 
-#include <iostream>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -42,6 +38,16 @@
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
+class Camera;
+struct RenderData;
+class Renderable;
+struct RendererTasks;
+class Rotation;
+class Translation;
+class Scale;
+class Scene;
+struct UpdateData;
 
 namespace documentation { struct Documentation; }
 

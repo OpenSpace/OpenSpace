@@ -34,6 +34,8 @@
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
+
 /**
  * This class renders the constellation bounds as defined in
  * http://cdsarc.u-strasbg.fr/viz-bin/Cat?cat=VI%2F49. It contains the bounds on the
@@ -42,14 +44,6 @@ namespace openspace {
  * The bounds are drawn as lines on a sphere with variable radius, set by the
  * <code>_distance</code> property. Currently, all constellation bounds are lines, which
  * leads to artifacts if the radius is very small.
- * Renderable configuration attributes:
- * <code>File</code> [string] (required): The file that contains the bounds and the
- * abbreviations for the different constellations
- * <code>ConstellationFile</code> [string]: The file that contains the mapping between
- * abbreviations and full names. If the file is omitted, the abbreviations are used as the
- * full names.
- * <code>ReferenceFrame</code> [string]: The reference frame in which the points contained
- * in the <code>File</code> are stored in. Defaults to <code>J2000</code>
  */
 class RenderableConstellationBounds : public Renderable {
 public:
@@ -62,6 +56,8 @@ public:
 
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
 
 private:
     /// Stores the constellation bounds
@@ -106,7 +102,7 @@ private:
     /// The list of all loaded constellation bounds
     std::vector<ConstellationBound> _constellationBounds;
     
-    typedef std::array<float, 3> Vertex;
+    using Vertex = std::array<float, 3>;
     std::vector<Vertex> _vertexValues; ///< A list of all vertices of all bounds
 
     /// The radius of the celestial sphere onto which the bounds are drawn

@@ -78,7 +78,7 @@ glm::dvec3 Ellipsoid::geodeticSurfaceProjection(const glm::dvec3& p) const {
 
         dSdA = -2.0 * glm::dot(p2 / (_cached._radiiToTheFourth * d3), glm::dvec3(1.0));
     }
-    while (abs(s) > epsilon);
+    while (std::abs(s) > epsilon);
     return p / d;
 }
 

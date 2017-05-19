@@ -281,7 +281,6 @@ void ChunkedLodGlobe::render(const RenderData& data) {
             stats.i["leafs chunk nodes"]++;
             if (chunk.isVisible()) {
                 stats.i["rendered chunks"]++;
-                double t0 = Time::now().j2000Seconds();
                 _renderer->renderChunk(chunkNode.getChunk(), data);
                 debugRenderChunk(chunk, mvp);
             }

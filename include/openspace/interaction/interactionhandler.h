@@ -25,9 +25,11 @@
 #ifndef __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 #define __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 
+#include <openspace/documentation/documentationgenerator.h>
+#include <openspace/properties/propertyowner.h>
+
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/network/parallelconnection.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -47,8 +49,7 @@ class SceneGraphNode;
 
 namespace interaction {
 
-
-class InteractionHandler : public properties::PropertyOwner
+class InteractionHandler : public properties::PropertyOwner, public DocumentationGenerator
 {
 public:
     InteractionHandler();
@@ -98,11 +99,10 @@ public:
 
     // Accessors
     ghoul::Dictionary getCameraStateDictionary();
-    SceneGraphNode* const focusNode() const;
+    SceneGraphNode* focusNode() const;
     glm::dvec3 focusNodeToCameraVector() const;
     glm::quat focusNodeToCameraRotation() const;
-    Camera* const camera() const;
-	std::shared_ptr<InteractionMode> interactionmode();
+    Camera* camera() const;
     const InputState& inputState() const;
 
     /**
@@ -122,7 +122,6 @@ public:
 
     void saveCameraStateToFile(const std::string& filepath);
     void restoreCameraStateFromFile(const std::string& filepath);
-    void writeKeyboardDocumentation(const std::string& type, const std::string& file);
 
 private:
     using Synchronized = ghoul::Boolean;
@@ -132,6 +131,8 @@ private:
         Synchronized synchronization;
         std::string documentation;
     };
+    
+    std::string generateJson() const override;
 
     void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
 

@@ -25,20 +25,24 @@
 #include <modules/base/rendering/modelgeometry.h>
 
 #include <openspace/documentation/verifier.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
+
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/invariants.h>
 
 #include <fstream>
 
 namespace {
     const char* _loggerCat = "ModelGeometry";
-    const char* keyGeomModelFile = "GeometryFile";
+
+    const char* KeyName = "Name";
+    const char* KeyType = "Type";
+    const char* KeyGeomModelFile = "GeometryFile";
     const int8_t CurrentCacheVersion = 3;
-    const char* keyType = "Type";
-    const char* keyName = "Name";
-}
+} // namespace
 
 namespace openspace {
 namespace modelgeometry {
@@ -50,13 +54,13 @@ documentation:: Documentation ModelGeometry::Documentation() {
         "base_geometry_model",
         {
             {
-                keyType,
+                KeyType,
                 new StringVerifier,
                 "The type of the Model Geometry that should be generated",
                 Optional::No
             },
             {
-                keyGeomModelFile,
+                KeyGeomModelFile,
                 new StringVerifier,
                 "The file that should be loaded in this ModelGeometry. The file can "
                 "contain filesystem tokens or can be specified relatively to the "
@@ -71,25 +75,18 @@ documentation:: Documentation ModelGeometry::Documentation() {
 std::unique_ptr<ModelGeometry> ModelGeometry::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
-    if (!dictionary.hasKeyAndValue<std::string>(keyType)) {
+    if (!dictionary.hasKeyAndValue<std::string>(KeyType)) {
         throw ghoul::RuntimeError("Dictionary did not contain a key 'Type'");
     }
 
-    std::string geometryType = dictionary.value<std::string>(keyType);
+    const std::string geometryType = dictionary.value<std::string>(KeyType);
+    
     auto factory = FactoryManager::ref().factory<ModelGeometry>();
-
-    std::unique_ptr<ModelGeometry> result = factory->create(geometryType, dictionary);
-    if (result == nullptr) {
-        throw ghoul::RuntimeError(
-            "Failed to create a ModelGeometry object of type '" + geometryType + "'"
-        );
-    }
-    return result;
+    return factory->create(geometryType, dictionary);;
 }
 
 ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner("ModelGeometry")
-    , _parent(nullptr)
     , _mode(GL_TRIANGLES)
 {
     documentation::testSpecificationAndThrow(
@@ -98,11 +95,7 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
         "ModelGeometry"
     );
 
-    std::string name;
-    bool success = dictionary.getValue(keyName, name);
-    ghoul_assert(success, "Name tag was not present");
-
-    _file = absPath(dictionary.value<std::string>(keyGeomModelFile));
+    _file = absPath(dictionary.value<std::string>(KeyGeomModelFile));
 }
 
 double ModelGeometry::boundingRadius() const {
@@ -119,10 +112,6 @@ double ModelGeometry::boundingRadius() const {
     return maxDist;
 }
 
-
-ModelGeometry::~ModelGeometry() {
-}
-
 void ModelGeometry::render() {
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
@@ -135,39 +124,67 @@ void ModelGeometry::changeRenderMode(const GLenum mode) {
 }
 
 bool ModelGeometry::initialize(Renderable* parent) {
-    _parent = parent;
     float maximumDistanceSquared = 0;
-    for (auto v: _vertices)
-    {
+    for (const Vertex& v : _vertices) {
         maximumDistanceSquared = glm::max(
             glm::pow(v.location[0], 2.f) +
             glm::pow(v.location[1], 2.f) +
             glm::pow(v.location[2], 2.f), maximumDistanceSquared);
     }
-    _parent->setBoundingSphere(glm::sqrt(maximumDistanceSquared));
+    parent->setBoundingSphere(glm::sqrt(maximumDistanceSquared));
 
-    if (_vertices.empty())
+    if (_vertices.empty()) {
         return false;
+    }
+    
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vbo);
     glGenBuffers(1, &_ibo);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(Vertex), _vertices.data(), GL_STATIC_DRAW);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _vertices.size() * sizeof(Vertex),
+        _vertices.data(),
+        GL_STATIC_DRAW
+    );
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, location)));
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex)));
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal)));
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Vertex),
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, location))
+    );
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Vertex),
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
+    );
+    glVertexAttribPointer(
+        2,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Vertex),
+        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))
+    );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(int), _indices.data(), GL_STATIC_DRAW);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        _indices.size() * sizeof(int),
+        _indices.data(),
+        GL_STATIC_DRAW
+    );
 
     glBindVertexArray(0);
 
@@ -181,37 +198,42 @@ void ModelGeometry::deinitialize() {
 }
 
 bool ModelGeometry::loadObj(const std::string& filename) {
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+    const std::string cachedFile = FileSys.cacheManager()->cachedFilename(
         filename,
         ghoul::filesystem::CacheManager::Persistent::Yes
-        );
+    );
 
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
+    const bool hasCachedFile = FileSys.fileExists(cachedFile);
     if (hasCachedFile) {
-        LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "'");
+        LINFO("Cached file '" << cachedFile << "' used for file '" << filename << "'");
 
-        bool success = loadCachedFile(cachedFile);
-        if (success)
+        const bool success = loadCachedFile(cachedFile);
+        if (success) {
             return true;
-        else
+        }
+        else {
             FileSys.cacheManager()->removeCacheFile(filename);
+        }
         // Intentional fall-through to the 'else' computation to generate the cache
         // file for the next run
     }
     else {
-        LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "' not found");
+        LINFO(
+            "Cached file '" << cachedFile << "' for file '" << filename << "' not found"
+        );
     }
 
     LINFO("Loading Model file '" << filename << "'");
-    bool success = loadModel(filename);
+    const bool modelSuccess = loadModel(filename);
 
-    if (!success)
+    if (!modelSuccess) {
         return false;
+    }
 
     LINFO("Saving cache");
-    success = saveCachedFile(cachedFile);
+    const bool cacheSuccess = saveCachedFile(cachedFile);
 
-    return success;
+    return cacheSuccess;
 }
 
 bool ModelGeometry::saveCachedFile(const std::string& filename) {
@@ -271,24 +293,7 @@ bool ModelGeometry::loadCachedFile(const std::string& filename) {
     }
 }
 
-bool ModelGeometry::getVertices(std::vector<Vertex>* vertexList) {
-    vertexList->clear();
-    for (auto v : _vertices)
-        vertexList->push_back(v);
-
-    return !(vertexList->empty());
-}
-
-bool ModelGeometry::getIndices(std::vector<int>* indexList) {
-    indexList->clear();
-    for (auto i : _indices)
-        indexList->push_back(i);
-
-    return !(indexList->empty());
-}
-
-void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject& program) {
-}
+void ModelGeometry::setUniforms(ghoul::opengl::ProgramObject&) {}
 
 }  // namespace modelgeometry
 }  // namespace openspace

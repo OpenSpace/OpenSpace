@@ -44,15 +44,7 @@ using namespace properties;
 namespace globebrowsing {
     
 RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
-    : _generalProperties({
-        BoolProperty("enabled", "Enabled", true),
-        BoolProperty("performShading", "perform shading", true),
-        BoolProperty("atmosphere", "atmosphere", false),
-        FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
-        FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f)
-    })
-    , _debugPropertyOwner("Debug")
-    , _debugProperties({
+    : _debugProperties({
         BoolProperty("saveOrThrowCamera", "save or throw camera", false),
         BoolProperty("showChunkEdges", "show chunk edges", false),
         BoolProperty("showChunkBounds", "show chunk bounds", false),
@@ -68,6 +60,14 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty("limitLevelByAvailableData", "Limit level by available data", true),
         IntProperty("modelSpaceRenderingCutoffLevel", "Model Space Rendering Cutoff Level", 10, 1, 22)
     })
+    , _generalProperties({
+        BoolProperty("enabled", "Enabled", true),
+        BoolProperty("performShading", "perform shading", true),
+        BoolProperty("atmosphere", "atmosphere", false),
+        FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
+        FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f)
+    })
+    , _debugPropertyOwner("Debug")
     , _texturePropertyOwner("Textures")
 {
     setName("RenderableGlobe");

@@ -89,7 +89,6 @@ size_t numberOfBytes(GDALDataType gdalType) {
             return sizeof(GLdouble);
         default:
             ghoul_assert(false, "Unknown data type");
-
     }
 }
 
@@ -107,7 +106,6 @@ size_t getMaximumValue(GDALDataType gdalType) {
             return 1 << 31;
         default:
             ghoul_assert(false, "Unknown data type");
-
     }
 }
 

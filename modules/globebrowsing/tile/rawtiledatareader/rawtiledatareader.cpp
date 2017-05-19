@@ -53,10 +53,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-namespace {
-    const char* _loggerCat = "RawTileDataReader";
-}
-
 namespace openspace {
 namespace globebrowsing {
 
@@ -176,8 +172,8 @@ PixelRegion::PixelCoordinate RawTileDataReader::geodeticToPixel(
     double Xp = a[0] + P*a[1] + L*a[2];
     double Yp = b[0] + P*b[1] + L*b[2];
 
-    ghoul_assert(abs(X - Xp) < 1e-10, "inverse should yield X as before");
-    ghoul_assert(abs(Y - Yp) < 1e-10, "inverse should yield Y as before");
+    ghoul_assert(std::abs(X - Xp) < 1e-10, "inverse should yield X as before");
+    ghoul_assert(std::abs(Y - Yp) < 1e-10, "inverse should yield Y as before");
 
     return PixelRegion::PixelCoordinate(glm::round(P), glm::round(L));
 }
@@ -238,7 +234,7 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
 
             // Example: 
             // We are currently considering the left side of the pixel region
-            PixelRegion::Side side = (PixelRegion::Side) i;
+            PixelRegion::Side side = static_cast<PixelRegion::Side>(i);
             IODescription cutoff = io.cut(side, io.read.fullRegion.edge(side));
 
             // Example: 
@@ -262,7 +258,7 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
 
             if (cutoff.read.region.area() > 0) {
                 // Wrap by repeating
-                PixelRegion::Side oppositeSide = (PixelRegion::Side) ((i + 2) % 4);
+                PixelRegion::Side oppositeSide = static_cast<PixelRegion::Side>((i + 2) % 4);
 
                 cutoff.read.region.align(
                     oppositeSide, io.read.fullRegion.edge(oppositeSide));

@@ -71,13 +71,12 @@ namespace properties {
         return true;                                                                     \
     }
 
-REGISTER_NUMERICALPROPERTY_SOURCE(LongDoubleProperty, long double, (long double)0,
+REGISTER_NUMERICALPROPERTY_SOURCE(LongDoubleProperty, long double, 0l,
                                   numeric_limits<long double>::lowest(),
-                                  numeric_limits<long double>::max(), (long double)0.01f,
-                                  DEFAULT_FROM_LUA_LAMBDA(long double, (long double)(0)),
+                                  numeric_limits<long double>::max(), 0.01l,
+                                  DEFAULT_FROM_LUA_LAMBDA(long double, 0l),
                                   DEFAULT_TO_LUA_LAMBDA(long double),
-                                  DEFAULT_FROM_STRING_LAMBDA(long double,
-                                                             (long double)(0)),
+                                  DEFAULT_FROM_STRING_LAMBDA(long double, 0l),
                                   DEFAULT_TO_STRING_LAMBDA(long double),
                                   LUA_TNUMBER);
 

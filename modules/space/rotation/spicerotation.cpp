@@ -32,8 +32,6 @@
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    const char* _loggerCat = "SpiceRotation";
-
     const char* KeySourceFrame = "SourceFrame";
     const char* KeyDestinationFrame = "DestinationFrame";
     const char* KeyKernels = "Kernels";

@@ -80,7 +80,7 @@ Time Time::now() {
     secondsSince1970 = time(nullptr);
 
     const time_t secondsInAYear = static_cast<time_t>(365.25 * 24 * 60 * 60);
-    double secondsSince2000 = (double)(secondsSince1970 - 30 * secondsInAYear);
+    double secondsSince2000 = static_cast<double>(secondsSince1970 - 30 * secondsInAYear);
     now.setTime(secondsSince2000);
     return now;
 }

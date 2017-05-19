@@ -25,6 +25,8 @@
 #ifndef __OPENSPACE_CORE___SCENE___H__
 #define __OPENSPACE_CORE___SCENE___H__
 
+#include <openspace/documentation/documentationgenerator.h>
+
 #include <vector>
 #include <map>
 #include <set>
@@ -45,7 +47,7 @@ class SceneGraphNode;
 
 // Notifications:
 // SceneGraphFinishedLoading
-class Scene {
+class Scene : public DocumentationGenerator {
 public:
 
     using UpdateDependencies = ghoul::Boolean;
@@ -136,11 +138,6 @@ public:
     const std::map<std::string, SceneGraphNode*>& nodesByName() const;
 
     /**
-     * Output property documentation to a file.
-     */
-    void writePropertyDocumentation(const std::string& filename, const std::string& type, const std::string& sceneFilename);
-
-    /**
      * Returns the Lua library that contains all Lua functions available to change the
      * scene graph. The functions contained are
      * - openspace::luascriptfunctions::property_setValue
@@ -152,7 +149,9 @@ public:
 
     static documentation::Documentation Documentation();
 
-private:  
+private:
+    std::string generateJson() const override;
+
     void sortTopologically();
 
     std::unique_ptr<SceneGraphNode> _root;

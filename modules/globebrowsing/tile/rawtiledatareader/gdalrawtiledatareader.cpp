@@ -69,7 +69,7 @@ GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
 
 GdalRawTileDataReader::~GdalRawTileDataReader() {
     if (_dataset != nullptr) {
-        GDALClose((GDALDatasetH)_dataset);
+        GDALClose(_dataset);
         _dataset = nullptr;
     }
 }
@@ -77,7 +77,7 @@ GdalRawTileDataReader::~GdalRawTileDataReader() {
 void GdalRawTileDataReader::reset() {
     _cached._maxLevel = -1;
     if (_dataset != nullptr) {
-        GDALClose((GDALDatasetH)_dataset);
+        GDALClose(_dataset);
         _dataset = nullptr;
     }
     initialize();

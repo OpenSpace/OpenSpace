@@ -164,11 +164,12 @@ def check_copyright(lines):
 
     year = lines[index[0]][len(beginning_string) : len(beginning_string) + 4]
 
+    if lines[index[0] + 1][0] != ' ':
+        return 'Copyright header is not correctly indented'
+
     if year != current_year:
         return 'Out of date copyright notice ' + year + ' || ' + current_year
 
-    if lines[index[0] + 1][0] != ' ':
-        return 'Copyright header is not correctly indented'
 
     return ''
 
@@ -195,7 +196,7 @@ def check_naming_convention_subcomponent(lines, component, file):
     subcomponent_part = ifndef_symbol[2 + len(component) + 1 :]
     subcomponent_part = subcomponent_part[: subcomponent_part.find('_')]
 
-    path_part = file.split(os.sep)[2]
+    path_part = file.split(os.sep)[1]
 
     if path_part.upper() != subcomponent_part:
         return 'Subcomponent naming convention broken: ' + ifndef_symbol
@@ -220,7 +221,7 @@ def check_glm_header(lines, file):
     ]
 
     for f in Allowed_Files:
-        if f in file:
+        if f in file.replace('\\', '/'):
             return ''
 
     index = [i for i,s in enumerate(lines)
@@ -324,12 +325,10 @@ def check_inline_file(file, component):
         copyright = check_copyright(lines)
         if copyright:
             print(file, '\t', 'Copyright check failed', '\t', copyright)
-            return
 
         header = check_glm_header(lines, file)
         if header:
             print(file, '\t', 'Illegal glm header include', header)
-            return
 
         core_dependency = check_core_dependency(lines, component)
         if core_dependency:
@@ -350,7 +349,6 @@ def check_source_file(file, component):
         header = check_glm_header(lines, file)
         if header:
             print(file, '\t',  'Illegal glm header include', header)
-            return
 
         core_dependency = check_core_dependency(lines, component)
         if core_dependency:
@@ -359,7 +357,6 @@ def check_source_file(file, component):
         copyright = check_copyright(lines)
         if copyright:
             print(file, '\t', 'Copyright check failed', '\t', copyright)
-            return
 
 
 

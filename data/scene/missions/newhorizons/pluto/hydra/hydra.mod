@@ -46,7 +46,7 @@ return {
         Parent = "Hydra",
         Renderable = {
             Type = "RenderablePlane",
-            Size = 1.0E6.3,
+            Size = 10.0^6.3,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Hydra-Text.png"

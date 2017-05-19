@@ -77,7 +77,7 @@ void TransferFunction::setPath(const std::string& filepath) {
     _filepath = f;
     _file = std::make_unique<ghoul::filesystem::File>(filepath, ghoul::filesystem::File::RawPath::Yes);
     _needsUpdate = true;
-    _file->setCallback([this](const ghoul::filesystem::File& file) {
+    _file->setCallback([this](const ghoul::filesystem::File&) {
         _needsUpdate = true;
     });
 }

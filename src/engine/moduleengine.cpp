@@ -88,7 +88,7 @@ std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
 }
 
 ghoul::systemcapabilities::Version ModuleEngine::requiredOpenGLVersion() const {
-    ghoul::systemcapabilities::Version version = { 0, 0 };
+    ghoul::systemcapabilities::Version version = { 0, 0, 0 };
 
     for (const auto& m : _modules) {
         version = std::max(version, m->requiredOpenGLVersion());
