@@ -233,11 +233,6 @@ void MainWindow::configureLogging() {
     }
 #endif // GHOUL_LOGGING_ENABLE_TRACE
 
-//    printf("%d", _optionParser->value("d").toInt());
-//    ghoul::logging::LogManager::initialize(static_cast<ghoul::logging::LogLevel>(_optionParser->value("d").toInt()));
-//    LogMgr.addLog( std::make_unique< ghoul::logging::ConsoleLog >() );
-
-
 }
 
 void MainWindow::initialize() {

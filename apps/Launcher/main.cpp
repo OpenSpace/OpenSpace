@@ -23,8 +23,6 @@
  ****************************************************************************************/
 
 #include <QApplication>
-#include <QCommandLineParser>
-
 #include <QFile>
 
 #include "mainwindow.h"
@@ -165,12 +163,11 @@ QScrollBar::add-page, QScrollBar::sub-page {
 }
 )style";
 
-
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
     app.setStyleSheet(style);
-    
-    MainWindow window;
+
+	MainWindow window;
     window.show();
 
     return app.exec();
