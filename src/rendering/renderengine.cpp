@@ -42,6 +42,7 @@
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/renderer.h>
 
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
@@ -830,6 +831,8 @@ void RenderEngine::renderInformation() {
             fontResolution().y
             //OsEng.windowWrapper().viewportPixelCoordinates().w
         );
+
+        penPosition.y -= OsEng.console().currentHeight();
 
         if (_showDate && _fontDate) {
             penPosition.y -= _fontDate->height();
