@@ -100,7 +100,6 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
 				ds << ",";
 			}
 		}
-		int k = 1;
 		for (i = 0; i < ny; ++i) {
 			for (j = 0; j < 2; ++j) {
 				std::string s = (j == 0) ? "x" : "y";

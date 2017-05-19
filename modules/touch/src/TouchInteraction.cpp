@@ -60,6 +60,7 @@ TouchInteraction::TouchInteraction()
 	_origin("origin", "Origin", ""),
 	_unitTest("Click to take a unit test", "Take a unit test saving the LM data into file", false),
 	_onlyPan("Toggle Panning Mode", "Toggle pan interaction on direct-manipulation three finger case (FOR FEEDBACK)", true), // temp
+	_touchActive("TouchEvents", "True if we have a touch event", false, properties::Property::Visibility::Hidden),
 	_maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000),
 	_touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f),
 	_tapZoomFactor("Tap zoom factor","Scaling distance travelled on tap", 0.2, 0.0, 1.0),
@@ -81,6 +82,8 @@ TouchInteraction::TouchInteraction()
 	_currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 },
 	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true }, _guiON{ false }
 {
+	addProperty(_touchActive);
+
 	addProperty(_unitTest);
 	addProperty(_onlyPan); // temp
 	addProperty(_maxTapTime);
@@ -158,8 +161,7 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
 			static_cast<int>(100 * (pos.x / _guiButton.value().x)) << "%, " << static_cast<int>(100 * (pos.y / _guiButton.value().y)) << "%)\n");
 	}
 	else if (_guiON) {
-		uint32_t action = (_tap) ? 0 : 1;
-		OnScreenGUIModule::touchInput = { _guiON, pos, action };
+		OnScreenGUIModule::touchInput = { _guiON, pos, 1 };
 	}
 	return _guiON; // return if consumed
 }
@@ -269,8 +271,6 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		}
 		else if (ptr->nDOF == 6) {
 			for (int i = 0; i < ptr->nDOF; ++i) { // 3 finger case
-				
-				
 				if (ptr->onlyPan) { // temp for feedback
 					g[i] = g[i] / std::abs(g[i]); // no zoom, weird roll sometimes, otherwise only pan
 				}
@@ -718,6 +718,9 @@ void TouchInteraction::resetAfterInput() {
 
 void TouchInteraction::tap() {
 	_tap = true;
+}
+void TouchInteraction::touchActive(bool active) {
+	_touchActive = active;
 }
 
 // Get & Setters

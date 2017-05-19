@@ -50,6 +50,7 @@ bool TouchModule::hasNewInput() {
 	// Get new input from listener
 	listOfContactPoints = ear.getInput();
 	ear.clearInput();
+	touch.touchActive(!listOfContactPoints.empty());
 
 	// Erase old input id's that no longer exists
 	lastProcessed.erase(
@@ -98,7 +99,7 @@ bool TouchModule::hasNewInput() {
 }
 
 TouchModule::TouchModule()
-    : OpenSpaceModule("Touch")
+	: OpenSpaceModule("Touch")
 {
 	addPropertySubOwner(touch);
 	
@@ -124,7 +125,6 @@ TouchModule::TouchModule()
 		touch.step(OsEng.windowWrapper().deltaTime());
 	}
 	);
-	
 }
 
 } // namespace openspace

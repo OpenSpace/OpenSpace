@@ -86,6 +86,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void unitTest();
 		void resetAfterInput();
 		void tap();
+		void touchActive(bool active);
 
 		// Get & Setters
 		Camera* getCamera();
@@ -108,6 +109,7 @@ class TouchInteraction : public properties::PropertyOwner
 		properties::StringProperty _origin;
 		properties::BoolProperty _unitTest;
 		properties::BoolProperty _onlyPan; // temp
+		properties::BoolProperty _touchActive;
 		properties::IntProperty _maxTapTime;
 		properties::FloatProperty _touchScreenSize;
 		properties::FloatProperty _tapZoomFactor;
