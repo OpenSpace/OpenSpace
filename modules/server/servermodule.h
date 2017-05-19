@@ -38,12 +38,6 @@
 
 namespace openspace {
 
-enum class SocketAction : uint32_t {
-    Open = 0,
-    Data = 1,
-    Close = 2
-};
-
 struct Connection {
 public:
     Connection(std::shared_ptr<ghoul::io::Socket> s, std::thread t)
@@ -66,7 +60,6 @@ struct Message {
     Connection* conneciton;
     std::string messageString;
 };
-
 
 class ServerModule : public OpenSpaceModule {
 public:

@@ -34,7 +34,6 @@
 #include <cstdint>
 
 namespace {
-    using Json = nlohmann::json;
     const char* _loggerCat = "ServerModule";
 
     const char* MessageKeyType = "type";
@@ -46,11 +45,6 @@ namespace openspace {
 
 ServerModule::ServerModule()
     : OpenSpaceModule("Server")
-    //, _connectionPool([this](std::shared_ptr<ghoul::io::Socket> socket) {
-    //    std::thread thread([this, socket] () {
-    //        handleSocket(socket);
-    //    });
-    //})
 {}
 
 ServerModule::~ServerModule() {
@@ -70,15 +64,10 @@ void ServerModule::internalInitialize() {
 
     _servers.push_back(std::move(tcpServer));
     _servers.push_back(std::move(wsServer));
-    
-    //_connectionPool.addServer(wsServer);
-    //_connectionPool.addServer(tcpServer);
 
     OsEng.registerModuleCallback(
         OpenSpaceEngine::CallbackOption::PreSync,
-        [this]() {
-            preSync();
-        }
+        [this]() { preSync(); }
     );
 }
 
@@ -110,13 +99,13 @@ void ServerModule::cleanUpFinishedThreads() {
             }
         }
     }
-    std::remove_if(
+    _connections.erase(std::remove_if(
         _connections.begin(),
         _connections.end(),
         [](const auto& connection) {
             return !connection->active;
         }
-    );
+    ), _connections.end());
 }
     
 void ServerModule::disconnectAll() {
@@ -126,7 +115,6 @@ void ServerModule::disconnectAll() {
         }
     }
 }
-    
     
 void ServerModule::handleConnection(Connection* connection) {
     std::string messageString;
@@ -150,14 +138,14 @@ void ServerModule::consumeMessages() {
 
 void Connection::handleMessage(std::string message) {
     try {
-        Json j = Json::parse(message);
+        nlohmann::json j = nlohmann::json::parse(message);
         handleJson(j);
     } catch (...) {
         LERROR("Json parse error");
     }
 }
 
-void Connection::handleJson(Json j) {
+void Connection::handleJson(nlohmann::json j) {
     auto keyJson = j.find(MessageKeyType);
     if (keyJson == j.end() || !keyJson->is_string()) {
         LERROR("Expected string key");
@@ -187,70 +175,8 @@ void Connection::sendMessage(const std::string& message) {
     socket->putMessage(message);
 }
 
-void Connection::sendJson(const Json& j) {
+void Connection::sendJson(const nlohmann::json& j) {
     sendMessage(j.dump());
 }
-
-
-/*
-void Channel::initialize(const char* data, uint32_t size) {
-    const char* instructionEnd = std::find(data, data + size, '\n');
-    std::string instruction(data, instructionEnd);
-
-    _dataHandler = createDataHandler(instruction);
-
-    const char* newData = instructionEnd + 1;
-    size -= newData - data;
-
-    _dataHandler->initialize(newData, size);
-}
-
-void Channel::handleData(const char* data, uint32_t size) {
-    _dataHandler->handleData(data, size);
-}
-
-void Channel::deinitialize(const char* data, uint32_t size) {
-    _dataHandler->deinitialize(data, size);
-}
-
-void Channel::sendData(const char* data, uint32_t size) {
-    _connection->sendMessage(data, size, _channelId);
-}
-
-std::unique_ptr<DataHandler> Channel::createDataHandler(std::string instruction)
-{
-    if (instruction == "subscribe") {
-        //return std::make_unique<SubsciptionHandler>();
-    }
-    if (instruction == "execute") {
-        return std::make_unique<ExecutionHandler>(this);
-    }
-    return nullptr;
-}
-
-
-
-
-DataHandler::DataHandler(Channel* channel)
-    : _channel(channel)
-{}
-
-ExecutionHandler::ExecutionHandler(Channel* channel)
-    : DataHandler(channel) {}
-
-void ExecutionHandler::initialize(const char* data, uint32_t size) {
-    handleData(data, size);
-}
-
-void ExecutionHandler::handleData(const char* data, uint32_t size) {
-    std::string script(data, size);
-    OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::Yes);
-}
-
-void ExecutionHandler::deinitialize(const char* data, uint32_t size) {
-    // Do nothing.
-}
-*/
-
 
 } // namespace openspace
