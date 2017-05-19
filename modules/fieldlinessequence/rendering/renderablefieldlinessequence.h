@@ -90,6 +90,7 @@ private:
     properties::BoolProperty _isMorphing;           // Time interpolation/morphing
     properties::BoolProperty _show3DLines;          // 3D "ropes". Billboards
     properties::BoolProperty _showSeedPoints;
+    properties::BoolProperty _useNearestSampling;   // TF: Nearest or linear interpolation
 
     properties::FloatProperty _lineWidth;           // Interactive Line Width
     properties::FloatProperty _seedPointSize;       // Interactive Seed Point Size

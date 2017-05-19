@@ -92,6 +92,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _isMorphing("isMorphing", "Morphing", false),
       _show3DLines("show3DLines", "3D Lines", false),
       _showSeedPoints("showSeedPoints", "Show Seed Points", false),
+      _useNearestSampling("useNearestSampling", "Nearest Sampling", false),
       _lineWidth("fieldlineWidth", "Fieldline Width", 1.f, 0.f, 10.f),
       _seedPointSize("seedPointSize", "Seed Point Size", 4.0, 0.0, 20.0),
       _fieldlineParticleSize("fieldlineParticleSize", "FL Particle Size", 0, 0, 1000),
@@ -632,6 +633,17 @@ bool RenderableFieldlinesSequence::initialize() {
             _transferFunctionLimits[_colorizingQuantity].y = std::stof(_transferFunctionMaxVal);
         });
 
+        // TODO: fix bug related to changing/updating of transfer function
+        // TODO: Bug causes texture to get default FilterMode: linear
+        _useNearestSampling.onChange([this] {
+            LDEBUG("Changed TransferFunction sampling method!");
+
+            ghoul::opengl::Texture& texture = _transferFunction->getTexture();
+            // TOGGLE BETWEEN NEAREST AND LINEAR SAMPLING
+            texture.setFilter(_useNearestSampling ? texture.FilterMode::Linear :
+                                                    texture.FilterMode::Nearest);
+        });
+
         // _colorGroup.setPropertyGroupName(0,"FieldlineColorRelated");
         addPropertySubOwner(_colorGroup);
 
@@ -641,6 +653,7 @@ bool RenderableFieldlinesSequence::initialize() {
         _colorGroup.addProperty(_transferFunctionMinVal);
         _colorGroup.addProperty(_transferFunctionMaxVal);
         _colorGroup.addProperty(_fieldlineColor);
+        _colorGroup.addProperty(_useNearestSampling);
 
     } else {
         addProperty(_fieldlineColor);
