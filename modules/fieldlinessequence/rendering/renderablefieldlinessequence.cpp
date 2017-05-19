@@ -112,6 +112,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _domainLimX("domainLimitsX", "Domain Limits X"),
       _domainLimY("domainLimitsY", "Domain Limits Y"),
       _domainLimZ("domainLimitsZ", "Domain Limits Z"),
+      _unitInterestRange("unitInterestRange", "Range Of Interest"),
       _fieldlineColor("fieldlineColor", "Fieldline Color", glm::vec4(0.7f,0.f,0.7f,0.75f),
                                                            glm::vec4(0.f),
                                                            glm::vec4(1.f)),
@@ -619,16 +620,26 @@ bool RenderableFieldlinesSequence::initialize() {
             float minVal = *minMaxPos.first;
             float maxVal = *minMaxPos.second;
             _transferFunctionLimits.push_back(glm::vec2(minVal, maxVal));
+            _tFInterestRange.push_back(glm::vec2(minVal, maxVal));
+            _tFInterestRangeLimits.push_back(glm::vec2(minVal, maxVal));
         }
 
+        // INITIAL VALUES
         _transferFunctionMinVal = std::to_string(_transferFunctionLimits[0].x);
         _transferFunctionMaxVal = std::to_string(_transferFunctionLimits[0].y);
+
+        _unitInterestRange = _tFInterestRange[0];
+        _unitInterestRange.setMinValue(glm::vec3(_tFInterestRangeLimits[0].x));
+        _unitInterestRange.setMaxValue(glm::vec3(_tFInterestRangeLimits[0].y));
 
         _colorizingQuantity.onChange([this] {
             LDEBUG("CHANGED COLORIZING QUANTITY");
             _updateColorBuffer = true;
             _transferFunctionMinVal = std::to_string(_transferFunctionLimits[_colorizingQuantity].x);
             _transferFunctionMaxVal = std::to_string(_transferFunctionLimits[_colorizingQuantity].y);
+            _unitInterestRange = _tFInterestRange[_colorizingQuantity];
+            _unitInterestRange.setMinValue(glm::vec3(_tFInterestRangeLimits[_colorizingQuantity].x));
+            _unitInterestRange.setMaxValue(glm::vec3(_tFInterestRangeLimits[_colorizingQuantity].y));
         });
 
         _transferFunctionPath.onChange([this] {
@@ -641,6 +652,9 @@ bool RenderableFieldlinesSequence::initialize() {
             // TODO CHECK IF VALID NUMBER!
             // _updateTransferFunctionMin = true;
             _transferFunctionLimits[_colorizingQuantity].x = std::stof(_transferFunctionMinVal);
+            _tFInterestRangeLimits[_colorizingQuantity].x =
+                    std::min(_transferFunctionLimits[_colorizingQuantity].x,
+                             _tFInterestRangeLimits[_colorizingQuantity].x);
         });
 
         _transferFunctionMaxVal.onChange([this] {
@@ -648,6 +662,9 @@ bool RenderableFieldlinesSequence::initialize() {
             // TODO CHECK IF VALID NUMBER!
             // _updateTransferFunctionMin = true;
             _transferFunctionLimits[_colorizingQuantity].y = std::stof(_transferFunctionMaxVal);
+            _tFInterestRangeLimits[_colorizingQuantity].y =
+                    std::max(_transferFunctionLimits[_colorizingQuantity].y,
+                             _tFInterestRangeLimits[_colorizingQuantity].y);
         });
 
         // TODO: fix bug related to changing/updating of transfer function
@@ -665,6 +682,12 @@ bool RenderableFieldlinesSequence::initialize() {
             LDEBUG("Changed whether to Clamp or Discard values outside of TF range!");
         });
 
+        _unitInterestRange.onChange([this] {
+            LDEBUG("CHANGED TRANSFER FUNTION RANGE OF INTEREST");
+            // Save the change even if colorizingQuantity is changed
+            _tFInterestRange[_colorizingQuantity] = _unitInterestRange;
+        });
+
         // _colorGroup.setPropertyGroupName(0,"FieldlineColorRelated");
         addPropertySubOwner(_colorGroup);
 
@@ -676,6 +699,7 @@ bool RenderableFieldlinesSequence::initialize() {
         _colorGroup.addProperty(_transferFunctionMaxVal);
         _colorGroup.addProperty(_fieldlineColor);
         _colorGroup.addProperty(_useNearestSampling);
+        _colorGroup.addProperty(_unitInterestRange);
 
     } else {
         addProperty(_fieldlineColor);
@@ -773,9 +797,10 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
             _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
             _textureUnit->activate();
             _transferFunction->bind(); // Calls update internally
-            _activeProgramPtr->setUniform("transferFunctionLimits", _transferFunctionLimits[_colorizingQuantity]);
             _activeProgramPtr->setUniform("colorMap", _textureUnit->unitNumber());
             _activeProgramPtr->setUniform("isClamping", _isClampingColorValues);
+            _activeProgramPtr->setUniform("transferFunctionLimits", _transferFunctionLimits[_colorizingQuantity]);
+            _activeProgramPtr->setUniform("tFIterestRange", _unitInterestRange);
         }
 
         glDisable(GL_CULL_FACE);

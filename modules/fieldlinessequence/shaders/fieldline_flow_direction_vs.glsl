@@ -31,11 +31,13 @@ uniform bool isClamping;
 //uniform mat4 modelTransform;
 // uniform int time;
 uniform double timeD;
+
 uniform int flParticleSize;
 uniform int modulusDivider;
 uniform int colorMethod;
 
 uniform vec2 transferFunctionLimits;
+uniform vec2 tFIterestRange;
 uniform vec2 domainLimR;
 uniform vec2 domainLimX;
 uniform vec2 domainLimY;
@@ -67,7 +69,8 @@ void main() {
     if ((in_position.x < domainLimX.x) || (in_position.x > domainLimX.y) ||
         (in_position.y < domainLimY.x) || (in_position.y > domainLimY.y) ||
         (in_position.z < domainLimZ.x) || (in_position.z > domainLimZ.y) ||
-        (radius        < domainLimR.x) || (radius        > domainLimR.y)) {
+        (radius        < domainLimR.x) || (radius        > domainLimR.y) ||
+        unitIntensity < tFIterestRange.x || unitIntensity > tFIterestRange.y ) {
         fragment_discard = 0.0;
     }
 
