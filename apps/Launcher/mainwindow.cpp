@@ -179,19 +179,25 @@ void MainWindow::configureLogging() {
     const std::string KeyLogs =
     openspace::ConfigurationManager::KeyLauncher + '.' + openspace::ConfigurationManager::PartLogs;
 
+    ghoul::logging::LogLevel ghoulLogLevel;
     std::string logLevel = "None";
     bool immediateFlush = false;
 
-    if (_configuration->hasKeyAndValue<std::string>(KeyLogLevel)) {
-        _configuration->getValue(KeyLogLevel, logLevel);
-        _configuration->getValue(KeyLogImmediateFlush, immediateFlush);
+    if (_optionParser->isSet("d")) {
+        ghoulLogLevel = static_cast<ghoul::logging::LogLevel>(_optionParser->value("d").toInt());
+    } else {
+        if (_configuration->hasKeyAndValue<std::string>(KeyLogLevel)) {
+            _configuration->getValue(KeyLogLevel, logLevel);
+            _configuration->getValue(KeyLogImmediateFlush, immediateFlush);
+        }
+        ghoulLogLevel = ghoul::logging::levelFromString(logLevel);
     }
+    printf("%d", ghoulLogLevel);
 
-    ghoul::logging::LogLevel level = ghoul::logging::levelFromString(logLevel);
     using ImmediateFlush = ghoul::logging::LogManager::ImmediateFlush;
 
     ghoul::logging::LogManager::initialize(
-                      level,
+                      ghoulLogLevel,
                       immediateFlush ? ImmediateFlush::Yes : ImmediateFlush::No
                       );
     LogMgr.addLog(std::make_unique<ghoul::logging::ConsoleLog>());
@@ -223,11 +229,7 @@ void MainWindow::configureLogging() {
 #endif // WIN32
 
 #ifndef GHOUL_LOGGING_ENABLE_TRACE
-    std::string logLevel;
-    _configuration->getValue(KeyLogLevel, logLevel);
-    LogLevel level = ghoul::logging::levelFromString(logLevel);
-
-    if (level == ghoul::logging::LogLevel::Trace) {
+    if (ghoulLogLevel == ghoul::logging::LogLevel::Trace) {
         LWARNING("Desired logging level is set to 'Trace' but application was " <<
                  "compiled without Trace support");
     }
@@ -340,7 +342,7 @@ void MainWindow::generateOptions() {
     _optionParser->addOptions({
         { { "d", "debug" },
         QCoreApplication::translate("main", "Debug output level"),
-        QCoreApplication::translate("main", "0, 1, 2, 3, 4, 5, 6"),
+        QCoreApplication::translate("main", "0, 1, 2, 3, 4, 5, 6, 7"),
         QCoreApplication::translate("main", "1"),
         }
     });
