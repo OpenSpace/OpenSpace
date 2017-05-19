@@ -115,7 +115,7 @@ else ()
 endif ()
 
 if (OPENSPACE_SPOUT_SUPPORT)
-    copy_files(
+    ghl_copy_files(
         ${APPLICATION_NAME}
         ${OPENSPACE_APPS_DIR}/OpenSpace/ext/spout/SpoutLibrary.dll
     )
