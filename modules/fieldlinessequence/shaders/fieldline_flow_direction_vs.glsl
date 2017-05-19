@@ -26,7 +26,8 @@
 
 uniform mat4 modelViewProjection;
 //uniform mat4 modelTransform;
-uniform int time;
+// uniform int time;
+uniform double timeD;
 uniform int flParticleSize;
 uniform int modulusDivider;
 uniform int colorMethod;
@@ -49,10 +50,9 @@ out vec4 vs_color;
 out float vs_depth;
 out flat float fragment_discard;
 
-const int UNIFORM_COLOR = 0;
-const int UNIT_DEPENDENT_COLOR = 1;
-const int CLASSIFIED_COLOR = 2;
-
+const int UNIFORM_COLOR         = 0;
+const int UNIT_DEPENDENT_COLOR  = 1;
+const int CLASSIFIED_COLOR      = 2;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -69,7 +69,8 @@ void main() {
     }
 
     // Color every n-th vertex differently to show fieldline flow direction
-    int modulus = (gl_VertexID + time) % modulusDivider;
+    int modulus = (gl_VertexID + int(timeD)) % modulusDivider;
+    // int modulus = (gl_VertexID + time) % modulusDivider;
     if ( modulus > 0 && modulus < flParticleSize) {
         if (colorMethod == UNIT_DEPENDENT_COLOR) {
             float lookUpValue = (unitIntensity - transferFunctionLimits.x )

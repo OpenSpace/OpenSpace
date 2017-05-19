@@ -72,6 +72,7 @@ namespace nlohmann {
             j = { vec3.x, vec3.y, vec3.z};
         }
 
+        // TODO: try this: static void from_json(const std::array<float,3>, glm::vec3& vec3) {
         static void from_json(const json& j, glm::vec3& vec3) {
             vec3 = glm::vec3(j[0], j[1], j[2]);
         }
@@ -191,15 +192,11 @@ bool FieldlinesSequenceManager::saveFieldlinesStateAsJson(const FieldlinesState&
                 s = "s";
             }
 
+            fileName += separator + std::to_string(numExtras);
             if (state._extraVariableNames.size() == numExtras) {
-                fileName += separator + "ColorVar" + s;
-                for (size_t i = 0; i < numExtras; ++i) {
-                    std::string temp = state._extraVariableNames[i];
-                    temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
-                    fileName += separator + temp;
-                }
+                fileName += "ColorVar" + s;
             } else {
-                fileName += separator + std::to_string(numExtras) + "UnknownColorVar" + s;
+                fileName += "UnknownColorVar" + s;
             }
         }
     } else {
@@ -248,6 +245,8 @@ bool FieldlinesSequenceManager::saveFieldlinesStateAsJson(const FieldlinesState&
     if (!ofs.is_open()) {
         LERROR("FAILED TO OPEN FILE TO WRITE TO");
         return false;
+    } else {
+        LINFO("Saved fieldline state to: " << fullPath );
     }
 
     ofs << std::setw(prettyIndentation) << jfile << std::endl;
@@ -305,8 +304,14 @@ bool FieldlinesSequenceManager::getFieldlinesState(
 
         // jfile["1. _lineStart"] stores an array of 'GLuint's
         // jfile["2. _lineCount"] stores an array of 'GLsizei's
-        outFieldlinesState._lineStart = jfile["1. _lineStart"];
-        outFieldlinesState._lineCount = jfile["2. _lineCount"];
+        std::vector<GLint> lS   = jfile["1. _lineStart"];
+        std::vector<GLsizei> lC = jfile["2. _lineCount"];
+
+        outFieldlinesState._lineStart = std::move(lS);
+        outFieldlinesState._lineCount = std::move(lC);
+
+        // outFieldlinesState._lineStart = jfile["1. _lineStart"];
+        // outFieldlinesState._lineCount = jfile["2. _lineCount"];
 
         // jfile["3. _vertexPositions"] stores an array of 'glm::vec3's
         for (auto it = jfile["3. _vertexPositions"].begin(); it != jfile["3. _vertexPositions"].end(); ++it) {
@@ -867,9 +872,14 @@ double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
         if (kameleon->doesAttributeExist("start_time")){
             seqStartStr =
                     kameleon->getGlobalAttribute("start_time").getAttributeString();
-        } else if (kameleon->doesAttributeExist("tim_crstart_cal")) {
+        // } else if (kameleon->doesAttributeExist("tim_crstart_cal")) {
+        } else if (kameleon->doesAttributeExist("tim_rundate_cal")) {
             seqStartStr =
-                    kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
+                    kameleon->getGlobalAttribute("tim_rundate_cal").getAttributeString();
+                    // kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
+        } else if (kameleon->doesAttributeExist("tim_obsdate_cal")) {
+            seqStartStr =
+                    kameleon->getGlobalAttribute("tim_obsdate_cal").getAttributeString();
         } else {
             LWARNING("No starting time attribute could be found in the .cdf file.\n\t" <<
                     "Starting time is set to 01.JAN.2000 12:00.");
@@ -902,7 +912,7 @@ double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
                      "The current state starts the same time as the sequence!");
         }
 
-    return seqStartDbl + stateStartOffset;;
+    return seqStartDbl + stateStartOffset;
 }
 
 // TODO find a smarter way
