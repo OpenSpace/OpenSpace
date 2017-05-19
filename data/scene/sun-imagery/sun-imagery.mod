@@ -2,7 +2,8 @@ return {
     {
         Name = "Sun Imagery",
         Parent = "SolarSystemBarycenter",
-        Dependencies = {"SDO Plane"},
+        Dependencies = {"SDO Plane", "Stereo A Plane", "Stereo B Plane"},
+       -- Dependencies = {"SDO Plane"},
         Renderable = {
             -- This is a really bad name
             Type = "RenderableSpacecraftCameraSphere",

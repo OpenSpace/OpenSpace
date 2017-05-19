@@ -318,8 +318,9 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
         }
 
         const std::string& currentFilename = imageList[nextImageIndex].filename;
+        const double& timeObserved = imageList[nextImageIndex].timeObserved;
         auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename,
-                                               _resolutionLevel, _verboseMode);
+                                               _resolutionLevel, _verboseMode, timeObserved);
         _concurrentJobManager.enqueueJob(job);
         _enqueuedImageIds.insert(currentFilename);
         if (_verboseMode) {
@@ -534,8 +535,9 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
                 }
 
                 const auto& imageList = _imageMetadataMap[_currentActiveInstrument];
-                const double& osTime = Time::ref().j2000Seconds();
-                double time = osTime + (_bufferSize + 1) * (Time::ref().deltaTime() * ( static_cast<double>(_minRealTimeUpdateInterval )/ 1000.0 ) );
+                //const double& osTime = Time::ref().j2000Seconds();
+                const double& startTime = b->timeObserved;
+                double time = startTime + (_bufferSize + 1) * (Time::ref().deltaTime() * ( static_cast<double>(_minRealTimeUpdateInterval )/ 1000.0 ) );
                 const auto& low = std::lower_bound(imageList.begin(), imageList.end(), time);
                 int nextImageIndex = low - imageList.begin();
                 if (nextImageIndex
@@ -545,8 +547,10 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
 
                 std::string currentFilename
                       = _imageMetadataMap[_currentActiveInstrument][nextImageIndex].filename;
+
+                double& timeObserved = _imageMetadataMap[_currentActiveInstrument][nextImageIndex].timeObserved;
                 auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename,
-                                                       _resolutionLevel, _verboseMode);
+                                                       _resolutionLevel, _verboseMode, timeObserved);
                 _concurrentJobManager.enqueueJob(job);
                 _enqueuedImageIds.insert(currentFilename);
 
@@ -556,6 +560,9 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
                 if (_verboseMode)  {
                     LDEBUG("Adding work from PBO " << currentFilename);
                 }
+
+                break;
+
             } if (!hadFinishedJobs) {
                 if (_verboseMode) {
                     LWARNING("Nothing to update, buffer is not ready");
