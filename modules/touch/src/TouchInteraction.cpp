@@ -30,6 +30,7 @@
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/time.h>
 #include <openspace/util/keys.h>
 #include <ghoul/misc/invariants.h>
@@ -356,7 +357,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
 		for (std::string name : selectables)
 			if (node->name() == name)
 				selectableNodes.push_back(node);
-
+				
 	//glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
     // @COMMENT  ^_^
 	double aspectRatio = 1.88; //res.x/res.y;
@@ -383,8 +384,6 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
 					d -= sqrt(root);
 				glm::dvec3 intersectionPoint = camPos + d * raytrace;
 				glm::dvec3 pointInModelView = glm::inverse(node->rotationMatrix()) * (intersectionPoint - node->worldPosition());
-				//double theta = atan(pointInModelView.y / pointInModelView.x);
-				//double phi = atan(glm::length(glm::dvec2(pointInModelView.x, pointInModelView.y)) / pointInModelView.z);
 
 				// Add id, node and surface coordinates to the selected list
 				std::vector<SelectedBody>::iterator oldNode = find_if(newSelected.begin(), newSelected.end(), [id](SelectedBody s) { return s.id == id; });
