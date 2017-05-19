@@ -62,8 +62,9 @@ TouchInteraction::TouchInteraction()
 	_onlyPan("Toggle Panning Mode", "Toggle pan interaction on direct-manipulation three finger case (FOR FEEDBACK)", true), // temp
 	_touchActive("TouchEvents", "True if we have a touch event", false, properties::Property::Visibility::Hidden),
 	_maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000),
+	_deceleratesPerSecond("Decelerates per second", "Deceleration rate of velocity, times per second", 240, 60, 300),
 	_touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f),
-	_tapZoomFactor("Tap zoom factor","Scaling distance travelled on tap", 0.2, 0.0, 1.0),
+	_tapZoomFactor("Tap zoom factor","Scaling distance travelled on tap", 0.1, 0.0, 0.5),
 	_nodeRadiusThreshold("Activate direct-manipulation", "Radius a planet has to have to activate direct-manipulation", 0.2f, 0.0f, 1.0f),
 	_rollAngleThreshold("Interpret roll", "Threshold for min angle for roll interpret", 0.019f, 0.0f, 0.05f),
 	_orbitSpeedThreshold("Activate orbit spinning", "Threshold to activate orbit spinning in direct-manipulation", 0.038f, 0.0f, 0.1f),
@@ -79,14 +80,15 @@ TouchInteraction::TouchInteraction()
 	_sensitivity{glm::dvec2(0.0808181818181818, 0.0454545454545455), 4.0, 2.75, glm::dvec2(0.0808181818181818, 0.0454545454545455) },
 	_centroid{ glm::dvec3(0.0) },
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
-	_currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 },
+	_currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 }, _timeSlack { 0.0 },
 	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true }, _guiON{ false }
 {
-	addProperty(_touchActive);
+	addProperty(_touchActive); // hide
 
 	addProperty(_unitTest);
 	addProperty(_onlyPan); // temp
 	addProperty(_maxTapTime);
+	addProperty(_deceleratesPerSecond);
 	addProperty(_touchScreenSize);
 	addProperty(_tapZoomFactor);
 	addProperty(_nodeRadiusThreshold);
@@ -588,7 +590,7 @@ void TouchInteraction::step(double dt) {
 			// if we have chosen a new focus node
 			if (_slerpdT < _slerpTime) {
 				_slerpdT += dt;
-				localCamRot = slerp(localCamRot, _toSlerp, _slerpdT / _slerpTime * 0.025);
+				localCamRot = slerp(localCamRot, _toSlerp, _slerpdT / _slerpTime);
 			}
 		}
 		{ // Orbit (global rotation)
@@ -621,7 +623,7 @@ void TouchInteraction::step(double dt) {
 			}
 		}
 
-		decelerate();
+		decelerate(dt);
 		// Update the camera state
 		_camera->setPositionVec3(camPos);
 		_camera->setRotation(globalCamRot * localCamRot);
@@ -677,14 +679,18 @@ void TouchInteraction::unitTest() {
 }
 
 // Decelerate velocities (set 0 for directTouch)
-void TouchInteraction::decelerate() {
-	if (!_directTouchMode && _currentRadius > _nodeRadiusThreshold && _vel.zoom > _focusNode->boundingSphere()) { // check for velocity speed too
-		_vel.zoom *= (1 - 2*_friction.value().y);
+void TouchInteraction::decelerate(double dt) {
+	double frequency = 1.0 / _deceleratesPerSecond;
+	int times = (dt + _timeSlack) / frequency;
+	_timeSlack = fmod((dt + _timeSlack), frequency);
+
+	if (!_directTouchMode && _currentRadius > _nodeRadiusThreshold && _vel.zoom > _focusNode->boundingSphere()) {
+		_vel.zoom *= std::pow(1 - 2 * _friction.value().y, times);
 	}
-	_vel.orbit *= (1 - _friction.value().x);
-	_vel.zoom *= (1 - _friction.value().y);
-	_vel.roll *= (1 - _friction.value().z);
-	_vel.pan *= (1 - _friction.value().w);
+	_vel.orbit *= std::pow(1 - _friction.value().x, times);
+	_vel.zoom *= std::pow(1 - _friction.value().y, times);
+	_vel.roll *= std::pow(1 - _friction.value().z, times);
+	_vel.pan *= std::pow(1 - _friction.value().w, times);
 }
 
 // Called if all fingers are off the screen

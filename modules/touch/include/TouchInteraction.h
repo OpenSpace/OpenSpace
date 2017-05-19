@@ -100,7 +100,7 @@ class TouchInteraction : public properties::PropertyOwner
 		void findSelectedNode(const std::vector<TUIO::TuioCursor>& list);
 		int interpretInteraction(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void computeVelocities(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
-		void decelerate();
+		void decelerate(double dt);
 
 		Camera* _camera;
 		SceneGraphNode* _focusNode = nullptr;
@@ -111,6 +111,7 @@ class TouchInteraction : public properties::PropertyOwner
 		properties::BoolProperty _onlyPan; // temp
 		properties::BoolProperty _touchActive;
 		properties::IntProperty _maxTapTime;
+		properties::IntProperty _deceleratesPerSecond;
 		properties::FloatProperty _touchScreenSize;
 		properties::FloatProperty _tapZoomFactor;
 		properties::FloatProperty _nodeRadiusThreshold;
@@ -132,6 +133,7 @@ class TouchInteraction : public properties::PropertyOwner
 		double _projectionScaleFactor;
 		double _currentRadius;
 		double _slerpdT;
+		double _timeSlack;
 		int _numOfTests;
 		TUIO::TuioTime _time;
 		bool _directTouchMode;
