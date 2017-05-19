@@ -134,11 +134,16 @@ bool RenderableRoverSurface::isReady() const {
 	return true;
 }
 
-void RenderableRoverSurface::render(const RenderData & data) {
+void RenderableRoverSurface::render(const RenderData& data) {
 	_renderableExplorationPath->render(data);
 	_models.clear();
 
 	std::vector<std::vector<Subsite>> subSitesVector = _chunkedLodGlobe->subsites();
+
+	if (subSitesVector.size() < 1) {
+		return;
+	}
+
 	std::vector<Subsite> ss;
 	ghoul::Dictionary modelDic;
 	std::unique_ptr<ModelProvider>_modelProvider;
@@ -151,6 +156,7 @@ void RenderableRoverSurface::render(const RenderData & data) {
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
 			ss = _modelProvider->calculate(subSitesVector, data);
 			level = 2;
+		
 			break;
 		case LodModelSwitch::Mode::Close :
 			//Close
@@ -168,6 +174,7 @@ void RenderableRoverSurface::render(const RenderData & data) {
 
 	std::vector<Subsite> ss1;
 
+	// TODO: Find way to skip the loop
 	for (auto s : ss) {
 		Subsite s1 = std::move(s);
 		s1.pathToGeometryFolder = _absModelPath;
@@ -254,17 +261,13 @@ void RenderableRoverSurface::render(const RenderData & data) {
 			_programObject->setUniform("performShading", false);
 			_programObject->setUniform("fading", 1.0f);
 
-			model->geometry->setUniforms(*_programObject);
-
 			ghoul::opengl::TextureUnit unit;
 			unit.activate();
 			model->texture->bind();
 			_programObject->setUniform("texture1", unit);
 			model->geometry->render();
-
 		}
 	}
-
 	_programObject->deactivate();
 }
 

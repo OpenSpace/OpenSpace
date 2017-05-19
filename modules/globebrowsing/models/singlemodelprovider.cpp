@@ -66,6 +66,9 @@ namespace globebrowsing {
 				}
 			}
 		}
+		if (std::isnan(smallest.lat)) {
+			return ss;
+		}
 		ss.push_back(smallest);
 		return ss;
 	}
