@@ -116,6 +116,7 @@ private:
     properties::Vec2Property _domainLimX;        // Cartesian domain limits in which to
     properties::Vec2Property _domainLimY;        // render. The x component corresponds
     properties::Vec2Property _domainLimZ;        // to min value and y component to max
+    properties::Vec2Property _unitInterestRange; // Value range of interest from TF
 
     properties::Vec4Property _fieldlineColor;         // Uniform fieldline color
     properties::Vec4Property _fieldlineParticleColor; // Simulated line particles' color
@@ -127,6 +128,8 @@ private:
     bool _updateColorBuffer = false;
 
     std::vector<glm::vec2> _transferFunctionLimits; // .x corresponds to 0 in tf, .y to 1
+    std::vector<glm::vec2> _tFInterestRange;        // range of interest for each colorVar
+    std::vector<glm::vec2> _tFInterestRangeLimits;  // limits of interest
 
     std::shared_ptr<TransferFunction> _transferFunction;        // Transfer funtion (tf)
 
