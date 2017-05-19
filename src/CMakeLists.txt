@@ -138,6 +138,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/util/blockplaneintersectiongeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/boxgeometry.cpp
     ${OPENSPACE_BASE_DIR}/src/util/camera.cpp
+    ${OPENSPACE_BASE_DIR}/src/util/documented.cpp
     ${OPENSPACE_BASE_DIR}/src/util/factorymanager.cpp
     ${OPENSPACE_BASE_DIR}/src/util/keys.cpp
     ${OPENSPACE_BASE_DIR}/src/util/openspacemodule.cpp
@@ -281,6 +282,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/boxgeometry.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/camera.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/util/documented.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/util/factorymanager.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/util/keys.h

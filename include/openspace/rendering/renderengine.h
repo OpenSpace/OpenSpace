@@ -204,6 +204,7 @@ private:
 
     //FrametimeType _frametimeType;
 
+    properties::BoolProperty _showDate;
     properties::BoolProperty _showInfo;
     properties::BoolProperty _showLog;
     
@@ -212,7 +213,7 @@ private:
     properties::BoolProperty _applyWarping;
     properties::BoolProperty _showFrameNumber;
     properties::BoolProperty _disableMasterRendering;
-    properties::BoolProperty _disableSceneOnMaster;
+    properties::BoolProperty _disableSceneTranslationOnMaster;
 
     float _globalBlackOutFactor;
     float _fadeDuration;

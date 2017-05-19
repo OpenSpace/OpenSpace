@@ -36,5 +36,5 @@ out vec4 vs_color;
 
 void main() {        
     vs_color = in_color;
-    gl_Position = vec4(in_position, 0);
+    gl_Position = modelTransform * vec4(in_position, 0);
 }

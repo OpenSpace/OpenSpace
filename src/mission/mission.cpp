@@ -137,19 +137,19 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dict) {
     }
 }
 
-const std::string & MissionPhase::name() const {
+std::string MissionPhase::name() const {
     return _name;
 }
 
-const TimeRange & MissionPhase::timeRange() const {
+TimeRange MissionPhase::timeRange() const {
     return _timeRange;
 }
 
-const std::string & MissionPhase::description() const {
+std::string MissionPhase::description() const {
     return _description;
 }
 
-const std::vector<MissionPhase>& MissionPhase::phases() const {
+std::vector<MissionPhase> MissionPhase::phases() const {
     return _subphases;
 }
 
@@ -163,6 +163,8 @@ MissionPhase::Trace MissionPhase::phaseTrace(double time, int maxDepth) const {
 }
 
 void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
+    ghoul_assert(maxDepth >= 0, "maxDepth must not be negative");
+    
     if (maxDepth == 0) {
         return;
     }
@@ -180,7 +182,7 @@ void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
     }
 }
 
-Mission missionFromFile(std::string filename) {
+Mission missionFromFile(const std::string& filename) {
     ghoul_assert(!filename.empty(), "filename must not be empty");
     ghoul_assert(!FileSys.containsToken(filename), "filename must not contain tokens");
     ghoul_assert(FileSys.fileExists(filename), "filename must exist");
