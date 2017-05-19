@@ -453,29 +453,29 @@ void SimpleJ2kCodec::SetupDecoder(const int resolutionLevel, const int numQualit
         }
     }
 
-    if (_verboseMode) {
-        // Extract some info from the code stream
-        _codestreamInfo = opj_get_cstr_info(_decoder);
-        fprintf(stdout, "The file contains %dx%d tiles\n", _codestreamInfo->tw,
-                _codestreamInfo->th);
-        // Catch events using our callbacks and give a local context
-        opj_set_info_handler(_decoder,
-                             [](const char* msg, void* client_data) {
-                                 (void)client_data;
-                                 std::clog << "[INFO]" << msg;
-                             },
-                             00);
-        opj_set_warning_handler(_decoder,
-                                [](const char* msg, void* client_data) {
-                                    (void)client_data;
-                                    std::cerr << "[WARNING]" << msg;
-                                },
-                                00);
-        opj_set_error_handler(_decoder,
-                              [](const char* msg, void* client_data) {
-                                  (void)client_data;
-                                  std::cerr << "[ERROR]" << msg;
-                              },
-                              00);
-    }
+    // if (_verboseMode) {
+    //     // Extract some info from the code stream
+    //     _codestreamInfo = opj_get_cstr_info(_decoder);
+    //     fprintf(stdout, "The file contains %dx%d tiles\n", _codestreamInfo->tw,
+    //             _codestreamInfo->th);
+    //     // Catch events using our callbacks and give a local context
+    //     opj_set_info_handler(_decoder,
+    //                          [](const char* msg, void* client_data) {
+    //                              (void)client_data;
+    //                              std::clog << "[INFO]" << msg;
+    //                          },
+    //                          00);
+    //     opj_set_warning_handler(_decoder,
+    //                             [](const char* msg, void* client_data) {
+    //                                 (void)client_data;
+    //                                 std::cerr << "[WARNING]" << msg;
+    //                             },
+    //                             00);
+    //     opj_set_error_handler(_decoder,
+    //                           [](const char* msg, void* client_data) {
+    //                               (void)client_data;
+    //                               std::cerr << "[ERROR]" << msg;
+    //                           },
+    //                           00);
+    // }
 }
