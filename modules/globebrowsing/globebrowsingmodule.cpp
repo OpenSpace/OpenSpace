@@ -71,7 +71,9 @@ GlobeBrowsingModule::GlobeBrowsingModule()
         2048,   // Maximum
         1)      // Step: One MB
     , _applyTileCacheSize("applyTileCacheSize", "Apply tile cache size")
-    , _clearTileCache("clearTileCache", "Clear tile cache") {}
+    , _clearTileCache("clearTileCache", "Clear tile cache")
+    , _usePbo("usePbo", "Use PBO", false)
+{ }
 
 void GlobeBrowsingModule::internalInitialize() {
     using namespace globebrowsing;
@@ -106,6 +108,7 @@ void GlobeBrowsingModule::internalInitialize() {
         addProperty(_cpuAllocatedTileData);
         addProperty(_gpuAllocatedTileData);
         addProperty(_tileCacheSize);
+        addProperty(_usePbo);
       
 #ifdef GLOBEBROWSING_USE_GDAL
         // Convert from MB to Bytes
@@ -153,6 +156,10 @@ void GlobeBrowsingModule::internalInitialize() {
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>("ByIndex");
     fTileProvider->registerClass<tileprovider::PresentationSlideProvider>("PresentationSlides");
     FactoryManager::ref().addFactory(std::move(fTileProvider));
+}
+
+bool GlobeBrowsingModule::shouldUsePbo() {
+    return _usePbo;
 }
 
 } // namespace openspace

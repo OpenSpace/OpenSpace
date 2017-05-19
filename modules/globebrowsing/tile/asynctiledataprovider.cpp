@@ -24,11 +24,17 @@
 
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
 
+//#include <modules/globebrowsing/globebrowsingmodule.h>
+
 #include <modules/globebrowsing/other/lruthreadpool.h>
 
 #include <modules/globebrowsing/tile/tileloadjob.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
+
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -36,20 +42,15 @@ namespace openspace {
 namespace globebrowsing {
 
 AsyncTileDataProvider::AsyncTileDataProvider(
-    const std::shared_ptr<RawTileDataReader> rawTileDataReader,
-    UsePBO usePbo)
+    const std::shared_ptr<RawTileDataReader> rawTileDataReader)
     : _rawTileDataReader(rawTileDataReader)
     , _concurrentJobManager(
         std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 10))
     , _pboContainer(nullptr)
-    , _shouldReset(false)
+    , _resetMode(ResetMode::ShouldResetAllButRawTileDataReader)
 {
-    if (usePbo == UsePBO::Yes) {
-        size_t pboNumBytes = rawTileDataReader->tileTextureInitData().totalNumBytes();
-        _pboContainer = std::make_unique<PixelBufferContainer<TileIndex::TileHashKey>>(
-            pboNumBytes, PixelBuffer::Usage::STREAM_DRAW, 10
-        );
-    }
+    _globeBrowsingModule = OsEng.moduleEngine().getModule<GlobeBrowsingModule>();
+    performReset(ResetRawTileDataReader::No);
 }
 
 std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getRawTileDataReader() const {
@@ -57,8 +58,8 @@ std::shared_ptr<RawTileDataReader> AsyncTileDataProvider::getRawTileDataReader()
 }
 
 bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
-    if (!_shouldReset && satisfiesEnqueueCriteria(tileIndex)) {
-		if (_pboContainer) {
+    if (_resetMode == ResetMode::ShouldNotReset && satisfiesEnqueueCriteria(tileIndex)) {
+        if (_pboContainer) {
             char* dataPtr = static_cast<char*>(_pboContainer->mapBuffer(
                 tileIndex.hashKey(), GL_WRITE_ONLY));
             if (dataPtr) {
@@ -72,7 +73,6 @@ bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
             }
         }
         else {
-            size_t numBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
             auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex);
             _concurrentJobManager.enqueueJob(job, tileIndex.hashKey());
             _enqueuedTileRequests.insert(tileIndex.hashKey());
@@ -143,35 +143,76 @@ void AsyncTileDataProvider::endUnfinishedJobs() {
     }
 }
 
+void AsyncTileDataProvider::updatePboUsage() {
+    bool usingPbo = _pboContainer != nullptr;
+    bool shouldUsePbo = _globeBrowsingModule->shouldUsePbo();
+
+    if (usingPbo != shouldUsePbo) {
+        _resetMode = ResetMode::ShouldResetAllButRawTileDataReader;
+    }
+}
+
 void AsyncTileDataProvider::update() {
+    updatePboUsage();
     endUnfinishedJobs();
     // Only reset if there are no threads executing any jobs i.e.
     // _enqueuedTileRequests is empty
-    if (_shouldReset && _enqueuedTileRequests.size() == 0) {
-        while (_concurrentJobManager.numFinishedJobs() > 0) {
-            // When calling product, the job releases ownership of the data and it must
-            // be deleted if not using PBO. If PBO is used, the imageData pointer is
-            // GPU DMA and should not be deleted.
-            std::shared_ptr<RawTile> product =
-                _concurrentJobManager.popFinishedJob()->product();
-            if (_pboContainer) {
-                TileIndex::TileHashKey key = product->tileIndex.hashKey();
-                _pboContainer->unMapBuffer(key);
-            }
-            else {
-                delete [] product->imageData;
+    switch (_resetMode) {
+        case ResetMode::ShouldResetAll: {
+            if (_enqueuedTileRequests.size() == 0) {
+                performReset(ResetRawTileDataReader::Yes);
             }
         }
-        _rawTileDataReader->reset();
-        _shouldReset = false;
+        case ResetMode::ShouldResetAllButRawTileDataReader: {
+            if (_enqueuedTileRequests.size() == 0) {
+                performReset(ResetRawTileDataReader::No);
+            }
+        }
+        case ResetMode::ShouldNotReset:
+            break;
+        default:
+            break;
     }
 }
 
 void AsyncTileDataProvider::reset() {
     // Can not clear concurrent job manager in case there are threads running. therefore
     // we need to wait until _enqueuedTileRequests is empty before finishing up.
-    _shouldReset = true;
+    _resetMode = ResetMode::ShouldResetAll;
     _concurrentJobManager.clearEnqueuedJobs();
+}
+
+void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileDataReader) {
+    while (_concurrentJobManager.numFinishedJobs() > 0) {
+        // When calling product, the job releases ownership of the data and it must
+        // be deleted if not using PBO. If PBO is used, the imageData pointer is
+        // GPU DMA and should not be deleted.
+        std::shared_ptr<RawTile> product =
+            _concurrentJobManager.popFinishedJob()->product();
+        if (_pboContainer) {
+            TileIndex::TileHashKey key = product->tileIndex.hashKey();
+            _pboContainer->unMapBuffer(key);
+        }
+        else {
+            delete [] product->imageData;
+        }
+    }
+
+    if (_globeBrowsingModule->shouldUsePbo()) {
+        size_t pboNumBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
+        _pboContainer = std::make_unique<PixelBufferContainer<TileIndex::TileHashKey>>(
+            pboNumBytes, PixelBuffer::Usage::STREAM_DRAW, 10
+        );
+    }
+    else {
+        _pboContainer = nullptr;
+    }
+
+    if (resetRawTileDataReader == ResetRawTileDataReader::Yes) {
+        _rawTileDataReader->reset();
+    }
+
+    _resetMode = ResetMode::ShouldNotReset;
 }
 
 float AsyncTileDataProvider::noDataValueAsFloat() const {

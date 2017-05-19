@@ -32,6 +32,7 @@
 #include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/triggerproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -59,6 +60,7 @@ public:
 
 private:
     properties::BoolProperty _enabled;
+    properties::TriggerProperty _reset;
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
     LayerRenderSettings _renderSettings;
 };

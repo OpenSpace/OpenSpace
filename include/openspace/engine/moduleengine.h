@@ -30,6 +30,8 @@
 
 #include <openspace/util/openspacemodule.h>
 
+#include <ghoul/misc/assert.h>
+
 namespace ghoul {
 namespace systemcapabilities {
 
@@ -83,6 +85,18 @@ public:
      * \return A list of all registered OpenSpaceModule%s
      */
     std::vector<OpenSpaceModule*> modules() const;
+
+    template <class ModuleSubClass>
+    ModuleSubClass* getModule() {
+        for (size_t i = 0; i < _modules.size(); ++i) {
+            ModuleSubClass* module = dynamic_cast<ModuleSubClass*>(_modules[i].get());
+            if (module) {
+                return module;
+            }
+        }
+        ghoul_assert(false, "This module does not exist!");
+        return nullptr;
+    }
 
     /**
      * Returns the combined minimum OpenGL version. The return value is the maximum

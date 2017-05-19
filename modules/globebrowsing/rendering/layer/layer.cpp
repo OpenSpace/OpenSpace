@@ -31,7 +31,8 @@ namespace globebrowsing {
 
 Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     : properties::PropertyOwner(layerDict.value<std::string>("Name"))
-    , _enabled(properties::BoolProperty("enabled", "enabled", false))
+    , _enabled(properties::BoolProperty("enabled", "Enabled", false))
+    , _reset("reset", "Reset")
 {
     // We add the id to the dictionary since it needs to be known by
     // the tile provider
@@ -50,7 +51,12 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     layerDict.getValue("Enabled", enabled);
     _enabled.setValue(enabled);
     
+    _reset.onChange([&](){
+        _tileProvider.reset();
+    });
+
     addProperty(_enabled);
+    addProperty(_reset);
 
     addPropertySubOwner(_renderSettings);
     addPropertySubOwner(*_tileProvider);
@@ -59,7 +65,6 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
     return _tileProvider->getChunkTilePile(tileIndex, pileSize);
 }
-
 
 void Layer::onChange(std::function<void(void)> callback) {
     _enabled.onChange(callback);

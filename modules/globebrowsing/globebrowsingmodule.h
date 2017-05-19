@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalarproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
@@ -36,6 +37,8 @@ namespace openspace {
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
     GlobeBrowsingModule();
+
+    bool shouldUsePbo();
     
 protected:
     void internalInitialize() override;
@@ -45,6 +48,9 @@ private:
     properties::IntProperty _tileCacheSize;
     properties::TriggerProperty _applyTileCacheSize;
     properties::TriggerProperty _clearTileCache;
+
+    /// Whether or not pixel buffer objects should be used when uploading tile data
+    properties::BoolProperty _usePbo;
 };
 
 } // namespace openspace

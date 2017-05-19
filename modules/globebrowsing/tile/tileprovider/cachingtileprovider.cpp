@@ -102,8 +102,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     auto tileDataset = std::make_shared<SimpleRawTileDataReader>(filePath, initData, preprocess);
 #endif // GLOBEBROWSING_USE_GDAL
 
-    _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
-        tileDataset, AsyncTileDataProvider::UsePBO::No);
+    _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(tileDataset);
 
     if (dictionary.hasKeyAndValue<double>(KeyPreCacheLevel)) {
         int preCacheLevel = static_cast<int>(dictionary.value<double>(KeyPreCacheLevel));

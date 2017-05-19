@@ -25,6 +25,9 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__
 
+
+#include <modules/globebrowsing/globebrowsingmodule.h>
+
 #include <modules/globebrowsing/other/prioritizingconcurrentjobmanager.h>
 #include <modules/globebrowsing/other/pixelbuffercontainer.h>
 #include <modules/globebrowsing/tile/tileindex.h>
@@ -38,6 +41,7 @@
 namespace openspace {
 namespace globebrowsing {
     
+//class GlobeBrowsingModule;
 struct RawTile;
 class RawTileDataReader;
 
@@ -47,17 +51,11 @@ class RawTileDataReader;
  */
 class AsyncTileDataProvider {
 public:
-    enum class UsePBO {
-        Yes,
-        No
-    };
-
     /**
      * \param textureDataProvider is the reader that will be used for the asynchronos
      * tile loading.
      */
-    AsyncTileDataProvider(std::shared_ptr<RawTileDataReader> textureDataProvider,
-        UsePBO usePbo = UsePBO::No);
+    AsyncTileDataProvider(std::shared_ptr<RawTileDataReader> textureDataProvider);
 
     /**
      * Creates a job which asynchronously loads a raw tile. This job is enqueued.
@@ -81,6 +79,17 @@ public:
     float noDataValueAsFloat() const;
 
 protected:
+    enum class ResetRawTileDataReader {
+        Yes,
+        No
+    };
+
+    enum class ResetMode {
+        ShouldResetAll,
+        ShouldResetAllButRawTileDataReader,
+        ShouldNotReset
+    };
+
     /**
      * \returns true if tile of index <code>tileIndex</code> is not already enqueued.
      */
@@ -93,7 +102,12 @@ protected:
      */
     void endUnfinishedJobs();
 
+    void updatePboUsage();
+
+    void performReset(ResetRawTileDataReader resetRawTileDataReader);
+
 private:
+    GlobeBrowsingModule* _globeBrowsingModule;
     /// The reader used for asynchronous reading
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
     
@@ -104,7 +118,7 @@ private:
     std::unique_ptr<PixelBufferContainer<TileIndex::TileHashKey>> _pboContainer;
     std::set<TileIndex::TileHashKey> _enqueuedTileRequests;
 
-    bool _shouldReset;
+    ResetMode _resetMode;
 };
 
 } // namespace globebrowsing
