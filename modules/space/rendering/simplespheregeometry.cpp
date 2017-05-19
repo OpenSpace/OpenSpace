@@ -25,6 +25,7 @@
 #include <modules/space/rendering/simplespheregeometry.h>
 #include <openspace/util/powerscaledsphere.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/rendering/renderable.h>
 
 namespace {
     const std::string _loggerCat = "SimpleSphereGeometry";

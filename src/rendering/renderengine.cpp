@@ -27,6 +27,7 @@
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 #include <modules/newhorizons/util/imagesequencer.h>
 #endif
+#include <openspace/util/syncdata.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
@@ -38,11 +39,17 @@
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/scene/scene.h>
+#include <openspace/performance/performancemanager.h>
+#include <openspace/rendering/renderer.h>
 
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/font/font.h>
@@ -174,6 +181,11 @@ RenderEngine::RenderEngine()
     addProperty(_disableSceneTranslationOnMaster);
     addProperty(_disableMasterRendering);
 }
+
+/**
+ * Destructor
+ */
+RenderEngine::~RenderEngine() {}
 
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
     _rendererImplementation = rendererFromString(renderingMethod);
@@ -819,6 +831,8 @@ void RenderEngine::renderInformation() {
             fontResolution().y
             //OsEng.windowWrapper().viewportPixelCoordinates().w
         );
+
+        penPosition.y -= OsEng.console().currentHeight();
 
         if (_showDate && _fontDate) {
             penPosition.y -= _fontDate->height();

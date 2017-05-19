@@ -32,6 +32,8 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 
+#include <ghoul/opengl/programobject.h>
+
 namespace openspace {
 
 namespace documentation { struct Documentation; }

@@ -28,10 +28,12 @@
 #include <openspace/util/powerscaledcoordinate.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/opengl/programobject.h>
 
 #include <fstream>
 

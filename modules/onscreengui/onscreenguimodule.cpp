@@ -31,6 +31,7 @@
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
@@ -61,7 +62,8 @@ OnScreenGUIModule::OnScreenGUIModule()
                         &(OsEng.settingsEngine()),
                         &(OsEng.interactionHandler()),
                         &(OsEng.renderEngine()),
-                        &(OsEng.parallelConnection())
+                        &(OsEng.parallelConnection()),
+                        &(OsEng.console())
                     };
                     return res;
                 }
