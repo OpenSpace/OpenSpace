@@ -211,9 +211,17 @@ void LuaConsole::initialize() {
 
     glBindVertexArray(0);
 
-    _font = OsEng.fontManager().font(FontName, EntryFontSize);
+    _font = OsEng.fontManager().font(
+        FontName,
+        EntryFontSize,
+        ghoul::fontrendering::Font::Outline::No
+    );
 
-    _historyFont = OsEng.fontManager().font(FontName, HistoryFontSize);
+    _historyFont = OsEng.fontManager().font(
+        FontName,
+        HistoryFontSize,
+        ghoul::fontrendering::Font::Outline::No
+    );
 
 
     OsEng.parallelConnection().connectionEvent()->subscribe(
