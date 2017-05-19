@@ -49,21 +49,23 @@ namespace openspace {
 struct BufferObject {
     unsigned char* data;
     std::string name;
+    double timeObserved;
 };
 
 // TODO(mnoven) : Move to separate class
 class DecodeJob : public globebrowsing::Job<BufferObject>{
 public:
-    DecodeJob(const int& imageSize, const std::string& path, const int& resolutionLevel, const bool& verboseMode)
+    DecodeJob(const int& imageSize, const std::string& path, const int& resolutionLevel, const bool& verboseMode, const double& timeObserved)
         : _imageSize(imageSize)
         , _path(path)
         , _resolutionLevel(resolutionLevel)
         , _verboseMode(verboseMode)
+        , _timeObserved(timeObserved)
     {
     }
 
     virtual void execute() final {
-        BufferObject b = {new unsigned char[_imageSize * _imageSize], _path};
+        BufferObject b = {new unsigned char[_imageSize * _imageSize], _path, _timeObserved};
         SimpleJ2kCodec j2c(_verboseMode);
         j2c.DecodeIntoBuffer(b.name, b.data, _resolutionLevel);
         _bufferObject = std::make_shared<BufferObject>(b);
@@ -79,6 +81,7 @@ protected:
     int _resolutionLevel;
     int _imageSize;
     bool _verboseMode;
+    double _timeObserved;
 };
 
 class RenderableSpacecraftCameraPlane : public Renderable {
