@@ -1,8 +1,12 @@
 local seedPointsFileBatsrus = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/BATS_R_US_all_combined.txt';
 local seedPointsFileEnlil = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/enlil.txt';
+local eqSeedsEnlil2AU = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/equitorialslice2_AU.txt';
+local eqSeedsEnlil1AU_1nHalfdeg = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/equitorialslice1_AU_1.5deg.txt';
 
-local volumeFolderBatsrus = '${OPENSPACE_DATA}/bats_sequence';
+-- local volumeFolderBatsrus = '${OPENSPACE_DATA}/bats_sequence';
+local volumeFolderBatsrus = '${OPENSPACE_DATA}/new_bats';
 local volumeFolderEnlil = '${OPENSPACE_DATA}/enlil_sequence';
+local volumeFolderEnlilHighRes = '${OPENSPACE_DATA}/Leila_Mays_042517_SH_2';
 -- local volumeFolderEnlil = '${OPENSPACE_DATA}/Ailsa';
 local volumeFile1 = '${OPENSPACE_DATA}/bats_sequence/batsrus1.cdf';
 local volumeFile2 = '${OPENSPACE_DATA}/bats_sequence/batsrus2.cdf';
@@ -39,6 +43,9 @@ return {
     --     Parent = "GSMReferenceFrame",
     --     Renderable = {
     --         Type = "RenderableFieldlinesSequence",
+    --         TracingMethod = "PreTraced",
+    --         -- TracingMethod = "PreProcess",
+    --         -- TracingMethod = "LiveTrace",
     --         VectorVolume = {
     --             -- Type = "VolumeKameleon",
     --             Directory = volumeFolderBatsrus,
@@ -51,7 +58,7 @@ return {
     --             MaximumTracingSteps = 1000.0,
     --             -- Stepsize = 1.0,
     --             -- Classification = true,
-    --             Morphing = true,
+    --             Morphing = false,
     --             ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
     --             NumResamples = 500,
     --             QuickMorphDistance = 637100000,
@@ -62,33 +69,36 @@ return {
     --         }
     --     }
     -- },
-    {
-        Name = "ENLILFieldlinesSequence",
-        Parent = "HNMReferenceFrame",
-        Renderable = {
-            Type = "RenderableFieldlinesSequence",
-            VectorVolume = {
-                -- Type = "VolumeKameleon",
-                Directory = volumeFolderEnlil,
-                -- Model = "BATSRUS",
-                TracingVariable = "b", -- "b" is the variable specifying the magnetic field
-                -- Variables = {"bx", "by", "bz"},
-                -- TimeDependent = true,
-            },
-            Fieldlines = {
-                MaximumTracingSteps = 100000.0,
-                -- Stepsize = 1.0,
-                -- Classification = true,
-                Morphing = true,
-                -- NumResamples = 5,
-                ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
-            },
-            SeedPoints = {
-                -- Type = "File",
-                File = seedPointsFileEnlil,
-            }
-        }
-    },
+    -- {
+    --     Name = "ENLILFieldlinesSequence",
+    --     Parent = "HNMReferenceFrame",
+    --     Renderable = {
+    --         Type = "RenderableFieldlinesSequence",
+            -- TracingMethod = "PreTraced",
+            -- TracingMethod = "PreTraced",
+            -- TracingMethod = "PreTraced",
+    --         VectorVolume = {
+    --             -- Type = "VolumeKameleon",
+    --             Directory = volumeFolderEnlil,
+    --             -- Model = "BATSRUS",
+    --             TracingVariable = "b", -- "b" is the variable specifying the magnetic field
+    --             -- Variables = {"bx", "by", "bz"},
+    --             -- TimeDependent = true,
+    --         },
+    --         Fieldlines = {
+    --             MaximumTracingSteps = 100000.0,
+    --             -- Stepsize = 1.0,
+    --             -- Classification = true,
+    --             Morphing = true,
+    --             -- NumResamples = 5,
+    --             ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
+    --         },
+    --         SeedPoints = {
+    --             -- Type = "File",
+    --             File = seedPointsFileEnlil,
+    --         }
+    --     }
+    -- },
     -- {
     --     Name = "EMF",
     --     Parent = "GSMReferenceFrame",
@@ -113,92 +123,36 @@ return {
     --     }
     -- },
 
-    -- {
-    --     Name = "FieldlinesTimestep1",
-    --     Parent = "GSMReferenceFrame",
-    --     Renderable = {
-    --         Type = "RenderableFieldlines",
-    --         VectorField = {
-    --             Type = "VolumeKameleon",
-    --             File = volumeFile1,
-    --             Model = "BATSRUS",
-    --             Variables = {"bx", "by", "bz"},
-    --             TimeDependent = true,
-    --         },
-    --         Fieldlines = {
-    --             Stepsize = 1.0,
-    --             Classification = true,
-    --         },
-    --         SeedPoints = {
-    --             Type = "File",
-    --             File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_all_combined.txt';
-    --         }
-    --     }
-    -- },
-    -- {
-    --     Name = "FieldlinesTimestep2",
-    --     Parent = "GSMReferenceFrame",
-    --     Renderable = {
-    --         Type = "RenderableFieldlines",
-    --         VectorField = {
-    --             Type = "VolumeKameleon",
-    --             File = volumeFile2,
-    --             Model = "BATSRUS",
-    --             Variables = {"bx", "by", "bz"},
-    --             TimeDependent = true,
-    --         },
-    --         Fieldlines = {
-    --             Stepsize = 1.0,
-    --             Classification = true,
-    --         },
-    --         SeedPoints = {
-    --             Type = "File",
-    --             File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_all_combined.txt';
-    --         }
-    --     }
-    -- },
-    -- {
-    --     Name = "FieldlinesTimestep3",
-    --     Parent = "GSMReferenceFrame",
-    --     Renderable = {
-    --         Type = "RenderableFieldlines",
-    --         VectorField = {
-    --             Type = "VolumeKameleon",
-    --             File = volumeFile3,
-    --             Model = "BATSRUS",
-    --             Variables = {"bx", "by", "bz"},
-    --             TimeDependent = true,
-    --         },
-    --         Fieldlines = {
-    --             Stepsize = 1.0,
-    --             Classification = true,
-    --         },
-    --         SeedPoints = {
-    --             Type = "File",
-    --             File = file1;
-    --         }
-    --     }
-    -- },
-    -- {
-    --     Name = "FieldlinesEnlil",
-    --     Parent = "HNMReferenceFrame", --"Sun",
-    --     Renderable = {
-    --         Type = "RenderableFieldlines",
-    --         VectorField = {
-    --             Type = "VolumeKameleon",
-    --             File = volumeFileEnlil,
-    --             Model = "ENLIL",
-    --             Variables = {"br", "btheta", "bphi"},
-    --             TimeDependent = false,
-    --         },
-    --         Fieldlines = {
-    --             Stepsize = 1.0,
-    --             Classification = true,
-    --         },
-    --         SeedPoints = {
-    --             Type = "File",
-    --             File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/enlil.txt';
-    --         }
-    --     }
-    -- },
+    {
+        Name = "HighResENLILFieldlinesSequence",
+        Parent = "HNMReferenceFrame",
+        Renderable = {
+            Type = "RenderableFieldlinesSequence",
+            -- TracingMethod = "PreProcess",
+            TracingMethod = "PreTraced",
+            -- TracingMethod = "PreTraced",
+            VectorVolume = {
+                -- Type = "VolumeKameleon",
+                Directory = volumeFolderEnlilHighRes,
+                -- Model = "BATSRUS",
+                TracingVariable = "b", -- "b" is the variable specifying the magnetic field
+                -- Variables = {"bx", "by", "bz"},
+                -- TimeDependent = true,
+            },
+            Fieldlines = {
+                MaximumTracingSteps = 10000.0,
+                -- Stepsize = 1.0,
+                -- Classification = true,
+                Morphing = false,
+                -- NumResamples = 5,
+                ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
+            },
+            SeedPoints = {
+                -- Type = "File",
+                -- File = seedPointsFileEnlil,
+                File = eqSeedsEnlil1AU_1nHalfdeg,
+                -- File = eqSeedsEnlil2AU,
+            }
+        }
+    },
 }

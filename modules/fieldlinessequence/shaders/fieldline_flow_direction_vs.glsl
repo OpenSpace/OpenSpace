@@ -25,14 +25,19 @@
 #version __CONTEXT__
 
 uniform mat4 modelViewProjection;
+
+uniform bool isClamping;
+
 //uniform mat4 modelTransform;
 // uniform int time;
 uniform double timeD;
+
 uniform int flParticleSize;
 uniform int modulusDivider;
 uniform int colorMethod;
 
 uniform vec2 transferFunctionLimits;
+uniform vec2 tFIterestRange;
 uniform vec2 domainLimR;
 uniform vec2 domainLimX;
 uniform vec2 domainLimY;
@@ -64,7 +69,8 @@ void main() {
     if ((in_position.x < domainLimX.x) || (in_position.x > domainLimX.y) ||
         (in_position.y < domainLimY.x) || (in_position.y > domainLimY.y) ||
         (in_position.z < domainLimZ.x) || (in_position.z > domainLimZ.y) ||
-        (radius        < domainLimR.x) || (radius        > domainLimR.y)) {
+        (radius        < domainLimR.x) || (radius        > domainLimR.y) ||
+        unitIntensity < tFIterestRange.x || unitIntensity > tFIterestRange.y ) {
         fragment_discard = 0.0;
     }
 
@@ -77,6 +83,19 @@ void main() {
                     / (transferFunctionLimits.y - transferFunctionLimits.x);
             vec4 color = texture(colorMap, lookUpValue);
             vs_color = vec4(color.xyz,fieldlineParticleColor.a);
+            // If color table says to not use values in this range discard
+            if (color.a == 0) {
+                fragment_discard = 0.0;
+            }
+
+            // Discard values outside of specified range
+            if (!isClamping) {
+                if (unitIntensity > transferFunctionLimits.y ||
+                    unitIntensity < transferFunctionLimits.x) {
+                    fragment_discard = 0.0;
+                }
+            }
+
         } else /*if (colorMethod == UNIFORM_COLOR)*/ {
             vs_color = fieldlineParticleColor;
         }
@@ -86,6 +105,20 @@ void main() {
                     / (transferFunctionLimits.y - transferFunctionLimits.x);
             vec4 color = texture(colorMap, lookUpValue);
             vs_color = vec4(color.xyz,fieldlineColor.a);
+
+            // If color table says to not use values in this range discard
+            if (color.a == 0) {
+                fragment_discard = 0.0;
+            }
+
+            // Discard values outside of specified range
+            if (!isClamping) {
+                if (unitIntensity > transferFunctionLimits.y ||
+                    unitIntensity < transferFunctionLimits.x) {
+                    fragment_discard = 0.0;
+                }
+            }
+
         } else /*if (colorMethod == UNIFORM_COLOR)*/ {
             vs_color = fieldlineColor;
         }
