@@ -89,6 +89,7 @@ namespace openspace {
 
 RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary),
+      _isClampingColorValues("isClamping", "Clamp", true),
       _isMorphing("isMorphing", "Morphing", false),
       _show3DLines("show3DLines", "3D Lines", false),
       _showSeedPoints("showSeedPoints", "Show Seed Points", false),
@@ -644,11 +645,16 @@ bool RenderableFieldlinesSequence::initialize() {
                                                     texture.FilterMode::Nearest);
         });
 
+        _isClampingColorValues.onChange([this] {
+            LDEBUG("Changed whether to Clamp or Discard values outside of TF range!");
+        });
+
         // _colorGroup.setPropertyGroupName(0,"FieldlineColorRelated");
         addPropertySubOwner(_colorGroup);
 
         _colorGroup.addProperty(_colorMethod);
         _colorGroup.addProperty(_colorizingQuantity);
+        _colorGroup.addProperty(_isClampingColorValues);
         _colorGroup.addProperty(_transferFunctionPath);
         _colorGroup.addProperty(_transferFunctionMinVal);
         _colorGroup.addProperty(_transferFunctionMaxVal);
@@ -753,6 +759,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
             _transferFunction->bind(); // Calls update internally
             _activeProgramPtr->setUniform("transferFunctionLimits", _transferFunctionLimits[_colorizingQuantity]);
             _activeProgramPtr->setUniform("colorMap", _textureUnit->unitNumber());
+            _activeProgramPtr->setUniform("isClamping", _isClampingColorValues);
         }
 
         glDisable(GL_CULL_FACE);
