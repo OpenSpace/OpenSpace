@@ -210,10 +210,10 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         }
         updateTextureGPU(/*asyncUpload=*/false);
         _concurrentJobManager.reset();
-        while (_concurrentJobManager.numFinishedJobs() > 0) {
+    /*    while (_concurrentJobManager.numFinishedJobs() > 0) {
             _concurrentJobManager.popFinishedJob();
         }
-
+*/
         if (_useBuffering) {
            // _initializePBO = true;
             fillBuffer(Time::ref().deltaTime());
@@ -232,10 +232,10 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         _imageSize = _fullResolution / (pow(2, _resolutionLevel));
         updateTextureGPU(/*asyncUpload=*/false, /*resChanged=*/true);
         _concurrentJobManager.reset();
-        while (_concurrentJobManager.numFinishedJobs() > 0) {
+  /*      while (_concurrentJobManager.numFinishedJobs() > 0) {
             _concurrentJobManager.popFinishedJob();
         }
-
+*/
         if (_useBuffering) {
             //_initializePBO = true;
             fillBuffer(Time::ref().deltaTime());
@@ -288,6 +288,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 }
 
 void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
+    _enqueuedImageIds.clear();
     if (_verboseMode) {
         LDEBUG("Refilling Buffer. dt: " << dt);
     }
@@ -311,6 +312,7 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
         auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename,
                                                _resolutionLevel, _verboseMode);
         _concurrentJobManager.enqueueJob(job);
+        _enqueuedImageIds.insert(currentFilename);
         if (_verboseMode) {
             LDEBUG("Enqueueing " << currentFilename);
         }
@@ -496,8 +498,15 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
                   }));
             _pboIsDirty = true;
         } else {
-            if (_concurrentJobManager.numFinishedJobs() > 0) {
+            bool hadFinishedJobs = false;
+            while (_concurrentJobManager.numFinishedJobs() > 0) {
                 std::shared_ptr<BufferObject> b = _concurrentJobManager.popFinishedJob()->product();
+
+                // Not found in set, queue finished old job
+                if (_enqueuedImageIds.find(b->name) == _enqueuedImageIds.end()) continue;
+
+                hadFinishedJobs = true;
+                _enqueuedImageIds.erase(b->name);
                 unsigned char* data = b->data;
 
                 if (_verboseMode) {
@@ -530,13 +539,15 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
                 auto job = std::make_shared<DecodeJob>(_imageSize, currentFilename,
                                                        _resolutionLevel, _verboseMode);
                 _concurrentJobManager.enqueueJob(job);
+                _enqueuedImageIds.insert(currentFilename);
+
                 _initializePBO = false;
                 _pboIsDirty = true;
 
                 if (_verboseMode)  {
                     LDEBUG("Adding work from PBO " << currentFilename);
                 }
-            } else {
+            } if (!hadFinishedJobs) {
                 if (_verboseMode) {
                     LWARNING("Nothing to update, buffer is not ready");
                 }

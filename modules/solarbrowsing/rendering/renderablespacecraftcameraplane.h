@@ -177,6 +177,7 @@ private:
     std::unordered_map<int, std::string> _optionToInstrument;
     std::unordered_map<std::string, std::vector<ImageMetadata>> _imageMetadataMap;
     std::unordered_set<std::string> _instrumentFilter;
+    std::unordered_set<std::string> _enqueuedImageIds;
 
     void uploadImageDataToPBO(const int& image);
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
