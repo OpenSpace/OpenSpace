@@ -102,6 +102,8 @@ protected:
      */
     void endUnfinishedJobs();
 
+    void endEnqueuedJobs();
+
     void updatePboUsage();
 
     void performReset(ResetRawTileDataReader resetRawTileDataReader);

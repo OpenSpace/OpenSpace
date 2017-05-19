@@ -144,7 +144,7 @@ ghoul::opengl::Texture* MemoryAwareTileCache::getTexture(
     texture = _textureContainerMap[initDataKey].first->getTextureIfFree();
     // Second option. No more textures available. Pop from the LRU cache
     if (!texture) {
-        Tile oldTile = _textureContainerMap[initDataKey].second->popLRU();
+        Tile oldTile = _textureContainerMap[initDataKey].second->popLRU().second;
         // Use the old tile's texture
         texture = oldTile.texture();
     }

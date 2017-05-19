@@ -50,6 +50,12 @@ PrioritizingConcurrentJobManager<P, KeyType>::getKeysToUnfinishedJobs() {
 }
 
 template<typename P, typename KeyType>
+std::vector<KeyType>
+PrioritizingConcurrentJobManager<P, KeyType>::getKeysToEnqueuedJobs() {
+    return _threadPool->getQueuedTasksKeys();
+}
+
+template<typename P, typename KeyType>
 bool PrioritizingConcurrentJobManager<P, KeyType>::touch(KeyType key) {
     return _threadPool->touch(key);
 }

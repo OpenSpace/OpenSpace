@@ -69,6 +69,7 @@ public:
 
     void enqueue(std::function<void()> f, KeyType key);
     bool touch(KeyType key);
+    std::vector<KeyType> getQueuedTasksKeys();
     std::vector<KeyType> getUnqueuedTasksKeys();
     void clearEnqueuedTasks();
 

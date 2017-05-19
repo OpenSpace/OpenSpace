@@ -56,6 +56,8 @@ public:
      */
     std::vector<KeyType> getKeysToUnfinishedJobs();
 
+    std::vector<KeyType> getKeysToEnqueuedJobs();
+
     /**
      * Bumps the job identified with <code>key</code> to the beginning of the queue.
      * In case the job was not already enqueued the function simply returns false and

@@ -91,24 +91,24 @@ ValueType LRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
-ValueType LRUCache<KeyType, ValueType, HasherType>::popMRU() {
+std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popMRU() {
     ghoul_assert(_itemList.size() > 0,
         "Can not pop from LRU cache. Ensure cache is not empty.");
     auto first_it = _itemList.begin();
     _itemMap.erase(first_it->first);
-    ValueType toReturn = _itemList.front().second;
+    std::pair<KeyType, ValueType> toReturn = _itemList.front();
     _itemList.pop_front();
     return toReturn;
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
-ValueType LRUCache<KeyType, ValueType, HasherType>::popLRU() {
+std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popLRU() {
     ghoul_assert(_itemList.size() > 0,
         "Can not pop from LRU cache. Ensure cache is not empty.");
     auto lastIt = _itemList.end();
     lastIt--;
     _itemMap.erase(lastIt->first);
-    ValueType toReturn = _itemList.back().second;
+    std::pair<KeyType, ValueType> toReturn = _itemList.back();
     _itemList.pop_back();
     return toReturn;
 }

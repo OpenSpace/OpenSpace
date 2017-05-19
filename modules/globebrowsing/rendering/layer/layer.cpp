@@ -52,7 +52,7 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     _enabled.setValue(enabled);
     
     _reset.onChange([&](){
-        _tileProvider.reset();
+        _tileProvider->reset();
     });
 
     addProperty(_enabled);

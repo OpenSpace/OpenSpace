@@ -59,12 +59,12 @@ public:
     /**
      * Pops the front of the queue.
      */
-    ValueType popMRU();
+    std::pair<KeyType, ValueType> popMRU();
     
     /**
      * Pops the back of the queue.
      */
-    ValueType popLRU();
+    std::pair<KeyType, ValueType> popLRU();
     size_t size() const;
 
 private:

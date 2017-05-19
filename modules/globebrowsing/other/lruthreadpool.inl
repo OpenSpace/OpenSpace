@@ -49,7 +49,7 @@ void LRUThreadPoolWorker<KeyType>::operator()() {
             }
 
             // get the task from the queue
-            task = _pool._queuedTasks.popMRU();
+            task = _pool._queuedTasks.popMRU().second;
             
         }// release lock
 
@@ -115,6 +115,18 @@ std::vector<KeyType> LRUThreadPool<KeyType>::getUnqueuedTasksKeys() {
         _unqueuedTasks.clear();
     }
     return toReturn;
+}
+
+template<typename KeyType>
+std::vector<KeyType> LRUThreadPool<KeyType>::getQueuedTasksKeys() {
+    std::vector<KeyType> queuedTasks;
+    {
+        std::unique_lock<std::mutex> lock(_queueMutex);
+        while (!_queuedTasks.isEmpty()) {
+            queuedTasks.push_back(_queuedTasks.popMRU().first);
+        }
+    }
+    return queuedTasks;
 }
 
 template<typename KeyType>
