@@ -652,12 +652,30 @@ void LuaConsole::render() {
     );
 
     // Render the current command
+    std::string currentCommand = _commands.at(_activeCommand);
+    // We chop off the beginning of the string until it fits on the screen (with a margin)
+    // this should be replaced as soon as the mono-spaced fonts work properly. Right now,
+    // every third character is a bit wider than the others
+    while (true) {
+        const float w = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+            *_font,
+            "> %s",
+            currentCommand.c_str()
+        ).boundingBox.x + inputLocation.x;
+
+        const float d = w - res.x * 0.995f;
+        if (d < 0.f) {
+            break;
+        }
+
+        currentCommand = currentCommand.substr(std::max(1.f, d / _font->glyph('m')->width()));
+    }
     RenderFontCr(
         *_font,
         inputLocation,
         _entryTextColor,
         "> %s",
-        _commands.at(_activeCommand).c_str()
+        currentCommand.c_str()
     );
     
     // Just offset the ^ marker slightly for a nicer look
@@ -668,7 +686,7 @@ void LuaConsole::render() {
         *_font,
         inputLocation,
         _entryTextColor,
-        (std::string(_inputPosition + 2, ' ') + "^").c_str()
+        (std::string(currentCommand.length() + 2, ' ') + "^").c_str()
     );
     
     glm::vec2 historyInputLocation = glm::vec2(
