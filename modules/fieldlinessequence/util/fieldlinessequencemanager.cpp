@@ -254,6 +254,82 @@ bool FieldlinesSequenceManager::saveFieldlinesStateAsJson(const FieldlinesState&
     return true;
 }
 
+bool FieldlinesSequenceManager::getFieldlinesStateFromBinary(
+        const std::string& pathToBinaryFile, FieldlinesState& outState) {
+
+    std::ifstream ifs(pathToBinaryFile, std::ifstream::binary);
+    if (!ifs.is_open()) {
+        LERROR("Couldn't open file: " << pathToBinaryFile);
+        return false;
+    }
+
+    int binFileVersion;
+    ifs.read( reinterpret_cast<char*>(&binFileVersion), sizeof(int));
+
+    switch (binFileVersion) {
+        case 0 : {
+                LDEBUG("BINARY FILE - VERSION 0");
+            }
+            break;
+        default : {
+                LERROR("VERSION OF BINARY FILE NOT RECOGNISED!");
+            }
+    }
+
+    ifs.read( reinterpret_cast<char*>(&outState._triggerTime), sizeof(double));
+    FieldlinesState::Model model;
+    ifs.read( reinterpret_cast<char*>(&model), sizeof(int));
+    outState.setModel(model);
+    ifs.read( reinterpret_cast<char*>(&outState._isMorphable), sizeof(bool));
+    size_t numLines;
+    ifs.read( reinterpret_cast<char*>(&numLines), sizeof(size_t));
+    size_t numPoints;
+    ifs.read( reinterpret_cast<char*>(&numPoints), sizeof(size_t));
+    size_t numExtras;
+    ifs.read( reinterpret_cast<char*>(&numExtras), sizeof(size_t));
+    size_t byteSizeAllNames;
+    ifs.read( reinterpret_cast<char*>(&byteSizeAllNames), sizeof(size_t));
+
+    // TODO: figure out how to do this with reserve instead of resize! resize is about 1,4 times slower
+    // outState._lineStart.reserve(numLines);
+    outState._lineStart.resize(numLines);
+    ifs.read( reinterpret_cast<char*>(outState._lineStart.data()), sizeof(GLint)*numLines);
+
+    // outState._lineCount.reserve(numLines);
+    outState._lineCount.resize(numLines);
+    ifs.read( reinterpret_cast<char*>(outState._lineCount.data()), sizeof(GLsizei)*numLines);
+
+    // outState._vertexPositions.reserve(numPoints);
+    outState._vertexPositions.resize(numPoints);
+    ifs.read( reinterpret_cast<char*>(outState._vertexPositions.data()), sizeof(glm::vec3)*numPoints);
+
+    // outState._extraVariables.reserve(numExtras);
+    outState._extraVariables.resize(numExtras);
+    for (std::vector<float>& vec : outState._extraVariables) {
+        //vec.reserve(numPoints);
+        vec.resize(numPoints);
+        ifs.read( reinterpret_cast<char*>(vec.data()), sizeof(float) * numPoints);
+    }
+
+    // outState._extraVariableNames.reserve(numExtras);
+    outState._extraVariableNames.resize(numExtras);
+    std::string allNamesInOne;
+    char* s = new char[byteSizeAllNames];
+    ifs.read(s, byteSizeAllNames);
+    allNamesInOne.assign(s,byteSizeAllNames);
+    delete s;
+
+    size_t offset = 0;
+    for (size_t i = 0; i < numExtras; ++i) {
+        auto endOfVarName = allNamesInOne.find('\0', offset);
+        endOfVarName -= offset;
+        std::string varName = allNamesInOne.substr(offset, endOfVarName);
+        offset += varName.size() + 1;
+        outState._extraVariableNames.emplace_back(varName);
+    }
+
+    return true;
+}
 
 /** READ PRECALCULATED FIELDLINE STATES FROM .JSON FILES AND STORE AS A FIELDLINE STATE
  *
@@ -353,6 +429,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         // when specifying which folders to get JSON files from
         const std::string model = "batsrus";
         outFieldlinesState._modelName = model;
+        outFieldlinesState._model = outFieldlinesState.Model::batsrus;
 
         // Check if the json file contains a trigger time
         if (jfile.find("_triggerTime") != jfile.end()) {
@@ -429,6 +506,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
 
     const std::string model = kameleon->getModelName();
     outFieldlinesState._modelName = model;
+    outFieldlinesState._model = outFieldlinesState.Model::batsrus;
     bool status = kameleon->loadVariable(tracingVariable);
     if (!status) {
         LERROR("FAILED TO LOAD TRACING VARIABLE: " << tracingVariable);
@@ -441,10 +519,12 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     bool convertToCartesian = false;
 
     if (model == "batsrus") {
+        outFieldlinesState._model = outFieldlinesState.Model::batsrus;
         innerBoundaryLimit = 2.5f; // TODO specify in Lua
         scalingFactor = R_E_TO_METER;
 
     } else if (model == "enlil") {
+        outFieldlinesState._model = outFieldlinesState.Model::enlil;
         innerBoundaryLimit = 0.11f; // TODO specify in Lua
         scalingFactor = A_U_TO_METER;
         convertToCartesian = true;

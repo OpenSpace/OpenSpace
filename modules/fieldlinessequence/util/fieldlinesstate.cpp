@@ -24,6 +24,16 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
+#include <ghoul/logging/logmanager.h>
+
+#include <fstream>
+
+namespace {
+    std::string _loggerCat = "FieldlineState";
+
+    const int CURRENT_VERSION = 0;
+}
+
 namespace openspace {
 
 FieldlinesState::FieldlinesState(size_t numLines) {
@@ -34,6 +44,86 @@ FieldlinesState::FieldlinesState(size_t numLines) {
 void FieldlinesState::reserveSize(size_t size) {
     _vertexPositions.reserve(size);
     _vertexColors.reserve(size);
+}
+
+/**
+ * @param absFilePath is the entire path to the file to save to including file extension
+ * Directory must exist. File is created.
+ * File is structured like this: Version 0
+ *  0. int                      - version number of binary state file! (in case something needs to be altered in the future, then increase CURRENT_VERSION)
+ *  1. double                   - _triggerTime
+ *  2. int                      - _model
+ *  3. bool                     - _isMorphable
+ *  4. size_t                   - _lineStart.size() == _lineCount.size()
+ *  5. size_t                   - _vertexPositions.size()
+ *  6. size_t                   - _extraVariables.size() == _extraVariableNames.size()
+ *  7. site_t                   - number of total bytes that ALL colorVariableNames consists of (Each such name is stored as a c_str which means it ends with the null char '\0' )
+ *  7. std::vector<GLint>       - _lineStart
+ *  8. std::vector<GLsizei>     - _lineCount
+ *  9. std::vector<glm::vec3>   - _vertexPositions
+ * 10. std::vector<float>       - _extraVariables
+ * 11. array of c_str           - strings nameing the extra variables. Each string end with null char '\0'
+ * 12. size_t                   - sizeof(_quickMorph) - Might not exist! (Might exist if _isMorphable is true)
+ * 13. std::vector<GLfloat>     - _quickMorph         - Might not exist!
+ */
+void FieldlinesState::saveStateToBinaryFile(const std::string& absFilePath) {
+    // Create the file
+    std::ofstream ofs(absFilePath, std::ofstream::binary | std::ofstream::trunc);
+    if (!ofs.is_open()) {
+        LERROR("Failed to save state to binary file at location: " << absFilePath);
+    }
+
+    size_t numLines         = _lineStart.size();
+    size_t numPoints        = _vertexPositions.size();
+    size_t numExtras        = _extraVariables.size();
+    std::string allExtraVarNamesInOne = "";
+    for (std::string str : _extraVariableNames) {
+        allExtraVarNamesInOne += str + '\0'; // Add the null char '\0' for easier reading
+    }
+    size_t numStringBytes = allExtraVarNamesInOne.size();
+
+
+    //------------------------------ WRITE EVERYTHING TO FILE ------------------------------
+    // WHICH VERSION OF BINARY FIELDLINES STATE FILE - IN CASE STRUCTURE CHANGES IN THE FUTURE
+    ofs.write( (char*)(&CURRENT_VERSION), sizeof( int ) );
+
+    //-------------------- WRITE META DATA FOR STATE --------------------------------
+    ofs.write( reinterpret_cast<char*>(&_triggerTime),      sizeof( _triggerTime ) );
+    ofs.write( reinterpret_cast<char*>(&_model),            sizeof( int ) );
+    ofs.write( reinterpret_cast<char*>(&_isMorphable),      sizeof( bool ) ); // Handle bool as a byte
+
+    ofs.write( reinterpret_cast<char*>(&numLines),          sizeof( size_t ) );
+    ofs.write( reinterpret_cast<char*>(&numPoints),         sizeof( size_t ) );
+    ofs.write( reinterpret_cast<char*>(&numExtras),         sizeof( size_t ) );
+    ofs.write( reinterpret_cast<char*>(&numStringBytes),    sizeof( size_t ) );
+
+    //---------------------- WRITE ALL ARRAYS OF DATA --------------------------------
+    ofs.write( reinterpret_cast<char*>(_lineStart.data()),       sizeof(GLint) *  numLines);
+    ofs.write( reinterpret_cast<char*>(_lineCount.data()),       sizeof(GLsizei) * numLines);
+    ofs.write( reinterpret_cast<char*>(_vertexPositions.data()), sizeof(glm::vec3) * numPoints);
+    // Write the data for each vector in _extraVariables
+    for (std::vector<float>& vec : _extraVariables) {
+        ofs.write( reinterpret_cast<char*>(vec.data()),  sizeof(float) * numPoints);
+    }
+    ofs.write( allExtraVarNamesInOne.c_str(), numStringBytes);
+}
+
+void FieldlinesState::setModel(const Model& modelNumber) {
+    switch (modelNumber) {
+        case batsrus : {
+                _model = modelNumber;
+                _modelName = "batsrus";
+            }
+            break;
+        case enlil : {
+                _model = modelNumber;
+                _modelName = "enlil";
+            }
+            break;
+        default :
+            LERROR("Unrecognised model!");
+            break;
+    }
 }
 
 } // namespace openspace

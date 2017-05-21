@@ -74,6 +74,9 @@ public:
                                    const std::string& separator = "_",
                                    const int& prettyIndentation = 1);
 
+    bool getFieldlinesStateFromBinary(const std::string& pathToBinaryFile,
+                                      FieldlinesState& outState);
+
     bool getFieldlinesState/*Json*/(const std::string& pathToJsonFile,
                             const bool shouldResample, //does const bool& make sense?
                             const int& numResamples,

@@ -33,6 +33,11 @@ namespace openspace {
 
 class FieldlinesState {
 public:
+    enum Model : int {
+        batsrus = 0,
+        enlil = 1
+    };
+
     FieldlinesState() {}
     FieldlinesState(size_t numLines);
     // ~FieldlinesState();
@@ -48,14 +53,19 @@ public:
     // TODO: start/trigger time as double in j2000 time
     double _triggerTime = -1.0;
 
-    //TODO bool _isMorphable = false;
+    bool _isMorphable = false;
 
     std::vector<std::vector<float>> _extraVariables;
     std::vector<std::string> _extraVariableNames;
 
     std::string _modelName = "";
+    Model _model;
 
     void reserveSize(size_t size);
+
+    void saveStateToBinaryFile(const std::string& absoluteFilePath);
+
+    void setModel(const Model& modelNumber);
 private:
 };
 
