@@ -326,7 +326,6 @@ bool RenderableFieldlinesSequence::initialize() {
                                                                resamplingOption,
                                                                colorizingFloatVars,
                                                                colorizingMagVars,
-                                                               _startTimes,
                                                                _states[i]);
 
            FieldlinesSequenceManager::ref().saveFieldlinesStateAsJson(_states[i],
@@ -338,6 +337,7 @@ bool RenderableFieldlinesSequence::initialize() {
                                                                       // separator,
                                                                       // indentations
                                                                       );
+            _startTimes.push_back(_states[i]._triggerTime);
         }
     } else if (_tracingMethod == keyTracingMethodPreTraced) {
         allowSeedPoints = false;
@@ -378,8 +378,9 @@ bool RenderableFieldlinesSequence::initialize() {
                                                                _isMorphing,
                                                                numResamples,
                                                                resamplingOption,
-                                                               _startTimes,
                                                                _states[i]);
+            // TODO: Move elsewhere
+            _startTimes.push_back(_states[i]._triggerTime);
         }
 
         // TODO specify saveJsonState in LUA;
@@ -414,10 +415,10 @@ bool RenderableFieldlinesSequence::initialize() {
         // Approximate the end time of last state (and for the sequence as a whole)
         _seqStartTime = _startTimes[0];
 
-        double lastStateStart = _startTimes[_numberOfStates-1];
+        double lastStateStart = _startTimes[_numberOfStates - 1];
         if (_numberOfStates > 1) {
             double avgTimeOffset = (lastStateStart - _seqStartTime) /
-                                   (static_cast<double>(_numberOfStates) - 1.0);
+                                   (static_cast<double>(_numberOfStates - 1));
             _seqEndTime =  lastStateStart + avgTimeOffset;
         } else {
             _isMorphing = false;

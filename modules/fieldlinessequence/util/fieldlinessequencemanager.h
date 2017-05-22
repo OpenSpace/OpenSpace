@@ -89,7 +89,6 @@ public:
                             const bool shouldResample, //does const bool& make sense?
                             const int& numResamples,
                             const int& resamplingOption,
-                            std::vector<double>& startTimes,
                             FieldlinesState& outFieldlinesStates);
 
     bool getFieldlinesState/*Cdf*/(const std::string& pathToCdfFile,
@@ -101,7 +100,6 @@ public:
                             const int& resamplingOption,
                             std::vector<std::string>& colorizingFloatVars,
                             std::vector<std::string>& colorizingMagnitudeVars,
-                            std::vector<double>& startTimes,
                             FieldlinesState& outFieldlinesStates);
 
     void setQuickMorphBooleans(std::vector<FieldlinesState>& states,

@@ -386,7 +386,6 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         const bool shouldResample, //does const bool& make sense?
         const int& numResamples,
         const int& resamplingOption,
-        std::vector<double>& startTimes,
         FieldlinesState& outFieldlinesState) {
 
 
@@ -446,9 +445,6 @@ bool FieldlinesSequenceManager::getFieldlinesState(
             outFieldlinesState._extraVariables.push_back(it.value());
         }
 
-        // TODO: startTime should not be set here!
-        startTimes.push_back(outFieldlinesState._triggerTime);
-
     } else {
         // in the json file I have gotten from CCMC, fieldline data is structured like this:
         // {
@@ -480,13 +476,13 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         // Check if the json file contains a trigger time
         if (jfile.find("_triggerTime") != jfile.end()) {
           // there is an entry for key "trigger_time"
-            startTimes.push_back(jfile["_triggerTime"]);
+            outFieldlinesState._triggerTime = jfile["_triggerTime"];
         } else {
             // LWARNING("JSON FILE DOESN'T CONTAIN A TRIGGER TIME. USING DEFAULT: July 12th 2012 at 00:00:00:000");
             // startTimes.push_back(395323200.0);
 
             LWARNING("JSON FILE DOESN'T CONTAIN A TRIGGER TIME. USING DEFAULT: March 15th 2015 at 00:00:00:000");
-            startTimes.push_back(479649600.0);
+            outFieldlinesState._triggerTime = 479649600.0;
         }
 
         // iterate through each line
@@ -521,9 +517,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
             outFieldlinesState._lineCount.push_back(static_cast<GLsizei>(pointCount));
             outFieldlinesState._lineStart.push_back(static_cast<GLint>(lineStart));
         }
-
     }
-
 
     return true;
 }
@@ -538,7 +532,6 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         const int& resamplingOption,
         std::vector<std::string>& colorizingFloatVars,
         std::vector<std::string>& colorizingMagVars,
-        std::vector<double>& startTimes,
         FieldlinesState& outFieldlinesState) {
 
     // ----------------------------- CREATE KAMELEON OBJECT -----------------------------
@@ -812,7 +805,6 @@ bool FieldlinesSequenceManager::getFieldlinesState(
 
     // ------------------------ MAKE SURE STATE HAS A START TIME ------------------------
     double startTime = getTime(kameleon.get());
-    startTimes.push_back(startTime);
     outFieldlinesState._triggerTime = startTime;
     LDEBUG("State will start at " << startTime << " (J2000 Time)");
 
