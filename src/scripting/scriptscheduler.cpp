@@ -103,7 +103,7 @@ ScriptScheduler::ScheduledScript::ScheduledScript(const ghoul::Dictionary& dicti
     : time(-std::numeric_limits<double>::max())
 {
     std::string timeStr = dictionary.value<std::string>(KeyTime);
-    time = Time::ref().convertTime(timeStr);
+    time = Time::convertTime(timeStr);
     
     // If a universal script is specified, retrieve it and add a ; as a separator so that
     // it can be added to the other scripts

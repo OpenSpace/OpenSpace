@@ -180,7 +180,7 @@ void RenderableGlobe::render(const RenderData& data) {
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
-    _time = data.time;
+    _time = data.time.j2000Seconds();
     _distanceSwitch.update(data);
 
     glm::dmat4 translation =

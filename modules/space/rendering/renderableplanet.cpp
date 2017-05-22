@@ -531,7 +531,7 @@ void RenderablePlanet::update(const UpdateData& data) {
     // set spice-orientation in accordance to timestamp
     _stateMatrix = data.modelTransform.rotation;
     //_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
-    _time = data.time;
+    _time = data.time.j2000Seconds();
 }
 
 void RenderablePlanet::loadTexture() {

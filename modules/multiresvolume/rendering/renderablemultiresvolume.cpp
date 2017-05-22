@@ -528,8 +528,8 @@ std::vector<unsigned int> RenderableMultiresVolume::getBuffers() {
 }*/
 
 void RenderableMultiresVolume::update(const UpdateData& data) {
-        _timestep++;
-    _time = data.time;
+    _timestep++;
+    _time = data.time.j2000Seconds();
 
     if (_gatheringStats) {
         std::chrono::system_clock::time_point frameEnd = std::chrono::system_clock::now();
