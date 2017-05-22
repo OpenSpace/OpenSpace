@@ -52,4 +52,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNCHMULTIMODELGEOMETRY___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNCMULTIMODELGEOMETRY___H__
