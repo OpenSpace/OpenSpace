@@ -35,6 +35,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.h
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/asyncmultimodelgeometry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.h
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.h
@@ -54,6 +55,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrail.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailorbit.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletrailtrajectory.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/rendering/asyncmultimodelgeometry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceframebuffer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/screenspaceimage.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/translation/statictranslation.cpp

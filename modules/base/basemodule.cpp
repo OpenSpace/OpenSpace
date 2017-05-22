@@ -40,6 +40,7 @@
 #include <modules/base/rendering/renderableplane.h>
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/base/rendering/multimodelgeometry.h>
+#include <modules/base/rendering/asyncmultimodelgeometry.h>
 #include <modules/base/rendering/screenspaceimage.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
 
@@ -102,6 +103,7 @@ void BaseModule::internalInitialize() {
     auto fModelGeometry = FactoryManager::ref().factory<modelgeometry::ModelGeometry>();
     ghoul_assert(fModelGeometry, "Model geometry factory was not created");
     fModelGeometry->registerClass<modelgeometry::MultiModelGeometry>("MultiModelGeometry");
+	fModelGeometry->registerClass<modelgeometry::AsyncMultiModelGeometry>("AsyncMultiModelGeometry");
 }
 
 std::vector<documentation::Documentation> BaseModule::documentations() const {
