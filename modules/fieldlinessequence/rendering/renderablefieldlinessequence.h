@@ -68,7 +68,7 @@ private:
     std::vector<FieldlinesState> _states;
 
     int _activeStateIndex = -1;
-    int _numberOfStates;
+    size_t _numberOfStates;
 
     // Time variables
                                      // Sorted vector of each state's start time.
@@ -82,9 +82,7 @@ private:
 
 
     // ------------------------- LUA .mod file info -------------------------
-    ghoul::Dictionary _vectorVolumeInfo;
-    ghoul::Dictionary _fieldlineInfo;
-    ghoul::Dictionary _seedPointsInfo;
+    ghoul::Dictionary _dictionary;
 
     // ----------------------------- Properties -----------------------------
     properties::BoolProperty _isClampingColorValues;// == false => fragments are discarded
@@ -165,10 +163,13 @@ private:
     std::string _scalingFactorUnit;
 
     bool isWithinSequenceInterval();
+
     void updateActiveStateIndex();
     void updateColorBuffer();
     void updateMorphingBuffers();
     void updateVertexPosBuffer();
+    bool getSourceFilesFromDictionary(const std::string& fileExt, std::vector<std::string>& validSourceFilePaths);
+    bool getUnsignedIntFromModfile(const std::string& key, unsigned int& val);
 };
 
 } // namespace openspace

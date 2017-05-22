@@ -24,6 +24,7 @@
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 #include <modules/fieldlinessequence/util/fieldlinessequencemanager.h>
+#include <modules/fieldlinessequence/util/helperfunctions.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
@@ -46,16 +47,20 @@ namespace {
 }
 
 namespace {
-    const char* keyTracingMethod            = "TracingMethod";
-    // TODO CHOOSE METHODS BASED ON INTEGERS INSTEAD?
-    const char* keyTracingMethodPreTraced   = "PreTraced";
-    const char* keyTracingMethodPreProcess  = "PreProcess";
-    const char* keyTracingMethodLiveTrace   = "LiveTrace";
+    const char* keyTracingMethod                = "TracingMethod";
+    const char* keyTracingMethodPreTracedJson   = "PreTracedJson";
+    const char* keyTracingMethodPreTracedBinary = "PreTracedBinary";
+    const char* keyTracingMethodPreProcess      = "PreProcess";
+    const char* keyTracingMethodLiveTrace       = "LiveTrace";
 
-    const char* keyVertexListDirectory      = "VertexListDirectory";
-    const char* keyVertexListFileType       = "FileType";
-    const char* keyVertexListFileTypeJson   = "Json";
-    const char* keyVertexListFileTypeBinary = "Binary";
+    const char* keySourceFolder                 = "SourceFolder";
+    const char* keyStartStateOffset             = "StartStateOffset";
+    const char* keyStateStepSize                = "StateStepSize";
+    const char* keyMaxNumStates                 = "MaxNumStates";
+
+    // const char* keyVertexListFileType       = "FileType";
+    // const char* keyVertexListFileTypeJson   = "Json";
+    // const char* keyVertexListFileTypeBinary = "Binary";
 
     const char* keyVolume = "VectorVolume";
     const char* keyFieldlines = "Fieldlines";
@@ -79,9 +84,6 @@ namespace {
     // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
 
     enum colorMethod{UNIFORM, QUANTITY_DEPENDENT, CLASSIFIED};
-    // const int colorUniform = 0;
-    // const int colorUnitDependent = 1;
-    // const int colorClassified = 2;
 }
 
 
@@ -130,23 +132,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
 
     _loggerCat = "RenderableFieldlines [" + name + "]";
 
-    if (!dictionary.getValue(keyTracingMethod, _tracingMethod)) {
-        LERROR("Renderable does not contain a key for '" << keyTracingMethod << "'");
-        // deinitialize();
-    }
-
-    // Find VectorVolume, SeedPoint and Fieldlines Info from Lua
-    if (!dictionary.getValue(keyVolume, _vectorVolumeInfo)) {
-        LERROR("Renderable does not contain a key for '" << keyVolume << "'");
-    }
-
-    if (!dictionary.getValue(keyFieldlines, _fieldlineInfo)) {
-        LERROR("Renderable does not contain a key for '" << keyFieldlines << "'");
-    }
-
-    if (!dictionary.getValue(keySeedPoints, _seedPointsInfo)) {
-        LERROR("Renderable does not contain a key for '" << keySeedPoints << "'");
-    }
+    _dictionary = dictionary;
 
     // TODO: REMOVE HARDCODED PATH
     _transferFunctionPath = "/home/ccarlbau/workspace/OpenSpace/data/colortables/uniform_heatmap_bcgyr.txt";
@@ -158,15 +144,50 @@ bool RenderableFieldlinesSequence::isReady() const {
 }
 
 bool RenderableFieldlinesSequence::initialize() {
+    //--Extract common  info from LUA, applicable to all types of renderable fieldline sequences--//
+    std::string sourceFileExt = "";
+    std::vector<std::string> validSourceFilePaths;
+
+    // Determine what type of tracing method to use.
+    if (!_dictionary.getValue(keyTracingMethod, _tracingMethod)) {
+        LERROR("Renderable does not contain a key for '" << keyTracingMethod << "'");
+        return false;
+    } else {
+        if (_tracingMethod == keyTracingMethodPreProcess) {
+            sourceFileExt = "cdf";
+        } else if (_tracingMethod == keyTracingMethodPreTracedBinary) {
+            sourceFileExt = "osfls";
+        } else if (_tracingMethod == keyTracingMethodPreTracedJson) {
+            sourceFileExt = "json";
+        } else if (_tracingMethod == keyTracingMethodLiveTrace) {
+            sourceFileExt = "cdf";
+        } else {
+            LERROR("\"" << _tracingMethod << "\" is not a recognised key!");
+            return false;
+        }
+    }
+
+    if (!getSourceFilesFromDictionary(sourceFileExt, validSourceFilePaths)) {
+        return false;
+    }
+
+    _numberOfStates = validSourceFilePaths.size();
+    _states.reserve(_numberOfStates);
+    _startTimes.reserve(_numberOfStates);
+
     int numResamples;
     bool allowSeedPoints = false;
+    bool saveBinaries = false;
+    bool saveJson = false;
+    std::string jsonPath;
+    std::string binaryPath;
+    std::string saveFilePrefix;
 
     if (_tracingMethod == keyTracingMethodPreProcess) {
-        allowSeedPoints = true;
         // SeedPoints Info. Needs a .txt file containing seed points.
         // Each row should have 3 floats seperated by spaces
         std::string pathToSeedPointFile;
-        if (!_seedPointsInfo.getValue(keySeedPointsFile, pathToSeedPointFile)) {
+        if (!_dictionary.getValue(keySeedPointsFile, pathToSeedPointFile)) {
             LERROR(keySeedPoints << " doesn't specify a '" << keySeedPointsFile << "'" <<
                 "\n\tRequires a path to a .txt file containing seed point data." <<
                 "Each row should have 3 floats seperated by spaces.");
@@ -178,50 +199,13 @@ bool RenderableFieldlinesSequence::initialize() {
                 return false;
             }
         }
-
-        // VectorVolume Info. Needs a folder containing .CDF files
-        std::string pathToCdfDirectory;
-        if (!_vectorVolumeInfo.getValue(keyVolumeDirectory, pathToCdfDirectory)) {
-            LERROR(keyVolume << " doesn't specify a '" << keyVolumeDirectory <<
-                    "'\n\tRequires a path to a Directory containing .CDF files. " <<
-                    "Files must be of the same model and in sequence!");
-            return false;
-        }
-        // Everything essential is provided
-        std::vector<std::string> validCdfFilePaths;
-        const std::string fileExt = "cdf";
-        // const std::string fileExt = ".cdf";
-        if (!FieldlinesSequenceManager::ref().getAllFilePathsOfType(
-                pathToCdfDirectory, fileExt, validCdfFilePaths) ||
-                validCdfFilePaths.empty() ) {
-
-            LERROR("Failed to get valid "<< fileExt << " file paths from '"
-                    << pathToCdfDirectory << "'" );
-            return false;
-        }
-
-        // Only choose n number of volumes
-        float f_maxStates;
-        int numMaxStates = 0;
-        int numValidPaths = static_cast<int>(validCdfFilePaths.size());
-
-        if (!_vectorVolumeInfo.getValue(keyMaxNumVolumes, f_maxStates)) {
-            numMaxStates = numValidPaths;
-            LWARNING(keyVolume << " isn't specifying a " <<
-                     keyMaxNumVolumes << ". Using all valid paths found.");
-        } else {
-            numMaxStates = static_cast<int>(f_maxStates);
-            if (numMaxStates >= numValidPaths || numMaxStates == 0) {
-                numMaxStates = numValidPaths;
-            } else {
-                validCdfFilePaths.erase(validCdfFilePaths.begin() + numMaxStates,
-                                        validCdfFilePaths.end());
-            }
+        if (_seedPoints.size() > 0) {
+            allowSeedPoints = true;
         }
 
         // Specify which quantity to trace
         std::string tracingVariable;
-        if (!_vectorVolumeInfo.getValue(keyVolumeTracingVariable, tracingVariable)) {
+        if (!_dictionary.getValue(keyVolumeTracingVariable, tracingVariable)) {
             tracingVariable = "b"; //default: b = magnetic field.
             LWARNING(keyVolume << " isn't specifying a " <<
                      keyVolumeTracingVariable << ". Using default value: '" <<
@@ -230,7 +214,7 @@ bool RenderableFieldlinesSequence::initialize() {
 
         int maxSteps = 1000; // Default value
         float f_maxSteps;
-        if (!_fieldlineInfo.getValue(keyFieldlineMaxTraceSteps, f_maxSteps)) {
+        if (!_dictionary.getValue(keyFieldlineMaxTraceSteps, f_maxSteps)) {
             LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineMaxTraceSteps
                     << ". Using default value: " << maxSteps);
         } else {
@@ -238,7 +222,7 @@ bool RenderableFieldlinesSequence::initialize() {
         }
 
         bool userWantsMorphing;
-        if (!_fieldlineInfo.getValue(keyFieldlineShouldMorph, userWantsMorphing)) {
+        if (!_dictionary.getValue(keyFieldlineShouldMorph, userWantsMorphing)) {
             _isMorphing = false; // Default value
             LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph
                     << ". Using default: " << _isMorphing);
@@ -252,7 +236,7 @@ bool RenderableFieldlinesSequence::initialize() {
 
             float f_resamplingOption;
 
-            if(!_fieldlineInfo.getValue(keyFieldlineResampleOption, f_resamplingOption)) {
+            if(!_dictionary.getValue(keyFieldlineResampleOption, f_resamplingOption)) {
                 LWARNING(keyFieldlines << " isn't specifying " <<
                          keyFieldlineResampleOption << ". Default is set to " <<
                          resamplingOption);
@@ -262,7 +246,7 @@ bool RenderableFieldlinesSequence::initialize() {
 
             float f_numResamples;
 
-            if(_fieldlineInfo.getValue(keyFieldlineResamples, f_numResamples)) {
+            if(_dictionary.getValue(keyFieldlineResamples, f_numResamples)) {
                 if (resamplingOption == 4) {
                     LWARNING(keyFieldlineResampleOption << " 4 does not allow a custom" <<
                              " value for " << keyFieldlineResamples <<". Using (2 * " <<
@@ -277,11 +261,6 @@ bool RenderableFieldlinesSequence::initialize() {
                              keyFieldlineMaxTraceSteps << "+3) = " << numResamples);
                 }
             }
-        }
-
-        LDEBUG("Found the following valid .cdf files in " << pathToCdfDirectory);
-        for (std::string str : validCdfFilePaths) {
-            LDEBUG("\t" << str);
         }
 
         // TODO: This should be specified in LUA .mod file!
@@ -303,21 +282,10 @@ bool RenderableFieldlinesSequence::initialize() {
                                                               "ur", "utheta", "uphi"
                                                           });
 
-        // TODO this could be done in manager
-        _numberOfStates = validCdfFilePaths.size();
-        _states.reserve(_numberOfStates);
-        _startTimes.reserve(_numberOfStates);
-
-        // TODO specify saveJsonState in LUA;
-        std::string folder = "${OPENSPACE_DATA}/scene/fieldlinessequence/json_new/";
-        // std::string prefix = "";
-        // std::string separator = "-";
-        // int indentations = 1;
-
-        for (int i = 0; i < _numberOfStates; ++i) {
-           LDEBUG(validCdfFilePaths[i] << " is now being traced.");
+        for (size_t i = 0; i < _numberOfStates; ++i) {
+           LDEBUG(validSourceFilePaths[i] << " is now being traced.");
            _states.push_back(FieldlinesState(_seedPoints.size()));
-           FieldlinesSequenceManager::ref().getFieldlinesState(validCdfFilePaths[i],
+           FieldlinesSequenceManager::ref().getFieldlinesState(validSourceFilePaths[i],
                                                                tracingVariable,
                                                                _seedPoints,
                                                                maxSteps,
@@ -327,54 +295,22 @@ bool RenderableFieldlinesSequence::initialize() {
                                                                colorizingFloatVars,
                                                                colorizingMagVars,
                                                                _states[i]);
-
-           FieldlinesSequenceManager::ref().saveFieldlinesStateAsJson(_states[i],
-                                                                      folder,
-                                                                      false//,
-                                                                      ,"0",true,"_",0
-                                                                      // prefix,
-                                                                      // true,
-                                                                      // separator,
-                                                                      // indentations
-                                                                      );
             _startTimes.push_back(_states[i]._triggerTime);
         }
-    } else if (_tracingMethod == keyTracingMethodPreTraced) {
+
+    } else if (_tracingMethod == keyTracingMethodPreTracedJson) {
         allowSeedPoints = false;
-        // TODO: DON'T HARDCODE.. GET FROM LUA
-        std::string jsonFolder = "${OPENSPACE_DATA}/scene/fieldlinessequence/enlilMarch2015/";
-        std::vector<std::string> validJsonFilePaths;
-        FieldlinesSequenceManager::ref().getAllFilePathsOfType(jsonFolder,
-                                                               "json",
-                                                               validJsonFilePaths);
-        // std::vector<std::string> validJsonFilePaths{"${OPENSPACE_DATA}/scene/fieldlinessequence/json_new1/"};
-        // std::vector<std::string> validJsonFilePaths{"C:/Users/oskar/Develop/workspace/OpenSpace/data/scene/fieldlinessequence/precalculatedjson/fieldline_samples.json "};
-
-
-        // Only choose n number of volumes
-        // int numMaxStates = 20;
-        // int numValidPaths = static_cast<int>(validJsonFilePaths.size());
-        // validJsonFilePaths.erase(validJsonFilePaths.begin() + numMaxStates,
-        //                                 validJsonFilePaths.end());
-
-        LDEBUG("Found the following valid .json files in " << jsonFolder);
-        for (std::string str : validJsonFilePaths) {
-            LDEBUG("\t" << str);
-        }
 
         LERROR("TODO: allow Morphing for provided vertex lists!");
         _isMorphing = false;
         int resamplingOption = 0;   // TODO: implement morphing
         numResamples = 0;       // TODO: implement morphing
-        _numberOfStates = validJsonFilePaths.size();
-        _states.reserve(_numberOfStates);
-        _startTimes.reserve(_numberOfStates);
 
-        for (int i = 0; i < _numberOfStates; ++i) {
-            LDEBUG(validJsonFilePaths[i] << " is now being processed.");
+        for (size_t i = 0; i < _numberOfStates; ++i) {
+            LDEBUG(validSourceFilePaths[i] << " is now being processed.");
             FieldlinesState tmpState;
             _states.push_back(tmpState);
-            FieldlinesSequenceManager::ref().getFieldlinesState(validJsonFilePaths[i],
+            FieldlinesSequenceManager::ref().getFieldlinesState(validSourceFilePaths[i],
                                                                _isMorphing,
                                                                numResamples,
                                                                resamplingOption,
@@ -383,19 +319,20 @@ bool RenderableFieldlinesSequence::initialize() {
             _startTimes.push_back(_states[i]._triggerTime);
         }
 
-        // TODO specify saveJsonState in LUA;
-        // std::string folder = "${OPENSPACE_DATA}/scene/fieldlinessequence/json_new/";
-        // std::string prefix = "jsonConv";
-        // std::string separator = "-";
-        // int indentations = 1;
+    } else if (_tracingMethod == keyTracingMethodPreTracedBinary) {
+        allowSeedPoints = false;
 
-        // FieldlinesSequenceManager::ref().saveFieldlinesStateAsJson(_states[0],
-        //                                                            folder,
-        //                                                            false,
-        //                                                            prefix,
-        //                                                            true,
-        //                                                            separator,
-        //                                                            indentations);
+        for (size_t i = 0; i < _numberOfStates; ++i) {
+            LDEBUG(validSourceFilePaths[i] << " is now being processed.");
+            FieldlinesState tmpState;
+            _states.push_back(tmpState);
+            bool statuss = FieldlinesSequenceManager::ref().getFieldlinesStateFromBinary(
+                validSourceFilePaths[i],
+                _states[i]);
+
+            // TODO: Move elsewhere
+            _startTimes.push_back(_states[i]._triggerTime);
+        }
 
     } else if (_tracingMethod == keyTracingMethodLiveTrace) {
         LERROR("NOT YET INCORPORATED INTO THIS CLASS! TODO, TODO TODO!");
@@ -403,9 +340,10 @@ bool RenderableFieldlinesSequence::initialize() {
         return false;
     } else {
         LERROR(keyTracingMethod << " isn't specifying a valid tracing method.\n\t"
-                << "Valid methods are: " << keyTracingMethodPreTraced << ", "
+                << "Valid methods are: " << keyTracingMethodPreTracedJson << ", "
+                                         << keyTracingMethodPreTracedBinary << ", "
                                          << keyTracingMethodPreProcess << " and "
-                                         << keyTracingMethodPreTraced);
+                                         << keyTracingMethodLiveTrace);
         return false;
     }
 
@@ -508,7 +446,7 @@ bool RenderableFieldlinesSequence::initialize() {
     if (_isMorphing) {
         LDEBUG("Optimising morphing!");
         float quickMorphDist;
-        if(!_fieldlineInfo.getValue(keyFieldlineQuickMorphDistance, quickMorphDist)) {
+        if(!_dictionary.getValue(keyFieldlineQuickMorphDistance, quickMorphDist)) {
             quickMorphDist = 20.f * R_E_TO_METER; // 2 times Earth's radius
             LWARNING(keyFieldlines << " isn't specifying " <<
                      keyFieldlineQuickMorphDistance <<
@@ -1009,6 +947,57 @@ void RenderableFieldlinesSequence::updateVertexPosBuffer() {
 
     glEnableVertexAttribArray(_vertAttrVertexPos);
     glVertexAttribPointer(_vertAttrVertexPos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+}
+
+bool RenderableFieldlinesSequence::getUnsignedIntFromModfile(const std::string& key, unsigned int& val) {
+    float f_val;
+    if (!_dictionary.getValue(key, f_val)) {
+        LDEBUG("Key \"" << key << "\" wasn't found!");
+        return false;
+    }
+    val = static_cast<unsigned int>(f_val);
+    return true;
+}
+
+bool RenderableFieldlinesSequence::getSourceFilesFromDictionary(
+        const std::string& fileExt, std::vector<std::string>& validSourceFilePaths) {
+
+    // ----------------- GET SOURCE FOLDER AS SPECIFIED IN MOD FILE --------------------
+    std::string pathToSourceFolder;
+    if (!_dictionary.getValue(keySourceFolder, pathToSourceFolder)) {
+        LERROR("Mod file doesn't specify a '" << keySourceFolder);
+        return false;
+    }
+
+    // ------------- GET ALL FILES OF SPECIFIED TYPE FROM SOURCE FOLDER ----------------
+    if (!FieldlinesSequenceManager::ref().getAllFilePathsOfType(
+            pathToSourceFolder, fileExt, validSourceFilePaths) ||
+            validSourceFilePaths.empty() ) {
+
+        LERROR("Failed to get valid "<< fileExt << " file paths from '"
+                << pathToSourceFolder << "'" );
+        return false;
+    }
+
+    // Set default values
+    unsigned int startStateOffset = 0;  // 0 => start at first file in folder
+    unsigned int stateStepSize    = 1;  // 1 => every state (no state skipping)
+    unsigned int numMaxStates     = 0;  // 0 => means no limit
+
+    // Update default values if provided in mod file
+    getUnsignedIntFromModfile(keyStartStateOffset, startStateOffset);
+    getUnsignedIntFromModfile(keyStateStepSize,    stateStepSize);
+    getUnsignedIntFromModfile(keyMaxNumStates,     numMaxStates);
+
+    // Extract the file paths that fulfill the specification
+    //VectorHelper vh;
+    vector_extraction::extractChosenElements(startStateOffset, stateStepSize, numMaxStates, validSourceFilePaths);
+
+    LDEBUG("Found the following valid ." << fileExt << " files in " << pathToSourceFolder);
+    for (std::string str : validSourceFilePaths) {
+        LDEBUG("\t" << str);
+    }
+    return true;
 }
 
 } // namespace openspace
