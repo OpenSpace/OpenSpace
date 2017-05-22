@@ -27,6 +27,7 @@ include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinessequencemanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/helperfunctions.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.h
     ${CMAKE_CURRENT_SOURCE_DIR}/ext/nlohmann/json/json.hpp
     # ${OPENSPACE_BASE_DIR}/modules/iswa/ext/json/json.hpp
