@@ -35,10 +35,6 @@ namespace openspace {
 * Base class for keyframes
 */
 struct KeyframeBase {
-    KeyframeBase(size_t i, double t)
-        : id(i)
-        , timestamp(t)
-    {}
     size_t id;
     double timestamp;
 };
