@@ -29,7 +29,10 @@
 
 #include <ghoul/ghoul.h>
 #include <ghoul/logging/consolelog.h>
+#include <ghoul/misc/invariants.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+
+#include <numeric>
 
 namespace openspace {
 namespace globebrowsing {
@@ -101,12 +104,11 @@ MemoryAwareTileCache::~MemoryAwareTileCache()
 void MemoryAwareTileCache::clear() {
     LINFO("Clearing tile cache");
     _numTextureBytesAllocatedOnCPU = 0;
-    for (TextureContainerMap::iterator it = _textureContainerMap.begin();
-        it != _textureContainerMap.end();
-        it++)
+    for (std::pair<const TileTextureInitData::HashKey,
+        TextureContainerTileCache>& p : _textureContainerMap)
     {
-        it->second.first->reset();
-        it->second.second->clear();
+        p.second.first->reset();
+        p.second.second->clear();
     }
     LINFO("Tile cache cleared");
 }
@@ -136,7 +138,9 @@ void MemoryAwareTileCache::assureTextureContainerExists(
 void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
     LINFO("Resetting tile cache size");
     ghoul_assert(_textureContainerMap.size() > 0, "Texture containers must exist.");
+  
     size_t sumTextureTypeSize = 0;
+  
     for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
         it != _textureContainerMap.cend();
         it++)
@@ -144,6 +148,7 @@ void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
         sumTextureTypeSize +=
             it->second.first->tileTextureInitData().totalNumBytes();
     }
+  
     size_t numTexturesPerType = estimatedSize / sumTextureTypeSize;
     resetTextureContainerSize(numTexturesPerType);
     LINFO("Tile cache size was reset");
@@ -151,12 +156,11 @@ void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
 
 void MemoryAwareTileCache::resetTextureContainerSize(size_t numTexturesPerTextureType) {
     _numTextureBytesAllocatedOnCPU = 0;
-    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
-        it != _textureContainerMap.cend();
-        it++)
+    for (std::pair<const TileTextureInitData::HashKey,
+        TextureContainerTileCache>& p : _textureContainerMap)
     {
-        it->second.first->reset(numTexturesPerTextureType);
-        it->second.second->clear();
+        p.second.first->reset(numTexturesPerTextureType);
+        p.second.second->clear();
     }
 }
 
@@ -181,7 +185,7 @@ Tile MemoryAwareTileCache::get(ProviderTileKey key) {
             return it->second.second->get(key);
         }
     }
-    ghoul_assert(false, "");
+    ghoul_assert(false, "Tile did not exsist in cache. Call 'exist()' first");
 }
 
 ghoul::opengl::Texture* MemoryAwareTileCache::getTexture(
@@ -207,6 +211,7 @@ ghoul::opengl::Texture* MemoryAwareTileCache::getTexture(
 void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
     std::shared_ptr<RawTile> rawTile)
 {
+    ghoul_precondition(rawTile, "RawTile can not be null");
     using ghoul::opengl::Texture;
     
     if (rawTile->error != RawTile::ReadError::None) {

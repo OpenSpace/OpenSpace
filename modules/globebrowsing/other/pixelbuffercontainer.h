@@ -63,7 +63,7 @@ public:
      * is returned. The mapping can fail if the buffer identified with <code>key</code>
      * is already mapped or if something else failed.
      */
-    void* mapBuffer(KeyType key, GLenum  access);
+    void* mapBuffer(KeyType key, PixelBuffer::Access access);
     
     /**
      * Finds a Pixel buffer and maps a range of it if it is available.

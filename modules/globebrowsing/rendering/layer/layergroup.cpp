@@ -50,7 +50,6 @@ LayerGroup::LayerGroup(layergroupid::ID id, const ghoul::Dictionary& dict)
             LERRORC(e.component, e.message);
             continue;
         }
-        //_layers.push_back(std::make_shared<Layer>(layerDict));
     }
 
     for (const auto& layer : _layers) {
@@ -84,7 +83,7 @@ int LayerGroup::pileSize() const{
 void LayerGroup::onChange(std::function<void(void)> callback) {
     _onChangeCallback = callback;
     _levelBlendingEnabled.onChange(callback);
-    for (const auto& layer : _layers) {
+    for (const std::shared_ptr<Layer>& layer : _layers) {
         layer->onChange(callback);
     }
 }

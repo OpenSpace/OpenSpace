@@ -111,7 +111,7 @@ struct TileIndex {
     TileHashKey hashKey() const;
 
     inline bool operator==(const TileIndex& other) const {
-        return x == other.x && y == other.y && level == other.level;
+        return (x == other.x) && (y == other.y) && (level == other.level);
     }
 };
 

@@ -123,7 +123,7 @@ LayerShaderManager::~LayerShaderManager() {
     }
 }
 
-ghoul::opengl::ProgramObject* LayerShaderManager::programObject() {
+ghoul::opengl::ProgramObject* LayerShaderManager::programObject() const {
     ghoul_assert(_programObject, "Program does not exist. Needs to be compiled!");
     return _programObject.get();
 }

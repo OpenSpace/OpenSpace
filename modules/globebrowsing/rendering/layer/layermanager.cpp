@@ -41,7 +41,7 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
 
     // Create all the categories of tile providers
     for (size_t i = 0; i < layerGroupsDict.size(); i++) {
-        std::string groupName = layergroupid::LAYER_GROUP_NAMES[i];
+        const std::string& groupName = layergroupid::LAYER_GROUP_NAMES[i];
         ghoul::Dictionary layerGroupDict = 
             layerGroupsDict.value<ghoul::Dictionary>(groupName);
 
@@ -50,7 +50,7 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
                 static_cast<layergroupid::ID>(i), layerGroupDict));
     }
         
-    for (const auto& layerGroup : _layerGroups) {
+    for (const std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
         addPropertySubOwner(layerGroup.get());
     }
 }
@@ -77,14 +77,14 @@ const std::vector<std::shared_ptr<LayerGroup>>& LayerManager::layerGroups() cons
 }
 
 void LayerManager::update() {
-    for (auto& layerGroup : _layerGroups) {
+    for (std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
         layerGroup->update();
     }
 }
 
 void LayerManager::reset(bool includeDisabled) {
-    for (auto& layerGroup : _layerGroups) {
-        for (auto layer : layerGroup->layers()) {
+    for (std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
+        for (std::shared_ptr<Layer> layer : layerGroup->layers()) {
             if (layer->enabled() || includeDisabled) {
                 layer->tileProvider()->reset();
             }
@@ -147,7 +147,7 @@ bool LayerManager::shouldPerformPreProcessingOnLayergroup(layergroupid::ID id) {
 }
 
 void LayerManager::onChange(std::function<void(void)> callback) {
-    for (auto& layerGroup : _layerGroups) {
+    for (std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
         layerGroup->onChange(callback);
     }
 }

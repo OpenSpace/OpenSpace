@@ -32,6 +32,7 @@
 #include <modules/globebrowsing/other/pixelbuffercontainer.h>
 #include <modules/globebrowsing/tile/tileindex.h>
 
+#include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
 #include <map>
@@ -80,10 +81,7 @@ public:
     float noDataValueAsFloat() const;
 
 protected:
-    enum class ResetRawTileDataReader {
-        Yes,
-        No
-    };
+    using ResetRawTileDataReader = ghoul::Boolean;
 
     enum class ResetMode {
         ShouldResetAll,

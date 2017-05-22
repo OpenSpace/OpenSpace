@@ -47,32 +47,32 @@ TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
 { }
 
 TileLoadJob::~TileLoadJob() {
-	if (_hasOwnershipOfData) {
-		ghoul_assert(_rawTile->imageData, "Image data must exist");
-		delete [] _rawTile->imageData;
-	}
+    if (_hasOwnershipOfData) {
+        ghoul_assert(_rawTile->imageData, "Image data must exist");
+        delete [] _rawTile->imageData;
+    }
 }
 
 void TileLoadJob::execute() {
     size_t numBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
     char* dataPtr = nullptr;
     if (_rawTileDataReader->tileTextureInitData().shouldAllocateDataOnCPU() ||
-    	!_pboMappedDataDestination)
+        !_pboMappedDataDestination)
     {
-    	dataPtr = new char[numBytes];
-    	_hasOwnershipOfData = true;
+        dataPtr = new char[numBytes];
+        _hasOwnershipOfData = true;
     }
     _rawTile = _rawTileDataReader->readTileData(
-    	_chunkIndex, dataPtr, _pboMappedDataDestination);
+        _chunkIndex, dataPtr, _pboMappedDataDestination);
 }
 
 std::shared_ptr<RawTile> TileLoadJob::product() {
-	_hasOwnershipOfData = false;
+    _hasOwnershipOfData = false;
     return _rawTile;
 }
 
 bool TileLoadJob::hasOwnershipOfData() const {
-	return _hasOwnershipOfData;
+    return _hasOwnershipOfData;
 }
 
 } // namespace globebrowsing

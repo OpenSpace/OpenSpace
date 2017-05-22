@@ -120,10 +120,6 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
         rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);
         rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile, io));
     }
-  
-    if (rawTile->error != RawTile::ReadError::None) {
-        int hej = 0;
-    }
 
     return rawTile;
 }

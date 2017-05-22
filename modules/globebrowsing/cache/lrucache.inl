@@ -40,7 +40,9 @@ void LRUCache<KeyType, ValueType, HasherType>::clear() {
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
-void LRUCache<KeyType, ValueType, HasherType>::put(const KeyType& key, const ValueType& value) {
+void LRUCache<KeyType, ValueType, HasherType>::put(const KeyType& key,
+                                                   const ValueType& value)
+{
     putWithoutCleaning(key, value);
     clean();
 }
@@ -48,7 +50,7 @@ void LRUCache<KeyType, ValueType, HasherType>::put(const KeyType& key, const Val
 template<typename KeyType, typename ValueType, typename HasherType>
 std::vector<std::pair<KeyType, ValueType>>
 LRUCache<KeyType, ValueType, HasherType>::putAndFetchPopped(const KeyType& key,
-    const ValueType& value)
+                                                            const ValueType& value)
 {
     putWithoutCleaning(key, value);
     return cleanAndFetchPopped();
@@ -68,8 +70,8 @@ bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
         _itemList.erase(it->second);
         _itemMap.erase(it);
         // Bump to front
-        _itemList.push_front(std::make_pair(key, value));
-        _itemMap.insert(std::make_pair(key, _itemList.begin()));
+        _itemList.emplace_front(key, value);
+        _itemMap.emplace(key, _itemList.begin());
         return true;
     } else {
         return false;
@@ -120,7 +122,7 @@ size_t LRUCache<KeyType, ValueType, HasherType>::size() const {
 
 template<typename KeyType, typename ValueType, typename HasherType>
 void LRUCache<KeyType, ValueType, HasherType>::putWithoutCleaning(const KeyType& key,
-    const ValueType& value)
+                                                                  const ValueType& value)
 {
     auto it = _itemMap.find(key);
     if (it != _itemMap.end()) {
@@ -134,7 +136,8 @@ void LRUCache<KeyType, ValueType, HasherType>::putWithoutCleaning(const KeyType&
 template<typename KeyType, typename ValueType, typename HasherType>
 void LRUCache<KeyType, ValueType, HasherType>::clean() {
     while (_itemMap.size() > _maximumCacheSize) {
-        auto lastIt = _itemList.end(); lastIt--;
+        auto lastIt = _itemList.end();
+        lastIt--;
         _itemMap.erase(lastIt->first);
         _itemList.pop_back();
     }

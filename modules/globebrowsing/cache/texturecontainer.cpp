@@ -25,65 +25,65 @@
 #include <modules/globebrowsing/cache/texturecontainer.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
-
 namespace openspace {
 namespace globebrowsing {
 namespace cache {
 
 TextureContainer::TextureContainer(TileTextureInitData initData, size_t numTextures)
-	: _initData(initData)
-	, _freeTexture(0)
-	, _numTextures(numTextures)
+    : _initData(initData)
+    , _freeTexture(0)
+    , _numTextures(numTextures)
 {
-	reset();
+    reset();
 }
 
 void TextureContainer::reset() {
-	_textures.clear();
-	_freeTexture = 0;
-	ghoul::opengl::Texture::AllocateData allocate =
-		_initData.shouldAllocateDataOnCPU() ?
-		ghoul::opengl::Texture::AllocateData::Yes :
-		ghoul::opengl::Texture::AllocateData::No;
-	for (size_t i = 0; i < _numTextures; ++i)
-	{
-		_textures.push_back(std::make_unique<ghoul::opengl::Texture>(
-			_initData.dimensionsWithPadding(),
-			_initData.ghoulTextureFormat(),
-			_initData.glTextureFormat(),
-			_initData.glType(),
-			ghoul::opengl::Texture::FilterMode::Linear,
-			ghoul::opengl::Texture::WrappingMode::ClampToEdge,
-			allocate
-			));
-		_textures.back()->setDataOwnership(
-			ghoul::opengl::Texture::TakeOwnership::Yes);
-		_textures.back()->uploadTexture();
-		_textures.back()->setFilter(
-			ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-	}
+    _textures.clear();
+    _freeTexture = 0;
+    ghoul::opengl::Texture::AllocateData allocate =
+        _initData.shouldAllocateDataOnCPU() ?
+        ghoul::opengl::Texture::AllocateData::Yes :
+        ghoul::opengl::Texture::AllocateData::No;
+    for (size_t i = 0; i < _numTextures; ++i)
+    {
+        auto tex = std::make_unique<ghoul::opengl::Texture>(
+            _initData.dimensionsWithPadding(),
+            _initData.ghoulTextureFormat(),
+            _initData.glTextureFormat(),
+            _initData.glType(),
+            ghoul::opengl::Texture::FilterMode::Linear,
+            ghoul::opengl::Texture::WrappingMode::ClampToEdge,
+            allocate
+        );
+        
+        tex->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::Yes);
+        tex->uploadTexture();
+        tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        
+        _textures.push_back(std::move(tex));
+    }
 }
 
 void TextureContainer::reset(size_t numTextures) {
-	_numTextures = numTextures;
-	reset();
+    _numTextures = numTextures;
+    reset();
 }
 
 ghoul::opengl::Texture* TextureContainer::getTextureIfFree() {
-	ghoul::opengl::Texture* texture = nullptr;
-	if (_freeTexture < _textures.size()) {
-		texture = _textures[_freeTexture].get();
-		_freeTexture++;
-	}
-	return texture;
+    ghoul::opengl::Texture* texture = nullptr;
+    if (_freeTexture < _textures.size()) {
+        texture = _textures[_freeTexture].get();
+        _freeTexture++;
+    }
+    return texture;
 }
 
 const openspace::globebrowsing::TileTextureInitData& TextureContainer::tileTextureInitData() const {
-	return _initData;
+    return _initData;
 };
 
 size_t TextureContainer::size() const {
-	return _textures.size();
+    return _textures.size();
 };
 
 }

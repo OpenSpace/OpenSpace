@@ -45,16 +45,26 @@ public:
      * See: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glBufferData.xhtml
      */
 	enum class Usage {
-		STREAM_DRAW = GL_STREAM_DRAW,
-		STREAM_READ = GL_STREAM_READ,
-		STREAM_COPY = GL_STREAM_COPY,
-		STATIC_DRAW = GL_STATIC_DRAW,
-		STATIC_READ = GL_STATIC_READ,
-		STATIC_COPY = GL_STATIC_COPY,
-		DYNAMIC_DRAW = GL_DYNAMIC_DRAW,
-		DYNAMIC_READ = GL_DYNAMIC_READ,
-		DYNAMIC_COPY = GL_DYNAMIC_COPY
+		StreamDraw = GL_STREAM_DRAW,
+		StreamRead = GL_STREAM_READ,
+		StreamCopy = GL_STREAM_COPY,
+		StaticDraw = GL_STATIC_DRAW,
+		StaticRead = GL_STATIC_READ,
+		StaticCopy = GL_STATIC_COPY,
+		DynamicDraw = GL_DYNAMIC_DRAW,
+		DynamicRead = GL_DYNAMIC_READ,
+		DynamicCopy = GL_DYNAMIC_COPY
 	};
+
+    /**
+     * Access hints for OpenGL buffer mapping
+     * See: https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glMapBuffer.xml
+     */
+    enum class Access {
+        ReadOnly = GL_READ_ONLY,
+        WriteOnly = GL_WRITE_ONLY,
+        ReadWrite = GL_READ_WRITE
+    };
 
     /**
      * Allocates <code>numBytes</code> bytes on the GPU and creates an ID for the pixel
@@ -77,7 +87,7 @@ public:
      * \returns the DMA address to the mapped buffer. Returns nullptr if the mapping
      * failed
      */
-    void* mapBuffer(GLenum access);
+    void* mapBuffer(Access access);
     
     /**
      * Maps an address pointer to GPU direct memory access. Gives access to a range of

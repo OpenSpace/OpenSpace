@@ -46,7 +46,7 @@ std::vector<std::pair<ChunkTile, const LayerRenderSettings*> >
     getTilesAndSettingsSortedByHighestResolution(const LayerGroup& layerGroup,
     const TileIndex& tileIndex);
 std::vector<std::pair<ChunkTile, const LayerRenderSettings*> >
-    getTilesAndSettingsUnSorted(const LayerGroup& layerGroup,
+    getTilesAndSettingsUnsorted(const LayerGroup& layerGroup,
 	const TileIndex& tileIndex);
 
 void ascendToParent(TileIndex& tileIndex, TileUvTransform& uv);

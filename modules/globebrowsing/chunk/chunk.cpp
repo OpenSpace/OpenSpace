@@ -104,7 +104,7 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
     const size_t HeightChannel = 0;
     const LayerGroup& heightmaps = layerManager->layerGroup(layergroupid::HeightLayers);
     std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
-        tileselector::getTilesAndSettingsUnSorted(
+        tileselector::getTilesAndSettingsUnsorted(
             heightmaps, _tileIndex);
 
     bool lastHadMissingData = true;

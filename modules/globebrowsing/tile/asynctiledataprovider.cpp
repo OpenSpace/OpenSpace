@@ -64,7 +64,7 @@ bool AsyncTileDataProvider::enqueueTileIO(const TileIndex& tileIndex) {
     if (_resetMode == ResetMode::ShouldNotReset && satisfiesEnqueueCriteria(tileIndex)) {
         if (_pboContainer) {
             char* dataPtr = static_cast<char*>(_pboContainer->mapBuffer(
-                tileIndex.hashKey(), GL_WRITE_ONLY));
+                tileIndex.hashKey(), PixelBuffer::Access::WriteOnly));
             if (dataPtr) {
                 auto job = std::make_shared<TileLoadJob>(_rawTileDataReader, tileIndex,
                     dataPtr);
@@ -226,7 +226,7 @@ void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileData
     if (_globeBrowsingModule->tileCache()->shouldUsePbo()) {
         size_t pboNumBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
         _pboContainer = std::make_unique<PixelBufferContainer<TileIndex::TileHashKey>>(
-            pboNumBytes, PixelBuffer::Usage::STREAM_DRAW, 10
+            pboNumBytes, PixelBuffer::Usage::StreamDraw, 10
         );
     }
     else {

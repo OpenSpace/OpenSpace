@@ -33,6 +33,7 @@
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
+#include <ghoul/misc/boolean.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
@@ -46,10 +47,7 @@ class GeodeticPatch;
 
 class RawTileDataReader {
 public:
-    enum class PerformPreprocessing {
-        Yes,
-        No
-    };
+    using PerformPreprocessing = ghoul::Boolean;
 
     RawTileDataReader(const TileTextureInitData& initData,
         PerformPreprocessing preprocess = PerformPreprocessing::No);

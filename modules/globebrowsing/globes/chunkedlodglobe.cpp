@@ -173,15 +173,16 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
     );
 
     // Get the tile providers for the height maps
-    const auto& heightMapLayers = _layerManager->layerGroup(layergroupid::HeightLayers).activeLayers();
+    const std::vector<std::shared_ptr<Layer>>& heightMapLayers =
+        _layerManager->layerGroup(layergroupid::HeightLayers).activeLayers();
         
-    for (const auto& layer : heightMapLayers) {
+    for (const std::shared_ptr<Layer>& layer : heightMapLayers) {
         tileprovider::TileProvider* tileProvider = layer->tileProvider();
         // Transform the uv coordinates to the current tile texture
         ChunkTile chunkTile = tileProvider->getChunkTile(tileIndex);
-        const auto& tile = chunkTile.tile;
-        const auto& uvTransform = chunkTile.uvTransform;
-        const auto& depthTransform = tileProvider->depthTransform();
+        const Tile& tile = chunkTile.tile;
+        const TileUvTransform& uvTransform = chunkTile.uvTransform;
+        const TileDepthTransform& depthTransform = tileProvider->depthTransform();
         if (tile.status() != Tile::Status::OK) {
             return 0;
         }

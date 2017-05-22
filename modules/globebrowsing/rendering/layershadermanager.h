@@ -82,12 +82,8 @@ public:
 
     /**
      * Returns a pointer to a <code>ProgramObject</code> for rendering tiles.
-     * \param <code>preprocessingData</code> determines wherer or not the shader
-     * program needs to be re-compiled. If <code>preprocessingData</code> is different
-     * from the last time this function was called the shader program will be
-     * recompiled before returned.
      */
-    ghoul::opengl::ProgramObject* programObject();
+    ghoul::opengl::ProgramObject* programObject() const;
 
     bool updatedOnLastCall();
     

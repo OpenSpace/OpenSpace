@@ -136,7 +136,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.limitLevelByAvailableData);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
   
-    std::function<void(void)> notifyShaderRecompilation = [&](){
+    auto notifyShaderRecompilation = [&](){
         _chunkedLodGlobe->notifyShaderRecompilation();
     };
     _generalProperties.atmosphereEnabled.onChange(notifyShaderRecompilation);

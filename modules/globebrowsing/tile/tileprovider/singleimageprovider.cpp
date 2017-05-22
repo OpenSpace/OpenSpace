@@ -75,8 +75,7 @@ void SingleImageProvider::update() {
 
 void SingleImageProvider::reset() {
     _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_imagePath);
-    auto tileStatus = _tileTexture ? Tile::Status::OK : Tile::Status::IOError;
-    auto tileMetaData = nullptr;
+    Tile::Status tileStatus = _tileTexture ? Tile::Status::OK : Tile::Status::IOError;
 
     if (!_tileTexture) {
         throw std::runtime_error(std::string("Unable to load texture '")
@@ -86,7 +85,7 @@ void SingleImageProvider::reset() {
     _tileTexture->uploadTexture();
     _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-    _tile = Tile(_tileTexture.get(), tileMetaData, tileStatus);
+    _tile = Tile(_tileTexture.get(), nullptr, tileStatus);
 }
 
 int SingleImageProvider::maxLevel() {

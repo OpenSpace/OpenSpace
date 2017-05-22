@@ -46,8 +46,8 @@ PixelBuffer::~PixelBuffer() {
     glDeleteBuffers(1, &_id);
 }
 
-void* PixelBuffer::mapBuffer(GLenum access) {
-    void* dataPtr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, access);
+void* PixelBuffer::mapBuffer(Access access) {
+    void* dataPtr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, static_cast<GLenum>(access));
     _isMapped = dataPtr ? true : false;
     return dataPtr;
 }

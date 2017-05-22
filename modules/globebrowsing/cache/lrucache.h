@@ -39,13 +39,16 @@ namespace cache {
 template<typename KeyType, typename ValueType, typename HasherType>
 class LRUCache {
 public:
+    using Item = std::pair<KeyType, ValueType>;
+    using Items = std::list<Item>;
+    
     /**
      * \param size is the maximum size of the cache given in number of cached items.
      */
     LRUCache(size_t size);
 
     void put(const KeyType& key, const ValueType& value);
-    std::vector<std::pair<KeyType, ValueType>> putAndFetchPopped(const KeyType& key, const ValueType& value);
+    std::vector<Item> putAndFetchPopped(const KeyType& key, const ValueType& value);
     void clear();
     bool exist(const KeyType& key) const;
     /**
@@ -59,23 +62,21 @@ public:
     /**
      * Pops the front of the queue.
      */
-    std::pair<KeyType, ValueType> popMRU();
+    Item popMRU();
     
     /**
      * Pops the back of the queue.
      */
-    std::pair<KeyType, ValueType> popLRU();
+    Item popLRU();
     size_t size() const;
 
 private:
     void putWithoutCleaning(const KeyType& key, const ValueType& value);
     void clean();
-    std::vector<std::pair<KeyType, ValueType>> cleanAndFetchPopped();
+    std::vector<Item> cleanAndFetchPopped();
 
-    using Item = std::pair<KeyType, ValueType>;
-    using Items = std::list<Item>;
     Items _itemList;
-    std::unordered_map<KeyType, decltype(_itemList.begin()), HasherType> _itemMap;
+    std::unordered_map<KeyType, typename Items::const_iterator, HasherType> _itemMap;
 
     size_t _maximumCacheSize;
 };
