@@ -73,6 +73,8 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 
 set(WEBGUI_SOURCES
   webguimodule.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/browser_client.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/renderer.cpp
   )
 set(WEBGUI_SOURCES_LINUX
   )
@@ -80,8 +82,7 @@ set(WEBGUI_SOURCES_MACOSX
   )
 set(WEBGUI_SOURCES_WINDOWS
   cefsimple.exe.manifest
-  cefsimple.rc
-  cefsimple_win.cc
+  cef_webgui.rc
   resource.h
   simple_handler_win.cc
   )
@@ -106,7 +107,7 @@ set(WEBGUI_HELPER_SOURCES_WINDOWS
 	process_helper_windows.cpp
 	)
 APPEND_PLATFORM_SOURCES(WEBGUI_HELPER_SOURCES)
-source_group(cefsimple FILES ${WEBGUI_HELPER_SOURCES})
+source_group(WebGUI\\\\helper FILES ${WEBGUI_HELPER_SOURCES})
 
 set(WEBGUI_RESOURCES_MAC_SOURCES_MACOSX
   mac/Info.plist
@@ -120,7 +121,7 @@ set(WEBGUI_RESOURCES_MAC_ENGLISH_LPROJ_SRCS_MACOSX
   mac/English.lproj/MainMenu.xib
   )
 APPEND_PLATFORM_SOURCES(WEBGUI_RESOURCES_MAC_ENGLISH_LPROJ_SRCS)
-source_group(cefsimple\\\\mac\\\\English.lproj FILES ${WEBGUI_RESOURCES_MAC_ENGLISH_LPROJ_SRCS})
+source_group(WebGUI\\\\mac\\\\English.lproj FILES ${WEBGUI_RESOURCES_MAC_ENGLISH_LPROJ_SRCS})
 
 set(WEBGUI_RESOURCES_SRCS
   ${WEBGUI_RESOURCES_MAC_SOURCES}
@@ -163,11 +164,15 @@ endif (OS_WINDOWS)
 # Create OpenSpace module.
 set(OPENSPACE_HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/webguimodule.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/browser_client.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/renderer.h
 )
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 
 set(OPENSPACE_SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/webguimodule.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/browser_client.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/renderer.cpp
 )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 

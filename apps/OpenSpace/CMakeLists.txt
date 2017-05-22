@@ -101,7 +101,7 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
         ${RESOURCE_FILE}
     )
 elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    add_executable(${APPLICATION_NAME} WIN32
+    add_executable(${APPLICATION_NAME}
         ${SGCT_OPENVR_FILES}
         ${OPENSPACE_APPS_DIR}/OpenSpace/main.cpp
         ${RESOURCE_FILE}
@@ -150,7 +150,7 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
 
     # main CEF executable target
     set(CEF_TARGET ${APPLICATION_NAME})
-    SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_TARGET})
+    #SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_TARGET})
 
     # Logical target used to link the libcef library.
     ADD_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
@@ -213,8 +213,8 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
 	if (OS_WINDOWS)
 		# Executable target.
 		add_dependencies(${CEF_TARGET} libcef_dll_wrapper)
-		SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_TARGET})
 		target_link_libraries(${CEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+        include_directories(${CEF_ROOT})
 
 		if(USE_SANDBOX)
 			# Logical target used to link the cef_sandbox library.
@@ -223,13 +223,13 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
 		endif()
 
 		# Add the custom manifest files to the executable.
-		ADD_WINDOWS_MANIFEST("${WEBGUI_MODULE_PATH}" "${CEF_TARGET}" "exe")
+		# ADD_WINDOWS_MANIFEST("${WEBGUI_MODULE_PATH}" "${CEF_TARGET}" "exe")
 
 		# Copy binary and resource files to the target output directory.
 		# COPY_FILES("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "${CEF_TARGET_OUT_DIR}")
 		# COPY_FILES("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "${CEF_TARGET_OUT_DIR}")
 	endif (OS_WINDOWS)
-elseif(OPENSPACE_MODULE_WEBGUI)
+elseif (OPENSPACE_MODULE_WEBGUI)
     message(WARNING "WebGUI configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()
 
