@@ -29,15 +29,22 @@
 namespace openspace {
 namespace globebrowsing {
 
+namespace {
+    const char* keyName = "Name";
+    const char* keyEnabled = "Enabled";
+    const char* keyLayerGroupID = "LayerGroupID";
+    const char* keySettings = "Settings";
+}
+
 Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
-    : properties::PropertyOwner(layerDict.value<std::string>("Name"))
+    : properties::PropertyOwner(layerDict.value<std::string>(keyName))
     , _enabled(properties::BoolProperty("enabled", "Enabled", false))
     , _reset("reset", "Reset")
 {
     // We add the id to the dictionary since it needs to be known by
     // the tile provider
     ghoul::Dictionary newLayerDict = layerDict;
-    newLayerDict.setValue("LayerGroupID", id);
+    newLayerDict.setValue(keyLayerGroupID, id);
   
     _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
         tileprovider::TileProvider::createFromDictionary(newLayerDict));
@@ -48,9 +55,17 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     }
 
     bool enabled = false; // defaults to false if unspecified
-    layerDict.getValue("Enabled", enabled);
+    layerDict.getValue(keyEnabled, enabled);
     _enabled.setValue(enabled);
-    
+
+    ghoul::Dictionary settingsDict;
+    if (layerDict.getValue(keySettings, settingsDict)) {
+        _renderSettings.setValuesFromDictionary(settingsDict);
+    }
+    if (id == layergroupid::ID::GrayScaleColorOverlays) {
+        _renderSettings.addProperty(_renderSettings.valueBlending);
+    }
+
     _reset.onChange([&](){
         _tileProvider->reset();
     });
