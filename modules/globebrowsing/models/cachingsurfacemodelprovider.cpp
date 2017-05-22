@@ -39,8 +39,9 @@ CachingSurfaceModelProvider::CachingSurfaceModelProvider(Renderable* parent)
 {
 	double cacheSize = 20;
 
-	auto threadPool = std::make_shared<ThreadPool>(1);
-	_asyncSurfaceModelProvider = std::make_shared<AsyncSurfaceModelProvider>(threadPool);
+	auto threadPool1 = std::make_shared<ThreadPool>(1);
+	auto threadPool2 = std::make_shared<ThreadPool>(1);
+	_asyncSurfaceModelProvider = std::make_shared<AsyncSurfaceModelProvider>(threadPool1, threadPool2, parent);
 	_modelCache = std::make_shared<ModelCache>(static_cast<size_t>(cacheSize));
 }
 
@@ -73,13 +74,10 @@ void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 		_asyncSurfaceModelProvider->getLoadedModels();
 
 	for (auto subsiteModels : vectorOfSubsiteModels) {
-		subsiteModels->models;
 		std::vector<std::shared_ptr<Model>> theModels = subsiteModels->models;
 		for (auto model : theModels) {
-			model->geometry->initialize(parent);
-
-			// Must create a new texture because the texture created in the load job 
-			// is given the id zero (0). In this way the texture gets a unique id.
+			
+			// TODO: Fix async uploading of textures
 			void* pixelData = new char[model->texture->expectedPixelDataSize()];
 			memcpy(pixelData, model->texture->pixelData(), model->texture->expectedPixelDataSize());
 
@@ -98,8 +96,8 @@ void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 			// Upoad to GPU and set filter
 			model->texture->uploadTexture();
 			model->texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
 		}
+
 		subsiteModels->models = theModels;
 		
 		uint64_t key = CachingSurfaceModelProvider::hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level);
@@ -110,6 +108,7 @@ void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 
 uint64_t CachingSurfaceModelProvider::hashKey(const std::string site, const std::string drive, const int level) {
 	uint64_t key = 0LL;
+
 	int siteNumber = std::stoi(site);
 	int driveNumber = std::stoi(drive);
 
@@ -119,8 +118,6 @@ uint64_t CachingSurfaceModelProvider::hashKey(const std::string site, const std:
 	
 	return key;
 }
-
-
 
 } // namespace globebrowsing
 } // namespace openspace

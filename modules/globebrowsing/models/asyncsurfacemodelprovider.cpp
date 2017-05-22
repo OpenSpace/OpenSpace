@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/models/asyncsurfacemodelprovider.h>
 #include <ghoul/logging/logmanager.h>
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
+#include <modules/globebrowsing/models/job/subsiteinitializationjob.h>
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
@@ -34,16 +35,18 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-AsyncSurfaceModelProvider::AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> pool)
-	: _concurrentJobManager(pool)
+AsyncSurfaceModelProvider::AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> diskToRamPool, std::shared_ptr<ThreadPool> ramToGpuPool, Renderable* parent)
+	: _diskToRamJobManager(diskToRamPool)
+	, _ramToGpuJobManager(ramToGpuPool)
+	, _parent(parent)
 {}
 
 bool AsyncSurfaceModelProvider::enqueueModelIO(const Subsite subsite, const int level) {
 	if (satisfiesEnqueueCriteria(subsite.hashKey(level))) {
 		auto job = std::make_shared<SurfaceModelLoadJob>(subsite, level);
-		_concurrentJobManager.enqueueJob(job);
+		_diskToRamJobManager.enqueueJob(job);
 
-		_enqueuedTileRequests[subsite.hashKey(level)] = subsite;
+		_enqueuedModelRequests[subsite.hashKey(level)] = subsite;
 
 		return true;
 	}
@@ -51,18 +54,39 @@ bool AsyncSurfaceModelProvider::enqueueModelIO(const Subsite subsite, const int 
 }
 
 std::vector<std::shared_ptr<SubsiteModels>> AsyncSurfaceModelProvider::getLoadedModels() {
-	std::vector<std::shared_ptr<SubsiteModels>> loadedModels;
 
-	if (_concurrentJobManager.numFinishedJobs() > 0) {
-		std::shared_ptr<SubsiteModels> subsiteModels = _concurrentJobManager.popFinishedJob()->product();
-		loadedModels.push_back(subsiteModels);
-		_enqueuedTileRequests.erase(hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level));
+	std::vector<std::shared_ptr<SubsiteModels>> loadedModels;
+	if (_diskToRamJobManager.numFinishedJobs() > 0) {
+		std::shared_ptr<SubsiteModels> subsiteModels = _diskToRamJobManager.popFinishedJob()->product();
+		enqueueSubsiteInitialization(subsiteModels);
+		_enqueuedModelRequests.erase(hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level));
 	}
-	return loadedModels;
+
+	std::vector<std::shared_ptr<SubsiteModels>> initializedModels;
+	if (_ramToGpuJobManager.numFinishedJobs() > 0) {
+		std::shared_ptr<SubsiteModels> subsiteModels = _ramToGpuJobManager.popFinishedJob()->product();
+		unmapBuffers(subsiteModels);
+		initializedModels.push_back(subsiteModels);
+	}
+	return initializedModels;
 }
 
 bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const uint64_t hashKey) const {
-	return _enqueuedTileRequests.find(hashKey) == _enqueuedTileRequests.end();
+	return _enqueuedModelRequests.find(hashKey) == _enqueuedModelRequests.end();
+}
+
+void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels) {
+	for (auto model : subsiteModels->models) {
+		model->geometry->initialize(_parent);
+	}
+	auto job = std::make_shared<SubsiteInitializationJob>(subsiteModels);
+	_ramToGpuJobManager.enqueueJob(job);
+}
+
+void AsyncSurfaceModelProvider::unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels) {
+	for (auto model : subsiteModels->models) {
+		model->geometry->unmapBuffers();
+	}
 }
 
 uint64_t AsyncSurfaceModelProvider::hashKey(const std::string site, const std::string drive, const int level) {

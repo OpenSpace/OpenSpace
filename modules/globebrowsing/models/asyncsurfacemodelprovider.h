@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACE_MODEL_PROVIDER__H_
 
 #include <modules/globebrowsing/cache/lrucache.h>
-#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/other/threadpool.h>
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
 #include <modules/globebrowsing/models/subsitemodels.h>
@@ -37,17 +36,25 @@ namespace globebrowsing {
 
 class AsyncSurfaceModelProvider {
 public:
-	AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> pool);
+	AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> pool1, std::shared_ptr<ThreadPool> pool2, Renderable* parent);
 
 	bool enqueueModelIO(const Subsite subsite, const int level);
+	
 	std::vector<std::shared_ptr<SubsiteModels>> getLoadedModels();
 
 protected:
 	virtual bool satisfiesEnqueueCriteria(const uint64_t hashKey) const;
 
 private:
-	ConcurrentJobManager<SubsiteModels> _concurrentJobManager;
-	std::unordered_map <uint64_t, Subsite> _enqueuedTileRequests;
+	ConcurrentJobManager<SubsiteModels> _diskToRamJobManager;
+	ConcurrentJobManager<SubsiteModels> _ramToGpuJobManager;
+
+	Renderable* _parent;
+
+	void enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels);
+	void unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels);
+
+	std::unordered_map <uint64_t, Subsite> _enqueuedModelRequests;
 
 	uint64_t hashKey(const std::string site, const std::string drive, const int level);
 };
