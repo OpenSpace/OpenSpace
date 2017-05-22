@@ -55,7 +55,8 @@ public:
      * \param textureDataProvider is the reader that will be used for the asynchronos
      * tile loading.
      */
-    AsyncTileDataProvider(std::shared_ptr<RawTileDataReader> textureDataProvider);
+    AsyncTileDataProvider(const std::string& name,
+                          std::shared_ptr<RawTileDataReader> textureDataProvider);
 
     /**
      * Creates a job which asynchronously loads a raw tile. This job is enqueued.
@@ -109,6 +110,7 @@ protected:
     void performReset(ResetRawTileDataReader resetRawTileDataReader);
 
 private:
+    const std::string _name;
     GlobeBrowsingModule* _globeBrowsingModule;
     /// The reader used for asynchronous reading
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;

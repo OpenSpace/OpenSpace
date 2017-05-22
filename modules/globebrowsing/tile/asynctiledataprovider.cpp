@@ -39,9 +39,14 @@
 namespace openspace {
 namespace globebrowsing {
 
-AsyncTileDataProvider::AsyncTileDataProvider(
+namespace {
+    const char* _loggerCat = "AsyncTileDataProvider";
+}
+
+AsyncTileDataProvider::AsyncTileDataProvider(const std::string& name,
     const std::shared_ptr<RawTileDataReader> rawTileDataReader)
-    : _rawTileDataReader(rawTileDataReader)
+    : _name(name)
+    , _rawTileDataReader(rawTileDataReader)
     , _concurrentJobManager(
         std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 10))
     , _pboContainer(nullptr)
@@ -162,8 +167,11 @@ void AsyncTileDataProvider::updatePboUsage() {
 
     // If changed, we need to reset the async tile data provider.
     // No need to reset the raw tile data reader when changing PBO usage.
-    if (usingPbo != shouldUsePbo) {
+    if (usingPbo != shouldUsePbo &&
+        _resetMode != ResetMode::ShouldResetAllButRawTileDataReader) {
         _resetMode = ResetMode::ShouldResetAllButRawTileDataReader;
+        LINFO(std::string("PBO usage updated, prepairing for resetting of tile reader ") +
+            "'" + _name + "'");
     }
 }
 
@@ -203,6 +211,8 @@ void AsyncTileDataProvider::reset() {
     // we need to wait until _enqueuedTileRequests is empty before finishing up.
     _resetMode = ResetMode::ShouldResetAll;
     endEnqueuedJobs();
+    LINFO(std::string("Prepairing for resetting of tile reader ") +
+        "'" + _name + "'");
 }
 
 void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileDataReader) {
@@ -226,6 +236,7 @@ void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileData
 
     // Finished resetting
     _resetMode = ResetMode::ShouldNotReset;
+    LINFO(std::string("Tile data reader ") + "'" + _name + "'" + " reset successfully.");
 }
 
 float AsyncTileDataProvider::noDataValueAsFloat() const {
