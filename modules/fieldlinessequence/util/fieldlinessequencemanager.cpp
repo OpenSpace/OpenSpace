@@ -806,7 +806,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     // ------------------------ MAKE SURE STATE HAS A START TIME ------------------------
     double startTime = getTime(kameleon.get());
     outFieldlinesState._triggerTime = startTime;
-    LDEBUG("State will start at " << startTime << " (J2000 Time)");
+    LDEBUG("State will start at " << timeToString(startTime));
 
     return status;
 }
@@ -990,14 +990,19 @@ double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
         if (kameleon->doesAttributeExist("start_time")){
             seqStartStr =
                     kameleon->getGlobalAttribute("start_time").getAttributeString();
-        // } else if (kameleon->doesAttributeExist("tim_crstart_cal")) {
         } else if (kameleon->doesAttributeExist("tim_rundate_cal")) {
             seqStartStr =
                     kameleon->getGlobalAttribute("tim_rundate_cal").getAttributeString();
-                    // kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
+            if (seqStartStr.length() < 19 && kameleon->doesAttributeExist("tim_crstart_cal")) {
+                seqStartStr =
+                     kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
+            }
         } else if (kameleon->doesAttributeExist("tim_obsdate_cal")) {
             seqStartStr =
                     kameleon->getGlobalAttribute("tim_obsdate_cal").getAttributeString();
+        } else if (kameleon->doesAttributeExist("tim_crstart_cal")) {
+            seqStartStr =
+                    kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
         } else {
             LWARNING("No starting time attribute could be found in the .cdf file.\n\t" <<
                     "Starting time is set to 01.JAN.2000 12:00.");
@@ -1012,6 +1017,10 @@ double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
             seqStartDbl =
                     Time::ref().convertTime(
                             seqStartStr.substr(0, seqStartStr.length() - 2));
+        } else {
+            LWARNING("No starting time attribute could be found in the .cdf file.\n\t" <<
+                "Starting time is set to 01.JAN.2000 12:00.");
+            seqStartDbl = 0.0;
         }
 
         double stateStartOffset;
