@@ -66,6 +66,14 @@ public:
                                const std::string& fileExtension,
                                std::vector<std::string>& outFilePaths);
 
+    void saveFieldlinesStatesToJson(const std::string& directoryPath,
+                                    const std::string& filePrefix,
+                                    const std::vector<FieldlinesState>& states);
+
+    void saveFieldlinesStatesToBinaries(const std::string& directoryPath,
+                                        const std::string& filePrefix,
+                                        const std::vector<FieldlinesState>& states);
+
     bool saveFieldlinesStateAsJson(const FieldlinesState& state,
                                    const std::string& directoryPath,
                                    const bool isAbsPath,
@@ -99,6 +107,9 @@ public:
     void setQuickMorphBooleans(std::vector<FieldlinesState>& states,
                                const int& pointsPerCurve,
                                const float& threshold);
+
+    // TODO move somewhere else
+    std::string timeToString(double time);
 
 private:
 

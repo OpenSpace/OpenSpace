@@ -85,6 +85,29 @@ FieldlinesSequenceManager::FieldlinesSequenceManager() {}
 
 FieldlinesSequenceManager::~FieldlinesSequenceManager() {}
 
+std::string FieldlinesSequenceManager::timeToString(double time) {
+    std::string datetime = SpiceManager::ref().dateFromEphemerisTime(time);
+    std::string month = datetime.substr(5, 3);
+
+    std::string MM = "";
+    if      (month == "JAN") MM = "01";
+    else if (month == "FEB") MM = "02";
+    else if (month == "MAR") MM = "03";
+    else if (month == "APR") MM = "04";
+    else if (month == "MAY") MM = "05";
+    else if (month == "JUN") MM = "06";
+    else if (month == "JUL") MM = "07";
+    else if (month == "AUG") MM = "08";
+    else if (month == "SEP") MM = "09";
+    else if (month == "OCT") MM = "10";
+    else if (month == "NOV") MM = "11";
+    else if (month == "DEC") MM = "12";
+    else ghoul_assert(false, "Bad month");
+
+    datetime.replace(4, 5, "-" + MM + "-");
+    return datetime;
+}
+
 bool FieldlinesSequenceManager::getSeedPointsFromFile(
         const std::string& path, std::vector<glm::vec3>& outVec) {
 
@@ -153,6 +176,29 @@ bool FieldlinesSequenceManager::getAllFilePathsOfType(
                 }), outFilePaths.end());
 
     return true;
+}
+
+void FieldlinesSequenceManager::saveFieldlinesStatesToJson(const std::string& directoryPath,
+                                                           const std::string& filePrefix,
+                                                           const std::vector<FieldlinesState>& states) {
+    std::string absFolder = absPath(directoryPath);
+
+    for (auto state : states) {
+        std::string prefix = filePrefix + timeToString(state._triggerTime);
+        saveFieldlinesStateAsJson(state, absFolder, true, prefix, false);
+    }
+}
+
+void FieldlinesSequenceManager::saveFieldlinesStatesToBinaries(const std::string& directoryPath,
+                                                               const std::string& filePrefix,
+                                                               const std::vector<FieldlinesState>& states) {
+    std::string absPrefix = absPath(directoryPath) + filePrefix;
+    std::string extension = ".osfls"; // (O)pen(S)pace(F)ield(L)ine(S)tate
+
+    for (auto state : states) {
+        std::string timeString = timeToString(state._triggerTime);
+        state.saveStateToBinaryFile(absPrefix + timeString + extension);
+    }
 }
 
 // TODO - MOVE ALL JSON HANDLING TO ITS OWN FILE!!!!!!!
