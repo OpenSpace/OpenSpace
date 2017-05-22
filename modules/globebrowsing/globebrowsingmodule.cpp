@@ -81,15 +81,16 @@ void GlobeBrowsingModule::internalInitialize() {
     using namespace globebrowsing;
 
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&] {
-        // Convert from MB to KB
-        cache::MemoryAwareTileCache::create();
+
+        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
+
         _clearTileCache.onChange(
         [&]{
-            cache::MemoryAwareTileCache::ref().clear();
+            _tileCache->clear();
         });
         _applyTileCacheSize.onChange(
         [&]{
-            cache::MemoryAwareTileCache::ref().setSizeEstimated(
+            _tileCache->setSizeEstimated(
                 _tileCacheSize * 1024 * 1024);
         });
         _cpuAllocatedTileData.setMaxValue(
@@ -99,7 +100,7 @@ void GlobeBrowsingModule::internalInitialize() {
         _tileCacheSize.setMaxValue(
             CpuCap.installedMainMemory() * 0.25);
       
-        cache::MemoryAwareTileCache::ref().setSizeEstimated(
+        _tileCache->setSizeEstimated(
             _tileCacheSize * 1024 * 1024);
       
         _cpuAllocatedTileData.setReadOnly(true);
@@ -122,16 +123,14 @@ void GlobeBrowsingModule::internalInitialize() {
     });
   
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Render, [&]{
-        size_t dataSizeCPU = cache::MemoryAwareTileCache::ref().getCPUAllocatedDataSize();
-        size_t dataSizeGPU = cache::MemoryAwareTileCache::ref().getGPUAllocatedDataSize();
+        size_t dataSizeCPU = _tileCache->getCPUAllocatedDataSize();
+        size_t dataSizeGPU = _tileCache->getGPUAllocatedDataSize();
         _cpuAllocatedTileData.setValue(dataSizeCPU / 1024 / 1024);
         _gpuAllocatedTileData.setValue(dataSizeGPU / 1024 / 1024);
     });
 
   
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&]{
-        cache::MemoryAwareTileCache::ref().clear();
-        cache::MemoryAwareTileCache::ref().destroy();
 #ifdef GLOBEBROWSING_USE_GDAL
         GdalWrapper::ref().destroy();
 #endif // GLOBEBROWSING_USE_GDAL
@@ -162,6 +161,10 @@ void GlobeBrowsingModule::internalInitialize() {
 
 bool GlobeBrowsingModule::shouldUsePbo() {
     return _usePbo;
+}
+
+globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
+    return _tileCache.get();
 }
 
 } // namespace openspace

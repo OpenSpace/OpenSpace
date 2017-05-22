@@ -34,20 +34,15 @@ namespace openspace {
 namespace globebrowsing {
 namespace cache {
 
-MemoryAwareTileCache* MemoryAwareTileCache::_singleton = nullptr;
 
-void MemoryAwareTileCache::create() {
-    _singleton = new MemoryAwareTileCache();
+MemoryAwareTileCache::MemoryAwareTileCache()
+    : _numTextureBytesAllocatedOnCPU(0)
+{
+    createDefaultTextureContainers();
 }
 
-void MemoryAwareTileCache::destroy() {
-    delete _singleton;
-}
-
-MemoryAwareTileCache& MemoryAwareTileCache::ref() {
-    ghoul_assert(_singleton, "MemoryAwareTileCache not created");
-    return *_singleton;
-}
+MemoryAwareTileCache::~MemoryAwareTileCache()
+{ }
 
 void MemoryAwareTileCache::clear() {
     _numTextureBytesAllocatedOnCPU = 0;
@@ -193,7 +188,6 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key,
     return;
 }
 
-
 void MemoryAwareTileCache::put(const ProviderTileKey& key,
         const TileTextureInitData::HashKey& initDataKey, Tile tile)
 {
@@ -226,12 +220,6 @@ size_t MemoryAwareTileCache::getCPUAllocatedDataSize() const {
         }
     }
     return dataSize + _numTextureBytesAllocatedOnCPU;
-}
-
-MemoryAwareTileCache::MemoryAwareTileCache()
-    : _numTextureBytesAllocatedOnCPU(0)
-{
-    createDefaultTextureContainers();
 }
 
 } // namespace cache

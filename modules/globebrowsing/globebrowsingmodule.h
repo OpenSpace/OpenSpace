@@ -34,14 +34,21 @@
 
 namespace openspace {
 
+namespace globebrowsing {
+namespace cache {
+    class MemoryAwareTileCache;
+}
+}
+
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
     GlobeBrowsingModule();
 
     bool shouldUsePbo();
-
-    static const std::string name;
+    globebrowsing::cache::MemoryAwareTileCache* tileCache();
     
+    static const std::string name;
+
 protected:
     void internalInitialize() override;
 private:
@@ -53,6 +60,8 @@ private:
 
     /// Whether or not pixel buffer objects should be used when uploading tile data
     properties::BoolProperty _usePbo;
+
+    std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 };
 
 } // namespace openspace

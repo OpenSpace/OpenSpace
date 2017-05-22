@@ -80,14 +80,11 @@ struct ProviderTileHasher {
     }
 };
 
-/**
- * Singleton class used to cache tiles for all <code>CachingTileProvider</code>s.
- */
 class MemoryAwareTileCache {
 public:
     
-    static void create();
-    static void destroy();
+    MemoryAwareTileCache();
+    ~MemoryAwareTileCache();
 
     void clear();
     void setSizeEstimated(size_t estimatedSize);
@@ -101,18 +98,12 @@ public:
     size_t getGPUAllocatedDataSize() const;
     size_t getCPUAllocatedDataSize() const;
 
-    static MemoryAwareTileCache& ref();
-
 private:
-
-    MemoryAwareTileCache();
-    ~MemoryAwareTileCache() = default;
 
     void createDefaultTextureContainers();
     void assureTextureContainerExists(const TileTextureInitData& initData);
     void resetTextureContainerSize(size_t numTexturesPerTextureType);
     
-    static MemoryAwareTileCache* _singleton;
     using TileCache = LRUCache<ProviderTileKey, Tile, ProviderTileHasher>;
     using TextureContainerTileCache =
         std::pair<std::unique_ptr<TextureContainer>, std::unique_ptr<TileCache>>;

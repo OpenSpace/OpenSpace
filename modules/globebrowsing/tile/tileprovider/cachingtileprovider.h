@@ -73,13 +73,9 @@ private:
     */
     void initTexturesFromLoadedData();
 
-    /**
-    * \returns A tile with <code>Tile::Status::OK</code> if no errors
-    * occured, a tile with <code>Tile::Status::IOError</code> otherwise
-    */
-    //Tile createTile(std::shared_ptr<RawTile> res);
-
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
+  
+    cache::MemoryAwareTileCache* _tileCache;
 };
 
 } // namespace tileprovider

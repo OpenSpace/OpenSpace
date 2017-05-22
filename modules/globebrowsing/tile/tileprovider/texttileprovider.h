@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEXT_TILE_PROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TEXT_TILE_PROVIDER___H__
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/cache/lrucache.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
@@ -92,6 +93,8 @@ private:
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
 	
     GLuint _fbo;
+  
+    cache::MemoryAwareTileCache* _tileCache;
 };
 
 } // namespace tileprovider

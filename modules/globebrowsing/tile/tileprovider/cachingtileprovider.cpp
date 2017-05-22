@@ -34,6 +34,9 @@
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
+
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
@@ -56,6 +59,7 @@ namespace tileprovider {
 CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
     : TileProvider(dictionary)
 {
+    _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();
     _name = "Name unspecified";
     dictionary.getValue("Name", _name);
     std::string _loggerCat = "CachingTileProvider : " + _name;
@@ -131,7 +135,7 @@ void CachingTileProvider::update() {
 }
 
 void CachingTileProvider::reset() {
-    cache::MemoryAwareTileCache::ref().clear();
+    _tileCache->clear();
     _asyncTextureDataProvider->reset();
 }
 
@@ -146,8 +150,8 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
 
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
-    if (cache::MemoryAwareTileCache::ref().exist(key)) {
-        return cache::MemoryAwareTileCache::ref().get(key);
+    if (_tileCache->exist(key)) {
+        return _tileCache->get(key);
     }
     else {
         _asyncTextureDataProvider->enqueueTileIO(tileIndex);
@@ -164,8 +168,8 @@ void CachingTileProvider::initTexturesFromLoadedData() {
     std::shared_ptr<RawTile> rawTile = _asyncTextureDataProvider->popFinishedRawTile();
     if (rawTile) {
         cache::ProviderTileKey key = { rawTile->tileIndex, uniqueIdentifier() };
-        if (!cache::MemoryAwareTileCache::ref().exist(key)) {
-            cache::MemoryAwareTileCache::ref().createTileAndPut(key, rawTile);
+        if (!_tileCache->exist(key)) {
+            _tileCache->createTileAndPut(key, rawTile);
         }
         else {
             ghoul_assert(false, "Tile is already existing in cache.");
@@ -181,8 +185,8 @@ Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
 
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
-    if (cache::MemoryAwareTileCache::ref().exist(key)) {
-        return cache::MemoryAwareTileCache::ref().get(key).status();
+    if (_tileCache->exist(key)) {
+        return _tileCache->get(key).status();
     }
 
     return Tile::Status::Unavailable;

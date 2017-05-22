@@ -29,6 +29,7 @@
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
@@ -46,6 +47,7 @@ TextTileProvider::TextTileProvider(const TileTextureInitData& initData, size_t f
     : _initData(initData)
     , _fontSize(fontSize)
 {
+    _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();
     _font = OsEng.fontManager().font("Mono", _fontSize);
         
     _fontRenderer = std::unique_ptr<FontRenderer>(FontRenderer::createDefault());
@@ -61,12 +63,12 @@ TextTileProvider::~TextTileProvider() {
 Tile TextTileProvider::getTile(const TileIndex& tileIndex) {
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
-    if (cache::MemoryAwareTileCache::ref().exist(key)) {
-        return cache::MemoryAwareTileCache::ref().get(key);
+    if (_tileCache->exist(key)) {
+        return _tileCache->get(key);
     }
     else {
         Tile tile = TextTileProvider::createChunkIndexTile(tileIndex);
-        cache::MemoryAwareTileCache::ref().put(key, _initData.hashKey(), tile);
+        _tileCache->put(key, _initData.hashKey(), tile);
         return tile;
     }
 }
@@ -85,12 +87,11 @@ TileDepthTransform TextTileProvider::depthTransform() {
 void TextTileProvider::update() {}
 
 void TextTileProvider::reset() {
-    cache::MemoryAwareTileCache::ref().clear();
+    _tileCache->clear();
 }
 
 Tile TextTileProvider::createChunkIndexTile(const TileIndex& tileIndex) {
-    ghoul::opengl::Texture* texture =
-        cache::MemoryAwareTileCache::ref().getTexture(_initData);
+    ghoul::opengl::Texture* texture = _tileCache->getTexture(_initData);
 
     // Keep track of defaultFBO and viewport to be able to reset state when done
     GLint defaultFBO;
