@@ -642,7 +642,33 @@ bool RenderableFieldlinesSequence::initialize() {
 
     } else {
         addProperty(_fieldlineColor);
+    }
 
+    // TODO move to separate function
+    //------------------ Initialize OpenGL VBOs and VAOs-------------------------------//
+    glGenVertexArrays(1, &_vertexArrayObject);
+
+    glGenBuffers(1, &_vertexPositionBuffer);
+    glGenBuffers(1, &_vertexColorBuffer);
+
+    if (_isMorphing) {
+        glGenBuffers(1, &_morphToPositionBuffer);
+        glGenBuffers(1, &_quickMorphBuffer);
+    }
+
+    if (_seedPoints.size() > 0) {
+        glGenVertexArrays(1, &_seedArrayObject);
+        glBindVertexArray(_seedArrayObject);
+        glGenBuffers(1, &_seedPositionBuffer);
+
+        glBindBuffer(GL_ARRAY_BUFFER, _seedPositionBuffer);
+        glBufferData(GL_ARRAY_BUFFER,
+            _seedPoints.size() * sizeof(glm::vec3),
+            &_seedPoints.front(),
+            GL_STATIC_DRAW);
+        GLuint seedLocation = 0;
+        glEnableVertexAttribArray(seedLocation);
+        glVertexAttribPointer(seedLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
     return true;
@@ -663,7 +689,6 @@ bool RenderableFieldlinesSequence::deinitialize() {
 
     glDeleteBuffers(1, &_quickMorphBuffer);
     _quickMorphBuffer = 0;
-
 
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_program) {
@@ -813,42 +838,17 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
 
     if(_needsUpdate) {
         updateActiveStateIndex(); // sets _activeStateIndex
-        if (_vertexArrayObject == 0) {
-            glGenVertexArrays(1, &_vertexArrayObject);
 
-            if (_seedPoints.size() > 0) {
-                glGenVertexArrays(1, &_seedArrayObject);
-                glBindVertexArray(_seedArrayObject);
-                glGenBuffers(1, &_seedPositionBuffer);
-
-                glBindBuffer(GL_ARRAY_BUFFER, _seedPositionBuffer);
-                glBufferData(GL_ARRAY_BUFFER,
-                    _seedPoints.size() * sizeof(glm::vec3),
-                    &_seedPoints.front(),
-                    GL_STATIC_DRAW);
-                GLuint seedLocation = 0;
-                glEnableVertexAttribArray(seedLocation);
-                glVertexAttribPointer(seedLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
-            }
-        }
         glBindVertexArray(_vertexArrayObject);
-
-        if (_vertexPositionBuffer == 0) {
-            glGenBuffers(1, &_vertexPositionBuffer);
-            if (_isMorphing) {
-                glGenBuffers(1, &_morphToPositionBuffer);
-                glGenBuffers(1, &_quickMorphBuffer);
-            }
-        }
-
-        if (_vertexColorBuffer == 0) {
-            glGenBuffers(1, &_vertexColorBuffer);
-        }
 
         updateVertexPosBuffer();
 
         if (_isMorphing) {
             updateMorphingBuffers();
+            double stateDuration = _startTimes[_activeStateIndex + 1] -
+                                       _startTimes[_activeStateIndex]; // TODO? could be stored
+            double stateTimeElapsed = _currentTime - _startTimes[_activeStateIndex];
+            _stateProgress = static_cast<float>(stateTimeElapsed / stateDuration);
         }
 
         // TODO fix colors -- color classification, etc
@@ -864,13 +864,6 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
 
         _needsUpdate = false;
         _shouldRender = true;
-
-        if (_isMorphing) {
-            double stateDuration = _startTimes[_activeStateIndex + 1] -
-                                       _startTimes[_activeStateIndex]; // TODO? could be stored
-            double stateTimeElapsed = _currentTime - _startTimes[_activeStateIndex];
-            _stateProgress = static_cast<float>(stateTimeElapsed / stateDuration);
-        }
     }
 
     if (_updateColorBuffer) {
