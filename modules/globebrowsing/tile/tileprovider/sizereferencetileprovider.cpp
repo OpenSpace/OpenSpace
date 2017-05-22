@@ -59,9 +59,6 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
         throw std::runtime_error("Must define key '" + std::string(KeyRadii) + "'");
     }
     _ellipsoid = Ellipsoid(radii);
-
-    auto backgroundTileStatus = Tile::Status::Unavailable;
-    std::shared_ptr<ghoul::opengl::Texture> backgroundTileTexture;
 }
 
 void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRenderer&

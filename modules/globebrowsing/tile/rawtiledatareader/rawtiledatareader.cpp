@@ -118,7 +118,7 @@ std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
 
     if (_preprocess == PerformPreprocessing::Yes) {
         rawTile->tileMetaData = getTileMetaData(rawTile, io.write.region);
-        rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile, io));
+        rawTile->error = std::max(rawTile->error, postProcessErrorCheck(rawTile));
     }
 
     return rawTile;
@@ -330,10 +330,10 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
         noDataValues[raster] = noDataValueAsFloat();
     }
 
-    for (size_t y = 0; y < region.numPixels.y; ++y) {
+    for (int y = 0; y < region.numPixels.y; ++y) {
         size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
         size_t i = 0;
-        for (size_t x = 0; x < region.numPixels.x; ++x) {
+        for (int x = 0; x < region.numPixels.x; ++x) {
             for (size_t raster = 0; raster < _initData.nRasters(); ++raster) {
                 float noDataValue = noDataValueAsFloat();
                 float val = tiledatatype::interpretFloat(
@@ -381,8 +381,7 @@ TileDepthTransform RawTileDataReader::calculateTileDepthTransform() {
     return transform;
 }
 
-RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
-    std::shared_ptr<const RawTile> rawTile, const IODescription& io)
+RawTile::ReadError RawTileDataReader::postProcessErrorCheck(std::shared_ptr<const RawTile> rawTile)
 {
     ensureInitialized();
 

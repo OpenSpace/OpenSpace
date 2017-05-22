@@ -81,9 +81,9 @@ struct TileLoadJob : public Job<RawTile> {
     bool hasOwnershipOfData() const;
 
 protected:
-    TileIndex _chunkIndex;
     std::shared_ptr<RawTileDataReader> _rawTileDataReader;
     std::shared_ptr<RawTile> _rawTile;
+    TileIndex _chunkIndex;
     char* _pboMappedDataDestination;
 	bool _hasOwnershipOfData;
 };

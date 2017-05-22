@@ -60,8 +60,8 @@ void LRUThreadPoolWorker<KeyType>::operator()() {
 
 template<typename KeyType>
 LRUThreadPool<KeyType>::LRUThreadPool(size_t numThreads, size_t queueSize)
-    : _stop(false)
-    , _queuedTasks(queueSize)
+    : _queuedTasks(queueSize)
+    , _stop(false)
 {
     for (size_t i = 0; i < numThreads; ++i) {
         _workers.push_back(std::thread(LRUThreadPoolWorker<KeyType>(*this)));

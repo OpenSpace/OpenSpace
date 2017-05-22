@@ -46,8 +46,8 @@ public:
 
 private:
     std::unique_ptr<ghoul::opengl::Texture> _tileTexture;
-    Tile _tile;
     std::string _imagePath;
+    Tile _tile;
 };
 
 } // namespace tileprovider

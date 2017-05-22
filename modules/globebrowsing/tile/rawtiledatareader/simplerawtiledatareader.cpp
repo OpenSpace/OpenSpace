@@ -131,9 +131,9 @@ void SimpleRawTileDataReader::readImageData(
 RawTile::ReadError SimpleRawTileDataReader::rasterRead(
     int rasterBand, const IODescription& io, char* dataDestination) const
 {
-    ghoul_assert(io.read.fullRegion.numPixels.x == _dataTexture->dimensions().x,
+    ghoul_assert(static_cast<unsigned int>(io.read.fullRegion.numPixels.x) == _dataTexture->dimensions().x,
         "IODescription does not match data texture.");
-    ghoul_assert(io.read.fullRegion.numPixels.y == _dataTexture->dimensions().y,
+    ghoul_assert(static_cast<unsigned int>(io.read.fullRegion.numPixels.y) == _dataTexture->dimensions().y,
         "IODescription does not match data texture.");
     ghoul_assert(io.read.region.numPixels.x == io.write.region.numPixels.x,
         "IODescription does not match data texture.");

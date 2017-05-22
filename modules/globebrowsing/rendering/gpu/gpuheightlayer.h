@@ -56,7 +56,7 @@ public:
      * called before setting using this method.
      */
     virtual void setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
-        const TileIndex& tileIndex, int pileSize);
+        const TileIndex& tileIndex, int pileSize) override;
 
     /** 
      * Binds this object with GLSL variables with identifiers starting 
@@ -64,7 +64,7 @@ public:
      * After this method has been called, users may invoke setValue.
      */
     virtual void bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
-        const std::string& nameBase, int pileSize);
+        const std::string& nameBase, int pileSize) override;
 
 private:
     GPUTileDepthTransform _gpuDepthTransform;

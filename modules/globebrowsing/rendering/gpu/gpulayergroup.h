@@ -54,6 +54,8 @@ struct TileIndex;
 class GPULayerGroup {
 public:
 
+    virtual ~GPULayerGroup() = default;
+
     /**
      * Sets the value of <code>LayerGroup</code> to its corresponding
      * GPU struct. OBS! Users must ensure bind has been 

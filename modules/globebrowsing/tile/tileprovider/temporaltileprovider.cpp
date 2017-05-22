@@ -38,12 +38,8 @@
 namespace {
     const std::string _loggerCat = "TemporalTileProvider";
 
-    const char* KeyDoPreProcessing = "DoPreProcessing";
-    const char* KeyMinimumPixelSize = "MinimumPixelSize";
     const char* KeyFilePath = "FilePath";
     const char* KeyBasePath = "BasePath";
-    const char* KeyCacheSize = "CacheSize";
-    const char* KeyFlushInterval = "FlushInterval";
     const char* KeyPreCacheStartTime = "PreCacheStartTime";
     const char* KeyPreCacheEndTime = "PreCacheEndTime";
 }
@@ -155,7 +151,7 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
         gdalDescription = CPLSerializeXMLTree(gdalNode);
     }
     if (!gdalNode) {
-        CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "FilePath");
+        gdalNode = CPLSearchXMLNode(node, "FilePath");
         gdalDescription = std::string(gdalNode->psChild->pszValue);
     }
         

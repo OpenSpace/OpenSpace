@@ -77,7 +77,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             );
             
             // Ensure we can represent the max level
-            if(_providerIndices.size() < maxLevel){
+            if(static_cast<int>(_providerIndices.size()) < maxLevel){
                 _providerIndices.resize(maxLevel+1, -1);
             }
                 

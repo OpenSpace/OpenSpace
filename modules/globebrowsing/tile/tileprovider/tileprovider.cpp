@@ -36,7 +36,6 @@
 
 namespace {
     const char* KeyType = "Type";
-    const char* KeyName = "Name";
 }
 
 namespace openspace {
@@ -123,7 +122,7 @@ ChunkTilePile TileProvider::getChunkTilePile(TileIndex tileIndex, int pileSize) 
     ghoul_assert(pileSize >= 0, "pileSize must be positive");
     ChunkTilePile chunkTilePile;
     chunkTilePile.resize(pileSize);
-    for (size_t i = 0; i < pileSize; ++i) {
+    for (int i = 0; i < pileSize; ++i) {
         chunkTilePile[i] = getChunkTile(tileIndex, i);
         if (chunkTilePile[i].tile.status() == Tile::Status::Unavailable) {
             if (i>0) {

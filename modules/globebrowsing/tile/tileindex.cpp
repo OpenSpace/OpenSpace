@@ -128,7 +128,7 @@ TileIndex::TileHashKey TileIndex::hashKey() const {
     TileHashKey key = 0LL;
     key |= level;
     key |= x << 5;
-    key |= ((TileHashKey)y) << 35;
+    key |= static_cast<TileHashKey>(y) << 35;
     return key;
 }
 

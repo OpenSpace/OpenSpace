@@ -33,21 +33,13 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <openspace/util/updatestructures.h>
 
-namespace {
-    const char* keyFrame = "Frame";
-    const char* keyGeometry = "Geometry";
-    const char* keyShading = "PerformShading";
-
-    const char* keyBody = "Body";
-}
-
 namespace openspace {
 namespace globebrowsing {
 
 ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
                              std::shared_ptr<LayerManager> layerManager)
-    : _layerManager(layerManager)
-    , _grid(grid)
+    : _grid(grid)
+    ,_layerManager(layerManager)
 {
     _globalLayerShaderManager = std::make_shared<LayerShaderManager>(
             "GlobalChunkedLodPatch",
@@ -152,7 +144,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     glm::dmat4 modelTransform = chunk.owner().modelTransform();
     glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
     glm::mat4 modelViewTransform = glm::mat4(viewTransform * modelTransform);
-    glm::mat4 modelViewProjectionTransform = data.camera.projectionMatrix() *
+    glm::mat4 modelViewProjectionTransform = data.camera.sgctInternal.projectionMatrix() *
         modelViewTransform;
 
     // Upload the uniform variables
@@ -223,7 +215,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     std::vector<std::string> cornerNames = { "p01", "p11", "p00", "p10" };
     std::vector<glm::dvec3> cornersCameraSpace(4);
     for (int i = 0; i < 4; ++i) {
-        Quad q = (Quad)i;
+        Quad q = static_cast<Quad>(i);
         Geodetic2 corner = chunk.surfacePatch().getCorner(q);
         glm::dvec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
         glm::dvec3 cornerCameraSpace =
@@ -241,7 +233,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
                 cornersCameraSpace[Quad::SOUTH_WEST]));
 
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
-    programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+    programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
 
     if (_layerManager->layerGroup(
             layergroupid::NightLayers).activeLayers().size() > 0 ||

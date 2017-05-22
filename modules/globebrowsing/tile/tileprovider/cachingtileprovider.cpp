@@ -42,13 +42,10 @@
 #include <ghoul/opengl/texture.h>
 
 namespace {
-    const char* _loggerCat = "CachingTileProvider";
-
     const char* KeyPerformPreProcessing = "PerformPreProcessing";
     const char* KeyTilePixelSize = "TilePixelSize";
     const char* KeyFilePath = "FilePath";
     const char* KeyBasePath = "BasePath";
-    const char* KeyFlushInterval = "FlushInterval";
     const char* KeyPreCacheLevel = "PreCacheLevel";
 }
 

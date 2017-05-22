@@ -39,7 +39,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
         activeLayers.size() == _gpuActiveLayers.size(),
         "GPU and CPU active layers must have same size!"
     );
-    for (int i = 0; i < activeLayers.size(); ++i) {
+    for (unsigned int i = 0; i < activeLayers.size(); ++i) {
         _gpuActiveLayers[i]->setValue(
             programObject,
             *activeLayers[i],

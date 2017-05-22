@@ -157,8 +157,7 @@ protected:
     std::shared_ptr<TileMetaData> getTileMetaData(
         std::shared_ptr<RawTile> result, const PixelRegion& region);
     TileDepthTransform calculateTileDepthTransform();
-    RawTile::ReadError postProcessErrorCheck(
-        std::shared_ptr<const RawTile> ioResult, const IODescription& io);
+    RawTile::ReadError postProcessErrorCheck(std::shared_ptr<const RawTile> ioResult);
 
     struct Cached {
         int _maxLevel = -1;
