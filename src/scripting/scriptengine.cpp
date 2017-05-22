@@ -41,29 +41,35 @@
 #include "scriptengine_lua.inl"
 
 namespace {
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/main.hbs";
-    const char* ScriptingTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/scripting.hbs";
-    const char* HandlebarsFilename = "${OPENSPACE_DATA}/web/common/handlebars-v4.0.5.js";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
-    const char* BootstrapFilename = "${OPENSPACE_DATA}/web/common/bootstrap.min.css";
-    const char* CssFilename = "${OPENSPACE_DATA}/web/common/style.css";
-}
-
-namespace openspace {
-
-namespace scripting {
-
-namespace {
     const std::string _loggerCat = "ScriptEngine";
-    
+
     const char* LuaGlobalNamespace = "_G";
     const char* PrintFunctionName = "print";
     //const lua_CFunction _printFunctionReplacement = luascriptfunctions::printInfo;
-    
+
     const int TableOffset = -3; // -1 (top) -1 (first argument) -1 (second argument)
-}
+
+    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/main.hbs";
+    const char* ScriptingTemplateFilename = "${OPENSPACE_DATA}/web/luascripting/scripting.hbs";
+    const char* JsFilename = "${OPENSPACE_DATA}/web/luascripting/script.js";
+} // namespace
+
+namespace openspace {
+namespace scripting {
 
 std::string ScriptEngine::OpenSpaceLibraryName = "openspace";
+
+ScriptEngine::ScriptEngine()
+    : DocumentationGenerator(
+        "Script Documentation",
+        "scripting",
+        {
+            { "mainTemplate", MainTemplateFilename },
+            { "scriptingTemplate", ScriptingTemplateFilename }
+        },
+        JsFilename
+    )
+{}
 
 void ScriptEngine::initialize() {
     LDEBUG("Adding base library");
@@ -496,255 +502,62 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
     return result;
 }
 
-void ScriptEngine::writeDocumentation(const std::string& filename, const std::string& type) const {
-    auto concatenate = [](std::string library, std::string function) {
-        std::string total = "openspace.";
-        if (!library.empty()) {
-            total += std::move(library) + ".";
+std::string ScriptEngine::generateJson() const {
+    // Create JSON
+    std::stringstream json;
+    json << "[";
+
+    bool first = true;
+    for (const LuaLibrary& l : _registeredLibraries) {
+        if (!first) {
+            json << ",";
         }
-        total += std::move(function);
-        return total;
-    };
+        first = false;
 
-    LDEBUG("Writing Lua documentation of type '" << type <<
-           "' to file '" << filename << "'");
-    if (type == "text") {
-        // Settings
-        const unsigned int lineWidth = 80;
-        static const std::string whitespace = " \t";
-        static const std::string padding = "    ";
+        json << "{";
+        json << "\"library\": \"" << l.name << "\",";
+        json << "\"functions\": [";
 
-        // The additional space between the longest function name and the descriptions
-
-        std::ofstream file;
-        file.exceptions(~std::ofstream::goodbit);
-        file.open(filename);
-
-        file << "Available commands:\n";
-        // Now write out the functions
-        for (const LuaLibrary& l : _registeredLibraries) {
-            for (const LuaLibrary::Function& f : l.functions) {
-                std::string name = concatenate(l.name, f.name);
-                file << padding << name << "(" << f.argumentText << ")" << std::endl;
-            }
-        }
-        file << std::endl;
-
-        // Now write out the functions definitions
-        for (const LuaLibrary& library : _registeredLibraries) {
-            for (const LuaLibrary::Function& function : library.functions) {
-                std::string name = concatenate(library.name, function.name);
-                file << name << "(" << function.argumentText << "):" << std::endl;
-
-                std::string remainingHelptext = function.helpText;
-                while (!remainingHelptext.empty()) {
-                    const size_t length = remainingHelptext.length();
-                    const size_t paddingLength = padding.length();
-
-                    if ((length + paddingLength) > lineWidth) {
-                        size_t lastSpace = remainingHelptext.find_last_of(
-                            whitespace,
-                            lineWidth - 1 - paddingLength
-                        );
-                        if (lastSpace == remainingHelptext.npos) {
-                            lastSpace = lineWidth;
-                        }
-                        
-                        file << padding << remainingHelptext.substr(0, lastSpace) << '\n';
-                        
-                        size_t firstNotSpace = remainingHelptext.find_first_not_of(
-                            whitespace,
-                            lastSpace
-                        );
-                        if (firstNotSpace == remainingHelptext.npos) {
-                            firstNotSpace = lastSpace;
-                        }
-                        remainingHelptext = remainingHelptext.substr(firstNotSpace);
-                    }
-                    else {
-                        file << padding << remainingHelptext << std::endl;
-                        remainingHelptext = "";
-                    }
-                }
-                file << std::endl;
-            }
-        }
-    }
-    else if (type == "html") {
-        std::ifstream handlebarsInput(absPath(HandlebarsFilename));
-        std::ifstream jsInput(absPath(JsFilename));
-
-        std::string jsContent;
-        std::back_insert_iterator<std::string> jsInserter(jsContent);
-
-        std::copy(std::istreambuf_iterator<char>{handlebarsInput}, std::istreambuf_iterator<char>(), jsInserter);
-        std::copy(std::istreambuf_iterator<char>{jsInput}, std::istreambuf_iterator<char>(), jsInserter);
-
-        std::ifstream bootstrapInput(absPath(BootstrapFilename));
-        std::ifstream cssInput(absPath(CssFilename));
-
-        std::string cssContent;
-        std::back_insert_iterator<std::string> cssInserter(cssContent);
-
-        std::copy(std::istreambuf_iterator<char>{bootstrapInput}, std::istreambuf_iterator<char>(), cssInserter);
-        std::copy(std::istreambuf_iterator<char>{cssInput}, std::istreambuf_iterator<char>(), cssInserter);
-
-        std::ifstream mainTemplateInput(absPath(MainTemplateFilename));
-        std::string mainTemplateContent{ std::istreambuf_iterator<char>{mainTemplateInput},
-            std::istreambuf_iterator<char>{} };
-
-        std::ifstream scriptingTemplateInput(absPath(ScriptingTemplateFilename));
-        std::string scriptingTemplateContent{ std::istreambuf_iterator<char>{scriptingTemplateInput},
-            std::istreambuf_iterator<char>{} };
-
-        std::ofstream file;
-        file.exceptions(~std::ofstream::goodbit);
-        file.open(filename);
-
-        // Create JSON
-        std::stringstream json;
-        json << "[";
-
-        bool first = true;
-        for (const LuaLibrary& l : _registeredLibraries) {
-            if (!first) {
+        for (const LuaLibrary::Function& f : l.functions) {
+            json << "{";
+            json << "\"name\": \"" << f.name << "\", ";
+            json << "\"arguments\": \"" << f.argumentText << "\", ";
+            json << "\"help\": \"" << f.helpText << "\"";
+            json << "}";
+            if (&f != &l.functions.back()) {
                 json << ",";
             }
-            first = false;
-
-            json << "{";
-            json << "\"library\": \"" << l.name << "\",";
-            json << "\"functions\": [";
-
-            for (const LuaLibrary::Function& f : l.functions) {
-                json << "{";
-                json << "\"name\": \"" << f.name << "\", ";
-                json << "\"arguments\": \"" << f.argumentText << "\", ";
-                json << "\"help\": \"" << f.helpText << "\"";
-                json << "}";
-                if (&f != &l.functions.back()) {
-                    json << ",";
-                }
-            }
-            json << "]}";
-
         }
-        json << "]";
+        json << "]}";
 
-        std::string jsonString = "";
-        for (const char& c : json.str()) {
-            if (c == '\'') {
-                jsonString += "\\'";
-            }
-            else {
-                jsonString += c;
-            }
-        }
-
-        std::stringstream html;
-        html << "<!DOCTYPE html>\n"
-            << "<html>\n"
-            << "\t<head>\n"
-            << "\t\t<script id=\"mainTemplate\" type=\"text/x-handlebars-template\">\n"
-            << mainTemplateContent << "\n"
-            << "\t\t</script>\n"
-            << "\t\t<script id=\"scriptingTemplate\" type=\"text/x-handlebars-template\">\n"
-            << scriptingTemplateContent << "\n"
-            << "\t\t</script>\n"
-            << "\t<script>\n"
-            << "var scripting = JSON.parse('" << jsonString << "');\n"
-            << "var version = [" << OPENSPACE_VERSION_MAJOR << ", " << OPENSPACE_VERSION_MINOR << ", " << OPENSPACE_VERSION_PATCH << "];\n"
-            << jsContent << "\n"
-            << "\t</script>\n"
-            << "\t<style type=\"text/css\">\n"
-            << cssContent << "\n"
-            << "\t</style>\n"
-            << "\t\t<title>Documentation</title>\n"
-            << "\t</head>\n"
-            << "\t<body>\n"
-            << "\t<body>\n"
-            << "</html>\n";
-
-        file << html.str();
-
-        /*
-
-        html << "<html>\n"
-             << "\t<head>\n"
-             << "\t\t<title>Script Log</title>\n"
-             << "\t</head>\n"
-             << "<body>\n"
-             << "<table cellpadding=3 cellspacing=0 border=1>\n"
-             << "\t<caption>Script Log</caption>\n\n"
-             << "\t<thead>\n"
-             << "\t\t<tr>\n"
-             << "\t\t\t<th rowspan=2>Library</th>\n"
-             << "\t\t\t<th colspan=3>Functions</th>\n"
-             << "\t\t</tr>\n"
-             << "\t\t<tr>\n"
-             << "\t\t\t<th>Name</th>\n"
-             << "\t\t\t<th>Arguments</th>\n"
-             << "\t\t\t<th>Help</th>\n"
-             << "\t\t</tr>\n"
-             << "\t</thead>\n"
-             << "\t<tbody>\n";
-
-
-
-        for (const LuaLibrary& l : _registeredLibraries) {
-            html << "\t<tr>\n";
-
-            if (l.name.empty()) {
-                html << "\t\t<td>openspace</td>\n";
-            }
-            else {
-                html << "\t\t<td>openspace." << l.name << "</td>\n";
-            }
-            html << "\t\t<td></td><td></td><td></td>\n"
-                 << "\t\</tr>";
-
-            for (const LuaLibrary::Function& f : l.functions) {
-                html << "\t<tr>\n"
-                     << "\t\t<td></td>\n"
-                     << "\t\t<td>" << f.name << "</td>\n"
-                     << "\t\t<td>" << f.argumentText << "</td>\n"
-                     << "\t\t<td>" << f.helpText << "</td>\n"
-                     << "\t</tr>\n";
-            }
-
-            html << "\t<tr><td style=\"line-height: 10px;\" colspan=4></td></tr>\n";
-        }
-
-        html << "\t</tbody>\n"
-             << "</table>\n"
-             << "</html>";
-
-        file << html.str();
-*/
     }
-    else {
-        throw ghoul::RuntimeError("Undefined type '" + type + "' for Lua documentation");
+    json << "]";
+
+    std::string jsonString = "";
+    for (const char& c : json.str()) {
+        if (c == '\'') {
+            jsonString += "\\'";
+        }
+        else {
+            jsonString += c;
+        }
     }
+
+    return jsonString;
 }
 
 bool ScriptEngine::writeLog(const std::string& script) {
-    const std::string KeyScriptLogType =
-        ConfigurationManager::KeyScriptLog + '.' + ConfigurationManager::PartType;
-    const std::string KeyScriptLogFile =
-        ConfigurationManager::KeyScriptLog + '.' + ConfigurationManager::PartFile;
-
     // Check that logging is enabled and initialize if necessary
     if (!_logFileExists) {
         // If a ScriptLogFile was specified, generate it now
-        const bool hasType = OsEng.configurationManager()
-            .hasKey(KeyScriptLogType);
-        const bool hasFile = OsEng.configurationManager()
-            .hasKey(KeyScriptLogFile);
-        if (hasType && hasFile) {
-            OsEng.configurationManager()
-                .getValue(KeyScriptLogType, _logType);
-            OsEng.configurationManager()
-                .getValue(KeyScriptLogFile, _logFilename);
+        const bool hasFile = OsEng.configurationManager().hasKey(
+            ConfigurationManager::KeyScriptLog
+        );
+        if (hasFile) {
+            OsEng.configurationManager().getValue(
+                ConfigurationManager::KeyScriptLog,
+                _logFilename
+            );
 
             _logFilename = absPath(_logFilename);
             _logFileExists = true;
@@ -762,31 +575,20 @@ bool ScriptEngine::writeLog(const std::string& script) {
                 return false;
             }
         } else {
-            LDEBUG("No script log specified in 'openspace.cfg.' To log, set '"
-                   << KeyScriptLogType << " and "
-                   << KeyScriptLogFile
-                   << " in configuration table.");
             _logScripts = false;
             return false;
         }
     }
 
-    if (_logType == "text") {
-        // Simple text output to logfile
-        std::ofstream file(_logFilename, std::ofstream::app);
-        if (!file.good()) {
-            LERROR("Could not open file '" << _logFilename << "' for logging scripts");
-            return false;
-        }
-
-        file << script << std::endl;
-        file.close();
-    }
-    else {
-        LERROR("Undefined type '" << _logType << "' for script documentation");
-        _logScripts = false;
+    // Simple text output to logfile
+    std::ofstream file(_logFilename, std::ofstream::app);
+    if (!file.good()) {
+        LERROR("Could not open file '" << _logFilename << "' for logging scripts");
         return false;
     }
+
+    file << script << std::endl;
+    file.close();
 
     return true;
 }

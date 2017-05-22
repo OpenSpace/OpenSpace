@@ -229,7 +229,7 @@ GUI::GUI()
     , _property("Properties")
     , _screenSpaceProperty("ScreenSpace Properties")
     , _virtualProperty("Virtual Properties")
-    , _currentVisibility(properties::Property::Visibility::All)
+    , _currentVisibility(properties::Property::Visibility::Developer)
 {
     addPropertySubOwner(_help);
     addPropertySubOwner(_origin);
@@ -634,7 +634,7 @@ void GUI::renderAndUpdatePropertyVisibility() {
     int t = static_cast<std::underlying_type_t<V>>(_currentVisibility);
 
     // Array is sorted by importance
-    std::array<const char*, 4> items = { "None", "User", "Developer", "All"};
+    std::array<const char*, 4> items = { "User", "Developer", "Hidden", "All"};
     ImGui::Combo("PropertyVisibility", &t, items.data(), static_cast<int>(items.size()));
 
     _currentVisibility = static_cast<V>(t);

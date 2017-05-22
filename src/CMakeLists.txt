@@ -27,6 +27,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/documentation/core_registration.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/documentation.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/documentationengine.cpp
+    ${OPENSPACE_BASE_DIR}/src/documentation/documentationgenerator.cpp
     ${OPENSPACE_BASE_DIR}/src/documentation/verifier.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager.cpp
     ${OPENSPACE_BASE_DIR}/src/engine/configurationmanager_doc.inl
@@ -167,6 +168,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationgenerator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/verifier.inl
     ${OPENSPACE_BASE_DIR}/include/openspace/engine/configurationmanager.h
