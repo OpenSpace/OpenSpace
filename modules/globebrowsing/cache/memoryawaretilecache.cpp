@@ -35,6 +35,9 @@ namespace openspace {
 namespace globebrowsing {
 namespace cache {
 
+namespace {
+    const char* _loggerCat = "MemoryAwareTileCache";
+}
 
 MemoryAwareTileCache::MemoryAwareTileCache()
     : PropertyOwner("TileCache")
@@ -96,6 +99,7 @@ MemoryAwareTileCache::~MemoryAwareTileCache()
 { }
 
 void MemoryAwareTileCache::clear() {
+    LINFO("Clearing tile cache");
     _numTextureBytesAllocatedOnCPU = 0;
     for (TextureContainerMap::iterator it = _textureContainerMap.begin();
         it != _textureContainerMap.end();
@@ -104,6 +108,7 @@ void MemoryAwareTileCache::clear() {
         it->second.first->reset();
         it->second.second->clear();
     }
+    LINFO("Tile cache cleared");
 }
 
 void MemoryAwareTileCache::createDefaultTextureContainers() {
@@ -129,6 +134,7 @@ void MemoryAwareTileCache::assureTextureContainerExists(
 }
 
 void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
+    LINFO("Resetting tile cache size");
     ghoul_assert(_textureContainerMap.size() > 0, "Texture containers must exist.");
     size_t sumTextureTypeSize = 0;
     for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
@@ -140,6 +146,7 @@ void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
     }
     size_t numTexturesPerType = estimatedSize / sumTextureTypeSize;
     resetTextureContainerSize(numTexturesPerType);
+    LINFO("Tile cache size was reset");
 }
 
 void MemoryAwareTileCache::resetTextureContainerSize(size_t numTexturesPerTextureType) {

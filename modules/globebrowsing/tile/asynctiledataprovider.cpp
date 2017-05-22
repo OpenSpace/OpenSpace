@@ -187,6 +187,8 @@ void AsyncTileDataProvider::update() {
             // Only allow resetting if there are no jobs currently running
             if (_enqueuedTileRequests.size() == 0) {
                 performReset(ResetRawTileDataReader::Yes);
+                LINFO(std::string("Tile data reader ") + "'" + _name + "'" +
+                    " reset successfully.");
             }
             break;
         }
@@ -196,6 +198,8 @@ void AsyncTileDataProvider::update() {
             // Only allow resetting if there are no jobs currently running
             if (_enqueuedTileRequests.size() == 0) {
                 performReset(ResetRawTileDataReader::No);
+                LINFO(std::string("Tile data reader ") + "'" + _name + "'" +
+                    " reset successfully.");
             }
             break;
         }
@@ -236,7 +240,6 @@ void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileData
 
     // Finished resetting
     _resetMode = ResetMode::ShouldNotReset;
-    LINFO(std::string("Tile data reader ") + "'" + _name + "'" + " reset successfully.");
 }
 
 float AsyncTileDataProvider::noDataValueAsFloat() const {
