@@ -50,8 +50,10 @@
 
 namespace openspace {
 
+const std::string GlobeBrowsingModule::name = "GlobeBrowsing";
+
 GlobeBrowsingModule::GlobeBrowsingModule()
-    : OpenSpaceModule("GlobeBrowsing")
+    : OpenSpaceModule(name)
     , _cpuAllocatedTileData(
         "cpuAllocatedTileData", "CPU allocated tile data (MB)",
         1024,      // Default
@@ -109,7 +111,7 @@ void GlobeBrowsingModule::internalInitialize() {
         addProperty(_gpuAllocatedTileData);
         addProperty(_tileCacheSize);
         addProperty(_usePbo);
-      
+
 #ifdef GLOBEBROWSING_USE_GDAL
         // Convert from MB to Bytes
         GdalWrapper::create(

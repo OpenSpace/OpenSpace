@@ -39,6 +39,8 @@ public:
     GlobeBrowsingModule();
 
     bool shouldUsePbo();
+
+    static const std::string name;
     
 protected:
     void internalInitialize() override;

@@ -47,7 +47,7 @@ AsyncTileDataProvider::AsyncTileDataProvider(
     , _pboContainer(nullptr)
     , _resetMode(ResetMode::ShouldResetAllButRawTileDataReader)
 {
-    _globeBrowsingModule = OsEng.moduleEngine().getModule<GlobeBrowsingModule>();
+    _globeBrowsingModule = OsEng.moduleEngine().module<GlobeBrowsingModule>();
     performReset(ResetRawTileDataReader::No);
 }
 

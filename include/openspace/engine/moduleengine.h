@@ -85,17 +85,24 @@ public:
      * \return A list of all registered OpenSpaceModule%s
      */
     std::vector<OpenSpaceModule*> modules() const;
-
+    
+    /**
+     * Get the module subclass with given template argument. Requires the module subclass
+     * to have the public static member variable <code>name</code> which must be equal to
+     * the name of the module used in its constructor.
+     * \return a pointer to the module of the given subclass
+     */
     template <class ModuleSubClass>
-    ModuleSubClass* getModule() {
-        for (size_t i = 0; i < _modules.size(); ++i) {
-            ModuleSubClass* module = dynamic_cast<ModuleSubClass*>(_modules[i].get());
-            if (module) {
-                return module;
-            }
+    ModuleSubClass* module() const {
+        auto it = std::find_if(_modules.begin(), _modules.end(),
+            [](const std::unique_ptr<OpenSpaceModule>& module) {
+                return module->name() == ModuleSubClass::name;
+            });
+        if (it != _modules.end()) {
+            return dynamic_cast<ModuleSubClass*>(it->get());
+        } else {
+            return nullptr;
         }
-        ghoul_assert(false, "This module does not exist!");
-        return nullptr;
     }
 
     /**
