@@ -32,6 +32,11 @@
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/triggerproperty.h>
+
 #include <memory>
 #include <vector>
 #include <unordered_map>
@@ -80,7 +85,7 @@ struct ProviderTileHasher {
     }
 };
 
-class MemoryAwareTileCache {
+class MemoryAwareTileCache : public properties::PropertyOwner {
 public:
     
     MemoryAwareTileCache();
@@ -94,9 +99,11 @@ public:
     void createTileAndPut(ProviderTileKey key, std::shared_ptr<RawTile> rawTile);
     void put(const ProviderTileKey& key,
         const TileTextureInitData::HashKey& initDataKey, Tile tile);
+    void update();
 
     size_t getGPUAllocatedDataSize() const;
     size_t getCPUAllocatedDataSize() const;
+    bool shouldUsePbo() const;
 
 private:
 
@@ -112,6 +119,16 @@ private:
 
     TextureContainerMap _textureContainerMap;
     size_t _numTextureBytesAllocatedOnCPU;
+
+    // Properties
+    properties::IntProperty _cpuAllocatedTileData;
+    properties::IntProperty _gpuAllocatedTileData;
+    properties::IntProperty _tileCacheSize;
+    properties::TriggerProperty _applyTileCacheSize;
+    properties::TriggerProperty _clearTileCache;
+
+    /// Whether or not pixel buffer objects should be used when uploading tile data
+    properties::BoolProperty _usePbo;
 };
 
 } // namespace cache

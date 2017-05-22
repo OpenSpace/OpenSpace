@@ -29,7 +29,7 @@
 #include <modules/globebrowsing/tile/tileloadjob.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
-
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/moduleengine.h>
@@ -158,7 +158,7 @@ void AsyncTileDataProvider::endEnqueuedJobs() {
 
 void AsyncTileDataProvider::updatePboUsage() {
     bool usingPbo = _pboContainer != nullptr;
-    bool shouldUsePbo = _globeBrowsingModule->shouldUsePbo();
+    bool shouldUsePbo = _globeBrowsingModule->tileCache()->shouldUsePbo();
 
     // If changed, we need to reset the async tile data provider.
     // No need to reset the raw tile data reader when changing PBO usage.
@@ -209,7 +209,7 @@ void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileData
     ghoul_assert(_enqueuedTileRequests.size() == 0, "No enqueued requests left");
   
     // Re-initialize PBO container
-    if (_globeBrowsingModule->shouldUsePbo()) {
+    if (_globeBrowsingModule->tileCache()->shouldUsePbo()) {
         size_t pboNumBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
         _pboContainer = std::make_unique<PixelBufferContainer<TileIndex::TileHashKey>>(
             pboNumBytes, PixelBuffer::Usage::STREAM_DRAW, 10

@@ -29,6 +29,7 @@
 
 #include <ghoul/ghoul.h>
 #include <ghoul/logging/consolelog.h>
+#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -36,9 +37,59 @@ namespace cache {
 
 
 MemoryAwareTileCache::MemoryAwareTileCache()
-    : _numTextureBytesAllocatedOnCPU(0)
+    : PropertyOwner("TileCache")
+    , _numTextureBytesAllocatedOnCPU(0)
+    , _cpuAllocatedTileData(
+        "cpuAllocatedTileData", "CPU allocated tile data (MB)",
+        1024,   // Default
+        128,    // Minimum
+        2048,   // Maximum
+        1)      // Step: One MB
+    , _gpuAllocatedTileData(
+        "gpuAllocatedTileData", "GPU allocated tile data (MB)",
+        1024,   // Default
+        128,    // Minimum
+        2048,   // Maximum
+        1)      // Step: One MB
+    , _tileCacheSize(
+        "tileCacheSize", "Tile cache size",
+        1024,   // Default
+        128,    // Minimum
+        2048,   // Maximum
+        1)      // Step: One MB
+    , _applyTileCacheSize("applyTileCacheSize", "Apply tile cache size")
+    , _clearTileCache("clearTileCache", "Clear tile cache")
+    , _usePbo("usePbo", "Use PBO", false)
 {
     createDefaultTextureContainers();
+
+    // Properties
+    _clearTileCache.onChange(
+    [&]{
+        clear();
+    });
+    _applyTileCacheSize.onChange(
+    [&]{
+        setSizeEstimated(_tileCacheSize * 1024 * 1024);
+    });
+    _cpuAllocatedTileData.setMaxValue(
+        CpuCap.installedMainMemory() * 0.25);
+    _gpuAllocatedTileData.setMaxValue(
+        CpuCap.installedMainMemory() * 0.25);
+    _tileCacheSize.setMaxValue(
+        CpuCap.installedMainMemory() * 0.25);
+  
+    setSizeEstimated(_tileCacheSize * 1024 * 1024);
+  
+    _cpuAllocatedTileData.setReadOnly(true);
+    _gpuAllocatedTileData.setReadOnly(true);
+
+    addProperty(_clearTileCache);
+    addProperty(_applyTileCacheSize);
+    addProperty(_cpuAllocatedTileData);
+    addProperty(_gpuAllocatedTileData);
+    addProperty(_tileCacheSize);
+    addProperty(_usePbo);
 }
 
 MemoryAwareTileCache::~MemoryAwareTileCache()
@@ -195,6 +246,13 @@ void MemoryAwareTileCache::put(const ProviderTileKey& key,
     return;
 }
 
+void MemoryAwareTileCache::update() {
+    size_t dataSizeCPU = getCPUAllocatedDataSize();
+    size_t dataSizeGPU = getGPUAllocatedDataSize();
+    _cpuAllocatedTileData.setValue(dataSizeCPU / 1024 / 1024);
+    _gpuAllocatedTileData.setValue(dataSizeGPU / 1024 / 1024);
+}
+
 size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {
     size_t dataSize = 0;
     for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
@@ -220,6 +278,10 @@ size_t MemoryAwareTileCache::getCPUAllocatedDataSize() const {
         }
     }
     return dataSize + _numTextureBytesAllocatedOnCPU;
+}
+
+bool MemoryAwareTileCache::shouldUsePbo() const {
+    return _usePbo;
 }
 
 } // namespace cache

@@ -54,27 +54,6 @@ const std::string GlobeBrowsingModule::name = "GlobeBrowsing";
 
 GlobeBrowsingModule::GlobeBrowsingModule()
     : OpenSpaceModule(name)
-    , _cpuAllocatedTileData(
-        "cpuAllocatedTileData", "CPU allocated tile data (MB)",
-        1024,      // Default
-        128,      // Minimum
-        2048,   // Maximum
-        1)      // Step: One MB
-    , _gpuAllocatedTileData(
-        "gpuAllocatedTileData", "GPU allocated tile data (MB)",
-        1024,      // Default
-        128,      // Minimum
-        2048,   // Maximum
-        1)      // Step: One MB
-    , _tileCacheSize(
-        "tileCacheSize", "Tile cache size",
-        1024,    // Default
-        128,    // Minimum
-        2048,   // Maximum
-        1)      // Step: One MB
-    , _applyTileCacheSize("applyTileCacheSize", "Apply tile cache size")
-    , _clearTileCache("clearTileCache", "Clear tile cache")
-    , _usePbo("usePbo", "Use PBO", false)
 { }
 
 void GlobeBrowsingModule::internalInitialize() {
@@ -82,36 +61,8 @@ void GlobeBrowsingModule::internalInitialize() {
 
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&] {
 
-        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
-
-        _clearTileCache.onChange(
-        [&]{
-            _tileCache->clear();
-        });
-        _applyTileCacheSize.onChange(
-        [&]{
-            _tileCache->setSizeEstimated(
-                _tileCacheSize * 1024 * 1024);
-        });
-        _cpuAllocatedTileData.setMaxValue(
-            CpuCap.installedMainMemory() * 0.25);
-        _gpuAllocatedTileData.setMaxValue(
-            CpuCap.installedMainMemory() * 0.25);
-        _tileCacheSize.setMaxValue(
-            CpuCap.installedMainMemory() * 0.25);
-      
-        _tileCache->setSizeEstimated(
-            _tileCacheSize * 1024 * 1024);
-      
-        _cpuAllocatedTileData.setReadOnly(true);
-        _gpuAllocatedTileData.setReadOnly(true);
-
-        addProperty(_clearTileCache);
-        addProperty(_applyTileCacheSize);
-        addProperty(_cpuAllocatedTileData);
-        addProperty(_gpuAllocatedTileData);
-        addProperty(_tileCacheSize);
-        addProperty(_usePbo);
+    _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
+    addPropertySubOwner(*_tileCache);
 
 #ifdef GLOBEBROWSING_USE_GDAL
         // Convert from MB to Bytes
@@ -123,10 +74,7 @@ void GlobeBrowsingModule::internalInitialize() {
     });
   
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Render, [&]{
-        size_t dataSizeCPU = _tileCache->getCPUAllocatedDataSize();
-        size_t dataSizeGPU = _tileCache->getGPUAllocatedDataSize();
-        _cpuAllocatedTileData.setValue(dataSizeCPU / 1024 / 1024);
-        _gpuAllocatedTileData.setValue(dataSizeGPU / 1024 / 1024);
+        _tileCache->update();
     });
 
   
@@ -157,10 +105,6 @@ void GlobeBrowsingModule::internalInitialize() {
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>("ByIndex");
     fTileProvider->registerClass<tileprovider::PresentationSlideProvider>("PresentationSlides");
     FactoryManager::ref().addFactory(std::move(fTileProvider));
-}
-
-bool GlobeBrowsingModule::shouldUsePbo() {
-    return _usePbo;
 }
 
 globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
