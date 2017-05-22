@@ -27,9 +27,13 @@
 
 #include <ghoul/misc/dictionary.h>
 
+#include <modules/globebrowsing/tasks/imgreader.h>
+
 #include <vector>
 
 #include <pcl/TextureMesh.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
 namespace {
 	const std::string _outputPath = "";
@@ -51,8 +55,12 @@ namespace globebrowsing {
 
 		static void generateMeshFromBinary(ghoul::Dictionary);
 
-		static void writeTxtFile(const std::string filename, std::string output_path);
+		static void writeTxtFile(const std::string filename, std::string output_path, ImgReader::PointCloudInfo mInfo);
+
+		static void extractCoordinatesFromArray(pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud, std::vector<std::vector<float>> xyz, ImgReader::PointCloudInfo mInfo);
 	};
+
+
 }
 }
 
