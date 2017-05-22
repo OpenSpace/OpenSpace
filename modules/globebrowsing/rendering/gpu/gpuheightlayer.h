@@ -48,6 +48,8 @@ struct TileIndex;
 class GPUHeightLayer : public GPULayer {
 public:
 
+    virtual ~GPUHeightLayer() override = default;
+
     /**
      * Sets the value of <code>Layer</code> to its corresponding
      * GPU struct. OBS! Users must ensure bind has been 

@@ -41,7 +41,7 @@ namespace globebrowsing {
 
 struct ChunkTile;
 class Layer;
-class LayerRenderSettings;
+struct LayerRenderSettings;
 struct TileDepthTransform;
 struct TileUvTransform;
 

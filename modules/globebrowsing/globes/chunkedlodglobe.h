@@ -123,6 +123,8 @@ private:
     static const TileIndex LEFT_HEMISPHERE_INDEX;
     static const TileIndex RIGHT_HEMISPHERE_INDEX;
 
+    const RenderableGlobe& _owner;
+  
     // Covers all negative longitudes
     std::unique_ptr<ChunkNode> _leftRoot;
 
@@ -140,7 +142,6 @@ private:
 
     std::shared_ptr<LayerManager> _layerManager;
 
-    const RenderableGlobe& _owner;
     bool _shadersNeedRecompilation;
 };
 

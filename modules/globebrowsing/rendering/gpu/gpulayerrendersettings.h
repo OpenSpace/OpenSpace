@@ -36,7 +36,7 @@ class ProgramObject;
 namespace openspace {
 namespace globebrowsing {
 
-class LayerRenderSettings;
+struct LayerRenderSettings;
 
 /**
  * Manages a GPU representation of a <code>LayerRenderSettings</code>

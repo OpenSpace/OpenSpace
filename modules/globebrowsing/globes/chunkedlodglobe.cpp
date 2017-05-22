@@ -58,13 +58,13 @@ const GeodeticPatch ChunkedLodGlobe::COVERAGE = GeodeticPatch(0, 0, 90, 180);
 
 ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
                                  std::shared_ptr<LayerManager> layerManager)
-    : _owner(owner)
+    : minSplitDepth(2)
+    , maxSplitDepth(22)
+    , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
+    , _owner(owner)
     , _leftRoot(std::make_unique<ChunkNode>(Chunk(owner, LEFT_HEMISPHERE_INDEX)))
     , _rightRoot(std::make_unique<ChunkNode>(Chunk(owner, RIGHT_HEMISPHERE_INDEX)))
-    , minSplitDepth(2)
-    , maxSplitDepth(22)
     , _layerManager(layerManager)
-    , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
     , _shadersNeedRecompilation(true)
 {
     auto geometry = std::make_shared<SkirtedGrid>(

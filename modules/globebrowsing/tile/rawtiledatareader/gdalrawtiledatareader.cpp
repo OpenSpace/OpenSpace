@@ -306,7 +306,7 @@ GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath)
             _initDirectory, filePath
         );
 
-        dataset = (GDALDataset *)GDALOpen(correctedPath.c_str(), GA_ReadOnly);
+        dataset = static_cast<GDALDataset*>(GDALOpen(correctedPath.c_str(), GA_ReadOnly));
         if (!dataset) {
             throw ghoul::RuntimeError("Failed to load dataset:\n" + filePath);
         }

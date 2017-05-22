@@ -34,7 +34,7 @@ namespace globebrowsing {
 
 ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
     : _parent(parent)
-    , _children({ nullptr, nullptr, nullptr, nullptr })
+    , _children({ {nullptr, nullptr, nullptr, nullptr} })
     , _chunk(chunk)
 {}
 
@@ -147,7 +147,7 @@ const ChunkNode& ChunkNode::find(const Geodetic2& location) const {
             ++index;
             ++index;
         }
-        node = &(node->getChild((Quad)index));
+        node = &(node->getChild(static_cast<Quad>(index)));
     }
     return *node;
 }

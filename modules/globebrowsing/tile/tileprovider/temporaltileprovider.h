@@ -51,6 +51,7 @@ namespace tileprovider {
  * of here.    
  */
 struct TimeFormat {
+    virtual ~TimeFormat() = default;
     /**
      * Stringifies a OpenSpace time instance
      * \param t The time to be stringifyed
@@ -64,7 +65,8 @@ struct TimeFormat {
  * Example: 2016-09-08
  */
 struct YYYY_MM_DD : public TimeFormat {
-    virtual std::string stringify(const Time& t) const;
+    virtual ~YYYY_MM_DD() override = default;
+    virtual std::string stringify(const Time& t) const override;
 };
 
 /**
@@ -72,7 +74,8 @@ struct YYYY_MM_DD : public TimeFormat {
 * Example: 20160908_230505
 */
 struct YYYYMMDD_hhmmss : public TimeFormat {
-    virtual std::string stringify(const Time& t) const;
+    virtual ~YYYYMMDD_hhmmss() override = default;
+    virtual std::string stringify(const Time& t) const override;
 };
 
 /**
@@ -80,7 +83,8 @@ struct YYYYMMDD_hhmmss : public TimeFormat {
  * Example: 2016-09-08T23:05:05Z
  */
 struct YYYY_MM_DDThhColonmmColonssZ : public TimeFormat {
-    virtual std::string stringify(const Time& t) const;
+    virtual ~YYYY_MM_DDThhColonmmColonssZ() override = default;
+    virtual std::string stringify(const Time& t) const override;
 };
     
 /**
@@ -88,7 +92,8 @@ struct YYYY_MM_DDThhColonmmColonssZ : public TimeFormat {
  * Example: 2016-09-08T23:05:05Z
  */
 struct YYYY_MM_DDThh_mm_ssZ : public TimeFormat {
-    virtual std::string stringify(const Time& t) const;
+    virtual ~YYYY_MM_DDThh_mm_ssZ() override = default;
+    virtual std::string stringify(const Time& t) const override;
 };
 
 /**
