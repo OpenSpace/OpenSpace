@@ -74,6 +74,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/models/multimodelprovider.h
     ${CMAKE_CURRENT_SOURCE_DIR}/models/singlemodelprovider.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/subsitemodels.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/job/subsiteinitializationjob.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
@@ -183,6 +184,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/models/modelprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/models/multimodelprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/models/singlemodelprovider.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/job/subsiteinitializationjob.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/statscollector.cpp
