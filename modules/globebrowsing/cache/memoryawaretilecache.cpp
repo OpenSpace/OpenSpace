@@ -270,10 +270,13 @@ void MemoryAwareTileCache::update() {
 size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {
     return std::accumulate(
         _textureContainerMap.cbegin(),
-        _textureContainerMap.cend(), 0, [](size_t s, const std::pair<const TileTextureInitData::HashKey,
-        TextureContainerTileCache>& p){
+        _textureContainerMap.cend(), 0,
+        [](size_t s, const std::pair<const TileTextureInitData::HashKey,
+        TextureContainerTileCache>& p)
+        {
             const TextureContainer& textureContainer = *p.second.first;
-            size_t bytesPerTexture = textureContainer.tileTextureInitData().totalNumBytes();
+            size_t bytesPerTexture =
+                textureContainer.tileTextureInitData().totalNumBytes();
             return s + bytesPerTexture * textureContainer.size();
         }
     );
@@ -282,8 +285,10 @@ size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {
 size_t MemoryAwareTileCache::getCPUAllocatedDataSize() const {
     size_t dataSize = std::accumulate(
         _textureContainerMap.cbegin(),
-        _textureContainerMap.cend(), 0, [](size_t s, const std::pair<const TileTextureInitData::HashKey,
-        TextureContainerTileCache>& p){
+        _textureContainerMap.cend(), 0,
+        [](size_t s, const std::pair<const TileTextureInitData::HashKey,
+        TextureContainerTileCache>& p)
+        {
             const TextureContainer& textureContainer = *p.second.first;
             const TileTextureInitData& initData = textureContainer.tileTextureInitData();
             if (initData.shouldAllocateDataOnCPU()) {
