@@ -131,6 +131,8 @@ return {
             -- TracingMethod = "PreProcess",
             TracingMethod = "PreTraced",
             -- TracingMethod = "PreTraced",
+            SourceFolder = volumeFolderEnlil,
+
             VectorVolume = {
                 -- Type = "VolumeKameleon",
                 Directory = volumeFolderEnlilHighRes,
@@ -147,7 +149,7 @@ return {
                 -- NumResamples = 5,
                 ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
             },
-            SeedPoints = {
+            SeedPointInfo = {
                 -- Type = "File",
                 -- File = seedPointsFileEnlil,
                 File = eqSeedsEnlil1AU_1nHalfdeg,

@@ -135,6 +135,12 @@ bool FieldlinesSequenceManager::getSeedPointsFromFile(
         s >> point.z;
         outVec.push_back(std::move(point));
     }
+
+    // TODO: Will this actually ever be triggered even if file is empty? Check!
+    if (outVec.size() == 0) {
+        return false;
+    }
+
     return true;
 }
 

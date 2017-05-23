@@ -62,8 +62,6 @@ private:
 
     std::vector<glm::vec3> _seedPoints; // TODO: no need to store these here?
 
-    std::string _tracingMethod;
-
     // State variables
     std::vector<FieldlinesState> _states;
 
@@ -169,6 +167,7 @@ private:
     void updateMorphingBuffers();
     void updateVertexPosBuffer();
     bool getSourceFilesFromDictionary(const std::string& fileExt, std::vector<std::string>& validSourceFilePaths);
+    bool getSeedPointsFromDictionary();
     bool getUnsignedIntFromModfile(const std::string& key, unsigned int& val);
 };
 

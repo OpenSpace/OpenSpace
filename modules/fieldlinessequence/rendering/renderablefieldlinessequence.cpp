@@ -58,6 +58,9 @@ namespace {
     const char* keyStateStepSize                = "StateStepSize";
     const char* keyMaxNumStates                 = "MaxNumStates";
 
+    const char* keySeedPointsInfo               = "SeedPointInfo";
+    const char* keySeedPointsFile               = "File";
+
     // const char* keyVertexListFileType       = "FileType";
     // const char* keyVertexListFileTypeJson   = "Json";
     // const char* keyVertexListFileTypeBinary = "Binary";
@@ -76,14 +79,16 @@ namespace {
     const char* keyFieldlineResampleOption = "ResamplingType";
     const char* keyFieldlineQuickMorphDistance = "QuickMorphDistance";
 
-    const char* keySeedPointsFile = "File";
-
     const float R_E_TO_METER = 6371000.f; // Earth radius
     const float R_S_TO_METER = 695700000.f; // Sun radius
     const float A_U_TO_METER = 149597870700.f; // Astronomical Units
     // const char* keySeedPointsDirectory = "Directory"; // TODO: allow for varying seed points?
 
-    enum colorMethod{UNIFORM, QUANTITY_DEPENDENT, CLASSIFIED};
+    enum colorMethod{ UNIFORM, QUANTITY_DEPENDENT, CLASSIFIED };
+    enum TracingMethod{ PRE_PROCESS,
+                        PRE_CALCULATED_JSON,
+                        PRE_CALCULATED_BINARY,
+                        LIVE_TRACE };
 }
 
 
@@ -147,22 +152,28 @@ bool RenderableFieldlinesSequence::initialize() {
     //--Extract common  info from LUA, applicable to all types of renderable fieldline sequences--//
     std::string sourceFileExt = "";
     std::vector<std::string> validSourceFilePaths;
+    TracingMethod tracingMethod;
 
     // Determine what type of tracing method to use.
-    if (!_dictionary.getValue(keyTracingMethod, _tracingMethod)) {
+    std::string tracingMethodString;
+    if (!_dictionary.getValue(keyTracingMethod, tracingMethodString)) {
         LERROR("Renderable does not contain a key for '" << keyTracingMethod << "'");
         return false;
     } else {
-        if (_tracingMethod == keyTracingMethodPreProcess) {
+        if (tracingMethodString == keyTracingMethodPreProcess) {
             sourceFileExt = "cdf";
-        } else if (_tracingMethod == keyTracingMethodPreTracedBinary) {
+            tracingMethod = PRE_PROCESS;
+        } else if (tracingMethodString == keyTracingMethodPreTracedBinary) {
             sourceFileExt = "osfls";
-        } else if (_tracingMethod == keyTracingMethodPreTracedJson) {
+            tracingMethod = PRE_CALCULATED_BINARY;
+        } else if (tracingMethodString == keyTracingMethodPreTracedJson) {
             sourceFileExt = "json";
-        } else if (_tracingMethod == keyTracingMethodLiveTrace) {
+            tracingMethod = PRE_CALCULATED_JSON;
+        } else if (tracingMethodString == keyTracingMethodLiveTrace) {
             sourceFileExt = "cdf";
+            tracingMethod = LIVE_TRACE;
         } else {
-            LERROR("\"" << _tracingMethod << "\" is not a recognised key!");
+            LERROR("\"" << tracingMethodString << "\" is not a recognised key!");
             return false;
         }
     }
@@ -183,168 +194,153 @@ bool RenderableFieldlinesSequence::initialize() {
     std::string binaryPath;
     std::string saveFilePrefix;
 
-    if (_tracingMethod == keyTracingMethodPreProcess) {
-        // SeedPoints Info. Needs a .txt file containing seed points.
-        // Each row should have 3 floats seperated by spaces
-        std::string pathToSeedPointFile;
-        if (!_dictionary.getValue(keySeedPointsFile, pathToSeedPointFile)) {
-            LERROR(keySeedPoints << " doesn't specify a '" << keySeedPointsFile << "'" <<
-                "\n\tRequires a path to a .txt file containing seed point data." <<
-                "Each row should have 3 floats seperated by spaces.");
-            return false;
-        } else {
-            if (!FieldlinesSequenceManager::ref().getSeedPointsFromFile(pathToSeedPointFile,
-                                                                        _seedPoints)) {
-                LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
+    switch (tracingMethod) {
+        case PRE_PROCESS: {
+            if (!getSeedPointsFromDictionary()) {
                 return false;
             }
-        }
-        if (_seedPoints.size() > 0) {
+
             allowSeedPoints = true;
-        }
 
-        // Specify which quantity to trace
-        std::string tracingVariable;
-        if (!_dictionary.getValue(keyVolumeTracingVariable, tracingVariable)) {
-            tracingVariable = "b"; //default: b = magnetic field.
-            LWARNING(keyVolume << " isn't specifying a " <<
-                     keyVolumeTracingVariable << ". Using default value: '" <<
-                     tracingVariable << "' for magnetic field.");
-        }
-
-        int maxSteps = 1000; // Default value
-        float f_maxSteps;
-        if (!_dictionary.getValue(keyFieldlineMaxTraceSteps, f_maxSteps)) {
-            LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineMaxTraceSteps
-                    << ". Using default value: " << maxSteps);
-        } else {
-            maxSteps = static_cast<int>(f_maxSteps);
-        }
-
-        bool userWantsMorphing;
-        if (!_dictionary.getValue(keyFieldlineShouldMorph, userWantsMorphing)) {
-            _isMorphing = false; // Default value
-            LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph
-                    << ". Using default: " << _isMorphing);
-        } else {
-            _isMorphing = userWantsMorphing;
-        }
-
-        int resamplingOption = 4; // Default
-        numResamples = 2 * maxSteps + 3; // Default
-        if (_isMorphing) {
-
-            float f_resamplingOption;
-
-            if(!_dictionary.getValue(keyFieldlineResampleOption, f_resamplingOption)) {
-                LWARNING(keyFieldlines << " isn't specifying " <<
-                         keyFieldlineResampleOption << ". Default is set to " <<
-                         resamplingOption);
-            } else {
-                resamplingOption = static_cast<int>(f_resamplingOption);
+            // Specify which quantity to trace
+            std::string tracingVariable;
+            if (!_dictionary.getValue(keyVolumeTracingVariable, tracingVariable)) {
+                tracingVariable = "b"; //default: b = magnetic field.
+                LWARNING(keyVolume << " isn't specifying a " <<
+                         keyVolumeTracingVariable << ". Using default value: '" <<
+                         tracingVariable << "' for magnetic field.");
             }
 
-            float f_numResamples;
-
-            if(_dictionary.getValue(keyFieldlineResamples, f_numResamples)) {
-                if (resamplingOption == 4) {
-                    LWARNING(keyFieldlineResampleOption << " 4 does not allow a custom" <<
-                             " value for " << keyFieldlineResamples <<". Using (2 * " <<
-                             keyFieldlineMaxTraceSteps <<" + 3) = " << numResamples);
-                } else {
-                    numResamples = static_cast<int>(f_numResamples);
-                }
+            int maxSteps = 1000; // Default value
+            float f_maxSteps;
+            if (!_dictionary.getValue(keyFieldlineMaxTraceSteps, f_maxSteps)) {
+                LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineMaxTraceSteps
+                        << ". Using default value: " << maxSteps);
             } else {
-                if (resamplingOption != 4) {
+                maxSteps = static_cast<int>(f_maxSteps);
+            }
+
+            bool userWantsMorphing;
+            if (!_dictionary.getValue(keyFieldlineShouldMorph, userWantsMorphing)) {
+                _isMorphing = false; // Default value
+                LWARNING(keyFieldlines << " isn't specifying " << keyFieldlineShouldMorph
+                        << ". Using default: " << _isMorphing);
+            } else {
+                _isMorphing = userWantsMorphing;
+            }
+
+            int resamplingOption = 4; // Default
+            numResamples = 2 * maxSteps + 3; // Default
+            if (_isMorphing) {
+
+                float f_resamplingOption;
+
+                if(!_dictionary.getValue(keyFieldlineResampleOption, f_resamplingOption)) {
                     LWARNING(keyFieldlines << " isn't specifying " <<
-                             keyFieldlineResamples << ". Default is set to (2*" <<
-                             keyFieldlineMaxTraceSteps << "+3) = " << numResamples);
+                             keyFieldlineResampleOption << ". Default is set to " <<
+                             resamplingOption);
+                } else {
+                    resamplingOption = static_cast<int>(f_resamplingOption);
+                }
+
+                float f_numResamples;
+
+                if(_dictionary.getValue(keyFieldlineResamples, f_numResamples)) {
+                    if (resamplingOption == 4) {
+                        LWARNING(keyFieldlineResampleOption << " 4 does not allow a custom" <<
+                                 " value for " << keyFieldlineResamples <<". Using (2 * " <<
+                                 keyFieldlineMaxTraceSteps <<" + 3) = " << numResamples);
+                    } else {
+                        numResamples = static_cast<int>(f_numResamples);
+                    }
+                } else {
+                    if (resamplingOption != 4) {
+                        LWARNING(keyFieldlines << " isn't specifying " <<
+                                 keyFieldlineResamples << ". Default is set to (2*" <<
+                                 keyFieldlineMaxTraceSteps << "+3) = " << numResamples);
+                    }
                 }
             }
-        }
 
-        // TODO: This should be specified in LUA .mod file!
-        std::vector<std::string> colorizingFloatVars;
-        std::vector<std::string> colorizingMagVars;
-        colorizingFloatVars.insert(colorizingFloatVars.end(), {
-                                                                 "T",
-                                                                 // "dp",
-                                                                 "rho",
-                                                                 // "p",
-                                                                 "status"
+            // TODO: This should be specified in LUA .mod file!
+            std::vector<std::string> colorizingFloatVars;
+            std::vector<std::string> colorizingMagVars;
+            colorizingFloatVars.insert(colorizingFloatVars.end(), {
+                                                                     "T",
+                                                                     // "dp",
+                                                                     "rho",
+                                                                     // "p",
+                                                                     "status"
+                                                                  });
+
+            colorizingMagVars.insert(colorizingMagVars.end(), {
+                                                                  "ux", "uy", "uz",
+                                                                  "jx", "jy", "jz",
+                                                                  "jr", "jtheta", "jphi",
+                                                                  // "br", "btheta", "bphi",
+                                                                  "ur", "utheta", "uphi"
                                                               });
 
-        colorizingMagVars.insert(colorizingMagVars.end(), {
-                                                              "ux", "uy", "uz",
-                                                              "jx", "jy", "jz",
-                                                              "jr", "jtheta", "jphi",
-                                                              // "br", "btheta", "bphi",
-                                                              "ur", "utheta", "uphi"
-                                                          });
+            for (size_t i = 0; i < _numberOfStates; ++i) {
+               LDEBUG(validSourceFilePaths[i] << " is now being traced.");
+               _states.push_back(FieldlinesState(_seedPoints.size()));
+               FieldlinesSequenceManager::ref().getFieldlinesState(validSourceFilePaths[i],
+                                                                   tracingVariable,
+                                                                   _seedPoints,
+                                                                   maxSteps,
+                                                                   _isMorphing,
+                                                                   numResamples,
+                                                                   resamplingOption,
+                                                                   colorizingFloatVars,
+                                                                   colorizingMagVars,
+                                                                   _states[i]);
+                _startTimes.push_back(_states[i]._triggerTime);
+            }
+        } break;
+        case PRE_CALCULATED_JSON: {
+            allowSeedPoints = false;
 
-        for (size_t i = 0; i < _numberOfStates; ++i) {
-           LDEBUG(validSourceFilePaths[i] << " is now being traced.");
-           _states.push_back(FieldlinesState(_seedPoints.size()));
-           FieldlinesSequenceManager::ref().getFieldlinesState(validSourceFilePaths[i],
-                                                               tracingVariable,
-                                                               _seedPoints,
-                                                               maxSteps,
-                                                               _isMorphing,
-                                                               numResamples,
-                                                               resamplingOption,
-                                                               colorizingFloatVars,
-                                                               colorizingMagVars,
-                                                               _states[i]);
-            _startTimes.push_back(_states[i]._triggerTime);
-        }
+            LERROR("TODO: allow Morphing for provided vertex lists!");
+            _isMorphing = false;
+            int resamplingOption = 0;   // TODO: implement morphing
+            numResamples = 0;       // TODO: implement morphing
 
-    } else if (_tracingMethod == keyTracingMethodPreTracedJson) {
-        allowSeedPoints = false;
+            for (size_t i = 0; i < _numberOfStates; ++i) {
+                LDEBUG(validSourceFilePaths[i] << " is now being processed.");
+                FieldlinesState tmpState;
+                _states.push_back(tmpState);
+                FieldlinesSequenceManager::ref().getFieldlinesState(validSourceFilePaths[i],
+                                                                   _isMorphing,
+                                                                   numResamples,
+                                                                   resamplingOption,
+                                                                   _states[i]);
+                // TODO: Move elsewhere
+                _startTimes.push_back(_states[i]._triggerTime);
+            }
 
-        LERROR("TODO: allow Morphing for provided vertex lists!");
-        _isMorphing = false;
-        int resamplingOption = 0;   // TODO: implement morphing
-        numResamples = 0;       // TODO: implement morphing
+        } break;
+        case PRE_CALCULATED_BINARY: {
+            allowSeedPoints = false;
 
-        for (size_t i = 0; i < _numberOfStates; ++i) {
-            LDEBUG(validSourceFilePaths[i] << " is now being processed.");
-            FieldlinesState tmpState;
-            _states.push_back(tmpState);
-            FieldlinesSequenceManager::ref().getFieldlinesState(validSourceFilePaths[i],
-                                                               _isMorphing,
-                                                               numResamples,
-                                                               resamplingOption,
-                                                               _states[i]);
-            // TODO: Move elsewhere
-            _startTimes.push_back(_states[i]._triggerTime);
-        }
+            for (size_t i = 0; i < _numberOfStates; ++i) {
+                LDEBUG(validSourceFilePaths[i] << " is now being processed.");
+                FieldlinesState tmpState;
+                _states.push_back(tmpState);
+                bool statuss = FieldlinesSequenceManager::ref().getFieldlinesStateFromBinary(
+                    validSourceFilePaths[i],
+                    _states[i]);
 
-    } else if (_tracingMethod == keyTracingMethodPreTracedBinary) {
-        allowSeedPoints = false;
-
-        for (size_t i = 0; i < _numberOfStates; ++i) {
-            LDEBUG(validSourceFilePaths[i] << " is now being processed.");
-            FieldlinesState tmpState;
-            _states.push_back(tmpState);
-            bool statuss = FieldlinesSequenceManager::ref().getFieldlinesStateFromBinary(
-                validSourceFilePaths[i],
-                _states[i]);
-
-            // TODO: Move elsewhere
-            _startTimes.push_back(_states[i]._triggerTime);
-        }
-
-    } else if (_tracingMethod == keyTracingMethodLiveTrace) {
-        LERROR("NOT YET INCORPORATED INTO THIS CLASS! TODO, TODO TODO!");
-        allowSeedPoints = true;
-        return false;
-    } else {
-        LERROR(keyTracingMethod << " isn't specifying a valid tracing method.\n\t"
-                << "Valid methods are: " << keyTracingMethodPreTracedJson << ", "
-                                         << keyTracingMethodPreTracedBinary << ", "
-                                         << keyTracingMethodPreProcess << " and "
-                                         << keyTracingMethodLiveTrace);
-        return false;
+                // TODO: Move elsewhere
+                _startTimes.push_back(_states[i]._triggerTime);
+            }
+        } break;
+        case LIVE_TRACE: {
+            allowSeedPoints = true;
+            LERROR("NOT YET INCORPORATED INTO FIELDLINESSEQUENCE CLASS! TODO TODO!!!!!!");
+            return false;
+        } break;
+        default:
+            return false;
     }
 
     bool allowUnitColoring = false;
@@ -989,6 +985,30 @@ bool RenderableFieldlinesSequence::getSourceFilesFromDictionary(
     LDEBUG("Found the following valid ." << fileExt << " files in " << pathToSourceFolder);
     for (std::string str : validSourceFilePaths) {
         LDEBUG("\t" << str);
+    }
+    return true;
+}
+
+// TODO: allow more than one CDF file.. allow folder!
+bool RenderableFieldlinesSequence::getSeedPointsFromDictionary() {
+    ghoul::Dictionary seedInfo;
+    if (!_dictionary.getValue(keySeedPointsInfo, seedInfo)) {
+        LERROR("Mod-file doesn't specify a '" << keySeedPointsInfo << "' field.");
+        return false;
+    }
+
+    // SeedPoints Info. Needs a .txt file containing seed points.
+    // Each row should have 3 floats seperated by spaces
+    std::string pathToSeedPointFile;
+    if (!seedInfo.getValue(keySeedPointsFile, pathToSeedPointFile)) {
+        LERROR(keySeedPointsInfo << " doesn't specify a '" << keySeedPointsFile << "'" <<
+            "\n\tRequires a path to a .txt file containing seed point data." <<
+            "Each row should have 3 floats seperated by spaces.");
+        return false;
+    } else if (!FieldlinesSequenceManager::ref().getSeedPointsFromFile(pathToSeedPointFile,
+                                                                    _seedPoints)) {
+        LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
+        return false;
     }
     return true;
 }
