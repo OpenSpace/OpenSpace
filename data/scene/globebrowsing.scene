@@ -64,8 +64,6 @@ end
 function postInitialization()
     openspace.printInfo("Setting default values")
 
-    openspace.setInteractionMode('GlobeBrowsing')
-
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
