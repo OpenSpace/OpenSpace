@@ -29,35 +29,41 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <CCfits>
 
-namespace CCfits { class PHDU; class ExtHDU; }
+namespace CCfits { class FITS; class PHDU; class ExtHDU; }
 namespace ghoul { namespace opengl{ class Texture; }}
 
 namespace openspace {
 
+template<typename T>
+struct ImageData {
+    std::valarray<T> contents;
+    long int width;
+    long int height;
+};
+
 class FitsFileReader {
 public:
-    static void open(const std::string& path);
-    static void close();
+    FitsFileReader(bool verboseMode);
+    ~FitsFileReader();
 
     template<typename T>
-    static std::valarray<T> readImage();
-    // Fits will throw error if keyword does not exist in header
+    std::shared_ptr<ImageData<T>> readImage(const std::string& path);
     template<typename T>
-    static const std::unordered_map<std::string, T> readHeader(std::vector<std::string>& keywords);
+    std::shared_ptr<std::unordered_map<std::string, T>> readHeader(std::vector<std::string>& keywords);
     template<typename T>
-    static const T readHeaderValue(const std::string key);
-
-    //TODO(mnoven): Don't assume that client has read image content already
-    static const std::pair<int, int>& getImageSize();
-
-    static std::unique_ptr<ghoul::opengl::Texture> loadTextureFromMemory(const std::string& buffer);
-    static std::unique_ptr<ghoul::opengl::Texture> loadTexture();
+    std::shared_ptr<T> readHeaderValue(const std::string key);
 
 private:
-	// Only for debugging
-	static void dump(CCfits::PHDU& image);
-    static const bool isPrimaryHDU();
+    std::unique_ptr<CCfits::FITS> _infile;
+    bool _verboseMode;
+
+    bool isPrimaryHDU();
+    template<typename T>
+    const std::shared_ptr<ImageData<T>> readImageInternal(CCfits::PHDU& image);
+    template<typename T>
+    const std::shared_ptr<ImageData<T>> readImageInternal(CCfits::ExtHDU& image);
 };
 
 } // namespace openspace

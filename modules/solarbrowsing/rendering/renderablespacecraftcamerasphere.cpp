@@ -62,14 +62,15 @@ bool RenderableSpacecraftCameraSphere::initialize() {
     _planeDependencies
           = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
 
-    //std::string path = "/Users/michaelnoven/workspace/OpenSpace/data/hmimap1.fits";
-    std::string path = "/home/noven/workspace/OpenSpace/data/hmimap1.fits";
-    FitsFileReader::open(path);
-    std::valarray<float> imageData = FitsFileReader::readImage<float>();
-    FitsFileReader::close();
-
-    float* data = new float[imageData.size()];
-    std::memmove(data, &imageData[0], imageData.size() * sizeof(float));
+    const std::string path = "/home/noven/workspace/OpenSpace/data/hmimap1.fits";
+    FitsFileReader fts(false);
+    std::shared_ptr<ImageData<float>> imageData = fts.readImage<float>(path);
+    float* data;
+    if (imageData) {
+        const std::valarray<float>& imageContents = imageData->contents;
+        data = new float[imageContents.size()];
+        std::memmove(data, &imageContents[0], imageContents.size() * sizeof(float));
+    }
 
     //const glm::size3_t imageSize(sizeX, sizeY, 1);
     _magnetogramTexture = std::make_unique<Texture>(
