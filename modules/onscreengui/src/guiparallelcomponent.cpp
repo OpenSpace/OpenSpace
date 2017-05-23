@@ -82,11 +82,11 @@ void GuiParallelComponent::renderClientWithHost() {
     ImGui::Text("%s", connectionInfo.c_str());
     renderClientCommon();
 
-    const std::deque<datamessagestructures::TimeKeyframe> timeKeyframes = OsEng.timeManager().keyframes();
-    const std::vector<datamessagestructures::CameraKeyframe> cameraKeyframes = OsEng.interactionHandler().keyframes();
+    const size_t nTimeKeyframes = OsEng.timeManager().nKeyframes();
+    const size_t nCameraKeyframes = OsEng.interactionHandler().nKeyframes();
 
-    std::string timeKeyframeInfo = "TimeKeyframes : " + std::to_string(timeKeyframes.size());
-    std::string cameraKeyframeInfo = "CameraKeyframes : " + std::to_string(cameraKeyframes.size());
+    std::string timeKeyframeInfo = "TimeKeyframes : " + std::to_string(nTimeKeyframes);
+    std::string cameraKeyframeInfo = "CameraKeyframes : " + std::to_string(nCameraKeyframes);
     std::string latencyStandardDeviation = "Latency standard deviation: " + std::to_string(parallel.latencyStandardDeviation()) + " s";
 
     const bool resetTimeOffset = ImGui::Button("Reset time offset");

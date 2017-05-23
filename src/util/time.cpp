@@ -26,6 +26,8 @@
 
 #include <time.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/util/timemanager.h>
 #include "time_lua.inl"
 
 #include <openspace/util/spicemanager.h>
@@ -35,9 +37,6 @@
 #include <ghoul/misc/assert.h>
 
 namespace openspace {
-
-Time* Time::_instance = nullptr;
-    
 
 double Time::convertTime(const std::string& time) {
     ghoul_assert(!time.empty(), "timeString must not be empty");
@@ -54,24 +53,9 @@ Time::Time(const Time& other)
     : _time(other._time)
     , _dt(other._dt)
     , _timeJumped(other._timeJumped)
+    , _timePaused(other._timePaused)
 {
 
-}
-
-void Time::initialize() {
-    ghoul_assert(_instance == nullptr, "Static time must not have been ininitialized");
-    _instance = new Time();
-}
-
-void Time::deinitialize() {
-    ghoul_assert(_instance, "Static time must have been ininitialized");
-    delete _instance;
-    _instance = nullptr;
-}
-
-Time& Time::ref() {
-    ghoul_assert(_instance, "Static time must have been ininitialized");
-    return *_instance;
 }
 
 Time Time::now() {
@@ -83,10 +67,6 @@ Time Time::now() {
     double secondsSince2000 = static_cast<double>(secondsSince1970 - 30 * secondsInAYear);
     now.setTime(secondsSince2000);
     return now;
-}
-
-bool Time::isInitialized() {
-    return (_instance != nullptr);
 }
 
 void Time::setTime(double value, bool requireJump) {
@@ -167,10 +147,6 @@ void Time::setTimeJumped(bool jumped) {
     
 bool Time::paused() const {
     return _timePaused;
-}
-
-std::vector<Syncable*> Time::getSyncables() {
-    return{ &_time, &_dt, &_timeJumped};
 }
 
 scripting::LuaLibrary Time::luaLibrary() {

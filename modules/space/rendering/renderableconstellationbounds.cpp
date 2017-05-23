@@ -211,7 +211,7 @@ void RenderableConstellationBounds::update(const UpdateData& data) {
     _stateMatrix = SpiceManager::ref().positionTransformMatrix(
         _originReferenceFrame,
         "GALACTIC",
-        data.time
+        data.time.j2000Seconds()
     );
 }
 

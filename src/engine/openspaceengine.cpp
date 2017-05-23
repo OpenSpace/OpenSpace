@@ -177,7 +177,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     );
 
     SpiceManager::initialize();
-    Time::initialize();
     TransformationManager::initialize();
 }
 
@@ -384,7 +383,7 @@ void OpenSpaceEngine::destroy() {
         func();
     }
 
-    _engine->_syncEngine->removeSyncables(Time::ref().getSyncables());
+    _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
     _engine->_syncEngine->removeSyncables(_engine->_renderEngine->getSyncables());
     _engine->_syncEngine->removeSyncable(_engine->_scriptEngine.get());
 
@@ -396,7 +395,6 @@ void OpenSpaceEngine::destroy() {
 
     delete _engine;
     FactoryManager::deinitialize();
-    Time::deinitialize();
     SpiceManager::deinitialize();
 
 
@@ -563,7 +561,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 
     Scene* previousScene = _renderEngine->scene();
     if (previousScene) {
-        _syncEngine->removeSyncables(Time::ref().getSyncables());
+        _syncEngine->removeSyncables(_timeManager->getSyncables());
         _syncEngine->removeSyncables(_renderEngine->getSyncables());
         _syncEngine->removeSyncable(_scriptEngine.get());
 
@@ -606,7 +604,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         );
     }
 
-    _syncEngine->addSyncables(Time::ref().getSyncables());
+    _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
     _syncEngine->addSyncable(_scriptEngine.get());
 
@@ -996,7 +994,7 @@ void OpenSpaceEngine::preSynchronization() {
         double dt = _windowWrapper->averageDeltaTime();
         _timeManager->preSynchronization(dt);
 
-        auto scheduledScripts = _scriptScheduler->progressTo(Time::ref().j2000Seconds());
+        auto scheduledScripts = _scriptScheduler->progressTo(timeManager().time().j2000Seconds());
         for (auto it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
             _scriptEngine->queueScript(
                 *it, ScriptEngine::RemoteScripting::Yes

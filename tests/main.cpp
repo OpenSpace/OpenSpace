@@ -40,6 +40,7 @@
 #include <test_common.inl>
 #include <test_spicemanager.inl>
 #include <test_sceneloader.inl>
+#include <test_timeline.inl>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 //#include <test_chunknode.inl>

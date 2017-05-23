@@ -33,6 +33,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/performance/performancemeasurement.h>
 
 
@@ -264,7 +265,8 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
         static_cast<int>(Renderable::RenderBin::Transparent) |
         static_cast<int>(Renderable::RenderBin::Overlay);
 
-    RenderData data{ *_camera, psc(), doPerformanceMeasurements, renderBinMask };
+    Time time = OsEng.timeManager().time();
+    RenderData data{ *_camera, psc(), time, doPerformanceMeasurements, renderBinMask };
     RendererTasks tasks;
     _scene->render(data, tasks);
     _blackoutFactor = blackoutFactor;
