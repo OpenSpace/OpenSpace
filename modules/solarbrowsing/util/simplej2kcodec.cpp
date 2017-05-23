@@ -412,9 +412,9 @@ void SimpleJ2kCodec::SetupDecoder(const int resolutionLevel, const int numQualit
     _decoderParams.cp_layer = numQualityLayers;
     _decoderParams.cp_reduce = resolutionLevel;
 
-    if (numThreads != ALL_THREADS) {
-      _decoderParams.numThreads = numThreads;
-    }
+    // if (numThreads != ALL_THREADS) {
+    //   _decoderParams.numThreads = numThreads;
+    // }
 
     switch (_decoderParams.decod_format) {
         case J2K_CFMT: {  // JPEG-2000 codestream

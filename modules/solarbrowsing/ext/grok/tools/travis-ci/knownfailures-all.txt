@@ -1,8 +1,0 @@
-NR-DEC-p1_06.j2k-164-decode
-NR-DEC-issue104_jpxstream.jp2-33-decode-md5
-NR-DEC-issue226.j2k-74-decode-md5
-NR-DEC-p1_06.j2k-156-decode-md5
-NR-DEC-p1_06.j2k-164-decode-md5
-NR-DEC-p1_06.j2k-156-decode
-NR-DEC-issue226.j2k-74-decode
-NR-DEC-broken.jpc-73-decode

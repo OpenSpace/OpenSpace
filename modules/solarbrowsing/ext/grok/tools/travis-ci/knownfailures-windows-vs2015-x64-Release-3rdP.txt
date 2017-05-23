@@ -1,3 +1,0 @@
-NR-ENC-Bretagne2.ppm-7-compare_dec-ref-out2base
-ETS-C1P0-p0_12.j2k-compare2ref
-NR-C1P0-p0_12.j2k-compare2base

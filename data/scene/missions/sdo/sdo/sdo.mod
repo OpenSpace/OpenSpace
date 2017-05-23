@@ -69,7 +69,7 @@ return {
             MagicPlaneOffset = {0.0, 0.0},
             -- Will recursively find all instruments that match array instruments
             --RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
-            RootPath = "/media/noven/BE23-1097/solarflare/SDO/2012/07/12",
+            RootPath = "/media/noven/BE23-1097/solarbrowsingdata/event/sdo/2012/07/12",
            -- RootPath = "/Volumes/Untitled/solarflare/SDO/2012/07/12",
             -- Optional filter on instruments, otherwise get all
             Instruments = {
@@ -81,7 +81,7 @@ return {
             },
             -- Path to transferfunctions whose name must match the instrument
            -- TransferfunctionPath = "/Users/michaelnoven/workspace/OpenSpace/data/sdotransferfunctions"
-            TransferfunctionPath = "/home/noven/workspace/OpenSpace/data/sdotransferfunctions"
+            TransferfunctionPath = "/media/noven/BE23-1097/solarbrowsingdata/colortables/sdo"
         },
     },
 }

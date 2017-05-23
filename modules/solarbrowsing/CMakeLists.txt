@@ -24,19 +24,22 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
-set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/grok/")
+set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
 add_subdirectory(${OPENJPEG_ROOT_DIR})
 
 set(HEADER_FILES
-    # Openjpeg stuff
-    ${OPENSPACE_BASE_DIR}/build/modules/solarbrowsing/ext/grok/src/lib/openjp2
-    ${OPENJPEG_ROOT_DIR}/src/bin/common
-    ${OPENJPEG_ROOT_DIR}/src/lib/openjp2
-    ${OPENJPEG_ROOT_DIR}/src/bin/jp2
-    ${OPENJPEG_ROOT_DIR}/src/bin/common
+     # Openjpeg stuff
+    ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
+    ${OPENJPEG_BINARY_DIR}/src/bin/common
+    ${OPENJPEG_SOURCE_DIR}/src/lib/openjp2
+    ${OPENJPEG_SOURCE_DIR}/src/bin/jp2
+    ${OPENJPEG_SOURCE_DIR}/src/bin/common
     ${Z_INCLUDE_DIRNAME}
     ${PNG_INCLUDE_DIRNAME}
     ${TIFF_INCLUDE_DIRNAME}
+    ${CMAKE_SOURCE_DIR}/include
+    ${TIFF_INCLUDE_DIRNAME}
+
     # Other
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.h
