@@ -35,7 +35,11 @@ void GPULayerRenderSettings::setValue(ghoul::opengl::ProgramObject* programObjec
     gpuOpacity.setValue(programObject, layerSettings.opacity.value());
     gpuGamma.setValue(programObject, layerSettings.gamma.value());
     gpuMultiplier.setValue(programObject, layerSettings.multiplier.value());
-    gpuValueBlending.setValue(programObject, layerSettings.valueBlending.value());
+
+    useValueBlending = layerSettings.useValueBlending;
+    if (useValueBlending) {
+        gpuValueBlending.setValue(programObject, layerSettings.valueBlending.value());
+    }
 }
 
 void GPULayerRenderSettings::bind(ghoul::opengl::ProgramObject* programObject,
@@ -44,7 +48,10 @@ void GPULayerRenderSettings::bind(ghoul::opengl::ProgramObject* programObject,
     gpuOpacity.bind(programObject, nameBase + "opacity");
     gpuGamma.bind(programObject, nameBase + "gamma");
     gpuMultiplier.bind(programObject, nameBase + "multiplier");
-    gpuValueBlending.bind(programObject, nameBase + "valueBlending");
+    
+    if (useValueBlending) {
+        gpuValueBlending.bind(programObject, nameBase + "valueBlending");
+    }
 }
 
 }  // namespace globebrowsing

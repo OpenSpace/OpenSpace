@@ -41,6 +41,7 @@ LayerRenderSettings::LayerRenderSettings()
     , multiplier(properties::FloatProperty("Multiplier", "multiplier", 1.f, 0.f, 20.f))
     , valueBlending(properties::FloatProperty("Value blending", "valueBlending",
                                                1.f, 0.f, 1.f))
+    , useValueBlending(false)
 {
     // Implicitly added properties (other ones are not for all layer types)
     addProperty(opacity);
@@ -67,6 +68,7 @@ void LayerRenderSettings::setValuesFromDictionary(
     }
     if(renderSettingsDict.getValue(keyValueBlending, dictValueBlending)) {
         valueBlending.setValue(dictValueBlending);
+        useValueBlending = true;
     }
 }
 

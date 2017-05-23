@@ -64,6 +64,7 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     }
     if (id == layergroupid::ID::GrayScaleColorOverlays) {
         _renderSettings.addProperty(_renderSettings.valueBlending);
+        _renderSettings.useValueBlending = true;
     }
 
     _reset.onChange([&](){

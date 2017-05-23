@@ -62,7 +62,10 @@ private:
     GPUData<float> gpuOpacity;
     GPUData<float> gpuGamma;
     GPUData<float> gpuMultiplier;
+
+    // Optional
     GPUData<float> gpuValueBlending;
+    bool useValueBlending = false;
 };
 
 } // namespace globebrowsing

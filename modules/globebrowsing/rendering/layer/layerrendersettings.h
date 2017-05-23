@@ -38,7 +38,10 @@ struct LayerRenderSettings : public properties::PropertyOwner {
     properties::FloatProperty opacity;
     properties::FloatProperty gamma;
     properties::FloatProperty multiplier;
+
+    // Optional properties
     properties::FloatProperty valueBlending;
+    bool useValueBlending = false;
 
     void setValuesFromDictionary(const ghoul::Dictionary& renderSettingsDict);
 
