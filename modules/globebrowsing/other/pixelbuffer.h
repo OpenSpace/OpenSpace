@@ -120,12 +120,12 @@ public:
     /**
      * \returns true of the buffer is mapped, otherwise false 
      */
-    bool isMapped();
+    bool isMapped() const;
 
     /**
      * \returns the OpenGL id of the pixel buffer object
      */
-    operator GLuint();
+    operator GLuint() const;
 
 private:
     GLuint _id;

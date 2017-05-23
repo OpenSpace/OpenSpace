@@ -141,15 +141,15 @@ void MemoryAwareTileCache::setSizeEstimated(size_t estimatedSize) {
     LINFO("Resetting tile cache size");
     ghoul_assert(_textureContainerMap.size() > 0, "Texture containers must exist.");
   
-    size_t sumTextureTypeSize = 0;
-  
-    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
-        it != _textureContainerMap.cend();
-        it++)
-    {
-        sumTextureTypeSize +=
-            it->second.first->tileTextureInitData().totalNumBytes();
-    }
+    size_t sumTextureTypeSize = std::accumulate(
+        _textureContainerMap.cbegin(),
+        _textureContainerMap.cend(), 0,
+        [](size_t s, const std::pair<const TileTextureInitData::HashKey,
+        TextureContainerTileCache>& p)
+        {
+            return s + p.second.first->tileTextureInitData().totalNumBytes();
+        }
+    );
   
     size_t numTexturesPerType = estimatedSize / sumTextureTypeSize;
     resetTextureContainerSize(numTexturesPerType);

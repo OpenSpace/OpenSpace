@@ -75,10 +75,10 @@ void PixelBuffer::unbind() {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-bool PixelBuffer::isMapped() {
+bool PixelBuffer::isMapped() const {
     return _isMapped;
 }
 
-PixelBuffer::operator GLuint() {
+PixelBuffer::operator GLuint() const {
     return _id;
 }
