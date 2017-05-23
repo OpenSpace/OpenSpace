@@ -126,7 +126,10 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
 
     Time start; start.setTime(timeStart);
     Time end(Time::now());
-    if (timeEnd != "Now") {
+    if (timeEnd == "Yesterday") {
+        end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
+    }
+    else if (timeEnd != "Now") {
         end.setTime(timeEnd);
     }
 
