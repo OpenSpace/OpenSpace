@@ -87,6 +87,11 @@ private:
 
 	glm::dvec3 _sunPos;
 
+	int _prevLevel;
+
+	bool _isFirst;
+	std::shared_ptr<SubsiteModels> _prevSubsite;
+
 	LodModelSwitch _modelSwitch;
 
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;

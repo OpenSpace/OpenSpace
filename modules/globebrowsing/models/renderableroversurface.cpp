@@ -62,6 +62,8 @@ namespace globebrowsing {
 	})
 		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
 		, _modelSwitch(nullptr)
+		, _prevLevel(3)
+		, _isFirst(true)
 {
 	if (!dictionary.getValue(keyRoverLocationPath, _roverLocationPath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -97,6 +99,8 @@ namespace globebrowsing {
 	_absTexturePath = absPath(_texturePath);
 	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
 	_renderableExplorationPath = std::make_shared<RenderableExplorationPath>();
+
+
 }
 
 bool RenderableRoverSurface::initialize() {
@@ -148,7 +152,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 	ghoul::Dictionary modelDic;
 	std::unique_ptr<ModelProvider>_modelProvider;
 	int level;
-
 	switch (_modelSwitch.getLevel(data)) {
 		case LodModelSwitch::Mode::Low :	
 			//Low
@@ -160,6 +163,8 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			break;
 		case LodModelSwitch::Mode::Close :
 			//Close
+			if (_isFirst) LERROR("GOING CLOSE");
+			_isFirst = false;
 			modelDic.setValue("Type", "SingleModelProvider");
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
 			ss = _modelProvider->calculate(subSitesVector, data);
@@ -182,13 +187,68 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		ss1.push_back(s1);
 	}
 
+	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
+	//FOR ALPHA BLENDING TO WORK
 	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels = _cachingModelProvider->getModels(ss1, level);
 	
+	if (_subsiteModels.size() == 0) return;
+
+	if (level == 3 && _prevSubsite != nullptr 
+		&& _prevSubsite->drive != _subsiteModels.at(0)->drive) {
+		_subsiteModels.push_back(_prevSubsite);
+	}
+
 	_subsiteModels = calculateSurfacePosition(_subsiteModels);
 
 	_programObject->activate();
-
 	for (auto subsiteModels : _subsiteModels) {
+
+		float dir = 1;
+		float alpha = subsiteModels->_alpha;
+		int subsitePrevLevel = subsiteModels->level;
+		if (level != _prevLevel) {
+			// We went from one level to the next
+			// we need to fade out previously rendered models
+			if (level != subsitePrevLevel && alpha >= 0.0) {
+				// Current subsite should fade out
+				dir *= -1;
+			}
+			else if (alpha >= 1.0) {
+				// Current subsite is the correct level and has been faded in correctly
+				dir = 0;
+			}
+
+			if (level == 3) {
+				_prevSubsite = subsiteModels;
+			}
+		}
+		else if (_prevSubsite != nullptr 
+			&& _prevSubsite->drive != subsiteModels->drive 
+			&& level == 3) {
+			// Walking between models
+			// And this is the new model that should be faded in
+			// if it's not already done
+			dir = subsiteModels->_alpha >= 1.0 ? 0 : 1;
+			if (dir == 0.0) {
+				_prevSubsite = subsiteModels;
+			}
+		}
+		else if (_prevSubsite != nullptr 
+			&& _subsiteModels.size() > 1
+			&& _prevSubsite->drive == subsiteModels->drive 
+			&& level == 3) {
+			// Walking between models
+			// And this is the previous model that should be faded out
+			// if it's not already done
+			dir = subsiteModels->_alpha <= 0.0 ? 0 : -1;
+		}
+		else {
+			dir = subsiteModels->_alpha >= 1.0 ? 0 : 1;
+		}
+
+		alpha = alpha + dir * 0.005;
+		subsiteModels->_alpha = alpha;
+
 		for (auto model : subsiteModels->models) {
 			glm::dmat4 globeTransform = _globe->modelTransform();
 
@@ -259,16 +319,18 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
 			_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 			_programObject->setUniform("performShading", false);
-			_programObject->setUniform("fading", 1.0f);
+			_programObject->setUniform("fading", alpha);
 
 			ghoul::opengl::TextureUnit unit;
 			unit.activate();
 			model->texture->bind();
+			glEnable(GL_BLEND);
 			_programObject->setUniform("texture1", unit);
 			model->geometry->render();
 		}
 	}
 	_programObject->deactivate();
+	_prevLevel = level;
 }
 
 void RenderableRoverSurface::update(const UpdateData & data) {

@@ -41,10 +41,11 @@ namespace globebrowsing {
 	}
 
 	std::vector<Subsite> SingleModelProvider::calculate(const std::vector<std::vector<Subsite>> subsites, const RenderData& data) {
-		std::vector<Subsite> ss;
-		float minDist = 1000000000000000;
-		int minIdx1 = 0, minIdx2 = 0;
+		std::vector<Subsite> mostModelsInsideRadius;
+		std::vector<Subsite> subsitesInsideRadius;
+		float radius = 10;
 		Subsite smallest;
+
 		SceneGraphNode* _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
 		RenderableGlobe* rg = (RenderableGlobe*)_parent->renderable();
 		
@@ -60,17 +61,24 @@ namespace globebrowsing {
 			for (auto s1 : s) {
 				Geodetic2 coord = Geodetic2{ s1.lat, s1.lon } / 180.0 * glm::pi<double>();
 				glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ coord, 0 });
-				if (glm::distance(cameraPositionProjected, temp) < minDist) {
-					minDist = glm::distance(cameraPositionProjected, temp);
-					smallest = s1;
+				if (glm::distance(cameraPositionProjected, temp) < radius) {
+					subsitesInsideRadius.push_back(s1);
 				}
 			}
 		}
-		if (std::isnan(smallest.lat) || smallest.site == "" || smallest.drive == "") {
-			return ss;
+		int max = 0;
+		for (auto s : subsitesInsideRadius) {
+			int temp = s.fileNames.size();
+			if (temp > max) {
+				smallest = s;
+			}
 		}
-		ss.push_back(smallest);
-		return ss;
+
+		if (std::isnan(smallest.lat) || smallest.site == "" || smallest.drive == "") {
+			return mostModelsInsideRadius;
+		}
+		mostModelsInsideRadius.push_back(smallest);
+		return mostModelsInsideRadius;
 	}
 
 	bool SingleModelProvider::initialize() {
