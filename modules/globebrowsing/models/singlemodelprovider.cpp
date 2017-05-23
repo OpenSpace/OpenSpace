@@ -66,18 +66,18 @@ namespace globebrowsing {
 				}
 			}
 		}
-		int max = 0;
+		int maxModels = 0;
 		for (auto s : subsitesInsideRadius) {
 			int temp = s.fileNames.size();
-			if (temp > max) {
+			if (temp > maxModels) {
+				maxModels = temp;
 				smallest = s;
 			}
 		}
 
-		if (std::isnan(smallest.lat) || smallest.site == "" || smallest.drive == "") {
-			return mostModelsInsideRadius;
+		if (smallest.site != "" && smallest.drive != "") {
+			mostModelsInsideRadius.push_back(smallest);
 		}
-		mostModelsInsideRadius.push_back(smallest);
 		return mostModelsInsideRadius;
 	}
 
