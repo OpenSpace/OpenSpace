@@ -49,6 +49,8 @@ struct SubsiteModels {
 	std::string site;
 	std::string drive;
 	int level;
+	float _alpha;
+	int _dir;
 
 	bool status = false;
 
@@ -61,6 +63,8 @@ struct SubsiteModels {
 		drive = "0";
 		level = 0;
 		status = true;
+		_alpha = 0.0f;
+		_dir = 1;
 	}
 };
 
