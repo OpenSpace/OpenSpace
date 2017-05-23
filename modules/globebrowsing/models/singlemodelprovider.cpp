@@ -66,7 +66,7 @@ namespace globebrowsing {
 				}
 			}
 		}
-		if (std::isnan(smallest.lat)) {
+		if (std::isnan(smallest.lat) || smallest.site == "" || smallest.drive == "") {
 			return ss;
 		}
 		ss.push_back(smallest);
