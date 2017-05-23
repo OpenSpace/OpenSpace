@@ -85,8 +85,8 @@ public:
     unsigned int numBricksPerAxis() const;
     GLuint ssbo() const;
 
-    bool calculateSpatialError();
-    bool calculateTemporalError();
+    virtual bool calculateSpatialError();
+    virtual bool calculateTemporalError();
 
     float getSpatialError(unsigned int _brickIndex);
     float getTemporalError(unsigned int _brickIndex);
@@ -98,7 +98,7 @@ public:
     bool isBstLeaf(unsigned int _brickIndex);
     bool isOctreeLeaf(unsigned int _brickIndex);
 
-private:
+protected:
     // Returns a list of the octree leaf nodes that a given input 
     // brick covers. If the input is already a leaf, the list will
     // only contain that one index.

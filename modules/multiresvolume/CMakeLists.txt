@@ -38,6 +38,8 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simpletfbrickselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemultiresvolume.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tsp.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/sandtsp.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/shentsp.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/histogrammanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/errorhistogrammanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localerrorhistogrammanager.h
@@ -55,6 +57,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/simpletfbrickselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablemultiresvolume.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tsp.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/sandtsp.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/shentsp.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/histogrammanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/errorhistogrammanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localerrorhistogrammanager.cpp
