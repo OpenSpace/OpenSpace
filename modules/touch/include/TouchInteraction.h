@@ -78,7 +78,8 @@ class TouchInteraction : public properties::PropertyOwner
 			SceneGraphNode* node;
 			double aspectRatio;
 			LMstat stats;
-			bool onlyPan;
+			bool onlyPan; // temp
+			double objectScreenRadius;
 		};
 
 		void updateStateFromInput(const std::vector<TUIO::TuioCursor>& list, std::vector<Point>& lastProcessed);
