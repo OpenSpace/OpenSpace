@@ -381,10 +381,9 @@ TileDepthTransform RawTileDataReader::calculateTileDepthTransform() {
     return transform;
 }
 
-RawTile::ReadError RawTileDataReader::postProcessErrorCheck(std::shared_ptr<const RawTile> rawTile)
+RawTile::ReadError RawTileDataReader::postProcessErrorCheck(
+    std::shared_ptr<const RawTile> rawTile) const
 {
-    ensureInitialized();
-
     float missingDataValue = noDataValueAsFloat();
 
     bool hasMissingData = false;

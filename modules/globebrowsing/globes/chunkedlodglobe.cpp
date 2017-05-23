@@ -187,7 +187,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             return 0;
         }
 
-		auto tileTexture = tile.texture();
+		ghoul::opengl::Texture* tileTexture = tile.texture();
 		if (!tileTexture)
 			return 0;
 

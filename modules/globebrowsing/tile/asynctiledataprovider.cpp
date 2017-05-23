@@ -151,7 +151,7 @@ void AsyncTileDataProvider::endUnfinishedJobs() {
 void AsyncTileDataProvider::endEnqueuedJobs() {
     std::vector<TileIndex::TileHashKey> enqueuedJobs =
         _concurrentJobManager.getKeysToEnqueuedJobs();
-    for (auto enqueuedJob : enqueuedJobs) {
+    for (const TileIndex::TileHashKey& enqueuedJob : enqueuedJobs) {
         // Unmap unfinished jobs
         if (_pboContainer) {
             _pboContainer->unMapBuffer(enqueuedJob);
