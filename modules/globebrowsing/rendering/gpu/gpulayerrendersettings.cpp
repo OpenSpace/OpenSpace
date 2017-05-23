@@ -36,20 +36,19 @@ void GPULayerRenderSettings::setValue(ghoul::opengl::ProgramObject* programObjec
     gpuGamma.setValue(programObject, layerSettings.gamma.value());
     gpuMultiplier.setValue(programObject, layerSettings.multiplier.value());
 
-    useValueBlending = layerSettings.useValueBlending;
-    if (useValueBlending) {
+    if (layerSettings.useValueBlending) {
         gpuValueBlending.setValue(programObject, layerSettings.valueBlending.value());
     }
 }
 
-void GPULayerRenderSettings::bind(ghoul::opengl::ProgramObject* programObject,
+void GPULayerRenderSettings::bind(const LayerRenderSettings& layerSettings, ghoul::opengl::ProgramObject* programObject,
                                   const std::string& nameBase)
 {
     gpuOpacity.bind(programObject, nameBase + "opacity");
     gpuGamma.bind(programObject, nameBase + "gamma");
     gpuMultiplier.bind(programObject, nameBase + "multiplier");
     
-    if (useValueBlending) {
+    if (layerSettings.useValueBlending) {
         gpuValueBlending.bind(programObject, nameBase + "valueBlending");
     }
 }
