@@ -46,7 +46,7 @@ int time_setDeltaTime(lua_State* L) {
     const bool isNumber = (lua_isnumber(L, -1) != 0);
     if (isNumber) {
         double value = lua_tonumber(L, -1);
-        openspace::Time::ref().setDeltaTime(value);
+        OsEng.timeManager().time().setDeltaTime(value);
         return 0;
     }
     else {
@@ -67,7 +67,7 @@ int time_setDeltaTime(lua_State* L) {
  * Returns the delta time by calling the Time::deltaTime method
  */
 int time_deltaTime(lua_State* L) {
-    lua_pushnumber(L, openspace::Time::ref().deltaTime());
+    lua_pushnumber(L, OsEng.timeManager().time().deltaTime());
     return 1;
 }
 
@@ -82,7 +82,7 @@ int time_togglePause(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
-    openspace::Time::ref().togglePause();
+    OsEng.timeManager().time().togglePause();
     return 0;
 }
 
@@ -98,7 +98,7 @@ int time_setPause(lua_State* L) {
     }
 
     bool pause = lua_toboolean(L, -1) == 1;
-    openspace::Time::ref().setPause(pause);
+    OsEng.timeManager().time().setPause(pause);
     return 0;
 }
 
@@ -130,12 +130,12 @@ int time_setTime(lua_State* L) {
     }
     if (isNumber) {
         double value = lua_tonumber(L, -1);
-        openspace::Time::ref().setTime(value);
+        OsEng.timeManager().time().setTime(value);
         return 0;
     }
     if (isString) {
         const char* time = lua_tostring(L, -1);
-        openspace::Time::ref().setTime(time);
+        OsEng.timeManager().time().setTime(time);
         return 0;
     }
     return 0;
@@ -148,7 +148,7 @@ int time_setTime(lua_State* L) {
  * It is returned by calling the Time::currentTime method.
  */
 int time_currentTime(lua_State* L) {
-    lua_pushnumber(L, openspace::Time::ref().j2000Seconds());
+    lua_pushnumber(L, OsEng.timeManager().time().j2000Seconds());
     return 1;
 }
 
@@ -159,7 +159,7 @@ int time_currentTime(lua_State* L) {
  * timezone by calling the Time::UTC method
  */
 int time_currentTimeUTC(lua_State* L) {
-    lua_pushstring(L, openspace::Time::ref().UTC().c_str());
+    lua_pushstring(L, OsEng.timeManager().time().UTC().c_str());
     return 1;
 }
 

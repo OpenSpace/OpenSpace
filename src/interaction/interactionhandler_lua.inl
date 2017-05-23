@@ -169,28 +169,6 @@ int clearKeys(lua_State* L) {
     return 0;
 }
 
-/**
-* \ingroup LuaScripts
-* setInteractionMode():
-* Set the interaction mode
-*/
-int setInteractionMode(lua_State* L) {
-    using ghoul::lua::luaTypeToString;
-
-    int nArguments = lua_gettop(L);
-    if (nArguments != 1)
-        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-
-    std::string interactionModeKey = luaL_checkstring(L, -1);
-    
-    if (interactionModeKey.empty())
-        return luaL_error(L, "interactionmode name string is empty");
-
-    OsEng.interactionHandler().setInteractionMode(interactionModeKey);
-    return 0;
-}
-
 int goToChunk(lua_State* L) {
     using ghoul::lua::luaTypeToString;
     

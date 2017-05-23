@@ -255,7 +255,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         // If only trail so far should be rendered, we need to find the corresponding time
         // in the array and only render it until then
         _primaryRenderInformation.first = 0;
-        double t = (data.time - _start) / (_end - _start);
+        double t = (data.time.j2000Seconds() - _start) / (_end - _start);
         _primaryRenderInformation.count = std::min(
             static_cast<GLsizei>(ceil(_vertexArray.size() * t)),
             static_cast<GLsizei>(_vertexArray.size() - 1)
@@ -264,7 +264,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
     // If we are inside the valid time, we additionally want to draw a line from the last
     // correct point to the current location of the object
-    if (data.time >= _start && data.time <= _end && !_renderFullTrail) {
+    if (data.time.j2000Seconds() >= _start && data.time.j2000Seconds() <= _end && !_renderFullTrail) {
         // Copy the last valid location
         glm::dvec3 v0(
             _vertexArray[_primaryRenderInformation.count - 1].x,
@@ -273,7 +273,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         );
         
         // And get the current location of the object
-        glm::dvec3 p = _translation->position(data.time);
+        glm::dvec3 p = _translation->position(data.time.j2000Seconds());
         glm::dvec3 v1 = { p.x, p.y, p.z };
 
         // Comptue the difference between the points in double precision

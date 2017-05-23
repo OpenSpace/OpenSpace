@@ -22,32 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/onscreengui/include/guitimecomponent.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/util/time.h>
-
-#include "imgui.h"
+#include <openspace/util/timeline.h>
 
 namespace openspace {
-namespace gui {
 
-GuiTimeComponent::GuiTimeComponent()
-    : GuiComponent("Time")
-{}
-
-void GuiTimeComponent::render() {
-    float deltaTime = static_cast<float>(OsEng.timeManager().time().deltaTime());
-    
-    bool changed = ImGui::SliderFloat("Delta Time", &deltaTime, -50000.f, 50000.f);
-    if (changed) {
-        OsEng.scriptEngine().queueScript(
-            "openspace.time.setDeltaTime(" + std::to_string(deltaTime) + ")",
-            scripting::ScriptEngine::RemoteScripting::Yes
-        );
-    }
+bool compareKeyframeTimes(const KeyframeBase& a, const KeyframeBase& b) {
+    return a.timestamp < b.timestamp;
 }
 
-} // gui
-} // openspace
+bool compareTimeWithKeyframeTime(double a, const KeyframeBase& b) {
+    return a < b.timestamp;
+}
+
+bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b) {
+    return a.timestamp < b;
+}
+
+} // namespace

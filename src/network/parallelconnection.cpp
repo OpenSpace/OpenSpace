@@ -68,6 +68,7 @@
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/interaction/interactionmode.h>
 #include <openspace/util/time.h>
 #include <openspace/openspace.h>
 #include <openspace/scripting/script_helper.h>
@@ -549,7 +550,13 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
             kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
 
             OsEng.interactionHandler().removeKeyframesAfter(kf._timestamp);
-            OsEng.interactionHandler().addKeyframe(kf);
+            interaction::KeyframeInteractionMode::CameraPose pose;
+            pose.focusNode = kf._focusNode;
+            pose.position = kf._position;
+            pose.rotation = kf._rotation;
+            pose.followFocusNodeRotation = kf._followNodeRotation;
+
+            OsEng.interactionHandler().addKeyframe(kf._timestamp, pose);
             break;
         }
         case datamessagestructures::Type::TimeData: {
@@ -557,7 +564,12 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
             kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
 
             OsEng.timeManager().removeKeyframesAfter(kf._timestamp);
-            OsEng.timeManager().addKeyframe(kf);
+            Time time(kf._time);
+            time.setDeltaTime(kf._dt);
+            time.setPause(kf._paused);
+            time.setTimeJumped(kf._requiresTimeJump);
+
+            OsEng.timeManager().addKeyframe(kf._timestamp, time);
             break;
         }
         case datamessagestructures::Type::ScriptData: {
@@ -970,7 +982,7 @@ void ParallelConnection::preSynchronization() {
     }
     
     if (status() == Status::Host) {
-        if (Time::ref().timeJumped()) {
+        if (OsEng.timeManager().time().timeJumped()) {
             _timeJumped = true;
         }
         double now = OsEng.runTime();
@@ -1061,10 +1073,12 @@ void ParallelConnection::sendTimeKeyframe() {
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::TimeKeyframe kf;
     
-    kf._dt = Time::ref().deltaTime();
-    kf._paused = Time::ref().paused();
+    Time& time = OsEng.timeManager().time();
+
+    kf._dt = time.deltaTime();
+    kf._paused = time.paused();
     kf._requiresTimeJump = _timeJumped;
-    kf._time = Time::ref().j2000Seconds();
+    kf._time = time.j2000Seconds();
 
     // Timestamp as current runtime of OpenSpace instance
     kf._timestamp = OsEng.runTime();
