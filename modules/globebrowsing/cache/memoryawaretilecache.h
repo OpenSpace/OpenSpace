@@ -71,16 +71,16 @@ struct ProviderTileHasher {
     */
     unsigned long long operator()(const ProviderTileKey& t) const {
         unsigned long long key = 0;
-        key |= static_cast<unsigned long long>(static_cast<unsigned long long>(t.tileIndex.level));
-        key |= static_cast<unsigned long long>(static_cast<unsigned long long>(t.tileIndex.x) << 5);
-        key |= static_cast<unsigned long long>(static_cast<unsigned long long>(t.tileIndex.y) << 35);
+        key |= static_cast<unsigned long long>(t.tileIndex.level);
+        key |= static_cast<unsigned long long>(t.tileIndex.x) << 5ULL;
+        key |= static_cast<unsigned long long>(t.tileIndex.y) << 35ULL;
         // Now the key is unique for all tiles, however not for all tile providers.
         // Add to the key depending on the tile provider to avoid some hash collisions.
         // (All hash collisions can not be avoided due to the limit in 64 bit for the
         // hash key)
         // Idea: make some offset in the place of the bits for the x value. Lesser chance
         // of having different x-value than having different tile provider ids.
-        key += static_cast<unsigned long long>(static_cast<unsigned long long>(t.providerID) << 25);
+        key += static_cast<unsigned long long>(t.providerID) << 25ULL;
         return key;
     }
 };
