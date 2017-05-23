@@ -71,14 +71,20 @@ namespace openspace {
 namespace globebrowsing {
 	void MeshGeneration::generateMeshFromBinary(ghoul::Dictionary dictionary) {
 		//const std::string binary_path, std::string output_path
+
+		LDEBUG(vtkVersion::GetVTKVersion());
+
 		std::string binary_path;
 		dictionary.getValue("BinaryPath", binary_path);
 
 		std::string output_path;
 		dictionary.getValue("OutputPath", output_path);
 
-		ghoul::Dictionary extensions; 
+		ghoul::Dictionary extensions;
 		dictionary.getValue("Extension", extensions);
+
+		ghoul::Dictionary generationParams;
+		dictionary.getValue("GenerationParams", generationParams);
 
 		std::string texture_extension;
 		extensions.getValue("TextureExtension", texture_extension);
@@ -90,11 +96,13 @@ namespace globebrowsing {
 		// Strip path
 		std::string file_name_stripped = file_name_no_extension;
 		file_name_stripped.erase(0, file_name_no_extension.find_last_of('/') + 1);
-		
+
+		LDEBUG("file: " << file_name_no_extension);
+
 		const clock_t begin_time = clock();
 
 		output_path = correctPath(file_name_stripped, output_path);
-		
+
 		if (!FileSys.directoryExists(output_path)) {
 			ghoul::Boolean k(true);
 			FileSys.createDirectory(output_path, k);
@@ -119,54 +127,42 @@ namespace globebrowsing {
 		std::string filterType;
 		ghoul::Dictionary filters;
 		generationParams.getValue("Filters", filters);
-		filters.getValue("Type", filterType);
-		ghoul::Dictionary pointCloudDictionary;
-		pointCloudDictionary.setValue("Type", filterType);
-		pcf = std::move(PointCloudFilter::createFromDictionary(pointCloudDictionary));
+
+		std::vector<std::unique_ptr<PointCloudFilter>> upSamplingFilters;
+
+		for (size_t i = 0; i < filters.size(); ++i) {
+			std::string dictKey = std::to_string(i + 1);
+			ghoul::Dictionary filterDic = filters.value<ghoul::Dictionary>(dictKey);
+			std::string test;
+			filterDic.getValue("Type", test);
+			LDEBUG("FILTERS USED: " << test);
+
+			upSamplingFilters.push_back(std::move(PointCloudFilter::createFromDictionary(filterDic)));
+		}
 		
-		pcf->setInputCloud(fullCloud);
-		pcl::PointCloud<pcl::PointXYZ>::Ptr mfProcessedCloud2(new pcl::PointCloud<pcl::PointXYZ>());
+		pcl::PointCloud<pcl::PointXYZ>::Ptr prevCloud(new pcl::PointCloud<pcl::PointXYZ>());
+		prevCloud = fullCloud;
 
-		pcf->filter(mfProcessedCloud2);
-
-		pcl::PointCloud<pcl::PointXYZ>::Ptr mfProcessedCloud(new pcl::PointCloud<pcl::PointXYZ>());
-		pcl::MedianFilter<pcl::PointXYZ> medianSamplingFilter;
-		medianSamplingFilter.setInputCloud(fullCloud);
-		medianSamplingFilter.setWindowSize(7);
-		medianSamplingFilter.setMaxAllowedMovement(0.02);
-		medianSamplingFilter.applyFilter(*mfProcessedCloud);
-
-
-		pcl::PointCloud<pcl::PointXYZ>::Ptr bfProcessedCloud(new pcl::PointCloud<pcl::PointXYZ>());
-		pcl::FastBilateralFilterOMP<pcl::PointXYZ> bf;
-		bf.setInputCloud(mfProcessedCloud2);
-		bf.setNumberOfThreads(1);
-		bf.filter(*bfProcessedCloud);
-
-		LERROR("POINTS AFTER FILTERING: " << bfProcessedCloud->points.size());
-
-		if (bfProcessedCloud->isOrganized()) {
-			LERROR(" bfProcessedCloud is ORGANIZED");
+		for (size_t i = 0; i < upSamplingFilters.size(); ++i) {
+			pcl::PointCloud<pcl::PointXYZ>::Ptr outputCloud(new pcl::PointCloud<pcl::PointXYZ>());
+			upSamplingFilters.at(i)->setInputCloud(prevCloud);
+			upSamplingFilters.at(i)->filter(outputCloud);
+			prevCloud = nullptr;
+			prevCloud = outputCloud;
+		}
+		
+		if (prevCloud->isOrganized()) {
+			LINFO(" bfProcessedCloud is ORGANIZED");
 		}
 
-		/////////////////////////////////////////SAMPLING//////////////////////////////////////////////
-		pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud(new pcl::PointCloud<pcl::PointXYZ>());
-
-		pcl::RandomSample<pcl::PointXYZ> randomSamplingFiltering;
-		randomSamplingFiltering.setSample(bfProcessedCloud->size() / 2);
-		randomSamplingFiltering.setInputCloud(bfProcessedCloud);
-		randomSamplingFiltering.setKeepOrganized(true);
-		randomSamplingFiltering.filter(*filteredCloud);
-
-		LINFO("POINTS AFTER SAMLPING: " << filteredCloud->points.size());
-
+		//////////////////////////////////////////NORMAL ESTIMATION///////////////////////////////////////
 		pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloudRotatedNoNan(new pcl::PointCloud<pcl::PointXYZ>);
 		pcl::PointCloud<pcl::PointNormal>::Ptr filteredCloudNoNanNormal(new pcl::PointCloud<pcl::PointNormal>);
 
 		std::vector<int> vec;
 		//pcl::removeNaNNormalsFromPointCloud(*filteredCloud, *filteredCloudNoNanNormal, vec);
 		vec.clear();
-		pcl::removeNaNFromPointCloud(*filteredCloud, *filteredCloudRotatedNoNan, vec);
+		pcl::removeNaNFromPointCloud(*prevCloud, *filteredCloudRotatedNoNan, vec);
 				
 		// Output has the PointNormal type in order to store the normals calculated by MLS
 		pcl::PointCloud<pcl::PointNormal>::Ptr normalCloud(new pcl::PointCloud<pcl::PointNormal>);
@@ -189,10 +185,10 @@ namespace globebrowsing {
 		//mls.setDilationIterations(5);
 		//mls.setDilationVoxelSize(0.01f);
 		// Reconstruct
-		LERROR("before normalcloud size : " << filteredCloud->points.size());
+		LINFO("before normalcloud size : " << prevCloud->points.size());
 		mls.process(*normalCloud);
 
-		LERROR("POINTS AFTER NORMAL ESTIMATION: " << normalCloud->points.size());
+		LINFO("POINTS AFTER NORMAL ESTIMATION: " << normalCloud->points.size());
 
 		Eigen::Quaternionf q(mInfo._roverQuat.at(0), mInfo._roverQuat.at(1), mInfo._roverQuat.at(2), mInfo._roverQuat.at(3));
 
