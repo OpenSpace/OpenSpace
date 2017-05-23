@@ -22,46 +22,40 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE___MESH_GENERATION___H__
-#define __OPENSPACE___MESH_GENERATION___H__
+#include <modules/globebrowsing/tasks/pointcloudfilter.h>
 
-#include <ghoul/misc/dictionary.h>
-
-#include <modules/globebrowsing/tasks/imgreader.h>
-
-#include <vector>
-
-#include <pcl/TextureMesh.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
+#include <openspace/util/factorymanager.h>
 
 namespace {
-	const std::string _outputPath = "";
+  const std::string _loggerCat = "PointCloudFilter";
+  const std::string Type = "Type";
 }
 
 namespace openspace {
 namespace globebrowsing {
-	class MeshGeneration {		
-	public:
-		struct PointCloudInfo {
-			int _lines;
-			int _cols;
-			int _bands;
-			int _bytes;
-			std::vector<double> _roverOrigin;
-		};
+	std::unique_ptr<PointCloudFilter> PointCloudFilter::createFromDictionary (const ghoul::Dictionary &dictionary) {
+		std::string type = "PointCloudFilter";
 
-		static std::string correctPath(const std::string filename, std::string output_path);
+		dictionary.getValue(Type, type);
 
-		static void generateMeshFromBinary(ghoul::Dictionary);
+		auto factory = FactoryManager::ref().factory<PointCloudFilter>();
 
-		static void writeTxtFile(const std::string filename, std::string output_path, ImgReader::PointCloudInfo mInfo);
+		std::unique_ptr<PointCloudFilter> pcf = factory->create(type, dictionary);
 
-		static void extractCoordinatesFromArray(pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud, std::vector<std::vector<float>> xyz, ImgReader::PointCloudInfo mInfo);
-	};
+		return pcf;
+	}
 
+	PointCloudFilter::PointCloudFilter(const ghoul::Dictionary dictionary) {
+
+	}
+
+	bool PointCloudFilter::initialize() {
+		return true;
+	}
+
+	void PointCloudFilter::setInputCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud) {
+		_inputCloud = inputCloud;
+	}
 
 }
 }
-
-#endif //__OPENSPACE___MESH_GENERATION___H__

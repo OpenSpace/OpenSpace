@@ -27,18 +27,39 @@
 #include <modules/globebrowsing/tasks/imgreader.h>
 #include <modules/globebrowsing/tasks/meshwriter.h>
 
+#include <modules/globebrowsing/tasks/pointcloudfilter.h>
+
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 
 #include <pcl/point_types.h>
 #include <pcl/io/obj_io.h>
+#include <pcl/features/integral_image_normal.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/common/transforms.h>
 #include <pcl/surface/gp3.h>
 #include <pcl/surface/vtk_smoothing/vtk_mesh_subdivision.h>
+#include <pcl/surface/vtk_smoothing/vtk_mesh_quadric_decimation.h>
 #include <glm/gtx/quaternion.hpp>
+#include <pcl/surface/poisson.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/segmentation/region_growing.h>
+#include <pcl/filters/fast_bilateral_omp.h>
+#include <pcl/filters/random_sample.h>
+#include <pcl/filters/normal_space.h>
+#include <pcl/filters/median_filter.h>
+#include <pcl/surface/mls.h>
+#include <pcl/filters/covariance_sampling.h>
+#include <vtkDecimatePro.h>
+#include <pcl/surface/simplification_remove_unused_vertices.h>
+#include <pcl/io/ply_io.h>
+
+#include <pcl/surface/vtk_smoothing/vtk_utils.h>
+#include <vtkFillHolesFilter.h>
+#include <vtkQuadricDecimation.h>
+#include <vtkVersion.h>
 
 #include <fstream>
 
@@ -50,14 +71,20 @@ namespace openspace {
 namespace globebrowsing {
 	void MeshGeneration::generateMeshFromBinary(ghoul::Dictionary dictionary) {
 		//const std::string binary_path, std::string output_path
+
+		LDEBUG(vtkVersion::GetVTKVersion());
+
 		std::string binary_path;
 		dictionary.getValue("BinaryPath", binary_path);
 
 		std::string output_path;
 		dictionary.getValue("OutputPath", output_path);
 
-		ghoul::Dictionary extensions; 
+		ghoul::Dictionary extensions;
 		dictionary.getValue("Extension", extensions);
+
+		ghoul::Dictionary generationParams;
+		dictionary.getValue("GenerationParams", generationParams);
 
 		std::string texture_extension;
 		extensions.getValue("TextureExtension", texture_extension);
@@ -69,11 +96,13 @@ namespace globebrowsing {
 		// Strip path
 		std::string file_name_stripped = file_name_no_extension;
 		file_name_stripped.erase(0, file_name_no_extension.find_last_of('/') + 1);
-		
+
+		LDEBUG("file: " << file_name_no_extension);
+
 		const clock_t begin_time = clock();
 
 		output_path = correctPath(file_name_stripped, output_path);
-		
+
 		if (!FileSys.directoryExists(output_path)) {
 			ghoul::Boolean k(true);
 			FileSys.createDirectory(output_path, k);
@@ -81,92 +110,85 @@ namespace globebrowsing {
 
 		ImgReader::PointCloudInfo mInfo = ImgReader::readBinaryHeader(binary_path);
 
-		LINFO("POINTS BEFORE DECIMATION: ");
 		std::vector<std::vector<float>> xyz;
 
 		ImgReader::readBinaryData(binary_path, xyz, mInfo);
+		pcl::PointCloud<pcl::PointXYZ>::Ptr fullCloud(new pcl::PointCloud<pcl::PointXYZ>);
+
+		extractCoordinatesFromArray(fullCloud, xyz, mInfo);
+
+		LINFO("POINTS BEFORE DECIMATION: " << fullCloud->points.size());
+
+		if (fullCloud->points.size() == 0) return;
+
 		
-		int uvTeller = 0;
+		/////////////////////////////////////////FILTERING//////////////////////////////////////////////
+		std::unique_ptr<PointCloudFilter> pcf;
+		std::string filterType;
+		ghoul::Dictionary filters;
+		generationParams.getValue("Filters", filters);
 
-		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-		pcl::PointCloud<pcl::PointNormal>::Ptr uvCloud(new pcl::PointCloud<pcl::PointNormal>);
+		std::vector<std::unique_ptr<PointCloudFilter>> upSamplingFilters;
 
-		// TODO: Once again, try and create custom pcl::PointUV and see if we can speed up this process
-		// Reconstruct the data format, and add cloud containing uv-coordinates
-		for (int i = 0; i < mInfo._cols; ++i) {
-			for (int k = 0; k < mInfo._lines; ++k) {
+		for (size_t i = 0; i < filters.size(); ++i) {
+			std::string dictKey = std::to_string(i + 1);
+			ghoul::Dictionary filterDic = filters.value<ghoul::Dictionary>(dictKey);
+			std::string test;
+			filterDic.getValue("Type", test);
+			LDEBUG("FILTERS USED: " << test);
 
-				// Extract points, the coordinate system for the binary file is the same as rover
-				// Invert so that we get z up, too keep right handed coordinate system swap(x, y)
-				float x = xyz.at(0).at(uvTeller);
-				float y = xyz.at(1).at(uvTeller);
-				float z = xyz.at(2).at(uvTeller);
+			upSamplingFilters.push_back(std::move(PointCloudFilter::createFromDictionary(filterDic)));
+		}
+		
+		pcl::PointCloud<pcl::PointXYZ>::Ptr prevCloud(new pcl::PointCloud<pcl::PointXYZ>());
+		prevCloud = fullCloud;
 
-				pcl::PointXYZ depthPoint;
-				depthPoint.x = x;
-				depthPoint.y = y;
-				depthPoint.z = z;
-
-				// Create uv coordinates
-				pcl::PointNormal uvPoint;
-				if (i < mInfo._cols - 1 && k < mInfo._lines - 1) {
-					uvPoint.x = x;
-					uvPoint.y = y;
-					uvPoint.z = z;
-
-					glm::fvec2 uv = glm::fvec2(i, k);
-					uvPoint.normal_x = uv.x;
-					uvPoint.normal_y = uv.y;
-				}
-
-				// We avoid adding origo, since the binary files contains zero-vectors for NULL data 
-				if (x != 0.0 || y != 0.0 || z != 0.0) {
-					if (i < mInfo._cols - 1 && k < mInfo._lines - 1) {
-						uvCloud->push_back(uvPoint);
-					}
-
-					cloud->push_back(depthPoint);
-				}
-
-				uvTeller++;
-			}
+		for (size_t i = 0; i < upSamplingFilters.size(); ++i) {
+			pcl::PointCloud<pcl::PointXYZ>::Ptr outputCloud(new pcl::PointCloud<pcl::PointXYZ>());
+			upSamplingFilters.at(i)->setInputCloud(prevCloud);
+			upSamplingFilters.at(i)->filter(outputCloud);
+			prevCloud = nullptr;
+			prevCloud = outputCloud;
+		}
+		
+		if (prevCloud->isOrganized()) {
+			LINFO(" bfProcessedCloud is ORGANIZED");
 		}
 
-		LINFO("POINTS BEFORE DECIMATION: " << cloud->points.size());
+		//////////////////////////////////////////NORMAL ESTIMATION///////////////////////////////////////
+		pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloudRotatedNoNan(new pcl::PointCloud<pcl::PointXYZ>);
+		pcl::PointCloud<pcl::PointNormal>::Ptr filteredCloudNoNanNormal(new pcl::PointCloud<pcl::PointNormal>);
 
-		if (cloud->points.size() == 0) return;
-
-		writeTxtFile(file_name_stripped, output_path);
-
-		// Create a VoxelGrid for the model
-		// Used to simplify the model
-		pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
-		voxel_grid.setDownsampleAllData(false);
-		voxel_grid.setInputCloud(cloud);
-		voxel_grid.setLeafSize(0.18, 0.18, 0.18);
-		voxel_grid.filter(*cloud);
-		
-		LINFO("POINTS AFTER DECIMATION: " << cloud->points.size());
-
-		// Normal estimation
-		pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
-		pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+		std::vector<int> vec;
+		//pcl::removeNaNNormalsFromPointCloud(*filteredCloud, *filteredCloudNoNanNormal, vec);
+		vec.clear();
+		pcl::removeNaNFromPointCloud(*prevCloud, *filteredCloudRotatedNoNan, vec);
+				
+		// Output has the PointNormal type in order to store the normals calculated by MLS
+		pcl::PointCloud<pcl::PointNormal>::Ptr normalCloud(new pcl::PointCloud<pcl::PointNormal>);
+		// Init object (second point type is for the normals, even if unused)
+		pcl::MovingLeastSquares<pcl::PointXYZ, pcl::PointNormal> mls;
 		pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
-		tree->setInputCloud(cloud);
-		n.setInputCloud(cloud);
-		n.setSearchMethod(tree);
-		n.setKSearch(20);
-		n.compute(*normals);
-
-		// Concatenate the XYZ and normal fields
-		pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
-		pcl::concatenateFields(*cloud, *normals, *cloud_with_normals);
-
-		LINFO("DONE CALCULATING THE NORMALS");
+		tree->setInputCloud(filteredCloudRotatedNoNan);
+		// Set parameters
+		mls.setInputCloud(filteredCloudRotatedNoNan);
+		mls.setPolynomialFit(true);
+		mls.setComputeNormals(true);
+		mls.setSearchMethod(tree);
+		mls.setSearchRadius(0.3);
 		
-		// Create search tree
-		pcl::search::KdTree<pcl::PointNormal>::Ptr tree2(new pcl::search::KdTree<pcl::PointNormal>);
-		tree2->setInputCloud(cloud_with_normals);
+		mls.setUpsamplingMethod(mls.SAMPLE_LOCAL_PLANE);
+		mls.setUpsamplingRadius(0.1);
+		mls.setUpsamplingStepSize(0.05);
+
+		//mls.setUpsamplingMethod(mls.VOXEL_GRID_DILATION);
+		//mls.setDilationIterations(5);
+		//mls.setDilationVoxelSize(0.01f);
+		// Reconstruct
+		LINFO("before normalcloud size : " << prevCloud->points.size());
+		mls.process(*normalCloud);
+
+		LINFO("POINTS AFTER NORMAL ESTIMATION: " << normalCloud->points.size());
 
 		Eigen::Quaternionf q(mInfo._roverQuat.at(0), mInfo._roverQuat.at(1), mInfo._roverQuat.at(2), mInfo._roverQuat.at(3));
 
@@ -174,10 +196,10 @@ namespace globebrowsing {
 
 		rotation.block(0, 0, 3, 3) = q.toRotationMatrix();
 
-		typename pcl::PointCloud<pcl::PointNormal>::Ptr originalCloudTransformed(new pcl::PointCloud<pcl::PointNormal>);
-		typename pcl::PointCloud<pcl::PointNormal>::Ptr originalCloudTransformed2(new pcl::PointCloud<pcl::PointNormal>);
+		typename pcl::PointCloud<pcl::PointNormal>::Ptr normalCloudTransformed(new pcl::PointCloud<pcl::PointNormal>);
+		typename pcl::PointCloud<pcl::PointNormal>::Ptr normalCloudRotated(new pcl::PointCloud<pcl::PointNormal>);
 
-		pcl::transformPointCloud(*cloud_with_normals, *originalCloudTransformed2, rotation);
+		pcl::transformPointCloud(*normalCloud, *normalCloudTransformed, rotation);
 
 		Eigen::AngleAxisf rollAngle(-M_PI / 2.0, Eigen::Vector3f::UnitZ());
 		Eigen::AngleAxisf yawAngle(M_PI, Eigen::Vector3f::UnitY());
@@ -188,89 +210,98 @@ namespace globebrowsing {
 		Eigen::Matrix4f rotationMatrix = Eigen::Matrix4f::Identity();
 		rotationMatrix.block(0, 0, 3, 3) = q2.toRotationMatrix();
 
-		pcl::transformPointCloud(*originalCloudTransformed2, *originalCloudTransformed, rotationMatrix);
+		pcl::transformPointCloud(*normalCloudTransformed, *normalCloudRotated, rotationMatrix);
+		
+		pcl::PointCloud<pcl::PointNormal>::Ptr voxelGriddedPCLCloud(new pcl::PointCloud<pcl::PointNormal>());
 
+		pcl::VoxelGrid<pcl::PointNormal> voxelGridded;
+
+		voxelGridded.setDownsampleAllData(true);
+		voxelGridded.setInputCloud(normalCloudRotated);
+		voxelGridded.setLeafSize(0.05,0.05,0.01);
+		voxelGridded.filter(*voxelGriddedPCLCloud);
+
+		pcl::search::KdTree<pcl::PointNormal>::Ptr kdTree(new pcl::search::KdTree<pcl::PointNormal>);
+		kdTree->setInputCloud(voxelGriddedPCLCloud);
+		
 		// Greedy projection triangulation algorithm
 		pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
 		pcl::PolygonMesh triangles;
-		LINFO("RECONSTRUCTING MESH");
+		LINFO("RECONSTRUCTING MESH " << voxelGriddedPCLCloud->size());
 		// Set the maximum distance between connected points (maximum edge length)
-		gp3.setSearchRadius(1.0);
+		gp3.setSearchRadius(0.35);
 		gp3.setMu(2.5);
-		gp3.setMaximumNearestNeighbors(250);
-		gp3.setMaximumSurfaceAngle(M_PI); // 45 degrees
-		gp3.setMinimumAngle(0); // 10 degrees
-		gp3.setMaximumAngle(M_PI); // 120 degrees
+		gp3.setNormalConsistency(true);
+		gp3.setMaximumNearestNeighbors(750);
+		gp3.setMaximumSurfaceAngle(M_PI + M_PI_2); // 270 degrees
+		gp3.setMinimumAngle(0); // 0 degrees
+		gp3.setMaximumAngle(M_PI + M_PI_2); // 270 degrees
+		
+		//gp3.setMaximumSurfaceAngle(M_PI / 4); // 45 degrees
+		//gp3.setMinimumAngle(M_PI / 18); // 10 degrees
+		//gp3.setMaximumAngle(2 * M_PI / 3); // 120 degrees
+
 		gp3.setNormalConsistency(true);
 
-		gp3.setInputCloud(originalCloudTransformed);
-		gp3.setSearchMethod(tree2);
+		gp3.setInputCloud(voxelGriddedPCLCloud);
+		gp3.setSearchMethod(kdTree);
 		gp3.reconstruct(triangles);
 
-		LINFO("RECONSTRUCTION IS DONE");
-		/*
-		pcl::PolygonMesh::Ptr triangles = pcl::PolygonMesh::Ptr(new pcl::PolygonMesh);
-		triangles->cloud = triangles2.cloud;
-		triangles->header = triangles2.header;
-		for (size_t i = 0; i < triangles2.polygons.size(); ++i) {
-			triangles->polygons.push_back(triangles2.polygons.at(i));
+		LERROR("GP3, before vtk dec, nr of triangles: " << triangles.polygons.size());
+
+		/*vtkSmartPointer<vtkPolyData> input;
+		pcl::VTKUtils::mesh2vtk(triangles, input);
+		LERROR("CREATING VTK");
+		vtkSmartPointer<vtkFillHolesFilter> fillHolesFilter = vtkSmartPointer<vtkFillHolesFilter>::New();
+		LERROR(input->GetNumberOfPoints());
+		if (input->GetNumberOfPoints() <= 0) {
+			LERROR("NOT ENOUGH DATA BEFORE FILLING HOLES");
+			return;
 		}
+		fillHolesFilter->SetInputData(input);
+		fillHolesFilter->SetHoleSize(1000);
+		LERROR("I CRASHED");
 
-		pcl::PolygonMeshConstPtr constMeshPtr = pcl::PolygonMeshConstPtr(triangles);
-
-		pcl::MeshSubdivisionVTK k;
-		pcl::PolygonMesh pm;
-
-		k.setInputMesh(triangles);
-		k.setFilterType(pcl::MeshSubdivisionVTK::LINEAR);
-		k.process(pm);
+		fillHolesFilter->Update();
+		
+		LERROR("I FAILED");
+		vtkSmartPointer<vtkPolyData> polyData = fillHolesFilter->GetOutput();
 		*/
-		// Create mesh from point cloud
-		// TODO: Make this into TextureMeshPtr
-		pcl::TextureMesh texMesh;
+		
 
-		std::vector<pcl::Vertices> polygons;
+		/*if (polyData->GetNumberOfPoints() > 0) {
+			LERROR("HERE I AM " << polyData->GetNumberOfPoints());
+			vtkSmartPointer<vtkDecimatePro> decimate = vtkSmartPointer<vtkDecimatePro>::New();
+			decimate->SetInputData(polyData);
+			decimate->SetTargetReduction(0.60);
+			LERROR("BEFORE UPDATE");
+			decimate->Update();
+			LERROR("AFTER UPDATE");
+			vtkSmartPointer<vtkPolyData> decimated =
+				vtkSmartPointer<vtkPolyData>::New();
+			decimated->ShallowCopy(decimate->GetOutput());
+			pcl::VTKUtils::vtk2mesh(decimated, triangles);
+		}
+		else {
+			LERROR("COULD NOT CREATE OBJ FOR THIS, NO DATA TO DECIMATE");
+			return;
+		}
+		*/
+		LERROR("TRIANGLES AFTER: " << triangles.polygons.size());
 
-		texMesh.header = triangles.header;
-		texMesh.cloud = triangles.cloud;
+		pcl::PolygonMesh trianglesDecimated;
 
-		// Move all the polygons from the pointcloud to mesh
-		for (size_t i = 0; i < triangles.polygons.size(); ++i) {
-			pcl::Vertices v1 = triangles.polygons.at(i);
+		pcl::surface::SimplificationRemoveUnusedVertices sruv;
+		sruv.simplify(triangles, trianglesDecimated);
 
-			pcl::PointNormal pt = originalCloudTransformed->points[v1.vertices.at(0)];
-			pcl::PointNormal pt2 = originalCloudTransformed->points[v1.vertices.at(1)];
-			pcl::PointNormal pt3 = originalCloudTransformed->points[v1.vertices.at(2)];
+		LERROR("REMOVE UNUSED: " << trianglesDecimated.polygons.size());
 
-			// Edges on triangle
-			glm::fvec3 one = glm::normalize(glm::fvec3(pt.x, pt.y, pt.z) - glm::fvec3(pt3.x, pt3.y, pt3.z));
-			glm::fvec3 two = glm::normalize(glm::fvec3(pt2.x, pt2.y, pt2.z) - glm::fvec3(pt3.x, pt3.y, pt3.z));
-
-			// Normal for triangle
-			glm::fvec3 norm = glm::cross(one, two);
-
-			if (norm.z < 0) {
-				//If the normal is pointing down, swap vertices
-				int temp = v1.vertices.at(0);
-				v1.vertices.at(0) = v1.vertices.at(1);
-				v1.vertices.at(1) = temp;
-			}
-
-			polygons.push_back(v1);
+		if (trianglesDecimated.polygons.size() < 10) {
+			LERROR("THE NUMBER OF POLYGONS ARE TO FEW " << triangles.polygons.size());
+			return;
 		}
 
-		// Add the polygons to 
-		texMesh.tex_polygons.push_back(polygons);
-
-		if (texMesh.cloud.data.empty()) {
-			LERROR("Input point cloud has no data!");
-		}
-		///////////////////////////////////UV///////////////////////////////////////////
-
-		typename pcl::PointCloud<pcl::PointXYZ>::Ptr originalCloud(new pcl::PointCloud<pcl::PointXYZ>);
-
-		// Convert mesh's cloud to pcl format for easier access
-		pcl::fromPCLPointCloud2(texMesh.cloud, *originalCloud);
+		///////////////////////////////////UV///////////////////////////////////////
 		// Texture coordinates
 		std::vector<std::vector<Eigen::Vector2f, Eigen::aligned_allocator<Eigen::Vector2f> > > texture_map;
 		int nrOfOutside = 0;
@@ -281,22 +312,10 @@ namespace globebrowsing {
 		int nrOfFound = 0;
 		int nrOfClosest = 0;
 
-		pcl::PointNormal pt;
+		pcl::PointXYZ pt;
 		size_t idx;
 		float maxMinDist = 0.0f;
-
-		typename pcl::PointCloud<pcl::PointNormal>::Ptr uvCloudTransformed(new pcl::PointCloud<pcl::PointNormal>);
-		typename pcl::PointCloud<pcl::PointNormal>::Ptr uvCloudTransformed2(new pcl::PointCloud<pcl::PointNormal>);
-
-		pcl::transformPointCloud(*uvCloud, *uvCloudTransformed2, rotation);
-		pcl::transformPointCloud(*uvCloudTransformed2, *uvCloudTransformed, rotationMatrix);
 		
-		pcl::search::KdTree<pcl::PointNormal>::Ptr tree5(new pcl::search::KdTree<pcl::PointNormal>);
-		tree5->setInputCloud(uvCloudTransformed);
-		int K = 1;
-		std::vector<int> pointIdxNKNSearch(K);
-		std::vector<float> pointNKNSquaredDistance(K);
-
 		float minDist = 10000.0f;
 		float maxDist = 0.0f;
 		LINFO("BEFORE UV POINT POSITIONING");
@@ -320,24 +339,18 @@ namespace globebrowsing {
 		glm::dvec3 horizontal = debugModelRotation * rot * glm::dvec4(mInfo._cameraHorizontal, 1);
 		glm::dvec3 vector = debugModelRotation * rot * glm::dvec4(mInfo._cameraVector, 1);
 		
-		LERROR("ROTATIONMATRIX TO ROVERSPACE : ");
+
+		mInfo._cameraCenter = center;
+		mInfo._cameraAxis = axis;
+		mInfo._cameraHorizontal = horizontal;
+		mInfo._cameraVector = vector;
+
 		glm::dmat4 totRot = debugModelRotation * rot;
-		//LERROR(totRot[0][0] << ", " << totRot[1][0] << ", " << totRot[2][0], << ", " << totRot[3][0]);
-		//LERROR(totRot[0][1] << ", " << totRot[1][1] << ", " << totRot[2][1], << ", " << totRot[3][1]);
-		//LERROR(totRot[0][2] << ", " << totRot[1][2] << ", " << totRot[2][2], << ", " << totRot[3][2]);
-		//LERROR(totRot[0][3] << ", " << totRot[1][3] << ", " << totRot[2][3], << ", " << totRot[3][3]);
 		
-		//LERROR("ROTATED: ");
-		//LERROR(mInfo._cameraCenter.x << ", " << mInfo._cameraCenter.y << ", " << mInfo._cameraCenter.z);
-		//LERROR(mInfo._cameraAxis.x << ", " << mInfo._cameraAxis.y << ", " << mInfo._cameraAxis.z);
-		//LERROR(mInfo._cameraHorizontal.x << ", " << mInfo._cameraHorizontal.y << ", " << mInfo._cameraHorizontal.z);
-		//LERROR(mInfo._cameraVector.x << ", " << mInfo._cameraVector.y << ", " << mInfo._cameraVector.z);
-
-
-		glm::dvec3 center2 = debugModelRotation * rot * glm::dvec4(0.9151621, 0.6070837, -1.969376, 1);
-		glm::dvec3 axis2 = debugModelRotation * rot * glm::dvec4(0.4535986, -0.7205702, 0.5244301, 1);
-		glm::dvec3 horizontal2 = debugModelRotation * rot * glm::dvec4(11893.36, 6845.262, 402.5473, 1);
-		glm::dvec3 vector2 = debugModelRotation * rot * glm::dvec4(-3605.031, 5617.956, 11992.82, 1);
+		//glm::dvec3 center2 = debugModelRotation * rot * glm::dvec4(0.9151621, 0.6070837, -1.969376, 1);
+		//glm::dvec3 axis2 = debugModelRotation * rot * glm::dvec4(0.4535986, -0.7205702, 0.5244301, 1);
+		//glm::dvec3 horizontal2 = debugModelRotation * rot * glm::dvec4(11893.36, 6845.262, 402.5473, 1);
+		//glm::dvec3 vector2 = debugModelRotation * rot * glm::dvec4(-3605.031, 5617.956, 11992.82, 1);
 
 		//LERROR(center2.x << ", " << center2.y << ", " << center2.z);
 		//LERROR(axis2.x << ", " << axis2.y << ", " << axis2.z);
@@ -351,6 +364,29 @@ namespace globebrowsing {
 		//glm::dvec3 horizontal = glm::dvec3(1006.26, 763.497, -401.87);
 		//glm::dvec3 vector = glm::dvec3(258.049, -609.992, -1146.34);
 
+		// Create mesh from point cloud
+		// TODO: Make this into TextureMeshPtr
+		pcl::TextureMesh texMesh;
+
+		std::vector<pcl::Vertices> polygons;
+
+		texMesh.header = trianglesDecimated.header;
+		texMesh.cloud = trianglesDecimated.cloud;
+
+		pcl::PointCloud<pcl::PointXYZ>::Ptr finishedPointCloud(new pcl::PointCloud<pcl::PointXYZ>);
+
+		pcl::fromPCLPointCloud2(trianglesDecimated.cloud, *finishedPointCloud);
+		
+		// Move all the polygons from the pointcloud to mesh
+		for (size_t i = 0; i < trianglesDecimated.polygons.size(); i++) {
+			polygons.push_back(trianglesDecimated.polygons.at(i));
+		}
+		texMesh.tex_polygons.push_back(polygons);
+		
+		if (texMesh.cloud.data.empty()) {
+			LERROR("Input point cloud has no data!");
+		}
+		
 		for (size_t i = 0; i < texMesh.tex_polygons[0].size(); ++i) {
 			Eigen::Vector2f tmp_VT;
 			// For each point of this face
@@ -358,8 +394,8 @@ namespace globebrowsing {
 
 				// Get point in scene
 				idx = texMesh.tex_polygons[0][i].vertices[j];
-				pt = originalCloudTransformed->points[idx];
-
+				pt = finishedPointCloud->points[idx];
+				
 				glm::dvec3 meshPoint;
 				meshPoint.x = pt.x;
 				meshPoint.y = pt.y;
@@ -378,208 +414,12 @@ namespace globebrowsing {
 				tmp_VT[0] = tc1.x;
 				tmp_VT[1] = tc1.y;
 
-				texture_map_tmp.push_back(tmp_VT);
+				if (tc1.x > 0 || tc1.y > 0 || tc1.x < 1 || tc1.y < 1) {
+					texture_map_tmp.push_back(tmp_VT);
+				}
+
 			}
 		}
-
-		/*
-		for (size_t i = 0; i < texMesh.tex_polygons[0].size(); ++i)
-		{
-			Eigen::Vector2f tmp_VT;
-			// For each point of this face
-			for (size_t j = 0; j < texMesh.tex_polygons[0][i].vertices.size(); ++j)
-			{
-				// Get point
-				idx = texMesh.tex_polygons[0][i].vertices[j];
-				pt = originalCloudTransformed->points[idx];
-
-				// Point in mesh cloud
-				glm::fvec3 meshPoint;
-				meshPoint.x = pt.x;
-				meshPoint.y = pt.y;
-				meshPoint.z = pt.z;
-				int index = 0;
-				bool found = false;
-				int minIndex = 0;
-
-				pcl::PointNormal test;
-				test.x = pt.x;
-				test.y = pt.y;
-				test.z = pt.z;
-
-				
-				if (tree5->nearestKSearch(test, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0) {
-					nrOfFound++;
-
-					// Get the pixel index from the uvCloud
-					float indexi = uvCloudTransformed->points[pointIdxNKNSearch[0]].normal_x;
-					float indexk = uvCloudTransformed->points[pointIdxNKNSearch[0]].normal_y;
-					if (minDist > pointNKNSquaredDistance[0]) {
-						minDist = pointNKNSquaredDistance[0];
-					}
-					if (maxDist < pointNKNSquaredDistance[0]) {
-						maxDist = pointNKNSquaredDistance[0];
-					}
-					
-					// Caculate uv for the coordinates
-					glm::fvec2 tc1 = glm::fvec2((1.0 / mInfo._lines) * indexk, 1.0 - (1.0 / mInfo._cols) * indexi);
-					glm::fvec2 tc2 = glm::fvec2((1.0 / mInfo._lines) * (indexk + 1), 1.0 - (1.0 / mInfo._cols) * indexi);
-					glm::fvec2 tc3 = glm::fvec2((1.0 / mInfo._lines) * (indexk + 1), 1.0 - (1.0 / mInfo._cols) * (indexi + 1));
-					glm::fvec2 tc4 = glm::fvec2((1.0 / mInfo._lines) * indexk, 1.0 - (1.0 / mInfo._cols) * (indexi + 1));
-
-					// Magical number...
-					// If we don't use this there will be an offset in the texture,
-					// I believe that this comes from the offset between rover and camera
-					// Since it's static and doesn't change from subsite to subsite
-					float tempu = .33f + tc1.x;
-
-					// Openspace cannot handle uv values > 1
-					tempu = tempu <= 1 ? tempu : tempu - 1;
-
-					tmp_VT[0] = tempu;
-					tmp_VT[1] = tc1.y;
-
-					texture_map_tmp.push_back(tmp_VT);
-
-					//tmp_VT[0] = tc2.x;
-					//tmp_VT[1] = tc2.y;
-
-					//texture_map_tmp.push_back(tmp_VT);
-
-					//tmp_VT[0] = tc3.x;
-					//tmp_VT[1] = tc3.y;
-
-					//texture_map_tmp.push_back(tmp_VT);
-
-					//tmp_VT[0] = tc4.x;
-					//tmp_VT[1] = tc4.y;
-
-					//texture_map_tmp.push_back(tmp_VT);
-
-					/*if (nrOfFound < 5) {
-						for (size_t i = 0; i < pointIdxNKNSearch.size(); ++i)
-							std::cout << "    " << uvCloud->points[pointIdxNKNSearch[i]].x
-							<< " " << uvCloud->points[pointIdxNKNSearch[i]].y
-							<< " " << uvCloud->points[pointIdxNKNSearch[i]].z
-							<< " " << uvCloud->points[pointIdxNKNSearch[i]].normal_x
-							<< " " << uvCloud->points[pointIdxNKNSearch[i]].normal_y
-							<< " (squared distance: " << pointNKNSquaredDistance[i] << ")" << std::endl;
-					}*/
-					
-				//}
-				/* Slow way of finding nearest neighbour
-				// Iterate through uv cloud to find the best match
-				while (!found && index < uvCloud->size()) {
-					glm::fvec3 uvPoint;
-					uvPoint.x = uvCloud->at(index).x;
-					uvPoint.y = uvCloud->at(index).y;
-					uvPoint.z = uvCloud->at(index).z;
-
-					// Calculate the distance between the mesh point and uv point
-					float dist = glm::distance(meshPoint, uvPoint);
-
-					// To keep track of the smallest distance found
-					// Used if there is exact match
-					if (dist < minDist) {
-						minDist = dist;
-						minIndex = index;
-					}
-
-					// If an exact match was found
-					// The best case
-					if (dist == 0.0) {
-						found = true;
-						nrOfFound++;
-
-						// Get the pixel index from the uvCloud
-						float indexi = uvCloud->at(index).normal_x;
-						float indexk = uvCloud->at(index).normal_y;
-
-						// Caculate uv for the coordinates
-						glm::fvec2 tc1 = glm::fvec2((1.0 / mInfo._lines) * indexk, 1.0 - (1.0 / mInfo._cols) * indexi);
-						glm::fvec2 tc2 = glm::fvec2((1.0 / mInfo._lines) * (indexk + 1), 1.0 - (1.0 / mInfo._cols) * indexi);
-						glm::fvec2 tc3 = glm::fvec2((1.0 / mInfo._lines) * (indexk + 1), 1.0 - (1.0 / mInfo._cols) * (indexi + 1));
-						glm::fvec2 tc4 = glm::fvec2((1.0 / mInfo._lines) * indexk, 1.0 - (1.0 / mInfo._cols) * (indexi + 1));
-
-						// Magical number...
-						float tempu = .33f + tc1.x;
-
-						// Openspace cannot handle uv values > 1
-						tempu = tempu <= 1 ? tempu : tempu - 1;
-
-						tmp_VT[0] = tempu;
-						tmp_VT[1] = tc1.y;
-
-						texture_map_tmp.push_back(tmp_VT);
-
-						//tmp_VT[0] = tc2.x;
-						//tmp_VT[1] = tc2.y;
-
-						//texture_map_tmp.push_back(tmp_VT);
-
-						//tmp_VT[0] = tc3.x;
-						//tmp_VT[1] = tc3.y;
-
-						//texture_map_tmp.push_back(tmp_VT);
-
-						//tmp_VT[0] = tc4.x;
-						//tmp_VT[1] = tc4.y;
-
-						//texture_map_tmp.push_back(tmp_VT);
-					}
-					// If there was no exact match found, use the smallest distance found
-					if (index == uvCloud->size() - 1 && !found) {
-						found = true;
-						nrOfClosest++;
-
-						// Get the pixel index from the uvCloud
-						float indexi = uvCloud->at(minIndex).normal_x;
-						float indexk = uvCloud->at(minIndex).normal_y;
-
-						// To keep track of the maximum error distance
-						if (maxMinDist < minDist) {
-							maxMinDist = minDist;
-						}
-
-						// Caculate uv for the coordinates
-						glm::fvec2 tc1 = glm::fvec2((1.0 / mInfo._lines) * indexk, 1.0 - (1.0 / mInfo._cols) * indexi);
-						glm::fvec2 tc2 = glm::fvec2((1.0 / mInfo._lines) * (indexk + 1), 1.0 - (1.0 / mInfo._cols) * indexi);
-						glm::fvec2 tc3 = glm::fvec2((1.0 / mInfo._lines) * (indexk + 1), 1.0 - (1.0 / mInfo._cols) * (indexi + 1));
-						glm::fvec2 tc4 = glm::fvec2((1.0 / mInfo._lines) * indexk, 1.0 - (1.0 / mInfo._cols) * (indexi + 1));
-
-						// Magical number...
-						float tempu = .33f + tc1.x;
-
-						// Openspace cannot handle uv values > 1
-						tempu = tempu <= 1 ? tempu : tempu - 1;
-
-						tmp_VT[0] = tempu;
-						tmp_VT[1] = tc1.y;
-
-						texture_map_tmp.push_back(tmp_VT);
-
-						//tmp_VT[0] = tc2.x;
-						//tmp_VT[1] = tc2.y;
-
-						//texture_map_tmp.push_back(tmp_VT);
-
-						//tmp_VT[0] = tc3.x;
-						//tmp_VT[1] = tc3.y;
-
-						//texture_map_tmp.push_back(tmp_VT);
-
-						//tmp_VT[0] = tc4.x;
-						//tmp_VT[1] = tc4.y;
-
-						//texture_map_tmp.push_back(tmp_VT);
-
-					}
-
-					index++;
-				}*/
-		
-		//	}
-		//}
 		std::size_t pos = file_name_stripped.find("XYR");
 		std::string texture_filename = file_name_stripped.substr(0, pos) + "RAS" + file_name_stripped.substr(pos + 3);
 
@@ -609,12 +449,15 @@ namespace globebrowsing {
 
 		// texture coordinates
 		texMesh.tex_coordinates.push_back(texture_map_tmp);
-				
+		
 		MeshWriter::writeObjFile(file_name_stripped, output_path, texMesh);
 		
 		//writeObjFile(file_name_stripped, output_path, texMesh);
 		
 		MeshWriter::writeMtlFile(file_name_stripped, output_path, texMesh);
+
+
+		writeTxtFile(file_name_stripped, output_path, mInfo);
 
 		//writeMtlFile(file_name_stripped, output_path, texMesh);
 
@@ -622,7 +465,7 @@ namespace globebrowsing {
 
 	}
 
-	void MeshGeneration::writeTxtFile(const std::string filename, std::string output_path) {
+	void MeshGeneration::writeTxtFile(const std::string filename, std::string output_path, ImgReader::PointCloudInfo mInfo) {
 		std::string txt_path = output_path + "filenames.txt";
 
 		if (FileSys.fileExists(txt_path)) {
@@ -641,6 +484,10 @@ namespace globebrowsing {
 		fs.open(txt_path.c_str(), std::ios_base::app);
 
 		fs << filename << "\n";
+		fs << mInfo._cameraCenter.x << ", " << mInfo._cameraCenter.y << ", " << mInfo._cameraCenter.z << "\n";
+		fs << mInfo._cameraAxis.x << ", " << mInfo._cameraAxis.y << ", " << mInfo._cameraAxis.z << "\n";
+		fs << mInfo._cameraHorizontal.x << ", " << mInfo._cameraHorizontal.y << ", " << mInfo._cameraHorizontal.z << "\n";
+		fs << mInfo._cameraVector.x << ", " << mInfo._cameraVector.y << ", " << mInfo._cameraVector.z << "\n";
 		fs.close();
 	}
 
@@ -653,7 +500,67 @@ namespace globebrowsing {
 		std::string drive_number_string = "drive" + file_name_stripped.substr(3, 7) + "/";
 
 		return output_path + site_number_string + drive_number_string;
+	}
+
+	void MeshGeneration::extractCoordinatesFromArray(pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud, std::vector<std::vector<float>> xyz, ImgReader::PointCloudInfo mInfo) {
+
+		int uvTeller = 0;
+
+		inputCloud->width = mInfo._cols;
+		inputCloud->height = mInfo._lines;
+
+		// TODO: Once again, try and create custom pcl::PointUV and see if we can speed up this process
+		// Reconstruct the data format, and add cloud containing uv-coordinates
+		for (int i = 0; i < mInfo._cols; ++i) {
+			for (int k = 0; k < mInfo._lines; ++k) {
+
+				// Extract points, the coordinate system for the binary file is the same as rover
+				// Invert so that we get z up, too keep right handed coordinate system swap(x, y)
+				float x = xyz.at(0).at(uvTeller);
+				float y = xyz.at(1).at(uvTeller);
+				float z = xyz.at(2).at(uvTeller);
+
+				pcl::PointXYZ depthPoint;
+				depthPoint.x = x;
+				depthPoint.y = y;
+				depthPoint.z = z;
+
+				// Create uv coordinates
+				pcl::PointNormal uvPoint;
+				if (i < mInfo._cols - 1 && k < mInfo._lines - 1) {
+					uvPoint.x = x;
+					uvPoint.y = y;
+					uvPoint.z = z;
+
+					glm::fvec2 uv = glm::fvec2(i, k);
+					uvPoint.normal_x = uv.x;
+					uvPoint.normal_y = uv.y;
+				}
+				// We avoid adding origo, since the binary files contains zero-vectors for NULL data 
+				if (x == 0.0 && y == 0.0 && z == 0.0) {
+					float f_nan = std::numeric_limits<float>::quiet_NaN();
+					
+					depthPoint.x = f_nan;
+					depthPoint.y = f_nan;
+					depthPoint.z = f_nan;
+
+				}
+				//inputCloud->push_back(depthPoint);
+				
+				inputCloud->points.push_back(depthPoint);
+
+				uvTeller++;
+			}
+		}
+
+		if (!inputCloud->isOrganized()) {
+			LERROR("THE INPUTCOUD IS NOT ORGANIZED");
+		}
+		else {
+			LERROR("THE CLOUD IS ORGANIZED");
+		}
 
 	}
+
 }
 }

@@ -22,46 +22,30 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE___MESH_GENERATION___H__
-#define __OPENSPACE___MESH_GENERATION___H__
+#ifndef __OPENSPACE___MEDIAN_POINTCLOUD_FILTERING___H__
+#define __OPENSPACE___MEDIAN_POINTCLOUD_FILTERING___H__
 
-#include <ghoul/misc/dictionary.h>
+#include <modules/globebrowsing/tasks/pointcloudfilter.h>
 
-#include <modules/globebrowsing/tasks/imgreader.h>
-
-#include <vector>
-
-#include <pcl/TextureMesh.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-
-namespace {
-	const std::string _outputPath = "";
-}
+#include <pcl/filters/median_filter.h>
 
 namespace openspace {
 namespace globebrowsing {
-	class MeshGeneration {		
-	public:
-		struct PointCloudInfo {
-			int _lines;
-			int _cols;
-			int _bands;
-			int _bytes;
-			std::vector<double> _roverOrigin;
-		};
+class MedianPointCloudFilter : public PointCloudFilter {
+public:
+  MedianPointCloudFilter(const ghoul::Dictionary& dictionary);
 
-		static std::string correctPath(const std::string filename, std::string output_path);
+  virtual bool initialize();
 
-		static void generateMeshFromBinary(ghoul::Dictionary);
+  virtual bool filter(pcl::PointCloud<pcl::PointXYZ>::Ptr outputCloud);
 
-		static void writeTxtFile(const std::string filename, std::string output_path, ImgReader::PointCloudInfo mInfo);
+private:
+  int _windowSize = 7;
+  float _maxAllowedMovement = 0.02;
 
-		static void extractCoordinatesFromArray(pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud, std::vector<std::vector<float>> xyz, ImgReader::PointCloudInfo mInfo);
-	};
-
-
+  pcl::MedianFilter<pcl::PointXYZ> _mFilter;
+};
 }
 }
 
-#endif //__OPENSPACE___MESH_GENERATION___H__
+#endif //__OPENSPACE___MEDIAN_POINTCLOUD_FILTERING___H__

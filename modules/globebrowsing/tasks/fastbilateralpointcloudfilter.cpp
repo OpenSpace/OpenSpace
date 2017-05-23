@@ -22,46 +22,23 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE___MESH_GENERATION___H__
-#define __OPENSPACE___MESH_GENERATION___H__
-
-#include <ghoul/misc/dictionary.h>
-
-#include <modules/globebrowsing/tasks/imgreader.h>
-
-#include <vector>
-
-#include <pcl/TextureMesh.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-
-namespace {
-	const std::string _outputPath = "";
-}
+#include <modules/globebrowsing/tasks/fastbilateralpointcloudfilter.h>
 
 namespace openspace {
 namespace globebrowsing {
-	class MeshGeneration {		
-	public:
-		struct PointCloudInfo {
-			int _lines;
-			int _cols;
-			int _bands;
-			int _bytes;
-			std::vector<double> _roverOrigin;
-		};
+	FastBilateralPointCloudFilter::FastBilateralPointCloudFilter(const ghoul::Dictionary & dictionary)
+		: PointCloudFilter(dictionary) {
+		_fbFilter.setNumberOfThreads(_nrOfThreads);
+	}
 
-		static std::string correctPath(const std::string filename, std::string output_path);
+	bool FastBilateralPointCloudFilter::initialize() {
+		return true;
+	}
 
-		static void generateMeshFromBinary(ghoul::Dictionary);
-
-		static void writeTxtFile(const std::string filename, std::string output_path, ImgReader::PointCloudInfo mInfo);
-
-		static void extractCoordinatesFromArray(pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud, std::vector<std::vector<float>> xyz, ImgReader::PointCloudInfo mInfo);
-	};
-
-
+	bool FastBilateralPointCloudFilter::filter(pcl::PointCloud<pcl::PointXYZ>::Ptr outputCloud) {
+		_fbFilter.setInputCloud(_inputCloud);
+		_fbFilter.applyFilter(*outputCloud);
+		return true;
+	}
 }
 }
-
-#endif //__OPENSPACE___MESH_GENERATION___H__

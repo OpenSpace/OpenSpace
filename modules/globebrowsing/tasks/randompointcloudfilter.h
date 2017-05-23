@@ -22,46 +22,28 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE___MESH_GENERATION___H__
-#define __OPENSPACE___MESH_GENERATION___H__
+#ifndef __OPENSPACE___RANDOM_POINTCLOUD_FILTERING___H__
+#define __OPENSPACE___RANDOM_POINTCLOUD_FILTERING___H__
 
-#include <ghoul/misc/dictionary.h>
+#include <modules/globebrowsing/tasks/pointcloudfilter.h>
 
-#include <modules/globebrowsing/tasks/imgreader.h>
-
-#include <vector>
-
-#include <pcl/TextureMesh.h>
-#include <pcl/point_cloud.h>
+#include <pcl/filters/random_sample.h>
 #include <pcl/point_types.h>
-
-namespace {
-	const std::string _outputPath = "";
-}
 
 namespace openspace {
 namespace globebrowsing {
-	class MeshGeneration {		
-	public:
-		struct PointCloudInfo {
-			int _lines;
-			int _cols;
-			int _bands;
-			int _bytes;
-			std::vector<double> _roverOrigin;
-		};
+class RandomPointCloudFilter : public PointCloudFilter {
+public:
+	RandomPointCloudFilter(const ghoul::Dictionary& dictionary);
 
-		static std::string correctPath(const std::string filename, std::string output_path);
+	virtual bool initialize();
 
-		static void generateMeshFromBinary(ghoul::Dictionary);
+	virtual bool filter(pcl::PointCloud<pcl::PointXYZ>::Ptr outputCloud);
 
-		static void writeTxtFile(const std::string filename, std::string output_path, ImgReader::PointCloudInfo mInfo);
-
-		static void extractCoordinatesFromArray(pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud, std::vector<std::vector<float>> xyz, ImgReader::PointCloudInfo mInfo);
-	};
-
-
+private:
+	pcl::RandomSample<pcl::PointXYZ> _rFilter;
+};
 }
 }
 
-#endif //__OPENSPACE___MESH_GENERATION___H__
+#endif //__OPENSPACE___RANDOM_POINTCLOUD_FILTERING___H__
