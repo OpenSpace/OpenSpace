@@ -22,44 +22,34 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACE_MODEL_PROVIDER__H_
-#define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACE_MODEL_PROVIDER__H_
+#ifndef __OPENSPACE_MODULE_BASE___ASYNCMULTIMODELGEOMETRY___H__
+#define __OPENSPACE_MODULE_BASE___ASYNCMULTIMODELGEOMETRY___H__
 
-#include <modules/globebrowsing/cache/lrucache.h>
-#include <modules/globebrowsing/other/threadpool.h>
-#include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
-#include <modules/globebrowsing/models/subsitemodels.h>
-#include <modules/globebrowsing/models/subsite.h>
+#include <modules/base/rendering/modelgeometry.h>
 
 namespace openspace {
-namespace globebrowsing {
+namespace modelgeometry {
 
-class AsyncSurfaceModelProvider {
+class AsyncMultiModelGeometry : public ModelGeometry{
 public:
-	AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> pool1, std::shared_ptr<ThreadPool> pool2, Renderable* parent);
+	AsyncMultiModelGeometry(const ghoul::Dictionary& dictionary);
 
-	bool enqueueModelIO(const Subsite subsite, const int level);
-	
-	std::vector<std::shared_ptr<SubsiteModels>> getLoadedModels();
+	bool initialize(Renderable* parent) override;
+	void deinitialize() override;
 
-protected:
-	virtual bool satisfiesEnqueueCriteria(const uint64_t hashKey) const;
+	void uploadData();
+	void unmapBuffers();
 
 private:
-	ConcurrentJobManager<SubsiteModels> _diskToRamJobManager;
-	ConcurrentJobManager<SubsiteModels> _ramToGpuJobManager;
-
 	Renderable* _parent;
 
-	void enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels);
-	void unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels);
+	bool loadModel(const std::string& filename);
 
-	std::unordered_map <uint64_t, Subsite> _enqueuedModelRequests;
-
-	uint64_t hashKey(const std::string site, const std::string drive, const int level);
+	Vertex* _vertexBufferData;
+	int* _indexBufferData;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACEMODEL_PROVIDER__H_
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNCMULTIMODELGEOMETRY___H__

@@ -22,44 +22,34 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACE_MODEL_PROVIDER__H_
-#define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACE_MODEL_PROVIDER__H_
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING__SUBSITEINITIALIZATIONJOB__H_
+#define __OPENSPACE_MODULE_GLOBEBROWSING__SUBSITEINITIALIZATIONJOB__H_
 
-#include <modules/globebrowsing/cache/lrucache.h>
-#include <modules/globebrowsing/other/threadpool.h>
-#include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
+#include <modules/globebrowsing/tile/loadjob/loadjob2.h>
+#include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/models/subsitemodels.h>
-#include <modules/globebrowsing/models/subsite.h>
+
+#include <modules/base/rendering/asyncmultimodelgeometry.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-class AsyncSurfaceModelProvider {
-public:
-	AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> pool1, std::shared_ptr<ThreadPool> pool2, Renderable* parent);
+struct SubsiteInitializationJob : LoadJob2 {
+	SubsiteInitializationJob(const std::shared_ptr<SubsiteModels> subsiteModels)
+		: _subsiteModels(subsiteModels)
+	{}
 
-	bool enqueueModelIO(const Subsite subsite, const int level);
-	
-	std::vector<std::shared_ptr<SubsiteModels>> getLoadedModels();
+	virtual ~SubsiteInitializationJob() = default;
+
+	virtual void execute() override;
+
+	virtual std::shared_ptr<SubsiteModels> product() const override;
 
 protected:
-	virtual bool satisfiesEnqueueCriteria(const uint64_t hashKey) const;
-
-private:
-	ConcurrentJobManager<SubsiteModels> _diskToRamJobManager;
-	ConcurrentJobManager<SubsiteModels> _ramToGpuJobManager;
-
-	Renderable* _parent;
-
-	void enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels);
-	void unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels);
-
-	std::unordered_map <uint64_t, Subsite> _enqueuedModelRequests;
-
-	uint64_t hashKey(const std::string site, const std::string drive, const int level);
+	std::shared_ptr<SubsiteModels> _subsiteModels;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+} // globebrowsing
+} // openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACEMODEL_PROVIDER__H_
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING__SUBSITEINITIALIZATIONJOB__H_

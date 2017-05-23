@@ -22,44 +22,24 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACE_MODEL_PROVIDER__H_
-#define __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACE_MODEL_PROVIDER__H_
+#include <modules/globebrowsing/models/job/subsiteinitializationjob.h>
 
-#include <modules/globebrowsing/cache/lrucache.h>
-#include <modules/globebrowsing/other/threadpool.h>
-#include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
-#include <modules/globebrowsing/models/subsitemodels.h>
-#include <modules/globebrowsing/models/subsite.h>
+namespace {
+	const std::string _loggerCat = "SubsiteInitializationJob";
+}
 
 namespace openspace {
 namespace globebrowsing {
 
-class AsyncSurfaceModelProvider {
-public:
-	AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> pool1, std::shared_ptr<ThreadPool> pool2, Renderable* parent);
+void SubsiteInitializationJob::execute() {
+	for (auto model : _subsiteModels->models) {
+		model->geometry->uploadData();
+	}
+}
 
-	bool enqueueModelIO(const Subsite subsite, const int level);
-	
-	std::vector<std::shared_ptr<SubsiteModels>> getLoadedModels();
+std::shared_ptr<SubsiteModels> SubsiteInitializationJob::product() const {
+	return _subsiteModels;
+}
 
-protected:
-	virtual bool satisfiesEnqueueCriteria(const uint64_t hashKey) const;
-
-private:
-	ConcurrentJobManager<SubsiteModels> _diskToRamJobManager;
-	ConcurrentJobManager<SubsiteModels> _ramToGpuJobManager;
-
-	Renderable* _parent;
-
-	void enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels);
-	void unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels);
-
-	std::unordered_map <uint64_t, Subsite> _enqueuedModelRequests;
-
-	uint64_t hashKey(const std::string site, const std::string drive, const int level);
-};
-
-} // namespace globebrowsing
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_SURFACEMODEL_PROVIDER__H_
+} // globebrowsing
+} // openspace

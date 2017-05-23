@@ -26,7 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___MODEL__H_
 
 #include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/base/rendering/modelgeometry.h>
+#include <modules/base/rendering/asyncmultimodelgeometry.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <memory>
 
@@ -34,7 +34,7 @@ namespace openspace {
 namespace globebrowsing {
 
 struct Model {
-	std::unique_ptr<modelgeometry::ModelGeometry> geometry;
+	std::shared_ptr<modelgeometry::AsyncMultiModelGeometry> geometry;
 	std::shared_ptr<ghoul::opengl::Texture> texture;
 };
 

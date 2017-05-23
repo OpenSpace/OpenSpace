@@ -23,12 +23,12 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
+#include <modules/base/rendering/multimodelgeometry.h>
 #include <ghoul/io/texture/texturereader.h>
 
 namespace {
 	const std::string _loggerCat = "SurfaceModelLoadJob";
 	const char* keyPathToTexture = "PathToTexture";
-	const char* keyMultiModelGeometry = "MultiModelGeometry";
 	const char* keyGeometryFile = "GeometryFile";
 	const char* keyType = "Type";
 }
@@ -41,7 +41,7 @@ void SurfaceModelLoadJob::execute() {
 	std::string pathToGeometryFolder = _subsite.pathToGeometryFolder + "level" + levelString + "//" + "site" + _subsite.site +
 		"//" + "drive" + _subsite.drive + "//";
 	std::string pathToTextureFolder = _subsite.pathToTextureFolder;
-	std::string multiModelGeometry = "MultiModelGeometry";
+	std::string roverSurfaceModelGeometry = "AsyncMultiModelGeometry";
 
 	_subsiteModels->site = _subsite.site;
 	_subsiteModels->drive = _subsite.drive;
@@ -52,14 +52,15 @@ void SurfaceModelLoadJob::execute() {
 	for (auto fileName : _subsite.fileNames) {
 		// Set up a dictionary to load the model
 		ghoul::Dictionary dictionary;
+		ghoul::Dictionary dictionary2;
 		std::string pathToGeometry = pathToGeometryFolder + "//" + fileName + ".obj";
 
 		dictionary.setValue(keyGeometryFile, pathToGeometry);
-		dictionary.setValue(keyType, multiModelGeometry);
+		dictionary.setValue(keyType, roverSurfaceModelGeometry);
 
 		// Create modelgeometry from dictionary
 		Model model;
-		model.geometry = std::move(modelgeometry::ModelGeometry::createFromDictionary(dictionary));
+		model.geometry = std::make_shared<modelgeometry::AsyncMultiModelGeometry>(dictionary);
 
 		// Load the corresponding texture;
 		std::string tempFileName = fileName;
@@ -72,7 +73,7 @@ void SurfaceModelLoadJob::execute() {
 			"//" + "drive" + _subsite.drive + "//" + tempFileName + textureFormat;
 		model.texture = std::move(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
 
-		_subsiteModels->models.push_back(std::make_shared<Model>(std::move(model)));
+		_subsiteModels->models.push_back(std::make_shared<Model>(model));
 	}
 }
 

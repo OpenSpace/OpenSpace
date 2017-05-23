@@ -57,6 +57,8 @@ private:
 	uint64_t hashKey(const std::string site, const std::string drive, const int level);
 	
 	Renderable* _parent;
+
+	Vertex* _vertexBufferData = nullptr;
 };
 
 } // namespace globebrowsing

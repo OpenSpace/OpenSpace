@@ -30,14 +30,11 @@
 #include <modules/globebrowsing/models/subsitemodels.h>
 #include <modules/globebrowsing/models/subsite.h>
 #include <ghoul/misc/dictionary.h>
-
-#include <modules/base/rendering/modelgeometry.h>
+#include <modules/base/rendering/asyncmultimodelgeometry.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-class modelgeometry::ModelGeometry;
-	
 struct SurfaceModelLoadJob : LoadJob2 {
 	SurfaceModelLoadJob(const Subsite& subsite, const int level)
 		: _subsite(subsite)
@@ -59,6 +56,7 @@ protected:
 
 private:
 	std::string textureFormat(const std::string site);
+	std::shared_ptr<modelgeometry::AsyncMultiModelGeometry> mm;
 };
 
 } // globebrowsing

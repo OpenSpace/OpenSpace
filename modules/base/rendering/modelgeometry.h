@@ -34,6 +34,12 @@ namespace ghoul { class Dictionary; }
 namespace openspace {
 namespace documentation {  struct Documentation; }
 
+struct Vertex {
+	GLfloat location[4];
+	GLfloat tex[2];
+	GLfloat normal[3];
+};
+
 namespace modelgeometry {
 
 class ModelGeometry : public properties::PropertyOwner {
@@ -41,12 +47,6 @@ public:
     static std::unique_ptr<ModelGeometry> createFromDictionary(
         const ghoul::Dictionary& dictionary
     );
-
-    struct Vertex {
-        GLfloat location[4];
-        GLfloat tex[2];
-        GLfloat normal[3];
-    };
 
     ModelGeometry(const ghoul::Dictionary& dictionary);
     virtual ~ModelGeometry();

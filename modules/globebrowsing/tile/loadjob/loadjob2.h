@@ -26,16 +26,12 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING__LOADJOB2__H_
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
-#include <modules/base/rendering/modelgeometry.h>
 #include <modules/globebrowsing/models/subsitemodels.h>
-
 
 #include <memory>
 
 namespace openspace {
 namespace globebrowsing {
-
-	class modelgeometry::ModelGeometry;
 
 struct LoadJob2 : public Job<SubsiteModels> {
 	virtual void execute() = 0;
