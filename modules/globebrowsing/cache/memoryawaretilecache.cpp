@@ -33,6 +33,7 @@
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 
 #include <numeric>
+#include <algorithm>
 
 namespace openspace {
 namespace globebrowsing {
@@ -165,27 +166,28 @@ void MemoryAwareTileCache::resetTextureContainerSize(size_t numTexturesPerTextur
 }
 
 bool MemoryAwareTileCache::exist(ProviderTileKey key) const {
-    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
-        it != _textureContainerMap.cend();
-        it++)
-    {
-        if(it->second.second->exist(key)) {
-            return true;
-        }
-    }
-    return false;
+    TextureContainerMap::const_iterator result =
+        std::find_if(_textureContainerMap.cbegin(), _textureContainerMap.cend(),
+            [&](const std::pair<const TileTextureInitData::HashKey,
+                    TextureContainerTileCache>& p){
+                return p.second.second->exist(key);
+            });
+    return result != _textureContainerMap.cend();
 }
 
 Tile MemoryAwareTileCache::get(ProviderTileKey key) {
-    for (TextureContainerMap::iterator it = _textureContainerMap.begin();
-        it != _textureContainerMap.end();
-        it++)
-    {
-        if(it->second.second->exist(key)) {
-            return it->second.second->get(key);
-        }
+    TextureContainerMap::const_iterator it =
+        std::find_if(_textureContainerMap.cbegin(), _textureContainerMap.cend(),
+            [&](const std::pair<const TileTextureInitData::HashKey,
+                    TextureContainerTileCache>& p){
+                return p.second.second->exist(key);
+            });
+    if (it != _textureContainerMap.cend()) {
+        return it->second.second->get(key);
     }
-    ghoul_assert(false, "Tile did not exsist in cache. Call 'exist()' first");
+    else {
+        return Tile::TileUnavailable;
+    }
 }
 
 ghoul::opengl::Texture* MemoryAwareTileCache::getTexture(
@@ -266,29 +268,31 @@ void MemoryAwareTileCache::update() {
 }
 
 size_t MemoryAwareTileCache::getGPUAllocatedDataSize() const {
-    size_t dataSize = 0;
-    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
-            it != _textureContainerMap.cend(); it++)
-    {
-        const TextureContainer& textureContainer = *it->second.first;
-        size_t bytesPerTexture = textureContainer.tileTextureInitData().totalNumBytes();
-        dataSize += bytesPerTexture * textureContainer.size();
-    }
-    return dataSize;
+    return std::accumulate(
+        _textureContainerMap.cbegin(),
+        _textureContainerMap.cend(), 0, [](size_t s, const std::pair<const TileTextureInitData::HashKey,
+        TextureContainerTileCache>& p){
+            const TextureContainer& textureContainer = *p.second.first;
+            size_t bytesPerTexture = textureContainer.tileTextureInitData().totalNumBytes();
+            return s + bytesPerTexture * textureContainer.size();
+        }
+    );
 }
 
 size_t MemoryAwareTileCache::getCPUAllocatedDataSize() const {
-    size_t dataSize = 0;
-    for (TextureContainerMap::const_iterator it = _textureContainerMap.cbegin();
-            it != _textureContainerMap.cend(); it++)
-    {
-        const TextureContainer& textureContainer = *it->second.first;
-        const TileTextureInitData& initData = textureContainer.tileTextureInitData();
-        if (initData.shouldAllocateDataOnCPU()) {
-            size_t bytesPerTexture = initData.totalNumBytes();
-            dataSize += bytesPerTexture * textureContainer.size();
+    size_t dataSize = std::accumulate(
+        _textureContainerMap.cbegin(),
+        _textureContainerMap.cend(), 0, [](size_t s, const std::pair<const TileTextureInitData::HashKey,
+        TextureContainerTileCache>& p){
+            const TextureContainer& textureContainer = *p.second.first;
+            const TileTextureInitData& initData = textureContainer.tileTextureInitData();
+            if (initData.shouldAllocateDataOnCPU()) {
+                size_t bytesPerTexture = initData.totalNumBytes();
+                return s + bytesPerTexture * textureContainer.size();
+            }
+            return s;
         }
-    }
+    );
     return dataSize + _numTextureBytesAllocatedOnCPU;
 }
 

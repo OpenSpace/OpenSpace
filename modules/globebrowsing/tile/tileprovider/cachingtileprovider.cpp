@@ -149,14 +149,13 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
 
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
-    if (_tileCache->exist(key)) {
-        return _tileCache->get(key);
-    }
-    else {
+    Tile tile = _tileCache->get(key);
+
+    if (tile.texture() == nullptr) {
         _asyncTextureDataProvider->enqueueTileIO(tileIndex);
     }
-        
-    return Tile::TileUnavailable;
+
+    return tile;
 }
 
 float CachingTileProvider::noDataValueAsFloat() {
@@ -167,12 +166,8 @@ void CachingTileProvider::initTexturesFromLoadedData() {
     std::shared_ptr<RawTile> rawTile = _asyncTextureDataProvider->popFinishedRawTile();
     if (rawTile) {
         cache::ProviderTileKey key = { rawTile->tileIndex, uniqueIdentifier() };
-        if (!_tileCache->exist(key)) {
-            _tileCache->createTileAndPut(key, rawTile);
-        }
-        else {
-            ghoul_assert(false, "Tile is already existing in cache.");
-        }
+        ghoul_assert(!_tileCache->exist(key), "Tile must not be existing in cache");
+        _tileCache->createTileAndPut(key, rawTile);
     }
 }
 
@@ -184,11 +179,7 @@ Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
 
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
-    if (_tileCache->exist(key)) {
-        return _tileCache->get(key).status();
-    }
-
-    return Tile::Status::Unavailable;
+    return _tileCache->get(key).status();
 }
 
 TileDepthTransform CachingTileProvider::depthTransform() {

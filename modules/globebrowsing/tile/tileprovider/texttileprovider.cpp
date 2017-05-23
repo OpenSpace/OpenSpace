@@ -63,14 +63,13 @@ TextTileProvider::~TextTileProvider() {
 Tile TextTileProvider::getTile(const TileIndex& tileIndex) {
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
-    if (_tileCache->exist(key)) {
-        return _tileCache->get(key);
-    }
-    else {
-        Tile tile = TextTileProvider::createChunkIndexTile(tileIndex);
+    Tile tile = _tileCache->get(key);
+
+    if (tile.texture() == nullptr) {
+        tile = TextTileProvider::createChunkIndexTile(tileIndex);
         _tileCache->put(key, _initData.hashKey(), tile);
-        return tile;
     }
+    return tile;
 }
 
 Tile::Status TextTileProvider::getTileStatus(const TileIndex&) {
