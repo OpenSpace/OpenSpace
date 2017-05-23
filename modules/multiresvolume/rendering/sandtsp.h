@@ -34,6 +34,7 @@ public:
     SandTSP(const std::string& filename);
     ~SandTSP();
 
+    bool construct();
     bool calculateSpatialError();
     bool calculateTemporalError();
 

@@ -34,6 +34,7 @@ public:
     ShenTSP(const std::string& filename);
     ~ShenTSP();
 
+    bool construct();
     bool calculateSpatialError();
     bool calculateTemporalError();
 

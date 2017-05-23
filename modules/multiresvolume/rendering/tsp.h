@@ -68,7 +68,7 @@ public:
     bool readHeader();
     bool readCache();
     bool writeCache();
-    bool construct();
+    virtual bool construct();
     bool initalizeSSO();
 
     const Header& header() const;

@@ -49,6 +49,11 @@ ShenTSP::~ShenTSP() {
         _file.close();
 }
 
+bool ShenTSP::construct() {
+    LDEBUG("Constructing TSP...");
+    return TSP::construct();
+}
+
 bool ShenTSP::calculateSpatialError() {
     unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 

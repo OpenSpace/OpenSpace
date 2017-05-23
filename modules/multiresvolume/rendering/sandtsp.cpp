@@ -49,6 +49,11 @@ SandTSP::~SandTSP() {
         _file.close();
 }
 
+bool SandTSP::construct() {
+    LDEBUG("Constructing TSP...");
+    return TSP::construct();
+}
+
 bool SandTSP::calculateSpatialError() {
     unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 

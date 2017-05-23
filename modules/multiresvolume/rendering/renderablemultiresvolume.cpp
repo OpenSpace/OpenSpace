@@ -42,8 +42,9 @@
 #include <ghoul/opengl/texture.h>
 
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <modules/multiresvolume/rendering/sandtsp.h>
+#include <modules/multiresvolume/rendering/shentsp.h>
 #include <modules/multiresvolume/rendering/atlasmanager.h>
-#include <modules/multiresvolume/rendering/shenbrickselector.h>
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 #include <modules/multiresvolume/rendering/simpletfbrickselector.h>
 #include <modules/multiresvolume/rendering/localtfbrickselector.h>
@@ -216,7 +217,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
 
     //setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)*pow(10,_w)));
 
-    _tsp = std::make_shared<TSP>(_filename);
+    _tsp = std::make_shared<SandTSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
     _selectorName = TYPE_TF;
