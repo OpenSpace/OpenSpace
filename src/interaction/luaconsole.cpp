@@ -663,7 +663,7 @@ void LuaConsole::render() {
 
     size_t nChoppedCharsBeginning = 0, nChoppedCharsEnd = 0;
 
-    size_t inputPositionFromEnd = currentCommand.size() - _inputPosition;
+    const size_t inputPositionFromEnd = currentCommand.size() - _inputPosition;
     while (true) {
         // Compute the current width of the string and console prefix.
         const float currentWidth = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
@@ -679,13 +679,13 @@ void LuaConsole::render() {
         }
 
         // Since the overflow is positive, at least one character needs to be removed.
-        size_t nCharsOverflow = std::min(
+        const size_t nCharsOverflow = std::min(
             std::max(1.f, overflow / _font->glyph('m')->width()),
             static_cast<float>(currentCommand.size())
         );
 
         // Do not hide the cursor and `NVisibleCharsAfterCursor` more characters in the end.
-        size_t maxAdditionalCharsToChopEnd = std::max(
+        const size_t maxAdditionalCharsToChopEnd = std::max(
             0,
             static_cast<int>(inputPositionFromEnd) -
                 (NVisibleCharsAfterCursor + 1) -
@@ -693,14 +693,14 @@ void LuaConsole::render() {
         );
 
         // Do not hide the cursor in the beginning.
-        size_t maxAdditionalCharsToChopBeginning = std::max(
+        const size_t maxAdditionalCharsToChopBeginning = std::max(
             0,
             static_cast<int>(_inputPosition) - 1 - static_cast<int>(nChoppedCharsBeginning)
         );
 
         // Prioritize chopping in the end of the string.
-        size_t nCharsToChopEnd = std::min(nCharsOverflow, maxAdditionalCharsToChopEnd);
-        size_t nCharsToChopBeginning = std::min(
+        const size_t nCharsToChopEnd = std::min(nCharsOverflow, maxAdditionalCharsToChopEnd);
+        const size_t nCharsToChopBeginning = std::min(
             nCharsOverflow - nCharsToChopEnd,
             maxAdditionalCharsToChopBeginning
         );
@@ -708,7 +708,7 @@ void LuaConsole::render() {
         nChoppedCharsBeginning += nCharsToChopBeginning;
         nChoppedCharsEnd += nCharsToChopEnd;
 
-        size_t displayLength =
+        const size_t displayLength =
             _commands.at(_activeCommand).size() -
             nChoppedCharsBeginning - nChoppedCharsEnd;
 
@@ -819,7 +819,7 @@ std::string LuaConsole::sanitizeInput(std::string str) {
     str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
 
     // Replace newlines with spaces.
-    auto replace = [](char c) {
+    const std::function<char(char)> replace = [](char c) {
         return c == '\n' ? ' ' : c;
     };
     std::transform(str.begin(), str.end(), str.begin(), replace);
