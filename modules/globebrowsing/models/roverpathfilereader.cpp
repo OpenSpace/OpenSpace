@@ -41,7 +41,7 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 	
-std::vector<Subsite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictionary dictionary) {
+std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractAllSubsites(const ghoul::Dictionary dictionary) {
 	std::string roverLocationFilePath;
 	if (!dictionary.getValue(keyRoverLocationPath, roverLocationFilePath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -65,7 +65,7 @@ std::vector<Subsite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictio
 	int currentSite = 0;
 	double siteLat;
 	double siteLon;
-	std::vector<Subsite> subsites;
+	std::vector<std::shared_ptr<Subsite>> subsites;
 
 	while ((poFeature = poLayer->GetNextFeature()) != NULL) {
 
@@ -85,15 +85,15 @@ std::vector<Subsite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictio
 			}
 
 			std::string type = "site";
-			Subsite subsite;
-			subsite.site = convertString(site, type);
+			std::shared_ptr<Subsite> subsite = std::make_shared<Subsite>();
+			subsite->site = convertString(site, type);
 			type = "drive";
-			subsite.drive = convertString(drive, type);
-			subsite.lat = lat;
-			subsite.lon = lon;
-			subsite.frame = frame;
-			subsite.siteLat = siteLat;
-			subsite.siteLon = siteLon;
+			subsite->drive = convertString(drive, type);
+			subsite->lat = lat;
+			subsite->lon = lon;
+			subsite->frame = frame;
+			subsite->siteLat = siteLat;
+			subsite->siteLon = siteLon;
 
 			// All features with the the frame is "Site" will have "Drive" that is -1. 
 			// The feature right after each site frame has the same coordinates as the site frame.
@@ -109,7 +109,7 @@ std::vector<Subsite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictio
 	return subsites;
 }
 
-std::vector<Subsite> RoverPathFileReader::extractSubsitesWithModels(const ghoul::Dictionary dictionary) {
+std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithModels(const ghoul::Dictionary dictionary) {
 
 	// Make sure the dictionary includes the necessary keys
 	std::string roverLocationFilePath;
@@ -131,17 +131,17 @@ std::vector<Subsite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 	// Extract all subsites in the data set given the path to the file
 	ghoul::Dictionary tempDictionary;
 	tempDictionary.setValue(keyRoverLocationPath, roverLocationFilePath);
-	std::vector<Subsite> allSubsites = extractAllSubsites(tempDictionary);
+	std::vector<std::shared_ptr<Subsite>> allSubsites = extractAllSubsites(tempDictionary);
 
-	std::vector<Subsite> subsitesWithModels;
+	std::vector<std::shared_ptr<Subsite>> subsitesWithModels;
 	for (auto subsite : allSubsites) {
 		std::string pathToDriveFolderLevel1;
 		std::string pathToDriveFolderLevel2;
 		std::string pathToDriveFolderLevel3;
 
 		// Convert the site and drive string to match the folder structure
-		std::string site = convertString(subsite.site, "site");
-		std::string drive = convertString(subsite.drive, "drive");
+		std::string site = convertString(subsite->site, "site");
+		std::string drive = convertString(subsite->drive, "drive");
 		pathToDriveFolderLevel1 = surfaceModelFilePath + "/level1/" + "site" + site + "/" + "drive" + drive;
 		pathToDriveFolderLevel2 = surfaceModelFilePath + "/level2/" + "site" + site + "/" + "drive" + drive;
 		pathToDriveFolderLevel3 = surfaceModelFilePath + "/level3/" + "site" + site + "/" + "drive" + drive;
@@ -157,18 +157,18 @@ std::vector<Subsite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 		// TODO: refactor like hell!!!
 
 		if (pathToLevel1Exists)
-			subsite.availableLevels.push_back(1);
+			subsite->availableLevels.push_back(1);
 
 		if (pathToLevel2Exists)
-			subsite.availableLevels.push_back(2);
+			subsite->availableLevels.push_back(2);
 
 		if (pathToLevel3Exists)
-			subsite.availableLevels.push_back(3);
+			subsite->availableLevels.push_back(3);
 
 		bool modelExists = false;
 		if(pathToLevel1Exists) {
 			for (auto controlSubsite : subsitesWithModels) {
-				if (subsite.site == controlSubsite.site && subsite.drive == controlSubsite.drive) {
+				if (subsite->site == controlSubsite->site && subsite->drive == controlSubsite->drive) {
 					modelExists = true;
 					break;
 				}
@@ -177,9 +177,9 @@ std::vector<Subsite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 				std::string pathToFilenamesTextFile = pathToDriveFolderLevel1 + "/filenames.txt";
 				std::vector<std::string> fileNames = extractFileNames(pathToFilenamesTextFile);
 
-				subsite.fileNames = fileNames;
-				subsite.pathToTextureFolder = absPathToTextures;
-				subsite.pathToGeometryFolder = absPathToTModels;
+				subsite->fileNames = fileNames;
+				subsite->pathToTextureFolder = absPathToTextures;
+				subsite->pathToGeometryFolder = absPathToTModels;
 				subsitesWithModels.push_back(subsite);
 			}
 		}

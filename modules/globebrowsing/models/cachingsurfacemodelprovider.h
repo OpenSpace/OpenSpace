@@ -42,7 +42,7 @@ class CachingSurfaceModelProvider {
 public:
 	CachingSurfaceModelProvider(Renderable* parent);
 
-	std::vector<std::shared_ptr<SubsiteModels>> getModels(const std::vector<Subsite> Subsites, const int level);
+	std::vector<std::shared_ptr<SubsiteModels>> getModels(const std::vector<std::shared_ptr<Subsite>> Subsites, const int level);
 
 	void update(Renderable* parent);
 	void reset();

@@ -36,7 +36,7 @@ namespace openspace {
 namespace globebrowsing {
 
 struct SurfaceModelLoadJob : LoadJob2 {
-	SurfaceModelLoadJob(const Subsite& subsite, const int level)
+	SurfaceModelLoadJob(const std::shared_ptr<Subsite> subsite, const int level)
 		: _subsite(subsite)
 		, _level(level)
 	{
@@ -50,7 +50,7 @@ struct SurfaceModelLoadJob : LoadJob2 {
 	virtual std::shared_ptr<SubsiteModels> product() const override;
 
 protected:
-	Subsite _subsite;
+	std::shared_ptr<Subsite> _subsite;
 	int _level;
 	std::shared_ptr<SubsiteModels> _subsiteModels;
 

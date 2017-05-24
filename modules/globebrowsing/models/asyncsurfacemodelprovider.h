@@ -38,7 +38,7 @@ class AsyncSurfaceModelProvider {
 public:
 	AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> pool1, std::shared_ptr<ThreadPool> pool2, Renderable* parent);
 
-	bool enqueueModelIO(const Subsite subsite, const int level);
+	bool enqueueModelIO(const std::shared_ptr<Subsite> subsite, const int level);
 	
 	std::vector<std::shared_ptr<SubsiteModels>> getLoadedModels();
 
@@ -54,7 +54,7 @@ private:
 	void enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels);
 	void unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels);
 
-	std::unordered_map <uint64_t, Subsite> _enqueuedModelRequests;
+	std::unordered_map <uint64_t, std::shared_ptr<Subsite>> _enqueuedModelRequests;
 
 	uint64_t hashKey(const std::string site, const std::string drive, const int level);
 };

@@ -32,8 +32,8 @@ namespace openspace {
 namespace globebrowsing {
 class RoverPathFileReader {
 public:
-	static std::vector<Subsite> extractAllSubsites(const ghoul::Dictionary dictionary);
-	static std::vector<Subsite> extractSubsitesWithModels(const ghoul::Dictionary dictionary);
+	static std::vector<std::shared_ptr<Subsite>> extractAllSubsites(const ghoul::Dictionary dictionary);
+	static std::vector<std::shared_ptr<Subsite>> extractSubsitesWithModels(const ghoul::Dictionary dictionary);
 
 private:
 	static std::string RoverPathFileReader::convertString(const std::string sitenr, const std::string type);

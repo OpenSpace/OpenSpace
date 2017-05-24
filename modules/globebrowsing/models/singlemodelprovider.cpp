@@ -36,53 +36,53 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-	SingleModelProvider::SingleModelProvider(const ghoul::Dictionary& dictionary)
-		: ModelProvider(dictionary) {
-	}
+SingleModelProvider::SingleModelProvider(const ghoul::Dictionary& dictionary)
+	: ModelProvider(dictionary) {
+}
 
-	std::vector<Subsite> SingleModelProvider::calculate(const std::vector<std::vector<Subsite>> subsites, const RenderData& data) {
-		std::vector<Subsite> mostModelsInsideRadius;
-		std::vector<Subsite> subsitesInsideRadius;
-		float radius = 10;
-		Subsite smallest;
+std::vector<std::shared_ptr<Subsite>> SingleModelProvider::calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites, const RenderData& data) {
+	std::vector<std::shared_ptr<Subsite>> mostModelsInsideRadius;
+	std::vector<std::shared_ptr<Subsite>> subsitesInsideRadius;
+	float radius = 10;
+	std::shared_ptr<Subsite> smallest = std::make_shared<Subsite>();
 
-		SceneGraphNode* _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
-		RenderableGlobe* rg = (RenderableGlobe*)_parent->renderable();
+	SceneGraphNode* _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
+	RenderableGlobe* rg = (RenderableGlobe*)_parent->renderable();
 		
-		double ellipsoidShrinkTerm = rg->interactionDepthBelowEllipsoid();
-		glm::dvec3 center = _parent->worldPosition();
-		glm::dmat4 globeModelTransform = rg->modelTransform();
-		glm::dmat4 globeModelInverseTransform = rg->inverseModelTransform();
-		glm::dvec3 cameraPos = data.camera.positionVec3();
-		glm::dvec4 cameraPositionModelSpace = globeModelInverseTransform * glm::dvec4(cameraPos, 1.0);
-		glm::dvec3 cameraPositionProjected = rg->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
+	double ellipsoidShrinkTerm = rg->interactionDepthBelowEllipsoid();
+	glm::dvec3 center = _parent->worldPosition();
+	glm::dmat4 globeModelTransform = rg->modelTransform();
+	glm::dmat4 globeModelInverseTransform = rg->inverseModelTransform();
+	glm::dvec3 cameraPos = data.camera.positionVec3();
+	glm::dvec4 cameraPositionModelSpace = globeModelInverseTransform * glm::dvec4(cameraPos, 1.0);
+	glm::dvec3 cameraPositionProjected = rg->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
 		
-		for (auto s : subsites) {
-			for (auto s1 : s) {
-				Geodetic2 coord = Geodetic2{ s1.lat, s1.lon } / 180.0 * glm::pi<double>();
-				glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ coord, 0 });
-				if (glm::distance(cameraPositionProjected, temp) < radius) {
-					subsitesInsideRadius.push_back(s1);
-				}
+	for (auto s : subsites) {
+		for (auto s1 : s) {
+			Geodetic2 coord = Geodetic2{ s1->lat, s1->lon } / 180.0 * glm::pi<double>();
+			glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ coord, 0 });
+			if (glm::distance(cameraPositionProjected, temp) < radius) {
+				subsitesInsideRadius.push_back(s1);
 			}
 		}
-		int maxModels = 0;
-		for (auto s : subsitesInsideRadius) {
-			int temp = s.fileNames.size();
-			if (temp > maxModels) {
-				maxModels = temp;
-				smallest = s;
-			}
+	}
+	int maxModels = 0;
+	for (auto s : subsitesInsideRadius) {
+		int temp = s->fileNames.size();
+		if (temp > maxModels) {
+			maxModels = temp;
+			smallest = s;
 		}
-
-		if (smallest.site != "" && smallest.drive != "") {
-			mostModelsInsideRadius.push_back(smallest);
-		}
-		return mostModelsInsideRadius;
 	}
 
-	bool SingleModelProvider::initialize() {
-		return true;
+	if (smallest->site != "" && smallest->drive != "") {
+		mostModelsInsideRadius.push_back(smallest);
 	}
+	return mostModelsInsideRadius;
+}
+
+bool SingleModelProvider::initialize() {
+	return true;
+}
 }
 }

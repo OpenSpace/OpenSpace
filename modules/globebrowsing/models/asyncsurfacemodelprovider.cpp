@@ -41,12 +41,12 @@ AsyncSurfaceModelProvider::AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool>
 	, _parent(parent)
 {}
 
-bool AsyncSurfaceModelProvider::enqueueModelIO(const Subsite subsite, const int level) {
-	if (satisfiesEnqueueCriteria(subsite.hashKey(level))) {
+bool AsyncSurfaceModelProvider::enqueueModelIO(const std::shared_ptr<Subsite> subsite, const int level) {
+	if (satisfiesEnqueueCriteria(subsite->hashKey(level))) {
 		auto job = std::make_shared<SurfaceModelLoadJob>(subsite, level);
 		_diskToRamJobManager.enqueueJob(job);
 
-		_enqueuedModelRequests[subsite.hashKey(level)] = subsite;
+		_enqueuedModelRequests[subsite->hashKey(level)] = subsite;
 
 		return true;
 	}

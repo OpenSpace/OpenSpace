@@ -36,11 +36,12 @@ public:
 
 	ModelProvider(const ghoul::Dictionary& dictionary);
 
-	virtual std::vector<Subsite> calculate(const std::vector<std::vector<Subsite>> subsites, const RenderData& data) = 0;
+	virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites, const RenderData& data) = 0;
 
 	virtual bool initialize() = 0;
 };
-}
-}
+
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif //__OPENSPACE_MODULE_GLOBEBROWSING___MODEL_PROVIDER___H__

@@ -45,7 +45,7 @@ CachingSurfaceModelProvider::CachingSurfaceModelProvider(Renderable* parent)
 	_modelCache = std::make_shared<ModelCache>(static_cast<size_t>(cacheSize));
 }
 
-std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getModels(const std::vector<Subsite> Subsites,
+std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getModels(const std::vector<std::shared_ptr<Subsite>> Subsites,
 	const int level) {
 
 	// Check if the chunk is already in the cache. If it is in the cache, loop through the corresponding vector
@@ -54,7 +54,7 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfSubsiteModels;
 	for (auto subsite : Subsites) {
 		bool requestedExistsInCache = true;
-		uint64_t key = hashKey(subsite.site, subsite.drive, level);
+		uint64_t key = hashKey(subsite->site, subsite->drive, level);
 		if (_modelCache->exist(key)) {
 			vectorOfSubsiteModels.push_back(_modelCache->get(key));
 		}
@@ -63,9 +63,9 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 			
 			// If the cache holds the correct models but with lower resultion than requested,
 			// return highest available resolution.
-			std::vector<int> levelsAbove = getLevelsAbove(subsite.availableLevels, level);
+			std::vector<int> levelsAbove = getLevelsAbove(subsite->availableLevels, level);
 			for (int i = levelsAbove.size() + 1; i-- > 1; ) {
-				uint64_t keyLowerLevel = hashKey(subsite.site, subsite.drive, i);
+				uint64_t keyLowerLevel = hashKey(subsite->site, subsite->drive, i);
 				if (_modelCache->exist(keyLowerLevel)) {
 					vectorOfSubsiteModels.push_back(_modelCache->get(keyLowerLevel));
 					break;

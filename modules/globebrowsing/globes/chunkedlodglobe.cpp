@@ -113,7 +113,7 @@ std::shared_ptr<LayerManager> ChunkedLodGlobe::layerManager() const {
     return _layerManager;
 }
 
-void ChunkedLodGlobe::addSites(const std::vector<Subsite> subSites) {
+void ChunkedLodGlobe::addSites(const std::vector<std::shared_ptr<Subsite>> subSites) {
 	_leftRoot->addSites(subSites);
 	_rightRoot->addSites(subSites);
 }
@@ -347,7 +347,7 @@ void ChunkedLodGlobe::update(const UpdateData& data) {
     _renderer->update();
 }
 
-std::vector<std::vector<Subsite>> ChunkedLodGlobe::subsites() {
+std::vector<std::vector<std::shared_ptr<Subsite>>> ChunkedLodGlobe::subsites() {
 	return _subsites;
 }
     

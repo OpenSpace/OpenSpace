@@ -81,6 +81,7 @@ namespace globebrowsing {
 
 	_multiModelGeometry = "MultiModelGeometry";
 
+	// Save abs path to the models and texture folders
 	_absModelPath = absPath(_modelPath);
 	_absTexturePath = absPath(_texturePath);
 
@@ -107,7 +108,7 @@ namespace globebrowsing {
 bool RenderableRoverSurface::initialize() {
 	std::vector<glm::dvec2> coordinates;
 	for (auto subsite : _subSites) {
-		coordinates.push_back(glm::dvec2(subsite.lat, subsite.lon));
+		coordinates.push_back(glm::dvec2(subsite->lat, subsite->lon));
 	}
 
 	std::string ownerName = owner()->name();
@@ -143,13 +144,13 @@ void RenderableRoverSurface::render(const RenderData& data) {
 	_renderableExplorationPath->render(data);
 	_models.clear();
 
-	std::vector<std::vector<Subsite>> subSitesVector = _chunkedLodGlobe->subsites();
+	std::vector<std::vector<std::shared_ptr<Subsite>>> subSitesVector = _chunkedLodGlobe->subsites();
 
 	if (subSitesVector.size() < 1) {
 		return;
 	}
 
-	std::vector<Subsite> ss;
+	std::vector<std::shared_ptr<Subsite>> ss;
 	ghoul::Dictionary modelDic;
 	std::unique_ptr<ModelProvider>_modelProvider;
 	int level;
@@ -178,19 +179,9 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			return;
 	}
 
-	std::vector<Subsite> ss1;
-
-	// TODO: Find way to skip the loop, must change to std::shared_ptr<Subsite> instead.
-	for (auto s : ss) {
-		Subsite s1 = std::move(s);
-		//s1.pathToGeometryFolder = _absModelPath;
-		//s1.pathToTextureFolder = _absTexturePath;
-		ss1.push_back(s1);
-	}
-
 	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
 	//FOR ALPHA BLENDING TO WORK
-	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels = _cachingModelProvider->getModels(ss1, level);
+	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels = _cachingModelProvider->getModels(ss, level);
 	
 	if (_subsiteModels.size() == 0) return;
 

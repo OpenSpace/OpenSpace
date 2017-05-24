@@ -34,11 +34,11 @@ class MultiModelProvider : public ModelProvider {
 public: 
 	MultiModelProvider(const ghoul::Dictionary& dictionary);
 
-	virtual std::vector<Subsite> calculate(const std::vector<std::vector<Subsite>> subsites, const RenderData& data);
+	virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites, const RenderData& data);
 
 	virtual bool initialize();
 };
-}
-}
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif //__OPENSPACE_MODULE_GLOBEBROWSING___MULTI_MODEL_PROVIDER___H__
