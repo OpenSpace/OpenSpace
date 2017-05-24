@@ -679,21 +679,39 @@ void LuaConsole::render() {
         }
 
         // Since the overflow is positive, at least one character needs to be removed.
-        size_t nCharsOverflow = std::min(std::max(1.f, overflow / _font->glyph('m')->width()), static_cast<float>(currentCommand.size()));
+        size_t nCharsOverflow = std::min(
+            std::max(1.f, overflow / _font->glyph('m')->width()),
+            static_cast<float>(currentCommand.size())
+        );
 
         // Do not hide the cursor and `NVisibleCharsAfterCursor` more characters in the end.
-        size_t maxAdditionalCharsToChopEnd = std::max(0, static_cast<int>(inputPositionFromEnd) - 1 - NVisibleCharsAfterCursor - static_cast<int>(nChoppedCharsEnd));
+        size_t maxAdditionalCharsToChopEnd = std::max(
+            0,
+            static_cast<int>(inputPositionFromEnd) -
+                (NVisibleCharsAfterCursor + 1) -
+                static_cast<int>(nChoppedCharsEnd)
+        );
+
         // Do not hide the cursor in the beginning.
-        size_t maxAdditionalCharsToChopBeginning = std::max(0, static_cast<int>(_inputPosition) - 1 - static_cast<int>(nChoppedCharsBeginning));
+        size_t maxAdditionalCharsToChopBeginning = std::max(
+            0,
+            static_cast<int>(_inputPosition) - 1 - static_cast<int>(nChoppedCharsBeginning)
+        );
 
         // Prioritize chopping in the end of the string.
         size_t nCharsToChopEnd = std::min(nCharsOverflow, maxAdditionalCharsToChopEnd);
-        size_t nCharsToChopBeginning = std::min(nCharsOverflow - nCharsToChopEnd, maxAdditionalCharsToChopBeginning);
+        size_t nCharsToChopBeginning = std::min(
+            nCharsOverflow - nCharsToChopEnd,
+            maxAdditionalCharsToChopBeginning
+        );
 
         nChoppedCharsBeginning += nCharsToChopBeginning;
         nChoppedCharsEnd += nCharsToChopEnd;
 
-        size_t displayLength = _commands.at(_activeCommand).size() - nChoppedCharsBeginning - nChoppedCharsEnd;
+        size_t displayLength =
+            _commands.at(_activeCommand).size() -
+            nChoppedCharsBeginning - nChoppedCharsEnd;
+
         currentCommand = _commands.at(_activeCommand).substr(nChoppedCharsBeginning, displayLength);
     }
 
