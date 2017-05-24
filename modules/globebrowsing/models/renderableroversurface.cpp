@@ -47,7 +47,8 @@ namespace {
 	const char* keyType					= "Type";
 	const char* keyMultiModelGeometry	= "MultiModelGeometry";
 	const char* keyName					= "Name";
-	const char* keyPathToTexture		= "PathToTexture";
+	const char* keyAbsPathToTextures	= "AbsPathToTextures";
+	const char* keyAbsPathToModels		= "AbsPathToModels";
 }
 
 namespace openspace {
@@ -80,10 +81,15 @@ namespace globebrowsing {
 
 	_multiModelGeometry = "MultiModelGeometry";
 
+	_absModelPath = absPath(_modelPath);
+	_absTexturePath = absPath(_texturePath);
+
 	// Extract all subsites that has models
 	ghoul::Dictionary tempDic;
 	tempDic.setValue(keyRoverLocationPath, _roverLocationPath);
 	tempDic.setValue(keyModelPath, _modelPath);
+	tempDic.setValue(keyAbsPathToTextures, _absTexturePath);
+	tempDic.setValue(keyAbsPathToModels, _absModelPath);
 	_subSitesWithModels = RoverPathFileReader::extractSubsitesWithModels(tempDic);
 
 	// Extract all subsites
@@ -94,9 +100,6 @@ namespace globebrowsing {
 
 	addProperty(_debugModelRotation);
 
-	// Save the abspath because it changes when leaving the constructor.
-	_absModelPath = absPath(_modelPath);
-	_absTexturePath = absPath(_texturePath);
 	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
 	_renderableExplorationPath = std::make_shared<RenderableExplorationPath>();
 }
@@ -180,8 +183,8 @@ void RenderableRoverSurface::render(const RenderData& data) {
 	// TODO: Find way to skip the loop, must change to std::shared_ptr<Subsite> instead.
 	for (auto s : ss) {
 		Subsite s1 = std::move(s);
-		s1.pathToGeometryFolder = _absModelPath;
-		s1.pathToTextureFolder = _absTexturePath;
+		//s1.pathToGeometryFolder = _absModelPath;
+		//s1.pathToTextureFolder = _absTexturePath;
 		ss1.push_back(s1);
 	}
 

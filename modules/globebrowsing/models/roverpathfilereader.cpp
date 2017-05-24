@@ -34,6 +34,8 @@ namespace {
 	const std::string _loggerCat		= "RoverPathFileReader";
 	const char* keyRoverLocationPath	= "RoverLocationPath";
 	const char* keyModelPath			= "ModelPath";
+	const char* keyAbsPathToTextures	= "AbsPathToTextures";
+	const char* keyAbsPathToModels		= "AbsPathToModels";
 }
 
 namespace openspace {
@@ -118,6 +120,14 @@ std::vector<Subsite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 	if (!dictionary.getValue(keyModelPath, surfaceModelFilePath))
 		throw ghoul::RuntimeError(std::string(keyModelPath) + " must be specified!");
 
+	std::string absPathToTextures;
+	if (!dictionary.getValue(keyAbsPathToTextures, absPathToTextures))
+		throw ghoul::RuntimeError(std::string(keyAbsPathToTextures) + " must be specified!");
+
+	std::string absPathToTModels;
+	if (!dictionary.getValue(keyAbsPathToModels, absPathToTModels))
+		throw ghoul::RuntimeError(std::string(keyAbsPathToTextures) + " must be specified!");
+
 	// Extract all subsites in the data set given the path to the file
 	ghoul::Dictionary tempDictionary;
 	tempDictionary.setValue(keyRoverLocationPath, roverLocationFilePath);
@@ -168,6 +178,8 @@ std::vector<Subsite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 				std::vector<std::string> fileNames = extractFileNames(pathToFilenamesTextFile);
 
 				subsite.fileNames = fileNames;
+				subsite.pathToTextureFolder = absPathToTextures;
+				subsite.pathToGeometryFolder = absPathToTModels;
 				subsitesWithModels.push_back(subsite);
 			}
 		}
