@@ -25,15 +25,12 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___SHENBRICKSELECTOR___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___SHENBRICKSELECTOR___H__
 
-#include <vector>
-#include <modules/multiresvolume/rendering/brickselector.h>
-#include <modules/multiresvolume/rendering/tsp.h>
-#include <modules/multiresvolume/rendering/brickcover.h>
+#include <modules/multiresvolume/rendering/tspbrickselector.h>
 
 namespace openspace {
 
 
-class ShenBrickSelector : public BrickSelector {
+class ShenBrickSelector : public TSPBrickSelector {
 public:
     ShenBrickSelector(TSP* tsp, float spatialTolerance, float temporalTolerance);
     ~ShenBrickSelector();
@@ -66,8 +63,6 @@ private:
                       int timeSpanEnd,
                       BrickCover coveredBricks,
                       std::vector<int>& bricks);
-
-    int linearCoords(int x, int y, int z);
 
     void selectCover(BrickCover coveredBricks, unsigned int brickIndex, std::vector<int>& bricks);
 };

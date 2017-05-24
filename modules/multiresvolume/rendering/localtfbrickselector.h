@@ -25,19 +25,14 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___LOCALTFBRICKSELECTOR___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___LOCALTFBRICKSELECTOR___H__
 
-#include <vector>
-#include <modules/multiresvolume/rendering/brickselection.h>
-#include <modules/multiresvolume/rendering/brickselector.h>
-#include <modules/multiresvolume/rendering/brickcover.h>
-
+#include <modules/multiresvolume/rendering/tspbrickselector.h>
 
 namespace openspace {
 
-class TSP;
 class LocalErrorHistogramManager;
 class TransferFunction;
 
-class LocalTfBrickSelector : public BrickSelector {
+class LocalTfBrickSelector : public TSPBrickSelector {
 public:
     struct Error {
         float spatial;
@@ -51,9 +46,8 @@ public:
 
     void selectBricks(int timestep, std::vector<int>& bricks);
     bool calculateBrickErrors();
- private:
-
-    TSP* _tsp;
+ 
+private:
     LocalErrorHistogramManager* _histogramManager;
     TransferFunction* _transferFunction;
     std::vector<Error> _brickErrors;
@@ -61,9 +55,6 @@ public:
     float spatialSplitPoints(unsigned int brickIndex);
     float temporalSplitPoints(unsigned int brickIndex);
     float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
-
-    int linearCoords(int x, int y, int z);
-    void writeSelection(BrickSelection coveredBricks, std::vector<int>& bricks);
 };
 
 } // namespace openspace

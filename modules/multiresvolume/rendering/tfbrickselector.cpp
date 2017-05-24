@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/multiresvolume/rendering/tsp.h>
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
 #include <openspace/util/histogram.h>
@@ -37,8 +36,7 @@ namespace {
 namespace openspace {
 
 TfBrickSelector::TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
-    : BrickSelector(memoryBudget, streamingBudget)
-    , _tsp(tsp)
+    : TSPBrickSelector(tsp, memoryBudget, streamingBudget)
     , _histogramManager(hm)
     , _transferFunction(tf) {}
 
@@ -356,22 +354,5 @@ bool TfBrickSelector::calculateBrickErrors() {
 
     return true;
 }
-
-int TfBrickSelector::linearCoords(int x, int y, int z) {
-    const TSP::Header &header = _tsp->header();
-    return x + (header.xNumBricks_ * y) + (header.xNumBricks_ * header.yNumBricks_ * z);
-}
-
-void TfBrickSelector::writeSelection(BrickSelection brickSelection, std::vector<int>& bricks) {
-    BrickCover coveredBricks = brickSelection.cover;
-    for (int z = coveredBricks.lowZ; z < coveredBricks.highZ; z++) {
-        for (int y = coveredBricks.lowY; y < coveredBricks.highY; y++) {
-            for (int x = coveredBricks.lowX; x < coveredBricks.highX; x++) {
-                bricks[linearCoords(x, y, z)] = brickSelection.brickIndex;
-            }
-        }
-    }
-}
-
 
 } // namespace openspace

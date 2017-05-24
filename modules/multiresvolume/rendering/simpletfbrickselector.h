@@ -26,9 +26,7 @@
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___SIMPLETFBRICKSELECTOR___H__
 
 #include <vector>
-#include <modules/multiresvolume/rendering/brickselection.h>
-#include <modules/multiresvolume/rendering/brickselector.h>
-#include <modules/multiresvolume/rendering/brickcover.h>
+#include <modules/multiresvolume/rendering/tspbrickselector.h>
 
 
 namespace openspace {
@@ -37,7 +35,7 @@ class TSP;
 class HistogramManager;
 class TransferFunction;
 
-class SimpleTfBrickSelector : public BrickSelector {
+class SimpleTfBrickSelector : public TSPBrickSelector {
 public:
     SimpleTfBrickSelector(TSP* tsp, HistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
     ~SimpleTfBrickSelector();
@@ -48,7 +46,6 @@ public:
     bool calculateBrickImportances();
  private:
 
-    TSP* _tsp;
     HistogramManager* _histogramManager;
     TransferFunction* _transferFunction;
     std::vector<float> _brickImportances;
@@ -56,8 +53,6 @@ public:
     float temporalSplitPoints(unsigned int brickIndex);
     float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
 
-    int linearCoords(int x, int y, int z);
-    void writeSelection(BrickSelection coveredBricks, std::vector<int>& bricks);
 };
 
 } // namespace openspace

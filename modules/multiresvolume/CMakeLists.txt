@@ -31,6 +31,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickcover.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickselection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multiresvolumeraycaster.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tspbrickselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/shenbrickselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tfbrickselector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localtfbrickselector.h
@@ -49,7 +50,8 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/atlasmanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/brickmanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multiresvolumeraycaster.cpp    
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/multiresvolumeraycaster.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tspbrickselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/shenbrickselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/tfbrickselector.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/localtfbrickselector.cpp

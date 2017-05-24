@@ -22,36 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__
-#define __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__
-
 #include <modules/multiresvolume/rendering/tspbrickselector.h>
 
+#include <algorithm>
+#include <cassert>
+#include <ghoul/logging/logmanager.h>
+
+namespace {
+    const std::string _loggerCat = "TSPBrickSelector";
+}
+
 namespace openspace {
+    TSPBrickSelector::TSPBrickSelector()
+    : BrickSelector(0, 0) {}
 
-class ErrorHistogramManager;
-class TransferFunction;
+    TSPBrickSelector::TSPBrickSelector(TSP* tsp)
+    : BrickSelector(0, 0)
+    , _tsp(tsp) {}
 
-class TfBrickSelector : public TSPBrickSelector {
-public:
-    TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
+    TSPBrickSelector::TSPBrickSelector(TSP* tsp, int memoryBudget, int streamingBudget)
+    : BrickSelector(memoryBudget, streamingBudget)
+    , _tsp(tsp) {}
 
-    ~TfBrickSelector();
+TSPBrickSelector::~TSPBrickSelector() {}
 
-    virtual bool initialize();
+int TSPBrickSelector::linearCoords(int x, int y, int z) {
+    const TSP::Header &header = _tsp->header();
+    return x + (header.xNumBricks_ * y) + (header.xNumBricks_ * header.yNumBricks_ * z);
+}
 
-    virtual void selectBricks(int timestep, std::vector<int>& bricks);
-    virtual bool calculateBrickErrors();
+void TSPBrickSelector::writeSelection(BrickSelection brickSelection, std::vector<int>& bricks) {
+    BrickCover coveredBricks = brickSelection.cover;
+    for (int z = coveredBricks.lowZ; z < coveredBricks.highZ; z++) {
+        for (int y = coveredBricks.lowY; y < coveredBricks.highY; y++) {
+            for (int x = coveredBricks.lowX; x < coveredBricks.highX; x++) {
+                bricks[linearCoords(x, y, z)] = brickSelection.brickIndex;
+            }
+        }
+    }
+}
 
-protected:
-    ErrorHistogramManager* _histogramManager;
-    TransferFunction* _transferFunction;
-    std::vector<float> _brickErrors;
-    virtual float spatialSplitPoints(unsigned int brickIndex);
-    virtual float temporalSplitPoints(unsigned int brickIndex);
-    virtual float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
-};
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__

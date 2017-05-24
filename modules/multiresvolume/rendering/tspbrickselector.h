@@ -22,36 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__
-#define __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__
+#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___TSPBRICKSELECTOR___H__
+#define __OPENSPACE_MODULE_MULTIRESVOLUME___TSPBRICKSELECTOR___H__
 
-#include <modules/multiresvolume/rendering/tspbrickselector.h>
+#include <vector>
+#include <modules/multiresvolume/rendering/tsp.h>
+#include <modules/multiresvolume/rendering/brickselector.h>
+#include <modules/multiresvolume/rendering/brickselection.h>
+#include <modules/multiresvolume/rendering/brickcover.h>
 
 namespace openspace {
 
-class ErrorHistogramManager;
-class TransferFunction;
-
-class TfBrickSelector : public TSPBrickSelector {
+class TSPBrickSelector : public BrickSelector {
 public:
-    TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
-
-    ~TfBrickSelector();
-
-    virtual bool initialize();
-
-    virtual void selectBricks(int timestep, std::vector<int>& bricks);
-    virtual bool calculateBrickErrors();
+    TSPBrickSelector();
+    TSPBrickSelector(TSP* tsp);
+    TSPBrickSelector(TSP* tsp, int memoryBudget, int streamingBudget);
+    virtual ~TSPBrickSelector();
 
 protected:
-    ErrorHistogramManager* _histogramManager;
-    TransferFunction* _transferFunction;
-    std::vector<float> _brickErrors;
-    virtual float spatialSplitPoints(unsigned int brickIndex);
-    virtual float temporalSplitPoints(unsigned int brickIndex);
-    virtual float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
+    TSP* _tsp;
+
+    int linearCoords(int x, int y, int z);
+    void writeSelection(BrickSelection brickSelection, std::vector<int>& bricks);
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___TFBRICKSELECTOR___H__
+#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___TSPBRICKSELECTOR___H__

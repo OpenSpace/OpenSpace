@@ -108,11 +108,6 @@ void ShenBrickSelector::selectBricks(int timestep,
     }
 }
 
-int ShenBrickSelector::linearCoords(int x, int y, int z) {
-    const TSP::Header &header = _tsp->header();
-    return x + (header.xNumBricks_ * y) + (header.xNumBricks_ * header.yNumBricks_ * z);
-}
-
 void ShenBrickSelector::selectCover(BrickCover coveredBricks, unsigned int brickIndex, std::vector<int>& bricks) {
     for (int z = coveredBricks.lowZ; z < coveredBricks.highZ; z++) {
         for (int y = coveredBricks.lowY; y < coveredBricks.highY; y++) {
