@@ -30,36 +30,43 @@
 
 namespace openspace {
 
+template<typename T>
 struct TimedependentState {
-    TimedependentState(double timeObserved) : _timeObserved(timeObserved) {}
+    TimedependentState(std::shared_ptr<T> state, double _timeObserved) {
+        _timeObserved = _timeObserved;
+        _state = state;
+    };
 
-    //virtual ~TimedependentState() {}
-    double getTime() { return _timeObserved; }
+    double getTimeObserved() { return _timeObserved; }
+    std::shared_ptr<T> contents() { return _state; };
 
-    static bool compFunc (const std::shared_ptr<TimedependentState> v, const double v1) {
-        return v->_timeObserved < v1;
+    bool operator<(const double val) const {
+        return _timeObserved < val;
     }
 
-    private:
-        double _timeObserved;
+private:
+    double _timeObserved;
+    std::shared_ptr<T> _state;
 };
 
+template<typename T>
 class TimedependentStateSequence {
 public:
-    TimedependentStateSequence() : _currentActiveStateIndex(0) {}
-
-    TimedependentStateSequence(const std::vector<std::shared_ptr<TimedependentState>>& states) {
-        _states = states;
+    TimedependentStateSequence() {
         _currentActiveStateIndex = 0;
     }
 
-    void addState(const std::shared_ptr<TimedependentState>& state) {
+    TimedependentStateSequence(const std::vector<TimedependentState<T>>& states) {
+        _states = states;
+        _currentActiveStateIndex = -1;
+    };
+
+    void addState(const TimedependentState<T>& state) {
         _states.push_back(state);
     }
 
-    const std::shared_ptr<TimedependentState>& getState(double osTime, bool& stateChanged) {
-        const auto& lowerBound = std::lower_bound(_states.begin(), _states.end(), osTime,
-                                                  TimedependentState::compFunc);
+    TimedependentState<T>& getState(double osTime, bool& stateChanged) {
+        const auto& lowerBound = std::lower_bound(_states.begin(), _states.end(), osTime);
         size_t activeStateIndex = lowerBound - _states.begin();
         if (activeStateIndex == _states.size()) {
             activeStateIndex = activeStateIndex - 1;
@@ -71,9 +78,8 @@ public:
         return _states[_currentActiveStateIndex];
     };
 
-    const std::shared_ptr<TimedependentState>& getState(double osTime) {
-        const auto& lowerBound = std::lower_bound(_states.begin(), _states.end(), osTime,
-                                                  TimedependentState::compFunc);
+    TimedependentState<T>& getState(double osTime) {
+        const auto& lowerBound = std::lower_bound(_states.begin(), _states.end(), osTime);
         size_t activeStateIndex = lowerBound - _states.begin();
         if (activeStateIndex == _states.size()) {
             activeStateIndex = activeStateIndex - 1;
@@ -83,7 +89,7 @@ public:
     };
 
 private:
-    std::vector<std::shared_ptr<TimedependentState>> _states;
+    std::vector<TimedependentState<T>> _states;
     size_t _currentActiveStateIndex;
 };
 

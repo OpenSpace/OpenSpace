@@ -123,7 +123,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     }
 
     SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap, _instrumentFilter);
-
+    SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap2, _instrumentFilter);
 
     std::string tfRootPath;
     if (dictionary.getValue("TransferfunctionPath", tfRootPath)) {
@@ -144,7 +144,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     }
 
     unsigned int i = 0;
-    for (auto& el : _imageMetadataMap) {
+    for (auto& el : _imageMetadataMap2) {
         _activeInstruments.addOption(i++, el.first);
     }
 

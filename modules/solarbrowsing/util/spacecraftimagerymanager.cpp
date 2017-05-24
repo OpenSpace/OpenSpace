@@ -124,7 +124,7 @@ void SpacecraftImageryManager::loadTransferFunctions(
 
 void SpacecraftImageryManager::loadImageMetadata(
       const std::string& path,
-      std::unordered_map<std::string, TimedependentStateSequence> _imageMetadataMap,
+      std::unordered_map<std::string, TimedependentStateSequence<ImageMetadataNew>>& _imageMetadataMap,
       const std::unordered_set<std::string>& _filter)
 {
 
@@ -185,17 +185,11 @@ void SpacecraftImageryManager::loadImageMetadata(
                                            tokens[2] + "T" + tokens[4] + ":" +
                                            tokens[5] + ":" + tokens[6] + "." + tokens[7];
 
-                        ImageMetadataNew metadata = ImageMetadataNew(Time::ref().convertTime(time));
-                        // metadata.filename = seqPath;
+                        ImageMetadataNew im {seqPath};
+                        std::shared_ptr<ImageMetadataNew> data = std::make_shared<ImageMetadataNew>(im);
 
-                        // //TimedependentState t = TimedependentState(metadata);
-                        // _imageMetadataMap[instrumentName].addState(std::make_shared<ImageMetadataNew>(metadata));
-
-                       // _imageMetadataMap[instrumentName].lol();
-
-                        //ImageMetadata metadata(Time::ref().convertTime(time));
-                       // metadata.timeObserved = Time::ref().convertTime(time);
-                       // _imageMetadataMapTemp[instrumentName].push_back(metadata);
+                        TimedependentState<ImageMetadataNew> timeState(std::move(data), 21312321.0);
+                        _imageMetadataMap[instrumentName].addState(std::move(timeState));
                     }
                 }
             }

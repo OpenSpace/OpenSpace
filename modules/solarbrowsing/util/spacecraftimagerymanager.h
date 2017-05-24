@@ -41,9 +41,7 @@ namespace openspace {
 
 class TransferFunction;
 
-struct ImageMetadataNew : public TimedependentState {
-    ImageMetadataNew(double timeObserved) : TimedependentState(timeObserved) {}
-
+struct ImageMetadataNew {
     std::string filename;
 };
 
@@ -70,7 +68,7 @@ public:
 
     void loadImageMetadata(
       const std::string& path,
-      std::unordered_map<std::string, TimedependentStateSequence> _imageMetadataMap,
+      std::unordered_map<std::string, TimedependentStateSequence<ImageMetadataNew>>& _imageMetadataMap,
       const std::unordered_set<std::string>& _filter);
 
     void loadImageMetadata(
