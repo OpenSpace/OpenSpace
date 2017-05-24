@@ -37,24 +37,15 @@ namespace {
 namespace openspace {
 
 LocalTfBrickSelector::LocalTfBrickSelector(TSP* tsp, LocalErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
-    : _tsp(tsp)
+    : BrickSelector(memoryBudget, streamingBudget)
+    , _tsp(tsp)
     , _histogramManager(hm)
-    , _transferFunction(tf)
-    , _memoryBudget(memoryBudget)
-    , _streamingBudget(streamingBudget) {}
+    , _transferFunction(tf) {}
 
 LocalTfBrickSelector::~LocalTfBrickSelector() {}
 
 bool LocalTfBrickSelector::initialize() {
     return calculateBrickErrors();
-}
-
-void LocalTfBrickSelector::setMemoryBudget(int memoryBudget) {
-    _memoryBudget = memoryBudget;
-}
-
-void LocalTfBrickSelector::setStreamingBudget(int streamingBudget) {
-    _streamingBudget = streamingBudget;
 }
 
 void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {

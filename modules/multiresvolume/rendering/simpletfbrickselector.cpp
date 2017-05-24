@@ -38,24 +38,15 @@ namespace {
 namespace openspace {
 
     SimpleTfBrickSelector::SimpleTfBrickSelector(TSP* tsp, HistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
-    : _tsp(tsp)
+    : BrickSelector(memoryBudget, streamingBudget)
+    , _tsp(tsp)
     , _histogramManager(hm)
-    , _transferFunction(tf)
-    , _memoryBudget(memoryBudget)
-    , _streamingBudget(streamingBudget) {}
+    , _transferFunction(tf) {}
 
 SimpleTfBrickSelector::~SimpleTfBrickSelector() {}
 
 bool SimpleTfBrickSelector::initialize() {
     return true;
-}
-
-void SimpleTfBrickSelector::setMemoryBudget(int memoryBudget) {
-    _memoryBudget = memoryBudget;
-}
-
-void SimpleTfBrickSelector::setStreamingBudget(int streamingBudget) {
-    _streamingBudget = streamingBudget;
 }
 
 void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {

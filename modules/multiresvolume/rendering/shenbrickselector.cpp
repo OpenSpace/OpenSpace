@@ -39,14 +39,6 @@ ShenBrickSelector::~ShenBrickSelector() {
 
 }
 
-void ShenBrickSelector::setSpatialTolerance(float spatialTolerance) {
-    _spatialTolerance = spatialTolerance;
-}
-
-void ShenBrickSelector::setTemporalTolerance(float temporalTolerance) {
-    _temporalTolerance = temporalTolerance;
-}
-
 void ShenBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
     int numTimeSteps = _tsp->header().numTimesteps_;
     BrickCover coveredBricks(_tsp->header().xNumBricks_);

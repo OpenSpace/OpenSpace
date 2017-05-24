@@ -31,12 +31,19 @@ namespace openspace {
 
 class BrickSelector {
 public:
+    BrickSelector() {};
+    BrickSelector(int memoryBudget, int streamingBudget)
+        : _memoryBudget(memoryBudget), _streamingBudget(streamingBudget) {};
     virtual ~BrickSelector() {};
     virtual bool initialize() { return true; };
     virtual void selectBricks(int timestep,
                       std::vector<int>& bricks) = 0;
-    virtual void setMemoryBudget(int memoryBudget) = 0;
-    virtual void setStreamingBudget(int streamingBudget) = 0;
+    virtual void setMemoryBudget(int memoryBudget) { _memoryBudget = memoryBudget; };
+    virtual void setStreamingBudget(int streamingBudget) { _streamingBudget = streamingBudget; };
+
+protected:
+    int _memoryBudget;
+    int _streamingBudget;
 };
 
 } // namespace openspace

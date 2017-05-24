@@ -45,8 +45,6 @@ public:
     virtual bool initialize();
 
     virtual void selectBricks(int timestep, std::vector<int>& bricks);
-    virtual void setMemoryBudget(int memoryBudget);
-    virtual void setStreamingBudget(int streamingBudget);
     virtual bool calculateBrickErrors();
 
 protected:
@@ -60,10 +58,6 @@ protected:
 
     int linearCoords(int x, int y, int z);
     void writeSelection(BrickSelection coveredBricks, std::vector<int>& bricks);
-
-    int _memoryBudget;
-    int _streamingBudget;
-    
 };
 
 } // namespace openspace
