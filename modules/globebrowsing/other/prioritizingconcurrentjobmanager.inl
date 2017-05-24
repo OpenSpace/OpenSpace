@@ -22,71 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__
-
-#include <modules/globebrowsing/tile/textureformat.h>
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/tiledatalayout.h>
-#include <modules/globebrowsing/tile/pixelregion.h>
-
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-
-#include <gdal.h>
-#include <string>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-struct RawTile;
-class GeodeticPatch;
+template<typename P, typename KeyType>
+PrioritizingConcurrentJobManager<P, KeyType>::PrioritizingConcurrentJobManager(
+    std::shared_ptr<LRUThreadPool<KeyType>> pool)
+    : _threadPool(pool)
+{ }
 
-/**
- * Interface for reading <code>RawTile</code>s given a <code>TileIndex</code>
- */
-class TileDataReader {
-public:
-    struct Configuration {
-        bool doPreProcessing;
-        int minimumTilePixelSize;
-        GLuint dataType = 0; // default = no datatype reinterpretation
-    };
+template<typename P, typename KeyType>
+void PrioritizingConcurrentJobManager<P, KeyType>::enqueueJob(std::shared_ptr<Job<P>> job,
+    KeyType key)
+{
+    _threadPool->enqueue([this, job]() {
+        job->execute();
+        _finishedJobs.push(job);
+    }, key);
+}
 
-    virtual TileDataReader(const Configuration& config);
+template<typename P, typename KeyType>
+std::vector<KeyType>
+PrioritizingConcurrentJobManager<P, KeyType>::getKeysToUnfinishedJobs() {
+    return _threadPool->getUnqueuedTasksKeys();
+}
 
-    std::shared_ptr<RawTile> defaultTileData();
-    
-    virtual std::shared_ptr<RawTile> readTileData(TileIndex tileIndex) = 0;
-    virtual int maxChunkLevel() = 0;
-    virtual TileDepthTransform getDepthTransform() = 0;
-    virtual const TileDataLayout& getDataLayout() = 0;
-    virtual void reset() = 0;
-    virtual float noDataValueAsFloat() = 0;
-    virtual size_t rasterXSize() = 0;
-    virtual size_t rasterYSize() = 0;
+template<typename P, typename KeyType>
+std::vector<KeyType>
+PrioritizingConcurrentJobManager<P, KeyType>::getKeysToEnqueuedJobs() {
+    return _threadPool->getQueuedTasksKeys();
+}
 
-    const static glm::ivec2 tilePixelStartOffset;
-    const static glm::ivec2 tilePixelSizeDifference;
-    const static PixelRegion padding; // same as the two above
-  
-    const static glm::ivec2 tilePixelStartOffset;
-    const static glm::ivec2 tilePixelSizeDifference;
-    const static PixelRegion padding; // same as the two above
+template<typename P, typename KeyType>
+bool PrioritizingConcurrentJobManager<P, KeyType>::touch(KeyType key) {
+    return _threadPool->touch(key);
+}
 
-    static bool logReadErrors;
-    
-protected:
-    Configuration _config;
+template<typename P, typename KeyType>
+void PrioritizingConcurrentJobManager<P, KeyType>::clearEnqueuedJobs() {
+    _threadPool->clearEnqueuedTasks();
+}
 
-    virtual std::array<double, 6> padfTransform getGeoTransform();
-    PixelRegion::PixelCoordinate geodeticToPixel(const Geodetic2& geo) const;
-    Geodetic2 pixelToGeodetic(const PixelRegion::PixelCoordinate& p) const;
-};
+template<typename P, typename KeyType>
+std::shared_ptr<Job<P>> PrioritizingConcurrentJobManager<P, KeyType>::popFinishedJob() {
+    ghoul_assert(_finishedJobs.size() > 0, "There is no finished job to pop!");
+    return _finishedJobs.pop();
+}
+
+template<typename P, typename KeyType>
+size_t PrioritizingConcurrentJobManager<P, KeyType>::numFinishedJobs() const {
+    return _finishedJobs.size();
+}
 
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DATAREADER___H__

@@ -42,6 +42,8 @@
 
 #include <gdal_priv.h>
 
+#include <algorithm>
+
 namespace {
     const std::string _loggerCat = "GdalRawTileDataReader";
 }
@@ -55,15 +57,14 @@ std::ostream& operator<<(std::ostream& os, const PixelRegion& pr) {
 }
 
 GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
-                                             const Configuration& config,
-                                             const std::string& baseDirectory)
-    : RawTileDataReader(config)
+        const TileTextureInitData& initData,
+        const std::string& baseDirectory,
+        RawTileDataReader::PerformPreprocessing preprocess)
+    : RawTileDataReader(initData, preprocess)
     , _dataset(nullptr)
 {
-
-    std::string initDir = baseDirectory.empty() ? CPLGetCurrentDir() : baseDirectory;
-
-    _initData = { initDir, filePath, config.tilePixelSize, config.dataType };
+    _initDirectory = baseDirectory.empty() ? CPLGetCurrentDir() : baseDirectory;
+    _datasetFilePath = filePath;
     ensureInitialized();
 }
 
@@ -98,7 +99,7 @@ int GdalRawTileDataReader::maxChunkLevel() {
 float GdalRawTileDataReader::noDataValueAsFloat() const {
     float noDataValue;
     if (_dataset && _dataset->GetRasterBand(1)) {
-        noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();;
+        noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
     }
     else {
         noDataValue = std::numeric_limits<float>::min();
@@ -137,7 +138,8 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
     
     // write region starts in origin
     io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
-    io.write.region.numPixels = PixelRegion::PixelCoordinate(_initData.tilePixelSize, _initData.tilePixelSize);
+    io.write.region.numPixels = PixelRegion::PixelCoordinate(
+        _initData.dimensionsWithoutPadding().x, _initData.dimensionsWithoutPadding().y);
     
     io.read.overview = 0;
     io.read.fullRegion = gdalPixelRegion(
@@ -145,7 +147,8 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
     // For correct sampling in dataset, we need to pad the texture tile
     
     PixelRegion scaledPadding = padding;
-    double scale = io.read.region.numPixels.x / static_cast<double>(io.write.region.numPixels.x);
+    double scale =
+        io.read.region.numPixels.x / static_cast<double>(io.write.region.numPixels.x);
     scaledPadding.numPixels *= scale;
     scaledPadding.start *= scale;
 
@@ -153,97 +156,91 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
     io.write.region.pad(padding);
     io.write.region.start = PixelRegion::PixelCoordinate(0, 0);
     
+    io.write.bytesPerLine = _initData.bytesPerLine();
+    io.write.totalNumBytes = _initData.totalNumBytes();
 
-  
-    io.write.bytesPerLine = _dataLayout.bytesPerPixel * io.write.region.numPixels.x;
-    io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
-
-    // OpenGL does not like if the number of bytes per line is not 4
-    if (io.write.bytesPerLine % 4 != 0) {
-        io.write.region.roundUpNumPixelToNearestMultipleOf(4);
-        io.write.bytesPerLine = _dataLayout.bytesPerPixel * io.write.region.numPixels.x;
-        io.write.totalNumBytes = io.write.bytesPerLine * io.write.region.numPixels.y;
-    }
+    ghoul_assert(io.write.region.numPixels.x == io.write.region.numPixels.y, "");
+    ghoul_assert(io.write.region.numPixels.x == _initData.dimensionsWithPadding().x, "");
 
     return io;
 }
 
 void GdalRawTileDataReader::initialize() {
-    _dataset = openGdalDataset(_initData.datasetFilePath);
+    _dataset = openGdalDataset(_datasetFilePath);
 
-    //Do any other initialization needed for the GdalRawTileDataReader
-    _dataLayout = getTileDataLayout(_initData.dataType);
+    // Assume all raster bands have the same data type
+    _gdalType = tiledatatype::getGdalDataType(_initData.glType());
+    
     _depthTransform = calculateTileDepthTransform();
     _cached._tileLevelDifference =
-        calculateTileLevelDifference(_initData.tilePixelSize);
+        calculateTileLevelDifference(_initData.dimensionsWithoutPadding().x);
 }
 
-char* GdalRawTileDataReader::readImageData(
-    IODescription& io, RawTile::ReadError& worstError) const {
-    // allocate memory for the image
-    char* imageData = new char[io.write.totalNumBytes];
+void GdalRawTileDataReader::readImageData(
+    IODescription& io, RawTile::ReadError& worstError, char* imageDataDest) const {
+  
+    // Only read the minimum number of rasters
+    int nRastersToRead = std::min(_dataset->GetRasterCount(),
+        static_cast<int>(_initData.nRasters()));
 
-    // In case there are extra channels not existing in the GDAL dataset
-    // we set the bytes to 255 (for example an extra alpha channel that)
-    // needs to be 1.
-    if (_dataLayout.numRasters > _dataLayout.numRastersAvailable) {
-        memset(imageData, 255, io.write.totalNumBytes);
-    }
-    
-    if (_dataLayout.numRastersAvailable == 3) // RGB -> BGR
-    {
-        for (size_t i = 0; i < _dataLayout.numRastersAvailable; i++) {
-            // The final destination pointer is offsetted by one datum byte size
-            // for every raster (or data channel, i.e. R in RGB)
-            char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
+    switch (_initData.ghoulTextureFormat()) {
+        case ghoul::opengl::Texture::Format::Red:
+        case ghoul::opengl::Texture::Format::RG:
+        case ghoul::opengl::Texture::Format::RGB:
+        case ghoul::opengl::Texture::Format::RGBA: {
+            // Read the data (each rasterband is a separate channel)
+            for (int i = 0; i < nRastersToRead; i++) {
+                // The final destination pointer is offsetted by one datum byte size
+                // for every raster (or data channel, i.e. R in RGB)
+                char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
 
-            RawTile::ReadError err = repeatedRasterRead(3 - i, io, dataDestination);
+                RawTile::ReadError err = repeatedRasterRead(i + 1, io, dataDestination);
 
-            // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
-            worstError = std::max(worstError, err);
+                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                worstError = std::max(worstError, err);
+            }
+            break;
+        }
+        case ghoul::opengl::Texture::Format::BGR: {
+            // Read the data (each rasterband is a separate channel)
+            for (int i = 0; i < 3 && i < nRastersToRead; i++) {
+                // The final destination pointer is offsetted by one datum byte size
+                // for every raster (or data channel, i.e. R in RGB)
+                char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
+
+                RawTile::ReadError err = repeatedRasterRead(3 - i, io, dataDestination);
+
+                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                worstError = std::max(worstError, err);
+            }
+            break;
+        }
+        case ghoul::opengl::Texture::Format::BGRA: {
+            for (int i = 0; i < 3 && i < nRastersToRead; i++) {
+                // The final destination pointer is offsetted by one datum byte size
+                // for every raster (or data channel, i.e. R in RGB)
+                char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
+
+                RawTile::ReadError err = repeatedRasterRead(3 - i, io, dataDestination);
+
+                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                worstError = std::max(worstError, err);
+            }
+            if (nRastersToRead > 3) { // Alpha channel exists
+                // Last read is the alpha channel
+                char* dataDestination = imageDataDest + (3 * _initData.bytesPerDatum());
+                RawTile::ReadError err = repeatedRasterRead(4, io, dataDestination);
+
+                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
+                worstError = std::max(worstError, err);
+            }
+            break;
+        }
+        default: {
+            ghoul_assert(false, "Texture format not supported for tiles");
+            break;
         }
     }
-    else if (_dataLayout.numRastersAvailable == 4) // RGBA -> BGRA
-    {
-        for (size_t i = 0; i < 3; i++) {
-            // The final destination pointer is offsetted by one datum byte size
-            // for every raster (or data channel, i.e. R in RGB)
-            char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
-
-            RawTile::ReadError err = repeatedRasterRead(3 - i, io, dataDestination);
-
-            // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
-            worstError = std::max(worstError, err);
-        }
-
-        // The final destination pointer is offsetted by one datum byte size
-        // for every raster (or data channel, i.e. R in RGB)
-        char* dataDestination = imageData + (3 * _dataLayout.bytesPerDatum);
-
-        RawTile::ReadError err = repeatedRasterRead(4, io, dataDestination);
-
-        // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
-        worstError = std::max(worstError, err);
-    }
-    else
-    {
-        // Read the data (each rasterband is a separate channel)
-        for (size_t i = 0; i < _dataLayout.numRastersAvailable; i++) {
-            GDALRasterBand* rasterBand = _dataset->GetRasterBand(i + 1);
-          
-            // The final destination pointer is offsetted by one datum byte size
-            // for every raster (or data channel, i.e. R in RGB)
-            char* dataDestination = imageData + (i * _dataLayout.bytesPerDatum);
-
-            RawTile::ReadError err = repeatedRasterRead(i + 1, io, dataDestination);
-
-            // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
-            worstError = std::max(worstError, err);
-        }
-    }
-
-    // GDAL reads pixel lines top to bottom, we want the opposite
-    return imageData;
 }
 
 RawTile::ReadError GdalRawTileDataReader::rasterRead(
@@ -257,7 +254,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
 
     PixelRegion::PixelCoordinate end = io.write.region.end();
     size_t largestIndex =
-        (end.y - 1) * io.write.bytesPerLine + (end.x - 1) * _dataLayout.bytesPerPixel;
+        (end.y - 1) * io.write.bytesPerLine + (end.x - 1) * _initData.bytesPerPixel();
     ghoul_assert(largestIndex <= io.write.totalNumBytes, "Invalid write region");
 
     char* dataDest = dataDestination;
@@ -270,9 +267,10 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
 
     // handle requested write region. Note -= since flipped y axis
     dataDest -= io.write.region.start.y * io.write.bytesPerLine;
-    dataDest += io.write.region.start.x * _dataLayout.bytesPerPixel;
+    dataDest += io.write.region.start.x * _initData.bytesPerPixel();
   
-    CPLErr readError = _dataset->GetRasterBand(rasterBand)->RasterIO(
+    GDALRasterBand* gdalRasterBand = _dataset->GetRasterBand(rasterBand);
+    CPLErr readError = gdalRasterBand->RasterIO(
         GF_Read,
         io.read.region.start.x,         // Begin read x
         io.read.region.start.y,         // Begin read y
@@ -282,7 +280,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
         io.write.region.numPixels.x,    // width to write x in destination
         io.write.region.numPixels.y,    // width to write y in destination
         _gdalType,                      // Type
-        _dataLayout.bytesPerPixel,      // Pixel spacing
+        _initData.bytesPerPixel(),      // Pixel spacing
         -io.write.bytesPerLine          // Line spacing
     );
   
@@ -300,14 +298,15 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
 }
 
 GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath) {
-    GDALDataset* dataset = static_cast<GDALDataset*>(GDALOpen(filePath.c_str(), GA_ReadOnly));
+    GDALDataset* dataset = static_cast<GDALDataset*>(
+        GDALOpen(filePath.c_str(), GA_ReadOnly));
     if (!dataset) {
         using namespace ghoul::filesystem;
         std::string correctedPath = FileSystem::ref().pathByAppendingComponent(
-            _initData.initDirectory, filePath
+            _initDirectory, filePath
         );
 
-        dataset = (GDALDataset *)GDALOpen(correctedPath.c_str(), GA_ReadOnly);
+        dataset = static_cast<GDALDataset*>(GDALOpen(correctedPath.c_str(), GA_ReadOnly));
         if (!dataset) {
             throw ghoul::RuntimeError("Failed to load dataset:\n" + filePath);
         }
@@ -376,35 +375,6 @@ PixelRegion GdalRawTileDataReader::gdalPixelRegion(GDALRasterBand* rasterBand) c
     gdalRegion.numPixels.y = rasterBand->GetYSize();
     return gdalRegion;
 }
-
-TileDataLayout GdalRawTileDataReader::getTileDataLayout(GLuint preferredGlType) {
-    TileDataLayout layout;
-
-    // Assume all raster bands have the same data type
-    _gdalType = preferredGlType != 0 ?
-        tiledatatype::getGdalDataType(preferredGlType) :
-        _dataset->GetRasterBand(1)->GetRasterDataType();
-
-    layout.glType = tiledatatype::getOpenGLDataType(_gdalType);
-    layout.numRastersAvailable = _dataset->GetRasterCount();
-    layout.numRasters = layout.numRastersAvailable;
-    
-    // This is to avoid corrupted textures that can appear when the number of
-    // bytes per row is not a multiplie of 4. 
-    // Info here: https://www.khronos.org/opengl/wiki/Pixel_Transfer#Pixel_layout
-    // This also mean that we need to make sure not to read from non existing
-    // rasters from the GDAL dataset
-    if (layout.numRasters == 3) {
-        layout.numRasters = 4;
-    }
-    
-    layout.bytesPerDatum = tiledatatype::numberOfBytes(_gdalType);
-    layout.bytesPerPixel = layout.bytesPerDatum * layout.numRasters;
-    layout.textureFormat = tiledatatype::getTextureFormatOptimized(layout.numRasters, _gdalType);
-
-    return layout;
-}
-
 
 } // namespace globebrowsing
 } // namespace openspace

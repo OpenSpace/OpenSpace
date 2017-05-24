@@ -40,9 +40,9 @@ const float Chunk::DEFAULT_HEIGHT = 0.0f;
 
 Chunk::Chunk(const RenderableGlobe& owner, const TileIndex& tileIndex, bool initVisible)
     : _owner(owner)
-    , _surfacePatch(tileIndex)
     , _tileIndex(tileIndex)
-    , _isVisible(initVisible) 
+    , _isVisible(initVisible)
+    , _surfacePatch(tileIndex) 
 {}
 
 const GeodeticPatch& Chunk::surfacePatch() const {
@@ -64,7 +64,7 @@ bool Chunk::isVisible() const {
 Chunk::Status Chunk::update(const RenderData& data) {
     const auto& savedCamera = _owner.savedCamera();
     const Camera& camRef = savedCamera != nullptr ? *savedCamera : data.camera;
-    RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement };
+    RenderData myRenderData = { camRef, data.position, data.doPerformanceMeasurement, data.doPerformanceMeasurement, data.renderBinMask, data.modelTransform };
 
     _isVisible = true;
     if (_owner.chunkedLodGlobe()->testIfCullable(*this, myRenderData)) {
@@ -102,9 +102,9 @@ Chunk::BoundingHeights Chunk::getBoundingHeights() const {
     // a single raster image. If it is not we will just use the first raster
     // (that is channel 0).
     const size_t HeightChannel = 0;
-    const LayerGroup& heightmaps = layerManager->layerGroup(LayerManager::HeightLayers);
+    const LayerGroup& heightmaps = layerManager->layerGroup(layergroupid::HeightLayers);
     std::vector<ChunkTileSettingsPair> chunkTileSettingPairs =
-        tileselector::getTilesAndSettingsSortedByHighestResolution(
+        tileselector::getTilesAndSettingsUnsorted(
             heightmaps, _tileIndex);
 
     bool lastHadMissingData = true;

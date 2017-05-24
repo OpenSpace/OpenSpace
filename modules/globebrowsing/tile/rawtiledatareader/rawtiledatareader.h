@@ -26,13 +26,14 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RAW_TILE_DATA_READER___H__
 
 #include <modules/globebrowsing/tile/pixelregion.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 #include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
 #include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
 
+#include <ghoul/misc/boolean.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
@@ -46,21 +47,21 @@ class GeodeticPatch;
 
 class RawTileDataReader {
 public:
-    struct Configuration {
-        bool doPreProcessing;
-        int tilePixelSize;
-        GLuint dataType = 0; // default = no datatype reinterpretation
-    };
+    using PerformPreprocessing = ghoul::Boolean;
 
-    RawTileDataReader(const Configuration& config);
+    RawTileDataReader(const TileTextureInitData& initData,
+        PerformPreprocessing preprocess = PerformPreprocessing::No);
     virtual ~RawTileDataReader() = default;
 
     /**
      * Reads data from the current dataset and initializes a <code>RawTile</code>
      * which gets returned.
      */
-    std::shared_ptr<RawTile> readTileData(TileIndex tileIndex);
+    std::shared_ptr<RawTile> readTileData(TileIndex tileIndex,
+        char* dataDestination, char* pboMappedDataDestination);
     TileDepthTransform getDepthTransform() const;
+    const TileTextureInitData& tileTextureInitData() const;
+    const PixelRegion::PixelRange fullPixelSize() const;
     
     /**
      * \returns the maximum chunk level available in the dataset. Should be a value
@@ -77,14 +78,11 @@ public:
     virtual int rasterYSize() const = 0;
     virtual float depthOffset() const;
     virtual float depthScale() const;
-
+  
     /**
      * Returns a single channeled empty <code>RawTile</code> of size 16 * 16 pixels.
      */
     std::shared_ptr<RawTile> defaultTileData();
-    
-    const static glm::ivec2 tilePixelStartOffset;
-    const static glm::ivec2 tilePixelSizeDifference;
     
     /// Padding around all tiles to read to make sure edge blending works.
     const static PixelRegion padding; // same as the two above
@@ -114,8 +112,8 @@ protected:
      * \param <code>worstError</code> should be set to the error code returned when
      * reading the data.
      */
-    virtual char* readImageData(
-        IODescription& io, RawTile::ReadError& worstError) const = 0;
+    virtual void readImageData(
+        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const = 0;
 
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const = 0;
@@ -159,15 +157,14 @@ protected:
     std::shared_ptr<TileMetaData> getTileMetaData(
         std::shared_ptr<RawTile> result, const PixelRegion& region);
     TileDepthTransform calculateTileDepthTransform();
-    RawTile::ReadError postProcessErrorCheck(
-        std::shared_ptr<const RawTile> ioResult, const IODescription& io);
+    RawTile::ReadError postProcessErrorCheck(std::shared_ptr<const RawTile> ioResult) const;
 
     struct Cached {
         int _maxLevel = -1;
         double _tileLevelDifference;
     } _cached;
-    const Configuration _config;
-    TileDataLayout _dataLayout;
+    const TileTextureInitData _initData;
+    PerformPreprocessing _preprocess;
     TileDepthTransform _depthTransform;
 
 private:

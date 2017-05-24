@@ -35,15 +35,14 @@ class TileProviderByLevel : public TileProvider {
 public:
     TileProviderByLevel(const ghoul::Dictionary& dictionary);
     TileProviderByLevel(const std::string& imagePath);
-    virtual ~TileProviderByLevel() { }
+    virtual ~TileProviderByLevel() = default;
 
-    virtual Tile getTile(const TileIndex& tileIndex);
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& index);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
+    virtual Tile getTile(const TileIndex& tileIndex) override;
+    virtual Tile::Status getTileStatus(const TileIndex& index) override;
+    virtual TileDepthTransform depthTransform() override;
+    virtual void update() override;
+    virtual void reset() override;
+    virtual int maxLevel() override;
 private:
     inline int providerIndex(int level) const;
     inline TileProvider* levelProvider(int level) const;

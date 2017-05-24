@@ -35,12 +35,12 @@ namespace globebrowsing {
 
 TriangleSoup::TriangleSoup(std::vector<unsigned int> elements, Positions usePositions,
                            TextureCoordinates useTextures, Normals useNormals)
-    : _vaoID(0)
-    , _vertexBufferID(0)
-    , _elementBufferID(0)
-    , _useVertexPositions(usePositions)
+    : _useVertexPositions(usePositions)
     , _useTextureCoordinates(useTextures)
     , _useVertexNormals(useNormals)
+    , _vaoID(0)
+    , _vertexBufferID(0)
+    , _elementBufferID(0)
 {
     setElements(elements);
 }
