@@ -44,6 +44,9 @@ namespace {
     const char* keySegmentsPerPatch = "SegmentsPerPatch";
     const char* keyLayers = "Layers";
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+    const std::string keyATMDebug = "Debug";
+    const std::string keyTextureScale = "PreCalculatedTextureScale";
+    const std::string keySaveTextures = "SaveCalculatedTextures";
     const std::string keyAtmosphere = "Atmosphere";
     const std::string keyAtmosphereRadius = "AtmoshereRadius";
     const std::string keyPlanetRadius = "PlanetRadius";
@@ -117,6 +120,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _sunRadianceIntensity(50.0f)
     , _hdrConstant(0.4f)
     , _atmosphereEnabled(false)
+    , _saveCalculationsToTexture(false)
+    , _preCalculatedTexturesScale(1.0)
 #endif
 {
     setName("RenderableGlobe");
@@ -273,6 +278,19 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             //    << name << " planet.\nDisabling atmosphere effects for this planet.");
         }
 
+        ghoul::Dictionary debugATMDictionary;
+        success = atmosphereDictionary.getValue(keyATMDebug, debugATMDictionary);
+        if (success) {
+            if (debugATMDictionary.getValue(keyTextureScale, _preCalculatedTexturesScale)) {
+                //LDEBUG("Atmosphere Texture Scaled to " << _preCalculatedTexturesScale);
+            }
+
+            if (debugATMDictionary.getValue(keySaveTextures, _saveCalculationsToTexture)) {
+                //LDEBUG("Saving Precalculated Atmosphere Textures.");
+            }
+
+        }
+
         if (!errorReadingAtmosphereData) {
             _atmosphereEnabled = true;
 
@@ -352,6 +370,11 @@ bool RenderableGlobe::initialize() {
             _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
             _deferredcaster->setEllipsoidRadii(_ellipsoid.radii());
             _deferredcaster->setRenderableClass(AtmosphereDeferredcaster::RenderableGlobe);
+
+            _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
+            if (_saveCalculationsToTexture)
+                _deferredcaster->enablePrecalculationTexturesSaving();
+
             _deferredcaster->initialize();
         }
 

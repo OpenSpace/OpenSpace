@@ -60,6 +60,7 @@ namespace {
 
     const std::string keyFrame                    = "Frame";
     const std::string keyGeometry                 = "Geometry";
+    const std::string keyDebug                    = "Debug";
     const std::string keyRadius                   = "Radius";
     const std::string keyShading                  = "PerformShading";
     const std::string keyShadowGroup              = "Shadow_Group";
@@ -75,6 +76,8 @@ namespace {
     const std::string keyMieHeightScale           = "H_M";
     const std::string keyMiePhaseConstant         = "G";
     const std::string keyBody                     = "Body";
+    const std::string keyTextureScale             = "PreCalculatedTextureScale";
+    const std::string keySaveTextures             = "SaveCalculatedTextures";    
 }
 
 namespace openspace {
@@ -122,6 +125,8 @@ namespace openspace {
         , _mieAsymmetricFactorGP("mieAsymmetricFactorG", "Mie Asymmetric Factor G", 0.85f, -1.0f, 1.0f)
         , _sunIntensityP("sunIntensity", "Sun Intensity", 50.0f, 0.1f, 1000.0f)
         , _hdrExpositionP("hdrExposition", "HDR", 0.4f, 0.01f, 5.0f)
+        , _saveCalculationsToTexture(false)
+        , _preCalculatedTexturesScale(1.0)
     {
         std::string name;
         bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
@@ -390,6 +395,19 @@ namespace openspace {
                     << name << " planet.\nDisabling atmosphere effects for this planet.");
             }
 
+            ghoul::Dictionary debugDictionary;
+            success = atmosphereDictionary.getValue(keyDebug, debugDictionary);
+            if (success) {
+                if (debugDictionary.getValue(keyTextureScale, _preCalculatedTexturesScale)) {
+                    LDEBUG("Atmosphere Texture Scaled to " << _preCalculatedTexturesScale);
+                }
+
+                if (debugDictionary.getValue(keySaveTextures, _saveCalculationsToTexture)) {
+                    LDEBUG("Saving Precalculated Atmosphere Textures.");
+                }
+                
+            }
+
             if (!errorReadingAtmosphereData) {
                 _atmosphereEnabled = true;
 
@@ -546,6 +564,10 @@ namespace openspace {
             _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
             _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
             _deferredcaster->setRenderableClass(AtmosphereDeferredcaster::RenderablePlanet);
+
+            _deferredcaster->setPrecalculationTextureScale(_preCalculatedTexturesScale);
+            if (_saveCalculationsToTexture)
+                _deferredcaster->enablePrecalculationTexturesSaving();
 
             _deferredcaster->initialize();
         }

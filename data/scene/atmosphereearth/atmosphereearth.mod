@@ -100,7 +100,12 @@ return {
                 --      }
                 --     H_M = 3.0,
                 --     G = 0.65,
-                -- },                
+                -- },
+                Debug = {
+                    -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)
+                    PreCalculatedTextureScale = 1.0, 
+                    SaveCalculatedTextures = false, 
+                },    
             }
         },
         Transform = {

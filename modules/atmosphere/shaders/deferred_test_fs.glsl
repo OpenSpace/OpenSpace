@@ -415,7 +415,7 @@ vec3 inscatterNoTestRadiance(inout vec3 x, inout float t, const vec3 v, const ve
         // The "infinite" ray hist something inside the atmosphere, so we need to remove
         // the unsused contribution to the final radiance.
         inscatterRadiance = max(inscatterRadiance - attenuation.rgbr * texture4D(inscatterTexture, r0, mu0, muSun0, nu), 0.0);
-        
+
         // cos(PI-thetaH) = dist/r
         // cos(thetaH) = - dist/r
         // muHorizon = -sqrt(r^2-Rg^2)/r = -sqrt(1-(Rg/r)^2)

@@ -34,6 +34,18 @@ uniform vec3 betaMieExtinction;
 uniform float mieG;
 uniform float sunRadiance;
 
+uniform int TRANSMITTANCE_W;
+uniform int TRANSMITTANCE_H;
+uniform int SKY_W;
+uniform int SKY_H;
+uniform int OTHER_TEXTURES_W;
+uniform int OTHER_TEXTURES_H;
+uniform int SAMPLES_R;
+uniform int SAMPLES_MU;
+uniform int SAMPLES_MU_S;
+uniform int SAMPLES_NU;
+
+
 const float ATM_EPSILON = 1.0;
 
 // Integration steps
@@ -44,30 +56,17 @@ const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 16;
 
 const float M_PI = 3.141592657;
 
-const int TRANSMITTANCE_W = 256;
-const int TRANSMITTANCE_H = 64;
-
-const int SKY_W = 64;
-const int SKY_H = 16;
-
-const int OTHER_TEXTURES_W = 64;
-const int OTHER_TEXTURES_H = 16;
-
-// const int TRANSMITTANCE_W = 512;
-// const int TRANSMITTANCE_H = 128;
-
-// const int SKY_W = 128;
-// const int SKY_H = 32;
-
-// const int OTHER_TEXTURES_W = 128;
-// const int OTHER_TEXTURES_H = 32;
-
-
-// cosines sampling
-const int SAMPLES_R    = 32;
-const int SAMPLES_MU   = 128;
-const int SAMPLES_MU_S = 32;
-const int SAMPLES_NU   = 8;
+// const int TRANSMITTANCE_W = 256;
+// const int TRANSMITTANCE_H = 64;
+// const int SKY_W = 64;
+// const int SKY_H = 16;
+// const int OTHER_TEXTURES_W = 64;
+// const int OTHER_TEXTURES_H = 16;
+// // cosines sampling
+// const int SAMPLES_R    = 32;
+// const int SAMPLES_MU   = 128;
+// const int SAMPLES_MU_S = 32;
+// const int SAMPLES_NU   = 8;
 
 uniform sampler2D transmittanceTexture;
 

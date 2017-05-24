@@ -58,7 +58,7 @@ public:
     // See: Precomputed Atmospheric Scattering from Bruneton et al.
     // for explanation of the following parameters.
     
-    const unsigned int TRANSMITTANCE_TABLE_WIDTH = 256;
+    /*const unsigned int TRANSMITTANCE_TABLE_WIDTH = 256;
     const unsigned int TRANSMITTANCE_TABLE_HEIGHT = 64;
 
     const unsigned int IRRADIANCE_TABLE_WIDTH = 64;
@@ -66,22 +66,11 @@ public:
 
     const unsigned int DELTA_E_TABLE_WIDTH = 64;
     const unsigned int DELTA_E_TABLE_HEIGHT = 16;
-    
-    /*
-    const unsigned int TRANSMITTANCE_TABLE_WIDTH = 512;
-    const unsigned int TRANSMITTANCE_TABLE_HEIGHT = 128;
-
-    const unsigned int IRRADIANCE_TABLE_WIDTH = 128;
-    const unsigned int IRRADIANCE_TABLE_HEIGHT = 32;
-
-    const unsigned int DELTA_E_TABLE_WIDTH = 128;
-    const unsigned int DELTA_E_TABLE_HEIGHT = 32;
-    */
-
+        
     const unsigned int R_SAMPLES = 32;
     const unsigned int MU_SAMPLES = 128;
     const unsigned int MU_S_SAMPLES = 32;
-    const unsigned int NU_SAMPLES = 8;
+    const unsigned int NU_SAMPLES = 8;*/
 
 public:
     AtmosphereDeferredcaster();
@@ -116,6 +105,9 @@ public:
     void setMieExtinctionCoefficients(const glm::vec3 & mieExtCoeff);
     void setEllipsoidRadii(const glm::dvec3 & radii);
     void setRenderableClass(const AtmosphereDeferredcaster::AtmospherRenderableClass rc);
+
+    void setPrecalculationTextureScale(const float _preCalculatedTexturesScale);
+    void enablePrecalculationTexturesSaving();
 
 private:
     void loadComputationPrograms();
@@ -187,9 +179,26 @@ private:
     GLuint _atmosphereRenderVAO;
     GLuint _atmosphereRenderVBO;
 
+    // Atmosphere Textures Dimmensions
+    unsigned int _transmittance_table_width;
+    unsigned int _transmittance_table_height;
+    unsigned int _irradiance_table_width;
+    unsigned int _irradiance_table_height;
+    unsigned int _delta_e_table_width;
+    unsigned int _delta_e_table_height;
+    unsigned int _r_samples;
+    unsigned int _mu_samples;
+    unsigned int _mu_s_samples;
+    unsigned int _nu_samples;
+
+
     glm::dmat4 _modelTransform;
     float _stepSize;
     double _time;
+
+    // Atmosphere Debugging
+    float _calculationTextureScale;
+    bool _saveCalculationTextures;
 
     AtmospherRenderableClass _renderableClass;
 

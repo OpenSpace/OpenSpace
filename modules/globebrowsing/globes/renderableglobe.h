@@ -165,6 +165,10 @@ private:
     glm::vec3 _rayleighScatteringCoeff;
     glm::vec3 _mieScatteringCoeff;
 
+    // Atmosphere Debug
+    bool _saveCalculationsToTexture;
+    float _preCalculatedTexturesScale;
+
     AtmosphereProperties _atmosphereProperties;
     properties::PropertyOwner _atmospherePropertyOwner;
 

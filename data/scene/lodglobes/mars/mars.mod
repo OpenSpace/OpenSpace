@@ -64,6 +64,11 @@ return {
                     -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
                     G = 0.85,
                 },
+                Debug = {
+                    -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)
+                    PreCalculatedTextureScale = 1.0,
+                    SaveCalculatedTextures = false, 
+                },   
             },                                              
             Layers = {
                 ColorLayers = {
