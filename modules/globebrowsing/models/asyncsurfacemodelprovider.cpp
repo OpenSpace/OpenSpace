@@ -76,16 +76,36 @@ bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const uint64_t hashKey)
 }
 
 void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels) {
+	std::vector<std::shared_ptr<ghoul::opengl::Texture>> textures;
 	for (auto model : subsiteModels->models) {
 		model->geometry->initialize(_parent);
+		std::shared_ptr<ghoul::opengl::Texture> tempTexture = std::make_shared<ghoul::opengl::Texture>(
+			nullptr,
+			model->texture->dimensions(),
+			model->texture->format(),
+			model->texture->internalFormat(),
+			model->texture->dataType(),
+			model->texture->filter(),
+			model->texture->wrapping()
+			);
+
+		textures.push_back(tempTexture);
+		// Skapa texturer med samma dimensions som de inlasta, fast med nullptr data.
+		// Pusha de allokerade texturerna till en vector.
+
 	}
-	auto job = std::make_shared<SubsiteInitializationJob>(subsiteModels);
+	// Koa tillsammans med vectorn fran ovanstaende steg.
+	// I jobbet sa skrivs pixeldatan fran gamla tetxurerna till nya texturerna
+	// och byter plats med nya texturerna.
+	auto job = std::make_shared<SubsiteInitializationJob>(subsiteModels, textures);
 	_ramToGpuJobManager.enqueueJob(job);
 }
 
 void AsyncSurfaceModelProvider::unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels) {
 	for (auto model : subsiteModels->models) {
 		model->geometry->unmapBuffers();
+		//model->texture->uploadTexture();
+		//model->texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 	}
 }
 

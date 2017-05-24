@@ -75,7 +75,7 @@ void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 
 	for (auto subsiteModels : vectorOfSubsiteModels) {
 		std::vector<std::shared_ptr<Model>> theModels = subsiteModels->models;
-		for (auto model : theModels) {
+		/*for (auto model : theModels) {
 			
 			// TODO: Fix async uploading of textures
 			void* pixelData = new char[model->texture->expectedPixelDataSize()];
@@ -96,7 +96,7 @@ void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 			// Upoad to GPU and set filter
 			model->texture->uploadTexture();
 			model->texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-		}
+		}*/
 
 		subsiteModels->models = theModels;
 		
