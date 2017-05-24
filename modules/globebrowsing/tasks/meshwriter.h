@@ -26,14 +26,15 @@
 #define __OPENSPACE___MESH_WRITER___H__
 
 #include <pcl/TextureMesh.h>
+#include <pcl/PolygonMesh.h>
 
 namespace openspace {
 namespace globebrowsing {
 	class MeshWriter {
-	public: 
+	public:
 		static void writeObjFile(const std::string filename, std::string output_path, const pcl::TextureMesh texMesh);
 		static void writeMtlFile(const std::string filename, const std::string output_path, const pcl::TextureMesh texMesh);
-
+		static void writeObjFileNoTex(const std::string filename, std::string output_path, const pcl::PolygonMesh polyMesh);
 	};
 }
 }
