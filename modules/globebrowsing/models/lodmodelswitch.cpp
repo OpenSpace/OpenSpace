@@ -42,6 +42,8 @@ namespace globebrowsing {
 
 LodModelSwitch::Mode LodModelSwitch::getLevel(const RenderData& data) {
 	double ellipsoidShrinkTerm = _owner->interactionDepthBelowEllipsoid();
+
+	// TODO: Should be dynamic scene graph node.
 	SceneGraphNode*_parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars")->parent();
 	glm::dvec3 center = _parent->worldPosition();
 	glm::dmat4 globeModelTransform = _owner->modelTransform();
