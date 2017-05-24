@@ -84,9 +84,7 @@ std::vector<int> CachingSurfaceModelProvider::getLevelsAbove(const std::vector<i
 	std::vector<int> levelsAbove;
 	for (int i = 0; i < requestedLevel - 1; i++) {
 		levelsAbove.push_back(availableLevels.at(i));
-		//LERROR("i = " << availableLevels.at(i));
 	}
-
 	return levelsAbove;
 }
 
@@ -94,31 +92,9 @@ void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfSubsiteModels =
 		_asyncSurfaceModelProvider->getLoadedModels();
 
+	//TODO: Remove this loop when the asynctex uploading is implemented
 	for (auto subsiteModels : vectorOfSubsiteModels) {
 		std::vector<std::shared_ptr<Model>> theModels = subsiteModels->models;
-		/*for (auto model : theModels) {
-			
-			// TODO: Fix async uploading of textures
-			void* pixelData = new char[model->texture->expectedPixelDataSize()];
-			memcpy(pixelData, model->texture->pixelData(), model->texture->expectedPixelDataSize());
-
-			std::shared_ptr<ghoul::opengl::Texture> tempTexture = std::make_shared<ghoul::opengl::Texture>(
-				pixelData,
-				model->texture->dimensions(),
-				model->texture->format(),
-				model->texture->internalFormat(),
-				model->texture->dataType(),
-				model->texture->filter(),
-				model->texture->wrapping()
-				);
-
-			model->texture = tempTexture;
-
-			// Upoad to GPU and set filter
-			model->texture->uploadTexture();
-			model->texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-		}*/
-
 		subsiteModels->models = theModels;
 		
 		uint64_t key = CachingSurfaceModelProvider::hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level);

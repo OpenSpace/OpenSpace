@@ -43,8 +43,6 @@ void SubsiteInitializationJob::execute() {
 
 		counter++;
 	}
-
-
 }
 
 std::shared_ptr<SubsiteModels> SubsiteInitializationJob::product() const {
