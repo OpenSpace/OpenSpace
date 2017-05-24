@@ -249,20 +249,41 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 	// Gradient of distToMinimize w.r.t par (using forward difference)
 	auto gradient = [](double* g, double* par, int x, void* fdata, LMstat* lmstat) {
 		FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-		double h, der, f1, f0 = ptr->distToMinimize(par, x, fdata, lmstat);
-		glm::dvec3 camPos = ptr->camera->positionVec3();
-		glm::dvec3 selectedPoint = (ptr->node->rotationMatrix() * ptr->selectedPoints.at(x)) + ptr->node->worldPosition();		
-		double hAngle = (1e-2 / ptr->node->boundingSphere()) / std::min(ptr->objectScreenRadius, 1000.0);
+		double h, scale = log10(ptr->node->boundingSphere()), lastG, f1, f0 = ptr->distToMinimize(par, x, fdata, lmstat);
+		double hAngle = (1e-2 / ptr->node->boundingSphere()) / std::min(ptr->objectScreenRadius, 300.0);
 		double hZoom = 1e-2 / std::min(ptr->objectScreenRadius, 300.0);
+		std::vector<double> dPar(ptr->nDOF, 0.0);
 
 		for (int i = 0; i < ptr->nDOF; ++i) {
-			h = (i == 2) ? hZoom : hAngle; // the 'zoom'-DOF is so big a smaller step creates NAN
+			/*h = (i == 2) ? hZoom : hAngle; // the 'zoom'-DOF is so big a smaller step creates NAN
 			par[i] += h;
 			f1 = ptr->distToMinimize(par, x, fdata, lmstat);
-			par[i] -= h;
-			der = (f1 - f0) / h;
-			
-			g[i] = der;
+			par[i] -= h;*/
+
+			dPar.assign(par, par + ptr->nDOF);
+			h = 1e-8;
+			lastG = 1;
+			dPar.at(i) += h;
+			f1 = ptr->distToMinimize(dPar.data(), x, fdata, lmstat);
+			for (int j = 0; j < 100; ++j) { // iterative process to find the minimum step h that gives a good gradient
+				dPar.assign(par, par + ptr->nDOF); // reset parameters for precision
+				if ((f1 - f0) != 0 && lastG == 0) { // found good step size h
+					h *= scale * scale;
+					dPar.at(i) += h;
+					f1 = ptr->distToMinimize(dPar.data(), x, fdata, lmstat);
+					break;
+				}
+				else if ((f1 - f0) != 0 && lastG != 0) { // h too big
+					h /= scale;
+				}
+				else if ((f1 - f0) == 0) { // h too small
+					h *= scale;
+				}
+				lastG = f1 - f0;
+				dPar.at(i) += h;
+				f1 = ptr->distToMinimize(dPar.data(), x, fdata, lmstat);
+			}
+			g[i] = (f1 - f0) / h;
 		}
 		if (ptr->nDOF == 2) {
 			for (int i = 0; i < 2; ++i) {
@@ -319,19 +340,15 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 
 	_lmSuccess = levmarq(nDOF, par.data(), nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
 
-
-	glm::dvec3 camPos = _camera->positionVec3();
-	glm::dvec3 selectedPoint = (node->rotationMatrix() * selectedPoints.at(0)) + node->worldPosition();
-	//double hAngle = 5e-14 * glm::distance(camPos, selectedPoint);
-	//double hZoom = 1e-10 * node->boundingSphere() * log(glm::distance(camPos, selectedPoint));
-	double hAngle = (1e-2 / node->boundingSphere()) / std::min(_currentRadius, 1000.0),  hZoom = log(node->boundingSphere()) / std::min(_currentRadius, 300.0);
+	// debug
+	/*double hAngle = (1e-2 / node->boundingSphere()) / std::min(_currentRadius, 1000.0),  hZoom = log(node->boundingSphere()) / std::min(_currentRadius, 300.0);
 	double h;
 	for (int i = 0; i < nDOF; ++i) {
 		h = (i == 2) ? hZoom : hAngle;
-		std::cout << "par(" << i << "): " << par[i] << ", ";
-		std::cout << "h(" << i << "): " << h << ", dist: " << log(glm::distance(camPos, selectedPoint)) << "\n";
+		std::cout << "par(" << i << "): " << par[i] << ", " << "h(" << i << "): " << h << "\n";
 	}
-	std::cout << "Radius: " << _currentRadius << "\n"; // 0.1 - 20000
+	std::cout << "Radius: " << _currentRadius << "\n";*/
+	//std::cout << "Levmarq success after " << _lmstat.final_it << " iterations\n";
 
 	if (_lmSuccess && !_unitTest) { // if good values were found set new camera state
 		_vel.orbit = glm::dvec2(par.at(0), par.at(1));
@@ -351,16 +368,6 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		_vel.zoom = 0.0;
 		_vel.roll = 0.0;
 		_vel.pan = glm::dvec2(0.0, 0.0);
-	}
-
-	// debugging
-	if (_lmstat.verbose) {
-		/*std::cout << _lmstat.data;
-		std::ostringstream os;
-		for (int i = 0; i < nDOF; ++i) {
-			os << par[i] << ", ";
-		}
-		std::cout << "Levmarq success after " << _lmstat.final_it << " iterations. Values: " << os.str() << "\n";*/
 	}
 }
 
