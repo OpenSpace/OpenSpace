@@ -423,7 +423,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks& tasks) {
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
-    _time = data.time;
+    _time = data.time.j2000Seconds();
     _distanceSwitch.update(data);
 
     glm::dmat4 translation =
@@ -445,7 +445,7 @@ void RenderableGlobe::update(const UpdateData& data) {
 
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
     if (_deferredcaster) {
-        _deferredcaster->setTime(data.time);
+        _deferredcaster->setTime(data.time.j2000Seconds());
         _deferredcaster->setModelTransform(_cachedModelTransform);
     }
 #endif

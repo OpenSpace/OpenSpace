@@ -43,8 +43,10 @@
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/renderer.h>
 
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -307,12 +309,10 @@ void RenderEngine::deinitialize() {
 }
 
 void RenderEngine::updateScene() {
+    const Time& currentTime = OsEng.timeManager().time();
     _scene->update({
         { glm::dvec3(0), glm::dmat3(1), 1.0 },
-        Time::ref().j2000Seconds(),
-        Time::ref().deltaTime(),
-        Time::ref().paused(),
-        Time::ref().timeJumped(),
+        currentTime,
         _performanceManager != nullptr
     });
     
@@ -483,8 +483,9 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 }
 
 void RenderEngine::postDraw() {
-    if (Time::ref().timeJumped()) {
-        Time::ref().setTimeJumped(false);
+    Time& currentTime = OsEng.timeManager().time();
+    if (currentTime.timeJumped()) {
+        currentTime.setTimeJumped(false);
     }
 
     if (_shouldTakeScreenshot) {
@@ -835,13 +836,15 @@ void RenderEngine::renderInformation() {
             //OsEng.windowWrapper().viewportPixelCoordinates().w
         );
 
+        penPosition.y -= OsEng.console().currentHeight();
+
         if (_showDate && _fontDate) {
             penPosition.y -= _fontDate->height();
             RenderFontCr(
                 *_fontDate,
                 penPosition,
                 "Date: %s",
-                Time::ref().UTC().c_str()
+                OsEng.timeManager().time().UTC().c_str()
             );
         }
         else {
@@ -852,7 +855,7 @@ void RenderEngine::renderInformation() {
                 *_fontInfo,
                 penPosition,
                 "Simulation increment (s): %.3f",
-                Time::ref().deltaTime()
+                OsEng.timeManager().time().deltaTime()
             );
 
             FrametimeType frametimeType = FrametimeType(_frametimeType.value());
@@ -942,7 +945,7 @@ void RenderEngine::renderInformation() {
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
             bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
-            double currentTime = Time::ref().j2000Seconds();
+            double currentTime = OsEng.timeManager().time().j2000Seconds();
 
             if (MissionManager::ref().hasCurrentMission()) {
 

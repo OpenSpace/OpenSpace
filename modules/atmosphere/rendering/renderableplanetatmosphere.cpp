@@ -806,13 +806,13 @@ namespace openspace {
         // set spice-orientation in accordance to timestamp
         //_stateMatrix = SpiceManager::ref().positionTransformMatrix(_frame, "GALACTIC", data.time);
         _stateMatrix = data.modelTransform.rotation;
-        _time = data.time;
+        _time = data.time.j2000Seconds();
 
         if (_programObject && _programObject->isDirty())
             _programObject->rebuildFromFile();
 
         if (_deferredcaster) {
-            _deferredcaster->setTime(data.time);
+            _deferredcaster->setTime(data.time.j2000Seconds());
             glm::dmat4 modelTransform;
             computeModelTransformMatrix(&modelTransform);
             _deferredcaster->setModelTransform(modelTransform);

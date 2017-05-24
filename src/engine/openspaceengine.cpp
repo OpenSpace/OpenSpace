@@ -152,6 +152,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
     _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
+    _globalPropertyNamespace->addPropertySubOwner(_console.get());
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -176,7 +177,6 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     );
 
     SpiceManager::initialize();
-    Time::initialize();
     TransformationManager::initialize();
 }
 
@@ -346,7 +346,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
     FileSys.createCacheManager(
         absPath("${" + ConfigurationManager::KeyCache + "}"), CacheVersion
     );
-    _engine->_console->initialize();
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
@@ -384,7 +383,7 @@ void OpenSpaceEngine::destroy() {
         func();
     }
 
-    _engine->_syncEngine->removeSyncables(Time::ref().getSyncables());
+    _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
     _engine->_syncEngine->removeSyncables(_engine->_renderEngine->getSyncables());
     _engine->_syncEngine->removeSyncable(_engine->_scriptEngine.get());
 
@@ -396,7 +395,6 @@ void OpenSpaceEngine::destroy() {
 
     delete _engine;
     FactoryManager::deinitialize();
-    Time::deinitialize();
     SpiceManager::deinitialize();
 
 
@@ -563,7 +561,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 
     Scene* previousScene = _renderEngine->scene();
     if (previousScene) {
-        _syncEngine->removeSyncables(Time::ref().getSyncables());
+        _syncEngine->removeSyncables(_timeManager->getSyncables());
         _syncEngine->removeSyncables(_renderEngine->getSyncables());
         _syncEngine->removeSyncable(_scriptEngine.get());
 
@@ -606,7 +604,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         );
     }
 
-    _syncEngine->addSyncables(Time::ref().getSyncables());
+    _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
     _syncEngine->addSyncable(_scriptEngine.get());
 
@@ -843,6 +841,8 @@ void OpenSpaceEngine::configureLogging() {
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
+    _engine->_console->initialize();
+
     const std::string key = ConfigurationManager::KeyOpenGLDebugContext;
     if (_configurationManager->hasKey(key)) {
         ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(key);
@@ -994,7 +994,7 @@ void OpenSpaceEngine::preSynchronization() {
         double dt = _windowWrapper->averageDeltaTime();
         _timeManager->preSynchronization(dt);
 
-        auto scheduledScripts = _scriptScheduler->progressTo(Time::ref().j2000Seconds());
+        auto scheduledScripts = _scriptScheduler->progressTo(timeManager().time().j2000Seconds());
         for (auto it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
             _scriptEngine->queueScript(
                 *it, ScriptEngine::RemoteScripting::Yes
@@ -1073,17 +1073,24 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
                              const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
+
+    bool isGuiWindow = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    bool showOverlay = isGuiWindow && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering();
+    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
+    // rendered ---abock
+
+    if (showOverlay) {
+        _console->update();
+    }
+
     LTRACE("OpenSpaceEngine::render(begin)");
     _renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
     
     for (const auto& func : _moduleCallbacks.render) {
         func();
     }
-    
-    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
-    // rendered ---abock
-    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
-    if (showGui && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering()) {
+
+    if (showOverlay) {
         _renderEngine->renderScreenLog();
         _console->render();
     }

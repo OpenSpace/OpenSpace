@@ -22,79 +22,75 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___LUACONSOLE___H__
-#define __OPENSPACE_CORE___LUACONSOLE___H__
+#ifndef __OPENSPACE_CORE___TIMELINE___H__
+#define __OPENSPACE_CORE___TIMELINE___H__
 
-#include <openspace/network/parallelconnection.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/vector/vec4property.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/keys.h>
-
-#include <string>
-#include <vector>
-
-namespace ghoul {
-namespace opengl {
-    class ProgramObject;
-} // namespace opengl
-} // namespace ghoul
+#include <algorithm>
+#include <deque>
+#include <cstddef>
 
 namespace openspace {
 
-class LuaConsole : public properties::PropertyOwner {
-public:
-    LuaConsole();
-
-    void initialize();
-    void deinitialize();
-
-    bool keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-    void charCallback(unsigned int codepoint, KeyModifier modifier);
-
-    void update();
-    void render();
-    float currentHeight() const;
-
-private:
-    void parallelConnectionChanged(const ParallelConnection::Status& status);
-    void addToCommand(std::string c);
-
-    properties::BoolProperty _isVisible;
-    properties::BoolProperty _remoteScripting;
-
-    properties::Vec4Property _backgroundColor;
-    properties::Vec4Property _highlightColor;
-    properties::Vec4Property _separatorColor;
-    properties::Vec4Property _entryTextColor;
-    properties::Vec4Property _historyTextColor;
-    properties::IntProperty _historyLength;
-
-    
-    size_t _inputPosition;
-    std::vector<std::string> _commandsHistory;
-    size_t _activeCommand;
-    std::vector<std::string> _commands;
-
-    struct {
-        int lastIndex;
-        bool hasInitialValue;
-        std::string initialValue;
-    } _autoCompleteInfo;
-
-    float _currentHeight;
-    float _targetHeight;
-    float _fullHeight;
-
-    std::shared_ptr<ghoul::fontrendering::Font> _font;
-    std::shared_ptr<ghoul::fontrendering::Font> _historyFont;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    GLuint _vao;
-    GLuint _vbo;
+/**
+* Base class for keyframes
+*/
+struct KeyframeBase {
+    size_t id;
+    double timestamp;
 };
+
+/**
+* Templated class for keyframes containing data
+*/
+template <typename T>
+struct Keyframe : public KeyframeBase {
+    Keyframe(size_t i, double t, T p)
+        : KeyframeBase{i, t}
+        , data(p)
+    {}
+    T data;
+};
+
+/**
+* Templated class for timelines
+*/
+template <typename T>
+class Timeline {
+public:
+    Timeline();
+    virtual ~Timeline();
+    void addKeyframe(double time, T data);
+    void clearKeyframes();
+    void removeKeyframe(size_t id);
+    void removeKeyframesBefore(double timestamp, bool inclusive = false);
+    void removeKeyframesAfter(double timestamp, bool inclusive = false);
+    void removeKeyframesBetween(double begin, double end, bool inclusiveBegin = false, bool inclusiveEnd = false);
+    size_t nKeyframes() const;
+    const Keyframe<T>* firstKeyframeAfter(double timestamp, bool inclusive = false) const;
+    const Keyframe<T>* lastKeyframeBefore(double timestamp, bool inclusive = false) const;
+    const std::deque<Keyframe<T>>& keyframes() const;
+private:
+    size_t _nextKeyframeId;
+    std::deque<Keyframe<T>> _keyframes;
+};
+
+/**
+* Return true if the timestamp of a is smaller the timestamp of b.
+*/
+bool compareKeyframeTimes(const KeyframeBase& a, const KeyframeBase& b);
+
+/**
+* Return true if a is smaller than the timestamp of b.
+*/
+bool compareTimeWithKeyframeTime(double a, const KeyframeBase& b);
+
+/**
+* Return true if the timestamp of a is smaller than b.
+*/
+bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b);
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___LUACONSOLE___H__
+#include <openspace/util/timeline.inl>;
+
+#endif // __OPENSPACE_CORE___TIMELINE___H__

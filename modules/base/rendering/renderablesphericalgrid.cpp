@@ -230,7 +230,7 @@ void RenderableSphericalGrid::render(const RenderData& data){
 }
 
 void RenderableSphericalGrid::update(const UpdateData& data) {
-    _parentMatrix = SpiceManager::ref().positionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time);
+    _parentMatrix = SpiceManager::ref().positionTransformMatrix("IAU_JUPITER", "GALACTIC", data.time.j2000Seconds());
 
 }
 }
