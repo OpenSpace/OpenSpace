@@ -318,7 +318,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
 
     // Paste from clipboard
     if (modifierControl && (key == Key::V || key == Key::Y)) {
-        addToCommand(ghoul::clipboardText());
+        addToCommand(sanitizeInput(ghoul::clipboardText()));
         return true;
     }
 
@@ -679,12 +679,16 @@ void LuaConsole::render() {
         }
 
         // Since the overflow is positive, at least one character needs to be removed.
-        size_t nCharsOverflow = std::max(1.f, overflow / _font->glyph('m')->width());
+        size_t nCharsOverflow = std::min(std::max(1.f, overflow / _font->glyph('m')->width()), static_cast<float>(currentCommand.size()));
 
-        // Prioritize chopping in the end of the string, but do not hide the cursor and `NVisibleCharsAfterCursor` more characters.
+        // Do not hide the cursor and `NVisibleCharsAfterCursor` more characters in the end.
         size_t maxAdditionalCharsToChopEnd = std::max(0, static_cast<int>(inputPositionFromEnd) - 1 - NVisibleCharsAfterCursor - static_cast<int>(nChoppedCharsEnd));
+        // Do not hide the cursor in the beginning.
+        size_t maxAdditionalCharsToChopBeginning = std::max(0, static_cast<int>(_inputPosition) - 1 - static_cast<int>(nChoppedCharsBeginning));
+
+        // Prioritize chopping in the end of the string.
         size_t nCharsToChopEnd = std::min(nCharsOverflow, maxAdditionalCharsToChopEnd);
-        size_t nCharsToChopBeginning = nCharsOverflow - nCharsToChopEnd;
+        size_t nCharsToChopBeginning = std::min(nCharsOverflow - nCharsToChopEnd, maxAdditionalCharsToChopBeginning);
 
         nChoppedCharsBeginning += nCharsToChopBeginning;
         nChoppedCharsEnd += nCharsToChopEnd;
@@ -790,6 +794,19 @@ void LuaConsole::addToCommand(std::string c) {
     const size_t length = c.length();
     _commands.at(_activeCommand).insert(_inputPosition, std::move(c));
     _inputPosition += length;
+}
+
+std::string LuaConsole::sanitizeInput(std::string str) {
+    // Remove carriage returns.
+    str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
+
+    // Replace newlines with spaces.
+    auto replace = [](char c) {
+        return c == '\n' ? ' ' : c;
+    };
+    std::transform(str.begin(), str.end(), str.begin(), replace);
+
+    return str;
 }
 
 void LuaConsole::parallelConnectionChanged(const ParallelConnection::Status& status) {
