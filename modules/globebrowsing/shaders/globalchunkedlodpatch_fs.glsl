@@ -32,11 +32,13 @@ Fragment getFragment() {
 #if SHOW_CHUNK_EDGES
     frag.color += patchBorderOverlay(fs_uv, vec3(0,1,0), 0.02);
 #endif // SHOW_CHUNK_EDGES
-
-    // frag.gColor    = frag.color;
-    // frag.gNormal   = normal;
-    // frag.gPosition = p;
     
+    // TODO: Change the color for the new deferred system (JCC)
+    frag.gColor             = frag.color;
+    // Normal is written in Camera Rig (OS Eye) Space
+    frag.gNormalReflectance = vec4(ellipsoidNormalCameraSpace, 1.0); // adding 1.0 to reflectance by now
+    frag.gPosition          = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
+
     frag.depth = fs_position.w;
     return frag;
 }

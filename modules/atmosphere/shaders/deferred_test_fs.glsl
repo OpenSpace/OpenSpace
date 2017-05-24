@@ -249,8 +249,10 @@ void dCalculateRayRenderableGlobe(out dRay ray, out dvec4 planetPositionObjectCo
   //sgctEyeCoords /= sgctEyeCoords.w;
   sgctEyeCoords.w = 1.0;
   
-  // OS Eye to World coords
+  // SGCT Eye to OS Eye
   dvec4 tOSEyeCoordsInv = dSgctEyeToOSEyeTranform * sgctEyeCoords;
+  
+  // OS Eye to World coords
   dvec4 tmpRInv = dInverseCamRotTransform * tOSEyeCoordsInv;
   dvec4 worldCoords= dvec4(dvec3(tmpRInv) + dCampos, 1.0);
   
@@ -258,6 +260,8 @@ void dCalculateRayRenderableGlobe(out dRay ray, out dvec4 planetPositionObjectCo
   dvec4 objectCoords = dInverseTransformMatrix * worldCoords;
 
   // Planet Position in Object Space
+  // JCC: Applying the inverse of the model transformation on the object postion in World 
+  // space results in imprecision. 
   planetPositionObjectCoords = dvec4(0.0,0.0,0.0,1.0);//dInverseTransformMatrix * dvec4(dObjpos.xyz, 1.0);
 
   // Camera Position in Object Space
@@ -811,8 +815,6 @@ void main() {
     meanPosition /= nAaSamples;
     // geoDepth /= nAaSamples;
 
-    //meanPosition = texture2D(mainPositionTexture, vec2(gl_FragCoord));
-
     // Ray in object space
     dRay ray;
     dvec4 planetPositionObjectCoords = dvec4(0.0);
@@ -912,21 +914,25 @@ void main() {
         // is occluded
         // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
         // when using their positions later, one must convert them to the planet's coords 
-        
-        // OS Eye to World coords
-        dvec4 tmpRInv = dInverseCamRotTransform * meanPosition;
-        dvec4 fragWorldCoords= dvec4(dvec3(tmpRInv) + dCampos, 1.0);
-  
-        // World to Object
-        dvec4 fragObjectCoords = dInverseTransformMatrix * fragWorldCoords;
 
+        // OS Eye to World coords
+        dvec4 tmpRInvPos            = dInverseCamRotTransform * meanPosition;
+        dvec4 fragWorldCoords       = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
+        dvec4 tmpRInvNormal         = dInverseCamRotTransform * meanNormal;
+        dvec4 fragNormalWorldCoords = dvec4(dvec3(tmpRInvNormal) + dCampos, 1.0);
+
+        // World to Object
+        dvec4 fragObjectCoords       = dInverseTransformMatrix * fragWorldCoords;
+        dvec4 fragNormalObjectCoords = dInverseTransformMatrix * fragNormalWorldCoords;
+
+        // Distance of the pixel in the gBuffer to the observer
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
         
-        // TODO: Write the correct values in G-Buffer
-        // if (pixelDepth < offset) {        
-        //   renderTarget = meanColor;         
-        // } else {
-        {
+        if (meanPosition.xyz != vec3(0.0) && (pixelDepth < offset)) {        
+           renderTarget = meanColor;
+           renderTarget = vec4(1.0, 0.0, 0.0, 0.5);
+        } else {
+        //{
           // Following paper nomenclature      
           double t = offset;                  
           vec3 attenuation;     
@@ -949,11 +955,6 @@ void main() {
           vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation, meanColor, meanNormal);
           vec3 sunColor       = sunColor(x, tF, v, s, r, mu); 
           
-          //renderTarget = vec4(HDR(inscatterColor), 1.0); 
-          //renderTarget = vec4(HDR(groundColor), 1.0); 
-          //renderTarget = vec4(groundColor, 1.0); 
-          //renderTarget = vec4(HDR(sunColor), 1.0); 
-          //renderTarget = vec4(HDR(sunColor), 1.0); 
           //vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
           //finalRadiance = mix(finalRadiance, meanColor);
           //vec4 finalRadiance = vec4(inscatterColor, 1.0);
@@ -966,22 +967,9 @@ void main() {
           // The meanColor is temporary here
           vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor + meanColor.xyz), 1.0);          
           
-          //renderTarget = finalRadiance + meanColor;
-          renderTarget = finalRadiance;
-          //renderTarget = vec4(normalize(meanNormal.xyz), 1.0);
-          dvec4 ttmp         = dInverseScaleTransformMatrix * meanPosition;
-          dvec3 ttmp2        = dmat3(dInverseCamRotTransform) * dvec3(ttmp);
-          dvec4 worldCoords  = dvec4(dCampos + ttmp2, 1.0);
-          dvec4 positionInObject = dInverseTransformMatrix * dvec4(-dObjpos.xyz + worldCoords.xyz, 1.0);
-          //renderTarget = vec4(positionInObject.xyz, 1.0);
-          //renderTarget = vec4(meanColor.xyz, 1.0);
-          //renderTarget = meanColor;      
-          //renderTarget = vec4(0.5, 0.0, 0.0, 0.5);
-          //renderTarget = vec4(0.0);
+          renderTarget = finalRadiance;          
         }      
       } else {
-        //renderTarget = vec4(1.0, 1.0, 0.0, 1.0);      
-        //renderTarget = vec4(0.0);      
         renderTarget = meanColor;
       }
     } else {

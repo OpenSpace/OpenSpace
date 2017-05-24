@@ -44,23 +44,23 @@ const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 16;
 
 const float M_PI = 3.141592657;
 
-// const int TRANSMITTANCE_W = 256;
-// const int TRANSMITTANCE_H = 64;
+const int TRANSMITTANCE_W = 256;
+const int TRANSMITTANCE_H = 64;
 
-// const int SKY_W = 64;
-// const int SKY_H = 16;
+const int SKY_W = 64;
+const int SKY_H = 16;
 
-// const int OTHER_TEXTURES_W = 64;
-// const int OTHER_TEXTURES_H = 16;
+const int OTHER_TEXTURES_W = 64;
+const int OTHER_TEXTURES_H = 16;
 
-const int TRANSMITTANCE_W = 512;
-const int TRANSMITTANCE_H = 128;
+// const int TRANSMITTANCE_W = 512;
+// const int TRANSMITTANCE_H = 128;
 
-const int SKY_W = 128;
-const int SKY_H = 32;
+// const int SKY_W = 128;
+// const int SKY_H = 32;
 
-const int OTHER_TEXTURES_W = 128;
-const int OTHER_TEXTURES_H = 32;
+// const int OTHER_TEXTURES_W = 128;
+// const int OTHER_TEXTURES_H = 32;
 
 
 // cosines sampling

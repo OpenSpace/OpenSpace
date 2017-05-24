@@ -57,7 +57,7 @@ public:
 public:
     // See: Precomputed Atmospheric Scattering from Bruneton et al.
     // for explanation of the following parameters.
-    /*
+    
     const unsigned int TRANSMITTANCE_TABLE_WIDTH = 256;
     const unsigned int TRANSMITTANCE_TABLE_HEIGHT = 64;
 
@@ -66,7 +66,8 @@ public:
 
     const unsigned int DELTA_E_TABLE_WIDTH = 64;
     const unsigned int DELTA_E_TABLE_HEIGHT = 16;
-    */
+    
+    /*
     const unsigned int TRANSMITTANCE_TABLE_WIDTH = 512;
     const unsigned int TRANSMITTANCE_TABLE_HEIGHT = 128;
 
@@ -75,6 +76,7 @@ public:
 
     const unsigned int DELTA_E_TABLE_WIDTH = 128;
     const unsigned int DELTA_E_TABLE_HEIGHT = 32;
+    */
 
     const unsigned int R_SAMPLES = 32;
     const unsigned int MU_SAMPLES = 128;

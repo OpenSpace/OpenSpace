@@ -47,7 +47,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-//#define _SAVE_ATMOSPHERE_TEXTURES
+#define _SAVE_ATMOSPHERE_TEXTURES
 
 namespace {
     const std::string _loggerCat       = "AtmosphereDeferredcaster";

@@ -57,8 +57,10 @@ return {
             SegmentsPerPatch = 64,
             Atmosphere = {
                 -- Atmosphere radius in Km
-                AtmoshereRadius = 6450,
-                PlanetRadius    = 6378.1366,
+                --AtmoshereRadius = 6450,
+                AtmoshereRadius = 6420.0,
+                PlanetRadius    = 6378.137,
+                --PlanetRadius    = 6360.0,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
                     Coefficients = {
