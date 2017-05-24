@@ -35,16 +35,17 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-	LodModelSwitch::LodModelSwitch(RenderableGlobe* owner) 
-		: _owner(owner) 
-	{}
+LodModelSwitch::LodModelSwitch() 
+{}
 
+void LodModelSwitch::initialize(RenderableGlobe * owner) {
+	_owner = owner;
+	std::string planetName = _owner->owner()->name();
+	_parent = OsEng.renderEngine().scene()->sceneGraphNode(planetName)->parent();
+	_ellipsoidShrinkTerm = _owner->interactionDepthBelowEllipsoid();
+}
 
 LodModelSwitch::Mode LodModelSwitch::getLevel(const RenderData& data) {
-	double ellipsoidShrinkTerm = _owner->interactionDepthBelowEllipsoid();
-
-	// TODO: Should be dynamic scene graph node.
-	SceneGraphNode*_parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars")->parent();
 	glm::dvec3 center = _parent->worldPosition();
 	glm::dmat4 globeModelTransform = _owner->modelTransform();
 	glm::dmat4 globeModelInverseTransform = _owner->inverseModelTransform();
@@ -56,13 +57,13 @@ LodModelSwitch::Mode LodModelSwitch::getLevel(const RenderData& data) {
 			_owner->ellipsoid().cartesianToGeodetic2(cameraPositionModelSpace));
 
 	glm::dvec3 centerToEllipsoidSurface = glm::dmat3(globeModelTransform)  * (_owner->projectOnEllipsoid(cameraPositionModelSpace) -
-		directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
+		directionFromSurfaceToCameraModelSpace * _ellipsoidShrinkTerm);
 
 	glm::dvec3 ellipsoidSurfaceToCamera = cameraPos - (center + centerToEllipsoidSurface);
 	double distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
 
 	double heightToSurface =
-		_owner->getHeight(cameraPositionModelSpace) + ellipsoidShrinkTerm;
+		_owner->getHeight(cameraPositionModelSpace) + _ellipsoidShrinkTerm;
 
 	double distFromSurfaceToCamera = glm::abs(heightToSurface - distFromEllipsoidSurfaceToCamera);
 
@@ -74,5 +75,6 @@ LodModelSwitch::Mode LodModelSwitch::getLevel(const RenderData& data) {
 	}
 	return Mode::Close;
 }
-}
-}
+
+} // namespace globebrowsing
+} // namespace openspace

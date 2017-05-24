@@ -62,7 +62,7 @@ namespace globebrowsing {
 			BoolProperty("enabled", "enabled", false)
 	})
 		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
-		, _modelSwitch(nullptr)
+		, _modelSwitch()
 		, _prevLevel(3)
 		, _isFirst(true)
 {
@@ -120,7 +120,7 @@ bool RenderableRoverSurface::initialize() {
 
 	_chunkedLodGlobe = _globe->chunkedLodGlobe();
 
-	_modelSwitch = LodModelSwitch(_globe);
+	_modelSwitch.initialize(_globe);
 
 	_chunkedLodGlobe->addSites(_subSitesWithModels);
 

@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/models/renderableexplorationpath.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/properties/scalar/boolproperty.h>

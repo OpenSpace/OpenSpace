@@ -27,31 +27,36 @@
 #include <ghoul/ghoul.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 
-
 namespace openspace {
 namespace globebrowsing {
-	class LodModelSwitch {
-	public :
-		enum class Mode {
-			High,
-			Low,
-			Close,
-		};
-
-		LodModelSwitch(RenderableGlobe* owner);
-
-		Mode getLevel(const RenderData& data);
-
-	private:
-		RenderableGlobe* _owner;
-
-		bool _firstLow;
-		bool _firstHigh;
-		bool _firstClose;
-
-		glm::dvec3 _prevCam;
+class LodModelSwitch {
+public :
+	enum class Mode {
+		High,
+		Low,
+		Close,
 	};
-}
-}
+
+	LodModelSwitch();
+
+	void initialize(RenderableGlobe* owner);
+
+	Mode getLevel(const RenderData& data);
+
+private:
+	RenderableGlobe* _owner;
+	SceneGraphNode*_parent;
+
+	double _ellipsoidShrinkTerm;
+
+	bool _firstLow;
+	bool _firstHigh;
+	bool _firstClose;
+
+	glm::dvec3 _prevCam;
+};
+
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif //__OPENSPACE_MODULE_GLOBEBROWSING___LOD_MODEL_SWITCH___H__
