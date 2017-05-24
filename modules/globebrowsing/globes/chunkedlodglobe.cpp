@@ -253,12 +253,19 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
 
         float sample = sample0 * (1.0 - samplePosFract.y) + sample1 * samplePosFract.y;
 
-        // Perform depth transform to get the value in meters
-        height = depthTransform.depthOffset + depthTransform.depthScale * sample;
-        // Make sure that the height value follows the layer settings.
-        // For example if the multiplier is set to a value bigger than one,
-        // the sampled height should be modified as well.
-        height = layer->renderSettings().performLayerSettings(height);
+        // Same as is used in the shader. This is not a perfect solution but
+        // if the sample is actually a no-data-value (min_float) the interpolated
+        // value might not be. Therefore we have a cut-off. Assuming no data value
+        // is smaller than -100000
+        if (sample > -100000)
+        {
+            // Perform depth transform to get the value in meters
+            height = depthTransform.depthOffset + depthTransform.depthScale * sample;
+            // Make sure that the height value follows the layer settings.
+            // For example if the multiplier is set to a value bigger than one,
+            // the sampled height should be modified as well.
+            height = layer->renderSettings().performLayerSettings(height);
+        }
     }
     // Return the result
     return height;

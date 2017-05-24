@@ -324,11 +324,13 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
     noDataValues.resize(_initData.nRasters());
 
     for (size_t raster = 0; raster < _initData.nRasters(); ++raster) {
-        preprocessData->maxValues[raster] = -FLT_MAX;
+        preprocessData->maxValues[raster] = FLT_MIN;
         preprocessData->minValues[raster] = FLT_MAX;
         preprocessData->hasMissingData[raster] = false;
         noDataValues[raster] = noDataValueAsFloat();
     }
+
+    bool allIsMissing = true;
 
     for (int y = 0; y < region.numPixels.y; ++y) {
         size_t yi = (region.numPixels.y - 1 - y) * bytesPerLine;
@@ -340,7 +342,10 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
                     _initData.glType(),
                     &(rawTile->imageData[yi + i])
                 );
-                if (val != noDataValue && val == val) {
+                if (val != noDataValue &&
+                    val == val &&
+                    val != 32767) // Max int which is the real nodatavalue for terrain tileset
+                {
                     preprocessData->maxValues[raster] = std::max(
                         val,
                         preprocessData->maxValues[raster]
@@ -349,13 +354,20 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
                         val,
                         preprocessData->minValues[raster]
                     );
+                    allIsMissing = false;
                 }
                 else {
                     preprocessData->hasMissingData[raster] = true;
+                    float& floatToRewrite = reinterpret_cast<float&>(rawTile->imageData[yi + i]);
+                    floatToRewrite = FLT_MIN;
                 }
                 i += _initData.bytesPerDatum();
             }
         }
+    }
+  
+    if (allIsMissing) {
+        rawTile->error = RawTile::ReadError::Failure;
     }
 
     return std::shared_ptr<TileMetaData>(preprocessData);
