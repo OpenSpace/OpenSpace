@@ -50,6 +50,7 @@ public:
 private:
 	std::shared_ptr<AsyncSurfaceModelProvider> _asyncSurfaceModelProvider;
 	std::shared_ptr<ModelCache> _modelCache;
+	std::vector<int> getLevelsAbove(const std::vector<int> availableLevels, const int requestedLevel);
 
 	void initModelsFromLoadedData(Renderable* parent);
 	void clearRequestQueue();

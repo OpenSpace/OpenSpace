@@ -43,6 +43,9 @@ struct Subsite {
 	// Latitude and longitude for this subsite
 	double lat, lon;
 
+	// Stores what levels are available for this subsite
+	std::vector<int> availableLevels;
+
 	// Latitude and longitude for the site that this subsite belongs to
 	double siteLat, siteLon;
 

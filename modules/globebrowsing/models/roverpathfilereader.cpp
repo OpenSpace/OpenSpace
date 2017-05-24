@@ -125,19 +125,38 @@ std::vector<Subsite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 
 	std::vector<Subsite> subsitesWithModels;
 	for (auto subsite : allSubsites) {
-		std::string pathToDriveFolder;
+		std::string pathToDriveFolderLevel1;
+		std::string pathToDriveFolderLevel2;
+		std::string pathToDriveFolderLevel3;
 
 		// Convert the site and drive string to match the folder structure
 		std::string site = convertString(subsite.site, "site");
 		std::string drive = convertString(subsite.drive, "drive");
-		pathToDriveFolder = surfaceModelFilePath + "/level1/" + "site" + site + "/" + "drive" + drive;
+		pathToDriveFolderLevel1 = surfaceModelFilePath + "/level1/" + "site" + site + "/" + "drive" + drive;
+		pathToDriveFolderLevel2 = surfaceModelFilePath + "/level2/" + "site" + site + "/" + "drive" + drive;
+		pathToDriveFolderLevel3 = surfaceModelFilePath + "/level3/" + "site" + site + "/" + "drive" + drive;
 
 		// If the folder exists it means there are models for this subsite, then check if that
 		// specific site/drive combination has already been added. If the models haven't already been 
 		// added, loop through the text file with file names and add those to the subsite.
-		bool pathExists = FileSys.directoryExists(pathToDriveFolder);
+		// Also store information about which levels are available for this specific subsite.
+		bool pathToLevel1Exists = FileSys.directoryExists(pathToDriveFolderLevel1);
+		bool pathToLevel2Exists = FileSys.directoryExists(pathToDriveFolderLevel2);
+		bool pathToLevel3Exists = FileSys.directoryExists(pathToDriveFolderLevel3);
+
+		// TODO: refactor like hell!!!
+
+		if (pathToLevel1Exists)
+			subsite.availableLevels.push_back(1);
+
+		if (pathToLevel2Exists)
+			subsite.availableLevels.push_back(2);
+
+		if (pathToLevel3Exists)
+			subsite.availableLevels.push_back(3);
+
 		bool modelExists = false;
-		if(pathExists) {
+		if(pathToLevel1Exists) {
 			for (auto controlSubsite : subsitesWithModels) {
 				if (subsite.site == controlSubsite.site && subsite.drive == controlSubsite.drive) {
 					modelExists = true;
@@ -145,7 +164,7 @@ std::vector<Subsite> RoverPathFileReader::extractSubsitesWithModels(const ghoul:
 				}
 			}
 			if(!modelExists) {
-				std::string pathToFilenamesTextFile = pathToDriveFolder + "/filenames.txt";
+				std::string pathToFilenamesTextFile = pathToDriveFolderLevel1 + "/filenames.txt";
 				std::vector<std::string> fileNames = extractFileNames(pathToFilenamesTextFile);
 
 				subsite.fileNames = fileNames;

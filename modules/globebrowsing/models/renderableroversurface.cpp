@@ -99,8 +99,6 @@ namespace globebrowsing {
 	_absTexturePath = absPath(_texturePath);
 	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
 	_renderableExplorationPath = std::make_shared<RenderableExplorationPath>();
-
-
 }
 
 bool RenderableRoverSurface::initialize() {
@@ -179,7 +177,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 	std::vector<Subsite> ss1;
 
-	// TODO: Find way to skip the loop
+	// TODO: Find way to skip the loop, must change to std::shared_ptr<Subsite> instead.
 	for (auto s : ss) {
 		Subsite s1 = std::move(s);
 		s1.pathToGeometryFolder = _absModelPath;
