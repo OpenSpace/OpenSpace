@@ -536,7 +536,18 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return false;
     }
 
-    return true;
+    // Do not consume modifier keys
+    switch (key) {
+    case Key::LeftShift:
+    case Key::RightShift:
+    case Key::LeftAlt:
+    case Key::RightAlt:
+    case Key::LeftControl:
+    case Key::RightControl:
+        return false;
+    default:
+        return true;
+    }
 }
 
 void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
