@@ -104,8 +104,8 @@ void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_p
 void AsyncSurfaceModelProvider::unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels) {
 	for (auto model : subsiteModels->models) {
 		model->geometry->unmapBuffers();
-		//model->texture->uploadTexture();
-		//model->texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+		model->texture->uploadTexture();
+		model->texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 	}
 }
 
