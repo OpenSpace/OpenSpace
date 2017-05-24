@@ -124,6 +124,105 @@ void SpacecraftImageryManager::loadTransferFunctions(
 
 void SpacecraftImageryManager::loadImageMetadata(
       const std::string& path,
+      std::unordered_map<std::string, TimedependentStateSequence> _imageMetadataMap,
+      const std::unordered_set<std::string>& _filter)
+{
+
+    LDEBUG("Begin loading imagery metadata");
+
+    using RawPath = ghoul::filesystem::Directory::RawPath;
+    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
+
+    if (!FileSys.directoryExists(sequenceDir)) {
+        LERROR("Could not load directory '" << sequenceDir.path() << "'");
+    }
+
+    unsigned int count = 0;
+    using Recursive = ghoul::filesystem::Directory::RawPath;
+    using Sort = ghoul::filesystem::Directory::Sort;
+    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
+
+    //std::unordered_map<std::string, std::vector<TimedependentState>> _imageMetadataMapTemp;
+
+    for (auto seqPath : sequencePaths) {
+        if (size_t position = seqPath.find_last_of(".") + 1) {
+            if (position != std::string::npos) {
+                ghoul::filesystem::File currentFile(seqPath);
+                std::string extension = currentFile.fileExtension();
+                if (extension == "jp2" || extension == "j2k") {
+                    // // TODO(mnoven): Prettify or read metadata instead
+                    std::string fileName = currentFile.filename();
+                    size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
+                    std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
+
+                    // Name
+                    size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
+                    std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
+                    //LDEBUG("Satellite NAME: " << satelliteName);
+
+                    // Instrument
+                    size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
+                    std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
+                    size_t dot = instrumentName.rfind(".");
+                    instrumentName = instrumentName.substr(0, dot);
+                    std::string filterKey = instrumentName;
+                    std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
+                                   ::tolower);
+
+                    // If filter is empty or value exist
+                    if (_filter.size() == 0
+                        || _filter.find(filterKey) != _filter.end()) {
+                        count++;
+                        // Time
+                        std::vector<std::string> tokens;
+                        std::stringstream ss;
+                        ss.str(currentFile.filename());
+                        std:: string item;
+                        while (std::getline(ss, item, '_')) {
+                            tokens.push_back(item);
+                        }
+                        std::string time = tokens[0] + "-" + tokens[1] + "-" +
+                                           tokens[2] + "T" + tokens[4] + ":" +
+                                           tokens[5] + ":" + tokens[6] + "." + tokens[7];
+
+                        ImageMetadataNew metadata = ImageMetadataNew(Time::ref().convertTime(time));
+                        // metadata.filename = seqPath;
+
+                        // //TimedependentState t = TimedependentState(metadata);
+                        // _imageMetadataMap[instrumentName].addState(std::make_shared<ImageMetadataNew>(metadata));
+
+                       // _imageMetadataMap[instrumentName].lol();
+
+                        //ImageMetadata metadata(Time::ref().convertTime(time));
+                       // metadata.timeObserved = Time::ref().convertTime(time);
+                       // _imageMetadataMapTemp[instrumentName].push_back(metadata);
+                    }
+                }
+            }
+        }
+        //LDEBUG("Finished loading path " << seqPath);
+    }
+   /* struct A {
+        A();
+    };*/
+
+  //  std::map<std::string, A> map;
+
+    // for (const auto& sequence : _imageMetadataMapTemp) {
+    //     TimedependentStateSequence ts = std::move(sequence.second);
+    //     _imageMetadataMap[sequence.first] = TimedependentStateSequence();
+    //    // map["asd"] = A();
+    //     _imageMetadataMap.insert({sequence.first, seconce.second});
+    // }
+
+
+    LDEBUG("Finish loading imagery metadata");
+    LDEBUG(count << " Images loaded");
+}
+
+
+void SpacecraftImageryManager::loadImageMetadata(
+      const std::string& path,
       std::unordered_map<std::string, std::vector<ImageMetadata>>& _imageMetadataMap,
       const std::unordered_set<std::string>& _filter)
 {

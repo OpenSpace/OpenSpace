@@ -179,6 +179,8 @@ private:
 
     std::unordered_map<int, std::string> _optionToInstrument;
     std::unordered_map<std::string, std::vector<ImageMetadata>> _imageMetadataMap;
+    std::unordered_map<std::string, TimedependentStateSequence> _imageMetadataMap2;
+
     std::unordered_set<std::string> _instrumentFilter;
     std::unordered_set<std::string> _enqueuedImageIds;
 

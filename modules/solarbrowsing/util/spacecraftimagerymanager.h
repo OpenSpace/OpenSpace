@@ -31,6 +31,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <unordered_set>
+#include <modules/solarbrowsing/util/statemanager.h>
 
 #define IMG_PRECISION unsigned char
 
@@ -40,15 +41,19 @@ namespace openspace {
 
 class TransferFunction;
 
+struct ImageMetadataNew : public TimedependentState {
+    ImageMetadataNew(double timeObserved) : TimedependentState(timeObserved) {}
+
+    std::string filename;
+};
+
 struct ImageMetadata {
     double timeObserved;
     std::string filename;
-
     bool operator<(const double val) const {
         return timeObserved < val;
     }
 };
-
 
 class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManager> {
     friend class ghoul::Singleton<SpacecraftImageryManager>;
@@ -62,6 +67,12 @@ public:
           std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap,
           const std::unordered_set<std::string>& _filter);
     std::vector<ImageMetadata> loadImageMetadata(const std::string& path);
+
+    void loadImageMetadata(
+      const std::string& path,
+      std::unordered_map<std::string, TimedependentStateSequence> _imageMetadataMap,
+      const std::unordered_set<std::string>& _filter);
+
     void loadImageMetadata(
           const std::string& path,
           std::unordered_map<std::string, std::vector<ImageMetadata>>& _imageMetadataMap,
