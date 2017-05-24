@@ -68,6 +68,10 @@ namespace {
     // Determines at which speed the console opens.
      const float ConsoleOpenSpeed = 2.5;
 
+     // The number of characters to display after the cursor
+     // when horizontal scrolling is required.
+     const int NVisibleCharsAfterCursor = 5;
+
 } // namespace
 
 namespace openspace {
@@ -653,23 +657,42 @@ void LuaConsole::render() {
 
     // Render the current command
     std::string currentCommand = _commands.at(_activeCommand);
-    // We chop off the beginning of the string until it fits on the screen (with a margin)
+    // We chop off the beginning and end of the string until it fits on the screen (with a margin)
     // this should be replaced as soon as the mono-spaced fonts work properly. Right now,
     // every third character is a bit wider than the others
+
+    size_t nChoppedCharsBeginning = 0, nChoppedCharsEnd = 0;
+
+    size_t inputPositionFromEnd = currentCommand.size() - _inputPosition;
     while (true) {
-        const float w = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+        // Compute the current width of the string and console prefix.
+        const float currentWidth = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
             *_font,
             "> %s",
             currentCommand.c_str()
         ).boundingBox.x + inputLocation.x;
 
-        const float d = w - res.x * 0.995f;
-        if (d < 0.f) {
+        // Compute the overflow in pixels
+        const float overflow = currentWidth - res.x * 0.995f;
+        if (overflow <= 0.f) {
             break;
         }
 
-        currentCommand = currentCommand.substr(std::max(1.f, d / _font->glyph('m')->width()));
+        // Since the overflow is positive, at least one character needs to be removed.
+        size_t nCharsOverflow = std::max(1.f, overflow / _font->glyph('m')->width());
+
+        // Prioritize chopping in the end of the string, but do not hide the cursor and `NVisibleCharsAfterCursor` more characters.
+        size_t maxAdditionalCharsToChopEnd = std::max(0, static_cast<int>(inputPositionFromEnd) - 1 - NVisibleCharsAfterCursor - static_cast<int>(nChoppedCharsEnd));
+        size_t nCharsToChopEnd = std::min(nCharsOverflow, maxAdditionalCharsToChopEnd);
+        size_t nCharsToChopBeginning = nCharsOverflow - nCharsToChopEnd;
+
+        nChoppedCharsBeginning += nCharsToChopBeginning;
+        nChoppedCharsEnd += nCharsToChopEnd;
+
+        size_t displayLength = _commands.at(_activeCommand).size() - nChoppedCharsBeginning - nChoppedCharsEnd;
+        currentCommand = _commands.at(_activeCommand).substr(nChoppedCharsBeginning, displayLength);
     }
+
     RenderFontCr(
         *_font,
         inputLocation,
@@ -686,7 +709,7 @@ void LuaConsole::render() {
         *_font,
         inputLocation,
         _entryTextColor,
-        (std::string(currentCommand.length() + 2, ' ') + "^").c_str()
+        (std::string(_inputPosition - nChoppedCharsBeginning + 2, ' ') + "^").c_str()
     );
     
     glm::vec2 historyInputLocation = glm::vec2(
