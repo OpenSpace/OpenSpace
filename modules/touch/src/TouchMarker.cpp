@@ -22,30 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-
-#include <openspace/util/openspacemodule.h>
-#include <modules/touch/include/TuioEar.h>
-#include <modules/touch/include/TouchInteraction.h>
 #include <modules/touch/include/TouchMarker.h>
 
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/settingsengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/interaction/interactionhandler.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/screenspacerenderable.h>
+
+#include <ghoul/logging/logmanager.h>
+
+namespace {
+	const std::string _loggerCat = "TouchMarker";
+}
 namespace openspace {
 
-	class TouchModule : public OpenSpaceModule {
-		using Point = std::pair<int, TUIO::TuioPoint>;
-	public:
-		TouchModule();
+TouchMarker::TouchMarker() 
+	: properties::PropertyOwner("TouchMarker") { }
 
-	private:
-		bool hasNewInput();
-
-		TuioEar ear;
-		TouchInteraction touch;
-		std::vector<TUIO::TuioCursor> listOfContactPoints;
-		std::vector<Point> lastProcessed; // contains an id and the TuioPoint that was processed last frame
-	};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+} // openspace namespace

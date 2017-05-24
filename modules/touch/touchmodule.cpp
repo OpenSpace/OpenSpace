@@ -125,6 +125,12 @@ TouchModule::TouchModule()
 		touch.step(OsEng.windowWrapper().deltaTime());
 	}
 	);
+
+	OsEng.registerModuleCallback(
+		OpenSpaceEngine::CallbackOption::PostDraw,
+		[]() {
+	}
+	);
 }
 
 } // namespace openspace

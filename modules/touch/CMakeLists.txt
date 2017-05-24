@@ -28,6 +28,7 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/TuioEar.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/TouchInteraction.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/TouchMarker.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -35,6 +36,7 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/ext/levmarq.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TuioEar.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/TouchInteraction.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/TouchMarker.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 	
