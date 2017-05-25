@@ -36,17 +36,35 @@
 #define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <include/wrapper/cef_helpers.h>
+#include "browser_client.h"
+#include "gui_render_handler.h"
 
 namespace openspace {
+
+#ifdef __APPLE__
+    static const std::string SUBPROCESS_PATH = "C:\\Users\\Klas\\Development\\OpenSpace\\bin\\openspace\\webgui_cef_helper.exe";
+#endif
 
 class WebGUIModule : public OpenSpaceModule {
 public:
     WebGUIModule();
     virtual ~WebGUIModule() = default;
 
-    // void lifeCheck() { std::cout << "i'm alive" << endl; }
+protected:
+	void initialize();
+	void internalInitialize();
+    void initializeCallbacks();
+
+private:
+    GUIRenderHandler* renderHandler;
+    CefRefPtr<BrowserClient> client;
+    CefRefPtr<CefBrowser> browser;
+	CefSettings settings;
+
+    void reshape(WindowWrapper&);
 };
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
+#endif // __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__

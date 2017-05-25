@@ -24,10 +24,101 @@
 
 #include "modules/webgui/webguimodule.h"
 
+namespace {
+    std::string _loggerCat = "WebGUI";
+}
+
 namespace openspace {
 
 WebGUIModule::WebGUIModule()
-    : OpenSpaceModule("WebGUI")
-{}
+    : OpenSpaceModule("WebGUI") {
+    LDEBUG("Initializing CEF...");
+    // --off-screen-rendering-enabled
+    CefMainArgs args;
+
+#ifdef __APPLE__
+    CefString(&settings.browser_subprocess_path).FromASCII((char*) SUBPROCESS_PATH.c_str());
+#endif
+#ifdef __WIN32__
+    settings.multi_threaded_message_loop = true;
+#endif
+
+    int exitCode = CefExecuteProcess(args, nullptr, NULL);
+    CefInitialize(args, settings, nullptr, NULL);
+    if (exitCode >= 0) {
+        // The sub-process terminated, exit now.
+//        return exitCode;
+    }
+    LDEBUG("Initializing CEF... done!");
+
+    renderHandler = new GUIRenderHandler();
+    client = new BrowserClient(renderHandler);
+}
+
+void WebGUIModule::internalInitialize() {
+    OsEng.registerModuleCallback(
+            OpenSpaceEngine::CallbackOption::Initialize,
+            [this](){
+                LDEBUG("Initializing WebGUIModule members");
+                initialize();
+                renderHandler->initialize();
+            }
+    );
+    OsEng.registerModuleCallback(
+            OpenSpaceEngine::CallbackOption::Deinitialize,
+            [this](){
+                LDEBUG("Denitializing CEF...");
+                CefShutdown();
+                LDEBUG("Denitializing CEF... done!");
+            }
+    );
+}
+
+void WebGUIModule::initialize() {
+    LDEBUG("Creating CEF context in WebGUI...");
+    CefBrowserSettings browserSettings;
+    CefWindowInfo windowInfo;
+
+    bool renderTransparent = true;
+    windowInfo.SetAsWindowless(nullptr, renderTransparent);
+
+    std::string url = "https://media.giphy.com/media/3t7RAFhu75Wwg/giphy.gif";
+    browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), url, browserSettings, NULL);
+    LDEBUG("Creating CEF context in WebGUI... done!");
+
+    initializeCallbacks();
+
+    WindowWrapper& wrapper = OsEng.windowWrapper();
+    reshape(wrapper);
+}
+
+void WebGUIModule::reshape(WindowWrapper& wrapper) {
+    glm::ivec2 windowSize = wrapper.currentWindowSize();
+    renderHandler->reshape(windowSize.x, windowSize.y);
+    browser->GetHost()->WasResized();
+}
+
+void WebGUIModule::initializeCallbacks() {
+    OsEng.registerModuleCallback(
+            // This is done in the PostDraw phase so that it will render it on top of
+            // everything else in the case of fisheyes. With this being in the Render callback
+            // the GUI would be rendered on top of each of the cube faces
+            OpenSpaceEngine::CallbackOption::Render,
+            [this](){
+                WindowWrapper& wrapper = OsEng.windowWrapper();
+
+                if (wrapper.isMaster()) {
+                    if (wrapper.windowHasResized()) {
+                        reshape(wrapper);
+                    }
+#ifndef __WIN32__
+                    // Use multi-threaded message loop on windows
+                    CefDoMessageLoopWork();
+#endif
+                    renderHandler->draw();
+                }
+            }
+    );
+}
 
 }

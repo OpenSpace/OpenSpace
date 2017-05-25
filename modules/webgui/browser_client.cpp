@@ -27,6 +27,12 @@
 
 namespace openspace {
 
-BrowserClient::BrowserClient(Renderer* renderer) {};
+BrowserClient::BrowserClient(GUIRenderHandler* handler) {
+    renderHandler = handler;
+};
+
+CefRefPtr<CefRenderHandler> BrowserClient::GetRenderHandler() {
+    return renderHandler;
+}
 
 } // namespace openspace

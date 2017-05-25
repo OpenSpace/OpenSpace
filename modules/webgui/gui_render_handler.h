@@ -22,26 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "renderer.h"
+#ifndef __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
+#define __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
+
+#include <memory>
+#include <include/openspace/engine/openspaceengine.h>
+#include <include/openspace/rendering/renderengine.h>
+#include <include/openspace/engine/wrapper/windowwrapper.h>
+#include <ghoul/opengl/opengl>
+#include <fmt/format.h>
+#include <include/cef_app.h>
+#include <include/cef_render_handler.h>
 
 namespace openspace {
 
-void Renderer::init(void) {
-  ghoul::opengl::ProgramObject shaderProgram();
-  ghoul::opengl::ShaderObject vertexShader(ghoul::opengl::ShaderType.ShaderTypeVertex,
-                                           "shaders/vertex.glsl");
-  ghoul::opengl::ShaderObject fragmentShader(ghoul::opengl::ShaderType.ShaderTypeFragment,
-                                             "shaders/fragments.glsl");
-  shaderProgram.attachObject(vertexShader);
-  shaderProgram.attachObject(fragmentShader);
-  // setup shaders etc
+class GUIRenderHandler : public CefRenderHandler {
+public:
+    GUIRenderHandler();
 
-  // intialized = true;
-}
+    void initialize();
+    void initializeGL();
+    void reshape(int, int);
+    void draw(void);
+    bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
+    void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList &dirtyRects, const void *buffer,
+                 int width, int height) override;
 
-void Renderer::reshape(int w, int h) {
-  width  = w;
-  height = h;
-}
+    bool initialized;
+
+private:
+    int width, height;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
+    GLuint program, vao, vbo, texture, positionLoc;
+
+    IMPLEMENT_REFCOUNTING(GUIRenderHandler);
+};
 
 } // namespace openspace
+
+#endif  // __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__

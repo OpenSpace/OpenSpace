@@ -25,15 +25,23 @@
 #ifndef __OPENSPACE_MODULE_WEBGUI___BROWSER_CLIENT___H__
 #define __OPENSPACE_MODULE_WEBGUI___BROWSER_CLIENT___H__
 
-#include "include/cef_client.h"
+#include <memory>
+#include <include/cef_client.h>
 
-#include "renderer.h"
+#include "gui_render_handler.h"
 
 namespace openspace {
 
 class BrowserClient : public CefClient {
 public:
-  BrowserClient(Renderer*);
+    BrowserClient(GUIRenderHandler*);
+
+    virtual CefRefPtr<CefRenderHandler> GetRenderHandler();
+
+private:
+    CefRefPtr<CefRenderHandler> renderHandler;
+
+    IMPLEMENT_REFCOUNTING(BrowserClient);
 };
 
 } // namespace openspace

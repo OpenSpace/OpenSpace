@@ -110,3 +110,14 @@ macro(SET_OPENSPACE_CEF_TARGET_OUT_DIR)
     set(CEF_TARGET_OUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIGURATION>")
   endif()
 endmacro()
+
+macro(ADD_WINDOWS_CEF_MANIFEST manifest_path target extension)
+  add_custom_command(
+          TARGET ${target}
+          POST_BUILD
+          COMMAND "mt.exe" -nologo
+          -manifest \"${manifest_path}/${target}.${extension}.manifest\" \"${manifest_path}/compatibility.manifest\"
+          -outputresource:"${CEF_TARGET_OUT_DIR}/${target}.${extension}"\;\#1
+          COMMENT "Adding manifest..."
+  )
+endmacro()

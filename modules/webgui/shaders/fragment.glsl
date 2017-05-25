@@ -24,7 +24,6 @@
 
 #version __CONTEXT__
 
-
 in vec2 Texcoord;
 
 out vec4 outputColor;
