@@ -100,7 +100,7 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	}		
 		
 	if (_isReady) {
-		_renderableExplorationPath = std::make_shared<RenderableExplorationPath>(*this, _pathLatlonCoordinates);
+		//_renderableExplorationPath = std::make_shared<RenderableExplorationPath>(*this, _pathLatlonCoordinates);
 	}
 	
 	ghoul::Dictionary modelDic;
@@ -131,7 +131,7 @@ RenderableSite::RenderableSite(const ghoul::Dictionary& dictionary)
 	
 bool RenderableSite::initialize() {
 	//TODO: Check if _renderableExplorationPath has been created before calling initialize.
-	_renderableExplorationPath->initialize();
+	//_renderableExplorationPath->initialize();
 		
 	for (auto it = _models.begin(); it != _models.end(); ++it) {
 		(*it)._model->initialize(this);
