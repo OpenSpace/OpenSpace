@@ -82,7 +82,7 @@ TouchInteraction::TouchInteraction()
 	_sensitivity{glm::dvec2(0.0808181818181818, 0.0454545454545455), 4.0, 2.75, glm::dvec2(0.0808181818181818, 0.0454545454545455) },
 	_centroid{ glm::dvec3(0.0) },
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
-	_currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 }, _timeSlack { 0.0 },
+	_currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 }, _numOfTries{ 0 }, _timeSlack{ 0.0 },
 	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true }, _guiON{ false }
 {
 	addProperty(_touchActive); // how do i hide this?
@@ -268,7 +268,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 			for (int j = 0; j < 100; ++j) { // iterative process to find the minimum step h that gives a good gradient
 				dPar.assign(par, par + ptr->nDOF); // reset parameters for precision
 				if ((f1 - f0) != 0 && lastG == 0) { // found good step size h
-					h *= scale * scale;
+					h *= std::max(scale * scale, 10.0);
 					dPar.at(i) += h;
 					f1 = ptr->distToMinimize(dPar.data(), x, fdata, lmstat);
 					break;
@@ -351,6 +351,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 	//std::cout << "Levmarq success after " << _lmstat.final_it << " iterations\n";
 
 	if (_lmSuccess && !_unitTest) { // if good values were found set new camera state
+		_numOfTries = 0;
 		_vel.orbit = glm::dvec2(par.at(0), par.at(1));
 		if (nDOF > 2) {
 			_vel.zoom = par.at(2);
@@ -368,6 +369,12 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		_vel.zoom = 0.0;
 		_vel.roll = 0.0;
 		_vel.pan = glm::dvec2(0.0, 0.0);
+	}
+	else {
+		_numOfTries++;
+		if (_numOfTries > 3) {
+			resetAfterInput();
+		}
 	}
 }
 
@@ -726,10 +733,8 @@ void TouchInteraction::decelerate(double dt) {
 // Called if all fingers are off the screen
 void TouchInteraction::resetAfterInput() {
 	//ghoul_postcondition(_selected.empty(), "Selected list must be empty after reset");
-	_lmSuccess = true;
-	_guiON = OnScreenGUIModule::gui.isEnabled();
 	//_directTouchMode = false;
-	if (_directTouchMode && _selected.size() > 0) {
+	if (_directTouchMode && _selected.size() > 0 && _lmSuccess) {
 		double spinDelta = _spinSensitivity / OsEng.windowWrapper().averageDeltaTime();
 		if (glm::length(_lastVel.pan) > _panSpeedThreshold) { // might not be desired
 			_vel.pan = _lastVel.pan * spinDelta;
@@ -749,6 +754,15 @@ void TouchInteraction::resetAfterInput() {
 			OnScreenGUIModule::touchInput.action = 0;
 		}
 	}
+	else {
+		OnScreenGUIModule::touchInput.active = false;
+		OnScreenGUIModule::touchInput.action = 0;
+	}
+	
+	_lmSuccess = true;
+	_numOfTries = 0;
+	_guiON = OnScreenGUIModule::gui.isEnabled();
+
 	_lastVel.orbit = glm::dvec2(0.0, 0.0);
 	_lastVel.zoom = 0.0;
 	_lastVel.roll = 0.0;

@@ -138,6 +138,7 @@ class TouchInteraction : public properties::PropertyOwner
 		double _slerpdT;
 		double _timeSlack;
 		int _numOfTests;
+		int _numOfTries;
 		TUIO::TuioTime _time;
 		bool _directTouchMode;
 		bool _tap;
