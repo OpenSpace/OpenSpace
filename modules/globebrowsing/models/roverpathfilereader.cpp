@@ -33,7 +33,6 @@
 namespace {
 	const std::string _loggerCat		= "RoverPathFileReader";
 	const char* keyRoverLocationPath	= "RoverLocationPath";
-	const char* keyModelPath			= "ModelPath";
 	const char* keyAbsPathToTextures	= "AbsPathToTextures";
 	const char* keyAbsPathToModels		= "AbsPathToModels";
 }
@@ -116,10 +115,6 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 	if (!dictionary.getValue(keyRoverLocationPath, roverLocationFilePath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
 
-	std::string surfaceModelFilePath;
-	if (!dictionary.getValue(keyModelPath, surfaceModelFilePath))
-		throw ghoul::RuntimeError(std::string(keyModelPath) + " must be specified!");
-
 	std::string absPathToTextures;
 	if (!dictionary.getValue(keyAbsPathToTextures, absPathToTextures))
 		throw ghoul::RuntimeError(std::string(keyAbsPathToTextures) + " must be specified!");
@@ -142,9 +137,9 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 		// Convert the site and drive string to match the folder structure
 		std::string site = convertString(subsite->site, "site");
 		std::string drive = convertString(subsite->drive, "drive");
-		pathToDriveFolderLevel1 = surfaceModelFilePath + "/level1/" + "site" + site + "/" + "drive" + drive;
-		pathToDriveFolderLevel2 = surfaceModelFilePath + "/level2/" + "site" + site + "/" + "drive" + drive;
-		pathToDriveFolderLevel3 = surfaceModelFilePath + "/level3/" + "site" + site + "/" + "drive" + drive;
+		pathToDriveFolderLevel1 = absPathToTModels + "/level1/" + "site" + site + "/" + "drive" + drive;
+		pathToDriveFolderLevel2 = absPathToTModels + "/level2/" + "site" + site + "/" + "drive" + drive;
+		pathToDriveFolderLevel3 = absPathToTModels + "/level3/" + "site" + site + "/" + "drive" + drive;
 
 		// If the folder exists it means there are models for this subsite, then check if that
 		// specific site/drive combination has already been added. If the models haven't already been 

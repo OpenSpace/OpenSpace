@@ -73,7 +73,6 @@ private:
 	std::string _texturePath;
 	std::string _absModelPath;
 	std::string _absTexturePath;
-	std::string _multiModelGeometry;
 
 	properties::Vec3Property _debugModelRotation;
 

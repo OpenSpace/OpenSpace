@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ROVERPATHFILEREADER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ROVERPATHFILEREADER___H__
 
-#include <modules/globebrowsing/models/renderableroversurface.h>
+#include <ghoul/misc/dictionary.h>
 #include <modules/globebrowsing/models/subsite.h>
 
 namespace openspace {
@@ -38,7 +38,6 @@ public:
 private:
 	static std::string RoverPathFileReader::convertString(const std::string sitenr, const std::string type);
 	static std::vector<std::string> RoverPathFileReader::extractFileNames(const std::string filePath);
-
 };
 } // namespace globebrowsing
 } // namespace openspace

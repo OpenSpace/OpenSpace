@@ -42,10 +42,6 @@ namespace {
 	const char* keyRoverLocationPath	= "RoverLocationPath";
 	const char* keyModelPath			= "ModelPath";
 	const char* keyTexturePath			= "TexturePath";
-	const char* keyGeometryFile			= "GeometryFile";
-	const char* keyRenderable			= "Renderable";
-	const char* keyType					= "Type";
-	const char* keyMultiModelGeometry	= "MultiModelGeometry";
 	const char* keyName					= "Name";
 	const char* keyAbsPathToTextures	= "AbsPathToTextures";
 	const char* keyAbsPathToModels		= "AbsPathToModels";
@@ -79,16 +75,13 @@ namespace globebrowsing {
 	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	ghoul_assert(success, "Name was not passed to RenderableSite");
 
-	_multiModelGeometry = "MultiModelGeometry";
-
-	// Save abs path to the models and texture folders
+	// Save abs path to the models and texture folders because the abs path is changed when leaving constructor.
 	_absModelPath = absPath(_modelPath);
 	_absTexturePath = absPath(_texturePath);
 
 	// Extract all subsites that has models
 	ghoul::Dictionary tempDictionary;
 	tempDictionary.setValue(keyRoverLocationPath, _roverLocationPath);
-	tempDictionary.setValue(keyModelPath, _modelPath);
 	tempDictionary.setValue(keyAbsPathToTextures, _absTexturePath);
 	tempDictionary.setValue(keyAbsPathToModels, _absModelPath);
 	_subSitesWithModels = RoverPathFileReader::extractSubsitesWithModels(tempDictionary);
@@ -96,7 +89,6 @@ namespace globebrowsing {
 	// Extract all subsites
 	ghoul::Dictionary tempDictionary2;
 	tempDictionary2.setValue(keyRoverLocationPath, _roverLocationPath);
-	tempDictionary2.setValue(keyModelPath, _modelPath);
 	_subSites = RoverPathFileReader::extractAllSubsites(tempDictionary2);
 
 	addProperty(_debugModelRotation);
@@ -179,6 +171,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 		case LodModelSwitch::Mode::Far:
 			//Far away
+			// Only used to decide if renderableexplorationpath should be visible or not atm.
 			level = 0;
 			break;
 	}
