@@ -178,6 +178,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 	_renderableExplorationPath->setLevel(level);
 	_renderableExplorationPath->render(data);
+	_cachingModelProvider->setLevel(level);
 
 	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
 	//FOR ALPHA BLENDING TO WORK

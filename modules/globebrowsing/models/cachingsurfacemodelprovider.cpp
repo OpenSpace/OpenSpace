@@ -80,6 +80,17 @@ void CachingSurfaceModelProvider::update(Renderable* parent) {
 	initModelsFromLoadedData(parent);
 }
 
+void CachingSurfaceModelProvider::setLevel(const int level) {
+	if (level != _previousLevel && level >= 2) {
+		clearQueuesAndJobs();
+	}
+	_previousLevel = level;
+}
+
+void CachingSurfaceModelProvider::clearQueuesAndJobs() {
+	_asyncSurfaceModelProvider->clearQueuesAndJobs();
+}
+
 std::vector<int> CachingSurfaceModelProvider::getLevelsAbove(const std::vector<int> availableLevels, const int requestedLevel) {
 	std::vector<int> levelsAbove;
 	for (int i = 0; i < requestedLevel - 1; i++) {

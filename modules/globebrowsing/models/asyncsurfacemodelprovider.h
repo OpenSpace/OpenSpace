@@ -42,6 +42,8 @@ public:
 	
 	std::vector<std::shared_ptr<SubsiteModels>> getLoadedModels();
 
+	void clearQueuesAndJobs();
+
 protected:
 	virtual bool satisfiesEnqueueCriteria(const uint64_t hashKey) const;
 

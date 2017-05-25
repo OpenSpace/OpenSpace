@@ -45,7 +45,8 @@ public:
 	std::vector<std::shared_ptr<SubsiteModels>> getModels(const std::vector<std::shared_ptr<Subsite>> Subsites, const int level);
 
 	void update(Renderable* parent);
-	void reset();
+	
+	void setLevel(const int level);
 
 private:
 	std::shared_ptr<AsyncSurfaceModelProvider> _asyncSurfaceModelProvider;
@@ -53,13 +54,15 @@ private:
 	std::vector<int> getLevelsAbove(const std::vector<int> availableLevels, const int requestedLevel);
 
 	void initModelsFromLoadedData(Renderable* parent);
-	void clearRequestQueue();
+	void clearQueuesAndJobs();
 
 	uint64_t hashKey(const std::string site, const std::string drive, const int level);
 	
 	Renderable* _parent;
 
 	Vertex* _vertexBufferData = nullptr;
+
+	int _previousLevel = 0;
 };
 
 } // namespace globebrowsing

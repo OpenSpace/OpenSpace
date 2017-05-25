@@ -47,7 +47,6 @@ bool AsyncSurfaceModelProvider::enqueueModelIO(const std::shared_ptr<Subsite> su
 		_diskToRamJobManager.enqueueJob(job);
 
 		_enqueuedModelRequests[subsite->hashKey(level)] = subsite;
-
 		return true;
 	}
 	return false;
@@ -69,6 +68,12 @@ std::vector<std::shared_ptr<SubsiteModels>> AsyncSurfaceModelProvider::getLoaded
 		initializedModels.push_back(subsiteModels);
 	}
 	return initializedModels;
+}
+
+void AsyncSurfaceModelProvider::clearQueuesAndJobs() {
+	_ramToGpuJobManager.clearEnqueuedJobs();
+	_diskToRamJobManager.clearEnqueuedJobs();
+	_enqueuedModelRequests.clear();
 }
 
 bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const uint64_t hashKey) const {
@@ -108,6 +113,8 @@ void AsyncSurfaceModelProvider::unmapBuffers(const std::shared_ptr<SubsiteModels
 		model->texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 	}
 }
+
+
 
 uint64_t AsyncSurfaceModelProvider::hashKey(const std::string site, const std::string drive, const int level) {
 	uint64_t key = 0LL;
