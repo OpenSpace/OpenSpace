@@ -194,7 +194,7 @@ private:
     std::unordered_set<std::string> _enqueuedImageIds;
 
     DecodeData getDecodeDataFromOsTime(const int& osTime);
-    void uploadImageDataToPBO(const int& image);
+    void uploadImageDataToPBO();
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
 
     void createFrustum();

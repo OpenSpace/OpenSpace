@@ -188,8 +188,8 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _texture->setDataOwnership(ghoul::Boolean::No);
     _texture->uploadTexture();
 
-    _currentActiveImage = 0;
-    _currentPBO = 0;
+  //  _currentActiveImage = 0;
+  //  _currentPBO = 0;
 
     // Initialize time
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
@@ -197,8 +197,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
     _activeInstruments.onChange([this]() {
         _pboIsDirty = false;
-
-        _updatingCurrentActiveChannel = true;
+       // _updatingCurrentActiveChannel = true;
         _currentActiveInstrument
                = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
         // if (_verboseMode) {
@@ -225,20 +224,15 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
            // _initializePBO = true;
             _concurrentJobManager.reset();
             fillBuffer(Time::ref().deltaTime());
-        } else {
-            uploadImageDataToPBO(_currentActiveImage);
-        }
-        _updatingCurrentActiveChannel = false;
+        } /*else {
+            uploadImageDataToPBO();
+        }*/
+        //_updatingCurrentActiveChannel = false;
     });
 
     _resolutionLevel.onChange([this]() {
-
-
-                _pboIsDirty = false;
-        if (_verboseMode) {
-            LDEBUG("Updating level of resolution " << _resolutionLevel);
-        }
-        _updatingCurrentLevelOfResolution = true;
+        _pboIsDirty = false;
+        //_updatingCurrentLevelOfResolution = true;
         _imageSize = _fullResolution / (pow(2, _resolutionLevel));
         //_pboSize = (_fullResolution * _fullResolution * sizeof(IMG_PRECISION)) / (pow(4, _resolutionLevel));
         _pboSize = _imageSize * _imageSize * sizeof(IMG_PRECISION);
@@ -251,10 +245,10 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         if (_useBuffering) {
             //_initializePBO = true;
             fillBuffer(Time::ref().deltaTime());
-        } else {
-            uploadImageDataToPBO(_currentActiveImage);
-        }
-        _updatingCurrentLevelOfResolution = false;
+        } /*else {
+            uploadImageDataToPBO();
+        }*/
+       // _updatingCurrentLevelOfResolution = false;
     });
 
     _moveFactor.onChange([this]() {
@@ -264,7 +258,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _deltaTimeLast = 1.0;
 
     if (_useBuffering) {
-        fillBuffer(1.0);
+        fillBuffer(Time::ref().j2000Seconds());
     }
 
     // If no buffer is used this is needed
@@ -291,7 +285,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     addProperty(_resolutionLevel);
     addProperty(_lazyBuffering);
     addProperty(_minRealTimeUpdateInterval);
-    addProperty(_asyncUploadPBO);
+    //addProperty(_asyncUploadPBO);
     addProperty(_useBuffering);
     addProperty(_usePBO);
     addProperty(_target);
@@ -302,7 +296,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 DecodeData RenderableSpacecraftCameraPlane::getDecodeDataFromOsTime(const int& osTime) {
     auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
     auto& state = stateSequence.getState(osTime);
-    const double& timeObserved = state.getTimeObserved();
+    const double& timeObserved = state.timeObserved();
     const std::string stateFilename = state.contents()->filename;
     DecodeData decodeData {_imageSize * _imageSize, stateFilename, _resolutionLevel, _verboseMode, timeObserved};
     return std::move(decodeData);
@@ -364,7 +358,6 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
 
         DecodeData decodeData = getDecodeDataFromOsTime(time);
         auto job = std::make_shared<DecodeJob>(decodeData);
-
         _concurrentJobManager.enqueueJob(job);
         _enqueuedImageIds.insert(decodeData.path + std::to_string(decodeData.totalImageSize));
         if (_verboseMode) {
@@ -529,7 +522,7 @@ bool RenderableSpacecraftCameraPlane::deinitialize() {
     return true;
 }
 
-void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
+void RenderableSpacecraftCameraPlane::uploadImageDataToPBO() {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboHandles[0]); // 1 - _currentPBO
     // Orphan data and multithread
     glBufferData(GL_PIXEL_UNPACK_BUFFER, _pboSize, NULL, GL_STREAM_DRAW);
@@ -539,95 +532,101 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
           glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, NULL, _pboSize,
                            GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
 
-    if (!_asyncUploadPBO) {
-        std::string& currentFilename = _imageMetadataMap[_currentActiveInstrument][image].filename;
-        decode(_pboBufferData, currentFilename);
+    if (!_useBuffering) {
+        const std::string filename = getDecodeDataFromOsTime(Time::ref().j2000Seconds()).path;
+        //std::string& currentFilename = _imageMetadataMap[_currentActiveInstrument][image].filename;
+        decode(_pboBufferData, filename);
         _pboIsDirty = true;
     } else {
-        if (!_useBuffering) {
-            std::string& currentFilename = _imageMetadataMap[_currentActiveInstrument][image].filename;
+       /* if (!_useBuffering) {
+            //std::string& currentFilename = _imageMetadataMap[_currentActiveInstrument][image].filename;
+
+            const std::string filename = getDecodeDataFromOsTime(Time::ref().j2000Seconds()).path;
+        //std::string& currentFilename = _imageMetadataMap[_currentActiveInstrument][image].filename;
+           // decode(_pboBufferData, filename);
+
             _future = std::make_unique<std::future<void>>(
-                  std::async(std::launch::async, [this, &currentFilename]() {
-                      decode(_pboBufferData, currentFilename);
+                  std::async(std::launch::async, [this, &filename]() {
+                      decode(_pboBufferData, filename);
                   }));
             _pboIsDirty = true;
-        } else {
-            bool hadFinishedJobs = false;
-            while (_concurrentJobManager.numFinishedJobs() > 0) {
-                std::shared_ptr<SolarImageData> b = _concurrentJobManager.popFinishedJob()->product();
+        } */ //else {
+        bool hadFinishedJobs = false;
+        while (_concurrentJobManager.numFinishedJobs() > 0) {
+            std::shared_ptr<SolarImageData> b = _concurrentJobManager.popFinishedJob()->product();
 
-                // Not found in set, queue finished old job
-                if (_enqueuedImageIds.find(b->name + std::to_string(b->dataSize))
-                    == _enqueuedImageIds.end()) {
-                    continue;
-                }
-
-                hadFinishedJobs = true;
-                _enqueuedImageIds.erase(b->name + std::to_string(b->dataSize));
-                unsigned char* data = b->data;
-
-                auto t1 = Clock::now();
-                std::memcpy(_pboBufferData, data, _imageSize * _imageSize * sizeof(unsigned char));
-                auto t2 = Clock::now();
-
-                if (_displayTimers) {
-                    LDEBUG("Memcpy time "
-                           << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
-                                    .count()
-                           << " ms" << std::endl);
-                }
-
-
-                // const double& startTime = b->timeObserved;
-                // auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
-                // auto& nextState = stateSequence.getState(startTime + (_bufferSize + 1) * Time::ref().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
-                // const std::string nextStateFilename = nextState.contents()->filename;
-                // const double& nextTimeObserved = nextState.getTimeObserved();
-
-                // const auto& imageList = _imageMetadataMap[_currentActiveInstrument];
-                // //const double& osTime = Time::ref().j2000Seconds();
-                // const double& startTime = b->timeObserved;
-                // double time = startTime + (_bufferSize + 1) * (Time::ref().deltaTime() * ( static_cast<double>(_minRealTimeUpdateInterval )/ 1000.0 ) );
-                // const auto& low = std::lower_bound(imageList.begin(), imageList.end(), time);
-                // int nextImageIndex = low - imageList.begin();
-                // if (nextImageIndexos
-                //     == _imageMetadataMap[_currentActiveInstrument].size()) {
-                //     nextImageIndex = nextImageIndex - 1;
-                // }
-
-                // std::string currentFilename
-                //       = _imageMetadataMap[_currentActiveInstrument][nextImageIndex].filename;
-
-                // double& timeObserved = _imageMetadataMap[_currentActiveInstrument][nextImageIndex].timeObserved;
-
-              //  DecodeData decodeData {_imageSize * _imageSize, nextStateFilename, _resolutionLevel, _verboseMode, b->timeObserved};
-                // auto job = std::make_shared<DecodeJob>(_imageSize, nextStateFilename,
-                //                                        _resolutionLevel, _verboseMode, nextTimeObserved);
-
-                const double& osTime = Time::ref().j2000Seconds();
-                DecodeData decodeData = getDecodeDataFromOsTime(osTime + (_bufferSize + 1) * (Time::ref().deltaTime() * (static_cast<double>(_minRealTimeUpdateInterval )/1000.0)));
-                auto job = std::make_shared<DecodeJob>(decodeData);
-                _concurrentJobManager.enqueueJob(job);
-                _enqueuedImageIds.insert(decodeData.path + std::to_string(decodeData.totalImageSize));
-
-                _initializePBO = false;
-                _pboIsDirty = true;
-
-                if (_verboseMode)  {
-                    LDEBUG("Popped image" << b->name);
-                    LDEBUG("Adding work from PBO " << decodeData.path);
-                }
-
-                break;
-
-            } if (!hadFinishedJobs) {
-                if (_verboseMode) {
-                    LWARNING("Nothing to update, buffer is not ready");
-                }
-                _pboBufferData = nullptr;
+            // Not found in set, queue finished old job
+            if (_enqueuedImageIds.find(b->name + std::to_string(b->dataSize))
+                == _enqueuedImageIds.end()) {
+                continue;
             }
 
+            hadFinishedJobs = true;
+            _enqueuedImageIds.erase(b->name + std::to_string(b->dataSize));
+            unsigned char* data = b->data;
+
+            auto t1 = Clock::now();
+            std::memcpy(_pboBufferData, data, _imageSize * _imageSize * sizeof(unsigned char));
+            auto t2 = Clock::now();
+
+            if (_displayTimers) {
+                LDEBUG("Memcpy time "
+                       << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
+                                .count()
+                       << " ms" << std::endl);
+            }
+
+
+            // const double& startTime = b->timeObserved;
+            // auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
+            // auto& nextState = stateSequence.getState(startTime + (_bufferSize + 1) * Time::ref().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
+            // const std::string nextStateFilename = nextState.contents()->filename;
+            // const double& nextTimeObserved = nextState.getTimeObserved();
+
+            // const auto& imageList = _imageMetadataMap[_currentActiveInstrument];
+            // //const double& osTime = Time::ref().j2000Seconds();
+            // const double& startTime = b->timeObserved;
+            // double time = startTime + (_bufferSize + 1) * (Time::ref().deltaTime() * ( static_cast<double>(_minRealTimeUpdateInterval )/ 1000.0 ) );
+            // const auto& low = std::lower_bound(imageList.begin(), imageList.end(), time);
+            // int nextImageIndex = low - imageList.begin();
+            // if (nextImageIndexos
+            //     == _imageMetadataMap[_currentActiveInstrument].size()) {
+            //     nextImageIndex = nextImageIndex - 1;
+            // }
+
+            // std::string currentFilename
+            //       = _imageMetadataMap[_currentActiveInstrument][nextImageIndex].filename;
+
+            // double& timeObserved = _imageMetadataMap[_currentActiveInstrument][nextImageIndex].timeObserved;
+
+          //  DecodeData decodeData {_imageSize * _imageSize, nextStateFilename, _resolutionLevel, _verboseMode, b->timeObserved};
+            // auto job = std::make_shared<DecodeJob>(_imageSize, nextStateFilename,
+            //                                        _resolutionLevel, _verboseMode, nextTimeObserved);
+
+            const double& osTime = Time::ref().j2000Seconds();
+            DecodeData decodeData = getDecodeDataFromOsTime(osTime + (_bufferSize + 1) * (Time::ref().deltaTime() * (static_cast<double>(_minRealTimeUpdateInterval )/1000.0)));
+            auto job = std::make_shared<DecodeJob>(decodeData);
+            _concurrentJobManager.enqueueJob(job);
+            _enqueuedImageIds.insert(decodeData.path + std::to_string(decodeData.totalImageSize));
+
+            _initializePBO = false;
+            _pboIsDirty = true;
+
+            if (_verboseMode)  {
+                LDEBUG("Popped image" << b->name);
+                LDEBUG("Adding work from PBO " << decodeData.path);
+            }
+
+            break;
+
+        } if (!hadFinishedJobs) {
+            if (_verboseMode) {
+                LWARNING("Nothing to update, buffer is not ready");
+            }
+            _pboBufferData = nullptr;
         }
+
+       // }
 
     }
 
@@ -722,7 +721,7 @@ void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime)
             LDEBUG("Time to update image! ");
         }
         if (_usePBO /*&& !_initializePBO*/) {
-            uploadImageDataToPBO(_currentActiveImage);
+            uploadImageDataToPBO();
         }
         //_initializePBO = false;
     }
