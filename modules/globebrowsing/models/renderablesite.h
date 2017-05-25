@@ -31,6 +31,7 @@
 #include <ghoul/opengl/texture.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <modules/globebrowsing/tasks/imgreader.h>
 
 namespace openspace {
 
@@ -41,10 +42,10 @@ namespace modelgeometry {
 namespace globebrowsing {
 
 	struct Models {
-		std::string _texturePath;
+		std::vector<std::string> _texturePaths;
 		std::unique_ptr<modelgeometry::ModelGeometry> _model;
 		std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-		std::unique_ptr<ghoul::opengl::Texture> _texture;
+		std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
 	};
 
 	class RenderableExplorationPath;
@@ -94,6 +95,7 @@ private:
 
 	properties::StringProperty _textureTxtPath;
 	std::vector<std::string> _fileNames;
+	std::vector<ImgReader::PointCloudInfo> _cameraInfoVector;
 
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
 
@@ -106,6 +108,16 @@ private:
 	GeneralProperties _generalProperties;
 
 	properties::Vec3Property _debugModelRotation;
+	properties::FloatProperty _debugModelScale;
+	properties::BoolProperty _debugModelCullface;
+	properties::BoolProperty _debugModelMastCamColor;
+	properties::BoolProperty _recalculateHeight;
+	properties::BoolProperty _debugUseUVCoord;
+	properties::BoolProperty _debugUseMultipleTextures;
+
+	properties::PropertyOwner _renderableSitePropertyOwner;
+
+	bool _prevDebugModelMastCamColor;
 
 	std::vector<Models> _models;
 	globebrowsing::RenderableGlobe* _globe;
@@ -113,6 +125,11 @@ private:
 	glm::dvec3 _sunPos;
 
 	glm::dvec2 _tempLonLat;
+	glm::dvec2 _tempLonLatSite;
+
+	int kalle22 = 0;
+
+	int _lookup[21 * 3];
 };
 
 }
