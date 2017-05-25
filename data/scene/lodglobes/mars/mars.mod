@@ -1,4 +1,5 @@
-local marsEllipsoid = {3396190.0, 3396190.0, 3376200.0}
+--local marsEllipsoid = {3396190.0, 3396190.0, 3376200.0}
+local marsEllipsoid = {3396190.0, 3396190.0, 3396190.0}
 return {
     -- Barycenter module
     {
@@ -37,8 +38,9 @@ return {
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             Atmosphere = {
                 -- Atmosphere radius in Km
-                AtmoshereRadius = 3416.0,
-                PlanetRadius    = 3396.19,
+                AtmoshereRadius = 3436.0,
+                --PlanetRadius    = 3396.19,
+                PlanetRadius = 3395.0,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
                     Coefficients = {

@@ -388,7 +388,8 @@ void FramebufferRenderer::updateRaycastData() {
         _raycastData[raycaster] = data;
 
         try {
-            _exitPrograms[raycaster] = ghoul::opengl::ProgramObject::Build("Volume " + std::to_string(data.id) + " exit", vsPath, ExitFragmentShaderPath, dict);
+            _exitPrograms[raycaster] = ghoul::opengl::ProgramObject::Build("Volume " 
+                + std::to_string(data.id) + " exit", vsPath, ExitFragmentShaderPath, dict);
         } catch (ghoul::RuntimeError e) {
             LERROR(e.message);
         }
@@ -609,13 +610,15 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
         ghoul::opengl::ProgramObject* deferredcastProgram = nullptr;
 
-        if (deferredcastProgram != _deferredcastPrograms[deferredcaster].get()) {
+        if (deferredcastProgram != _deferredcastPrograms[deferredcaster].get() 
+            || deferredcastProgram == nullptr) {
             deferredcastProgram = _deferredcastPrograms[deferredcaster].get();            
-        }
-
-        deferredcastProgram->activate();
+        }        
 
         if (deferredcastProgram) {
+            
+            deferredcastProgram->activate();
+
             // DEBUG: adding G-Buffer
             ghoul::opengl::TextureUnit mainDColorTextureUnit;
             mainDColorTextureUnit.activate();
