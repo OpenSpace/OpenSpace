@@ -176,7 +176,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
     // TODO(mnoven): Faster to send GL_RGBA32F as internal format - GPU Pads anyways?
     _texture =  std::make_unique<Texture>(
-                    nullptr, // Update pixel data later, is this really safe?
+                    nullptr,
                     glm::size3_t(_imageSize, _imageSize, 1),
                     ghoul::opengl::Texture::Red, // Format of the pixeldata
                     GL_R8, // INTERNAL format. More preferable to give explicit precision here, otherwise up to the driver to decide
@@ -185,7 +185,6 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
                     Texture::WrappingMode::ClampToEdge
                 );
 
-   // _future = nullptr;
     _texture->setDataOwnership(ghoul::Boolean::No);
     _texture->uploadTexture();
 
@@ -197,6 +196,8 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     _lastUpdateRealTime = _realTime;
 
     _activeInstruments.onChange([this]() {
+        _pboIsDirty = false;
+
         _updatingCurrentActiveChannel = true;
         _currentActiveInstrument
                = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
@@ -231,6 +232,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     });
 
     _resolutionLevel.onChange([this]() {
+
+
+                _pboIsDirty = false;
         if (_verboseMode) {
             LDEBUG("Updating level of resolution " << _resolutionLevel);
         }
@@ -295,6 +299,15 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     addProperty(_verboseMode);
 }
 
+DecodeData RenderableSpacecraftCameraPlane::getDecodeDataFromOsTime(const int& osTime) {
+    auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
+    auto& state = stateSequence.getState(osTime);
+    const double& timeObserved = state.getTimeObserved();
+    const std::string stateFilename = state.contents()->filename;
+    DecodeData decodeData {_imageSize * _imageSize, stateFilename, _resolutionLevel, _verboseMode, timeObserved};
+    return std::move(decodeData);
+}
+
 void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
     while (_concurrentJobManager.numFinishedJobs() > 0) {
         _concurrentJobManager.popFinishedJob();
@@ -316,12 +329,12 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
     //     startId = startId - 1;
     // }
 
-    auto& stateSequence = _imageMetadataMap2[_activeInstruments.getDescriptionByValue(
-          _activeInstruments.value())];
-    auto& currentState = stateSequence.getState(osTime);
+    // auto& stateSequence = _imageMetadataMap2[_activeInstruments.getDescriptionByValue(
+    //       _activeInstruments.value())];
+    // auto& currentState = stateSequence.getState(osTime);
 
     //const std::string& startFilename = currentState.contents()->filename;
-    const double& startTime = currentState.getTimeObserved();
+    const double& startTime = getDecodeDataFromOsTime(osTime).timeObserved;
 
    // const double& startTime = imageList[startId].timeObserved;
 
@@ -339,18 +352,23 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
 //        const std::string& currentFilename = imageList[nextImageIndex].filename;
   //      const double& timeObserved = imageList[nextImageIndex].timeObserved;
 
-        auto& nextState = stateSequence.getState(
-              startTime
-              + (dt * i) * static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
-        const std::string nextStateFilename = nextState.contents()->filename;
-        const double& nextTimeObserved = nextState.getTimeObserved();
+        const double& time = startTime + (dt * i) * (static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
 
-        auto job = std::make_shared<DecodeJob>(_imageSize, nextStateFilename,
-                                               _resolutionLevel, _verboseMode, nextTimeObserved);
+        // auto& nextState = stateSequence.getState(
+        //       startTime
+        //       + (dt * i) * static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
+        // const std::string nextStateFilename = nextState.contents()->filename;
+        // const double& nextTimeObserved = nextState.getTimeObserved();
+
+        // DecodeData data {_imageSize * _imageSize, nextStateFilename, _resolutionLevel, _verboseMode, nextTimeObserved};
+
+        DecodeData decodeData = getDecodeDataFromOsTime(time);
+        auto job = std::make_shared<DecodeJob>(decodeData);
+
         _concurrentJobManager.enqueueJob(job);
-        _enqueuedImageIds.insert(nextStateFilename);
+        _enqueuedImageIds.insert(decodeData.path + std::to_string(decodeData.totalImageSize));
         if (_verboseMode) {
-            LDEBUG("Enqueueing " << nextStateFilename);
+            LDEBUG("Enqueueing " << decodeData.path);
         }
         //_currentActiveImage = nextImageIndex;
     }
@@ -536,20 +554,17 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
         } else {
             bool hadFinishedJobs = false;
             while (_concurrentJobManager.numFinishedJobs() > 0) {
-                std::shared_ptr<BufferObject> b = _concurrentJobManager.popFinishedJob()->product();
+                std::shared_ptr<SolarImageData> b = _concurrentJobManager.popFinishedJob()->product();
 
                 // Not found in set, queue finished old job
-                if (_enqueuedImageIds.find(b->name) == _enqueuedImageIds.end()) {
+                if (_enqueuedImageIds.find(b->name + std::to_string(b->dataSize))
+                    == _enqueuedImageIds.end()) {
                     continue;
                 }
 
                 hadFinishedJobs = true;
-                _enqueuedImageIds.erase(b->name);
+                _enqueuedImageIds.erase(b->name + std::to_string(b->dataSize));
                 unsigned char* data = b->data;
-
-                if (_verboseMode) {
-                    LDEBUG("Popped image" << b->name);
-                }
 
                 auto t1 = Clock::now();
                 std::memcpy(_pboBufferData, data, _imageSize * _imageSize * sizeof(unsigned char));
@@ -563,11 +578,11 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
                 }
 
 
-                const double& startTime = b->timeObserved;
-                auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
-                auto& nextState = stateSequence.getState(startTime + (_bufferSize + 1) * Time::ref().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
-                const std::string nextStateFilename = nextState.contents()->filename;
-                const double& nextTimeObserved = nextState.getTimeObserved();
+                // const double& startTime = b->timeObserved;
+                // auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
+                // auto& nextState = stateSequence.getState(startTime + (_bufferSize + 1) * Time::ref().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
+                // const std::string nextStateFilename = nextState.contents()->filename;
+                // const double& nextTimeObserved = nextState.getTimeObserved();
 
                 // const auto& imageList = _imageMetadataMap[_currentActiveInstrument];
                 // //const double& osTime = Time::ref().j2000Seconds();
@@ -575,7 +590,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
                 // double time = startTime + (_bufferSize + 1) * (Time::ref().deltaTime() * ( static_cast<double>(_minRealTimeUpdateInterval )/ 1000.0 ) );
                 // const auto& low = std::lower_bound(imageList.begin(), imageList.end(), time);
                 // int nextImageIndex = low - imageList.begin();
-                // if (nextImageIndex
+                // if (nextImageIndexos
                 //     == _imageMetadataMap[_currentActiveInstrument].size()) {
                 //     nextImageIndex = nextImageIndex - 1;
                 // }
@@ -584,16 +599,23 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO(const int& image) {
                 //       = _imageMetadataMap[_currentActiveInstrument][nextImageIndex].filename;
 
                 // double& timeObserved = _imageMetadataMap[_currentActiveInstrument][nextImageIndex].timeObserved;
-                auto job = std::make_shared<DecodeJob>(_imageSize, nextStateFilename,
-                                                       _resolutionLevel, _verboseMode, nextTimeObserved);
+
+              //  DecodeData decodeData {_imageSize * _imageSize, nextStateFilename, _resolutionLevel, _verboseMode, b->timeObserved};
+                // auto job = std::make_shared<DecodeJob>(_imageSize, nextStateFilename,
+                //                                        _resolutionLevel, _verboseMode, nextTimeObserved);
+
+                const double& osTime = Time::ref().j2000Seconds();
+                DecodeData decodeData = getDecodeDataFromOsTime(osTime + (_bufferSize + 1) * (Time::ref().deltaTime() * (static_cast<double>(_minRealTimeUpdateInterval )/1000.0)));
+                auto job = std::make_shared<DecodeJob>(decodeData);
                 _concurrentJobManager.enqueueJob(job);
-                _enqueuedImageIds.insert(nextStateFilename);
+                _enqueuedImageIds.insert(decodeData.path + std::to_string(decodeData.totalImageSize));
 
                 _initializePBO = false;
                 _pboIsDirty = true;
 
                 if (_verboseMode)  {
-                    LDEBUG("Adding work from PBO " << nextStateFilename);
+                    LDEBUG("Popped image" << b->name);
+                    LDEBUG("Adding work from PBO " << decodeData.path);
                 }
 
                 break;
@@ -637,9 +659,10 @@ void RenderableSpacecraftCameraPlane::updateTextureGPU(bool asyncUpload, bool re
               = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
 
         const double& osTime = Time::ref().j2000Seconds();
-        auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
-        auto& filename = stateSequence.getState(osTime).contents()->filename;
-        decode(data, filename);
+  //      auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
+//        auto& filename = stateSequence.getState(osTime).contents()->filename;
+        const auto& decodeData = getDecodeDataFromOsTime(osTime);
+        decode(data, decodeData.path);
 
         _texture->bind();
         if (!resChanged) {
@@ -722,7 +745,7 @@ void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     // }
     //double j2000 = Time::ref().j2000Seconds();
     if (_useBuffering) {
-        double dt = Time::ref().deltaTime();
+        const double& dt = Time::ref().deltaTime();
         // Delta time changed, need to refill buffer
         if ((abs(_deltaTimeLast - dt)) > EPSILON) {
             // _concurrentJobManager.reset();
