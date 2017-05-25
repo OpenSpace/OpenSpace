@@ -280,12 +280,9 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 _errorHistogramManager = new ErrorHistogramManager(_tsp.get());
                 _tfBrickSelector = tbs = new TfBrickSelector(_tsp.get(), _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
                 _transferFunction->setCallback([tbs](const TransferFunction &tf) {
-                    tbs->calculateBrickErrors();
+                    tbs->initialize();
                 });
-                if (initializeSelector()) {
-                    tbs->calculateBrickErrors();
-                    return true;
-                }
+                return initializeSelector();
             }
             break;
         case Selector::TIME:
@@ -295,12 +292,9 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 tbs = new TimeBrickSelector(_tsp.get(), _errorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
                 _timeBrickSelector = tbs;
                 _transferFunction->setCallback([tbs](const TransferFunction &tf) {
-                    tbs->calculateBrickErrors();
+                    tbs->initialize();
                 });
-                if (initializeSelector()) {
-                    tbs->calculateBrickErrors();
-                    return true;
-                }
+                return initializeSelector();
             }
             break;
         case Selector::SIMPLE:
@@ -309,12 +303,9 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 _histogramManager = new HistogramManager(_tsp.get());
                 _simpleTfBrickSelector = stbs = new SimpleTfBrickSelector(_tsp.get(), _histogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
                 _transferFunction->setCallback([stbs](const TransferFunction &tf) {
-                    stbs->calculateBrickImportances();
+                    stbs->initialize();
                 });
-                if (initializeSelector()) {
-                    stbs->calculateBrickImportances();
-                    return true;
-                }
+                return initializeSelector();
             }
             break;
 
@@ -324,16 +315,13 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 _localErrorHistogramManager = new LocalErrorHistogramManager(_tsp.get());
                 _localTfBrickSelector = ltbs = new LocalTfBrickSelector(_tsp.get(), _localErrorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
                 _transferFunction->setCallback([ltbs](const TransferFunction &tf) {
-                    ltbs->calculateBrickErrors();
+                    ltbs->initialize();
                 });
-                if (initializeSelector()) {
-                    ltbs->calculateBrickErrors();
-                    return true;
-                }
+                return initializeSelector();
             }
             break;
     }
-    return false;
+    return true;
 }
 
 bool RenderableMultiresVolume::initialize() {

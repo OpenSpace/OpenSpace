@@ -44,7 +44,7 @@ namespace openspace {
 SimpleTfBrickSelector::~SimpleTfBrickSelector() {}
 
 bool SimpleTfBrickSelector::initialize() {
-    return true;
+    return calculateBrickImportances();
 }
 
 void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
