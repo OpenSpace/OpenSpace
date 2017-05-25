@@ -50,10 +50,9 @@ RenderableExplorationPath::RenderableExplorationPath()
 
 RenderableExplorationPath::~RenderableExplorationPath() {}
 
-bool RenderableExplorationPath::initialize(RenderableGlobe* globe, std::vector<glm::dvec2> coordinates) {
-
+bool RenderableExplorationPath::initialize(RenderableGlobe* globe, const std::vector<Geodetic2> geodetics) {
 	_globe = globe;
-	_latLonCoordinates = coordinates;
+	_geodetics = geodetics;
 
 	// Shaders for the path (GL_LINES)
 	if (_pathShader == nullptr) {
@@ -80,7 +79,7 @@ bool RenderableExplorationPath::initialize(RenderableGlobe* globe, std::vector<g
 	}
 
 	calculatePathModelCoordinates();
-	if (_latLonCoordinates.size() == 0) return false;
+	if (_geodetics.size() == 0) return false;
 
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaioID);
@@ -169,7 +168,6 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		glBindVertexArray(0);
 
 		_siteShader->deactivate();*/
-
 }
 
 void RenderableExplorationPath::update(const UpdateData& data) {
@@ -184,22 +182,19 @@ void RenderableExplorationPath::setLevel(const int level) {
 }
 
 void RenderableExplorationPath::calculatePathModelCoordinates() {
-	for (auto position : _latLonCoordinates) {
-		globebrowsing::Geodetic2 geo = globebrowsing::Geodetic2{ position.x, position.y } / 180 * glm::pi<double>();
-		glm::dvec3 positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
+	for (auto geodetic : _geodetics) {
+		glm::dvec3 positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
 		_stationPointsModelCoordinates.push_back(glm::dvec4(positionModelSpace, 1.0));
 	}
 }
 
 void RenderableExplorationPath::recalculateCartesianPathCoordinates() {
 	_stationPointsModelCoordinates.clear();
-	for (auto i : _latLonCoordinates) {
-
-		globebrowsing::Geodetic2 geoTemp = globebrowsing::Geodetic2{ i.x, i.y } / 180 * glm::pi<double>();
-		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geoTemp);
+	for (auto geodetic : _geodetics) {
+		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geoTemp, heightToSurface + 0.5 };
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geodetic, heightToSurface + 0.5 };
 		glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
 		_stationPointsModelCoordinates.push_back(glm::dvec4(tempPos2, 1.0));
 	}

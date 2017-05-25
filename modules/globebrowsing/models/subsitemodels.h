@@ -42,8 +42,8 @@ struct SubsiteModels {
 
 	glm::dvec3 cartesianPosition;
 
-	Geodetic2 subsiteCoordinate;
-	Geodetic2 siteCoordinate;
+	Geodetic2 geodetic;
+	Geodetic2 siteGeodetic;
 
 	uint64_t tileHashKey;
 	std::string site;

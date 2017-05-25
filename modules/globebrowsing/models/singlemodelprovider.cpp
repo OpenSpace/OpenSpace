@@ -59,8 +59,7 @@ std::vector<std::shared_ptr<Subsite>> SingleModelProvider::calculate(const std::
 		
 	for (auto s : subsites) {
 		for (auto s1 : s) {
-			Geodetic2 coord = Geodetic2{ s1->lat, s1->lon } / 180.0 * glm::pi<double>();
-			glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ coord, 0 });
+			glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ s1->geodetic , 0 });
 			if (glm::distance(cameraPositionProjected, temp) < radius) {
 				subsitesInsideRadius.push_back(s1);
 			}
@@ -84,5 +83,6 @@ std::vector<std::shared_ptr<Subsite>> SingleModelProvider::calculate(const std::
 bool SingleModelProvider::initialize() {
 	return true;
 }
-}
-}
+
+} // namespace globebrowsing
+} // namespace openspace

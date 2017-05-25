@@ -98,9 +98,9 @@ namespace globebrowsing {
 }
 
 bool RenderableRoverSurface::initialize() {
-	std::vector<glm::dvec2> coordinates;
+	std::vector<Geodetic2> coordinates;
 	for (auto subsite : _subSites) {
-		coordinates.push_back(glm::dvec2(subsite->lat, subsite->lon));
+		coordinates.push_back(subsite->geodetic);
 	}
 
 	std::string ownerName = owner()->name();
@@ -263,7 +263,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			glm::dmat4 debugModelRotation = rotX * rotY * rotZ;
 
 			// Rotation to make model up become normal of position on ellipsoid
-			glm::dvec3 surfaceNormal = _globe->ellipsoid().geodeticSurfaceNormal(subsiteModels->siteCoordinate / 180.0 * glm::pi<double>());
+			glm::dvec3 surfaceNormal = _globe->ellipsoid().geodeticSurfaceNormal(subsiteModels->siteGeodetic);
 
 			surfaceNormal = glm::normalize(surfaceNormal);
 			float cosTheta = dot(glm::dvec3(0, 0, 1), surfaceNormal);
@@ -334,13 +334,12 @@ void RenderableRoverSurface::update(const UpdateData& data) {
 }
 
 std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector) {
-	for (auto i : vector) {
-		globebrowsing::Geodetic2 geoTemp = i->subsiteCoordinate / 180 * glm::pi<double>();
-		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geoTemp);
+	for (auto subsiteModels : vector) {
+		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(subsiteModels->geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geoTemp, heightToSurface + 2.0 };
-		i->cartesianPosition = _globe->ellipsoid().cartesianPosition(geo3);
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + 2.0 };
+		subsiteModels->cartesianPosition = _globe->ellipsoid().cartesianPosition(geo3);
 	}
 	return vector;
 }

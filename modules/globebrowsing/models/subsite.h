@@ -25,14 +25,14 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SUBSITE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___SUBSITE___H__
 
+#include <modules/globebrowsing/geometry/geodetic2.h>
+
 #include <stdint.h>
 #include <string>
 #include <vector>
 
 namespace openspace {
 namespace globebrowsing {
-
-struct Geodetic2;
 
 struct Subsite {
 	using SubsiteHashKey = uint64_t;
@@ -41,13 +41,13 @@ struct Subsite {
 	std::string site, drive, frame;
 
 	// Latitude and longitude for this subsite
-	double lat, lon;
+	Geodetic2 geodetic;
+
+	// Latitude and longitude for the site that this subsite belongs to
+	Geodetic2 siteGeodetic;
 
 	// Stores what levels are available for this subsite
 	std::vector<int> availableLevels;
-
-	// Latitude and longitude for the site that this subsite belongs to
-	double siteLat, siteLon;
 
 	// The file names of the .obj models and textures for this subsite
 	std::vector<std::string> fileNames;

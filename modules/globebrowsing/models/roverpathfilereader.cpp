@@ -88,11 +88,9 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractAllSubsites(co
 			subsite->site = convertString(site, type);
 			type = "drive";
 			subsite->drive = convertString(drive, type);
-			subsite->lat = lat;
-			subsite->lon = lon;
+			subsite->geodetic = Geodetic2{ lat, lon} / 180.0 * glm::pi<double>();
 			subsite->frame = frame;
-			subsite->siteLat = siteLat;
-			subsite->siteLon = siteLon;
+			subsite->siteGeodetic = Geodetic2{ siteLat, siteLon} / 180.0 * glm::pi<double>();
 
 			// All features with the the frame is "Site" will have "Drive" that is -1. 
 			// The feature right after each site frame has the same coordinates as the site frame.

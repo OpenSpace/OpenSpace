@@ -43,7 +43,7 @@ public:
 	RenderableExplorationPath();
 	~RenderableExplorationPath();
 	
-	bool initialize(RenderableGlobe* globe, std::vector<glm::dvec2> coordinates);
+	bool initialize(RenderableGlobe* globe, const std::vector<Geodetic2> coordinates);
 	bool deinitialize();
 	bool isReady() const;
 
@@ -66,7 +66,7 @@ private:
 
 	globebrowsing::RenderableGlobe* _globe;
 
-	std::vector<glm::dvec2> _latLonCoordinates;
+	std::vector<Geodetic2> _geodetics;
 
 	float _fading;
 	GLuint _vaioID;

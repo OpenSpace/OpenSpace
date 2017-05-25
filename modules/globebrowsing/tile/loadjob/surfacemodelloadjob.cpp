@@ -45,8 +45,8 @@ void SurfaceModelLoadJob::execute() {
 
 	_subsiteModels->site = _subsite->site;
 	_subsiteModels->drive = _subsite->drive;
-	_subsiteModels->subsiteCoordinate = Geodetic2{ _subsite->lat, _subsite->lon };
-	_subsiteModels->siteCoordinate = Geodetic2{ _subsite->siteLat, _subsite->siteLon };
+	_subsiteModels->geodetic = _subsite->geodetic;
+	_subsiteModels->siteGeodetic = _subsite->siteGeodetic;
 	_subsiteModels->level = _level;
 
 	for (auto fileName : _subsite->fileNames) {

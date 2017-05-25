@@ -173,8 +173,7 @@ void ChunkNode::split(int depth) {
 			std::unique_ptr<ChunkNode> temp = std::make_unique<ChunkNode>(chunk, this);
 			if (this != nullptr) {
 				for (int k = 0; k < this->_subsites.size(); ++k) {
-					globebrowsing::Geodetic2 temp = globebrowsing::Geodetic2{ this->_subsites.at(k)->lat, this->_subsites.at(k)->lon } / 180.0 * glm::pi<double>();
-					if (patch.contains(temp)) {
+					if (patch.contains(this->_subsites.at(k)->geodetic)) {
 						tempSites.push_back(this->_subsites.at(k));
 					}
 				}
