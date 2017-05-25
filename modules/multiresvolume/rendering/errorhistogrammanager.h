@@ -54,7 +54,6 @@ protected:
     std::map<unsigned int, std::vector<float>> _voxelCache;
 
     bool buildFromLeaf(unsigned int bstOffset, unsigned int octreeOffset);
-    std::vector<float> readValues(unsigned int brickIndex) const;
 
     int parentOffset(int offset, int base) const;
 

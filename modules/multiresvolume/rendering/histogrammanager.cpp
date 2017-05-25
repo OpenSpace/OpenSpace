@@ -30,6 +30,8 @@
 #include <modules/multiresvolume/rendering/histogrammanager.h>
 #include <openspace/util/histogram.h>
 
+#include <ghoul/logging/logmanager.h>
+
 namespace {
     const std::string _loggerCat = "HistogramManager";
 }
@@ -42,26 +44,30 @@ HistogramManager::HistogramManager(TSP* tsp)
 HistogramManager::~HistogramManager() {}
 
 bool HistogramManager::buildHistograms(int numBins) {
-    std::cout << "Build histograms with " << numBins << " bins each" << std::endl;
+    if (!initHistogramVars(numBins)) return false;
+
+    int numTotalNodes = _tsp->numTotalNodes();
+    _histograms = std::vector<Histogram>(numTotalNodes);
+
+    return buildHistogram(0);
+}
+
+const Histogram* HistogramManager::getHistogram(unsigned int brickIndex) const {
+    return &_histograms[brickIndex];
+}
+
+bool HistogramManager::initHistogramVars(int numBins) {
+    LINFO("Building histograms with " << numBins << " bins each");
     _numBins = numBins;
 
-    std::ifstream& file = _tsp->file();
-    if (!file.is_open()) {
+    _file = &(_tsp->file());
+    if (!_file->is_open()) {
         return false;
     }
     _minBin = 0.0; // Should be calculated from tsp file
     _maxBin = 1.0; // Should be calculated from tsp file
 
-    int numTotalNodes = _tsp->numTotalNodes();
-    _histograms = std::vector<Histogram>(numTotalNodes);
-
-    bool success = buildHistogram(0);
-
-    return success;
-}
-
-const Histogram* HistogramManager::getHistogram(unsigned int brickIndex) const {
-    return &_histograms[brickIndex];
+    return true;
 }
 
 bool HistogramManager::buildHistogram(unsigned int brickIndex) {
@@ -121,10 +127,9 @@ std::vector<float> HistogramManager::readValues(unsigned int brickIndex) const {
     std::vector<float> voxelValues(numBrickVals);
 
     std::streampos offset = _tsp->dataPosition() + static_cast<long long>(brickIndex*numBrickVals*sizeof(float));
-    std::ifstream& file = _tsp->file();
-    file.seekg(offset);
+    _file->seekg(offset);
 
-    file.read(reinterpret_cast<char*>(&voxelValues[0]),
+    _file->read(reinterpret_cast<char*>(&voxelValues[0]),
         static_cast<size_t>(numBrickVals)*sizeof(float));
 
     return voxelValues;

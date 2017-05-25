@@ -52,6 +52,7 @@ protected:
     float _maxBin;
     int _numBins;
 
+    virtual bool initHistogramVars(int numBins);
     virtual bool buildHistogram(unsigned int brickIndex);
     virtual std::vector<float> readValues(unsigned int brickIndex) const;
 

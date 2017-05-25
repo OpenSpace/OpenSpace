@@ -45,14 +45,8 @@ ErrorHistogramManager::ErrorHistogramManager(TSP* tsp)  : HistogramManager(tsp) 
 ErrorHistogramManager::~ErrorHistogramManager() {}
 
 bool ErrorHistogramManager::buildHistograms(int numBins) {
-    _numBins = numBins;
 
-    _file = &(_tsp->file());
-    if (!_file->is_open()) {
-        return false;
-    }
-    _minBin = 0.0; // Should be calculated from tsp file
-    _maxBin = 1.0; // Should be calculated from tsp file as (maxValue - minValue)
+    if (!initHistogramVars(numBins)) return false;
 
     unsigned int numOtLevels = _tsp->numOTLevels();
     unsigned int numOtLeaves = pow(8, numOtLevels - 1);
@@ -297,20 +291,6 @@ int ErrorHistogramManager::parentOffset(int offset, int base) const {
 
     int parentOffset = firstInParentLevel + parentInLevelOffset;
     return parentOffset;
-}
-
-std::vector<float> ErrorHistogramManager::readValues(unsigned int brickIndex) const {
-    unsigned int paddedBrickDim = _tsp->paddedBrickDim();
-    unsigned int numBrickVals = paddedBrickDim * paddedBrickDim * paddedBrickDim;
-    std::vector<float> voxelValues(numBrickVals);
-
-    std::streampos offset = _tsp->dataPosition() + static_cast<long long>(brickIndex*numBrickVals*sizeof(float));
-    _file->seekg(offset);
-
-    _file->read(reinterpret_cast<char*>(&voxelValues[0]),
-        static_cast<size_t>(numBrickVals)*sizeof(float));
-
-    return voxelValues;
 }
 
 unsigned int ErrorHistogramManager::brickToInnerNodeIndex(unsigned int brickIndex) const {

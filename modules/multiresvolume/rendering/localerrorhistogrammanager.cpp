@@ -45,15 +45,7 @@ LocalErrorHistogramManager::LocalErrorHistogramManager(TSP* tsp) : ErrorHistogra
 LocalErrorHistogramManager::~LocalErrorHistogramManager() {}
 
 bool LocalErrorHistogramManager::buildHistograms(int numBins) {
-    LINFO("Build histograms with " << numBins << " bins each");
-    _numBins = numBins;
-
-    _file = &(_tsp->file());
-    if (!_file->is_open()) {
-        return false;
-    }
-    _minBin = 0.0; // Should be calculated from tsp file
-    _maxBin = 1.0; // Should be calculated from tsp file as (maxValue - minValue)
+    if (!initHistogramVars(numBins)) return false;
 
     unsigned int numOtLevels = _tsp->numOTLevels();
     unsigned int numOtLeaves = pow(8, numOtLevels - 1);
@@ -85,8 +77,7 @@ bool LocalErrorHistogramManager::buildHistograms(int numBins) {
     for (int bst = bstOffset; bst < numBstNodes; bst++) {
         for (int ot = otOffset; ot < numOtNodes; ot++) {
             success &= buildFromOctreeChild(bst, ot);
-            if (!success) LERROR("Failed in buildFromOctreeChild");
-            if (!success) return false;
+            if (!success) { LERROR("Failed in buildFromOctreeChild"); return false; }
             pb1.print(processedLeaves++);
         }
     }
@@ -100,8 +91,7 @@ bool LocalErrorHistogramManager::buildHistograms(int numBins) {
     for (int ot = otOffset; ot < numOtNodes; ot++) {
         for (int bst = bstOffset; bst < numBstNodes; bst++) {
             success &= buildFromBstChild(bst, ot);
-            if (!success) LERROR("Failed in buildFromBstChild");
-            if (!success) return false;
+            if (!success) { LERROR("Failed in buildFromBstChild"); return false; }
             pb2.print(processedLeaves++);
         }
     }
