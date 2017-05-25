@@ -155,7 +155,7 @@ private:
     bool _updatingCurrentActiveChannel = false;
     bool _updatingCurrentLevelOfResolution = false;
 
-    std::unique_ptr<std::future<void>> _future;
+    std::unique_ptr<std::future<void>> _future = nullptr;
     bool _initializePBO;
     bool _bufferingForwardInTime = true;
     bool _pboIsDirty = false;

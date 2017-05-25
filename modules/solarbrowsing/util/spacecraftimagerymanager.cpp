@@ -187,8 +187,8 @@ void SpacecraftImageryManager::loadImageMetadata(
 
                         ImageMetadataNew im {seqPath};
                         std::shared_ptr<ImageMetadataNew> data = std::make_shared<ImageMetadataNew>(im);
-
-                        TimedependentState<ImageMetadataNew> timeState(std::move(data), 21312321.0);
+                        TimedependentState<ImageMetadataNew> timeState(
+                              std::move(data), Time::ref().convertTime(time), seqPath);
                         _imageMetadataMap[instrumentName].addState(std::move(timeState));
                     }
                 }

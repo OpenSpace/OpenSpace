@@ -27,18 +27,25 @@
 
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 #include <modules/globebrowsing/other/threadpool.h>
+#include <openspace/util/spicemanager.h>
+#include <ghoul/logging/logmanager.h>
+
+// TODO(mnoven): How to include loggercat in template class?
+#include <iostream>
 
 namespace openspace {
 
 template<typename T>
 struct TimedependentState {
-    TimedependentState(std::shared_ptr<T> state, double _timeObserved) {
-        _timeObserved = _timeObserved;
+    TimedependentState(std::shared_ptr<T> state, const double& timeObserved, const std::string id = "") {
+        _timeObserved = timeObserved;
         _state = state;
+        _id = id;
     };
 
-    double getTimeObserved() { return _timeObserved; }
-    std::shared_ptr<T> contents() { return _state; };
+    const std::string& getId() const { return _id; }
+    const double& getTimeObserved() const { return _timeObserved; }
+    std::shared_ptr<T> contents() const { return _state; };
 
     bool operator<(const double val) const {
         return _timeObserved < val;
@@ -47,13 +54,14 @@ struct TimedependentState {
 private:
     double _timeObserved;
     std::shared_ptr<T> _state;
+    std::string _id;
 };
 
 template<typename T>
 class TimedependentStateSequence {
 public:
     TimedependentStateSequence() {
-        _currentActiveStateIndex = 0;
+        _currentActiveStateIndex = -1;
     }
 
     TimedependentStateSequence(const std::vector<TimedependentState<T>>& states) {
@@ -65,18 +73,36 @@ public:
         _states.push_back(state);
     }
 
-    TimedependentState<T>& getState(double osTime, bool& stateChanged) {
+    bool hasStateChanged(const double& osTime) {
         const auto& lowerBound = std::lower_bound(_states.begin(), _states.end(), osTime);
         size_t activeStateIndex = lowerBound - _states.begin();
-        if (activeStateIndex == _states.size()) {
-            activeStateIndex = activeStateIndex - 1;
-        }
-        if (_currentActiveStateIndex != activeStateIndex) {
-            stateChanged = true;
-        }
+     //   std::cout << "active state idex" << activeStateIndex;
+      //  std::cout << "current ac" << _currentActiveStateIndex;
+        bool changed = activeStateIndex != _currentActiveStateIndex;
         _currentActiveStateIndex = activeStateIndex;
-        return _states[_currentActiveStateIndex];
-    };
+        return changed;
+    }
+
+    void displayStateTimes() {
+        for (auto& state : _states) {
+            const double& time = state.getTimeObserved();
+            const std::string& dateString = SpiceManager::ref().dateFromEphemerisTime(time);
+            std::cout << "State " << state.getId() << " Time Observed: " << dateString << "\n";
+        }
+    }
+
+    // TimedependentState<T>& getState(double osTime, bool& stateChanged) {
+    //     const auto& lowerBound = std::lower_bound(_states.begin(), _states.end(), osTime);
+    //     size_t activeStateIndex = lowerBound - _states.begin();
+    //     if (activeStateIndex == _states.size()) {
+    //         activeStateIndex = activeStateIndex - 1;
+    //     }
+    //     if (_currentActiveStateIndex != activeStateIndex) {
+    //         stateChanged = true;
+    //     }
+    //     _currentActiveStateIndex = activeStateIndex;
+    //     return _states[_currentActiveStateIndex];
+    // };
 
     TimedependentState<T>& getState(double osTime) {
         const auto& lowerBound = std::lower_bound(_states.begin(), _states.end(), osTime);
@@ -84,8 +110,8 @@ public:
         if (activeStateIndex == _states.size()) {
             activeStateIndex = activeStateIndex - 1;
         }
-        _currentActiveStateIndex = activeStateIndex;
-        return _states[_currentActiveStateIndex];
+      //  _currentActiveStateIndex = activeStateIndex;
+        return _states[activeStateIndex];
     };
 
 private:
