@@ -86,18 +86,18 @@ namespace globebrowsing {
 	_absTexturePath = absPath(_texturePath);
 
 	// Extract all subsites that has models
-	ghoul::Dictionary tempDic;
-	tempDic.setValue(keyRoverLocationPath, _roverLocationPath);
-	tempDic.setValue(keyModelPath, _modelPath);
-	tempDic.setValue(keyAbsPathToTextures, _absTexturePath);
-	tempDic.setValue(keyAbsPathToModels, _absModelPath);
-	_subSitesWithModels = RoverPathFileReader::extractSubsitesWithModels(tempDic);
+	ghoul::Dictionary tempDictionary;
+	tempDictionary.setValue(keyRoverLocationPath, _roverLocationPath);
+	tempDictionary.setValue(keyModelPath, _modelPath);
+	tempDictionary.setValue(keyAbsPathToTextures, _absTexturePath);
+	tempDictionary.setValue(keyAbsPathToModels, _absModelPath);
+	_subSitesWithModels = RoverPathFileReader::extractSubsitesWithModels(tempDictionary);
 
 	// Extract all subsites
-	ghoul::Dictionary tempDic2;
-	tempDic2.setValue(keyRoverLocationPath, _roverLocationPath);
-	tempDic2.setValue(keyModelPath, _modelPath);
-	_subSites = RoverPathFileReader::extractAllSubsites(tempDic2);
+	ghoul::Dictionary tempDictionary2;
+	tempDictionary2.setValue(keyRoverLocationPath, _roverLocationPath);
+	tempDictionary2.setValue(keyModelPath, _modelPath);
+	_subSites = RoverPathFileReader::extractAllSubsites(tempDictionary2);
 
 	addProperty(_debugModelRotation);
 
@@ -141,7 +141,6 @@ bool RenderableRoverSurface::isReady() const {
 }
 
 void RenderableRoverSurface::render(const RenderData& data) {
-	_renderableExplorationPath->render(data);
 	_models.clear();
 
 	std::vector<std::vector<std::shared_ptr<Subsite>>> subSitesVector = _chunkedLodGlobe->subsites();
@@ -173,11 +172,19 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			level = 3;
 			break;
 
-		default: 
+		case LodModelSwitch::Mode::High :
 			//High up
 			level = 1;
-			return;
+			break;
+
+		case LodModelSwitch::Mode::Far:
+			//Far away
+			level = 0;
+			break;
 	}
+
+	_renderableExplorationPath->setLevel(level);
+	_renderableExplorationPath->render(data);
 
 	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
 	//FOR ALPHA BLENDING TO WORK
@@ -307,6 +314,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
 
 			_programObject->setUniform("transparency", 1.0f);
+			//TODO: Is this really used? Otherwise delete this and _sunPos.
 			_programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
 			_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
 			_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
@@ -325,7 +333,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 	_prevLevel = level;
 }
 
-void RenderableRoverSurface::update(const UpdateData & data) {
+void RenderableRoverSurface::update(const UpdateData& data) {
 	_renderableExplorationPath->update(data);
 	_cachingModelProvider->update(this);
 	_sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();

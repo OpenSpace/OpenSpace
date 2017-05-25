@@ -32,6 +32,7 @@ namespace globebrowsing {
 class LodModelSwitch {
 public :
 	enum class Mode {
+		Far,
 		High,
 		Low,
 		Close,

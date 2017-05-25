@@ -70,10 +70,13 @@ LodModelSwitch::Mode LodModelSwitch::getLevel(const RenderData& data) {
 	if (distFromSurfaceToCamera > 1000 && distFromSurfaceToCamera < 5000) {
 		return Mode::Low;
 	}
-	else if (distFromSurfaceToCamera >= 5000) {
+	else if (distFromSurfaceToCamera >= 5000 && distFromSurfaceToCamera < 8000) {
 		return Mode::High;
 	}
-	return Mode::Close;
+	else if(distFromSurfaceToCamera <= 1000)
+		return Mode::Close;
+
+	return Mode::Far;
 }
 
 } // namespace globebrowsing
