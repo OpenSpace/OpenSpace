@@ -68,6 +68,7 @@ protected:
     Renderable* _parent;
 
     bool loadObj(const std::string& filename);
+	bool loadObjWithoutCaching(const std::string& filename);
     bool loadCachedFile(const std::string& filename);
     bool saveCachedFile(const std::string& filename);
 

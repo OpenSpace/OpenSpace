@@ -105,19 +105,7 @@ ModelGeometry::ModelGeometry(const ghoul::Dictionary& dictionary)
 	std::string tempString;
 	dictionary.getValue(keyGeomModelFile, tempString);
 
-	if(tempString.substr(0,6) == "models") {
-		std::string map1 = tempString.substr(7, tempString.find("j"));
-
-		
-		_file = "C:\\Users\\openspace\\Documents\\develop\\OpenSpace\\data\\scene\\models\\models\\" + map1;
-	}
-	/*if (tempString.substr(0, 6) == "models") {
-		std::string site = tempString.substr(7, tempString.find("/"));
-		LERROR("Site: " << site);
-	}*/
-
-	else
-		_file = absPath(dictionary.value<std::string>(keyGeomModelFile));
+	_file = absPath(dictionary.value<std::string>(keyGeomModelFile));
 }
 
 double ModelGeometry::boundingRadius() const {
@@ -196,37 +184,52 @@ void ModelGeometry::deinitialize() {
 }
 
 bool ModelGeometry::loadObj(const std::string& filename) {
-    std::string cachedFile = FileSys.cacheManager()->cachedFilename(
-        filename,
-        ghoul::filesystem::CacheManager::Persistent::Yes
-        );
+	const std::string cachedFile = FileSys.cacheManager()->cachedFilename(
+		filename,
+		ghoul::filesystem::CacheManager::Persistent::Yes
+	);
 
-    bool hasCachedFile = FileSys.fileExists(cachedFile);
-    if (hasCachedFile) {
-        //LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "'");
+	const bool hasCachedFile = FileSys.fileExists(cachedFile);
+	if (hasCachedFile) {
+		LINFO("Cached file '" << cachedFile << "' used for file '" << filename << "'");
 
-        bool success = loadCachedFile(cachedFile);
-        if (success)
-            return true;
-        else
-            FileSys.cacheManager()->removeCacheFile(filename);
-        // Intentional fall-through to the 'else' computation to generate the cache
-        // file for the next run
-    }
-    else {
-        //LINFO("Cached file '" << cachedFile << "' used for Model file '" << filename << "' not found");
-    }
+		const bool success = loadCachedFile(cachedFile);
+		if (success) {
+			return true;
+		}
+		else {
+			FileSys.cacheManager()->removeCacheFile(filename);
+		}
+		// Intentional fall-through to the 'else' computation to generate the cache
+		// file for the next run
+	}
+	else {
+		LINFO(
+			"Cached file '" << cachedFile << "' for file '" << filename << "' not found"
+		);
+	}
 
-    //LINFO("Loading Model file '" << filename << "'");
-    bool success = loadModel(filename);
+	LINFO("Loading Model file '" << filename << "'");
+	const bool modelSuccess = loadModel(filename);
 
-    if (!success)
-        return false;
+	if (!modelSuccess) {
+		return false;
+	}
 
-    //LINFO("Saving cache");
-    success = saveCachedFile(cachedFile);
+	LINFO("Saving cache");
+	const bool cacheSuccess = saveCachedFile(cachedFile);
 
-    return success;
+	return cacheSuccess;
+}
+
+bool ModelGeometry::loadObjWithoutCaching(const std::string & filename) {
+	const bool modelSuccess = loadModel(filename);
+
+	if (!modelSuccess) {
+		return false;
+	}
+
+	return modelSuccess;
 }
 
 bool ModelGeometry::saveCachedFile(const std::string& filename) {
