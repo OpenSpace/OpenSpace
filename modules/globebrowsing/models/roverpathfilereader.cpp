@@ -33,13 +33,14 @@
 namespace {
 	const std::string _loggerCat		= "RoverPathFileReader";
 	const char* keyRoverLocationPath	= "RoverLocationPath";
-	const char* keyModelPath			= "ModelPath";
+	const char* keyAbsPathToTextures	= "AbsPathToTextures";
+	const char* keyAbsPathToModels		= "AbsPathToModels";
 }
 
 namespace openspace {
 namespace globebrowsing {
 	
-std::vector<Subsite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictionary dictionary) {
+std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractAllSubsites(const ghoul::Dictionary dictionary) {
 	std::string roverLocationFilePath;
 	if (!dictionary.getValue(keyRoverLocationPath, roverLocationFilePath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -63,7 +64,7 @@ std::vector<Subsite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictio
 	int currentSite = 0;
 	double siteLat;
 	double siteLon;
-	std::vector<Subsite> subsites;
+	std::vector<std::shared_ptr<Subsite>> subsites;
 
 	while ((poFeature = poLayer->GetNextFeature()) != NULL) {
 
@@ -83,15 +84,13 @@ std::vector<Subsite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictio
 			}
 
 			std::string type = "site";
-			Subsite subsite;
-			subsite.site = convertString(site, type);
+			std::shared_ptr<Subsite> subsite = std::make_shared<Subsite>();
+			subsite->site = convertString(site, type);
 			type = "drive";
-			subsite.drive = convertString(drive, type);
-			subsite.lat = lat;
-			subsite.lon = lon;
-			subsite.frame = frame;
-			subsite.siteLat = siteLat;
-			subsite.siteLon = siteLon;
+			subsite->drive = convertString(drive, type);
+			subsite->geodetic = Geodetic2{ lat, lon} / 180.0 * glm::pi<double>();
+			subsite->frame = frame;
+			subsite->siteGeodetic = Geodetic2{ siteLat, siteLon} / 180.0 * glm::pi<double>();
 
 			// All features with the the frame is "Site" will have "Drive" that is -1. 
 			// The feature right after each site frame has the same coordinates as the site frame.
@@ -107,48 +106,73 @@ std::vector<Subsite> RoverPathFileReader::extractAllSubsites(const ghoul::Dictio
 	return subsites;
 }
 
-std::vector<Subsite> RoverPathFileReader::extractSubsitesWithModels(const ghoul::Dictionary dictionary) {
+std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithModels(const ghoul::Dictionary dictionary) {
 
 	// Make sure the dictionary includes the necessary keys
 	std::string roverLocationFilePath;
 	if (!dictionary.getValue(keyRoverLocationPath, roverLocationFilePath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
 
-	std::string surfaceModelFilePath;
-	if (!dictionary.getValue(keyModelPath, surfaceModelFilePath))
-		throw ghoul::RuntimeError(std::string(keyModelPath) + " must be specified!");
+	std::string absPathToTextures;
+	if (!dictionary.getValue(keyAbsPathToTextures, absPathToTextures))
+		throw ghoul::RuntimeError(std::string(keyAbsPathToTextures) + " must be specified!");
+
+	std::string absPathToTModels;
+	if (!dictionary.getValue(keyAbsPathToModels, absPathToTModels))
+		throw ghoul::RuntimeError(std::string(keyAbsPathToTextures) + " must be specified!");
 
 	// Extract all subsites in the data set given the path to the file
 	ghoul::Dictionary tempDictionary;
 	tempDictionary.setValue(keyRoverLocationPath, roverLocationFilePath);
-	std::vector<Subsite> allSubsites = extractAllSubsites(tempDictionary);
+	std::vector<std::shared_ptr<Subsite>> allSubsites = extractAllSubsites(tempDictionary);
 
-	std::vector<Subsite> subsitesWithModels;
+	std::vector<std::shared_ptr<Subsite>> subsitesWithModels;
 	for (auto subsite : allSubsites) {
-		std::string pathToDriveFolder;
+		std::string pathToDriveFolderLevel1;
+		std::string pathToDriveFolderLevel2;
+		std::string pathToDriveFolderLevel3;
 
 		// Convert the site and drive string to match the folder structure
-		std::string site = convertString(subsite.site, "site");
-		std::string drive = convertString(subsite.drive, "drive");
-		pathToDriveFolder = surfaceModelFilePath + "/level1/" + "site" + site + "/" + "drive" + drive;
+		std::string site = convertString(subsite->site, "site");
+		std::string drive = convertString(subsite->drive, "drive");
+		pathToDriveFolderLevel1 = absPathToTModels + "/level1/" + "site" + site + "/" + "drive" + drive;
+		pathToDriveFolderLevel2 = absPathToTModels + "/level2/" + "site" + site + "/" + "drive" + drive;
+		pathToDriveFolderLevel3 = absPathToTModels + "/level3/" + "site" + site + "/" + "drive" + drive;
 
 		// If the folder exists it means there are models for this subsite, then check if that
 		// specific site/drive combination has already been added. If the models haven't already been 
 		// added, loop through the text file with file names and add those to the subsite.
-		bool pathExists = FileSys.directoryExists(pathToDriveFolder);
+		// Also store information about which levels are available for this specific subsite.
+		bool pathToLevel1Exists = FileSys.directoryExists(pathToDriveFolderLevel1);
+		bool pathToLevel2Exists = FileSys.directoryExists(pathToDriveFolderLevel2);
+		bool pathToLevel3Exists = FileSys.directoryExists(pathToDriveFolderLevel3);
+
+		// TODO: refactor like hell!!!
+
+		if (pathToLevel1Exists)
+			subsite->availableLevels.push_back(1);
+
+		if (pathToLevel2Exists)
+			subsite->availableLevels.push_back(2);
+
+		if (pathToLevel3Exists)
+			subsite->availableLevels.push_back(3);
+
 		bool modelExists = false;
-		if(pathExists) {
+		if(pathToLevel1Exists) {
 			for (auto controlSubsite : subsitesWithModels) {
-				if (subsite.site == controlSubsite.site && subsite.drive == controlSubsite.drive) {
+				if (subsite->site == controlSubsite->site && subsite->drive == controlSubsite->drive) {
 					modelExists = true;
 					break;
 				}
 			}
 			if(!modelExists) {
-				std::string pathToFilenamesTextFile = pathToDriveFolder + "/filenames.txt";
+				std::string pathToFilenamesTextFile = pathToDriveFolderLevel1 + "/filenames.txt";
 				std::vector<std::string> fileNames = extractFileNames(pathToFilenamesTextFile);
 
-				subsite.fileNames = fileNames;
+				subsite->fileNames = fileNames;
+				subsite->pathToTextureFolder = absPathToTextures;
+				subsite->pathToGeometryFolder = absPathToTModels;
 				subsitesWithModels.push_back(subsite);
 			}
 		}

@@ -65,7 +65,7 @@ public:
     const ChunkNode& find(const Geodetic2& location) const;
     const ChunkNode& getChild(Quad quad) const;
     const Chunk& getChunk() const;
-	const std::vector<Subsite> getSubsites() const;
+	const std::vector<std::shared_ptr<Subsite>> getSubsites() const;
     /**
      * Updates all children recursively. If this ChunkNode wants to split it will,
      * otherwise check if the children wants to merge. If all children wants to merge
@@ -75,13 +75,13 @@ public:
     */
     bool updateChunkTree(const RenderData& data);
 
-	void addSites(std::vector<Subsite> subSites);
+	void addSites(const std::vector<std::shared_ptr<Subsite>> subSites);
 
 private:
     ChunkNode* _parent;
     std::array<std::unique_ptr<ChunkNode>, 4> _children;
 
-	std::vector<Subsite> _subsites;
+	std::vector<std::shared_ptr<Subsite>> _subsites;
 
     Chunk _chunk;
 };

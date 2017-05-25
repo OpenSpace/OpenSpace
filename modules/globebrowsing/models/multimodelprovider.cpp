@@ -36,8 +36,8 @@ MultiModelProvider::MultiModelProvider(const ghoul::Dictionary& dictionary)
 	: ModelProvider(dictionary) {
 }
 
-std::vector<Subsite> MultiModelProvider::calculate(const std::vector<std::vector<Subsite>> subsites, const RenderData& data) {
-	std::vector<Subsite> ss;
+std::vector<std::shared_ptr<Subsite>> MultiModelProvider::calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites, const RenderData& data) {
+	std::vector<std::shared_ptr<Subsite>> ss;
 	for (auto subSites : subsites) {
 		if (subSites.size() > 0) {
 			ss.push_back(subSites.at(0));

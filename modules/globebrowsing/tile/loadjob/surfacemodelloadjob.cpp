@@ -38,18 +38,18 @@ namespace globebrowsing {
 
 void SurfaceModelLoadJob::execute() {
 	std::string levelString = std::to_string(_level);
-	std::string pathToGeometryFolder = _subsite.pathToGeometryFolder + "level" + levelString + "//" + "site" + _subsite.site +
-		"//" + "drive" + _subsite.drive + "//";
-	std::string pathToTextureFolder = _subsite.pathToTextureFolder;
+	std::string pathToGeometryFolder = _subsite->pathToGeometryFolder + "level" + levelString + "//" + "site" + _subsite->site +
+		"//" + "drive" + _subsite->drive + "//";
+	std::string pathToTextureFolder = _subsite->pathToTextureFolder;
 	std::string roverSurfaceModelGeometry = "AsyncMultiModelGeometry";
 
-	_subsiteModels->site = _subsite.site;
-	_subsiteModels->drive = _subsite.drive;
-	_subsiteModels->subsiteCoordinate = Geodetic2{ _subsite.lat, _subsite.lon };
-	_subsiteModels->siteCoordinate = Geodetic2{ _subsite.siteLat, _subsite.siteLon };
+	_subsiteModels->site = _subsite->site;
+	_subsiteModels->drive = _subsite->drive;
+	_subsiteModels->geodetic = _subsite->geodetic;
+	_subsiteModels->siteGeodetic = _subsite->siteGeodetic;
 	_subsiteModels->level = _level;
 
-	for (auto fileName : _subsite.fileNames) {
+	for (auto fileName : _subsite->fileNames) {
 		// Set up a dictionary to load the model
 		ghoul::Dictionary dictionary;
 		ghoul::Dictionary dictionary2;
@@ -68,9 +68,9 @@ void SurfaceModelLoadJob::execute() {
 		tempFileName[14] = 'A';
 		tempFileName[15] = 'S';
 
-		std::string textureFormat = SurfaceModelLoadJob::textureFormat(_subsite.site);
-		std::string pathToTexture = pathToTextureFolder + "site" + _subsite.site +
-			"//" + "drive" + _subsite.drive + "//" + tempFileName + textureFormat;
+		std::string textureFormat = SurfaceModelLoadJob::textureFormat(_subsite->site);
+		std::string pathToTexture = pathToTextureFolder + "site" + _subsite->site +
+			"//" + "drive" + _subsite->drive + "//" + tempFileName + textureFormat;
 		model.texture = std::move(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
 
 		_subsiteModels->models.push_back(std::make_shared<Model>(model));

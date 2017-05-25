@@ -30,17 +30,18 @@
 #include <modules/globebrowsing/models/renderableroversurface.h>
 
 namespace openspace {
-	namespace globebrowsing {
-		class SingleModelProvider : public ModelProvider {
-		public:
-			SingleModelProvider(const ghoul::Dictionary& dictionary);
+namespace globebrowsing {
+class SingleModelProvider : public ModelProvider {
+public:
+	SingleModelProvider(const ghoul::Dictionary& dictionary);
 
-			virtual std::vector<Subsite> calculate(const std::vector<std::vector<Subsite>> subsites, const RenderData& data);
+	virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites, const RenderData& data);
 
-			virtual bool initialize();
-		};
-	}
-}
+	virtual bool initialize();
+};
+
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif //__OPENSPACE_MODULE_GLOBEBROWSING___SINGLE_MODEL_PROVIDER___H__
 

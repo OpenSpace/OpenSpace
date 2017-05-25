@@ -42,8 +42,8 @@ struct SubsiteModels {
 
 	glm::dvec3 cartesianPosition;
 
-	Geodetic2 subsiteCoordinate;
-	Geodetic2 siteCoordinate;
+	Geodetic2 geodetic;
+	Geodetic2 siteGeodetic;
 
 	uint64_t tileHashKey;
 	std::string site;
@@ -51,21 +51,6 @@ struct SubsiteModels {
 	int level;
 	float _alpha;
 	int _dir;
-
-	bool status = false;
-
-	SubsiteModels() {
-		cartesianPosition = glm::dvec3(0.0, 0.0, 0.0);
-		subsiteCoordinate = Geodetic2{ 0.0, 0.0 };
-		siteCoordinate = Geodetic2{ 0.0, 0.0 };
-		tileHashKey = 7367823;
-		site = "0";
-		drive = "0";
-		level = 0;
-		status = true;
-		_alpha = 0.0f;
-		_dir = 1;
-	}
 };
 
 } // namespace globebrowsing

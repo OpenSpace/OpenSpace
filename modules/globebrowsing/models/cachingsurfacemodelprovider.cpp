@@ -45,28 +45,39 @@ CachingSurfaceModelProvider::CachingSurfaceModelProvider(Renderable* parent)
 	_modelCache = std::make_shared<ModelCache>(static_cast<size_t>(cacheSize));
 }
 
-std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getModels(const std::vector<Subsite> Subsites,
+std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getModels(const std::vector<std::shared_ptr<Subsite>> Subsites,
 	const int level) {
 
 	// Check if the chunk is already in the cache. If it is in the cache, loop through the corresponding vector
 	// and look if the model is already loaded. If the model is already loaded, return the vector. If the model is
 	// not already loaded, enqueue the model.
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfSubsiteModels;
-
 	for (auto subsite : Subsites) {
-		uint64_t key = hashKey(subsite.site, subsite.drive, level);
+		uint64_t key = hashKey(subsite->site, subsite->drive, level);
 		uint64_t keyPrevLevel = -1;
 
 		if (_prevLevel != -1 && _prevLevel != level) {
-			keyPrevLevel = hashKey(subsite.site, subsite.drive, _prevLevel);
+			keyPrevLevel = hashKey(subsite->site, subsite->drive, _prevLevel);
 		}
 			
 
+		bool requestedExistsInCache = true;
 		if (_modelCache->exist(key)) {
 			vectorOfSubsiteModels.push_back(_modelCache->get(key)); 
 		}
 		else {
 			_asyncSurfaceModelProvider->enqueueModelIO(subsite, level);
+			
+			// If the cache holds the correct models but with lower resultion than requested,
+			// return highest available resolution.
+			std::vector<int> levelsAbove = getLevelsAbove(subsite->availableLevels, level);
+			for (int i = levelsAbove.size() + 1; i-- > 1; ) {
+				uint64_t keyLowerLevel = hashKey(subsite->site, subsite->drive, i);
+				if (_modelCache->exist(keyLowerLevel)) {
+					vectorOfSubsiteModels.push_back(_modelCache->get(keyLowerLevel));
+					break;
+				}
+			}
 		}
 		if (keyPrevLevel != -1 && _modelCache->exist(keyPrevLevel)) {
 			vectorOfSubsiteModels.push_back(_modelCache->get(keyPrevLevel));
@@ -79,35 +90,32 @@ void CachingSurfaceModelProvider::update(Renderable* parent) {
 	initModelsFromLoadedData(parent);
 }
 
+void CachingSurfaceModelProvider::setLevel(const int level) {
+	if (level != _previousLevel && level >= 2) {
+		clearQueuesAndJobs();
+	}
+	_previousLevel = level;
+}
+
+void CachingSurfaceModelProvider::clearQueuesAndJobs() {
+	_asyncSurfaceModelProvider->clearQueuesAndJobs();
+}
+
+std::vector<int> CachingSurfaceModelProvider::getLevelsAbove(const std::vector<int> availableLevels, const int requestedLevel) {
+	std::vector<int> levelsAbove;
+	for (int i = 0; i < requestedLevel - 1; i++) {
+		levelsAbove.push_back(availableLevels.at(i));
+	}
+	return levelsAbove;
+}
+
 void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfSubsiteModels =
 		_asyncSurfaceModelProvider->getLoadedModels();
 
+	//TODO: Remove this loop when the asynctex uploading is implemented
 	for (auto subsiteModels : vectorOfSubsiteModels) {
 		std::vector<std::shared_ptr<Model>> theModels = subsiteModels->models;
-		for (auto model : theModels) {
-			
-			// TODO: Fix async uploading of textures
-			void* pixelData = new char[model->texture->expectedPixelDataSize()];
-			memcpy(pixelData, model->texture->pixelData(), model->texture->expectedPixelDataSize());
-
-			std::shared_ptr<ghoul::opengl::Texture> tempTexture = std::make_shared<ghoul::opengl::Texture>(
-				pixelData,
-				model->texture->dimensions(),
-				model->texture->format(),
-				model->texture->internalFormat(),
-				model->texture->dataType(),
-				model->texture->filter(),
-				model->texture->wrapping()
-				);
-
-			model->texture = tempTexture;
-
-			// Upoad to GPU and set filter
-			model->texture->uploadTexture();
-			model->texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-		}
-
 		subsiteModels->models = theModels;
 		
 		uint64_t key = CachingSurfaceModelProvider::hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level);

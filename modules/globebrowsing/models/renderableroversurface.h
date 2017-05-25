@@ -62,8 +62,8 @@ private:
 
 	std::vector<std::string> _fileNames;
 	std::vector<glm::fvec2> _coordinates;
-	std::vector<Subsite> _subSites;
-	std::vector<Subsite> _subSitesWithModels;
+	std::vector<std::shared_ptr<Subsite>> _subSites;
+	std::vector<std::shared_ptr<Subsite>> _subSitesWithModels;
 	std::vector<std::shared_ptr<Model>> _models;
 
 	GeneralProperties _generalProperties;
@@ -73,7 +73,6 @@ private:
 	std::string _texturePath;
 	std::string _absModelPath;
 	std::string _absTexturePath;
-	std::string _multiModelGeometry;
 
 	properties::Vec3Property _debugModelRotation;
 

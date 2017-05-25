@@ -107,9 +107,9 @@ public:
      * \returns the height from the reference ellipsoid to the globe surface.
      */
 
-	void ChunkedLodGlobe::addSites(const std::vector<Subsite> subsites);
+	void ChunkedLodGlobe::addSites(const std::vector<std::shared_ptr<Subsite>> subsites);
 
-	std::vector<std::vector<Subsite>> ChunkedLodGlobe::subsites();
+	std::vector<std::vector<std::shared_ptr<Subsite>>> ChunkedLodGlobe::subsites();
 
     float getHeight(glm::dvec3 position) const;
 
@@ -120,7 +120,7 @@ public:
 
     StatsCollector stats;
 
-	std::vector<std::vector<Subsite>> _subsites;
+	std::vector<std::vector<std::shared_ptr<Subsite>>> _subsites;
     
 private:
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& data) const;

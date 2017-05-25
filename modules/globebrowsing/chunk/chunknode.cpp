@@ -77,7 +77,7 @@ bool ChunkNode::updateChunkTree(const RenderData& data) {
     }
 }
 
-void ChunkNode::addSites(std::vector<Subsite> subSites) {
+void ChunkNode::addSites(const std::vector<std::shared_ptr<Subsite>> subSites) {
 	_subsites = subSites;
 }
 
@@ -169,12 +169,11 @@ void ChunkNode::split(int depth) {
         for (size_t i = 0; i < _children.size(); ++i) {
             Chunk chunk(_chunk.owner(), _chunk.tileIndex().child((Quad)i));
 			globebrowsing::GeodeticPatch patch = chunk.surfacePatch();
-			std::vector<Subsite> tempSites;
+			std::vector<std::shared_ptr<Subsite>> tempSites;
 			std::unique_ptr<ChunkNode> temp = std::make_unique<ChunkNode>(chunk, this);
 			if (this != nullptr) {
 				for (int k = 0; k < this->_subsites.size(); ++k) {
-					globebrowsing::Geodetic2 temp = globebrowsing::Geodetic2{ this->_subsites.at(k).lat, this->_subsites.at(k).lon } / 180.0 * glm::pi<double>();
-					if (patch.contains(temp)) {
+					if (patch.contains(this->_subsites.at(k)->geodetic)) {
 						tempSites.push_back(this->_subsites.at(k));
 					}
 				}
@@ -206,7 +205,7 @@ const Chunk& ChunkNode::getChunk() const {
     return _chunk;
 }
 
-const std::vector<Subsite> ChunkNode::getSubsites() const {
+const std::vector<std::shared_ptr<Subsite>> ChunkNode::getSubsites() const {
 	return _subsites;
 }
 

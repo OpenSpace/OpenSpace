@@ -36,7 +36,7 @@ namespace modelgeometry {
 AsyncMultiModelGeometry::AsyncMultiModelGeometry(const ghoul::Dictionary& dictionary)
 	: ModelGeometry(dictionary)
 {
-	loadObj(_file);
+	loadObjWithoutCaching(_file);
 }
 
 bool AsyncMultiModelGeometry::initialize(Renderable* parent) {
@@ -79,18 +79,13 @@ void AsyncMultiModelGeometry::deinitialize() {
 }
 
 void AsyncMultiModelGeometry::uploadData() {
-	//glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-
 	for (int i = 0; i < _vertices.size(); i++) {
 		_vertexBufferData[i] = _vertices.at(i);
 	}
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibo);
 
 	for (int k = 0; k < _indices.size(); k++) {
 		_indexBufferData[k] = _indices.at(k);
 	}
-	//glUnmapBuffer(GL_ARRAY_BUFFER);
-	//glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 }
 
 void AsyncMultiModelGeometry::unmapBuffers() {

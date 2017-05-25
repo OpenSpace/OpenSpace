@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/models/renderableexplorationpath.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -43,22 +42,17 @@ namespace globebrowsing {
 RenderableExplorationPath::RenderableExplorationPath()
 	: _pathShader(nullptr)
 	, _siteShader(nullptr)
-	, _fading(1.0)
+	, _fading(0.0)
 	, _vertexBufferID(0)
 	, _vaioID(0)
-	, _hasLoopedOnce(false)
-	, _isCloseEnough(false)
-	, _cameraToPointDistance(0.0)
 	, _isEnabled(properties::BoolProperty("enabled", "enabled", false))
-{
-}
+{}
 
 RenderableExplorationPath::~RenderableExplorationPath() {}
 
-bool RenderableExplorationPath::initialize(RenderableGlobe* globe, std::vector<glm::dvec2> coordinates) {
-
+bool RenderableExplorationPath::initialize(RenderableGlobe* globe, const std::vector<Geodetic2> geodetics) {
 	_globe = globe;
-	_latLonCoordinates = coordinates;
+	_geodetics = geodetics;
 
 	// Shaders for the path (GL_LINES)
 	if (_pathShader == nullptr) {
@@ -85,7 +79,7 @@ bool RenderableExplorationPath::initialize(RenderableGlobe* globe, std::vector<g
 	}
 
 	calculatePathModelCoordinates();
-	if (_latLonCoordinates.size() == 0) return false;
+	if (_geodetics.size() == 0) return false;
 
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaioID);
@@ -99,7 +93,7 @@ bool RenderableExplorationPath::initialize(RenderableGlobe* globe, std::vector<g
 	glBufferData(GL_ARRAY_BUFFER,
 		_stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
 		&_stationPointsModelCoordinates[0],
-		GL_DYNAMIC_DRAW);
+		GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(_stationPointsModelCoordinates[0]), 0);
@@ -133,37 +127,11 @@ bool RenderableExplorationPath::isReady() const {
 }
 
 void RenderableExplorationPath::render(const RenderData& data) {
-
-	// Camera position in model space
-	glm::dvec3 camPos = data.camera.positionVec3();
-	glm::dmat4 inverseModelTransform = _globe->inverseModelTransform();
-	glm::dvec3 cameraPositionModelSpace =
-		glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
-
-	// Takes the coordinates for the station in the middle of the array
-	// and calculates the position on the ellipsoid
-	int vectorSize = _stationPointsModelCoordinates.size();
-	glm::dvec3 positionOnEllipsoid = _stationPointsModelCoordinates[int(vectorSize / 2)];
-
-	// Temporary solution to trigger the calculation of new positions of the stations when the camera is 
-	// less than 5000 meters from the "middle' station. Should possibly be moved do a distanceswitch.
-	double heightToSurface = _globe->getHeight(_stationPointsModelCoordinates[int(vectorSize / 2)]);
-	glm::dvec3 directionFromSurfaceToPointModelSpace = _globe->ellipsoid().
-		geodeticSurfaceNormal(_globe->ellipsoid().cartesianToGeodetic2(_stationPointsModelCoordinates[int(vectorSize / 2)]));
-	glm::dvec3 tempPos = glm::dvec3(_stationPointsModelCoordinates[int(vectorSize / 2)]) + heightToSurface * directionFromSurfaceToPointModelSpace;
-
-	// The distance from the camera to the position on the ellipsoid
-	_cameraToPointDistance = glm::length(cameraPositionModelSpace - tempPos);
-
-	if (_cameraToPointDistance < 10000.0) {
-		_isCloseEnough = true;
-
-		// Only show the path when camera is close enough. Especially GL_POINTS look bad
-		// when camera is far form the globe. Will have to improve this.
-		/*if (distance < 16737 && _fading < 1.f)
+		// Only show the path when camera is close enough
+		if (_currentLevel > 0 && _fading < 1.f)
 			_fading += 0.01f;
-		else if (distance >= 16737 && _fading > 0.f)
-			_fading -= 0.01f;*/
+		else if (_currentLevel == 0 && _fading > 0.f)
+			_fading -= 0.01f;
 
 		// Model transform and view transform needs to be in double precision
 		glm::dmat4 globeModelTransform = _globe->modelTransform();
@@ -172,7 +140,7 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		_pathShader->activate();
 
 		// Passing model view transform as double to maintain precision for vertices.
-		// Otherwise the path i "jumping".
+		// Otherwise the path will be twitching.
 		_pathShader->setUniform("modelViewTransform", modelViewTransform);
 		_pathShader->setUniform("projectionTransform", data.camera.projectionMatrix());
 		_pathShader->setUniform("fading", _fading);
@@ -200,54 +168,51 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		glBindVertexArray(0);
 
 		_siteShader->deactivate();*/
-	}
 }
 
 void RenderableExplorationPath::update(const UpdateData& data) {
+}
 
-	
-	if(_isCloseEnough == true && _hasLoopedOnce == false) {
-		// Clear old coordinates values.
-		_stationPointsModelCoordinates.clear();
-		for (auto i : _latLonCoordinates) {
-
-			globebrowsing::Geodetic2 geoTemp = globebrowsing::Geodetic2{ i.x, i.y } / 180 * glm::pi<double>();
-			glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geoTemp);
-			double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
-
-			globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geoTemp, heightToSurface + 1.0 };
-			glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
-			_stationPointsModelCoordinates.push_back(glm::dvec4(tempPos2, 1.0));
-		}
-		
-		_hasLoopedOnce = true;
-
-		// Buffer new data
-		glBindVertexArray(_vaioID);
-		glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
-
-		glBufferData(GL_ARRAY_BUFFER, _stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
-			NULL, GL_STREAM_DRAW);
-		glBufferSubData(GL_ARRAY_BUFFER, 0,
-			_stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
-			&_stationPointsModelCoordinates[0]);
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glBindVertexArray(0);
-	}	
+void RenderableExplorationPath::setLevel(const int level) {
+	_currentLevel = level;
+	if (level > lastLevel) {
+		recalculateCartesianPathCoordinates();
+		lastLevel = level;
+	}
 }
 
 void RenderableExplorationPath::calculatePathModelCoordinates() {
-	globebrowsing::Geodetic2 geo;
-	glm::dvec3 positionModelSpace;
-
-	for (auto position : _latLonCoordinates) {
-		geo = globebrowsing::Geodetic2{ position.x, position.y } / 180 * glm::pi<double>();
-		positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geo);
-		_stationPointsModelCoordinates.push_back(glm::dvec4(positionModelSpace, 1.0f));
+	for (auto geodetic : _geodetics) {
+		glm::dvec3 positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
+		_stationPointsModelCoordinates.push_back(glm::dvec4(positionModelSpace, 1.0));
 	}
+}
+
+void RenderableExplorationPath::recalculateCartesianPathCoordinates() {
+	_stationPointsModelCoordinates.clear();
+	for (auto geodetic : _geodetics) {
+		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
+		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
+
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geodetic, heightToSurface + 0.5 };
+		glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
+		_stationPointsModelCoordinates.push_back(glm::dvec4(tempPos2, 1.0));
+	}
+
+	// Buffer new data
+	glBindVertexArray(_vaioID);
+	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
+
+	glBufferData(GL_ARRAY_BUFFER, _stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
+		NULL, GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, 0,
+		_stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
+		&_stationPointsModelCoordinates[0]);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glBindVertexArray(0);
 }
 
 } // namespace globebrowsing

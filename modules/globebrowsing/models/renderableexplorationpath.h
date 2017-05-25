@@ -43,39 +43,37 @@ public:
 	RenderableExplorationPath();
 	~RenderableExplorationPath();
 	
-	bool initialize(RenderableGlobe* globe, std::vector<glm::dvec2> coordinates);
+	bool initialize(RenderableGlobe* globe, const std::vector<Geodetic2> coordinates);
 	bool deinitialize();
 	bool isReady() const;
 
 	void render(const RenderData& data);
 	void update(const UpdateData& data);
+	void setLevel(const int level);
 
 private:
 	void calculatePathModelCoordinates();
+	void recalculateCartesianPathCoordinates();
 
 	std::unique_ptr<ghoul::opengl::ProgramObject> _pathShader;
 	std::unique_ptr<ghoul::opengl::ProgramObject> _siteShader;
 	properties::BoolProperty _isEnabled;
 
-	bool _isReady;
+	int lastLevel = 0;
+	int _currentLevel = 0;
 
 	std::vector<glm::vec4> _stationPointsModelCoordinates;
 
 	globebrowsing::RenderableGlobe* _globe;
 
-	std::vector<glm::dvec2> _latLonCoordinates;
+	std::vector<Geodetic2> _geodetics;
 
 	float _fading;
 	GLuint _vaioID;
 	GLuint _vertexBufferID;
-	double _cameraToPointDistance;
-	bool _hasLoopedOnce;
-	bool _isCloseEnough;
-
-	//RenderableGlobe& _globe;
-
 };
-}
-}
+
+} // namespace globebrowsing
+} // namespace openspace
 
 #endif //__OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLE_EXPLORATION_PATH___H__

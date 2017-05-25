@@ -42,12 +42,9 @@ namespace {
 	const char* keyRoverLocationPath	= "RoverLocationPath";
 	const char* keyModelPath			= "ModelPath";
 	const char* keyTexturePath			= "TexturePath";
-	const char* keyGeometryFile			= "GeometryFile";
-	const char* keyRenderable			= "Renderable";
-	const char* keyType					= "Type";
-	const char* keyMultiModelGeometry	= "MultiModelGeometry";
 	const char* keyName					= "Name";
-	const char* keyPathToTexture		= "PathToTexture";
+	const char* keyAbsPathToTextures	= "AbsPathToTextures";
+	const char* keyAbsPathToModels		= "AbsPathToModels";
 }
 
 namespace openspace {
@@ -61,7 +58,7 @@ namespace globebrowsing {
 			BoolProperty("enabled", "enabled", false)
 	})
 		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
-		, _modelSwitch(nullptr)
+		, _modelSwitch()
 		, _prevLevel(3)
 		, _isFirst(true)
 {
@@ -78,35 +75,32 @@ namespace globebrowsing {
 	bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
 	ghoul_assert(success, "Name was not passed to RenderableSite");
 
-	_multiModelGeometry = "MultiModelGeometry";
+	// Save abs path to the models and texture folders because the abs path is changed when leaving constructor.
+	_absModelPath = absPath(_modelPath);
+	_absTexturePath = absPath(_texturePath);
 
 	// Extract all subsites that has models
-	ghoul::Dictionary tempDic;
-	tempDic.setValue(keyRoverLocationPath, _roverLocationPath);
-	tempDic.setValue(keyModelPath, _modelPath);
-	_subSitesWithModels = RoverPathFileReader::extractSubsitesWithModels(tempDic);
+	ghoul::Dictionary tempDictionary;
+	tempDictionary.setValue(keyRoverLocationPath, _roverLocationPath);
+	tempDictionary.setValue(keyAbsPathToTextures, _absTexturePath);
+	tempDictionary.setValue(keyAbsPathToModels, _absModelPath);
+	_subSitesWithModels = RoverPathFileReader::extractSubsitesWithModels(tempDictionary);
 
 	// Extract all subsites
-	ghoul::Dictionary tempDic2;
-	tempDic2.setValue(keyRoverLocationPath, _roverLocationPath);
-	tempDic2.setValue(keyModelPath, _modelPath);
-	_subSites = RoverPathFileReader::extractAllSubsites(tempDic2);
+	ghoul::Dictionary tempDictionary2;
+	tempDictionary2.setValue(keyRoverLocationPath, _roverLocationPath);
+	_subSites = RoverPathFileReader::extractAllSubsites(tempDictionary2);
 
 	addProperty(_debugModelRotation);
 
-	// Save the abspath because it changes when leaving the constructor.
-	_absModelPath = absPath(_modelPath);
-	_absTexturePath = absPath(_texturePath);
 	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
 	_renderableExplorationPath = std::make_shared<RenderableExplorationPath>();
-
-
 }
 
 bool RenderableRoverSurface::initialize() {
-	std::vector<glm::dvec2> coordinates;
+	std::vector<Geodetic2> coordinates;
 	for (auto subsite : _subSites) {
-		coordinates.push_back(glm::dvec2(subsite.lat, subsite.lon));
+		coordinates.push_back(subsite->geodetic);
 	}
 
 	std::string ownerName = owner()->name();
@@ -118,7 +112,7 @@ bool RenderableRoverSurface::initialize() {
 
 	_chunkedLodGlobe = _globe->chunkedLodGlobe();
 
-	_modelSwitch = LodModelSwitch(_globe);
+	_modelSwitch.initialize(_globe);
 
 	_chunkedLodGlobe->addSites(_subSitesWithModels);
 
@@ -139,16 +133,15 @@ bool RenderableRoverSurface::isReady() const {
 }
 
 void RenderableRoverSurface::render(const RenderData& data) {
-	_renderableExplorationPath->render(data);
 	_models.clear();
 
-	std::vector<std::vector<Subsite>> subSitesVector = _chunkedLodGlobe->subsites();
+	std::vector<std::vector<std::shared_ptr<Subsite>>> subSitesVector = _chunkedLodGlobe->subsites();
 
 	if (subSitesVector.size() < 1) {
 		return;
 	}
 
-	std::vector<Subsite> ss;
+	std::vector<std::shared_ptr<Subsite>> ss;
 	ghoul::Dictionary modelDic;
 	std::unique_ptr<ModelProvider>_modelProvider;
 	int level;
@@ -171,25 +164,25 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			level = 3;
 			break;
 
-		default: 
+		case LodModelSwitch::Mode::High :
 			//High up
 			level = 1;
-			return;
+			break;
+
+		case LodModelSwitch::Mode::Far:
+			//Far away
+			// Only used to decide if renderableexplorationpath should be visible or not atm.
+			level = 0;
+			break;
 	}
 
-	std::vector<Subsite> ss1;
-
-	// TODO: Find way to skip the loop
-	for (auto s : ss) {
-		Subsite s1 = std::move(s);
-		s1.pathToGeometryFolder = _absModelPath;
-		s1.pathToTextureFolder = _absTexturePath;
-		ss1.push_back(s1);
-	}
+	_renderableExplorationPath->setLevel(level);
+	_renderableExplorationPath->render(data);
+	_cachingModelProvider->setLevel(level);
 
 	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
 	//FOR ALPHA BLENDING TO WORK
-	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels = _cachingModelProvider->getModels(ss1, level);
+	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels = _cachingModelProvider->getModels(ss, level);
 	
 	if (_subsiteModels.size() == 0) return;
 
@@ -270,7 +263,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			glm::dmat4 debugModelRotation = rotX * rotY * rotZ;
 
 			// Rotation to make model up become normal of position on ellipsoid
-			glm::dvec3 surfaceNormal = _globe->ellipsoid().geodeticSurfaceNormal(subsiteModels->siteCoordinate / 180.0 * glm::pi<double>());
+			glm::dvec3 surfaceNormal = _globe->ellipsoid().geodeticSurfaceNormal(subsiteModels->siteGeodetic);
 
 			surfaceNormal = glm::normalize(surfaceNormal);
 			float cosTheta = dot(glm::dvec3(0, 0, 1), surfaceNormal);
@@ -315,6 +308,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
 
 			_programObject->setUniform("transparency", 1.0f);
+			//TODO: Is this really used? Otherwise delete this and _sunPos.
 			_programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
 			_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
 			_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
@@ -333,20 +327,19 @@ void RenderableRoverSurface::render(const RenderData& data) {
 	_prevLevel = level;
 }
 
-void RenderableRoverSurface::update(const UpdateData & data) {
+void RenderableRoverSurface::update(const UpdateData& data) {
 	_renderableExplorationPath->update(data);
 	_cachingModelProvider->update(this);
 	_sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 }
 
 std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector) {
-	for (auto i : vector) {
-		globebrowsing::Geodetic2 geoTemp = i->subsiteCoordinate / 180 * glm::pi<double>();
-		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geoTemp);
+	for (auto subsiteModels : vector) {
+		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(subsiteModels->geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geoTemp, heightToSurface + 2.0 };
-		i->cartesianPosition = _globe->ellipsoid().cartesianPosition(geo3);
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + 2.0 };
+		subsiteModels->cartesianPosition = _globe->ellipsoid().cartesianPosition(geo3);
 	}
 	return vector;
 }
