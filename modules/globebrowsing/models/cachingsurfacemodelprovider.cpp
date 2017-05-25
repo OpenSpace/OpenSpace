@@ -55,11 +55,21 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 
 	for (auto subsite : Subsites) {
 		uint64_t key = hashKey(subsite.site, subsite.drive, level);
+		uint64_t keyPrevLevel = -1;
+
+		if (_prevLevel != -1 && _prevLevel != level) {
+			keyPrevLevel = hashKey(subsite.site, subsite.drive, _prevLevel);
+		}
+			
+
 		if (_modelCache->exist(key)) {
-			vectorOfSubsiteModels.push_back(_modelCache->get(key));
+			vectorOfSubsiteModels.push_back(_modelCache->get(key)); 
 		}
 		else {
 			_asyncSurfaceModelProvider->enqueueModelIO(subsite, level);
+		}
+		if (keyPrevLevel != -1 && _modelCache->exist(keyPrevLevel)) {
+			vectorOfSubsiteModels.push_back(_modelCache->get(keyPrevLevel));
 		}
 	}
 	return vectorOfSubsiteModels;

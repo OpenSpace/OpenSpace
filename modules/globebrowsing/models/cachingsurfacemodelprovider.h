@@ -56,6 +56,8 @@ private:
 
 	uint64_t hashKey(const std::string site, const std::string drive, const int level);
 	
+	int _prevLevel = -1;
+
 	Renderable* _parent;
 
 	Vertex* _vertexBufferData = nullptr;
