@@ -40,58 +40,13 @@
 #include <unordered_set>
 
 #include <openspace/util/powerscaledsphere.h>
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
+#include <modules/solarbrowsing/util/streambuffer.h>
+#include <modules/solarbrowsing/util/pixelbufferobject.h>
+#include <modules/solarbrowsing/util/decodejob.h>
 
 namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
-
-struct SolarImageData {
-    unsigned char* data;
-    unsigned int dataSize;
-    std::string name;
-    double timeObserved;
-};
-
-struct DecodeData {
-    unsigned int totalImageSize;
-    std::string path;
-    unsigned int resolutionLevel;
-    bool verboseMode;
-    double timeObserved;
-};
-
-// TODO(mnoven) : Move to separate class
-class DecodeJob : public globebrowsing::Job<SolarImageData>{
-public:
-    DecodeJob(const DecodeData& decodeData)
-        : _decodeData(decodeData)
-    {
-    }
-
-    virtual void execute() final {
-        //const int& imageSize = _decodeData.imageSize * _decodeData.imageSize;
-        SolarImageData imd{new unsigned char[_decodeData.totalImageSize],
-                           _decodeData.totalImageSize, _decodeData.path,
-                           _decodeData.timeObserved};
-        SimpleJ2kCodec j2c(_decodeData.verboseMode);
-        j2c.DecodeIntoBuffer(imd.name, imd.data, _decodeData.resolutionLevel);
-        _solarImageData = std::make_shared<SolarImageData>(std::move(imd));
-    }
-
-    virtual std::shared_ptr<SolarImageData> product() const final {
-        return std::move(_solarImageData);
-    }
-
-protected:
-    std::shared_ptr<SolarImageData> _solarImageData;
-    DecodeData _decodeData;
-    /*std::string _path;
-    int _resolutionLevel;
-    int _imageSize;
-    bool _verboseMode;
-    double _timeObserved;*/
-};
 
 class RenderableSpacecraftCameraPlane : public Renderable {
 
@@ -119,7 +74,7 @@ public:
     unsigned int _imageSize;
 
 private:
-    globebrowsing::ConcurrentJobManager<SolarImageData> _concurrentJobManager;
+    //globebrowsing::ConcurrentJobManager<SolarImageData> _concurrentJobManager;
 
     properties::BoolProperty _asyncUploadPBO;
     properties::OptionProperty _activeInstruments;
@@ -154,6 +109,7 @@ private:
     GLuint _frustum;
     GLuint _frustumPositionBuffer;
 
+    std::unique_ptr<PixelBufferObject> _pbo;
     GLuint pboHandles[2];
     unsigned int _currentPBO;
 
@@ -169,8 +125,6 @@ private:
     bool _bufferingForwardInTime = true;
     bool _pboIsDirty = false;
 
-    IMG_PRECISION* _pboBufferData;
-
     float _size;
     GLuint _quad;
     GLuint _vertexPositionBuffer;
@@ -179,6 +133,8 @@ private:
     double _move = 0.0;
     double _deltaTimeLast = 0.0;
     double _realTimeDiff;
+
+    StreamBuffer<SolarImageData> _streamBuffer;
 
     std::vector<std::unique_ptr<TransferFunction>> _transferFunctions;
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
