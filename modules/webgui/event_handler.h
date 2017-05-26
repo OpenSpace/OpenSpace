@@ -36,16 +36,25 @@ namespace openspace {
 
 class EventHandler {
 public:
-    EventHandler(CefRefPtr<CefBrowser> browser) : browser(browser) {};
+    EventHandler(CefRefPtr<CefBrowser> browser) : browser(browser), mousePosition(0,0) {};
+
     void initialize();
+
+    const int SINGLE_CLICK = 1;
 
 private:
     bool mouseButtonCallback(MouseButton, MouseAction);
+    bool mousePositionCallback(double, double);
     bool mouseWheelCallback(double);
     bool keyBoardCallback(Key, KeyModifier, KeyAction);
 
+    CefMouseEvent mouseEvent();
+    cef_key_event_type_t EventHandler::keyEventType(KeyAction);
+
     CefRefPtr<CefBrowser> browser;
+    glm::vec2 mousePosition;
 };
+
 
 }
 
