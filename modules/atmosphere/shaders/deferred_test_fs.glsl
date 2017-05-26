@@ -37,12 +37,9 @@ const int RenderableGlobe  = 2;
 // a RenderableGlobe
 uniform int RenderableClass;
 
-//uniform sampler2D reflectanceTexture;
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
-//uniform sampler2DMS mainDepthTexture;
 uniform sampler2DMS mainPositionTexture;
-//uniform sampler2D mainPositionTexture;
 uniform sampler2DMS mainNormalReflectanceTexture;
 uniform sampler2DMS mainColorTexture;
 
@@ -55,25 +52,16 @@ in vec3 interpolatedNDCPos;
 
 // Model Transform Matrix Used for Globe Rendering
 uniform dmat4 ModelTransformMatrix;
-//uniform dmat4 dSgctProjectionMatrix;
 uniform dmat4 dInverseTransformMatrix;
-//uniform dmat4 dScaleTransformMatrix;
 uniform dmat4 dInverseScaleTransformMatrix;
-//uniform dmat4 dObjToWorldTransform;
-//uniform dmat4 dWorldToObjectTransform;
-//uniform dmat4 dWorldToOsEyeTransform;
-//uniform dmat4 dOsEyeToWorldTransform; // OS Eye to World
-//uniform dmat4 dOsEyeToSGCTEyeTranform; // OS Eye to SGCT Eye
 uniform dmat4 dInverseSgctEyeToWorldTranform; // SGCT Eye to OS World
 uniform dmat4 dSgctEyeToOSEyeTranform; // SGCT Eye to OS Eye
-//uniform dmat4 dSgctEyeToClipTranform; // SGCT Eye to SGCT Project Clip
 uniform dmat4 dInverseSgctProjectionMatrix; // Clip to SGCT Eye
 uniform dmat4 dInverseCamRotTransform;
 
 // Double Precision Versions:
 uniform dvec4 dObjpos;
 uniform dvec3 dCampos;
-//uniform dmat3 dCamrot;
 
 uniform dvec3 sunDirectionObj;
 
@@ -754,7 +742,7 @@ void main() {
       }
     } else {
       // No ATM defined.
-      //renderTarget = vec4(1.0, 1.0, 0.0, 1.0);
+      renderTarget = meanColor;
     }
 
                 
