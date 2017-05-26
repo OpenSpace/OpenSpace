@@ -74,8 +74,9 @@ bool HistogramManager::buildHistogram(unsigned int brickIndex) {
     Histogram histogram(_minBin, _maxBin, _numBins);
     bool isBstLeaf = _tsp->isBstLeaf(brickIndex);
     bool isOctreeLeaf = _tsp->isOctreeLeaf(brickIndex);
+    bool isTSPLeaf = isBstLeaf && isOctreeLeaf;
 
-    if (isBstLeaf && isOctreeLeaf) {
+    if (isTSPLeaf) {
         // TSP leaf, read from file and build histogram
         std::vector<float> voxelValues = readValues(brickIndex);
         unsigned int numVoxels = voxelValues.size();

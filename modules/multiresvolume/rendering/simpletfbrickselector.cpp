@@ -44,6 +44,7 @@ namespace openspace {
 SimpleTfBrickSelector::~SimpleTfBrickSelector() {}
 
 bool SimpleTfBrickSelector::initialize() {
+    LERROR("Selector init again");
     return calculateBrickImportances();
 }
 
@@ -269,29 +270,36 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
 
     float tfWidth = tf->width();
     if (tfWidth <= 0) return false;
-
-    unsigned int nHistograms = _tsp->numTotalNodes();
+    LERROR("Transfer function width: " << tfWidth);
+    // The importance of every brick. Each brick has a histogram.
+    size_t nHistograms = _tsp->numTotalNodes();
     _brickImportances = std::vector<float>(nHistograms);
 
-    for (unsigned int brickIndex = 0; brickIndex < nHistograms; brickIndex++) {
+    for (size_t brickIndex = 0; brickIndex < nHistograms; brickIndex++) {
+        // For every brick, get its histogram
         const Histogram* histogram = _histogramManager->getHistogram(brickIndex);
         if (!histogram->isValid()) {
             return false;
         }
 
-        float dotProduct = 0;
-        for (int i = 0; i < tf->width(); i++) {
+        float importance = 0.;
+        for (size_t i = 0; i < tfWidth; i++) {
+            // For the width of the transfer function, get the bin as a percentage instead
+            // of an index, so we can sample histogram
             float x = float(i) / tfWidth;
+
+            // Get the value of the bin at x
             float sample = histogram->interpolate(x);
 
             assert(sample >= 0);
-            dotProduct += sample * tf->sample(i).w;
+
+            // Sample index from transfer function's alpha, multiply by histogram value, and sum
+            importance += sample * tf->sample(i).w;
         }
-        _brickImportances[brickIndex] = dotProduct;
+        _brickImportances[brickIndex] = importance;
     }
 
     LINFO("Updated brick importances");
-    LINFO("Dollarydoo");
     return true;
 }
 

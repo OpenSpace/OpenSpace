@@ -147,20 +147,18 @@ void Histogram::changeRange(float minValue, float maxValue){\
 }
 
 bool Histogram::add(const Histogram& histogram) {
-    if (_minValue == histogram.minValue() && _maxValue == histogram.maxValue() && _numBins == histogram.numBins()) {
-
-        const float* data = histogram.data();
-        for (int i = 0; i < _numBins; i++) {
-
-            _data[i] += data[i];
-
-        }
-        _numValues += histogram._numValues;
-        return true;
-    } else {
+    bool dimTest = _minValue == histogram.minValue() && _maxValue == histogram.maxValue() && _numBins == histogram.numBins();
+    if (!dimTest) {
         LERROR("Dimension mismatch");
         return false;
     }
+
+    const float* data = histogram.data();
+    for (int i = 0; i < _numBins; i++) {
+        _data[i] += data[i];
+    }
+    _numValues += histogram._numValues;
+    return true;
 }
 
 bool Histogram::addRectangle(float lowBin, float highBin, float value) {
