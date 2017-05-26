@@ -59,8 +59,18 @@ RenderableSpacecraftCameraSphere::RenderableSpacecraftCameraSphere(
 }
 
 bool RenderableSpacecraftCameraSphere::initialize() {
+    const std::vector<SceneGraphNode*>& allNodes
+          = OsEng.renderEngine().scene()->allSceneGraphNodes();
+    for (auto node : allNodes) {
+        if (dynamic_cast<RenderableSpacecraftCameraPlane*>(node->renderable())) {
+           // SceneGraphNode* tmp2 = const_cast<SceneGraphNode*>(node);
+            auto thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName);
+            thisNode->addDependency(*node);
+        }
+    }
+
     _planeDependencies
-          = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
+         = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
 
     const std::string path = "/home/noven/workspace/OpenSpace/data/hmimap1.fits";
     FitsFileReader fts(false);
@@ -95,7 +105,7 @@ bool RenderableSpacecraftCameraSphere::initialize() {
         }
     }
 
-    PowerScaledScalar planetSize(glm::vec2(6.96701f, 8.f));
+    PowerScaledScalar planetSize(glm::vec2(696701000.f * (1574.9623f / 4096.f) , 0.f));
     _sphere = std::make_unique<PowerScaledSphere>(PowerScaledSphere(planetSize, 100));
     _sphere->initialize();
 
@@ -112,7 +122,7 @@ bool RenderableSpacecraftCameraSphere::deinitialize() {
 }
 
 bool RenderableSpacecraftCameraSphere::isReady() const {
-    return _shader && _sphere && _magnetogramTexture;;
+    return _shader && _sphere && _magnetogramTexture;
 }
 
 void RenderableSpacecraftCameraSphere::update(const UpdateData& data) {
@@ -122,7 +132,6 @@ void RenderableSpacecraftCameraSphere::update(const UpdateData& data) {
 }
 
 void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
-
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
