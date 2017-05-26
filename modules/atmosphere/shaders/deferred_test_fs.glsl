@@ -534,9 +534,10 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
  * mu := cosine of the zenith view angle
  * attenuation := transmittance T(x,x0)
  */
-vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r, const float mu) {
-  vec3 transmittance = (r <= Rt) ? ( mu < -sqrt(1.0f - (Rg*Rg)/(r*r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);    
-  float sunFinalColor = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance; 
+vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r,
+              const float mu, const float irradianceFactor) {
+  vec3 transmittance = (r <= Rt) ? ( mu < -sqrt(1.0f - (Rg*Rg)/(r*r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);  
+  float sunFinalColor = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance * (1.0 - irradianceFactor); 
 
   return transmittance * sunFinalColor;      
 }
@@ -618,7 +619,7 @@ void main() {
                                                   maxLength, pixelDepth); 
           vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation,
                                             meanColor, meanNormal, irradianceFactor);
-          vec3 sunColor       = sunColor(x, tF, v, s, r, mu); 
+          vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
           
           vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
                   
@@ -685,12 +686,12 @@ void main() {
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
 
         // All calculations are done in Km:
-        pixelDepth /= 1000.0; 
+        pixelDepth /= 1000.0;
         fragObjectCoords.xyz /= 1000.0;
         
         if (meanPosition.xyz != vec3(0.0) && (pixelDepth < offset)) {        
-          //renderTarget = meanColor;
-           renderTarget = vec4(0.0);
+          renderTarget = meanColor;
+          //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
         } else {
           // Following paper nomenclature      
           double t = offset;                  
@@ -719,7 +720,7 @@ void main() {
                                                   maxLength, pixelDepth); 
           vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation,
                                             meanColor, meanNormal, irradianceFactor);
-          vec3 sunColor       = sunColor(x, tF, v, s, r, mu); 
+          vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
           
           //vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
           //finalRadiance = mix(finalRadiance, meanColor);
@@ -738,7 +739,7 @@ void main() {
           //renderTarget = vec4(vec3(pixelDepth/100000),1.0);
         }
       } else {
-        renderTarget = meanColor;
+        renderTarget = meanColor;        
       }
     } else {
       // No ATM defined.

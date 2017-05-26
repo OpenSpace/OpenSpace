@@ -210,7 +210,7 @@ void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, d
 
     const CameraPose& prevPose = prevKeyframe->data;
     const CameraPose& nextPose = nextKeyframe->data;
-	
+    
     Scene* scene = camera.parent()->scene();
     SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
