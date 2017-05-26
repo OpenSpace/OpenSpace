@@ -31,10 +31,6 @@ namespace {
 
 namespace openspace {
 
-GUIRenderHandler::GUIRenderHandler() {
-    initialized = false;
-}
-
 void GUIRenderHandler::initialize() {
     OsEng.registerModuleCallback(
             OpenSpaceEngine::CallbackOption::InitializeGL,
@@ -53,20 +49,9 @@ void GUIRenderHandler::initializeGL() {
             "${MODULE_WEBGUI}/shaders/fragment.glsl"
     );
     float data[] = {-1.0f, -1.0f, -1.0f,
-                      1.0f,  1.0f, -1.0f,
-                      1.0f, -1.0f, -1.0f,
-                      1.0f,  1.0f,  1.0f};
-
-//    GLfloat data[] = {
-//            0.f, 0.f,
-//            1.f, 1.f,
-//            0.f, 1.f,
-//
-//            0.f, 0.f,
-//            1.f, 0.f,
-//            1.f, 1.f
-//    };
-
+                     1.0f,  1.0f, -1.0f,
+                     1.0f, -1.0f, -1.0f,
+                     1.0f,  1.0f,  1.0f};
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glGenBuffers(1, &vbo);
@@ -75,10 +60,7 @@ void GUIRenderHandler::initializeGL() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-//    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-
-    initialized = true;
     LDEBUG("Initializing CEF GL environment... done!");
 }
 

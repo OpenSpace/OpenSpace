@@ -22,40 +22,55 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
-#define __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
 
-#include <memory>
-#include <include/openspace/engine/openspaceengine.h>
-#include <include/openspace/rendering/renderengine.h>
-#include <include/openspace/engine/wrapper/windowwrapper.h>
-#include <ghoul/opengl/opengl>
-#include <fmt/format.h>
-#include <include/cef_app.h>
-#include <include/cef_render_handler.h>
+#include "event_handler.h"
+
+namespace {
+    std::string _loggerCat = "WebGUI:EventHandler";
+}
 
 namespace openspace {
+    void EventHandler::initialize() {
+        OsEng.registerModuleKeyboardCallback(
+                [this](Key key, KeyModifier mod, KeyAction action) -> bool {
+                    if (true /*gui.isEnabled()*/) {
+                        return keyBoardCallback(key, mod, action);
+                    } else {
+                        return false;
+                    }
+                }
+        );
+        OsEng.registerModuleMouseButtonCallback(
+                [this](MouseButton button, MouseAction action) -> bool {
+                    if (true /*gui.isEnabled()*/) {
+                        return mouseButtonCallback(button, action);
+                    } else {
+                        return false;
+                    }
+                }
+        );
+        OsEng.registerModuleMouseScrollWheelCallback(
+                [this](double pos) -> bool {
+                    if (true /*gui.isEnabled()*/) {
+                        return mouseWheelCallback(pos);
+                    } else {
+                        return false;
+                    }
+                }
+        );
+    }
 
-class GUIRenderHandler : public CefRenderHandler {
-public:
-    GUIRenderHandler() {};
+    bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
+        return false;
+    }
 
-    void initialize();
-    void initializeGL();
-    void reshape(int, int);
-    void draw(void);
-    bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
-    void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList &dirtyRects, const void *buffer,
-                 int width, int height) override;
+    bool EventHandler::mouseWheelCallback(double position) {
+        return false;
+    }
 
-private:
-    int width = 0, height = 0;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    GLuint program, vao, vbo, texture, positionLoc;
+    bool EventHandler::keyBoardCallback(Key key, KeyModifier modifier, KeyAction action) {
+        return false;
+    }
 
-    IMPLEMENT_REFCOUNTING(GUIRenderHandler);
-};
 
 } // namespace openspace
-
-#endif  // __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__

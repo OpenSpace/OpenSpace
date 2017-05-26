@@ -22,40 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
-#define __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
 
-#include <memory>
-#include <include/openspace/engine/openspaceengine.h>
-#include <include/openspace/rendering/renderengine.h>
-#include <include/openspace/engine/wrapper/windowwrapper.h>
-#include <ghoul/opengl/opengl>
-#include <fmt/format.h>
-#include <include/cef_app.h>
-#include <include/cef_render_handler.h>
+#ifndef __OPENSPACE_MODULE_WEBGUI___EVENT_HANDLER___H__
+#define __OPENSPACE_MODULE_WEBGUI___EVENT_HANDLER___H__
+
+#include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
+//#include <include/cef_base.h>
+#include <include/cef_browser.h>
+#include <openspace/engine/openspaceengine.h>
 
 namespace openspace {
 
-class GUIRenderHandler : public CefRenderHandler {
+class EventHandler {
 public:
-    GUIRenderHandler() {};
-
+    EventHandler(CefRefPtr<CefBrowser> browser) : browser(browser) {};
     void initialize();
-    void initializeGL();
-    void reshape(int, int);
-    void draw(void);
-    bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
-    void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList &dirtyRects, const void *buffer,
-                 int width, int height) override;
 
 private:
-    int width = 0, height = 0;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    GLuint program, vao, vbo, texture, positionLoc;
+    bool mouseButtonCallback(MouseButton, MouseAction);
+    bool mouseWheelCallback(double);
+    bool keyBoardCallback(Key, KeyModifier, KeyAction);
 
-    IMPLEMENT_REFCOUNTING(GUIRenderHandler);
+    CefRefPtr<CefBrowser> browser;
 };
 
-} // namespace openspace
+}
 
-#endif  // __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
+#endif //__OPENSPACE_MODULE_WEBGUI___EVENT_HANDLER___H__

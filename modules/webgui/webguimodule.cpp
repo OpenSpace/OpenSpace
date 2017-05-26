@@ -39,9 +39,10 @@ WebGUIModule::WebGUIModule()
 #ifdef __APPLE__
     CefString(&settings.browser_subprocess_path).FromASCII((char*) SUBPROCESS_PATH.c_str());
 #endif
-#ifdef __WIN32__
-    settings.multi_threaded_message_loop = true;
-#endif
+//#ifdef WIN32
+//    TODO(klas): This is for some reason causing a crash -- use DoMessageLoopWork instead
+//    settings.multi_threaded_message_loop = true;
+//#endif
 
     int exitCode = CefExecuteProcess(args, nullptr, NULL);
     CefInitialize(args, settings, nullptr, NULL);
@@ -53,6 +54,14 @@ WebGUIModule::WebGUIModule()
 
     renderHandler = new GUIRenderHandler();
     client = new BrowserClient(renderHandler);
+
+    CefBrowserSettings browserSettings;
+    CefWindowInfo windowInfo;
+    bool renderTransparent = true;
+    windowInfo.SetAsWindowless(nullptr, renderTransparent);
+    std::string url = "";
+    browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), url, browserSettings, NULL);
+    eventHandler = std::make_shared<EventHandler>(EventHandler(browser));
 }
 
 void WebGUIModule::internalInitialize() {
@@ -62,34 +71,30 @@ void WebGUIModule::internalInitialize() {
                 LDEBUG("Initializing WebGUIModule members");
                 initialize();
                 renderHandler->initialize();
+                eventHandler->initialize();
             }
     );
     OsEng.registerModuleCallback(
             OpenSpaceEngine::CallbackOption::Deinitialize,
             [this](){
-                LDEBUG("Denitializing CEF...");
-                CefShutdown();
-                LDEBUG("Denitializing CEF... done!");
+                LDEBUG("Deinitializing CEF...");
+                deinitialize();
+                LDEBUG("Deinitializing CEF... done!");
             }
     );
 }
 
 void WebGUIModule::initialize() {
-    LDEBUG("Creating CEF context in WebGUI...");
-    CefBrowserSettings browserSettings;
-    CefWindowInfo windowInfo;
-
-    bool renderTransparent = true;
-    windowInfo.SetAsWindowless(nullptr, renderTransparent);
-
-    std::string url = "https://media.giphy.com/media/3t7RAFhu75Wwg/giphy.gif";
-    browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), url, browserSettings, NULL);
-    LDEBUG("Creating CEF context in WebGUI... done!");
-
     initializeCallbacks();
-
+    loadLocalPath("${MODULE_WEBGUI}/web/transparent_test.html");
     WindowWrapper& wrapper = OsEng.windowWrapper();
     reshape(wrapper);
+}
+
+void WebGUIModule::deinitialize() {
+    // TODO(klas): This is causing a crash during shutdown
+    browser->GetHost()->CloseBrowser(false);
+    CefShutdown();
 }
 
 void WebGUIModule::reshape(WindowWrapper& wrapper) {
@@ -105,20 +110,43 @@ void WebGUIModule::initializeCallbacks() {
             // the GUI would be rendered on top of each of the cube faces
             OpenSpaceEngine::CallbackOption::Render,
             [this](){
-                WindowWrapper& wrapper = OsEng.windowWrapper();
-
-                if (wrapper.isMaster()) {
-                    if (wrapper.windowHasResized()) {
-                        reshape(wrapper);
-                    }
-#ifndef __WIN32__
-                    // Use multi-threaded message loop on windows
-                    CefDoMessageLoopWork();
-#endif
-                    renderHandler->draw();
-                }
+                render();
             }
     );
+
+}
+
+/**
+ * Load a local file
+ * @param path - the path to load
+ * @return true if the path exists, false otherwise
+ */
+bool WebGUIModule::loadLocalPath(std::string path) {
+    if (!FileSys.fileExists(path)) {
+		LDEBUG(fmt::format("Could not find path `{}`, verify that it is correct.", path));
+        return false;
+    }
+
+    load(absPath(path));
+    return true;
+}
+
+void WebGUIModule::load(const std::string &url) {
+    LDEBUG(fmt::format("Loading URL: {}", url));
+    browser->GetMainFrame()->LoadURL(url);
+}
+
+void WebGUIModule::render() {
+    WindowWrapper& wrapper = OsEng.windowWrapper();
+
+    if (wrapper.isMaster()) {
+        if (wrapper.windowHasResized()) {
+            reshape(wrapper);
+        }
+
+        CefDoMessageLoopWork();
+        renderHandler->draw();
+    }
 }
 
 }

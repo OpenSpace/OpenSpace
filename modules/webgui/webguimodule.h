@@ -36,9 +36,11 @@
 #define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <include/wrapper/cef_helpers.h>
 #include "browser_client.h"
 #include "gui_render_handler.h"
+#include "event_handler.h"
 
 namespace openspace {
 
@@ -51,13 +53,20 @@ public:
     WebGUIModule();
     virtual ~WebGUIModule() = default;
 
+	void load(const std::string&);
+	bool loadLocalPath(std::string);
+
 protected:
 	void initialize();
 	void internalInitialize();
     void initializeCallbacks();
-
 private:
-    GUIRenderHandler* renderHandler;
+    void render();
+    void deinitialize();
+
+    std::shared_ptr<EventHandler> eventHandler;
+
+    CefRefPtr<GUIRenderHandler> renderHandler;
     CefRefPtr<BrowserClient> client;
     CefRefPtr<CefBrowser> browser;
 	CefSettings settings;
