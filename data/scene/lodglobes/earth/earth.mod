@@ -58,7 +58,8 @@ return {
             Atmosphere = {
                 -- Atmosphere radius in Km
                 --AtmoshereRadius = 6450,
-                AtmoshereRadius = 6420.0,
+                --AtmoshereRadius = 6420.0,
+                AtmoshereRadius = 6447.0,
                 --PlanetRadius    = 6378.137,
                 PlanetRadius    = 6377.0,
                 --PlanetRadius    = 6360.0,

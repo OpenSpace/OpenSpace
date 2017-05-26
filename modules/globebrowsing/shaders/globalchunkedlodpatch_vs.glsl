@@ -43,6 +43,7 @@ layout(location = 1) in vec2 in_uv;
 
 out vec2 fs_uv;
 out vec4 fs_position;
+out vec3 fs_normal;
 out vec3 ellipsoidNormalCameraSpace;
 out LevelWeights levelWeights;
 out vec3 positionCameraSpace;
@@ -84,5 +85,6 @@ void main() {
     fs_position = z_normalization(positionClippingSpace);
     gl_Position = fs_position;
     ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;
+    fs_normal = pair.normal;
     positionCameraSpace = vec3(modelViewTransform * vec4(pair.position, 1));
 }

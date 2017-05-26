@@ -38,6 +38,7 @@ Fragment getFragment() {
     frag.gColor             = frag.color;
     // Normal is written in Camera Rig (OS Eye) Space
     frag.gNormalReflectance = vec4(ellipsoidNormalCameraSpace, 1.0); // adding 1.0 to reflectance by now
+    //frag.gNormalReflectance = vec4(fs_normal, 1.0); // adding 1.0 to reflectance by now
     frag.gPosition          = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
 
     frag.depth = fs_position.w;    

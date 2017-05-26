@@ -93,7 +93,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _texturePropertyOwner("Textures")
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
     , _atmosphereProperties({
-        FloatProperty("atmmosphereHeight", "Atmosphere Height (KM)", 60.0f, 0.1f, 1000.0f),
+        FloatProperty("atmmosphereHeight", "Atmosphere Height (KM)", 60.0f, 0.1f, 99.0f),
         FloatProperty("averageGroundReflectance", "Average Ground Reflectance (%)", 0.1f, 0.0f, 1.0f),
         FloatProperty("rayleighHeightScale", "Rayleigh Height Scale (KM)", 8.0f, 0.1f, 20.0f),
         FloatProperty("rayleighScatteringCoeffX", "Rayleigh Scattering Coeff X (x10e-3)", 1.0f, 0.01f, 100.0f),

@@ -39,12 +39,14 @@ uniform vec3 p10;
 uniform vec3 p01;
 uniform vec3 p11;
 uniform vec3 patchNormalCameraSpace;
+uniform vec3 patchNormalModelSpace;
 uniform float chunkMinHeight;
 
 layout(location = 1) in vec2 in_uv;
 
 out vec2 fs_uv;
 out vec4 fs_position;
+out vec3 fs_normal;
 out vec3 ellipsoidNormalCameraSpace;
 out LevelWeights levelWeights;
 out vec3 positionCameraSpace;
@@ -93,5 +95,6 @@ void main() {
     fs_position = z_normalization(positionClippingSpace);
     gl_Position = fs_position;
     ellipsoidNormalCameraSpace = patchNormalCameraSpace;
+    fs_normal = patchNormalModelSpace;
     positionCameraSpace = p;
 }

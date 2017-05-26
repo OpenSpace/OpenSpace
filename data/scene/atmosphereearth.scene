@@ -45,7 +45,8 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", false)
+    openspace.setPropertyValue("Sun.renderable.enabled", true)
+     openspace.setPropertyValue("SunGlare.renderable.enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
     openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
@@ -88,8 +89,8 @@ return {
         --"atmospheremars",
         --"moon",
         
-        --"lodglobes/earth",
-        "lodglobes/mars",
+        "lodglobes/earth",
+        --"lodglobes/mars",
         --"lodglobes/moon",
                 
         --"toyvolume",

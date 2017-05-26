@@ -70,6 +70,7 @@ uniform vec2 vertexResolution;
 #endif
 
 in vec4 fs_position;
+in vec3 fs_normal;
 in vec2 fs_uv;
 in vec3 ellipsoidNormalCameraSpace;
 in vec3 positionCameraSpace;

@@ -38,9 +38,9 @@ return {
             InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             Atmosphere = {
                 -- Atmosphere radius in Km
-                AtmoshereRadius = 3436.0,
+                AtmoshereRadius = 3476.0,
                 --PlanetRadius    = 3396.19,
-                PlanetRadius = 3395.0,
+                PlanetRadius = 3394.0,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
                     Coefficients = {

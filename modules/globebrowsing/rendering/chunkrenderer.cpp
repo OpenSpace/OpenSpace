@@ -255,14 +255,17 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
 
     std::vector<std::string> cornerNames = { "p01", "p11", "p00", "p10" };
     std::vector<glm::dvec3> cornersCameraSpace(4);
+    std::vector<glm::dvec3> cornersModelSpace(4);
     for (int i = 0; i < 4; ++i) {
         Quad q = (Quad)i;
         Geodetic2 corner = chunk.surfacePatch().getCorner(q);
         glm::dvec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
+        cornersModelSpace.push_back(cornerModelSpace);
         glm::dvec3 cornerCameraSpace =
             glm::dvec3(dmat4(modelViewTransform) * glm::dvec4(cornerModelSpace, 1));
         cornersCameraSpace[i] = cornerCameraSpace;
         programObject->setUniform(cornerNames[i], vec3(cornerCameraSpace));
+
     }
 
     // TODO: Patch normal can be calculated for all corners and then linearly
@@ -273,7 +276,18 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
             cornersCameraSpace[Quad::NORTH_EAST] -
                 cornersCameraSpace[Quad::SOUTH_WEST]));
 
+    // In order to improve performance, lets use the normal in object space (model space)
+    // for deferred rendering.
+    vec3 patchNormalModelSpace = normalize(
+        cross(cornersModelSpace[Quad::SOUTH_EAST] -
+            cornersModelSpace[Quad::SOUTH_WEST],
+            cornersModelSpace[Quad::NORTH_EAST] -
+            cornersModelSpace[Quad::SOUTH_WEST]));
+
+
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
+    // TODO (JCC): Enable the right normal for displaced points in the patch
+    //programObject->setUniform("patchNormalModelSpace", patchNormalModelSpace);
     programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
     if (_layerManager->layerGroup(
