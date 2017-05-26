@@ -43,7 +43,7 @@ void SurfaceModelLoadJob::execute() {
 	std::string pathToTextureFolder = _subsite->pathToTextureFolder;
 	std::string roverSurfaceModelGeometry = "AsyncMultiModelGeometry";
 
-	//lalalalal
+	//lalalalalasdasd
 	_subsiteModels->site = _subsite->site;
 	_subsiteModels->drive = _subsite->drive;
 	_subsiteModels->geodetic = _subsite->geodetic;
