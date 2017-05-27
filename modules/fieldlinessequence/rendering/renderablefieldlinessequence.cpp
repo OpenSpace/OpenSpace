@@ -584,11 +584,15 @@ bool RenderableFieldlinesSequence::initialize() {
         // TODO: this should probably be determined some other way..
         // TODO: set in LUA when tracing variables are set there! Requires state to store min/max
         for (size_t i = 0; i < _states[0]._extraVariables.size(); i++) {
-            std::vector<float>& quantityVec = _states[0]._extraVariables[i];
-        // for (std::vector<float>& quantityVec : _states[0]._extraVariables) {
-            auto minMaxPos = std::minmax_element(quantityVec.begin(), quantityVec.end());
-            float minVal = *minMaxPos.first;
-            float maxVal = *minMaxPos.second;
+            float minVal = FLT_MAX;
+            float maxVal = FLT_MIN;
+            for (size_t j = 0; j < _states.size(); ++j) {
+                std::vector<float>& quantityVec = _states[j]._extraVariables[i];
+            // for (std::vector<float>& quantityVec : _states[0]._extraVariables) {
+                auto minMaxPos = std::minmax_element(quantityVec.begin(), quantityVec.end());
+                minVal = *minMaxPos.first  < minVal ? *minMaxPos.first  : minVal;
+                maxVal = *minMaxPos.second > maxVal ? *minMaxPos.second : maxVal;
+            }
             _transferFunctionLimits.push_back(glm::vec2(minVal, maxVal));
             _tFInterestRange.push_back(glm::vec2(minVal, maxVal));
             _tFInterestRangeLimits.push_back(glm::vec2(minVal, maxVal));
