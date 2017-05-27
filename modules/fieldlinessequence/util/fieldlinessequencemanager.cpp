@@ -221,6 +221,12 @@ bool FieldlinesSequenceManager::saveFieldlinesStateAsJson(const FieldlinesState&
                                                           const std::string& separator /* = "_"  */,
                                                           const int& prettyIndentation /* = 1    */) {
 
+    // TODO: VALIDATE THAT FOLDER EXISTS FIRST?
+    std::string fullPath;
+    if (!isAbsPath) {
+        fullPath = absPath(directoryPath);
+    }
+
     size_t numExtras = state._extraVariables.size();
     size_t numLines = state._lineStart.size();
     size_t numPoints = state._vertexPositions.size();
@@ -262,6 +268,13 @@ bool FieldlinesSequenceManager::saveFieldlinesStateAsJson(const FieldlinesState&
 
     fileName += ".json";
 
+    fullPath += fileName;
+    std::ofstream ofs(fullPath);
+    if (!ofs.is_open()) {
+        LERROR("FAILED TO OPEN FILE TO WRITE TO");
+        return false;
+    }
+
     // Create main json object
     json jfile = {
         // Create meta data
@@ -292,22 +305,9 @@ bool FieldlinesSequenceManager::saveFieldlinesStateAsJson(const FieldlinesState&
 
     jfile["4. colorizingVariables"] = jExtras;
 
-    // TODO: VALIDATE THAT FOLDER EXISTS FIRST?
-    std::string fullPath;
-    if (!isAbsPath) {
-        fullPath = absPath(directoryPath);
-    }
-    fullPath += fileName;
-    std::ofstream ofs(fullPath);
-    if (!ofs.is_open()) {
-        LERROR("FAILED TO OPEN FILE TO WRITE TO");
-        return false;
-    } else {
-        LINFO("Saved fieldline state to: " << fullPath );
-    }
-
     ofs << std::setw(prettyIndentation) << jfile << std::endl;
 
+    LINFO("Saved fieldline state to: " << fullPath );
     return true;
 }
 
@@ -368,8 +368,8 @@ bool FieldlinesSequenceManager::getFieldlinesStateFromBinary(
         ifs.read( reinterpret_cast<char*>(vec.data()), sizeof(float) * numPoints);
     }
 
-    // outState._extraVariableNames.reserve(numExtras);
-    outState._extraVariableNames.resize(numExtras);
+    outState._extraVariableNames.reserve(numExtras);
+    // outState._extraVariableNames.resize(numExtras);
     std::string allNamesInOne;
     char* s = new char[byteSizeAllNames];
     ifs.read(s, byteSizeAllNames);
@@ -1108,6 +1108,11 @@ void FieldlinesSequenceManager::setQuickMorphBooleans(std::vector<FieldlinesStat
 
         }
     }
+}
+
+std::string FieldlinesSequenceManager::getAbsPath(const std::string& inPath) {
+    // std::string absolutePath;
+    return std::move(absPath(inPath));
 }
 
 } // namsepace openspace

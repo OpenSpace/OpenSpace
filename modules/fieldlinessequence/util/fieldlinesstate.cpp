@@ -47,7 +47,8 @@ void FieldlinesState::reserveSize(size_t size) {
 }
 
 /**
- * @param absFilePath is the entire path to the file to save to including file extension
+ * @param absFilePath must be the entire path to the file to create/overwrite (INCLUDING
+ * file extension!)
  * Directory must exist. File is created.
  * File is structured like this: Version 0
  *  0. int                      - version number of binary state file! (in case something needs to be altered in the future, then increase CURRENT_VERSION)
@@ -71,6 +72,7 @@ void FieldlinesState::saveStateToBinaryFile(const std::string& absFilePath) {
     std::ofstream ofs(absFilePath, std::ofstream::binary | std::ofstream::trunc);
     if (!ofs.is_open()) {
         LERROR("Failed to save state to binary file at location: " << absFilePath);
+        return;
     }
 
     size_t numLines         = _lineStart.size();

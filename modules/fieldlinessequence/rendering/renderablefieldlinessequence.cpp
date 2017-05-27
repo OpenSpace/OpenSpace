@@ -45,6 +45,8 @@
 #include <iterator>
 #include <sstream>
 
+#include <chrono>
+
 namespace {
     std::string _loggerCat = "RenderableFieldlinesSequence";
 }
@@ -154,8 +156,8 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     _dictionary = dictionary;
 
     // TODO: REMOVE HARDCODED PATH
-    _transferFunctionPath = "/home/ccarlbau/workspace/OpenSpace/data/colortables/uniform_heatmap_bcgyr.txt";
-    _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
+    _transferFunctionPath = "${OPENSPACE_DATA}/colortables/uniform_heatmap_bcgyr.txt";
+    _transferFunction = std::make_shared<TransferFunction>(fsManager.getAbsPath(_transferFunctionPath));
 }
 
 bool RenderableFieldlinesSequence::isReady() const {
@@ -351,14 +353,19 @@ bool RenderableFieldlinesSequence::initialize() {
         } break;
         case PRE_CALCULATED_BINARY: {
             allowSeedPoints = false;
-
             for (size_t i = 0; i < _numberOfStates; ++i) {
                 LDEBUG(validSourceFilePaths[i] << " is now being processed.");
+
+            auto start = std::chrono::high_resolution_clock::now();
                 FieldlinesState tmpState;
                 _states.push_back(tmpState);
                 bool statuss = fsManager.getFieldlinesStateFromBinary(
                     validSourceFilePaths[i],
                     _states[i]);
+
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double, std::milli> diff = end - start;
+            LDEBUG("TIME FOR ADDING STATE FROM BINARY: " << diff.count() << " milliseconds");
 
                 // TODO: Move elsewhere
                 _startTimes.push_back(_states[i]._triggerTime);
@@ -575,6 +582,7 @@ bool RenderableFieldlinesSequence::initialize() {
     if (allowUnitColoring) {
         _colorMethod.addOption(colorMethod::UNIFORM, "Uniform Color");
         _colorMethod.addOption(colorMethod::QUANTITY_DEPENDENT, "Quantity Dependent");
+        _colorMethod = UNIFORM;
 
         // ASSUMING ALL STATES HAVE THE SAME COLOR VARIABLES
         for (size_t i = 0; i < _states[0]._extraVariableNames.size(); ++i) {
@@ -799,7 +807,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
             _transferFunction->bind(); // Calls update internally
             _activeProgramPtr->setUniform("colorMap", _textureUnit->unitNumber());
             _activeProgramPtr->setUniform("isClamping", _isClampingColorValues);
-            _activeProgramPtr->setUniform("transferFunctionLimits", _transferFunctionLimits[_colorizingQuantity]);
+            _activeProgramPtr->setUniform("transferFunctionLimits",
+                                          _transferFunctionLimits[_colorizingQuantity]);
             _activeProgramPtr->setUniform("tFIterestRange", _unitInterestRange);
         }
 
@@ -1002,11 +1011,15 @@ void RenderableFieldlinesSequence::updateVertexPosBuffer() {
     glVertexAttribPointer(_vertAttrVertexPos, 3, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
-bool RenderableFieldlinesSequence::getUnsignedIntFromModfile(const std::string& key, unsigned int& val) {
+bool RenderableFieldlinesSequence::getUnsignedIntFromModfile(const std::string& key,
+                                                             unsigned int& val) {
     float f_val;
     if (!_dictionary.getValue(key, f_val)) {
         LDEBUG("Key \"" << key << "\" wasn't found!");
         return false;
+    } else if (f_val < 0.f) {
+        LWARNING(key << " doesn't accept negative numbers. Converting to absolute value!");
+        f_val *= -1.f;
     }
     val = static_cast<unsigned int>(f_val);
     return true;

@@ -110,6 +110,8 @@ public:
     // TODO move somewhere else
     std::string timeToString(double time, bool pathSafe = false);
 
+    std::string getAbsPath(const std::string& inPath);
+
 private:
 
     void resampleCcmcFieldline( const int& numResamples,
