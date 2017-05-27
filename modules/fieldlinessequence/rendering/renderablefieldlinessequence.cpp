@@ -41,6 +41,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <sstream>
 
 namespace {
     std::string _loggerCat = "RenderableFieldlinesSequence";
@@ -60,6 +63,9 @@ namespace {
 
     const char* keySeedPointsInfo               = "SeedPointInfo";
     const char* keySeedPointsFile               = "File";
+
+    const char* keyExtraVariables               = "ExtraVariables";
+    const char* keyExtraMagnitudeVariables      = "ExtraMagnitudeVariables";
 
     // const char* keyVertexListFileType       = "FileType";
     // const char* keyVertexListFileTypeJson   = "Json";
@@ -89,6 +95,8 @@ namespace {
                         PRE_CALCULATED_JSON,
                         PRE_CALCULATED_BINARY,
                         LIVE_TRACE };
+
+    #define fsManager (FieldlinesSequenceManager::ref())
 }
 
 
@@ -264,38 +272,33 @@ bool RenderableFieldlinesSequence::initialize() {
                 }
             }
 
-            // TODO: This should be specified in LUA .mod file!
-            std::vector<std::string> colorizingFloatVars;
-            std::vector<std::string> colorizingMagVars;
-            colorizingFloatVars.insert(colorizingFloatVars.end(), {
-                                                                     "T",
-                                                                     // "dp",
-                                                                     "rho",
-                                                                     // "p",
-                                                                     "status"
-                                                                  });
+            std::string allExtraVars;
+            std::string allExtraMagVars;
+            _dictionary.getValue(keyExtraVariables,          allExtraVars);
+            _dictionary.getValue(keyExtraMagnitudeVariables, allExtraMagVars);
 
-            colorizingMagVars.insert(colorizingMagVars.end(), {
-                                                                  "ux", "uy", "uz",
-                                                                  "jx", "jy", "jz",
-                                                                  "jr", "jtheta", "jphi",
-                                                                  // "br", "btheta", "bphi",
-                                                                  "ur", "utheta", "uphi"
-                                                              });
+            std::istringstream iss(allExtraVars);
+            std::vector<std::string> extraFloatVars{std::istream_iterator<std::string>{iss},
+                                                    std::istream_iterator<std::string>{}};
+
+            iss.clear();
+            iss.str(allExtraMagVars);
+            std::vector<std::string> extraMagVars{std::istream_iterator<std::string>{iss},
+                                                  std::istream_iterator<std::string>{}};
 
             for (size_t i = 0; i < _numberOfStates; ++i) {
-               LDEBUG(validSourceFilePaths[i] << " is now being traced.");
-               _states.push_back(FieldlinesState(_seedPoints.size()));
-               FieldlinesSequenceManager::ref().getFieldlinesState(validSourceFilePaths[i],
-                                                                   tracingVariable,
-                                                                   _seedPoints,
-                                                                   maxSteps,
-                                                                   _isMorphing,
-                                                                   numResamples,
-                                                                   resamplingOption,
-                                                                   colorizingFloatVars,
-                                                                   colorizingMagVars,
-                                                                   _states[i]);
+                LDEBUG(validSourceFilePaths[i] << " is now being traced.");
+                _states.push_back(FieldlinesState(_seedPoints.size()));
+                fsManager.getFieldlinesState(validSourceFilePaths[i],
+                                             tracingVariable,
+                                             _seedPoints,
+                                             maxSteps,
+                                             _isMorphing,
+                                             numResamples,
+                                             resamplingOption,
+                                             extraFloatVars,
+                                             extraMagVars,
+                                             _states[i]);
                 _startTimes.push_back(_states[i]._triggerTime);
             }
         } break;
@@ -311,7 +314,7 @@ bool RenderableFieldlinesSequence::initialize() {
                 LDEBUG(validSourceFilePaths[i] << " is now being processed.");
                 FieldlinesState tmpState;
                 _states.push_back(tmpState);
-                FieldlinesSequenceManager::ref().getFieldlinesState(validSourceFilePaths[i],
+                fsManager.getFieldlinesState(validSourceFilePaths[i],
                                                                    _isMorphing,
                                                                    numResamples,
                                                                    resamplingOption,
@@ -328,7 +331,7 @@ bool RenderableFieldlinesSequence::initialize() {
                 LDEBUG(validSourceFilePaths[i] << " is now being processed.");
                 FieldlinesState tmpState;
                 _states.push_back(tmpState);
-                bool statuss = FieldlinesSequenceManager::ref().getFieldlinesStateFromBinary(
+                bool statuss = fsManager.getFieldlinesStateFromBinary(
                     validSourceFilePaths[i],
                     _states[i]);
 
@@ -451,9 +454,7 @@ bool RenderableFieldlinesSequence::initialize() {
                      ". Default is set to 20 Earth radii.");
         }
 
-        FieldlinesSequenceManager::ref().setQuickMorphBooleans(_states,
-                                                               numResamples,
-                                                               quickMorphDist);
+        fsManager.setQuickMorphBooleans(_states, numResamples, quickMorphDist);
     }
 
     // GL_LINE width related constants dependent on hardware..
@@ -993,7 +994,7 @@ bool RenderableFieldlinesSequence::getSourceFilesFromDictionary(
     }
 
     // ------------- GET ALL FILES OF SPECIFIED TYPE FROM SOURCE FOLDER ----------------
-    if (!FieldlinesSequenceManager::ref().getAllFilePathsOfType(
+    if (!fsManager.getAllFilePathsOfType(
             pathToSourceFolder, fileExt, validSourceFilePaths) ||
             validSourceFilePaths.empty() ) {
 
@@ -1013,7 +1014,6 @@ bool RenderableFieldlinesSequence::getSourceFilesFromDictionary(
     getUnsignedIntFromModfile(keyMaxNumStates,     numMaxStates);
 
     // Extract the file paths that fulfill the specification
-    //VectorHelper vh;
     vector_extraction::extractChosenElements(startStateOffset, stateStepSize, numMaxStates, validSourceFilePaths);
 
     LDEBUG("Found the following valid ." << fileExt << " files in " << pathToSourceFolder);
@@ -1023,7 +1023,7 @@ bool RenderableFieldlinesSequence::getSourceFilesFromDictionary(
     return true;
 }
 
-// TODO: allow more than one CDF file.. allow folder!
+// TODO: allow more than one seed file.. allow folder!
 bool RenderableFieldlinesSequence::getSeedPointsFromDictionary() {
     ghoul::Dictionary seedInfo;
     if (!_dictionary.getValue(keySeedPointsInfo, seedInfo)) {
@@ -1039,7 +1039,7 @@ bool RenderableFieldlinesSequence::getSeedPointsFromDictionary() {
             "\n\tRequires a path to a .txt file containing seed point data." <<
             "Each row should have 3 floats seperated by spaces.");
         return false;
-    } else if (!FieldlinesSequenceManager::ref().getSeedPointsFromFile(pathToSeedPointFile,
+    } else if (!fsManager.getSeedPointsFromFile(pathToSeedPointFile,
                                                                     _seedPoints)) {
         LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
         return false;

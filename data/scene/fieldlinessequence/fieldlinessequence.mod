@@ -46,6 +46,9 @@ return {
     --         TracingMethod = "PreTraced",
     --         -- TracingMethod = "PreProcess",
     --         -- TracingMethod = "LiveTrace",
+    --         ExtraVariables          = "T status",
+    --         ExtraMagnitudeVariables = "jx jy jz",
+
     --         VectorVolume = {
     --             -- Type = "VolumeKameleon",
     --             Directory = volumeFolderBatsrus,
