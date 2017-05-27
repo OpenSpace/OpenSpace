@@ -1025,10 +1025,32 @@ double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
         } else if (kameleon->doesAttributeExist("tim_rundate_cal")) {
             seqStartStr =
                     kameleon->getGlobalAttribute("tim_rundate_cal").getAttributeString();
-            if (seqStartStr.length() < 19 && kameleon->doesAttributeExist("tim_crstart_cal")) {
-                seqStartStr =
-                     kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
+            size_t numChars = seqStartStr.length();
+            if (numChars < 19) {
+                // Fall through to add the required characters
+                switch (numChars) {
+                    case 10 : // YYYY-MM-DD             =>       YYYY-MM-DDTHH
+                        seqStartStr += "T00";
+                    case 13 : // YYYY-MM-DDTHH          =>       YYYY-MM-DDTHH:
+                        seqStartStr += ":";
+                    case 14 : // YYYY-MM-DDTHH:         =>       YYYY-MM-DDTHH:MM
+                        seqStartStr += "00";
+                    case 16 : // YYYY-MM-DDTHH:MM       =>       YYYY-MM-DDTHH:MM:
+                        seqStartStr += ":";
+                    case 17 : // YYYY-MM-DDTHH:MM:      =>       YYYY-MM-DDTHH:MM:SS
+                        seqStartStr += "00";
+                    // case 19 : // YYYY-MM-DDTHH:MM:SS    =>    YYYY-MM-DDTHH:MM:SS.000
+                    //     seqStartStr += ".000";
+                    // case 23 : // YYYY-MM-DDTHH:MM:SS.   =>    YYYY-MM-DDTHH:MM:SS.000Z
+                    //     seqStartStr += "Z";
+                    default :
+                        break;
+                }
             }
+            // else if (seqStartStr.length() < 19 && kameleon->doesAttributeExist("tim_crstart_cal")) {
+            //     seqStartStr =
+            //          kameleon->getGlobalAttribute("tim_crstart_cal").getAttributeString();
+            // }
         } else if (kameleon->doesAttributeExist("tim_obsdate_cal")) {
             seqStartStr =
                     kameleon->getGlobalAttribute("tim_obsdate_cal").getAttributeString();
