@@ -30,6 +30,22 @@
 #include <gdal_priv.h>
 #include "ogrsf_frmts.h"
 
+template<typename Out>
+static void split(const std::string &s, char delim, Out result) {
+	std::stringstream ss;
+	ss.str(s);
+	std::string item;
+	while (std::getline(ss, item, delim)) {
+		*(result++) = item;
+	}
+}
+
+static std::vector<std::string> split(const std::string &s, char delim) {
+	std::vector<std::string> elems;
+	split(s, delim, std::back_inserter(elems));
+	return elems;
+}
+
 namespace {
 	const std::string _loggerCat		= "RoverPathFileReader";
 	const char* keyRoverLocationPath	= "RoverLocationPath";
@@ -168,9 +184,10 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 			}
 			if(!modelExists) {
 				std::string pathToFilenamesTextFile = pathToDriveFolderLevel1 + "/filenames.txt";
-				std::vector<std::string> fileNames = extractFileNames(pathToFilenamesTextFile);
+				std::shared_ptr<RoverPathFileReader::TextureInformation> textureInformation = extractTextureInfo(pathToFilenamesTextFile);
 
-				subsite->fileNames = fileNames;
+				subsite->fileNames = textureInformation->fileNames;
+				subsite->cameraInfoVector = textureInformation->cameraInfoVector;
 				subsite->pathToTextureFolder = absPathToTextures;
 				subsite->pathToGeometryFolder = absPathToTModels;
 				subsitesWithModels.push_back(subsite);
@@ -209,19 +226,60 @@ std::string RoverPathFileReader::convertString(const std::string sitenr, const s
 	return temp;
 }
 
-std::vector<std::string> RoverPathFileReader::extractFileNames(const std::string filePath) {
-	std::string path = absPath(filePath);
-	std::ifstream myfile(path);
-
+std::shared_ptr<RoverPathFileReader::TextureInformation> RoverPathFileReader::extractTextureInfo(std::string filePath) {
+	std::string absoluteFilePath = absPath(filePath);
 	std::string fileName;
-	std::vector<std::string> fileNames;
+	std::ifstream myfile(absoluteFilePath);
+	std::vector<std::string> fileNameVector;
+	std::vector<ImgReader::PointCloudInfo> cameraInfoVector;
+
 	if (myfile.is_open()) {
 		while (std::getline(myfile, fileName)) {
-			fileNames.push_back(fileName);
+			fileNameVector.push_back(fileName);
+			ImgReader::PointCloudInfo mInfo;
+
+			std::string coordinates;
+			std::getline(myfile, coordinates);
+			std::vector<std::string> temp;
+			temp = split(coordinates, ',');
+
+			mInfo._cameraCenter.x = std::stof(temp.at(0));
+			mInfo._cameraCenter.y = std::stof(temp.at(1));
+			mInfo._cameraCenter.z = std::stof(temp.at(2));
+
+			std::getline(myfile, coordinates);
+			temp = split(coordinates, ',');
+
+			mInfo._cameraAxis.x = std::stof(temp.at(0));
+			mInfo._cameraAxis.y = std::stof(temp.at(1));
+			mInfo._cameraAxis.z = std::stof(temp.at(2));
+
+			std::getline(myfile, coordinates);
+			temp = split(coordinates, ',');
+
+			mInfo._cameraHorizontal.x = std::stof(temp.at(0));
+			mInfo._cameraHorizontal.y = std::stof(temp.at(1));
+			mInfo._cameraHorizontal.z = std::stof(temp.at(2));
+
+			std::getline(myfile, coordinates);
+			temp = split(coordinates, ',');
+
+			mInfo._cameraVector.x = std::stof(temp.at(0));
+			mInfo._cameraVector.y = std::stof(temp.at(1));
+			mInfo._cameraVector.z = std::stof(temp.at(2));
+
+			cameraInfoVector.push_back(mInfo);
 		}
 		myfile.close();
 	}
-	return fileNames;
+	else
+		LERROR("Could not open .txt file");
+
+	std::shared_ptr<TextureInformation> textureInformation = std::make_shared<TextureInformation>();
+	textureInformation->cameraInfoVector = cameraInfoVector;
+	textureInformation->fileNames = fileNameVector;
+
+	return textureInformation;
 }
 
 } // namespace globebrowsing

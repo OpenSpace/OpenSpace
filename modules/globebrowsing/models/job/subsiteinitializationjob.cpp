@@ -32,17 +32,14 @@ namespace openspace {
 namespace globebrowsing {
 
 void SubsiteInitializationJob::execute() {
-	int counter = 0;
-	for (auto model : _subsiteModels->models) {
-		model->geometry->uploadData();
-
-		void* pixelData = new char[model->texture->expectedPixelDataSize()];
-		memcpy(pixelData, model->texture->pixelData(), model->texture->expectedPixelDataSize());
+	//int counter = 0;
+	_subsiteModels->model->uploadData();
+	/*for (auto texture : _subsiteModels->textures) {
+		void* pixelData = new char[texture->expectedPixelDataSize()];
+		memcpy(pixelData, texture->pixelData(), texture->expectedPixelDataSize());
 		_textures.at(counter)->setPixelData(pixelData);
-		model->texture = _textures.at(counter);
-
-		counter++;
 	}
+	_subsiteModels->textures = _textures;*/
 }
 
 std::shared_ptr<SubsiteModels> SubsiteInitializationJob::product() const {

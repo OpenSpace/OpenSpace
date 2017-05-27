@@ -37,33 +37,29 @@ namespace openspace {
 namespace globebrowsing {
 
 void SurfaceModelLoadJob::execute() {
+	const clock_t begin_time = clock();
 	std::string levelString = std::to_string(_level);
 	std::string pathToGeometryFolder = _subsite->pathToGeometryFolder + "level" + levelString + "//" + "site" + _subsite->site +
 		"//" + "drive" + _subsite->drive + "//";
 	std::string pathToTextureFolder = _subsite->pathToTextureFolder;
 	std::string roverSurfaceModelGeometry = "AsyncMultiModelGeometry";
 
-	//lalalalalasdasd
 	_subsiteModels->site = _subsite->site;
 	_subsiteModels->drive = _subsite->drive;
 	_subsiteModels->geodetic = _subsite->geodetic;
 	_subsiteModels->siteGeodetic = _subsite->siteGeodetic;
+	_subsiteModels->cameraInfoVector = _subsite->cameraInfoVector;
 	_subsiteModels->level = _level;
 
+	ghoul::Dictionary dictionary;
+	std::string pathToGeometry2 = pathToGeometryFolder + "OBJ.obj";
+	dictionary.setValue(keyGeometryFile, pathToGeometry2);
+	dictionary.setValue(keyType, roverSurfaceModelGeometry);
+
+	_subsiteModels->model = std::make_shared<modelgeometry::AsyncMultiModelGeometry>(dictionary);
+
 	for (auto fileName : _subsite->fileNames) {
-		// Set up a dictionary to load the model
-		ghoul::Dictionary dictionary;
-		ghoul::Dictionary dictionary2;
-		std::string pathToGeometry = pathToGeometryFolder + "//" + fileName + ".obj";
-
-		dictionary.setValue(keyGeometryFile, pathToGeometry);
-		dictionary.setValue(keyType, roverSurfaceModelGeometry);
-
-		// Create modelgeometry from dictionary
-		Model model;
-		model.geometry = std::make_shared<modelgeometry::AsyncMultiModelGeometry>(dictionary);
-
-		// Load the corresponding texture;
+		// Load all textures
 		std::string tempFileName = fileName;
 		tempFileName[13] = 'R';
 		tempFileName[14] = 'A';
@@ -72,10 +68,9 @@ void SurfaceModelLoadJob::execute() {
 		std::string textureFormat = SurfaceModelLoadJob::textureFormat(_subsite->site);
 		std::string pathToTexture = pathToTextureFolder + "site" + _subsite->site +
 			"//" + "drive" + _subsite->drive + "//" + tempFileName + textureFormat;
-		model.texture = std::move(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
-
-		_subsiteModels->models.push_back(std::make_shared<Model>(model));
+		_subsiteModels->textures.push_back(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
 	}
+	LINFO("FINISHED LOADING MODELS: " << float(clock() - begin_time) / CLOCKS_PER_SEC);
 }
 
 std::shared_ptr<SubsiteModels> SurfaceModelLoadJob::product() const {

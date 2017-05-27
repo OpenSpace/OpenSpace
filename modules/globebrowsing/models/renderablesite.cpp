@@ -51,7 +51,6 @@ static void split(const std::string &s, char delim, Out result) {
 	}
 }
 
-
 static std::vector<std::string> split(const std::string &s, char delim) {
 	std::vector<std::string> elems;
 	split(s, delim, std::back_inserter(elems));
@@ -245,7 +244,7 @@ namespace openspace {
 			_renderableSitePropertyOwner.
 				addPropertySubOwner(_renderableSitePropertyOwner);
 			addProperty(_debugUseMultipleTextures);
-			createLookUpTable();
+			//createLookUpTable();
 
 		}
 
@@ -295,7 +294,6 @@ namespace openspace {
 				glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
 				//Allocate the storage.
 				glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevelCount, GL_RGBA8, 1024, 1024, layerCount);
-
 
 				//Upload pixel data.
 				//The first 0 refers to the mipmap level (level 0, since there's only 1)
@@ -775,25 +773,6 @@ namespace openspace {
 					(*it)._texture3->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
 					(*it)._texture3->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 				}*/
-			}
-		}
-
-		void RenderableSite::createLookUpTable() {
-			int rStart = 204;
-			int rStepSize = -5;
-			int gStart = 102;
-			int gStepSize = 0;
-			int bStart = 0;
-			int bStepSize = 5;
-
-			int counter = 0;
-			for (size_t i = 0; i < 21 * 3; ++i) {
-				_lookup[i] = rStart + counter * rStepSize;
-				i++;
-				_lookup[i] = gStart + counter * gStepSize;
-				i++;
-				_lookup[i] = bStart + counter * bStepSize;
-				counter++;
 			}
 		}
 

@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___ROVERPATHFILEREADER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___ROVERPATHFILEREADER___H__
 
+#include <modules/globebrowsing/tasks/imgreader.h>
 #include <ghoul/misc/dictionary.h>
 #include <modules/globebrowsing/models/subsite.h>
 
@@ -32,12 +33,18 @@ namespace openspace {
 namespace globebrowsing {
 class RoverPathFileReader {
 public:
+
+	struct TextureInformation{
+		std::vector<std::string> fileNames;
+		std::vector<ImgReader::PointCloudInfo> cameraInfoVector;
+	};
+
 	static std::vector<std::shared_ptr<Subsite>> extractAllSubsites(const ghoul::Dictionary dictionary);
 	static std::vector<std::shared_ptr<Subsite>> extractSubsitesWithModels(const ghoul::Dictionary dictionary);
 
 private:
 	static std::string RoverPathFileReader::convertString(const std::string sitenr, const std::string type);
-	static std::vector<std::string> RoverPathFileReader::extractFileNames(const std::string filePath);
+	static std::shared_ptr<TextureInformation> RoverPathFileReader::extractTextureInfo(const std::string absoluteFilePath);
 };
 } // namespace globebrowsing
 } // namespace openspace

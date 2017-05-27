@@ -29,6 +29,7 @@
 #include <modules/base/rendering/modelgeometry.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/models/model.h>
+#include <modules/globebrowsing/tasks/imgreader.h>
 
 #include <memory>
 
@@ -40,10 +41,21 @@ struct SubsiteModels {
 
 	std::vector<std::shared_ptr<Model>> models;
 
+	std::vector <std::shared_ptr<ghoul::opengl::Texture>> textures;
+	std::shared_ptr<openspace::modelgeometry::AsyncMultiModelGeometry> model;
+
 	glm::dvec3 cartesianPosition;
 
 	Geodetic2 geodetic;
 	Geodetic2 siteGeodetic;
+
+	// The file names of the .obj models and textures for this subsite
+	std::vector<std::string> fileNames;
+
+	// Information needed for texture projection
+	std::vector<ImgReader::PointCloudInfo> cameraInfoVector;
+
+	GLuint textureID;
 
 	uint64_t tileHashKey;
 	std::string site;

@@ -105,6 +105,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgeneration.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshwriter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/imgreader.h
+	${CMAKE_CURRENT_SOURCE_DIR}/tasks/pointcloudinfo.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.h
 
@@ -263,6 +264,8 @@ set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/tilevertexheight.hglsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablepanoramic_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/renderablepanoramic_fs.glsl
+	${CMAKE_CURRENT_SOURCE_DIR}/shaders/fullsubsite_vs.glsl
+	${CMAKE_CURRENT_SOURCE_DIR}/shaders/fullsubsite_fs.glsl
 )
 
 source_group("Shader Files" FILES ${SHADER_FILES})

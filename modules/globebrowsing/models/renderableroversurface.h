@@ -94,6 +94,8 @@ private:
 	LodModelSwitch _modelSwitch;
 
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
+
+	GLuint _textureID;
 };
 
 } // namespace globebrowsing

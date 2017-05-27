@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___SUBSITE___H__
 
 #include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/tasks/imgreader.h>
 
 #include <stdint.h>
 #include <string>
@@ -51,6 +52,9 @@ struct Subsite {
 
 	// The file names of the .obj models and textures for this subsite
 	std::vector<std::string> fileNames;
+
+	// Information needed for texture projection
+	std::vector<ImgReader::PointCloudInfo> cameraInfoVector;
 
 	std::string pathToGeometryFolder;
 	std::string pathToTextureFolder;

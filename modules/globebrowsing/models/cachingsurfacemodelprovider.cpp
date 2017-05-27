@@ -60,7 +60,6 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 			keyPrevLevel = hashKey(subsite->site, subsite->drive, _prevLevel);
 		}
 			
-
 		bool requestedExistsInCache = true;
 		if (_modelCache->exist(key)) {
 			vectorOfSubsiteModels.push_back(_modelCache->get(key)); 

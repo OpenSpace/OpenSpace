@@ -82,39 +82,61 @@ bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const uint64_t hashKey)
 
 void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels) {
 	std::vector<std::shared_ptr<ghoul::opengl::Texture>> textures;
-	for (auto model : subsiteModels->models) {
-		model->geometry->initialize(_parent);
+	subsiteModels->model->initialize(_parent);
+	/*for (auto texture : subsiteModels->textures) {
 		std::shared_ptr<ghoul::opengl::Texture> tempTexture = std::make_shared<ghoul::opengl::Texture>(
 			nullptr,
-			model->texture->dimensions(),
-			model->texture->format(),
-			model->texture->internalFormat(),
-			model->texture->dataType(),
-			model->texture->filter(),
-			model->texture->wrapping()
+			texture->dimensions(),
+			texture->format(),
+			texture->internalFormat(),
+			texture->dataType(),
+			texture->filter(),
+			texture->wrapping()
 			);
 
 		textures.push_back(tempTexture);
-		// Skapa texturer med samma dimensions som de inlasta, fast med nullptr data.
-		// Pusha de allokerade texturerna till en vector.
+	}*/
 
+	GLuint texture;
+	GLsizei mipLevelCount = 1;
+
+	const clock_t begin_time = clock();
+
+	glGenTextures(1, &texture);
+	subsiteModels->textureID = texture;
+	glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+	//Allocate the storage.
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevelCount, GL_RGBA8, 1024, 1024, subsiteModels->textures.size());
+
+	//Upload pixel data.
+	//The first 0 refers to the mipmap level (level 0, since there's only 1)
+	//The following 2 zeroes refers to the x and y offsets in case you only want to specify a subrectangle.
+	//The final 0 refers to the layer index offset (we start from index 0 and have 2 levels).
+	//Altogether you can specify a 3D box subset of the overall texture, but only one mip level at a time.
+	int counter = 0;
+	for (auto texture : subsiteModels->textures) {
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, counter, 1024, 1024, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture->pixelData());
+		counter++;
 	}
-	// Koa tillsammans med vectorn fran ovanstaende steg.
-	// I jobbet sa skrivs pixeldatan fran gamla tetxurerna till nya texturerna
-	// och byter plats med nya texturerna.
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	LINFO("FINISHED UPLOADING TEXTURES: " << float(clock() - begin_time) / CLOCKS_PER_SEC);
+
 	auto job = std::make_shared<SubsiteInitializationJob>(subsiteModels, textures);
 	_ramToGpuJobManager.enqueueJob(job);
 }
 
 void AsyncSurfaceModelProvider::unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels) {
-	for (auto model : subsiteModels->models) {
-		model->geometry->unmapBuffers();
-		model->texture->uploadTexture();
-		model->texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+	subsiteModels->model->unmapBuffers();
+	for (auto texture : subsiteModels->textures) {
+		texture->uploadTexture();
+		texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 	}
 }
-
-
 
 uint64_t AsyncSurfaceModelProvider::hashKey(const std::string site, const std::string drive, const int level) {
 	uint64_t key = 0LL;

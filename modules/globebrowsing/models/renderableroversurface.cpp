@@ -118,8 +118,8 @@ bool RenderableRoverSurface::initialize() {
 
 	RenderEngine& renderEngine = OsEng.renderEngine();
 	_programObject = renderEngine.buildRenderProgram("RenderableRoverSurface",
-		"${MODULE_BASE}/shaders/model_vs.glsl",
-		"${MODULE_BASE}/shaders/model_fs.glsl");
+		"${MODULE_GLOBEBROWSING}/shaders/fullsubsite_vs.glsl",
+		"${MODULE_GLOBEBROWSING}/shaders/fullsubsite_fs.glsl");
 
 	return true;
 }
@@ -242,86 +242,112 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		alpha = alpha + dir * 0.005;
 		subsiteModels->_alpha = alpha;
 
-		for (auto model : subsiteModels->models) {
-			glm::dmat4 globeTransform = _globe->modelTransform();
+		glm::dmat4 globeTransform = _globe->modelTransform();
 
-			glm::dvec3 positionWorldSpace = globeTransform * glm::dvec4(subsiteModels->cartesianPosition, 1.0);
-			glm::dvec3 positionWorldSpace2 = glm::dvec4(subsiteModels->cartesianPosition, 1.0);
+		glm::dvec3 positionWorldSpace = globeTransform * glm::dvec4(subsiteModels->cartesianPosition, 1.0);
+		glm::dvec3 positionWorldSpace2 = glm::dvec4(subsiteModels->cartesianPosition, 1.0);
 
-			// debug rotation controlled from GUI
-			glm::mat4 unitMat4(1);
-			glm::vec3 debugEulerRot = glm::radians(_debugModelRotation.value());
+		// debug rotation controlled from GUI
+		glm::mat4 unitMat4(1);
+		glm::vec3 debugEulerRot = glm::radians(_debugModelRotation.value());
 
-			//debugEulerRot.x = glm::radians(146.f);
-			//debugEulerRot.y = glm::radians(341.f);
-			//debugEulerRot.z = glm::radians(79.f);
+		//debugEulerRot.x = glm::radians(146.f);
+		//debugEulerRot.y = glm::radians(341.f);
+		//debugEulerRot.z = glm::radians(79.f);
 
-			glm::mat4 rotX = glm::rotate(unitMat4, debugEulerRot.x, glm::vec3(1, 0, 0));
-			glm::mat4 rotY = glm::rotate(unitMat4, debugEulerRot.y, glm::vec3(0, 1, 0));
-			glm::mat4 rotZ = glm::rotate(unitMat4, debugEulerRot.z, glm::vec3(0, 0, 1));
+		glm::mat4 rotX = glm::rotate(unitMat4, debugEulerRot.x, glm::vec3(1, 0, 0));
+		glm::mat4 rotY = glm::rotate(unitMat4, debugEulerRot.y, glm::vec3(0, 1, 0));
+		glm::mat4 rotZ = glm::rotate(unitMat4, debugEulerRot.z, glm::vec3(0, 0, 1));
 
-			glm::dmat4 debugModelRotation = rotX * rotY * rotZ;
+		glm::dmat4 debugModelRotation = rotX * rotY * rotZ;
 
-			// Rotation to make model up become normal of position on ellipsoid
-			glm::dvec3 surfaceNormal = _globe->ellipsoid().geodeticSurfaceNormal(subsiteModels->siteGeodetic);
+		// Rotation to make model up become normal of position on ellipsoid
+		glm::dvec3 surfaceNormal = _globe->ellipsoid().geodeticSurfaceNormal(subsiteModels->siteGeodetic);
 
-			surfaceNormal = glm::normalize(surfaceNormal);
-			float cosTheta = dot(glm::dvec3(0, 0, 1), surfaceNormal);
-			glm::dvec3 rotationAxis;
+		surfaceNormal = glm::normalize(surfaceNormal);
+		float cosTheta = dot(glm::dvec3(0, 0, 1), surfaceNormal);
+		glm::dvec3 rotationAxis;
 
-			rotationAxis = cross(glm::dvec3(0, 0, 1), surfaceNormal);
+		rotationAxis = cross(glm::dvec3(0, 0, 1), surfaceNormal);
 
-			float s = sqrt((1 + cosTheta) * 2);
-			float invs = 1 / s;
+		float s = sqrt((1 + cosTheta) * 2);
+		float invs = 1 / s;
 
-			glm::dquat rotationMatrix = glm::dquat(s * 0.5f, rotationAxis.x * invs, rotationAxis.y * invs, rotationAxis.z * invs);
+		glm::dquat rotationMatrix = glm::dquat(s * 0.5f, rotationAxis.x * invs, rotationAxis.y * invs, rotationAxis.z * invs);
 
-			glm::dvec3 xAxis = _globe->ellipsoid().geodeticSurfaceNorthPoleTangent(positionWorldSpace2);
+		glm::dvec3 xAxis = _globe->ellipsoid().geodeticSurfaceNorthPoleTangent(positionWorldSpace2);
 
-			if (xAxis.x == 0 && xAxis.y == 0 && xAxis.z == 0) {
-				LERROR("PLANE AND LINE HAS SAME");
-			}
-
-			glm::dvec4 test = glm::rotate(rotationMatrix, glm::dvec4(0, -1, 0, 1));
-
-			glm::dvec3 testa = glm::dvec3(test.x, test.y, test.z);
-
-			float cosTheta2 = dot(testa, xAxis);
-			glm::dvec3 rotationAxis2;
-
-			rotationAxis2 = cross(testa, xAxis);
-
-			float s2 = sqrt((1 + cosTheta2) * 2);
-			float invs2 = 1 / s2;
-
-			glm::quat rotationMatrix2 = glm::quat(s2 * 0.5f, rotationAxis2.x * invs2, rotationAxis2.y * invs2, rotationAxis2.z * invs2);
-
-			glm::dmat4 modelTransform =
-				glm::translate(glm::dmat4(1.0), positionWorldSpace) *
-				glm::dmat4(data.modelTransform.rotation) *
-				glm::dmat4(glm::toMat4(rotationMatrix2)) *
-				glm::dmat4(glm::toMat4(rotationMatrix)) *
-				debugModelRotation;
-
-			glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-			glm::vec3 directionToSun = glm::normalize(_sunPos - positionWorldSpace);
-			glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
-
-			_programObject->setUniform("transparency", 1.0f);
-			//TODO: Is this really used? Otherwise delete this and _sunPos.
-			_programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
-			_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-			_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
-			_programObject->setUniform("performShading", false);
-			_programObject->setUniform("fading", alpha);
-
-			ghoul::opengl::TextureUnit unit;
-			unit.activate();
-			model->texture->bind();
-			glEnable(GL_BLEND);
-			_programObject->setUniform("texture1", unit);
-			model->geometry->render();
+		if (xAxis.x == 0 && xAxis.y == 0 && xAxis.z == 0) {
+			LERROR("PLANE AND LINE HAS SAME");
 		}
+
+		glm::dvec4 test = glm::rotate(rotationMatrix, glm::dvec4(0, -1, 0, 1));
+
+		glm::dvec3 testa = glm::dvec3(test.x, test.y, test.z);
+
+		float cosTheta2 = dot(testa, xAxis);
+		glm::dvec3 rotationAxis2;
+
+		rotationAxis2 = cross(testa, xAxis);
+
+		float s2 = sqrt((1 + cosTheta2) * 2);
+		float invs2 = 1 / s2;
+
+		glm::quat rotationMatrix2 = glm::quat(s2 * 0.5f, rotationAxis2.x * invs2, rotationAxis2.y * invs2, rotationAxis2.z * invs2);
+
+		glm::dmat4 modelTransform =
+			glm::translate(glm::dmat4(1.0), positionWorldSpace) *
+			glm::dmat4(data.modelTransform.rotation) *
+			glm::dmat4(glm::toMat4(rotationMatrix2)) *
+			glm::dmat4(glm::toMat4(rotationMatrix)) *
+			debugModelRotation;
+
+		glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
+		glm::vec3 directionToSun = glm::normalize(_sunPos - positionWorldSpace);
+		glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
+
+		std::vector<glm::fvec3> cameraInfoCenter;
+		std::vector<glm::fvec3> cameraInfoAxis;
+		std::vector<glm::fvec3> cameraInfoHorizontal;
+		std::vector<glm::fvec3> cameraInfoVector;
+
+		for (auto cameraInfo : subsiteModels->cameraInfoVector) {
+			ImgReader::PointCloudInfo mInfoTemp = cameraInfo;
+			cameraInfoCenter.push_back(mInfoTemp._cameraCenter);
+			cameraInfoAxis.push_back(mInfoTemp._cameraAxis);
+			cameraInfoHorizontal.push_back(mInfoTemp._cameraHorizontal);
+			cameraInfoVector.push_back(mInfoTemp._cameraVector);
+		}
+
+		//(*it)._programObject->setUniform("camerasCenters", cameraInfoCenter);
+		//(*it)._programObject->setUniform("camerasAxes", cameraInfoAxis);
+		//(*it)._programObject->setUniform("camerasHorizontals", cameraInfoHorizontal);
+		//(*it)._programObject->setUniform("camerasVectors", cameraInfoVector);
+
+		const GLint locationCenter = _programObject->uniformLocation("camerasCenters");
+		const GLint locationAxis = _programObject->uniformLocation("camerasAxes");
+		const GLint locationHorizontal = _programObject->uniformLocation("camerasHorizontals");
+		const GLint locationVector = _programObject->uniformLocation("camerasVectors");
+
+		glUniform3fv(locationCenter, cameraInfoCenter.size(), reinterpret_cast<GLfloat *>(cameraInfoCenter.data()));
+		glUniform3fv(locationAxis, cameraInfoAxis.size(), reinterpret_cast<GLfloat *>(cameraInfoAxis.data()));
+		glUniform3fv(locationHorizontal, cameraInfoHorizontal.size(), reinterpret_cast<GLfloat *>(cameraInfoHorizontal.data()));
+		glUniform3fv(locationVector, cameraInfoVector.size(), reinterpret_cast<GLfloat *>(cameraInfoVector.data()));
+
+		//TODO: Is this really used? Otherwise delete this and _sunPos.
+		_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
+		_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+		//_programObject->setUniform("fading", alpha);
+
+		_programObject->setUniform("size", static_cast<int>(cameraInfoCenter.size()));
+
+		glEnable(GL_BLEND);
+		glDisable(GL_CULL_FACE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		//model->geometry->setUniforms(*_programObject);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, subsiteModels->textureID);
+		subsiteModels->model->render();
 	}
 	_programObject->deactivate();
 	_prevLevel = level;
@@ -330,6 +356,8 @@ void RenderableRoverSurface::render(const RenderData& data) {
 void RenderableRoverSurface::update(const UpdateData& data) {
 	_renderableExplorationPath->update(data);
 	_cachingModelProvider->update(this);
+	// Faster to store a reference to the node and call worldPosition() from that node?
+	// Might not have to traverse the scenegraph like that.
 	_sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 }
 
