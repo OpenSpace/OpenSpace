@@ -537,6 +537,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         const std::string& pathToCdfFile,
         const std::string& tracingVariable,
         const std::vector<glm::vec3>& inSeedPoints,
+        const float& tracingStepLength,
         const int& maxIterations,
         const bool shouldResample,
         const int& numResamples,
@@ -704,6 +705,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         // IMPORTANT!: Remember to delete interpolator if creating it here!
         ccmc::Interpolator* interpolator = kameleon->createNewInterpolator();
         ccmc::Tracer tracer(kameleon.get(), interpolator);
+        tracer.setDn(tracingStepLength);
         // ccmc::Tracer tracer(kameleon.get());
         tracer.setMaxIterations(maxIterations);
         tracer.setInnerBoundary(innerBoundaryLimit); // TODO specify in Lua

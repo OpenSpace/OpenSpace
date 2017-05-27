@@ -94,6 +94,7 @@ public:
     bool getFieldlinesState/*Cdf*/(const std::string& pathToCdfFile,
                             const std::string& tracingVariable,
                             const std::vector<glm::vec3>& inSeedPoints,
+                            const float& tracingStepLength,
                             const int& maxIterations,
                             const bool shouldResample, //does const bool& make sense?
                             const int& numResamples,

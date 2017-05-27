@@ -301,6 +301,7 @@ bool RenderableFieldlinesSequence::initialize() {
                 fsManager.getFieldlinesState(validSourceFilePaths[i],
                                              tracingVariable,
                                              _seedPoints,
+                                             tracingStepLength,
                                              maxSteps,
                                              _isMorphing,
                                              numResamples,
