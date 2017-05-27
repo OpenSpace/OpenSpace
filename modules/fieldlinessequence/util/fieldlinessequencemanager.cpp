@@ -85,7 +85,7 @@ FieldlinesSequenceManager::FieldlinesSequenceManager() {}
 
 FieldlinesSequenceManager::~FieldlinesSequenceManager() {}
 
-std::string FieldlinesSequenceManager::timeToString(double time) {
+std::string FieldlinesSequenceManager::timeToString(double time, bool pathSafe /* = false*/) {
     std::string datetime = SpiceManager::ref().dateFromEphemerisTime(time);
     std::string month = datetime.substr(5, 3);
 
@@ -105,6 +105,11 @@ std::string FieldlinesSequenceManager::timeToString(double time) {
     else ghoul_assert(false, "Bad month");
 
     datetime.replace(4, 5, "-" + MM + "-");
+    if (pathSafe) {
+        datetime.replace(13, 1, "-");
+        datetime.replace(16, 1, "-");
+        datetime.replace(19, 1, "-");
+    }
     return datetime;
 }
 

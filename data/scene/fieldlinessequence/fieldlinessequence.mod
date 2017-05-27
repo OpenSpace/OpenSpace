@@ -3,6 +3,10 @@ local seedPointsFileEnlil = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoin
 local eqSeedsEnlil2AU = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/equitorialslice2_AU.txt';
 local eqSeedsEnlil1AU_1nHalfdeg = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/equitorialslice1_AU_1.5deg.txt';
 
+local batsrusBinaryFolder = '${OPENSPACE_DATA}/scene/fieldlinessequence/binary_batsrus_2012_July/600MaxPoints/';
+local enlilBinaryFolder = '${OPENSPACE_DATA}/scene/fieldlinessequence/binary_enlil_2012_July/step_length_0.99/30000MaxPoints_0.11AU_2deg/';
+
+
 -- local volumeFolderBatsrus = '${OPENSPACE_DATA}/bats_sequence';
 local volumeFolderBatsrus = '${OPENSPACE_DATA}/new_bats';
 local volumeFolderEnlil = '${OPENSPACE_DATA}/enlil_sequence';
@@ -46,16 +50,19 @@ return {
     --         TracingMethod = "PreTraced",
     --         -- TracingMethod = "PreProcess",
     --         -- TracingMethod = "LiveTrace",
+    --         SourceFolder = volumeFolderBatsrus,
+    --         StartStateOffset = 0,
+    --         StateStepSize = 16,
+    --         MaxNumStates = 1,
+
+    --         OutputLocationBinary = batsrusBinaryFolder,
+
     --         ExtraVariables          = "T status",
     --         ExtraMagnitudeVariables = "jx jy jz",
 
     --         VectorVolume = {
-    --             -- Type = "VolumeKameleon",
-    --             Directory = volumeFolderBatsrus,
-    --             -- Model = "BATSRUS",
     --             TracingVariable = "b", -- "b" is the variable specifying the magnetic field
     --             -- Variables = {"bx", "by", "bz"},
-    --             -- TimeDependent = true,
     --         },
     --         Fieldlines = {
     --             MaximumTracingSteps = 1000.0,
@@ -66,7 +73,7 @@ return {
     --             NumResamples = 500,
     --             QuickMorphDistance = 637100000,
     --         },
-    --         SeedPoints = {
+    --         SeedPointInfo = {
     --             -- Type = "File",
     --             File = seedPointsFileBatsrus,
     --         }
@@ -135,14 +142,14 @@ return {
             TracingMethod = "PreTraced",
             -- TracingMethod = "PreTraced",
             SourceFolder = volumeFolderEnlil,
+            StartStateOffset = 5,
+            StateStepSize = 8,
+            MaxNumStates = 0,
+            OutputLocationBinary = enlilBinaryFolder,
 
             VectorVolume = {
-                -- Type = "VolumeKameleon",
-                Directory = volumeFolderEnlilHighRes,
-                -- Model = "BATSRUS",
                 TracingVariable = "b", -- "b" is the variable specifying the magnetic field
                 -- Variables = {"bx", "by", "bz"},
-                -- TimeDependent = true,
             },
             Fieldlines = {
                 MaximumTracingSteps = 10000.0,
@@ -160,4 +167,34 @@ return {
             }
         }
     },
+
+
+    -- {
+    --     Name = "BATSRUSFieldlinesSequenceBinary",
+    --     Parent = "GSMReferenceFrame",
+    --     Renderable = {
+    --         Type = "RenderableFieldlinesSequence",
+    --         TracingMethod = "PreTracedBinary",
+    --         SourceFolder = batsrusBinaryFolder,
+    --         -- StartStateOffset = 10,
+    --         -- StateStepSize = 4,
+    --         -- MaxNumStates = 150,
+    --         -- OutputLocationBinary = batsrusBinaryFolder,
+    --     },
+    -- },
+
+    -- {
+    --     Name = "ENLILFieldlinesSequenceBinary",
+    --     Parent = "HNMReferenceFrame",
+    --     Renderable = {
+    --         Type = "RenderableFieldlinesSequence",
+    --         TracingMethod = "PreTracedBinary",
+    --         SourceFolder = enlilBinaryFolder,
+    --         -- StartStateOffset = 10,
+    --         -- StateStepSize = 4,
+    --         -- MaxNumStates = 150,
+    --         -- OutputLocationBinary = enlilBinaryFolder",
+    --     },
+    -- },
+
 }

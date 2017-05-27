@@ -64,6 +64,9 @@ namespace {
     const char* keySeedPointsInfo               = "SeedPointInfo";
     const char* keySeedPointsFile               = "File";
 
+    const char* keyOutputLocationBinary         = "OutputLocationBinary";
+    const char* keyOutputLocationJson           = "OutputLocationJson";
+
     const char* keyExtraVariables               = "ExtraVariables";
     const char* keyExtraMagnitudeVariables      = "ExtraMagnitudeVariables";
 
@@ -196,13 +199,14 @@ bool RenderableFieldlinesSequence::initialize() {
     _states.reserve(_numberOfStates);
     _startTimes.reserve(_numberOfStates);
 
+    std::string outputJsonLoc;
+    std::string outputBinaryLoc;
+    // TODO: Use function that validate paths as well?
+    bool saveJsonOutputs   = _dictionary.getValue(keyOutputLocationJson  , outputJsonLoc);
+    bool saveBinaryOutputs = _dictionary.getValue(keyOutputLocationBinary, outputBinaryLoc);
+
     int numResamples;
     bool allowSeedPoints = false;
-    bool saveBinaries = false;
-    bool saveJson = false;
-    std::string jsonPath;
-    std::string binaryPath;
-    std::string saveFilePrefix;
 
     switch (tracingMethod) {
         case PRE_PROCESS: {
@@ -286,6 +290,7 @@ bool RenderableFieldlinesSequence::initialize() {
             std::vector<std::string> extraMagVars{std::istream_iterator<std::string>{iss},
                                                   std::istream_iterator<std::string>{}};
 
+            // TODO Only one loop.. Not one for each tracing method!!
             for (size_t i = 0; i < _numberOfStates; ++i) {
                 LDEBUG(validSourceFilePaths[i] << " is now being traced.");
                 _states.push_back(FieldlinesState(_seedPoints.size()));
@@ -300,6 +305,21 @@ bool RenderableFieldlinesSequence::initialize() {
                                              extraMagVars,
                                              _states[i]);
                 _startTimes.push_back(_states[i]._triggerTime);
+
+                if (saveBinaryOutputs) {
+                    std::string filePath = outputBinaryLoc +
+                                           fsManager.timeToString(_states[i]._triggerTime, true) +
+                                           ".osfls";
+                    _states[i].saveStateToBinaryFile(filePath);
+                }
+                if (saveJsonOutputs) {
+                    std::string filePrefix = fsManager.timeToString(_states[i]._triggerTime, true);
+                    fsManager.saveFieldlinesStateAsJson(_states[i],
+                                                        outputJsonLoc,
+                                                        false,
+                                                        filePrefix,
+                                                        false);
+                }
             }
         } break;
         case PRE_CALCULATED_JSON: {

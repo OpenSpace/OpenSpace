@@ -107,7 +107,7 @@ public:
                                const float& threshold);
 
     // TODO move somewhere else
-    std::string timeToString(double time);
+    std::string timeToString(double time, bool pathSafe = false);
 
 private:
 
