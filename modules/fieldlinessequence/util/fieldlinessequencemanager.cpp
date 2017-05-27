@@ -744,6 +744,11 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                         } else {
                             val = interpolator->interpolate(colorizingFloatVars[i],
                                                           gPos.x, gPos.y, gPos.z);
+
+                            // When measuring density in ENLIL they multiply by radius^2
+                            if (colorizingFloatVars[i] == "rho" && model == "enlil") {
+                                val *= std::pow(gPos.x*A_U_TO_METER, 2.0f);
+                            }
                         }
                         colorizingVariables[i].push_back(val);
                     }
@@ -759,8 +764,22 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                         float zVal = interpolator->interpolate(
                                 colorizingMagVars[firstIdx+2], gPos.x, gPos.y, gPos.z);
 
-                        colorizingVariables[i + numValidFloatQuantities].push_back(
-                                sqrt(xVal*xVal + yVal*yVal + zVal*zVal));
+                        float val;
+                        // When looking at the current's magnitude in Batsrus, CCMC staff are
+                        // only interested in the magnitude parallel to the magnetic field
+                        if (colorizingMagVars[firstIdx] == "jx" && model == "batsrus") {
+                            glm::vec3 magVecHat =  glm::normalize(glm::vec3(
+                                interpolator->interpolate("bx", gPos.x, gPos.y, gPos.z),
+                                interpolator->interpolate("by", gPos.x, gPos.y, gPos.z),
+                                interpolator->interpolate("bz", gPos.x, gPos.y, gPos.z)));
+                            // Magnitude of the part of the current vector that's parallel to
+                            // the magnetic field vector!
+                            val = glm::dot(glm::vec3(xVal,yVal,zVal),magVecHat);
+
+                        } else {
+                            val = std::sqrt(xVal*xVal + yVal*yVal + zVal*zVal);
+                        }
+                        colorizingVariables[i + numValidFloatQuantities].push_back(val);
                     }
                 }
                 if (convertToCartesian) {
