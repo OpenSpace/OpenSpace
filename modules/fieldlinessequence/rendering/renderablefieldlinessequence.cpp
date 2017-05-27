@@ -67,6 +67,10 @@ namespace {
     const char* keyOutputLocationBinary         = "OutputLocationBinary";
     const char* keyOutputLocationJson           = "OutputLocationJson";
 
+    const char* keyFieldlineMaxTraceSteps       = "MaximumTracingSteps";
+    const char* keyTracingVariable              = "TracingVariable";
+    const char* keyTracingStepLength            = "TracingStepLength";
+
     const char* keyExtraVariables               = "ExtraVariables";
     const char* keyExtraMagnitudeVariables      = "ExtraMagnitudeVariables";
 
@@ -79,10 +83,7 @@ namespace {
     const char* keySeedPoints = "SeedPoints";
 
     const char* keyVolumeDirectory = "Directory";
-    const char* keyVolumeTracingVariable = "TracingVariable";
-    const char* keyMaxNumVolumes         = "NumVolumes";
 
-    const char* keyFieldlineMaxTraceSteps = "MaximumTracingSteps";
     const char* keyFieldlineShouldMorph = "Morphing";
     const char* keyFieldlineResamples = "NumResamples";
     const char* keyFieldlineResampleOption = "ResamplingType";
@@ -218,10 +219,10 @@ bool RenderableFieldlinesSequence::initialize() {
 
             // Specify which quantity to trace
             std::string tracingVariable;
-            if (!_dictionary.getValue(keyVolumeTracingVariable, tracingVariable)) {
+            if (!_dictionary.getValue(keyTracingVariable, tracingVariable)) {
                 tracingVariable = "b"; //default: b = magnetic field.
                 LWARNING(keyVolume << " isn't specifying a " <<
-                         keyVolumeTracingVariable << ". Using default value: '" <<
+                         keyTracingVariable << ". Using default value: '" <<
                          tracingVariable << "' for magnetic field.");
             }
 
@@ -233,6 +234,9 @@ bool RenderableFieldlinesSequence::initialize() {
             } else {
                 maxSteps = static_cast<int>(f_maxSteps);
             }
+
+            float tracingStepLength = 0.2f;
+            _dictionary.getValue(keyTracingStepLength, tracingStepLength);
 
             bool userWantsMorphing;
             if (!_dictionary.getValue(keyFieldlineShouldMorph, userWantsMorphing)) {

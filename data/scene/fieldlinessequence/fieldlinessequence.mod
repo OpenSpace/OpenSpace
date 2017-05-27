@@ -55,6 +55,10 @@ return {
     --         StateStepSize = 16,
     --         MaxNumStates = 1,
 
+    --         TracingVariable = "b", -- "b" is the variable specifying the magnetic field
+    --         MaximumTracingSteps = 600.0,
+    --         -- TracingStepLength   = 0.99, -- default == 0.2, value higher than 1 results in weird behaviour
+
     --         OutputLocationBinary = batsrusBinaryFolder,
 
     --         ExtraVariables          = "T status",
@@ -65,8 +69,6 @@ return {
     --             -- Variables = {"bx", "by", "bz"},
     --         },
     --         Fieldlines = {
-    --             MaximumTracingSteps = 1000.0,
-    --             -- Stepsize = 1.0,
     --             -- Classification = true,
     --             Morphing = false,
     --             ResamplingType = 4, -- resampling will depend on: 1=length, 2=integral, 3=index
@@ -147,13 +149,12 @@ return {
             MaxNumStates = 0,
             OutputLocationBinary = enlilBinaryFolder,
 
-            VectorVolume = {
-                TracingVariable = "b", -- "b" is the variable specifying the magnetic field
-                -- Variables = {"bx", "by", "bz"},
-            },
+            MaximumTracingSteps = 30000.0,
+            TracingStepLength   = 0.99,
+
+            TracingVariable = "b", -- "b" is the variable specifying the magnetic field
+
             Fieldlines = {
-                MaximumTracingSteps = 10000.0,
-                -- Stepsize = 1.0,
                 -- Classification = true,
                 Morphing = false,
                 -- NumResamples = 5,
