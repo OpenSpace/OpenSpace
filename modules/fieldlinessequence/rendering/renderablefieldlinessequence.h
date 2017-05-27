@@ -87,7 +87,9 @@ private:
     properties::BoolProperty _isMorphing;           // Time interpolation/morphing
     properties::BoolProperty _show3DLines;          // 3D "ropes". Billboards
     properties::BoolProperty _showSeedPoints;
+    properties::BoolProperty _useABlending;         // Toggles additive blending on/off
     properties::BoolProperty _useNearestSampling;   // TF: Nearest or linear interpolation
+    properties::BoolProperty _usePointDrawing;      // Toggles outputting lines vs points
 
     properties::FloatProperty _lineWidth;           // Interactive Line Width
     properties::FloatProperty _seedPointSize;       // Interactive Seed Point Size
@@ -153,6 +155,8 @@ private:
     GLuint _vertAttrMorphToPos      = 1;
     GLuint _vertAttrMorphQuick      = 2;
     GLuint _vertAttrColorQuantity   = 3;
+
+    GLenum _drawingOutputType       = GL_LINE_STRIP;            // Draw points or lines
 
     GLfloat _maxLineWidthOpenGl; // hardware related variable?
     float _scalingFactor;

@@ -100,7 +100,9 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _isMorphing("isMorphing", "Morphing", false),
       _show3DLines("show3DLines", "3D Lines", false),
       _showSeedPoints("showSeedPoints", "Show Seed Points", false),
+      _useABlending("additiveBlending", "Additive Blending", false),
       _useNearestSampling("useNearestSampling", "Nearest Sampling", false),
+      _usePointDrawing("togglePointDrawing", "Draw Points", false),
       _lineWidth("fieldlineWidth", "Fieldline Width", 1.f, 0.f, 10.f),
       _seedPointSize("seedPointSize", "Seed Point Size", 4.0, 0.0, 20.0),
       _fieldlineParticleSize("fieldlineParticleSize", "FL Particle Size", 0, 0, 1000),
@@ -460,6 +462,14 @@ bool RenderableFieldlinesSequence::initialize() {
     // glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE, &_maxLineWidthOpenGl);
     // glGetFloatv(GL_SMOOTH_LINE_WIDTH_GRANULARITY, &_maxLineWidthOpenGl);
 
+    _usePointDrawing.onChange([this] {
+        _drawingOutputType = _drawingOutputType == GL_LINE_STRIP ?
+                             GL_POINTS : GL_LINE_STRIP;
+    });
+
+    addProperty(_useABlending);
+    addProperty(_usePointDrawing);
+
     if (allowSeedPoints) {
         _seedPointProgram = OsEng.renderEngine().buildRenderProgram(
             "FieldlinesSequenceSeeds",
@@ -765,13 +775,32 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
 
         glDisable(GL_CULL_FACE);
 
+        bool additiveBlending = false;
+        if (_useABlending) {
+            bool usingFramebufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+                                            RenderEngine::RendererImplementation::Framebuffer;
+
+            bool usingABufferRenderer = OsEng.renderEngine().rendererImplementation() ==
+                                        RenderEngine::RendererImplementation::ABuffer;
+
+            if (usingABufferRenderer) {
+                _activeProgramPtr->setUniform("useABlending", _useABlending);
+            }
+
+            additiveBlending = usingFramebufferRenderer;
+            if (additiveBlending) {
+                glDepthMask(false);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            }
+        }
+
         // _activeProgramPtr->setUniform("classification", _classification);
         // if (!_classification)
         //     _activeProgramPtr->setUniform("fieldLineColor", _fieldlineColor);
 
         glBindVertexArray(_vertexArrayObject);
         glMultiDrawArrays(
-                GL_LINE_STRIP_ADJACENCY,
+                _drawingOutputType,
                 &_states[_activeStateIndex]._lineStart[0],
                 &_states[_activeStateIndex]._lineCount[0],
                 static_cast<GLsizei>(_states[_activeStateIndex]._lineStart.size())
@@ -793,6 +822,11 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
 
             glBindVertexArray(0);
             _seedPointProgram->deactivate();
+        }
+
+        if (additiveBlending) {
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glDepthMask(true);
         }
 
         glEnable(GL_CULL_FACE);
