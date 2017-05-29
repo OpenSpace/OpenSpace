@@ -35,10 +35,8 @@ namespace openspace {
 namespace globebrowsing {
 
 struct SubsiteInitializationJob : LoadJob2 {
-	SubsiteInitializationJob(const std::shared_ptr<SubsiteModels> subsiteModels,
-		std::vector<std::shared_ptr<ghoul::opengl::Texture>> textures)
+	SubsiteInitializationJob(const std::shared_ptr<SubsiteModels> subsiteModels)
 		: _subsiteModels(subsiteModels)
-		, _textures(textures)
 	{}
 
 	virtual ~SubsiteInitializationJob() = default;
@@ -49,7 +47,6 @@ struct SubsiteInitializationJob : LoadJob2 {
 
 protected:
 	std::shared_ptr<SubsiteModels> _subsiteModels;
-	std::vector<std::shared_ptr<ghoul::opengl::Texture>> _textures;
 };
 
 } // globebrowsing
