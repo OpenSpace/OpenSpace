@@ -186,27 +186,26 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		_pressedOnce = false;
 	}
 
-
 	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
 	//FOR ALPHA BLENDING TO WORK
-	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels;
+	std::vector<std::shared_ptr<SubsiteModels>> vectorOfsubsiteModels;
 	if(_generalProperties.lockSubsite.value())
-		_subsiteModels = _cachingModelProvider->getModels(_prevSubsites, level);
+		vectorOfsubsiteModels = _cachingModelProvider->getModels(_prevSubsites, level);
 	else
-		_subsiteModels = _cachingModelProvider->getModels(ss, level);
+		vectorOfsubsiteModels = _cachingModelProvider->getModels(ss, level);
 	
 	//if (_subsiteModels.size() == 0) return;
 
-	if(_subsiteModels.size() > 0) {
+	if(vectorOfsubsiteModels.size() > 0) {
 		if (level == 3 && _prevSubsite != nullptr 
-			&& _prevSubsite->drive != _subsiteModels.at(0)->drive) {
-			_subsiteModels.push_back(_prevSubsite);
+			&& _prevSubsite->drive != vectorOfsubsiteModels.at(0)->drive) {
+			vectorOfsubsiteModels.push_back(_prevSubsite);
 		}
 	}
-	_subsiteModels = calculateSurfacePosition(_subsiteModels);
+	vectorOfsubsiteModels = calculateSurfacePosition(vectorOfsubsiteModels);
 
 	_programObject->activate();
-	for (auto subsiteModels : _subsiteModels) {
+	for (auto subsiteModels : vectorOfsubsiteModels) {
 
 		float dir = 1;
 		float alpha = subsiteModels->_alpha;
@@ -239,7 +238,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			}
 		}
 		else if (_prevSubsite != nullptr 
-			&& _subsiteModels.size() > 1
+			&& vectorOfsubsiteModels.size() > 1
 			&& _prevSubsite->drive == subsiteModels->drive 
 			&& level == 3) {
 			// Walking between models
