@@ -244,8 +244,6 @@ namespace openspace {
 			_renderableSitePropertyOwner.
 				addPropertySubOwner(_renderableSitePropertyOwner);
 			addProperty(_debugUseMultipleTextures);
-			//createLookUpTable();
-
 		}
 
 		bool RenderableSite::initialize() {
@@ -775,6 +773,5 @@ namespace openspace {
 				}*/
 			}
 		}
-
 	} // namespace globebrowsing
 } // namespace openspace
