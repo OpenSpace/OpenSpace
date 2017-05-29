@@ -50,7 +50,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstatesequence.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstatesequence.inl
 
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcameraplane.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcamerasphere.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.h
 
@@ -64,7 +64,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcameraplane.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcamerasphere.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/pixelbufferobject.cpp

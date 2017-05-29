@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
+#ifndef __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERY___H__
+#define __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERY___H__
 
 // TODO(mnoven): A-Z
 #include <modules/base/rendering/renderableplane.h>
@@ -51,10 +51,10 @@ namespace ghoul { namespace opengl { class Texture; }}
 
 namespace openspace {
 
-class RenderableSpacecraftCameraPlane : public Renderable {
+class RenderableSolarImagery : public Renderable {
 
 public:
-    RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary);
+    RenderableSolarImagery(const ghoul::Dictionary& dictionary);
 
     void render(const RenderData& data);
     void update(const UpdateData& data);
@@ -128,4 +128,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLESPACECRAFTCAMERAPLANE___H__
+#endif // __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERY___H__

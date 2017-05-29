@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-#include <modules/solarbrowsing/rendering/renderablespacecraftcameraplane.h>
+#include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
 #include <modules/solarbrowsing/rendering/renderablespacecraftcamerasphere.h>
 #include <openspace/engine/openspaceengine.h>
 
@@ -47,14 +47,14 @@ using namespace std::chrono;
 typedef std::chrono::high_resolution_clock Clock;
 
 namespace {
-    static const std::string _loggerCat = "RenderableSpacecraftCameraPlane";
+    static const std::string _loggerCat = "RenderableSolarImagery";
     double HALF_SUN_RADIUS = (1391600000.0 * 0.50); // Half sun radius divided by magic factor
     const double EPSILON = std::numeric_limits<double>::epsilon();
 }
 
 namespace openspace {
 
-RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Dictionary& dictionary)
+RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _sharpenValue("sharpenValue", "Sharpen", 0.0, 0.0, 1.0)
     , _contrastValue("contrastValue", "Contrast", 0.0, -15.0, 15.0)
@@ -240,7 +240,7 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     addProperty(_verboseMode);
 }
 
-DecodeData RenderableSpacecraftCameraPlane::getDecodeDataFromOsTime(const int& osTime) {
+DecodeData RenderableSolarImagery::getDecodeDataFromOsTime(const int& osTime) {
     auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
     auto& state = stateSequence.getState(osTime);
     const double& timeObserved = state.timeObserved();
@@ -249,7 +249,7 @@ DecodeData RenderableSpacecraftCameraPlane::getDecodeDataFromOsTime(const int& o
     return std::move(decodeData);
 }
 
-void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
+void RenderableSolarImagery::fillBuffer(const double& dt) {
     _streamBuffer.clear();
     if (_verboseMode) {
         LDEBUG("Refilling Buffer. dt: " << dt);
@@ -269,21 +269,21 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
     _initializePBO = true;
 }
 
-bool RenderableSpacecraftCameraPlane::isReady() const {
+bool RenderableSolarImagery::isReady() const {
     return _spacecraftCameraPlane->isReady() && _texture != nullptr;
 }
 
-bool RenderableSpacecraftCameraPlane::initialize() {
+bool RenderableSolarImagery::initialize() {
     _spacecraftCameraPlane = std::make_unique<SpacecraftCameraPlane>(
           _magicPlaneOffset, _magicPlaneFactor, _moveFactor);
     return isReady();
 }
 
-bool RenderableSpacecraftCameraPlane::deinitialize() {
+bool RenderableSolarImagery::deinitialize() {
     return _spacecraftCameraPlane->destroy();
 }
 
-void RenderableSpacecraftCameraPlane::uploadImageDataToPBO() {
+void RenderableSolarImagery::uploadImageDataToPBO() {
     _pbo->activate();
     IMG_PRECISION* _pboBufferData = _pbo->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true);
 
@@ -326,7 +326,7 @@ void RenderableSpacecraftCameraPlane::uploadImageDataToPBO() {
     _pbo->deactivate();
 }
 
-void RenderableSpacecraftCameraPlane::updateTextureGPU(bool asyncUpload, bool resChanged) {
+void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged) {
     if (_usePBO && asyncUpload) {
             _pbo->activate();
             _texture->bind();
@@ -355,14 +355,14 @@ void RenderableSpacecraftCameraPlane::updateTextureGPU(bool asyncUpload, bool re
     }
 }
 
-void RenderableSpacecraftCameraPlane::decode(unsigned char* buffer,
+void RenderableSolarImagery::decode(unsigned char* buffer,
                                              const std::string& filename)
 {
     SimpleJ2kCodec j2c(_verboseMode);
     j2c.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
 }
 
-void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime) {
+void RenderableSolarImagery::performImageTimestep(const double& osTime) {
     if (_pboIsDirty || !_usePBO) {
         updateTextureGPU();
     }
@@ -380,7 +380,7 @@ void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime)
     }
 }
 
-void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
+void RenderableSolarImagery::update(const UpdateData& data) {
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
     if (_useBuffering) {
@@ -407,7 +407,7 @@ void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     _spacecraftCameraPlane->update();
 }
 
-void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
+void RenderableSolarImagery::render(const RenderData& data) {
     if (!isReady()) {
         return;
     }

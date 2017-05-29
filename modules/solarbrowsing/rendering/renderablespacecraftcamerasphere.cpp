@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/solarbrowsing/rendering/renderablespacecraftcamerasphere.h>
-#include <modules/solarbrowsing/rendering/renderablespacecraftcameraplane.h>
+#include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
 #include <modules/space/rendering/planetgeometry.h>
 #include <openspace/util/time.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -63,14 +63,14 @@ bool RenderableSpacecraftCameraSphere::initialize() {
     const std::vector<SceneGraphNode*>& allNodes
           = OsEng.renderEngine().scene()->allSceneGraphNodes();
     for (auto node : allNodes) {
-        if (dynamic_cast<RenderableSpacecraftCameraPlane*>(node->renderable())) {
+        if (dynamic_cast<RenderableSolarImagery*>(node->renderable())) {
            // SceneGraphNode* tmp2 = const_cast<SceneGraphNode*>(node);
             auto thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName);
             thisNode->addDependency(*node);
         }
     }
 
-    _planeDependencies
+    _solarImageryDependencies
          = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
 
     const std::string path = "/Users/michaelnoven/workspace/OpenSpace/data/hmimap1.fits";
@@ -146,41 +146,41 @@ void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
 
-    const int numPlanes = _planeDependencies.size();
+    const int numPlanes = _solarImageryDependencies.size();
     const int MAX_SPACECRAFT_OBSERVATORY = 6;
-    int planeCount = 0;
+    int solarImageryCount = 0;
 
     ghoul::opengl::TextureUnit txUnits[MAX_SPACECRAFT_OBSERVATORY];
     ghoul::opengl::TextureUnit tfUnits[MAX_SPACECRAFT_OBSERVATORY];
 
     for (int i = 0; i < numPlanes; ++i) {
-        auto* plane = static_cast<RenderableSpacecraftCameraPlane*>(
-              _planeDependencies[i]->renderable());
+        auto* solarImagery = static_cast<RenderableSolarImagery*>(
+              _solarImageryDependencies[i]->renderable());
 
-        const SpacecraftCameraPlane& p1 = plane->cameraPlane();
-        const glm::dvec3 planePos = p1.worldPosition();
-        const glm::dmat4 planeRot = p1.worldRotation();
+        const SpacecraftCameraPlane& plane = solarImagery->cameraPlane();
+        const glm::dvec3 planePos = plane.worldPosition();
+        const glm::dmat4 planeRot = plane.worldRotation();
 
-        _shader->setUniform("magicPlaneFactor[" + std::to_string(i) + "]", plane->_magicPlaneFactor);
-       // _shader->setUniform("magicPlaneOffset[" + std::to_string(i) + "]", plane->_magicPlaneOffset);
+        _shader->setUniform("magicPlaneFactor[" + std::to_string(i) + "]", solarImagery->_magicPlaneFactor);
+       // _shader->setUniform("magicPlaneOffset[" + std::to_string(i) + "]", solarImagery->_magicPlaneOffset);
 
         _shader->setUniform("sunToSpacecraftReferenceFrame[" + std::to_string(i) + "]",
                         planeRot * glm::dmat4(data.modelTransform.rotation));
         _shader->setUniform("planePositionSpacecraft[" + std::to_string(i) + "]",
                             glm::dvec3(planeRot * glm::dvec4(planePos, 1.0)));
 
-        //_shader->setUniform("imageSize[" + std::to_string(i) + "]" , plane->_imageSize);
-        //_shader->setUniform("sharpenValue[" + std::to_string(i) + "]", plane->_sharpenValue);
-        _shader->setUniform("gammaValue[" + std::to_string(i) + "]", plane->_gammaValue);
-        _shader->setUniform("contrastValue[" + std::to_string(i) + "]", plane->_contrastValue);
+        //_shader->setUniform("imageSize[" + std::to_string(i) + "]" , solarImagery->_imageSize);
+        //_shader->setUniform("sharpenValue[" + std::to_string(i) + "]", solarImagery->_sharpenValue);
+        _shader->setUniform("gammaValue[" + std::to_string(i) + "]", solarImagery->_gammaValue);
+        _shader->setUniform("contrastValue[" + std::to_string(i) + "]", solarImagery->_contrastValue);
 
         // Imagery texture
         txUnits[i].activate();
-        plane->getImageryTexture()->bind();
+        solarImagery->getImageryTexture()->bind();
         _shader->setUniform("imageryTexture[" + std::to_string(i) + "]", txUnits[i]);
         tfUnits[i].activate();
 
-        auto lut = plane->getTransferFunction();
+        auto lut = solarImagery->getTransferFunction();
         if (lut) {
             lut->bind();
             _shader->setUniform("hasLut[" + std::to_string(i) + "]", true);
@@ -189,11 +189,11 @@ void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
         }
         // Must bind all sampler2D, otherwise undefined behaviour
         _shader->setUniform("lut[" + std::to_string(i) + "]", tfUnits[i]);
-        planeCount++;
+        solarImageryCount++;
     }
 
     // Set the rest of the texture units for well defined behaviour
-    for (int i = planeCount; i < MAX_SPACECRAFT_OBSERVATORY; ++i) {
+    for (int i = solarImageryCount; i < MAX_SPACECRAFT_OBSERVATORY; ++i) {
         txUnits[i].activate();
         _shader->setUniform("imageryTexture[" + std::to_string(i) + "]", txUnits[i]);
         tfUnits[i].activate();

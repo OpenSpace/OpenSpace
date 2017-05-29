@@ -65,7 +65,7 @@ public:
 private:
     void loadTexture();
 
-    std::vector<SceneGraphNode*> _planeDependencies;
+    std::vector<SceneGraphNode*> _solarImageryDependencies;
     std::string _nodeName;
     std::unique_ptr<ghoul::opengl::Texture> _magnetogramTexture;
     float _planetRadius;
