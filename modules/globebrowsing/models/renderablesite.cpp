@@ -168,6 +168,7 @@ namespace openspace {
 
 			if (success) {
 				_textureTxtPath = absPath(textureTxtPath);
+				_textureTxtPath = "D:/models/level1/site048/drive1570/filenames.txt";
 				// Get the file texture file names
 				_fileNames = loadTexturePaths(_textureTxtPath);
 			}
@@ -190,8 +191,8 @@ namespace openspace {
 					std::string extension = ".IMG";
 
 					extension = ".obj";
-
-					modelDic.setValue("GeometryFile", modelFilepath + "/" + _fileNames[count] + extension);
+					std::string tempfilename = "OBJ";
+					modelDic.setValue("GeometryFile", modelFilepath + "/" + tempfilename + extension);
 
 					std::unique_ptr<modelgeometry::ModelGeometry> m = modelgeometry::ModelGeometry::createFromDictionary(modelDic);
 
@@ -201,20 +202,34 @@ namespace openspace {
 
 					std::size_t pos = _fileNames[count].find("XYR");
 
-					_textureFileNames.push_back(_fileNames[count].substr(0, pos) + "RAS" + _fileNames[count].substr(pos + 3));
-					_textureFileNames.push_back(_fileNames[count + 1].substr(0, pos) + "RAS" + _fileNames[count + 1].substr(pos + 3));
-					_textureFileNames.push_back(_fileNames[count + 2].substr(0, pos) + "RAS" + _fileNames[count + 2].substr(pos + 3));
-
-					LERROR("CREATING MODEL " << _textureFileNames.at(count));
+					//LERROR("CREATING MODEL " << _textureFileNames.at(count));
 					//@TODO this must be refactored
 					//_models.at(count)._texturePath = absPath(k + "/" + "NLB_486005346RAS_F0481570NCAM07813M1" + ".png");
 					std::string texture_extension = ".png";
 					if (name == "RoverSite3") {
 						texture_extension = ".jpg";
 					}
-					_models.at(count)._texturePaths.push_back(absPath(k + "/" + _textureFileNames.at(count) + texture_extension));
-					_models.at(count)._texturePaths.push_back(absPath(k + "/" + _textureFileNames.at(count + 1) + texture_extension));
-					_models.at(count)._texturePaths.push_back(absPath(k + "/" + _textureFileNames.at(count + 1) + texture_extension));
+
+					for (int j = 0; j < _fileNames.size(); ++j) {
+						_textureFileNames.push_back(_fileNames[j].substr(0, pos) + "RAS" + _fileNames[j].substr(pos + 3));
+						_models.at(count)._texturePaths.push_back(absPath(k + "/" + _textureFileNames.at(j) + texture_extension));
+					}
+
+					//_textureFileNames.push_back(_fileNames[count    ].substr(0, pos) + "RAS" + _fileNames[count    ].substr(pos + 3));
+					//_textureFileNames.push_back(_fileNames[count + 1].substr(0, pos) + "RAS" + _fileNames[count + 1].substr(pos + 3));
+					//_textureFileNames.push_back(_fileNames[count + 2].substr(0, pos) + "RAS" + _fileNames[count + 2].substr(pos + 3));
+					//_textureFileNames.push_back(_fileNames[count + 3].substr(0, pos) + "RAS" + _fileNames[count + 3].substr(pos + 3));
+					//_textureFileNames.push_back(_fileNames[count + 4].substr(0, pos) + "RAS" + _fileNames[count + 4].substr(pos + 3));
+					//_textureFileNames.push_back(_fileNames[count + 5].substr(0, pos) + "RAS" + _fileNames[count + 5].substr(pos + 3));
+
+					
+					//_models.at(count)._texturePaths.push_back(absPath(k + "/" + _textureFileNames.at(count + 0) + texture_extension));
+					//_models.at(count)._texturePaths.push_back(absPath(k + "/" + _textureFileNames.at(count + 1) + texture_extension));
+					//_models.at(count)._texturePaths.push_back(absPath(k + "/" + _textureFileNames.at(count + 2) + texture_extension));
+					//_models.at(count)._texturePaths.push_back(absPath(k + "/" + _textureFileNames.at(count + 3) + texture_extension));
+					//_models.at(count)._texturePaths.push_back(absPath(k + "/" + _textureFileNames.at(count + 4) + texture_extension));
+					//_models.at(count)._texturePaths.push_back(absPath(k + "/" + _textureFileNames.at(count + 5) + texture_extension));
+
 					//_models.at(count)._texturePath = absPath(k + "/" + _textureFileNames.at(count) + texture_extension);
 					//_models.at(count)._texturePath2 = absPath(k + "/" + _textureFileNames.at(count + 1) + texture_extension);
 					//_models.at(count)._texturePath3 = absPath(k + "/" + _textureFileNames.at(count + 2) + texture_extension);
@@ -288,7 +303,7 @@ namespace openspace {
 
 				GLsizei width = 2;
 				GLsizei height = 2;
-				GLsizei layerCount = 3;
+				GLsizei layerCount = (*it)._textures.size();
 				GLsizei mipLevelCount = 1;
 
 				glGenTextures(1, &texture);
@@ -302,7 +317,7 @@ namespace openspace {
 				//The following 2 zeroes refers to the x and y offsets in case you only want to specify a subrectangle.
 				//The final 0 refers to the layer index offset (we start from index 0 and have 2 levels).
 				//Altogether you can specify a 3D box subset of the overall texture, but only one mip level at a time.
-				for (int i = 0; i < 3; ++i) {
+				for (int i = 0; i < layerCount; ++i) {
 					glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, 1024, 1024, 1, GL_RGBA, GL_UNSIGNED_BYTE, (*it)._textures.at(i)->pixelData());
 				}
 			}
@@ -437,8 +452,7 @@ namespace openspace {
 				float invs2 = 1 / s2;
 
 				glm::quat rotationMatrix2 = glm::quat(s2 * 0.5f, rotationAxis2.x * invs2, rotationAxis2.y * invs2, rotationAxis2.z * invs2);
-
-
+				
 				glm::dmat4 modelTransform =
 					glm::translate(glm::dmat4(1.0), positionWorldSpace) * // Translation
 					glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
@@ -447,8 +461,6 @@ namespace openspace {
 					glm::dmat4(glm::toMat4(rotationMatrix)) * //debug model rotation controlled from GUI
 					debugModelRotation;
 				//rotationMatrixCombined;
-				//bbb2 *
-				//
 				glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
 				//positionModelSpace1  originally data.modelTransform.translation
@@ -748,7 +760,7 @@ namespace openspace {
 					(*it)._textures.emplace_back(std::move(ghoul::io::TextureReader::ref().loadTexture(absPath((*it)._texturePaths.at(i)))));
 				
 					if ((*it)._textures.at(i)) {
-						(*it)._textures.at(i)->uploadTexture();
+						//(*it)._textures.at(i)->uploadTexture();
 
 						(*it)._textures.at(i)->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
 						(*it)._textures.at(i)->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
