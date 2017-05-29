@@ -28,7 +28,7 @@ set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
 add_subdirectory(${OPENJPEG_ROOT_DIR})
 
 set(HEADER_FILES
-     # Openjpeg stuff
+    # Openjpeg stuff
     ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
     ${OPENJPEG_BINARY_DIR}/src/bin/common
     ${OPENJPEG_SOURCE_DIR}/src/lib/openjp2
@@ -51,7 +51,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstatesequence.inl
 
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcamerasphere.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.h
 
     # This should be moved to global util
@@ -65,7 +65,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablespacecraftcamerasphere.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/pixelbufferobject.cpp
 

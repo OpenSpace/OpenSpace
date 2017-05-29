@@ -4,7 +4,7 @@ return {
         Parent = "Sun",
         Renderable = {
             -- This is a really bad name
-            Type = "RenderableSpacecraftCameraSphere",
+            Type = "RenderableSolarImageryProjection",
         },
     },
 }

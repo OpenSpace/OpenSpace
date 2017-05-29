@@ -31,7 +31,7 @@
 #include <ghoul/misc/assert.h>
 
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
-#include <modules/solarbrowsing/rendering/renderablespacecraftcamerasphere.h>
+#include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 
 namespace openspace {
@@ -52,7 +52,7 @@ void SolarBrowsingModule::internalInitialize(){
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableSolarImagery>("RenderableSolarImagery");
-    fRenderable->registerClass<RenderableSpacecraftCameraSphere>("RenderableSpacecraftCameraSphere");
+    fRenderable->registerClass<RenderableSolarImageryProjection>("RenderableSolarImageryProjection");
 }
 
 } // namespace openspace

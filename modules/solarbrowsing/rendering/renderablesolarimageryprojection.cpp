@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/solarbrowsing/rendering/renderablespacecraftcamerasphere.h>
+#include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
 #include <modules/space/rendering/planetgeometry.h>
 #include <openspace/util/time.h>
@@ -48,7 +48,7 @@ namespace {
 }
 
 namespace openspace {
-RenderableSpacecraftCameraSphere::RenderableSpacecraftCameraSphere(
+RenderableSolarImageryProjection::RenderableSolarImageryProjection(
       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _shader(nullptr)
@@ -59,7 +59,7 @@ RenderableSpacecraftCameraSphere::RenderableSpacecraftCameraSphere(
     }
 }
 
-bool RenderableSpacecraftCameraSphere::initialize() {
+bool RenderableSolarImageryProjection::initialize() {
     const std::vector<SceneGraphNode*>& allNodes
           = OsEng.renderEngine().scene()->allSceneGraphNodes();
     for (auto node : allNodes) {
@@ -114,7 +114,7 @@ bool RenderableSpacecraftCameraSphere::initialize() {
     return isReady();
 }
 
-bool RenderableSpacecraftCameraSphere::deinitialize() {
+bool RenderableSolarImageryProjection::deinitialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);
@@ -123,17 +123,17 @@ bool RenderableSpacecraftCameraSphere::deinitialize() {
     return true;
 }
 
-bool RenderableSpacecraftCameraSphere::isReady() const {
+bool RenderableSolarImageryProjection::isReady() const {
     return _shader && _sphere && _magnetogramTexture;
 }
 
-void RenderableSpacecraftCameraSphere::update(const UpdateData& data) {
+void RenderableSolarImageryProjection::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
     }
 }
 
-void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
+void RenderableSolarImageryProjection::render(const RenderData& data) {
     glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
         glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
