@@ -31,7 +31,7 @@
 #include <valarray>
 #include <unordered_map>
 #include <unordered_set>
-#include <modules/solarbrowsing/util/statemanager.h>
+#include <modules/solarbrowsing/util/timedependentstatesequence.h>
 
 #define IMG_PRECISION unsigned char
 
