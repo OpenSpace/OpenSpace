@@ -70,6 +70,9 @@ out vec4 vs_color;
 
 out vec2 vs_stDone[20];
 out int vs_size;
+out int textureIndex;
+out vec2 vs_st;
+out vec2 textureIndexDone[20]
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -77,11 +80,17 @@ void main () {
   int colsize = 1024;
   vec2 textureSize = vec2(colsize,colsize);
   int nrOfIterations = size;
-
+  int counter = 0;
   for (int i = 0; i < nrOfIterations; i++) {
     vec4 pointToCamera = in_position - vec4(camerasCenters[i], 1);
 
     double floor = dot(pointToCamera, vec4(camerasAxes[i], 1));
+
+    if (floor < 0) {
+      //This means that the point is on the wrong side
+      //of the camera (behind)
+      continue;
+    }
 
     double xRoof = dot(pointToCamera, vec4(camerasHorizontals[i], 1));
 
@@ -90,10 +99,24 @@ void main () {
     double x = xRoof / floor;
     double y = yRoof / floor;
 
-    vs_stDone[i] = vec2((1.0 / textureSize.x) * x, 1.0 - (1.0 / textureSize.y) * y);
+    vec2 tempUV = vec2((1.0 / textureSize.x) * x, 1.0 - (1.0 / textureSize.y) * y);
+
+    if (tempUV.s > 0 && tempUV.t > 0 && tempUV.s < 1 && tempUV.t < 1) {
+      vs_stDone[counter] = tempUV;
+      textureIndexDone[counter] = vec2(i, 1);
+
+      vs_st = tempUV;
+      counter++;
+      textureIndex = i;
+      i = nrOfIterations;
+    }
   }
 
-  vs_size = size;
+  /*for (int kalle = 0; kalle < 20; kalle++) {
+    textureIndexDone[kalle] = vec2(1,0);
+  }*/
+
+  vs_size = counter;
 
   vec4 position = in_position;
   position.z = position.z - 0.1;
