@@ -28,6 +28,7 @@ uniform float alpha;
 
 in vec2 vs_st;
 in vec4 vs_position;
+in vec4 vs_gPosition;
 
 #include "fragment.glsl"
 #include "PowerScaling/powerScaling_fs.hglsl"
@@ -75,5 +76,14 @@ Fragment getFragment()
     Fragment frag;
     frag.color = diffuse;
     frag.depth = depth;
+
+    // G-Buffer
+    frag.gColor = diffuse;
+    frag.gPosition = vs_gPosition;
+    // There is no normal here
+    // TODO: Add the correct normal (JCC)
+    frag.gNormalReflectance = vec4(0.0);
+
+    
     return frag;
 }

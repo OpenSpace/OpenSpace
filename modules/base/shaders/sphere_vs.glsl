@@ -33,6 +33,7 @@ layout(location = 1) in vec2 in_st;
 out vec2 vs_st;
 out vec4 vs_position;
 out float s;
+out vec4 vs_gPosition;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -51,6 +52,7 @@ void main()
 
     vs_position = tmp;
     vs_st = in_st;
+    vs_gPosition = position;
     
     position = ViewProjection * position;
     gl_Position =  z_normalization(position);
