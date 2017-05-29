@@ -45,7 +45,6 @@ bool AsyncSurfaceModelProvider::enqueueModelIO(const std::shared_ptr<Subsite> su
 	if (satisfiesEnqueueCriteria(subsite->hashKey(level))) {
 		auto job = std::make_shared<SurfaceModelLoadJob>(subsite, level);
 		_diskToRamJobManager.enqueueJob(job);
-
 		_enqueuedModelRequests[subsite->hashKey(level)] = subsite;
 		return true;
 	}
@@ -58,7 +57,6 @@ std::vector<std::shared_ptr<SubsiteModels>> AsyncSurfaceModelProvider::getLoaded
 	if (_diskToRamJobManager.numFinishedJobs() > 0) {
 		std::shared_ptr<SubsiteModels> subsiteModels = _diskToRamJobManager.popFinishedJob()->product();
 		enqueueSubsiteInitialization(subsiteModels);
-		_enqueuedModelRequests.erase(hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level));
 	}
 
 	std::vector<std::shared_ptr<SubsiteModels>> initializedModels;
@@ -66,6 +64,7 @@ std::vector<std::shared_ptr<SubsiteModels>> AsyncSurfaceModelProvider::getLoaded
 		std::shared_ptr<SubsiteModels> subsiteModels = _ramToGpuJobManager.popFinishedJob()->product();
 		unmapBuffers(subsiteModels);
 		initializedModels.push_back(subsiteModels);
+		_enqueuedModelRequests.erase(hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level));
 	}
 	return initializedModels;
 }
@@ -81,30 +80,17 @@ bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const uint64_t hashKey)
 }
 
 void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels) {
-	std::vector<std::shared_ptr<ghoul::opengl::Texture>> textures;
 	subsiteModels->model->initialize(_parent);
-	/*for (auto texture : subsiteModels->textures) {
-		std::shared_ptr<ghoul::opengl::Texture> tempTexture = std::make_shared<ghoul::opengl::Texture>(
-			nullptr,
-			texture->dimensions(),
-			texture->format(),
-			texture->internalFormat(),
-			texture->dataType(),
-			texture->filter(),
-			texture->wrapping()
-			);
 
-		textures.push_back(tempTexture);
-	}*/
-
-	GLuint texture;
+	GLuint textureID;
 	GLsizei mipLevelCount = 1;
 
 	const clock_t begin_time = clock();
 
-	glGenTextures(1, &texture);
-	subsiteModels->textureID = texture;
-	glBindTexture(GL_TEXTURE_2D_ARRAY, texture);
+	glGenTextures(1, &textureID);
+	subsiteModels->textureID = textureID;
+	glBindTexture(GL_TEXTURE_2D_ARRAY, textureID);
+
 	//Allocate the storage.
 	glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevelCount, GL_RGBA8, 1024, 1024, subsiteModels->textures.size());
 
@@ -118,25 +104,22 @@ void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_p
 		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, counter, 1024, 1024, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture->pixelData());
 		counter++;
 	}
+	// Temporary solution to release memory and throw texture id
+	for (auto texture : subsiteModels->textures) {
+		texture = nullptr;
+	}
 
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	LINFO("FINISHED UPLOADING TEXTURES: " << float(clock() - begin_time) / CLOCKS_PER_SEC);
-
-	auto job = std::make_shared<SubsiteInitializationJob>(subsiteModels, textures);
+	auto job = std::make_shared<SubsiteInitializationJob>(subsiteModels);
 	_ramToGpuJobManager.enqueueJob(job);
 }
 
 void AsyncSurfaceModelProvider::unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels) {
 	subsiteModels->model->unmapBuffers();
-	for (auto texture : subsiteModels->textures) {
-		texture->uploadTexture();
-		// This is not necessary when textures are uploaded using glTexSubimage3D
-		//texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-	}
 }
 
 uint64_t AsyncSurfaceModelProvider::hashKey(const std::string site, const std::string drive, const int level) {

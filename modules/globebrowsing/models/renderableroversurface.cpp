@@ -176,17 +176,13 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			break;
 	}
 
-	if(_generalProperties.enablePath.value()) {
-		_renderableExplorationPath->setLevel(level);
-		_renderableExplorationPath->render(data);
-	}
-	_cachingModelProvider->setLevel(level);
+	
 
 	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
 	//FOR ALPHA BLENDING TO WORK
 	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels = _cachingModelProvider->getModels(ss, level);
 	
-	if (_subsiteModels.size() == 0) return;
+	//if (_subsiteModels.size() == 0) return;
 
 	if (level == 3 && _prevSubsite != nullptr 
 		&& _prevSubsite->drive != _subsiteModels.at(0)->drive) {
@@ -324,6 +320,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		const GLint locationHorizontal = _programObject->uniformLocation("camerasHorizontals");
 		const GLint locationVector = _programObject->uniformLocation("camerasVectors");
 
+		
 		glUniform3fv(locationCenter, cameraInfoCenter.size(), reinterpret_cast<GLfloat *>(cameraInfoCenter.data()));
 		glUniform3fv(locationAxis, cameraInfoAxis.size(), reinterpret_cast<GLfloat *>(cameraInfoAxis.data()));
 		glUniform3fv(locationHorizontal, cameraInfoHorizontal.size(), reinterpret_cast<GLfloat *>(cameraInfoHorizontal.data()));
@@ -335,14 +332,25 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 		_programObject->setUniform("size", static_cast<int>(cameraInfoCenter.size()));
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, subsiteModels->textureID);
+		
 		glEnable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		glBindTexture(GL_TEXTURE_2D_ARRAY, subsiteModels->textureID);
+		
 		subsiteModels->model->render();
+		glEnable(GL_DEPTH_TEST);
 	}
 	_programObject->deactivate();
+	_cachingModelProvider->setLevel(level);
+
+	if (_generalProperties.enablePath.value()) {
+		_renderableExplorationPath->setLevel(level);
+		_renderableExplorationPath->render(data);
+	}
+
 	_prevLevel = level;
 }
 
@@ -358,7 +366,7 @@ std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSur
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(subsiteModels->geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + 2.0 };
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + 0.0 };
 		subsiteModels->cartesianPosition = _globe->ellipsoid().cartesianPosition(geo3);
 	}
 	return vector;
