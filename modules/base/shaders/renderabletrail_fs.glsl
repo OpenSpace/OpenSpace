@@ -29,6 +29,7 @@
 #define Delta 0.25
 
 in vec4 vs_positionScreenSpace;
+in vec4 vs_gPosition;
 in float fade;
 
 uniform vec3 color;
@@ -61,6 +62,13 @@ Fragment getFragment() {
         //     discard;
         // }
     }
+
+    // G-Buffer
+    frag.gColor = frag.color;
+    frag.gPosition = vs_gPosition;
+    // There is no normal here
+    // TODO: Add the correct normal if necessary (JCC)
+    frag.gNormalReflectance = vec4(0.0);
 
 
     return frag;
