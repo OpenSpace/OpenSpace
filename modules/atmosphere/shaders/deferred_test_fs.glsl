@@ -789,11 +789,11 @@ void main() {
           //renderTarget = vec4(vec3(pixelDepth/100000),1.0);
         }
       } else {
-        renderTarget = vec4(HDR(meanColor.xyz), 1.0);        
+        renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);        
       }
     } else {
       // No ATM defined.
-      renderTarget = meanColor;
+      renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
     }
 
                 

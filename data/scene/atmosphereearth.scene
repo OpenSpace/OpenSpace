@@ -95,7 +95,7 @@ return {
                 
         --"toyvolume",
         --"earth",
-        --"stars",
+        "stars",
         --"stars-denver",
         "milkyway",
         -- "milkyway-eso",
