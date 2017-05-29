@@ -38,6 +38,7 @@ out vec3 vs_brightness;
 out vec3 vs_velocity;
 out float vs_speed;
 out vec4 cam_position;
+out vec4 vs_gPosition;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -51,6 +52,7 @@ void main() {
 
     vec4 tmp = p;
     vec4 position = pscTransform(tmp, mat4(1.0));
+    vs_gPosition = position;
     // vec4 position = pscTransform(tmp, model);
     // psc_position = tmp;
     position = view * position;

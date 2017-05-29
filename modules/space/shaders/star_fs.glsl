@@ -36,6 +36,7 @@ uniform float alphaValue;
 uniform int colorOption;
 
 in vec4 vs_position;
+in vec4 vs_gPosition;
 in vec3 ge_brightness;
 in vec3 ge_velocity;
 in float ge_speed;
@@ -85,6 +86,13 @@ Fragment getFragment() {
     frag.color = fullColor;
     frag.depth = pscDepth(position);
 
+    // G-Buffer
+    frag.gColor = fullColor;
+    frag.gPosition = vs_gPosition;
+    // There is no normal here
+    // TODO: Add the correct normal (JCC)
+    frag.gNormalReflectance = vec4(vec3(0.0), fullColor.a);
+    
     if (fullColor.a == 0) {
         discard;
     }
