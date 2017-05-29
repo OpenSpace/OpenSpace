@@ -134,7 +134,8 @@ void AsyncSurfaceModelProvider::unmapBuffers(const std::shared_ptr<SubsiteModels
 	subsiteModels->model->unmapBuffers();
 	for (auto texture : subsiteModels->textures) {
 		texture->uploadTexture();
-		texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+		// This is not necessary when textures are uploaded using glTexSubimage3D
+		//texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 	}
 }
 

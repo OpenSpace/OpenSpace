@@ -45,6 +45,7 @@ public:
 
 	struct GeneralProperties {
 		properties::BoolProperty isEnabled;
+		properties::BoolProperty enablePath;
 	};
 
 	RenderableRoverSurface(const ghoul::Dictionary& dictionary);

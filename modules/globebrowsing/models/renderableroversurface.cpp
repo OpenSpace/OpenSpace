@@ -53,10 +53,11 @@ using namespace properties;
 
 namespace globebrowsing {
 	RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & dictionary)
-		: Renderable(dictionary),
-		_generalProperties({
-			BoolProperty("enabled", "enabled", false)
-	})
+		: Renderable(dictionary)
+		, _generalProperties({
+				BoolProperty("enable", "Enabled", true),
+				BoolProperty("enablePath", "Enable path", true)
+		})
 		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
 		, _modelSwitch()
 		, _prevLevel(3)
@@ -91,6 +92,7 @@ namespace globebrowsing {
 	tempDictionary2.setValue(keyRoverLocationPath, _roverLocationPath);
 	_subsites = RoverPathFileReader::extractAllSubsites(tempDictionary2);
 
+	addProperty(_generalProperties.enablePath);
 	addProperty(_debugModelRotation);
 
 	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
@@ -174,8 +176,10 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			break;
 	}
 
-	_renderableExplorationPath->setLevel(level);
-	_renderableExplorationPath->render(data);
+	if(_generalProperties.enablePath.value()) {
+		_renderableExplorationPath->setLevel(level);
+		_renderableExplorationPath->render(data);
+	}
 	_cachingModelProvider->setLevel(level);
 
 	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
@@ -315,11 +319,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			cameraInfoVector.push_back(mInfoTemp._cameraVector);
 		}
 
-		//(*it)._programObject->setUniform("camerasCenters", cameraInfoCenter);
-		//(*it)._programObject->setUniform("camerasAxes", cameraInfoAxis);
-		//(*it)._programObject->setUniform("camerasHorizontals", cameraInfoHorizontal);
-		//(*it)._programObject->setUniform("camerasVectors", cameraInfoVector);
-
 		const GLint locationCenter = _programObject->uniformLocation("camerasCenters");
 		const GLint locationAxis = _programObject->uniformLocation("camerasAxes");
 		const GLint locationHorizontal = _programObject->uniformLocation("camerasHorizontals");
@@ -340,7 +339,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		glDisable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		//model->geometry->setUniforms(*_programObject);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, subsiteModels->textureID);
 		subsiteModels->model->render();
 	}
@@ -349,7 +347,9 @@ void RenderableRoverSurface::render(const RenderData& data) {
 }
 
 void RenderableRoverSurface::update(const UpdateData& data) {
-	_renderableExplorationPath->update(data);
+	if (_generalProperties.enablePath.value()) {
+		_renderableExplorationPath->update(data);
+	}
 	_cachingModelProvider->update(this);
 }
 
