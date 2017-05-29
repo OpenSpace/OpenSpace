@@ -86,6 +86,12 @@ void main () {
 
     double floor = dot(pointToCamera, vec4(camerasAxes[i], 1));
 
+    if (floor < 0) {
+      //This means that the point is on the wrong side
+      //of the camera (behind)
+      continue;
+    }
+
     double xRoof = dot(pointToCamera, vec4(camerasHorizontals[i], 1));
 
     double yRoof = dot(pointToCamera, vec4(camerasVectors[i], 1));
@@ -93,12 +99,13 @@ void main () {
     double x = xRoof / floor;
     double y = yRoof / floor;
 
-    vec2 test = vec2((1.0 / textureSize.x) * x, 1.0 - (1.0 / textureSize.y) * y);
+    vec2 tempUV = vec2((1.0 / textureSize.x) * x, 1.0 - (1.0 / textureSize.y) * y);
 
-    if (test.s > 0 && test.t > 0 && test.s < 1 && test.t < 1) {
-      vs_stDone[counter] = vec2(test.s, test.t);
+    if (tempUV.s > 0 && tempUV.t > 0 && tempUV.s < 1 && tempUV.t < 1) {
+      vs_stDone[counter] = tempUV;
       textureIndexDone[counter] = vec2(i, 1);
-      vs_st = vec2(test.s, test.t);
+
+      vs_st = tempUV;
       counter++;
       textureIndex = i;
       i = nrOfIterations;
