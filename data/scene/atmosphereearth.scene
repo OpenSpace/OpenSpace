@@ -97,7 +97,7 @@ return {
         --"earth",
         --"stars",
         --"stars-denver",
-        --"milkyway",
+        "milkyway",
         -- "milkyway-eso",
     }
 }
