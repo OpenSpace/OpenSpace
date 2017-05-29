@@ -60,6 +60,7 @@ public:
 private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
     void addToCommand(std::string c);
+    std::string sanitizeInput(std::string str);
 
     properties::BoolProperty _isVisible;
     properties::BoolProperty _remoteScripting;

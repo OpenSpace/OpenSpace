@@ -68,6 +68,10 @@ namespace {
     // Determines at which speed the console opens.
      const float ConsoleOpenSpeed = 2.5;
 
+     // The number of characters to display after the cursor
+     // when horizontal scrolling is required.
+     const int NVisibleCharsAfterCursor = 5;
+
 } // namespace
 
 namespace openspace {
@@ -314,7 +318,7 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
 
     // Paste from clipboard
     if (modifierControl && (key == Key::V || key == Key::Y)) {
-        addToCommand(ghoul::clipboardText());
+        addToCommand(sanitizeInput(ghoul::clipboardText()));
         return true;
     }
 
@@ -532,7 +536,18 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return false;
     }
 
-    return true;
+    // Do not consume modifier keys
+    switch (key) {
+    case Key::LeftShift:
+    case Key::RightShift:
+    case Key::LeftAlt:
+    case Key::RightAlt:
+    case Key::LeftControl:
+    case Key::RightControl:
+        return false;
+    default:
+        return true;
+    }
 }
 
 void LuaConsole::charCallback(unsigned int codepoint, KeyModifier modifier) {
@@ -653,23 +668,64 @@ void LuaConsole::render() {
 
     // Render the current command
     std::string currentCommand = _commands.at(_activeCommand);
-    // We chop off the beginning of the string until it fits on the screen (with a margin)
+    // We chop off the beginning and end of the string until it fits on the screen (with a margin)
     // this should be replaced as soon as the mono-spaced fonts work properly. Right now,
     // every third character is a bit wider than the others
+
+    size_t nChoppedCharsBeginning = 0, nChoppedCharsEnd = 0;
+
+    const size_t inputPositionFromEnd = currentCommand.size() - _inputPosition;
     while (true) {
-        const float w = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
+        // Compute the current width of the string and console prefix.
+        const float currentWidth = ghoul::fontrendering::FontRenderer::defaultRenderer().boundingBox(
             *_font,
             "> %s",
             currentCommand.c_str()
         ).boundingBox.x + inputLocation.x;
 
-        const float d = w - res.x * 0.995f;
-        if (d < 0.f) {
+        // Compute the overflow in pixels
+        const float overflow = currentWidth - res.x * 0.995f;
+        if (overflow <= 0.f) {
             break;
         }
 
-        currentCommand = currentCommand.substr(std::max(1.f, d / _font->glyph('m')->width()));
+        // Since the overflow is positive, at least one character needs to be removed.
+        const size_t nCharsOverflow = std::min(
+            std::max(1.f, overflow / _font->glyph('m')->width()),
+            static_cast<float>(currentCommand.size())
+        );
+
+        // Do not hide the cursor and `NVisibleCharsAfterCursor` more characters in the end.
+        const size_t maxAdditionalCharsToChopEnd = std::max(
+            0,
+            static_cast<int>(inputPositionFromEnd) -
+                (NVisibleCharsAfterCursor + 1) -
+                static_cast<int>(nChoppedCharsEnd)
+        );
+
+        // Do not hide the cursor in the beginning.
+        const size_t maxAdditionalCharsToChopBeginning = std::max(
+            0,
+            static_cast<int>(_inputPosition) - 1 - static_cast<int>(nChoppedCharsBeginning)
+        );
+
+        // Prioritize chopping in the end of the string.
+        const size_t nCharsToChopEnd = std::min(nCharsOverflow, maxAdditionalCharsToChopEnd);
+        const size_t nCharsToChopBeginning = std::min(
+            nCharsOverflow - nCharsToChopEnd,
+            maxAdditionalCharsToChopBeginning
+        );
+
+        nChoppedCharsBeginning += nCharsToChopBeginning;
+        nChoppedCharsEnd += nCharsToChopEnd;
+
+        const size_t displayLength =
+            _commands.at(_activeCommand).size() -
+            nChoppedCharsBeginning - nChoppedCharsEnd;
+
+        currentCommand = _commands.at(_activeCommand).substr(nChoppedCharsBeginning, displayLength);
     }
+
     RenderFontCr(
         *_font,
         inputLocation,
@@ -686,7 +742,7 @@ void LuaConsole::render() {
         *_font,
         inputLocation,
         _entryTextColor,
-        (std::string(currentCommand.length() + 2, ' ') + "^").c_str()
+        (std::string(_inputPosition - nChoppedCharsBeginning + 2, ' ') + "^").c_str()
     );
     
     glm::vec2 historyInputLocation = glm::vec2(
@@ -767,6 +823,19 @@ void LuaConsole::addToCommand(std::string c) {
     const size_t length = c.length();
     _commands.at(_activeCommand).insert(_inputPosition, std::move(c));
     _inputPosition += length;
+}
+
+std::string LuaConsole::sanitizeInput(std::string str) {
+    // Remove carriage returns.
+    str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
+
+    // Replace newlines with spaces.
+    const std::function<char(char)> replace = [](char c) {
+        return c == '\n' ? ' ' : c;
+    };
+    std::transform(str.begin(), str.end(), str.begin(), replace);
+
+    return str;
 }
 
 void LuaConsole::parallelConnectionChanged(const ParallelConnection::Status& status) {
