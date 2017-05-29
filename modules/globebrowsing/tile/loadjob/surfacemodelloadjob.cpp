@@ -37,7 +37,6 @@ namespace openspace {
 namespace globebrowsing {
 
 void SurfaceModelLoadJob::execute() {
-	const clock_t begin_time = clock();
 	std::string levelString = std::to_string(_level);
 	std::string pathToGeometryFolder = _subsite->pathToGeometryFolder + "level" + levelString + "//" + "site" + _subsite->site +
 		"//" + "drive" + _subsite->drive + "//";
@@ -50,6 +49,7 @@ void SurfaceModelLoadJob::execute() {
 	_subsiteModels->siteGeodetic = _subsite->siteGeodetic;
 	_subsiteModels->cameraInfoVector = _subsite->cameraInfoVector;
 	_subsiteModels->level = _level;
+	_subsiteModels->fileNames = _subsite->fileNames;
 
 	ghoul::Dictionary dictionary;
 	std::string pathToGeometry2 = pathToGeometryFolder + "OBJ.obj";
@@ -70,7 +70,6 @@ void SurfaceModelLoadJob::execute() {
 			"//" + "drive" + _subsite->drive + "//" + tempFileName + textureFormat;
 		_subsiteModels->textures.push_back(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
 	}
-	LINFO("FINISHED LOADING MODELS: " << float(clock() - begin_time) / CLOCKS_PER_SEC);
 }
 
 std::shared_ptr<SubsiteModels> SurfaceModelLoadJob::product() const {
