@@ -84,12 +84,12 @@ namespace globebrowsing {
 	tempDictionary.setValue(keyRoverLocationPath, _roverLocationPath);
 	tempDictionary.setValue(keyAbsPathToTextures, _absTexturePath);
 	tempDictionary.setValue(keyAbsPathToModels, _absModelPath);
-	_subSitesWithModels = RoverPathFileReader::extractSubsitesWithModels(tempDictionary);
+	_subsitesWithModels = RoverPathFileReader::extractSubsitesWithModels(tempDictionary);
 
 	// Extract all subsites
 	ghoul::Dictionary tempDictionary2;
 	tempDictionary2.setValue(keyRoverLocationPath, _roverLocationPath);
-	_subSites = RoverPathFileReader::extractAllSubsites(tempDictionary2);
+	_subsites = RoverPathFileReader::extractAllSubsites(tempDictionary2);
 
 	addProperty(_debugModelRotation);
 
@@ -99,7 +99,7 @@ namespace globebrowsing {
 
 bool RenderableRoverSurface::initialize() {
 	std::vector<Geodetic2> coordinates;
-	for (auto subsite : _subSites) {
+	for (auto subsite : _subsites) {
 		coordinates.push_back(subsite->geodetic);
 	}
 
@@ -114,7 +114,7 @@ bool RenderableRoverSurface::initialize() {
 
 	_modelSwitch.initialize(_globe);
 
-	_chunkedLodGlobe->addSites(_subSitesWithModels);
+	_chunkedLodGlobe->addSites(_subsitesWithModels);
 
 	RenderEngine& renderEngine = OsEng.renderEngine();
 	_programObject = renderEngine.buildRenderProgram("RenderableRoverSurface",
@@ -133,8 +133,6 @@ bool RenderableRoverSurface::isReady() const {
 }
 
 void RenderableRoverSurface::render(const RenderData& data) {
-	_models.clear();
-
 	std::vector<std::vector<std::shared_ptr<Subsite>>> subSitesVector = _chunkedLodGlobe->subsites();
 
 	if (subSitesVector.size() < 1) {
@@ -303,8 +301,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			debugModelRotation;
 
 		glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
-		glm::vec3 directionToSun = glm::normalize(_sunPos - positionWorldSpace);
-		glm::vec3 directionToSunViewSpace = glm::mat3(data.camera.combinedViewMatrix()) * directionToSun;
 
 		std::vector<glm::fvec3> cameraInfoCenter;
 		std::vector<glm::fvec3> cameraInfoAxis;
@@ -334,7 +330,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		glUniform3fv(locationHorizontal, cameraInfoHorizontal.size(), reinterpret_cast<GLfloat *>(cameraInfoHorizontal.data()));
 		glUniform3fv(locationVector, cameraInfoVector.size(), reinterpret_cast<GLfloat *>(cameraInfoVector.data()));
 
-		//TODO: Is this really used? Otherwise delete this and _sunPos.
 		_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
 		_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 		//_programObject->setUniform("fading", alpha);
@@ -356,9 +351,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 void RenderableRoverSurface::update(const UpdateData& data) {
 	_renderableExplorationPath->update(data);
 	_cachingModelProvider->update(this);
-	// Faster to store a reference to the node and call worldPosition() from that node?
-	// Might not have to traverse the scenegraph like that.
-	_sunPos = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 }
 
 std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector) {

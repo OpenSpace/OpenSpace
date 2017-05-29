@@ -60,11 +60,8 @@ public:
 private:
 	std::vector<std::shared_ptr<SubsiteModels>> calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector);
 
-	std::vector<std::string> _fileNames;
-	std::vector<glm::fvec2> _coordinates;
-	std::vector<std::shared_ptr<Subsite>> _subSites;
-	std::vector<std::shared_ptr<Subsite>> _subSitesWithModels;
-	std::vector<std::shared_ptr<Model>> _models;
+	std::vector<std::shared_ptr<Subsite>> _subsites;
+	std::vector<std::shared_ptr<Subsite>> _subsitesWithModels;
 
 	GeneralProperties _generalProperties;
 
@@ -78,13 +75,10 @@ private:
 
 	globebrowsing::RenderableGlobe* _globe;
 	std::shared_ptr<globebrowsing::ChunkedLodGlobe> _chunkedLodGlobe;
-	std::unordered_map <uint64_t, std::vector<glm::dvec3>> _pathChunks;
 
 	std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
 	std::shared_ptr<CachingSurfaceModelProvider> _cachingModelProvider;
-
-	glm::dvec3 _sunPos;
 
 	int _prevLevel;
 
@@ -94,8 +88,6 @@ private:
 	LodModelSwitch _modelSwitch;
 
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
-
-	GLuint _textureID;
 };
 
 } // namespace globebrowsing
