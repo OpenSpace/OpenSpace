@@ -69,8 +69,10 @@ in vec3 vs_normalViewSpace;
 in vec4 vs_positionCameraSpace;
 in vec4 vs_positionScreenSpace;
 in vec4 vs_color;
+flat in int textureIndex;
 
 in vec2 vs_stDone[20];
+in vec2 textureIndexDone[20];
 flat in int vs_size;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
@@ -83,19 +85,33 @@ Fragment getFragment() {
   vec4 prevTexture = vec4(1,0,0,1);
   int size = vs_size;
   int counter = 0;
-  for (int i = 0; i < size; i++) {
-    if (vs_stDone[i].s > 0 && vs_stDone[i].t > 0 && vs_stDone[i].s < 1 && vs_stDone[i].t < 1) {
+  /*for (int i = 0; i < size; i++) {
+    //if (vs_stDone[i].s > 0 && vs_stDone[i].t > 0 && vs_stDone[i].s < 1 && vs_stDone[i].t < 1) {
       vec4 textureSample = texture(roverTerrainTextures, vec3(vs_stDone[i], i));
 
       if (counter == 0) {
+        counter++;
         prevTexture = vec4(textureSample.rgb, 1.0);
       } else {
         diffuseAl = mix(prevTexture, textureSample, alpha);
         prevTexture = diffuseAl;
       }
 
-    }
-  }
+    //}
+  }*/
+
+  /*for (int i = 0; i < vs_size; ++i) {
+    vec4 textureSample = texture(roverTerrainTextures, vec3(vs_stDone[i], textureIndexDone[i].s));
+    if (vs_size > 1 && i > 0) {
+        diffuseAl = mix(prevTexture, textureSample, alpha);
+        prevTexture = diffuseAl;
+      } else {
+        prevTexture = textureSample;
+      }
+  }*/
+
+  vec4 textureSample = texture(roverTerrainTextures, vec3(vs_st, textureIndex));
+  prevTexture = vec4(textureSample.rgb, 1.0);
 
 
   /*vec4 textureSample = texture(texture1, vs_stDone[0]);
