@@ -25,75 +25,22 @@ uniform sampler2D imageryTexture;
 uniform sampler1D lut;
 uniform bool additiveBlending;
 
-uniform float sharpenValue;
 uniform float contrastValue;
-uniform float opacityValue;
 uniform float gammaValue;
 uniform float planeOpacity;
-
-uniform float imageSize;
-
 uniform bool hasLut;
-
-uniform dvec2 magicPlaneOffset;
 
 in vec2 vs_st;
 in vec4 vs_positionScreenSpace;
 
-//float intensityOrg = texture(imageryTexture, vec2(vs_st.x /* +  ( (1024.0 - 1021.81 ) / 2048  )*/ , vs_st.y /* + (  (1024.0 - 926.171) / 2048) */)).r;
-
 #include "fragment.glsl"
-
-/* shapen 5x5 filter
-  0  -4  -6  -4  0  14
- -4 -16 -24 -16 -4  64
- -6 -24 220 -24 -6  60
- -4 -16 -24 -16 -4  64
-  0  -4  -6  -4  0  14
-  */
-float sharpen(vec2 texPos) {
-    float x = 1.0 / (imageSize);
-    float y = 1.0 / (imageSize);
-
-    float accumulator = 0.0;
-    accumulator -= texture(imageryTexture,texPos + vec2(-  x, -y-y)).r * 4;
-    accumulator -= texture(imageryTexture,texPos + vec2(   0, -y-y)).r * 6;
-    accumulator -= texture(imageryTexture,texPos + vec2(   x, -y-y)).r * 4;
-
-    accumulator -= texture(imageryTexture,texPos + vec2(-x-x,   -y)).r * 4;
-    accumulator -= texture(imageryTexture,texPos + vec2(-  x,   -y)).r * 16;
-    accumulator -= texture(imageryTexture,texPos + vec2(   0,   -y)).r * 24;
-    accumulator -= texture(imageryTexture,texPos + vec2(   x,   -y)).r * 16;
-    accumulator -= texture(imageryTexture,texPos + vec2( x+x,   -y)).r * 4;
-
-    accumulator -= texture(imageryTexture,texPos + vec2(-x-x,    0)).r * 6;
-    accumulator -= texture(imageryTexture,texPos + vec2(-  x,    0)).r * 24;
-    accumulator += texture(imageryTexture,texPos + vec2(   0,    0)).r * 220;
-    accumulator -= texture(imageryTexture,texPos + vec2(   x,    0)).r * 24;
-    accumulator -= texture(imageryTexture,texPos + vec2( x+x,    0)).r * 6;
-
-    accumulator -= texture(imageryTexture,texPos + vec2(-x-x,    y)).r * 4;
-    accumulator -= texture(imageryTexture,texPos + vec2(-  x,    y)).r * 16;
-    accumulator -= texture(imageryTexture,texPos + vec2(   0,    y)).r * 24;
-    accumulator -= texture(imageryTexture,texPos + vec2(   x,    y)).r * 16;
-    accumulator -= texture(imageryTexture,texPos + vec2( x+x,    y)).r * 4;
-
-    accumulator -= texture(imageryTexture,texPos + vec2(-  x,  y+y)).r * 4;
-    accumulator -= texture(imageryTexture,texPos + vec2(   0,  y+y)).r * 6;
-    accumulator -= texture(imageryTexture,texPos + vec2(   x,  y+y)).r * 4;
-
-    return clamp(texture(imageryTexture,texPos).r + (accumulator / 30.0) * sharpenValue, 0.0, 1.0);
-}
 
 float contrast(float intensity) {
     return min(clamp(0.5 + (intensity - 0.5) * (1 + contrastValue/10.0), 0.0, 1.0), sqrt(intensity) + intensity);
 }
 
-
 Fragment getFragment() {
-
-    //float intensityOrg = texture(imageryTexture, vec2(vs_st.x + magicPlaneOffset.x, vs_st.y + magicPlaneOffset.y )).r;
-    float intensityOrg = sharpen(vec2( vs_st.x + magicPlaneOffset.x, vs_st.y + magicPlaneOffset.y));
+    float intensityOrg = texture(imageryTexture, vec2(vs_st.x, 1 - vs_st.y)).r;
     intensityOrg = contrast(intensityOrg);
 
     vec4 outColor;
@@ -111,7 +58,7 @@ Fragment getFragment() {
         discard;
 
     outColor = vec4(outColor.xyz, planeOpacity);
-
+    
     Fragment frag;
     frag.color = outColor;
     frag.depth = vs_positionScreenSpace.w;

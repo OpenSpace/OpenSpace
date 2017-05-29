@@ -61,32 +61,25 @@ public:
     void loadTexture();
     void performImageTimestep(const double& osTime);
     void updateTexture();
+
+    TransferFunction* getTransferFunction() { return _lut; }
+    const std::unique_ptr<ghoul::opengl::Texture>& getImageryTexture() { return _texture; }
     const SpacecraftCameraPlane& cameraPlane() {return *_spacecraftCameraPlane; };
 
-    // TODO(mnoven): Getters
-    glm::dvec3 _planePosSpacecraftRefFrame;
-    glm::dmat4 _sunToSpacecraftTransform;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-    TransferFunction* _lut;
-
+    //TODO: Remove
     float _magicPlaneFactor = 0;
     glm::dvec2 _magicPlaneOffset = glm::dvec2();
-
     properties::FloatProperty _sharpenValue;
     properties::FloatProperty _contrastValue;
     properties::FloatProperty _gammaValue;
     unsigned int _imageSize;
 
 private:
-    //globebrowsing::ConcurrentJobManager<SolarImageData> _concurrentJobManager;
-
     properties::BoolProperty _asyncUploadPBO;
     properties::OptionProperty _activeInstruments;
     properties::IntProperty _bufferSize;
-
     properties::FloatProperty _planeOpacity;
     properties::BoolProperty _disableBorder;
-
     properties::BoolProperty _disableFrustum;
     properties::BoolProperty _displayTimers;
     properties::BoolProperty _lazyBuffering;
@@ -101,72 +94,33 @@ private:
 
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
-    std::unique_ptr<PowerScaledSphere> _sphere;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _frustumShader;
-    //std::unique_ptr<ghoul::opengl::ProgramObject> _sphereShader;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _planeShader;
-
-    std::string _type;
-    int _currentActiveImage;
-    unsigned int _pboSize;
-    GLuint _frustum;
-    GLuint _frustumPositionBuffer;
-
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    TransferFunction* _lut;
     std::unique_ptr<PixelBufferObject> _pbo;
-    GLuint pboHandles[2];
-    unsigned int _currentPBO;
 
-    double _startTimeSequence;
-    double _endTimeSequence;
-    int _id;
-
+    // TODO: Remove these?
     bool _updatingCurrentActiveChannel = false;
     bool _updatingCurrentLevelOfResolution = false;
-
-    std::unique_ptr<std::future<void>> _future = nullptr;
     bool _initializePBO;
-    bool _bufferingForwardInTime = true;
     bool _pboIsDirty = false;
 
-    float _size;
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
-
     unsigned int _fullResolution;
-    double _move = 0.0;
     double _deltaTimeLast = 0.0;
     double _realTimeDiff;
 
     StreamBuffer<SolarImageData> _streamBuffer;
-
-    std::vector<std::unique_ptr<TransferFunction>> _transferFunctions;
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
-
     std::string _currentActiveInstrument;
-    std::vector<std::vector<ImageMetadata>> _imageMetadata;
-
-    std::unordered_map<int, std::string> _optionToInstrument;
-    std::unordered_map<std::string, std::vector<ImageMetadata>> _imageMetadataMap;
-    std::unordered_map<std::string, TimedependentStateSequence<ImageMetadataNew>> _imageMetadataMap2;
-
+    std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>> _imageMetadataMap2;
     std::unordered_set<std::string> _instrumentFilter;
-    std::unordered_set<std::string> _enqueuedImageIds;
-
-    //SpacecraftCameraPlane _spacecraftCameraPlane;
     std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;
 
     DecodeData getDecodeDataFromOsTime(const int& osTime);
     void uploadImageDataToPBO();
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
-
-    void createFrustum();
-    void createPlane();
-    void updatePlane();
     void fillBuffer(const double& dt);
 
     void decode(unsigned char* buffer, const std::string& fileame);
-    void downloadTextureResource();
     bool initialize() override;
     bool deinitialize() override;
     bool isReady() const override;

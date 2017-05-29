@@ -35,9 +35,23 @@ out float s;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
+float HALF_SUN_RADIUS = 696701000.0; //(1391600000.0 * 0.50);
+float R_SUN = 995.90523 / 1.5877740;
+
 void main() {
     // Transform the damn psc to homogenous coordinate
     vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+
+
+   // float rSunNorm = R_SUN / 1048.0;
+    //rSunNorm = rSunNorm * HALF_SUN_RADIUS;
+   // float scaleFactor = (rSunNorm * HALF_SUN_RADIUS) / HALF_SUN_RADIUS;
+   // position.x += 0.00213867 * HALF_SUN_RADIUS;
+  //  position.y += 0.0954971 * HALF_SUN_RADIUS;
+
+//    position.xy *= 1.0 / scaleFactor * 0.96;
+
+
     vec4 positionClipSpace = modelViewProjectionTransform * position;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
     gl_Position = vs_positionScreenSpace;

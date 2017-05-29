@@ -124,7 +124,7 @@ void SpacecraftImageryManager::loadTransferFunctions(
 
 void SpacecraftImageryManager::loadImageMetadata(
       const std::string& path,
-      std::unordered_map<std::string, TimedependentStateSequence<ImageMetadataNew>>& _imageMetadataMap,
+      std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap,
       const std::unordered_set<std::string>& _filter)
 {
 
@@ -142,8 +142,6 @@ void SpacecraftImageryManager::loadImageMetadata(
     using Sort = ghoul::filesystem::Directory::Sort;
     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
 
-    //std::unordered_map<std::string, std::vector<TimedependentState>> _imageMetadataMapTemp;
-
     for (auto seqPath : sequencePaths) {
         if (size_t position = seqPath.find_last_of(".") + 1) {
             if (position != std::string::npos) {
@@ -158,7 +156,6 @@ void SpacecraftImageryManager::loadImageMetadata(
                     // Name
                     size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
                     std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
-                    //LDEBUG("Satellite NAME: " << satelliteName);
 
                     // Instrument
                     size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
@@ -185,220 +182,19 @@ void SpacecraftImageryManager::loadImageMetadata(
                                            tokens[2] + "T" + tokens[4] + ":" +
                                            tokens[5] + ":" + tokens[6] + "." + tokens[7];
 
-                        ImageMetadataNew im {seqPath};
-                        std::shared_ptr<ImageMetadataNew> data = std::make_shared<ImageMetadataNew>(im);
-                        TimedependentState<ImageMetadataNew> timeState(
+                        ImageMetadata im {seqPath};
+                        std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
+                        TimedependentState<ImageMetadata> timeState(
                               std::move(data), Time::ref().convertTime(time), seqPath);
                         _imageMetadataMap[instrumentName].addState(std::move(timeState));
                     }
                 }
             }
         }
-        //LDEBUG("Finished loading path " << seqPath);
-    }
-   /* struct A {
-        A();
-    };*/
-
-  //  std::map<std::string, A> map;
-
-    // for (const auto& sequence : _imageMetadataMapTemp) {
-    //     TimedependentStateSequence ts = std::move(sequence.second);
-    //     _imageMetadataMap[sequence.first] = TimedependentStateSequence();
-    //    // map["asd"] = A();
-    //     _imageMetadataMap.insert({sequence.first, seconce.second});
-    // }
-
-
-    LDEBUG("Finish loading imagery metadata");
-    LDEBUG(count << " Images loaded");
-}
-
-
-void SpacecraftImageryManager::loadImageMetadata(
-      const std::string& path,
-      std::unordered_map<std::string, std::vector<ImageMetadata>>& _imageMetadataMap,
-      const std::unordered_set<std::string>& _filter)
-{
-
-    LDEBUG("Begin loading imagery metadata");
-
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
-
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load directory '" << sequenceDir.path() << "'");
-    }
-
-    unsigned int count = 0;
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
-
-    for (auto seqPath : sequencePaths) {
-        if (size_t position = seqPath.find_last_of(".") + 1) {
-            if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(seqPath);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "jp2" || extension == "j2k") {
-                    // // TODO(mnoven): Prettify or read metadata instead
-                    std::string fileName = currentFile.filename();
-                    size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
-                    std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
-
-                    // Name
-                    size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
-                    std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
-                    //LDEBUG("Satellite NAME: " << satelliteName);
-
-                    // Instrument
-                    size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
-                    std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
-                    size_t dot = instrumentName.rfind(".");
-                    instrumentName = instrumentName.substr(0, dot);
-                    std::string filterKey = instrumentName;
-                    std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
-                                   ::tolower);
-
-                    // If filter is empty or value exist
-                    if (_filter.size() == 0
-                        || _filter.find(filterKey) != _filter.end()) {
-                        count++;
-                        // Time
-                        std::vector<std::string> tokens;
-                        std::stringstream ss;
-                        ss.str(currentFile.filename());
-                        std:: string item;
-                        while (std::getline(ss, item, '_')) {
-                            tokens.push_back(item);
-                        }
-                        std::string time = tokens[0] + "-" + tokens[1] + "-" +
-                                           tokens[2] + "T" + tokens[4] + ":" +
-                                           tokens[5] + ":" + tokens[6] + "." + tokens[7];
-                        ImageMetadata metadata;
-                        metadata.filename = seqPath;
-                        metadata.timeObserved = Time::ref().convertTime(time);
-                        _imageMetadataMap[instrumentName].push_back(metadata);
-                    }
-                }
-            }
-        }
-        //LDEBUG("Finished loading path " << seqPath);
     }
 
     LDEBUG("Finish loading imagery metadata");
     LDEBUG(count << " Images loaded");
 }
-
-std::vector<ImageMetadata> SpacecraftImageryManager::loadImageMetadata(const std::string& path) {
-    std::vector<ImageMetadata> imageSequenceMetadata;
-
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
-
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load directory '" << sequenceDir.path() << "'");
-    }
-
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::Yes);
-    imageSequenceMetadata.reserve(sequencePaths.size());
-
-    // TODO(mnoven): Remove this
-    int limit = 0;
-    for (auto seqPath : sequencePaths) {
-       // if (limit++ == 1000) break;
-        if (size_t position = seqPath.find_last_of(".") + 1) {
-            if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(seqPath);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "jp2" || extension == "j2k") {
-                    const std::string relativePath = FileSys.relativePath(seqPath);
-
-                    // TODO(mnoven): Prettify or read metadata instead
-                    std::vector<std::string> tokens;
-                    std::stringstream ss;
-                    ss.str(currentFile.filename());
-                    std:: string item;
-                    while (std::getline(ss, item, '_')) {
-                        tokens.push_back(item);
-                    }
-                    std::string time = tokens[0] + "-" + tokens[1] + "-" +
-                                       tokens[2] + "T" + tokens[4] + ":" +
-                                       tokens[5] + ":" + tokens[6] + "." + tokens[7];
-                    ImageMetadata metadata;
-                    metadata.filename = seqPath;
-                    metadata.timeObserved = Time::ref().convertTime(time);
-                    imageSequenceMetadata.push_back(metadata);
-                }
-            }
-        }
-        LDEBUG("Finished loading path " << seqPath);
-    }
-    return std::move(imageSequenceMetadata);
-}
-
-// std::vector<ImageDataObject> SpacecraftImageryManager::loadImageData(const std::string& path, int& imageSize) {
-//     std::vector<ImageDataObject> imageData;
-
-//     using RawPath = ghoul::filesystem::Directory::RawPath;
-//     ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
-
-//     if (!FileSys.directoryExists(sequenceDir)) {
-//         LERROR("Could not load FITS Directory '" << sequenceDir.path() << "'");
-//     }
-
-//     using Recursive = ghoul::filesystem::Directory::RawPath;
-//     using Sort = ghoul::filesystem::Directory::Sort;
-//     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
-//     imageData.reserve(sequencePaths.size());
-
-//     // TODO(mnoven): Remove this
-//     int limit = 0;
-
-//     for (auto seqPath : sequencePaths) {
-//         if (limit++ == 2) break;
-//         if (size_t position = seqPath.find_last_of(".") + 1) {
-//             if (position != std::string::npos) {
-//                 ghoul::filesystem::File currentFile(seqPath);
-//                 std::string extension = currentFile.fileExtension();
-//                 if (extension == "fits" || extension == "fit" || extension == "fts") {
-//                     const std::string relativePath = FileSys.relativePath(seqPath);
-//                     // We'll need to scan the header of the fits
-//                     // and insert in some smart data structure that handles time / mn
-
-//                     FitsFileReader::open(relativePath);
-//                     ImageDataObject im;
-//                     im.contents = FitsFileReader::readImage<IMG_PRECISION>();
-
-//                     ImageMetadata metaData;
-//                     metaData.filename = relativePath;
-//                     metaData.expTime = FitsFileReader::readHeaderValue<float>(std::string("EXPTIME"));
-//                     metaData.waveLength = FitsFileReader::readHeaderValue<int>(std::string("WAVELNTH"));
-
-//                     metaData.min = FitsFileReader::readHeaderValue<int>(std::string("DATAMIN"));
-//                     metaData.max = FitsFileReader::readHeaderValue<int>(std::string("DATAMAX"));
-
-//                     std::string time = FitsFileReader::readHeaderValue<std::string>(std::string("DATE-OBS"));
-//                     LDEBUG("Sending in TIME" << time);
-//                     LDEBUG("Converted to " << Time::ref().convertTime(time));
-//                     metaData.timeObserved = Time::ref().convertTime(time);
-
-//                     im.metaData = metaData;
-
-//                     //TODO(mnoven): Ugly, fix!
-//                     imageSize = FitsFileReader::getImageSize().first;
-
-//                     imageData.push_back(im);
-//                     FitsFileReader::close();
-//                 }
-//             }
-//         }
-//         LDEBUG("Finished loading path " << seqPath);
-//         LDEBUG("Count" << limit);
-//     }
-//     return std::move(imageData);
-// }
 
 } //namespace openspace

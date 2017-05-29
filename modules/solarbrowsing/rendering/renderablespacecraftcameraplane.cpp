@@ -121,9 +121,9 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
         }
     }
 
-    SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap, _instrumentFilter);
     SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap2, _instrumentFilter);
 
+    // Add GUI names
     unsigned int i = 0;
     for (auto& el : _imageMetadataMap2) {
         _activeInstruments.addOption(i++, el.first);
@@ -131,8 +131,6 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
 
     _currentActiveInstrument
           = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
-
-    //_imageMetadataMap2[_currentActiveInstrument].displayStateTimes();
 
     std::string tfRootPath;
     if (dictionary.getValue("TransferfunctionPath", tfRootPath)) {
@@ -271,140 +269,18 @@ void RenderableSpacecraftCameraPlane::fillBuffer(const double& dt) {
     _initializePBO = true;
 }
 
-void RenderableSpacecraftCameraPlane::createPlane() {
-    // ============================
-    //         GEOMETRY (quad)
-    // ============================
-    const GLfloat size = _size;
-    const GLfloat vertex_data[] = {
-        //      x      y     z     w     s     t
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
-        -size, size, 0.f, 0.f, 0.f, 1.f,
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-        size, -size, 0.f, 0.f, 1.f, 0.f,
-        size, size, 0.f, 0.f, 1.f, 1.f,
-    };
-
-    glBindVertexArray(_quad); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6,
-                          reinterpret_cast<void*>(0));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6,
-                          reinterpret_cast<void*>(sizeof(GLfloat) * 4));
-}
-
-void RenderableSpacecraftCameraPlane::updatePlane() {
-    //const double a = 1;
-    //const double b = 0;
-    //const double c = 0.31622776601; // sqrt(0.1)
-    //_move = a * exp(-(pow((_moveFactor.value() - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)));
-    _move = /*a **/ exp(-(pow((_moveFactor.value() - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
-    //_size = _move * HALF_SUN_RADIUS / _magicPlaneFactor;
-   // _size = _move * HALF_SUN_RADIUS / _planeSize;
-   // createPlane();
-    //createFrustum();
-}
-
 bool RenderableSpacecraftCameraPlane::isReady() const {
     return _spacecraftCameraPlane->isReady() && _texture != nullptr;
 }
 
-void RenderableSpacecraftCameraPlane::createFrustum() {
-    // Vertex orders x, y, z, w
-    // Where w indicates if vertex should be drawn in spacecraft
-    // or planes coordinate system
-    const GLfloat vertex_data[] = {
-        0.f, 0.f, 0.f, 0.0,
-        _size, _size, 0.f , 1.0,
-        0.f, 0.f, 0.f, 0.0,
-        -_size, -_size, 0.f , 1.0,
-        0.f, 0.f, 0.f, 0.0,
-        _size, -_size, 0.f , 1.0,
-        0.f, 0.f, 0.f, 0.0,
-        -_size, _size, 0.f , 1.0,
-        // Borders
-        // Left
-        -_size, -_size, 0.f, 1.0,
-        -_size, _size, 0.f, 1.0,
-        // Top
-        -_size, _size, 0.f, 1.0,
-        _size, _size, 0.f, 1.0,
-        // Right
-        _size, _size, 0.f, 1.0,
-        _size, -_size, 0.f, 1.0,
-        // Bottom
-        _size, -_size, 0.f, 1.0,
-        -_size, -_size, 0.f, 1.0,
-    };
-
-    glGenVertexArrays(1, &_frustum);
-    glGenBuffers(1, &_frustumPositionBuffer);  // generate buffer
-    glBindVertexArray(_frustum);
-    glBindBuffer(GL_ARRAY_BUFFER, _frustumPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(0));
-}
-
 bool RenderableSpacecraftCameraPlane::initialize() {
-    // Initialize plane buffer
-    //glGenVertexArrays(1, &_quad); // generate array
-    //glGenBuffers(1, &_vertexPositionBuffer);
-    //_size.setValue(glm::vec2(FULL_PLANE_SIZE, 0.f));
-    //updatePlane();
-
     _spacecraftCameraPlane = std::make_unique<SpacecraftCameraPlane>(
           _magicPlaneOffset, _magicPlaneFactor, _moveFactor);
-
-    // if (!_planeShader) {
-    //     RenderEngine& renderEngine = OsEng.renderEngine();
-    //     _planeShader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
-    //         "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl",
-    //         "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl"
-    //         );
-    //     if (!_planeShader) {
-    //         return false;
-    //     }
-    // }
-
-    // if (!_frustumShader) {
-    //     RenderEngine& renderEngine = OsEng.renderEngine();
-    //     _frustumShader = renderEngine.buildRenderProgram("SpacecraftFrustumProgram",
-    //         "${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl",
-    //         "${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl"
-    //         );
-    //     if (!_frustumShader) {
-    //         return false;
-    //     }
-    // }
-
-    // using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
-    // _planeShader->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
-    //_planeShader->setIgnoreUniformLocationError(IgnoreError::Yes);
-
     return isReady();
 }
 
 bool RenderableSpacecraftCameraPlane::deinitialize() {
-    // Deinitialize Plane
-
-
-    // glDeleteVertexArrays(1, &_quad);
-    // _quad = 0;
-
-    // glDeleteBuffers(1, &_vertexPositionBuffer);
-    // _vertexPositionBuffer = 0;
-
-    // RenderEngine& renderEngine = OsEng.renderEngine();
-    // if (_planeShader) {
-    //     renderEngine.removeRenderProgram(_planeShader);
-    //     _planeShader = nullptr;
-    // }
-    return true;
+    return _spacecraftCameraPlane->destroy();
 }
 
 void RenderableSpacecraftCameraPlane::uploadImageDataToPBO() {
@@ -507,7 +383,6 @@ void RenderableSpacecraftCameraPlane::performImageTimestep(const double& osTime)
 void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
-    //double j2000 = Time::ref().j2000Seconds();
     if (_useBuffering) {
         const double& dt = Time::ref().deltaTime();
         // Delta time changed, need to refill buffer
@@ -519,7 +394,6 @@ void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     }
 
     bool timeToUpdateTexture = _realTimeDiff > _minRealTimeUpdateInterval;
-
     // Update texture
     // The bool blockers might probably not be needed now
     if (timeToUpdateTexture && !_updatingCurrentLevelOfResolution
@@ -528,23 +402,15 @@ void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
         _lastUpdateRealTime = _realTime;
     }
 
+    // Update lookup table, TODO: No need to do this every update
     _lut = _tfMap[_currentActiveInstrument].get();
     _spacecraftCameraPlane->update();
-    // if (_planeShader->isDirty()) {
-    //     _planeShader->rebuildFromFile();
-    // }
-
-    // if (_frustumShader->isDirty()) {
-    //     _frustumShader->rebuildFromFile();
-    // }
-
 }
 
 void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     if (!isReady()) {
         return;
     }
-
     // TODO: We want to create sun imagery node from within the module
     const glm::dvec3& sunPositionWorld
           = OsEng.renderEngine().scene()->sceneGraphNode(_target)->worldPosition();
@@ -552,102 +418,6 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
     _spacecraftCameraPlane->render(data, *_texture, _lut, sunPositionWorld, _planeOpacity,
                                    _contrastValue, _gammaValue, _disableBorder,
                                    _disableFrustum);
-
-    const glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
-    const glm::mat4 projectionMatrix = data.camera.projectionMatrix();
-
-    // Model and view transform needs to be in double precision
-    const SceneGraphNode* target = OsEng.renderEngine().scene()->sceneGraphNode(_target);
-
-    const glm::dvec3 spacecraftPositionWorld = data.modelTransform.translation;
-
-    // Send to plane shader
-    const glm::dvec3 positionWorld = data.modelTransform.translation;
-
-    const glm::dvec3 targetPositionWorld = target->worldPosition();
-
-    const glm::dvec3 upWorld = data.modelTransform.rotation * glm::dvec3(0.0, 0.0, 1.0);
-    const glm::dvec3 nPositionWorld = glm::normalize(positionWorld);
-    const glm::dvec3 nTargetWorld = glm::normalize(targetPositionWorld);
-
-    // We don't normalize sun's position since its in the origin
-    glm::dmat4 rotationTransformSpacecraft
-          = glm::lookAt(nPositionWorld, glm::dvec3(target->worldPosition()), upWorld);
-    glm::dmat4 rotationTransformWorld = glm::inverse(rotationTransformSpacecraft);
-
-    // Scale vector to sun barycenter to get translation distance
-    glm::dvec3 sunDir = targetPositionWorld - positionWorld;
-    glm::dvec3 offset = sunDir * _move;
-
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), positionWorld + offset) *
-        rotationTransformWorld *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
-        glm::dmat4(1.0);
-    glm::dmat4 modelViewTransform = viewMatrix * modelTransform;
-
-    glm::dmat4 spacecraftModelTransform =
-        glm::translate(glm::dmat4(1.0), positionWorld) *
-        rotationTransformWorld *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
-        glm::dmat4(1.0);
-   // Shader activate
-   //  _planeShader->activate();
-
-   // /// _planeShader->setUniform("planeSize", _size);
-   //  //_planeShader->setUniform("imageSize", _imageSize);
-   //  _planeShader->setUniform("planeOpacity", _planeOpacity);
-   //  //_planeShader->setUniform("sharpenValue", _sharpenValue);
-   //  _planeShader->setUniform("gammaValue", _gammaValue);
-   //  _planeShader->setUniform("contrastValue", _contrastValue);
-   //  _planeShader->setUniform("modelViewProjectionTransform",
-   //      projectionMatrix * glm::mat4(modelViewTransform));
-
-   // // _planeShader->setUniform("magicPlaneFactor", _magicPlaneFactor);
-   //  _planeShader->setUniform("magicPlaneOffset", _magicPlaneOffset);
-
-   //  ghoul::opengl::TextureUnit imageUnit;
-   //  imageUnit.activate();
-   //  _texture->bind();
-   //  _planeShader->setUniform("imageryTexture", imageUnit);
-
-   //  //_tfMap[_currentActiveInstrument]->bind(); // Calls update internally
-   //  ghoul::opengl::TextureUnit tfUnit;
-   //  tfUnit.activate();
-   //  if (_lut) {
-   //      _lut->bind();
-   //      _planeShader->setUniform("hasLut", true);
-   //  } else {
-   //      _planeShader->setUniform("hasLut", false);
-   //  }
-   //  // Must bind all sampler2D, otherwise undefined behaviour
-   //  _planeShader->setUniform("lut", tfUnit);
-
-   //  glBindVertexArray(_quad);
-
-   //  glDrawArrays(GL_TRIANGLES, 0, 6);
-
-   //  _planeShader->deactivate();
-
-   //  _frustumShader->activate();
-   //  _frustumShader->setUniform("modelViewProjectionTransform",
-   //      projectionMatrix * glm::mat4(viewMatrix * spacecraftModelTransform));
-   //  _frustumShader->setUniform("modelViewProjectionTransformPlane",
-   //                             projectionMatrix * glm::mat4(modelViewTransform));
-   //  glBindVertexArray(_frustum);
-
-   //  if (!_disableBorder && !_disableFrustum) {
-   //      glDrawArrays(GL_LINES, 0, 16);
-   //  } else if (_disableBorder && !_disableFrustum) {
-   //      glDrawArrays(GL_LINES, 0, 8);
-   //  } else if (_disableFrustum && !_disableBorder) {
-   //      glDrawArrays(GL_LINES, 8, 16);
-   //  }
-
-   //  _frustumShader->deactivate();
-
-    _planePosSpacecraftRefFrame = glm::dvec3(rotationTransformSpacecraft * glm::dvec4(positionWorld + offset, 1.0));
-    _sunToSpacecraftTransform = rotationTransformSpacecraft * glm::dmat4(target->rotationMatrix());
 }
 
 } // namespace openspace

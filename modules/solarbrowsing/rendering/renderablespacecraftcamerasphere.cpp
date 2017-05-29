@@ -162,29 +162,27 @@ void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
         const glm::dmat4 planeRot = p1.worldRotation();
 
         _shader->setUniform("magicPlaneFactor[" + std::to_string(i) + "]", plane->_magicPlaneFactor);
-        _shader->setUniform("magicPlaneOffset[" + std::to_string(i) + "]", plane->_magicPlaneOffset);
+       // _shader->setUniform("magicPlaneOffset[" + std::to_string(i) + "]", plane->_magicPlaneOffset);
 
-        // GET PLANE which holds position
         _shader->setUniform("sunToSpacecraftReferenceFrame[" + std::to_string(i) + "]",
                         planeRot * glm::dmat4(data.modelTransform.rotation));
         _shader->setUniform("planePositionSpacecraft[" + std::to_string(i) + "]",
                             glm::dvec3(planeRot * glm::dvec4(planePos, 1.0)));
 
-        _shader->setUniform("imageSize[" + std::to_string(i) + "]" , plane->_imageSize);
-        _shader->setUniform("sharpenValue[" + std::to_string(i) + "]", plane->_sharpenValue);
+        //_shader->setUniform("imageSize[" + std::to_string(i) + "]" , plane->_imageSize);
+        //_shader->setUniform("sharpenValue[" + std::to_string(i) + "]", plane->_sharpenValue);
         _shader->setUniform("gammaValue[" + std::to_string(i) + "]", plane->_gammaValue);
         _shader->setUniform("contrastValue[" + std::to_string(i) + "]", plane->_contrastValue);
 
         // Imagery texture
         txUnits[i].activate();
-        plane->_texture->bind();
+        plane->getImageryTexture()->bind();
         _shader->setUniform("imageryTexture[" + std::to_string(i) + "]", txUnits[i]);
-        //txUnits[i].setZeroUnit();
-
         tfUnits[i].activate();
-       // tfUnits[i].setZeroUnit();
-        if (plane->_lut) {
-            plane->_lut->bind();
+
+        auto lut = plane->getTransferFunction();
+        if (lut) {
+            lut->bind();
             _shader->setUniform("hasLut[" + std::to_string(i) + "]", true);
         } else {
             _shader->setUniform("hasLut[" + std::to_string(i) + "]", false);
