@@ -200,7 +200,8 @@ RenderableSpacecraftCameraPlane::RenderableSpacecraftCameraPlane(const ghoul::Di
     });
 
     _moveFactor.onChange([this]() {
-        updatePlane();
+        //updatePlane();
+        _spacecraftCameraPlane->createPlaneAndFrustum(_moveFactor);
     });
 
     _deltaTimeLast = 1.0;
@@ -302,14 +303,14 @@ void RenderableSpacecraftCameraPlane::updatePlane() {
     //const double c = 0.31622776601; // sqrt(0.1)
     //_move = a * exp(-(pow((_moveFactor.value() - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)));
     _move = /*a **/ exp(-(pow((_moveFactor.value() - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
-    _size = _move * HALF_SUN_RADIUS / _magicPlaneFactor;
+    //_size = _move * HALF_SUN_RADIUS / _magicPlaneFactor;
    // _size = _move * HALF_SUN_RADIUS / _planeSize;
-    createPlane();
-    createFrustum();
+   // createPlane();
+    //createFrustum();
 }
 
 bool RenderableSpacecraftCameraPlane::isReady() const {
-    return _planeShader && _frustumShader && _texture;
+    return _spacecraftCameraPlane->isReady() && _texture != nullptr;
 }
 
 void RenderableSpacecraftCameraPlane::createFrustum() {
@@ -351,32 +352,35 @@ void RenderableSpacecraftCameraPlane::createFrustum() {
 
 bool RenderableSpacecraftCameraPlane::initialize() {
     // Initialize plane buffer
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer);
+    //glGenVertexArrays(1, &_quad); // generate array
+    //glGenBuffers(1, &_vertexPositionBuffer);
     //_size.setValue(glm::vec2(FULL_PLANE_SIZE, 0.f));
-    updatePlane();
+    //updatePlane();
 
-    if (!_planeShader) {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _planeShader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
-            "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl",
-            "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl"
-            );
-        if (!_planeShader) {
-            return false;
-        }
-    }
+    _spacecraftCameraPlane = std::make_unique<SpacecraftCameraPlane>(
+          _magicPlaneOffset, _magicPlaneFactor, _moveFactor);
 
-    if (!_frustumShader) {
-        RenderEngine& renderEngine = OsEng.renderEngine();
-        _frustumShader = renderEngine.buildRenderProgram("SpacecraftFrustumProgram",
-            "${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl",
-            "${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl"
-            );
-        if (!_frustumShader) {
-            return false;
-        }
-    }
+    // if (!_planeShader) {
+    //     RenderEngine& renderEngine = OsEng.renderEngine();
+    //     _planeShader = renderEngine.buildRenderProgram("SpacecraftImagePlaneProgram",
+    //         "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl",
+    //         "${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl"
+    //         );
+    //     if (!_planeShader) {
+    //         return false;
+    //     }
+    // }
+
+    // if (!_frustumShader) {
+    //     RenderEngine& renderEngine = OsEng.renderEngine();
+    //     _frustumShader = renderEngine.buildRenderProgram("SpacecraftFrustumProgram",
+    //         "${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl",
+    //         "${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl"
+    //         );
+    //     if (!_frustumShader) {
+    //         return false;
+    //     }
+    // }
 
     // using IgnoreError = ghoul::opengl::ProgramObject::IgnoreError;
     // _planeShader->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
@@ -386,17 +390,20 @@ bool RenderableSpacecraftCameraPlane::initialize() {
 }
 
 bool RenderableSpacecraftCameraPlane::deinitialize() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
+    // Deinitialize Plane
 
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
 
-    RenderEngine& renderEngine = OsEng.renderEngine();
-    if (_planeShader) {
-        renderEngine.removeRenderProgram(_planeShader);
-        _planeShader = nullptr;
-    }
+    // glDeleteVertexArrays(1, &_quad);
+    // _quad = 0;
+
+    // glDeleteBuffers(1, &_vertexPositionBuffer);
+    // _vertexPositionBuffer = 0;
+
+    // RenderEngine& renderEngine = OsEng.renderEngine();
+    // if (_planeShader) {
+    //     renderEngine.removeRenderProgram(_planeShader);
+    //     _planeShader = nullptr;
+    // }
     return true;
 }
 
@@ -522,14 +529,15 @@ void RenderableSpacecraftCameraPlane::update(const UpdateData& data) {
     }
 
     _lut = _tfMap[_currentActiveInstrument].get();
+    _spacecraftCameraPlane->update();
+    // if (_planeShader->isDirty()) {
+    //     _planeShader->rebuildFromFile();
+    // }
 
-    if (_planeShader->isDirty()) {
-        _planeShader->rebuildFromFile();
-    }
+    // if (_frustumShader->isDirty()) {
+    //     _frustumShader->rebuildFromFile();
+    // }
 
-    if (_frustumShader->isDirty()) {
-        _frustumShader->rebuildFromFile();
-    }
 }
 
 void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
@@ -537,12 +545,25 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
         return;
     }
 
+    // TODO: We want to create sun imagery node from within the module
+    const glm::dvec3& sunPositionWorld
+          = OsEng.renderEngine().scene()->sceneGraphNode(_target)->worldPosition();
+
+    _spacecraftCameraPlane->render(data, *_texture, _lut, sunPositionWorld, _planeOpacity,
+                                   _contrastValue, _gammaValue, _disableBorder,
+                                   _disableFrustum);
+
     const glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
     const glm::mat4 projectionMatrix = data.camera.projectionMatrix();
 
-    // Model transform and view transform needs to be in double precision
+    // Model and view transform needs to be in double precision
     const SceneGraphNode* target = OsEng.renderEngine().scene()->sceneGraphNode(_target);
+
+    const glm::dvec3 spacecraftPositionWorld = data.modelTransform.translation;
+
+    // Send to plane shader
     const glm::dvec3 positionWorld = data.modelTransform.translation;
+
     const glm::dvec3 targetPositionWorld = target->worldPosition();
 
     const glm::dvec3 upWorld = data.modelTransform.rotation * glm::dvec3(0.0, 0.0, 1.0);
@@ -570,62 +591,60 @@ void RenderableSpacecraftCameraPlane::render(const RenderData& data) {
         rotationTransformWorld *
         glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
         glm::dmat4(1.0);
+   // Shader activate
+   //  _planeShader->activate();
 
+   // /// _planeShader->setUniform("planeSize", _size);
+   //  //_planeShader->setUniform("imageSize", _imageSize);
+   //  _planeShader->setUniform("planeOpacity", _planeOpacity);
+   //  //_planeShader->setUniform("sharpenValue", _sharpenValue);
+   //  _planeShader->setUniform("gammaValue", _gammaValue);
+   //  _planeShader->setUniform("contrastValue", _contrastValue);
+   //  _planeShader->setUniform("modelViewProjectionTransform",
+   //      projectionMatrix * glm::mat4(modelViewTransform));
 
-    // Activate shader
-    _planeShader->activate();
+   // // _planeShader->setUniform("magicPlaneFactor", _magicPlaneFactor);
+   //  _planeShader->setUniform("magicPlaneOffset", _magicPlaneOffset);
 
-   /// _planeShader->setUniform("planeSize", _size);
-    _planeShader->setUniform("imageSize", _imageSize);
-    _planeShader->setUniform("planeOpacity", _planeOpacity);
-    _planeShader->setUniform("sharpenValue", _sharpenValue);
-    _planeShader->setUniform("gammaValue", _gammaValue);
-    _planeShader->setUniform("contrastValue", _contrastValue);
-    _planeShader->setUniform("modelViewProjectionTransform",
-        projectionMatrix * glm::mat4(modelViewTransform));
+   //  ghoul::opengl::TextureUnit imageUnit;
+   //  imageUnit.activate();
+   //  _texture->bind();
+   //  _planeShader->setUniform("imageryTexture", imageUnit);
 
-   // _planeShader->setUniform("magicPlaneFactor", _magicPlaneFactor);
-    _planeShader->setUniform("magicPlaneOffset", _magicPlaneOffset);
+   //  //_tfMap[_currentActiveInstrument]->bind(); // Calls update internally
+   //  ghoul::opengl::TextureUnit tfUnit;
+   //  tfUnit.activate();
+   //  if (_lut) {
+   //      _lut->bind();
+   //      _planeShader->setUniform("hasLut", true);
+   //  } else {
+   //      _planeShader->setUniform("hasLut", false);
+   //  }
+   //  // Must bind all sampler2D, otherwise undefined behaviour
+   //  _planeShader->setUniform("lut", tfUnit);
 
-    ghoul::opengl::TextureUnit imageUnit;
-    imageUnit.activate();
-    _texture->bind();
-    _planeShader->setUniform("imageryTexture", imageUnit);
+   //  glBindVertexArray(_quad);
 
-    //_tfMap[_currentActiveInstrument]->bind(); // Calls update internally
-    ghoul::opengl::TextureUnit tfUnit;
-    tfUnit.activate();
-    if (_lut) {
-        _lut->bind();
-        _planeShader->setUniform("hasLut", true);
-    } else {
-        _planeShader->setUniform("hasLut", false);
-    }
-    // Must bind all sampler2D, otherwise undefined behaviour
-    _planeShader->setUniform("lut", tfUnit);
+   //  glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    glBindVertexArray(_quad);
+   //  _planeShader->deactivate();
 
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+   //  _frustumShader->activate();
+   //  _frustumShader->setUniform("modelViewProjectionTransform",
+   //      projectionMatrix * glm::mat4(viewMatrix * spacecraftModelTransform));
+   //  _frustumShader->setUniform("modelViewProjectionTransformPlane",
+   //                             projectionMatrix * glm::mat4(modelViewTransform));
+   //  glBindVertexArray(_frustum);
 
-    _planeShader->deactivate();
+   //  if (!_disableBorder && !_disableFrustum) {
+   //      glDrawArrays(GL_LINES, 0, 16);
+   //  } else if (_disableBorder && !_disableFrustum) {
+   //      glDrawArrays(GL_LINES, 0, 8);
+   //  } else if (_disableFrustum && !_disableBorder) {
+   //      glDrawArrays(GL_LINES, 8, 16);
+   //  }
 
-    _frustumShader->activate();
-    _frustumShader->setUniform("modelViewProjectionTransform",
-        projectionMatrix * glm::mat4(viewMatrix * spacecraftModelTransform));
-    _frustumShader->setUniform("modelViewProjectionTransformPlane",
-                               projectionMatrix * glm::mat4(modelViewTransform));
-    glBindVertexArray(_frustum);
-
-    if (!_disableBorder && !_disableFrustum) {
-        glDrawArrays(GL_LINES, 0, 16);
-    } else if (_disableBorder && !_disableFrustum) {
-        glDrawArrays(GL_LINES, 0, 8);
-    } else if (_disableFrustum && !_disableBorder) {
-        glDrawArrays(GL_LINES, 8, 16);
-    }
-
-    _frustumShader->deactivate();
+   //  _frustumShader->deactivate();
 
     _planePosSpacecraftRefFrame = glm::dvec3(rotationTransformSpacecraft * glm::dvec4(positionWorld + offset, 1.0));
     _sunToSpacecraftTransform = rotationTransformSpacecraft * glm::dmat4(target->rotationMatrix());

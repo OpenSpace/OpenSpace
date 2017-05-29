@@ -29,6 +29,7 @@
 #include <modules/base/rendering/renderableplane.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/uintproperty.h>
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/stringproperty.h>
@@ -38,6 +39,8 @@
 #include <memory>
 #include <modules/solarbrowsing/util/simplej2kcodec.h>
 #include <unordered_set>
+
+#include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
 
 #include <openspace/util/powerscaledsphere.h>
 #include <modules/solarbrowsing/util/streambuffer.h>
@@ -58,6 +61,7 @@ public:
     void loadTexture();
     void performImageTimestep(const double& osTime);
     void updateTexture();
+    const SpacecraftCameraPlane& cameraPlane() {return *_spacecraftCameraPlane; };
 
     // TODO(mnoven): Getters
     glm::dvec3 _planePosSpacecraftRefFrame;
@@ -88,7 +92,7 @@ private:
     properties::BoolProperty _lazyBuffering;
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
-    properties::IntProperty _resolutionLevel;
+    properties::UIntProperty _resolutionLevel;
     properties::StringProperty _target;
     properties::BoolProperty _useBuffering;
     properties::BoolProperty _usePBO;
@@ -148,6 +152,9 @@ private:
 
     std::unordered_set<std::string> _instrumentFilter;
     std::unordered_set<std::string> _enqueuedImageIds;
+
+    //SpacecraftCameraPlane _spacecraftCameraPlane;
+    std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;
 
     DecodeData getDecodeDataFromOsTime(const int& osTime);
     void uploadImageDataToPBO();

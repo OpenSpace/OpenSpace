@@ -34,6 +34,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <modules/fitsfilereader/include/fitsfilereader.h>
+#include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
 
 #include <memory>
 #include <fstream>
@@ -72,7 +73,7 @@ bool RenderableSpacecraftCameraSphere::initialize() {
     _planeDependencies
          = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
 
-    const std::string path = "/home/noven/workspace/OpenSpace/data/hmimap1.fits";
+    const std::string path = "/Users/michaelnoven/workspace/OpenSpace/data/hmimap1.fits";
     FitsFileReader fts(false);
     std::shared_ptr<ImageData<float>> imageData = fts.readImage<float>(path);
     float* data;
@@ -105,7 +106,8 @@ bool RenderableSpacecraftCameraSphere::initialize() {
         }
     }
 
-    PowerScaledScalar planetSize(glm::vec2(696701000.f * (1574.9623f / 4096.f) , 0.f));
+    //PowerScaledScalar planetSize(glm::vec2(696701000.f, 0.f));
+    PowerScaledScalar planetSize(glm::vec2(6.96701f, 8.f));
     _sphere = std::make_unique<PowerScaledSphere>(PowerScaledSphere(planetSize, 100));
     _sphere->initialize();
 
@@ -155,13 +157,18 @@ void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
         auto* plane = static_cast<RenderableSpacecraftCameraPlane*>(
               _planeDependencies[i]->renderable());
 
+        const SpacecraftCameraPlane& p1 = plane->cameraPlane();
+        const glm::dvec3 planePos = p1.worldPosition();
+        const glm::dmat4 planeRot = p1.worldRotation();
+
         _shader->setUniform("magicPlaneFactor[" + std::to_string(i) + "]", plane->_magicPlaneFactor);
         _shader->setUniform("magicPlaneOffset[" + std::to_string(i) + "]", plane->_magicPlaneOffset);
 
+        // GET PLANE which holds position
         _shader->setUniform("sunToSpacecraftReferenceFrame[" + std::to_string(i) + "]",
-                        plane->_sunToSpacecraftTransform);
+                        planeRot * glm::dmat4(data.modelTransform.rotation));
         _shader->setUniform("planePositionSpacecraft[" + std::to_string(i) + "]",
-                            plane->_planePosSpacecraftRefFrame);
+                            glm::dvec3(planeRot * glm::dvec4(planePos, 1.0)));
 
         _shader->setUniform("imageSize[" + std::to_string(i) + "]" , plane->_imageSize);
         _shader->setUniform("sharpenValue[" + std::to_string(i) + "]", plane->_sharpenValue);
@@ -194,7 +201,6 @@ void RenderableSpacecraftCameraSphere::render(const RenderData& data) {
         tfUnits[i].activate();
         _shader->setUniform("lut[" + std::to_string(i) + "]", tfUnits[i]);
     }
-
 
     ghoul::opengl::TextureUnit imageUnit;
     imageUnit.activate();
