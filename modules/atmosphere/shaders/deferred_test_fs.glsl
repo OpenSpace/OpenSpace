@@ -336,7 +336,8 @@ void dCalculateRayRenderablePlanet(out dRay ray, out dvec4 planetPositionObjectC
 vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor,
                        const vec3 v, const vec3 s, out float r, out float mu,
                        out vec3 attenuation, const vec3 fragPosObj,
-                       const double maxLength, const double pixelDepth ) {
+                       const double maxLength, const double pixelDepth,
+                       const vec4 spaceColor) {
   vec3 radiance;
   
   r  = length(x);
@@ -447,7 +448,18 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
   
   // Finally we add the Lsun (all calculations are done with no Lsun so
   // we can change it on the fly with no precomputations)
-  return radiance * sunRadiance;
+  // return radiance * sunRadiance;
+
+  if (pixelDepth < maxLength) {
+    //return spaceColor.rgb + (1.0 - spaceColor.a)*(radiance * sunRadiance);
+    return radiance * sunRadiance;
+  } else {
+    //return radiance * sunRadiance;
+    //return spaceColor.rgb + (radiance * sunRadiance);
+    vec3 finalScatteringRadiance = radiance * sunRadiance;
+    float atmAlpha = length(finalScatteringRadiance);
+    return spaceColor.rgb + finalScatteringRadiance;
+  }
   
 }
 
@@ -547,10 +559,17 @@ void main() {
     vec4 meanColor = vec4(0.0);
     vec4 meanNormal = vec4(0.0);
     vec4 meanPosition = vec4(0.0);
+    //vec4 positionArray[nAaSamples];
+    vec4 positionArray[8];
+    float maxAlpha = -1.0;
     for (int i = 0; i < nAaSamples; i++) {
       meanNormal   += texelFetch(mainNormalReflectanceTexture, ivec2(gl_FragCoord), i);
-      meanColor    += texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
+      vec4 color = texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
+      if ( color.a > maxAlpha )
+        maxAlpha = color.a;
+      meanColor += color;
       meanPosition += texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
+      positionArray[i] = texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
       //     geoDepth += denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), i).x);
     }
     meanColor    /= nAaSamples;
@@ -558,6 +577,8 @@ void main() {
     meanPosition /= nAaSamples;
     // geoDepth /= nAaSamples;
 
+    meanColor.a = maxAlpha;
+    
     //meanNormal.xyz = normalize(meanNormal.xyz);
     
     // Ray in object space
@@ -577,22 +598,40 @@ void main() {
       intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt-10*EPSILON,
                                             insideATM, offset, maxLength );
       if ( intersectATM ) {
+        // Debugging:
+        vec4 farthestPosition = vec4(0.0);
+        float farthest = -1.0;
+        for (int i = 0; i < nAaSamples; i++) {
+          float tmpDistance = float(distance(dCampos.xyz, dvec3(positionArray[i].xyz)));
+          if ( positionArray[i].w > 0.0 && tmpDistance >= farthest ) {
+            farthest = tmpDistance;
+            farthestPosition = positionArray[i];
+          }
+        }
+        
+        dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * farthestPosition);
+        dvec4 fragWorldCoords  = dvec4(dCampos + tmpPos, 1.0); // Fragment in World Coords
+        dvec4 fragObjectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + fragWorldCoords.xyz, 1.0);
+        double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
+        
         // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
         // in the depth buffer is less than the distance to the atmosphere then the atmosphere
         // is occluded
         // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
         // when using their positions later, one must convert them to the planet's coords 
-        dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * meanPosition);
-        dvec4 fragWorldCoords  = dvec4(dCampos + tmpPos, 1.0); // Fragment in World Coords
-        dvec4 fragObjectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + fragWorldCoords.xyz, 1.0);
-        double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
+
+        //dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * meanPosition);
+        //dvec4 fragWorldCoords  = dvec4(dCampos + tmpPos, 1.0); // Fragment in World Coords
+        //dvec4 fragObjectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + fragWorldCoords.xyz, 1.0);
+        //double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
 
         // All calculations are done in Km:
         pixelDepth /= 1000.0; 
         fragObjectCoords.xyz /= 1000.0;
         
         if ((pixelDepth > 0.0) && pixelDepth < offset) {        
-          renderTarget = meanColor;         
+          //renderTarget = meanColor;
+          renderTarget = vec4(1.0, 0.0, 0.0, 1.0);         
         } else {
           // Following paper nomenclature      
           double t = offset;                  
@@ -616,7 +655,8 @@ void main() {
           vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v,
                                                   s, r, mu, attenuation, 
                                                   vec3(fragObjectCoords.xyz),
-                                                  maxLength, pixelDepth); 
+                                                  maxLength, pixelDepth,
+                                                  meanColor); 
           vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation,
                                             meanColor, meanNormal, irradianceFactor);
           vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
@@ -668,9 +708,19 @@ void main() {
         // is occluded
         // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
         // when using their positions later, one must convert them to the planet's coords 
-
-        // OS Eye to World coords
-        dvec4 tmpRInvPos            = dInverseCamRotTransform * meanPosition;
+        vec4 farthestPosition = vec4(0.0);
+        float farthest = -1.0;
+        for (int i = 0; i < nAaSamples; i++) {
+          float tmpDistance = float(distance(dCampos.xyz, dvec3(positionArray[i].xyz)));
+          if ( positionArray[i].w > 0.0 && tmpDistance >= farthest ) {
+            farthest = tmpDistance;
+            farthestPosition = positionArray[i];
+          }
+        }
+        
+         // OS Eye to World coords
+        dvec4 tmpRInvPos            = dInverseCamRotTransform * farthestPosition;
+        //dvec4 tmpRInvPos            = dInverseCamRotTransform * meanPosition;
         dvec4 fragWorldCoords       = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
         //dvec4 tmpRInvNormal         = dInverseCamRotTransform * meanNormal;
         //dvec4 fragNormalWorldCoords = dvec4(dvec3(tmpRInvNormal) + dCampos, 1.0);
@@ -684,14 +734,13 @@ void main() {
 
         // Distance of the pixel in the gBuffer to the observer
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
-
+        
         // All calculations are done in Km:
         pixelDepth /= 1000.0;
         fragObjectCoords.xyz /= 1000.0;
         
         if (meanPosition.xyz != vec3(0.0) && (pixelDepth < offset)) {        
           renderTarget = meanColor;
-          //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
         } else {
           // Following paper nomenclature      
           double t = offset;                  
@@ -717,7 +766,8 @@ void main() {
           vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v,
                                                   s, r, mu, attenuation, 
                                                   vec3(fragObjectCoords.xyz),
-                                                  maxLength, pixelDepth); 
+                                                  maxLength, pixelDepth,
+                                                  meanColor); 
           vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation,
                                             meanColor, meanNormal, irradianceFactor);
           vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
@@ -739,7 +789,7 @@ void main() {
           //renderTarget = vec4(vec3(pixelDepth/100000),1.0);
         }
       } else {
-        renderTarget = meanColor;        
+        renderTarget = vec4(HDR(meanColor.xyz), 1.0);        
       }
     } else {
       // No ATM defined.
