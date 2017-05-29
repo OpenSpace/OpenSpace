@@ -115,10 +115,16 @@ struct LayerSettings {
 	float valueBlending;
 };
 
+struct AdjustmentLayer {
+	int type;
+	vec3 color;
+};
+
 struct Layer {
 	ChunkTilePile pile;
 	TileDepthTransform depthTransform;
 	LayerSettings settings;
+	AdjustmentLayer adjustmentLayer;
 };
 
 struct LevelWeights {

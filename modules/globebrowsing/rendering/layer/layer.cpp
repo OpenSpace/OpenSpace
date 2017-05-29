@@ -29,6 +29,67 @@
 namespace openspace {
 namespace globebrowsing {
 
+const std::string AdjustmentLayer::TypeNames[NumTypes] = {
+    "None",
+    "Color"
+};
+
+AdjustmentLayer::AdjustmentLayer(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner("AdjustmentLayer")
+    , _typeOption(
+          "type",
+          "Type",
+          properties::OptionProperty::DisplayType::Dropdown
+      )
+    , color(
+        "color",
+        "Color",
+        glm::vec4(1.f, 1.f, 1.f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+      )
+    , type(TypeID::NONE)
+{
+    for (int i = 0; i < NumTypes; ++i) {
+        _typeOption.addOption(i, TypeNames[i]);
+    }
+    
+    addProperty(_typeOption);
+    _typeOption.onChange([&](){
+        removeVisibleProperties();
+        type = static_cast<TypeID>(_typeOption.value());
+        addVisibleProperties();
+    });
+
+    color.setViewOption(properties::Property::ViewOptions::Color);
+
+    addVisibleProperties();
+}
+
+void AdjustmentLayer::removeVisibleProperties() {
+    switch (type) {
+        case NONE:
+            break;
+        case COLOR:
+            removeProperty(color);
+            break;
+        default:
+            break;
+    }
+}
+
+void AdjustmentLayer::addVisibleProperties() {
+    switch (type) {
+        case NONE:
+            break;
+        case COLOR:
+            addProperty(color);
+        default:
+            break;
+    }
+}
+
+
 namespace {
     const char* keyName = "Name";
     const char* keyEnabled = "Enabled";
@@ -40,6 +101,7 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     : properties::PropertyOwner(layerDict.value<std::string>(keyName))
     , _enabled(properties::BoolProperty("enabled", "Enabled", false))
     , _reset("reset", "Reset")
+    , _adjustmentLayer(layerDict)
 {
     // We add the id to the dictionary since it needs to be known by
     // the tile provider
@@ -76,6 +138,7 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
 
     addPropertySubOwner(_renderSettings);
     addPropertySubOwner(*_tileProvider);
+    addPropertySubOwner(_adjustmentLayer);
 }
 
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {

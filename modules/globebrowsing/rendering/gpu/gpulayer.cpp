@@ -29,12 +29,50 @@
 namespace openspace {
 namespace globebrowsing {
 
+
+void GPUAdjustmentLayer::setValue(ghoul::opengl::ProgramObject* programObject,
+                      const AdjustmentLayer& adjustmentLayer)
+{
+	gpuType.setValue(programObject, static_cast<int>(adjustmentLayer.type));
+	switch (adjustmentLayer.type) {
+		case AdjustmentLayer::TypeID::NONE:
+			break;
+		case AdjustmentLayer::TypeID::COLOR:
+			gpuColor.setValue(programObject, adjustmentLayer.color.value());
+			break;
+		default:
+			break;
+	}
+}
+
+void GPUAdjustmentLayer::bind(ghoul::opengl::ProgramObject* programObject,
+                  const AdjustmentLayer& adjustmentLayer,
+                  const std::string& nameBase)
+{
+	gpuType.bind(programObject, nameBase + "type");
+	switch (adjustmentLayer.type) {
+		case AdjustmentLayer::TypeID::NONE:
+			break;
+		case AdjustmentLayer::TypeID::COLOR:
+    		gpuColor.bind(programObject, nameBase + "color");
+			break;
+		default:
+			break;
+	}
+}
+
+
+
+
+
+
 void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                         const TileIndex& tileIndex, int pileSize)
 {
     ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
     gpuChunkTilePile.setValue(programObject, chunkTilePile);
     gpuRenderSettings.setValue(programObject, layer.renderSettings());
+    gpuAdjustmentLayer.setValue(programObject, layer.adjustmentLayer());
 }
 
 void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
@@ -42,6 +80,8 @@ void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& la
 {
     gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
     gpuRenderSettings.bind(layer.renderSettings(), programObject, nameBase + "settings.");
+    gpuAdjustmentLayer.bind(programObject, layer.adjustmentLayer(),
+    						nameBase + "adjustmentLayer.");
 }
 
 void GPULayer::deactivate() {

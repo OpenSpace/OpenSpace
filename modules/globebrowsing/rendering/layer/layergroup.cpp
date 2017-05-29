@@ -53,7 +53,7 @@ LayerGroup::LayerGroup(layergroupid::ID id, const ghoul::Dictionary& dict)
     }
 
     for (const auto& layer : _layers) {
-        addPropertySubOwner(layer.get());
+        addPropertySubOwnerUnsorted(layer.get());
     }
 }
 

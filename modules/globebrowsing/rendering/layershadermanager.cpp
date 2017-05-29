@@ -40,7 +40,8 @@ namespace globebrowsing {
 
 bool LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
     const LayerGroupPreprocessingData& other) const {
-    return lastLayerIdx == other.lastLayerIdx &&
+    return layerIsAdjustmentLayer == other.layerIsAdjustmentLayer &&
+        lastLayerIdx == other.lastLayerIdx &&
         layerBlendingEnabled == other.layerBlendingEnabled;
 }
 
@@ -72,9 +73,14 @@ LayerShaderManager::LayerShaderPreprocessingData
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; i++) {
         LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData
             layeredTextureInfo;
-        auto layerGroup = layerManager->layerGroup(i);
+        const LayerGroup& layerGroup = layerManager->layerGroup(i);
         layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
+
+        std::vector<std::shared_ptr<Layer>> layers; layerGroup.activeLayers();
+        for (const std::shared_ptr<Layer>& layer : layers) {
+            layeredTextureInfo.layerIsAdjustmentLayer.push_back(false);
+        }
 
         preprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
     }
@@ -153,6 +159,12 @@ void LayerShaderManager::recompileShaderProgram(
             "blend" + groupName,
             textureTypes[i].layerBlendingEnabled
         );
+
+        for (unsigned int j = 0; j < textureTypes[i].layerIsAdjustmentLayer.size(); ++j) {
+            shaderDictionary.setValue(
+                groupName + "IsAdjustmentLayer_" + std::to_string(j),
+                textureTypes[i].layerIsAdjustmentLayer[j]);
+        }
     }
 
     // Other settings such as "useAtmosphere"

@@ -34,12 +34,39 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/optionproperty.h>
+
 namespace openspace {
 namespace globebrowsing {
 
 namespace tileprovider {
     class TileProvider;
 }
+
+
+
+class AdjustmentLayer : public properties::PropertyOwner {
+public:
+    enum TypeID
+    {
+        NONE = 0,
+        COLOR = 1,
+    };
+    static const int NumTypes = 2;
+    static const std::string TypeNames[NumTypes];
+
+    AdjustmentLayer(const ghoul::Dictionary& dictionary);
+
+    properties::Vec3Property color;
+    TypeID type;
+
+private:
+    void removeVisibleProperties();
+    void addVisibleProperties();
+    properties::OptionProperty _typeOption;
+};
+
 
 /**
  * Simple struct which is used to enable/disable <code>TileProvider</code> 
@@ -55,6 +82,7 @@ public:
     bool enabled() const { return _enabled.value(); }
     tileprovider::TileProvider* tileProvider() const { return _tileProvider.get(); }
     const LayerRenderSettings& renderSettings() const { return _renderSettings; }
+    const AdjustmentLayer& adjustmentLayer() const { return _adjustmentLayer; }
 
     void onChange(std::function<void(void)> callback);
 
@@ -63,6 +91,8 @@ private:
     properties::TriggerProperty _reset;
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
     LayerRenderSettings _renderSettings;
+  
+    AdjustmentLayer _adjustmentLayer;
 };
 
 } // namespace globebrowsing

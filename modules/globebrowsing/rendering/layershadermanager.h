@@ -63,6 +63,7 @@ public:
         struct LayerGroupPreprocessingData {
             int lastLayerIdx;
             bool layerBlendingEnabled;
+            std::vector<bool> layerIsAdjustmentLayer;
             bool operator==(const LayerGroupPreprocessingData& other) const;
         };
         

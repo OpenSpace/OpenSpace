@@ -183,6 +183,8 @@ public:
      * \param owner The owner that should be assigned to this PropertyOwner
      */
     void addPropertySubOwner(PropertyOwner* owner);
+  
+    void addPropertySubOwnerUnsorted(PropertyOwner* owner);
 
     /// \see PropertyOwner::addPropertySubOwner(PropertyOwner*)
     void addPropertySubOwner(PropertyOwner& owner);

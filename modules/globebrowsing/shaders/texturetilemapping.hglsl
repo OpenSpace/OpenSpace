@@ -93,6 +93,17 @@ vec4 performLayerSettings(vec4 currentValue, const LayerSettings settings) {
 	return newValue;
 }
 
+vec3 applyAdjustmentLayer(vec3 currentValue, const AdjustmentLayer adjustmentLayer) {
+	switch (adjustmentLayer.type) {
+		case 0: { // None
+			return currentValue;
+		}
+		case 1: { // Color
+			return adjustmentLayer.color;
+		}
+	}
+}
+
 float calculateUntransformedHeight(
 	vec2 uv,
 	LevelWeights levelWeights,
@@ -163,9 +174,12 @@ vec4 calculateColor(
 	{
 		vec4 colorSample = getTexVal(ColorLayers[#{i}].pile, levelWeights, uv);
 
+		colorSample.rgb = applyAdjustmentLayer(colorSample.rgb, ColorLayers[#{i}].adjustmentLayer);
+		
 		colorSample = performLayerSettings(colorSample, ColorLayers[#{i}].settings);
 
 		color = blendOver(color, colorSample);
+
 	}
 	#endfor
 
