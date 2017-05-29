@@ -260,7 +260,6 @@ namespace openspace {
 			_renderableSitePropertyOwner.
 				addPropertySubOwner(_renderableSitePropertyOwner);
 			addProperty(_debugUseMultipleTextures);
-			createLookUpTable();
 
 		}
 
@@ -790,24 +789,6 @@ namespace openspace {
 			}
 		}
 
-		void RenderableSite::createLookUpTable() {
-			int rStart = 204;
-			int rStepSize = -5;
-			int gStart = 102;
-			int gStepSize = 0;
-			int bStart = 0;
-			int bStepSize = 5;
-
-			int counter = 0;
-			for (size_t i = 0; i < 21 * 3; ++i) {
-				_lookup[i] = rStart + counter * rStepSize;
-				i++;
-				_lookup[i] = gStart + counter * gStepSize;
-				i++;
-				_lookup[i] = bStart + counter * bStepSize;
-				counter++;
-			}
-		}
 
 	} // namespace globebrowsing
 } // namespace openspace
