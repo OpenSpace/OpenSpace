@@ -56,7 +56,8 @@ namespace globebrowsing {
 		: Renderable(dictionary)
 		, _generalProperties({
 				BoolProperty("enable", "Enabled", true),
-				BoolProperty("enablePath", "Enable path", true)
+				BoolProperty("enablePath", "Enable path", true),
+				BoolProperty("lockSubsite", "Lock subsite", false)
 		})
 		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
 		, _modelSwitch()
@@ -93,6 +94,7 @@ namespace globebrowsing {
 	_subsites = RoverPathFileReader::extractAllSubsites(tempDictionary2);
 
 	addProperty(_generalProperties.enablePath);
+	addProperty(_generalProperties.lockSubsite);
 	addProperty(_debugModelRotation);
 
 	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
@@ -176,19 +178,31 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			break;
 	}
 
-	
+	if (_generalProperties.lockSubsite.value() && level == 3 && _pressedOnce == false) {
+		_prevSubsites = ss;
+		_pressedOnce = true;
+	}
+	else if (!_generalProperties.lockSubsite.value() && level == 3 && _pressedOnce == true) {
+		_pressedOnce = false;
+	}
+
 
 	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
 	//FOR ALPHA BLENDING TO WORK
-	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels = _cachingModelProvider->getModels(ss, level);
+	std::vector<std::shared_ptr<SubsiteModels>> _subsiteModels;
+	if(_generalProperties.lockSubsite.value())
+		_subsiteModels = _cachingModelProvider->getModels(_prevSubsites, level);
+	else
+		_subsiteModels = _cachingModelProvider->getModels(ss, level);
 	
 	//if (_subsiteModels.size() == 0) return;
 
-	if (level == 3 && _prevSubsite != nullptr 
-		&& _prevSubsite->drive != _subsiteModels.at(0)->drive) {
-		_subsiteModels.push_back(_prevSubsite);
+	if(_subsiteModels.size() > 0) {
+		if (level == 3 && _prevSubsite != nullptr 
+			&& _prevSubsite->drive != _subsiteModels.at(0)->drive) {
+			_subsiteModels.push_back(_prevSubsite);
+		}
 	}
-
 	_subsiteModels = calculateSurfacePosition(_subsiteModels);
 
 	_programObject->activate();

@@ -46,6 +46,7 @@ public:
 	struct GeneralProperties {
 		properties::BoolProperty isEnabled;
 		properties::BoolProperty enablePath;
+		properties::BoolProperty lockSubsite;
 	};
 
 	RenderableRoverSurface(const ghoul::Dictionary& dictionary);
@@ -62,7 +63,10 @@ private:
 	std::vector<std::shared_ptr<SubsiteModels>> calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector);
 
 	std::vector<std::shared_ptr<Subsite>> _subsites;
+	std::vector<std::shared_ptr<Subsite>> _prevSubsites;
 	std::vector<std::shared_ptr<Subsite>> _subsitesWithModels;
+
+	bool _pressedOnce = false;
 
 	GeneralProperties _generalProperties;
 
