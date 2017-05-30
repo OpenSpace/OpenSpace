@@ -510,7 +510,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   vec3 groundRadiance = reflectance.rgb * (muSun * transmittanceL0 + irradianceReflected)
     * sunRadiance / M_PI;
     
-  // Yellowish specular reflection from sun on oceans and rivers
+  // Specular reflection from sun on oceans and rivers  
   if (reflectance.w > 0.0) {
     vec3  h         = normalize(s - v);
     // Fresnell Schlick's approximation
@@ -521,7 +521,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     // (After adding the sunRadiance and the attenuation of the Sun through atmosphere)
     groundRadiance += reflectance.w * max(waterBrdf, 0.0) * transmittanceL0 * sunRadiance;
   }
-
+  
   // Finally, we attenuate the surface Radiance from the the point x0 to the camera location.
   reflectedRadiance = attenuationXtoX0 * groundRadiance;    
     

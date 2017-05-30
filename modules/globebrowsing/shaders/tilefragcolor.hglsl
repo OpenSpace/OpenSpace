@@ -75,6 +75,7 @@ in vec2 fs_uv;
 in vec3 ellipsoidNormalCameraSpace;
 in vec3 positionCameraSpace;
 
+float reflectance;
 
 // levelInterpolationParameter is used to interpolate between a tile and its parent tiles
 // The value increases with the distance from the vertex (or fragment) to the camera
@@ -155,7 +156,8 @@ vec4 getTileFragColor(){
 		WaterMasks,
 		normalize(ellipsoidNormalCameraSpace),
 		lightDirectionCameraSpace, // Should already be normalized
-		positionCameraSpace);
+		positionCameraSpace);//,
+    //        reflectance);
 
 #endif // USE_WATERMASK
 
