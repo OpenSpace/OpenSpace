@@ -62,7 +62,7 @@ function preInitialization()
     openspace.bindKey("p",
         'openspace.setPropertyValue("*Trail.renderable.enabled", true)'
     )
-    
+
 ]]
 end
 
@@ -75,7 +75,7 @@ function postInitialization()
     openspace.setPropertyValue("Sun.renderable.enabled", true)
     openspace.setPropertyValue("SunGlare.renderable.enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
-    
+
     openspace.setPropertyValue("Earth.RenderableGlobe.atmosphere", true)
     openspace.setPropertyValue("Earth.RenderableGlobe.Debug.levelByProjectedAreaElseDistance", false)
     openspace.setPropertyValue("Earth.RenderableGlobe.Layers.ColorLayers.blendTileLevels", true)
@@ -90,9 +90,9 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "Earth",
-        Position = {30000000, 0, 0},
-        Rotation = {0.758797, 0.221490, -0.605693, -0.091135},
+        Focus = "Mars",
+        Position = {138530625167.228241, 42217005217.825005, -46336405755.934372},
+        Rotation = {0.633883, 0.492158, -0.123913, -0.583625},
     },
 
     Modules = {
@@ -100,6 +100,7 @@ return {
         "sun",
         "stars",
         "milkyway",
+        "models"
     }
 }
 
