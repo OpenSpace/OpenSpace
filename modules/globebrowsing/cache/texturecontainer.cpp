@@ -22,41 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__
-
-#include <ghoul/filesystem/directory.h>
-#include <ghoul/filesystem/file.h>
-
-#include <memory>
+#include <modules/globebrowsing/cache/texturecontainer.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 namespace openspace {
 namespace globebrowsing {
+namespace cache {
 
-struct TileIndex;
-struct RawTile;
+TextureContainer::TextureContainer(TileTextureInitData initData, size_t numTextures)
+    : _initData(initData)
+    , _freeTexture(0)
+    , _numTextures(numTextures)
+{
+    reset();
+}
 
-class TileDiskCache {
-public:
-    TileDiskCache(const std::string& name);
+void TextureContainer::reset() {
+    _textures.clear();
+    _freeTexture = 0;
+    ghoul::opengl::Texture::AllocateData allocate =
+        _initData.shouldAllocateDataOnCPU() ?
+        ghoul::opengl::Texture::AllocateData::Yes :
+        ghoul::opengl::Texture::AllocateData::No;
+    for (size_t i = 0; i < _numTextures; ++i)
+    {
+        auto tex = std::make_unique<ghoul::opengl::Texture>(
+            _initData.dimensionsWithPadding(),
+            _initData.ghoulTextureFormat(),
+            _initData.glTextureFormat(),
+            _initData.glType(),
+            ghoul::opengl::Texture::FilterMode::Linear,
+            ghoul::opengl::Texture::WrappingMode::ClampToEdge,
+            allocate
+        );
         
-    std::shared_ptr<RawTile> get(const TileIndex& tileIndex);
-    bool has(const TileIndex& tileIndex) const;
-    bool put(const TileIndex& tileIndex, std::shared_ptr<RawTile> rawTile);
+        tex->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::Yes);
+        tex->uploadTexture();
+        tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
         
-    static const std::string CACHE_ROOT;
-    
-private:
-    const std::string _name;
-        
-    ghoul::filesystem::Directory _cacheDir;
-        
-    std::string getFilePath(const TileIndex& tileIndex) const;
-    ghoul::filesystem::File getMetaDataFile(const TileIndex& tileIndex) const;
-    ghoul::filesystem::File getDataFile(const TileIndex& tileIndex) const;
+        _textures.push_back(std::move(tex));
+    }
+}
+
+void TextureContainer::reset(size_t numTextures) {
+    _numTextures = numTextures;
+    reset();
+}
+
+ghoul::opengl::Texture* TextureContainer::getTextureIfFree() {
+    ghoul::opengl::Texture* texture = nullptr;
+    if (_freeTexture < _textures.size()) {
+        texture = _textures[_freeTexture].get();
+        _freeTexture++;
+    }
+    return texture;
+}
+
+const openspace::globebrowsing::TileTextureInitData& TextureContainer::tileTextureInitData() const {
+    return _initData;
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+size_t TextureContainer::size() const {
+    return _textures.size();
+};
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__
+}
+}
+}

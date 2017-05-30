@@ -28,8 +28,6 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/tile/tileuvtransform.h>
 
-#include <modules/globebrowsing/cache/memoryawarecacheable.h>
-
 #include <memory>
 
 namespace ghoul { namespace opengl {
@@ -45,7 +43,7 @@ struct TileUvTransform;
 /**
  * Defines a status and may have a Texture and TileMetaData
  */
-class Tile : public cache::MemoryAwareCacheable {
+class Tile {
 public:
      /**
      * Describe if this Tile is good for usage (OK) or otherwise
@@ -79,25 +77,17 @@ public:
         OK
     };
     
-    Tile(std::shared_ptr<ghoul::opengl::Texture> texture,
+    Tile(ghoul::opengl::Texture* texture,
          std::shared_ptr<TileMetaData> metaData,
          Status status);
     ~Tile() = default;
 
     std::shared_ptr<TileMetaData> metaData() const { return _metaData; };
     Status status() const { return _status; };
-    std::shared_ptr<ghoul::opengl::Texture> texture() const { return _texture; };
+    ghoul::opengl::Texture* texture() const {
+        return _texture;
+    };
 
-    /**
-     * Instantiates a new tile with a single color. 
-     * 
-     * \param size The size of texture to be created
-     * \param color defined RGBA values in range 0-255.
-     *
-     * \returns a Tile with status OK and the a texture 
-     * with the requested size and color
-     */
-    static Tile createPlainTile(const glm::uvec2& size, const glm::uvec4& color);
     static glm::vec2 compensateSourceTextureSampling(glm::vec2 startOffset, 
         glm::vec2 sizeDiff, glm::uvec2 resolution, glm::vec2 tileUV);
     static glm::vec2 TileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
@@ -109,7 +99,7 @@ public:
     static const Tile TileUnavailable;
 
 private:
-    std::shared_ptr<ghoul::opengl::Texture> _texture;
+    ghoul::opengl::Texture* _texture;
     std::shared_ptr<TileMetaData> _metaData;
     Status _status;
 };

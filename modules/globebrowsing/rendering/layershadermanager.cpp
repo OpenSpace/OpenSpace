@@ -23,6 +23,12 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/rendering/layershadermanager.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/chunk/chunk.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroup.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
@@ -56,6 +62,50 @@ bool LayerShaderManager::LayerShaderPreprocessingData::operator==(
     }
 }
 
+LayerShaderManager::LayerShaderPreprocessingData
+    LayerShaderManager::LayerShaderPreprocessingData::get(
+    const RenderableGlobe& globe)
+{
+    LayerShaderManager::LayerShaderPreprocessingData preprocessingData;
+
+    std::shared_ptr<LayerManager> layerManager = globe.chunkedLodGlobe()->layerManager();
+    for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; i++) {
+        LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData
+            layeredTextureInfo;
+        auto layerGroup = layerManager->layerGroup(i);
+        layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
+        layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
+
+        preprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
+    }
+        
+    const auto& generalProps = globe.generalProperties();
+    const auto& debugProps = globe.debugProperties();
+    auto& pairs = preprocessingData.keyValuePairs;
+        
+    pairs.emplace_back("useAtmosphere", std::to_string(generalProps.atmosphereEnabled));
+    pairs.emplace_back("performShading", std::to_string(generalProps.performShading));
+    pairs.emplace_back("showChunkEdges", std::to_string(debugProps.showChunkEdges));
+    pairs.emplace_back("showHeightResolution",
+        std::to_string(debugProps.showHeightResolution));
+    pairs.emplace_back("showHeightIntensities",
+        std::to_string(debugProps.showHeightIntensities));
+    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
+
+    pairs.emplace_back("tilePaddingStart",
+        "ivec2(" +
+        std::to_string(RawTileDataReader::padding.start.x) + "," +
+        std::to_string(RawTileDataReader::padding.start.y) + ")"
+    );
+    pairs.emplace_back("tilePaddingSizeDiff",
+        "ivec2(" +
+        std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
+        std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
+    );
+
+    return preprocessingData;
+}
+
 LayerShaderManager::LayerShaderManager(const std::string& shaderName,
                                        const std::string& vsPath,
                                        const std::string& fsPath)
@@ -73,14 +123,8 @@ LayerShaderManager::~LayerShaderManager() {
     }
 }
 
-ghoul::opengl::ProgramObject* LayerShaderManager::programObject(
-                                           LayerShaderPreprocessingData preprocessingData)
-{
-    _updatedOnLastCall = false;
-    if (!(preprocessingData == _preprocessingData) || _programObject == nullptr) {
-        recompileShaderProgram(preprocessingData);
-        _updatedOnLastCall = true;
-    }
+ghoul::opengl::ProgramObject* LayerShaderManager::programObject() const {
+    ghoul_assert(_programObject, "Program does not exist. Needs to be compiled!");
     return _programObject.get();
 }
 
@@ -96,7 +140,7 @@ void LayerShaderManager::recompileShaderProgram(
     for (size_t i = 0; i < textureTypes.size(); i++) {
         // lastLayerIndex must be at least 0 for the shader to compile,
         // the layer type is inactivated by setting use to false
-        std::string groupName = LayerManager::LAYER_GROUP_NAMES[i];
+        std::string groupName = layergroupid::LAYER_GROUP_NAMES[i];
         shaderDictionary.setValue(
             "lastLayerIndex" + groupName,
             glm::max(textureTypes[i].lastLayerIdx, 0)
@@ -130,6 +174,7 @@ void LayerShaderManager::recompileShaderProgram(
     ghoul_assert(_programObject != nullptr, "Failed to initialize programObject!");
     using IgnoreError = ghoul::opengl::ProgramObject::ProgramObject::IgnoreError;
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
+    _updatedOnLastCall = true;
 }
 
 bool LayerShaderManager::updatedOnLastCall() {

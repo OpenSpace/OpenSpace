@@ -32,15 +32,21 @@
 
 class LRUCacheTest : public testing::Test {};
 
+struct DefaultHasher {
+	unsigned long long operator()(const int& var) const {
+		return static_cast<unsigned long long>(var);
+	}
+};
+
 TEST_F(LRUCacheTest, Get) {
-    openspace::globebrowsing::cache::LRUCache<int, std::string> lru(4);
+    openspace::globebrowsing::cache::LRUCache<int, std::string, DefaultHasher> lru(4);
     lru.put(1, "hej");
     lru.put(12, "san");
     ASSERT_STREQ(lru.get(1).c_str(), "hej") << "testing get";
 }
 
 TEST_F(LRUCacheTest, CleaningCache) {
-    openspace::globebrowsing::cache::LRUCache<int, double> lru(4);
+    openspace::globebrowsing::cache::LRUCache<int, double, DefaultHasher> lru(4);
     lru.put(1, 1.2);
     lru.put(12, 2.3);
     lru.put(123, 33.4);
@@ -62,17 +68,15 @@ std::ostream& operator<<(std::ostream& o, const MyKey& key) {
     return o << key.x << ", " << key.y;
 }
 
-// custom specialization of std::hash can be injected in namespace std
-namespace std {
-    template<> struct hash<MyKey> {
-        std::size_t operator()(MyKey const& s) const {
-            return s.x ^ (s.y << 1);
-        }
-    };
-}
+// custom specialization 
+struct DefaultHasherMyKey {
+	unsigned long long operator()(const MyKey& s) const {
+		return s.x ^ (s.y << 1);
+	}
+};
 
 TEST_F(LRUCacheTest, StructKey) {
-    openspace::globebrowsing::cache::LRUCache<MyKey, std::string> lru(4);
+    openspace::globebrowsing::cache::LRUCache<MyKey, std::string, DefaultHasherMyKey> lru(4);
 
     // These two custom keys should be treated as equal
     MyKey key1 = { 2, 3 };

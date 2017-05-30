@@ -58,13 +58,14 @@ const GeodeticPatch ChunkedLodGlobe::COVERAGE = GeodeticPatch(0, 0, 90, 180);
 
 ChunkedLodGlobe::ChunkedLodGlobe(const RenderableGlobe& owner, size_t segmentsPerPatch,
                                  std::shared_ptr<LayerManager> layerManager)
-    : _owner(owner)
+    : minSplitDepth(2)
+    , maxSplitDepth(22)
+    , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
+    , _owner(owner)
     , _leftRoot(std::make_unique<ChunkNode>(Chunk(owner, LEFT_HEMISPHERE_INDEX)))
     , _rightRoot(std::make_unique<ChunkNode>(Chunk(owner, RIGHT_HEMISPHERE_INDEX)))
-    , minSplitDepth(2)
-    , maxSplitDepth(22)
     , _layerManager(layerManager)
-    , stats(StatsCollector(absPath("test_stats"), 1, StatsCollector::Enabled::No))
+    , _shadersNeedRecompilation(true)
 {
     auto geometry = std::make_shared<SkirtedGrid>(
         static_cast<unsigned int>(segmentsPerPatch),
@@ -172,23 +173,28 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
     );
 
     // Get the tile providers for the height maps
-    const auto& heightMapLayers = _layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
+    const std::vector<std::shared_ptr<Layer>>& heightMapLayers =
+        _layerManager->layerGroup(layergroupid::HeightLayers).activeLayers();
         
-    for (const auto& layer : heightMapLayers) {
+    for (const std::shared_ptr<Layer>& layer : heightMapLayers) {
         tileprovider::TileProvider* tileProvider = layer->tileProvider();
         // Transform the uv coordinates to the current tile texture
         ChunkTile chunkTile = tileProvider->getChunkTile(tileIndex);
-        const auto& tile = chunkTile.tile;
-        const auto& uvTransform = chunkTile.uvTransform;
-        const auto& depthTransform = tileProvider->depthTransform();
+        const Tile& tile = chunkTile.tile;
+        const TileUvTransform& uvTransform = chunkTile.uvTransform;
+        const TileDepthTransform& depthTransform = tileProvider->depthTransform();
         if (tile.status() != Tile::Status::OK) {
             return 0;
         }
 
+		ghoul::opengl::Texture* tileTexture = tile.texture();
+		if (!tileTexture)
+			return 0;
+
         glm::vec2 transformedUv = Tile::TileUvToTextureSamplePosition(
             uvTransform,
             patchUV,
-            glm::uvec2(tile.texture()->dimensions())
+            glm::uvec2(tileTexture->dimensions())
         );
 
         // Sample and do linear interpolation
@@ -196,7 +202,7 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
         // Suggestion: a function in ghoul::opengl::Texture that takes uv coordinates
         // in range [0,1] and uses the set interpolation method and clamping.
 
-        glm::uvec3 dimensions = tile.texture()->dimensions();
+        glm::uvec3 dimensions = tileTexture->dimensions();
             
         glm::vec2 samplePos = transformedUv * glm::vec2(dimensions);
         glm::uvec2 samplePos00 = samplePos;
@@ -220,10 +226,10 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
             glm::uvec2(dimensions) - glm::uvec2(1)
         );
 
-        float sample00 = tile.texture()->texelAsFloat(samplePos00).x;
-        float sample10 = tile.texture()->texelAsFloat(samplePos10).x;
-        float sample01 = tile.texture()->texelAsFloat(samplePos01).x;
-        float sample11 = tile.texture()->texelAsFloat(samplePos11).x;
+        float sample00 = tileTexture->texelAsFloat(samplePos00).x;
+        float sample10 = tileTexture->texelAsFloat(samplePos10).x;
+        float sample01 = tileTexture->texelAsFloat(samplePos01).x;
+        float sample11 = tileTexture->texelAsFloat(samplePos11).x;
 
         // In case the texture has NaN or no data values don't use this height map.
         bool anySampleIsNaN =
@@ -258,8 +264,16 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
     return height;
 }
 
+void ChunkedLodGlobe::notifyShaderRecompilation() {
+    _shadersNeedRecompilation = true;
+}
+
 void ChunkedLodGlobe::render(const RenderData& data) {
     stats.startNewRecord();
+    if (_shadersNeedRecompilation) {
+        _renderer->recompileShaders(_owner);
+        _shadersNeedRecompilation = false;
+    }
         
     auto duration = std::chrono::system_clock::now().time_since_epoch();
     auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
@@ -270,7 +284,7 @@ void ChunkedLodGlobe::render(const RenderData& data) {
 
     // Calculate the MVP matrix
     glm::dmat4 viewTransform = glm::dmat4(data.camera.combinedViewMatrix());
-    glm::dmat4 vp = glm::dmat4(data.camera.projectionMatrix()) * viewTransform;
+    glm::dmat4 vp = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) * viewTransform;
     glm::dmat4 mvp = vp * _owner.modelTransform();
 
     // Render function

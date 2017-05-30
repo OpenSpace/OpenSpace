@@ -26,22 +26,28 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <openspace/properties/scalarproperty.h>
-#include <openspace/properties/triggerproperty.h>
-
 #include <memory>
 
 namespace openspace {
 
+namespace globebrowsing {
+namespace cache {
+    class MemoryAwareTileCache;
+}
+}
+
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
     GlobeBrowsingModule();
+
+    globebrowsing::cache::MemoryAwareTileCache* tileCache();
     
+    static const std::string name;
+
 protected:
     void internalInitialize() override;
 private:
-    properties::IntProperty _openSpaceMaximumTileCacheSize;
-    properties::TriggerProperty _clearTileCache;
+    std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 };
 
 } // namespace openspace

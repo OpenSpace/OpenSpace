@@ -48,13 +48,15 @@ struct TileIndex;
 class GPUHeightLayer : public GPULayer {
 public:
 
+    virtual ~GPUHeightLayer() override = default;
+
     /**
      * Sets the value of <code>Layer</code> to its corresponding
      * GPU struct. OBS! Users must ensure bind has been 
      * called before setting using this method.
      */
     virtual void setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
-        const TileIndex& tileIndex, int pileSize);
+        const TileIndex& tileIndex, int pileSize) override;
 
     /** 
      * Binds this object with GLSL variables with identifiers starting 
@@ -62,7 +64,7 @@ public:
      * After this method has been called, users may invoke setValue.
      */
     virtual void bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
-        const std::string& nameBase, int pileSize);
+        const std::string& nameBase, int pileSize) override;
 
 private:
     GPUTileDepthTransform _gpuDepthTransform;

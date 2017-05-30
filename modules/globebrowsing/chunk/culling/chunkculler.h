@@ -37,6 +37,7 @@ namespace culling {
 
 class ChunkCuller {
 public:
+    virtual ~ChunkCuller() = default;
     /**
      * Determine if the Chunk is cullable. That is return true if removing the
      * Chunk 'culling it' will not have any result on the final rendering. Culling

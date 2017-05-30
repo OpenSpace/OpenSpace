@@ -36,21 +36,20 @@ LayerGroup::LayerGroup(std::string name)
     addProperty(_levelBlendingEnabled);
 }
 
-LayerGroup::LayerGroup(std::string name, const ghoul::Dictionary& dict)
-    : LayerGroup(std::move(name))
+LayerGroup::LayerGroup(layergroupid::ID id, const ghoul::Dictionary& dict)
+    : LayerGroup(layergroupid::LAYER_GROUP_NAMES[id])
 {
     for (size_t i = 0; i < dict.size(); i++) {
         std::string dictKey = std::to_string(i + 1);
         ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(dictKey);
 
         try {
-            _layers.push_back(std::make_shared<Layer>(layerDict));
+            _layers.push_back(std::make_shared<Layer>(id, layerDict));
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
             continue;
         }
-        //_layers.push_back(std::make_shared<Layer>(layerDict));
     }
 
     for (const auto& layer : _layers) {
@@ -79,6 +78,14 @@ const std::vector<std::shared_ptr<Layer>>& LayerGroup::activeLayers() const {
 
 int LayerGroup::pileSize() const{
     return _levelBlendingEnabled.value() ? 3 : 1;
+}
+
+void LayerGroup::onChange(std::function<void(void)> callback) {
+    _onChangeCallback = callback;
+    _levelBlendingEnabled.onChange(callback);
+    for (const std::shared_ptr<Layer>& layer : _layers) {
+        layer->onChange(callback);
+    }
 }
 
 } // namespace globebrowsing

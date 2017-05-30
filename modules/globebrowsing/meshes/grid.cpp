@@ -27,8 +27,7 @@
 namespace openspace {
 namespace globebrowsing {
 
-Grid::Grid(int xSegments, int ySegments, TriangleSoup::Positions usePositions,
-           TriangleSoup::TextureCoordinates useTextures, TriangleSoup::Normals useNormals)
+Grid::Grid(int xSegments, int ySegments)
     : _xSegments(xSegments)
     , _ySegments(ySegments)
 {}

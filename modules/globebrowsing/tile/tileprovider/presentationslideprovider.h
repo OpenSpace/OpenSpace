@@ -44,15 +44,14 @@ class PresentationSlideProvider : public TileProvider {
 public:
     PresentationSlideProvider(const ghoul::Dictionary& dictionary);
     PresentationSlideProvider(const std::string& imagePath);
-    virtual ~PresentationSlideProvider() { }
+    virtual ~PresentationSlideProvider() = default;
 
-    virtual Tile getTile(const TileIndex& tileIndex);
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& index);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
+    virtual Tile getTile(const TileIndex& tileIndex) override;
+    virtual Tile::Status getTileStatus(const TileIndex& index) override;
+    virtual TileDepthTransform depthTransform() override;
+    virtual void update() override;
+    virtual void reset() override;
+    virtual int maxLevel() override;
 
 private:
     TileProvider* slideProvider();

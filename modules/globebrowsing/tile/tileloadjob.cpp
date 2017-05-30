@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
+#include <modules/globebrowsing/tile/tileloadjob.h>
 
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
@@ -32,14 +32,47 @@ namespace globebrowsing {
 TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
     const TileIndex& tileIndex)
     : _rawTileDataReader(rawTileDataReader)
-    , _chunkIndex(tileIndex) {}
+    , _chunkIndex(tileIndex)
+    , _pboMappedDataDestination(nullptr)
+    , _hasOwnershipOfData(false)
+{ }
 
-void TileLoadJob::execute() {
-    _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
+
+TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
+    const TileIndex& tileIndex, char* pboDataPtr)
+    : _rawTileDataReader(rawTileDataReader)
+    , _chunkIndex(tileIndex)
+    , _pboMappedDataDestination(pboDataPtr)
+    , _hasOwnershipOfData(false)
+{ }
+
+TileLoadJob::~TileLoadJob() {
+    if (_hasOwnershipOfData) {
+        ghoul_assert(_rawTile->imageData, "Image data must exist");
+        delete [] _rawTile->imageData;
+    }
 }
 
-std::shared_ptr<RawTile> TileLoadJob::product() const {
+void TileLoadJob::execute() {
+    size_t numBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
+    char* dataPtr = nullptr;
+    if (_rawTileDataReader->tileTextureInitData().shouldAllocateDataOnCPU() ||
+        !_pboMappedDataDestination)
+    {
+        dataPtr = new char[numBytes];
+        _hasOwnershipOfData = true;
+    }
+    _rawTile = _rawTileDataReader->readTileData(
+        _chunkIndex, dataPtr, _pboMappedDataDestination);
+}
+
+std::shared_ptr<RawTile> TileLoadJob::product() {
+    _hasOwnershipOfData = false;
     return _rawTile;
+}
+
+bool TileLoadJob::hasOwnershipOfData() const {
+    return _hasOwnershipOfData;
 }
 
 } // namespace globebrowsing

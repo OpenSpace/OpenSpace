@@ -33,7 +33,7 @@ SkirtedGrid::SkirtedGrid(unsigned int xSegments, unsigned int ySegments,
                          TriangleSoup::Positions usePositions,
                          TriangleSoup::TextureCoordinates useTextureCoordinates,
                          TriangleSoup::Normals useNormals)
-    : Grid(xSegments, ySegments, usePositions, useTextureCoordinates, useNormals)
+    : Grid(xSegments, ySegments)
 {
     _geometry = std::make_unique<TriangleSoup>(
         createElements(xSegments, ySegments),
@@ -81,8 +81,8 @@ std::vector<GLuint> SkirtedGrid::createElements(int xSegments, int ySegments) {
 
     std::vector<GLuint> elements;
     elements.reserve(numElements(xSegments + 2, ySegments + 2));
-    for (unsigned int y = 0; y < ySegments + 2; y++) {
-        for (unsigned int x = 0; x < xSegments + 2; x++) {
+    for (int y = 0; y < ySegments + 2; y++) {
+        for (int x = 0; x < xSegments + 2; x++) {
 
             // x    v01---v11   x ..
             //       |  /  |

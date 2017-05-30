@@ -24,22 +24,28 @@
 
 #include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
 
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
 #include <modules/globebrowsing/tile/asynctiledataprovider.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalrawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/simplerawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/cache/memoryawaretilecache.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/moduleengine.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/texture.h>
 
 namespace {
-    const char* KeyDoPreProcessing = "DoPreProcessing";
+    const char* KeyPerformPreProcessing = "PerformPreProcessing";
     const char* KeyTilePixelSize = "TilePixelSize";
     const char* KeyFilePath = "FilePath";
     const char* KeyBasePath = "BasePath";
-    const char* KeyFlushInterval = "FlushInterval";
     const char* KeyPreCacheLevel = "PreCacheLevel";
 }
 
@@ -49,12 +55,11 @@ namespace tileprovider {
     
 CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
     : TileProvider(dictionary)
-    , _framesSinceLastRequestFlush(0)
-    , _defaultTile(Tile::TileUnavailable)
 {
-    std::string name = "Name unspecified";
-    dictionary.getValue("Name", name);
-    std::string _loggerCat = "CachingTileProvider : " + name;
+    _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();
+    _name = "Name unspecified";
+    dictionary.getValue("Name", _name);
+    std::string _loggerCat = "CachingTileProvider : " + _name;
 
     // 1. Get required Keys
     std::string filePath;
@@ -62,46 +67,45 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
         throw std::runtime_error(std::string("Must define key '") + KeyFilePath + "'");
     }
 
+    layergroupid::ID layerGroupID;
+    if (!dictionary.getValue<layergroupid::ID>("LayerGroupID", layerGroupID)) {
+        ghoul_assert(false, "Unknown layer group id");
+    }
+
     // 2. Initialize default values for any optional Keys
-    RawTileDataReader::Configuration config;
-    config.doPreProcessing = false;
-    config.tilePixelSize = 512;
-        
     // getValue does not work for integers
-    double minimumPixelSize;
-    double framesUntilRequestFlush = 60;
-
-    // 3. Check for used spcified optional keys
-    if (dictionary.getValue<bool>(KeyDoPreProcessing, config.doPreProcessing)) {
-        LDEBUG("Default doPreProcessing overridden: " << config.doPreProcessing);
+    double pixelSize = 0.0;
+    int tilePixelSize = 0;
+    if (dictionary.getValue<double>(KeyTilePixelSize, pixelSize)) {
+        LDEBUG("Default pixel size overridden: " << pixelSize);
+        tilePixelSize = static_cast<int>(pixelSize); 
     }
-    if (dictionary.getValue<double>(KeyTilePixelSize, minimumPixelSize)) {
-        LDEBUG("Default minimumPixelSize overridden: " << minimumPixelSize);
-        config.tilePixelSize = static_cast<int>(minimumPixelSize); 
+    
+    TileTextureInitData initData(LayerManager::getTileTextureInitData(
+        layerGroupID, tilePixelSize));
+  
+    bool performPreProcessing =
+        LayerManager::shouldPerformPreProcessingOnLayergroup(layerGroupID);
+    if (dictionary.getValue<bool>(KeyPerformPreProcessing, performPreProcessing)) {
+        LDEBUG("Default PerformPreProcessing overridden: " << performPreProcessing);
     }
-    if (dictionary.getValue<double>(KeyFlushInterval, framesUntilRequestFlush)) {
-        LDEBUG("Default framesUntilRequestFlush overridden: " <<
-            framesUntilRequestFlush);
-    }
-
+    RawTileDataReader::PerformPreprocessing preprocess =
+        performPreProcessing ? RawTileDataReader::PerformPreprocessing::Yes :
+        RawTileDataReader::PerformPreprocessing::No;
+    
     std::string basePath;
     dictionary.getValue(KeyBasePath, basePath);
 
     // Initialize instance variables
 #ifdef GLOBEBROWSING_USE_GDAL
-    auto tileDataset = std::make_shared<GdalRawTileDataReader>(filePath, config, basePath);
+    auto tileDataset = std::make_shared<GdalRawTileDataReader>(filePath, initData,
+                                                               basePath, preprocess);
 #else // GLOBEBROWSING_USE_GDAL
-    auto tileDataset = std::make_shared<SimpleRawTileDataReader>(filePath, config);
+    auto tileDataset = std::make_shared<SimpleRawTileDataReader>(filePath, initData,
+                                                                 preprocess);
 #endif // GLOBEBROWSING_USE_GDAL
 
-    // only one thread per provider supported atm
-    // (GDAL does not handle multiple threads for a single dataset very well
-    // currently)
-    auto threadPool = std::make_shared<ThreadPool>(1);
-
-    _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(
-        tileDataset, threadPool);
-    _framesUntilRequestFlush = framesUntilRequestFlush;
+    _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(_name, tileDataset);
 
     if (dictionary.hasKeyAndValue<double>(KeyPreCacheLevel)) {
         int preCacheLevel = static_cast<int>(dictionary.value<double>(KeyPreCacheLevel));
@@ -117,28 +121,21 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
 }
 
 CachingTileProvider::CachingTileProvider(
-                                        std::shared_ptr<AsyncTileDataProvider> tileReader, 
-                                        int framesUntilFlushRequestQueue)
+    std::shared_ptr<AsyncTileDataProvider> tileReader)
     : _asyncTextureDataProvider(tileReader)
-    , _framesUntilRequestFlush(framesUntilFlushRequestQueue)
-    , _framesSinceLastRequestFlush(0)
-    , _defaultTile(Tile::TileUnavailable)
-{}
+{ }
 
-CachingTileProvider::~CachingTileProvider(){
-    clearRequestQueue();
-}
+CachingTileProvider::~CachingTileProvider()
+{ }
 
 void CachingTileProvider::update() {
+    _asyncTextureDataProvider->update();
     initTexturesFromLoadedData();
-    if (_framesSinceLastRequestFlush++ > _framesUntilRequestFlush) {
-        clearRequestQueue();
-    }
 }
 
 void CachingTileProvider::reset() {
-    cache::MemoryAwareTileCache::ref().clear();
-    //_asyncTextureDataProvider->reset();
+    _tileCache->clear();
+    _asyncTextureDataProvider->reset();
 }
 
 int CachingTileProvider::maxLevel() {
@@ -152,41 +149,26 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
 
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
-    if (cache::MemoryAwareTileCache::ref().exist(key)) {
-        return cache::MemoryAwareTileCache::ref().get(key);
-    }
-    else {
+    Tile tile = _tileCache->get(key);
+
+    if (tile.texture() == nullptr) {
         _asyncTextureDataProvider->enqueueTileIO(tileIndex);
     }
-        
-    return Tile::TileUnavailable;
+
+    return tile;
 }
 
 float CachingTileProvider::noDataValueAsFloat() {
     return _asyncTextureDataProvider->noDataValueAsFloat();
 }
 
-Tile CachingTileProvider::getDefaultTile() {
-    if (_defaultTile.texture() == nullptr) {
-        _defaultTile = createTile(
-            _asyncTextureDataProvider->getRawTileDataReader()->defaultTileData()
-        );
-    }
-    return _defaultTile;
-}
-
 void CachingTileProvider::initTexturesFromLoadedData() {
     std::shared_ptr<RawTile> rawTile = _asyncTextureDataProvider->popFinishedRawTile();
     if (rawTile) {
         cache::ProviderTileKey key = { rawTile->tileIndex, uniqueIdentifier() };
-        Tile tile = createTile(rawTile);
-        cache::MemoryAwareTileCache::ref().put(key, tile);
+        ghoul_assert(!_tileCache->exist(key), "Tile must not be existing in cache");
+        _tileCache->createTileAndPut(key, rawTile);
     }
-}
-
-void CachingTileProvider::clearRequestQueue() {
-    _asyncTextureDataProvider->clearRequestQueue();
-    _framesSinceLastRequestFlush = 0;
 }
 
 Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
@@ -197,42 +179,11 @@ Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
 
     cache::ProviderTileKey key = { tileIndex, uniqueIdentifier() };
 
-    if (cache::MemoryAwareTileCache::ref().exist(key)) {
-        return cache::MemoryAwareTileCache::ref().get(key).status();
-    }
-
-    return Tile::Status::Unavailable;
+    return _tileCache->get(key).status();
 }
 
 TileDepthTransform CachingTileProvider::depthTransform() {
     return _asyncTextureDataProvider->getRawTileDataReader()->getDepthTransform();
-}
-
-Tile CachingTileProvider::createTile(std::shared_ptr<RawTile> rawTile) {
-    if (rawTile->error != RawTile::ReadError::None) {
-        return Tile(nullptr, nullptr, Tile::Status::IOError);
-    }
-
-    //TileDataLayout dataLayout =
-    //   _asyncTextureDataProvider->getTextureDataProvider()->getDataLayout();
-        
-    // The texture should take ownership of the data
-    using ghoul::opengl::Texture;
-    std::shared_ptr<Texture> texture = std::make_shared<Texture>(
-        rawTile->imageData,
-        rawTile->dimensions,
-        rawTile->textureFormat.ghoulFormat,
-        rawTile->textureFormat.glFormat,
-        rawTile->glType,
-        Texture::FilterMode::Linear,
-        Texture::WrappingMode::ClampToEdge);
-        
-    texture->uploadTexture();
-
-    // AnisotropicMipMap must be set after texture is uploaded
-    texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-    return Tile(texture, rawTile->tileMetaData, Tile::Status::OK);
 }
 
 } // namespace tileprovider
