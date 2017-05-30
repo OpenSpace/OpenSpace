@@ -29,8 +29,8 @@ template <typename T>
 TemplatedStatsCollector<T>::TemplatedStatsCollector(bool& enabled,
                                                     const std::string& delimiter)
     : _enabled(enabled)
-    , _delimiter(delimiter)
     , _writePos(0)
+    , _delimiter(delimiter)
 {}
 
 template <typename T>

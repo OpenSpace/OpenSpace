@@ -22,62 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/loadjob/diskcachedtileloadjob.h>
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEXTURE_CONTAINER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TEXTURE_CONTAINER___H__
 
-#include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
-#include <modules/globebrowsing/tile/tilediskcache.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
+
+#include <memory>
+#include <vector>
 
 namespace openspace {
 namespace globebrowsing {
+namespace cache {
 
-DiskCachedTileLoadJob::DiskCachedTileLoadJob(
-    std::shared_ptr<RawTileDataReader> textureDataProvider,
-    const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc,
-    CacheMode m)
-    : TileLoadJob(textureDataProvider, tileIndex)
-    , _tileDiskCache(tdc)
-    , _mode(m)
-{}
+/**
+ * Owner of texture data used for tiles. Instead of dynamically allocating textures one
+ * by one, they are created once and reused.
+ */
+class TextureContainer
+{
+public:
+    /**
+     * \param initData is the description of the texture type.
+     * \param numTextures is the number of textures to allocate.
+     */
+    TextureContainer(TileTextureInitData initData, size_t numTextures);
 
-void DiskCachedTileLoadJob::execute() {
-    _rawTile = nullptr;
+    ~TextureContainer() = default;
 
-    switch (_mode) {
-        case CacheMode::Disabled: 
-            _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
-            break;
+    void reset();
+    void reset(size_t numTextures);
+    
+    /**
+     * \returns a pointer to a texture if there is one texture never used before.
+     * If there are no textures left, nullptr is returned. TextureContainer still owns
+     * the texture so no delete should be called on the raw pointer.
+     */
+    ghoul::opengl::Texture* getTextureIfFree();
 
-        case CacheMode::ReadOnly:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
-            }
-            break;
+    const TileTextureInitData& tileTextureInitData() const;
+    
+    /**
+     * \returns the number of textures in this TextureContainer
+     */
+    size_t size() const;
 
-        case CacheMode::ReadAndWrite:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
-                _tileDiskCache->put(_chunkIndex, _rawTile);
-            }
-            break;
+private:
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+    size_t _freeTexture;
+    const TileTextureInitData _initData;
+    size_t _numTextures;
+};
 
-        case CacheMode::WriteOnly:
-            _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
-            _tileDiskCache->put(_chunkIndex, _rawTile);
-            break;
-
-        case CacheMode::CacheHitsOnly:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                RawTile res = RawTile::createDefaultRes();
-                res.tileIndex = _chunkIndex;
-                _rawTile = std::make_shared<RawTile>(res);
-            }
-            break;
-    }
-}
-
+} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEXTURE_CONTAINER___H__

@@ -25,12 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___IO_DESCRIPTION___H__
 
-#include <modules/globebrowsing/tile/textureformat.h>
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
-#include <modules/globebrowsing/tile/rawtile.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>

@@ -25,65 +25,27 @@
 #include <modules/globebrowsing/tile/rawtile.h>
 
 #include <modules/globebrowsing/tile/tilemetadata.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 namespace openspace {
 namespace globebrowsing {
 
 RawTile::RawTile()
     : imageData(nullptr)
-    , dimensions(0, 0, 0)
     , tileMetaData(nullptr)
+    , textureInitData(nullptr)
     , tileIndex(0, 0, 0)
     , error(ReadError::None)
-    , nBytesImageData(0)
+    , pbo(0)
 {}
-        
-RawTile RawTile::createDefaultRes() {
+
+RawTile RawTile::createDefault(const TileTextureInitData& initData) {
     RawTile defaultRes;
-    int w = 8;
-    int h = 8;
-    defaultRes.dimensions = glm::uvec3(w, h, 1);
-    defaultRes.nBytesImageData = w * h * 1 * 3 * 4; // assume max 3 channels, max 4 bytes per pixel
-    defaultRes.imageData = new char[defaultRes.nBytesImageData];
-    std::fill_n((char*)defaultRes.imageData, defaultRes.nBytesImageData, 0);
+    defaultRes.textureInitData = std::make_shared<TileTextureInitData>(initData);
+    defaultRes.imageData = new char[initData.totalNumBytes()];
+    std::fill_n(static_cast<char*>(defaultRes.imageData), initData.totalNumBytes(), 0);
     return defaultRes;
-}
 
-void RawTile::serializeMetaData(std::ostream& os) {
-    os << dimensions.x << " " << dimensions.y << " " << dimensions.z << std::endl;
-    os << tileIndex.x << " " << tileIndex.y << " " << tileIndex.level << std::endl;
-    os << static_cast<int>(error) << std::endl;
-
-    // preprocess data
-    os << (tileMetaData != nullptr) << std::endl;
-    if (tileMetaData != nullptr) {    
-        tileMetaData->serialize(os);
-    }
-        
-    os << nBytesImageData << std::endl;
-}
-
-RawTile RawTile::deserializeMetaData(std::istream& is) {
-    RawTile res;
-    is >> res.dimensions.x >> res.dimensions.y >> res.dimensions.z;
-    is >> res.tileIndex.x >> res.tileIndex.y >> res.tileIndex.level;
-    int err; is >> err; res.error = static_cast<ReadError>(err);
-        
-    res.tileMetaData = nullptr;
-    bool hastileMetaData; 
-    is >> hastileMetaData;
-    if (hastileMetaData) {
-        TileMetaData tileMetaData = TileMetaData::deserialize(is);
-        res.tileMetaData = std::make_shared<TileMetaData>(tileMetaData);
-    }
-        
-    is >> res.nBytesImageData;
-
-    char binaryDataSeparator;
-    is >> binaryDataSeparator; // not used
-        
-//    char* buffer = new char[res.nBytesImageData]();
-    return res;
 }
 
 } // namespace globebrowsing

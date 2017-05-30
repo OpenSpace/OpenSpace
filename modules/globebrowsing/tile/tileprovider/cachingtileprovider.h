@@ -29,6 +29,9 @@
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
 namespace openspace {
+
+class PixelBuffer;
+
 namespace globebrowsing {
 
 class AsyncTileDataProvider;
@@ -43,27 +46,23 @@ namespace tileprovider {
 class CachingTileProvider : public TileProvider {
 public:
     CachingTileProvider(const ghoul::Dictionary& dictionary);
+    CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader);
 
-    CachingTileProvider(
-        std::shared_ptr<AsyncTileDataProvider> tileReader,
-        int framesUntilFlushRequestQueue);
-
-    virtual ~CachingTileProvider();
+    virtual ~CachingTileProvider() override;
         
     /**
     * \returns a Tile with status OK iff it exists in in-memory 
     * cache. If not, it may enqueue some IO operations on a 
     * separate thread.
     */
-    virtual Tile getTile(const TileIndex& tileIndex);
+    virtual Tile getTile(const TileIndex& tileIndex) override;
 
-    virtual Tile getDefaultTile();
-    virtual Tile::Status getTileStatus(const TileIndex& tileIndex);
-    virtual TileDepthTransform depthTransform();
-    virtual void update();
-    virtual void reset();
-    virtual int maxLevel();
-    virtual float noDataValueAsFloat();
+    virtual Tile::Status getTileStatus(const TileIndex& tileIndex) override;
+    virtual TileDepthTransform depthTransform() override;
+    virtual void update() override;
+    virtual void reset() override;
+    virtual int maxLevel() override;
+    virtual float noDataValueAsFloat() override;
 
 private:
     /**
@@ -74,25 +73,9 @@ private:
     */
     void initTexturesFromLoadedData();
 
-    /**
-    * \returns A tile with <code>Tile::Status::OK</code> if no errors
-    * occured, a tile with <code>Tile::Status::IOError</code> otherwise
-    */
-    Tile createTile(std::shared_ptr<RawTile> res);
-
-    /**
-    * Deletes all enqueued, but not yet started async downloads of textures.
-    * Note that this does not cancel any currently ongoing async downloads.
-    */
-    void clearRequestQueue();
-
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-    //std::shared_ptr<TileCache> _tileCache;
-
-    int _framesSinceLastRequestFlush;
-    int _framesUntilRequestFlush;
-
-    Tile _defaultTile;
+  
+    cache::MemoryAwareTileCache* _tileCache;
 };
 
 } // namespace tileprovider

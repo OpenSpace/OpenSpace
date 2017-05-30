@@ -26,10 +26,6 @@
 
 #include <modules/globebrowsing/tile/pixelregion.h>
 
-namespace {
-    const char* _loggerCat = "IODescription";
-}
-
 namespace openspace {
 namespace globebrowsing {
 
