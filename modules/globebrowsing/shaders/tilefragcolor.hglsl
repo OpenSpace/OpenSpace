@@ -156,8 +156,8 @@ vec4 getTileFragColor(){
 		WaterMasks,
 		normalize(ellipsoidNormalCameraSpace),
 		lightDirectionCameraSpace, // Should already be normalized
-		positionCameraSpace);//,
-    //        reflectance);
+		positionCameraSpace,
+        reflectance);
 
 #endif // USE_WATERMASK
 

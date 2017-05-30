@@ -352,8 +352,8 @@ vec4 calculateWater(
 	const Layer WaterMasks[NUMLAYERS_WATERMASK],
 	const vec3 ellipsoidNormalCameraSpace,
 	const vec3 lightDirectionCameraSpace,
-	const vec3 positionCameraSpace){//,
-    //out float reflectance) {
+	const vec3 positionCameraSpace,
+    out float reflectance) {
 
 	vec4 waterColor = vec4(0,0,0,0);
 
@@ -383,7 +383,7 @@ vec4 calculateWater(
 
 	vec3 specularTotal = specularColor * cosineFactor * specularIntensity * waterColor.a;
 
-    //reflectance = waterColor.a;
+    reflectance = 1.0;//waterColor.a;
     
 	//return blendOver(currentColor, waterColor);
 	return currentColor + vec4(specularTotal, 1);

@@ -493,7 +493,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   float r0 = length(x0);
   // Normal of intersection point.
   vec3  n  = normalReflectance.xyz;
-  vec4 reflectance = groundColor * vec4(0.4);
+  vec4 groundReflectance = groundColor * vec4(0.4);
   //reflectance.w = 1.0;
             
   // L0 is not included in the irradiance texture.
@@ -507,11 +507,11 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   vec3 irradianceReflected = irradiance(irradianceTexture, r0, muSun) * irradianceFactor;
     
   // R[L0] + R[L*]
-  vec3 groundRadiance = reflectance.rgb * (muSun * transmittanceL0 + irradianceReflected)
+  vec3 groundRadiance = groundReflectance.rgb * (muSun * transmittanceL0 + irradianceReflected)
     * sunRadiance / M_PI;
     
   // Specular reflection from sun on oceans and rivers  
-  if (reflectance.w > 0.0) {
+  if (normalReflectance.w > 0.0) {
     vec3  h         = normalize(s - v);
     // Fresnell Schlick's approximation
     float fresnel   = 0.02f + 0.98f * pow(1.0f - dot(-v, h), 5.0f);
@@ -519,7 +519,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     float waterBrdf = fresnel * pow(max(dot(h, n), 0.0f), 150.0f);
     // Adding Fresnell and Water BRDFs approximation to the final surface color
     // (After adding the sunRadiance and the attenuation of the Sun through atmosphere)
-    groundRadiance += reflectance.w * max(waterBrdf, 0.0) * transmittanceL0 * sunRadiance;
+    groundRadiance += normalReflectance.w * max(waterBrdf, 0.0) * transmittanceL0 * sunRadiance;
   }
   
   // Finally, we attenuate the surface Radiance from the the point x0 to the camera location.
@@ -788,6 +788,7 @@ void main() {
           
           renderTarget = finalRadiance;
           //renderTarget = vec4(1.0 - HDR(vec3(pixelDepth/100)),1.0);
+          //renderTarget = vec4(vec3(meanNormal.a),1.0);
         }
       } else {
         renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);        
