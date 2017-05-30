@@ -122,6 +122,10 @@ void SpacecraftImageryManager::loadTransferFunctions(
     }
 }
 
+void SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::File& file) {
+    const std::string xmlFileName = std::string(file.fullBaseName() + ".xml");
+}
+
 void SpacecraftImageryManager::loadImageMetadata(
       const std::string& path,
       std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap,
@@ -182,6 +186,7 @@ void SpacecraftImageryManager::loadImageMetadata(
                                            tokens[2] + "T" + tokens[4] + ":" +
                                            tokens[5] + ":" + tokens[6] + "." + tokens[7];
 
+                        parseMetadata(currentFile);
                         ImageMetadata im {seqPath};
                         std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
                         TimedependentState<ImageMetadata> timeState(

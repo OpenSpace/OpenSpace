@@ -35,7 +35,10 @@
 
 #define IMG_PRECISION unsigned char
 
-namespace ghoul { namespace opengl { class Texture; }}
+namespace ghoul {
+  namespace opengl { class Texture; }
+  namespace filesystem { class File; }
+}
 
 namespace openspace {
 
@@ -70,6 +73,7 @@ public:
       std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap,
       const std::unordered_set<std::string>& _filter);
 private:
+    void parseMetadata(const ghoul::filesystem::File& file);
     void fetchServerImages(std::string type);
     void fillImageryInfo(std::string buffer, std::string type);
 };
