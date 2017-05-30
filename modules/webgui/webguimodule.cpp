@@ -33,8 +33,8 @@ namespace openspace {
 WebGUIModule::WebGUIModule()
     : OpenSpaceModule("WebGUI") {
     LDEBUG("Initializing CEF...");
-    // --off-screen-rendering-enabled
     CefMainArgs args;
+    CefSettings settings;
 
 #ifdef __APPLE__
     CefString(&settings.browser_subprocess_path).FromASCII((char*) SUBPROCESS_PATH.c_str());
@@ -42,6 +42,9 @@ WebGUIModule::WebGUIModule()
 //#ifdef WIN32
 //    TODO(klas): This is for some reason causing a crash -- use DoMessageLoopWork instead
 //    settings.multi_threaded_message_loop = true;
+//#endif
+//#ifdef DEBUG
+    attachDebugSettings(settings);
 //#endif
 
     int exitCode = CefExecuteProcess(args, nullptr, NULL);
@@ -89,6 +92,11 @@ void WebGUIModule::initialize() {
     loadLocalPath("${MODULE_WEBGUI}/web/transparent_test.html");
     WindowWrapper& wrapper = OsEng.windowWrapper();
     reshape(wrapper);
+}
+
+void WebGUIModule::attachDebugSettings(CefSettings &settings) {
+    settings.remote_debugging_port = 8088;
+    LDEBUG(fmt::format("Remote WebGUI debugging available on http://localhost:{}", settings.remote_debugging_port));
 }
 
 void WebGUIModule::deinitialize() {

@@ -63,13 +63,13 @@ protected:
 private:
     void render();
     void deinitialize();
+	void attachDebugSettings(CefSettings&);
 
     std::shared_ptr<EventHandler> eventHandler;
 
     CefRefPtr<GUIRenderHandler> renderHandler;
     CefRefPtr<BrowserClient> client;
     CefRefPtr<CefBrowser> browser;
-	CefSettings settings;
 
     void reshape(WindowWrapper&);
 };
