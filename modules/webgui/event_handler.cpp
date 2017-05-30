@@ -157,18 +157,22 @@ bool EventHandler::specialKeyEvent(Key key) {
 }
 
 /**
- * Map from GLFW key codes to "regular" key codes, supported by JS and CEF
+ * Map from GLFW key codes to "regular" key codes, supported by JS and CEF.
+ * See http://keycode.info/ for lookup
  * @param key
  * @return the key code, if mapped or the GLFW key code
  */
 int EventHandler::mapFromGlfwToNative(Key key) {
     switch (key) {
-        case Key::Enter: return 13;
-        case Key::Left:  return 37;
-        case Key::Up:    return 38;
-        case Key::Right: return 39;
-        case Key::Down:  return 40;
-        default:         return static_cast<int>(key);
+        case Key::BackSpace:      return 8;
+        case Key::Tab:            return 9;
+        case Key::Enter:          return 13;
+        case Key::Left:           return 37;
+        case Key::Up:             return 38;
+        case Key::Right:          return 39;
+        case Key::Down:           return 40;
+        case Key::Delete:         return 46;
+        default:                  return static_cast<int>(key);
     }
 }
 
