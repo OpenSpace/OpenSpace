@@ -49,6 +49,11 @@ function preInitialization()
         "Disables visibility of the trails"
     )
 
+   openspace.bindKey("l",
+        helper.property.invert('RoverSite.renderable.lockSubsite', false),
+        "Locks the current visible subsite."
+    )
+
     --[[
     -- Toggle trails
     openspace.bindKey("o",
