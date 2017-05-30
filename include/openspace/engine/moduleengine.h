@@ -31,6 +31,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <ghoul/misc/assert.h>
+#include <algorithm>
 
 namespace ghoul {
 namespace systemcapabilities {
