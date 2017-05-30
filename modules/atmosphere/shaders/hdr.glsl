@@ -80,8 +80,8 @@ vec3 RomBinDaHouseToneMapping(vec3 color)
 
 vec3 filmicToneMapping(vec3 color)
 {
-  color = max(vec3(0.0f), color - vec3(0.004f));
-  color = (color * (6.2f * color + 0.5f)) / (color * (6.2f * color + 1.7f) + 0.06f);
+  color = max(vec3(0.0f), color - vec3(0.04f));
+  color = (color * (6.2f * color + 0.5f)) / (color * (6.2f * color + 20.0f) + 0.06f);
   return color;
 }
 
@@ -94,7 +94,7 @@ vec3 Uncharted2ToneMapping(vec3 color)
   float E = 0.02f;
   float F = 0.30f;
   float W = 11.2f;
-  float tExposure = 0.9f;
+  float tExposure = 0.3f;
   color *= tExposure;
   color = ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
   float white = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;

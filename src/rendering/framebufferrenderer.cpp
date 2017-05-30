@@ -592,17 +592,18 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     }
 
     // DEBUG: g-buffer
-    if (tasks.deferredcasterTasks.size()) {
+    if (!tasks.deferredcasterTasks.empty()) {
         glBindFramebuffer(GL_FRAMEBUFFER, _deferredFramebuffer);
         GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, dBuffer);
         glClear(GL_COLOR_BUFFER_BIT);
-    } else {
-        glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
-        glDrawBuffers(4, textureBuffers);
-        //GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
-        //glDrawBuffers(1, dBuffer);
     }
+    //} else {
+    //    glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
+    //    glDrawBuffers(4, textureBuffers);
+    //    //GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
+    //    //glDrawBuffers(1, dBuffer);
+    //}
 
     for (const DeferredcasterTask& deferredcasterTask : tasks.deferredcasterTasks) {
 

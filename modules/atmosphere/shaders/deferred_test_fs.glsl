@@ -366,10 +366,11 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
   float muSun0 = dot(fragPosObj, s) / r0;
   //vec3  x0     = x + float(pixelDepth) * v;      
   float mu0    = dot(x0, v) / r0;
-  
+
+  bool groundHit = false;
   if ((pixelDepth > 0.0) && pixelDepth < maxLength) {    
     t = float(pixelDepth);  
-
+    groundHit = true;
     // Transmittance from point r, direction mu, distance t
     // By Analytical calculation
     attenuation = analyticTransmittance(r, mu, t);
@@ -449,15 +450,10 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
   // Finally we add the Lsun (all calculations are done with no Lsun so
   // we can change it on the fly with no precomputations)
   // return radiance * sunRadiance;
-
-  if (pixelDepth < maxLength) {
-    //return spaceColor.rgb + (1.0 - spaceColor.a)*(radiance * sunRadiance);
-    return radiance * sunRadiance;
+  vec3 finalScatteringRadiance = radiance * sunRadiance;
+  if (groundHit) {
+    return finalScatteringRadiance;
   } else {
-    //return radiance * sunRadiance;
-    //return spaceColor.rgb + (radiance * sunRadiance);
-    vec3 finalScatteringRadiance = radiance * sunRadiance;
-    float atmAlpha = length(finalScatteringRadiance);
     return spaceColor.rgb + finalScatteringRadiance;
   }
   
@@ -493,7 +489,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   float r0 = length(x0);
   // Normal of intersection point.
   vec3  n  = normalReflectance.xyz;
-  vec4 groundReflectance = groundColor * vec4(0.4);
+  vec4 groundReflectance = groundColor * vec4(0.5);
   //reflectance.w = 1.0;
             
   // L0 is not included in the irradiance texture.
@@ -773,31 +769,27 @@ void main() {
                                             meanColor, meanNormal, irradianceFactor);
           vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
           
-          //vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
+          // Final Color of ATM plus terrain:
+          vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
+
+          // Debug:
+          //finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
           //finalRadiance = mix(finalRadiance, meanColor);
-          //vec4 finalRadiance = vec4(inscatterColor, 1.0);
-          //vec4 finalRadiance = vec4(HDR(groundColor), 1.0);
-          //vec4 finalRadiance = vec4(HDR(inscatterColor), 1.0);
-          //vec4 finalRadiance = vec4(HDR(inscatterColor + meanColor.xyz), meanColor.w);
-          //vec4 finalRadiance = vec4(HDR(sunColor), 1.0);
-          //vec4 finalRadiance = vec4(sunColor, 1.0);
-          //vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor), 1.0);
-          
-          // The meanColor is temporary here
-          vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);          
-          
+          //finalRadiance = vec4(inscatterColor, 1.0);
+          //finalRadiance = vec4(HDR(groundColor), 1.0);
+          //finalRadiance = vec4(HDR(inscatterColor), 1.0);
+          //finalRadiance = vec4(HDR(inscatterColor + meanColor.xyz), meanColor.w);
+          //finalRadiance = vec4(HDR(sunColor), 1.0);
+          //finalRadiance = vec4(sunColor, 1.0);
+          //finalRadiance = vec4(HDR(inscatterColor + groundColor), 1.0);
+          //finalRadiance = vec4(1.0 - HDR(vec3(pixelDepth/100)),1.0);
+          //finalRadiance = vec4(vec3(meanNormal.a),1.0);
+                    
           renderTarget = finalRadiance;
-          //renderTarget = vec4(1.0 - HDR(vec3(pixelDepth/100)),1.0);
-          //renderTarget = vec4(vec3(meanNormal.a),1.0);
         }
       } else {
-        renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);        
+        renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
       }
-    } else {
-      // No ATM defined.
-      renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
-    }
-
-                
+    }                 
 }
 
