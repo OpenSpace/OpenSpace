@@ -29,7 +29,7 @@
 #include <ghoul/opengl/programobject.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/models/renderablesite.h>
-
+#include <openspace/util/updatestructures.h>
 
 #include <map>
 

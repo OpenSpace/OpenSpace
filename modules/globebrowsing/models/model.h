@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/base/rendering/asyncmultimodelgeometry.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
+#include <ghoul/opengl/texture.h>
 #include <memory>
 
 namespace openspace {

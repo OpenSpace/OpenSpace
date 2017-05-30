@@ -35,7 +35,7 @@ namespace globebrowsing {
 
 struct LoadJob2 : public Job<SubsiteModels> {
 	virtual void execute() = 0;
-	virtual std::shared_ptr<SubsiteModels> product() const = 0;
+	virtual std::shared_ptr<SubsiteModels> product() = 0;
 };
 
 } // namespace globebrowsing

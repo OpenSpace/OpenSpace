@@ -27,6 +27,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 
 #include <ghoul/glm.h>
 

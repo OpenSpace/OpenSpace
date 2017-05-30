@@ -61,8 +61,9 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 		}
 			
 		bool requestedExistsInCache = true;
-		if (_modelCache->exist(key)) {
-			vectorOfSubsiteModels.push_back(_modelCache->get(key)); 
+		ProviderSubsiteKey key2 = { level, subsite->site, subsite->drive };
+		if (_modelCache->exist(key2)) {
+			vectorOfSubsiteModels.push_back(_modelCache->get(key2));
 		}
 		else {
 			_asyncSurfaceModelProvider->enqueueModelIO(subsite, level);
@@ -71,16 +72,17 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 			// return highest available resolution.
 			std::vector<int> levelsAbove = getLevelsAbove(subsite->availableLevels, level);
 			for (int i = levelsAbove.size() + 1; i-- > 1; ) {
-				uint64_t keyLowerLevel = hashKey(subsite->site, subsite->drive, i);
+				//uint64_t keyLowerLevel = hashKey(subsite->site, subsite->drive, i);
+				ProviderSubsiteKey keyLowerLevel = { i, subsite->site, subsite->drive };
 				if (_modelCache->exist(keyLowerLevel)) {
 					vectorOfSubsiteModels.push_back(_modelCache->get(keyLowerLevel));
 					break;
 				}
 			}
 		}
-		if (keyPrevLevel != -1 && _modelCache->exist(keyPrevLevel)) {
+		/*if (keyPrevLevel != -1 && _modelCache->exist(keyPrevLevel)) {
 			vectorOfSubsiteModels.push_back(_modelCache->get(keyPrevLevel));
-		}
+		}*/
 	}
 	return vectorOfSubsiteModels;
 }
@@ -117,7 +119,8 @@ void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 		std::vector<std::shared_ptr<Model>> theModels = subsiteModels->models;
 		subsiteModels->models = theModels;
 		
-		uint64_t key = CachingSurfaceModelProvider::hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level);
+		//uint64_t key = CachingSurfaceModelProvider::hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level);
+		ProviderSubsiteKey key = { subsiteModels->level, subsiteModels->site, subsiteModels->drive };
 
 		_modelCache->put(key, subsiteModels);
 	}

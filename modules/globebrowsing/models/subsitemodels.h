@@ -63,6 +63,10 @@ struct SubsiteModels {
 	int level;
 	float _alpha;
 	int _dir;
+
+	inline bool operator==(const SubsiteModels& other) const {
+		return (site == other.site) && (drive == other.drive) && (level == other.level);
+	}
 };
 
 } // namespace globebrowsing

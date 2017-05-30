@@ -72,7 +72,7 @@ void SurfaceModelLoadJob::execute() {
 	}
 }
 
-std::shared_ptr<SubsiteModels> SurfaceModelLoadJob::product() const {
+std::shared_ptr<SubsiteModels> SurfaceModelLoadJob::product() {
 	return _subsiteModels;
 }
 

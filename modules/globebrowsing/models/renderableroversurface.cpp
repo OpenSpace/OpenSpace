@@ -29,6 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <modules/globebrowsing/chunk/chunknode.h>
 #include <modules/globebrowsing/models/modelprovider.h>
+#include <openspace/scene/scene.h>
 
 #include <ghoul/io/texture/texturereader.h>
 

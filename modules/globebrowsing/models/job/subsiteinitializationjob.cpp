@@ -35,7 +35,7 @@ void SubsiteInitializationJob::execute() {
 	_subsiteModels->model->uploadData();
 }
 
-std::shared_ptr<SubsiteModels> SubsiteInitializationJob::product() const {
+std::shared_ptr<SubsiteModels> SubsiteInitializationJob::product() {
 	return _subsiteModels;
 }
 
