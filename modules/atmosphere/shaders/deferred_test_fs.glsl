@@ -579,7 +579,7 @@ void main() {
 
     meanColor.a = maxAlpha;
     
-    //meanNormal.xyz = normalize(meanNormal.xyz);
+    meanNormal.xyz = normalize(meanNormal.xyz);
     
     // Ray in object space
     dRay ray;
@@ -598,7 +598,7 @@ void main() {
       intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt-10*EPSILON,
                                             insideATM, offset, maxLength );
       if ( intersectATM ) {
-        // Debugging:
+        /*
         vec4 farthestPosition = vec4(0.0);
         float farthest = -1.0;
         for (int i = 0; i < nAaSamples; i++) {
@@ -608,11 +608,16 @@ void main() {
             farthestPosition = positionArray[i];
           }
         }
-        
         dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * farthestPosition);
+        */
+        dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * meanPosition);
         dvec4 fragWorldCoords  = dvec4(dCampos + tmpPos, 1.0); // Fragment in World Coords
         dvec4 fragObjectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + fragWorldCoords.xyz, 1.0);
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
+
+        // All calculations are done in Km:
+        pixelDepth /= 1000.0; 
+        fragObjectCoords.xyz /= 1000.0;
         
         // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
         // in the depth buffer is less than the distance to the atmosphere then the atmosphere
@@ -620,18 +625,8 @@ void main() {
         // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
         // when using their positions later, one must convert them to the planet's coords 
 
-        //dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * meanPosition);
-        //dvec4 fragWorldCoords  = dvec4(dCampos + tmpPos, 1.0); // Fragment in World Coords
-        //dvec4 fragObjectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + fragWorldCoords.xyz, 1.0);
-        //double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
-
-        // All calculations are done in Km:
-        pixelDepth /= 1000.0; 
-        fragObjectCoords.xyz /= 1000.0;
-        
         if ((pixelDepth > 0.0) && pixelDepth < offset) {        
-          //renderTarget = meanColor;
-          renderTarget = vec4(1.0, 0.0, 0.0, 1.0);         
+          renderTarget = meanColor;          
         } else {
           // Following paper nomenclature      
           double t = offset;                  
@@ -707,7 +702,12 @@ void main() {
         // in the depth buffer is less than the distance to the atmosphere then the atmosphere
         // is occluded
         // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
-        // when using their positions later, one must convert them to the planet's coords 
+        // when using their positions later, one must convert them to the planet's coords
+        
+        // OS Eye to World coords
+
+        // Version when no milkway is present (performance hit)
+        /*
         vec4 farthestPosition = vec4(0.0);
         float farthest = -1.0;
         for (int i = 0; i < nAaSamples; i++) {
@@ -717,10 +717,11 @@ void main() {
             farthestPosition = positionArray[i];
           }
         }
+        dvec4 tmpRInvPos            = dInverseCamRotTransform * farthestPosition;        
+        */
+        // Version with milkway enabled
+        dvec4 tmpRInvPos            = dInverseCamRotTransform * meanPosition;
         
-         // OS Eye to World coords
-        dvec4 tmpRInvPos            = dInverseCamRotTransform * farthestPosition;
-        //dvec4 tmpRInvPos            = dInverseCamRotTransform * meanPosition;
         dvec4 fragWorldCoords       = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
         //dvec4 tmpRInvNormal         = dInverseCamRotTransform * meanNormal;
         //dvec4 fragNormalWorldCoords = dvec4(dvec3(tmpRInvNormal) + dCampos, 1.0);
@@ -730,7 +731,7 @@ void main() {
         //dvec4 fragNormalObjectCoords = dInverseTransformMatrix * fragNormalWorldCoords;
 
         // Normal in Object Space already (changed 05/26/2017).
-        dvec4 fragNormalObjectCoords = dvec4(normalize(meanNormal.xyz), 1.0);
+        //dvec4 fragNormalObjectCoords = dvec4(normalize(meanNormal.xyz), 1.0);
 
         // Distance of the pixel in the gBuffer to the observer
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
@@ -786,7 +787,7 @@ void main() {
           vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);          
           
           renderTarget = finalRadiance;
-          //renderTarget = vec4(vec3(pixelDepth/100000),1.0);
+          //renderTarget = vec4(1.0 - HDR(vec3(pixelDepth/100)),1.0);
         }
       } else {
         renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);        

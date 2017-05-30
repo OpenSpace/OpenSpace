@@ -41,6 +41,7 @@ out vec4 vs_position;
 out vec4 vs_posWorld;
 out float s;
 out vec4 vs_gPosition;
+out vec3 vs_gNormal;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -54,6 +55,9 @@ void main()
     // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
 
+    // We are using the normal in Object (model) space in G-Buffer (because of atm).
+    vs_gNormal = in_normal;
+    
     // The tmp is now in the OS eye space (camera rig space)
     // and wrtitten using PSC coords.
     // position is in the same space, i.e., OS eye space but 

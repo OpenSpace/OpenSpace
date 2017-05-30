@@ -51,6 +51,7 @@ in vec4 vs_normal;
 in vec4 vs_position;
 in vec4 vs_posWorld;
 in vec4 vs_gPosition;
+out vec3 vs_gNormal;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
@@ -95,10 +96,7 @@ Fragment getFragment() {
     vec4 diffuse = texture(texture1, vs_st);
 
     Fragment frag;
-    frag.gPosition = vs_gPosition;
-    // TODO: get the write reflectance from the texture
-    frag.gNormalReflectance = vec4(vs_normal.xyz, 0.5);
-
+    
     if (_performShading) {
         // directional lighting
         vec3 origin = vec3(0.0);
@@ -129,6 +127,11 @@ Fragment getFragment() {
     frag.color = diffuse;
     frag.depth = depth;
 
+    frag.gColor = frag.color;
+    frag.gPosition = vs_gPosition;
+    // TODO: get the write reflectance from the texture
+    frag.gNormalReflectance = vec4(vs_gNormal, 0.5);
+    
     return frag;
 }
 

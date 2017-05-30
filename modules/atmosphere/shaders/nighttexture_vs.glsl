@@ -36,6 +36,7 @@ out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
 out vec4 vs_gPosition;
+out vec3 vs_gNormal;
 
 uniform mat4 ModelTransform;
 uniform mat4 modelViewProjectionTransform;
@@ -51,7 +52,9 @@ void main() {
 
     // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
-    // vs_normal = vec4(in_normal, 0.0);
+
+    // G-Buffer
+    vs_gNormal = in_normal;
     
     // The tmp is now in the OS eye space (camera rig space)
     // and wrtitten using PSC coords.
