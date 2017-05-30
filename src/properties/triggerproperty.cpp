@@ -36,12 +36,12 @@ std::string TriggerProperty::className() const {
     return "TriggerProperty";
 }
 
-bool TriggerProperty::setLuaValue(lua_State* state) {
+bool TriggerProperty::setLuaValue(lua_State*) {
     notifyListener();
     return true;
 }
 
-void TriggerProperty::set(ghoul::any value) {
+void TriggerProperty::set(ghoul::any) {
     notifyListener();
 }
 

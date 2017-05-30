@@ -25,6 +25,8 @@
 #include <modules/globebrowsing/tile/tileprovider/sizereferencetileprovider.h>
 
 #include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
 
 #include <openspace/engine/openspaceengine.h>
 
@@ -42,12 +44,13 @@ namespace tileprovider {
     
 namespace {
     const char* KeyRadii = "Radii";
-    const char* KeyBackgroundImagePath = "BackgroundImagePath";
 }
 
 SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& dictionary)
-    : _backgroundTile(Tile::TileUnavailable)
+    : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::ID::ColorLayers))
+    , _backgroundTile(Tile::TileUnavailable)
 {
+	
     _fontSize = 50;
     _font = OsEng.fontManager().font("Mono", _fontSize);
 
@@ -56,20 +59,6 @@ SizeReferenceTileProvider::SizeReferenceTileProvider(const ghoul::Dictionary& di
         throw std::runtime_error("Must define key '" + std::string(KeyRadii) + "'");
     }
     _ellipsoid = Ellipsoid(radii);
-
-    auto backgroundTileStatus = Tile::Status::Unavailable;
-    std::shared_ptr<ghoul::opengl::Texture> backgroundTileTexture;
-
-    std::string backgroundImagePath;
-    if (dictionary.getValue(KeyBackgroundImagePath, backgroundImagePath)) {
-        using namespace ghoul::io;
-        std::string imgAbsPath = absPath(backgroundImagePath);
-        backgroundTileTexture = TextureReader::ref().loadTexture(imgAbsPath);
-        backgroundTileTexture->uploadTexture();
-        backgroundTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        backgroundTileStatus = Tile::Status::OK;
-    }
-    _backgroundTile = Tile(backgroundTileTexture, nullptr, backgroundTileStatus);
 }
 
 void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
@@ -89,7 +78,7 @@ void SizeReferenceTileProvider::renderText(const ghoul::fontrendering::FontRende
 
     glm::vec2 textPosition;
     textPosition.x = 0;
-    textPosition.y = aboveEquator ? _fontSize / 2 : _textureSize.y - 3 * _fontSize / 2;
+    textPosition.y = aboveEquator ? _fontSize / 2 : _initData.dimensionsWithPadding().y - 3 * _fontSize / 2;
     glm::vec4 color(1.0, 1.0, 1.0, 1.0);
 
     fontRenderer.render(
@@ -125,31 +114,6 @@ TileIndex::TileHashKey SizeReferenceTileProvider::toHash(const TileIndex& tileIn
     int l = roundedLongitudalLength(tileIndex);
     TileIndex::TileHashKey key = static_cast<TileIndex::TileHashKey>(l);
     return key;
-}
-
-Tile SizeReferenceTileProvider::backgroundTile(const TileIndex& tileIndex) const {
-    if (_backgroundTile.status() == Tile::Status::OK) {
-        auto t = _backgroundTile.texture();
-        void* pixelData = new char[t->expectedPixelDataSize()];
-        memcpy(pixelData, t->pixelData(), t->expectedPixelDataSize());
-        auto tileTexture = std::make_shared<ghoul::opengl::Texture>(
-            pixelData,
-            t->dimensions(),
-            t->format(),
-            t->internalFormat(),
-            t->dataType(),
-            t->filter(),
-            t->wrapping()
-        );
-        tileTexture->uploadTexture();
-        tileTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::Yes);
-        auto tileStatus = Tile::Status::OK;
-        return Tile(tileTexture, nullptr, tileStatus);
-    }
-    else {
-        // use default background
-        return TextTileProvider::backgroundTile(tileIndex);
-    }
 }
 
 } // namespace tileprovider

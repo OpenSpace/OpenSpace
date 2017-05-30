@@ -33,10 +33,10 @@
 
 #include <openspace/util/spicemanager.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 namespace ghoul {
-namespace opengl {
-class ProgramObject;
-}
+namespace opengl { class ProgramObject; }
 }
 
 namespace openspace {

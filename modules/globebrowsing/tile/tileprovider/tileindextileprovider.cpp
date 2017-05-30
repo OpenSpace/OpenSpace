@@ -23,14 +23,18 @@
  ****************************************************************************************/
 
 #include <modules/globebrowsing/tile/tileprovider/tileindextileprovider.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
 
 #include <ghoul/font/fontrenderer.h>
 
 namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
-    
-TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dict) {}
+
+TileIndexTileProvider::TileIndexTileProvider(const ghoul::Dictionary& dict)
+    : TextTileProvider(LayerManager::getTileTextureInitData(layergroupid::ID::ColorLayers))
+{ }
 
 void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
                                        fontRenderer, const TileIndex& tileIndex) const
@@ -38,9 +42,10 @@ void TileIndexTileProvider::renderText(const ghoul::fontrendering::FontRenderer&
     fontRenderer.render(
         *_font,
         glm::vec2(
-            _textureSize.x / 4 - (_textureSize.x / 32) * log10(1 << tileIndex.level),
-            _textureSize.y / 2 + _fontSize),
-        glm::vec4(1.0, 0.0, 0.0, 1.0),
+            _initData.dimensionsWithPadding().x / 4 - (_initData.dimensionsWithPadding().x / 32) * log10(1 << tileIndex.level),
+            _initData.dimensionsWithPadding().y / 2 + _fontSize),
+        glm::vec4(1.0, 1.0, 1.0, 1.0),
+        glm::vec4(1.0, 1.0, 1.0, 1.0),
         "level: %i \nx: %i \ny: %i",
         tileIndex.level, tileIndex.x, tileIndex.y
     );

@@ -28,7 +28,6 @@
 #include <ctime>
 
 namespace openspace {
-
 namespace luascriptfunctions {
 
 /**
@@ -47,12 +46,16 @@ int time_setDeltaTime(lua_State* L) {
     const bool isNumber = (lua_isnumber(L, -1) != 0);
     if (isNumber) {
         double value = lua_tonumber(L, -1);
-        openspace::Time::ref().setDeltaTime(value);
+        OsEng.timeManager().time().setDeltaTime(value);
         return 0;
     }
     else {
-        const char* msg = lua_pushfstring(L, "%s expected, got %s",
-                                lua_typename(L, LUA_TNUMBER), luaL_typename(L, -1));
+        const char* msg = lua_pushfstring(
+            L,
+            "%s expected, got %s",
+            lua_typename(L, LUA_TNUMBER),
+            luaL_typename(L, -1)
+        );
         return luaL_error(L, "bad argument #%d (%s)", 1, msg);
     }
 
@@ -64,7 +67,7 @@ int time_setDeltaTime(lua_State* L) {
  * Returns the delta time by calling the Time::deltaTime method
  */
 int time_deltaTime(lua_State* L) {
-    lua_pushnumber(L, openspace::Time::ref().deltaTime());
+    lua_pushnumber(L, OsEng.timeManager().time().deltaTime());
     return 1;
 }
 
@@ -74,7 +77,12 @@ int time_deltaTime(lua_State* L) {
  * Toggles a pause functionm i.e. setting the delta time to 0 and restoring it afterwards
  */
 int time_togglePause(lua_State* L) {
-    openspace::Time::ref().togglePause();
+    int nArguments = lua_gettop(L);
+    if (nArguments != 0) {
+        return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
+    }
+
+    OsEng.timeManager().time().togglePause();
     return 0;
 }
 
@@ -85,11 +93,12 @@ int time_togglePause(lua_State* L) {
  */
 int time_setPause(lua_State* L) {
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     bool pause = lua_toboolean(L, -1) == 1;
-    openspace::Time::ref().setPause(pause);
+    OsEng.timeManager().time().setPause(pause);
     return 0;
 }
 
@@ -121,12 +130,12 @@ int time_setTime(lua_State* L) {
     }
     if (isNumber) {
         double value = lua_tonumber(L, -1);
-        openspace::Time::ref().setTime(value);
+        OsEng.timeManager().time().setTime(value);
         return 0;
     }
     if (isString) {
         const char* time = lua_tostring(L, -1);
-        openspace::Time::ref().setTime(time);
+        OsEng.timeManager().time().setTime(time);
         return 0;
     }
     return 0;
@@ -139,7 +148,7 @@ int time_setTime(lua_State* L) {
  * It is returned by calling the Time::currentTime method.
  */
 int time_currentTime(lua_State* L) {
-    lua_pushnumber(L, openspace::Time::ref().j2000Seconds());
+    lua_pushnumber(L, OsEng.timeManager().time().j2000Seconds());
     return 1;
 }
 
@@ -150,7 +159,7 @@ int time_currentTime(lua_State* L) {
  * timezone by calling the Time::UTC method
  */
 int time_currentTimeUTC(lua_State* L) {
-    lua_pushstring(L, openspace::Time::ref().UTC().c_str());
+    lua_pushstring(L, OsEng.timeManager().time().UTC().c_str());
     return 1;
 }
 

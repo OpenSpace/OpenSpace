@@ -83,10 +83,12 @@ public:
      * program.
      * OBS! Users must ensure bind has been called before using this method.
      */
-    void setValue(ghoul::opengl::ProgramObject* program, std::shared_ptr<ghoul::opengl::Texture> texture){
+    void setValue(ghoul::opengl::ProgramObject* program, ghoul::opengl::Texture* texture){
         _texUnit = std::make_unique<ghoul::opengl::TextureUnit>();
         _texUnit->activate();
-        texture->bind();
+		if (texture) {
+			texture->bind();
+		}
         program->setUniform(_uniformLocation, *_texUnit);
     }
 

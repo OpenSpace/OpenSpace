@@ -75,7 +75,12 @@ public:
      * have in order to be stored in the ScreenLog
      */
     ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel = LogLevel::Info);
-    
+
+    /**
+     * Destructor
+     */
+    ~ScreenLog();
+
     /**
      * Overwritten ghoul::loggling::Log method that is called whenever a new log message
      * shall be stored.

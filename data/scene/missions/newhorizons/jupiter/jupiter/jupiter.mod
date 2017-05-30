@@ -101,7 +101,7 @@ return {
         Parent = "JupiterProjection",
         Renderable = {
             Type = "RenderablePlane",
-            Size = 1.0E7.5,
+            Size = 10^7.5,
             Origin = "Center",
             Billboard = true,
             Texture = "textures/Jupiter-text.png",

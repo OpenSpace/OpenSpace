@@ -41,6 +41,8 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <ghoul/opengl/programobject.h>
+
 #include <fstream>
 
 
@@ -283,7 +285,8 @@ void RenderableGalaxy::update(const UpdateData& data) {
         _raycaster->setStepSize(_stepSize);
         _raycaster->setAspect(_aspect);
         _raycaster->setModelTransform(volumeTransform);
-        _raycaster->setTime(data.time);
+        // @EMIL: is this correct? ---abock
+        _raycaster->setTime(data.time.j2000Seconds());
     }
 }
 

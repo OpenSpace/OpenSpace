@@ -27,12 +27,17 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/base/rendering/renderablemodel.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul { class Dictionary; }
+#include <memory>
+
+namespace ghoul {
+    class Dictionary;
+
+    namespace opengl { class ProgramObject; }
+} // namespace ghoul
 
 namespace openspace {
-namespace documentation {  struct Documentation; }
 
 struct Vertex {
 	GLfloat location[4];
@@ -40,6 +45,9 @@ struct Vertex {
 	GLfloat normal[3];
 };
 
+class Renderable;
+
+namespace documentation {  struct Documentation; }
 namespace modelgeometry {
 
 class ModelGeometry : public properties::PropertyOwner {
@@ -49,14 +57,16 @@ public:
     );
 
     ModelGeometry(const ghoul::Dictionary& dictionary);
-    virtual ~ModelGeometry();
+    virtual ~ModelGeometry() = default;
+    
     virtual bool initialize(Renderable* parent);
     virtual void deinitialize();
     void render();
+    
     virtual bool loadModel(const std::string& filename) = 0;
     void changeRenderMode(const GLenum mode);
-    bool getVertices(std::vector<Vertex>* vertexList);
-    bool getIndices(std::vector<int>* indexList);
+    //bool getVertices(std::vector<Vertex>* vertexList);
+    //bool getIndices(std::vector<int>* indexList);
 
     double boundingRadius() const;
 
@@ -65,8 +75,6 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    Renderable* _parent;
-
     bool loadObj(const std::string& filename);
 	bool loadObjWithoutCaching(const std::string& filename);
     bool loadCachedFile(const std::string& filename);

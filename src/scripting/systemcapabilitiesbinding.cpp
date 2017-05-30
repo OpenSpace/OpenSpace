@@ -140,7 +140,7 @@ int extensions(lua_State* L) {
     
     lua_newtable(L);
     
-    for (int i = 1; i <= extensions.size(); ++i) {
+    for (size_t i = 1; i <= extensions.size(); ++i) {
         lua_pushstring(L, extensions[i].c_str());
         lua_rawseti(L, -2, i);
     }

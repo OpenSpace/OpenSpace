@@ -52,6 +52,8 @@ namespace planetgeometry {
 class PlanetGeometry;
 }
 
+namespace documentation { struct Documentation; }
+
 class RenderablePlanet : public Renderable {
 public:
     // Shadow structure
@@ -69,8 +71,7 @@ public:
     };
 
 public:
-    explicit RenderablePlanet(const ghoul::Dictionary& dictionary);
-    ~RenderablePlanet();
+    RenderablePlanet(const ghoul::Dictionary& dictionary);
 
     bool initialize() override;
     bool deinitialize() override;
@@ -78,6 +79,8 @@ public:
 
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
 
 protected:
     void loadTexture();
@@ -96,14 +99,11 @@ private:
 
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
     properties::BoolProperty _performShading;
-    properties::IntProperty _rotation;
     float _alpha;
     std::vector< ShadowConf > _shadowConfArray;
     float _planetRadius;
 
     glm::dmat3 _stateMatrix;
-    std::string _frame;
-    std::string _target;
     bool _hasNightTexture;
     bool _hasHeightTexture;
     bool _shadowEnabled;

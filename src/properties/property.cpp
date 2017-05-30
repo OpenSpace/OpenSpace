@@ -32,7 +32,6 @@ namespace openspace {
 namespace properties {
 
 namespace {
-    const char* _loggerCat = "Property";
     const char* MetaDataKeyGuiName = "guiName";
     const char* MetaDataKeyGroup = "Group";
     const char* MetaDataKeyVisibility = "Visibility";
@@ -43,8 +42,6 @@ namespace {
 
 const char* Property::ViewOptions::Color = "color";
 const char* Property::ViewOptions::LightPosition = "lightPosition";
-const char* Property::ViewOptions::PowerScaledCoordinate = "powerScaledCoordinate";
-const char* Property::ViewOptions::PowerScaledScalar = "powerScaledScalar";
 
 const char* Property::IdentifierKey = "Identifier";
 const char* Property::NameKey = "Name";
@@ -85,13 +82,13 @@ ghoul::any Property::get() const {
     return ghoul::any();
 }
 
-bool Property::getLuaValue(lua_State* state) const {
+bool Property::getLuaValue(lua_State*) const {
     return false;
 }
 
-void Property::set(ghoul::any value) {}
+void Property::set(ghoul::any) {}
 
-bool Property::setLuaValue(lua_State* state) {
+bool Property::setLuaValue(lua_State*) {
     return false;
 }
 
@@ -103,11 +100,11 @@ int Property::typeLua() const {
     return LUA_TNIL;
 }
 
-bool Property::getStringValue(std::string& value) const {
+bool Property::getStringValue(std::string&) const {
     return false;
 }
 
-bool Property::setStringValue(std::string value) {
+bool Property::setStringValue(std::string) {
     return false;
 }
 
@@ -155,6 +152,12 @@ void Property::setViewOption(std::string option, bool value) {
         value,
         ghoul::Dictionary::CreateIntermediate::Yes
     );
+}
+
+bool Property::viewOption(const std::string& option, bool defaultValue) const {
+    bool v = defaultValue;
+    _metaData.getValue(_metaDataKeyViewPrefix + option, v);
+    return v;
 }
 
 const ghoul::Dictionary& Property::metaData() const {

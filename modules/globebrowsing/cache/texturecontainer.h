@@ -22,37 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___DISKCACHEDTILELOADJOB___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___DISKCACHEDTILELOADJOB___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TEXTURE_CONTAINER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TEXTURE_CONTAINER___H__
 
-#include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
+
+#include <memory>
+#include <vector>
 
 namespace openspace {
 namespace globebrowsing {
+namespace cache {
 
-class TileDiskCache;
+/**
+ * Owner of texture data used for tiles. Instead of dynamically allocating textures one
+ * by one, they are created once and reused.
+ */
+class TextureContainer
+{
+public:
+    /**
+     * \param initData is the description of the texture type.
+     * \param numTextures is the number of textures to allocate.
+     */
+    TextureContainer(TileTextureInitData initData, size_t numTextures);
 
-struct DiskCachedTileLoadJob : public TileLoadJob {
-    enum CacheMode {
-        Disabled,
-        ReadOnly,
-        ReadAndWrite,
-        WriteOnly,
-        CacheHitsOnly,
-    };
-        
-    DiskCachedTileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-        const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc, 
-        CacheMode cacheMode = CacheMode::ReadOnly);
+    ~TextureContainer() = default;
 
-    void execute() override;
+    void reset();
+    void reset(size_t numTextures);
+    
+    /**
+     * \returns a pointer to a texture if there is one texture never used before.
+     * If there are no textures left, nullptr is returned. TextureContainer still owns
+     * the texture so no delete should be called on the raw pointer.
+     */
+    ghoul::opengl::Texture* getTextureIfFree();
 
-protected:
-    std::shared_ptr<TileDiskCache> _tileDiskCache;
-    CacheMode _mode;
+    const TileTextureInitData& tileTextureInitData() const;
+    
+    /**
+     * \returns the number of textures in this TextureContainer
+     */
+    size_t size() const;
+
+private:
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+    size_t _freeTexture;
+    const TileTextureInitData _initData;
+    size_t _numTextures;
 };
 
+} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___DISKCACHEDTILELOADJOB___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TEXTURE_CONTAINER___H__

@@ -41,7 +41,7 @@ void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& la
                     const std::string& nameBase, int pileSize)
 {
     gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
-    gpuRenderSettings.bind(programObject, nameBase + "settings.");
+    gpuRenderSettings.bind(layer.renderSettings(), programObject, nameBase + "settings.");
 }
 
 void GPULayer::deactivate() {

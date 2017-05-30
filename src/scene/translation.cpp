@@ -80,14 +80,12 @@ bool Translation::initialize() {
     return true;
 }
     
-void Translation::update(const UpdateData& data) {}
+void Translation::update(const UpdateData&) {}
 
 glm::dvec3 Translation::position(double time) {
     update({
         {},
         time,
-        1.0,
-        false,
         false
     });
 

@@ -146,11 +146,12 @@ float calculateHeight(
 }
 
 vec4 calculateColor(
+	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
 	const Layer ColorLayers[NUMLAYERS_COLORTEXTURE]) {
 
-	vec4 color = vec4(0);
+	vec4 color = currentColor;
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
@@ -309,6 +310,8 @@ vec4 calculateGrayScaleOverlay(
 	const Layer GrayScaleColorOverlays[NUMLAYERS_GRAYSCALE_OVERLAY]) {
 
 	vec4 colorGrayScale = currentColor;
+	// HSV blending
+	vec3 hsvCurrent = rgb2hsv(currentColor.rgb);
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
@@ -324,12 +327,12 @@ vec4 calculateGrayScaleOverlay(
 		colorSample = performLayerSettings(colorSample, GrayScaleColorOverlays[#{i}].settings);
 
 		colorGrayScale = blendOver(colorGrayScale, colorSample);
+		float valueBlending = GrayScaleColorOverlays[#{i}].settings.valueBlending;
+		hsvCurrent.z = colorGrayScale.r * valueBlending + hsvCurrent.b * (1 - valueBlending);
 	}
 	#endfor
 
-	// HSV blending
-	vec3 hsvCurrent = rgb2hsv(currentColor.rgb);
-	vec3 hsvNew = vec3(hsvCurrent.x, hsvCurrent.y, colorGrayScale.r);
+	vec3 hsvNew = vec3(hsvCurrent.x, hsvCurrent.y, hsvCurrent.z);
 	vec3 rgbNew = hsv2rgb(hsvNew);
 /*
 	// HSL blending

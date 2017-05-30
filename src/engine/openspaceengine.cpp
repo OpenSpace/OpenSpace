@@ -116,29 +116,28 @@ class Scene;
 
 OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 
-OpenSpaceEngine::OpenSpaceEngine(
-    std::string programName,
-    std::unique_ptr<WindowWrapper> windowWrapper)
+OpenSpaceEngine::OpenSpaceEngine(std::string programName,
+                                 std::unique_ptr<WindowWrapper> windowWrapper)
     : _configurationManager(new ConfigurationManager)
-    , _interactionHandler(new interaction::InteractionHandler)
-    , _renderEngine(new RenderEngine)
     , _sceneManager(new SceneManager)
-    , _scriptEngine(new scripting::ScriptEngine)
-    , _scriptScheduler(new scripting::ScriptScheduler)
-    , _networkEngine(new NetworkEngine)
-    , _syncEngine(std::make_unique<SyncEngine>(4096))
-    , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
-        programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
-      ))
+    , _downloadManager(nullptr)
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
+    , _networkEngine(new NetworkEngine)
+    , _parallelConnection(new ParallelConnection)
+    , _renderEngine(new RenderEngine)
     , _settingsEngine(new SettingsEngine)
+    , _syncEngine(std::make_unique<SyncEngine>(4096))
     , _timeManager(new TimeManager)
-    , _downloadManager(nullptr)
-    , _parallelConnection(std::make_unique<ParallelConnection>())
     , _windowWrapper(std::move(windowWrapper))
-    , _globalPropertyNamespace(new properties::PropertyOwner(""))
+    , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
+        programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+    ))
+    , _interactionHandler(new interaction::InteractionHandler)
+    , _scriptEngine(new scripting::ScriptEngine)
+    , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
+    , _globalPropertyNamespace(new properties::PropertyOwner(""))
     , _scheduledSceneSwitch(false)
     , _scenePath("")
     , _runTime(0.0)
@@ -153,6 +152,7 @@ OpenSpaceEngine::OpenSpaceEngine(
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
     _globalPropertyNamespace->addPropertySubOwner(_parallelConnection.get());
+    _globalPropertyNamespace->addPropertySubOwner(_console.get());
 
     FactoryManager::initialize();
     FactoryManager::ref().addFactory(
@@ -177,7 +177,6 @@ OpenSpaceEngine::OpenSpaceEngine(
     );
 
     SpiceManager::initialize();
-    Time::initialize();
     TransformationManager::initialize();
 }
 
@@ -347,7 +346,6 @@ void OpenSpaceEngine::create(int argc, char** argv,
     FileSys.createCacheManager(
         absPath("${" + ConfigurationManager::KeyCache + "}"), CacheVersion
     );
-    _engine->_console->initialize();
 
     // Register the provided shader directories
     ghoul::opengl::ShaderPreprocessor::addIncludePath(absPath("${SHADERS}"));
@@ -385,7 +383,7 @@ void OpenSpaceEngine::destroy() {
         func();
     }
 
-    _engine->_syncEngine->removeSyncables(Time::ref().getSyncables());
+    _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
     _engine->_syncEngine->removeSyncables(_engine->_renderEngine->getSyncables());
     _engine->_syncEngine->removeSyncable(_engine->_scriptEngine.get());
 
@@ -397,7 +395,6 @@ void OpenSpaceEngine::destroy() {
 
     delete _engine;
     FactoryManager::deinitialize();
-    Time::deinitialize();
     SpiceManager::deinitialize();
 
 
@@ -564,7 +561,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 
     Scene* previousScene = _renderEngine->scene();
     if (previousScene) {
-        _syncEngine->removeSyncables(Time::ref().getSyncables());
+        _syncEngine->removeSyncables(_timeManager->getSyncables());
         _syncEngine->removeSyncables(_renderEngine->getSyncables());
         _syncEngine->removeSyncable(_scriptEngine.get());
 
@@ -590,46 +587,24 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     }
 
     // Write keyboard documentation.
-    {
-        const std::string KeyboardShortcutsType =
-            ConfigurationManager::KeyKeyboardShortcuts + "." +
-            ConfigurationManager::PartType;
-
-        const std::string KeyboardShortcutsFile =
-            ConfigurationManager::KeyKeyboardShortcuts + "." +
-            ConfigurationManager::PartFile;
-
-        std::string type, file;
-        const bool hasType = configurationManager().getValue(KeyboardShortcutsType, type);
-        const bool hasFile = configurationManager().getValue(KeyboardShortcutsFile, file);
-
-        if (hasType && hasFile) {
-            file = absPath(file);
-            interactionHandler().writeKeyboardDocumentation(type, file);
-        }
+    if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
+        interactionHandler().writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyKeyboardShortcuts
+            ))
+        );
     }
 
     // If a PropertyDocumentationFile was specified, generate it now.
-    {    
-        const std::string KeyPropertyDocumentationType =
-            ConfigurationManager::KeyPropertyDocumentation + '.' +
-            ConfigurationManager::PartType;
-
-        const std::string KeyPropertyDocumentationFile =
-            ConfigurationManager::KeyPropertyDocumentation + '.' +
-            ConfigurationManager::PartFile;
-
-        std::string type, file;
-        const bool hasType = configurationManager().getValue(KeyPropertyDocumentationType, type);
-        const bool hasFile = configurationManager().getValue(KeyPropertyDocumentationFile, file);
-
-        if (hasType && hasFile) {
-            file = absPath(file);
-            scene->writePropertyDocumentation(file, type, scenePath);
-        }
+    if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
+        scene->writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyPropertyDocumentation
+            ))
+        );
     }
 
-    _syncEngine->addSyncables(Time::ref().getSyncables());
+    _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
     _syncEngine->addSyncable(_scriptEngine.get());
 
@@ -647,72 +622,30 @@ void OpenSpaceEngine::deinitialize() {
 
 void OpenSpaceEngine::writeDocumentation() {
     // If a LuaDocumentationFile was specified, generate it now
-    const std::string LuaDocumentationType =
-        ConfigurationManager::KeyLuaDocumentation + "." + ConfigurationManager::PartType;
-    const std::string LuaDocumentationFile =
-        ConfigurationManager::KeyLuaDocumentation + "." + ConfigurationManager::PartFile;
-
-    const bool hasLuaDocType = configurationManager().hasKey(LuaDocumentationType);
-    const bool hasLuaDocFile = configurationManager().hasKey(LuaDocumentationFile);
-    if (hasLuaDocType && hasLuaDocFile) {
-        std::string luaDocumentationType = configurationManager().value<std::string>(
-            LuaDocumentationType
-        );
-        std::string luaDocumentationFile = configurationManager().value<std::string>(
-            LuaDocumentationFile
-        );
-
+    if (configurationManager().hasKey(ConfigurationManager::KeyLuaDocumentation)) {
         _scriptEngine->writeDocumentation(
-            absPath(luaDocumentationFile),
-            luaDocumentationType
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyLuaDocumentation
+            ))
         );
     }
 
     // If a general documentation was specified, generate it now
-    const std::string DocumentationType =
-        ConfigurationManager::KeyDocumentation + '.' + ConfigurationManager::PartType;
-    const std::string DocumentationFile =
-        ConfigurationManager::KeyDocumentation + '.' + ConfigurationManager::PartFile;
-
-    const bool hasDocumentationType = configurationManager().hasKey(DocumentationType);
-    const bool hasDocumentationFile = configurationManager().hasKey(DocumentationFile);
-    if (hasDocumentationType && hasDocumentationFile) {
-        std::string documentationType = configurationManager().value<std::string>(
-            DocumentationType
-        );
-        std::string documentationFile = configurationManager().value<std::string>(
-            DocumentationFile
-        );
-
+    if (configurationManager().hasKey(ConfigurationManager::KeyDocumentation)) {
         DocEng.writeDocumentation(
-            absPath(documentationFile),
-            documentationType
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyDocumentation
+            ))
         );
     }
 
-    const std::string FactoryDocumentationType =
-        ConfigurationManager::KeyFactoryDocumentation + '.' +
-        ConfigurationManager::PartType;
-
-    const std::string FactoryDocumentationFile =
-        ConfigurationManager::KeyFactoryDocumentation + '.' +
-        ConfigurationManager::PartFile;
-    
-    bool hasFactoryDocumentationType = configurationManager().hasKey(
-        FactoryDocumentationType
-    );
-    bool hasFactoryDocumentationFile = configurationManager().hasKey(
-        FactoryDocumentationFile
-    );
-    if (hasFactoryDocumentationType && hasFactoryDocumentationFile) {
-        std::string type = configurationManager().value<std::string>(
-            FactoryDocumentationType
+    // If a factory documentation was specified, generate it now
+    if (configurationManager().hasKey(ConfigurationManager::KeyFactoryDocumentation)) {
+        FactoryManager::ref().writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyFactoryDocumentation
+            ))
         );
-        std::string file = configurationManager().value<std::string>(
-            FactoryDocumentationFile
-        );
-
-        FactoryManager::ref().writeDocumentation(absPath(file), type);
     }
 }
 
@@ -908,6 +841,8 @@ void OpenSpaceEngine::configureLogging() {
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
+    _engine->_console->initialize();
+
     const std::string key = ConfigurationManager::KeyOpenGLDebugContext;
     if (_configurationManager->hasKey(key)) {
         ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(key);
@@ -936,7 +871,7 @@ void OpenSpaceEngine::initializeGL() {
                     ConfigurationManager::PartFilterIdentifier
                 );
 
-                for (int i = 1; i <= filterDict.size(); ++i) {
+                for (size_t i = 1; i <= filterDict.size(); ++i) {
                     ghoul::Dictionary id = filterDict.value<ghoul::Dictionary>(
                         std::to_string(i)
                     );
@@ -969,7 +904,7 @@ void OpenSpaceEngine::initializeGL() {
                     ConfigurationManager::PartFilterIdentifier
                 );
 
-                for (int i = 1; i <= filterDict.size(); ++i) {
+                for (size_t i = 1; i <= filterDict.size(); ++i) {
                     std::string severity = filterDict.value<std::string>(
                         std::to_string(i)
                     );
@@ -1059,7 +994,7 @@ void OpenSpaceEngine::preSynchronization() {
         double dt = _windowWrapper->averageDeltaTime();
         _timeManager->preSynchronization(dt);
 
-        auto scheduledScripts = _scriptScheduler->progressTo(Time::ref().j2000Seconds());
+        auto scheduledScripts = _scriptScheduler->progressTo(timeManager().time().j2000Seconds());
         for (auto it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
             _scriptEngine->queueScript(
                 *it, ScriptEngine::RemoteScripting::Yes
@@ -1138,17 +1073,24 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
                              const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
+
+    bool isGuiWindow = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    bool showOverlay = isGuiWindow && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering();
+    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
+    // rendered ---abock
+
+    if (showOverlay) {
+        _console->update();
+    }
+
     LTRACE("OpenSpaceEngine::render(begin)");
     _renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
     
     for (const auto& func : _moduleCallbacks.render) {
         func();
     }
-    
-    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
-    // rendered ---abock
-    bool showGui = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
-    if (showGui && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering()) {
+
+    if (showOverlay) {
         _renderEngine->renderScreenLog();
         _console->render();
     }

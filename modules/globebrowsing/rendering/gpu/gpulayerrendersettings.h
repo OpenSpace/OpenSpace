@@ -36,7 +36,7 @@ class ProgramObject;
 namespace openspace {
 namespace globebrowsing {
 
-class LayerRenderSettings;
+struct LayerRenderSettings;
 
 /**
  * Manages a GPU representation of a <code>LayerRenderSettings</code>
@@ -56,12 +56,15 @@ public:
      * with nameBase within the provided shader program.
      * After this method has been called, users may invoke setValue.
      */
-    void bind(ghoul::opengl::ProgramObject* programObject, const std::string& nameBase);
+    void bind(const LayerRenderSettings& layerSettings, ghoul::opengl::ProgramObject* programObject, const std::string& nameBase);
 
 private:
     GPUData<float> gpuOpacity;
     GPUData<float> gpuGamma;
     GPUData<float> gpuMultiplier;
+
+    // Optional
+    GPUData<float> gpuValueBlending;
 };
 
 } // namespace globebrowsing

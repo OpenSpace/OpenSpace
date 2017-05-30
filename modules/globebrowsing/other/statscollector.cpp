@@ -33,14 +33,14 @@ namespace globebrowsing {
 
 StatsCollector::StatsCollector(const std::string& filename, int dumpEveryXRecord,
                                Enabled enabled, const std::string & delimiter)
-    : _filename(filename)
+    : i(TemplatedStatsCollector<long long>(_enabled, delimiter))
+    , d(TemplatedStatsCollector<double>(_enabled, delimiter))
+    , _filename(filename)
+    , _delimiter(delimiter)
     , _dumpEveryXRecord(dumpEveryXRecord)
     , _recordsSinceLastDump(0)
     , _enabled(enabled)
-    , _delimiter(delimiter)
     , _hasWrittenHeader(false)
-    , i(TemplatedStatsCollector<long long>(_enabled, delimiter))
-    , d(TemplatedStatsCollector<double>(_enabled, delimiter))
 {}
 
 StatsCollector::~StatsCollector() {

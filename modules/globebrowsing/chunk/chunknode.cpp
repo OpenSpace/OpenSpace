@@ -37,9 +37,9 @@ namespace openspace {
 namespace globebrowsing {
 
 ChunkNode::ChunkNode(const Chunk& chunk, ChunkNode* parent)
-    : _chunk(chunk)
-    , _parent(parent)
-    , _children({ nullptr, nullptr, nullptr, nullptr })
+    : _parent(parent)
+    , _children({ {nullptr, nullptr, nullptr, nullptr} })
+    , _chunk(chunk)
 {}
 
 bool ChunkNode::isRoot() const {
@@ -155,7 +155,7 @@ const ChunkNode& ChunkNode::find(const Geodetic2& location) const {
             ++index;
             ++index;
         }
-        node = &(node->getChild((Quad)index));
+        node = &(node->getChild(static_cast<Quad>(index)));
     }
     return *node;
 }
@@ -180,18 +180,23 @@ void ChunkNode::split(int depth) {
 				temp->addSites(tempSites);
 			}
 			_children[i] = std::move(temp);
+
+			// This is how it should be (beforte merge)
+            //Chunk chunk(_chunk.owner(), _chunk.tileIndex().child(static_cast<Quad>(i)));
+            //_children[i] = std::make_unique<ChunkNode>(chunk, this);
+
         }
     }
 
     if (depth - 1 > 0) {
-        for (int i = 0; i < _children.size(); ++i) {
+        for (size_t i = 0; i < _children.size(); ++i) {
             _children[i]->split(depth - 1);
         }
     }
 }
 
 void ChunkNode::merge() {
-    for (int i = 0; i < _children.size(); ++i) {
+    for (size_t i = 0; i < _children.size(); ++i) {
         if (_children[i] != nullptr) {
             _children[i]->merge();
         }

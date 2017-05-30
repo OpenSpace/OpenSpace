@@ -29,6 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/io/texture/texturereader.h>
@@ -260,12 +261,12 @@ void RenderableRings::createPlane() {
     };
     
     VertexData data[] = {
-        -size, -size, 0.f, 0.f,
-        size, size, 1.f, 1.f,
-        -size, size, 0.f, 1.f,
-        -size, -size, 0.f, 0.f,
-        size, -size, 1.f, 0.f,
-        size, size, 1.f, 1.f,
+        { -size, -size, 0.f, 0.f },
+        {  size,  size, 1.f, 1.f },
+        { -size,  size, 0.f, 1.f },
+        { -size, -size, 0.f, 0.f },
+        {  size, -size, 1.f, 0.f },
+        {  size,  size, 1.f, 1.f },
     };
 
     glBindVertexArray(_quad);

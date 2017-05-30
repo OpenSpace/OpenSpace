@@ -32,7 +32,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/time.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -62,7 +61,7 @@ namespace {
     const char* keyHeightTexture = "Textures.Height";
 
     const char* keyRadius = "Geometry.Radius";
-    const char* keyShading = "PerformShading";
+//    const char* keyShading = "PerformShading";
     const char* _mainFrame = "GALACTIC";
 }
 
@@ -125,13 +124,13 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     , _colorTexturePath("planetTexture", "RGB Texture")
     , _heightMapTexturePath("heightMap", "Heightmap Texture")
     , _rotation("rotation", "Rotation", 0, 0, 360)
-    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
-    , _shiftMeridianBy180("shiftMeiridian", "Shift Meridian by 180 deg", false)
-    , _debugProjectionTextureRotation("debug.projectionTextureRotation", "Projection Texture Rotation", 0.f, 0.f, 360.f)
     , _programObject(nullptr)
     , _fboProgramObject(nullptr)
     , _baseTexture(nullptr)
     , _heightMapTexture(nullptr)
+    , _shiftMeridianBy180("shiftMeiridian", "Shift Meridian by 180 deg", false)
+    , _heightExaggeration("heightExaggeration", "Height Exaggeration", 1.f, 0.f, 100.f)
+    , _debugProjectionTextureRotation("debug.projectionTextureRotation", "Projection Texture Rotation", 0.f, 0.f, 360.f)
     , _capture(false)
 {
     documentation::testSpecificationAndThrow(
@@ -175,9 +174,9 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
         _shiftMeridianBy180 = dictionary.value<bool>(keyMeridianShift);
     }
 
-    glm::vec2 radius = glm::vec2(1.0, 9.0);
+    float radius = std::pow(10.0, 9.0);
     dictionary.getValue(keyRadius, radius);
-    setBoundingSphere(radius[0] * std::pow(10, radius[1]));
+    setBoundingSphere(radius);
 
     addPropertySubOwner(_geometry.get());
     addPropertySubOwner(_projectionComponent);
@@ -465,7 +464,7 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
 
     _projectionComponent.update();
 
-    _time = Time::ref().j2000Seconds();
+    _time = data.time.j2000Seconds();
     _capture = false;
 
     if (openspace::ImageSequencer::ref().isReady()){

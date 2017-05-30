@@ -30,6 +30,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/opengl/programobject.h>
 
@@ -40,7 +41,7 @@
 namespace {
     const char* KeyBody                 = "Body";
     const char* KeyFrame                = "Frame";
-    const char* KeyColor                = "RGB";
+//    const char* KeyColor                = "RGB";
 
     const char* KeyInstrument           = "Instrument";
     const char* KeyInstrumentName       = "Name";
@@ -131,6 +132,8 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _lineWidth("lineWidth", "Line Width", 1.f, 1.f, 20.f)
     , _drawSolid("solidDraw", "Draw as Quads", false)
     , _standOffDistance("standOffDistance", "Standoff Distance", 0.9999, 0.99, 1.0, 0.000001)
+    , _programObject(nullptr)
+    , _drawFOV(false)
     , _colors({
         {
             "colors.defaultStart",
@@ -168,8 +171,6 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
             glm::vec4(0.85f, 0.85f, 0.85f, 1.f)
         }
     })
-    , _programObject(nullptr)
-    , _drawFOV(false)
 {
     documentation::testSpecificationAndThrow(
         Documentation(),
@@ -192,7 +193,7 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
 
     ghoul::Dictionary pt = dictionary.value<ghoul::Dictionary>(KeyPotentialTargets);
     _instrument.potentialTargets.reserve(pt.size());
-    for (int i = 1; i <= pt.size(); ++i) {
+    for (size_t i = 1; i <= pt.size(); ++i) {
         std::string target = pt.value<std::string>(std::to_string(i));
         _instrument.potentialTargets.push_back(target);
     }
@@ -401,17 +402,17 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
         // Regardless of what happens next, the position of every second element is going
         // to be the same. Only the color attribute might change
         first = {
-            0.f, 0.f, 0.f,
+            { 0.f, 0.f, 0.f },
             RenderInformation::VertexColorTypeDefaultStart
         };
 
         if (!isInFov) {
             // If the target is not in the field of view, we don't need to perform any
             // surface intercepts
-            glm::vec3 o = orthogonalProjection(bound, data.time, target);
+            glm::vec3 o = orthogonalProjection(bound, data.time.j2000Seconds(), target);
 
             second = {
-                o.x, o.y, o.z,
+                { o.x, o.y, o.z },
                 RenderInformation::VertexColorTypeDefaultEnd // This had a different color (0.4) before ---abock
             };
         }
@@ -425,7 +426,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                 _instrument.name,
                 ref.first,
                 _instrument.aberrationCorrection,
-                data.time,
+                data.time.j2000Seconds(),
                 bound
             );
 
@@ -442,7 +443,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     r.surfaceVector = SpiceManager::ref().frameTransformationMatrix(
                         ref.first,
                         _instrument.referenceFrame,
-                        data.time
+                        data.time.j2000Seconds()
                     ) * r.surfaceVector;
                 }
 
@@ -453,15 +454,15 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                 srfVec *= _standOffDistance;
 
                 second = {
-                    srfVec.x, srfVec.y, srfVec.z,
+                    { srfVec.x, srfVec.y, srfVec.z },
                     RenderInformation::VertexColorTypeIntersectionEnd
                 };
             }
             else {
                 // This point did not intersect the target though others did
-                glm::vec3 o = orthogonalProjection(bound, data.time, target);
+                glm::vec3 o = orthogonalProjection(bound, data.time.j2000Seconds(), target);
                 second = {
-                    o.x, o.y, o.z,
+                    { o.x, o.y, o.z },
                     RenderInformation::VertexColorTypeInFieldOfView
                 };
             }
@@ -515,7 +516,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     _instrument.name,
                     makeBodyFixedReferenceFrame(_instrument.referenceFrame).first,
                     _instrument.aberrationCorrection,
-                    data.time,
+                    data.time.j2000Seconds(),
                     probe
                 ).interceptFound;
             };
@@ -530,7 +531,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     _instrument.name,
                     ref.first,
                     _instrument.aberrationCorrection,
-                    data.time,
+                    data.time.j2000Seconds(),
                     probe
                 );
 
@@ -538,7 +539,7 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     r.surfaceVector = SpiceManager::ref().frameTransformationMatrix(
                         ref.first,
                         _instrument.referenceFrame,
-                        data.time
+                        data.time.j2000Seconds()
                     ) * r.surfaceVector;
                 }
 
@@ -555,15 +556,15 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                 if (intercepts(tBound)) {
                     const glm::vec3 icpt = interceptVector(tBound);
                     _orthogonalPlane.data[indexForBounds(i) + m] = {
-                        icpt.x, icpt.y, icpt.z,
+                        { icpt.x, icpt.y, icpt.z },
                         RenderInformation::VertexColorTypeSquare
                     };
                 }
                 else {
-                    const glm::vec3 o = orthogonalProjection(tBound, data.time, target);
+                    const glm::vec3 o = orthogonalProjection(tBound, data.time.j2000Seconds(), target);
 
                     _orthogonalPlane.data[indexForBounds(i) + m] = {
-                        o.x, o.y, o.z,
+                        { o.x, o.y, o.z },
                         RenderInformation::VertexColorTypeSquare
                     };
                 }
@@ -1002,8 +1003,8 @@ void RenderableFov::update(const UpdateData& data) {
         _drawFOV = ImageSequencer::ref().instrumentActive(_instrument.name);
     }
 
-    if (_drawFOV && !data.timePaused) {
-        auto t = determineTarget(data.time);
+    if (_drawFOV && !data.time.paused()) {
+        auto t = determineTarget(data.time.j2000Seconds());
         std::string target = t.first;
         bool inFOV = t.second;
 
@@ -1011,7 +1012,7 @@ void RenderableFov::update(const UpdateData& data) {
         updateGPU();
 
         double t2 = (ImageSequencer::ref().getNextCaptureTime());
-        double diff = (t2 - data.time);
+        double diff = (t2 - data.time.j2000Seconds());
         _interpolationTime = 0.0;
         float interpolationStart = 7.0; //seconds before
         if (diff <= interpolationStart) {
