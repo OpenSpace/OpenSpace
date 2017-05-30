@@ -28,7 +28,6 @@
 
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-//#include <include/cef_base.h>
 #include <include/cef_browser.h>
 #include <openspace/engine/openspaceengine.h>
 
@@ -46,10 +45,17 @@ private:
     bool mouseButtonCallback(MouseButton, MouseAction);
     bool mousePositionCallback(double, double);
     bool mouseWheelCallback(double);
-    bool keyBoardCallback(Key, KeyModifier, KeyAction);
+    bool charCallback(unsigned int, KeyModifier);
+    bool keyboardCallback(Key, KeyModifier, KeyAction);
+    bool specialKeyEvent(Key);
+    int mapFromGlfwToNative(Key);
 
     CefMouseEvent mouseEvent();
     cef_key_event_type_t EventHandler::keyEventType(KeyAction);
+
+    bool leftMouseDown = false;
+
+    void reloadBrowser();
 
     CefRefPtr<CefBrowser> browser;
     glm::vec2 mousePosition;

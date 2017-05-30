@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 
+#include <ext/ghoul/include/ghoul/logging/logmanager.h>
+#include <ext/ghoul/ext/cppformat/fmt/format.h>
 #include "event_handler.h"
 
 namespace {
@@ -31,10 +33,19 @@ namespace {
 
 namespace openspace {
     void EventHandler::initialize() {
+        OsEng.registerModuleCharCallback(
+                [this](unsigned int charCode, KeyModifier mod) -> bool {
+                    if (true /*gui.isEnabled()*/) {
+                        return charCallback(charCode, mod);
+                    } else {
+                        return false;
+                    }
+                }
+        );
         OsEng.registerModuleKeyboardCallback(
                 [this](Key key, KeyModifier mod, KeyAction action) -> bool {
                     if (true /*gui.isEnabled()*/) {
-                        return keyBoardCallback(key, mod, action);
+                        return keyboardCallback(key, mod, action);
                     } else {
                         return false;
                     }
@@ -70,19 +81,28 @@ namespace openspace {
     }
 
     bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
-        bool mouseReleased = action == MouseAction::Release;
-        // TODO(klas): Support more button types than only left
-        CefBrowserHost::MouseButtonType leftButton = MBT_LEFT;
-        browser->GetHost()->SendMouseClickEvent(mouseEvent(), leftButton, mouseReleased, SINGLE_CLICK);
+        if (button != MouseButton::Left) return false;
+
+        if (action == MouseAction::Release) {
+            leftMouseDown = false;
+        } else {
+            leftMouseDown = true;
+        }
+        browser->GetHost()->SendMouseClickEvent(mouseEvent(), MBT_LEFT, leftMouseDown, SINGLE_CLICK);
 
         // TODO(klas): Figure out when to block and when to not block
         return false;
     }
 
     bool EventHandler::mousePositionCallback(double x, double y) {
-        mousePosition.x = x;
-        mousePosition.y = y;
-        browser->GetHost()->SendMouseMoveEvent(mouseEvent(), false);
+        mousePosition.x = (int) x;
+        mousePosition.y = (int) y;
+        CefMouseEvent localMouseEvent(mouseEvent());
+        if (leftMouseDown) {
+            localMouseEvent.modifiers = EVENTFLAG_LEFT_MOUSE_BUTTON;
+			LDEBUGC("event", fmt::format("dragging: {}, {}", x, y));
+        }
+        browser->GetHost()->SendMouseMoveEvent(localMouseEvent, false);
 
         // Let the mouse event trickle on
         return false;
@@ -91,39 +111,93 @@ namespace openspace {
     bool EventHandler::mouseWheelCallback(double position) {
         // TODO(klas): Support horizontal scrolling, use shift?
         // TODO(klas): Figure out how this should be used
-        browser->GetHost()->SendMouseWheelEvent(mouseEvent(), position, 0);
+        browser->GetHost()->SendMouseWheelEvent(mouseEvent(), (int) position, 0);
         return false;
     }
 
-    bool EventHandler::keyBoardCallback(Key key, KeyModifier modifier, KeyAction action) {
+    bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
         CefKeyEvent keyEvent;
-        keyEvent.windows_key_code = static_cast<int>(key);
-        keyEvent.modifiers        = 0;
-//        keyEvent.modifiers        = modifier;
+        keyEvent.windows_key_code = charCode;
+        keyEvent.modifiers        = static_cast<uint32>(modifier);
+        keyEvent.type             = KEYEVENT_CHAR;
+		browser->GetHost()->SendKeyEvent(keyEvent);
+
+        // TODO(klas): figure out when to block
+        return false;
+    }
+
+    bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
+		if (specialKeyEvent(key)) {
+			return true;
+		}
+
+        CefKeyEvent keyEvent;
+//        keyEvent.native_key_code  = mapFromGlfwToNative(key);
+        keyEvent.windows_key_code = mapFromGlfwToNative(key);
+        keyEvent.modifiers        = static_cast<uint32>(modifier);
         keyEvent.type             = keyEventType(action);
-//        browser->GetHost()->SendKeyEvent(keyEvent);
-        keyEvent.type = KEYEVENT_CHAR;
         browser->GetHost()->SendKeyEvent(keyEvent);
 
         // TODO(klas): figure out when to block
         return false;
     }
 
-    cef_key_event_type_t EventHandler::keyEventType(KeyAction action) {
-        switch(action) {
-            case KeyAction::Release:
-                return KEYEVENT_KEYUP;
-            case KeyAction::Press:
-            case KeyAction::Repeat:
-            default:
-                return KEYEVENT_KEYDOWN;
+    /**
+     * Detect if there is a special event that should be caught by the GUI before it is sent to CEF
+     * @param key the pressed key
+     * @return true if event found, false otherwise
+     */
+    bool EventHandler::specialKeyEvent(Key key) {
+        switch(key) {
+            case Key::F5:
+                reloadBrowser();
+                return true;
+            default: return false;
         }
     }
 
+    /**
+     * Map from GLFW key codes to "regular" key codes, supported by JS and CEF
+     * @param key
+     * @return the key code, if mapped or the GLFW key code
+     */
+    int EventHandler::mapFromGlfwToNative(Key key) {
+        switch (key) {
+            case Key::Enter: return 13;
+            case Key::Left:  return 37;
+            case Key::Up:    return 38;
+            case Key::Right: return 39;
+            case Key::Down:  return 40;
+            default:         return static_cast<int>(key);
+        }
+    }
+
+    void EventHandler::reloadBrowser() {
+        browser->Reload();
+    }
+
+    /**
+     * Find the CEF key event to use for a given action
+     * @param action
+     * @return
+     */
+    cef_key_event_type_t EventHandler::keyEventType(KeyAction action) {
+        if (action == KeyAction::Release) {
+            return KEYEVENT_KEYUP;
+        } else {
+//            return KEYEVENT_RAWKEYDOWN;
+            return KEYEVENT_KEYDOWN;
+        }
+    }
+
+    /**
+     * Create a mouse event on the current cursor position
+     * @return
+     */
     CefMouseEvent EventHandler::mouseEvent() {
         CefMouseEvent event;
-        event.x = mousePosition.x;
-        event.y = mousePosition.y;
+        event.x = (int) mousePosition.x;
+        event.y = (int) mousePosition.y;
         return event;
     }
 } // namespace openspace
