@@ -249,9 +249,8 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 	// Gradient of distToMinimize w.r.t par (using forward difference)
 	auto gradient = [](double* g, double* par, int x, void* fdata, LMstat* lmstat) {
 		FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
-		double h, scale = log10(ptr->node->boundingSphere()), lastG, f1, f0 = ptr->distToMinimize(par, x, fdata, lmstat);
-		double hAngle = (1e-2 / ptr->node->boundingSphere()) / std::min(ptr->objectScreenRadius, 300.0);
-		double hZoom = 1e-2 / std::min(ptr->objectScreenRadius, 300.0);
+		double h, hZoom, lastG, f1, f0 = ptr->distToMinimize(par, x, fdata, lmstat);
+		double scale = log10(ptr->node->boundingSphere()); // scale value to find minimum step size h, dependant on planet size
 		std::vector<double> dPar(ptr->nDOF, 0.0);
 
 		for (int i = 0; i < ptr->nDOF; ++i) {
@@ -259,16 +258,26 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 			par[i] += h;
 			f1 = ptr->distToMinimize(par, x, fdata, lmstat);
 			par[i] -= h;*/
-
 			dPar.assign(par, par + ptr->nDOF);
 			h = 1e-8;
 			lastG = 1;
 			dPar.at(i) += h;
 			f1 = ptr->distToMinimize(dPar.data(), x, fdata, lmstat);
 			for (int j = 0; j < 100; ++j) { // iterative process to find the minimum step h that gives a good gradient
-				dPar.assign(par, par + ptr->nDOF); // reset parameters for precision
-				if ((f1 - f0) != 0 && lastG == 0) { // found good step size h
-					h *= std::max(scale * scale, 10.0);
+				dPar.assign(par, par + ptr->nDOF);
+				if ((f1 - f0) != 0 && lastG == 0) { // found minimum step size h
+					// scale up to get a good initial guess value
+					h *= scale * scale * scale;
+					
+					// find optimal h
+					if (i == 2) {
+						h = std::max(std::min(std::abs(dPar.at(i)) / 1e8, 1.0), h); // choose zoom step size dependant on incoming zoom parameter
+					}
+					else if (ptr->nDOF == 2) {
+						h = std::max(std::abs(dPar.at(i)) * 0.001, h); // make sure the angle step size isnt smaller than a fraction of the incoming parameter for 1 finger
+					}
+
+					// calculate f1 with good h for finite difference
 					dPar.at(i) += h;
 					f1 = ptr->distToMinimize(dPar.data(), x, fdata, lmstat);
 					break;
@@ -285,13 +294,13 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 			}
 			g[i] = (f1 - f0) / h;
 		}
-		if (ptr->nDOF == 2) {
+		if (ptr->nDOF == 2) { // normalize on 1 finger case to allow for horizontal/vertical movement
 			for (int i = 0; i < 2; ++i) {
 				g[i] = g[i]/std::abs(g[i]);
 			}
 		}
 		else if (ptr->nDOF == 6) {
-			for (int i = 0; i < ptr->nDOF; ++i) { // 3 finger case
+			for (int i = 0; i < ptr->nDOF; ++i) { // lock to only pan and zoom on 3 finger case
 				if (ptr->onlyPan) { // temp for feedback
 					g[i] = (i == 2) ? g[i] : g[i] / std::abs(g[i]); // no zoom, weird roll sometimes, otherwise only pan
 				}
@@ -372,7 +381,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 	}
 	else {
 		_numOfTries++;
-		if (_numOfTries > 3) {
+		if (_numOfTries > 2) {
 			resetAfterInput();
 		}
 	}
@@ -744,10 +753,7 @@ void TouchInteraction::resetAfterInput() {
 		}
 	}
 	if (_guiON) {
-		bool activeLastFrame = false;
-		if (OnScreenGUIModule::touchInput.action) {
-			activeLastFrame = true;
-		}
+		bool activeLastFrame = OnScreenGUIModule::touchInput.action;
 		OnScreenGUIModule::touchInput.active = false;
 		if (activeLastFrame) {
 			OnScreenGUIModule::touchInput.active = true;
