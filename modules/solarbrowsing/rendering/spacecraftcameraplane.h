@@ -25,6 +25,7 @@
 #define __OPENSPACE_MODULE_BASE___SPACECRAFTCAMERAPLANE___H__
 
 #include <openspace/util/updatestructures.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
 

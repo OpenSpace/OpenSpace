@@ -27,6 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/opengl/programobject.h>
 
 namespace {
   const double SUN_RADIUS = (1391600000.0 * 0.50);

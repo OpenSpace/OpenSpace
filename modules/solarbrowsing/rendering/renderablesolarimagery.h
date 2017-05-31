@@ -40,9 +40,9 @@
 #include <modules/solarbrowsing/util/simplej2kcodec.h>
 #include <unordered_set>
 
+
 #include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
 
-#include <openspace/util/powerscaledsphere.h>
 #include <modules/solarbrowsing/util/streambuffer.h>
 #include <modules/solarbrowsing/util/pixelbufferobject.h>
 #include <modules/solarbrowsing/util/decodejob.h>

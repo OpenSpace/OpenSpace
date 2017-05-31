@@ -60,7 +60,7 @@ void StreamBuffer<T>::clear() {
     while (_concurrentJobManager.numFinishedJobs() > 0) {
         _concurrentJobManager.popFinishedJob();
     }
-    _concurrentJobManager.reset();
+    _concurrentJobManager.clearEnqueuedJobs();
     _enqueuedJobIds.clear();
 }
 

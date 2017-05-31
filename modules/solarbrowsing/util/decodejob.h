@@ -68,7 +68,7 @@ public:
         _solarImageData = std::make_shared<SolarImageData>(std::move(imd));
     }
 
-    virtual std::shared_ptr<SolarImageData> product() const final {
+    virtual std::shared_ptr<SolarImageData> product() final {
         return std::move(_solarImageData);
     }
 

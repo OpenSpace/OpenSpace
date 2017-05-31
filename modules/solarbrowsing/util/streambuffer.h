@@ -42,7 +42,7 @@ public:
     StreamJob(const std::string& id) : _id(id) {}
     //virtual ~StreamJob() override;
     virtual void execute() override = 0;
-    virtual std::shared_ptr<T> product() const override = 0;
+    virtual std::shared_ptr<T> product() override = 0;
 
     const std::string& id() { return _id; }
 private:

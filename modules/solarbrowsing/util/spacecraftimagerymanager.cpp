@@ -29,7 +29,6 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem>
 #include <modules/solarbrowsing/util/simplej2kcodec.h>
 #include <openspace/rendering/transferfunction.h>
@@ -270,10 +269,11 @@ void SpacecraftImageryManager::loadImageMetadata(
                                            tokens[2] + "T" + tokens[4] + ":" +
                                            tokens[5] + ":" + tokens[6] + "." + tokens[7];
 
+                        //auto t = OsEng.timeManager();
                         const ImageMetadata im = parseMetadata(currentFile);
                         std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
                         TimedependentState<ImageMetadata> timeState(
-                              std::move(data), Time::ref().convertTime(time), seqPath);
+                              std::move(data), /*OsEng.timeManager().time().convertTime(time)*/2123132, seqPath);
                         _imageMetadataMap[instrumentName].addState(std::move(timeState));
                     }
                 }

@@ -26,13 +26,13 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLESOLARIMAGERYPROJECTION___H__
 
 #include <openspace/rendering/renderable.h>
-
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/powerscaledsphere.h>
-
+#include <openspace/scene/scene.h>
 #include <ghoul/opengl/textureunit.h>
 
 #include <memory>
