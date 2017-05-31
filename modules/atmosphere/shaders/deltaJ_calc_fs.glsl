@@ -41,7 +41,7 @@ uniform int firstIteraction;
 const float stepPhi = (2.0f * M_PI) / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 const float stepTheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 
-void inscatter(float r, float mu, float muSun, float nu, out vec3 radianceJ) {
+void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
   // Be sure to not get a cosine or height out of bounds
   r     = clamp(r, Rg, Rt);
   mu    = clamp(mu, -1.0f, 1.0f);

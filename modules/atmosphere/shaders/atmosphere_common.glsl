@@ -70,7 +70,7 @@ const float M_PI = 3.141592657;
 
 uniform sampler2D transmittanceTexture;
 
-float opticalDepth(float H, float r, float mu, float d) {
+float opticalDepth(const float H, const float r, const float mu, const float d) {
   float a    = sqrt((0.5/H)*r);
   vec2 a01   = a*vec2(mu, mu + d / r);
   vec2 a01s  = sign(a01);
@@ -80,7 +80,7 @@ float opticalDepth(float H, float r, float mu, float d) {
   return sqrt((6.2831*H)*r) * exp((Rg-r)/H) * (x + dot(y, vec2(1.0, -1.0)));
 }
 
-vec3 analyticTransmittance(float r, float mu, float d) {
+vec3 analyticTransmittance(const float r, const float mu, const float d) {
   return exp(- betaRayleigh * opticalDepth(HR, r, mu, d) -
              betaMieExtinction * opticalDepth(HM, r, mu, d));
 }
