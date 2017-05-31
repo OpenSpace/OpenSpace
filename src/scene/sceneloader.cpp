@@ -281,7 +281,7 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadModule(const std::string& 
         }
     }
     return loadedNodes;
-};
+}
 
 std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode>&& loadedNodes) {
     std::map<std::string, SceneGraphNode*> existingNodes = scene.nodesByName();
