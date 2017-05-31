@@ -219,7 +219,7 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadDirectory(
         const Directory directory(path);
         const std::string directoryPath = directory.path();
 
-        if (!FileSys.fileExists(directoryPath)) {
+        if (!FileSys.directoryExists(directoryPath)) {
             LERROR("The directory " << directoryPath << " does not exist.");
             return std::vector<SceneLoader::LoadedNode>();
         }
