@@ -271,6 +271,7 @@ void RenderEngine::initialize() {
 }
 
 void RenderEngine::initializeGL() {
+    LTRACE("RenderEngine::initializeGL(begin)");
     // TODO:    Fix the power scaled coordinates in such a way that these 
     //            values can be set to more realistic values
 
@@ -298,6 +299,7 @@ void RenderEngine::initializeGL() {
     ghoul::logging::LogManager::ref().addLog(std::move(log));
 
     LINFO("Finished initializing GL");
+    LTRACE("RenderEngine::initializeGL(end)");
 }
 
 void RenderEngine::deinitialize() {
