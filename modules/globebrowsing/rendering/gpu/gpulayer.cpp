@@ -33,11 +33,11 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
                         const TileIndex& tileIndex, int pileSize)
 {
     ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
-    gpuChunkTilePile.setValue(programObject, chunkTilePile);
     gpuRenderSettings.setValue(programObject, layer.renderSettings());  
     
     switch (layer.type) {
         case Layer::TypeID::Texture:
+        	gpuChunkTilePile.setValue(programObject, chunkTilePile);
             break;
         case Layer::TypeID::SolidColor:
             gpuColor.setValue(programObject, layer.color.value());
@@ -50,11 +50,11 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
 void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                     const std::string& nameBase, int pileSize)
 {
-    gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
     gpuRenderSettings.bind(layer.renderSettings(), programObject, nameBase + "settings.");
     
     switch (layer.type) {
         case Layer::TypeID::Texture:
+    		gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
             break;
         case Layer::TypeID::SolidColor:
             gpuColor.bind(programObject, nameBase + "color");
