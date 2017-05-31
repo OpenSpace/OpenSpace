@@ -38,7 +38,7 @@ namespace {
 
     const char* MessageKeyType = "type";
     const char* MessageKeyPayload = "payload";
-    const char* MessageKeySubject = "subject";
+    const char* MessageKeyTopic = "topic";
 }
 
 namespace openspace {
@@ -136,6 +136,17 @@ void ServerModule::consumeMessages() {
     }
 }
 
+Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, std::thread t)
+    : socket(s)
+    , thread(std::move(t))
+    , active(true)
+{
+    _topicFactory.registerClass<GetPropertyTopic>("authenticate");
+    _topicFactory.registerClass<GetPropertyTopic>("get");
+    _topicFactory.registerClass<SetPropertyTopic>("set");
+    _topicFactory.registerClass<SubscribePropertyTopic>("subscribe");
+}
+
 void Connection::handleMessage(std::string message) {
     try {
         nlohmann::json j = nlohmann::json::parse(message);
@@ -146,29 +157,45 @@ void Connection::handleMessage(std::string message) {
 }
 
 void Connection::handleJson(nlohmann::json j) {
-    auto keyJson = j.find(MessageKeyType);
-    if (keyJson == j.end() || !keyJson->is_string()) {
-        LERROR("Expected string key");
-        return;
-    }
-
+    auto topicJson = j.find(MessageKeyTopic);
     auto payloadJson = j.find(MessageKeyPayload);
+
+    if (topicJson == j.end() || !topicJson->is_number_integer()) {
+        LERROR("Topic must be an integer");
+        return;
+    }
+
     if (payloadJson == j.end() || !payloadJson->is_object()) {
-        LERROR("Expected object payload");
+        LERROR("Payload must be an object");
         return;
     }
-
-    auto subjectJson = j.find(MessageKeySubject);
-    if (keyJson == j.end() || !subjectJson->is_number_integer()) {
-        LERROR("Expected integer subject");
-        return;
-    }
-
-    std::string key = *keyJson;
-    int subject = *subjectJson;
     
-    std::cout << key << std::to_string(subject) << subjectJson->dump();
-
+    // The topic id may be an already discussed topic, or a new one.
+    size_t topicId = *topicJson;
+    auto topicIt = _topics.find(topicId);
+    
+    if (topicIt == _topics.end()) {
+        // The topic id is not registered: Initialize a new topic.
+        auto typeJson = j.find(MessageKeyType);
+        if (typeJson == j.end() || !typeJson->is_string()) {
+            LERROR("A type must be specified as a string when a new topic is initialized");
+            return;
+        }
+        std::string type = *typeJson;
+        std::unique_ptr<Topic> topic = _topicFactory.create(type);
+        topic->initialize(this, topicId);
+        topic->handleJson(payloadJson);
+        if (!topic.isDone()) {
+            _topics.emplace(topicId, topic);
+        }
+    } else {
+        // Dispatch the message to the existing topic.
+        std::unique_ptr<Topic>& topic = topicIt->second;
+        topic->handleJson(payloadJson);
+        if (topic->isDone()) {
+            _topics.erase(topicIt);
+        }
+    }
 }
 
 void Connection::sendMessage(const std::string& message) {

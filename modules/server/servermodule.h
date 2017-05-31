@@ -26,40 +26,52 @@
 #define __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+
 #include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/misc/templatefactory.h>
 
 #include <deque>
 #include <memory>
 #include <thread>
 #include <mutex>
 #include <cstdint>
+#include <map>
 
 #include <ext/json/json.hpp>
 
 namespace openspace {
 
+class Connection;
+
+class Topic {
+public:
+    virtual ~Topic();
+    initialize(Connection* connection, size_t topicId)
+    void handleJson(nlohmann::json json);
+};
+
 struct Connection {
 public:
-    Connection(std::shared_ptr<ghoul::io::Socket> s, std::thread t)
-        : socket(s)
-        , thread(std::move(t))
-        , active(true)
-    {}
+    Connection(std::shared_ptr<ghoul::io::Socket> s, std::thread t);
 
     void handleMessage(std::string message);
     void sendMessage(const std::string& message);
     void handleJson(nlohmann::json json);
     void sendJson(const nlohmann::json& json);
 
+    ghoul::TemplateFactory<Topic> _topicFactory;
+    std::map<size_t, std::unique_ptr<Topic>> _topics;
     std::shared_ptr<ghoul::io::Socket> socket;
     std::thread thread;
     bool active;
 };
-    
+   
 struct Message {
     Connection* conneciton;
     std::string messageString;
 };
+
+
 
 class ServerModule : public OpenSpaceModule {
 public:
