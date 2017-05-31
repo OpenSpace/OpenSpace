@@ -25,8 +25,8 @@ echo flags
 
 stage('Build') {
 	parallel linux: {
-		timeout(time: 30, unit: 'MINUTES') {
-			node('linux') {
+		node('linux') {
+			timeout(time: 30, unit: 'MINUTES') {
 				checkout scm
 				sh 'git submodule update --init --recursive'
 				sh '''
@@ -40,8 +40,8 @@ stage('Build') {
 		}
 	},
 	windows: {
-		timeout(time: 30, unit: 'MINUTES') {
-			node('windows') {
+		node('windows') {
+			timeout(time: 30, unit: 'MINUTES') {
 				checkout scm
 				bat '''
 					git submodule update --init --recursive
@@ -55,8 +55,8 @@ stage('Build') {
 		}
 	},
 	osx: {
-		timeout(time: 30, unit: 'MINUTES') {
-			node('osx') {
+		node('osx') {
+			timeout(time: 30, unit: 'MINUTES') {
 				checkout scm
 				sh 'git submodule update --init --recursive'
 				sh '''

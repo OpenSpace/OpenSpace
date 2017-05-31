@@ -73,6 +73,7 @@ LayerShaderManager::LayerShaderPreprocessingData
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; i++) {
         LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData
             layeredTextureInfo;
+
         const LayerGroup& layerGroup = layerManager->layerGroup(i);
         layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
