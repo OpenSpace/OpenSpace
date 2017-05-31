@@ -99,16 +99,34 @@ vec4 performLayerSettings(vec4 currentValue, const LayerSettings settings) {
 vec4 getSample#{layerGroup}#{i}(
 	const vec2 uv,
 	const LevelWeights levelWeights,
-	const Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1]) {
-
+	const Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1])
+{
 	vec4 color = vec4(0,0,0,1);
 #if #{#{layerGroup}#{i}LayerType} == 0 // Default, sample from texture
-		color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
 #elif #{#{layerGroup}#{i}LayerType} == 1 // Color adjustment layer
-		color.rgb = #{layerGroup}[#{i}].color;
+	color.rgb = #{layerGroup}[#{i}].color;
 #endif
 
 	return color;
+}
+
+#endfor
+#endfor
+
+#for id, layerGroup in layerGroups
+#for i in 0..#{lastLayerIndex#{layerGroup}}
+
+vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor) {
+#if #{#{layerGroup}#{i}BlendMode} == 0 // Default, Normal
+	return blendNormal(currentColor, newColor);	
+#elif #{#{layerGroup}#{i}BlendMode} == 1 // Multiply
+	return blendMultiply(currentColor, newColor);
+#elif #{#{layerGroup}#{i}BlendMode} == 2 // Add
+	return blendAdd(currentColor, newColor);
+#elif #{#{layerGroup}#{i}BlendMode} == 3 // Subtract
+	return blendSubtract(currentColor, newColor);
+#endif
 }
 
 #endfor
@@ -185,8 +203,7 @@ vec4 calculateColor(
 
 		colorSample = performLayerSettings(colorSample, ColorLayers[#{i}].settings);
 
-		color = blendOver(color, colorSample);
-
+		color = blendColorLayers#{i}(color, colorSample);
 	}
 	#endfor
 
@@ -214,7 +231,7 @@ vec4 calculateGrayScale(
 		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, 1);
 		colorSample = performLayerSettings(colorSample, GrayScaleLayers[#{i}].settings);
 
-		colorGrayScale = blendOver(colorGrayScale, colorSample);
+		colorGrayScale = blendGrayScaleLayers#{i}(colorGrayScale, colorSample);
 	}
 	#endfor
 
@@ -266,7 +283,7 @@ vec4 calculateNight(
 
 		colorSample = performLayerSettings(colorSample, NightLayers[#{i}].settings);
 
-		nightColor = blendOver(nightColor, colorSample);
+		nightColor = blendNightLayers#{i}(nightColor, colorSample);
 	}
 	#endfor
 
@@ -318,7 +335,8 @@ vec4 calculateOverlay(
 		vec4 colorSample = getSampleColorOverlays#{i}(uv, levelWeights, ColorOverlays);
 		colorSample = performLayerSettings(colorSample, ColorOverlays[#{i}].settings);
 
-		color = blendOver(color, colorSample);
+		color = blendNormal(color, colorSample);
+		color = blendColorOverlays#{i}(color, colorSample);
 	}
 	#endfor
 
@@ -348,7 +366,8 @@ vec4 calculateGrayScaleOverlay(
 		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
 		colorSample = performLayerSettings(colorSample, GrayScaleColorOverlays[#{i}].settings);
 
-		colorGrayScale = blendOver(colorGrayScale, colorSample);
+		colorGrayScale = blendGrayScaleColorOverlays#{i}(colorGrayScale, colorSample);
+
 		float valueBlending = GrayScaleColorOverlays[#{i}].settings.valueBlending;
 		hsvCurrent.z = colorGrayScale.r * valueBlending + hsvCurrent.b * (1 - valueBlending);
 	}
@@ -365,7 +384,7 @@ vec4 calculateGrayScaleOverlay(
 */
 	// No color blending, use grayscale
 	//vec3 rgbNew = colorGrayScale.rgb;
-	vec4 color = blendOver(currentColor, vec4(rgbNew, colorGrayScale.a));
+	vec4 color = blendNormal(currentColor, vec4(rgbNew, colorGrayScale.a));
 
 	return color;
 }
@@ -393,7 +412,8 @@ vec4 calculateWater(
 
 		colorSample = performLayerSettings(colorSample, WaterMasks[#{i}].settings);
 
-		waterColor = blendOver(waterColor, colorSample);
+		waterColor = blendWaterMasks#{i}(waterColor, colorSample);
+
 	}
 	#endfor
 
@@ -407,7 +427,7 @@ vec4 calculateWater(
 
 	vec3 specularTotal = specularColor * cosineFactor * specularIntensity * waterColor.a;
 
-	//return blendOver(currentColor, waterColor);
+	//return blendNormal(currentColor, waterColor);
 	return currentColor + vec4(specularTotal, 1);
 }
 

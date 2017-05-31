@@ -34,6 +34,13 @@ const std::string Layer::TypeNames[NumTypes] = {
     "SolidColor"
 };
 
+const std::string Layer::BlendModeNames[NumBlendModes] = {
+    "Normal",
+    "Multiply",
+    "Add",
+    "Subtract",
+};
+
 namespace {
     const char* keyName = "Name";
     const char* keyEnabled = "Enabled";
@@ -50,6 +57,11 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
           "Type",
           properties::OptionProperty::DisplayType::Dropdown
       )
+    , _blendModeOption(
+          "blendMode",
+          "Blend Mode",
+          properties::OptionProperty::DisplayType::Dropdown
+      )
     , color(
         "color",
         "Color",
@@ -58,6 +70,7 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
         glm::vec4(1.f)
       )
     , type(TypeID::TileLayer)
+    , blendMode(BlendModeID::Normal)
 {
     // We add the id to the dictionary since it needs to be known by
     // the tile provider
@@ -92,8 +105,11 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     for (int i = 0; i < NumTypes; ++i) {
         _typeOption.addOption(i, TypeNames[i]);
     }
-    
-    addProperty(_typeOption);
+
+    for (int i = 0; i < NumBlendModes; ++i) {
+        _blendModeOption.addOption(i, BlendModeNames[i]);
+    }
+
     _typeOption.onChange([&](){
         removeVisibleProperties();
         type = static_cast<TypeID>(_typeOption.value());
@@ -101,6 +117,14 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
         _onChangeCallback();
     });
 
+    _blendModeOption.onChange([&](){
+        blendMode = static_cast<BlendModeID>(_blendModeOption.value());
+        _onChangeCallback();
+    });
+
+    addProperty(_typeOption);
+    addProperty(_blendModeOption);
+    
     color.setViewOption(properties::Property::ViewOptions::Color);
 
     addVisibleProperties();

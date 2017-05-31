@@ -59,6 +59,16 @@ public:
     static const int NumTypes = 2;
     static const std::string TypeNames[NumTypes];
 
+    enum class BlendModeID
+    {
+        Normal = 0,
+        Multiply = 1,
+        Add = 2,
+        Subtract = 3,
+    };
+    static const int NumBlendModes = 4;
+    static const std::string BlendModeNames[NumBlendModes];
+
     Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict);
 
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
@@ -71,11 +81,13 @@ public:
 
     properties::Vec3Property color;
     TypeID type;
+    BlendModeID blendMode;
 
 private:
     void removeVisibleProperties();
     void addVisibleProperties();
     properties::OptionProperty _typeOption;
+    properties::OptionProperty _blendModeOption;
 
     properties::BoolProperty _enabled;
     properties::TriggerProperty _reset;

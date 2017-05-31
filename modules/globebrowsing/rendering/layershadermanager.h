@@ -65,6 +65,7 @@ public:
             int lastLayerIdx;
             bool layerBlendingEnabled;
             std::vector<Layer::TypeID> layerType;
+            std::vector<Layer::BlendModeID> blendMode;
             bool operator==(const LayerGroupPreprocessingData& other) const;
         };
         

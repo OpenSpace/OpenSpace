@@ -41,6 +41,7 @@ namespace globebrowsing {
 bool LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
     const LayerGroupPreprocessingData& other) const {
     return layerType == other.layerType &&
+        blendMode == other.blendMode &&
         lastLayerIdx == other.lastLayerIdx &&
         layerBlendingEnabled == other.layerBlendingEnabled;
 }
@@ -75,12 +76,14 @@ LayerShaderManager::LayerShaderPreprocessingData
             layeredTextureInfo;
 
         const LayerGroup& layerGroup = layerManager->layerGroup(i);
+        std::vector<std::shared_ptr<Layer>> layers = layerGroup.activeLayers();
+        
         layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
 
-        std::vector<std::shared_ptr<Layer>> layers = layerGroup.activeLayers();
         for (const std::shared_ptr<Layer>& layer : layers) {
             layeredTextureInfo.layerType.push_back(layer->type);
+            layeredTextureInfo.blendMode.push_back(layer->blendMode);
         }
 
         preprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
@@ -162,12 +165,21 @@ void LayerShaderManager::recompileShaderProgram(
         );
 
         // This is to avoid errors from shader preprocessor
-        std::string key = groupName + "0" + "LayerType";
-        shaderDictionary.setValue(key, 0);
+        std::string keyLayerType = groupName + "0" + "LayerType";
+        shaderDictionary.setValue(keyLayerType, 0);
 
         for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
             std::string key = groupName + std::to_string(j) + "LayerType";
             shaderDictionary.setValue(key, static_cast<int>(textureTypes[i].layerType[j]));
+        }
+
+        // This is to avoid errors from shader preprocessor
+        std::string keyBlendMode = groupName + "0" + "BlendMode";
+        shaderDictionary.setValue(keyBlendMode, 0);
+
+        for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
+            std::string key = groupName + std::to_string(j) + "BlendMode";
+            shaderDictionary.setValue(key, static_cast<int>(textureTypes[i].blendMode[j]));
         }
     }
 
