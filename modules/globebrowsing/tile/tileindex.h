@@ -110,7 +110,9 @@ struct TileIndex {
 
     TileHashKey hashKey() const;
 
-    bool operator==(const TileIndex& other) const;
+    inline bool operator==(const TileIndex& other) const {
+        return (x == other.x) && (y == other.y) && (level == other.level);
+    }
 };
 
 std::ostream& operator<<(std::ostream& os, const TileIndex& ti);

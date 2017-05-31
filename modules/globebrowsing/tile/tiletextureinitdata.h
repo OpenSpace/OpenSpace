@@ -22,37 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_CACHEABLE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_CACHEABLE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__
+
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
+
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
-namespace cache {
 
 /**
- * Base class to be extended by classes that need to be cached and make use of the
- * memoryImpact interface. A class extending <code>MemoryAwareCacheable</code> needs to
- * know its memory impact at initialization and hence provide the memory impact in its
- * constructors. The memory impact can not change during the lifetime of an object that is
- * a <code>MemoryAwareCacheable</code>.
+ * All information needed to create a texture used for a Tile.
  */
-class MemoryAwareCacheable {
+class TileTextureInitData
+{
 public:
-    /**
-     * \param memoryImpact is the memory impact of the object. Can for example be given
-     * in kilobytes.
-     */
-    MemoryAwareCacheable(size_t memoryImpact) : _memoryImpact(memoryImpact) {};
-    ~MemoryAwareCacheable() {};
+    using HashKey = unsigned long long;
+    using ShouldAllocateDataOnCPU = ghoul::Boolean;
+    using Format = ghoul::opengl::Texture::Format;
 
-    size_t memoryImpact() { return _memoryImpact; };
-    
-protected:
-    size_t _memoryImpact;
+    TileTextureInitData(size_t width, size_t height, GLuint glType, Format textureFormat,
+        ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
+
+    TileTextureInitData(const TileTextureInitData& original);
+
+    ~TileTextureInitData() = default;
+
+    glm::ivec3 dimensionsWithPadding() const;
+    glm::ivec3 dimensionsWithoutPadding() const;
+    size_t nRasters() const;
+    size_t bytesPerDatum() const;
+    size_t bytesPerPixel() const;
+    size_t bytesPerLine() const;
+    size_t totalNumBytes() const;
+    GLuint glType() const;
+    Format ghoulTextureFormat() const;
+    GLint glTextureFormat() const;
+    bool shouldAllocateDataOnCPU() const;
+    HashKey hashKey() const;
+
+    const static glm::ivec2 tilePixelStartOffset;
+    const static glm::ivec2 tilePixelSizeDifference;
+
+private:
+    void calculateHashKey();
+    unsigned int getUniqueIdFromTextureFormat(Format textureFormat) const;
+
+    HashKey _hashKey;
+    glm::ivec3 _dimensionsWithPadding;
+    glm::ivec3 _dimensionsWithoutPadding;
+    GLuint _glType;
+    Format _ghoulTextureFormat;
+    GLint _glTextureFormat;
+    size_t _nRasters;
+    size_t _bytesPerDatum;
+    size_t _bytesPerPixel;
+    size_t _bytesPerLine;
+    size_t _totalNumBytes;
+    bool _shouldAllocateDataOnCPU;
 };
 
-} // namespace cache
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_CACHEABLE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__

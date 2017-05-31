@@ -57,8 +57,8 @@ public:
         TriangleSoup::Normals useNormals);
     ~SkirtedGrid() = default;
 
-    virtual int xSegments() const;
-    virtual int ySegments() const;
+    virtual int xSegments() const override;
+    virtual int ySegments() const override;
 
 private:
     std::vector<GLuint> createElements(int xRes, int yRes) override;

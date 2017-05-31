@@ -22,37 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___DISKCACHEDTILELOADJOB___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___DISKCACHEDTILELOADJOB___H__
+#include <modules/globebrowsing/other/pixelbuffer.h>
+#include <ghoul/logging/logmanager.h>
 
-#include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
-
-namespace openspace {
-namespace globebrowsing {
-
-class TileDiskCache;
-
-struct DiskCachedTileLoadJob : public TileLoadJob {
-    enum CacheMode {
-        Disabled,
-        ReadOnly,
-        ReadAndWrite,
-        WriteOnly,
-        CacheHitsOnly,
-    };
-        
-    DiskCachedTileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-        const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc, 
-        CacheMode cacheMode = CacheMode::ReadOnly);
-
-    void execute() override;
-
-protected:
-    std::shared_ptr<TileDiskCache> _tileDiskCache;
-    CacheMode _mode;
+namespace {
+    const char* _loggerCat = "PixelBuffer";
 };
 
-} // namespace globebrowsing
-} // namespace openspace
+using namespace openspace::globebrowsing;
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___DISKCACHEDTILELOADJOB___H__
+PixelBuffer::PixelBuffer(size_t numBytes, Usage usage)
+    : _numBytes(numBytes)
+    , _usage(usage)
+    , _isMapped(false)
+{
+    glGenBuffers(1, &_id);
+    bind();
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, _numBytes, 0, static_cast<GLenum>(_usage));
+    unbind();
+}
+
+PixelBuffer::~PixelBuffer() {
+    glDeleteBuffers(1, &_id);
+}
+
+void* PixelBuffer::mapBuffer(Access access) {
+    void* dataPtr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, static_cast<GLenum>(access));
+    _isMapped = dataPtr ? true : false;
+    return dataPtr;
+}
+
+void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access) {
+    void* dataPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset, length, access);
+    _isMapped = dataPtr ? true : false;
+    return dataPtr;
+}
+
+bool PixelBuffer::unMapBuffer() {
+    bool success = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    if (!success) {
+        LERROR("Unable to unmap pixel buffer, data may be corrupt!");
+    }
+    _isMapped = false;
+    return success;
+}
+
+void PixelBuffer::bind() {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _id);
+}
+
+void PixelBuffer::unbind() {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+}
+
+bool PixelBuffer::isMapped() const {
+    return _isMapped;
+}
+
+PixelBuffer::operator GLuint() const {
+    return _id;
+}

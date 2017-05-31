@@ -22,62 +22,78 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_LRU_CACHE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_LRU_CACHE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LRU_THREAD_POOL___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LRU_THREAD_POOL___H__
 
-#include <list>
-#include <unordered_map>
+#include <modules/globebrowsing/cache/lrucache.h>
+
+#include <condition_variable>
+#include <functional>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
+
+// Implementatin based on http://progsch.net/wordpress/?p=81
 
 namespace openspace {
-namespace globebrowsing {
-namespace cache {
+namespace globebrowsing {    
 
-/**
- * Least recently used cache that knows about its memory impact. This class is templated
- * and the second template argument <code>ValueType</code> needs to have a function
- * <code>void memoryImpact()</code> that returns the size of the object given in whatever
- * unit is used for size in the creation of the <code>MemoryAwareLRUCache</code>.
- * It can for example be given in kilobytes.
- * <code>KeyType</code> needs to be a size comparable type.
- */
+template<typename KeyType>
+class LRUThreadPool;
 
-template<typename KeyType, typename ValueType, typename HasherType>
-class MemoryAwareLRUCache {
-public:
-    /**
-     * \param maximumSize is the maximum size of the <code>MemoryAwareLRUCache</code>
-     * Once the maximum size is reached, the cache will start removing objects that were
-     * least recently used. The maximum size can for example be given in kilobytes. It
-     * must be the same size unit as used by the cached object class
-     * <code>ValueType</code>. 
-     */
-    MemoryAwareLRUCache(size_t maximumSize);
-
-    void put(const KeyType& key, const ValueType& value);
-    void clear();
-    bool exist(const KeyType& key) const;
-    ValueType get(const KeyType& key);
-    size_t size() const;
-    size_t maximumSize() const;
-
-    void setMaximumSize(size_t maximumSize);
-
+template<typename KeyType>
+class LRUThreadPoolWorker {
+public: 
+    LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool);
+    void operator()();
 private:
-    void clean();
-
-    using Item = std::pair<KeyType, ValueType>;
-    using Items = std::list<Item>;
-    Items _itemList;
-    std::unordered_map<KeyType, decltype(_itemList.begin()), HasherType> _itemMap;
-
-    size_t _cacheSize;
-    size_t _maximumCacheSize;
+    LRUThreadPool<KeyType>& _pool;
 };
 
-} // namespace cache
+/**
+ * The <code>LRUThreadPool</code> will only enqueue a certain number of tasks. The most
+ * recently enqueued task is the one that will be executed first. This class is templated
+ * on a key type which used as an identifier to determine wheter or not a task with the
+ * given key has been enqueued or not. This means that a task can be enqueued several
+ * times. The user must ensure that an enqueued task with a given key should be
+ * equal in outcome to a second enqueued task with the same key. This is because a second
+ * enqueued task with the same key will simply be bumped and prioritised before other
+ * enqueued tasks. The given task will be ignored.
+ */
+template<typename KeyType>
+class LRUThreadPool {
+public:
+    LRUThreadPool(size_t numThreads, size_t queueSize);
+    ~LRUThreadPool();
+
+    void enqueue(std::function<void()> f, KeyType key);
+    bool touch(KeyType key);
+    std::vector<KeyType> getQueuedTasksKeys();
+    std::vector<KeyType> getUnqueuedTasksKeys();
+    void clearEnqueuedTasks();
+
+private:
+    
+    struct DefaultHasher {
+        unsigned long long operator()(const KeyType& key) const {
+            return static_cast<unsigned long long>(key);
+        }
+    };
+    friend class LRUThreadPoolWorker<KeyType>;
+
+    std::vector<std::thread> _workers;
+    cache::LRUCache<KeyType, std::function<void()>, DefaultHasher> _queuedTasks;
+    std::vector<KeyType> _unqueuedTasks;
+    std::mutex _queueMutex;
+    std::condition_variable _condition;
+
+    bool _stop;
+};
+
 } // namespace globebrowsing
 } // namespace openspace
 
-#include <modules/globebrowsing/cache/memoryawarelrucache.inl>
+#include "lruthreadpool.inl"
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_LRU_CACHE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LRU_THREAD_POOL___H__

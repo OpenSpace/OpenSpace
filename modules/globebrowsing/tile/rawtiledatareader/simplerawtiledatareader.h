@@ -28,7 +28,6 @@
 #include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 
@@ -48,7 +47,10 @@ class GeodeticPatch;
 class SimpleRawTileDataReader : public RawTileDataReader {
 public:
 
-    SimpleRawTileDataReader(const std::string& filePath, const Configuration& config);
+    SimpleRawTileDataReader(const std::string& filePath,
+        const TileTextureInitData& initData,
+        RawTileDataReader::PerformPreprocessing preprocess =
+            RawTileDataReader::PerformPreprocessing::No);
 
     // Public virtual function overloading
     virtual void reset() override;
@@ -66,8 +68,8 @@ protected:
 private:
     // Private virtual function overloading
     virtual void initialize() override;
-    virtual char* readImageData(
-        IODescription& io, RawTile::ReadError& worstError) const override;
+    virtual void readImageData(
+        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const override;
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const override;
 

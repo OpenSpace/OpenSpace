@@ -41,9 +41,9 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class SceneGraphNode;
+
+namespace documentation { struct Documentation; }
 
 // Notifications:
 // SceneGraphFinishedLoading

@@ -50,39 +50,20 @@
 
 namespace openspace {
 
+const std::string GlobeBrowsingModule::name = "GlobeBrowsing";
+
 GlobeBrowsingModule::GlobeBrowsingModule()
-    : OpenSpaceModule("GlobeBrowsing")
-    , _openSpaceMaximumTileCacheSize(
-        "maximumTileCacheSize", "Maximum tile cache size",
-        512,    // Default: 512 MB
-        0,      // Minimum: No caching
-        1024,   // Maximum: 1024 MB
-        1)      // Step: One MB
-    , _clearTileCache("clearTileCache", "Clear tile cache") {}
+    : OpenSpaceModule(name)
+{ }
 
 void GlobeBrowsingModule::internalInitialize() {
     using namespace globebrowsing;
 
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&] {
-        // Set maximum cache size to 25% of total RAM
-        _openSpaceMaximumTileCacheSize.setMaxValue(CpuCap.installedMainMemory() * 0.25);
-        
-        // Convert from MB to KB
-        cache::MemoryAwareTileCache::create(_openSpaceMaximumTileCacheSize * 1024);
-        _openSpaceMaximumTileCacheSize.onChange(
-        [&]{
-            // Convert from MB to KB
-            cache::MemoryAwareTileCache::ref().setMaximumSize(
-                _openSpaceMaximumTileCacheSize * 1024);
-        });
-        _clearTileCache.onChange(
-        [&]{
-            cache::MemoryAwareTileCache::ref().clear();
-        });
 
-        addProperty(_openSpaceMaximumTileCacheSize);
-        addProperty(_clearTileCache);
-      
+    _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
+    addPropertySubOwner(*_tileCache);
+
 #ifdef GLOBEBROWSING_USE_GDAL
         // Convert from MB to Bytes
         GdalWrapper::create(
@@ -92,9 +73,12 @@ void GlobeBrowsingModule::internalInitialize() {
 #endif // GLOBEBROWSING_USE_GDAL
     });
   
+    OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Render, [&]{
+        _tileCache->update();
+    });
+
+  
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&]{
-        cache::MemoryAwareTileCache::ref().clear();
-        cache::MemoryAwareTileCache::ref().destroy();
 #ifdef GLOBEBROWSING_USE_GDAL
         GdalWrapper::ref().destroy();
 #endif // GLOBEBROWSING_USE_GDAL
@@ -121,6 +105,10 @@ void GlobeBrowsingModule::internalInitialize() {
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>("ByIndex");
     fTileProvider->registerClass<tileprovider::PresentationSlideProvider>("PresentationSlides");
     FactoryManager::ref().addFactory(std::move(fTileProvider));
+}
+
+globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
+    return _tileCache.get();
 }
 
 } // namespace openspace

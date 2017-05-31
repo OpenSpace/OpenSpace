@@ -44,6 +44,8 @@ class LayerManager;
  */
 class GPULayerManager {
 public:
+    virtual ~GPULayerManager() = default;
+
     /**
      * Sets the value of <code>LayerGroup</code> to its corresponding
      * GPU struct. OBS! Users must ensure bind has been 

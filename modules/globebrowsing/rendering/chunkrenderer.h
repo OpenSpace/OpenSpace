@@ -42,6 +42,7 @@ class Grid;
 class GPULayerManager;
 class LayerManager;
 class LayerShaderManager;
+class RenderableGlobe;
 
 class ChunkRenderer {
 public:
@@ -54,6 +55,8 @@ public:
     */
     void renderChunk(const Chunk& chunk, const RenderData& data);
     void update();
+
+    void recompileShaders(const RenderableGlobe& globe);
 
 private:
     /**

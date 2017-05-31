@@ -43,11 +43,7 @@ namespace globebrowsing {
  */
 class Grid {
 public:
-    Grid(int xSegments, int ySegments,
-        TriangleSoup::Positions usePositions = TriangleSoup::Positions::No,
-        TriangleSoup::TextureCoordinates useTextures =
-        TriangleSoup::TextureCoordinates::No,
-        TriangleSoup::Normals useNormals = TriangleSoup::Normals::No);
+    Grid(int xSegments, int ySegments);
     
     virtual ~Grid() = default;
 
