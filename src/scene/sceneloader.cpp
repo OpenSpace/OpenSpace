@@ -215,11 +215,17 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadDirectory(
         // If we do not have a module file, we have to include all subdirectories.
         using ghoul::filesystem::Directory;
         using std::string;
-        std::vector<string> directories = Directory(path).readDirectories();
 
-        for (const string& s : directories) {
-            //std::string submodulePath = FileSys.pathByAppendingComponent(path, s);
-            std::vector<SceneLoader::LoadedNode> loadedNodes = loadDirectory(s, luaState);
+        const Directory directory(path);
+        const std::string directoryPath = directory.path();
+
+        if (!FileSys.fileExists(directoryPath)) {
+            LERROR("The directory " << directoryPath << " does not exist.");
+            return std::vector<SceneLoader::LoadedNode>();
+        }
+
+        for (const string& subdirectory : directory.readDirectories()) {
+            std::vector<SceneLoader::LoadedNode> loadedNodes = loadDirectory(subdirectory, luaState);
             std::move(loadedNodes.begin(), loadedNodes.end(), std::back_inserter(allLoadedNodes));
         }
         return allLoadedNodes;
