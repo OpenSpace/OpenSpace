@@ -36,7 +36,7 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
     gpuRenderSettings.setValue(programObject, layer.renderSettings());  
     
     switch (layer.type) {
-        case Layer::TypeID::Texture:
+        case Layer::TypeID::TileLayer:
         	gpuChunkTilePile.setValue(programObject, chunkTilePile);
             break;
         case Layer::TypeID::SolidColor:
@@ -53,7 +53,7 @@ void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& la
     gpuRenderSettings.bind(layer.renderSettings(), programObject, nameBase + "settings.");
     
     switch (layer.type) {
-        case Layer::TypeID::Texture:
+        case Layer::TypeID::TileLayer:
     		gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
             break;
         case Layer::TypeID::SolidColor:

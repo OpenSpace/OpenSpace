@@ -53,7 +53,7 @@ class Layer : public properties::PropertyOwner {
 public:
     enum class TypeID
     {
-        Texture = 0,
+        TileLayer = 0,
         SolidColor = 1,
     };
     static const int NumTypes = 2;

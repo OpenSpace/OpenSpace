@@ -30,7 +30,7 @@ namespace openspace {
 namespace globebrowsing {
 
 const std::string Layer::TypeNames[NumTypes] = {
-    "Texture",
+    "TileLayer",
     "SolidColor"
 };
 
@@ -57,7 +57,7 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
         glm::vec4(0.f),
         glm::vec4(1.f)
       )
-    , type(TypeID::Texture)
+    , type(TypeID::TileLayer)
 {
     // We add the id to the dictionary since it needs to be known by
     // the tile provider
@@ -109,8 +109,6 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     addProperty(_reset);
 
     addPropertySubOwner(_renderSettings);
-    addPropertySubOwner(*_tileProvider);
-    
 }
 
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
@@ -119,7 +117,8 @@ ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) 
 
 void Layer::removeVisibleProperties() {
     switch (type) {
-        case TypeID::Texture:
+        case TypeID::TileLayer:
+            removePropertySubOwner(*_tileProvider);
             break;
         case TypeID::SolidColor:
             removeProperty(color);
@@ -131,7 +130,8 @@ void Layer::removeVisibleProperties() {
 
 void Layer::addVisibleProperties() {
     switch (type) {
-        case TypeID::Texture:
+        case TypeID::TileLayer:
+            addPropertySubOwner(*_tileProvider);
             break;
         case TypeID::SolidColor:
             addProperty(color);
