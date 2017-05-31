@@ -25,6 +25,8 @@
 #version __CONTEXT__
 
 uniform mat4 modelViewProjectionTransform;
+uniform float scale;
+uniform vec2 centerPixel;
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
@@ -41,16 +43,9 @@ float R_SUN = 995.90523 / 1.5877740;
 void main() {
     // Transform the damn psc to homogenous coordinate
     vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
-
-
-   // float rSunNorm = R_SUN / 1048.0;
-    //rSunNorm = rSunNorm * HALF_SUN_RADIUS;
-   // float scaleFactor = (rSunNorm * HALF_SUN_RADIUS) / HALF_SUN_RADIUS;
-   // position.x += 0.00213867 * HALF_SUN_RADIUS;
-  //  position.y += 0.0954971 * HALF_SUN_RADIUS;
-
-//    position.xy *= 1.0 / scaleFactor * 0.96;
-
+    position.x += centerPixel.x;
+    position.y += centerPixel.y;
+    position.xy *= 1.0 / scale;
 
     vec4 positionClipSpace = modelViewProjectionTransform * position;
     vs_positionScreenSpace = z_normalization(positionClipSpace);

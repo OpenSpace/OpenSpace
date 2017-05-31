@@ -33,6 +33,13 @@
 #include <ghoul/filesystem/filesystem>
 #include <modules/solarbrowsing/util/simplej2kcodec.h>
 #include <openspace/rendering/transferfunction.h>
+#include <string>
+#include <chrono>
+
+typedef std::chrono::high_resolution_clock Clock;
+
+#include <fstream>
+#include <ext/json/json.hpp>
 
 using namespace ghoul::opengl;
 
@@ -40,11 +47,12 @@ namespace {
     const std::string _loggerCat = "SpacecraftImageryManager";
     // Might be needed for fits compability later
     //std::vector<std::string> _headerKeywords = {"EXPTIME", "BITPIX", "DATAVALS"};
+    const double SUN_RADIUS = (1391600000.0 * 0.50);
 }
 
 namespace openspace {
 
-SpacecraftImageryManager::SpacecraftImageryManager() { }
+SpacecraftImageryManager::SpacecraftImageryManager() {}
 
 void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
                                                     const unsigned int tileWidth,
@@ -122,8 +130,84 @@ void SpacecraftImageryManager::loadTransferFunctions(
     }
 }
 
-void SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::File& file) {
-    const std::string xmlFileName = std::string(file.fullBaseName() + ".xml");
+ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::File& file) {
+    auto t1 = Clock::now();
+
+    const std::string filename = std::string(file.fullBaseName() + ".json");
+    using json = nlohmann::json;
+    ImageMetadata im;
+
+    std::ifstream i(filename);
+    json j;
+    i >> j;
+    const json data = j["meta"]["fits"];
+
+    if (data.is_null()) {
+        LERROR("Error in metadata " << filename);
+    }
+
+    const json value = data["TELESCOP"];
+    if (value.is_null() && !value.is_string()) {
+        LERROR("Metadata did not hold information about type of spacecraft");
+        return im;
+    }
+    im.filename = file.path();
+    im.spacecraftType = value;
+    // TODO: value might not exist
+
+    //int res = data["NAXIS1"];
+    std::string sFullResolution = data["NAXIS1"];
+    im.fullResolution = std::stoi(sFullResolution);
+
+    // Special case of sdo - RSUN is given in pixels
+    // For SOHO the radius of the sun is not specified - we instead use platescl
+    if (im.spacecraftType == "SOHO") {
+        std::string sScale = data["PLATESCL"];
+        float plateScale = stof(sScale);
+        im.scale = 1.0 / plateScale;
+    } else {
+        float sunRadiusPixels = 0.f;
+        // SDO has RSUN specified in pixels
+        if (im.spacecraftType == "SDO") {
+            std::string sSunRadiusPixels = data["RSUN"];
+            sunRadiusPixels = stof(sSunRadiusPixels);
+        }
+        // STEREO has RSUN specified in arcsecs - need to divide by factor
+        else {
+            std::string sCdelt1 = data["CDELT1"];
+            const float cdelt1 = stof(sCdelt1);
+            std::string sSunRadiusArcsec = data["RSUN"];
+            const float sunRadiusArcsec = stof(sSunRadiusArcsec);
+            sunRadiusPixels = sunRadiusArcsec / cdelt1;
+        }
+
+        float scale = sunRadiusPixels / (im.fullResolution / 2.f); //* SUN_RADIUS;
+        im.scale = scale;
+    }
+
+    LDEBUG("scale " << im.scale);
+
+    //float centerpixelX = data["CRPIX1"];
+    //float centerpixelY = data["CRPIX2"];
+    std::string sCenterPixelX = data["CRPIX1"];
+    std::string sCenterPixelY = data["CRPIX2"];
+
+    float centerPixelX = stof(sCenterPixelX);
+    float centerPixelY = stof(sCenterPixelY);
+    float halfRes = im.fullResolution / 2.f;
+
+    float offsetX = ((halfRes - centerPixelX) / halfRes) * SUN_RADIUS;
+    float offsetY = ((halfRes - centerPixelY) / halfRes) * SUN_RADIUS;
+
+    im.centerPixel = glm::vec2(offsetX, offsetY);
+
+    // Measure time
+    auto t2 = Clock::now();
+  // LDEBUG("Metadata parse time "
+    //       << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+      //     << " ms" << std::endl);
+    return im;
+
 }
 
 void SpacecraftImageryManager::loadImageMetadata(
@@ -186,8 +270,7 @@ void SpacecraftImageryManager::loadImageMetadata(
                                            tokens[2] + "T" + tokens[4] + ":" +
                                            tokens[5] + ":" + tokens[6] + "." + tokens[7];
 
-                        parseMetadata(currentFile);
-                        ImageMetadata im {seqPath};
+                        const ImageMetadata im = parseMetadata(currentFile);
                         std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
                         TimedependentState<ImageMetadata> timeState(
                               std::move(data), Time::ref().convertTime(time), seqPath);

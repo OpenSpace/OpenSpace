@@ -73,7 +73,7 @@ bool RenderableSolarImageryProjection::initialize() {
     _solarImageryDependencies
          = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
 
-    const std::string path = "/Users/michaelnoven/workspace/OpenSpace/data/hmimap1.fits";
+    const std::string path = "/home/noven/workspace/OpenSpace/data/hmimap1.fits";
     FitsFileReader fts(false);
     std::shared_ptr<ImageData<float>> imageData = fts.readImage<float>(path);
     float* data;
@@ -173,6 +173,10 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
         //_shader->setUniform("sharpenValue[" + std::to_string(i) + "]", solarImagery->_sharpenValue);
         _shader->setUniform("gammaValue[" + std::to_string(i) + "]", solarImagery->_gammaValue);
         _shader->setUniform("contrastValue[" + std::to_string(i) + "]", solarImagery->_contrastValue);
+
+        // Offset and scale
+     //   _shader->setUniform("scale[" + std::to_string(i) + "]", solarImagery->_currentScale);
+        _shader->setUniform("centerPixel[" + std::to_string(i) + "]", solarImagery->_currentCenterPixel);
 
         // Imagery texture
         txUnits[i].activate();

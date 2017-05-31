@@ -74,6 +74,9 @@ public:
     properties::FloatProperty _gammaValue;
     unsigned int _imageSize;
 
+    float _currentScale;
+    glm::vec2 _currentCenterPixel;
+
 private:
     properties::BoolProperty _asyncUploadPBO;
     properties::OptionProperty _activeInstruments;
@@ -85,7 +88,7 @@ private:
     properties::BoolProperty _lazyBuffering;
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
-    properties::UIntProperty _resolutionLevel;
+    properties::IntProperty _resolutionLevel;
     properties::StringProperty _target;
     properties::BoolProperty _useBuffering;
     properties::BoolProperty _usePBO;

@@ -244,8 +244,11 @@ DecodeData RenderableSolarImagery::getDecodeDataFromOsTime(const int& osTime) {
     auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
     auto& state = stateSequence.getState(osTime);
     const double& timeObserved = state.timeObserved();
-    const std::string stateFilename = state.contents()->filename;
-    DecodeData decodeData {_imageSize * _imageSize, stateFilename, _resolutionLevel, _verboseMode, timeObserved};
+    std::shared_ptr<ImageMetadata> im = state.contents();
+    //const std::string stateFilename = state.contents()->filename;
+    //DecodeData decodeData {_imageSize * _imageSize, stateFilename, _resolutionLevel, _verboseMode, timeObserved};
+
+    DecodeData decodeData {std::move(im), _resolutionLevel, timeObserved, _verboseMode};
     return std::move(decodeData);
 }
 
@@ -260,10 +263,10 @@ void RenderableSolarImagery::fillBuffer(const double& dt) {
     for (int i = 0; i < _bufferSize; i++) {
         const double& time = startTime + (dt * i) * (static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
         DecodeData decodeData = getDecodeDataFromOsTime(time);
-        auto job = std::make_shared<DecodeJob>(decodeData, decodeData.path + std::to_string(decodeData.totalImageSize));
+        auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(decodeData.im->fullResolution));
         _streamBuffer.enqueueJob(job);
         if (_verboseMode) {
-            LDEBUG("Enqueueing " << decodeData.path);
+            LDEBUG("Enqueueing " << decodeData.im->filename);
         }
     }
     _initializePBO = true;
@@ -288,12 +291,16 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
     IMG_PRECISION* _pboBufferData = _pbo->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true);
 
     if (!_useBuffering) {
-        const std::string filename = getDecodeDataFromOsTime(Time::ref().j2000Seconds()).path;
+        const std::string filename = getDecodeDataFromOsTime(Time::ref().j2000Seconds()).im->filename;
         decode(_pboBufferData, filename);
         _pboIsDirty = true;
     } else {
         std::shared_ptr<SolarImageData> _solarImageData = _streamBuffer.popFinishedJob();
         if (_solarImageData) {
+
+            _currentScale = _solarImageData->im->scale;
+            _currentCenterPixel = _solarImageData->im->centerPixel;
+
             auto t1 = Clock::now();
             std::memcpy(_pboBufferData, _solarImageData->data, _imageSize * _imageSize * sizeof(unsigned char));
             auto t2 = Clock::now();
@@ -307,14 +314,14 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
 
             const double& osTime = Time::ref().j2000Seconds();
             DecodeData decodeData = getDecodeDataFromOsTime(osTime + (_bufferSize + 1) * (Time::ref().deltaTime() * (static_cast<double>(_minRealTimeUpdateInterval )/1000.0)));
-            auto job = std::make_shared<DecodeJob>(decodeData, decodeData.path + std::to_string(decodeData.totalImageSize));
+            auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(decodeData.im->fullResolution));
             _streamBuffer.enqueueJob(job);
             _initializePBO = false;
             _pboIsDirty = true;
 
             if (_verboseMode)  {
-                LDEBUG("Popped image" << _solarImageData->name);
-                LDEBUG("Adding work from PBO " << decodeData.path);
+                LDEBUG("Popped image" << _solarImageData->im->filename);
+                LDEBUG("Adding work from PBO " << decodeData.im->filename);
             }
         } else {
             if (_verboseMode) {
@@ -340,7 +347,11 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
               = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
         const double& osTime = Time::ref().j2000Seconds();
         const auto& decodeData = getDecodeDataFromOsTime(osTime);
-        decode(data, decodeData.path);
+        decode(data, decodeData.im->filename);
+
+        _currentScale = decodeData.im->scale;
+        _currentCenterPixel = decodeData.im->centerPixel;
+
 
         _texture->bind();
         if (!resChanged) {
@@ -417,7 +428,7 @@ void RenderableSolarImagery::render(const RenderData& data) {
 
     _spacecraftCameraPlane->render(data, *_texture, _lut, sunPositionWorld, _planeOpacity,
                                    _contrastValue, _gammaValue, _disableBorder,
-                                   _disableFrustum);
+                                   _disableFrustum, _currentCenterPixel, _currentScale);
 }
 
 } // namespace openspace

@@ -82,7 +82,7 @@ void SpacecraftCameraPlane::createPlaneAndFrustum(const double& moveDistance) {
     //_move = a * exp(-(pow((_moveFactor.value() - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)));
     //_move = /*a **/ exp(-(pow((_moveFactor.value() - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
     _gaussianMoveFactor = /*a **/ exp(-(pow((moveDistance - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
-    _size = _gaussianMoveFactor * SUN_RADIUS / _scaleFactor;
+    _size = _gaussianMoveFactor * SUN_RADIUS; /// _scaleFactor;
     createPlane();
     createFrustum();
 }
@@ -174,14 +174,12 @@ void SpacecraftCameraPlane::createFrustum() {
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(0));
 }
 
-void SpacecraftCameraPlane::render(const RenderData& data,
-                                  ghoul::opengl::Texture& imageryTexture,
-                                  TransferFunction* lut,
-                                  const glm::dvec3& sunPositionWorld,
-                                  const float& planeOpacity, const float& contrastValue,
-                                  const float& gammaValue,
-                                  const bool& disableBorder,
-                                  const bool& disableFrustum)
+void SpacecraftCameraPlane::render(
+      const RenderData& data, ghoul::opengl::Texture& imageryTexture,
+      TransferFunction* lut, const glm::dvec3& sunPositionWorld,
+      const float& planeOpacity, const float& contrastValue, const float& gammaValue,
+      const bool& disableBorder, const bool& disableFrustum,
+      const glm::vec2& currentCenterPixel, const float& currentScale)
 {
     // Perform necessary transforms
     const glm::dmat4& viewMatrix = data.camera.combinedViewMatrix();
@@ -217,6 +215,10 @@ void SpacecraftCameraPlane::render(const RenderData& data,
     ghoul::opengl::TextureUnit imageUnit;
     imageUnit.activate();
     imageryTexture.bind();
+
+
+    _planeShader->setUniform("scale", currentScale);
+    _planeShader->setUniform("centerPixel", currentCenterPixel);
     _planeShader->setUniform("imageryTexture", imageUnit);
     _planeShader->setUniform("planeOpacity", planeOpacity);
     _planeShader->setUniform("gammaValue", gammaValue);

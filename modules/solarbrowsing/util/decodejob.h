@@ -30,17 +30,21 @@ namespace openspace {
 
 struct SolarImageData {
     unsigned char* data;
-    unsigned int dataSize;
-    std::string name;
+    std::shared_ptr<ImageMetadata> im;
+    //unsigned int dataSize;
+    //std::string name;
     double timeObserved;
 };
 
 struct DecodeData {
-    unsigned int totalImageSize;
-    std::string path;
+    //unsigned int totalImageSize;
+    //std::string path;
+    //unsigned int resolutionLevel;
+    //bool verboseMode;
+    std::shared_ptr<ImageMetadata> im;
     unsigned int resolutionLevel;
-    bool verboseMode;
     double timeObserved;
+    bool verboseMode;
 };
 
 class DecodeJob : public StreamJob<SolarImageData> {
@@ -51,11 +55,16 @@ public:
     }
 
     virtual void execute() final {
-        SolarImageData imd{new unsigned char[_decodeData.totalImageSize],
-                           _decodeData.totalImageSize, _decodeData.path,
-                           _decodeData.timeObserved};
+        //SolarImageData imd{new unsigned char[_decodeData.totalImageSize],
+        //                   _decodeData.totalImageSize, _decodeData.path,
+         //                  _decodeData.timeObserved};
+        const unsigned int totalImageSize
+              = _decodeData.im->fullResolution * _decodeData.im->fullResolution;
+        SolarImageData imd {new unsigned char[totalImageSize],
+                            _decodeData.im,
+                            _decodeData.timeObserved};
         SimpleJ2kCodec j2c(_decodeData.verboseMode);
-        j2c.DecodeIntoBuffer(imd.name, imd.data, _decodeData.resolutionLevel);
+        j2c.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
         _solarImageData = std::make_shared<SolarImageData>(std::move(imd));
     }
 

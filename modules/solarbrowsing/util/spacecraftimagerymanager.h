@@ -44,8 +44,13 @@ namespace openspace {
 
 class TransferFunction;
 
+// Assume everythign in arcsec to minimize metadata
 struct ImageMetadata {
     std::string filename;
+    std::string spacecraftType;
+    int fullResolution;
+    float scale;
+    glm::vec2 centerPixel;
 };
 
 // struct ImageMetadata {
@@ -73,9 +78,10 @@ public:
       std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap,
       const std::unordered_set<std::string>& _filter);
 private:
-    void parseMetadata(const ghoul::filesystem::File& file);
+    ImageMetadata parseMetadata(const ghoul::filesystem::File& file);
     void fetchServerImages(std::string type);
     void fillImageryInfo(std::string buffer, std::string type);
+    void createLUT();
 };
 
 } //namespace openspace

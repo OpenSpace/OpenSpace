@@ -38,7 +38,8 @@ public:
                 TransferFunction* lut, const glm::dvec3& sunPositionWorld,
                 const float& planeOpacity, const float& contrastValue,
                 const float& gammaValue, const bool& disableBorder,
-                const bool& disableFrustum);
+                const bool& disableFrustum, const glm::vec2& currentCenterPixel,
+                const float& currentScale);
     void update();
     void createPlaneAndFrustum(const double& moveDistance);
     // TODO(mnoven) : Pre process image, no need to set uniforms

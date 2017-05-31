@@ -44,6 +44,9 @@ uniform float imageSize[MAX_SPACECRAFT_OBSERVATORY];
 uniform dvec2 magicPlaneOffset[MAX_SPACECRAFT_OBSERVATORY];
 uniform float magicPlaneFactor[MAX_SPACECRAFT_OBSERVATORY];
 
+//uniform float scale[MAX_SPACECRAFT_OBSERVATORY];
+uniform vec2 centerPixel[MAX_SPACECRAFT_OBSERVATORY];
+
 const float HALF_SUN_RADIUS = (1391600000 * 0.5);
 
 // TODO(mnoven): Uniform
@@ -68,6 +71,10 @@ Fragment getFragment() {
             vec2 uv = vUv[i].xy;
             uv /= ( (HALF_SUN_RADIUS / magicPlaneFactor[i]) * 2);
             uv += 0.5;
+
+            uv.x += ((centerPixel[i].x) / HALF_SUN_RADIUS) / 2.0;
+            uv.y -= ((centerPixel[i].y) /  HALF_SUN_RADIUS) / 2.0;
+
             float intensityOrg = texture(imageryTexture[i], vec2(uv.x, 1.0 - uv.y)).r;
             intensityOrg = contrast(intensityOrg, i);
 
