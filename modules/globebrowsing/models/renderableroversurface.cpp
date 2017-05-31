@@ -358,7 +358,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		glEnable(GL_DEPTH_TEST);
 	}
 	_programObject->deactivate();
-	_cachingModelProvider->setLevel(level);
+	//_cachingModelProvider->setLevel(level);
 
 	if (_generalProperties.enablePath.value()) {
 		_renderableExplorationPath->setLevel(level);

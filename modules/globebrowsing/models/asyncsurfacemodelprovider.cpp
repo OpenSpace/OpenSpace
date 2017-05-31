@@ -35,16 +35,16 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-AsyncSurfaceModelProvider::AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> diskToRamPool, std::shared_ptr<ThreadPool> ramToGpuPool, Renderable* parent)
-	: _diskToRamJobManager(diskToRamPool)
-	, _ramToGpuJobManager(ramToGpuPool)
+AsyncSurfaceModelProvider::AsyncSurfaceModelProvider(Renderable* parent)
+	: _diskToRamJobManager(std::make_shared<LRUThreadPool<uint64_t>>(1, 20))
+	, _ramToGpuJobManager(std::make_shared<LRUThreadPool<uint64_t>>(1, 20))
 	, _parent(parent)
 {}
 
 bool AsyncSurfaceModelProvider::enqueueModelIO(const std::shared_ptr<Subsite> subsite, const int level) {
 	if (satisfiesEnqueueCriteria(subsite->hashKey(level))) {
 		auto job = std::make_shared<SurfaceModelLoadJob>(subsite, level);
-		_diskToRamJobManager.enqueueJob(job);
+		_diskToRamJobManager.enqueueJob(job, subsite->hashKey(level));
 		_enqueuedModelRequests[subsite->hashKey(level)] = subsite;
 		return true;
 	}
@@ -52,8 +52,6 @@ bool AsyncSurfaceModelProvider::enqueueModelIO(const std::shared_ptr<Subsite> su
 }
 
 std::vector<std::shared_ptr<SubsiteModels>> AsyncSurfaceModelProvider::getLoadedModels() {
-
-	std::vector<std::shared_ptr<SubsiteModels>> loadedModels;
 	if (_diskToRamJobManager.numFinishedJobs() > 0) {
 		std::shared_ptr<SubsiteModels> subsiteModels = _diskToRamJobManager.popFinishedJob()->product();
 		enqueueSubsiteInitialization(subsiteModels);
@@ -115,7 +113,7 @@ void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_p
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	auto job = std::make_shared<SubsiteInitializationJob>(subsiteModels);
-	_ramToGpuJobManager.enqueueJob(job);
+	_ramToGpuJobManager.enqueueJob(job, hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level));
 }
 
 void AsyncSurfaceModelProvider::unmapBuffers(const std::shared_ptr<SubsiteModels> subsiteModels) {

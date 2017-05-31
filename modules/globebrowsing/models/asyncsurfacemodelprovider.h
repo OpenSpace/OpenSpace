@@ -30,13 +30,14 @@
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
 #include <modules/globebrowsing/models/subsitemodels.h>
 #include <modules/globebrowsing/models/subsite.h>
+#include <modules/globebrowsing/other/prioritizingconcurrentjobmanager.h>
 
 namespace openspace {
 namespace globebrowsing {
 
 class AsyncSurfaceModelProvider {
 public:
-	AsyncSurfaceModelProvider(std::shared_ptr<ThreadPool> pool1, std::shared_ptr<ThreadPool> pool2, Renderable* parent);
+	AsyncSurfaceModelProvider(Renderable* parent);
 
 	bool enqueueModelIO(const std::shared_ptr<Subsite> subsite, const int level);
 	
@@ -48,8 +49,10 @@ protected:
 	virtual bool satisfiesEnqueueCriteria(const uint64_t hashKey) const;
 
 private:
-	ConcurrentJobManager<SubsiteModels> _diskToRamJobManager;
-	ConcurrentJobManager<SubsiteModels> _ramToGpuJobManager;
+	PrioritizingConcurrentJobManager<SubsiteModels, uint64_t>
+		_diskToRamJobManager;
+	PrioritizingConcurrentJobManager<SubsiteModels, uint64_t>
+		_ramToGpuJobManager;
 
 	Renderable* _parent;
 

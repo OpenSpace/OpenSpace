@@ -82,7 +82,6 @@ struct ProviderSubsiteHasher {
 };
 
 using ModelCache = cache::LRUCache<ProviderSubsiteKey, std::shared_ptr<SubsiteModels>, ProviderSubsiteHasher>;
-//using ModelCache = cache::LRUCache<uint64_t, std::shared_ptr<SubsiteModels>>;
 
 class CachingSurfaceModelProvider {
 public:
