@@ -114,6 +114,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _currentTime("currentTime", "Current Time", 0, 0, 0)
     , _memoryBudget("memoryBudget", "Memory Budget", 0, 0, 0)
     , _streamingBudget("streamingBudget", "Streaming Budget", 0, 0, 0)
+    , _histogramBins("histogramBins", "Histogram Bins", 0, 0, 0, 1)
     , _useGlobalTime("useGlobalTime", "Global Time", false)
     , _loop("loop", "Loop", false)
     , _selectorName("selector", "Brick Selector")
@@ -124,6 +125,8 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _scaling("scaling", "Scaling", glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0), glm::vec3(10.0))
     , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
     , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28))
+    , _toleranceSpatial("spatialTolerance", "Spatial Tolerance", 1.f, 0.01f, 10.f)
+    , _toleranceTemporal("temporalTolerance", "Temporal Tolerance", 1.f, 0.01f, 10.f)
 {
     std::string name;
     //bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
@@ -246,8 +249,8 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     addProperty(_scalingExponent);
     addProperty(_translation);
     addProperty(_rotation);
-
-
+    addProperty(_toleranceSpatial);
+    addProperty(_toleranceTemporal);
     //_brickSelector = new ShenBrickSelector(_tsp, -1, -1);
 }
 
@@ -333,12 +336,20 @@ bool RenderableMultiresVolume::initialize() {
     unsigned int maxInitialBudget = 2048;
     int initialBudget = std::min(maxInitialBudget, maxNumBricks);
 
+    unsigned int histoBins = 50,
+        histoBinsMin = 2,
+        histoBinsMax = maxInitialBudget,
+        histoBinsStep = 1;
+
     _currentTime = properties::IntProperty("currentTime", "Current Time", 0, 0, _tsp->header().numTimesteps_ - 1);
     _memoryBudget = properties::IntProperty("memoryBudget", "Memory Budget", initialBudget, 0, maxNumBricks);
     _streamingBudget = properties::IntProperty("streamingBudget", "Streaming Budget", initialBudget, 0, maxNumBricks);
+    _histogramBins = properties::IntProperty("histogramBins", "Histogram Bins", histoBins, histoBinsMin, histoBinsMax, histoBinsStep);
+
     addProperty(_currentTime);
     addProperty(_memoryBudget);
     addProperty(_streamingBudget);
+    addProperty(_histogramBins);
 
     if (success) {
         _brickIndices.resize(maxNumBricks, 0);
@@ -382,7 +393,7 @@ bool RenderableMultiresVolume::isReady() const {
 
 
 bool RenderableMultiresVolume::initializeSelector() {
-    int nHistograms = 50;
+    int nHistograms = _histogramBins;
     bool success = true;
 
     BrickSelector * selector;

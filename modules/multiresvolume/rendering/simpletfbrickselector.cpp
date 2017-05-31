@@ -44,7 +44,7 @@ namespace openspace {
 SimpleTfBrickSelector::~SimpleTfBrickSelector() {}
 
 bool SimpleTfBrickSelector::initialize() {
-    LERROR("Selector init again");
+    LINFO("Selector init");
     return calculateBrickImportances();
 }
 
@@ -270,7 +270,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
 
     float tfWidth = tf->width();
     if (tfWidth <= 0) return false;
-    LERROR("Transfer function width: " << tfWidth);
+    LINFO("Transfer function width: " << tfWidth);
     // The importance of every brick. Each brick has a histogram.
     size_t nHistograms = _tsp->numTotalNodes();
     _brickImportances = std::vector<float>(nHistograms);

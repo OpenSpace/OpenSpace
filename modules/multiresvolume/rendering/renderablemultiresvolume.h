@@ -108,10 +108,13 @@ private:
     properties::IntProperty _currentTime; // used to vary time, if not using global time nor looping
     properties::IntProperty _memoryBudget;
     properties::IntProperty _streamingBudget;
+    properties::IntProperty _histogramBins;
     properties::FloatProperty _stepSizeCoefficient;
     properties::StringProperty _selectorName;
     properties::BoolProperty _statsToFile;
     properties::StringProperty _statsToFileName;
+    properties::FloatProperty _toleranceSpatial;
+    properties::FloatProperty _toleranceTemporal;
 
     // Stats timers
     std::string _statsFileName;
