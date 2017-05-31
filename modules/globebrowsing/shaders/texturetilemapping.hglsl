@@ -93,21 +93,31 @@ vec4 performLayerSettings(vec4 currentValue, const LayerSettings settings) {
 	return newValue;
 }
 
-vec3 applyAdjustmentLayer(vec3 currentValue, const AdjustmentLayer adjustmentLayer) {
-	switch (adjustmentLayer.type) {
-		case 0: { // None
-			return currentValue;
-		}
-		case 1: { // Color
-			return adjustmentLayer.color;
-		}
-	}
+#for id, layerGroup in layerGroups
+#for i in 0..#{lastLayerIndex#{layerGroup}}
+
+vec4 getSample#{layerGroup}#{i}(
+	const vec2 uv,
+	const LevelWeights levelWeights,
+	const Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1]) {
+
+	vec4 color = vec4(0,0,0,1);
+#if #{#{layerGroup}#{i}LayerType} == 0 // Default, sample from texture
+		color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+#elif #{#{layerGroup}#{i}LayerType} == 1 // Color adjustment layer
+		color.rgb = #{layerGroup}[#{i}].color;
+#endif
+
+	return color;
 }
+
+#endfor
+#endfor
 
 float calculateUntransformedHeight(
 	vec2 uv,
 	LevelWeights levelWeights,
-	const Layer HeightTextures[NUMLAYERS_HEIGHTMAP]) {
+	const Layer HeightLayers[NUMLAYERS_HEIGHTMAP]) {
 
 	float height = 0;
 
@@ -117,12 +127,11 @@ float calculateUntransformedHeight(
 	levelWeights = getDefaultLevelWeights();
 #endif // HEIGHTMAP_BLENDING_ENABLED
 	
-	
 	#for i in 0..#{lastLayerIndexHeightLayers}
 	{
-		height = getTexVal(HeightTextures[#{i}].pile, levelWeights, uv).r;
+		height = getSampleHeightLayers#{i}(uv, levelWeights, HeightLayers).r;
 
-		height = performLayerSettings(height, HeightTextures[#{i}].settings);
+		height = performLayerSettings(height, HeightLayers[#{i}].settings);
 	}
 	#endfor
 	return height;
@@ -131,7 +140,7 @@ float calculateUntransformedHeight(
 float calculateHeight(
 	vec2 uv,
 	LevelWeights levelWeights,
-	const Layer HeightTextures[NUMLAYERS_HEIGHTMAP]) {
+	const Layer HeightLayers[NUMLAYERS_HEIGHTMAP]) {
 
 	float height = 0;
 
@@ -144,11 +153,11 @@ float calculateHeight(
 	
 	#for i in 0..#{lastLayerIndexHeightLayers}
 	{
-		float untransformedHeight = getTexVal(HeightTextures[#{i}].pile, levelWeights, uv).r;
+		float untransformedHeight = getSampleHeightLayers#{i}(uv, levelWeights, HeightLayers).r;
 
-		float heightSample = getTransformedTexVal(HeightTextures[#{i}].depthTransform, untransformedHeight);
+		float heightSample = getTransformedTexVal(HeightLayers[#{i}].depthTransform, untransformedHeight);
 		if (heightSample > -100000) {
-			heightSample = performLayerSettings(heightSample, HeightTextures[#{i}].settings);
+			heightSample = performLayerSettings(heightSample, HeightLayers[#{i}].settings);
 			height = heightSample;
 		}
 	}
@@ -172,10 +181,8 @@ vec4 calculateColor(
 
 	#for i in 0..#{lastLayerIndexColorLayers}
 	{
-		vec4 colorSample = getTexVal(ColorLayers[#{i}].pile, levelWeights, uv);
+		vec4 colorSample = getSampleColorLayers#{i}(uv, levelWeights, ColorLayers);
 
-		colorSample.rgb = applyAdjustmentLayer(colorSample.rgb, ColorLayers[#{i}].adjustmentLayer);
-		
 		colorSample = performLayerSettings(colorSample, ColorLayers[#{i}].settings);
 
 		color = blendOver(color, colorSample);
@@ -202,7 +209,7 @@ vec4 calculateGrayScale(
 
 	#for i in 0..#{lastLayerIndexGrayScaleLayers}
 	{
-		vec4 colorSample = getTexVal(GrayScaleLayers[#{i}].pile, levelWeights, uv);
+		vec4 colorSample = getSampleGrayScaleLayers#{i}(uv, levelWeights, GrayScaleLayers);
 
 		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, 1);
 		colorSample = performLayerSettings(colorSample, GrayScaleLayers[#{i}].settings);
@@ -255,7 +262,8 @@ vec4 calculateNight(
 
 	#for i in 0..#{lastLayerIndexNightLayers}
 	{
-		vec4 colorSample = getTexVal(NightLayers[#{i}].pile, levelWeights, uv);
+		vec4 colorSample = getSampleNightLayers#{i}(uv, levelWeights, NightLayers);
+
 		colorSample = performLayerSettings(colorSample, NightLayers[#{i}].settings);
 
 		nightColor = blendOver(nightColor, colorSample);
@@ -307,7 +315,7 @@ vec4 calculateOverlay(
 
 	#for i in 0..#{lastLayerIndexColorOverlays}
 	{
-		vec4 colorSample = getTexVal(ColorOverlays[#{i}].pile, levelWeights, uv);
+		vec4 colorSample = getSampleColorOverlays#{i}(uv, levelWeights, ColorOverlays);
 		colorSample = performLayerSettings(colorSample, ColorOverlays[#{i}].settings);
 
 		color = blendOver(color, colorSample);
@@ -335,7 +343,7 @@ vec4 calculateGrayScaleOverlay(
 
 	#for i in 0..#{lastLayerIndexGrayScaleColorOverlays}
 	{
-		vec4 colorSample = getTexVal(GrayScaleColorOverlays[#{i}].pile, levelWeights, uv);
+		vec4 colorSample = getSampleGrayScaleColorOverlays#{i}(uv, levelWeights, GrayScaleColorOverlays);
 
 		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
 		colorSample = performLayerSettings(colorSample, GrayScaleColorOverlays[#{i}].settings);
@@ -381,7 +389,7 @@ vec4 calculateWater(
 
 	#for i in 0..#{lastLayerIndexWaterMasks}
 	{
-		vec4 colorSample = getTexVal(WaterMasks[#{i}].pile, levelWeights, uv);
+		vec4 colorSample = getSampleWaterMasks#{i}(uv, levelWeights, WaterMasks);
 
 		colorSample = performLayerSettings(colorSample, WaterMasks[#{i}].settings);
 

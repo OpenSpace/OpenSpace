@@ -44,19 +44,30 @@ namespace tileprovider {
     class TileProvider;
 }
 
-
-
-class AdjustmentLayer : public properties::PropertyOwner {
+/**
+ * Simple struct which is used to enable/disable <code>TileProvider</code> 
+ * and associate is with a name. It also holds layer specific information
+ * which is used in rendering of layer.
+ */
+class Layer : public properties::PropertyOwner {
 public:
-    enum TypeID
+    enum class TypeID
     {
-        NONE = 0,
-        COLOR = 1,
+        Texture = 0,
+        SolidColor = 1,
     };
     static const int NumTypes = 2;
     static const std::string TypeNames[NumTypes];
 
-    AdjustmentLayer(const ghoul::Dictionary& dictionary);
+    Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict);
+
+    ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
+
+    bool enabled() const { return _enabled.value(); }
+    tileprovider::TileProvider* tileProvider() const { return _tileProvider.get(); }
+    const LayerRenderSettings& renderSettings() const { return _renderSettings; }
+
+    void onChange(std::function<void(void)> callback);
 
     properties::Vec3Property color;
     TypeID type;
@@ -65,35 +76,14 @@ private:
     void removeVisibleProperties();
     void addVisibleProperties();
     properties::OptionProperty _typeOption;
-};
 
-
-/**
- * Simple struct which is used to enable/disable <code>TileProvider</code> 
- * and associate is with a name. It also holds layer specific information
- * which is used in rendering of layer.
- */
-class Layer : public properties::PropertyOwner {
-public:
-    Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict);
-
-    ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
-
-    bool enabled() const { return _enabled.value(); }
-    tileprovider::TileProvider* tileProvider() const { return _tileProvider.get(); }
-    const LayerRenderSettings& renderSettings() const { return _renderSettings; }
-    const AdjustmentLayer& adjustmentLayer() const { return _adjustmentLayer; }
-
-    void onChange(std::function<void(void)> callback);
-
-private:
     properties::BoolProperty _enabled;
     properties::TriggerProperty _reset;
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
     LayerRenderSettings _renderSettings;
   
-    AdjustmentLayer _adjustmentLayer;
-};
+    std::function<void(void)> _onChangeCallback;
+  };
 
 } // namespace globebrowsing
 } // namespace openspace

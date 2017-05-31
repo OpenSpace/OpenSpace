@@ -29,66 +29,10 @@
 namespace openspace {
 namespace globebrowsing {
 
-const std::string AdjustmentLayer::TypeNames[NumTypes] = {
-    "None",
-    "Color"
+const std::string Layer::TypeNames[NumTypes] = {
+    "Texture",
+    "SolidColor"
 };
-
-AdjustmentLayer::AdjustmentLayer(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner("AdjustmentLayer")
-    , _typeOption(
-          "type",
-          "Type",
-          properties::OptionProperty::DisplayType::Dropdown
-      )
-    , color(
-        "color",
-        "Color",
-        glm::vec4(1.f, 1.f, 1.f, 1.f),
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-      )
-    , type(TypeID::NONE)
-{
-    for (int i = 0; i < NumTypes; ++i) {
-        _typeOption.addOption(i, TypeNames[i]);
-    }
-    
-    addProperty(_typeOption);
-    _typeOption.onChange([&](){
-        removeVisibleProperties();
-        type = static_cast<TypeID>(_typeOption.value());
-        addVisibleProperties();
-    });
-
-    color.setViewOption(properties::Property::ViewOptions::Color);
-
-    addVisibleProperties();
-}
-
-void AdjustmentLayer::removeVisibleProperties() {
-    switch (type) {
-        case NONE:
-            break;
-        case COLOR:
-            removeProperty(color);
-            break;
-        default:
-            break;
-    }
-}
-
-void AdjustmentLayer::addVisibleProperties() {
-    switch (type) {
-        case NONE:
-            break;
-        case COLOR:
-            addProperty(color);
-        default:
-            break;
-    }
-}
-
 
 namespace {
     const char* keyName = "Name";
@@ -101,7 +45,19 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     : properties::PropertyOwner(layerDict.value<std::string>(keyName))
     , _enabled(properties::BoolProperty("enabled", "Enabled", false))
     , _reset("reset", "Reset")
-    , _adjustmentLayer(layerDict)
+    , _typeOption(
+          "type",
+          "Type",
+          properties::OptionProperty::DisplayType::Dropdown
+      )
+    , color(
+        "color",
+        "Color",
+        glm::vec4(1.f, 1.f, 1.f, 1.f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+      )
+    , type(TypeID::Texture)
 {
     // We add the id to the dictionary since it needs to be known by
     // the tile provider
@@ -133,20 +89,60 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
         _tileProvider->reset();
     });
 
+    for (int i = 0; i < NumTypes; ++i) {
+        _typeOption.addOption(i, TypeNames[i]);
+    }
+    
+    addProperty(_typeOption);
+    _typeOption.onChange([&](){
+        removeVisibleProperties();
+        type = static_cast<TypeID>(_typeOption.value());
+        addVisibleProperties();
+        _onChangeCallback();
+    });
+
+    color.setViewOption(properties::Property::ViewOptions::Color);
+
+    addVisibleProperties();
+
     addProperty(_enabled);
     addProperty(_reset);
 
     addPropertySubOwner(_renderSettings);
     addPropertySubOwner(*_tileProvider);
-    addPropertySubOwner(_adjustmentLayer);
+    
 }
 
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
     return _tileProvider->getChunkTilePile(tileIndex, pileSize);
 }
 
+void Layer::removeVisibleProperties() {
+    switch (type) {
+        case TypeID::Texture:
+            break;
+        case TypeID::SolidColor:
+            removeProperty(color);
+            break;
+        default:
+            break;
+    }
+}
+
+void Layer::addVisibleProperties() {
+    switch (type) {
+        case TypeID::Texture:
+            break;
+        case TypeID::SolidColor:
+            addProperty(color);
+        default:
+            break;
+    }
+}
+
 void Layer::onChange(std::function<void(void)> callback) {
     _enabled.onChange(callback);
+    _onChangeCallback = callback;
 }
 
 } // namespace globebrowsing

@@ -40,7 +40,7 @@ namespace globebrowsing {
 
 bool LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData::operator==(
     const LayerGroupPreprocessingData& other) const {
-    return layerIsAdjustmentLayer == other.layerIsAdjustmentLayer &&
+    return layerType == other.layerType &&
         lastLayerIdx == other.lastLayerIdx &&
         layerBlendingEnabled == other.layerBlendingEnabled;
 }
@@ -77,9 +77,9 @@ LayerShaderManager::LayerShaderPreprocessingData
         layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
 
-        std::vector<std::shared_ptr<Layer>> layers; layerGroup.activeLayers();
+        std::vector<std::shared_ptr<Layer>> layers = layerGroup.activeLayers();
         for (const std::shared_ptr<Layer>& layer : layers) {
-            layeredTextureInfo.layerIsAdjustmentLayer.push_back(false);
+            layeredTextureInfo.layerType.push_back(layer->type);
         }
 
         preprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
@@ -160,12 +160,21 @@ void LayerShaderManager::recompileShaderProgram(
             textureTypes[i].layerBlendingEnabled
         );
 
-        for (unsigned int j = 0; j < textureTypes[i].layerIsAdjustmentLayer.size(); ++j) {
-            shaderDictionary.setValue(
-                groupName + "IsAdjustmentLayer_" + std::to_string(j),
-                textureTypes[i].layerIsAdjustmentLayer[j]);
+        // This is to avoid errors from shader preprocessor
+        std::string key = groupName + "0" + "LayerType";
+        shaderDictionary.setValue(key, 0);
+
+        for (int j = 0; j < textureTypes[i].lastLayerIdx + 1; ++j) {
+            std::string key = groupName + std::to_string(j) + "LayerType";
+            shaderDictionary.setValue(key, static_cast<int>(textureTypes[i].layerType[j]));
         }
     }
+
+    ghoul::Dictionary layerGroupNames;
+    for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
+        layerGroupNames.setValue(std::to_string(i), layergroupid::LAYER_GROUP_NAMES[i]);
+    }
+    shaderDictionary.setValue("layerGroups", layerGroupNames);
 
     // Other settings such as "useAtmosphere"
     auto keyValuePairs = _preprocessingData.keyValuePairs;

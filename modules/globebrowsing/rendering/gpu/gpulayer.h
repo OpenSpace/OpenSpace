@@ -40,25 +40,6 @@ namespace globebrowsing {
 class Layer;
 struct TileIndex;
 
-class AdjustmentLayer;
-
-class GPUAdjustmentLayer
-{
-public:
-    ~GPUAdjustmentLayer() = default;
-    
-    virtual void setValue(ghoul::opengl::ProgramObject* programObject,
-                          const AdjustmentLayer& adjustmentLayer);
-    
-
-    virtual void bind(ghoul::opengl::ProgramObject* programObject,
-                      const AdjustmentLayer& adjustmentLayer,
-                      const std::string& nameBase);
-private:
-    GPUData<int> gpuType;
-    GPUData<glm::vec3> gpuColor;
-};
-
 /**
  * Manages a GPU representation of a <code>Layer</code>
  */
@@ -92,7 +73,9 @@ public:
 private:
     GPUChunkTilePile gpuChunkTilePile;
     GPULayerRenderSettings gpuRenderSettings;
-    GPUAdjustmentLayer gpuAdjustmentLayer;
+    
+    // Adjustment layer stuff
+    GPUData<glm::vec3> gpuColor;
 };
 
 } // namespace globebrowsing
