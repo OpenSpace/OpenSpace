@@ -81,8 +81,6 @@ bool LocalErrorHistogramManager::buildHistograms(int numBins) {
             pb1.print(processedLeaves++);
         }
     }
-    //pb1.stop();
-
 
     LINFO("Building temporal histograms");
     ProgressBar pb2(numberOfLeaves);
@@ -95,8 +93,6 @@ bool LocalErrorHistogramManager::buildHistograms(int numBins) {
             pb2.print(processedLeaves++);
         }
     }
-    //pb2.stop();
-
     return success;
 }
 

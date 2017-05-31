@@ -100,7 +100,6 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl:
     std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
 
     std::string id = std::to_string(data.id);
-    //program.setUniform("opacity_" + std::to_string(id), visible ? 1.0f : 0.0f);
     program.setUniform("stepSizeCoefficient_" + id, _stepSizeCoefficient);
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
@@ -129,7 +128,6 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data, ghoul::opengl:
 bool MultiresVolumeRaycaster::cameraIsInside(const RenderData& data, glm::vec3& localPosition) {
     // Camera rig position in world coordinates.
     glm::vec4 rigWorldPos = glm::vec4(data.camera.position().vec3(), 1.0);
-    //rigWorldPos /= data.camera.scaling().x * pow(10.0, data.camera.scaling().y);
     glm::mat4 invSgctMatrix = glm::inverse(data.camera.viewMatrix());
 
     // Camera position in world coordinates.

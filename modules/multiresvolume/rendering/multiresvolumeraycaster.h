@@ -74,7 +74,6 @@ public:
     std::string getHelperPath() const override;
 
     void setModelTransform(glm::mat4 transform);
-    //void setTime(double time);
     void setStepSizeCoefficient(float coefficient);
 private:
     BoxGeometry _boundingBox;

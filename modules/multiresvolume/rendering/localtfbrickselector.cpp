@@ -80,7 +80,6 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
         unsigned int brickIndex = bs.brickIndex;
         priorityQueue.pop_back();
         if (bs.splitType == BrickSelection::SplitType::Temporal) {
-//            int timeSpanCenter = bs.centerT();
             unsigned int childBrickIndex;
             bool pickRightTimeChild = bs.timestepInRightChild(timestep);
 
@@ -222,9 +221,6 @@ void LocalTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) 
     for (const BrickSelection& bs : leafSelections) {
         writeSelection(bs, bricks);
     }
-
-    //std::cout << "Bricks in memory: " << nBricksInMemory << "/" << _memoryBudget << "___\t\t"
-    //          << "Streamed bricks:  " << nStreamedBricks << "/" << totalStreamingBudget << std::flush << "___\r";
 }
 
 float LocalTfBrickSelector::temporalSplitPoints(unsigned int brickIndex) {

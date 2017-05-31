@@ -226,8 +226,6 @@ void SimpleTfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks)
         writeSelection(bs, bricks);
     }
 
-    //std::cout << "Bricks in memory: " << nBricksInMemory << "/" << _memoryBudget << "___\t\t"
-    //          << "Streamed bricks:  " << nStreamedBricks << "/" << totalStreamingBudget << std::flush << "___\r";
 }
 
 float SimpleTfBrickSelector::temporalSplitPoints(unsigned int brickIndex) {

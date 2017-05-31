@@ -90,13 +90,6 @@ public:
     virtual void render(const RenderData& data, RendererTasks& tasks);
 
     Selector getSelector();
-  
-     
-    //virtual void preResolve(ghoul::opengl::ProgramObject* program) override;
-    //virtual std::string getHeaderPath() override;
-    //virtual std::string getHelperPath() override;
-    //virtual std::vector<ghoul::opengl::Texture*> getTextures() override;
-    //virtual std::vector<unsigned int> getBuffers() override;
 
 private:
     double _time;

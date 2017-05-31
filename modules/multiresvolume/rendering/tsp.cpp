@@ -73,7 +73,6 @@ bool TSP::load() {
     }
 
     if (readCache()) {
-    //if (false) {
         LINFO("Using cache");
     }
     else {
@@ -110,17 +109,6 @@ bool TSP::readHeader() {
     _file.seekg(_file.beg);
 
     _file.read(reinterpret_cast<char*>(&_header), sizeof(Header));
-    /*
-    file.read(reinterpret_cast<char*>(&gridType_),            sizeof(unsigned int));
-    file.read(reinterpret_cast<char*>(&numOrigTimesteps_),    sizeof(unsigned int));
-    file.read(reinterpret_cast<char*>(&numTimesteps_),        sizeof(unsigned int));
-    file.read(reinterpret_cast<char*>(&xBrickDim_),            sizeof(unsigned int));
-    file.read(reinterpret_cast<char*>(&yBrickDim_),            sizeof(unsigned int));
-    file.read(reinterpret_cast<char*>(&zBrickDim_),            sizeof(unsigned int));
-    file.read(reinterpret_cast<char*>(&xNumBricks_),        sizeof(unsigned int));
-    file.read(reinterpret_cast<char*>(&yNumBricks_),        sizeof(unsigned int));
-    file.read(reinterpret_cast<char*>(&zNumBricks_),        sizeof(unsigned int));
-    */
 
     LDEBUG("Grid type: " << _header.gridType_);
     LDEBUG("Brick dimensions: " << _header.xBrickDim_ << " " << _header.yBrickDim_ << " " << _header.zBrickDim_);
@@ -172,7 +160,6 @@ bool TSP::construct() {
                 data_[OTNode*NUM_DATA + BRICK_INDEX] = (int)OTNode;
 
                 // Error metrics
-                //int localOTNode = (OTNode - OT*numOTNodes_);
                 data_[OTNode*NUM_DATA + TEMPORAL_ERR] = static_cast<int>(numBSTLevels_ - 1 - BSTLevel);
                 data_[OTNode*NUM_DATA + SPATIAL_ERR] = static_cast<int>(numOTLevels_ - 1 - OTLevel);
 
@@ -222,7 +209,6 @@ bool TSP::initalizeSSO() {
 
     const size_t size = sizeof(GLint)*data_.size();
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, _dataSSBO);
-    //glBufferData(GL_SHADER_STORAGE_BUFFER, size, data_.data(), GL_DYNAMIC_READ);
     glBufferData(GL_SHADER_STORAGE_BUFFER, size, data_.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     glFinish();
@@ -381,24 +367,15 @@ bool TSP::calculateSpatialError() {
     }
 
     std::sort(medianArray.begin(), medianArray.end());
-    //float medError = medianArray[medianArray.size()/2];
-
-    /*
-    LDEBUG("\nMin spatial std dev: " << minError);
-    LDEBUG("Max spatial std dev: " << maxError);
-    LDEBUG("Median spatial std dev: " << medError);
-    LDEBUG("");
-    */
 
     // "Normalize" errors
     float minNorm = 1e20f;
     float maxNorm = 0.f;
     for (unsigned int i = 0; i<numTotalNodes_; ++i) {
-        //float normalized = (stdDevs[i]-minError)/(maxError-minError);
         if (stdDevs[i] > 0.f) {
             stdDevs[i] = pow(stdDevs[i], 0.5f);
         }
-        //data_[i*NUM_DATA + SPATIAL_ERR] = *reinterpret_cast<int*>(&stdDevs[i]);
+
         data_[i*NUM_DATA + SPATIAL_ERR] = glm::floatBitsToInt(stdDevs[i]);
         if (stdDevs[i] < minNorm) {
             minNorm = stdDevs[i];
@@ -429,9 +406,6 @@ bool TSP::calculateTemporalError() {
 
     LDEBUG("Calculating temporal error");
 
-    // Statistics
-    //float minErr = 1e20f;
-    //float maxErr = 0.f;
     std::vector<float> meanArray(numTotalNodes_);
 
     // Save errors
@@ -496,25 +470,9 @@ bool TSP::calculateTemporalError() {
             errors[brick] = avgStdDev;
 
         }
-
-        /*
-        if (avgStdDev < minErr) {
-        minErr = avgStdDev;
-        } else if (avgStdDev > maxErr) {
-        maxErr = avgStdDev;
-        }
-        */
-
     } // for all bricks
 
     std::sort(meanArray.begin(), meanArray.end());
-    //float medErr = meanArray[meanArray.size()/2];
-
-    /*
-    LDEBUG("\nMin temporal error: " << minErr);
-    LDEBUG("Max temporal error: " << maxErr);
-    LDEBUG("Median temporal error: " << medErr);
-    */
 
     // Adjust errors using user-provided exponents
     float minNorm = 1e20f;
@@ -523,7 +481,7 @@ bool TSP::calculateTemporalError() {
         if (errors[i] > 0.f) {
             errors[i] = pow(errors[i], 0.25f);
         }
-        //data_[i*NUM_DATA + TEMPORAL_ERR] = *reinterpret_cast<int*>(&errors[i]);
+
         data_[i*NUM_DATA + TEMPORAL_ERR] = glm::floatBitsToInt(errors[i]);
         if (errors[i] < minNorm) {
             minNorm = errors[i];
@@ -611,17 +569,6 @@ bool TSP::writeCache() {
     file.write(reinterpret_cast<char*>(&data_[0]), data_.size()*sizeof(float));
 
     file.close();
-
-    /*
-    LDEBUG("\nData:");
-    for (unsigned i=0; i<data_.size()/NUM_DATA; ++i) {
-    LDEBUG("Brick nr " << i);
-    LDEBUG("Brick index " << data_[i*NUM_DATA + BRICK_INDEX]);
-    LDEBUG("Child index " << data_[i*NUM_DATA + CHILD_INDEX]);
-    LDEBUG("Spatial err " << *reinterpret_cast<float*>(&data_[i*NUM_DATA + SPATIAL_ERR]));
-    LDEBUG("Temporal err " << *reinterpret_cast<float*>(&data_[i*NUM_DATA + TEMPORAL_ERR]));
-    }
-    */
 
     return true;
 }

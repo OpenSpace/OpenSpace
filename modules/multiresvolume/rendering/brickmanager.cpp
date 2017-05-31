@@ -158,9 +158,6 @@ bool BrickManager::initialize() {
         GL_RGBA, 
         GL_FLOAT);
     textureAtlas_->uploadTexture();
-    //textureAtlas_ = Texture3D::New(dims);
-
-    //if (!textureAtlas_->Init()) return false;
 
     atlasInitialized_ = true;
 
@@ -186,8 +183,6 @@ bool BrickManager::BuildBrickList(BUFFER_INDEX _bufIdx,
         if (_brickRequest[i] > 0) {
 
             numBricks++;
-
-            //INFO("Checking brick " << i);
 
             // If the brick is already in the atlas, keep the coordinate
             if (bricksInPBO_[_bufIdx][i] != -1) {
@@ -244,9 +239,6 @@ bool BrickManager::BuildBrickList(BUFFER_INDEX _bufIdx,
         *it = false;
     }
 
-    //INFO("bricks NOT used: " << (float)(numBricksFrame_-numBricks) / (float)(numBricksFrame_));
-    //INFO("bricks cached: " << (float)numCached / (float)(numBricksFrame_));
-
     return true;
 }
 
@@ -255,7 +247,6 @@ bool BrickManager::FillVolume(float *_in, float *_out,
     unsigned int _y,
     unsigned int _z) {
 
-    //timer_.start();
     unsigned int xMin = _x*paddedBrickDim_;
     unsigned int yMin = _y*paddedBrickDim_;
     unsigned int zMin = _z*paddedBrickDim_;
@@ -354,16 +345,10 @@ bool BrickManager::DiskToPBO(BUFFER_INDEX _pboIndex) {
             }
             brickIndexProbe++;
         }
-        //INFO("Reading " << sequence << " bricks");
 
         // Read the sequence into a buffer
         float *seqBuffer = new float[sequence*numBrickVals_];
         size_t bufSize = sequence*numBrickVals_*sizeof(float);
-        /*
-        std::ios::pos_type offset = dataPos_ +
-        static_cast<std::ios::pos_type>(brickIndex) *
-        static_cast<std::ios::pos_type>(brickSize_);
-        */
 
         long offset = TSP::dataPosition() +
             static_cast<long>(brickIndex)*
@@ -372,30 +357,8 @@ bool BrickManager::DiskToPBO(BUFFER_INDEX _pboIndex) {
         // Skip reading if all bricks in sequence is already in PBO
         if (inPBO != sequence) {
 
-            //timer_.start();
-
-            /*
-            std::streamoff off = static_cast<std::streamoff>(offset);
-            in_.seekg(off);
-            if (in_.tellg() == -1) {
-            ERROR("Failed to get input stream position");
-            INFO("offset: " << offset);
-            INFO("streamoff max: " << std::numeric_limits<std::streamoff>::max());
-            INFO("size_t max: " << std::numeric_limits<size_t>::max());
-            return false;
-            }
-            INFO("in.tellg(): " << in_.tellg());
-            in_.read(reinterpret_cast<char*>(seqBuffer), brickSize_*sequence);
-            */
-
             _tsp->file().seekg(offset);
             _tsp->file().read(reinterpret_cast<char*>(seqBuffer), bufSize);
-
-
-            //timer_.stop();
-            //double time = timer_.elapsed().wall / 1.0e9;
-            //double mb = (brickSize_*sequence) / 1048576.0;
-            //INFO("Disk read "<<mb<<" MB in "<<time<<" s, "<< mb/time<<" MB/s");
 
             // For each brick in the buffer, put it the correct buffer spot
             for (unsigned int i = 0; i<sequence; ++i) {
@@ -419,7 +382,6 @@ bool BrickManager::DiskToPBO(BUFFER_INDEX _pboIndex) {
                     // the volume needs to be filled with one big float array.
                     FillVolume(&seqBuffer[numBrickVals_*i], mappedBuffer, x, y, z);
                     // Update the atlas list since the brick will be uploaded
-                    //INFO(brickIndex+i);
                     bricksInPBO_[_pboIndex][brickIndex + i] = LinearCoord(x, y, z);
 
                 }

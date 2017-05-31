@@ -95,11 +95,9 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
             // is 2^nTemporalSplits over the whole time period.
 
             int newStreams = std::pow(2, bs.nTemporalSplits);
-            //std::cout << "preparing for " << newStreams << " new streams" << std::endl;
 
             // Refining this one more step would require the double amount of streams
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
-                //std::cout << "Reached streaming budget when splitting temporally! Breaking" << std::endl;
                 // Reached dead end (streaming budget would be exceeded)
                 deadEnds.push_back(bs);
                 break;
@@ -133,7 +131,6 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
                 // Reached dead end (streaming budget would be exceeded)
                 // However, temporal split might be possible
-                //std::cout << "Reached streaming budget when splitting spatially! Breaking" << std::endl;
                 if (bs.splitType != BrickSelection::SplitType::Temporal) {
                     bs.splitType = BrickSelection::SplitType::Temporal;
                     bs.splitPoints = temporalSplitPoints(bs.brickIndex);
@@ -152,7 +149,6 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
 
                 BrickSelection::SplitType childSplitType;
                 float childSplitPoints = splitPoints(childBrickIndex, childSplitType);
-                //std::cout << "Splitting spatially." << std::endl;
                 BrickSelection childSelection = bs.splitSpatially(i % 2, (i/2) % 2, i/4, childBrickIndex, childSplitType, childSplitPoints);
 
                 if (childSplitType != BrickSelection::SplitType::None) {
@@ -165,14 +161,8 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
         }
     }
 
-    if (nBricksInMemory <= memoryBudget - 7) {
-        //std::cout << "memory budget not reached. " << nBricksInMemory << " out of " << memoryBudget << std::endl;
-    }
-
     // Is it possible that we may stream more bricks?
     if (nStreamedBricks < totalStreamingBudget - 1) {
-        //std::cout << "streaming budget not reached. " << nStreamedBricks << " out of " << totalStreamingBudget << std::endl;
-        //std::cout << "there are " << priorityQueue.size() << " elements left in priority queue." << std::endl;
 
         while (priorityQueue.size() > 0) {
             BrickSelection bs = priorityQueue.back();
@@ -200,7 +190,6 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
             if (nStreamedBricks + newStreams > totalStreamingBudget) {
                 // The current best choice would make us exceed the streaming budget, try next instead.
                 deadEnds.push_back(bs);
-                //std::cout << "Dead end trying to split " << brickIndex << ". Streamed would be " << (nStreamedBricks + newStreams) << std::endl;
                 continue;
             }
 
@@ -227,29 +216,24 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
         }
     } else {
         // Write selected inner nodes to brickSelection vector
-        //std::cout << "priority queue: " << priorityQueue.size() << std::endl;
+
         for (const BrickSelection& bs : priorityQueue) {
             writeSelection(bs, bricks);
         }
     }
 
-    //std::cout << "temporal split queue: " << temporalSplitQueue.size() << std::endl;
     // Write selected inner nodes to brickSelection vector
     for (const BrickSelection& bs : temporalSplitQueue) {
         writeSelection(bs, bricks);
     }
-    //std::cout << "dead ends: " << deadEnds.size() << std::endl;
+
     for (const BrickSelection& bs : deadEnds) {
         writeSelection(bs, bricks);
     }
     // Write selected leaf nodes to brickSelection vector
-    //std::cout << "leaf selections: " << leafSelections.size() << std::endl;
     for (const BrickSelection& bs : leafSelections) {
         writeSelection(bs, bricks);
     }
-
-    //std::cout << "Bricks in memory: " << nBricksInMemory << "/" << _memoryBudget << "___\t\t"
-    //          << "Streamed bricks:  " << nStreamedBricks << "/" << totalStreamingBudget << std::flush << "___\r";
 }
 
 float TfBrickSelector::temporalSplitPoints(unsigned int brickIndex) {
@@ -263,9 +247,6 @@ float TfBrickSelector::temporalSplitPoints(unsigned int brickIndex) {
     float currentError = _brickErrors[brickIndex];
     float splitError = _brickErrors[leftChild] + _brickErrors[rightChild];
 
-    /*if (currentError + 0.001 < splitError) {
-        std::cout << "Warning! (TEMPORAL SPLIT) Current error " << currentError << " is smaller than split error " << splitError << "." << std::endl;
-    }*/
     float diff = fabs(currentError - splitError);
     return diff * 0.5;
 }
@@ -284,10 +265,6 @@ float TfBrickSelector::spatialSplitPoints(unsigned int brickIndex) {
         unsigned int child = firstChild + i;
         splitError += _brickErrors[child];
     }
-
-    /*if (currentError + 0.001 < splitError) {
-        std::cout << "Warning! (SPATIAL SPLIT) Current error " << currentError << " is smaller than split error " << splitError << "." << std::endl;
-    }*/
 
     float diff = fabs(currentError - splitError);
     return diff * 0.125;

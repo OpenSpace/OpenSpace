@@ -115,7 +115,6 @@ bool HistogramManager::buildHistogram(unsigned int brickIndex) {
         }
     }
 
-    //histogram.normalize();
     _histograms[brickIndex] = std::move(histogram);
 
 

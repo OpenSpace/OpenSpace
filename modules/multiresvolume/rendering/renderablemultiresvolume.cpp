@@ -129,8 +129,6 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _toleranceTemporal("temporalTolerance", "Temporal Tolerance", 1.f, 0.01f, 10.f)
 {
     std::string name;
-    //bool success = dictionary.getValue(constants::scenegraphnode::keyName, name);
-    //assert(success);
 
     _filename = "";
     bool success = dictionary.getValue(KeyDataSource, _filename);
@@ -197,34 +195,10 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     _transferFunctionPath = absPath(_transferFunctionPath);
     _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 
-    //_pscOffset = psc(glm::vec4(0.0));
-    //_boxScaling = glm::vec3(1.0);
-
-
-    /*if (dictionary.hasKey(KeyBoxScaling)) {
-        glm::vec4 scalingVec4(_boxScaling, _w);
-        success = dictionary.getValue(KeyBoxScaling, scalingVec4);
-        if (success) {
-            _boxScaling = scalingVec4.xyz;
-            _w = scalingVec4.w;
-        }
-        else {
-            success = dictionary.getValue(KeyBoxScaling, _boxScaling);
-            if (!success) {
-                LERROR("Node '" << name << "' did not contain a valid '" <<
-                    KeyBoxScaling << "'");
-                return;
-            }
-        }
-    }*/
-
-    //setBoundingSphere(PowerScaledScalar::CreatePSS(glm::length(_boxScaling)*pow(10,_w)));
-
     _tsp = std::make_shared<SandTSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
     _selectorName = TYPE_TF;
-	//_selectorName = "tf";
     std::string brickSelectorType;
     if (dictionary.hasKey(KeyBrickSelector)) {
         success = dictionary.getValue(KeyBrickSelector, brickSelectorType);
@@ -251,11 +225,9 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     addProperty(_rotation);
     addProperty(_toleranceSpatial);
     addProperty(_toleranceTemporal);
-    //_brickSelector = new ShenBrickSelector(_tsp, -1, -1);
 }
 
 RenderableMultiresVolume::~RenderableMultiresVolume() {
-    //OsEng.renderEngine()->aBuffer()->removeVolume(this);
 
     if (_tfBrickSelector)
         delete _tfBrickSelector;
@@ -448,62 +420,6 @@ bool RenderableMultiresVolume::initializeSelector() {
 
     return success;
 }
-/*
-void RenderableMultiresVolume::preResolve(ghoul::opengl::ProgramObject* program) {
-    RenderableVolume::preResolve(program);
-
-
-    std::stringstream ss;
-    ss << "opacity_" << getId();
-    program->setUniform(ss.str(), visible ? 1.0f : 0.0f);
-
-    ss.str(std::string());
-    ss << "stepSizeCoefficient_" << getId();
-    program->setUniform(ss.str(), _stepSizeCoefficient);
-
-    ss.str(std::string());
-    ss << "transferFunction_" << getId();
-    program->setUniform(ss.str(), getTextureUnit(_transferFunction->getTexture()));
-
-    ss.str(std::string());
-    ss << "textureAtlas_" << getId();
-    program->setUniform(ss.str(), getTextureUnit(_atlasManager->textureAtlas()));
-
-    ss.str(std::string());
-    ss << "atlasMapBlock_" << getId();
-    program->setSsboBinding(ss.str(), getSsboBinding(_atlasManager->atlasMapBuffer()));
-
-    ss.str(std::string());
-    ss << "gridType_" << getId();
-    program->setUniform(ss.str(), static_cast<int>(_tsp->header().gridType_));
-
-    ss.str(std::string());
-    ss << "maxNumBricksPerAxis_" << getId();
-    program->setUniform(ss.str(), static_cast<unsigned int>(_tsp->header().xNumBricks_));
-
-    ss.str(std::string());
-    ss << "paddedBrickDim_" << getId();
-    program->setUniform(ss.str(), static_cast<unsigned int>(_tsp->paddedBrickDim()));
-
-    ss.str(std::string());
-    ss << "atlasSize_" << getId();
-    glm::size3_t size = _atlasManager->textureSize();
-    glm::ivec3 atlasSize(size.x, size.y, size.z);
-    program->setUniform(ss.str(), atlasSize);
-
-    _timestep++;
-}
-*/
-/*
-std::vector<ghoul::opengl::Texture*> RenderableMultiresVolume::getTextures() {
-    std::vector<ghoul::opengl::Texture*> textures{_transferFunction->getTexture(), _atlasManager->textureAtlas()};
-    return textures;
-}
-
-std::vector<unsigned int> RenderableMultiresVolume::getBuffers() {
-    std::vector<unsigned int> buffers{_atlasManager->atlasMapBuffer()};
-    return buffers;
-}*/
 
 void RenderableMultiresVolume::update(const UpdateData& data) {
     _timestep++;
@@ -607,7 +523,6 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
     
         _raycaster->setStepSizeCoefficient(_stepSizeCoefficient);
         _raycaster->setModelTransform(transform);
-        //_raycaster->setTime(data.time);
     }
 
 }
