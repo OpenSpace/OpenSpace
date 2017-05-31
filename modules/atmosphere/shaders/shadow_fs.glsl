@@ -51,7 +51,7 @@ in vec4 vs_normal;
 in vec4 vs_position;
 in vec4 vs_posWorld;
 in vec4 vs_gPosition;
-out vec3 vs_gNormal;
+in vec3 vs_gNormal;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"

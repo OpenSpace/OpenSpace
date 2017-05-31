@@ -52,6 +52,8 @@ in vec2 vs_nightTex;
 in vec4 vs_normal;
 in vec4 vs_position;
 in vec4 vs_posWorld;
+in vec4 vs_gPosition;
+in vec3 vs_gNormal;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
@@ -126,6 +128,11 @@ Fragment getFragment() {
     frag.color = diffuse;
     frag.depth = depth;
 
+    frag.gColor    = diffuse;
+    frag.gPosition = vs_gPosition;
+    // TODO: get the write reflectance from the texture
+    frag.gNormalReflectance = vec4(vs_gNormal, 0.5);
+    
     return frag;
 }
 

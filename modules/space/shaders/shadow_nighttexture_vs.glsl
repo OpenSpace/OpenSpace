@@ -38,6 +38,8 @@ out vec4 vs_normal;
 out vec4 vs_position;
 out vec4 vs_posWorld;
 out float s;
+out vec4 vs_gPosition;
+out vec3 vs_gNormal;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -51,9 +53,15 @@ void main()
     // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
 
+    // G-Buffer
+    vs_gNormal = in_normal;
+
     // The things is not in world coordinates, they are in
     // regular view/eye coordinates.
     vec4 position = pscTransform(tmp, ModelTransform);
+
+    // G-Buffer
+    vs_gPosition = position;
 
     vec3 local_vertex_pos = mat3(ModelTransform) * in_position.xyz;
     vec4 vP = psc_addition(vec4(local_vertex_pos,in_position.w),objpos);

@@ -36,6 +36,8 @@ out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
 out float s;
+out vec4 vs_gPosition;
+out vec3 vs_gNormal;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -44,11 +46,18 @@ void main() {
     vs_st = in_st;
     vec4 tmp = in_position;
 
+    // G-Buffer
+    vs_gNormal = in_normal;
+
     // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
     // vs_normal = vec4(in_normal, 0.0);
     
     vec4 position = vec4(tmp.xyz * pow(10, tmp.w), 1.0);
+
+    // G-Buffer
+    vs_gPosition = position;
+
     position = modelViewProjectionTransform * position;
     
     vs_position = z_normalization(position);
