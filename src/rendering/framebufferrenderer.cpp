@@ -377,12 +377,14 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         ghoul::opengl::ProgramObject* raycastProgram = nullptr;
 
         if (cameraIsInside) {
-            if (raycastProgram == _insideRaycastPrograms[raycaster].get()) {
+            raycastProgram = _insideRaycastPrograms[raycaster].get();
+            if (raycastProgram) {
                 raycastProgram->activate();
                 raycastProgram->setUniform("cameraPosInRaycaster", cameraPosition);
             }
         } else {
-            if (raycastProgram == _raycastPrograms[raycaster].get()) {
+            raycastProgram = _raycastPrograms[raycaster].get();
+            if (raycastProgram) {
                 raycastProgram->activate();
             }
         }
