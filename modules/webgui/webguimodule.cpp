@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/webgui/webguimodule.h"
+#include "webguimodule.h"
 
 namespace {
     std::string _loggerCat = "WebGUI";

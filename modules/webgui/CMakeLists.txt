@@ -72,10 +72,10 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
 # Add CEF client files
 
 set(WEBGUI_SOURCES
-    webguimodule.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/gui_render_handler.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/browser_client.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/event_handler.cpp
+        webguimodule.cpp
+        src/gui_render_handler.cpp
+        src/browser_client.cpp
+        src/event_handler.cpp
     )
 set(WEBGUI_SOURCES_LINUX
     )
@@ -101,11 +101,11 @@ set(WEBGUI_SOURCES
     )
 
 # CEF helper sources
-set(WEBGUI_HELPER_SOURCES_MACOSX	
-	process_helper_mac.cpp
+set(WEBGUI_HELPER_SOURCES_MACOSX
+        src/process_helper_mac.cpp
 	)
-set(WEBGUI_HELPER_SOURCES_WINDOWS	
-	process_helper_windows.cpp
+set(WEBGUI_HELPER_SOURCES_WINDOWS
+        src/process_helper_windows.cpp
 	)
 APPEND_PLATFORM_SOURCES(WEBGUI_HELPER_SOURCES)
 source_group(WebGUI\\\\helper FILES ${WEBGUI_HELPER_SOURCES})
@@ -166,20 +166,22 @@ endif (OS_WINDOWS)
 ##########################################################################################
 # Create OpenSpace module.
 set(OPENSPACE_HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/webguimodule.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/browser_client.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/gui_render_handler.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/event_handler.h
+        webguimodule.h
+        include/browser_client.h
+        include/gui_render_handler.h
+        include/event_handler.h
     )
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 
 set(OPENSPACE_SOURCE_FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/webguimodule.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/browser_client.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/gui_render_handler.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/event_handler.cpp
+        webguimodule.cpp
+        src/browser_client.cpp
+        src/gui_render_handler.cpp
+        src/event_handler.cpp
         )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 create_new_module(
     ${WEBGUI_MODULE_NAME}

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <glm/gtc/matrix_transform.hpp>
-#include "gui_render_handler.h"
+#include "include/gui_render_handler.h"
 
 namespace {
     std::string _loggerCat = "WebGUI:RenderHandler";

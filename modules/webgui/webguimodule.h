@@ -38,9 +38,9 @@
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <include/wrapper/cef_helpers.h>
-#include "browser_client.h"
-#include "gui_render_handler.h"
-#include "event_handler.h"
+#include "include/browser_client.h"
+#include "include/gui_render_handler.h"
+#include "include/event_handler.h"
 
 namespace openspace {
 
