@@ -67,6 +67,13 @@ WebGUIModule::WebGUIModule()
     eventHandler = std::make_shared<EventHandler>(EventHandler(browser));
 }
 
+WebGUIModule::~WebGUIModule() {
+    // TODO(klas): This is causing a crash during shutdown
+    browser->GetHost()->CloseBrowser(true);
+
+    CefShutdown();
+}
+
 void WebGUIModule::internalInitialize() {
     OsEng.registerModuleCallback(
             OpenSpaceEngine::CallbackOption::Initialize,
@@ -90,6 +97,8 @@ void WebGUIModule::internalInitialize() {
 void WebGUIModule::initialize() {
     initializeCallbacks();
     loadLocalPath("${MODULE_WEBGUI}/web/transparent_test.html");
+//    loadLocalPath("${MODULE_WEBGUI}/ext/cef/cef_binary_3.3029.1617.gaf831b6_windows64/tests/shared/resources/osr_test.html");
+//    load("http://html5demos.com/");
     WindowWrapper& wrapper = OsEng.windowWrapper();
     reshape(wrapper);
 }
@@ -100,9 +109,6 @@ void WebGUIModule::attachDebugSettings(CefSettings &settings) {
 }
 
 void WebGUIModule::deinitialize() {
-    // TODO(klas): This is causing a crash during shutdown
-    browser->GetHost()->CloseBrowser(false);
-    CefShutdown();
 }
 
 void WebGUIModule::reshape(WindowWrapper& wrapper) {

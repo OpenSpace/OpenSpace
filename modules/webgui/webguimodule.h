@@ -51,7 +51,7 @@ namespace openspace {
 class WebGUIModule : public OpenSpaceModule {
 public:
     WebGUIModule();
-    virtual ~WebGUIModule() = default;
+    ~WebGUIModule();
 
 	void load(const std::string&);
 	bool loadLocalPath(std::string);
