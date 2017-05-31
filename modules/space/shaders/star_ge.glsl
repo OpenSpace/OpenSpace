@@ -39,16 +39,16 @@ layout(triangle_strip, max_vertices = 4) out;
 in vec4 psc_position[];
 in vec3 vs_brightness[];
 in vec3 vs_velocity[];
+in vec4 vs_gPosition[];
 in float vs_speed[];
 in vec4 cam_position[];
                
 out vec4 vs_position;
-out vec4 vs_gPosition;               
+out vec4 ge_gPosition;               
 out vec3 ge_brightness;
 out vec3 ge_velocity;
 out float ge_speed;
 out vec2 texCoord;
-out float billboardSize;
 
 uniform mat4 projection;
 
@@ -91,7 +91,7 @@ void main() {
         gl_Position = projPos[i];
         // gl_Position = z_normalization(projPos[i]);
         texCoord    = corners[i];
-        billboardSize = sizeInPixels;
+        ge_gPosition = vs_gPosition[0];
       EmitVertex();
     }
     EndPrimitive();
