@@ -38,29 +38,9 @@ uniform vec3 camerasVectors[20];
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
-//uniform vec4 cameraCenter;
-//uniform vec4 cameraAxis;
-//uniform vec4 cameraHorizontal;
-//uniform vec4 cameraVector;
-
-//uniform vec4 cameraCenter2;
-//uniform vec4 cameraAxis2;
-//uniform vec4 cameraHorizontal2;
-//uniform vec4 cameraVector2;
-
-//uniform vec4 cameraCenter3;
-//uniform vec4 cameraAxis3;
-//uniform vec4 cameraHorizontal3;
-//uniform vec4 cameraVector3;
-
 uniform int size;
 
-
-uniform vec3 cameraDirectionWorldSpace;
-
 uniform float _magnification;
-
-uniform bool useUVCoord;
 
 // Outputs
 out vec3 vs_normalViewSpace;
@@ -72,7 +52,6 @@ out vec2 vs_stDone[20];
 out int vs_size;
 out int textureIndex;
 out vec2 vs_st;
-out vec2 textureIndexDone[20]
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
@@ -80,19 +59,23 @@ void main () {
   int colsize = 1024;
   vec2 textureSize = vec2(colsize,colsize);
   int nrOfIterations = size;
-  int counter = 0;
+  vec2 center = vec2(0.5,0.5);
+  float maxDist = 100000000;
+  vec2 bestMatch;
+  int bestIndex;
+
   for (int i = 0; i < nrOfIterations; i++) {
     vec4 pointToCamera = in_position - vec4(camerasCenters[i], 1);
 
-    double floor = dot(pointToCamera, vec4(camerasAxes[i], 1));
+    double floor = dot(pointToCamera, vec4(camerasAxes[i], 0));
 
     if (floor < 0) {
-      //This means that the point is on the wrong side
-      //of the camera (behind)
+      // This means that the point is behind the camera/imageplane
       continue;
     }
 
     double xRoof = dot(pointToCamera, vec4(camerasHorizontals[i], 1));
+
 
     double yRoof = dot(pointToCamera, vec4(camerasVectors[i], 1));
 
@@ -101,22 +84,16 @@ void main () {
 
     vec2 tempUV = vec2((1.0 / textureSize.x) * x, 1.0 - (1.0 / textureSize.y) * y);
 
-    if (tempUV.s > 0 && tempUV.t > 0 && tempUV.s < 1 && tempUV.t < 1) {
-      vs_stDone[counter] = tempUV;
-      textureIndexDone[counter] = vec2(i, 1);
-
-      vs_st = tempUV;
-      counter++;
-      textureIndex = i;
-      i = nrOfIterations;
+    vec2 tempp = tempUV - center;
+    float dist = length(tempp);
+    if (dist < maxDist) {
+      maxDist = dist;
+      bestIndex = i;
     }
+    vs_stDone[i] = tempUV;
+    textureIndex = i;
   }
-
-  /*for (int kalle = 0; kalle < 20; kalle++) {
-    textureIndexDone[kalle] = vec2(1,0);
-  }*/
-
-  vs_size = counter;
+  textureIndex = bestIndex;
 
   vec4 position = in_position;
   position.z = position.z - 0.1;

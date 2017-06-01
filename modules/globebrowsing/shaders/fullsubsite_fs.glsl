@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 // Uniforms
 uniform float transparency;
 uniform float fading;
@@ -30,10 +29,6 @@ uniform bool performShading = true;
 uniform bool useMastCamColor = false;
 
 uniform vec3 directionToSunViewSpace;
-
-uniform sampler2D texture1;
-uniform sampler2D texture2;
-uniform sampler2D texture3;
 
 uniform sampler2DArray roverTerrainTextures;
 
@@ -48,33 +43,18 @@ in vec4 vs_color;
 flat in int textureIndex;
 
 in vec2 vs_stDone[20];
-in vec2 textureIndexDone[20];
-flat in int vs_size;
+
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
 Fragment getFragment() {
+  int temporary2 = textureIndex;
 
-  float alpha = 1;
-  vec4 diffuseAl;
-  vec4 prevTexture = vec4(1,0,0,1);
-  int size = vs_size;
-  int counter = 0;
-
-  /*for (int i = 0; i < vs_size; ++i) {
-    int temporary = int(textureIndexDone[i].x);
-    vec4 textureSample = texture(roverTerrainTextures, vec3(vs_stDone[i], temporary));
-      diffuseAl = mix(prevTexture, textureSample, alpha);
-      prevTexture = diffuseAl;
-  }*/
-
-  vec4 textureSample = texture(roverTerrainTextures, vec3(vs_st, textureIndex));
-  prevTexture = vec4(textureSample.rgb, 1.0);
-
+  vec4 prevTexture3 = texture(roverTerrainTextures, vec3(vs_stDone[textureIndex], temporary2));
 
   Fragment frag2;
-  frag2.color = prevTexture;
+  frag2.color = prevTexture3;
   frag2.depth = vs_positionScreenSpace.w;
 
   return frag2;
