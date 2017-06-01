@@ -157,10 +157,13 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
         auto* solarImagery = static_cast<RenderableSolarImagery*>(
               _solarImageryDependencies[i]->renderable());
 
+        bool isCoronaGraph = solarImagery->_currentSolarImageData.im->isCoronaGraph;
+
         const SpacecraftCameraPlane& plane = solarImagery->cameraPlane();
         const glm::dvec3 planePos = plane.worldPosition();
         const glm::dmat4 planeRot = plane.worldRotation();
 
+        _shader->setUniform("isCoronaGraph[" + std::to_string(i) + "]", isCoronaGraph);
         _shader->setUniform("magicPlaneFactor[" + std::to_string(i) + "]", solarImagery->_magicPlaneFactor);
        // _shader->setUniform("magicPlaneOffset[" + std::to_string(i) + "]", solarImagery->_magicPlaneOffset);
 
@@ -209,8 +212,6 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
     _magnetogramTexture->bind();
     _shader->setUniform("magnetogram", imageUnit);
 
-    //  int numPlanes = 1;
-    // LDEBUG("NUM PLANES " << numPlanes);
     _shader->setUniform("numSpacecraftCameraPlanes", numPlanes);
 
     _sphere->render();;

@@ -51,6 +51,7 @@ struct ImageMetadata {
     int fullResolution;
     float scale;
     glm::vec2 centerPixel;
+    bool isCoronaGraph;
 };
 
 // struct ImageMetadata {

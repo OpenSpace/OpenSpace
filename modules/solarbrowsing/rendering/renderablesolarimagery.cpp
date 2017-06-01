@@ -308,6 +308,7 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
 
             _currentScale = _solarImageData->im->scale;
             _currentCenterPixel = _solarImageData->im->centerPixel;
+            _currentSolarImageData = *_solarImageData;
 
             auto t1 = Clock::now();
             std::memcpy(_pboBufferData, _solarImageData->data, _imageSize * _imageSize * sizeof(unsigned char));

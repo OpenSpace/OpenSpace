@@ -44,6 +44,7 @@ uniform float imageSize[MAX_SPACECRAFT_OBSERVATORY];
 uniform dvec2 magicPlaneOffset[MAX_SPACECRAFT_OBSERVATORY];
 uniform float magicPlaneFactor[MAX_SPACECRAFT_OBSERVATORY];
 
+uniform bool isCoronaGraph[MAX_SPACECRAFT_OBSERVATORY];
 //uniform float scale[MAX_SPACECRAFT_OBSERVATORY];
 uniform vec2 centerPixel[MAX_SPACECRAFT_OBSERVATORY];
 
@@ -67,6 +68,11 @@ Fragment getFragment() {
     bool renderMagnetoGram = true;
 
     for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
+
+        if (isCoronaGraph[i]) {
+            continue;
+        }
+
         if (planePositionSpacecraft[i].z < vUv[i].z) {
             vec2 uv = vUv[i].xy;
             uv /= ( (HALF_SUN_RADIUS / magicPlaneFactor[i]) * 2);

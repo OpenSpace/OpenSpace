@@ -29,6 +29,7 @@ uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelTransform;
 //uniform dmat4 sunToSpacecraftReferenceFrame[6];
 //uniform int numSpacecraftCameraPlanes;
+uniform bool isCoronaGraph[MAX_SPACECRAFT_OBSERVATORY];
 uniform dmat4 sunToSpacecraftReferenceFrame[MAX_SPACECRAFT_OBSERVATORY];
 uniform int numSpacecraftCameraPlanes;
 
@@ -47,6 +48,7 @@ void main() {
     vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
 
     for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
+        if (isCoronaGraph[i]) continue;
         vUv[i] = vec3(sunToSpacecraftReferenceFrame[i] * dvec4(position)).xyz;
     }
     //vUv= vec3(sunToSpacecraftReferenceFrame * dvec4(position)).xyz;

@@ -32,6 +32,7 @@
 #include <ghoul/filesystem/filesystem>
 #include <modules/solarbrowsing/util/simplej2kcodec.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/timemanager.h>
 #include <string>
 #include <chrono>
 
@@ -145,7 +146,7 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
         LERROR("Error in metadata " << filename);
     }
 
-    const json value = data["TELESCOP"];
+    json value = data["TELESCOP"];
     if (value.is_null() && !value.is_string()) {
         LERROR("Metadata did not hold information about type of spacecraft");
         return im;
@@ -155,21 +156,38 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
     // TODO: value might not exist
 
     //int res = data["NAXIS1"];
-    std::string sFullResolution = data["NAXIS1"];
+    value = data["NAXIS1"];
+    if (value.is_null()) {
+        LERROR("Metadata did not hold information about resolution");
+    }
+    std::string sFullResolution = value;
     im.fullResolution = std::stoi(sFullResolution);
-
     // Special case of sdo - RSUN is given in pixels
     // For SOHO the radius of the sun is not specified - we instead use platescl
     if (im.spacecraftType == "SOHO") {
         std::string sScale = data["PLATESCL"];
         float plateScale = stof(sScale);
         im.scale = 1.0 / plateScale;
+        im.isCoronaGraph = true;
     } else {
         float sunRadiusPixels = 0.f;
         // SDO has RSUN specified in pixels
         if (im.spacecraftType == "SDO") {
-            std::string sSunRadiusPixels = data["RSUN"];
-            sunRadiusPixels = stof(sSunRadiusPixels);
+            value = data["RSUN_OBS"];
+            if (value.is_null()) {
+                LERROR("SDO Metadata: RSUN_OBS missing!");
+            }
+            std::string sSunRadiusArcsec = value;
+            value = data["CDELT1"];
+            if (value.is_null()) {
+                LERROR("SDO Metadata: CDELT1 missing!");
+            }
+            std::string sCdelt1 = value;
+            const float cdelt1 = stof(sCdelt1);
+            const float sunRadiusArcsec = stof(sSunRadiusArcsec);
+            sunRadiusPixels = sunRadiusArcsec / cdelt1;
+            //sunRadiusPixels = stof(sSunRadiusPixels);
+            im.isCoronaGraph = false;
         }
         // STEREO has RSUN specified in arcsecs - need to divide by factor
         else {
@@ -178,13 +196,26 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
             std::string sSunRadiusArcsec = data["RSUN"];
             const float sunRadiusArcsec = stof(sSunRadiusArcsec);
             sunRadiusPixels = sunRadiusArcsec / cdelt1;
+
+            value = data["DETECTOR"];
+            if (value.is_null()) {
+                LERROR("No observer specified in Stereo");
+            }
+
+            std::string sObserver = value;
+            if (sObserver == "COR1" || sObserver == "COR2") {
+                im.isCoronaGraph = true;
+            } else {
+                im.isCoronaGraph = false;
+            }
+
         }
 
         float scale = sunRadiusPixels / (im.fullResolution / 2.f); //* SUN_RADIUS;
         im.scale = scale;
     }
 
-    LDEBUG("scale " << im.scale);
+    //LDEBUG("scale " << im.scale);
 
     //float centerpixelX = data["CRPIX1"];
     //float centerpixelY = data["CRPIX2"];
@@ -273,7 +304,8 @@ void SpacecraftImageryManager::loadImageMetadata(
                         const ImageMetadata im = parseMetadata(currentFile);
                         std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
                         TimedependentState<ImageMetadata> timeState(
-                              std::move(data), /*OsEng.timeManager().time().convertTime(time)*/2123132, seqPath);
+                              std::move(data),
+                              OsEng.timeManager().time().convertTime(time), seqPath);
                         _imageMetadataMap[instrumentName].addState(std::move(timeState));
                     }
                 }

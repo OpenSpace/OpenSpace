@@ -76,6 +76,7 @@ public:
 
     float _currentScale;
     glm::vec2 _currentCenterPixel;
+    SolarImageData _currentSolarImageData;
 
 private:
     properties::BoolProperty _asyncUploadPBO;
