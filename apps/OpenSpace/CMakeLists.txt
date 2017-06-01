@@ -231,7 +231,21 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
 		# Copy binary and resource files to the target output directory.
 		copy_files("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
 		copy_files("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
+
+
 	endif (OS_WINDOWS)
+
+    set(NPM_COMMAND "npm" CACHE STRING "Location of NPM executable unless in PATH.")
+    # copy webgui source
+    add_custom_command(
+            TARGET OpenSpace POST_BUILD
+            COMMAND ${NPM_COMMAND} install
+            COMMAND ${NPM_COMMAND} run b uild
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${WEBGUI_MODULE_PATH}/web/dist "$<TARGET_FILE_DIR:${CEF_TARGET}>/gui"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${WEBGUI_MODULE_PATH}/web/dist/static "$<TARGET_FILE_DIR:${CEF_TARGET}>/gui/static"
+            WORKING_DIRECTORY ${WEBGUI_MODULE_PATH}/web
+            VERBATIM
+    )
 elseif (OPENSPACE_MODULE_WEBGUI)
     message(WARNING "WebGUI configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()
