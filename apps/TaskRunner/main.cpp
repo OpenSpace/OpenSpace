@@ -31,6 +31,7 @@
 #include <ghoul/io/texture/texturereaderdevil.h>
 #include <ghoul/io/texture/texturereaderfreeimage.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/filesystem/directory.h>
 #include <ghoul/ghoul.h>
 
 #include <openspace/scripting/scriptengine.h>
@@ -60,6 +61,32 @@ void initTextureReaders() {
     #ifdef GHOUL_USE_FREEIMAGE
         ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
     #endif // GHOUL_USE_FREEIMAGE
+}
+
+void performTasks(const std::string& path) {
+    using namespace openspace;
+
+    TaskLoader taskLoader;
+    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(path);
+
+    size_t nTasks = tasks.size();
+    if (nTasks == 1) {
+        LINFO("Task queue has 1 item");
+    }
+    else {
+        LINFO("Task queue has " << tasks.size() << " items");
+    }
+
+    for (size_t i = 0; i < tasks.size(); i++) {
+        Task& task = *tasks[i].get();
+        LINFO("Performing task " << (i + 1) << " out of " << tasks.size() << ": " << task.description());
+        ProgressBar progressBar(100);
+        auto onProgress = [&progressBar](float progress) {
+            progressBar.print(progress * 100);
+        };
+        task.perform(onProgress);
+    }
+    std::cout << "Done performing tasks." << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -98,34 +125,22 @@ int main(int argc, char** argv) {
 
     ModuleEngine moduleEngine;
     moduleEngine.initialize();
-
-    std::string tasksPath;
-    configuration.getValue(ConfigurationManager::KeyConfigTask, tasksPath);
-
     LINFO("Initialization done.");
 
-    TaskLoader taskLoader;
-    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(tasksPath);
+    std::string tasksRoot;
+    if (configuration.getValue(ConfigurationManager::KeyConfigTasksRoot, tasksRoot)) {
+        LINFO("Task root: " << tasksRoot);
+        FileSys.setCurrentDirectory(ghoul::filesystem::Directory(absPath(tasksRoot)));
+    }
     
-    size_t nTasks = tasks.size();
-    if (nTasks == 1) {
-        LINFO("Task queue has 1 item");
-    } else {
-        LINFO("Task queue has " << tasks.size() << " items");
+    std::string tasksPath;
+    while (true) {
+        std::cout << "TASK >";
+        std::cin >> tasksPath;
+        performTasks(tasksPath);
     }
 
-    for (size_t i = 0; i < tasks.size(); i++) {
-        Task& task = *tasks[i].get();
-        LINFO("Performing task " << (i+1) << " out of " << tasks.size() << ": " << task.description());
-        ProgressBar progressBar(100);
-        auto onProgress = [&progressBar](float progress) {
-            progressBar.print(progress * 100);
-        };
-        task.perform(onProgress);
-    }
 
-    std::cout << "Done performing tasks." << std::endl;
 
-    std::cin.get();
     return 0;
 };
