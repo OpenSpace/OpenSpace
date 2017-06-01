@@ -249,6 +249,9 @@ void SpacecraftCameraPlane::render(
                                      * glm::mat4(viewMatrix * spacecraftModelTransform));
     _frustumShader->setUniform("modelViewProjectionTransformPlane",
                                projectionMatrix * glm::mat4(modelViewTransform));
+
+    _frustumShader->setUniform("scale", currentScale);
+
     glBindVertexArray(_frustum);
 
     if (!disableBorder && !disableFrustum) {
