@@ -67,7 +67,7 @@ void performTasks(const std::string& path) {
     using namespace openspace;
 
     TaskLoader taskLoader;
-    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(path);
+    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(path + ".task");
 
     size_t nTasks = tasks.size();
     if (nTasks == 1) {

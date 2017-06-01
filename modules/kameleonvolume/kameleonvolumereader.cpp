@@ -42,13 +42,14 @@ KameleonVolumeReader::KameleonVolumeReader(const std::string& path)
     : _path(path)
 {
     if (!FileSys.fileExists(path)) {
-        LERROR(_path << "does not exist");
-        return;
+        LERROR(_path << " does not exist");
+        throw ghoul::FileNotFoundError(_path);
     }
 
     long status = _kameleon.open(_path);
     if (status != ccmc::FileReader::OK) {
-        LERROR("Failed to open file " << _path << " with kameleon");
+        LERROR("Failed to open file " << _path << " with Kameleon");
+        throw ghoul::RuntimeError("Failed to open file: " + _path + " with Kameleon");
         return;
     }
 
