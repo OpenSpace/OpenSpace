@@ -383,12 +383,12 @@ vec4 calculateWater(
 
 	vec3 specularTotal = specularColor * cosineFactor * specularIntensity * waterColor.a;
 
-    reflectance = 1.0;//waterColor.a;
+    reflectance = waterColor.a;
     
 	//return blendOver(currentColor, waterColor);
-	return currentColor + vec4(specularTotal, 1);
+	//return currentColor + vec4(specularTotal, 1);
     
-    //return currentColor;
+    return currentColor;
 }
 
 #endif // TEXTURETILEMAPPING_HGLSL

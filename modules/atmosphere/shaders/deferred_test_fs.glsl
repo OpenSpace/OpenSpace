@@ -42,6 +42,7 @@ uniform sampler3D inscatterTexture;
 uniform sampler2DMS mainPositionTexture;
 uniform sampler2DMS mainNormalReflectanceTexture;
 uniform sampler2DMS mainColorTexture;
+uniform sampler2DMS otherDataTexture;
 
 uniform int nAaSamples;
 
@@ -480,7 +481,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
  */
 vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r,
                  const float mu, const vec3 attenuationXtoX0, const vec4 groundColor, 
-                 const vec4 normalReflectance, const float irradianceFactor)
+                 const vec4 normalReflectance, const float irradianceFactor,
+                 const float waterReflectance)
 {
   vec3 reflectedRadiance = vec3(0.0f);
 
@@ -488,8 +490,8 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   vec3  x0 = x + t * v;
   float r0 = length(x0);
   // Normal of intersection point.
-  vec3  n  = normalReflectance.xyz;
-  vec4 groundReflectance = groundColor * vec4(.35);
+  vec3 n = normalize(normalReflectance.xyz);
+  vec4 groundReflectance = groundColor * vec4(.37);
   //reflectance.w = 1.0;
             
   // L0 is not included in the irradiance texture.
@@ -507,7 +509,8 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     * sunRadiance / M_PI;
     
   // Specular reflection from sun on oceans and rivers  
-  if (normalReflectance.w > 0.0) {
+  //if (normalReflectance.a < 0.0) {
+  if (waterReflectance > 0.1) {
     vec3  h         = normalize(s - v);
     // Fresnell Schlick's approximation
     float fresnel   = 0.02f + 0.98f * pow(1.0f - dot(-v, h), 5.0f);
@@ -515,7 +518,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     float waterBrdf = fresnel * pow(max(dot(h, n), 0.0f), 150.0f);
     // Adding Fresnell and Water BRDFs approximation to the final surface color
     // (After adding the sunRadiance and the attenuation of the Sun through atmosphere)
-    groundRadiance += normalReflectance.w * max(waterBrdf, 0.0) * transmittanceL0 * sunRadiance;
+    groundRadiance += waterReflectance * max(waterBrdf, 0.0) * transmittanceL0 * sunRadiance;
   }
   
   // Finally, we attenuate the surface Radiance from the the point x0 to the camera location.
@@ -551,32 +554,33 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
 }
 
 void main() {
-    //float geoDepth = 0.0;
+    //float mainDepth = 0.0;
     vec4 meanColor = vec4(0.0);
     vec4 meanNormal = vec4(0.0);
     vec4 meanPosition = vec4(0.0);
+    vec4 meanOtherData = vec4(0.0);
     //vec4 positionArray[nAaSamples];
-    vec4 positionArray[8];
+    //vec4 positionArray[8];
     float maxAlpha = -1.0;
     for (int i = 0; i < nAaSamples; i++) {
       meanNormal   += texelFetch(mainNormalReflectanceTexture, ivec2(gl_FragCoord), i);
       vec4 color = texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
       if ( color.a > maxAlpha )
         maxAlpha = color.a;
-      meanColor += color;
-      meanPosition += texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
-      positionArray[i] = texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
-      //     geoDepth += denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), i).x);
+      meanColor       += color;
+      meanPosition    += texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
+      meanOtherData   += texelFetch(otherDataTexture, ivec2(gl_FragCoord), i);
+      //positionArray[i] = texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
+      //mainDepth += denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), i).x);
     }
-    meanColor    /= nAaSamples;
-    meanNormal   /= nAaSamples;
-    meanPosition /= nAaSamples;
-    // geoDepth /= nAaSamples;
+    meanColor     /= nAaSamples;
+    meanNormal    /= nAaSamples;
+    meanPosition  /= nAaSamples;
+    meanOtherData /= nAaSamples;
+    //mainDepth /= nAaSamples;
 
     meanColor.a = maxAlpha;
-    
-    meanNormal.xyz = normalize(meanNormal.xyz);
-    
+
     // Ray in object space
     dRay ray;
     dvec4 planetPositionObjectCoords = dvec4(0.0);
@@ -649,7 +653,8 @@ void main() {
                                                   maxLength, pixelDepth,
                                                   meanColor); 
           vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation,
-                                            meanColor, meanNormal, irradianceFactor);
+                                            meanColor, meanNormal, irradianceFactor, 
+                                            meanOtherData.r);
           vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
           
           vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
@@ -690,8 +695,8 @@ void main() {
       // intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay,  Rt+EPSILON,
       //                                       insideATM, offset, maxLength );
     
-      intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay,  Rt-10*EPSILON,
-                                            insideATM, offset, maxLength );
+      intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, transfRay,  
+                                             Rt-10*EPSILON, insideATM, offset, maxLength );
 
       if ( intersectATM ) {
         // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
@@ -766,7 +771,8 @@ void main() {
                                                   maxLength, pixelDepth,
                                                   meanColor); 
           vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation,
-                                            meanColor, meanNormal, irradianceFactor);
+                                            meanColor, meanNormal, irradianceFactor, 
+                                            meanOtherData.r);
           vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
           
           // Final Color of ATM plus terrain:

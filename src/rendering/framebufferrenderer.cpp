@@ -289,7 +289,7 @@ void FramebufferRenderer::updateResolution() {
     glTexImage2DMultisample(
         GL_TEXTURE_2D_MULTISAMPLE,
         _nAaSamples,
-        GL_RGBA,
+        GL_RGBA32F,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
         true);
@@ -627,6 +627,11 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
             deferredcastProgram->setUniform("mainColorTexture", mainDColorTextureUnit);
 
+            ghoul::opengl::TextureUnit otherDataTextureUnit;
+            otherDataTextureUnit.activate();
+            glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDColorTexture);
+            deferredcastProgram->setUniform("otherDataTexture", otherDataTextureUnit);
+
             ghoul::opengl::TextureUnit mainPositionTextureUnit;
             mainPositionTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
@@ -650,6 +655,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
                                        *deferredcastProgram);
             
             glDisable(GL_DEPTH_TEST);
+            //glDisable(GL_BLEND);
             glDepthMask(false);
 
             glBindVertexArray(_screenQuad);
@@ -658,6 +664,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
             glDepthMask(true);
             glEnable(GL_DEPTH_TEST);
+            //glEnable(GL_BLEND);
             
             deferredcaster->postRaycast(deferredcasterTask.renderData,
                 _deferredcastData[deferredcaster],
