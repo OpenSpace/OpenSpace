@@ -72,11 +72,10 @@ class TouchInteraction : public properties::PropertyOwner
 			std::vector<glm::dvec3> selectedPoints;
 			std::vector<glm::dvec2> screenPoints;
 			int nDOF;
-			glm::dvec2(*castToNDC)(glm::dvec3, Camera&, SceneGraphNode*, double);
+			glm::dvec2(*castToNDC)(glm::dvec3, Camera&, SceneGraphNode*);
 			double(*distToMinimize)(double* par, int x, void* fdata, LMstat* lmstat);
 			Camera* camera;
 			SceneGraphNode* node;
-			double aspectRatio;
 			LMstat stats;
 			bool onlyPan; // temp
 			double objectScreenRadius;
@@ -97,7 +96,7 @@ class TouchInteraction : public properties::PropertyOwner
 
 	private:
 		bool guiMode(const std::vector<TUIO::TuioCursor>& list);
-		void directControl(const std::vector<TUIO::TuioCursor>& list);
+		void directControl(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void findSelectedNode(const std::vector<TUIO::TuioCursor>& list);
 		int interpretInteraction(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void computeVelocities(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
@@ -138,7 +137,6 @@ class TouchInteraction : public properties::PropertyOwner
 		double _slerpdT;
 		double _timeSlack;
 		int _numOfTests;
-		int _numOfTries;
 		TUIO::TuioTime _time;
 		bool _directTouchMode;
 		bool _tap;

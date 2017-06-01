@@ -56,11 +56,11 @@ namespace {
 using namespace TUIO;
 namespace openspace {
 
-TouchInteraction::TouchInteraction()
-	: properties::PropertyOwner("TouchInteraction"),
-	_origin("origin", "Origin", ""),
-	_unitTest("Click to take a unit test", "Take a unit test saving the LM data into file", false),
-	_onlyPan("Toggle Panning Mode", "Toggle pan interaction on direct-manipulation three finger case (FOR FEEDBACK)", true), // temp
+	TouchInteraction::TouchInteraction()
+		: properties::PropertyOwner("TouchInteraction"),
+		_origin("origin", "Origin", ""),
+		_unitTest("Click to take a unit test", "Take a unit test saving the LM data into file", false),
+		_onlyPan("Toggle Panning Mode", "Toggle pan interaction on direct-manipulation three finger case (FOR FEEDBACK)", false), // temp
 	_touchActive("TouchEvents", "True if we have a touch event", false, properties::Property::Visibility::Hidden),
 	_reset("Default Values", "Reset all properties to default", false),
 	_maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000),
@@ -68,7 +68,7 @@ TouchInteraction::TouchInteraction()
 	_touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f),
 	_tapZoomFactor("Tap zoom factor","Scaling distance travelled on tap", 0.1, 0.0, 0.5),
 	_nodeRadiusThreshold("Activate direct-manipulation", "Radius a planet has to have to activate direct-manipulation", 0.2f, 0.0f, 1.0f),
-	_rollAngleThreshold("Interpret roll", "Threshold for min angle for roll interpret", 0.019f, 0.0f, 0.05f),
+	_rollAngleThreshold("Interpret roll", "Threshold for min angle for roll interpret", 0.025f, 0.0f, 0.05f),
 	_orbitSpeedThreshold("Activate orbit spinning", "Threshold to activate orbit spinning in direct-manipulation", 0.005f, 0.0f, 0.01f),
 	_panSpeedThreshold("Activate pan spinning", "Threshold to activate pan spinning in direct-manipulation", 0.0005f, 0.0, 0.01),
 	_spinSensitivity("Sensitivity of Spinning", "Sensitivity of spinning in direct-manipulation", 1.0f, 0, 2),
@@ -82,7 +82,7 @@ TouchInteraction::TouchInteraction()
 	_sensitivity{glm::dvec2(0.0808181818181818, 0.0454545454545455), 4.0, 2.75, glm::dvec2(0.0808181818181818, 0.0454545454545455) },
 	_centroid{ glm::dvec3(0.0) },
 	_projectionScaleFactor{ 1.000004 }, // calculated with two vectors with known diff in length, then projDiffLength/diffLength.
-	_currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 }, _numOfTries{ 0 }, _timeSlack{ 0.0 },
+	_currentRadius{ 1.0 }, _slerpdT{ 1000 }, _numOfTests{ 0 }, _timeSlack{ 0.0 },
 	_directTouchMode{ false }, _tap{ false }, _doubleTap{ false }, _lmSuccess{ true }, _guiON{ false }
 {
 	addProperty(_touchActive); // how do i hide this?
@@ -132,7 +132,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 	
 	if (!guiMode(list)) {
 		if (_directTouchMode && _selected.size() > 0 && list.size() == _selected.size()) {
-			directControl(list);
+			directControl(list, lastProcessed);
 		}
 		if (_lmSuccess) {
 			findSelectedNode(list);
@@ -151,6 +151,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TuioCursor>& list,
 	}
 }
 
+// Activates/Deactivates gui input mode (if active it voids all other interactions)
 bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
 	WindowWrapper& wrapper = OsEng.windowWrapper();
 	glm::ivec2 res = wrapper.currentWindowSize();
@@ -171,7 +172,7 @@ bool TouchInteraction::guiMode(const std::vector<TuioCursor>& list) {
 }
 
 // Sets _vel to update _camera according to direct-manipulation (L2 error)
-void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
+void TouchInteraction::directControl(const std::vector<TuioCursor>& list, const std::vector<Point>& lastProcessed) {
 	// Reset old velocities upon new interaction
 	_vel.orbit = glm::dvec2(0.0, 0.0);
 	_vel.zoom = 0.0;
@@ -207,13 +208,13 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		dquat localCamRot = inverse(globalCamRot) * ptr->camera->rotationQuaternion();
 
 		{ // Roll
-			dquat camRollRot = angleAxis(q[3], dvec3(0.0, 0.0, 1.0));
-			localCamRot = localCamRot * camRollRot;
+			dquat rollRot = angleAxis(q[3], dvec3(0.0, 0.0, 1.0));
+			localCamRot = localCamRot * rollRot;
 		}
 		{ // Panning (local rotation)
 			dvec3 eulerAngles(q[5], q[4], 0);
-			dquat rotationDiff = dquat(eulerAngles);
-			localCamRot = localCamRot * rotationDiff;
+			dquat panRot = dquat(eulerAngles);
+			localCamRot = localCamRot * panRot;
 		}
 		{ // Orbit (global rotation)
 			dvec3 eulerAngles(q[1], q[0], 0);
@@ -235,14 +236,13 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		{ // Zooming
 			camPos += directionToCenter * q[2];
 		}
-
 		// Update the camera state
 		Camera cam = *(ptr->camera);
 		cam.setPositionVec3(camPos);
 		cam.setRotation(globalCamRot * localCamRot);
 
 		// we now have a new position and orientation of camera, project surfacePoint to the new screen to get distance to minimize
-		glm::dvec2 newScreenPoint = ptr->castToNDC(ptr->selectedPoints.at(x), cam, ptr->node, ptr->aspectRatio);
+		glm::dvec2 newScreenPoint = ptr->castToNDC(ptr->selectedPoints.at(x), cam, ptr->node);
 		lmstat->pos.push_back(newScreenPoint);
 		return glm::length(ptr->screenPoints.at(x) - newScreenPoint);
 	};
@@ -252,34 +252,49 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		double h, hZoom, lastG, f1, f0 = ptr->distToMinimize(par, x, fdata, lmstat);
 		double scale = log10(ptr->node->boundingSphere()); // scale value to find minimum step size h, dependant on planet size
 		std::vector<double> dPar(ptr->nDOF, 0.0);
+		dPar.assign(par, par + ptr->nDOF);
+		/*
+		Paper:
+		p = h(Vx)
+			* p = position in screen space 
+			* x = position in world space
+			* V = projection * worldToCam
+			* h = redefine to 2D = [x/w,y/w]
 
+		Mine:
+		p = h * projection * worldToCam * x
+		worldToCam contains the parameter q
+
+		h'(x) = [1/w,	0
+				0,		1/w
+				0,		0
+				-x/w2, -y/w2]
+		J = h'(projection * worldToCam * x) * d(Vx)/d(q)
+		p = Jq - linear function of q even though its nonlinear
+		*/
 		for (int i = 0; i < ptr->nDOF; ++i) {
-			/*h = (i == 2) ? hZoom : hAngle; // the 'zoom'-DOF is so big a smaller step creates NAN
-			par[i] += h;
-			f1 = ptr->distToMinimize(par, x, fdata, lmstat);
-			par[i] -= h;*/
-			dPar.assign(par, par + ptr->nDOF);
 			h = 1e-8;
 			lastG = 1;
 			dPar.at(i) += h;
 			f1 = ptr->distToMinimize(dPar.data(), x, fdata, lmstat);
+			dPar.at(i) = par[i];
 			for (int j = 0; j < 100; ++j) { // iterative process to find the minimum step h that gives a good gradient
-				dPar.assign(par, par + ptr->nDOF);
 				if ((f1 - f0) != 0 && lastG == 0) { // found minimum step size h
 					// scale up to get a good initial guess value
 					h *= scale * scale * scale;
-					
+
 					// find optimal h
 					if (i == 2) {
-						h = std::max(std::min(std::abs(dPar.at(i)) / 1e8, 1.0), h); // choose zoom step size dependant on incoming zoom parameter
+						h = std::max(std::abs(dPar.at(i)) / 1e4, h); // choose zoom step size dependant on incoming zoom parameter
 					}
 					else if (ptr->nDOF == 2) {
-						h = std::max(std::abs(dPar.at(i)) * 0.001, h); // make sure the angle step size isnt smaller than a fraction of the incoming parameter for 1 finger
+						h = std::max(std::abs(dPar.at(i)) * 0.01, h); // make sure the angle step size isnt smaller than a fraction of the incoming parameter for 1 finger
 					}
 
 					// calculate f1 with good h for finite difference
 					dPar.at(i) += h;
 					f1 = ptr->distToMinimize(dPar.data(), x, fdata, lmstat);
+					dPar.at(i) = par[i];
 					break;
 				}
 				else if ((f1 - f0) != 0 && lastG != 0) { // h too big
@@ -291,8 +306,10 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 				lastG = f1 - f0;
 				dPar.at(i) += h;
 				f1 = ptr->distToMinimize(dPar.data(), x, fdata, lmstat);
+				dPar.at(i) = par[i];
 			}
 			g[i] = (f1 - f0) / h;
+			//std::cout << "h(" << i << "): " << h << ", g(" << i << "): " << g[i] << "\n";
 		}
 		if (ptr->nDOF == 2) { // normalize on 1 finger case to allow for horizontal/vertical movement
 			for (int i = 0; i < 2; ++i) {
@@ -301,33 +318,35 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		}
 		else if (ptr->nDOF == 6) {
 			for (int i = 0; i < ptr->nDOF; ++i) { // lock to only pan and zoom on 3 finger case
-				if (ptr->onlyPan) { // temp for feedback
-					g[i] = (i == 2) ? g[i] : g[i] / std::abs(g[i]); // no zoom, weird roll sometimes, otherwise only pan
-				}
-				else {
-					// do nothing - fits fingers well, but is difficult to control
-				}	
+				g[i] = (i == 2) ? g[i] : g[i] / std::abs(g[i]); // no zoom, weird roll sometimes, otherwise only pan	
 			}
 		}
 	};
 
-	SceneGraphNode* node = _selected.at(0).node;
-	auto castToNDC = [](glm::dvec3 vec, Camera& camera, SceneGraphNode* node, double aspectRatio) {
-		glm::dvec3 backToScreenSpace = glm::inverse(camera.rotationQuaternion())
-			* glm::normalize(((node->rotationMatrix() * vec) + (node->worldPosition() - camera.positionVec3()) ));
-		backToScreenSpace *= (-3.2596558 / backToScreenSpace.z);
-		backToScreenSpace.x /= aspectRatio;
+	auto castToNDC = [](glm::dvec3 vec, Camera& camera, SceneGraphNode* node) {
+		glm::dvec3 posInCamSpace = glm::inverse(camera.rotationQuaternion())
+			* ((node->rotationMatrix() * vec) + (node->worldPosition() - camera.positionVec3()) );
 
-		return glm::dvec2(backToScreenSpace);
+		glm::dvec4 clipspace = camera.projectionMatrix() * glm::dvec4(posInCamSpace, 1.0);
+		return (glm::dvec2(clipspace) / clipspace.w);
 	};
 
 	const int nFingers = list.size();
 	int nDOF = std::min(nFingers * 2, 6);
-    std::vector<double> par(nDOF, 0.0); // use _lastVel
+    std::vector<double> par(nDOF, 0.0); // use _lastVel, 
+
+	// check if zoom direction has changed
+	/*double distance = std::accumulate(list.begin(), list.end(), 0.0, [&](double d, const TuioCursor& c) {
+		return d + c.getDistance(_centroid.x, _centroid.y);
+	}) / list.size();
+	double lastDistance = std::accumulate(lastProcessed.begin(), lastProcessed.end(), 0.0f, [&](float d, const Point& p) {
+		return d + p.second.getDistance(_centroid.x, _centroid.y);
+	}) / lastProcessed.size();*/
+
 	par.at(0) = _lastVel.orbit.x;
 	par.at(1) = _lastVel.orbit.y;
 	if (nDOF > 2) {
-		par.at(2) = _lastVel.zoom;
+		par.at(2) = _lastVel.zoom; //((distance < lastDistance && _lastVel.zoom < 0.0) || (distance > lastDistance && _lastVel.zoom > 0.0)) ? _lastVel.zoom : -_lastVel.zoom;
 		par.at(3) = _lastVel.roll;
 		if (nDOF > 4) {
 			par.at(4) = _lastVel.pan.x;
@@ -343,24 +362,15 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		std::vector<TuioCursor>::const_iterator c = find_if(list.begin(), list.end(), [&sb](const TuioCursor& c) { return c.getSessionID() == sb.id; });
 		screenPoints.push_back(glm::dvec2(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5))); // normalized -1 to 1 coordinates on screen
 	}
-	//glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-	FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, node, 1.88, _lmstat, _onlyPan, _currentRadius };
+	FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, _selected.at(0).node, _lmstat, _onlyPan, _currentRadius };
 	void* dataPtr = reinterpret_cast<void*>(&fData);
 
 	_lmSuccess = levmarq(nDOF, par.data(), nFingers, NULL, distToMinimize, gradient, dataPtr, &_lmstat); // finds best transform values and stores them in par
 
 	// debug
-	/*double hAngle = (1e-2 / node->boundingSphere()) / std::min(_currentRadius, 1000.0),  hZoom = log(node->boundingSphere()) / std::min(_currentRadius, 300.0);
-	double h;
-	for (int i = 0; i < nDOF; ++i) {
-		h = (i == 2) ? hZoom : hAngle;
-		std::cout << "par(" << i << "): " << par[i] << ", " << "h(" << i << "): " << h << "\n";
-	}
-	std::cout << "Radius: " << _currentRadius << "\n";*/
 	//std::cout << "Levmarq success after " << _lmstat.final_it << " iterations\n";
 
 	if (_lmSuccess && !_unitTest) { // if good values were found set new camera state
-		_numOfTries = 0;
 		_vel.orbit = glm::dvec2(par.at(0), par.at(1));
 		if (nDOF > 2) {
 			_vel.zoom = par.at(2);
@@ -379,12 +389,6 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		_vel.roll = 0.0;
 		_vel.pan = glm::dvec2(0.0, 0.0);
 	}
-	else {
-		_numOfTries++;
-		if (_numOfTries > 2) {
-			resetAfterInput();
-		}
-	}
 }
 
 // Traces the touch input into the scene and finds the surface coordinates of touched planets (if occuring)
@@ -400,18 +404,15 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
 			if (node->name() == name)
 				selectableNodes.push_back(node);
 				
-	//glm::dvec2 res = OsEng.windowWrapper().currentWindowResolution();
-    // @COMMENT  ^_^
-	double aspectRatio = 1.88; //res.x/res.y;
 	glm::dquat camToWorldSpace = _camera->rotationQuaternion();
 	glm::dvec3 camPos = _camera->positionVec3();
 	std::vector<SelectedBody> newSelected;
 	for (const TuioCursor& c : list) {
-		double xCo = 2 * (c.getX() - 0.5) * aspectRatio;
+		double xCo = 2 * (c.getX() - 0.5);
 		double yCo = -2 * (c.getY() - 0.5); // normalized -1 to 1 coordinates on screen
-		glm::dvec3 cursorInWorldSpace = camToWorldSpace * glm::dvec3(xCo, yCo, -3.2596558);
+		glm::dvec3 cursorInWorldSpace = camToWorldSpace * 
+			glm::dvec3(glm::inverse(_camera->projectionMatrix()) * glm::dvec4(xCo, yCo, -1.0, 1.0)); // vec3(projectionmatrix * clipspace), divide with w?
 		glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
-
 
 		int id = c.getSessionID();
 		for (SceneGraphNode* node : selectableNodes) {
@@ -446,10 +447,9 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
 	_selected = newSelected;
 
 	//debugging
-	for (auto it : newSelected) {
-		//std::cout << it.node->name() << " hit with cursor " << it.id << ". Surface Coordinates: " << glm::to_string(it.coordinates) << 
-			//", Node at:" << glm::to_string(it.node->worldPosition()) << ", Camera at: " << glm::to_string(_camera->positionVec3()) << "\n";
-	}
+	/*for (auto it : newSelected) {
+		std::cout << it.node->name() << " hit with cursor " << it.id << ". Surface Coordinates: " << glm::to_string(it.coordinates) << "\n";
+	}*/
 }
 
 // Interprets the input gesture to a specific interaction
@@ -702,7 +702,7 @@ void TouchInteraction::unitTest() {
 
 		// call update
 		findSelectedNode(lastFrame);
-		directControl(currFrame);
+		//directControl(currFrame);
 
 		// save lmstats.data into a file and clear it
 		char buffer[32];
@@ -766,7 +766,6 @@ void TouchInteraction::resetAfterInput() {
 	}
 	
 	_lmSuccess = true;
-	_numOfTries = 0;
 	_guiON = OnScreenGUIModule::gui.isEnabled();
 
 	_lastVel.orbit = glm::dvec2(0.0, 0.0);
@@ -778,14 +777,14 @@ void TouchInteraction::resetAfterInput() {
 
 void TouchInteraction::resetToDefault() {
 	_unitTest.set(false);
-	_onlyPan.set(true); // temp
+	_onlyPan.set(false); // temp
 	_reset.set(false);
 	_maxTapTime.set(300);
 	_deceleratesPerSecond.set(240);
 	_touchScreenSize.set(55.0f);
 	_tapZoomFactor.set(0.1f);
 	_nodeRadiusThreshold.set(0.2f);
-	_rollAngleThreshold.set(0.019f);
+	_rollAngleThreshold.set(0.025f);
 	_orbitSpeedThreshold.set(0.038f);
 	_panSpeedThreshold.set(0.004f);
 	_spinSensitivity.set(1.0f);
