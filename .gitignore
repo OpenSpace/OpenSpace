@@ -33,6 +33,10 @@ shaders/ABuffer/constants.hglsl
 log.html
 ScriptLog.txt
 
+*.idea/
+.vs/
+.build-vs/
+
 data/scene/atmosphereearth/textures
 data/scene/debugglobe/textures
 data/scene/earth/textures
