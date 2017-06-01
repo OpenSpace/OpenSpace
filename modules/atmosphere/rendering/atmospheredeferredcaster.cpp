@@ -285,27 +285,28 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     program.setUniform("inscatterTexture", _inScatteringTableTextureUnit); 
 
     // DEBUG:
+    /*
     if (_renderableClass == RenderablePlanet) {
         glm::dvec3 objP = glm::dvec3(renderData.position[0] * pow(10, renderData.position[3]),
             renderData.position[1] * pow(10, renderData.position[3]), renderData.position[2] * pow(10, renderData.position[3]));
         glm::dvec4 cameraP = glm::inverse(_modelTransform) * glm::dvec4(-objP + renderData.camera.positionVec3(), 1.0);
-        /*std::cout << "====== Planet's position in KM: " << glm::to_string( objP/glm::dvec3(1000.0, 1000.0, 1000.0) ) 
+        std::cout << "====== Planet's position in KM: " << glm::to_string( objP/glm::dvec3(1000.0, 1000.0, 1000.0) ) 
             << " =======" << std::endl;
         std::cout << "====== Distance from Planet's ground in KM: " 
             << glm::length(glm::dvec3(cameraP / glm::dvec4(1000.0, 1000.0, 1000.0, 1.0))) - _atmospherePlanetRadius 
             << " =======" << std::endl;
-        std::cout << "====== Camera Position: " << glm::to_string(renderData.camera.positionVec3()) << " =====" << std::endl;        */
+        std::cout << "====== Camera Position: " << glm::to_string(renderData.camera.positionVec3()) << " =====" << std::endl;        
     }
     else if (_renderableClass == RenderableGlobe) {
         glm::dvec3 objP = renderData.modelTransform.translation;
         glm::dvec4 cameraP = glm::inverse(_modelTransform) * glm::dvec4(renderData.camera.positionVec3(), 1);
-        /*std::cout << "====== Planet's position in KM: " << glm::to_string( objP/glm::dvec3(1000.0, 1000.0, 1000.0) ) 
+        std::cout << "====== Planet's position in KM: " << glm::to_string( objP/glm::dvec3(1000.0, 1000.0, 1000.0) ) 
             << " =======" << std::endl;
         std::cout << "====== Distance from Planet's ground in KM: " 
             << glm::length(glm::dvec3(cameraP / glm::dvec4(1000.0, 1000.0, 1000.0, 1.0))) - _atmospherePlanetRadius 
             << " =======" << std::endl;
         std::cout << "====== Camera Position: " << glm::to_string(renderData.camera.positionVec3()) << " =====" << std::endl;
-        std::cout << "--- Ellipsoid Radii: " << glm::to_string(_ellipsoidRadii) << " ----" << std::endl;*/
+        std::cout << "--- Ellipsoid Radii: " << glm::to_string(_ellipsoidRadii) << " ----" << std::endl;
 
         // Testing Transformations:
         //glm::dvec4 tObjCoords = glm::dvec4(0.0); tObjCoords.w = 1.0;
@@ -324,7 +325,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
         //glm::dvec4 tObjCoordsInv = glm::inverse(_modelTransform) * tWorldCoordsInv;
         //std::cout << "==== Obj Coordinates Inv:      " << glm::to_string(tObjCoordsInv) << " ====" << std::endl;
 
-        ///*
+        
         ////glm::dmat4 cameraTranslation = glm::inverse(glm::translate(glm::dmat4(1.0), static_cast<glm::dvec3>(renderData.camera.positionVec3())));
         ////glm::dmat4 sgctViewMatrix = renderData.camera.viewMatrix();
         ////glm::dmat4 camRotationMatrix = glm::mat4_cast(glm::inverse((glm::dquat)renderData.camera.rotationQuaternion()));
@@ -366,7 +367,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
         ////glm::dvec3 tmp7 = glm::dmat3(glm::transpose(objRotation)) * tmp6;
         ////glm::dvec3 tmp8 = glm::dmat3(glm::inverse(objScaling)) * tmp7;
         ////std::cout << "==== Obj Coordinates Inv5:     " << glm::to_string(tmp8) << " ====" << std::endl;
-        //*/
+        
         //// Doing it by parts like in RenderablePlanet:
         //glm::dvec3 cameraPos  = renderData.camera.positionVec3();
         //glm::dmat4 invSGCTEye = glm::inverse(glm::dmat4(renderData.camera.viewMatrix()));
@@ -394,6 +395,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
 
 
     }
+    */
     
 }
 
