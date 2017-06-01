@@ -77,6 +77,7 @@ float performLayerSettings(float currentValue, const LayerSettings settings) {
 
 	newValue = sign(newValue) * pow(abs(newValue), settings.gamma);
 	newValue = newValue * settings.multiplier;
+	newValue = newValue + settings.offset;
 	newValue = newValue * settings.opacity;
 
 	return newValue;
@@ -312,6 +313,7 @@ vec4 calculateGrayScaleOverlay(
 	vec4 colorGrayScale = currentColor;
 	// HSV blending
 	vec3 hsvCurrent = rgb2hsv(currentColor.rgb);
+	vec4 value = vec4(0,0,0,1);
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
@@ -327,8 +329,11 @@ vec4 calculateGrayScaleOverlay(
 		colorSample = performLayerSettings(colorSample, GrayScaleColorOverlays[#{i}].settings);
 
 		colorGrayScale = blendOver(colorGrayScale, colorSample);
+
 		float valueBlending = GrayScaleColorOverlays[#{i}].settings.valueBlending;
-		hsvCurrent.z = colorGrayScale.r * valueBlending + hsvCurrent.b * (1 - valueBlending);
+
+		hsvCurrent.z = colorGrayScale.r * valueBlending + hsvCurrent.z * (1 - valueBlending);
+		colorGrayScale.rgb = vec3(hsvCurrent.z);
 	}
 	#endfor
 
