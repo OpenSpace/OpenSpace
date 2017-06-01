@@ -185,6 +185,10 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
     return *_engine;
 }
 
+bool OpenSpaceEngine::isCreated() {
+    return _engine != nullptr;
+}
+
 void OpenSpaceEngine::create(int argc, char** argv,
                              std::unique_ptr<WindowWrapper> windowWrapper,
                              std::vector<std::string>& sgctArguments, bool& requestClose)
