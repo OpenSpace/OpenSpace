@@ -96,6 +96,7 @@ public:
         properties::FloatProperty mieAsymmetricFactorGP;
         properties::FloatProperty sunIntensityP;
         properties::FloatProperty hdrExpositionP;
+        properties::FloatProperty gammaConstantP;
     };
 
     const AtmosphereProperties& atmosphereProperties() const;
@@ -161,6 +162,7 @@ private:
     float _miePhaseConstant;
     float _sunRadianceIntensity;
     float _hdrConstant;
+    float _gammaConstant;
     glm::vec3 _mieExtinctionCoeff;
     glm::vec3 _rayleighScatteringCoeff;
     glm::vec3 _mieScatteringCoeff;

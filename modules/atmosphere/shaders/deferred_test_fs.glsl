@@ -489,7 +489,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   float r0 = length(x0);
   // Normal of intersection point.
   vec3  n  = normalReflectance.xyz;
-  vec4 groundReflectance = groundColor * vec4(.65);
+  vec4 groundReflectance = groundColor * vec4(.35);
   //reflectance.w = 1.0;
             
   // L0 is not included in the irradiance texture.
@@ -789,8 +789,8 @@ void main() {
           renderTarget = finalRadiance;
         }
       } else {
-        //renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
-        renderTarget = meanColor;
+        renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
+        //renderTarget = meanColor;
       }
     }                 
 }

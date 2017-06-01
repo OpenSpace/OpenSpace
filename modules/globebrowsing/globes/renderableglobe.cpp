@@ -105,7 +105,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             "Mie Scattering/Extinction Proportion Coefficient (%)", 0.9f, 0.01f, 1.0f),
         FloatProperty("mieAsymmetricFactorG", "Mie Asymmetric Factor G", 0.85f, -1.0f, 1.0f),
         FloatProperty("sunIntensity", "Sun Intensity", 50.0f, 0.1f, 1000.0f),
-        FloatProperty("hdrExposition", "HDR", 0.4f, 0.01f, 5.0f)
+        FloatProperty("hdrExposition", "HDR", 0.4f, 0.01f, 5.0f),
+        FloatProperty("gamma", "Gamma Correction", 1.8f, 0.1f, 3.0f )
     })
     , _atmospherePropertyOwner("Atmosphere")
     , _atmosphereRadius(0.f)
@@ -119,6 +120,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _mieScatteringCoeff(glm::vec3(0.f))
     , _sunRadianceIntensity(50.0f)
     , _hdrConstant(0.4f)
+    , _gammaConstant(1.8f)
     , _atmosphereEnabled(false)
     , _saveCalculationsToTexture(false)
     , _preCalculatedTexturesScale(1.0)
@@ -346,6 +348,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             _atmosphereProperties.hdrExpositionP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
             _atmospherePropertyOwner.addProperty(_atmosphereProperties.hdrExpositionP);
 
+            _atmosphereProperties.gammaConstantP.set(_gammaConstant);
+            _atmosphereProperties.gammaConstantP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
+            _atmospherePropertyOwner.addProperty(_atmosphereProperties.gammaConstantP);
+
             addPropertySubOwner(_atmospherePropertyOwner);
         }
     }
@@ -365,6 +371,7 @@ bool RenderableGlobe::initialize() {
             _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
             _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
             _deferredcaster->setHDRConstant(_hdrConstant);
+            _deferredcaster->setGammaConstant(_gammaConstant);
             _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
             _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
             _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);
@@ -529,7 +536,8 @@ void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) {
 void RenderableGlobe::updateAtmosphereParameters() {
     bool executeComputation = true;
     if (_sunRadianceIntensity != _atmosphereProperties.sunIntensityP.value() ||
-        _hdrConstant != _atmosphereProperties.hdrExpositionP.value())
+        _hdrConstant != _atmosphereProperties.hdrExpositionP.value() ||
+        _gammaConstant != _atmosphereProperties.gammaConstantP.value())
         executeComputation = false;
     _atmosphereRadius = _atmospherePlanetRadius + _atmosphereProperties.atmosphereHeightP.value();
     _planetAverageGroundReflectance = _atmosphereProperties.groundAverageReflectanceP.value();
@@ -543,6 +551,7 @@ void RenderableGlobe::updateAtmosphereParameters() {
     _miePhaseConstant = _atmosphereProperties.mieAsymmetricFactorGP.value();
     _sunRadianceIntensity = _atmosphereProperties.sunIntensityP.value();
     _hdrConstant = _atmosphereProperties.hdrExpositionP.value();
+    _gammaConstant = _atmosphereProperties.gammaConstantP.value();
 
     if (_deferredcaster) {
         _deferredcaster->setAtmosphereRadius(_atmosphereRadius);
@@ -553,6 +562,7 @@ void RenderableGlobe::updateAtmosphereParameters() {
         _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
         _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
         _deferredcaster->setHDRConstant(_hdrConstant);
+        _deferredcaster->setGammaConstant(_gammaConstant);
         _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
         _deferredcaster->setMieScatteringCoefficients(_mieScatteringCoeff);
         _deferredcaster->setMieExtinctionCoefficients(_mieExtinctionCoeff);

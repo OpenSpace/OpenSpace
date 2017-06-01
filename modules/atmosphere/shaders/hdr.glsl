@@ -23,14 +23,14 @@
  ****************************************************************************************/
  
 uniform float exposure;
-const float gamma = 2.0f;
+uniform float gamma;
 
 vec3 exponentialToneMapping(vec3 color) {
   color *= exposure;
     
-  color.r = color.r < 1.413 ? pow(color.r * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.r);
-  color.g = color.g < 1.413 ? pow(color.g * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.g);
-  color.b = color.b < 1.413 ? pow(color.b * 0.38317, 1.0 / 2.2) : 1.0 - exp(-color.b);
+  color.r = color.r < 1.413 ? pow(color.r * 0.38317, 1.0 / gamma) : 1.0 - exp(-color.r);
+  color.g = color.g < 1.413 ? pow(color.g * 0.38317, 1.0 / gamma) : 1.0 - exp(-color.g);
+  color.b = color.b < 1.413 ? pow(color.b * 0.38317, 1.0 / gamma) : 1.0 - exp(-color.b);
     
   return color;
 
@@ -64,7 +64,8 @@ vec3 lumaBasedReinhardToneMapping(vec3 color)
 vec3 whitePreservingLumaBasedReinhardToneMapping(vec3 color)
 {
   float white = 4.0f;
-  float luma = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
+  //float luma = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
+  float luma = dot(color, vec3(0.4126f, 0.9152f, 0.2722f));
   float toneMappedLuma = luma * (1.0f + luma / (white * white)) / (1.0f + luma);
   color *= toneMappedLuma / luma;
   color = pow(color, vec3(1.0f / gamma));
@@ -74,7 +75,7 @@ vec3 whitePreservingLumaBasedReinhardToneMapping(vec3 color)
 vec3 RomBinDaHouseToneMapping(vec3 color)
 {
   color = exp( -1.0f / ( 2.72f * color + 0.15f ) );
-  color = pow(color, vec3(1. / gamma));
+  color = pow(color, vec3(1.7 / gamma));
   return color;
 }
 
@@ -94,7 +95,7 @@ vec3 Uncharted2ToneMapping(vec3 color)
   float E = 0.02f;
   float F = 0.30f;
   float W = 11.2f;
-  float tExposure = 0.3f;
+  float tExposure = 0.4f;
   color *= tExposure;
   color = ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
   float white = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
@@ -104,13 +105,13 @@ vec3 Uncharted2ToneMapping(vec3 color)
 }
 
 vec3 HDR(vec3 color) {
-  //return exponentialToneMapping(color);  
+  return exponentialToneMapping(color);  
   //return linearToneMapping(color);
   //return simpleReinhardToneMapping(color);
   //return lumaBasedReinhardToneMapping(color);
   //return whitePreservingLumaBasedReinhardToneMapping(color);
   //return RomBinDaHouseToneMapping(color);		
-  return filmicToneMapping(color);
+  //return filmicToneMapping(color);
   //return Uncharted2ToneMapping(color);
   
 }

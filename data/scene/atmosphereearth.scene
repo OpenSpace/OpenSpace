@@ -87,10 +87,10 @@ return {
         "sun",
         --"atmosphereearth",
         --"atmospheremars",
-        --"moon",
+        "moon",
         
         "lodglobes/earth",
-        --"lodglobes/mars",
+        "lodglobes/mars",
         --"lodglobes/moon",
                 
         --"toyvolume",
