@@ -137,6 +137,7 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		glm::dmat4 globeModelTransform = _globe->modelTransform();
 		glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * globeModelTransform;
 
+
 		_pathShader->activate();
 
 		// Passing model view transform as double to maintain precision for vertices.

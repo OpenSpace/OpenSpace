@@ -37,8 +37,8 @@ namespace {
 namespace openspace {
 
 SGCTWindowWrapper::SGCTWindowWrapper()
-    : _showStatsGraph("showStatsGraph", "Show Stats Graph", false)
-    , _eyeSeparation("eyeSeparation", "Eye Separation", 0.f, 0.f, 10.f)
+    : _eyeSeparation("eyeSeparation", "Eye Separation", 0.f, 0.f, 10.f)
+    , _showStatsGraph("showStatsGraph", "Show Stats Graph", false)
 {
     _showStatsGraph.onChange([this](){
         sgct::Engine::instance()->setStatsGraphVisibility(_showStatsGraph);

@@ -30,7 +30,6 @@
 #include <modules/globebrowsing/tile/textureformat.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/tiledatalayout.h>
 #include <modules/globebrowsing/tile/pixelregion.h>
 #include <modules/globebrowsing/tile/rawtile.h>
 
@@ -62,8 +61,13 @@ public:
     * \param config, Configuration used for initialization
     * \param baseDirectory, the base directory to use in future loading operations
     */
-    GdalRawTileDataReader(const std::string& filePath, const Configuration& config,
-        const std::string& baseDirectory = "");
+    GdalRawTileDataReader(const std::string& filePath,
+        const TileTextureInitData& initData,
+        const std::string& baseDirectory = "",
+        RawTileDataReader::PerformPreprocessing preprocess =
+            RawTileDataReader::PerformPreprocessing::No
+        );
+
 
     virtual ~GdalRawTileDataReader() override;
 
@@ -90,8 +94,8 @@ protected:
 private:
     // Private virtual function overloading
     virtual void initialize() override;
-    virtual char* readImageData(
-        IODescription& io, RawTile::ReadError& worstError) const override;
+    virtual void readImageData(IODescription& io, RawTile::ReadError& worstError,
+        char* dataDestination) const override;
     virtual RawTile::ReadError rasterRead(
         int rasterBand, const IODescription& io, char* dst) const override;
 
@@ -103,18 +107,13 @@ private:
     int gdalOverview(const TileIndex& tileIndex) const;
     int gdalVirtualOverview(const TileIndex& tileIndex) const;
     PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
-    TileDataLayout getTileDataLayout(GLuint prefferedGLType);
 
     // Member variables
-    struct InitData {
-        std::string initDirectory;
-        std::string datasetFilePath;
-        int tilePixelSize;
-        GLuint dataType;
-    } _initData;
-
+    std::string _initDirectory;
+    std::string _datasetFilePath;
+  
     GDALDataset* _dataset;
-    GDALDataType _gdalType; // The type to reinterpret to when reading
+    GDALDataType _gdalType;
 };
 
 } // namespace globebrowsing

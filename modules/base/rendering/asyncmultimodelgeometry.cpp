@@ -97,21 +97,12 @@ void AsyncMultiModelGeometry::unmapBuffers() {
 }
 
 bool AsyncMultiModelGeometry::loadModel(const std::string& filename) {
-	ghoul::io::ModelReaderMultiFormat modelReader;
-
 	std::vector<ghoul::io::ModelReaderBase::Vertex> vertices;
 	std::vector<int> indices;
-
-	modelReader.loadModel(filename, vertices, indices);
+	ghoul::io::ModelReaderMultiFormat().loadModel(filename, vertices, indices);
 
 	_vertices.reserve(vertices.size());
-	for (const auto & v : vertices) {
-		psc p = PowerScaledCoordinate::CreatePowerScaledCoordinate(
-			v.location[0],
-			v.location[1],
-			v.location[2]
-		);
-
+	for (const ghoul::io::ModelReaderBase::Vertex& v : vertices) {
 		Vertex vv;
 		memcpy(vv.location, v.location, sizeof(GLfloat) * 3);
 		vv.location[3] = 1.0;

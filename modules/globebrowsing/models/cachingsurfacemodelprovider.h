@@ -36,7 +36,52 @@
 namespace openspace {
 namespace globebrowsing {
 
-using ModelCache = cache::LRUCache<uint64_t, std::shared_ptr<SubsiteModels>>;
+struct ProviderSubsiteKey {
+	int level;
+	std::string site;
+	std::string drive;
+	unsigned int providerID;
+
+	bool operator==(const ProviderSubsiteKey& r) const {
+		return (providerID == r.providerID) &&
+			(level == r.level) && (site == r.site)
+				&& (drive == r.drive);
+	}
+};
+
+struct ProviderSubsiteHasher {
+	/**
+	Creates a hash which can be used as key in hash maps.
+	First set the bits to be unique for all tiles.
+	+-------+------------+-------+------------+
+	| USAGE | BIT RANGE  | #BITS | MAX VALUE  |
+	+-------+------------+-------+------------+
+	| level |   0 -  5   |   5   |         31 |
+	|     x |   5 - 35   |  30   | 1073741824 |
+	|     y |  35 - 64   |  29   |  536870912 |
+	+-------+------------+-------+------------+
+
+	Bits are then shifted depending on the tile provider used.
+	*/
+	unsigned long long operator()(const ProviderSubsiteKey& t) const {
+		unsigned long long key = 0;
+		const int site = std::stoi(t.site);
+		const int drive = std::stoi(t.drive);
+		key |= static_cast<unsigned long long>(t.level);
+		key |= static_cast<unsigned long long>(site) << 5ULL;
+		key |= static_cast<unsigned long long>(drive) << 35ULL;
+		// Now the key is unique for all tiles, however not for all tile providers.
+		// Add to the key depending on the tile provider to avoid some hash collisions.
+		// (All hash collisions can not be avoided due to the limit in 64 bit for the
+		// hash key)
+		// Idea: make some offset in the place of the bits for the x value. Lesser chance
+		// of having different x-value than having different tile provider ids.
+		key += static_cast<unsigned long long>(t.providerID) << 25ULL;
+		return key;
+	}
+};
+
+using ModelCache = cache::LRUCache<ProviderSubsiteKey, std::shared_ptr<SubsiteModels>, ProviderSubsiteHasher>;
 
 class CachingSurfaceModelProvider {
 public:

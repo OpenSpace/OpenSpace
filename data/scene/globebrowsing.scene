@@ -62,14 +62,12 @@ function preInitialization()
     openspace.bindKey("p",
         'openspace.setPropertyValue("*Trail.renderable.enabled", true)'
     )
-    
+
 ]]
 end
 
 function postInitialization()
     openspace.printInfo("Setting default values")
-
-    openspace.setInteractionMode('GlobeBrowsing')
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
@@ -77,10 +75,10 @@ function postInitialization()
     openspace.setPropertyValue("Sun.renderable.enabled", true)
     openspace.setPropertyValue("SunGlare.renderable.enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
-    
+
     openspace.setPropertyValue("Earth.RenderableGlobe.atmosphere", true)
-    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.settings.gamma", 1.8)
-    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.NightLayers.Earth at Night 2012.settings.multiplier", 10)
+    openspace.setPropertyValue("Earth.RenderableGlobe.Debug.levelByProjectedAreaElseDistance", false)
+    openspace.setPropertyValue("Earth.RenderableGlobe.Layers.ColorLayers.blendTileLevels", true)
 
     openspace.resetCameraDirection()
 
@@ -92,7 +90,7 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "Earth",
+        Focus = "Mars",
         Position = {138530625167.228241, 42217005217.825005, -46336405755.934372},
         Rotation = {0.633883, 0.492158, -0.123913, -0.583625},
     },
@@ -102,6 +100,7 @@ return {
         "sun",
         "stars",
         "milkyway",
+        "models"
     }
 }
 

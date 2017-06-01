@@ -31,6 +31,8 @@
  
 #include <openspace/properties/propertyowner.h>
 
+#include <ghoul/opengl/texture.h>
+
 #include <vector>
 
 namespace openspace {
@@ -49,7 +51,8 @@ public:
      * define a key specifying what implementation of TileProvider
      * to be instantiated.
      */
-    static std::unique_ptr<TileProvider> createFromDictionary(const ghoul::Dictionary& dictionary);
+    static std::unique_ptr<TileProvider> createFromDictionary(
+        const ghoul::Dictionary& dictionary);
 
     /** 
      * Default constructor. 
@@ -98,14 +101,7 @@ public:
 
     virtual ChunkTilePile getChunkTilePile(TileIndex tileIndex, int pileSize);
 
-    /**
-     * TileProviders must be able to provide a defualt
-     * <code>Tile</code> which may be used by clients in cases when
-     * requested tiles were unavailable.
-     *
-     * \returns A default tile
-     */
-    virtual Tile getDefaultTile() = 0;
+    Tile getDefaultTile() const;
 
     /**
      * Returns the status of a <code>Tile</code>. The <code>Tile::Status</code>
@@ -153,10 +149,17 @@ public:
      */
     unsigned int uniqueIdentifier() const;
 
+protected:
+    std::string _name;
 private:
+    void initializeDefaultTile();
+
     static unsigned int _numTileProviders;
     unsigned int _uniqueIdentifier;
     bool _initialized;
+  
+    std::unique_ptr<ghoul::opengl::Texture> _defaultTileTexture;
+    Tile _defaultTile;
 };
 
 } // namespace tileprovider

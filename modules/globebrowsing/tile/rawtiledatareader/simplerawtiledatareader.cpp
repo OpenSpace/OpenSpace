@@ -44,9 +44,10 @@ namespace {
 namespace openspace {
 namespace globebrowsing {
 
-SimpleRawTileDataReader::SimpleRawTileDataReader(
-    const std::string& filePath, const Configuration& config)
-    : RawTileDataReader(config)
+SimpleRawTileDataReader::SimpleRawTileDataReader(const std::string& filePath,
+        const TileTextureInitData& initData,
+        RawTileDataReader::PerformPreprocessing preprocess)
+    : RawTileDataReader(initData, preprocess)
 {
     _datasetFilePath = filePath;
     ensureInitialized();
@@ -57,7 +58,7 @@ void SimpleRawTileDataReader::reset() {
 }
 
 int SimpleRawTileDataReader::maxChunkLevel() {
-    return _cached._maxLevel;
+    return 2;
 }
 
 float SimpleRawTileDataReader::noDataValueAsFloat() const {
@@ -110,50 +111,29 @@ void SimpleRawTileDataReader::initialize() {
             ".\nCurrently only supporting power of 2 textures."
         );
     }
-  
-    _cached._maxLevel = 2;
-    _cached._tileLevelDifference = 0;
-
-    _dataLayout.glType = _dataTexture->dataType();
-    _dataLayout.bytesPerDatum = tiledatatype::numberOfBytes(_dataLayout.glType);
-    _dataLayout.numRasters = tiledatatype::numberOfRasters(_dataTexture->format());
-    _dataLayout.numRastersAvailable = _dataLayout.numRasters;
-    _dataLayout.bytesPerPixel = _dataLayout.bytesPerDatum * _dataLayout.numRasters;
-    _dataLayout.textureFormat = {_dataTexture->format(), _dataTexture->internalFormat()};
 
     _depthTransform = {depthScale(), depthOffset()};
 }
 
-char* SimpleRawTileDataReader::readImageData(
-    IODescription& io, RawTile::ReadError& worstError) const {
-    // allocate memory for the image
-    char* imageData = new char[io.write.totalNumBytes];
-
-    // In case there are extra channels not existing in the dataset
-    // we set the bytes to 255 (for example an extra alpha channel that)
-    // needs to be 1.
-    if (_dataLayout.numRasters > _dataLayout.numRastersAvailable) {
-        memset(imageData, 255, io.write.totalNumBytes);
-    }
+void SimpleRawTileDataReader::readImageData(
+    IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const {
     
     // Modify to match OpenGL texture layout:
     IODescription modifiedIO = io;
     modifiedIO.read.region.start.y = modifiedIO.read.fullRegion.numPixels.y - modifiedIO.read.region.numPixels.y - modifiedIO.read.region.start.y;
   
-    RawTile::ReadError err = repeatedRasterRead(0, modifiedIO, imageData);
+    RawTile::ReadError err = repeatedRasterRead(0, modifiedIO, dataDestination);
 
     // None = 0, Debug = 1, Warning = 2, Failure = 3, Fatal = 4
     worstError = std::max(worstError, err);
-
-    return imageData;
 }
 
 RawTile::ReadError SimpleRawTileDataReader::rasterRead(
     int rasterBand, const IODescription& io, char* dataDestination) const
 {
-    ghoul_assert(io.read.fullRegion.numPixels.x == _dataTexture->dimensions().x,
+    ghoul_assert(static_cast<unsigned int>(io.read.fullRegion.numPixels.x) == _dataTexture->dimensions().x,
         "IODescription does not match data texture.");
-    ghoul_assert(io.read.fullRegion.numPixels.y == _dataTexture->dimensions().y,
+    ghoul_assert(static_cast<unsigned int>(io.read.fullRegion.numPixels.y) == _dataTexture->dimensions().y,
         "IODescription does not match data texture.");
     ghoul_assert(io.read.region.numPixels.x == io.write.region.numPixels.x,
         "IODescription does not match data texture.");

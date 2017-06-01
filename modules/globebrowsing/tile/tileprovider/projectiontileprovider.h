@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTION_TILE_PROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTION_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <ghoul/opengl/programobject.h>
@@ -48,7 +48,6 @@ public:
         
     virtual Tile getTile(const TileIndex& tileIndex) override;
 
-    virtual Tile getDefaultTile() override;
     virtual Tile::Status getTileStatus(const TileIndex& tileIndex) override;
     virtual TileDepthTransform depthTransform() override;
     virtual void update() override;
@@ -118,4 +117,4 @@ private:
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___PROJECTION_TILE_PROVIDER___H__

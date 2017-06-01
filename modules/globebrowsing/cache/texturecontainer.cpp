@@ -22,62 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/loadjob/diskcachedtileloadjob.h>
-
-#include <modules/globebrowsing/tile/rawtile.h>
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
-#include <modules/globebrowsing/tile/tilediskcache.h>
+#include <modules/globebrowsing/cache/texturecontainer.h>
+#include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
 namespace openspace {
 namespace globebrowsing {
+namespace cache {
 
-DiskCachedTileLoadJob::DiskCachedTileLoadJob(
-    std::shared_ptr<RawTileDataReader> textureDataProvider,
-    const TileIndex& tileIndex, std::shared_ptr<TileDiskCache> tdc,
-    CacheMode m)
-    : TileLoadJob(textureDataProvider, tileIndex)
-    , _tileDiskCache(tdc)
-    , _mode(m)
-{}
+TextureContainer::TextureContainer(TileTextureInitData initData, size_t numTextures)
+    : _initData(initData)
+    , _freeTexture(0)
+    , _numTextures(numTextures)
+{
+    reset();
+}
 
-void DiskCachedTileLoadJob::execute() {
-    _rawTile = nullptr;
-
-    switch (_mode) {
-        case CacheMode::Disabled: 
-            _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
-            break;
-
-        case CacheMode::ReadOnly:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
-            }
-            break;
-
-        case CacheMode::ReadAndWrite:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
-                _tileDiskCache->put(_chunkIndex, _rawTile);
-            }
-            break;
-
-        case CacheMode::WriteOnly:
-            _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
-            _tileDiskCache->put(_chunkIndex, _rawTile);
-            break;
-
-        case CacheMode::CacheHitsOnly:
-            _rawTile = _tileDiskCache->get(_chunkIndex);
-            if (_rawTile == nullptr) {
-                RawTile res = RawTile::createDefaultRes();
-                res.tileIndex = _chunkIndex;
-                _rawTile = std::make_shared<RawTile>(res);
-            }
-            break;
+void TextureContainer::reset() {
+    _textures.clear();
+    _freeTexture = 0;
+    ghoul::opengl::Texture::AllocateData allocate =
+        _initData.shouldAllocateDataOnCPU() ?
+        ghoul::opengl::Texture::AllocateData::Yes :
+        ghoul::opengl::Texture::AllocateData::No;
+    for (size_t i = 0; i < _numTextures; ++i)
+    {
+        auto tex = std::make_unique<ghoul::opengl::Texture>(
+            _initData.dimensionsWithPadding(),
+            _initData.ghoulTextureFormat(),
+            _initData.glTextureFormat(),
+            _initData.glType(),
+            ghoul::opengl::Texture::FilterMode::Linear,
+            ghoul::opengl::Texture::WrappingMode::ClampToEdge,
+            allocate
+        );
+        
+        tex->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::Yes);
+        tex->uploadTexture();
+        tex->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+        
+        _textures.push_back(std::move(tex));
     }
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+void TextureContainer::reset(size_t numTextures) {
+    _numTextures = numTextures;
+    reset();
+}
+
+ghoul::opengl::Texture* TextureContainer::getTextureIfFree() {
+    ghoul::opengl::Texture* texture = nullptr;
+    if (_freeTexture < _textures.size()) {
+        texture = _textures[_freeTexture].get();
+        _freeTexture++;
+    }
+    return texture;
+}
+
+const openspace::globebrowsing::TileTextureInitData& TextureContainer::tileTextureInitData() const {
+    return _initData;
+};
+
+size_t TextureContainer::size() const {
+    return _textures.size();
+};
+
+}
+}
+}

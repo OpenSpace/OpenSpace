@@ -46,6 +46,8 @@ struct TileIndex;
 class GPULayer {
 public:
 
+    virtual ~GPULayer() = default;
+
     /**
      * Sets the value of <code>Layer</code> to its corresponding
      * GPU struct. OBS! Users must ensure bind has been 

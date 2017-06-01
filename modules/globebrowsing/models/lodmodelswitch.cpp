@@ -26,7 +26,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 
 namespace {
 	const std::string _loggerCat = "LodModelSwitch";

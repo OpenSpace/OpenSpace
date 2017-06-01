@@ -33,6 +33,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/performance/performancemeasurement.h>
 
 
@@ -53,23 +54,22 @@ namespace {
     const int MaxRaycasters = 32;
     const int MaxLayers = 32;
     const int MaxAverageLayers = 8;
-}
+} // namespace
 
 namespace openspace {
 
-
 ABufferRenderer::ABufferRenderer()
-        : _camera(nullptr)
-        , _scene(nullptr)
-        , _resolution(glm::ivec2(0))
-        , _dirtyResolution(true)
-        , _dirtyRaycastData(true)
-        , _dirtyRendererData(true)
-        , _dirtyResolveDictionary(true)
-        , _resolveProgram(nullptr) { }
+    : _camera(nullptr)
+    , _scene(nullptr)
+    , _resolution(glm::ivec2(0))
+    , _dirtyResolution(true)
+    , _dirtyRaycastData(true)
+    , _dirtyRendererData(true)
+    , _dirtyResolveDictionary(true)
+    , _resolveProgram(nullptr)
+{}
 
 ABufferRenderer::~ABufferRenderer() {}
-
 
 void ABufferRenderer::initialize() {
     LINFO("Initializing ABufferRenderer");
@@ -265,7 +265,8 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
         static_cast<int>(Renderable::RenderBin::Transparent) |
         static_cast<int>(Renderable::RenderBin::Overlay);
 
-    RenderData data{ *_camera, psc(), doPerformanceMeasurements, renderBinMask };
+    Time time = OsEng.timeManager().time();
+    RenderData data{ *_camera, psc(), time, doPerformanceMeasurements, renderBinMask };
     RendererTasks tasks;
     _scene->render(data, tasks);
     _blackoutFactor = blackoutFactor;

@@ -68,6 +68,8 @@ const string ConfigurationManager::PartLogs = "Logs";
 const string ConfigurationManager::PartAppend = "Append";
 const string ConfigurationManager::PartCapabilitiesVerbosity = "CapabilitiesVerbosity";
 
+const string ConfigurationManager::KeyLauncher = "Launcher";
+
 const string ConfigurationManager::KeyCapabilitiesVerbosity =
     KeyLogging + "." + PartCapabilitiesVerbosity;
 

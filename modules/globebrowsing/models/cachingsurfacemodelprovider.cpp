@@ -38,10 +38,7 @@ CachingSurfaceModelProvider::CachingSurfaceModelProvider(Renderable* parent)
 	: _parent(parent)
 {
 	double cacheSize = 20;
-
-	auto threadPool1 = std::make_shared<ThreadPool>(1);
-	auto threadPool2 = std::make_shared<ThreadPool>(1);
-	_asyncSurfaceModelProvider = std::make_shared<AsyncSurfaceModelProvider>(threadPool1, threadPool2, parent);
+	_asyncSurfaceModelProvider = std::make_shared<AsyncSurfaceModelProvider>(parent);
 	_modelCache = std::make_shared<ModelCache>(static_cast<size_t>(cacheSize));
 }
 
@@ -53,16 +50,17 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 	// not already loaded, enqueue the model.
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfSubsiteModels;
 	for (auto subsite : Subsites) {
-		uint64_t key = hashKey(subsite->site, subsite->drive, level);
-		uint64_t keyPrevLevel = -1;
+		//uint64_t key = hashKey(subsite->site, subsite->drive, level);
+		//uint64_t keyPrevLevel = -1;
 
-		if (_prevLevel != -1 && _prevLevel != level) {
-			keyPrevLevel = hashKey(subsite->site, subsite->drive, _prevLevel);
-		}
+		//if (_prevLevel != -1 && _prevLevel != level) {
+			//keyPrevLevel = hashKey(subsite->site, subsite->drive, _prevLevel);
+		//}
 			
 		bool requestedExistsInCache = true;
+		ProviderSubsiteKey key = { level, subsite->site, subsite->drive };
 		if (_modelCache->exist(key)) {
-			vectorOfSubsiteModels.push_back(_modelCache->get(key)); 
+			vectorOfSubsiteModels.push_back(_modelCache->get(key));
 		}
 		else {
 			_asyncSurfaceModelProvider->enqueueModelIO(subsite, level);
@@ -71,16 +69,16 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 			// return highest available resolution.
 			std::vector<int> levelsAbove = getLevelsAbove(subsite->availableLevels, level);
 			for (int i = levelsAbove.size() + 1; i-- > 1; ) {
-				uint64_t keyLowerLevel = hashKey(subsite->site, subsite->drive, i);
+				ProviderSubsiteKey keyLowerLevel = { i, subsite->site, subsite->drive };
 				if (_modelCache->exist(keyLowerLevel)) {
 					vectorOfSubsiteModels.push_back(_modelCache->get(keyLowerLevel));
 					break;
 				}
 			}
 		}
-		if (keyPrevLevel != -1 && _modelCache->exist(keyPrevLevel)) {
+		/*if (keyPrevLevel != -1 && _modelCache->exist(keyPrevLevel)) {
 			vectorOfSubsiteModels.push_back(_modelCache->get(keyPrevLevel));
-		}
+		}*/
 	}
 	return vectorOfSubsiteModels;
 }
@@ -90,9 +88,9 @@ void CachingSurfaceModelProvider::update(Renderable* parent) {
 }
 
 void CachingSurfaceModelProvider::setLevel(const int level) {
-	if (level != _previousLevel && level >= 2) {
-		clearQueuesAndJobs();
-	}
+	//if (level != _previousLevel && level >= 2) {
+		//clearQueuesAndJobs();
+	//}
 	_previousLevel = level;
 }
 
@@ -117,7 +115,8 @@ void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
 		std::vector<std::shared_ptr<Model>> theModels = subsiteModels->models;
 		subsiteModels->models = theModels;
 		
-		uint64_t key = CachingSurfaceModelProvider::hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level);
+		//uint64_t key = CachingSurfaceModelProvider::hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level);
+		ProviderSubsiteKey key = { subsiteModels->level, subsiteModels->site, subsiteModels->drive };
 
 		_modelCache->put(key, subsiteModels);
 	}

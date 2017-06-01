@@ -29,6 +29,7 @@
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/time.h>
 #include <openspace/util/keys.h>
 
@@ -57,46 +58,6 @@ namespace interaction {
 
     InputState::~InputState() {
 
-    }
-
-    const std::vector<datamessagestructures::CameraKeyframe>& InputState::keyframes() const {
-        return _keyframes;
-    }
-
-    void InputState::addKeyframe(const datamessagestructures::CameraKeyframe &kf) {
-        clearOldKeyframes();
-        if (kf._timestamp < OsEng.runTime()) {
-            return;
-        }
-        _keyframes.insert(std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, &InputState::compareKeyframeTimes), kf);
-    }
-
-    void InputState::removeKeyframesAfter(double timestamp) {
-        datamessagestructures::CameraKeyframe kf;
-        kf._timestamp = timestamp;
-        // Remove keyframes after the inserted keyframe.
-        _keyframes.erase(std::upper_bound(_keyframes.begin(), _keyframes.end(), kf, &InputState::compareKeyframeTimes), _keyframes.end());
-    }
-
-    bool InputState::compareKeyframeTimes(const datamessagestructures::CameraKeyframe& a, const datamessagestructures::CameraKeyframe& b) {
-        return a._timestamp < b._timestamp;
-    }
-
-    void InputState::clearOldKeyframes() {
-        double now = OsEng.runTime();
-        auto isLater = [now](const datamessagestructures::CameraKeyframe kf) {
-            return kf._timestamp > now;
-        };
-
-        // Remote keyframes with earlier timestamps than the current time.
-        auto nextKeyframe = std::find_if(_keyframes.begin(), _keyframes.end(), isLater);
-        if (nextKeyframe != _keyframes.begin()) {
-            _keyframes.erase(_keyframes.begin(), nextKeyframe - 1);
-        }
-    }
-
-    void InputState::clearKeyframes() {
-        _keyframes.clear();
     }
 
     void InputState::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
@@ -204,66 +165,73 @@ Interpolator<double>& InteractionMode::rotateToFocusNodeInterpolator() {
     
     
 // KeyframeInteractionMode
-KeyframeInteractionMode::KeyframeInteractionMode(){
-
+KeyframeInteractionMode::KeyframeInteractionMode()
+{
 }
 
 KeyframeInteractionMode::~KeyframeInteractionMode() {
-
 }
 
-void KeyframeInteractionMode::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
-    _keyframes = inputState.keyframes();
+
+void KeyframeInteractionMode::updateMouseStatesFromInput(const InputState&, double) {
+    // Do nothing.
 }
 
-void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, double deltaTime) {
-    if (_keyframes.size() == 0) {
-        return;
-    }
-
+void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, double) {
     double now = OsEng.runTime();
-    auto isLater = [now](const datamessagestructures::CameraKeyframe kf) {
-        return kf._timestamp > now;
-    };
 
-    auto nextKeyframe = std::find_if(_keyframes.begin(), _keyframes.end(), isLater);
-    if (nextKeyframe == _keyframes.end()) {
+    if (_cameraPoseTimeline.nKeyframes() == 0) {
         return;
     }
 
-    if (nextKeyframe == _keyframes.begin()) {
-        camera.setPositionVec3(_keyframes[0]._position);
-        camera.setRotation(_keyframes[0]._rotation);
+    const Keyframe<CameraPose>* nextKeyframe = _cameraPoseTimeline.firstKeyframeAfter(now);
+    const Keyframe<CameraPose>* prevKeyframe = _cameraPoseTimeline.lastKeyframeBefore(now);
+    double nextTime = 0;
+    double prevTime = 0;
+    double t = 0;
+
+    if (nextKeyframe) {
+        nextTime = nextKeyframe->timestamp;
+    } else {
         return;
     }
-    auto prevKeyframe = nextKeyframe - 1;
 
-    double prevTime = prevKeyframe->_timestamp;
-    double nextTime = nextKeyframe->_timestamp;
+    if (prevKeyframe) {
+        prevTime = prevKeyframe->timestamp;
+        t = (now - prevTime) / (nextTime - prevTime);
+    } else {
+        // If there is no keyframe before: Only use the next keyframe.
+        prevTime = nextTime;
+        prevKeyframe = nextKeyframe;
+        t = 1;
+    }
 
-    double t = (now - prevTime) / (nextTime - prevTime);
+    _cameraPoseTimeline.removeKeyframesBefore(prevTime);
 
+    const CameraPose& prevPose = prevKeyframe->data;
+    const CameraPose& nextPose = nextKeyframe->data;
+	
     Scene* scene = camera.parent()->scene();
-    SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevKeyframe->_focusNode);
-    SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextKeyframe->_focusNode);
+    SceneGraphNode* prevFocusNode = scene->sceneGraphNode(prevPose.focusNode);
+    SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
 
     if (!prevFocusNode || !nextFocusNode) {
         return;
     }
 
-    glm::dvec3 prevKeyframeCameraPosition = prevKeyframe->_position;
-    glm::dvec3 nextKeyframeCameraPosition = nextKeyframe->_position;
-    glm::dquat prevKeyframeCameraRotation = prevKeyframe->_rotation;
-    glm::dquat nextKeyframeCameraRotation = nextKeyframe->_rotation;
+    glm::dvec3 prevKeyframeCameraPosition = prevPose.position;
+    glm::dvec3 nextKeyframeCameraPosition = nextPose.position;
+    glm::dquat prevKeyframeCameraRotation = prevPose.rotation;
+    glm::dquat nextKeyframeCameraRotation = nextPose.rotation;
 
     // Transform position and rotation based on focus node rotation (if following rotation)
-    if (prevKeyframe->_followNodeRotation) {
-        prevKeyframeCameraRotation = prevFocusNode->worldRotationMatrix() * glm::dmat3(prevKeyframe->_rotation);
-        prevKeyframeCameraPosition = prevFocusNode->worldRotationMatrix() * prevKeyframeCameraPosition;
+    if (prevPose.followFocusNodeRotation) {
+        prevKeyframeCameraRotation = prevFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(prevPose.rotation));
+        prevKeyframeCameraPosition = prevFocusNode->worldRotationMatrix() * prevPose.position;
     }
-    if (nextKeyframe->_followNodeRotation) {
-        nextKeyframeCameraRotation = nextFocusNode->worldRotationMatrix() * glm::dmat3(nextKeyframe->_rotation);
-        nextKeyframeCameraPosition = nextFocusNode->worldRotationMatrix() * nextKeyframeCameraPosition;
+    if (nextPose.followFocusNodeRotation) {
+        nextKeyframeCameraRotation = nextFocusNode->worldRotationMatrix() * glm::dmat3(glm::dquat(nextPose.rotation));
+        nextKeyframeCameraPosition = nextFocusNode->worldRotationMatrix() * nextPose.position;
     }
 
     // Transform position based on focus node position
@@ -279,16 +247,19 @@ bool KeyframeInteractionMode::followingNodeRotation() const {
     return false;
 }
 
+Timeline<KeyframeInteractionMode::CameraPose>& KeyframeInteractionMode::timeline() {
+    return _cameraPoseTimeline;
+}
+
 // OrbitalInteractionMode
 OrbitalInteractionMode::MouseStates::MouseStates(double sensitivity, double velocityScaleFactor)
     : _sensitivity(sensitivity)
     , _globalRotationMouseState(velocityScaleFactor)
     , _localRotationMouseState(velocityScaleFactor)
     , _truckMovementMouseState(velocityScaleFactor)
+    , _localRollMouseState(velocityScaleFactor)
     , _globalRollMouseState(velocityScaleFactor)
-    , _localRollMouseState(velocityScaleFactor) {
-
-}
+{}
 
 void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
     glm::dvec2 mousePosition = inputState.getMousePosition();

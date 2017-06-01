@@ -26,6 +26,8 @@
 #include <openspace/util/powerscaledsphere.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 
+#include <ghoul/opengl/programobject.h>
+
 #ifdef WIN32
 #define _USE_MATH_DEFINES
 #include <math.h>

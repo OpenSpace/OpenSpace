@@ -295,9 +295,9 @@ return {
             Type  = "RenderableCrawlingLine",
             Source = "NH_REX",
             Target = "EARTH",
-            -- Body  = "NEW HORIZONS",
+            -- Body = "NEW HORIZONS",
             Frame = "GALACTIC",
-            RGB   = { 1.0, 0.7, 0.0 },
+            Color = { 1.0, 0.7, 0.0 },
             Instrument = "NH_REX"
         },
     }

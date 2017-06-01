@@ -38,6 +38,7 @@ namespace chunklevelevaluator {
 */
 class AvailableTileData : public Evaluator {
 public:
+    virtual ~AvailableTileData() override = default;
     int getDesiredLevel(const Chunk& chunk, const RenderData& data) const override;
 };
 

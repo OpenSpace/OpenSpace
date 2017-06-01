@@ -26,6 +26,8 @@
 
 #include <ghoul/ghoul.h>
 #include <modules/globebrowsing/globes/renderableglobe.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/updatestructures.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -46,7 +48,7 @@ public :
 
 private:
 	RenderableGlobe* _owner;
-	SceneGraphNode*_parent;
+	SceneGraphNode* _parent;
 
 	double _ellipsoidShrinkTerm;
 

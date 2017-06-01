@@ -27,6 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 namespace ghoul { namespace opengl {
 class ProgramObject;
 } }
@@ -46,7 +48,6 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
     
 private:
     const RenderableGlobe& _owner;

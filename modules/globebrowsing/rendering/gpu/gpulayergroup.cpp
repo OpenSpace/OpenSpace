@@ -39,7 +39,7 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject* programObject,
         activeLayers.size() == _gpuActiveLayers.size(),
         "GPU and CPU active layers must have same size!"
     );
-    for (int i = 0; i < activeLayers.size(); ++i) {
+    for (unsigned int i = 0; i < activeLayers.size(); ++i) {
         _gpuActiveLayers[i]->setValue(
             programObject,
             *activeLayers[i],
@@ -58,7 +58,7 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject* programObject,
     int pileSize = layerGroup.pileSize();
     for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
         // should maybe a proper GPULayer factory
-        _gpuActiveLayers[i] = (category == LayerManager::HeightLayers) ?
+        _gpuActiveLayers[i] = (category == layergroupid::HeightLayers) ?
             std::make_unique<GPUHeightLayer>() : 
             std::make_unique<GPULayer>();
         std::string nameExtension = "[" + std::to_string(i) + "].";

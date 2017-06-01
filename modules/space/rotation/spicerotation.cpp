@@ -32,8 +32,6 @@
 #include <openspace/util/updatestructures.h>
 
 namespace {
-    const char* _loggerCat = "SpiceRotation";
-
     const char* KeySourceFrame = "SourceFrame";
     const char* KeyDestinationFrame = "DestinationFrame";
     const char* KeyKernels = "Kernels";
@@ -121,7 +119,7 @@ void SpiceRotation::update(const UpdateData& data) {
         _matrix = SpiceManager::ref().positionTransformMatrix(
             _sourceFrame,
             _destinationFrame,
-            data.time
+            data.time.j2000Seconds()
         );
     }
     catch (const SpiceManager::SpiceException&) {

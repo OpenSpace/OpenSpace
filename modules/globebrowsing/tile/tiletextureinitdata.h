@@ -22,41 +22,70 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__
 
-#include <ghoul/filesystem/directory.h>
-#include <ghoul/filesystem/file.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
 
-#include <memory>
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
 
-struct TileIndex;
-struct RawTile;
-
-class TileDiskCache {
+/**
+ * All information needed to create a texture used for a Tile.
+ */
+class TileTextureInitData
+{
 public:
-    TileDiskCache(const std::string& name);
-        
-    std::shared_ptr<RawTile> get(const TileIndex& tileIndex);
-    bool has(const TileIndex& tileIndex) const;
-    bool put(const TileIndex& tileIndex, std::shared_ptr<RawTile> rawTile);
-        
-    static const std::string CACHE_ROOT;
-    
+    using HashKey = unsigned long long;
+    using ShouldAllocateDataOnCPU = ghoul::Boolean;
+    using Format = ghoul::opengl::Texture::Format;
+
+    TileTextureInitData(size_t width, size_t height, GLuint glType, Format textureFormat,
+        ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
+
+    TileTextureInitData(const TileTextureInitData& original);
+
+    ~TileTextureInitData() = default;
+
+    glm::ivec3 dimensionsWithPadding() const;
+    glm::ivec3 dimensionsWithoutPadding() const;
+    size_t nRasters() const;
+    size_t bytesPerDatum() const;
+    size_t bytesPerPixel() const;
+    size_t bytesPerLine() const;
+    size_t totalNumBytes() const;
+    GLuint glType() const;
+    Format ghoulTextureFormat() const;
+    GLint glTextureFormat() const;
+    bool shouldAllocateDataOnCPU() const;
+    HashKey hashKey() const;
+
+    const static glm::ivec2 tilePixelStartOffset;
+    const static glm::ivec2 tilePixelSizeDifference;
+
 private:
-    const std::string _name;
-        
-    ghoul::filesystem::Directory _cacheDir;
-        
-    std::string getFilePath(const TileIndex& tileIndex) const;
-    ghoul::filesystem::File getMetaDataFile(const TileIndex& tileIndex) const;
-    ghoul::filesystem::File getDataFile(const TileIndex& tileIndex) const;
+    void calculateHashKey();
+    unsigned int getUniqueIdFromTextureFormat(Format textureFormat) const;
+
+    HashKey _hashKey;
+    glm::ivec3 _dimensionsWithPadding;
+    glm::ivec3 _dimensionsWithoutPadding;
+    GLuint _glType;
+    Format _ghoulTextureFormat;
+    GLint _glTextureFormat;
+    size_t _nRasters;
+    size_t _bytesPerDatum;
+    size_t _bytesPerPixel;
+    size_t _bytesPerLine;
+    size_t _totalNumBytes;
+    bool _shouldAllocateDataOnCPU;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_DISK_CACHE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_TEXTURE_INIT_DATA___H__

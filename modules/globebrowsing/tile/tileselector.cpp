@@ -32,14 +32,17 @@ namespace openspace {
 namespace globebrowsing {
 namespace tileselector {
 
-ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup, const TileIndex& tileIndex) {
+ChunkTile getHighestResolutionTile(const LayerGroup& layerGroup,
+                                   const TileIndex& tileIndex) {
     TileUvTransform uvTransform;
     uvTransform.uvScale.x = 0;
-    ChunkTile mostHighResolution{ Tile::TileUnavailable, uvTransform, TileDepthTransform() };
+    ChunkTile mostHighResolution{
+        Tile::TileUnavailable, uvTransform, TileDepthTransform()
+    };
     mostHighResolution.tile = Tile::TileUnavailable;
     
 
-    for (const auto& layer : layerGroup.activeLayers()) {
+    for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
         ChunkTile chunkTile = layer->tileProvider()->getChunkTile(tileIndex);
         bool tileIsOk = chunkTile.tile.status() == Tile::Status::OK;
         bool tileHasMetaData = chunkTile.tile.metaData() != nullptr;
@@ -57,7 +60,7 @@ std::vector<ChunkTile> getTilesSortedByHighestResolution(const LayerGroup& layer
                                                          const TileIndex& tileIndex)
 {
     std::vector<ChunkTile> tiles;
-    for (const auto& layer : layerGroup.activeLayers()) {
+    for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
         tiles.push_back(layer->tileProvider()->getChunkTile(tileIndex));
     }
 
@@ -78,8 +81,10 @@ getTilesAndSettingsSortedByHighestResolution(const LayerGroup& layerGroup,
     const TileIndex& tileIndex)
 {
     std::vector<std::pair<ChunkTile, const LayerRenderSettings*> > tilesAndSettings;
-    for (const auto& layer : layerGroup.activeLayers()) {
-        tilesAndSettings.push_back({ layer->tileProvider()->getChunkTile(tileIndex), &layer->renderSettings() });
+    for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
+        tilesAndSettings.push_back({
+            layer->tileProvider()->getChunkTile(tileIndex), &layer->renderSettings()
+        });
     }
     std::sort(
         tilesAndSettings.begin(),
@@ -90,7 +95,20 @@ getTilesAndSettingsSortedByHighestResolution(const LayerGroup& layerGroup,
             return lhs.first.uvTransform.uvScale.x > rhs.first.uvTransform.uvScale.x;
         }
     );
-    
+    return tilesAndSettings;
+}
+
+std::vector<std::pair<ChunkTile, const LayerRenderSettings*> >
+getTilesAndSettingsUnsorted(const LayerGroup& layerGroup,
+    const TileIndex& tileIndex)
+{
+    std::vector<std::pair<ChunkTile, const LayerRenderSettings*> > tilesAndSettings;
+    for (const std::shared_ptr<Layer>& layer : layerGroup.activeLayers()) {
+        tilesAndSettings.push_back({
+            layer->tileProvider()->getChunkTile(tileIndex), &layer->renderSettings()
+        });
+    }
+    std::reverse(tilesAndSettings.begin(), tilesAndSettings.end());
     return tilesAndSettings;
 }
 

@@ -22,25 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
+#include <modules/globebrowsing/other/pixelbuffer.h>
+#include <ghoul/logging/logmanager.h>
 
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+namespace {
+    const char* _loggerCat = "PixelBuffer";
+};
 
-namespace openspace {
-namespace globebrowsing {
+using namespace openspace::globebrowsing;
 
-TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-    const TileIndex& tileIndex)
-    : _rawTileDataReader(rawTileDataReader)
-    , _chunkIndex(tileIndex) {}
-
-void TileLoadJob::execute() {
-    _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
+PixelBuffer::PixelBuffer(size_t numBytes, Usage usage)
+    : _numBytes(numBytes)
+    , _usage(usage)
+    , _isMapped(false)
+{
+    glGenBuffers(1, &_id);
+    bind();
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, _numBytes, 0, static_cast<GLenum>(_usage));
+    unbind();
 }
 
-std::shared_ptr<RawTile> TileLoadJob::product() const {
-    return _rawTile;
+PixelBuffer::~PixelBuffer() {
+    glDeleteBuffers(1, &_id);
 }
 
-} // namespace globebrowsing
-} // namespace openspace
+void* PixelBuffer::mapBuffer(Access access) {
+    void* dataPtr = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, static_cast<GLenum>(access));
+    _isMapped = dataPtr ? true : false;
+    return dataPtr;
+}
+
+void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access) {
+    void* dataPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset, length, access);
+    _isMapped = dataPtr ? true : false;
+    return dataPtr;
+}
+
+bool PixelBuffer::unMapBuffer() {
+    bool success = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    if (!success) {
+        LERROR("Unable to unmap pixel buffer, data may be corrupt!");
+    }
+    _isMapped = false;
+    return success;
+}
+
+void PixelBuffer::bind() {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _id);
+}
+
+void PixelBuffer::unbind() {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+}
+
+bool PixelBuffer::isMapped() const {
+    return _isMapped;
+}
+
+PixelBuffer::operator GLuint() const {
+    return _id;
+}

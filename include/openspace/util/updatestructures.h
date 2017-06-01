@@ -27,6 +27,7 @@
 
 #include <openspace/util/camera.h>
 #include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/time.h>
 
 namespace openspace {
 
@@ -44,11 +45,8 @@ struct TransformData {
 
 struct UpdateData {
     TransformData modelTransform;
-    double time;
-    double delta;
-    bool timePaused;
-    bool isTimeJump;
-    bool doPerformanceMeasurement;
+    const Time time;
+    const bool doPerformanceMeasurement;
 };
 
 
@@ -57,6 +55,7 @@ struct RenderData {
     // psc position to be removed in favor of the double precision position defined in
     // the translation in transform.
     psc position;
+    const Time time;
     bool doPerformanceMeasurement;
     int renderBinMask;
     TransformData modelTransform;

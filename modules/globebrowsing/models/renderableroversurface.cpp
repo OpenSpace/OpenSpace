@@ -29,6 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <modules/globebrowsing/chunk/chunknode.h>
 #include <modules/globebrowsing/models/modelprovider.h>
+#include <openspace/scene/scene.h>
 
 #include <ghoul/io/texture/texturereader.h>
 
@@ -357,7 +358,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		glEnable(GL_DEPTH_TEST);
 	}
 	_programObject->deactivate();
-	_cachingModelProvider->setLevel(level);
+	//_cachingModelProvider->setLevel(level);
 
 	if (_generalProperties.enablePath.value()) {
 		_renderableExplorationPath->setLevel(level);

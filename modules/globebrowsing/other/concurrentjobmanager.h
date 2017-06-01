@@ -39,13 +39,13 @@ struct Job {
     virtual ~Job();
 
     virtual void execute() = 0;
-    virtual std::shared_ptr<P> product() const = 0;
+    virtual std::shared_ptr<P> product() = 0;
 };
 
 /* 
-    * Templated Concurrent Job Manager
-    * This class is used execute specific jobs on one (1) parallell thread
-    */
+ * Templated Concurrent Job Manager
+ * This class is used execute specific jobs on one (1) parallell thread
+ */
 template<typename P>
 class ConcurrentJobManager {
 public:
@@ -58,8 +58,6 @@ public:
     std::shared_ptr<Job<P>> popFinishedJob();
 
     size_t numFinishedJobs() const;
-
-    void reset();
 
 private:
     ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;

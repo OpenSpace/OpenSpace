@@ -34,6 +34,8 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 
+#include <openspace/util/powerscaledcoordinate.h>
+
 namespace ghoul {
 namespace opengl {
 class ProgramObject;

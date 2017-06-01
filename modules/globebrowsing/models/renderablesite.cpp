@@ -27,6 +27,7 @@
 #include <modules/base/rendering/modelgeometry.h>
 #include <openspace/engine/openspaceengine.h>
 #include <modules/globebrowsing/tasks/imgreader.h>
+#include <openspace/scene/scene.h>
 #include <GL/GL.h>
 #include <fstream>
 #include "ogr_geometry.h"

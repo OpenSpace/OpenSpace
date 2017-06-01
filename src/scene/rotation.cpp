@@ -70,7 +70,7 @@ Rotation::Rotation()
     : properties::PropertyOwner("Rotation")
 {}
     
-Rotation::Rotation(const ghoul::Dictionary& dictionary)
+Rotation::Rotation(const ghoul::Dictionary&)
     : properties::PropertyOwner("Rotation")
 {}
     
@@ -82,6 +82,6 @@ const glm::dmat3& Rotation::matrix() const {
     return _matrix;
 }
 
-void Rotation::update(const UpdateData& data) {}
+void Rotation::update(const UpdateData&) {}
 
 } // namespace openspace

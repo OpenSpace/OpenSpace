@@ -29,6 +29,9 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/opengl/programobject.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -103,7 +106,7 @@ void PointGlobe::render(const RenderData& data) {
     _programObject->setUniform("globeRadius", avgRadius);
     _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-    _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+    _programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
 
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
@@ -116,8 +119,6 @@ void PointGlobe::render(const RenderData& data) {
 
     _programObject->deactivate();
 }
-
-void PointGlobe::update(const UpdateData& data) {}
 
 } // namespace globebrowsing
 } // namespace openspace

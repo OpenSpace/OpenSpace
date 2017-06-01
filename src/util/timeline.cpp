@@ -22,24 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LOADJOB___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LOADJOB___H__
-
-#include <modules/globebrowsing/other/concurrentjobmanager.h>
-
-#include <memory>
+#include <openspace/util/timeline.h>
 
 namespace openspace {
-namespace globebrowsing {
 
-struct RawTile;
+bool compareKeyframeTimes(const KeyframeBase& a, const KeyframeBase& b) {
+    return a.timestamp < b.timestamp;
+}
 
-struct LoadJob : public Job<RawTile> {
-    virtual void execute() = 0;
-    virtual std::shared_ptr<RawTile> product() const = 0;
-};
+bool compareTimeWithKeyframeTime(double a, const KeyframeBase& b) {
+    return a < b.timestamp;
+}
 
-} // namespace globebrowsing
-} // namespace openspace
+bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b) {
+    return a.timestamp < b;
+}
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LOADJOB___H__
+} // namespace
