@@ -78,6 +78,7 @@ public:
         std::vector<std::string>& sgctArguments, bool& requestClose);
     static void destroy();
     static OpenSpaceEngine& ref();
+    static bool isCreated();
 
     double runTime();
     void setRunTime(double t);
