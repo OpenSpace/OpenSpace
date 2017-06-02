@@ -111,4 +111,14 @@ globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
     return _tileCache.get();
 }
 
+scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
+    return {
+        "globebrowsing",
+        {},
+        {
+            "${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"
+        }
+    };
+}
+
 } // namespace openspace

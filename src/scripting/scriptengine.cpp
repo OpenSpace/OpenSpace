@@ -76,8 +76,8 @@ void ScriptEngine::initialize() {
     addBaseLibrary();
     LDEBUG("Initializing Lua state");
     initializeLuaState(_state);
-    LDEBUG("Remapping Print functions");
-    remapPrintFunction();
+    //LDEBUG("Remapping Print functions");
+    //remapPrintFunction();
 }
 
 void ScriptEngine::deinitialize() {}
@@ -88,7 +88,7 @@ void ScriptEngine::initializeLuaState(lua_State* state) {
     lua_setglobal(state, OpenSpaceLibraryName.c_str());
     
     LDEBUG("Add OpenSpace modules");
-    for (const LuaLibrary& lib : _registeredLibraries) {
+    for (LuaLibrary& lib : _registeredLibraries) {
         registerLuaLibrary(state, lib);
     }
 }
@@ -106,7 +106,8 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
     if (it == _registeredLibraries.end()) {
         // If not, we can add it after we sorted it
         std::sort(library.functions.begin(), library.functions.end(), sortFunc);
-        _registeredLibraries.insert(std::move(library));
+        _registeredLibraries.push_back(std::move(library));
+        std::sort(_registeredLibraries.begin(), _registeredLibraries.end());
     }
     else {
         // otherwise, we merge the libraries
@@ -127,15 +128,21 @@ void ScriptEngine::addLibrary(LuaLibrary library) {
                     "' has been defined twice");
                 return;
             }
-            else
+            else {
                 merged.functions.push_back(fun);
+            }
+        }
+
+        for (const std::string& script : library.scripts) {
+            merged.scripts.push_back(script);
         }
 
         _registeredLibraries.erase(it);
 
         // Sort the merged library before inserting it
         std::sort(merged.functions.begin(), merged.functions.end(), sortFunc);
-        _registeredLibraries.insert(std::move(merged));
+        _registeredLibraries.push_back(std::move(merged));
+        std::sort(_registeredLibraries.begin(), _registeredLibraries.end());
     }
 }
 
@@ -345,13 +352,11 @@ bool ScriptEngine::isLibraryNameAllowed(lua_State* state, const std::string& nam
     return result;
 }
 
-void ScriptEngine::addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace) {
-    assert(state);
+void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library, bool replace) {
+    ghoul_assert(state, "State must not be nullptr");
     for (LuaLibrary::Function p : library.functions) {
         if (!replace) {
-            //ghoul::lua::logStack(_state);
             lua_getfield(state, -1, p.name.c_str());
-            //ghoul::lua::logStack(_state);
             const bool isNil = lua_isnil(state, -1);
             if (!isNil) {
                 LERROR("Function name '" << p.name << "' was already assigned");
@@ -359,13 +364,49 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, const LuaLibrary& libra
             }
             lua_pop(state, 1);
         }
-        //ghoul::lua::logStack(_state);
         lua_pushstring(state, p.name.c_str());
-        //ghoul::lua::logStack(_state);
         lua_pushcfunction(state, p.function);
-        //ghoul::lua::logStack(_state);
         lua_settable(state, TableOffset);
-        //ghoul::lua::logStack(_state);
+    }
+
+    for (const std::string& script : library.scripts) {
+        // First we run the script to set its values in the current state
+        ghoul::lua::runScriptFile(state, absPath(script));
+
+        library.documentations.clear();
+        // Then, we extract the documentation information from the file
+        lua_pushstring(state, "documentation");
+        lua_gettable(state, -2);
+        if (lua_isnil(state, -1)) {
+            LERROR(
+                "Module '" << library.name << "' did not provide a documentation in " <<
+                "script file '" << script << "'");
+        }
+        else {
+            lua_pushnil(state);
+            while (lua_next(state, -2)) {
+                lua_pushstring(state, "Name");
+                lua_gettable(state, -2);
+                const std::string name = lua_tostring(state, -1);
+                lua_pop(state, 1);
+
+                lua_pushstring(state, "Arguments");
+                lua_gettable(state, -2);
+                const std::string arguments = lua_tostring(state, -1);
+                lua_pop(state, 1);
+
+                lua_pushstring(state, "Documentation");
+                lua_gettable(state, -2);
+                const std::string documentation = lua_tostring(state, -1);
+                lua_pop(state, 1);
+
+                lua_pop(state, 1);
+
+                library.documentations.push_back({ name, arguments, documentation });
+
+            }
+            lua_pop(state, 1);
+        }
     }
 }
     
@@ -423,6 +464,12 @@ void ScriptEngine::addBaseLibrary() {
                 "well as resolving relative paths"
             },
             {
+                "fileExists",
+                &luascriptfunctions::fileExists,
+                "string",
+                "Checks whether the provided file exists."
+            },
+            {
                 "setPathToken",
                 &luascriptfunctions::setPathToken,
                 "string, string",
@@ -476,42 +523,37 @@ void ScriptEngine::remapPrintFunction() {
     //ghoul::lua::logStack(_state);
 }
 
-bool ScriptEngine::registerLuaLibrary(lua_State* state, const LuaLibrary& library) {
+bool ScriptEngine::registerLuaLibrary(lua_State* state, LuaLibrary& library) {
     ghoul_assert(state, "State must not be nullptr");
 
-    if (library.functions.empty()) {
-        LERROR("Lua library '" << library.name << "' does not have any functions");
-        return false;
-    }
-
-    //ghoul::lua::logStack(_state);
     lua_getglobal(state, OpenSpaceLibraryName.c_str());
-    //ghoul::lua::logStack(_state);
     if (library.name.empty()) {
-        //ghoul::lua::logStack(_state);
         addLibraryFunctions(state, library, true);
-        //ghoul::lua::logStack(_state);
         lua_pop(state, 1);
-        //ghoul::lua::logStack(_state);
     }
     else {
         const bool allowed = isLibraryNameAllowed(state, library.name);
         if (!allowed) {
             return false;
         }
-        
-        //ghoul::lua::logStack(_state);
-        
-        lua_pushstring(state, library.name.c_str());
-        //ghoul::lua::logStack(_state);
-        lua_newtable(state);
-        //ghoul::lua::logStack(_state);
-        addLibraryFunctions(state, library, false);
-        lua_settable(state, TableOffset);
-        //ghoul::lua::logStack(_state);
 
-        //_registeredLibraries.insert(library);
-        //_registeredLibraries.push_back(library);
+        // We need to first create the table and then retrieve it as the table will
+        // probably be used by scripts already
+
+        // Add the table
+        lua_pushstring(state, library.name.c_str());
+        lua_newtable(state);
+        lua_settable(state, TableOffset);
+
+        // Retrieve the table
+        lua_pushstring(state, library.name.c_str());
+        lua_gettable(state, -2);
+
+        // Add the library functions into the table
+        addLibraryFunctions(state, library, false);
+
+        // Pop the table
+        lua_pop(state, 1);
     }
     return true;
 }
@@ -522,9 +564,19 @@ std::vector<std::string> ScriptEngine::allLuaFunctions() const {
     for (const LuaLibrary& library : _registeredLibraries) {
         for (const LuaLibrary::Function& function : library.functions) {
             std::string total = "openspace.";
-            if (!library.name.empty())
+            if (!library.name.empty()) {
                 total += library.name + ".";
+            }
             total += function.name;
+            result.push_back(std::move(total));
+        }
+
+        for (const LuaLibrary::Documentation& doc : library.documentations) {
+            std::string total = "openspace.";
+            if (!library.name.empty()) {
+                total += library.name + ".";
+            }
+            total += doc.name;
             result.push_back(std::move(total));
         }
     }
@@ -554,10 +606,23 @@ std::string ScriptEngine::generateJson() const {
             json << "\"arguments\": \"" << f.argumentText << "\", ";
             json << "\"help\": \"" << f.helpText << "\"";
             json << "}";
-            if (&f != &l.functions.back()) {
+            if (&f != &l.functions.back() || !l.documentations.empty()) {
                 json << ",";
             }
         }
+
+        for (const LuaLibrary::Documentation& doc : l.documentations) {
+            json << "{";
+            json << "\"name\": \"" << doc.name << "\", ";
+            json << "\"arguments\": \"" << doc.parameter<< "\", ";
+            json << "\"help\": \"" << doc.description<< "\"";
+            json << "}";
+            if (&doc != &l.documentations.back()) {
+                json << ",";
+            }
+        }
+
+
         json << "]}";
 
     }
@@ -624,14 +689,14 @@ bool ScriptEngine::writeLog(const std::string& script) {
 }
 
 void ScriptEngine::presync(bool isMaster) {
-    if (!isMaster) return;
+    if (!isMaster) {
+        return;
+    }
 
     _mutex.lock();
-
     if (!_queuedScripts.empty()) {
         _currentSyncedScript = _queuedScripts.back().first;
         bool remoteScripting = _queuedScripts.back().second;
-
 
         //Not really a received script but the master also needs to run the script...
         _receivedScripts.push_back(_currentSyncedScript);
@@ -640,11 +705,8 @@ void ScriptEngine::presync(bool isMaster) {
         if (OsEng.parallelConnection().isHost() && remoteScripting) {
             OsEng.parallelConnection().sendScript(_currentSyncedScript);
         }
-
     }
-
     _mutex.unlock();
-
 }
 
 void ScriptEngine::encode(SyncBuffer* syncBuffer) {
@@ -682,13 +744,12 @@ void ScriptEngine::postsync(bool) {
 }
 
 void ScriptEngine::queueScript(const std::string &script, ScriptEngine::RemoteScripting remoteScripting){
-    if (script.empty())
+    if (script.empty()) {
         return;
+    }
     
     _mutex.lock();
-
     _queuedScripts.insert(_queuedScripts.begin(), std::make_pair(script, remoteScripting));
-
     _mutex.unlock();
 }
 

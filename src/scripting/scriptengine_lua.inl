@@ -229,6 +229,30 @@ int setPathToken(lua_State* L) {
 /**
  * \ingroup LuaScripts
  * walkDirectory(string, bool, bool):
+ * Walks a directory and returns the contents of the directory as absolute paths. The
+ * first argument is the path of the directory that should be walked, the second argument
+ * determines if the walk is recursive and will continue in contained directories. The
+ * default value for this parameter is "false". The third argument determines whether the
+ * table that is returned is sorted. The default value for this parameter is "false".
+ */
+int fileExists(lua_State* L) {
+    const int nArguments = lua_gettop(L);
+    if (nArguments != 1) {
+        return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
+
+    const std::string file = luaL_checkstring(L, -1);
+    const bool e = FileSys.fileExists(absPath(file));
+    lua_pushboolean(
+        L,
+        e ? 1 : 0
+    );
+    return 1;
+}
+
+/**
+ * \ingroup LuaScripts
+ * walkDirectory(string, bool, bool):
  * Walks a directory and returns the contents of the directory as absolute paths. The 
  * first argument is the path of the directory that should be walked, the second argument
  * determines if the walk is recursive and will continue in contained directories. The
