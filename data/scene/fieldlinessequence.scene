@@ -15,7 +15,9 @@ function preInitialization()
     -- openspace.time.setTime("2015 JUN 30 09:17:32.000") -- ENLIL time
     -- openspace.time.setTime("2010 OCT 16 07:30:00.000") -- ENLIL (Aisla) time
     -- openspace.time.setTime("2010 OCT 30 14:19:54.000") -- ENLIL (Aisla) actual time
-    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys_fieldlinessequence.lua'))
+    -- dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 end
 
 function postInitialization()
