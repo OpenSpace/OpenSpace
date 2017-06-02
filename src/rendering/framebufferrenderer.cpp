@@ -669,7 +669,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
                 _deferredcastData[deferredcaster],
                 *deferredcastProgram);
 
-            deferredcastProgram->deactivate();            
+            deferredcastProgram->deactivate();                        
 
         } else {
             LWARNING("Deferredcaster is not attached when trying to perform deferred task");

@@ -455,7 +455,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
   if (groundHit) {
     return finalScatteringRadiance;
   } else {
-    return spaceColor.rgb + finalScatteringRadiance;
+    return ((r-Rg)/(Rt-Rg))*spaceColor.rgb + finalScatteringRadiance;
   }
   
 }
@@ -719,8 +719,7 @@ void main() {
         dvec4 tmpRInvPos            = dInverseCamRotTransform * farthestPosition;        
         */
         // Version with milkway enabled
-        dvec4 tmpRInvPos            = dInverseCamRotTransform * meanPosition;
-        
+        dvec4 tmpRInvPos            = dInverseCamRotTransform * meanPosition;        
         dvec4 fragWorldCoords       = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
         //dvec4 tmpRInvNormal         = dInverseCamRotTransform * meanNormal;
         //dvec4 fragNormalWorldCoords = dvec4(dvec3(tmpRInvNormal) + dCampos, 1.0);
@@ -740,7 +739,7 @@ void main() {
         fragObjectCoords.xyz /= 1000.0;
         
         if (meanPosition.xyz != vec3(0.0) && (pixelDepth < offset)) {        
-          renderTarget = meanColor;
+          renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
         } else {
           // Following paper nomenclature      
           double t = offset;                  
@@ -795,6 +794,6 @@ void main() {
         renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
         //renderTarget = meanColor;
       }
-    }                 
+    }                     
 }
 

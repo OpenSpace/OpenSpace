@@ -1,5 +1,96 @@
 --local marsEllipsoid = {3396190.0, 3396190.0, 3376200.0}
+--local marsEllipsoid = {3376200.0, 3376200.0, 3376200.0}
 local marsEllipsoid = {3396190.0, 3396190.0, 3396190.0}
+                           
+local patches = {
+    {
+        Name = "West Candor Chasma",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/CTX/West_Candor_Chasma_longlat_global.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt")
+    },
+    {
+        Name = "Southwest Candor Chasma",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt")
+    },
+    {
+        Name = "Kaiser Crater",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Active_Dune_Gullies_in_Kaiser_Crater_Texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Active_Dune_Gullies_in_Kaiser_Crater_Heightmap.vrt")
+    },
+    {
+        Name = "Eberswalde Crater",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Delta_Structure_in_Eberswalde_Crater_Texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Delta_Structure_in_Eberswalde_Crater_Heightmap.vrt")
+    },
+    {
+        Name = "Mojave Crater",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Dissected_Wall_of_Mojave_Crater_Texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Dissected_Wall_of_Mojave_Crater_Heightmap.vrt")
+    },
+    {
+        Name = "Tartarus Montes",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Field_of_Cones_in_the_Tartarus_Montes_Texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Field_of_Cones_in_the_Tartarus_Montes_Heightmap.vrt")
+    },
+    {
+        Name = "Juventae Chasma 2",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Light-toned_Layering_in_Plains_West_of_Juventae_Chasma_2_Texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Light-toned_Layering_in_Plains_West_of_Juventae_Chasma_2_Heightmap.vrt")
+    },
+    {
+        Name = "Ganges Chasma",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Light-Toned_Mounds_in_Ganges_Chasma_Texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Light-Toned_Mounds_in_Ganges_Chasma_Heightmap.vrt")
+    },
+    {
+        Name = "MSL EDL Landing Site",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/MSL_EDL_Landing_Site_6_Days_texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/MSL_EDL_Landing_Site_6_Days_hole_filled_heightmap.vrt")
+    },
+    {
+        Name = "Northeast Melas Chasma",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/northeast_melas_chasma_dune_fields_and_wall_rock_texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/northeast_melas_chasma_dune_fields_and_wall_rock_heightmap.vrt")
+    },
+    {
+        Name = "Olympus Mons",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Olympus_Mons-Fissure_and_Channel-17N127W_Texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Olympus_Mons-Fissure_and_Channel-17N127W_Heightmap.vrt")
+    },
+    {
+        Name = "Melas Chasma",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Sulfates_and_Valley_System_in_Melas_Chasma_Basin_Texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Sulfates_and_Valley_System_in_Melas_Chasma_Basin_Heightmap.vrt")
+    },
+    {
+        Name = "Elysium Mons",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Unusual_Depression_Near_Elysium_Mons_Texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Unusual_Depression_Near_Elysium_Mons_Heightmap.vrt")
+    },
+    {
+        Name = "Mars Exploration Rover",
+        Texture = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Texture.vrt"),
+        Height = openspace.absPath("${MARS_DATA}/map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt")
+    },
+}
+
+local function createTextureLayers(patches)
+    result = {}
+    for k,v in pairs(patches) do
+        table.insert(result, { Name = v["Name"], FilePath = v["Texture"] })
+    end
+    return result
+end
+
+local function createHeightLayers(patches)
+    result = {}
+    for k,v in pairs(patches) do
+        table.insert(result, { Name = v["Name"], FilePath = v["Height"], TilePixelSize = 90, DoPreProcessing = true })
+    end
+    return result
+end
+
 return {
     -- Barycenter module
     {
@@ -35,10 +126,9 @@ return {
             CameraMinHeight = 10,
             SegmentsPerPatch = 90,
             -- Allows camera to go down 10000 meters below the reference ellipsoid InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
-           
-            Atmosphere = {
+             Atmosphere = {
                 -- Atmosphere radius in Km
-                AtmoshereRadius = 3476.0,
+                AtmoshereRadius = 3423.0,
                 --PlanetRadius    = 3396.19,
                 PlanetRadius = 3393.0,
                 PlanetAverageGroundReflectance = 0.1,
@@ -51,7 +141,7 @@ return {
                         -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
                     },
                     -- Thichkness of atmosphere if its density were uniform, in Km
-                    H_R = 11.0,
+                    H_R = 5.0,
                 },
                 -- Default
                 Mie = {
@@ -66,29 +156,23 @@ return {
                     -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
                     G = 0.85,
                 },
+                Image = {
+                    ToneMapping = jToneMapping,
+                    Exposure = 0.4,
+                    Gamma = 2.2,                                                                      
+                },
                 Debug = {
                     -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)
                     PreCalculatedTextureScale = 1.0,
                     SaveCalculatedTextures = false, 
                 },   
-            },
-           
+            },                                     
             Layers = {
                 ColorLayers = {
                     {
-                        Name = "Viking combo",
-                        Type = "ByLevel",
-                        LevelTileProviders = {
-                            {
-                                MaxLevel = 3, 
-                                TileProvider = { FilePath = "textures/mars.jpg", }, 
-                            },
-                            {
-                                MaxLevel = 22, 
-                                TileProvider = { FilePath = "map_service_configs/MARS_Viking_MDIM21.xml" },
-                            },
-                        },
-                        Enabled = true,
+                        Name = "Viking",
+                        FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
+                        -- Enabled = true,
                     },
                     -- {
                     --     Type = "SingleImage",
@@ -105,17 +189,13 @@ return {
                         FilePath = "map_service_configs/Utah/MolaPseudoColor.xml",
                         -- Enabled = true,
                     },
-                    --[[
                     {
-                        Name = "Mars Viking Clr",
-                        FilePath = "map_datasets/Viking/Mars_Viking_ClrMosaic_global_925m_longlat_full.vrt",
-                        Enabled = true,
-                    },
-                    ]]
+                        Name = "Mars COL v006",
+                        FilePath = openspace.absPath("${MARS_DATA}/map_datasets/mars_COL_v006_mars2000_rgb.vrt"),
+                        Enabled = true
+                    }
                 },
-                GrayScaleLayers = {
-                    
-                },
+                GrayScaleLayers = {},
                 GrayScaleColorOverlays = {
                     {
                         Name = "CTX Mosaic [Europe]",
@@ -126,15 +206,7 @@ return {
                         Name = "CTX Mosaic [Utah]",
                         FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
                     },
-                    {
-                        Name = "West Candor Chasma",
-                        FilePath = "map_datasets/CTX/West_Candor_Chasma_longlat_global.vrt",
-                        --Enabled = true,
-                    },
-                    {
-                        Name = "Layered Rock Outcrops in Southwest Candor Chasma",
-                        FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
-                    },
+                    table.unpack(createTextureLayers(patches))
                     --[[{
                         Name = "Themis IR Day",
                         FilePath = "map_service_configs/Utah/ThemisIRDay.xml",
@@ -176,48 +248,7 @@ return {
                         TilePixelSize = 90,
                         DoPreProcessing = true,
                     },
-                    --[[
-                    {
-                        Name = "Mola Elevation [Utah]",
-                        FilePath = "map_service_configs/Utah/Mola_Elevation.xml",
-                        Enabled = false,
-                        TilePixelSize = 90,
-                        DoPreProcessing = true,
-                    },
-                    {
-                        Name = "Mola Elevation CTX",
-                        FilePath = "map_service_configs/Utah/MolaCTX_Elevation.xml",
-                        -- Enabled = true,
-                        TilePixelSize = 90,
-                        DoPreProcessing = true,
-                    },]]   
-                    {
-                        Name = "West Candor Chasma",
-                        FilePath = "map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt",
-                        --Enabled = true,
-                        MinimumPixelSize = 90,
-                        DoPreProcessing = true,
-                    },
-                    {
-                        Name = "Layered Rock Outcrops in Southwest Candor Chasma",
-                        FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt",
-                        TilePixelSize = 90,
-                        DoPreProcessing = true,
-                    },
-                    --[[
-                    {
-                        Name = "West Candor Chasma",
-                        FilePath = "map_datasets/CTX/West_Candor_Chasma_DEM_longlat_global.vrt",
-                        --Enabled = true,
-                        TilePixelSize = 90,
-                        DoPreProcessing = true,
-                    },]]              
-                    --[[
-                    {
-                        Name = "Part of Area Traversed by the Mars Exploration Rover",
-                        FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Heightmap.vrt",
-                    },
-                    ]]
+                    table.unpack(createHeightLayers(patches))
                 },
             },
         }
