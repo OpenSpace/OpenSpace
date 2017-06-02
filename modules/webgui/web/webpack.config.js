@@ -40,8 +40,6 @@ module.exports = {
 
         // match the output path
         publicPath: '/static/',
-
-        // match the output `publicPath`
     },
 
     module: {
