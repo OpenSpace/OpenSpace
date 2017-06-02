@@ -428,6 +428,36 @@ void ScriptEngine::addBaseLibrary() {
                 "string, string",
                 "Registers a new path token provided by the first argument to the path "
                 "provided in the second argument"
+            },
+            {
+                "walkDirectory",
+                &luascriptfunctions::walkDirectory,
+                "string [bool, bool]",
+                "Walks a directory and returns all contents (files and directories) of "
+                "the directory as absolute paths. The first argument is the path of the "
+                "directory that should be walked, the second argument determines if the "
+                "walk is recursive and will continue in contained directories. The third "
+                "argument determines whether the table that is returned is sorted."
+            },
+            {
+                "walkDirectoryFiles",
+                &luascriptfunctions::walkDirectoryFiles,
+                "string [bool, bool]",
+                "Walks a directory and returns the files of the directory as absolute "
+                "paths. The first argument is the path of the directory that should be "
+                "walked, the second argument determines if the walk is recursive and "
+                "will continue in contained directories. The third argument determines "
+                "whether the table that is returned is sorted."
+            },
+            {
+                "walkDirectoryFolder",
+                &luascriptfunctions::walkDirectoryFolder,
+                "string [bool, bool]",
+                "Walks a directory and returns the subfolders of the directory as "
+                "absolute paths. The first argument is the path of the directory that "
+                "should be walked, the second argument determines if the walk is "
+                "recursive and will continue in contained directories. The third "
+                "argument determines whether the table that is returned is sorted."
             }
         }
     };
