@@ -107,11 +107,14 @@ private:
     bool _updatingCurrentLevelOfResolution = false;
     bool _initializePBO;
     bool _pboIsDirty = false;
+    bool _timeToUpdateTexture = false;
 
     unsigned int _fullResolution;
     double _deltaTimeLast = 0.0;
     double _realTimeDiff;
 
+    bool _isWithinFrustumLast = true;
+    std::string _name;
     StreamBuffer<SolarImageData> _streamBuffer;
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
     std::string _currentActiveInstrument;
@@ -128,6 +131,7 @@ private:
     bool initialize() override;
     bool deinitialize() override;
     bool isReady() const override;
+    bool checkBoundaries(const RenderData& data);
 };
 
 } // namespace openspace

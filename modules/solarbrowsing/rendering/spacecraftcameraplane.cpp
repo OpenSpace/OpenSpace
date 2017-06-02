@@ -73,7 +73,7 @@ void SpacecraftCameraPlane::update() {
 }
 
 bool SpacecraftCameraPlane::isReady() {
-  return _planeShader && _frustumShader;
+    return _planeShader && _frustumShader;
 }
 
 void SpacecraftCameraPlane::createPlaneAndFrustum(const double& moveDistance) {
@@ -195,6 +195,7 @@ void SpacecraftCameraPlane::render(
 
     const glm::dvec3 up = spacecraftRotWorld * glm::dvec3(0.0, 0.0, 1.0);
     _position = spacecraftPosWorld + offset;
+    _normal = glm::normalize(spacecraftPosWorld - _position);
     _rotation = glm::lookAt(glm::normalize(spacecraftPosWorld), glm::dvec3(sunPositionWorld), up);
     const glm::dmat4 rotationInv = glm::inverse(_rotation);
 

@@ -68,7 +68,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _gammaValue("gammaValue", "Gamma", 0.9, 0.1, 10.0)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
-    , _bufferSize("bufferSize", "Buffer Size", 15, 1, 100)
+    , _bufferSize("bufferSize", "Buffer Size", 5, 1, 300)
     , _displayTimers("displayTimers", "Display Timers", false)
     , _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
     , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 85, 0, 300)
@@ -83,6 +83,10 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     std::string target;
     if (dictionary.getValue("Target", target)) {
         _target = target;
+    }
+
+    if (!dictionary.getValue("Name", _name)) {
+        throw ghoul::RuntimeError("Nodename has to be specified");
     }
 
     glm::dvec2 magicPlaneOffset;
@@ -399,6 +403,18 @@ void RenderableSolarImagery::performImageTimestep(const double& osTime) {
     }
 }
 
+bool RenderableSolarImagery::checkBoundaries(const RenderData& data) {
+    const glm::dvec3& normal = _spacecraftCameraPlane->normal();
+    const glm::dvec3& cameraPosition = data.camera.positionVec3();
+    const glm::dvec3& planePosition = _spacecraftCameraPlane->worldPosition();
+
+    const glm::dvec3 toCamera = glm::normalize(cameraPosition - planePosition);
+    if (glm::dot(toCamera, normal) < 0) {
+        return false;
+    }
+    return true;
+}
+
 void RenderableSolarImagery::update(const UpdateData& data) {
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
@@ -412,14 +428,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         _deltaTimeLast = dt;
     }
 
-    bool timeToUpdateTexture = _realTimeDiff > _minRealTimeUpdateInterval;
-    // Update texture
-    // The bool blockers might probably not be needed now
-    if (timeToUpdateTexture && !_updatingCurrentLevelOfResolution
-        && !_updatingCurrentActiveChannel) {
-        performImageTimestep(OsEng.timeManager().time().j2000Seconds());
-        _lastUpdateRealTime = _realTime;
-    }
+    _timeToUpdateTexture = _realTimeDiff > _minRealTimeUpdateInterval;
 
     // Update lookup table, TODO: No need to do this every update
     _lut = _tfMap[_currentActiveInstrument].get();
@@ -430,6 +439,22 @@ void RenderableSolarImagery::render(const RenderData& data) {
     if (!isReady()) {
         return;
     }
+
+    const bool isWithinFrustum = checkBoundaries(data);
+    if (_isWithinFrustumLast != isWithinFrustum) {
+        //_pboIsDirty = false;
+        fillBuffer(OsEng.timeManager().time().j2000Seconds());
+    }
+    _isWithinFrustumLast = isWithinFrustum;
+
+    // Update texture
+    // The bool blockers might probably not be needed now
+    if (_timeToUpdateTexture && !_updatingCurrentLevelOfResolution
+        && !_updatingCurrentActiveChannel && (isWithinFrustum || _initializePBO)) {
+        performImageTimestep(OsEng.timeManager().time().j2000Seconds());
+        _lastUpdateRealTime = _realTime;
+    }
+
     // TODO: We want to create sun imagery node from within the module
     const glm::dvec3& sunPositionWorld
           = OsEng.renderEngine().scene()->sceneGraphNode(_target)->worldPosition();

@@ -48,7 +48,7 @@ public:
     bool isReady();
     bool destroy();
 
-    // Local coordinates
+    const glm::vec3& normal() const { return _normal; };
     const glm::dvec3& worldPosition() const { return _position; }
     const glm::dmat4& worldRotation() const { return _rotation; }
 
@@ -68,6 +68,7 @@ private:
  //   glm::dmat4 _spacecraftRotation.
     glm::dvec3 _position;
     glm::dmat4 _rotation;
+    glm::vec3 _normal;
 
     glm::dvec2 _centerPixel;
     double _gaussianMoveFactor;

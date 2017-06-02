@@ -134,13 +134,13 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
     auto t1 = Clock::now();
 
     ImageMetadata im;
-    const std::string preprocessedFilename = std::string(file.fullBaseName() + ".bmp");
-    if (FileSys.fileExists(preprocessedFilename)) {
-        LDEBUG("Setting pre processed " << preprocessedFilename);
-        im.preprocessedFilename = preprocessedFilename;
-    } else {
-        im.preprocessedFilename = "";
-    }
+    // const std::string preprocessedFilename = std::string(file.fullBaseName() + ".bmp");
+    // if (FileSys.fileExists(preprocessedFilename)) {
+    //     LDEBUG("Setting pre processed " << preprocessedFilename);
+    //     im.preprocessedFilename = preprocessedFilename;
+    // } else {
+    //     im.preprocessedFilename = "";
+    // }
 
     const std::string filename = std::string(file.fullBaseName() + ".json");
 
