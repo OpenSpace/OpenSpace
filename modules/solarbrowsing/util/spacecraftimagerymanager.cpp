@@ -167,7 +167,7 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
     if (im.spacecraftType == "SOHO") {
         std::string sScale = data["PLATESCL"];
         float plateScale = stof(sScale);
-        im.scale = 1.0 / plateScale;
+        im.scale = 1.0 / (plateScale / 2.0);
         im.isCoronaGraph = true;
     } else {
         float sunRadiusPixels = 0.f;
