@@ -412,10 +412,6 @@ void SimpleJ2kCodec::SetupDecoder(const int resolutionLevel, const int numQualit
     _decoderParams.cp_layer = numQualityLayers;
     _decoderParams.cp_reduce = resolutionLevel;
 
-    // if (numThreads != ALL_THREADS) {
-    //   _decoderParams.numThreads = numThreads;
-    // }
-
     switch (_decoderParams.decod_format) {
         case J2K_CFMT: {  // JPEG-2000 codestream
             _decoder = opj_create_decompress(OPJ_CODEC_J2K);
@@ -452,6 +448,13 @@ void SimpleJ2kCodec::SetupDecoder(const int resolutionLevel, const int numQualit
           return;
         }
     }
+
+    // NOTE: Broken internal multithreading
+    // if (opj_has_thread_support()) {
+    //     if (!opj_codec_set_threads(_decoder, 2)) {
+    //         std::cerr << "Failed to set multi-threads threads" << std::endl;
+    //     };
+    // }
 
     // if (_verboseMode) {
     //     // Extract some info from the code stream
