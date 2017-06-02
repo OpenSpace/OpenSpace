@@ -22,12 +22,16 @@ public:
                                     const int numQualityLayers = 1, const int x0 = -1,
                                     const int y0 = -1, const int x1 = -1, const int y1 = -1,
                                     const int numThreads = ALL_THREADS);
+
   // Decode into a client allocated buffer
   void DecodeTileIntoBuffer(const int tileId, const std::string& path,
                             unsigned char& buffer, const int resolutionLevel,
                             const int numQualityLayers = 1, const int x0 = -1,
                             const int y0 = -1, const int x1 = -1, const int y1 = -1,
                             const int numThreads = ALL_THREADS);
+
+  void DecodePGMIntoBuffer(const std::string& path, unsigned char* buffer);
+  void DecodeBMPIntoBuffer(const std::string& path, unsigned char* buffer);
 
   void DecodeIntoBuffer(const std::string& path, unsigned char* buffer,
                         const int resolutionLevel, const int numQualityLayers = 1,

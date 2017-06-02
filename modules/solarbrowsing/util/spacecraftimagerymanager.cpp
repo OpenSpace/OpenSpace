@@ -133,9 +133,23 @@ void SpacecraftImageryManager::loadTransferFunctions(
 ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::File& file) {
     auto t1 = Clock::now();
 
-    const std::string filename = std::string(file.fullBaseName() + ".json");
-    using json = nlohmann::json;
     ImageMetadata im;
+    const std::string preprocessedFilename = std::string(file.fullBaseName() + ".bmp");
+    if (FileSys.fileExists(preprocessedFilename)) {
+        LDEBUG("Setting pre processed " << preprocessedFilename);
+        im.preprocessedFilename = preprocessedFilename;
+    } else {
+        im.preprocessedFilename = "";
+    }
+
+    const std::string filename = std::string(file.fullBaseName() + ".json");
+
+    if (!FileSys.fileExists(filename)) {
+        LERROR(file.fullBaseName() << " had no metadata");
+        return im;
+    }
+
+    using json = nlohmann::json;
 
     std::ifstream i(filename);
     json j;

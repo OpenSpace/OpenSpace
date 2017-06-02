@@ -47,6 +47,7 @@ class TransferFunction;
 // Assume everythign in arcsec to minimize metadata
 struct ImageMetadata {
     std::string filename;
+    std::string preprocessedFilename;
     std::string spacecraftType;
     int fullResolution;
     float scale;

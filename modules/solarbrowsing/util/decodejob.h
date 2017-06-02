@@ -58,13 +58,20 @@ public:
         //SolarImageData imd{new unsigned char[_decodeData.totalImageSize],
         //                   _decodeData.totalImageSize, _decodeData.path,
          //                  _decodeData.timeObserved};
+
+        // TODO RESOLUTION BUGG!!!!
         const unsigned int totalImageSize
               = _decodeData.im->fullResolution * _decodeData.im->fullResolution;
         SolarImageData imd {new unsigned char[totalImageSize],
                             _decodeData.im,
                             _decodeData.timeObserved};
         SimpleJ2kCodec j2c(_decodeData.verboseMode);
+
+      /*  if (imd.im->preprocessedFilename != "") {
+            j2c.DecodeBMPIntoBuffer(imd.im->preprocessedFilename, imd.data);
+        } else {*/
         j2c.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
+        //}
         _solarImageData = std::make_shared<SolarImageData>(std::move(imd));
     }
 

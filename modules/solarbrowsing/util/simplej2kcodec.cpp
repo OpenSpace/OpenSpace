@@ -6,6 +6,10 @@
 #include <cstring>
 #include <chrono>
 
+#include <fstream>
+#include <sstream>
+#include <SOIL.h>
+
 typedef std::chrono::high_resolution_clock Clock;
 
 #define JP2_RFC3745_MAGIC "\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
@@ -96,6 +100,81 @@ SimpleJ2kCodec::SimpleJ2kCodec(const bool verboseMode)
 
 SimpleJ2kCodec::~SimpleJ2kCodec(){
     Destroy();
+}
+
+void SimpleJ2kCodec::DecodeBMPIntoBuffer(const std::string& path, unsigned char* buffer) {
+
+  auto t1 = Clock::now();
+
+  int width, height;
+  unsigned char* image =  SOIL_load_image(path.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
+  auto t2 = Clock::now();
+
+  // TODO: efficiency
+  for (int i = 0; i < width * height; i++) {
+    buffer[i] = image[i];
+  }
+
+  if (_verboseMode) {
+      std::cout
+            << "Decode time BMP "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+            << " ms" << std::endl;
+  }
+}
+
+void SimpleJ2kCodec::DecodePGMIntoBuffer(const std::string& path, unsigned char* buffer) {
+  auto t1 = Clock::now();
+  int textureWidth = 0;
+  int textureHeight = 0;
+  std::ifstream infile(path);
+  //std::stringstream ss;
+  std::string line = "";
+
+  // Version
+  getline(infile, line);
+  if (line.compare("P5") != 0) {
+    std::cerr << "Version error" << std::endl;
+  }
+  if (_verboseMode) {
+    std::cerr << "Version : " << line;
+  }
+
+  // // Comment
+  // getline(infile, line);
+  // if (_verboseMode) {
+  //   std::cerr << "Comment : " << line;
+  // }
+
+  // String stream
+ // ss << infile.rdbuf();
+  // size
+  infile >> textureWidth;
+  infile >> textureHeight;
+
+  int maxValue;
+  infile >> maxValue;
+
+  if (_verboseMode) {
+    std::cerr << " textureWidth: " << textureWidth << " , " << " textureHeight: " << textureHeight << " Max value: " << maxValue << std::endl;
+  }
+
+  // TODO: efficiency
+  char greyScaleValue;
+  for (int l = 0; l < textureHeight; l++) {
+      for(int k = 0; k < textureWidth; k++) {
+          infile >> greyScaleValue;
+          buffer[k * textureWidth + l] = greyScaleValue;
+      }
+  }
+  auto t2 = Clock::now();
+
+  if (_verboseMode) {
+      std::cout
+            << "Decode time PGM "
+            << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+            << " ms" << std::endl;
+  }
 }
 
 void SimpleJ2kCodec::DecodeIntoBuffer(const std::string& path, unsigned char* buffer,
