@@ -78,11 +78,11 @@ Fragment getFragment()
     frag.depth = depth;
 
     // G-Buffer
-    frag.gColor = diffuse;
-    frag.gPosition = vs_gPosition;
+    frag.gOtherData = vec4(diffuse.xyz, 1.0);
+    frag.gPosition  = vs_gPosition;
     // There is no normal here
     // TODO: Add the correct normal (JCC)
-    frag.gNormalReflectance = vec4(0.0);
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
     
     return frag;

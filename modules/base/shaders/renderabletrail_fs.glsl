@@ -64,11 +64,11 @@ Fragment getFragment() {
     }
 
     // G-Buffer
-    frag.gColor = frag.color;
-    frag.gPosition = vs_gPosition;
+    frag.gOtherData = vec4(frag.color.xyz, 1.0);
+    frag.gPosition  = vs_gPosition;
     // There is no normal here
     // TODO: Add the correct normal if necessary (JCC)
-    frag.gNormalReflectance = vec4(0.0);
+    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
 
     return frag;

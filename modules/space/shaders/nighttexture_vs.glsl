@@ -35,6 +35,8 @@ layout(location = 2) in vec3 in_normal;
 out vec2 vs_st;
 out vec4 vs_normal;
 out vec4 vs_position;
+out vec4 vs_gPosition;
+out vec3 vs_gNormal;
 
 uniform mat4 ModelTransform;
 uniform mat4 modelViewProjectionTransform;
@@ -51,7 +53,10 @@ void main() {
     // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
     // vs_normal = vec4(in_normal, 0.0);
-    
+
+    // G-Buffer
+    vs_gNormal = in_normal;
+
     vec4 position = vec4(tmp.xyz * pow(10, tmp. w), 1.0);
 
     if (_hasHeightMap) {
@@ -60,6 +65,9 @@ void main() {
         float displacementFactor = height * _heightExaggeration;
         position.xyz = position.xyz + displacementDirection * displacementFactor;
     }
+
+    // G-Buffer
+    vs_gPosition = position
     
     position = modelViewProjectionTransform * position;
     vs_position = z_normalization(position);

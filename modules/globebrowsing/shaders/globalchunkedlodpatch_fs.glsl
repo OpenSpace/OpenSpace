@@ -34,11 +34,10 @@ Fragment getFragment() {
 #endif // SHOW_CHUNK_EDGES
     
     // TODO: Change the color for the new deferred system (JCC)
-    frag.gColor             = vec4(waterReflectance, 0.0, 0.0, 1.0);
+    frag.gOtherData = vec4(waterReflectance, 0.0, 0.0, 1.0);
     // Normal is written in Camera Rig (OS Eye) Space
-    //frag.gNormalReflectance = vec4(ellipsoidNormalCameraSpace, 1.0); 
-    frag.gNormalReflectance = vec4(fs_normal, 1.0); 
-    frag.gPosition          = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
+    frag.gNormal    = vec4(fs_normal, 1.0); 
+    frag.gPosition  = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
 
     frag.depth = fs_position.w;
     return frag;

@@ -80,10 +80,11 @@ Fragment getFragment() {
     frag.depth = vs_position.w;
 
     // G-Buffer
-    frag.gColor = diffuse;
-    frag.gPosition = vs_gPosition;
     // TODO: get the write reflectance from the texture
-    frag.gNormalReflectance = vec4(vs_gNormal, 1.0);
+    frag.gOtherData = vec4(diffuse.xyz, 1.0);
+    frag.gPosition  = vs_gPosition;
+    frag.gNormal    = vec4(vs_gNormal, 1.0);
+    
 
 
     return frag;

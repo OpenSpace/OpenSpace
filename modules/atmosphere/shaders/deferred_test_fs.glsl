@@ -40,7 +40,7 @@ uniform int RenderableClass;
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
 uniform sampler2DMS mainPositionTexture;
-uniform sampler2DMS mainNormalReflectanceTexture;
+uniform sampler2DMS mainNormalTexture;
 uniform sampler2DMS mainColorTexture;
 uniform sampler2DMS otherDataTexture;
 
@@ -480,8 +480,8 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
  * attenuationXtoX0 := transmittance T(x,x0)
  */
 vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r,
-                 const float mu, const vec3 attenuationXtoX0, const vec4 groundColor, 
-                 const vec4 normalReflectance, const float irradianceFactor,
+                 const float mu, const vec3 attenuationXtoX0, const vec4 groundMeanColor, 
+                 const vec3 normal, const float irradianceFactor,
                  const float waterReflectance)
 {
   vec3 reflectedRadiance = vec3(0.0f);
@@ -490,8 +490,9 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   vec3  x0 = x + t * v;
   float r0 = length(x0);
   // Normal of intersection point.
-  vec3 n = normalize(normalReflectance.xyz);
-  vec4 groundReflectance = groundColor * vec4(.37);
+  vec3 n = normalize(normal);
+  //n = normalize(vec3(1.0, 1.0, 1.0));
+  vec4 groundReflectance = groundMeanColor * vec4(.37);
   //reflectance.w = 1.0;
             
   // L0 is not included in the irradiance texture.
@@ -509,7 +510,6 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     * sunRadiance / M_PI;
     
   // Specular reflection from sun on oceans and rivers  
-  //if (normalReflectance.a < 0.0) {
   if (waterReflectance > 0.1) {
     vec3  h         = normalize(s - v);
     // Fresnell Schlick's approximation
@@ -555,15 +555,15 @@ vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const flo
 
 void main() {
     //float mainDepth = 0.0;
-    vec4 meanColor = vec4(0.0);
-    vec4 meanNormal = vec4(0.0);
-    vec4 meanPosition = vec4(0.0);
+    vec4 meanColor     = vec4(0.0);
+    vec4 meanNormal    = vec4(0.0);
+    vec4 meanPosition  = vec4(0.0);
     vec4 meanOtherData = vec4(0.0);
     //vec4 positionArray[nAaSamples];
     //vec4 positionArray[8];
     float maxAlpha = -1.0;
     for (int i = 0; i < nAaSamples; i++) {
-      meanNormal   += texelFetch(mainNormalReflectanceTexture, ivec2(gl_FragCoord), i);
+      meanNormal   += texelFetch(mainNormalTexture, ivec2(gl_FragCoord), i);
       vec4 color = texelFetch(mainColorTexture, ivec2(gl_FragCoord), i);
       if ( color.a > maxAlpha )
         maxAlpha = color.a;
@@ -653,7 +653,7 @@ void main() {
                                                   maxLength, pixelDepth,
                                                   meanColor); 
           vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation,
-                                            meanColor, meanNormal, irradianceFactor, 
+                                            meanColor, meanNormal.xyz, irradianceFactor, 
                                             meanOtherData.r);
           vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
           
@@ -662,9 +662,7 @@ void main() {
           renderTarget = finalRadiance;
         }      
       } else {
-        //renderTarget = vec4(1.0, 1.0, 0.0, 1.0);      
-        //renderTarget = vec4(0.0);      
-        renderTarget = meanColor;
+        renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
       }
     } else if ( RenderableClass == RenderableGlobe) {
       // Get the ray from camera to atm in object space
@@ -771,7 +769,7 @@ void main() {
                                                   maxLength, pixelDepth,
                                                   meanColor); 
           vec3 groundColor    = groundColor(x, tF, v, s, r, mu, attenuation,
-                                            meanColor, meanNormal, irradianceFactor, 
+                                            meanColor, meanNormal.xyz, irradianceFactor, 
                                             meanOtherData.r);
           vec3 sunColor       = sunColor(x, tF, v, s, r, mu, irradianceFactor); 
           
@@ -790,7 +788,6 @@ void main() {
           //finalRadiance = vec4(sunColor, 1.0);
           //finalRadiance = vec4(HDR(inscatterColor + groundColor), 1.0);
           //finalRadiance = vec4(1.0 - HDR(vec3(pixelDepth/100)),1.0);
-          //finalRadiance = vec4(vec3(meanNormal.a),1.0);
                     
           renderTarget = finalRadiance;
         }

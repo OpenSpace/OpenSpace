@@ -30,9 +30,9 @@
 
 struct Fragment {
     vec4 color;
-    vec4 gColor;
+    vec4 gOtherData;
     vec4 gPosition;
-    vec4 gNormalReflectance;
+    vec4 gNormal;
     float depth;
     uint blend;
     bool forceFboRendering;

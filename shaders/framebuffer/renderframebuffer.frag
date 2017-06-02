@@ -26,15 +26,15 @@
 #include <#{fragmentPath}>
 
 layout(location = 0) out vec4 _out_color_;
-layout(location = 1) out vec4 gColor;
+layout(location = 1) out vec4 gOtherData;
 layout(location = 2) out vec4 gPosition;
-layout(location = 3) out vec4 gNormalReflectance;
+layout(location = 3) out vec4 gNormal;
 
 void main() {
-     Fragment f = getFragment();
-     _out_color_ = f.color;
-     gPosition = f.gPosition;
-     gNormalReflectance = f.gNormalReflectance;
-     gColor = f.gColor;
+     Fragment f   = getFragment();
+     _out_color_  = f.color;
+     gPosition    = f.gPosition;
+     gNormal      = f.gNormal;
+     gOtherData   = f.gOtherData;
      gl_FragDepth = normalizeFloat(f.depth);
 }

@@ -39,7 +39,8 @@ in vec2 vs_st;
 in vec2 vs_nightTex;
 in vec4 vs_normal;
 in vec4 vs_position;
-in vec4 test;
+in vec4 vs_gPosition;
+in vec3 vs_gNormal;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
@@ -75,6 +76,10 @@ Fragment getFragment() {
     diffuse[3] = transparency;
     frag.color = diffuse;
     frag.depth = vs_position.w;
+
+    frag.gOtherData = vec4(diffuse.xyz, 1.0);
+    frag.gPosition  = vs_gPosition;
+    frag.gNormal    = vec4(vs_gNormal, 1.0);
 
     return frag;
 }

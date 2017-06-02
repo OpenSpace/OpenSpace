@@ -87,11 +87,10 @@ Fragment getFragment() {
     frag.depth = pscDepth(position);
 
     // G-Buffer
-    frag.gColor = fullColor;
-    frag.gPosition = ge_gPosition;
+    frag.gOtherData = vec4(fullColor.xyz, 1.0);
+    frag.gPosition  = ge_gPosition;
     // There is no normal here
-    // TODO: Add the correct normal (JCC)
-    frag.gNormalReflectance = vec4(vec3(0.0), fullColor.a);
+    frag.gNormal    = vec4(0.0, 0.0, 0.0, 1.0);
     
     if (fullColor.a == 0) {
         discard;
