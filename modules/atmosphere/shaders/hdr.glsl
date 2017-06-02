@@ -104,8 +104,12 @@ vec3 Uncharted2ToneMapping(vec3 color)
   return color;
 }
 
+vec3 jToneMapping(const vec3 color) {
+  return 1.0 - exp(-exposure * color);
+}
+
 vec3 HDR(vec3 color) {
-  return exponentialToneMapping(color);  
+  //return exponentialToneMapping(color);  
   //return linearToneMapping(color);
   //return simpleReinhardToneMapping(color);
   //return lumaBasedReinhardToneMapping(color);
@@ -113,5 +117,6 @@ vec3 HDR(vec3 color) {
   //return RomBinDaHouseToneMapping(color);		
   //return filmicToneMapping(color);
   //return Uncharted2ToneMapping(color);
+  return jToneMapping(color);
   
 }
