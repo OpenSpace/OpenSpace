@@ -34,16 +34,12 @@ template<typename P>
 Job<P>::~Job() {}
 
 template<typename P>
-ConcurrentJobManager<P>::ConcurrentJobManager(std::shared_ptr<ThreadPool> pool) : threadPool(pool) {
-
-}
+ConcurrentJobManager<P>::ConcurrentJobManager(std::shared_ptr<ThreadPool> pool)
+    : threadPool(pool)
+{ }
 
 template<typename P>
 void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
-    //threadPool->queue([this, job]() {
-    //    job->execute();
-    //    _finishedJobs.push(job);
-    //});
     threadPool->enqueue([this, job]() {
         job->execute();
         _finishedJobs.push(job);
@@ -52,7 +48,6 @@ void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
 
 template<typename P>
 void ConcurrentJobManager<P>::clearEnqueuedJobs() {
-    //threadPool->clearRemainingTasks();
     threadPool->clearTasks();
 }
 
@@ -66,13 +61,6 @@ template<typename P>
 size_t ConcurrentJobManager<P>::numFinishedJobs() const {
     return _finishedJobs.size();
 }
-
-template<typename P>
-void ConcurrentJobManager<P>::reset() {
-    //threadPool->clearRemainingTasks();
-    threadPool->clearTasks();
-}
-
 
 } // namespace globebrowsing
 } // namespace openspace

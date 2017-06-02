@@ -34,9 +34,17 @@ namespace globebrowsing {
 
 struct LayerRenderSettings : public properties::PropertyOwner {
     LayerRenderSettings();
+    
     properties::FloatProperty opacity;
     properties::FloatProperty gamma;
     properties::FloatProperty multiplier;
+    properties::FloatProperty offset;
+
+    // Optional properties
+    properties::FloatProperty valueBlending;
+    bool useValueBlending = false;
+
+    void setValuesFromDictionary(const ghoul::Dictionary& renderSettingsDict);
 
     /// This function matches the function with the same name in the
     /// shader code

@@ -106,7 +106,7 @@ void PointGlobe::render(const RenderData& data) {
     _programObject->setUniform("globeRadius", avgRadius);
     _programObject->setUniform("directionToSunViewSpace", directionToSunViewSpace);
     _programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-    _programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+    _programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
 
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 

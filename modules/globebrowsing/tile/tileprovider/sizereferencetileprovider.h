@@ -43,7 +43,6 @@ public:
 
     virtual void renderText(const ghoul::fontrendering::FontRenderer& fontRenderer,
         const TileIndex& tileIndex) const;
-    virtual Tile backgroundTile(const TileIndex& tileIndex) const;
 
     virtual TileIndex::TileHashKey toHash(const TileIndex& tileIndex) const;
 

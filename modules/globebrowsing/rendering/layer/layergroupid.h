@@ -22,35 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 
-#include <modules/globebrowsing/tile/textureformat.h>
-
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-
-class GDALDataset;
 
 namespace openspace {
 namespace globebrowsing {
+namespace layergroupid  {
 
-struct TileDataLayout {
-    GLuint glType;
-
-    size_t bytesPerDatum;
-    size_t numRasters;
-    /// Number of rasters available in the GDAL dataset.
-    /// Does not necessarily have to be equal to numRasters.
-    /// In case an extra alpha channel needs to be added that
-    /// does not exist in the GDAL dataset for example
-    size_t numRastersAvailable;
-    size_t bytesPerPixel;
-
-    TextureFormat textureFormat;
+static const int NUM_LAYER_GROUPS = 7;
+static const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
+    "HeightLayers",
+    "ColorLayers",
+    "ColorOverlays",
+    "GrayScaleLayers",
+    "GrayScaleColorOverlays",
+    "NightLayers",
+    "WaterMasks"
 };
 
+enum ID {
+    HeightLayers,
+    ColorLayers,
+    ColorOverlays,
+    GrayScaleLayers,
+    GrayScaleColorOverlays,
+    NightLayers,
+    WaterMasks
+};
+
+} // namespace layergroupid
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEDATALAYOUT___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__

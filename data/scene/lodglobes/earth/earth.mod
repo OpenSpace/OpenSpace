@@ -115,30 +115,26 @@ return {
             },
             Layers = {
                 ColorLayers = {
-                
                     {
                         Name = "ESRI VIIRS Combo",
                         Type = "ByLevel",
                         LevelTileProviders = {
                             {
                                 MaxLevel = 3, 
-                                TileProvider = { Type = "Temporal", FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml", }, 
+                                TileProvider = {
+                                    Type = "Temporal",
+                                    Name = "Temporal VIIRS SNPP",
+                                    FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml", }, 
                             },
                             {
-                                MaxLevel = 22, 
-                                TileProvider = { FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms" },
+                                MaxLevel = 22,
+                                TileProvider = {
+                                    Name = "ESRI Imagery World 2D",
+                                    FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms"
+                                },
                             },
                         },
                         Enabled = true,
-                    },
-                    {
-                        Name = "ESRI Imagery World",
-                        FilePath = "map_service_configs/ESRI/ESRI_Imagery_World_2D.wms"
-                    },
-                    {
-                        Type = "Temporal",
-                        Name = "Temporal VIIRS SNPP",
-                        FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml",
                     },
                     {
                         Type = "Temporal",
@@ -149,21 +145,11 @@ return {
                         Type = "Temporal",
                         Name = "Temporal_AMSR2_GCOM_W1_Sea_Ice_Concentration",
                         FilePath = "map_service_configs/GIBS/Temporal_AMSR2_GCOM_W1_Sea_Ice_Concentration.xml",
-                    },                    
-                    -- {
-                    --     Type = "SingleImage",
-                    --     Name = "Debug Tiles",
-                    --     FilePath = "../../debugglobe/textures/test_tile.png",
-                    -- },
+                    },
                     {
                         Name = "BMNG",
                         FilePath = "map_service_configs/Utah/Bmng.wms"
                     }
-                    -- {
-                    --     Type = "Temporal",
-                    --     Name = "NOAA RT",
-                    --     FilePath = "map_service_configs/other/noaa_rt.xml"
-                    -- }
                 },
                 GrayScaleLayers = { },
                 GrayScaleColorOverlays = { },
@@ -172,6 +158,11 @@ return {
                         Name = "Earth at Night 2012",
                         FilePath = "map_service_configs/GIBS/VIIRS_CityLights_2012.xml",
                         Enabled = true,
+                        Settings = {
+                            Opacity = 1.0,
+                            Gamma = 1.5,
+                            Multiplier = 15.0,
+                        },
                     },
                     {
                         Type = "Temporal",
@@ -213,20 +204,6 @@ return {
                         Radii = earthEllipsoid,
                         BackgroundImagePath = "../arrows.png",
                     },
-                    --[[{
-                        Name = "Test",
-                        Type = "LevelSpecific",
-                        LevelTileProviders = {
-                            {
-                                MaxLevel = 5,
-                                TileProvider = { Type = "TileIndex" },
-                            },
-                            {
-                                MaxLevel = 7,
-                                TileProvider = { Type = "SingleImage", FilePath = "../../debugglobe/textures/test_tile.png",},
-                            },
-                        },
-                    },]]
                 },
                 HeightLayers = {
                     {
@@ -234,7 +211,6 @@ return {
                         FilePath = "map_service_configs/ESRI/TERRAIN.wms",
                         Enabled = true,
                         TilePixelSize = 64,
-                        DoPreProcessing = true,
                     },
                 },
             },

@@ -38,12 +38,8 @@
 namespace {
     const std::string _loggerCat = "TemporalTileProvider";
 
-    const char* KeyDoPreProcessing = "DoPreProcessing";
-    const char* KeyMinimumPixelSize = "MinimumPixelSize";
     const char* KeyFilePath = "FilePath";
     const char* KeyBasePath = "BasePath";
-    const char* KeyCacheSize = "CacheSize";
-    const char* KeyFlushInterval = "FlushInterval";
     const char* KeyPreCacheStartTime = "PreCacheStartTime";
     const char* KeyPreCacheEndTime = "PreCacheEndTime";
 }
@@ -130,7 +126,10 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
 
     Time start; start.setTime(timeStart);
     Time end(Time::now());
-    if (timeEnd != "Now") {
+    if (timeEnd == "Yesterday") {
+        end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
+    }
+    else if (timeEnd != "Now") {
         end.setTime(timeEnd);
     }
 
@@ -155,7 +154,7 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
         gdalDescription = CPLSerializeXMLTree(gdalNode);
     }
     if (!gdalNode) {
-        CPLXMLNode* gdalNode = CPLSearchXMLNode(node, "FilePath");
+        gdalNode = CPLSearchXMLNode(node, "FilePath");
         gdalDescription = std::string(gdalNode->psChild->pszValue);
     }
         
@@ -190,10 +189,6 @@ Tile::Status TemporalTileProvider::getTileStatus(const TileIndex& tileIndex) {
 Tile TemporalTileProvider::getTile(const TileIndex& tileIndex) {
     ensureUpdated();
     return _currentTileProvider->getTile(tileIndex);
-}
-
-Tile TemporalTileProvider::getDefaultTile() {
-    return getTileProvider()->getDefaultTile();
 }
 
 int TemporalTileProvider::maxLevel() {

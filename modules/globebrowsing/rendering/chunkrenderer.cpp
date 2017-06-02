@@ -33,21 +33,13 @@
 #include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 #include <openspace/util/updatestructures.h>
 
-namespace {
-    const char* keyFrame = "Frame";
-    const char* keyGeometry = "Geometry";
-    const char* keyShading = "PerformShading";
-
-    const char* keyBody = "Body";
-}
-
 namespace openspace {
 namespace globebrowsing {
 
 ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
                              std::shared_ptr<LayerManager> layerManager)
-    : _layerManager(layerManager)
-    , _grid(grid)
+    : _grid(grid)
+    ,_layerManager(layerManager)
 {
     _globalLayerShaderManager = std::make_shared<LayerShaderManager>(
             "GlobalChunkedLodPatch",
@@ -61,7 +53,6 @@ ChunkRenderer::ChunkRenderer(std::shared_ptr<Grid> grid,
 
     _globalGpuLayerManager = std::make_shared<GPULayerManager>();
     _localGpuLayerManager = std::make_shared<GPULayerManager>();
-
 }
 
 void ChunkRenderer::renderChunk(const Chunk& chunk, const RenderData& data) {
@@ -79,6 +70,13 @@ void ChunkRenderer::update() {
     // unused atm. Could be used for caching or precalculating
 }
 
+void ChunkRenderer::recompileShaders(const RenderableGlobe& globe) {
+    LayerShaderManager::LayerShaderPreprocessingData preprocessingData =
+        LayerShaderManager::LayerShaderPreprocessingData::get(globe);
+    _globalLayerShaderManager->recompileShaderProgram(preprocessingData);
+    _localLayerShaderManager->recompileShaderProgram(preprocessingData);
+}
+
 ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     std::shared_ptr<LayerShaderManager> layeredShaderManager,
     std::shared_ptr<GPULayerManager> gpuLayerManager,
@@ -86,45 +84,8 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
 {
     const TileIndex& tileIndex = chunk.tileIndex();
 
-    LayerShaderManager::LayerShaderPreprocessingData layeredTexturePreprocessingData;
-        
-    for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; i++) {
-        LayerShaderManager::LayerShaderPreprocessingData::LayerGroupPreprocessingData layeredTextureInfo;
-        auto layerGroup = _layerManager->layerGroup(i);
-        layeredTextureInfo.lastLayerIdx = layerGroup.activeLayers().size() - 1;
-        layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
-
-        layeredTexturePreprocessingData.layeredTextureInfo[i] = layeredTextureInfo;
-    }
-        
-    const auto& generalProps = chunk.owner().generalProperties();
-    const auto& debugProps = chunk.owner().debugProperties();
-    auto& pairs = layeredTexturePreprocessingData.keyValuePairs;
-        
-    pairs.emplace_back("useAtmosphere", std::to_string(generalProps.atmosphereEnabled));
-    pairs.emplace_back("performShading", std::to_string(generalProps.performShading));
-    pairs.emplace_back("showChunkEdges", std::to_string(debugProps.showChunkEdges));
-    pairs.emplace_back("showHeightResolution",
-        std::to_string(debugProps.showHeightResolution));
-    pairs.emplace_back("showHeightIntensities",
-        std::to_string(debugProps.showHeightIntensities));
-    pairs.emplace_back("defaultHeight", std::to_string(Chunk::DEFAULT_HEIGHT));
-
-    pairs.emplace_back("tilePaddingStart",
-        "ivec2(" +
-        std::to_string(RawTileDataReader::padding.start.x) + "," +
-        std::to_string(RawTileDataReader::padding.start.y) + ")"
-    );
-    pairs.emplace_back("tilePaddingSizeDiff",
-        "ivec2(" +
-        std::to_string(RawTileDataReader::padding.numPixels.x) + "," +
-        std::to_string(RawTileDataReader::padding.numPixels.y) + ")"
-    );
-
     // Now the shader program can be accessed
-    ghoul::opengl::ProgramObject* programObject =
-        layeredShaderManager->programObject(
-            layeredTexturePreprocessingData);
+    ghoul::opengl::ProgramObject* programObject = layeredShaderManager->programObject();
         
     if (layeredShaderManager->updatedOnLastCall()) {
         gpuLayerManager->bind(programObject, *_layerManager);
@@ -183,7 +144,7 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     glm::dmat4 modelTransform = chunk.owner().modelTransform();
     glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
     glm::mat4 modelViewTransform = glm::mat4(viewTransform * modelTransform);
-    glm::mat4 modelViewProjectionTransform = data.camera.projectionMatrix() *
+    glm::mat4 modelViewProjectionTransform = data.camera.sgctInternal.projectionMatrix() *
         modelViewTransform;
 
     // Upload the uniform variables
@@ -195,9 +156,9 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
     programObject->setUniform("radiiSquared", glm::vec3(ellipsoid.radiiSquared()));
 
     if (_layerManager->layerGroup(
-            LayerManager::NightLayers).activeLayers().size() > 0 ||
+            layergroupid::NightLayers).activeLayers().size() > 0 ||
         _layerManager->layerGroup(
-            LayerManager::WaterMasks).activeLayers().size() > 0 ||
+            layergroupid::WaterMasks).activeLayers().size() > 0 ||
         chunk.owner().generalProperties().atmosphereEnabled ||
         chunk.owner().generalProperties().performShading) {
         // This code temporary until real light sources can be implemented.
@@ -257,7 +218,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     std::vector<glm::dvec3> cornersCameraSpace(4);
     std::vector<glm::dvec3> cornersModelSpace(4);
     for (int i = 0; i < 4; ++i) {
-        Quad q = (Quad)i;
+        Quad q = static_cast<Quad>(i);
         Geodetic2 corner = chunk.surfacePatch().getCorner(q);
         glm::dvec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
         cornersModelSpace[i] = cornerModelSpace;
@@ -288,12 +249,12 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
     // TODO (JCC): Enable the right normal for displaced points in the patch
     programObject->setUniform("patchNormalModelSpace", glm::normalize(patchNormalModelSpace));
-    programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+    programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
 
     if (_layerManager->layerGroup(
-            LayerManager::NightLayers).activeLayers().size() > 0 ||
+            layergroupid::NightLayers).activeLayers().size() > 0 ||
         _layerManager->layerGroup(
-            LayerManager::WaterMasks).activeLayers().size() > 0 ||
+            layergroupid::WaterMasks).activeLayers().size() > 0 ||
         chunk.owner().generalProperties().atmosphereEnabled ||
         chunk.owner().generalProperties().performShading)
     {

@@ -81,8 +81,8 @@ private:
     
     void setGdalProxyConfiguration();
     
-    properties::IntProperty _gdalMaximumCacheSize;
     properties::BoolProperty _logGdalErrors;
+    properties::IntProperty _gdalMaximumCacheSize;
 
     static GdalWrapper* _singleton;
     static std::mutex _mutexLock;

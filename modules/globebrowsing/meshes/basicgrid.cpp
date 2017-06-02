@@ -33,7 +33,7 @@ BasicGrid::BasicGrid(unsigned int xSegments, unsigned int ySegments,
                      TriangleSoup::Positions usePositions,
                      TriangleSoup::TextureCoordinates useTextureCoordinates,
                      TriangleSoup::Normals useNormals)
-    : Grid(xSegments, ySegments, usePositions, useTextureCoordinates, useNormals)
+    : Grid(xSegments, ySegments)
 {
     _geometry = std::make_unique<TriangleSoup>(
         createElements(xSegments, ySegments),
@@ -84,8 +84,8 @@ std::vector<GLuint> BasicGrid::createElements(int xSegments, int ySegments) {
 
     std::vector<GLuint> elements;
     elements.reserve(numElements(xSegments, ySegments));
-    for (unsigned int y = 0; y < ySegments; y++) {
-        for (unsigned int x = 0; x < xSegments; x++) {
+    for (int y = 0; y < ySegments; y++) {
+        for (int x = 0; x < xSegments; x++) {
 
             // x    v01---v11   x ..
             //       |  /  |
@@ -141,8 +141,8 @@ std::vector<glm::vec2> BasicGrid::createTextureCoordinates(int xSegments, int yS
     std::vector<glm::vec2> textureCoordinates;
     textureCoordinates.reserve(numVertices(xSegments, ySegments));
 
-    for (unsigned int y = 0; y < ySegments + 1; y++) {
-        for (unsigned int x = 0; x < xSegments + 1; x++) {
+    for (int y = 0; y < ySegments + 1; y++) {
+        for (int x = 0; x < xSegments + 1; x++) {
             textureCoordinates.push_back(glm::vec2(
                 static_cast<float>(x) / static_cast<float>(xSegments),
                 static_cast<float>(y) / static_cast<float>(ySegments)
@@ -157,8 +157,8 @@ std::vector<glm::vec3> BasicGrid::createNormals(int xSegments, int ySegments) {
     std::vector<glm::vec3> normals;
     normals.reserve(numVertices(xSegments, ySegments));
 
-    for (unsigned int y = 0; y < ySegments + 1; y++) {
-        for (unsigned int x = 0; x < xSegments + 1; x++) {
+    for (int y = 0; y < ySegments + 1; y++) {
+        for (int x = 0; x < xSegments + 1; x++) {
             normals.push_back(glm::vec3(0, 0, 1));
         }
     }

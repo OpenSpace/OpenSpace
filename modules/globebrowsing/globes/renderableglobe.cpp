@@ -191,7 +191,18 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.collectStats);
     _debugPropertyOwner.addProperty(_debugProperties.limitLevelByAvailableData);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
-    
+  
+    auto notifyShaderRecompilation = [&](){
+        _chunkedLodGlobe->notifyShaderRecompilation();
+    };
+    _generalProperties.atmosphereEnabled.onChange(notifyShaderRecompilation);
+    _generalProperties.performShading.onChange(notifyShaderRecompilation);
+    _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
+    _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
+    _debugProperties.showHeightIntensities.onChange(notifyShaderRecompilation);
+
+    _layerManager->onChange(notifyShaderRecompilation);
+
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager.get());
 

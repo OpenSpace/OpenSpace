@@ -36,26 +36,49 @@ namespace cache {
  * Templated class implementing a Least-Recently-Used Cache.
  * <code>KeyType</code> needs to be an enumerable type.
  */
-template<typename KeyType, typename ValueType>
+template<typename KeyType, typename ValueType, typename HasherType>
 class LRUCache {
 public:
+    using Item = std::pair<KeyType, ValueType>;
+    using Items = std::list<Item>;
+    
     /**
      * \param size is the maximum size of the cache given in number of cached items.
      */
     LRUCache(size_t size);
 
     void put(const KeyType& key, const ValueType& value);
+    std::vector<Item> putAndFetchPopped(const KeyType& key, const ValueType& value);
     void clear();
     bool exist(const KeyType& key) const;
+    /**
+     * If value exists, the value is bumped to the front of the queue.
+     * \returns true if value of this key exists.
+     */
+    bool touch(const KeyType& key);
+    bool isEmpty() const;
     ValueType get(const KeyType& key);
+
+    /**
+     * Pops the front of the queue.
+     */
+    Item popMRU();
+    
+    /**
+     * Pops the back of the queue.
+     */
+    Item popLRU();
     size_t size() const;
 
 private:
+    void putWithoutCleaning(const KeyType& key, const ValueType& value);
     void clean();
+    std::vector<Item> cleanAndFetchPopped();
 
-    std::list<std::pair<KeyType, ValueType>> _itemList;
-    std::unordered_map<KeyType, decltype(_itemList.begin())> _itemMap;
-    size_t _cacheSize;
+    Items _itemList;
+    std::unordered_map<KeyType, typename Items::const_iterator, HasherType> _itemMap;
+
+    size_t _maximumCacheSize;
 };
 
 } // namespace cache

@@ -25,12 +25,21 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
 
+#include <modules/globebrowsing/cache/lrucache.h>
+#include <modules/globebrowsing/cache/texturecontainer.h>
 #include <modules/globebrowsing/tile/tile.h>
 #include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/globebrowsing/cache/memoryawarelrucache.h>
+#include <modules/globebrowsing/tile/rawtile.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/iodescription.h>
+
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/triggerproperty.h>
 
 #include <memory>
-#include <mutex>
+#include <vector>
+#include <unordered_map>
 
 namespace openspace {
 namespace globebrowsing {
@@ -63,47 +72,63 @@ struct ProviderTileHasher {
     unsigned long long operator()(const ProviderTileKey& t) const {
         unsigned long long key = 0;
         key |= static_cast<unsigned long long>(t.tileIndex.level);
-        key |= static_cast<unsigned long long>(t.tileIndex.x << 5);
-        key |= static_cast<unsigned long long>(t.tileIndex.y << 35);
+        key |= static_cast<unsigned long long>(t.tileIndex.x) << 5ULL;
+        key |= static_cast<unsigned long long>(t.tileIndex.y) << 35ULL;
         // Now the key is unique for all tiles, however not for all tile providers.
         // Add to the key depending on the tile provider to avoid some hash collisions.
         // (All hash collisions can not be avoided due to the limit in 64 bit for the
         // hash key)
         // Idea: make some offset in the place of the bits for the x value. Lesser chance
         // of having different x-value than having different tile provider ids.
-        key += static_cast<unsigned long long>(t.providerID << 25);
+        key += static_cast<unsigned long long>(t.providerID) << 25ULL;
         return key;
     }
 };
 
-
-/**
- * Singleton class used to cache tiles for all <code>CachingTileProvider</code>s.
- */
-class MemoryAwareTileCache {
+class MemoryAwareTileCache : public properties::PropertyOwner {
 public:
-    static void create(size_t cacheSize);
-    static void destroy();
+    
+    MemoryAwareTileCache();
+    ~MemoryAwareTileCache();
 
     void clear();
+    void setSizeEstimated(size_t estimatedSize);
     bool exist(ProviderTileKey key) const;
     Tile get(ProviderTileKey key);
-    void put(ProviderTileKey key, Tile tile);
-  
-    void setMaximumSize(size_t maximumSize);
+    ghoul::opengl::Texture* getTexture(const TileTextureInitData& initData);
+    void createTileAndPut(ProviderTileKey key, std::shared_ptr<RawTile> rawTile);
+    void put(const ProviderTileKey& key,
+        const TileTextureInitData::HashKey& initDataKey, Tile tile);
+    void update();
 
-    static MemoryAwareTileCache& ref();
+    size_t getGPUAllocatedDataSize() const;
+    size_t getCPUAllocatedDataSize() const;
+    bool shouldUsePbo() const;
 
 private:
-    /**
-     * \param cacheSize is the cache size given in bytes.
-     */
-    MemoryAwareTileCache(size_t cacheSize);
-    ~MemoryAwareTileCache() = default;
+
+    void createDefaultTextureContainers();
+    void assureTextureContainerExists(const TileTextureInitData& initData);
+    void resetTextureContainerSize(size_t numTexturesPerTextureType);
     
-    static MemoryAwareTileCache* _singleton;
-    MemoryAwareLRUCache<ProviderTileKey, Tile, ProviderTileHasher> _tileCache;
-    static std::mutex _mutexLock;
+    using TileCache = LRUCache<ProviderTileKey, Tile, ProviderTileHasher>;
+    using TextureContainerTileCache =
+        std::pair<std::unique_ptr<TextureContainer>, std::unique_ptr<TileCache>>;
+    using TextureContainerMap = std::unordered_map<TileTextureInitData::HashKey,
+        TextureContainerTileCache>;
+
+    TextureContainerMap _textureContainerMap;
+    size_t _numTextureBytesAllocatedOnCPU;
+
+    // Properties
+    properties::IntProperty _cpuAllocatedTileData;
+    properties::IntProperty _gpuAllocatedTileData;
+    properties::IntProperty _tileCacheSize;
+    properties::TriggerProperty _applyTileCacheSize;
+    properties::TriggerProperty _clearTileCache;
+
+    /// Whether or not pixel buffer objects should be used when uploading tile data
+    properties::BoolProperty _usePbo;
 };
 
 } // namespace cache

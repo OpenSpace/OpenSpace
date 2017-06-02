@@ -41,6 +41,7 @@ namespace culling {
  */
 class HorizonCuller : public ChunkCuller {
 public:
+    virtual ~HorizonCuller() override = default;
     bool isCullable(const Chunk& chunk, const RenderData& renderData) override;
 
 private:
