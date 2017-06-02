@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -50,30 +50,30 @@ are used by some function in T2.C.
 Tag node
 */
 typedef struct opj_tgt_node {
-/** Node parent reference */
-  struct opj_tgt_node *parent;
-/**  */
-  int value;
-/**  */
-  int low;
-/**  */
-  int known;
+    /** Node parent reference */
+    struct opj_tgt_node *parent;
+    /**  */
+    int value;
+    /**  */
+    int low;
+    /**  */
+    int known;
 } opj_tgt_node_t;
 
 /**
 Tag tree
 */
 typedef struct opj_tgt_tree {
-/** Number of leaves from horizontal axis */
-  int numleafsh;
-/** Number of leaves from vertical axis */
-  int numleafsv;
-/** Number of leaves from axial axis */
-  int numleafsz;
-/** Number of nodes */
-  int numnodes;
-/** Reference to each node instance */
-  opj_tgt_node_t *nodes;
+    /** Number of leaves from horizontal axis */
+    int numleafsh;
+    /** Number of leaves from vertical axis */
+    int numleafsv;
+    /** Number of leaves from axial axis */
+    int numleafsz;
+    /** Number of nodes */
+    int numnodes;
+    /** Reference to each node instance */
+    opj_tgt_node_t *nodes;
 } opj_tgt_tree_t;
 
 /** @name Funciones generales */
@@ -111,7 +111,8 @@ Encode the value of a leaf of the tag-tree up to a given threshold
 @param leafno Number that identifies the leaf to encode
 @param threshold Threshold to use when encoding value of the leaf
 */
-void tgt_encode(opj_bio_t *bio, opj_tgt_tree_t *tree, int leafno, int threshold);
+void tgt_encode(opj_bio_t *bio, opj_tgt_tree_t *tree, int leafno,
+                int threshold);
 /**
 Decode the value of a leaf of the tag-tree up to a given threshold
 @param bio Pointer to a BIO handle
@@ -124,7 +125,7 @@ int tgt_decode(opj_bio_t *bio, opj_tgt_tree_t *tree, int leafno, int threshold);
 
 /*@}*/
 /* ----------------------------------------------------------------------- */
-void tgt_tree_dump (FILE *fd, opj_tgt_tree_t * tree);
+void tgt_tree_dump(FILE *fd, opj_tgt_tree_t * tree);
 /*@}*/
 
 #endif /* __TGT_H */

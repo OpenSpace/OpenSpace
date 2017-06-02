@@ -41,7 +41,8 @@ opj_volume_t* pgxtovolume(char *filename, opj_cparameters_t *parameters);
 
 int volumetopgx(opj_volume_t *volume, char *outfile);
 
-opj_volume_t* bintovolume(char *filename,char *fileimg, opj_cparameters_t *parameters);
+opj_volume_t* bintovolume(char *filename, char *fileimg,
+                          opj_cparameters_t *parameters);
 
 int volumetobin(opj_volume_t *volume, char *outfile);
 

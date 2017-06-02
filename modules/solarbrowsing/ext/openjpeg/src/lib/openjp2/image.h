@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -55,12 +55,14 @@ opj_image_t* opj_image_create0(void);
 /**
  * Updates the components characteristics of the image from the coding parameters.
  *
- * @param p_image_header		the image header to update.
- * @param p_cp					the coding parameters from which to update the image.
+ * @param p_image_header        the image header to update.
+ * @param p_cp                  the coding parameters from which to update the image.
  */
-void opj_image_comp_header_update(opj_image_t * p_image, const struct opj_cp* p_cp);
+void opj_image_comp_header_update(opj_image_t * p_image,
+                                  const struct opj_cp* p_cp);
 
-void opj_copy_image_header(const opj_image_t* p_image_src, opj_image_t* p_image_dest);
+void opj_copy_image_header(const opj_image_t* p_image_src,
+                           opj_image_t* p_image_dest);
 
 /*@}*/
 

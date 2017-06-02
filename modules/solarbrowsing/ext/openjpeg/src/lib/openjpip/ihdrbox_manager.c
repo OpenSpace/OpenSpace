@@ -33,46 +33,49 @@
 #include <assert.h>
 #include "ihdrbox_manager.h"
 
-ihdrbox_param_t * gene_ihdrbox( metadatalist_param_t *metadatalist, Byte_t *jpipstream)
+ihdrbox_param_t * gene_ihdrbox(metadatalist_param_t *metadatalist,
+                               Byte_t *jpipstream)
 {
-  ihdrbox_param_t *ihdrbox;
-  metadata_param_t *meta;
-  box_param_t *jp2h, *ihdr;
-  int bpc_val;
-  
-  jp2h = NULL;
-  meta = metadatalist->first;
-  while( meta){
-    if( meta->boxlist){
-      jp2h = search_box( "jp2h", meta->boxlist);
-      if( jp2h)
-	break;
+    ihdrbox_param_t *ihdrbox;
+    metadata_param_t *meta;
+    box_param_t *jp2h, *ihdr;
+    int bpc_val;
+
+    jp2h = NULL;
+    meta = metadatalist->first;
+    while (meta) {
+        if (meta->boxlist) {
+            jp2h = search_box("jp2h", meta->boxlist);
+            if (jp2h) {
+                break;
+            }
+        }
+        meta = meta->next;
     }
-    meta = meta->next;
-  }
-  if( !jp2h){
-    fprintf( stderr, "jp2h box not found\n");
-    return NULL;
-  }
-  
-  ihdr = gene_boxbyTypeinStream( jpipstream, get_DBoxoff( jp2h), get_DBoxlen( jp2h), "ihdr");
+    if (!jp2h) {
+        fprintf(stderr, "jp2h box not found\n");
+        return NULL;
+    }
 
-  if( !ihdr){
-    fprintf( stderr, "ihdr box not found\n");
-    return NULL;
-  }
-  
-  ihdrbox = (ihdrbox_param_t *)malloc( sizeof(ihdrbox_param_t));
-  
-  ihdrbox->height = big4( jpipstream+get_DBoxoff(ihdr));
-  ihdrbox->width  = big4( jpipstream+get_DBoxoff(ihdr)+4);
-  ihdrbox->nc     = big2( jpipstream+get_DBoxoff(ihdr)+8);
-  bpc_val = *(jpipstream+get_DBoxoff(ihdr)+10)+1;
-  assert( bpc_val >= 0 && bpc_val <= 255 );
-  ihdrbox->bpc    = (Byte_t)bpc_val;
+    ihdr = gene_boxbyTypeinStream(jpipstream, get_DBoxoff(jp2h), get_DBoxlen(jp2h),
+                                  "ihdr");
 
-  free( ihdr);
+    if (!ihdr) {
+        fprintf(stderr, "ihdr box not found\n");
+        return NULL;
+    }
 
-  return ihdrbox;
+    ihdrbox = (ihdrbox_param_t *)malloc(sizeof(ihdrbox_param_t));
+
+    ihdrbox->height = big4(jpipstream + get_DBoxoff(ihdr));
+    ihdrbox->width  = big4(jpipstream + get_DBoxoff(ihdr) + 4);
+    ihdrbox->nc     = big2(jpipstream + get_DBoxoff(ihdr) + 8);
+    bpc_val = *(jpipstream + get_DBoxoff(ihdr) + 10) + 1;
+    assert(bpc_val >= 0 && bpc_val <= 255);
+    ihdrbox->bpc    = (Byte_t)bpc_val;
+
+    free(ihdr);
+
+    return ihdrbox;
 }
 

@@ -19,7 +19,7 @@ if("$ENV{TRAVIS_OS_NAME}" STREQUAL "windows")
 	set( JPYLYZER_EXT          "exe"  )
 else()
 	set( CTEST_CMAKE_GENERATOR "Unix Makefiles")   # Always makefile in travis-ci environment
-	set( CCFLAGS_WARNING "-Wall -Wextra -Wconversion -Wno-unused-parameter -Wdeclaration-after-statement")
+	set( CCFLAGS_WARNING "-Wall -Wextra -Wconversion -Wno-unused-parameter -Wdeclaration-after-statement -Werror=declaration-after-statement")
 	set( JPYLYZER_EXT          "py"  )
 endif()
 
@@ -91,6 +91,13 @@ else()
 	set(BUILD_TESTING "FALSE")
 endif(NOT "$ENV{OPJ_CI_SKIP_TESTS}" STREQUAL "1")
 
+
+if("$ENV{OPJ_CI_CHECK_STYLE}" STREQUAL "1")
+	set(BUILD_ASTYLE "TRUE")
+else()
+	set(BUILD_ASTYLE "FALSE")
+endif("$ENV{OPJ_CI_CHECK_STYLE}" STREQUAL "1")
+
 # Options
 set( CACHE_CONTENTS "
 
@@ -99,6 +106,9 @@ CMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION}
 
 # Warning level
 CMAKE_C_FLAGS:STRING= ${CCFLAGS_ARCH} ${CCFLAGS_WARNING}
+
+# For astyle
+CMAKE_CXX_FLAGS:STRING= ${CCFLAGS_ARCH}
 
 # Use to activate the test suite
 BUILD_TESTING:BOOL=${BUILD_TESTING}
@@ -112,6 +122,8 @@ OPJ_DATA_ROOT:PATH=$ENV{PWD}/data
 # jpylyzer is available with on GitHub: https://github.com/openpreserve/jpylyzer
 JPYLYZER_EXECUTABLE=$ENV{PWD}/jpylyzer/jpylyzer.${JPYLYZER_EXT}
 
+# Enable astyle
+WITH_ASTYLE:BOOL=${BUILD_ASTYLE}
 " )
 
 #---------------------

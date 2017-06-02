@@ -28,28 +28,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	CACHE_MANAGER_H_
-# define   	CACHE_MANAGER_H_
+#ifndef     CACHE_MANAGER_H_
+# define    CACHE_MANAGER_H_
 
 #include "metadata_manager.h"
 #include "ihdrbox_manager.h"
 
 /** cache parameters*/
-typedef struct cache_param{
-  char *filename;                     /**< file name*/
-  char *tid;                          /**< taregt identifier*/
-  int csn;                            /**< codestream number*/
-  char **cid;                         /**< dynamic array of channel identifiers*/
-  int numOfcid;                       /**< number of cids*/
-  metadatalist_param_t *metadatalist; /**< metadata-bin list*/
-  ihdrbox_param_t *ihdrbox;           /**< ihdrbox*/
-  struct cache_param *next;           /**< pointer to the next cache*/
+typedef struct cache_param {
+    char *filename;                     /**< file name*/
+    char *tid;                          /**< taregt identifier*/
+    int csn;                            /**< codestream number*/
+    char **cid;                         /**< dynamic array of channel identifiers*/
+    int numOfcid;                       /**< number of cids*/
+    metadatalist_param_t *metadatalist; /**< metadata-bin list*/
+    ihdrbox_param_t *ihdrbox;           /**< ihdrbox*/
+    struct cache_param *next;           /**< pointer to the next cache*/
 } cache_param_t;
 
 /**< cache list parameters*/
-typedef struct cachelist_param{
-  cache_param_t *first; /**< first cache pointer of the list*/
-  cache_param_t *last;  /**< last  cache pointer of the list*/
+typedef struct cachelist_param {
+    cache_param_t *first; /**< first cache pointer of the list*/
+    cache_param_t *last;  /**< last  cache pointer of the list*/
 } cachelist_param_t;
 
 
@@ -76,14 +76,15 @@ void delete_cachelist(cachelist_param_t **cachelist);
  * @param[in] cid        channel identifier
  * @return               pointer to the generated cache
  */
-cache_param_t * gene_cache( const char *targetname, int csn, char *tid, char *cid);
+cache_param_t * gene_cache(const char *targetname, int csn, char *tid,
+                           char *cid);
 
 /**
  * delete a cache
  *
  * @param[in] cache address of the cache pointer
  */
-void delete_cache( cache_param_t **cache);
+void delete_cache(cache_param_t **cache);
 
 /**
  * insert a cache into list
@@ -91,7 +92,7 @@ void delete_cache( cache_param_t **cache);
  * @param[in] cache     cache pointer
  * @param[in] cachelist cache list pointer
  */
-void insert_cache_into_list( cache_param_t *cache, cachelist_param_t *cachelist);
+void insert_cache_into_list(cache_param_t *cache, cachelist_param_t *cachelist);
 
 
 /**
@@ -101,7 +102,8 @@ void insert_cache_into_list( cache_param_t *cache, cachelist_param_t *cachelist)
  * @param[in] cachelist  cache list pointer
  * @return               found cache pointer
  */
-cache_param_t * search_cache( const char targetname[], cachelist_param_t *cachelist);
+cache_param_t * search_cache(const char targetname[],
+                             cachelist_param_t *cachelist);
 
 
 /**
@@ -111,7 +113,7 @@ cache_param_t * search_cache( const char targetname[], cachelist_param_t *cachel
  * @param[in] cachelist  cache list pointer
  * @return               found cache pointer
  */
-cache_param_t * search_cacheBycsn( int csn, cachelist_param_t *cachelist);
+cache_param_t * search_cacheBycsn(int csn, cachelist_param_t *cachelist);
 
 
 /**
@@ -121,7 +123,8 @@ cache_param_t * search_cacheBycsn( int csn, cachelist_param_t *cachelist);
  * @param[in] cachelist  cache list pointer
  * @return               found cache pointer
  */
-cache_param_t * search_cacheBycid( const char cid[], cachelist_param_t *cachelist);
+cache_param_t * search_cacheBycid(const char cid[],
+                                  cachelist_param_t *cachelist);
 
 
 /**
@@ -131,7 +134,8 @@ cache_param_t * search_cacheBycid( const char cid[], cachelist_param_t *cachelis
  * @param[in] cachelist  cache list pointer
  * @return               found cache pointer
  */
-cache_param_t * search_cacheBytid( const char tid[], cachelist_param_t *cachelist);
+cache_param_t * search_cacheBytid(const char tid[],
+                                  cachelist_param_t *cachelist);
 
 /**
  * add cid into a cache
@@ -139,7 +143,7 @@ cache_param_t * search_cacheBytid( const char tid[], cachelist_param_t *cachelis
  * @param[in] cid   channel identifier
  * @param[in] cache cache pointer
  */
-void add_cachecid( const char *cid, cache_param_t *cache);
+void add_cachecid(const char *cid, cache_param_t *cache);
 
 
 /**
@@ -148,7 +152,7 @@ void add_cachecid( const char *cid, cache_param_t *cache);
  * @param[in] tid   target identifier
  * @param[in] cache cache pointer
  */
-void update_cachetid( const char *tid, cache_param_t *cache);
+void update_cachetid(const char *tid, cache_param_t *cache);
 
 
 /**
@@ -157,7 +161,7 @@ void update_cachetid( const char *tid, cache_param_t *cache);
  * @param[in] cid       channel identifier
  * @param[in] cachelist cachelist pointer
  */
-void remove_cachecid( const char *cid, cachelist_param_t *cachelist);
+void remove_cachecid(const char *cid, cachelist_param_t *cachelist);
 
 
 /**
@@ -165,13 +169,13 @@ void remove_cachecid( const char *cid, cachelist_param_t *cachelist);
  *
  * @param[in] cache cache pointer
  */
-void print_cache( cache_param_t *cache);
+void print_cache(cache_param_t *cache);
 
 /**
  * print all cache parameters
  *
  * @param[in] cachelist cache list pointer
  */
-void print_allcache( cachelist_param_t *cachelist);
+void print_allcache(cachelist_param_t *cachelist);
 
 #endif /* !CACHE_MANAGER_H_ */

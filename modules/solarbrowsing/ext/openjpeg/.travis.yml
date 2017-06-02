@@ -1,4 +1,4 @@
-language: c
+language: cpp
 
 matrix:
   include:
@@ -6,27 +6,43 @@ matrix:
       compiler: clang
       env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_CI_INCLUDE_IF_DEPLOY=1
     - os: linux
-      compiler: gcc
-      env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_CI_INCLUDE_IF_DEPLOY=1
+      compiler: clang-3.8
+      env: OPJ_CI_CC=clang-3.8 OPJ_CI_CXX=clang-3.8 OPJ_CI_CHECK_STYLE=1 OPJ_CI_SKIP_TESTS=1
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-precise-3.8
+            - ubuntu-toolchain-r-test
+          packages:
+            - clang-3.8
+            - flip
     - os: linux
-      compiler: gcc
+      compiler: g++
+      env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_CI_INCLUDE_IF_DEPLOY=1 OPJ_CI_PERF_TESTS=1
+    - os: linux
+      compiler: g++
       env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_NUM_THREADS=2
     - os: linux
-      compiler: gcc
+      compiler: g++
       env: OPJ_CI_ARCH=i386 OPJ_CI_BUILD_CONFIGURATION=Release
       addons:
         apt:
           packages:
             - gcc-multilib
+            - g++-multilib
     - os: linux
-      compiler: gcc
-      env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Debug
+      compiler: g++
+      env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Debug OPJ_CI_PROFILE=1
+      addons:
+        apt:
+          packages:
+            - valgrind
     - os: linux
       compiler: clang
       env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Debug OPJ_CI_ASAN=1
     - os: linux
       compiler: clang-3.8
-      env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release
+      env: OPJ_CI_CC=clang-3.8 OPJ_CI_CXX=clang-3.8 OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release OPJ_CI_PERF_TESTS=1
       addons:
         apt:
           sources:
@@ -35,18 +51,8 @@ matrix:
           packages:
             - clang-3.8
     - os: linux
-      compiler: x86_64-w64-mingw32-gcc
-      env: OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release
-      addons:
-        apt:
-          packages:
-            - gcc-mingw-w64-base
-            - binutils-mingw-w64-x86-64
-            - gcc-mingw-w64-x86-64
-            - gcc-mingw-w64
-    - os: linux
-      compiler: x86_64-w64-mingw32-gcc
-      env: OPJ_CI_ARCH=i386 OPJ_CI_BUILD_CONFIGURATION=Release
+      compiler: x86_64-w64-mingw32-g++
+      env: OPJ_CI_CC=x86_64-w64-mingw32-gcc OPJ_CI_CXX=x86_64-w64-mingw32-g++ OPJ_CI_ARCH=i386 OPJ_CI_BUILD_CONFIGURATION=Release
       addons:
         apt:
           packages:
@@ -54,15 +60,30 @@ matrix:
             - binutils-mingw-w64-i686
             - gcc-mingw-w64-i686
             - gcc-mingw-w64      
+            - g++-mingw-w64-i686
+            - gcc-multilib
+            - g++-multilib
     - os: linux
-      compiler: gcc-4.8
-      env: OPJ_CI_ABI_CHECK=1
+      compiler: x86_64-w64-mingw32-g++
+      env: OPJ_CI_CC=x86_64-w64-mingw32-gcc OPJ_CI_CXX=x86_64-w64-mingw32-g++ OPJ_CI_ARCH=x86_64 OPJ_CI_BUILD_CONFIGURATION=Release
+      addons:
+        apt:
+          packages:
+            - gcc-mingw-w64-base
+            - binutils-mingw-w64-x86-64
+            - gcc-mingw-w64-x86-64
+            - gcc-mingw-w64
+            - g++-mingw-w64-x86-64
+    - os: linux
+      compiler: g++-4.8
+      env: OPJ_CI_CC=gcc-4.8 OPJ_CI_CXX=g++-4.8 OPJ_CI_ABI_CHECK=1
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - gcc-4.8
+            - g++-4.8
             - libelf-dev
             - elfutils
             - texinfo

@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -55,7 +55,7 @@ Allocate a memory block with elements initialized to 0
 @param size Bytes to allocate
 @return Returns a void pointer to the allocated space, or NULL if there is insufficient memory available
 */
-void* opj_malloc( size_t size );
+void* opj_malloc(size_t size);
 
 /**
 Reallocate memory blocks.
@@ -63,13 +63,13 @@ Reallocate memory blocks.
 @param size New size in bytes
 @return Returns a void pointer to the reallocated (and possibly moved) memory block
 */
-void* opj_realloc( void *memblock, size_t size );
+void* opj_realloc(void *memblock, size_t size);
 
 /**
 Deallocates or frees a memory block.
 @param memblock Previously allocated memory block to be freed
 */
-void opj_free( void *memblock );
+void opj_free(void *memblock);
 
 /* ----------------------------------------------------------------------- */
 /*@}*/

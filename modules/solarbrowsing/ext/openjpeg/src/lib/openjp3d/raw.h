@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -48,27 +48,27 @@ with the corresponding mode switch.
 RAW encoding operations
 */
 typedef struct opj_raw {
-/** Temporary buffer where bits are coded or decoded */
-	unsigned char c;		
-/** Number of bits already read or free to write */
-	unsigned int ct;		
-/** Maximum length to decode */
-	unsigned int lenmax;	
-/** Length decoded */
-	unsigned int len;		
-/** Pointer to the current position in the buffer */
-	unsigned char *bp;		
-/** Pointer to the start of the buffer */
-	unsigned char *start;	
-/** Pointer to the end of the buffer */
-	unsigned char *end;		
+    /** Temporary buffer where bits are coded or decoded */
+    unsigned char c;
+    /** Number of bits already read or free to write */
+    unsigned int ct;
+    /** Maximum length to decode */
+    unsigned int lenmax;
+    /** Length decoded */
+    unsigned int len;
+    /** Pointer to the current position in the buffer */
+    unsigned char *bp;
+    /** Pointer to the start of the buffer */
+    unsigned char *start;
+    /** Pointer to the end of the buffer */
+    unsigned char *end;
 } opj_raw_t;
 
 /** @name Funciones generales */
 /*@{*/
 /* ----------------------------------------------------------------------- */
 /**
-Create a new RAW handle 
+Create a new RAW handle
 @return Returns a new RAW handle if successful, returns NULL otherwise
 */
 opj_raw_t* raw_create(void);

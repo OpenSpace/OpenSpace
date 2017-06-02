@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -59,11 +59,11 @@
  * to NN-KK erasures or (NN-KK)/2 errors, or combinations thereof with
  * each error counting as two erasures.
  */
-#define MM  8		/* RS code over GF(2**MM) - change to suit */
+#define MM  8       /* RS code over GF(2**MM) - change to suit */
 
 /* KK defined in rs.c */
 
-#define	NN ((1 << MM) - 1)
+#define NN ((1 << MM) - 1)
 
 #if (MM <= 8)
 typedef unsigned char dtype;
@@ -77,13 +77,13 @@ void init_rs(int);
 /** These two functions *must* be called in this order (e.g.,
  * by init_rs()) before any encoding/decoding
  */
-void generate_gf(void);	/* Generate Galois Field */
-void gen_poly(void);	/* Generate generator polynomial */
+void generate_gf(void); /* Generate Galois Field */
+void gen_poly(void);    /* Generate generator polynomial */
 
 /** Reed-Solomon encoding
  * data[] is the input block, parity symbols are placed in bb[]
  * bb[] may lie past the end of the data, e.g., for (255,223):
- *	encode_rs(&data[0],&data[223]);
+ *  encode_rs(&data[0],&data[223]);
  */
 int encode_rs(dtype data[], dtype bb[]);
 

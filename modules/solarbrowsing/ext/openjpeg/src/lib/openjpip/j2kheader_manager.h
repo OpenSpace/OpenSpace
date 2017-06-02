@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2014, Professor Benoit Macq
- * Copyright (c) 2010-2011, Kaori Hagihara 
+ * Copyright (c) 2010-2011, Kaori Hagihara
  * Copyright (c) 2011,      Lucian Corlaciu, GSoC
  * All rights reserved.
  *
@@ -43,7 +43,8 @@
  * @param[out] COD       COD marker pointer
  * @return               if succeeded (true) or failed (false)
  */
-OPJ_BOOL get_mainheader_from_j2kstream( Byte_t *j2kstream, SIZmarker_param_t *SIZ, CODmarker_param_t *COD);
+OPJ_BOOL get_mainheader_from_j2kstream(Byte_t *j2kstream,
+                                       SIZmarker_param_t *SIZ, CODmarker_param_t *COD);
 
 /**
  * modify main header in j2k codestream to fit with the new number of decompositions
@@ -55,7 +56,8 @@ OPJ_BOOL get_mainheader_from_j2kstream( Byte_t *j2kstream, SIZmarker_param_t *SI
  * @param[out] j2klen      pointer to the length of j2k code stream
  * @return                 if succeeded (true) or failed (false)
  */
-OPJ_BOOL modify_mainheader( Byte_t *j2kstream, int numOfdecomp, SIZmarker_param_t SIZ, CODmarker_param_t COD, Byte8_t *j2klen);
+OPJ_BOOL modify_mainheader(Byte_t *j2kstream, int numOfdecomp,
+                           SIZmarker_param_t SIZ, CODmarker_param_t COD, Byte8_t *j2klen);
 
 /**
  * modify tile header in j2k codestream to fit with the tile part length, and new number of decompositions for multi-componet images
@@ -67,6 +69,7 @@ OPJ_BOOL modify_mainheader( Byte_t *j2kstream, int numOfdecomp, SIZmarker_param_
  * @param[out] j2klen      pointer to the length of j2k code stream
  * @return                 if succeeded (true) or failed (false)
  */
-OPJ_BOOL modify_tileheader( Byte_t *j2kstream, Byte8_t SOToffset, int numOfdecomp, Byte2_t Csiz, Byte8_t *j2klen);
+OPJ_BOOL modify_tileheader(Byte_t *j2kstream, Byte8_t SOToffset,
+                           int numOfdecomp, Byte2_t Csiz, Byte8_t *j2klen);
 
 #endif      /* !J2KHEADER_MANAGER_H_ */

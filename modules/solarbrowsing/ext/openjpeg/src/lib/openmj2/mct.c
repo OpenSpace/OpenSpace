@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -8,7 +8,7 @@
  * Copyright (c) 2002-2014, Professor Benoit Macq
  * Copyright (c) 2001-2003, David Janssens
  * Copyright (c) 2002-2003, Yannick Verschueren
- * Copyright (c) 2003-2007, Francois-Olivier Devaux 
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
  * Copyright (c) 2003-2014, Antonin Descampe
  * Copyright (c) 2005, Herve Drolon, FreeImage Team
  * All rights reserved.
@@ -55,142 +55,144 @@ static const double mct_norms_real[3] = { 1.732, 1.805, 1.573 };
 /* Forward reversible MCT. */
 /* </summary> */
 void mct_encode(
-		int* restrict c0,
-		int* restrict c1,
-		int* restrict c2,
-		int n)
+    int* restrict c0,
+    int* restrict c1,
+    int* restrict c2,
+    int n)
 {
-	int i;
-	for(i = 0; i < n; ++i) {
-		int r = c0[i];
-		int g = c1[i];
-		int b = c2[i];
-		int y = (r + (g * 2) + b) >> 2;
-		int u = b - g;
-		int v = r - g;
-		c0[i] = y;
-		c1[i] = u;
-		c2[i] = v;
-	}
+    int i;
+    for (i = 0; i < n; ++i) {
+        int r = c0[i];
+        int g = c1[i];
+        int b = c2[i];
+        int y = (r + (g * 2) + b) >> 2;
+        int u = b - g;
+        int v = r - g;
+        c0[i] = y;
+        c1[i] = u;
+        c2[i] = v;
+    }
 }
 
 /* <summary> */
 /* Inverse reversible MCT. */
 /* </summary> */
 void mct_decode(
-		int* restrict c0,
-		int* restrict c1, 
-		int* restrict c2, 
-		int n)
+    int* restrict c0,
+    int* restrict c1,
+    int* restrict c2,
+    int n)
 {
-	int i;
-	for (i = 0; i < n; ++i) {
-		int y = c0[i];
-		int u = c1[i];
-		int v = c2[i];
-		int g = y - ((u + v) >> 2);
-		int r = v + g;
-		int b = u + g;
-		c0[i] = r;
-		c1[i] = g;
-		c2[i] = b;
-	}
+    int i;
+    for (i = 0; i < n; ++i) {
+        int y = c0[i];
+        int u = c1[i];
+        int v = c2[i];
+        int g = y - ((u + v) >> 2);
+        int r = v + g;
+        int b = u + g;
+        c0[i] = r;
+        c1[i] = g;
+        c2[i] = b;
+    }
 }
 
 /* <summary> */
 /* Get norm of basis function of reversible MCT. */
 /* </summary> */
-double mct_getnorm(int compno) {
-	return mct_norms[compno];
+double mct_getnorm(int compno)
+{
+    return mct_norms[compno];
 }
 
 /* <summary> */
 /* Forward irreversible MCT. */
 /* </summary> */
 void mct_encode_real(
-		int* restrict c0,
-		int* restrict c1,
-		int* restrict c2,
-		int n)
+    int* restrict c0,
+    int* restrict c1,
+    int* restrict c2,
+    int n)
 {
-	int i;
-	for(i = 0; i < n; ++i) {
-		int r = c0[i];
-		int g = c1[i];
-		int b = c2[i];
-		int y =  fix_mul(r, 2449) + fix_mul(g, 4809) + fix_mul(b, 934);
-		int u = -fix_mul(r, 1382) - fix_mul(g, 2714) + fix_mul(b, 4096);
-		int v =  fix_mul(r, 4096) - fix_mul(g, 3430) - fix_mul(b, 666);
-		c0[i] = y;
-		c1[i] = u;
-		c2[i] = v;
-	}
+    int i;
+    for (i = 0; i < n; ++i) {
+        int r = c0[i];
+        int g = c1[i];
+        int b = c2[i];
+        int y =  fix_mul(r, 2449) + fix_mul(g, 4809) + fix_mul(b, 934);
+        int u = -fix_mul(r, 1382) - fix_mul(g, 2714) + fix_mul(b, 4096);
+        int v =  fix_mul(r, 4096) - fix_mul(g, 3430) - fix_mul(b, 666);
+        c0[i] = y;
+        c1[i] = u;
+        c2[i] = v;
+    }
 }
 
 /* <summary> */
 /* Inverse irreversible MCT. */
 /* </summary> */
 void mct_decode_real(
-		float* restrict c0,
-		float* restrict c1,
-		float* restrict c2,
-		int n)
+    float* restrict c0,
+    float* restrict c1,
+    float* restrict c2,
+    int n)
 {
-	int i;
+    int i;
 #ifdef __SSE__
-	__m128 vrv, vgu, vgv, vbu;
-	vrv = _mm_set1_ps(1.402f);
-	vgu = _mm_set1_ps(0.34413f);
-	vgv = _mm_set1_ps(0.71414f);
-	vbu = _mm_set1_ps(1.772f);
-	for (i = 0; i < (n >> 3); ++i) {
-		__m128 vy, vu, vv;
-		__m128 vr, vg, vb;
+    __m128 vrv, vgu, vgv, vbu;
+    vrv = _mm_set1_ps(1.402f);
+    vgu = _mm_set1_ps(0.34413f);
+    vgv = _mm_set1_ps(0.71414f);
+    vbu = _mm_set1_ps(1.772f);
+    for (i = 0; i < (n >> 3); ++i) {
+        __m128 vy, vu, vv;
+        __m128 vr, vg, vb;
 
-		vy = _mm_load_ps(c0);
-		vu = _mm_load_ps(c1);
-		vv = _mm_load_ps(c2);
-		vr = _mm_add_ps(vy, _mm_mul_ps(vv, vrv));
-		vg = _mm_sub_ps(_mm_sub_ps(vy, _mm_mul_ps(vu, vgu)), _mm_mul_ps(vv, vgv));
-		vb = _mm_add_ps(vy, _mm_mul_ps(vu, vbu));
-		_mm_store_ps(c0, vr);
-		_mm_store_ps(c1, vg);
-		_mm_store_ps(c2, vb);
-		c0 += 4;
-		c1 += 4;
-		c2 += 4;
+        vy = _mm_load_ps(c0);
+        vu = _mm_load_ps(c1);
+        vv = _mm_load_ps(c2);
+        vr = _mm_add_ps(vy, _mm_mul_ps(vv, vrv));
+        vg = _mm_sub_ps(_mm_sub_ps(vy, _mm_mul_ps(vu, vgu)), _mm_mul_ps(vv, vgv));
+        vb = _mm_add_ps(vy, _mm_mul_ps(vu, vbu));
+        _mm_store_ps(c0, vr);
+        _mm_store_ps(c1, vg);
+        _mm_store_ps(c2, vb);
+        c0 += 4;
+        c1 += 4;
+        c2 += 4;
 
-		vy = _mm_load_ps(c0);
-		vu = _mm_load_ps(c1);
-		vv = _mm_load_ps(c2);
-		vr = _mm_add_ps(vy, _mm_mul_ps(vv, vrv));
-		vg = _mm_sub_ps(_mm_sub_ps(vy, _mm_mul_ps(vu, vgu)), _mm_mul_ps(vv, vgv));
-		vb = _mm_add_ps(vy, _mm_mul_ps(vu, vbu));
-		_mm_store_ps(c0, vr);
-		_mm_store_ps(c1, vg);
-		_mm_store_ps(c2, vb);
-		c0 += 4;
-		c1 += 4;
-		c2 += 4;
-	}
-	n &= 7;
+        vy = _mm_load_ps(c0);
+        vu = _mm_load_ps(c1);
+        vv = _mm_load_ps(c2);
+        vr = _mm_add_ps(vy, _mm_mul_ps(vv, vrv));
+        vg = _mm_sub_ps(_mm_sub_ps(vy, _mm_mul_ps(vu, vgu)), _mm_mul_ps(vv, vgv));
+        vb = _mm_add_ps(vy, _mm_mul_ps(vu, vbu));
+        _mm_store_ps(c0, vr);
+        _mm_store_ps(c1, vg);
+        _mm_store_ps(c2, vb);
+        c0 += 4;
+        c1 += 4;
+        c2 += 4;
+    }
+    n &= 7;
 #endif
-	for(i = 0; i < n; ++i) {
-		float y = c0[i];
-		float u = c1[i];
-		float v = c2[i];
-		float r = y + (v * 1.402f);
-		float g = y - (u * 0.34413f) - (v * (0.71414f));
-		float b = y + (u * 1.772f);
-		c0[i] = r;
-		c1[i] = g;
-		c2[i] = b;
-	}
+    for (i = 0; i < n; ++i) {
+        float y = c0[i];
+        float u = c1[i];
+        float v = c2[i];
+        float r = y + (v * 1.402f);
+        float g = y - (u * 0.34413f) - (v * (0.71414f));
+        float b = y + (u * 1.772f);
+        c0[i] = r;
+        c1[i] = g;
+        c2[i] = b;
+    }
 }
 
 /* <summary> */
 /* Get norm of basis function of irreversible MCT. */
 /* </summary> */
-double mct_getnorm_real(int compno) {
-	return mct_norms_real[compno];
+double mct_getnorm_real(int compno)
+{
+    return mct_norms_real[compno];
 }

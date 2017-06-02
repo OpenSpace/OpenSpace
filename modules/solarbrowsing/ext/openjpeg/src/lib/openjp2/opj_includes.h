@@ -1,11 +1,11 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
  * Copyright (c) 2005, Herve Drolon, FreeImage Team
- * Copyright (c) 2008, 2011-2012, Centre National d'Etudes Spatiales (CNES), FR 
+ * Copyright (c) 2008, 2011-2012, Centre National d'Etudes Spatiales (CNES), FR
  * Copyright (c) 2012, CS Systemes d'Information, France
  * All rights reserved.
  *
@@ -71,11 +71,11 @@
 #if defined(WIN32) && !defined(Windows95) && !defined(__BORLANDC__) && \
   !(defined(_MSC_VER) && _MSC_VER < 1400) && \
   !(defined(__MINGW32__) && __MSVCRT_VERSION__ < 0x800)
-  /*
-    Windows '95 and Borland C do not support _lseeki64
-    Visual Studio does not support _fseeki64 and _ftelli64 until the 2005 release.
-    Without these interfaces, files over 2GB in size are not supported for Windows.
-  */
+/*
+  Windows '95 and Borland C do not support _lseeki64
+  Visual Studio does not support _fseeki64 and _ftelli64 until the 2005 release.
+  Without these interfaces, files over 2GB in size are not supported for Windows.
+*/
 #  define OPJ_FSEEK(stream,offset,whence) _fseeki64(stream,/* __int64 */ offset,whence)
 #  define OPJ_FSTAT(fildes,stat_buff) _fstati64(fildes,/* struct _stati64 */ stat_buff)
 #  define OPJ_FTELL(stream) /* __int64 */ _ftelli64(stream)
@@ -105,83 +105,86 @@
 
 /* Are restricted pointers available? (C99) */
 #if (__STDC_VERSION__ >= 199901L)
-  #define OPJ_RESTRICT restrict
+#define OPJ_RESTRICT restrict
 #else
-	/* Not a C99 compiler */
-	#if defined(__GNUC__)
-		#define OPJ_RESTRICT __restrict__
+/* Not a C99 compiler */
+#if defined(__GNUC__)
+#define OPJ_RESTRICT __restrict__
 
 /*
   vc14 (2015) outputs wrong results.
   Need to check OPJ_RESTRICT usage (or a bug in vc14)
-	#elif defined(_MSC_VER) && (_MSC_VER >= 1400)
-		#define OPJ_RESTRICT __restrict
+    #elif defined(_MSC_VER) && (_MSC_VER >= 1400)
+        #define OPJ_RESTRICT __restrict
 */
-	#else
-		#define OPJ_RESTRICT /* restrict */
-	#endif
+#else
+#define OPJ_RESTRICT /* restrict */
+#endif
 #endif
 
 #ifdef __has_attribute
-	#if __has_attribute(no_sanitize)
-		#define OPJ_NOSANITIZE(kind) __attribute__((no_sanitize(kind)))
-	#endif
+#if __has_attribute(no_sanitize)
+#define OPJ_NOSANITIZE(kind) __attribute__((no_sanitize(kind)))
+#endif
 #endif
 #ifndef OPJ_NOSANITIZE
-	#define OPJ_NOSANITIZE(kind)
+#define OPJ_NOSANITIZE(kind)
 #endif
 
 
 /* MSVC before 2013 and Borland C do not have lrintf */
 #if defined(_MSC_VER)
 #include <intrin.h>
-static INLINE long opj_lrintf(float f){
+static INLINE long opj_lrintf(float f)
+{
 #ifdef _M_X64
-	return _mm_cvt_ss2si(_mm_load_ss(&f));
+    return _mm_cvt_ss2si(_mm_load_ss(&f));
 
-	/* commented out line breaks many tests */
-  /* return (long)((f>0.0f) ? (f + 0.5f):(f -0.5f)); */
+    /* commented out line breaks many tests */
+    /* return (long)((f>0.0f) ? (f + 0.5f):(f -0.5f)); */
 #elif defined(_M_IX86)
     int i;
-     _asm{
+    _asm{
         fld f
         fistp i
     };
- 
+
     return i;
-#else 
-	return (long)((f>0.0f) ? (f + 0.5f) : (f - 0.5f));
+#else
+    return (long)((f>0.0f) ? (f + 0.5f) : (f - 0.5f));
 #endif
 }
 #elif defined(__BORLANDC__)
-static INLINE long opj_lrintf(float f) {
+static INLINE long opj_lrintf(float f)
+{
 #ifdef _M_X64
-     return (long)((f>0.0f) ? (f + 0.5f):(f -0.5f));
+    return (long)((f > 0.0f) ? (f + 0.5f) : (f - 0.5f));
 #else
-	int i;
+    int i;
 
-	_asm {
-		fld f
-			fistp i
-	};
+    _asm {
+        fld f
+        fistp i
+    };
 
-	return i;
+    return i;
 #endif
 }
 #else
-static INLINE long opj_lrintf(float f) {
-	return lrintf(f);
+static INLINE long opj_lrintf(float f)
+{
+    return lrintf(f);
 }
 #endif
 
 #if defined(_MSC_VER) && (_MSC_VER < 1400)
-	#define vsnprintf _vsnprintf
+#define vsnprintf _vsnprintf
 #endif
 
 /* MSVC x86 is really bad at doing int64 = int32 * int32 on its own. Use intrinsic. */
 #if defined(_MSC_VER) && (_MSC_VER >= 1400) && !defined(__INTEL_COMPILER) && defined(_M_IX86)
-#	include <intrin.h>
-#	pragma intrinsic(__emul)
+#   include <intrin.h>
+#   pragma intrinsic(__emul)
 #endif
 
 /* Type to use for bit-fields in internal headers */

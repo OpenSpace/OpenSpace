@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -8,7 +8,7 @@
  * Copyright (c) 2002-2014, Professor Benoit Macq
  * Copyright (c) 2001-2003, David Janssens
  * Copyright (c) 2002-2003, Yannick Verschueren
- * Copyright (c) 2003-2007, Francois-Olivier Devaux 
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
  * Copyright (c) 2003-2014, Antonin Descampe
  * Copyright (c) 2005, Herve Drolon, FreeImage Team
  * All rights reserved.
@@ -49,13 +49,13 @@
 Tier-2 coding
 */
 typedef struct opj_t2 {
-	/** codec context */
-	opj_common_ptr cinfo;
+    /** codec context */
+    opj_common_ptr cinfo;
 
-	/** Encoding: pointer to the src image. Decoding: pointer to the dst image. */
-	opj_image_t *image;
-	/** pointer to the image coding parameters */
-	opj_cp_t *cp;
+    /** Encoding: pointer to the src image. Decoding: pointer to the dst image. */
+    opj_image_t *image;
+    /** pointer to the image coding parameters */
+    opj_cp_t *cp;
 } opj_t2_t;
 
 /** @name Exported functions */
@@ -70,14 +70,16 @@ Encode the packets of a tile to a destination buffer
 @param maxlayers maximum number of layers
 @param dest the destination buffer
 @param len the length of the destination buffer
-@param cstr_info Codestream information structure 
+@param cstr_info Codestream information structure
 @param tpnum Tile part number of the current tile
 @param tppos The position of the tile part flag in the progression order
-@param pino 
+@param pino
 @param t2_mode If == 0 In Threshold calculation ,If == 1 Final pass
 @param cur_totnum_tp The total number of tile parts in the current tile
 */
-int t2_encode_packets(opj_t2_t* t2,int tileno, opj_tcd_tile_t *tile, int maxlayers, unsigned char *dest, int len, opj_codestream_info_t *cstr_info,int tpnum, int tppos,int pino,J2K_T2_MODE t2_mode,int cur_totnum_tp);
+int t2_encode_packets(opj_t2_t* t2, int tileno, opj_tcd_tile_t *tile,
+                      int maxlayers, unsigned char *dest, int len, opj_codestream_info_t *cstr_info,
+                      int tpnum, int tppos, int pino, J2K_T2_MODE t2_mode, int cur_totnum_tp);
 /**
 Decode the packets of a tile from a source buffer
 @param t2 T2 handle
@@ -87,7 +89,8 @@ Decode the packets of a tile from a source buffer
 @param tile tile for which to decode the packets
 @param cstr_info Codestream information structure
  */
-int t2_decode_packets(opj_t2_t *t2, unsigned char *src, int len, int tileno, opj_tcd_tile_t *tile, opj_codestream_info_t *cstr_info);
+int t2_decode_packets(opj_t2_t *t2, unsigned char *src, int len, int tileno,
+                      opj_tcd_tile_t *tile, opj_codestream_info_t *cstr_info);
 
 /**
 Create a T2 handle

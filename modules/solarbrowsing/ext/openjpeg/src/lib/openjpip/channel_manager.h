@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	CHANNEL_MANAGER_H_
-# define   	CHANNEL_MANAGER_H_
+#ifndef     CHANNEL_MANAGER_H_
+# define    CHANNEL_MANAGER_H_
 
 #include <time.h>
 #include "query_parser.h"
@@ -40,20 +40,20 @@
 #define MAX_LENOFCID 30
 
 /** Channel parameters*/
-typedef struct channel_param{
-  cachemodel_param_t *cachemodel; /**< reference pointer to the cache model*/
-  char cid[MAX_LENOFCID];         /**< channel identifier*/
-  cnew_transport_t aux;           /**< auxiliary transport*/
-  /* - a record of the client's capabilities and preferences to the extent that the server queues requests*/
-  time_t start_tm;                /**< starting time*/
-  struct channel_param *next;     /**< pointer to the next channel*/
+typedef struct channel_param {
+    cachemodel_param_t *cachemodel; /**< reference pointer to the cache model*/
+    char cid[MAX_LENOFCID];         /**< channel identifier*/
+    cnew_transport_t aux;           /**< auxiliary transport*/
+    /* - a record of the client's capabilities and preferences to the extent that the server queues requests*/
+    time_t start_tm;                /**< starting time*/
+    struct channel_param *next;     /**< pointer to the next channel*/
 } channel_param_t;
 
 
 /** Channel list parameters*/
-typedef struct channellist_param{
-  channel_param_t *first; /**< first channel pointer of the list*/
-  channel_param_t *last;  /**< last  channel pointer of the list*/
+typedef struct channellist_param {
+    channel_param_t *first; /**< first channel pointer of the list*/
+    channel_param_t *last;  /**< last  channel pointer of the list*/
 } channellist_param_t;
 
 
@@ -74,7 +74,9 @@ channellist_param_t * gene_channellist(void);
  * @param[in] channellist channel list pointer
  * @return                pointer to the generated channel
  */
-channel_param_t * gene_channel( query_param_t query_param, auxtrans_param_t auxtrans, cachemodel_param_t *cachemodel, channellist_param_t *channellist);
+channel_param_t * gene_channel(query_param_t query_param,
+                               auxtrans_param_t auxtrans, cachemodel_param_t *cachemodel,
+                               channellist_param_t *channellist);
 
 /**
  * set channel variable parameters
@@ -82,7 +84,8 @@ channel_param_t * gene_channel( query_param_t query_param, auxtrans_param_t auxt
  * @param[in]     query_param query parameters
  * @param[in,out] channel     pointer to the modifying channel
  */
-void set_channel_variable_param( query_param_t query_param, channel_param_t *channel);
+void set_channel_variable_param(query_param_t query_param,
+                                channel_param_t *channel);
 
 /**
  * delete a channel
@@ -90,7 +93,8 @@ void set_channel_variable_param( query_param_t query_param, channel_param_t *cha
  * @param[in] channel address of the deleting channel pointer
  * @param[in,out] channellist channel list pointer
  */
-void delete_channel( channel_param_t **channel, channellist_param_t *channellist);
+void delete_channel(channel_param_t **channel,
+                    channellist_param_t *channellist);
 
 
 /**
@@ -98,7 +102,7 @@ void delete_channel( channel_param_t **channel, channellist_param_t *channellist
  *
  * @param[in,out] channellist address of the channel list pointer
  */
-void delete_channellist( channellist_param_t **channellist);
+void delete_channellist(channellist_param_t **channellist);
 
 
 /**
@@ -106,7 +110,7 @@ void delete_channellist( channellist_param_t **channellist);
  *
  * @param[in] channellist channel list pointer
  */
-void print_allchannel( channellist_param_t *channellist);
+void print_allchannel(channellist_param_t *channellist);
 
 
 /**
@@ -116,5 +120,6 @@ void print_allchannel( channellist_param_t *channellist);
  * @param[in] channellist channel list pointer
  * @return                found channel pointer
  */
-channel_param_t * search_channel( const char cid[], channellist_param_t *channellist);
-#endif 	    /* !CHANNEL_MANAGER_H_ */
+channel_param_t * search_channel(const char cid[],
+                                 channellist_param_t *channellist);
+#endif      /* !CHANNEL_MANAGER_H_ */

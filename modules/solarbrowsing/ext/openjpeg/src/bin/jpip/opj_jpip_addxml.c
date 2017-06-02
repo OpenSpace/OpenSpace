@@ -36,7 +36,7 @@
  *   -# Input/output image file in JP2 format, this JP2 file is being modified
  *   -# Input XML file with metadata contents\n
  *   % ./addXMLinJP2 image.jp2 metadata.xml\n
- *  
+ *
  *  Currently, this program does not parse XML file, and the XML file contents is directly embedded as a XML Box.\n
  *  The following is an example of XML file contents specifying Region Of Interests with target names.\n
  *  <xmlbox>\n
@@ -60,7 +60,7 @@
  * @param[in] filename file name string
  * @return             file descriptor
  */
-FILE * open_jp2file( const char filename[]);
+FILE * open_jp2file(const char filename[]);
 
 
 /**
@@ -70,115 +70,118 @@ FILE * open_jp2file( const char filename[]);
  * @param[out] fsize    file byte size
  * @return              pointer to the xml file content buffer
  */
-char * read_xmlfile( const char filename[], long *fsize);
+char * read_xmlfile(const char filename[], long *fsize);
 
 int main(int argc, char *argv[])
 {
-  FILE *fp;
-  char *xmldata, type[]="xml ";
-  long fsize, boxsize;
+    FILE *fp;
+    char *xmldata, type[] = "xml ";
+    long fsize, boxsize;
 
-  if( argc<3){
-    fprintf( stderr, "USAGE: %s modifing.jp2 adding.xml\n", argv[0] );
-    return -1;
-  }
+    if (argc < 3) {
+        fprintf(stderr, "USAGE: %s modifing.jp2 adding.xml\n", argv[0]);
+        return -1;
+    }
 
-  fp = open_jp2file( argv[1]);
-  if( !fp)
-    return -1;
-  
-  xmldata = read_xmlfile( argv[2], &fsize);
-  if( fsize < 0 ) return -1;
-  boxsize = fsize + 8;
+    fp = open_jp2file(argv[1]);
+    if (!fp) {
+        return -1;
+    }
 
-  fputc( (boxsize>>24)&0xff, fp);
-  fputc( (boxsize>>16)&0xff, fp);
-  fputc( (boxsize>>8)&0xff, fp);
-  fputc( boxsize&0xff, fp);
-  fwrite( type, 4, 1, fp);
-  fwrite( xmldata, (size_t)fsize, 1, fp);
-  
-  free( xmldata);
-  fclose(fp);
-  
-  return 0;
+    xmldata = read_xmlfile(argv[2], &fsize);
+    if (fsize < 0) {
+        return -1;
+    }
+    boxsize = fsize + 8;
+
+    fputc((boxsize >> 24) & 0xff, fp);
+    fputc((boxsize >> 16) & 0xff, fp);
+    fputc((boxsize >> 8) & 0xff, fp);
+    fputc(boxsize & 0xff, fp);
+    fwrite(type, 4, 1, fp);
+    fwrite(xmldata, (size_t)fsize, 1, fp);
+
+    free(xmldata);
+    fclose(fp);
+
+    return 0;
 }
 
-FILE * open_jp2file( const char filename[])
+FILE * open_jp2file(const char filename[])
 {
-  FILE *fp;
-  char *data;
-  
-  if( !(fp = fopen( filename, "a+b"))){
-    fprintf( stderr, "Original JP2 %s not found\n", filename);
-    return NULL;
-  }
-  /* Check resource is a JP family file. */
-  if( fseek( fp, 0, SEEK_SET)==-1){
-    fclose(fp);
-    fprintf( stderr, "Original JP2 %s broken (fseek error)\n", filename);
-    return NULL;
-  }
-  
-  data = (char *)malloc( 12); /* size of header */
-  if( fread( data, 12, 1, fp) != 1){
-    free( data);
-    fclose(fp);
-    fprintf( stderr, "Original JP2 %s broken (read error)\n", filename);
-    return NULL;
-  }
-    
-  if( *data || *(data + 1) || *(data + 2) ||
-      *(data + 3) != 12 || strncmp (data + 4, "jP  \r\n\x87\n", 8)){
-    free( data);
-    fclose(fp);
-    fprintf( stderr, "No JPEG 2000 Signature box in target %s\n", filename);
-    return NULL;
-  }
-  free( data);
-  return fp;
+    FILE *fp;
+    char *data;
+
+    if (!(fp = fopen(filename, "a+b"))) {
+        fprintf(stderr, "Original JP2 %s not found\n", filename);
+        return NULL;
+    }
+    /* Check resource is a JP family file. */
+    if (fseek(fp, 0, SEEK_SET) == -1) {
+        fclose(fp);
+        fprintf(stderr, "Original JP2 %s broken (fseek error)\n", filename);
+        return NULL;
+    }
+
+    data = (char *)malloc(12);  /* size of header */
+    if (fread(data, 12, 1, fp) != 1) {
+        free(data);
+        fclose(fp);
+        fprintf(stderr, "Original JP2 %s broken (read error)\n", filename);
+        return NULL;
+    }
+
+    if (*data || *(data + 1) || *(data + 2) ||
+            *(data + 3) != 12 || strncmp(data + 4, "jP  \r\n\x87\n", 8)) {
+        free(data);
+        fclose(fp);
+        fprintf(stderr, "No JPEG 2000 Signature box in target %s\n", filename);
+        return NULL;
+    }
+    free(data);
+    return fp;
 }
 
-char * read_xmlfile( const char filename[], long *fsize)
+char * read_xmlfile(const char filename[], long *fsize)
 {
-  FILE *fp;
-  char *data;
-  
-  /*  fprintf( stderr, "open %s\n", filename);*/
-  if(!(fp = fopen( filename, "r"))){
-    fprintf( stderr, "XML file %s not found\n", filename);
-    return NULL;
-  }
+    FILE *fp;
+    char *data;
 
-  if( fseek( fp, 0, SEEK_END) == -1){
-    fprintf( stderr, "XML file %s broken (seek error)\n", filename);
-    fclose( fp);
-    return NULL;
-  }
-    
-  if( (*fsize = ftell( fp)) == -1){
-    fprintf( stderr, "XML file %s broken (seek error)\n", filename);
-    fclose( fp);
-    return NULL;
-  }
-  assert( *fsize >= 0 );
+    /*  fprintf( stderr, "open %s\n", filename);*/
+    if (!(fp = fopen(filename, "r"))) {
+        fprintf(stderr, "XML file %s not found\n", filename);
+        return NULL;
+    }
 
-  if( fseek( fp, 0, SEEK_SET) == -1){
-    fprintf( stderr, "XML file %s broken (seek error)\n", filename);
-    fclose( fp);
-    return NULL;
-  }
+    if (fseek(fp, 0, SEEK_END) == -1) {
+        fprintf(stderr, "XML file %s broken (seek error)\n", filename);
+        fclose(fp);
+        return NULL;
+    }
 
-  data = (char *)malloc( (size_t)*fsize);
-  
-  if( fread( data, (size_t)*fsize, 1, fp) != 1){
-    fprintf( stderr, "XML file %s broken (read error)\n", filename);
-    free( data);
+    if ((*fsize = ftell(fp)) == -1) {
+        fprintf(stderr, "XML file %s broken (seek error)\n", filename);
+        fclose(fp);
+        return NULL;
+    }
+    assert(*fsize >= 0);
+
+    if (fseek(fp, 0, SEEK_SET) == -1) {
+        fprintf(stderr, "XML file %s broken (seek error)\n", filename);
+        fclose(fp);
+        return NULL;
+    }
+
+    data = (char *)malloc((size_t) * fsize);
+
+    if (fread(data, (size_t)*fsize, 1, fp) != 1) {
+        fprintf(stderr, "XML file %s broken (read error)\n", filename);
+        free(data);
+        fclose(fp);
+        return NULL;
+    }
+
     fclose(fp);
-    return NULL;
-  }
 
-  fclose( fp);
-
-  return data;
+    return data;
 }

@@ -1,12 +1,12 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
  * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2014, Professor Benoit Macq
- * Copyright (c) 2003-2007, Francois-Olivier Devaux 
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
  * Copyright (c) 2003-2014, Antonin Descampe
  * Copyright (c) 2005, Herve Drolon, FreeImage Team
  * All rights reserved.
@@ -50,27 +50,27 @@ with the corresponding mode switch.
 RAW encoding operations
 */
 typedef struct opj_raw {
-	/** temporary buffer where bits are coded or decoded */
-	unsigned char c;
-	/** number of bits already read or free to write */
-	unsigned int ct;
-	/** maximum length to decode */
-	unsigned int lenmax;
-	/** length decoded */
-	unsigned int len;
-	/** pointer to the current position in the buffer */
-	unsigned char *bp;
-	/** pointer to the start of the buffer */
-	unsigned char *start;
-	/** pointer to the end of the buffer */
-	unsigned char *end;
+    /** temporary buffer where bits are coded or decoded */
+    unsigned char c;
+    /** number of bits already read or free to write */
+    unsigned int ct;
+    /** maximum length to decode */
+    unsigned int lenmax;
+    /** length decoded */
+    unsigned int len;
+    /** pointer to the current position in the buffer */
+    unsigned char *bp;
+    /** pointer to the start of the buffer */
+    unsigned char *start;
+    /** pointer to the end of the buffer */
+    unsigned char *end;
 } opj_raw_t;
 
 /** @name Exported functions */
 /*@{*/
 /* ----------------------------------------------------------------------- */
 /**
-Create a new RAW handle 
+Create a new RAW handle
 @return Returns a new RAW handle if successful, returns NULL otherwise
 */
 opj_raw_t* raw_create(void);

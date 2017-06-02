@@ -28,12 +28,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	JP2K_DECODER_H_
-# define   	JP2K_DECODER_H_
+#ifndef     JP2K_DECODER_H_
+# define    JP2K_DECODER_H_
 
 #include "byte_manager.h"
 #include "ihdrbox_manager.h"
 
-Byte_t * j2k_to_pnm( const char *fn, ihdrbox_param_t **ihdrbox);
+Byte_t * j2k_to_pnm(const char *fn, ihdrbox_param_t **ihdrbox);
 
-#endif 	    /* !JP2K_DECODER_H_ */
+#endif      /* !JP2K_DECODER_H_ */

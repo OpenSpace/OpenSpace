@@ -28,15 +28,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	IMGSOCK_MANAGER_H_
-# define   	IMGSOCK_MANAGER_H_
+#ifndef     IMGSOCK_MANAGER_H_
+# define    IMGSOCK_MANAGER_H_
 
 #include "byte_manager.h"
 #include "sock_manager.h"
 #include "opj_includes.h"
 
 #define NUM_OF_MSGTYPES 9
-typedef enum eMSGTYPE{ JPIPSTREAM, PNMREQ, XMLREQ, TIDREQ, CIDREQ, CIDDST, SIZREQ, JP2SAVE, QUIT, MSGERROR} msgtype_t;
+typedef enum eMSGTYPE { JPIPSTREAM, PNMREQ, XMLREQ, TIDREQ, CIDREQ, CIDDST, SIZREQ, JP2SAVE, QUIT, MSGERROR} msgtype_t;
 
 /**
  * indeitify client message type
@@ -44,7 +44,7 @@ typedef enum eMSGTYPE{ JPIPSTREAM, PNMREQ, XMLREQ, TIDREQ, CIDREQ, CIDDST, SIZRE
  * @param [in] connected_socket file descriptor of the connected socket
  * @return                      message type
  */
-msgtype_t identify_clientmsg( SOCKET connected_socket);
+msgtype_t identify_clientmsg(SOCKET connected_socket);
 
 /**
  * receive a JPT- JPP- stream from client
@@ -56,7 +56,8 @@ msgtype_t identify_clientmsg( SOCKET connected_socket);
  * @param [out] streamlen        length of the received codestream
  * @return                       JPT- JPP- codestream
  */
-Byte_t * receive_JPIPstream( SOCKET connected_socket, char **target, char **tid, char **cid, OPJ_SIZE_T *streamlen);
+Byte_t * receive_JPIPstream(SOCKET connected_socket, char **target, char **tid,
+                            char **cid, OPJ_SIZE_T *streamlen);
 
 /**
  * send PGM/PPM image stream to the client
@@ -68,7 +69,8 @@ Byte_t * receive_JPIPstream( SOCKET connected_socket, char **target, char **tid,
  * @param [in]  numofcomp        number of components of the image
  * @param [in]  maxval           maximum value of the image (only 255 supported)
  */
-void send_PNMstream( SOCKET connected_socket, Byte_t *pnmstream, unsigned int width, unsigned int height, unsigned int numofcomp, Byte_t maxval);
+void send_PNMstream(SOCKET connected_socket, Byte_t *pnmstream,
+                    unsigned int width, unsigned int height, unsigned int numofcomp, Byte_t maxval);
 
 /**
  * send XML data stream to the client
@@ -77,7 +79,8 @@ void send_PNMstream( SOCKET connected_socket, Byte_t *pnmstream, unsigned int wi
  * @param [in]  xmlstream        xml data stream
  * @param [in]  length           legnth of the xml data stream
  */
-void send_XMLstream( SOCKET connected_socket, Byte_t *xmlstream, OPJ_SIZE_T length);
+void send_XMLstream(SOCKET connected_socket, Byte_t *xmlstream,
+                    OPJ_SIZE_T length);
 
 /**
  * send TID data stream to the client
@@ -86,7 +89,8 @@ void send_XMLstream( SOCKET connected_socket, Byte_t *xmlstream, OPJ_SIZE_T leng
  * @param [in]  tid              tid string
  * @param [in]  tidlen           legnth of the tid string
  */
-void send_TIDstream( SOCKET connected_socket, const char *tid, OPJ_SIZE_T tidlen);
+void send_TIDstream(SOCKET connected_socket, const char *tid,
+                    OPJ_SIZE_T tidlen);
 
 /**
  * send CID data stream to the client
@@ -95,7 +99,8 @@ void send_TIDstream( SOCKET connected_socket, const char *tid, OPJ_SIZE_T tidlen
  * @param [in]  cid              cid string
  * @param [in]  cidlen           legnth of the cid string
  */
-void send_CIDstream( SOCKET connected_socket, const char *cid, OPJ_SIZE_T cidlen);
+void send_CIDstream(SOCKET connected_socket, const char *cid,
+                    OPJ_SIZE_T cidlen);
 
 /**
  * send SIZ data stream to the client
@@ -104,7 +109,8 @@ void send_CIDstream( SOCKET connected_socket, const char *cid, OPJ_SIZE_T cidlen
  * @param [in]  width            original width  of the image
  * @param [in]  height           original height of the image
  */
-void send_SIZstream( SOCKET connected_socket, unsigned int width, unsigned int height);
+void send_SIZstream(SOCKET connected_socket, unsigned int width,
+                    unsigned int height);
 
 /**
  * send response signal to the client
@@ -112,7 +118,7 @@ void send_SIZstream( SOCKET connected_socket, unsigned int width, unsigned int h
  * @param [in]  connected_socket file descriptor of the connected socket
  * @param [in]  succeed          whether if the requested process succeeded
  */
-void response_signal( SOCKET connected_socket, OPJ_BOOL succeed);
+void response_signal(SOCKET connected_socket, OPJ_BOOL succeed);
 
 #endif /* !IMGSOCK_MANAGER_H_ */
 
@@ -124,7 +130,7 @@ void response_signal( SOCKET connected_socket, OPJ_BOOL succeed);
  *
  * client -> server: JPIP-stream\\n version 1.1\\n (optional for cid registration: targetnamestring\\n  tidstring\\n  cidstring\\n) bytelengthvalue\\n data \n
  * server -> client: 1 or 0 (of 1Byte response signal)
- * 
+ *
  *\section sec2 PNM request
  * Get decoded PGM/PPM image
  *

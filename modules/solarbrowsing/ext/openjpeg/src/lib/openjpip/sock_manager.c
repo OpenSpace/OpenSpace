@@ -52,131 +52,134 @@ typedef SSIZE_T ssize_t;
 #define logstream stderr
 #endif /*SERVER*/
 
-SOCKET open_listeningsocket( uint16_t port)
+SOCKET open_listeningsocket(uint16_t port)
 {
-  SOCKET listening_socket;
-  struct sockaddr_in sin;
-  int sock_optval = 1;
-  
-  listening_socket = socket(AF_INET, SOCK_STREAM, 0);
-  if ( listening_socket == -1 ){
-    perror("socket");
-    exit(1);
-  }
-  
-  if ( setsockopt(listening_socket, SOL_SOCKET, SO_REUSEADDR, (const char *)&sock_optval, sizeof(sock_optval)) == -1 ){
-    perror("setsockopt");
-    exit(1);
-  }
+    SOCKET listening_socket;
+    struct sockaddr_in sin;
+    int sock_optval = 1;
 
-  memset(&sin, 0, sizeof(sin));
-  sin.sin_family = AF_INET;
-  sin.sin_port = htons(port);
-  sin.sin_addr.s_addr = htonl(INADDR_ANY);
-
-  if ( bind(listening_socket, (struct sockaddr *)&sin, sizeof(sin)) < 0 ){
-    perror("bind");
-    close_socket(listening_socket);
-    exit(1);
-  }
-
-  if( listen(listening_socket, SOMAXCONN) == -1){
-    perror("listen");
-    close_socket(listening_socket);
-    exit(1);
-  }
-  fprintf( FCGI_stderr, "port %d is listened\n", port);
-
-  return listening_socket;
-}
-
-SOCKET accept_socket( SOCKET listening_socket)
-{
-  struct sockaddr_in peer_sin;
-  unsigned int addrlen = sizeof(peer_sin);
-
-  return accept( listening_socket, (struct sockaddr *)&peer_sin, &addrlen);
-}
-
-void send_stream( SOCKET connected_socket, const void *stream, OPJ_SIZE_T length)
-{
-  char *ptr = (char*)stream;
-  OPJ_SIZE_T remlen = length;
-
-  while( remlen > 0){
-    ssize_t sentlen = send( connected_socket, ptr, remlen, 0);
-    if( sentlen == -1){
-      fprintf( FCGI_stderr, "sending stream error\n");
-      break;
+    listening_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (listening_socket == -1) {
+        perror("socket");
+        exit(1);
     }
-    remlen = remlen - (OPJ_SIZE_T)sentlen;
-    ptr = ptr + sentlen;
-  }
+
+    if (setsockopt(listening_socket, SOL_SOCKET, SO_REUSEADDR,
+                   (const char *)&sock_optval, sizeof(sock_optval)) == -1) {
+        perror("setsockopt");
+        exit(1);
+    }
+
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_port = htons(port);
+    sin.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    if (bind(listening_socket, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
+        perror("bind");
+        close_socket(listening_socket);
+        exit(1);
+    }
+
+    if (listen(listening_socket, SOMAXCONN) == -1) {
+        perror("listen");
+        close_socket(listening_socket);
+        exit(1);
+    }
+    fprintf(FCGI_stderr, "port %d is listened\n", port);
+
+    return listening_socket;
 }
 
-void * receive_stream( SOCKET connected_socket, OPJ_SIZE_T length)
+SOCKET accept_socket(SOCKET listening_socket)
 {
-  char *stream, *ptr;
-  OPJ_SIZE_T remlen;
+    struct sockaddr_in peer_sin;
+    unsigned int addrlen = sizeof(peer_sin);
 
-  ptr = stream = malloc( length);
-  remlen = length;
+    return accept(listening_socket, (struct sockaddr *)&peer_sin, &addrlen);
+}
 
-  while( remlen > 0){
-    ssize_t redlen = recv( connected_socket, ptr, remlen, 0);
-    if( redlen == -1){
-      fprintf( FCGI_stderr, "receive stream error\n");
-      free( stream);
-      stream = NULL;
-      break;
+void send_stream(SOCKET connected_socket, const void *stream, OPJ_SIZE_T length)
+{
+    char *ptr = (char*)stream;
+    OPJ_SIZE_T remlen = length;
+
+    while (remlen > 0) {
+        ssize_t sentlen = send(connected_socket, ptr, remlen, 0);
+        if (sentlen == -1) {
+            fprintf(FCGI_stderr, "sending stream error\n");
+            break;
+        }
+        remlen = remlen - (OPJ_SIZE_T)sentlen;
+        ptr = ptr + sentlen;
     }
-    remlen -= (OPJ_SIZE_T)redlen;
-    ptr = ptr + redlen;
-  }
-  return stream;
+}
+
+void * receive_stream(SOCKET connected_socket, OPJ_SIZE_T length)
+{
+    char *stream, *ptr;
+    OPJ_SIZE_T remlen;
+
+    ptr = stream = malloc(length);
+    remlen = length;
+
+    while (remlen > 0) {
+        ssize_t redlen = recv(connected_socket, ptr, remlen, 0);
+        if (redlen == -1) {
+            fprintf(FCGI_stderr, "receive stream error\n");
+            free(stream);
+            stream = NULL;
+            break;
+        }
+        remlen -= (OPJ_SIZE_T)redlen;
+        ptr = ptr + redlen;
+    }
+    return stream;
 }
 
 OPJ_SIZE_T receive_line(SOCKET connected_socket, char *p)
 {
-  OPJ_SIZE_T len = 0;
-  while (1){
-    ssize_t ret;
-    ret = recv( connected_socket, p, 1, 0);
-    if ( ret == -1 ){
-      perror("receive");
-      exit(1);
-    } else if ( ret == 0 ){
-      break;
+    OPJ_SIZE_T len = 0;
+    while (1) {
+        ssize_t ret;
+        ret = recv(connected_socket, p, 1, 0);
+        if (ret == -1) {
+            perror("receive");
+            exit(1);
+        } else if (ret == 0) {
+            break;
+        }
+        if (*p == '\n') {
+            break;
+        }
+        p++;
+        len++;
     }
-    if ( *p == '\n' )
-      break;
-    p++;
-    len++;
-  }
-  *p = '\0';
+    *p = '\0';
 
-  if( len == 0)
-    fprintf( FCGI_stderr, "Header receive error\n");
+    if (len == 0) {
+        fprintf(FCGI_stderr, "Header receive error\n");
+    }
 
-  return len;
+    return len;
 }
 
-char * receive_string( SOCKET connected_socket)
+char * receive_string(SOCKET connected_socket)
 {
-  char buf[BUF_LEN];
-  
-  /* MM FIXME: there is a nasty bug here, size of buf if BUF_LEN which is never
-  indicated to downstream receive_line */
-  receive_line( connected_socket, buf);
-    
-  return strdup(buf);
+    char buf[BUF_LEN];
+
+    /* MM FIXME: there is a nasty bug here, size of buf if BUF_LEN which is never
+    indicated to downstream receive_line */
+    receive_line(connected_socket, buf);
+
+    return strdup(buf);
 }
 
-int close_socket( SOCKET sock)
+int close_socket(SOCKET sock)
 {
 #ifdef _WIN32
-  return closesocket( sock);
+    return closesocket(sock);
 #else
-  return close( sock);
+    return close(sock);
 #endif
 }

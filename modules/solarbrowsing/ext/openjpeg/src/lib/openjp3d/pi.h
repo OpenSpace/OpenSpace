@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -49,69 +49,69 @@ by some function in T2.C.
 /*@{*/
 
 /**
-Packet iterator : resolution level information 
+Packet iterator : resolution level information
 */
 typedef struct opj_pi_resolution {
-/** Size of precints in horizontal axis */
-	int pdx;
-/** Size of precints in vertical axis */
-	int pdy;
-/** Size of precints in axial axis */
-	int pdz;
-/** Number of precints in each axis */
-	int prctno[3];				
+    /** Size of precints in horizontal axis */
+    int pdx;
+    /** Size of precints in vertical axis */
+    int pdy;
+    /** Size of precints in axial axis */
+    int pdz;
+    /** Number of precints in each axis */
+    int prctno[3];
 } opj_pi_resolution_t;
 
 /**
-Packet iterator : component information 
+Packet iterator : component information
 */
 typedef struct opj_pi_comp {
-/** Size in horizontal axis */
-	int dx;
-/** Size in vertical axis */
-	int dy;
-/** Size in axial axis */
-	int dz;
-/** Number of resolution levels */
-	int numresolution[3];			
-/** Packet iterator : resolution level information */
-	opj_pi_resolution_t *resolutions;
+    /** Size in horizontal axis */
+    int dx;
+    /** Size in vertical axis */
+    int dy;
+    /** Size in axial axis */
+    int dz;
+    /** Number of resolution levels */
+    int numresolution[3];
+    /** Packet iterator : resolution level information */
+    opj_pi_resolution_t *resolutions;
 } opj_pi_comp_t;
 
-/** 
-Packet iterator 
+/**
+Packet iterator
 */
 typedef struct opj_pi_iterator {
-/** precise if the packet has been already used (useful for progression order change) */
-	short int *include;		
-/** layer step used to localize the packet in the include vector */
-	int step_l;		
-/** resolution step used to localize the packet in the include vector */
-	int step_r;	
-/** component step used to localize the packet in the include vector */
-	int step_c;				
-/** precinct step used to localize the packet in the include vector */
-	int step_p;				
-/** component that identify the packet */
-	int compno;				
-/** resolution that identify the packet */
-	int resno;				
-/** precinct that identify the packet */
-	int precno;				
-/** layer that identify the packet */
-	int layno;				
-/** 0 if the first packet */
-	int first;				
-/** progression order change information */
-	opj_poc_t poc;			
-/**	Packet iterator : component information */
-opj_pi_comp_t *comps;
-	
-	int numcomps;
-	int tx0, ty0, tz0;
-	int tx1, ty1, tz1;
-	int x, y, z;
-	int dx, dy, dz;
+    /** precise if the packet has been already used (useful for progression order change) */
+    short int *include;
+    /** layer step used to localize the packet in the include vector */
+    int step_l;
+    /** resolution step used to localize the packet in the include vector */
+    int step_r;
+    /** component step used to localize the packet in the include vector */
+    int step_c;
+    /** precinct step used to localize the packet in the include vector */
+    int step_p;
+    /** component that identify the packet */
+    int compno;
+    /** resolution that identify the packet */
+    int resno;
+    /** precinct that identify the packet */
+    int precno;
+    /** layer that identify the packet */
+    int layno;
+    /** 0 if the first packet */
+    int first;
+    /** progression order change information */
+    opj_poc_t poc;
+    /** Packet iterator : component information */
+    opj_pi_comp_t *comps;
+
+    int numcomps;
+    int tx0, ty0, tz0;
+    int tx1, ty1, tz1;
+    int x, y, z;
+    int dx, dy, dz;
 } opj_pi_iterator_t;
 
 /** @name Funciones generales */
@@ -139,7 +139,7 @@ void pi_destroy(opj_pi_iterator_t *pi, opj_cp_t *cp, int tileno);
 /**
 Modify the packet iterator to point to the next packet
 @param pi Packet iterator to modify
-@return Returns false if pi pointed to the last packet or else returns true 
+@return Returns false if pi pointed to the last packet or else returns true
 */
 bool pi_next(opj_pi_iterator_t * pi);
 /* ----------------------------------------------------------------------- */

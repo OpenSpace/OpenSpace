@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -60,155 +60,155 @@ Assume a basic codestream structure, so you can resort better from uncorrected e
 EPB (Error Protection Block) Marker segment
 */
 typedef struct jpwl_epb_ms {
-	/**@name Private fields set by epb_create */
-	/*@{*/
-	/** is the latest in header? */
-	opj_bool latest;
-	/** is it in packed mode? */
-	opj_bool packed;
-	/** TH where this marker has been placed (-1 means MH) */
-	int tileno;
-	/** index in current header (0-63) */
-	unsigned char index;
-	/** error protection method	[-1=absent 0=none 1=predefined 16=CRC-16 32=CRC-32 37-128=RS] */
-	int hprot;
-	/** message word length of pre-data */
-	int k_pre;
-	/** code word length of pre-data */
-	int n_pre;
-	/** length of pre-data */
-	int pre_len;
-	/** message word length of post-data */
-	int k_post;
-	/** code word length of post-data */
-	int n_post;
-	/** length of post-data */
-	int post_len;
-	/*@}*/
-	/**@name Marker segment fields */
-	/*@{*/
-	/** two bytes for the length of EPB MS, exluding the marker itself (11 to 65535 bytes) */
-	unsigned short int Lepb;
-	/** single byte for the style */
-	unsigned char Depb; 
-	/** four bytes, from 0 to 2^31-1 */
-	unsigned long int LDPepb;
-	/** four bytes, next error management method */
-	unsigned long int Pepb;
-	/** EPB data, variable size */
-	unsigned char *data;   
-	/*@}*/
-}	jpwl_epb_ms_t;
+    /**@name Private fields set by epb_create */
+    /*@{*/
+    /** is the latest in header? */
+    opj_bool latest;
+    /** is it in packed mode? */
+    opj_bool packed;
+    /** TH where this marker has been placed (-1 means MH) */
+    int tileno;
+    /** index in current header (0-63) */
+    unsigned char index;
+    /** error protection method [-1=absent 0=none 1=predefined 16=CRC-16 32=CRC-32 37-128=RS] */
+    int hprot;
+    /** message word length of pre-data */
+    int k_pre;
+    /** code word length of pre-data */
+    int n_pre;
+    /** length of pre-data */
+    int pre_len;
+    /** message word length of post-data */
+    int k_post;
+    /** code word length of post-data */
+    int n_post;
+    /** length of post-data */
+    int post_len;
+    /*@}*/
+    /**@name Marker segment fields */
+    /*@{*/
+    /** two bytes for the length of EPB MS, exluding the marker itself (11 to 65535 bytes) */
+    unsigned short int Lepb;
+    /** single byte for the style */
+    unsigned char Depb;
+    /** four bytes, from 0 to 2^31-1 */
+    unsigned long int LDPepb;
+    /** four bytes, next error management method */
+    unsigned long int Pepb;
+    /** EPB data, variable size */
+    unsigned char *data;
+    /*@}*/
+}   jpwl_epb_ms_t;
 
 /**
 EPC (Error Protection Capability) Marker segment
 */
 typedef struct jpwl_epc_ms {
-	/** is ESD active? */
-	opj_bool esd_on;
-	/** is RED active? */
-	opj_bool red_on;
-	/** is EPB active? */
-	opj_bool epb_on;
-	/** are informative techniques active? */
-	opj_bool info_on;
-	/**@name Marker segment fields */
-	/*@{*/
-	/** two bytes for the length of EPC MS, exluding the marker itself (9 to 65535 bytes) */
-	unsigned short int Lepc;   
-	/** two bytes, CRC for the EPC, excluding Pcrc itself */
-	unsigned short int Pcrc;   
-	/** four bytes, the codestream length from SOC to EOC */
-	unsigned long int DL;     
-	/** one byte, signals JPWL techniques adoption */
-	unsigned char Pepc;	
-	/** EPC data, variable length */
-	unsigned char *data;	
-	/*@}*/
-}	jpwl_epc_ms_t;
+    /** is ESD active? */
+    opj_bool esd_on;
+    /** is RED active? */
+    opj_bool red_on;
+    /** is EPB active? */
+    opj_bool epb_on;
+    /** are informative techniques active? */
+    opj_bool info_on;
+    /**@name Marker segment fields */
+    /*@{*/
+    /** two bytes for the length of EPC MS, exluding the marker itself (9 to 65535 bytes) */
+    unsigned short int Lepc;
+    /** two bytes, CRC for the EPC, excluding Pcrc itself */
+    unsigned short int Pcrc;
+    /** four bytes, the codestream length from SOC to EOC */
+    unsigned long int DL;
+    /** one byte, signals JPWL techniques adoption */
+    unsigned char Pepc;
+    /** EPC data, variable length */
+    unsigned char *data;
+    /*@}*/
+}   jpwl_epc_ms_t;
 
 /**
 ESD (Error Sensitivity Descriptor) Marker segment
 */
 typedef struct jpwl_esd_ms {
-	/** codestream addressing mode [0=packet, 1=byte range, 2=packet range, 3=reserved] */
-	unsigned char addrm;
-	/** size of codestream addresses [2/4 bytes] */
-	unsigned char ad_size;
-	/** type of sensitivity
-	[0=relative error, 1=MSE, 2=MSE reduction, 3=PSNR, 4=PSNR increment,
-	5=MAXERR (absolute peak error), 6=TSE (total squared error), 7=reserved */
-	unsigned char senst;
-	/** size of sensitivity data (1/2 bytes) */
-	unsigned char se_size;
-	/**@name Marker segment fields */
-	/*@{*/
-	/** two bytes for the length of ESD MS, exluding the marker itself (4 to 65535 bytes) */
-	unsigned short int Lesd;   
-	/** two bytes, component of error sensitivity */
-	unsigned short int Cesd;
-	/** one byte, signals JPWL techniques adoption */
-	unsigned char Pesd;	
-	/** ESD data, variable length */
-	unsigned char *data;	
-	/*@}*/
-	/**@name Fields set by esd_create (only internal use) */
-	/*@{*/
-	/** number of components in the image */
-	int numcomps;
-	/** tile where this marker has been placed (-1 means MH) */
-	int tileno;
-	/** number of sensitivity values */
-	unsigned long int svalnum;
-	/** size of a single sensitivity pair (address+value) */
-	size_t sensval_size;
-	/*@}*/
-}	jpwl_esd_ms_t;
+    /** codestream addressing mode [0=packet, 1=byte range, 2=packet range, 3=reserved] */
+    unsigned char addrm;
+    /** size of codestream addresses [2/4 bytes] */
+    unsigned char ad_size;
+    /** type of sensitivity
+    [0=relative error, 1=MSE, 2=MSE reduction, 3=PSNR, 4=PSNR increment,
+    5=MAXERR (absolute peak error), 6=TSE (total squared error), 7=reserved */
+    unsigned char senst;
+    /** size of sensitivity data (1/2 bytes) */
+    unsigned char se_size;
+    /**@name Marker segment fields */
+    /*@{*/
+    /** two bytes for the length of ESD MS, exluding the marker itself (4 to 65535 bytes) */
+    unsigned short int Lesd;
+    /** two bytes, component of error sensitivity */
+    unsigned short int Cesd;
+    /** one byte, signals JPWL techniques adoption */
+    unsigned char Pesd;
+    /** ESD data, variable length */
+    unsigned char *data;
+    /*@}*/
+    /**@name Fields set by esd_create (only internal use) */
+    /*@{*/
+    /** number of components in the image */
+    int numcomps;
+    /** tile where this marker has been placed (-1 means MH) */
+    int tileno;
+    /** number of sensitivity values */
+    unsigned long int svalnum;
+    /** size of a single sensitivity pair (address+value) */
+    size_t sensval_size;
+    /*@}*/
+}   jpwl_esd_ms_t;
 
 /**
 RED (Residual Error Descriptor) Marker segment
 */
 typedef struct jpwl_red_ms {
-	/** two bytes for the length of RED MS, exluding the marker itself (3 to 65535 bytes) */
-	unsigned short int Lred;
-	/** one byte, signals JPWL techniques adoption */
-	unsigned char Pred;	
-	/** RED data, variable length */
-	unsigned char *data;	
-}	jpwl_red_ms_t;
+    /** two bytes for the length of RED MS, exluding the marker itself (3 to 65535 bytes) */
+    unsigned short int Lred;
+    /** one byte, signals JPWL techniques adoption */
+    unsigned char Pred;
+    /** RED data, variable length */
+    unsigned char *data;
+}   jpwl_red_ms_t;
 
 /**
 Structure used to store JPWL markers temporary position and readyness
 */
 typedef struct jpwl_marker {
-	/** marker value (J2K_MS_EPC, etc.) */
-	int id;
-	/** union keeping the pointer to the real marker struct */
-	union jpwl_marks {
-		/** pointer to EPB marker */
-		jpwl_epb_ms_t *epbmark;
-		/** pointer to EPC marker */
-		jpwl_epc_ms_t *epcmark;
-		/** pointer to ESD marker */
-		jpwl_esd_ms_t *esdmark;
-		/** pointer to RED marker */
-		jpwl_red_ms_t *redmark;
-	} m;
-	/** position where the marker should go, in the pre-JPWL codestream */ 
-	unsigned long int pos;
-	/** same as before, only written as a double, so we can sort it better */
-	double dpos;
-	/** length of the marker segment (marker excluded) */
-	unsigned short int len;
-	/** the marker length is ready or not? */
-	opj_bool len_ready;
-	/** the marker position is ready or not? */
-	opj_bool pos_ready;
-	/** the marker parameters are ready or not? */
-	opj_bool parms_ready;
-	/** are the written data ready or not */
-	opj_bool data_ready;
-}	jpwl_marker_t;
+    /** marker value (J2K_MS_EPC, etc.) */
+    int id;
+    /** union keeping the pointer to the real marker struct */
+    union jpwl_marks {
+        /** pointer to EPB marker */
+        jpwl_epb_ms_t *epbmark;
+        /** pointer to EPC marker */
+        jpwl_epc_ms_t *epcmark;
+        /** pointer to ESD marker */
+        jpwl_esd_ms_t *esdmark;
+        /** pointer to RED marker */
+        jpwl_red_ms_t *redmark;
+    } m;
+    /** position where the marker should go, in the pre-JPWL codestream */
+    unsigned long int pos;
+    /** same as before, only written as a double, so we can sort it better */
+    double dpos;
+    /** length of the marker segment (marker excluded) */
+    unsigned short int len;
+    /** the marker length is ready or not? */
+    opj_bool len_ready;
+    /** the marker position is ready or not? */
+    opj_bool pos_ready;
+    /** the marker parameters are ready or not? */
+    opj_bool parms_ready;
+    /** are the written data ready or not */
+    opj_bool data_ready;
+}   jpwl_marker_t;
 
 /**
 Encode according to JPWL specs
@@ -287,8 +287,9 @@ void j2k_read_red(opj_j2k_t *j2k);
 @param post_len length of post-protected data
 @return returns the freshly created EPB
 */
-jpwl_epb_ms_t *jpwl_epb_create(opj_j2k_t *j2k, opj_bool latest, opj_bool packed, int tileno, int idx, int hprot,
-							   unsigned long int pre_len, unsigned long int post_len);
+jpwl_epb_ms_t *jpwl_epb_create(opj_j2k_t *j2k, opj_bool latest, opj_bool packed,
+                               int tileno, int idx, int hprot,
+                               unsigned long int pre_len, unsigned long int post_len);
 
 /** add a number of EPB marker segments
 @param j2k J2K compressor handle
@@ -306,9 +307,9 @@ jpwl_epb_ms_t *jpwl_epb_create(opj_j2k_t *j2k, opj_bool latest, opj_bool packed,
 @return returns the length of all added markers
 */
 int jpwl_epbs_add(opj_j2k_t *j2k, jpwl_marker_t *jwmarker, int *jwmarker_num,
-				  opj_bool latest, opj_bool packed, opj_bool insideMH, int *idx, int hprot,
-				  double place_pos, int tileno,
-				  unsigned long int pre_len, unsigned long int post_len);
+                  opj_bool latest, opj_bool packed, opj_bool insideMH, int *idx, int hprot,
+                  double place_pos, int tileno,
+                  unsigned long int pre_len, unsigned long int post_len);
 
 /** add a number of ESD marker segments
 @param j2k J2K compressor handle
@@ -324,24 +325,28 @@ int jpwl_epbs_add(opj_j2k_t *j2k, jpwl_marker_t *jwmarker, int *jwmarker_num,
 @return returns the length of all added markers
 */
 int jpwl_esds_add(opj_j2k_t *j2k, jpwl_marker_t *jwmarker, int *jwmarker_num,
-				  int comps, unsigned char addrm, unsigned char ad_size,
-				  unsigned char senst, unsigned char se_size,
-				  double place_pos, int tileno);
-	
+                  int comps, unsigned char addrm, unsigned char ad_size,
+                  unsigned char senst, unsigned char se_size,
+                  double place_pos, int tileno);
+
 /** updates the information structure by modifying the positions and lengths
 @param j2k J2K compressor handle
 @param jwmarker pointer to JPWL markers list
 @param jwmarker_num number of JPWL markers
 @return returns true in case of success
-*/			  
-opj_bool jpwl_update_info(opj_j2k_t *j2k, jpwl_marker_t *jwmarker, int jwmarker_num);
+*/
+opj_bool jpwl_update_info(opj_j2k_t *j2k, jpwl_marker_t *jwmarker,
+                          int jwmarker_num);
 
 
-opj_bool jpwl_esd_fill(opj_j2k_t *j2k, jpwl_esd_ms_t *esdmark, unsigned char *buf);
+opj_bool jpwl_esd_fill(opj_j2k_t *j2k, jpwl_esd_ms_t *esdmark,
+                       unsigned char *buf);
 
-opj_bool jpwl_epb_fill(opj_j2k_t *j2k, jpwl_epb_ms_t *epbmark, unsigned char *buf, unsigned char *post_buf);
+opj_bool jpwl_epb_fill(opj_j2k_t *j2k, jpwl_epb_ms_t *epbmark,
+                       unsigned char *buf, unsigned char *post_buf);
 
-opj_bool j2k_add_marker(opj_codestream_info_t *cstr_info, unsigned short int type, int pos, int len);
+opj_bool j2k_add_marker(opj_codestream_info_t *cstr_info,
+                        unsigned short int type, int pos, int len);
 
 /** corrects the data in the JPWL codestream
 @param j2k J2K compressor handle
@@ -359,8 +364,9 @@ opj_bool jpwl_correct(opj_j2k_t *j2k);
 @param L4_bufp is a pointer to the buffer pointer of redundancy data
 @return returns true if correction could be successfully performed
 */
-opj_bool jpwl_epb_correct(opj_j2k_t *j2k, unsigned char *buffer, int type, int pre_len, int post_len, int *conn,
-					  unsigned char **L4_bufp);
+opj_bool jpwl_epb_correct(opj_j2k_t *j2k, unsigned char *buffer, int type,
+                          int pre_len, int post_len, int *conn,
+                          unsigned char **L4_bufp);
 
 /** check that a tile and its children have valid data
 @param j2k J2K decompressor handle

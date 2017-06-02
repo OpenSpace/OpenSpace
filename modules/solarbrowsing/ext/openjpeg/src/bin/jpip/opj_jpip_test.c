@@ -51,23 +51,25 @@
 int
 main(int argc, char *argv[])
 {
-  int fd;
-  index_t *jp2idx;
-  if( argc < 2 ) return 1;
-  
-  if( (fd = open( argv[1], O_RDONLY)) == -1){
-    fprintf( stderr, "Error: Target %s not found\n", argv[1]);
-    return -1;
-  }
+    int fd;
+    index_t *jp2idx;
+    if (argc < 2) {
+        return 1;
+    }
 
-  if( !(jp2idx = get_index_from_JP2file( fd))){
-    fprintf( stderr, "JP2 file broken\n");
-    return -1;
-  }
-  
-  output_index( jp2idx);
-  destroy_index( &jp2idx);
-  close(fd);
+    if ((fd = open(argv[1], O_RDONLY)) == -1) {
+        fprintf(stderr, "Error: Target %s not found\n", argv[1]);
+        return -1;
+    }
 
-  return 0;
+    if (!(jp2idx = get_index_from_JP2file(fd))) {
+        fprintf(stderr, "JP2 file broken\n");
+        return -1;
+    }
+
+    output_index(jp2idx);
+    destroy_index(&jp2idx);
+    close(fd);
+
+    return 0;
 } /* main */

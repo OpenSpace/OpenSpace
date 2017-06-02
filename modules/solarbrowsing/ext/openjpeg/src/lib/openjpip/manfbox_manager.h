@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	MANFBOX_MANAGER_H_
-# define   	MANFBOX_MANAGER_H_
+#ifndef     MANFBOX_MANAGER_H_
+# define    MANFBOX_MANAGER_H_
 
 #include "byte_manager.h"
 #include "box_manager.h"
@@ -38,8 +38,8 @@
 
 /** manifest box parameters*/
 /** I.3.2.3 Manifest box*/
-typedef struct manfbox_param{
-  boxheader_param_t *first; /**< top of the box header list*/
+typedef struct manfbox_param {
+    boxheader_param_t *first; /**< top of the box header list*/
 } manfbox_param_t;
 
 
@@ -49,7 +49,7 @@ typedef struct manfbox_param{
  * @param[in] box pointer to the reference manf box
  * @return        generated manfbox
  */
-manfbox_param_t * gene_manfbox( box_param_t *box);
+manfbox_param_t * gene_manfbox(box_param_t *box);
 
 
 /**
@@ -57,7 +57,7 @@ manfbox_param_t * gene_manfbox( box_param_t *box);
  *
  * @param[in,out] manf addressof the manfbox pointer
  */
-void delete_manfbox( manfbox_param_t **manf);
+void delete_manfbox(manfbox_param_t **manf);
 
 
 /**
@@ -65,7 +65,7 @@ void delete_manfbox( manfbox_param_t **manf);
  *
  * @param[in] manf manf box pointer
  */
-void print_manfbox( manfbox_param_t *manf);
+void print_manfbox(manfbox_param_t *manf);
 
 
 /**
@@ -75,7 +75,7 @@ void print_manfbox( manfbox_param_t *manf);
  * @param[in]     manf manf box pointer
  * @return             found box pointer
  */
-boxheader_param_t * search_boxheader( const char type[], manfbox_param_t *manf);
+boxheader_param_t * search_boxheader(const char type[], manfbox_param_t *manf);
 
 
-#endif 	    /* !MANFBOX_MANAGER_H_ */
+#endif      /* !MANFBOX_MANAGER_H_ */

@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -8,7 +8,7 @@
  * Copyright (c) 2002-2014, Professor Benoit Macq
  * Copyright (c) 2001-2003, David Janssens
  * Copyright (c) 2002-2003, Yannick Verschueren
- * Copyright (c) 2003-2007, Francois-Olivier Devaux 
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
  * Copyright (c) 2003-2014, Antonin Descampe
  * Copyright (c) 2005, Herve Drolon, FreeImage Team
  * All rights reserved.
@@ -40,17 +40,17 @@
 /**@name RAW image encoding parameters */
 /*@{*/
 typedef struct raw_cparameters {
-	/** width of the raw image */
-	int rawWidth;
-	/** height of the raw image */
-	int rawHeight;
-	/** components of the raw image */
-	int rawComp;
-	/** bit depth of the raw image */
-	int rawBitDepth;
-	/** signed/unsigned raw image */
-	opj_bool rawSigned;
-	/*@}*/
+    /** width of the raw image */
+    int rawWidth;
+    /** height of the raw image */
+    int rawHeight;
+    /** components of the raw image */
+    int rawComp;
+    /** bit depth of the raw image */
+    int rawBitDepth;
+    /** signed/unsigned raw image */
+    opj_bool rawSigned;
+    /*@}*/
 } raw_cparameters_t;
 
 /* TGA conversion */
@@ -78,11 +78,13 @@ int imagetopnm(opj_image_t *image, const char *outfile);
 
 /* RAW conversion */
 int imagetoraw(opj_image_t * image, const char *outfile);
-opj_image_t* rawtoimage(const char *filename, opj_cparameters_t *parameters, raw_cparameters_t *raw_cp);
+opj_image_t* rawtoimage(const char *filename, opj_cparameters_t *parameters,
+                        raw_cparameters_t *raw_cp);
 
 /* PNG conversion*/
 extern int imagetopng(opj_image_t *image, const char *write_idf);
-extern opj_image_t* pngtoimage(const char *filename, opj_cparameters_t *parameters);
+extern opj_image_t* pngtoimage(const char *filename,
+                               opj_cparameters_t *parameters);
 
 #endif /* __J2K_CONVERT_H */
 

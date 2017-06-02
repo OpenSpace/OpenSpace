@@ -9,5 +9,6 @@
 
 void xml_write_init(BOOL n, BOOL t, BOOL r, BOOL d);
 
-int xml_write_struct(FILE *file, FILE *xmlout, opj_mj2_t * movie, unsigned int sampleframe, char* stringDTD, opj_event_mgr_t *event_mgr);
+int xml_write_struct(FILE *file, FILE *xmlout, opj_mj2_t * movie,
+                     unsigned int sampleframe, char* stringDTD, opj_event_mgr_t *event_mgr);
 

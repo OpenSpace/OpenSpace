@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -61,49 +61,50 @@
 
 /* Ignore GCC attributes if this is not GCC */
 #ifndef __GNUC__
-	#define __attribute__(x) /* __attribute__(x) */
+#define __attribute__(x) /* __attribute__(x) */
 #endif
 
 /*
-The inline keyword is supported by C99 but not by C90. 
-Most compilers implement their own version of this keyword ... 
+The inline keyword is supported by C99 but not by C90.
+Most compilers implement their own version of this keyword ...
 */
 #ifndef INLINE
-	#if defined(_MSC_VER)
-		#define INLINE __forceinline
-	#elif defined(__GNUC__)
-		#define INLINE __inline__
-	#elif defined(__MWERKS__)
-		#define INLINE inline
-	#else 
-		/* add other compilers here ... */
-		#define INLINE 
-	#endif /* defined(<Compiler>) */
+#if defined(_MSC_VER)
+#define INLINE __forceinline
+#elif defined(__GNUC__)
+#define INLINE __inline__
+#elif defined(__MWERKS__)
+#define INLINE inline
+#else
+/* add other compilers here ... */
+#define INLINE
+#endif /* defined(<Compiler>) */
 #endif /* INLINE */
 
 /* Are restricted pointers available? (C99) */
 #if (__STDC_VERSION__ != 199901L)
-	/* Not a C99 compiler */
-	#ifdef __GNUC__
-		#define restrict __restrict__
-	#else
-		#define restrict /* restrict */
-	#endif
+/* Not a C99 compiler */
+#ifdef __GNUC__
+#define restrict __restrict__
+#else
+#define restrict /* restrict */
+#endif
 #endif
 
 /* MSVC and Borland C do not have lrintf */
 #if defined(_MSC_VER) || defined(__BORLANDC__)
-static INLINE long lrintf(float f){
+static INLINE long lrintf(float f)
+{
 #ifdef _M_X64
-    return (long)((f>0.0f) ? (f + 0.5f):(f -0.5f));
+    return (long)((f > 0.0f) ? (f + 0.5f) : (f - 0.5f));
 #else
     int i;
- 
+
     _asm{
         fld f
         fistp i
     };
- 
+
     return i;
 #endif
 }

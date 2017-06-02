@@ -116,3 +116,9 @@ else(BUILD_THIRDPARTY)
     endif(LCMS_FOUND)
   endif(LCMS2_FOUND)
 endif(BUILD_THIRDPARTY)
+
+
+#------------
+IF (WITH_ASTYLE)
+  ADD_SUBDIRECTORY(astyle)
+ENDIF(WITH_ASTYLE)

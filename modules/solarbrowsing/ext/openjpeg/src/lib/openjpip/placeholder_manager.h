@@ -28,36 +28,36 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	PLACEHOLDER_MANAGER_H_
-# define   	PLACEHOLDER_MANAGER_H_
+#ifndef     PLACEHOLDER_MANAGER_H_
+# define    PLACEHOLDER_MANAGER_H_
 
 #include "byte_manager.h"
 #include "box_manager.h"
 
 /** A.3.6.3 Placeholder box format*/
 /** placeholder box parameters*/
-typedef struct placeholder_param{
-  Byte4_t LBox;
-  char TBox[4];
-  Byte4_t Flags;
-  Byte8_t OrigID;
-  Byte_t *OrigBH;   /**< dynamic memory pointer*/
-  Byte_t OrigBHlen; /**< length of OrigBH*/
+typedef struct placeholder_param {
+    Byte4_t LBox;
+    char TBox[4];
+    Byte4_t Flags;
+    Byte8_t OrigID;
+    Byte_t *OrigBH;   /**< dynamic memory pointer*/
+    Byte_t OrigBHlen; /**< length of OrigBH*/
 #ifdef AAA
-  Byte8_t EquivID;
-  Byte_t *EquivBH;   /**< dynamic memory pointer*/
-  Byte_t EquivBHlen; /**< length of EquivBH*/
-  Byte8_t CSID;
-  Byte4_t NCS;
+    Byte8_t EquivID;
+    Byte_t *EquivBH;   /**< dynamic memory pointer*/
+    Byte_t EquivBHlen; /**< length of EquivBH*/
+    Byte8_t CSID;
+    Byte4_t NCS;
 #endif /*AAA*/
-  struct placeholder_param *next; /**< pointer to the next placeholder*/
+    struct placeholder_param *next; /**< pointer to the next placeholder*/
 } placeholder_param_t;
 
 
 /** placeholder box list parameters*/
-typedef struct placeholderlist_param{
-  placeholder_param_t *first; /**< first placeholder pointer of the list*/
-  placeholder_param_t *last;  /**< last  placeholder pointer of the list*/
+typedef struct placeholderlist_param {
+    placeholder_param_t *first; /**< first placeholder pointer of the list*/
+    placeholder_param_t *last;  /**< last  placeholder pointer of the list*/
 } placeholderlist_param_t;
 
 
@@ -74,7 +74,7 @@ placeholderlist_param_t * gene_placeholderlist(void);
  *
  * @param[in,out] list address of the placeholder list pointer
  */
-void delete_placeholderlist( placeholderlist_param_t **list);
+void delete_placeholderlist(placeholderlist_param_t **list);
 
 
 /**
@@ -84,7 +84,7 @@ void delete_placeholderlist( placeholderlist_param_t **list);
  * @param[in] origID metadata-bin ID of the bin containing the contents of the original box
  * @return           pointer to the generated placeholder
  */
-placeholder_param_t * gene_placeholder( box_param_t *box, Byte8_t origID);
+placeholder_param_t * gene_placeholder(box_param_t *box, Byte8_t origID);
 
 
 /**
@@ -92,9 +92,10 @@ placeholder_param_t * gene_placeholder( box_param_t *box, Byte8_t origID);
  *
  * @param[in,out] placeholder address of the placeholder pointer
  */
-void delete_placeholder( placeholder_param_t **placeholder);
+void delete_placeholder(placeholder_param_t **placeholder);
 
-void insert_placeholder_into_list( placeholder_param_t *phld, placeholderlist_param_t *phldlist);
+void insert_placeholder_into_list(placeholder_param_t *phld,
+                                  placeholderlist_param_t *phldlist);
 
 
 /**
@@ -102,7 +103,7 @@ void insert_placeholder_into_list( placeholder_param_t *phld, placeholderlist_pa
  *
  * @param[in] phld placeholder pointer
  */
-void print_placeholder( placeholder_param_t *phld);
+void print_placeholder(placeholder_param_t *phld);
 
 
 /**
@@ -110,6 +111,6 @@ void print_placeholder( placeholder_param_t *phld);
  *
  * @param[in] list placeholder list pointer
  */
-void print_allplaceholder( placeholderlist_param_t *list);
+void print_allplaceholder(placeholderlist_param_t *list);
 
-#endif 	    /* !PLACEHOLDER_MANAGER_H_ */
+#endif      /* !PLACEHOLDER_MANAGER_H_ */

@@ -35,11 +35,11 @@
 #include "opj_includes.h"
 
 /** auxiliary transport setting parameters*/
-typedef struct auxtrans_param{
-  int tcpauxport;       /**< tcp port*/
-  int udpauxport;       /**< udp port*/
-  SOCKET tcplistensock; /**< listenning socket for aux tcp (-1 if not open)*/
-  SOCKET udplistensock; /**< listenning socket for aux udp (-1 if not open)*/
+typedef struct auxtrans_param {
+    int tcpauxport;       /**< tcp port*/
+    int udpauxport;       /**< udp port*/
+    SOCKET tcplistensock; /**< listenning socket for aux tcp (-1 if not open)*/
+    SOCKET udplistensock; /**< listenning socket for aux udp (-1 if not open)*/
 } auxtrans_param_t;
 
 /**
@@ -49,14 +49,14 @@ typedef struct auxtrans_param{
  * @param[in] udp_auxport opening udp auxiliary port ( 0 not to open, valid No. 49152-65535)
  * @return                intialized transport parameters
  */
-auxtrans_param_t init_aux_transport( int tcp_auxport, int udp_auxport);
+auxtrans_param_t init_aux_transport(int tcp_auxport, int udp_auxport);
 
 /**
  * Close auxiliary transport server of JPIP server
  *
  * @param[in] auxtrans closing transport server
  */
-void close_aux_transport( auxtrans_param_t auxtrans);
+void close_aux_transport(auxtrans_param_t auxtrans);
 
 /**
  * Send response data on aux transport
@@ -68,6 +68,7 @@ void close_aux_transport( auxtrans_param_t auxtrans);
  * @param[in] length         length of data
  * @param[in] maxlenPerFrame maximum data length to send per frame
  */
-void send_responsedata_on_aux( OPJ_BOOL istcp, auxtrans_param_t auxtrans, const char cid[], void *data, OPJ_SIZE_T length, OPJ_SIZE_T maxlenPerFrame);
+void send_responsedata_on_aux(OPJ_BOOL istcp, auxtrans_param_t auxtrans,
+                              const char cid[], void *data, OPJ_SIZE_T length, OPJ_SIZE_T maxlenPerFrame);
 
 #endif /* !AUXTRANS_MANAGER_H_ */

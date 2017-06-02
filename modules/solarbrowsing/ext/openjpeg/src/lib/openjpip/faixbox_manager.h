@@ -28,53 +28,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	FAIXBOX_MANAGER_H_
-# define   	FAIXBOX_MANAGER_H_
+#ifndef     FAIXBOX_MANAGER_H_
+# define    FAIXBOX_MANAGER_H_
 
 #include "byte_manager.h"
 #include "box_manager.h"
 
 /** 4byte parameters of a faix element*/
-typedef struct faixelem4_param{
-  Byte4_t off; /**< offset*/
-  Byte4_t len; /**< length*/
+typedef struct faixelem4_param {
+    Byte4_t off; /**< offset*/
+    Byte4_t len; /**< length*/
 } faixelem4_param_t;
 
 /** 8byte parameters of a faix element*/
-typedef struct faixelem8_param{
-  Byte8_t off; /**< offset*/
-  Byte8_t len; /**< length*/
+typedef struct faixelem8_param {
+    Byte8_t off; /**< offset*/
+    Byte8_t len; /**< length*/
 } faixelem8_param_t;
 
 /** 4byte parameters of fragment array index box*/
-typedef struct subfaixbox4_param{
-  Byte4_t nmax;             /**< maximum number of valid elements in any row of the array*/
-  Byte4_t m;                /**< number of raws of the array*/
-  faixelem4_param_t *elem;  /**< dynamic array pointer of faix elements*/
-  Byte4_t *aux;             /**< dynamic array pointer of auxiliary*/
-			                      /**info in each element for version 2 or 3*/
+typedef struct subfaixbox4_param {
+    Byte4_t nmax;             /**< maximum number of valid elements in any row of the array*/
+    Byte4_t m;                /**< number of raws of the array*/
+    faixelem4_param_t *elem;  /**< dynamic array pointer of faix elements*/
+    Byte4_t *aux;             /**< dynamic array pointer of auxiliary*/
+    /**info in each element for version 2 or 3*/
 } subfaixbox4_param_t;
 
 /** 8byte parameters of fragment array index box*/
-typedef struct subfaixbox8_param{
-  Byte8_t nmax;             /**< maximum number of valid elements in any row of the array*/
-  Byte8_t m;                /**< number of raws of the array*/
-  faixelem8_param_t *elem;  /**< dynamic array pointer of faix elements*/
-  Byte4_t *aux;             /**< dynamic array pointer of auxiliary*/
-			                      /**info in each element for version 2 or 3*/
+typedef struct subfaixbox8_param {
+    Byte8_t nmax;             /**< maximum number of valid elements in any row of the array*/
+    Byte8_t m;                /**< number of raws of the array*/
+    faixelem8_param_t *elem;  /**< dynamic array pointer of faix elements*/
+    Byte4_t *aux;             /**< dynamic array pointer of auxiliary*/
+    /**info in each element for version 2 or 3*/
 } subfaixbox8_param_t;
 
 /** variable sized parameters in fragment array index box*/
-typedef union subfaixbox_param{
-  subfaixbox4_param_t *byte4_params; /**< parameters with 4byte codes for version 0 or 2*/
-  subfaixbox8_param_t *byte8_params; /**< parameters with 8byte codes for version 1 or 3*/
+typedef union subfaixbox_param {
+    subfaixbox4_param_t
+    *byte4_params; /**< parameters with 4byte codes for version 0 or 2*/
+    subfaixbox8_param_t
+    *byte8_params; /**< parameters with 8byte codes for version 1 or 3*/
 } subfaixbox_param_t;
 
 /** fragment array index box parameters*/
 /** I.3.2.4.2 Fragment Array Index box*/
-typedef struct faixbox_param{
-  Byte_t version;                /**< Refer to the Table I.3 - Version values*/
-  subfaixbox_param_t subfaixbox; /**< rest information in faixbox*/
+typedef struct faixbox_param {
+    Byte_t version;                /**< Refer to the Table I.3 - Version values*/
+    subfaixbox_param_t subfaixbox; /**< rest information in faixbox*/
 } faixbox_param_t;
 
 
@@ -84,7 +86,7 @@ typedef struct faixbox_param{
  * @param[in] box pointer to the reference faix_box
  * @return        generated faixbox
  */
-faixbox_param_t * gene_faixbox( box_param_t *box);
+faixbox_param_t * gene_faixbox(box_param_t *box);
 
 
 /**
@@ -92,7 +94,7 @@ faixbox_param_t * gene_faixbox( box_param_t *box);
  *
  * @param[in] faix faix box pointer
  */
-void print_faixbox( faixbox_param_t *faix);
+void print_faixbox(faixbox_param_t *faix);
 
 
 /**
@@ -100,21 +102,21 @@ void print_faixbox( faixbox_param_t *faix);
  *
  * @param[in,out] faix addressof the faixbox pointer
  */
-void delete_faixbox( faixbox_param_t **faix);
+void delete_faixbox(faixbox_param_t **faix);
 
 /**
  * get nmax parameter value from faix box
  *
  * @param[in] faix faix box pointer
  */
-Byte8_t get_nmax( faixbox_param_t *faix);
+Byte8_t get_nmax(faixbox_param_t *faix);
 
 /**
  * get m parameter value from faix box
  *
  * @param[in] faix faix box pointer
  */
-Byte8_t get_m( faixbox_param_t *faix);
+Byte8_t get_m(faixbox_param_t *faix);
 
 /**
  * get offset of a element from faix box
@@ -123,7 +125,7 @@ Byte8_t get_m( faixbox_param_t *faix);
  * @param[in] elem_id element id in a row (0<= <nmax)
  * @param[in] row_id  row id (0<= <m)
  */
-Byte8_t get_elemOff( faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id);
+Byte8_t get_elemOff(faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id);
 
 /**
  * get length of a element from faix box
@@ -132,7 +134,7 @@ Byte8_t get_elemOff( faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id);
  * @param[in] elem_id element id in a row (0<= <nmax)
  * @param[in] row_id  row id (0<= <m)
  */
-Byte8_t get_elemLen( faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id);
+Byte8_t get_elemLen(faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id);
 
 /**
  * get aux of a element from faix box
@@ -141,6 +143,6 @@ Byte8_t get_elemLen( faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id);
  * @param[in] elem_id element id in a row (0<= <nmax)
  * @param[in] row_id  row id (0<= <m)
  */
-Byte4_t get_elemAux( faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id);
+Byte4_t get_elemAux(faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id);
 
-#endif 	    /* !FAIXBOX_MANAGER_H_ */
+#endif      /* !FAIXBOX_MANAGER_H_ */

@@ -39,30 +39,31 @@
 #define logstream stderr
 #endif /*SERVER */
 
-marker_param_t set_marker( codestream_param_t cs, Byte2_t code, OPJ_OFF_T offset, Byte2_t length)
+marker_param_t set_marker(codestream_param_t cs, Byte2_t code, OPJ_OFF_T offset,
+                          Byte2_t length)
 {
-  marker_param_t mkr;
+    marker_param_t mkr;
 
-  mkr.cs = cs;
-  mkr.code = code;
-  mkr.offset = offset;
-  mkr.length = length;
+    mkr.cs = cs;
+    mkr.code = code;
+    mkr.offset = offset;
+    mkr.length = length;
 
-  return mkr;
+    return mkr;
 }
 
 
-Byte_t fetch_marker1byte( marker_param_t marker, OPJ_OFF_T offset)
+Byte_t fetch_marker1byte(marker_param_t marker, OPJ_OFF_T offset)
 {
-  return fetch_codestream1byte( &(marker.cs), marker.offset+offset);
+    return fetch_codestream1byte(&(marker.cs), marker.offset + offset);
 }
 
-Byte2_t fetch_marker2bytebigendian( marker_param_t marker, OPJ_OFF_T offset)
+Byte2_t fetch_marker2bytebigendian(marker_param_t marker, OPJ_OFF_T offset)
 {
-  return fetch_codestream2bytebigendian( &(marker.cs), marker.offset+offset);
+    return fetch_codestream2bytebigendian(&(marker.cs), marker.offset + offset);
 }
 
-Byte4_t fetch_marker4bytebigendian( marker_param_t marker, OPJ_OFF_T offset)
+Byte4_t fetch_marker4bytebigendian(marker_param_t marker, OPJ_OFF_T offset)
 {
-  return fetch_codestream4bytebigendian( &(marker.cs), marker.offset+offset);
+    return fetch_codestream4bytebigendian(&(marker.cs), marker.offset + offset);
 }

@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -38,33 +38,33 @@
 @file jpt.h
 @brief JPT-stream reader (JPEG 2000, JPIP)
 
-JPT-stream functions are implemented in J2K.C. 
+JPT-stream functions are implemented in J2K.C.
 */
 
 /**
 Message Header JPT stream structure
 */
 typedef struct opj_jpt_msg_header {
-	/** In-class Identifier */
-	unsigned int Id;
-	/** Last byte information */
-	unsigned int last_byte;	
-	/** Class Identifier */
-	unsigned int Class_Id;	
-	/** CSn : index identifier */
-	unsigned int CSn_Id;
-	/** Message offset */
-	unsigned int Msg_offset;
-	/** Message length */
-	unsigned int Msg_length;
-	/** Auxiliary for JPP case */
-	unsigned int Layer_nb;
+    /** In-class Identifier */
+    unsigned int Id;
+    /** Last byte information */
+    unsigned int last_byte;
+    /** Class Identifier */
+    unsigned int Class_Id;
+    /** CSn : index identifier */
+    unsigned int CSn_Id;
+    /** Message offset */
+    unsigned int Msg_offset;
+    /** Message length */
+    unsigned int Msg_length;
+    /** Auxiliary for JPP case */
+    unsigned int Layer_nb;
 } opj_jpt_msg_header_t;
 
 /* ----------------------------------------------------------------------- */
 
 /**
-Initialize the value of the message header structure 
+Initialize the value of the message header structure
 @param header Message header structure
 */
 void jpt_init_msg_header(opj_jpt_msg_header_t * header);
@@ -75,6 +75,7 @@ Read the message header for a JPP/JPT - stream
 @param cio CIO handle
 @param header Message header structure
 */
-void jpt_read_msg_header(opj_common_ptr cinfo, opj_cio_t *cio, opj_jpt_msg_header_t *header);
+void jpt_read_msg_header(opj_common_ptr cinfo, opj_cio_t *cio,
+                         opj_jpt_msg_header_t *header);
 
 #endif

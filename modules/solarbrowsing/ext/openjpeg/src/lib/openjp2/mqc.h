@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -8,7 +8,7 @@
  * Copyright (c) 2002-2014, Professor Benoit Macq
  * Copyright (c) 2001-2003, David Janssens
  * Copyright (c) 2002-2003, Yannick Verschueren
- * Copyright (c) 2003-2007, Francois-Olivier Devaux 
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
  * Copyright (c) 2003-2014, Antonin Descampe
  * Copyright (c) 2005, Herve Drolon, FreeImage Team
  * Copyright (c) 2008, Jerome Fimes, Communications & Systemes <jerome.fimes@c-s.fr>
@@ -53,14 +53,14 @@ in MQC.C are used by some function in T1.C.
 This struct defines the state of a context.
 */
 typedef struct opj_mqc_state {
-	/** the probability of the Least Probable Symbol (0.75->0x8000, 1.5->0xffff) */
-	OPJ_UINT32 qeval;
-	/** the Most Probable Symbol (0 or 1) */
-	OPJ_UINT32 mps;
-	/** next state if the next encoded symbol is the MPS */
-	struct opj_mqc_state *nmps;
-	/** next state if the next encoded symbol is the LPS */
-	struct opj_mqc_state *nlps;
+    /** the probability of the Least Probable Symbol (0.75->0x8000, 1.5->0xffff) */
+    OPJ_UINT32 qeval;
+    /** the Most Probable Symbol (0 or 1) */
+    OPJ_UINT32 mps;
+    /** next state if the next encoded symbol is the MPS */
+    struct opj_mqc_state *nmps;
+    /** next state if the next encoded symbol is the LPS */
+    struct opj_mqc_state *nlps;
 } opj_mqc_state_t;
 
 #define MQC_NUMCTXS 19
@@ -69,18 +69,15 @@ typedef struct opj_mqc_state {
 MQ coder
 */
 typedef struct opj_mqc {
-	OPJ_UINT32 c;
-	OPJ_UINT32 a;
-	OPJ_UINT32 ct;
-	OPJ_BYTE *bp;
-	OPJ_BYTE *start;
-	OPJ_BYTE *end;
-	opj_mqc_state_t *ctxs[MQC_NUMCTXS];
-	opj_mqc_state_t **curctx;
-	const OPJ_BYTE *lut_ctxno_zc_orient; /* lut_ctxno_zc shifted by 256 * bandno */
-#ifdef MQC_PERF_OPT
-	unsigned char *buffer;
-#endif
+    OPJ_UINT32 c;
+    OPJ_UINT32 a;
+    OPJ_UINT32 ct;
+    OPJ_BYTE *bp;
+    OPJ_BYTE *start;
+    OPJ_BYTE *end;
+    opj_mqc_state_t *ctxs[MQC_NUMCTXS];
+    opj_mqc_state_t **curctx;
+    const OPJ_BYTE *lut_ctxno_zc_orient; /* lut_ctxno_zc shifted by 256 * bandno */
 } opj_mqc_t;
 
 #include "mqc_inl.h"
@@ -89,7 +86,7 @@ typedef struct opj_mqc {
 /*@{*/
 /* ----------------------------------------------------------------------- */
 /**
-Create a new MQC handle 
+Create a new MQC handle
 @return Returns a new MQC handle if successful, returns NULL otherwise
 */
 opj_mqc_t* opj_mqc_create(void);
@@ -105,7 +102,7 @@ Return the number of bytes written/read since initialisation
 */
 OPJ_UINT32 opj_mqc_numbytes(opj_mqc_t *mqc);
 /**
-Reset the states of all the context of the coder/decoder 
+Reset the states of all the context of the coder/decoder
 (each context is set to a state where 0 and 1 are more or less equiprobable)
 @param mqc MQC handle
 */
@@ -117,7 +114,8 @@ Set the state of a particular context
 @param msb The MSB of the new state of the context
 @param prob Number that identifies the probability of the symbols for the new state of the context
 */
-void opj_mqc_setstate(opj_mqc_t *mqc, OPJ_UINT32 ctxno, OPJ_UINT32 msb, OPJ_INT32 prob);
+void opj_mqc_setstate(opj_mqc_t *mqc, OPJ_UINT32 ctxno, OPJ_UINT32 msb,
+                      OPJ_INT32 prob);
 /**
 Initialize the encoder
 @param mqc MQC handle
@@ -129,7 +127,7 @@ Set the current context used for coding/decoding
 @param mqc MQC handle
 @param ctxno Number that identifies the context
 */
-#define opj_mqc_setcurctx(mqc, ctxno)	(mqc)->curctx = &(mqc)->ctxs[(OPJ_UINT32)(ctxno)]
+#define opj_mqc_setcurctx(mqc, ctxno)   (mqc)->curctx = &(mqc)->ctxs[(OPJ_UINT32)(ctxno)]
 /**
 Encode a symbol using the MQ-coder
 @param mqc MQC handle
@@ -142,15 +140,15 @@ Flush the encoder, so that all remaining data is written
 */
 void opj_mqc_flush(opj_mqc_t *mqc);
 /**
-BYPASS mode switch, initialization operation. 
-JPEG 2000 p 505. 
+BYPASS mode switch, initialization operation.
+JPEG 2000 p 505.
 <h2>Not fully implemented and tested !!</h2>
 @param mqc MQC handle
 */
 void opj_mqc_bypass_init_enc(opj_mqc_t *mqc);
 /**
-BYPASS mode switch, coding operation. 
-JPEG 2000 p 505. 
+BYPASS mode switch, coding operation.
+JPEG 2000 p 505.
 <h2>Not fully implemented and tested !!</h2>
 @param mqc MQC handle
 @param d The symbol to be encoded (0 or 1)

@@ -28,17 +28,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	IMGREG_MANAGER_H_
-# define   	IMGREG_MANAGER_H_
+#ifndef     IMGREG_MANAGER_H_
+# define    IMGREG_MANAGER_H_
 
 /** image region parameters */
-typedef struct imgreg_param{
-  int xosiz, yosiz; /** offset from the origin of the reference grid
-		    at the decomposition level */
-  int fx, fy;       /** frame size (fsiz) */
-  int ox, oy;       /** offset (roff) */
-  int sx, sy;       /** region size (rsiz) */
-  int level;        /** decomposition level */
+typedef struct imgreg_param {
+    int xosiz, yosiz; /** offset from the origin of the reference grid
+            at the decomposition level */
+    int fx, fy;       /** frame size (fsiz) */
+    int ox, oy;       /** offset (roff) */
+    int sx, sy;       /** region size (rsiz) */
+    int level;        /** decomposition level */
 } imgreg_param_t;
 
 
@@ -53,12 +53,12 @@ typedef struct imgreg_param{
  * @param[in] numOfreslev number of resolution levels
  * @return                structure of image region parameters
  */
-imgreg_param_t map_viewin2imgreg( const int fx,    const int fy, 
-				  const int rx,    const int ry,
-				  const int rw,    const int rh,
-				  const int XOsiz, const int YOsiz,
-				  const int Xsiz,  const int Ysiz,
-				  const int numOfreslev);
+imgreg_param_t map_viewin2imgreg(const int fx,    const int fy,
+                                 const int rx,    const int ry,
+                                 const int rw,    const int rh,
+                                 const int XOsiz, const int YOsiz,
+                                 const int Xsiz,  const int Ysiz,
+                                 const int numOfreslev);
 
 
 /**
@@ -76,7 +76,8 @@ imgreg_param_t map_viewin2imgreg( const int fx,    const int fy,
  * @param[in,out] xmax   horizontal image size pointer
  * @param[in,out] ymax   vertical   image size pointer
  */
-void find_level( int maxlev, int *lev, int *fx, int *fy, int *xmin, int *ymin, int *xmax, int *ymax);
+void find_level(int maxlev, int *lev, int *fx, int *fy, int *xmin, int *ymin,
+                int *xmax, int *ymax);
 
 /**
  * compute decomposition level (only to get the level
@@ -88,14 +89,14 @@ void find_level( int maxlev, int *lev, int *fx, int *fy, int *xmin, int *ymin, i
  * @param[in] Ysiz image height
  * @return decomposition level
  */
-int comp_decomplev( int fw, int fh, int Xsiz, int Ysiz);
+int comp_decomplev(int fw, int fh, int Xsiz, int Ysiz);
 
 /**
  * print image region parameters
  *
  * @param[in] imgreg image region structure of parameters
  */
-void print_imgreg( imgreg_param_t imgreg);
+void print_imgreg(imgreg_param_t imgreg);
 
 
-#endif 	    /* !IMGREG_MANAGER_H_ */
+#endif      /* !IMGREG_MANAGER_H_ */

@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2014, Professor Benoit Macq
- * Copyright (c) 2010-2011, Kaori Hagihara 
+ * Copyright (c) 2010-2011, Kaori Hagihara
  * Copyright (c) 2011,      Lucian Corlaciu, GSoC
  * All rights reserved.
  *
@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	JP2K_ENCODER_H_
-# define   	JP2K_ENCODER_H_
+#ifndef     JP2K_ENCODER_H_
+# define    JP2K_ENCODER_H_
 
 #include "byte_manager.h"
 #include "msgqueue_manager.h"
@@ -46,7 +46,8 @@
  * @param[out] j2klen     pointer to the j2k codestream length
  * @return     generated  reconstructed j2k codestream
  */
-Byte_t * recons_j2k( msgqueue_param_t *msgqueue, Byte_t *jpipstream, Byte8_t csn, int fw, int fh, Byte8_t *j2klen);
+Byte_t * recons_j2k(msgqueue_param_t *msgqueue, Byte_t *jpipstream, Byte8_t csn,
+                    int fw, int fh, Byte8_t *j2klen);
 
 
 /**
@@ -58,7 +59,8 @@ Byte_t * recons_j2k( msgqueue_param_t *msgqueue, Byte_t *jpipstream, Byte8_t csn
  * @param[out] jp2len     pointer to the jp2 codestream length
  * @return     generated  reconstructed jp2 codestream
  */
-Byte_t * recons_jp2( msgqueue_param_t *msgqueue, Byte_t *jpipstream, Byte8_t csn, Byte8_t *jp2len);
+Byte_t * recons_jp2(msgqueue_param_t *msgqueue, Byte_t *jpipstream, Byte8_t csn,
+                    Byte8_t *jp2len);
 
 /**
  * reconstruct j2k codestream of mainheader from message queue
@@ -69,6 +71,7 @@ Byte_t * recons_jp2( msgqueue_param_t *msgqueue, Byte_t *jpipstream, Byte8_t csn
  * @param[out] j2klen     pointer to the j2k codestream length
  * @return     generated  reconstructed j2k codestream
  */
-Byte_t * recons_j2kmainhead( msgqueue_param_t *msgqueue, Byte_t *jpipstream, Byte8_t csn, Byte8_t *j2klen);
+Byte_t * recons_j2kmainhead(msgqueue_param_t *msgqueue, Byte_t *jpipstream,
+                            Byte8_t csn, Byte8_t *j2klen);
 
-#endif 	    /* !JP2K_ENCODER_H_ */
+#endif      /* !JP2K_ENCODER_H_ */

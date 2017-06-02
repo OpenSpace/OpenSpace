@@ -28,19 +28,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	IHDRBOX_MANAGER_H_
-# define   	IHDRBOX_MANAGER_H_
+#ifndef     IHDRBOX_MANAGER_H_
+# define    IHDRBOX_MANAGER_H_
 
 #include "byte_manager.h"
 #include "box_manager.h"
 #include "metadata_manager.h"
 
 /** I.5.3.1 Image Header box*/
-typedef struct ihdrbox_param{
-  Byte4_t height;
-  Byte4_t width;
-  Byte2_t nc;       /**< number of components*/
-  Byte_t  bpc;      /**< bits per component*/
+typedef struct ihdrbox_param {
+    Byte4_t height;
+    Byte4_t width;
+    Byte2_t nc;       /**< number of components*/
+    Byte_t  bpc;      /**< bits per component*/
 } ihdrbox_param_t;
 
 /**
@@ -50,7 +50,8 @@ typedef struct ihdrbox_param{
  * @param[in] jpipstream   JPT/JPP stream
  * @return    pointer to generated ihdr box
  */
-ihdrbox_param_t * gene_ihdrbox( metadatalist_param_t *metadatalist, Byte_t *jpipstream);
+ihdrbox_param_t * gene_ihdrbox(metadatalist_param_t *metadatalist,
+                               Byte_t *jpipstream);
 
 
-#endif 	    /* !IHDRBOX_MANAGER_H_ */
+#endif      /* !IHDRBOX_MANAGER_H_ */

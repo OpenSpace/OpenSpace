@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	SOCK_MANAGER_H_
-# define   	SOCK_MANAGER_H_
+#ifndef     SOCK_MANAGER_H_
+# define    SOCK_MANAGER_H_
 
 #include "byte_manager.h"
 #include "opj_stdint.h"
@@ -48,7 +48,7 @@ typedef int SOCKET;
  * @param  port opening port number
  * @return      new socket
  */
-SOCKET open_listeningsocket( uint16_t port);
+SOCKET open_listeningsocket(uint16_t port);
 
 /**
  * accept a new connection to the listenning socket
@@ -56,7 +56,7 @@ SOCKET open_listeningsocket( uint16_t port);
  * @param listening_socket listenning socket
  * @return                 connected socket (-1 if error occurs)
  */
-SOCKET accept_socket( SOCKET listening_socket);
+SOCKET accept_socket(SOCKET listening_socket);
 
 
 /**
@@ -74,7 +74,7 @@ OPJ_SIZE_T receive_line(SOCKET connected_socket, char *buf);
  * @param [in]  connected_socket file descriptor of the connected socket
  * @return                       pointer to the string (memory allocated)
  */
-char * receive_string( SOCKET connected_socket);
+char * receive_string(SOCKET connected_socket);
 
 /**
  * receive data stream to client
@@ -83,7 +83,7 @@ char * receive_string( SOCKET connected_socket);
  * @param [in]  length           length of the receiving stream
  * @return                       pointer to the data stream (memory allocated), NULL if failed
  */
-void * receive_stream( SOCKET connected_socket, OPJ_SIZE_T length);
+void * receive_stream(SOCKET connected_socket, OPJ_SIZE_T length);
 
 /**
  * send data stream to client
@@ -92,7 +92,8 @@ void * receive_stream( SOCKET connected_socket, OPJ_SIZE_T length);
  * @param [in]  stream           data stream
  * @param [in]  length           length of data stream
  */
-void send_stream( SOCKET connected_socket, const void *stream, OPJ_SIZE_T length);
+void send_stream(SOCKET connected_socket, const void *stream,
+                 OPJ_SIZE_T length);
 
 /**
  * close socket
@@ -100,6 +101,6 @@ void send_stream( SOCKET connected_socket, const void *stream, OPJ_SIZE_T length
  * @param [in] sock closing socket
  * @return     0 if succeed, -1 if failed
  */
-int close_socket( SOCKET sock);
+int close_socket(SOCKET sock);
 
 #endif /* !SOCK_MANAGER_H_ */

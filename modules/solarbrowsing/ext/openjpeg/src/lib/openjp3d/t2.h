@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -48,12 +48,12 @@
 Tier-2 coding
 */
 typedef struct opj_t2 {
-/** Codec context */
-	opj_common_ptr cinfo;	
-/** Encoding: pointer to the src volume. Decoding: pointer to the dst volume. */
-	opj_volume_t *volume;	
-/** Pointer to the volume coding parameters */
-	opj_cp_t *cp;			
+    /** Codec context */
+    opj_common_ptr cinfo;
+    /** Encoding: pointer to the src volume. Decoding: pointer to the dst volume. */
+    opj_volume_t *volume;
+    /** Pointer to the volume coding parameters */
+    opj_cp_t *cp;
 } opj_t2_t;
 
 /** @name Funciones generales */
@@ -71,7 +71,8 @@ Encode the packets of a tile to a destination buffer
 @param volume_info structure to create an index file
 @return Number of bytes written from packets
 */
-int t2_encode_packets(opj_t2_t* t2, int tileno, opj_tcd_tile_t *tile, int maxlayers, unsigned char *dest, int len, opj_volume_info_t *volume_info);
+int t2_encode_packets(opj_t2_t* t2, int tileno, opj_tcd_tile_t *tile,
+                      int maxlayers, unsigned char *dest, int len, opj_volume_info_t *volume_info);
 
 /**
 Decode the packets of a tile from a source buffer
@@ -82,7 +83,8 @@ Decode the packets of a tile from a source buffer
 @param tile tile for which to decode the packets
 @return Number of bytes read from packets
  */
-int t2_decode_packets(opj_t2_t *t2, unsigned char *src, int len, int tileno, opj_tcd_tile_t *tile);
+int t2_decode_packets(opj_t2_t *t2, unsigned char *src, int len, int tileno,
+                      opj_tcd_tile_t *tile);
 
 /**
 Create a T2 handle

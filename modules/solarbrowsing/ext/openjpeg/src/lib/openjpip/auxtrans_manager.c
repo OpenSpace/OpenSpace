@@ -48,111 +48,127 @@
 #define logstream stderr
 #endif /*SERVER */
 
-auxtrans_param_t init_aux_transport( int tcp_auxport, int udp_auxport)
+auxtrans_param_t init_aux_transport(int tcp_auxport, int udp_auxport)
 {
-  auxtrans_param_t auxtrans;
+    auxtrans_param_t auxtrans;
 
-  auxtrans.tcpauxport = tcp_auxport;
-  auxtrans.udpauxport = udp_auxport;
+    auxtrans.tcpauxport = tcp_auxport;
+    auxtrans.udpauxport = udp_auxport;
 
-  if( 49152 <= tcp_auxport && tcp_auxport <= 65535)
-    auxtrans.tcplistensock = open_listeningsocket( (uint16_t)tcp_auxport);
-  else
-    auxtrans.tcplistensock = -1;
+    if (49152 <= tcp_auxport && tcp_auxport <= 65535) {
+        auxtrans.tcplistensock = open_listeningsocket((uint16_t)tcp_auxport);
+    } else {
+        auxtrans.tcplistensock = -1;
+    }
 
-  auxtrans.udplistensock = -1;
-  /* open listening socket for udp later */
+    auxtrans.udplistensock = -1;
+    /* open listening socket for udp later */
 
-  return auxtrans;
+    return auxtrans;
 }
 
-void close_aux_transport( auxtrans_param_t auxtrans)
+void close_aux_transport(auxtrans_param_t auxtrans)
 {
-  if( auxtrans.tcplistensock != -1)
-    if( close_socket( auxtrans.tcplistensock) != 0)
-      perror("close");
+    if (auxtrans.tcplistensock != -1)
+        if (close_socket(auxtrans.tcplistensock) != 0) {
+            perror("close");
+        }
 
-  if( auxtrans.udplistensock != -1)
-    if( close_socket( auxtrans.udplistensock) != 0)
-      perror("close");
+    if (auxtrans.udplistensock != -1)
+        if (close_socket(auxtrans.udplistensock) != 0) {
+            perror("close");
+        }
 }
 
 
 /*!< auxiliary response parameters */
-typedef struct aux_response_param{
-  char *cid;            /*!< channel ID */
-  unsigned char *data;  /*!< sending data */
-  OPJ_SIZE_T datalen;          /*!< length of data */
-  OPJ_SIZE_T maxlenPerFrame;   /*!< maximum data length to send per frame */
-  SOCKET listensock;    /*!< listeing socket */
+typedef struct aux_response_param {
+    char *cid;            /*!< channel ID */
+    unsigned char *data;  /*!< sending data */
+    OPJ_SIZE_T datalen;          /*!< length of data */
+    OPJ_SIZE_T maxlenPerFrame;   /*!< maximum data length to send per frame */
+    SOCKET listensock;    /*!< listeing socket */
 #ifdef _WIN32
-  HANDLE hTh;           /*!< thread handle */
+    HANDLE hTh;           /*!< thread handle */
 #endif
 } aux_response_param_t;
 
-aux_response_param_t * gene_auxresponse( OPJ_BOOL istcp, auxtrans_param_t auxtrans, const char cid[], void *data, OPJ_SIZE_T datalen, OPJ_SIZE_T maxlenPerFrame);
+aux_response_param_t * gene_auxresponse(OPJ_BOOL istcp,
+                                        auxtrans_param_t auxtrans, const char cid[], void *data, OPJ_SIZE_T datalen,
+                                        OPJ_SIZE_T maxlenPerFrame);
 
-void delete_auxresponse( aux_response_param_t **auxresponse);
+void delete_auxresponse(aux_response_param_t **auxresponse);
 
 
 #ifdef _WIN32
-unsigned __stdcall aux_streaming( void *arg);
+unsigned __stdcall aux_streaming(void *arg);
 #else
-void * aux_streaming( void *arg);
+void * aux_streaming(void *arg);
 #endif
 
-void send_responsedata_on_aux( OPJ_BOOL istcp, auxtrans_param_t auxtrans, const char cid[], void *data, OPJ_SIZE_T datalen, OPJ_SIZE_T maxlenPerFrame)
+void send_responsedata_on_aux(OPJ_BOOL istcp, auxtrans_param_t auxtrans,
+                              const char cid[], void *data, OPJ_SIZE_T datalen, OPJ_SIZE_T maxlenPerFrame)
 {
-  aux_response_param_t *auxresponse;
+    aux_response_param_t *auxresponse;
 #ifdef _WIN32
-  unsigned int threadId;
+    unsigned int threadId;
 #else
-  pthread_t thread;
-  int status;
+    pthread_t thread;
+    int status;
 #endif
-  
-  if( istcp){
-    if( auxtrans.tcplistensock == -1){
-      fprintf( FCGI_stderr, "Error: error in send_responsedata_on_aux(), tcp listening socket no open\n");
-      return;
+
+    if (istcp) {
+        if (auxtrans.tcplistensock == -1) {
+            fprintf(FCGI_stderr,
+                    "Error: error in send_responsedata_on_aux(), tcp listening socket no open\n");
+            return;
+        }
+
+        auxresponse = gene_auxresponse(istcp, auxtrans, cid, data, datalen,
+                                       maxlenPerFrame);
+
+#ifdef _WIN32
+        auxresponse->hTh = (HANDLE)_beginthreadex(NULL, 0, &aux_streaming, auxresponse,
+                           0, &threadId);
+        if (auxresponse->hTh == 0) {
+            fprintf(FCGI_stderr, "ERRO: pthread_create() %s",
+                    strerror((int)auxresponse->hTh));
+        }
+#else
+        status = pthread_create(&thread, NULL, &aux_streaming, auxresponse);
+        if (status != 0) {
+            fprintf(FCGI_stderr, "ERROR: pthread_create() %s", strerror(status));
+        }
+#endif
+    } else {
+        fprintf(FCGI_stderr,
+                "Error: error in send_responsedata_on_aux(), udp not implemented\n");
     }
-
-    auxresponse = gene_auxresponse( istcp, auxtrans, cid, data, datalen, maxlenPerFrame);
-
-#ifdef _WIN32
-    auxresponse->hTh = (HANDLE)_beginthreadex( NULL, 0, &aux_streaming, auxresponse, 0, &threadId);
-    if( auxresponse->hTh == 0)
-      fprintf( FCGI_stderr,"ERRO: pthread_create() %s", strerror( (int)auxresponse->hTh));
-#else
-    status = pthread_create( &thread, NULL, &aux_streaming, auxresponse);
-    if( status != 0)
-      fprintf( FCGI_stderr,"ERROR: pthread_create() %s",strerror(status));
-#endif   
-  }
-  else
-    fprintf( FCGI_stderr, "Error: error in send_responsedata_on_aux(), udp not implemented\n");
 }
 
-aux_response_param_t * gene_auxresponse( OPJ_BOOL istcp, auxtrans_param_t auxtrans, const char cid[], void *data, OPJ_SIZE_T datalen, OPJ_SIZE_T maxlenPerFrame)
+aux_response_param_t * gene_auxresponse(OPJ_BOOL istcp,
+                                        auxtrans_param_t auxtrans, const char cid[], void *data, OPJ_SIZE_T datalen,
+                                        OPJ_SIZE_T maxlenPerFrame)
 {
-  aux_response_param_t *auxresponse;
+    aux_response_param_t *auxresponse;
 
-  auxresponse = (aux_response_param_t *)opj_malloc( sizeof(aux_response_param_t));
+    auxresponse = (aux_response_param_t *)opj_malloc(sizeof(aux_response_param_t));
 
-  auxresponse->cid = strdup( cid);
-  auxresponse->data = data;
-  auxresponse->datalen = datalen;
-  auxresponse->maxlenPerFrame = maxlenPerFrame;
-  auxresponse->listensock = istcp ? auxtrans.tcplistensock : auxtrans.udplistensock;
+    auxresponse->cid = strdup(cid);
+    auxresponse->data = data;
+    auxresponse->datalen = datalen;
+    auxresponse->maxlenPerFrame = maxlenPerFrame;
+    auxresponse->listensock = istcp ? auxtrans.tcplistensock :
+                              auxtrans.udplistensock;
 
-  return auxresponse;
+    return auxresponse;
 }
 
-void delete_auxresponse( aux_response_param_t **auxresponse)
+void delete_auxresponse(aux_response_param_t **auxresponse)
 {
-  opj_free( (*auxresponse)->cid);
-  opj_free( (*auxresponse)->data);
-  opj_free( *auxresponse);
+    opj_free((*auxresponse)->cid);
+    opj_free((*auxresponse)->data);
+    opj_free(*auxresponse);
 }
 
 /**
@@ -163,105 +179,109 @@ void delete_auxresponse( aux_response_param_t **auxresponse)
  * @param [in] fp               file pointer for log of aux stream
  * @return                      true if identified, false otherwise
  */
-OPJ_BOOL identify_cid( SOCKET connected_socket, char refcid[], FILE *fp);
+OPJ_BOOL identify_cid(SOCKET connected_socket, char refcid[], FILE *fp);
 
-OPJ_BOOL recv_ack( SOCKET connected_socket, void *data);
+OPJ_BOOL recv_ack(SOCKET connected_socket, void *data);
 
 #ifdef _WIN32
-unsigned __stdcall aux_streaming( void *arg)
+unsigned __stdcall aux_streaming(void *arg)
 #else
-void * aux_streaming( void *arg)
+void * aux_streaming(void *arg)
 #endif
 {
-  SOCKET connected_socket;
-  unsigned char *chunk, *ptr;
-  OPJ_SIZE_T maxLenOfBody, remlen, chunklen;
-  const OPJ_SIZE_T headlen = 8;
-  
-  aux_response_param_t *auxresponse = (aux_response_param_t *)arg;
+    SOCKET connected_socket;
+    unsigned char *chunk, *ptr;
+    OPJ_SIZE_T maxLenOfBody, remlen, chunklen;
+    const OPJ_SIZE_T headlen = 8;
+
+    aux_response_param_t *auxresponse = (aux_response_param_t *)arg;
 
 #ifdef _WIN32
-  CloseHandle( auxresponse->hTh);
+    CloseHandle(auxresponse->hTh);
 #else
-  pthread_detach( pthread_self());
+    pthread_detach(pthread_self());
 #endif
 
-  chunk = (unsigned char *)opj_malloc( auxresponse->maxlenPerFrame);
-  maxLenOfBody = auxresponse->maxlenPerFrame - headlen;
-  remlen = auxresponse->datalen;
+    chunk = (unsigned char *)opj_malloc(auxresponse->maxlenPerFrame);
+    maxLenOfBody = auxresponse->maxlenPerFrame - headlen;
+    remlen = auxresponse->datalen;
 
-  while((connected_socket = accept_socket( auxresponse->listensock)) != -1){
-    if( identify_cid( connected_socket, auxresponse->cid, FCGI_stderr)){
-      ptr = auxresponse->data;
-      while( 0 < remlen){
-        memset( chunk, 0, auxresponse->maxlenPerFrame);
+    while ((connected_socket = accept_socket(auxresponse->listensock)) != -1) {
+        if (identify_cid(connected_socket, auxresponse->cid, FCGI_stderr)) {
+            ptr = auxresponse->data;
+            while (0 < remlen) {
+                memset(chunk, 0, auxresponse->maxlenPerFrame);
 
-        chunklen = remlen<maxLenOfBody?remlen:maxLenOfBody;
-        chunklen += headlen;
+                chunklen = remlen < maxLenOfBody ? remlen : maxLenOfBody;
+                chunklen += headlen;
 
-        chunk[0] = (chunklen >> 8) & 0xff;
-        chunk[1] = chunklen & 0xff;
+                chunk[0] = (chunklen >> 8) & 0xff;
+                chunk[1] = chunklen & 0xff;
 
-        memcpy( chunk+headlen, ptr, chunklen-headlen);
+                memcpy(chunk + headlen, ptr, chunklen - headlen);
 
-        do{
-          send_stream( connected_socket, chunk, chunklen);
-        }while( !recv_ack( connected_socket, chunk));
+                do {
+                    send_stream(connected_socket, chunk, chunklen);
+                } while (!recv_ack(connected_socket, chunk));
 
-        remlen -= maxLenOfBody;
-        ptr += maxLenOfBody;
-      }
-      if( close_socket( connected_socket) != 0)
-        perror("close");
-      break;
+                remlen -= maxLenOfBody;
+                ptr += maxLenOfBody;
+            }
+            if (close_socket(connected_socket) != 0) {
+                perror("close");
+            }
+            break;
+        }
     }
-  }
-  opj_free( chunk);
+    opj_free(chunk);
 
-  delete_auxresponse( &auxresponse);
-  
+    delete_auxresponse(&auxresponse);
+
 #ifdef _WIN32
-  _endthreadex(0);
+    _endthreadex(0);
 #else
-  pthread_exit(0);
+    pthread_exit(0);
 #endif
 
-  return 0;
+    return 0;
 }
 
 
-OPJ_BOOL identify_cid( SOCKET connected_socket, char refcid[], FILE *fp)
+OPJ_BOOL identify_cid(SOCKET connected_socket, char refcid[], FILE *fp)
 {
-  char *cid;
-  OPJ_BOOL succeed;
+    char *cid;
+    OPJ_BOOL succeed;
 
-  if(!(cid = receive_string( connected_socket))){
-    fprintf( fp, "Error: error in identify_cid(), while receiving cid from client\n");
-    return OPJ_FALSE;
-  }
-  
-  succeed = OPJ_FALSE;
-  if( strncmp( refcid, cid, strlen( refcid)) == 0)
-    succeed = OPJ_TRUE;
-  
-  opj_free( cid);
+    if (!(cid = receive_string(connected_socket))) {
+        fprintf(fp,
+                "Error: error in identify_cid(), while receiving cid from client\n");
+        return OPJ_FALSE;
+    }
 
-  return succeed;
-}
-
-OPJ_BOOL recv_ack( SOCKET connected_socket, void *data)
-{
-  char *header;
-  OPJ_BOOL succeed;
-  
-  header = receive_stream( connected_socket, 8);
-  
-  if( memcmp( header, data, 8) != 0)
     succeed = OPJ_FALSE;
-  else
-    succeed = OPJ_TRUE;
-  
-  opj_free( header);
+    if (strncmp(refcid, cid, strlen(refcid)) == 0) {
+        succeed = OPJ_TRUE;
+    }
 
-  return succeed;
+    opj_free(cid);
+
+    return succeed;
+}
+
+OPJ_BOOL recv_ack(SOCKET connected_socket, void *data)
+{
+    char *header;
+    OPJ_BOOL succeed;
+
+    header = receive_stream(connected_socket, 8);
+
+    if (memcmp(header, data, 8) != 0) {
+        succeed = OPJ_FALSE;
+    } else {
+        succeed = OPJ_TRUE;
+    }
+
+    opj_free(header);
+
+    return succeed;
 }

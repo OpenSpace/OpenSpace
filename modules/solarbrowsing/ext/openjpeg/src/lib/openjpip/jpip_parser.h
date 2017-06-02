@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2014, Professor Benoit Macq
- * Copyright (c) 2010-2011, Kaori Hagihara 
+ * Copyright (c) 2010-2011, Kaori Hagihara
  * Copyright (c) 2011,      Lucian Corlaciu, GSoC
  * All rights reserved.
  *
@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	JPIP_PARSER_H_
-# define   	JPIP_PARSER_H_
+#ifndef     JPIP_PARSER_H_
+# define    JPIP_PARSER_H_
 
 #include "query_parser.h"
 #include "session_manager.h"
@@ -46,7 +46,8 @@
  * @param[out]    target        address of target pointer
  * @return                      if succeeded (true) or failed (false)
  */
-OPJ_BOOL identify_target( query_param_t query_param, targetlist_param_t *targetlist, target_param_t **target);
+OPJ_BOOL identify_target(query_param_t query_param,
+                         targetlist_param_t *targetlist, target_param_t **target);
 
 /**
  * REQUEST: channel association
@@ -58,10 +59,10 @@ OPJ_BOOL identify_target( query_param_t query_param, targetlist_param_t *targetl
  * @param[out]    curchannel    address of the associated channel pointer
  * @return                      if succeeded (true) or failed (false)
  */
-OPJ_BOOL associate_channel( query_param_t    query_param, 
-			sessionlist_param_t *sessionlist,
-			session_param_t **cursession, 
-			channel_param_t **curchannel);
+OPJ_BOOL associate_channel(query_param_t    query_param,
+                           sessionlist_param_t *sessionlist,
+                           session_param_t **cursession,
+                           channel_param_t **curchannel);
 /**
  * REQUEST: new channel (cnew) assignment
  *
@@ -73,12 +74,12 @@ OPJ_BOOL associate_channel( query_param_t    query_param,
  * @param[in,out] curchannel    address of the associated/opened channel pointer
  * @return                      if succeeded (true) or failed (false)
  */
-OPJ_BOOL open_channel( query_param_t query_param, 
-		   sessionlist_param_t *sessionlist,
-		   auxtrans_param_t auxtrans,
-		   target_param_t *target,
-		   session_param_t **cursession, 
-		   channel_param_t **curchannel);
+OPJ_BOOL open_channel(query_param_t query_param,
+                      sessionlist_param_t *sessionlist,
+                      auxtrans_param_t auxtrans,
+                      target_param_t *target,
+                      session_param_t **cursession,
+                      channel_param_t **curchannel);
 
 /**
  * REQUEST: channel close (cclose)
@@ -89,10 +90,10 @@ OPJ_BOOL open_channel( query_param_t query_param,
  * @param[in,out] curchannel    address of the deleting channel pointer
  * @return                      if succeeded (true) or failed (false)
  */
-OPJ_BOOL close_channel( query_param_t query_param, 
-		    sessionlist_param_t *sessionlist,
-		    session_param_t **cursession, 
-		    channel_param_t **curchannel);
+OPJ_BOOL close_channel(query_param_t query_param,
+                       sessionlist_param_t *sessionlist,
+                       session_param_t **cursession,
+                       channel_param_t **curchannel);
 
 /**
  * REQUEST: view-window (fsiz)
@@ -104,10 +105,10 @@ OPJ_BOOL close_channel( query_param_t query_param,
  * @param[out]    msgqueue    address of the message queue pointer
  * @return                    if succeeded (true) or failed (false)
  */
-OPJ_BOOL gene_JPIPstream( query_param_t query_param,
-		      target_param_t *target,
-		      session_param_t *cursession, 
-		      channel_param_t *curchannel,
-		      msgqueue_param_t **msgqueue);
+OPJ_BOOL gene_JPIPstream(query_param_t query_param,
+                         target_param_t *target,
+                         session_param_t *cursession,
+                         channel_param_t *curchannel,
+                         msgqueue_param_t **msgqueue);
 
-#endif 	    /* !JPIP_PARSER_H_ */
+#endif      /* !JPIP_PARSER_H_ */

@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2014, Professor Benoit Macq
- * Copyright (c) 2010-2011, Kaori Hagihara 
+ * Copyright (c) 2010-2011, Kaori Hagihara
  * Copyright (c) 2011,      Lucian Corlaciu, GSoC
  * All rights reserved.
  *
@@ -41,7 +41,7 @@
  *
  *  Note: JP2 files are stored in the working directory of opj_server\n
  *  Check README for the JP2 Encoding\n
- *  
+ *
  *  We tested this software with a virtual server running on the same Linux machine as the clients.
  */
 
@@ -60,69 +60,72 @@ WSADATA initialisation_win32;
 #endif /*_WIN32*/
 
 int main(void)
-{ 
-  server_record_t *server_record;
+{
+    server_record_t *server_record;
 #ifdef SERVER
-  char *query_string;
+    char *query_string;
 #endif
 
 #ifdef _WIN32
-  int erreur = WSAStartup(MAKEWORD(2,2),&initialisation_win32);
-  if( erreur!=0)
-    fprintf( stderr, "Erreur initialisation Winsock error : %d %d\n",erreur,WSAGetLastError());
-  else
-    fprintf( stderr, "Initialisation Winsock\n");
+    int erreur = WSAStartup(MAKEWORD(2, 2), &initialisation_win32);
+    if (erreur != 0) {
+        fprintf(stderr, "Erreur initialisation Winsock error : %d %d\n", erreur,
+                WSAGetLastError());
+    } else {
+        fprintf(stderr, "Initialisation Winsock\n");
+    }
 #endif /*_WIN32*/
 
-  server_record = init_JPIPserver( 60000, 0);
+    server_record = init_JPIPserver(60000, 0);
 
 #ifdef SERVER
-  while(FCGI_Accept() >= 0)
+    while (FCGI_Accept() >= 0)
 #else
 
-  char query_string[128];
-  while( fgets( query_string, 128, stdin) && query_string[0]!='\n')
+    char query_string[128];
+    while (fgets(query_string, 128, stdin) && query_string[0] != '\n')
 #endif
     {
-      QR_t *qr;
-      OPJ_BOOL parse_status;
+        QR_t *qr;
+        OPJ_BOOL parse_status;
 
-#ifdef SERVER     
-      query_string = getenv("QUERY_STRING");    
+#ifdef SERVER
+        query_string = getenv("QUERY_STRING");
 #endif /*SERVER*/
 
-      if( strcmp( query_string, QUIT_SIGNAL) == 0)
-	break;
-      
-      qr = parse_querystring( query_string);
-      
-      parse_status = process_JPIPrequest( server_record, qr);
-      
-#ifndef SERVER
-      local_log( OPJ_TRUE, OPJ_TRUE, parse_status, OPJ_FALSE, qr, server_record);
-#endif
-            
-      if( parse_status)
-	send_responsedata( server_record, qr);
-      else{
-	fprintf( FCGI_stderr, "Error: JPIP request failed\n");
-	fprintf( FCGI_stdout, "\r\n");
-      }
-      
-      end_QRprocess( server_record, &qr);
-    }
-  
-  fprintf( FCGI_stderr, "JPIP server terminated by a client request\n");
+        if (strcmp(query_string, QUIT_SIGNAL) == 0) {
+            break;
+        }
 
-  terminate_JPIPserver( &server_record);
+        qr = parse_querystring(query_string);
+
+        parse_status = process_JPIPrequest(server_record, qr);
+
+#ifndef SERVER
+        local_log(OPJ_TRUE, OPJ_TRUE, parse_status, OPJ_FALSE, qr, server_record);
+#endif
+
+        if (parse_status) {
+            send_responsedata(server_record, qr);
+        } else {
+            fprintf(FCGI_stderr, "Error: JPIP request failed\n");
+            fprintf(FCGI_stdout, "\r\n");
+        }
+
+        end_QRprocess(server_record, &qr);
+    }
+
+    fprintf(FCGI_stderr, "JPIP server terminated by a client request\n");
+
+    terminate_JPIPserver(&server_record);
 
 #ifdef _WIN32
-  if( WSACleanup() != 0){
-    fprintf( stderr, "\nError in WSACleanup : %d %d",erreur,WSAGetLastError());
-  }else{
-    fprintf( stderr, "\nWSACleanup OK\n");
-  }
+    if (WSACleanup() != 0) {
+        fprintf(stderr, "\nError in WSACleanup : %d %d", erreur, WSAGetLastError());
+    } else {
+        fprintf(stderr, "\nWSACleanup OK\n");
+    }
 #endif
 
-  return 0;
+    return 0;
 }

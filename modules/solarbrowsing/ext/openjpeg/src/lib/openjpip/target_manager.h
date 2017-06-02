@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	TARGET_MANAGER_H_
-# define   	TARGET_MANAGER_H_
+#ifndef     TARGET_MANAGER_H_
+# define    TARGET_MANAGER_H_
 
 #include "index_manager.h"
 
@@ -37,26 +37,28 @@
 #define MAX_LENOFTID 30
 
 /** target parameters*/
-typedef struct target_param{
-  char tid[MAX_LENOFTID];         /**< target identifier*/
-  char *targetname;               /**< local file path or URL ( URL is suported only with SERVER mode)*/
-  int fd;                         /**< file descriptor*/
+typedef struct target_param {
+    char tid[MAX_LENOFTID];         /**< target identifier*/
+    char *targetname;               /**< local file path or URL ( URL is suported only with SERVER mode)*/
+    int fd;                         /**< file descriptor*/
 #ifdef SERVER
-  char *tmpfname;                 /**< temporal file name to download a remote target file*/
+    char *tmpfname;                 /**< temporal file name to download a remote target file*/
 #endif
-  int csn;                        /**< codestream number                                  */
-  index_param_t *codeidx;         /**< index information of codestream                    */
-  int num_of_use;                 /**< numbers of sessions referring to this target       */
-  OPJ_BOOL jppstream;                 /**< if this target can return JPP-stream               */
-  OPJ_BOOL jptstream;                 /**< if this target can return JPP-stream               */
-  struct target_param *next;      /**< pointer to the next target                         */
+    int csn;                        /**< codestream number                                  */
+    index_param_t
+    *codeidx;         /**< index information of codestream                    */
+    int num_of_use;                 /**< numbers of sessions referring to this target       */
+    OPJ_BOOL jppstream;                 /**< if this target can return JPP-stream               */
+    OPJ_BOOL jptstream;                 /**< if this target can return JPP-stream               */
+    struct target_param
+        *next;      /**< pointer to the next target                         */
 } target_param_t;
 
 
 /** Target list parameters*/
-typedef struct targetlist_param{
-  target_param_t *first; /**< first target pointer of the list*/
-  target_param_t *last;  /**< last  target pointer of the list*/
+typedef struct targetlist_param {
+    target_param_t *first; /**< first target pointer of the list*/
+    target_param_t *last;  /**< last  target pointer of the list*/
 } targetlist_param_t;
 
 
@@ -76,7 +78,7 @@ targetlist_param_t * gene_targetlist(void);
  * @param[in] targetpath file path or URL of the target
  * @return               pointer to the generated target
  */
-target_param_t * gene_target( targetlist_param_t *targetlist, char *targetpath);
+target_param_t * gene_target(targetlist_param_t *targetlist, char *targetpath);
 
 
 /**
@@ -85,7 +87,7 @@ target_param_t * gene_target( targetlist_param_t *targetlist, char *targetpath);
  * @param[in]  reftarget reference target pointer
  * @param[out] ptr       address of feeding target pointer
  */
-void refer_target( target_param_t *reftarget, target_param_t **ptr);
+void refer_target(target_param_t *reftarget, target_param_t **ptr);
 
 
 /**
@@ -93,14 +95,14 @@ void refer_target( target_param_t *reftarget, target_param_t **ptr);
  *
  * @param[in]  target reference pointer to the target
  */
-void unrefer_target( target_param_t *target);
+void unrefer_target(target_param_t *target);
 
 /**
  * delete a target
  *
  * @param[in,out] target address of the deleting target pointer
  */
-void delete_target( target_param_t **target);
+void delete_target(target_param_t **target);
 
 
 /**
@@ -109,7 +111,8 @@ void delete_target( target_param_t **target);
  * @param[in,out] target     address of the deleting target pointer
  * @param[in] targetlist target list pointer
  */
-void delete_target_in_list( target_param_t **target, targetlist_param_t *targetlist);
+void delete_target_in_list(target_param_t **target,
+                           targetlist_param_t *targetlist);
 
 
 /**
@@ -125,14 +128,14 @@ void delete_targetlist(targetlist_param_t **targetlist);
  *
  * @param[in] target target pointer
  */
-void print_target( target_param_t *target);
+void print_target(target_param_t *target);
 
 /**
  * print all target parameters
  *
  * @param[in] targetlist target list pointer
  */
-void print_alltarget( targetlist_param_t *targetlist);
+void print_alltarget(targetlist_param_t *targetlist);
 
 
 /**
@@ -142,7 +145,8 @@ void print_alltarget( targetlist_param_t *targetlist);
  * @param[in] targetlist target list pointer
  * @return               found target pointer
  */
-target_param_t * search_target( const char targetname[], targetlist_param_t *targetlist);
+target_param_t * search_target(const char targetname[],
+                               targetlist_param_t *targetlist);
 
 
 /**
@@ -152,7 +156,8 @@ target_param_t * search_target( const char targetname[], targetlist_param_t *tar
  * @param[in] targetlist target list pointer
  * @return               found target pointer
  */
-target_param_t * search_targetBytid( const char tid[], targetlist_param_t *targetlist);
+target_param_t * search_targetBytid(const char tid[],
+                                    targetlist_param_t *targetlist);
 
-#endif 	    /* !TARGET_MANAGER_H_ */
+#endif      /* !TARGET_MANAGER_H_ */
 

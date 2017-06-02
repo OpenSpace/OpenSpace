@@ -42,74 +42,76 @@
 #define logstream stderr
 #endif /*SERVER */
 
-manfbox_param_t * gene_manfbox( box_param_t *box)
+manfbox_param_t * gene_manfbox(box_param_t *box)
 {
-  manfbox_param_t *manf;   /* manifest parameters */
-  boxheader_param_t *bh;   /* current box pointer */
-  boxheader_param_t *last; /* last boxheader pointer of the list */
-  OPJ_OFF_T pos;                 /* current position in manf_box contents; */
-  
-  manf = ( manfbox_param_t *)malloc( sizeof( manfbox_param_t));
+    manfbox_param_t *manf;   /* manifest parameters */
+    boxheader_param_t *bh;   /* current box pointer */
+    boxheader_param_t *last; /* last boxheader pointer of the list */
+    OPJ_OFF_T pos;                 /* current position in manf_box contents; */
 
-  pos = 0;
-  manf->first = last = NULL;
+    manf = (manfbox_param_t *)malloc(sizeof(manfbox_param_t));
 
-  while( (OPJ_SIZE_T)pos < get_DBoxlen( box)){
+    pos = 0;
+    manf->first = last = NULL;
 
-    bh = gene_childboxheader( box, pos);
-    pos += bh->headlen;
-    
-    /* insert into the list */
-    if( manf->first)
-      last->next = bh;
-    else
-      manf->first = bh;
-    last = bh;
-  }
-  return manf;
+    while ((OPJ_SIZE_T)pos < get_DBoxlen(box)) {
+
+        bh = gene_childboxheader(box, pos);
+        pos += bh->headlen;
+
+        /* insert into the list */
+        if (manf->first) {
+            last->next = bh;
+        } else {
+            manf->first = bh;
+        }
+        last = bh;
+    }
+    return manf;
 }
 
-void delete_manfbox( manfbox_param_t **manf)
+void delete_manfbox(manfbox_param_t **manf)
 {
-  boxheader_param_t *bhPtr, *bhNext;
-  
-  bhPtr = (*manf)->first;
-  while( bhPtr != NULL){
-    bhNext = bhPtr->next;
+    boxheader_param_t *bhPtr, *bhNext;
+
+    bhPtr = (*manf)->first;
+    while (bhPtr != NULL) {
+        bhNext = bhPtr->next;
 #ifndef SERVER
-    /*      fprintf( logstream, "local log: boxheader %.4s deleted!\n", bhPtr->type); */
+        /*      fprintf( logstream, "local log: boxheader %.4s deleted!\n", bhPtr->type); */
 #endif
-      free(bhPtr);
-      bhPtr = bhNext;
-  }
-  free( *manf);
+        free(bhPtr);
+        bhPtr = bhNext;
+    }
+    free(*manf);
 }
 
-void print_manfbox( manfbox_param_t *manf)
+void print_manfbox(manfbox_param_t *manf)
 {
-  boxheader_param_t *ptr;
+    boxheader_param_t *ptr;
 
-  ptr = manf->first;
-  while( ptr != NULL){
-    print_boxheader( ptr);
-    ptr=ptr->next;
-  }
+    ptr = manf->first;
+    while (ptr != NULL) {
+        print_boxheader(ptr);
+        ptr = ptr->next;
+    }
 }
 
-boxheader_param_t * search_boxheader( const char type[], manfbox_param_t *manf)
+boxheader_param_t * search_boxheader(const char type[], manfbox_param_t *manf)
 {
-  boxheader_param_t *found;
-  
-  found = manf->first;
-  
-  while( found != NULL){
-    
-    if( strncmp( type, found->type, 4) == 0)
-      return found;
-      
-    found = found->next;
-  }
-  fprintf( FCGI_stderr, "Error: Boxheader %s not found\n", type);
+    boxheader_param_t *found;
 
-  return NULL;
+    found = manf->first;
+
+    while (found != NULL) {
+
+        if (strncmp(type, found->type, 4) == 0) {
+            return found;
+        }
+
+        found = found->next;
+    }
+    fprintf(FCGI_stderr, "Error: Boxheader %s not found\n", type);
+
+    return NULL;
 }

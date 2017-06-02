@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -57,9 +57,10 @@ Multiply two fixed-precision rational numbers.
 @param b
 @return Returns a * b
 */
-static  int fix_mul(int a, int b) {
+static  int fix_mul(int a, int b)
+{
     int64 temp = (int64) a * (int64) b >> 12;
-    return (int) ((temp >> 1) + (temp & 1)) ;
+    return (int)((temp >> 1) + (temp & 1)) ;
 }
 
 /*@}*/

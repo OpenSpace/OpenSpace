@@ -65,7 +65,7 @@ if [ "${OPJ_CI_SKIP_TESTS:-}" != "1" ]; then
     JPYLYZER_VERSION="1.17.0"    
 	echo "Retrieving jpylyzer"
 	if [ "${APPVEYOR:-}" == "True" ]; then
-		wget --local-encoding=UTF-8 -q http://dl.bintray.com/openplanets/opf-windows/jpylyzer_${JPYLYZER_VERSION}_win32.zip
+		wget -q http://dl.bintray.com/openplanets/opf-windows/jpylyzer_${JPYLYZER_VERSION}_win32.zip
 		mkdir jpylyzer
 		cd jpylyzer
 		cmake -E tar -xf ../jpylyzer_${JPYLYZER_VERSION}_win32.zip
@@ -114,4 +114,8 @@ if [ "${OPJ_CI_SKIP_TESTS:-}" != "1" ]; then
 			fi
 		fi
 	fi
+fi
+
+if [ "${OPJ_CI_CHECK_STYLE:-}" == "1" ]; then
+    pip install --user autopep8
 fi

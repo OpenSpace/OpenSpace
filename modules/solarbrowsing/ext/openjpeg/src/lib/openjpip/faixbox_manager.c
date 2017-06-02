@@ -42,154 +42,175 @@
 #define logstream stderr
 #endif /*SERVER*/
 
-faixbox_param_t * gene_faixbox( box_param_t *box)
+faixbox_param_t * gene_faixbox(box_param_t *box)
 {
-  faixbox_param_t *faix;
-  size_t numOfelem;
-  long pos = 0;
+    faixbox_param_t *faix;
+    size_t numOfelem;
+    long pos = 0;
 
-  faix = ( faixbox_param_t *)malloc( sizeof(faixbox_param_t));
-  
-  faix->version = fetch_DBox1byte( box, (pos+=1)-1);
-  
-  if( 3< faix->version){
-    fprintf( FCGI_stderr, "Error: version %d in faix box is reserved for ISO use.\n", faix->version);
-    free(faix);
-    return NULL;
-  }
+    faix = (faixbox_param_t *)malloc(sizeof(faixbox_param_t));
 
-  if( faix->version%2){
-    subfaixbox8_param_t *subfaixbox;
-    size_t i;
-    
-    faix->subfaixbox.byte8_params = (subfaixbox8_param_t *)malloc( sizeof(subfaixbox8_param_t));
-    
-    subfaixbox = faix->subfaixbox.byte8_params;
-    subfaixbox->nmax = fetch_DBox8bytebigendian( box, (pos+=8)-8);
-    subfaixbox->m    = fetch_DBox8bytebigendian( box, (pos+=8)-8);
-    
-    numOfelem = subfaixbox->nmax*subfaixbox->m;
-    
-    subfaixbox->elem = ( faixelem8_param_t *)malloc( numOfelem*sizeof(faixelem8_param_t));
-    
-    if( faix->version == 3)
-      subfaixbox->aux = ( Byte4_t *)malloc( numOfelem*sizeof(Byte4_t));
-    
-    for( i=0; i<numOfelem; i++){
-      subfaixbox->elem[i].off = fetch_DBox8bytebigendian( box, (pos+=8)-8);
-      subfaixbox->elem[i].len = fetch_DBox8bytebigendian( box, (pos+=8)-8);
-      if( faix->version == 3)
-	subfaixbox->aux[i] = fetch_DBox4bytebigendian( box, (pos+=4)-4);
+    faix->version = fetch_DBox1byte(box, (pos += 1) - 1);
+
+    if (3 < faix->version) {
+        fprintf(FCGI_stderr, "Error: version %d in faix box is reserved for ISO use.\n",
+                faix->version);
+        free(faix);
+        return NULL;
     }
-  }
-  else{
-    subfaixbox4_param_t *subfaixbox;
-    size_t i;
 
-    faix->subfaixbox.byte4_params = (subfaixbox4_param_t *)malloc( sizeof(subfaixbox4_param_t));
-    
-    subfaixbox = faix->subfaixbox.byte4_params;
-    subfaixbox->nmax = fetch_DBox4bytebigendian( box, (pos+=4)-4);
-    subfaixbox->m    = fetch_DBox4bytebigendian( box, (pos+=4)-4);
-    
-    numOfelem = subfaixbox->nmax*subfaixbox->m;
-    
-    subfaixbox->elem = ( faixelem4_param_t *)malloc( numOfelem*sizeof(faixelem4_param_t));
-    
-    if( faix->version == 2)
-      subfaixbox->aux = ( Byte4_t *)malloc( numOfelem*sizeof(Byte4_t));
-    
-    for( i=0; i<numOfelem; i++){
-      subfaixbox->elem[i].off = fetch_DBox4bytebigendian( box, (pos+=4)-4);
-      subfaixbox->elem[i].len = fetch_DBox4bytebigendian( box, (pos+=4)-4);
-      if( faix->version == 2)
-	subfaixbox->aux[i] = fetch_DBox4bytebigendian( box, (pos+=4)-4);
+    if (faix->version % 2) {
+        subfaixbox8_param_t *subfaixbox;
+        size_t i;
+
+        faix->subfaixbox.byte8_params = (subfaixbox8_param_t *)malloc(sizeof(
+                                            subfaixbox8_param_t));
+
+        subfaixbox = faix->subfaixbox.byte8_params;
+        subfaixbox->nmax = fetch_DBox8bytebigendian(box, (pos += 8) - 8);
+        subfaixbox->m    = fetch_DBox8bytebigendian(box, (pos += 8) - 8);
+
+        numOfelem = subfaixbox->nmax * subfaixbox->m;
+
+        subfaixbox->elem = (faixelem8_param_t *)malloc(numOfelem * sizeof(
+                               faixelem8_param_t));
+
+        if (faix->version == 3) {
+            subfaixbox->aux = (Byte4_t *)malloc(numOfelem * sizeof(Byte4_t));
+        }
+
+        for (i = 0; i < numOfelem; i++) {
+            subfaixbox->elem[i].off = fetch_DBox8bytebigendian(box, (pos += 8) - 8);
+            subfaixbox->elem[i].len = fetch_DBox8bytebigendian(box, (pos += 8) - 8);
+            if (faix->version == 3) {
+                subfaixbox->aux[i] = fetch_DBox4bytebigendian(box, (pos += 4) - 4);
+            }
+        }
+    } else {
+        subfaixbox4_param_t *subfaixbox;
+        size_t i;
+
+        faix->subfaixbox.byte4_params = (subfaixbox4_param_t *)malloc(sizeof(
+                                            subfaixbox4_param_t));
+
+        subfaixbox = faix->subfaixbox.byte4_params;
+        subfaixbox->nmax = fetch_DBox4bytebigendian(box, (pos += 4) - 4);
+        subfaixbox->m    = fetch_DBox4bytebigendian(box, (pos += 4) - 4);
+
+        numOfelem = subfaixbox->nmax * subfaixbox->m;
+
+        subfaixbox->elem = (faixelem4_param_t *)malloc(numOfelem * sizeof(
+                               faixelem4_param_t));
+
+        if (faix->version == 2) {
+            subfaixbox->aux = (Byte4_t *)malloc(numOfelem * sizeof(Byte4_t));
+        }
+
+        for (i = 0; i < numOfelem; i++) {
+            subfaixbox->elem[i].off = fetch_DBox4bytebigendian(box, (pos += 4) - 4);
+            subfaixbox->elem[i].len = fetch_DBox4bytebigendian(box, (pos += 4) - 4);
+            if (faix->version == 2) {
+                subfaixbox->aux[i] = fetch_DBox4bytebigendian(box, (pos += 4) - 4);
+            }
+        }
     }
-  }
-  return faix;
+    return faix;
 }
 
-void print_faixbox( faixbox_param_t *faix)
+void print_faixbox(faixbox_param_t *faix)
 {
-  Byte8_t i, j;
+    Byte8_t i, j;
 
-  fprintf( logstream, "faix box info\n");
-  fprintf( logstream, "\tversion: %d\n", faix->version);
-  
-  fprintf( logstream, "\t nmax: %#" PRIx64 " = %" PRId64 "\n", get_nmax( faix), get_nmax( faix));
-  fprintf( logstream, "\t m: %#" PRIx64 " = %" PRId64 "\n", get_m( faix), get_m( faix));
+    fprintf(logstream, "faix box info\n");
+    fprintf(logstream, "\tversion: %d\n", faix->version);
 
-  for( i=0; i<get_m( faix); i++){
-    for( j=0; j<get_nmax( faix); j++){
-      fprintf( logstream, "\t off = %#" PRIx64 ", len = %#" PRIx64 "", get_elemOff( faix, j, i), get_elemLen( faix, j, i));
-      if( 2 <= faix->version)
-	fprintf( logstream, ", aux = %#x", get_elemAux( faix, j, i));
-      fprintf( logstream, "\n");
+    fprintf(logstream, "\t nmax: %#" PRIx64 " = %" PRId64 "\n", get_nmax(faix),
+            get_nmax(faix));
+    fprintf(logstream, "\t m: %#" PRIx64 " = %" PRId64 "\n", get_m(faix),
+            get_m(faix));
+
+    for (i = 0; i < get_m(faix); i++) {
+        for (j = 0; j < get_nmax(faix); j++) {
+            fprintf(logstream, "\t off = %#" PRIx64 ", len = %#" PRIx64 "",
+                    get_elemOff(faix, j, i), get_elemLen(faix, j, i));
+            if (2 <= faix->version) {
+                fprintf(logstream, ", aux = %#x", get_elemAux(faix, j, i));
+            }
+            fprintf(logstream, "\n");
+        }
+        fprintf(logstream, "\n");
     }
-    fprintf( logstream, "\n");
-  }
 }
 
-void delete_faixbox( faixbox_param_t **faix)
+void delete_faixbox(faixbox_param_t **faix)
 {
-  if((*faix)->version%2){
-    free((*faix)->subfaixbox.byte8_params->elem);
-    if( (*faix)->version == 3)
-      free((*faix)->subfaixbox.byte8_params->aux);
-    free((*faix)->subfaixbox.byte8_params);
-  }
-  else{
-    free((*faix)->subfaixbox.byte4_params->elem);
-    if( (*faix)->version == 2)
-      free((*faix)->subfaixbox.byte4_params->aux);
-    free((*faix)->subfaixbox.byte4_params);
-  }
-  free( *faix);
+    if ((*faix)->version % 2) {
+        free((*faix)->subfaixbox.byte8_params->elem);
+        if ((*faix)->version == 3) {
+            free((*faix)->subfaixbox.byte8_params->aux);
+        }
+        free((*faix)->subfaixbox.byte8_params);
+    } else {
+        free((*faix)->subfaixbox.byte4_params->elem);
+        if ((*faix)->version == 2) {
+            free((*faix)->subfaixbox.byte4_params->aux);
+        }
+        free((*faix)->subfaixbox.byte4_params);
+    }
+    free(*faix);
 }
 
-Byte8_t get_nmax( faixbox_param_t *faix)
+Byte8_t get_nmax(faixbox_param_t *faix)
 {
-  if( faix->version%2)
-    return faix->subfaixbox.byte8_params->nmax;
-  else
-    return (Byte8_t)faix->subfaixbox.byte4_params->nmax;
+    if (faix->version % 2) {
+        return faix->subfaixbox.byte8_params->nmax;
+    } else {
+        return (Byte8_t)faix->subfaixbox.byte4_params->nmax;
+    }
 }
 
-Byte8_t get_m( faixbox_param_t *faix)
+Byte8_t get_m(faixbox_param_t *faix)
 {
-  if( faix->version%2)
-    return faix->subfaixbox.byte8_params->m;
-  else
-    return (Byte8_t)faix->subfaixbox.byte4_params->m;
+    if (faix->version % 2) {
+        return faix->subfaixbox.byte8_params->m;
+    } else {
+        return (Byte8_t)faix->subfaixbox.byte4_params->m;
+    }
 }
 
-Byte8_t get_elemOff( faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id)
+Byte8_t get_elemOff(faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id)
 {
-  Byte8_t nmax = get_nmax( faix);
-  if( faix->version%2)
-    return faix->subfaixbox.byte8_params->elem[ row_id*nmax+elem_id].off;
-  else
-    return (Byte8_t)faix->subfaixbox.byte4_params->elem[ row_id*nmax+elem_id].off;
+    Byte8_t nmax = get_nmax(faix);
+    if (faix->version % 2) {
+        return faix->subfaixbox.byte8_params->elem[ row_id * nmax + elem_id].off;
+    } else {
+        return (Byte8_t)faix->subfaixbox.byte4_params->elem[ row_id * nmax +
+                       elem_id].off;
+    }
 }
 
-Byte8_t get_elemLen( faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id)
+Byte8_t get_elemLen(faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id)
 {
-  Byte8_t nmax = get_nmax( faix);
-  if( faix->version%2)
-    return faix->subfaixbox.byte8_params->elem[ row_id*nmax+elem_id].len;
-  else
-    return (Byte8_t)faix->subfaixbox.byte4_params->elem[ row_id*nmax+elem_id].len;
+    Byte8_t nmax = get_nmax(faix);
+    if (faix->version % 2) {
+        return faix->subfaixbox.byte8_params->elem[ row_id * nmax + elem_id].len;
+    } else {
+        return (Byte8_t)faix->subfaixbox.byte4_params->elem[ row_id * nmax +
+                       elem_id].len;
+    }
 }
 
-Byte4_t get_elemAux( faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id)
+Byte4_t get_elemAux(faixbox_param_t *faix, Byte8_t elem_id, Byte8_t row_id)
 {
-  Byte8_t nmax;
-  if( faix->version <2)
-    return (Byte4_t)-1;
+    Byte8_t nmax;
+    if (faix->version < 2) {
+        return (Byte4_t) - 1;
+    }
 
-  nmax = get_nmax( faix);
-  if( faix->version%2)
-    return faix->subfaixbox.byte8_params->aux[ row_id*nmax+elem_id];
-  else
-    return faix->subfaixbox.byte4_params->aux[ row_id*nmax+elem_id];
+    nmax = get_nmax(faix);
+    if (faix->version % 2) {
+        return faix->subfaixbox.byte8_params->aux[ row_id * nmax + elem_id];
+    } else {
+        return faix->subfaixbox.byte4_params->aux[ row_id * nmax + elem_id];
+    }
 }

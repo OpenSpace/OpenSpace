@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2002-2014, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2014, Professor Benoit Macq
- * Copyright (c) 2010-2011, Kaori Hagihara 
+ * Copyright (c) 2010-2011, Kaori Hagihara
  * Copyright (c) 2011,      Lucian Corlaciu, GSoC
  * All rights reserved.
  *
@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	DEC_CLIENTMSG_HANDLER_H_
-# define   	DEC_CLIENTMSG_HANDLER_H_
+#ifndef     DEC_CLIENTMSG_HANDLER_H_
+# define    DEC_CLIENTMSG_HANDLER_H_
 
 #include "imgsock_manager.h"
 #include "cache_manager.h"
@@ -46,7 +46,8 @@
  * @param[in,out] streamlen        address of stream length
  * @param[in,out] msgqueue         message queue pointer
  */
-void handle_JPIPstreamMSG( SOCKET connected_socket, cachelist_param_t *cachelist, Byte_t **jpipstream, OPJ_SIZE_T *streamlen, msgqueue_param_t *msgqueue);
+void handle_JPIPstreamMSG(SOCKET connected_socket, cachelist_param_t *cachelist,
+                          Byte_t **jpipstream, OPJ_SIZE_T *streamlen, msgqueue_param_t *msgqueue);
 
 /**
  * handle PNM request message
@@ -56,7 +57,8 @@ void handle_JPIPstreamMSG( SOCKET connected_socket, cachelist_param_t *cachelist
  * @param[in] msgqueue         message queue pointer
  * @param[in] cachelist        cache list pointer
  */
-void handle_PNMreqMSG( SOCKET connected_socket, Byte_t *jpipstream, msgqueue_param_t *msgqueue, cachelist_param_t *cachelist);
+void handle_PNMreqMSG(SOCKET connected_socket, Byte_t *jpipstream,
+                      msgqueue_param_t *msgqueue, cachelist_param_t *cachelist);
 
 /**
  * handle XML request message
@@ -65,7 +67,8 @@ void handle_PNMreqMSG( SOCKET connected_socket, Byte_t *jpipstream, msgqueue_par
  * @param[in] jpipstream       address of caching jpipstream pointer
  * @param[in] cachelist        cache list pointer
  */
-void handle_XMLreqMSG( SOCKET connected_socket, Byte_t *jpipstream, cachelist_param_t *cachelist);
+void handle_XMLreqMSG(SOCKET connected_socket, Byte_t *jpipstream,
+                      cachelist_param_t *cachelist);
 
 /**
  * handle TargetID request message
@@ -73,7 +76,7 @@ void handle_XMLreqMSG( SOCKET connected_socket, Byte_t *jpipstream, cachelist_pa
  * @param[in] connected_socket socket descriptor
  * @param[in] cachelist        cache list pointer
  */
-void handle_TIDreqMSG( SOCKET connected_socket, cachelist_param_t *cachelist);
+void handle_TIDreqMSG(SOCKET connected_socket, cachelist_param_t *cachelist);
 
 /**
  * handle ChannelID request message
@@ -81,7 +84,7 @@ void handle_TIDreqMSG( SOCKET connected_socket, cachelist_param_t *cachelist);
  * @param[in] connected_socket socket descriptor
  * @param[in] cachelist        cache list pointer
  */
-void handle_CIDreqMSG( SOCKET connected_socket, cachelist_param_t *cachelist);
+void handle_CIDreqMSG(SOCKET connected_socket, cachelist_param_t *cachelist);
 
 /**
  * handle distroy ChannelID message
@@ -89,7 +92,7 @@ void handle_CIDreqMSG( SOCKET connected_socket, cachelist_param_t *cachelist);
  * @param[in]     connected_socket socket descriptor
  * @param[in,out] cachelist        cache list pointer
  */
-void handle_dstCIDreqMSG( SOCKET connected_socket, cachelist_param_t *cachelist);
+void handle_dstCIDreqMSG(SOCKET connected_socket, cachelist_param_t *cachelist);
 
 /**
  * handle SIZ request message
@@ -99,7 +102,8 @@ void handle_dstCIDreqMSG( SOCKET connected_socket, cachelist_param_t *cachelist)
  * @param[in] msgqueue         message queue pointer
  * @param[in,out] cachelist        cache list pointer
  */
-void handle_SIZreqMSG( SOCKET connected_socket, Byte_t *jpipstream, msgqueue_param_t *msgqueue, cachelist_param_t *cachelist);
+void handle_SIZreqMSG(SOCKET connected_socket, Byte_t *jpipstream,
+                      msgqueue_param_t *msgqueue, cachelist_param_t *cachelist);
 
 /**
  * handle saving JP2 file request message
@@ -109,7 +113,8 @@ void handle_SIZreqMSG( SOCKET connected_socket, Byte_t *jpipstream, msgqueue_par
  * @param[in] msgqueue         message queue pointer
  * @param[in] jpipstream       address of caching jpipstream pointer
  */
-void handle_JP2saveMSG( SOCKET connected_socket, cachelist_param_t *cachelist, msgqueue_param_t *msgqueue, Byte_t *jpipstream);
+void handle_JP2saveMSG(SOCKET connected_socket, cachelist_param_t *cachelist,
+                       msgqueue_param_t *msgqueue, Byte_t *jpipstream);
 
 
-#endif 	    /* !DEC_CLIENTMSG_HANDLER_H_ */
+#endif      /* !DEC_CLIENTMSG_HANDLER_H_ */

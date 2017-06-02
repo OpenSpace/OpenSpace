@@ -32,10 +32,13 @@
 #include "msgqueue_manager.h"
 #include "ihdrbox_manager.h"
 
-Byte_t * update_JPIPstream( Byte_t *newstream, OPJ_SIZE_T newstreamlen, Byte_t *cache_stream, OPJ_SIZE_T *streamlen);
+Byte_t * update_JPIPstream(Byte_t *newstream, OPJ_SIZE_T newstreamlen,
+                           Byte_t *cache_stream, OPJ_SIZE_T *streamlen);
 
-void save_codestream( Byte_t *codestream, OPJ_SIZE_T streamlen, const char *fmt);
+void save_codestream(Byte_t *codestream, OPJ_SIZE_T streamlen, const char *fmt);
 
-Byte_t * jpipstream_to_pnm( Byte_t *jpipstream, msgqueue_param_t *msgqueue, Byte8_t csn, int fw, int fh, ihdrbox_param_t **ihdrbox);
+Byte_t * jpipstream_to_pnm(Byte_t *jpipstream, msgqueue_param_t *msgqueue,
+                           Byte8_t csn, int fw, int fh, ihdrbox_param_t **ihdrbox);
 
-ihdrbox_param_t * get_SIZ_from_jpipstream( Byte_t *jpipstream, msgqueue_param_t *msgqueue, Byte8_t csn);
+ihdrbox_param_t * get_SIZ_from_jpipstream(Byte_t *jpipstream,
+        msgqueue_param_t *msgqueue, Byte8_t csn);

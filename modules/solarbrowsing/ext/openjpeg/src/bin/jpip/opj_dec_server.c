@@ -42,7 +42,7 @@
  *     quit\n
  *  Be sure all image viewers are closed.\n
  *  Cache file in JPT format is stored in the working directly before it quites.
- *  
+ *
  */
 
 #include <stdio.h>
@@ -54,40 +54,45 @@
 WSADATA initialisation_win32;
 #endif
 
-int main(int argc, char *argv[]){
-  
-  dec_server_record_t *server_record;
-  client_t client;
-  int port = 50000;
-  int erreur;
-  (void)erreur;
+int main(int argc, char *argv[])
+{
 
-  if( argc > 1)
-    port = atoi( argv[1]);
+    dec_server_record_t *server_record;
+    client_t client;
+    int port = 50000;
+    int erreur;
+    (void)erreur;
+
+    if (argc > 1) {
+        port = atoi(argv[1]);
+    }
 
 #ifdef _WIN32
-  erreur = WSAStartup(MAKEWORD(2,2),&initialisation_win32);
-  if( erreur!=0)
-    fprintf( stderr, "Erreur initialisation Winsock error : %d %d\n",erreur,WSAGetLastError());
-  else
-    printf( "Initialisation Winsock\n");
+    erreur = WSAStartup(MAKEWORD(2, 2), &initialisation_win32);
+    if (erreur != 0) {
+        fprintf(stderr, "Erreur initialisation Winsock error : %d %d\n", erreur,
+                WSAGetLastError());
+    } else {
+        printf("Initialisation Winsock\n");
+    }
 #endif /*_WIN32*/
-  
-  server_record = init_dec_server( port);
-  
-  while(( client = accept_connection( server_record)) != -1 )
-    if(!handle_clientreq( client, server_record))
-      break;
-  
-  terminate_dec_server( &server_record);
+
+    server_record = init_dec_server(port);
+
+    while ((client = accept_connection(server_record)) != -1)
+        if (!handle_clientreq(client, server_record)) {
+            break;
+        }
+
+    terminate_dec_server(&server_record);
 
 #ifdef _WIN32
-  if( WSACleanup() != 0){
-    printf("\nError in WSACleanup : %d %d",erreur,WSAGetLastError());
-  }else{
-    printf("\nWSACleanup OK\n");
-  }
+    if (WSACleanup() != 0) {
+        printf("\nError in WSACleanup : %d %d", erreur, WSAGetLastError());
+    } else {
+        printf("\nWSACleanup OK\n");
+    }
 #endif
 
-  return 0;
+    return 0;
 }

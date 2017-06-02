@@ -47,97 +47,105 @@
 
 placeholderlist_param_t * gene_placeholderlist(void)
 {
-  placeholderlist_param_t *list;
+    placeholderlist_param_t *list;
 
-  list = (placeholderlist_param_t *)malloc( sizeof(placeholderlist_param_t));
-  
-  list->first = NULL;
-  list->last  = NULL;
+    list = (placeholderlist_param_t *)malloc(sizeof(placeholderlist_param_t));
 
-  return list;
+    list->first = NULL;
+    list->last  = NULL;
+
+    return list;
 }
 
-void delete_placeholderlist( placeholderlist_param_t **list)
+void delete_placeholderlist(placeholderlist_param_t **list)
 {
-  placeholder_param_t *ptr, *next;
+    placeholder_param_t *ptr, *next;
 
-  if(!(*list))
-    return;
+    if (!(*list)) {
+        return;
+    }
 
-  ptr = (*list)->first;
-  
-  while( ptr){
-    next=ptr->next;
-    delete_placeholder( &ptr);
-    ptr=next;
-  }
-  free( *list);
+    ptr = (*list)->first;
+
+    while (ptr) {
+        next = ptr->next;
+        delete_placeholder(&ptr);
+        ptr = next;
+    }
+    free(*list);
 }
 
-placeholder_param_t * gene_placeholder( box_param_t *box, Byte8_t origID)
+placeholder_param_t * gene_placeholder(box_param_t *box, Byte8_t origID)
 {
-  placeholder_param_t *placeholder;
+    placeholder_param_t *placeholder;
 
-  placeholder = (placeholder_param_t *)malloc( sizeof(placeholder_param_t));
-  
-  strncpy( placeholder->TBox, "phld", 4);
-  placeholder->Flags = 1; /* only the access to the original contents of this box, for now */
-  placeholder->OrigID = origID;
-  placeholder->OrigBH = fetch_headbytes( box);
-  placeholder->OrigBHlen = box->headlen;
-  placeholder->LBox = 20+(Byte4_t)box->headlen;
-  placeholder->next = NULL;
+    placeholder = (placeholder_param_t *)malloc(sizeof(placeholder_param_t));
 
-  return placeholder;
+    strncpy(placeholder->TBox, "phld", 4);
+    placeholder->Flags =
+        1; /* only the access to the original contents of this box, for now */
+    placeholder->OrigID = origID;
+    placeholder->OrigBH = fetch_headbytes(box);
+    placeholder->OrigBHlen = box->headlen;
+    placeholder->LBox = 20 + (Byte4_t)box->headlen;
+    placeholder->next = NULL;
+
+    return placeholder;
 }
 
-void delete_placeholder( placeholder_param_t **placeholder)
+void delete_placeholder(placeholder_param_t **placeholder)
 {
-  if( (*placeholder)->OrigBH)
-    free((*placeholder)->OrigBH);
-  free(*placeholder);
+    if ((*placeholder)->OrigBH) {
+        free((*placeholder)->OrigBH);
+    }
+    free(*placeholder);
 }
 
-void insert_placeholder_into_list( placeholder_param_t *phld, placeholderlist_param_t *phldlist)
+void insert_placeholder_into_list(placeholder_param_t *phld,
+                                  placeholderlist_param_t *phldlist)
 {
-  if( phldlist->first)
-    phldlist->last->next = phld;
-  else
-    phldlist->first = phld;
-  phldlist->last = phld;
+    if (phldlist->first) {
+        phldlist->last->next = phld;
+    } else {
+        phldlist->first = phld;
+    }
+    phldlist->last = phld;
 }
 
-void print_placeholder( placeholder_param_t *phld)
+void print_placeholder(placeholder_param_t *phld)
 {
-  int i;
+    int i;
 
-  fprintf( logstream, "placeholder info:\n");
-  fprintf( logstream, "\t LBox: %d %#x\n", phld->LBox, phld->LBox);
-  fprintf( logstream, "\t TBox: %.4s\n", phld->TBox);
-  fprintf( logstream, "\t Flags: %#x %#x\n", phld->Flags, phld->Flags);
-  fprintf( logstream, "\t OrigID: %" PRId64 "\n", phld->OrigID);
-  fprintf( logstream, "\t OrigBH: ");
-  
-  for( i=0; i< phld->OrigBHlen; i++)
-    fprintf( logstream, "%02x ", phld->OrigBH[i]);
-  fprintf( logstream, "\t");
+    fprintf(logstream, "placeholder info:\n");
+    fprintf(logstream, "\t LBox: %d %#x\n", phld->LBox, phld->LBox);
+    fprintf(logstream, "\t TBox: %.4s\n", phld->TBox);
+    fprintf(logstream, "\t Flags: %#x %#x\n", phld->Flags, phld->Flags);
+    fprintf(logstream, "\t OrigID: %" PRId64 "\n", phld->OrigID);
+    fprintf(logstream, "\t OrigBH: ");
 
-  for( i=0; i< phld->OrigBHlen; i++)
-    fprintf( logstream, "%c", phld->OrigBH[i]);
-  fprintf( logstream, "\n");
+    for (i = 0; i < phld->OrigBHlen; i++) {
+        fprintf(logstream, "%02x ", phld->OrigBH[i]);
+    }
+    fprintf(logstream, "\t");
+
+    for (i = 0; i < phld->OrigBHlen; i++) {
+        fprintf(logstream, "%c", phld->OrigBH[i]);
+    }
+    fprintf(logstream, "\n");
 }
 
-void print_allplaceholder( placeholderlist_param_t *list)
+void print_allplaceholder(placeholderlist_param_t *list)
 {
-  placeholder_param_t *ptr;
+    placeholder_param_t *ptr;
 
-  if( !list)
-    return;
-  
-  fprintf( logstream, "all placeholder info: \n");
-  ptr = list->first;
-  while( ptr != NULL){
-    print_placeholder( ptr);
-    ptr=ptr->next;
-  }
+    if (!list) {
+        return;
+    }
+
+    fprintf(logstream, "all placeholder info: \n");
+    ptr = list->first;
+    while (ptr != NULL) {
+        print_placeholder(ptr);
+        ptr = ptr->next;
+    }
 }

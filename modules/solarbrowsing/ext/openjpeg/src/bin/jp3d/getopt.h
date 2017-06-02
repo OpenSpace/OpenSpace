@@ -11,4 +11,4 @@ extern char *optarg;
 
 extern int getopt(int nargc, char *const *nargv, const char *ostr);
 
-#endif				/* _GETOPT_H_ */
+#endif              /* _GETOPT_H_ */

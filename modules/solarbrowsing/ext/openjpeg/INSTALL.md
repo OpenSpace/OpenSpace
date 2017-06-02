@@ -31,6 +31,7 @@ Main available cmake flags:
   * To build the shared libraries and links the executables against it: '-DBUILD\_SHARED\_LIBS:bool=on' (default: 'ON')
 > Note: when using this option, static libraries are not built and executables are dynamically linked.
   * To build the CODEC executables: '-DBUILD\_CODEC:bool=on' (default: 'ON')
+  * To build opjstyle (internal version of astyle) for OpenJPEG development: '-DWITH_ASTYLE=ON'
   * [OBSOLETE] To build the MJ2 executables: '-DBUILD\_MJ2:bool=on' (default: 'OFF')
   * [OBSOLETE] To build the JPWL executables and JPWL library: '-DBUILD\_JPWL:bool=on' (default: 'OFF')
   * [OBSOLETE] To build the JPIP client (java compiler recommended) library and executables: '-DBUILD\_JPIP:bool=on' (default: 'OFF')
@@ -61,6 +62,11 @@ Note 4 : On MacOS, if it does not work, try adding the following flag to the cma
 
 You can use cmake to generate the project files for the IDE you are using (VC2010, XCode, etc).
 Type 'cmake --help' for available generators on your platform.
+
+# Modifying OpenJPEG
+
+Before committing changes, run:
+scripts/prepare-commit.sh
 
 # Using OpenJPEG
 

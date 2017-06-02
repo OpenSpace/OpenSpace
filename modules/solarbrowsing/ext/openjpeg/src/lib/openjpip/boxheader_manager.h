@@ -28,19 +28,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	BOXHEADER_MANAGER_H_
-# define   	BOXHEADER_MANAGER_H_
+#ifndef     BOXHEADER_MANAGER_H_
+# define    BOXHEADER_MANAGER_H_
 
 #include "openjpeg.h"
 #include "byte_manager.h"
 #include "box_manager.h"
 
 /** box header parameters*/
-typedef struct boxheader_param{
-  Byte_t  headlen;              /**< header length  8 or 16*/
-  Byte8_t length;               /**< length of the reference Box*/
-  char    type[4];              /**< type of information in the DBox*/
-  struct boxheader_param *next; /**< pointer to the next header box*/
+typedef struct boxheader_param {
+    Byte_t  headlen;              /**< header length  8 or 16*/
+    Byte8_t length;               /**< length of the reference Box*/
+    char    type[4];              /**< type of information in the DBox*/
+    struct boxheader_param *next; /**< pointer to the next header box*/
 } boxheader_param_t;
 
 
@@ -51,7 +51,7 @@ typedef struct boxheader_param{
  * @param[in] offset Box offset
  * @return           pointer to the structure of generate box header parameters
  */
-boxheader_param_t * gene_boxheader( int fd, OPJ_OFF_T offset);
+boxheader_param_t * gene_boxheader(int fd, OPJ_OFF_T offset);
 
 /**
  * generate a child box header at the given offset
@@ -60,13 +60,14 @@ boxheader_param_t * gene_boxheader( int fd, OPJ_OFF_T offset);
  * @param[in] offset   offset from DBox first byte of superbox
  * @return             pointer to the structure of generate box header parameters
  */
-boxheader_param_t * gene_childboxheader( box_param_t *superbox, OPJ_OFF_T offset);
+boxheader_param_t * gene_childboxheader(box_param_t *superbox,
+                                        OPJ_OFF_T offset);
 
 /**
  * print box header parameters
  *
  * @param[in] boxheader boxheader pointer
  */
-void print_boxheader( boxheader_param_t *boxheader);
+void print_boxheader(boxheader_param_t *boxheader);
 
-#endif 	    /* !BOXHEADER_MANAGER_H_ */
+#endif      /* !BOXHEADER_MANAGER_H_ */

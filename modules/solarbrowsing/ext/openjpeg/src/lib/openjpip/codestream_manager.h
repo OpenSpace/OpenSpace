@@ -28,16 +28,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	CODESTREAM_MANAGER_H_
-# define   	CODESTREAM_MANAGER_H_
+#ifndef     CODESTREAM_MANAGER_H_
+# define    CODESTREAM_MANAGER_H_
 
 #include "byte_manager.h"
 
 /** codestream parameters*/
-typedef struct codestream_param{
-  int fd;         /**< file descriptor*/
-  OPJ_OFF_T offset; /**< byte position of DBox (Box Contents) in the file*/
-  Byte8_t length; /**< content length*/
+typedef struct codestream_param {
+    int fd;         /**< file descriptor*/
+    OPJ_OFF_T offset; /**< byte position of DBox (Box Contents) in the file*/
+    Byte8_t length; /**< content length*/
 } codestream_param_t;
 
 
@@ -49,7 +49,7 @@ typedef struct codestream_param{
  * @param[in] length codestream length
  * @return           structure of generated codestream parameters
  */
-codestream_param_t set_codestream( int fd, OPJ_OFF_T offset, OPJ_SIZE_T length);
+codestream_param_t set_codestream(int fd, OPJ_OFF_T offset, OPJ_SIZE_T length);
 
 
 /**
@@ -60,7 +60,8 @@ codestream_param_t set_codestream( int fd, OPJ_OFF_T offset, OPJ_SIZE_T length);
  * @param[in] size   Byte length
  * @return           pointer to the fetched data
  */
-Byte_t * fetch_codestreambytes( codestream_param_t *cs, OPJ_OFF_T offset, OPJ_SIZE_T size);
+Byte_t * fetch_codestreambytes(codestream_param_t *cs, OPJ_OFF_T offset,
+                               OPJ_SIZE_T size);
 
 /**
  * fetch Codestream 1-byte Byte code in file stream
@@ -69,7 +70,7 @@ Byte_t * fetch_codestreambytes( codestream_param_t *cs, OPJ_OFF_T offset, OPJ_SI
  * @param[in] offset start Byte position in codestream
  * @return           fetched code
  */
-Byte_t fetch_codestream1byte( codestream_param_t *cs, OPJ_OFF_T offset);
+Byte_t fetch_codestream1byte(codestream_param_t *cs, OPJ_OFF_T offset);
 
 /**
  * fetch Codestream 2-byte big endian Byte codes in file stream
@@ -78,7 +79,8 @@ Byte_t fetch_codestream1byte( codestream_param_t *cs, OPJ_OFF_T offset);
  * @param[in] offset start Byte position in codestream
  * @return           fetched code
  */
-Byte2_t fetch_codestream2bytebigendian( codestream_param_t *cs, OPJ_OFF_T offset);
+Byte2_t fetch_codestream2bytebigendian(codestream_param_t *cs,
+                                       OPJ_OFF_T offset);
 
 /**
  * fetch Codestream 4-byte big endian Byte codes in file stream
@@ -87,7 +89,8 @@ Byte2_t fetch_codestream2bytebigendian( codestream_param_t *cs, OPJ_OFF_T offset
  * @param[in] offset start Byte position in codestream
  * @return           fetched code
  */
-Byte4_t fetch_codestream4bytebigendian( codestream_param_t *cs, OPJ_OFF_T offset);
+Byte4_t fetch_codestream4bytebigendian(codestream_param_t *cs,
+                                       OPJ_OFF_T offset);
 
 
 /**
@@ -95,7 +98,7 @@ Byte4_t fetch_codestream4bytebigendian( codestream_param_t *cs, OPJ_OFF_T offset
  *
  * @param[in] cs codestream
  */
-void print_codestream( codestream_param_t cs);
+void print_codestream(codestream_param_t cs);
 
 
-#endif 	    /* !CODESTREAM_MANAGER_H_ */
+#endif      /* !CODESTREAM_MANAGER_H_ */

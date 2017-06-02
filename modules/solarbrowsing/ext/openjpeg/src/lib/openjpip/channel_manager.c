@@ -47,134 +47,146 @@
 
 channellist_param_t * gene_channellist(void)
 {
-  channellist_param_t *channellist;
+    channellist_param_t *channellist;
 
-  channellist = (channellist_param_t *)opj_malloc( sizeof(channellist_param_t));
-  
-  channellist->first = NULL;
-  channellist->last  = NULL;
+    channellist = (channellist_param_t *)opj_malloc(sizeof(channellist_param_t));
 
-  return channellist;
+    channellist->first = NULL;
+    channellist->last  = NULL;
+
+    return channellist;
 }
 
-channel_param_t * gene_channel( query_param_t query_param, auxtrans_param_t auxtrans, cachemodel_param_t *cachemodel, channellist_param_t *channellist)
+channel_param_t * gene_channel(query_param_t query_param,
+                               auxtrans_param_t auxtrans, cachemodel_param_t *cachemodel,
+                               channellist_param_t *channellist)
 {
-  channel_param_t *channel;
-  const char transport[4][10] = { "non", "http", "http-tcp", "http-udp"};
-  
-  if( !cachemodel){
-    fprintf( FCGI_stdout, "Status: 404\r\n"); 
-    fprintf( FCGI_stdout, "Reason: cnew cancelled\r\n"); 
-    return NULL;
-  }
+    channel_param_t *channel;
+    const char transport[4][10] = { "non", "http", "http-tcp", "http-udp"};
 
-  channel = (channel_param_t *)opj_malloc( sizeof(channel_param_t));
-  channel->cachemodel = cachemodel;
-
-  /* set channel ID and get present time */
-  snprintf( channel->cid, MAX_LENOFCID, "%x%x", (unsigned int)time( &channel->start_tm), (unsigned int)rand());
-  
-  channel->aux = query_param.cnew;
-  
-  /* only tcp implemented for now */
-  if( channel->aux == udp)
-    channel->aux = tcp;
-  
-  channel->next=NULL;
-
-  set_channel_variable_param( query_param, channel);
-
-  if( channellist->first != NULL)
-    channellist->last->next = channel;
-  else
-    channellist->first = channel;
-  channellist->last = channel;
-  
-  fprintf( FCGI_stdout, "JPIP-cnew: cid=%s", channel->cid);
-  fprintf( FCGI_stdout, ",transport=%s", transport[channel->aux]);
-  
-  if( channel->aux == tcp || channel->aux == udp)
-    fprintf( FCGI_stdout, ",auxport=%d", channel->aux==tcp ? auxtrans.tcpauxport : auxtrans.udpauxport);
-
-  fprintf( FCGI_stdout, "\r\n");
-
-  return channel;
-}
-
-
-void set_channel_variable_param( query_param_t query_param, channel_param_t *channel)
-{
-  /* set roi information */
-  (void)query_param;
-  (void)channel;
-}
-
-
-void delete_channel( channel_param_t **channel, channellist_param_t *channellist)
-{
-  channel_param_t *ptr;
-
-  if( *channel == channellist->first)
-    channellist->first = (*channel)->next;
-  else{
-    ptr = channellist->first;
-    while( ptr->next != *channel){
-      ptr=ptr->next;
+    if (!cachemodel) {
+        fprintf(FCGI_stdout, "Status: 404\r\n");
+        fprintf(FCGI_stdout, "Reason: cnew cancelled\r\n");
+        return NULL;
     }
-    
-    ptr->next = (*channel)->next;
-    
-    if( *channel == channellist->last)
-      channellist->last = ptr;
-  }
+
+    channel = (channel_param_t *)opj_malloc(sizeof(channel_param_t));
+    channel->cachemodel = cachemodel;
+
+    /* set channel ID and get present time */
+    snprintf(channel->cid, MAX_LENOFCID, "%x%x",
+             (unsigned int)time(&channel->start_tm), (unsigned int)rand());
+
+    channel->aux = query_param.cnew;
+
+    /* only tcp implemented for now */
+    if (channel->aux == udp) {
+        channel->aux = tcp;
+    }
+
+    channel->next = NULL;
+
+    set_channel_variable_param(query_param, channel);
+
+    if (channellist->first != NULL) {
+        channellist->last->next = channel;
+    } else {
+        channellist->first = channel;
+    }
+    channellist->last = channel;
+
+    fprintf(FCGI_stdout, "JPIP-cnew: cid=%s", channel->cid);
+    fprintf(FCGI_stdout, ",transport=%s", transport[channel->aux]);
+
+    if (channel->aux == tcp || channel->aux == udp) {
+        fprintf(FCGI_stdout, ",auxport=%d",
+                channel->aux == tcp ? auxtrans.tcpauxport : auxtrans.udpauxport);
+    }
+
+    fprintf(FCGI_stdout, "\r\n");
+
+    return channel;
+}
+
+
+void set_channel_variable_param(query_param_t query_param,
+                                channel_param_t *channel)
+{
+    /* set roi information */
+    (void)query_param;
+    (void)channel;
+}
+
+
+void delete_channel(channel_param_t **channel, channellist_param_t *channellist)
+{
+    channel_param_t *ptr;
+
+    if (*channel == channellist->first) {
+        channellist->first = (*channel)->next;
+    } else {
+        ptr = channellist->first;
+        while (ptr->next != *channel) {
+            ptr = ptr->next;
+        }
+
+        ptr->next = (*channel)->next;
+
+        if (*channel == channellist->last) {
+            channellist->last = ptr;
+        }
+    }
 #ifndef SERVER
-  fprintf( logstream, "local log: channel: %s deleted\n", (*channel)->cid);
+    fprintf(logstream, "local log: channel: %s deleted\n", (*channel)->cid);
 #endif
-  opj_free(*channel);
+    opj_free(*channel);
 }
 
-void delete_channellist( channellist_param_t **channellist)
+void delete_channellist(channellist_param_t **channellist)
 {
-  channel_param_t *channelPtr, *channelNext;
-    
-  channelPtr = (*channellist)->first;
-  while( channelPtr != NULL){
-    channelNext=channelPtr->next;
+    channel_param_t *channelPtr, *channelNext;
+
+    channelPtr = (*channellist)->first;
+    while (channelPtr != NULL) {
+        channelNext = channelPtr->next;
 #ifndef SERVER
-      fprintf( logstream, "local log: channel %s deleted!\n", channelPtr->cid);
+        fprintf(logstream, "local log: channel %s deleted!\n", channelPtr->cid);
 #endif
-      opj_free(channelPtr);
-      channelPtr=channelNext;
-  }
-  opj_free( *channellist);
+        opj_free(channelPtr);
+        channelPtr = channelNext;
+    }
+    opj_free(*channellist);
 }
 
-void print_allchannel( channellist_param_t *channellist)
+void print_allchannel(channellist_param_t *channellist)
 {
-  channel_param_t *ptr;
+    channel_param_t *ptr;
 
-  ptr = channellist->first;
-  while( ptr != NULL){
-    fprintf( logstream,"channel-ID=%s \t target=%s\n", ptr->cid, ptr->cachemodel->target->targetname);
-    ptr=ptr->next;
-  }
+    ptr = channellist->first;
+    while (ptr != NULL) {
+        fprintf(logstream, "channel-ID=%s \t target=%s\n", ptr->cid,
+                ptr->cachemodel->target->targetname);
+        ptr = ptr->next;
+    }
 }
 
-channel_param_t * search_channel( const char cid[], channellist_param_t *channellist)
+channel_param_t * search_channel(const char cid[],
+                                 channellist_param_t *channellist)
 {
-  channel_param_t *foundchannel;
+    channel_param_t *foundchannel;
 
-  foundchannel = channellist->first;
-  
-  while( foundchannel != NULL){
-    
-    if( strcmp( cid, foundchannel->cid) == 0)
-      return foundchannel;
-      
-    foundchannel = foundchannel->next;
-  }
-  fprintf( FCGI_stdout, "Status: 503\r\n");
-  fprintf( FCGI_stdout, "Reason: Channel %s not found in this session\r\n", cid); 
+    foundchannel = channellist->first;
 
-  return NULL;
+    while (foundchannel != NULL) {
+
+        if (strcmp(cid, foundchannel->cid) == 0) {
+            return foundchannel;
+        }
+
+        foundchannel = foundchannel->next;
+    }
+    fprintf(FCGI_stdout, "Status: 503\r\n");
+    fprintf(FCGI_stdout, "Reason: Channel %s not found in this session\r\n", cid);
+
+    return NULL;
 }

@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	BYTE_MANAGER_H_
-#define   	BYTE_MANAGER_H_
+#ifndef     BYTE_MANAGER_H_
+#define     BYTE_MANAGER_H_
 
 #include <stddef.h>
 #include "openjpeg.h"
@@ -47,7 +47,7 @@ typedef uint64_t Byte8_t;
  * @param[in] size   Byte length
  * @return           pointer to the fetched data
  */
-Byte_t * fetch_bytes( int fd, OPJ_OFF_T offset, OPJ_SIZE_T size);
+Byte_t * fetch_bytes(int fd, OPJ_OFF_T offset, OPJ_SIZE_T size);
 
 
 /**
@@ -57,7 +57,7 @@ Byte_t * fetch_bytes( int fd, OPJ_OFF_T offset, OPJ_SIZE_T size);
  * @param[in] offset start Byte position
  * @return           fetched codes
  */
-Byte_t fetch_1byte( int fd, OPJ_OFF_T offset);
+Byte_t fetch_1byte(int fd, OPJ_OFF_T offset);
 
 /**
  * fetch a 2-byte big endian Byte codes in file stream
@@ -66,7 +66,7 @@ Byte_t fetch_1byte( int fd, OPJ_OFF_T offset);
  * @param[in] offset start Byte position
  * @return           fetched codes
  */
-Byte2_t fetch_2bytebigendian( int fd, OPJ_OFF_T offset);
+Byte2_t fetch_2bytebigendian(int fd, OPJ_OFF_T offset);
 
 /**
  * fetch a 4-byte big endian Byte codes in file stream
@@ -75,7 +75,7 @@ Byte2_t fetch_2bytebigendian( int fd, OPJ_OFF_T offset);
  * @param[in] offset start Byte position
  * @return           fetched codes
  */
-Byte4_t fetch_4bytebigendian( int fd, OPJ_OFF_T offset);
+Byte4_t fetch_4bytebigendian(int fd, OPJ_OFF_T offset);
 
 /**
  * fetch a 8-byte big endian Byte codes in file stream
@@ -84,7 +84,7 @@ Byte4_t fetch_4bytebigendian( int fd, OPJ_OFF_T offset);
  * @param[in] offset start Byte position
  * @return           fetched codes
  */
-Byte8_t fetch_8bytebigendian( int fd, OPJ_OFF_T offset);
+Byte8_t fetch_8bytebigendian(int fd, OPJ_OFF_T offset);
 
 
 /**
@@ -93,7 +93,7 @@ Byte8_t fetch_8bytebigendian( int fd, OPJ_OFF_T offset);
  * @param[in] buf Byte codes
  * @return        resolved number
  */
-Byte2_t big2( Byte_t *buf);
+Byte2_t big2(Byte_t *buf);
 
 /**
  * convert 4-byte big endian Byte codes to number
@@ -101,7 +101,7 @@ Byte2_t big2( Byte_t *buf);
  * @param[in] buf Byte codes
  * @return        resolved number
  */
-Byte4_t big4( Byte_t *buf);
+Byte4_t big4(Byte_t *buf);
 
 /**
  * convert 8-byte big endian Byte codes to number
@@ -109,15 +109,15 @@ Byte4_t big4( Byte_t *buf);
  * @param[in] buf Byte codes
  * @return        resolved number
  */
-Byte8_t big8( Byte_t *buf);
+Byte8_t big8(Byte_t *buf);
 
 /**
  * modify 4Byte code in a codestream
- *  
+ *
  * @param[in]  code code value
  * @param[out] stream modifying codestream
  */
-void modify_4Bytecode( Byte4_t code, Byte_t *stream);
+void modify_4Bytecode(Byte4_t code, Byte_t *stream);
 
 /**
  * Get file size
@@ -125,6 +125,6 @@ void modify_4Bytecode( Byte4_t code, Byte_t *stream);
  * @param[in] fd file discriptor
  * @return       file size
  */
-OPJ_OFF_T get_filesize( int fd);
+OPJ_OFF_T get_filesize(int fd);
 
-#endif 	    /* !BYTE_MANAGER_H_ */
+#endif      /* !BYTE_MANAGER_H_ */

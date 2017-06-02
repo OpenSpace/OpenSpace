@@ -35,241 +35,260 @@
 
 cachelist_param_t * gene_cachelist(void)
 {
-  cachelist_param_t *cachelist;
-  
-  cachelist = (cachelist_param_t *)malloc( sizeof(cachelist_param_t));
-  
-  cachelist->first = NULL;
-  cachelist->last  = NULL;
+    cachelist_param_t *cachelist;
 
-  return cachelist;
+    cachelist = (cachelist_param_t *)malloc(sizeof(cachelist_param_t));
+
+    cachelist->first = NULL;
+    cachelist->last  = NULL;
+
+    return cachelist;
 }
 
 void delete_cachelist(cachelist_param_t **cachelist)
 {
-  cache_param_t *cachePtr, *cacheNext;
-  
-  cachePtr = (*cachelist)->first;
-  while( cachePtr != NULL){
-    cacheNext=cachePtr->next;
-    delete_cache( &cachePtr);
-    cachePtr=cacheNext;
-  }
-  free( *cachelist);
+    cache_param_t *cachePtr, *cacheNext;
+
+    cachePtr = (*cachelist)->first;
+    while (cachePtr != NULL) {
+        cacheNext = cachePtr->next;
+        delete_cache(&cachePtr);
+        cachePtr = cacheNext;
+    }
+    free(*cachelist);
 }
 
-cache_param_t * gene_cache( const char *targetname, int csn, char *tid, char *cid)
+cache_param_t * gene_cache(const char *targetname, int csn, char *tid,
+                           char *cid)
 {
-  cache_param_t *cache;
-  
-  cache = (cache_param_t *)malloc( sizeof(cache_param_t));
-  cache->filename = strdup( targetname);
-  cache->tid = strdup( tid);
-  cache->csn = csn;
-  cache->cid = (char **)malloc( sizeof(char *));
-  *cache->cid = strdup( cid);
-  cache->numOfcid = 1;
+    cache_param_t *cache;
+
+    cache = (cache_param_t *)malloc(sizeof(cache_param_t));
+    cache->filename = strdup(targetname);
+    cache->tid = strdup(tid);
+    cache->csn = csn;
+    cache->cid = (char **)malloc(sizeof(char *));
+    *cache->cid = strdup(cid);
+    cache->numOfcid = 1;
 #if 1
-  cache->metadatalist = NULL;
+    cache->metadatalist = NULL;
 #else
-  cache->metadatalist = gene_metadatalist();
+    cache->metadatalist = gene_metadatalist();
 #endif
-  cache->ihdrbox = NULL;
-  cache->next = NULL;
+    cache->ihdrbox = NULL;
+    cache->next = NULL;
 
-  return cache;
+    return cache;
 }
 
-void delete_cache( cache_param_t **cache)
+void delete_cache(cache_param_t **cache)
 {
-  int i;
-  
-  free( (*cache)->filename);
-  free( (*cache)->tid);
+    int i;
 
-  delete_metadatalist( &(*cache)->metadatalist);
+    free((*cache)->filename);
+    free((*cache)->tid);
 
-  if((*cache)->ihdrbox)
-    free((*cache)->ihdrbox);
-  for( i=0; i<(*cache)->numOfcid; i++)
-    free( (*cache)->cid[i]);
-  free( (*cache)->cid);
-  free( *cache);
+    delete_metadatalist(&(*cache)->metadatalist);
+
+    if ((*cache)->ihdrbox) {
+        free((*cache)->ihdrbox);
+    }
+    for (i = 0; i < (*cache)->numOfcid; i++) {
+        free((*cache)->cid[i]);
+    }
+    free((*cache)->cid);
+    free(*cache);
 }
 
-void insert_cache_into_list( cache_param_t *cache, cachelist_param_t *cachelist)
+void insert_cache_into_list(cache_param_t *cache, cachelist_param_t *cachelist)
 {
-  if( cachelist->first)
-    cachelist->last->next = cache;
-  else
-    cachelist->first = cache;
-  cachelist->last = cache;
+    if (cachelist->first) {
+        cachelist->last->next = cache;
+    } else {
+        cachelist->first = cache;
+    }
+    cachelist->last = cache;
 }
 
-cache_param_t * search_cache( const char targetname[], cachelist_param_t *cachelist)
+cache_param_t * search_cache(const char targetname[],
+                             cachelist_param_t *cachelist)
 {
-  cache_param_t *foundcache;
+    cache_param_t *foundcache;
 
-  if( !targetname)
-    return NULL;
-
-  foundcache = cachelist->first;
-  
-  while( foundcache != NULL){
-    
-    if( strcmp( targetname, foundcache->filename) == 0)
-      return foundcache;
-      
-    foundcache = foundcache->next;
-  }
-  return NULL;
-}
-
-cache_param_t * search_cacheBycsn( int csn, cachelist_param_t *cachelist)
-{
-  cache_param_t *foundcache;
-
-  foundcache = cachelist->first;
-  
-  while( foundcache != NULL){
-    
-    if(  csn == foundcache->csn)
-      return foundcache;
-    foundcache = foundcache->next;
-  }
-  return NULL;
-}
-
-cache_param_t * search_cacheBycid( const char cid[], cachelist_param_t *cachelist)
-{
-  cache_param_t *foundcache;
-  int i;
-
-  if( !cid)
-    return NULL;
-
-  foundcache = cachelist->first;
-  
-  while( foundcache != NULL){
-    for( i=0; i<foundcache->numOfcid; i++)
-      if( strcmp( cid, foundcache->cid[i]) == 0)
-	return foundcache;
-    foundcache = foundcache->next;
-  }
-  return NULL;
-}
-
-cache_param_t * search_cacheBytid( const char tid[], cachelist_param_t *cachelist)
-{
-  cache_param_t *foundcache;
-
-  if( !tid)
-    return NULL;
-
-  foundcache = cachelist->first;
-  
-  while( foundcache != NULL){
-    if( strcmp( tid, foundcache->tid) == 0)
-      return foundcache;
-    foundcache = foundcache->next;
-  }
-  return NULL;
-}
-
-void add_cachecid( const char *cid, cache_param_t *cache)
-{
-  if( !cid)
-    return;
-  
-  if( (cache->cid = realloc( cache->cid, (OPJ_SIZE_T)(cache->numOfcid+1)*sizeof(char *))) == NULL){
-    fprintf( stderr, "failed to add new cid to cache table in add_cachecid()\n");
-    return;
-  }
-  
-  cache->cid[ cache->numOfcid] = strdup( cid);
-
-  cache->numOfcid ++;
-}
-
-void update_cachetid( const char *tid, cache_param_t *cache)
-{
-  if( !tid)
-    return;
-
-  if( tid[0] != '0' && strcmp( tid, cache->tid) !=0){
-    fprintf( stderr, "tid is updated to %s for %s\n", tid, cache->filename);
-    free( cache->tid);
-    cache->tid = strdup( tid);
-  }
-}
-
-void remove_cidInCache( const char *cid, cache_param_t *cache);
-
-void remove_cachecid( const char *cid, cachelist_param_t *cachelist)
-{
-  cache_param_t *cache;
-
-  cache = search_cacheBycid( cid, cachelist);
-  remove_cidInCache( cid, cache);
-}
-
-void remove_cidInCache( const char *cid, cache_param_t *cache)
-{
-  int idx = -1;
-  char **tmp;
-  int i, j;
-
-  for( i=0; i<cache->numOfcid; i++)
-    if( strcmp( cid, cache->cid[i]) == 0){
-      idx = i;
-      break;
+    if (!targetname) {
+        return NULL;
     }
 
-  if( idx == -1){
-    fprintf( stderr, "cid: %s not found\n", cid);
-    return;   
-  }
-  
-  tmp = cache->cid;
+    foundcache = cachelist->first;
 
-  cache->cid = (char **)malloc( (OPJ_SIZE_T)(cache->numOfcid-1)*sizeof(char *));
-  
-  for( i=0, j=0; i<cache->numOfcid; i++){
-    if( i != idx){
-      cache->cid[j] = strdup( tmp[i]);
-      j++;
+    while (foundcache != NULL) {
+
+        if (strcmp(targetname, foundcache->filename) == 0) {
+            return foundcache;
+        }
+
+        foundcache = foundcache->next;
     }
-    free( tmp[i]);
-  }
-  free( tmp);
-
-  cache->numOfcid --;
+    return NULL;
 }
 
-void print_cache( cache_param_t *cache)
+cache_param_t * search_cacheBycsn(int csn, cachelist_param_t *cachelist)
 {
-  int i;
-  
-  fprintf( stdout,"cache\n");
-  fprintf( stdout,"\t filename: %s\n", cache->filename);
-  fprintf( stdout,"\t tid: %s\n", cache->tid);
-  fprintf( stdout,"\t csn: %d\n", cache->csn);
-  fprintf( stdout,"\t cid:");
+    cache_param_t *foundcache;
 
-  for( i=0; i<cache->numOfcid; i++)
-    fprintf( stdout," %s", cache->cid[i]);
-  fprintf( stdout,"\n");
+    foundcache = cachelist->first;
+
+    while (foundcache != NULL) {
+
+        if (csn == foundcache->csn) {
+            return foundcache;
+        }
+        foundcache = foundcache->next;
+    }
+    return NULL;
 }
 
-void print_allcache( cachelist_param_t *cachelist)
+cache_param_t * search_cacheBycid(const char cid[],
+                                  cachelist_param_t *cachelist)
 {
-  cache_param_t *ptr;
+    cache_param_t *foundcache;
+    int i;
 
-  fprintf( stdout,"cache list\n");
-  
-  ptr = cachelist->first;
-  while( ptr != NULL){
-    print_cache( ptr);
-    ptr=ptr->next;
-  }
+    if (!cid) {
+        return NULL;
+    }
+
+    foundcache = cachelist->first;
+
+    while (foundcache != NULL) {
+        for (i = 0; i < foundcache->numOfcid; i++)
+            if (strcmp(cid, foundcache->cid[i]) == 0) {
+                return foundcache;
+            }
+        foundcache = foundcache->next;
+    }
+    return NULL;
+}
+
+cache_param_t * search_cacheBytid(const char tid[],
+                                  cachelist_param_t *cachelist)
+{
+    cache_param_t *foundcache;
+
+    if (!tid) {
+        return NULL;
+    }
+
+    foundcache = cachelist->first;
+
+    while (foundcache != NULL) {
+        if (strcmp(tid, foundcache->tid) == 0) {
+            return foundcache;
+        }
+        foundcache = foundcache->next;
+    }
+    return NULL;
+}
+
+void add_cachecid(const char *cid, cache_param_t *cache)
+{
+    if (!cid) {
+        return;
+    }
+
+    if ((cache->cid = realloc(cache->cid,
+                              (OPJ_SIZE_T)(cache->numOfcid + 1) * sizeof(char *))) == NULL) {
+        fprintf(stderr, "failed to add new cid to cache table in add_cachecid()\n");
+        return;
+    }
+
+    cache->cid[ cache->numOfcid] = strdup(cid);
+
+    cache->numOfcid ++;
+}
+
+void update_cachetid(const char *tid, cache_param_t *cache)
+{
+    if (!tid) {
+        return;
+    }
+
+    if (tid[0] != '0' && strcmp(tid, cache->tid) != 0) {
+        fprintf(stderr, "tid is updated to %s for %s\n", tid, cache->filename);
+        free(cache->tid);
+        cache->tid = strdup(tid);
+    }
+}
+
+void remove_cidInCache(const char *cid, cache_param_t *cache);
+
+void remove_cachecid(const char *cid, cachelist_param_t *cachelist)
+{
+    cache_param_t *cache;
+
+    cache = search_cacheBycid(cid, cachelist);
+    remove_cidInCache(cid, cache);
+}
+
+void remove_cidInCache(const char *cid, cache_param_t *cache)
+{
+    int idx = -1;
+    char **tmp;
+    int i, j;
+
+    for (i = 0; i < cache->numOfcid; i++)
+        if (strcmp(cid, cache->cid[i]) == 0) {
+            idx = i;
+            break;
+        }
+
+    if (idx == -1) {
+        fprintf(stderr, "cid: %s not found\n", cid);
+        return;
+    }
+
+    tmp = cache->cid;
+
+    cache->cid = (char **)malloc((OPJ_SIZE_T)(cache->numOfcid - 1) * sizeof(
+                                     char *));
+
+    for (i = 0, j = 0; i < cache->numOfcid; i++) {
+        if (i != idx) {
+            cache->cid[j] = strdup(tmp[i]);
+            j++;
+        }
+        free(tmp[i]);
+    }
+    free(tmp);
+
+    cache->numOfcid --;
+}
+
+void print_cache(cache_param_t *cache)
+{
+    int i;
+
+    fprintf(stdout, "cache\n");
+    fprintf(stdout, "\t filename: %s\n", cache->filename);
+    fprintf(stdout, "\t tid: %s\n", cache->tid);
+    fprintf(stdout, "\t csn: %d\n", cache->csn);
+    fprintf(stdout, "\t cid:");
+
+    for (i = 0; i < cache->numOfcid; i++) {
+        fprintf(stdout, " %s", cache->cid[i]);
+    }
+    fprintf(stdout, "\n");
+}
+
+void print_allcache(cachelist_param_t *cachelist)
+{
+    cache_param_t *ptr;
+
+    fprintf(stdout, "cache list\n");
+
+    ptr = cachelist->first;
+    while (ptr != NULL) {
+        print_cache(ptr);
+        ptr = ptr->next;
+    }
 }

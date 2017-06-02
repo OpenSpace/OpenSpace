@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -50,209 +50,209 @@ each other. The functions in TCD.C are used by some function in JP3D.C.
 Tile coder/decoder: segment instance
 */
 typedef struct opj_tcd_seg {
-/** Number of passes in the segment */
-	int numpasses;			
-/** Length of information */
-    int len;					
-/** Data */
-	unsigned char *data;		
-/** Number of passes posible for the segment */
-	int maxpasses;			
-/** Number of passes added to the segment */
-	int numnewpasses;		    
-/** New length after inclusion of segments */
-	int newlen;
+    /** Number of passes in the segment */
+    int numpasses;
+    /** Length of information */
+    int len;
+    /** Data */
+    unsigned char *data;
+    /** Number of passes posible for the segment */
+    int maxpasses;
+    /** Number of passes added to the segment */
+    int numnewpasses;
+    /** New length after inclusion of segments */
+    int newlen;
 } opj_tcd_seg_t;
 
 /**
 Tile coder/decoder: pass instance
 */
 typedef struct opj_tcd_pass {
-/** Rate obtained in the pass*/
-  int rate;					
-/** Distorsion obtained in the pass*/
-  double distortiondec;		
-  int term;
-/** Length of information */
-  int len;					
+    /** Rate obtained in the pass*/
+    int rate;
+    /** Distorsion obtained in the pass*/
+    double distortiondec;
+    int term;
+    /** Length of information */
+    int len;
 } opj_tcd_pass_t;
 
 /**
 Tile coder/decoder: layer instance
 */
 typedef struct opj_tcd_layer {
-/** Number of passes in the layer */
-	int numpasses;			
-/** Length of information */
-  int len;					
-/** Distortion within layer */
-  double disto;				/* add for index (Cfr. Marcela) */
-  unsigned char *data;		/* data */
+    /** Number of passes in the layer */
+    int numpasses;
+    /** Length of information */
+    int len;
+    /** Distortion within layer */
+    double disto;             /* add for index (Cfr. Marcela) */
+    unsigned char *data;      /* data */
 } opj_tcd_layer_t;
 
 /**
 Tile coder/decoder: codeblock instance
 */
 typedef struct opj_tcd_cblk {
-/** Dimension of the code-blocks : left upper corner (x0, y0, z0) */
-  int x0, y0, z0;
-/** Dimension of the code-blocks : right low corner (x1,y1,z1) */
-  int x1, y1, z1;		
-/** Number of bits per simbol in codeblock */
-  int numbps;
-  int numlenbits;
-  int len;						/* length */
-/** Number of pass already done for the code-blocks */
-  int numpasses;				
-/** number of pass added to the code-blocks */
-  int numnewpasses;				
-/** Number of segments */
-  int numsegs;					
-/** Segments informations */
-  opj_tcd_seg_t segs[100];		
-/** Number of passes in the layer */
-  int numpassesinlayers;		
-/** Layer information */
-  opj_tcd_layer_t layers[100];	
-/** Total number of passes */
-  int totalpasses;				
-/** Information about the passes */
-  opj_tcd_pass_t passes[100];	
-/* Data */
-  unsigned char data[524288];		
-  /*unsigned char *data;*/
+    /** Dimension of the code-blocks : left upper corner (x0, y0, z0) */
+    int x0, y0, z0;
+    /** Dimension of the code-blocks : right low corner (x1,y1,z1) */
+    int x1, y1, z1;
+    /** Number of bits per simbol in codeblock */
+    int numbps;
+    int numlenbits;
+    int len;                      /* length */
+    /** Number of pass already done for the code-blocks */
+    int numpasses;
+    /** number of pass added to the code-blocks */
+    int numnewpasses;
+    /** Number of segments */
+    int numsegs;
+    /** Segments informations */
+    opj_tcd_seg_t segs[100];
+    /** Number of passes in the layer */
+    int numpassesinlayers;
+    /** Layer information */
+    opj_tcd_layer_t layers[100];
+    /** Total number of passes */
+    int totalpasses;
+    /** Information about the passes */
+    opj_tcd_pass_t passes[100];
+    /* Data */
+    unsigned char data[524288];
+    /*unsigned char *data;*/
 } opj_tcd_cblk_t;
 
 /**
 Tile coder/decoder: precint instance
 */
 typedef struct opj_tcd_precinct {
-/** Dimension of the precint : left upper corner (x0, y0, z0) */
-  int x0, y0, z0;
-/** Dimension of the precint : right low corner (x1,y1,z1) */
-  int x1, y1, z1;
-/** Number of codeblocks in precinct in width and heigth and length*/
-  int cblkno[3];				
-/** Information about the codeblocks */
-  opj_tcd_cblk_t *cblks;		
-/** Inclusion tree */
-  opj_tgt_tree_t *incltree;		
-/** Missing MSBs tree */
-  opj_tgt_tree_t *imsbtree;		
+    /** Dimension of the precint : left upper corner (x0, y0, z0) */
+    int x0, y0, z0;
+    /** Dimension of the precint : right low corner (x1,y1,z1) */
+    int x1, y1, z1;
+    /** Number of codeblocks in precinct in width and heigth and length*/
+    int cblkno[3];
+    /** Information about the codeblocks */
+    opj_tcd_cblk_t *cblks;
+    /** Inclusion tree */
+    opj_tgt_tree_t *incltree;
+    /** Missing MSBs tree */
+    opj_tgt_tree_t *imsbtree;
 } opj_tcd_precinct_t;
 
 /**
 Tile coder/decoder: subband instance
 */
 typedef struct opj_tcd_band {
-/** Dimension of the subband : left upper corner (x0, y0, z0) */
-  int x0, y0, z0;
-/** Dimension of the subband : right low corner (x1,y1,z1) */
-  int x1, y1, z1;
-/** Information about the precints */
-  opj_tcd_precinct_t *precincts;	/* precinct information */
-/** Number of bits per symbol in band */
-  int numbps;
-/** Quantization stepsize associated */
-  float stepsize;
-/** Band orientation (O->LLL,...,7->HHH) */
-  int bandno;
+    /** Dimension of the subband : left upper corner (x0, y0, z0) */
+    int x0, y0, z0;
+    /** Dimension of the subband : right low corner (x1,y1,z1) */
+    int x1, y1, z1;
+    /** Information about the precints */
+    opj_tcd_precinct_t *precincts;    /* precinct information */
+    /** Number of bits per symbol in band */
+    int numbps;
+    /** Quantization stepsize associated */
+    float stepsize;
+    /** Band orientation (O->LLL,...,7->HHH) */
+    int bandno;
 } opj_tcd_band_t;
 
 /**
 Tile coder/decoder: resolution instance
 */
 typedef struct opj_tcd_resolution {
-/** Dimension of the resolution level : left upper corner (x0, y0, z0) */
-  int x0, y0, z0;
-/** Dimension of the resolution level : right low corner (x1,y1,z1) */
-  int x1, y1, z1;
-/** Number of precints in each dimension for the resolution level */
-  int prctno[3];				
-/** Number of subbands for the resolution level */
-  int numbands;					
-/** Subband information */
-  opj_tcd_band_t *bands;		
+    /** Dimension of the resolution level : left upper corner (x0, y0, z0) */
+    int x0, y0, z0;
+    /** Dimension of the resolution level : right low corner (x1,y1,z1) */
+    int x1, y1, z1;
+    /** Number of precints in each dimension for the resolution level */
+    int prctno[3];
+    /** Number of subbands for the resolution level */
+    int numbands;
+    /** Subband information */
+    opj_tcd_band_t *bands;
 } opj_tcd_resolution_t;
 
 /**
 Tile coder/decoder: component instance
 */
 typedef struct opj_tcd_tilecomp {
-/** Dimension of the component : left upper corner (x0, y0, z0) */
-  int x0, y0, z0;
-/** Dimension of the component : right low corner (x1,y1,z1) */
-  int x1, y1, z1;
-/** Number of resolutions level if DWT transform*/
-  int numresolution[3];					
-/** Resolution information */
-  opj_tcd_resolution_t *resolutions;	
-/** Data of the component */
-  int *data;					
-/** Fixed_quality related */
-  int nbpix;				
-/** Number of bits per voxel in component */
-  int bpp;
+    /** Dimension of the component : left upper corner (x0, y0, z0) */
+    int x0, y0, z0;
+    /** Dimension of the component : right low corner (x1,y1,z1) */
+    int x1, y1, z1;
+    /** Number of resolutions level if DWT transform*/
+    int numresolution[3];
+    /** Resolution information */
+    opj_tcd_resolution_t *resolutions;
+    /** Data of the component */
+    int *data;
+    /** Fixed_quality related */
+    int nbpix;
+    /** Number of bits per voxel in component */
+    int bpp;
 } opj_tcd_tilecomp_t;
 
 /**
 Tile coder/decoder: tile instance
 */
 typedef struct opj_tcd_tile {
-/** Dimension of the tile : left upper corner (x0, y0, z0) */
-  int x0, y0, z0;
-/** Dimension of the tile : right low corner (x1,y1,z1) */
-  int x1, y1, z1;
-/** Number of components in tile */
-  int numcomps;					
-/** Components information */
-  opj_tcd_tilecomp_t *comps;	
-/** Fixed_quality related : no of bytes of data*/
-  int nbpix;					
-/** Fixed_quality related : distortion achieved in tile */
-  double distotile;				
-/** Fixed_quality related : distortion achieved in each layer */
-  double distolayer[100];		
+    /** Dimension of the tile : left upper corner (x0, y0, z0) */
+    int x0, y0, z0;
+    /** Dimension of the tile : right low corner (x1,y1,z1) */
+    int x1, y1, z1;
+    /** Number of components in tile */
+    int numcomps;
+    /** Components information */
+    opj_tcd_tilecomp_t *comps;
+    /** Fixed_quality related : no of bytes of data*/
+    int nbpix;
+    /** Fixed_quality related : distortion achieved in tile */
+    double distotile;
+    /** Fixed_quality related : distortion achieved in each layer */
+    double distolayer[100];
 } opj_tcd_tile_t;
 
 /**
 Tile coder/decoder: volume instance
 */
 typedef struct opj_tcd_volume {
-/** Number of tiles in width and heigth and length */
-	int tw, th, tl;				
-/** Tiles information */
-  opj_tcd_tile_t *tiles;		
+    /** Number of tiles in width and heigth and length */
+    int tw, th, tl;
+    /** Tiles information */
+    opj_tcd_tile_t *tiles;
 } opj_tcd_volume_t;
 
 /**
 Tile coder/decoder
 */
 typedef struct opj_tcd {
-/** Codec context */	
-	opj_common_ptr cinfo;			
-/** Volume information */	
-	opj_volume_t *volume;			
-/** Coding parameters */	
-	opj_cp_t *cp;					
-/** Coding/decoding parameters common to all tiles */	
-	opj_tcp_t *tcp;					
-/** Info on each volume tile */
-	opj_tcd_volume_t *tcd_volume;	
-/** Pointer to the current encoded/decoded tile */
-	opj_tcd_tile_t *tcd_tile;		
-/** Current encoded/decoded tile */
-	int tcd_tileno;					
+    /** Codec context */
+    opj_common_ptr cinfo;
+    /** Volume information */
+    opj_volume_t *volume;
+    /** Coding parameters */
+    opj_cp_t *cp;
+    /** Coding/decoding parameters common to all tiles */
+    opj_tcp_t *tcp;
+    /** Info on each volume tile */
+    opj_tcd_volume_t *tcd_volume;
+    /** Pointer to the current encoded/decoded tile */
+    opj_tcd_tile_t *tcd_tile;
+    /** Current encoded/decoded tile */
+    int tcd_tileno;
 
-	/**@name working variables */
-	/*@{*/
-	opj_tcd_tile_t *tile;
-	opj_tcd_tilecomp_t *tilec;
-	opj_tcd_resolution_t *res;
-	opj_tcd_band_t *band;
-	opj_tcd_precinct_t *prc;
-	opj_tcd_cblk_t *cblk;
-	/*@}*/
+    /**@name working variables */
+    /*@{*/
+    opj_tcd_tile_t *tile;
+    opj_tcd_tilecomp_t *tilec;
+    opj_tcd_resolution_t *res;
+    opj_tcd_band_t *band;
+    opj_tcd_precinct_t *prc;
+    opj_tcd_cblk_t *cblk;
+    /*@}*/
 } opj_tcd_t;
 
 /** @name Funciones generales */
@@ -275,13 +275,14 @@ Destroy a previously created TCD handle
 */
 void tcd_destroy(opj_tcd_t *tcd);
 /**
-Initialize the tile coder (allocate the memory) 
+Initialize the tile coder (allocate the memory)
 @param tcd TCD handle
 @param volume Raw volume
 @param cp Coding parameters
 @param curtileno Number that identifies the tile that will be encoded
 */
-void tcd_malloc_encode(opj_tcd_t *tcd, opj_volume_t * volume, opj_cp_t * cp, int curtileno);
+void tcd_malloc_encode(opj_tcd_t *tcd, opj_volume_t * volume, opj_cp_t * cp,
+                       int curtileno);
 /**
 Initialize the tile coder (reuses the memory allocated by tcd_malloc_encode)(for 3D-DWT)
 @param tcd TCD handle
@@ -289,7 +290,8 @@ Initialize the tile coder (reuses the memory allocated by tcd_malloc_encode)(for
 @param cp Coding parameters
 @param curtileno Number that identifies the tile that will be encoded
 */
-void tcd_init_encode(opj_tcd_t *tcd, opj_volume_t * volume, opj_cp_t * cp, int curtileno);
+void tcd_init_encode(opj_tcd_t *tcd, opj_volume_t * volume, opj_cp_t * cp,
+                     int curtileno);
 /**
 Free the memory allocated for encoding
 @param tcd TCD handle
@@ -306,7 +308,8 @@ void tcd_malloc_decode(opj_tcd_t *tcd, opj_volume_t * volume, opj_cp_t * cp);
 void tcd_makelayer_fixed(opj_tcd_t *tcd, int layno, int final);
 void tcd_rateallocate_fixed(opj_tcd_t *tcd);
 void tcd_makelayer(opj_tcd_t *tcd, int layno, double thresh, int final);
-bool tcd_rateallocate(opj_tcd_t *tcd, unsigned char *dest, int len, opj_volume_info_t * volume_info);
+bool tcd_rateallocate(opj_tcd_t *tcd, unsigned char *dest, int len,
+                      opj_volume_info_t * volume_info);
 /**
 Encode a tile from the raw volume into a buffer
 @param tcd TCD handle
@@ -314,9 +317,10 @@ Encode a tile from the raw volume into a buffer
 @param dest Destination buffer
 @param len Length of destination buffer
 @param volume_info Creation of index file
-@return 
+@return
 */
-int tcd_encode_tile(opj_tcd_t *tcd, int tileno, unsigned char *dest, int len, opj_volume_info_t * volume_info);
+int tcd_encode_tile(opj_tcd_t *tcd, int tileno, unsigned char *dest, int len,
+                    opj_volume_info_t * volume_info);
 /**
 Decode a tile from a buffer into a raw volume
 @param tcd TCD handle

@@ -28,26 +28,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef   	CACHEMODEL_MANAGER_H_
-# define   	CACHEMODEL_MANAGER_H_
+#ifndef     CACHEMODEL_MANAGER_H_
+# define    CACHEMODEL_MANAGER_H_
 
 #include "target_manager.h"
 
 /** Cache model parameters*/
-typedef struct cachemodel_param{
-  target_param_t *target;        /**< reference pointer to the target*/
-  OPJ_BOOL jppstream;                /**< return type, true: JPP-stream, false: JPT-stream*/
-  OPJ_BOOL mhead_model;              /**< main header model, if sent, 1, else 0*/
-  OPJ_BOOL *tp_model;                /**< dynamic array pointer of tile part model, if sent, 1, else 0*/
-  OPJ_BOOL *th_model;                /**< dynamic array pointer of tile header model*/
-  OPJ_BOOL **pp_model;               /**< dynamic array pointer of precint packet model*/
-  struct cachemodel_param *next; /**< pointer to the next cache model*/
+typedef struct cachemodel_param {
+    target_param_t *target;        /**< reference pointer to the target*/
+    OPJ_BOOL jppstream;                /**< return type, true: JPP-stream, false: JPT-stream*/
+    OPJ_BOOL mhead_model;              /**< main header model, if sent, 1, else 0*/
+    OPJ_BOOL *tp_model;                /**< dynamic array pointer of tile part model, if sent, 1, else 0*/
+    OPJ_BOOL *th_model;                /**< dynamic array pointer of tile header model*/
+    OPJ_BOOL **pp_model;               /**< dynamic array pointer of precint packet model*/
+    struct cachemodel_param *next; /**< pointer to the next cache model*/
 } cachemodel_param_t;
 
 /** Cache model list parameters*/
-typedef struct cachemodellist_param{
-  cachemodel_param_t *first; /**< first cache model pointer of the list*/
-  cachemodel_param_t *last;  /**< last  cache model pointer of the list*/
+typedef struct cachemodellist_param {
+    cachemodel_param_t *first; /**< first cache model pointer of the list*/
+    cachemodel_param_t *last;  /**< last  cache model pointer of the list*/
 } cachemodellist_param_t;
 
 
@@ -66,7 +66,8 @@ cachemodellist_param_t * gene_cachemodellist(void);
  * @param[in] reqJPP         if JPP-stream is desired true, JPT-stream false
  * @return                   pointer to the generated cache model
  */
-cachemodel_param_t * gene_cachemodel( cachemodellist_param_t *cachemodellist, target_param_t *target, OPJ_BOOL reqJPP);
+cachemodel_param_t * gene_cachemodel(cachemodellist_param_t *cachemodellist,
+                                     target_param_t *target, OPJ_BOOL reqJPP);
 
 
 /**
@@ -74,7 +75,7 @@ cachemodel_param_t * gene_cachemodel( cachemodellist_param_t *cachemodellist, ta
  *
  * @param[in] cachemodel cache model
  */
-void print_cachemodel( cachemodel_param_t cachemodel);
+void print_cachemodel(cachemodel_param_t cachemodel);
 
 
 /**
@@ -84,7 +85,8 @@ void print_cachemodel( cachemodel_param_t cachemodel);
  * @param[in] cachemodellist cache model list
  * @return                   found cache model pointer
  */
-cachemodel_param_t * search_cachemodel( target_param_t *target, cachemodellist_param_t *cachemodellist);
+cachemodel_param_t * search_cachemodel(target_param_t *target,
+                                       cachemodellist_param_t *cachemodellist);
 
 
 /**
@@ -93,7 +95,7 @@ cachemodel_param_t * search_cachemodel( target_param_t *target, cachemodellist_p
  * @param[in] cachemodel cache model
  * @return               true if sent all, false otherwise
  */
-OPJ_BOOL is_allsent( cachemodel_param_t cachemodel);
+OPJ_BOOL is_allsent(cachemodel_param_t cachemodel);
 
 
 /**
@@ -101,14 +103,14 @@ OPJ_BOOL is_allsent( cachemodel_param_t cachemodel);
  *
  * @param[in] cachemodel     address of the cachemodel pointer
  */
-void delete_cachemodel( cachemodel_param_t **cachemodel);
+void delete_cachemodel(cachemodel_param_t **cachemodel);
 
 /**
  * delete cachemodel list
  *
  * @param[in,out] cachemodellist address of the cachemodel list pointer
  */
-void delete_cachemodellist( cachemodellist_param_t **cachemodellist);
+void delete_cachemodellist(cachemodellist_param_t **cachemodellist);
 
 
-#endif 	    /* !CACHEMODEL_MANAGER_H_ */
+#endif      /* !CACHEMODEL_MANAGER_H_ */

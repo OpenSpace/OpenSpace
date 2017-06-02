@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -8,7 +8,7 @@
  * Copyright (c) 2002-2014, Professor Benoit Macq
  * Copyright (c) 2001-2003, David Janssens
  * Copyright (c) 2002-2003, Yannick Verschueren
- * Copyright (c) 2003-2007, Francois-Olivier Devaux 
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
  * Copyright (c) 2003-2014, Antonin Descampe
  * Copyright (c) 2005, Herve Drolon, FreeImage Team
  * All rights reserved.
@@ -50,14 +50,14 @@ in T1.C are used by some function in TCD.C.
 /* ----------------------------------------------------------------------- */
 #define T1_NMSEDEC_BITS 7
 
-#define T1_SIG_NE 0x0001	/**< Context orientation : North-East direction */
-#define T1_SIG_SE 0x0002	/**< Context orientation : South-East direction */
-#define T1_SIG_SW 0x0004	/**< Context orientation : South-West direction */
-#define T1_SIG_NW 0x0008	/**< Context orientation : North-West direction */
-#define T1_SIG_N 0x0010		/**< Context orientation : North direction */
-#define T1_SIG_E 0x0020		/**< Context orientation : East direction */
-#define T1_SIG_S 0x0040		/**< Context orientation : South direction */
-#define T1_SIG_W 0x0080		/**< Context orientation : West direction */
+#define T1_SIG_NE 0x0001    /**< Context orientation : North-East direction */
+#define T1_SIG_SE 0x0002    /**< Context orientation : South-East direction */
+#define T1_SIG_SW 0x0004    /**< Context orientation : South-West direction */
+#define T1_SIG_NW 0x0008    /**< Context orientation : North-West direction */
+#define T1_SIG_N 0x0010     /**< Context orientation : North direction */
+#define T1_SIG_E 0x0020     /**< Context orientation : East direction */
+#define T1_SIG_S 0x0040     /**< Context orientation : South direction */
+#define T1_SIG_W 0x0080     /**< Context orientation : West direction */
 #define T1_SIG_OTH (T1_SIG_N|T1_SIG_NE|T1_SIG_E|T1_SIG_SE|T1_SIG_S|T1_SIG_SW|T1_SIG_W|T1_SIG_NW)
 #define T1_SIG_PRIM (T1_SIG_N|T1_SIG_E|T1_SIG_S|T1_SIG_W)
 
@@ -86,8 +86,8 @@ in T1.C are used by some function in TCD.C.
 
 #define T1_NMSEDEC_FRACBITS (T1_NMSEDEC_BITS-1)
 
-#define T1_TYPE_MQ 0	/**< Normal coding using entropy coder */
-#define T1_TYPE_RAW 1	/**< No encoding the information is store under raw format in codestream (mode switch RAW)*/
+#define T1_TYPE_MQ 0    /**< Normal coding using entropy coder */
+#define T1_TYPE_RAW 1   /**< No encoding the information is store under raw format in codestream (mode switch RAW)*/
 
 /* ----------------------------------------------------------------------- */
 
@@ -97,21 +97,21 @@ typedef short flag_t;
 Tier-1 coding (coding of code-block coefficients)
 */
 typedef struct opj_t1 {
-	/** codec context */
-	opj_common_ptr cinfo;
+    /** codec context */
+    opj_common_ptr cinfo;
 
-	/** MQC component */
-	opj_mqc_t *mqc;
-	/** RAW component */
-	opj_raw_t *raw;
+    /** MQC component */
+    opj_mqc_t *mqc;
+    /** RAW component */
+    opj_raw_t *raw;
 
-	int *data;
-	flag_t *flags;
-	int w;
-	int h;
-	int datasize;
-	int flagssize;
-	int flags_stride;
+    int *data;
+    flag_t *flags;
+    int w;
+    int h;
+    int datasize;
+    int flagssize;
+    int flags_stride;
 } opj_t1_t;
 
 #define MACRO_t1_flags(x,y) t1->flags[((x)*(t1->flags_stride))+(y)]
@@ -120,7 +120,7 @@ typedef struct opj_t1 {
 /*@{*/
 /* ----------------------------------------------------------------------- */
 /**
-Create a new T1 handle 
+Create a new T1 handle
 and initialize the look-up tables of the Tier-1 coder/decoder
 @return Returns a new T1 handle if successful, returns NULL otherwise
 @see t1_init_luts

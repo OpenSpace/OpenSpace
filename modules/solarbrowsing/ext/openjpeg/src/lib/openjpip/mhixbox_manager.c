@@ -44,98 +44,101 @@
 #endif /*SERVER */
 
 
-mhixbox_param_t * gene_mhixbox( box_param_t *box)
+mhixbox_param_t * gene_mhixbox(box_param_t *box)
 {
-  mhixbox_param_t *mhix;
-  markeridx_param_t  *mkridx, *lastmkidx;
-  OPJ_OFF_T pos = 0;
+    mhixbox_param_t *mhix;
+    markeridx_param_t  *mkridx, *lastmkidx;
+    OPJ_OFF_T pos = 0;
 
-  mhix = ( mhixbox_param_t *)malloc( sizeof( mhixbox_param_t));
-  
-  mhix->tlen = fetch_DBox8bytebigendian( box, (pos+=8)-8);
- 
-  mhix->first = lastmkidx = NULL;
-  while( (OPJ_SIZE_T)pos < get_DBoxlen( box)){
-    
-    mkridx = ( markeridx_param_t *)malloc( sizeof( markeridx_param_t));
-    mkridx->code       = fetch_DBox2bytebigendian( box, (pos+=2)-2);
-    mkridx->num_remain = fetch_DBox2bytebigendian( box, (pos+=2)-2);
-    mkridx->offset     = (OPJ_OFF_T)fetch_DBox8bytebigendian( box, (pos+=8)-8);
-    mkridx->length     = fetch_DBox2bytebigendian( box, (pos+=2)-2);
-    mkridx->next = NULL;
-    
-    if( mhix->first)
-      lastmkidx->next = mkridx;
-    else
-      mhix->first = mkridx;
-    lastmkidx = mkridx;
-  } 
-  return mhix;
+    mhix = (mhixbox_param_t *)malloc(sizeof(mhixbox_param_t));
+
+    mhix->tlen = fetch_DBox8bytebigendian(box, (pos += 8) - 8);
+
+    mhix->first = lastmkidx = NULL;
+    while ((OPJ_SIZE_T)pos < get_DBoxlen(box)) {
+
+        mkridx = (markeridx_param_t *)malloc(sizeof(markeridx_param_t));
+        mkridx->code       = fetch_DBox2bytebigendian(box, (pos += 2) - 2);
+        mkridx->num_remain = fetch_DBox2bytebigendian(box, (pos += 2) - 2);
+        mkridx->offset     = (OPJ_OFF_T)fetch_DBox8bytebigendian(box, (pos += 8) - 8);
+        mkridx->length     = fetch_DBox2bytebigendian(box, (pos += 2) - 2);
+        mkridx->next = NULL;
+
+        if (mhix->first) {
+            lastmkidx->next = mkridx;
+        } else {
+            mhix->first = mkridx;
+        }
+        lastmkidx = mkridx;
+    }
+    return mhix;
 }
 
 
-markeridx_param_t * search_markeridx( Byte2_t code, mhixbox_param_t *mhix)
+markeridx_param_t * search_markeridx(Byte2_t code, mhixbox_param_t *mhix)
 {
-  markeridx_param_t *found;
-  
-  found = mhix->first;
-  
-  while( found != NULL){
-    
-    if( code == found->code)
-      return found;
-    
-    found = found->next;
-  }
-  fprintf( FCGI_stderr, "Error: Marker index %#x not found\n", code);
+    markeridx_param_t *found;
 
-  return NULL;
+    found = mhix->first;
+
+    while (found != NULL) {
+
+        if (code == found->code) {
+            return found;
+        }
+
+        found = found->next;
+    }
+    fprintf(FCGI_stderr, "Error: Marker index %#x not found\n", code);
+
+    return NULL;
 }
 
 
-void print_mhixbox( mhixbox_param_t *mhix)
+void print_mhixbox(mhixbox_param_t *mhix)
 {
-  markeridx_param_t *ptr;
+    markeridx_param_t *ptr;
 
-  fprintf( logstream, "mhix box info:\n");
-  fprintf( logstream, "\t tlen: %#" PRIx64 "\n", mhix->tlen);
+    fprintf(logstream, "mhix box info:\n");
+    fprintf(logstream, "\t tlen: %#" PRIx64 "\n", mhix->tlen);
 
-  ptr = mhix->first;
-  while( ptr != NULL){
-    fprintf( logstream, "marker index info:\n"
-	     "\t code: %#x\n"
-	     "\t num_remain: %#x\n"
-	     "\t offset: %#" PRIx64 "\n"
-	     "\t length: %#x\n", ptr->code, ptr->num_remain, ptr->offset, ptr->length);
-    ptr=ptr->next;
-  }
+    ptr = mhix->first;
+    while (ptr != NULL) {
+        fprintf(logstream, "marker index info:\n"
+                "\t code: %#x\n"
+                "\t num_remain: %#x\n"
+                "\t offset: %#" PRIx64 "\n"
+                "\t length: %#x\n", ptr->code, ptr->num_remain, ptr->offset, ptr->length);
+        ptr = ptr->next;
+    }
 }
 
 
-void print_markeridx( markeridx_param_t *markeridx)
+void print_markeridx(markeridx_param_t *markeridx)
 {
-  fprintf( logstream, "marker index info:\n"
-	   "\t code: %#x\n"
-	   "\t num_remain: %#x\n"
-	   "\t offset: %#" PRIx64 "\n"
-	   "\t length: %#x\n", markeridx->code, markeridx->num_remain, markeridx->offset, markeridx->length);
+    fprintf(logstream, "marker index info:\n"
+            "\t code: %#x\n"
+            "\t num_remain: %#x\n"
+            "\t offset: %#" PRIx64 "\n"
+            "\t length: %#x\n", markeridx->code, markeridx->num_remain, markeridx->offset,
+            markeridx->length);
 }
 
 
-void delete_mhixbox( mhixbox_param_t **mhix)
+void delete_mhixbox(mhixbox_param_t **mhix)
 {
-  markeridx_param_t *mkPtr, *mkNext;
-  
-  mkPtr = (*mhix)->first;
-  while( mkPtr != NULL){
-    mkNext=mkPtr->next;
+    markeridx_param_t *mkPtr, *mkNext;
+
+    mkPtr = (*mhix)->first;
+    while (mkPtr != NULL) {
+        mkNext = mkPtr->next;
 #ifndef SERVER
-    /*      fprintf( logstream, "local log: marker index %#x deleted!\n", mkPtr->code); */
+        /*      fprintf( logstream, "local log: marker index %#x deleted!\n", mkPtr->code); */
 #endif
-      free(mkPtr);
-      mkPtr=mkNext;
-  }
-  free(*mhix);
+        free(mkPtr);
+        mkPtr = mkNext;
+    }
+    free(*mhix);
 }
 
 

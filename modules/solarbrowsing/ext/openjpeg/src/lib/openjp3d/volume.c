@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -33,64 +33,69 @@
 #include "volume.h"
 #include "openjp3d.h"
 
-opj_volume_t* OPJ_CALLCONV opj_volume_create(int numcmpts, opj_volume_cmptparm_t *cmptparms, OPJ_COLOR_SPACE clrspc) {
-	int compno;
-	opj_volume_t *volume = NULL;
+opj_volume_t* OPJ_CALLCONV opj_volume_create(int numcmpts,
+        opj_volume_cmptparm_t *cmptparms, OPJ_COLOR_SPACE clrspc)
+{
+    int compno;
+    opj_volume_t *volume = NULL;
 
-	volume = (opj_volume_t*)opj_malloc(sizeof(opj_volume_t));
-	if(volume) {
-		volume->color_space = clrspc;
-		volume->numcomps = numcmpts;
-		/* allocate memory for the per-component information */
-		volume->comps = (opj_volume_comp_t*)opj_malloc(volume->numcomps * sizeof(opj_volume_comp_t));
-		if(!volume->comps) {
-			opj_volume_destroy(volume);
-			return NULL;
-		}
-		/* create the individual volume components */
-		for(compno = 0; compno < numcmpts; compno++) {
-			opj_volume_comp_t *comp = &volume->comps[compno];
-			comp->dx = cmptparms[compno].dx;
-			comp->dy = cmptparms[compno].dy;
-			comp->dz = cmptparms[compno].dz;
-			comp->w = cmptparms[compno].w;
-			comp->h = cmptparms[compno].h;
-			comp->l = cmptparms[compno].l;
-			comp->x0 = cmptparms[compno].x0;
-			comp->y0 = cmptparms[compno].y0;
-			comp->z0 = cmptparms[compno].z0;
-			comp->prec = cmptparms[compno].prec;
-			comp->bpp = cmptparms[compno].bpp;
-			comp->sgnd = cmptparms[compno].sgnd;
-			comp->bigendian = cmptparms[compno].bigendian;
-			comp->dcoffset = cmptparms[compno].dcoffset;
-			comp->data = (int*)opj_malloc(comp->w * comp->h * comp->l * sizeof(int));
-			if(!comp->data) {
-				fprintf(stdout,"Unable to malloc comp->data (%d x %d x %d x bytes)",comp->w,comp->h,comp->l);
-				opj_volume_destroy(volume);
-				return NULL;
-			}
-			/*fprintf(stdout,"%d %d %d %d %d %d %d %d %d", comp->w,comp->h, comp->l, comp->dx, comp->dy, comp->dz, comp->prec, comp->bpp, comp->sgnd);*/
-		}
-	}
+    volume = (opj_volume_t*)opj_malloc(sizeof(opj_volume_t));
+    if (volume) {
+        volume->color_space = clrspc;
+        volume->numcomps = numcmpts;
+        /* allocate memory for the per-component information */
+        volume->comps = (opj_volume_comp_t*)opj_malloc(volume->numcomps * sizeof(
+                            opj_volume_comp_t));
+        if (!volume->comps) {
+            opj_volume_destroy(volume);
+            return NULL;
+        }
+        /* create the individual volume components */
+        for (compno = 0; compno < numcmpts; compno++) {
+            opj_volume_comp_t *comp = &volume->comps[compno];
+            comp->dx = cmptparms[compno].dx;
+            comp->dy = cmptparms[compno].dy;
+            comp->dz = cmptparms[compno].dz;
+            comp->w = cmptparms[compno].w;
+            comp->h = cmptparms[compno].h;
+            comp->l = cmptparms[compno].l;
+            comp->x0 = cmptparms[compno].x0;
+            comp->y0 = cmptparms[compno].y0;
+            comp->z0 = cmptparms[compno].z0;
+            comp->prec = cmptparms[compno].prec;
+            comp->bpp = cmptparms[compno].bpp;
+            comp->sgnd = cmptparms[compno].sgnd;
+            comp->bigendian = cmptparms[compno].bigendian;
+            comp->dcoffset = cmptparms[compno].dcoffset;
+            comp->data = (int*)opj_malloc(comp->w * comp->h * comp->l * sizeof(int));
+            if (!comp->data) {
+                fprintf(stdout, "Unable to malloc comp->data (%d x %d x %d x bytes)", comp->w,
+                        comp->h, comp->l);
+                opj_volume_destroy(volume);
+                return NULL;
+            }
+            /*fprintf(stdout,"%d %d %d %d %d %d %d %d %d", comp->w,comp->h, comp->l, comp->dx, comp->dy, comp->dz, comp->prec, comp->bpp, comp->sgnd);*/
+        }
+    }
 
-	return volume;
+    return volume;
 }
 
-void OPJ_CALLCONV opj_volume_destroy(opj_volume_t *volume) {
-	int i;
-	if(volume) {
-		if(volume->comps) {
-			/* volume components */
-			for(i = 0; i < volume->numcomps; i++) {
-				opj_volume_comp_t *volume_comp = &volume->comps[i];
-				if(volume_comp->data) {
-					opj_free(volume_comp->data);
-				}
-			}
-			opj_free(volume->comps);
-		}
-		opj_free(volume);
-	}
+void OPJ_CALLCONV opj_volume_destroy(opj_volume_t *volume)
+{
+    int i;
+    if (volume) {
+        if (volume->comps) {
+            /* volume components */
+            for (i = 0; i < volume->numcomps; i++) {
+                opj_volume_comp_t *volume_comp = &volume->comps[i];
+                if (volume_comp->data) {
+                    opj_free(volume_comp->data);
+                }
+            }
+            opj_free(volume->comps);
+        }
+        opj_free(volume);
+    }
 }
 

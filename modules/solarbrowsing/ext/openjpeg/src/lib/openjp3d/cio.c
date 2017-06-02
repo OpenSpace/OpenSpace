@@ -1,6 +1,6 @@
 /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -37,59 +37,63 @@
 
 /* ----------------------------------------------------------------------- */
 
-opj_cio_t* OPJ_CALLCONV opj_cio_open(opj_common_ptr cinfo, unsigned char *buffer, int length) {
-	opj_cp_t *cp = NULL;
-	opj_cio_t *cio = (opj_cio_t*)opj_malloc(sizeof(opj_cio_t));
-	if(!cio) return NULL;
-	cio->cinfo = cinfo;
-	if(buffer && length) {
-		/* wrap a user buffer containing the encoded image */
-		cio->openmode = OPJ_STREAM_READ;
-		cio->buffer = buffer;
-		cio->length = length;
-	}
-	else if(!buffer && !length && cinfo) {
-		/* allocate a buffer for the encoded image */
-		cio->openmode = OPJ_STREAM_WRITE;
-		switch(cinfo->codec_format) {
-			case CODEC_J3D:
-			case CODEC_J2K:
-				cp = ((opj_j3d_t*)cinfo->j3d_handle)->cp;
-				break;
-			default:
-				opj_free(cio);
-				return NULL;
-		}
-		cio->length = cp->tdx * cp->tdy * cp->tdz * cp->tw * cp->th * cp->tl * 4;
-		cio->buffer = (unsigned char *)opj_malloc(cio->length);
-		if(!cio->buffer) {
-			opj_event_msg(cio->cinfo, EVT_ERROR, "Error allocating memory for compressed bitstream\n");
-			opj_free(cio);
-			return NULL;
-		}
-	}
-	else {
-		opj_free(cio);
-		return NULL;
-	}
+opj_cio_t* OPJ_CALLCONV opj_cio_open(opj_common_ptr cinfo,
+                                     unsigned char *buffer, int length)
+{
+    opj_cp_t *cp = NULL;
+    opj_cio_t *cio = (opj_cio_t*)opj_malloc(sizeof(opj_cio_t));
+    if (!cio) {
+        return NULL;
+    }
+    cio->cinfo = cinfo;
+    if (buffer && length) {
+        /* wrap a user buffer containing the encoded image */
+        cio->openmode = OPJ_STREAM_READ;
+        cio->buffer = buffer;
+        cio->length = length;
+    } else if (!buffer && !length && cinfo) {
+        /* allocate a buffer for the encoded image */
+        cio->openmode = OPJ_STREAM_WRITE;
+        switch (cinfo->codec_format) {
+        case CODEC_J3D:
+        case CODEC_J2K:
+            cp = ((opj_j3d_t*)cinfo->j3d_handle)->cp;
+            break;
+        default:
+            opj_free(cio);
+            return NULL;
+        }
+        cio->length = cp->tdx * cp->tdy * cp->tdz * cp->tw * cp->th * cp->tl * 4;
+        cio->buffer = (unsigned char *)opj_malloc(cio->length);
+        if (!cio->buffer) {
+            opj_event_msg(cio->cinfo, EVT_ERROR,
+                          "Error allocating memory for compressed bitstream\n");
+            opj_free(cio);
+            return NULL;
+        }
+    } else {
+        opj_free(cio);
+        return NULL;
+    }
 
-	/* Initialize byte IO */
-	cio->start = cio->buffer;
-	cio->end = cio->buffer + cio->length;
-	cio->bp = cio->buffer;
+    /* Initialize byte IO */
+    cio->start = cio->buffer;
+    cio->end = cio->buffer + cio->length;
+    cio->bp = cio->buffer;
 
-	return cio;
+    return cio;
 }
 
-void OPJ_CALLCONV opj_cio_close(opj_cio_t *cio) {
-	if(cio) {
-		if(cio->openmode == OPJ_STREAM_WRITE) {
-			/* destroy the allocated buffer */
-			opj_free(cio->buffer);
-		}
-		/* destroy the cio */
-		opj_free(cio);
-	}
+void OPJ_CALLCONV opj_cio_close(opj_cio_t *cio)
+{
+    if (cio) {
+        if (cio->openmode == OPJ_STREAM_WRITE) {
+            /* destroy the allocated buffer */
+            opj_free(cio->buffer);
+        }
+        /* destroy the cio */
+        opj_free(cio);
+    }
 }
 
 
@@ -98,8 +102,9 @@ void OPJ_CALLCONV opj_cio_close(opj_cio_t *cio) {
 /*
  * Get position in byte stream.
  */
-int OPJ_CALLCONV cio_tell(opj_cio_t *cio) {
-	return cio->bp - cio->start;
+int OPJ_CALLCONV cio_tell(opj_cio_t *cio)
+{
+    return cio->bp - cio->start;
 }
 
 /*
@@ -107,45 +112,50 @@ int OPJ_CALLCONV cio_tell(opj_cio_t *cio) {
  *
  * pos : position, in number of bytes, from the beginning of the stream
  */
-void OPJ_CALLCONV cio_seek(opj_cio_t *cio, int pos) {
-	cio->bp = cio->start + pos;
+void OPJ_CALLCONV cio_seek(opj_cio_t *cio, int pos)
+{
+    cio->bp = cio->start + pos;
 }
 
 /*
  * Number of bytes left before the end of the stream.
  */
-int cio_numbytesleft(opj_cio_t *cio) {
-	return cio->end - cio->bp;
+int cio_numbytesleft(opj_cio_t *cio)
+{
+    return cio->end - cio->bp;
 }
 
 /*
  * Get pointer to the current position in the stream.
  */
-unsigned char *cio_getbp(opj_cio_t *cio) {
-	return cio->bp;
+unsigned char *cio_getbp(opj_cio_t *cio)
+{
+    return cio->bp;
 }
 
 /*
  * Write a byte.
  */
-static bool cio_byteout(opj_cio_t *cio, unsigned char v) {
-	if (cio->bp >= cio->end) {
-		opj_event_msg(cio->cinfo, EVT_ERROR, "write error\n");
-		return false;
-	}
-	*cio->bp++ = v;
-	return true;
+static bool cio_byteout(opj_cio_t *cio, unsigned char v)
+{
+    if (cio->bp >= cio->end) {
+        opj_event_msg(cio->cinfo, EVT_ERROR, "write error\n");
+        return false;
+    }
+    *cio->bp++ = v;
+    return true;
 }
 
 /*
  * Read a byte.
  */
-static unsigned char cio_bytein(opj_cio_t *cio) {
-	if (cio->bp >= cio->end) {
-		opj_event_msg(cio->cinfo, EVT_ERROR, "read error\n");
-		return 0;
-	}
-	return *cio->bp++;
+static unsigned char cio_bytein(opj_cio_t *cio)
+{
+    if (cio->bp >= cio->end) {
+        opj_event_msg(cio->cinfo, EVT_ERROR, "read error\n");
+        return 0;
+    }
+    return *cio->bp++;
 }
 
 /*
@@ -154,13 +164,15 @@ static unsigned char cio_bytein(opj_cio_t *cio) {
  * v : value to write
  * n : number of bytes to write
  */
-unsigned int cio_write(opj_cio_t *cio, unsigned int v, int n) {
-	int i;
-	for (i = n - 1; i >= 0; i--) {
-		if( !cio_byteout(cio, (unsigned char) ((v >> (i << 3)) & 0xff)) )
-			return 0;
-	}
-	return n;
+unsigned int cio_write(opj_cio_t *cio, unsigned int v, int n)
+{
+    int i;
+    for (i = n - 1; i >= 0; i--) {
+        if (!cio_byteout(cio, (unsigned char)((v >> (i << 3)) & 0xff))) {
+            return 0;
+        }
+    }
+    return n;
 }
 
 /*
@@ -170,23 +182,25 @@ unsigned int cio_write(opj_cio_t *cio, unsigned int v, int n) {
  *
  * return : value of the n bytes read
  */
-unsigned int cio_read(opj_cio_t *cio, int n) {
-	int i;
-	unsigned int v;
-	v = 0;
-	for (i = n - 1; i >= 0; i--) {
-		v += cio_bytein(cio) << (i << 3);
-	}
-	return v;
+unsigned int cio_read(opj_cio_t *cio, int n)
+{
+    int i;
+    unsigned int v;
+    v = 0;
+    for (i = n - 1; i >= 0; i--) {
+        v += cio_bytein(cio) << (i << 3);
+    }
+    return v;
 }
 
-/* 
+/*
  * Skip some bytes.
  *
  * n : number of bytes to skip
  */
-void cio_skip(opj_cio_t *cio, int n) {
-	cio->bp += n;
+void cio_skip(opj_cio_t *cio, int n)
+{
+    cio->bp += n;
 }
 
 /*
@@ -195,13 +209,15 @@ void cio_skip(opj_cio_t *cio, int n) {
  * v : value to write
  * n : number of bytes to write
  */
-int cio_write_int(opj_cio_t *cio, int v, int n) {
-	int i;
-	for (i = n - 1; i >= 0; i--) {
-		if( !cio_byteout(cio, (char) ((v >> (i << 3)) & 0xff)) )
-			return 0;
-	}
-	return n;
+int cio_write_int(opj_cio_t *cio, int v, int n)
+{
+    int i;
+    for (i = n - 1; i >= 0; i--) {
+        if (!cio_byteout(cio, (char)((v >> (i << 3)) & 0xff))) {
+            return 0;
+        }
+    }
+    return n;
 }
 
 /*
@@ -211,13 +227,14 @@ int cio_write_int(opj_cio_t *cio, int v, int n) {
  *
  * return : value of the n bytes read
  */
-int cio_read_int(opj_cio_t *cio, int n) {
-	int i;
-	int v;
-	v = 0;
-	for (i = n - 1; i >= 0; i--) {
-		v += cio_bytein(cio) << (i << 3);
-	}
-	return v;
+int cio_read_int(opj_cio_t *cio, int n)
+{
+    int i;
+    int v;
+    v = 0;
+    for (i = n - 1; i >= 0; i--) {
+        v += cio_bytein(cio) << (i << 3);
+    }
+    return v;
 }
 

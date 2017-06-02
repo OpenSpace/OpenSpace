@@ -43,115 +43,119 @@
 #define logstream stderr
 #endif /*SERVER*/
 
-imgreg_param_t map_viewin2imgreg( const int fx,    const int fy, 
-				  const int rx,    const int ry,
-				  const int rw,    const int rh,
-				  const int XOsiz, const int YOsiz,
-				  const int Xsiz,  const int Ysiz,
-				  const int numOfreslev)
+imgreg_param_t map_viewin2imgreg(const int fx,    const int fy,
+                                 const int rx,    const int ry,
+                                 const int rw,    const int rh,
+                                 const int XOsiz, const int YOsiz,
+                                 const int Xsiz,  const int Ysiz,
+                                 const int numOfreslev)
 {
-  imgreg_param_t imgreg;
-  int px,py;
-  int xmax, ymax;
+    imgreg_param_t imgreg;
+    int px, py;
+    int xmax, ymax;
 
-  imgreg.xosiz = XOsiz;
-  imgreg.yosiz = YOsiz;
-  imgreg.fx = fx;
-  imgreg.fy = fy;
-  imgreg.level = 0;
-  xmax = Xsiz;
-  ymax = Ysiz;
-  
-  find_level( numOfreslev, &imgreg.level, &imgreg.fx, &imgreg.fy, &imgreg.xosiz, &imgreg.yosiz, &xmax, &ymax);
+    imgreg.xosiz = XOsiz;
+    imgreg.yosiz = YOsiz;
+    imgreg.fx = fx;
+    imgreg.fy = fy;
+    imgreg.level = 0;
+    xmax = Xsiz;
+    ymax = Ysiz;
 
-  if( rx == -1 ||  ry == -1){
-    imgreg.ox = 0;
-    imgreg.oy = 0;
-  }
-  else{
-    imgreg.ox = rx*imgreg.fx/fx;
-    imgreg.oy = ry*imgreg.fy/fy;
-  }
+    find_level(numOfreslev, &imgreg.level, &imgreg.fx, &imgreg.fy, &imgreg.xosiz,
+               &imgreg.yosiz, &xmax, &ymax);
 
-  if( rw == -1 || rh == -1){
-    imgreg.sx = imgreg.fx;
-    imgreg.sy = imgreg.fy;
-  }
-  else{
-    px = (int)ceil((double)((rx+rw)*imgreg.fx)/(double)fx);
-    py = (int)ceil((double)((ry+rh)*imgreg.fy)/(double)fy);
-    
-    if( imgreg.fx < px)
-      px = imgreg.fx;
-    if( imgreg.fy < py)
-      py = imgreg.fy;
-    
-    imgreg.sx = px - imgreg.ox;
-    imgreg.sy = py - imgreg.oy;
-  }
+    if (rx == -1 ||  ry == -1) {
+        imgreg.ox = 0;
+        imgreg.oy = 0;
+    } else {
+        imgreg.ox = rx * imgreg.fx / fx;
+        imgreg.oy = ry * imgreg.fy / fy;
+    }
 
-  if( fx != imgreg.fx || fy != imgreg.fy)
-    fprintf( FCGI_stdout, "JPIP-fsiz: %d,%d\r\n", imgreg.fx, imgreg.fy);
-  
-  if( rw != imgreg.sx || rh != imgreg.sy)
-    fprintf( FCGI_stdout, "JPIP-rsiz: %d,%d\r\n", imgreg.sx, imgreg.sy);
-  
-  if( rx != imgreg.ox || ry != imgreg.oy)
-    fprintf( FCGI_stdout, "JPIP-roff: %d,%d\r\n", imgreg.ox, imgreg.oy);
- 
-  return imgreg;
+    if (rw == -1 || rh == -1) {
+        imgreg.sx = imgreg.fx;
+        imgreg.sy = imgreg.fy;
+    } else {
+        px = (int)ceil((double)((rx + rw) * imgreg.fx) / (double)fx);
+        py = (int)ceil((double)((ry + rh) * imgreg.fy) / (double)fy);
+
+        if (imgreg.fx < px) {
+            px = imgreg.fx;
+        }
+        if (imgreg.fy < py) {
+            py = imgreg.fy;
+        }
+
+        imgreg.sx = px - imgreg.ox;
+        imgreg.sy = py - imgreg.oy;
+    }
+
+    if (fx != imgreg.fx || fy != imgreg.fy) {
+        fprintf(FCGI_stdout, "JPIP-fsiz: %d,%d\r\n", imgreg.fx, imgreg.fy);
+    }
+
+    if (rw != imgreg.sx || rh != imgreg.sy) {
+        fprintf(FCGI_stdout, "JPIP-rsiz: %d,%d\r\n", imgreg.sx, imgreg.sy);
+    }
+
+    if (rx != imgreg.ox || ry != imgreg.oy) {
+        fprintf(FCGI_stdout, "JPIP-roff: %d,%d\r\n", imgreg.ox, imgreg.oy);
+    }
+
+    return imgreg;
 }
 
-void find_level( int maxlev, int *lev, int *fx, int *fy, int *xmin, int *ymin, int *xmax, int *ymax)
+void find_level(int maxlev, int *lev, int *fx, int *fy, int *xmin, int *ymin,
+                int *xmax, int *ymax)
 {
-  int xwidth = *xmax - *xmin;
-  int ywidth = *ymax - *ymin;
+    int xwidth = *xmax - *xmin;
+    int ywidth = *ymax - *ymin;
 
-  /* Find smaller frame size for now (i.e. assume "round-down"). */
-  if ((*fx < 1 && xwidth != 0) || (*fy < 1 && ywidth != 0)){
-    fprintf( FCGI_stderr, "Frame size must be strictly positive");
-    exit(-1);
-  }
-  else if( *lev < maxlev-1 && ( *fx < xwidth || *fy < ywidth)) {
-    /* Simulate the ceil function. */
-    *xmin = (int)ceil((double)*xmin/(double)2.0);
-    *ymin = (int)ceil((double)*ymin/(double)2.0);
-    *xmax = (int)ceil((double)*xmax/(double)2.0);
-    *ymax = (int)ceil((double)*ymax/(double)2.0);
-    
-    (*lev) ++;
-    find_level ( maxlev, lev, fx, fy, xmin, ymin, xmax, ymax);
-  } else {
-    *fx = xwidth;
-    *fy = ywidth;
-  }
+    /* Find smaller frame size for now (i.e. assume "round-down"). */
+    if ((*fx < 1 && xwidth != 0) || (*fy < 1 && ywidth != 0)) {
+        fprintf(FCGI_stderr, "Frame size must be strictly positive");
+        exit(-1);
+    } else if (*lev < maxlev - 1 && (*fx < xwidth || *fy < ywidth)) {
+        /* Simulate the ceil function. */
+        *xmin = (int)ceil((double) * xmin / (double)2.0);
+        *ymin = (int)ceil((double) * ymin / (double)2.0);
+        *xmax = (int)ceil((double) * xmax / (double)2.0);
+        *ymax = (int)ceil((double) * ymax / (double)2.0);
+
+        (*lev) ++;
+        find_level(maxlev, lev, fx, fy, xmin, ymin, xmax, ymax);
+    } else {
+        *fx = xwidth;
+        *fy = ywidth;
+    }
 }
 
-int comp_decomplev( int fw, int fh, int Xsiz, int Ysiz)
+int comp_decomplev(int fw, int fh, int Xsiz, int Ysiz)
 {
-  int level;
-  int xmin, xmax, ymin, ymax;
+    int level;
+    int xmin, xmax, ymin, ymax;
 
-  level = 0;
-  xmin = ymin = 0;
-  xmax = Xsiz;
-  ymax = Ysiz;
-  
-  find_level( 1000, &level, &fw, &fh, &xmin, &ymin, &xmax, &ymax);
+    level = 0;
+    xmin = ymin = 0;
+    xmax = Xsiz;
+    ymax = Ysiz;
 
-  assert( level >= 0 );
-  return level;
+    find_level(1000, &level, &fw, &fh, &xmin, &ymin, &xmax, &ymax);
+
+    assert(level >= 0);
+    return level;
 }
 
-void print_imgreg( imgreg_param_t imgreg)
+void print_imgreg(imgreg_param_t imgreg)
 {
 #ifndef SERVER
-  fprintf( logstream, "codestream image region:\n");
-  fprintf( logstream, "\t fsiz: %d, %d\n", imgreg.fx, imgreg.fy);
-  fprintf( logstream, "\t roff: %d, %d\n", imgreg.ox, imgreg.oy);
-  fprintf( logstream, "\t rsiz: %d, %d\n", imgreg.sx, imgreg.sy);
-  fprintf( logstream, "\t level: %d\n", imgreg.level);
+    fprintf(logstream, "codestream image region:\n");
+    fprintf(logstream, "\t fsiz: %d, %d\n", imgreg.fx, imgreg.fy);
+    fprintf(logstream, "\t roff: %d, %d\n", imgreg.ox, imgreg.oy);
+    fprintf(logstream, "\t rsiz: %d, %d\n", imgreg.sx, imgreg.sy);
+    fprintf(logstream, "\t level: %d\n", imgreg.level);
 #else
-  (void)imgreg;
+    (void)imgreg;
 #endif
 }
