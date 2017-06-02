@@ -260,7 +260,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
         Quad q = (Quad)i;
         Geodetic2 corner = chunk.surfacePatch().getCorner(q);
         glm::dvec3 cornerModelSpace = ellipsoid.cartesianSurfacePosition(corner);
-        cornersModelSpace.push_back(cornerModelSpace);
+        cornersModelSpace[i] = cornerModelSpace;
         glm::dvec3 cornerCameraSpace =
             glm::dvec3(dmat4(modelViewTransform) * glm::dvec4(cornerModelSpace, 1));
         cornersCameraSpace[i] = cornerCameraSpace;
@@ -287,7 +287,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
 
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
     // TODO (JCC): Enable the right normal for displaced points in the patch
-    //programObject->setUniform("patchNormalModelSpace", patchNormalModelSpace);
+    programObject->setUniform("patchNormalModelSpace", glm::normalize(patchNormalModelSpace));
     programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 
     if (_layerManager->layerGroup(

@@ -34,13 +34,13 @@ return {
             Radii = marsEllipsoid,
             CameraMinHeight = 10,
             SegmentsPerPatch = 90,
-            -- Allows camera to go down 10000 meters below the reference ellipsoid
-            InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
+            -- Allows camera to go down 10000 meters below the reference ellipsoid InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
+           
             Atmosphere = {
                 -- Atmosphere radius in Km
                 AtmoshereRadius = 3476.0,
                 --PlanetRadius    = 3396.19,
-                PlanetRadius = 3394.0,
+                PlanetRadius = 3393.0,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
                     Coefficients = {
@@ -71,7 +71,8 @@ return {
                     PreCalculatedTextureScale = 1.0,
                     SaveCalculatedTextures = false, 
                 },   
-            },                                              
+            },
+           
             Layers = {
                 ColorLayers = {
                     {
