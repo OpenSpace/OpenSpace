@@ -59,7 +59,11 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 				vectorOfSubsiteModels.push_back(_modelCache->get(key));
 			}
 			else {
-				_asyncSurfaceModelProvider->enqueueModelIO(subsite, level);
+				for(const int& tempLevel : subsite->availableLevels){
+					// Only enqueue the model if the LOD exists
+					if(tempLevel == level)
+						_asyncSurfaceModelProvider->enqueueModelIO(subsite, level);
+				}
 			
 				// Check for available LODs above the requested.
 				std::vector<int> levelsAbove = getLevelsAbove(subsite->availableLevels, level);
@@ -112,6 +116,9 @@ void CachingSurfaceModelProvider::clearQueuesAndJobs() {
 std::vector<int> CachingSurfaceModelProvider::getLevelsAbove(const std::vector<int> availableLevels, const int requestedLevel) {
 	std::vector<int> levelsAbove;
 	for (int i = 0; i < requestedLevel - 1; i++) {
+		if (i >= availableLevels.size()){
+			return levelsAbove;
+		}
 		levelsAbove.push_back(availableLevels.at(i));
 	}
 	return levelsAbove;

@@ -43,7 +43,7 @@ public:
 	RenderableExplorationPath();
 	~RenderableExplorationPath();
 	
-	bool initialize(RenderableGlobe* globe, const std::vector<Geodetic2> coordinates);
+	bool initialize(RenderableGlobe* globe, const std::vector<Geodetic2> allCoordinates, const std::vector<Geodetic2> coordinatesWithModels);
 	bool deinitialize();
 	bool isReady() const;
 
@@ -63,14 +63,21 @@ private:
 	int _currentLevel = 0;
 
 	std::vector<glm::vec4> _stationPointsModelCoordinates;
+	std::vector<glm::vec4> _stationPointsModelCoordinatesWithModel;
 
 	globebrowsing::RenderableGlobe* _globe;
 
-	std::vector<Geodetic2> _geodetics;
+	std::vector<Geodetic2> _allGeodetics;
+	std::vector<Geodetic2> _geodeticsWithModel;
 
 	float _fading;
+	float _fading2;
+
 	GLuint _vaioID;
 	GLuint _vertexBufferID;
+
+	GLuint _vaioID2;
+	GLuint _vertexBufferID2;
 };
 
 } // namespace globebrowsing

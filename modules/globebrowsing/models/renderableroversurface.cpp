@@ -103,17 +103,23 @@ namespace globebrowsing {
 }
 
 bool RenderableRoverSurface::initialize() {
-	std::vector<Geodetic2> coordinates;
+	std::vector<Geodetic2> allCoordinates;
+	std::vector<Geodetic2> coordinatesWithModel;
+
 	for (auto subsite : _subsites) {
-		coordinates.push_back(subsite->geodetic);
+		allCoordinates.push_back(subsite->geodetic);
 	}
+	for (auto subsite : _subsitesWithModels) {
+		coordinatesWithModel.push_back(subsite->geodetic);
+	}
+
 
 	std::string ownerName = owner()->name();
 	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(ownerName)->parent();
 
 	_globe = (globebrowsing::RenderableGlobe*)parent->renderable();
 
-	_renderableExplorationPath->initialize(_globe, coordinates);
+	_renderableExplorationPath->initialize(_globe, allCoordinates, coordinatesWithModel);
 
 	_chunkedLodGlobe = _globe->chunkedLodGlobe();
 
