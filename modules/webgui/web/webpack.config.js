@@ -16,7 +16,7 @@ module.exports = {
         // bundle the client for hot reloading
         // only- means to only hot reload for successful updates
 
-        './index.js'
+        './index.jsx',
         // the entry point of our app
     ],
     output: {
@@ -25,7 +25,7 @@ module.exports = {
 
         path: resolve(__dirname, 'dist'),
 
-        publicPath: '/static/'
+        publicPath: '/static/',
         // necessary for HMR to know where to load the hot update chunks
     },
 
@@ -54,6 +54,10 @@ module.exports = {
                 use: [ 'style-loader', 'css-loader?modules', ],
             },
         ],
+    },
+
+    resolve: {
+        extensions: ['.js', '.jsx'],
     },
 
     plugins: [

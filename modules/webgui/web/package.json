@@ -2,7 +2,7 @@
   "name": "openspace-webgui",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
+  "main": "src/index.jsx",
   "private": true,
   "scripts": {
     "lint": "eslint src",
