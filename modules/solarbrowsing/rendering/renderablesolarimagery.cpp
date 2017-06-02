@@ -213,7 +213,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     _deltaTimeLast = 1.0;
 
     if (_useBuffering) {
-        fillBuffer(OsEng.timeManager().time().j2000Seconds());
+        fillBuffer(OsEng.timeManager().time().deltaTime());
     }
 
     // If no buffer is used this is needed
@@ -268,7 +268,7 @@ void RenderableSolarImagery::fillBuffer(const double& dt) {
     const double& osTime = OsEng.timeManager().time().j2000Seconds();
     const double& startTime = getDecodeDataFromOsTime(osTime).timeObserved;
 
-    for (int i = 0; i < _bufferSize; i++) {
+    for (int i = 1; i < _bufferSize; i++) {
         const double& time = startTime + (dt * i) * (static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
         DecodeData decodeData = getDecodeDataFromOsTime(time);
         auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(decodeData.im->fullResolution));
@@ -277,7 +277,7 @@ void RenderableSolarImagery::fillBuffer(const double& dt) {
             LDEBUG("Enqueueing " << decodeData.im->filename);
         }
     }
-    _initializePBO = true;
+    //_initializePBO = true;
 }
 
 bool RenderableSolarImagery::isReady() const {
@@ -361,7 +361,6 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
         _currentScale = decodeData.im->scale;
         _currentCenterPixel = decodeData.im->centerPixel;
 
-
         _texture->bind();
         if (!resChanged) {
             glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
@@ -375,8 +374,7 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
     }
 }
 
-void RenderableSolarImagery::decode(unsigned char* buffer,
-                                             const std::string& filename)
+void RenderableSolarImagery::decode(unsigned char* buffer, const std::string& filename)
 {
     SimpleJ2kCodec j2c(_verboseMode);
     j2c.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
@@ -386,14 +384,15 @@ void RenderableSolarImagery::performImageTimestep(const double& osTime) {
     if (_pboIsDirty || !_usePBO) {
         updateTextureGPU();
     }
+
     bool stateChanged = _imageMetadataMap2[_currentActiveInstrument].hasStateChanged(osTime);
 
     // Time to pop from buffer !!! - And refill with buffer offset
     if (stateChanged || _initializePBO) {
         // Refill PBO
-        if (_verboseMode) {
-            LDEBUG("Time to update image! ");
-        }
+        // if (_verboseMode) {
+        //     LDEBUG("Time to update image! ");
+        // }
         if (_usePBO /*&& !_initializePBO*/) {
             uploadImageDataToPBO();
         }
@@ -407,8 +406,8 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         const double& dt = OsEng.timeManager().time().deltaTime();
         // Delta time changed, need to refill buffer
         if ((abs(_deltaTimeLast - dt)) > EPSILON) {
-            fillBuffer(dt);
             _pboIsDirty = false;
+            fillBuffer(dt);
         }
         _deltaTimeLast = dt;
     }
@@ -418,7 +417,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
     // The bool blockers might probably not be needed now
     if (timeToUpdateTexture && !_updatingCurrentLevelOfResolution
         && !_updatingCurrentActiveChannel) {
-        performImageTimestep(OsEng.timeManager().time().deltaTime());
+        performImageTimestep(OsEng.timeManager().time().j2000Seconds());
         _lastUpdateRealTime = _realTime;
     }
 
