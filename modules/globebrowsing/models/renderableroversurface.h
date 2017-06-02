@@ -61,6 +61,7 @@ public:
 	
 private:
 	std::vector<std::shared_ptr<SubsiteModels>> calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector);
+	void lockSubsite(const int level, std::vector<std::shared_ptr<Subsite>> subsites);
 
 	std::vector<std::shared_ptr<Subsite>> _subsites;
 	std::vector<std::shared_ptr<Subsite>> _prevSubsites;
@@ -88,7 +89,7 @@ private:
 	int _prevLevel;
 
 	bool _isFirst;
-	std::shared_ptr<SubsiteModels> _prevSubsite;
+	std::shared_ptr<SubsiteModels> _prevSubsiteModels;
 
 	LodModelSwitch _modelSwitch;
 

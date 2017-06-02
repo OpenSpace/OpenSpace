@@ -195,7 +195,13 @@ void RenderableExplorationPath::recalculateCartesianPathCoordinates() {
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geodetic, heightToSurface + 0.5 };
+		int offset;
+		if (_currentLevel < 2)
+			offset = 4.0;
+		else
+			offset = 2.0;
+
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geodetic, heightToSurface + offset };
 		glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
 		_stationPointsModelCoordinates.push_back(glm::dvec4(tempPos2, 1.0));
 	}

@@ -24,7 +24,7 @@
 
 // Uniforms
 uniform float transparency;
-uniform float fading;
+uniform float alpha;
 uniform bool performShading = true;
 uniform bool useMastCamColor = false;
 
@@ -52,6 +52,7 @@ Fragment getFragment() {
   int temporary2 = textureIndex;
 
   vec4 prevTexture3 = texture(roverTerrainTextures, vec3(vs_stDone[textureIndex], temporary2));
+  prevTexture3.a = alpha;
 
   Fragment frag2;
   frag2.color = prevTexture3;
