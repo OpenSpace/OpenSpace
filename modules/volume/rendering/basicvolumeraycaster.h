@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER___H__
-#define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER___H__
+#ifndef __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__
+#define __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__
 
 #include <string>
 #include <vector>
@@ -52,17 +52,18 @@ namespace openspace {
 struct RenderData;
 struct RaycastData;
 
-class KameleonVolumeRaycaster : public VolumeRaycaster {
+class BasicVolumeRaycaster : public VolumeRaycaster {
 public:
 
-    KameleonVolumeRaycaster(
+    BasicVolumeRaycaster(
         std::shared_ptr<ghoul::opengl::Texture> texture,
         std::shared_ptr<TransferFunction> transferFunction, 
         std::shared_ptr<VolumeClipPlanes> clipPlanes);
 
-    virtual ~KameleonVolumeRaycaster();
+    virtual ~BasicVolumeRaycaster();
     void initialize();
     void deinitialize();
+
     void renderEntryPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
     void renderExitPoints(const RenderData& data, ghoul::opengl::ProgramObject& program) override;
     void preRaycast(const RaycastData& data, ghoul::opengl::ProgramObject& program) override;
@@ -74,10 +75,14 @@ public:
     std::string getRaycastPath() const override;
     std::string getHelperPath() const override;
 
+    void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
+    void setTransferFunction(std::shared_ptr<TransferFunction> transferFunction);
     void setStepSize(float stepSize);
     void setGridType(VolumeGridType gridType);
     void setModelTransform(const glm::mat4& transform);
 private:
+    glm::dmat4 modelViewTransform(const RenderData& data);
+
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
     std::shared_ptr<TransferFunction> _transferFunction;
@@ -92,4 +97,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMERAYCASTER___H__ 
+#endif // __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__ 

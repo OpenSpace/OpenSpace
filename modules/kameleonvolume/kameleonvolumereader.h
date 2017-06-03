@@ -47,14 +47,15 @@ public:
     std::unique_ptr<RawVolume<float>> readFloatVolume(
         const glm::uvec3& dimensions,
         const std::string& variable,
-        const glm::vec3& lowerBound,
-        const glm::vec3& upperBound) const;
+        const glm::vec3& lowerDomainBound,
+        const glm::vec3& upperDomainBound) const;
     ghoul::Dictionary readMetaData() const;
+    std::string startTime() const;
+    std::string endTime() const;
     float minValue(const std::string& variable) const;
     float maxValue(const std::string& variable) const;
 
     std::vector<std::string> gridVariableNames() const;
-    std::vector<std::string> gridUnits() const;
     std::vector<std::string> variableNames() const;
     std::vector<std::string> variableAttributeNames() const;
     std::vector<std::string> globalAttributeNames() const;

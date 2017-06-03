@@ -29,17 +29,14 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/util/boxgeometry.h>
-#include <openspace/util/blockplaneintersectiongeometry.h>
-
 #include <openspace/rendering/renderable.h>
-
 #include <openspace/rendering/transferfunction.h>
+
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/volume/rawvolume.h>
-#include <modules/kameleonvolume/rendering/kameleonvolumeraycaster.h>
+#include <modules/volume/rendering/basicvolumeraycaster.h>
 
 #include <modules/volume/rendering/volumeclipplanes.h>
-
 
 namespace openspace {
 
@@ -92,7 +89,7 @@ private:
 
     std::unique_ptr<RawVolume<float>> _rawVolume;
     std::unique_ptr<RawVolume<GLfloat>> _normalizedVolume;
-    std::unique_ptr<KameleonVolumeRaycaster> _raycaster;
+    std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
     std::shared_ptr<TransferFunction> _transferFunction;

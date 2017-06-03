@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/volume/volumemodule.h>
+#include <modules/volume/rendering/renderabletimevaryingvolume.h>
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -36,7 +37,9 @@ VolumeModule::VolumeModule()
 {}
 
 void VolumeModule::internalInitialize() {
-
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
+    fRenderable->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
 }
 
 } // namespace openspace

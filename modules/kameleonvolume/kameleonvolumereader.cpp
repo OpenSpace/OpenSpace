@@ -54,6 +54,8 @@ KameleonVolumeReader::KameleonVolumeReader(const std::string& path)
     }
 
     _model = _kameleon.model;
+
+    // Possibly use a kameleon interpolator instead of a model interpolator?
     _interpolator = std::unique_ptr<ccmc::Interpolator>(_model->createNewInterpolator());
 }
 
@@ -180,6 +182,14 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
         {"globalAttributes", std::move(globalAttributesDictionary) },
         {"variableAttributes", std::move(variableDictionary) }
     };
+}
+
+std::string KameleonVolumeReader::startTime() const {
+    return  _model->getGlobalAttribute("start_time").getAttributeString();
+}
+
+std::string KameleonVolumeReader::endTime() const {
+    return  _model->getGlobalAttribute("end_time").getAttributeString();
 }
 
 float KameleonVolumeReader::minValue(const std::string & variable) const {

@@ -21,28 +21,68 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
- 
-#version __CONTEXT__
 
-layout(location = 0) in vec3 vertPosition;
+#ifndef __OPENSPACE_MODULE_VOLUME___RENDERABLEKAMELEONVOLUME___H__
+#define __OPENSPACE_MODULE_VOLUME___RENDERABLEKAMELEONVOLUME___H__
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/util/boxgeometry.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/transferfunction.h>
 
-out vec4 positionLocalSpace;
-out vec4 positionCameraSpace;
+#include <modules/volume/rawvolume.h>
+#include <modules/volume/rendering/basicvolumeraycaster.h>
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <modules/volume/rendering/volumeclipplanes.h>
 
-void main() {
+namespace openspace {
 
-    positionLocalSpace = vec4(vertPosition, 1.0);
-    positionCameraSpace = modelViewTransform * positionLocalSpace;
-
-    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
-    vec4 positionScreenSpace = z_normalization(positionClipSpace);
+struct RenderData;
     
-    //positionScreenSpace.z = 1.0;
-    // project the position to view space
-    gl_Position = positionScreenSpace;
-}
+class RenderableTimeVaryingVolume : public Renderable {
+public:
+    RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
+    ~RenderableTimeVaryingVolume();
+    
+    bool initialize() override;
+    bool deinitialize() override;
+    bool isReady() const override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
+    void update(const UpdateData& data) override;
+    bool cachingEnabled();
+
+private:
+    void load();
+    void loadFromPath(const std::string& path);
+    void loadRaw(const std::string& path);
+
+    void updateTextureFromVolume();
+    void updateRaycasterModelTransform();
+
+    properties::Vec3Property _lowerDomainBound;
+    properties::Vec3Property _upperDomainBound;
+    properties::Vec3Property _domainScale;
+
+    properties::FloatProperty _lowerValueBound;
+    properties::FloatProperty _upperValueBound;
+    
+    properties::OptionProperty _gridType;
+    
+    std::shared_ptr<VolumeClipPlanes> _clipPlanes;
+
+    properties::FloatProperty _stepSize;
+    properties::StringProperty _sourcePath;
+    properties::StringProperty _transferFunctionPath;
+    
+    std::vector<RawVolume<float>> _volumeTimesteps;
+    std::unique_ptr<BasicVolumeRaycaster> _raycaster;
+
+    std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
+    std::shared_ptr<TransferFunction> _transferFunction;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__

@@ -75,10 +75,10 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
         ghoul::lua::loadDictionaryFromFile(
             absTasksFile,
             tasksDictionary
-            );
-    } catch (...) {
+        );
+    } catch (const ghoul::RuntimeError& e) {
         LERROR("Could not load tasks file '" << absTasksFile << "'. " <<
-            "Lua parse error");
+            "Lua error: " << e.message << ": " << e.component);
         return std::vector<std::unique_ptr<Task>>();
     }
     return tasksFromDictionary(tasksDictionary);

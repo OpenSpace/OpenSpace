@@ -50,7 +50,6 @@ namespace ghoul {
 
 namespace openspace {
 
-class RenderableVolume;
 class Camera;
 class Scene;
     
