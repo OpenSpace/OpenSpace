@@ -38,6 +38,7 @@ function preInitialization()
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 
     openspace.setPathToken("${MARS_DATA}", "C:/Users/Jonathas/Pessoal/Work/OpenSpace/data/scene/lodglobes/mars")
+    --openspace.setPathToken("${MARS_DATA}", "F:/Pessoal/Work/OpenSpace/Source/OpenSpace/data/scene/lodglobes/mars")
 end
 
 function postInitialization()
