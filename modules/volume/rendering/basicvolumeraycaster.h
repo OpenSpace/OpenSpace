@@ -78,6 +78,7 @@ public:
     std::string getHelperPath() const override;
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
+    std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
     void setTransferFunction(std::shared_ptr<TransferFunction> transferFunction);
     void setStepSize(float stepSize);
     void setGridType(VolumeGridType gridType);

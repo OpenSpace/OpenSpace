@@ -195,7 +195,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData& data) {
 }
 
 void RenderableTimeVaryingVolume::render(const RenderData& data, RendererTasks& tasks) {
-    if (_raycaster) {
+    if (_raycaster && _raycaster->volumeTexture()) {
         tasks.raycasterTasks.push_back({ _raycaster.get(), data });
     }
 }

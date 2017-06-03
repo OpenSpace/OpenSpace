@@ -195,6 +195,10 @@ void BasicVolumeRaycaster::setVolumeTexture(
     _volumeTexture = volumeTexture;
 }
 
+std::shared_ptr<ghoul::opengl::Texture> BasicVolumeRaycaster::volumeTexture() const {
+    return _volumeTexture;
+}
+
 void BasicVolumeRaycaster::setStepSize(float stepSize) {
     _stepSize = stepSize;
 }
