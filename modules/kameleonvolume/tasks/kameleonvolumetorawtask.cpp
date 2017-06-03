@@ -43,8 +43,7 @@ namespace {
     const char* KeyDictionaryOutput = "DictionaryOutput";
     const char* KeyDimensions = "Dimensions";
     const char* KeyVariable = "Variable";
-    const char* KeyStartTime = "StartTime";
-    const char* KeyEndTime = "EndTime";
+    const char* KeyTime = "Time";
     const char* KeyLowerDomainBound = "LowerDomainBound";
     const char* KeyUpperDomainBound = "UpperDomainBound";
 
@@ -55,6 +54,7 @@ namespace {
 }
 
 namespace openspace {
+namespace kameleonvolume {
 
 KameleonVolumeToRawTask::KameleonVolumeToRawTask(
     const ghoul::Dictionary& dictionary)
@@ -109,7 +109,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     }
 
     
-    std::unique_ptr<RawVolume<float>> rawVolume = reader.readFloatVolume(
+    std::unique_ptr<volume::RawVolume<float>> rawVolume = reader.readFloatVolume(
         _dimensions,
         _variable,
         _lowerDomainBound,
@@ -117,7 +117,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
 
     progressCallback(0.5f);
 
-    RawVolumeWriter<float> writer(_rawVolumeOutputPath);
+    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
     writer.write(*rawVolume);
 
     progressCallback(0.9f);
@@ -125,11 +125,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     ghoul::Dictionary inputMetadata = reader.readMetaData();
     ghoul::Dictionary outputMetadata;
 
-    std::string startTime = reader.startTime();
-    std::string endTime = reader.endTime();
-
-    outputMetadata.setValue<std::string>(KeyStartTime, startTime);
-    outputMetadata.setValue<std::string>(KeyEndTime, endTime);
+    outputMetadata.setValue<double>(KeyTime, reader.time());
     outputMetadata.setValue<glm::vec3>(KeyDimensions, _dimensions);
     outputMetadata.setValue<glm::vec3>(KeyLowerDomainBound, _lowerDomainBound);
     outputMetadata.setValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound);
@@ -196,9 +192,9 @@ documentation::Documentation KameleonVolumeToRawTask::documentation() {
                 "in the native kameleon grid units",
                 Optional::Yes
             }
-
         }
     };
 }
 
+} // namespace kameleonvolume
 } // namespace openspace

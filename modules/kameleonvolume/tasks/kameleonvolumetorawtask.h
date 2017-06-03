@@ -32,6 +32,7 @@
 #include <string>
 
 namespace openspace {
+namespace kameleonvolume {
 
 class KameleonVolumeToRawTask : public Task {
 public:
@@ -52,6 +53,7 @@ private:
     glm::vec3 _upperDomainBound;
 };
 
+} // namespace kameleon
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATORAWTASK___H__

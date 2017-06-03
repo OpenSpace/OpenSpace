@@ -28,6 +28,7 @@
 
 
 namespace openspace {
+namespace volume {
 
 VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
     : _nClipPlanes("nClipPlanes", "Number of clip planes", 0, 0, 10)
@@ -69,4 +70,5 @@ std::vector<glm::vec2> VolumeClipPlanes::offsets() {
     return offsets;
 }
 
+} // namespace volume
 } // namespace openspace

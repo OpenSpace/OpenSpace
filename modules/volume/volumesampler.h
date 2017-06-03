@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_VOLUME___VOLUMESAMPLER___H__
 
 namespace openspace {
+namespace volume {
 
 template <typename VolumeType>
 class VolumeSampler {
@@ -37,6 +38,7 @@ private:
     const VolumeType* _volume;
 };
 
+} // namespace volume
 } // namespace openspace
 
 #include "volumesampler.inl"

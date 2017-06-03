@@ -28,6 +28,7 @@
 
 
 namespace openspace {
+namespace volume {
 
 VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
     : _normal("normal", "Normal", glm::vec3(1.0, 0.0, 0.0), glm::vec3(-1.0), glm::vec3(1.0))
@@ -56,4 +57,5 @@ glm::vec2 VolumeClipPlane::offsets() {
     return _offsets;
 }
 
+}
 } // namespace openspace

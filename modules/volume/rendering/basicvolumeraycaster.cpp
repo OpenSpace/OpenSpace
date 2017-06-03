@@ -41,6 +41,7 @@ namespace {
 }
 
 namespace openspace {
+namespace volume {
 
 BasicVolumeRaycaster::BasicVolumeRaycaster(
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
@@ -201,5 +202,6 @@ void BasicVolumeRaycaster::setGridType(VolumeGridType gridType) {
 void BasicVolumeRaycaster::setModelTransform(const glm::mat4 & transform) {
     _modelTransform = transform;
 }
-    
-}
+
+} // namespace volume
+} // namespace openspace

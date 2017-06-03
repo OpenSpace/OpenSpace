@@ -52,6 +52,8 @@ namespace openspace {
 struct RenderData;
 struct RaycastData;
 
+namespace volume {
+
 class BasicVolumeRaycaster : public VolumeRaycaster {
 public:
 
@@ -95,6 +97,8 @@ private:
     float _stepSize;
 };
 
+} // namespace volume
 } // namespace openspace
+
 
 #endif // __OPENSPACE_MODULE_VOLUME___BASICVOLUMERAYCASTER___H__ 

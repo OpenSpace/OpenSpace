@@ -51,7 +51,6 @@ namespace {
     const char* KeyVariable = "Variable";
     const char* KeyLowerDomainBound = "LowerDomainBound";
     const char* KeyUpperDomainBound = "UpperDomainBound";
-    const char* KeyDomainScale = "DomainScale";
     const char* KeyLowerValueBound = "LowerValueBound";
     const char* KeyUpperValueBound = "UpperValueBound";
     const char* KeyClipPlanes = "ClipPlanes";
@@ -61,21 +60,38 @@ namespace {
 }
 
 namespace openspace {
+namespace volume {
+/*
+    ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
+    if (!FileSys.directoryExists(sequenceDir)) {
+        LERROR("Could not load Label Directory '" << sequenceDir.path() << "'");
+        return false;
+    }
+    using Recursive = ghoul::filesystem::Directory::Recursive;
+    using Sort = ghoul::filesystem::Directory::Sort;
+    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
+    for (auto path : sequencePaths) {
+        if (size_t position = path.find_last_of(".") + 1) {
+            if (position != std::string::npos) {
+                ghoul::filesystem::File currentFile(path);
+                std::string extension = currentFile.fileExtension();
+                if (extension == "lbl" || extension == "LBL") { // discovered header file         */
 
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _lowerDomainBound("lowerDomainBound", "Lower Domain Bound")
-    , _upperDomainBound("upperDomainBound", "Upper Domain Bound")
-    , _domainScale("domainScale", "Domain scale")
-    , _lowerValueBound("lowerValueBound", "Lower Value Bound", 0.0, 0.0, 1)
-    , _upperValueBound("upperValueBound", "Upper Value Bound", 1, 0.01, 1)
-    , _gridType("gridType", "Grid Type", properties::OptionProperty::DisplayType::Dropdown)
     , _clipPlanes(nullptr)
     , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
-    , _sourcePath("sourcePath", "Source Path")
+    , _sourceDirectory("sourceDirectory", "Source Directory")
     , _transferFunctionPath("transferFunctionPath", "Transfer Function Path")
     , _raycaster(nullptr)
-    , _transferFunction(nullptr) {
+    , _transferFunction(nullptr)
+{
+    _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
+    _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
+    _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
+    _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
+    _gridType = VolumeGridType::Cartesian;
+
     /*
     glm::vec3 dimensions;
     if (dictionary.getValue(KeyDimensions, dimensions)) {
@@ -303,4 +319,5 @@ bool RenderableTimeVaryingVolume::deinitialize() {
     return true;
 }
 
-}
+} // namespace volume
+} // namespace openspace

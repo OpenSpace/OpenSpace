@@ -39,6 +39,7 @@ namespace {
 }
 
 namespace openspace {
+namespace kameleonvolume {
 
 KameleonMetadataToJsonTask::KameleonMetadataToJsonTask(
                                                       const ghoul::Dictionary& dictionary)
@@ -95,4 +96,5 @@ documentation::Documentation KameleonMetadataToJsonTask::documentation() {
     };
 }
 
+} // namespace kameleonvolume
 } // namespace openspace

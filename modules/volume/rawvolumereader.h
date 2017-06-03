@@ -29,6 +29,7 @@
 #include <modules/volume/rawvolume.h>
 
 namespace openspace {
+namespace volume {
 
 template <typename Voxel>
 class RawVolumeReader {
@@ -49,6 +50,7 @@ private:
     std::string _path;
 };
 
+} // namespace volume
 } // namespace openspace
 
 #include "rawvolumereader.inl"

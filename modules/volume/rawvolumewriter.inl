@@ -26,6 +26,7 @@
 #include <modules/volume/volumeutils.h>
 
 namespace openspace {
+namespace volume {
 
 template <typename VoxelType>
     RawVolumeWriter<VoxelType>::RawVolumeWriter(std::string path, size_t bufferSize)
@@ -97,4 +98,5 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     file.close();
 }
 
+} // namespace volume
 } // namespace openspace

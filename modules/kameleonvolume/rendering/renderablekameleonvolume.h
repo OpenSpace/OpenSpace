@@ -41,7 +41,9 @@
 namespace openspace {
 
 struct RenderData;
-    
+
+namespace kameleonvolume {
+
 class RenderableKameleonVolume : public Renderable {
 public:
     RenderableKameleonVolume(const ghoul::Dictionary& dictionary);
@@ -79,7 +81,7 @@ private:
     properties::OptionProperty _gridType;
     bool _autoGridType;
 
-    std::shared_ptr<VolumeClipPlanes> _clipPlanes;
+    std::shared_ptr<volume::VolumeClipPlanes> _clipPlanes;
 
     properties::FloatProperty _stepSize;
     properties::StringProperty _sourcePath;
@@ -87,14 +89,15 @@ private:
     properties::BoolProperty _cache;
 
 
-    std::unique_ptr<RawVolume<float>> _rawVolume;
-    std::unique_ptr<RawVolume<GLfloat>> _normalizedVolume;
-    std::unique_ptr<BasicVolumeRaycaster> _raycaster;
+    std::unique_ptr<volume::RawVolume<float>> _rawVolume;
+    std::unique_ptr<volume::RawVolume<GLfloat>> _normalizedVolume;
+    std::unique_ptr<volume::BasicVolumeRaycaster> _raycaster;
 
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
     std::shared_ptr<TransferFunction> _transferFunction;
 };
 
+} // namespace kameleonvolume
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__

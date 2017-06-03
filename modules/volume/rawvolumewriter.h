@@ -30,6 +30,7 @@
 #include <modules/volume/rawvolume.h>
 
 namespace openspace {
+namespace volume {
 
 template <typename VoxelType>
 class RawVolumeWriter {
@@ -50,6 +51,7 @@ private:
     size_t _bufferSize;    
 };
 
+} // namespace volume
 } // namespace openspace 
 
 #include "rawvolumewriter.inl";

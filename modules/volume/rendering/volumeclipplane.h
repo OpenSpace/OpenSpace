@@ -34,6 +34,7 @@ namespace ghoul {
 }
 
 namespace openspace {
+namespace volume {
 
 class VolumeClipPlane : public properties::PropertyOwner {
 public:
@@ -48,6 +49,7 @@ private:
 
 };
 
-}  // namespace openspace
+} // namespace volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANE___H__

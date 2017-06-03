@@ -38,22 +38,28 @@ namespace ccmc {
 }
 
 namespace openspace {
+namespace kameleonvolume {
 
 class KameleonVolumeReader {
 public:
     KameleonVolumeReader(const std::string& path);
-    //KameleonMetaData readMetaData();
 
-    std::unique_ptr<RawVolume<float>> readFloatVolume(
+    std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
         const glm::uvec3& dimensions,
         const std::string& variable,
         const glm::vec3& lowerDomainBound,
         const glm::vec3& upperDomainBound) const;
     ghoul::Dictionary readMetaData() const;
-    std::string startTime() const;
-    std::string endTime() const;
-    float minValue(const std::string& variable) const;
-    float maxValue(const std::string& variable) const;
+
+    std::string timeString() const;
+    std::string simulationStartString() const;
+    std::string simulationEndString() const;
+    double time() const;
+    double simulationStart() const;
+    double simulationEnd() const;
+
+    double minValue(const std::string& variable) const;
+    double maxValue(const std::string& variable) const;
 
     std::vector<std::string> gridVariableNames() const;
     std::vector<std::string> variableNames() const;
@@ -69,6 +75,7 @@ private:
 
 };
 
+} // namespace kameleonvolume
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__

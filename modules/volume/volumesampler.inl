@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 namespace openspace {
+namespace volume {
     
 template <typename VolumeType>
 VolumeSampler<VolumeType>::VolumeSampler(const VolumeType& volume, const glm::vec3& filterSize) {
@@ -78,4 +79,5 @@ typename VolumeType::VoxelType VolumeSampler<VolumeType>::sample(const glm::vec3
     return value;
 }
 
+} // namespace volume
 } // namespace openspace

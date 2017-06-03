@@ -37,6 +37,7 @@ namespace {
 }
 
 namespace openspace {
+namespace kameleonvolume {
 
 KameleonVolumeReader::KameleonVolumeReader(const std::string& path)
     : _path(path)
@@ -59,13 +60,13 @@ KameleonVolumeReader::KameleonVolumeReader(const std::string& path)
     _interpolator = std::unique_ptr<ccmc::Interpolator>(_model->createNewInterpolator());
 }
 
-std::unique_ptr<RawVolume<float>> KameleonVolumeReader::readFloatVolume(
+std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     const glm::uvec3 & dimensions,
     const std::string & variable,
     const glm::vec3 & lowerBound,
     const glm::vec3 & upperBound) const
 {
-    auto volume = std::make_unique<RawVolume<float>>(dimensions);
+    auto volume = std::make_unique<volume::RawVolume<float>>(dimensions);
     const glm::vec3 dims = volume->dimensions();
     const glm::vec3 diff = upperBound - lowerBound;
 
@@ -184,23 +185,45 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
     };
 }
 
-std::string KameleonVolumeReader::startTime() const {
-    return  _model->getGlobalAttribute("start_time").getAttributeString();
+std::string KameleonVolumeReader::simulationStartString() const {
+    return _model->getGlobalAttribute("start_time").getAttributeString();
 }
 
-std::string KameleonVolumeReader::endTime() const {
-    return  _model->getGlobalAttribute("end_time").getAttributeString();
+std::string KameleonVolumeReader::simulationEndString() const {
+    return _model->getGlobalAttribute("end_time").getAttributeString();
 }
 
-float KameleonVolumeReader::minValue(const std::string & variable) const {
+std::string KameleonVolumeReader::timeString() const {
+    double start =
+        ccmc::Time(_model->getGlobalAttribute("start_time").getAttributeString()).getEpoch();
+    double elapsed = _model->getGlobalAttribute("elapsed_time_in_seconds").getAttributeFloat();
+    return ccmc::Time(start + elapsed).toString();
+}
+
+
+double KameleonVolumeReader::simulationStart() const {
+    return ccmc::Time(_model->getGlobalAttribute("start_time").getAttributeString()).getEpoch();
+}
+
+double KameleonVolumeReader::simulationEnd() const {
+    return ccmc::Time(_model->getGlobalAttribute("end_time").getAttributeString()).getEpoch();
+}
+
+double KameleonVolumeReader::time() const {
+    double start =
+        ccmc::Time(_model->getGlobalAttribute("start_time").getAttributeString()).getEpoch();
+    double elapsed = _model->getGlobalAttribute("elapsed_time_in_seconds").getAttributeFloat();
+    return start + elapsed;
+}
+
+double KameleonVolumeReader::minValue(const std::string & variable) const {
     return _model->getVariableAttribute(variable, "actual_min").getAttributeFloat();
 }
 
-float KameleonVolumeReader::maxValue(const std::string & variable) const {
+double KameleonVolumeReader::maxValue(const std::string & variable) const {
     return _model->getVariableAttribute(variable, "actual_max").getAttributeFloat();
 }
 
 
-
-
-}
+} // namepace kameleonvolume
+} // namespace openspace

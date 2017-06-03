@@ -36,6 +36,8 @@
 
 namespace openspace {
 
+using namespace kameleonvolume;
+
 KameleonVolumeModule::KameleonVolumeModule() : OpenSpaceModule("KameleonVolume") {}
 
 void KameleonVolumeModule::internalInitialize() {

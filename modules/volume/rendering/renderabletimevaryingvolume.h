@@ -40,7 +40,9 @@
 namespace openspace {
 
 struct RenderData;
-    
+
+namespace volume {
+
 class RenderableTimeVaryingVolume : public Renderable {
 public:
     RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary);
@@ -51,38 +53,34 @@ public:
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
-    bool cachingEnabled();
-
 private:
-    void load();
-    void loadFromPath(const std::string& path);
-    void loadRaw(const std::string& path);
+    struct Volume {
+        RawVolume<float> rawVolume;
+        ghoul::opengl::Texture texture;
+    };
 
-    void updateTextureFromVolume();
-    void updateRaycasterModelTransform();
+    glm::vec3 _lowerDomainBound;
+    glm::vec3 _upperDomainBound;
+    glm::vec3 _domainScale;
 
-    properties::Vec3Property _lowerDomainBound;
-    properties::Vec3Property _upperDomainBound;
-    properties::Vec3Property _domainScale;
-
-    properties::FloatProperty _lowerValueBound;
-    properties::FloatProperty _upperValueBound;
+    float _lowerValueBound;
+    float _upperValueBound;
     
-    properties::OptionProperty _gridType;
+    VolumeGridType _gridType;
     
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
     properties::FloatProperty _stepSize;
-    properties::StringProperty _sourcePath;
+    properties::StringProperty _sourceDirectory;
     properties::StringProperty _transferFunctionPath;
     
-    std::vector<RawVolume<float>> _volumeTimesteps;
+    std::vector<Volume> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
-    std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
     std::shared_ptr<TransferFunction> _transferFunction;
 };
 
+} // namespace volume
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__

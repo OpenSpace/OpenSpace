@@ -25,6 +25,7 @@
 #include <fstream>
 
 namespace openspace {
+namespace volume {
 
 template <typename VoxelType>
 RawVolumeReader<VoxelType>::RawVolumeReader(const std::string& path,
@@ -95,4 +96,5 @@ std::unique_ptr<RawVolume<VoxelType>> RawVolumeReader<VoxelType>::read() {
     return volume;
 }
 
+} // namepsace volume
 } // namespace openspace

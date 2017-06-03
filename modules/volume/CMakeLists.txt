@@ -52,6 +52,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/rawvolumewriter.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/textureslicevolumereader.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/volumesampler.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/volumegridtype.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/volumeutils.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletimevaryingvolume.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/basicvolumeraycaster.cpp

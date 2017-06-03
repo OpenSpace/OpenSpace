@@ -32,6 +32,8 @@
 
 namespace openspace {
 
+using namespace volume;
+
 VolumeModule::VolumeModule() 
     : OpenSpaceModule("Volume")
 {}
