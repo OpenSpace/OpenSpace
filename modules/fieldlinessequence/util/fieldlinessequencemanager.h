@@ -30,6 +30,7 @@
 #include <ghoul/opengl/ghoul_gl.h> // TODO: FORWARD DECLARE glm::vec3 instead?
 #include <ghoul/glm.h>
 
+#include <memory>
 #include <vector>
 
 // #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
@@ -91,7 +92,11 @@ public:
                             const int& resamplingOption,
                             FieldlinesState& outFieldlinesStates);
 
-    bool getFieldlinesState/*Cdf*/(const std::string& pathToCdfFile,
+    std::unique_ptr<ccmc::Kameleon> createKameleonObject(
+            const std::string& pathToCdfFile) const;
+
+    bool getFieldlinesState/*Cdf*/(
+                            ccmc::Kameleon* kameleon,
                             const std::string& tracingVariable,
                             const std::vector<glm::vec3>& inSeedPoints,
                             const float& tracingStepLength,

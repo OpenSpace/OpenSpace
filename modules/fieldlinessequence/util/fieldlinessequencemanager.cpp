@@ -34,7 +34,6 @@
 
 #include <algorithm>
 #include <fstream>
-#include <memory>
 
 #include <ccmc/Kameleon.h>
 
@@ -533,8 +532,25 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     return true;
 }
 
+std::unique_ptr<ccmc::Kameleon> FieldlinesSequenceManager::createKameleonObject(
+        const std::string& pathToCdfFile) const {
+
+    // ----------------------------- CREATE KAMELEON OBJECT -----------------------------
+    std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
+    LDEBUG("\tOpening the cdf file: '" << pathToCdfFile << "' with Kameleon!");
+    long kamStatus = kameleon->open(pathToCdfFile);
+
+    if (kamStatus != ccmc::FileReader::OK) {
+        LERROR("Failed to create a Kameleon Object from file: " << pathToCdfFile);
+       return nullptr;
+    }
+    return kameleon;
+}
+
+
+
 bool FieldlinesSequenceManager::getFieldlinesState(
-        const std::string& pathToCdfFile,
+        ccmc::Kameleon* kameleon,
         const std::string& tracingVariable,
         const std::vector<glm::vec3>& inSeedPoints,
         const float& tracingStepLength,
@@ -546,18 +562,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         std::vector<std::string>& colorizingMagVars,
         FieldlinesState& outFieldlinesState) {
 
-    // ----------------------------- CREATE KAMELEON OBJECT -----------------------------
-    std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
-    long kamStatus = kameleon->open(pathToCdfFile);
-
-    if (kamStatus != ccmc::FileReader::OK) {
-        LERROR("Failed to create a Kameleon Object from file: " << pathToCdfFile);
-        return false;
-    }
-
-    const std::string model = kameleon->getModelName();
-    outFieldlinesState._modelName = model;
-    outFieldlinesState._model = outFieldlinesState.Model::batsrus;
+    // ----------------------------- LOAD TRACING VARIABLE -----------------------------
     bool status = kameleon->loadVariable(tracingVariable);
     if (!status) {
         LERROR("FAILED TO LOAD TRACING VARIABLE: " << tracingVariable);
@@ -565,6 +570,9 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     }
 
     // ----------------- CHECK CDF MODEL AND SETUP VARIABLES ACCORDINGLY -----------------
+    const std::string model = kameleon->getModelName();
+    outFieldlinesState._modelName = model;
+
     float scalingFactor;
     float innerBoundaryLimit;
     bool convertToCartesian = false;
@@ -704,7 +712,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
 
         // IMPORTANT!: Remember to delete interpolator if creating it here!
         ccmc::Interpolator* interpolator = kameleon->createNewInterpolator();
-        ccmc::Tracer tracer(kameleon.get(), interpolator);
+        ccmc::Tracer tracer(kameleon, interpolator);
         tracer.setDn(tracingStepLength);
         // ccmc::Tracer tracer(kameleon.get());
         tracer.setMaxIterations(maxIterations);
@@ -836,7 +844,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     }
 
     // ------------------------ MAKE SURE STATE HAS A START TIME ------------------------
-    double startTime = getTime(kameleon.get());
+    double startTime = getTime(kameleon);
     outFieldlinesState._triggerTime = startTime;
     LDEBUG("State will start at " << timeToString(startTime));
 

@@ -38,6 +38,8 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/textureunit.h>
 
+#include <ccmc/Kameleon.h>
+
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <algorithm>
@@ -298,9 +300,14 @@ bool RenderableFieldlinesSequence::initialize() {
 
             // TODO Only one loop.. Not one for each tracing method!!
             for (size_t i = 0; i < _numberOfStates; ++i) {
+                std::unique_ptr<ccmc::Kameleon> kameleon =
+                        fsManager.createKameleonObject(validSourceFilePaths[i]);
+                if (kameleon == nullptr) {
+                    continue;
+                }
                 LDEBUG(validSourceFilePaths[i] << " is now being traced.");
                 _states.push_back(FieldlinesState(_seedPoints.size()));
-                fsManager.getFieldlinesState(validSourceFilePaths[i],
+                fsManager.getFieldlinesState(kameleon.get(),
                                              tracingVariable,
                                              _seedPoints,
                                              tracingStepLength,
