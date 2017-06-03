@@ -110,6 +110,83 @@ void FieldlinesState::saveStateToBinaryFile(const std::string& absFilePath) {
     ofs.write( allExtraVarNamesInOne.c_str(), numStringBytes);
 }
 
+// TEMPORARY.. only pre event to downscale how many points each state stores!!
+// Should be provided as option from LUA and incorporated into the main saveState function!
+// Saves only every n'th point to the binary file!
+void FieldlinesState::saveStateSubsetToBinaryFile(const std::string& absFilePath,
+                                                  const size_t& numPointsToSkipEachStep) {
+    // Create the file
+    std::ofstream ofs(absFilePath, std::ofstream::binary | std::ofstream::trunc);
+    if (!ofs.is_open()) {
+        LERROR("Failed to save state to binary file at location: " << absFilePath);
+        return;
+    }
+
+    size_t numLines         = _lineStart.size();
+    size_t numPoints        = 0;
+    std::vector<GLint> lineStart;
+    std::vector<GLsizei> lineCount;
+
+    size_t numExtras        = _extraVariables.size();
+    std::string allExtraVarNamesInOne = "";
+    for (std::string str : _extraVariableNames) {
+        allExtraVarNamesInOne += str + '\0'; // Add the null char '\0' for easier reading
+    }
+    size_t numStringBytes = allExtraVarNamesInOne.size();
+
+    std::vector<glm::vec3>  vertexPositionsSubset;
+    // vertexPositionsSubset.reserve(numPoints);
+    std::vector<std::vector<float>> extraVariablesSubset;
+    extraVariablesSubset.resize(numExtras);
+
+    GLint newStart = 0;
+    for (size_t i = 0; i < numLines; ++i) {
+        auto tmpStart = _lineStart[i];
+        auto tmpCount = _lineCount[i];
+        GLsizei newCount = 0;
+        GLint oldIndex = tmpStart;
+        // Add every nth point in line
+        for (size_t j = 0; j < tmpCount; j += numPointsToSkipEachStep) {
+            vertexPositionsSubset.push_back(_vertexPositions[oldIndex]);
+            newCount++;
+            numPoints++;
+            for (size_t k = 0; k < numExtras ; ++k) {
+                extraVariablesSubset[k].push_back(_extraVariables[k][oldIndex]);
+            }
+            oldIndex += numPointsToSkipEachStep;
+        }
+        if (newCount > 0) {
+            lineCount.push_back(newCount);
+            lineStart.push_back(newStart);
+            newStart += newCount;
+        }
+    }
+
+    //------------------------------ WRITE EVERYTHING TO FILE ------------------------------
+    // WHICH VERSION OF BINARY FIELDLINES STATE FILE - IN CASE STRUCTURE CHANGES IN THE FUTURE
+    ofs.write( (char*)(&CURRENT_VERSION), sizeof( int ) );
+
+    //-------------------- WRITE META DATA FOR STATE --------------------------------
+    ofs.write( reinterpret_cast<char*>(&_triggerTime),      sizeof( _triggerTime ) );
+    ofs.write( reinterpret_cast<char*>(&_model),            sizeof( int ) );
+    ofs.write( reinterpret_cast<char*>(&_isMorphable),      sizeof( bool ) ); // Handle bool as a byte
+
+    ofs.write( reinterpret_cast<char*>(&numLines),          sizeof( size_t ) );
+    ofs.write( reinterpret_cast<char*>(&numPoints),         sizeof( size_t ) );
+    ofs.write( reinterpret_cast<char*>(&numExtras),         sizeof( size_t ) );
+    ofs.write( reinterpret_cast<char*>(&numStringBytes),    sizeof( size_t ) );
+
+    //---------------------- WRITE ALL ARRAYS OF DATA --------------------------------
+    ofs.write( reinterpret_cast<char*>(lineStart.data()),       sizeof(GLint) *  numLines);
+    ofs.write( reinterpret_cast<char*>(lineCount.data()),       sizeof(GLsizei) * numLines);
+    ofs.write( reinterpret_cast<char*>(vertexPositionsSubset.data()), sizeof(glm::vec3) * numPoints);
+    // Write the data for each vector in _extraVariables
+    for (std::vector<float>& vec : extraVariablesSubset) {
+        ofs.write( reinterpret_cast<char*>(vec.data()),  sizeof(float) * numPoints);
+    }
+    ofs.write( allExtraVarNamesInOne.c_str(), numStringBytes);
+}
+
 void FieldlinesState::setModel(const Model& modelNumber) {
     switch (modelNumber) {
         case batsrus : {

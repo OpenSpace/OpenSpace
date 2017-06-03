@@ -64,6 +64,8 @@ public:
     void reserveSize(size_t size);
 
     void saveStateToBinaryFile(const std::string& absoluteFilePath);
+    void saveStateSubsetToBinaryFile(const std::string& absFilePath,
+                                     const size_t& numPointsToSkipEachStep);
 
     void setModel(const Model& modelNumber);
 private:
