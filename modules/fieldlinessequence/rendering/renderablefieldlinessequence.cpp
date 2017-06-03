@@ -942,7 +942,7 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
         _shouldRender = true;
     }
 
-    if (_updateColorBuffer) {
+    if (_updateColorBuffer && _activeStateIndex > -1) {
         _updateColorBuffer = false;
         updateColorBuffer();
     }
