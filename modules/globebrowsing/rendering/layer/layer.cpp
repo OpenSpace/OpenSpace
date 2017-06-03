@@ -50,6 +50,7 @@ namespace {
 
 Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     : properties::PropertyOwner(layerDict.value<std::string>(keyName))
+    , _tileProvider(nullptr)
     , _enabled(properties::BoolProperty("enabled", "Enabled", false))
     , _reset("reset", "Reset")
     , _typeOption(
@@ -74,15 +75,15 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
 {
     // We add the id to the dictionary since it needs to be known by
     // the tile provider
-    ghoul::Dictionary newLayerDict = layerDict;
-    newLayerDict.setValue(keyLayerGroupID, id);
-  
+    ghoul::Dictionary tileProviderInitDict = layerDict;
+    tileProviderInitDict.setValue(keyLayerGroupID, id);
+
+    // First try to see if the type is any of the tile provider types
     _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
-        tileprovider::TileProvider::createFromDictionary(newLayerDict));
-        
-    // Something else went wrong and no exception was thrown
-    if (_tileProvider == nullptr) {
-        throw ghoul::RuntimeError("Unable to create TileProvider '" + name() + "'");
+        tileprovider::TileProvider::createFromDictionary(tileProviderInitDict));
+    
+    if (!_tileProvider) {
+        //initializeAdjustmentLayer();
     }
 
     bool enabled = false; // defaults to false if unspecified
@@ -98,10 +99,6 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
         _renderSettings.useValueBlending = true;
     }
 
-    _reset.onChange([&](){
-        _tileProvider->reset();
-    });
-
     for (int i = 0; i < NumTypes; ++i) {
         _typeOption.addOption(i, TypeNames[i]);
     }
@@ -109,6 +106,10 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     for (int i = 0; i < NumBlendModes; ++i) {
         _blendModeOption.addOption(i, BlendModeNames[i]);
     }
+
+    _reset.onChange([&](){
+        _tileProvider->reset();
+    });
 
     _typeOption.onChange([&](){
         removeVisibleProperties();
@@ -133,6 +134,10 @@ Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
     addProperty(_reset);
 
     addPropertySubOwner(_renderSettings);
+}
+
+bool initializeAdjustmentLayer(const ghoul::Dictionary& adjustmentLayerDict) {
+
 }
 
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {

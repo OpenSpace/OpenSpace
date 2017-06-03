@@ -79,11 +79,13 @@ public:
 
     void onChange(std::function<void(void)> callback);
 
-    properties::Vec3Property color;
     TypeID type;
     BlendModeID blendMode;
 
+    properties::Vec3Property color;
+
 private:
+    bool initializeAdjustmentLayer(const ghoul::Dictionary& adjustmentLayerDict);
     void removeVisibleProperties();
     void addVisibleProperties();
     properties::OptionProperty _typeOption;

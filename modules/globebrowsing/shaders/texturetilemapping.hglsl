@@ -102,9 +102,9 @@ vec4 getSample#{layerGroup}#{i}(
 	const Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1])
 {
 	vec4 color = vec4(0,0,0,1);
-#if #{#{layerGroup}#{i}LayerType} == 0 // Default, sample from texture
+#if (#{#{layerGroup}#{i}LayerType} == 0) // Default, sample from texture
 	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
-#elif #{#{layerGroup}#{i}LayerType} == 1 // Color adjustment layer
+#elif (#{#{layerGroup}#{i}LayerType} == 1) // Color adjustment layer
 	color.rgb = #{layerGroup}[#{i}].color;
 #endif
 
@@ -118,13 +118,13 @@ vec4 getSample#{layerGroup}#{i}(
 #for i in 0..#{lastLayerIndex#{layerGroup}}
 
 vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor) {
-#if #{#{layerGroup}#{i}BlendMode} == 0 // Default, Normal
+#if (#{#{layerGroup}#{i}BlendMode} == 0) // Default, Normal
 	return blendNormal(currentColor, newColor);	
-#elif #{#{layerGroup}#{i}BlendMode} == 1 // Multiply
+#elif (#{#{layerGroup}#{i}BlendMode} == 1) // Multiply
 	return blendMultiply(currentColor, newColor);
-#elif #{#{layerGroup}#{i}BlendMode} == 2 // Add
+#elif (#{#{layerGroup}#{i}BlendMode} == 2) // Add
 	return blendAdd(currentColor, newColor);
-#elif #{#{layerGroup}#{i}BlendMode} == 3 // Subtract
+#elif (#{#{layerGroup}#{i}BlendMode} == 3) // Subtract
 	return blendSubtract(currentColor, newColor);
 #endif
 }
