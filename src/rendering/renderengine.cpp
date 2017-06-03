@@ -271,6 +271,7 @@ void RenderEngine::initialize() {
 }
 
 void RenderEngine::initializeGL() {
+    LTRACE("RenderEngine::initializeGL(begin)");
     // TODO:    Fix the power scaled coordinates in such a way that these 
     //            values can be set to more realistic values
 
@@ -298,6 +299,7 @@ void RenderEngine::initializeGL() {
     ghoul::logging::LogManager::ref().addLog(std::move(log));
 
     LINFO("Finished initializing GL");
+    LTRACE("RenderEngine::initializeGL(end)");
 }
 
 void RenderEngine::deinitialize() {
@@ -309,7 +311,7 @@ void RenderEngine::deinitialize() {
 }
 
 void RenderEngine::updateScene() {
-	const Time& currentTime = OsEng.timeManager().time();
+    const Time& currentTime = OsEng.timeManager().time();
     _scene->update({
         { glm::dvec3(0), glm::dmat3(1), 1.0 },
         currentTime,
@@ -483,9 +485,9 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 }
 
 void RenderEngine::postDraw() {
-	Time& currentTime = OsEng.timeManager().time();
+    Time& currentTime = OsEng.timeManager().time();
     if (currentTime.timeJumped()) {
-		currentTime.setTimeJumped(false);
+        currentTime.setTimeJumped(false);
     }
 
     if (_shouldTakeScreenshot) {
