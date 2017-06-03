@@ -30,6 +30,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/verifier.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -47,7 +49,7 @@ namespace {
     const char* KeyDimensions = "Dimensions";
     const char* KeyStepSize = "StepSize";
     const char* KeyTransferFunction = "TransferFunction";
-    const char* KeySource = "Source";
+    const char* KeySourceDirectory = "SourceDirectory";
     const char* KeyVariable = "Variable";
     const char* KeyLowerDomainBound = "LowerDomainBound";
     const char* KeyUpperDomainBound = "UpperDomainBound";
@@ -57,25 +59,13 @@ namespace {
     const char* KeyCache = "Cache";
     const char* KeyGridType = "GridType";
     const char* ValueSphericalGridType = "Spherical";
+    const char* KeyMinValue = "MinValue";
+    const char* KeyMaxValue = "MaxValue";
+    const char* KeyTime = "Time";
 }
 
 namespace openspace {
 namespace volume {
-/*
-    ghoul::filesystem::Directory sequenceDir(_fileName, RawPath::Yes);
-    if (!FileSys.directoryExists(sequenceDir)) {
-        LERROR("Could not load Label Directory '" << sequenceDir.path() << "'");
-        return false;
-    }
-    using Recursive = ghoul::filesystem::Directory::Recursive;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
-    for (auto path : sequencePaths) {
-        if (size_t position = path.find_last_of(".") + 1) {
-            if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(path);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "lbl" || extension == "LBL") { // discovered header file         */
 
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
@@ -86,222 +76,128 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
 {
-    _lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
-    _upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
+    documentation::testSpecificationAndThrow(
+        Documentation(),
+        dictionary,
+        "RenderableTimeVaryingVolume"
+    );
+
+    _sourceDirectory = absPath(dictionary.value<std::string>(KeySourceDirectory));
+    _transferFunctionPath = absPath(dictionary.value<std::string>(KeyTransferFunction));
     _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
     _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
     _gridType = VolumeGridType::Cartesian;
 
-    /*
-    glm::vec3 dimensions;
-    if (dictionary.getValue(KeyDimensions, dimensions)) {
-        _dimensions = dimensions;
-    } else {
-        LWARNING("No dimensions specified for volumetric data, falling back to 32^3");
-        _dimensions = glm::uvec3(32, 32, 32);
+    if (dictionary.hasValue<std::string>(KeyGridType)) {
+        _gridType = volume::parseGridType(dictionary.value<std::string>(KeyGridType));
     }
-
-    float stepSize;
-    if (dictionary.getValue(KeyStepSize, stepSize)) {
-        _stepSize = stepSize;
-    }
-
-    std::string transferFunctionPath;
-    if (dictionary.getValue(KeyTransferFunction, transferFunctionPath)) {
-        _transferFunctionPath = transferFunctionPath;
-        _transferFunction = std::make_shared<TransferFunction>(absPath(transferFunctionPath));
-    }
-
-    std::string sourcePath;
-    if (dictionary.getValue(KeySource, sourcePath)) {
-        _sourcePath = absPath(sourcePath);
-    }
-    
-    std::string variable;
-    if (dictionary.getValue(KeyVariable, variable)) {
-        _variable = variable;
-    }
-
-    glm::vec3 lowerDomainBound;
-    if (dictionary.getValue(KeyLowerDomainBound, lowerDomainBound)) {
-        _lowerDomainBound = lowerDomainBound;
-    }
-    else {
-        _autoDomainBounds = true;
-    }
-
-    glm::vec3 upperDomainBound;
-    if (dictionary.getValue(KeyUpperDomainBound, upperDomainBound)) {
-        _upperDomainBound = upperDomainBound;
-    }
-    else {
-        _autoDomainBounds = true;
-    }
-
-    glm::vec3 domainScale;
-    if (dictionary.getValue(KeyDomainScale, domainScale)) {
-        _domainScale = domainScale;
-    } else {
-        _domainScale = glm::vec3(1, 1, 1); // Assume meters if nothing else is specified.
-    }
-
-    float lowerValueBound;
-    if (dictionary.getValue(KeyLowerValueBound, lowerValueBound)) {
-        _lowerValueBound = lowerValueBound;
-    }
-    else {
-        _autoValueBounds = true;
-    }
-
-    float upperValueBound;
-    if (dictionary.getValue(KeyUpperValueBound, upperValueBound)) {
-        _upperValueBound = upperValueBound;
-    }
-    else {
-        _autoValueBounds = true;
-    }
-
-    ghoul::Dictionary clipPlanesDictionary;
-    dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
-    _clipPlanes = std::make_shared<VolumeClipPlanes>(clipPlanesDictionary);
-    _clipPlanes->setName("clipPlanes");
-
-    bool cache;
-    if (dictionary.getValue(KeyCache, cache)) {
-        _cache = cache;
-    }
-
-    _gridType.addOption(static_cast<int>(VolumeGridType::Cartesian), "Cartesian grid");
-    _gridType.addOption(static_cast<int>(VolumeGridType::Spherical), "Spherical grid");
-    _gridType.setValue(static_cast<int>(VolumeGridType::Cartesian));
-
-    std::string gridType;
-    if (dictionary.getValue(KeyGridType, gridType)) {
-        if (gridType == ValueSphericalGridType) {
-            _gridType.setValue(static_cast<int>(VolumeGridType::Spherical));
-        } else {
-            _autoGridType = true;
-        }
-    }
-    */
 }
     
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
 
-
 bool RenderableTimeVaryingVolume::initialize() {
+
+    using RawPath = ghoul::filesystem::Directory::RawPath;
+    ghoul::filesystem::Directory sequenceDir(_sourceDirectory, RawPath::Yes);
+
+    if (!FileSys.directoryExists(sequenceDir)) {
+        LERROR("Could not load sequence directory '" << sequenceDir.path() << "'");
+        return false;
+    }
+
+    using Recursive = ghoul::filesystem::Directory::Recursive;
+    using Sort = ghoul::filesystem::Directory::Sort;
+
+    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::No);
+    for (auto path : sequencePaths) {
+        ghoul::filesystem::File currentFile(path);
+        std::string extension = currentFile.fileExtension();
+        if (extension == "dictionary") {
+            loadTimestepMetadata(path);
+        }
+    }
+
+
+    // TODO: defer loading of data to later. (separate thread or at least not when loading)
+    for (auto& p : _volumeTimesteps) {
+        Timestep& t = p.second;
+        std::string path = FileSys.pathByAppendingComponent(_sourceDirectory, t.baseName) + ".rawvolume";
+        RawVolumeReader<float> reader(path, t.dimensions);
+        t.rawVolume = reader.read();
+
+        // TODO: remap values from [lowerValueBounds, upperDomainBounds[ to [0, 1[
+
+        t.texture = std::make_shared<ghoul::opengl::Texture>(
+            t.dimensions,
+            ghoul::opengl::Texture::Format::Red,
+            GL_RED,
+            GL_FLOAT,
+            ghoul::opengl::Texture::FilterMode::Linear,
+            ghoul::opengl::Texture::WrappingMode::Clamp
+        );
+
+        void* data = reinterpret_cast<void*>(t.rawVolume->data());
+        t.texture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
+        t.texture->uploadTexture();
+    }
+
+    
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(nullptr, _transferFunction, _clipPlanes);
+    _raycaster->initialize();
+    OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+    auto onChange = [&](bool enabled) {
+        if (enabled) {
+            OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
+        } else {
+            OsEng.renderEngine().raycasterManager().detachRaycaster(*_raycaster.get());
+        }
+    };
+    onEnabledChange(onChange);
+
     return true;
 }
-/*
-void RenderableTimeVaryingVolume::updateRaycasterModelTransform() {
-    glm::vec3 lowerBoundingBoxBound = _domainScale.value() * _lowerDomainBound.value();
-    glm::vec3 upperBoundingBoxBound = _domainScale.value() * _upperDomainBound.value();
-    
-    glm::vec3 scale = upperBoundingBoxBound - lowerBoundingBoxBound;
-    glm::vec3 translation = (lowerBoundingBoxBound + upperBoundingBoxBound) * 0.5f;
 
-    glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation); 
-    modelTransform = glm::scale(modelTransform, scale);
-    _raycaster->setModelTransform(modelTransform);
-}
-
-
-bool RenderableTimeVaryingVolume::cachingEnabled() {
-    return _cache;
-}
-
-void RenderableTimeVaryingVolume::load() {
-    if (!FileSys.fileExists(_sourcePath)) {
-        LERROR("File " << _sourcePath << " does not exist."); 
+void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) {
+    ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(path);
+    try {
+        documentation::testSpecificationAndThrow(TimestepDocumentation(), dictionary, "TimeVaryingVolumeTimestep");
+    } catch (const documentation::SpecificationError& e) {
+        LERROR(e.message << e.component);
         return;
     }
-    if (!cachingEnabled()) {
-        loadFromPath(_sourcePath);
-        return;
-    }
-    ghoul::filesystem::File sourceFile(_sourcePath);
-    std::string cachePath = FileSys.cacheManager()->cachedFilename(
-        sourceFile.baseName(),
-        cacheSuffix(),
-        ghoul::filesystem::CacheManager::Persistent::Yes
-    );
-    if (FileSys.fileExists(cachePath)) {
-        loadRaw(cachePath);
-    } else {
-        loadFromPath(_sourcePath);
-        storeRaw(cachePath);
-    }
-}
 
-std::string RenderableTimeVaryingVolume::cacheSuffix() {
-    glm::vec3 dims = _dimensions.value();
-    return "." + _variable.value() +
-        "." + std::to_string(dims[0]) +
-        "x" + std::to_string(dims[1]) +
-        "x" + std::to_string(dims[2]);
-}
-
-void RenderableTimeVaryingVolume::loadFromPath(const std::string& path) {
-    ghoul::filesystem::File file(path);
-    std::string extension = file.fileExtension();
-    std::transform(
-        extension.begin(),
-        extension.end(),
-        extension.begin(),
-        [](char v) { return static_cast<char>(tolower(v)); }
-    );
-    if (extension == "cdf") {
-        loadCdf(path);
-    } else {
-        loadRaw(path);
-    }
-}
-
-void RenderableTimeVaryingVolume::loadRaw(const std::string& path) {
-    RawVolumeReader<float> reader(path, _dimensions);
-    _rawVolume = reader.read();
-    updateTextureFromVolume();
-}
-
-void RenderableTimeVaryingVolume::updateTextureFromVolume() {
-    _normalizedVolume = std::make_unique<RawVolume<GLfloat>>(_dimensions);
-    float* in = _rawVolume->data();
-    GLfloat* out = _normalizedVolume->data();
-    float min = _lowerValueBound;
-    float diff = _upperValueBound - _lowerValueBound;
-
-    for (size_t i = 0; i < _normalizedVolume->nCells(); ++i) {
-        out[i] = glm::clamp((in[i] - min) / diff, 0.0f, 1.0f);
-    }
-
-    _volumeTexture = std::make_shared<ghoul::opengl::Texture>(
-        _dimensions,
-        ghoul::opengl::Texture::Format::Red,
-        GL_RED,
-        GL_FLOAT,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::Repeat
-    );
-
-    void* data = reinterpret_cast<void*>(_normalizedVolume->data());
-    _volumeTexture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
-}
-
-void RenderableTimeVaryingVolume::storeRaw(const std::string& path) {
-    RawVolumeWriter<float> writer(path);
-    writer.write(*_rawVolume);
-}
+    Timestep t;
+    t.baseName = ghoul::filesystem::File(path).baseName();
+    t.dimensions = dictionary.value<glm::vec3>(KeyDimensions);
+    t.lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
+    t.upperDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
+    t.minValue = dictionary.value<float>(KeyMinValue);
+    t.maxValue = dictionary.value<float>(KeyMaxValue);
+    t.time = dictionary.value<double>(KeyTime);
+    t.inRam = false;
+    t.onGpu = false;
     
-*/
+    _volumeTimesteps[t.time] = std::move(t);
+}
+
+RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
+    return &(_volumeTimesteps.begin()->second);
+}
 
 void RenderableTimeVaryingVolume::update(const UpdateData& data) {
     if (_raycaster) {
+        Timestep* t = currentTimestep();
+        if (t && t->texture) {
+            _raycaster->setVolumeTexture(t->texture);
+        }
         _raycaster->setStepSize(_stepSize);
     }
 }
 
 void RenderableTimeVaryingVolume::render(const RenderData& data, RendererTasks& tasks) {
-    //tasks.raycasterTasks.push_back({ _raycaster.get(), data });
+    if (_raycaster) {
+        tasks.raycasterTasks.push_back({ _raycaster.get(), data });
+    }
 }
 
  
@@ -317,6 +213,93 @@ bool RenderableTimeVaryingVolume::deinitialize() {
         _raycaster = nullptr;
     }
     return true;
+}
+
+documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
+    using namespace documentation;
+    return {
+        "RenderableTimevaryingVolume",
+        "volume_renderable_timevaryingvolume",
+        {
+            {
+                KeySourceDirectory,
+                new StringVerifier,
+                "Specifies the path to load timesteps from",
+                Optional::No
+            },
+            {
+                KeyTransferFunction,
+                new StringVerifier,
+                "Specifies the transfer function file path",
+                Optional::No
+            },
+            {
+                KeyLowerValueBound,
+                new DoubleVerifier,
+                "Specifies the lower value bound."
+                "This number will be mapped to 0 before uploadin to the GPU.",
+                Optional::No
+            },
+            {
+                KeyUpperValueBound,
+                new DoubleVerifier,
+                "Specifies the lower value bound."
+                "This number will be mapped to 0 before uploadin to the GPU.",
+                Optional::No
+            },
+            {
+                KeyGridType,
+                new StringInListVerifier({"Cartesian", "Spherical"}),
+                "Specifies the grid type",
+                Optional::Yes
+            }
+        }
+    };
+}
+
+
+documentation::Documentation RenderableTimeVaryingVolume::TimestepDocumentation() {
+    using namespace documentation;
+    return {
+        "TimevaryingVolumeTimestep",
+        "volume_timevaryingvolumetimestep",
+        {
+            {
+                KeyLowerDomainBound,
+                new Vector3Verifier<float>,
+                "Specifies the lower domain bounds in the model coordinate system",
+                Optional::No
+            },
+            {
+                KeyUpperDomainBound,
+                new Vector3Verifier<float>,
+                "Specifies the upper domain bounds in the model coordinate system",
+                Optional::No
+            },
+            {
+                KeyDimensions,
+                new Vector3Verifier<float>,
+                "Specifies the number of grid cells in each dimension",
+                Optional::No
+            },
+            {
+                KeyTime,
+                new DoubleVerifier,
+                "Specifies the time (seconds since epoch)",
+                Optional::No
+            },
+            {
+                KeyMinValue,
+                new DoubleVerifier,
+                "Specifies the minimum value stored in the volume"
+            },
+            {
+                KeyMaxValue,
+                new DoubleVerifier,
+                "Specifies the maximum value stored in the volume"
+            }
+        }
+    };
 }
 
 } // namespace volume

@@ -53,15 +53,27 @@ public:
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
+    static documentation::Documentation TimestepDocumentation();
 private:
-    struct Volume {
-        RawVolume<float> rawVolume;
-        ghoul::opengl::Texture texture;
+    struct Timestep {
+        std::string baseName;
+        double time;
+        float minValue;
+        float maxValue;
+        glm::uvec3 dimensions;
+        glm::vec3 lowerDomainBound;
+        glm::vec3 upperDomainBound;
+        bool inRam;
+        bool onGpu;
+        std::unique_ptr<RawVolume<float>> rawVolume;
+        std::shared_ptr<ghoul::opengl::Texture> texture;
     };
 
-    glm::vec3 _lowerDomainBound;
-    glm::vec3 _upperDomainBound;
-    glm::vec3 _domainScale;
+    Timestep* currentTimestep();
+
+    void loadTimestepMetadata(const std::string& path);
 
     float _lowerValueBound;
     float _upperValueBound;
@@ -74,7 +86,7 @@ private:
     properties::StringProperty _sourceDirectory;
     properties::StringProperty _transferFunctionPath;
     
-    std::vector<Volume> _volumeTimesteps;
+    std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
     std::shared_ptr<TransferFunction> _transferFunction;

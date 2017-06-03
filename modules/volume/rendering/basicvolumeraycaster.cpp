@@ -112,6 +112,10 @@ void BasicVolumeRaycaster::preRaycast(
     const RaycastData& data,
     ghoul::opengl::ProgramObject& program)
 {
+    if (!_volumeTexture || !_transferFunction) {
+        return;
+    }
+
     std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
     program.setUniform(stepSizeUniformName, _stepSize);
 
