@@ -210,12 +210,9 @@ void addScreenSpaceRenderable(std::string texturePath) {
         return;
     }
 
-    texturePath = absPath(texturePath);
-    texturePath = FileSys.convertPathSeparator(texturePath, '/');
-
-    std::string luaTable =
-        "{Type = 'ScreenSpaceImage', TexturePath = '" + texturePath + "' }";
-    std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
+    const std::string luaTable =
+        "{Type = 'ScreenSpaceImage', TexturePath = openspace.absPath('" + texturePath + "') }";
+    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
     OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
 }
 } // namespace 
