@@ -176,7 +176,7 @@ bool FieldlinesSequenceManager::getAllFilePathsOfType(
 
     // Get absolute path to
     ghoul::filesystem::Directory dir(absFolderPath, RawPath::Yes);
-    outFilePaths = dir.read(FileSystem::Recursive::Yes, Sort::Yes);
+    outFilePaths = dir.read(FileSystem::Recursive::No, Sort::Yes);
 
     outFilePaths.erase(std::remove_if(
             outFilePaths.begin(), outFilePaths.end(), [extLength, extension](std::string s) {
