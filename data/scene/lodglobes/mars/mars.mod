@@ -160,7 +160,7 @@ return {
                 Image = {
                     ToneMapping = jToneMapping,
                     Exposure = 0.4,
-                    Gamma = 2.2,                                                                      
+                    Gamma = 1.85,                                                                      
                 },
                 Debug = {
                     -- PreCalculatedTextureScale is a float from 1.0 to N, with N > 0.0 and N in Naturals (i.e., 1, 2, 3, 4, 5....)

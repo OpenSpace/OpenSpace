@@ -105,7 +105,7 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _mieScatteringCoeff(glm::vec3(0.f))
     , _ellipsoidRadii(glm::dvec3(0.0))
     , _sunRadianceIntensity(50.0f)
-    , _hdrConstant(0.4f)
+    , _exposureConstant(0.4f)
     , _gammaConstant(1.8f)
     , _renderableClass(NoRenderableClass)
     , _calculationTextureScale(1.0)
@@ -194,7 +194,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     program.setUniform("mieG", _miePhaseConstant);
     program.setUniform("sunRadiance", _sunRadianceIntensity);
 
-    program.setUniform("exposure", _hdrConstant);
+    program.setUniform("exposure", _exposureConstant);
     program.setUniform("gamma", _gammaConstant);
     program.setUniform("RenderableClass", static_cast<int>(_renderableClass));
     
@@ -463,7 +463,7 @@ void AtmosphereDeferredcaster::setSunRadianceIntensity(const float sunRadiance) 
 }
 
 void AtmosphereDeferredcaster::setHDRConstant(const float hdrConstant) {
-    _hdrConstant = hdrConstant;
+    _exposureConstant = hdrConstant;
 }
 
 void AtmosphereDeferredcaster::setGammaConstant(const float gammaConstant) {
@@ -1550,7 +1550,7 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(std::unique_p
     shaderProg->setUniform("betaMieExtinction", _mieExtinctionCoeff);
     shaderProg->setUniform("mieG", _miePhaseConstant);
     shaderProg->setUniform("sunRadiance", _sunRadianceIntensity);
-    shaderProg->setUniform("exposure", _hdrConstant);
+    shaderProg->setUniform("exposure", _exposureConstant);
     shaderProg->setUniform("gamma", _gammaConstant);
     shaderProg->setUniform("RenderableClass", static_cast<int>(_renderableClass));
     shaderProg->setUniform("TRANSMITTANCE_W", (int)_transmittance_table_width);
