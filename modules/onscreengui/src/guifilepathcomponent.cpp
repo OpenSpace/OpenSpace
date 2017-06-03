@@ -22,69 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__
-#define __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__
-
-#include <modules/onscreengui/include/guicomponent.h>
 #include <modules/onscreengui/include/guifilepathcomponent.h>
-#include <modules/onscreengui/include/guihelpcomponent.h>
-#include <modules/onscreengui/include/guiperformancecomponent.h>
-#include <modules/onscreengui/include/guipropertycomponent.h>
-#include <modules/onscreengui/include/guiorigincomponent.h>
-#include <modules/onscreengui/include/guitimecomponent.h>
-#include <modules/onscreengui/include/guiiswacomponent.h>
-#include <modules/onscreengui/include/guiparallelcomponent.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/properties/property.h>
 
-#include <openspace/util/keys.h>
-#include <openspace/util/mouse.h>
+#include <ghoul/filesystem/filesystem.h>
+
+#include "imgui.h"
 
 namespace openspace {
 namespace gui {
 
-class GUI : public GuiComponent {
-public:
-    GUI();
+GuiFilePathComponent::GuiFilePathComponent()
+    : GuiComponent("File Path")
+{}
 
-    void initialize();
-    void deinitialize();
+void GuiFilePathComponent::render() {
+    bool v = _isEnabled;
+    ImGui::Begin("File Path", &v);
 
-    void initializeGL();
-    void deinitializeGL();
+    ImGui::Text(
+        "%s",
+        "These are file paths registered in the current OpenSpace instance."
+    );
+    ImGui::Separator();
 
-    bool mouseButtonCallback(MouseButton button, MouseAction action);
-    bool mouseWheelCallback(double position);
-    bool keyCallback(Key key, KeyModifier modifier, KeyAction action);
-    bool charCallback(unsigned int character, KeyModifier modifier);
+    ImGui::Columns(2);
+    ImGui::Separator();
+    std::vector<std::string> tokens = FileSys.tokens();
+    for (const std::string& t : tokens) {
+        ImGui::Text("%s", t.c_str());
+        ImGui::NextColumn();
+        ImGui::Text("%s", absPath(t).c_str());
+        ImGui::NextColumn();
+        ImGui::Separator();
+    }
+    ImGui::End();
+}
 
-    void startFrame(float deltaTime, const glm::vec2& windowSize,
-        const glm::vec2& dpiScaling, const glm::vec2& mousePos, uint32_t mouseButtons);
-    void endFrame();
-
-    void render();
-
-//protected:
-    GuiHelpComponent _help;
-    GuiFilePathComponent _filePath;
-    GuiOriginComponent _origin;
-    GuiPerformanceComponent _performance;
-    GuiPropertyComponent _globalProperty;
-    GuiPropertyComponent _property;
-    GuiPropertyComponent _screenSpaceProperty;
-    GuiPropertyComponent _virtualProperty;
-    GuiTimeComponent _time;
-    GuiIswaComponent _iswa;
-    GuiParallelComponent _parallel;
-
-private:
-    void renderAndUpdatePropertyVisibility();
-
-    properties::Property::Visibility _currentVisibility;
-
-};
-
-} // namespace gui
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUI___H__
+} // gui
+} // openspace
