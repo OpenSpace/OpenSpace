@@ -30,6 +30,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
@@ -40,6 +41,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
 
 #include <modules/gpufieldlines/util/gpufieldlinesmanager.h>
 
@@ -783,7 +785,9 @@ void RenderableGpuFieldlines::render(const RenderData& data) {
     }
 }
 
-void RenderableGpuFieldlines::update(const UpdateData&) {
+void RenderableGpuFieldlines::update(const UpdateData& data) {
+    _currentTime = data.time.j2000Seconds();
+
     if (_program->isDirty()) {
         _program->rebuildFromFile();
     }
@@ -888,7 +892,6 @@ void RenderableGpuFieldlines::update(const UpdateData&) {
 }
 
 bool RenderableGpuFieldlines::isWithinInterval() {
-    _currentTime = Time::ref().j2000Seconds();
     return (_currentTime >= _seqStartTime) &&
            (_isMorphing ? _currentTime < _startTimes[_numberOfStates-1] // nothing to morph to after last state
                         : _currentTime < _seqEndTime);

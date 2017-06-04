@@ -25,7 +25,10 @@
 #ifndef __OPENSPACE_MODULE_GPUFIELDLINES___RENDERABLEGPUFIELDLINES___H__
 #define __OPENSPACE_MODULE_GPUFIELDLINES___RENDERABLEGPUFIELDLINES___H__
 
-#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -39,8 +42,15 @@
 
 #include <modules/volume/rawvolume.h>
 
+#include <memory>
+#include <string>
+#include <vector>
+
 
 namespace ghoul {
+    namespace filesystem {
+        class File;
+    }
     namespace opengl {
         class Texture;
         class TextureUnit;

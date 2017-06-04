@@ -567,7 +567,7 @@ double GpuFieldlinesManager::getTime(ccmc::Kameleon* kameleon) {
 
         if (seqStartStr.length() == 24){
             seqStartDbl =
-                    Time::ref().convertTime(
+                    Time::convertTime(
                             seqStartStr.substr(0, seqStartStr.length() - 2));
         }
 

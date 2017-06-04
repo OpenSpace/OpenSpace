@@ -1077,7 +1077,7 @@ double FieldlinesSequenceManager::getTime(ccmc::Kameleon* kameleon) {
 
         if (seqStartStr.length() == 24){
             seqStartDbl =
-                    Time::ref().convertTime(
+                    Time::convertTime(
                             seqStartStr.substr(0, seqStartStr.length() - 2));
         } else {
             LWARNING("No starting time attribute could be found in the .cdf file.\n\t" <<

@@ -32,10 +32,12 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 
 #include <ccmc/Kameleon.h>
@@ -664,8 +666,8 @@ bool RenderableFieldlinesSequence::initialize() {
 
             ghoul::opengl::Texture& texture = _transferFunction->getTexture();
             // TOGGLE BETWEEN NEAREST AND LINEAR SAMPLING
-            texture.setFilter(_useNearestSampling ? texture.FilterMode::Linear :
-                                                    texture.FilterMode::Nearest);
+            texture.setFilter(_useNearestSampling ? ghoul::opengl::Texture::FilterMode::Linear :
+                                                    ghoul::opengl::Texture::FilterMode::Nearest);
         });
 
         _isClampingColorValues.onChange([this] {
@@ -774,7 +776,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
                 glm::dmat4(scaleTransform);
         glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
-        int testTime = static_cast<int>(Time::ref().deltaTime() * OsEng.runTime() * 100) / 5;
+        int testTime = static_cast<int>(data.time.deltaTime() * OsEng.runTime() * 100) / 5;
         // double testTime = _;
 
         // Set uniforms for shaders
@@ -879,7 +881,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
     }
 }
 
-void RenderableFieldlinesSequence::update(const UpdateData&) {
+void RenderableFieldlinesSequence::update(const UpdateData& data) {
+    _currentTime = data.time.j2000Seconds();
     if (_activeProgramPtr->isDirty()) {
         _activeProgramPtr->rebuildFromFile();
     }
@@ -949,7 +952,6 @@ void RenderableFieldlinesSequence::update(const UpdateData&) {
 }
 
 bool RenderableFieldlinesSequence::isWithinSequenceInterval() {
-    _currentTime = Time::ref().j2000Seconds();
     return (_currentTime >= _seqStartTime) &&
            (_isMorphing ? _currentTime < _startTimes[_numberOfStates-1] // nothing to morph to after last state
                         : _currentTime < _seqEndTime);
