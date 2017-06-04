@@ -70,7 +70,8 @@ void main() {
         (in_position.y < domainLimY.x) || (in_position.y > domainLimY.y) ||
         (in_position.z < domainLimZ.x) || (in_position.z > domainLimZ.y) ||
         (radius        < domainLimR.x) || (radius        > domainLimR.y) ||
-        unitIntensity < tFIterestRange.x || unitIntensity > tFIterestRange.y ) {
+        ((colorMethod == UNIT_DEPENDENT_COLOR) && (unitIntensity < tFIterestRange.x ||
+                                                   unitIntensity > tFIterestRange.y))) {
         fragment_discard = 0.0;
     }
 
