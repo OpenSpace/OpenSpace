@@ -44,6 +44,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.h
 
+    # Video
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/h265decoder.h
+
     ${CMAKE_CURRENT_SOURCE_DIR}/util/streambuffer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/streambuffer.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstate.h
