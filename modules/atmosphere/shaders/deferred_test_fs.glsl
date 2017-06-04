@@ -719,7 +719,7 @@ void main() {
         dvec4 tmpRInvPos            = dInverseCamRotTransform * farthestPosition;        
         */
         // Version with milkway enabled
-        dvec4 tmpRInvPos            = dInverseCamRotTransform * meanPosition;        
+        dvec4 tmpRInvPos            = dInverseCamRotTransform * dSgctEyeToOSEyeTranform * meanPosition;        
         dvec4 fragWorldCoords       = dvec4(dvec3(tmpRInvPos) + dCampos, 1.0);
         //dvec4 tmpRInvNormal         = dInverseCamRotTransform * meanNormal;
         //dvec4 fragNormalWorldCoords = dvec4(dvec3(tmpRInvNormal) + dCampos, 1.0);
