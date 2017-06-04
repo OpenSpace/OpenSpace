@@ -25,7 +25,9 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
+set(H264_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/libde265/")
 add_subdirectory(${OPENJPEG_ROOT_DIR})
+add_subdirectory(${H264_ROOT_DIR})
 
 set(HEADER_FILES
     # Openjpeg stuff
@@ -82,5 +84,8 @@ set(MODULE_NAME openspace-module-solarbrowsing)
 
 target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${HEADER_FILES})
 # Link to openjpeg
-target_link_libraries(${MODULE_NAME} openjp2)
+target_link_libraries(${MODULE_NAME} openjp2 de265)
 #target_link_libraries(${MODULE_NAME} ${GROK_LIBRARY_NAME} ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+
+
+
