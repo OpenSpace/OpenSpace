@@ -260,7 +260,7 @@ DecodeData RenderableSolarImagery::getDecodeDataFromOsTime(const int& osTime) {
     //const std::string stateFilename = state.contents()->filename;
     //DecodeData decodeData {_imageSize * _imageSize, stateFilename, _resolutionLevel, _verboseMode, timeObserved};
 
-    DecodeData decodeData {std::move(im), _resolutionLevel, timeObserved, _verboseMode};
+    DecodeData decodeData {std::move(im), static_cast<unsigned int>(_resolutionLevel), timeObserved, _verboseMode};
     return std::move(decodeData);
 }
 

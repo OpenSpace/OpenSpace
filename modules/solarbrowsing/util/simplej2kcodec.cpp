@@ -8,7 +8,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <SOIL.h>
 
 typedef std::chrono::high_resolution_clock Clock;
 
@@ -102,26 +101,26 @@ SimpleJ2kCodec::~SimpleJ2kCodec(){
     Destroy();
 }
 
-void SimpleJ2kCodec::DecodeBMPIntoBuffer(const std::string& path, unsigned char* buffer) {
+// void SimpleJ2kCodec::DecodeBMPIntoBuffer(const std::string& path, unsigned char* buffer) {
 
-  auto t1 = Clock::now();
+//   auto t1 = Clock::now();
 
-  int width, height;
-  unsigned char* image =  SOIL_load_image(path.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
-  auto t2 = Clock::now();
+//   int width, height;
+//   unsigned char* image =  SOIL_load_image(path.c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
+//   auto t2 = Clock::now();
 
-  // TODO: efficiency
-  for (int i = 0; i < width * height; i++) {
-    buffer[i] = image[i];
-  }
+//   // TODO: efficiency
+//   for (int i = 0; i < width * height; i++) {
+//     buffer[i] = image[i];
+//   }
 
-  if (_verboseMode) {
-      std::cout
-            << "Decode time BMP "
-            << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
-            << " ms" << std::endl;
-  }
-}
+//   if (_verboseMode) {
+//       std::cout
+//             << "Decode time BMP "
+//             << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+//             << " ms" << std::endl;
+//   }
+// }
 
 void SimpleJ2kCodec::DecodePGMIntoBuffer(const std::string& path, unsigned char* buffer) {
   auto t1 = Clock::now();
