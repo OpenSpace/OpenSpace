@@ -408,8 +408,6 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     json jfile;// = json::parse(ifs);
     ifs >> jfile;
 
-    size_t numLines = jfile.size();
-
     // if the JSON file contains the key "0. meta" it is in fieldline state format
     if (jfile.find("0. meta") != jfile.end()) {
         // check my format
@@ -455,8 +453,133 @@ bool FieldlinesSequenceManager::getFieldlinesState(
             outFieldlinesState._extraVariables.push_back(it.value());
         }
 
-    } else {
-        // in the json file I have gotten from CCMC, fieldline data is structured like this:
+    } else if (jfile.find("0") != jfile.end()) {
+        // File is in a format provided by CCMC.. currently 2 different available
+
+        // tmp json variable to determina which CCMC structure it is.
+        json jsonTmp = jfile["0"];
+        const std::string strTrace = "trace";
+        if (jsonTmp.find(strTrace) != jsonTmp.end()) {
+            // New json format provided for SUN-EARTH event at AMNH June 27th 2017.. for BATSRUS magnetosphere
+            // is structured something like this:
+            //
+            // {
+            //     "0":{
+            //         "ux": -52.186,
+            //         "uy": 25.266,
+            //         "uz": 14.403,
+            //         "transition": 0.118,
+            //         "x": 13.200,
+            //         "y": 1.4780,
+            //         "z": 0.0,
+            //         "resolution": 0.5,
+            //         "topology": "solar_wind",
+            //         "trace": {
+            //             "index": [0,1,...2081,2082],
+            //             "columns": ["x","y","z","s","temperature","rho","j_para"],
+            //             "data": [[8.694,127.853,115.304,0.0,0.047,9.249,-5e-10],...,[8.698,127.253,114.768,0.800,0.0,9.244,-5e-10]]
+            //         },
+            //     },
+            //     "1":{
+            //         "ux": -52.1869049072,
+            //         "uy": 25.2660446167,
+            //         "uz": 14.4033794403,
+            //         "transition": 0.1182744259,
+            //         "x": 13.2007786501,
+            //         "y": 1.4780422477,
+            //         "z": 0.0,
+            //         "resolution": 0.5,
+            //         "topology": "solar_wind",
+            //         "trace": {
+            //             "index": [0,1,...2081,2082],
+            //             "columns": ["x","y","z","s","temperature","rho","j_para"],
+            //             "data": [[8.698,127.845,115.306,0.0,0.027,9.249,-5e-10],...,[8.698,127.253,114.768,0.8,0.004,9.244,-5e-10]]
+            //         },
+            //     }
+            // }
+
+            // Determine how many variables there are in each line. (Assumes each line is structured the same)
+            const std::string strColumns = "columns";
+            std::vector<std::string> variableNames = jsonTmp[strTrace][strColumns];
+            //if (jsonTmp.find(strTrace) == jsonTmp.end()) {
+            //}
+
+            // TODO: Don't hardcode this!!
+            const float scalingFactor = R_E_TO_METER;
+
+            const size_t numDataVariables = variableNames.size();
+            if (numDataVariables < 3) {
+                LERROR("Json file: " << pathToJsonFile << " doesn't contain necessary fields." <<
+                        "Expects a field \"columns\" which contains at least 3 variables representing position");
+                return false;
+            }
+            auto xIter = std::find(variableNames.begin(), variableNames.end(), "x");
+            auto yIter = std::find(variableNames.begin(), variableNames.end(), "y");
+            auto zIter = std::find(variableNames.begin(), variableNames.end(), "z");
+            if (xIter == variableNames.end() || yIter == variableNames.end() || zIter == variableNames.end() ) {
+               LERROR("Couldn't find \"x\", \"y\" and/or \"z\" variable in field \"columns\" of file: " << pathToJsonFile);
+            }
+            // The essential values exists!
+            size_t xIdx = std::distance(variableNames.begin(), xIter);
+            size_t yIdx = std::distance(variableNames.begin(), yIter);
+            size_t zIdx = std::distance(variableNames.begin(), zIter);
+
+            std::vector<size_t> extraVarIdx;
+
+            const size_t numExtraVariables = numDataVariables - 3;
+            if (numExtraVariables > 0) {
+                // Extra variables exist
+                for (size_t j = 0 ; j < numDataVariables; ++j) {
+                    if (j == xIdx || j == yIdx || j == zIdx) {
+                        continue;
+                    }
+                    outFieldlinesState._extraVariableNames.push_back(variableNames[j]);
+                    extraVarIdx.push_back(j);
+                }
+                // TODO: Remove this hardcoded stuff, just for the event
+                // if ( sghhh.key() == "s") {
+
+                // }
+                outFieldlinesState._extraVariables.resize(numExtraVariables);
+            }
+
+            size_t lineStartIdx = 0;
+            // Loop through all fieldlines
+            for (json::iterator fieldlineIt = jfile.begin(); fieldlineIt != jfile.end(); ++fieldlineIt) {
+                json fieldline = *fieldlineIt;
+
+                // TODO: CREATE A SEPARATE GENERALIZED FUNCTION FOR READING A FIELDLINE IN THIS FORMAT
+                std::vector<std::vector<float>> jsonData    = fieldline[strTrace]["data"];
+                // json jsonData    = fieldline[strTrace]["data"];
+                size_t numPoints = jsonData.size();
+                for (size_t j = 0; j < numPoints; ++j) {
+                    const std::vector<float>& variables = jsonData[j];
+                    // json variables = jsonData[j];
+                    outFieldlinesState._vertexPositions.push_back(glm::vec3(variables[xIdx], variables[yIdx], variables[zIdx]) * scalingFactor);
+                    for (size_t k = 0; k < numExtraVariables; ++k ) {
+                        outFieldlinesState._extraVariables[k].push_back(variables[extraVarIdx[k]]);
+                    }
+                }
+                outFieldlinesState._lineCount.push_back(numPoints);
+                outFieldlinesState._lineStart.push_back(lineStartIdx);
+                lineStartIdx += numPoints;
+
+                // TODO REMOVE THIS HARDCODED STUFF!!
+                outFieldlinesState.setModel(FieldlinesState::Model::batsrus);
+                size_t numChars = pathToJsonFile.size();
+                std::string timeString = pathToJsonFile.substr(numChars - 32, 19);
+                timeString = timeString.substr(0, 4) + "-" + timeString.substr(4, 2) + "-" +
+                             timeString.substr(6, 2) + "T" + timeString.substr(9, 2) + ":" +
+                             timeString.substr(11,2) + ":" + timeString.substr(13,2) + "." +
+                             timeString.substr(16,3);
+                double time = Time::convertTime(timeString);
+                outFieldlinesState._triggerTime = time;
+            }
+            // size_t numExtras                = jfile["0. meta"]["4. numExtras"];
+            return true;
+        }
+
+        // In the old json file I have gotten from CCMC, fieldline data is structured like this:
         // {
         //   "0": {
         //     "y": [value0, value1, value2],
@@ -495,7 +618,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
             outFieldlinesState._triggerTime = 479649600.0;
         }
 
-        // iterate through each line
+        // iterate through each field line
         for (json::iterator fieldlineIt = jfile.begin(); fieldlineIt != jfile.end(); ++fieldlineIt) {
             json fieldline = *fieldlineIt;
 
@@ -527,6 +650,9 @@ bool FieldlinesSequenceManager::getFieldlinesState(
             outFieldlinesState._lineCount.push_back(static_cast<GLsizei>(pointCount));
             outFieldlinesState._lineStart.push_back(static_cast<GLint>(lineStart));
         }
+    } else {
+        LERROR("Unable to read fieldlines from: " << pathToJsonFile << "Couldn't recognise structure of data!" );
+        return false;
     }
 
     return true;
@@ -703,7 +829,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     // ------ LOOP THROUGH THE SEED POINTS, TRACE AND CONVERT TO THE DESIRED FORMAT ------
     // TODO CREATE MORE VECTORS
     // std::vector<float> xtraVarVec;
-    int lineStart = 0;
+    size_t lineStart = 0;
     for (glm::vec3 seedPoint : inSeedPoints) {
         //--------------------------------------------------------------------------//
         // We have to create a new tracer (or actually a new interpolator) for each //
@@ -726,7 +852,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                                                                   seedPoint.z);
 
         outFieldlinesState._lineStart.push_back(lineStart);
-        int lineCount = 0;
+        size_t lineCount = 0;
 
         if (preConversionResampling) {
             resampleCcmcFieldline(numResamples, resamplingOption, ccmcFieldline);
