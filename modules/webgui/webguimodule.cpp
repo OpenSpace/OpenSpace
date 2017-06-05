@@ -36,23 +36,17 @@ WebGUIModule::WebGUIModule()
     CefMainArgs args;
     CefSettings settings;
 
-#ifdef __APPLE__
-    CefString(&settings.browser_subprocess_path).FromASCII((char*) SUBPROCESS_PATH.c_str());
-#endif
+//#ifdef __APPLE__
+//#endif
 //#ifdef WIN32
 //    TODO(klas): This is for some reason causing a crash -- use DoMessageLoopWork instead
 //    settings.multi_threaded_message_loop = true;
 //#endif
-//#ifdef DEBUG
+    CefString(&settings.browser_subprocess_path).FromASCII((char*) SUBPROCESS_PATH.c_str());
     attachDebugSettings(settings);
-//#endif
 
-    int exitCode = CefExecuteProcess(args, nullptr, NULL);
+//    CefExecuteProcess(args, nullptr, NULL);
     CefInitialize(args, settings, nullptr, NULL);
-    if (exitCode >= 0) {
-        // The sub-process terminated, exit now.
-//        return exitCode;
-    }
     LDEBUG("Initializing CEF... done!");
 
     renderHandler = new GUIRenderHandler();
@@ -96,9 +90,8 @@ void WebGUIModule::internalInitialize() {
 
 void WebGUIModule::initialize() {
     initializeCallbacks();
-    loadLocalPath("${MODULE_WEBGUI}/web/transparent_test.html");
-//    loadLocalPath("${MODULE_WEBGUI}/ext/cef/cef_binary_3.3029.1617.gaf831b6_windows64/tests/shared/resources/osr_test.html");
-//    load("http://html5demos.com/");
+//    loadLocalPath("${MODULE_WEBGUI}/web/transparent_test.html");
+    load("http://localhost:8080/");
     WindowWrapper& wrapper = OsEng.windowWrapper();
     reshape(wrapper);
 }

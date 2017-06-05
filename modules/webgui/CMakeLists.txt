@@ -130,7 +130,7 @@ set(WEBGUI_RESOURCES_SRCS
   )
  
 # place helper in separate executable
-set(CEF_HELPER_TARGET "webgui_cef_helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+set(CEF_HELPER_TARGET "openspace_gui_helper" CACHE INTERNAL "CEF_HELPER_TARGET")
 
 #
 # CEF platform-specific config
@@ -149,17 +149,19 @@ if(OS_MACOSX)
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
         )
 
-  # Fix the framework rpath in the helper executable.
+    # Fix the framework rpath in the helper executable.
     FIX_MACOSX_HELPER_FRAMEWORK_RPATH(${CEF_HELPER_TARGET})
 endif()
 
 if (OS_WINDOWS)
-     add_executable(${CEF_HELPER_TARGET} ${WEBGUI_HELPER_SOURCES})
-     SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
-     add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
-     target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
-     # Add the custom manifest files to the executable.
-#     ADD_WINDOWS_CEF_MANIFEST("${WEBGUI_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
+    message(STATUS "Setting up WebGUI CEF helper executable: ${CEF_HELPER_TARGET}")
+    SET_OPENSPACE_CEF_TARGET_OUT_DIR()
+    add_executable(${CEF_HELPER_TARGET} ${WEBGUI_HELPER_SOURCES})
+    SET_EXECUTABLE_TARGET_PROPERTIES(${CEF_HELPER_TARGET})
+    add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
+    target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+    # Add the custom manifest files to the executable.
+    ADD_WINDOWS_CEF_MANIFEST("${WEBGUI_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
 endif (OS_WINDOWS)
 
 

@@ -218,6 +218,8 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
 		target_link_libraries(${CEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
         include_directories(${CEF_ROOT})
 
+        add_dependencies(${CEF_TARGET} libcef_dll_wrapper "${CEF_HELPER_TARGET}")
+
 		if(USE_SANDBOX)
 			# Logical target used to link the cef_sandbox library.
             message(STATUS "Using CEF in Sandboxed mode.")
