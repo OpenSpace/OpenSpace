@@ -455,7 +455,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
   if (groundHit) {
     return finalScatteringRadiance;
   } else {
-    return ((r-Rg)/(Rt-Rg))*spaceColor.rgb + finalScatteringRadiance;
+    return ((r-Rg)/(Rt-Rg))*spaceColor.rgb * 1.8 + finalScatteringRadiance;
   }
   
 }
@@ -791,7 +791,7 @@ void main() {
           renderTarget = finalRadiance;
         }
       } else {
-        renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
+        renderTarget = vec4(HDR(meanColor.xyz * 1.8), meanColor.a);
         //renderTarget = meanColor;
       }
     }                     

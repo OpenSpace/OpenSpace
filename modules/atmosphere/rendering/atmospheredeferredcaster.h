@@ -96,12 +96,15 @@ public:
     void setPlanetRadius(const float planetRadius);
     void setPlanetAverageGroundReflectance(const float averageGReflectance);
     void setRayleighHeightScale(const float rayleighHeightScale);
+    void enableOzone(const bool enable);
+    void setOzoneHeightScale(const float ozoneHeightScale);
     void setMieHeightScale(const float mieHeightScale);
     void setMiePhaseConstant(const float miePhaseConstant);
     void setSunRadianceIntensity(const float sunRadiance);
     void setHDRConstant(const float hdrConstant);
     void setGammaConstant(const float gammaConstant);
     void setRayleighScatteringCoefficients(const glm::vec3 & rayScattCoeff);
+    void setOzoneExtinctionCoefficients(const glm::vec3 & ozoneExtCoeff);
     void setMieScatteringCoefficients(const glm::vec3 & mieScattCoeff);
     void setMieExtinctionCoefficients(const glm::vec3 & mieExtCoeff);
     void setEllipsoidRadii(const glm::dvec3 & radii);
@@ -162,19 +165,22 @@ private:
     // Atmosphere Data
     bool _atmosphereCalculated;
     bool _atmosphereEnabled;
+    bool _ozoneEnabled;
     float _atmosphereRadius;
     float _atmospherePlanetRadius;
     float _planetAverageGroundReflectance;
     float _rayleighHeightScale;
+    float _ozoneHeightScale;
     float _mieHeightScale;
     float _miePhaseConstant;
     float _sunRadianceIntensity;
     float _exposureConstant;
     float _gammaConstant;
-
-    glm::vec3 _mieExtinctionCoeff;
+    
     glm::vec3 _rayleighScatteringCoeff;
+    glm::vec3 _ozoneExtinctionCoeff;
     glm::vec3 _mieScatteringCoeff;
+    glm::vec3 _mieExtinctionCoeff;
     glm::dvec3 _ellipsoidRadii;
 
     // Atmosphere Texture Data Geometry

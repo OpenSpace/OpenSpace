@@ -72,6 +72,8 @@ namespace {
     const std::string keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
     const std::string keyRayleigh                 = "Rayleigh";
     const std::string keyRayleighHeightScale      = "H_R";
+    const std::string keyOzone                    = "Ozone";
+    const std::string keyOzoneHeightScale         = "H_O";
     const std::string keyMie                      = "Mie";
     const std::string keyMieHeightScale           = "H_M";
     const std::string keyMiePhaseConstant         = "G";

@@ -75,16 +75,23 @@ return {
                     -- Thichkness of atmosphere if its density were uniform, in Km
                     H_R = 8.0,
                 },
+                Ozone = {
+                     Coefficients = {
+                        -- Extinction coefficients 
+                        Extinction = {3.426E-5, 8.298E-5, 0.356E-5}
+                     },
+                     H_O = 8.0,
+                },
                 -- Default
                 Mie = {
                     Coefficients = {
                         -- Reflection coefficients are given in km^-1
                         Scattering = {4.0e-3, 4.0e-3, 4.0e-3},
                         --Scattering = {2.0e-5, 2.0e-5, 2.0e-5},
-                        -- Extinction coefficients are a fraction of the Scattering coefficients
+                        -- Extinction coefficients are a fraction of the Mie coefficients
                         Extinction = {4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9}
-                        -- Height scale (atmosphere thickness for constant density) in Km
                     },
+                    -- Height scale (atmosphere thickness for constant density) in Km
                     H_M = 1.2,
                     -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
                     G = 0.85

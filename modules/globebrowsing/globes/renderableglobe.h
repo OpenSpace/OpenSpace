@@ -79,7 +79,7 @@ public:
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
         properties::FloatProperty lodScaleFactor;
-        properties::FloatProperty cameraMinHeight;
+        properties::FloatProperty cameraMinHeight;        
     };
 
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
@@ -89,7 +89,11 @@ public:
         properties::FloatProperty rayleighHeightScaleP;
         properties::FloatProperty rayleighScatteringCoeffXP;
         properties::FloatProperty rayleighScatteringCoeffYP;
-        properties::FloatProperty rayleighScatteringCoeffZP;
+        properties::FloatProperty rayleighScatteringCoeffZP;        
+        properties::FloatProperty ozoneHeightScaleP;
+        properties::FloatProperty ozoneLayerExtinctionCoeffXP;
+        properties::FloatProperty ozoneLayerExtinctionCoeffYP;
+        properties::FloatProperty ozoneLayerExtinctionCoeffZP;
         properties::FloatProperty mieHeightScaleP;
         properties::FloatProperty mieScatteringCoefficientP;
         properties::FloatProperty mieScatteringExtinctionPropCoefficientP;
@@ -97,6 +101,7 @@ public:
         properties::FloatProperty sunIntensityP;
         properties::FloatProperty hdrExpositionP;
         properties::FloatProperty gammaConstantP;
+        properties::BoolProperty ozoneLayerEnabledP;
     };
 
     const AtmosphereProperties& atmosphereProperties() const;
@@ -154,18 +159,22 @@ private:
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
     // Atmosphere Data
     bool _atmosphereEnabled;
+    bool _ozoneLayerEnabled;
     float _atmosphereRadius;
     float _atmospherePlanetRadius;
     float _planetAverageGroundReflectance;
     float _rayleighHeightScale;
+    float _ozoneLayerHeightScale;
     float _mieHeightScale;
     float _miePhaseConstant;
     float _sunRadianceIntensity;
     float _exposureConstant;
     float _gammaConstant;
-    glm::vec3 _mieExtinctionCoeff;
+    
     glm::vec3 _rayleighScatteringCoeff;
+    glm::vec3 _ozoneLayerExtinctionCoeff;
     glm::vec3 _mieScatteringCoeff;
+    glm::vec3 _mieExtinctionCoeff;
 
     // Atmosphere Debug
     bool _saveCalculationsToTexture;

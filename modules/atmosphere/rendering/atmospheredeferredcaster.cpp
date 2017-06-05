@@ -94,15 +94,18 @@ AtmosphereDeferredcaster::AtmosphereDeferredcaster()
     , _nu_samples(8)
     , _atmosphereCalculated(false)
     , _atmosphereEnabled(false)
+    , _ozoneEnabled(false)
     , _atmosphereRadius(0.f)
     , _atmospherePlanetRadius(0.f)
     , _planetAverageGroundReflectance(0.f)
     , _rayleighHeightScale(0.f)
+    , _ozoneHeightScale(0.f)
     , _mieHeightScale(0.f)
-    , _miePhaseConstant(0.f)
-    , _mieExtinctionCoeff(glm::vec3(0.f))
+    , _miePhaseConstant(0.f)    
     , _rayleighScatteringCoeff(glm::vec3(0.f))
+    , _ozoneExtinctionCoeff(glm::vec3(0.f))
     , _mieScatteringCoeff(glm::vec3(0.f))
+    , _mieExtinctionCoeff(glm::vec3(0.f))
     , _ellipsoidRadii(glm::dvec3(0.0))
     , _sunRadianceIntensity(50.0f)
     , _exposureConstant(0.4f)
@@ -193,6 +196,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     program.setUniform("betaMieExtinction", _mieExtinctionCoeff);
     program.setUniform("mieG", _miePhaseConstant);
     program.setUniform("sunRadiance", _sunRadianceIntensity);
+    program.setUniform("ozoneLayerEnabled", _ozoneEnabled);
+    program.setUniform("HO", _ozoneHeightScale);
+    program.setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
 
     program.setUniform("exposure", _exposureConstant);
     program.setUniform("gamma", _gammaConstant);
@@ -450,6 +456,15 @@ void AtmosphereDeferredcaster::setRayleighHeightScale(const float rayleighHeight
     _rayleighHeightScale = rayleighHeightScale;
 }
 
+void AtmosphereDeferredcaster::enableOzone(const bool enable) {
+    _ozoneEnabled = enable;
+}
+
+void AtmosphereDeferredcaster::setOzoneHeightScale(const float ozoneHeightScale) {
+    _ozoneHeightScale = ozoneHeightScale;
+}
+
+
 void AtmosphereDeferredcaster::setMieHeightScale(const float mieHeightScale) {
     _mieHeightScale = mieHeightScale;
 }
@@ -472,6 +487,10 @@ void AtmosphereDeferredcaster::setGammaConstant(const float gammaConstant) {
 
 void AtmosphereDeferredcaster::setRayleighScatteringCoefficients(const glm::vec3 & rayScattCoeff) {
     _rayleighScatteringCoeff = rayScattCoeff;
+}
+
+void AtmosphereDeferredcaster::setOzoneExtinctionCoefficients(const glm::vec3 & ozoneExtCoeff) {
+    _ozoneExtinctionCoeff = ozoneExtCoeff;
 }
 
 void AtmosphereDeferredcaster::setMieScatteringCoefficients(const glm::vec3 & mieScattCoeff) {
@@ -1563,6 +1582,9 @@ void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(std::unique_p
     shaderProg->setUniform("SAMPLES_MU", (int)_mu_samples);
     shaderProg->setUniform("SAMPLES_MU_S", (int)_mu_s_samples);
     shaderProg->setUniform("SAMPLES_NU", (int)_nu_samples); 
+    shaderProg->setUniform("ozoneLayerEnabled", _ozoneEnabled);
+    shaderProg->setUniform("HO", _ozoneHeightScale);
+    shaderProg->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
 }
 
 void AtmosphereDeferredcaster::checkFrameBufferState(const std::string & codePosition) const {
