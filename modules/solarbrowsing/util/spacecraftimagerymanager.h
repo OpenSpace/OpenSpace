@@ -55,13 +55,16 @@ struct ImageMetadata {
     bool isCoronaGraph;
 };
 
-// struct ImageMetadata {
-//     double timeObserved;
-//     std::string filename;
-//     bool operator<(const double val) const {
-//         return timeObserved < val;
-//     }
-// };
+struct VideoMetadata {
+    std::string path;
+    int startTime;
+    int endTime;
+    bool isCoronaGraph;
+    float scale;
+    int resolution;
+    glm::vec2 centerPixel;
+    int frameUpdateInterval;
+};
 
 class SpacecraftImageryManager : public ghoul::Singleton<SpacecraftImageryManager> {
     friend class ghoul::Singleton<SpacecraftImageryManager>;
@@ -70,10 +73,14 @@ public:
     SpacecraftImageryManager();
     void ConvertTileJ2kImages(const std::string& path, const unsigned int tileWidth,
                               const unsigned int tileHeight);
+    void loadVideoMetadata(const std::string& path, std::unordered_map<std::string, VideoMetadata>& _videoMetadata);
     void loadTransferFunctions(
           const std::string& path,
           std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap,
           const std::unordered_set<std::string>& _filter);
+    void loadTransferFunctions(
+          const std::string& path,
+          std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap);
     std::vector<ImageMetadata> loadImageMetadata(const std::string& path);
     void loadImageMetadata(
       const std::string& path,

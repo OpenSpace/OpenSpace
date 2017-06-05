@@ -94,6 +94,43 @@ void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
 
 void SpacecraftImageryManager::loadTransferFunctions(
     const std::string& path,
+    std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap)
+{
+    using RawPath = ghoul::filesystem::Directory::RawPath;
+    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
+
+    if (!FileSys.directoryExists(sequenceDir)) {
+        LERROR("Could not load directory '" << sequenceDir.path() << "'");
+    }
+
+    using Recursive = ghoul::filesystem::Directory::RawPath;
+    using Sort = ghoul::filesystem::Directory::Sort;
+    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
+
+    for (auto seqPath : sequencePaths) {
+        if (size_t position = seqPath.find_last_of(".") + 1) {
+            if (position != std::string::npos) {
+                ghoul::filesystem::File currentFile(seqPath);
+                std::string extension = currentFile.fileExtension();
+                if (extension == "txt") {
+                    std::string key = currentFile.baseName();
+                    //std::string filterKey = key;
+                    //std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
+                      //             ::tolower);
+
+                    // If filter is empty or value exist
+                    //if (_filter.size() == 0
+                      //  || _filter.find(filterKey) != _filter.end()) {
+                        _tfMap[key] = std::make_shared<TransferFunction>(seqPath);
+                    //}
+                }
+            }
+        }
+    }
+}
+
+void SpacecraftImageryManager::loadTransferFunctions(
+    const std::string& path,
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap,
     const std::unordered_set<std::string>& _filter)
 {
@@ -252,6 +289,54 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
       //     << " ms" << std::endl);
     return im;
 
+}
+
+void SpacecraftImageryManager::loadVideoMetadata(const std::string& path, std::unordered_map<std::string, VideoMetadata>& _videoMetadata)
+{
+
+    LDEBUG("Begin loading video metadata");
+
+    using RawPath = ghoul::filesystem::Directory::RawPath;
+    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
+
+    if (!FileSys.directoryExists(sequenceDir)) {
+        LERROR("Could not load directory '" << sequenceDir.path() << "'");
+    }
+
+    unsigned int count = 0;
+    using Recursive = ghoul::filesystem::Directory::RawPath;
+    using Sort = ghoul::filesystem::Directory::Sort;
+    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
+
+    for (auto seqPath : sequencePaths) {
+        if (size_t position = seqPath.find_last_of(".") + 1) {
+            if (position != std::string::npos) {
+                ghoul::filesystem::File currentFile(seqPath);
+                std::string extension = currentFile.fileExtension();
+                if (extension == "h265") {
+                    // // TODO(mnoven): Prettify or read metadata instead
+                    VideoMetadata vm;
+
+                    std::string fileName = currentFile.filename();
+                    std::string startTime = "2012-07-12T00:00:33.62";
+                    std::string endTime = "2012-07-12T23:59:33.62";
+
+                    vm.path = fileName;
+                    vm.startTime = OsEng.timeManager().time().convertTime(startTime);
+                    vm.endTime = OsEng.timeManager().time().convertTime(endTime);
+                    vm.isCoronaGraph = false;
+                    vm.scale = 0.76827;
+                    vm.resolution = 4096;
+                    vm.centerPixel = glm::vec2(2048.5, 2048.5);
+                    // Read name from text file
+                    _videoMetadata["aia_aia_93"] = vm;
+                }
+            }
+        }
+    }
+
+    LDEBUG("Finish loading imagery metadata");
+    LDEBUG(count << " Images loaded");
 }
 
 void SpacecraftImageryManager::loadImageMetadata(
