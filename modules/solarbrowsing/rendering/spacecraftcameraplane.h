@@ -33,7 +33,7 @@ class TransferFunction;
 class SpacecraftCameraPlane {
 
 public:
-    SpacecraftCameraPlane(glm::vec2 centerPixel, float scaleFactor, double moveDistance);
+    SpacecraftCameraPlane(/*glm::vec2 centerPixel, float scaleFactor,*/ double moveDistance);
 
     void render(const RenderData& data, ghoul::opengl::Texture& imageryTexture,
                 TransferFunction* lut, const glm::dvec3& sunPositionWorld,
@@ -70,10 +70,10 @@ private:
     glm::dmat4 _rotation;
     glm::vec3 _normal;
 
-    glm::dvec2 _centerPixel;
+    //glm::dvec2 _centerPixel;
     double _gaussianMoveFactor;
     float _size;
-    float _scaleFactor;
+    //float _scaleFactor;
 
     void createFrustum();
     void createPlane();

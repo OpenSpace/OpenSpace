@@ -36,10 +36,7 @@ namespace {
 
 namespace openspace {
 
-SpacecraftCameraPlane::SpacecraftCameraPlane(glm::vec2 centerPixel, float scaleFactor,
-                                             double moveDistance)
-    : _scaleFactor(scaleFactor)
-    , _centerPixel(centerPixel)
+SpacecraftCameraPlane::SpacecraftCameraPlane(double moveDistance)
 {
     initialize();
     createPlaneAndFrustum(moveDistance);
