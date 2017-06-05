@@ -22,39 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/solarbrowsing/solarbrowsingmodule.h>
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___VIDEOPLAYER___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___VIDEOPLAYER___H__
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/engine/openspaceengine.h>
-
-#include <ghoul/misc/assert.h>
-
+#include <modules/solarbrowsing/util/streambuffer.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
-#include <modules/solarbrowsing/rendering/renderablesolarvideo.h>
-#include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
-#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
+
+#include <mutex>
+
+#define BUFFER_SIZE 1
 
 namespace openspace {
 
-SolarBrowsingModule::SolarBrowsingModule()
-    : OpenSpaceModule("SolarBrowsing")
-{
-	OsEng.registerModuleCallback(
-        OpenSpaceEngine::CallbackOption::Initialize,
-        [](){
-            SpacecraftImageryManager::initialize();
+// class VideoJob : public Job<SolarImageData> {
+// public:
+//     VideoJob(H265Decoder* decoder) {
+//         _decoder(decoder), _more(0)
+//     }
+
+//     virtual void execute() final {
+//         _more =_decoder->decode();
+//     }
+//     // Just used for decoding
+//     virtual std::shared_ptr<int> product() final {
+//         return std::make_shared<int>(_more);
+//     }
+
+// private:
+//     int _more;
+//     H265Decoder* _decoder;
+// };
+
+class VideoPlayer {
+public:
+
+    void decode() {
+        while (_decoder->hasMoreFrames()) {
+            int more = _decoder->decode();
+            if (more == 0) {
+                _decoder->giveDataToDecoder();
+            }
         }
-    );
+    }
+    VideoPlayer(const std::string& path, VideoMetadata& vim) {
+        _decoder = std::make_unique<H265Decoder>(path);
+        _metadata = vim;
+        _decodeThread = std::thread([this] { decode(); });
+        _decodeThread.detach();
+    }
+
+    const unsigned char* popFrame() {
+        // Do some decoding
+        // _streamBuffer.popFinishedJob();
+        // auto job = VideoJob(_decoder.get());
+        // _streamBuffer.enqueueJob(job);
+        // return _decoder.popFrame();
+        mtx.lock();
+        return _decoder->popFrame();
+        mtx.unlock();
+    }
+
+    // void seek(const double& osTime) {
+    // }
+private:
+
+    std::unique_ptr<H265Decoder> _decoder;
+    VideoMetadata _metadata;
+    std::thread _decodeThread;
+    //StreamBuffer<SolarImageData> _streamBuffer;
+    std::mutex mtx;
+};
+
 }
-
-void SolarBrowsingModule::internalInitialize(){
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-
-    fRenderable->registerClass<RenderableSolarVideo>("RenderableSolarVideo");
-    fRenderable->registerClass<RenderableSolarImagery>("RenderableSolarImagery");
-    fRenderable->registerClass<RenderableSolarImageryProjection>("RenderableSolarImageryProjection");
-}
-
-} // namespace openspace
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___H265DECODER___H__
