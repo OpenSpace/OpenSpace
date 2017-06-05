@@ -73,7 +73,7 @@ bool RenderableSolarImageryProjection::initialize() {
     _solarImageryDependencies
          = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
 
-    const std::string path = "/home/noven/workspace/OpenSpace/data/hmimap1.fits";
+    const std::string path = "/Users/michaelnoven/workspace/OpenSpace/data/hmimap1.fits";
     FitsFileReader fts(false);
     std::shared_ptr<ImageData<float>> imageData = fts.readImage<float>(path);
     float* data;
@@ -157,7 +157,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
         auto* solarImagery = static_cast<RenderableSolarImagery*>(
               _solarImageryDependencies[i]->renderable());
 
-        bool isCoronaGraph = solarImagery->_currentSolarImageData.im->isCoronaGraph;
+        bool isCoronaGraph = solarImagery->_isCoronaGraph;
 
         const SpacecraftCameraPlane& plane = solarImagery->cameraPlane();
         const glm::dvec3 planePos = plane.worldPosition();

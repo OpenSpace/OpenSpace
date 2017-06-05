@@ -290,7 +290,7 @@ bool RenderableSolarImagery::isReady() const {
 
 bool RenderableSolarImagery::initialize() {
     _spacecraftCameraPlane = std::make_unique<SpacecraftCameraPlane>(
-          _magicPlaneOffset, _magicPlaneFactor, _moveFactor);
+          /*_magicPlaneOffset, _magicPlaneFactor,*/ _moveFactor);
     return isReady();
 }
 
@@ -312,7 +312,7 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
 
             _currentScale = _solarImageData->im->scale;
             _currentCenterPixel = _solarImageData->im->centerPixel;
-            _currentSolarImageData = *_solarImageData;
+            _isCoronaGraph = _solarImageData->im->isCoronaGraph;
 
             auto t1 = Clock::now();
             std::memcpy(_pboBufferData, _solarImageData->data, _imageSize * _imageSize * sizeof(unsigned char));
