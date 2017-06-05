@@ -54,7 +54,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstate.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstatesequence.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstatesequence.inl
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/videoplayer.h
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarvideo.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.h
@@ -70,6 +72,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarvideo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/pixelbufferobject.cpp
