@@ -170,6 +170,7 @@ endif (OS_WINDOWS)
 set(OPENSPACE_HEADER_FILES
         webguimodule.h
         include/browser_client.h
+        include/cef_host.h
         include/gui_render_handler.h
         include/event_handler.h
     )
@@ -178,6 +179,7 @@ source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 set(OPENSPACE_SOURCE_FILES
         webguimodule.cpp
         src/browser_client.cpp
+        src/cef_host.cpp
         src/gui_render_handler.cpp
         src/event_handler.cpp
         )

@@ -22,59 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-/**
- * Structure:
- * WebGUIModule  - handles connection between all classes in module
- * Interface     - handle connections and business logic
-                 - handle
- * Renderer      - Handle rendering CEF in GL env
- *               - resizing
- * BrowserClient - Handle CEF setup and processes
- */
-
 #ifndef __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 #define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <include/wrapper/cef_helpers.h>
-#include "include/browser_client.h"
-#include "include/gui_render_handler.h"
-#include "include/event_handler.h"
+#include "include/cef_host.h"
 
 namespace openspace {
-
-#ifdef __APPLE__
-    static const std::string SUBPROCESS_PATH = "./webgui_cef_helper";
-#endif
-#ifdef WIN32
-    static const std::string SUBPROCESS_PATH = "C:\\Users\\Klas\\Development\\OpenSpace\\bin\\openspace\\Debug\\webgui_cef_helper.exe";
-#endif
 
 class WebGUIModule : public OpenSpaceModule {
 public:
     WebGUIModule();
-    ~WebGUIModule();
 
-	void load(const std::string&);
-	bool loadLocalPath(std::string);
+    void internalInitialize();
 
-protected:
-	void initialize();
-	void internalInitialize();
-    void initializeCallbacks();
 private:
-    void render();
-    void deinitialize();
-	void attachDebugSettings(CefSettings&);
-
-    std::shared_ptr<EventHandler> eventHandler;
-
-    CefRefPtr<GUIRenderHandler> renderHandler;
-    CefRefPtr<BrowserClient> client;
-    CefRefPtr<CefBrowser> browser;
-
-    void reshape(WindowWrapper&);
+	std::unique_ptr<CefHost> cefHost;
 };
 
 } // namespace openspace
