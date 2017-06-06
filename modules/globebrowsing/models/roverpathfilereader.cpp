@@ -184,12 +184,20 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 			}
 			if(!modelExists) {
 				std::string pathToFilenamesTextFile = pathToDriveFolderLevel1 + "/filenames.txt";
+				std::string pathToColoredFilenamesTextFile = pathToDriveFolderLevel1 + "/mastcam.txt";
+
 				std::shared_ptr<RoverPathFileReader::TextureInformation> textureInformation = extractTextureInfo(pathToFilenamesTextFile);
+
+				std::shared_ptr<RoverPathFileReader::TextureInformation> coloredTextureInformation = extractTextureInfo(pathToColoredFilenamesTextFile);
+				
+				subsite->coloredTextureFileNames = coloredTextureInformation->fileNames;
+				subsite->cameraColoredInfoVector = coloredTextureInformation->cameraInfoVector;
 
 				subsite->fileNames = textureInformation->fileNames;
 				subsite->cameraInfoVector = textureInformation->cameraInfoVector;
 				subsite->pathToTextureFolder = absPathToTextures;
 				subsite->pathToGeometryFolder = absPathToTModels;
+
 				subsitesWithModels.push_back(subsite);
 			}
 		}
@@ -278,7 +286,7 @@ std::shared_ptr<RoverPathFileReader::TextureInformation> RoverPathFileReader::ex
 	std::shared_ptr<TextureInformation> textureInformation = std::make_shared<TextureInformation>();
 	textureInformation->cameraInfoVector = cameraInfoVector;
 	textureInformation->fileNames = fileNameVector;
-
+	
 	return textureInformation;
 }
 
