@@ -47,6 +47,7 @@ public:
 		properties::BoolProperty isEnabled;
 		properties::BoolProperty enablePath;
 		properties::BoolProperty lockSubsite;
+		properties::BoolProperty useMastCam;
 	};
 
 	RenderableRoverSurface(const ghoul::Dictionary& dictionary);
@@ -88,6 +89,8 @@ private:
 	int _prevLevel;
 
 	bool _isFirst;
+	bool _isFirstLow;
+	bool _isFirstHigh;
 	std::shared_ptr<SubsiteModels> _prevSubsite;
 
 	LodModelSwitch _modelSwitch;

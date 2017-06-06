@@ -30,6 +30,7 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/models/model.h>
 #include <modules/globebrowsing/tasks/imgreader.h>
+#include <ghoul/opengl/texturearray.h>
 
 #include <memory>
 
@@ -42,7 +43,9 @@ struct SubsiteModels {
 	std::vector<std::shared_ptr<Model>> models;
 
 	std::vector <std::shared_ptr<ghoul::opengl::Texture>> textures;
+	std::vector <std::shared_ptr<ghoul::opengl::Texture>> coloredTextures;
 	std::shared_ptr<openspace::modelgeometry::AsyncMultiModelGeometry> model;
+	std::shared_ptr<ghoul::opengl::TextureArray> textureArray;
 
 	glm::dvec3 cartesianPosition;
 
@@ -55,7 +58,11 @@ struct SubsiteModels {
 	// Information needed for texture projection
 	std::vector<ImgReader::PointCloudInfo> cameraInfoVector;
 
+	// Information needed for colored texture projection
+	std::vector<ImgReader::PointCloudInfo> coloredCameraInfoVector;
+
 	GLuint textureID;
+	GLuint coloredTextureID;
 
 	uint64_t tileHashKey;
 	std::string site;

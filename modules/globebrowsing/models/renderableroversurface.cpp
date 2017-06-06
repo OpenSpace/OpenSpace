@@ -32,6 +32,7 @@
 #include <openspace/scene/scene.h>
 
 #include <ghoul/io/texture/texturereader.h>
+#include <glm/gtx/quaternion.hpp>
 
 #include <fstream>
 #include <gdal_priv.h>
@@ -58,12 +59,15 @@ namespace globebrowsing {
 		, _generalProperties({
 				BoolProperty("enable", "Enabled", true),
 				BoolProperty("enablePath", "Enable path", true),
-				BoolProperty("lockSubsite", "Lock subsite", false)
+				BoolProperty("lockSubsite", "Lock subsite", false),
+				BoolProperty("useMastCam", "Show mastcam coloring", false)
 		})
 		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
 		, _modelSwitch()
 		, _prevLevel(3)
 		, _isFirst(true)
+		, _isFirstLow(true)
+		, _isFirstHigh(true)
 {
 	if (!dictionary.getValue(keyRoverLocationPath, _roverLocationPath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -96,6 +100,7 @@ namespace globebrowsing {
 
 	addProperty(_generalProperties.enablePath);
 	addProperty(_generalProperties.lockSubsite);
+	addProperty(_generalProperties.useMastCam);
 	addProperty(_debugModelRotation);
 
 	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
@@ -148,9 +153,14 @@ void RenderableRoverSurface::render(const RenderData& data) {
 	ghoul::Dictionary modelDic;
 	std::unique_ptr<ModelProvider>_modelProvider;
 	int level;
+	
 	switch (_modelSwitch.getLevel(data)) {
 		case LodModelSwitch::Mode::Low :	
 			//Low
+			if (_isFirstLow) LERROR("GOIING LOW");
+			_isFirstLow = false;
+			_isFirstHigh = true;
+			_isFirst = true;
 			modelDic.setValue("Type", "MultiModelProvider");
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
 			ss = _modelProvider->calculate(subSitesVector, data);
@@ -161,6 +171,9 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			//Close
 			if (_isFirst) LERROR("GOING CLOSE");
 			_isFirst = false;
+			_isFirstLow = true;
+			_isFirstHigh = true;
+			
 			modelDic.setValue("Type", "SingleModelProvider");
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
 			ss = _modelProvider->calculate(subSitesVector, data);
@@ -168,6 +181,10 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			break;
 
 		case LodModelSwitch::Mode::High :
+			if (_isFirstHigh) LERROR("GOING HIGH");
+			_isFirstHigh = false;
+			_isFirstLow = true;
+			_isFirst = true;
 			//High up
 			level = 1;
 			break;
@@ -342,20 +359,72 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 		_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
 		_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
+		_programObject->setUniform("useMastCamColor", _generalProperties.useMastCam.value());
 		//_programObject->setUniform("fading", alpha);
 
+
+		// TODO: Hardcoded values for site 48 drive 1570,
+		// this should be read from, maybe, txt file
+		// it's the rotation of the roversite param in the img file
+		glm::quat q3(0.3320701, -0.0762275, -0.0618002, 0.9381362);
+
+		glm::mat4 rot = glm::mat4(glm::toMat4(q3));
+
+		glm::vec3 angle33 = glm::vec3(0, M_PI, -M_PI / 2.0);
+
+		glm::mat4 unitMat44(1);
+
+		glm::mat4 rotX2 = glm::rotate(unitMat44, angle33.x, glm::vec3(1, 0, 0));
+		glm::mat4 rotY2 = glm::rotate(unitMat44, angle33.y, glm::vec3(0, 1, 0));
+		glm::mat4 rotZ2 = glm::rotate(unitMat44, angle33.z, glm::vec3(0, 0, 1));
+
+		glm::mat4 debugModelRotation33 = rotX2 * rotY2 * rotZ2;
+
+		std::vector<glm::fvec4> cameraColoredInfoCenter;
+		std::vector<glm::fvec4> cameraColoredInfoAxis;
+		std::vector<glm::fvec4> cameraColoredInfoHorizontal;
+		std::vector<glm::fvec4> cameraColoredInfoVector;
+
+		for (auto coloredCameraInfo : subsiteModels->coloredCameraInfoVector) {
+			ImgReader::PointCloudInfo mInfoTemp = coloredCameraInfo;
+			cameraColoredInfoCenter.push_back(debugModelRotation33 * rot * glm::vec4(mInfoTemp._cameraCenter, 1.0f));
+			cameraColoredInfoAxis.push_back(debugModelRotation33 * rot * glm::vec4(mInfoTemp._cameraAxis, 1.0f));
+			cameraColoredInfoHorizontal.push_back(debugModelRotation33 * rot * glm::vec4(mInfoTemp._cameraHorizontal, 1.0f));
+			cameraColoredInfoVector.push_back(debugModelRotation33 * rot * glm::vec4(mInfoTemp._cameraVector, 1.0f));
+		}
+		
+		const GLint locationColoredCenter = _programObject->uniformLocation("camerasColoredCenters");
+		const GLint locationColoredAxis = _programObject->uniformLocation("camerasColoredAxes");
+		const GLint locationColoredHorizontal = _programObject->uniformLocation("camerasColoredHorizontals");
+		const GLint locationColoredVector = _programObject->uniformLocation("camerasColoredVectors");
+		
+		glUniform4fv(locationColoredCenter, cameraColoredInfoCenter.size(), reinterpret_cast<GLfloat *>(cameraColoredInfoCenter.data()));
+		glUniform4fv(locationColoredAxis, cameraColoredInfoAxis.size(), reinterpret_cast<GLfloat *>(cameraColoredInfoAxis.data()));
+		glUniform4fv(locationColoredHorizontal, cameraColoredInfoHorizontal.size(), reinterpret_cast<GLfloat *>(cameraColoredInfoHorizontal.data()));
+		glUniform4fv(locationColoredVector, cameraColoredInfoVector.size(), reinterpret_cast<GLfloat *>(cameraColoredInfoVector.data()));
+
 		_programObject->setUniform("size", static_cast<int>(cameraInfoCenter.size()));
+		_programObject->setUniform("colorSize", static_cast<int>(cameraColoredInfoCenter.size()));
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, subsiteModels->textureID);
+		//subsiteModels->textureArray->bind();
+
+		const GLint locationRoverTerrainTextures = _programObject->uniformLocation("roverTerrainTextures");
+		glUniform1i(locationRoverTerrainTextures, 0);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, subsiteModels->coloredTextureID);
+				
+		const GLint locationRoverTerrainTextures2 = _programObject->uniformLocation("roverTerrainColoredTextures");
+		glUniform1i(locationRoverTerrainTextures2, 1);
 		
 		glEnable(GL_BLEND);
-		glDisable(GL_DEPTH_TEST);
+		//glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 		subsiteModels->model->render();
-		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_DEPTH_TEST);
 	}
 	_programObject->deactivate();
 	//_cachingModelProvider->setLevel(level);
@@ -380,7 +449,7 @@ std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSur
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(subsiteModels->geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + 0.0 };
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + 1.0 };
 		subsiteModels->cartesianPosition = _globe->ellipsoid().cartesianPosition(geo3);
 	}
 	return vector;

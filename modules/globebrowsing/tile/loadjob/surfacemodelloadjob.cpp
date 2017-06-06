@@ -50,6 +50,7 @@ void SurfaceModelLoadJob::execute() {
 	_subsiteModels->cameraInfoVector = _subsite->cameraInfoVector;
 	_subsiteModels->level = _level;
 	_subsiteModels->fileNames = _subsite->fileNames;
+	_subsiteModels->coloredCameraInfoVector = _subsite->cameraColoredInfoVector;
 
 	ghoul::Dictionary dictionary;
 	std::string pathToGeometry2 = pathToGeometryFolder + "OBJ.obj";
@@ -69,6 +70,13 @@ void SurfaceModelLoadJob::execute() {
 		std::string pathToTexture = pathToTextureFolder + "site" + _subsite->site +
 			"//" + "drive" + _subsite->drive + "//" + tempFileName + textureFormat;
 		_subsiteModels->textures.push_back(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
+	}
+
+	for (auto coloredFileName : _subsite->coloredTextureFileNames) {
+		std::string pathToTexture = pathToTextureFolder + "site" + _subsite->site +
+			"//" + "drive" + _subsite->drive + "//" + "colored//" + coloredFileName + ".jpg";
+
+		_subsiteModels->coloredTextures.push_back(ghoul::io::TextureReader::ref().loadTexture(pathToTexture));
 	}
 }
 
