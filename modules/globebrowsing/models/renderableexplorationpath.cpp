@@ -210,7 +210,7 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 void RenderableExplorationPath::setLevel(const int level) {
 	_currentLevel = level;
 	if (level > lastLevel) {
-		recalculateCartesianPathCoordinates();
+		recalculateCartesianCoordinates();
 		lastLevel = level;
 	}
 }
@@ -226,7 +226,7 @@ void RenderableExplorationPath::calculatePathModelCoordinates() {
 	}
 }
 
-void RenderableExplorationPath::recalculateCartesianPathCoordinates() {
+void RenderableExplorationPath::recalculateCartesianCoordinates() {
 	_stationPointsModelCoordinates.clear();
 	_stationPointsModelCoordinatesWithModel.clear();
 	for (auto geodetic : _allGeodetics) {

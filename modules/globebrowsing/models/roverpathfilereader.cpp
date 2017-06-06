@@ -169,7 +169,6 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 			subsite->availableLevels.push_back(1);
 			pathToDriveFolder = pathToDriveFolderLevel1;
 		}
-
 		if (pathToLevel2Exists) {
 			subsite->availableLevels.push_back(2);
 			pathToDriveFolder = pathToDriveFolderLevel2;

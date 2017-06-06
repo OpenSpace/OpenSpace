@@ -175,7 +175,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			//High up
 			level = 1;
 			break;
-		case LodModelSwitch::Mode::Far:
+		case LodModelSwitch::Mode::Far :
 			//Far away
 			// Only used to decide if renderableexplorationpath should be visible or not atm.
 			level = 0;
@@ -184,8 +184,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 	lockSubsite(level, ss);
 
-	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
-	//FOR ALPHA BLENDING TO WORK
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfsubsiteModels;
 	if(_generalProperties.lockSubsite.value())
 		vectorOfsubsiteModels = _cachingModelProvider->getModels(_prevSubsites, level);
@@ -196,58 +194,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 	_programObject->activate();
 	for (auto subsiteModels : vectorOfsubsiteModels) {
-
-		/*float dir = 1;
-		float alpha = subsiteModels->_alpha;
-		int subsitePrevLevel = subsiteModels->level;
-		if (level != _prevLevel) {
-			// We went from one level to the next
-			// we need to fade out previously rendered models
-			if (level != subsitePrevLevel && alpha >= 0.0) {
-				// Current subsite should fade out
-				dir *= -1;
-			}
-			else if (alpha >= 1.0) {
-				// Current subsite is the correct level and has been faded in correctly
-				dir = 0;
-			}
-
-			if (level == 3) {
-				_prevSubsite = subsiteModels;
-			}
-		}
-		else if (_prevSubsite != nullptr 
-			&& _prevSubsite->drive != subsiteModels->drive 
-			&& level == 3) {
-			// Walking between models
-			// And this is the new model that should be faded in
-			// if it's not already done
-			dir = subsiteModels->_alpha >= 1.0 ? 0 : 1;
-			if (dir == 0.0) {
-				_prevSubsite = subsiteModels;
-			}
-		}
-		else if (_prevSubsite != nullptr 
-			&& vectorOfsubsiteModels.size() > 1
-			&& _prevSubsite->drive == subsiteModels->drive 
-			&& level == 3) {
-			// Walking between models
-			// And this is the previous model that should be faded out
-			// if it's not already done
-			dir = subsiteModels->_alpha <= 0.0 ? 0 : -1;
-		}
-		else {
-			dir = subsiteModels->_alpha >= 1.0 ? 0 : 1;
-		}*/
-
-		//alpha = alpha + dir * 0.005;
-		//subsiteModels->_alpha = alpha;
-
-		/*if (_prevSubsiteModels != nullptr && _prevSubsiteModels != subsiteModels
-				&& level == 3) {
-			_prevSubsiteModels = subsiteModels;
-		}*/
-
 		glm::dmat4 globeTransform = _globe->modelTransform();
 
 		glm::dvec3 positionWorldSpace = globeTransform * glm::dvec4(subsiteModels->cartesianPosition, 1.0);
@@ -342,17 +288,14 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D_ARRAY, subsiteModels->textureID);
-		
+
 		glEnable(GL_BLEND);
-		//glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 		subsiteModels->model->render();
-		//glEnable(GL_DEPTH_TEST);
 	}
 	_programObject->deactivate();
-	//_cachingModelProvider->setLevel(level);
 
 	if (_generalProperties.enablePath.value()) {
 		_renderableExplorationPath->setLevel(level);
@@ -373,7 +316,7 @@ std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSur
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(subsiteModels->geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + 1.0 };
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + 0.7 };
 		subsiteModels->cartesianPosition = _globe->ellipsoid().cartesianPosition(geo3);
 	}
 	return vector;

@@ -67,12 +67,6 @@ std::vector<std::shared_ptr<SubsiteModels>> AsyncSurfaceModelProvider::getLoaded
 	return initializedModels;
 }
 
-void AsyncSurfaceModelProvider::clearQueuesAndJobs() {
-	_ramToGpuJobManager.clearEnqueuedJobs();
-	_diskToRamJobManager.clearEnqueuedJobs();
-	_enqueuedModelRequests.clear();
-}
-
 bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const uint64_t hashKey) const {
 	return _enqueuedModelRequests.find(hashKey) == _enqueuedModelRequests.end();
 }

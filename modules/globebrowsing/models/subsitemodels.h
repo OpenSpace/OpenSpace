@@ -61,15 +61,18 @@ struct SubsiteModels {
 	std::string site;
 	std::string drive;
 	int level;
-	float alpha = 1.0f;
-	int _dir = 0;
+	float alpha = 0.0f;
+	int _dir = -1;
 
 	inline bool operator==(const SubsiteModels& other) const {
 		return (site == other.site) && (drive == other.drive) && (level == other.level);
 	}
 
-	void fade(const int direction) {
-		alpha = alpha + (direction * 0.01f);
+	void fade() {
+		if (_dir == 1 && alpha < 1.0f)
+			alpha = alpha + 0.01f;
+		else if (_dir == -1 && alpha > 0.0f)
+			alpha = alpha - 0.01f;
 	}
 };
 

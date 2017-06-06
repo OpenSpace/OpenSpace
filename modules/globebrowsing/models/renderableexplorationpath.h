@@ -53,7 +53,7 @@ public:
 
 private:
 	void calculatePathModelCoordinates();
-	void recalculateCartesianPathCoordinates();
+	void recalculateCartesianCoordinates();
 
 	std::unique_ptr<ghoul::opengl::ProgramObject> _pathShader;
 	std::unique_ptr<ghoul::opengl::ProgramObject> _siteShader;
