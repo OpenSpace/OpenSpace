@@ -69,14 +69,14 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 				for (int levelAbove = levelsAbove.size() + 1; levelAbove-- > 1; ) {
 					ProviderSubsiteKey keyLowerLevel = { levelAbove, subsite->site, subsite->drive };
 					// If the cache holds the correct model but with lower resultion than requested,
-					// return highest available resolution.
+					// fade in that model
 					if (_modelCache->exist(keyLowerLevel)) {
 						_modelCache->get(keyLowerLevel)->setFadeDirection(1);
 						// Breaks the loop that goes through levelsAbove
 						break;
 					}
-					// If the cache doesn't hold the LOD above, enqueue it. The LOD above is much smaller
-					// in filesize and will be loaded more quickly. This is done to have something to render
+					// If the cache doesn't hold the LOD above, enqueue it. The LOD above might be much smaller
+					// in filesize and will then be loaded more quickly. This is done to have something to render
 					// when waiting for the rquested level to load.
 					else {
 						for(const int& availableLevel : subsite->availableLevels) {
