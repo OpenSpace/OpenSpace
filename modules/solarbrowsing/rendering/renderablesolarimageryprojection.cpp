@@ -24,6 +24,7 @@
 
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
+#include <modules/solarbrowsing/rendering/renderablesolarvideo.h>
 #include <modules/space/rendering/planetgeometry.h>
 #include <openspace/util/time.h>
 #include <openspace/scene/scenegraphnode.h>
@@ -68,12 +69,13 @@ bool RenderableSolarImageryProjection::initialize() {
             auto thisNode = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName);
             thisNode->addDependency(*node);
         }
+
     }
 
     _solarImageryDependencies
          = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
 
-    const std::string path = "/Users/michaelnoven/workspace/OpenSpace/data/hmimap1.fits";
+    const std::string path = "/home/noven/workspace/OpenSpace/data/hmimap1.fits";
     FitsFileReader fts(false);
     std::shared_ptr<ImageData<float>> imageData = fts.readImage<float>(path);
     float* data;
@@ -141,13 +143,28 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _shader->activate();
+    // _shader->setUniform(
+    //     "modelTransform",
+    //     modelTransform
+    // );
+
+    // _shader->setUniform(
+    //     "viewTransform",
+    //     data.camera.combinedViewMatrix()
+    // );
+
+    //  _shader->setUniform(
+    //     "projectionTransform",
+    //      data.camera.projectionMatrix() 
+    // );
+
     _shader->setUniform(
         "modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
 
     const int numPlanes = _solarImageryDependencies.size();
-    const int MAX_SPACECRAFT_OBSERVATORY = 6;
+    const int MAX_SPACECRAFT_OBSERVATORY = 5;
     int solarImageryCount = 0;
 
     ghoul::opengl::TextureUnit txUnits[MAX_SPACECRAFT_OBSERVATORY];
@@ -163,9 +180,14 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
         const glm::dvec3 planePos = plane.worldPosition();
         const glm::dmat4 planeRot = plane.worldRotation();
 
+        // Camera looking away, fake corona graph same bool same logic, TODO: change name
+        // if (!solarImagery->_shouldRenderPlane) {
+        //     isCoronaGraph = true;
+        // }
+
         _shader->setUniform("isCoronaGraph[" + std::to_string(i) + "]", isCoronaGraph);
-        _shader->setUniform("magicPlaneFactor[" + std::to_string(i) + "]", solarImagery->_magicPlaneFactor);
-       // _shader->setUniform("magicPlaneOffset[" + std::to_string(i) + "]", solarImagery->_magicPlaneOffset);
+
+        //_shader->setUniform("magicPlaneFactor[" + std::to_string(i) + "]", solarImagery->_magicPlaneFactor);
 
         _shader->setUniform("sunToSpacecraftReferenceFrame[" + std::to_string(i) + "]",
                         planeRot * glm::dmat4(data.modelTransform.rotation));
@@ -178,7 +200,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
         _shader->setUniform("contrastValue[" + std::to_string(i) + "]", solarImagery->_contrastValue);
 
         // Offset and scale
-     //   _shader->setUniform("scale[" + std::to_string(i) + "]", solarImagery->_currentScale);
+        _shader->setUniform("scale[" + std::to_string(i) + "]", solarImagery->_currentScale);
         _shader->setUniform("centerPixel[" + std::to_string(i) + "]", solarImagery->_currentCenterPixel);
 
         // Imagery texture

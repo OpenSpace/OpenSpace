@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-const int MAX_SPACECRAFT_OBSERVATORY = 6;
+const int MAX_SPACECRAFT_OBSERVATORY = 5;
 
 in vec2 vs_st;
 in vec4 vs_positionScreenSpace;
@@ -45,7 +45,7 @@ uniform dvec2 magicPlaneOffset[MAX_SPACECRAFT_OBSERVATORY];
 uniform float magicPlaneFactor[MAX_SPACECRAFT_OBSERVATORY];
 
 uniform bool isCoronaGraph[MAX_SPACECRAFT_OBSERVATORY];
-//uniform float scale[MAX_SPACECRAFT_OBSERVATORY];
+uniform float scale[MAX_SPACECRAFT_OBSERVATORY];
 uniform vec2 centerPixel[MAX_SPACECRAFT_OBSERVATORY];
 
 const float HALF_SUN_RADIUS = (1391600000 * 0.5);
@@ -75,7 +75,7 @@ Fragment getFragment() {
 
         if (planePositionSpacecraft[i].z < vUv[i].z) {
             vec2 uv = vUv[i].xy;
-            uv /= ( (HALF_SUN_RADIUS / magicPlaneFactor[i]) * 2);
+            uv /= ( (HALF_SUN_RADIUS / scale[i]) * 2);
             uv += 0.5;
 
             uv.x += ((centerPixel[i].x) / HALF_SUN_RADIUS) / 2.0;

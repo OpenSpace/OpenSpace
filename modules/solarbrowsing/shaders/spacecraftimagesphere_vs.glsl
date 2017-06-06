@@ -23,10 +23,12 @@
  ****************************************************************************************/
 #version __CONTEXT__
 
-const int MAX_SPACECRAFT_OBSERVATORY = 6;
+const int MAX_SPACECRAFT_OBSERVATORY = 5;
 
 uniform mat4 modelViewProjectionTransform;
-uniform mat4 modelTransform;
+uniform dmat4 viewTransform;
+uniform mat4 projectionTransform;
+uniform dmat4 modelTransform;
 //uniform dmat4 sunToSpacecraftReferenceFrame[6];
 //uniform int numSpacecraftCameraPlanes;
 uniform bool isCoronaGraph[MAX_SPACECRAFT_OBSERVATORY];
@@ -58,5 +60,8 @@ void main() {
     vs_positionScreenSpace = z_normalization(positionClipSpace);
     gl_Position = vs_positionScreenSpace;
 
-    vs_st = in_st;
+    //vec4 res = vec4 ( (  dvec4(in_st.x - 0.5,  in_st.y - 0.5, 0.0, 1.0) * modelTransform));
+    //vec2 temp = res.xy;
+    //float w = res.w;
+    vs_st = in_st;//temp.xy + 0.5;
 }
