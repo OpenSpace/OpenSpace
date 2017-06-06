@@ -121,6 +121,7 @@ void SpacecraftImageryManager::loadTransferFunctions(
                     // If filter is empty or value exist
                     //if (_filter.size() == 0
                       //  || _filter.find(filterKey) != _filter.end()) {
+                        LWARNING("loading " << key);
                         _tfMap[key] = std::make_shared<TransferFunction>(seqPath);
                     //}
                 }
@@ -320,16 +321,98 @@ void SpacecraftImageryManager::loadVideoMetadata(const std::string& path, std::u
                     std::string fileName = currentFile.filename();
                     std::string startTime = "2012-07-12T00:00:33.62";
                     std::string endTime = "2012-07-12T23:59:33.62";
-
-                    vm.path = fileName;
+                    vm.frameUpdateInterval = 15;
+                    LDEBUG("path" << vm.path);
+                    vm.path = currentFile.path();
                     vm.startTime = OsEng.timeManager().time().convertTime(startTime);
+                    std::cout << "starttime" << vm.startTime;
                     vm.endTime = OsEng.timeManager().time().convertTime(endTime);
                     vm.isCoronaGraph = false;
                     vm.scale = 0.76827;
                     vm.resolution = 4096;
-                    vm.centerPixel = glm::vec2(2048.5, 2048.5);
+                    //vm.centerPixel = glm::vec2(2048.5, 2048.5);
+
+                    glm::vec2 centerPixel =glm::vec2(2048.5, 2048.5);
+                    float halfRes = vm.resolution / 2.f;
+
+                    float offsetX = ((halfRes - centerPixel.x) / halfRes) * SUN_RADIUS;
+                    float offsetY = ((halfRes - centerPixel.y) / halfRes) * SUN_RADIUS;
+
+                    vm.centerPixel = glm::vec2(offsetX, offsetY);
+
                     // Read name from text file
-                    _videoMetadata["aia_aia_93"] = vm;
+                    _videoMetadata["AIA_AIA_171"] = vm;
+                }
+            }
+        }
+    }
+
+    LDEBUG("Finish loading imagery metadata");
+    LDEBUG(count << " Images loaded");
+}
+
+void SpacecraftImageryManager::loadImageMetadata(
+      const std::string& path,
+      std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap)
+{
+
+    LDEBUG("Begin loading imagery metadata");
+    using RawPath = ghoul::filesystem::Directory::RawPath;
+    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
+
+    if (!FileSys.directoryExists(sequenceDir)) {
+        LERROR("Could not load directory '" << sequenceDir.path() << "'");
+    }
+
+    unsigned int count = 0;
+    using Recursive = ghoul::filesystem::Directory::RawPath;
+    using Sort = ghoul::filesystem::Directory::Sort;
+    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
+
+    for (auto seqPath : sequencePaths) {
+        if (size_t position = seqPath.find_last_of(".") + 1) {
+            if (position != std::string::npos) {
+                ghoul::filesystem::File currentFile(seqPath);
+                std::string extension = currentFile.fileExtension();
+                if (extension == "jp2" || extension == "j2k") {
+                    // // TODO(mnoven): Prettify or read metadata instead
+                    std::string fileName = currentFile.filename();
+                    size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
+                    std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
+
+                    // Name
+                    size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
+                    std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
+
+                    // Instrument
+                    size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
+                    std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
+                    size_t dot = instrumentName.rfind(".");
+                    instrumentName = instrumentName.substr(0, dot);
+                    // std::string filterKey = instrumentName;
+                    // std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
+                    //                ::tolower);
+
+                    count++;
+                    // Time
+                    std::vector<std::string> tokens;
+                    std::stringstream ss;
+                    ss.str(currentFile.filename());
+                    std:: string item;
+                    while (std::getline(ss, item, '_')) {
+                        tokens.push_back(item);
+                    }
+                    std::string time = tokens[0] + "-" + tokens[1] + "-" +
+                                       tokens[2] + "T" + tokens[4] + ":" +
+                                       tokens[5] + ":" + tokens[6] + "." + tokens[7];
+
+                    //auto t = OsEng.timeManager();
+                    const ImageMetadata im = parseMetadata(currentFile);
+                    std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
+                    TimedependentState<ImageMetadata> timeState(
+                          std::move(data),
+                          OsEng.timeManager().time().convertTime(time), seqPath);
+                    _imageMetadataMap[instrumentName].addState(std::move(timeState));
                 }
             }
         }
@@ -382,7 +465,6 @@ void SpacecraftImageryManager::loadImageMetadata(
                     std::string filterKey = instrumentName;
                     std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
                                    ::tolower);
-
                     // If filter is empty or value exist
                     if (_filter.size() == 0
                         || _filter.find(filterKey) != _filter.end()) {

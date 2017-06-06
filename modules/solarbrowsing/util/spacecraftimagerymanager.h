@@ -86,6 +86,9 @@ public:
       const std::string& path,
       std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap,
       const std::unordered_set<std::string>& _filter);
+    void loadImageMetadata(
+      const std::string& path,
+      std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>>& _imageMetadataMap);
 private:
     ImageMetadata parseMetadata(const ghoul::filesystem::File& file);
     void fetchServerImages(std::string type);
