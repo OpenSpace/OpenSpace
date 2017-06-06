@@ -210,12 +210,9 @@ void addScreenSpaceRenderable(std::string texturePath) {
         return;
     }
 
-    texturePath = absPath(texturePath);
-    texturePath = FileSys.convertPathSeparator(texturePath, '/');
-
-    std::string luaTable =
-        "{Type = 'ScreenSpaceImage', TexturePath = '" + texturePath + "' }";
-    std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
+    const std::string luaTable =
+        "{Type = 'ScreenSpaceImage', TexturePath = openspace.absPath('" + texturePath + "') }";
+    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
     OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
 }
 } // namespace 
@@ -238,6 +235,7 @@ GUI::GUI()
     addPropertySubOwner(_property);
     addPropertySubOwner(_screenSpaceProperty);
     addPropertySubOwner(_virtualProperty);
+    addPropertySubOwner(_filePath);
     addPropertySubOwner(_time);
     addPropertySubOwner(_iswa);
 }
@@ -321,6 +319,7 @@ void GUI::initialize() {
     _globalProperty.initialize();
     _globalProperty.setHasRegularProperties(true);
     _virtualProperty.initialize();
+    _filePath.initialize();
     _performance.initialize();
     _help.initialize();
     _parallel.initialize();
@@ -337,6 +336,7 @@ void GUI::deinitialize() {
     _globalProperty.deinitialize();
     _screenSpaceProperty.deinitialize();
     _virtualProperty.deinitialize();
+    _filePath.deinitialize();
     _property.deinitialize();
 
     delete iniFileBuffer;
@@ -488,6 +488,9 @@ void GUI::endFrame() {
         if (_iswa.isEnabled()) {
             _iswa.render();
         }
+        if (_filePath.isEnabled()) {
+            _filePath.render();
+        }
     }
 
     ImGui::Render();
@@ -582,6 +585,10 @@ void GUI::render() {
     bool virtualProperty = _virtualProperty.isEnabled();
     ImGui::Checkbox("Virtual Properties", &virtualProperty);
     _virtualProperty.setEnabled(virtualProperty);
+
+    bool filePath = _filePath.isEnabled();
+    ImGui::Checkbox("File Paths", &filePath);
+    _filePath.setEnabled(filePath);
 
 #ifdef OPENSPACE_MODULE_ISWA_ENABLED
     bool iswa = _iswa.isEnabled();

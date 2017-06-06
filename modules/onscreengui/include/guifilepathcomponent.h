@@ -22,39 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__
 
-#include <openspace/properties/propertyowner.h>
-
-#include <openspace/properties/scalar/floatproperty.h>
+#include <modules/onscreengui/include/guicomponent.h>
 
 namespace openspace {
-namespace globebrowsing {
+namespace gui {
 
-struct LayerRenderSettings : public properties::PropertyOwner {
-    LayerRenderSettings();
-    
-    properties::FloatProperty opacity;
-    properties::FloatProperty gamma;
-    properties::FloatProperty multiplier;
-    properties::FloatProperty offset;
+class GuiFilePathComponent : public GuiComponent {
+public:
+    GuiFilePathComponent();
 
-    // Optional properties
-    properties::FloatProperty valueBlending;
-    bool useValueBlending = false;
-
-    void setValuesFromDictionary(const ghoul::Dictionary& renderSettingsDict);
-
-    /// This function matches the function with the same name in the
-    /// shader code
-    float performLayerSettings(float currentValue) const;
-    /// This function matches the function with the same name in the
-    /// shader code
-    glm::vec4 performLayerSettings(glm::vec4 currentValue) const;
+    void render() override;
 };
 
-} // namespace globebrowsing
+} // namespace gui
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__

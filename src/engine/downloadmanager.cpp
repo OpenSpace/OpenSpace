@@ -158,6 +158,7 @@ DownloadManager::DownloadManager(std::string requestURL, int applicationVersion,
 
 std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     const std::string& url, const ghoul::filesystem::File& file, bool overrideFile,
+    bool failOnError, unsigned int timeout_secs,
     DownloadFinishedCallback finishedCallback, DownloadProgressCallback progressCallback)
 {
     if (!overrideFile && FileSys.fileExists(file))
@@ -182,13 +183,23 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
 
     //LDEBUG("Start downloading file: '" << url << "' into file '" << file.path() << "'");
     
-    auto downloadFunction = [url, finishedCallback, progressCallback, future, fp]() {
+    auto downloadFunction = [url,
+                             failOnError,
+                             timeout_secs,
+                             finishedCallback,
+                             progressCallback,
+                             future,
+                             fp]() {
         CURL* curl = curl_easy_init();
         if (curl) {
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
             curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeData);
+            if (timeout_secs)
+                curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout_secs);
+            if (failOnError)
+                curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
             
             ProgressInformation p = {
                 future,
@@ -337,6 +348,8 @@ std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downl
                 line,
                 destination.path() + "/" + file,
                 overrideFiles,
+                false,
+                0,
                 [](const FileFuture& f) { LDEBUG("Finished: " << f.filePath); }
             );
             if (future)
@@ -349,6 +362,8 @@ std::vector<std::shared_ptr<DownloadManager::FileFuture>> DownloadManager::downl
         fullRequest,
         requestFile,
         true,
+        false,
+        0,
         callback
     );
 

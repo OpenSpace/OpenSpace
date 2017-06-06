@@ -1243,6 +1243,12 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "Writes out documentation files"
             },
             {
+                "downloadFile",
+                &luascriptfunctions::downloadFile,
+                "",
+                "Downloads a file from Lua scope"
+            },
+            {
                 "addVirtualProperty",
                 &luascriptfunctions::addVirtualProperty,
                 "type, name, identifier, [value, minimumValue, maximumValue]",

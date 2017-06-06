@@ -55,8 +55,24 @@ struct LuaLibrary {
     };
     /// The name of the library
     std::string name;
-    /// The list of all functions for this library
+    /// The list of all C-based callback functions for this library
     std::vector<Function> functions;
+    /// A list of script files that are executed for each Lua state
+    std::vector<std::string> scripts;
+
+    /// This struct contains information about a function or constant that is defined in
+    /// a Lua script
+    struct Documentation {
+        /// The name of the function/variable
+        std::string name;
+        /// The description of the parameters for a function
+        std::string parameter;
+        /// The description of the function/variable
+        std::string description;
+    };
+    /// The list of documentations will be populated automatically by parsing the Lua
+    /// scripts
+    std::vector<Documentation> documentations;
 
     /// Comparison function that compares two LuaLibrary%s name
     bool operator<(const LuaLibrary& rhs) const;

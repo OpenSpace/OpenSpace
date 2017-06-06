@@ -35,6 +35,7 @@ void GPULayerRenderSettings::setValue(ghoul::opengl::ProgramObject* programObjec
     gpuOpacity.setValue(programObject, layerSettings.opacity.value());
     gpuGamma.setValue(programObject, layerSettings.gamma.value());
     gpuMultiplier.setValue(programObject, layerSettings.multiplier.value());
+    gpuOffset.setValue(programObject, layerSettings.offset.value());
 
     if (layerSettings.useValueBlending) {
         gpuValueBlending.setValue(programObject, layerSettings.valueBlending.value());
@@ -47,6 +48,7 @@ void GPULayerRenderSettings::bind(const LayerRenderSettings& layerSettings, ghou
     gpuOpacity.bind(programObject, nameBase + "opacity");
     gpuGamma.bind(programObject, nameBase + "gamma");
     gpuMultiplier.bind(programObject, nameBase + "multiplier");
+    gpuOffset.bind(programObject, nameBase + "offset");
     
     if (layerSettings.useValueBlending) {
         gpuValueBlending.bind(programObject, nameBase + "valueBlending");
