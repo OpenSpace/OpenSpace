@@ -57,8 +57,9 @@ std::vector<std::shared_ptr<Subsite>> SingleModelProvider::calculate(const std::
 	glm::dvec3 cameraPos = data.camera.positionVec3();
 	glm::dvec4 cameraPositionModelSpace = globeModelInverseTransform * glm::dvec4(cameraPos, 1.0);
 	glm::dvec3 cameraPositionProjected = rg->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
-		
-	for (auto s : subsites) {
+	
+	// Version that picks the subsite with most models
+	/*for (auto s : subsites) {
 		for (auto s1 : s) {
 			glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ s1->geodetic , 0 });
 			if (glm::distance(cameraPositionProjected, temp) < radius) {
@@ -75,6 +76,24 @@ std::vector<std::shared_ptr<Subsite>> SingleModelProvider::calculate(const std::
 		}
 	}
 
+	if (smallest->site != "" && smallest->drive != "") {
+		mostModelsInsideRadius.push_back(smallest);
+	}
+	return mostModelsInsideRadius;*/
+
+	// Version that picks the subsite closest to the camera
+	float smallestDistance = 100;
+
+	for (auto s : subsites) {
+		for (auto s1 : s) {
+			glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ s1->geodetic , 0 });
+			double distanceToCamera = glm::distance(cameraPositionProjected, temp);
+			if (distanceToCamera < smallestDistance) {
+				smallest = s1;
+				smallestDistance = distanceToCamera;
+			}
+		}
+	}
 	if (smallest->site != "" && smallest->drive != "") {
 		mostModelsInsideRadius.push_back(smallest);
 	}

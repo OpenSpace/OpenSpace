@@ -164,18 +164,22 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 		bool pathToLevel3Exists = FileSys.directoryExists(pathToDriveFolderLevel3);
 
 		// TODO: refactor like hell!!!
-
-		if (pathToLevel1Exists)
+		std::string pathToDriveFolder;
+		if (pathToLevel1Exists) {
 			subsite->availableLevels.push_back(1);
+			pathToDriveFolder = pathToDriveFolderLevel1;
+		}
 
-		if (pathToLevel2Exists)
+		if (pathToLevel2Exists) {
 			subsite->availableLevels.push_back(2);
-
-		if (pathToLevel3Exists)
+			pathToDriveFolder = pathToDriveFolderLevel2;
+		}
+		if (pathToLevel3Exists) {
 			subsite->availableLevels.push_back(3);
-
+			pathToDriveFolder = pathToDriveFolderLevel3;
+		}
 		bool modelExists = false;
-		if(pathToLevel1Exists) {
+		if(pathToLevel1Exists || pathToLevel2Exists || pathToLevel3Exists) {
 			for (auto controlSubsite : subsitesWithModels) {
 				if (subsite->site == controlSubsite->site && subsite->drive == controlSubsite->drive) {
 					modelExists = true;
@@ -185,6 +189,7 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 			if(!modelExists) {
 				std::string pathToFilenamesTextFile = pathToDriveFolderLevel1 + "/filenames.txt";
 				std::string pathToColoredFilenamesTextFile = pathToDriveFolderLevel1 + "/mastcam.txt";
+
 
 				std::shared_ptr<RoverPathFileReader::TextureInformation> textureInformation = extractTextureInfo(pathToFilenamesTextFile);
 
@@ -281,7 +286,7 @@ std::shared_ptr<RoverPathFileReader::TextureInformation> RoverPathFileReader::ex
 		myfile.close();
 	}
 	else
-		LERROR("Could not open .txt file");
+		LERROR("Could not open .txt file " << absoluteFilePath);
 
 	std::shared_ptr<TextureInformation> textureInformation = std::make_shared<TextureInformation>();
 	textureInformation->cameraInfoVector = cameraInfoVector;

@@ -66,14 +66,14 @@ LodModelSwitch::Mode LodModelSwitch::getLevel(const RenderData& data) {
 		_owner->getHeight(cameraPositionModelSpace) + _ellipsoidShrinkTerm;
 
 	double distFromSurfaceToCamera = glm::abs(heightToSurface - distFromEllipsoidSurfaceToCamera);
-
-	if (distFromSurfaceToCamera > 1000 && distFromSurfaceToCamera < 5000) {
+	
+	if (distFromSurfaceToCamera > 100 && distFromSurfaceToCamera < 800) {
 		return Mode::Low;
 	}
-	else if (distFromSurfaceToCamera >= 5000 && distFromSurfaceToCamera < 8000) {
+	else if (distFromSurfaceToCamera >= 800 && distFromSurfaceToCamera < 8000) {
 		return Mode::High;
 	}
-	else if(distFromSurfaceToCamera <= 1000)
+	else if(distFromSurfaceToCamera <= 100)
 		return Mode::Close;
 
 	return Mode::Far;

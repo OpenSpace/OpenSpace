@@ -23,6 +23,9 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/models/multimodelprovider.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -37,13 +40,30 @@ MultiModelProvider::MultiModelProvider(const ghoul::Dictionary& dictionary)
 }
 
 std::vector<std::shared_ptr<Subsite>> MultiModelProvider::calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites, const RenderData& data) {
-	std::vector<std::shared_ptr<Subsite>> ss;
-	for (auto subSites : subsites) {
-		if (subSites.size() > 0) {
-			ss.push_back(subSites.at(0));
+	std::vector<std::shared_ptr<Subsite>> subsitesInsideRadius;
+	float radius = 20;
+
+	SceneGraphNode* _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
+	RenderableGlobe* rg = (RenderableGlobe*)_parent->renderable();
+
+	double ellipsoidShrinkTerm = rg->interactionDepthBelowEllipsoid();
+	glm::dvec3 center = _parent->worldPosition();
+	glm::dmat4 globeModelTransform = rg->modelTransform();
+	glm::dmat4 globeModelInverseTransform = rg->inverseModelTransform();
+	glm::dvec3 cameraPos = data.camera.positionVec3();
+	glm::dvec4 cameraPositionModelSpace = globeModelInverseTransform * glm::dvec4(cameraPos, 1.0);
+	glm::dvec3 cameraPositionProjected = rg->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
+	
+	for (auto s : subsites) {
+		for (auto s1 : s) {
+			glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ s1->geodetic , 0 });
+			if (glm::distance(cameraPositionProjected, temp) < radius) {
+				subsitesInsideRadius.push_back(s1);
+			}
 		}
 	}
-	return ss;
+
+	return subsitesInsideRadius;
 }
 
 bool MultiModelProvider::initialize() {

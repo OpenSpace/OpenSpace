@@ -49,37 +49,52 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 	// and look if the model is already loaded. If the model is already loaded, return the vector. If the model is
 	// not already loaded, enqueue the model.
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfSubsiteModels;
-	for (auto subsite : Subsites) {
-		//uint64_t key = hashKey(subsite->site, subsite->drive, level);
-		//uint64_t keyPrevLevel = -1;
 
-		//if (_prevLevel != -1 && _prevLevel != level) {
-			//keyPrevLevel = hashKey(subsite->site, subsite->drive, _prevLevel);
-		//}
+	// Temporary solution to not load LOD 0 models
+	if(level > 0) {
+		for (auto subsite : Subsites) {			
+			bool requestedExistsInCache = true;
+			ProviderSubsiteKey key = { level, subsite->site, subsite->drive };
+			if (_modelCache->exist(key)) {
+				vectorOfSubsiteModels.push_back(_modelCache->get(key));
+			}
+			else {
+				for(const int& tempLevel : subsite->availableLevels){
+					// Only enqueue the model if the LOD exists
+					if(tempLevel == level)
+						_asyncSurfaceModelProvider->enqueueModelIO(subsite, level);
+				}
 			
-		bool requestedExistsInCache = true;
-		ProviderSubsiteKey key = { level, subsite->site, subsite->drive };
-		if (_modelCache->exist(key)) {
-			vectorOfSubsiteModels.push_back(_modelCache->get(key));
-		}
-		else {
-			_asyncSurfaceModelProvider->enqueueModelIO(subsite, level);
-			
-			// If the cache holds the correct models but with lower resultion than requested,
-			// return highest available resolution.
-			std::vector<int> levelsAbove = getLevelsAbove(subsite->availableLevels, level);
-			for (int i = levelsAbove.size() + 1; i-- > 1; ) {
-				ProviderSubsiteKey keyLowerLevel = { i, subsite->site, subsite->drive };
-				if (_modelCache->exist(keyLowerLevel)) {
-					vectorOfSubsiteModels.push_back(_modelCache->get(keyLowerLevel));
-					break;
+				// Check for available LODs above the requested.
+				std::vector<int> levelsAbove = getLevelsAbove(subsite->availableLevels, level);
+				for (int levelAbove = levelsAbove.size() + 1; levelAbove-- > 1; ) {
+					ProviderSubsiteKey keyLowerLevel = { levelAbove, subsite->site, subsite->drive };
+					// If the cache holds the correct model but with lower resultion than requested,
+					// return highest available resolution.
+					if (_modelCache->exist(keyLowerLevel)) {
+						vectorOfSubsiteModels.push_back(_modelCache->get(keyLowerLevel));
+						// Breaks the loop that goes through levelsAbove
+						break;
+					}
+					// If the cache doesn't hold the LOD above, enqueue it. The LOD above is much smaller
+					// in filesize and will be loaded more quickly. This is done to have something to render
+					// when waiting for the rquested level to load.
+					else {
+						for(const int& availableLevel : subsite->availableLevels) {
+							if(availableLevel == levelAbove) {
+								_asyncSurfaceModelProvider->enqueueModelIO(subsite, levelAbove);
+								// Breaks the loop that goes trough available levels for the subsite
+								break;
+							}
+						}
+						// Breaks the loop that goes through levelsAbove
+						break;
+					}
 				}
 			}
 		}
-		/*if (keyPrevLevel != -1 && _modelCache->exist(keyPrevLevel)) {
-			vectorOfSubsiteModels.push_back(_modelCache->get(keyPrevLevel));
-		}*/
 	}
+
 	return vectorOfSubsiteModels;
 }
 
@@ -101,6 +116,9 @@ void CachingSurfaceModelProvider::clearQueuesAndJobs() {
 std::vector<int> CachingSurfaceModelProvider::getLevelsAbove(const std::vector<int> availableLevels, const int requestedLevel) {
 	std::vector<int> levelsAbove;
 	for (int i = 0; i < requestedLevel - 1; i++) {
+		if (i >= availableLevels.size()){
+			return levelsAbove;
+		}
 		levelsAbove.push_back(availableLevels.at(i));
 	}
 	return levelsAbove;

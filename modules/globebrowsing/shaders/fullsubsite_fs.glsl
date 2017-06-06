@@ -24,7 +24,7 @@
 
 // Uniforms
 uniform float transparency;
-uniform float fading;
+uniform float alpha;
 
 uniform vec3 directionToSunViewSpace;
 
@@ -54,6 +54,7 @@ Fragment getFragment() {
     prevTexture3 = texture(roverTerrainTextures, vec3(vs_stDone[blackAndWhiteUvIndex], blackAndWhiteUvIndex));
   }
 
+  prevTexture3.a = alpha;
 
   Fragment frag2;
   frag2.color = prevTexture3;

@@ -108,17 +108,23 @@ namespace globebrowsing {
 }
 
 bool RenderableRoverSurface::initialize() {
-	std::vector<Geodetic2> coordinates;
+	std::vector<Geodetic2> allCoordinates;
+	std::vector<Geodetic2> coordinatesWithModel;
+
 	for (auto subsite : _subsites) {
-		coordinates.push_back(subsite->geodetic);
+		allCoordinates.push_back(subsite->geodetic);
 	}
+	for (auto subsite : _subsitesWithModels) {
+		coordinatesWithModel.push_back(subsite->geodetic);
+	}
+
 
 	std::string ownerName = owner()->name();
 	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(ownerName)->parent();
 
 	_globe = (globebrowsing::RenderableGlobe*)parent->renderable();
 
-	_renderableExplorationPath->initialize(_globe, coordinates);
+	_renderableExplorationPath->initialize(_globe, allCoordinates, coordinatesWithModel);
 
 	_chunkedLodGlobe = _globe->chunkedLodGlobe();
 
@@ -165,7 +171,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
 			ss = _modelProvider->calculate(subSitesVector, data);
 			level = 2;
-		
 			break;
 		case LodModelSwitch::Mode::Close :
 			//Close
@@ -179,7 +184,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			ss = _modelProvider->calculate(subSitesVector, data);
 			level = 3;
 			break;
-
 		case LodModelSwitch::Mode::High :
 			if (_isFirstHigh) LERROR("GOING HIGH");
 			_isFirstHigh = false;
@@ -188,7 +192,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			//High up
 			level = 1;
 			break;
-
 		case LodModelSwitch::Mode::Far:
 			//Far away
 			// Only used to decide if renderableexplorationpath should be visible or not atm.
@@ -196,13 +199,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			break;
 	}
 
-	if (_generalProperties.lockSubsite.value() && level == 3 && _pressedOnce == false) {
-		_prevSubsites = ss;
-		_pressedOnce = true;
-	}
-	else if (!_generalProperties.lockSubsite.value() && level == 3 && _pressedOnce == true) {
-		_pressedOnce = false;
-	}
+	lockSubsite(level, ss);
 
 	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
 	//FOR ALPHA BLENDING TO WORK
@@ -212,20 +209,12 @@ void RenderableRoverSurface::render(const RenderData& data) {
 	else
 		vectorOfsubsiteModels = _cachingModelProvider->getModels(ss, level);
 	
-	//if (_subsiteModels.size() == 0) return;
-
-	if(vectorOfsubsiteModels.size() > 0) {
-		if (level == 3 && _prevSubsite != nullptr 
-			&& _prevSubsite->drive != vectorOfsubsiteModels.at(0)->drive) {
-			vectorOfsubsiteModels.push_back(_prevSubsite);
-		}
-	}
 	vectorOfsubsiteModels = calculateSurfacePosition(vectorOfsubsiteModels);
 
 	_programObject->activate();
 	for (auto subsiteModels : vectorOfsubsiteModels) {
 
-		float dir = 1;
+		/*float dir = 1;
 		float alpha = subsiteModels->_alpha;
 		int subsitePrevLevel = subsiteModels->level;
 		if (level != _prevLevel) {
@@ -266,10 +255,15 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		}
 		else {
 			dir = subsiteModels->_alpha >= 1.0 ? 0 : 1;
-		}
+		}*/
 
-		alpha = alpha + dir * 0.005;
-		subsiteModels->_alpha = alpha;
+		//alpha = alpha + dir * 0.005;
+		//subsiteModels->_alpha = alpha;
+
+		/*if (_prevSubsiteModels != nullptr && _prevSubsiteModels != subsiteModels
+				&& level == 3) {
+			_prevSubsiteModels = subsiteModels;
+		}*/
 
 		glm::dmat4 globeTransform = _globe->modelTransform();
 
@@ -360,7 +354,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
 		_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 		_programObject->setUniform("useMastCamColor", _generalProperties.useMastCam.value());
-		//_programObject->setUniform("fading", alpha);
+		_programObject->setUniform("alpha", subsiteModels->alpha);
 
 
 		// TODO: Hardcoded values for site 48 drive 1570,
@@ -433,7 +427,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		_renderableExplorationPath->setLevel(level);
 		_renderableExplorationPath->render(data);
 	}
-
 	_prevLevel = level;
 }
 
@@ -453,6 +446,16 @@ std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSur
 		subsiteModels->cartesianPosition = _globe->ellipsoid().cartesianPosition(geo3);
 	}
 	return vector;
+}
+
+void RenderableRoverSurface::lockSubsite(const int level, std::vector<std::shared_ptr<Subsite>> subsites) {
+	if (_generalProperties.lockSubsite.value() && level == 3 && _pressedOnce == false) {
+		_prevSubsites = subsites;
+		_pressedOnce = true;
+	}
+	else if (!_generalProperties.lockSubsite.value() && level == 3 && _pressedOnce == true) {
+		_pressedOnce = false;
+	}
 }
 
 } // namespace globebrowsing
