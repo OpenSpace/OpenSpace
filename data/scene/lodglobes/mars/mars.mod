@@ -128,10 +128,10 @@ return {
             -- Allows camera to go down 10000 meters below the reference ellipsoid InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
              Atmosphere = {
                 -- Atmosphere radius in Km
-                AtmoshereRadius = 3415.0,
+                AtmoshereRadius = 3463.17495,
                 --PlanetRadius    = 3396.19,
                 --PlanetRadius = 3393.0,
-                PlanetRadius = 3391.0,
+                PlanetRadius = 3386.190,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
                     Coefficients = {
@@ -142,18 +142,18 @@ return {
                         -- In Rayleigh scattering, the coefficients of absorption and scattering are the same.
                     },
                     -- Thichkness of atmosphere if its density were uniform, in Km
-                    H_R = 5.0,
+                    H_R = 10.43979,
                 },
                 -- Default
                 Mie = {
                     Coefficients = {
                         -- Reflection coefficients are given in km^-1
-                        Scattering = {4.0e-3, 4.0e-3, 4.0e-3},
+                        Scattering = {53.61771e-3, 53.61771e-3, 53.61771e-3},
                         -- Extinction coefficients are a fraction of the Scattering coefficients
-                        Extinction = {4.0e-3/0.9, 4.0e-3/0.9, 4.0e-3/0.9}                        
+                        Extinction = {53.61771e-3/0.98979, 53.61771e-3/0.98979, 53.61771e-3/0.98979}                        
                     },
                     -- Mie Height scale (atmosphere thickness for constant density) in Km
-                    H_M = 1.2,
+                    H_M = 3.09526,
                     -- Mie Phase Function Value (G e [-1.0, 1.0]. If G = 1.0, Mie phase function = Rayleigh Phase Function)
                     G = 0.85,
                 },
