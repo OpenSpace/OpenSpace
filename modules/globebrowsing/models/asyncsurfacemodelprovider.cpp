@@ -27,7 +27,7 @@
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
 #include <modules/globebrowsing/models/job/subsiteinitializationjob.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/texturearray.h>
+//#include <ghoul/opengl/texturearray.h>
 
 namespace {
 	const std::string _loggerCat = "AsyncSurfaceModelProvider";
@@ -115,7 +115,8 @@ void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_p
 	glBindTexture(GL_TEXTURE_2D_ARRAY, coloredTextureID);
 
 	//Allocate the storage.
-	glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevelCount, GL_RGB8, 1344, 1200, subsiteModels->coloredTextures.size());
+	if(subsiteModels->coloredTextures.size()>0)
+		glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevelCount, GL_RGB8, 1344, 1200, subsiteModels->coloredTextures.size());
 
 	counter = 0;
 	for (auto texture2 : subsiteModels->coloredTextures) {
