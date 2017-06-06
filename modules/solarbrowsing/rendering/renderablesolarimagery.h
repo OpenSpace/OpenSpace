@@ -76,7 +76,10 @@ public:
 
     float _currentScale;
     glm::vec2 _currentCenterPixel;
+    SolarImageData _currentSolarImageData;
+    double _currentActiveImageTime;
     bool _isCoronaGraph;
+    bool _shouldRenderPlane = true;
 
 private:
     properties::BoolProperty _asyncUploadPBO;

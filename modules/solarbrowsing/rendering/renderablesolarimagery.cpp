@@ -42,8 +42,12 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/scene/scene.h>
 
+#include <openspace/util/spicemanager.h>
+
 #include <chrono>
 #include <math.h>
+
+#define BUFFER_MAX_SIZE 100
 
 using namespace ghoul::opengl;
 using namespace std::chrono;
@@ -68,7 +72,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _gammaValue("gammaValue", "Gamma", 0.9, 0.1, 10.0)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
-    , _bufferSize("bufferSize", "Buffer Size", 5, 1, 300)
+    , _bufferSize("bufferSize", "Buffer Size", 5, 1, 150)
     , _displayTimers("displayTimers", "Display Timers", false)
     , _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
     , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 85, 0, 300)
@@ -89,10 +93,10 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         throw ghoul::RuntimeError("Nodename has to be specified");
     }
 
-    glm::dvec2 magicPlaneOffset;
-    if (dictionary.getValue("MagicOffsetFromCenter", magicPlaneOffset)) {
-        _magicPlaneOffset = magicPlaneOffset;
-    }
+    // glm::dvec2 magicPlaneOffset;
+    // if (dictionary.getValue("MagicOffsetFromCenter", magicPlaneOffset)) {
+    //     _magicPlaneOffset = magicPlaneOffset;
+    // }
 
     float tmpStartResolutionLevel;
     if (!dictionary.getValue("StartResolutionLevel", tmpStartResolutionLevel)) {
@@ -100,9 +104,9 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     }
     _resolutionLevel = static_cast<int>(tmpStartResolutionLevel);
 
-    if (!dictionary.getValue("MagicPlaneFactor", _magicPlaneFactor)) {
-        throw ghoul::RuntimeError("Plane must at the moment have a magic factor");
-    }
+    // if (!dictionary.getValue("MagicPlaneFactor", _magicPlaneFactor)) {
+    //     throw ghoul::RuntimeError("Plane must at the moment have a magic factor");
+    // }
 
     std::string rootPath;
     if (!dictionary.getValue("RootPath", rootPath)) {
@@ -186,27 +190,28 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         // Upload asap
         updateTextureGPU(/*asyncUpload=*/false);
         if (_useBuffering) {
-
             //double oktime = OsEng.timeManager().time().deltaTime();
             //TimeManager& lel = OsEng.timeManager();
-
-            fillBuffer(OsEng.timeManager().time().deltaTime());
+            _streamBuffer.clear();
+            //fillBuffer(OsEng.timeManager().time().deltaTime());
         } /*else {
             uploadImageDataToPBO();
         }*/
     });
 
     _resolutionLevel.onChange([this]() {
+        _updatingCurrentLevelOfResolution = true;
         _pboIsDirty = false;
         _imageSize = _fullResolution / (pow(2, _resolutionLevel));
         _pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
         updateTextureGPU(/*asyncUpload=*/false, /*resChanged=*/true);
         if (_useBuffering) {
-            fillBuffer(OsEng.timeManager().time().deltaTime());
+            _streamBuffer.clear();
+            //fillBuffer(OsEng.timeManager().time().deltaTime());
         } /*else {
             uploadImageDataToPBO();
         }*/
-       // _updatingCurrentLevelOfResolution = false;
+       _updatingCurrentLevelOfResolution = false;
     });
 
     _moveFactor.onChange([this]() {
@@ -216,9 +221,13 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
     _deltaTimeLast = 1.0;
 
-    if (_useBuffering) {
-        fillBuffer(OsEng.timeManager().time().deltaTime());
-    }
+    // if (_useBuffering) {
+    //     fillBuffer(OsEng.timeManager().time().deltaTime());
+    // }
+
+    _currentActiveImageTime
+          = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+                  .timeObserved;
 
     // If no buffer is used this is needed
     _initializePBO = true;
@@ -310,6 +319,7 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
         std::shared_ptr<SolarImageData> _solarImageData = _streamBuffer.popFinishedJob();
         if (_solarImageData) {
 
+            _currentActiveImageTime = _solarImageData->timeObserved;
             _currentScale = _solarImageData->im->scale;
             _currentCenterPixel = _solarImageData->im->centerPixel;
             _isCoronaGraph = _solarImageData->im->isCoronaGraph;
@@ -325,16 +335,12 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
                        << " ms" << std::endl);
             }
 
-            const double& osTime = OsEng.timeManager().time().j2000Seconds();
-            DecodeData decodeData = getDecodeDataFromOsTime(osTime + (_bufferSize + 1) * (OsEng.timeManager().time().deltaTime() * (static_cast<double>(_minRealTimeUpdateInterval )/1000.0)));
-            auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(decodeData.im->fullResolution));
-            _streamBuffer.enqueueJob(job);
             _initializePBO = false;
             _pboIsDirty = true;
 
             if (_verboseMode)  {
                 LDEBUG("Popped image" << _solarImageData->im->filename);
-                LDEBUG("Adding work from PBO " << decodeData.im->filename);
+                //LDEBUG("Adding work from PBO " << decodeData.im->filename);
             }
         } else {
             if (_verboseMode) {
@@ -348,18 +354,18 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
 
 void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged) {
     if (_usePBO && asyncUpload) {
-            _pbo->activate();
-            _texture->bind();
-            // Send async to GPU by coping from PBO to texture objects
-            glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
-                            GLint(_texture->format()), _texture->dataType(), nullptr);
-            _pbo->deactivate();
-            _pboIsDirty = false;
+        _pbo->activate();
+        _texture->bind();
+        // Send async to GPU by coping from PBO to texture objects
+        glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
+                        GLint(_texture->format()), _texture->dataType(), nullptr);
+        _pbo->deactivate();
+        _pboIsDirty = false;
     } else {
         unsigned char* data
               = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
         const double& osTime = OsEng.timeManager().time().j2000Seconds();
-        const auto& decodeData = getDecodeDataFromOsTime(osTime);
+        const auto& decodeData = getDecodeDataFromOsTime(_currentActiveImageTime);
         decode(data, decodeData.im->filename);
 
         _currentScale = decodeData.im->scale;
@@ -422,10 +428,25 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         const double& dt = OsEng.timeManager().time().deltaTime();
         // Delta time changed, need to refill buffer
         if ((abs(_deltaTimeLast - dt)) > EPSILON) {
+            LDEBUG("clearing buffer .. " );
             _pboIsDirty = false;
-            fillBuffer(dt);
+            //fillBuffer(dt);
+            _streamBuffer.clear();
         }
         _deltaTimeLast = dt;
+    }
+
+    if (_streamBuffer.numJobs() < _bufferSize) {
+        // Always add to buffer faster than pop ..
+        //const double& osTime = OsEng.timeManager().time().j2000Seconds();
+
+
+        // The min real time update interval doesnt make any sense
+        DecodeData decodeData = getDecodeDataFromOsTime(_currentActiveImageTime + (_streamBuffer.numJobs()) * (OsEng.timeManager().time().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval)/1000.0));
+
+        //LDEBUG("Pushing delta time  " << SpiceManager::ref().dateFromEphemerisTime(decodeData.timeObserved));
+        auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(decodeData.im->fullResolution));
+        _streamBuffer.enqueueJob(job);
     }
 
     _timeToUpdateTexture = _realTimeDiff > _minRealTimeUpdateInterval;
@@ -441,23 +462,30 @@ void RenderableSolarImagery::render(const RenderData& data) {
     }
 
     const bool isWithinFrustum = checkBoundaries(data);
+    if (!isWithinFrustum) {
+        _shouldRenderPlane = false;
+    } else {
+        _shouldRenderPlane = true;
+    }
+
     if (_isWithinFrustumLast != isWithinFrustum) {
         //_pboIsDirty = false;
-        fillBuffer(OsEng.timeManager().time().j2000Seconds());
+        //fillBuffer(OsEng.timeManager().time().j2000Seconds());
+        _streamBuffer.clear();
     }
     _isWithinFrustumLast = isWithinFrustum;
 
     // Update texture
     // The bool blockers might probably not be needed now
     if (_timeToUpdateTexture && !_updatingCurrentLevelOfResolution
-        && !_updatingCurrentActiveChannel && (isWithinFrustum || _initializePBO)) {
+        && !_updatingCurrentActiveChannel && (isWithinFrustum || _initializePBO || _pboIsDirty)) {
         performImageTimestep(OsEng.timeManager().time().j2000Seconds());
         _lastUpdateRealTime = _realTime;
     }
 
     // TODO: We want to create sun imagery node from within the module
     const glm::dvec3& sunPositionWorld
-          = OsEng.renderEngine().scene()->sceneGraphNode(_target)->worldPosition();
+          = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 
     _spacecraftCameraPlane->render(data, *_texture, _lut, sunPositionWorld, _planeOpacity,
                                    _contrastValue, _gammaValue, _disableBorder,
