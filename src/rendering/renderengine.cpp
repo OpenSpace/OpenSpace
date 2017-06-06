@@ -27,6 +27,7 @@
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
 #include <modules/newhorizons/util/imagesequencer.h>
 #endif
+#include <openspace/util/syncdata.h>
 
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/engine/openspaceengine.h>
@@ -38,11 +39,18 @@
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/scene/scene.h>
+#include <openspace/performance/performancemanager.h>
+#include <openspace/rendering/renderer.h>
 
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/font/font.h>
@@ -105,6 +113,7 @@ RenderEngine::RenderEngine()
         "Type of the frametime display",
         properties::OptionProperty::DisplayType::Dropdown
     )
+    , _showDate("showDate", "Show Date Information", true)
     , _showInfo("showInfo", "Show Render Information", true)
     , _showLog("showLog", "Show the OnScreen log", true)
     , _takeScreenshot("takeScreenshot", "Take Screenshot")
@@ -112,7 +121,11 @@ RenderEngine::RenderEngine()
     , _applyWarping("applyWarpingScreenshot", "Apply Warping to Screenshots", false)
     , _showFrameNumber("showFrameNumber", "Show Frame Number", false)
     , _disableMasterRendering("disableMasterRendering", "Disable Master Rendering", false)
-    , _disableSceneOnMaster("disableSceneOnMaster", "Disable Scene on Master", false)
+    , _disableSceneTranslationOnMaster(
+        "disableSceneTranslationOnMaster",
+        "Disable Scene Translation on Master",
+        false
+    )
     , _globalBlackOutFactor(1.f)
     , _fadeDuration(2.f)
     , _currentFadeTime(0.f)
@@ -147,6 +160,7 @@ RenderEngine::RenderEngine()
     );
     addProperty(_frametimeType);
     
+    addProperty(_showDate);
     addProperty(_showInfo);
     addProperty(_showLog);
     
@@ -165,9 +179,14 @@ RenderEngine::RenderEngine()
     
     addProperty(_showFrameNumber);
     
+    addProperty(_disableSceneTranslationOnMaster);
     addProperty(_disableMasterRendering);
-    addProperty(_disableSceneOnMaster);
 }
+
+/**
+ * Destructor
+ */
+RenderEngine::~RenderEngine() {}
 
 void RenderEngine::setRendererFromString(const std::string& renderingMethod) {
     _rendererImplementation = rendererFromString(renderingMethod);
@@ -214,7 +233,7 @@ void RenderEngine::initialize() {
     }
 
     if (confManager.hasKey(ConfigurationManager::KeyDisableSceneOnMaster)) {
-        _disableSceneOnMaster = confManager.value<bool>(
+        _disableSceneTranslationOnMaster = confManager.value<bool>(
             ConfigurationManager::KeyDisableSceneOnMaster
         );
     }
@@ -226,22 +245,33 @@ void RenderEngine::initialize() {
     setRendererFromString(renderingMethod);
 
 #ifdef GHOUL_USE_DEVIL
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderDevIL>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderDevIL>()
+    );
 #endif // GHOUL_USE_DEVIL
 #ifdef GHOUL_USE_FREEIMAGE
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderFreeImage>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderFreeImage>()
+    );
 #endif // GHOUL_USE_FREEIMAGE
 #ifdef GHOUL_USE_SOIL
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderSOIL>());
-    ghoul::io::TextureWriter::ref().addWriter(std::make_shared<ghoul::io::TextureWriterSOIL>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderSOIL>()
+    );
+    ghoul::io::TextureWriter::ref().addWriter(
+        std::make_shared<ghoul::io::TextureWriterSOIL>()
+    );
 #endif // GHOUL_USE_SOIL
 
-    ghoul::io::TextureReader::ref().addReader(std::make_shared<ghoul::io::TextureReaderCMAP>());
+    ghoul::io::TextureReader::ref().addReader(
+        std::make_shared<ghoul::io::TextureReaderCMAP>()
+    );
 
     MissionManager::initialize();
 }
 
 void RenderEngine::initializeGL() {
+    LTRACE("RenderEngine::initializeGL(begin)");
     // TODO:    Fix the power scaled coordinates in such a way that these 
     //            values can be set to more realistic values
 
@@ -269,23 +299,22 @@ void RenderEngine::initializeGL() {
     ghoul::logging::LogManager::ref().addLog(std::move(log));
 
     LINFO("Finished initializing GL");
+    LTRACE("RenderEngine::initializeGL(end)");
 }
 
 void RenderEngine::deinitialize() {
-    for (auto screenspacerenderable : _screenSpaceRenderables) {
-        screenspacerenderable->deinitialize();
+    for (std::shared_ptr<ScreenSpaceRenderable> ssr : _screenSpaceRenderables) {
+        ssr->deinitialize();
     }
 
     MissionManager::deinitialize();
 }
 
 void RenderEngine::updateScene() {
+    const Time& currentTime = OsEng.timeManager().time();
     _scene->update({
         { glm::dvec3(0), glm::dmat3(1), 1.0 },
-        Time::ref().j2000Seconds(),
-        Time::ref().deltaTime(),
-        Time::ref().paused(),
-        Time::ref().timeJumped(),
+        currentTime,
         _performanceManager != nullptr
     });
     
@@ -320,8 +349,8 @@ void RenderEngine::updateRenderer() {
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
-    for (auto& screenspacerenderable : _screenSpaceRenderables) {
-        screenspacerenderable->update();
+    for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+        ssr->update();
     }
 }
 
@@ -387,15 +416,13 @@ void RenderEngine::updateFade() {
     }
 }
 
-
-
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {
     LTRACE("RenderEngine::render(begin)");
     WindowWrapper& wrapper = OsEng.windowWrapper();
 
-    if (_disableSceneOnMaster && wrapper.isMaster()) {
+    if (_disableSceneTranslationOnMaster && wrapper.isMaster()) {
         _camera->sgctInternal.setViewMatrix(viewMatrix);
     }
     else {
@@ -413,20 +440,20 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         renderInformation();
     }
 
-    glm::vec2 penPosition = glm::vec2(
-        OsEng.windowWrapper().viewportPixelCoordinates().y / 2 - 50,
-        OsEng.windowWrapper().viewportPixelCoordinates().w / 3
-        );
-
     if (_showFrameNumber) {
-        RenderFontCr(*_fontBig, penPosition, "%i", _frameNumber);
+        const glm::vec2 penPosition = glm::vec2(
+            fontResolution().x / 2 - 50,
+            fontResolution().y / 3
+        );
+        
+        RenderFont(*_fontBig, penPosition, "%i", _frameNumber);
     }
     
     _frameNumber++;
     
-    for (auto& screenSpaceRenderable : _screenSpaceRenderables) {
-        if (screenSpaceRenderable->isEnabled() && screenSpaceRenderable->isReady()) {
-            screenSpaceRenderable->render();
+    for (std::shared_ptr<ScreenSpaceRenderable>& ssr : _screenSpaceRenderables) {
+        if (ssr->isEnabled() && ssr->isReady()) {
+            ssr->render();
         }
     }
     LTRACE("RenderEngine::render(end)");
@@ -443,8 +470,8 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
     );
 
     glm::vec2 penPosition = glm::vec2(
-        OsEng.windowWrapper().viewportPixelCoordinates().y - size.boundingBox.x,
-        OsEng.windowWrapper().viewportPixelCoordinates().w - size.boundingBox.y
+        fontResolution().x - size.boundingBox.x - 10,
+        fontResolution().y - size.boundingBox.y
     );
     penPosition.y -= _fontDate->height();
 
@@ -458,8 +485,9 @@ void RenderEngine::renderShutdownInformation(float timer, float fullTime) {
 }
 
 void RenderEngine::postDraw() {
-    if (Time::ref().timeJumped()) {
-        Time::ref().setTimeJumped(false);
+    Time& currentTime = OsEng.timeManager().time();
+    if (currentTime.timeJumped()) {
+        currentTime.setTimeJumped(false);
     }
 
     if (_shouldTakeScreenshot) {
@@ -736,7 +764,7 @@ void RenderEngine::unregisterScreenSpaceRenderable(
 }
 
 void RenderEngine::unregisterScreenSpaceRenderable(std::string name){
-    auto s = screenSpaceRenderable(name);
+    std::shared_ptr<ScreenSpaceRenderable> s = screenSpaceRenderable(name);
     if (s) {
         unregisterScreenSpaceRenderable(s);
     }
@@ -805,22 +833,27 @@ void RenderEngine::renderInformation() {
             fontResolution().y
             //OsEng.windowWrapper().viewportPixelCoordinates().w
         );
-        penPosition.y -= _fontDate->height();
 
-        if (_showInfo && _fontDate) {
+        penPosition.y -= OsEng.console().currentHeight();
+
+        if (_showDate && _fontDate) {
+            penPosition.y -= _fontDate->height();
             RenderFontCr(
                 *_fontDate,
                 penPosition,
                 "Date: %s",
-                Time::ref().UTC().c_str()
+                OsEng.timeManager().time().UTC().c_str()
             );
+        }
+        else {
+            penPosition.y -= _fontInfo->height();
         }
         if (_showInfo && _fontInfo) {
             RenderFontCr(
                 *_fontInfo,
                 penPosition,
                 "Simulation increment (s): %.3f",
-                Time::ref().deltaTime()
+                OsEng.timeManager().time().deltaTime()
             );
 
             FrametimeType frametimeType = FrametimeType(_frametimeType.value());
@@ -905,7 +938,7 @@ void RenderEngine::renderInformation() {
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
         bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
-        double currentTime = Time::ref().j2000Seconds();
+        double currentTime = OsEng.timeManager().time().j2000Seconds();
 
         if (MissionManager::ref().hasCurrentMission()) {
 
@@ -1276,7 +1309,9 @@ void RenderEngine::sortScreenspaceRenderables() {
     std::sort(
         _screenSpaceRenderables.begin(),
         _screenSpaceRenderables.end(),
-        [](auto j, auto i) {
+        [](const std::shared_ptr<ScreenSpaceRenderable>& j,
+           const std::shared_ptr<ScreenSpaceRenderable>& i)
+        {
             return i->depth() > j->depth();
         }
     );

@@ -30,6 +30,7 @@
 #include <openspace/engine/configurationmanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 
@@ -158,7 +159,7 @@ void RenderablePlaneProjection::render(const RenderData& data) {
 }
 
 void RenderablePlaneProjection::update(const UpdateData& data) {
-    double time = data.time;
+    double time = data.time.j2000Seconds();
     const Image img = openspace::ImageSequencer::ref().getLatestImageForInstrument(_instrument);
     
     if (img.path == "")

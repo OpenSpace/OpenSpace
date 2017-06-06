@@ -40,7 +40,7 @@ int AvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& dat
     // auto layers = layerManager->layerGroup(LayerManager::HeightLayers).activeLayers();
     int currLevel = chunk.tileIndex().level;
         
-    for (size_t i = 0; i < LayerManager::NUM_LAYER_GROUPS; ++i) {
+    for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
         for (const auto& layer : layerManager->layerGroup(i).activeLayers()) {
             Tile::Status status = layer->tileProvider()->getTileStatus(chunk.tileIndex());
             if (status == Tile::Status::OK) {

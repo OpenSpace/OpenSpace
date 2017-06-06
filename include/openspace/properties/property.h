@@ -68,9 +68,9 @@ public:
      */
     enum class Visibility {
         All = 3,  ///< Visible for all types, no matter what
-        Developer = 2, ///< Visible in Developer mode
-        User = 1, ///< Visible in User mode
-        Hidden = 0 ///< Never visible
+        Hidden = 2, ///< Never visible
+        Developer = 1, ///< Visible in Developer mode
+        User = 0 ///< Visible in User mode
     };
 
     /**
@@ -293,6 +293,18 @@ public:
     void setReadOnly(bool state);
 
     /**
+    * Default view options that can be used in the Property::setViewOption method. The
+    * values are: Property::ViewOptions::Color = <code>color</code>,
+    * Property::ViewOptions::LightPosition = <code>lightPosition</code>,
+    * Property::ViewOptions::PowerScaledScalar = <code>powerScaledScalar</code>, and
+    * Property::ViewOptions::PowerScaledCoordinate = <code>powerScaledCoordinate</code>.
+    */
+    struct ViewOptions {
+        static const char* Color;
+        static const char* LightPosition;
+    };
+
+    /**
      * This method allows the developer to give hints to the GUI about different
      * representations for the GUI. The same Property (for example Vec4Property) can be
      * used in different ways, each requiring a different input method. These values are
@@ -307,18 +319,14 @@ public:
     void setViewOption(std::string option, bool value = true);
 
     /**
-     * Default view options that can be used in the Property::setViewOption method. The
-     * values are: Property::ViewOptions::Color = <code>color</code>,
-     * Property::ViewOptions::LightPosition = <code>lightPosition</code>,
-     * Property::ViewOptions::PowerScaledScalar = <code>powerScaledScalar</code>, and
-     * Property::ViewOptions::PowerScaledCoordinate = <code>powerScaledCoordinate</code>.
+     * This method returns the state of a \p option hint. See Property::ViewOptions for a
+     * default list of possible options. As these are only hints, the GUI is free to
+     * ignore any suggestion by the developer.
+     * \param option The view option that should be retrieved
+     * \param defaultValue The value that is returned if the \p option was not set
+     * \return The view option's value
      */
-    struct ViewOptions {
-        static const char* Color;
-        static const char* LightPosition;
-        static const char* PowerScaledScalar;
-        static const char* PowerScaledCoordinate;
-    };
+    bool viewOption(const std::string& option, bool defaultValue = false) const;
 
     /**
      * Returns the metaData that contains all information for external applications to

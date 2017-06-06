@@ -55,8 +55,6 @@ namespace openspace {
  * The synchronization of the simulation time requires 
  */
 
-class SyncBuffer;
-
 class Time {
 public:
     /**
@@ -90,20 +88,6 @@ public:
 
     static Time now();
 
-    /**
-     * Returns the reference to the Time singleton object.
-     * \return The reference to the Time singleton object
-     * \pre The Time singleton must have been initialized
-     */
-    static Time& ref();
-
-    /**
-     * Returns <code>true</code> if the singleton has been successfully initialized,
-     * <code>false</code> otherwise
-     * \return <code>true</code> if the singleton has been successfully initialized,
-     * <code>false</code> otherwise
-     */
-    static bool isInitialized();
     
     /**
      * Sets the current time to the specified value in seconds past the J2000 epoch. This
@@ -210,15 +194,10 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-    std::vector<Syncable*> getSyncables();
-
 private:
-    static Time* _instance; ///< The singleton instance
-
-    SyncData<double> _time;
-    SyncData<double> _dt;
-    SyncData<bool> _timeJumped;
-
+    double _time;
+    double _dt;
+    bool _timeJumped;
     bool _timePaused = false;    
 };
 

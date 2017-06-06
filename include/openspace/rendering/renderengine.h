@@ -25,20 +25,13 @@
 #ifndef __OPENSPACE_CORE___RENDERENGINE___H__
 #define __OPENSPACE_CORE___RENDERENGINE___H__
 
-#include <openspace/performance/performancemanager.h>
-#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/propertyowner.h>
+
+#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
-#include <openspace/rendering/raycastermanager.h>
-#include <openspace/rendering/renderer.h>
-#include <openspace/rendering/screenspacerenderable.h>
-
-#include <openspace/scripting/scriptengine.h>
-
-#include <openspace/util/syncdata.h>
 
 namespace ghoul {
 namespace fontrendering {
@@ -49,17 +42,21 @@ namespace opengl {
 }
 class Dictionary;
 class SharedMemory;
-}
+} // namespace ghoul
 
 namespace openspace {
 
-// Forward declare to minimize dependencies
+namespace performance { class PerformanceManager; }
+namespace scripting { struct LuaLibrary; }
 class Camera;
-class SyncBuffer;
+class RaycasterManager;
+class Renderer;
 class Scene;
 class SceneManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
+class Syncable;
+class SyncBuffer;
 
 class RenderEngine : public properties::PropertyOwner {
 public:
@@ -76,7 +73,7 @@ public:
     };
 
     RenderEngine();
-    ~RenderEngine() = default;
+    ~RenderEngine();
     
     void initialize();
     void initializeGL();
@@ -204,6 +201,7 @@ private:
 
     //FrametimeType _frametimeType;
 
+    properties::BoolProperty _showDate;
     properties::BoolProperty _showInfo;
     properties::BoolProperty _showLog;
     
@@ -212,7 +210,7 @@ private:
     properties::BoolProperty _applyWarping;
     properties::BoolProperty _showFrameNumber;
     properties::BoolProperty _disableMasterRendering;
-    properties::BoolProperty _disableSceneOnMaster;
+    properties::BoolProperty _disableSceneTranslationOnMaster;
 
     float _globalBlackOutFactor;
     float _fadeDuration;

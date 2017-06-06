@@ -43,6 +43,7 @@ namespace culling {
  */
 class FrustumCuller : public ChunkCuller {
 public:
+    virtual ~FrustumCuller() override = default;
     /**
      * \param viewFrustum is the view space in normalized device coordinates space.
      * Hence it is an axis aligned bounding box and not a real frustum.

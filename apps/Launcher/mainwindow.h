@@ -31,6 +31,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QTextEdit>
+#include <QCommandLineParser>
 
 class QComboBox;
 class QNetworkAccessManager;
@@ -56,9 +57,12 @@ private slots:
     void newsNetworkError();
     void newsReadyRead();
 
+    void generateOptions();
+
 private:
     void initialize();
-    
+    void configureLogging();
+
     QNetworkReply* _newsReply;
     
     QTextEdit* _informationWidget;
@@ -74,42 +78,9 @@ private:
 
     QNetworkAccessManager _networkManager;
     openspace::ConfigurationManager* _configuration;
+
+    QCommandLineParser* _optionParser;
 };
 
-//class MainWindow : public QWidget {
-//Q_OBJECT
-//public:
-//    MainWindow();
-//    ~MainWindow();
-//
-//    std::string nextTarget() const;
-//
-//public slots:
-//    void sendScript(QString script);
-//
-//private slots:
-//    void onConnect(QString host, QString port);
-//    void onDisconnect();
-//
-//    void onSocketConnected();
-//    void onSocketDisconnected();
-//
-//    void readTcpData();
-//    void handleStatusMessage(QByteArray data);
-//    void handlePlaybook(QByteArray data);
-//
-//    void fullyConnected();
-//
-//private:
-//    ConfigurationWidget* _configurationWidget;
-//    ControlWidget* _timeControlWidget;
-//    InformationWidget* _informationWidget;
-//    TimelineWidget* _timelineWidget;
-//    
-//    QTcpSocket* _socket;
-//
-//    bool _hasHongKangTimeline = false;
-//    bool _hasLabelTimeline = false;
-//};
 
 #endif // __OPENSPACE_APP_LAUNCHER___MAINWINDOW___H__

@@ -28,6 +28,7 @@
 #include <openspace/network/parallelconnection.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
+#include <openspace/util/timeline.h>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/tile/tileindex.h>
@@ -80,14 +81,6 @@ namespace interaction {
         void mousePositionCallback(double mouseX, double mouseY);
         void mouseScrollWheelCallback(double mouseScrollDelta);
 
-        // Mutators
-        void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
-        void removeKeyframesAfter(double timestamp);
-        void clearKeyframes();
-        void clearOldKeyframes();
-
-        static bool compareKeyframeTimes(const datamessagestructures::CameraKeyframe& a, const datamessagestructures::CameraKeyframe& b);
-
         // Accessors
         const std::list<std::pair<Key, KeyModifier> >& getPressedKeys() const;
         const std::list<MouseButton>& getPressedMouseButtons() const;
@@ -104,9 +97,6 @@ namespace interaction {
         std::list<MouseButton> _mouseButtonsDown;
         glm::dvec2 _mousePosition;
         double _mouseScrollDelta;
-
-        // Remote input via keyframes
-        std::vector<datamessagestructures::CameraKeyframe> _keyframes;
     };
 
 
@@ -194,16 +184,23 @@ protected:
 class KeyframeInteractionMode : public InteractionMode
 {
 public:
+    struct CameraPose {
+        glm::dvec3 position;
+        glm::quat rotation;
+        std::string focusNode;
+        bool followFocusNodeRotation;
+    };
+
     KeyframeInteractionMode();
     ~KeyframeInteractionMode();
 
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
     virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
     bool followingNodeRotation() const override;
+    Timeline<CameraPose>& timeline();
 
 private:
-    std::vector<datamessagestructures::CameraKeyframe> _keyframes;
-    double _currentKeyframeTime;
+    Timeline<CameraPose> _cameraPoseTimeline;
 };
 
 class GlobeBrowsingInteractionMode;

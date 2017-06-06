@@ -1,6 +1,6 @@
 <OpenSpaceTemporalGDALDataset>
     <OpenSpaceTimeStart>2015-11-24</OpenSpaceTimeStart>
-    <OpenSpaceTimeEnd></OpenSpaceTimeEnd>
+    <OpenSpaceTimeEnd>Yesterday</OpenSpaceTimeEnd>
     <OpenSpaceTimeResolution>1d</OpenSpaceTimeResolution>
     <OpenSpaceTimeIdFormat>YYYY-MM-DD</OpenSpaceTimeIdFormat>
     <GDAL_WMS>

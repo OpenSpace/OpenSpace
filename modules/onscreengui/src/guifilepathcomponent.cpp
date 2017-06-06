@@ -22,25 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/loadjob/tileloadjob.h>
+#include <modules/onscreengui/include/guifilepathcomponent.h>
 
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
+#include <ghoul/filesystem/filesystem.h>
+
+#include "imgui.h"
 
 namespace openspace {
-namespace globebrowsing {
+namespace gui {
 
-TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
-    const TileIndex& tileIndex)
-    : _rawTileDataReader(rawTileDataReader)
-    , _chunkIndex(tileIndex) {}
+GuiFilePathComponent::GuiFilePathComponent()
+    : GuiComponent("File Path")
+{}
 
-void TileLoadJob::execute() {
-    _rawTile = _rawTileDataReader->readTileData(_chunkIndex);
+void GuiFilePathComponent::render() {
+    bool v = _isEnabled;
+    ImGui::Begin("File Path", &v);
+
+    ImGui::Text(
+        "%s",
+        "These are file paths registered in the current OpenSpace instance."
+    );
+    ImGui::Separator();
+
+    ImGui::Columns(2);
+    ImGui::Separator();
+    std::vector<std::string> tokens = FileSys.tokens();
+    for (const std::string& t : tokens) {
+        ImGui::Text("%s", t.c_str());
+        ImGui::NextColumn();
+        ImGui::Text("%s", absPath(t).c_str());
+        ImGui::NextColumn();
+        ImGui::Separator();
+    }
+    ImGui::End();
 }
 
-std::shared_ptr<RawTile> TileLoadJob::product() const {
-    return _rawTile;
-}
-
-} // namespace globebrowsing
-} // namespace openspace
+} // gui
+} // openspace

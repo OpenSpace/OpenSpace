@@ -25,8 +25,10 @@
 #ifndef __OPENSPACE_CORE___SCRIPTENGINE___H__
 #define __OPENSPACE_CORE___SCRIPTENGINE___H__
 
-#include <openspace/scripting/lualibrary.h>
+#include <openspace/documentation/documentationgenerator.h>
 #include <openspace/util/syncdata.h>
+
+#include <openspace/scripting/lualibrary.h>
 
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
@@ -50,9 +52,12 @@ namespace scripting {
  * <code>openspace</code> namespac prefix in Lua. The same functions can be exposed to
  * other Lua states by passing them to the #initializeLuaState method.
  */
-class ScriptEngine : public Syncable {
+class ScriptEngine : public Syncable, public DocumentationGenerator {
 public:
     using RemoteScripting = ghoul::Boolean;
+
+    ScriptEngine();
+
     /**
      * Initializes the internal Lua state and registers a common set of library functions
      * \throw LuaRuntimeException If the creation of the new Lua state fails
@@ -72,8 +77,6 @@ public:
     
     bool runScript(const std::string& script);
     bool runScriptFile(const std::string& filename);
-
-    void writeDocumentation(const std::string& filename, const std::string& type) const;
 
     bool writeLog(const std::string& script);
 
@@ -98,16 +101,19 @@ public:
     static std::string OpenSpaceLibraryName;
     
 private:
-    bool registerLuaLibrary(lua_State* state, const LuaLibrary& library);
-    void addLibraryFunctions(lua_State* state, const LuaLibrary& library, bool replace);
+    bool registerLuaLibrary(lua_State* state, LuaLibrary& library);
+    void addLibraryFunctions(lua_State* state, LuaLibrary& library, bool replace);
 
     bool isLibraryNameAllowed(lua_State* state, const std::string& name);
     
     void addBaseLibrary();
     void remapPrintFunction();
     
+    std::string generateJson() const override;
+
     ghoul::lua::LuaState _state;
-    std::set<LuaLibrary> _registeredLibraries;
+    std::vector<LuaLibrary> _registeredLibraries;
+
     
     //sync variables
     std::mutex _mutex;

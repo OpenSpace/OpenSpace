@@ -135,7 +135,18 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.collectStats);
     _debugPropertyOwner.addProperty(_debugProperties.limitLevelByAvailableData);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
-    
+  
+    auto notifyShaderRecompilation = [&](){
+        _chunkedLodGlobe->notifyShaderRecompilation();
+    };
+    _generalProperties.atmosphereEnabled.onChange(notifyShaderRecompilation);
+    _generalProperties.performShading.onChange(notifyShaderRecompilation);
+    _debugProperties.showChunkEdges.onChange(notifyShaderRecompilation);
+    _debugProperties.showHeightResolution.onChange(notifyShaderRecompilation);
+    _debugProperties.showHeightIntensities.onChange(notifyShaderRecompilation);
+
+    _layerManager->onChange(notifyShaderRecompilation);
+
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager.get());
 }
@@ -180,7 +191,7 @@ void RenderableGlobe::render(const RenderData& data) {
 }
 
 void RenderableGlobe::update(const UpdateData& data) {
-    _time = data.time;
+    _time = data.time.j2000Seconds();
     _distanceSwitch.update(data);
 
     glm::dmat4 translation =

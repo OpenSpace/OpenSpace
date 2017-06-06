@@ -27,6 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+
 namespace ghoul { namespace opengl {
 class ProgramObject;
 } }

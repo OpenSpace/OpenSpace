@@ -28,6 +28,10 @@
 #include <openspace/util/time.h>
 #include <openspace/util/transformationmanager.h>
 #include <modules/iswa/rendering/iswabasegroup.h>
+#include <openspace/util/powerscaledcoordinate.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/opengl/programobject.h>
 
 namespace {
     const std::string _loggerCat = "IswaCygnet";
@@ -181,8 +185,8 @@ void IswaCygnet::update(const UpdateData& data){
 
     // the texture resource is downloaded ahead of time, so we need to
     // now if we are going backwards or forwards
-    double clockwiseSign = (Time::ref().deltaTime()>0) ? 1.0 : -1.0;
-    _openSpaceTime = Time::ref().j2000Seconds();
+    double clockwiseSign = (OsEng.timeManager().time().deltaTime()>0) ? 1.0 : -1.0;
+    _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     _stateMatrix = TransformationManager::ref().frameTransformationMatrix(_data->frame, "GALACTIC", _openSpaceTime);
 
@@ -226,7 +230,7 @@ void IswaCygnet::unregisterProperties(){
 }
 
 void IswaCygnet::initializeTime(){
-    _openSpaceTime = Time::ref().j2000Seconds();
+    _openSpaceTime = OsEng.timeManager().time().j2000Seconds();
     _lastUpdateOpenSpaceTime = 0.0;
 
     _realTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());

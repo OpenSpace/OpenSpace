@@ -27,10 +27,12 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 #include <modules/globebrowsing/tile/chunktile.h>
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
+#include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/triggerproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -46,7 +48,7 @@ namespace tileprovider {
  */
 class Layer : public properties::PropertyOwner {
 public:
-    Layer(const ghoul::Dictionary& layerDict);
+    Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict);
 
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
 
@@ -54,8 +56,11 @@ public:
     tileprovider::TileProvider* tileProvider() const { return _tileProvider.get(); }
     const LayerRenderSettings& renderSettings() const { return _renderSettings; }
 
+    void onChange(std::function<void(void)> callback);
+
 private:
     properties::BoolProperty _enabled;
+    properties::TriggerProperty _reset;
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
     LayerRenderSettings _renderSettings;
 };

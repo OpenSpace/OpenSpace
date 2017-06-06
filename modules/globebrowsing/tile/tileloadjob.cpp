@@ -22,73 +22,58 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___RENDERABLEPATH___H__
-#define __OPENSPACE_MODULE_BASE___RENDERABLEPATH___H__
+#include <modules/globebrowsing/tile/tileloadjob.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
+namespace openspace {
+namespace globebrowsing {
 
-namespace ghoul {
-    namespace opengl {
-        class ProgramObject;
-        class Texture;
+TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
+    const TileIndex& tileIndex)
+    : _rawTileDataReader(rawTileDataReader)
+    , _chunkIndex(tileIndex)
+    , _pboMappedDataDestination(nullptr)
+    , _hasOwnershipOfData(false)
+{ }
+
+
+TileLoadJob::TileLoadJob(std::shared_ptr<RawTileDataReader> rawTileDataReader,
+    const TileIndex& tileIndex, char* pboDataPtr)
+    : _rawTileDataReader(rawTileDataReader)
+    , _chunkIndex(tileIndex)
+    , _pboMappedDataDestination(pboDataPtr)
+    , _hasOwnershipOfData(false)
+{ }
+
+TileLoadJob::~TileLoadJob() {
+    if (_hasOwnershipOfData) {
+        ghoul_assert(_rawTile->imageData, "Image data must exist");
+        delete [] _rawTile->imageData;
     }
 }
 
-namespace openspace {
+void TileLoadJob::execute() {
+    size_t numBytes = _rawTileDataReader->tileTextureInitData().totalNumBytes();
+    char* dataPtr = nullptr;
+    if (_rawTileDataReader->tileTextureInitData().shouldAllocateDataOnCPU() ||
+        !_pboMappedDataDestination)
+    {
+        dataPtr = new char[numBytes];
+        _hasOwnershipOfData = true;
+    }
+    _rawTile = _rawTileDataReader->readTileData(
+        _chunkIndex, dataPtr, _pboMappedDataDestination);
+}
 
-class RenderablePath : public Renderable {
-public:
-    RenderablePath(const ghoul::Dictionary& dictionary);
+std::shared_ptr<RawTile> TileLoadJob::product() {
+    _hasOwnershipOfData = false;
+    return _rawTile;
+}
 
-    bool initialize() override;
-    bool deinitialize() override;
+bool TileLoadJob::hasOwnershipOfData() const {
+    return _hasOwnershipOfData;
+}
 
-    bool isReady() const override;
-
-    void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
-
-    void calculatePath(std::string observer);
-private:
-    struct VertexInfo {
-        float x, y, z, e;
-        //float r, g, b, a;
-    };
-    void sendToGPU();
-    void addPosition(glm::vec3 pos);
-    void addColor(glm::vec4 col);
-
-    glm::vec3 _lineColor;
-    glm::vec4 _lastPosition;
-    properties::FloatProperty _lineWidth;
-    properties::BoolProperty _drawLine;
-
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-
-    bool _successfullDictionaryFetch;
-
-    std::string _target;
-    std::string _observer;
-    std::string _frame;
-
-    GLuint _vaoID;
-    GLuint _vBufferID;
-        
-    bool _needsSweep;
-
-    std::vector<VertexInfo> _vertexArray;
-        
-    float _increment;
-    double _start;
-    double _stop;
-    float _distanceFade;
-    int _pointSteps;
-};
-
+} // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___RENDERABLEPATH___H__

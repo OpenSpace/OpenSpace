@@ -77,10 +77,6 @@ Tile TileProviderByIndex::getTile(const TileIndex& tileIndex) {
     return hasProvider ? it->second->getTile(tileIndex) : Tile::TileUnavailable;
 }
 
-Tile TileProviderByIndex::getDefaultTile() {
-    return _defaultTileProvider->getDefaultTile();
-}
-
 Tile::Status TileProviderByIndex::getTileStatus(const TileIndex& tileIndex) {
     auto it = _tileProviderMap.find(tileIndex.hashKey());
     bool hasProvider = it != _tileProviderMap.end();

@@ -41,7 +41,7 @@ namespace globebrowsing {
 
 struct ChunkTile;
 class Layer;
-class LayerRenderSettings;
+struct LayerRenderSettings;
 struct TileDepthTransform;
 struct TileUvTransform;
 
@@ -53,6 +53,8 @@ struct TileIndex;
  */
 class GPULayerGroup {
 public:
+
+    virtual ~GPULayerGroup() = default;
 
     /**
      * Sets the value of <code>LayerGroup</code> to its corresponding

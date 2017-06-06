@@ -31,6 +31,9 @@
 #include <ghoul/misc/sharedmemory.h>
 #include <ghoul/misc/onscopeexit.h>
 
+#include <algorithm>
+#include <cstring>
+
 namespace {
     const std::string _loggerCat = "PerformanceManager";
     

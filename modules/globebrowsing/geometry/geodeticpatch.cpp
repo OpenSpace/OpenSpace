@@ -49,8 +49,8 @@ GeodeticPatch::GeodeticPatch(const GeodeticPatch& patch)
 {}
 
 GeodeticPatch::GeodeticPatch(const TileIndex& tileIndex) {
-    double deltaLat = (2 * glm::pi<double>()) / ((double)(1 << tileIndex.level));
-    double deltaLon = (2 * glm::pi<double>()) / ((double)(1 << tileIndex.level));
+    double deltaLat = (2 * glm::pi<double>()) / (static_cast<double>(1 << tileIndex.level));
+    double deltaLon = (2 * glm::pi<double>()) / (static_cast<double>(1 << tileIndex.level));
     Geodetic2 nwCorner(glm::pi<double>() / 2 - deltaLat * tileIndex.y, -glm::pi<double>() + deltaLon * tileIndex.x);
     _halfSize = Geodetic2(deltaLat / 2, deltaLon / 2);
     _center = Geodetic2(nwCorner.lat - _halfSize.lat, nwCorner.lon + _halfSize.lon);

@@ -29,12 +29,25 @@
 namespace openspace {
 namespace globebrowsing {
 
-Layer::Layer(const ghoul::Dictionary& layerDict)
-    : properties::PropertyOwner(layerDict.value<std::string>("Name"))
-    , _enabled(properties::BoolProperty("enabled", "enabled", false))
+namespace {
+    const char* keyName = "Name";
+    const char* keyEnabled = "Enabled";
+    const char* keyLayerGroupID = "LayerGroupID";
+    const char* keySettings = "Settings";
+}
+
+Layer::Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict)
+    : properties::PropertyOwner(layerDict.value<std::string>(keyName))
+    , _enabled(properties::BoolProperty("enabled", "Enabled", false))
+    , _reset("reset", "Reset")
 {
+    // We add the id to the dictionary since it needs to be known by
+    // the tile provider
+    ghoul::Dictionary newLayerDict = layerDict;
+    newLayerDict.setValue(keyLayerGroupID, id);
+  
     _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
-        tileprovider::TileProvider::createFromDictionary(layerDict));
+        tileprovider::TileProvider::createFromDictionary(newLayerDict));
         
     // Something else went wrong and no exception was thrown
     if (_tileProvider == nullptr) {
@@ -42,9 +55,24 @@ Layer::Layer(const ghoul::Dictionary& layerDict)
     }
 
     bool enabled = false; // defaults to false if unspecified
-    layerDict.getValue("Enabled", enabled);
+    layerDict.getValue(keyEnabled, enabled);
     _enabled.setValue(enabled);
+
+    ghoul::Dictionary settingsDict;
+    if (layerDict.getValue(keySettings, settingsDict)) {
+        _renderSettings.setValuesFromDictionary(settingsDict);
+    }
+    if (id == layergroupid::ID::GrayScaleColorOverlays) {
+        _renderSettings.addProperty(_renderSettings.valueBlending);
+        _renderSettings.useValueBlending = true;
+    }
+
+    _reset.onChange([&](){
+        _tileProvider->reset();
+    });
+
     addProperty(_enabled);
+    addProperty(_reset);
 
     addPropertySubOwner(_renderSettings);
     addPropertySubOwner(*_tileProvider);
@@ -52,6 +80,10 @@ Layer::Layer(const ghoul::Dictionary& layerDict)
 
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
     return _tileProvider->getChunkTilePile(tileIndex, pileSize);
+}
+
+void Layer::onChange(std::function<void(void)> callback) {
+    _enabled.onChange(callback);
 }
 
 } // namespace globebrowsing

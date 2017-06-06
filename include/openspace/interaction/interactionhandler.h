@@ -25,9 +25,11 @@
 #ifndef __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 #define __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 
+#include <openspace/documentation/documentationgenerator.h>
+#include <openspace/properties/propertyowner.h>
+
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/network/parallelconnection.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -47,8 +49,7 @@ class SceneGraphNode;
 
 namespace interaction {
 
-
-class InteractionHandler : public properties::PropertyOwner
+class InteractionHandler : public properties::PropertyOwner, public DocumentationGenerator
 {
 public:
     InteractionHandler();
@@ -64,7 +65,6 @@ public:
 
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
-    void setInteractionMode(const std::string& interactionModeKey);
     InteractionMode* interactionMode();
     
     void goToChunk(int x, int y, int level);
@@ -72,9 +72,10 @@ public:
     
     void resetKeyBindings();
 
-    void addKeyframe(const datamessagestructures::CameraKeyframe &kf);
+    void addKeyframe(double timestamp, KeyframeInteractionMode::CameraPose pose);
     void removeKeyframesAfter(double timestamp);
     void clearKeyframes();
+    size_t nKeyframes() const;
     const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
     void bindKeyLocal(
@@ -121,7 +122,6 @@ public:
 
     void saveCameraStateToFile(const std::string& filepath);
     void restoreCameraStateFromFile(const std::string& filepath);
-    void writeKeyboardDocumentation(const std::string& type, const std::string& file);
 
 private:
     using Synchronized = ghoul::Boolean;
@@ -131,8 +131,10 @@ private:
         Synchronized synchronization;
         std::string documentation;
     };
+    
+    std::string generateJson() const override;
 
-    void setInteractionMode(std::shared_ptr<InteractionMode> interactionMode);
+    void setInteractionMode(InteractionMode* interactionMode);
 
     bool _cameraUpdatedFromScript = false;
 
@@ -141,14 +143,18 @@ private:
     std::unique_ptr<InputState> _inputState;
     Camera* _camera;
 
-    std::shared_ptr<InteractionMode> _currentInteractionMode;
+    InteractionMode* _currentInteractionMode;
 
-    std::map<std::string, std::shared_ptr<InteractionMode>> _interactionModes;
     std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
+
+    std::unique_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
+    std::unique_ptr<GlobeBrowsingInteractionMode> _globeBrowsingInteractionMode;
+    std::unique_ptr<KeyframeInteractionMode> _keyframeInteractionMode;
 
     // Properties
     properties::StringProperty _origin;
-
+    properties::OptionProperty _interactionModeOption;
+    
     properties::BoolProperty _rotationalFriction;
     properties::BoolProperty _horizontalFriction;
     properties::BoolProperty _verticalFriction;

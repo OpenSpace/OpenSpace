@@ -29,6 +29,7 @@
 #include <string>
 #include <openspace/scene/scene.h>
 #include <openspace/util/camera.h>
+#include <openspace/util/timemanager.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/volumeraycaster.h>
@@ -336,7 +337,9 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    RenderData data = { *_camera, psc(), doPerformanceMeasurements, 0 };
+    Time time = OsEng.timeManager().time();
+
+    RenderData data = { *_camera, psc(), time, doPerformanceMeasurements, 0 };
     RendererTasks tasks;
 
     // Capture standard fbo
@@ -374,12 +377,14 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         ghoul::opengl::ProgramObject* raycastProgram = nullptr;
 
         if (cameraIsInside) {
-            if (raycastProgram == _insideRaycastPrograms[raycaster].get()) {
+            raycastProgram = _insideRaycastPrograms[raycaster].get();
+            if (raycastProgram) {
                 raycastProgram->activate();
                 raycastProgram->setUniform("cameraPosInRaycaster", cameraPosition);
             }
         } else {
-            if (raycastProgram == _raycastPrograms[raycaster].get()) {
+            raycastProgram = _raycastPrograms[raycaster].get();
+            if (raycastProgram) {
                 raycastProgram->activate();
             }
         }

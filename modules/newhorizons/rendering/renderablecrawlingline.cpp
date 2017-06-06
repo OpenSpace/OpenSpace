@@ -24,12 +24,17 @@
 
 #include <modules/newhorizons/rendering/renderablecrawlingline.h>
 
+#include <modules/newhorizons/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
-#include <modules/newhorizons/util/imagesequencer.h>
+#include <openspace/util/updatestructures.h>
+
+#include <ghoul/opengl/programobject.h>
+
+#include <ghoul/glm.h>
 
 namespace {
     const char* KeySource = "Source";
@@ -235,10 +240,10 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
         _source,
         //"ECLIPJ2000",
         "GALACTIC",
-        data.time
+        data.time.j2000Seconds()
     );
 
-    glm::dmat3 tm = SpiceManager::ref().frameTransformationMatrix(_instrumentName, "ECLIPJ2000", data.time);
+    glm::dmat3 tm = SpiceManager::ref().frameTransformationMatrix(_instrumentName, "ECLIPJ2000", data.time.j2000Seconds());
 
     //_positions[SourcePosition] = { 0.f, 0.f, 0.f, 0.f };
 
