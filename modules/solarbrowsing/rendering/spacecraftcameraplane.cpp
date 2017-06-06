@@ -179,6 +179,8 @@ void SpacecraftCameraPlane::render(
       const bool& disableBorder, const bool& disableFrustum,
       const glm::vec2& currentCenterPixel, const float& currentScale)
 {
+    glEnable(GL_CULL_FACE);
+
     // Perform necessary transforms
     const glm::dmat4& viewMatrix = data.camera.combinedViewMatrix();
     const glm::mat4& projectionMatrix = data.camera.projectionMatrix();
@@ -260,5 +262,7 @@ void SpacecraftCameraPlane::render(
         glDrawArrays(GL_LINES, 8, 16);
     }
     _frustumShader->deactivate();
+
+    glDisable(GL_CULL_FACE);
 }
 }
