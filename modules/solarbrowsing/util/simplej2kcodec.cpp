@@ -487,7 +487,7 @@ void SimpleJ2kCodec::SetupDecoder(const int resolutionLevel, const int numQualit
 {
     opj_set_default_decoder_parameters(&_decoderParams);
     _decoderParams.decod_format = GetInfileFormat(_infileName.c_str());
-    _decoderParams.cp_layer = numQualityLayers;
+    //_decoderParams.cp_layer = numQualityLayers;
     _decoderParams.cp_reduce = resolutionLevel;
 
     switch (_decoderParams.decod_format) {
