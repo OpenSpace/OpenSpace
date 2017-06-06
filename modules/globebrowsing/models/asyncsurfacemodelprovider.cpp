@@ -27,6 +27,7 @@
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
 #include <modules/globebrowsing/models/job/subsiteinitializationjob.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/opengl/texturearray.h>
 
 namespace {
 	const std::string _loggerCat = "AsyncSurfaceModelProvider";
@@ -79,8 +80,15 @@ void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_p
 
 	const clock_t begin_time = clock();
 
+	//ghoul::opengl::TextureArray ta = ghoul::opengl::TextureArray(glm::uvec3(1024, 1024, 1), subsiteModels->textures.size());
+	//ta.setType(GL_TEXTURE_2D_ARRAY);
+
+	//subsiteModels->textureArray = std::make_shared<ghoul::opengl::TextureArray>(ta);
+
 	glGenTextures(1, &textureID);
 	subsiteModels->textureID = textureID;
+	//subsiteModels->textureID = ta.Id();
+	
 	glBindTexture(GL_TEXTURE_2D_ARRAY, textureID);
 
 	//Allocate the storage.
@@ -93,6 +101,7 @@ void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_p
 	//Altogether you can specify a 3D box subset of the overall texture, but only one mip level at a time.
 	int counter = 0;
 	for (auto texture : subsiteModels->textures) {
+		//ta.uploadTexture(texture->pixelData());
 		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, counter, 1024, 1024, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture->pixelData());
 		counter++;
 	}
@@ -100,6 +109,25 @@ void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_p
 	for (auto texture : subsiteModels->textures) {
 		texture = nullptr;
 	}
+	GLuint coloredTextureID;
+	glGenTextures(1, &coloredTextureID);
+	subsiteModels->coloredTextureID = coloredTextureID;
+	glBindTexture(GL_TEXTURE_2D_ARRAY, coloredTextureID);
+
+	//Allocate the storage.
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevelCount, GL_RGB8, 1344, 1200, subsiteModels->coloredTextures.size());
+
+	counter = 0;
+	for (auto texture2 : subsiteModels->coloredTextures) {
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, counter, 1344, 1200, 1, GL_RGB, GL_UNSIGNED_BYTE, texture2->pixelData());
+		counter++;
+	}
+
+	// Temporary solution to release memory and throw texture id
+	for (auto texture2 : subsiteModels->coloredTextures) {
+		texture2 = nullptr;
+	}
+
 
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

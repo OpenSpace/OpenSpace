@@ -53,8 +53,14 @@ struct Subsite {
 	// The file names of the .obj models and textures for this subsite
 	std::vector<std::string> fileNames;
 
+	// The file names of the .obj models and textures for this subsite
+	std::vector<std::string> coloredTextureFileNames;
+
 	// Information needed for texture projection
 	std::vector<ImgReader::PointCloudInfo> cameraInfoVector;
+
+	// Information needed for texture projection
+	std::vector<ImgReader::PointCloudInfo> cameraColoredInfoVector;
 
 	std::string pathToGeometryFolder;
 	std::string pathToTextureFolder;
