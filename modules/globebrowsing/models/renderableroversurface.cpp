@@ -300,7 +300,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
 		_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 		_programObject->setUniform("useMastCamColor", _generalProperties.useMastCam.value());
-		_programObject->setUniform("alpha", subsiteModels->alpha);
+		_programObject->setUniform("alpha", subsiteModels->alpha());
 
 
 		// TODO: Hardcoded values for site 48 drive 1570,

@@ -187,6 +187,7 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/models/modelprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/models/multimodelprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/models/singlemodelprovider.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/subsitemodels.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/job/subsiteinitializationjob.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp

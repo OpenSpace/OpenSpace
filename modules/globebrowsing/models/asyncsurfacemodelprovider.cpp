@@ -63,7 +63,7 @@ std::vector<std::shared_ptr<SubsiteModels>> AsyncSurfaceModelProvider::getLoaded
 		std::shared_ptr<SubsiteModels> subsiteModels = _ramToGpuJobManager.popFinishedJob()->product();
 		unmapBuffers(subsiteModels);
 		initializedModels.push_back(subsiteModels);
-		_enqueuedModelRequests.erase(hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level));
+		_enqueuedModelRequests.erase(subsiteModels->hashKey());
 	}
 	return initializedModels;
 }

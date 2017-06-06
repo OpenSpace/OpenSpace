@@ -22,68 +22,38 @@
 * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
 ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SUBSITEMODELS__H_
-#define __OPENSPACE_MODULE_GLOBEBROWSING___SUBSITEMODELS__H_
-
-#include <modules/globebrowsing/tile/tileindex.h>
-#include <modules/base/rendering/modelgeometry.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/models/model.h>
-#include <modules/globebrowsing/tasks/imgreader.h>
-//#include <ghoul/opengl/texturearray.h>
-
-#include <memory>
+#include <modules/globebrowsing/models/subsitemodels.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-struct SubsiteModels {
-public:
-	using SubsiteHashKey = uint64_t;
+float SubsiteModels::alpha() const {
 
-	std::vector<std::shared_ptr<Model>> models;
+	return _alpha;
+}
 
-	std::vector <std::shared_ptr<ghoul::opengl::Texture>> textures;
-	std::vector <std::shared_ptr<ghoul::opengl::Texture>> coloredTextures;
-	std::shared_ptr<openspace::modelgeometry::AsyncMultiModelGeometry> model;
-	//std::shared_ptr<ghoul::opengl::TextureArray> textureArray;
+void SubsiteModels::setFadeDirection(const int direction) {
+	_fadeDirection = direction;
+}
 
-	glm::dvec3 cartesianPosition;
+void SubsiteModels::fade() {
+	if (_fadeDirection == 1 && _alpha < 1.0f)
+		_alpha = _alpha + 0.01f;
+	else if (_fadeDirection == -1 && _alpha > 0.0f)
+		_alpha = _alpha - 0.01f;
+}
 
-	Geodetic2 geodetic;
-	Geodetic2 siteGeodetic;
+SubsiteModels::SubsiteHashKey SubsiteModels::hashKey() const {
+	uint64_t key = 0LL;
+	int siteNumber = std::stoi(site);
+	int driveNumber = std::stoi(drive);
 
-	// The file names of the .obj models and textures for this subsite
-	std::vector<std::string> fileNames;
+	key |= level;
+	key |= siteNumber << 5;
+	key |= ((uint64_t)driveNumber) << 35;
 
-	// Information needed for texture projection
-	std::vector<ImgReader::PointCloudInfo> cameraInfoVector;
-
-	// Information needed for colored texture projection
-	std::vector<ImgReader::PointCloudInfo> coloredCameraInfoVector;
-
-	GLuint textureID;
-	GLuint coloredTextureID;
-
-	uint64_t tileHashKey;
-	std::string site;
-	std::string drive;
-	int level;
-
-	float alpha() const;
-
-	void setFadeDirection(const int direction);
-
-	void fade();
-
-	SubsiteModels::SubsiteHashKey hashKey() const;
-
-private:
-	int _fadeDirection = -1;
-	float _alpha = 0.0f;
-};
+	return key;
+}
 
 } // namespace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SUBSITEMODELS__H_

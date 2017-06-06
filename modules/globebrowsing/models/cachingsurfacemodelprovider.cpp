@@ -98,7 +98,7 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 	// Save all models that are still visible and fade at the same time
 	auto itemListSetDirection = _modelCache->list();
 	for (auto entry : itemListSetDirection) {
-		if (entry.second->alpha > 0.0) {
+		if (entry.second->alpha() > 0.0) {
 			vectorOfSubsiteModels.push_back(entry.second);
 		}
 		entry.second->fade();
