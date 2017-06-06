@@ -47,7 +47,7 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 	// Reset the fading direction automatically makes all unwanted models to fade out
 	auto itemListResetDirection = _modelCache->list();
 	for (auto entry : itemListResetDirection) {
-		entry.second->_dir = -1;
+		entry.second->setFadeDirection(-1);
 	}
 
 	// Temporary solution to not load LOD 0 models
@@ -56,7 +56,7 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 			bool requestedExistsInCache = true;
 			ProviderSubsiteKey key = { level, subsite->site, subsite->drive };
 			if (_modelCache->exist(key)) {
-				_modelCache->get(key)->_dir = 1;
+				_modelCache->get(key)->setFadeDirection(1);
 			}
 			else {
 				for(const int& tempLevel : subsite->availableLevels){
@@ -71,7 +71,7 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 					// If the cache holds the correct model but with lower resultion than requested,
 					// return highest available resolution.
 					if (_modelCache->exist(keyLowerLevel)) {
-						_modelCache->get(keyLowerLevel)->_dir = 1;
+						_modelCache->get(keyLowerLevel)->setFadeDirection(1);
 						// Breaks the loop that goes through levelsAbove
 						break;
 					}
