@@ -68,7 +68,7 @@ public:
     std::shared_ptr<T> popFinishedJob();
     void clear();
 private:
-    std::unordered_set<std::string> _enqueuedJobIds;
+    std::unordered_multiset<std::string> _enqueuedJobIds;
     globebrowsing::ConcurrentJobManager<T> _concurrentJobManager;
 };
 
