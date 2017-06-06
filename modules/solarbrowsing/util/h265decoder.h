@@ -48,12 +48,12 @@ namespace openspace {
 
 class H265Decoder {
 public:
-    H265Decoder(const std::string& path) {
-      initialize(path);
+    H265Decoder() {
+      initialize();
     };
 
     ~H265Decoder() {
-        fclose(_fh);
+       // fclose(_fh);
         de265_free_decoder(_ctx);
     }
 
@@ -88,18 +88,18 @@ public:
             // ERROR
             if (err != DE265_OK) {
                 if (err == DE265_ERROR_CHECKSUM_MISMATCH) {
-                    std::cerr << "Some error mismatch";
+                    std::cerr << "Some error mismatch" << std::endl;
                     _isRunning = false;
                     more = 0;
                 }
                 // Must collect some more
                 else if (err == DE265_ERROR_IMAGE_BUFFER_FULL) {
-                    std::cerr << "Warning, buffer is full needs collect";
+                    //std::cerr << "Warning, buffer is full needs collect" << std::endl;
                     more = 1;
                 }
 
                 else if (err == DE265_ERROR_WAITING_FOR_INPUT_DATA) {
-                    std::cerr << "Warning, decoder is empty"; 
+                    std::cerr << "Warning, decoder is empty" << std::endl;
                     more = 0;
                 }
             }
@@ -110,62 +110,82 @@ public:
         return more;
     }
 
-    void giveDataToDecoder() {
-        if (!_isRunning) {
-            std::cerr << "Is not running " << std::endl;
-             return;
-        }
-        std::cerr << "Pushing some data to decoder " << std::endl;
-
-        de265_error err;
-        uint8_t buf[CHUNK_SIZE];
-        int n = fread(buf, 1, CHUNK_SIZE, _fh);
-        if (n) {
-            err = de265_push_data(_ctx, buf, n, 0, (void*)2);
-            if (err != DE265_OK) {
-                std::cerr << "Error in giving data to buffer" << std::endl;
-                _isRunning = false;
-                return;
-            }
-        }
-
-        if (feof(_fh)) {
-            std::cerr << "Breaking..";
-            err = de265_flush_data(_ctx);
+    bool pushData(const unsigned char* buf, int numElements) {
+        de265_error err = de265_push_data(_ctx, buf, numElements, 0, (void*)2);
+        if (err != DE265_OK) {
+            std::cerr << "Error in giving data to buffer" << std::endl;
             _isRunning = false;
+            return false;
         }
+        return true;
     }
 
+    void reset() {
+        de265_reset(_ctx);
+    }
+
+    void flush() {
+        de265_flush_data(_ctx);
+    }
+
+    // void giveDataToDecoder() {
+    //     if (!_isRunning) {
+    //         std::cerr << "Is not running " << std::endl;
+    //          return;
+    //     }
+    //     std::cerr << "Pushing some data to decoder " << std::endl;
+
+    //     de265_error err;
+    //     uint8_t buf[CHUNK_SIZE];
+    //     int n = fread(buf, 1, CHUNK_SIZE, _fh);
+    //     if (n) {
+    //         err = de265_push_data(_ctx, buf, n, 0, (void*)2);
+    //         if (err != DE265_OK) {
+    //             std::cerr << "Error in giving data to buffer" << std::endl;
+    //             _isRunning = false;
+    //             return;
+    //         }
+    //     }
+
+    //     if (feof(_fh)) {
+    //         std::cerr << "Breaking..";
+    //         err = de265_flush_data(_ctx);
+    //         _isRunning = false;
+    //     }
+    // }
 
 private:
-    void initialize(const std::string path) {
+    void initialize() {
         std::cerr << "Initializing decoder ..." << std::endl;
         _isRunning = true;
         de265_error err = DE265_OK;
         _ctx = de265_new_decoder();
         de265_set_parameter_bool(_ctx, DE265_DECODER_PARAM_BOOL_SEI_CHECK_HASH, false);
         de265_set_parameter_bool(_ctx, DE265_DECODER_PARAM_SUPPRESS_FAULTY_PICTURES, false);
-        de265_set_parameter_bool(_ctx, DE265_DECODER_PARAM_DISABLE_DEBLOCKING, 1);
+        de265_set_parameter_bool(_ctx, DE265_DECODER_PARAM_DISABLE_DEBLOCKING, 0);
         de265_set_parameter_bool(_ctx, DE265_DECODER_PARAM_DISABLE_SAO, 1);
 
         de265_disable_logging();
         de265_set_verbosity(false);
 
+        de265_start_worker_threads(_ctx, 16);
+
         // Set highest temporal substream to decode
         de265_set_limit_TID(_ctx, 100);
-        _fh = fopen(path.c_str(), "rb");
-        if (_fh == NULL) {
-            std::cerr << "Cannot open file: " << path << std::endl;
-        }
+        ///de265_set_framerate_ratio(_ctx, 10);
+        // _fh = fopen(path.c_str(), "rb");
+        // if (_fh == NULL) {
+        //     std::cerr << "Cannot open file: " << path << std::endl;
+        // }
 
-        giveDataToDecoder();
+        //giveDataToDecoder();
         // int hasMoreWork = decode();
         // if (!hasMoreWork) {
         //     giveDataToDecoder();
         // }
     };
 
-    FILE* _fh;
+  //  FILE* _fh;
     bool _isRunning;
     de265_decoder_context* _ctx;
 

@@ -27,70 +27,103 @@
 
 #include <modules/solarbrowsing/util/streambuffer.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
+#include <modules/solarbrowsing/util/h265decoder.h>
 
 #include <mutex>
 
-#define BUFFER_SIZE 1
-
 namespace openspace {
 
-// class VideoJob : public Job<SolarImageData> {
-// public:
-//     VideoJob(H265Decoder* decoder) {
-//         _decoder(decoder), _more(0)
-//     }
-
-//     virtual void execute() final {
-//         _more =_decoder->decode();
-//     }
-//     // Just used for decoding
-//     virtual std::shared_ptr<int> product() final {
-//         return std::make_shared<int>(_more);
-//     }
-
-// private:
-//     int _more;
-//     H265Decoder* _decoder;
-// };
+#define CHUNK_SIZE 500000
 
 class VideoPlayer {
 public:
-
+    // Keep decoding thread running
     void decode() {
-        while (_decoder->hasMoreFrames()) {
+        while (_decoder->hasMoreFrames() && isRunning) {
             int more = _decoder->decode();
             if (more == 0) {
-                _decoder->giveDataToDecoder();
+                //_decoder->giveDataToDecoder();
+                pushDataToDecoder();
             }
         }
     }
-    VideoPlayer(const std::string& path, VideoMetadata& vim) {
-        _decoder = std::make_unique<H265Decoder>(path);
-        _metadata = vim;
-        _decodeThread = std::thread([this] { decode(); });
-        _decodeThread.detach();
+
+    void pushDataToDecoder() {
+        uint8_t buf[CHUNK_SIZE];
+
+        int elementsRead = fread(buf, 1, CHUNK_SIZE, _fh);
+        if (elementsRead) {
+            bool ok = _decoder->pushData(buf, elementsRead);
+            if (!ok) {
+                std::cerr << "Couldn't give data to decoder";
+                isRunning = false;
+            }
+        }
+        if (feof(_fh)) {
+            std::cerr << "End of stream..";
+            _decoder->flush();
+        }
+    }
+
+    void start(const double& osTime) {
+        //startByte = findByteFromosTime();
+    }
+
+    void stop() {
+        isRunning = false;
+        _decodeThread.join();
+        _decoder->reset();
+    }
+
+    void clear() {
+        fclose(_fh);
+    }
+
+    VideoPlayer() {
+        _decoder = std::make_unique<H265Decoder>();
+    }
+
+    void playSign(int sign) {
+        clockwisePush = sign;
+        backwardsCount = 1;
+       // isRunning = false;
+       // _decoder->reset();
+       // run();
+       // _decoder->reset();
+    }
+
+    void run() {
+        isRunning = true;
+        _decodeThread = std::thread([=] { decode(); });
+    }
+
+    void initialize(VideoMetadata& metadata) {
+        _metadata = metadata;
+        const std::string& path = _metadata.path;
+
+        _fh = fopen(path.c_str(), "rb");
+        if (_fh == NULL) {
+            std::cerr << "Cannot open file: " << path << std::endl;
+        }
+        pushDataToDecoder();
+        //_decodeThread.detach();
     }
 
     const unsigned char* popFrame() {
-        // Do some decoding
-        // _streamBuffer.popFinishedJob();
-        // auto job = VideoJob(_decoder.get());
-        // _streamBuffer.enqueueJob(job);
-        // return _decoder.popFrame();
-        mtx.lock();
         return _decoder->popFrame();
-        mtx.unlock();
     }
 
-    // void seek(const double& osTime) {
-    // }
 private:
 
+    int clockwisePush = 1;
     std::unique_ptr<H265Decoder> _decoder;
     VideoMetadata _metadata;
     std::thread _decodeThread;
+    std::atomic<bool> isRunning;
+    int backwardsCount;
     //StreamBuffer<SolarImageData> _streamBuffer;
-    std::mutex mtx;
+    //std::mutex mtx;
+    FILE* _fh;
 };
 
 }

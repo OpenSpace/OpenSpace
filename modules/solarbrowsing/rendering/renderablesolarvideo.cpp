@@ -133,11 +133,26 @@ RenderableSolarVideo::RenderableSolarVideo(const ghoul::Dictionary& dictionary)
         _currentActiveInstrument
                = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
         // Upload asap
-        updateTextureGPU(/*asyncUpload=*/false);
+        updateTextureGPU(/*asyncUpload=*/);
         // if (_useBuffering) {
         //     fillBuffer(OsEng.timeManager().time().deltaTime());
         // }
     });
+
+    std::string metadataPath;
+    if (!dictionary.getValue("MetadataPath", metadataPath)) {
+        throw ghoul::RuntimeError("MetadataPath has to be specified");
+    }
+
+    SpacecraftImageryManager::ref().loadImageMetadata(metadataPath, _imageMetadataMap);
+
+    _currentScale = _cVideoMetadata.scale;
+    _currentCenterPixel = _cVideoMetadata.centerPixel;
+    _isCoronaGraph = false;
+
+    _videoPlayer = std::make_unique<VideoPlayer>();
+    _videoPlayer->initialize(_cVideoMetadata);
+    _videoPlayer->run();
 
     _openspaceTimeLast = OsEng.timeManager().time().j2000Seconds();
     // _resolutionLevel.onChange([this]() {
@@ -171,7 +186,6 @@ RenderableSolarVideo::RenderableSolarVideo(const ghoul::Dictionary& dictionary)
     //     LDEBUG("Initializing PBO with image " << _currentActiveImage);
     //     uploadImageDataToPBO(_currentActiveImage); // Begin fill PBO 1
     // }
-    _videoDecoder = std::make_unique<H265Decoder>(_cVideoMetadata.path);
 
     performImageTimestep(OsEng.timeManager().time().j2000Seconds());
 
@@ -244,15 +258,17 @@ void RenderableSolarVideo::uploadImageDataToPBO() {
     _pbo->activate();
     IMG_PRECISION* _pboBufferData = _pbo->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true);
 
-    if (_videoDecoder->hasMoreFrames() && OsEng.timeManager().time().deltaTime() > 0) {
-        const unsigned char* someData = _videoDecoder->popFrame();
-
+    if (OsEng.timeManager().time().deltaTime() > 0) {
+        const unsigned char* someData = _videoPlayer->popFrame();
         if (someData) {
-            std::cout << "Got some data";
+            //std::cerr << "Got some data " << datacount++ << std::endl;
+            std::memcpy(_pboBufferData, someData, 4096 * 4096 * sizeof(unsigned char));
+            _initializePBO = false;
+            _pboIsDirty = true;
+        } else {
+            LDEBUG("Nothing to UPDATE! ");
         }
-
     }
-
 
     // if (!_useBuffering) {
     //     const std::string filename = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds()).im->filename;
@@ -333,35 +349,15 @@ void RenderableSolarVideo::uploadImageDataToPBO() {
 }
 
 void RenderableSolarVideo::updateTextureGPU(bool asyncUpload, bool resChanged) {
-  /*  if (_usePBO && asyncUpload) {
-            _pbo->activate();
-            _texture->bind();
-            // Send async to GPU by coping from PBO to texture objects
-            glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
-                            GLint(_texture->format()), _texture->dataType(), nullptr);
-            _pbo->deactivate();
-            _pboIsDirty = false;
-    } else {
-        unsigned char* data
-              = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
-        const double& osTime = OsEng.timeManager().time().j2000Seconds();
-        const auto& decodeData = getDecodeDataFromOsTime(osTime);
-        decode(data, decodeData.im->filename);
-
-        _currentScale = decodeData.im->scale;
-        _currentCenterPixel = decodeData.im->centerPixel;
-
-        _texture->bind();
-        if (!resChanged) {
-            glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
-                            GLint(_texture->format()), _texture->dataType(), data);
-        } else {
-            glTexImage2D(_texture->type(), 0, _texture->internalFormat(), _imageSize,
-                         _imageSize, 0, GLint(_texture->format()), _texture->dataType(),
-                         data);
-        }
-        delete[] data;
-    }*/
+   // if (_usePBO && asyncUpload) {
+    _pbo->activate();
+    _texture->bind();
+    // Send async to GPU by coping from PBO to texture objects
+    glTexSubImage2D(_texture->type(), 0, 0, 0, 4096, 4096,
+                    GLint(_texture->format()), _texture->dataType(), nullptr);
+    _pbo->deactivate();
+    _pboIsDirty = false;
+   // }
 }
 
 void RenderableSolarVideo::performImageTimestep(const double& osTime) {
@@ -374,7 +370,7 @@ void RenderableSolarVideo::performImageTimestep(const double& osTime) {
     double openspaceDiff = abs(openspaceTime - _openspaceTimeLast);
     // Check open space time since last time
     bool updateFrame = openspaceDiff > _videoMetadataMap[_currentActiveInstrument].frameUpdateInterval;
-
+    //bool stateChanged = _imageMetadataMap[_currentActiveInstrument].hasStateChanged(osTime);
     // Time to pop video frame
     if (updateFrame || _initializePBO) {
         if (_usePBO /*&& !_initializePBO*/) {
@@ -401,13 +397,19 @@ void RenderableSolarVideo::update(const UpdateData& data) {
     _realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
 
     // if (_useBuffering) {
-    //     const double& dt = OsEng.timeManager().time().deltaTime();
-    //     // Delta time changed, need to refill buffer
-    //     if ((abs(_deltaTimeLast - dt)) > EPSILON) {
-    //         _pboIsDirty = false;
-    //         fillBuffer(dt);
-    //     }
-    //     _deltaTimeLast = dt;
+        const double& dt = OsEng.timeManager().time().deltaTime();
+        // Delta time changed, need to refill buffer
+        if ((abs(_deltaTimeLast - dt)) > EPSILON) {
+            _pboIsDirty = false;
+            if (dt < 0) {
+                _videoPlayer->stop();
+                _videoIsStopped = true;
+            } else if (_videoIsStopped) {
+                _videoPlayer->start(OsEng.timeManager().time().j2000Seconds());
+            }
+
+        }
+        _deltaTimeLast = dt;
     // }
 
     _timeToUpdateTexture = _realTimeDiff > _minRealTimeUpdateInterval;

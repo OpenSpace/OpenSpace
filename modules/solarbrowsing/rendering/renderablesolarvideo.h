@@ -45,6 +45,7 @@
 #include <modules/solarbrowsing/util/streambuffer.h>
 #include <modules/solarbrowsing/util/pixelbufferobject.h>
 #include <modules/solarbrowsing/util/decodejob.h>
+#include <modules/solarbrowsing/util/videoplayer.h>
 
 namespace ghoul { namespace opengl { class Texture; }}
 
@@ -109,8 +110,14 @@ private:
     double _realTimeDiff;
     double _openspaceDiff;
     double _openspaceTimeLast = 0.0;
+    bool _videoIsStopped = false;
 
-    std::unique_ptr<H265Decoder> _videoDecoder;
+    std::unique_ptr<VideoPlayer> _videoPlayer;
+
+    std::unordered_map<std::string, TimedependentStateSequence<ImageMetadata>> _imageMetadataMap;
+
+    int datacount  = 0;
+
     std::string _name;
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
     std::string _currentActiveInstrument;
