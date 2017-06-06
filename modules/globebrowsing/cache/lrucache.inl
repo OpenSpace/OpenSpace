@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/assert.h>
+#include "lrucache.h"
 
 namespace openspace {
 namespace globebrowsing {
@@ -156,6 +157,12 @@ LRUCache<KeyType, ValueType, HasherType>::cleanAndFetchPopped()
         _itemList.pop_back();
     }
     return toReturn;
+}
+
+template<typename KeyType, typename ValueType, typename HasherType>
+std::list<std::pair<KeyType, ValueType>>
+LRUCache<KeyType, ValueType, HasherType>::list() {
+	return _itemList;
 }
 
 } // namespace cache
