@@ -196,7 +196,8 @@ void RenderableExplorationPath::render(const RenderData& data) {
 
 			glBindVertexArray(_vaioID2);
 			glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID2);
-			glPointSize(15.0f);
+
+			glEnable(GL_PROGRAM_POINT_SIZE);
 			glDrawArrays(GL_POINTS, 0, _stationPointsModelCoordinatesWithModel.size());
 			glBindVertexArray(0);
 
@@ -233,11 +234,13 @@ void RenderableExplorationPath::recalculateCartesianCoordinates() {
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		int offset;
+		int offset = 10;
 		if (_currentLevel < 2)
-			offset = 4.0;
-		else
-			offset = 2.0;
+			offset = 6;
+		else if (_currentLevel == 2)
+			offset = 4;
+		else if (_currentLevel == 3)
+			offset = 1;
 
 		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geodetic, heightToSurface + offset };
 		glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
@@ -248,11 +251,13 @@ void RenderableExplorationPath::recalculateCartesianCoordinates() {
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		int offset;
+		int offset = 10;
 		if (_currentLevel < 2)
-			offset = 4.0;
-		else
-			offset = 2.0;
+			offset = 6;
+		else if (_currentLevel == 2)
+			offset = 4;
+		else if (_currentLevel == 3)
+			offset = 1;
 
 		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geodetic, heightToSurface + offset };
 		glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);

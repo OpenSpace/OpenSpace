@@ -35,8 +35,12 @@ out vec4 vs_positionScreenSpace;
 
 void main() {
     vec4 positionCameraSpace = vec4(modelViewTransform * in_point_position);
+
+    vec4 projCorner = projectionTransform * vec4(0.5*15.0, 0.5*15.0, positionCameraSpace.z, positionCameraSpace.w);
+
     vec4 positionClipSpace = projectionTransform * positionCameraSpace;
     vs_positionScreenSpace = z_normalization(positionClipSpace);
 
+    gl_PointSize = 70 * projCorner.x / projCorner.w;
     gl_Position = vs_positionScreenSpace;
 }
