@@ -96,7 +96,7 @@ class TouchInteraction : public properties::PropertyOwner
 
 	private:
 		bool guiMode(const std::vector<TUIO::TuioCursor>& list);
-		void directControl(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
+		void directControl(const std::vector<TUIO::TuioCursor>& list);
 		void findSelectedNode(const std::vector<TUIO::TuioCursor>& list);
 		int interpretInteraction(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
 		void computeVelocities(const std::vector<TUIO::TuioCursor>& list, const std::vector<Point>& lastProcessed);
@@ -122,6 +122,7 @@ class TouchInteraction : public properties::PropertyOwner
 		properties::FloatProperty _panSpeedThreshold;
 		properties::FloatProperty _spinSensitivity;
 		properties::FloatProperty _inputStillThreshold;
+		properties::FloatProperty _centroidStillThreshold;
 		properties::FloatProperty _interpretPan;
 		properties::FloatProperty _slerpTime;
 		properties::IVec2Property _guiButton;
