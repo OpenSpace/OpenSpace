@@ -25,33 +25,35 @@
 // Uniforms
 uniform float transparency;
 uniform float fading;
-uniform bool performShading = true;
-uniform bool useMastCamColor = false;
 
 uniform vec3 directionToSunViewSpace;
 
 uniform sampler2DArray roverTerrainTextures;
+uniform sampler2DArray roverTerrainColoredTextures;
 
 // Input from the vertex shader
-in vec2 vs_st;
-in vec2 vs_st2;
-in vec2 vs_st3;
-in vec3 vs_normalViewSpace;
 in vec4 vs_positionCameraSpace;
 in vec4 vs_positionScreenSpace;
-in vec4 vs_color;
 flat in int textureIndex;
 
-in vec2 vs_stDone[20];
+flat in int coloredTextureIndexOut;
+in vec2 vs_stDone[22];
+in vec2 vs_st_color[7];
 
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
 
 Fragment getFragment() {
-  int temporary2 = textureIndex;
+  int blackAndWhiteUvIndex = textureIndex;
+  vec4 prevTexture3 = vec4(0,0,0,0);
 
-  vec4 prevTexture3 = texture(roverTerrainTextures, vec3(vs_stDone[textureIndex], temporary2));
+  if (coloredTextureIndexOut != -1 && vs_st_color[coloredTextureIndexOut].s >= 0.0 && vs_st_color[coloredTextureIndexOut].t >= 0.0 && vs_st_color[coloredTextureIndexOut].s <= 1.0 && vs_st_color[coloredTextureIndexOut].t <= 1.0) {
+    prevTexture3 = texture(roverTerrainColoredTextures, vec3(vs_st_color[coloredTextureIndexOut], coloredTextureIndexOut));
+  } else {
+    prevTexture3 = texture(roverTerrainTextures, vec3(vs_stDone[blackAndWhiteUvIndex], blackAndWhiteUvIndex));
+  }
+
 
   Fragment frag2;
   frag2.color = prevTexture3;
