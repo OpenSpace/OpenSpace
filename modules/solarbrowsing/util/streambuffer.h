@@ -61,6 +61,7 @@ class StreamBuffer {
 public:
     StreamBuffer();
 
+    int numJobs();
     void removeJob(std::shared_ptr<StreamJob<T>> job);
     void enqueueJob(std::shared_ptr<StreamJob<T>> job);
 
