@@ -22,38 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
+#include <modules/onscreengui/include/guifilepathcomponent.h>
 
-#include <openspace/util/openspacemodule.h>
-#include <memory>
+#include <ghoul/filesystem/filesystem.h>
+
+#include "imgui.h"
 
 namespace openspace {
+namespace gui {
 
-namespace globebrowsing {
-namespace cache {
-    class MemoryAwareTileCache;
+GuiFilePathComponent::GuiFilePathComponent()
+    : GuiComponent("File Path")
+{}
+
+void GuiFilePathComponent::render() {
+    bool v = _isEnabled;
+    ImGui::Begin("File Path", &v);
+
+    ImGui::Text(
+        "%s",
+        "These are file paths registered in the current OpenSpace instance."
+    );
+    ImGui::Separator();
+
+    ImGui::Columns(2);
+    ImGui::Separator();
+    std::vector<std::string> tokens = FileSys.tokens();
+    for (const std::string& t : tokens) {
+        ImGui::Text("%s", t.c_str());
+        ImGui::NextColumn();
+        ImGui::Text("%s", absPath(t).c_str());
+        ImGui::NextColumn();
+        ImGui::Separator();
+    }
+    ImGui::End();
 }
-}
 
-class GlobeBrowsingModule : public OpenSpaceModule {
-public:
-    static const std::string name;
-
-    GlobeBrowsingModule();
-
-    globebrowsing::cache::MemoryAwareTileCache* tileCache();
-    
-
-    scripting::LuaLibrary luaLibrary() const override;
-
-protected:
-    void internalInitialize() override;
-
-private:
-    std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
+} // gui
+} // openspace

@@ -22,38 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__
 
-#include <openspace/util/openspacemodule.h>
-#include <memory>
+#include <modules/onscreengui/include/guicomponent.h>
 
 namespace openspace {
+namespace gui {
 
-namespace globebrowsing {
-namespace cache {
-    class MemoryAwareTileCache;
-}
-}
-
-class GlobeBrowsingModule : public OpenSpaceModule {
+class GuiFilePathComponent : public GuiComponent {
 public:
-    static const std::string name;
+    GuiFilePathComponent();
 
-    GlobeBrowsingModule();
-
-    globebrowsing::cache::MemoryAwareTileCache* tileCache();
-    
-
-    scripting::LuaLibrary luaLibrary() const override;
-
-protected:
-    void internalInitialize() override;
-
-private:
-    std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
+    void render() override;
 };
 
+} // namespace gui
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEBROWSING_MODULE___H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__
