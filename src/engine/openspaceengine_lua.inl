@@ -139,6 +139,31 @@ int removeAllVirtualProperties(lua_State* L) {
     return 0;
 }
 
+/**
+* \ingroup LuaScripts
+* downloadFile():
+* Downloads a file from Lua interpreter
+*/
+int downloadFile(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 2)
+        return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    std::string uri = luaL_checkstring(L, -2);
+    std::string savePath = luaL_checkstring(L, -1);
+
+    const std::string _loggerCat = "OpenSpaceEngine";
+    LINFO("Downloading file from " << uri);
+    DownloadManager dm = openspace::DownloadManager("", 1, false);
+    std::shared_ptr<openspace::DownloadManager::FileFuture> future =
+        dm.downloadFile(uri, absPath("${SCENE}/" + savePath), true, true, 5);
+    if (!future || (future && !future->isFinished)) {
+        std::string errorMsg = "Download failed";
+        if (future)
+            errorMsg += ": " + future->errorMessage;
+        return luaL_error(L, errorMsg.c_str());
+    }
+    return 1;
+}
 
 } // namespace luascriptfunctions
 } // namespace openspace
