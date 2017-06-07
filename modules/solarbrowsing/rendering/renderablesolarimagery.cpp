@@ -192,6 +192,9 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         if (_useBuffering) {
             //double oktime = OsEng.timeManager().time().deltaTime();
             //TimeManager& lel = OsEng.timeManager();
+            _currentActiveImageTime
+                      = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+                              .timeObserved;
             _streamBuffer.clear();
             //fillBuffer(OsEng.timeManager().time().deltaTime());
         } /*else {
@@ -206,6 +209,10 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         _pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
         updateTextureGPU(/*asyncUpload=*/false, /*resChanged=*/true);
         if (_useBuffering) {
+
+            _currentActiveImageTime
+                      = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+                              .timeObserved;
             _streamBuffer.clear();
             //fillBuffer(OsEng.timeManager().time().deltaTime());
         } /*else {
@@ -225,9 +232,15 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     //     fillBuffer(OsEng.timeManager().time().deltaTime());
     // }
 
+
     _currentActiveImageTime
           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
                   .timeObserved;
+
+   // _imageMetadataMap2[_currentActiveInstrument].displayStateTimes();
+
+   // LDEBUG("Init current active image time " <<  SpiceManager::ref().dateFromEphemerisTime(OsEng.timeManager().time().j2000Seconds()));                  
+    //LDEBUG("Init current active image time " << SpiceManager::ref().dateFromEphemerisTime(_currentActiveImageTime));
 
     // If no buffer is used this is needed
     _initializePBO = true;
@@ -316,6 +329,7 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
         decode(_pboBufferData, filename);
         _pboIsDirty = true;
     } else {
+        // WARNING - this can be an old job - but looks smoother - bug or feature?
         std::shared_ptr<SolarImageData> _solarImageData = _streamBuffer.popFinishedJob();
         if (_solarImageData) {
 
@@ -432,18 +446,24 @@ void RenderableSolarImagery::update(const UpdateData& data) {
             _pboIsDirty = false;
             //fillBuffer(dt);
             _streamBuffer.clear();
+            _currentActiveImageTime
+                      = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+                              .timeObserved;
         }
         _deltaTimeLast = dt;
     }
 
+    // LDEBUG("_stream" << _streamBuffer.numJobs());
+    // LDEBUG("buffersize" << _bufferSize);
     if (_streamBuffer.numJobs() < _bufferSize) {
         // Always add to buffer faster than pop ..
         //const double& osTime = OsEng.timeManager().time().j2000Seconds();
 
-
         // The min real time update interval doesnt make any sense
         DecodeData decodeData = getDecodeDataFromOsTime(_currentActiveImageTime + (_streamBuffer.numJobs()) * (OsEng.timeManager().time().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval)/1000.0));
 
+        //LDEBUG("Current active time " << SpiceManager::ref().dateFromEphemerisTime(_currentActiveImageTime));
+        //LDEBUG("dt" << (_streamBuffer.numJobs()) * (OsEng.timeManager().time().deltaTime()));
         //LDEBUG("Pushing delta time  " << SpiceManager::ref().dateFromEphemerisTime(decodeData.timeObserved));
         auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(decodeData.im->fullResolution));
         _streamBuffer.enqueueJob(job);
@@ -471,6 +491,9 @@ void RenderableSolarImagery::render(const RenderData& data) {
     if (_isWithinFrustumLast != isWithinFrustum) {
         //_pboIsDirty = false;
         //fillBuffer(OsEng.timeManager().time().j2000Seconds());
+        _currentActiveImageTime
+                      = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+                              .timeObserved;
         _streamBuffer.clear();
     }
     _isWithinFrustumLast = isWithinFrustum;

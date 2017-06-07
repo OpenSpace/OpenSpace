@@ -52,7 +52,7 @@ bool TimedependentStateSequence<T>::hasStateChanged(const double& osTime) {
 template<typename T>
 void TimedependentStateSequence<T>::displayStateTimes() {
     for (auto& state : _states) {
-        const double& time = state.getTimeObserved();
+        const double& time = state.timeObserved();
         const std::string& dateString = SpiceManager::ref().dateFromEphemerisTime(time);
         std::cout << "State " << state.id() << " Time Observed: " << dateString << "\n";
     }
