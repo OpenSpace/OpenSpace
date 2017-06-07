@@ -67,9 +67,9 @@ public:
 
     std::shared_ptr<T> popFinishedJob();
     void clear();
+    globebrowsing::ConcurrentJobManager<T> _concurrentJobManager;
 private:
     std::unordered_multiset<std::string> _enqueuedJobIds;
-    globebrowsing::ConcurrentJobManager<T> _concurrentJobManager;
 };
 
 } // namespace openspace

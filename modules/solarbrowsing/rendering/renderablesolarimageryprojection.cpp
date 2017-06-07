@@ -24,7 +24,7 @@
 
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
-#include <modules/solarbrowsing/rendering/renderablesolarvideo.h>
+//#include <modules/solarbrowsing/rendering/renderablesolarvideo.h>
 #include <modules/space/rendering/planetgeometry.h>
 #include <openspace/util/time.h>
 #include <openspace/scene/scenegraphnode.h>

@@ -31,7 +31,7 @@
 #include <ghoul/misc/assert.h>
 
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
-#include <modules/solarbrowsing/rendering/renderablesolarvideo.h>
+//#include <modules/solarbrowsing/rendering/renderablesolarvideo.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 
@@ -52,7 +52,7 @@ void SolarBrowsingModule::internalInitialize(){
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
-    fRenderable->registerClass<RenderableSolarVideo>("RenderableSolarVideo");
+    //fRenderable->registerClass<RenderableSolarVideo>("RenderableSolarVideo");
     fRenderable->registerClass<RenderableSolarImagery>("RenderableSolarImagery");
     fRenderable->registerClass<RenderableSolarImageryProjection>("RenderableSolarImageryProjection");
 }

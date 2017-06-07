@@ -190,11 +190,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         // Upload asap
         updateTextureGPU(/*asyncUpload=*/false);
         if (_useBuffering) {
-            //double oktime = OsEng.timeManager().time().deltaTime();
+            double oktime = OsEng.timeManager().time().deltaTime();
             //TimeManager& lel = OsEng.timeManager();
-            _currentActiveImageTime
-                      = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-                              .timeObserved;
+            // _currentActiveImageTime
+            //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+            //                   .timeObserved;
             _streamBuffer.clear();
             //fillBuffer(OsEng.timeManager().time().deltaTime());
         } /*else {
@@ -209,10 +209,9 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         _pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
         updateTextureGPU(/*asyncUpload=*/false, /*resChanged=*/true);
         if (_useBuffering) {
-
-            _currentActiveImageTime
-                      = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-                              .timeObserved;
+            // _currentActiveImageTime
+            //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+            //                   .timeObserved;
             _streamBuffer.clear();
             //fillBuffer(OsEng.timeManager().time().deltaTime());
         } /*else {
@@ -330,9 +329,16 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
         _pboIsDirty = true;
     } else {
         // WARNING - this can be an old job - but looks smoother - bug or feature?
-        std::shared_ptr<SolarImageData> _solarImageData = _streamBuffer.popFinishedJob();
-        if (_solarImageData) {
+        const double& osTime = OsEng.timeManager().time().j2000Seconds();
+        std::shared_ptr<SolarImageData> _solarImageData = nullptr;
+        while (_streamBuffer._concurrentJobManager.numFinishedJobs() > 0) {
+            _solarImageData = _streamBuffer.popFinishedJob();
+            if (osTime <= _solarImageData->timeObserved) {
+                break;
+            }
+        }
 
+        if (_solarImageData) {
             _currentActiveImageTime = _solarImageData->timeObserved;
             _currentScale = _solarImageData->im->scale;
             _currentCenterPixel = _solarImageData->im->centerPixel;
@@ -358,7 +364,8 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
             }
         } else {
             if (_verboseMode) {
-                LWARNING("Nothing to update, buffer is not ready");
+                LWARNING("Nothing to update, buffer is not ready, missing frames " << _frameSkipCount);
+                _frameSkipCount++;
             }
         }
     }
@@ -400,8 +407,10 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
 
 void RenderableSolarImagery::decode(unsigned char* buffer, const std::string& filename)
 {
-    SimpleJ2kCodec j2c(_verboseMode);
-    j2c.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
+    //SimpleJ2kCodec j2c(_verboseMode);
+    //j2c.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
+    KakaduWrapper w(_verboseMode);
+    w.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
 }
 
 void RenderableSolarImagery::performImageTimestep(const double& osTime) {
@@ -444,7 +453,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         if ((abs(_deltaTimeLast - dt)) > EPSILON) {
             LDEBUG("clearing buffer .. " );
             _pboIsDirty = false;
-            //fillBuffer(dt);
+           // fillBuffer(dt);
             _streamBuffer.clear();
             _currentActiveImageTime
                       = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
@@ -455,12 +464,13 @@ void RenderableSolarImagery::update(const UpdateData& data) {
 
     // LDEBUG("_stream" << _streamBuffer.numJobs());
     // LDEBUG("buffersize" << _bufferSize);
-    if (_streamBuffer.numJobs() < _bufferSize) {
+    if (_streamBuffer.numJobs() < _bufferSize && _isWithinFrustum) {
         // Always add to buffer faster than pop ..
-        //const double& osTime = OsEng.timeManager().time().j2000Seconds();
+        const double& osTime = OsEng.timeManager().time().j2000Seconds();
 
+        _frameSkipCount = 0;
         // The min real time update interval doesnt make any sense
-        DecodeData decodeData = getDecodeDataFromOsTime(_currentActiveImageTime + (_streamBuffer.numJobs()) * (OsEng.timeManager().time().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval)/1000.0));
+        DecodeData decodeData = getDecodeDataFromOsTime(osTime + (_streamBuffer.numJobs()) * (OsEng.timeManager().time().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval)/1000.0));
 
         //LDEBUG("Current active time " << SpiceManager::ref().dateFromEphemerisTime(_currentActiveImageTime));
         //LDEBUG("dt" << (_streamBuffer.numJobs()) * (OsEng.timeManager().time().deltaTime()));
@@ -481,14 +491,14 @@ void RenderableSolarImagery::render(const RenderData& data) {
         return;
     }
 
-    const bool isWithinFrustum = checkBoundaries(data);
-    if (!isWithinFrustum) {
+    _isWithinFrustum = checkBoundaries(data);
+    if (!_isWithinFrustum) {
         _shouldRenderPlane = false;
     } else {
         _shouldRenderPlane = true;
     }
 
-    if (_isWithinFrustumLast != isWithinFrustum) {
+    if (_isWithinFrustumLast != _isWithinFrustum) {
         //_pboIsDirty = false;
         //fillBuffer(OsEng.timeManager().time().j2000Seconds());
         _currentActiveImageTime
@@ -496,12 +506,12 @@ void RenderableSolarImagery::render(const RenderData& data) {
                               .timeObserved;
         _streamBuffer.clear();
     }
-    _isWithinFrustumLast = isWithinFrustum;
+    _isWithinFrustumLast = _isWithinFrustum;
 
     // Update texture
     // The bool blockers might probably not be needed now
     if (_timeToUpdateTexture && !_updatingCurrentLevelOfResolution
-        && !_updatingCurrentActiveChannel && (isWithinFrustum || _initializePBO || _pboIsDirty)) {
+        && !_updatingCurrentActiveChannel && (_isWithinFrustum || _initializePBO || _pboIsDirty)) {
         performImageTimestep(OsEng.timeManager().time().j2000Seconds());
         _lastUpdateRealTime = _realTime;
     }

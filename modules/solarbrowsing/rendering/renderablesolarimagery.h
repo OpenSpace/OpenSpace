@@ -115,6 +115,8 @@ private:
     unsigned int _fullResolution;
     double _deltaTimeLast = 0.0;
     double _realTimeDiff;
+    unsigned int _frameSkipCount = 0;
+    bool _isWithinFrustum = false;
 
     bool _isWithinFrustumLast = true;
     std::string _name;
