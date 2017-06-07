@@ -196,7 +196,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     program.setUniform("betaMieExtinction", _mieExtinctionCoeff);
     program.setUniform("mieG", _miePhaseConstant);
     program.setUniform("sunRadiance", _sunRadianceIntensity);
-    program.setUniform("ozoneLayerEnabled", _ozoneEnabled);
+    program.setUniform("ozoneLayerEnabled", (bool)_ozoneEnabled);
     program.setUniform("HO", _ozoneHeightScale);
     program.setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
 

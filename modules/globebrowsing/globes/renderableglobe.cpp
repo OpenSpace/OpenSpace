@@ -626,23 +626,24 @@ void RenderableGlobe::updateAtmosphereParameters() {
         _exposureConstant != _atmosphereProperties.hdrExpositionP.value() ||
         _gammaConstant != _atmosphereProperties.gammaConstantP.value())
         executeComputation = false;
-    _atmosphereRadius = _atmospherePlanetRadius + _atmosphereProperties.atmosphereHeightP.value();
+    _atmosphereRadius               = _atmospherePlanetRadius + _atmosphereProperties.atmosphereHeightP.value();
     _planetAverageGroundReflectance = _atmosphereProperties.groundAverageReflectanceP.value();
-    _rayleighHeightScale = _atmosphereProperties.rayleighHeightScaleP.value();
-    _rayleighScatteringCoeff = glm::vec3(_atmosphereProperties.rayleighScatteringCoeffXP.value() * 0.001f, 
+    _rayleighHeightScale            = _atmosphereProperties.rayleighHeightScaleP.value();
+    _rayleighScatteringCoeff        = glm::vec3(_atmosphereProperties.rayleighScatteringCoeffXP.value() * 0.001f, 
         _atmosphereProperties.rayleighScatteringCoeffYP.value() * 0.001f,
         _atmosphereProperties.rayleighScatteringCoeffZP.value() * 0.001f);
-    _ozoneLayerHeightScale = _atmosphereProperties.ozoneHeightScaleP.value();
+    _ozoneLayerEnabled         = _atmosphereProperties.ozoneLayerEnabledP.value();
+    _ozoneLayerHeightScale     = _atmosphereProperties.ozoneHeightScaleP.value();
     _ozoneLayerExtinctionCoeff = glm::vec3(_atmosphereProperties.ozoneLayerExtinctionCoeffXP.value() * 0.00001f,
         _atmosphereProperties.ozoneLayerExtinctionCoeffYP.value() * 0.00001f,
         _atmosphereProperties.ozoneLayerExtinctionCoeffZP.value() * 0.00001f);
-    _mieHeightScale = _atmosphereProperties.mieHeightScaleP.value();
-    _mieScatteringCoeff = glm::vec3(_atmosphereProperties.mieScatteringCoefficientP.value() * 0.001f);
-    _mieExtinctionCoeff = _mieScatteringCoeff * (1.0f / static_cast<float>(_atmosphereProperties.mieScatteringExtinctionPropCoefficientP.value()));
-    _miePhaseConstant = _atmosphereProperties.mieAsymmetricFactorGP.value();
+    _mieHeightScale       = _atmosphereProperties.mieHeightScaleP.value();
+    _mieScatteringCoeff   = glm::vec3(_atmosphereProperties.mieScatteringCoefficientP.value() * 0.001f);
+    _mieExtinctionCoeff   = _mieScatteringCoeff * (1.0f / static_cast<float>(_atmosphereProperties.mieScatteringExtinctionPropCoefficientP.value()));
+    _miePhaseConstant     = _atmosphereProperties.mieAsymmetricFactorGP.value();
     _sunRadianceIntensity = _atmosphereProperties.sunIntensityP.value();
-    _exposureConstant = _atmosphereProperties.hdrExpositionP.value();
-    _gammaConstant = _atmosphereProperties.gammaConstantP.value();
+    _exposureConstant     = _atmosphereProperties.hdrExpositionP.value();
+    _gammaConstant        = _atmosphereProperties.gammaConstantP.value();
 
     if (_deferredcaster) {
         _deferredcaster->setAtmosphereRadius(_atmosphereRadius);

@@ -72,8 +72,14 @@ float opticalDepth(const float H, const float r, const float mu, const float d) 
 }
 
 vec3 analyticTransmittance(const float r, const float mu, const float d) {
-  return exp(- betaRayleigh * opticalDepth(HR, r, mu, d) -
+  if (ozoneLayerEnabled) {
+    return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) -
+             betaOzoneExtinction * (6.0e-7) * opticalDepth(HO, r, mu, d) -
              betaMieExtinction * opticalDepth(HM, r, mu, d));
+  } else {
+    return exp(-betaRayleigh * opticalDepth(HR, r, mu, d) -
+               betaMieExtinction * opticalDepth(HM, r, mu, d));
+  }
 }
 
 vec3 irradiance(sampler2D sampler, const float r, const float muSun) {

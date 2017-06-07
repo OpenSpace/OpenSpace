@@ -183,14 +183,8 @@ void inscatter(float r, float mu, float muSun, float nu, inout vec3 radianceJ) {
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the Atmosphere and Ocean from
       // Thomas and Stamnes, pg 9-10.
-      if (ozoneLayerEnabled) {
-        radianceJ += radianceJ1 * (betaOzoneExtinction * exp(-(r - Rg) / HO) * ((6e-7)*phaseRayleighWV) +
-                                   betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
-                                   betaMieScattering * exp(-(r - Rg) / HM) * phaseMieWV) * dw;  
-      } else {
-        radianceJ += radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
-                                  betaMieScattering * exp(-(r - Rg) / HM) * phaseMieWV) * dw;  
-      }
+      radianceJ += radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
+                                 betaMieScattering * exp(-(r - Rg) / HM) * phaseMieWV) * dw;        
     }
   }
 }
