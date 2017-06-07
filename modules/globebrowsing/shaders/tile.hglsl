@@ -112,6 +112,7 @@ struct LayerSettings {
 	float opacity;
 	float gamma;
 	float multiplier;
+	float offset;
 	float valueBlending;
 };
 

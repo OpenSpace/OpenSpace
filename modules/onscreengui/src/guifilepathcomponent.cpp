@@ -22,39 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__
+#include <modules/onscreengui/include/guifilepathcomponent.h>
 
-#include <openspace/properties/propertyowner.h>
+#include <ghoul/filesystem/filesystem.h>
 
-#include <openspace/properties/scalar/floatproperty.h>
+#include "imgui.h"
 
 namespace openspace {
-namespace globebrowsing {
+namespace gui {
 
-struct LayerRenderSettings : public properties::PropertyOwner {
-    LayerRenderSettings();
-    
-    properties::FloatProperty opacity;
-    properties::FloatProperty gamma;
-    properties::FloatProperty multiplier;
-    properties::FloatProperty offset;
+GuiFilePathComponent::GuiFilePathComponent()
+    : GuiComponent("File Path")
+{}
 
-    // Optional properties
-    properties::FloatProperty valueBlending;
-    bool useValueBlending = false;
+void GuiFilePathComponent::render() {
+    bool v = _isEnabled;
+    ImGui::Begin("File Path", &v);
 
-    void setValuesFromDictionary(const ghoul::Dictionary& renderSettingsDict);
+    ImGui::Text(
+        "%s",
+        "These are file paths registered in the current OpenSpace instance."
+    );
+    ImGui::Separator();
 
-    /// This function matches the function with the same name in the
-    /// shader code
-    float performLayerSettings(float currentValue) const;
-    /// This function matches the function with the same name in the
-    /// shader code
-    glm::vec4 performLayerSettings(glm::vec4 currentValue) const;
-};
+    ImGui::Columns(2);
+    ImGui::Separator();
+    std::vector<std::string> tokens = FileSys.tokens();
+    for (const std::string& t : tokens) {
+        ImGui::Text("%s", t.c_str());
+        ImGui::NextColumn();
+        ImGui::Text("%s", absPath(t).c_str());
+        ImGui::NextColumn();
+        ImGui::Separator();
+    }
+    ImGui::End();
+}
 
-} // namespace globebrowsing
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__
+} // gui
+} // openspace
