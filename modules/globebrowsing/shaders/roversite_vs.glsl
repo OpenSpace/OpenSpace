@@ -25,7 +25,6 @@
 #version __CONTEXT__
 
 #include "PowerScaling/powerScaling_vs.hglsl"
-
 in vec4 in_point_position;
 
 uniform dmat4 modelViewTransform;

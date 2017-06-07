@@ -46,8 +46,6 @@ RenderableExplorationPath::RenderableExplorationPath()
 	, _siteShader(nullptr)
 	, _fading(0.0)
 	, _fading2(0.0)
-	, _vertexBufferID(0)
-	, _vaioID(0)
 	, _isEnabled(properties::BoolProperty("enabled", "enabled", false))
 {}
 
@@ -85,45 +83,26 @@ bool RenderableExplorationPath::initialize(RenderableGlobe* globe, const std::ve
 
 	calculatePathModelCoordinates();
 	if (_allGeodetics.size() == 0) return false;
-
+	
+	// 
 	// Initialize and upload to graphics card
-	glGenVertexArrays(1, &_vaioID);
+	glGenVertexArrays(1, &_vaPathID);
 	ghoul_assert(_vaioID != 0, "Could not generate vertex arrays");
 
-	glGenBuffers(1, &_vertexBufferID);
+	glGenBuffers(1, &_vbPathID);
 	ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
 
-	glBindVertexArray(_vaioID);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
-	glBufferData(GL_ARRAY_BUFFER,
-		_stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
-		&_stationPointsModelCoordinates[0],
-		GL_STATIC_DRAW);
+	bufferData(_vaPathID, _vbPathID, _stationPointsModelCoordinates);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(_stationPointsModelCoordinates[0]), 0);
-
-	glBindVertexArray(0);
-
-	// Staions with models
+	// Stations with models
 	// Initialize and upload to graphics card
-	glGenVertexArrays(1, &_vaioID2);
+	glGenVertexArrays(1, &_vaModelsID);
 	ghoul_assert(_vaioID2 != 0, "Could not generate vertex arrays");
 
-	glGenBuffers(1, &_vertexBufferID2);
+	glGenBuffers(1, &_vbModelsID);
 	ghoul_assert(_vertexBufferID2 != 0, "Could not create vertex buffer");
-
-	glBindVertexArray(_vaioID2);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID2);
-	glBufferData(GL_ARRAY_BUFFER,
-		_stationPointsModelCoordinatesWithModel.size() * sizeof(_stationPointsModelCoordinatesWithModel[0]),
-		&_stationPointsModelCoordinatesWithModel[0],
-		GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(_stationPointsModelCoordinatesWithModel[0]), 0);
-
-	glBindVertexArray(0);
+	
+	bufferData(_vaModelsID, _vbModelsID, _stationPointsModelCoordinatesWithModel);
 
 	return true;
 }
@@ -139,11 +118,11 @@ bool RenderableExplorationPath::deinitialize() {
 		_siteShader = nullptr;
 	}
 
-	glDeleteVertexArrays(1, &_vaioID);
-	glDeleteBuffers(1, &_vertexBufferID);
+	glDeleteVertexArrays(1, &_vaPathID);
+	glDeleteBuffers(1, &_vbPathID);
 
-	glDeleteVertexArrays(1, &_vaioID2);
-	glDeleteBuffers(1, &_vertexBufferID2);
+	glDeleteVertexArrays(1, &_vaModelsID);
+	glDeleteBuffers(1, &_vbModelsID);
 
 	return false;
 }
@@ -155,6 +134,9 @@ bool RenderableExplorationPath::isReady() const {
 }
 
 void RenderableExplorationPath::render(const RenderData& data) {
+	glm::dmat4 globeModelTransform;
+	glm::dmat4 modelViewTransform;
+	if(_currentLevel >= 1) {
 		// Only show the path when camera is close enough
 		if (_currentLevel > 0 && _fading < 1.f)
 			_fading += 0.01f;
@@ -162,8 +144,8 @@ void RenderableExplorationPath::render(const RenderData& data) {
 			_fading -= 0.01f;
 
 		// Model transform and view transform needs to be in double precision
-		glm::dmat4 globeModelTransform = _globe->modelTransform();
-		glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * globeModelTransform;
+		globeModelTransform = _globe->modelTransform();
+		modelViewTransform = data.camera.combinedViewMatrix() * globeModelTransform;
 
 		_pathShader->activate();
 
@@ -172,38 +154,37 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		_pathShader->setUniform("modelViewTransform", modelViewTransform);
 		_pathShader->setUniform("projectionTransform", data.camera.projectionMatrix());
 		_pathShader->setUniform("fading", _fading);
-		_pathShader->setUniform("color", glm::vec3(1.0, 1.0, 1.0));
 
-		glBindVertexArray(_vaioID);
-		glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
+		glBindVertexArray(_vaPathID);
+		glBindBuffer(GL_ARRAY_BUFFER, _vbPathID);
 		glLineWidth(1.0f);
 		glDrawArrays(GL_LINE_STRIP, 0, _stationPointsModelCoordinates.size());
 		glBindVertexArray(0);
 
 		_pathShader->deactivate();
+	}
 		
-		if(_currentLevel >= 2) {
-			if (_currentLevel >= 2 && _fading2 < 1.f)
-				_fading2 += 0.01f;
-			else if (_currentLevel < 2 && _fading2 > 0.f)
-				_fading2 -= 0.01f;
+	if(_currentLevel >= 2) {
+		if (_currentLevel >= 2 && _fading2 < 1.f)
+			_fading2 += 0.01f;
+		else if (_currentLevel < 2 && _fading2 > 0.f)
+			_fading2 -= 0.01f;
 
-			_siteShader->activate();
+		_siteShader->activate();
 
-			_siteShader->setUniform("modelViewTransform", modelViewTransform);
-			_siteShader->setUniform("projectionTransform", data.camera.projectionMatrix());
-			_siteShader->setUniform("fading", _fading2);
-			_siteShader->setUniform("color", glm::vec3(1.0, 1.0, 1.0));
+		_siteShader->setUniform("modelViewTransform", modelViewTransform);
+		_siteShader->setUniform("projectionTransform", data.camera.projectionMatrix());
+		_siteShader->setUniform("fading", _fading2);
 
-			glBindVertexArray(_vaioID2);
-			glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID2);
+		glBindVertexArray(_vaModelsID);
+		glBindBuffer(GL_ARRAY_BUFFER, _vbModelsID);
 
-			glEnable(GL_PROGRAM_POINT_SIZE);
-			glDrawArrays(GL_POINTS, 0, _stationPointsModelCoordinatesWithModel.size());
-			glBindVertexArray(0);
+		glEnable(GL_PROGRAM_POINT_SIZE);
+		glDrawArrays(GL_POINTS, 0, _stationPointsModelCoordinatesWithModel.size());
+		glBindVertexArray(0);
 
-			_siteShader->deactivate();
-		}
+		_siteShader->deactivate();
+	}
 }
 
 void RenderableExplorationPath::update(const UpdateData& data) {
@@ -265,34 +246,35 @@ void RenderableExplorationPath::recalculateCartesianCoordinates() {
 		_stationPointsModelCoordinatesWithModel.push_back(glm::dvec4(tempPos2, 1.0));
 	}
 
-	// Buffer new data
-	glBindVertexArray(_vaioID);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
+	reBufferData(_vaPathID, _vbPathID, _stationPointsModelCoordinates);
+	reBufferData(_vaModelsID, _vbModelsID, _stationPointsModelCoordinatesWithModel);
+}
 
-	glBufferData(GL_ARRAY_BUFFER, _stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
-		NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0,
-		_stationPointsModelCoordinates.size() * sizeof(_stationPointsModelCoordinates[0]),
-		&_stationPointsModelCoordinates[0]);
+void RenderableExplorationPath::bufferData(GLuint vaID, GLuint vbID, const std::vector<glm::vec4> coordinates) {
+	glBindVertexArray(vaID);
+	glBindBuffer(GL_ARRAY_BUFFER, vbID);
+	glBufferData(GL_ARRAY_BUFFER,
+		coordinates.size() * sizeof(coordinates[0]),
+		&coordinates[0],
+		GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(coordinates[0]), 0);
 	glBindVertexArray(0);
+}
 
-	// Buffer new data
-	glBindVertexArray(_vaioID2);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID2);
+void RenderableExplorationPath::reBufferData(GLuint vaID, GLuint vbID, const std::vector<glm::vec4> coordinates) {
+	glBindVertexArray(vaID);
+	glBindBuffer(GL_ARRAY_BUFFER, vbID);
 
-	glBufferData(GL_ARRAY_BUFFER, _stationPointsModelCoordinatesWithModel.size() * sizeof(_stationPointsModelCoordinatesWithModel[0]),
+	glBufferData(GL_ARRAY_BUFFER, coordinates.size() * sizeof(coordinates[0]),
 		NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0,
-		_stationPointsModelCoordinatesWithModel.size() * sizeof(_stationPointsModelCoordinatesWithModel[0]),
-		&_stationPointsModelCoordinatesWithModel[0]);
+		coordinates.size() * sizeof(coordinates[0]),
+		&coordinates[0]);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
 	glBindVertexArray(0);
 }
 

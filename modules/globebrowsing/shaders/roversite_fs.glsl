@@ -26,19 +26,16 @@
 #include "fragment.glsl"
 
 in vec4 vs_positionScreenSpace;
-
-uniform vec3 color;
 uniform float fading;
 
-
 Fragment getFragment() {
+    vec3 color = vec3(1.0, 1.0, 1.0);
 
     vec3 N;
     N.xy = gl_PointCoord * 2.0 - vec2(1.0);
     float mag = dot(N.xy, N.xy);
     if (mag > 1.0) discard;
     N.z = sqrt(1.0-mag);
-
 
     Fragment frag;
     frag.color = vec4(color, fading);
