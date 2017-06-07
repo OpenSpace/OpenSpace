@@ -81,10 +81,10 @@ bool RenderableExplorationPath::initialize(RenderableGlobe* globe, const std::ve
 		}
 	}
 
-	calculatePathModelCoordinates();
+	_stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, 0);
+	_stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, 0);
 	if (_allGeodetics.size() == 0) return false;
 	
-	// 
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaPathID);
 	ghoul_assert(_vaioID != 0, "Could not generate vertex arrays");
@@ -193,61 +193,37 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 void RenderableExplorationPath::setLevel(const int level) {
 	_currentLevel = level;
 	if (level > lastLevel) {
-		recalculateCartesianCoordinates();
+		int offset = 10;
+		if (_currentLevel < 2)
+			offset = 6;
+		else if (_currentLevel == 2)
+			offset = 4;
+		else if (_currentLevel == 3)
+			offset = 1;
+
+		_stationPointsModelCoordinates.clear();
+		_stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, offset);
+		reBufferData(_vaPathID, _vbPathID, _stationPointsModelCoordinates);
+
+		_stationPointsModelCoordinatesWithModel.size();
+		_stationPointsModelCoordinatesWithModel = calculateModelCoordinates(_geodeticsWithModel, offset);
+		reBufferData(_vaModelsID, _vbModelsID, _stationPointsModelCoordinatesWithModel);
+
 		lastLevel = level;
 	}
 }
 
-void RenderableExplorationPath::calculatePathModelCoordinates() {
-	for (auto geodetic : _allGeodetics) {
-		glm::dvec3 positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
-		_stationPointsModelCoordinates.push_back(glm::dvec4(positionModelSpace, 1.0));
-	}
-	for (auto geodetic : _geodeticsWithModel) {
-		glm::dvec3 positionModelSpace = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
-		_stationPointsModelCoordinatesWithModel.push_back(glm::dvec4(positionModelSpace, 1.0));
-	}
-}
-
-void RenderableExplorationPath::recalculateCartesianCoordinates() {
-	_stationPointsModelCoordinates.clear();
-	_stationPointsModelCoordinatesWithModel.clear();
-	for (auto geodetic : _allGeodetics) {
+std::vector<glm::vec4> RenderableExplorationPath::calculateModelCoordinates(std::vector<Geodetic2> geodetics,  const int offset) {
+	std::vector<glm::vec4> cartesianCoordinates;
+	for (auto geodetic : geodetics) {
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		int offset = 10;
-		if (_currentLevel < 2)
-			offset = 6;
-		else if (_currentLevel == 2)
-			offset = 4;
-		else if (_currentLevel == 3)
-			offset = 1;
-
 		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geodetic, heightToSurface + offset };
 		glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
-		_stationPointsModelCoordinates.push_back(glm::dvec4(tempPos2, 1.0));
+		cartesianCoordinates.push_back(glm::dvec4(tempPos2, 1.0));
 	}
-	
-	for (auto geodetic : _geodeticsWithModel) {
-		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);
-		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
-
-		int offset = 10;
-		if (_currentLevel < 2)
-			offset = 6;
-		else if (_currentLevel == 2)
-			offset = 4;
-		else if (_currentLevel == 3)
-			offset = 1;
-
-		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ geodetic, heightToSurface + offset };
-		glm::dvec3 tempPos2 = _globe->ellipsoid().cartesianPosition(geo3);
-		_stationPointsModelCoordinatesWithModel.push_back(glm::dvec4(tempPos2, 1.0));
-	}
-
-	reBufferData(_vaPathID, _vbPathID, _stationPointsModelCoordinates);
-	reBufferData(_vaModelsID, _vbModelsID, _stationPointsModelCoordinatesWithModel);
+	return cartesianCoordinates;
 }
 
 void RenderableExplorationPath::bufferData(GLuint vaID, GLuint vbID, const std::vector<glm::vec4> coordinates) {
