@@ -37,6 +37,11 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
     -- @TODO Carlbaum Default scene does openspace.resetCameraDirection() here
+    openspace.addVirtualProperty("BoolProperty", "Show ALL Fieldlines", "*Fieldlines.renderable.enabled", true, nil, nil)
+    openspace.addVirtualProperty("BoolProperty", "Draw Points", "*Fieldlines.renderable.togglePointDrawing", false, nil, nil)
+    openspace.addVirtualProperty("BoolProperty", "Additive Blending", "*Fieldlines.renderable.additiveBlending", false, nil, nil)
+    openspace.addVirtualProperty("IntProperty", "Fieldline Color Method", "*Fieldlines.renderable.Color.fieldlineColorMethod", 0, 0, 1)
+    openspace.addVirtualProperty("FloatProperty", "Fieldline Alpha", "*Fieldlines.renderable.Color.fieldlineColor", 0.5, 0.0, 1.0)
 
     openspace.printInfo("Done setting default values")
 end

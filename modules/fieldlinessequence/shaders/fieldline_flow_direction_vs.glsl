@@ -83,7 +83,7 @@ void main() {
             float lookUpValue = (unitIntensity - transferFunctionLimits.x )
                     / (transferFunctionLimits.y - transferFunctionLimits.x);
             vec4 color = texture(colorMap, lookUpValue);
-            vs_color = vec4(color.xyz,fieldlineParticleColor.a);
+            vs_color = vec4(color.xyz,fieldlineParticleColor.a*color.a);
             // If color table says to not use values in this range discard
             if (color.a == 0) {
                 fragment_discard = 0.0;
@@ -105,7 +105,7 @@ void main() {
             float lookUpValue = (unitIntensity - transferFunctionLimits.x)
                     / (transferFunctionLimits.y - transferFunctionLimits.x);
             vec4 color = texture(colorMap, lookUpValue);
-            vs_color = vec4(color.xyz,fieldlineColor.a);
+            vs_color = vec4(color.xyz,fieldlineColor.a*color.a);
 
             // If color table says to not use values in this range discard
             if (color.a == 0) {

@@ -65,7 +65,8 @@ public:
 
     bool getAllFilePathsOfType(const std::string& pathToDirectory,
                                const std::string& fileExtension,
-                               std::vector<std::string>& outFilePaths);
+                               std::vector<std::string>& outFilePaths,
+                               bool recursiveSearch = false);
 
     void saveFieldlinesStatesToJson(const std::string& directoryPath,
                                     const std::string& filePrefix,

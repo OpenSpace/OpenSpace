@@ -153,7 +153,8 @@ bool FieldlinesSequenceManager::getSeedPointsFromFile(
 bool FieldlinesSequenceManager::getAllFilePathsOfType(
         const std::string& pathToDirectory,
         const std::string& fileExtension,
-        std::vector<std::string>& outFilePaths) {
+        std::vector<std::string>& outFilePaths,
+        bool recursiveSearch /*= false*/) {
 
     std::string absFolderPath;
     absFolderPath = absPath(pathToDirectory);
@@ -176,7 +177,7 @@ bool FieldlinesSequenceManager::getAllFilePathsOfType(
 
     // Get absolute path to
     ghoul::filesystem::Directory dir(absFolderPath, RawPath::Yes);
-    outFilePaths = dir.read(FileSystem::Recursive::No, Sort::Yes);
+    outFilePaths = dir.read(static_cast<ghoul::Boolean>(recursiveSearch), Sort::Yes);
 
     outFilePaths.erase(std::remove_if(
             outFilePaths.begin(), outFilePaths.end(), [extLength, extension](std::string s) {
@@ -332,43 +333,43 @@ bool FieldlinesSequenceManager::getFieldlinesStateFromBinary(
             }
     }
 
-    ifs.read( reinterpret_cast<char*>(&outState._triggerTime), sizeof(double));
+    // Define tmp variables to store meta data in
     FieldlinesState::Model model;
-    ifs.read( reinterpret_cast<char*>(&model), sizeof(int));
-    outState.setModel(model);
-    ifs.read( reinterpret_cast<char*>(&outState._isMorphable), sizeof(bool));
     size_t numLines;
-    ifs.read( reinterpret_cast<char*>(&numLines), sizeof(size_t));
     size_t numPoints;
-    ifs.read( reinterpret_cast<char*>(&numPoints), sizeof(size_t));
     size_t numExtras;
-    ifs.read( reinterpret_cast<char*>(&numExtras), sizeof(size_t));
     size_t byteSizeAllNames;
-    ifs.read( reinterpret_cast<char*>(&byteSizeAllNames), sizeof(size_t));
 
+    // Read single value variables
+    ifs.read( reinterpret_cast<char*>(&outState._triggerTime), sizeof(double));
+    ifs.read( reinterpret_cast<char*>(&model),                 sizeof(int));
+    ifs.read( reinterpret_cast<char*>(&outState._isMorphable), sizeof(bool));
+    ifs.read( reinterpret_cast<char*>(&numLines),              sizeof(size_t));
+    ifs.read( reinterpret_cast<char*>(&numPoints),             sizeof(size_t));
+    ifs.read( reinterpret_cast<char*>(&numExtras),             sizeof(size_t));
+    ifs.read( reinterpret_cast<char*>(&byteSizeAllNames),      sizeof(size_t));
+
+    outState.setModel(model);
+    // RESERVE/RESIZE vectors
     // TODO: figure out how to do this with reserve instead of resize! resize is about 1,4 times slower
-    // outState._lineStart.reserve(numLines);
     outState._lineStart.resize(numLines);
-    ifs.read( reinterpret_cast<char*>(outState._lineStart.data()), sizeof(GLint)*numLines);
-
-    // outState._lineCount.reserve(numLines);
     outState._lineCount.resize(numLines);
-    ifs.read( reinterpret_cast<char*>(outState._lineCount.data()), sizeof(GLsizei)*numLines);
-
-    // outState._vertexPositions.reserve(numPoints);
     outState._vertexPositions.resize(numPoints);
+    outState._extraVariables.resize(numExtras);
+    outState._extraVariableNames.reserve(numExtras);
+
+    // Read vertex position data
+    ifs.read( reinterpret_cast<char*>(outState._lineStart.data()), sizeof(GLint)*numLines);
+    ifs.read( reinterpret_cast<char*>(outState._lineCount.data()), sizeof(GLsizei)*numLines);
     ifs.read( reinterpret_cast<char*>(outState._vertexPositions.data()), sizeof(glm::vec3)*numPoints);
 
-    // outState._extraVariables.reserve(numExtras);
-    outState._extraVariables.resize(numExtras);
+    // Read all extra variables
     for (std::vector<float>& vec : outState._extraVariables) {
-        //vec.reserve(numPoints);
         vec.resize(numPoints);
         ifs.read( reinterpret_cast<char*>(vec.data()), sizeof(float) * numPoints);
     }
 
-    outState._extraVariableNames.reserve(numExtras);
-    // outState._extraVariableNames.resize(numExtras);
+    // Read all extra variables
     std::string allNamesInOne;
     char* s = new char[byteSizeAllNames];
     ifs.read(s, byteSizeAllNames);
@@ -526,22 +527,40 @@ bool FieldlinesSequenceManager::getFieldlinesState(
 
             std::vector<size_t> extraVarIdx;
 
-            const size_t numExtraVariables = numDataVariables - 3;
+            size_t numExtraVariables = numDataVariables /*- 3 */;
             if (numExtraVariables > 0) {
                 // Extra variables exist
                 for (size_t j = 0 ; j < numDataVariables; ++j) {
-                    if (j == xIdx || j == yIdx || j == zIdx) {
+                    // TODO: Remove hardcoded "s"? Supposed to represent arclength.. Why should we have that?
+                    if (j == xIdx || j == yIdx || j == zIdx || variableNames[j] == "s") {
+                        numExtraVariables--;
                         continue;
                     }
+
                     outFieldlinesState._extraVariableNames.push_back(variableNames[j]);
                     extraVarIdx.push_back(j);
                 }
-                // TODO: Remove this hardcoded stuff, just for the event
-                // if ( sghhh.key() == "s") {
-
-                // }
-                outFieldlinesState._extraVariables.resize(numExtraVariables);
             }
+
+            // TODO REMOVE THIS HARDCODED STUFF!!
+            outFieldlinesState.setModel(FieldlinesState::Model::batsrus);
+            size_t numChars = pathToJsonFile.size();
+            std::string timeString = pathToJsonFile.substr(numChars - 32, 19);
+            timeString = timeString.substr(0, 4) + "-" + timeString.substr(4, 2) + "-" +
+                         timeString.substr(6, 2) + "T" + timeString.substr(9, 2) + ":" +
+                         timeString.substr(11,2) + ":" + timeString.substr(13,2) + "." +
+                         timeString.substr(16,2);
+            double time = Time::convertTime(timeString);
+            outFieldlinesState._triggerTime = time;
+
+            // Add topology and transition.. TODO remove this or change to check if it exists first
+            numExtraVariables += 2;
+            size_t transitionIdx = extraVarIdx.size();
+            size_t topologyIdx   = transitionIdx + 1;
+            outFieldlinesState._extraVariableNames.push_back("transition");
+            outFieldlinesState._extraVariableNames.push_back("topology");
+
+            outFieldlinesState._extraVariables.resize(numExtraVariables);
 
             size_t lineStartIdx = 0;
             // Loop through all fieldlines
@@ -549,31 +568,45 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                 json fieldline = *fieldlineIt;
 
                 // TODO: CREATE A SEPARATE GENERALIZED FUNCTION FOR READING A FIELDLINE IN THIS FORMAT
-                std::vector<std::vector<float>> jsonData    = fieldline[strTrace]["data"];
+                std::vector<std::vector<float>> jsonData = fieldline[strTrace]["data"];
+                std::string tStr = fieldline["topology"];
+                float topology = (tStr == "solar_wind" ? 0.f : ( tStr == "closed" ? 3.f : (tStr == "north" ? 1.f : 2.f)));
+                float transition = fieldline["transition"];
                 // json jsonData    = fieldline[strTrace]["data"];
                 size_t numPoints = jsonData.size();
+
+                // TODO REMOVE THESE LINES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1111
+                const std::vector<float>& f = jsonData[0];
+                const std::vector<float>& l = jsonData[numPoints-1];
+                glm::vec3 ps = glm::vec3(f[xIdx], f[yIdx], f[zIdx]);
+                glm::vec3 pe = glm::vec3(l[xIdx], l[yIdx], l[zIdx]);
+                float f1 = glm::length(ps);
+                float f2 = glm::length(pe);
+                bool np = false;
+                bool sp = false;
+                if (f1 < 3.1f) np = true;
+                if (f2 < 3.1f) sp = true;
+
+                if      ( np &&  sp) { topology = 3.f; }
+                else if (!np && !sp) { topology = 0.f; }
+                else if ( np && !sp) { topology = 1.f; }
+                else    { topology = 2.f; }
+                ///////////////////////////
+
                 for (size_t j = 0; j < numPoints; ++j) {
                     const std::vector<float>& variables = jsonData[j];
                     // json variables = jsonData[j];
                     outFieldlinesState._vertexPositions.push_back(glm::vec3(variables[xIdx], variables[yIdx], variables[zIdx]) * scalingFactor);
-                    for (size_t k = 0; k < numExtraVariables; ++k ) {
+                    for (size_t k = 0; k < extraVarIdx.size(); ++k ) {
                         outFieldlinesState._extraVariables[k].push_back(variables[extraVarIdx[k]]);
                     }
+                    outFieldlinesState._extraVariables[transitionIdx].push_back(transition);
+                    outFieldlinesState._extraVariables[topologyIdx].push_back(topology);
                 }
                 outFieldlinesState._lineCount.push_back(numPoints);
                 outFieldlinesState._lineStart.push_back(lineStartIdx);
                 lineStartIdx += numPoints;
 
-                // TODO REMOVE THIS HARDCODED STUFF!!
-                outFieldlinesState.setModel(FieldlinesState::Model::batsrus);
-                size_t numChars = pathToJsonFile.size();
-                std::string timeString = pathToJsonFile.substr(numChars - 32, 19);
-                timeString = timeString.substr(0, 4) + "-" + timeString.substr(4, 2) + "-" +
-                             timeString.substr(6, 2) + "T" + timeString.substr(9, 2) + ":" +
-                             timeString.substr(11,2) + ":" + timeString.substr(13,2) + "." +
-                             timeString.substr(16,3);
-                double time = Time::convertTime(timeString);
-                outFieldlinesState._triggerTime = time;
             }
             // size_t numExtras                = jfile["0. meta"]["4. numExtras"];
             return true;
@@ -662,14 +695,16 @@ std::unique_ptr<ccmc::Kameleon> FieldlinesSequenceManager::createKameleonObject(
         const std::string& pathToCdfFile) const {
 
     // ----------------------------- CREATE KAMELEON OBJECT -----------------------------
+    // LDEBUG("Creating Kameleon object");
     std::unique_ptr<ccmc::Kameleon> kameleon = std::make_unique<ccmc::Kameleon>();
-    LDEBUG("\tOpening the cdf file: '" << pathToCdfFile << "' with Kameleon!");
+    LDEBUG("\tOpening the cdf file: " << pathToCdfFile);
     long kamStatus = kameleon->open(pathToCdfFile);
 
     if (kamStatus != ccmc::FileReader::OK) {
         LERROR("Failed to create a Kameleon Object from file: " << pathToCdfFile);
        return nullptr;
     }
+    LDEBUG("\tSuccessfully opened : " << pathToCdfFile);
     return kameleon;
 }
 
@@ -688,7 +723,15 @@ bool FieldlinesSequenceManager::getFieldlinesState(
         std::vector<std::string>& colorizingMagVars,
         FieldlinesState& outFieldlinesState) {
 
+    // ------------------------ MAKE SURE STATE HAS A START TIME ------------------------
+    // double startTime = getTime(kameleon.get());
+    double startTime = getTime(kameleon);
+    outFieldlinesState._triggerTime = startTime;
+    // LDEBUG("State will start at " << timeToString(startTime));
+
+
     // ----------------------------- LOAD TRACING VARIABLE -----------------------------
+    // LDEBUG("Loading tracing variable '" << tracingVariable << "'");
     bool status = kameleon->loadVariable(tracingVariable);
     if (!status) {
         LERROR("FAILED TO LOAD TRACING VARIABLE: " << tracingVariable);
@@ -753,6 +796,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
 
     // ---- DETERMINE WETHER OR NOT TO SAMPLE EXTRA QUANTITIES AT FIELDLINE VERTICES ----
     // ----------------- IF SO LOAD THEM, ELSE DELETE STRING FROM VECTOR -----------------
+    // LDEBUG("LOADING EXTRA VARIABLES!");
     bool sampleExtraQuantities = false;
     for (int i = 0; i < static_cast<int>(colorizingFloatVars.size()); i++) {
         std::string str = colorizingFloatVars[i];
@@ -778,7 +822,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
             --i;
         } else {
             sampleExtraQuantities = true;
-            LDEBUG("Color depending on variable " << str << " is allowed!");
+            // LDEBUG("Color depending on variable " << str << " is allowed!");
             outFieldlinesState._extraVariableNames.push_back(str);
         }
     }
@@ -803,8 +847,8 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                 i -= 3;
             } else {
                 sampleExtraQuantities = true;
-                LDEBUG("Color depending on magnitude of variables "
-                        << str1 << ", " << str2 <<  " & " << str3 << " is allowed!");
+                // LDEBUG("Color depending on magnitude of variables "
+                //         << str1 << ", " << str2 <<  " & " << str3 << " is allowed!");
                 outFieldlinesState._extraVariableNames.push_back("Magnitude of ("
                                                                 + str1 + ", "
                                                                 + str2 + ", "
@@ -829,6 +873,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     // ------ LOOP THROUGH THE SEED POINTS, TRACE AND CONVERT TO THE DESIRED FORMAT ------
     // TODO CREATE MORE VECTORS
     // std::vector<float> xtraVarVec;
+    // LDEBUG("TRACING, CONVERTING AND STORING FIELDLINES");
     size_t lineStart = 0;
     for (glm::vec3 seedPoint : inSeedPoints) {
         //--------------------------------------------------------------------------//
@@ -968,11 +1013,6 @@ bool FieldlinesSequenceManager::getFieldlinesState(
     if (sampleExtraQuantities) {
         outFieldlinesState._extraVariables = std::move(colorizingVariables);
     }
-
-    // ------------------------ MAKE SURE STATE HAS A START TIME ------------------------
-    double startTime = getTime(kameleon);
-    outFieldlinesState._triggerTime = startTime;
-    LDEBUG("State will start at " << timeToString(startTime));
 
     return status;
 }

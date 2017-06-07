@@ -419,8 +419,8 @@ bool RenderableFieldlinesSequence::initialize() {
             // TODO: change these hardcoded limits to something that makes sense
             // or allow user to specify in LUA
             rmin =  0.09f;
-            xmin = ymin = zmin = -40.f;
-            xmax = ymax = zmax = 40.f;
+            xmin = ymin = zmin = -5.f;
+            xmax = ymax = zmax = 5.f;
             rmax = std::max(xmax, std::max(ymax,zmax));
 
             _isSpherical = true;
@@ -1090,12 +1090,13 @@ bool RenderableFieldlinesSequence::getSeedPointsFromDictionary() {
             "\n\tRequires a path to a .txt file containing seed point data." <<
             "Each row should have 3 floats seperated by spaces.");
         return false;
-    } else if (!fsManager.getSeedPointsFromFile(pathToSeedPointFile,
-                                                                    _seedPoints)) {
+    } else if (!fsManager.getSeedPointsFromFile(pathToSeedPointFile, _seedPoints)) {
         LERROR("Failed to find seed points in'" << pathToSeedPointFile << "'");
         return false;
     }
     return true;
 }
+
+
 
 } // namespace openspace
