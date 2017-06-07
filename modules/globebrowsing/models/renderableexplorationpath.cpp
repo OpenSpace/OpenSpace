@@ -26,6 +26,8 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/scene.h>
 
 #include <fstream>
 #include "ogr_geometry.h"
@@ -181,10 +183,9 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		_pathShader->deactivate();
 		
 		if(_currentLevel >= 2) {
-
-			if (_currentLevel >= 3 && _fading2 < 1.f)
+			if (_currentLevel >= 2 && _fading2 < 1.f)
 				_fading2 += 0.01f;
-			else if (_currentLevel < 3 && _fading2 > 0.f)
+			else if (_currentLevel < 2 && _fading2 > 0.f)
 				_fading2 -= 0.01f;
 
 			_siteShader->activate();

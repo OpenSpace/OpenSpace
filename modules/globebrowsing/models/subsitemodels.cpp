@@ -28,7 +28,6 @@ namespace openspace {
 namespace globebrowsing {
 
 float SubsiteModels::alpha() const {
-
 	return _alpha;
 }
 
