@@ -58,12 +58,15 @@ namespace {
     const char* KeyLowerValueBound = "LowerValueBound";
     const char* KeyUpperValueBound = "UpperValueBound";
     const char* KeyClipPlanes = "ClipPlanes";
+    const char* KeySecondsBefore = "SecondsBefore";
+    const char* KeySecondsAfter = "SecondsAfter";
     const char* KeyCache = "Cache";
     const char* KeyGridType = "GridType";
     const char* ValueSphericalGridType = "Spherical";
     const char* KeyMinValue = "MinValue";
     const char* KeyMaxValue = "MaxValue";
     const char* KeyTime = "Time";
+    const float SecondsInOneDay = 60 * 60 * 24;
 }
 
 namespace openspace {
@@ -73,6 +76,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     : Renderable(dictionary)
     , _clipPlanes(nullptr)
     , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
+    , _secondsBefore("secondsBefore", "Seconds before", 0.0, 0.01, SecondsInOneDay)
+    , _secondsAfter("secondsAfter", "Seconds after", 0.0, 0.01, SecondsInOneDay)
     , _sourceDirectory("sourceDirectory", "Source Directory")
     , _transferFunctionPath("transferFunctionPath", "Transfer Function Path")
     , _raycaster(nullptr)
@@ -90,6 +95,11 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
     _gridType = VolumeGridType::Cartesian;
     _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
+
+    if (dictionary.hasValue<float>(KeySecondsBefore)) {
+        _secondsBefore = dictionary.value<float>(KeySecondsBefore);
+    }
+    _secondsAfter = dictionary.value<float>(KeySecondsAfter);
 
     ghoul::Dictionary clipPlanesDictionary;
     dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
@@ -197,14 +207,29 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 }
 
 RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
-    double currentTime = OsEng.timeManager().time().j2000Seconds();
-    auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
-    if (currentTimestepIt == _volumeTimesteps.end() && _volumeTimesteps.size() > 0) {
-        currentTimestepIt = (--_volumeTimesteps.end());
-        return &(currentTimestepIt->second);
-    } else {
+    if (_volumeTimesteps.size() == 0) {
         return nullptr;
     }
+    double currentTime = OsEng.timeManager().time().j2000Seconds();
+
+    // Get the first item with time > currentTime
+    auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
+    if (currentTimestepIt == _volumeTimesteps.end()) {
+        // No such timestep was found: show last timestep if it is within the time margin.
+        RenderableTimeVaryingVolume::Timestep* lastTimestep = &(_volumeTimesteps.rbegin()->second);
+        double threshold = lastTimestep->time + static_cast<double>(_secondsAfter);
+        return currentTime < threshold ? lastTimestep : nullptr;
+    }
+    // Get the last item with time <= currentTime
+    currentTimestepIt--;
+
+    if (currentTimestepIt == _volumeTimesteps.end()) {
+        // No such timestep was found: show first timestep if it is within the time margin.
+        RenderableTimeVaryingVolume::Timestep* firstTimestep = &(_volumeTimesteps.begin()->second);
+        double threshold = firstTimestep->time - static_cast<double>(_secondsBefore);
+        return currentTime >= threshold ? firstTimestep : nullptr;
+    }
+    return &(currentTimestepIt->second);
 }
 
 void RenderableTimeVaryingVolume::update(const UpdateData& data) {
@@ -284,7 +309,20 @@ documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
                 new StringInListVerifier({"Cartesian", "Spherical"}),
                 "Specifies the grid type",
                 Optional::Yes
-            }
+            },
+            {
+                KeySecondsBefore,
+                new DoubleVerifier,
+                "Specifies the number of seconds to show the the first timestep before its actual time."
+                "The default value is 0.",
+                Optional::Yes
+            },
+            {
+                KeySecondsAfter,
+                new DoubleVerifier,
+                "Specifies the number of seconds to show the the last timestep after its actual time",
+                Optional::No
+            },
         }
     };
 }

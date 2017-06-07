@@ -83,6 +83,8 @@ private:
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
     properties::FloatProperty _stepSize;
+    properties::FloatProperty _secondsBefore;
+    properties::FloatProperty _secondsAfter;
     properties::StringProperty _sourceDirectory;
     properties::StringProperty _transferFunctionPath;
     
