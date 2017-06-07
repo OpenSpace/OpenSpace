@@ -32,6 +32,8 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/util/time.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -87,6 +89,12 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
     _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
     _gridType = VolumeGridType::Cartesian;
+    _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
+
+    ghoul::Dictionary clipPlanesDictionary;
+    dictionary.getValue(KeyClipPlanes, clipPlanesDictionary);
+    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
+    _clipPlanes->setName("clipPlanes");
 
     if (dictionary.hasValue<std::string>(KeyGridType)) {
         _gridType = volume::parseGridType(dictionary.value<std::string>(KeyGridType));
@@ -141,7 +149,8 @@ bool RenderableTimeVaryingVolume::initialize() {
         t.texture->uploadTexture();
     }
 
-    
+    _clipPlanes->initialize();
+    _transferFunction->update();
     _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(nullptr, _transferFunction, _clipPlanes);
     _raycaster->initialize();
     OsEng.renderEngine().raycasterManager().attachRaycaster(*_raycaster.get());
@@ -153,6 +162,11 @@ bool RenderableTimeVaryingVolume::initialize() {
         }
     };
     onEnabledChange(onChange);
+
+    addProperty(_stepSize);
+    addProperty(_transferFunctionPath);
+    addProperty(_sourceDirectory);
+    addPropertySubOwner(_clipPlanes.get());
 
     return true;
 }
@@ -170,10 +184,12 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
     t.baseName = ghoul::filesystem::File(path).baseName();
     t.dimensions = dictionary.value<glm::vec3>(KeyDimensions);
     t.lowerDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
-    t.upperDomainBound = dictionary.value<glm::vec3>(KeyLowerDomainBound);
+    t.upperDomainBound = dictionary.value<glm::vec3>(KeyUpperDomainBound);
     t.minValue = dictionary.value<float>(KeyMinValue);
     t.maxValue = dictionary.value<float>(KeyMaxValue);
-    t.time = dictionary.value<double>(KeyTime);
+
+    std::string timeString = dictionary.value<std::string>(KeyTime);
+    t.time = Time::convertTime(timeString);
     t.inRam = false;
     t.onGpu = false;
     
@@ -181,14 +197,30 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::string& path) 
 }
 
 RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimestep() {
-    return &(_volumeTimesteps.begin()->second);
+    double currentTime = OsEng.timeManager().time().j2000Seconds();
+    auto currentTimestepIt = _volumeTimesteps.upper_bound(currentTime);
+    if (currentTimestepIt == _volumeTimesteps.end() && _volumeTimesteps.size() > 0) {
+        currentTimestepIt = (--_volumeTimesteps.end());
+        return &(currentTimestepIt->second);
+    } else {
+        return nullptr;
+    }
 }
 
 void RenderableTimeVaryingVolume::update(const UpdateData& data) {
     if (_raycaster) {
         Timestep* t = currentTimestep();
         if (t && t->texture) {
+            glm::vec3 scale = t->upperDomainBound - t->lowerDomainBound;
+            glm::vec3 translation = (t->lowerDomainBound + t->upperDomainBound) * 0.5f;
+
+            glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation);
+            modelTransform = glm::scale(modelTransform, scale);
+            _raycaster->setModelTransform(modelTransform);
+
             _raycaster->setVolumeTexture(t->texture);
+        } else {
+            _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);
     }
@@ -284,8 +316,8 @@ documentation::Documentation RenderableTimeVaryingVolume::TimestepDocumentation(
             },
             {
                 KeyTime,
-                new DoubleVerifier,
-                "Specifies the time (seconds since epoch)",
+                new StringVerifier,
+                "Specifies the time on the format YYYY-MM-DDTHH:MM:SS.000Z",
                 Optional::No
             },
             {

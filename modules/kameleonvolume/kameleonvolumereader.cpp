@@ -185,35 +185,20 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
     };
 }
 
-std::string KameleonVolumeReader::simulationStartString() const {
+std::string KameleonVolumeReader::simulationStart() const {
     return _model->getGlobalAttribute("start_time").getAttributeString();
 }
 
-std::string KameleonVolumeReader::simulationEndString() const {
+std::string KameleonVolumeReader::simulationEnd() const {
     return _model->getGlobalAttribute("end_time").getAttributeString();
 }
 
-std::string KameleonVolumeReader::timeString() const {
+std::string KameleonVolumeReader::time() const {
     double start =
         ccmc::Time(_model->getGlobalAttribute("start_time").getAttributeString()).getEpoch();
-    double elapsed = _model->getGlobalAttribute("elapsed_time_in_seconds").getAttributeFloat();
+    // Get elapsed time in seconds and convert to milliseconds.
+    double elapsed = _model->getGlobalAttribute("elapsed_time_in_seconds").getAttributeFloat() * 1000;
     return ccmc::Time(start + elapsed).toString();
-}
-
-
-double KameleonVolumeReader::simulationStart() const {
-    return ccmc::Time(_model->getGlobalAttribute("start_time").getAttributeString()).getEpoch();
-}
-
-double KameleonVolumeReader::simulationEnd() const {
-    return ccmc::Time(_model->getGlobalAttribute("end_time").getAttributeString()).getEpoch();
-}
-
-double KameleonVolumeReader::time() const {
-    double start =
-        ccmc::Time(_model->getGlobalAttribute("start_time").getAttributeString()).getEpoch();
-    double elapsed = _model->getGlobalAttribute("elapsed_time_in_seconds").getAttributeFloat();
-    return start + elapsed;
 }
 
 double KameleonVolumeReader::minValue(const std::string & variable) const {

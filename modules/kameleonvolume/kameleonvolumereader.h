@@ -51,12 +51,9 @@ public:
         const glm::vec3& upperDomainBound) const;
     ghoul::Dictionary readMetaData() const;
 
-    std::string timeString() const;
-    std::string simulationStartString() const;
-    std::string simulationEndString() const;
-    double time() const;
-    double simulationStart() const;
-    double simulationEnd() const;
+    std::string time() const;
+    std::string simulationStart() const;
+    std::string simulationEnd() const;
 
     double minValue(const std::string& variable) const;
     double maxValue(const std::string& variable) const;

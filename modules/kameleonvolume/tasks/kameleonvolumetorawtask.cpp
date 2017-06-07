@@ -125,13 +125,20 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     ghoul::Dictionary inputMetadata = reader.readMetaData();
     ghoul::Dictionary outputMetadata;
 
-    outputMetadata.setValue<double>(KeyTime, reader.time());
+    std::string time = reader.time();
+
+    // Do not include time offset in time string
+    if (time.back() == 'Z') {
+        time.pop_back();
+    }
+
+    outputMetadata.setValue<std::string>(KeyTime, time);
     outputMetadata.setValue<glm::vec3>(KeyDimensions, _dimensions);
     outputMetadata.setValue<glm::vec3>(KeyLowerDomainBound, _lowerDomainBound);
     outputMetadata.setValue<glm::vec3>(KeyUpperDomainBound, _upperDomainBound);
     outputMetadata.setValue<float>(KeyMinValue, reader.minValue(_variable));
     outputMetadata.setValue<float>(KeyMaxValue, reader.maxValue(_variable));
-    
+
     ghoul::DictionaryLuaFormatter formatter;
     std::string metadataString = formatter.format(outputMetadata);
 
