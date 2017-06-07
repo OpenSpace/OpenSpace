@@ -28,6 +28,8 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
+#include <openspace/properties/stringproperty.h>
+
 namespace openspace {
 
 class PixelBuffer;
@@ -73,9 +75,18 @@ private:
     */
     void initTexturesFromLoadedData();
 
+    void initAsyncTileDataReader();
+
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
   
     cache::MemoryAwareTileCache* _tileCache;
+
+    properties::StringProperty _filePath;
+    layergroupid::GroupID _layerGroupID;
+    std::string _basePath;
+    int _tilePixelSize;
+    int _preCacheLevel;
+    bool _performPreProcessing;
 };
 
 } // namespace tileprovider

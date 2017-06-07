@@ -57,19 +57,49 @@ const char* TemporalTileProvider::TemporalXMLTags::TIME_RESOLUTION =
 const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeIdFormat";
 
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
-    : _initDict(dictionary) 
+    : _initDict(dictionary)
+    , _filePath("filePath", "File Path", "")
+    , _successfulInit(false)
 {
-    if (!dictionary.getValue<std::string>(KeyFilePath, _datasetFile)) {
-        throw std::runtime_error(std::string("Must define key '") + KeyFilePath + "'");
+    std::string filePath;
+    dictionary.getValue<std::string>(KeyFilePath, filePath);
+    if (!filePath.empty()) {
+        filePath = absPath(filePath);
     }
+  
+    _filePath.setValue(filePath);
+    addProperty(_filePath);
+  
+    if(readFilePath()) {
+        const bool hasStart = dictionary.hasKeyAndValue<std::string>(KeyPreCacheStartTime);
+        const bool hasEnd = dictionary.hasKeyAndValue<std::string>(KeyPreCacheEndTime);
+        if (hasStart && hasEnd) {
+            const std::string start = dictionary.value<std::string>(KeyPreCacheStartTime);
+            const std::string end = dictionary.value<std::string>(KeyPreCacheEndTime);
+            std::vector<Time> preCacheTimes = _timeQuantizer.quantized(
+                Time(Time::convertTime(start)),
+                Time(Time::convertTime(end))
+            );
 
-    _datasetFile = absPath(_datasetFile);
+            LINFO("Preloading: " << _filePath.value());
+            for (Time& t : preCacheTimes) {
+                getTileProvider(t);
+            }
+        }
+        _successfulInit = true;
+    }
+    else {
+        LERROR("Unable to read file " + _filePath.value());
+        _successfulInit = false;
+    }  
+}
 
-    std::ifstream in(_datasetFile.c_str());
+bool TemporalTileProvider::readFilePath() {
+    std::ifstream in(_filePath.value().c_str());
     if (!in.is_open()) {
-        throw ghoul::FileNotFoundError(_datasetFile);
+        return false;
     }
-        
+  
     // read file
     std::string xml(
         std::istreambuf_iterator<char>(in),
@@ -78,26 +108,11 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 
     _initDict.setValue<std::string>(
         KeyBasePath,
-        ghoul::filesystem::File(_datasetFile).directoryName()
+        ghoul::filesystem::File(_filePath.value()).directoryName()
     );
 
     _gdalXmlTemplate = consumeTemporalMetaData(xml);
-
-    const bool hasStart = dictionary.hasKeyAndValue<std::string>(KeyPreCacheStartTime);
-    const bool hasEnd = dictionary.hasKeyAndValue<std::string>(KeyPreCacheEndTime);
-    if (hasStart && hasEnd) {
-        const std::string start = dictionary.value<std::string>(KeyPreCacheStartTime);
-        const std::string end = dictionary.value<std::string>(KeyPreCacheEndTime);
-        std::vector<Time> preCacheTimes = _timeQuantizer.quantized(
-            Time(Time::convertTime(start)),
-            Time(Time::convertTime(end))
-        );
-
-        LINFO("Preloading: " << _datasetFile);
-        for (Time& t : preCacheTimes) {
-            getTileProvider(t);
-        }
-    }
+    return true;
 }
 
 std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml) {
@@ -139,12 +154,12 @@ std::string TemporalTileProvider::consumeTemporalMetaData(const std::string& xml
     catch (const ghoul::RuntimeError& e) {
         throw ghoul::RuntimeError(
             "Could not create time quantizer for Temporal GDAL dataset '" +
-            _datasetFile + "'. " + e.message);
+            _filePath.value() + "'. " + e.message);
     }
     _timeFormat = TimeIdProviderFactory::getProvider(timeIdFormat);
     if (!_timeFormat) {
         throw ghoul::RuntimeError(
-            "Invalid Time Format " + timeIdFormat + " in " + _datasetFile
+            "Invalid Time Format " + timeIdFormat + " in " + _filePath.value()
         );
     }
 
@@ -167,7 +182,7 @@ std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::strin
     CPLXMLNode * n = CPLSearchXMLNode(root, key.c_str());
     if (!n) {
         throw ghoul::RuntimeError(
-            "Unable to parse file " + _datasetFile + ". " + key + " missing."
+            "Unable to parse file " + _filePath.value() + ". " + key + " missing."
         );
     }
 
@@ -177,23 +192,43 @@ std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::strin
 }
 
 TileDepthTransform TemporalTileProvider::depthTransform() {
-    ensureUpdated();
-    return _currentTileProvider->depthTransform();
+    if (_successfulInit) {
+        ensureUpdated();
+        return _currentTileProvider->depthTransform();    
+    }
+    else {
+        return { 1.0f, 0.0f};
+    }
 }
 
 Tile::Status TemporalTileProvider::getTileStatus(const TileIndex& tileIndex) {
-    ensureUpdated();
-    return _currentTileProvider->getTileStatus(tileIndex);
+    if (_successfulInit) {
+        ensureUpdated();
+        return _currentTileProvider->getTileStatus(tileIndex);
+    }
+    else {
+        return Tile::Status::Unavailable;
+    }
 }
 
 Tile TemporalTileProvider::getTile(const TileIndex& tileIndex) {
-    ensureUpdated();
-    return _currentTileProvider->getTile(tileIndex);
+    if (_successfulInit) {
+        ensureUpdated();
+        return _currentTileProvider->getTile(tileIndex);
+    }
+    else {
+        return Tile::TileUnavailable;
+    }
 }
 
 int TemporalTileProvider::maxLevel() {
-    ensureUpdated();
-    return _currentTileProvider->maxLevel();
+    if (_successfulInit) {
+        ensureUpdated();
+        return _currentTileProvider->maxLevel();
+    }
+    else {
+        return 0;
+    }
 }
 
 void TemporalTileProvider::ensureUpdated() {
@@ -204,16 +239,20 @@ void TemporalTileProvider::ensureUpdated() {
 }
 
 void TemporalTileProvider::update() {
-    auto newCurrent = getTileProvider();
-    if (newCurrent) {
-        _currentTileProvider = newCurrent;
+    if (_successfulInit) {
+        auto newCurrent = getTileProvider();
+        if (newCurrent) {
+            _currentTileProvider = newCurrent;
+        }
+        _currentTileProvider->update();
     }
-    _currentTileProvider->update();
 }
 
 void TemporalTileProvider::reset() {
-    for (auto& it : _tileProviderMap) {
-        it.second->reset();
+    if (_successfulInit) {
+        for (auto& it : _tileProviderMap) {
+            it.second->reset();
+        }
     }
     //auto end = _tileProviderMap.end();
     //for (auto it = _tileProviderMap.begin(); it != end; it++) {
@@ -280,7 +319,6 @@ std::string TemporalTileProvider::getGdalDatasetXML(TimeKey timeKey) {
     size_t pos = xmlTemplate.find(URL_TIME_PLACEHOLDER);
     //size_t numChars = std::string(URL_TIME_PLACEHOLDER).length();
     size_t numChars = strlen(URL_TIME_PLACEHOLDER);
-    ghoul_assert(pos != std::string::npos, "Invalid dataset file");
     // @FRAGILE:  This will only find the first instance. Dangerous if that instance is
     // commented out ---abock
     std::string timeSpecifiedXml = xmlTemplate.replace(pos, numChars, timeKey);

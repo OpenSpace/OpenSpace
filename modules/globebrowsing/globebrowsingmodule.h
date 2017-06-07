@@ -44,9 +44,20 @@ public:
     
     static const std::string name;
 
+    virtual scripting::LuaLibrary luaLibrary() const override;
 protected:
     void internalInitialize() override;
 private:
+    /**
+     \return a comma separated list of layer group names.
+     */
+    static std::string layerGroupNamesList();
+
+    /**
+     \return a comma separated list of layer type names.
+     */
+    static std::string layerTypeNamesList();
+
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 };
 

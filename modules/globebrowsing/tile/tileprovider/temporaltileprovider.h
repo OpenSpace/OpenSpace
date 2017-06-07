@@ -34,6 +34,8 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/timerange.h>
 
+#include <openspace/properties/stringproperty.h>
+
 #include <ghoul/misc/dictionary.h>
 
 #include <memory>
@@ -303,8 +305,10 @@ private:
      * Ensures that the TemporalTileProvider is up to date.
      */
     void ensureUpdated();
+  
+    bool readFilePath();
 
-    std::string _datasetFile;
+    properties::StringProperty _filePath;
     std::string _gdalXmlTemplate;
 
     std::unordered_map<TimeKey, std::shared_ptr<TileProvider>> _tileProviderMap;
@@ -316,6 +320,7 @@ private:
         
     TimeFormat* _timeFormat;
     TimeQuantizer _timeQuantizer;
+    bool _successfulInit;
 };
 
 } // namespace tileprovider

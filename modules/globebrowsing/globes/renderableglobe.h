@@ -93,6 +93,7 @@ public:
     
     // Getters
     std::shared_ptr<ChunkedLodGlobe> chunkedLodGlobe() const;
+    LayerManager* layerManager() const;
     const Ellipsoid& ellipsoid() const;
     const glm::dmat4& modelTransform() const;
     const glm::dmat4& inverseModelTransform() const;

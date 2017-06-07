@@ -229,6 +229,10 @@ std::shared_ptr<ChunkedLodGlobe> RenderableGlobe::chunkedLodGlobe() const{
     return _chunkedLodGlobe;
 }
 
+LayerManager* RenderableGlobe::layerManager() const {
+    return _layerManager.get();
+}
+
 const Ellipsoid& RenderableGlobe::ellipsoid() const{
     return _ellipsoid;
 }

@@ -35,11 +35,18 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
     ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
     gpuRenderSettings.setValue(programObject, layer.renderSettings());  
     
-    switch (layer.type) {
-        case Layer::TypeID::TileLayer:
-        	gpuChunkTilePile.setValue(programObject, chunkTilePile);
+    switch (layer.type()) {
+        // Intentional fall throgh. Same for all tile layers
+        case layergroupid::TypeID::DefaultTileLayer:
+        case layergroupid::TypeID::SingleImageTileLayer:
+        case layergroupid::TypeID::SizeReferenceTileLayer:
+        case layergroupid::TypeID::TemporalTileLayer:
+        case layergroupid::TypeID::TileIndexTileLayer:
+        case layergroupid::TypeID::ByIndexTileLayer:
+        case layergroupid::TypeID::ByLevelTileLayer:
+            gpuChunkTilePile.setValue(programObject, chunkTilePile);
             break;
-        case Layer::TypeID::SolidColor:
+        case layergroupid::TypeID::SolidColor:
             gpuColor.setValue(programObject, layer.color.value());
             break;
         default:
@@ -52,11 +59,18 @@ void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& la
 {
     gpuRenderSettings.bind(layer.renderSettings(), programObject, nameBase + "settings.");
     
-    switch (layer.type) {
-        case Layer::TypeID::TileLayer:
-    		gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
+    switch (layer.type()) {
+        // Intentional fall throgh. Same for all tile layers
+        case layergroupid::TypeID::DefaultTileLayer:
+        case layergroupid::TypeID::SingleImageTileLayer:
+        case layergroupid::TypeID::SizeReferenceTileLayer:
+        case layergroupid::TypeID::TemporalTileLayer:
+        case layergroupid::TypeID::TileIndexTileLayer:
+        case layergroupid::TypeID::ByIndexTileLayer:
+        case layergroupid::TypeID::ByLevelTileLayer:
+            gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
             break;
-        case Layer::TypeID::SolidColor:
+        case layergroupid::TypeID::SolidColor:
             gpuColor.bind(programObject, nameBase + "color");
             break;
         default:

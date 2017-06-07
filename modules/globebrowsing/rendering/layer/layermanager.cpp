@@ -47,7 +47,7 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
 
         _layerGroups.push_back(
             std::make_shared<LayerGroup>(
-                static_cast<layergroupid::ID>(i), layerGroupDict));
+                static_cast<layergroupid::GroupID>(i), layerGroupDict));
     }
         
     for (const std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
@@ -55,11 +55,17 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
     }
 }
 
+void LayerManager::addLayer(layergroupid::GroupID groupId, layergroupid::TypeID typeId) {
+    ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
+    ghoul_assert(typeId != layergroupid::TypeID::Unknown, "Layer type ID must be known");
+    _layerGroups[groupId]->addLayer(typeId);
+}
+
 const LayerGroup& LayerManager::layerGroup(size_t groupId) {
     return *_layerGroups[groupId];
 }
 
-const LayerGroup& LayerManager::layerGroup(layergroupid::ID groupId) {
+const LayerGroup& LayerManager::layerGroup(layergroupid::GroupID groupId) {
     return *_layerGroups[groupId];
 }
 
@@ -92,42 +98,42 @@ void LayerManager::reset(bool includeDisabled) {
     }
 }
 
-TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::ID id,
+TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID id,
     size_t preferredTileSize)
 {
     switch (id) {
-        case layergroupid::ID::HeightLayers: {
+        case layergroupid::GroupID::HeightLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 64;
             return TileTextureInitData(tileSize, tileSize, GL_FLOAT,
                 ghoul::opengl::Texture::Format::Red,
                 TileTextureInitData::ShouldAllocateDataOnCPU::Yes);
         }
-        case layergroupid::ID::ColorLayers: {
+        case layergroupid::GroupID::ColorLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::RGBA);
         }
-        case layergroupid::ID::ColorOverlays: {
+        case layergroupid::GroupID::ColorOverlays: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::RGBA);
         }
-        case layergroupid::ID::GrayScaleLayers: {
+        case layergroupid::GroupID::GrayScaleLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::RG);
         }
-        case layergroupid::ID::GrayScaleColorOverlays: {
+        case layergroupid::GroupID::GrayScaleColorOverlays: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::RG);
         }
-        case layergroupid::ID::NightLayers: {
+        case layergroupid::GroupID::NightLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::RGBA);
         }
-        case layergroupid::ID::WaterMasks: {
+        case layergroupid::GroupID::WaterMasks: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::RGBA);
@@ -138,10 +144,10 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::ID id,
     }
 }
 
-bool LayerManager::shouldPerformPreProcessingOnLayergroup(layergroupid::ID id) {
+bool LayerManager::shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID id) {
     // Only preprocess height layers by default
     switch (id) {
-        case layergroupid::ID::HeightLayers: return true;
+        case layergroupid::GroupID::HeightLayers: return true;
         default: return false;
     }
 }

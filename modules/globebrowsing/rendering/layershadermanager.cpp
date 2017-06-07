@@ -82,8 +82,8 @@ LayerShaderManager::LayerShaderPreprocessingData
         layeredTextureInfo.layerBlendingEnabled = layerGroup.layerBlendingEnabled();
 
         for (const std::shared_ptr<Layer>& layer : layers) {
-            layeredTextureInfo.layerType.push_back(layer->type);
-            layeredTextureInfo.blendMode.push_back(layer->blendMode);
+            layeredTextureInfo.layerType.push_back(layer->type());
+            layeredTextureInfo.blendMode.push_back(layer->blendMode());
         }
 
         preprocessingData.layeredTextureInfo[i] = layeredTextureInfo;

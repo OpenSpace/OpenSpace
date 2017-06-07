@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
+#include <modules/globebrowsing/rendering/layer/layer.h>
 #include <modules/globebrowsing/tile/chunktile.h>
 #include <modules/globebrowsing/tile/tiletextureinitdata.h>
 
@@ -45,8 +46,10 @@ class LayerManager : public properties::PropertyOwner  {
 public:
     LayerManager(const ghoul::Dictionary& textureCategoriesDictionary);
 
+    void addLayer(layergroupid::GroupID groupId, layergroupid::TypeID typeId);
+
     const LayerGroup& layerGroup(size_t groupId);
-    const LayerGroup& layerGroup(layergroupid::ID);
+    const LayerGroup& layerGroup(layergroupid::GroupID);
 
     bool hasAnyBlendingLayersEnabled() const;
 
@@ -55,10 +58,10 @@ public:
     void update();
     void reset(bool includingDisabled = false);
 
-    static TileTextureInitData getTileTextureInitData(layergroupid::ID id,
+    static TileTextureInitData getTileTextureInitData(layergroupid::GroupID id,
         size_t preferredTileSize = 0);
 
-    static bool shouldPerformPreProcessingOnLayergroup(layergroupid::ID id);
+    static bool shouldPerformPreProcessingOnLayergroup(layergroupid::GroupID id);
     void onChange(std::function<void(void)> callback);
 
 private:

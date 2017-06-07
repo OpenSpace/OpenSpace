@@ -25,6 +25,8 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.h
+    
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.h
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/lrucache.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.h
@@ -123,6 +125,9 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/globebrowsingmodule_lua.inl
+
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/memoryawaretilecache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/cache/texturecontainer.cpp
 

@@ -64,8 +64,8 @@ public:
         struct LayerGroupPreprocessingData {
             int lastLayerIdx;
             bool layerBlendingEnabled;
-            std::vector<Layer::TypeID> layerType;
-            std::vector<Layer::BlendModeID> blendMode;
+            std::vector<layergroupid::TypeID> layerType;
+            std::vector<layergroupid::BlendModeID> blendMode;
             bool operator==(const LayerGroupPreprocessingData& other) const;
         };
         

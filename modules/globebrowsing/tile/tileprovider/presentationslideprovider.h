@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#if 0
+
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___PRESENTATION_SLIDE_PROVIDER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___PRESENTATION_SLIDE_PROVIDER___H__
 
@@ -67,3 +69,5 @@ private:
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___PRESENTATION_SLIDE_PROVIDER___H__
+
+#endif

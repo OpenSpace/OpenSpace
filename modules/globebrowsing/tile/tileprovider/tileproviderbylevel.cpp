@@ -39,11 +39,12 @@ namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
 
-TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
+TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary)
+{
     std::string name = "Name unspecified";
     dictionary.getValue("Name", name);
   
-    layergroupid::ID layerGroupID;
+    layergroupid::GroupID layerGroupID;
     dictionary.getValue(KeyLayerGroupID, layerGroupID);
     const char* _loggerCat = ("TileProviderByLevel" + name).c_str();
   
@@ -71,10 +72,29 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
                 );
             }
             providerDict.setValue(KeyLayerGroupID, layerGroupID);
-                
+
+            std::string typeString;
+            providerDict.getValue("Type", typeString);
+            layergroupid::TypeID typeID = layergroupid::TypeID::Unknown;
+            if (typeString.empty()) {
+                typeID = layergroupid::TypeID::DefaultTileLayer;
+            }
+            else {
+                typeID = layergroupid::getTypeIDFromTypeString(typeString);
+            }
+
+            if (typeID == layergroupid::TypeID::Unknown) {
+                throw ghoul::RuntimeError("Unknown layer type: " + typeString);
+            }
+
             _levelTileProviders.push_back(
-                std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(providerDict))
+                std::shared_ptr<TileProvider>(TileProvider::createFromDictionary(typeID, providerDict))
             );
+
+            std::string providerName;
+            providerDict.getValue("Name", providerName);
+            _levelTileProviders.back()->setName(providerName);
+            addPropertySubOwner(_levelTileProviders.back().get());
             
             // Ensure we can represent the max level
             if(static_cast<int>(_providerIndices.size()) < maxLevel){

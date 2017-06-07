@@ -102,9 +102,23 @@ vec4 getSample#{layerGroup}#{i}(
 	const Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1])
 {
 	vec4 color = vec4(0,0,0,1);
-#if (#{#{layerGroup}#{i}LayerType} == 0) // Default, sample from texture
+	
+	// All tile layers are the same. Sample from texture
+#if (#{#{layerGroup}#{i}LayerType} == 0) // DefaultTileLayer
 	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
-#elif (#{#{layerGroup}#{i}LayerType} == 1) // Color adjustment layer
+#elif (#{#{layerGroup}#{i}LayerType} == 1) // SingleImageTileLayer
+	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+#elif (#{#{layerGroup}#{i}LayerType} == 2) // SizeReferenceTileLayer
+	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+#elif (#{#{layerGroup}#{i}LayerType} == 3) // TemporalTileLayer
+	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+#elif (#{#{layerGroup}#{i}LayerType} == 4) // TileIndexTileLayer
+	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+#elif (#{#{layerGroup}#{i}LayerType} == 5) // ByIndexTileLayer
+	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+#elif (#{#{layerGroup}#{i}LayerType} == 6) // ByLevelTileLayer
+	color = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);	
+#elif (#{#{layerGroup}#{i}LayerType} == 7) // SolidColor
 	color.rgb = #{layerGroup}[#{i}].color;
 #endif
 

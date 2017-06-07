@@ -324,7 +324,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
     noDataValues.resize(_initData.nRasters());
 
     for (size_t raster = 0; raster < _initData.nRasters(); ++raster) {
-        preprocessData->maxValues[raster] = FLT_MIN;
+        preprocessData->maxValues[raster] = -FLT_MAX;
         preprocessData->minValues[raster] = FLT_MAX;
         preprocessData->hasMissingData[raster] = false;
         noDataValues[raster] = noDataValueAsFloat();
@@ -359,7 +359,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
                 else {
                     preprocessData->hasMissingData[raster] = true;
                     float& floatToRewrite = reinterpret_cast<float&>(rawTile->imageData[yi + i]);
-                    floatToRewrite = FLT_MIN;
+                    floatToRewrite = -FLT_MAX;
                 }
                 i += _initData.bytesPerDatum();
             }

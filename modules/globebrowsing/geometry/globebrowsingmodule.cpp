@@ -43,6 +43,10 @@
 #include <modules/globebrowsing/rendering/layer/layer.h>
 
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/templatefactory.h>
@@ -50,7 +54,66 @@
 
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 
-#include "globebrowsingmodule_lua.inl"
+
+
+namespace {
+    const char* _loggerCat = "GlobeBrowsingModule";
+}
+
+namespace openspace {
+namespace globebrowsing { 
+namespace luascriptfunctions {
+
+int addLayer(lua_State* L) {
+        
+    using ghoul::lua::luaTypeToString;
+
+    int nArguments = lua_gettop(L);
+    if (nArguments != 3) {
+        return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
+    }
+
+    int GlobeLocation = -3;
+    int LayerGroupLocation = -2;
+    int TypeLocation = -1;
+
+    std::string globeName = luaL_checkstring(L, GlobeLocation);
+    std::string layerGroupName = luaL_checkstring(L, LayerGroupLocation);
+    std::string typeName = luaL_checkstring(L, TypeLocation);
+
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
+  
+    if (!node) {
+        return luaL_error(L, ("Unknown globe name: " + globeName).c_str());
+    }
+  
+    // Get the renderable globe
+    RenderableGlobe* globe;
+    globe = dynamic_cast<RenderableGlobe*>(node->renderable());
+    if (!globe) {
+        return luaL_error(L, ("Renderable is not a globe: " + globeName).c_str());
+    }
+  
+    // Get the layer group
+    layergroupid::GroupID groupID = Layer::getGroupIDFromName(layerGroupName);
+    if (groupID == layergroupid::GroupID::Unknown) {
+        return luaL_error(L, ("Unknown layer group: " + layerGroupName).c_str());
+    }
+    
+    // Get the layer type
+    Layer::TypeID typeID = Layer::getTypeIDFromTypeString(typeName);
+    if (typeID == Layer::TypeID::Unknown) {
+        return luaL_error(L, ("Unknown layer type: " + typeName).c_str());
+    }
+  
+    globe->layerManager()->addLayer(groupID, typeID);
+  
+    return 0;
+}
+
+} // namespace luascriptfunctions
+}
+}
 
 namespace openspace {
 
@@ -63,10 +126,11 @@ GlobeBrowsingModule::GlobeBrowsingModule()
 void GlobeBrowsingModule::internalInitialize() {
     using namespace globebrowsing;
 
-    // Initialize
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&] {
-        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
-        addPropertySubOwner(*_tileCache);
+
+    _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
+    addPropertySubOwner(*_tileCache);
+
 #ifdef GLOBEBROWSING_USE_GDAL
         // Convert from MB to Bytes
         GdalWrapper::create(
@@ -76,48 +140,44 @@ void GlobeBrowsingModule::internalInitialize() {
 #endif // GLOBEBROWSING_USE_GDAL
     });
   
-    // Render
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Render, [&]{
         _tileCache->update();
     });
 
-    // Deinitialize
+  
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&]{
 #ifdef GLOBEBROWSING_USE_GDAL
         GdalWrapper::ref().destroy();
 #endif // GLOBEBROWSING_USE_GDAL
     });
 
-    // Get factories
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
-    // Create factory for TileProviders
-    auto fTileProvider =
-        std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
-    ghoul_assert(fTileProvider, "TileProvider factory was not created");
-  
-    // Register renderable class
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
 
-    // Register TileProvider classes
+    // add Tile Provider factory
+    auto fTileProvider = std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
+
     fTileProvider->registerClass<tileprovider::CachingTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::DefaultTileLayer)]);
+        Layer::TypeNames[static_cast<int>(Layer::TypeID::DefaultTileLayer)]);
     fTileProvider->registerClass<tileprovider::SingleImageProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::SingleImageTileLayer)]);
+        Layer::TypeNames[static_cast<int>(Layer::TypeID::SingleImageTileLayer)]);
 #ifdef GLOBEBROWSING_USE_GDAL
     fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::TemporalTileLayer)]);
+        Layer::TypeNames[static_cast<int>(Layer::TypeID::TemporalTileLayer)]);
 #endif // GLOBEBROWSING_USE_GDAL
+
     fTileProvider->registerClass<tileprovider::TileIndexTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::TileIndexTileLayer)]);
+        Layer::TypeNames[static_cast<int>(Layer::TypeID::TileIndexTileLayer)]);
     fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::SizeReferenceTileLayer)]);
+        Layer::TypeNames[static_cast<int>(Layer::TypeID::SizeReferenceTileLayer)]);
+
+    // Combining Tile Providers
     fTileProvider->registerClass<tileprovider::TileProviderByLevel>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::ByLevelTileLayer)]);
+        Layer::TypeNames[static_cast<int>(Layer::TypeID::ByLevelTileLayer)]);
     fTileProvider->registerClass<tileprovider::TileProviderByIndex>(
-        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::ByIndexTileLayer)]);
+        Layer::TypeNames[static_cast<int>(Layer::TypeID::ByIndexTileLayer)]);
     //fTileProvider->registerClass<tileprovider::PresentationSlideProvider>("PresentationSlides");
-  
     FactoryManager::ref().addFactory(std::move(fTileProvider));
 }
 
@@ -126,8 +186,6 @@ globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
-    std::string listLayerGroups = layerGroupNamesList();
-    std::string listLayerTypes = layerTypeNamesList();
     return {
         GlobeBrowsingModule::name,
         {
@@ -135,37 +193,11 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
                 "addLayer",
                 &globebrowsing::luascriptfunctions::addLayer,
                 "string, string, string",
-                "Adds a layer to the specified globe. The first argument specifies the "
-                "name of the scene graph node of which to add the layer. The renderable "
-                "of the specified scene graph node needs to be a renderable globe. "
-                "The second argument is the layer group which can be any of "
-                + listLayerGroups + ". The third argument is the layer type which can be "
-                "any of " + listLayerTypes + "."
+                "Test function"
             }
         }
+
     };
-}
-
-std::string GlobeBrowsingModule::layerGroupNamesList() {
-    std::string listLayerGroups("");
-    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1; ++i) {
-        listLayerGroups +=
-            globebrowsing::layergroupid::LAYER_GROUP_NAMES[i] + std::string(", ");
-    }
-    listLayerGroups +=
-        std::string(" and ") + globebrowsing::layergroupid::LAYER_GROUP_NAMES[
-            globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1];
-    return listLayerGroups;
-}
-
-std::string GlobeBrowsingModule::layerTypeNamesList() {
-    std::string listLayerTypes("");
-    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_TYPES - 1; ++i) {
-        listLayerTypes += globebrowsing::layergroupid::LAYER_TYPE_NAMES[i] + ", ";
-    }
-    listLayerTypes +=
-        " and " + globebrowsing::layergroupid::LAYER_TYPE_NAMES[globebrowsing::layergroupid::NUM_LAYER_TYPES - 1];
-    return listLayerTypes;
 }
 
 } // namespace openspace

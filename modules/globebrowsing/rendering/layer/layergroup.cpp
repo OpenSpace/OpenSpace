@@ -29,22 +29,23 @@
 namespace openspace {
 namespace globebrowsing {
 
-LayerGroup::LayerGroup(std::string name)
-    : properties::PropertyOwner(std::move(name))
+LayerGroup::LayerGroup(layergroupid::GroupID id)
+    : properties::PropertyOwner(std::move(layergroupid::LAYER_GROUP_NAMES[id]))
+    , _groupId(id)
     , _levelBlendingEnabled("blendTileLevels", "blend tile levels", false)
 {
     addProperty(_levelBlendingEnabled);
 }
 
-LayerGroup::LayerGroup(layergroupid::ID id, const ghoul::Dictionary& dict)
-    : LayerGroup(layergroupid::LAYER_GROUP_NAMES[id])
+LayerGroup::LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict)
+    : LayerGroup(id)
 {
     for (size_t i = 0; i < dict.size(); i++) {
         std::string dictKey = std::to_string(i + 1);
         ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(dictKey);
 
         try {
-            _layers.push_back(std::make_shared<Layer>(id, layerDict));
+            _layers.push_back(std::make_shared<Layer>(_groupId, layerDict));
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
@@ -62,8 +63,23 @@ void LayerGroup::update() {
 
     for (const auto& layer : _layers) {
         if (layer->enabled()) {
-            layer->tileProvider()->update();
+            layer->update();
             _activeLayers.push_back(layer);
+        }
+    }
+}
+
+void LayerGroup::addLayer(layergroupid::TypeID typeId) {
+    for (int i = 0; i < 50; ++i) {
+        ghoul::Dictionary layerDict;
+        layerDict.setValue("Name", "New Layer " + std::to_string(i));
+        layerDict.setValue("Type", layergroupid::LAYER_TYPE_NAMES[static_cast<int>(typeId)]);
+        auto layer = std::make_shared<Layer>(_groupId, layerDict);
+        layer->onChange(_onChangeCallback);
+        if (addPropertySubOwnerUnsorted(layer.get())) {
+            // If name did not already exist among sub owners, success.
+            _layers.push_back(layer);
+            break;
         }
     }
 }
@@ -82,9 +98,9 @@ int LayerGroup::pileSize() const{
 
 void LayerGroup::onChange(std::function<void(void)> callback) {
     _onChangeCallback = callback;
-    _levelBlendingEnabled.onChange(callback);
+    _levelBlendingEnabled.onChange(_onChangeCallback);
     for (const std::shared_ptr<Layer>& layer : _layers) {
-        layer->onChange(callback);
+        layer->onChange(_onChangeCallback);
     }
 }
 

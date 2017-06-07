@@ -184,7 +184,7 @@ public:
      */
     void addPropertySubOwner(PropertyOwner* owner);
   
-    void addPropertySubOwnerUnsorted(PropertyOwner* owner);
+    bool addPropertySubOwnerUnsorted(PropertyOwner* owner);
 
     /// \see PropertyOwner::addPropertySubOwner(PropertyOwner*)
     void addPropertySubOwner(PropertyOwner& owner);

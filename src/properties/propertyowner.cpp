@@ -270,7 +270,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
     }
 }
 
-void PropertyOwner::addPropertySubOwnerUnsorted(openspace::properties::PropertyOwner* owner) {
+bool PropertyOwner::addPropertySubOwnerUnsorted(openspace::properties::PropertyOwner* owner) {
     ghoul_assert(owner != nullptr, "owner must not be nullptr");
     ghoul_assert(!owner->name().empty(), "PropertyOwner must have a name");
   
@@ -285,14 +285,14 @@ void PropertyOwner::addPropertySubOwnerUnsorted(openspace::properties::PropertyO
     if (it != _subOwners.end()) {
         LERROR("PropertyOwner '" << owner->name() <<
             "' already present in PropertyOwner '" << name() << "'");
-        return;
+        return false;
     } else {
         // We still need to check if the PropertyOwners name is used in a Property
         const bool hasProp = hasProperty(owner->name());
         if (hasProp) {
             LERROR("PropertyOwner '" << owner->name() << "'s name already names a "
                  << "Property");
-            return;
+            return false;
         }
         else {
             // Otherwise we have found the correct position to add it in
@@ -300,6 +300,7 @@ void PropertyOwner::addPropertySubOwnerUnsorted(openspace::properties::PropertyO
             owner->setPropertyOwner(this);
         }
     }
+    return true;
 }
     
 void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner& owner) {

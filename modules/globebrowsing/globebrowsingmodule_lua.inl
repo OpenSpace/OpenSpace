@@ -22,39 +22,71 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/globes/renderableglobe.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layer.h>
+
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 
 namespace openspace {
-namespace globebrowsing {
-namespace tileprovider {
+namespace globebrowsing { 
+namespace luascriptfunctions {
 
-class TileProviderByLevel : public TileProvider {
-public:
-    TileProviderByLevel(const ghoul::Dictionary& dictionary);
-    TileProviderByLevel(const std::string& imagePath);
-    virtual ~TileProviderByLevel() = default;
+/**
+ Adds a layer to the specified globe.
+ */
+int addLayer(lua_State* L) {
+    int nArguments = lua_gettop(L);
+    if (nArguments != 3) {
+        return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
+    }
 
-    virtual Tile getTile(const TileIndex& tileIndex) override;
-    virtual Tile::Status getTileStatus(const TileIndex& index) override;
-    virtual TileDepthTransform depthTransform() override;
-    virtual void update() override;
-    virtual void reset() override;
-    virtual int maxLevel() override;
-private:
-    inline int providerIndex(int level) const;
-    inline TileProvider* levelProvider(int level) const;
+    // Argument locations
+    int GlobeLocation = -3;
+    int LayerGroupLocation = -2;
+    int TypeLocation = -1;
 
-    std::vector<int> _providerIndices;
-    std::vector<std::shared_ptr<TileProvider>> _levelTileProviders;
-};
+    // String arguments
+    std::string globeName = luaL_checkstring(L, GlobeLocation);
+    std::string layerGroupName = luaL_checkstring(L, LayerGroupLocation);
+    std::string typeName = luaL_checkstring(L, TypeLocation);
 
-} // namespace tileprovider
-} // namespace globebrowsing
+    // Get the node and make sure it exists
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
+    if (!node) {
+        return luaL_error(L, ("Unknown globe name: " + globeName).c_str());
+    }
+  
+    // Get the renderable globe
+    RenderableGlobe* globe;
+    globe = dynamic_cast<RenderableGlobe*>(node->renderable());
+    if (!globe) {
+        return luaL_error(L, ("Renderable is not a globe: " + globeName).c_str());
+    }
+  
+    // Get the layer group
+    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(layerGroupName);
+    if (groupID == layergroupid::GroupID::Unknown) {
+        return luaL_error(L, ("Unknown layer group: " + layerGroupName).c_str());
+    }
+    
+    // Get the layer type
+    layergroupid::TypeID typeID = layergroupid::getTypeIDFromTypeString(typeName);
+    if (typeID == layergroupid::TypeID::Unknown) {
+        return luaL_error(L, ("Unknown layer type: " + typeName).c_str());
+    }
+  
+    globe->layerManager()->addLayer(groupID, typeID);
+
+    return 0;
+}
+
+} // namespace luascriptfunctions
+} // nameapace globebrowsing
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__

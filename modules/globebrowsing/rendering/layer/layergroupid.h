@@ -25,13 +25,14 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 
+#include <string>
 
 namespace openspace {
 namespace globebrowsing {
 namespace layergroupid  {
 
 static const int NUM_LAYER_GROUPS = 7;
-static const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
+static const std::string LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
     "HeightLayers",
     "ColorLayers",
     "ColorOverlays",
@@ -41,15 +42,79 @@ static const char* LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
     "WaterMasks"
 };
 
-enum ID {
+enum GroupID {
     HeightLayers,
     ColorLayers,
     ColorOverlays,
     GrayScaleLayers,
     GrayScaleColorOverlays,
     NightLayers,
-    WaterMasks
+    WaterMasks,
+    Unknown,
 };
+
+static const int NUM_LAYER_TYPES = 8;
+static const std::string LAYER_TYPE_NAMES[NUM_LAYER_TYPES] = {
+    "DefaultTileLayer",
+    "SingleImageTileLayer",
+    "SizeReferenceTileLayer",
+    "TemporalTileLayer",
+    "TileIndexTileLayer",
+    "ByIndexTileLayer",
+    "ByLevelTileLayer",
+    "SolidColor",
+};
+
+/**
+ This enumeration is specified explicitly since it is used in the shader as well.
+ */
+enum class TypeID {
+    Unknown = -1,
+    DefaultTileLayer = 0,
+    SingleImageTileLayer = 1,
+    SizeReferenceTileLayer = 2,
+    TemporalTileLayer = 3,
+    TileIndexTileLayer = 4,
+    ByIndexTileLayer = 5,
+    ByLevelTileLayer = 6,
+    SolidColor = 7,
+};
+
+static const int NUM_BLEND_MODES = 4;
+static const std::string BLEND_MODE_NAMES[NUM_BLEND_MODES] = {
+    "Normal",
+    "Multiply",
+    "Add",
+    "Subtract",
+};
+
+/**
+ This enumeration is specified explicitly since it is used in the shader as well.
+ */
+enum class BlendModeID {
+    Normal = 0,
+    Multiply = 1,
+    Add = 2,
+    Subtract = 3,
+};
+
+static TypeID getTypeIDFromTypeString(std::string typeString) {
+    for (int i = 0; i < NUM_LAYER_TYPES; ++i) {
+        if (typeString == LAYER_TYPE_NAMES[i]) {
+            return static_cast<TypeID>(i);
+        }
+    }
+    return TypeID::Unknown;
+}
+
+static layergroupid::GroupID getGroupIDFromName(std::string layerGroupName) {
+    for (int i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
+        if (layerGroupName == layergroupid::LAYER_GROUP_NAMES[i]) {
+            return static_cast<layergroupid::GroupID>(i);
+        }
+    }
+    return GroupID::Unknown;
+}
 
 } // namespace layergroupid
 } // namespace globebrowsing

@@ -47,11 +47,13 @@ namespace tileprovider {
  * Convenience class for dealing with multiple <code>Layer</code>s.
  */
 struct LayerGroup : public properties::PropertyOwner {
-    LayerGroup(std::string name);
-    LayerGroup(layergroupid::ID id, const ghoul::Dictionary& dict);
+    LayerGroup(layergroupid::GroupID id);
+    LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict);
 
     /// Updates all layers tile providers within this group
     void update();
+
+    void addLayer(layergroupid::TypeID typeId);
 
     /// @returns const vector of all layers
     const std::vector<std::shared_ptr<Layer>>& layers() const;
@@ -67,6 +69,7 @@ struct LayerGroup : public properties::PropertyOwner {
     void onChange(std::function<void(void)> callback);
 
 private:
+    const layergroupid::GroupID _groupId;
     std::vector<std::shared_ptr<Layer>> _layers;
     std::vector<std::shared_ptr<Layer>> _activeLayers;
 

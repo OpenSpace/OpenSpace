@@ -44,50 +44,31 @@ namespace tileprovider {
     class TileProvider;
 }
 
-/**
- * Simple struct which is used to enable/disable <code>TileProvider</code> 
- * and associate is with a name. It also holds layer specific information
- * which is used in rendering of layer.
- */
 class Layer : public properties::PropertyOwner {
 public:
-    enum class TypeID
-    {
-        TileLayer = 0,
-        SolidColor = 1,
-    };
-    static const int NumTypes = 2;
-    static const std::string TypeNames[NumTypes];
-
-    enum class BlendModeID
-    {
-        Normal = 0,
-        Multiply = 1,
-        Add = 2,
-        Subtract = 3,
-    };
-    static const int NumBlendModes = 4;
-    static const std::string BlendModeNames[NumBlendModes];
-
-    Layer(layergroupid::ID id, const ghoul::Dictionary& layerDict);
+    Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict);
 
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
+    Tile::Status getTileStatus(const TileIndex& index) const;
 
+    layergroupid::TypeID type() const {return static_cast<layergroupid::TypeID>(_typeOption.value()); };
+    layergroupid::BlendModeID blendMode() const {return static_cast<layergroupid::BlendModeID>(_blendModeOption.value()); };
+    TileDepthTransform depthTransform() const;
     bool enabled() const { return _enabled.value(); }
     tileprovider::TileProvider* tileProvider() const { return _tileProvider.get(); }
     const LayerRenderSettings& renderSettings() const { return _renderSettings; }
-
+    
     void onChange(std::function<void(void)> callback);
+    
+    void update();
 
-    TypeID type;
-    BlendModeID blendMode;
-
+    // TODO: Make private and structure adjustment layer variables
     properties::Vec3Property color;
-
 private:
-    bool initializeAdjustmentLayer(const ghoul::Dictionary& adjustmentLayerDict);
+    void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
     void removeVisibleProperties();
     void addVisibleProperties();
+    
     properties::OptionProperty _typeOption;
     properties::OptionProperty _blendModeOption;
 
@@ -95,6 +76,8 @@ private:
     properties::TriggerProperty _reset;
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
     LayerRenderSettings _renderSettings;
+
+    const layergroupid::GroupID _layerGroupId;
   
     std::function<void(void)> _onChangeCallback;
   };
