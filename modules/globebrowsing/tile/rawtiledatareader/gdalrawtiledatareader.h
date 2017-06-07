@@ -103,6 +103,12 @@ private:
 
     // GDAL Helper methods
     GDALDataset* openGdalDataset(const std::string& filePath);
+    
+    /**
+     * Use as a helper function when determining the maximum tile level. This function
+     * returns the negated number of overviews requred to downscale the highest overview
+     * dataset so that it fits within minimumPixelSize pixels in the x-dimension. 
+     */
     int calculateTileLevelDifference(int minimumPixelSize) const;
 
     // Member variables
