@@ -25,7 +25,7 @@
 #include "include/cef_host.h"
 
 namespace {
-std::string _loggerCat = "WebGUI";
+const char* _loggerCat = "CefHost";
 }
 
 namespace openspace {
@@ -39,53 +39,12 @@ CefHost::CefHost() {
     attachDebugSettings(settings);
 
     CefInitialize(args, settings, nullptr, NULL);
+    initializeCallbacks();
     LDEBUG("Initializing CEF... done!");
-
-    renderHandler = new GUIRenderHandler();
-    client = new BrowserClient(renderHandler);
-
-    CefBrowserSettings browserSettings;
-    CefWindowInfo windowInfo;
-    bool renderTransparent = true;
-    windowInfo.SetAsWindowless(nullptr, renderTransparent);
-    std::string url = "";
-    browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), url, browserSettings, NULL);
-    eventHandler = std::make_shared<EventHandler>(EventHandler(browser));
 }
 
 CefHost::~CefHost() {
-    // TODO(klas): This is causing a crash during shutdown
-    browser->GetHost()->CloseBrowser(true);
-
     CefShutdown();
-}
-
-void CefHost::internalInitialize() {
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Initialize,
-            [this](){
-                LDEBUG("Initializing CefHost members");
-                initialize();
-                renderHandler->initialize();
-                eventHandler->initialize();
-                initializeCallbacks();
-            }
-    );
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Deinitialize,
-            [this](){
-                LDEBUG("Deinitializing CEF...");
-                deinitialize();
-                LDEBUG("Deinitializing CEF... done!");
-            }
-    );
-}
-
-void CefHost::initialize() {
-//    loadLocalPath("${MODULE_WEBGUI}/web/transparent_test.html");
-    load("http://localhost:8080/");
-    WindowWrapper& wrapper = OsEng.windowWrapper();
-    reshape(wrapper);
 }
 
 void CefHost::attachDebugSettings(CefSettings &settings) {
@@ -96,56 +55,21 @@ void CefHost::attachDebugSettings(CefSettings &settings) {
 void CefHost::deinitialize() {
 }
 
-void CefHost::reshape(WindowWrapper& wrapper) {
-    glm::ivec2 windowSize = wrapper.currentWindowSize();
-    renderHandler->reshape(windowSize.x, windowSize.y);
-    browser->GetHost()->WasResized();
-}
-
 void CefHost::initializeCallbacks() {
     OsEng.registerModuleCallback(
-            // This is done in the PostDraw phase so that it will render it on top of
-            // everything else in the case of fisheyes. With this being in the Render callback
-            // the GUI would be rendered on top of each of the cube faces
+            OpenSpaceEngine::CallbackOption::Deinitialize,
+            [this]() {
+                deinitialize();
+            }
+    );
+    OsEng.registerModuleCallback(
             OpenSpaceEngine::CallbackOption::Render,
             [this](){
-                render();
+                CefDoMessageLoopWork();
+//                render();
             }
     );
 
-}
-
-/**
- * Load a local file
- * @param path - the path to load
- * @return true if the path exists, false otherwise
- */
-bool CefHost::loadLocalPath(std::string path) {
-    if (!FileSys.fileExists(path)) {
-        LDEBUG(fmt::format("Could not find path `{}`, verify that it is correct.", path));
-        return false;
-    }
-
-    load(absPath(path));
-    return true;
-}
-
-void CefHost::load(const std::string &url) {
-    LDEBUG(fmt::format("Loading URL: {}", url));
-    browser->GetMainFrame()->LoadURL(url);
-}
-
-void CefHost::render() {
-    WindowWrapper& wrapper = OsEng.windowWrapper();
-
-    if (wrapper.isMaster()) {
-        if (wrapper.windowHasResized()) {
-            reshape(wrapper);
-        }
-
-        CefDoMessageLoopWork();
-        renderHandler->draw();
-    }
 }
 
 }

@@ -173,6 +173,7 @@ set(OPENSPACE_HEADER_FILES
         include/cef_host.h
         include/gui_render_handler.h
         include/event_handler.h
+        include/browser_instance.h
     )
 source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
 
@@ -182,6 +183,7 @@ set(OPENSPACE_SOURCE_FILES
         src/cef_host.cpp
         src/gui_render_handler.cpp
         src/event_handler.cpp
+        src/browser_instance.cpp
         )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 

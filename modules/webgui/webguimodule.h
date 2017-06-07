@@ -26,18 +26,21 @@
 #define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include "include/browser_instance.h"
 #include "include/cef_host.h"
 
 namespace openspace {
 
+static const std::string GUI_LOCATION = "http://google.com";
+
 class WebGUIModule : public OpenSpaceModule {
 public:
     WebGUIModule();
-
     void internalInitialize();
 
 private:
 	std::unique_ptr<CefHost> cefHost;
+	std::unique_ptr<BrowserInstance> guiInstance;
 };
 
 } // namespace openspace

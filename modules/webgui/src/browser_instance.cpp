@@ -22,24 +22,83 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "webguimodule.h"
+#include "include/browser_instance.h"
+
+namespace {
+    const char* _loggerCat = "CEF BrowserInstance";
+}
 
 namespace openspace {
 
-WebGUIModule::WebGUIModule()
-    : OpenSpaceModule("WebGUI") {
-    cefHost = std::make_unique<CefHost>();
-    guiInstance = std::make_unique<BrowserInstance>();
+BrowserInstance::BrowserInstance(GUIRenderHandler* rh) : isInitialized(false) {
+    renderHandler = rh;
+    client = new BrowserClient(renderHandler);
+
+    CefBrowserSettings browserSettings;
+    CefWindowInfo windowInfo;
+    bool renderTransparent = true;
+    windowInfo.SetAsWindowless(nullptr, renderTransparent);
+    std::string url = "";
+    browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), url, browserSettings, NULL);
+    eventHandler = std::make_shared<EventHandler>(EventHandler(browser));
 }
 
-void WebGUIModule::internalInitialize() {
+BrowserInstance::~BrowserInstance() {
+    browser->GetHost()->CloseBrowser(false);
+}
+
+void BrowserInstance::initialize() {
+    renderHandler->initialize();
+    eventHandler->initialize();
+
+    WindowWrapper& wrapper = OsEng.windowWrapper();
+    reshape(wrapper);
+
+    isInitialized = true;
+
     OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Initialize,
-            [this]() {
-                LDEBUGC("WebGUI", fmt::format("Loading GUI from {}", GUI_LOCATION));
-                guiInstance->load(GUI_LOCATION);
-            }
-    );
+            OpenSpaceEngine::CallbackOption::Render,
+            [this](){
+                WindowWrapper& wrapper = OsEng.windowWrapper();
+
+                if (wrapper.isMaster()) {
+                    if (wrapper.windowHasResized()) {
+                        reshape(wrapper);
+                    }
+
+                    renderHandler->draw();
+                }
+            });
+}
+
+void BrowserInstance::load(const std::string& url) {
+    if (!isInitialized) {
+        initialize();
+    }
+
+    LDEBUG(fmt::format("Loading URL: {}", url));
+    browser->GetMainFrame()->LoadURL(url);
+}
+
+/**
+ * Load a local file
+ * @param path - the path to load
+ * @return true if the path exists, false otherwise
+ */
+bool BrowserInstance::loadLocalPath(std::string path) {
+    if (!FileSys.fileExists(path)) {
+        LDEBUG(fmt::format("Could not find path `{}`, verify that it is correct.", path));
+        return false;
+    }
+
+    load(absPath(path));
+    return true;
+}
+
+void BrowserInstance::reshape(WindowWrapper& wrapper) {
+    glm::ivec2 windowSize = wrapper.currentWindowSize();
+    renderHandler->reshape(windowSize.x, windowSize.y);
+    browser->GetHost()->WasResized();
 }
 
 }
