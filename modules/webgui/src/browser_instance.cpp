@@ -51,7 +51,7 @@ void BrowserInstance::initialize() {
     eventHandler->initialize();
 
     WindowWrapper &wrapper = OsEng.windowWrapper();
-    reshape(wrapper);
+    reshape(wrapper.currentWindowSize());
 
     isInitialized = true;
 }
@@ -80,12 +80,18 @@ bool BrowserInstance::loadLocalPath(std::string path) {
     return true;
 }
 
-void BrowserInstance::reshape(WindowWrapper& wrapper) {
-    glm::ivec2 windowSize = wrapper.currentWindowSize();
+/**
+ * Call when the window has been reshaped
+ * @param wrapper the windowWrapper capable of
+ */
+void BrowserInstance::reshape(const glm::ivec2 &windowSize) {
     renderHandler->reshape(windowSize.x, windowSize.y);
     browser->GetHost()->WasResized();
 }
 
+/**
+ * encapsulate renderHandler's draw method
+ */
 void BrowserInstance::draw() {
     renderHandler->draw();
 }

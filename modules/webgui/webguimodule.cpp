@@ -47,7 +47,7 @@ void WebGUIModule::internalInitialize() {
 
                 if (wrapper.isMaster()) {
                     if (wrapper.windowHasResized()) {
-                        guiInstance->reshape(wrapper);
+                        guiInstance->reshape(wrapper.currentWindowSize());
                     }
 
                     guiInstance->draw();

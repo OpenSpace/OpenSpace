@@ -41,7 +41,7 @@ public:
     void load(const std::string&);
     bool loadLocalPath(std::string);
     void initialize();
-    void reshape(WindowWrapper&);
+    void reshape(const glm::ivec2&);
     void draw();
 
 private:
