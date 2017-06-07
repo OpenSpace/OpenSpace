@@ -38,9 +38,9 @@ void SubsiteModels::setFadeDirection(const int direction) {
 
 void SubsiteModels::fade() {
 	if (_fadeDirection == 1 && _alpha < 1.0f)
-		_alpha = _alpha + 0.01f;
+		_alpha = _alpha + 0.05f;
 	else if (_fadeDirection == -1 && _alpha > 0.0f)
-		_alpha = _alpha - 0.01f;
+		_alpha = _alpha - 0.05f;
 }
 
 SubsiteModels::SubsiteHashKey SubsiteModels::hashKey() const {
