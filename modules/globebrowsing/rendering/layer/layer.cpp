@@ -38,10 +38,6 @@ namespace {
 
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     : properties::PropertyOwner(layerDict.value<std::string>(keyName))
-    , _layerGroupId(id)
-    , _tileProvider(nullptr)
-    , _enabled(properties::BoolProperty("enabled", "Enabled", false))
-    , _reset("reset", "Reset")
     , _typeOption(
         "type",
         "Type",
@@ -52,27 +48,23 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
         "Blend Mode",
         properties::OptionProperty::DisplayType::Dropdown
     )
-    , color(
+    , _enabled(properties::BoolProperty("enabled", "Enabled", false))
+    , _reset("reset", "Reset")
+    , _tileProvider(nullptr)
+    , _adjustmentProperties{
+        properties::Vec3Property (
         "color",
         "Color",
         glm::vec4(1.f, 1.f, 1.f, 1.f),
         glm::vec4(0.f),
-        glm::vec4(1.f)
-    )
+        glm::vec4(1.f))
+    }
+    , _layerGroupId(id)
     , _onChangeCallback([](){})
 {
-    std::string typeString;
-    layerDict.getValue("Type", typeString);
-    layergroupid::TypeID typeID = layergroupid::TypeID::Unknown;
-    if (typeString.empty()) {
-        typeID = layergroupid::TypeID::DefaultTileLayer;
-    }
-    else {
-        typeID = layergroupid::getTypeIDFromTypeString(typeString);
-    }
-
+    layergroupid::TypeID typeID = parseTypeIdFromDictionary(layerDict);
     if (typeID == layergroupid::TypeID::Unknown) {
-        throw ghoul::RuntimeError("Unknown layer type: " + typeString);
+        throw ghoul::RuntimeError("Unknown layer type!");
     }
 
     initializeBasedOnType(typeID, layerDict);
@@ -81,6 +73,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     layerDict.getValue(keyEnabled, enabled);
     _enabled.setValue(enabled);
 
+    // Initialize settings
     ghoul::Dictionary settingsDict;
     if (layerDict.getValue(keySettings, settingsDict)) {
         _renderSettings.setValuesFromDictionary(settingsDict);
@@ -90,6 +83,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
         _renderSettings.useValueBlending = true;
     }
 
+    // Add options to option properties
     for (int i = 0; i < layergroupid::NUM_LAYER_TYPES; ++i) {
         _typeOption.addOption(i, layergroupid::LAYER_TYPE_NAMES[i]);
     }
@@ -100,6 +94,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     }
     _blendModeOption.setValue(static_cast<int>(layergroupid::BlendModeID::Normal));
 
+    // On change callbacks definitions
     _reset.onChange([&](){
         if (_tileProvider) {
             _tileProvider->reset();
@@ -118,17 +113,30 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
         _onChangeCallback();
     });
 
+    // Add the properties
     addProperty(_typeOption);
     addProperty(_blendModeOption);
-    
-    color.setViewOption(properties::Property::ViewOptions::Color);
-
-    addVisibleProperties();
-
     addProperty(_enabled);
     addProperty(_reset);
 
+    _adjustmentProperties.color.setViewOption(properties::Property::ViewOptions::Color);
+
+    addVisibleProperties();
+
     addPropertySubOwner(_renderSettings);
+}
+
+layergroupid::TypeID Layer::parseTypeIdFromDictionary(const ghoul::Dictionary& initDict) const {
+    std::string typeString;
+    initDict.getValue("Type", typeString);
+    layergroupid::TypeID typeID = layergroupid::TypeID::Unknown;
+    if (typeString.empty()) {
+        typeID = layergroupid::TypeID::DefaultTileLayer;
+    }
+    else {
+        typeID = layergroupid::getTypeIDFromTypeString(typeString);
+    }
+    return typeID;
 }
 
 void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict) {
@@ -211,7 +219,7 @@ void Layer::removeVisibleProperties() {
             }
             break;
         case layergroupid::TypeID::SolidColor:
-            removeProperty(color);
+            removeProperty(_adjustmentProperties.color);
             break;
         default:
             break;
@@ -233,7 +241,7 @@ void Layer::addVisibleProperties() {
             }
             break;
         case layergroupid::TypeID::SolidColor:
-            addProperty(color);
+            addProperty(_adjustmentProperties.color);
         default:
             break;
     }

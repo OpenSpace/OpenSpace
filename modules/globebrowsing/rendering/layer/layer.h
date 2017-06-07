@@ -46,6 +46,14 @@ namespace tileprovider {
 
 class Layer : public properties::PropertyOwner {
 public:
+    /**
+     * Properties used when the layer type is not a tile type layer. These properties
+     * can be added or removed depending on the layer type.
+     */
+    struct AdjustmentProperties {
+        properties::Vec3Property color;
+    };
+
     Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict);
 
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
@@ -56,25 +64,26 @@ public:
     TileDepthTransform depthTransform() const;
     bool enabled() const { return _enabled.value(); }
     tileprovider::TileProvider* tileProvider() const { return _tileProvider.get(); }
+    const AdjustmentProperties& adjustmentProperties() const { return _adjustmentProperties; }
     const LayerRenderSettings& renderSettings() const { return _renderSettings; }
     
     void onChange(std::function<void(void)> callback);
     
     void update();
 
-    // TODO: Make private and structure adjustment layer variables
-    properties::Vec3Property color;
 private:
+    layergroupid::TypeID parseTypeIdFromDictionary(const ghoul::Dictionary& initDict) const;
     void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
     void removeVisibleProperties();
     void addVisibleProperties();
     
     properties::OptionProperty _typeOption;
     properties::OptionProperty _blendModeOption;
-
     properties::BoolProperty _enabled;
     properties::TriggerProperty _reset;
+
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
+    AdjustmentProperties _adjustmentProperties;
     LayerRenderSettings _renderSettings;
 
     const layergroupid::GroupID _layerGroupId;
