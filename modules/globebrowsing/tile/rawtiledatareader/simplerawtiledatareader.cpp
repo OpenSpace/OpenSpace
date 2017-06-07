@@ -50,14 +50,14 @@ SimpleRawTileDataReader::SimpleRawTileDataReader(const std::string& filePath,
     : RawTileDataReader(initData, preprocess)
 {
     _datasetFilePath = filePath;
-    ensureInitialized();
+    initialize();
 }
 
 void SimpleRawTileDataReader::reset() {
     initialize();
 }
 
-int SimpleRawTileDataReader::maxChunkLevel() {
+int SimpleRawTileDataReader::maxChunkLevel() const {
     return 2;
 }
 
