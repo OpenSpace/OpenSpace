@@ -171,6 +171,7 @@ set(OPENSPACE_HEADER_FILES
         webguimodule.h
         include/browser_client.h
         include/cef_host.h
+        include/web_render_handler.h
         include/gui_render_handler.h
         include/event_handler.h
         include/browser_instance.h
@@ -181,6 +182,7 @@ set(OPENSPACE_SOURCE_FILES
         webguimodule.cpp
         src/browser_client.cpp
         src/cef_host.cpp
+        src/web_render_handler.cpp
         src/gui_render_handler.cpp
         src/event_handler.cpp
         src/browser_instance.cpp

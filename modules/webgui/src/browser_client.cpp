@@ -27,7 +27,7 @@
 
 namespace openspace {
 
-BrowserClient::BrowserClient(GUIRenderHandler* handler) {
+BrowserClient::BrowserClient(WebRenderHandler* handler) {
     renderHandler = handler;
 };
 

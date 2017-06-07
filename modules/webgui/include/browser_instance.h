@@ -35,7 +35,7 @@ namespace openspace {
 
 class BrowserInstance {
 public:
-    BrowserInstance(GUIRenderHandler* = new GUIRenderHandler());
+    BrowserInstance(WebRenderHandler*);
     ~BrowserInstance();
 
     void load(const std::string&);
@@ -46,7 +46,7 @@ private:
     void reshape(WindowWrapper&);
 
     std::shared_ptr<EventHandler> eventHandler;
-    CefRefPtr<GUIRenderHandler> renderHandler;
+    CefRefPtr<WebRenderHandler> renderHandler;
     CefRefPtr<BrowserClient> client;
     CefRefPtr<CefBrowser> browser;
     bool isInitialized;

@@ -31,7 +31,7 @@ namespace {
 
 namespace openspace {
 
-void GUIRenderHandler::initialize() {
+GUIRenderHandler::GUIRenderHandler() {
     OsEng.registerModuleCallback(
             OpenSpaceEngine::CallbackOption::InitializeGL,
             [this](){
@@ -89,29 +89,6 @@ void GUIRenderHandler::draw(void) {
     _programObject->deactivate();
 
     glEnable(GL_CULL_FACE);
-}
-
-void GUIRenderHandler::reshape(int w, int h) {
-    LDEBUGC("WebGui", fmt::format("Reshaping CEF window. Width: {}, height: {}.", w, h));
-    width  = w;
-    height = h;
-}
-
-bool GUIRenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) {
-    rect = CefRect(0, 0, width, height);
-    return true;
-}
-
-void GUIRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::PaintElementType type,
-                               const CefRenderHandler::RectList &dirtyRects, const void *buffer, int width,
-                               int height) {
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, (unsigned char*) buffer);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 } // namespace openspace

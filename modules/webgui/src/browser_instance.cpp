@@ -30,8 +30,8 @@ namespace {
 
 namespace openspace {
 
-BrowserInstance::BrowserInstance(GUIRenderHandler* rh) : isInitialized(false) {
-    renderHandler = rh;
+BrowserInstance::BrowserInstance(WebRenderHandler* handler) : isInitialized(false) {
+    renderHandler = handler;
     client = new BrowserClient(renderHandler);
 
     CefBrowserSettings browserSettings;
@@ -48,7 +48,6 @@ BrowserInstance::~BrowserInstance() {
 }
 
 void BrowserInstance::initialize() {
-    renderHandler->initialize();
     eventHandler->initialize();
 
     WindowWrapper& wrapper = OsEng.windowWrapper();

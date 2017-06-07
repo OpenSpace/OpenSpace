@@ -22,35 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
-#define __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
-
-#include <memory>
-#include <include/openspace/engine/openspaceengine.h>
-#include <include/openspace/rendering/renderengine.h>
-#include <include/openspace/engine/wrapper/windowwrapper.h>
-#include <ghoul/opengl/opengl>
-#include <fmt/format.h>
-#include <include/cef_app.h>
 #include "include/web_render_handler.h"
 
 namespace openspace {
 
-class GUIRenderHandler : public WebRenderHandler {
-public:
-    GUIRenderHandler();
+void WebRenderHandler::reshape(int w, int h) {
+    width = w;
+    height = h;
+}
 
-    void initializeGL();
-    void draw(void);
-    void render() {};
+bool WebRenderHandler::GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) {
+    rect = CefRect(0, 0, width, height);
+    return true;
+}
 
-private:
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    GLuint program, vao, vbo, positionLoc;
+void WebRenderHandler::OnPaint(CefRefPtr<CefBrowser> browser, CefRenderHandler::PaintElementType type,
+                               const CefRenderHandler::RectList &dirtyRects, const void *buffer, int width,
+                               int height) {
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, (unsigned char*) buffer);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
 
-    IMPLEMENT_REFCOUNTING(GUIRenderHandler);
-};
-
-} // namespace openspace
-
-#endif  // __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
+}

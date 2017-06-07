@@ -29,7 +29,7 @@ namespace openspace {
 WebGUIModule::WebGUIModule()
     : OpenSpaceModule("WebGUI") {
     cefHost = std::make_unique<CefHost>();
-    guiInstance = std::make_unique<BrowserInstance>();
+    guiInstance = std::make_unique<BrowserInstance>(new GUIRenderHandler());
 }
 
 void WebGUIModule::internalInitialize() {

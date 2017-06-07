@@ -22,35 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
-#define __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
+#ifndef OPENSPACE_MODULES_WEBGUI__WEB_RENDER_HANDLER_H
+#define OPENSPACE_MODULES_WEBGUI__WEB_RENDER_HANDLER_H
 
-#include <memory>
-#include <include/openspace/engine/openspaceengine.h>
-#include <include/openspace/rendering/renderengine.h>
-#include <include/openspace/engine/wrapper/windowwrapper.h>
 #include <ghoul/opengl/opengl>
 #include <fmt/format.h>
+#include <include/cef_render_handler.h>
 #include <include/cef_app.h>
-#include "include/web_render_handler.h"
 
 namespace openspace {
 
-class GUIRenderHandler : public WebRenderHandler {
+class WebRenderHandler : public CefRenderHandler {
 public:
-    GUIRenderHandler();
+    virtual void draw(void) = 0;
+    virtual void render() = 0;
 
-    void initializeGL();
-    void draw(void);
-    void render() {};
+    void reshape(int, int);
 
-private:
-    std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    GLuint program, vao, vbo, positionLoc;
+    bool GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
+    void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList &dirtyRects, const void *buffer,
+                 int width, int height) override;
 
-    IMPLEMENT_REFCOUNTING(GUIRenderHandler);
+protected:
+    int width = 0, height = 0;
+    GLuint texture;
 };
 
 } // namespace openspace
 
-#endif  // __OPENSPACE_MODULE_WEBGUI___GUI_RENDER_HANDLER___H__
+#endif //OPENSPACE_MODULES_WEBGUI__WEB_RENDER_HANDLER_H

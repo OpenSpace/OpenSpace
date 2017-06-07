@@ -34,7 +34,7 @@ namespace openspace {
 
 class BrowserClient : public CefClient {
 public:
-    BrowserClient(GUIRenderHandler*);
+    BrowserClient(WebRenderHandler*);
 
     virtual CefRefPtr<CefRenderHandler> GetRenderHandler();
 
