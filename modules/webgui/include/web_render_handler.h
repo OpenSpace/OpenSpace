@@ -26,6 +26,7 @@
 #define OPENSPACE_MODULES_WEBGUI__WEB_RENDER_HANDLER_H
 
 #include <ghoul/opengl/opengl>
+#include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
 #include <include/cef_render_handler.h>
 #include <include/cef_app.h>

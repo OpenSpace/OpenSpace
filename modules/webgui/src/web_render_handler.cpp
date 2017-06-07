@@ -27,6 +27,7 @@
 namespace openspace {
 
 void WebRenderHandler::reshape(int w, int h) {
+//    LDEBUGC("WebRenderHandler", fmt::format("Reshaping browser window. Width: {}, height: {}", w, h));
     width = w;
     height = h;
 }

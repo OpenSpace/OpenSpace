@@ -41,10 +41,10 @@ public:
     void load(const std::string&);
     bool loadLocalPath(std::string);
     void initialize();
+    void reshape(WindowWrapper&);
+    void draw();
 
 private:
-    void reshape(WindowWrapper&);
-
     std::shared_ptr<EventHandler> eventHandler;
     CefRefPtr<WebRenderHandler> renderHandler;
     CefRefPtr<BrowserClient> client;

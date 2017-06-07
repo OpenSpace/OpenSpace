@@ -50,24 +50,10 @@ BrowserInstance::~BrowserInstance() {
 void BrowserInstance::initialize() {
     eventHandler->initialize();
 
-    WindowWrapper& wrapper = OsEng.windowWrapper();
+    WindowWrapper &wrapper = OsEng.windowWrapper();
     reshape(wrapper);
 
     isInitialized = true;
-
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::Render,
-            [this](){
-                WindowWrapper& wrapper = OsEng.windowWrapper();
-
-                if (wrapper.isMaster()) {
-                    if (wrapper.windowHasResized()) {
-                        reshape(wrapper);
-                    }
-
-                    renderHandler->draw();
-                }
-            });
 }
 
 void BrowserInstance::load(const std::string& url) {
@@ -98,6 +84,10 @@ void BrowserInstance::reshape(WindowWrapper& wrapper) {
     glm::ivec2 windowSize = wrapper.currentWindowSize();
     renderHandler->reshape(windowSize.x, windowSize.y);
     browser->GetHost()->WasResized();
+}
+
+void BrowserInstance::draw() {
+    renderHandler->draw();
 }
 
 }

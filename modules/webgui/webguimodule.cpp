@@ -40,6 +40,19 @@ void WebGUIModule::internalInitialize() {
                 guiInstance->load(GUI_LOCATION);
             }
     );
+    OsEng.registerModuleCallback(
+            OpenSpaceEngine::CallbackOption::Render,
+            [this](){
+                WindowWrapper& wrapper = OsEng.windowWrapper();
+
+                if (wrapper.isMaster()) {
+                    if (wrapper.windowHasResized()) {
+                        guiInstance->reshape(wrapper);
+                    }
+
+                    guiInstance->draw();
+                }
+            });
 }
 
 }
