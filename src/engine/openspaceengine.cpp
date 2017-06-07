@@ -185,6 +185,10 @@ OpenSpaceEngine& OpenSpaceEngine::ref() {
     return *_engine;
 }
 
+bool OpenSpaceEngine::isCreated() {
+    return _engine != nullptr;
+}
+
 void OpenSpaceEngine::create(int argc, char** argv,
                              std::unique_ptr<WindowWrapper> windowWrapper,
                              std::vector<std::string>& sgctArguments, bool& requestClose)
@@ -841,10 +845,19 @@ void OpenSpaceEngine::configureLogging() {
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
-    _engine->_console->initialize();
+    LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
+    try {
+        _engine->_console->initialize();
+    }
+    catch (ghoul::RuntimeError& e) {
+        LERROR("Error initializing Console with error:");
+        LERRORC(e.component, e.message);
+    }
+    LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(end)");
 
     const std::string key = ConfigurationManager::KeyOpenGLDebugContext;
     if (_configurationManager->hasKey(key)) {
+        LTRACE("OpenSpaceEngine::initializeGL::DebugContext(begin)");
         ghoul::Dictionary dict = _configurationManager->value<ghoul::Dictionary>(key);
         bool debug = dict.value<bool>(ConfigurationManager::PartActivate);
 
@@ -945,6 +958,7 @@ void OpenSpaceEngine::initializeGL() {
             };
             ghoul::opengl::debug::setDebugCallback(callback);
         }
+        LTRACE("OpenSpaceEngine::initializeGL::DebugContext(end)");
     }
 
 
@@ -1227,6 +1241,12 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 &luascriptfunctions::writeDocumentation,
                 "",
                 "Writes out documentation files"
+            },
+            {
+                "downloadFile",
+                &luascriptfunctions::downloadFile,
+                "",
+                "Downloads a file from Lua scope"
             },
             {
                 "addVirtualProperty",

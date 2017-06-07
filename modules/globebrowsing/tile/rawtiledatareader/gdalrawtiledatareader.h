@@ -40,7 +40,9 @@
 #include <ghoul/opengl/texture.h>
 
 #include <gdal.h>
+
 #include <string>
+#include <mutex>
 
 class GDALDataset;
 class GDALRasterBand;
@@ -73,7 +75,7 @@ public:
 
     // Public virtual function overloading
     virtual void reset() override;
-    virtual int maxChunkLevel() override;
+    virtual int maxChunkLevel() const override;
     virtual float noDataValueAsFloat() const override;
     virtual int rasterXSize() const override;
     virtual int rasterYSize() const override;
@@ -101,19 +103,34 @@ private:
 
     // GDAL Helper methods
     GDALDataset* openGdalDataset(const std::string& filePath);
-    int calculateTileLevelDifference(int minimumPixelSize);
-    bool gdalHasOverviews() const;
-    int gdalOverview(const PixelRegion::PixelRange& baseRegionSize) const;
-    int gdalOverview(const TileIndex& tileIndex) const;
-    int gdalVirtualOverview(const TileIndex& tileIndex) const;
-    PixelRegion gdalPixelRegion(GDALRasterBand* rasterBand) const;
+    
+    /**
+     * Use as a helper function when determining the maximum tile level. This function
+     * returns the negated number of overviews requred to downscale the highest overview
+     * dataset so that it fits within minimumPixelSize pixels in the x-dimension. 
+     */
+    int calculateTileLevelDifference(int minimumPixelSize) const;
 
     // Member variables
     std::string _initDirectory;
     std::string _datasetFilePath;
   
     GDALDataset* _dataset;
-    GDALDataType _gdalType;
+
+    struct GdalDatasetMetaDataCached {
+        int rasterCount;
+        float scale;
+        float offset;
+        int rasterXSize;
+        int rasterYSize;
+        float noDataValue;
+        std::array<double, 6> padfTransform;
+
+        GDALDataType dataType;
+
+    } _gdalDatasetMetaDataCached;
+
+    mutable std::mutex _datasetLock;
 };
 
 } // namespace globebrowsing

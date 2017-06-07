@@ -38,15 +38,17 @@ namespace cache {
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
+    static const std::string name;
+
     GlobeBrowsingModule();
 
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     
-    static const std::string name;
 
-    virtual scripting::LuaLibrary luaLibrary() const override;
+    scripting::LuaLibrary luaLibrary() const override;
 protected:
     void internalInitialize() override;
+
 private:
     /**
      \return a comma separated list of layer group names.

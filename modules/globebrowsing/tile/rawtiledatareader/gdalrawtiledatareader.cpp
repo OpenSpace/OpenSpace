@@ -65,10 +65,15 @@ GdalRawTileDataReader::GdalRawTileDataReader(const std::string& filePath,
 {
     _initDirectory = baseDirectory.empty() ? CPLGetCurrentDir() : baseDirectory;
     _datasetFilePath = filePath;
-    ensureInitialized();
+
+    { // Aquire lock
+        std::lock_guard<std::mutex> lockGuard(_datasetLock);
+        initialize();
+    }
 }
 
 GdalRawTileDataReader::~GdalRawTileDataReader() {
+    std::lock_guard<std::mutex> lockGuard(_datasetLock);
     if (_dataset != nullptr) {
         GDALClose(_dataset);
         _dataset = nullptr;
@@ -76,6 +81,7 @@ GdalRawTileDataReader::~GdalRawTileDataReader() {
 }
 
 void GdalRawTileDataReader::reset() {
+    std::lock_guard<std::mutex> lockGuard(_datasetLock);
     _cached._maxLevel = -1;
     if (_dataset != nullptr) {
         GDALClose(_dataset);
@@ -84,52 +90,32 @@ void GdalRawTileDataReader::reset() {
     initialize();
 }
 
-int GdalRawTileDataReader::maxChunkLevel() {
-    ensureInitialized();
-    if (_cached._maxLevel < 0) {
-        int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-        _cached._maxLevel = -_cached._tileLevelDifference;
-        if (numOverviews > 0) {
-            _cached._maxLevel += numOverviews - 1;
-        }
-    }
+int GdalRawTileDataReader::maxChunkLevel() const {
     return _cached._maxLevel;
 }
 
 float GdalRawTileDataReader::noDataValueAsFloat() const {
-    float noDataValue;
-    if (_dataset && _dataset->GetRasterBand(1)) {
-        noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
-    }
-    else {
-        noDataValue = std::numeric_limits<float>::min();
-    }
-    return noDataValue;
+    return _gdalDatasetMetaDataCached.noDataValue;
 }
 
 int GdalRawTileDataReader::rasterXSize() const {
-    return _dataset->GetRasterXSize();
+    return _gdalDatasetMetaDataCached.rasterXSize;
 }
 
 int GdalRawTileDataReader::rasterYSize() const {
-    return _dataset->GetRasterYSize();
+    return _gdalDatasetMetaDataCached.rasterYSize;
 }
 
 float GdalRawTileDataReader::depthOffset() const {
-    return _dataset->GetRasterBand(1)->GetOffset();
+    return _gdalDatasetMetaDataCached.offset;
 }
 
 float GdalRawTileDataReader::depthScale() const {
-    return _dataset->GetRasterBand(1)->GetScale();
+    return _gdalDatasetMetaDataCached.scale;
 }
 
 std::array<double, 6> GdalRawTileDataReader::getGeoTransform() const {
-    std::array<double, 6> padfTransform;
-    CPLErr err = _dataset->GetGeoTransform(&padfTransform[0]);
-    if (err == CE_Failure) {
-        return RawTileDataReader::getGeoTransform();
-    }
-    return padfTransform;
+    return _gdalDatasetMetaDataCached.padfTransform;
 }
 
 IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex) const {
@@ -142,8 +128,7 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
         _initData.dimensionsWithoutPadding().x, _initData.dimensionsWithoutPadding().y);
     
     io.read.overview = 0;
-    io.read.fullRegion = gdalPixelRegion(
-            _dataset->GetRasterBand(1));
+    io.read.fullRegion = fullPixelRegion();
     // For correct sampling in dataset, we need to pad the texture tile
     
     PixelRegion scaledPadding = padding;
@@ -169,18 +154,35 @@ void GdalRawTileDataReader::initialize() {
     _dataset = openGdalDataset(_datasetFilePath);
 
     // Assume all raster bands have the same data type
-    _gdalType = tiledatatype::getGdalDataType(_initData.glType());
+    _gdalDatasetMetaDataCached.rasterCount = _dataset->GetRasterCount();
+    _gdalDatasetMetaDataCached.scale = _dataset->GetRasterBand(1)->GetScale();
+    _gdalDatasetMetaDataCached.offset = _dataset->GetRasterBand(1)->GetOffset();
+    _gdalDatasetMetaDataCached.rasterXSize = _dataset->GetRasterXSize();
+    _gdalDatasetMetaDataCached.rasterYSize = _dataset->GetRasterYSize();
+    _gdalDatasetMetaDataCached.noDataValue = _dataset->GetRasterBand(1)->GetNoDataValue();
+    _gdalDatasetMetaDataCached.dataType = tiledatatype::getGdalDataType(_initData.glType());
     
+    CPLErr err = _dataset->GetGeoTransform(&_gdalDatasetMetaDataCached.padfTransform[0]);
+    if (err == CE_Failure) {
+        _gdalDatasetMetaDataCached.padfTransform = RawTileDataReader::getGeoTransform();
+    }
+
     _depthTransform = calculateTileDepthTransform();
     _cached._tileLevelDifference =
         calculateTileLevelDifference(_initData.dimensionsWithoutPadding().x);
+
+    int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+    _cached._maxLevel = -_cached._tileLevelDifference;
+    if (numOverviews > 0) {
+        _cached._maxLevel += numOverviews - 1;
+    }
 }
 
 void GdalRawTileDataReader::readImageData(
     IODescription& io, RawTile::ReadError& worstError, char* imageDataDest) const {
   
     // Only read the minimum number of rasters
-    int nRastersToRead = std::min(_dataset->GetRasterCount(),
+    int nRastersToRead = std::min(_gdalDatasetMetaDataCached.rasterCount,
         static_cast<int>(_initData.nRasters()));
 
     switch (_initData.ghoulTextureFormat()) {
@@ -270,7 +272,8 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
     dataDest += io.write.region.start.x * _initData.bytesPerPixel();
   
     GDALRasterBand* gdalRasterBand = _dataset->GetRasterBand(rasterBand);
-    CPLErr readError = gdalRasterBand->RasterIO(
+	CPLErr readError = CE_Failure;
+	readError = gdalRasterBand->RasterIO(
         GF_Read,
         io.read.region.start.x,         // Begin read x
         io.read.region.start.y,         // Begin read y
@@ -279,7 +282,7 @@ RawTile::ReadError GdalRawTileDataReader::rasterRead(
         dataDest,                       // Where to put data
         io.write.region.numPixels.x,    // width to write x in destination
         io.write.region.numPixels.y,    // width to write y in destination
-        _gdalType,                      // Type
+        _gdalDatasetMetaDataCached.dataType,                      // Type
         _initData.bytesPerPixel(),      // Pixel spacing
         -io.write.bytesPerLine          // Line spacing
     );
@@ -314,7 +317,7 @@ GDALDataset* GdalRawTileDataReader::openGdalDataset(const std::string& filePath)
     return dataset;
 }
 
-int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) {
+int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) const {
     GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
     GDALRasterBand* maxOverview;
     int numOverviews = firstBand->GetOverviewCount();
@@ -328,52 +331,6 @@ int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) {
     sizeLevel0 = maxOverview->GetXSize();
     double diff = log2(minimumPixelSize) - log2(sizeLevel0);
     return diff;
-}
-
-bool GdalRawTileDataReader::gdalHasOverviews() const {
-    return _dataset->GetRasterBand(1)->GetOverviewCount() > 0;
-}
-
-int GdalRawTileDataReader::gdalOverview(
-    const PixelRegion::PixelRange& regionSizeOverviewZero) const {
-    GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
-
-    int minNumPixels0 = glm::min(regionSizeOverviewZero.x, regionSizeOverviewZero.y);
-
-    int overviews = firstBand->GetOverviewCount();
-    GDALRasterBand* maxOverview =
-        overviews ? firstBand->GetOverview(overviews - 1) : firstBand;
-        
-    int sizeLevel0 = maxOverview->GetXSize();
-    // The dataset itself may not have overviews but even if it does not, an overview
-    // for the data region can be calculated and possibly be used to sample greater
-    // Regions of the original dataset.
-    int ov = std::log2(minNumPixels0) - std::log2(sizeLevel0 + 1) -
-        _cached._tileLevelDifference;
-    ov = glm::clamp(ov, 0, overviews - 1);
-        
-    return ov;
-}
-
-int GdalRawTileDataReader::gdalOverview(const TileIndex& tileIndex) const {
-    int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-    int ov = overviews - (tileIndex.level + _cached._tileLevelDifference + 1);
-    return glm::clamp(ov, 0, overviews - 1);
-}
-
-int GdalRawTileDataReader::gdalVirtualOverview(const TileIndex& tileIndex) const {
-    int overviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-    int ov = overviews - (tileIndex.level + _cached._tileLevelDifference + 1);
-    return ov;
-}
-
-PixelRegion GdalRawTileDataReader::gdalPixelRegion(GDALRasterBand* rasterBand) const {
-    PixelRegion gdalRegion;
-    gdalRegion.start.x = 0;
-    gdalRegion.start.y = 0;
-    gdalRegion.numPixels.x = rasterBand->GetXSize();
-    gdalRegion.numPixels.y = rasterBand->GetYSize();
-    return gdalRegion;
 }
 
 } // namespace globebrowsing

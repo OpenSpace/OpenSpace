@@ -22,63 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
+#ifndef __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__
+#define __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__
 
-#include <modules/globebrowsing/tile/textureformat.h>
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/pixelregion.h>
-#include <modules/globebrowsing/tile/rawtile.h>
-
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
-
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-
-#include <string>
+#include <modules/onscreengui/include/guicomponent.h>
 
 namespace openspace {
-namespace globebrowsing {
+namespace gui {
 
-class GeodeticPatch;
-
-class SimpleRawTileDataReader : public RawTileDataReader {
+class GuiFilePathComponent : public GuiComponent {
 public:
+    GuiFilePathComponent();
 
-    SimpleRawTileDataReader(const std::string& filePath,
-        const TileTextureInitData& initData,
-        RawTileDataReader::PerformPreprocessing preprocess =
-            RawTileDataReader::PerformPreprocessing::No);
-
-    // Public virtual function overloading
-    virtual void reset() override;
-    virtual int maxChunkLevel() const override;
-    virtual float noDataValueAsFloat() const override;
-    virtual int rasterXSize() const override;
-    virtual int rasterYSize() const override;
-    virtual float depthOffset() const override;
-    virtual float depthScale() const override;
-
-protected:
-
-    virtual IODescription getIODescription(const TileIndex& tileIndex) const override;
-
-private:
-    // Private virtual function overloading
-    virtual void initialize() override;
-    virtual void readImageData(
-        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const override;
-    virtual RawTile::ReadError rasterRead(
-        int rasterBand, const IODescription& io, char* dst) const override;
-
-    // Member variables
-    std::string _datasetFilePath;
-    std::unique_ptr<ghoul::opengl::Texture> _dataTexture;
+    void render() override;
 };
 
-} // namespace globebrowsing
+} // namespace gui
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
+#endif // __OPENSPACE_MODULE_ONSCREENGUI___GUIFILEPATHCOMPONENT___H__

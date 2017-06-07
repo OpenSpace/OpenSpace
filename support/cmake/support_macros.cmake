@@ -247,7 +247,7 @@ function (handle_applications)
 
 
                     if (WIN32)
-                        copy_files(
+                        ghl_copy_files(
                             ${APPLICATION_NAME}
                             "${CURL_ROOT_DIR}/lib/libcurl.dll"
                             "${CURL_ROOT_DIR}/lib/libeay32.dll"
@@ -293,7 +293,7 @@ function (handle_option_vld)
         target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_EXT_DIR}/vld)
 
         foreach (app ${OPENSPACE_APPLCATIONS})
-            copy_files(${app} "${OPENSPACE_EXT_DIR}/vld/bin/vld_x64.dll")
+            ghl_copy_files(${app} "${OPENSPACE_EXT_DIR}/vld/bin/vld_x64.dll")
         endforeach ()
     endif ()
 endfunction ()
@@ -503,7 +503,7 @@ function (handle_internal_modules)
     if (WIN32)
     foreach (application ${OPENSPACE_APPLICATIONS})
         foreach (dll ${dll_list})
-            copy_files(${application} ${dll})
+            ghl_copy_files(${application} ${dll})
         endforeach ()
     endforeach ()
     endif ()
@@ -511,7 +511,7 @@ endfunction ()
 
 function (copy_dynamic_libraries)
     if (WIN32)
-        copy_files(OpenSpace "${CURL_ROOT_DIR}/lib/libcurl.dll")
+        ghl_copy_files(OpenSpace "${CURL_ROOT_DIR}/lib/libcurl.dll")
 
         # Copy DLLs needed by Ghoul into the executable directory
         ghl_copy_shared_libraries(OpenSpace ${OPENSPACE_EXT_DIR}/ghoul)

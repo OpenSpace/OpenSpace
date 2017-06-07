@@ -129,7 +129,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
     std::string listLayerGroups = layerGroupNamesList();
     std::string listLayerTypes = layerTypeNamesList();
     return {
-        GlobeBrowsingModule::name,
+        "globebrowsing",
         {
             {
                 "addLayer",
@@ -141,7 +141,13 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
                 "The second argument is the layer group which can be any of "
                 + listLayerGroups + ". The third argument is the layer type which can be "
                 "any of " + listLayerTypes + "."
-            }
+            },
+        },
+        {
+            "${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"
+        },
+        {
+            // Documentation
         }
     };
 }

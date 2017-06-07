@@ -38,6 +38,7 @@ struct LayerRenderSettings : public properties::PropertyOwner {
     properties::FloatProperty opacity;
     properties::FloatProperty gamma;
     properties::FloatProperty multiplier;
+    properties::FloatProperty offset;
 
     // Optional properties
     properties::FloatProperty valueBlending;

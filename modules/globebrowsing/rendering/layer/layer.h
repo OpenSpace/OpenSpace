@@ -59,13 +59,13 @@ public:
     ChunkTilePile getChunkTilePile(const TileIndex& tileIndex, int pileSize) const;
     Tile::Status getTileStatus(const TileIndex& index) const;
 
-    layergroupid::TypeID type() const {return static_cast<layergroupid::TypeID>(_typeOption.value()); };
-    layergroupid::BlendModeID blendMode() const {return static_cast<layergroupid::BlendModeID>(_blendModeOption.value()); };
+    layergroupid::TypeID type() const;
+    layergroupid::BlendModeID blendMode() const;
     TileDepthTransform depthTransform() const;
-    bool enabled() const { return _enabled.value(); }
-    tileprovider::TileProvider* tileProvider() const { return _tileProvider.get(); }
-    const AdjustmentProperties& adjustmentProperties() const { return _adjustmentProperties; }
-    const LayerRenderSettings& renderSettings() const { return _renderSettings; }
+    bool enabled() const;
+    tileprovider::TileProvider* tileProvider() const;
+    const AdjustmentProperties& adjustmentProperties() const;
+    const LayerRenderSettings& renderSettings() const;
     
     void onChange(std::function<void(void)> callback);
     
@@ -74,14 +74,15 @@ public:
 private:
     layergroupid::TypeID parseTypeIdFromDictionary(const ghoul::Dictionary& initDict) const;
     void initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict);
-    void removeVisibleProperties();
     void addVisibleProperties();
+    void removeVisibleProperties();
     
     properties::OptionProperty _typeOption;
     properties::OptionProperty _blendModeOption;
     properties::BoolProperty _enabled;
     properties::TriggerProperty _reset;
 
+    layergroupid::TypeID _type;
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
     AdjustmentProperties _adjustmentProperties;
     LayerRenderSettings _renderSettings;

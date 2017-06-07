@@ -95,6 +95,10 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     _blendModeOption.setValue(static_cast<int>(layergroupid::BlendModeID::Normal));
 
     // On change callbacks definitions
+    _enabled.onChange([&](){
+        _onChangeCallback();
+    });
+
     _reset.onChange([&](){
         if (_tileProvider) {
             _tileProvider->reset();
@@ -103,6 +107,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
 
     _typeOption.onChange([&](){
         removeVisibleProperties();
+        _type = static_cast<layergroupid::TypeID>(_typeOption.value());
         ghoul::Dictionary dict;
         initializeBasedOnType(type(), dict);
         addVisibleProperties();
@@ -124,6 +129,75 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     addVisibleProperties();
 
     addPropertySubOwner(_renderSettings);
+}
+
+ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
+    if (_tileProvider) {
+        return _tileProvider->getChunkTilePile(tileIndex, pileSize);
+    }
+    else {   
+        ChunkTilePile chunkTilePile;
+        chunkTilePile.resize(pileSize);
+        for (int i = 0; i < pileSize; ++i) {
+            chunkTilePile[i].tile = Tile::TileUnavailable;
+            chunkTilePile[i].uvTransform.uvOffset = { 0, 0 };
+            chunkTilePile[i].uvTransform.uvScale = { 1, 1 };
+        }
+        return chunkTilePile;
+    }
+}
+
+Tile::Status Layer::getTileStatus(const TileIndex& index) const {
+    if (_tileProvider) {
+        return _tileProvider->getTileStatus(index);
+    }
+    else {
+        return Tile::Status::OK;
+    }
+}
+
+layergroupid::TypeID Layer::type() const {
+    return _type;
+};
+
+layergroupid::BlendModeID Layer::blendMode() const {
+    return static_cast<layergroupid::BlendModeID>(_blendModeOption.value());
+};
+
+
+TileDepthTransform Layer::depthTransform() const {
+    if (_tileProvider) {
+        return _tileProvider->depthTransform();
+    }
+    else {
+        return {1.0f, 0.0f};
+    }
+}
+
+bool Layer::enabled() const {
+    return _enabled.value();
+}
+
+tileprovider::TileProvider* Layer::tileProvider() const {
+    return _tileProvider.get();
+}
+
+const Layer::AdjustmentProperties& Layer::adjustmentProperties() const {
+    return _adjustmentProperties;
+}
+
+const LayerRenderSettings& Layer::renderSettings() const {
+    return _renderSettings;
+}
+
+void Layer::onChange(std::function<void(void)> callback) {
+    _onChangeCallback = callback;
+}
+
+void Layer::update() {
+    if (_tileProvider) {
+        _tileProvider->update();
+    }
 }
 
 layergroupid::TypeID Layer::parseTypeIdFromDictionary(const ghoul::Dictionary& initDict) const {
@@ -164,43 +238,24 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
     }
 }
 
-ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
-    if (_tileProvider) {
-        return _tileProvider->getChunkTilePile(tileIndex, pileSize);
-    }
-    else {   
-        ChunkTilePile chunkTilePile;
-        chunkTilePile.resize(pileSize);
-        for (int i = 0; i < pileSize; ++i) {
-            chunkTilePile[i].tile = Tile::TileUnavailable;
-            chunkTilePile[i].uvTransform.uvOffset = { 0, 0 };
-            chunkTilePile[i].uvTransform.uvScale = { 1, 1 };
-        }
-        return chunkTilePile;
-    }
-}
-
-void Layer::update() {
-    if (_tileProvider) {
-        _tileProvider->update();
-    }
-}
-
-Tile::Status Layer::getTileStatus(const TileIndex& index) const {
-    if (_tileProvider) {
-        return _tileProvider->getTileStatus(index);
-    }
-    else {
-        return Tile::Status::OK;
-    }
-}
-
-TileDepthTransform Layer::depthTransform() const {
-    if (_tileProvider) {
-        return _tileProvider->depthTransform();
-    }
-    else {
-        return {1.0f, 0.0f};
+void Layer::addVisibleProperties() {
+    switch (type()) {
+        // Intentional fall throgh. Same for all tile layers
+        case layergroupid::TypeID::DefaultTileLayer:
+        case layergroupid::TypeID::SingleImageTileLayer:
+        case layergroupid::TypeID::SizeReferenceTileLayer:
+        case layergroupid::TypeID::TemporalTileLayer:
+        case layergroupid::TypeID::TileIndexTileLayer:
+        case layergroupid::TypeID::ByIndexTileLayer:
+        case layergroupid::TypeID::ByLevelTileLayer:
+            if (_tileProvider) {
+                addPropertySubOwner(*_tileProvider);
+            }
+            break;
+        case layergroupid::TypeID::SolidColor:
+            addProperty(_adjustmentProperties.color);
+        default:
+            break;
     }
 }
 
@@ -224,32 +279,6 @@ void Layer::removeVisibleProperties() {
         default:
             break;
     }
-}
-
-void Layer::addVisibleProperties() {
-    switch (type()) {
-        // Intentional fall throgh. Same for all tile layers
-        case layergroupid::TypeID::DefaultTileLayer:
-        case layergroupid::TypeID::SingleImageTileLayer:
-        case layergroupid::TypeID::SizeReferenceTileLayer:
-        case layergroupid::TypeID::TemporalTileLayer:
-        case layergroupid::TypeID::TileIndexTileLayer:
-        case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer:
-            if (_tileProvider) {
-                addPropertySubOwner(*_tileProvider);
-            }
-            break;
-        case layergroupid::TypeID::SolidColor:
-            addProperty(_adjustmentProperties.color);
-        default:
-            break;
-    }
-}
-
-void Layer::onChange(std::function<void(void)> callback) {
-    _enabled.onChange(callback);
-    _onChangeCallback = callback;
 }
 
 } // namespace globebrowsing

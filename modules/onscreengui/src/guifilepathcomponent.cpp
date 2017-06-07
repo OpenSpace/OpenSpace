@@ -22,63 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
+#include <modules/onscreengui/include/guifilepathcomponent.h>
 
-#include <modules/globebrowsing/tile/textureformat.h>
-#include <modules/globebrowsing/tile/tile.h>
-#include <modules/globebrowsing/tile/tiledepthtransform.h>
-#include <modules/globebrowsing/tile/pixelregion.h>
-#include <modules/globebrowsing/tile/rawtile.h>
+#include <ghoul/filesystem/filesystem.h>
 
-#include <modules/globebrowsing/tile/rawtiledatareader/rawtiledatareader.h>
-
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/texture.h>
-
-#include <string>
+#include "imgui.h"
 
 namespace openspace {
-namespace globebrowsing {
+namespace gui {
 
-class GeodeticPatch;
+GuiFilePathComponent::GuiFilePathComponent()
+    : GuiComponent("File Path")
+{}
 
-class SimpleRawTileDataReader : public RawTileDataReader {
-public:
+void GuiFilePathComponent::render() {
+    bool v = _isEnabled;
+    ImGui::Begin("File Path", &v);
 
-    SimpleRawTileDataReader(const std::string& filePath,
-        const TileTextureInitData& initData,
-        RawTileDataReader::PerformPreprocessing preprocess =
-            RawTileDataReader::PerformPreprocessing::No);
+    ImGui::Text(
+        "%s",
+        "These are file paths registered in the current OpenSpace instance."
+    );
+    ImGui::Separator();
 
-    // Public virtual function overloading
-    virtual void reset() override;
-    virtual int maxChunkLevel() const override;
-    virtual float noDataValueAsFloat() const override;
-    virtual int rasterXSize() const override;
-    virtual int rasterYSize() const override;
-    virtual float depthOffset() const override;
-    virtual float depthScale() const override;
+    ImGui::Columns(2);
+    ImGui::Separator();
+    std::vector<std::string> tokens = FileSys.tokens();
+    for (const std::string& t : tokens) {
+        ImGui::Text("%s", t.c_str());
+        ImGui::NextColumn();
+        ImGui::Text("%s", absPath(t).c_str());
+        ImGui::NextColumn();
+        ImGui::Separator();
+    }
+    ImGui::End();
+}
 
-protected:
-
-    virtual IODescription getIODescription(const TileIndex& tileIndex) const override;
-
-private:
-    // Private virtual function overloading
-    virtual void initialize() override;
-    virtual void readImageData(
-        IODescription& io, RawTile::ReadError& worstError, char* dataDestination) const override;
-    virtual RawTile::ReadError rasterRead(
-        int rasterBand, const IODescription& io, char* dst) const override;
-
-    // Member variables
-    std::string _datasetFilePath;
-    std::unique_ptr<ghoul::opengl::Texture> _dataTexture;
-};
-
-} // namespace globebrowsing
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___SIMPLE_RAW_TILE_DATA_READER___H__
+} // gui
+} // openspace
