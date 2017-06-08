@@ -73,6 +73,8 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/models/subsitemodels.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/job/subsiteinitializationjob.h
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/opengl/texturearray.h
+
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.inl
     ${CMAKE_CURRENT_SOURCE_DIR}/other/prioritizingconcurrentjobmanager.h
@@ -188,6 +190,8 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/models/multimodelprovider.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/models/singlemodelprovider.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/job/subsiteinitializationjob.cpp
+
+    ${CMAKE_CURRENT_SOURCE_DIR}/opengl/texturearray.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/distanceswitch.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/other/pixelbuffer.cpp
