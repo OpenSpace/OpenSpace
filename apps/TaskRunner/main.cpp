@@ -49,6 +49,10 @@
 #include <openspace/scene/scale.h>
 #include <openspace/engine/moduleengine.h>
 
+#include <ghoul/cmdparser/commandlineparser.h>
+#include <ghoul/cmdparser/singlecommand.h>
+
+
 namespace {
     const std::string ConfigurationFile = "openspace.cfg";
     const std::string _loggerCat = "TaskRunner Main";
@@ -127,13 +131,41 @@ int main(int argc, char** argv) {
     moduleEngine.initialize();
     LINFO("Initialization done.");
 
+    // Parse commandline arguments
+    std::vector<std::string> args(argv, argv + argc);
+
+    ghoul::cmdparser::CommandlineParser commandlineParser(
+        "OpenSpace TaskRunner",
+        ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
+    );
+
+    std::string tasksPath = "";
+    commandlineParser.addCommand(
+        std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
+            &tasksPath,
+            "--task",
+            "-t",
+            "Provides the path to a task file to execute"
+            )
+    );
+
+    commandlineParser.setCommandLine(args);
+    commandlineParser.execute();
+
+
+    if (tasksPath != "") {
+        performTasks(tasksPath);
+        return 0;
+    }
+
+    // If no task file was specified in as argument, run in CLI mode.
+
     std::string tasksRoot;
     if (configuration.getValue(ConfigurationManager::KeyConfigTasksRoot, tasksRoot)) {
         LINFO("Task root: " << tasksRoot);
         FileSys.setCurrentDirectory(ghoul::filesystem::Directory(absPath(tasksRoot)));
     }
     
-    std::string tasksPath;
     while (true) {
         std::cout << "TASK >";
         std::cin >> tasksPath;
