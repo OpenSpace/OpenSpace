@@ -77,7 +77,9 @@ bool ScreenSpaceBrowser::initialize() {
     renderHandler->setTexture(*_texture);
 
     createPlane();
-    createShaders();
+    // Load a special version of the regular ScreenRenderable shaders. This mirrors the
+    // image along the Y axis since the image produced by CEF was flipped.
+    createShaders("${MODULE_WEBGUI}/shaders/");
     browserInstance->load(url);
 
     return isReady();

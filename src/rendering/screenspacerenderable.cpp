@@ -267,7 +267,7 @@ glm::vec2 ScreenSpaceRenderable::toSpherical(const glm::vec2& euclidean) {
     return glm::vec2(theta, phi);
 }
 
-void ScreenSpaceRenderable::createShaders() {
+void ScreenSpaceRenderable::createShaders(std::string shaderPath) {
     if (!_shader) {
         ghoul::Dictionary dict = ghoul::Dictionary();
 
@@ -279,10 +279,10 @@ void ScreenSpaceRenderable::createShaders() {
         };
 
         dict.setValue("rendererData", rendererData);
-        dict.setValue("fragmentPath", "${MODULE_BASE}/shaders/screenspace_fs.glsl");
+        dict.setValue("fragmentPath", shaderPath + "screenspace_fs.glsl");
         _shader = ghoul::opengl::ProgramObject::Build(
             "ScreenSpaceProgram",
-            "${MODULE_BASE}/shaders/screenspace_vs.glsl",
+            shaderPath + "screenspace_vs.glsl",
             "${SHADERS}/render.frag",
             dict
         );

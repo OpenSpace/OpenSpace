@@ -22,73 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <glm/gtc/matrix_transform.hpp>
-#include "include/gui_render_handler.h"
+#version __CONTEXT__
 
-namespace {
-    std::string _loggerCat = "WebGUI:RenderHandler";
+uniform mat4 ModelTransform;
+uniform mat4 ViewProjectionMatrix;
+
+layout(location = 0) in vec4 in_position;
+layout(location = 1) in vec2 in_st;
+
+out vec2 vs_st;
+out vec4 vs_position;
+
+void main(){
+    vs_st = in_st;
+    vs_position =  ViewProjectionMatrix * ModelTransform * in_position * vec4(1.0, -1.0, 1.0, 1.0);
+    gl_Position =  vec4(vs_position);
 }
-
-namespace openspace {
-
-GUIRenderHandler::GUIRenderHandler() {
-    OsEng.registerModuleCallback(
-            OpenSpaceEngine::CallbackOption::InitializeGL,
-            [this](){
-                LDEBUG("Initializing WebGUI RenderHandler OpenGL");
-                initializeGL();
-            }
-    );
-}
-
-void GUIRenderHandler::initializeGL() {
-    LDEBUG("Initializing CEF GL environment...");
-    _programObject = ghoul::opengl::ProgramObject::Build(
-            "WebGUICEFProgram",
-            "${MODULE_WEBGUI}/shaders/gui_vs.glsl",
-            "${MODULE_WEBGUI}/shaders/gui_fs.glsl"
-    );
-    float data[] = {-1.0f, -1.0f, -1.0f,
-                     1.0f,  1.0f, -1.0f,
-                     1.0f, -1.0f, -1.0f,
-                     1.0f,  1.0f,  1.0f};
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glGenBuffers(1, &vbo);
-    glGenTextures(1, &texture);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-    glBindVertexArray(0);
-    LDEBUG("Initializing CEF GL environment... done!");
-}
-
-void GUIRenderHandler::draw(void) {
-	if (_programObject->isDirty()) {
-		_programObject->rebuildFromFile();
-	}
-
-    glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-
-    _programObject->activate();
-
-    ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    glBindTexture(GL_TEXTURE_2D, texture);
-    _programObject->setUniform("tex", unit);
-
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-
-    _programObject->deactivate();
-
-    glEnable(GL_CULL_FACE);
-}
-
-} // namespace openspace

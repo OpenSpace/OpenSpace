@@ -90,7 +90,7 @@ protected:
     glm::vec2 toSpherical(const glm::vec2& euclidean);
 
 
-    void createShaders();
+    void createShaders(std::string shaderPath = "${MODULE_BASE}/shaders/");
     glm::mat4 scaleMatrix();
     glm::mat4 rotationMatrix();
     glm::mat4 translationMatrix();
