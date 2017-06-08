@@ -51,6 +51,7 @@ void SurfaceModelLoadJob::execute() {
 	_subsiteModels->level = _level;
 	_subsiteModels->fileNames = _subsite->fileNames;
 	_subsiteModels->coloredCameraInfoVector = _subsite->cameraColoredInfoVector;
+	_subsiteModels->rotationMatrix = _subsite->rotationMatrix;
 
 	ghoul::Dictionary dictionary;
 	std::string pathToGeometry2 = pathToGeometryFolder + "OBJ.obj";

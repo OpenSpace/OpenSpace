@@ -189,14 +189,18 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 			if(!modelExists) {
 				std::string pathToFilenamesTextFile = pathToDriveFolderLevel1 + "/filenames.txt";
 				std::string pathToColoredFilenamesTextFile = pathToDriveFolderLevel1 + "/mastcam.txt";
+				std::string pathToRotationMatrixTextFile = pathToDriveFolderLevel1 + "/rotationmatrix.txt";
 
 
 				std::shared_ptr<RoverPathFileReader::TextureInformation> textureInformation = extractTextureInfo(pathToFilenamesTextFile);
 
 				std::shared_ptr<RoverPathFileReader::TextureInformation> coloredTextureInformation = extractTextureInfo(pathToColoredFilenamesTextFile);
 				
+				glm::dmat4 subsiteRotationMatrix = extractRotationMatrix(pathToRotationMatrixTextFile);
+
 				subsite->coloredTextureFileNames = coloredTextureInformation->fileNames;
 				subsite->cameraColoredInfoVector = coloredTextureInformation->cameraInfoVector;
+				subsite->rotationMatrix = subsiteRotationMatrix;
 
 				subsite->fileNames = textureInformation->fileNames;
 				subsite->cameraInfoVector = textureInformation->cameraInfoVector;
@@ -237,6 +241,31 @@ std::string RoverPathFileReader::convertString(const std::string sitenr, const s
 		}
 	}
 	return temp;
+}
+
+glm::dmat4 RoverPathFileReader::extractRotationMatrix(std::string filename) {
+	std::string absoluteFilePath = absPath(filename);
+	std::string line;
+	std::ifstream myFile(absoluteFilePath);
+	glm::dmat4 temp2;
+	int counter = 0;
+	if (myFile.is_open()) {
+		while (std::getline(myFile, line)) {
+			std::vector<std::string> temp;
+			temp = split(line, ',');
+			temp2[counter][0] = std::stod(temp.at(0));
+			temp2[counter][1] = std::stod(temp.at(1));
+			temp2[counter][2] = std::stod(temp.at(2));
+			temp2[counter][3] = std::stod(temp.at(3));
+			counter++;
+		}
+	}
+	else {
+		LERROR("Could not open file: " << filename);
+	}
+	
+	return temp2;
+
 }
 
 std::shared_ptr<RoverPathFileReader::TextureInformation> RoverPathFileReader::extractTextureInfo(std::string filePath) {
