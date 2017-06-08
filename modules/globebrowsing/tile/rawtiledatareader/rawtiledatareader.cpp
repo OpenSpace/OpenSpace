@@ -68,21 +68,13 @@ RawTileDataReader::RawTileDataReader(const TileTextureInitData& initData,
     , _hasBeenInitialized(false)
 {}
 
-void RawTileDataReader::ensureInitialized() {
-    if (!_hasBeenInitialized) {
-        initialize();
-        _hasBeenInitialized = true;
-    }
-}
-
-std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() {
+std::shared_ptr<RawTile> RawTileDataReader::defaultTileData() const {
     return std::make_shared<RawTile>(RawTile::createDefault(_initData));
 }
 
 std::shared_ptr<RawTile> RawTileDataReader::readTileData(TileIndex tileIndex,
-    char* dataDestination, char* pboMappedDataDestination)
+    char* dataDestination, char* pboMappedDataDestination) const
 {
-    ensureInitialized();
     IODescription io = getIODescription(tileIndex);
     RawTile::ReadError worstError = RawTile::ReadError::None;
 
@@ -134,6 +126,15 @@ const TileTextureInitData& RawTileDataReader::tileTextureInitData() const {
 
 const PixelRegion::PixelRange RawTileDataReader::fullPixelSize() const {
     return glm::uvec2(geodeticToPixel(Geodetic2(90, 180)));
+}
+
+PixelRegion RawTileDataReader::fullPixelRegion() const {
+    PixelRegion fullRegion;
+    fullRegion.start.x = 0;
+    fullRegion.start.y = 0;
+    fullRegion.numPixels.x = rasterXSize();
+    fullRegion.numPixels.y = rasterYSize();
+    return fullRegion;
 }
 
 std::array<double, 6> RawTileDataReader::getGeoTransform() const {
@@ -310,9 +311,8 @@ RawTile::ReadError RawTileDataReader::repeatedRasterRead(
 }
 
 std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
-    std::shared_ptr<RawTile> rawTile, const PixelRegion& region)
+    std::shared_ptr<RawTile> rawTile, const PixelRegion& region) const
 {
-    ensureInitialized();
     size_t bytesPerLine = _initData.bytesPerPixel() * region.numPixels.x;
 
     TileMetaData* preprocessData = new TileMetaData();

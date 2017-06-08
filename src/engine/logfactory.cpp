@@ -212,7 +212,9 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
             );
         }
     }
-    ghoul_assert(false, "Missing case in the documentation for LogFactory");
+    else {
+        throw ghoul::MissingCaseException();
+    }
 }
     
 } // namespace openspace

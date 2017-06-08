@@ -66,7 +66,7 @@ struct CameraKeyframe {
         // Follow focus node rotation?
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&_followNodeRotation), reinterpret_cast<char*>(&_followNodeRotation) + sizeof(_followNodeRotation));
 
-        int nodeNameLength = _focusNode.size();
+        int nodeNameLength = static_cast<int>(_focusNode.size());
 
         // Add focus node
         buffer.insert(buffer.end(), reinterpret_cast<char*>(&nodeNameLength), reinterpret_cast<char*>(&nodeNameLength) + sizeof(nodeNameLength));

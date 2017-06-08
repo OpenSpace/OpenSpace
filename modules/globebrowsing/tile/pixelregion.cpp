@@ -240,16 +240,11 @@ int PixelRegion::area() const {
 
 int PixelRegion::edge(Side side) const {
     switch (side) {
-    case Side::LEFT:
-        return start.x;
-    case Side::TOP:
-        return start.y;
-    case Side::RIGHT:
-        return start.x + numPixels.x;
-    case Side::BOTTOM:
-        return start.y + numPixels.y;
-    default:
-        ghoul_assert(false, "Missing case label");
+        case Side::LEFT:   return start.x;
+        case Side::TOP:    return start.y;
+        case Side::RIGHT:  return start.x + numPixels.x;
+        case Side::BOTTOM: return start.y + numPixels.y;
+        default:           throw ghoul::MissingCaseException();
     }
 }
 

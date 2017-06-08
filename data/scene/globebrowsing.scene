@@ -95,6 +95,7 @@ return {
         "sun",
         "stars",
         "milkyway",
+        -- "satellites"
     }
 }
 

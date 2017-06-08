@@ -953,7 +953,7 @@ void OpenSpaceEngine::initializeGL() {
                         LDEBUGC(category, std::string(message));
                         break;
                     default:
-                        ghoul_assert(false, "Missing case label");
+                        throw ghoul::MissingCaseException();
                 }
             };
             ghoul::opengl::debug::setDebugCallback(callback);
@@ -1243,6 +1243,12 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
                 "Writes out documentation files"
             },
             {
+                "downloadFile",
+                &luascriptfunctions::downloadFile,
+                "",
+                "Downloads a file from Lua scope"
+            },
+            {
                 "addVirtualProperty",
                 &luascriptfunctions::addVirtualProperty,
                 "type, name, identifier, [value, minimumValue, maximumValue]",
@@ -1302,7 +1308,7 @@ void OpenSpaceEngine::registerModuleCallback(OpenSpaceEngine::CallbackOption opt
             _moduleCallbacks.postDraw.push_back(std::move(function));
             break;
         default:
-            ghoul_assert(false, "Missing case label");
+            throw ghoul::MissingCaseException();
     }
 }
     
