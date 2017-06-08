@@ -169,7 +169,6 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 			subsite->availableLevels.push_back(1);
 			pathToDriveFolder = pathToDriveFolderLevel1;
 		}
-
 		if (pathToLevel2Exists) {
 			subsite->availableLevels.push_back(2);
 			pathToDriveFolder = pathToDriveFolderLevel2;
@@ -187,10 +186,9 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 				}
 			}
 			if(!modelExists) {
-				std::string pathToFilenamesTextFile = pathToDriveFolderLevel1 + "/filenames.txt";
-				std::string pathToColoredFilenamesTextFile = pathToDriveFolderLevel1 + "/mastcam.txt";
-				std::string pathToRotationMatrixTextFile = pathToDriveFolderLevel1 + "/rotationmatrix.txt";
-
+				std::string pathToFilenamesTextFile = pathToDriveFolder + "/filenames.txt";
+				std::string pathToColoredFilenamesTextFile = pathToDriveFolder + "/mastcam.txt";
+				std::string pathToRotationMatrixTextFile = pathToDriveFolder + "/rotationmatrix.txt";
 
 				std::shared_ptr<RoverPathFileReader::TextureInformation> textureInformation = extractTextureInfo(pathToFilenamesTextFile);
 

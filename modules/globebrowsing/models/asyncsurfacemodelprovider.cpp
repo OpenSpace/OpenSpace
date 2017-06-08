@@ -63,15 +63,9 @@ std::vector<std::shared_ptr<SubsiteModels>> AsyncSurfaceModelProvider::getLoaded
 		std::shared_ptr<SubsiteModels> subsiteModels = _ramToGpuJobManager.popFinishedJob()->product();
 		unmapBuffers(subsiteModels);
 		initializedModels.push_back(subsiteModels);
-		_enqueuedModelRequests.erase(hashKey(subsiteModels->site, subsiteModels->drive, subsiteModels->level));
+		_enqueuedModelRequests.erase(subsiteModels->hashKey());
 	}
 	return initializedModels;
-}
-
-void AsyncSurfaceModelProvider::clearQueuesAndJobs() {
-	_ramToGpuJobManager.clearEnqueuedJobs();
-	_diskToRamJobManager.clearEnqueuedJobs();
-	_enqueuedModelRequests.clear();
 }
 
 bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const uint64_t hashKey) const {
@@ -90,7 +84,7 @@ void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_p
 		//subsiteModels->textureArray2 = std::make_shared<ghoul::opengl::Texture>(textureArray);
 
 		subsiteModels->textureArray = std::make_shared<TextureArray>(ta);
-	
+
 		//Upload pixel data.
 		//The first 0 refers to the mipmap level (level 0, since there's only 1)
 		//The following 2 zeroes refers to the x and y offsets in case you only want to specify a subrectangle.
@@ -104,7 +98,6 @@ void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_p
 			texture = nullptr;
 		}
 	}
-
 	if (subsiteModels->coloredTextures.size() > 0) {
 		GLuint coloredTextureID;
 

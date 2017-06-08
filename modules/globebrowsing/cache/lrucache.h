@@ -70,13 +70,19 @@ public:
     Item popLRU();
     size_t size() const;
 
+	/**
+	 * Return the whole list of.
+	 */
+	std::list<std::pair<KeyType, ValueType>> list();
+
 private:
     void putWithoutCleaning(const KeyType& key, const ValueType& value);
     void clean();
     std::vector<Item> cleanAndFetchPopped();
 
     Items _itemList;
-    std::unordered_map<KeyType, typename Items::const_iterator, HasherType> _itemMap;
+    
+	std::unordered_map<KeyType, typename Items::const_iterator, HasherType> _itemMap;
 
     size_t _maximumCacheSize;
 };

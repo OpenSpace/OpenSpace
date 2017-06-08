@@ -194,7 +194,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			//High up
 			level = 1;
 			break;
-		case LodModelSwitch::Mode::Far:
+		case LodModelSwitch::Mode::Far :
 			//Far away
 			// Only used to decide if renderableexplorationpath should be visible or not atm.
 			level = 0;
@@ -203,8 +203,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 	lockSubsite(level, ss);
 
-	//TODO: MAKE CACHE AWARE OF PREVIOUS LEVEL
-	//FOR ALPHA BLENDING TO WORK
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfsubsiteModels;
 	if(_generalProperties.lockSubsite.value())
 		vectorOfsubsiteModels = _cachingModelProvider->getModels(_prevSubsites, level);
@@ -300,7 +298,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		_programObject->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
 		_programObject->setUniform("projectionTransform", data.camera.projectionMatrix());
 		_programObject->setUniform("useMastCamColor", _generalProperties.useMastCam.value());
-		_programObject->setUniform("alpha", subsiteModels->alpha);
+		_programObject->setUniform("alpha", subsiteModels->alpha());
 
 		std::vector<glm::fvec4> cameraColoredInfoCenter;
 		std::vector<glm::fvec4> cameraColoredInfoAxis;
@@ -349,16 +347,13 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		if (!_generalProperties.enableDepth.value()) {
 			glDisable(GL_DEPTH_TEST);
 		}
-		
 		glDisable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 		subsiteModels->model->render();
-		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_CULL_FACE);
 	}
 	_programObject->deactivate();
-	//_cachingModelProvider->setLevel(level);
 
 	if (_generalProperties.enablePath.value()) {
 		_renderableExplorationPath->setLevel(level);
@@ -379,7 +374,7 @@ std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSur
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(subsiteModels->geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + 1.0 };
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + 0.7 };
 		subsiteModels->cartesianPosition = _globe->ellipsoid().cartesianPosition(geo3);
 	}
 	return vector;

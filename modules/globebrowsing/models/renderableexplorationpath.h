@@ -52,8 +52,9 @@ public:
 	void setLevel(const int level);
 
 private:
-	void calculatePathModelCoordinates();
-	void recalculateCartesianPathCoordinates();
+	std::vector<glm::vec4> calculateModelCoordinates(std::vector<Geodetic2> geodetics, const int offset);
+	void bufferData(GLuint vaID, GLuint vbID, const std::vector<glm::vec4> coordinates);
+	void reBufferData(GLuint vaID, GLuint vbID, const std::vector<glm::vec4> coordinates);
 
 	std::unique_ptr<ghoul::opengl::ProgramObject> _pathShader;
 	std::unique_ptr<ghoul::opengl::ProgramObject> _siteShader;
@@ -73,11 +74,11 @@ private:
 	float _fading;
 	float _fading2;
 
-	GLuint _vaioID;
-	GLuint _vertexBufferID;
+	GLuint _vaPathID;
+	GLuint _vbPathID;
 
-	GLuint _vaioID2;
-	GLuint _vertexBufferID2;
+	GLuint _vaModelsID;
+	GLuint _vbModelsID;
 };
 
 } // namespace globebrowsing
