@@ -953,7 +953,7 @@ void OpenSpaceEngine::initializeGL() {
                         LDEBUGC(category, std::string(message));
                         break;
                     default:
-                        ghoul_assert(false, "Missing case label");
+                        throw ghoul::MissingCaseException();
                 }
             };
             ghoul::opengl::debug::setDebugCallback(callback);
@@ -1308,7 +1308,7 @@ void OpenSpaceEngine::registerModuleCallback(OpenSpaceEngine::CallbackOption opt
             _moduleCallbacks.postDraw.push_back(std::move(function));
             break;
         default:
-            ghoul_assert(false, "Missing case label");
+            throw ghoul::MissingCaseException();
     }
 }
     

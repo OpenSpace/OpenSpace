@@ -80,7 +80,8 @@ std::string to_string(openspace::documentation::TestResult::Offense::Reason reas
         case openspace::documentation::TestResult::Offense::Reason::WrongType:
             return "Wrong type";
         default:
-            ghoul_assert(false, "Missing case label");
+            throw ghoul::MissingCaseException();
+
     }
 }
     
@@ -89,7 +90,7 @@ std::string to_string(openspace::documentation::TestResult::Warning::Reason reas
         case openspace::documentation::TestResult::Warning::Reason::Deprecated:
             return "Deprecated";
         default:
-            ghoul_assert(false, "Missing case label");
+            throw ghoul::MissingCaseException();
     }
 }
 

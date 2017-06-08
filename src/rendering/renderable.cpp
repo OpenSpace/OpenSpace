@@ -70,9 +70,11 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
     // The name is passed down from the SceneGraphNode
-    std::string name;
-    bool success = dictionary.getValue(SceneGraphNode::KeyName, name);
-    ghoul_assert(success, "The SceneGraphNode did not set the 'name' key");
+    ghoul_assert(
+        dictionary.hasKeyAndValue<std::string>(SceneGraphNode::KeyName),
+        "The SceneGraphNode did not set the 'name' key"
+    );
+    std::string name = dictionary.value<std::string>(SceneGraphNode::KeyName);
 
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 

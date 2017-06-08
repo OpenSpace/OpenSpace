@@ -91,6 +91,6 @@ bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b);
 
 } // namespace openspace
 
-#include <openspace/util/timeline.inl>;
+#include <openspace/util/timeline.inl>
 
 #endif // __OPENSPACE_CORE___TIMELINE___H__
