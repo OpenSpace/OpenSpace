@@ -48,8 +48,11 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary)
     dictionary.getValue(KeyLayerGroupID, layerGroupID);
     const char* _loggerCat = ("TileProviderByLevel" + name).c_str();
   
-    ghoul::Dictionary providers = dictionary.value<ghoul::Dictionary>(KeyProviders);
-
+    ghoul::Dictionary providers;
+    if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyProviders)) {
+        providers = dictionary.value<ghoul::Dictionary>(KeyProviders);
+    }
+    
     for (size_t i = 0; i < providers.size(); i++) {
         try {
             std::string dictKey = std::to_string(i + 1);
