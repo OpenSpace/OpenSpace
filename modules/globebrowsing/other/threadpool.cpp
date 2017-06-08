@@ -67,6 +67,10 @@ ThreadPool::ThreadPool(size_t numThreads)
     }
 }
 
+ThreadPool::ThreadPool(const ThreadPool& toCopy)
+    : ThreadPool(toCopy.workers.size())
+{ }
+
 // the destructor joins all threads
 ThreadPool::~ThreadPool() {
     // stop all threads

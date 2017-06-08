@@ -47,8 +47,7 @@ AsyncTileDataProvider::AsyncTileDataProvider(const std::string& name,
     const std::shared_ptr<RawTileDataReader> rawTileDataReader)
     : _name(name)
     , _rawTileDataReader(rawTileDataReader)
-    , _concurrentJobManager(
-        std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 10))
+    , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
     , _pboContainer(nullptr)
     , _resetMode(ResetMode::ShouldResetAllButRawTileDataReader)
     , _shouldBeDeleted(false)

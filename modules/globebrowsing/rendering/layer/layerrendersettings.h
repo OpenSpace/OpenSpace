@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/triggerproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -35,6 +36,8 @@ namespace globebrowsing {
 struct LayerRenderSettings : public properties::PropertyOwner {
     LayerRenderSettings();
     
+    properties::TriggerProperty setDefault;
+
     properties::FloatProperty opacity;
     properties::FloatProperty gamma;
     properties::FloatProperty multiplier;
@@ -52,6 +55,9 @@ struct LayerRenderSettings : public properties::PropertyOwner {
     /// This function matches the function with the same name in the
     /// shader code
     glm::vec4 performLayerSettings(glm::vec4 currentValue) const;
+
+private:
+    void setDefaultValues();
 };
 
 } // namespace globebrowsing

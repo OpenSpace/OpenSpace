@@ -57,6 +57,7 @@ namespace tileprovider {
 CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
     : TileProvider(dictionary)
     , _filePath("filePath", "File Path", "")
+    , _tilePixelSize("tilePixelSize", "Tile Pixel Size", 32, 32, 1024)
     , _preCacheLevel(0)
 {
     _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();
@@ -77,12 +78,15 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     // 2. Initialize default values for any optional Keys
     // getValue does not work for integers
     double pixelSize = 0.0;
-    _tilePixelSize = 0;
+    int tilePixelSize = 0;
     if (dictionary.getValue<double>(KeyTilePixelSize, pixelSize)) {
         LDEBUG("Default pixel size overridden: " << pixelSize);
-        _tilePixelSize = static_cast<int>(pixelSize); 
+        tilePixelSize = pixelSize; 
     }
-    
+    TileTextureInitData initData(LayerManager::getTileTextureInitData(
+        _layerGroupID, tilePixelSize));
+    _tilePixelSize.setValue(initData.dimensionsWithoutPadding().x);
+
     _performPreProcessing =
         LayerManager::shouldPerformPreProcessingOnLayergroup(_layerGroupID);
     if (dictionary.getValue<bool>(KeyPerformPreProcessing, _performPreProcessing)) {
@@ -95,16 +99,18 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
 
     dictionary.getValue(KeyBasePath, _basePath);
 
-    initAsyncTileDataReader();
+    initAsyncTileDataReader(initData);
 
     // Properties
     addProperty(_filePath);
+    addProperty(_tilePixelSize);
 }
 
 CachingTileProvider::CachingTileProvider(
     std::shared_ptr<AsyncTileDataProvider> tileReader)
     : _asyncTextureDataProvider(tileReader)
     , _filePath("filePath", "File Path", "")
+    , _tilePixelSize("tilePixelSize", "Tile Pixel Size", 32, 32, 1024)
 { }
 
 CachingTileProvider::~CachingTileProvider()
@@ -116,7 +122,9 @@ void CachingTileProvider::update() {
         initTexturesFromLoadedData();
         if (_asyncTextureDataProvider->shouldBeDeleted()) {
             _asyncTextureDataProvider = nullptr;
-            initAsyncTileDataReader();
+            TileTextureInitData initData(LayerManager::getTileTextureInitData(
+                _layerGroupID, _tilePixelSize));
+            initAsyncTileDataReader(initData);
         }
     }
 }
@@ -127,7 +135,9 @@ void CachingTileProvider::reset() {
         _asyncTextureDataProvider->prepairToBeDeleted();
     }
     else {
-        initAsyncTileDataReader();
+        TileTextureInitData initData(LayerManager::getTileTextureInitData(
+            _layerGroupID, _tilePixelSize));
+        initAsyncTileDataReader(initData);
     }
 }
 
@@ -181,13 +191,10 @@ void CachingTileProvider::initTexturesFromLoadedData() {
     }
 }
 
-void CachingTileProvider::initAsyncTileDataReader() {
+void CachingTileProvider::initAsyncTileDataReader(TileTextureInitData initData) {
     std::string _loggerCat = "CachingTileProvider : " + _name;
 
     RawTileDataReader* tileDataReader = nullptr;
-
-    TileTextureInitData initData(LayerManager::getTileTextureInitData(
-        _layerGroupID, _tilePixelSize));
 
     RawTileDataReader::PerformPreprocessing preprocess =
         _performPreProcessing ? RawTileDataReader::PerformPreprocessing::Yes :

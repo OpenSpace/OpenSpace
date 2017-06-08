@@ -29,6 +29,7 @@
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/numericalproperty.h>
 
 namespace openspace {
 
@@ -75,16 +76,16 @@ private:
     */
     void initTexturesFromLoadedData();
 
-    void initAsyncTileDataReader();
+    void initAsyncTileDataReader(TileTextureInitData initData);
 
     std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
   
     cache::MemoryAwareTileCache* _tileCache;
 
     properties::StringProperty _filePath;
+    properties::IntProperty _tilePixelSize;
     layergroupid::GroupID _layerGroupID;
     std::string _basePath;
-    int _tilePixelSize;
     int _preCacheLevel;
     bool _performPreProcessing;
 };

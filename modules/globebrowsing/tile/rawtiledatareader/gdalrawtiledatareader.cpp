@@ -151,6 +151,9 @@ IODescription GdalRawTileDataReader::getIODescription(const TileIndex& tileIndex
 }
 
 void GdalRawTileDataReader::initialize() {
+    if (_datasetFilePath.empty()) {
+        throw ghoul::RuntimeError("File path must not be empty");
+    }
     _dataset = openGdalDataset(_datasetFilePath);
 
     // Assume all raster bands have the same data type

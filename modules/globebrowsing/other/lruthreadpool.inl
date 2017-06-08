@@ -68,6 +68,11 @@ LRUThreadPool<KeyType>::LRUThreadPool(size_t numThreads, size_t queueSize)
     }
 }
 
+template<typename KeyType>
+LRUThreadPool<KeyType>::LRUThreadPool(const LRUThreadPool& toCopy)
+    : LRUThreadPool(toCopy._workers.size(), _queuedTasks.maximumCacheSize())
+{ }
+
 // the destructor joins all threads
 template<typename KeyType>
 LRUThreadPool<KeyType>::~LRUThreadPool() {

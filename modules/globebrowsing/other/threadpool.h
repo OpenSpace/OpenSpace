@@ -50,6 +50,7 @@ private:
 class ThreadPool {
 public:
     ThreadPool(size_t numThreads);
+    ThreadPool(const ThreadPool& toCopy);
     ~ThreadPool();
 
     void enqueue(std::function<void()> f);

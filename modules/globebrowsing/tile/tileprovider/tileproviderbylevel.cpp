@@ -109,11 +109,6 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary)
         }    
     }
 
-    // If all failed
-    if (_levelTileProviders.size() == 0) {
-        throw ghoul::RuntimeError("Failed to create tile provider: " + name);
-    }
-
     // Fill in the gaps (value -1) in provider indices, from back to end
     for(int i = _providerIndices.size() - 2; i >= 0; --i){
         if(_providerIndices[i] == -1){
@@ -123,11 +118,23 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary)
 }
 
 Tile TileProviderByLevel::getTile(const TileIndex& tileIndex) {
-    return levelProvider(tileIndex.level)->getTile(tileIndex);
+    TileProvider* provider = levelProvider(tileIndex.level);
+    if (provider) {
+        return provider->getTile(tileIndex);
+    }
+    else {
+        return Tile::TileUnavailable;
+    }
 }
 
 Tile::Status TileProviderByLevel::getTileStatus(const TileIndex& index) {
-    return levelProvider(index.level)->getTileStatus(index);
+    TileProvider* provider = levelProvider(index.level);
+    if (provider) {
+        return provider->getTileStatus(index);
+    }
+    else {
+        return Tile::Status::Unavailable;
+    }
 }
 
 TileDepthTransform TileProviderByLevel::depthTransform() {
@@ -162,7 +169,12 @@ int TileProviderByLevel::providerIndex(int level) const {
 }
 
 TileProvider* TileProviderByLevel::levelProvider(int level) const {
-    return _levelTileProviders[providerIndex(level)].get();
+    if (_levelTileProviders.size() > 0) {
+        return _levelTileProviders[providerIndex(level)].get();
+    }
+    else {
+        return nullptr;
+    }
 }
 
 } // namespace tileprovider

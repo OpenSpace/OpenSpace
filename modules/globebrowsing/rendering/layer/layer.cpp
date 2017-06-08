@@ -88,6 +88,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
         _typeOption.addOption(i, layergroupid::LAYER_TYPE_NAMES[i]);
     }
     _typeOption.setValue(static_cast<int>(typeID));
+    _type = static_cast<layergroupid::TypeID>(_typeOption.value());
 
     for (int i = 0; i < layergroupid::NUM_BLEND_MODES; ++i) {
         _blendModeOption.addOption(i, layergroupid::BLEND_MODE_NAMES[i]);
@@ -152,7 +153,7 @@ Tile::Status Layer::getTileStatus(const TileIndex& index) const {
         return _tileProvider->getTileStatus(index);
     }
     else {
-        return Tile::Status::OK;
+        return Tile::Status::Unavailable;
     }
 }
 
@@ -225,6 +226,7 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
         case layergroupid::TypeID::ByLevelTileLayer: {
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
+            _tileProvider = nullptr;
             ghoul::Dictionary tileProviderInitDict = initDict;
             tileProviderInitDict.setValue(keyLayerGroupID, _layerGroupId);
             _tileProvider = std::shared_ptr<tileprovider::TileProvider>(

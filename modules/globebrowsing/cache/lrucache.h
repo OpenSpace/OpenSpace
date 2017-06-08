@@ -69,6 +69,7 @@ public:
      */
     Item popLRU();
     size_t size() const;
+    size_t maximumCacheSize() const;
 
 private:
     void putWithoutCleaning(const KeyType& key, const ValueType& value);
