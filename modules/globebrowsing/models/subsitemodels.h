@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/models/model.h>
 #include <modules/globebrowsing/tasks/imgreader.h>
-#include <ghoul/opengl/texturearray.h>
+#include <modules/globebrowsing/opengl/texturearray.h>
 
 #include <memory>
 
@@ -45,7 +45,9 @@ struct SubsiteModels {
 	std::vector <std::shared_ptr<ghoul::opengl::Texture>> textures;
 	std::vector <std::shared_ptr<ghoul::opengl::Texture>> coloredTextures;
 	std::shared_ptr<openspace::modelgeometry::AsyncMultiModelGeometry> model;
-	std::shared_ptr<ghoul::opengl::TextureArray> textureArray;
+	std::shared_ptr<TextureArray> textureArray;
+	std::shared_ptr<TextureArray> coloredTextureArray;
+	glm::dmat4 rotationMatrix;
 
 	glm::dvec3 cartesianPosition;
 
