@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_csv.h 33844 2016-04-01 08:42:13Z rouault $
+ * $Id: cpl_csv.h 36376 2016-11-21 06:54:04Z goatbar $
  *
  * Project:  Common Portability Library
  * Purpose:  Functions for reading and scanning CSV (comma separated,
@@ -30,6 +30,8 @@
 
 #ifndef CPL_CSV_H_INCLUDED
 #define CPL_CSV_H_INCLUDED
+
+#include <stdio.h>
 
 #include "cpl_conv.h"
 #include "cpl_string.h"
