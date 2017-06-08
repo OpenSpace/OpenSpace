@@ -204,7 +204,7 @@ static void RenderDrawLists(ImDrawData* drawData) {
 }
 
 
-void addScreenSpaceRenderable(std::string texturePath) {
+void addScreenSpaceImage(std::string texturePath) {
     if (!FileSys.fileExists(texturePath)) {
         LWARNING("Could not find image '" << texturePath << "'");
         return;
@@ -212,6 +212,14 @@ void addScreenSpaceRenderable(std::string texturePath) {
 
     const std::string luaTable =
         "{Type = 'ScreenSpaceImage', TexturePath = openspace.absPath('" + texturePath + "') }";
+    const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
+    OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
+}
+
+
+void addScreenSpaceBrowser(std::string url) {
+    const std::string luaTable =
+        "{Type = 'ScreenSpaceBrowser', URL = '" + url + "'}";
     const std::string script = "openspace.registerScreenSpaceRenderable(" + luaTable + ");";
     OsEng.scriptEngine().queueScript(script, openspace::scripting::ScriptEngine::RemoteScripting::Yes);
 }
@@ -616,8 +624,23 @@ void GUI::render() {
         ImGuiInputTextFlags_EnterReturnsTrue
     );
     if (addImage) {
-        addScreenSpaceRenderable(std::string(addImageBuffer));
+        addScreenSpaceImage(std::string(addImageBuffer));
     }
+
+#ifdef OPENSPACE_MODULE_WEBGUI_ENABLED
+    static const int openUrlBufferSize = 256;
+    static char openUrlBuffer[openUrlBufferSize];
+
+    bool openUrl = ImGui::InputText(
+            "Open Browser",
+            openUrlBuffer,
+            openUrlBufferSize,
+            ImGuiInputTextFlags_EnterReturnsTrue
+    );
+    if (openUrl) {
+        addScreenSpaceBrowser(std::string(openUrlBuffer));
+    }
+#endif
 
 #ifdef SHOW_IMGUI_HELPERS
     ImGui::Begin("Style Editor");

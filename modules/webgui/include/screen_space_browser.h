@@ -22,27 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
-#define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
+#ifndef OPENSPACE_MODULES_WEBGUI__SCREEN_SPACE_BROWSER_H
+#define OPENSPACE_MODULES_WEBGUI__SCREEN_SPACE_BROWSER_H
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/vectorproperty.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/rendering/renderengine.h>
+#include <fmt/format.h>
+#include "include/screen_space_render_handler.h"
 #include "include/browser_instance.h"
-#include "include/cef_host.h"
 
 namespace openspace {
 
-static const std::string GUI_LOCATION = "http://localhost:8080";
-
-class WebGUIModule : public OpenSpaceModule {
+class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:
-    WebGUIModule();
-    void internalInitialize();
+    ScreenSpaceBrowser(const ghoul::Dictionary& dictionary);
+
+    bool initialize() override;
+    bool deinitialize() override;
+    void render() override;
+    void update() override;
+    bool isReady() const override;
 
 private:
-	std::unique_ptr<CefHost> cefHost;
-	std::unique_ptr<BrowserInstance> guiInstance;
+    properties::StringProperty url;
+    properties::Vec2Property dimensions;
+    CefRefPtr<ScreenSpaceRenderHandler> renderHandler;
+    std::shared_ptr<BrowserInstance> browserInstance;
+
+    bool urlIsDirty;
+    bool dimensionsAreDirty;
 };
 
-} // namespace openspace
+};
 
-#endif // __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
+#endif //OPENSPACE_MODULES_WEBGUI__SCREEN_SPACE_BROWSER_H

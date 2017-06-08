@@ -46,9 +46,7 @@ public:
 
 private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
-    GLuint program, vao, vbo, positionLoc;
-
-    IMPLEMENT_REFCOUNTING(GUIRenderHandler);
+    GLuint program, vao, vbo;
 };
 
 } // namespace openspace

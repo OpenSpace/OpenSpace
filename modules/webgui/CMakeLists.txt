@@ -172,6 +172,8 @@ set(OPENSPACE_HEADER_FILES
         include/browser_client.h
         include/cef_host.h
         include/web_render_handler.h
+        include/screen_space_render_handler.h
+        include/screen_space_browser.h
         include/gui_render_handler.h
         include/event_handler.h
         include/browser_instance.h
@@ -183,6 +185,8 @@ set(OPENSPACE_SOURCE_FILES
         src/browser_client.cpp
         src/cef_host.cpp
         src/web_render_handler.cpp
+        src/screen_space_render_handler.cpp
+        src/screen_space_browser.cpp
         src/gui_render_handler.cpp
         src/event_handler.cpp
         src/browser_instance.cpp

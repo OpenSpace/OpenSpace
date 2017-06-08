@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <include/openspace/util/factorymanager.h>
+#include <include/screen_space_browser.h>
 #include "webguimodule.h"
 
 namespace openspace {
@@ -53,6 +55,11 @@ void WebGUIModule::internalInitialize() {
                     guiInstance->draw();
                 }
             });
+
+    auto fScreenSpaceRenderable = FactoryManager::ref().factory<ScreenSpaceRenderable>();
+    ghoul_assert(fScreenSpaceRenderable, "ScreenSpaceRenderable factory was not created");
+
+    fScreenSpaceRenderable->registerClass<ScreenSpaceBrowser>("ScreenSpaceBrowser");
 }
 
 }

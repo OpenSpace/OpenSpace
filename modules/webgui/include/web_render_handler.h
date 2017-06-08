@@ -47,6 +47,8 @@ public:
 protected:
     int width = 0, height = 0;
     GLuint texture;
+
+    IMPLEMENT_REFCOUNTING(WebRenderHandler);
 };
 
 } // namespace openspace

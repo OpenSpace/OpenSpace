@@ -22,27 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
-#define __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
-
-#include <openspace/util/openspacemodule.h>
-#include "include/browser_instance.h"
-#include "include/cef_host.h"
+#include "include/screen_space_render_handler.h"
 
 namespace openspace {
 
-static const std::string GUI_LOCATION = "http://localhost:8080";
+void ScreenSpaceRenderHandler::draw(void) {
 
-class WebGUIModule : public OpenSpaceModule {
-public:
-    WebGUIModule();
-    void internalInitialize();
+}
 
-private:
-	std::unique_ptr<CefHost> cefHost;
-	std::unique_ptr<BrowserInstance> guiInstance;
-};
+void ScreenSpaceRenderHandler::render() {
 
-} // namespace openspace
+}
 
-#endif // __OPENSPACE_MODULE_WEBGUI___WEBGUIMODULE___H__
+void ScreenSpaceRenderHandler::setTexture(const GLuint &t) {
+    texture = t;
+}
+
+}
