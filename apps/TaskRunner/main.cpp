@@ -73,7 +73,7 @@ void performTasks(const std::string& path) {
     using namespace openspace;
 
     TaskLoader taskLoader;
-    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(path + ".task");
+    std::vector<std::unique_ptr<Task>> tasks = taskLoader.tasksFromFile(path);
 
     size_t nTasks = tasks.size();
     if (nTasks == 1) {
@@ -107,6 +107,8 @@ int main(int argc, char** argv) {
     LogMgr.addLog(std::make_unique< ghoul::logging::ConsoleLog>());
 
     LDEBUG("Initialize FileSystem");
+
+    ghoul::filesystem::Directory launchDirectory = FileSys.currentDirectory();
 
 #ifdef __APPLE__
     ghoul::filesystem::File app(argv[0]);
@@ -170,6 +172,7 @@ int main(int argc, char** argv) {
     commandlineParser.setCommandLine(args);
     commandlineParser.execute();
 
+    FileSys.setCurrentDirectory(launchDirectory);
 
     if (tasksPath != "") {
         performTasks(tasksPath);
