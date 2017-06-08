@@ -67,7 +67,7 @@ void main() {
     }
 
     // G-Buffer
-    vs_gPosition = position
+    vs_gPosition = position;
     
     position = modelViewProjectionTransform * position;
     vs_position = z_normalization(position);
