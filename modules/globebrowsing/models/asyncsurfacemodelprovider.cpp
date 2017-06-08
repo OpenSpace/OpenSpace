@@ -27,7 +27,7 @@
 #include <modules/globebrowsing/tile/loadjob/surfacemodelloadjob.h>
 #include <modules/globebrowsing/models/job/subsiteinitializationjob.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/texturearray.h>
+#include <modules/globebrowsing/opengl/texturearray.h>
 
 namespace {
 	const std::string _loggerCat = "AsyncSurfaceModelProvider";
@@ -80,61 +80,61 @@ bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const uint64_t hashKey)
 
 void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels) {
 	subsiteModels->model->initialize(_parent);
-
-	GLuint textureID;
+	
 	GLsizei mipLevelCount = 1;
 
 	const clock_t begin_time = clock();
+	if (subsiteModels->textures.size() > 0) {
+		TextureArray ta = TextureArray(subsiteModels->textures.at(0)->dimensions(), subsiteModels->textures.size());
 
-	//ghoul::opengl::TextureArray ta = ghoul::opengl::TextureArray(glm::uvec3(1024, 1024, 1), subsiteModels->textures.size());
-	//ta.setType(GL_TEXTURE_2D_ARRAY);
+		//subsiteModels->textureArray2 = std::make_shared<ghoul::opengl::Texture>(textureArray);
 
-	//subsiteModels->textureArray = std::make_shared<ghoul::opengl::TextureArray>(ta);
-
-	glGenTextures(1, &textureID);
-	subsiteModels->textureID = textureID;
-	//subsiteModels->textureID = ta.Id();
+		subsiteModels->textureArray = std::make_shared<TextureArray>(ta);
 	
-	glBindTexture(GL_TEXTURE_2D_ARRAY, textureID);
-
-	//Allocate the storage.
-	glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevelCount, GL_RGBA8, 1024, 1024, subsiteModels->textures.size());
-
-	//Upload pixel data.
-	//The first 0 refers to the mipmap level (level 0, since there's only 1)
-	//The following 2 zeroes refers to the x and y offsets in case you only want to specify a subrectangle.
-	//The final 0 refers to the layer index offset (we start from index 0 and have 2 levels).
-	//Altogether you can specify a 3D box subset of the overall texture, but only one mip level at a time.
-	int counter = 0;
-	for (auto texture : subsiteModels->textures) {
-		//ta.uploadTexture(texture->pixelData());
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, counter, 1024, 1024, 1, GL_RGBA, GL_UNSIGNED_BYTE, texture->pixelData());
-		counter++;
-	}
-	// Temporary solution to release memory and throw texture id
-	for (auto texture : subsiteModels->textures) {
-		texture = nullptr;
-	}
-	GLuint coloredTextureID;
-	glGenTextures(1, &coloredTextureID);
-	subsiteModels->coloredTextureID = coloredTextureID;
-	glBindTexture(GL_TEXTURE_2D_ARRAY, coloredTextureID);
-
-	//Allocate the storage.
-	glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevelCount, GL_RGB8, 1344, 1200, subsiteModels->coloredTextures.size());
-
-	counter = 0;
-	for (auto texture2 : subsiteModels->coloredTextures) {
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, counter, 1344, 1200, 1, GL_RGB, GL_UNSIGNED_BYTE, texture2->pixelData());
-		counter++;
+		//Upload pixel data.
+		//The first 0 refers to the mipmap level (level 0, since there's only 1)
+		//The following 2 zeroes refers to the x and y offsets in case you only want to specify a subrectangle.
+		//The final 0 refers to the layer index offset (we start from index 0 and have 2 levels).
+		//Altogether you can specify a 3D box subset of the overall texture, but only one mip level at a time
+		for (auto texture : subsiteModels->textures) {
+			subsiteModels->textureArray->uploadTexture(texture->pixelData());
+		}
+		// Temporary solution to release memory and throw texture id
+		for (auto texture : subsiteModels->textures) {
+			texture = nullptr;
+		}
 	}
 
-	// Temporary solution to release memory and throw texture id
-	for (auto texture2 : subsiteModels->coloredTextures) {
-		texture2 = nullptr;
+	if (subsiteModels->coloredTextures.size() > 0) {
+		GLuint coloredTextureID;
+
+		TextureArray coloredTextureArray = TextureArray(subsiteModels->coloredTextures.at(0)->dimensions(), subsiteModels->coloredTextures.size(), GL_RGB);
+
+		//glGenTextures(1, &coloredTextureID);
+		//subsiteModels->coloredTextureID = coloredTextureID;
+
+		subsiteModels->coloredTextureArray = std::make_shared<TextureArray>(coloredTextureArray);
+
+		subsiteModels->coloredTextureID = subsiteModels->coloredTextureArray->id();
+
+		//glBindTexture(GL_TEXTURE_2D_ARRAY, coloredTextureID);
+
+		//Allocate the storage.
+		//glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevelCount, GL_RGB8, 1344, 1200, subsiteModels->coloredTextures.size());
+
+		int counter = 0;
+		for (auto texture2 : subsiteModels->coloredTextures) {
+			subsiteModels->coloredTextureArray->uploadTexture(texture2->pixelData());
+			//glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, counter, 1344, 1200, 1, GL_RGB, GL_UNSIGNED_BYTE, texture2->pixelData());
+			counter++;
+		}
+
+		// Temporary solution to release memory and throw texture id
+		for (auto texture2 : subsiteModels->coloredTextures) {
+			texture2 = nullptr;
+		}
 	}
-
-
+	
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
