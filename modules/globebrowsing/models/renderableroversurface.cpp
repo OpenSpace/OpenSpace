@@ -60,7 +60,8 @@ namespace globebrowsing {
 				BoolProperty("enable", "Enabled", true),
 				BoolProperty("enablePath", "Enable path", true),
 				BoolProperty("lockSubsite", "Lock subsite", false),
-				BoolProperty("useMastCam", "Show mastcam coloring", false)
+				BoolProperty("useMastCam", "Show mastcam coloring", false),
+				BoolProperty("enableDepth", "Enable depth", true)
 		})
 		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
 		, _modelSwitch()
@@ -101,6 +102,7 @@ namespace globebrowsing {
 	addProperty(_generalProperties.enablePath);
 	addProperty(_generalProperties.lockSubsite);
 	addProperty(_generalProperties.useMastCam);
+	addProperty(_generalProperties.enableDepth);
 	addProperty(_debugModelRotation);
 
 	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
@@ -213,58 +215,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 	_programObject->activate();
 	for (auto subsiteModels : vectorOfsubsiteModels) {
-
-		/*float dir = 1;
-		float alpha = subsiteModels->_alpha;
-		int subsitePrevLevel = subsiteModels->level;
-		if (level != _prevLevel) {
-			// We went from one level to the next
-			// we need to fade out previously rendered models
-			if (level != subsitePrevLevel && alpha >= 0.0) {
-				// Current subsite should fade out
-				dir *= -1;
-			}
-			else if (alpha >= 1.0) {
-				// Current subsite is the correct level and has been faded in correctly
-				dir = 0;
-			}
-
-			if (level == 3) {
-				_prevSubsite = subsiteModels;
-			}
-		}
-		else if (_prevSubsite != nullptr 
-			&& _prevSubsite->drive != subsiteModels->drive 
-			&& level == 3) {
-			// Walking between models
-			// And this is the new model that should be faded in
-			// if it's not already done
-			dir = subsiteModels->_alpha >= 1.0 ? 0 : 1;
-			if (dir == 0.0) {
-				_prevSubsite = subsiteModels;
-			}
-		}
-		else if (_prevSubsite != nullptr 
-			&& vectorOfsubsiteModels.size() > 1
-			&& _prevSubsite->drive == subsiteModels->drive 
-			&& level == 3) {
-			// Walking between models
-			// And this is the previous model that should be faded out
-			// if it's not already done
-			dir = subsiteModels->_alpha <= 0.0 ? 0 : -1;
-		}
-		else {
-			dir = subsiteModels->_alpha >= 1.0 ? 0 : 1;
-		}*/
-
-		//alpha = alpha + dir * 0.005;
-		//subsiteModels->_alpha = alpha;
-
-		/*if (_prevSubsiteModels != nullptr && _prevSubsiteModels != subsiteModels
-				&& level == 3) {
-			_prevSubsiteModels = subsiteModels;
-		}*/
-
 		glm::dmat4 globeTransform = _globe->modelTransform();
 
 		glm::dvec3 positionWorldSpace = globeTransform * glm::dvec4(subsiteModels->cartesianPosition, 1.0);
@@ -273,10 +223,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		// debug rotation controlled from GUI
 		glm::mat4 unitMat4(1);
 		glm::vec3 debugEulerRot = glm::radians(_debugModelRotation.value());
-
-		//debugEulerRot.x = glm::radians(146.f);
-		//debugEulerRot.y = glm::radians(341.f);
-		//debugEulerRot.z = glm::radians(79.f);
 
 		glm::mat4 rotX = glm::rotate(unitMat4, debugEulerRot.x, glm::vec3(1, 0, 0));
 		glm::mat4 rotY = glm::rotate(unitMat4, debugEulerRot.y, glm::vec3(0, 1, 0));
@@ -356,24 +302,6 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		_programObject->setUniform("useMastCamColor", _generalProperties.useMastCam.value());
 		_programObject->setUniform("alpha", subsiteModels->alpha);
 
-
-		// TODO: Hardcoded values for site 48 drive 1570,
-		// this should be read from, maybe, txt file
-		// it's the rotation of the roversite param in the img file
-		glm::quat q3(0.3320701, -0.0762275, -0.0618002, 0.9381362);
-
-		glm::mat4 rot = glm::mat4(glm::toMat4(q3));
-
-		glm::vec3 angle33 = glm::vec3(0, M_PI, -M_PI / 2.0);
-
-		glm::mat4 unitMat44(1);
-
-		glm::mat4 rotX2 = glm::rotate(unitMat44, angle33.x, glm::vec3(1, 0, 0));
-		glm::mat4 rotY2 = glm::rotate(unitMat44, angle33.y, glm::vec3(0, 1, 0));
-		glm::mat4 rotZ2 = glm::rotate(unitMat44, angle33.z, glm::vec3(0, 0, 1));
-
-		glm::mat4 debugModelRotation33 = rotX2 * rotY2 * rotZ2;
-
 		std::vector<glm::fvec4> cameraColoredInfoCenter;
 		std::vector<glm::fvec4> cameraColoredInfoAxis;
 		std::vector<glm::fvec4> cameraColoredInfoHorizontal;
@@ -381,10 +309,12 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 		for (auto coloredCameraInfo : subsiteModels->coloredCameraInfoVector) {
 			ImgReader::PointCloudInfo mInfoTemp = coloredCameraInfo;
-			cameraColoredInfoCenter.push_back(debugModelRotation33 * rot * glm::vec4(mInfoTemp._cameraCenter, 1.0f));
-			cameraColoredInfoAxis.push_back(debugModelRotation33 * rot * glm::vec4(mInfoTemp._cameraAxis, 1.0f));
-			cameraColoredInfoHorizontal.push_back(debugModelRotation33 * rot * glm::vec4(mInfoTemp._cameraHorizontal, 1.0f));
-			cameraColoredInfoVector.push_back(debugModelRotation33 * rot * glm::vec4(mInfoTemp._cameraVector, 1.0f));
+
+			cameraColoredInfoCenter.push_back(subsiteModels->rotationMatrix * glm::vec4(mInfoTemp._cameraCenter, 1.0f));
+			cameraColoredInfoAxis.push_back(subsiteModels->rotationMatrix * glm::vec4(mInfoTemp._cameraAxis, 1.0f));
+			cameraColoredInfoHorizontal.push_back(subsiteModels->rotationMatrix * glm::vec4(mInfoTemp._cameraHorizontal, 1.0f));
+			cameraColoredInfoVector.push_back(subsiteModels->rotationMatrix * glm::vec4(mInfoTemp._cameraVector, 1.0f));
+				
 		}
 		
 		const GLint locationColoredCenter = _programObject->uniformLocation("camerasColoredCenters");
@@ -399,26 +329,33 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 		_programObject->setUniform("size", static_cast<int>(cameraInfoCenter.size()));
 		_programObject->setUniform("colorSize", static_cast<int>(cameraColoredInfoCenter.size()));
+		if (subsiteModels->textures.size() > 0) {
+			glActiveTexture(GL_TEXTURE0);
+			subsiteModels->textureArray->bind();
+			const GLint locationRoverTerrainTextures = _programObject->uniformLocation("roverTerrainTextures");
+			glUniform1i(locationRoverTerrainTextures, 0);
+		}
+		
+		if (subsiteModels->coloredTextures.size() > 0) {
+			_programObject->setUniform("coloredTextureDimensions", subsiteModels->coloredTextures.at(0)->dimensions());
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, subsiteModels->textureID);
-		//subsiteModels->textureArray->bind();
-
-		const GLint locationRoverTerrainTextures = _programObject->uniformLocation("roverTerrainTextures");
-		glUniform1i(locationRoverTerrainTextures, 0);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D_ARRAY, subsiteModels->coloredTextureID);
-				
-		const GLint locationRoverTerrainTextures2 = _programObject->uniformLocation("roverTerrainColoredTextures");
-		glUniform1i(locationRoverTerrainTextures2, 1);
+			glActiveTexture(GL_TEXTURE1);
+			subsiteModels->coloredTextureArray->bind();
+			const GLint locationRoverTerrainTextures2 = _programObject->uniformLocation("roverTerrainColoredTextures");
+			glUniform1i(locationRoverTerrainTextures2, 1);
+		}
 		
 		glEnable(GL_BLEND);
-		//glDisable(GL_DEPTH_TEST);
+		if (!_generalProperties.enableDepth.value()) {
+			glDisable(GL_DEPTH_TEST);
+		}
+		
 		glDisable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 		subsiteModels->model->render();
-		//glEnable(GL_DEPTH_TEST);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
 	}
 	_programObject->deactivate();
 	//_cachingModelProvider->setLevel(level);
