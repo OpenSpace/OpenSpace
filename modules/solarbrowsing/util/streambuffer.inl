@@ -35,6 +35,11 @@ void StreamBuffer<T>::removeJob(std::shared_ptr<StreamJob<T>> job) {
 }
 
 template<typename T>
+bool StreamBuffer<T>::hasJob(const std::string& id) {
+    return _enqueuedJobIds.count(id);
+}
+
+template<typename T>
 int StreamBuffer<T>::numJobs() {
     return _enqueuedJobIds.size();
 }

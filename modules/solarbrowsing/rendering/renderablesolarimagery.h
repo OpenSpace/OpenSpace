@@ -117,6 +117,7 @@ private:
     double _realTimeDiff;
     unsigned int _frameSkipCount = 0;
     bool _isWithinFrustum = false;
+    unsigned int _bufferCountOffset = 1;
 
     bool _isWithinFrustumLast = true;
     std::string _name;

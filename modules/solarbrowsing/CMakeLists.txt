@@ -55,7 +55,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstatesequence.h
     ${CMAKE_CURRENT_SOURCE_DIR}/util/timedependentstatesequence.inl
     #${CMAKE_CURRENT_SOURCE_DIR}/util/videoplayer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/kakaduwrapper.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/util/kakaduwrapper.h
 
     #${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarvideo.h
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.h
@@ -67,7 +67,7 @@ set(HEADER_FILES
     ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.h
     ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.inl
     # Kakadu Headers
-    /home/noven/workspace/Kakadu/all_includes
+    #/home/noven/workspace/Kakadu/all_includes
 )
 
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -91,7 +91,7 @@ set(MODULE_NAME openspace-module-solarbrowsing)
 
 target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${HEADER_FILES})
 
-set(KDU_LIB_PATH /home/noven/workspace/Kakadu/)
+#set(KDU_LIB_PATH /home/noven/workspace/Kakadu/)
 
 # Link to Kakadu lib
 
@@ -101,7 +101,7 @@ set(KDU_LIB_PATH /home/noven/workspace/Kakadu/)
 #find_library(KDU_LIB kdu_v79R /home/noven/workspace/Kakadu/)
 #find_library(KDU_LIA kdu_a79R /home/noven/workspace/Kakadu/)
 #target_link_libraries(kdu_v79R "${KDU_LIB_PATH}")
-target_link_libraries(${MODULE_NAME} openjp2 /home/noven/workspace/Kakadu/libkdu_v79R.so /home/noven/workspace/Kakadu/libkdu_a79R.so)
+target_link_libraries(${MODULE_NAME} openjp2 #[[/home/noven/workspace/Kakadu/libkdu_v79R.so /home/noven/workspace/Kakadu/libkdu_a79R.so]])
 
 #target_link_libraries(${MODULE_NAME} ${GROK_LIBRARY_NAME} ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 

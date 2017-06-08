@@ -56,7 +56,7 @@ typedef std::chrono::high_resolution_clock Clock;
 
 namespace {
     static const std::string _loggerCat = "RenderableSolarImagery";
-    double HALF_SUN_RADIUS = (1391600000.0 * 0.50); // Half sun radius divided by magic factor
+    //double HALF_SUN_RADIUS = (1391600000.0 * 0.50); // Half sun radius divided by magic factor
     const double EPSILON = std::numeric_limits<double>::epsilon();
 }
 
@@ -190,16 +190,24 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         // Upload asap
         updateTextureGPU(/*asyncUpload=*/false);
         if (_useBuffering) {
-            double oktime = OsEng.timeManager().time().deltaTime();
+            //double oktime = OsEng.timeManager().time().deltaTime();
             //TimeManager& lel = OsEng.timeManager();
             // _currentActiveImageTime
             //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
             //                   .timeObserved;
             _streamBuffer.clear();
+            _frameSkipCount = 0;
+            _bufferCountOffset = 1;
             //fillBuffer(OsEng.timeManager().time().deltaTime());
         } /*else {
             uploadImageDataToPBO();
         }*/
+    });
+
+    _minRealTimeUpdateInterval.onChange([this]() {
+        _streamBuffer.clear();
+        _frameSkipCount = 0;
+        _bufferCountOffset = 1;
     });
 
     _resolutionLevel.onChange([this]() {
@@ -213,6 +221,8 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
             //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
             //                   .timeObserved;
             _streamBuffer.clear();
+            _frameSkipCount = 0;
+            _bufferCountOffset = 1;
             //fillBuffer(OsEng.timeManager().time().deltaTime());
         } /*else {
             uploadImageDataToPBO();
@@ -232,9 +242,9 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     // }
 
 
-    _currentActiveImageTime
-          = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-                  .timeObserved;
+    // _currentActiveImageTime
+    //       = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+    //               .timeObserved;
 
    // _imageMetadataMap2[_currentActiveInstrument].displayStateTimes();
 
@@ -282,28 +292,28 @@ DecodeData RenderableSolarImagery::getDecodeDataFromOsTime(const int& osTime) {
     //DecodeData decodeData {_imageSize * _imageSize, stateFilename, _resolutionLevel, _verboseMode, timeObserved};
 
     DecodeData decodeData {std::move(im), static_cast<unsigned int>(_resolutionLevel), timeObserved, _verboseMode};
-    return std::move(decodeData);
+    return decodeData;
 }
 
-void RenderableSolarImagery::fillBuffer(const double& dt) {
-    _streamBuffer.clear();
-    if (_verboseMode) {
-        LDEBUG("Refilling Buffer. dt: " << dt);
-    }
-    const double& osTime = OsEng.timeManager().time().j2000Seconds();
-    const double& startTime = getDecodeDataFromOsTime(osTime).timeObserved;
+// void RenderableSolarImagery::fillBuffer(const double& dt) {
+//     _streamBuffer.clear();
+//     if (_verboseMode) {
+//         LDEBUG("Refilling Buffer. dt: " << dt);
+//     }
+//     const double& osTime = OsEng.timeManager().time().j2000Seconds();
+//     const double& startTime = getDecodeDataFromOsTime(osTime).timeObserved;
 
-    for (int i = 1; i < _bufferSize; i++) {
-        const double& time = startTime + (dt * i) * (static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
-        DecodeData decodeData = getDecodeDataFromOsTime(time);
-        auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(decodeData.im->fullResolution));
-        _streamBuffer.enqueueJob(job);
-        if (_verboseMode) {
-            LDEBUG("Enqueueing " << decodeData.im->filename);
-        }
-    }
-    //_initializePBO = true;
-}
+//     for (int i = 1; i < _bufferSize; i++) {
+//         const double& time = startTime + (dt * i) * (static_cast<double>(_minRealTimeUpdateInterval) / 1000.0);
+//         DecodeData decodeData = getDecodeDataFromOsTime(time);
+//         auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(_imageSize));
+//         _streamBuffer.enqueueJob(job);
+//         if (_verboseMode) {
+//             LDEBUG("Enqueueing " << decodeData.im->filename);
+//         }
+//     }
+//     //_initializePBO = true;
+// }
 
 bool RenderableSolarImagery::isReady() const {
     return _spacecraftCameraPlane->isReady() && _texture != nullptr;
@@ -329,14 +339,15 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
         _pboIsDirty = true;
     } else {
         // WARNING - this can be an old job - but looks smoother - bug or feature?
-        const double& osTime = OsEng.timeManager().time().j2000Seconds();
-        std::shared_ptr<SolarImageData> _solarImageData = nullptr;
-        while (_streamBuffer._concurrentJobManager.numFinishedJobs() > 0) {
-            _solarImageData = _streamBuffer.popFinishedJob();
-            if (osTime <= _solarImageData->timeObserved) {
-                break;
-            }
-        }
+        // const double& osTime = OsEng.timeManager().time().j2000Seconds();
+        // std::shared_ptr<SolarImageData> _solarImageData = nullptr;
+        // while (_streamBuffer._concurrentJobManager.numFinishedJobs() > 0) {
+        //     _solarImageData = _streamBuffer.popFinishedJob();
+        //     if (osTime <= _solarImageData->timeObserved) {
+        //         break;
+        //     }
+        // }
+        std::shared_ptr<SolarImageData> _solarImageData = _streamBuffer.popFinishedJob();
 
         if (_solarImageData) {
             _currentActiveImageTime = _solarImageData->timeObserved;
@@ -386,7 +397,8 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
         unsigned char* data
               = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
         const double& osTime = OsEng.timeManager().time().j2000Seconds();
-        const auto& decodeData = getDecodeDataFromOsTime(_currentActiveImageTime);
+        const auto& decodeData = getDecodeDataFromOsTime(osTime);
+        //const auto& decodeData = getDecodeDataFromOsTime(_currentActiveImageTime);
         decode(data, decodeData.im->filename);
 
         _currentScale = decodeData.im->scale;
@@ -407,10 +419,10 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
 
 void RenderableSolarImagery::decode(unsigned char* buffer, const std::string& filename)
 {
-    //SimpleJ2kCodec j2c(_verboseMode);
-    //j2c.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
-    KakaduWrapper w(_verboseMode);
-    w.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
+    SimpleJ2kCodec j2c(_verboseMode);
+    j2c.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
+    //KakaduWrapper w(_verboseMode);
+    //w.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
 }
 
 void RenderableSolarImagery::performImageTimestep(const double& osTime) {
@@ -450,14 +462,16 @@ void RenderableSolarImagery::update(const UpdateData& data) {
     if (_useBuffering) {
         const double& dt = OsEng.timeManager().time().deltaTime();
         // Delta time changed, need to refill buffer
-        if ((abs(_deltaTimeLast - dt)) > EPSILON) {
-            LDEBUG("clearing buffer .. " );
+        if ((std::abs(_deltaTimeLast - dt)) > EPSILON) {
             _pboIsDirty = false;
            // fillBuffer(dt);
+            _frameSkipCount = 0;
             _streamBuffer.clear();
-            _currentActiveImageTime
-                      = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-                              .timeObserved;
+            _bufferCountOffset = 1;
+            LDEBUG("Clearing ... dt : " << dt);
+            // _currentActiveImageTime
+            //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+            //                   .timeObserved;
         }
         _deltaTimeLast = dt;
     }
@@ -467,16 +481,22 @@ void RenderableSolarImagery::update(const UpdateData& data) {
     if (_streamBuffer.numJobs() < _bufferSize && _isWithinFrustum) {
         // Always add to buffer faster than pop ..
         const double& osTime = OsEng.timeManager().time().j2000Seconds();
-
-        _frameSkipCount = 0;
         // The min real time update interval doesnt make any sense
-        DecodeData decodeData = getDecodeDataFromOsTime(osTime + (_streamBuffer.numJobs()) * (OsEng.timeManager().time().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval)/1000.0));
-
+        DecodeData decodeData = getDecodeDataFromOsTime(osTime + (_bufferCountOffset /** _streamBuffer.numJobs()*/) * (OsEng.timeManager().time().deltaTime() * static_cast<double>(_minRealTimeUpdateInterval)/1000.0));
         //LDEBUG("Current active time " << SpiceManager::ref().dateFromEphemerisTime(_currentActiveImageTime));
         //LDEBUG("dt" << (_streamBuffer.numJobs()) * (OsEng.timeManager().time().deltaTime()));
-        //LDEBUG("Pushing delta time  " << SpiceManager::ref().dateFromEphemerisTime(decodeData.timeObserved));
-        auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(decodeData.im->fullResolution));
-        _streamBuffer.enqueueJob(job);
+        const std::string hash = decodeData.im->filename + std::to_string(_imageSize);
+        if (!_streamBuffer.hasJob(hash) && _currentActiveImageTime != decodeData.timeObserved) {
+            //LDEBUG("Adding job");
+            //LINFO("Pushing hash  " << hash);
+            //LINFO("Pushing delta time  " << SpiceManager::ref().dateFromEphemerisTime(decodeData.timeObserved));
+            auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(_imageSize));
+            _streamBuffer.enqueueJob(job);
+            //_bufferCountOffset = 0;
+        } else {
+           // LDEBUG("has job increasing counter");
+            _bufferCountOffset++;
+        }
     }
 
     _timeToUpdateTexture = _realTimeDiff > _minRealTimeUpdateInterval;
@@ -501,10 +521,12 @@ void RenderableSolarImagery::render(const RenderData& data) {
     if (_isWithinFrustumLast != _isWithinFrustum) {
         //_pboIsDirty = false;
         //fillBuffer(OsEng.timeManager().time().j2000Seconds());
-        _currentActiveImageTime
-                      = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-                              .timeObserved;
+        // _currentActiveImageTime
+        //               = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+        //                       .timeObserved;
         _streamBuffer.clear();
+        _bufferCountOffset = 1;
+        _frameSkipCount = 0;
     }
     _isWithinFrustumLast = _isWithinFrustum;
 

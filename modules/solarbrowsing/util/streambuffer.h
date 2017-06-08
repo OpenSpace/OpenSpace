@@ -61,6 +61,7 @@ class StreamBuffer {
 public:
     StreamBuffer();
 
+    bool hasJob(const std::string& id);
     int numJobs();
     void removeJob(std::shared_ptr<StreamJob<T>> job);
     void enqueueJob(std::shared_ptr<StreamJob<T>> job);
@@ -69,7 +70,7 @@ public:
     void clear();
     globebrowsing::ConcurrentJobManager<T> _concurrentJobManager;
 private:
-    std::unordered_multiset<std::string> _enqueuedJobIds;
+    std::unordered_set<std::string> _enqueuedJobIds;
 };
 
 } // namespace openspace
