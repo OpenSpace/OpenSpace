@@ -562,6 +562,14 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         LERRORC(e.component, e.message);
         return;
     }
+    catch (const std::exception& e) {
+        LERROR(e.what());
+        return;
+    }
+    catch (...) {
+        LERROR("Unknown error loading the scene");
+        return;
+    }
 
     Scene* previousScene = _renderEngine->scene();
     if (previousScene) {
