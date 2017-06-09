@@ -40,7 +40,7 @@ LayerAdjustment::LayerAdjustment()
     for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
         _typeOption.addOption(i, layergroupid::ADJUSTMENT_TYPE_NAMES[i]);
     }
-    _typeOption.setValue(static_cast<int>(layergroupid::AdjutmentTypeID::None));
+    _typeOption.setValue(static_cast<int>(layergroupid::AdjustmentTypeID::None));
 
 }
 

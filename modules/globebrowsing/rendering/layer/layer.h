@@ -48,7 +48,7 @@ class LayerAdjustment : public properties::PropertyOwner
 {
 public:
     LayerAdjustment();
-    ~LayerAdjustment();
+    ~LayerAdjustment() = default;
     
 private:
     properties::OptionProperty _typeOption;
