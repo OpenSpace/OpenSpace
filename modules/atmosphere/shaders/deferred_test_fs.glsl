@@ -52,13 +52,13 @@ out vec4 renderTarget;
 in vec3 interpolatedNDCPos;
 
 // Model Transform Matrix Used for Globe Rendering
-uniform dmat4 ModelTransformMatrix;
-uniform dmat4 dInverseTransformMatrix;
-uniform dmat4 dInverseScaleTransformMatrix;
+uniform dmat4 dInverseTransformMatrix; 
 uniform dmat4 dInverseSgctEyeToWorldTranform; // SGCT Eye to OS World
-uniform dmat4 dSgctEyeToOSEyeTranform; // SGCT Eye to OS Eye
-uniform dmat4 dInverseSgctProjectionMatrix; // Clip to SGCT Eye
-uniform dmat4 dInverseCamRotTransform;
+uniform dmat4 dSgctEyeToOSEyeTranform; // SGCT Eye to OS Eye *
+uniform dmat4 dInverseSgctProjectionMatrix; // Clip to SGCT Eye *
+uniform dmat4 dInverseCamRotTransform; 
+uniform dmat4 dInverseModelTransformMatrix; 
+uniform dmat4 dInverseOSEyeTransformMatrix;
 
 // Double Precision Versions:
 uniform dvec4 dObjpos;
@@ -295,19 +295,16 @@ void dCalculateRayRenderablePlanet(out dRay ray, out dvec4 planetPositionObjectC
   dvec4 osEyeCoords = dSgctEyeToOSEyeTranform * sgctEyeCoords;
     
   // OS Eye to World coords
-  // Now we execute the transformations with no matrices:
-  dvec4 ttmp         = dInverseScaleTransformMatrix * osEyeCoords;
-  dvec3 ttmp2        = dmat3(dInverseCamRotTransform) * dvec3(ttmp);
-  dvec4 worldCoords  = dvec4(dCampos + ttmp2, 1.0);
-    
+  dvec4 worldCoords = dInverseOSEyeTransformMatrix * osEyeCoords;
+
   // World to Object
-  dvec4 objectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + worldCoords.xyz, 1.0);
+  dvec4 objectCoords = dInverseModelTransformMatrix * worldCoords;
 
   // Planet Position in Object Space
   planetPositionObjectCoords =  dvec4(0.0,0.0,0.0,1.0);//dInverseTransformMatrix * dvec4(-dObjpos.xyz + dObjpos.xyz, 1.0);
 
   // Camera Position in Object Space
-  cameraPositionInObject = dInverseTransformMatrix * dvec4(-dObjpos.xyz + dCampos, 1.0);
+  cameraPositionInObject = dInverseModelTransformMatrix * dvec4(dCampos, 1.0);
     
   // ============================
   // ====== Building Ray ========
@@ -597,6 +594,7 @@ void main() {
       
       intersectATM = dAtmosphereIntersection(planetPositionObjectCoords.xyz, ray,  Rt-10*EPSILON,
                                             insideATM, offset, maxLength );
+
       if ( intersectATM ) {
         /*
         vec4 farthestPosition = vec4(0.0);
@@ -610,9 +608,8 @@ void main() {
         }
         dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * farthestPosition);
         */
-        dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * meanPosition);
-        dvec4 fragWorldCoords  = dvec4(dCampos + tmpPos, 1.0); // Fragment in World Coords
-        dvec4 fragObjectCoords = dInverseTransformMatrix * dvec4(-dObjpos.xyz + fragWorldCoords.xyz, 1.0);
+        //dvec4 fragWorldCoords  = dInverseOSEyeTransformMatrix * meanPosition;
+        dvec4 fragObjectCoords = dInverseModelTransformMatrix * meanPosition;//fragWorldCoords;
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
 
         // All calculations are done in Km:
@@ -626,7 +623,7 @@ void main() {
         // when using their positions later, one must convert them to the planet's coords 
 
         if ((pixelDepth > 0.0) && pixelDepth < offset) {        
-          renderTarget = meanColor;          
+          renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
         } else {
           // Following paper nomenclature      
           double t = offset;                  
@@ -662,7 +659,8 @@ void main() {
           renderTarget = finalRadiance;
         }      
       } else {
-        renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
+        renderTarget = vec4(HDR(meanColor.xyz * 1.8), meanColor.a);
+        //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
       }
     } else if ( RenderableClass == RenderableGlobe) {
       // Get the ray from camera to atm in object space

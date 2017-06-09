@@ -48,6 +48,12 @@ namespace ghoul {
 
 namespace openspace {
 
+#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+class AtmosphereDeferredcaster;
+#endif
+
+struct TransformData;
+
 namespace planetgeometry {
 class PlanetGeometry;
 }
@@ -77,39 +83,93 @@ public:
     bool deinitialize() override;
     bool isReady() const override;
 
-    void render(const RenderData& data) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
 protected:
     void loadTexture();
+
+private: 
+    void computeModelTransformMatrix(const openspace::TransformData & transformData, glm::dmat4 * modelTransform);
+#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+    void updateAtmosphereParameters();
+#endif
+
 private:
     properties::StringProperty _colorTexturePath;
     properties::StringProperty _nightTexturePath;
     properties::StringProperty _heightMapTexturePath;
-    
+    properties::FloatProperty _heightExaggeration;
+    properties::BoolProperty _performShading;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _programObject;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::opengl::Texture> _nightTexture;    
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
-    
-    properties::FloatProperty _heightExaggeration;
-
+        
     std::unique_ptr<planetgeometry::PlanetGeometry> _geometry;
-    properties::BoolProperty _performShading;
-    float _alpha;
-    std::vector< ShadowConf > _shadowConfArray;
-    float _planetRadius;
+    
 
-    glm::dmat3 _stateMatrix;
+#ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
+    properties::FloatProperty _atmosphereHeightP;
+    properties::FloatProperty _groundAverageReflectanceP;
+    properties::FloatProperty _rayleighHeightScaleP;
+    properties::FloatProperty _rayleighScatteringCoeffXP;
+    properties::FloatProperty _rayleighScatteringCoeffYP;
+    properties::FloatProperty _rayleighScatteringCoeffZP;
+    properties::BoolProperty  _ozoneEnabledP;
+    properties::FloatProperty _ozoneHeightScaleP;
+    properties::FloatProperty _ozoneCoeffXP;
+    properties::FloatProperty _ozoneCoeffYP;
+    properties::FloatProperty _ozoneCoeffZP;
+    properties::FloatProperty _mieHeightScaleP;
+    properties::FloatProperty _mieScatteringCoefficientP;
+    properties::FloatProperty _mieScatteringExtinctionPropCoefficientP;
+    properties::FloatProperty _mieAsymmetricFactorGP;
+    properties::FloatProperty _sunIntensityP;
+    properties::FloatProperty _hdrExpositionP;
+    properties::FloatProperty _gammaConstantP;
+
+    bool _atmosphereEnabled;
+    bool _ozoneLayerEnabled;
+    float _atmosphereRadius;
+    float _atmospherePlanetRadius;
+    float _planetAverageGroundReflectance;
+    float _rayleighHeightScale;
+    float _ozoneHeightScale;
+    float _mieHeightScale;
+    float _miePhaseConstant;
+    float _sunRadianceIntensity;
+    float _hdrConstant;
+    float _gammaConstant;
+
+    glm::vec3 _mieExtinctionCoeff;
+    glm::vec3 _rayleighScatteringCoeff;
+    glm::vec3 _ozoneExtinctionCoeff;
+    glm::vec3 _mieScatteringCoeff;
+
+    // Atmosphere Debug
+    bool _saveCalculationsToTexture;
+    float _preCalculatedTexturesScale;
+
+    std::unique_ptr<AtmosphereDeferredcaster> _deferredcaster;
+#endif
+
+    float _alpha;
+    float _planetRadius;
     bool _hasNightTexture;
     bool _hasHeightTexture;
     bool _shadowEnabled;
     double _time;
 
-    bool tempPic;
+    glm::dmat3 _stateMatrix;
+
+    std::vector< ShadowConf > _shadowConfArray;
+
+    
 };
 
 } // namespace openspace

@@ -56,8 +56,10 @@ void main()
     // G-Buffer
     vs_gNormal = in_normal;
 
-    // The things is not in world coordinates, they are in
-    // regular view/eye coordinates.
+    // The tmp is now in the OS eye space (camera rig space)
+    // and wrtitten using PSC coords.
+    // position is in the same space, i.e., OS eye space but 
+    // in meters (no PSC coords).    
     vec4 position = pscTransform(tmp, ModelTransform);
 
     // G-Buffer

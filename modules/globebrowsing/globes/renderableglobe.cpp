@@ -274,24 +274,17 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         ghoul::Dictionary ozoneDictionary;
         success = atmosphereDictionary.getValue(keyOzone, ozoneDictionary);
         if (success) {
+            _ozoneLayerEnabled = true;
             if (!ozoneDictionary.getValue(keyOzoneHeightScale, _ozoneLayerHeightScale)) {
-                errorReadingAtmosphereData = true;
-                //LWARNING("No Mie Height Scale value expecified for Atmosphere Effects of "
-                //    << name << " planet.\nDisabling atmosphere effects for this planet.");
+                _ozoneLayerEnabled = false;
             }
 
             if (!ozoneDictionary.getValue("Coefficients.Extinction", _ozoneLayerExtinctionCoeff)) {
-                errorReadingAtmosphereData = true;
-                //LWARNING("No Mie Extinction parameters expecified for Atmosphere Effects of "
-                //    << name << " planet.\nDisabling atmosphere effects for this planet.");
+                _ozoneLayerEnabled = false;                
             } 
-            //_ozoneLayerEnabled = true;
-            //std::cout << "====== Ozone is enabled =======" << std::endl;
         }
         else {
-            errorReadingAtmosphereData = true;
-            //LWARNING("No Mie parameters expecified for Atmosphere Effects of "
-            //    << name << " planet.\nDisabling atmosphere effects for this planet.");
+            _ozoneLayerEnabled = false;
         }
 
         ghoul::Dictionary mieDictionary;

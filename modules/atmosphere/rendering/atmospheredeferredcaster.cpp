@@ -216,6 +216,14 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     program.setUniform("SAMPLES_NU", (int)_nu_samples);
 
     program.setUniform("ModelTransformMatrix", _modelTransform);
+    program.setUniform("dInverseModelTransformMatrix", glm::inverse(_modelTransform));
+    program.setUniform("dInverseOSEyeTransformMatrix", glm::inverse(renderData.camera.combinedViewMatrix()));
+
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        const GLubyte * errString = gluErrorString(err);
+        LERROR("After inverse matrices. OpenGL error: " << errString);
+    }
 
     // Object Space
     //program.setUniform("inverseTransformMatrix", glm::inverse(_modelTransform));

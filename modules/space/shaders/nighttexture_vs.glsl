@@ -39,6 +39,7 @@ out vec4 vs_gPosition;
 out vec3 vs_gNormal;
 
 uniform mat4 ModelTransform;
+uniform dmat4 modelViewTransform;
 uniform mat4 modelViewProjectionTransform;
 
 uniform sampler2D heightTex;
@@ -48,8 +49,7 @@ uniform float _heightExaggeration;
 void main() {
     // set variables
     vs_st = in_st;
-    vec4 tmp = in_position;
-
+        
     // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
     vs_normal = normalize(ModelTransform * vec4(in_normal,0));
     // vs_normal = vec4(in_normal, 0.0);
@@ -57,7 +57,7 @@ void main() {
     // G-Buffer
     vs_gNormal = in_normal;
 
-    vec4 position = vec4(tmp.xyz * pow(10, tmp. w), 1.0);
+    vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1.0);
 
     if (_hasHeightMap) {
         float height = texture(heightTex, in_st).r;
@@ -67,7 +67,7 @@ void main() {
     }
 
     // G-Buffer
-    vs_gPosition = position;
+    vs_gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space
     
     position = modelViewProjectionTransform * position;
     vs_position = z_normalization(position);
