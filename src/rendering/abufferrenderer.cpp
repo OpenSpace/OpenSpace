@@ -23,10 +23,11 @@
  ****************************************************************************************/
 
 #include <openspace/rendering/abufferrenderer.h>
-#include <openspace/rendering/raycastermanager.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/performance/performancemeasurement.h>
+#include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/volumeraycaster.h>
@@ -34,23 +35,19 @@
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/timemanager.h>
-#include <openspace/performance/performancemeasurement.h>
-
 
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 
-
-
 #include <string>
 #include <iterator>
 
 namespace {
-    const std::string _loggerCat = "ABufferRenderer";
-    const std::string BoundsFragmentShaderPath = "${SHADERS}/abuffer/boundsabuffer.frag";
-    const std::string RenderFragmentShaderPath = "${SHADERS}/abuffer/renderabuffer.frag";
+    const char* _loggerCat = "ABufferRenderer";
+    const char* BoundsFragmentShaderPath = "${SHADERS}/abuffer/boundsabuffer.frag";
+    const char* RenderFragmentShaderPath = "${SHADERS}/abuffer/renderabuffer.frag";
     const int MaxRaycasters = 32;
     const int MaxLayers = 32;
     const int MaxAverageLayers = 8;
@@ -92,7 +89,14 @@ void ABufferRenderer::initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, reinterpret_cast<void*>(0));
+    glVertexAttribPointer(
+        0,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(GLfloat) * 4,
+        reinterpret_cast<void*>(0)
+    );
     glEnableVertexAttribArray(0);
 
     glGenTextures(1, &_anchorPointerTexture);
@@ -110,16 +114,26 @@ void ABufferRenderer::initialize() {
     GLint defaultFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
-
-
     updateResolution();
     updateRendererData();
     updateRaycastData();
     updateResolveDictionary();
 
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture, 0);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _mainColorTexture,
+        0
+    );
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D_MULTISAMPLE,
+        _mainDepthTexture,
+        0
+    );
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -128,18 +142,19 @@ void ABufferRenderer::initialize() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 
-
     try {
         ghoul::Dictionary dict;
         dict.setValue("resolveData", _resolveDictionary);
         dict.setValue("rendererData", _rendererData);
 
-        _resolveProgram = ghoul::opengl::ProgramObject::Build("ABuffer Resolve",
+        _resolveProgram = ghoul::opengl::ProgramObject::Build(
+            "ABuffer Resolve",
             "${SHADERS}/abuffer/resolveabuffer.vert",
             "${SHADERS}/abuffer/resolveabuffer.frag",
-            dict);
-    } catch (ghoul::RuntimeError e) {
-        LERROR(e.message);
+            dict
+        );
+    } catch (const ghoul::RuntimeErcomponent& e) {
+        LERRORC(e.component, e.message);
     }
 
     OsEng.renderEngine().raycasterManager().addListener(*this);
@@ -160,9 +175,7 @@ void ABufferRenderer::deinitialize() {
     OsEng.renderEngine().raycasterManager().removeListener(*this);
 }
 
-void ABufferRenderer::raycastersChanged(VolumeRaycaster& raycaster, bool attached) {
-    (void) raycaster;
-    (void) attached;
+void ABufferRenderer::raycastersChanged(VolumeRaycaster&, bool) {
     _dirtyRaycastData = true;
 }
     
@@ -205,8 +218,8 @@ void ABufferRenderer::update() {
     if (_resolveProgram->isDirty()) {
         try {
             _resolveProgram->rebuildFromFile();
-        } catch (ghoul::RuntimeError& error) {
-            LERROR(error.message);
+        } catch (const ghoul::RuntimeError& error) {
+            LERRORC(error.component, error.message);
         }
     }
 
@@ -214,23 +227,19 @@ void ABufferRenderer::update() {
         if (program.second->isDirty()) {
             try {
                 program.second->rebuildFromFile();
-            } catch (ghoul::RuntimeError e) {
-                LERROR(e.message);
+            } catch (const ghoul::RuntimeError e) {
+                LERRORC(e.component, e.message);
             }
         }
     }
-
 }
-
     
 void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
     PerfMeasure("ABufferRenderer::render");
 
-
-    if (_scene == nullptr)
+    if (!_scene || !_camera) { 
         return;
-    if (_camera == nullptr)
-        return;
+    }
 
     _mainColorTextureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _mainColorTextureUnit->activate();
@@ -291,22 +300,25 @@ void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurement
         }
     }
 
+
     // Step 3: Resolve the buffer
     _resolveProgram->activate();
 
     // TEMPORARY GAMMA CORRECTION.
 
-    float gamma = 1.0;
     glm::vec3 cameraPos = data.camera.position().vec3();
-    float maxComponent = std::max(std::max(std::abs(cameraPos.x), std::abs(cameraPos.y)), std::abs(cameraPos.z));
-    float logDistance = std::log(glm::length(cameraPos / maxComponent) * maxComponent) / std::log(10.f);
+    float maxComponent = std::max(
+        std::max(std::abs(cameraPos.x), std::abs(cameraPos.y)), std::abs(cameraPos.z)
+    );
+    float logDistance = std::log(glm::length(cameraPos / maxComponent) * maxComponent)
+        / std::log(10.f);
 
-    float minLogDist = 15;
-    float maxLogDist = 20;
+    const float minLogDist = 15;
+    const float maxLogDist = 20;
 
     float t = (logDistance - minLogDist) / (maxLogDist - minLogDist);
     t = glm::clamp(t, 0.0f, 1.0f);
-    gamma = 1.f * (1.f - t) + 2.2f * t;
+    const float gamma = 1.f * (1.f - t) + 2.2f * t;
 
     _resolveProgram->setUniform("gamma", gamma);
 
