@@ -25,13 +25,18 @@
 #define __OPENSPACE_MODULE_SOLARBROWSING___DECODEJOB___H__
 
 #include <modules/solarbrowsing/util/streambuffer.h>
-#include <modules/solarbrowsing/util/kakaduwrapper.h>
+//#include <modules/solarbrowsing/util/kakaduwrapper.h>
 
 namespace openspace {
 
 struct SolarImageData {
     unsigned char* data;
     std::shared_ptr<ImageMetadata> im;
+    ~SolarImageData() {
+        if (data) {
+            delete[] data;
+        }
+    }
     //unsigned int dataSize;
     //std::string name;
     double timeObserved;
@@ -52,8 +57,7 @@ class DecodeJob : public StreamJob<SolarImageData> {
 public:
     DecodeJob(const DecodeData& decodeData, const std::string& id)
         : StreamJob(id), _decodeData(decodeData)
-    {
-    }
+    { }
 
     virtual void execute() final {
         //SolarImageData imd{new unsigned char[_decodeData.totalImageSize],
@@ -66,17 +70,17 @@ public:
         SolarImageData imd {new unsigned char[totalImageSize],
                             _decodeData.im,
                             _decodeData.timeObserved};
+
         SimpleJ2kCodec j2c(_decodeData.verboseMode);
-
-        KakaduWrapper w(_decodeData.verboseMode);
-        w.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
-        //j2c.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
-
+        j2c.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
+       // KakaduWrapper w(_decodeData.verboseMode);
+       // w.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
       /*  if (imd.im->preprocessedFilename != "") {
             j2c.DecodeBMPIntoBuffer(imd.im->preprocessedFilename, imd.data);
         } else {*/
         //}
-        _solarImageData = std::make_shared<SolarImageData>(std::move(imd));
+        _solarImageData = std::make_shared<SolarImageData>(imd);
+        imd.data = nullptr;
     }
 
     virtual std::shared_ptr<SolarImageData> product() final {
