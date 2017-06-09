@@ -44,6 +44,14 @@
 #include <modules/globebrowsing/models/multimodelprovider.h>
 #include <modules/globebrowsing/models/singlemodelprovider.h>
 
+#ifdef GLOBEBROWSING_USE_PCL
+#include <modules/globebrowsing/tasks/meshgenerationtask.h>
+#include <modules/globebrowsing/tasks/pointcloudfilter.h>
+#include <modules/globebrowsing/tasks/medianpointcloudfilter.h>
+#include <modules/globebrowsing/tasks/fastbilateralpointcloudfilter.h>
+#include <modules/globebrowsing/tasks/randompointcloudfilter.h>
+#endif
+
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
@@ -129,6 +137,41 @@ void GlobeBrowsingModule::internalInitialize() {
 	fModelProvider->registerClass<SingleModelProvider>("SingleModelProvider");
 
 	FactoryManager::ref().addFactory(std::move(fModelProvider));
+
+#ifdef GLOBEBROWSING_USE_PCL
+
+	auto fPointCloudFilter = std::make_unique<ghoul::TemplateFactory<PointCloudFilter>>();
+
+	fPointCloudFilter->registerClass<MedianPointCloudFilter>("MedianPointCloudFilter");
+	fPointCloudFilter->registerClass<MedianPointCloudFilter>("FastBilateralPointCloudFilter");
+	fPointCloudFilter->registerClass<MedianPointCloudFilter>("RandomPointCloudFilter");
+
+	FactoryManager::ref().addFactory(std::move(fPointCloudFilter));
+
+	auto fTask = FactoryManager::ref().factory<Task>();
+	ghoul_assert(fTask, "No task factory existed");
+	fTask->registerClass<globebrowsing::MeshGenerationTask>("MeshGenerationTask");
+
+	//TODO: FIX THIS SO IT ACCTUALLY USES FROM DIC
+	std::string lib_path = "C:/Users/openspace/Documents/develop/OpenSpace/data/tasks/meshgenerationtask2.task";
+	TaskLoader tl;
+	std::vector<std::unique_ptr<Task>> task = tl.tasksFromFile(lib_path);
+
+	ProgressBar pBar(100);
+	auto onProgress = [&pBar](float progress) {//
+		pBar.print(progress * 100);
+	};
+
+	const clock_t begin_time = clock();
+
+	for (int i = 0; i < task.size(); ++i) {
+		task.at(i)->perform(onProgress);
+	}
+
+	LINFO("TOTAL TIME WAS : " << float(clock() - begin_time) / CLOCKS_PER_SEC);
+#else
+	LERROR("IT WAS NOT DONE");
+#endif
 }
 
 globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
