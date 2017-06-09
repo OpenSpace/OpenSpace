@@ -29,6 +29,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <modules/globebrowsing/chunk/chunknode.h>
 #include <modules/globebrowsing/models/modelprovider.h>
+#include <modules/globebrowsing/models/sitemanager.h>
 #include <openspace/scene/scene.h>
 
 #include <ghoul/io/texture/texturereader.h>
@@ -47,6 +48,7 @@ namespace {
 	const char* keyName					= "Name";
 	const char* keyAbsPathToTextures	= "AbsPathToTextures";
 	const char* keyAbsPathToModels		= "AbsPathToModels";
+	const std::string marsRoverModels	= "MarsRoverModels";
 }
 
 namespace openspace {
@@ -61,7 +63,8 @@ namespace globebrowsing {
 				BoolProperty("enablePath", "Enable path", true),
 				BoolProperty("lockSubsite", "Lock subsite", false),
 				BoolProperty("useMastCam", "Show mastcam coloring", false),
-				BoolProperty("enableDepth", "Enable depth", true)
+				BoolProperty("enableDepth", "Enable depth", true),
+				FloatProperty("heightProp", "Site height", 1.f, 1.0f, 100.f)
 		})
 		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
 		, _modelSwitch()
@@ -69,6 +72,7 @@ namespace globebrowsing {
 		, _isFirst(true)
 		, _isFirstLow(true)
 		, _isFirstHigh(true)
+		, _renderableSitePropertyOwner("LayersOfThis")
 {
 	if (!dictionary.getValue(keyRoverLocationPath, _roverLocationPath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -103,8 +107,12 @@ namespace globebrowsing {
 	addProperty(_generalProperties.lockSubsite);
 	addProperty(_generalProperties.useMastCam);
 	addProperty(_generalProperties.enableDepth);
+	addProperty(_generalProperties.heightProp);
 	addProperty(_debugModelRotation);
-
+	
+	_siteManager = std::make_shared<SiteManager>(marsRoverModels, _subsitesWithModels);
+	addPropertySubOwner(_siteManager.get());
+	
 	_cachingModelProvider = std::make_shared<CachingSurfaceModelProvider>(this);
 	_renderableExplorationPath = std::make_shared<RenderableExplorationPath>();
 }
@@ -119,8 +127,7 @@ bool RenderableRoverSurface::initialize() {
 	for (auto subsite : _subsitesWithModels) {
 		coordinatesWithModel.push_back(subsite->geodetic);
 	}
-
-
+	
 	std::string ownerName = owner()->name();
 	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(ownerName)->parent();
 
@@ -374,7 +381,7 @@ std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSur
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(subsiteModels->geodetic);
 		double heightToSurface = _globe->getHeight(positionModelSpaceTemp);
 
-		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + 0.7 };
+		globebrowsing::Geodetic3 geo3 = globebrowsing::Geodetic3{ subsiteModels->geodetic , heightToSurface + _generalProperties.heightProp.value() };
 		subsiteModels->cartesianPosition = _globe->ellipsoid().cartesianPosition(geo3);
 	}
 	return vector;

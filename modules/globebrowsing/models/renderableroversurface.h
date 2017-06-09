@@ -39,6 +39,7 @@
 
 namespace openspace {
 namespace globebrowsing {
+class SiteManager;
 
 class RenderableRoverSurface : public Renderable {
 public:
@@ -48,6 +49,8 @@ public:
 		properties::BoolProperty enablePath;
 		properties::BoolProperty lockSubsite;
 		properties::BoolProperty useMastCam;
+		properties::BoolProperty enableDepth;
+		properties::FloatProperty heightProp;
 	};
 
 	RenderableRoverSurface(const ghoul::Dictionary& dictionary);
@@ -87,6 +90,8 @@ private:
 
 	std::shared_ptr<CachingSurfaceModelProvider> _cachingModelProvider;
 
+	std::shared_ptr<SiteManager> _siteManager;
+
 	int _prevLevel;
 
 	bool _isFirst;
@@ -97,6 +102,8 @@ private:
 	LodModelSwitch _modelSwitch;
 
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
+
+	properties::PropertyOwner _renderableSitePropertyOwner;
 };
 
 } // namespace globebrowsing
