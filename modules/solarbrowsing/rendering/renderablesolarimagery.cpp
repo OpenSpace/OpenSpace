@@ -67,15 +67,15 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _sharpenValue("sharpenValue", "Sharpen", 0.0, 0.0, 1.0)
     , _contrastValue("contrastValue", "Contrast", 0.0, -15.0, 15.0)
     , _planeOpacity("planeOpacity", "Plane Opacity", 1.0, 0.0, 1.0)
-    , _disableFrustum("disableFrustum", "Disable Frustum", true)
-    , _disableBorder("disableBorder", "Disable Border", true)
+    , _disableFrustum("disableFrustum", "Disable Frustum", false)
+    , _disableBorder("disableBorder", "Disable Border", false)
     , _gammaValue("gammaValue", "Gamma", 0.9, 0.1, 10.0)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
     , _bufferSize("bufferSize", "Buffer Size", 5, 1, 150)
     , _displayTimers("displayTimers", "Display Timers", false)
     , _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
-    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 85, 0, 300)
+    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 50, 0, 300)
     , _moveFactor("movefactor", "Move Factor" , 1.0, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
     , _target("target", "Target", "Sun")
@@ -248,7 +248,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
    // _imageMetadataMap2[_currentActiveInstrument].displayStateTimes();
 
-   // LDEBUG("Init current active image time " <<  SpiceManager::ref().dateFromEphemerisTime(OsEng.timeManager().time().j2000Seconds()));                  
+   // LDEBUG("Init current active image time " <<  SpiceManager::ref().dateFromEphemerisTime(OsEng.timeManager().time().j2000Seconds()));
     //LDEBUG("Init current active image time " << SpiceManager::ref().dateFromEphemerisTime(_currentActiveImageTime));
 
     // If no buffer is used this is needed

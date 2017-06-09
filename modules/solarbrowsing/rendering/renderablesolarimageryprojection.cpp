@@ -58,6 +58,10 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
     if (!dictionary.getValue("Name", _nodeName)) {
         throw ghoul::RuntimeError("Nodename has to be specified");
     }
+    //std::string path;
+    if (!dictionary.getValue("hmipath", path)) {
+        throw ghoul::RuntimeError("HMIPath has to be specified");
+    }
 }
 
 bool RenderableSolarImageryProjection::initialize() {
@@ -75,7 +79,6 @@ bool RenderableSolarImageryProjection::initialize() {
     _solarImageryDependencies
          = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
 
-    const std::string path = "/home/noven/workspace/OpenSpace/data/hmimap1.fits";
     FitsFileReader fts(false);
     std::shared_ptr<ImageData<float>> imageData = fts.readImage<float>(path);
     float* data;
@@ -155,7 +158,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
 
     //  _shader->setUniform(
     //     "projectionTransform",
-    //      data.camera.projectionMatrix() 
+    //      data.camera.projectionMatrix()
     // );
 
     _shader->setUniform(
