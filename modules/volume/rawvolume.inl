@@ -57,7 +57,7 @@ size_t RawVolume<VoxelType>::nCells() const
 
 template <typename VoxelType>
 VoxelType RawVolume<VoxelType>::get(const glm::uvec3& coordinates) const {
-    return get(coordsToIndex(coordinates, dimensions()));
+    return get(coordsToIndex(coordinates));
 }
 
 template <typename VoxelType>
@@ -67,7 +67,7 @@ VoxelType RawVolume<VoxelType>::get(size_t index) const {
 
 template <typename VoxelType>
 void RawVolume<VoxelType>::set(const glm::uvec3& coordinates, const VoxelType& value) {
-    return set(coordsToIndex(coordinates, dimensions()), value);
+    return set(coordsToIndex(coordinates), value);
 }
 
 template <typename VoxelType>

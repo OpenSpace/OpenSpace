@@ -64,6 +64,10 @@
 //#include <test_iswamanager.inl>
 #endif
 
+#ifdef OPENSPACE_MODULE_VOLUME_ENABLED
+#include <test_rawvolumeio.inl>
+#endif
+
 #include <test_scriptscheduler.inl>
 
 #include <test_documentation.inl>
