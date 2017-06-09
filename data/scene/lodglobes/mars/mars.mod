@@ -87,6 +87,10 @@ return {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
                         FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Texture.vrt",
                     },
+                    {
+                        Name = "Northeast_melas_chasma",
+                        FilePath = "map_datasets/Northeast_melas_chasma/northeast_melas_chasma_dune_fields_and_wall_rock_texture.vrt",
+                    },
                     --[[{
                         Name = "Themis IR Day",
                         FilePath = "map_service_configs/Utah/ThemisIRDay.xml",
@@ -110,11 +114,11 @@ return {
                 WaterMasks = { },
                 ColorOverlays = {
                     {
-                        Type = "TileIndex",
+                        Type = "TileIndexTileLayer",
                         Name = "Indices",
                     },
                     {
-                        Type = "SizeReference",
+                        Type = "SizeReferenceTileLayer",
                         Name = "Size Reference",
                         Radii = marsEllipsoid,
                         BackgroundImagePath = "../arrows.png",
@@ -153,6 +157,12 @@ return {
                     {
                         Name = "Layered Rock Outcrops in Southwest Candor Chasma",
                         FilePath = "map_datasets/HiRISE/Layered_Rock_Outcrops_in_Southwest_Candor_Chasma_Heightmap.vrt",
+                        TilePixelSize = 90,
+                        DoPreProcessing = true,
+                    },
+                    {
+                        Name = "Northeast_melas_chasma",
+                        FilePath = "map_datasets/Northeast_melas_chasma/northeast_melas_chasma_dune_fields_and_wall_rock_heightmap.vrt",
                         TilePixelSize = 90,
                         DoPreProcessing = true,
                     },

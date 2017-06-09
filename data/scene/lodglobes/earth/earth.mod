@@ -58,12 +58,12 @@ return {
                 ColorLayers = {
                     {
                         Name = "ESRI VIIRS Combo",
-                        Type = "ByLevel",
+                        Type = "ByLevelTileLayer",
                         LevelTileProviders = {
                             {
                                 MaxLevel = 3, 
                                 TileProvider = {
-                                    Type = "Temporal",
+                                    Type = "TemporalTileLayer",
                                     Name = "Temporal VIIRS SNPP",
                                     FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml", }, 
                             },
@@ -78,12 +78,12 @@ return {
                         Enabled = true,
                     },
                     {
-                        Type = "Temporal",
+                        Type = "TemporalTileLayer",
                         Name = "Temporal_GHRSST_L4_MUR_Sea_Surface_Temperature",
                         FilePath = "map_service_configs/GIBS/Temporal_GHRSST_L4_MUR_Sea_Surface_Temperature.xml",
                     },
                     {
-                        Type = "Temporal",
+                        Type = "TemporalTileLayer",
                         Name = "Temporal_AMSR2_GCOM_W1_Sea_Ice_Concentration",
                         FilePath = "map_service_configs/GIBS/Temporal_AMSR2_GCOM_W1_Sea_Ice_Concentration.xml",
                     },
@@ -106,7 +106,7 @@ return {
                         },
                     },
                     {
-                        Type = "Temporal",
+                        Type = "TemporalTileLayer",
                         Name = "Temporal Earth at Night",
                         FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_DayNightBand_ENCC.xml"
                     }
@@ -136,11 +136,11 @@ return {
                         FilePath = "map_service_configs/GIBS/Reference_Labels.xml",
                     },
                     {
-                        Type = "TileIndex",
+                        Type = "TileIndexTileLayer",
                         Name = "Tile Indices",
                     },
                     {
-                        Type = "SizeReference",
+                        Type = "SizeReferenceTileLayer",
                         Name = "Size Reference",
                         Radii = earthEllipsoid,
                         BackgroundImagePath = "../arrows.png",
