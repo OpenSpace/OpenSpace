@@ -55,7 +55,6 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data) override;
-    void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
 
@@ -110,11 +109,6 @@ private:
 
     /// The property that stores all indices of constellations that should be drawn
     properties::SelectionProperty _constellationSelection;
-
-    std::string _originReferenceFrame; ///< Reference frame in which bounds are defined
-    
-    /// Used to translate between the origin reference frame and the target frame
-    glm::dmat3 _stateMatrix;
 
     GLuint _vao;
     GLuint _vbo;
