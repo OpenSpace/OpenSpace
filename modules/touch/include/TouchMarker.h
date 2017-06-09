@@ -25,29 +25,64 @@
 #ifndef __OPENSPACE_TOUCH___MARKER___H__
 #define __OPENSPACE_TOUCH___MARKER___H__
 
+#include <modules/touch/include/TuioEar.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/vectorproperty.h>
+#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+
 
 #include <glm/glm.hpp>
-
-#include <math.h>
+#include <memory>
 #include <vector>
-#include <mutex>
-#include <numeric>
-#include <algorithm>
 
+namespace ghoul {
+namespace opengl {
+	class ProgramObject;
+	class Texture;
+} // namespace opengl
+} // namespace ghoul
 
 namespace openspace {
+
+struct RenderData;
+struct UpdateData;
 
 class TouchMarker : public properties::PropertyOwner
 {
 	public:
 		TouchMarker();
 
-	private:
+		bool initialize(const std::vector<TUIO::TuioCursor> list);
+		bool deinitialize();
 
+		bool isReady() const;
+
+		void render(const std::vector<TUIO::TuioCursor> list);
+		void update();
+
+
+	private:
+		void loadTexture();
+		void createVertexList(const std::vector<TUIO::TuioCursor> list);
+
+		properties::StringProperty _texturePath;
+		properties::BoolProperty _visible;
+		properties::FloatProperty _radiusSize;
+
+		std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+		std::unique_ptr<ghoul::opengl::Texture> _texture;
+		
+		GLuint _quad;
+		GLuint _vertexPositionBuffer;
+		int _numFingers;
+
+		bool _listIsDirty;
+		bool _textureIsDirty;
 };
 
 } // openspace namespace

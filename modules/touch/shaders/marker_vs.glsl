@@ -22,31 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#version __CONTEXT__
 
-#include <openspace/util/openspacemodule.h>
-#include <modules/touch/include/TouchMarker.h>
-#include <modules/touch/include/TouchInteraction.h>
+// Vertex attributes
+layout(location = 0) in vec2 in_position;
 
+// Uniforms
+uniform float radius;
 
-namespace openspace {
+// Outputs
+out vec2 out_position;
+out float pointRadius;
 
-	class TouchModule : public OpenSpaceModule {
-		using Point = std::pair<int, TUIO::TuioPoint>;
-	public:
-		TouchModule();
+void main() {
+    out_position = in_position;
+    pointRadius = 0.05; //radius;
 
-	private:
-		bool hasNewInput();
-
-		TuioEar ear;
-		TouchInteraction touch;
-		TouchMarker markers;
-		std::vector<TUIO::TuioCursor> listOfContactPoints;
-		std::vector<Point> lastProcessed; // contains an id and the TuioPoint that was processed last frame
-	};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+    gl_PointSize = 0.05; //radius;
+    gl_Position = in_position;
+}

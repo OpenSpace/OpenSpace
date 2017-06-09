@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/touch/include/TuioEar.h>
-#include <vector>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settingsengine.h>

@@ -102,7 +102,24 @@ TouchModule::TouchModule()
 	: OpenSpaceModule("Touch")
 {
 	addPropertySubOwner(touch);
-	
+	addPropertySubOwner(markers);
+
+	OsEng.registerModuleCallback(
+		OpenSpaceEngine::CallbackOption::InitializeGL,
+		[&]() {
+		LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
+		markers.initialize(listOfContactPoints);
+	}
+	);
+
+	OsEng.registerModuleCallback(
+		OpenSpaceEngine::CallbackOption::DeinitializeGL,
+		[&]() {
+		LDEBUGC("TouchMarker", "Deinitialize TouchMarker OpenGL");
+		markers.deinitialize();
+	}
+	);
+
 	OsEng.registerModuleCallback(
 		OpenSpaceEngine::CallbackOption::PreSync,
 		[&]() {
@@ -128,7 +145,8 @@ TouchModule::TouchModule()
 
 	OsEng.registerModuleCallback(
 		OpenSpaceEngine::CallbackOption::PostDraw,
-		[]() {
+		[&]() {
+		markers.render(listOfContactPoints);
 	}
 	);
 }
