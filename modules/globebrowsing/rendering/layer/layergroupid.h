@@ -80,6 +80,21 @@ enum class TypeID {
     SolidColor = 7,
 };
 
+static const int NUM_ADJUSTMENT_TYPES = 4;
+static const std::string ADJUSTMENT_TYPE_NAMES[NUM_ADJUSTMENT_TYPES] = {
+    "None",
+    "SolidColor",
+    "ChromaKey",
+};
+
+/**
+ This enumeration is specified explicitly since it is used in the shader as well.
+ */
+enum class AdjustmentTypeID {
+    None = 0,
+    ChromaKey = 1
+};
+
 static const int NUM_BLEND_MODES = 4;
 static const std::string BLEND_MODE_NAMES[NUM_BLEND_MODES] = {
     "Normal",

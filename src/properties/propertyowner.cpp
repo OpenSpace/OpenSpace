@@ -124,13 +124,11 @@ std::vector<PropertyOwner*> PropertyOwner::propertySubOwners() const {
 }
 
 PropertyOwner* PropertyOwner::propertySubOwner(const std::string& name) const {
-    /*
     ghoul_assert(
         std::is_sorted(_subOwners.begin(), _subOwners.end(), subOwnerLess),
         "List of subowners must be sorted"
     );
-  
-  
+    
     // As the _subOwners list is sorted, getting the lower bound is sufficient
     std::vector<PropertyOwner*>::const_iterator it = std::lower_bound(
         _subOwners.begin(),
@@ -140,16 +138,7 @@ PropertyOwner* PropertyOwner::propertySubOwner(const std::string& name) const {
             return owner->name() < str;
         }
     );
-    */
-  
-    std::vector<PropertyOwner*>::const_iterator it = std::find_if(
-        _subOwners.cbegin(), _subOwners.cend(),
-        [&](PropertyOwner* ownerInList) {
-            return ownerInList->name() == name;
-        }
-    );
-  
-  
+    
     if (it == _subOwners.end() || (*it)->name() != name) {
         return nullptr;
     }
@@ -268,39 +257,6 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
             owner->setPropertyOwner(this);
         }
     }
-}
-
-bool PropertyOwner::addPropertySubOwnerUnsorted(openspace::properties::PropertyOwner* owner) {
-    ghoul_assert(owner != nullptr, "owner must not be nullptr");
-    ghoul_assert(!owner->name().empty(), "PropertyOwner must have a name");
-  
-    std::vector<PropertyOwner*>::iterator it = std::find_if(
-        _subOwners.begin(), _subOwners.end(),
-        [&](PropertyOwner* ownerInList) {
-            return ownerInList->name() == owner->name();
-        }
-    );
-    
-    // If we found the propertyowner's name, we need to bail out
-    if (it != _subOwners.end()) {
-        LERROR("PropertyOwner '" << owner->name() <<
-            "' already present in PropertyOwner '" << name() << "'");
-        return false;
-    } else {
-        // We still need to check if the PropertyOwners name is used in a Property
-        const bool hasProp = hasProperty(owner->name());
-        if (hasProp) {
-            LERROR("PropertyOwner '" << owner->name() << "'s name already names a "
-                 << "Property");
-            return false;
-        }
-        else {
-            // Otherwise we have found the correct position to add it in
-            _subOwners.insert(it, owner);
-            owner->setPropertyOwner(this);
-        }
-    }
-    return true;
 }
     
 void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner& owner) {

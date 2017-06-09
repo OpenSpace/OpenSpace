@@ -199,34 +199,27 @@ void CachingTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
     RawTileDataReader::PerformPreprocessing preprocess =
         _performPreProcessing ? RawTileDataReader::PerformPreprocessing::Yes :
         RawTileDataReader::PerformPreprocessing::No;
-  
-    try {
 
-        // Initialize instance variables
+    // Initialize instance variables
 #ifdef GLOBEBROWSING_USE_GDAL
-        auto tileDataset = std::make_shared<GdalRawTileDataReader>(_filePath, initData,
-                                                                   _basePath, preprocess);
+    auto tileDataset = std::make_shared<GdalRawTileDataReader>(_filePath, initData,
+                                                               _basePath, preprocess);
 #else // GLOBEBROWSING_USE_GDAL
-        auto tileDataset = std::make_shared<SimpleRawTileDataReader>(_filePath, initData,
-                                                                     preprocess);
+    auto tileDataset = std::make_shared<SimpleRawTileDataReader>(_filePath, initData,
+                                                                 preprocess);
 #endif // GLOBEBROWSING_USE_GDAL
 
-        _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(_name, tileDataset);
+    _asyncTextureDataProvider = std::make_shared<AsyncTileDataProvider>(_name, tileDataset);
 
-        if (_preCacheLevel > -1) {
-            LDEBUG("Precaching '" << _filePath << "' with level '" << _preCacheLevel << "'");
-            for (int level = 0; level <= _preCacheLevel; ++level) {
-                for (int x = 0; x <= level * 2; ++x) {
-                    for (int y = 0; y <= level; ++y) {
-                        _asyncTextureDataProvider->enqueueTileIO({ x, y, level });
-                    }
+    if (_preCacheLevel > -1) {
+        LDEBUG("Precaching '" << _filePath << "' with level '" << _preCacheLevel << "'");
+        for (int level = 0; level <= _preCacheLevel; ++level) {
+            for (int x = 0; x <= level * 2; ++x) {
+                for (int y = 0; y <= level; ++y) {
+                    _asyncTextureDataProvider->enqueueTileIO({ x, y, level });
                 }
             }
         }
-
-    }
-    catch (const ghoul::RuntimeError& e) {
-
     }
 }
 

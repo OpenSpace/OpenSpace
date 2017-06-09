@@ -53,7 +53,8 @@ struct LayerGroup : public properties::PropertyOwner {
     /// Updates all layers tile providers within this group
     void update();
 
-    void addLayer(layergroupid::TypeID typeId);
+    void addLayer(const ghoul::Dictionary& layerDict);
+    void deleteLayer(const std::string& layerName);
 
     /// @returns const vector of all layers
     const std::vector<std::shared_ptr<Layer>>& layers() const;

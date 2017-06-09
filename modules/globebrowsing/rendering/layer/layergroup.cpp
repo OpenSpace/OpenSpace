@@ -26,6 +26,10 @@
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 
+namespace {
+    const char* _loggerCat = "LayerGroup";
+}
+
 namespace openspace {
 namespace globebrowsing {
 
@@ -33,6 +37,7 @@ LayerGroup::LayerGroup(layergroupid::GroupID id)
     : properties::PropertyOwner(std::move(layergroupid::LAYER_GROUP_NAMES[id]))
     , _groupId(id)
     , _levelBlendingEnabled("blendTileLevels", "blend tile levels", false)
+    , _onChangeCallback([](){})
 {
     addProperty(_levelBlendingEnabled);
 }
@@ -45,16 +50,12 @@ LayerGroup::LayerGroup(layergroupid::GroupID id, const ghoul::Dictionary& dict)
         ghoul::Dictionary layerDict = dict.value<ghoul::Dictionary>(dictKey);
 
         try {
-            _layers.push_back(std::make_shared<Layer>(_groupId, layerDict));
+            addLayer(layerDict);
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
             continue;
         }
-    }
-
-    for (const auto& layer : _layers) {
-        addPropertySubOwnerUnsorted(layer.get());
     }
 }
 
@@ -69,19 +70,36 @@ void LayerGroup::update() {
     }
 }
 
-void LayerGroup::addLayer(layergroupid::TypeID typeId) {
-    for (int i = 0; i < 50; ++i) {
-        ghoul::Dictionary layerDict;
-        layerDict.setValue("Name", "New Layer " + std::to_string(i));
-        layerDict.setValue("Type", layergroupid::LAYER_TYPE_NAMES[static_cast<int>(typeId)]);
-        auto layer = std::make_shared<Layer>(_groupId, layerDict);
-        layer->onChange(_onChangeCallback);
-        if (addPropertySubOwnerUnsorted(layer.get())) {
-            // If name did not already exist among sub owners, success.
-            _layers.push_back(layer);
-            break;
+void LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
+    if (!layerDict.hasKeyAndValue<std::string>("Name")) {
+        LERROR("'Name' must be specified for layer.");
+        return;
+    }
+    auto layer = std::make_shared<Layer>(_groupId, layerDict);
+    layer->onChange(_onChangeCallback);
+    if (hasPropertySubOwner(layer->name())) {
+        LINFO("Layer with name " + layer->name() + " already exists.");
+    }
+    else {
+        _layers.push_back(layer);
+        update();
+        _onChangeCallback();
+        addPropertySubOwner(layer.get());
+    }
+}
+
+void LayerGroup::deleteLayer(const std::string& layerName) {
+    for (std::vector<std::shared_ptr<Layer>>::iterator it = _layers.begin(); it != _layers.end(); ++it) {
+        if (it->get()->name() == layerName) {
+            removePropertySubOwner(it->get());
+            _layers.erase(it);
+            update();
+            _onChangeCallback();
+            LINFO("Deleted layer " + layerName);
+            return;
         }
     }
+    LERROR("Could not find layer " + layerName);
 }
 
 const std::vector<std::shared_ptr<Layer>>& LayerGroup::layers() const {

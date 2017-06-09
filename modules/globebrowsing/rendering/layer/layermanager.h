@@ -46,7 +46,8 @@ class LayerManager : public properties::PropertyOwner  {
 public:
     LayerManager(const ghoul::Dictionary& textureCategoriesDictionary);
 
-    void addLayer(layergroupid::GroupID groupId, layergroupid::TypeID typeId);
+    void addLayer(layergroupid::GroupID groupId, ghoul::Dictionary layerDict);
+    void deleteLayer(layergroupid::GroupID groupId, std::string layerName);
 
     const LayerGroup& layerGroup(size_t groupId);
     const LayerGroup& layerGroup(layergroupid::GroupID);

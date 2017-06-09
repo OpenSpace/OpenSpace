@@ -44,6 +44,16 @@ namespace tileprovider {
     class TileProvider;
 }
 
+class LayerAdjustment : public properties::PropertyOwner
+{
+public:
+    LayerAdjustment();
+    ~LayerAdjustment();
+    
+private:
+    properties::OptionProperty _typeOption;
+};
+
 class Layer : public properties::PropertyOwner {
 public:
     /**

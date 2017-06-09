@@ -127,20 +127,30 @@ globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
     std::string listLayerGroups = layerGroupNamesList();
-    std::string listLayerTypes = layerTypeNamesList();
     return {
         "globebrowsing",
         {
             {
                 "addLayer",
                 &globebrowsing::luascriptfunctions::addLayer,
-                "string, string, string",
+                "string, string, table",
                 "Adds a layer to the specified globe. The first argument specifies the "
                 "name of the scene graph node of which to add the layer. The renderable "
                 "of the specified scene graph node needs to be a renderable globe. "
                 "The second argument is the layer group which can be any of "
-                + listLayerGroups + ". The third argument is the layer type which can be "
-                "any of " + listLayerTypes + "."
+                + listLayerGroups + ". The third argument is the dictionary defining the "
+                "layer."
+            },
+            {
+                "deleteLayer",
+                &globebrowsing::luascriptfunctions::deleteLayer,
+                "string, string",
+                "Removes a layer from the specified globe. The first argument specifies "
+                "the name of the scene graph node of which to remove the layer. "
+                "The renderable of the specified scene graph node needs to be a "
+                "renderable globe. The second argument is the layer group which can be "
+                "any of " + listLayerGroups + ". The third argument is the dictionary"
+                "defining the layer."
             },
         },
         {

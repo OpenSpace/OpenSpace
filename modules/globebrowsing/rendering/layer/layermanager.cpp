@@ -55,10 +55,14 @@ LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
     }
 }
 
-void LayerManager::addLayer(layergroupid::GroupID groupId, layergroupid::TypeID typeId) {
+void LayerManager::addLayer(layergroupid::GroupID groupId, ghoul::Dictionary layerDict) {
     ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
-    ghoul_assert(typeId != layergroupid::TypeID::Unknown, "Layer type ID must be known");
-    _layerGroups[groupId]->addLayer(typeId);
+    _layerGroups[groupId]->addLayer(layerDict);
+}
+
+void LayerManager::deleteLayer(layergroupid::GroupID groupId, std::string layerName) {
+    ghoul_assert(groupId != layergroupid::Unknown, "Layer group ID must be known");
+    _layerGroups[groupId]->deleteLayer(layerName);
 }
 
 const LayerGroup& LayerManager::layerGroup(size_t groupId) {

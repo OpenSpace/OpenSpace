@@ -147,6 +147,25 @@ vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor) {
 #endfor
 #endfor
 
+#for id, layerGroup in layerGroups
+#for i in 0..#{lastLayerIndex#{layerGroup}}
+
+vec4 performAdjustment#{layerGroup}#{i}(
+	vec4 currentColor,
+	const Layer #{layerGroup}[#{lastLayerIndex#{layerGroup}} + 1])
+{
+#if (#{#{layerGroup}#{i}AdjutmentType} == 0) // Default, None
+	return currentColor;	
+#elif (#{#{layerGroup}#{i}AdjutmentType} == 1) // ChromaKey
+	return vec4(0,1,0,1); // TODO implement chroma key
+#endif
+}
+
+#endfor
+#endfor
+
+
+
 float calculateUntransformedHeight(
 	vec2 uv,
 	LevelWeights levelWeights,
@@ -215,6 +234,8 @@ vec4 calculateColor(
 	#for i in 0..#{lastLayerIndexColorLayers}
 	{
 		vec4 colorSample = getSampleColorLayers#{i}(uv, levelWeights, ColorLayers);
+
+		colorSample = performAdjustmentColorLayers#{i}(colorSample, ColorLayers);
 
 		colorSample = performLayerSettings(colorSample, ColorLayers[#{i}].settings);
 

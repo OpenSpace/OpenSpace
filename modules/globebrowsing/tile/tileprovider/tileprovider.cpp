@@ -51,9 +51,7 @@ std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
     std::string type = layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layerTypeID)];
     auto factory = FactoryManager::ref().factory<TileProvider>();
     std::unique_ptr<TileProvider> result = nullptr;
-    try {
-      result = factory->create(type, dictionary);
-    } catch (const ghoul::RuntimeError& e) { }
+    result = factory->create(type, dictionary);
     return result;
 }
 

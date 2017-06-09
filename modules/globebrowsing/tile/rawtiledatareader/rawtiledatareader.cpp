@@ -343,8 +343,7 @@ std::shared_ptr<TileMetaData> RawTileDataReader::getTileMetaData(
                     &(rawTile->imageData[yi + i])
                 );
                 if (val != noDataValue &&
-                    val == val &&
-                    val != 32767) // Max int which is the real nodatavalue for terrain tileset
+                    val == val)
                 {
                     preprocessData->maxValues[raster] = std::max(
                         val,

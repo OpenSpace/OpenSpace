@@ -29,6 +29,21 @@
 namespace openspace {
 namespace globebrowsing {
 
+LayerAdjustment::LayerAdjustment()
+    : properties::PropertyOwner("adjustment")
+    , _typeOption(
+        "type",
+        "Type",
+        properties::OptionProperty::DisplayType::Dropdown)
+{
+    // Add options to option properties
+    for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
+        _typeOption.addOption(i, layergroupid::ADJUSTMENT_TYPE_NAMES[i]);
+    }
+    _typeOption.setValue(static_cast<int>(layergroupid::AdjutmentTypeID::None));
+
+}
+
 namespace {
     const char* keyName = "Name";
     const char* keyEnabled = "Enabled";
@@ -118,6 +133,8 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     _blendModeOption.onChange([&](){
         _onChangeCallback();
     });
+
+    _typeOption.setReadOnly(true);
 
     // Add the properties
     addProperty(_typeOption);
@@ -226,16 +243,19 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
         case layergroupid::TypeID::ByLevelTileLayer: {
             // We add the id to the dictionary since it needs to be known by
             // the tile provider
-            _tileProvider = nullptr;
             ghoul::Dictionary tileProviderInitDict = initDict;
             tileProviderInitDict.setValue(keyLayerGroupID, _layerGroupId);
             _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
                 tileprovider::TileProvider::createFromDictionary(typeId, tileProviderInitDict));
+            if (!_tileProvider) {
+                throw ghoul::RuntimeError("Unable to create tile provider");
+            }
             break;
         }
         case layergroupid::TypeID::SolidColor:
             break;
         default:
+            throw ghoul::RuntimeError("Unable to create tile provider. Unknown type.");
             break;
     }
 }
