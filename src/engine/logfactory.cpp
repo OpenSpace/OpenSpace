@@ -153,7 +153,6 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
         logLevel = dictionary.value<std::string>(keyLogLevel);
     }
 
-
     using Append = ghoul::logging::TextLog::Append;
     using TimeStamping = ghoul::logging::Log::TimeStamping;
     using DateStamping = ghoul::logging::Log::DateStamping;

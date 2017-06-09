@@ -98,6 +98,9 @@ namespace {
     const int CacheVersion = 1;
     const int DownloadVersion = 1;
     
+    const glm::ivec3 FontAtlasSize{ 1536, 1536, 1 };
+
+
     struct {
         std::string configurationName;
         std::string sgctConfigurationName;
@@ -341,7 +344,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     // After registering the modules, the documentations for the available classes
     // can be added as well
     for (OpenSpaceModule* m : _engine->_moduleEngine->modules()) {
-        for (auto&& doc : m->documentations()) {
+        for (const documentation::Documentation& doc : m->documentations()) {
             DocEng.addDocumentation(doc);
         }
     }
@@ -400,7 +403,6 @@ void OpenSpaceEngine::destroy() {
     delete _engine;
     FactoryManager::deinitialize();
     SpiceManager::deinitialize();
-
 
     ghoul::fontrendering::FontRenderer::deinitialize();
 
@@ -756,8 +758,7 @@ void OpenSpaceEngine::loadFonts() {
     ghoul::Dictionary fonts;
     configurationManager().getValue(ConfigurationManager::KeyFonts, fonts);
 
-    glm::ivec3 fontAtlasSize{1024, 1024, 1};
-    _fontManager = std::make_unique<ghoul::fontrendering::FontManager>(fontAtlasSize);
+    _fontManager = std::make_unique<ghoul::fontrendering::FontManager>(FontAtlasSize);
     
     for (const std::string& key : fonts.keys()) {
         std::string font = fonts.value<std::string>(key);
@@ -771,14 +772,16 @@ void OpenSpaceEngine::loadFonts() {
         LINFO("Registering font '" << font << "' with key '" << key << "'");
         bool success = _fontManager->registerFontPath(key, font);
         
-        if (!success)
+        if (!success) {
             LERROR("Error registering font '" << font << "' with key '" << key << "'");
+        }
     }
     
     try {
         bool initSuccess = ghoul::fontrendering::FontRenderer::initialize();
-        if (!initSuccess)
+        if (!initSuccess) {
             LERROR("Error initializing default font renderer");
+        }
 
         ghoul::fontrendering::FontRenderer::defaultRenderer().setFramebufferSize(
             _renderEngine->fontResolution()
@@ -971,7 +974,6 @@ void OpenSpaceEngine::initializeGL() {
 
 
     LINFO("Initializing Rendering Engine");
-    // @CLEANUP:  Remove the return statement and replace with exceptions ---abock
     _renderEngine->initializeGL();
     
     for (const auto& func : _moduleCallbacks.initializeGL) {
@@ -980,8 +982,6 @@ void OpenSpaceEngine::initializeGL() {
     
     LINFO("Finished initializing OpenGL");
 
-    // If using swapgroups,
-    
     LINFO("IsUsingSwapGroups: " << _windowWrapper->isUsingSwapGroups());
     LINFO("IsSwapGroupMaster: " << _windowWrapper->isSwapGroupMaster());
     
@@ -1016,8 +1016,11 @@ void OpenSpaceEngine::preSynchronization() {
         double dt = _windowWrapper->averageDeltaTime();
         _timeManager->preSynchronization(dt);
 
-        auto scheduledScripts = _scriptScheduler->progressTo(timeManager().time().j2000Seconds());
-        for (auto it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
+        using Iter = std::vector<std::string>::const_iterator;
+        std::pair<Iter, Iter> scheduledScripts = _scriptScheduler->progressTo(
+            timeManager().time().j2000Seconds()
+        );
+        for (Iter it = scheduledScripts.first; it != scheduledScripts.second; ++it) {
             _scriptEngine->queueScript(
                 *it, ScriptEngine::RemoteScripting::Yes
             );
@@ -1030,7 +1033,6 @@ void OpenSpaceEngine::preSynchronization() {
         _renderEngine->camera()->invalidateCache();
 
         _parallelConnection->preSynchronization();
-
     }
     
     for (const auto& func : _moduleCallbacks.preSync) {

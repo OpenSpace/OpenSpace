@@ -62,27 +62,26 @@
 #endif
 
 #include <openspace/network/parallelconnection.h>
+
+#include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmode.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/timemanager.h>
-#include <openspace/interaction/interactionmode.h>
-#include <openspace/util/time.h>
-#include <openspace/openspace.h>
 #include <openspace/scripting/script_helper.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 
 #include <ghoul/logging/logmanager.h>
 
-//lua functions
 #include "parallelconnection_lua.inl"
 
 namespace {
     const uint32_t ProtocolVersion = 2;
     const size_t MaxLatencyDiffs = 64;
-    const std::string _loggerCat = "ParallelConnection";
-}
+    const char* _loggerCat = "ParallelConnection";
+} // namespace
 
 namespace openspace {
 
@@ -94,8 +93,20 @@ ParallelConnection::ParallelConnection()
     , _address("address", "Address", "localhost")
     , _name("name", "Connection name", "Anonymous")
     , _bufferTime("bufferTime", "Buffer Time", 1, 0.5, 10)
-    , _timeKeyframeInterval("timeKeyframeInterval", "Time keyframe interval", 0.1f, 0.f, 1.f)
-    , _cameraKeyframeInterval("cameraKeyframeInterval", "Camera Keyframe interval", 0.1f, 0.f, 1.f)
+    , _timeKeyframeInterval(
+        "timeKeyframeInterval",
+        "Time keyframe interval",
+        0.1f,
+        0.f,
+        1.f
+    )
+    , _cameraKeyframeInterval(
+        "cameraKeyframeInterval",
+        "Camera Keyframe interval",
+        0.1f,
+        0.f,
+        1.f
+    )
     , _timeTolerance("timeTolerance", "Time tolerance", 1.f, 0.5f, 5.f)
     , _lastTimeKeyframeTimestamp(0)
     , _lastCameraKeyframeTimestamp(0)
@@ -127,50 +138,51 @@ ParallelConnection::ParallelConnection()
     addProperty(_timeTolerance);
 
     _connectionEvent = std::make_shared<ghoul::Event<>>();
-    _handlerThread = std::make_unique<std::thread>(&ParallelConnection::threadManagement, this);
+    _handlerThread = std::make_unique<std::thread>(
+        &ParallelConnection::threadManagement,
+        this
+    );
 }
         
-ParallelConnection::~ParallelConnection(){
-            
-    //signal that a disconnect should occur
+ParallelConnection::~ParallelConnection() {
+    // signal that a disconnect should occur
     signalDisconnect();
             
-    //signal that execution has stopped
+    // signal that execution has stopped
     _isRunning.store(false);
             
-    //join handler
+    // join handler
     _handlerThread->join();
 }
         
-void ParallelConnection::threadManagement(){
+void ParallelConnection::threadManagement() {
     // The _disconnectCondition.wait(unqlock) stalls
     // How about moving this out of the thread and into the destructor? ---abock
     
-    //while we're still running
+    // while we're still running
     while(_isRunning){
-        {
-            //lock disconnect mutex mutex
-            //not really needed since no data is modified but conditions need a mutex
-            std::unique_lock<std::mutex> disconnectLock(_disconnectMutex);
-            //wait for a signal to disconnect
-            _disconnectCondition.wait(disconnectLock, [this]() { return _disconnect.load(); });
+        // lock disconnect mutex mutex
+        // not really needed since no data is modified but conditions need a mutex
+        std::unique_lock<std::mutex> disconnectLock(_disconnectMutex);
+        // wait for a signal to disconnect
+        _disconnectCondition.wait(
+            disconnectLock,
+            [this]() { return _disconnect.load(); }
+        );
                 
-            //perform actual disconnect
-            disconnect();
-                    
-        }
+        // perform actual disconnect
+        disconnect();
     }
 }
         
-void ParallelConnection::signalDisconnect(){
+void ParallelConnection::signalDisconnect() {
     //signal handler thread to disconnect
     _disconnect = true;
     _sendCondition.notify_all(); // Allow send function to terminate.
     _disconnectCondition.notify_all(); // Unblock thread management thread.
 }
         
-void ParallelConnection::closeSocket(){
-            
+void ParallelConnection::closeSocket() {
     /*
         Windows shutdown options
         * SD_RECIEVE
@@ -194,36 +206,35 @@ void ParallelConnection::closeSocket(){
     _clientSocket = INVALID_SOCKET;
 }
         
-void ParallelConnection::disconnect(){
-    //we're disconnecting
-            
-    if (_clientSocket != INVALID_SOCKET){
-                
-        //must be run before trying to join communication threads, else the threads are stuck trying to receive data
+void ParallelConnection::disconnect() {
+    // We're disconnecting
+    if (_clientSocket != INVALID_SOCKET) {
+        // Must be run before trying to join communication threads, else the threads are
+        // stuck trying to receive data
         closeSocket();
                 
-        //tell connection thread to stop trying to connect
-        _tryConnect.store(false);
+        // Ttell connection thread to stop trying to connect
+        _tryConnect = false;
                 
-        //tell send thread to stop sending and listen thread to stop listenin
-        _isConnected.store(false);
+        // Tell send thread to stop sending and listen thread to stop listenin
+        _isConnected = false;
 
         setStatus(Status::Disconnected);
                
-        //join connection thread and delete it
-        if(_connectionThread != nullptr){
+        // join connection thread and delete it
+        if (_connectionThread != nullptr) {
             _connectionThread->join();
             _connectionThread = nullptr;
         }
                 
-        //join send thread and delete it
-        if (_sendThread != nullptr){
+        // join send thread and delete it
+        if (_sendThread != nullptr) {
             _sendThread->join();
             _sendThread = nullptr;
         }
                 
-        //join listen thread and delete it
-        if( _listenThread != nullptr){
+        // join listen thread and delete it
+        if (_listenThread != nullptr) {
             _listenThread->join();
             _listenThread = nullptr;
         }
@@ -233,19 +244,19 @@ void ParallelConnection::disconnect(){
     }
 }
         
-void ParallelConnection::clientConnect(){
-
-    //we're already connected (or already trying to connect), do nothing (dummy check)
-    if(_isConnected.load() || _tryConnect.load()){
+void ParallelConnection::clientConnect() {
+    // We're already connected (or already trying to connect), do nothing (dummy check)
+    if (_isConnected.load() || _tryConnect.load()) {
         return;
     }
             
-    if (!initNetworkAPI()){
+    if (!initNetworkAPI()) {
         LERROR("Failed to initialize network API for Parallel Connection");
         return;
     }
             
-    struct addrinfo *addresult = NULL, hints;
+    struct addrinfo* addresult = NULL;
+    struct addrinfo hints;
     
     memset(&hints, 0, sizeof(hints));
     
@@ -255,33 +266,39 @@ void ParallelConnection::clientConnect(){
     hints.ai_flags = AI_PASSIVE;
 
     // Resolve the local address and port to be used by the server
-    int result = getaddrinfo(_address.value().c_str(), _port.value().c_str(), &hints, &addresult);
-    if (result != 0)
-    {
+    int result = getaddrinfo(
+        _address.value().c_str(),
+        _port.value().c_str(),
+        &hints,
+        &addresult
+    );
+    if (result != 0) {
         LERROR("Failed to parse hints for Parallel Connection");
         return;
     }
             
-    //we're not connected
-    _isConnected.store(false);
+    // We're not connected
+    _isConnected = false;
             
-    //we want to try and establish a connection
-    _tryConnect.store(true);
+    // We want to try and establish a connection
+    _tryConnect = true;
             
-    //start connection thread
-    _connectionThread = std::make_unique<std::thread>(&ParallelConnection::establishConnection, this, addresult);
-            
+    // Start connection thread
+    _connectionThread = std::make_unique<std::thread>(
+        &ParallelConnection::establishConnection,
+        this,
+        addresult
+    );
 }
 
-void ParallelConnection::establishConnection(addrinfo *info){
-
+void ParallelConnection::establishConnection(addrinfo *info) {
     _clientSocket = socket(info->ai_family, info->ai_socktype, info->ai_protocol);
             
-    if (_clientSocket == INVALID_SOCKET){
+    if (_clientSocket == INVALID_SOCKET) {
         freeaddrinfo(info);
         LERROR("Failed to create client socket, disconnecting.");
 
-        //signal a disconnect
+        // Signal a disconnect
         signalDisconnect();
     }
             
@@ -289,7 +306,7 @@ void ParallelConnection::establishConnection(addrinfo *info){
     int falseFlag = 0;
     int result;
             
-    //set no delay
+    // Set no delay
     result = setsockopt(
         _clientSocket,                      // socket affected
         IPPROTO_TCP,                        // set option at TCP level
@@ -298,7 +315,7 @@ void ParallelConnection::establishConnection(addrinfo *info){
         sizeof(int)                         // length of option value
     );
     
-    //set send timeout
+    // Set send timeout
     int timeout = 0;
     result = setsockopt(
         _clientSocket,
@@ -308,7 +325,7 @@ void ParallelConnection::establishConnection(addrinfo *info){
         sizeof(timeout)
     );
     
-    //set receive timeout
+    // Set receive timeout
     result = setsockopt(
         _clientSocket,
         SOL_SOCKET,
@@ -349,16 +366,19 @@ void ParallelConnection::establishConnection(addrinfo *info){
         LINFO("Connection established with server at ip: "<< _address);
                     
         // We're connected
-        _isConnected.store(true);
+        _isConnected = true;
                     
         // Start sending messages
         _sendThread = std::make_unique<std::thread>(&ParallelConnection::sendFunc, this);
                     
         // Start listening for communication
-        _listenThread = std::make_unique<std::thread>(&ParallelConnection::listenCommunication, this);
+        _listenThread = std::make_unique<std::thread>(
+            &ParallelConnection::listenCommunication,
+            this
+        );
                     
         // We no longer need to try to establish connection
-        _tryConnect.store(false);
+        _tryConnect = false;
                     
         _sendBufferMutex.lock();
         _sendBuffer.clear();
@@ -390,10 +410,18 @@ void ParallelConnection::sendAuthentication() {
     uint32_t passCode = hash(_password.value());
 
     // Write passcode to buffer
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&passCode), reinterpret_cast<char*>(&passCode) + sizeof(uint32_t));
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<char*>(&passCode),
+        reinterpret_cast<char*>(&passCode) + sizeof(uint32_t)
+    );
 
     // Write the length of the nodes name to buffer
-    buffer.insert(buffer.end(), reinterpret_cast<char*>(&nameLength), reinterpret_cast<char*>(&nameLength) + sizeof(uint32_t));
+    buffer.insert(
+        buffer.end(),
+        reinterpret_cast<char*>(&nameLength),
+        reinterpret_cast<char*>(&nameLength) + sizeof(uint32_t)
+    );
 
     // Write this node's name to buffer
     buffer.insert(buffer.end(), name.begin(), name.end());
@@ -409,18 +437,18 @@ void ParallelConnection::queueInMessage(const Message& message) {
 
 void ParallelConnection::handleMessage(const Message& message) {
     switch (message.type){
-    case MessageType::Data:
-        dataMessageReceived(message.content);
-        break;
-    case MessageType::ConnectionStatus:
-        connectionStatusMessageReceived(message.content);
-        break;
-    case MessageType::NConnections:
-        nConnectionsMessageReceived(message.content);
-        break;
-    default:
-        //unknown message type
-        break;
+        case MessageType::Data:
+            dataMessageReceived(message.content);
+            break;
+        case MessageType::ConnectionStatus:
+            connectionStatusMessageReceived(message.content);
+            break;
+        case MessageType::NConnections:
+            nConnectionsMessageReceived(message.content);
+            break;
+        default:
+            //unknown message type
+            break;
     }
 }
 
@@ -542,7 +570,10 @@ double ParallelConnection::timeTolerance() const {
 void ParallelConnection::dataMessageReceived(const std::vector<char>& messageContent) {
     // The type of data message received
     uint32_t type = *(reinterpret_cast<const uint32_t*>(messageContent.data()));   
-    std::vector<char> buffer(messageContent.begin() + sizeof(uint32_t), messageContent.end());
+    std::vector<char> buffer(
+        messageContent.begin() + sizeof(uint32_t),
+        messageContent.end()
+    );
  
     switch (static_cast<datamessagestructures::Type>(type)) {
         case datamessagestructures::Type::CameraData: {
@@ -576,11 +607,16 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
             datamessagestructures::ScriptMessage sm;
             sm.deserialize(buffer);
 
-            OsEng.scriptEngine().queueScript(sm._script, scripting::ScriptEngine::RemoteScripting::No);         
+            OsEng.scriptEngine().queueScript(
+                sm._script,
+                scripting::ScriptEngine::RemoteScripting::No
+            );         
             break;
         }
         default: {
-            LERROR("Unidentified data message with identifier " << type << " received in parallel connection.");
+            LERROR("Unidentified data message with identifier " << type <<
+                   " received in parallel connection."
+            );
             break;
         }
     }
@@ -661,7 +697,8 @@ void ParallelConnection::sendFunc(){
             );
 
             if (result == SOCKET_ERROR) {
-                LERROR("Failed to send message.\nError: " <<
+                LERROR(
+                    "Failed to send message.\nError: " <<
                     _ERRNO << " detected in connection, disconnecting."
                 );
                 signalDisconnect();
@@ -824,7 +861,10 @@ void ParallelConnection::listenCommunication() {
         // If enough data was received
         if (nBytesRead <= 0) {
             if (!_disconnect) {
-                LERROR("Error " << _ERRNO << " detected in connection when reading header, disconnecting!");
+                LERROR(
+                    "Error " << _ERRNO <<
+                    " detected in connection when reading header, disconnecting!"
+                );
                 signalDisconnect();
             }
             break;
@@ -844,7 +884,10 @@ void ParallelConnection::listenCommunication() {
         uint32_t messageSizeIn = *(ptr++);
 
         if (protocolVersionIn != ProtocolVersion) {
-            LERROR("Protocol versions do not match. Server version: " << protocolVersionIn << ", Client version: " << ProtocolVersion);
+            LERROR(
+                "Protocol versions do not match. Server version: " <<
+                protocolVersionIn << ", Client version: " << ProtocolVersion
+            );
             signalDisconnect();
             break;
         }
@@ -862,7 +905,9 @@ void ParallelConnection::listenCommunication() {
 
         if (nBytesRead <= 0) {
             if (!_disconnect) {
-                LERROR("Error " << _ERRNO << " detected in connection when reading message, disconnecting!");
+                LERROR(
+                    "Error " << _ERRNO <<
+                    " detected in connection when reading message, disconnecting!");
                 signalDisconnect();
             }
             break;

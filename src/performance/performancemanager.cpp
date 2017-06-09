@@ -43,8 +43,6 @@ namespace {
     // the global memory alive, and 2 bytes to enforce alignment)
     const size_t GlobalSharedMemorySize = 4;
     
-    const int MaximumNumber = 256;
-
     struct GlobalMemory {
         uint8_t number;
         uint8_t referenceCount;
