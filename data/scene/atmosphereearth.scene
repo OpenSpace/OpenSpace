@@ -92,12 +92,12 @@ return {
         --"atmospheremars",
         --"moon",
    
-        --"lodglobes/earth",
+        "lodglobes/earth",
         --"lodglobes/mars",
         --"lodglobes/moon",
                 
         --"toyvolume",
-        "earth",
+        --"earth",
         "stars",
         --"stars-denver",
         "milkyway",
