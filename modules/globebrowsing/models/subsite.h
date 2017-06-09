@@ -62,6 +62,9 @@ struct Subsite {
 	// Information needed for texture projection
 	std::vector<ImgReader::PointCloudInfo> cameraColoredInfoVector;
 
+	// Rotation matrix needed for placement of subsites
+	glm::dmat4 rotationMatrix;
+
 	std::string pathToGeometryFolder;
 	std::string pathToTextureFolder;
 
