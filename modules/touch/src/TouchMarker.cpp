@@ -58,13 +58,6 @@ TouchMarker::TouchMarker()
 	
 }
 
-bool TouchMarker::isReady() const {
-	if (_shader == nullptr) {
-		std::cout << "something went wrong\n";
-	}
-	return (_shader != nullptr); // && _texture;
-}
-
 bool TouchMarker::initialize(const std::vector<TUIO::TuioCursor> list) {
 	glGenVertexArrays(1, &_quad); // generate array
 	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
@@ -77,7 +70,7 @@ bool TouchMarker::initialize(const std::vector<TUIO::TuioCursor> list) {
 
 	//loadTexture();
 
-	return isReady();
+	return (_shader != nullptr); // && _texture;
 }
 
 bool TouchMarker::deinitialize() {
@@ -108,7 +101,7 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor> list) {
 		unit.activate();
 		_texture->bind();
 		_shader->setUniform("texture1", unit);*/
-		_shader->setUniform("radius", _radiusSize);
+		//_shader->setUniform("radius", _radiusSize);
 		
 		glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);

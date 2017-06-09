@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 in vec2 out_position;
-in float pointRadius;
+//in float pointRadius;
 
 out vec4 FragColor;
 

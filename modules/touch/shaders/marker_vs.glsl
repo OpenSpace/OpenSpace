@@ -28,16 +28,16 @@
 layout(location = 0) in vec2 in_position;
 
 // Uniforms
-uniform float radius;
+//uniform float radius;
 
 // Outputs
 out vec2 out_position;
-out float pointRadius;
+//out float pointRadius;
 
 void main() {
     out_position = in_position;
-    pointRadius = 0.05; //radius;
+    //pointRadius = 0.05; //radius;
 
     gl_PointSize = 0.05; //radius;
-    gl_Position = in_position;
+    gl_Position = vec3(in_position, -1.0, 1.0);
 }

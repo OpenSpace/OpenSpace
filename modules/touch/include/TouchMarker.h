@@ -49,8 +49,6 @@ namespace opengl {
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
 
 class TouchMarker : public properties::PropertyOwner
 {
@@ -59,8 +57,6 @@ class TouchMarker : public properties::PropertyOwner
 
 		bool initialize(const std::vector<TUIO::TuioCursor> list);
 		bool deinitialize();
-
-		bool isReady() const;
 
 		void render(const std::vector<TUIO::TuioCursor> list);
 		void update();
