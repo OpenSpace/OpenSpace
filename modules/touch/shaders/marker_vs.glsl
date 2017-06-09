@@ -39,5 +39,5 @@ void main() {
     //pointRadius = 0.05; //radius;
 
     gl_PointSize = 0.05; //radius;
-    gl_Position = vec3(in_position, -1.0, 1.0);
+    gl_Position = vec4(in_position, -1.0, 1.0);
 }

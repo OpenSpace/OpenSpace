@@ -46,7 +46,6 @@ TouchMarker::TouchMarker()
 	, _texturePath("texturePath", "Color Texture")
 	, _shader(nullptr)
 	, _texture(nullptr)
-	, _listIsDirty(false)
 	, _textureIsDirty(false)
 	, _numFingers(0)
 {
@@ -116,9 +115,6 @@ void TouchMarker::update() {
 	if (_shader->isDirty())
 		_shader->rebuildFromFile();
 
-	if (_listIsDirty)
-		//createFingerList();
-
 	if (_textureIsDirty) {
 		loadTexture();
 		_textureIsDirty = false;
@@ -147,7 +143,7 @@ void TouchMarker::loadTexture() {
 
 void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor> list) {
 	_numFingers = list.size();
-	std::vector<GLfloat> vertexData(_numFingers * 2, 0);
+	std::vector<GLfloat> vertexData(_numFingers * 2, 0.0f);
 	int i = 0;
 	for (const TUIO::TuioCursor& c : list) {
 		vertexData.at(i) = 2 * (c.getX() - 0.5);
@@ -164,7 +160,7 @@ void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor> list) {
 		2,
 		GL_FLOAT,
 		GL_FALSE,
-		0,
+		sizeof(GLfloat) * 2,
 		reinterpret_cast<void*>(0)
 	);
 }

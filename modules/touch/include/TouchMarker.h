@@ -77,7 +77,6 @@ class TouchMarker : public properties::PropertyOwner
 		GLuint _vertexPositionBuffer;
 		int _numFingers;
 
-		bool _listIsDirty;
 		bool _textureIsDirty;
 };
 
