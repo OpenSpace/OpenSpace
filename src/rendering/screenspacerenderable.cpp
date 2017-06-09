@@ -29,9 +29,9 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/scripting/scriptengine.h>
 
 #ifdef WIN32
 #define _USE_MATH_DEFINES
@@ -49,7 +49,7 @@ namespace {
     const char* KeyAlpha = "Alpha";
     const char* KeyTag = "Tag";
     const float PlaneDepth = -2.f;
-}
+} // namespace
 
 namespace openspace {
 
@@ -148,16 +148,18 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
 
     if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
-        if (!tagName.empty())
+        if (!tagName.empty()) {
             addTag(std::move(tagName));
+        }
     } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
         ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
         std::vector<std::string> keys = tagNames.keys();
         std::string tagName;
         for (const std::string& key : keys) {
             tagName = tagNames.value<std::string>(key);
-            if (!tagName.empty())
+            if (!tagName.empty()) {
                 addTag(std::move(tagName));
+            }
         }
     }
 
@@ -176,7 +178,10 @@ ScreenSpaceRenderable::ScreenSpaceRenderable(const ghoul::Dictionary& dictionary
     _delete.onChange([this](){
         std::string script = 
             "openspace.unregisterScreenSpaceRenderable('" + name() + "');";
-        OsEng.scriptEngine().queueScript(script, scripting::ScriptEngine::RemoteScripting::Yes);
+        OsEng.scriptEngine().queueScript(
+            script,
+            scripting::ScriptEngine::RemoteScripting::Yes
+        );
     });
 }
 

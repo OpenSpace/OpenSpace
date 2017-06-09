@@ -153,7 +153,7 @@ void ABufferRenderer::initialize() {
             "${SHADERS}/abuffer/resolveabuffer.frag",
             dict
         );
-    } catch (const ghoul::RuntimeErcomponent& e) {
+    } catch (const ghoul::RuntimeError& e) {
         LERRORC(e.component, e.message);
     }
 
@@ -401,14 +401,23 @@ void ABufferRenderer::clear() {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
     glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _resolution.x, _resolution.y, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R32UI,
+        _resolution.x,
+        _resolution.y,
+        0,
+        GL_RED_INTEGER,
+        GL_UNSIGNED_INT,
+        nullptr
+    );
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     static const GLuint zero = 1;
     glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, _atomicCounterBuffer);
     glBufferSubData(GL_ATOMIC_COUNTER_BUFFER, 0, sizeof(zero), &zero);
     glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, 0);
-
 }
 
 void ABufferRenderer::updateResolution() {
@@ -416,21 +425,43 @@ void ABufferRenderer::updateResolution() {
 
     int totalPixels = _resolution.x * _resolution.y;
     glBindTexture(GL_TEXTURE_2D, _anchorPointerTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, _resolution.x, _resolution.y, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, NULL);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R32UI,
+        _resolution.x,
+        _resolution.y,
+        0,
+        GL_RED_INTEGER,
+        GL_UNSIGNED_INT,
+        nullptr
+    );
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _anchorPointerTextureInitializer);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, totalPixels * sizeof(GLuint), NULL, GL_STATIC_DRAW);
+    glBufferData(
+        GL_PIXEL_UNPACK_BUFFER,
+        totalPixels * sizeof(GLuint),
+        nullptr,
+        GL_STATIC_DRAW
+    );
 
-    GLuint* data = (GLuint*)glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+    GLuint* data = reinterpret_cast<GLuint*>(
+        glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
+    );
     memset(data, 0x00, totalPixels * sizeof(GLuint));
     glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     glBindBuffer(GL_TEXTURE_BUFFER, _fragmentBuffer);
-    glBufferData(GL_TEXTURE_BUFFER, MaxAverageLayers*totalPixels*sizeof(GLuint) * 4, NULL, GL_DYNAMIC_COPY);
+    glBufferData(
+        GL_TEXTURE_BUFFER,
+        MaxAverageLayers*totalPixels * sizeof(GLuint) * 4,
+        nullptr,
+        GL_DYNAMIC_COPY
+    );
 
     glBindTexture(GL_TEXTURE_BUFFER, _fragmentTexture);
     glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32UI, _fragmentBuffer);
@@ -446,7 +477,8 @@ void ABufferRenderer::updateResolution() {
         GL_RGBA,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
-        true);
+        true
+    );
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainDepthTexture);
     glTexImage2DMultisample(
@@ -455,9 +487,9 @@ void ABufferRenderer::updateResolution() {
         GL_DEPTH_COMPONENT32F,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
-        true);
+        true
+    );
 
-    
     _dirtyResolution = false;
 }
 
@@ -465,10 +497,9 @@ void ABufferRenderer::updateResolution() {
 
 void ABufferRenderer::updateResolveDictionary() {
     ghoul::Dictionary dict;
-
     ghoul::Dictionary raycastersDict;
 
-    for (const auto &raycastPair : _raycastData) {
+    for (const auto& raycastPair : _raycastData) {
         ghoul::Dictionary innerDict;
         int id = raycastPair.second.id;
         std::string namespaceName = raycastPair.second.namespaceName;
@@ -485,7 +516,7 @@ void ABufferRenderer::updateResolveDictionary() {
     dict.setValue("raycasters", raycastersDict);
 
     ghoul::Dictionary helperPathsDict;
-    for (int i = 0; i < _helperPaths.size(); i++) {
+    for (int i = 0; i < _helperPaths.size(); ++i) {
         helperPathsDict.setValue(std::to_string(i), _helperPaths[i]);
     }
 
@@ -508,7 +539,8 @@ void ABufferRenderer::updateRaycastData() {
     _boundsPrograms.clear();
     _helperPaths.clear();
 
-    const std::vector<VolumeRaycaster*>& raycasters = OsEng.renderEngine().raycasterManager().raycasters();
+    const std::vector<VolumeRaycaster*>& raycasters =
+        OsEng.renderEngine().raycasterManager().raycasters();
 
     std::map<std::string, int> namespaceIndices;
     int nextId = 0; // raycaster ids are positive integers starting at 0. (for raycasters, fragment type is id+1)
@@ -517,7 +549,10 @@ void ABufferRenderer::updateRaycastData() {
     for (auto &raycaster : raycasters) {
         if (nextId > MaxRaycasters) {
             int nIgnored = MaxRaycasters - static_cast<int>(raycasters.size());
-            LWARNING("ABufferRenderer does not support more than 32 raycasters. Ignoring " << nIgnored << " raycasters");
+            LWARNING(
+                "ABufferRenderer does not support more than 32 raycasters. " <<
+                "Ignoring " << nIgnored << " raycasters"
+            );
             break;
         }
 
@@ -557,18 +592,21 @@ void ABufferRenderer::updateRaycastData() {
         dict.setValue("fragmentPath", fsPath);
         dict.setValue("fragmentType", data.id + 1);
         try {
-            _boundsPrograms[raycaster] = ghoul::opengl::ProgramObject::Build("Volume " + std::to_string(data.id) + " bounds", vsPath, BoundsFragmentShaderPath, dict);
+            _boundsPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
+                "Volume " + std::to_string(data.id) + " bounds",
+                vsPath,
+                BoundsFragmentShaderPath,
+                dict
+            );
         }
         catch (ghoul::RuntimeError& error) {
-            LERROR(error.message);
+            LERRORC(error.component, error.message);
         }
     }
 
     _dirtyRaycastData = false;
     _dirtyResolveDictionary = true;
-
 }
-
 
 void ABufferRenderer::updateRendererData() {
     PerfMeasure("ABufferRenderer::updateRendererData");

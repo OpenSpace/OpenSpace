@@ -23,18 +23,18 @@
  ****************************************************************************************/
 
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/updatestructures.h>
 
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/programobject.h>
 
 namespace {
     const char* _loggerCat = "Renderable";
@@ -42,7 +42,7 @@ namespace {
     const char* keyEnd = "EndTime";
     const char* KeyType = "Type";
     const char* KeyTag = "Tag";
-}
+} // namespace
 
 namespace openspace {
 
@@ -81,6 +81,7 @@ std::unique_ptr<Renderable> Renderable::createFromDictionary(
     std::string renderableType = dictionary.value<std::string>(KeyType);
 
     auto factory = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(factory, "Renderable factory did not exist");
     std::unique_ptr<Renderable> result = factory->create(renderableType, dictionary);
     if (result == nullptr) {
         LERROR("Failed to create a Renderable object of type '" << renderableType << "'");
@@ -117,16 +118,18 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary)
 
     if (dictionary.hasKeyAndValue<std::string>(KeyTag)) {
         std::string tagName = dictionary.value<std::string>(KeyTag);
-        if (!tagName.empty())
+        if (!tagName.empty()) {
             addTag(std::move(tagName));
+        }
     } else if (dictionary.hasKeyAndValue<ghoul::Dictionary>(KeyTag)) {
         ghoul::Dictionary tagNames = dictionary.value<ghoul::Dictionary>(KeyTag);
         std::vector<std::string> keys = tagNames.keys();
         std::string tagName;
         for (const std::string& key : keys) {
             tagName = tagNames.value<std::string>(key);
-            if (!tagName.empty())
+            if (!tagName.empty()) {
                 addTag(std::move(tagName));
+            }
         }
     }
 
@@ -191,8 +194,9 @@ bool Renderable::getInterval(double& start, double& end) {
         end = SpiceManager::ref().ephemerisTimeFromDate(_endTime);
         return true;
     }
-    else
+    else {
         return false;
+    }
 }
 
 bool Renderable::isReady() const {
@@ -204,8 +208,8 @@ bool Renderable::isEnabled() const {
 }
 
 void Renderable::onEnabledChange(std::function<void(bool)> callback) {
-    _enabled.onChange([=] () {
-            callback(isEnabled());
+    _enabled.onChange([&] () {
+        callback(isEnabled());
     });
 }
 
