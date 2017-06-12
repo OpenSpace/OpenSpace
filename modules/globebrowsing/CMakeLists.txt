@@ -72,6 +72,9 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/models/singlemodelprovider.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/subsitemodels.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/job/subsiteinitializationjob.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/sitemanager.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/drivepropertyowner.h
+	${CMAKE_CURRENT_SOURCE_DIR}/models/sitepropertyowner.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/opengl/texturearray.h
 
@@ -191,6 +194,9 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/models/singlemodelprovider.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/subsitemodels.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/job/subsiteinitializationjob.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/sitemanager.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/drivepropertyowner.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/models/sitepropertyowner.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/opengl/texturearray.cpp
 
