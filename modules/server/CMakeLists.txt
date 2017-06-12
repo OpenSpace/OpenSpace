@@ -23,15 +23,18 @@
 ##########################################################################################
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/connectionpool.h
+    include/connectionpool.h
+    include/topic.h
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/connectionpool.cpp
+    src/connectionpool.cpp
+    src/topic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})

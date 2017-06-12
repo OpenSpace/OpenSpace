@@ -22,66 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/connectionpool.h>
-#include <ghoul/io/socket/socket.h>
-
-#include <vector>
-#include <algorithm>
-
+#include <modules/server/servermodule.h>
+#include "include/topic.h"
 
 namespace openspace {
 
-ConnectionPool::ConnectionPool(std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket)
-    : _handleSocket(std::move(handleSocket))
-{}
+void Topic::initialize(Connection* connection, size_t topicId) {};
 
-ConnectionPool::~ConnectionPool() {
-    disconnectAllConnections();
+void Topic::handleJson(nlohmann::json json) {};
+
+bool Topic::isDone() {
+    return false;
 }
 
-void ConnectionPool::addServer(std::shared_ptr<ghoul::io::SocketServer> server) {
-    _socketServers.push_back(server);
 }
-
-void ConnectionPool::removeServer(ghoul::io::SocketServer* server) {
-    std::remove_if(_socketServers.begin(), _socketServers.end(), [server](const auto& s) {
-        return s.get() == server;
-    });
-}
-
-void ConnectionPool::clearServers() {
-    _socketServers.clear();
-}
-
-void ConnectionPool::updateConnections() {
-    removeDisconnectedSockets();
-    acceptNewSockets();
-}
-
-void ConnectionPool::acceptNewSockets() {
-    for (auto& server : _socketServers) {
-        std::shared_ptr<ghoul::io::Socket> socket;
-        while (socket = server->nextPendingSocket()) {
-            _handleSocket(socket);
-            _sockets.push_back(socket);
-        }
-    }
-}
-
-void ConnectionPool::removeDisconnectedSockets() {
-    std::remove_if(_sockets.begin(), _sockets.end(), [](const std::shared_ptr<ghoul::io::Socket> socket) {
-        return !socket || !socket->isConnected();
-    });
-}
-
-void ConnectionPool::disconnectAllConnections() {
-    for (auto& socket : _sockets) {
-        if (socket && socket->isConnected()) {
-            socket->disconnect();
-        }
-    }
-    _sockets.clear();
-}
-
-
-} // namespace openspace

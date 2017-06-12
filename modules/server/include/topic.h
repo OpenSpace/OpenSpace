@@ -22,72 +22,23 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
-#define __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
-
-#include <openspace/util/openspacemodule.h>
-
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/misc/templatefactory.h>
-
-#include <deque>
-#include <memory>
-#include <thread>
-#include <mutex>
-#include <cstdint>
-#include <map>
+#ifndef OPENSPACE_MODULES_SERVER__TOPIC_H
+#define OPENSPACE_MODULES_SERVER__TOPIC_H
 
 #include <ext/json/json.hpp>
-
-#include "include/topic.h"
 
 namespace openspace {
 
 class Connection;
 
-struct Connection {
+class Topic {
 public:
-    Connection(std::shared_ptr<ghoul::io::Socket> s, std::thread t);
-
-    void handleMessage(std::string message);
-    void sendMessage(const std::string& message);
+    virtual ~Topic() {};
+    void initialize(Connection* connection, size_t topicId);
     void handleJson(nlohmann::json json);
-    void sendJson(const nlohmann::json& json);
-
-    ghoul::TemplateFactory<Topic> _topicFactory;
-    std::map<size_t, std::unique_ptr<Topic>> _topics;
-    std::shared_ptr<ghoul::io::Socket> socket;
-    std::thread thread;
-    bool active;
-};
-   
-struct Message {
-    Connection* conneciton;
-    std::string messageString;
+    bool isDone();
 };
 
+}
 
-
-class ServerModule : public OpenSpaceModule {
-public:
-    ServerModule();
-    virtual ~ServerModule();
-protected:
-    void internalInitialize() override;
-private:
-    void handleConnection(Connection* socket);
-    void cleanUpFinishedThreads();
-    void consumeMessages();
-    void disconnectAll();
-    void preSync();
-
-    std::mutex _messageQueueMutex;
-    std::deque<Message> _messageQueue;
-
-    std::vector<std::unique_ptr<Connection>> _connections;
-    std::vector<std::unique_ptr<ghoul::io::SocketServer>> _servers;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#endif //OPENSPACE_MODULES_SERVER__TOPIC_H
