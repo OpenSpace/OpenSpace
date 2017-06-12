@@ -75,6 +75,10 @@ namespace {
 
     const char* keyExtraVariables               = "ExtraVariables";
     const char* keyExtraMagnitudeVariables      = "ExtraMagnitudeVariables";
+    const char* keyExtraMinMax                  = "ExtraMinMax";
+    const char* keyExtraMinMaxLimits            = "ExtraMinMaxLimits";
+    const char* keyExtraColorTablePaths         = "ColorTablePaths";
+    const char* keyExtraColorTableMinMaxs       = "ColorTableMinMax";
 
     // const char* keyVertexListFileType       = "FileType";
     // const char* keyVertexListFileTypeJson   = "Json";
@@ -154,10 +158,6 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     _loggerCat += " [" + name + "]";
 
     _dictionary = dictionary;
-
-    // TODO: REMOVE HARDCODED PATH
-    _transferFunctionPath = "${OPENSPACE_DATA}/colortables/uniform_heatmap_bcgyr.txt";
-    _transferFunction = std::make_shared<TransferFunction>(fsManager.getAbsPath(_transferFunctionPath));
 }
 
 bool RenderableFieldlinesSequence::isReady() const {
@@ -386,7 +386,7 @@ bool RenderableFieldlinesSequence::initialize() {
     }
 
     bool allowUnitColoring = false;
-    int numQuanityColorVariables = 0;
+    size_t numExtraVariables = 0;
     if (_numberOfStates > 0) {
         // Approximate the end time of last state (and for the sequence as a whole)
         _seqStartTime = _startTimes[0];
@@ -471,8 +471,8 @@ bool RenderableFieldlinesSequence::initialize() {
         _domainLimY.setValue(glm::vec2(ymin,ymax));
         _domainLimZ.setValue(glm::vec2(zmin,zmax));
 
-        numQuanityColorVariables = _states[0]._extraVariables.size();
-        if (numQuanityColorVariables > 0) {
+        numExtraVariables = _states[0]._extraVariables.size();
+        if (numExtraVariables > 0) {
             allowUnitColoring = (_states[0]._extraVariables[0].size() > 0) ? true : false;
         }
 
@@ -587,7 +587,7 @@ bool RenderableFieldlinesSequence::initialize() {
     if (allowUnitColoring) {
         _colorMethod.addOption(colorMethod::UNIFORM, "Uniform Color");
         _colorMethod.addOption(colorMethod::QUANTITY_DEPENDENT, "Quantity Dependent");
-        _colorMethod = UNIFORM;
+        _colorMethod = QUANTITY_DEPENDENT;
 
         // ASSUMING ALL STATES HAVE THE SAME COLOR VARIABLES
         for (size_t i = 0; i < _states[0]._extraVariableNames.size(); ++i) {
@@ -595,22 +595,90 @@ bool RenderableFieldlinesSequence::initialize() {
         }
 
         // Set tranferfunction min/max to min/max in the given range
+        if (_dictionary.hasKeyAndValue<ghoul::Dictionary>(keyExtraColorTablePaths)) {
+            // TODO: create helper function to extract all values of type from dictionary
+            ghoul::Dictionary colTabPathsDic =
+                    _dictionary.value<ghoul::Dictionary>(keyExtraColorTablePaths);
+            size_t numColorTables = colTabPathsDic.size();
+            if (numColorTables == 0) {
+                LERROR("Must specify ColorTablePaths!");
+                return false;
+            }
+            for (size_t i = 1; i <= numColorTables; ++i) {
+                _colorTablePaths.push_back(
+                        colTabPathsDic.value<std::string>( std::to_string(i) ) );
+            }
+            // If numberOfColorTables don't add up to numberOfExtraVariables extend or
+            // remove to make sure they add up
+            // if (numColorTables != numExtraVariables) {
+                // _colorTablePaths.resize(numExtraVariables,
+                        // _colorTablePaths[numColorTables-1]);
+            // }
+
+            if (_dictionary.hasKeyAndValue<ghoul::Dictionary>(keyExtraColorTableMinMaxs)) {
+                ghoul::Dictionary colorTableMinMaxDic =
+                        _dictionary.value<ghoul::Dictionary>(keyExtraColorTableMinMaxs);
+                size_t numMinMaxs = colorTableMinMaxDic.size();
+                // TODO: check if (numMinMaxs != ,jdfgh)
+                for (size_t i = 1; i <= numMinMaxs; ++i) {
+                    _transferFunctionLimits.push_back(
+                            colorTableMinMaxDic.value<glm::vec2>(std::to_string(i)));
+                }
+
+            } else {
+                LERROR("Must specify \"" << keyExtraColorTableMinMaxs << "\"!");
+                return false;
+            }
+
+            if (_dictionary.hasKeyAndValue<ghoul::Dictionary>(keyExtraMinMaxLimits)) {
+                ghoul::Dictionary extraVarMinMaxDic =
+                        _dictionary.value<ghoul::Dictionary>(keyExtraMinMaxLimits);
+                size_t numMinMaxs = extraVarMinMaxDic.size();
+                // TODO: check if (numMinMaxs != ,jdfgh)
+                for (size_t i = 1; i <= numMinMaxs; ++i) {
+                    glm::vec2 tmp = extraVarMinMaxDic.value<glm::vec2>(std::to_string(i));
+                    _tFInterestRangeLimits.push_back(tmp);
+                    _tFInterestRange.push_back(tmp);
+                }
+            } else {
+                // TODO: make some general function to handle all mod file exceptions messages
+                LERROR("Must specify \"" << keyExtraMinMaxLimits << "\"!");
+                return false;
+            }
+
+            // Make sure all vectors contain 'numExtraVariables' elements
+            // Extend or remove to make sure they add up
+            // TODO: Give warning if they actually change!
+            _colorTablePaths.resize(numExtraVariables, _colorTablePaths[numColorTables-1]);
+            _tFInterestRange.resize(numExtraVariables, _tFInterestRange[0]);
+            _tFInterestRangeLimits.resize(numExtraVariables, _tFInterestRangeLimits[0]);
+            _transferFunctionLimits.resize(numExtraVariables, _transferFunctionLimits[0]);
+
+
+        } else {
+            LERROR("Must specify \"" << keyExtraColorTablePaths << "\"!");
+            return false;
+        }
         // TODO: this should probably be determined some other way..
         // TODO: set in LUA when tracing variables are set there! Requires state to store min/max
-        for (size_t i = 0; i < _states[0]._extraVariables.size(); i++) {
-            float minVal = FLT_MAX;
-            float maxVal = FLT_MIN;
-            for (size_t j = 0; j < _states.size(); ++j) {
-                std::vector<float>& quantityVec = _states[j]._extraVariables[i];
-            // for (std::vector<float>& quantityVec : _states[0]._extraVariables) {
-                auto minMaxPos = std::minmax_element(quantityVec.begin(), quantityVec.end());
-                minVal = *minMaxPos.first  < minVal ? *minMaxPos.first  : minVal;
-                maxVal = *minMaxPos.second > maxVal ? *minMaxPos.second : maxVal;
-            }
-            _transferFunctionLimits.push_back(glm::vec2(minVal, maxVal));
-            _tFInterestRange.push_back(glm::vec2(minVal, maxVal));
-            _tFInterestRangeLimits.push_back(glm::vec2(minVal, maxVal));
-        }
+        // for (size_t i = 0; i < _states[0]._extraVariables.size(); i++) {
+        //     float minVal = FLT_MAX;
+        //     float maxVal = FLT_MIN;
+        //     for (size_t j = 0; j < _states.size(); ++j) {
+        //         std::vector<float>& quantityVec = _states[j]._extraVariables[i];
+        //     // for (std::vector<float>& quantityVec : _states[0]._extraVariables) {
+        //         auto minMaxPos = std::minmax_element(quantityVec.begin(), quantityVec.end());
+        //         minVal = *minMaxPos.first  < minVal ? *minMaxPos.first  : minVal;
+        //         maxVal = *minMaxPos.second > maxVal ? *minMaxPos.second : maxVal;
+        //     }
+        //     _transferFunctionLimits.push_back(glm::vec2(minVal, maxVal));
+        //     _tFInterestRange.push_back(glm::vec2(minVal, maxVal));
+        //     _tFInterestRangeLimits.push_back(glm::vec2(minVal, maxVal));
+        // }
+            // TODO: REMOVE HARDCODED PATH
+        _activeColorTable = &_colorTablePaths[0];
+        _transferFunctionPath = *_activeColorTable;
+        _transferFunction = std::make_shared<TransferFunction>(fsManager.getAbsPath(_transferFunctionPath));
 
         // INITIAL VALUES
         _transferFunctionMinVal = std::to_string(_transferFunctionLimits[0].x);
@@ -628,11 +696,14 @@ bool RenderableFieldlinesSequence::initialize() {
             _unitInterestRange = _tFInterestRange[_colorizingQuantity];
             _unitInterestRange.setMinValue(glm::vec3(_tFInterestRangeLimits[_colorizingQuantity].x));
             _unitInterestRange.setMaxValue(glm::vec3(_tFInterestRangeLimits[_colorizingQuantity].y));
+            _activeColorTable = &_colorTablePaths[_colorizingQuantity];
+            _transferFunctionPath = *_activeColorTable;
         });
 
         _transferFunctionPath.onChange([this] {
             // TOGGLE ACTIVE SHADER PROGRAM
             _transferFunction->setPath(_transferFunctionPath);
+            *_activeColorTable = _transferFunctionPath;
         });
 
         _transferFunctionMinVal.onChange([this] {

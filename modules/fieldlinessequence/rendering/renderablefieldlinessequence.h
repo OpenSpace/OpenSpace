@@ -84,6 +84,9 @@ private:
 
     float _stateProgress; // Time progression of active state. Range: 0 to 1
 
+    std::vector<std::string> _colorTablePaths;
+    std::string* _activeColorTable;
+
 
     // ------------------------- LUA .mod file info -------------------------
     ghoul::Dictionary _dictionary;
