@@ -22,72 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
-#define __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#include <modules/server/include/connectionpool.h>
+#include <ghoul/io/socket/socket.h>
 
-#include <openspace/util/openspacemodule.h>
+#include <vector>
+#include <algorithm>
 
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/misc/templatefactory.h>
-
-#include <deque>
-#include <memory>
-#include <thread>
-#include <mutex>
-#include <cstdint>
-#include <map>
-
-#include <ext/json/json.hpp>
-
-#include "include/topic.h"
 
 namespace openspace {
 
-class Connection;
+ConnectionPool::ConnectionPool(std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket)
+    : _handleSocket(std::move(handleSocket))
+{}
 
-struct Connection {
-public:
-    Connection(std::shared_ptr<ghoul::io::Socket> s, std::thread t);
+ConnectionPool::~ConnectionPool() {
+    disconnectAllConnections();
+}
 
-    void handleMessage(std::string message);
-    void sendMessage(const std::string& message);
-    void handleJson(nlohmann::json json);
-    void sendJson(const nlohmann::json& json);
+void ConnectionPool::addServer(std::shared_ptr<ghoul::io::SocketServer> server) {
+    _socketServers.push_back(server);
+}
 
-    ghoul::TemplateFactory<Topic> _topicFactory;
-    std::map<size_t, std::unique_ptr<Topic>> _topics;
-    std::shared_ptr<ghoul::io::Socket> socket;
-    std::thread thread;
-    bool active;
-};
-   
-struct Message {
-    Connection* conneciton;
-    std::string messageString;
-};
+void ConnectionPool::removeServer(ghoul::io::SocketServer* server) {
+    std::remove_if(_socketServers.begin(), _socketServers.end(), [server](const auto& s) {
+        return s.get() == server;
+    });
+}
 
+void ConnectionPool::clearServers() {
+    _socketServers.clear();
+}
 
+void ConnectionPool::updateConnections() {
+    removeDisconnectedSockets();
+    acceptNewSockets();
+}
 
-class ServerModule : public OpenSpaceModule {
-public:
-    ServerModule();
-    virtual ~ServerModule();
-protected:
-    void internalInitialize() override;
-private:
-    void handleConnection(Connection* socket);
-    void cleanUpFinishedThreads();
-    void consumeMessages();
-    void disconnectAll();
-    void preSync();
+void ConnectionPool::acceptNewSockets() {
+    for (auto& server : _socketServers) {
+        std::shared_ptr<ghoul::io::Socket> socket;
+        while (socket = server->nextPendingSocket()) {
+            _handleSocket(socket);
+            _sockets.push_back(socket);
+        }
+    }
+}
 
-    std::mutex _messageQueueMutex;
-    std::deque<Message> _messageQueue;
+void ConnectionPool::removeDisconnectedSockets() {
+    std::remove_if(_sockets.begin(), _sockets.end(), [](const std::shared_ptr<ghoul::io::Socket> socket) {
+        return !socket || !socket->isConnected();
+    });
+}
 
-    std::vector<std::unique_ptr<Connection>> _connections;
-    std::vector<std::unique_ptr<ghoul::io::SocketServer>> _servers;
-};
+void ConnectionPool::disconnectAllConnections() {
+    for (auto& socket : _sockets) {
+        if (socket && socket->isConnected()) {
+            socket->disconnect();
+        }
+    }
+    _sockets.clear();
+}
+
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
