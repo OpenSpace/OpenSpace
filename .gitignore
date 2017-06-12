@@ -36,6 +36,9 @@ ScriptLog.txt
 *.idea/
 .vs/
 .build-vs/
+*.dir
+cmake-build-*
+x64/
 
 data/scene/atmosphereearth/textures
 data/scene/debugglobe/textures
