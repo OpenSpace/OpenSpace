@@ -61,6 +61,7 @@ public:
     void render(const RenderData& data) override;
     void update(const UpdateData& data) override;
 private:
+    std::string _loggerCat = "RenderableFieldlinesSequence";
     // -------------------- MAIN VARIABLES, STATE & TIME --------------------
     bool _needsUpdate  = false; // If still in same state as previous frame == false
     bool _shouldRender = false; // only temporary, unnecessary?

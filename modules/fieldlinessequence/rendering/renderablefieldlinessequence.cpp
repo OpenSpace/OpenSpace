@@ -52,10 +52,6 @@
 #include <chrono>
 
 namespace {
-    std::string _loggerCat = "RenderableFieldlinesSequence";
-}
-
-namespace {
     const char* keyTracingMethod                = "TracingMethod";
     const char* keyTracingMethodPreTracedJson   = "PreTracedJson";
     const char* keyTracingMethodPreTracedBinary = "PreTracedBinary";
@@ -155,7 +151,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
     std::string name;
     dictionary.getValue(SceneGraphNode::KeyName, name);
 
-    _loggerCat = "RenderableFieldlines [" + name + "]";
+    _loggerCat += " [" + name + "]";
 
     _dictionary = dictionary;
 
