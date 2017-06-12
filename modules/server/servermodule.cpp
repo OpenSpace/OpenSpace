@@ -141,10 +141,10 @@ Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, std::thread t)
     , thread(std::move(t))
     , active(true)
 {
-    _topicFactory.registerClass<GetPropertyTopic>("authenticate");
-    _topicFactory.registerClass<GetPropertyTopic>("get");
-    _topicFactory.registerClass<SetPropertyTopic>("set");
-    _topicFactory.registerClass<SubscribePropertyTopic>("subscribe");
+//    _topicFactory.registerClass<GetPropertyTopic>("authenticate");
+//    _topicFactory.registerClass<GetPropertyTopic>("get");
+//    _topicFactory.registerClass<SetPropertyTopic>("set");
+//    _topicFactory.registerClass<SubscribePropertyTopic>("subscribe");
 }
 
 void Connection::handleMessage(std::string message) {
@@ -184,14 +184,14 @@ void Connection::handleJson(nlohmann::json j) {
         std::string type = *typeJson;
         std::unique_ptr<Topic> topic = _topicFactory.create(type);
         topic->initialize(this, topicId);
-        topic->handleJson(payloadJson);
-        if (!topic.isDone()) {
+        topic->handleJson(*payloadJson);
+        /*if (!topic->isDone()) {
             _topics.emplace(topicId, topic);
-        }
+        }*/
     } else {
         // Dispatch the message to the existing topic.
         std::unique_ptr<Topic>& topic = topicIt->second;
-        topic->handleJson(payloadJson);
+        topic->handleJson(*payloadJson);
         if (topic->isDone()) {
             _topics.erase(topicIt);
         }
