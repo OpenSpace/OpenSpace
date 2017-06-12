@@ -46,8 +46,9 @@ class Connection;
 class Topic {
 public:
     virtual ~Topic();
-    initialize(Connection* connection, size_t topicId)
-    void handleJson(nlohmann::json json);
+	void initialize(Connection* connection, size_t topicId) {};
+    void handleJson(nlohmann::json json) {};
+	bool isDone() { return true; };
 };
 
 struct Connection {
