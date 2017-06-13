@@ -114,11 +114,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     }
 
     //TODO(mnoven): Can't pass in an int to dictionary?
-    float tmpResolution;
-    if (!dictionary.getValue("Resolution", tmpResolution)){
-        throw ghoul::RuntimeError("Resolution has to be specified");
-    }
-    _fullResolution = static_cast<unsigned int>(tmpResolution);
+    // float tmpResolution;
+    // if (!dictionary.getValue("Resolution", tmpResolution)){
+    //     throw ghoul::RuntimeError("Resolution has to be specified");
+    // }
+    //_fullResolution = static_cast<unsigned int>(tmpResolution);
 
     if (dictionary.hasKeyAndValue<ghoul::Dictionary>("Instruments")) {
         ghoul::Dictionary instrumentDic = dictionary.value<ghoul::Dictionary>("Instruments");
@@ -162,8 +162,15 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         }
     }
 
-    _imageSize = _fullResolution / (pow(2, _resolutionLevel));
-    _pbo = std::make_unique<PixelBufferObject>(_imageSize * _imageSize * sizeof(IMG_PRECISION));
+    // Get image size
+    auto& stateSequenceStart = _imageMetadataMap2[_currentActiveInstrument];
+    auto& stateStart = stateSequenceStart.getState(OsEng.timeManager().time().j2000Seconds());
+    std::shared_ptr<ImageMetadata> imStart = stateStart.contents();
+    //_imageSize = _imageMetadataMap2[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
+    _imageSize = imStart->fullResolution / (pow(2, _resolutionLevel));
+
+    // Always give PBO maximum size
+    _pbo = std::make_unique<PixelBufferObject>(4096 * 4096 * sizeof(IMG_PRECISION));
 
     // TODO(mnoven): Faster to send GL_RGBA32F as internal format - GPU Pads anyways?
     _texture =  std::make_unique<Texture>(
@@ -184,9 +191,20 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     _lastUpdateRealTime = _realTime;
 
     _activeInstruments.onChange([this]() {
+        _updatingCurrentActiveChannel = true;
         _pboIsDirty = false;
         _currentActiveInstrument
                = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
+
+        // Update image size
+        auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
+        auto& state = stateSequence.getState(OsEng.timeManager().time().j2000Seconds());
+       // const double& timeObserved = state.timeObserved();
+        std::shared_ptr<ImageMetadata> im = state.contents();
+        //_imageSize = _imageMetadataMap2[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
+        _imageSize = im->fullResolution / (pow(2, _resolutionLevel));
+        _pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
+
         // Upload asap
         updateTextureGPU(/*asyncUpload=*/false);
         if (_useBuffering) {
@@ -202,6 +220,8 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         } /*else {
             uploadImageDataToPBO();
         }*/
+
+        _updatingCurrentActiveChannel = false;
     });
 
     _minRealTimeUpdateInterval.onChange([this]() {
@@ -213,10 +233,22 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     _resolutionLevel.onChange([this]() {
         _updatingCurrentLevelOfResolution = true;
         _pboIsDirty = false;
-        _imageSize = _fullResolution / (pow(2, _resolutionLevel));
+
+        auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
+        auto& state = stateSequence.getState(OsEng.timeManager().time().j2000Seconds());
+       // const double& timeObserved = state.timeObserved();
+        std::shared_ptr<ImageMetadata> im = state.contents();
+        //_imageSize = _imageMetadataMap2[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
+        _imageSize = im->fullResolution / (pow(2, _resolutionLevel));
+
+        //_imageSize = _fullResolution / (pow(2, _resolutionLevel));
+
         _pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
         updateTextureGPU(/*asyncUpload=*/false, /*resChanged=*/true);
         if (_useBuffering) {
+
+           // LDEBUG("image size" << _imageSize);
+
             // _currentActiveImageTime
             //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
             //                   .timeObserved;
@@ -396,6 +428,7 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
     } else {
         unsigned char* data
               = new unsigned char[_imageSize * _imageSize * sizeof(IMG_PRECISION)];
+
         const double& osTime = OsEng.timeManager().time().j2000Seconds();
         const auto& decodeData = getDecodeDataFromOsTime(osTime);
         //const auto& decodeData = getDecodeDataFromOsTime(_currentActiveImageTime);
@@ -405,14 +438,14 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
         _currentCenterPixel = decodeData.im->centerPixel;
 
         _texture->bind();
-        if (!resChanged) {
-            glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
-                            GLint(_texture->format()), _texture->dataType(), data);
-        } else {
+        // if (!resChanged) {
+        //     glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
+        //                     GLint(_texture->format()), _texture->dataType(), data);
+        // } else {
             glTexImage2D(_texture->type(), 0, _texture->internalFormat(), _imageSize,
                          _imageSize, 0, GLint(_texture->format()), _texture->dataType(),
                          data);
-        }
+       // }
         delete[] data;
     }
 }
@@ -468,7 +501,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
             _frameSkipCount = 0;
             _streamBuffer.clear();
             _bufferCountOffset = 1;
-            LDEBUG("Clearing ... dt : " << dt);
+           // LDEBUG("Clearing ... dt : " << dt);
             // _currentActiveImageTime
             //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
             //                   .timeObserved;
@@ -478,7 +511,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
 
     // LDEBUG("_stream" << _streamBuffer.numJobs());
     // LDEBUG("buffersize" << _bufferSize);
-    if (_streamBuffer.numJobs() < _bufferSize && _isWithinFrustum) {
+    if (_streamBuffer.numJobs() < _bufferSize /*&& _isWithinFrustum*/) {
         // Always add to buffer faster than pop ..
         const double& osTime = OsEng.timeManager().time().j2000Seconds();
         // The min real time update interval doesnt make any sense
@@ -511,29 +544,29 @@ void RenderableSolarImagery::render(const RenderData& data) {
         return;
     }
 
-    _isWithinFrustum = checkBoundaries(data);
-    if (!_isWithinFrustum) {
-        _shouldRenderPlane = false;
-    } else {
-        _shouldRenderPlane = true;
-    }
+    // _isWithinFrustum = checkBoundaries(data);
+    // if (!_isWithinFrustum) {
+    //     _shouldRenderPlane = false;
+    // } else {
+    //     _shouldRenderPlane = true;
+    // }
 
-    if (_isWithinFrustumLast != _isWithinFrustum) {
-        //_pboIsDirty = false;
-        //fillBuffer(OsEng.timeManager().time().j2000Seconds());
-        // _currentActiveImageTime
-        //               = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-        //                       .timeObserved;
-        _streamBuffer.clear();
-        _bufferCountOffset = 1;
-        _frameSkipCount = 0;
-    }
-    _isWithinFrustumLast = _isWithinFrustum;
+    // if (_isWithinFrustumLast != _isWithinFrustum) {
+    //     //_pboIsDirty = false;
+    //     //fillBuffer(OsEng.timeManager().time().j2000Seconds());
+    //     // _currentActiveImageTime
+    //     //               = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+    //     //                       .timeObserved;
+    //     _streamBuffer.clear();
+    //     _bufferCountOffset = 1;
+    //     _frameSkipCount = 0;
+    // }
+    // _isWithinFrustumLast = _isWithinFrustum;
 
     // Update texture
     // The bool blockers might probably not be needed now
     if (_timeToUpdateTexture && !_updatingCurrentLevelOfResolution
-        && !_updatingCurrentActiveChannel && (_isWithinFrustum || _initializePBO || _pboIsDirty)) {
+        && !_updatingCurrentActiveChannel && (/*_isWithinFrustum ||*/ _initializePBO || _pboIsDirty)) {
         performImageTimestep(OsEng.timeManager().time().j2000Seconds());
         _lastUpdateRealTime = _realTime;
     }
