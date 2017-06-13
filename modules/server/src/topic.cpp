@@ -27,9 +27,13 @@
 
 namespace openspace {
 
-void Topic::initialize(Connection* connection, size_t topicId) {};
+void Topic::initialize(Connection* connection, size_t topic) {
+    topicId = topic;
+};
 
-void Topic::handleJson(nlohmann::json json) {};
+void Topic::handleJson(nlohmann::json json) {
+
+};
 
 bool Topic::isDone() {
     return false;

@@ -28,17 +28,11 @@
 #include <ghoul/io/socket/websocketserver.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
-
-
 #include <ghoul/logging/logmanager.h>
 #include <cstdint>
 
 namespace {
     const char* _loggerCat = "ServerModule";
-
-    const char* MessageKeyType = "type";
-    const char* MessageKeyPayload = "payload";
-    const char* MessageKeyTopic = "topic";
 }
 
 namespace openspace {
@@ -55,12 +49,15 @@ ServerModule::~ServerModule() {
 void ServerModule::internalInitialize() {
     using namespace ghoul::io;
 
-    std::unique_ptr<SocketServer> tcpServer = std::make_unique<TcpSocketServer>();
-    std::unique_ptr<SocketServer> wsServer = std::make_unique<WebSocketServer>();
+    std::unique_ptr<TcpSocketServer> tcpServer = std::make_unique<TcpSocketServer>();
+    std::unique_ptr<WebSocketServer> wsServer = std::make_unique<WebSocketServer>();
 
     // Temporary hard coded addresses and ports.
     tcpServer->listen("localhost", 8000);
     wsServer->listen("localhost", 8001);
+    LDEBUG(fmt::format("TCP Server listening on {}:{}", tcpServer->getAddress(), tcpServer->getPort()));
+    LDEBUG(fmt::format("WS Server listening on {}:{}", wsServer->getAddress(), wsServer->getPort()));
+
 
     _servers.push_back(std::move(tcpServer));
     _servers.push_back(std::move(wsServer));
@@ -76,7 +73,7 @@ void ServerModule::preSync() {
     for (auto& server : _servers) {
         std::shared_ptr<ghoul::io::Socket> socket;
         while ((socket = server->nextPendingSocket())) {
-            std::unique_ptr<Connection> conneciton = std::make_unique<Connection>(socket, std::thread());
+            std::unique_ptr<Connection> conneciton = std::make_unique<Connection>(socket);
             Connection* c = conneciton.get();
             conneciton->thread = std::thread([this, c] () { handleConnection(c); });
             _connections.push_back(std::move(conneciton));
@@ -134,76 +131,6 @@ void ServerModule::consumeMessages() {
         _messageQueue.pop_front();
         m.conneciton->handleMessage(m.messageString);
     }
-}
-
-Connection::Connection(std::shared_ptr<ghoul::io::Socket> s, std::thread t)
-    : socket(s)
-    , thread(std::move(t))
-    , active(true)
-{
-//    _topicFactory.registerClass<GetPropertyTopic>("authenticate");
-//    _topicFactory.registerClass<GetPropertyTopic>("get");
-//    _topicFactory.registerClass<SetPropertyTopic>("set");
-//    _topicFactory.registerClass<SubscribePropertyTopic>("subscribe");
-}
-
-void Connection::handleMessage(std::string message) {
-    try {
-        nlohmann::json j = nlohmann::json::parse(message);
-        handleJson(j);
-    } catch (...) {
-        LERROR("Json parse error");
-    }
-}
-
-void Connection::handleJson(nlohmann::json j) {
-    auto topicJson = j.find(MessageKeyTopic);
-    auto payloadJson = j.find(MessageKeyPayload);
-
-    if (topicJson == j.end() || !topicJson->is_number_integer()) {
-        LERROR("Topic must be an integer");
-        return;
-    }
-
-    if (payloadJson == j.end() || !payloadJson->is_object()) {
-        LERROR("Payload must be an object");
-        return;
-    }
-    
-    // The topic id may be an already discussed topic, or a new one.
-    size_t topicId = *topicJson;
-    auto topicIt = _topics.find(topicId);
-    
-    if (topicIt == _topics.end()) {
-        // The topic id is not registered: Initialize a new topic.
-        auto typeJson = j.find(MessageKeyType);
-        if (typeJson == j.end() || !typeJson->is_string()) {
-            LERROR("A type must be specified as a string when a new topic is initialized");
-            return;
-        }
-        std::string type = *typeJson;
-        std::unique_ptr<Topic> topic = _topicFactory.create(type);
-        topic->initialize(this, topicId);
-        topic->handleJson(*payloadJson);
-        /*if (!topic->isDone()) {
-            _topics.emplace(topicId, topic);
-        }*/
-    } else {
-        // Dispatch the message to the existing topic.
-        std::unique_ptr<Topic>& topic = topicIt->second;
-        topic->handleJson(*payloadJson);
-        if (topic->isDone()) {
-            _topics.erase(topicIt);
-        }
-    }
-}
-
-void Connection::sendMessage(const std::string& message) {
-    socket->putMessage(message);
-}
-
-void Connection::sendJson(const nlohmann::json& j) {
-    sendMessage(j.dump());
 }
 
 } // namespace openspace

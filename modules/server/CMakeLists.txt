@@ -27,6 +27,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(HEADER_FILES
     include/connectionpool.h
+    include/connection.h
     include/topic.h
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.h
 )
@@ -34,6 +35,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     src/connectionpool.cpp
+    src/connection.cpp
     src/topic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.cpp
 )
