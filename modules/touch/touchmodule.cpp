@@ -108,7 +108,7 @@ TouchModule::TouchModule()
 		OpenSpaceEngine::CallbackOption::InitializeGL,
 		[&]() {
 		LDEBUGC("TouchModule", "Initializing TouchMarker OpenGL");
-		markers.initialize(listOfContactPoints);
+		markers.initialize();
 	}
 	);
 

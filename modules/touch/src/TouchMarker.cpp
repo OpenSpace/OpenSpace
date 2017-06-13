@@ -36,13 +36,14 @@
 
 namespace {
 	const std::string _loggerCat = "TouchMarker";
+	const int MAX_FINGERS = 20;
 }
 namespace openspace {
 
 TouchMarker::TouchMarker()
 	: properties::PropertyOwner("TouchMarker")
-	, _visible("TouchMarkers visible", "Toggle visibility of markers", false)
-	, _radiusSize("Marker size", "Set marker size in radius", 0.5, 0, 1)
+	, _visible("TouchMarkers visible", "Toggle visibility of markers", true)
+	, _radiusSize("Marker size", "Set marker size in radius", 10, 0, 30)
 	, _texturePath("texturePath", "Color Texture")
 	, _shader(nullptr)
 	, _texture(nullptr)
@@ -57,15 +58,19 @@ TouchMarker::TouchMarker()
 	
 }
 
-bool TouchMarker::initialize(const std::vector<TUIO::TuioCursor> list) {
+bool TouchMarker::initialize() {
 	glGenVertexArrays(1, &_quad); // generate array
 	glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
-	createVertexList(list);
 
-	_shader = OsEng.renderEngine().buildRenderProgram("MarkerProgram",
-		"${MODULE_TOUCH}/shaders/marker_vs.glsl",
-		"${MODULE_TOUCH}/shaders/marker_fs.glsl"
-	);
+	try {
+		_shader = OsEng.renderEngine().buildRenderProgram("MarkerProgram",
+			"${MODULE_TOUCH}/shaders/marker_vs.glsl",
+			"${MODULE_TOUCH}/shaders/marker_fs.glsl"
+		);
+	}
+	catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
+		LERRORC(e.component, e.what());
+	}
 
 	//loadTexture();
 
@@ -91,7 +96,7 @@ bool TouchMarker::deinitialize() {
 }
 
 void TouchMarker::render(const std::vector<TUIO::TuioCursor> list) {
-	if (_visible) {
+	if (_visible && !list.empty()) {
 		createVertexList(list);
 		_shader->activate();
 
@@ -100,7 +105,7 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor> list) {
 		unit.activate();
 		_texture->bind();
 		_shader->setUniform("texture1", unit);*/
-		//_shader->setUniform("radius", _radiusSize);
+		_shader->setUniform("radius", _radiusSize);
 		
 		glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
@@ -123,45 +128,41 @@ void TouchMarker::update() {
 
 void TouchMarker::loadTexture() {
 	if (_texturePath.value() != "") {
-		std::unique_ptr<ghoul::opengl::Texture> texture =
-			ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
+		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
 
-		if (texture) {
+		if (_texture) {
 			LDEBUGC(
 				"TouchMarker",
 				"Loaded texture from '" << absPath(_texturePath) << "'"
 			);
-			texture->uploadTexture();
-
-			// Textures of planets looks much smoother with AnisotropicMipMap rather than linear
-			texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-			_texture = std::move(texture);
+			_texture->uploadTexture();
+			_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap); // linear or mipmap?
 		}
 	}
 }
 
 void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor> list) {
 	_numFingers = list.size();
-	std::vector<GLfloat> vertexData(_numFingers * 2, 0.0f);
+	std::vector<GLfloat> vertexData(_numFingers * 2, 0);
+	GLfloat vertexTest[MAX_FINGERS];
 	int i = 0;
 	for (const TUIO::TuioCursor& c : list) {
-		vertexData.at(i) = 2 * (c.getX() - 0.5);
-		vertexData.at(i + 1) = -2 * (c.getY() - 0.5);
+		vertexTest[i] = 2 * (c.getX() - 0.5);
+		vertexTest[i + 1] = -2 * (c.getY() - 0.5);
 		i += 2;
 	}
 
 	glBindVertexArray(_quad);
 	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData.data()), vertexData.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexTest), vertexTest, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(
 		0,
 		2,
 		GL_FLOAT,
 		GL_FALSE,
-		sizeof(GLfloat) * 2,
-		reinterpret_cast<void*>(0)
+		0,
+		0
 	);
 }
 

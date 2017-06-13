@@ -55,7 +55,7 @@ class TouchMarker : public properties::PropertyOwner
 	public:
 		TouchMarker();
 
-		bool initialize(const std::vector<TUIO::TuioCursor> list);
+		bool initialize();
 		bool deinitialize();
 
 		void render(const std::vector<TUIO::TuioCursor> list);
