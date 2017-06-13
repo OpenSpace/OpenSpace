@@ -373,7 +373,7 @@ void RenderableRoverSurface::update(const UpdateData& data) {
 	if (_generalProperties.enablePath.value()) {
 		_renderableExplorationPath->update(data);
 	}
-	_cachingModelProvider->update(this);
+	_cachingModelProvider->update();
 }
 
 std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector) {

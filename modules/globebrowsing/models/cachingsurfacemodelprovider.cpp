@@ -107,8 +107,8 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 	return vectorOfSubsiteModels;
 }
 
-void CachingSurfaceModelProvider::update(Renderable* parent) {
-	initModelsFromLoadedData(parent);
+void CachingSurfaceModelProvider::update() {
+	initModelsFromLoadedData();
 }
 
 std::vector<int> CachingSurfaceModelProvider::getLevelsAbove(const std::vector<int> availableLevels, const int requestedLevel) {
@@ -122,7 +122,7 @@ std::vector<int> CachingSurfaceModelProvider::getLevelsAbove(const std::vector<i
 	return levelsAbove;
 }
 
-void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
+void CachingSurfaceModelProvider::initModelsFromLoadedData() {
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfSubsiteModels =
 		_asyncSurfaceModelProvider->getLoadedModels();
 
