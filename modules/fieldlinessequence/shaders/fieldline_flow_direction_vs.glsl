@@ -32,6 +32,8 @@ uniform bool isClamping;
 // uniform int time;
 uniform double timeD;
 
+uniform float alphaMultiplier;
+
 uniform int flParticleSize;
 uniform int modulusDivider;
 uniform int colorMethod;
@@ -130,6 +132,7 @@ void main() {
         }
     }
 
+    vs_color.a *= alphaMultiplier;
     vec4 position_in_meters = vec4(in_position.xyz, 1);
     vec4 positionClipSpace = modelViewProjection * position_in_meters;
     gl_Position = z_normalization(positionClipSpace);

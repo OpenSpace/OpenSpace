@@ -121,6 +121,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _useABlending("additiveBlending", "Additive Blending", false),
       _useNearestSampling("useNearestSampling", "Nearest Sampling", false),
       _usePointDrawing("togglePointDrawing", "Draw Points", false),
+      _alphaFade("fieldlineAlpha", "Opacity Multiplier", 1.f, 0.f, 1.f),
       _lineWidth("fieldlineWidth", "Fieldline Width", 1.f, 0.f, 10.f),
       _seedPointSize("seedPointSize", "Seed Point Size", 4.0, 0.0, 20.0),
       _fieldlineParticleSize("fieldlineParticleSize", "FL Particle Size", 0, 0, 1000),
@@ -560,6 +561,9 @@ bool RenderableFieldlinesSequence::initialize() {
             _activeProgramPtr = (_activeProgramPtr == _program.get()) ? &*_ropeProgram : &*_program;
         });
     }
+
+    addProperty(_alphaFade);
+
     // TODO: IT MAY BE BENEFICIAL IF SOME OF THESE PROPERTIES WERE DEPENDENT ON THE
     // NUMBER OF MAX TRACING STEPS THAT THE USER DEFINED IN LUA!
     // The fieldlineParticleSize and modulusDivider espacially
@@ -874,6 +878,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
         _activeProgramPtr->setUniform("domainLimX", _domainLimX.value() * _scalingFactor);
         _activeProgramPtr->setUniform("domainLimY", _domainLimY.value() * _scalingFactor);
         _activeProgramPtr->setUniform("domainLimZ", _domainLimZ.value() * _scalingFactor);
+        _activeProgramPtr->setUniform("alphaMultiplier", _alphaFade);
         if (_show3DLines) {
             _activeProgramPtr->setUniform("width", _lineWidth * _scalingFactorLineWidth);
             // _activeProgramPtr->setUniform("camDirection",

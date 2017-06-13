@@ -100,6 +100,7 @@ private:
     properties::BoolProperty _useNearestSampling;   // TF: Nearest or linear interpolation
     properties::BoolProperty _usePointDrawing;      // Toggles outputting lines vs points
 
+    properties::FloatProperty _alphaFade;           // Multiplies a vertex's alpha value
     properties::FloatProperty _lineWidth;           // Interactive Line Width
     properties::FloatProperty _seedPointSize;       // Interactive Seed Point Size
 
