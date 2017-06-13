@@ -791,6 +791,8 @@ bool RenderableFieldlinesSequence::initialize() {
         glVertexAttribPointer(seedLocation, 3, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
+    setRenderBin(Renderable::RenderBin::Overlay);
+
     return true;
 }
 
