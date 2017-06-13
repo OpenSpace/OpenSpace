@@ -22,54 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
-#define __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#ifndef OPENSPACE_MODOULES_SERVER__CONNECTION_H
+#define OPENSPACE_MODOULES_SERVER__CONNECTION_H
 
-#include <openspace/util/openspacemodule.h>
-
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/misc/templatefactory.h>
-
-#include <deque>
 #include <memory>
-#include <thread>
-#include <mutex>
-#include <cstdint>
-#include <map>
-
+#include <string>
+#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/io/socket/websocketserver.h>
+#include <ghoul/misc/templatefactory.h>
 #include <ext/json/json.hpp>
+#include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
 
-#include "include/connection.h"
-#include "include/topic.h"
+#include "topic.h"
 
 namespace openspace {
 
-struct Message {
-    Connection* conneciton;
-    std::string messageString;
-};
-
-class ServerModule : public OpenSpaceModule {
+class Connection {
 public:
-    ServerModule();
-    virtual ~ServerModule();
-protected:
-    void internalInitialize() override;
-private:
-    void handleConnection(Connection* socket);
-    void cleanUpFinishedThreads();
-    void consumeMessages();
-    void disconnectAll();
-    void preSync();
+    Connection(std::shared_ptr<ghoul::io::Socket> s);
 
-    std::mutex _messageQueueMutex;
-    std::deque<Message> _messageQueue;
+    void handleMessage(std::string message);
+    void sendMessage(const std::string& message);
+    void handleJson(nlohmann::json json);
+    void sendJson(const nlohmann::json& json);
 
-    std::vector<std::unique_ptr<Connection>> _connections;
-    std::vector<std::unique_ptr<ghoul::io::SocketServer>> _servers;
+    ghoul::TemplateFactory<Topic> _topicFactory;
+    std::map<size_t, std::unique_ptr<Topic>> _topics;
+    std::shared_ptr<ghoul::io::Socket> socket;
+    std::thread thread;
+    bool active;
 };
 
-} // namespace openspace
+}
 
-#endif // __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#endif //OPENSPACE_MODOULES_SERVER__CONNECTION_H
