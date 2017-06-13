@@ -251,6 +251,7 @@ void SpacecraftCameraPlane::render(
                                projectionMatrix * glm::mat4(modelViewTransform));
 
     _frustumShader->setUniform("scale", currentScale);
+    _frustumShader->setUniform("centerPixel", currentCenterPixel);
 
     glBindVertexArray(_frustum);
 
