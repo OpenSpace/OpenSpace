@@ -109,6 +109,7 @@ private:
 
     properties::OptionProperty _colorMethod;        // Uniform/transfer function/topology?
     properties::OptionProperty _colorizingQuantity; // Which quantity to use in tf
+    properties::OptionProperty _domainQuantity; // Which quantity to use in tf
 
     properties::PropertyOwner _colorGroup;
     properties::PropertyOwner _domainGroup;
@@ -130,9 +131,10 @@ private:
     properties::Vec4Property _uniformSeedPointColor;
 
     // -------- Colorize fieldline depending on additional variables --------
-    bool _hasUnitColoring;
+    bool _hasExtraVariables;
     bool _isSpherical;
     bool _updateColorBuffer = false;
+    bool _updateDomainBuffer = false;
 
     std::vector<glm::vec2> _transferFunctionLimits; // .x corresponds to 0 in tf, .y to 1
     std::vector<glm::vec2> _tFInterestRange;        // range of interest for each colorVar
@@ -157,13 +159,16 @@ private:
     GLuint _vertexPositionBuffer    = 0;
     GLuint _seedPositionBuffer      = 0;
     GLuint _vertexColorBuffer       = 0;
+    GLuint _vertexDomainBuffer      = 0;
     GLuint _morphToPositionBuffer   = 0;
     GLuint _quickMorphBuffer        = 0;
 
+    // THESE MUST FOLLOW SHADER PROGRAM
     GLuint _vertAttrVertexPos       = 0;
     GLuint _vertAttrMorphToPos      = 1;
     GLuint _vertAttrMorphQuick      = 2;
     GLuint _vertAttrColorQuantity   = 3;
+    GLuint _vertAttrDomainQuantity  = 4;
 
     GLenum _drawingOutputType       = GL_LINE_STRIP;            // Draw points or lines
 
@@ -177,6 +182,7 @@ private:
 
     void updateActiveStateIndex();
     void updateColorBuffer();
+    void updateDomainBuffer();
     void updateMorphingBuffers();
     void updateVertexPosBuffer();
     bool getSourceFilesFromDictionary(const std::string& fileExt, std::vector<std::string>& validSourceFilePaths);

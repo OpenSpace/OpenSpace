@@ -128,6 +128,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _timeMultiplier("fieldlineParticleSpeed", "FL Particle Speed", 20, 1, 1000),
       _colorMethod("fieldlineColorMethod", "Color Method", properties::OptionProperty::DisplayType::Radio),
       _colorizingQuantity("fieldlineColorQuantity", "Quantity", properties::OptionProperty::DisplayType::Dropdown),
+      _domainQuantity("fieldlineDomainQuantity", "Quantity", properties::OptionProperty::DisplayType::Dropdown),
       _colorGroup("Color"),
       _domainGroup("Domain Limits"),
       _particleGroup("Particles"),
@@ -385,7 +386,7 @@ bool RenderableFieldlinesSequence::initialize() {
             return false;
     }
 
-    bool allowUnitColoring = false;
+    bool allowExtraVariables = false;
     size_t numExtraVariables = 0;
     if (_numberOfStates > 0) {
         // Approximate the end time of last state (and for the sequence as a whole)
@@ -473,7 +474,8 @@ bool RenderableFieldlinesSequence::initialize() {
 
         numExtraVariables = _states[0]._extraVariables.size();
         if (numExtraVariables > 0) {
-            allowUnitColoring = (_states[0]._extraVariables[0].size() > 0) ? true : false;
+            allowExtraVariables = (_states[0]._extraVariables[0].size() > 0) ? true : false;
+            _hasExtraVariables = true;
         }
 
     } else {
@@ -584,14 +586,15 @@ bool RenderableFieldlinesSequence::initialize() {
         addProperty(_isMorphing);
     }
 
-    if (allowUnitColoring) {
+    if (allowExtraVariables) {
         _colorMethod.addOption(colorMethod::UNIFORM, "Uniform Color");
         _colorMethod.addOption(colorMethod::QUANTITY_DEPENDENT, "Quantity Dependent");
         _colorMethod = QUANTITY_DEPENDENT;
 
-        // ASSUMING ALL STATES HAVE THE SAME COLOR VARIABLES
+        // ASSUMING ALL STATES HAVE THE SAME EXTRA VARIABLES
         for (size_t i = 0; i < _states[0]._extraVariableNames.size(); ++i) {
             _colorizingQuantity.addOption(i, _states[0]._extraVariableNames[i]);
+            _domainQuantity.addOption(i, _states[0]._extraVariableNames[i]);
         }
 
         // Set tranferfunction min/max to min/max in the given range
@@ -693,11 +696,16 @@ bool RenderableFieldlinesSequence::initialize() {
             _updateColorBuffer = true;
             _transferFunctionMinVal = std::to_string(_transferFunctionLimits[_colorizingQuantity].x);
             _transferFunctionMaxVal = std::to_string(_transferFunctionLimits[_colorizingQuantity].y);
-            _unitInterestRange = _tFInterestRange[_colorizingQuantity];
-            _unitInterestRange.setMinValue(glm::vec3(_tFInterestRangeLimits[_colorizingQuantity].x));
-            _unitInterestRange.setMaxValue(glm::vec3(_tFInterestRangeLimits[_colorizingQuantity].y));
             _activeColorTable = &_colorTablePaths[_colorizingQuantity];
             _transferFunctionPath = *_activeColorTable;
+        });
+
+        _domainQuantity.onChange([this] {
+            LDEBUG("CHANGED DOMAIN QUANTITY");
+            _updateDomainBuffer = true;
+            _unitInterestRange = _tFInterestRange[_domainQuantity];
+            _unitInterestRange.setMinValue(glm::vec3(_tFInterestRangeLimits[_domainQuantity].x));
+            _unitInterestRange.setMaxValue(glm::vec3(_tFInterestRangeLimits[_domainQuantity].y));
         });
 
         _transferFunctionPath.onChange([this] {
@@ -743,8 +751,8 @@ bool RenderableFieldlinesSequence::initialize() {
 
         _unitInterestRange.onChange([this] {
             LDEBUG("CHANGED TRANSFER FUNTION RANGE OF INTEREST");
-            // Save the change even if colorizingQuantity is changed
-            _tFInterestRange[_colorizingQuantity] = _unitInterestRange;
+            // Save the change even if domainQuantity is changed
+            _tFInterestRange[_domainQuantity] = _unitInterestRange;
         });
 
         // _colorGroup.setPropertyGroupName(0,"FieldlineColorRelated");
@@ -758,7 +766,9 @@ bool RenderableFieldlinesSequence::initialize() {
         _colorGroup.addProperty(_transferFunctionMaxVal);
         _colorGroup.addProperty(_fieldlineColor);
         _colorGroup.addProperty(_useNearestSampling);
-        _colorGroup.addProperty(_unitInterestRange);
+
+        _domainGroup.addProperty(_domainQuantity);
+        _domainGroup.addProperty(_unitInterestRange);
 
     } else {
         addProperty(_fieldlineColor);
@@ -770,6 +780,7 @@ bool RenderableFieldlinesSequence::initialize() {
 
     glGenBuffers(1, &_vertexPositionBuffer);
     glGenBuffers(1, &_vertexColorBuffer);
+    glGenBuffers(1, &_vertexDomainBuffer);
 
     if (_isMorphing) {
         glGenBuffers(1, &_morphToPositionBuffer);
@@ -805,6 +816,9 @@ bool RenderableFieldlinesSequence::deinitialize() {
 
     glDeleteBuffers(1, &_vertexColorBuffer);
     _vertexColorBuffer = 0;
+
+    glDeleteBuffers(1, &_vertexDomainBuffer);
+    _vertexDomainBuffer = 0;
 
     glDeleteBuffers(1, &_morphToPositionBuffer);
     _morphToPositionBuffer = 0;
@@ -878,16 +892,18 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
             }
         }
 
-        if (_colorMethod == colorMethod::QUANTITY_DEPENDENT) {
-            // TODO MOVE THIS TO UPDATE AND CHECK
-            _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-            _textureUnit->activate();
-            _transferFunction->bind(); // Calls update internally
-            _activeProgramPtr->setUniform("colorMap", _textureUnit->unitNumber());
-            _activeProgramPtr->setUniform("isClamping", _isClampingColorValues);
-            _activeProgramPtr->setUniform("transferFunctionLimits",
-                                          _transferFunctionLimits[_colorizingQuantity]);
-            _activeProgramPtr->setUniform("tFIterestRange", _unitInterestRange);
+        if (_hasExtraVariables) {
+            if (_colorMethod == colorMethod::QUANTITY_DEPENDENT) {
+                // TODO MOVE THIS TO UPDATE AND CHECK
+                _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
+                _textureUnit->activate();
+                _transferFunction->bind(); // Calls update internally
+                _activeProgramPtr->setUniform("colorMap", _textureUnit->unitNumber());
+                _activeProgramPtr->setUniform("isClamping", _isClampingColorValues);
+                _activeProgramPtr->setUniform("transferFunctionLimits",
+                                              _transferFunctionLimits[_colorizingQuantity]);
+            }
+            _activeProgramPtr->setUniform("tFIterestRange", _tFInterestRange[_domainQuantity]);
         }
 
         glDisable(GL_CULL_FACE);
@@ -999,11 +1015,12 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             _stateProgress = static_cast<float>(stateTimeElapsed / stateDuration);
         }
 
-        // TODO fix colors -- color classification, etc
-        // Set color buffer if state has values for it
-        _hasUnitColoring = (_states[_activeStateIndex]._extraVariables.size() > 0) ? true : false;
-        if (_hasUnitColoring) {
+        // TODO: makes no sense in having _hasExtraVariables as a member variable if it is
+        // only used here..
+        _hasExtraVariables = (_states[_activeStateIndex]._extraVariables.size() > 0) ? true : false;
+        if (_hasExtraVariables) {
             _updateColorBuffer = true;
+            _updateDomainBuffer = true;
         }
 
         // UNBIND
@@ -1013,10 +1030,15 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         _needsUpdate = false;
         _shouldRender = true;
     }
-
-    if (_updateColorBuffer && _activeStateIndex > -1) {
-        _updateColorBuffer = false;
-        updateColorBuffer();
+    if (_activeStateIndex > -1) {
+        if (_updateColorBuffer) {
+            _updateColorBuffer = false;
+            updateColorBuffer();
+        }
+        if (_updateDomainBuffer) {
+            _updateDomainBuffer = false;
+            updateDomainBuffer();
+        }
     }
 }
 
@@ -1053,6 +1075,22 @@ void RenderableFieldlinesSequence::updateColorBuffer() {
 
     glEnableVertexAttribArray(_vertAttrColorQuantity);
     glVertexAttribPointer(_vertAttrColorQuantity, 1, GL_FLOAT, GL_FALSE, 0, 0);
+}
+
+// TODO updateDomainBuffer() and updateColorBuffer() are identical except for a few variables
+// TODO Make a generalized function
+void RenderableFieldlinesSequence::updateDomainBuffer() {
+    glBindVertexArray(_vertexArrayObject);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexDomainBuffer);
+
+    auto& quantityVec = _states[_activeStateIndex]._extraVariables[_domainQuantity];
+
+    glBufferData(GL_ARRAY_BUFFER, quantityVec.size() * sizeof(float),
+            &quantityVec.front(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(_vertAttrDomainQuantity);
+    glVertexAttribPointer(_vertAttrDomainQuantity, 1, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
 void RenderableFieldlinesSequence::updateMorphingBuffers() {

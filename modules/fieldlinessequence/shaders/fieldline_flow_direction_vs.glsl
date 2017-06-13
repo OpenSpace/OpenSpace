@@ -49,7 +49,8 @@ uniform vec4 fieldlineColor;
 uniform vec4 fieldlineParticleColor;
 
 layout(location = 0) in vec3 in_position; // in meters
-layout(location = 3) in float unitIntensity;
+layout(location = 3) in float colorIntensity;
+layout(location = 4) in float domainIntensity;
 
 out vec4 vs_color;
 out float vs_depth;
@@ -66,21 +67,22 @@ void main() {
     float radius = length(in_position);
     fragment_discard = 1.0;
 
-    if ((in_position.x < domainLimX.x) || (in_position.x > domainLimX.y) ||
-        (in_position.y < domainLimY.x) || (in_position.y > domainLimY.y) ||
-        (in_position.z < domainLimZ.x) || (in_position.z > domainLimZ.y) ||
-        (radius        < domainLimR.x) || (radius        > domainLimR.y) ||
-        ((colorMethod == UNIT_DEPENDENT_COLOR) && (unitIntensity < tFIterestRange.x ||
-                                                   unitIntensity > tFIterestRange.y))) {
+    // Check domain limits
+    if (in_position.x   < domainLimX.x     || in_position.x   > domainLimX.y ||
+        in_position.y   < domainLimY.x     || in_position.y   > domainLimY.y ||
+        in_position.z   < domainLimZ.x     || in_position.z   > domainLimZ.y ||
+        radius          < domainLimR.x     || radius          > domainLimR.y ||
+        domainIntensity < tFIterestRange.x || domainIntensity > tFIterestRange.y) {
+
         fragment_discard = 0.0;
     }
 
     // Color every n-th vertex differently to show fieldline flow direction
-    int modulus = (gl_VertexID + int(timeD)) % modulusDivider;
+    int modulus = (int(timeD/1000 - gl_VertexID)) % modulusDivider;
     // int modulus = (gl_VertexID + time) % modulusDivider;
     if ( modulus > 0 && modulus < flParticleSize) {
         if (colorMethod == UNIT_DEPENDENT_COLOR) {
-            float lookUpValue = (unitIntensity - transferFunctionLimits.x )
+            float lookUpValue = (colorIntensity - transferFunctionLimits.x )
                     / (transferFunctionLimits.y - transferFunctionLimits.x);
             vec4 color = texture(colorMap, lookUpValue);
             vs_color = vec4(color.xyz,fieldlineParticleColor.a*color.a);
@@ -89,10 +91,13 @@ void main() {
                 fragment_discard = 0.0;
             }
 
-            // Discard values outside of specified range
+            // // Discard values outside of specified range
             if (!isClamping) {
-                if (unitIntensity > transferFunctionLimits.y ||
-                    unitIntensity < transferFunctionLimits.x) {
+            //     if (colorIntensity > transferFunctionLimits.y ||
+            //         colorIntensity < transferFunctionLimits.x) {
+            //         fragment_discard = 0.0;
+            //     }
+                if (color.a == 0) {
                     fragment_discard = 0.0;
                 }
             }
@@ -102,22 +107,22 @@ void main() {
         }
     } else {
         if (colorMethod == UNIT_DEPENDENT_COLOR) {
-            float lookUpValue = (unitIntensity - transferFunctionLimits.x)
+            float lookUpValue = (colorIntensity - transferFunctionLimits.x)
                     / (transferFunctionLimits.y - transferFunctionLimits.x);
             vec4 color = texture(colorMap, lookUpValue);
-            vs_color = vec4(color.xyz,fieldlineColor.a*color.a);
+            vs_color =  vec4(color.xyz,fieldlineColor.a*color.a);
 
             // If color table says to not use values in this range discard
             if (color.a == 0) {
                 fragment_discard = 0.0;
             }
 
-            // Discard values outside of specified range
+            // // Discard values outside of specified range
             if (!isClamping) {
-                if (unitIntensity > transferFunctionLimits.y ||
-                    unitIntensity < transferFunctionLimits.x) {
-                    fragment_discard = 0.0;
-                }
+            //     if (colorIntensity > transferFunctionLimits.y ||
+            //         colorIntensity < transferFunctionLimits.x) {
+            //         fragment_discard = 0.0;
+            //     }
             }
 
         } else /*if (colorMethod == UNIFORM_COLOR)*/ {
