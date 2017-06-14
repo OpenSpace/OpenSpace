@@ -87,7 +87,7 @@ bool RenderableExplorationPath::initialize(RenderableGlobe* globe, const std::ve
 	
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaPathID);
-	ghoul_assert(_vaioID != 0, "Could not generate vertex arrays");
+	ghoul_assert(_vaPathID != 0, "Could not generate vertex arrays");
 
 	glGenBuffers(1, &_vbPathID);
 	ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
