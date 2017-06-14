@@ -25,6 +25,9 @@
 in vec2 out_position;
 
 uniform float radius;
+uniform float transparency;
+uniform float thickness;
+uniform vec3 color;
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
@@ -37,24 +40,14 @@ Fragment getFragment() {
     float mag = dot(n.xy, n.xy);
     if (mag > 1.0) discard;   // kill pixels outside circle
     n.z = sqrt(1.0-mag);
-
-    //vec3 eye = vec3(0.0, 0.0, radius * n.z);
-    //float depth = (P[2][2] * eye.z + P[3][2]) / (P[2][3] * eye.z + P[3][3]);
-    //gl_FragDepth = (depth + 1.0) / 2.0;
-
     
     // calculate lighting
-    //const vec3 light_dir = vec3(0.0, 0.0, 1.0);
-    //float diffuse = max(0.0, dot(light_dir, n));
- 
-    //vec3 halfVector = normalize( eye + light_dir);  
-    //float spec = pow(max(0.0, dot(n,halfVector)), 100.0);
-
-    vec3 color = vec3(1.0, 1.0, 1.0);
-    float alpha = mag;
+    const vec3 light_dir = vec3(0.0, 0.0, 1.0);
+    float diffuse = max(0.0, dot(light_dir, n));
+    float alpha = min(pow(mag, thickness), transparency);
 
     Fragment frag;
-    frag.color = vec4(color, alpha);
+    frag.color = vec4(color * diffuse, alpha);
     frag.depth = 1.0;
     return frag;
 }

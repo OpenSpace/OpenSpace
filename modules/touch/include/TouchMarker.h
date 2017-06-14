@@ -34,6 +34,7 @@
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec3property.h>
 
 
 #include <glm/glm.hpp>
@@ -69,6 +70,9 @@ class TouchMarker : public properties::PropertyOwner
 		properties::StringProperty _texturePath;
 		properties::BoolProperty _visible;
 		properties::FloatProperty _radiusSize;
+		properties::FloatProperty _transparency;
+		properties::FloatProperty _thickness;
+		properties::Vec3Property _color;
 
 		std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 		std::unique_ptr<ghoul::opengl::Texture> _texture;

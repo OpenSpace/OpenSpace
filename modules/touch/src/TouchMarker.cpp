@@ -43,7 +43,16 @@ namespace openspace {
 TouchMarker::TouchMarker()
 	: properties::PropertyOwner("TouchMarker")
 	, _visible("TouchMarkers visible", "Toggle visibility of markers", true)
-	, _radiusSize("Marker size", "Set marker size in radius", 10, 0, 30)
+	, _radiusSize("Marker size", "Marker radius", 30, 0, 50)
+	, _transparency("Transparency of marker", "Marker transparency", 0.8, 0, 1.0)
+	, _thickness("Thickness of marker", "Marker thickness", 1.0, 0, 2.0)
+	, _color(
+		"MarkerColor",
+		"Marker color",
+		glm::vec3(204.f / 255.f, 51.f / 255.f, 51.f / 255.f),
+		glm::vec3(0.f),
+		glm::vec3(1.f)
+	)
 	, _texturePath("texturePath", "Color Texture")
 	, _shader(nullptr)
 	, _texture(nullptr)
@@ -52,9 +61,13 @@ TouchMarker::TouchMarker()
 {
 	addProperty(_visible);
 	addProperty(_radiusSize);
+	addProperty(_transparency);
+	addProperty(_thickness);
+	_color.setViewOption(properties::Property::ViewOptions::Color);
+	addProperty(_color);
 	addProperty(_texturePath);
 	_texturePath.onChange(std::bind(&TouchMarker::loadTexture, this));
-
+	//_texturePath.set("?");
 	
 }
 
@@ -106,8 +119,17 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor> list) {
 		_texture->bind();
 		_shader->setUniform("texture1", unit);*/
 		_shader->setUniform("radius", _radiusSize);
-		
+		_shader->setUniform("transparency", _transparency);
+		_shader->setUniform("thickness", _thickness);
+		_shader->setUniform("color", _color.value());
+
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_SCISSOR_TEST);
 		glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 		glBindVertexArray(_quad);
 		glDrawArrays(GL_POINTS, 0, _numFingers);
@@ -143,18 +165,17 @@ void TouchMarker::loadTexture() {
 
 void TouchMarker::createVertexList(const std::vector<TUIO::TuioCursor> list) {
 	_numFingers = list.size();
-	std::vector<GLfloat> vertexData(_numFingers * 2, 0);
-	GLfloat vertexTest[MAX_FINGERS];
+	GLfloat vertexData[MAX_FINGERS];
 	int i = 0;
 	for (const TUIO::TuioCursor& c : list) {
-		vertexTest[i] = 2 * (c.getX() - 0.5);
-		vertexTest[i + 1] = -2 * (c.getY() - 0.5);
+		vertexData[i] = 2 * (c.getX() - 0.5);
+		vertexData[i + 1] = -2 * (c.getY() - 0.5);
 		i += 2;
 	}
 
 	glBindVertexArray(_quad);
 	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexTest), vertexTest, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(
 		0,
