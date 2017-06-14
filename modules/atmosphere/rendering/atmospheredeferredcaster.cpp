@@ -50,8 +50,8 @@
 
 namespace {
     const std::string _loggerCat       = "AtmosphereDeferredcaster";
-    const char* GlslDeferredcastPath   = "${MODULES}/atmosphere/shaders/deferred_test_fs.glsl";
-    const char* GlslDeferredcastFSPath = "${MODULES}/atmosphere/shaders/deferred_test_fs.glsl";
+    const char* GlslDeferredcastPath   = "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
+    const char* GlslDeferredcastFSPath = "${MODULES}/atmosphere/shaders/atmosphere_deferred_fs.glsl";
     const char* GlslDeferredcastVsPath = "${MODULES}/atmosphere/shaders/atmosphere_deferred_vs.glsl";
 }
 

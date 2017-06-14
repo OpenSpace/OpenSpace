@@ -23,12 +23,11 @@
  ****************************************************************************************/
 
 #include <modules/atmosphere/atmospheremodule.h>
-
 #include <openspace/util/factorymanager.h>
-
 #include <ghoul/misc/assert.h>
 
-#include <modules/atmosphere/rendering/renderableplanetatmosphere.h>
+#include <openspace/rendering/renderable.h>
+//#include <modules/atmosphere/rendering/renderableplanetatmosphere.h>
 
 namespace openspace {
 
@@ -37,7 +36,7 @@ AtmosphereModule::AtmosphereModule() : OpenSpaceModule("Atmosphere") {}
 void AtmosphereModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderablePlanetAtmosphere>("RenderablePlanetAtmosphere");
+    //fRenderable->registerClass<RenderablePlanetAtmosphere>("RenderablePlanetAtmosphere");
 }
 
 } // namespace openspace

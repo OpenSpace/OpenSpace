@@ -58,14 +58,14 @@ void main() {
     vs_gNormal = in_normal;
 
     vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1.0);
-
+    
     if (_hasHeightMap) {
         float height = texture(heightTex, in_st).r;
         vec3 displacementDirection = abs(normalize(in_normal.xyz));
         float displacementFactor = height * _heightExaggeration;
         position.xyz = position.xyz + displacementDirection * displacementFactor;
     }
-
+    
     // G-Buffer
     vs_gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space
     

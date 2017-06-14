@@ -34,7 +34,7 @@ return {
             Body = "EARTH",
             Geometry = {
                 Type = "SimpleSphere",
-                Radius = 6.371E6,
+                Radius = 6.3781365E6,
                 Segments = 100
             },
             Textures = {
@@ -49,7 +49,7 @@ return {
                 --AtmoshereRadius = 6420.0,
                 AtmoshereRadius = 6447.0,
                 --PlanetRadius    = 6378.137,
-                PlanetRadius    = 6377.0,
+                PlanetRadius    = 6356.752,
                 --PlanetRadius    = 6360.0,
                 PlanetAverageGroundReflectance = 0.1,
                 Rayleigh = {
