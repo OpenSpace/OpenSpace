@@ -55,9 +55,8 @@ void ServerModule::internalInitialize() {
     // Temporary hard coded addresses and ports.
     tcpServer->listen("localhost", 8000);
     wsServer->listen("localhost", 8001);
-    LDEBUG(fmt::format("TCP Server listening on {}:{}", tcpServer->getAddress(), tcpServer->getPort()));
-    LDEBUG(fmt::format("WS Server listening on {}:{}", wsServer->getAddress(), wsServer->getPort()));
-
+    LDEBUG(fmt::format("TCP Server listening on {}:{}", tcpServer->address(), tcpServer->port()));
+    LDEBUG(fmt::format("WS Server listening on {}:{}", wsServer->address(), wsServer->port()));
 
     _servers.push_back(std::move(tcpServer));
     _servers.push_back(std::move(wsServer));
