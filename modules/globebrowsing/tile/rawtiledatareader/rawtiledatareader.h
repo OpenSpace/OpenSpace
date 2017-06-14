@@ -58,7 +58,7 @@ public:
      * which gets returned.
      */
     std::shared_ptr<RawTile> readTileData(TileIndex tileIndex,
-        char* dataDestination, char* pboMappedDataDestination);
+        char* dataDestination, char* pboMappedDataDestination) const;
     TileDepthTransform getDepthTransform() const;
     const TileTextureInitData& tileTextureInitData() const;
     const PixelRegion::PixelRange fullPixelSize() const;
@@ -67,7 +67,7 @@ public:
      * \returns the maximum chunk level available in the dataset. Should be a value
      * between 2 and 31.
      */
-    virtual int maxChunkLevel() = 0;
+    virtual int maxChunkLevel() const = 0;
     
     /**
      * Reset the dataset to its initial state. This is the place to clear any cache used.
@@ -78,11 +78,12 @@ public:
     virtual int rasterYSize() const = 0;
     virtual float depthOffset() const;
     virtual float depthScale() const;
+    PixelRegion fullPixelRegion() const;
   
     /**
      * Returns a single channeled empty <code>RawTile</code> of size 16 * 16 pixels.
      */
-    std::shared_ptr<RawTile> defaultTileData();
+    std::shared_ptr<RawTile> defaultTileData() const;
     
     /// Padding around all tiles to read to make sure edge blending works.
     const static PixelRegion padding; // same as the two above
@@ -98,7 +99,7 @@ protected:
     /**
      * Call this in the constructor of the class extending <code>RawTileDataReader</code>
      */
-    void ensureInitialized();
+    //void ensureInitialized();
 
     /**
      * The function returns a transform to map
@@ -155,7 +156,7 @@ protected:
         int rasterBand, const IODescription& io, char* dst, int depth = 0) const;
 
     std::shared_ptr<TileMetaData> getTileMetaData(
-        std::shared_ptr<RawTile> result, const PixelRegion& region);
+        std::shared_ptr<RawTile> result, const PixelRegion& region) const;
     TileDepthTransform calculateTileDepthTransform();
     RawTile::ReadError postProcessErrorCheck(std::shared_ptr<const RawTile> ioResult) const;
 

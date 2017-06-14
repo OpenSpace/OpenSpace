@@ -29,6 +29,8 @@
 #include <modules/globebrowsing/other/lruthreadpool.h>
 #include <modules/globebrowsing/other/concurrentjobmanager.h>
 
+#include <mutex>
+
 namespace openspace {
 namespace globebrowsing {
 
@@ -85,6 +87,7 @@ private:
     ConcurrentQueue<std::shared_ptr<Job<P>>> _finishedJobs;
     /// An LRU thread pool is used since the jobs can be bumped and hence prioritized.
     std::shared_ptr<LRUThreadPool<KeyType>> _threadPool;
+    std::mutex _finishedJobsMutex;
 };
 
 } // namespace globebrowsing
