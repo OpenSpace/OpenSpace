@@ -355,6 +355,7 @@ void ChunkedLodGlobe::debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp
 }
 
 void ChunkedLodGlobe::update(const UpdateData& data) {
+    setBoundingSphere(_owner.ellipsoid().maximumRadius() * data.modelTransform.scale);
     _renderer->update();
 }
     
