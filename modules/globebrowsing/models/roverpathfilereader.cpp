@@ -275,6 +275,8 @@ std::shared_ptr<RoverPathFileReader::TextureInformation> RoverPathFileReader::ex
 
 	if (myfile.is_open()) {
 		while (std::getline(myfile, fileName)) {
+			if (fileName.empty())
+				break;
 			fileNameVector.push_back(fileName);
 			ImgReader::PointCloudInfo mInfo;
 
