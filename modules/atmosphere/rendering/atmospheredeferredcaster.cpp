@@ -217,7 +217,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
 
     program.setUniform("ModelTransformMatrix", _modelTransform);
     program.setUniform("dInverseModelTransformMatrix", glm::inverse(_modelTransform));
-    program.setUniform("dInverseOSEyeTransformMatrix", glm::inverse(renderData.camera.combinedViewMatrix()));
+    program.setUniform("dSGCTEyeToOSWorldTransformMatrix", glm::inverse(renderData.camera.combinedViewMatrix()));
 
     GLenum err;
     while ((err = glGetError()) != GL_NO_ERROR) {

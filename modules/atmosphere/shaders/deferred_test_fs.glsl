@@ -58,7 +58,7 @@ uniform dmat4 dSgctEyeToOSEyeTranform; // SGCT Eye to OS Eye *
 uniform dmat4 dInverseSgctProjectionMatrix; // Clip to SGCT Eye *
 uniform dmat4 dInverseCamRotTransform; 
 uniform dmat4 dInverseModelTransformMatrix; 
-uniform dmat4 dInverseOSEyeTransformMatrix;
+uniform dmat4 dSGCTEyeToOSWorldTransformMatrix;
 
 // Double Precision Versions:
 uniform dvec4 dObjpos;
@@ -290,12 +290,9 @@ void dCalculateRayRenderablePlanet(out dRay ray, out dvec4 planetPositionObjectC
   dvec4 sgctEyeCoords = dInverseSgctProjectionMatrix * clipCoords;
   //sgctEyeCoords /= sgctEyeCoords.w;
   sgctEyeCoords.w = 1.0;
-  
-  // SGCT Eye to OS Eye (This is SGCT eye to OS eye)
-  dvec4 osEyeCoords = dSgctEyeToOSEyeTranform * sgctEyeCoords;
     
-  // OS Eye to World coords
-  dvec4 worldCoords = dInverseOSEyeTransformMatrix * osEyeCoords;
+  // SGCT Eye to OS World
+  dvec4 worldCoords = dSGCTEyeToOSWorldTransformMatrix * sgctEyeCoords;
 
   // World to Object
   dvec4 objectCoords = dInverseModelTransformMatrix * worldCoords;
@@ -608,8 +605,9 @@ void main() {
         }
         dvec3 tmpPos = dmat3(dInverseCamRotTransform) * dvec3(dInverseScaleTransformMatrix * farthestPosition);
         */
-        //dvec4 fragWorldCoords  = dInverseOSEyeTransformMatrix * meanPosition;
-        dvec4 fragObjectCoords = dInverseModelTransformMatrix * meanPosition;//fragWorldCoords;
+        dvec4 fragWorldCoords  = dSGCTEyeToOSWorldTransformMatrix * meanPosition;
+        dvec4 fragObjectCoords = dInverseModelTransformMatrix * fragWorldCoords;
+        //dvec4 fragObjectCoords = dInverseModelTransformMatrix * meanPosition;//fragWorldCoords;
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
 
         // All calculations are done in Km:
