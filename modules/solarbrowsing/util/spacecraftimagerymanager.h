@@ -33,6 +33,13 @@
 #include <unordered_set>
 #include <modules/solarbrowsing/util/timedependentstatesequence.h>
 
+#include <ext/json/json.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/unordered_map.hpp>
+#include <boost/serialization/string.hpp>
+
 #define IMG_PRECISION unsigned char
 
 namespace ghoul {
@@ -47,8 +54,6 @@ class TransferFunction;
 // Assume everythign in arcsec to minimize metadata
 struct ImageMetadata {
     std::string filename;
-    std::string preprocessedFilename;
-    std::string spacecraftType;
     int fullResolution;
     float scale;
     glm::vec2 centerPixel;

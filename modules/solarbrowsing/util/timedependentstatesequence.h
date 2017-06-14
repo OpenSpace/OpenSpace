@@ -28,6 +28,7 @@
 #include <openspace/util/spicemanager.h>
 #include <modules/solarbrowsing/util/timedependentstate.h>
 #include <ghoul/logging/logmanager.h>
+#include <boost/serialization/vector.hpp>
 
 // TODO(mnoven): How to include loggercat in template class?
 #include <iostream>
@@ -43,6 +44,8 @@ public:
     void addState(const TimedependentState<T>& state);
     void displayStateTimes();
     bool hasStateChanged(const double& osTime);
+    int getNumStates() { return _states.size(); }
+    const std::vector<TimedependentState<T>>& getStates() { return _states; }
 
     TimedependentState<T>& getState(double osTime);
 private:

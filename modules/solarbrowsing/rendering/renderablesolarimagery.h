@@ -132,7 +132,10 @@ private:
     void uploadImageDataToPBO();
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
     void fillBuffer(const double& dt);
+    void saveMetadata(const std::string& rootPath);
+    void loadMetadata(const std::string& rootPath);
 
+    std::string ISO8601(std::string& datetime);
     void decode(unsigned char* buffer, const std::string& fileame);
     bool initialize() override;
     bool deinitialize() override;

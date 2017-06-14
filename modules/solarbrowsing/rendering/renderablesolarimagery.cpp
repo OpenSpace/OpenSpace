@@ -44,6 +44,8 @@
 
 #include <openspace/util/spicemanager.h>
 
+#include <fstream>
+
 #include <chrono>
 #include <math.h>
 
@@ -133,7 +135,10 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         }
     }
 
-    SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap2, _instrumentFilter);
+
+    //SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap2, _instrumentFilter);
+    //saveMetadata(rootPath);
+    loadMetadata(rootPath);
 
     // Add GUI names
     unsigned int i = 0;
@@ -144,11 +149,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     _currentActiveInstrument
           = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
 
-    std::string tfRootPath;
-    if (dictionary.getValue("TransferfunctionPath", tfRootPath)) {
-        SpacecraftImageryManager::ref().loadTransferFunctions(tfRootPath, _tfMap, _instrumentFilter);
+    SpacecraftImageryManager::ref().loadTransferFunctions(rootPath + "/colortables", _tfMap, _instrumentFilter);
+    //std::string tfRootPath;
+    //if (dictionary.getValue("TransferfunctionPath", tfRootPath)) {
         //throw ghoul::RuntimeError("TransferfunctionPath has to be specified");
-    }
+    //}
 
     // Some sanity checks
     if (_imageMetadataMap2.size() == 0) {
@@ -274,11 +279,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     // }
 
 
+
+
     // _currentActiveImageTime
     //       = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
     //               .timeObserved;
-
-   // _imageMetadataMap2[_currentActiveInstrument].displayStateTimes();
 
    // LDEBUG("Init current active image time " <<  SpiceManager::ref().dateFromEphemerisTime(OsEng.timeManager().time().j2000Seconds()));
     //LDEBUG("Init current active image time " << SpiceManager::ref().dateFromEphemerisTime(_currentActiveImageTime));
@@ -313,6 +318,119 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     addProperty(_target);
     addProperty(_moveFactor);
     addProperty(_verboseMode);
+}
+
+// MUST do this conversion before passing in the spice manager again - WTF.
+std::string RenderableSolarImagery::ISO8601(std::string& datetime) {
+    std::string month = datetime.substr(5, 3);
+
+    std::string MM = "";
+    if (month == "JAN") MM = "01";
+    else if (month == "FEB") MM = "02";
+    else if (month == "MAR") MM = "03";
+    else if (month == "APR") MM = "04";
+    else if (month == "MAY") MM = "05";
+    else if (month == "JUN") MM = "06";
+    else if (month == "JUL") MM = "07";
+    else if (month == "AUG") MM = "08";
+    else if (month == "SEP") MM = "09";
+    else if (month == "OCT") MM = "10";
+    else if (month == "NOV") MM = "11";
+    else if (month == "DEC") MM = "12";
+    else ghoul_assert(false, "Bad month");
+
+    datetime.replace(4, 5, "-" + MM + "-");
+    return datetime;
+}
+
+void RenderableSolarImagery::loadMetadata(const std::string& rootPath) {
+
+    using RawPath = ghoul::filesystem::Directory::RawPath;
+    ghoul::filesystem::Directory sequenceDir(rootPath, RawPath::Yes);
+    if (!FileSys.directoryExists(sequenceDir)) {
+        LERROR("Could not load directory '" << sequenceDir.path() << "'");
+    }
+
+    using Recursive = ghoul::filesystem::Directory::RawPath;
+    using Sort = ghoul::filesystem::Directory::Sort;
+
+    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::No);
+
+    LDEBUG("Begin reading from files");
+    for (auto& seqPath : sequencePaths) {
+        if (size_t position = seqPath.find_last_of(".") + 1) {
+            if (position != std::string::npos) {
+                ghoul::filesystem::File currentFile(seqPath);
+                std::string extension = currentFile.fileExtension();
+                if (extension == "txt") {
+                    LDEBUG("Loading instrument: " << currentFile.baseName());
+                    std::ifstream myfile(currentFile.path());
+                    if (!myfile.is_open()) {
+                        LERROR("Failed to open metadata file");
+                    }
+                  //  std::string ca;
+                    int numStates;
+                    myfile >> numStates;
+
+                    for (int i = 0; i < numStates; i++) {
+                        ImageMetadata im;
+
+                        myfile >> std::ws; // skip the rest of the line
+                        //LDEBUG("HEJ");
+                        std::string date;
+                        //myfile >> date;
+                        std::getline(myfile, date);
+                        double timeObserved = SpiceManager::ref().ephemerisTimeFromDate(ISO8601(date));
+                        //LDEBUG("time obs");
+
+                        std::string relPath;
+                        myfile >> relPath;
+                        //LDEBUG(rootPath + relPath);
+                        im.filename = rootPath + relPath;
+
+                        myfile >> im.fullResolution;
+                        myfile >> im.scale;
+
+                        float x, y;
+                        myfile >> x >> y;
+                        im.centerPixel = glm::vec2(x,y);
+                        myfile >> im.isCoronaGraph;
+                        std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
+                        TimedependentState<ImageMetadata> timeState(
+                                      std::move(data), timeObserved, im.filename);
+                        _imageMetadataMap2[currentFile.baseName()].addState(std::move(timeState));
+                    }
+                    myfile.close();
+                }
+            }
+        }
+    }
+}
+
+void RenderableSolarImagery::saveMetadata(const std::string& rootPath) {
+    for (auto& instrument : _imageMetadataMap2) {
+        std::ofstream ofs(rootPath + instrument.first + ".txt");
+        if (!ofs.is_open()) {
+            LERROR("Failed to open file");
+        }
+        auto &sequence = instrument.second;
+       // ofs << instrument.first << "\n";
+        ofs << sequence.getNumStates() << "\n";
+        for (const auto& metadata : sequence.getStates()) {
+                ofs << SpiceManager::ref().dateFromEphemerisTime(metadata.timeObserved()) << "\n";
+                auto im = metadata.contents();
+
+                size_t filenamePos = im->filename.find("imagedata");
+                std::string fname = im->filename.substr(filenamePos);
+                ofs << fname << "\n";
+                ofs << im->fullResolution << "\n";
+                ofs << im->scale << "\n";
+                ofs << im->centerPixel.x << "\n";
+                ofs << im->centerPixel.y << "\n";
+                ofs << im->isCoronaGraph << "\n";
+        }
+        ofs.close();
+    }
 }
 
 DecodeData RenderableSolarImagery::getDecodeDataFromOsTime(const int& osTime) {
@@ -464,7 +582,6 @@ void RenderableSolarImagery::performImageTimestep(const double& osTime) {
     }
 
     bool stateChanged = _imageMetadataMap2[_currentActiveInstrument].hasStateChanged(osTime);
-
     // Time to pop from buffer !!! - And refill with buffer offset
     if (stateChanged || _initializePBO) {
         // Refill PBO
@@ -501,7 +618,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
             _frameSkipCount = 0;
             _streamBuffer.clear();
             _bufferCountOffset = 1;
-           // LDEBUG("Clearing ... dt : " << dt);
+            //LDEBUG("Clearing ... dt : " << dt);
             // _currentActiveImageTime
             //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
             //                   .timeObserved;
@@ -519,6 +636,8 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         //LDEBUG("Current active time " << SpiceManager::ref().dateFromEphemerisTime(_currentActiveImageTime));
         //LDEBUG("dt" << (_streamBuffer.numJobs()) * (OsEng.timeManager().time().deltaTime()));
         const std::string hash = decodeData.im->filename + std::to_string(_imageSize);
+
+        //LDEBUG("hASH?? " << hash);
         if (!_streamBuffer.hasJob(hash) && _currentActiveImageTime != decodeData.timeObserved) {
             //LDEBUG("Adding job");
             //LINFO("Pushing hash  " << hash);
@@ -566,7 +685,7 @@ void RenderableSolarImagery::render(const RenderData& data) {
     // Update texture
     // The bool blockers might probably not be needed now
     if (_timeToUpdateTexture && !_updatingCurrentLevelOfResolution
-        && !_updatingCurrentActiveChannel && (/*_isWithinFrustum ||*/ _initializePBO || _pboIsDirty)) {
+        && !_updatingCurrentActiveChannel /*&& (_isWithinFrustum || _initializePBO || _pboIsDirty)*/) {
         performImageTimestep(OsEng.timeManager().time().j2000Seconds());
         _lastUpdateRealTime = _realTime;
     }

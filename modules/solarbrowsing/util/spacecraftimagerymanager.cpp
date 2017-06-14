@@ -204,8 +204,9 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
         return im;
     }
     im.filename = file.path();
-    im.spacecraftType = value;
+   // im.spacecraftType = value;
     // TODO: value might not exist
+    std::string spacecraftType = value;
 
     //int res = data["NAXIS1"];
     value = data["NAXIS1"];
@@ -216,7 +217,7 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
     im.fullResolution = std::stoi(sFullResolution);
     // Special case of sdo - RSUN is given in pixels
     // For SOHO the radius of the sun is not specified - we instead use platescl
-    if (im.spacecraftType == "SOHO") {
+    if (spacecraftType == "SOHO") {
         std::string sScale = data["PLATESCL"];
         float plateScale = stof(sScale);
         im.scale = 1.0 / (plateScale / 2.0);
@@ -224,7 +225,7 @@ ImageMetadata SpacecraftImageryManager::parseMetadata(const ghoul::filesystem::F
     } else {
         float sunRadiusPixels = 0.f;
         // SDO has RSUN specified in pixels
-        if (im.spacecraftType == "SDO") {
+        if (spacecraftType == "SDO") {
             value = data["RSUN_OBS"];
             if (value.is_null()) {
                 LERROR("SDO Metadata: RSUN_OBS missing!");
