@@ -136,7 +136,8 @@ void FramebufferRenderer::initialize() {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _deferredFramebuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _deferredColorTexture, 0);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _deferredColorTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _deferredColorTexture, 0);
 
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -274,6 +275,7 @@ void FramebufferRenderer::updateResolution() {
         true);
 
     // DEBUG: deferred g-buffer
+    /*
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _deferredColorTexture);
 
     glTexImage2DMultisample(
@@ -283,6 +285,22 @@ void FramebufferRenderer::updateResolution() {
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
         true);
+    */
+    glBindTexture(GL_TEXTURE_2D, _deferredColorTexture);
+
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA,
+        GLsizei(_resolution.x),
+        GLsizei(_resolution.y),
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_SHORT,
+        nullptr);
+
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainOtherDataTexture);
 
@@ -677,27 +695,61 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             LWARNING("Deferredcaster is not attached when trying to perform deferred task");
         }
     }
-
+    /*
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     _resolveProgram->activate();
 
     ghoul::opengl::TextureUnit mainColorTextureUnit;
-    mainColorTextureUnit.activate();
+    mainColorTextureUnit.activate();*/
 
     // DEBUG: g-buffer
     if (tasks.deferredcasterTasks.size()) {
-        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _deferredColorTexture);
+        //glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _deferredColorTexture);
+        // Bind input FBO + texture to a color attachment
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, _deferredFramebuffer);
+        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _deferredColorTexture, 0);
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+        // Bind destination FBO + texture to another color attachment
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFbo);
+        //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, textureOut, 0);
+        //glDrawBuffer(GL_COLOR_ATTACHMENT1);
+
+        // specify source, destination drawing (sub)rectangles.
+        glBlitFramebuffer(0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
+            0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
+            GL_COLOR_BUFFER_BIT, GL_NEAREST);
+
+        // unbind the color attachments
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
+        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+        _resolveProgram->activate();
+
+        ghoul::opengl::TextureUnit mainColorTextureUnit;
+        mainColorTextureUnit.activate();
+
         glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+        _resolveProgram->setUniform("mainColorTexture", mainColorTextureUnit);
+        _resolveProgram->setUniform("blackoutFactor", blackoutFactor);
+        _resolveProgram->setUniform("nAaSamples", _nAaSamples);
+        glBindVertexArray(_screenQuad);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+
+        _resolveProgram->deactivate();
     }
-    _resolveProgram->setUniform("mainColorTexture", mainColorTextureUnit);
+    /*_resolveProgram->setUniform("mainColorTexture", mainColorTextureUnit);
     _resolveProgram->setUniform("blackoutFactor", blackoutFactor);
     _resolveProgram->setUniform("nAaSamples", _nAaSamples);
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
-    _resolveProgram->deactivate();
+    _resolveProgram->deactivate();*/
 }
 
 void FramebufferRenderer::setScene(Scene* scene) {
