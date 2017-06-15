@@ -26,7 +26,7 @@ namespace openspace {
 
 template<typename T>
 StreamBuffer<T>::StreamBuffer()
-    : _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
+    : _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(4))
 {}
 
 template<typename T>
@@ -46,7 +46,9 @@ int StreamBuffer<T>::numJobs() {
 
 template<typename T>
 void StreamBuffer<T>::enqueueJob(std::shared_ptr<StreamJob<T>> job) {
+    _queue.push(job->id());
     _enqueuedJobIds.insert(job->id());
+    //_enqueuedJobs[job->id()] = job;
     _concurrentJobManager.enqueueJob(job);
 }
 
@@ -55,12 +57,27 @@ std::shared_ptr<T> StreamBuffer<T>::popFinishedJob() {
     while (_concurrentJobManager.numFinishedJobs() > 0) {
         std::shared_ptr<globebrowsing::Job<T>> job = _concurrentJobManager.popFinishedJob();
         std::shared_ptr<StreamJob<T>> streamJob = std::dynamic_pointer_cast<StreamJob<T>>(job);
+
+        // If id is not enqueued simply remove it
         const std::string& id = streamJob->id();
         if (_enqueuedJobIds.find(streamJob->id()) == _enqueuedJobIds.end()){
             continue;
         }
-        _enqueuedJobIds.erase(streamJob->id());
-        return job->product();
+
+        // Add popped job to finished jobs
+        _finishedJobs[streamJob->id()] = streamJob;
+
+        // Look at front if id queue
+        std::string queueFrontId = _queue.front();
+        // // If finished job has front queue id, pop it and return
+        if (_finishedJobs.count(queueFrontId) > 0) {
+            auto finishedJob = _finishedJobs[queueFrontId];
+            _queue.pop();
+            _enqueuedJobIds.erase(queueFrontId);
+            _finishedJobs.erase(queueFrontId);
+            return finishedJob->product();
+        }
+        //return job->product();
     }
     return nullptr;
 }
@@ -70,8 +87,13 @@ void StreamBuffer<T>::clear() {
     while (_concurrentJobManager.numFinishedJobs() > 0) {
         _concurrentJobManager.popFinishedJob();
     }
+
     _concurrentJobManager.clearEnqueuedJobs();
     _enqueuedJobIds.clear();
+    while (!_queue.empty()) {
+        _queue.pop();
+    }
+    _finishedJobs.clear();
 }
 
 } // namespace openspace

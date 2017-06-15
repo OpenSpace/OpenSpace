@@ -71,6 +71,8 @@ public:
     globebrowsing::ConcurrentJobManager<T> _concurrentJobManager;
 private:
     std::unordered_set<std::string> _enqueuedJobIds;
+    std::queue<std::string> _queue;
+    std::unordered_map<std::string, std::shared_ptr<StreamJob<T>>> _finishedJobs;
 };
 
 } // namespace openspace
