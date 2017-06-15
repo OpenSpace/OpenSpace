@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/multiresvolume/rendering/tspbrickselector.h>
-
+#include <openspace/rendering/transferfunction.h>
 #include <algorithm>
 #include <cassert>
 #include <ghoul/logging/logmanager.h>
@@ -44,6 +44,11 @@ namespace openspace {
     : BrickSelector(memoryBudget, streamingBudget)
     , _tsp(tsp) {}
 
+    TSPBrickSelector::TSPBrickSelector(TSP* tsp, TransferFunction* tf, int memoryBudget, int streamingBudget)
+    : BrickSelector(memoryBudget, streamingBudget)
+        , _tsp(tsp)
+        ,_transferFunction(tf) {}
+
 TSPBrickSelector::~TSPBrickSelector() {}
 
 int TSPBrickSelector::linearCoords(int x, int y, int z) {
@@ -62,5 +67,24 @@ void TSPBrickSelector::writeSelection(BrickSelection brickSelection, std::vector
     }
 }
 
+std::vector<float> * TSPBrickSelector::getTfGradients() {
+    TransferFunction *tf = _transferFunction;
+    if (!tf) return nullptr;
+
+    size_t tfWidth = tf->width();
+    if (tfWidth <= 0) return nullptr;
+
+    std::vector<float> gradients(tfWidth - 1);
+    for (size_t offset = 0; offset < tfWidth - 1; offset++) {
+        glm::vec4 prevRgba = tf->sample(offset);
+        glm::vec4 nextRgba = tf->sample(offset + 1);
+
+        float colorDifference = glm::distance(prevRgba, nextRgba);
+        float alpha = (prevRgba.w + nextRgba.w) * 0.5;
+
+        gradients[offset] = colorDifference*alpha;
+    }
+    return &gradients;
+}
 
 } // namespace openspace

@@ -33,18 +33,23 @@
 
 namespace openspace {
 
+class TransferFunction;
+
 class TSPBrickSelector : public BrickSelector {
 public:
     TSPBrickSelector();
     TSPBrickSelector(TSP* tsp);
     TSPBrickSelector(TSP* tsp, int memoryBudget, int streamingBudget);
+    TSPBrickSelector(TSP* tsp, TransferFunction* tf, int memoryBudget, int streamingBudget);
     virtual ~TSPBrickSelector();
 
 protected:
     TSP* _tsp;
+    TransferFunction* _transferFunction;
 
     int linearCoords(int x, int y, int z);
     void writeSelection(BrickSelection brickSelection, std::vector<int>& bricks);
+    std::vector<float> * getTfGradients();
 };
 
 } // namespace openspace

@@ -24,8 +24,8 @@
 
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
-#include <openspace/util/histogram.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/histogram.h>
 #include <algorithm>
 #include <cassert>
 
@@ -36,9 +36,8 @@ namespace {
 namespace openspace {
 
 TfBrickSelector::TfBrickSelector(TSP* tsp, ErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget)
-    : TSPBrickSelector(tsp, memoryBudget, streamingBudget)
-    , _histogramManager(hm)
-    , _transferFunction(tf) {}
+    : TSPBrickSelector(tsp, tf, memoryBudget, streamingBudget)
+    , _histogramManager(hm) {}
 
 TfBrickSelector::~TfBrickSelector() {}
 
@@ -288,26 +287,10 @@ float TfBrickSelector::splitPoints(unsigned int brickIndex, BrickSelection::Spli
     return splitPoints;
 }
 
-
 bool TfBrickSelector::calculateBrickErrors() {
-    TransferFunction *tf = _transferFunction;
-    if (!tf) return false;
 
-    size_t tfWidth = tf->width();
-    if (tfWidth <= 0) return false;
-
-    std::vector<float> gradients(tfWidth - 1);
-    for (size_t offset = 0; offset < tfWidth - 1; offset++) {
-        glm::vec4 prevRgba = tf->sample(offset);
-        glm::vec4 nextRgba = tf->sample(offset + 1);
-
-        float colorDifference = glm::distance(prevRgba, nextRgba);
-        float alpha = (prevRgba.w + nextRgba.w) * 0.5;
-
-        gradients[offset] = colorDifference*alpha;
-    }
-
-
+    std::vector<float> * gradients = getTfGradients();
+    if (!gradients) return false;
 
     unsigned int nHistograms = _tsp->numTotalNodes();
     _brickErrors = std::vector<float>(nHistograms);
@@ -318,12 +301,12 @@ bool TfBrickSelector::calculateBrickErrors() {
         } else {
             const Histogram* histogram = _histogramManager->getHistogram(brickIndex);
             float error = 0;
-            for (int i = 0; i < gradients.size(); i++) {
-                float x = (i + 0.5) / tfWidth;
+            for (int i = 0; i < gradients->size(); i++) {
+                float x = (i + 0.5) / _transferFunction->width();
                 float sample = histogram->interpolate(x);
                 assert(sample >= 0);
-                assert(gradients[i] >= 0);
-                error += sample * gradients[i];
+                assert(gradients->at(i) >= 0);
+                error += sample * gradients->at(i);
             }
             _brickErrors[brickIndex] = error;
         }

@@ -30,7 +30,6 @@
 namespace openspace {
 
 class ErrorHistogramManager;
-class TransferFunction;
 
 class TfBrickSelector : public TSPBrickSelector {
 public:
@@ -45,7 +44,6 @@ public:
 
 protected:
     ErrorHistogramManager* _histogramManager;
-    TransferFunction* _transferFunction;
     std::vector<float> _brickErrors;
     virtual float spatialSplitPoints(unsigned int brickIndex);
     virtual float temporalSplitPoints(unsigned int brickIndex);

@@ -33,7 +33,6 @@ namespace openspace {
 
 class TSP;
 class HistogramManager;
-class TransferFunction;
 
 class SimpleTfBrickSelector : public TSPBrickSelector {
 public:
@@ -47,7 +46,6 @@ public:
  private:
 
     HistogramManager* _histogramManager;
-    TransferFunction* _transferFunction;
     std::vector<float> _brickImportances;
     float spatialSplitPoints(unsigned int brickIndex);
     float temporalSplitPoints(unsigned int brickIndex);
