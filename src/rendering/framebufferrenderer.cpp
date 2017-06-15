@@ -45,6 +45,9 @@
 
 #include <ghoul/opengl/programobject.h>
 
+//#define _OLD_RENDERING_
+#define _NEW_RENDERING_
+
 namespace {
     const std::string _loggerCat = "FramebufferRenderer";
     const std::string ExitFragmentShaderPath = "${SHADERS}/framebuffer/exitframebuffer.frag";
@@ -136,8 +139,12 @@ void FramebufferRenderer::initialize() {
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, _deferredFramebuffer);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _deferredColorTexture, 0);
+#ifdef _OLD_RENDERING_
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _deferredColorTexture, 0);
+#endif
+#ifdef _NEW_RENDERING_
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _deferredColorTexture, 0);
+#endif
 
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -274,8 +281,9 @@ void FramebufferRenderer::updateResolution() {
         GLsizei(_resolution.y),
         true);
 
-    // DEBUG: deferred g-buffer
-    /*
+    // G-buffer
+#ifdef _OLD_RENDERING_
+    
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _deferredColorTexture);
 
     glTexImage2DMultisample(
@@ -284,8 +292,9 @@ void FramebufferRenderer::updateResolution() {
         GL_RGBA,
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
-        true);
-    */
+        true);    
+#endif
+#ifdef _NEW_RENDERING_
     glBindTexture(GL_TEXTURE_2D, _deferredColorTexture);
 
     glTexImage2D(
@@ -301,7 +310,8 @@ void FramebufferRenderer::updateResolution() {
 
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+#endif
+#ifdef _OLD_RENDERING_
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainOtherDataTexture);
 
     glTexImage2DMultisample(
@@ -311,7 +321,7 @@ void FramebufferRenderer::updateResolution() {
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
         true);
-
+#endif
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
 
     glTexImage2DMultisample(
@@ -695,35 +705,21 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             LWARNING("Deferredcaster is not attached when trying to perform deferred task");
         }
     }
-    /*
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-    _resolveProgram->activate();
-
-    ghoul::opengl::TextureUnit mainColorTextureUnit;
-    mainColorTextureUnit.activate();*/
-
-    // DEBUG: g-buffer
+    
+#ifdef _NEW_RENDERING_    
     if (tasks.deferredcasterTasks.size()) {
-        //glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _deferredColorTexture);
-        // Bind input FBO + texture to a color attachment
         glBindFramebuffer(GL_READ_FRAMEBUFFER, _deferredFramebuffer);
         glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _deferredColorTexture, 0);
         glReadBuffer(GL_COLOR_ATTACHMENT0);
 
-        // Bind destination FBO + texture to another color attachment
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, defaultFbo);
-        //glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, textureOut, 0);
-        //glDrawBuffer(GL_COLOR_ATTACHMENT1);
-
-        // specify source, destination drawing (sub)rectangles.
+        
         glBlitFramebuffer(0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
             0, 0, GLsizei(_resolution.x), GLsizei(_resolution.y),
             GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-        // unbind the color attachments
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
-        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
-
+        
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     } else {
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
@@ -742,14 +738,30 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
         _resolveProgram->deactivate();
     }
-    /*_resolveProgram->setUniform("mainColorTexture", mainColorTextureUnit);
+#endif
+#ifdef _OLD_RENDERING_    
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+    _resolveProgram->activate();
+
+    ghoul::opengl::TextureUnit mainColorTextureUnit;
+    mainColorTextureUnit.activate();
+
+    if (tasks.deferredcasterTasks.size()) {
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _deferredColorTexture);        
+    }
+    else {
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);        
+    }
+    _resolveProgram->setUniform("mainColorTexture", mainColorTextureUnit);
     _resolveProgram->setUniform("blackoutFactor", blackoutFactor);
     _resolveProgram->setUniform("nAaSamples", _nAaSamples);
     glBindVertexArray(_screenQuad);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
-    _resolveProgram->deactivate();*/
+    _resolveProgram->deactivate();
+#endif    
+
 }
 
 void FramebufferRenderer::setScene(Scene* scene) {
