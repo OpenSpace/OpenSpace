@@ -335,24 +335,30 @@ bool LocalErrorHistogramManager::saveToFile(const std::string& filename) {
     return true;
 }
 
-const Histogram* LocalErrorHistogramManager::getSpatialHistogram(unsigned int brickIndex) const {
+const Histogram* LocalErrorHistogramManager::getHistogram(unsigned int brickIndex, TSP::NodeType nodeType) const {
     unsigned int innerNodeIndex = brickToInnerNodeIndex(brickIndex);
+
     if (innerNodeIndex < _numInnerNodes) {
-        return &(_spatialHistograms[innerNodeIndex]);
-    } else {
-        return nullptr;
+        switch (nodeType) {
+        case TSP::NodeType::SPATIAL:
+            return &(_spatialHistograms[innerNodeIndex]);
+        case TSP::NodeType::TEMPORAL:
+            return &(_temporalHistograms[innerNodeIndex]);
+        default:
+            return nullptr;
+        }
     }
+
+    return nullptr;
+}
+
+const Histogram* LocalErrorHistogramManager::getSpatialHistogram(unsigned int brickIndex) const {
+    return getHistogram(brickIndex, TSP::NodeType::SPATIAL);
 }
 
 const Histogram* LocalErrorHistogramManager::getTemporalHistogram(unsigned int brickIndex) const {
-    unsigned int innerNodeIndex = brickToInnerNodeIndex(brickIndex);
-    if (innerNodeIndex < _numInnerNodes) {
-        return &(_temporalHistograms[innerNodeIndex]);
-    } else {
-        return nullptr;
-    }
+    return getHistogram(brickIndex, TSP::NodeType::TEMPORAL);
 }
 
 const char * LocalErrorHistogramManager::getName() const { return _name; }
 } // namespace openspace
-

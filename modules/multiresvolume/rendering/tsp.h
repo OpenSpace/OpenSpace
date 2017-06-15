@@ -58,6 +58,11 @@ public:
         NUM_DATA
     };
 
+    enum class NodeType {
+        SPATIAL,
+        TEMPORAL
+    };
+
     TSP(const std::string& filename);
     ~TSP();
 

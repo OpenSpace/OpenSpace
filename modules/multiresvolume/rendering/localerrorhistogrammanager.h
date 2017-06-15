@@ -40,6 +40,7 @@ public:
     bool buildHistograms(int numBins);
     const Histogram* getSpatialHistogram(unsigned int brickIndex) const;
     const Histogram* getTemporalHistogram(unsigned int brickIndex) const;
+    const Histogram* getHistogram(unsigned int brickIndex, TSP::NodeType nodeType) const;
 
     bool loadFromFile(const std::string& filename);
     bool saveToFile(const std::string& filename);

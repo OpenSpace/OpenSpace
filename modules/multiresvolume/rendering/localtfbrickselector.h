@@ -36,6 +36,30 @@ public:
     struct Error {
         float spatial;
         float temporal;
+        
+        void set(float a, TSP::NodeType nodeType) {
+            switch (nodeType) {
+            case TSP::NodeType::SPATIAL:
+                spatial = a;
+                break;
+            case TSP::NodeType::TEMPORAL:
+                temporal = a;
+                break;
+            default:
+                return;
+            }
+        }
+
+        float get(TSP::NodeType nodeType) {
+            switch (nodeType) {
+            case TSP::NodeType::SPATIAL:
+                return spatial;
+            case TSP::NodeType::TEMPORAL:
+                return temporal;
+            default:
+                return -1.;
+            }
+        }
     };
 
     LocalTfBrickSelector(TSP* tsp, LocalErrorHistogramManager* hm, TransferFunction* tf, int memoryBudget, int streamingBudget);
