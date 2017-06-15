@@ -27,6 +27,8 @@
 #include <modules/solarbrowsing/util/streambuffer.h>
 //#include <modules/solarbrowsing/util/kakaduwrapper.h>
 
+#include "kakaduwrapper.h"
+
 namespace openspace {
 
 struct SolarImageData {
@@ -64,17 +66,16 @@ public:
         //                   _decodeData.totalImageSize, _decodeData.path,
          //                  _decodeData.timeObserved};
 
-        // TODO RESOLUTION BUGG!!!!
         const unsigned int totalImageSize
-              = (_decodeData.im->fullResolution / (_decodeData.resolutionLevel + 1)) * _decodeData.im->fullResolution /  (_decodeData.resolutionLevel + 1);
+              = (_decodeData.im->fullResolution / (_decodeData.resolutionLevel + 1)) * _decodeData.im->fullResolution / (_decodeData.resolutionLevel + 1);
         SolarImageData imd {new unsigned char[totalImageSize],
                             _decodeData.im,
                             _decodeData.timeObserved};
 
-        SimpleJ2kCodec j2c(_decodeData.verboseMode);
-        j2c.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
-       // KakaduWrapper w(_decodeData.verboseMode);
-       // w.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
+        //SimpleJ2kCodec j2c(_decodeData.verboseMode);
+       // j2c.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
+        KakaduWrapper w(_decodeData.verboseMode);
+        w.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
       /*  if (imd.im->preprocessedFilename != "") {
             j2c.DecodeBMPIntoBuffer(imd.im->preprocessedFilename, imd.data);
         } else {*/

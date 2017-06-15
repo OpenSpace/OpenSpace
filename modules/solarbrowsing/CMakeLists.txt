@@ -67,7 +67,7 @@ set(HEADER_FILES
     ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.h
     ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.inl
     # Kakadu Headers
-    #/home/noven/workspace/Kakadu/all_includes
+    /home/noven/workspace/Kakadu/all_includes
 )
 
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -101,7 +101,7 @@ target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${HEADER_FILES})
 #find_library(KDU_LIB kdu_v79R /home/noven/workspace/Kakadu/)
 #find_library(KDU_LIA kdu_a79R /home/noven/workspace/Kakadu/)
 #target_link_libraries(kdu_v79R "${KDU_LIB_PATH}")
-target_link_libraries(${MODULE_NAME} openjp2 #[[/home/noven/workspace/Kakadu/libkdu_v79R.so /home/noven/workspace/Kakadu/libkdu_a79R.so]])
+target_link_libraries(${MODULE_NAME} openjp2 /home/noven/workspace/Kakadu/libkdu_v79R.so /home/noven/workspace/Kakadu/libkdu_a79R.so)
 
 #target_link_libraries(${MODULE_NAME} ${GROK_LIBRARY_NAME} ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 
