@@ -9,7 +9,8 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0011.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    openspace.time.setTime(openspace.time.currentWallTime())
+  --  openspace.time.setTime(openspace.time.currentWallTime())
+    openspace.time.setTime(395324000)
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 
 end
@@ -29,6 +30,16 @@ function postInitialization()
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    openspace.addVirtualProperty("BoolProperty", "Disable Frustums", "SolarImagery*.renderable.disableFrustum", false, nil, nil)
+    openspace.addVirtualProperty("IntProperty", "Buffer Size", "SolarImagery*.renderable.bufferSize", 5, 1, 150)
+    openspace.addVirtualProperty("FloatProperty", "Plane Opacity", "SolarImagery*.renderable.planeOpacity", 1.0, 0.0, 1.0)
+    openspace.addVirtualProperty("BoolProperty", "Verbose All Planes", "SolarImagery*.renderable.verboseMode", false, nil, nil)
+    openspace.addVirtualProperty("BoolProperty", "Use PBO", "SolarImagery*.renderable.usePBO", true, nil, nil)
+    openspace.addVirtualProperty("FloatProperty", "Move Factor", "SolarImagery*.renderable.moveFactor", 0.85, 0.0, 1.0)
+    openspace.addVirtualProperty("IntProperty", "Update Interval", "SolarImagery*.renderable.minRealTimeUpdateInterval", 100, 0, 300)
+    --openspace.addVirtualProperty("IntProperty", "Switch to 304", "SolarImagery*.renderable.activeInstrument", 0, 0, 1)
+    --openspace.addVirtualProperty("FloatProperty", "Fieldline Alpha", "Fieldlines*.renderable.fieldlineAlpha", 1.0, 0.0, 1.0)
 
     openspace.resetCameraDirection()
 
@@ -61,8 +72,8 @@ return {
         "milkyway-eso",
       --  "constellationbounds",
         "missions/sdo",
---        "missions/stereo-a",
-      --  "missions/stereo-b",
-        --"missions/soho"
+        "missions/stereo-a",
+        "missions/stereo-b",
+        "missions/soho"
     }
 }

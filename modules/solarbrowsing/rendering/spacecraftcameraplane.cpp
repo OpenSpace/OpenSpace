@@ -244,6 +244,8 @@ void SpacecraftCameraPlane::render(
 
     _planeShader->deactivate();
     _frustumShader->activate();
+
+    _frustumShader->setUniform("planeOpacity", planeOpacity);
     _frustumShader->setUniform("modelViewProjectionTransform",
                                projectionMatrix
                                      * glm::mat4(viewMatrix * spacecraftModelTransform));

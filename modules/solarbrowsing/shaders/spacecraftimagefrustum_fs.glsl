@@ -25,8 +25,16 @@
 in vec4 vs_positionScreenSpace;
 #include "fragment.glsl"
 
+uniform float planeOpacity;
+
 Fragment getFragment() {
-    vec4 diffuse = vec4(1.0, 1.0, 1.0, 0.25);
+
+    vec4 diffuse;
+    if (planeOpacity < 0.25) {
+        diffuse = vec4(1.0, 1.0, 1.0, planeOpacity);
+    } else {
+        diffuse = vec4(1.0, 1.0, 1.0, 0.25);
+    }
 
     if (diffuse.a == 0.0)
         discard;
