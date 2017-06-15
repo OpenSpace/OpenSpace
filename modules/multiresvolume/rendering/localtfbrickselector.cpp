@@ -265,25 +265,25 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
     _brickErrors = std::vector<Error>(nHistograms);
 
     for (unsigned int brickIndex = 0; brickIndex < nHistograms; brickIndex++) {
+
+        // Creating a spatial and temporal histogram set
+        std::vector<TSP::NodeType> types = { TSP::NodeType::SPATIAL, TSP::NodeType::TEMPORAL };
+
+        // If it's a spatial leaf, set to zero and remove SPATIAL from list of types to calculate error
         if (_tsp->isOctreeLeaf(brickIndex)) {
-            _brickErrors[brickIndex].spatial = 0.0;
-        } else {
-            const Histogram* histogram = _histogramManager->getSpatialHistogram(brickIndex);
-            float error = 0;
-            for (int i = 0; i < gradients.size(); i++) {
-                float x = (i + 0.5) / _transferFunction->width();
-                float sample = histogram->interpolate(x);
-                assert(sample >= 0);
-                assert(gradients[i] >= 0);
-                error += sample * gradients[i];
-            }
-            _brickErrors[brickIndex].spatial = error;
+            _brickErrors[brickIndex].set(0.0, TSP::NodeType::SPATIAL);
+            types.erase(std::remove(types.begin(), types.end(), TSP::NodeType::SPATIAL), types.end());
         }
 
+        // Same for temporal, since it could be both
         if (_tsp->isBstLeaf(brickIndex)) {
-            _brickErrors[brickIndex].temporal = 0.0;
-        } else {
-            const Histogram* histogram = _histogramManager->getTemporalHistogram(brickIndex);
+            _brickErrors[brickIndex].set(0.0, TSP::NodeType::TEMPORAL);
+            types.erase(std::remove(types.begin(), types.end(), TSP::NodeType::TEMPORAL), types.end());
+        }
+
+        // We've removed either if they were a leaf, but otherwise do the error caclulations
+        for (TSP::NodeType t : types) {
+            const Histogram* histogram = _histogramManager->getHistogram(brickIndex, t);
             float error = 0;
             for (int i = 0; i < gradients.size(); i++) {
                 float x = (i + 0.5) / _transferFunction->width();
@@ -292,7 +292,7 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
                 assert(gradients[i] >= 0);
                 error += sample * gradients[i];
             }
-            _brickErrors[brickIndex].temporal = error;
+            _brickErrors[brickIndex].set(error, t);
         }
     }
 
