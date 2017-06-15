@@ -49,7 +49,7 @@ protected:
 
     int linearCoords(int x, int y, int z);
     void writeSelection(BrickSelection brickSelection, std::vector<int>& bricks);
-    std::vector<float> * getTfGradients();
+    std::vector<float> getTfGradients();
 };
 
 } // namespace openspace

@@ -67,14 +67,16 @@ void TSPBrickSelector::writeSelection(BrickSelection brickSelection, std::vector
     }
 }
 
-std::vector<float> * TSPBrickSelector::getTfGradients() {
-    TransferFunction *tf = _transferFunction;
-    if (!tf) return nullptr;
+std::vector<float> TSPBrickSelector::getTfGradients() {
+    TransferFunction* tf = _transferFunction;
+    std::vector<float> gradients;
+    if (!tf) return gradients;
 
     size_t tfWidth = tf->width();
-    if (tfWidth <= 0) return nullptr;
+    if (tfWidth <= 0) return gradients;
 
-    std::vector<float> gradients(tfWidth - 1);
+    gradients.resize(tfWidth - 1);
+
     for (size_t offset = 0; offset < tfWidth - 1; offset++) {
         glm::vec4 prevRgba = tf->sample(offset);
         glm::vec4 nextRgba = tf->sample(offset + 1);
@@ -84,7 +86,7 @@ std::vector<float> * TSPBrickSelector::getTfGradients() {
 
         gradients[offset] = colorDifference*alpha;
     }
-    return &gradients;
+    return gradients;
 }
 
 } // namespace openspace

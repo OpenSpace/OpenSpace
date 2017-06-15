@@ -258,8 +258,8 @@ float LocalTfBrickSelector::splitPoints(unsigned int brickIndex, BrickSelection:
 
 bool LocalTfBrickSelector::calculateBrickErrors() {
 
-    std::vector<float> * gradients = getTfGradients();
-    if (!gradients) return false;
+    std::vector<float> gradients = getTfGradients();
+    if (!gradients.size()) return false;
 
     unsigned int nHistograms = _tsp->numTotalNodes();
     _brickErrors = std::vector<Error>(nHistograms);
@@ -270,12 +270,12 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
         } else {
             const Histogram* histogram = _histogramManager->getSpatialHistogram(brickIndex);
             float error = 0;
-            for (int i = 0; i < gradients->size(); i++) {
+            for (int i = 0; i < gradients.size(); i++) {
                 float x = (i + 0.5) / _transferFunction->width();
                 float sample = histogram->interpolate(x);
                 assert(sample >= 0);
-                assert(gradients->at(i) >= 0);
-                error += sample * gradients->at(i);
+                assert(gradients[i] >= 0);
+                error += sample * gradients[i];
             }
             _brickErrors[brickIndex].spatial = error;
         }
@@ -285,12 +285,12 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
         } else {
             const Histogram* histogram = _histogramManager->getTemporalHistogram(brickIndex);
             float error = 0;
-            for (int i = 0; i < gradients->size(); i++) {
+            for (int i = 0; i < gradients.size(); i++) {
                 float x = (i + 0.5) / _transferFunction->width();
                 float sample = histogram->interpolate(x);
                 assert(sample >= 0);
-                assert(gradients->at(i) >= 0);
-                error += sample * gradients->at(i);
+                assert(gradients[i] >= 0);
+                error += sample * gradients[i];
             }
             _brickErrors[brickIndex].temporal = error;
         }
