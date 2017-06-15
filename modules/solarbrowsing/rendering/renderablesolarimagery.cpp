@@ -77,19 +77,18 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _bufferSize("bufferSize", "Buffer Size", 5, 1, 150)
     , _displayTimers("displayTimers", "Display Timers", false)
     , _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
-    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 50, 0, 300)
-    , _moveFactor("movefactor", "Move Factor" , 1.0, 0.0, 1.0)
+    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 100, 0, 300)
+    , _moveFactor("moveFactor", "Move Factor" , 0.85, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
-    , _target("target", "Target", "Sun")
     , _useBuffering("useBuffering", "Use Buffering", true)
     , _usePBO("usePBO", "Use PBO", true)
     , _planeSize("planeSize", "Plane Size", 50.0, 0.0, 1.0)
     , _verboseMode("verboseMode", "Verbose Mode", false)
 {
-    std::string target;
-    if (dictionary.getValue("Target", target)) {
-        _target = target;
-    }
+    // std::string target;
+    // if (dictionary.getValue("Target", target)) {
+    //     _target = target;
+    // }
 
     if (!dictionary.getValue("Name", _name)) {
         throw ghoul::RuntimeError("Nodename has to be specified");
@@ -143,7 +142,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     // Add GUI names
     unsigned int i = 0;
     for (auto& el : _imageMetadataMap2) {
-        _activeInstruments.addOption(i++, el.first);
+       // if (el.first.find("304") != std::string::npos) {
+         //   _activeInstruments.addOption(0, el.first);
+        //} else {
+            _activeInstruments.addOption(i++, el.first);
+       // }
     }
 
     _currentActiveInstrument
@@ -315,7 +318,6 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     //addProperty(_asyncUploadPBO);
     addProperty(_useBuffering);
     addProperty(_usePBO);
-    addProperty(_target);
     addProperty(_moveFactor);
     addProperty(_verboseMode);
 }
@@ -525,7 +527,7 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
             }
         } else {
             if (_verboseMode) {
-                LWARNING("Nothing to update, buffer is not ready, missing frames " << _frameSkipCount);
+                LWARNING(_name << " -> Nothing to update, buffer is not ready, missing frames " << _frameSkipCount);
                 _frameSkipCount++;
             }
         }
@@ -628,7 +630,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
 
     // LDEBUG("_stream" << _streamBuffer.numJobs());
     // LDEBUG("buffersize" << _bufferSize);
-    if (_streamBuffer.numJobs() < _bufferSize /*&& _isWithinFrustum*/) {
+    if (_streamBuffer.numJobs() < _bufferSize && (_isWithinFrustum || _initializePBO)) {
         // Always add to buffer faster than pop ..
         const double& osTime = OsEng.timeManager().time().j2000Seconds();
         // The min real time update interval doesnt make any sense
@@ -663,29 +665,29 @@ void RenderableSolarImagery::render(const RenderData& data) {
         return;
     }
 
-    // _isWithinFrustum = checkBoundaries(data);
     // if (!_isWithinFrustum) {
     //     _shouldRenderPlane = false;
     // } else {
     //     _shouldRenderPlane = true;
     // }
 
-    // if (_isWithinFrustumLast != _isWithinFrustum) {
-    //     //_pboIsDirty = false;
-    //     //fillBuffer(OsEng.timeManager().time().j2000Seconds());
-    //     // _currentActiveImageTime
-    //     //               = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
-    //     //                       .timeObserved;
-    //     _streamBuffer.clear();
-    //     _bufferCountOffset = 1;
-    //     _frameSkipCount = 0;
-    // }
-    // _isWithinFrustumLast = _isWithinFrustum;
+     _isWithinFrustum = checkBoundaries(data);
+    if (_isWithinFrustumLast != _isWithinFrustum) {
+        //_pboIsDirty = false;
+        //fillBuffer(OsEng.timeManager().time().j2000Seconds());
+        // _currentActiveImageTime
+        //               = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
+        //                       .timeObserved;
+        _streamBuffer.clear();
+        _bufferCountOffset = 1;
+        _frameSkipCount = 0;
+    }
+    _isWithinFrustumLast = _isWithinFrustum;
 
     // Update texture
     // The bool blockers might probably not be needed now
     if (_timeToUpdateTexture && !_updatingCurrentLevelOfResolution
-        && !_updatingCurrentActiveChannel /*&& (_isWithinFrustum || _initializePBO || _pboIsDirty)*/) {
+        && !_updatingCurrentActiveChannel && (_isWithinFrustum || _initializePBO || _pboIsDirty)) {
         performImageTimestep(OsEng.timeManager().time().j2000Seconds());
         _lastUpdateRealTime = _realTime;
     }

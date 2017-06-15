@@ -93,7 +93,6 @@ private:
     properties::IntProperty _minRealTimeUpdateInterval;
     properties::DoubleProperty _moveFactor;
     properties::IntProperty _resolutionLevel;
-    properties::StringProperty _target;
     properties::BoolProperty _useBuffering;
     properties::BoolProperty _usePBO;
     properties::BoolProperty _verboseMode;
