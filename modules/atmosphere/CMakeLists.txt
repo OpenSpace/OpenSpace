@@ -36,7 +36,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_common.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deferred_test_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_deferred_vs.glsl 
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/atmosphere_deferred_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaE_calc_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaE_calc_fs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/deltaJ_calc_vs.glsl
