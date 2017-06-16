@@ -629,6 +629,10 @@ bool RenderableSolarImagery::checkBoundaries(const RenderData& data) {
 }
 
 void RenderableSolarImagery::update(const UpdateData& data) {
+    if (!isReady() || !isEnabled()) {
+        return;
+    }
+
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _realTimeDiff = _realTime.count() - _lastUpdateRealTime.count();
     if (_useBuffering) {
@@ -684,8 +688,12 @@ void RenderableSolarImagery::update(const UpdateData& data) {
 }
 
 void RenderableSolarImagery::render(const RenderData& data) {
-    if (!isReady()) {
+    if (!isReady() || !isEnabled()) {
         return;
+    }
+
+    if (_verboseMode) {
+        LDEBUG("rendering.. ");
     }
 
     // if (!_isWithinFrustum) {
@@ -705,6 +713,13 @@ void RenderableSolarImagery::render(const RenderData& data) {
         // _streamBuffer.clear();
         // _bufferCountOffset = 1;
         // _frameSkipCount = 0;
+        if (!_isWithinFrustum) {
+            _disableBorder = true;
+            _disableFrustum = true;
+        } else {
+            _disableBorder = false;
+            _disableFrustum = false;
+        }
     }
     _isWithinFrustumLast = _isWithinFrustum;
 
