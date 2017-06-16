@@ -168,7 +168,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 	std::vector<std::shared_ptr<Subsite>> ss;
 	ghoul::Dictionary modelDic;
-	std::unique_ptr<ModelProvider>_modelProvider;
+	std::unique_ptr<ModelProvider> _modelProvider;
 	int level;
 	
 	switch (_modelSwitch.getLevel(data)) {
@@ -210,16 +210,17 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			break;
 	}
 
-	if (_generalProperties.maxLod.value() < level)
-		level = _generalProperties.maxLod.value();
+	int lodCheck = level;
+	if (_generalProperties.maxLod.value() < lodCheck)
+		lodCheck = _generalProperties.maxLod.value();
 
 	lockSubsite(ss);
 
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfsubsiteModels;
 	if(_generalProperties.lockSubsite.value())
-		vectorOfsubsiteModels = _cachingModelProvider->getModels(_prevSubsites, level);
+		vectorOfsubsiteModels = _cachingModelProvider->getModels(_prevSubsites, lodCheck);
 	else
-		vectorOfsubsiteModels = _cachingModelProvider->getModels(ss, level);
+		vectorOfsubsiteModels = _cachingModelProvider->getModels(ss, lodCheck);
 	
 	vectorOfsubsiteModels = calculateSurfacePosition(vectorOfsubsiteModels);
 

@@ -136,12 +136,12 @@ bool RenderableExplorationPath::isReady() const {
 void RenderableExplorationPath::render(const RenderData& data) {
 	glm::dmat4 globeModelTransform;
 	glm::dmat4 modelViewTransform;
-	if(_currentLevel >= 1) {
+	//if(_currentLevel >= 1) {
 		// Only show the path when camera is close enough
-		if (_currentLevel > 0 && _fading < 1.f)
-			_fading += 0.01f;
-		else if (_currentLevel == 0 && _fading > 0.f)
-			_fading -= 0.01f;
+		if (_currentLevel > 0 && _fading < 1.0f)
+			_fading += 0.05f;
+		else if (_currentLevel <= 0 && _fading > 0.0f)
+			_fading -= 0.05f;
 
 		// Model transform and view transform needs to be in double precision
 		globeModelTransform = _globe->modelTransform();
@@ -162,8 +162,10 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		glBindVertexArray(0);
 
 		_pathShader->deactivate();
-	}
-		
+	//}
+	
+	//LERROR(_currentLevel);
+
 	if(_currentLevel >= 2) {
 		if (_currentLevel >= 2 && _fading2 < 1.f)
 			_fading2 += 0.01f;
@@ -192,7 +194,7 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 
 void RenderableExplorationPath::setLevel(const int level) {
 	_currentLevel = level;
-	if (level > lastLevel) {
+	if (level != lastLevel) {
 		int offset = 10;
 		if (_currentLevel < 2)
 			offset = 6;
