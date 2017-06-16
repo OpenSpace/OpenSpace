@@ -43,7 +43,7 @@ namespace openspace {
 	namespace globebrowsing {
 		class CollapsedMeshGeneration {
 		public:
-
+			
 			static std::string correctPath(const std::string filename, std::string output_path);
 
 			static void generateMeshFromBinary(ghoul::Dictionary);
@@ -51,6 +51,8 @@ namespace openspace {
 			static void extractCoordinatesFromArray(pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud, std::vector<std::vector<float>> xyz, ImgReader::PointCloudInfo mInfo);
 
 			static void writeTxtFile(const std::string filename, std::string output_path);
+
+			static void writeMatrixFile(std::string output_path, glm::dmat4 outputMatrix);
 		private:
 			int _levelOfDetail;
 		};
