@@ -118,7 +118,7 @@ void FramebufferRenderer::initialize() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture, 0);
-    // DEBUG: deferred g-buffer
+    // G-buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D_MULTISAMPLE, _mainOtherDataTexture, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D_MULTISAMPLE, _mainNormalTexture, 0);
@@ -311,7 +311,7 @@ void FramebufferRenderer::updateResolution() {
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 #endif
-#ifdef _OLD_RENDERING_
+
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainOtherDataTexture);
 
     glTexImage2DMultisample(
@@ -321,7 +321,7 @@ void FramebufferRenderer::updateResolution() {
         GLsizei(_resolution.x),
         GLsizei(_resolution.y),
         true);
-#endif
+
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainPositionTexture);
 
     glTexImage2DMultisample(

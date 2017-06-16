@@ -497,10 +497,13 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
 
   // E[L*] at x0
   vec3 irradianceReflected = irradiance(irradianceTexture, r0, muSun) * irradianceFactor;
-    
+
   // R[L0] + R[L*]
   vec3 groundRadiance = groundReflectance.rgb * (muSun * transmittanceL0 + irradianceReflected)
     * sunRadiance / M_PI;
+
+  // Night illumination from cities
+  //groundRadiance *= mix(30.0, 1.0, dot(n,s));
     
   // Specular reflection from sun on oceans and rivers  
   if (waterReflectance > 0.1) {
