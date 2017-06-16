@@ -43,9 +43,9 @@ namespace openspace {
 TouchMarker::TouchMarker()
 	: properties::PropertyOwner("TouchMarker")
 	, _visible("TouchMarkers visible", "Toggle visibility of markers", true)
-	, _radiusSize("Marker size", "Marker radius", 30, 0, 50)
+	, _radiusSize("Marker size", "Marker radius", 30, 0, 100)
 	, _transparency("Transparency of marker", "Marker transparency", 0.8, 0, 1.0)
-	, _thickness("Thickness of marker", "Marker thickness", 1.0, 0, 2.0)
+	, _thickness("Thickness of marker", "Marker thickness", 1.0, 0, 4.0)
 	, _color(
 		"MarkerColor",
 		"Marker color",
@@ -126,10 +126,7 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor> list) {
 		glEnable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_SCISSOR_TEST);
 		glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_DEPTH_TEST);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
 		glBindVertexArray(_quad);
 		glDrawArrays(GL_POINTS, 0, _numFingers);

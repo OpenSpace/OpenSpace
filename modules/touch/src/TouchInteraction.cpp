@@ -64,7 +64,7 @@ TouchInteraction::TouchInteraction()
 	_touchActive("TouchEvents", "True if we have a touch event", false, properties::Property::Visibility::Hidden),
 	_reset("Default Values", "Reset all properties to default", false),
 	_maxTapTime("Max Tap Time", "Max tap delay (in ms) for double tap", 300, 10, 1000),
-	_deceleratesPerSecond("Decelerates per second", "Deceleration rate of velocity, times per second", 240, 60, 300),
+	_deceleratesPerSecond("Decelerates per second", "Number of times velocity is decelerated per second", 240, 60, 300),
 	_touchScreenSize("TouchScreenSize", "Touch Screen size in inches", 55.0f, 5.5f, 150.0f),
 	_tapZoomFactor("Tap zoom factor","Scaling distance travelled on tap", 0.1, 0.0, 0.5),
 	_nodeRadiusThreshold("Activate direct-manipulation", "Radius a planet has to have to activate direct-manipulation", 0.2f, 0.0f, 1.0f),
@@ -758,8 +758,8 @@ void TouchInteraction::resetToDefault() {
 	_tapZoomFactor.set(0.1f);
 	_nodeRadiusThreshold.set(0.2f);
 	_rollAngleThreshold.set(0.025f);
-	_orbitSpeedThreshold.set(0.038f);
-	_panSpeedThreshold.set(0.004f);
+	_orbitSpeedThreshold.set(0.005f);
+	_panSpeedThreshold.set(0.0005f);
 	_spinSensitivity.set(1.0f);
 	_inputStillThreshold.set(0.0005f);
 	_centroidStillThreshold.set(0.0018f);
