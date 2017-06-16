@@ -95,7 +95,9 @@ public:
         properties::FloatProperty ozoneLayerExtinctionCoeffYP;
         properties::FloatProperty ozoneLayerExtinctionCoeffZP;
         properties::FloatProperty mieHeightScaleP;
-        properties::FloatProperty mieScatteringCoefficientP;
+        properties::FloatProperty mieScatteringCoeffXP;
+        properties::FloatProperty mieScatteringCoeffYP;
+        properties::FloatProperty mieScatteringCoeffZP;
         properties::FloatProperty mieScatteringExtinctionPropCoefficientP;
         properties::FloatProperty mieAsymmetricFactorGP;
         properties::FloatProperty sunIntensityP;

@@ -110,7 +110,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty("ozoneLayerCoeffY", "Ozone Layer Extinction Coeff Y (x10e-5)", 8.298f, 0.01f, 100.0f),
         FloatProperty("ozoneLayerCoeffZ", "Ozone Layer Extinction Coeff Z (x10e-5)", 0.356f, 0.01f, 100.0f),
         FloatProperty("mieHeightScale", "Mie Height Scale (KM)", 1.2f, 0.1f, 20.0f),
-        FloatProperty("mieScatteringCoefficient", "Mie Scattering Coefficient (x10e-3)", 4.0f, 0.01f, 1000.0f),
+        FloatProperty("mieScatteringCoeffX", "Mie Scattering Coeff X (x10e-3)", 4.0f, 0.01f, 1000.0f),
+        FloatProperty("mieScatteringCoeffY", "Mie Scattering Coeff Y (x10e-3)", 4.0f, 0.01f, 1000.0f),
+        FloatProperty("mieScatteringCoeffZ", "Mie Scattering Coeff Z (x10e-3)", 4.0f, 0.01f, 1000.0f),
         FloatProperty("mieScatteringExtinctionPropCoefficient",
             "Mie Scattering/Extinction Proportion Coefficient (%)", 0.9f, 0.01f, 1.0f),
         FloatProperty("mieAsymmetricFactorG", "Mie Asymmetric Factor G", 0.85f, -1.0f, 1.0f),
@@ -405,9 +407,17 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             _atmosphereProperties.mieHeightScaleP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
             _atmospherePropertyOwner.addProperty(_atmosphereProperties.mieHeightScaleP);
 
-            _atmosphereProperties.mieScatteringCoefficientP.set(_mieScatteringCoeff.r * 1000.0f);
-            _atmosphereProperties.mieScatteringCoefficientP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
-            _atmospherePropertyOwner.addProperty(_atmosphereProperties.mieScatteringCoefficientP);
+            _atmosphereProperties.mieScatteringCoeffXP.set(_mieScatteringCoeff.x * 1000.0f);
+            _atmosphereProperties.mieScatteringCoeffXP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
+            _atmospherePropertyOwner.addProperty(_atmosphereProperties.mieScatteringCoeffXP);
+
+            _atmosphereProperties.mieScatteringCoeffYP.set(_mieScatteringCoeff.y * 1000.0f);
+            _atmosphereProperties.mieScatteringCoeffYP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
+            _atmospherePropertyOwner.addProperty(_atmosphereProperties.mieScatteringCoeffYP);
+
+            _atmosphereProperties.mieScatteringCoeffZP.set(_mieScatteringCoeff.z * 1000.0f);
+            _atmosphereProperties.mieScatteringCoeffZP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
+            _atmospherePropertyOwner.addProperty(_atmosphereProperties.mieScatteringCoeffZP);
 
             _atmosphereProperties.mieScatteringExtinctionPropCoefficientP.set(_mieScatteringCoeff.r / _mieExtinctionCoeff.r);
             _atmosphereProperties.mieScatteringExtinctionPropCoefficientP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
@@ -631,7 +641,9 @@ void RenderableGlobe::updateAtmosphereParameters() {
         _atmosphereProperties.ozoneLayerExtinctionCoeffYP.value() * 0.00001f,
         _atmosphereProperties.ozoneLayerExtinctionCoeffZP.value() * 0.00001f);
     _mieHeightScale       = _atmosphereProperties.mieHeightScaleP.value();
-    _mieScatteringCoeff   = glm::vec3(_atmosphereProperties.mieScatteringCoefficientP.value() * 0.001f);
+    _mieScatteringCoeff   = glm::vec3(_atmosphereProperties.mieScatteringCoeffXP.value() * 0.001f,
+        _atmosphereProperties.mieScatteringCoeffYP.value() * 0.001f,
+        _atmosphereProperties.mieScatteringCoeffZP.value() * 0.001f);
     _mieExtinctionCoeff   = _mieScatteringCoeff * (1.0f / static_cast<float>(_atmosphereProperties.mieScatteringExtinctionPropCoefficientP.value()));
     _miePhaseConstant     = _atmosphereProperties.mieAsymmetricFactorGP.value();
     _sunRadianceIntensity = _atmosphereProperties.sunIntensityP.value();
