@@ -111,6 +111,7 @@ private:
     bool _initializePBO;
     bool _pboIsDirty = false;
     bool _timeToUpdateTexture = false;
+    float _offset = 0.0;
 
     unsigned int _fullResolution;
     double _deltaTimeLast = 0.0;

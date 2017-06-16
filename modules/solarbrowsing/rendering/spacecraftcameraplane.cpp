@@ -177,7 +177,7 @@ void SpacecraftCameraPlane::render(
       TransferFunction* lut, const glm::dvec3& sunPositionWorld,
       const float& planeOpacity, const float& contrastValue, const float& gammaValue,
       const bool& disableBorder, const bool& disableFrustum,
-      const glm::vec2& currentCenterPixel, const float& currentScale)
+      const glm::vec2& currentCenterPixel, const float& currentScale, const float& multipleImageryOffset)
 {
     glEnable(GL_CULL_FACE);
 
@@ -190,7 +190,7 @@ void SpacecraftCameraPlane::render(
     const glm::dmat3 spacecraftRotWorld = data.modelTransform.rotation;
 
     const glm::dvec3 sunDir = sunPositionWorld - spacecraftPosWorld;
-    const glm::dvec3 offset = sunDir * _gaussianMoveFactor;
+    const glm::dvec3 offset = sunDir * (_gaussianMoveFactor + static_cast<double>(multipleImageryOffset));
 
     const glm::dvec3 up = spacecraftRotWorld * glm::dvec3(0.0, 0.0, 1.0);
     _position = spacecraftPosWorld + offset;

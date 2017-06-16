@@ -109,6 +109,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     //     throw ghoul::RuntimeError("Plane must at the moment have a magic factor");
     // }
 
+    float offset;
+    if (dictionary.getValue("Offset", offset)) {
+        _offset = offset;
+    }
+
     std::string rootPath;
     if (!dictionary.getValue("RootPath", rootPath)) {
         throw ghoul::RuntimeError("RootPath has to be specified");
@@ -149,8 +154,14 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
        // }
     }
 
-    _currentActiveInstrument
-          = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
+    std::string startInstrument;
+    if (dictionary.getValue("StartInstrument", startInstrument)) {
+        _currentActiveInstrument = startInstrument;
+
+    } else {
+        _currentActiveInstrument
+            = _activeInstruments.getDescriptionByValue(_activeInstruments.value());
+    }
 
     SpacecraftImageryManager::ref().loadTransferFunctions(rootPath + "/colortables", _tfMap, _instrumentFilter);
     //std::string tfRootPath;
@@ -711,7 +722,7 @@ void RenderableSolarImagery::render(const RenderData& data) {
 
     _spacecraftCameraPlane->render(data, *_texture, _lut, sunPositionWorld, _planeOpacity,
                                    _contrastValue, _gammaValue, _disableBorder,
-                                   _disableFrustum, _currentCenterPixel, _currentScale);
+                                   _disableFrustum, _currentCenterPixel, _currentScale, _offset);
 }
 
 } // namespace openspace
