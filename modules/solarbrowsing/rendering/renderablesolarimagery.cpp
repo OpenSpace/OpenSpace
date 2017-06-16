@@ -221,9 +221,10 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
             // _currentActiveImageTime
             //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
             //                   .timeObserved;
-            _streamBuffer.clear();
-            _frameSkipCount = 0;
-            _bufferCountOffset = 1;
+            clearBuffer();
+            // _streamBuffer.clear();
+            // _frameSkipCount = 0;
+            // _bufferCountOffset = 1;
             //fillBuffer(OsEng.timeManager().time().deltaTime());
         } /*else {
             uploadImageDataToPBO();
@@ -233,9 +234,10 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     });
 
     _minRealTimeUpdateInterval.onChange([this]() {
-        _streamBuffer.clear();
-        _frameSkipCount = 0;
-        _bufferCountOffset = 1;
+        // _streamBuffer.clear();
+        // _frameSkipCount = 0;
+        // _bufferCountOffset = 1;
+        clearBuffer();
     });
 
     _resolutionLevel.onChange([this]() {
@@ -260,9 +262,10 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
             // _currentActiveImageTime
             //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
             //                   .timeObserved;
-            _streamBuffer.clear();
-            _frameSkipCount = 0;
-            _bufferCountOffset = 1;
+            clearBuffer();
+            // _streamBuffer.clear();
+            // _frameSkipCount = 0;
+            // _bufferCountOffset = 1;
             //fillBuffer(OsEng.timeManager().time().deltaTime());
         } /*else {
             uploadImageDataToPBO();
@@ -343,6 +346,12 @@ std::string RenderableSolarImagery::ISO8601(std::string& datetime) {
 
     datetime.replace(4, 5, "-" + MM + "-");
     return datetime;
+}
+
+void RenderableSolarImagery::clearBuffer() {
+    _streamBuffer.clear();
+    _frameSkipCount = 0;
+    _bufferCountOffset = 1;
 }
 
 void RenderableSolarImagery::loadMetadata(const std::string& rootPath) {
@@ -617,9 +626,10 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         if ((std::abs(_deltaTimeLast - dt)) > EPSILON) {
             _pboIsDirty = false;
            // fillBuffer(dt);
-            _frameSkipCount = 0;
-            _streamBuffer.clear();
-            _bufferCountOffset = 1;
+            clearBuffer();
+            // _frameSkipCount = 0;
+            // _streamBuffer.clear();
+            // _bufferCountOffset = 1;
             //LDEBUG("Clearing ... dt : " << dt);
             // _currentActiveImageTime
             //           = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
@@ -640,6 +650,8 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         const std::string hash = decodeData.im->filename + std::to_string(_imageSize);
 
         //LDEBUG("hASH?? " << hash);
+
+        // If job does not exist already and last popped time is not the same as the job trying to be enqueued
         if (!_streamBuffer.hasJob(hash) && _currentActiveImageTime != decodeData.timeObserved) {
             //LDEBUG("Adding job");
             //LINFO("Pushing hash  " << hash);
@@ -678,9 +690,10 @@ void RenderableSolarImagery::render(const RenderData& data) {
         // _currentActiveImageTime
         //               = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds())
         //                       .timeObserved;
-        _streamBuffer.clear();
-        _bufferCountOffset = 1;
-        _frameSkipCount = 0;
+        clearBuffer();
+        // _streamBuffer.clear();
+        // _bufferCountOffset = 1;
+        // _frameSkipCount = 0;
     }
     _isWithinFrustumLast = _isWithinFrustum;
 

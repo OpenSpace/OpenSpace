@@ -61,6 +61,7 @@ public:
     void loadTexture();
     void performImageTimestep(const double& osTime);
     void updateTexture();
+    void clearBuffer();
 
     TransferFunction* getTransferFunction() { return _lut; }
     const std::unique_ptr<ghoul::opengl::Texture>& getImageryTexture() { return _texture; }
