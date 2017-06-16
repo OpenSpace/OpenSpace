@@ -36,6 +36,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
+#include <openspace/util/timemanager.h>
 
 #include <memory>
 #include <fstream>
@@ -53,6 +54,7 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _shader(nullptr)
+    , _startLoop1("startLoop1", "Start Loop 1", false)
     , _sphere(nullptr)
 {
     if (!dictionary.getValue("Name", _nodeName)) {
@@ -62,6 +64,16 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
     if (!dictionary.getValue("hmipath", path)) {
         throw ghoul::RuntimeError("HMIPath has to be specified");
     }
+
+    _startLoop1.onChange([this]() {
+        if (_startLoop1) {
+            auto& time = OsEng.timeManager().time();
+            time.setTime("2012-07-12T15:00:00.00");
+            time.setDeltaTime(3600);
+        }
+    });
+
+    addProperty(_startLoop1);
 }
 
 bool RenderableSolarImageryProjection::initialize() {
@@ -136,6 +148,21 @@ void RenderableSolarImageryProjection::update(const UpdateData& data) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
     }
+
+    auto& time = OsEng.timeManager().time();
+    if (_startLoop1) {
+        auto endTime = time.convertTime("2012-07-13T02:00:00.00");
+        if (time.j2000Seconds() > endTime) {
+            time.setTime("2012-07-12T15:00:00.00");
+            for (int i = 0; i < _solarImageryDependencies.size(); ++i) {
+                auto* solarImagery = static_cast<RenderableSolarImagery*>(
+                      _solarImageryDependencies[i]->renderable());
+                solarImagery->clearBuffer();
+            }
+
+        }
+    }
+
 }
 
 void RenderableSolarImageryProjection::render(const RenderData& data) {
@@ -167,7 +194,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
     );
 
     const int numPlanes = _solarImageryDependencies.size();
-    const int MAX_SPACECRAFT_OBSERVATORY = 5;
+    const int MAX_SPACECRAFT_OBSERVATORY = 6;
     int solarImageryCount = 0;
 
     ghoul::opengl::TextureUnit txUnits[MAX_SPACECRAFT_OBSERVATORY];

@@ -40,7 +40,7 @@ function postInitialization()
     openspace.addVirtualProperty("IntProperty", "Update Interval", "SolarImagery*.renderable.minRealTimeUpdateInterval", 100, 0, 300)
     --openspace.addVirtualProperty("IntProperty", "Switch to 304", "SolarImagery*.renderable.activeInstrument", 0, 0, 1)
     --openspace.addVirtualProperty("FloatProperty", "Fieldline Alpha", "Fieldlines*.renderable.fieldlineAlpha", 1.0, 0.0, 1.0)
-
+    openspace.addVirtualProperty("BoolProperty", "Start Loop 1", "Sun_Projection*.renderable.startLoop1", false, nil, nil)
     openspace.resetCameraDirection()
 
     openspace.printInfo("Done setting default values")
