@@ -57,31 +57,6 @@ std::vector<std::shared_ptr<Subsite>> SingleModelProvider::calculate(const std::
 	glm::dvec3 cameraPos = data.camera.positionVec3();
 	glm::dvec4 cameraPositionModelSpace = globeModelInverseTransform * glm::dvec4(cameraPos, 1.0);
 	glm::dvec3 cameraPositionProjected = rg->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
-	
-	// Version that picks the subsite with most models
-	/*for (auto s : subsites) {
-		for (auto s1 : s) {
-			glm::dvec3 temp = rg->ellipsoid().cartesianPosition({ s1->geodetic , 0 });
-			if (glm::distance(cameraPositionProjected, temp) < radius) {
-				subsitesInsideRadius.push_back(s1);
-			}
-		}
-	}
-	int maxModels = 0;
-	for (auto s : subsitesInsideRadius) {
-		int temp = s->fileNames.size();
-		if (temp > maxModels) {
-			maxModels = temp;
-			smallest = s;
-		}
-	}
-
-	if (smallest->site != "" && smallest->drive != "") {
-		mostModelsInsideRadius.push_back(smallest);
-	}
-	return mostModelsInsideRadius;*/
-
-	// Version that picks the subsite closest to the camera
 	float smallestDistance = 100;
 
 	for (auto s : subsites) {
