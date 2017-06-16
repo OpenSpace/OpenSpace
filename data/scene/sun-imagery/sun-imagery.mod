@@ -1,6 +1,6 @@
 return {
     {
-        Name = "Sun Imagery",
+        Name = "Sun_Projection",
         Parent = "Sun",
         Renderable = {
             -- This is a really bad name
