@@ -64,7 +64,7 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 			BoolProperty("lockSubsite", "Lock subsite", false),
 			BoolProperty("useMastCam", "Show mastcam coloring", false),
 			BoolProperty("enableDepth", "Enable depth", true),
-			FloatProperty("heightProp", "Site height", 1.0f, 0.0f, 3.0f),
+			FloatProperty("heightProp", "Site height", 0.7f, 0.0f, 3.0f),
 			IntProperty("maxLod", "Max LOD",3.0, 1.0, 3.0)
 	})
 	, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))

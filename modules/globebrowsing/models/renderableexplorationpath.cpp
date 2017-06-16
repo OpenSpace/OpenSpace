@@ -201,7 +201,7 @@ void RenderableExplorationPath::setLevel(const int level) {
 		else if (_currentLevel == 2)
 			offset = 4;
 		else if (_currentLevel == 3)
-			offset = 1;
+			offset = 1.5;
 
 		_stationPointsModelCoordinates.clear();
 		_stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, offset);
