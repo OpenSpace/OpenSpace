@@ -70,6 +70,7 @@ private:
     std::string path;
     std::unique_ptr<ghoul::opengl::Texture> _magnetogramTexture;
     properties::BoolProperty _startLoop1;
+    properties::BoolProperty _startLoop2;
     float _planetRadius;
 };
 

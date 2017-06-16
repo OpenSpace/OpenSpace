@@ -43,6 +43,7 @@ uniform float imageSize[MAX_SPACECRAFT_OBSERVATORY];
 
 uniform dvec2 magicPlaneOffset[MAX_SPACECRAFT_OBSERVATORY];
 uniform float magicPlaneFactor[MAX_SPACECRAFT_OBSERVATORY];
+uniform bool isEnabled[MAX_SPACECRAFT_OBSERVATORY];
 
 uniform bool isCoronaGraph[MAX_SPACECRAFT_OBSERVATORY];
 uniform float scale[MAX_SPACECRAFT_OBSERVATORY];
@@ -69,7 +70,7 @@ Fragment getFragment() {
 
     for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
 
-        if (isCoronaGraph[i]) {
+        if (isCoronaGraph[i] || !isEnabled[i]) {
             continue;
         }
 

@@ -69,16 +69,16 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _sharpenValue("sharpenValue", "Sharpen", 0.0, 0.0, 1.0)
     , _contrastValue("contrastValue", "Contrast", 0.0, -15.0, 15.0)
     , _planeOpacity("planeOpacity", "Plane Opacity", 1.0, 0.0, 1.0)
-    , _disableFrustum("disableFrustum", "Disable Frustum", false)
-    , _disableBorder("disableBorder", "Disable Border", false)
+    , _disableFrustum("disableFrustum", "Disable Frustum", true)
+    , _disableBorder("disableBorder", "Disable Border", true)
     , _gammaValue("gammaValue", "Gamma", 0.9, 0.1, 10.0)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
     , _bufferSize("bufferSize", "Buffer Size", 5, 1, 150)
     , _displayTimers("displayTimers", "Display Timers", false)
     , _lazyBuffering("lazyBuffering", "Lazy Buffering", true)
-    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 100, 0, 300)
-    , _moveFactor("moveFactor", "Move Factor" , 0.85, 0.0, 1.0)
+    , _minRealTimeUpdateInterval("minRealTimeUpdateInterval", "Min Update Interval", 65, 0, 300)
+    , _moveFactor("moveFactor", "Move Factor" , 1.0, 0.0, 1.0)
     , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
     , _useBuffering("useBuffering", "Use Buffering", true)
     , _usePBO("usePBO", "Use PBO", true)
@@ -89,6 +89,12 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     // if (dictionary.getValue("Target", target)) {
     //     _target = target;
     // }
+
+    _enabled = false;
+    bool startEnabled;
+    if (dictionary.getValue("Enabled", startEnabled)) {
+        _enabled = startEnabled;
+    }
 
     if (!dictionary.getValue("Name", _name)) {
         throw ghoul::RuntimeError("Nodename has to be specified");
@@ -208,6 +214,14 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     // Initialize time
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
+
+     _disableFrustum.onChange([this]() {
+        if (_disableFrustum) {
+            _disableBorder = true;
+        } else {
+            _disableBorder = false;
+        }
+     });
 
     _activeInstruments.onChange([this]() {
         _updatingCurrentActiveChannel = true;
@@ -692,10 +706,6 @@ void RenderableSolarImagery::render(const RenderData& data) {
         return;
     }
 
-    if (_verboseMode) {
-        LDEBUG("rendering.. ");
-    }
-
     // if (!_isWithinFrustum) {
     //     _shouldRenderPlane = false;
     // } else {
@@ -713,13 +723,13 @@ void RenderableSolarImagery::render(const RenderData& data) {
         // _streamBuffer.clear();
         // _bufferCountOffset = 1;
         // _frameSkipCount = 0;
-        if (!_isWithinFrustum) {
-            _disableBorder = true;
-            _disableFrustum = true;
-        } else {
-            _disableBorder = false;
-            _disableFrustum = false;
-        }
+        // if (!_isWithinFrustum) {
+        //     _disableBorder = true;
+        //     _disableFrustum = true;
+        // } else {
+        //     _disableBorder = false;
+        //     _disableFrustum = false;
+        // }
     }
     _isWithinFrustumLast = _isWithinFrustum;
 
