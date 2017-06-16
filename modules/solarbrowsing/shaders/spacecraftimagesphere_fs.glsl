@@ -21,7 +21,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
-const int MAX_SPACECRAFT_OBSERVATORY = 5;
+const int MAX_SPACECRAFT_OBSERVATORY = 12;
 
 in vec2 vs_st;
 in vec4 vs_positionScreenSpace;
