@@ -63,15 +63,22 @@ public:
 private:
     std::string _loggerCat = "RenderableFieldlinesSequence";
     // -------------------- MAIN VARIABLES, STATE & TIME --------------------
-    bool _needsUpdate  = false; // If still in same state as previous frame == false
-    bool _shouldRender = false; // only temporary, unnecessary?
+    bool _isProcessingState     = false;
+    bool _loadBinariesAtRuntime = false;
+    bool _mustProcessNewState   = false;
+    bool _needsUpdate           = false; // If still in same state as previous frame == false
+    bool _newStateIsReady       = false;
+    bool _shouldRender          = false; // only temporary, unnecessary?
 
     std::vector<glm::vec3> _seedPoints; // TODO: no need to store these here?
 
     // State variables
     std::vector<FieldlinesState> _states;
+    FieldlinesState _newState;
+    std::vector<std::string> _validSourceFilePaths;
 
     int _activeStateIndex = -1;
+    size_t _drawingIndex = -1;
     size_t _numberOfStates;
 
     // Time variables
@@ -179,16 +186,18 @@ private:
 
     std::string _scalingFactorUnit;
 
+    bool getSourceFilesFromDictionary(const std::string& fileExt, std::vector<std::string>& validSourceFilePaths);
+    bool getSeedPointsFromDictionary();
+    bool getUnsignedIntFromModfile(const std::string& key, unsigned int& val);
     bool isWithinSequenceInterval();
 
+    void readNewState(/*const std::string& filepath, std::vector<FieldlinesState>& states*/);
     void updateActiveStateIndex();
     void updateColorBuffer();
     void updateDomainBuffer();
     void updateMorphingBuffers();
     void updateVertexPosBuffer();
-    bool getSourceFilesFromDictionary(const std::string& fileExt, std::vector<std::string>& validSourceFilePaths);
-    bool getSeedPointsFromDictionary();
-    bool getUnsignedIntFromModfile(const std::string& key, unsigned int& val);
+
 };
 
 } // namespace openspace

@@ -48,6 +48,7 @@
 #include <iostream>
 #include <iterator>
 #include <sstream>
+#include <thread>
 
 #include <chrono>
 
@@ -57,6 +58,8 @@ namespace {
     const char* keyTracingMethodPreTracedBinary = "PreTracedBinary";
     const char* keyTracingMethodPreProcess      = "PreProcess";
     const char* keyTracingMethodLiveTrace       = "LiveTrace";
+
+    const char* keyLoadBinariesAtRuntime        = "LoadBinariesAtRuntime";
 
     const char* keySourceFolder                 = "SourceFolder";
     const char* keyStartStateOffset             = "StartStateOffset";
@@ -169,7 +172,7 @@ bool RenderableFieldlinesSequence::isReady() const {
 bool RenderableFieldlinesSequence::initialize() {
     //--Extract common  info from LUA, applicable to all types of renderable fieldline sequences--//
     std::string sourceFileExt = "";
-    std::vector<std::string> validSourceFilePaths;
+    // std::vector<std::string> validSourceFilePaths;
     TracingMethod tracingMethod;
 
     // Determine what type of tracing method to use.
@@ -196,11 +199,14 @@ bool RenderableFieldlinesSequence::initialize() {
         }
     }
 
-    if (!getSourceFilesFromDictionary(sourceFileExt, validSourceFilePaths)) {
+    if (!getSourceFilesFromDictionary(sourceFileExt, _validSourceFilePaths)) {
         return false;
     }
 
-    _numberOfStates = validSourceFilePaths.size();
+    _numberOfStates = _validSourceFilePaths.size();
+    LDEBUG("Found " << _numberOfStates << " valid files!");
+
+    // TODO this makes no sense if binaries are loaded at runtime!
     _states.reserve(_numberOfStates);
     _startTimes.reserve(_numberOfStates);
 
@@ -301,11 +307,11 @@ bool RenderableFieldlinesSequence::initialize() {
             // TODO Only one loop.. Not one for each tracing method!!
             for (size_t i = 0; i < _numberOfStates; ++i) {
                 std::unique_ptr<ccmc::Kameleon> kameleon =
-                        fsManager.createKameleonObject(validSourceFilePaths[i]);
+                        fsManager.createKameleonObject(_validSourceFilePaths[i]);
                 if (kameleon == nullptr) {
                     continue;
                 }
-                LDEBUG(validSourceFilePaths[i] << " is now being traced.");
+                LDEBUG(_validSourceFilePaths[i] << " is now being traced.");
                 _states.push_back(FieldlinesState(_seedPoints.size()));
                 fsManager.getFieldlinesState(kameleon.get(),
                                              tracingVariable,
@@ -345,38 +351,80 @@ bool RenderableFieldlinesSequence::initialize() {
             numResamples = 0;       // TODO: implement morphing
 
             for (size_t i = 0; i < _numberOfStates; ++i) {
-                LDEBUG(validSourceFilePaths[i] << " is now being processed.");
+                LDEBUG(_validSourceFilePaths[i] << " is now being processed.");
                 FieldlinesState tmpState;
                 _states.push_back(tmpState);
-                fsManager.getFieldlinesState(validSourceFilePaths[i],
-                                                                   _isMorphing,
-                                                                   numResamples,
-                                                                   resamplingOption,
-                                                                   _states[i]);
+                fsManager.getFieldlinesState(_validSourceFilePaths[i],
+                                             _isMorphing,
+                                             numResamples,
+                                             resamplingOption,
+                                             _states[i]);
                 // TODO: Move elsewhere
                 _startTimes.push_back(_states[i]._triggerTime);
             }
 
         } break;
         case PRE_CALCULATED_BINARY: {
-            allowSeedPoints = false;
-            for (size_t i = 0; i < _numberOfStates; ++i) {
-                LDEBUG(validSourceFilePaths[i] << " is now being processed.");
 
-            auto start = std::chrono::high_resolution_clock::now();
+            allowSeedPoints = false;
+
+            if (!_dictionary.getValue(keyLoadBinariesAtRuntime, _loadBinariesAtRuntime)) {
+                LWARNING("Modfile " << " isn't specifying " << keyLoadBinariesAtRuntime);
+            }
+            if (_loadBinariesAtRuntime) {
+                LINFO("Binaries will be loaded during runtime.");
+
+                const size_t filenameSize = 23; // number of  characters in filename (excluding '.osfls')
+                const size_t extSize = 6; // size(".osfls")
+
+                // for (size_t i = 0; i < _numberOfStates; ++i) {
+                for (std::string fName : _validSourceFilePaths) {
+                    const size_t ssize = fName.size();
+                    // if (ssize != filenameSize + extSize) {
+                    //     LWARNING("Unrecognised naming format of file: " << fName
+                    //         << " Loading files at runtime requires each file to be named"
+                    //         << " in the format 'YYYY-MM-DDTHH-MM-SS-XXX.osfls'. "
+                    //         << "State will NOT be included");
+                    //     // TODO: DELETE FILENAME FROM VALIDFILEPATHS AND REDUCE _NUMSTATES
+                    //     continue;
+                    // }
+                    std::string tmpString = fName.substr(ssize - filenameSize - extSize, filenameSize-1);
+                    tmpString.replace(13,1,":");
+                    tmpString.replace(16,1,":");
+                    tmpString.replace(19,1,".");
+                    double tTime = Time::convertTime(tmpString);
+                    _startTimes.push_back(tTime);
+                }
                 FieldlinesState tmpState;
                 _states.push_back(tmpState);
                 bool statuss = fsManager.getFieldlinesStateFromBinary(
-                    validSourceFilePaths[i],
-                    _states[i]);
+                        _validSourceFilePaths[0], _states[0]);
+                _drawingIndex = 0;
+            } else {
+                LINFO("Binaries will be loaded now (at startup) and stored in RAM");
+                for (size_t i = 0; i < _numberOfStates; ++i) {
+                    // LDEBUG(_validSourceFilePaths[i] << " is now being processed.");
 
-            auto end = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double, std::milli> diff = end - start;
-            LDEBUG("TIME FOR ADDING STATE FROM BINARY: " << diff.count() << " milliseconds");
+                    // TODO: REMOVE.. JUST FOR DEBUG/PERFORMANCE TESTS
+                    auto start = std::chrono::high_resolution_clock::now();
 
-                // TODO: Move elsewhere
-                _startTimes.push_back(_states[i]._triggerTime);
+                    FieldlinesState tmpState;
+                    _states.push_back(tmpState);
+                    bool statuss = fsManager.getFieldlinesStateFromBinary(
+                        _validSourceFilePaths[i],
+                        _states[i]);
+
+                    // TODO: REMOVE.. JUST FOR DEBUG/PERFORMANCE TESTS
+                    auto end = std::chrono::high_resolution_clock::now();
+                    std::chrono::duration<double, std::milli> diff = end - start;
+                    LDEBUG("TIME FOR ADDING STATE FROM BINARY: " << diff.count() << " milliseconds");
+
+                    // TODO: Move elsewhere
+                    _startTimes.push_back(_states[i]._triggerTime);
+                }
             }
+
+
         } break;
         case LIVE_TRACE: {
             allowSeedPoints = true;
@@ -385,6 +433,11 @@ bool RenderableFieldlinesSequence::initialize() {
         } break;
         default:
             return false;
+    }
+
+    if (!_loadBinariesAtRuntime) {
+        // _validSourceFilePaths are no longer needed since binaries are already in RAM
+        _validSourceFilePaths.clear();
     }
 
     bool allowExtraVariables = false;
@@ -923,8 +976,6 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
             _activeProgramPtr->setUniform("tFIterestRange", _tFInterestRange[_domainQuantity]);
         }
 
-        glDisable(GL_CULL_FACE);
-
         bool additiveBlending = false;
         if (_useABlending) {
             bool usingFramebufferRenderer = OsEng.renderEngine().rendererImplementation() ==
@@ -951,9 +1002,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
         glBindVertexArray(_vertexArrayObject);
         glMultiDrawArrays(
                 _drawingOutputType,
-                &_states[_activeStateIndex]._lineStart[0],
-                &_states[_activeStateIndex]._lineCount[0],
-                static_cast<GLsizei>(_states[_activeStateIndex]._lineStart.size())
+                &_states[_drawingIndex]._lineStart[0],
+                &_states[_drawingIndex]._lineCount[0],
+                static_cast<GLsizei>(_states[_drawingIndex]._lineStart.size())
         );
 
         glBindVertexArray(0);
@@ -978,8 +1029,6 @@ void RenderableFieldlinesSequence::render(const RenderData& data) {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDepthMask(true);
         }
-
-        glEnable(GL_CULL_FACE);
     }
 }
 
@@ -998,11 +1047,17 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
     // Check if current time in OpenSpace is within sequence interval
     if (isWithinSequenceInterval()) {
         // if NOT in the same state as in the previous update..
-        if ( _activeStateIndex < 0 ||
-             _currentTime < _startTimes[_activeStateIndex] ||
-             // This next line requires/assumes seqEndTime to be last position in _startTimes
-             _currentTime >= _startTimes[_activeStateIndex + 1]) {
-            _needsUpdate = true;
+        if ( _activeStateIndex < 0 || _currentTime < _startTimes[_activeStateIndex] ||
+                // This next line requires/assumes seqEndTime to be last position in _startTimes
+                _currentTime >= _startTimes[_activeStateIndex + 1]) {
+
+            updateActiveStateIndex();
+
+            if (_loadBinariesAtRuntime) {
+                _mustProcessNewState = true;
+            } else {
+                _needsUpdate = true;
+            }
         } else if (_isMorphing) {
             double stateDuration = _startTimes[_activeStateIndex + 1] -
                                    _startTimes[_activeStateIndex]; // TODO? could be stored
@@ -1015,10 +1070,24 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         _activeStateIndex = -1;
         _shouldRender = false;
         _needsUpdate = false;
+        _mustProcessNewState = false;
     }
 
-    if(_needsUpdate) {
-        updateActiveStateIndex(); // sets _activeStateIndex
+    if (_mustProcessNewState) {
+        if (!_isProcessingState && !_newStateIsReady) {
+                _isProcessingState = true;
+                _mustProcessNewState = false;
+                std::thread readBinaryThread(&RenderableFieldlinesSequence::readNewState, this);
+                readBinaryThread.detach();
+        }
+    }
+
+    if(_needsUpdate || _newStateIsReady) {
+        if (_loadBinariesAtRuntime) {
+            _states[0] = std::move(_newState);
+        } else {
+            _drawingIndex = _activeStateIndex;
+        }
 
         glBindVertexArray(_vertexArrayObject);
 
@@ -1034,7 +1103,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
         // TODO: makes no sense in having _hasExtraVariables as a member variable if it is
         // only used here..
-        _hasExtraVariables = (_states[_activeStateIndex]._extraVariables.size() > 0) ? true : false;
+        _hasExtraVariables = (_states[_drawingIndex]._extraVariables.size() > 0) ? true : false;
         if (_hasExtraVariables) {
             _updateColorBuffer = true;
             _updateDomainBuffer = true;
@@ -1045,6 +1114,7 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         glBindVertexArray(0);
 
         _needsUpdate = false;
+        _newStateIsReady = false;
         _shouldRender = true;
     }
     if (_activeStateIndex > -1) {
@@ -1085,7 +1155,7 @@ void RenderableFieldlinesSequence::updateColorBuffer() {
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
 
-    auto& quantityVec = _states[_activeStateIndex]._extraVariables[_colorizingQuantity];
+    auto& quantityVec = _states[_drawingIndex]._extraVariables[_colorizingQuantity];
 
     glBufferData(GL_ARRAY_BUFFER, quantityVec.size() * sizeof(float),
             &quantityVec.front(), GL_STATIC_DRAW);
@@ -1101,7 +1171,7 @@ void RenderableFieldlinesSequence::updateDomainBuffer() {
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexDomainBuffer);
 
-    auto& quantityVec = _states[_activeStateIndex]._extraVariables[_domainQuantity];
+    auto& quantityVec = _states[_drawingIndex]._extraVariables[_domainQuantity];
 
     glBufferData(GL_ARRAY_BUFFER, quantityVec.size() * sizeof(float),
             &quantityVec.front(), GL_STATIC_DRAW);
@@ -1115,8 +1185,8 @@ void RenderableFieldlinesSequence::updateMorphingBuffers() {
     glBindBuffer(GL_ARRAY_BUFFER, _morphToPositionBuffer);
 
     glBufferData(GL_ARRAY_BUFFER,
-        _states[_activeStateIndex+1]._vertexPositions.size() * sizeof(glm::vec3),
-        &_states[_activeStateIndex+1]._vertexPositions.front(),
+        _states[_drawingIndex+1]._vertexPositions.size() * sizeof(glm::vec3),
+        &_states[_drawingIndex+1]._vertexPositions.front(),
         GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(_vertAttrMorphToPos);
@@ -1124,8 +1194,8 @@ void RenderableFieldlinesSequence::updateMorphingBuffers() {
     glBindBuffer(GL_ARRAY_BUFFER, _quickMorphBuffer);
 
     glBufferData(GL_ARRAY_BUFFER,
-            _states[_activeStateIndex]._quickMorph.size() * sizeof(GLfloat),
-            &_states[_activeStateIndex]._quickMorph.front(),
+            _states[_drawingIndex]._quickMorph.size() * sizeof(GLfloat),
+            &_states[_drawingIndex]._quickMorph.front(),
             GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(_vertAttrMorphQuick);
@@ -1135,7 +1205,7 @@ void RenderableFieldlinesSequence::updateMorphingBuffers() {
 void RenderableFieldlinesSequence::updateVertexPosBuffer() {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-    auto& vertexPosVec = _states[_activeStateIndex]._vertexPositions;
+    auto& vertexPosVec = _states[_drawingIndex]._vertexPositions;
 
     glBufferData(GL_ARRAY_BUFFER, vertexPosVec.size() * sizeof(glm::vec3),
             &vertexPosVec.front(), GL_STATIC_DRAW);
@@ -1191,10 +1261,11 @@ bool RenderableFieldlinesSequence::getSourceFilesFromDictionary(
     // Extract the file paths that fulfill the specification
     vector_extraction::extractChosenElements(startStateOffset, stateStepSize, numMaxStates, validSourceFilePaths);
 
-    LDEBUG("Found the following valid ." << fileExt << " files in " << pathToSourceFolder);
-    for (std::string str : validSourceFilePaths) {
-        LDEBUG("\t" << str);
-    }
+    LDEBUG("Found " << validSourceFilePaths.size() << " valid ." << fileExt << " files in " << pathToSourceFolder);
+    // LDEBUG("Found the following valid ." << fileExt << " files in " << pathToSourceFolder);
+    // for (std::string str : validSourceFilePaths) {
+    //     LDEBUG("\t" << str);
+    // }
     return true;
 }
 
@@ -1221,6 +1292,29 @@ bool RenderableFieldlinesSequence::getSeedPointsFromDictionary() {
     return true;
 }
 
+void RenderableFieldlinesSequence::readNewState() {
+    if (_states.size() > 1) {
+        LERROR("ALREADY MORE THAN ONE STATE IN '_states' VECTOR");
+    }
+    FieldlinesState tmpState;
+    // _states.push_back(tmpState);
+    // size_t numS = _states.size();
+    auto start = std::chrono::high_resolution_clock::now();
 
+    bool statuss = fsManager.getFieldlinesStateFromBinary(
+            _validSourceFilePaths[_activeStateIndex],
+            tmpState);
+
+    _newState = std::move(tmpState);
+    _newStateIsReady = true;
+    _isProcessingState = false;
+
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> diff = end - start;
+    auto ms = diff.count();
+    if (ms > 40) {
+        LWARNING("TIME FOR ADDING STATE FROM BINARY: " << ms << " milliseconds. (" << _validSourceFilePaths[_activeStateIndex] << ")");
+    }
+}
 
 } // namespace openspace
