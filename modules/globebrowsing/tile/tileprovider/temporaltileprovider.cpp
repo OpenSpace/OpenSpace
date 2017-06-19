@@ -63,8 +63,11 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 {
     std::string filePath;
     dictionary.getValue<std::string>(KeyFilePath, filePath);
-    if (!filePath.empty()) {
+    try {
         filePath = absPath(filePath);
+    }
+    catch (const std::runtime_error& e) {
+        // File path was not a path to a file but a GDAL config or empty
     }
   
     _filePath.setValue(filePath);
@@ -96,20 +99,28 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
 
 bool TemporalTileProvider::readFilePath() {
     std::ifstream in(_filePath.value().c_str());
-    if (!in.is_open()) {
-        return false;
+    std::string xml;
+    if (in.is_open()) {
+        // read file
+        xml = std::string(
+            std::istreambuf_iterator<char>(in),
+            (std::istreambuf_iterator<char>())
+        );
     }
-  
-    // read file
-    std::string xml(
-        std::istreambuf_iterator<char>(in),
-        (std::istreambuf_iterator<char>())
-    );
+    else {
+        // Assume that it is already an xml
+        xml = _filePath.value();
+    }
 
-    _initDict.setValue<std::string>(
-        KeyBasePath,
-        ghoul::filesystem::File(_filePath.value()).directoryName()
-    );
+    try {
+        _initDict.setValue<std::string>(
+            KeyBasePath,
+            ghoul::filesystem::File(_filePath.value()).directoryName()
+        );
+    }
+    catch (const std::runtime_error& e) {
+        // File path was not a path to a file but a GDAL config or empty
+    }
 
     _gdalXmlTemplate = consumeTemporalMetaData(xml);
     return true;
