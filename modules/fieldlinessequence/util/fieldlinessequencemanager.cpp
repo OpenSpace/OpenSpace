@@ -454,11 +454,11 @@ bool FieldlinesSequenceManager::getFieldlinesState(
             outFieldlinesState._extraVariables.push_back(it.value());
         }
 
-    } else if (jfile.find("0") != jfile.end()) {
+    } else if ((*jfile.begin()).find("trace") != (*jfile.begin()).end()) {
         // File is in a format provided by CCMC.. currently 2 different available
 
         // tmp json variable to determina which CCMC structure it is.
-        json jsonTmp = jfile["0"];
+        json jsonTmp = *jfile.begin();
         const std::string strTrace = "trace";
         if (jsonTmp.find(strTrace) != jsonTmp.end()) {
             // New json format provided for SUN-EARTH event at AMNH June 27th 2017.. for BATSRUS magnetosphere
