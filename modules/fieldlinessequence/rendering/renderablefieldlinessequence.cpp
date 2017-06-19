@@ -122,7 +122,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
       _useNearestSampling("useNearestSampling", "Nearest Sampling", false),
       _usePointDrawing("togglePointDrawing", "Draw Points", false),
       _alphaFade("fieldlineAlpha", "Opacity Multiplier", 1.f, 0.f, 1.f),
-      _lineWidth("fieldlineWidth", "Fieldline Width", 1.f, 0.f, 10.f),
+      _lineWidth("fieldlineWidth", "Fieldline Width", 1.f, 0.01f, 10.f),
       _seedPointSize("seedPointSize", "Seed Point Size", 4.0, 0.0, 20.0),
       _fieldlineParticleSize("fieldlineParticleSize", "FL Particle Size", 0, 0, 1000),
       _modulusDivider("fieldlineParticleFrequency", "FL Particle Frequency (reversed)", 100, 1, 10000),
@@ -422,6 +422,18 @@ bool RenderableFieldlinesSequence::initialize() {
             rmax = std::max(xmax, std::max(ymax,zmax));
 
             _isSpherical = true;
+        } else if (model == "pfss") {
+            _scalingFactor          = R_S_TO_METER;
+            _scalingFactorLineWidth = R_S_TO_METER;
+            _scalingFactorUnit = "RS";
+            // TODO: change these hardcoded limits to something that makes sense
+            // or allow user to specify in LUA
+            rmin =  0.0f;
+            xmin = ymin = zmin = -4.f;
+            xmax = ymax = zmax = 4.f;
+            rmax = 5;
+            _isSpherical = false; // this might have to change if pfss cdfs are provided
+
         } else if (model == "batsrus") {
             _scalingFactor          = R_E_TO_METER;
             _scalingFactorLineWidth = R_E_TO_METER;

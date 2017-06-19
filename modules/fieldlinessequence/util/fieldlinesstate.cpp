@@ -199,6 +199,11 @@ void FieldlinesState::setModel(const Model& modelNumber) {
                 _modelName = "enlil";
             }
             break;
+        case pfss : {
+                _model = modelNumber;
+                _modelName = "pfss";
+            }
+            break;
         default :
             LERROR("Unrecognised model!");
             break;

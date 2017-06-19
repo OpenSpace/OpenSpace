@@ -35,7 +35,8 @@ class FieldlinesState {
 public:
     enum Model : int {
         batsrus = 0,
-        enlil = 1
+        enlil = 1,
+        pfss = 2
     };
 
     FieldlinesState() {}
