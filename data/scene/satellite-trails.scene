@@ -31,6 +31,10 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
+    -- Loops
+    openspace.addVirtualProperty("BoolProperty", "Activate Looping", "Sun_Projection.renderable.activateLooping", true, nil, nil)
+    openspace.addVirtualProperty("IntProperty", "Loop Id", "Sun_Projection.renderable.loopId", 0, 0, 5)
+
     openspace.addVirtualProperty("BoolProperty", "Disable Frustums", "SolarImagery*.renderable.disableFrustum", true, nil, nil)
     openspace.addVirtualProperty("IntProperty", "Buffer Size", "SolarImagery*.renderable.bufferSize", 5, 1, 150)
     openspace.addVirtualProperty("FloatProperty", "Plane Opacity", "SolarImagery*.renderable.planeOpacity", 1.0, 0.0, 1.0)
