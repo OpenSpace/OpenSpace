@@ -80,11 +80,11 @@ enum class TypeID {
     SolidColor = 7,
 };
 
-static const int NUM_ADJUSTMENT_TYPES = 4;
+static const int NUM_ADJUSTMENT_TYPES = 3;
 static const std::string ADJUSTMENT_TYPE_NAMES[NUM_ADJUSTMENT_TYPES] = {
     "None",
-    "SolidColor",
     "ChromaKey",
+    "TransferFunction",
 };
 
 /**
@@ -92,7 +92,8 @@ static const std::string ADJUSTMENT_TYPE_NAMES[NUM_ADJUSTMENT_TYPES] = {
  */
 enum class AdjustmentTypeID {
     None = 0,
-    ChromaKey = 1
+    ChromaKey = 1,
+    TransferFunction = 2,
 };
 
 static const int NUM_BLEND_MODES = 4;

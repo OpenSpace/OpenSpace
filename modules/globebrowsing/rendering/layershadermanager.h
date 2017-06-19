@@ -66,6 +66,7 @@ public:
             bool layerBlendingEnabled;
             std::vector<layergroupid::TypeID> layerType;
             std::vector<layergroupid::BlendModeID> blendMode;
+            std::vector<layergroupid::AdjustmentTypeID> layerAdjustmentType;
             bool operator==(const LayerGroupPreprocessingData& other) const;
         };
         

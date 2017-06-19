@@ -35,13 +35,69 @@ LayerAdjustment::LayerAdjustment()
         "type",
         "Type",
         properties::OptionProperty::DisplayType::Dropdown)
+    , chromaKeyColor(
+        "chromaKeyColor",
+        "Chroma key color",
+        glm::vec3(0.f, 0.f, 0.f),
+        glm::vec3(0.f),
+        glm::vec3(1.f))
+    , chromaKeyTolerance(
+        "chromaKeyTolerance",
+        "Chroma Key Tolerance",
+        0,
+        0,
+        1)
+    , _onChangeCallback([](){})
 {
     // Add options to option properties
     for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
         _typeOption.addOption(i, layergroupid::ADJUSTMENT_TYPE_NAMES[i]);
     }
     _typeOption.setValue(static_cast<int>(layergroupid::AdjustmentTypeID::None));
+    _type = static_cast<layergroupid::AdjustmentTypeID>(_typeOption.value());
 
+    _typeOption.onChange([&](){
+        removeVisibleProperties();
+        _type = static_cast<layergroupid::AdjustmentTypeID>(_typeOption.value());
+        addVisibleProperties();
+        _onChangeCallback();
+    });
+    chromaKeyColor.setViewOption(properties::Property::ViewOptions::Color);
+
+    addProperty(_typeOption);
+    addVisibleProperties();
+}
+
+layergroupid::AdjustmentTypeID LayerAdjustment::type() const {
+    return _type;
+}
+
+void LayerAdjustment::addVisibleProperties() {
+    switch (type()) {
+        case layergroupid::AdjustmentTypeID::None:
+            break;
+        case layergroupid::AdjustmentTypeID::ChromaKey: {
+            addProperty(chromaKeyColor);
+            addProperty(chromaKeyTolerance);
+            break;
+        }
+        case layergroupid::AdjustmentTypeID::TransferFunction:
+            break;
+    }
+}
+
+void LayerAdjustment::removeVisibleProperties() {
+    switch (type()) {
+        case layergroupid::AdjustmentTypeID::None:
+            break;
+        case layergroupid::AdjustmentTypeID::ChromaKey: {
+            removeProperty(chromaKeyColor);
+            removeProperty(chromaKeyTolerance);
+            break;
+        }
+        case layergroupid::AdjustmentTypeID::TransferFunction:
+            break;
+    }
 }
 
 namespace {
@@ -49,6 +105,10 @@ namespace {
     const char* keyEnabled = "Enabled";
     const char* keyLayerGroupID = "LayerGroupID";
     const char* keySettings = "Settings";
+}
+
+void LayerAdjustment::onChange(std::function<void(void)> callback) {
+    _onChangeCallback = callback;
 }
 
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
@@ -134,6 +194,10 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
         _onChangeCallback();
     });
 
+    _layerAdjustment.onChange([&](){
+        _onChangeCallback();
+    });
+
     _typeOption.setReadOnly(true);
 
     // Add the properties
@@ -147,6 +211,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     addVisibleProperties();
 
     addPropertySubOwner(_renderSettings);
+    addPropertySubOwner(_layerAdjustment);
 }
 
 ChunkTilePile Layer::getChunkTilePile(const TileIndex& tileIndex, int pileSize) const {
@@ -206,6 +271,10 @@ const Layer::AdjustmentProperties& Layer::adjustmentProperties() const {
 
 const LayerRenderSettings& Layer::renderSettings() const {
     return _renderSettings;
+}
+
+const LayerAdjustment& Layer::layerAdjustment() const {
+    return _layerAdjustment;
 }
 
 void Layer::onChange(std::function<void(void)> callback) {

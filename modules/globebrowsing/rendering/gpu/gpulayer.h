@@ -37,6 +37,22 @@ class ProgramObject;
 namespace openspace {
 namespace globebrowsing {
 
+struct LayerAdjustment;
+
+class GPULayerAdjustment{
+public:
+    void setValue(ghoul::opengl::ProgramObject* programObject,
+        const LayerAdjustment& layerAdjustment);
+
+    void bind(const LayerAdjustment& layerAdjustment,
+        ghoul::opengl::ProgramObject* programObject,
+        const std::string& nameBase);
+
+private:
+    GPUData<glm::vec3> gpuChromaKeyColor;
+    GPUData<float> gpuChromaKeyTolerance;
+};
+
 class Layer;
 struct TileIndex;
 
@@ -73,6 +89,7 @@ public:
 private:
     GPUChunkTilePile gpuChunkTilePile;
     GPULayerRenderSettings gpuRenderSettings;
+    GPULayerAdjustment gpuLayerAdjustment;
     
     // Adjustment layer stuff
     GPUData<glm::vec3> gpuColor;

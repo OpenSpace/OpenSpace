@@ -83,7 +83,6 @@ float performLayerSettings(float currentValue, const LayerSettings settings) {
 	return newValue;
 }
 
-
 vec4 performLayerSettings(vec4 currentValue, const LayerSettings settings) {
 	vec4 newValue = vec4(
 		performLayerSettings(currentValue.r, settings),
@@ -141,6 +140,30 @@ vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor) {
 	return blendAdd(currentColor, newColor);
 #elif (#{#{layerGroup}#{i}BlendMode} == 3) // Subtract
 	return blendSubtract(currentColor, newColor);
+#endif
+}
+
+#endfor
+#endfor
+
+
+#for id, layerGroup in layerGroups
+#for i in 0..#{lastLayerIndex#{layerGroup}}
+
+vec4 performAdjustment#{layerGroup}#{i}(vec4 currentColor, const LayerAdjustment adjustment) {
+#if (#{#{layerGroup}#{i}LayerAdjustmentType} == 0) // Default, None
+	return currentColor;	
+#elif (#{#{layerGroup}#{i}LayerAdjustmentType} == 1) // ChromaKey
+	if (distance(currentColor.rgb, adjustment.chromaKeyColor) <= adjustment.chromaKeyTolerance) {
+		return vec4(0,0,0,0);
+	}
+	else {
+		return currentColor;
+	}
+#elif (#{#{layerGroup}#{i}LayerAdjustmentType} == 2) // TransferFunction
+	return currentColor;
+#else
+	return currentColor;
 #endif
 }
 
@@ -216,7 +239,7 @@ vec4 calculateColor(
 	{
 		vec4 colorSample = getSampleColorLayers#{i}(uv, levelWeights, ColorLayers);
 
-		
+		colorSample = performAdjustmentColorLayers#{i}(colorSample, ColorLayers[#{i}].adjustment);
 		colorSample = performLayerSettings(colorSample, ColorLayers[#{i}].settings);
 
 		color = blendColorLayers#{i}(color, colorSample);

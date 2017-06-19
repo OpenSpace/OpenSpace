@@ -49,9 +49,22 @@ class LayerAdjustment : public properties::PropertyOwner
 public:
     LayerAdjustment();
     ~LayerAdjustment() = default;
-    
+
+    layergroupid::AdjustmentTypeID type() const;
+
+    // Properties
+    properties::Vec3Property chromaKeyColor;
+    properties::FloatProperty chromaKeyTolerance;
+
+    void onChange(std::function<void(void)> callback);
 private:
+    void addVisibleProperties();
+    void removeVisibleProperties();
+    
     properties::OptionProperty _typeOption;
+    layergroupid::AdjustmentTypeID _type;
+
+    std::function<void(void)> _onChangeCallback;
 };
 
 class Layer : public properties::PropertyOwner {
@@ -76,6 +89,7 @@ public:
     tileprovider::TileProvider* tileProvider() const;
     const AdjustmentProperties& adjustmentProperties() const;
     const LayerRenderSettings& renderSettings() const;
+    const LayerAdjustment& layerAdjustment() const;
     
     void onChange(std::function<void(void)> callback);
     
@@ -96,6 +110,7 @@ private:
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
     AdjustmentProperties _adjustmentProperties;
     LayerRenderSettings _renderSettings;
+    LayerAdjustment _layerAdjustment;
 
     const layergroupid::GroupID _layerGroupId;
   

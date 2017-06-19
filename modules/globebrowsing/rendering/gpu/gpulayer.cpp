@@ -29,11 +29,47 @@
 namespace openspace {
 namespace globebrowsing {
 
+
+void GPULayerAdjustment::setValue(ghoul::opengl::ProgramObject* programObject,
+                                      const LayerAdjustment& layerAdjustment)
+{
+    switch (layerAdjustment.type()) {
+        // Intentional fall throgh. Same for all tile layers
+        case layergroupid::AdjustmentTypeID::None:
+            break;
+        case layergroupid::AdjustmentTypeID::ChromaKey: {
+            gpuChromaKeyColor.setValue(programObject, layerAdjustment.chromaKeyColor.value());
+            gpuChromaKeyTolerance.setValue(programObject, layerAdjustment.chromaKeyTolerance.value());
+            break;
+        }
+        case layergroupid::AdjustmentTypeID::TransferFunction:
+            break;
+    }
+}
+
+void GPULayerAdjustment::bind(const LayerAdjustment& layerAdjustment, ghoul::opengl::ProgramObject* programObject,
+                                  const std::string& nameBase)
+{
+    switch (layerAdjustment.type()) {
+        // Intentional fall throgh. Same for all tile layers
+        case layergroupid::AdjustmentTypeID::None:
+            break;
+        case layergroupid::AdjustmentTypeID::ChromaKey: {
+            gpuChromaKeyColor.bind(programObject, nameBase + "chromaKeyColor");
+            gpuChromaKeyTolerance.bind(programObject, nameBase + "chromaKeyTolerance");
+            break;
+        }
+        case layergroupid::AdjustmentTypeID::TransferFunction:
+            break;
+    }
+}
+
 void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
                         const TileIndex& tileIndex, int pileSize)
 {
     ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
-    gpuRenderSettings.setValue(programObject, layer.renderSettings());  
+    gpuRenderSettings.setValue(programObject, layer.renderSettings());
+    gpuLayerAdjustment.setValue(programObject, layer.layerAdjustment());
     
     switch (layer.type()) {
         // Intentional fall throgh. Same for all tile layers
@@ -58,6 +94,7 @@ void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& la
                     const std::string& nameBase, int pileSize)
 {
     gpuRenderSettings.bind(layer.renderSettings(), programObject, nameBase + "settings.");
+    gpuLayerAdjustment.bind(layer.layerAdjustment(), programObject, nameBase + "adjustment.");
     
     switch (layer.type()) {
         // Intentional fall throgh. Same for all tile layers

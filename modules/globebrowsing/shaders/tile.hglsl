@@ -116,10 +116,16 @@ struct LayerSettings {
 	float valueBlending;
 };
 
+struct LayerAdjustment {
+	vec3 chromaKeyColor;
+	float chromaKeyTolerance;
+};
+
 struct Layer {
 	ChunkTilePile pile;
 	TileDepthTransform depthTransform;
 	LayerSettings settings;
+	LayerAdjustment adjustment;
 	
 	// Adjustment layer stuff
 	vec3 color;
