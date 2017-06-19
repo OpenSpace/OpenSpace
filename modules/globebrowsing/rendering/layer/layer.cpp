@@ -126,7 +126,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     , _enabled(properties::BoolProperty("enabled", "Enabled", false))
     , _reset("reset", "Reset")
     , _tileProvider(nullptr)
-    , _adjustmentProperties{
+    , _otherTypesProperties{
         properties::Vec3Property (
         "color",
         "Color",
@@ -206,7 +206,7 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     addProperty(_enabled);
     addProperty(_reset);
 
-    _adjustmentProperties.color.setViewOption(properties::Property::ViewOptions::Color);
+    _otherTypesProperties.color.setViewOption(properties::Property::ViewOptions::Color);
 
     addVisibleProperties();
 
@@ -265,8 +265,8 @@ tileprovider::TileProvider* Layer::tileProvider() const {
     return _tileProvider.get();
 }
 
-const Layer::AdjustmentProperties& Layer::adjustmentProperties() const {
-    return _adjustmentProperties;
+const Layer::OtherTypesProperties& Layer::otherTypesProperties() const {
+    return _otherTypesProperties;
 }
 
 const LayerRenderSettings& Layer::renderSettings() const {
@@ -344,7 +344,7 @@ void Layer::addVisibleProperties() {
             }
             break;
         case layergroupid::TypeID::SolidColor:
-            addProperty(_adjustmentProperties.color);
+            addProperty(_otherTypesProperties.color);
         default:
             break;
     }
@@ -365,7 +365,7 @@ void Layer::removeVisibleProperties() {
             }
             break;
         case layergroupid::TypeID::SolidColor:
-            removeProperty(_adjustmentProperties.color);
+            removeProperty(_otherTypesProperties.color);
             break;
         default:
             break;

@@ -83,7 +83,7 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
             gpuChunkTilePile.setValue(programObject, chunkTilePile);
             break;
         case layergroupid::TypeID::SolidColor:
-            gpuColor.setValue(programObject, layer.adjustmentProperties().color.value());
+            gpuColor.setValue(programObject, layer.otherTypesProperties().color.value());
             break;
         default:
             break;

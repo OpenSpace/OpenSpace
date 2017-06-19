@@ -127,7 +127,7 @@ struct Layer {
 	LayerSettings settings;
 	LayerAdjustment adjustment;
 	
-	// Adjustment layer stuff
+	// Other layer type properties stuff
 	vec3 color;
 };
 

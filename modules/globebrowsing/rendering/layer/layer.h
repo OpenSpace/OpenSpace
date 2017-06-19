@@ -73,7 +73,7 @@ public:
      * Properties used when the layer type is not a tile type layer. These properties
      * can be added or removed depending on the layer type.
      */
-    struct AdjustmentProperties {
+    struct OtherTypesProperties {
         properties::Vec3Property color;
     };
 
@@ -87,7 +87,7 @@ public:
     TileDepthTransform depthTransform() const;
     bool enabled() const;
     tileprovider::TileProvider* tileProvider() const;
-    const AdjustmentProperties& adjustmentProperties() const;
+    const OtherTypesProperties& otherTypesProperties() const;
     const LayerRenderSettings& renderSettings() const;
     const LayerAdjustment& layerAdjustment() const;
     
@@ -108,7 +108,7 @@ private:
 
     layergroupid::TypeID _type;
     std::shared_ptr<tileprovider::TileProvider> _tileProvider;
-    AdjustmentProperties _adjustmentProperties;
+    OtherTypesProperties _otherTypesProperties;
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
 
