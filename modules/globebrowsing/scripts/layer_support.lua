@@ -36,6 +36,18 @@ openspace.globebrowsing.createHeightLayers = function (patches)
     return result
 end
 
+openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDate, endDate, timeResolution, timeFormat, resolution, format)
+    temporalTemplate =
+        "<OpenSpaceTemporalGDALDataset>" ..
+        "<OpenSpaceTimeStart>" .. startDate .. "</OpenSpaceTimeStart>" ..
+        "<OpenSpaceTimeEnd>" .. endDate .. "</OpenSpaceTimeEnd>" ..
+        "<OpenSpaceTimeResolution>" .. timeResolution .. "</OpenSpaceTimeResolution>" ..
+        "<OpenSpaceTimeIdFormat>" .. timeFormat .. "</OpenSpaceTimeIdFormat>" ..
+        openspace.globebrowsing.createGibsGdalXml(layerName, "${OpenSpaceTimeId}", resolution, format) ..
+        "</OpenSpaceTemporalGDALDataset>"
+    return temporalTemplate
+end
+
 openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolution, format)
     tileLevel = 5
     if resolution == "2km" then
@@ -55,7 +67,7 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
     elseif resolution == "15.625m" then
         tileLevel = 12
     else
-        print("Unknown resolution")
+        openspace.printError("Unknown resolution: " .. resolution)
         return ""
     end
 
@@ -69,7 +81,7 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
     elseif format == "png" then
         rasterCount = 4
     else
-        print("Unknown format. Use 'jpg' or 'png'")
+        openspace.printError("Unknown format \"" .. format .. "\". Use 'jpg' or 'png'")
         return ""
     end
 
