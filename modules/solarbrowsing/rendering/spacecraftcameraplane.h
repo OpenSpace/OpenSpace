@@ -38,8 +38,8 @@ public:
     void render(const RenderData& data, ghoul::opengl::Texture& imageryTexture,
                 TransferFunction* lut, const glm::dvec3& sunPositionWorld,
                 const float& planeOpacity, const float& contrastValue,
-                const float& gammaValue, const bool& disableBorder,
-                const bool& disableFrustum, const glm::vec2& currentCenterPixel,
+                const float& gammaValue, const bool& enableBorder,
+                const bool& enableFrustum, const glm::vec2& currentCenterPixel,
                 const float& currentScale, const float& multipleImageryOffset);
     void update();
     void createPlaneAndFrustum(const double& moveDistance);

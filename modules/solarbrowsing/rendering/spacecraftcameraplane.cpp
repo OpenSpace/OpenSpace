@@ -176,7 +176,7 @@ void SpacecraftCameraPlane::render(
       const RenderData& data, ghoul::opengl::Texture& imageryTexture,
       TransferFunction* lut, const glm::dvec3& sunPositionWorld,
       const float& planeOpacity, const float& contrastValue, const float& gammaValue,
-      const bool& disableBorder, const bool& disableFrustum,
+      const bool& enableBorder, const bool& enableFrustum,
       const glm::vec2& currentCenterPixel, const float& currentScale, const float& multipleImageryOffset)
 {
     glEnable(GL_CULL_FACE);
@@ -257,11 +257,11 @@ void SpacecraftCameraPlane::render(
 
     glBindVertexArray(_frustum);
 
-    if (!disableBorder && !disableFrustum) {
+    if (enableBorder && enableFrustum) {
         glDrawArrays(GL_LINES, 0, 16);
-    } else if (disableBorder && !disableFrustum) {
+    } else if (!enableBorder && enableFrustum) {
         glDrawArrays(GL_LINES, 0, 8);
-    } else if (disableFrustum && !disableBorder) {
+    } else if (!enableFrustum && enableBorder) {
         glDrawArrays(GL_LINES, 8, 16);
     }
     _frustumShader->deactivate();
