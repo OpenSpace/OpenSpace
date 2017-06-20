@@ -70,6 +70,11 @@ return {
                 },
                 GrayScaleColorOverlays = {
                     {
+                        Name = "CTX Mosaic [AWS]",
+                        FilePath = "map_service_configs/CTX.wms",
+                        Enabled = true,
+                    },
+                    {
                         Name = "CTX Mosaic [Europe]",
                         FilePath = "map_service_configs/CTX_Mosaic.xml",
                         --Enabled = true,

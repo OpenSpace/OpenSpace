@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /******************************************************************************
- * $Id: gdalvrt.xsd 30648 2015-09-22 15:16:23Z rouault $
+ * $Id: gdalvrt.xsd 35479 2016-09-16 20:34:58Z rouault $
  *
  * Project:  GDAL/OGR
  * Purpose:  XML Schema for GDAL VRT files.
@@ -167,6 +167,14 @@
                 <!-- for a VRTDerivedRasterBand -->
                 <xs:element name="PixelFunctionType" type="xs:string"/>
                 <xs:element name="SourceTransferType" type="DataTypeType"/>
+                <xs:element name="PixelFunctionLanguage" type="xs:string"/>
+                <xs:element name="PixelFunctionCode" type="xs:string"/>
+                <xs:element name="PixelFunctionArguments">
+                    <xs:complexType>
+                        <xs:anyAttribute processContents="lax"/>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="BufferRadius" type="xs:nonNegativeInteger"/>
 
                 <!-- for a VRTRawRasterBand -->
                 <xs:element name="SourceFilename" type="SourceFilenameType"/>
