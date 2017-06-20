@@ -158,26 +158,27 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 		// specific site/drive combination has already been added. If the models haven't already been 
 		// added, loop through the text file with file names and add those to the subsite.
 		// Also store information about which levels are available for this specific subsite.
-		bool pathToLevel1Exists = FileSys.directoryExists(pathToDriveFolderLevel1);
-		bool pathToLevel2Exists = FileSys.directoryExists(pathToDriveFolderLevel2);
-		bool pathToLevel3Exists = FileSys.directoryExists(pathToDriveFolderLevel3);
+		std::string restPath = "/OBJ.obj";
+		bool level1Exists = FileSys.fileExists(pathToDriveFolderLevel1 + restPath);
+		bool level2Exists = FileSys.fileExists(pathToDriveFolderLevel2 + restPath);
+		bool level3Exists = FileSys.fileExists(pathToDriveFolderLevel3 + restPath);
 
 		// TODO: refactor like hell!!!
 		std::string pathToDriveFolder;
-		if (pathToLevel1Exists) {
+		if (level1Exists) {
 			subsite->availableLevels.push_back(1);
 			pathToDriveFolder = pathToDriveFolderLevel1;
 		}
-		if (pathToLevel2Exists) {
+		if (level2Exists) {
 			subsite->availableLevels.push_back(2);
 			pathToDriveFolder = pathToDriveFolderLevel2;
 		}
-		if (pathToLevel3Exists) {
+		if (level3Exists) {
 			subsite->availableLevels.push_back(3);
 			pathToDriveFolder = pathToDriveFolderLevel3;
 		}
 		bool modelExists = false;
-		if(pathToLevel1Exists || pathToLevel2Exists || pathToLevel3Exists) {
+		if(level1Exists || level2Exists || level3Exists) {
 			for (auto controlSubsite : subsitesWithModels) {
 				if (subsite->site == controlSubsite->site && subsite->drive == controlSubsite->drive) {
 					modelExists = true;
