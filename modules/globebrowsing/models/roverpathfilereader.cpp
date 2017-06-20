@@ -77,7 +77,6 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractAllSubsites(co
 	OGRFeature *poFeature;
 	poLayer->ResetReading();
 
-	int currentSite = 0;
 	double siteLat;
 	double siteLon;
 	std::vector<std::shared_ptr<Subsite>> subsites;

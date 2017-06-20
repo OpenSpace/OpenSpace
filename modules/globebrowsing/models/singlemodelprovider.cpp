@@ -44,20 +44,18 @@ SingleModelProvider::SingleModelProvider(const ghoul::Dictionary& dictionary)
 std::vector<std::shared_ptr<Subsite>> SingleModelProvider::calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites, const RenderData& data) {
 	std::vector<std::shared_ptr<Subsite>> mostModelsInsideRadius;
 	std::vector<std::shared_ptr<Subsite>> subsitesInsideRadius;
-	float radius = 10;
 	std::shared_ptr<Subsite> smallest = std::make_shared<Subsite>();
 
 	SceneGraphNode* _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
 	RenderableGlobe* rg = (RenderableGlobe*)_parent->renderable();
 		
-	double ellipsoidShrinkTerm = rg->interactionDepthBelowEllipsoid();
 	glm::dvec3 center = _parent->worldPosition();
 	glm::dmat4 globeModelTransform = rg->modelTransform();
 	glm::dmat4 globeModelInverseTransform = rg->inverseModelTransform();
 	glm::dvec3 cameraPos = data.camera.positionVec3();
 	glm::dvec4 cameraPositionModelSpace = globeModelInverseTransform * glm::dvec4(cameraPos, 1.0);
 	glm::dvec3 cameraPositionProjected = rg->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
-	float smallestDistance = 100;
+	double smallestDistance = 100.0;
 
 	for (auto s : subsites) {
 		for (auto s1 : s) {

@@ -65,7 +65,7 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 			BoolProperty("useMastCam", "Show mastcam coloring", false),
 			BoolProperty("enableDepth", "Enable depth", true),
 			FloatProperty("heightProp", "Site height", 0.7f, 0.0f, 3.0f),
-			IntProperty("maxLod", "Max LOD",3.0, 1.0, 3.0)
+			IntProperty("maxLod", "Max LOD", 3, 1, 3)
 	})
 	, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
 	, _modelSwitch()
@@ -245,13 +245,13 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		glm::dvec3 surfaceNormal = _globe->ellipsoid().geodeticSurfaceNormal(subsiteModels->siteGeodetic);
 
 		surfaceNormal = glm::normalize(surfaceNormal);
-		float cosTheta = dot(glm::dvec3(0, 0, 1), surfaceNormal);
+		double cosTheta = dot(glm::dvec3(0.0, 0.0, 1.0), surfaceNormal);
 		glm::dvec3 rotationAxis;
 
-		rotationAxis = cross(glm::dvec3(0, 0, 1), surfaceNormal);
+		rotationAxis = cross(glm::dvec3(0.0, 0.0, 1.0), surfaceNormal);
 
-		float s = sqrt((1 + cosTheta) * 2);
-		float invs = 1 / s;
+		double s = sqrt((1 + cosTheta) * 2);
+		double invs = 1 / s;
 
 		glm::dquat rotationMatrix = glm::dquat(s * 0.5f, rotationAxis.x * invs, rotationAxis.y * invs, rotationAxis.z * invs);
 
@@ -265,15 +265,15 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 		glm::dvec3 testa = glm::dvec3(test.x, test.y, test.z);
 
-		float cosTheta2 = dot(testa, xAxis);
+		double  cosTheta2 = dot(testa, xAxis);
 		glm::dvec3 rotationAxis2;
 
 		rotationAxis2 = cross(testa, xAxis);
 
-		float s2 = sqrt((1 + cosTheta2) * 2);
-		float invs2 = 1 / s2;
+		double s2 = sqrt((1 + cosTheta2) * 2);
+		double invs2 = 1 / s2;
 
-		glm::quat rotationMatrix2 = glm::quat(s2 * 0.5f, rotationAxis2.x * invs2, rotationAxis2.y * invs2, rotationAxis2.z * invs2);
+		glm::quat rotationMatrix2 = glm::quat(s2 * 0.5, rotationAxis2.x * invs2, rotationAxis2.y * invs2, rotationAxis2.z * invs2);
 
 		glm::dmat4 modelTransform =
 			glm::translate(glm::dmat4(1.0), positionWorldSpace) *

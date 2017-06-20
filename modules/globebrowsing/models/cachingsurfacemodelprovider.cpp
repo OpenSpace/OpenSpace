@@ -66,7 +66,7 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 				}
 				// Check for available LODs above the requested.
 				std::vector<int> levelsAbove = getLevelsAbove(subsite->availableLevels, level);
-				for (int levelAbove = levelsAbove.size() + 1; levelAbove-- > 1; ) {
+				for (size_t levelAbove = levelsAbove.size() + 1; levelAbove-- > 1; ) {
 					ProviderSubsiteKey keyLowerLevel = { levelAbove, subsite->site, subsite->drive };
 					// If the cache holds the correct model but with lower resultion than requested,
 					// fade in that model

@@ -158,7 +158,7 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		glBindVertexArray(_vaPathID);
 		glBindBuffer(GL_ARRAY_BUFFER, _vbPathID);
 		glLineWidth(1.0f);
-		glDrawArrays(GL_LINE_STRIP, 0, _stationPointsModelCoordinates.size());
+		glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_stationPointsModelCoordinates.size()));
 		glBindVertexArray(0);
 
 		_pathShader->deactivate();
@@ -182,7 +182,7 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		glBindBuffer(GL_ARRAY_BUFFER, _vbModelsID);
 
 		glEnable(GL_PROGRAM_POINT_SIZE);
-		glDrawArrays(GL_POINTS, 0, _stationPointsModelCoordinatesWithModel.size());
+		glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_stationPointsModelCoordinatesWithModel.size()));
 		glBindVertexArray(0);
 
 		_siteShader->deactivate();
@@ -195,7 +195,7 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 void RenderableExplorationPath::setLevel(const int level) {
 	_currentLevel = level;
 	if (level != lastLevel) {
-		int offset = 10;
+		float offset = 10;
 		if (_currentLevel < 2)
 			offset = 6;
 		else if (_currentLevel == 2)
@@ -215,7 +215,7 @@ void RenderableExplorationPath::setLevel(const int level) {
 	}
 }
 
-std::vector<glm::vec4> RenderableExplorationPath::calculateModelCoordinates(std::vector<Geodetic2> geodetics,  const int offset) {
+std::vector<glm::vec4> RenderableExplorationPath::calculateModelCoordinates(std::vector<Geodetic2> geodetics,  const float offset) {
 	std::vector<glm::vec4> cartesianCoordinates;
 	for (auto geodetic : geodetics) {
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);

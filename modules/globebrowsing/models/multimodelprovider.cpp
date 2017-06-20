@@ -46,7 +46,6 @@ std::vector<std::shared_ptr<Subsite>> MultiModelProvider::calculate(const std::v
 	SceneGraphNode* _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
 	RenderableGlobe* rg = (RenderableGlobe*)_parent->renderable();
 
-	double ellipsoidShrinkTerm = rg->interactionDepthBelowEllipsoid();
 	glm::dvec3 center = _parent->worldPosition();
 	glm::dmat4 globeModelTransform = rg->modelTransform();
 	glm::dmat4 globeModelInverseTransform = rg->inverseModelTransform();
