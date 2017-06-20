@@ -131,6 +131,7 @@ private:
     properties::FloatProperty _mieAsymmetricFactorGP;
     properties::FloatProperty _sunIntensityP;
     properties::FloatProperty _hdrExpositionP;
+    properties::FloatProperty _backgroundExposureP;
     properties::FloatProperty _gammaConstantP;
 
     bool _atmosphereEnabled;
@@ -144,6 +145,7 @@ private:
     float _miePhaseConstant;
     float _sunRadianceIntensity;
     float _hdrConstant;
+    float _exposureBackgroundConstant;
     float _gammaConstant;
 
     glm::vec3 _mieExtinctionCoeff;

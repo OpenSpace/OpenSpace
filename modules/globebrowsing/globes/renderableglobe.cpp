@@ -48,7 +48,7 @@ namespace {
     const std::string keyTextureScale = "PreCalculatedTextureScale";
     const std::string keySaveTextures = "SaveCalculatedTextures";
     const std::string keyAtmosphere = "Atmosphere";
-    const std::string keyAtmosphereRadius = "AtmoshereRadius";
+    const std::string keyAtmosphereRadius = "AtmosphereRadius";
     const std::string keyPlanetRadius = "PlanetRadius";
     const std::string keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
     const std::string keyRayleigh = "Rayleigh";
@@ -61,6 +61,7 @@ namespace {
     const std::string keyImage = "Image";
     const std::string keyToneMappingOp = "ToneMapping";
     const std::string keyExposure = "Exposure";
+    const std::string keyBackground = "Background";
     const std::string keyGamma = "Gamma";
 #endif
 }
@@ -117,7 +118,8 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             "Mie Scattering/Extinction Proportion Coefficient (%)", 0.9f, 0.01f, 1.0f),
         FloatProperty("mieAsymmetricFactorG", "Mie Asymmetric Factor G", 0.85f, -1.0f, 1.0f),
         FloatProperty("sunIntensity", "Sun Intensity", 50.0f, 0.1f, 1000.0f),
-        FloatProperty("hdrExposition", "HDR", 0.4f, 0.01f, 5.0f),
+        FloatProperty("hdrExposition", "HDR Exposition", 0.4f, 0.01f, 5.0f),
+        FloatProperty("backgroundExposition", "Background Exposition", 1.8f, 0.01f, 10.0f),
         FloatProperty("gamma", "Gamma Correction", 1.8f, 0.1f, 3.0f ),
         BoolProperty("ozone", "Ozone Layer Enabled", true)
     })
@@ -135,6 +137,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _mieExtinctionCoeff(glm::vec3(0.f))
     , _sunRadianceIntensity(50.0f)
     , _exposureConstant(0.4f)
+    , _exposureBackgroundConstant(1.8f)
     , _gammaConstant(1.8f)
     , _atmosphereEnabled(false)
     , _saveCalculationsToTexture(false)
@@ -333,6 +336,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
                 //LDEBUG("Saving Precalculated Atmosphere Textures.");
             }
 
+            if (ImageDictionary.getValue(keyBackground, _exposureBackgroundConstant)) {
+                //LDEBUG("Saving Precalculated Atmosphere Textures.");
+            }
+
             if (ImageDictionary.getValue(keyGamma, _gammaConstant)) {
                 //LDEBUG("Saving Precalculated Atmosphere Textures.");
             }
@@ -435,6 +442,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             _atmosphereProperties.hdrExpositionP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
             _atmospherePropertyOwner.addProperty(_atmosphereProperties.hdrExpositionP);
 
+            _atmosphereProperties.backgroundExpositionP.set(_exposureBackgroundConstant);
+            _atmosphereProperties.backgroundExpositionP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
+            _atmospherePropertyOwner.addProperty(_atmosphereProperties.backgroundExpositionP);
+
             _atmosphereProperties.gammaConstantP.set(_gammaConstant);
             _atmosphereProperties.gammaConstantP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
             _atmospherePropertyOwner.addProperty(_atmosphereProperties.gammaConstantP);
@@ -460,6 +471,7 @@ bool RenderableGlobe::initialize() {
             _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
             _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
             _deferredcaster->setHDRConstant(_exposureConstant);
+            _deferredcaster->setBackgroundConstant(_exposureBackgroundConstant);
             _deferredcaster->setGammaConstant(_gammaConstant);
             _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
             _deferredcaster->setOzoneExtinctionCoefficients(_ozoneLayerExtinctionCoeff);
@@ -627,6 +639,7 @@ void RenderableGlobe::updateAtmosphereParameters() {
     bool executeComputation = true;
     if (_sunRadianceIntensity != _atmosphereProperties.sunIntensityP.value() ||
         _exposureConstant != _atmosphereProperties.hdrExpositionP.value() ||
+        _exposureBackgroundConstant != _atmosphereProperties.backgroundExpositionP.value() ||
         _gammaConstant != _atmosphereProperties.gammaConstantP.value())
         executeComputation = false;
     _atmosphereRadius               = _atmospherePlanetRadius + _atmosphereProperties.atmosphereHeightP.value();
@@ -648,6 +661,7 @@ void RenderableGlobe::updateAtmosphereParameters() {
     _miePhaseConstant     = _atmosphereProperties.mieAsymmetricFactorGP.value();
     _sunRadianceIntensity = _atmosphereProperties.sunIntensityP.value();
     _exposureConstant     = _atmosphereProperties.hdrExpositionP.value();
+    _exposureBackgroundConstant = _atmosphereProperties.backgroundExpositionP.value();
     _gammaConstant        = _atmosphereProperties.gammaConstantP.value();
 
     if (_deferredcaster) {
@@ -661,6 +675,10 @@ void RenderableGlobe::updateAtmosphereParameters() {
         _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
         _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
         _deferredcaster->setHDRConstant(_exposureConstant);
+        _deferredcaster->setBackgroundConstant(_exposureBackgroundConstant);
+
+        std::cout << "==== set background constnat to: " << _exposureBackgroundConstant << " =====" << std::endl;
+
         _deferredcaster->setGammaConstant(_gammaConstant);
         _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
         _deferredcaster->setOzoneExtinctionCoefficients(_ozoneLayerExtinctionCoeff);

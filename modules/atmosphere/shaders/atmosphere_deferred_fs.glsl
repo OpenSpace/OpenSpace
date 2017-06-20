@@ -36,6 +36,9 @@ const int RenderableGlobe  = 2;
 // a RenderableGlobe
 uniform int RenderableClass;
 
+// Background exposure hack
+uniform float backgroundExposure;
+
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
 uniform sampler2DMS mainPositionTexture;
@@ -448,7 +451,7 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
   if (groundHit) {
     return finalScatteringRadiance;
   } else {
-    return ((r-Rg)/(Rt-Rg))*spaceColor.rgb * 1.8 + finalScatteringRadiance;
+    return ((r-Rg)/(Rt-Rg))*spaceColor.rgb * backgroundExposure + finalScatteringRadiance;
   }
   
 }
@@ -659,7 +662,7 @@ void main() {
           renderTarget = finalRadiance;
         }      
       } else {
-        renderTarget = vec4(HDR(meanColor.xyz * 1.8), meanColor.a);
+        renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
         //renderTarget = vec4(1.0, 0.0, 0.0, 1.0);
       }
     } else if ( RenderableClass == RenderableGlobe) {
@@ -789,7 +792,7 @@ void main() {
           renderTarget = finalRadiance;
         }
       } else {
-        renderTarget = vec4(HDR(meanColor.xyz * 1.8), meanColor.a);
+        renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
         //renderTarget = meanColor;
       }
     }                     

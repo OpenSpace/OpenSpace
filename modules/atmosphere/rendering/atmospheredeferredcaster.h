@@ -102,6 +102,7 @@ public:
     void setMiePhaseConstant(const float miePhaseConstant);
     void setSunRadianceIntensity(const float sunRadiance);
     void setHDRConstant(const float hdrConstant);
+    void setBackgroundConstant(const float backgroundConstant);
     void setGammaConstant(const float gammaConstant);
     void setRayleighScatteringCoefficients(const glm::vec3 & rayScattCoeff);
     void setOzoneExtinctionCoefficients(const glm::vec3 & ozoneExtCoeff);
@@ -175,6 +176,7 @@ private:
     float _miePhaseConstant;
     float _sunRadianceIntensity;
     float _exposureConstant;
+    float _exposureBackgroundConstant;
     float _gammaConstant;
     
     glm::vec3 _rayleighScatteringCoeff;

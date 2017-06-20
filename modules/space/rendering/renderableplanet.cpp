@@ -86,6 +86,7 @@ namespace {
     const std::string keyImage                    = "Image";
     const std::string keyToneMappingOp            = "ToneMapping";
     const std::string keyExposure                 = "Exposure";
+    const std::string keyBackground               = "Background";
     const std::string keyGamma                    = "Gamma";
     const std::string keyATMDebug                 = "Debug";
     const std::string keyTextureScale             = "PreCalculatedTextureScale";
@@ -176,6 +177,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _mieAsymmetricFactorGP("mieAsymmetricFactorG", "Mie Asymmetric Factor G", 0.85f, -1.0f, 1.0f)
     , _sunIntensityP("sunIntensity", "Sun Intensity", 50.0f, 0.1f, 1000.0f)
     , _hdrExpositionP("hdrExposition", "HDR", 0.4f, 0.01f, 5.0f)
+    , _backgroundExposureP("backgroundExposition", "Background Exposition", 1.8f, 0.01f, 10.0f)
     , _gammaConstantP("gamma", "Gamma Correction", 1.8f, 0.1f, 3.0f)
     , _atmosphereEnabled(false)
     , _ozoneLayerEnabled(false)
@@ -188,6 +190,7 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
     , _miePhaseConstant(0.f)
     , _sunRadianceIntensity(50.f)
     , _hdrConstant(0.f)
+    , _exposureBackgroundConstant(1.8f)
     , _gammaConstant(1.8f)
     , _mieExtinctionCoeff(glm::vec3(0.f))
     , _rayleighScatteringCoeff(glm::vec3(0.f))
@@ -553,6 +556,10 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
             _hdrExpositionP.onChange(std::bind(&RenderablePlanet::updateAtmosphereParameters, this));
             addProperty(_hdrExpositionP);
 
+            _backgroundExposureP.set(_exposureBackgroundConstant);
+            _backgroundExposureP.onChange(std::bind(&RenderablePlanet::updateAtmosphereParameters, this));
+            addProperty(_backgroundExposureP);
+
             _gammaConstantP.set(_gammaConstant);
             _gammaConstantP.onChange(std::bind(&RenderablePlanet::updateAtmosphereParameters, this));
             addProperty(_gammaConstantP);
@@ -641,6 +648,7 @@ bool RenderablePlanet::initialize() {
             _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
             _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
             _deferredcaster->setHDRConstant(_hdrConstant);
+            _deferredcaster->setBackgroundConstant(_exposureBackgroundConstant);
             _deferredcaster->setGammaConstant(_gammaConstant);
             _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
             _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);
@@ -960,6 +968,7 @@ void RenderablePlanet::updateAtmosphereParameters() {
     
     if (_sunRadianceIntensity != _sunIntensityP ||
         _hdrConstant != _hdrExpositionP ||
+        _exposureBackgroundConstant != _backgroundExposureP ||
         _gammaConstant != _gammaConstantP)
         executeComputation = false;
 
@@ -979,6 +988,7 @@ void RenderablePlanet::updateAtmosphereParameters() {
     _miePhaseConstant = _mieAsymmetricFactorGP;
     _sunRadianceIntensity = _sunIntensityP;
     _hdrConstant = _hdrExpositionP;
+    _exposureBackgroundConstant = _backgroundExposureP;
     _gammaConstant = _gammaConstantP.value();
 
     if (_deferredcaster) {
@@ -992,6 +1002,7 @@ void RenderablePlanet::updateAtmosphereParameters() {
         _deferredcaster->setMiePhaseConstant(_miePhaseConstant);
         _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
         _deferredcaster->setHDRConstant(_hdrConstant);
+        _deferredcaster->setBackgroundConstant(_exposureBackgroundConstant);
         _deferredcaster->setGammaConstant(_gammaConstant);
         _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
         _deferredcaster->setOzoneExtinctionCoefficients(_ozoneExtinctionCoeff);

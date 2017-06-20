@@ -102,6 +102,7 @@ public:
         properties::FloatProperty mieAsymmetricFactorGP;
         properties::FloatProperty sunIntensityP;
         properties::FloatProperty hdrExpositionP;
+        properties::FloatProperty backgroundExpositionP;
         properties::FloatProperty gammaConstantP;
         properties::BoolProperty ozoneLayerEnabledP;
     };
@@ -171,6 +172,7 @@ private:
     float _miePhaseConstant;
     float _sunRadianceIntensity;
     float _exposureConstant;
+    float _exposureBackgroundConstant;
     float _gammaConstant;
     
     glm::vec3 _rayleighScatteringCoeff;

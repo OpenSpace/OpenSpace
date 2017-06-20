@@ -69,9 +69,9 @@ return {
             SegmentsPerPatch = 64,
             Atmosphere = {
                 -- Atmosphere radius in Km
-                --AtmoshereRadius = 6450,
-                --AtmoshereRadius = 6420.0,
-                AtmoshereRadius = 6447.0,
+                --AtmosphereRadius = 6450,
+                --AtmosphereRadius = 6420.0,
+                AtmosphereRadius = 6447.0,
                 --PlanetRadius    = 6378.137,
                 PlanetRadius    = 6377.0,
                 --PlanetRadius    = 6360.0,
@@ -131,6 +131,7 @@ return {
                 Image = {
                     ToneMapping = jToneMapping,
                     Exposure = 0.4,
+                    Background = 1.8,
                     Gamma = 1.85,                                                                      
                 },
                 Debug = {

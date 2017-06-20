@@ -128,7 +128,7 @@ return {
             -- Allows camera to go down 10000 meters below the reference ellipsoid InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
              Atmosphere = {
                 -- Atmosphere radius in Km
-                AtmoshereRadius = 3463.17495,
+                AtmosphereRadius = 3463.17495,
                 --PlanetRadius    = 3396.19,
                 --PlanetRadius = 3393.0,
                 PlanetRadius = 3386.190,
@@ -160,6 +160,7 @@ return {
                 Image = {
                     ToneMapping = jToneMapping,
                     Exposure = 0.4,
+                    Background = 1.8,
                     Gamma = 1.85,                                                                      
                 },
                 Debug = {
