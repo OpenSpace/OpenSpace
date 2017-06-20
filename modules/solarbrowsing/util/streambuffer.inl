@@ -26,7 +26,7 @@ namespace openspace {
 
 template<typename T>
 StreamBuffer<T>::StreamBuffer()
-    : _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(4))
+    : _concurrentJobManager(std::make_shared<globebrowsing::ThreadPool>(1))
 {}
 
 template<typename T>

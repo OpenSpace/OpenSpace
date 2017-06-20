@@ -49,7 +49,7 @@
 #include <chrono>
 #include <math.h>
 
-#define BUFFER_MAX_SIZE 100
+#define BUFFER_SIZE 5
 
 using namespace ghoul::opengl;
 using namespace std::chrono;
@@ -195,7 +195,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     _imageSize = imStart->fullResolution / (pow(2, _resolutionLevel));
 
     // Always give PBO maximum size
-    _pbo = std::make_unique<PixelBufferObject>(4096 * 4096 * sizeof(IMG_PRECISION));
+    //_pbo = std::make_unique<PixelBufferObject>(4096 * 4096 * sizeof(IMG_PRECISION));
+
+    for (int i = 0; i < BUFFER_SIZE; ++i) {
+        _pbos[i] = std::make_unique<PixelBufferObject>(4096 * 4096 * sizeof(IMG_PRECISION));
+    }
 
     // TODO(mnoven): Faster to send GL_RGBA32F as internal format - GPU Pads anyways?
     _texture =  std::make_unique<Texture>(
@@ -236,7 +240,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         std::shared_ptr<ImageMetadata> im = state.contents();
         //_imageSize = _imageMetadataMap2[_currentActiveInstrument]. //_fullResolution / (pow(2, _resolutionLevel));
         _imageSize = im->fullResolution / (pow(2, _resolutionLevel));
-        _pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
+        //_pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
 
         // Upload asap
         updateTextureGPU(/*asyncUpload=*/false);
@@ -278,7 +282,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
         //_imageSize = _fullResolution / (pow(2, _resolutionLevel));
 
-        _pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
+        //_pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
         updateTextureGPU(/*asyncUpload=*/false, /*resChanged=*/true);
         if (_useBuffering) {
 
@@ -337,7 +341,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     addProperty(_sharpenValue);
     addProperty(_gammaValue);
     addProperty(_contrastValue);
-    addProperty(_bufferSize);
+    //addProperty(_bufferSize);
     addProperty(_displayTimers);
     addProperty(_planeSize);
     addProperty(_resolutionLevel);
@@ -374,9 +378,15 @@ std::string RenderableSolarImagery::ISO8601(std::string& datetime) {
 }
 
 void RenderableSolarImagery::clearBuffer() {
+    _pboIsDirty = false;
     _streamBuffer.clear();
     _frameSkipCount = 0;
     _bufferCountOffset = 1;
+    _busyPbos.clear();
+
+    while (!_pboQueue.empty()) {
+        _pboQueue.pop();
+    }
 }
 
 void RenderableSolarImagery::loadMetadata(const std::string& rootPath) {
@@ -412,16 +422,12 @@ void RenderableSolarImagery::loadMetadata(const std::string& rootPath) {
                         ImageMetadata im;
 
                         myfile >> std::ws; // skip the rest of the line
-                        //LDEBUG("HEJ");
                         std::string date;
-                        //myfile >> date;
                         std::getline(myfile, date);
                         double timeObserved = SpiceManager::ref().ephemerisTimeFromDate(ISO8601(date));
-                        //LDEBUG("time obs");
 
                         std::string relPath;
                         myfile >> relPath;
-                        //LDEBUG(rootPath + relPath);
                         im.filename = rootPath + relPath;
 
                         myfile >> im.fullResolution;
@@ -516,13 +522,13 @@ bool RenderableSolarImagery::deinitialize() {
 }
 
 void RenderableSolarImagery::uploadImageDataToPBO() {
-    _pbo->activate();
-    IMG_PRECISION* _pboBufferData = _pbo->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true);
+  //  _pbo->activate();
+  //  IMG_PRECISION* _pboBufferData = _pbo->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true, _imageSize * _imageSize * sizeof(IMG_PRECISION));
 
     if (!_useBuffering) {
-        const std::string filename = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds()).im->filename;
-        decode(_pboBufferData, filename);
-        _pboIsDirty = true;
+        //const std::string filename = getDecodeDataFromOsTime(OsEng.timeManager().time().j2000Seconds()).im->filename;
+        //decode(_pboBufferData, filename);
+        //_pboIsDirty = true;
     } else {
         // WARNING - this can be an old job - but looks smoother - bug or feature?
         // const double& osTime = OsEng.timeManager().time().j2000Seconds();
@@ -533,7 +539,11 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
         //         break;
         //     }
         // }
+
         std::shared_ptr<SolarImageData> _solarImageData = _streamBuffer.popFinishedJob();
+        //int pboId = _streamBuffer.numJobs();
+
+        //LDEBUG("Popping job from PBO " << pboId);
 
         if (_solarImageData) {
             _currentActiveImageTime = _solarImageData->timeObserved;
@@ -541,16 +551,21 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
             _currentCenterPixel = _solarImageData->im->centerPixel;
             _isCoronaGraph = _solarImageData->im->isCoronaGraph;
 
-            auto t1 = Clock::now();
-            std::memcpy(_pboBufferData, _solarImageData->data, _imageSize * _imageSize * sizeof(unsigned char));
-            auto t2 = Clock::now();
+           // auto t1 = Clock::now();
+           // std::memcpy(_pboBufferData, _solarImageData->data, _imageSize * _imageSize * sizeof(unsigned char));
+           // auto t2 = Clock::now();
 
-            if (_displayTimers) {
-                LDEBUG("Memcpy time "
-                       << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
-                                .count()
-                       << " ms" << std::endl);
-            }
+           // _uploadData = _solarImageData->data;
+            _currentPbo = _pboQueue.front(); //_pbos[pboId].get();
+            //LDEBUG("Popping job to pbo" << _currentPbo->id());
+
+
+            // if (_displayTimers) {
+            //     LDEBUG("Memcpy time "
+            //            << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1)
+            //                     .count()
+            //            << " ms" << std::endl);
+            // }
 
             _initializePBO = false;
             _pboIsDirty = true;
@@ -566,18 +581,21 @@ void RenderableSolarImagery::uploadImageDataToPBO() {
             }
         }
     }
-    _pbo->releaseMappedBuffer();
-    _pbo->deactivate();
+    //_pbo->releaseMappedBuffer();
+    //_pbo->deactivate();
 }
 
 void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged) {
     if (_usePBO && asyncUpload) {
-        _pbo->activate();
+        _currentPbo->activate();
         _texture->bind();
         // Send async to GPU by coping from PBO to texture objects
         glTexSubImage2D(_texture->type(), 0, 0, 0, _imageSize, _imageSize,
                         GLint(_texture->format()), _texture->dataType(), nullptr);
-        _pbo->deactivate();
+        _currentPbo->deactivate();
+
+        _busyPbos.erase(_currentPbo->id());
+        _pboQueue.pop();
         _pboIsDirty = false;
     } else {
         unsigned char* data
@@ -667,9 +685,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         _deltaTimeLast = dt;
     }
 
-    // LDEBUG("_stream" << _streamBuffer.numJobs());
-    // LDEBUG("buffersize" << _bufferSize);
-    if (_streamBuffer.numJobs() < _bufferSize && (_isWithinFrustum || _initializePBO)) {
+    if (/*_streamBuffer.numJobs() */_pboQueue.size() < /*_bufferSize*/ BUFFER_SIZE && (_isWithinFrustum || _initializePBO)) {
         // Always add to buffer faster than pop ..
         const double& osTime = OsEng.timeManager().time().j2000Seconds();
         // The min real time update interval doesnt make any sense
@@ -678,18 +694,26 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         //LDEBUG("dt" << (_streamBuffer.numJobs()) * (OsEng.timeManager().time().deltaTime()));
         const std::string hash = decodeData.im->filename + std::to_string(_imageSize);
 
-        //LDEBUG("hASH?? " << hash);
-
         // If job does not exist already and last popped time is not the same as the job trying to be enqueued
         if (!_streamBuffer.hasJob(hash) && _currentActiveImageTime != decodeData.timeObserved) {
-            //LDEBUG("Adding job");
             //LINFO("Pushing hash  " << hash);
             //LINFO("Pushing delta time  " << SpiceManager::ref().dateFromEphemerisTime(decodeData.timeObserved));
-            auto job = std::make_shared<DecodeJob>(decodeData, decodeData.im->filename + std::to_string(_imageSize));
+
+            //_pboQueue.push(_stream)
+            // Get a free PBO, and add to Queue
+            PixelBufferObject* pboToPush = getAvailablePbo(); //_pbos[_streamBuffer.numJobs()].get();
+            pboToPush->activate();
+            IMG_PRECISION* _pboBufferData = _pbo->mapToClientMemory<IMG_PRECISION>(/*shouldOrphanData=*/true, _imageSize * _imageSize * sizeof(IMG_PRECISION));
+
+            // Give it a ready PBO
+            auto job = std::make_shared<DecodeJob>(_pboBufferData, decodeData, decodeData.im->filename + std::to_string(_imageSize));
             _streamBuffer.enqueueJob(job);
+
+            _pboQueue.push(pboToPush);
+            pboToPush->releaseMappedBuffer();
+            pboToPush->deactivate();
             //_bufferCountOffset = 0;
         } else {
-           // LDEBUG("has job increasing counter");
             _bufferCountOffset++;
         }
     }
@@ -699,6 +723,16 @@ void RenderableSolarImagery::update(const UpdateData& data) {
     // Update lookup table, TODO: No need to do this every update
     _lut = _tfMap[_currentActiveInstrument].get();
     _spacecraftCameraPlane->update();
+}
+
+PixelBufferObject* RenderableSolarImagery::getAvailablePbo() {
+    for (int i = 0; i < BUFFER_SIZE; ++i) {
+        if (_busyPbos.count(_pbos[i]->id()) == 0) {
+            _busyPbos.insert(_pbos[i]->id());
+            return _pbos[i].get();
+        }
+    }
+    return nullptr;
 }
 
 void RenderableSolarImagery::render(const RenderData& data) {

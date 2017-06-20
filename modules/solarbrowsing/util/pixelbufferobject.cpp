@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 #include <modules/solarbrowsing/util/pixelbufferobject.h>
+#include <iostream>
 
 namespace openspace {
 
@@ -33,19 +34,23 @@ PixelBufferObject::~PixelBufferObject() {
 }
 
 template<typename T>
-T* PixelBufferObject::mapToClientMemory(bool shouldOrphanData) {
+T* PixelBufferObject::mapToClientMemory(bool shouldOrphanData, int size) {
     if (shouldOrphanData) {
-        glBufferData(GL_PIXEL_UNPACK_BUFFER, _size, NULL, GL_STREAM_DRAW);
+        glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW);
     }
     T* data = static_cast<T*>(
-          glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, NULL, _size,
+          glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, NULL, size,
                            GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
 
     return std::move(data);
 }
 
-void PixelBufferObject::setSize(const unsigned int& size) {
-    _size = size;
+// void PixelBufferObject::setSize(const unsigned int& size) {
+//     _size = size;
+// }
+
+const GLuint& PixelBufferObject::id() {
+    return _id;
 }
 
 void PixelBufferObject::releaseMappedBuffer() {
@@ -67,11 +72,11 @@ void PixelBufferObject::initialize() {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-template unsigned char* PixelBufferObject::mapToClientMemory(bool shouldOrphanData);
-template float* PixelBufferObject::mapToClientMemory(bool shouldOrphanData);
-template double* PixelBufferObject::mapToClientMemory(bool shouldOrphanData);
-template int* PixelBufferObject::mapToClientMemory(bool shouldOrphanData);
-template unsigned int* PixelBufferObject::mapToClientMemory(bool shouldOrphanData);
-template long* PixelBufferObject::mapToClientMemory(bool shouldOrphanData);
-template unsigned long* PixelBufferObject::mapToClientMemory(bool shouldOrphanData);
+template unsigned char* PixelBufferObject::mapToClientMemory(bool shouldOrphanData, int size);
+template float* PixelBufferObject::mapToClientMemory(bool shouldOrphanData, int size);
+template double* PixelBufferObject::mapToClientMemory(bool shouldOrphanData, int size);
+template int* PixelBufferObject::mapToClientMemory(bool shouldOrphanData, int size);
+template unsigned int* PixelBufferObject::mapToClientMemory(bool shouldOrphanData, int size);
+template long* PixelBufferObject::mapToClientMemory(bool shouldOrphanData, int size);
+template unsigned long* PixelBufferObject::mapToClientMemory(bool shouldOrphanData, int size);
 } // namespace openspace

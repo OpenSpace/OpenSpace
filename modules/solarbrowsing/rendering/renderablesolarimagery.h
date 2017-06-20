@@ -105,6 +105,9 @@ private:
     TransferFunction* _lut;
     std::unique_ptr<PixelBufferObject> _pbo;
 
+    std::array<std::unique_ptr<PixelBufferObject>, 5> _pbos;
+    //std::queue<int> _enqueuedPboIds;
+
     // TODO: Remove these?
     bool _updatingCurrentActiveChannel = false;
     bool _updatingCurrentLevelOfResolution = false;
@@ -119,6 +122,9 @@ private:
     unsigned int _frameSkipCount = 0;
     bool _isWithinFrustum = false;
     unsigned int _bufferCountOffset = 1;
+    PixelBufferObject* _currentPbo;
+    std::queue<PixelBufferObject*> _pboQueue;
+    std::unordered_set<int> _busyPbos;
 
     bool _isWithinFrustumLast = true;
     std::string _name;
@@ -135,6 +141,7 @@ private:
     void fillBuffer(const double& dt);
     void saveMetadata(const std::string& rootPath);
     void loadMetadata(const std::string& rootPath);
+    PixelBufferObject* getAvailablePbo();
 
     std::string ISO8601(std::string& datetime);
     void decode(unsigned char* buffer, const std::string& fileame);
