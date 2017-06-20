@@ -57,7 +57,11 @@ function (create_openspace_target)
     target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR}/include)
     target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR})
     target_include_directories(libOpenSpace PUBLIC ${CMAKE_BINARY_DIR}/_generated/include)
-
+	
+	configure_file(${OPENSPACE_CMAKE_EXT_DIR}/openspace_header.template 
+               ${CMAKE_BINARY_DIR}/_generated/include/openspace/openspace.h 
+               @ONLY IMMEDIATE)
+			   
     set_compile_settings(libOpenSpace)
 endfunction ()
 
