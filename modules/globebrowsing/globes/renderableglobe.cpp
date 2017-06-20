@@ -676,9 +676,6 @@ void RenderableGlobe::updateAtmosphereParameters() {
         _deferredcaster->setSunRadianceIntensity(_sunRadianceIntensity);
         _deferredcaster->setHDRConstant(_exposureConstant);
         _deferredcaster->setBackgroundConstant(_exposureBackgroundConstant);
-
-        std::cout << "==== set background constnat to: " << _exposureBackgroundConstant << " =====" << std::endl;
-
         _deferredcaster->setGammaConstant(_gammaConstant);
         _deferredcaster->setRayleighScatteringCoefficients(_rayleighScatteringCoeff);
         _deferredcaster->setOzoneExtinctionCoefficients(_ozoneLayerExtinctionCoeff);
