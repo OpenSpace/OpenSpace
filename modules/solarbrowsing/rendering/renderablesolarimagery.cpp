@@ -69,8 +69,8 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _sharpenValue("sharpenValue", "Sharpen", 0.0, 0.0, 1.0)
     , _contrastValue("contrastValue", "Contrast", 0.0, -15.0, 15.0)
     , _planeOpacity("planeOpacity", "Plane Opacity", 1.0, 0.0, 1.0)
-    , _disableFrustum("disableFrustum", "Disable Frustum", true)
-    , _disableBorder("disableBorder", "Disable Border", true)
+    , _enableFrustum("enableFrustum", "Enable Frustum", false)
+    , _enableBorder("enableBorder", "Enable Border", false)
     , _gammaValue("gammaValue", "Gamma", 0.9, 0.1, 10.0)
     , _asyncUploadPBO("asyncUploadPBO", "Upload to PBO Async", true)
     , _activeInstruments("activeInstrument", "Active Instrument", properties::OptionProperty::DisplayType::Radio)
@@ -94,6 +94,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     bool startEnabled;
     if (dictionary.getValue("Enabled", startEnabled)) {
         _enabled = startEnabled;
+    }
+
+    float gamma;
+    if (dictionary.getValue("StartGamma", gamma)) {
+        _gammaValue = gamma;
     }
 
     if (!dictionary.getValue("Name", _name)) {
@@ -215,11 +220,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     _realTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch());
     _lastUpdateRealTime = _realTime;
 
-     _disableFrustum.onChange([this]() {
-        if (_disableFrustum) {
-            _disableBorder = true;
+     _enableFrustum.onChange([this]() {
+        if (_enableFrustum) {
+            _enableBorder = true;
         } else {
-            _disableBorder = false;
+            _enableBorder = false;
         }
      });
 
@@ -331,8 +336,8 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     performImageTimestep(OsEng.timeManager().time().j2000Seconds());
 
     addProperty(_planeOpacity);
-    addProperty(_disableBorder);
-    addProperty(_disableFrustum);
+    addProperty(_enableBorder);
+    addProperty(_enableFrustum);
     addProperty(_activeInstruments);
     addProperty(_sharpenValue);
     addProperty(_gammaValue);
@@ -724,11 +729,11 @@ void RenderableSolarImagery::render(const RenderData& data) {
         // _bufferCountOffset = 1;
         // _frameSkipCount = 0;
         // if (!_isWithinFrustum) {
-        //     _disableBorder = true;
-        //     _disableFrustum = true;
+        //     _enableBorder = true;
+        //     _enableFrustum = true;
         // } else {
-        //     _disableBorder = false;
-        //     _disableFrustum = false;
+        //     _enableBorder = false;
+        //     _enableFrustum = false;
         // }
     }
     _isWithinFrustumLast = _isWithinFrustum;
@@ -746,8 +751,8 @@ void RenderableSolarImagery::render(const RenderData& data) {
           = OsEng.renderEngine().scene()->sceneGraphNode("Sun")->worldPosition();
 
     _spacecraftCameraPlane->render(data, *_texture, _lut, sunPositionWorld, _planeOpacity,
-                                   _contrastValue, _gammaValue, _disableBorder,
-                                   _disableFrustum, _currentCenterPixel, _currentScale, _offset);
+                                   _contrastValue, _gammaValue, _enableBorder,
+                                   _enableFrustum, _currentCenterPixel, _currentScale, _offset);
 }
 
 } // namespace openspace

@@ -75,7 +75,7 @@ Fragment getFragment() {
         }
 
         if (planePositionSpacecraft[i].z < vUv[i].z) {
-            vec2 uv = vUv[i].xy;
+            vec3 uv = vUv[i].xyz;
             uv /= ( (HALF_SUN_RADIUS / scale[i]) * 2);
             uv += 0.5;
 
@@ -99,7 +99,8 @@ Fragment getFragment() {
             if (outColor == vec4(0)) {
                 outColor = res;
             } else {
-                outColor = mix(outColor, res, 0.5);
+                float factor = smoothstep(0.5, 0.65, uv.z);
+                outColor = mix(outColor, res, factor);
             }
             renderMagnetoGram = false;
         }

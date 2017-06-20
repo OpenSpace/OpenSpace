@@ -87,8 +87,8 @@ private:
     properties::OptionProperty _activeInstruments;
     properties::IntProperty _bufferSize;
     properties::FloatProperty _planeOpacity;
-    properties::BoolProperty _disableBorder;
-    properties::BoolProperty _disableFrustum;
+    properties::BoolProperty _enableBorder;
+    properties::BoolProperty _enableFrustum;
     properties::BoolProperty _displayTimers;
     properties::BoolProperty _lazyBuffering;
     properties::IntProperty _minRealTimeUpdateInterval;
