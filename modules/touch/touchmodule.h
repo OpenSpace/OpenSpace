@@ -38,6 +38,9 @@ namespace openspace {
 		TouchModule();
 
 	private:
+		/**
+		* Returns true if new touch input occured since the last frame
+		*/
 		bool hasNewInput();
 
 		TuioEar ear;

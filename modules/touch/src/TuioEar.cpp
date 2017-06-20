@@ -87,6 +87,8 @@ void TuioEar::updateTuioCursor(TuioCursor *tcur) {
 void TuioEar::removeTuioCursor(TuioCursor *tcur) {
 	_mx.lock();
 	_removeList.push_back(tcur->getSessionID());
+
+	// Check if the cursor ID could be considered a tap
 	double dist = 0;
 	for (const TuioPoint& p : tcur->getPath()) {
 		dist += glm::length(glm::dvec2(p.getX(), p.getY()) - glm::dvec2(tcur->getX(), tcur->getY()));
@@ -128,6 +130,7 @@ TuioCursor TuioEar::getTap() {
 	return _tapCo;
 }
 
+// Removes all cursor ID from list that exists in _removeList
 void TuioEar::clearInput() {
 	_mx.lock();
 	_list.erase(
@@ -149,6 +152,7 @@ void TuioEar::clearInput() {
 	_mx.unlock();
 }
 
+// Standard UDP IP connection to port 3333
 TuioEar::TuioEar() {
 	_oscReceiver = new UdpReceiver(3333);
 	_tuioClient = new TuioClient(_oscReceiver);

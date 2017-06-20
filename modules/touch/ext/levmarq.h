@@ -42,13 +42,22 @@ typedef struct {
 	double final_derr;
 } LMstat;
 
+/**
+* Initialize parameters to good values
+*/
 void levmarq_init(LMstat *lmstat);
 
+/**
+* Main function call, finds appropriate values for par[nDOF] that manipulates the camera correctly to direct-manipulation
+*/
 bool levmarq(int npar, double *par, int ny, double *dysq,
 	double (*func)(double *, int, void *, LMstat*),
 	void (*grad)(double *, double *, int, void *, LMstat*),
 	void *fdata, LMstat *lmstat);
 
+/**
+* Returns the total L2 error (to be minimized) with each contact point's distance from the projected coordinates depending on par[nDOF]. 
+*/
 double error_func(double *par, int ny, double *dysq,
 	double (*func)(double *, int, void *, LMstat*), void *fdata, LMstat* lmstat);
 

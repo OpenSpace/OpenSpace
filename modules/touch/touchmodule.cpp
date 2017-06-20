@@ -50,7 +50,7 @@ bool TouchModule::hasNewInput() {
 	// Get new input from listener
 	listOfContactPoints = ear.getInput();
 	ear.clearInput();
-	touch.touchActive(!listOfContactPoints.empty());
+	touch.touchActive(!listOfContactPoints.empty()); // Set touch property to active (to void mouse input, mainly for mtdev bridges)
 
 	// Erase old input id's that no longer exists
 	lastProcessed.erase(
@@ -67,7 +67,7 @@ bool TouchModule::hasNewInput() {
 		) == listOfContactPoints.end(); }),
 		lastProcessed.end());
 
-	// Tap
+	// if tap occured, we have new input
 	if (listOfContactPoints.empty() && lastProcessed.empty() && ear.tap()) {
 		TuioCursor c = ear.getTap();
 		listOfContactPoints.push_back(c);
@@ -79,12 +79,12 @@ bool TouchModule::hasNewInput() {
 	// Return true if we got new input
 	if (listOfContactPoints.size() == lastProcessed.size() && !listOfContactPoints.empty()) {
 		bool newInput = true;
-        // @COMMENT  Why can you use for_each without std:: ?  It seems like there is a using namespace std somewhere
+		// go through list and check if the last registrered time is newer than the one in lastProcessed (last frame)
 		std::for_each(lastProcessed.begin(), lastProcessed.end(), [this, &newInput](Point& p) {
-			std::vector<TuioCursor>::iterator cursor = find_if(listOfContactPoints.begin(), listOfContactPoints.end(), 
+			std::vector<TuioCursor>::iterator cursor = std::find_if(listOfContactPoints.begin(), listOfContactPoints.end(), 
 				[&p](const TuioCursor& c) { return c.getSessionID() == p.first; });
 			double now = cursor->getPath().back().getTuioTime().getTotalMilliseconds();
-			if (!cursor->isMoving()) {
+			if (!cursor->isMoving()) { // if current cursor isn't moving, we want to interpret that as new input for interaction purposes
 				newInput = true;
 			}
 			else if (p.second.getTuioTime().getTotalMilliseconds() == now) {
@@ -138,15 +138,18 @@ TouchModule::TouchModule()
 		for (const TuioCursor& c : listOfContactPoints) {
             lastProcessed.emplace_back(c.getSessionID(), c.getPath().back());
 		}
-		touch.unitTest();
-		touch.step(OsEng.windowWrapper().deltaTime());
+		touch.unitTest(); // used to save data from solver, only calculated for one frame when user chooses in GUI
+		touch.step(OsEng.windowWrapper().deltaTime()); // calculate the new camera state for this frame
 	}
 	);
 
 	OsEng.registerModuleCallback(
+		// This is done in the PostDraw phase so that it will render it on top of
+		// everything else in the case of fisheyes. With this being in the Render callback
+		// the markers would be rendered on top of each of the cube faces
 		OpenSpaceEngine::CallbackOption::PostDraw,
 		[&]() {
-		markers.render(listOfContactPoints);
+		markers.render(listOfContactPoints); // render markers, customizable through the GUI
 	}
 	);
 }

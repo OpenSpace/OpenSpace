@@ -44,7 +44,6 @@
 namespace ghoul {
 namespace opengl {
 	class ProgramObject;
-	class Texture;
 } // namespace opengl
 } // namespace ghoul
 
@@ -60,14 +59,11 @@ class TouchMarker : public properties::PropertyOwner
 		bool deinitialize();
 
 		void render(const std::vector<TUIO::TuioCursor> list);
-		void update();
 
 
 	private:
-		void loadTexture();
 		void createVertexList(const std::vector<TUIO::TuioCursor> list);
 
-		properties::StringProperty _texturePath;
 		properties::BoolProperty _visible;
 		properties::FloatProperty _radiusSize;
 		properties::FloatProperty _transparency;
@@ -75,13 +71,10 @@ class TouchMarker : public properties::PropertyOwner
 		properties::Vec3Property _color;
 
 		std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-		std::unique_ptr<ghoul::opengl::Texture> _texture;
 		
 		GLuint _quad;
 		GLuint _vertexPositionBuffer;
 		int _numFingers;
-
-		bool _textureIsDirty;
 };
 
 } // openspace namespace

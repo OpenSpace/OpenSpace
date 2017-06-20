@@ -48,7 +48,10 @@ class TuioEar : public TUIO::TuioListener {
 			delete _tuioClient;
 			delete _oscReceiver;
 		}
-	
+		
+		/**
+		* Callback functions, listens to the TUIO server
+		*/
 		void addTuioObject(TUIO::TuioObject *tobj);
 		void updateTuioObject(TUIO::TuioObject *tobj);
 		void removeTuioObject(TUIO::TuioObject *tobj);
@@ -63,9 +66,24 @@ class TuioEar : public TUIO::TuioListener {
 
 		void refresh(TUIO::TuioTime frameTime);
 
+		/**
+		* Returns a list of all touch history that happened since the last frame
+		*/
 		std::vector<TUIO::TuioCursor> getInput();
+
+		/**
+		* Returns true if a tap occured since the last frame
+		*/
 		bool tap();
+
+		/**
+		* Returns tap's cursor coordinates and time information
+		*/
 		TUIO::TuioCursor getTap();
+
+		/**
+		* Clears the input list, function called after getInput() each frame
+		*/
 		void clearInput();
 		
 	private:
@@ -78,6 +96,10 @@ class TuioEar : public TUIO::TuioListener {
 
 		
 		std::vector<TUIO::TuioCursor> _list;
+
+		/**
+		* A list that tracks all of the cursor ID's that got removed since last frame
+		*/
 		std::vector<int> _removeList;
 		
 };

@@ -27,10 +27,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -53,10 +50,7 @@ TouchMarker::TouchMarker()
 		glm::vec3(0.f),
 		glm::vec3(1.f)
 	)
-	, _texturePath("texturePath", "Color Texture")
 	, _shader(nullptr)
-	, _texture(nullptr)
-	, _textureIsDirty(false)
 	, _numFingers(0)
 {
 	addProperty(_visible);
@@ -65,9 +59,6 @@ TouchMarker::TouchMarker()
 	addProperty(_thickness);
 	_color.setViewOption(properties::Property::ViewOptions::Color);
 	addProperty(_color);
-	addProperty(_texturePath);
-	_texturePath.onChange(std::bind(&TouchMarker::loadTexture, this));
-	//_texturePath.set("?");
 	
 }
 
@@ -84,10 +75,7 @@ bool TouchMarker::initialize() {
 	catch (const ghoul::opengl::ShaderObject::ShaderCompileError& e) {
 		LERRORC(e.component, e.what());
 	}
-
-	//loadTexture();
-
-	return (_shader != nullptr); // && _texture;
+	return (_shader != nullptr);
 }
 
 bool TouchMarker::deinitialize() {
@@ -97,14 +85,11 @@ bool TouchMarker::deinitialize() {
 	glDeleteBuffers(1, &_vertexPositionBuffer);
 	_vertexPositionBuffer = 0;
 
-	_texture = nullptr;
-
 	RenderEngine& renderEngine = OsEng.renderEngine();
 	if (_shader) {
 		renderEngine.removeRenderProgram(_shader);
 		_shader = nullptr;
 	}
-
 	return true;
 }
 
@@ -113,11 +98,6 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor> list) {
 		createVertexList(list);
 		_shader->activate();
 
-		// Bind texture
-		/*ghoul::opengl::TextureUnit unit;
-		unit.activate();
-		_texture->bind();
-		_shader->setUniform("texture1", unit);*/
 		_shader->setUniform("radius", _radiusSize);
 		_shader->setUniform("transparency", _transparency);
 		_shader->setUniform("thickness", _thickness);
@@ -132,31 +112,6 @@ void TouchMarker::render(const std::vector<TUIO::TuioCursor> list) {
 		glDrawArrays(GL_POINTS, 0, _numFingers);
 
 		_shader->deactivate();
-	}
-}
-
-void TouchMarker::update() {
-	if (_shader->isDirty())
-		_shader->rebuildFromFile();
-
-	if (_textureIsDirty) {
-		loadTexture();
-		_textureIsDirty = false;
-	}
-}
-
-void TouchMarker::loadTexture() {
-	if (_texturePath.value() != "") {
-		_texture = ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath));
-
-		if (_texture) {
-			LDEBUGC(
-				"TouchMarker",
-				"Loaded texture from '" << absPath(_texturePath) << "'"
-			);
-			_texture->uploadTexture();
-			_texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap); // linear or mipmap?
-		}
 	}
 }
 
