@@ -55,9 +55,9 @@ target_link_libraries(${APPLICATION_NAME}
     Qt5::Network
 )
 
-if (APPLE)
-INSTALL(CODE "
-   include(BundleUtilities)
-   fixup_bundle(\"/Users/alex/Development/OpenSpace/bin/openspace/Debug/TimelineView.app/Contents/MacOS/TimelineView\"   \"/Users/alex/Development/OpenSpace/bin/openspace/Debug/TimelineView.app/Contents/plugins/platforms/libqcocoa.dylib\"   \"\")
-   " COMPONENT Runtime)
-endif ()
+#if (APPLE)
+#    INSTALL(CODE "
+#       include(BundleUtilities)
+#       fixup_bundle(\"${application_path}/bin/openspace/Debug/Launcher.app/Contents/MacOS/Launcher\"   \"${application_path}/bin/openspace/Debug/TimelineView.app/Contents/plugins/platforms/libqcocoa.dylib\"   \"\")
+#       " COMPONENT Runtime)
+#endif ()
