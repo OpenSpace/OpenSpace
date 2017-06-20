@@ -8,6 +8,55 @@ openspace.globebrowsing.documentation = {
         Name = "createHeightLayers",
         Arguments = "table",
         Documentation = "Creates a table used in the 'HeightLayers' of a RenderableGlobe."
+    },
+    {
+        Name = "createTemporalGibsGdalXml",
+        Arguments = "string, string, string, string, string, string",
+        Documentation =
+            "Creates an XML configuration for a temporal GIBS dataset." ..
+            "Arguments are: Name, Start date, end date, time resolution, time format," ..
+            "resolution, file format. For all specifications, see " ..
+            "https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products" ..
+            "Usage:" ..
+            "openspace.globebrowsing.addLayer(" ..
+                "\"Earth\"," ..
+                "\"ColorLayers\"," ..
+                "{" ..
+                    "Type = \"TemporalTileLayer\"," ..
+                    "Name = \"MODIS_Terra_Chlorophyll_A\"," ..
+                    "FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(" ..
+                        "\"MODIS_Terra_Chlorophyll_A\"," ..
+                        "\"2013-07-02\"," ..
+                        "\"Yesterday\"," ..
+                        "\"1d\"," ..
+                        "\"1km\"," ..
+                        "\"png\"" ..
+                    ")" ..
+                "}" ..
+            ")"
+    },
+    {
+        Name = "createGibsGdalXml",
+        Arguments = "string, string, string, string",
+        Documentation = 
+            "Creates an XML configuration for a GIBS dataset." ..
+            "Arguments are: layerName, date, resolution, format." ..
+            "For all specifications, see " ..
+            "https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+Available+Imagery+Products" ..
+            "Usage:" ..
+            "openspace.globebrowsing.addLayer(" ..
+                "\"Earth\"," ..
+                "\"ColorLayers\"," ..
+                "{" ..
+                    "Name = \"MODIS_Terra_Chlorophyll_A\"," ..
+                    "FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(" ..
+                        "\"MODIS_Terra_Chlorophyll_A\"," ..
+                        "\"2013-07-02\"," ..
+                        "\"1km\"," ..
+                        "\"png\"" ..
+                    ")" ..
+                "}" ..
+            ")"
     }
 }
 
@@ -36,13 +85,13 @@ openspace.globebrowsing.createHeightLayers = function (patches)
     return result
 end
 
-openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDate, endDate, timeResolution, timeFormat, resolution, format)
+openspace.globebrowsing.createTemporalGibsGdalXml = function (layerName, startDate, endDate, timeResolution, resolution, format)
     temporalTemplate =
         "<OpenSpaceTemporalGDALDataset>" ..
         "<OpenSpaceTimeStart>" .. startDate .. "</OpenSpaceTimeStart>" ..
         "<OpenSpaceTimeEnd>" .. endDate .. "</OpenSpaceTimeEnd>" ..
         "<OpenSpaceTimeResolution>" .. timeResolution .. "</OpenSpaceTimeResolution>" ..
-        "<OpenSpaceTimeIdFormat>" .. timeFormat .. "</OpenSpaceTimeIdFormat>" ..
+        "<OpenSpaceTimeIdFormat>YYYY-MM-DD</OpenSpaceTimeIdFormat>" ..
         openspace.globebrowsing.createGibsGdalXml(layerName, "${OpenSpaceTimeId}", resolution, format) ..
         "</OpenSpaceTemporalGDALDataset>"
     return temporalTemplate
@@ -106,6 +155,9 @@ openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolutio
         "<BlockSizeX>512</BlockSizeX>" ..
         "<BlockSizeY>512</BlockSizeY>" ..
         "<BandsCount>" .. rasterCount .. "</BandsCount>" ..
+        "<UnsafeSSL>true</UnsafeSSL>" ..
+        "<ZeroBlockHttpCodes>400,204,404</ZeroBlockHttpCodes>" ..
+        "<ZeroBlockOnServerException>true</ZeroBlockOnServerException>" ..
     "</GDAL_WMS>"
 
     return gdalWmsTemplate

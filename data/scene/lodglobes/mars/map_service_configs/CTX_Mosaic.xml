@@ -12,5 +12,6 @@
     <BlockSizeX>256</BlockSizeX>
     <BlockSizeY>256</BlockSizeY>
   </DataWindow>
-  <OfflineMode>false</OfflineMode>
+  <ZeroBlockHttpCodes>400,204,404</ZeroBlockHttpCodes>
+  <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
 </GDAL_WMS>

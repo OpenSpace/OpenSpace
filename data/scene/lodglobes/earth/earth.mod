@@ -78,9 +78,8 @@ return {
                         Enabled = true,
                     },
                     {
-                        Type = "TemporalTileLayer",
-                        Name = "Temporal_GHRSST_L4_MUR_Sea_Surface_Temperature",
-                        FilePath = "map_service_configs/GIBS/Temporal_GHRSST_L4_MUR_Sea_Surface_Temperature.xml",
+                        Name = "BMNG",
+                        FilePath = "map_service_configs/Utah/Bmng.wms"
                     },
                     {
                         Type = "TemporalTileLayer",
@@ -88,9 +87,27 @@ return {
                         FilePath = "map_service_configs/GIBS/Temporal_AMSR2_GCOM_W1_Sea_Ice_Concentration.xml",
                     },
                     {
-                        Name = "BMNG",
-                        FilePath = "map_service_configs/Utah/Bmng.wms"
-                    }
+                        Type = "TemporalTileLayer",
+                        Name = "MODIS_Terra_Chlorophyll_A",
+                        FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                            "MODIS_Terra_Chlorophyll_A",
+                            "2013-07-02",
+                            "Yesterday",
+                            "1d",
+                            "1km",
+                            "png")
+                    },
+                    {
+                        Type = "TemporalTileLayer",
+                        Name = "GHRSST_L4_G1SST_Sea_Surface_Temperature",
+                        FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                            "GHRSST_L4_G1SST_Sea_Surface_Temperature",
+                            "2010-06-21",
+                            "Yesterday",
+                            "1d",
+                            "1km",
+                            "png")
+                    },
                 },
                 GrayScaleLayers = { },
                 GrayScaleColorOverlays = { },

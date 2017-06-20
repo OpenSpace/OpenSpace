@@ -20,5 +20,4 @@
     <ZeroBlockHttpCodes>400</ZeroBlockHttpCodes>
     <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
     <MaxConnections>5</MaxConnections>
-    <OfflineMode>false</OfflineMode>      
 </GDAL_WMS>
