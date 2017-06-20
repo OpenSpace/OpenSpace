@@ -51,6 +51,10 @@ namespace openspace {
 
 TSPBrickSelector::~TSPBrickSelector() {}
 
+int TSPBrickSelector::getTimeStepCount() { return _tsp->header().numTimesteps_; }
+
+int TSPBrickSelector::getBrickCount() { return _tsp->header().xNumBricks_; }
+
 int TSPBrickSelector::linearCoords(int x, int y, int z) {
     const TSP::Header &header = _tsp->header();
     return x + (header.xNumBricks_ * y) + (header.xNumBricks_ * header.yNumBricks_ * z);
