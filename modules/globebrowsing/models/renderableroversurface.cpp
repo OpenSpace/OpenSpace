@@ -131,9 +131,9 @@ bool RenderableRoverSurface::initialize() {
 	}
 	
 	std::string ownerName = owner()->name();
-	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(ownerName)->parent();
+	_parent = OsEng.renderEngine().scene()->sceneGraphNode(ownerName)->parent();
 
-	_globe = (globebrowsing::RenderableGlobe*)parent->renderable();
+	_globe = (globebrowsing::RenderableGlobe*)_parent->renderable();
 
 	_renderableExplorationPath->initialize(_globe, allCoordinates, coordinatesWithModel);
 
@@ -180,7 +180,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			_isFirst = true;
 			modelDic.setValue("Type", "MultiModelProvider");
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
-			ss = _modelProvider->calculate(subSitesVector, data);
+			ss = _modelProvider->calculate(subSitesVector, data, _parent);
 			level = 2;
 			break;
 		case LodModelSwitch::Mode::Close :
@@ -192,7 +192,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			
 			modelDic.setValue("Type", "SingleModelProvider");
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
-			ss = _modelProvider->calculate(subSitesVector, data);
+			ss = _modelProvider->calculate(subSitesVector, data, _parent);
 			level = 3;
 			break;
 		case LodModelSwitch::Mode::High :

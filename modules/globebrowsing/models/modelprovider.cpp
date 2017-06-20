@@ -23,8 +23,8 @@
 ****************************************************************************************/
 
 #include <modules/globebrowsing/models/modelprovider.h>
-
 #include <openspace/util/factorymanager.h>
+#include <openspace/scene/scenegraphnode.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -51,5 +51,6 @@ ModelProvider::ModelProvider(const ghoul::Dictionary& dictionary) {
 bool ModelProvider::initialize() {
 	return true;
 }
-}
-}
+
+} // namespace globebrowsing
+} // namespace openspace

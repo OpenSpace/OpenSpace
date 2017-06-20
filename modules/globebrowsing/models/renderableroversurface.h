@@ -105,6 +105,8 @@ private:
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
 
 	properties::PropertyOwner _renderableSitePropertyOwner;
+
+	openspace::SceneGraphNode* _parent;
 };
 
 } // namespace globebrowsing

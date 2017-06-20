@@ -41,15 +41,16 @@ SingleModelProvider::SingleModelProvider(const ghoul::Dictionary& dictionary)
 	: ModelProvider(dictionary) {
 }
 
-std::vector<std::shared_ptr<Subsite>> SingleModelProvider::calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites, const RenderData& data) {
+std::vector<std::shared_ptr<Subsite>> SingleModelProvider::calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
+	const RenderData& data, const SceneGraphNode* parent) {
+
 	std::vector<std::shared_ptr<Subsite>> mostModelsInsideRadius;
 	std::vector<std::shared_ptr<Subsite>> subsitesInsideRadius;
 	std::shared_ptr<Subsite> smallest = std::make_shared<Subsite>();
 
-	SceneGraphNode* _parent = OsEng.renderEngine().scene()->sceneGraphNode("Mars");
-	RenderableGlobe* rg = (RenderableGlobe*)_parent->renderable();
+	RenderableGlobe* rg = (RenderableGlobe*)parent->renderable();
 		
-	glm::dvec3 center = _parent->worldPosition();
+	glm::dvec3 center = parent->worldPosition();
 	glm::dmat4 globeModelTransform = rg->modelTransform();
 	glm::dmat4 globeModelInverseTransform = rg->inverseModelTransform();
 	glm::dvec3 cameraPos = data.camera.positionVec3();
