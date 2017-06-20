@@ -22,7 +22,7 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         #
 #########################################################################################
 
-set(CPACK_MONOLITHIC_INSTALL FALSE)
+set(CPACK_MONOLITHIC_INSTALL TRUE)
 include(InstallRequiredSystemLibraries)
 set(CPACK_PACKAGE_NAME "OpenSpace")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${OPENSPACE_BASE_DIR}/README.md")
@@ -30,50 +30,70 @@ set(CPACK_RESOURCE_FILE_LICENSE "${OPENSPACE_BASE_DIR}/LICENSE.md")
 set(CPACK_PACKAGE_VERSION_MAJOR "${OPENSPACE_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${OPENSPACE_VERSION_MINOR}")
 set(CPACK_PACKAGE_VERSION_PATCH "${OPENSPACE_VERSION_PATCH}")
-set(OPENSPACE_VERSION "${OPENSPACE_VERSION_MAJOR}.${OPENSPACE_VERSION_MINOR}.${OPENSPACE_VERSION_PATCH} ${OPENSPACE_VERSION_STRING}")
+set(OPENSPACE_VERSION_NUMBER "${OPENSPACE_VERSION_MAJOR}.${OPENSPACE_VERSION_MINOR}.${OPENSPACE_VERSION_PATCH}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "OpenSpace ${OPENSPACE_VERSION}")
-
-if(WIN32)
-	# Need backslash for correct subdirectory paths with NSIS
-	if(CMAKE_SIZEOF_VOID_P EQUAL 8 )
-		set(CPACK_PACKAGE_FILE_NAME         "${CPACK_PACKAGE_NAME} ${OPENSPACE_VERSION} 64bit")
-		set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}\\\\${OPENSPACE_VERSION}\\\\64bit")
-		set(CPACK_NSIS_DISPLAY_NAME         "${CPACK_PACKAGE_NAME} ${OPENSPACE_VERSION} 64-bit")
-	else()
-		set(CPACK_PACKAGE_FILE_NAME         "${CPACK_PACKAGE_NAME} ${OPENSPACE_VERSION} 32bit")
-		set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}\\\\${OPENSPACE_VERSION}\\\\32bit")
-		set(CPACK_NSIS_DISPLAY_NAME         "${CPACK_PACKAGE_NAME} ${OPENSPACE_VERSION} 32-bit")
-	endif()
-else()
-	set(CPACK_PACKAGE_FILE_NAME         "${CPACK_PACKAGE_NAME} ${OPENSPACE_VERSION}")
-	set(CPACK_PACKAGE_INSTALL_DIRECTORY "CPACK_PACKAGE_NAME/${OPENSPACE_VERSION}")
-endif()
-
-set(CPACK_PACKAGE_EXECUTABLES "openspace;OpenSpace")
-set(CPACK_GENERATOR ZIP)
+set(CPACK_PACKAGE_ICON "${OPENSPACE_BASE_DIR}\\\\apps\\\\OpenSpace\\\\openspace.png")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME} ${OPENSPACE_VERSION_NUMBER} ${OPENSPACE_VERSION_STRING}")
 set(CPACK_STRIP_FILES 1)
 
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/bin/openspace/${CMAKE_BUILD_TYPE}/ DESTINATION bin COMPONENT Application)
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/config/ DESTINATION config COMPONENT Config)
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/data/ DESTINATION data COMPONENT Data)
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/documentation/ DESTINATION documentation COMPONENT Documentation)
+install(DIRECTORY ${OPENSPACE_BASE_DIR}/bin/openspace/${CMAKE_BUILD_TYPE}/ DESTINATION bin)
+install(DIRECTORY ${OPENSPACE_BASE_DIR}/config/ DESTINATION config)
+
+# Data needs to be separately distributed due to its size... but then it crashes with no data folder...
+install(DIRECTORY ${OPENSPACE_BASE_DIR}/data/ DESTINATION data)
+
+install(DIRECTORY ${OPENSPACE_BASE_DIR}/documentation/ DESTINATION documentation)
 install(DIRECTORY ${OPENSPACE_BASE_DIR}/modules/
-    DESTINATION modules COMPONENT Modules
+    DESTINATION modules
     FILES_MATCHING
 	PATTERN "*.glsl"
+	PATTERN "*.hglsl"
+	PATTERN "*.lua"
 )
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/scripts/ DESTINATION scripts COMPONENT Scripts)
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/shaders/ DESTINATION shaders COMPONENT Application)
-install(DIRECTORY ${OPENSPACE_BASE_DIR}/tests/ DESTINATION tests COMPONENT Tests)
-install(FILES ${OPENSPACE_BASE_DIR}/openspace.cfg DESTINATION . COMPONENT Application)
+install(DIRECTORY ${OPENSPACE_BASE_DIR}/scripts/ DESTINATION scripts)
+install(DIRECTORY ${OPENSPACE_BASE_DIR}/shaders/ DESTINATION shaders)
+install(DIRECTORY ${OPENSPACE_BASE_DIR}/tests/ DESTINATION tests)
+install(FILES ${OPENSPACE_BASE_DIR}/openspace.cfg DESTINATION .)
 
-#if(WIN32 AND NOT UNIX)
-  # There is a bug in NSI that does not handle full unix paths properly. Make
-  # sure there is at least one set of four (4) backlasshes.
-  #set(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
-  #set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\OpenSpace.exe")
-  #set(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} OpenSpace")
-  #set(CPACK_NSIS_URL_INFO_ABOUT "http://openspace.itn.liu.se/")
-  #set(CPACK_NSIS_MODIFY_PATH ON)
-#endif(WIN32 AND NOT UNIX)
+if(WIN32)
+	set(CPACK_GENERATOR ZIP)
+	# Need backslash for correct subdirectory paths
+	set(CPACK_PACKAGE_ICON "${OPENSPACE_BASE_DIR}\\\\apps\\\\OpenSpace\\\\openspace.png")
+	set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}\\\\${OPENSPACE_VERSION_NUMBER} ${OPENSPACE_VERSION_STRING}")
+else()
+	set(CPACK_GENERATOR TGZ)
+	set(CPACK_PACKAGE_ICON "${OPENSPACE_BASE_DIR}/apps/OpenSpace/openspace.png")
+	set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}/${OPENSPACE_VERSION_NUMBER} ${OPENSPACE_VERSION_STRING}")
+endif()
+
+option(OPENSPACE_CREATE_INSTALLER "Create an OpenSpace installer from the package" OFF)
+
+if(OPENSPACE_CREATE_INSTALLER)
+	set(CPACK_PACKAGE_EXECUTABLES "openspace;OpenSpace")
+	if(WIN32)
+		set(CPACK_GENERATOR "ZIP;NSIS")
+		# OpenSpace does NOT seem to handle C:/Program Files/ without crashing
+		set(CPACK_NSIS_INSTALL_ROOT "C:")
+		# There is a bug in NSI that does not handle full unix paths properly. Make
+		# sure there is at least one set of four (4) backlasshes.
+		set(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_FILE_NAME}")
+		# Create the desktop link
+		set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "CreateShortCut '$DESKTOP\\\\${CPACK_NSIS_DISPLAY_NAME}.lnk' '$INSTDIR\\\\bin\\\\OpenSpace.exe' ")
+		# Delete the desktop link
+		set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "Delete '$DESKTOP\\\\${CPACK_NSIS_DISPLAY_NAME}.lnk' ")
+		# The icon to start the application.
+		set(CPACK_NSIS_MUI_ICON "${OPENSPACE_BASE_DIR}\\\\apps\\\\OpenSpace\\\\openspace.ico")
+		# Add a link to the application website in the startup menu.
+		set(CPACK_NSIS_MENU_LINKS "http://openspace.itn.liu.se/" "OpenSpace Homepage")
+		# Set the icon for the application in the Add/Remove programs section.
+		set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\OpenSpace.exe")
+		# The mail address for the maintainer of the application in the Add/Remove programs section
+		set(CPACK_NSIS_CONTACT info at openspace.itn.liu.se)
+		# The url of the application in the Add/Remove programs section
+		set(CPACK_NSIS_URL_INFO_ABOUT "http://openspace.itn.liu.se/")
+		# Help URL
+		set(CPACK_NSIS_HELP_LINK "http://openspace.itn.liu.se/")
+	endif()
+endif()
+
 include(CPack)
