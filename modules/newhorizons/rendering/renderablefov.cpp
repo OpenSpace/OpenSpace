@@ -653,19 +653,11 @@ void RenderableFov::computeIntercepts(const UpdateData& data, const std::string&
                     break;
                 }
                 case ThisIntersect:
-                {
-                    break;
-                }
                 case NextIntersect:
-                {
-                    break;
-                }
                 case BothIntersect:
-                {
                     break;
-                }
                 default:
-                    ghoul_assert(false, "Missing case label");
+                    throw ghoul::MissingCaseException();
             }
         }
     }

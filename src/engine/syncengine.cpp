@@ -87,7 +87,7 @@ void SyncEngine::removeSyncable(Syncable* syncable) {
 }
 
 void SyncEngine::removeSyncables(const std::vector<Syncable*>& syncables) {
-    for (const auto& syncable : syncables) {
+    for (Syncable* syncable : syncables) {
         removeSyncable(syncable);
     }
 }

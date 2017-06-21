@@ -38,7 +38,6 @@ MissionManager::MissionManagerException::MissionManagerException(std::string err
     : ghoul::RuntimeError(std::move(error), "MissionManager")
 {}
 
-
 MissionManager::MissionManager()
     : _currentMission(_missionMap.end())
 {}

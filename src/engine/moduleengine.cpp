@@ -81,7 +81,7 @@ void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
 
 std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
     std::vector<OpenSpaceModule*> result;
-    for (auto& m : _modules) {
+    for (const std::unique_ptr<OpenSpaceModule>& m : _modules) {
         result.push_back(m.get());
     }
     return result;
@@ -90,7 +90,7 @@ std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
 ghoul::systemcapabilities::Version ModuleEngine::requiredOpenGLVersion() const {
     ghoul::systemcapabilities::Version version = { 0, 0, 0 };
 
-    for (const auto& m : _modules) {
+    for (const std::unique_ptr<OpenSpaceModule>& m : _modules) {
         version = std::max(version, m->requiredOpenGLVersion());
     }
 
@@ -108,7 +108,6 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
                 "Checks whether a specific module is loaded"
             }
         }
-
     };
 }
 

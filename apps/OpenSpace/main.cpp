@@ -42,9 +42,15 @@
 #include <fmt/format.h>
 
 #include <Windows.h>
-#include <dbghelp.h>
 #include <shellapi.h>
 #include <shlobj.h>
+
+#ifdef _MSC_VER
+#pragma warning (push)
+#pragma warning (disable : 4091)
+#include <dbghelp.h>
+#pragma warning (pop)
+#endif // _MSC_VER
 
 #endif // WIN32
 

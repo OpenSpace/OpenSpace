@@ -38,14 +38,18 @@ namespace cache {
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:
+    static const std::string name;
+
     GlobeBrowsingModule();
 
     globebrowsing::cache::MemoryAwareTileCache* tileCache();
     
-    static const std::string name;
+
+    scripting::LuaLibrary luaLibrary() const override;
 
 protected:
     void internalInitialize() override;
+
 private:
     std::unique_ptr<globebrowsing::cache::MemoryAwareTileCache> _tileCache;
 };

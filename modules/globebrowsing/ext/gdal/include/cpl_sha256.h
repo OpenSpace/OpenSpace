@@ -1,4 +1,4 @@
-/* $Id: cpl_sha256.h 31777 2015-11-26 14:14:41Z rouault $ */
+/* $Id: cpl_sha256.h 34921 2016-08-04 22:26:31Z rouault $ */
 
 /* The MIT License
 
@@ -28,6 +28,8 @@
 
 #ifndef CPL_SHA256_INCLUDED_H
 #define CPL_SHA256_INCLUDED_H
+
+#ifndef DOXYGEN_SKIP
 
 #include "cpl_port.h"
 
@@ -64,5 +66,7 @@ void CPL_DLL CPL_HMAC_SHA256(const void *pKey, size_t nKeyLen,
                              GByte abyDigest[CPL_SHA256_HASH_SIZE]);
 
 CPL_C_END
+
+#endif /* #ifndef DOXYGEN_SKIP */
 
 #endif  /* CPL_SHA256_INCLUDED_H */
