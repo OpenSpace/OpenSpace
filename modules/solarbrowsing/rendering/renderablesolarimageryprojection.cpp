@@ -49,12 +49,18 @@ namespace {
     const char* keyRadius = "Radius";
     const std::vector<std::pair<int, std::pair<std::string, std::string>>> loopTimes
           = {
-             {3600, {"2012-07-12T15:00:00.00", "2012-07-12T18:00:00.00"}},
-             {3600, {"2012-07-12T15:00:00.00", "2012-07-13T03:00:00.00"}},
-             {21600, {"2012-07-08T00:00:00.00", "2012-07-13T00:00:00.00"}},
-             {7200, {"2012-07-17T12:45:00.00", "2012-07-19T17:00:00.00"}},
-             {7200, {"2012-07-17T06:00:00.00", "2012-07-19T17:00:00.00"}},
-             {7200, {"2012-07-23T00:00:00.00", "2012-07-23T16:00:00.00"}}
+             // First section
+             {3600, {"2012-07-12T15:00:00.00", "2012-07-12T18:00:00.00"}},  // 1
+             {3600, {"2012-07-12T15:00:00.00", "2012-07-13T03:00:00.00"}},  // 2
+             {21600, {"2012-07-08T00:00:00.00", "2012-07-13T00:00:00.00"}}, // 3
+             // Second section
+             {7200, {"2012-07-17T12:45:00.00", "2012-07-19T17:00:00.00"}},  // 4
+             {21600, {"2012-07-17T06:00:00.00", "2012-07-19T17:00:00.00"}}, // 5
+             {21600, {"2012-07-23T00:00:00.00", "2012-07-23T16:00:00.00"}}, // 6
+             // Oskar loops start
+             {43200, {"2012-07-01T00:00:00.00", "2012-07-12T00:00:00.00"}}, // 7
+             {43200, {"2012-07-12T00:00:00.00", "2012-07-18T00:00:00.00"}}, // 8
+             {43200, {"2012-07-17T00:00:00.00", "2012-07-31T00:00:00.00"}}  // 9
             };
 }
 
@@ -70,10 +76,6 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
     if (!dictionary.getValue("Name", _nodeName)) {
         throw ghoul::RuntimeError("Nodename has to be specified");
     }
-    //std::string path;
-    if (!dictionary.getValue("hmipath", path)) {
-        throw ghoul::RuntimeError("HMIPath has to be specified");
-    }
 
     _activateLooping.onChange([this]() {
         if (_activateLooping) {
@@ -83,6 +85,42 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
             time.setDeltaTime(timePair.first);
         }
     });
+
+    std::string path;
+    if (dictionary.getValue("hmipath", path)) {
+        //throw ghoul::RuntimeError("HMIPath has to be specified");
+        FitsFileReader fts(false);
+        std::shared_ptr<ImageData<float>> imageData = fts.readImage<float>(path);
+        float* data;
+        if (imageData) {
+            const std::valarray<float>& imageContents = imageData->contents;
+            data = new float[imageContents.size()];
+            std::memmove(data, &imageContents[0], imageContents.size() * sizeof(float));
+        }
+
+        //const glm::size3_t imageSize(sizeX, sizeY, 1);
+        _magnetogramTexture = std::make_unique<Texture>(
+            data,
+            glm::size3_t(3600, 1440, 1),
+            ghoul::opengl::Texture::Red,
+            GL_R32F,
+            GL_FLOAT,
+            Texture::FilterMode::Linear,
+            Texture::WrappingMode::ClampToEdge
+        );
+    } else {
+        _magnetogramTexture = std::make_unique<Texture>(
+            nullptr,
+            glm::size3_t(3600, 1440, 1),
+            ghoul::opengl::Texture::Red,
+            GL_R32F,
+            GL_FLOAT,
+            Texture::FilterMode::Linear,
+            Texture::WrappingMode::ClampToEdge
+        );
+    }
+
+    _magnetogramTexture->uploadTexture();
 
     // _startLoop1.onChange([this]() {
     //     if (_startLoop1) {
@@ -120,27 +158,6 @@ bool RenderableSolarImageryProjection::initialize() {
 
     _solarImageryDependencies
          = OsEng.renderEngine().scene()->sceneGraphNode(_nodeName)->dependencies();
-
-    FitsFileReader fts(false);
-    std::shared_ptr<ImageData<float>> imageData = fts.readImage<float>(path);
-    float* data;
-    if (imageData) {
-        const std::valarray<float>& imageContents = imageData->contents;
-        data = new float[imageContents.size()];
-        std::memmove(data, &imageContents[0], imageContents.size() * sizeof(float));
-    }
-
-    //const glm::size3_t imageSize(sizeX, sizeY, 1);
-    _magnetogramTexture = std::make_unique<Texture>(
-        data,
-        glm::size3_t(3600, 1440, 1),
-        ghoul::opengl::Texture::Red,
-        GL_R32F,
-        GL_FLOAT,
-        Texture::FilterMode::Linear,
-        Texture::WrappingMode::ClampToEdge
-    );
-    _magnetogramTexture->uploadTexture();
 
     if (!_shader) {
         RenderEngine& renderEngine = OsEng.renderEngine();
@@ -319,10 +336,10 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
         _shader->setUniform("lut[" + std::to_string(i) + "]", tfUnits[i]);
     }
 
-    ghoul::opengl::TextureUnit imageUnit;
-    imageUnit.activate();
-    _magnetogramTexture->bind();
-    _shader->setUniform("magnetogram", imageUnit);
+    //ghoul::opengl::TextureUnit imageUnit;
+    //imageUnit.activate();
+    //_magnetogramTexture->bind();
+    //_shader->setUniform("magnetogram", imageUnit);
 
     _shader->setUniform("numSpacecraftCameraPlanes", numPlanes);
 

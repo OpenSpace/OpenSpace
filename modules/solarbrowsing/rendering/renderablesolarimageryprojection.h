@@ -67,7 +67,7 @@ private:
 
     std::vector<SceneGraphNode*> _solarImageryDependencies;
     std::string _nodeName;
-    std::string path;
+    //std::string path;
     std::unique_ptr<ghoul::opengl::Texture> _magnetogramTexture;
     properties::BoolProperty _activateLooping;
     properties::IntProperty _loopId;
