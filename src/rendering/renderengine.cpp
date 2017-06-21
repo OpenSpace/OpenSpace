@@ -33,24 +33,21 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/luaconsole.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/abufferrenderer.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/raycastermanager.h>
-#include <openspace/scene/scene.h>
-#include <openspace/performance/performancemanager.h>
 #include <openspace/rendering/renderer.h>
-
-#include <openspace/interaction/luaconsole.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/camera.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
-#include <openspace/rendering/raycastermanager.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scripting/scriptengine.h>
 
 #include <ghoul/glm.h>
 #include <ghoul/font/font.h>

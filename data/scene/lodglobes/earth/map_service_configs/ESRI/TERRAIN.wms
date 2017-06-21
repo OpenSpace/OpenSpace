@@ -5,10 +5,5 @@
     </Service>
     <Timeout>2</Timeout>
     <MaxConnections>5</MaxConnections>
-    <Cache>
-        <Path>./GDAL_Cache/TERRAIN</Path>
-        <Depth>4</Depth>
-        <Extension>.jpg</Extension>
-    </Cache>
     <OfflineMode>false</OfflineMode>    
 </GDAL_WMS>

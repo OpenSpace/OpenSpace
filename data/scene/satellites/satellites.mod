@@ -1,4 +1,4 @@
-DOWNLOAD = true
+DOWNLOAD = false
 
 function dirListing(dirname)
   f = io.popen('ls ' .. dirname)
@@ -58,7 +58,7 @@ function  getSat(title, file, lineNum)
       Parent = "EarthInertial",
       Renderable = {
           Type = "RenderablePlane",
-          Size = {3.0, 4.0},
+          Size = 3e4,
           Origin = "Center",
           Body = "TLE",
           Billboard = true,
@@ -100,31 +100,6 @@ function getSatTrail(title, file, lineNum, per, color)
           Resolution = 160
       },
       GuiName = "/Satellites/" .. trailName
-  }
-end
-
-function getTestPoint(parent, name, x, y, z)
-  return {
-        Name = name,
-        Parent = parent,
-        Renderable = {
-            Type = "RenderablePlane",
-            Size = {3.0, 4.0},
-            Origin = "Center",
-            Body = "TLE",
-            Billboard = true,
-            Texture = "satB.png"
-        },
-        Transform = {
-            Translation = {
-                Type = "StaticTranslation",
-                Position = {x, y, z},
-            },
-            Scale = {
-                Type = "StaticScale",
-                Scale = 1,
-            }
-        }
   }
 end
 

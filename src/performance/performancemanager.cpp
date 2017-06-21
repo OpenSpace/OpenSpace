@@ -35,16 +35,14 @@
 #include <cstring>
 
 namespace {
-    const std::string _loggerCat = "PerformanceManager";
+    const char* _loggerCat = "PerformanceManager";
     
-    const std::string GlobalSharedMemoryName = "OpenSpacePerformanceMeasurementData";
+    const char* GlobalSharedMemoryName = "OpenSpacePerformanceMeasurementData";
     // Probably 255 performance blocks per node are enough, so we can get away with
     // 4 bytes (one uint8_t for the number, one uint8_t for the reference count to keep
     // the global memory alive, and 2 bytes to enforce alignment)
     const size_t GlobalSharedMemorySize = 4;
     
-    const int MaximumNumber = 256;
-
     struct GlobalMemory {
         uint8_t number;
         uint8_t referenceCount;
@@ -52,7 +50,7 @@ namespace {
         std::array<uint8_t, 2> alignment;
     };
     
-    const std::string LocalSharedMemoryNameBase = "PerformanceMeasurement_";
+    const char* LocalSharedMemoryNameBase = "PerformanceMeasurement_";
 }
 
 namespace openspace {
@@ -204,7 +202,7 @@ PerformanceLayout* PerformanceManager::performanceData() {
 }
 
 void PerformanceManager::storeIndividualPerformanceMeasurement
-                                         (std::string identifier, long long microseconds)
+                                          (std::string identifier, long long microseconds)
 {
     PerformanceLayout* layout = performanceData();
     _performanceMemory->acquireLock();
@@ -251,7 +249,11 @@ void PerformanceManager::storeScenePerformanceMeasurements(
 
         memset(layout->sceneGraphEntries[i].name, 0, PerformanceLayout::LengthName);
 #ifdef _MSC_VER
-        strcpy_s(layout->sceneGraphEntries[i].name, node->name().length() + 1, node->name().c_str());
+        strcpy_s(
+            layout->sceneGraphEntries[i].name,
+            node->name().length() + 1,
+            node->name().c_str()
+        );
 #else
         strcpy(layout->sceneGraphEntries[i].name, node->name().c_str());
 #endif

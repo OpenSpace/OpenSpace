@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: ogr_p.h 33631 2016-03-04 06:28:09Z goatbar $
+ * $Id: ogr_p.h 37564 2017-03-03 09:09:26Z rouault $
  *
  * Project:  OpenGIS Simple Features Reference Implementation
  * Purpose:  Some private helper functions and stuff for OGR implementation.
@@ -109,8 +109,8 @@ char CPL_DLL * OGRGetRFC822DateTime(const OGRField* psField);
 char CPL_DLL * OGRGetXMLDateTime(const OGRField* psField);
 char CPL_DLL * OGRGetXML_UTF8_EscapedString(const char* pszString);
 
-int OGRCompareDate(   OGRField *psFirstTuple,
-                      OGRField *psSecondTuple ); /* used by ogr_gensql.cpp and ogrfeaturequery.cpp */
+int OGRCompareDate(const OGRField *psFirstTuple,
+                   const OGRField *psSecondTuple ); /* used by ogr_gensql.cpp and ogrfeaturequery.cpp */
 
 /* General utility option processing. */
 int CPL_DLL OGRGeneralCmdLineProcessor( int nArgc, char ***ppapszArgv, int nOptions );

@@ -23,25 +23,19 @@
  ****************************************************************************************/
 
 #include <openspace/rendering/raycastermanager.h>
+
 #include <openspace/rendering/raycasterlistener.h>
+
 #include <algorithm>
 #include <string>
 
-namespace {
-    const std::string _loggerCat = "RaycasterManager";
-}
-
 namespace openspace {
-
-RaycasterManager::RaycasterManager() {}
-
-RaycasterManager::~RaycasterManager() {}
 
 void RaycasterManager::attachRaycaster(VolumeRaycaster& raycaster) {
     if (!isAttached(raycaster)) {
         _raycasters.push_back(&raycaster);
     }
-    for (auto &listener : _listeners) {
+    for (RaycasterListener* listener : _listeners) {
         listener->raycastersChanged(raycaster, true);
     }
 }
@@ -51,17 +45,15 @@ bool RaycasterManager::isAttached(VolumeRaycaster& raycaster) {
     return it != _raycasters.end();
 }
 
-
 void RaycasterManager::detachRaycaster(VolumeRaycaster& raycaster) {
     auto it = std::find(_raycasters.begin(), _raycasters.end(), &raycaster);
     if (it != _raycasters.end()) {
         _raycasters.erase(it);
-        for (auto &listener : _listeners) {
+        for (RaycasterListener* listener : _listeners) {
             listener->raycastersChanged(raycaster, false);
         }
     }
 }
-
 
 void RaycasterManager::addListener(RaycasterListener& listener) {
     auto it = std::find(_listeners.begin(), _listeners.end(), &listener);
@@ -81,4 +73,4 @@ const std::vector<VolumeRaycaster*>& RaycasterManager::raycasters() {
     return _raycasters;
 }
 
-}
+} // namespace openspace

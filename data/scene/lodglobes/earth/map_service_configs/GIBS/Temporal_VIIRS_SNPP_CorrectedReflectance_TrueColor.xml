@@ -17,11 +17,6 @@
             <TileCountY>1</TileCountY>
             <YOrigin>top</YOrigin>
         </DataWindow>
-        <Cache>
-            <Path>./GDAL_Cache/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor</Path>
-            <Depth>2</Depth>
-            <Extension>.jpg</Extension>
-        </Cache>
         <Projection>EPSG:4326</Projection>
         <BlockSizeX>512</BlockSizeX>
         <BlockSizeY>512</BlockSizeY>

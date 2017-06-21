@@ -25,7 +25,7 @@
 #include <openspace/properties/optionproperty.h>
 
 namespace {
-    const std::string _loggerCat = "OptionProperty";
+    const char* _loggerCat = "OptionProperty";
 }
 
 namespace openspace {
@@ -49,8 +49,7 @@ std::string OptionProperty::className() const {
     return "OptionProperty";
 }
 
-OptionProperty::DisplayType OptionProperty::displayType() const
-{
+OptionProperty::DisplayType OptionProperty::displayType() const {
     return _displayType;
 }
 
@@ -61,7 +60,7 @@ const std::vector<OptionProperty::Option>& OptionProperty::options() const {
 void OptionProperty::addOption(int value, std::string desc) {
     Option option = { std::move(value), std::move(desc) };
 
-    for (const auto& o : _options) {
+    for (const Option& o : _options) {
         if (o.value == option.value) {
             LWARNING("The value of option {" << o.value << " -> " << o.description <<
                 "} was already registered when trying to add option {" << option.value <<
@@ -80,7 +79,7 @@ void OptionProperty::addOptions(std::vector<std::pair<int, std::string>> options
 
 void OptionProperty::setValue(int value) {
     // Check if the passed value belongs to any option
-    for (auto o : _options) {
+    for (const Option& o : _options) {
         if (o.value == value) {
             // If it does, set it by calling the superclasses setValue method
             NumericalProperty::setValue(value);
@@ -93,7 +92,7 @@ void OptionProperty::setValue(int value) {
 }
 
 std::string OptionProperty::getDescriptionByValue(int value) {
-    for (auto option : _options) {
+    for (const Option& option : _options) {
         if (option.value == value) {
             return option.description;
         }
