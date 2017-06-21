@@ -27,15 +27,21 @@
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
-
+#include <openspace/properties/triggerproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
 class DrivePropertyOwner : public properties::PropertyOwner {
 public:
-	DrivePropertyOwner(std::string drive);
+	DrivePropertyOwner(std::string drive, glm::dvec2 driveCoords);
 private:
+
+	void goToSubSite(std::string drive);
+
+	std::string _drive;
+	glm::dvec2 _driveCoords;
 	properties::BoolProperty _enabled;
+	properties::TriggerProperty _goToSubSite;
 };
 }
 }

@@ -60,13 +60,13 @@ namespace {
     const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/main.hbs";
     const char* KeybindingTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs";
     const char* JsFilename = "${OPENSPACE_DATA}/web/keybindings/script.js";
-    
+
     const int IdOrbitalInteractionMode = 0;
     const char* KeyOrbitalInteractionMode = "Orbital";
-    
+
     const int IdGlobeBrowsingInteractionMode = 1;
     const char* KeyGlobeBrowsingInteractionMode = "GlobeBrowsing";
-    
+
     const int IdKeyframeInteractionMode = 2;
     const char* KeyKeyframeInteractionMode = "Keyframe";
 } // namespace
@@ -124,7 +124,7 @@ InteractionHandler::InteractionHandler()
     _interactionModeOption.addOption(IdKeyframeInteractionMode, KeyKeyframeInteractionMode);
 
     // Set the interactionMode
-    _currentInteractionMode = _orbitalInteractionMode.get();
+    _currentInteractionMode = _globeBrowsingInteractionMode.get();
 
     // Define lambda functions for changed properties
     _rotationalFriction.onChange([&]() {
@@ -158,7 +158,7 @@ InteractionHandler::InteractionHandler()
         }
     });
 
-    
+
     // Add the properties
     addProperty(_origin);
     addProperty(_interactionModeOption);
@@ -241,10 +241,16 @@ void InteractionHandler::goToGeo(double latitude, double longitude) {
     }
 }
 
-void InteractionHandler::goToSol(int sol) {
+void InteractionHandler::goToSol(double latitude, double longitude) {
+	
 	if (_currentInteractionMode == _globeBrowsingInteractionMode.get()) {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-		LERROR("Solnumber " << sol);
+		globebrowsing::Geodetic2 geo2 = globebrowsing::Geodetic2(latitude, longitude); /// 180 * glm::pi<double>();
+		_globeBrowsingInteractionMode->goToGeodetic2(
+			*_camera,
+			geo2, 
+			true
+		);
 #endif
 	}
 	else {
@@ -447,7 +453,7 @@ void InteractionHandler::bindKey(Key key, KeyModifier modifier,
         { std::move(luaCommand), Synchronized::Yes, std::move(documentation) }
     });
 }
-    
+
 std::string InteractionHandler::generateJson() const {
     std::stringstream json;
     json << "[";
@@ -465,7 +471,7 @@ std::string InteractionHandler::generateJson() const {
         json << "}";
     }
     json << "]";
-    
+
     std::string jsonString = "";
     for (const char& c : json.str()) {
         if (c == '\'') {
@@ -477,7 +483,7 @@ std::string InteractionHandler::generateJson() const {
 
     return jsonString;
 }
-    
+
 
 scripting::LuaLibrary InteractionHandler::luaLibrary() {
     return{

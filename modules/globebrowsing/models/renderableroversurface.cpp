@@ -56,24 +56,26 @@ namespace openspace {
 using namespace properties;
 
 namespace globebrowsing {
-RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & dictionary)
-	: Renderable(dictionary)
-	, _generalProperties({
-			BoolProperty("enable", "Enabled", true),
-			BoolProperty("enablePath", "Enable path", true),
-			BoolProperty("lockSubsite", "Lock subsite", false),
-			BoolProperty("useMastCam", "Show mastcam coloring", false),
-			BoolProperty("enableDepth", "Enable depth", true),
-			FloatProperty("heightProp", "Site height", 0.7f, 0.0f, 3.0f),
-			IntProperty("maxLod", "Max LOD", 3, 1, 3)
-	})
-	, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
-	, _modelSwitch()
-	, _prevLevel(3)
-	, _isFirst(true)
-	, _isFirstLow(true)
-	, _isFirstHigh(true)
-	, _renderableSitePropertyOwner("LayersOfThis")
+	RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & dictionary)
+		: Renderable(dictionary)
+		, _generalProperties({
+				BoolProperty("enable", "Enabled", true),
+				BoolProperty("enablePath", "Enable path", true),
+				BoolProperty("lockSubsite", "Lock subsite", false),
+				BoolProperty("useMastCam", "Show mastcam coloring", false),
+				BoolProperty("enableDepth", "Enable depth", true),
+				BoolProperty("enableCulling", "Enable culling", true),
+				FloatProperty("heightProp", "Site height", 0.7f, 0.0f, 3.0f),
+				IntProperty("maxLod", "Max LOD", 3, 1, 3)
+
+		})
+		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
+		, _modelSwitch()
+		, _prevLevel(3)
+		, _isFirst(true)
+		, _isFirstLow(true)
+		, _isFirstHigh(true)
+		, _renderableSitePropertyOwner("LayersOfThis")
 {
 	if (!dictionary.getValue(keyRoverLocationPath, _roverLocationPath))
 		throw ghoul::RuntimeError(std::string(keyRoverLocationPath) + " must be specified!");
@@ -98,7 +100,7 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 	tempDictionary.setValue(keyAbsPathToTextures, _absTexturePath);
 	tempDictionary.setValue(keyAbsPathToModels, _absModelPath);
 	_subsitesWithModels = RoverPathFileReader::extractSubsitesWithModels(tempDictionary);
-
+	
 	// Extract all subsites
 	ghoul::Dictionary tempDictionary2;
 	tempDictionary2.setValue(keyRoverLocationPath, _roverLocationPath);
@@ -108,6 +110,7 @@ RenderableRoverSurface::RenderableRoverSurface(const ghoul::Dictionary & diction
 	addProperty(_generalProperties.lockSubsite);
 	addProperty(_generalProperties.useMastCam);
 	addProperty(_generalProperties.enableDepth);
+	addProperty(_generalProperties.enableCulling);
 	addProperty(_generalProperties.heightProp);
 	addProperty(_generalProperties.maxLod);
 	addProperty(_debugModelRotation);
@@ -360,11 +363,14 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		if (!_generalProperties.enableDepth.value()) {
 			glDisable(GL_DEPTH_TEST);
 		}
-		glDisable(GL_CULL_FACE);
+
+		if (!_generalProperties.enableCulling.value()) {
+			glDisable(GL_CULL_FACE);
+		}
+		
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 		subsiteModels->model->render();
-		glEnable(GL_CULL_FACE);
 	}
 	_programObject->deactivate();
 

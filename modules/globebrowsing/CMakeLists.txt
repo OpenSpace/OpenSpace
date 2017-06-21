@@ -72,9 +72,10 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/models/singlemodelprovider.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/subsitemodels.h
 	${CMAKE_CURRENT_SOURCE_DIR}/models/job/subsiteinitializationjob.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/sitemanager.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/drivepropertyowner.h
-	${CMAKE_CURRENT_SOURCE_DIR}/models/sitepropertyowner.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/sitepropertyowner.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/sitemanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/drivepropertyowner.h
+
 
     ${CMAKE_CURRENT_SOURCE_DIR}/opengl/texturearray.h
 
@@ -115,7 +116,15 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgeneration.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshwriter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/imgreader.h
-	${CMAKE_CURRENT_SOURCE_DIR}/tasks/pointcloudinfo.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/pointcloudinfo.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/collapsedmeshgeneration.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/pointcloudfilter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/medianpointcloudfilter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/fastbilateralpointcloudfilter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/randompointcloudfilter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/registerpointclouds.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/levelofdetail.h
+
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.h
 
@@ -194,9 +203,9 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/models/singlemodelprovider.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/subsitemodels.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/models/job/subsiteinitializationjob.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/sitemanager.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/drivepropertyowner.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/models/sitepropertyowner.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/sitepropertyowner.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/sitemanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/models/drivepropertyowner.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/opengl/texturearray.cpp
 
@@ -225,6 +234,12 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshgeneration.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/meshwriter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/imgreader.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/collapsedmeshgeneration.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/pointcloudfilter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/medianpointcloudfilter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/fastbilateralpointcloudfilter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/randompointcloudfilter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/registerpointclouds.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.cpp
 
@@ -323,6 +338,8 @@ endif () # OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL
 find_package( PCL 1.8 REQUIRED )
 
 if( PCL_FOUND )
+  target_compile_definitions(openspace-module-globebrowsing PRIVATE GLOBEBROWSING_USE_PCL)
+
   # Additional Include Directories
   # [C/C++]>[General]>[Additional Include Directories]
   include_directories( ${PCL_INCLUDE_DIRS} )

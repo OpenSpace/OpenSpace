@@ -41,6 +41,8 @@ uniform vec4 camerasColoredVectors[20];
 
 uniform bool useMastCamColor = false;
 
+uniform uvec3 coloredTextureDimensions;
+
 // Uniforms
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -105,8 +107,8 @@ void main () {
 
   if (useMastCamColor) {
     maxDist = 1000;
-    int colsize2 = 1200;
-    int linesize2 = 1344;
+    int colsize2 = int(coloredTextureDimensions.y);
+    int linesize2 = int(coloredTextureDimensions.x);
     vec2 textureSize2 = vec2(linesize2,colsize2);
 
     int nrOfColorIterations = colorSize;
