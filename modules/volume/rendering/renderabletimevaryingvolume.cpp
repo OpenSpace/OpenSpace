@@ -143,7 +143,14 @@ bool RenderableTimeVaryingVolume::initialize() {
         RawVolumeReader<float> reader(path, t.dimensions);
         t.rawVolume = reader.read();
 
-        // TODO: remap values from [lowerValueBounds, upperDomainBounds[ to [0, 1[
+        float min = t.minValue;
+        float diff = t.maxValue - t.minValue;
+
+        float *data = t.rawVolume->data();
+        for (size_t i = 0; i < t.rawVolume->nCells(); ++i) {
+            data[i] = glm::clamp((data[i] - min) / diff, 0.0f, 1.0f);
+        }
+        // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
             t.dimensions,
@@ -154,8 +161,7 @@ bool RenderableTimeVaryingVolume::initialize() {
             ghoul::opengl::Texture::WrappingMode::Clamp
         );
 
-        void* data = reinterpret_cast<void*>(t.rawVolume->data());
-        t.texture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
+        t.texture->setPixelData(reinterpret_cast<void*>(data), ghoul::opengl::Texture::TakeOwnership::No);
         t.texture->uploadTexture();
     }
 
