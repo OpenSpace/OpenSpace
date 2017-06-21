@@ -31,7 +31,7 @@ in vec3 vUv[MAX_SPACECRAFT_OBSERVATORY];
 uniform dvec3 planePositionSpacecraft[MAX_SPACECRAFT_OBSERVATORY];
 uniform sampler1D lut[MAX_SPACECRAFT_OBSERVATORY];
 uniform sampler2D imageryTexture[MAX_SPACECRAFT_OBSERVATORY];
-uniform sampler2D magnetogram;
+//uniform sampler2D magnetogram;
 uniform int numSpacecraftCameraPlanes;
 uniform bool hasLut[MAX_SPACECRAFT_OBSERVATORY];
 
@@ -96,20 +96,25 @@ Fragment getFragment() {
             res.g = pow(res.g, gammaValue[i]);
             res.b = pow(res.b, gammaValue[i]);
 
+            // If black
             if (outColor == vec4(0)) {
-                outColor = res;
+                float factor2 = smoothstep(0.5, uv.x, uv.z);
+                outColor = mix(res, res, factor2);
+                //outColor = vec4(1.0, 0.0, 0.0, 1.0);
             } else {
-                float factor = smoothstep(0.5, 0.65, uv.z);
-                outColor = mix(outColor, res, factor);
+                float factor = smoothstep(0.5, 1.0 - uv.x, uv.z);
+                float factor2 = smoothstep(0.5, uv.x, uv.z);
+                outColor = mix(outColor, res, factor + factor2);
             }
             renderMagnetoGram = false;
         }
     }
 
     if (renderMagnetoGram) {
-        float intensity = texture(magnetogram, vs_st).r;
-        intensity = (intensity - magnetogramMin) / (magnetogramMax - magnetogramMin);
-        outColor = vec4(intensity, intensity, intensity, 1.0);
+        //float intensity = texture(magnetogram, vs_st).r;
+        //intensity = (intensity - magnetogramMin) / (magnetogramMax - magnetogramMin);
+        //outColor = vec4(intensity, intensity, intensity, 1.0);
+        outColor = vec4(0.93, 0.96, 0.3, 1.0);
     }
 
     Fragment frag;
