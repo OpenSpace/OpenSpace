@@ -69,6 +69,7 @@ public:
                                      const size_t& numPointsToSkipEachStep);
 
     void setModel(const Model& modelNumber);
+    void calculateTopologies(const float& radius);
 private:
 };
 

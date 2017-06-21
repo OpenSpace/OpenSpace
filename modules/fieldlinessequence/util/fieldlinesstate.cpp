@@ -24,6 +24,8 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 
+#include <modules/fieldlinessequence/util/fieldlineutils.hpp>
+
 #include <ghoul/logging/logmanager.h>
 
 #include <fstream>
@@ -207,6 +209,26 @@ void FieldlinesState::setModel(const Model& modelNumber) {
         default :
             LERROR("Unrecognised model!");
             break;
+    }
+}
+
+// TODO: Topology should be stored ONCE PER LINE, not once per vertex as it is now!!!!!!!
+// Calculates topology of each line within the state and adds a new extraVariables vector
+void FieldlinesState::calculateTopologies(const float& radius) {
+    size_t arrayIdx = _extraVariables.size();
+    _extraVariables.resize(arrayIdx + 1);
+    _extraVariableNames.push_back("topology");
+    for (size_t idx = 0; idx < _lineStart.size(); ++idx) {
+
+        size_t startVertIdx = _lineStart[idx];
+        size_t endVertIdx = startVertIdx + _lineCount[idx] - 1;
+
+        int topology = getFieldlineTopology(_model, _vertexPositions[startVertIdx],
+                _vertexPositions[endVertIdx], radius);
+
+        _extraVariables[arrayIdx].insert(_extraVariables[arrayIdx].end(),
+                                         static_cast<size_t>(_lineCount[idx]),
+                                         static_cast<float>(topology));
     }
 }
 
