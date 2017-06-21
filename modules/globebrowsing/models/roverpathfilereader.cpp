@@ -134,7 +134,7 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 
 	std::string absPathToTModels;
 	if (!dictionary.getValue(keyAbsPathToModels, absPathToTModels))
-		throw ghoul::RuntimeError(std::string(keyAbsPathToTextures) + " must be specified!");
+		throw ghoul::RuntimeError(std::string(keyAbsPathToModels) + " must be specified!");
 
 	// Extract all subsites in the data set given the path to the file
 	ghoul::Dictionary tempDictionary;
@@ -159,26 +159,26 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 		// added, loop through the text file with file names and add those to the subsite.
 		// Also store information about which levels are available for this specific subsite.
 		std::string restPath = "/OBJ.obj";
-		bool level1Exists = FileSys.fileExists(pathToMeshFolderLevel1 + restPath);
-		bool level2Exists = FileSys.fileExists(pathToMeshFolderLevel2 + restPath);
-		bool level3Exists = FileSys.fileExists(pathToMeshFolderLevel3 + restPath);
+		bool level1Exist = FileSys.fileExists(pathToMeshFolderLevel1 + restPath);
+		bool level2Exist = FileSys.fileExists(pathToMeshFolderLevel2 + restPath);
+		bool level3Exist = FileSys.fileExists(pathToMeshFolderLevel3 + restPath);
 
 		// TODO: refactor like hell!!!
-		std::string pathToDriveFolder;
-		if (level1Exists) {
+		std::string pathToMeshFolder;
+		if (level1Exist) {
 			subsite->availableLevels.push_back(1);
-			pathToDriveFolder = pathToMeshFolderLevel1;
+			pathToMeshFolder = pathToMeshFolderLevel1;
 		}
-		if (level2Exists) {
+		if (level2Exist) {
 			subsite->availableLevels.push_back(2);
-			pathToDriveFolder = pathToMeshFolderLevel2;
+			pathToMeshFolder = pathToMeshFolderLevel2;
 		}
-		if (level3Exists) {
+		if (level3Exist) {
 			subsite->availableLevels.push_back(3);
-			pathToDriveFolder = pathToMeshFolderLevel3;
+			pathToMeshFolder = pathToMeshFolderLevel3;
 		}
 		bool modelExists = false;
-		if(level1Exists || level2Exists || level3Exists) {
+		if(level1Exist || level2Exist || level3Exist) {
 			for (auto controlSubsite : subsitesWithModels) {
 				if (subsite->site == controlSubsite->site && subsite->drive == controlSubsite->drive) {
 					modelExists = true;
@@ -186,9 +186,9 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractSubsitesWithMo
 				}
 			}
 			if(!modelExists) {
-				std::string pathToFilenamesTextFile = pathToDriveFolder + "/filenames.txt";
-				std::string pathToColoredFilenamesTextFile = pathToDriveFolder + "/mastcam.txt";
-				std::string pathToRotationMatrixTextFile = pathToDriveFolder + "/rotationmatrix.txt";
+				std::string pathToFilenamesTextFile = pathToMeshFolder + "/filenames.txt";
+				std::string pathToColoredFilenamesTextFile = pathToMeshFolder + "/mastcam.txt";
+				std::string pathToRotationMatrixTextFile = pathToMeshFolder + "/rotationmatrix.txt";
 
 				std::shared_ptr<RoverPathFileReader::TextureInformation> textureInformation = extractTextureInfo(pathToFilenamesTextFile);
 
