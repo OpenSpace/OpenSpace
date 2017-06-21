@@ -547,7 +547,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
 vec3 sunColor(const vec3 x, const float t, const vec3 v, const vec3 s, const float r,
               const float mu, const float irradianceFactor) {
   vec3 transmittance = (r <= Rt) ? ( mu < -sqrt(1.0f - (Rg*Rg)/(r*r)) ? vec3(0.0f) : transmittanceLUT(r, mu)) : vec3(1.0f);  
-  float sunFinalColor = step(cos(M_PI / 180.0), dot(v, s)) * sunRadiance * (1.0 - irradianceFactor); 
+  float sunFinalColor = step(cos(M_PI / 650.0), dot(v, s)) * sunRadiance * (1.0 - irradianceFactor); 
 
   return transmittance * sunFinalColor;      
 }
@@ -558,6 +558,7 @@ void main() {
     vec4 meanNormal    = vec4(0.0);
     vec4 meanPosition  = vec4(0.0);
     vec4 meanOtherData = vec4(0.0);
+    /*
     //vec4 positionArray[nAaSamples];
     //vec4 positionArray[8];
     float maxAlpha = -1.0;
@@ -579,6 +580,12 @@ void main() {
     //mainDepth /= nAaSamples;
 
     meanColor.a = maxAlpha;
+    */
+    // Temporary:
+    meanNormal    += texelFetch(mainNormalTexture, ivec2(gl_FragCoord), 0);
+    meanColor     += texelFetch(mainColorTexture, ivec2(gl_FragCoord), 0);;
+    meanPosition  += texelFetch(mainPositionTexture, ivec2(gl_FragCoord), 0);
+    meanOtherData += texelFetch(otherDataTexture, ivec2(gl_FragCoord), 0);
 
     // Ray in object space
     dRay ray;
@@ -775,16 +782,15 @@ void main() {
           
           // Final Color of ATM plus terrain:
           vec4 finalRadiance = vec4(HDR(inscatterColor + groundColor + sunColor), 1.0);
-          //vec4 finalRadiance = vec4(HDR(inscatterColor + sunColor) + groundColor, 1.0);
-
+          
           // Debug:
           //finalRadiance = vec4(HDR(inscatterColor + sunColor), 1.0);
           //finalRadiance = mix(finalRadiance, meanColor);
           //finalRadiance = vec4(inscatterColor, 1.0);
-          //finalRadiance = vec4(HDR(groundColor), 1.0);
+          //vec4 finalRadiance = vec4(HDR(groundColor), 1.0);
           //finalRadiance = vec4(HDR(inscatterColor), 1.0);
           //finalRadiance = vec4(HDR(inscatterColor + meanColor.xyz), meanColor.w);
-          //finalRadiance = vec4(HDR(sunColor), 1.0);
+          //vec4 finalRadiance = vec4(HDR(sunColor), 1.0);
           //finalRadiance = vec4(sunColor, 1.0);
           //finalRadiance = vec4(HDR(inscatterColor + groundColor), 1.0);
           //finalRadiance = vec4(1.0 - HDR(vec3(pixelDepth/100)),1.0);
