@@ -26,7 +26,7 @@
 
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
 
-#include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
 
 #include <ghoul/filesystem/filesystem>
 #include <ghoul/logging/logmanager.h>
@@ -316,7 +316,7 @@ std::shared_ptr<TileProvider> TemporalTileProvider::initTileProvider(TimeKey tim
     FileSys.expandPathTokens(gdalDatasetXml, AllowedToken);
 
     _initDict.setValue<std::string>(KeyFilePath, gdalDatasetXml);
-    auto tileProvider = std::make_shared<CachingTileProvider>(_initDict);
+    auto tileProvider = std::make_shared<DefaultTileProvider>(_initDict);
     return tileProvider;
 }
     

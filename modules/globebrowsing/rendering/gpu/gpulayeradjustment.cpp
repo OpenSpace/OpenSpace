@@ -22,66 +22,42 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/rendering/gpu/gpulayer.h>
-
-#include <modules/globebrowsing/rendering/layer/layer.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayeradjustment.h>
+#include <modules/globebrowsing/rendering/layer/layeradjustment.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
-                        const TileIndex& tileIndex, int pileSize)
+void GPULayerAdjustment::setValue(ghoul::opengl::ProgramObject* programObject,
+                                      const LayerAdjustment& layerAdjustment)
 {
-    ChunkTilePile chunkTilePile = layer.getChunkTilePile(tileIndex, pileSize);
-    gpuRenderSettings.setValue(programObject, layer.renderSettings());
-    gpuLayerAdjustment.setValue(programObject, layer.layerAdjustment());
-    
-    switch (layer.type()) {
-        // Intentional fall throgh. Same for all tile layers
-        case layergroupid::TypeID::DefaultTileLayer:
-        case layergroupid::TypeID::SingleImageTileLayer:
-        case layergroupid::TypeID::SizeReferenceTileLayer:
-        case layergroupid::TypeID::TemporalTileLayer:
-        case layergroupid::TypeID::TileIndexTileLayer:
-        case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer:
-            gpuChunkTilePile.setValue(programObject, chunkTilePile);
+    switch (layerAdjustment.type()) {
+        case layergroupid::AdjustmentTypeID::None:
             break;
-        case layergroupid::TypeID::SolidColor:
-            gpuColor.setValue(programObject, layer.otherTypesProperties().color.value());
+        case layergroupid::AdjustmentTypeID::ChromaKey: {
+            gpuChromaKeyColor.setValue(programObject, layerAdjustment.chromaKeyColor.value());
+            gpuChromaKeyTolerance.setValue(programObject, layerAdjustment.chromaKeyTolerance.value());
             break;
-        default:
+        }
+        case layergroupid::AdjustmentTypeID::TransferFunction:
             break;
     }
 }
 
-void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
-                    const std::string& nameBase, int pileSize)
+void GPULayerAdjustment::bind(const LayerAdjustment& layerAdjustment, ghoul::opengl::ProgramObject* programObject,
+                                  const std::string& nameBase)
 {
-    gpuRenderSettings.bind(layer.renderSettings(), programObject, nameBase + "settings.");
-    gpuLayerAdjustment.bind(layer.layerAdjustment(), programObject, nameBase + "adjustment.");
-    
-    switch (layer.type()) {
-        // Intentional fall throgh. Same for all tile layers
-        case layergroupid::TypeID::DefaultTileLayer:
-        case layergroupid::TypeID::SingleImageTileLayer:
-        case layergroupid::TypeID::SizeReferenceTileLayer:
-        case layergroupid::TypeID::TemporalTileLayer:
-        case layergroupid::TypeID::TileIndexTileLayer:
-        case layergroupid::TypeID::ByIndexTileLayer:
-        case layergroupid::TypeID::ByLevelTileLayer:
-            gpuChunkTilePile.bind(programObject, nameBase + "pile.", pileSize);
+    switch (layerAdjustment.type()) {
+        case layergroupid::AdjustmentTypeID::None:
             break;
-        case layergroupid::TypeID::SolidColor:
-            gpuColor.bind(programObject, nameBase + "color");
+        case layergroupid::AdjustmentTypeID::ChromaKey: {
+            gpuChromaKeyColor.bind(programObject, nameBase + "chromaKeyColor");
+            gpuChromaKeyTolerance.bind(programObject, nameBase + "chromaKeyTolerance");
             break;
-        default:
+        }
+        case layergroupid::AdjustmentTypeID::TransferFunction:
             break;
     }
-}
-
-void GPULayer::deactivate() {
-    gpuChunkTilePile.deactivate();
 }
 
 }  // namespace globebrowsing

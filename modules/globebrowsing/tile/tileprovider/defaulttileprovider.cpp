@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
 
 #include <modules/globebrowsing/cache/memoryawaretilecache.h>
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
@@ -54,7 +54,7 @@ namespace openspace {
 namespace globebrowsing {
 namespace tileprovider {
     
-CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary) 
+DefaultTileProvider::DefaultTileProvider(const ghoul::Dictionary& dictionary) 
     : TileProvider(dictionary)
     , _filePath("filePath", "File Path", "")
     , _tilePixelSize("tilePixelSize", "Tile Pixel Size", 32, 32, 1024)
@@ -63,7 +63,7 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     _tileCache = OsEng.moduleEngine().module<GlobeBrowsingModule>()->tileCache();
     _name = "Name unspecified";
     dictionary.getValue("Name", _name);
-    std::string _loggerCat = "CachingTileProvider : " + _name;
+    std::string _loggerCat = "DefaultTileProvider : " + _name;
 
     // 1. Get required Keys
     std::string filePath;
@@ -106,17 +106,17 @@ CachingTileProvider::CachingTileProvider(const ghoul::Dictionary& dictionary)
     addProperty(_tilePixelSize);
 }
 
-CachingTileProvider::CachingTileProvider(
+DefaultTileProvider::DefaultTileProvider(
     std::shared_ptr<AsyncTileDataProvider> tileReader)
     : _asyncTextureDataProvider(tileReader)
     , _filePath("filePath", "File Path", "")
     , _tilePixelSize("tilePixelSize", "Tile Pixel Size", 32, 32, 1024)
 { }
 
-CachingTileProvider::~CachingTileProvider()
+DefaultTileProvider::~DefaultTileProvider()
 { }
 
-void CachingTileProvider::update() {
+void DefaultTileProvider::update() {
     if (_asyncTextureDataProvider) {
         _asyncTextureDataProvider->update();
         initTexturesFromLoadedData();
@@ -129,7 +129,7 @@ void CachingTileProvider::update() {
     }
 }
 
-void CachingTileProvider::reset() {
+void DefaultTileProvider::reset() {
     _tileCache->clear();
     if (_asyncTextureDataProvider) {
         _asyncTextureDataProvider->prepairToBeDeleted();
@@ -141,7 +141,7 @@ void CachingTileProvider::reset() {
     }
 }
 
-int CachingTileProvider::maxLevel() {
+int DefaultTileProvider::maxLevel() {
     if (_asyncTextureDataProvider) {
         return _asyncTextureDataProvider->getRawTileDataReader()->maxChunkLevel();
     }
@@ -150,7 +150,7 @@ int CachingTileProvider::maxLevel() {
     }
 }
 
-Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
+Tile DefaultTileProvider::getTile(const TileIndex& tileIndex) {
     if (_asyncTextureDataProvider) {
         if (tileIndex.level > maxLevel()) {
             return Tile(nullptr, nullptr, Tile::Status::OutOfRange);
@@ -171,7 +171,7 @@ Tile CachingTileProvider::getTile(const TileIndex& tileIndex) {
     }
 }
 
-float CachingTileProvider::noDataValueAsFloat() {
+float DefaultTileProvider::noDataValueAsFloat() {
     if (_asyncTextureDataProvider) {
         return _asyncTextureDataProvider->noDataValueAsFloat();
     }
@@ -180,7 +180,7 @@ float CachingTileProvider::noDataValueAsFloat() {
     }
 }
 
-void CachingTileProvider::initTexturesFromLoadedData() {
+void DefaultTileProvider::initTexturesFromLoadedData() {
     if (_asyncTextureDataProvider) {
         std::shared_ptr<RawTile> rawTile = _asyncTextureDataProvider->popFinishedRawTile();
         if (rawTile) {
@@ -191,8 +191,8 @@ void CachingTileProvider::initTexturesFromLoadedData() {
     }
 }
 
-void CachingTileProvider::initAsyncTileDataReader(TileTextureInitData initData) {
-    std::string _loggerCat = "CachingTileProvider : " + _name;
+void DefaultTileProvider::initAsyncTileDataReader(TileTextureInitData initData) {
+    std::string _loggerCat = "DefaultTileProvider : " + _name;
 
     RawTileDataReader* tileDataReader = nullptr;
 
@@ -223,7 +223,7 @@ void CachingTileProvider::initAsyncTileDataReader(TileTextureInitData initData) 
     }
 }
 
-Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
+Tile::Status DefaultTileProvider::getTileStatus(const TileIndex& tileIndex) {
     if (_asyncTextureDataProvider) {
         auto rawTileDataReader = _asyncTextureDataProvider->getRawTileDataReader();
         if (tileIndex.level > rawTileDataReader->maxChunkLevel()) {
@@ -239,7 +239,7 @@ Tile::Status CachingTileProvider::getTileStatus(const TileIndex& tileIndex) {
     }
 }
 
-TileDepthTransform CachingTileProvider::depthTransform() {
+TileDepthTransform DefaultTileProvider::depthTransform() {
     if (_asyncTextureDataProvider) {
         return _asyncTextureDataProvider->getRawTileDataReader()->getDepthTransform();
     }

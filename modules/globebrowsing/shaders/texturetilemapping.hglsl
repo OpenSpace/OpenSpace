@@ -140,6 +140,12 @@ vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor) {
 	return blendAdd(currentColor, newColor);
 #elif (#{#{layerGroup}#{i}BlendMode} == 3) // Subtract
 	return blendSubtract(currentColor, newColor);
+#elif (#{#{layerGroup}#{i}BlendMode} == 4) // Color
+	vec3 hsvCurrent = rgb2hsv(currentColor.rgb);
+	vec3 hsvNew = vec3(hsvCurrent.x, hsvCurrent.y, newColor.x);
+	vec3 rgbNew = hsv2rgb(hsvNew);
+	vec4 color = blendNormal(currentColor, vec4(rgbNew, newColor.a));
+	return color;
 #endif
 }
 
@@ -271,7 +277,7 @@ vec4 calculateGrayScale(
 		vec4 colorSample = getSampleGrayScaleLayers#{i}(uv, levelWeights, GrayScaleLayers);
 		colorSample = performAdjustmentGrayScaleLayers#{i}(colorSample, GrayScaleLayers[#{i}].adjustment);
 
-		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, 1);
+		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
 		colorSample = performLayerSettings(colorSample, GrayScaleLayers[#{i}].settings);
 
 		colorGrayScale = blendGrayScaleLayers#{i}(colorGrayScale, colorSample);

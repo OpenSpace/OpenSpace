@@ -106,7 +106,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     _chunkedLodGlobe = std::make_shared<ChunkedLodGlobe>(
         *this, patchSegments, _layerManager);
-    _pointGlobe = std::make_shared<PointGlobe>(*this);
+    //_pointGlobe = std::make_shared<PointGlobe>(*this);
         
     _distanceSwitch.addSwitchValue(_chunkedLodGlobe);
     //_distanceSwitch.addSwitchValue(_pointGlobe);
@@ -147,7 +147,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager.get());
-    addPropertySubOwner(_pointGlobe.get());
+    //addPropertySubOwner(_pointGlobe.get());
 }
 
 bool RenderableGlobe::initialize() {

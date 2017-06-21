@@ -25,17 +25,17 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__
 
-#include <openspace/properties/propertyowner.h>
-
 #include <modules/globebrowsing/tile/chunktile.h>
+
+#include <modules/globebrowsing/rendering/layer/layeradjustment.h>
 #include <modules/globebrowsing/rendering/layer/layergroupid.h>
 #include <modules/globebrowsing/rendering/layer/layerrendersettings.h>
 
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/triggerproperty.h>
-
 #include <openspace/properties/vectorproperty.h>
-#include <openspace/properties/optionproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -43,29 +43,6 @@ namespace globebrowsing {
 namespace tileprovider {
     class TileProvider;
 }
-
-class LayerAdjustment : public properties::PropertyOwner
-{
-public:
-    LayerAdjustment();
-    ~LayerAdjustment() = default;
-
-    layergroupid::AdjustmentTypeID type() const;
-
-    // Properties
-    properties::Vec3Property chromaKeyColor;
-    properties::FloatProperty chromaKeyTolerance;
-
-    void onChange(std::function<void(void)> callback);
-private:
-    void addVisibleProperties();
-    void removeVisibleProperties();
-    
-    properties::OptionProperty _typeOption;
-    layergroupid::AdjustmentTypeID _type;
-
-    std::function<void(void)> _onChangeCallback;
-};
 
 class Layer : public properties::PropertyOwner {
 public:

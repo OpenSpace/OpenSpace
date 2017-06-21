@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
-#include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/sizereferencetileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
@@ -100,7 +100,7 @@ void GlobeBrowsingModule::internalInitialize() {
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
 
     // Register TileProvider classes
-    fTileProvider->registerClass<tileprovider::CachingTileProvider>(
+    fTileProvider->registerClass<tileprovider::DefaultTileProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::DefaultTileLayer)]);
     fTileProvider->registerClass<tileprovider::SingleImageProvider>(
         layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::SingleImageTileLayer)]);

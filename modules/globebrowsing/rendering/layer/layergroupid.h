@@ -96,12 +96,13 @@ enum class AdjustmentTypeID {
     TransferFunction = 2,
 };
 
-static const int NUM_BLEND_MODES = 4;
+static const int NUM_BLEND_MODES = 5;
 static const std::string BLEND_MODE_NAMES[NUM_BLEND_MODES] = {
     "Normal",
     "Multiply",
     "Add",
     "Subtract",
+    "Color",
 };
 
 /**
@@ -112,6 +113,7 @@ enum class BlendModeID {
     Multiply = 1,
     Add = 2,
     Subtract = 3,
+    Color = 4,
 };
 
 static TypeID getTypeIDFromTypeString(std::string typeString) {

@@ -22,65 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
 
-#include <modules/globebrowsing/rendering/gpu/gpuchunktilepile.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayeradjustment.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayerrendersettings.h>
-#include <openspace/util/gpudata.h>
-#include <string>
+#include <openspace/properties/propertyowner.h>
 
-namespace ghoul { namespace opengl {
-class ProgramObject;
-}}
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
+
+#include <openspace/properties/scalarproperty.h>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/vectorproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
 
-class Layer;
-struct TileIndex;
+namespace tileprovider {
+    class TileProvider;
+}
 
-/**
- * Manages a GPU representation of a <code>Layer</code>
- */
-class GPULayer {
+class LayerAdjustment : public properties::PropertyOwner
+{
 public:
+    LayerAdjustment();
+    ~LayerAdjustment() = default;
 
-    virtual ~GPULayer() = default;
+    layergroupid::AdjustmentTypeID type() const;
 
-    /**
-     * Sets the value of <code>Layer</code> to its corresponding
-     * GPU struct. OBS! Users must ensure bind has been 
-     * called before setting using this method.
-     */
-    virtual void setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
-        const TileIndex& tileIndex, int pileSize);
+    // Properties
+    properties::Vec3Property chromaKeyColor;
+    properties::FloatProperty chromaKeyTolerance;
 
-    /** 
-     * Binds this object with GLSL variables with identifiers starting 
-     * with nameBase within the provided shader program.
-     * After this method has been called, users may invoke setValue.
-     */
-    virtual void bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
-        const std::string& nameBase, int pileSize);
-
-    /**
-    * Deactivates any <code>TextureUnit</code>s assigned by this object.
-    * This method should be called after the OpenGL draw call.
-    */
-    virtual void deactivate();
-
+    void onChange(std::function<void(void)> callback);
 private:
-    GPUChunkTilePile gpuChunkTilePile;
-    GPULayerRenderSettings gpuRenderSettings;
-    GPULayerAdjustment gpuLayerAdjustment;
+    void addVisibleProperties();
+    void removeVisibleProperties();
     
-    // Adjustment layer stuff
-    GPUData<glm::vec3> gpuColor;
+    properties::OptionProperty _typeOption;
+    layergroupid::AdjustmentTypeID _type;
+
+    std::function<void(void)> _onChangeCallback;
 };
 
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__

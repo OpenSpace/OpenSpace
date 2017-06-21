@@ -22,65 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
 
-#include <modules/globebrowsing/rendering/gpu/gpuchunktilepile.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayeradjustment.h>
-#include <modules/globebrowsing/rendering/gpu/gpulayerrendersettings.h>
-#include <openspace/util/gpudata.h>
-#include <string>
+#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
-namespace ghoul { namespace opengl {
-class ProgramObject;
-}}
+#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/numericalproperty.h>
 
 namespace openspace {
+
+class PixelBuffer;
+
 namespace globebrowsing {
 
-class Layer;
-struct TileIndex;
+class AsyncTileDataProvider;
+struct RawTile;
+    
+namespace tileprovider {
 
 /**
- * Manages a GPU representation of a <code>Layer</code>
- */
-class GPULayer {
+* Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
+* caches them in memory using LRU caching
+*/
+class DefaultTileProvider : public TileProvider {
 public:
+    DefaultTileProvider(const ghoul::Dictionary& dictionary);
+    DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader);
 
-    virtual ~GPULayer() = default;
-
+    virtual ~DefaultTileProvider() override;
+        
     /**
-     * Sets the value of <code>Layer</code> to its corresponding
-     * GPU struct. OBS! Users must ensure bind has been 
-     * called before setting using this method.
-     */
-    virtual void setValue(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
-        const TileIndex& tileIndex, int pileSize);
-
-    /** 
-     * Binds this object with GLSL variables with identifiers starting 
-     * with nameBase within the provided shader program.
-     * After this method has been called, users may invoke setValue.
-     */
-    virtual void bind(ghoul::opengl::ProgramObject* programObject, const Layer& layer,
-        const std::string& nameBase, int pileSize);
-
-    /**
-    * Deactivates any <code>TextureUnit</code>s assigned by this object.
-    * This method should be called after the OpenGL draw call.
+    * \returns a Tile with status OK iff it exists in in-memory 
+    * cache. If not, it may enqueue some IO operations on a 
+    * separate thread.
     */
-    virtual void deactivate();
+    virtual Tile getTile(const TileIndex& tileIndex) override;
+
+    virtual Tile::Status getTileStatus(const TileIndex& tileIndex) override;
+    virtual TileDepthTransform depthTransform() override;
+    virtual void update() override;
+    virtual void reset() override;
+    virtual int maxLevel() override;
+    virtual float noDataValueAsFloat() override;
 
 private:
-    GPUChunkTilePile gpuChunkTilePile;
-    GPULayerRenderSettings gpuRenderSettings;
-    GPULayerAdjustment gpuLayerAdjustment;
-    
-    // Adjustment layer stuff
-    GPUData<glm::vec3> gpuColor;
+    /**
+    * Collects all asynchronously downloaded <code>RawTile</code>
+    * and uses <code>createTile</code> to create <code>Tile</code>s, 
+    * which are put in the LRU cache - potentially pushing out outdated
+    * Tiles.
+    */
+    void initTexturesFromLoadedData();
+
+    void initAsyncTileDataReader(TileTextureInitData initData);
+
+    std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
+  
+    cache::MemoryAwareTileCache* _tileCache;
+
+    properties::StringProperty _filePath;
+    properties::IntProperty _tilePixelSize;
+    layergroupid::GroupID _layerGroupID;
+    std::string _basePath;
+    int _preCacheLevel;
+    bool _performPreProcessing;
 };
 
+} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
