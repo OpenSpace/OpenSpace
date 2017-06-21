@@ -41,8 +41,8 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
     , _scaling("scaling", "Scaling", glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0), glm::vec3(10.0))
     , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
-    , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28))
-    , _color("color", "Color", glm::vec4(1.0, 0.0, 0.0, 0.1), glm::vec4(0.0), glm::vec4(1.0)) {
+    , _rotation("rotation", "Euler rotation", glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f))
+    , _color("color", "Color", glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f)) {
 
     float scalingExponent, stepSize;
     glm::vec3 scaling, translation, rotation;

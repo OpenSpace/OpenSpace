@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cpl_vsi_error.h 33758 2016-03-21 09:06:22Z rouault $
+ * $Id: cpl_vsi_error.h 36769 2016-12-10 01:44:43Z goatbar $
  *
  * Project:  VSI Virtual File System
  * Purpose:  Implement an error system for reporting file system errors.
@@ -54,13 +54,16 @@ typedef int VSIErrorNum;
 #define VSIE_AWSInvalidCredentials      9
 #define VSIE_AWSSignatureDoesNotMatch   10
 
-void CPL_DLL VSIError(VSIErrorNum err_no, const char *fmt, ...)  CPL_PRINT_FUNC_FORMAT (2, 3);
+void CPL_DLL VSIError( VSIErrorNum err_no,
+                       CPL_FORMAT_STRING(const char *fmt), ... )
+    CPL_PRINT_FUNC_FORMAT (2, 3);
 
 void CPL_DLL CPL_STDCALL VSIErrorReset( void );
 VSIErrorNum CPL_DLL CPL_STDCALL VSIGetLastErrorNo( void );
 const char CPL_DLL * CPL_STDCALL VSIGetLastErrorMsg( void );
 
-int CPL_DLL CPL_STDCALL VSIToCPLError(CPLErr eErrClass, CPLErrorNum eDefaultErrorNo);
+int CPL_DLL CPL_STDCALL VSIToCPLError( CPLErr eErrClass,
+                                       CPLErrorNum eDefaultErrorNo );
 
 CPL_C_END
 

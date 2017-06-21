@@ -31,9 +31,11 @@
 #include <chrono>
 #include <fstream>
 #include <vector>
+#include <system_error>
 
 namespace {
     const char* KeyFile = "File";
+    const char* KeyLineNum = "LineNum";
     
     // The list of leap years only goes until 2056 as we need to touch this file then
     // again anyway ;)
@@ -183,7 +185,8 @@ namespace {
         // 3
         using namespace std::chrono;
         int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-        double nSecondsSince2000 = (daysSince2000 + daysInYear) * SecondsPerDay;
+        //Need to subtract 1 from daysInYear since it is not a zero-based count
+        double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
         
         // 4
         // We need to remove additionbal leap seconds past 2000 and add them prior to
@@ -244,6 +247,12 @@ documentation::Documentation TLETranslation::Documentation() {
                 new StringVerifier,
                 "Specifies the filename of the Two-Line-Element file",
                 Optional::No
+            },
+            {
+                KeyLineNum,
+                new DoubleGreaterVerifier(0),
+                "Specifies the line number within the file where the group of 3 TLE lines begins (1-based)",
+                Optional::No
             }
         },
         Exhaustive::No
@@ -261,10 +270,11 @@ TLETranslation::TLETranslation(const ghoul::Dictionary& dictionary)
     );
     
     std::string file = dictionary.value<std::string>(KeyFile);
-    readTLEFile(file);
+    int lineNum = dictionary.value<double>(KeyLineNum);
+    readTLEFile(file, lineNum);
 }
 
-void TLETranslation::readTLEFile(const std::string& filename) {
+void TLETranslation::readTLEFile(const std::string& filename, int lineNum) {
     ghoul_assert(FileSys.fileExists(filename), "The filename must exist");
     
     std::ifstream file;
@@ -283,101 +293,87 @@ void TLETranslation::readTLEFile(const std::string& filename) {
         double epoch = 0.0;
     } keplerElements;
     
-    enum class State {
-        Initial = 0,
-        ReadFirstLine,
-        ReadSecondLine,
-        Finished = ReadSecondLine
-    };
-    
-    State state = State::Initial;
-
     std::string line;
-    while (std::getline(file, line)) {
-        if (line[0] == '1') {
-            // First line
-            // Field Columns Content
-            //    1  01-01   Line number
-            //    2  03-07   Satellite number
-            //    3  08-08   Classification (U = Unclassified)
-            //    4  10-11   International Designator (Last two digits of launch year)
-            //    5  12-14   International Designator (Launch number of the year)
-            //    6  15-17   International Designator(piece of the launch)    A
-            //    7  19-20   Epoch Year(last two digits of year)
-            //    8     21-32   Epoch(day of the year and fractional portion of the day)
-            //    9     34-43   First Time Derivative of the Mean Motion divided by two
-            //    10 45-52   Second Time Derivative of Mean Motion divided by six
-            //    11 54-61   BSTAR drag term(decimal point assumed)[10] - 11606 - 4
-            //    12 63-63   The "Ephemeris type"
-            //    13 65-68     Element set  number.Incremented when a new TLE is generated
-            //    14 69-69   Checksum (modulo 10)
-        
-            keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
-            state = State::ReadFirstLine;
-        }
-        else if (line[0] == '2') {
-            if (state != State::ReadFirstLine) {
-                throw ghoul::RuntimeError(
-                    "Malformed TLE file: '" + filename + "'. Line 2 before line 1",
-                    "TLETranslation"
-                );
-            }
-            // Second line
-            //Field    Columns    Content
-            //    1  01-01  Line number
-            //    2  03-07  Satellite number
-            //    3     09-16  Inclination (degrees)
-            //    4     18-25  Right ascension of the ascending node (degrees)
-            //    5     27-33  Eccentricity (decimal point assumed)
-            //    6     35-42  Argument of perigee (degrees)
-            //    7     44-51  Mean Anomaly (degrees)
-            //    8     53-63  Mean Motion (revolutions per day)
-            //    9     64-68  Revolution number at epoch (revolutions)
-            //    10 69-69  Checksum (modulo 10)
-            
-            std::stringstream stream;
-            stream.exceptions(std::ios::failbit);
-            
-            // Get inclination
-            stream.str(line.substr(8, 8));
-            stream >> keplerElements.inclination;
-            stream.clear();
-            
-            // Get Right ascension of the ascending node
-            stream.str(line.substr(17, 8));
-            stream >> keplerElements.ascendingNode;
-            stream.clear();
+    //Loop through and throw out lines until getting to the linNum of interest
+    for (unsigned int i = 1; i < lineNum; ++i)
+        std::getline(file, line);
+    std::getline(file, line); //Throw out the TLE title line (1st)
 
-            // Get Eccentricity
-            stream.str("0." + line.substr(26, 7));
-            stream >> keplerElements.eccentricity;
-            stream.clear();
-            
-            // Get argument of periapsis
-            stream.str(line.substr(34, 8));
-            stream >> keplerElements.argumentOfPeriapsis;
-            stream.clear();
-            
-            // Get mean anomaly
-            stream.str(line.substr(43, 8));
-            stream >> keplerElements.meanAnomaly;
-            stream.clear();
-            
-            // Get mean motion
-            stream.str(line.substr(52, 11));
-            stream >> keplerElements.meanMotion;
-            
-            state = State::ReadSecondLine;
-            break;
-        }
+    std::getline(file, line); //Get line 1 of TLE format
+    if (line[0] == '1') {
+        // First line
+        // Field Columns Content
+        //    1  01-01   Line number
+        //    2  03-07   Satellite number
+        //    3  08-08   Classification (U = Unclassified)
+        //    4  10-11   International Designator (Last two digits of launch year)
+        //    5  12-14   International Designator (Launch number of the year)
+        //    6  15-17   International Designator(piece of the launch)    A
+        //    7  19-20   Epoch Year(last two digits of year)
+        //    8     21-32   Epoch(day of the year and fractional portion of the day)
+        //    9     34-43   First Time Derivative of the Mean Motion divided by two
+        //    10 45-52   Second Time Derivative of Mean Motion divided by six
+        //    11 54-61   BSTAR drag term(decimal point assumed)[10] - 11606 - 4
+        //    12 63-63   The "Ephemeris type"
+        //    13 65-68     Element set  number.Incremented when a new TLE is generated
+        //    14 69-69   Checksum (modulo 10)
+        keplerElements.epoch = epochFromSubstring(line.substr(18, 14));
+    } else {
+        throw ghoul::RuntimeError("File " + filename + " @ line "
+                  + std::to_string(lineNum + 1) + " doesn't have '1' header");
     }
-    
-    if (state != State::Finished) {
-        throw ghoul::RuntimeError(
-            "Malformed TLE file: Line 1 or 2 missing",
-            "TLETranslation"
-        );
+
+    std::getline(file, line); //Get line 2 of TLE format
+    if (line[0] == '2') {
+        // Second line
+        //Field    Columns    Content
+        //    1  01-01  Line number
+        //    2  03-07  Satellite number
+        //    3     09-16  Inclination (degrees)
+        //    4     18-25  Right ascension of the ascending node (degrees)
+        //    5     27-33  Eccentricity (decimal point assumed)
+        //    6     35-42  Argument of perigee (degrees)
+        //    7     44-51  Mean Anomaly (degrees)
+        //    8     53-63  Mean Motion (revolutions per day)
+        //    9     64-68  Revolution number at epoch (revolutions)
+        //    10 69-69  Checksum (modulo 10)
+
+        std::stringstream stream;
+        stream.exceptions(std::ios::failbit);
+
+        // Get inclination
+        stream.str(line.substr(8, 8));
+        stream >> keplerElements.inclination;
+        stream.clear();
+
+        // Get Right ascension of the ascending node
+        stream.str(line.substr(17, 8));
+        stream >> keplerElements.ascendingNode;
+        stream.clear();
+
+        // Get Eccentricity
+        stream.str("0." + line.substr(26, 7));
+        stream >> keplerElements.eccentricity;
+        stream.clear();
+
+        // Get argument of periapsis
+        stream.str(line.substr(34, 8));
+        stream >> keplerElements.argumentOfPeriapsis;
+        stream.clear();
+
+        // Get mean anomaly
+        stream.str(line.substr(43, 8));
+        stream >> keplerElements.meanAnomaly;
+        stream.clear();
+
+        // Get mean motion
+        stream.str(line.substr(52, 11));
+        stream >> keplerElements.meanMotion;
+    } else {
+        throw ghoul::RuntimeError("File " + filename + " @ line "
+                  + std::to_string(lineNum + 2) + " doesn't have '2' header");
     }
+    file.close();
     
     // Calculate the semi major axis based on the mean motion using kepler's laws
     keplerElements.semiMajorAxis = calculateSemiMajorAxis(keplerElements.meanMotion);

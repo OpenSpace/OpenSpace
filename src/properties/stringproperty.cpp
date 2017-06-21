@@ -32,10 +32,12 @@ namespace properties {
 REGISTER_TEMPLATEPROPERTY_SOURCE(StringProperty, std::string, "",
 [](lua_State* state, bool& success) -> std::string {
         success = lua_isstring(state, -1) == 1;
-        if (success)
+        if (success) {
             return lua_tostring(state, -1);
-        else
+        }
+        else {
             return "";
+        }
     },
 [](lua_State* state, std::string value) -> bool {
         lua_pushstring(state, value.c_str());

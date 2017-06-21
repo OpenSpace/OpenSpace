@@ -22,23 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// open space includes
 #include <openspace/rendering/transferfunction.h>
 
-// ghoul includes
-#include <ghoul/opengl/texture.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
-
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
-#include <fstream>
-#include <string>
+#include <ghoul/opengl/texture.h>
+
 #include <cstring>
 #include <iterator>
+#include <fstream>
+#include <string>
 
 #include <iostream>
-
 
 namespace {
     const std::string _loggerCat = "TransferFunction";

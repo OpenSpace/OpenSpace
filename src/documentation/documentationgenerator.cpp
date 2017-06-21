@@ -52,6 +52,7 @@ DocumentationGenerator::DocumentationGenerator(std::string name,
     ghoul_precondition(!_name.empty(), "name must not be empty");
     ghoul_precondition(!_jsonName.empty(), "jsonName must not be empty");
     for (const HandlebarTemplate& t : _handlebarTemplates) {
+        (void)t; // Unused variable in Release mode
         ghoul_precondition(!t.name.empty(), "name must not be empty");
         ghoul_precondition(!t.filename.empty(), "filename must not be empty");
     }

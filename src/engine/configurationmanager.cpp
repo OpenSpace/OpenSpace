@@ -115,7 +115,6 @@ string ConfigurationManager::findConfiguration(const string& filename) {
         }
         
         // Otherwise, we traverse the directory tree up
-    
         Directory nextDirectory = directory.parentDirectory(
             ghoul::filesystem::Directory::AbsolutePath::Yes
         );
