@@ -27,6 +27,12 @@
 namespace openspace {
 namespace globebrowsing {
 
+namespace {
+    const char* keyType = "Type";
+    const char* keyChromaKeyColor = "ChromaKeyColor";
+    const char* keyChromaKeyTolerance = "ChromaKeyTolerance";
+}
+
 LayerAdjustment::LayerAdjustment()
     : properties::PropertyOwner("adjustment")
     , _typeOption(
@@ -64,6 +70,25 @@ LayerAdjustment::LayerAdjustment()
 
     addProperty(_typeOption);
     addVisibleProperties();
+}
+
+void LayerAdjustment::setValuesFromDictionary(
+    const ghoul::Dictionary& adjustmentDict)
+{
+    std::string dictType;
+    glm::vec3 dictChromaKeyColor;
+    float dictChromaKeyTolerance;
+    
+    if(adjustmentDict.getValue(keyType, dictType)) {
+        _typeOption.setValue(
+            static_cast<int>(layergroupid::getAdjustmentTypeIDFromName(dictType)));
+    }
+    if(adjustmentDict.getValue(keyChromaKeyColor, dictChromaKeyColor)) {
+        chromaKeyColor.setValue(dictChromaKeyColor);
+    }
+    if(adjustmentDict.getValue(keyChromaKeyTolerance, dictChromaKeyTolerance)) {
+        chromaKeyTolerance.setValue(dictChromaKeyTolerance);
+    }
 }
 
 layergroupid::AdjustmentTypeID LayerAdjustment::type() const {

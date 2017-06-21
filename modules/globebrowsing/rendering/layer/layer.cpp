@@ -34,6 +34,8 @@ namespace {
     const char* keyEnabled = "Enabled";
     const char* keyLayerGroupID = "LayerGroupID";
     const char* keySettings = "Settings";
+    const char* keyAdjustment = "Adjustment";
+    const char* KeyBlendMode = "BlendMode";
 }
 
 Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
@@ -83,6 +85,12 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
         _renderSettings.useValueBlending = true;
     }
 
+    // Initiallize layer adjustment
+    ghoul::Dictionary adjustmentDict;
+    if (layerDict.getValue(keyAdjustment, adjustmentDict)) {
+        _layerAdjustment.setValuesFromDictionary(adjustmentDict);
+    }
+
     // Add options to option properties
     for (int i = 0; i < layergroupid::NUM_LAYER_TYPES; ++i) {
         _typeOption.addOption(i, layergroupid::LAYER_TYPE_NAMES[i]);
@@ -93,7 +101,17 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     for (int i = 0; i < layergroupid::NUM_BLEND_MODES; ++i) {
         _blendModeOption.addOption(i, layergroupid::BLEND_MODE_NAMES[i]);
     }
-    _blendModeOption.setValue(static_cast<int>(layergroupid::BlendModeID::Normal));
+
+    // Initialize blend mode
+    std::string blendModeName;
+    if (layerDict.getValue(KeyBlendMode, blendModeName)) {
+        layergroupid::BlendModeID blendModeID =
+            layergroupid::getBlendModeIDFromName(blendModeName);
+        _blendModeOption.setValue(static_cast<int>(blendModeID));
+    }
+    else {
+        _blendModeOption.setValue(static_cast<int>(layergroupid::BlendModeID::Normal));
+    }
 
     // On change callbacks definitions
     _enabled.onChange([&](){

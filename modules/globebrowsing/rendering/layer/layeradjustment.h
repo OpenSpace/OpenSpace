@@ -46,6 +46,8 @@ public:
     LayerAdjustment();
     ~LayerAdjustment() = default;
 
+    void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
+
     layergroupid::AdjustmentTypeID type() const;
 
     // Properties

@@ -134,6 +134,28 @@ static layergroupid::GroupID getGroupIDFromName(std::string layerGroupName) {
     return GroupID::Unknown;
 }
 
+static layergroupid::AdjustmentTypeID getAdjustmentTypeIDFromName(
+    std::string adjustmentTypeName)
+{
+    for (int i = 0; i < layergroupid::NUM_ADJUSTMENT_TYPES; ++i) {
+        if (adjustmentTypeName == layergroupid::ADJUSTMENT_TYPE_NAMES[i]) {
+            return static_cast<layergroupid::AdjustmentTypeID>(i);
+        }
+    }
+    return AdjustmentTypeID::None;
+}
+
+static layergroupid::BlendModeID getBlendModeIDFromName(
+    std::string blendModeName)
+{
+    for (int i = 0; i < layergroupid::NUM_BLEND_MODES; ++i) {
+        if (blendModeName == layergroupid::BLEND_MODE_NAMES[i]) {
+            return static_cast<layergroupid::BlendModeID>(i);
+        }
+    }
+    return BlendModeID::Normal;
+}
+
 } // namespace layergroupid
 } // namespace globebrowsing
 } // namespace openspace
