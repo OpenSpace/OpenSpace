@@ -7,7 +7,7 @@ return {
                 Type = "SpiceTranslation",
                 Body = "SOHO",
                 Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/soho_2012.bsp"
+                Kernels = solarImageryDataRootPath .. "/spicekernels/soho_2012.bsp"
             },
             Rotation = {
                 Type = "SpiceRotation",
@@ -25,7 +25,7 @@ return {
                 Type = "SpiceTranslation",
                 Body = "SOHO",
                 Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/soho_2012.bsp"
+                Kernels = solarImageryDataRootPath .. "/spicekernels/soho_2012.bsp"
             },
             Color = { 0.18, 0.59, 0.21 },
             Period = 365.242,
@@ -41,7 +41,7 @@ return {
             Size =  10^9.8,
             Origin = "Center",
             Billboard = true,
-            Texture = "${OPENSPACE_DATA}/scene/missions/soho/textures/marker.png",
+            Texture = solarImageryDataRootPath .. "/markers/marker_soho.png",
             BlendMode = "Additive"
         },
         Transform = {

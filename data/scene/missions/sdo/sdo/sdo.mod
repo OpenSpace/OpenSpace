@@ -9,7 +9,7 @@ return {
                 Frame = "J2000",
                 Body = "-136395",
                 Observer = "EARTH",
-                Kernels = "${OPENSPACE_DATA}/spice/SDO_EPHEM_2010123_2017104_new.bsp"
+                Kernels = solarImageryDataRootPath .. "/spicekernels/SDO_EPHEM_2010123_2017104_new.bsp"
             },
             Color = { 1.0, 1.0, 1.0 },
             Period = 0.997319,
@@ -26,7 +26,7 @@ return {
                 Frame = "J2000",
                 Body = "-136395",
                 Observer = "EARTH",
-                Kernels = "${OPENSPACE_DATA}/spice/SDO_EPHEM_2010123_2017104_new.bsp"
+                Kernels = solarImageryDataRootPath .. "/spicekernels/SDO_EPHEM_2010123_2017104_new.bsp"
             },
         }
     },
@@ -63,7 +63,7 @@ return {
             Size =  10^9.8,
             Origin = "Center",
             Billboard = true,
-            Texture = "${OPENSPACE_DATA}/scene/missions/sdo/textures/marker_inv.png",
+            Texture = solarImageryDataRootPath .. "/markers/marker_sdo_inv.png",
             BlendMode = "Additive"
         },
         Transform = {

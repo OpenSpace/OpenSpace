@@ -7,7 +7,7 @@ return {
                 Type = "SpiceTranslation",
                 Body = "STEREO BEHIND",
                 Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/stereob/behind_2012_265_01.depm.bsp"
+                Kernels = solarImageryDataRootPath .. "/spicekernels/behind_2012_265_01.depm.bsp"
             },
             Rotation = {
                 Type = "SpiceRotation",
@@ -26,7 +26,7 @@ return {
                 Type = "SpiceTranslation",
                 Body = "STEREO BEHIND",
                 Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/stereob/behind_2012_265_01.depm.bsp"
+                Kernels = solarImageryDataRootPath .. "/spicekernels/behind_2012_265_01.depm.bsp"
             },
             Color = { 0.41, 0.52, 0.9 },
             Period = 365.242,
@@ -41,7 +41,7 @@ return {
             Size =  10^9.8,
             Origin = "Center",
             Billboard = true,
-            Texture = "${OPENSPACE_DATA}/scene/missions/stereo-b/textures/marker.png",
+            Texture = solarImageryDataRootPath .. "/markers/marker_stereob.png",
             BlendMode = "Additive"
         },
         Transform = {

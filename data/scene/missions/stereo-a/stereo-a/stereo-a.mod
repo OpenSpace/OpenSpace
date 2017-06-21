@@ -33,7 +33,7 @@ return {
                 Type = "SpiceTranslation",
                 Body = "STEREO AHEAD",
                 Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/STEREO-A_merged.bsp"
+                Kernels = solarImageryDataRootPath .. "/spicekernels/STEREO-A_merged.bsp"
             },
             -- Using internal reference frame
             -- Rotation = {
@@ -59,7 +59,7 @@ return {
                 Type = "SpiceTranslation",
                 Body = "STEREO AHEAD",
                 Observer = "SUN",
-                Kernels = "${OPENSPACE_DATA}/spice/STEREO-A_merged.bsp"
+                Kernels = solarImageryDataRootPath .. "/spicekernels/STEREO-A_merged.bsp"
             },
             Color = { 0.41, 0.52, 0.9 },
             Period = 365.242,
@@ -74,7 +74,7 @@ return {
             Size =  10^9.8,
             Origin = "Center",
             Billboard = true,
-            Texture = "${OPENSPACE_DATA}/scene/missions/stereo-a/textures/marker.png",
+            Texture = solarImageryDataRootPath .. "/markers/marker_stereoa.png",
             BlendMode = "Additive"
         },
         Transform = {
