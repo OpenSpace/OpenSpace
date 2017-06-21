@@ -39,7 +39,7 @@ using namespace openspace;
 
 class RawVolumeIoTest : public testing::Test {};
 
-TEST_F(RawVolumeIoTest, BasicInputOutput) {
+TEST_F(RawVolumeIoTest, TinyInputOutput) {
     using namespace volume;
 
     glm::uvec3 dims{ 1, 1, 1 };
@@ -61,3 +61,35 @@ TEST_F(RawVolumeIoTest, BasicInputOutput) {
     std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
     ASSERT_EQ(storedVolume->get({ 0, 0, 0 }), value);
 }
+
+TEST_F(RawVolumeIoTest, BasicInputOutput) {
+    using namespace volume;
+
+    glm::uvec3 dims{ 2, 4, 8 };
+    auto value = [dims](glm::uvec3 v) {
+        return v.z * 8 * 4 + v.y * 4 + v.x;
+    };
+
+    RawVolume<float> vol(dims);
+    vol.forEachVoxel([&vol, &value](glm::uvec3 x, float v) {
+        vol.set(x, value(x));
+    });
+
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) {
+        ASSERT_EQ(v, value(x));
+    });
+
+    std::string volumePath = absPath("${TESTDIR}/basicvolume.rawvolume");
+
+    // Write the 2x4x8 volume to disk
+    RawVolumeWriter<float> writer(volumePath);
+    writer.write(vol);
+
+    // Read the 2x4x8 volume and make sure the value is the same.
+    RawVolumeReader<float> reader(volumePath, dims);
+    std::unique_ptr<RawVolume<float>> storedVolume = reader.read();
+    vol.forEachVoxel([&value](glm::uvec3 x, float v) {
+        ASSERT_EQ(v, value(x));
+    });
+}
+
