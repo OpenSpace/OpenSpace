@@ -209,7 +209,7 @@ int goToSol(lua_State* L) {
 
 	int sol = lua_tonumber(L, 1);
 
-	OsEng.interactionHandler().goToSol(sol);
+	//OsEng.interactionHandler().goToSol(sol);
 
 	return 0;
 }

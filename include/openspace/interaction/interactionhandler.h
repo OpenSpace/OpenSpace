@@ -69,7 +69,7 @@ public:
     
     void goToChunk(int x, int y, int level);
     void goToGeo(double latitude, double longitude);
-	void goToSol(int sol);
+	void goToSol(double latitude, double longitude);
     
     void resetKeyBindings();
 
