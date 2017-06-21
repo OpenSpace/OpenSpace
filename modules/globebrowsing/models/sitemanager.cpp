@@ -44,7 +44,7 @@ SiteManager::SiteManager(std::string name, std::vector<std::shared_ptr<Subsite>>
 		if (std::find(temp2.begin(), temp2.end(), ss.at(i)->site) == temp2.end()) {
 			SiteWithDrives test;
 			test._site = ss.at(i)->site;
-
+			
 			temp2.push_back(ss.at(i)->site);
 			temp.push_back(test);
 		}
@@ -54,6 +54,7 @@ SiteManager::SiteManager(std::string name, std::vector<std::shared_ptr<Subsite>>
 		for (size_t j = 0; j < temp.size(); ++j) {
 			if (temp.at(j)._site == ss.at(i)->site) {
 				temp.at(j)._drives.push_back(ss.at(i)->drive);
+				temp.at(j)._driveCoords.push_back(glm::dvec2(ss.at(i)->geodetic.lat, ss.at(i)->geodetic.lon));
 			}
 		}
 	}

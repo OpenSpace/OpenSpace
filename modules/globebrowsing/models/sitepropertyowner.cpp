@@ -36,9 +36,10 @@ SitePropertyOwner::SitePropertyOwner(SiteWithDrives swd)
 	, _enabled(properties::BoolProperty("siteEnabled", "Site enabled", false))
 {
 	_site = swd._site;
-	LERROR("Adding site: " << _site);
+	int i = 0;
 	for (auto k : swd._drives) {
-		_drivePropertyOwner.push_back(std::make_shared<DrivePropertyOwner>(k));
+		_drivePropertyOwner.push_back(std::make_shared<DrivePropertyOwner>(k, swd._driveCoords.at(i)));
+		i++;
 	}
 
 	for (auto k : _drivePropertyOwner) {

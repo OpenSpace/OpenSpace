@@ -24,18 +24,36 @@
 
 #include <modules/globebrowsing/models/drivepropertyowner.h>
 
+#include <openspace/interaction/interactionhandler.h>
+
+#include <openspace/engine/openspaceengine.h>
+
+#include <ghoul/lua/lua_helper.h>
+
 namespace {
 	const std::string _loggerCat = "DrivePropertyOwner";
 }
 
 namespace openspace {
 namespace globebrowsing {
-DrivePropertyOwner::DrivePropertyOwner(std::string drive)
+DrivePropertyOwner::DrivePropertyOwner(std::string drive, glm::dvec2 driveCoords)
 	: properties::PropertyOwner("Drive" + drive)
 	, _enabled(properties::BoolProperty("driveEnabled", "Drive enabled", false))
+	, _goToSubSite(properties::TriggerProperty("goToSubSite", "Go to subsite"))
+	, _drive(drive)
+	, _driveCoords(driveCoords)
 {
+	_goToSubSite.onChange([&] { goToSubSite(_drive); });
+
 	addProperty(_enabled);
+	addProperty(_goToSubSite);
 }
+
+void DrivePropertyOwner::goToSubSite(std::string drive) {
+	LERROR("DRIVE: " << drive);
+	OsEng.ref().interactionHandler().goToSol(_driveCoords.x, _driveCoords.y);
+}
+
 }
 }
 
