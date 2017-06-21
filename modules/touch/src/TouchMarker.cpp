@@ -42,7 +42,7 @@ TouchMarker::TouchMarker()
 	, _visible("TouchMarkers visible", "Toggle visibility of markers", true)
 	, _radiusSize("Marker size", "Marker radius", 30, 0, 100)
 	, _transparency("Transparency of marker", "Marker transparency", 0.8, 0, 1.0)
-	, _thickness("Thickness of marker", "Marker thickness", 1.0, 0, 4.0)
+	, _thickness("Thickness of marker", "Marker thickness", 2.0, 0, 4.0)
 	, _color(
 		"MarkerColor",
 		"Marker color",
