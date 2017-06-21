@@ -49,11 +49,13 @@
 #include <pcl/features/normal_3d_omp.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/surface/marching_cubes_rbf.h>
+#include <pcl/surface/vtk_smoothing/vtk_mesh_smoothing_laplacian.h>
 
 #include <fstream>
 
 namespace {
-	const std::string _loggerCat = "MeshGeneration";
+	const std::string _loggerCat = "CollapsedMeshGeneration";
 }
 
 namespace openspace {
@@ -86,6 +88,8 @@ namespace openspace {
 				levelOfDetail = levelOfDetailVars->second;
 			}
 
+			LERROR("Level : " << level);
+
 			ghoul::Dictionary filters;
 			dictionary.getValue("Filters.Filters", filters);
 
@@ -100,13 +104,13 @@ namespace openspace {
 
 				upSamplingFilters.push_back(std::move(PointCloudFilter::createFromDictionary(filterDic)));
 			}
-			
+
 			std::string pathToDriveFolder;
 			pcl::PointCloud<pcl::PointXYZ>::Ptr fullSite(new pcl::PointCloud<pcl::PointXYZ>);
 
 			std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> tempVec;
 			glm::dmat4 outputMatrix;
-			
+
 			for (size_t i = 0; i < dictionary.size(); ++i) {
 				std::string pathToBinaryFile;
 
@@ -130,7 +134,7 @@ namespace openspace {
 					FileSys.createDirectory(pathToDriveFolder, k);
 				}
 				else if (FileSys.fileExists(pathToDriveFolder + outputFile + ".obj")) {
-					
+
 					LERROR("FILE ALREADY EXISTS " << pathToDriveFolder + outputFile + ".obj");
 					return;
 				}
@@ -145,12 +149,12 @@ namespace openspace {
 				pcl::PointCloud<pcl::PointXYZ>::Ptr fullCloud(new pcl::PointCloud<pcl::PointXYZ>);
 
 				MeshGeneration::extractCoordinatesFromArray(fullCloud, xyz, mInfo);
-			
+
 				tempVec.push_back(fullCloud);
 
 				pcl::PointCloud<pcl::PointXYZ>::Ptr prevCloud(new pcl::PointCloud<pcl::PointXYZ>());
 				prevCloud = fullCloud;
-				
+
 				for (size_t i = 0; i < upSamplingFilters.size(); ++i) {
 					pcl::PointCloud<pcl::PointXYZ>::Ptr outputCloud(new pcl::PointCloud<pcl::PointXYZ>());
 					upSamplingFilters.at(i)->setInputCloud(prevCloud);
@@ -165,7 +169,7 @@ namespace openspace {
 
 				glm::dmat4 rot = glm::dmat4(glm::toMat4(q3));
 
-				glm::dvec3 angle = glm::dvec3(0, M_PI, M_PI / 2.0);
+				glm::dvec3 angle = glm::dvec3(0, M_PI, -M_PI / 2.0);
 
 				glm::dmat4 unitMat4(1);
 
@@ -190,6 +194,15 @@ namespace openspace {
 				MeshGeneration::writeTxtFile(file_name_stripped, pathToDriveFolder, mInfo);
 			}
 
+
+			Eigen::Vector4f maxDist;
+
+			pcl::getMaxDistance(*fullSite, Eigen::Vector4f(0,0,0,1), maxDist);
+			LERROR("Distance from camera is : " << maxDist.norm());
+			LERROR("Max distance from camera: " << maxDist.x() << ", " << maxDist.y() << ", " << maxDist.z());
+
+			double res = computeCloudResolution(fullSite);
+			LERROR("Resolution of point cloud is : " << res);
 			writeMatrixFile(pathToDriveFolder, outputMatrix);
 			
 			std::vector<int> vec;
@@ -198,7 +211,7 @@ namespace openspace {
 			pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloudRotatedNoNan(new pcl::PointCloud<pcl::PointXYZ>);
 
 			pcl::removeNaNFromPointCloud(*fullSite, *filteredCloudRotatedNoNan, vec);
-			
+
 			// Output has the PointNormal type in order to store the normals calculated by MLS
 			pcl::PointCloud<pcl::PointXYZ>::Ptr movingLeastSquaresCloud(new pcl::PointCloud<pcl::PointXYZ>);
 			// Init object (second point type is for the normals, even if unused)
@@ -217,12 +230,12 @@ namespace openspace {
 			mls.setUpsamplingMethod(mls.SAMPLE_LOCAL_PLANE);
 			mls.setUpsamplingRadius(0.1);
 			mls.setUpsamplingStepSize(0.05);
-			
+
 			// Reconstruct
 			LINFO("Points before moving least squares size : " << fullSite->points.size());
 			//mls.process(*movingLeastSquaresCloud);
 			LINFO("Points after moving least squares: " << movingLeastSquaresCloud->points.size());
-						
+
 			Eigen::Quaternionf q(mInfo2._roverQuat.at(0), mInfo2._roverQuat.at(1), mInfo2._roverQuat.at(2), mInfo2._roverQuat.at(3));
 
 			Eigen::Matrix4f rotation = Eigen::Matrix4f::Identity();
@@ -245,9 +258,9 @@ namespace openspace {
 
 			pcl::transformPointCloud(*normalCloudTransformed, *normalCloudRotated, rotationMatrix);
 
-
-			////////////////////////////////////////////////////////////////////////////
 			
+			////////////////////////////////////////////////////////////////////////////
+
 			pcl::PointCloud<pcl::PointXYZ>::Ptr xf_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 			pcl::PointCloud<pcl::PointXYZ>::Ptr yf_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 			pcl::PointCloud<pcl::PointXYZ>::Ptr zf_cloud(new pcl::PointCloud<pcl::PointXYZ>);
@@ -267,155 +280,166 @@ namespace openspace {
 
 			*zf_cloud = *yf_cloud + *xf_cloud;
 
-			pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTree2(new pcl::search::KdTree<pcl::PointXYZ>);
-			kdTree2->setInputCloud(zf_cloud);
-			pcl::PointXYZ camera;
-			camera.x = -0.7;
-			camera.y = 0;
-			camera.z = 0;
-			std::vector<int> indicies;
-			std::vector<float> indiciesDist;
-			kdTree2->radiusSearch(camera,5.0,indicies,indiciesDist);
-			boost::shared_ptr<std::vector<int>> indicesptr(new std::vector<int>(indicies));
-			LERROR("HAS THIS SIZE CHANGED?" << zf_cloud->size());
-			typename pcl::PointCloud<pcl::PointXYZ>::Ptr normalCloudRotated2(new pcl::PointCloud<pcl::PointXYZ>);
-			//The smaller one was with 10 i radius
-			pcl::copyPointCloud(*zf_cloud, *normalCloudRotated2);
+			pcl::PointCloud<pcl::PointXYZ>::Ptr zf_cloud5(new pcl::PointCloud<pcl::PointXYZ>);
 
-			typename pcl::PointCloud<pcl::PointXYZ>::Ptr normalCloudRotated3(new pcl::PointCloud<pcl::PointXYZ>);
-			//The smaller one was with 10 i radius
-			pcl::copyPointCloud(*zf_cloud, *normalCloudRotated3);
-			
-			pcl::PointCloud<pcl::PointXYZ>::Ptr zf_cloud3(new pcl::PointCloud<pcl::PointXYZ>);
-			pcl::ExtractIndices<pcl::PointXYZ> eifilter(true); // Initializing with true will allow us to extract the removed indices
-			eifilter.setInputCloud(zf_cloud);
-			eifilter.setIndices(indicesptr);
-			eifilter.filter(*zf_cloud3);
-			
-			pcl::PointCloud<pcl::PointXYZ>::Ptr voxelGriddedPCLCloud(new pcl::PointCloud<pcl::PointXYZ>());
+			if (level == "level3") {
+				pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTree2(new pcl::search::KdTree<pcl::PointXYZ>);
+				kdTree2->setInputCloud(zf_cloud);
+				pcl::PointXYZ camera;
+				camera.x = -0.7;
+				camera.y = 0;
+				camera.z = 0;
+				std::vector<int> indicesInnerRadius;
+				std::vector<float> indiciesDist;
+				kdTree2->radiusSearch(camera, 5.0, indicesInnerRadius, indiciesDist);
+				boost::shared_ptr<std::vector<int>> indicesInnerRadiusPtr(new std::vector<int>(indicesInnerRadius));
 
-			pcl::VoxelGrid<pcl::PointXYZ> voxelGridded;
+				typename pcl::PointCloud<pcl::PointXYZ>::Ptr normalCloudRotated2(new pcl::PointCloud<pcl::PointXYZ>);
+				//The smaller one was with 10 i radius
+				pcl::copyPointCloud(*zf_cloud, *normalCloudRotated2);
 
-			voxelGridded.setDownsampleAllData(true);
-			voxelGridded.setInputCloud(zf_cloud3);
+				typename pcl::PointCloud<pcl::PointXYZ>::Ptr normalCloudRotated3(new pcl::PointCloud<pcl::PointXYZ>);
+				//The smaller one was with 10 i radius
+				pcl::copyPointCloud(*zf_cloud, *normalCloudRotated3);
 
-			voxelGridded.setLeafSize(levelOfDetail.voxelGridFilterLeafSize.x, levelOfDetail.voxelGridFilterLeafSize.y, levelOfDetail.voxelGridFilterLeafSize.z);
-			voxelGridded.filter(*voxelGriddedPCLCloud);
+				/////////////////////////////////////INNER RADIUS
 
-			pcl::PointCloud<pcl::PointXYZ>::Ptr zf_cloud4(new pcl::PointCloud<pcl::PointXYZ>);
-			pcl::IndicesConstPtr test = eifilter.getRemovedIndices();
+				pcl::PointCloud<pcl::PointXYZ>::Ptr innerRadiusFiltered(new pcl::PointCloud<pcl::PointXYZ>);
+				pcl::ExtractIndices<pcl::PointXYZ> innerFilter(true); // Initializing with true will allow us to extract the removed indices
+				innerFilter.setInputCloud(zf_cloud);
+				innerFilter.setIndices(indicesInnerRadiusPtr);
+				innerFilter.filter(*innerRadiusFiltered);
 
-			LERROR("NUMBER OF REMOVED: " << test->size());
-			LERROR("NUMBER KEPT: " << indicesptr->size());
-			
-			pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTree3(new pcl::search::KdTree<pcl::PointXYZ>);
-			kdTree3->setInputCloud(normalCloudRotated3);
+				double res = computeCloudResolution(innerRadiusFiltered);
 
-			std::vector<int> indicies2;
-			std::vector<float> indiciesDist2;
-			kdTree3->radiusSearch(camera, 7.0, indicies2, indiciesDist2);
-			boost::shared_ptr<std::vector<int>> indicesptr2(new std::vector<int>(indicies2));
-			boost::shared_ptr<std::vector<int>> indicesptr3(new std::vector<int>());
+				LERROR("Resolution is before : " << res);
 
-			//indicesptr2->insert(indicesptr2->begin(), indicesptr->begin(), indicesptr->end());
+				pcl::PointCloud<pcl::PointXYZ>::Ptr innerRadius(new pcl::PointCloud<pcl::PointXYZ>());
 
-			//std::sort(indicesptr2->begin(), indicesptr2->end());
-			//indicesptr2->erase(std::unique(indicesptr2->begin(), indicesptr2->end()), indicesptr2->end());
-			
-			
-			std::sort(indicesptr2->begin(), indicesptr2->end());
-			std::sort(indicesptr->begin(), indicesptr->end());
+				pcl::VoxelGrid<pcl::PointXYZ> voxelGridInnerRadius;
 
-			auto pred = [&indicesptr](const int& key) ->bool
-			{
-				return std::find(indicesptr->begin(), indicesptr->end(), key) != indicesptr->end();
-			};
+				voxelGridInnerRadius.setDownsampleAllData(true);
+				voxelGridInnerRadius.setInputCloud(innerRadiusFiltered);
+				voxelGridInnerRadius.setLeafSize(levelOfDetail.innerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.innerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.innerRadiusVoxelGridFilterLeafSize.z);
+				voxelGridInnerRadius.filter(*innerRadius);
 
-			indicesptr2->erase(std::remove_if(indicesptr2->begin(), indicesptr2->end(), pred), indicesptr2->end());
-			
+				double res2 = computeCloudResolution(innerRadius);
 
-			LERROR("THIS SIZE: " << indicesptr2->size());
-			/*for (int k = 0; k < indicesptr2->size(); ++k) {
-				
-				if (std::find(indicesptr->begin(), indicesptr->end(), indicesptr2->at(k)) == indicesptr->end()) {
-					indicesptr3->push_back(indicesptr2->at(k));
+				LERROR("Resolution is after : " << res2);
+
+				pcl::IndicesConstPtr test = innerFilter.getRemovedIndices();
+
+
+				/////////////////////////////////////MIDDLE RADIUS
+
+				pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTree3(new pcl::search::KdTree<pcl::PointXYZ>);
+				kdTree3->setInputCloud(normalCloudRotated3);
+
+				std::vector<int> indicesMiddleRadius;
+				std::vector<float> indiciesDist2;
+				kdTree3->radiusSearch(camera, 7.0, indicesMiddleRadius, indiciesDist2);
+				boost::shared_ptr<std::vector<int>> indicesMiddleRadiusPtr(new std::vector<int>(indicesMiddleRadius));
+
+				//indicesMiddleRadiusPtr->insert(indicesMiddleRadiusPtr->begin(), indicesptr->begin(), indicesptr->end());
+
+				//std::sort(indicesMiddleRadiusPtr->begin(), indicesMiddleRadiusPtr->end());
+				//indicesMiddleRadiusPtr->erase(std::unique(indicesMiddleRadiusPtr->begin(), indicesMiddleRadiusPtr->end()), indicesMiddleRadiusPtr->end());
+
+
+				std::sort(indicesMiddleRadiusPtr->begin(), indicesMiddleRadiusPtr->end());
+				std::sort(indicesInnerRadiusPtr->begin(), indicesInnerRadiusPtr->end());
+
+				auto pred = [&indicesInnerRadiusPtr](const int& key) ->bool
+				{
+					return std::find(indicesInnerRadiusPtr->begin(), indicesInnerRadiusPtr->end(), key) != indicesInnerRadiusPtr->end();
+				};
+
+				indicesMiddleRadiusPtr->erase(std::remove_if(indicesMiddleRadiusPtr->begin(), indicesMiddleRadiusPtr->end(), pred), indicesMiddleRadiusPtr->end());
+
+				/*for (int k = 0; k < indicesMiddleRadiusPtr->size(); ++k) {
+
+				if (std::find(indicesptr->begin(), indicesptr->end(), indicesMiddleRadiusPtr->at(k)) == indicesptr->end()) {
+				indicesptr3->push_back(indicesMiddleRadiusPtr->at(k));
 				}
-			}
-			LERROR("THIS SIZE: " << indicesptr3->size());*/
-			pcl::ExtractIndices<pcl::PointXYZ> eifilter3(true); // Initializing with true will allow us to extract the removed indices
-			eifilter3.setInputCloud(normalCloudRotated3);
+				}
+				LERROR("THIS SIZE: " << indicesptr3->size());*/
 
-			eifilter3.setIndices(indicesptr2);
-			eifilter3.filter(*zf_cloud4);
+				pcl::PointCloud<pcl::PointXYZ>::Ptr middleRadiusFiltered(new pcl::PointCloud<pcl::PointXYZ>);
 
-			pcl::PointCloud<pcl::PointXYZ>::Ptr voxelGriddedPCLCloud3(new pcl::PointCloud<pcl::PointXYZ>());
+				pcl::ExtractIndices<pcl::PointXYZ> middleFilter(true); // Initializing with true will allow us to extract the removed indices
+				middleFilter.setInputCloud(normalCloudRotated3);
 
-			pcl::VoxelGrid<pcl::PointXYZ> voxelGridded3;
+				middleFilter.setIndices(indicesMiddleRadiusPtr);
+				middleFilter.filter(*middleRadiusFiltered);
 
-			voxelGridded3.setDownsampleAllData(true);
-			voxelGridded3.setInputCloud(zf_cloud4);
-			double voxelGriddedLeafSize2 = 0.07;
-			voxelGridded3.setLeafSize(voxelGriddedLeafSize2, voxelGriddedLeafSize2, voxelGriddedLeafSize2);
-			voxelGridded3.filter(*voxelGriddedPCLCloud3);
+				pcl::PointCloud<pcl::PointXYZ>::Ptr middleRadius(new pcl::PointCloud<pcl::PointXYZ>());
 
-			pcl::PointCloud<pcl::PointXYZ>::Ptr zf_cloud9(new pcl::PointCloud<pcl::PointXYZ>);
+				pcl::VoxelGrid<pcl::PointXYZ> voxelGridMiddleRadius;
 
-			pcl::IndicesConstPtr test2 = eifilter3.getRemovedIndices();
+				voxelGridMiddleRadius.setDownsampleAllData(true);
+				voxelGridMiddleRadius.setInputCloud(middleRadiusFiltered);
+				voxelGridMiddleRadius.setLeafSize(levelOfDetail.middleRadiusVoxelGridFilterLeafSize.x, levelOfDetail.middleRadiusVoxelGridFilterLeafSize.y, levelOfDetail.middleRadiusVoxelGridFilterLeafSize.z);
+				voxelGridMiddleRadius.filter(*middleRadius);
 
-			/*boost::shared_ptr<std::vector<int>> indicesptr4(new std::vector<int>());
-			pcl::IndicesPtr testare = pcl::IndicesPtr();// = test2 + test;
+				pcl::PointCloud<pcl::PointXYZ>::Ptr outerRadiusFiltered(new pcl::PointCloud<pcl::PointXYZ>);
 
-			testare->insert(testare->begin(), test2->begin(), test2->end());
-			testare->insert(testare->begin(), test->begin(), test->end());
-			
-			std::sort(testare->begin(), testare->end());
-			testare->erase(unique(testare->begin(), testare->end()), testare->end());
-			
-			LERROR("THEIR SIZE: " << test2->size());
-			LERROR("THEIR SIZE: " << test->size());
-			*/
-			/*for (int k = 0; k < test2->size(); ++k) {
+				pcl::IndicesConstPtr test2 = middleFilter.getRemovedIndices();
+
+				/*boost::shared_ptr<std::vector<int>> indicesptr4(new std::vector<int>());
+				pcl::IndicesPtr testare = pcl::IndicesPtr();// = test2 + test;
+
+				testare->insert(testare->begin(), test2->begin(), test2->end());
+				testare->insert(testare->begin(), test->begin(), test->end());
+
+				std::sort(testare->begin(), testare->end());
+				testare->erase(unique(testare->begin(), testare->end()), testare->end());
+
+				LERROR("THEIR SIZE: " << test2->size());
+				LERROR("THEIR SIZE: " << test->size());
+				*/
+				/*for (int k = 0; k < test2->size(); ++k) {
 				indicesptr4->push_back(test2->at(k));
-			}
-			for (int k = 0; k < test->size(); ++k) {
+				}
+				for (int k = 0; k < test->size(); ++k) {
 
 				if (std::find(indicesptr4->begin(), indicesptr4->end(), test->at(k)) == indicesptr4->end()) {
-					indicesptr4->push_back(test->at(k));
+				indicesptr4->push_back(test->at(k));
 				}
-			}*/
+				}*/
 
 
-			pcl::ExtractIndices<pcl::PointXYZ> eifilter2(true); // Initializing with true will allow us to extract the removed indices
-			eifilter2.setInputCloud(normalCloudRotated2);
+				pcl::ExtractIndices<pcl::PointXYZ> outerFilter(true); // Initializing with true will allow us to extract the removed indices
+				outerFilter.setInputCloud(normalCloudRotated2);
 
-			LERROR("HAS THIS SIZE CHANGED?" << normalCloudRotated2->size());
+				outerFilter.setIndices(test);
+				outerFilter.filter(*outerRadiusFiltered);
 
-			eifilter2.setIndices(test);
-			eifilter2.filter(*zf_cloud9);
+				pcl::PointCloud<pcl::PointXYZ>::Ptr outerRadius(new pcl::PointCloud<pcl::PointXYZ>());
 
-			pcl::PointCloud<pcl::PointXYZ>::Ptr voxelGriddedPCLCloud2(new pcl::PointCloud<pcl::PointXYZ>());
+				pcl::VoxelGrid<pcl::PointXYZ> voxelGridOuter;
 
-			pcl::VoxelGrid<pcl::PointXYZ> voxelGridded2;
+				voxelGridOuter.setDownsampleAllData(true);
+				voxelGridOuter.setInputCloud(outerRadiusFiltered);
+				voxelGridOuter.setLeafSize(levelOfDetail.outerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.z);
+				voxelGridOuter.filter(*outerRadius);
 
-			voxelGridded2.setDownsampleAllData(true);
-			voxelGridded2.setInputCloud(zf_cloud9);
-			double voxelGriddedLeafSize = 0.17;
-			voxelGridded2.setLeafSize(voxelGriddedLeafSize,voxelGriddedLeafSize,voxelGriddedLeafSize);
-			voxelGridded2.filter(*voxelGriddedPCLCloud2);
+				// Adding the different clouds with different levels of detail back into one point cloud.
+				*zf_cloud5 = *innerRadius;
+				*zf_cloud5 += *middleRadius;
+				*zf_cloud5 += *outerRadius;
+			} 
+			else {
+				pcl::VoxelGrid<pcl::PointXYZ> voxelGridOuter;
 
-			LERROR("ARE THEY THE SAME SIZE? : " << zf_cloud3->size());
-			LERROR("ARE THEY THE SAME SIZE? : " << zf_cloud4->size());
-
-
-			pcl::PointCloud<pcl::PointXYZ>::Ptr zf_cloud5(new pcl::PointCloud<pcl::PointXYZ>);
-			LERROR("EACH ONE'S SIZE: ");
-			//*zf_cloud5 = *voxelGriddedPCLCloud;// +*voxelGriddedPCLCloud2;
-			*zf_cloud5 += *voxelGriddedPCLCloud3;
-			//*zf_cloud5 += *voxelGriddedPCLCloud2;
-			LERROR(zf_cloud5->size());
+				voxelGridOuter.setDownsampleAllData(true);
+				voxelGridOuter.setInputCloud(zf_cloud);
+				voxelGridOuter.setLeafSize(levelOfDetail.outerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.z);
+				voxelGridOuter.filter(*zf_cloud5);
+			}
+			
 
 			pcl::PointCloud<pcl::PointXYZ>::Ptr zf_cloud6(new pcl::PointCloud<pcl::PointXYZ>);
-			LERROR("SIZE: ");
+
 			for (size_t i = 0; i < upSamplingFilters.size(); ++i) {
 
 				LERROR(zf_cloud5->size());
@@ -433,7 +457,7 @@ namespace openspace {
 			_rFilter.setInputCloud(zf_cloud5);
 			_rFilter.setSeed(10000);
 			_rFilter.filter(*zf_cloud6);
-			
+
 
 			/*
 			pcl::PointCloud<pcl::PointXYZ>::Ptr voxelGriddedPCLCloud(new pcl::PointCloud<pcl::PointXYZ>());
@@ -451,20 +475,20 @@ namespace openspace {
 			pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> ne;
 			ne.setNumberOfThreads(8);
 			ne.setInputCloud(zf_cloud6);
-			ne.setRadiusSearch(0.01);
-			
+			ne.setRadiusSearch(1.0);
+
 			//Viewpoint from rover
-			Eigen::Vector4f centroid = Eigen::Vector4f(0, 0, -2.0, 1);
+			Eigen::Vector4f centroid = Eigen::Vector4f(0.0, 0.0, 2.0, 1);
 
 			ne.setViewPoint(centroid[0], centroid[1], centroid[2]);
 			pcl::PointCloud<pcl::Normal>::Ptr cloud_normals(new pcl::PointCloud<pcl::Normal>());
 			ne.compute(*cloud_normals);
-			for (size_t i = 0; i < cloud_normals->size(); ++i)
+			/*for (size_t i = 0; i < cloud_normals->size(); ++i)
 			{
-				cloud_normals->points[i].normal_x *= -1;
-				cloud_normals->points[i].normal_y *= -1;
-				cloud_normals->points[i].normal_z *= -1;
-			}
+				cloud_normals->points[i].normal_x *= 1;
+				cloud_normals->points[i].normal_y *= 1;
+				cloud_normals->points[i].normal_z *= 1;
+			}*/
 			pcl::PointCloud<pcl::PointNormal>::Ptr cloud_smoothed_normals(new pcl::PointCloud<pcl::PointNormal>());
 			concatenateFields(*zf_cloud6, *cloud_normals, *cloud_smoothed_normals);
 
@@ -476,30 +500,30 @@ namespace openspace {
 			// Greedy projection triangulation algorithm
 			pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
 			pcl::PolygonMesh triangles;
-			LINFO("PointCloud before mesh generation: " << voxelGriddedPCLCloud->size());
 			// Set the maximum distance between connected points (maximum edge length)
 			gp3.setSearchRadius(levelOfDetail.greedySearchRadius);
 			//HIRES
 			//gp3.setSearchRadius(0.35);
 			gp3.setMu(levelOfDetail.greedyMU);
-			gp3.setNormalConsistency(true);
-			gp3.setConsistentVertexOrdering(true);
 			gp3.setMaximumNearestNeighbors(levelOfDetail.greedyMaxNeighbours);
 			gp3.setMaximumSurfaceAngle(M_PI + M_PI_2); // 270 degrees
 			gp3.setMinimumAngle(0); // 0 degrees
 			gp3.setMaximumAngle(M_PI + M_PI_2); // 270 degrees
-
+			gp3.setNormalConsistency(true);
+			gp3.setConsistentVertexOrdering(true);
+			
 			gp3.setInputCloud(cloud_smoothed_normals);
 			gp3.setSearchMethod(kdTree);
+	
 			gp3.reconstruct(triangles);
-
+			
 			LINFO("Number of triangles in mesh: " << triangles.polygons.size());
 
 			MeshWriter::writeObjFileNoTex(outputFile, pathToDriveFolder, triangles);
 		}
 
 		void CollapsedMeshGeneration::extractCoordinatesFromArray(pcl::PointCloud<pcl::PointXYZ>::Ptr inputCloud, std::vector<std::vector<float>> xyz, ImgReader::PointCloudInfo mInfo) {
-			
+
 			int uvTeller = 0;
 			// TODO: Once again, try and create custom pcl::PointUV and see if we can speed up this process
 			// Reconstruct the data format, and add cloud containing uv-coordinates
@@ -529,7 +553,7 @@ namespace openspace {
 						uvPoint.normal_y = uv.y;
 					}
 
-					// We avoid adding origo, since the binary files contains zero-vectors for NULL data 
+					// We avoid adding origo, since the binary files contains zero-vectors for NULL data
 					if (x != 0.0 || y != 0.0 || z != 0.0) {
 						inputCloud->push_back(depthPoint);
 					}
@@ -542,7 +566,7 @@ namespace openspace {
 
 		void CollapsedMeshGeneration::writeMatrixFile(std::string output_path, glm::dmat4 outputMatrix) {
 			std::string matrix_path = output_path + "rotationmatrix.txt";
-			
+
 			if (FileSys.fileExists(matrix_path)) {
 				return;
 			}
@@ -589,6 +613,36 @@ namespace openspace {
 			std::string drive_number_string = "drive" + file_name_stripped.substr(3, 7) + "/";
 
 			return output_path + site_number_string + drive_number_string;
+		}
+
+		double CollapsedMeshGeneration::computeCloudResolution(pcl::PointCloud<pcl::PointXYZ>::Ptr inCloud) {
+			double res = 0.0;
+			int n_points = 0;
+			int nres;
+			std::vector<int> indices(2);
+			std::vector<float> sqr_distances(2);
+			pcl::search::KdTree<pcl::PointXYZ> tree;
+			tree.setInputCloud(inCloud);
+
+			for (size_t i = 0; i < inCloud->size(); ++i)
+			{
+				if (!pcl_isfinite((*inCloud)[i].x))
+				{
+					continue;
+				}
+				//Considering the second neighbor since the first is the point itself.
+				nres = tree.nearestKSearch(i, 2, indices, sqr_distances);
+				if (nres == 2)
+				{
+					res += sqrt(sqr_distances[1]);
+					++n_points;
+				}
+			}
+			if (n_points != 0)
+			{
+				res /= n_points;
+			}
+			return res;
 		}
 	}
 }
