@@ -26,6 +26,8 @@
 #include <ghoul\filesystem\filesystem.h>
 #include <modules\globebrowsing\tasks\meshgenerationtask.h>
 
+#include <openspace/documentation/verifier.h>
+
 #include <modules/base/rendering/modelgeometry.h>
 #include <fstream>
 #include <algorithm>
@@ -33,11 +35,13 @@
 #pragma comment(lib, "urlmon.lib")
 
 #include <modules/globebrowsing/tasks/meshgeneration.h>
+#include <modules/globebrowsing/tasks/collapsedmeshgeneration.h>
 
 namespace {
 	const std::string _loggerCat = "MeshgenerationTask";
 	const std::string _solname = "Name";
 	const std::string _inputPath = "InputPath";
+	const std::string _level = "Level";
 	const std::string _urlToPDS = "https://pds-imaging.jpl.nasa.gov/data/msl/MSLNAV_1XXX/DATA/";
 }
 
@@ -45,34 +49,40 @@ namespace openspace {
 namespace globebrowsing {
 	MeshGenerationTask::MeshGenerationTask(const ghoul::Dictionary & dictionary) {
 		dictionary.getValue(_solname, _inputSol);
-		dictionary.getValue(_inputPath, _root);
+		dictionary.getValue(_inputPath, _rootPath);
+		dictionary.getValue(_level, _levelOfDetail);
+		dictionary.getValue("GenerationParameters", _generationParams);
+		dictionary.getValue("OutputPath", _pathToModelsFolder);
 
-		ghoul_assert(_inputSol.empty(), "Need to specify Name");
-		ghoul_assert(_root.empty(), "Need to specify path to models");
+		_levelOfDetail = "level" + _levelOfDetail;
+
+		ghoul::Dictionary filterParams;
+
+		_generationParams.getValue("Filters", filterParams);
 
 		std::transform(_inputSol.begin(), _inputSol.end(), _inputSol.begin(), ::tolower);
-		
-		_inputTxt = _root + "/binaryfiles/" + _inputSol + "/" + _inputSol + ".txt";
+
+		_inputTxt = _rootPath + _inputSol + "/" + _inputSol + ".txt";
 		
 		_filenames = readFilenames(_inputTxt);
-		
-		_outputPath = _root + "/models/" + _inputSol;
 	}
 
 	std::string MeshGenerationTask::description() {
-		return "DESCRIPTION";
+		return "desc";
 	}
 
 	void MeshGenerationTask::perform(const Task::ProgressCallback &progressCallback) {
-		if (_filenames.empty()) return;
+		
+		if (_filenames.empty()) {
+			LERROR("FILENAMES IS EMPTY");
+			return;
+		}
 
 		const clock_t begin_time = clock();
 		progressCallback(0.0f);
 		int k = 0;
-		
 		ghoul::Dictionary extensions;
 		std::string extension;
-
 		std::string solNr = _inputSol.substr(3,_inputSol.size());
 		// NASA changed the fileformat from jpg to png around 450 sols
 		extension = std::stoi(solNr) > 450 ? ".png" : ".jpg";
@@ -80,48 +90,98 @@ namespace globebrowsing {
 		extensions.setValue("TextureExtension", extension);
 		extensions.setValue("ModelFile", ".obj");
 		extensions.setValue("BinaryFile", ".IMG");
+
+		int counter = 0;
+		ghoul::Dictionary allSites;
+		int counter2 = 0;
+
+		//Loop to fill dictionary allSites with structure:
+		// Mesh0 = {
+		//	Level = "1",
+		//	OutputFile = "solxxxxxx.obj",
+		//  InputFilename = "binaryfiles/NLB_..",
+		//	PointCloud0 = "NLB_..",
+		//	PointCloud1 = "NLB_..",
+		// },
+		// Mesh1 = {
+		//	Level = "1",
+		//	OutputFile = "solxxxxxx.obj",
+		//  InputFilename = "binaryfiles/NLB_..",
+		//	PointCloud0 = "NLB_..",
+		//	PointCloud1 = "NLB_..",
+		// },
+
 		for (auto f : _filenames) {
+			//Iterate over all binaries in txt in SOLxxxx folder
+			bool Exists = false;
+			for (size_t i = 0; i < allSites.size(); ++i) {
+				//Iterate over all existing meshes inside dictionary
+				std::string temp;
+				ghoul::Dictionary existingMesh;
+				allSites.getValue("Mesh" + std::to_string(i), existingMesh);
+				existingMesh.getValue("OutputFile", temp);
 
-			bool couldDownload = true;
-			std::string binary_path = _root + "binaryfiles/" + _inputSol + "/" + f + ".IMG";
-			std::string output_path = _root + "models/";
-			std::string obj_path = MeshGeneration::correctPath(f, output_path) + f + ".obj";
+				if (temp == f.outputFilename) {
+					// If the Output filenamem, in the already existing entry,
+					// is the same as the outputFilename, this means that we should add
+					// this one too already existing
+					ghoul::Dictionary newPointCloud;
+					std::string newEntry = "PointCloud" + std::to_string(existingMesh.size());
 
-			if (FileSys.fileExists(obj_path)) {
-				// Obj file already exists
-				continue;
+					existingMesh.setValue(newEntry, f.filename);
+					allSites.setValue("Mesh" + std::to_string(i), existingMesh);
+					Exists = true;
+				}
 			}
 
-			if (!FileSys.fileExists(binary_path)) {
-				// Downloading the file from the PDS-server
-				couldDownload = downloadBinaryFile(f, binary_path);
+			if (!Exists) {
+				ghoul::Dictionary newMesh;
+				newMesh.setValue("Level", _levelOfDetail);
+				newMesh.setValue("OutputFile", f.outputFilename);
+				newMesh.setValue("InputFilename", f.filename);
+				newMesh.setValue("BinaryPath", _rootPath + _inputSol + "/");
+				newMesh.setValue("OutputPath", _pathToModelsFolder);
+				newMesh.setValue("Filters", _generationParams);
+				ghoul::Dictionary firstPointCloud;
+				std::string testare = f.filename;
+				newMesh.setValue("PointCloud0", testare);
+
+				std::string newMeshStr = "Mesh" + std::to_string(counter2);
+
+				allSites.setValue(newMeshStr, newMesh);
+				counter2++;
 			}
 
-			ghoul::Dictionary meshDic;
+		}
 
-			meshDic.setValue("BinaryPath", binary_path);
-			meshDic.setValue("OutputPath", output_path);
-			meshDic.setValue("Extension", extensions);
+		for (size_t i = 0; i < allSites.size(); ++i) {
+			//Iterate over all sites again, now ordered as above,
 
-			if (couldDownload) {
-				MeshGeneration::generateMeshFromBinary(meshDic);
-			} else {
-				LERROR("Obj file not created");
-			}
+			std::string temp = "nothing";
+			ghoul::Dictionary inputDic;
+			allSites.getValue("Mesh" + std::to_string(i), inputDic);
+			inputDic.getValue("OutputFile", temp);
+			LERROR(temp);
+			inputDic.getValue("InputFilename", temp);
+			LERROR(temp);
+			inputDic.setValue("Filters", _generationParams);
 
-			//modelgeometry::ModelGeometry::createFromDictionary(model_dic);
+			//Generate mesh for each point cloud
+			CollapsedMeshGeneration::generateMeshFromBinary(inputDic);
+
 			k++;
 			float test = k / _filenames.size();
 			progressCallback(test);
 		}
+
 		progressCallback(1.0f);
 		LINFO("FINISHED IN : " << float(clock() - begin_time) / CLOCKS_PER_SEC);
 	}
 
-	std::vector<std::string> MeshGenerationTask::readFilenames(const std::string filename) {
+	std::vector<MeshGenerationTask::File> MeshGenerationTask::readFilenames(const std::string filename) {
 		ghoul_assert(!filename.empty(), "Filename not present");
-		
-		std::vector<std::string> filenames;
+
+		std::vector<File> filenames;
 		std::ifstream fs(filename.c_str());
 		std::string line;
 		if (!fs.is_open()) {
@@ -130,7 +190,12 @@ namespace globebrowsing {
 		}
 		else {
 			while (std::getline(fs, line)) {
-				filenames.push_back(line);
+				std::string outputFilename = extractOutputFilename(line);
+
+				File f;
+				f.outputFilename = outputFilename;
+				f.filename = line;
+				filenames.push_back(f);
 			}
 		}
 		return filenames;
@@ -142,7 +207,7 @@ namespace globebrowsing {
 		std::transform(upper_case_solname.begin(), upper_case_solname.end(), upper_case_solname.begin(), ::toupper);
 
 		std::string url_with_filename = _urlToPDS + upper_case_solname + "/" + filename + ".IMG";
-		
+
 		TCHAR *url = new TCHAR[url_with_filename.size() + 1];
 		url[url_with_filename.size()] = 0;
 		std::copy(url_with_filename.begin(), url_with_filename.end(), url);
@@ -161,6 +226,17 @@ namespace globebrowsing {
 		ghoul_assert(SUCCEEDED(hr), "The file " + filename + " was not found locally and could not be downloaded from url: " + url_with_filename);
 
 		return SUCCEEDED(hr);
+	}
+
+	std::string MeshGenerationTask::extractOutputFilename(std::string filename) {
+
+		// Create filename without path and extension
+		std::string fileNameStripped = filename.substr(filename.find_last_of("_F") + 1, 7);
+
+		std::string siteNumberString = fileNameStripped.substr(0, 3);
+		std::string driveNumberString = fileNameStripped.substr(3, 7);
+
+		return _inputSol + siteNumberString + driveNumberString;
 	}
 }
 }

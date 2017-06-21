@@ -32,6 +32,11 @@ namespace openspace {
 namespace globebrowsing {
 	class MeshGenerationTask : public Task {
 	public:
+		struct File {
+			std::string filename;
+			std::string outputFilename;
+		};
+
 		MeshGenerationTask(const ghoul::Dictionary& dictionary);
 
 		std::string description() override;
@@ -40,15 +45,19 @@ namespace globebrowsing {
 
 	private :
 
-		std::vector<std::string> readFilenames(const std::string filename);
+		std::vector<File> readFilenames(const std::string filename);
 		bool downloadBinaryFile(const std::string filename, std::string binary_path);
-
+		std::string MeshGenerationTask::extractOutputFilename(std::string filename);
 
 		std::string _inputTxt;
 		std::string _outputPath;
 		std::string _inputSol;
-		std::string _root;
-		std::vector<std::string> _filenames;
+		std::string _rootPath;
+		std::string _levelOfDetail;
+		std::string _pathToModelsFolder;
+		std::vector<File> _filenames;
+
+		ghoul::Dictionary _generationParams;
 	};
 } // namespace globebrowsing
 } // namespace openspace
