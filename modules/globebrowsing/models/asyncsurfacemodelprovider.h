@@ -42,9 +42,6 @@ public:
 	bool enqueueModelIO(const std::shared_ptr<Subsite> subsite, const int level);
 	
 	std::vector<std::shared_ptr<SubsiteModels>> getLoadedModels();
-
-	void clearQueuesAndJobs();
-
 protected:
 	virtual bool satisfiesEnqueueCriteria(const uint64_t hashKey) const;
 

@@ -44,9 +44,10 @@ CachingSurfaceModelProvider::CachingSurfaceModelProvider(Renderable* parent)
 
 std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getModels(const std::vector<std::shared_ptr<Subsite>> subsites,
 	const int level) {
+
 	// Reset the fading direction automatically makes all unwanted models to fade out
-	auto itemListResetDirection = _modelCache->list();
-	for (auto entry : itemListResetDirection) {
+	auto itemList = _modelCache->list();
+	for (auto entry : itemList) {
 		entry.second->setFadeDirection(-1);
 	}
 
@@ -61,32 +62,30 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 			else {
 				for(const int& tempLevel : subsite->availableLevels){
 					// Only enqueue the model if the LOD exists
-					if(tempLevel == level)
+					if(tempLevel == level) {
 						_asyncSurfaceModelProvider->enqueueModelIO(subsite, level);
+						break;
+					}
 				}
 				// Check for available LODs above the requested.
 				std::vector<int> levelsAbove = getLevelsAbove(subsite->availableLevels, level);
-				for (int levelAbove = levelsAbove.size() + 1; levelAbove-- > 1; ) {
+				for (size_t levelAbove = levelsAbove.size() + 1; levelAbove-- > 1; ) {
 					ProviderSubsiteKey keyLowerLevel = { levelAbove, subsite->site, subsite->drive };
-					// If the cache holds the correct model but with lower resultion than requested,
+					// If the cache holds the correct mesh but with lower resolution than requested,
 					// fade in that model
 					if (_modelCache->exist(keyLowerLevel)) {
 						_modelCache->get(keyLowerLevel)->setFadeDirection(1);
-						// Breaks the loop that goes through levelsAbove
 						break;
 					}
-					// If the cache doesn't hold the LOD above, enqueue it. The LOD above might be much smaller
-					// in filesize and will then be loaded more quickly. This is done to have something to render
-					// when waiting for the rquested level to load.
+					// If the cache doesn't hold the LOD above, enqueue it. The LOD is much smaller
+					// in filesize and will then be loaded faster.
 					else {
 						for(const int& availableLevel : subsite->availableLevels) {
 							if(availableLevel == levelAbove) {
 								_asyncSurfaceModelProvider->enqueueModelIO(subsite, levelAbove);
-								// Breaks the loop that goes trough available levels for the subsite
 								break;
 							}
 						}
-						// Breaks the loop that goes through levelsAbove
 						break;
 					}
 				}
@@ -96,8 +95,8 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 	
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfSubsiteModels;
 	// Save all models that are still visible and fade at the same time
-	auto itemListSetDirection = _modelCache->list();
-	for (auto entry : itemListSetDirection) {
+	auto itemList2 = _modelCache->list();
+	for (auto entry : itemList2) {
 		if (entry.second->alpha() > 0.0) {
 			vectorOfSubsiteModels.push_back(entry.second);
 		}
@@ -107,8 +106,8 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 	return vectorOfSubsiteModels;
 }
 
-void CachingSurfaceModelProvider::update(Renderable* parent) {
-	initModelsFromLoadedData(parent);
+void CachingSurfaceModelProvider::update() {
+	initModelsFromLoadedData();
 }
 
 std::vector<int> CachingSurfaceModelProvider::getLevelsAbove(const std::vector<int> availableLevels, const int requestedLevel) {
@@ -122,7 +121,7 @@ std::vector<int> CachingSurfaceModelProvider::getLevelsAbove(const std::vector<i
 	return levelsAbove;
 }
 
-void CachingSurfaceModelProvider::initModelsFromLoadedData(Renderable* parent) {
+void CachingSurfaceModelProvider::initModelsFromLoadedData() {
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfSubsiteModels =
 		_asyncSurfaceModelProvider->getLoadedModels();
 

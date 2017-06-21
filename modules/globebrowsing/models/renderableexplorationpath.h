@@ -52,7 +52,7 @@ public:
 	void setLevel(const int level);
 
 private:
-	std::vector<glm::vec4> calculateModelCoordinates(std::vector<Geodetic2> geodetics, const int offset);
+	std::vector<glm::vec4> calculateModelCoordinates(std::vector<Geodetic2> geodetics, const float offset);
 	void bufferData(GLuint vaID, GLuint vbID, const std::vector<glm::vec4> coordinates);
 	void reBufferData(GLuint vaID, GLuint vbID, const std::vector<glm::vec4> coordinates);
 

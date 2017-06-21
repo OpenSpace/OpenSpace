@@ -87,7 +87,7 @@ bool RenderableExplorationPath::initialize(RenderableGlobe* globe, const std::ve
 	
 	// Initialize and upload to graphics card
 	glGenVertexArrays(1, &_vaPathID);
-	ghoul_assert(_vaioID != 0, "Could not generate vertex arrays");
+	ghoul_assert(_vaPathID != 0, "Could not generate vertex arrays");
 
 	glGenBuffers(1, &_vbPathID);
 	ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
@@ -136,12 +136,12 @@ bool RenderableExplorationPath::isReady() const {
 void RenderableExplorationPath::render(const RenderData& data) {
 	glm::dmat4 globeModelTransform;
 	glm::dmat4 modelViewTransform;
-	if(_currentLevel >= 1) {
+	//if(_currentLevel >= 1) {
 		// Only show the path when camera is close enough
-		if (_currentLevel > 0 && _fading < 1.f)
-			_fading += 0.01f;
-		else if (_currentLevel == 0 && _fading > 0.f)
-			_fading -= 0.01f;
+		if (_currentLevel > 0 && _fading < 1.0f)
+			_fading += 0.05f;
+		else if (_currentLevel <= 0 && _fading > 0.0f)
+			_fading -= 0.05f;
 
 		// Model transform and view transform needs to be in double precision
 		globeModelTransform = _globe->modelTransform();
@@ -158,12 +158,14 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		glBindVertexArray(_vaPathID);
 		glBindBuffer(GL_ARRAY_BUFFER, _vbPathID);
 		glLineWidth(1.0f);
-		glDrawArrays(GL_LINE_STRIP, 0, _stationPointsModelCoordinates.size());
+		glDrawArrays(GL_LINE_STRIP, 0, static_cast<GLsizei>(_stationPointsModelCoordinates.size()));
 		glBindVertexArray(0);
 
 		_pathShader->deactivate();
-	}
-		
+	//}
+	
+	//LERROR(_currentLevel);
+
 	if(_currentLevel >= 2) {
 		if (_currentLevel >= 2 && _fading2 < 1.f)
 			_fading2 += 0.01f;
@@ -180,7 +182,7 @@ void RenderableExplorationPath::render(const RenderData& data) {
 		glBindBuffer(GL_ARRAY_BUFFER, _vbModelsID);
 
 		glEnable(GL_PROGRAM_POINT_SIZE);
-		glDrawArrays(GL_POINTS, 0, _stationPointsModelCoordinatesWithModel.size());
+		glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_stationPointsModelCoordinatesWithModel.size()));
 		glBindVertexArray(0);
 
 		_siteShader->deactivate();
@@ -192,14 +194,14 @@ void RenderableExplorationPath::update(const UpdateData& data) {
 
 void RenderableExplorationPath::setLevel(const int level) {
 	_currentLevel = level;
-	if (level > lastLevel) {
-		int offset = 10;
+	if (level != lastLevel) {
+		float offset = 10;
 		if (_currentLevel < 2)
 			offset = 6;
 		else if (_currentLevel == 2)
 			offset = 4;
 		else if (_currentLevel == 3)
-			offset = 1;
+			offset = 1.5;
 
 		_stationPointsModelCoordinates.clear();
 		_stationPointsModelCoordinates = calculateModelCoordinates(_allGeodetics, offset);
@@ -213,7 +215,7 @@ void RenderableExplorationPath::setLevel(const int level) {
 	}
 }
 
-std::vector<glm::vec4> RenderableExplorationPath::calculateModelCoordinates(std::vector<Geodetic2> geodetics,  const int offset) {
+std::vector<glm::vec4> RenderableExplorationPath::calculateModelCoordinates(std::vector<Geodetic2> geodetics,  const float offset) {
 	std::vector<glm::vec4> cartesianCoordinates;
 	for (auto geodetic : geodetics) {
 		glm::dvec3 positionModelSpaceTemp = _globe->ellipsoid().cartesianSurfacePosition(geodetic);

@@ -89,14 +89,14 @@ public:
 
 	std::vector<std::shared_ptr<SubsiteModels>> getModels(const std::vector<std::shared_ptr<Subsite>> Subsites, const int level);
 
-	void update(Renderable* parent);
+	void update();
 
 private:
 	std::shared_ptr<AsyncSurfaceModelProvider> _asyncSurfaceModelProvider;
 	std::shared_ptr<ModelCache> _modelCache;
 	std::vector<int> getLevelsAbove(const std::vector<int> availableLevels, const int requestedLevel);
 
-	void initModelsFromLoadedData(Renderable* parent);
+	void initModelsFromLoadedData();
 
 	Renderable* _parent;
 

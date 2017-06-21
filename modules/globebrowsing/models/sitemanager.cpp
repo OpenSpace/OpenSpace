@@ -39,7 +39,6 @@ SiteManager::SiteManager(std::string name, std::vector<std::shared_ptr<Subsite>>
 	
 	std::vector<SiteWithDrives> temp;
 	std::vector<std::string> temp2;
-	int counter = 0;
 	for (size_t i = 0; i < ss.size(); ++i) {
 		if (std::find(temp2.begin(), temp2.end(), ss.at(i)->site) == temp2.end()) {
 			SiteWithDrives test;
@@ -58,7 +57,7 @@ SiteManager::SiteManager(std::string name, std::vector<std::shared_ptr<Subsite>>
 			}
 		}
 	}
-	for (int k = 0; k < temp.size(); ++k) {
+	for (size_t k = 0; k < temp.size(); ++k) {
 		_sitePropertyOwner.push_back(std::make_shared<SitePropertyOwner>(temp.at(k)));
 	}
 	for (auto &s : _sitePropertyOwner) {

@@ -192,8 +192,8 @@ int goToGeo(lua_State* L) {
     if (nArguments != 2)
     return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
     
-    double latitude = static_cast<int>(lua_tonumber(L, 1));
-    double longitude = static_cast<int>(lua_tonumber(L, 2));
+    double latitude = static_cast<double>(lua_tonumber(L, 1));
+    double longitude = static_cast<double>(lua_tonumber(L, 2));
     
     OsEng.interactionHandler().goToGeo(latitude, longitude);
     

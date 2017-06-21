@@ -27,6 +27,7 @@
 
 #include <modules/globebrowsing/models/modelprovider.h>
 #include <modules/globebrowsing/models/renderableroversurface.h>
+#include <openspace/scene/scenegraphnode.h>
 
 namespace openspace {
 namespace globebrowsing {
@@ -34,7 +35,8 @@ class MultiModelProvider : public ModelProvider {
 public: 
 	MultiModelProvider(const ghoul::Dictionary& dictionary);
 
-	virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites, const RenderData& data);
+	virtual std::vector<std::shared_ptr<Subsite>> calculate(const std::vector<std::vector<std::shared_ptr<Subsite>>> subsites,
+		const RenderData& data, const SceneGraphNode* parent);
 
 	virtual bool initialize();
 };

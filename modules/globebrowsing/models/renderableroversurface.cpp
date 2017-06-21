@@ -65,7 +65,8 @@ namespace globebrowsing {
 				BoolProperty("useMastCam", "Show mastcam coloring", false),
 				BoolProperty("enableDepth", "Enable depth", true),
 				BoolProperty("enableCulling", "Enable culling", true),
-				FloatProperty("heightProp", "Site height", 1.f, 1.0f, 100.f)
+				FloatProperty("heightProp", "Site height", 0.7f, 0.0f, 3.0f),
+				IntProperty("maxLod", "Max LOD", 3, 1, 3)
 
 		})
 		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
@@ -111,6 +112,7 @@ namespace globebrowsing {
 	addProperty(_generalProperties.enableDepth);
 	addProperty(_generalProperties.enableCulling);
 	addProperty(_generalProperties.heightProp);
+	addProperty(_generalProperties.maxLod);
 	addProperty(_debugModelRotation);
 	
 	_siteManager = std::make_shared<SiteManager>(marsRoverModels, _subsitesWithModels);
@@ -132,9 +134,9 @@ bool RenderableRoverSurface::initialize() {
 	}
 	
 	std::string ownerName = owner()->name();
-	auto parent = OsEng.renderEngine().scene()->sceneGraphNode(ownerName)->parent();
+	_parent = OsEng.renderEngine().scene()->sceneGraphNode(ownerName)->parent();
 
-	_globe = (globebrowsing::RenderableGlobe*)parent->renderable();
+	_globe = (globebrowsing::RenderableGlobe*)_parent->renderable();
 
 	_renderableExplorationPath->initialize(_globe, allCoordinates, coordinatesWithModel);
 
@@ -169,7 +171,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 	std::vector<std::shared_ptr<Subsite>> ss;
 	ghoul::Dictionary modelDic;
-	std::unique_ptr<ModelProvider>_modelProvider;
+	std::unique_ptr<ModelProvider> _modelProvider;
 	int level;
 	
 	switch (_modelSwitch.getLevel(data)) {
@@ -181,7 +183,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			_isFirst = true;
 			modelDic.setValue("Type", "MultiModelProvider");
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
-			ss = _modelProvider->calculate(subSitesVector, data);
+			ss = _modelProvider->calculate(subSitesVector, data, _parent);
 			level = 2;
 			break;
 		case LodModelSwitch::Mode::Close :
@@ -193,7 +195,7 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			
 			modelDic.setValue("Type", "SingleModelProvider");
 			_modelProvider = std::move(ModelProvider::createFromDictionary(modelDic));
-			ss = _modelProvider->calculate(subSitesVector, data);
+			ss = _modelProvider->calculate(subSitesVector, data, _parent);
 			level = 3;
 			break;
 		case LodModelSwitch::Mode::High :
@@ -211,13 +213,17 @@ void RenderableRoverSurface::render(const RenderData& data) {
 			break;
 	}
 
-	lockSubsite(level, ss);
+	int lodCheck = level;
+	if (_generalProperties.maxLod.value() < lodCheck)
+		lodCheck = _generalProperties.maxLod.value();
+
+	lockSubsite(ss);
 
 	std::vector<std::shared_ptr<SubsiteModels>> vectorOfsubsiteModels;
 	if(_generalProperties.lockSubsite.value())
-		vectorOfsubsiteModels = _cachingModelProvider->getModels(_prevSubsites, level);
+		vectorOfsubsiteModels = _cachingModelProvider->getModels(_prevSubsites, lodCheck);
 	else
-		vectorOfsubsiteModels = _cachingModelProvider->getModels(ss, level);
+		vectorOfsubsiteModels = _cachingModelProvider->getModels(ss, lodCheck);
 	
 	vectorOfsubsiteModels = calculateSurfacePosition(vectorOfsubsiteModels);
 
@@ -242,13 +248,13 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		glm::dvec3 surfaceNormal = _globe->ellipsoid().geodeticSurfaceNormal(subsiteModels->siteGeodetic);
 
 		surfaceNormal = glm::normalize(surfaceNormal);
-		float cosTheta = dot(glm::dvec3(0, 0, 1), surfaceNormal);
+		double cosTheta = dot(glm::dvec3(0.0, 0.0, 1.0), surfaceNormal);
 		glm::dvec3 rotationAxis;
 
-		rotationAxis = cross(glm::dvec3(0, 0, 1), surfaceNormal);
+		rotationAxis = cross(glm::dvec3(0.0, 0.0, 1.0), surfaceNormal);
 
-		float s = sqrt((1 + cosTheta) * 2);
-		float invs = 1 / s;
+		double s = sqrt((1 + cosTheta) * 2);
+		double invs = 1 / s;
 
 		glm::dquat rotationMatrix = glm::dquat(s * 0.5f, rotationAxis.x * invs, rotationAxis.y * invs, rotationAxis.z * invs);
 
@@ -262,15 +268,15 @@ void RenderableRoverSurface::render(const RenderData& data) {
 
 		glm::dvec3 testa = glm::dvec3(test.x, test.y, test.z);
 
-		float cosTheta2 = dot(testa, xAxis);
+		double  cosTheta2 = dot(testa, xAxis);
 		glm::dvec3 rotationAxis2;
 
 		rotationAxis2 = cross(testa, xAxis);
 
-		float s2 = sqrt((1 + cosTheta2) * 2);
-		float invs2 = 1 / s2;
+		double s2 = sqrt((1 + cosTheta2) * 2);
+		double invs2 = 1 / s2;
 
-		glm::quat rotationMatrix2 = glm::quat(s2 * 0.5f, rotationAxis2.x * invs2, rotationAxis2.y * invs2, rotationAxis2.z * invs2);
+		glm::quat rotationMatrix2 = glm::quat(s2 * 0.5, rotationAxis2.x * invs2, rotationAxis2.y * invs2, rotationAxis2.z * invs2);
 
 		glm::dmat4 modelTransform =
 			glm::translate(glm::dmat4(1.0), positionWorldSpace) *
@@ -379,7 +385,7 @@ void RenderableRoverSurface::update(const UpdateData& data) {
 	if (_generalProperties.enablePath.value()) {
 		_renderableExplorationPath->update(data);
 	}
-	_cachingModelProvider->update(this);
+	_cachingModelProvider->update();
 }
 
 std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector) {
@@ -393,12 +399,12 @@ std::vector<std::shared_ptr<SubsiteModels>> RenderableRoverSurface::calculateSur
 	return vector;
 }
 
-void RenderableRoverSurface::lockSubsite(const int level, std::vector<std::shared_ptr<Subsite>> subsites) {
-	if (_generalProperties.lockSubsite.value() && level == 3 && _pressedOnce == false) {
+void RenderableRoverSurface::lockSubsite(std::vector<std::shared_ptr<Subsite>> subsites) {
+	if (_generalProperties.lockSubsite.value() && _pressedOnce == false) {
 		_prevSubsites = subsites;
 		_pressedOnce = true;
 	}
-	else if (!_generalProperties.lockSubsite.value() && level == 3 && _pressedOnce == true) {
+	else if (!_generalProperties.lockSubsite.value() && _pressedOnce == true) {
 		_pressedOnce = false;
 	}
 }

@@ -76,6 +76,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/models/sitemanager.h
     ${CMAKE_CURRENT_SOURCE_DIR}/models/drivepropertyowner.h
 
+
     ${CMAKE_CURRENT_SOURCE_DIR}/opengl/texturearray.h
 
     ${CMAKE_CURRENT_SOURCE_DIR}/other/concurrentjobmanager.h

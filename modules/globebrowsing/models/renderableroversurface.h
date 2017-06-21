@@ -52,6 +52,7 @@ public:
 		properties::BoolProperty enableDepth;
 		properties::BoolProperty enableCulling;
 		properties::FloatProperty heightProp;
+		properties::IntProperty maxLod;
 	};
 
 	RenderableRoverSurface(const ghoul::Dictionary& dictionary);
@@ -66,7 +67,7 @@ public:
 	
 private:
 	std::vector<std::shared_ptr<SubsiteModels>> calculateSurfacePosition(std::vector<std::shared_ptr<SubsiteModels>> vector);
-	void lockSubsite(const int level, std::vector<std::shared_ptr<Subsite>> subsites);
+	void lockSubsite(std::vector<std::shared_ptr<Subsite>> subsites);
 
 	std::vector<std::shared_ptr<Subsite>> _subsites;
 	std::vector<std::shared_ptr<Subsite>> _prevSubsites;
@@ -105,6 +106,8 @@ private:
 	std::shared_ptr<RenderableExplorationPath> _renderableExplorationPath;
 
 	properties::PropertyOwner _renderableSitePropertyOwner;
+
+	openspace::SceneGraphNode* _parent;
 };
 
 } // namespace globebrowsing

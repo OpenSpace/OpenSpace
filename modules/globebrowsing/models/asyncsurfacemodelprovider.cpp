@@ -75,8 +75,6 @@ bool AsyncSurfaceModelProvider::satisfiesEnqueueCriteria(const uint64_t hashKey)
 void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_ptr<SubsiteModels> subsiteModels) {
 	subsiteModels->model->initialize(_parent);
 	
-	GLsizei mipLevelCount = 1;
-
 	const clock_t begin_time = clock();
 	if (subsiteModels->textures.size() > 0) {
 		TextureArray ta = TextureArray(subsiteModels->textures.at(0)->dimensions(), subsiteModels->textures.size());
@@ -99,8 +97,6 @@ void AsyncSurfaceModelProvider::enqueueSubsiteInitialization(const std::shared_p
 		}
 	}
 	if (subsiteModels->coloredTextures.size() > 0) {
-		GLuint coloredTextureID;
-
 		TextureArray coloredTextureArray = TextureArray(subsiteModels->coloredTextures.at(0)->dimensions(), subsiteModels->coloredTextures.size(), GL_RGB);
 
 		//glGenTextures(1, &coloredTextureID);
