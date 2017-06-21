@@ -188,7 +188,7 @@ bool RenderableSolarImageryProjection::deinitialize() {
 }
 
 bool RenderableSolarImageryProjection::isReady() const {
-    return _shader && _sphere && _magnetogramTexture;
+    return _shader && _sphere /*&& _magnetogramTexture*/;
 }
 
 void RenderableSolarImageryProjection::update(const UpdateData& data) {

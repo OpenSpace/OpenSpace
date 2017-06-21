@@ -34,14 +34,14 @@ namespace openspace {
 struct SolarImageData {
     unsigned char* data;
     std::shared_ptr<ImageMetadata> im;
+    double timeObserved;
     ~SolarImageData() {
-        if (data) {
+        //if (data) {
             delete[] data;
-        }
+        //}
     }
     //unsigned int dataSize;
     //std::string name;
-    double timeObserved;
 };
 
 struct DecodeData {
@@ -59,15 +59,16 @@ class DecodeJob : public StreamJob<SolarImageData> {
 public:
     DecodeJob(const DecodeData& decodeData, const std::string& id)
         : StreamJob(id), _decodeData(decodeData)
-    { }
+    {
+    }
 
     virtual void execute() final {
         //SolarImageData imd{new unsigned char[_decodeData.totalImageSize],
         //                   _decodeData.totalImageSize, _decodeData.path,
          //                  _decodeData.timeObserved};
-
         const unsigned int totalImageSize
-              = (_decodeData.im->fullResolution / (_decodeData.resolutionLevel + 1)) * _decodeData.im->fullResolution / (_decodeData.resolutionLevel + 1);
+              = (_decodeData.im->fullResolution / (_decodeData.resolutionLevel + 1))
+                * _decodeData.im->fullResolution / (_decodeData.resolutionLevel + 1);
         SolarImageData imd {new unsigned char[totalImageSize],
                             _decodeData.im,
                             _decodeData.timeObserved};
@@ -76,11 +77,8 @@ public:
        // j2c.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
         KakaduWrapper w(_decodeData.verboseMode);
         w.DecodeIntoBuffer(imd.im->filename, imd.data, _decodeData.resolutionLevel);
-      /*  if (imd.im->preprocessedFilename != "") {
-            j2c.DecodeBMPIntoBuffer(imd.im->preprocessedFilename, imd.data);
-        } else {*/
-        //}
         _solarImageData = std::make_shared<SolarImageData>(imd);
+        // Let the smart pointer handle deletion of this data
         imd.data = nullptr;
     }
 
