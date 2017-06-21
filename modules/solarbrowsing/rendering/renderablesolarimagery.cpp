@@ -611,8 +611,8 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
 
 void RenderableSolarImagery::decode(unsigned char* buffer, const std::string& filename)
 {
-    SimpleJ2kCodec j2c(_verboseMode);
-    j2c.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
+    KakaduWrapper w(_verboseMode);
+    w.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
     //KakaduWrapper w(_verboseMode);
     //w.DecodeIntoBuffer(filename, buffer, _resolutionLevel);
 }

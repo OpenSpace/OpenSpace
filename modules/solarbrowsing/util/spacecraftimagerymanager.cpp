@@ -30,7 +30,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem>
-#include <modules/solarbrowsing/util/simplej2kcodec.h>
+//#include <modules/solarbrowsing/util/simplej2kcodec.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/timemanager.h>
 #include <string>
@@ -54,43 +54,43 @@ namespace openspace {
 
 SpacecraftImageryManager::SpacecraftImageryManager() {}
 
-void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
-                                                    const unsigned int tileWidth,
-                                                    const unsigned int tileHeight)
-{
-    using RawPath = ghoul::filesystem::Directory::RawPath;
-    using Recursive = ghoul::filesystem::Directory::RawPath;
-    using Sort = ghoul::filesystem::Directory::Sort;
-    ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
-    std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::Yes);
+// void SpacecraftImageryManager::ConvertTileJ2kImages(const std::string& path,
+//                                                     const unsigned int tileWidth,
+//                                                     const unsigned int tileHeight)
+// {
+//     using RawPath = ghoul::filesystem::Directory::RawPath;
+//     using Recursive = ghoul::filesystem::Directory::RawPath;
+//     using Sort = ghoul::filesystem::Directory::Sort;
+//     ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
+//     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::No, Sort::Yes);
 
-    int limit=0;
-     for (auto seqPath : sequencePaths) {
-        if(limit++ == 10) break;
-        if (size_t position = seqPath.find_last_of(".") + 1) {
-            if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(seqPath);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "j2k" || extension == "jp2") {
-                    const std::string relativePath = FileSys.relativePath(seqPath);
-                    const std::string outPath = FileSys.relativePath(path + "/converted/" + currentFile.filename()).c_str();
+//     int limit=0;
+//      for (auto seqPath : sequencePaths) {
+//         if(limit++ == 10) break;
+//         if (size_t position = seqPath.find_last_of(".") + 1) {
+//             if (position != std::string::npos) {
+//                 ghoul::filesystem::File currentFile(seqPath);
+//                 std::string extension = currentFile.fileExtension();
+//                 if (extension == "j2k" || extension == "jp2") {
+//                     const std::string relativePath = FileSys.relativePath(seqPath);
+//                     const std::string outPath = FileSys.relativePath(path + "/converted/" + currentFile.filename()).c_str();
 
-                    SimpleJ2kCodec j2c;
-                    auto decodedImg = j2c.Decode(relativePath, 0);
-                    j2c.EncodeAsTiles(outPath.c_str(),
-                                      decodedImg->data,
-                                      decodedImg->w,
-                                      decodedImg->h,
-                                      /*tileWidth=*/tileWidth,
-                                      /*tileHeight=*/tileHeight,
-                                      /*numComps=*/1,
-                                      /*compPrec=*/8);
-                }
-            }
-        }
-        LDEBUG("Finished converting " << seqPath);
-    }
-}
+//                     SimpleJ2kCodec j2c;
+//                     auto decodedImg = j2c.Decode(relativePath, 0);
+//                     j2c.EncodeAsTiles(outPath.c_str(),
+//                                       decodedImg->data,
+//                                       decodedImg->w,
+//                                       decodedImg->h,
+//                                       /*tileWidth=*/tileWidth,
+//                                       /*tileHeight=*/tileHeight,
+//                                       /*numComps=*/1,
+//                                       /*compPrec=*/8);
+//                 }
+//             }
+//         }
+//         LDEBUG("Finished converting " << seqPath);
+//     }
+// }
 
 void SpacecraftImageryManager::loadTransferFunctions(
     const std::string& path,

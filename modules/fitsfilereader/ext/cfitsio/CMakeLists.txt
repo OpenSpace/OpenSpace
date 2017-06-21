@@ -83,8 +83,8 @@ install(FILES ${H_FILES} DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
 
 # To expands the command line arguments in Windows, see:
 # http://msdn.microsoft.com/en-us/library/8bch7bkk.aspx
-if(MSVC)
-  set_target_properties(FPack Funpack PROPERTIES 
-    LINK_FLAGS "setargv.obj"
-  )
-endif(MSVC)
+# if(MSVC)
+#   set_target_properties(FPack Funpack PROPERTIES 
+#     LINK_FLAGS "setargv.obj"
+#   )
+# endif(MSVC)

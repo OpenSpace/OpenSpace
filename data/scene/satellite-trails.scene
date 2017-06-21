@@ -32,6 +32,9 @@ function postInitialization()
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 
+    -- ========================================================== SOLARBROWSING BEGIN ==================================================
+    -- =================================================================================================================================
+    -- =================================================================================================================================
     openspace.setPropertyValue("SolarImagery_*_Marker.renderable.enabled", false)
     openspace.setPropertyValue("SolarImagery_*_Trail.renderable.enabled", false)
 
@@ -44,12 +47,12 @@ function postInitialization()
     -- Display Markers
     openspace.addVirtualProperty("BoolProperty", "Display Markers", "SolarImagery_*_Marker.renderable.enabled", true, nil, nil)
 
-    --openspace.addVirtualProperty("IntProperty", "Buffer Size", "SolarImagery*.renderable.bufferSize", 5, 1, 150)
     openspace.addVirtualProperty("FloatProperty", "Plane Opacity", "SolarImagery*.renderable.planeOpacity", 1.0, 0.0, 1.0)
     openspace.addVirtualProperty("BoolProperty",  "Verbose All Planes", "SolarImagery*.renderable.verboseMode", false, nil, nil)
     openspace.addVirtualProperty("FloatProperty", "Move Factor", "SolarImagery*.renderable.moveFactor", 1.0, 0.0, 1.0)
     openspace.addVirtualProperty("IntProperty",   "Update Interval", "SolarImagery*.renderable.minRealTimeUpdateInterval", 65, 0, 300)
 
+       -- ===================================================== STEREO A & B ============================================================
     -- Stereo Orbits
     openspace.addVirtualProperty("BoolProperty",  "Stereo Orbits",   "SolarImagery_Stereo_O*.renderable.enabled", false, nil, nil)
     -- Stereo Labels
@@ -63,6 +66,7 @@ function postInitialization()
     openspace.addVirtualProperty("BoolProperty",  "Stereo B EUV", "SolarImagery_Stereo_StereoB_Image_EUV.renderable.enabled", false, nil, nil)
     openspace.addVirtualProperty("BoolProperty",  "Stereo B COR2", "SolarImagery_Stereo_StereoB_Image_COR.renderable.enabled", false, nil, nil)
 
+       -- ======================================================= SDO ===================================================================
     -- SDO Orbit
     openspace.addVirtualProperty("BoolProperty",  "SDO Orbit",   "SolarImagery_SDO_Trail.renderable.enabled", false, nil, nil)
     -- SDO Label
@@ -71,8 +75,8 @@ function postInitialization()
     openspace.addVirtualProperty("BoolProperty",  "SDO Frustum", "SolarImagery_SDO_Image_AIA.renderable.enableFrustum", false, nil, nil)
     -- SDO
     openspace.addVirtualProperty("BoolProperty",  "SDO",   "SolarImagery_SDO_Image*.renderable.enabled", false, nil, nil)
-    -- SDO label
 
+    -- ========================================================== SOHO ===================================================================
     -- Soho Orbit
     openspace.addVirtualProperty("BoolProperty",  "SOHO Orbit",   "SolarImagery_Soho_Trail.renderable.enabled", false, nil, nil)
     -- Soho Label
@@ -82,6 +86,10 @@ function postInitialization()
     -- SOHO
     openspace.addVirtualProperty("BoolProperty",  "SOHO C2", "SolarImagery_Soho_Image_C2.renderable.enabled", false, nil, nil)
     openspace.addVirtualProperty("BoolProperty",  "SOHO C3", "SolarImagery_Soho_Image_C3.renderable.enabled", false, nil, nil)
+
+    -- ========================================================== SOLARBROWSING END ==================================================
+    -- =================================================================================================================================
+    -- =================================================================================================================================
 
     openspace.resetCameraDirection()
 

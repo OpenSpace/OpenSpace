@@ -24,27 +24,29 @@
 
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
-set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
+#set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
 #set(H264_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/libde265/")
-add_subdirectory(${OPENJPEG_ROOT_DIR})
+#add_subdirectory(${OPENJPEG_ROOT_DIR})
 #add_subdirectory(${H264_ROOT_DIR})
+
+set(KAKADU_ROOT "/media/noven/BE23-1097/solarbrowsingdata/kakadu")
 
 set(HEADER_FILES
     # Openjpeg stuff
-    ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
-    ${OPENJPEG_BINARY_DIR}/src/bin/common
-    ${OPENJPEG_SOURCE_DIR}/src/lib/openjp2
-    ${OPENJPEG_SOURCE_DIR}/src/bin/jp2
-    ${OPENJPEG_SOURCE_DIR}/src/bin/common
-    ${Z_INCLUDE_DIRNAME}
-    ${PNG_INCLUDE_DIRNAME}
-    ${TIFF_INCLUDE_DIRNAME}
-    ${CMAKE_SOURCE_DIR}/include
-    ${TIFF_INCLUDE_DIRNAME}
+    # ${OPENJPEG_BINARY_DIR}/src/lib/openjp2
+    # ${OPENJPEG_BINARY_DIR}/src/bin/common
+    # ${OPENJPEG_SOURCE_DIR}/src/lib/openjp2
+    # ${OPENJPEG_SOURCE_DIR}/src/bin/jp2
+    # ${OPENJPEG_SOURCE_DIR}/src/bin/common
+    # ${Z_INCLUDE_DIRNAME}
+    # ${PNG_INCLUDE_DIRNAME}
+    # ${TIFF_INCLUDE_DIRNAME}
+    # ${CMAKE_SOURCE_DIR}/include
+    # ${TIFF_INCLUDE_DIRNAME}
 
     # Other
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.h
 
     # Video
     #${CMAKE_CURRENT_SOURCE_DIR}/util/h265decoder.h
@@ -67,14 +69,14 @@ set(HEADER_FILES
     ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.h
     ${OPENSPACE_BASE_DIR}/modules/globebrowsing/other/concurrentjobmanager.inl
     # Kakadu Headers
-    /home/noven/workspace/Kakadu/all_includes
+    ${KAKADU_ROOT}/all_includes
 )
 
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.cpp
+   # ${CMAKE_CURRENT_SOURCE_DIR}/util/simplej2kcodec.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.cpp
     #${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarvideo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.cpp
@@ -101,7 +103,13 @@ target_include_directories(${MODULE_NAME} SYSTEM PUBLIC ${HEADER_FILES})
 #find_library(KDU_LIB kdu_v79R /home/noven/workspace/Kakadu/)
 #find_library(KDU_LIA kdu_a79R /home/noven/workspace/Kakadu/)
 #target_link_libraries(kdu_v79R "${KDU_LIB_PATH}")
-target_link_libraries(${MODULE_NAME} openjp2 /home/noven/workspace/Kakadu/libkdu_v79R.so /home/noven/workspace/Kakadu/libkdu_a79R.so)
+
+if (UNIX)
+    target_link_libraries(${MODULE_NAME} ${KAKADU_ROOT}/linux/libkdu_v79R.so ${KAKADU_ROOT}/linux/libkdu_a79R.so)
+endif (UNIX)
+if (WIN32)
+    target_link_libraries(${MODULE_NAME} ${KAKADU_ROOT}/windows/libkdu_v79R.dll ${KAKADU_ROOT}/windows/libkdu_a79R.dll)
+endif(WIN32)
 
 #target_link_libraries(${MODULE_NAME} ${GROK_LIBRARY_NAME} ${CMAKE_DL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 

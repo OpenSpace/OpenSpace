@@ -37,7 +37,7 @@
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <memory>
-#include <modules/solarbrowsing/util/simplej2kcodec.h>
+//#include <modules/solarbrowsing/util/simplej2kcodec.h>
 #include <unordered_set>
 
 
