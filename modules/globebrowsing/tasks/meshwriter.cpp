@@ -304,8 +304,8 @@ namespace globebrowsing {
 				}
 				if (nxyz != 3)
 				{
-					LERROR("[pcl::io::saveOBJFile] Input point cloud has no normals!\n");
-					return;
+					//LERROR("[pcl::io::saveOBJFile] Input point cloud has no normals!\n");
+					//return;
 				}
 				fs << '\n';
 			}
