@@ -83,6 +83,9 @@ namespace {
     const char* keyExtraColorTablePaths         = "ColorTablePaths";
     const char* keyExtraColorTableMinMaxs       = "ColorTableMinMax";
 
+    const char* keyCartesianDomainLimits        = "CartesianDomainLimits";
+    const char* keyRadialDomainLimits           = "RadialDomainLimits";
+
     // const char* keyVertexListFileType       = "FileType";
     // const char* keyVertexListFileTypeJson   = "Json";
     // const char* keyVertexListFileTypeBinary = "Binary";
@@ -162,6 +165,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(const ghoul::Dictiona
 
     _loggerCat += " [" + name + "]";
 
+    // TODO Check dictionary for main fields and set bools accordingly?
     _dictionary = dictionary;
 }
 
@@ -304,43 +308,303 @@ bool RenderableFieldlinesSequence::initialize() {
             std::vector<std::string> extraMagVars{std::istream_iterator<std::string>{iss},
                                                   std::istream_iterator<std::string>{}};
 
-            // TODO Only one loop.. Not one for each tracing method!!
-            for (size_t i = 0; i < _numberOfStates; ++i) {
-                std::unique_ptr<ccmc::Kameleon> kameleon =
-                        fsManager.createKameleonObject(_validSourceFilePaths[i]);
-                if (kameleon == nullptr) {
-                    continue;
-                }
-                LDEBUG(_validSourceFilePaths[i] << " is now being traced.");
-                _states.push_back(FieldlinesState(_seedPoints.size()));
-                fsManager.getFieldlinesState(kameleon.get(),
-                                             tracingVariable,
-                                             _seedPoints,
-                                             tracingStepLength,
-                                             maxSteps,
-                                             _isMorphing,
-                                             numResamples,
-                                             resamplingOption,
-                                             extraFloatVars,
-                                             extraMagVars,
-                                             _states[i]);
-                _startTimes.push_back(_states[i]._triggerTime);
+// //---------------------- HARDCODE DELUXEEE START!-------------------------------------//
+    std::vector<std::string> sourcefiles;
+    std::vector<std::string> tmpfiles;
+    if (!fsManager.getAllFilePathsOfType(
+            "/media/ccarlbau/ff854077-f4bf-4644-a94b-1fe2d8824c64/Oskar_Carlbaum_061617_SH_1/3D_CDF", ".cdf", tmpfiles)) {
+            // "/media/ccarlbau/42a9eae3-e5e0-4d94-b439-f634d48b0d8c/Oskar_Carlbaum_060717_SH_4/3D_CDF", ".cdf", tmpfiles)) {
+        LERROR("Failed to get valid "<< ".cdf" << " file paths from '"
+                << "*pathToSourceFolder 061617_SH_1*" << "'" );
+        return false;
+    }
+    sourcefiles.insert(sourcefiles.end(),tmpfiles.begin(),tmpfiles.end());
+    // tmpfiles.clear();
+    // if (!fsManager.getAllFilePathsOfType(
+    //         "/media/ccarlbau/42a9eae3-e5e0-4d94-b439-f634d48b0d8c/Oskar_Carlbaum_060717_SH_3/3D_CDF", ".cdf", tmpfiles)) {
+    //     LERROR("Failed to get valid "<< ".cdf" << " file paths from '"
+    //             << "*pathToSourceFolder SH3*" << "'" );
+    //     return false;
+    // }
+    // sourcefiles.insert(sourcefiles.end(),tmpfiles.begin(),tmpfiles.end());
+    // tmpfiles.clear();
+    // if (!fsManager.getAllFilePathsOfType(
+    //         "/media/ccarlbau/42a9eae3-e5e0-4d94-b439-f634d48b0d8c/Oskar_Carlbaum_051717_SH_2/3D_CDF", ".cdf", tmpfiles)) {
+    //     LERROR("Failed to get valid "<< ".cdf" << " file paths from '"
+    //             << "*pathToSourceFolder SH2*" << "'" );
+    //     return false;
+    // }
+    // sourcefiles.insert(sourcefiles.end(),tmpfiles.begin(),tmpfiles.end());
 
-                if (saveBinaryOutputs) {
-                    std::string filePath = outputBinaryLoc +
-                                           fsManager.timeToString(_states[i]._triggerTime, true) +
-                                           ".osfls";
-                    _states[i].saveStateToBinaryFile(filePath);
-                }
-                if (saveJsonOutputs) {
-                    std::string filePrefix = fsManager.timeToString(_states[i]._triggerTime, true);
-                    fsManager.saveFieldlinesStateAsJson(_states[i],
-                                                        outputJsonLoc,
-                                                        false,
-                                                        filePrefix,
-                                                        false);
-                }
+
+    std::string seeds_eq011_1 = "${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/equitorialslice_0.11AU_4deg_1.txt";
+    std::string seeds_eq011_2 = "${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/equitorialslice_0.11AU_4deg_2.txt";
+    std::string seeds_eq1_1 = "${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/equitorialslice_1AU_4deg_1.txt";
+    std::string seeds_eq1_2 = "${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/equitorialslice_1AU_4deg_2.txt";
+
+    std::string seeds_lat4_1 = "${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/enlil_1AU_lat4deg_4degIncrements_1.txt";
+    std::string seeds_lat4_2 = "${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/enlil_1AU_lat4deg_4degIncrements_2.txt";
+    std::string seeds_lat4_3 = "${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/enlil_011AU_lat4deg_4degIncrements_1.txt";
+    std::string seeds_lat4_4 = "${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/enlil_011AU_lat4deg_4degIncrements_2.txt";
+
+    std::vector<std::string> seedGroupFiles = { seeds_eq011_1,
+                                                seeds_eq011_2,
+                                                seeds_eq1_1,
+                                                seeds_eq1_2,
+                                                seeds_lat4_1,
+                                                seeds_lat4_2,
+                                                seeds_lat4_3,
+                                                seeds_lat4_4
+                                              };
+
+    std::string blabla = "${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/new_dynamic/";
+    std::vector<std::string> dynamic_seed_folders = {blabla + "earth/with_extra_seeds/",
+                                                     blabla + "stereoa/with_extra_seeds/"};
+
+    std::vector<std::vector<std::string>> dynamic_seed_files;
+    std::vector<std::vector<std::vector<glm::vec3> > > dynamicSeeds;
+    dynamicSeeds.resize(2);
+
+    for (int j = 0 ; j < 2 ; j++ ) {
+        std::vector<std::string> dsfTmp;
+            if (!fsManager.getAllFilePathsOfType(dynamic_seed_folders[j], ".txt", dsfTmp)) {
+            return false;
+        }
+        // dynamic_seed_files.push_back(dsfTmp);
+        for (std::string str : dsfTmp) {
+            std::vector<glm::vec3> tmpVec;
+            if (!fsManager.getSeedPointsFromFile(str, tmpVec)) {
+                LERROR("Failed to find seed points in'" << str << "'");
+                return false;
             }
+            dynamicSeeds[j].push_back(tmpVec);
+        }
+    }
+
+
+    // std::string seeds_earth  = "${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/earth_seeds_pre/";
+    // std::vector<std::string> earthSeedFiles;
+    // if (!fsManager.getAllFilePathsOfType(seeds_earth, ".txt", earthSeedFiles)) {
+    //     return false;
+    // }
+    // std::vector<std::vector<glm::vec3>> earthSeeds;
+
+    // for (int i = 0; i < earthSeedFiles.size(); ++i) {
+    //     std::vector<glm::vec3> tmpVec;
+    //     if (!fsManager.getSeedPointsFromFile(earthSeedFiles[i], tmpVec)) {
+    //         LERROR("Failed to find seed points in'" << earthSeedFiles[i] << "'");
+    //         return false;
+    //     }
+    //     earthSeeds.push_back(tmpVec);
+    // }
+    std::string binOut1  = "${OPENSPACE_DATA}/scene/fieldlinessequence/binary_enlil_2012_July/new_originals/011AU_eq_1/";
+    std::string binOut2  = "${OPENSPACE_DATA}/scene/fieldlinessequence/binary_enlil_2012_July/new_originals/011AU_eq_2/";
+    std::string binOut3  = "${OPENSPACE_DATA}/scene/fieldlinessequence/binary_enlil_2012_July/new_originals/1AU_eq_1/";
+    std::string binOut4  = "${OPENSPACE_DATA}/scene/fieldlinessequence/binary_enlil_2012_July/new_originals/1AU_eq_2/";
+    std::string binOut5  = "${OPENSPACE_DATA}/scene/fieldlinessequence/binary_enlil_2012_July/new_originals/1AU_lat4_1/";
+    std::string binOut6  = "${OPENSPACE_DATA}/scene/fieldlinessequence/binary_enlil_2012_July/new_originals/1AU_lat4_2/";
+    std::string binOut7  = "${OPENSPACE_DATA}/scene/fieldlinessequence/binary_enlil_2012_July/new_originals/011AU_lat4_1/";
+    std::string binOut8  = "${OPENSPACE_DATA}/scene/fieldlinessequence/binary_enlil_2012_July/new_originals/011AU_lat4_2/";
+    std::string binOut9  = "${OPENSPACE_DATA}/scene/fieldlinessequence/binary_enlil_2012_July/new_originals/earth/";
+    std::string binOut10  = "${OPENSPACE_DATA}/scene/fieldlinessequence/binary_enlil_2012_July/new_originals/stereoa/";
+
+    std::vector<std::string> ssOutBins = {binOut1,
+                                          binOut2,
+                                          binOut3,
+                                          binOut4,
+                                          binOut5,
+                                          binOut6,
+                                          binOut7,
+                                          binOut8,
+                                          binOut9,
+                                          binOut10};
+
+    size_t numSeedGroups = seedGroupFiles.size();
+    std::vector<std::vector<glm::vec3>> seedGroups;
+    seedGroups.resize(numSeedGroups);
+
+    // GET THE STATIC SEEDS
+    for (size_t i = 0; i < numSeedGroups; ++i) {
+        if (!fsManager.getSeedPointsFromFile(seedGroupFiles[i], seedGroups[i])) {
+            LERROR("Failed to find seed points in'" << seedGroupFiles[i] << "'");
+        }
+        LERROR("DEBUG: Size of seedGroup" << i << seedGroups[i].size());
+    }
+
+    for (size_t i = 0; i < sourcefiles.size(); ++i) {
+        std::unique_ptr<ccmc::Kameleon> kameleon =
+                fsManager.createKameleonObject(sourcefiles[i]);
+        if (kameleon == nullptr) {
+            continue;
+        }
+        LDEBUG(sourcefiles[i] << " is now being traced.");
+        // if ( (i > 235 && i < 235 + 92) || i == 347 || i == 348 || i == 346|| i > 457) {
+            // TRACE ALL STATIC SEED GROUPS' STATE
+            // if (i < 169) {
+                for (size_t spf = 0 ; spf < numSeedGroups ; ++spf ) {
+                    FieldlinesState fls(seedGroups[spf].size());
+                    fsManager.getFieldlinesState(kameleon.get(),
+                                                 tracingVariable,
+                                                 seedGroups[spf],
+                                                 tracingStepLength,
+                                                 maxSteps,
+                                                 _isMorphing,
+                                                 numResamples,
+                                                 resamplingOption,
+                                                 extraFloatVars,
+                                                 extraMagVars,
+                                                 fls);
+                    std::string filePath = fsManager.getAbsPath(ssOutBins[spf] +
+                                   fsManager.timeToString(fls._triggerTime, true) + ".osfls");
+                    fls.saveStateToBinaryFile(filePath);
+                    LINFO("Saved state to " << filePath);
+                }
+            // }
+        // }
+
+        // TRACE FIELDLINES THROUGH EARTH
+        for (int k = 0; k < 2 ; k++) {
+            // if (i > 168 && k < 4 ) {continue;}
+            FieldlinesState fls(dynamicSeeds[k][i].size());
+            fsManager.getFieldlinesState(kameleon.get(),
+                                         tracingVariable,
+                                         dynamicSeeds[k][i],
+                                         tracingStepLength,
+                                         maxSteps,
+                                         _isMorphing,
+                                         numResamples,
+                                         resamplingOption,
+                                         extraFloatVars,
+                                         extraMagVars,
+                                         fls);
+            std::string filePath = fsManager.getAbsPath(ssOutBins[seedGroupFiles.size()+k] +
+                           fsManager.timeToString(fls._triggerTime, true) + ".osfls");
+            fls.saveStateToBinaryFile(filePath);
+            LINFO("Saved state to " << filePath);
+        }
+
+    // }
+
+    // for (size_t i = 0; i < 100; ++i) {
+    //     std::unique_ptr<ccmc::Kameleon> kameleon =
+    //             fsManager.createKameleonObject(validSourceFilePaths[i]);
+    //     if (kameleon == nullptr) {
+    //         continue;
+    //     }
+    //     LDEBUG(validSourceFilePaths[i] << " is now being traced.");
+    //     if (i > 21) {
+    //         // Trace eq_plane_1
+    //         FieldlinesState fls(seedGroups[0].size());
+    //         fsManager.getFieldlinesState(kameleon.get(),
+    //                                      tracingVariable,
+    //                                      seedGroups[0],
+    //                                      tracingStepLength,
+    //                                      maxSteps,
+    //                                      _isMorphing,
+    //                                      numResamples,
+    //                                      resamplingOption,
+    //                                      extraFloatVars,
+    //                                      extraMagVars,
+    //                                      fls);
+    //         std::string filePath = fsManager.getAbsPath(binOut1 +
+    //                        fsManager.timeToString(fls._triggerTime, true) + ".osfls");
+    //         fls.saveStateToBinaryFile(filePath);
+    //     }
+    //     // TRACE FIELDLINES THROUGH EARTH
+    //     FieldlinesState fls(earthSeeds[i].size());
+    //     fsManager.getFieldlinesState(kameleon.get(),
+    //                                  tracingVariable,
+    //                                  earthSeeds[i],
+    //                                  tracingStepLength,
+    //                                  maxSteps,
+    //                                  _isMorphing,
+    //                                  numResamples,
+    //                                  resamplingOption,
+    //                                  extraFloatVars,
+    //                                  extraMagVars,
+    //                                  fls);
+    //     std::string filePath = fsManager.getAbsPath(binOut5 +
+    //                    fsManager.timeToString(fls._triggerTime, true) + ".osfls");
+    //     fls.saveStateToBinaryFile(filePath);
+    //
+
+
+    //         if (saveBinaryOutputs) {
+    //             std::string filePath =
+    //                     fsManager.getAbsPath(outputBinaryLoc +
+    //                            fsManager.timeToString(_states[i]._triggerTime, true) +
+    //                            ".osfls");
+    //             _states[i].saveStateToBinaryFile(filePath);
+    //             // filePath =
+    //             //         fsManager.getAbsPath(outputBinaryLoc + "downsampled/" +
+    //             //                fsManager.timeToString(_states[i]._triggerTime, true) +
+    //             //                ".osfls");
+    //             // _states[i].saveStateSubsetToBinaryFile(filePath, 4);
+
+    //             // TODO REMOVE THIS OR ADD AS OPTION IN LUA MODFILE!
+    //             // DELETE STATE TO CLEAR MEMORY FOR A PREPROCESS RUN
+    //             _states.pop_back();
+    //             // // add new empty state to not screw with for-loop calling _state[i]
+    //             _states.push_back(FieldlinesState());
+    //         }
+    }
+    return false;
+
+//---------------------- HARDCODE DELUXEEE END!-------------------------------------//
+
+
+            // TODO Only one loop.. Not one for each tracing method!!
+            // for (size_t i = 0; i < _numberOfStates; ++i) {
+            //     std::unique_ptr<ccmc::Kameleon> kameleon =
+            //             fsManager.createKameleonObject(validSourceFilePaths[i]);
+            //     if (kameleon == nullptr) {
+            //         continue;
+            //     }
+            //     LDEBUG(validSourceFilePaths[i] << " is now being traced.");
+            //     _states.push_back(FieldlinesState(_seedPoints.size()));
+            //     fsManager.getFieldlinesState(
+            //                                  // validSourceFilePaths[i],
+            //                                  kameleon.get(),
+            //                                  tracingVariable,
+            //                                  _seedPoints,
+            //                                  tracingStepLength,
+            //                                  maxSteps,
+            //                                  _isMorphing,
+            //                                  numResamples,
+            //                                  resamplingOption,
+            //                                  extraFloatVars,
+            //                                  extraMagVars,
+            //                                  _states[i]);
+
+            //     _startTimes.push_back(_states[i]._triggerTime);
+
+            //     if (saveBinaryOutputs) {
+            //         std::string filePath =
+            //                 fsManager.getAbsPath(outputBinaryLoc +
+            //                        fsManager.timeToString(_states[i]._triggerTime, true) +
+            //                        ".osfls");
+            //         _states[i].saveStateToBinaryFile(filePath);
+            //         // filePath =
+            //         //         fsManager.getAbsPath(outputBinaryLoc + "downsampled/" +
+            //         //                fsManager.timeToString(_states[i]._triggerTime, true) +
+            //         //                ".osfls");
+            //         // _states[i].saveStateSubsetToBinaryFile(filePath, 4);
+
+            //         // TODO REMOVE THIS OR ADD AS OPTION IN LUA MODFILE!
+            //         // DELETE STATE TO CLEAR MEMORY FOR A PREPROCESS RUN
+            //         _states.pop_back();
+            //         // // add new empty state to not screw with for-loop calling _state[i]
+            //         _states.push_back(FieldlinesState());
+            //     }
+            //     if (saveJsonOutputs) {
+            //         std::string filePrefix = fsManager.timeToString(_states[i]._triggerTime, true);
+            //         fsManager.saveFieldlinesStateAsJson(_states[i],
+            //                                             outputJsonLoc,
+            //                                             false,
+            //                                             filePrefix,
+            //                                             false);
+            //     }
+            // }
         } break;
         case PRE_CALCULATED_JSON: {
             allowSeedPoints = false;
@@ -359,10 +623,43 @@ bool RenderableFieldlinesSequence::initialize() {
                                              numResamples,
                                              resamplingOption,
                                              _states[i]);
+                {
+                    // TODO: Delete this scope!!
+                    _states[i]._extraVariables.pop_back();
+                    _states[i]._extraVariableNames.pop_back();
+                    _states[i].calculateTopologies(3.1f*R_E_TO_METER);
+                }
                 // TODO: Move elsewhere
                 _startTimes.push_back(_states[i]._triggerTime);
-            }
 
+                if (saveBinaryOutputs) {
+                    std::string filePath =
+                            fsManager.getAbsPath(outputBinaryLoc +
+                                   fsManager.timeToString(_states[i]._triggerTime, true) +
+                                   ".osfls");
+                    LINFO("Saving file to: " << filePath);
+                    _states[i].saveStateToBinaryFile(filePath);
+                    // filePath =
+                    //         fsManager.getAbsPath(outputBinaryLoc + "downsampled/" +
+                    //                fsManager.timeToString(_states[i]._triggerTime, true) +
+                    //                ".osfls");
+                    // _states[i].saveStateSubsetToBinaryFile(filePath, 4);
+
+                    // TODO REMOVE THIS OR ADD AS OPTION IN LUA MODFILE!
+                    // DELETE STATE TO CLEAR MEMORY FOR A PREPROCESS RUN
+                    // _states.pop_back();
+                    // // add new empty state to not screw with for-loop calling _state[i]
+                    // _states.push_back(FieldlinesState());
+                }
+
+                // std::string filePath = validSourceFilePaths[i];
+                // auto lastPos = filePath.find_last_of("/\\");
+                // filePath = filePath.substr(0,lastPos);
+                // filePath += "/binary/" + fsManager.timeToString(tmpState._triggerTime, true) +
+                //                        ".osfls";
+                // tmpState.saveStateToBinaryFile(filePath);
+            }
+            // double tt = _states[19009]._triggerTime;
         } break;
         case PRE_CALCULATED_BINARY: {
 
@@ -397,6 +694,7 @@ bool RenderableFieldlinesSequence::initialize() {
                 }
                 FieldlinesState tmpState;
                 _states.push_back(tmpState);
+                // Load first state, just for initialization purposes
                 bool statuss = fsManager.getFieldlinesStateFromBinary(
                         _validSourceFilePaths[0], _states[0]);
                 _drawingIndex = 0;
@@ -421,10 +719,29 @@ bool RenderableFieldlinesSequence::initialize() {
 
                     // TODO: Move elsewhere
                     _startTimes.push_back(_states[i]._triggerTime);
+                    // TODO: Delete the rest in this scope!!
+                    // _states[i]._extraVariables.pop_back();
+                    // _states[i]._extraVariableNames.pop_back();
+                    // _states[i].calculateTopologies(3.1f);
+                    std::string filePath = _validSourceFilePaths[i];
+                    std::string fileName = filePath.substr(filePath.size()-29, 29);
+
+                    size_t dwnSmpl = 1;
+                    std::string filePath0 = filePath.substr(0,filePath.size()-29) + "downsampled" + std::to_string(dwnSmpl) + "/" + fileName;
+                    _states[i].saveStateSubsetToBinaryFile(fsManager.getAbsPath(filePath0), dwnSmpl);
+
+                    dwnSmpl = 2;
+                    std::string filePath1 = filePath.substr(0,filePath.size()-29) + "downsampled" + std::to_string(dwnSmpl) + "/" + fileName;
+                    _states[i].saveStateSubsetToBinaryFile(fsManager.getAbsPath(filePath1), dwnSmpl);
+
+                    dwnSmpl = 4;
+                    std::string filePath2 = filePath.substr(0,filePath.size()-29) + "downsampled" + std::to_string(dwnSmpl) + "/" + fileName;
+                    _states[i].saveStateSubsetToBinaryFile(fsManager.getAbsPath(filePath2), dwnSmpl);
+                    // _states.pop_back();
+                    // // // add new empty state to not screw with for-loop calling _state[i]
+                    // _states.push_back(FieldlinesState());
                 }
             }
-
-
         } break;
         case LIVE_TRACE: {
             allowSeedPoints = true;
@@ -462,6 +779,7 @@ bool RenderableFieldlinesSequence::initialize() {
 
         float rmin, rmax, xmin, xmax, ymin, ymax, zmin, zmax;
 
+
         std::string model = _states[0]._modelName;
         if (model == "enlil") {
             _scalingFactor          = A_U_TO_METER;
@@ -469,10 +787,10 @@ bool RenderableFieldlinesSequence::initialize() {
             _scalingFactorUnit = "AU";
             // TODO: change these hardcoded limits to something that makes sense
             // or allow user to specify in LUA
-            rmin =  0.09f;
-            xmin = ymin = zmin = -5.f;
-            xmax = ymax = zmax = 5.f;
-            rmax = std::max(xmax, std::max(ymax,zmax));
+            // rmin =  0.09f;
+            // xmin = ymin = zmin = -5.f;
+            // xmax = ymax = zmax = 5.f;
+            // rmax = std::max(xmax, std::max(ymax,zmax));
 
             _isSpherical = true;
         } else if (model == "pfss") {
@@ -481,10 +799,10 @@ bool RenderableFieldlinesSequence::initialize() {
             _scalingFactorUnit = "RS";
             // TODO: change these hardcoded limits to something that makes sense
             // or allow user to specify in LUA
-            rmin =  0.0f;
-            xmin = ymin = zmin = -4.f;
-            xmax = ymax = zmax = 4.f;
-            rmax = 5;
+            // rmin =  0.0f;
+            // xmin = ymin = zmin = -4.f;
+            // xmax = ymax = zmax = 4.f;
+            // rmax = 5;
             _isSpherical = false; // this might have to change if pfss cdfs are provided
 
         } else if (model == "batsrus") {
@@ -493,28 +811,28 @@ bool RenderableFieldlinesSequence::initialize() {
             _scalingFactorUnit = "RE";
             // TODO: change these hardcoded limits to something that makes sense
             // or allow user to specify in LUA
-            rmin =  1.0f;
-            xmin = -250.f;
-            ymin = zmin = -150.f;
-            xmax = 50.f;
-            ymax = zmax = 150.f;
+            // rmin =  1.0f;
+            // xmin = -250.f;
+            // ymin = zmin = -150.f;
+            // xmax = 50.f;
+            // ymax = zmax = 150.f;
 
             // All corners of volume
-            std::vector<glm::vec3> corners{glm::vec3(xmax, ymin, zmin),
-                                           glm::vec3(xmax, ymin, zmax),
-                                           glm::vec3(xmax, ymax, zmax),
-                                           glm::vec3(xmax, ymax, zmax),
-                                           glm::vec3(xmin, ymin, zmin),
-                                           glm::vec3(xmin, ymin, zmax),
-                                           glm::vec3(xmin, ymax, zmax),
-                                           glm::vec3(xmin, ymax, zmin)};
-            rmax = 0;
-            for (glm::vec3 vec : corners) {
-                float length = glm::length(vec);
-                if (length > rmax) {
-                    rmax = length;
-                }
-            }
+            // std::vector<glm::vec3> corners{glm::vec3(xmax, ymin, zmin),
+            //                                glm::vec3(xmax, ymin, zmax),
+            //                                glm::vec3(xmax, ymax, zmax),
+            //                                glm::vec3(xmax, ymax, zmax),
+            //                                glm::vec3(xmin, ymin, zmin),
+            //                                glm::vec3(xmin, ymin, zmax),
+            //                                glm::vec3(xmin, ymax, zmax),
+            //                                glm::vec3(xmin, ymax, zmin)};
+            // rmax = 0;
+            // for (glm::vec3 vec : corners) {
+            //     float length = glm::length(vec);
+            //     if (length > rmax) {
+            //         rmax = length;
+            //     }
+            // }
 
             _isSpherical = false;
         } else {
@@ -522,6 +840,31 @@ bool RenderableFieldlinesSequence::initialize() {
                 << " batsrus and enlil models for the time being! CDF contains the "
                 << model << " model.");
             return false;
+        }
+
+        ghoul::Dictionary cartesianLimits;
+        glm::vec2 radialLimits;
+        bool modfileSpecifiedCartesianLimits = _dictionary.getValue(keyCartesianDomainLimits, cartesianLimits);
+        bool modfileSpecifiedRadialLimits = _dictionary.getValue(keyRadialDomainLimits, radialLimits);
+
+        if (modfileSpecifiedCartesianLimits) {
+            xmin = cartesianLimits.value<glm::vec2>("1").x /** _scalingFactor*/;
+            xmax = cartesianLimits.value<glm::vec2>("1").y /** _scalingFactor*/;
+            ymin = cartesianLimits.value<glm::vec2>("2").x /** _scalingFactor*/;
+            ymax = cartesianLimits.value<glm::vec2>("2").y /** _scalingFactor*/;
+            zmin = cartesianLimits.value<glm::vec2>("3").x /** _scalingFactor*/;
+            zmax = cartesianLimits.value<glm::vec2>("3").y /** _scalingFactor*/;
+        } else {
+            xmin = ymin = zmin = -FLT_MAX;
+            xmax = ymax = zmax = FLT_MAX;
+        }
+
+        if (modfileSpecifiedRadialLimits) {
+            rmin = radialLimits.x /** _scalingFactor*/;
+            rmax = radialLimits.y /** _scalingFactor*/;
+        } else {
+            rmin = 0;
+            rmax = FLT_MAX;
         }
 
         _domainLimR.setMinValue(glm::vec2(rmin));
@@ -665,6 +1008,7 @@ bool RenderableFieldlinesSequence::initialize() {
             _colorizingQuantity.addOption(i, _states[0]._extraVariableNames[i]);
             _domainQuantity.addOption(i, _states[0]._extraVariableNames[i]);
         }
+        // _domainQuantity.addOption(-1, "---none---");
 
         // Set tranferfunction min/max to min/max in the given range
         if (_dictionary.hasKeyAndValue<ghoul::Dictionary>(keyExtraColorTablePaths)) {
@@ -1077,7 +1421,10 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         if (!_isProcessingState && !_newStateIsReady) {
                 _isProcessingState = true;
                 _mustProcessNewState = false;
-                std::thread readBinaryThread(&RenderableFieldlinesSequence::readNewState, this);
+                std::thread readBinaryThread([this] {
+                    this->readNewState(this->_activeStateIndex);
+                });
+                // std::thread readBinaryThread(&RenderableFieldlinesSequence::readNewState, _activeStateIndex, this);
                 readBinaryThread.detach();
         }
     }
@@ -1269,6 +1616,7 @@ bool RenderableFieldlinesSequence::getSourceFilesFromDictionary(
     return true;
 }
 
+// TODO: GENERALIZE!
 // TODO: allow more than one seed file.. allow folder!
 bool RenderableFieldlinesSequence::getSeedPointsFromDictionary() {
     ghoul::Dictionary seedInfo;
@@ -1292,7 +1640,7 @@ bool RenderableFieldlinesSequence::getSeedPointsFromDictionary() {
     return true;
 }
 
-void RenderableFieldlinesSequence::readNewState() {
+void RenderableFieldlinesSequence::readNewState(const int activeStateIndex) {
     if (_states.size() > 1) {
         LERROR("ALREADY MORE THAN ONE STATE IN '_states' VECTOR");
     }
@@ -1302,7 +1650,7 @@ void RenderableFieldlinesSequence::readNewState() {
     auto start = std::chrono::high_resolution_clock::now();
 
     bool statuss = fsManager.getFieldlinesStateFromBinary(
-            _validSourceFilePaths[_activeStateIndex],
+            _validSourceFilePaths[activeStateIndex],
             tmpState);
 
     _newState = std::move(tmpState);
@@ -1313,7 +1661,7 @@ void RenderableFieldlinesSequence::readNewState() {
     std::chrono::duration<double, std::milli> diff = end - start;
     auto ms = diff.count();
     if (ms > 40) {
-        LWARNING("TIME FOR ADDING STATE FROM BINARY: " << ms << " milliseconds. (" << _validSourceFilePaths[_activeStateIndex] << ")");
+        LWARNING("TIME FOR ADDING STATE FROM BINARY: " << ms << " milliseconds. (" << _validSourceFilePaths[activeStateIndex] << ")");
     }
 }
 

@@ -191,7 +191,7 @@ private:
     bool getUnsignedIntFromModfile(const std::string& key, unsigned int& val);
     bool isWithinSequenceInterval();
 
-    void readNewState(/*const std::string& filepath, std::vector<FieldlinesState>& states*/);
+    void readNewState(const int activeStateIndex/*const std::string& filepath, std::vector<FieldlinesState>& states*/);
     void updateActiveStateIndex();
     void updateColorBuffer();
     void updateDomainBuffer();
