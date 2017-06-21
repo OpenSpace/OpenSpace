@@ -54,6 +54,9 @@ namespace openspace {
 
 			static void writeMatrixFile(std::string output_path, glm::dmat4 outputMatrix);
 		private:
+
+			static double computeCloudResolution(pcl::PointCloud<pcl::PointXYZ>::Ptr inCloud);
+
 			int _levelOfDetail;
 		};
 	}
