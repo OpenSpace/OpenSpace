@@ -22,19 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+in vec4 gs_color;
+in vec3 gs_normal;
+in float gs_depth;
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
+#include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec4 in_color;
 
-out vec4 vs_color;
+Fragment getFragment()
+{
+    // TODO why not do this in geometry shadeR?
+    float alpha = 1-length(gs_normal)*length(gs_normal);
+    vec4 fragColor;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+    fragColor = vec4(gs_color.rgb * alpha, gs_color.a);
 
-void main() {        
-    vs_color = in_color;
-    gl_Position = modelTransform * vec4(in_position, 0);
+    Fragment frag;
+    frag.depth = gs_depth;
+    frag.color = fragColor;
+    return frag;
 }

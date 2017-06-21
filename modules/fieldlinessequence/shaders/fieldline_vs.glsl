@@ -24,9 +24,6 @@
 
 #version __CONTEXT__
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
-
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec4 in_color;
 
@@ -34,7 +31,7 @@ out vec4 vs_color;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-void main() {        
+void main() {
     vs_color = in_color;
-    gl_Position = modelTransform * vec4(in_position, 0);
+    gl_Position = vec4(in_position, 0);
 }

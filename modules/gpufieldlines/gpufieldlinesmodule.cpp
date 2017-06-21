@@ -22,19 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include <modules/gpufieldlines/gpufieldlinesmodule.h>
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec4 in_color;
+#include <ghoul/misc/assert.h>
 
-out vec4 vs_color;
+#include <modules/gpufieldlines/rendering/renderablegpufieldlines.h>
+#include <modules/gpufieldlines/util/gpufieldlinesmanager.h>
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+namespace openspace {
 
-void main() {        
-    vs_color = in_color;
-    gl_Position = modelTransform * vec4(in_position, 0);
+GpuFieldlinesModule::GpuFieldlinesModule()
+    : OpenSpaceModule("GpuFieldlines")
+{
+    OsEng.registerModuleCallback(
+        OpenSpaceEngine::CallbackOption::Initialize,
+        [](){
+            GpuFieldlinesManager::initialize();
+        }
+    );
 }
+
+void GpuFieldlinesModule::internalInitialize() {
+    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
+
+    fRenderable->registerClass<RenderableGpuFieldlines>("RenderableGpuFieldlines");
+}
+
+} // namespace openspace

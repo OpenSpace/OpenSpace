@@ -22,19 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSEQUENCEMODULE___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSEQUENCEMODULE___H__
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
+#include <openspace/util/openspacemodule.h>
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec4 in_color;
+namespace openspace {
 
-out vec4 vs_color;
+class FieldlinesSequenceModule : public OpenSpaceModule {
+public:
+    FieldlinesSequenceModule();
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+protected:
+    void internalInitialize() override;
+};
 
-void main() {        
-    vs_color = in_color;
-    gl_Position = modelTransform * vec4(in_position, 0);
-}
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSEQUENCEMODULE___H__

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,17 +24,35 @@
 
 #version __CONTEXT__
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
+uniform bool    isSpherical;
+uniform float   scaleFactor;
+uniform mat4    modelViewProjection;
 
+// as provided in seed point files! Needs conversion to render properly in OpenSpace
 layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec4 in_color;
 
-out vec4 vs_color;
+out float vs_depth;
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-void main() {        
-    vs_color = in_color;
-    gl_Position = modelTransform * vec4(in_position, 0);
+void main() {
+    
+    vec4 position_in_meters;
+    if (!isSpherical) {
+        position_in_meters = vec4(in_position.xyz * scaleFactor, 1);
+    } else {
+        // TODO MOVE CONVERTION FROM SPHERICAL TO CARTESIAN TO A SHADER UTILS FILE!
+        float radiusInMeters = in_position.x * scaleFactor; // AU to METERS
+        float rad_x_sinLat = radiusInMeters * cos(radians(in_position.y));
+        // float rad_x_sinLat = radiusInMeters * sin(radians(90.0 - sphericalPoint.y)); sin(90-x) == cos(x)
+
+        position_in_meters = vec4(rad_x_sinLat * cos(radians(in_position.z)),
+                                  rad_x_sinLat * sin(radians(in_position.z)),
+                                  radiusInMeters * sin(radians(in_position.y)),
+                                  1.0);
+    }
+
+    vec4 positionClipSpace = modelViewProjection * position_in_meters;
+    gl_Position = z_normalization(positionClipSpace);
+    vs_depth = gl_Position.w;
 }

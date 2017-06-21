@@ -25,27 +25,37 @@
 include(${OPENSPACE_CMAKE_EXT_DIR}/module_definition.cmake)
 
 set(HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlines.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinessequencemanager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlineutils.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/helperfunctions.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/ext/nlohmann/json/json.hpp
+    # ${OPENSPACE_BASE_DIR}/modules/iswa/ext/json/json.hpp
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlines.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinessequencemanager.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/fieldlinesstate.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablefieldlinessequence.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_fs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_gs.glsl
-    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_spherical_flow_direction_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_flow_direction_vs.glsl
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_flow_direction_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_rope_flow_direction_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_rope_fs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/fieldline_rope_gs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/seedpoint_vs.glsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/seedpoint_fs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
-    "Fieldlines"
-    fieldlines_module
+    "FieldlinesSequence"
+    fieldlinessequence_module
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )

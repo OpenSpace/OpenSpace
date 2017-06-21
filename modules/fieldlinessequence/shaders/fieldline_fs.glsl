@@ -22,19 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+in vec4 gs_color;
+in vec4 gs_position;
+in vec3 gs_normal;
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
+uniform bool classification;
+uniform vec4 fieldLineColor;
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec4 in_color;
 
-out vec4 vs_color;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-void main() {        
-    vs_color = in_color;
-    gl_Position = modelTransform * vec4(in_position, 0);
+
+Fragment getFragment()
+{
+    float alpha = 1-length(gs_normal)*length(gs_normal);
+    vec4 fragColor;
+    if (classification)
+        fragColor = vec4(gs_color.rgb * alpha, 1.0);
+    else
+        fragColor = vec4(fieldLineColor.rgb * fieldLineColor.a * alpha, 1.0);
+
+    float depth = pscDepth(gs_position);
+
+    Fragment frag;
+    frag.depth = depth;
+    frag.color = fragColor;
+    return frag;
 }
+
+
+
+// #include "ABuffer/abufferStruct.hglsl"
+// #include "ABuffer/abufferAddToBuffer.hglsl"
+// #include "PowerScaling/powerScaling_fs.hglsl"
+
+// void main() {
+//     float alpha = 1-length(gs_normal)*length(gs_normal);
+//     vec4 fragColor;
+//     if (classification)
+//         fragColor = vec4(gs_color.rgb, alpha);
+//     else
+//         fragColor = vec4(fieldLineColor.rgb, fieldLineColor.a * alpha);
+
+//     float depth = pscDepth(gs_position);
+//     ABufferStruct_t frag = createGeometryFragment(fragColor, gs_position, depth);
+//     addToBuffer(frag);
+// }

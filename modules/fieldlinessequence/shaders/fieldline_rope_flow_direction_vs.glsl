@@ -24,17 +24,57 @@
 
 #version __CONTEXT__
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec4 in_color;
+layout(location = 3) in float unitIntensity;
 
 out vec4 vs_color;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform int time;
+uniform int flParticleSize;
+uniform int modulusDivider;
+uniform int colorMethod;
 
-void main() {        
-    vs_color = in_color;
-    gl_Position = modelTransform * vec4(in_position, 0);
+uniform sampler1D colorMap;
+
+uniform vec4 fieldlineColor;
+uniform vec4 fieldlineParticleColor;
+
+uniform mat4 modelViewTransform;
+// uniform mat4 modelTransform;
+
+const int UNIFORM_COLOR = 0;
+const int UNIT_DEPENDENT_COLOR = 1;
+const int CLASSIFIED_COLOR = 2;
+
+void main() {
+    // Only a temp variable until proper transfer function
+    float mini = 500.0;
+    float maxi = 100000.0;
+
+    float lookUpValue = (unitIntensity - mini ) / (maxi-mini);
+    vec4 color = texture(colorMap, lookUpValue);
+
+    // Color every n-th vertex differently to show fieldline flow direction
+    int modulus = (gl_VertexID + time) % modulusDivider;
+    if ( modulus > 0 && modulus < flParticleSize) {
+        if (colorMethod == UNIT_DEPENDENT_COLOR) {
+            vs_color = vec4(color.xyz,fieldlineParticleColor.a);
+        } else /*if (colorMethod == UNIFORM_COLOR)*/ {
+            vs_color = fieldlineParticleColor;
+        }
+    } else {
+        if (colorMethod == UNIT_DEPENDENT_COLOR) {
+            vs_color = vec4(color.xyz,fieldlineColor.a);
+        } else /*if (colorMethod == UNIFORM_COLOR)*/ {
+            vs_color = fieldlineColor;
+        }
+    }
+
+    // FROM MODEL SPACE TO CAMERA SPACE
+    gl_Position = modelViewTransform * vec4(in_position, 1);
+
+    // FROM MODEL SPACE TO WORLD SPACE
+    // gl_Position = modelTransform * vec4(in_position, 1);
 }

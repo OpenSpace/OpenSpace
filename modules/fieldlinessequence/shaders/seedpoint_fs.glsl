@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2017                                                               *
+ * Copyright (c) 2014                                                                    *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,19 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+in float vs_depth;
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
+//uniform bool classification;
+uniform vec4 color;
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec4 in_color;
+#include "fragment.glsl"
+#include "PowerScaling/powerScaling_fs.hglsl"
 
-out vec4 vs_color;
-
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-void main() {        
-    vs_color = in_color;
-    gl_Position = modelTransform * vec4(in_position, 0);
+Fragment getFragment() {
+    if (color.a == 0) {
+        discard;
+    }
+    vec4 fragColor;
+    fragColor = color;
+    Fragment frag;
+    frag.depth = vs_depth;
+    frag.color = fragColor;
+    return frag;
 }

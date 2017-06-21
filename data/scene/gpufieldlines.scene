@@ -9,8 +9,11 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    -- openspace.time.setTime("2015 MAR 14 23:59:00.000") -- BATSRUS time
-    openspace.time.setTime("2010 OCT 16 07:30:00.000") -- ENLIL time
+    -- openspace.time.setTime("2015 MAR 14 23:59:58.000") -- BATSRUS time
+    openspace.time.setTime("2012 JUL 15 19:12:14.000") -- New BATSRUS time EVENT
+    -- openspace.time.setTime("2015 JUN 30 09:17:32.000") -- ENLIL time
+    -- openspace.time.setTime("2010 OCT 16 07:30:00.000") -- ENLIL (Aisla) time
+    -- openspace.time.setTime("2010 OCT 30 14:19:54.000") -- ENLIL (Aisla) actual time
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 end
 
@@ -22,6 +25,7 @@ function postInitialization()
     ]]--
     openspace.printInfo("Setting default values")
     openspace.setPropertyValue("Sun.renderable.enabled", true)
+    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
     openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
@@ -40,8 +44,9 @@ return {
     CommonFolder = "common",
     Camera = {
         Focus = "SolarSystemBarycenter", --"EarthBarycenter",--
+        -- Focus = "EarthBarycenter",--"SolarSystemBarycenter", --"EarthBarycenter",--
         Position = {505370268486.696167, 1089706179272.719116, -890259148524.319458},
-        Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
+        Rotation = {0.0, 0.0, 0.0, 0.0},
     },
     Modules = {
         "sun",
@@ -53,11 +58,11 @@ return {
         -- "saturn",
         -- "uranus",
         --"neptune",
-        "stars",
-        "fieldlines",
+        -- "stars",
+        "gpufieldlines",
         -- "stars-denver",
-        "milkyway",
+        -- "milkyway",
         -- "milkyway-eso",
-        "constellationbounds",
+        -- "constellationbounds",
     }
 }

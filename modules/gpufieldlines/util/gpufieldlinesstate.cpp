@@ -22,19 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#include <modules/gpufieldlines/util/gpufieldlinesstate.h>
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
+namespace openspace {
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec4 in_color;
-
-out vec4 vs_color;
-
-#include "PowerScaling/powerScaling_vs.hglsl"
-
-void main() {        
-    vs_color = in_color;
-    gl_Position = modelTransform * vec4(in_position, 0);
+GpuFieldlinesState::GpuFieldlinesState(size_t numLines) {
+    _lineStart.reserve(numLines);
+    _lineCount.reserve(numLines);
 }
+
+void GpuFieldlinesState::reserveSize(size_t size) {
+    _vertexPositions.reserve(size);
+    _vertexColors.reserve(size);
+}
+
+} // namespace openspace

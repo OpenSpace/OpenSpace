@@ -22,19 +22,57 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
+#include <vector>
+#include <ghoul/opengl/ghoul_gl.h> // TODO forward declare?
+#include <ghoul/glm.h>
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec4 in_color;
+namespace openspace {
 
-out vec4 vs_color;
+class FieldlinesState {
+public:
+    enum Model : int {
+        batsrus = 0,
+        enlil = 1,
+        pfss = 2
+    };
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+    FieldlinesState() {}
+    FieldlinesState(size_t numLines);
+    // ~FieldlinesState();
 
-void main() {        
-    vs_color = in_color;
-    gl_Position = modelTransform * vec4(in_position, 0);
-}
+    // TODO: MOVE TO PRIVATE
+    std::vector<glm::vec3>  _vertexPositions;
+    std::vector<glm::vec4>  _vertexColors;
+
+    std::vector<GLfloat>    _quickMorph;
+    std::vector<GLint>      _lineStart;
+    std::vector<GLsizei>    _lineCount;
+
+    // TODO: start/trigger time as double in j2000 time
+    double _triggerTime = -1.0;
+
+    bool _isMorphable = false;
+
+    std::vector<std::vector<float>> _extraVariables;
+    std::vector<std::string> _extraVariableNames;
+
+    std::string _modelName = "";
+    Model _model;
+
+    void reserveSize(size_t size);
+
+    void saveStateToBinaryFile(const std::string& absoluteFilePath);
+    void saveStateSubsetToBinaryFile(const std::string& absFilePath,
+                                     const size_t& numPointsToSkipEachStep);
+
+    void setModel(const Model& modelNumber);
+    void calculateTopologies(const float& radius);
+private:
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FIELDLINESSTATE___H__

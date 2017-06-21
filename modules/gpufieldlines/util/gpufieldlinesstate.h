@@ -22,19 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_MODULE_GPUFIELDLINES___GPUFIELDLINESSTATE___H__
+#define __OPENSPACE_MODULE_GPUFIELDLINES___GPUFIELDLINESSTATE___H__
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
+#include <vector>
+#include <ghoul/opengl/ghoul_gl.h> // TODO forward declare?
+#include <ghoul/glm.h>
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec4 in_color;
+namespace openspace {
 
-out vec4 vs_color;
+class GpuFieldlinesState {
+public:
+    GpuFieldlinesState(size_t numLines);
+    // ~FieldlinesState();
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+    // TODO: MOVE TO PRIVATE
+    std::vector<GLint> _lineStart;
+    std::vector<GLsizei> _lineCount;
+    std::vector<glm::vec3> _vertexPositions;
+    std::vector<glm::vec4> _vertexColors;
+    std::vector<GLfloat> _quickMorph;
 
-void main() {        
-    vs_color = in_color;
-    gl_Position = modelTransform * vec4(in_position, 0);
-}
+    void reserveSize(size_t size);
+private:
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_GPUFIELDLINES___GPUFIELDLINESSTATE___H__
