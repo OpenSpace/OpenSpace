@@ -131,20 +131,25 @@ vec4 getSample#{layerGroup}#{i}(
 #for id, layerGroup in layerGroups
 #for i in 0..#{lastLayerIndex#{layerGroup}}
 
-vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor) {
+vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor, float blendFactor) {
 #if (#{#{layerGroup}#{i}BlendMode} == 0) // Default, Normal
-	return blendNormal(currentColor, newColor);	
+	return blendNormal(currentColor, vec4(newColor.rgb, newColor.a * blendFactor));	
 #elif (#{#{layerGroup}#{i}BlendMode} == 1) // Multiply
-	return blendMultiply(currentColor, newColor);
+	return blendMultiply(currentColor, newColor * blendFactor);
 #elif (#{#{layerGroup}#{i}BlendMode} == 2) // Add
-	return blendAdd(currentColor, newColor);
+	return blendAdd(currentColor, newColor * blendFactor);
 #elif (#{#{layerGroup}#{i}BlendMode} == 3) // Subtract
-	return blendSubtract(currentColor, newColor);
+	return blendSubtract(currentColor, newColor * blendFactor);
 #elif (#{#{layerGroup}#{i}BlendMode} == 4) // Color
+	// Convert color to grayscale
+	float gray = (newColor.r + newColor.g + newColor.b) / 3.0;
+	
 	vec3 hsvCurrent = rgb2hsv(currentColor.rgb);
-	vec3 hsvNew = vec3(hsvCurrent.x, hsvCurrent.y, newColor.x);
+	// Use gray from new color as value in hsv
+	vec3 hsvNew = vec3(hsvCurrent.x, hsvCurrent.y, gray);
 	vec3 rgbNew = hsv2rgb(hsvNew);
-	vec4 color = blendNormal(currentColor, vec4(rgbNew, newColor.a));
+
+	vec4 color = blendNormal(currentColor, vec4(rgbNew, newColor.a * blendFactor));
 	return color;
 #endif
 }
@@ -251,7 +256,7 @@ vec4 calculateColor(
 		colorSample = performAdjustmentColorLayers#{i}(colorSample, ColorLayers[#{i}].adjustment);
 		colorSample = performLayerSettings(colorSample, ColorLayers[#{i}].settings);
 
-		color = blendColorLayers#{i}(color, colorSample);
+		color = blendColorLayers#{i}(color, colorSample, 1.0);
 	}
 	#endfor
 
@@ -278,9 +283,13 @@ vec4 calculateGrayScale(
 		colorSample = performAdjustmentGrayScaleLayers#{i}(colorSample, GrayScaleLayers[#{i}].adjustment);
 
 		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
-		colorSample = performLayerSettings(colorSample, GrayScaleLayers[#{i}].settings);
+		// New settings where opacity is 1.0. Instead use opacity in blending below
+		LayerSettings newSettings = GrayScaleLayers[#{i}].settings;
+		newSettings.opacity = 1.0;
+		colorSample = performLayerSettings(colorSample, newSettings);
 
-		colorGrayScale = blendGrayScaleLayers#{i}(colorGrayScale, colorSample);
+		// Here we use opacity in blending instead of settings
+		colorGrayScale = blendGrayScaleLayers#{i}(colorGrayScale, colorSample, GrayScaleLayers[#{i}].settings.opacity);
 	}
 	#endfor
 
@@ -333,7 +342,7 @@ vec4 calculateNight(
 
 		colorSample = performLayerSettings(colorSample, NightLayers[#{i}].settings);
 
-		nightColor = blendNightLayers#{i}(nightColor, colorSample);
+		nightColor = blendNightLayers#{i}(nightColor, colorSample, 1.0);
 	}
 	#endfor
 
@@ -388,7 +397,7 @@ vec4 calculateOverlay(
 		colorSample = performLayerSettings(colorSample, ColorOverlays[#{i}].settings);
 
 		color = blendNormal(color, colorSample);
-		color = blendColorOverlays#{i}(color, colorSample);
+		color = blendColorOverlays#{i}(color, colorSample, 1.0);
 	}
 	#endfor
 
@@ -421,7 +430,7 @@ vec4 calculateGrayScaleOverlay(
 
 		colorSample = performLayerSettings(colorSample, GrayScaleColorOverlays[#{i}].settings);
 
-		colorGrayScale = blendGrayScaleColorOverlays#{i}(colorGrayScale, colorSample);
+		colorGrayScale = blendGrayScaleColorOverlays#{i}(colorGrayScale, colorSample, 1.0);
 
 		float valueBlending = GrayScaleColorOverlays[#{i}].settings.valueBlending;
 
@@ -470,7 +479,7 @@ vec4 calculateWater(
 
 		colorSample = performLayerSettings(colorSample, WaterMasks[#{i}].settings);
 
-		waterColor = blendWaterMasks#{i}(waterColor, colorSample);
+		waterColor = blendWaterMasks#{i}(waterColor, colorSample, 1.0);
 
 	}
 	#endfor

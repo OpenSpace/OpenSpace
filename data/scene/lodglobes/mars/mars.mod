@@ -114,11 +114,12 @@ return {
                     {
                         Name = "Viking",
                         FilePath = "map_service_configs/MARS_Viking_MDIM21.xml",
+                        Enabled = true,
                     },
                     {
                         Name = "mars_COL_v006_equirectangular_rgb",
                         FilePath = "map_datasets/other/mars_COL_v006_equirectangular_rgb.tif",
-                        Enabled = true,
+                        --Enabled = true,
                     },
                     {
                         Name = "mars_COL_v006_equirectangular_rgb",
@@ -131,9 +132,6 @@ return {
                     },
                 },
                 GrayScaleLayers = {
-                    
-                },
-                GrayScaleColorOverlays = {
                     {
                         Name = "CTX Mosaic [AWS]",
                         FilePath = "map_service_configs/CTX.wms",
@@ -167,6 +165,8 @@ return {
                         FilePath = "map_datasets/HiRISE/Part_of_Area_Traversed_by_the_Mars_Exploration_Rover_Texture.vrt",
                     },
                     ]]
+                },
+                GrayScaleColorOverlays = {
                 },
                 NightLayers = { },
                 WaterMasks = { },
