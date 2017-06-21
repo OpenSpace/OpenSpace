@@ -67,7 +67,7 @@ return {
            -- Target = "Sun",
             -- Will recursively find all instruments that match array instruments
             --RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
-            RootPath = solarImageryDataRootPath .. "/soho/",
+            RootPath = solarImageryDataRootPath .. "/event/soho/",
             -- Optional filter on instruments, otherwise get all
             -- Instruments = {
             --     "aia_aia_94",
@@ -96,7 +96,7 @@ return {
            -- Target = "Sun",
             -- Will recursively find all instruments that match array instruments
             --RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
-            RootPath = "/media/noven/BE23-1097/solarbrowsingdata/event/soho/",
+            RootPath = solarImageryDataRootPath .. "event/soho/",
             -- Optional filter on instruments, otherwise get all
             -- Instruments = {
             --     "aia_aia_94",

@@ -81,6 +81,7 @@ return {
             --Resolution = 4096,
             --Enabled = true,
             StartResolutionLevel = 1,
+            Offset = 0.00001,
             Type = "RenderableSolarImagery",
             StartInstrument = "AIA_AIA_304",
             --Target = "Sun",
@@ -91,7 +92,7 @@ return {
             --RootPath = "/home/noven/workspace/OpenSpace/data/solarflarej2k/",
 
             --RootPath = "/media/noven/BE23-1097/solarbrowsingdata/event/sdo/imagedata/2012/07/12/",
-            RootPath = solarImageryDataRootPath .. "/sdo/",
+            RootPath = solarImageryDataRootPath .. "/event/sdo/",
            -- RootPath = "/Volumes/Untitled/solarflare/SDO/2012/07/12",
             -- Optional filter on instruments, otherwise get all
             -- Instruments = {
