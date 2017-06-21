@@ -50,6 +50,7 @@ public:
 		properties::BoolProperty lockSubsite;
 		properties::BoolProperty useMastCam;
 		properties::BoolProperty enableDepth;
+		properties::BoolProperty enableCulling;
 		properties::FloatProperty heightProp;
 	};
 

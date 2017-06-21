@@ -399,7 +399,7 @@ namespace openspace {
 
 			voxelGridded2.setDownsampleAllData(true);
 			voxelGridded2.setInputCloud(zf_cloud9);
-			double voxelGriddedLeafSize = 0.15;
+			double voxelGriddedLeafSize = 0.17;
 			voxelGridded2.setLeafSize(voxelGriddedLeafSize,voxelGriddedLeafSize,voxelGriddedLeafSize);
 			voxelGridded2.filter(*voxelGriddedPCLCloud2);
 
@@ -409,9 +409,9 @@ namespace openspace {
 
 			pcl::PointCloud<pcl::PointXYZ>::Ptr zf_cloud5(new pcl::PointCloud<pcl::PointXYZ>);
 			LERROR("EACH ONE'S SIZE: ");
-			*zf_cloud5 = *voxelGriddedPCLCloud;// +*voxelGriddedPCLCloud2;
+			//*zf_cloud5 = *voxelGriddedPCLCloud;// +*voxelGriddedPCLCloud2;
 			*zf_cloud5 += *voxelGriddedPCLCloud3;
-			*zf_cloud5 += *voxelGriddedPCLCloud2;
+			//*zf_cloud5 += *voxelGriddedPCLCloud2;
 			LERROR(zf_cloud5->size());
 
 			pcl::PointCloud<pcl::PointXYZ>::Ptr zf_cloud6(new pcl::PointCloud<pcl::PointXYZ>);

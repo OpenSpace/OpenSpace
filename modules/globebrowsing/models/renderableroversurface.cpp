@@ -64,7 +64,9 @@ namespace globebrowsing {
 				BoolProperty("lockSubsite", "Lock subsite", false),
 				BoolProperty("useMastCam", "Show mastcam coloring", false),
 				BoolProperty("enableDepth", "Enable depth", true),
+				BoolProperty("enableCulling", "Enable culling", true),
 				FloatProperty("heightProp", "Site height", 1.f, 1.0f, 100.f)
+
 		})
 		, _debugModelRotation("modelrotation", "Model Rotation", glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(360.0f))
 		, _modelSwitch()
@@ -97,7 +99,7 @@ namespace globebrowsing {
 	tempDictionary.setValue(keyAbsPathToTextures, _absTexturePath);
 	tempDictionary.setValue(keyAbsPathToModels, _absModelPath);
 	_subsitesWithModels = RoverPathFileReader::extractSubsitesWithModels(tempDictionary);
-
+	
 	// Extract all subsites
 	ghoul::Dictionary tempDictionary2;
 	tempDictionary2.setValue(keyRoverLocationPath, _roverLocationPath);
@@ -107,6 +109,7 @@ namespace globebrowsing {
 	addProperty(_generalProperties.lockSubsite);
 	addProperty(_generalProperties.useMastCam);
 	addProperty(_generalProperties.enableDepth);
+	addProperty(_generalProperties.enableCulling);
 	addProperty(_generalProperties.heightProp);
 	addProperty(_debugModelRotation);
 	
@@ -354,11 +357,14 @@ void RenderableRoverSurface::render(const RenderData& data) {
 		if (!_generalProperties.enableDepth.value()) {
 			glDisable(GL_DEPTH_TEST);
 		}
-		glDisable(GL_CULL_FACE);
+
+		if (!_generalProperties.enableCulling.value()) {
+			glDisable(GL_CULL_FACE);
+		}
+		
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
 		subsiteModels->model->render();
-		glEnable(GL_CULL_FACE);
 	}
 	_programObject->deactivate();
 
