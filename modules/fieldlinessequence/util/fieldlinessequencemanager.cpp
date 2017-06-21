@@ -374,7 +374,7 @@ bool FieldlinesSequenceManager::getFieldlinesStateFromBinary(
     char* s = new char[byteSizeAllNames];
     ifs.read(s, byteSizeAllNames);
     allNamesInOne.assign(s,byteSizeAllNames);
-    delete s;
+    delete[] s;
 
     size_t offset = 0;
     for (size_t i = 0; i < numExtras; ++i) {
@@ -507,6 +507,8 @@ bool FieldlinesSequenceManager::getFieldlinesState(
 
             // TODO: Don't hardcode this!!
             const float scalingFactor = R_E_TO_METER;
+            // const float scalingFactor = R_S_TO_METER;
+            // const float scalingFactor = A_U_TO_METER;
 
             const size_t numDataVariables = variableNames.size();
             if (numDataVariables < 3) {
@@ -543,13 +545,21 @@ bool FieldlinesSequenceManager::getFieldlinesState(
             }
 
             // TODO REMOVE THIS HARDCODED STUFF!!
+            // outFieldlinesState.setModel(FieldlinesState::Model::pfss);
             outFieldlinesState.setModel(FieldlinesState::Model::batsrus);
             size_t numChars = pathToJsonFile.size();
-            std::string timeString = pathToJsonFile.substr(numChars - 32, 19);
+            std::string timeString;
+            std::string timeKey = "time";
+            if (jsonTmp.find(timeKey) != jsonTmp.end()) {
+                timeString = jsonTmp[timeKey];
+            } else {
+                // File name should be in the format "<SOME_PATH_TO_FOLDER>/YYYYMMDD-HHMMSS.json"
+                timeString = pathToJsonFile.substr(numChars - 20, 15);
+
+            }
             timeString = timeString.substr(0, 4) + "-" + timeString.substr(4, 2) + "-" +
                          timeString.substr(6, 2) + "T" + timeString.substr(9, 2) + ":" +
-                         timeString.substr(11,2) + ":" + timeString.substr(13,2) + "." +
-                         timeString.substr(16,2);
+                         timeString.substr(11,2) + ":" + timeString.substr(13,2) + ".00";
             double time = Time::convertTime(timeString);
             outFieldlinesState._triggerTime = time;
 
@@ -559,6 +569,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
             size_t topologyIdx   = transitionIdx + 1;
             outFieldlinesState._extraVariableNames.push_back("transition");
             outFieldlinesState._extraVariableNames.push_back("topology");
+            // outFieldlinesState._extraVariableNames.push_back("bsign");
 
             outFieldlinesState._extraVariables.resize(numExtraVariables);
 
@@ -571,27 +582,12 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                 std::vector<std::vector<float>> jsonData = fieldline[strTrace]["data"];
                 std::string tStr = fieldline["topology"];
                 float topology = (tStr == "solar_wind" ? 0.f : ( tStr == "closed" ? 3.f : (tStr == "north" ? 1.f : 2.f)));
-                float transition = fieldline["transition"];
+                // float topology = (tStr == "closed" ? 0.f : (tStr == "open_inward" ? 1.f : 2.f));
+                // float transition = fieldline["transition"];
+                // float bsign = fieldline["bsign"];
                 // json jsonData    = fieldline[strTrace]["data"];
                 size_t numPoints = jsonData.size();
 
-                // TODO REMOVE THESE LINES!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1111
-                const std::vector<float>& f = jsonData[0];
-                const std::vector<float>& l = jsonData[numPoints-1];
-                glm::vec3 ps = glm::vec3(f[xIdx], f[yIdx], f[zIdx]);
-                glm::vec3 pe = glm::vec3(l[xIdx], l[yIdx], l[zIdx]);
-                float f1 = glm::length(ps);
-                float f2 = glm::length(pe);
-                bool np = false;
-                bool sp = false;
-                if (f1 < 3.1f) np = true;
-                if (f2 < 3.1f) sp = true;
-
-                if      ( np &&  sp) { topology = 3.f; }
-                else if (!np && !sp) { topology = 0.f; }
-                else if ( np && !sp) { topology = 1.f; }
-                else    { topology = 2.f; }
-                ///////////////////////////
 
                 for (size_t j = 0; j < numPoints; ++j) {
                     const std::vector<float>& variables = jsonData[j];
@@ -602,6 +598,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                     }
                     outFieldlinesState._extraVariables[transitionIdx].push_back(transition);
                     outFieldlinesState._extraVariables[topologyIdx].push_back(topology);
+                    // outFieldlinesState._extraVariables[bsignIdx].push_back(bsign);
                 }
                 outFieldlinesState._lineCount.push_back(numPoints);
                 outFieldlinesState._lineStart.push_back(lineStartIdx);
