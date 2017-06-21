@@ -450,7 +450,9 @@ namespace globebrowsing {
 		// texture coordinates
 		texMesh.tex_coordinates.push_back(texture_map_tmp);
 		
-		MeshWriter::writeObjFile(file_name_stripped, output_path, texMesh);
+		//MeshWriter::writeObjFile(file_name_stripped, output_path, texMesh);
+		
+		MeshWriter::writeObjFileNoTex(file_name_stripped, output_path, trianglesDecimated);
 		
 		//writeObjFile(file_name_stripped, output_path, texMesh);
 		
@@ -467,13 +469,15 @@ namespace globebrowsing {
 
 	void MeshGeneration::writeTxtFile(const std::string filename, std::string output_path, ImgReader::PointCloudInfo mInfo) {
 		std::string txt_path = output_path + "filenames.txt";
-
+		LERROR("output path txt: " << txt_path);
 		if (FileSys.fileExists(txt_path)) {
+			// If file already exists
 			std::ifstream txtFile;
 			txtFile.open(txt_path.c_str());
 			std::string line;
 			while (std::getline(txtFile, line)) {
 				if (filename == line) {
+					// If the entry is already in txt file
 					return;
 				}
 			}
@@ -539,14 +543,12 @@ namespace globebrowsing {
 				// We avoid adding origo, since the binary files contains zero-vectors for NULL data 
 				if (x == 0.0 && y == 0.0 && z == 0.0) {
 					float f_nan = std::numeric_limits<float>::quiet_NaN();
-					
+
 					depthPoint.x = f_nan;
 					depthPoint.y = f_nan;
 					depthPoint.z = f_nan;
 
 				}
-				//inputCloud->push_back(depthPoint);
-				
 				inputCloud->points.push_back(depthPoint);
 
 				uvTeller++;
