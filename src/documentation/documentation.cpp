@@ -81,7 +81,6 @@ std::string to_string(openspace::documentation::TestResult::Offense::Reason reas
             return "Wrong type";
         default:
             throw ghoul::MissingCaseException();
-
     }
 }
     

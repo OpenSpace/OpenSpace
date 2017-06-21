@@ -16,6 +16,9 @@
         <TileCountY>1</TileCountY>
         <YOrigin>top</YOrigin>
     </DataWindow>
+    <UnsafeSSL>true</UnsafeSSL>
+    <ZeroBlockHttpCodes>400</ZeroBlockHttpCodes>
+    <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
     <Cache>
         <Path>./GDAL_Cache/OnMoonHeight</Path>
         <Depth>4</Depth>

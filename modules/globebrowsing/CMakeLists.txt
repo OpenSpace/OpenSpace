@@ -236,7 +236,7 @@ if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
             openspace-module-globebrowsing
             ${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal_i.lib
         )
-        set(EXTERNAL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal201.dll" PARENT_SCOPE)
+        set(EXTERNAL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ext/gdal/lib/gdal202.dll" PARENT_SCOPE)
     else (WIN32)
         find_package(GDAL REQUIRED)
 

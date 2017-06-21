@@ -161,6 +161,9 @@ return {
                                 },
                             },
                         },
+                        Settings = {
+                            Gamma = 1.5
+                        },
                         Enabled = true,
                     },
                     {
