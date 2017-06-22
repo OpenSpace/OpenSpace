@@ -33,6 +33,7 @@
 struct SiteWithDrives {
 	std::string _site;
 	std::vector<std::string> _drives;
+	std::vector<std::string> sols;
 	std::vector<glm::dvec2> _driveCoords;
 };
 

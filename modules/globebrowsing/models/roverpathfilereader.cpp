@@ -87,6 +87,7 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractAllSubsites(co
 		std::string frame = poFeature->GetFieldAsString("frame");
 		std::string site = poFeature->GetFieldAsString("site");
 		std::string drive = poFeature->GetFieldAsString("drive");
+		std::string sol = poFeature->GetFieldAsString("sol");
 		double lat = poFeature->GetFieldAsDouble("plcl");
 		double lon = poFeature->GetFieldAsDouble("longitude");
 
@@ -106,6 +107,7 @@ std::vector<std::shared_ptr<Subsite>> RoverPathFileReader::extractAllSubsites(co
 			subsite->geodetic = Geodetic2{ lat, lon} / 180.0 * glm::pi<double>();
 			subsite->frame = frame;
 			subsite->siteGeodetic = Geodetic2{ siteLat, siteLon} / 180.0 * glm::pi<double>();
+			subsite->sol = sol;
 
 			// All features with the the frame is "Site" will have "Drive" that is -1. 
 			// The feature right after each site frame has the same coordinates as the site frame.

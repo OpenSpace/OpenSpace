@@ -36,8 +36,8 @@ namespace {
 
 namespace openspace {
 namespace globebrowsing {
-DrivePropertyOwner::DrivePropertyOwner(std::string drive, glm::dvec2 driveCoords)
-	: properties::PropertyOwner("Drive" + drive)
+	DrivePropertyOwner::DrivePropertyOwner(std::string drive, std::string sol, glm::dvec2 driveCoords)
+		: properties::PropertyOwner("Drive" + drive + " (Sol: " + sol + ")")
 	, _enabled(properties::BoolProperty("driveEnabled", "Drive enabled", false))
 	, _goToSubSite(properties::TriggerProperty("goToSubSite", "Go to subsite"))
 	, _drive(drive)

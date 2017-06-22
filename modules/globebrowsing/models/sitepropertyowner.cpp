@@ -38,7 +38,7 @@ SitePropertyOwner::SitePropertyOwner(SiteWithDrives swd)
 	_site = swd._site;
 	int i = 0;
 	for (auto k : swd._drives) {
-		_drivePropertyOwner.push_back(std::make_shared<DrivePropertyOwner>(k, swd._driveCoords.at(i)));
+		_drivePropertyOwner.push_back(std::make_shared<DrivePropertyOwner>(k, swd.sols.at(i), swd._driveCoords.at(i)));
 		i++;
 	}
 

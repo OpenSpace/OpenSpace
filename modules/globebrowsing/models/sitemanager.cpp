@@ -52,6 +52,7 @@ SiteManager::SiteManager(std::string name, std::vector<std::shared_ptr<Subsite>>
 		for (size_t j = 0; j < temp.size(); ++j) {
 			if (temp.at(j)._site == ss.at(i)->site) {
 				temp.at(j)._drives.push_back(ss.at(i)->drive);
+				temp.at(j).sols.push_back(ss.at(i)->sol);
 				temp.at(j)._driveCoords.push_back(glm::dvec2(ss.at(i)->geodetic.lat, ss.at(i)->geodetic.lon));
 			}
 		}

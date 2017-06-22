@@ -33,7 +33,7 @@ namespace openspace {
 namespace globebrowsing {
 class DrivePropertyOwner : public properties::PropertyOwner {
 public:
-	DrivePropertyOwner(std::string drive, glm::dvec2 driveCoords);
+	DrivePropertyOwner(std::string drive, std::string sol, glm::dvec2 driveCoords);
 private:
 
 	void goToSubSite(std::string drive);
