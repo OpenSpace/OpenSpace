@@ -17,6 +17,8 @@ helper.setDeltaTimeKeys({
 })
 --  OBS: One month (1mo) is approximated by 30 days.
 
+
+-- Spacecraft imagery stuff
 openspace.bindKey("a", "openspace.setPropertyValue('Interaction.origin', 'Sun')", "Sets the focus of the camera to the Sun")
 openspace.bindKey("s", "openspace.setPropertyValue('Interaction.origin', 'SDO')", "Sets the focus of the camera to SDO")
 openspace.bindKey("d", "openspace.setPropertyValue('Interaction.origin', 'Stereo A')", "Sets the focus of the camera to Stereo A")
@@ -27,3 +29,22 @@ openspace.bindKey("j", "openspace.time.setTime('2012 JUL 01 00:00:00.000')", "Se
 openspace.bindKey("k", "openspace.time.setTime('2012 JUL 04 00:00:00.000')", "Sets time to 2012 07 04 00:00:00.000")
 openspace.bindKey("l", "openspace.time.setTime('2012 JUL 12 00:00:00.000')", "Sets time to 2012 07 12 00:00:00.000")
 openspace.bindKey("h", "openspace.time.setDeltaTime(1500)", "Set delta time to 1500")
+
+openspace.bindKey("Shift+a",
+    "openspace.setPropertyValue('SolarImagery_Stereo_StereoA_Image_EUV.renderable.activeInstrument', 5);" ..
+    "openspace.setPropertyValue('SolarImagery_Stereo_StereoB_Image_EUV.renderable.activeInstrument', 5);" ..
+    "openspace.setPropertyValue('SolarImagery_SDO_Image_AIA.renderable.activeInstrument', 3);",
+    "Sets all EUV to 195"
+    --"openspace.setPropertyValue('Pluto.renderable.clearAllProjections', true);",
+)
+
+openspace.bindKey("Shift+f",
+    helper.property.invert('SolarImagery_SDO_Image_AIA.renderable.enableFrustum') ..
+    helper.property.invert('SolarImagery_Stereo_StereoA_Image_EUV.renderable.enableFrustum') ..
+    helper.property.invert('SolarImagery_Stereo_StereoA_Image_COR.renderable.enableFrustum') ..
+    helper.property.invert('SolarImagery_Stereo_StereoB_Image_EUV.renderable.enableFrustum') ..
+    helper.property.invert('SolarImagery_Stereo_StereoB_Image_COR.renderable.enableFrustum') ..
+    helper.property.invert('SolarImagery_Soho_Image_C2.renderable.enableFrustum') ..
+    helper.property.invert('SolarImagery_Soho_Image_C3.renderable.enableFrustum'),
+    "Invert display frustums"
+)

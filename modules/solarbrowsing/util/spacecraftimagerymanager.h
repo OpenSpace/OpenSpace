@@ -34,11 +34,6 @@
 #include <modules/solarbrowsing/util/timedependentstatesequence.h>
 
 #include <ext/json/json.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/serialization/unordered_map.hpp>
-#include <boost/serialization/string.hpp>
 
 #define IMG_PRECISION unsigned char
 
