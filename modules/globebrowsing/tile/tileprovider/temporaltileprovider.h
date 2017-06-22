@@ -81,6 +81,15 @@ struct YYYYMMDD_hhmmss : public TimeFormat {
 };
 
 /**
+ * Stringifies OpenSpace to the format "YYYYMMDD_hhmm"
+ * Example: 20160908_2305
+ */
+struct YYYYMMDD_hhmm : public TimeFormat {
+    virtual ~YYYYMMDD_hhmm() override = default;
+    virtual std::string stringify(const Time& t) const override;
+};
+
+/**
  * Stringifies OpenSpace to the format "YYYY-MM-DDThh:mm:ssZ"
  * Example: 2016-09-08T23:05:05Z
  */
