@@ -25,7 +25,6 @@
 #include <modules/globebrowsing/models/drivepropertyowner.h>
 
 #include <openspace/interaction/interactionhandler.h>
-
 #include <openspace/engine/openspaceengine.h>
 
 #include <ghoul/lua/lua_helper.h>
@@ -51,9 +50,10 @@ namespace globebrowsing {
 
 void DrivePropertyOwner::goToSubsite(std::string drive) {
 	LERROR("DRIVE: " << drive);
-	OsEng.ref().interactionHandler().goToSubsite(_driveCoords.x, _driveCoords.y);
+	Geodetic2 tempGeo = (Geodetic2{ _driveCoords.x, _driveCoords.y } * 180.0) / glm::pi<double>();
+	OsEng.ref().interactionHandler().goToGeo(tempGeo.lat, tempGeo.lon);
 }
 
-}
-}
+} // namespace globebrowsing
+} // namespace openspace
 

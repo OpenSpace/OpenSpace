@@ -229,6 +229,7 @@ void InteractionHandler::goToChunk(int x, int y, int level) {
 }
 
 void InteractionHandler::goToGeo(double latitude, double longitude) {
+	LERROR(latitude << "   " << longitude);
     if (_currentInteractionMode == _globeBrowsingInteractionMode.get()) {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
         _globeBrowsingInteractionMode->goToGeodetic2(
@@ -239,23 +240,6 @@ void InteractionHandler::goToGeo(double latitude, double longitude) {
     } else {
         LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
     }
-}
-
-void InteractionHandler::goToSubsite(double latitude, double longitude) {
-	
-	if (_currentInteractionMode == _globeBrowsingInteractionMode.get()) {
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-		globebrowsing::Geodetic2 geo2 = globebrowsing::Geodetic2(latitude, longitude); /// 180 * glm::pi<double>();
-		_globeBrowsingInteractionMode->goToGeodetic2(
-			*_camera,
-			geo2, 
-			true
-		);
-#endif
-	}
-	else {
-		LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
-	}
 }
 
 void InteractionHandler::lockControls() {
@@ -544,12 +528,6 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
                 "void",
                 "Go to geographic coordinates latitude and longitude"
             },
-			{
-				"goToSol",
-				&luascriptfunctions::goToSubsite,
-				"void",
-				"Go to a specific sibsite"
-			},
         }
     };
 }
