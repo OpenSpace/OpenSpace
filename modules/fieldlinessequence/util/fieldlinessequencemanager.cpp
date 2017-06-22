@@ -325,7 +325,7 @@ bool FieldlinesSequenceManager::getFieldlinesStateFromBinary(
 
     switch (binFileVersion) {
         case 0 : {
-                LDEBUG("BINARY FILE - VERSION 0");
+                //LDEBUG("BINARY FILE - VERSION 0");
             }
             break;
         default : {
@@ -583,7 +583,7 @@ bool FieldlinesSequenceManager::getFieldlinesState(
                 std::string tStr = fieldline["topology"];
                 float topology = (tStr == "solar_wind" ? 0.f : ( tStr == "closed" ? 3.f : (tStr == "north" ? 1.f : 2.f)));
                 // float topology = (tStr == "closed" ? 0.f : (tStr == "open_inward" ? 1.f : 2.f));
-                // float transition = fieldline["transition"];
+                float transition = fieldline["transition"];
                 // float bsign = fieldline["bsign"];
                 // json jsonData    = fieldline[strTrace]["data"];
                 size_t numPoints = jsonData.size();
