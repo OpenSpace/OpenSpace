@@ -267,7 +267,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data) {
     );
 
     const int numPlanes = _solarImageryDependencies.size();
-    const int MAX_SPACECRAFT_OBSERVATORY = 12;
+    const int MAX_SPACECRAFT_OBSERVATORY = 7;
     int solarImageryCount = 0;
 
     ghoul::opengl::TextureUnit txUnits[MAX_SPACECRAFT_OBSERVATORY];

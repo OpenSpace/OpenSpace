@@ -57,7 +57,7 @@ Fragment getFragment() {
     if (planeOpacity == 0.0)
         discard;
 
-    //if (length(outColor.xyz)  < 0.0001) discard;
+   // if (length(outColor.xyz)  < 0.05) discard;
 
     outColor = vec4(outColor.xyz, planeOpacity);
 
