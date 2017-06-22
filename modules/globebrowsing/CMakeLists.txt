@@ -122,9 +122,7 @@ set(HEADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/medianpointcloudfilter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/fastbilateralpointcloudfilter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/randompointcloudfilter.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/registerpointclouds.h
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/levelofdetail.h
-
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.h
 
@@ -239,7 +237,6 @@ set(SOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/medianpointcloudfilter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/fastbilateralpointcloudfilter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tasks/randompointcloudfilter.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/registerpointclouds.cpp
 
     ${CMAKE_CURRENT_SOURCE_DIR}/tile/asynctiledataprovider.cpp
 

@@ -33,7 +33,6 @@ namespace openspace {
 namespace globebrowsing {
 SiteManager::SiteManager(std::string name, std::vector<std::shared_ptr<Subsite>> ss) 
 : properties::PropertyOwner(std::move(name)) 
-	//, _subsites(ss)
 	, _isEnabledProperty("SiteEnabled", "Enable site", false)
 {
 	
@@ -67,5 +66,6 @@ SiteManager::SiteManager(std::string name, std::vector<std::shared_ptr<Subsite>>
 
 	addProperty(_isEnabledProperty);
 }
-}
-}
+
+} // namespace globebrowsing
+} // namespace openspace
