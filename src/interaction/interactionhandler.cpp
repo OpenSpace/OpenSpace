@@ -241,7 +241,7 @@ void InteractionHandler::goToGeo(double latitude, double longitude) {
     }
 }
 
-void InteractionHandler::goToSol(double latitude, double longitude) {
+void InteractionHandler::goToSubsite(double latitude, double longitude) {
 	
 	if (_currentInteractionMode == _globeBrowsingInteractionMode.get()) {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
@@ -546,9 +546,9 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
             },
 			{
 				"goToSol",
-				&luascriptfunctions::goToSol,
+				&luascriptfunctions::goToSubsite,
 				"void",
-				"Go to a specific sol number"
+				"Go to a specific sibsite"
 			},
         }
     };

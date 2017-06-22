@@ -43,15 +43,15 @@ namespace globebrowsing {
 	, _drive(drive)
 	, _driveCoords(driveCoords)
 {
-	_goToSubSite.onChange([&] { goToSubSite(_drive); });
+	_goToSubSite.onChange([&] { goToSubsite(_drive); });
 
 	addProperty(_enabled);
 	addProperty(_goToSubSite);
 }
 
-void DrivePropertyOwner::goToSubSite(std::string drive) {
+void DrivePropertyOwner::goToSubsite(std::string drive) {
 	LERROR("DRIVE: " << drive);
-	OsEng.ref().interactionHandler().goToSol(_driveCoords.x, _driveCoords.y);
+	OsEng.ref().interactionHandler().goToSubsite(_driveCoords.x, _driveCoords.y);
 }
 
 }

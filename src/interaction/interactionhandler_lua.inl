@@ -200,7 +200,7 @@ int goToGeo(lua_State* L) {
     return 0;
 }
 
-int goToSol(lua_State* L) {
+int goToSubsite(lua_State* L) {
 	using ghoul::lua::luaTypeToString;
 
 	int nArguments = lua_gettop(L);
