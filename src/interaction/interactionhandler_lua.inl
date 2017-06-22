@@ -200,20 +200,6 @@ int goToGeo(lua_State* L) {
     return 0;
 }
 
-int goToSol(lua_State* L) {
-	using ghoul::lua::luaTypeToString;
-
-	int nArguments = lua_gettop(L);
-	if (nArguments != 1)
-		return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
-
-	int sol = lua_tonumber(L, 1);
-
-	//OsEng.interactionHandler().goToSol(sol);
-
-	return 0;
-}
-
 int restoreCameraStateFromFile(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 

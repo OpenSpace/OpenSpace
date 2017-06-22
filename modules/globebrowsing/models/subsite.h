@@ -39,7 +39,7 @@ struct Subsite {
 	using SubsiteHashKey = uint64_t;
 	
 	// Site number, drive number and which frame the 
-	std::string site, drive, frame;
+	std::string site, drive, frame, sol;
 
 	// Latitude and longitude for this subsite
 	Geodetic2 geodetic;

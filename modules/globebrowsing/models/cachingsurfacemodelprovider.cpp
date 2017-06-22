@@ -69,8 +69,9 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 				}
 				// Check for available LODs above the requested.
 				std::vector<int> levelsAbove = getLevelsAbove(subsite->availableLevels, level);
-				for (size_t levelAbove = levelsAbove.size() + 1; levelAbove-- > 1; ) {
-					ProviderSubsiteKey keyLowerLevel = { levelAbove, subsite->site, subsite->drive };
+				std::vector<int>::reverse_iterator rit = levelsAbove.rbegin();
+				for (; rit != levelsAbove.rend(); ++rit){
+					ProviderSubsiteKey keyLowerLevel = { *rit, subsite->site, subsite->drive };
 					// If the cache holds the correct mesh but with lower resolution than requested,
 					// fade in that model
 					if (_modelCache->exist(keyLowerLevel)) {
@@ -80,13 +81,7 @@ std::vector<std::shared_ptr<SubsiteModels>> CachingSurfaceModelProvider::getMode
 					// If the cache doesn't hold the LOD above, enqueue it. The LOD is much smaller
 					// in filesize and will then be loaded faster.
 					else {
-						for(const int& availableLevel : subsite->availableLevels) {
-							if(availableLevel == levelAbove) {
-								_asyncSurfaceModelProvider->enqueueModelIO(subsite, levelAbove);
-								break;
-							}
-						}
-						break;
+						_asyncSurfaceModelProvider->enqueueModelIO(subsite, *rit);
 					}
 				}
 			}
@@ -112,11 +107,10 @@ void CachingSurfaceModelProvider::update() {
 
 std::vector<int> CachingSurfaceModelProvider::getLevelsAbove(const std::vector<int> availableLevels, const int requestedLevel) {
 	std::vector<int> levelsAbove;
-	for (int i = 0; i < requestedLevel - 1; i++) {
-		if (i >= availableLevels.size()){
-			return levelsAbove;
+	for (const int& level : availableLevels) {
+		if(level < requestedLevel) {
+			levelsAbove.push_back(level);
 		}
-		levelsAbove.push_back(availableLevels.at(i));
 	}
 	return levelsAbove;
 }
