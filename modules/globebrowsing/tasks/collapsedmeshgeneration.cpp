@@ -373,7 +373,7 @@ namespace openspace {
 
 				std::vector<int> indicesMiddleRadius;
 				std::vector<float> indiciesDist2;
-				kdTree3->radiusSearch(camera, 7.0, indicesMiddleRadius, indiciesDist2);
+				kdTree3->radiusSearch(camera, 9.0, indicesMiddleRadius, indiciesDist2);
 				boost::shared_ptr<std::vector<int>> indicesMiddleRadiusPtr(new std::vector<int>(indicesMiddleRadius));
 				
 				pcl::PointCloud<pcl::PointXYZ>::Ptr middleRadiusFiltered(new pcl::PointCloud<pcl::PointXYZ>);
@@ -508,12 +508,7 @@ namespace openspace {
 			ne.setViewPoint(centroid[0], centroid[1], centroid[2]);
 			pcl::PointCloud<pcl::Normal>::Ptr cloud_normals(new pcl::PointCloud<pcl::Normal>());
 			ne.compute(*cloud_normals);
-			/*for (size_t i = 0; i < cloud_normals->size(); ++i)
-			{
-				cloud_normals->points[i].normal_x *= 1;
-				cloud_normals->points[i].normal_y *= 1;
-				cloud_normals->points[i].normal_z *= 1;
-			}*/
+
 			pcl::PointCloud<pcl::PointNormal>::Ptr cloud_smoothed_normals(new pcl::PointCloud<pcl::PointNormal>());
 			concatenateFields(*zf_cloud6, *cloud_normals, *cloud_smoothed_normals);
 
