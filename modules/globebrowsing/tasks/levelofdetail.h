@@ -64,9 +64,9 @@ static const LevelOfDetail l3 = {
 	glm::dvec3(0.15,0.15,0.15),
 	//Organized
 	//glm::dvec3(0.00001,0.00001,0.00001),
-	0.4,
+	0.5,
 	2.5,
-	750
+	250
 };
 
 typedef const std::unordered_map<std::string, LevelOfDetail> LevelOfDetailMap;

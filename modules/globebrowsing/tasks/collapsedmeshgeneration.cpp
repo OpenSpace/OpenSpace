@@ -260,6 +260,26 @@ namespace openspace {
 
 			
 			////////////////////////////////////////////////////////////////////////////
+			pcl::PointXYZ camera;
+			camera.x = -0.7;
+			camera.y = 0;
+			camera.z = 0;
+
+			pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTreeFar(new pcl::search::KdTree<pcl::PointXYZ>);
+			kdTreeFar->setInputCloud(normalCloudRotated);
+
+			std::vector<int> indicesRadius;
+			std::vector<float> indiciesDistance;
+
+			kdTreeFar->radiusSearch(camera, 50, indicesRadius, indiciesDistance);
+
+			boost::shared_ptr<std::vector<int>> indicesRadiusPtr(new std::vector<int>(indicesRadius));
+
+			pcl::ExtractIndices<pcl::PointXYZ> innerFilter(true); // Initializing with true will allow us to extract the removed indices
+			innerFilter.setInputCloud(normalCloudRotated);
+			innerFilter.setIndices(indicesRadiusPtr);
+			
+			innerFilter.filterDirectly(normalCloudRotated);
 
 			pcl::PointCloud<pcl::PointXYZ>::Ptr xf_cloud(new pcl::PointCloud<pcl::PointXYZ>);
 			pcl::PointCloud<pcl::PointXYZ>::Ptr yf_cloud(new pcl::PointCloud<pcl::PointXYZ>);
@@ -285,97 +305,93 @@ namespace openspace {
 			if (level == "level3") {
 				pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTree2(new pcl::search::KdTree<pcl::PointXYZ>);
 				kdTree2->setInputCloud(zf_cloud);
-				pcl::PointXYZ camera;
-				camera.x = -0.7;
-				camera.y = 0;
-				camera.z = 0;
+				
 				std::vector<int> indicesInnerRadius;
 				std::vector<float> indiciesDist;
 				kdTree2->radiusSearch(camera, 5.0, indicesInnerRadius, indiciesDist);
 				boost::shared_ptr<std::vector<int>> indicesInnerRadiusPtr(new std::vector<int>(indicesInnerRadius));
-
-				typename pcl::PointCloud<pcl::PointXYZ>::Ptr normalCloudRotated2(new pcl::PointCloud<pcl::PointXYZ>);
-				//The smaller one was with 10 i radius
-				pcl::copyPointCloud(*zf_cloud, *normalCloudRotated2);
-
-				typename pcl::PointCloud<pcl::PointXYZ>::Ptr normalCloudRotated3(new pcl::PointCloud<pcl::PointXYZ>);
-				//The smaller one was with 10 i radius
-				pcl::copyPointCloud(*zf_cloud, *normalCloudRotated3);
-
 				/////////////////////////////////////INNER RADIUS
 
 				pcl::PointCloud<pcl::PointXYZ>::Ptr innerRadiusFiltered(new pcl::PointCloud<pcl::PointXYZ>);
+				pcl::PointCloud<pcl::PointXYZ>::Ptr withoutInnerRadius(new pcl::PointCloud<pcl::PointXYZ>);
+
 				pcl::ExtractIndices<pcl::PointXYZ> innerFilter(true); // Initializing with true will allow us to extract the removed indices
 				innerFilter.setInputCloud(zf_cloud);
 				innerFilter.setIndices(indicesInnerRadiusPtr);
+				
 				innerFilter.filter(*innerRadiusFiltered);
+
+				innerFilter.setNegative(true);
+				innerFilter.filter(*withoutInnerRadius);
+
+				pcl::PointCloud<pcl::PointXYZ>::Ptr xLargerThanZero(new pcl::PointCloud<pcl::PointXYZ>());
+				pcl::PointCloud<pcl::PointXYZ>::Ptr xSmallerThanZero(new pcl::PointCloud<pcl::PointXYZ>());
+				pcl::PointCloud<pcl::PointXYZ>::Ptr xLargerThanZeroOut(new pcl::PointCloud<pcl::PointXYZ>());
+				pcl::PointCloud<pcl::PointXYZ>::Ptr xSmallerThanZeroOut(new pcl::PointCloud<pcl::PointXYZ>());
+
+				pcl::PassThrough<pcl::PointXYZ> passXDivider;
+				passXDivider.setInputCloud(innerRadiusFiltered);
+				passXDivider.setFilterFieldName("x");
+				passXDivider.setFilterLimits(0, 70);
+				passXDivider.filter(*xLargerThanZero);
+
+				passXDivider.setFilterFieldName("x");
+				passXDivider.setFilterLimits(-70, 0);
+				passXDivider.filter(*xSmallerThanZero);
 
 				double res = computeCloudResolution(innerRadiusFiltered);
 
 				LERROR("Resolution is before : " << res);
 
-				pcl::PointCloud<pcl::PointXYZ>::Ptr innerRadius(new pcl::PointCloud<pcl::PointXYZ>());
+				pcl::PointCloud<pcl::PointXYZ>::Ptr innerRadiusTot(new pcl::PointCloud<pcl::PointXYZ>());
 
 				pcl::VoxelGrid<pcl::PointXYZ> voxelGridInnerRadius;
 
 				voxelGridInnerRadius.setDownsampleAllData(true);
-				voxelGridInnerRadius.setInputCloud(innerRadiusFiltered);
+				voxelGridInnerRadius.setInputCloud(xLargerThanZero);
+				// Cloud with x > 0
 				voxelGridInnerRadius.setLeafSize(levelOfDetail.innerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.innerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.innerRadiusVoxelGridFilterLeafSize.z);
-				voxelGridInnerRadius.filter(*innerRadius);
+				voxelGridInnerRadius.filter(*xLargerThanZeroOut);
+
+				// Cloud with x < 0
+				voxelGridInnerRadius.setInputCloud(xSmallerThanZero);
+				voxelGridInnerRadius.filter(*xSmallerThanZeroOut);
+
+				// Add the two clouds back together
+				*innerRadiusTot = *xLargerThanZeroOut + *xSmallerThanZeroOut;
 				
-				double res2 = computeCloudResolution(innerRadius);
+				double res2 = computeCloudResolution(innerRadiusTot);
 
 				LERROR("Resolution is after : " << res2);
 
 				pcl::IndicesConstPtr test = innerFilter.getRemovedIndices();
 
-
 				/////////////////////////////////////MIDDLE RADIUS
 
 				pcl::search::KdTree<pcl::PointXYZ>::Ptr kdTree3(new pcl::search::KdTree<pcl::PointXYZ>);
-				kdTree3->setInputCloud(normalCloudRotated3);
+				kdTree3->setInputCloud(withoutInnerRadius);
 
 				std::vector<int> indicesMiddleRadius;
 				std::vector<float> indiciesDist2;
 				kdTree3->radiusSearch(camera, 7.0, indicesMiddleRadius, indiciesDist2);
 				boost::shared_ptr<std::vector<int>> indicesMiddleRadiusPtr(new std::vector<int>(indicesMiddleRadius));
-
-				//indicesMiddleRadiusPtr->insert(indicesMiddleRadiusPtr->begin(), indicesptr->begin(), indicesptr->end());
-
-				//std::sort(indicesMiddleRadiusPtr->begin(), indicesMiddleRadiusPtr->end());
-				//indicesMiddleRadiusPtr->erase(std::unique(indicesMiddleRadiusPtr->begin(), indicesMiddleRadiusPtr->end()), indicesMiddleRadiusPtr->end());
-
-
-				std::sort(indicesMiddleRadiusPtr->begin(), indicesMiddleRadiusPtr->end());
-				std::sort(indicesInnerRadiusPtr->begin(), indicesInnerRadiusPtr->end());
-
-				auto pred = [&indicesInnerRadiusPtr](const int& key) ->bool
-				{
-					return std::find(indicesInnerRadiusPtr->begin(), indicesInnerRadiusPtr->end(), key) != indicesInnerRadiusPtr->end();
-				};
-
-				indicesMiddleRadiusPtr->erase(std::remove_if(indicesMiddleRadiusPtr->begin(), indicesMiddleRadiusPtr->end(), pred), indicesMiddleRadiusPtr->end());
-
-				/*for (int k = 0; k < indicesMiddleRadiusPtr->size(); ++k) {
-
-				if (std::find(indicesptr->begin(), indicesptr->end(), indicesMiddleRadiusPtr->at(k)) == indicesptr->end()) {
-				indicesptr3->push_back(indicesMiddleRadiusPtr->at(k));
-				}
-				}
-				LERROR("THIS SIZE: " << indicesptr3->size());*/
-
+				
 				pcl::PointCloud<pcl::PointXYZ>::Ptr middleRadiusFiltered(new pcl::PointCloud<pcl::PointXYZ>);
+				pcl::PointCloud<pcl::PointXYZ>::Ptr withoutMiddleRadius(new pcl::PointCloud<pcl::PointXYZ>);
 
 				pcl::ExtractIndices<pcl::PointXYZ> middleFilter(true); // Initializing with true will allow us to extract the removed indices
-				middleFilter.setInputCloud(normalCloudRotated3);
+				middleFilter.setInputCloud(withoutInnerRadius);
 
 				middleFilter.setIndices(indicesMiddleRadiusPtr);
 				middleFilter.filter(*middleRadiusFiltered);
 
+				middleFilter.setNegative(true);
+				middleFilter.filter(*withoutMiddleRadius);
+
 				pcl::PointCloud<pcl::PointXYZ>::Ptr middleRadius(new pcl::PointCloud<pcl::PointXYZ>());
 
 				pcl::VoxelGrid<pcl::PointXYZ> voxelGridMiddleRadius;
-
+				LERROR("Before middle");
 				voxelGridMiddleRadius.setDownsampleAllData(true);
 				voxelGridMiddleRadius.setInputCloud(middleRadiusFiltered);
 				voxelGridMiddleRadius.setLeafSize(levelOfDetail.middleRadiusVoxelGridFilterLeafSize.x, levelOfDetail.middleRadiusVoxelGridFilterLeafSize.y, levelOfDetail.middleRadiusVoxelGridFilterLeafSize.z);
@@ -385,46 +401,33 @@ namespace openspace {
 
 				pcl::IndicesConstPtr test2 = middleFilter.getRemovedIndices();
 
-				/*boost::shared_ptr<std::vector<int>> indicesptr4(new std::vector<int>());
-				pcl::IndicesPtr testare = pcl::IndicesPtr();// = test2 + test;
-
-				testare->insert(testare->begin(), test2->begin(), test2->end());
-				testare->insert(testare->begin(), test->begin(), test->end());
-
-				std::sort(testare->begin(), testare->end());
-				testare->erase(unique(testare->begin(), testare->end()), testare->end());
-
-				LERROR("THEIR SIZE: " << test2->size());
-				LERROR("THEIR SIZE: " << test->size());
-				*/
-				/*for (int k = 0; k < test2->size(); ++k) {
-				indicesptr4->push_back(test2->at(k));
-				}
-				for (int k = 0; k < test->size(); ++k) {
-
-				if (std::find(indicesptr4->begin(), indicesptr4->end(), test->at(k)) == indicesptr4->end()) {
-				indicesptr4->push_back(test->at(k));
-				}
-				}*/
-
-
-				pcl::ExtractIndices<pcl::PointXYZ> outerFilter(true); // Initializing with true will allow us to extract the removed indices
-				outerFilter.setInputCloud(normalCloudRotated2);
-
-				outerFilter.setIndices(test);
-				outerFilter.filter(*outerRadiusFiltered);
-
 				pcl::PointCloud<pcl::PointXYZ>::Ptr outerRadius(new pcl::PointCloud<pcl::PointXYZ>());
 
+				passXDivider.setInputCloud(withoutMiddleRadius);
+				passXDivider.setFilterFieldName("x");
+				passXDivider.setFilterLimits(0, 70);
+				passXDivider.filter(*xLargerThanZero);
+
+				passXDivider.setFilterFieldName("x");
+				passXDivider.setFilterLimits(-70, 0);
+				passXDivider.filter(*xSmallerThanZero);
+
 				pcl::VoxelGrid<pcl::PointXYZ> voxelGridOuter;
+				LERROR("Before outer");
+				voxelGridOuter.setDownsampleAllData(true);
+				voxelGridOuter.setInputCloud(xLargerThanZero);
+				voxelGridOuter.setLeafSize(levelOfDetail.outerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.z);
+				voxelGridOuter.filter(*xLargerThanZeroOut);
 
 				voxelGridOuter.setDownsampleAllData(true);
-				voxelGridOuter.setInputCloud(outerRadiusFiltered);
+				voxelGridOuter.setInputCloud(xSmallerThanZero);
 				voxelGridOuter.setLeafSize(levelOfDetail.outerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.z);
-				voxelGridOuter.filter(*outerRadius);
+				voxelGridOuter.filter(*xSmallerThanZeroOut);
+
+				*outerRadius = *xLargerThanZeroOut + *xSmallerThanZeroOut;
 
 				// Adding the different clouds with different levels of detail back into one point cloud.
-				*zf_cloud5 = *innerRadius;
+				*zf_cloud5 = *innerRadiusTot;
 				*zf_cloud5 += *middleRadius;
 				*zf_cloud5 += *outerRadius;
 			} 
@@ -438,30 +441,24 @@ namespace openspace {
 				passXDivider.setFilterLimits(0, 70);
 				passXDivider.filter(*xLargerThanZero);
 
-				pcl::PassThrough<pcl::PointXYZ> passXDividerSmall;
-				passXDividerSmall.setInputCloud(zf_cloud);
-				passXDividerSmall.setFilterFieldName("x");
-				passXDividerSmall.setFilterLimits(-70, 0);
-				passXDividerSmall.filter(*xSmallerThanZero);
+				passXDivider.setFilterFieldName("x");
+				passXDivider.setFilterLimits(-70, 0);
+				passXDivider.filter(*xSmallerThanZero);
 
-				pcl::PointCloud<pcl::PointXYZ>::Ptr temp1(new pcl::PointCloud<pcl::PointXYZ>);
-				pcl::PointCloud<pcl::PointXYZ>::Ptr temp2(new pcl::PointCloud<pcl::PointXYZ>);
+				pcl::PointCloud<pcl::PointXYZ>::Ptr xAboveZero(new pcl::PointCloud<pcl::PointXYZ>);
+				pcl::PointCloud<pcl::PointXYZ>::Ptr xBelowZero(new pcl::PointCloud<pcl::PointXYZ>);
 
 				pcl::VoxelGrid<pcl::PointXYZ> voxelGridOuter;
 
-				voxelGridOuter.setDownsampleAllData(true);
 				voxelGridOuter.setInputCloud(xLargerThanZero);
 				voxelGridOuter.setLeafSize(levelOfDetail.outerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.z);
-				voxelGridOuter.filter(*temp1);
+				voxelGridOuter.filter(*xAboveZero);
 
-				pcl::VoxelGrid<pcl::PointXYZ> voxelGridOuter2;
-
-				voxelGridOuter2.setDownsampleAllData(true);
-				voxelGridOuter2.setInputCloud(xSmallerThanZero);
-				voxelGridOuter2.setLeafSize(levelOfDetail.outerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.z);
-				voxelGridOuter2.filter(*temp2);
+				voxelGridOuter.setInputCloud(xSmallerThanZero);
+				voxelGridOuter.setLeafSize(levelOfDetail.outerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.z);
+				voxelGridOuter.filter(*xBelowZero);
 				
-				*zf_cloud5 = *temp1 + *temp2;
+				*zf_cloud5 = *xAboveZero + *xBelowZero;
 				
 			}
 			
@@ -530,6 +527,7 @@ namespace openspace {
 			pcl::PolygonMesh triangles;
 			// Set the maximum distance between connected points (maximum edge length)
 			gp3.setSearchRadius(levelOfDetail.greedySearchRadius);
+			
 			//HIRES
 			//gp3.setSearchRadius(0.35);
 			gp3.setMu(levelOfDetail.greedyMU);
