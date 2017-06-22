@@ -224,6 +224,8 @@ create_new_module(
 
 option(OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL "Use GDAL" ON)
 
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/gdal_data DESTINATION modules/globebrowsing)
+
 if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
     if (WIN32)
         target_include_directories(
