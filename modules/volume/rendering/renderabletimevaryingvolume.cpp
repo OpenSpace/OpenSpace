@@ -186,6 +186,7 @@ bool RenderableTimeVaryingVolume::initialize() {
     onEnabledChange(onChange);
 
     addProperty(_stepSize);
+    addProperty(_gridType);
     addProperty(_transferFunctionPath);
     addProperty(_sourceDirectory);
     addPropertySubOwner(_clipPlanes.get());

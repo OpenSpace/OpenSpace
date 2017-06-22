@@ -9,7 +9,8 @@ function preInitialization()
     openspace.spice.loadKernel("${SPICE}/naif0012.tls")
     openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
 
-    openspace.time.setTime("2015 JAN 01 12:00:00.000")
+    -- openspace.time.setTime("2015 MAR 14 23:59:00.000") -- BATSRUS time
+    openspace.time.setTime("2010 OCT 16 07:30:00.000") -- ENLIL time
     dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
 end
 
@@ -20,13 +21,15 @@ function postInitialization()
     graphical settings for the renderables.
     ]]--
     openspace.printInfo("Setting default values")
-    openspace.setPropertyValue("Sun.renderable.enabled", false)
+    openspace.setPropertyValue("Sun.renderable.enabled", true)
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
     openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    -- @TODO Carlbaum Default scene does openspace.resetCameraDirection() here
 
     openspace.printInfo("Done setting default values")
 end
@@ -36,19 +39,20 @@ return {
     ScenePath = ".",
     CommonFolder = "common",
     Camera = {
-        Focus = "Earth",
-        Position = {1, 0, 0, 5},
+        Focus = "SolarSystemBarycenter", --"EarthBarycenter",--
+        Position = {505370268486.696167, 1089706179272.719116, -890259148524.319458},
+        Rotation = {0.250635, -0.028751, 0.879269, 0.404030},
     },
     Modules = {
         "sun",
-        "mercury",
-        "venus",
+        -- "mercury",
+        -- "venus",
         "earth",
-        "mars",
-        "jupiter",
-        "saturn",
-        "uranus",
-        "neptune",
+        -- "mars",
+        -- "jupiter",
+        -- "saturn",
+        -- "uranus",
+        --"neptune",
         "stars",
         "fieldlines",
         -- "stars-denver",

@@ -3,113 +3,234 @@ local file2 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_open_nort
 local file3 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_open_south_all.txt';
 local file4 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_solar_wind_all.txt';
 local file5 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_separatrix_seeds_all.txt';
+local file6 = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_all_combined.txt';
 
-local volumeFile = '${OPENSPACE_DATA}/batsrus.cdf';
+local volumeFile1 = '${OPENSPACE_DATA}/bats_sequence/batsrus1.cdf';
+local volumeFile2 = '${OPENSPACE_DATA}/bats_sequence/batsrus2.cdf';
+local volumeFile3 = '${OPENSPACE_DATA}/bats_sequence/batsrus3.cdf';
+local volumeFileEnlil = '${OPENSPACE_DATA}/enlil_sequence/Ailsa_Prise_101414_SH_1.enlil.0001.cdf';
 
 return {
     {
-        Name = "Fieldlines1",
-        Parent = "Earth",
+        Name = "HNMReferenceFrame",
+        Parent = "SolarSystemBarycenter",
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                -- SourceFrame = "GALACTIC",
+                -- DestinationFrame = "HEEQ",
+                SourceFrame = "HEEQ180",
+                DestinationFrame = "GALACTIC",
+                Kernels = "${OPENSPACE_DATA}/spice/iSWAKernels/HNM-enlil_ref_frame.tf",
+            },
+        },
+    },
+    {
+        Name = "GSMReferenceFrame",
+        Parent = "EarthBarycenter",
+        Transform = {
+            Rotation = {
+                Type = "SpiceRotation",
+                -- SourceFrame = "HEEQ",
+                -- DestinationFrame = "GALACTIC",
+
+                SourceFrame = "GSM",
+                DestinationFrame = "GALACTIC",
+                Kernels = "${OPENSPACE_DATA}/spice/iSWAKernels/GSM.ti",
+            },
+        },
+    },
+    {
+        Name = "FieldlinesTimestep1",
+        Parent = "GSMReferenceFrame",
         Renderable = {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = volumeFile,
+                File = volumeFile1,
                 Model = "BATSRUS",
-                Variables = {"bx", "by", "bz"}
+                Variables = {"bx", "by", "bz"},
+                TimeDependent = true,
             },
             Fieldlines = {
-                Stepsize = 1,
+                Stepsize = 1.0,
                 Classification = true,
             },
             SeedPoints = {
                 Type = "File",
-                File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_closed_seeds_all.txt';
+                File = file6;
             }
         }
     },
-    {   
-        Name = "Fieldlines2",
-        Parent = "Earth",
+    {
+        Name = "FieldlinesTimestep2",
+        Parent = "GSMReferenceFrame",
         Renderable = {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = volumeFile,
+                File = volumeFile2,
                 Model = "BATSRUS",
-                Variables = {"bx", "by", "bz"}
+                Variables = {"bx", "by", "bz"},
+                TimeDependent = true,
             },
             Fieldlines = {
-                Stepsize = 1,
-                Classification = true
+                Stepsize = 1.0,
+                Classification = true,
             },
             SeedPoints = {
                 Type = "File",
-                File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_open_north_all.txt'
+                File = file6;
             }
         }
     },
-    {   
-        Name = "Fieldlines3",
-        Parent = "Earth",
+    {
+        Name = "FieldlinesTimestep3",
+        Parent = "GSMReferenceFrame",
         Renderable = {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = volumeFile,
+                File = volumeFile3,
                 Model = "BATSRUS",
-                Variables = {"bx", "by", "bz"}
+                Variables = {"bx", "by", "bz"},
+                TimeDependent = true,
             },
             Fieldlines = {
-                Stepsize = 1,
-                Classification = true
+                Stepsize = 1.0,
+                Classification = true,
             },
             SeedPoints = {
                 Type = "File",
-                File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_open_south_all.txt'
+                File = file1;
             }
         }
     },
-    {   
-        Name = "Fieldlines4",
-        Parent = "Earth",
+    {
+        Name = "FieldlinesEnlil",
+        Parent = "HNMReferenceFrame", --"Sun",
         Renderable = {
             Type = "RenderableFieldlines",
             VectorField = {
                 Type = "VolumeKameleon",
-                File = volumeFile,
-                Model = "BATSRUS",
-                Variables = {"bx", "by", "bz"}
+                File = volumeFileEnlil,
+                Model = "ENLIL",
+                Variables = {"br", "btheta", "bphi"},
+                TimeDependent = false,
             },
             Fieldlines = {
-                Stepsize = 1,
-                Classification = true
+                Stepsize = 1.0,
+                Classification = true,
             },
             SeedPoints = {
                 Type = "File",
-                File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_solar_wind_all.txt'
+                File = '${OPENSPACE_DATA}/scene/fieldlinessequence/seedpoints/enlil.txt';
             }
         }
     },
-    {   
-        Name = "Fieldlines5",
-        Parent = "Earth",
-        Renderable = {
-            Type = "RenderableFieldlines",
-            VectorField = {
-                Type = "VolumeKameleon",
-                File = volumeFile,
-                Model = "BATSRUS",
-                Variables = {"bx", "by", "bz"}
-            },
-            Fieldlines = {
-                Stepsize = 1,
-                Classification = true
-            },
-            SeedPoints = {
-                Type = "File",
-                File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_separatrix_seeds_all.txt'
-            }
-        }
-    }
+    -- {
+    --     Name = "Fieldlines1",
+    --     Parent = "Earth",
+    --     Renderable = {
+    --         Type = "RenderableFieldlines",
+    --         VectorField = {
+    --             Type = "VolumeKameleon",
+    --             File = volumeFile,
+    --             Model = "BATSRUS",
+    --             Variables = {"bx", "by", "bz"}
+    --         },
+    --         Fieldlines = {
+    --             Stepsize = 1,
+    --             Classification = true,
+    --         },
+    --         SeedPoints = {
+    --             Type = "File",
+    --             File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_closed_seeds_all.txt';
+    --         }
+    --     }
+    -- },
+    -- {
+    --     Name = "Fieldlines2",
+    --     Parent = "Earth",
+    --     Renderable = {
+    --         Type = "RenderableFieldlines",
+    --         VectorField = {
+    --             Type = "VolumeKameleon",
+    --             File = volumeFile,
+    --             Model = "BATSRUS",
+    --             Variables = {"bx", "by", "bz"}
+    --         },
+    --         Fieldlines = {
+    --             Stepsize = 1,
+    --             Classification = true
+    --         },
+    --         SeedPoints = {
+    --             Type = "File",
+    --             File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_open_north_all.txt'
+    --         }
+    --     }
+    -- },
+    -- {
+    --     Name = "Fieldlines3",
+    --     Parent = "Earth",
+    --     Renderable = {
+    --         Type = "RenderableFieldlines",
+    --         VectorField = {
+    --             Type = "VolumeKameleon",
+    --             File = volumeFile,
+    --             Model = "BATSRUS",
+    --             Variables = {"bx", "by", "bz"}
+    --         },
+    --         Fieldlines = {
+    --             Stepsize = 1,
+    --             Classification = true
+    --         },
+    --         SeedPoints = {
+    --             Type = "File",
+    --             File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_open_south_all.txt'
+    --         }
+    --     }
+    -- },
+    -- {
+    --     Name = "Fieldlines4",
+    --     Parent = "Earth",
+    --     Renderable = {
+    --         Type = "RenderableFieldlines",
+    --         VectorField = {
+    --             Type = "VolumeKameleon",
+    --             File = volumeFile,
+    --             Model = "BATSRUS",
+    --             Variables = {"bx", "by", "bz"}
+    --         },
+    --         Fieldlines = {
+    --             Stepsize = 1,
+    --             Classification = true
+    --         },
+    --         SeedPoints = {
+    --             Type = "File",
+    --             File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_solar_wind_all.txt'
+    --         }
+    --     }
+    -- },
+    -- {
+    --     Name = "Fieldlines5",
+    --     Parent = "Earth",
+    --     Renderable = {
+    --         Type = "RenderableFieldlines",
+    --         VectorField = {
+    --             Type = "VolumeKameleon",
+    --             File = volumeFile,
+    --             Model = "BATSRUS",
+    --             Variables = {"bx", "by", "bz"}
+    --         },
+    --         Fieldlines = {
+    --             Stepsize = 1,
+    --             Classification = true
+    --         },
+    --         SeedPoints = {
+    --             Type = "File",
+    --             File = '${OPENSPACE_DATA}/scene/fieldlines/bats_seeds/BATS_R_US_separatrix_seeds_all.txt'
+    --         }
+    --     }
+    -- }
 }

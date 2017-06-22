@@ -301,6 +301,16 @@ std::string YYYYMMDD_hhmmss::stringify(const Time& t) const {
     return ts;
 }
 
+std::string YYYYMMDD_hhmm::stringify(const Time& t) const {
+    std::string ts = t.ISO8601().substr(0, 16);
+    
+    // YYYY_MM_DDThh_mm -> YYYYMMDD_hhmm
+    ts.erase(std::remove(ts.begin(), ts.end(), '-'), ts.end());
+    ts.erase(std::remove(ts.begin(), ts.end(), ':'), ts.end());
+    replace(ts.begin(), ts.end(), 'T', '_');
+    return ts;
+}
+
 std::string YYYY_MM_DDThhColonmmColonssZ::stringify(const Time& t) const {
     return t.ISO8601().substr(0, 19) + "Z";
 }
@@ -328,7 +338,10 @@ void TimeIdProviderFactory::init() {
         { "YYYY-MM-DDThh_mm_ssZ", std::make_unique<YYYY_MM_DDThh_mm_ssZ>() }
     ));
     _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat>>(
-    { "YYYYMMDD_hhmmss", std::make_unique<YYYYMMDD_hhmmss>() }
+        { "YYYYMMDD_hhmmss", std::make_unique<YYYYMMDD_hhmmss>() }
+    ));
+    _timeIdProviderMap.insert(std::pair<std::string, std::unique_ptr<TimeFormat>>(
+        { "YYYYMMDD_hhmm" , std::make_unique<YYYYMMDD_hhmm>() }
     ));
     initialized = true;
 }

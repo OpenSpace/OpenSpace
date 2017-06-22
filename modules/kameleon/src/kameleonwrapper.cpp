@@ -1055,4 +1055,12 @@ std::vector<std::string> KameleonWrapper::getLoadedVariables(){
     return _kameleon->getLoadedVariables();
 }
 
+std::string KameleonWrapper::getStartTimeString() {
+    return _kameleon->getGlobalAttribute("start_time").getAttributeString();
+}
+
+double KameleonWrapper::getElapsedTime() {
+    return static_cast<double>(_kameleon->getGlobalAttribute("elapsed_time_in_seconds").getAttributeFloat());
+}
+
 } // namespace openspace

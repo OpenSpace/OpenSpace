@@ -1,0 +1,75 @@
+function preInitialization()
+    --[[
+    The scripts in this function are executed after the scene is loaded but before the
+    scene elements have been initialized, thus they should be used to set the time at
+    which the scene should start and other settings that might determine initialization
+    critical objects.
+    ]]--
+
+    openspace.spice.loadKernel("${SPICE}/naif0012.tls")
+    openspace.spice.loadKernel("${SPICE}/pck00010.tpc")
+
+    -- openspace.time.setTime("2015 MAR 14 23:59:58.000") -- BATSRUS time
+    -- openspace.time.setTime("2012 JUL 15 19:12:14.000") -- New BATSRUS time EVENT
+    openspace.time.setTime("2015 FEB 28 00:05:28.000") -- Old ENLIL time LMAYS
+    -- openspace.time.setTime("2015 JUN 30 09:17:32.000") -- ENLIL time
+    -- openspace.time.setTime("2010 OCT 16 07:30:00.000") -- ENLIL (Aisla) time
+    -- openspace.time.setTime("2010 OCT 30 14:19:54.000") -- ENLIL (Aisla) actual time
+
+    dofile(openspace.absPath('${SCRIPTS}/bind_keys_fieldlinessequence.lua'))
+    -- dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+end
+
+function postInitialization()
+    --[[
+    The scripts in this function are executed after all objects in the scene have been
+    created and initialized, but before the first render call. This is the place to set
+    graphical settings for the renderables.
+    ]]--
+    openspace.printInfo("Setting default values")
+    openspace.setPropertyValue("Sun.renderable.enabled", true)
+    openspace.setPropertyValue("SunGlare.renderable.enabled", false)
+    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+    openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
+    openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
+
+    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+
+    -- @TODO Carlbaum Default scene does openspace.resetCameraDirection() here
+    openspace.addVirtualProperty("BoolProperty", "Show ALL Fieldlines", "*Fieldlines.renderable.enabled", true, nil, nil)
+    openspace.addVirtualProperty("BoolProperty", "Draw Points", "*Fieldlines.renderable.togglePointDrawing", false, nil, nil)
+    openspace.addVirtualProperty("BoolProperty", "Additive Blending", "*Fieldlines.renderable.additiveBlending", false, nil, nil)
+    openspace.addVirtualProperty("IntProperty", "Fieldline Color Method", "*Fieldlines.renderable.Color.fieldlineColorMethod", 0, 0, 1)
+    openspace.addVirtualProperty("FloatProperty", "Fieldline Alpha", "*Fieldlines.renderable.Color.fieldlineColor", 0.5, 0.0, 1.0)
+
+    openspace.printInfo("Done setting default values")
+end
+
+
+return {
+    ScenePath = ".",
+    CommonFolder = "common",
+    Camera = {
+        Focus = "SolarSystemBarycenter", --"EarthBarycenter",--
+        Position = {505370268486.696167, 1089706179272.719116, -890259148524.319458},
+        Rotation = {0.0, 0.0, 0.0, 0.0},
+    },
+    Modules = {
+        "sun",
+        -- "mercury",
+        -- "venus",
+        "earth",
+        -- "mars",
+        -- "jupiter",
+        -- "saturn",
+        -- "uranus",
+        --"neptune",
+        -- "stars",
+        "fieldlinessequence",
+        -- "stars-denver",
+        -- "milkyway",
+        -- "milkyway-eso",
+        -- "constellationbounds",
+    }
+}

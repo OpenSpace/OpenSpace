@@ -164,6 +164,7 @@ bool RenderablePlane::deinitialize() {
 
     _textureFile = nullptr;
 
+
     RenderEngine& renderEngine = OsEng.renderEngine();
     if (_shader) {
         renderEngine.removeRenderProgram(_shader);

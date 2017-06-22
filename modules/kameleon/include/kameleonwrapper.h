@@ -35,6 +35,7 @@ namespace ccmc {
     class Kameleon;
     class Model;
     class Interpolator;
+    class Time;
 }
 
 namespace openspace {
@@ -140,6 +141,9 @@ public:
     std::string getFrame();
     std::vector<std::string> getVariables();
     std::vector<std::string> getLoadedVariables();
+
+    std::string getStartTimeString();
+    double getElapsedTime();
 
 private:
     typedef std::vector<glm::vec3> TraceLine;
