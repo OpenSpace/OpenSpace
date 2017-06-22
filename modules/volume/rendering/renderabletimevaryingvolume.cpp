@@ -76,6 +76,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     : Renderable(dictionary)
     , _clipPlanes(nullptr)
     , _stepSize("stepSize", "Step Size", 0.02, 0.01, 1)
+    , _gridType("gridType", "Grid Type", properties::OptionProperty::DisplayType::Dropdown)
     , _secondsBefore("secondsBefore", "Seconds before", 0.0, 0.01, SecondsInOneDay)
     , _secondsAfter("secondsAfter", "Seconds after", 0.0, 0.01, SecondsInOneDay)
     , _sourceDirectory("sourceDirectory", "Source Directory")
@@ -93,8 +94,12 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     _transferFunctionPath = absPath(dictionary.value<std::string>(KeyTransferFunction));
     _lowerValueBound = dictionary.value<float>(KeyLowerValueBound);
     _upperValueBound = dictionary.value<float>(KeyUpperValueBound);
-    _gridType = VolumeGridType::Cartesian;
     _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
+
+    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian grid");
+    _gridType.addOption(static_cast<int>(volume::VolumeGridType::Spherical), "Spherical grid");
+    _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
+
 
     if (dictionary.hasValue<float>(KeySecondsBefore)) {
         _secondsBefore = dictionary.value<float>(KeySecondsBefore);
@@ -107,7 +112,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     _clipPlanes->setName("clipPlanes");
 
     if (dictionary.hasValue<std::string>(KeyGridType)) {
-        _gridType = volume::parseGridType(dictionary.value<std::string>(KeyGridType));
+        VolumeGridType gridType = volume::parseGridType(dictionary.value<std::string>(KeyGridType));
+        _gridType = (gridType == VolumeGridType::Spherical) ? 1 : 0;
     }
 }
     
@@ -183,6 +189,11 @@ bool RenderableTimeVaryingVolume::initialize() {
     addProperty(_transferFunctionPath);
     addProperty(_sourceDirectory);
     addPropertySubOwner(_clipPlanes.get());
+
+    _raycaster->setGridType((_gridType.value() == 1) ? VolumeGridType::Spherical : VolumeGridType::Cartesian);
+    _gridType.onChange([this] {
+        _raycaster->setGridType((_gridType.value() == 1) ? VolumeGridType::Spherical : VolumeGridType::Cartesian);
+    });
 
     return true;
 }

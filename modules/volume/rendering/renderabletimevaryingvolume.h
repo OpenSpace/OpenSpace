@@ -77,9 +77,8 @@ private:
 
     float _lowerValueBound;
     float _upperValueBound;
-    
-    VolumeGridType _gridType;
-    
+
+    properties::OptionProperty _gridType;
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
     properties::FloatProperty _stepSize;
