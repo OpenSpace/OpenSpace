@@ -37,6 +37,7 @@ function postInitialization()
     -- =================================================================================================================================
     openspace.setPropertyValue("SolarImagery_*_Marker.renderable.enabled", false)
     openspace.setPropertyValue("SolarImagery_*_Trail.renderable.enabled", false)
+    openspace.setPropertyValue("SolarImagery_EarthMarker_Marker.renderable.enabled", true)
 
     -- Loops
     openspace.addVirtualProperty("BoolProperty", "Activate Looping", "Sun_Projection.renderable.activateLooping", false, nil, nil)
@@ -87,6 +88,8 @@ function postInitialization()
     openspace.addVirtualProperty("BoolProperty",  "SOHO C2", "SolarImagery_Soho_Image_C2.renderable.enabled", false, nil, nil)
     openspace.addVirtualProperty("BoolProperty",  "SOHO C3", "SolarImagery_Soho_Image_C3.renderable.enabled", false, nil, nil)
 
+    -- EARTH Label
+    openspace.addVirtualProperty("BoolProperty",  "Earth Label",   "SolarImagery_EarthMarker_Marker.renderable.enabled", true, nil, nil)
     -- ========================================================== SOLARBROWSING END ==================================================
     -- =================================================================================================================================
     -- =================================================================================================================================
@@ -128,9 +131,9 @@ return {
         "missions/stereo-b",
         "missions/soho",
         "fieldlinessequence/customkernels/hnm_ref_frame",
-        "fieldlinessequence/customkernels/gsm_ref_frame",
-        "fieldlinessequence/july2012/batsrus_fl_july2012",
-        "fieldlinessequence/july2012/enlil_fl_july2012",
-        "fieldlinessequence/july2012/pfss_fl_july2012",
+        --"fieldlinessequence/customkernels/gsm_ref_frame",
+        -- "fieldlinessequence/july2012/batsrus_fl_july2012",
+        -- "fieldlinessequence/july2012/enlil_fl_july2012",
+        --"fieldlinessequence/july2012/pfss_fl_july2012",
     }
 }
