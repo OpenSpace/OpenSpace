@@ -322,7 +322,7 @@ namespace openspace {
 				voxelGridInnerRadius.setInputCloud(innerRadiusFiltered);
 				voxelGridInnerRadius.setLeafSize(levelOfDetail.innerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.innerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.innerRadiusVoxelGridFilterLeafSize.z);
 				voxelGridInnerRadius.filter(*innerRadius);
-
+				
 				double res2 = computeCloudResolution(innerRadius);
 
 				LERROR("Resolution is after : " << res2);
@@ -429,12 +429,40 @@ namespace openspace {
 				*zf_cloud5 += *outerRadius;
 			} 
 			else {
+				pcl::PointCloud<pcl::PointXYZ>::Ptr xLargerThanZero(new pcl::PointCloud<pcl::PointXYZ>());
+				pcl::PointCloud<pcl::PointXYZ>::Ptr xSmallerThanZero(new pcl::PointCloud<pcl::PointXYZ>());
+
+				pcl::PassThrough<pcl::PointXYZ> passXDivider;
+				passXDivider.setInputCloud(zf_cloud);
+				passXDivider.setFilterFieldName("x");
+				passXDivider.setFilterLimits(0, 70);
+				passXDivider.filter(*xLargerThanZero);
+
+				pcl::PassThrough<pcl::PointXYZ> passXDividerSmall;
+				passXDividerSmall.setInputCloud(zf_cloud);
+				passXDividerSmall.setFilterFieldName("x");
+				passXDividerSmall.setFilterLimits(-70, 0);
+				passXDividerSmall.filter(*xSmallerThanZero);
+
+				pcl::PointCloud<pcl::PointXYZ>::Ptr temp1(new pcl::PointCloud<pcl::PointXYZ>);
+				pcl::PointCloud<pcl::PointXYZ>::Ptr temp2(new pcl::PointCloud<pcl::PointXYZ>);
+
 				pcl::VoxelGrid<pcl::PointXYZ> voxelGridOuter;
 
 				voxelGridOuter.setDownsampleAllData(true);
-				voxelGridOuter.setInputCloud(zf_cloud);
+				voxelGridOuter.setInputCloud(xLargerThanZero);
 				voxelGridOuter.setLeafSize(levelOfDetail.outerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.z);
-				voxelGridOuter.filter(*zf_cloud5);
+				voxelGridOuter.filter(*temp1);
+
+				pcl::VoxelGrid<pcl::PointXYZ> voxelGridOuter2;
+
+				voxelGridOuter2.setDownsampleAllData(true);
+				voxelGridOuter2.setInputCloud(xSmallerThanZero);
+				voxelGridOuter2.setLeafSize(levelOfDetail.outerRadiusVoxelGridFilterLeafSize.x, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.y, levelOfDetail.outerRadiusVoxelGridFilterLeafSize.z);
+				voxelGridOuter2.filter(*temp2);
+				
+				*zf_cloud5 = *temp1 + *temp2;
+				
 			}
 			
 
