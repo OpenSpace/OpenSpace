@@ -469,7 +469,7 @@ namespace globebrowsing {
 
 	void MeshGeneration::writeTxtFile(const std::string filename, std::string output_path, ImgReader::PointCloudInfo mInfo) {
 		std::string txt_path = output_path + "filenames.txt";
-		LERROR("output path txt: " << txt_path);
+		
 		if (FileSys.fileExists(txt_path)) {
 			// If file already exists
 			std::ifstream txtFile;
@@ -557,9 +557,6 @@ namespace globebrowsing {
 
 		if (!inputCloud->isOrganized()) {
 			LERROR("THE INPUTCOUD IS NOT ORGANIZED");
-		}
-		else {
-			LERROR("THE CLOUD IS ORGANIZED");
 		}
 
 	}
