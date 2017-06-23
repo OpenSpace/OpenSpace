@@ -260,8 +260,8 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 
 					// clamp min step size to a fraction of the incoming parameter
 					if (i == 2) {
-						double epsilon = 1e-4;
-						h = std::max(std::max(std::abs(dPar.at(i)), epsilon) * 0.01, h); // make sure incoming parameter is larger than 0
+						double epsilon = 1e-3;
+						h = std::max(std::max(std::abs(dPar.at(i)), epsilon) * 0.001, h); // make sure incoming parameter is larger than 0
 					}
 					else if (ptr->nDOF == 2) {
 						h = std::max(std::abs(dPar.at(i)) * 0.001, h);
@@ -349,6 +349,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 	}
 	else { // prevents touch to infinitely be active (due to windows bridge case where event doesnt get consumed sometimes when LMA fails to converge)
 		OnScreenGUIModule::touchInput = { 1, glm::dvec2(0.0, 0.0), 1 };
+		resetAfterInput();
 	}
 }
 
@@ -472,7 +473,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
 		}
 		// we have roll if one finger is still, or the total roll angles around the centroid is over _rollAngleThreshold (_centroidStillThreshold is used to void misinterpretations)
 		else if (std::abs(minDiff) < _inputStillThreshold || (std::abs(rollOn) < 100.0 && glm::distance(_centroid, lastCentroid) / list.size() < _centroidStillThreshold)) { 
-			return ROLL; // also interpret if angles are high
+			return ROLL;
 		}
 		else {
 			return PINCH;
