@@ -229,7 +229,6 @@ void InteractionHandler::goToChunk(int x, int y, int level) {
 }
 
 void InteractionHandler::goToGeo(double latitude, double longitude) {
-	LERROR(latitude << "   " << longitude);
     if (_currentInteractionMode == _globeBrowsingInteractionMode.get()) {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
         _globeBrowsingInteractionMode->goToGeodetic2(
