@@ -72,6 +72,9 @@ private:
     };
 
     Timestep* currentTimestep();
+    int timestepIndex(const Timestep* t) const;
+    Timestep* timestepFromIndex(int index);
+    void jumpToTimestep(int i);
 
     void loadTimestepMetadata(const std::string& path);
 
@@ -86,7 +89,11 @@ private:
     properties::FloatProperty _secondsAfter;
     properties::StringProperty _sourceDirectory;
     properties::StringProperty _transferFunctionPath;
-    
+
+    properties::TriggerProperty _triggerTimeJump;
+    properties::IntProperty _jumpToTimestep;
+    properties::IntProperty _currentTimestep;
+
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
