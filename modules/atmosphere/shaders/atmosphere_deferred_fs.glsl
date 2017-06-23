@@ -558,7 +558,7 @@ void main() {
     vec4 meanNormal    = vec4(0.0);
     vec4 meanPosition  = vec4(0.0);
     vec4 meanOtherData = vec4(0.0);
-    /*
+    
     //vec4 positionArray[nAaSamples];
     //vec4 positionArray[8];
     float maxAlpha = -1.0;
@@ -580,13 +580,14 @@ void main() {
     //mainDepth /= nAaSamples;
 
     meanColor.a = maxAlpha;
-    */
+    
+    /*
     // Temporary:
     meanNormal    += texelFetch(mainNormalTexture, ivec2(gl_FragCoord), 0);
     meanColor     += texelFetch(mainColorTexture, ivec2(gl_FragCoord), 0);;
     meanPosition  += texelFetch(mainPositionTexture, ivec2(gl_FragCoord), 0);
     meanOtherData += texelFetch(otherDataTexture, ivec2(gl_FragCoord), 0);
-
+    */
     // Ray in object space
     dRay ray;
     dvec4 planetPositionObjectCoords = dvec4(0.0);
@@ -633,7 +634,7 @@ void main() {
         // when using their positions later, one must convert them to the planet's coords 
 
         if ((pixelDepth > 0.0) && pixelDepth < offset) {        
-          renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
+          renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
         } else {
           // Following paper nomenclature      
           double t = offset;                  
@@ -747,7 +748,7 @@ void main() {
         fragObjectCoords.xyz /= 1000.0;
         
         if (meanPosition.xyz != vec3(0.0) && (pixelDepth < offset)) {        
-          renderTarget = vec4(HDR(meanColor.xyz), meanColor.a);
+          renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
         } else {
           // Following paper nomenclature      
           double t = offset;                  
