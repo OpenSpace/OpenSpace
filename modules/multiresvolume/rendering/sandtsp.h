@@ -39,8 +39,10 @@ public:
     bool calculateTemporalError();
 
 protected:
+    std::vector<float> generateLeafCoverages();
 
 }; // class SANDTSP
+
 
 }  // namespace openspace
 

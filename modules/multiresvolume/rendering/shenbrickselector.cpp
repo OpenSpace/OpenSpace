@@ -24,6 +24,8 @@
 
 #include <modules/multiresvolume/rendering/shenbrickselector.h>
 
+#include <ghoul/logging/logmanager.h>
+
 namespace {
     const std::string _loggerCat = "ShenBrickSelector";
 }
@@ -31,13 +33,28 @@ namespace {
 namespace openspace {
 
 ShenBrickSelector::ShenBrickSelector(TSP* tsp, float spatialTolerance, float temporalTolerance)
-    : _tsp(tsp)
+    : TSPBrickSelector(tsp)
     , _spatialTolerance(spatialTolerance)
-    , _temporalTolerance(temporalTolerance) {}
+    , _temporalTolerance(temporalTolerance) { }
 
 ShenBrickSelector::~ShenBrickSelector() {
 
 }
+
+
+bool ShenBrickSelector::initialize() {
+    for (size_t i = 0; i < 20; i++)
+        LINFO("HEY HEY HEY PUT THE SPATIAL ERROR BACK IN");LINFO("HEY HEY HEY PUT THE SPATIAL ERROR BACK IN");
+    //_tsp->calculateSpatialError();
+    _tsp->calculateTemporalError();
+    for (size_t i = 0; i < 20; i++)
+        LINFO("HEY HEY HEY PUT THE SPATIAL ERROR BACK IN"); LINFO("HEY HEY HEY PUT THE SPATIAL ERROR BACK IN");
+    return true;
+}
+
+void ShenBrickSelector::setSpatialTolerance(float spatialTolerance) { _spatialTolerance = spatialTolerance; }
+
+void ShenBrickSelector::setTemporalTolerance(float temporalTolerance) { _temporalTolerance = temporalTolerance; }
 
 void ShenBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
     int numTimeSteps = _tsp->header().numTimesteps_;

@@ -57,6 +57,7 @@ class BrickSelector;
 class TfBrickSelector;
 class SimpleTfBrickSelector;
 class LocalTfBrickSelector;
+class ShenBrickSelector;
 class TimeBrickSelector;
 class HistogramManager;
 class ErrorHistogramManager;
@@ -69,16 +70,18 @@ public:
     RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
     ~RenderableMultiresVolume();
 
-    enum Selector {TF, SIMPLE, LOCAL, TIME};
+    enum Selector {TF, SIMPLE, LOCAL, SHEN, TIME};
 
     static const char* TYPE_SIMPLE;
     static const char* TYPE_TIME;
     static const char* TYPE_TF;
     static const char* TYPE_LOCAL;
+    static const char* TYPE_SHEN;
 
     static const std::unordered_map<const char *, Selector> SelectorValues;
 
     bool setSelectorType(Selector selector);
+    bool initializeShenSelector();
     bool initializeSelector();
 
     bool initialize() override;
@@ -145,6 +148,7 @@ private:
     TfBrickSelector* _tfBrickSelector;
     SimpleTfBrickSelector* _simpleTfBrickSelector;
     LocalTfBrickSelector* _localTfBrickSelector;
+    ShenBrickSelector* _shenBrickSelector;
     TimeBrickSelector* _timeBrickSelector;
 
     Selector _selector;

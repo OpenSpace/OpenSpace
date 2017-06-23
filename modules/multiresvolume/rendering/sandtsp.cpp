@@ -54,6 +54,44 @@ bool SandTSP::construct() {
     return TSP::construct();
 }
 
+std::vector<float> SandTSP::generateLeafCoverages() {
+
+    unsigned int leaves = _header.numOrigTimesteps_;
+    unsigned int levels = numBSTLevels_;
+    unsigned int nodes = numBSTNodes_;
+    unsigned int voxels = std::pow(paddedBrickDim_, 3);
+
+    // Get the number of levels -- log(number of time steps) + 1 for root
+    // int levels = ceil(log2(_header.numOrigTimesteps_) + 1);
+    // Sum the number of nodes as geometric series (1-2^levels)/1-2
+    // int bstNodeCount = -(1 - std::exp2(levels));
+    LINFO("Orig: " << _header.numOrigTimesteps_ << " Levels : " << levels << " leaves : " << leaves << " Count : " << nodes);
+
+    std::vector<float> averages(nodes);
+
+    // First propogate all the leaves values
+    for (size_t n = 0; n < leaves; n++) {
+        std::vector<float> voxelAverages(voxels);
+        std::vector<float> voxelStdDevs(voxels);
+
+        // Read the whole brick to fill the averages
+        std::streampos offset = dataPosition() + static_cast<long long>(n * voxels * sizeof(float));
+        LINFO("Brick " << n << ", offset " << offset);
+        _file.seekg(offset);
+
+        _file.read(reinterpret_cast<char*>(&voxelAverages[0]), static_cast<size_t>(voxels) * sizeof(float));
+
+        averages[nodes - leaves + n] = 1;
+    }
+
+    // For each node, sum the level below it
+    for (int n = levels - 2; 0 <= n; n--) {
+        LINFO("Levels " << n );
+        averages[n] = n;
+    }
+    return averages;
+}
+
 bool SandTSP::calculateSpatialError() {
     unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
@@ -193,18 +231,19 @@ bool SandTSP::calculateTemporalError() {
         return false;
 
     LDEBUG("Calculating temporal error");
-
+    generateLeafCoverages();
     // Statistics
     std::vector<float> meanArray(numTotalNodes_);
 
     // Save errors
     std::vector<float> errors(numTotalNodes_);
 
+    unsigned int numBrickVals =
+        paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
+
     // Calculate temporal error for one brick at a time
     for (unsigned int brick = 0; brick<numTotalNodes_; ++brick) {
-
-        unsigned int numBrickVals =
-            paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
+        if (!(brick % 10)) LDEBUG("Working on bricks " << brick << " of " << numTotalNodes_);
 
         // Save the individual voxel's average over timesteps. Because the
         // BSTs are built by averaging leaf nodes, we only need to sample
@@ -221,6 +260,7 @@ bool SandTSP::calculateTemporalError() {
 
         // Build a list of the BST leaf bricks (within the same octree level) that
         // this brick covers
+
         std::list<unsigned int> coveredBricks = CoveredBSTLeafBricks(brick);
 
         // If the brick is at the lowest BST level, automatically set the error 
@@ -230,14 +270,13 @@ bool SandTSP::calculateTemporalError() {
         if (coveredBricks.size() == 1) {
             errors[brick] = -0.1f;
         } else {
+            LINFO("I'm the slow part...");
             // Calculate standard deviation per voxel, average over brick
             float avgStdDev = 0.f;
             for (unsigned int voxel = 0; voxel<numBrickVals; ++voxel) {
-
+                
                 float stdDev = 0.f;
-                for (auto leaf = coveredBricks.begin();
-                    leaf != coveredBricks.end(); ++leaf) {
-
+                for (auto leaf = coveredBricks.begin(); leaf != coveredBricks.end(); ++leaf) {
                     // Sample the leaves at the corresponding voxel position
 
                     std::streampos offset = dataPosition() + static_cast<long long>((*leaf*numBrickVals + voxel)*sizeof(float));
@@ -247,17 +286,18 @@ bool SandTSP::calculateTemporalError() {
                     _file.read(reinterpret_cast<char*>(&sample), sizeof(float));
 
                     stdDev += pow(sample - voxelAverages[voxel], 2.f);
+                    
                 }
                 stdDev /= static_cast<float>(coveredBricks.size());
                 stdDev = sqrt(stdDev);
 
                 avgStdDev += stdDev;
             } // for voxel
-
+            LINFO("...aren't I?");
             avgStdDev /= static_cast<float>(numBrickVals);
             meanArray[brick] = avgStdDev;
             errors[brick] = avgStdDev;
-
+            
         }
 
     } // for all bricks

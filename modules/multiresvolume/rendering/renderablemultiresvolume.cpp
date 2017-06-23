@@ -48,6 +48,7 @@
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 #include <modules/multiresvolume/rendering/simpletfbrickselector.h>
 #include <modules/multiresvolume/rendering/localtfbrickselector.h>
+#include <modules/multiresvolume/rendering/shenbrickselector.h>
 #include <modules/multiresvolume/rendering/timebrickselector.h>
 
 #include <modules/multiresvolume/rendering/histogrammanager.h>
@@ -90,11 +91,15 @@ namespace openspace {
     const char* RenderableMultiresVolume::TYPE_TIME = "time";
     const char* RenderableMultiresVolume::TYPE_TF = "tf";
     const char* RenderableMultiresVolume::TYPE_LOCAL = "local";
+    const char* RenderableMultiresVolume::TYPE_SHEN = "shen";
+
+
 
     const std::unordered_map<const char *, RenderableMultiresVolume::Selector> RenderableMultiresVolume::SelectorValues = {
         {RenderableMultiresVolume::TYPE_SIMPLE , RenderableMultiresVolume::Selector::SIMPLE},
         {RenderableMultiresVolume::TYPE_TF     , RenderableMultiresVolume::Selector::TF},
         {RenderableMultiresVolume::TYPE_LOCAL  , RenderableMultiresVolume::Selector::LOCAL},
+        { RenderableMultiresVolume::TYPE_SHEN  , RenderableMultiresVolume::Selector::SHEN },
         {RenderableMultiresVolume::TYPE_TIME   , RenderableMultiresVolume::Selector::TIME}
     };
 
@@ -235,6 +240,8 @@ RenderableMultiresVolume::~RenderableMultiresVolume() {
         delete _simpleTfBrickSelector;
     if (_localTfBrickSelector)
         delete _localTfBrickSelector;
+    if (_shenBrickSelector)
+        delete _shenBrickSelector;
     if (_timeBrickSelector)
         delete _timeBrickSelector;
 
@@ -291,6 +298,16 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
                 _localTfBrickSelector = ltbs = new LocalTfBrickSelector(_tsp.get(), _localErrorHistogramManager, _transferFunction.get(), _memoryBudget, _streamingBudget);
                 _transferFunction->setCallback([ltbs](const TransferFunction &tf) {
                     ltbs->initialize();
+                });
+                return initializeSelector();
+            }
+            break;
+        case Selector::SHEN:
+            if (!_shenBrickSelector) {
+                ShenBrickSelector* sbs;
+                _shenBrickSelector = sbs = new ShenBrickSelector(_tsp.get(), 100., 100.);
+                _transferFunction->setCallback([sbs](const TransferFunction &tf) {
+                    sbs->initialize();
                 });
                 return initializeSelector();
             }
@@ -364,6 +381,13 @@ bool RenderableMultiresVolume::isReady() const {
 }
 
 
+bool RenderableMultiresVolume::initializeShenSelector() {
+    bool success = true;
+    BrickSelector * selector = _shenBrickSelector;
+    success &= selector && selector->initialize();
+    return success;
+}
+
 bool RenderableMultiresVolume::initializeSelector() {
     int nHistograms = _histogramBins;
     bool success = true;
@@ -377,6 +401,7 @@ bool RenderableMultiresVolume::initializeSelector() {
     case Selector::TIME:    selector = _timeBrickSelector;      manager = _errorHistogramManager;        scenePath = _errorHistogramsPath;  break;
     case Selector::LOCAL:   selector = _localTfBrickSelector;   manager = _localErrorHistogramManager;                                      break;
     case Selector::SIMPLE:  selector = _simpleTfBrickSelector;  manager = _histogramManager;                                                break;
+    case Selector::SHEN:    selector = _shenBrickSelector;      return initializeShenSelector();
     }
 
     if (manager) {
@@ -484,12 +509,15 @@ void RenderableMultiresVolume::update(const UpdateData& data) {
         case Selector::TF:      s = _tfBrickSelector; break;
         case Selector::SIMPLE:  s = _simpleTfBrickSelector; break;
         case Selector::LOCAL:   s = _localTfBrickSelector; break;
+        case Selector::SHEN:    s = _shenBrickSelector; break;
         case Selector::TIME:    s = _timeBrickSelector; break;
         }
 
         if (s) {
-            s->setMemoryBudget(_memoryBudget);
-            s->setStreamingBudget(_streamingBudget);
+            if (_selector != Selector::SHEN) {
+                s->setMemoryBudget(_memoryBudget);
+                s->setStreamingBudget(_streamingBudget);
+            }
             s->selectBricks(currentTimestep, _brickIndices);
         }
 
@@ -540,6 +568,7 @@ RenderableMultiresVolume::Selector RenderableMultiresVolume::getSelector() {
     if (s == TYPE_TF)       return SelectorValues.at(TYPE_TF);
     if (s == TYPE_SIMPLE)   return SelectorValues.at(TYPE_SIMPLE);
     if (s == TYPE_LOCAL)    return SelectorValues.at(TYPE_LOCAL);
+    if (s == TYPE_SHEN)    return SelectorValues.at(TYPE_SHEN);
     if (s == TYPE_TIME)     return SelectorValues.at(TYPE_TIME);
 
     return Selector::SIMPLE;

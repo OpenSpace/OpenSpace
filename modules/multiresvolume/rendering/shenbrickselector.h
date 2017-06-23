@@ -34,12 +34,12 @@ class ShenBrickSelector : public TSPBrickSelector {
 public:
     ShenBrickSelector(TSP* tsp, float spatialTolerance, float temporalTolerance);
     ~ShenBrickSelector();
+    bool initialize();
     void setSpatialTolerance(float spatialTolerance);
     void setTemporalTolerance(float temporalTolerance);
     void selectBricks(int timestep,
                       std::vector<int>& bricks);
 private:
-    TSP* _tsp;
     float _spatialTolerance;
     float _temporalTolerance;
 
