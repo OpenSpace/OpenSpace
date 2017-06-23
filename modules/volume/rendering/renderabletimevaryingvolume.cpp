@@ -81,6 +81,9 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     , _secondsAfter("secondsAfter", "Seconds after", 0.0, 0.01, SecondsInOneDay)
     , _sourceDirectory("sourceDirectory", "Source Directory")
     , _transferFunctionPath("transferFunctionPath", "Transfer Function Path")
+    , _triggerTimeJump("triggerTimeJump", "Jump")
+    , _jumpToTimestep("jumpToTimestep", "Jump to timestep", 0, 0, 256)
+    , _currentTimestep("currentTimestep", "Current timestep", 0, 0, 256)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
 {
@@ -185,11 +188,25 @@ bool RenderableTimeVaryingVolume::initialize() {
     };
     onEnabledChange(onChange);
 
+    _triggerTimeJump.onChange([this] () {
+        jumpToTimestep(_jumpToTimestep);
+    });
+
+    _jumpToTimestep.onChange([this] () {
+        jumpToTimestep(_jumpToTimestep);
+    });
+
+    _currentTimestep.setMaxValue(_volumeTimesteps.size());
+    _jumpToTimestep.setMaxValue(_volumeTimesteps.size());
+
     addProperty(_stepSize);
     addProperty(_gridType);
     addProperty(_transferFunctionPath);
     addProperty(_sourceDirectory);
     addPropertySubOwner(_clipPlanes.get());
+    addProperty(_triggerTimeJump);
+    addProperty(_jumpToTimestep);
+    addProperty(_currentTimestep);
 
     _raycaster->setGridType((_gridType.value() == 1) ? VolumeGridType::Spherical : VolumeGridType::Cartesian);
     _gridType.onChange([this] {
@@ -238,29 +255,65 @@ RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::currentTimes
         double threshold = lastTimestep->time + static_cast<double>(_secondsAfter);
         return currentTime < threshold ? lastTimestep : nullptr;
     }
-    // Get the last item with time <= currentTime
-    currentTimestepIt--;
 
-    if (currentTimestepIt == _volumeTimesteps.end()) {
+    if (currentTimestepIt == _volumeTimesteps.begin()) {
         // No such timestep was found: show first timestep if it is within the time margin.
         RenderableTimeVaryingVolume::Timestep* firstTimestep = &(_volumeTimesteps.begin()->second);
         double threshold = firstTimestep->time - static_cast<double>(_secondsBefore);
         return currentTime >= threshold ? firstTimestep : nullptr;
     }
+
+    // Get the last item with time <= currentTime
+    currentTimestepIt--;
     return &(currentTimestepIt->second);
+}
+
+int RenderableTimeVaryingVolume::timestepIndex(const RenderableTimeVaryingVolume::Timestep* t) const {
+    if (!t) {
+        return -1;
+    }
+    int index = 0;
+    for (auto& it : _volumeTimesteps) {
+        if (&(it.second) == t) {
+            return index;
+        }
+        ++index;
+    }
+    return -1;
+}
+
+RenderableTimeVaryingVolume::Timestep* RenderableTimeVaryingVolume::timestepFromIndex(int target) {
+    if (target < 0) target = 0;
+    int index = 0;
+    for (auto& it : _volumeTimesteps) {
+        if (index == target) {
+            return &(it.second);
+        }
+        ++index;
+    }
+    return nullptr;
+}
+
+void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
+    Timestep* t = timestepFromIndex(target);
+    if (!t) {
+        return;
+    }
+    OsEng.timeManager().time().setTime(t->time);
 }
 
 void RenderableTimeVaryingVolume::update(const UpdateData& data) {
     if (_raycaster) {
         Timestep* t = currentTimestep();
+        _currentTimestep = timestepIndex(t);
         if (t && t->texture) {
-            glm::vec3 scale = t->upperDomainBound - t->lowerDomainBound;
-            glm::vec3 translation = (t->lowerDomainBound + t->upperDomainBound) * 0.5f;
+            glm::dvec3 scale = t->upperDomainBound - t->lowerDomainBound;
+            glm::dvec3 translation = (t->lowerDomainBound + t->upperDomainBound) * 0.5f;
 
-            glm::mat4 modelTransform = glm::translate(glm::mat4(1.0), translation);
-            modelTransform = glm::scale(modelTransform, scale);
-            _raycaster->setModelTransform(modelTransform);
-
+            glm::dmat4 modelTransform = glm::translate(glm::dmat4(1.0), translation);
+            glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
+            modelTransform = modelTransform * scaleMatrix;
+            _raycaster->setModelTransform(glm::mat4(modelTransform));
             _raycaster->setVolumeTexture(t->texture);
         } else {
             _raycaster->setVolumeTexture(nullptr);
