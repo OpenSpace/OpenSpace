@@ -287,7 +287,54 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
 }
 
 std::string KameleonVolumeReader::simulationStart() const {
-    return _model->getGlobalAttribute("start_time").getAttributeString();
+    std::string seqStartStr;
+    double seqStartDbl;
+    if (_model->doesAttributeExist("start_time")){
+        seqStartStr =
+            _model->getGlobalAttribute("start_time").getAttributeString();
+    } else if (_model->doesAttributeExist("tim_rundate_cal")) {
+        seqStartStr =
+            _model->getGlobalAttribute("tim_rundate_cal").getAttributeString();
+        size_t numChars = seqStartStr.length();
+        if (numChars < 19) {
+            // Fall through to add the required characters
+            switch (numChars) {
+                case 10 : // YYYY-MM-DD        => YYYY-MM-DDTHH
+                    seqStartStr += "T00";
+                case 13 : // YYYY-MM-DDTHH     => YYYY-MM-DDTHH:
+                    seqStartStr += ":";
+                case 14 : // YYYY-MM-DDTHH:    => YYYY-MM-DDTHH:MM
+                    seqStartStr += "00";
+                case 16 : // YYYY-MM-DDTHH:MM  => YYYY-MM-DDTHH:MM:
+                    seqStartStr += ":";
+                case 17 : // YYYY-MM-DDTHH:MM: => YYYY-MM-DDTHH:MM:SS
+                    seqStartStr += "00";
+                default :
+                    break;
+            }
+        }
+    } else if (_model->doesAttributeExist("tim_obsdate_cal")) {
+        seqStartStr =
+            _model->getGlobalAttribute("tim_obsdate_cal").getAttributeString();
+    } else if (_model->doesAttributeExist("tim_crstart_cal")) {
+        seqStartStr =
+            _model->getGlobalAttribute("tim_crstart_cal").getAttributeString();
+    }
+
+    if (seqStartStr.length() == 19){
+        seqStartStr += ".000Z";
+    }
+
+    return seqStartStr;
+}
+
+float KameleonVolumeReader::elapsedTime() const {
+    if (_model->doesAttributeExist("elapsed_time_in_seconds")) {
+        return _model->getGlobalAttribute("elapsed_time_in_seconds").getAttributeFloat();
+    } else if (_model->doesAttributeExist("time_physical_time")) {
+        return _model->getGlobalAttribute("time_physical_time").getAttributeFloat();
+    }
+    return 0;
 }
 
 std::string KameleonVolumeReader::simulationEnd() const {
@@ -296,9 +343,9 @@ std::string KameleonVolumeReader::simulationEnd() const {
 
 std::string KameleonVolumeReader::time() const {
     double start =
-        ccmc::Time(_model->getGlobalAttribute("start_time").getAttributeString()).getEpoch();
+        ccmc::Time(simulationStart()).getEpoch();
     // Get elapsed time in seconds and convert to milliseconds.
-    double elapsed = _model->getGlobalAttribute("elapsed_time_in_seconds").getAttributeFloat() * 1000;
+    double elapsed = elapsedTime() * 1000;
     return ccmc::Time(start + elapsed).toString();
 }
 

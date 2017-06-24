@@ -77,6 +77,7 @@ public:
     std::string time() const;
     std::string simulationStart() const;
     std::string simulationEnd() const;
+    float elapsedTime() const;
 
     double minValue(const std::string& variable) const;
     double maxValue(const std::string& variable) const;
