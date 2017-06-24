@@ -82,6 +82,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _resolutionLevel("resolutionlevel", "Level of detail", 3, 0, 5)
     , _useBuffering("useBuffering", "Use Buffering", true)
     , _usePBO("usePBO", "Use PBO", true)
+    , _currentActiveInstrumentProperty("currentActiveInstrumentProperty", "Current Active Instrument", "")
     , _planeSize("planeSize", "Plane Size", 50.0, 0.0, 1.0)
     , _verboseMode("verboseMode", "Verbose Mode", false)
 {
@@ -151,7 +152,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     }
 
 
-    //SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap2, _instrumentFilter);
+   //SpacecraftImageryManager::ref().loadImageMetadata(rootPath, _imageMetadataMap2, _instrumentFilter);
     //saveMetadata(rootPath);
     loadMetadata(rootPath);
 
@@ -227,6 +228,27 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
             _enableBorder = false;
         }
      });
+
+    _currentActiveInstrumentProperty.onChange([this]() {
+        _updatingCurrentActiveChannel = true;
+        _pboIsDirty = false;
+        _currentActiveInstrument = _currentActiveInstrumentProperty;
+               //= _activeInstruments.getDescriptionByValue(_activeInstruments.value());
+        // Update image size
+        auto& stateSequence = _imageMetadataMap2[_currentActiveInstrument];
+        auto& state = stateSequence.getState(OsEng.timeManager().time().j2000Seconds());
+       // const double& timeObserved = state.timeObserved();
+        std::shared_ptr<ImageMetadata> im = state.contents();
+        _imageSize = im->fullResolution / (std::pow(2, static_cast<int>(_resolutionLevel)));
+        _pbo->setSize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
+
+        // Upload asap
+        updateTextureGPU(/*asyncUpload=*/false);
+        if (_useBuffering) {
+            clearBuffer();
+        }
+        _updatingCurrentActiveChannel = false;
+    });
 
     _activeInstruments.onChange([this]() {
         _updatingCurrentActiveChannel = true;
@@ -339,20 +361,21 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     addProperty(_enableBorder);
     addProperty(_enableFrustum);
     addProperty(_activeInstruments);
-    addProperty(_sharpenValue);
+    //addProperty(_sharpenValue);
     addProperty(_gammaValue);
     addProperty(_contrastValue);
     addProperty(_bufferSize);
     addProperty(_displayTimers);
-    addProperty(_planeSize);
+   // addProperty(_planeSize);
     addProperty(_resolutionLevel);
-    addProperty(_lazyBuffering);
+   // addProperty(_lazyBuffering);
     addProperty(_minRealTimeUpdateInterval);
     //addProperty(_asyncUploadPBO);
     addProperty(_useBuffering);
-    addProperty(_usePBO);
+    //addProperty(_usePBO);
     addProperty(_moveFactor);
     addProperty(_verboseMode);
+    addProperty(_currentActiveInstrumentProperty);
 }
 
 // MUST do this conversion before passing in the spice manager again - WTF.

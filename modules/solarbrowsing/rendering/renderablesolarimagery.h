@@ -98,6 +98,7 @@ private:
     properties::BoolProperty _usePBO;
     properties::BoolProperty _verboseMode;
     properties::DoubleProperty _planeSize;
+    properties::StringProperty _currentActiveInstrumentProperty;
 
     std::chrono::milliseconds _realTime;
     std::chrono::milliseconds _lastUpdateRealTime;
