@@ -57,6 +57,7 @@ bool SpacecraftCameraPlane::destroy() {
         renderEngine.removeRenderProgram(_frustumShader);
         _frustumShader = nullptr;
     }
+    return true;
 }
 
 void SpacecraftCameraPlane::update() {

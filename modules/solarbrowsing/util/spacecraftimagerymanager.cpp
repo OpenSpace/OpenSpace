@@ -371,51 +371,56 @@ void SpacecraftImageryManager::loadImageMetadata(
     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
 
     for (auto seqPath : sequencePaths) {
-        if (size_t position = seqPath.find_last_of(".") + 1) {
-            if (position != std::string::npos) {
-                ghoul::filesystem::File currentFile(seqPath);
-                std::string extension = currentFile.fileExtension();
-                if (extension == "jp2" || extension == "j2k") {
-                    // // TODO(mnoven): Prettify or read metadata instead
-                    std::string fileName = currentFile.filename();
-                    size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
-                    std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
+        if (seqPath.find("131") != std::string::npos) {
+            std::cout << "seqPath" << seqPath;
 
-                    // Name
-                    size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
-                    std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
+            // if (size_t position = seqPath.find_last_of(".") + 1) {
+            //     if (position != std::string::npos) {
+            //         ghoul::filesystem::File currentFile(seqPath);
+            //         std::string extension = currentFile.fileExtension();
+            //         if (extension == "jp2" || extension == "j2k") {
+            //             // // TODO(mnoven): Prettify or read metadata instead
+            //             std::string fileName = currentFile.filename();
+            //             size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
+            //             std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
 
-                    // Instrument
-                    size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
-                    std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
-                    size_t dot = instrumentName.rfind(".");
-                    instrumentName = instrumentName.substr(0, dot);
-                    // std::string filterKey = instrumentName;
-                    // std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
-                    //                ::tolower);
+            //             // Name
+            //             size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
+            //             std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
 
-                    count++;
-                    // Time
-                    std::vector<std::string> tokens;
-                    std::stringstream ss;
-                    ss.str(currentFile.filename());
-                    std:: string item;
-                    while (std::getline(ss, item, '_')) {
-                        tokens.push_back(item);
-                    }
-                    std::string time = tokens[0] + "-" + tokens[1] + "-" +
-                                       tokens[2] + "T" + tokens[4] + ":" +
-                                       tokens[5] + ":" + tokens[6] + "." + tokens[7];
+            //             // Instrument
+            //             size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
+            //             std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
+            //             size_t dot = instrumentName.rfind(".");
+            //             instrumentName = instrumentName.substr(0, dot);
+            //             // std::string filterKey = instrumentName;
+            //             // std::transform(filterKey.begin(), filterKey.end(), filterKey.begin(),
+            //             //                ::tolower);
 
-                    //auto t = OsEng.timeManager();
-                    const ImageMetadata im = parseMetadata(currentFile);
-                    std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
-                    TimedependentState<ImageMetadata> timeState(
-                          std::move(data),
-                          OsEng.timeManager().time().convertTime(time), seqPath);
-                    _imageMetadataMap[instrumentName].addState(std::move(timeState));
-                }
-            }
+            //             count++;
+            //             // Time
+            //             std::vector<std::string> tokens;
+            //             std::stringstream ss;
+            //             ss.str(currentFile.filename());
+            //             std:: string item;
+            //             while (std::getline(ss, item, '_')) {
+            //                 tokens.push_back(item);
+            //             }
+            //             std::string time = tokens[0] + "-" + tokens[1] + "-" +
+            //                                tokens[2] + "T" + tokens[4] + ":" +
+            //                                tokens[5] + ":" + tokens[6] + "." + tokens[7];
+
+            //             //auto t = OsEng.timeManager();
+            //             const ImageMetadata im = parseMetadata(currentFile);
+            //             std::shared_ptr<ImageMetadata> data = std::make_shared<ImageMetadata>(im);
+            //             TimedependentState<ImageMetadata> timeState(
+            //                   std::move(data),
+            //                   OsEng.timeManager().time().convertTime(time), seqPath);
+            //             _imageMetadataMap[instrumentName].addState(std::move(timeState));
+            //         }
+            //     }
+            // }
+
         }
     }
 
@@ -429,7 +434,7 @@ void SpacecraftImageryManager::loadImageMetadata(
       const std::unordered_set<std::string>& _filter)
 {
 
-    LDEBUG("Begin loading imagery metadata");
+    LDEBUG("Begin loading imagery metadataaaaa");
 
     using RawPath = ghoul::filesystem::Directory::RawPath;
     ghoul::filesystem::Directory sequenceDir(path, RawPath::Yes);
@@ -443,7 +448,12 @@ void SpacecraftImageryManager::loadImageMetadata(
     using Sort = ghoul::filesystem::Directory::Sort;
     std::vector<std::string> sequencePaths = sequenceDir.read(Recursive::Yes, Sort::Yes);
 
+
+
     for (auto seqPath : sequencePaths) {
+       // std::cout << "seqPath" << seqPath;
+       // if (seqPath.find("131") != std::string::npos) {
+            //std::cout << "seqPath OK OK OK " << seqPath;
         if (size_t position = seqPath.find_last_of(".") + 1) {
             if (position != std::string::npos) {
                 ghoul::filesystem::File currentFile(seqPath);
@@ -493,6 +503,7 @@ void SpacecraftImageryManager::loadImageMetadata(
                 }
             }
         }
+        //}
     }
 
     LDEBUG("Finish loading imagery metadata");

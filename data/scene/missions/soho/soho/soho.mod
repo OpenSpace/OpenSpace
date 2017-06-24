@@ -57,6 +57,7 @@ return {
         Renderable = {
             -- Resolution of imagery, will be moved to metadata later
             --Resolution = 1024,
+            Offset = 0.00001,
             StartResolutionLevel = 0,
             StartInstrument = "LASCO_C2_white-light",
             -- Temp
@@ -85,7 +86,7 @@ return {
         Renderable = {
             -- Resolution of imagery, will be moved to metadata later
             --Resolution = 1024,
-            Offset = 0.00001,
+            Offset = 0.00002,
             StartResolutionLevel = 0,
             StartInstrument = "LASCO_C3_white-light",
             -- Temp

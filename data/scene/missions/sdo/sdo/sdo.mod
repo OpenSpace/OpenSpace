@@ -63,7 +63,7 @@ return {
             Size =  10^9.8,
             Origin = "Center",
             Billboard = true,
-            Texture = solarImageryDataRootPath .. "/markers/marker_sdo_inv.png",
+            Texture = solarImageryDataRootPath .. "/markers/marker_sdo.png",
             BlendMode = "Additive"
         },
         Transform = {
@@ -81,7 +81,6 @@ return {
             --Resolution = 4096,
             --Enabled = true,
             StartResolutionLevel = 1,
-            Offset = 0.00001,
             Type = "RenderableSolarImagery",
             StartInstrument = "AIA_AIA_304",
             --Target = "Sun",

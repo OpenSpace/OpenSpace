@@ -28,7 +28,6 @@
 #include <openspace/util/spicemanager.h>
 #include <modules/solarbrowsing/util/timedependentstate.h>
 #include <ghoul/logging/logmanager.h>
-#include <boost/serialization/vector.hpp>
 
 // TODO(mnoven): How to include loggercat in template class?
 #include <iostream>

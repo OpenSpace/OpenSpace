@@ -84,22 +84,22 @@ return {
         },
         GuiName = "/Solar/EarthTrail",
     },
-    --[[
     {
-        Name = "EarthMarker",
+        Name = "SolarImagery_EarthMarker_Marker",
         Parent = "Earth",
         Renderable = {
             Type = "RenderablePlane",
-            Size = 3.0E11,
+            Size = 10^9.8,
             Origin = "Center",
             Billboard = true,
-            Texture = "textures/marker.png",
+            Texture = solarImageryDataRootPath .. "/markers/marker_earth.png",
             BlendMode = "Additive"
         },
-        Ephemeris = {
-            Type = "Static",
-            Position = {0, 0, 0, 5}
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = {0, 0, 0},
+            }
         }
     }
-    ]]
 }
