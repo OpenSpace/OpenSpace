@@ -50,7 +50,9 @@ BasicVolumeRaycaster::BasicVolumeRaycaster(
     : _volumeTexture(volumeTexture)
     , _transferFunction(transferFunction)
     , _clipPlanes(clipPlanes)
-    , _boundingBox(glm::vec3(1.0)) {}
+    , _boundingBox(glm::vec3(1.0))
+    , _opacity(20.0)
+    {}
     
 BasicVolumeRaycaster::~BasicVolumeRaycaster() {}
 
@@ -136,6 +138,7 @@ void BasicVolumeRaycaster::preRaycast(
     program.setUniform("nClips_" + id, nClips);
     program.setUniform("clipNormals_" + id, clipNormals.data(), nClips);
     program.setUniform("clipOffsets_" + id, clipOffsets.data(), nClips);
+    program.setUniform("opacity_" + id, _opacity);
 }
     
 void BasicVolumeRaycaster::postRaycast(
@@ -197,6 +200,14 @@ std::shared_ptr<ghoul::opengl::Texture> BasicVolumeRaycaster::volumeTexture() co
 
 void BasicVolumeRaycaster::setStepSize(float stepSize) {
     _stepSize = stepSize;
+}
+
+void BasicVolumeRaycaster::setOpacity(float opacity) {
+    _opacity = opacity;
+}
+
+float BasicVolumeRaycaster::opacity() const {
+    return _opacity;
 }
 
 VolumeGridType BasicVolumeRaycaster::gridType() const {

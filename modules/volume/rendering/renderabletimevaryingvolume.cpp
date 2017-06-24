@@ -81,6 +81,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     , _triggerTimeJump("triggerTimeJump", "Jump")
     , _jumpToTimestep("jumpToTimestep", "Jump to timestep", 0, 0, 256)
     , _currentTimestep("currentTimestep", "Current timestep", 0, 0, 256)
+    , _opacity("opacity", "Opacity", 20.0f, 0.0f, 50.0f)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
 {
@@ -204,6 +205,7 @@ bool RenderableTimeVaryingVolume::initialize() {
     addProperty(_triggerTimeJump);
     addProperty(_jumpToTimestep);
     addProperty(_currentTimestep);
+    addProperty(_opacity);
 
     _raycaster->setGridType((_gridType.value() == 1) ? VolumeGridType::Spherical : VolumeGridType::Cartesian);
     _gridType.onChange([this] {
@@ -325,6 +327,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData& data) {
             _raycaster->setVolumeTexture(nullptr);
         }
         _raycaster->setStepSize(_stepSize);
+        _raycaster->setOpacity(_opacity);
     }
 }
 
