@@ -81,6 +81,7 @@ public:
     std::shared_ptr<ghoul::opengl::Texture> volumeTexture() const;
     void setTransferFunction(std::shared_ptr<TransferFunction> transferFunction);
     void setStepSize(float stepSize);
+    VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
     void setModelTransform(const glm::mat4& transform);
 private:
