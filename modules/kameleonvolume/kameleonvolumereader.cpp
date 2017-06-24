@@ -287,45 +287,44 @@ ghoul::Dictionary KameleonVolumeReader::readMetaData() const {
 }
 
 std::string KameleonVolumeReader::simulationStart() const {
-    std::string seqStartStr;
-    double seqStartDbl;
+    std::string startTime;
     if (_model->doesAttributeExist("start_time")){
-        seqStartStr =
+        startTime =
             _model->getGlobalAttribute("start_time").getAttributeString();
     } else if (_model->doesAttributeExist("tim_rundate_cal")) {
-        seqStartStr =
+        startTime =
             _model->getGlobalAttribute("tim_rundate_cal").getAttributeString();
-        size_t numChars = seqStartStr.length();
+        size_t numChars = startTime.length();
         if (numChars < 19) {
             // Fall through to add the required characters
             switch (numChars) {
                 case 10 : // YYYY-MM-DD        => YYYY-MM-DDTHH
-                    seqStartStr += "T00";
+                    startTime += "T00";
                 case 13 : // YYYY-MM-DDTHH     => YYYY-MM-DDTHH:
-                    seqStartStr += ":";
+                    startTime += ":";
                 case 14 : // YYYY-MM-DDTHH:    => YYYY-MM-DDTHH:MM
-                    seqStartStr += "00";
+                    startTime += "00";
                 case 16 : // YYYY-MM-DDTHH:MM  => YYYY-MM-DDTHH:MM:
-                    seqStartStr += ":";
+                    startTime += ":";
                 case 17 : // YYYY-MM-DDTHH:MM: => YYYY-MM-DDTHH:MM:SS
-                    seqStartStr += "00";
+                    startTime += "00";
                 default :
                     break;
             }
         }
     } else if (_model->doesAttributeExist("tim_obsdate_cal")) {
-        seqStartStr =
+        startTime =
             _model->getGlobalAttribute("tim_obsdate_cal").getAttributeString();
     } else if (_model->doesAttributeExist("tim_crstart_cal")) {
-        seqStartStr =
+        startTime =
             _model->getGlobalAttribute("tim_crstart_cal").getAttributeString();
     }
 
-    if (seqStartStr.length() == 19){
-        seqStartStr += ".000Z";
+    if (startTime.length() == 19){
+        startTime += ".000Z";
     }
 
-    return seqStartStr;
+    return startTime;
 }
 
 float KameleonVolumeReader::elapsedTime() const {
