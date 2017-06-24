@@ -93,7 +93,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         glm::vec3 coordsZeroToOne = coords / dims;
         glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
 
-        data[index] = _interpolator->interpolate(
+        data[index] = _kameleonInterpolator->interpolate(
             variable,
             static_cast<float>(volumeCoords[0]),
             static_cast<float>(volumeCoords[1]),

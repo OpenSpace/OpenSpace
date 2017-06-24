@@ -199,6 +199,10 @@ void BasicVolumeRaycaster::setStepSize(float stepSize) {
     _stepSize = stepSize;
 }
 
+VolumeGridType BasicVolumeRaycaster::gridType() const {
+    return _gridType;
+}
+
 void BasicVolumeRaycaster::setGridType(VolumeGridType gridType) {
     _gridType = gridType;
 }
