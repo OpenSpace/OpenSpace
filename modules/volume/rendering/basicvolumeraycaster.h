@@ -83,6 +83,8 @@ public:
     void setStepSize(float stepSize);
     float opacity() const;
     void setOpacity(float opacity);
+    float rNormalization() const;
+    void setRNormalization(float opacity);
     VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
     void setModelTransform(const glm::mat4& transform);
@@ -96,6 +98,7 @@ private:
     VolumeGridType _gridType;
     glm::mat4 _modelTransform;
     float _opacity;
+    float _rNormalization;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;

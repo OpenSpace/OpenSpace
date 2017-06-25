@@ -32,6 +32,7 @@ uniform vec3 clipNormals_#{id}[8];
 uniform vec2 clipOffsets_#{id}[8];
 
 uniform float opacity_#{id} = 20.0;
+uniform float rNormalization_#{id} = 0.0;
 
 
 void sample#{id}(vec3 samplePos,
@@ -42,7 +43,7 @@ void sample#{id}(vec3 samplePos,
 
     vec3 transformedPos = samplePos;
     if (gridType_#{id} == 1) {
-        transformedPos = kameleon_cartesianToSpherical(samplePos);
+        transformedPos = volume_cartesianToSpherical(samplePos);
     }
 
 
@@ -59,6 +60,11 @@ void sample#{id}(vec3 samplePos,
 
     if (clipAlpha > 0) {
         float val = texture(volumeTexture_#{id}, transformedPos).r;
+
+        if (rNormalization_#{id} > 0 && gridType_#{id} == 1) {
+            val *= pow(transformedPos.x, rNormalization_#{id});
+        }
+
         vec4 color = texture(transferFunction_#{id}, val);
         vec3 backColor = color.rgb;
         vec3 backAlpha = color.aaa;

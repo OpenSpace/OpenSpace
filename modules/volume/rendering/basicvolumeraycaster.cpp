@@ -52,6 +52,7 @@ BasicVolumeRaycaster::BasicVolumeRaycaster(
     , _clipPlanes(clipPlanes)
     , _boundingBox(glm::vec3(1.0))
     , _opacity(20.0)
+    , _rNormalization(0.0)
     {}
     
 BasicVolumeRaycaster::~BasicVolumeRaycaster() {}
@@ -139,6 +140,7 @@ void BasicVolumeRaycaster::preRaycast(
     program.setUniform("clipNormals_" + id, clipNormals.data(), nClips);
     program.setUniform("clipOffsets_" + id, clipOffsets.data(), nClips);
     program.setUniform("opacity_" + id, _opacity);
+    program.setUniform("rNormalization_" + id, _rNormalization);
 }
     
 void BasicVolumeRaycaster::postRaycast(
@@ -208,6 +210,14 @@ void BasicVolumeRaycaster::setOpacity(float opacity) {
 
 float BasicVolumeRaycaster::opacity() const {
     return _opacity;
+}
+
+void BasicVolumeRaycaster::setRNormalization(float rNormalization) {
+    _rNormalization = rNormalization;
+}
+
+float BasicVolumeRaycaster::rNormalization() const {
+    return _rNormalization;
 }
 
 VolumeGridType BasicVolumeRaycaster::gridType() const {
