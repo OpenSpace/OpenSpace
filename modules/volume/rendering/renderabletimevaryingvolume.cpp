@@ -83,6 +83,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     , _currentTimestep("currentTimestep", "Current timestep", 0, 0, 256)
     , _opacity("opacity", "Opacity", 20.0f, 0.0f, 50.0f)
     , _rNormalization("rNormalization", "Radius normalization", 0.0f, 0.0f, 2.0f)
+    , _lowerValueBound("lowerValueBound", "Lower value bound", 0.0f, 0.0f, 1000000.0f)
+    , _upperValueBound("upperValueBound", "Upper value bound", 0.0f, 0.0f, 1000000.0f)
     , _raycaster(nullptr)
     , _transferFunction(nullptr)
 {
@@ -207,6 +209,8 @@ bool RenderableTimeVaryingVolume::initialize() {
     addProperty(_currentTimestep);
     addProperty(_opacity);
     addProperty(_rNormalization);
+    addProperty(_lowerValueBound);
+    addProperty(_upperValueBound);
 
     _raycaster->setGridType((_gridType.value() == 1) ? VolumeGridType::Spherical : VolumeGridType::Cartesian);
     _gridType.onChange([this] {
@@ -324,6 +328,14 @@ void RenderableTimeVaryingVolume::update(const UpdateData& data) {
                 );
             }
             _raycaster->setVolumeTexture(t->texture);
+
+            // Remap volume value to that TF value 0 is sampled for lowerValueBound, and 1 is sampled for upperLowerBound.
+            // This means that volume values = 0 need to be remapped to how localMin relates to the global range.
+            float zeroMap = (t->minValue - _lowerValueBound) / (_upperValueBound - _lowerValueBound);
+
+            // Volume values = 1 are mapped to how localMax relates to the global range.
+            float oneMap = (t->maxValue - _lowerValueBound) / (_upperValueBound - _lowerValueBound);
+            _raycaster->setValueRemapping(zeroMap, oneMap);
         } else {
             _raycaster->setVolumeTexture(nullptr);
         }

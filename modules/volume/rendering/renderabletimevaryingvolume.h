@@ -78,9 +78,6 @@ private:
 
     void loadTimestepMetadata(const std::string& path);
 
-    float _lowerValueBound;
-    float _upperValueBound;
-
     properties::OptionProperty _gridType;
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
@@ -91,6 +88,8 @@ private:
     properties::FloatProperty _secondsAfter;
     properties::StringProperty _sourceDirectory;
     properties::StringProperty _transferFunctionPath;
+    properties::FloatProperty _lowerValueBound;
+    properties::FloatProperty _upperValueBound;
 
     properties::TriggerProperty _triggerTimeJump;
     properties::IntProperty _jumpToTimestep;

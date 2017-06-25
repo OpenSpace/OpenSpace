@@ -32,6 +32,16 @@ uniform vec3 clipNormals_#{id}[8];
 uniform vec2 clipOffsets_#{id}[8];
 
 uniform float opacity_#{id} = 20.0;
+
+// Value remapping:
+// Linearly remap volume values of zero to x and one to y
+// before using the values to sample the transfer function.
+uniform vec2 valueRemapping_#{id} = vec2(0.0, 1.0);
+
+// Normalization factor x for radius r [0, 1].
+// value *= 1/(r^x)
+// only working for volumes given in spherical coordianates.
+// Applied after any linear value remapping.
 uniform float rNormalization_#{id} = 0.0;
 
 
@@ -46,7 +56,6 @@ void sample#{id}(vec3 samplePos,
         transformedPos = volume_cartesianToSpherical(samplePos);
     }
 
-
     float clipAlpha = 1.0;
     vec3 centerToPos = transformedPos - vec3(0.5);
 
@@ -60,6 +69,8 @@ void sample#{id}(vec3 samplePos,
 
     if (clipAlpha > 0) {
         float val = texture(volumeTexture_#{id}, transformedPos).r;
+
+        val = mix(valueRemapping_#{id}.x, valueRemapping_#{id}.y, val);
 
         if (rNormalization_#{id} > 0 && gridType_#{id} == 1) {
             val *= pow(transformedPos.x, rNormalization_#{id});
