@@ -93,7 +93,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
 
         sample = [this, &numerator, &denominator, &interpolate] (glm::ivec3 volumeCoords) {
             return interpolate(numerator, volumeCoords) /
-            interpolate(denominator, volumeCoords);
+                interpolate(denominator, volumeCoords);
         };
         _model->loadVariable(numerator);
         _model->loadVariable(denominator);
