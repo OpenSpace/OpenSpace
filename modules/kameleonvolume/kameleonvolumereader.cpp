@@ -70,7 +70,34 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     const glm::vec3 dims = volume->dimensions();
     const glm::vec3 diff = upperBound - lowerBound;
 
-    _model->loadVariable(variable);
+    std::function<float(const std::string&, glm::ivec3)> interpolate =
+        [this](const std::string& variable, glm::ivec3 volumeCoords) {
+            return _kameleonInterpolator->interpolate(
+                variable,
+                static_cast<float>(volumeCoords[0]),
+                static_cast<float>(volumeCoords[1]),
+                static_cast<float>(volumeCoords[2]));
+        };
+
+    std::function<float(glm::ivec3)> sample = [this, &variable, &interpolate](glm::ivec3 volumeCoords) {
+        return interpolate(variable, volumeCoords);
+    };
+
+    // TODO: Handle more cases like subtraction etc, or better: parse expression and automaticly evaluate expression.
+    int indexOfDivision = variable.find('/');
+    if (indexOfDivision == -1) {
+        _model->loadVariable(variable);
+    } else {
+        std::string numerator = variable.substr(0, indexOfDivision);
+        std::string denominator = variable.substr(indexOfDivision + 1);
+
+        sample = [this, &numerator, &denominator, &interpolate] (glm::ivec3 volumeCoords) {
+            return interpolate(numerator, volumeCoords) /
+            interpolate(denominator, volumeCoords);
+        };
+        _model->loadVariable(numerator);
+        _model->loadVariable(denominator);
+    }
 
     float* data = volume->data();
     for (size_t index = 0; index < volume->nCells(); index++) {
@@ -78,11 +105,14 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         glm::vec3 coordsZeroToOne = coords / dims;
         glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
 
-        data[index] = _kameleonInterpolator->interpolate(
-            variable,
-            static_cast<float>(volumeCoords[0]),
-            static_cast<float>(volumeCoords[1]),
-            static_cast<float>(volumeCoords[2]));
+        data[index] = sample(volumeCoords);
+
+        if (data[index] < newMinValue) {
+            newMinValue = data[index];
+        }
+        if (data[index] > newMaxValue) {
+            newMaxValue = data[index];
+        }
     }
 
     return volume;
