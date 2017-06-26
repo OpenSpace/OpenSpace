@@ -24,6 +24,7 @@
 
 
 #include <modules/server/servermodule.h>
+#include <ghoul/io/socket/websocket.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 
@@ -67,11 +68,14 @@ void ServerModule::preSync() {
     // Set up new connections.
     for (auto& server : _servers) {
         std::shared_ptr<ghoul::io::Socket> socket;
+
+		// TODO(klas): might this block unintentionally? So that the TCP server waits until it has a 
+		// socket, which prevents the WebSocket to be connected?
         while ((socket = server->nextPendingSocket())) {
-            std::unique_ptr<Connection> conneciton = std::make_unique<Connection>(socket);
-            Connection* c = conneciton.get();
-            conneciton->thread = std::thread([this, c] () { handleConnection(c); });
-            _connections.push_back(std::move(conneciton));
+            std::unique_ptr<Connection> connection = std::make_unique<Connection>(socket);
+            Connection* c = connection.get();
+            connection->thread = std::thread([this, c] () { handleConnection(c); });
+            _connections.push_back(std::move(connection));
         }
     }
 
@@ -103,7 +107,7 @@ void ServerModule::cleanUpFinishedThreads() {
 void ServerModule::disconnectAll() {
     for (auto& connection : _connections) {
         if (connection->socket && connection->socket->isConnected()) {
-            connection->socket->disconnect();
+            connection->socket->disconnect(ghoul::io::WebSocket::ClosingReason::ClosingAll);
         }
     }
 }
