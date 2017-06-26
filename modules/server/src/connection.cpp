@@ -47,7 +47,7 @@ void Connection::handleMessage(std::string message) {
         nlohmann::json j = nlohmann::json::parse(message);
         handleJson(j);
     } catch (...) {
-        LERROR("Json parse error");
+        LERROR("Json parse/handling error");
     }
 }
 
@@ -73,7 +73,7 @@ void Connection::handleJson(nlohmann::json j) {
         // The topic id is not registered: Initialize a new topic.
         auto typeJson = j.find(MessageKeyType);
         if (typeJson == j.end() || !typeJson->is_string()) {
-            LERROR(fmt::format("A type must be specified ({}) as a string when "
+            LERROR(fmt::format("A type must be specified (`{}`) as a string when "
                                "a new topic is initialized", MessageKeyType));
             return;
         }
@@ -82,8 +82,7 @@ void Connection::handleJson(nlohmann::json j) {
         topic->initialize(this, topicId);
         topic->handleJson(*payloadJson);
         if (!topic->isDone()) {
-            // TODO(klas): this call to emplace causes a C2440 compile error.
-            // _topics.emplace(topicId, topic);
+            _topics.emplace(topicId, std::move(topic));
         }
     } else {
         // Dispatch the message to the existing topic.
