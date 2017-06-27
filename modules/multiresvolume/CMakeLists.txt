@@ -73,3 +73,10 @@ create_new_module(
     multiresvolume_module
     ${HEADER_FILES} ${SOURCE_FILES}
 )
+
+# Boost
+set(Boost_USE_STATIC_LIBS        ON)
+set(Boost_USE_MULTITHREADED      ON)
+find_package(Boost COMPONENTS REQUIRED iostreams)
+target_include_directories( openspace-module-multiresvolume PUBLIC ${Boost_INCLUDE_DIR})
+target_link_libraries( openspace-module-multiresvolume ${Boost_LIBRARIES})
