@@ -53,6 +53,7 @@ BasicVolumeRaycaster::BasicVolumeRaycaster(
     , _boundingBox(glm::vec3(1.0))
     , _opacity(20.0)
     , _rNormalization(0.0)
+    , _rUpperBound(1.0)
     , _valueRemapping(0.0, 1.0)
     {}
     
@@ -142,6 +143,7 @@ void BasicVolumeRaycaster::preRaycast(
     program.setUniform("clipOffsets_" + id, clipOffsets.data(), nClips);
     program.setUniform("opacity_" + id, _opacity);
     program.setUniform("rNormalization_" + id, _rNormalization);
+    program.setUniform("rUpperBound_" + id, _rUpperBound);
     program.setUniform("valueRemapping_" + id, _valueRemapping);
 }
     
@@ -220,6 +222,14 @@ void BasicVolumeRaycaster::setRNormalization(float rNormalization) {
 
 float BasicVolumeRaycaster::rNormalization() const {
     return _rNormalization;
+}
+
+void BasicVolumeRaycaster::setRUpperBound(float rUpperBound) {
+   _rUpperBound = rUpperBound;
+}
+
+float BasicVolumeRaycaster::rUpperBound() const {
+    return _rUpperBound;
 }
 
 void BasicVolumeRaycaster::setValueRemapping(float mapZeroTo, float mapOneTo) {

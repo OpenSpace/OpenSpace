@@ -81,8 +81,9 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(const ghoul::Dictionary
     , _triggerTimeJump("triggerTimeJump", "Jump")
     , _jumpToTimestep("jumpToTimestep", "Jump to timestep", 0, 0, 256)
     , _currentTimestep("currentTimestep", "Current timestep", 0, 0, 256)
-    , _opacity("opacity", "Opacity", 20.0f, 0.0f, 50.0f)
+    , _opacity("opacity", "Opacity", 10.0f, 0.0f, 50.0f)
     , _rNormalization("rNormalization", "Radius normalization", 0.0f, 0.0f, 2.0f)
+    , _rUpperBound("rUpperBound", "Radius upper bound", 1.0f, 0.0f, 2.0f)
     , _lowerValueBound("lowerValueBound", "Lower value bound", 0.0f, 0.0f, 1000000.0f)
     , _upperValueBound("upperValueBound", "Upper value bound", 0.0f, 0.0f, 1000000.0f)
     , _raycaster(nullptr)
@@ -209,6 +210,7 @@ bool RenderableTimeVaryingVolume::initialize() {
     addProperty(_currentTimestep);
     addProperty(_opacity);
     addProperty(_rNormalization);
+    addProperty(_rUpperBound);
     addProperty(_lowerValueBound);
     addProperty(_upperValueBound);
 
@@ -342,6 +344,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData& data) {
         _raycaster->setStepSize(_stepSize);
         _raycaster->setOpacity(_opacity);
         _raycaster->setRNormalization(_rNormalization);
+        _raycaster->setRUpperBound(_rUpperBound);
     }
 }
 

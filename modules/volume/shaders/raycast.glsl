@@ -31,7 +31,7 @@ uniform int nClips_#{id};
 uniform vec3 clipNormals_#{id}[8];
 uniform vec2 clipOffsets_#{id}[8];
 
-uniform float opacity_#{id} = 20.0;
+uniform float opacity_#{id} = 10.0;
 
 // Value remapping:
 // Linearly remap volume values of zero to x and one to y
@@ -44,6 +44,7 @@ uniform vec2 valueRemapping_#{id} = vec2(0.0, 1.0);
 // Applied after any linear value remapping.
 uniform float rNormalization_#{id} = 0.0;
 
+uniform float rUpperBound_#{id} = 1.0;
 
 void sample#{id}(vec3 samplePos,
              vec3 dir,
@@ -66,6 +67,8 @@ void sample#{id}(vec3 samplePos,
         float clipEnd = clipBegin + clipOffsets_#{id}[i].y;
         clipAlpha *= smoothstep(clipBegin, clipEnd, dot(centerToPos, clipNormal));
     }
+
+    clipAlpha *= 1.0 - smoothstep(rUpperBound_#{id} - 0.01, rUpperBound_#{id} + 0.01, transformedPos.x);
 
     if (clipAlpha > 0) {
         float val = texture(volumeTexture_#{id}, transformedPos).r;

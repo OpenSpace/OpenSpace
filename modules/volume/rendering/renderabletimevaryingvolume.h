@@ -84,6 +84,7 @@ private:
     properties::FloatProperty _stepSize;
     properties::FloatProperty _opacity;
     properties::FloatProperty _rNormalization;
+    properties::FloatProperty _rUpperBound;
     properties::FloatProperty _secondsBefore;
     properties::FloatProperty _secondsAfter;
     properties::StringProperty _sourceDirectory;
