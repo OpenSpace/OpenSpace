@@ -509,7 +509,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   //groundRadiance *= mix(30.0, 1.0, dot(n,s));
     
   // Specular reflection from sun on oceans and rivers  
-  if (waterReflectance > 0.1) {
+  if (waterReflectance > 0.1 && muSun > 0.0) {
     vec3  h         = normalize(s - v);
     // Fresnell Schlick's approximation
     float fresnel   = 0.02f + 0.98f * pow(1.0f - dot(-v, h), 5.0f);
