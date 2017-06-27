@@ -107,9 +107,9 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty("rayleighScatteringCoeffY", "Rayleigh Scattering Coeff Y (x10e-3)", 1.0f, 0.01f, 100.0f),
         FloatProperty("rayleighScatteringCoeffZ", "Rayleigh Scattering Coeff Z (x10e-3)", 1.0f, 0.01f, 100.0f),        
         FloatProperty("ozoneLayerHeightScale", "Ozone Height Scale (KM)", 8.0f, 0.1f, 20.0f),
-        FloatProperty("ozoneLayerCoeffX", "Ozone Layer Extinction Coeff X (x10e-5)", 3.426f, 0.01f, 100.0f),
-        FloatProperty("ozoneLayerCoeffY", "Ozone Layer Extinction Coeff Y (x10e-5)", 8.298f, 0.01f, 100.0f),
-        FloatProperty("ozoneLayerCoeffZ", "Ozone Layer Extinction Coeff Z (x10e-5)", 0.356f, 0.01f, 100.0f),
+        FloatProperty("ozoneLayerCoeffX", "Ozone Layer Extinction Coeff X", 3.426f, 0.01f, 100.0f),
+        FloatProperty("ozoneLayerCoeffY", "Ozone Layer Extinction Coeff Y", 8.298f, 0.01f, 100.0f),
+        FloatProperty("ozoneLayerCoeffZ", "Ozone Layer Extinction Coeff Z", 0.356f, 0.01f, 100.0f),
         FloatProperty("mieHeightScale", "Mie Height Scale (KM)", 1.2f, 0.1f, 20.0f),
         FloatProperty("mieScatteringCoeffX", "Mie Scattering Coeff X (x10e-3)", 4.0f, 0.01f, 1000.0f),
         FloatProperty("mieScatteringCoeffY", "Mie Scattering Coeff Y (x10e-3)", 4.0f, 0.01f, 1000.0f),
@@ -397,15 +397,15 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
             _atmosphereProperties.ozoneHeightScaleP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
             _atmospherePropertyOwner.addProperty(_atmosphereProperties.ozoneHeightScaleP);
 
-            _atmosphereProperties.ozoneLayerExtinctionCoeffXP.set(_ozoneLayerExtinctionCoeff.x * 100000.0f);
+            _atmosphereProperties.ozoneLayerExtinctionCoeffXP.set(_ozoneLayerExtinctionCoeff.x);
             _atmosphereProperties.ozoneLayerExtinctionCoeffXP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
             _atmospherePropertyOwner.addProperty(_atmosphereProperties.ozoneLayerExtinctionCoeffXP);
 
-            _atmosphereProperties.ozoneLayerExtinctionCoeffYP.set(_ozoneLayerExtinctionCoeff.y * 100000.0f);
+            _atmosphereProperties.ozoneLayerExtinctionCoeffYP.set(_ozoneLayerExtinctionCoeff.y);
             _atmosphereProperties.ozoneLayerExtinctionCoeffYP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
             _atmospherePropertyOwner.addProperty(_atmosphereProperties.ozoneLayerExtinctionCoeffYP);
 
-            _atmosphereProperties.ozoneLayerExtinctionCoeffZP.set(_ozoneLayerExtinctionCoeff.z * 100000.0f);
+            _atmosphereProperties.ozoneLayerExtinctionCoeffZP.set(_ozoneLayerExtinctionCoeff.z);
             _atmosphereProperties.ozoneLayerExtinctionCoeffZP.onChange(std::bind(&RenderableGlobe::updateAtmosphereParameters, this));
             _atmospherePropertyOwner.addProperty(_atmosphereProperties.ozoneLayerExtinctionCoeffZP);
 
@@ -650,9 +650,9 @@ void RenderableGlobe::updateAtmosphereParameters() {
         _atmosphereProperties.rayleighScatteringCoeffZP.value() * 0.001f);
     _ozoneLayerEnabled         = _atmosphereProperties.ozoneLayerEnabledP.value();
     _ozoneLayerHeightScale     = _atmosphereProperties.ozoneHeightScaleP.value();
-    _ozoneLayerExtinctionCoeff = glm::vec3(_atmosphereProperties.ozoneLayerExtinctionCoeffXP.value() * 0.00001f,
-        _atmosphereProperties.ozoneLayerExtinctionCoeffYP.value() * 0.00001f,
-        _atmosphereProperties.ozoneLayerExtinctionCoeffZP.value() * 0.00001f);
+    _ozoneLayerExtinctionCoeff = glm::vec3(_atmosphereProperties.ozoneLayerExtinctionCoeffXP.value(),
+        _atmosphereProperties.ozoneLayerExtinctionCoeffYP.value(),
+        _atmosphereProperties.ozoneLayerExtinctionCoeffZP.value());
     _mieHeightScale       = _atmosphereProperties.mieHeightScaleP.value();
     _mieScatteringCoeff   = glm::vec3(_atmosphereProperties.mieScatteringCoeffXP.value() * 0.001f,
         _atmosphereProperties.mieScatteringCoeffYP.value() * 0.001f,

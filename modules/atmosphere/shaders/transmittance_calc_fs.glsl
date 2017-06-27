@@ -79,7 +79,7 @@ void main(void) {
   vec3 opDepth = vec3(0.0);
   
   if (ozoneLayerEnabled) {
-    opDepth = betaOzoneExtinction * (6.0e-7) * opticalDepth(r, muSun, HO) + 
+    opDepth = betaOzoneExtinction * (0.0000006) * opticalDepth(r, muSun, HO) + 
     betaMieExtinction * opticalDepth(r, muSun, HM) +
     betaRayleigh * opticalDepth(r, muSun, HR);
   } else {

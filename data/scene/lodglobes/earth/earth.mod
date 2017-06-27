@@ -87,15 +87,15 @@ return {
                     -- Thichkness of atmosphere if its density were uniform, in Km
                     H_R = 8.0,
                 },
-                --[[
+                
                 Ozone = {
                      Coefficients = {
                         -- Extinction coefficients 
-                        Extinction = {3.426E-5, 8.298E-5, 0.356E-5}
+                        Extinction = {3.426, 8.298, 0.356}
                      },
                      H_O = 8.0,
                 },
-                ]]--
+                
                 -- Default
                 Mie = {
                     Coefficients = {
