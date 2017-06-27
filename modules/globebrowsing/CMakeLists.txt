@@ -331,10 +331,14 @@ if (OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL)
     target_compile_definitions(openspace-module-globebrowsing PRIVATE GLOBEBROWSING_USE_GDAL)
 endif () # OPENSPACE_MODULE_GLOBEBROWSING_USE_GDAL
 
-# Find Packages
-find_package( PCL 1.8 REQUIRED )
+option(OPENSPACE_MODULE_GLOBEBROWSING_USE_PCL "Use PCL" ON)
 
-if( PCL_FOUND )
+
+if( OPENSPACE_MODULE_GLOBEBROWSING_USE_PCL )
+
+  # Find Packages
+  find_package( PCL 1.8 )
+
   target_compile_definitions(openspace-module-globebrowsing PRIVATE GLOBEBROWSING_USE_PCL)
 
   # Additional Include Directories
