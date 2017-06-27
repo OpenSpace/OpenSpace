@@ -36,7 +36,6 @@
 #include <mutex>
 #include <cstdint>
 #include <map>
-
 #include <ext/json/json.hpp>
 #include <fmt/format.h>
 

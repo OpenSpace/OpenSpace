@@ -36,10 +36,11 @@ namespace openspace {
 
 Connection::Connection(std::shared_ptr<ghoul::io::Socket> s)
         : socket(s), active(true) {
-    _topicFactory.registerClass<GetPropertyTopic>("authenticate");
+    _topicFactory.registerClass<AuthorizationTopic>("authorize");
     _topicFactory.registerClass<GetPropertyTopic>("get");
     _topicFactory.registerClass<SetPropertyTopic>("set");
     _topicFactory.registerClass<SubscribePropertyTopic>("subscribe");
+    _topicFactory.registerClass<BounceTopic>("bounce");
 }
 
 void Connection::handleMessage(std::string message) {
