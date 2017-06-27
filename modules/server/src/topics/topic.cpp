@@ -22,39 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODOULES_SERVER__CONNECTION_H
-#define OPENSPACE_MODOULES_SERVER__CONNECTION_H
-
-#include <memory>
-#include <string>
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ext/json/json.hpp>
-#include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
-
-#include "topic.h"
-#include "authorizationtopic.h"
+#include <modules/server/servermodule.h>
+#include "include/topic.h"
 
 namespace openspace {
 
-class Connection {
-public:
-    Connection(std::shared_ptr<ghoul::io::Socket> s);
+void Topic::initialize(Connection* connection, size_t topicId) {
+    _connection = connection;
+    _topicId = topicId;
+};
 
-    void handleMessage(std::string message);
-    void sendMessage(const std::string& message);
-    void handleJson(nlohmann::json json);
-    void sendJson(const nlohmann::json& json);
-
-    ghoul::TemplateFactory<Topic> _topicFactory;
-    std::map<size_t, std::unique_ptr<Topic>> _topics;
-    std::shared_ptr<ghoul::io::Socket> socket;
-    std::thread thread;
-    bool active;
+void BounceTopic::handleJson(nlohmann::json json) {
+    _connection->sendJson(json);
 };
 
 }
-
-#endif //OPENSPACE_MODOULES_SERVER__CONNECTION_H

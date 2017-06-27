@@ -22,39 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODOULES_SERVER__CONNECTION_H
-#define OPENSPACE_MODOULES_SERVER__CONNECTION_H
+#include "include/authorizationtopic.h"
 
-#include <memory>
-#include <string>
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ext/json/json.hpp>
-#include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
-
-#include "topic.h"
-#include "authorizationtopic.h"
+namespace {
+std::string _loggerCat = "AuthorizationTopic";
+}
 
 namespace openspace {
 
-class Connection {
-public:
-    Connection(std::shared_ptr<ghoul::io::Socket> s);
-
-    void handleMessage(std::string message);
-    void sendMessage(const std::string& message);
-    void handleJson(nlohmann::json json);
-    void sendJson(const nlohmann::json& json);
-
-    ghoul::TemplateFactory<Topic> _topicFactory;
-    std::map<size_t, std::unique_ptr<Topic>> _topics;
-    std::shared_ptr<ghoul::io::Socket> socket;
-    std::thread thread;
-    bool active;
+AuthorizationTopic::AuthorizationTopic()
+        : Topic()
+        , _key(randomNumber())
+        , _isAuthorized(false) {
+    LINFO(fmt::format("Ready to authorize socket Client using key: {}", _key));
 };
 
+bool AuthorizationTopic::isDone() {
+    return _key > 0 && _isAuthorized;
 }
 
-#endif //OPENSPACE_MODOULES_SERVER__CONNECTION_H
+void AuthorizationTopic::handleJson(nlohmann::json json) {
+    if (isDone()) {
+        _connection->sendJson(message("Already authorized.", Statuses::OK));
+    } else {
+        try {
+            int providedKey = json.at("key").get<int>();
+            if (authorize(providedKey)) {
+                _connection->sendJson(message("Authorization OK.", Statuses::Accepted));
+                LINFO("Client successfully authorized.");
+            } else {
+                _connection->sendJson(message("Invalid key", Statuses::NotAcceptable));
+            }
+        } catch (const std::out_of_range& e) {
+            _connection->sendJson(message("Invalid request, key must be provided.", Statuses::BadRequest));
+        } catch (const std::domain_error& e) {
+            _connection->sendJson(message("Invalid request, invalid key format.", Statuses::BadRequest));
+        }
+    }
+};
+
+bool AuthorizationTopic::authorize(const int key) {
+    _isAuthorized = key == _key;
+    return _isAuthorized;
+}
+
+int AuthorizationTopic::randomNumber(int min, int max) {
+    assert(max > min);
+    std::srand(std::time(0));
+    return std::rand() % (max - min) + min;
+}
+
+nlohmann::json AuthorizationTopic::message(const std::string &message, const int &statusCode) {
+    nlohmann::json error = {{"error", message}, {"code", statusCode}};
+    return error;
+}
+
+}

@@ -29,6 +29,7 @@ set(HEADER_FILES
     include/connectionpool.h
     include/connection.h
     include/topic.h
+    include/authorizationtopic.h
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -36,7 +37,8 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
     src/connectionpool.cpp
     src/connection.cpp
-    src/topic.cpp
+    src/topics/topic.cpp
+    src/topics/authorizationtopic.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/servermodule.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
