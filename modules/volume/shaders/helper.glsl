@@ -38,6 +38,6 @@ vec3 volume_cartesianToSpherical(vec3 zeroToOneCoords) {
         theta = acos(cartesian.z/r) / VOLUME_PI;
         phi = (VOLUME_PI + atan(cartesian.y, cartesian.x)) / (2.0*VOLUME_PI );
     }
-    return vec3(r * VOLUME_SQRT1_3 * 2.0, theta, mod(0.5 + phi, 0.0));
+    return vec3(r * VOLUME_SQRT1_3 * 2.0, theta, mod(0.5 + phi, 1.0));
 }
 
