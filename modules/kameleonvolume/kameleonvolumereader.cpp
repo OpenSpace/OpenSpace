@@ -70,16 +70,16 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
     const glm::vec3 dims = volume->dimensions();
     const glm::vec3 diff = upperBound - lowerBound;
 
-    std::function<float(const std::string&, glm::ivec3)> interpolate =
-        [this](const std::string& variable, glm::ivec3 volumeCoords) {
+    std::function<float(const std::string&, glm::vec3)> interpolate =
+        [this](const std::string& variable, glm::vec3 volumeCoords) {
             return _kameleonInterpolator->interpolate(
                 variable,
-                static_cast<float>(volumeCoords[0]),
-                static_cast<float>(volumeCoords[1]),
-                static_cast<float>(volumeCoords[2]));
+                volumeCoords[0],
+                volumeCoords[1],
+                volumeCoords[2]);
         };
 
-    std::function<float(glm::ivec3)> sample = [this, &variable, &interpolate](glm::ivec3 volumeCoords) {
+    std::function<float(glm::vec3)> sample = [this, &variable, &interpolate](glm::vec3 volumeCoords) {
         return interpolate(variable, volumeCoords);
     };
 
@@ -91,7 +91,7 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         std::string numerator = variable.substr(0, indexOfDivision);
         std::string denominator = variable.substr(indexOfDivision + 1);
 
-        sample = [this, &numerator, &denominator, &interpolate] (glm::ivec3 volumeCoords) {
+        sample = [this, &numerator, &denominator, &interpolate] (glm::vec3 volumeCoords) {
             return interpolate(numerator, volumeCoords) /
                 interpolate(denominator, volumeCoords);
         };
