@@ -27,8 +27,9 @@
 
 namespace openspace {
 
-void Topic::initialize(Connection* connection, size_t topic) {
-    topicId = topic;
+void Topic::initialize(Connection* connection, size_t topicId) {
+    _connection = connection;
+    _topicId = topicId;
 };
 
 void Topic::handleJson(nlohmann::json json) {
@@ -36,7 +37,12 @@ void Topic::handleJson(nlohmann::json json) {
 };
 
 bool Topic::isDone() {
-    return false;
+    return _isDone;
 }
+
+void BounceTopic::handleJson(nlohmann::json json) {
+    _connection->sendJson(json);
+    _isDone = true;
+};
 
 }

@@ -25,7 +25,6 @@
 #ifndef OPENSPACE_MODULES_SERVER__TOPIC_H
 #define OPENSPACE_MODULES_SERVER__TOPIC_H
 
-#include <cstdint>
 #include <ext/json/json.hpp>
 
 namespace openspace {
@@ -34,31 +33,47 @@ class Connection;
 
 class Topic {
 public:
+    Topic() : _isDone(false) {};
     virtual ~Topic() {};
-    void initialize(Connection*, size_t);
-    void handleJson(nlohmann::json json);
+    void initialize(Connection* c, size_t t);
+    virtual void handleJson(nlohmann::json json);
     bool isDone();
 
-private:
-    size_t topicId;
+protected:
+    size_t _topicId;
+    Connection* _connection;
+    bool _isDone;
+};
+
+class AuthorizationTopic : public Topic {
+public:
+    AuthorizationTopic() : Topic() {};
+    ~AuthorizationTopic() {};
 };
 
 class GetPropertyTopic : public Topic {
 public:
-    GetPropertyTopic() {};
+    GetPropertyTopic() : Topic() {};
     ~GetPropertyTopic() {};
 };
 
 class SetPropertyTopic : public Topic {
 public:
-    SetPropertyTopic() {};
+    SetPropertyTopic() : Topic() {};
     ~SetPropertyTopic() {};
 };
 
 class SubscribePropertyTopic : public Topic {
 public:
-    SubscribePropertyTopic() {};
+    SubscribePropertyTopic() : Topic() {};
     ~SubscribePropertyTopic() {};
+};
+
+class BounceTopic : public Topic {
+public:
+    BounceTopic() : Topic() {};
+    ~BounceTopic() {};
+    void handleJson(nlohmann::json json);
 };
 
 }
