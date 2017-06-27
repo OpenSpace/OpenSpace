@@ -22,27 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/servermodule.h>
-#include "include/topic.h"
+#ifndef OPENSPACE_MODULES_SERVER__AUTHORIZATION_TOPIC_H
+#define OPENSPACE_MODULES_SERVER__AUTHORIZATION_TOPIC_H
+
+#include <ctime>
+#include <ext/json/json.hpp>
+#include <ghoul/logging/logmanager.h>
+#include <fmt/format.h>
+
+#include "topic.h"
+#include "connection.h"
 
 namespace openspace {
 
-void Topic::initialize(Connection* connection, size_t topicId) {
-    _connection = connection;
-    _topicId = topicId;
+class AuthorizationTopic : public Topic {
+public:
+    AuthorizationTopic();
+    ~AuthorizationTopic() {};
+    void handleJson(nlohmann::json json);
+    bool isDone();
+
+    /* https://httpstatuses.com/ */
+    static const struct Statuses {
+        enum StatusCode {
+            OK            = 200,
+            Accepted      = 202,
+
+            BadRequest    = 400,
+            Unauthorized  = 401,
+            NotAcceptable = 406,
+
+            NotImplemented = 501
+        };
+    };
+private:
+    int _key;
+    bool _isAuthorized;
+
+    bool authorize(const int key);
+    int randomNumber(int min = 1000, int max = 9999);
+    nlohmann::json message(const std::string &message, const int &statusCode = Statuses::NotImplemented);
 };
 
-void Topic::handleJson(nlohmann::json json) {
-
-};
-
-bool Topic::isDone() {
-    return _isDone;
 }
 
-void BounceTopic::handleJson(nlohmann::json json) {
-    _connection->sendJson(json);
-    _isDone = true;
-};
-
-}
+#endif //OPENSPACE_MODULES_SERVER__AUTHORIZATION_TOPIC_H

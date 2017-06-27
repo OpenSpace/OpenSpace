@@ -33,40 +33,39 @@ class Connection;
 
 class Topic {
 public:
-    Topic() : _isDone(false) {};
+    Topic() {};
     virtual ~Topic() {};
     void initialize(Connection* c, size_t t);
-    virtual void handleJson(nlohmann::json json);
-    bool isDone();
+    virtual void handleJson(nlohmann::json json) = 0;
+    virtual bool isDone() = 0;
 
 protected:
     size_t _topicId;
     Connection* _connection;
-    bool _isDone;
-};
-
-class AuthorizationTopic : public Topic {
-public:
-    AuthorizationTopic() : Topic() {};
-    ~AuthorizationTopic() {};
 };
 
 class GetPropertyTopic : public Topic {
 public:
     GetPropertyTopic() : Topic() {};
     ~GetPropertyTopic() {};
+    void handleJson(nlohmann::json json) {};
+    bool isDone() { return false; }
 };
 
 class SetPropertyTopic : public Topic {
 public:
     SetPropertyTopic() : Topic() {};
     ~SetPropertyTopic() {};
+    void handleJson(nlohmann::json json) {};
+    bool isDone() { return false; }
 };
 
 class SubscribePropertyTopic : public Topic {
 public:
     SubscribePropertyTopic() : Topic() {};
     ~SubscribePropertyTopic() {};
+    void handleJson(nlohmann::json json) {};
+    bool isDone() { return false; }
 };
 
 class BounceTopic : public Topic {
@@ -74,6 +73,7 @@ public:
     BounceTopic() : Topic() {};
     ~BounceTopic() {};
     void handleJson(nlohmann::json json);
+    bool isDone() { return false; }
 };
 
 }
