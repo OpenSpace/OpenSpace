@@ -59,7 +59,7 @@ const char* TemporalTileProvider::TemporalXMLTags::TIME_FORMAT = "OpenSpaceTimeI
 TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary) 
     : _initDict(dictionary)
     , _filePath("filePath", "File Path", "")
-    , _successfulInit(false)
+    , _successfulInitialization(false)
 {
     std::string filePath;
     dictionary.getValue<std::string>(KeyFilePath, filePath);
@@ -73,7 +73,7 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     _filePath.setValue(filePath);
     addProperty(_filePath);
   
-    if(readFilePath()) {
+    if (readFilePath()) {
         const bool hasStart = dictionary.hasKeyAndValue<std::string>(KeyPreCacheStartTime);
         const bool hasEnd = dictionary.hasKeyAndValue<std::string>(KeyPreCacheEndTime);
         if (hasStart && hasEnd) {
@@ -85,15 +85,15 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
             );
 
             LINFO("Preloading: " << _filePath.value());
-            for (Time& t : preCacheTimes) {
+            for (const Time& t : preCacheTimes) {
                 getTileProvider(t);
             }
         }
-        _successfulInit = true;
+        _successfulInitialization = true;
     }
     else {
         LERROR("Unable to read file " + _filePath.value());
-        _successfulInit = false;
+        _successfulInitialization = false;
     }  
 }
 
@@ -203,7 +203,7 @@ std::string TemporalTileProvider::getXMLValue(CPLXMLNode* root, const std::strin
 }
 
 TileDepthTransform TemporalTileProvider::depthTransform() {
-    if (_successfulInit) {
+    if (_successfulInitialization) {
         ensureUpdated();
         return _currentTileProvider->depthTransform();    
     }
@@ -213,7 +213,7 @@ TileDepthTransform TemporalTileProvider::depthTransform() {
 }
 
 Tile::Status TemporalTileProvider::getTileStatus(const TileIndex& tileIndex) {
-    if (_successfulInit) {
+    if (_successfulInitialization) {
         ensureUpdated();
         return _currentTileProvider->getTileStatus(tileIndex);
     }
@@ -223,7 +223,7 @@ Tile::Status TemporalTileProvider::getTileStatus(const TileIndex& tileIndex) {
 }
 
 Tile TemporalTileProvider::getTile(const TileIndex& tileIndex) {
-    if (_successfulInit) {
+    if (_successfulInitialization) {
         ensureUpdated();
         return _currentTileProvider->getTile(tileIndex);
     }
@@ -233,7 +233,7 @@ Tile TemporalTileProvider::getTile(const TileIndex& tileIndex) {
 }
 
 int TemporalTileProvider::maxLevel() {
-    if (_successfulInit) {
+    if (_successfulInitialization) {
         ensureUpdated();
         return _currentTileProvider->maxLevel();
     }
@@ -250,8 +250,8 @@ void TemporalTileProvider::ensureUpdated() {
 }
 
 void TemporalTileProvider::update() {
-    if (_successfulInit) {
-        auto newCurrent = getTileProvider();
+    if (_successfulInitialization) {
+        std::shared_ptr<TileProvider> newCurrent = getTileProvider();
         if (newCurrent) {
             _currentTileProvider = newCurrent;
         }
@@ -260,18 +260,13 @@ void TemporalTileProvider::update() {
 }
 
 void TemporalTileProvider::reset() {
-    if (_successfulInit) {
+    if (_successfulInitialization) {
         for (auto& it : _tileProviderMap) {
             it.second->reset();
         }
     }
-    //auto end = _tileProviderMap.end();
-    //for (auto it = _tileProviderMap.begin(); it != end; it++) {
-    //    it->second->reset();
-    //}
 }
-
-std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(Time t) {
+std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(const Time& t) {
     Time tCopy(t);
     if (_timeQuantizer.quantize(tCopy, true)) {
         TimeKey timekey = _timeFormat->stringify(tCopy);
@@ -286,13 +281,15 @@ std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(Time t) {
     return nullptr;
 }
 
-std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(TimeKey timekey) {
-    auto it = _tileProviderMap.find(timekey);
+std::shared_ptr<TileProvider> TemporalTileProvider::getTileProvider(
+    const TimeKey& timekey)
+{
+	std::unordered_map<TimeKey, std::shared_ptr<TileProvider>>::iterator it = _tileProviderMap.find(timekey);
     if (it != _tileProviderMap.end()) {
         return it->second;
     }
     else {
-        auto tileProvider = initTileProvider(timekey);
+        std::shared_ptr<TileProvider> tileProvider = initTileProvider(timekey);
 
         _tileProviderMap[timekey] = tileProvider;
         return tileProvider;

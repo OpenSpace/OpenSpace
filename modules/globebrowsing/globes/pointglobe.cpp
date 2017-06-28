@@ -41,11 +41,13 @@ PointGlobe::PointGlobe(const RenderableGlobe& owner)
     , _intensityClamp(
         "intensityClamp",
         "Intensity clamp",
-        1, 0, 1)
+        1, 0, 1
+    )
     , _lightIntensity(
         "lightIntensity",
         "Light intensity",
-        1, 0, 50)
+        1, 0, 50
+    )
 {
     addProperty(_intensityClamp);
     addProperty(_lightIntensity);
@@ -67,21 +69,21 @@ bool PointGlobe::initialize() {
 
     glBindVertexArray(_vaoID);
 
-    // Vertex data is only one point in the origin
-    std::vector<glm::vec2> data;
-    data.push_back(glm::vec2(-1.0f, -1.0f));
-    data.push_back(glm::vec2(1.0f, -1.0f));
-    data.push_back(glm::vec2(-1.0f, 1.0f));
-    data.push_back(glm::vec2(-1.0f, 1.0f));
-    data.push_back(glm::vec2(1.0f, -1.0f));
-    data.push_back(glm::vec2(1.0f, 1.0f));
-
+	std::array<glm::vec2, 6> quadVertexData = {
+		glm::vec2(-1.0f, -1.0f),
+		glm::vec2(1.0f, -1.0f),
+		glm::vec2(-1.0f, 1.0f),
+		glm::vec2(-1.0f, 1.0f),
+		glm::vec2(1.0f, -1.0f),
+		glm::vec2(1.0f, 1.0f)
+	};
+    
     // Vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(glm::vec2) * data.size(),
-        &data[0],
+        sizeof(glm::vec2) * quadVertexData.size(),
+        quadVertexData.data(),
         GL_STATIC_DRAW
     );
 

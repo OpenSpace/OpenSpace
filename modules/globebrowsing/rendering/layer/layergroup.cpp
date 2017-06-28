@@ -115,7 +115,7 @@ int LayerGroup::pileSize() const{
 }
 
 void LayerGroup::onChange(std::function<void(void)> callback) {
-    _onChangeCallback = callback;
+    _onChangeCallback = std::move(callback);
     _levelBlendingEnabled.onChange(_onChangeCallback);
     for (const std::shared_ptr<Layer>& layer : _layers) {
         layer->onChange(_onChangeCallback);

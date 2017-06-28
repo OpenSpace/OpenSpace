@@ -37,7 +37,7 @@ void GPULayer::setValue(ghoul::opengl::ProgramObject* programObject, const Layer
     gpuLayerAdjustment.setValue(programObject, layer.layerAdjustment());
     
     switch (layer.type()) {
-        // Intentional fall throgh. Same for all tile layers
+        // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
         case layergroupid::TypeID::SingleImageTileLayer:
         case layergroupid::TypeID::SizeReferenceTileLayer:
@@ -62,7 +62,7 @@ void GPULayer::bind(ghoul::opengl::ProgramObject* programObject, const Layer& la
     gpuLayerAdjustment.bind(layer.layerAdjustment(), programObject, nameBase + "adjustment.");
     
     switch (layer.type()) {
-        // Intentional fall throgh. Same for all tile layers
+        // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
         case layergroupid::TypeID::SingleImageTileLayer:
         case layergroupid::TypeID::SizeReferenceTileLayer:

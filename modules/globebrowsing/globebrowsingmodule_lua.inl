@@ -45,9 +45,9 @@ int addLayer(lua_State* L) {
     using ghoul::lua::errorLocation;
 
     // Argument locations
-    int GlobeLocation = -3;
-    int LayerGroupLocation = -2;
-    int DictionaryLocation = -1;
+    const int GlobeLocation = -3;
+    const int LayerGroupLocation = -2;
+    const int DictionaryLocation = -1;
 
     int nArguments = lua_gettop(L);
     if (nArguments != 3) {
@@ -55,26 +55,25 @@ int addLayer(lua_State* L) {
     }
 
     // String arguments
-    std::string globeName = luaL_checkstring(L, GlobeLocation);
-    std::string layerGroupName = luaL_checkstring(L, LayerGroupLocation);
+    const std::string GlobeName = luaL_checkstring(L, GlobeLocation);
+    const std::string LayerGroupName = luaL_checkstring(L, LayerGroupLocation);
 
     // Get the node and make sure it exists
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(GlobeName);
     if (!node) {
-        return luaL_error(L, ("Unknown globe name: " + globeName).c_str());
+        return luaL_error(L, ("Unknown globe name: " + GlobeName).c_str());
     }
   
     // Get the renderable globe
-    RenderableGlobe* globe;
-    globe = dynamic_cast<RenderableGlobe*>(node->renderable());
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(node->renderable());
     if (!globe) {
-        return luaL_error(L, ("Renderable is not a globe: " + globeName).c_str());
+        return luaL_error(L, ("Renderable is not a globe: " + GlobeName).c_str());
     }
   
     // Get the layer group
-    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(layerGroupName);
+    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(LayerGroupName);
     if (groupID == layergroupid::GroupID::Unknown) {
-        return luaL_error(L, ("Unknown layer group: " + layerGroupName).c_str());
+        return luaL_error(L, ("Unknown layer group: " + LayerGroupName).c_str());
     }
 
     // Get the dictionary defining the layer
@@ -99,9 +98,9 @@ int deleteLayer(lua_State* L) {
     using ghoul::lua::errorLocation;
 
     // Argument locations
-    int GlobeLocation = -3;
-    int LayerGroupLocation = -2;
-    int NameLocation = -1;
+    const int GlobeLocation = -3;
+    const int LayerGroupLocation = -2;
+    const int NameLocation = -1;
 
     int nArguments = lua_gettop(L);
     if (nArguments != 3) {
@@ -109,30 +108,29 @@ int deleteLayer(lua_State* L) {
     }
 
     // String arguments
-    std::string globeName = luaL_checkstring(L, GlobeLocation);
-    std::string layerGroupName = luaL_checkstring(L, LayerGroupLocation);
-    std::string layerName = luaL_checkstring(L, NameLocation);
+    const std::string GlobeName = luaL_checkstring(L, GlobeLocation);
+    const std::string LayerGroupName = luaL_checkstring(L, LayerGroupLocation);
+    const std::string LayerName = luaL_checkstring(L, NameLocation);
 
     // Get the node and make sure it exists
-    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(globeName);
+    SceneGraphNode* node = OsEng.renderEngine().scene()->sceneGraphNode(GlobeName);
     if (!node) {
-        return luaL_error(L, ("Unknown globe name: " + globeName).c_str());
+        return luaL_error(L, ("Unknown globe name: " + GlobeName).c_str());
     }
   
     // Get the renderable globe
-    RenderableGlobe* globe;
-    globe = dynamic_cast<RenderableGlobe*>(node->renderable());
+    RenderableGlobe* globe = dynamic_cast<RenderableGlobe*>(node->renderable());
     if (!globe) {
-        return luaL_error(L, ("Renderable is not a globe: " + globeName).c_str());
+        return luaL_error(L, ("Renderable is not a globe: " + GlobeName).c_str());
     }
   
     // Get the layer group
-    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(layerGroupName);
+    layergroupid::GroupID groupID = layergroupid::getGroupIDFromName(LayerGroupName);
     if (groupID == layergroupid::GroupID::Unknown) {
-        return luaL_error(L, ("Unknown layer group: " + layerGroupName).c_str());
+        return luaL_error(L, ("Unknown layer group: " + LayerGroupName).c_str());
     }
 
-    globe->layerManager()->deleteLayer(groupID, layerName);
+    globe->layerManager()->deleteLayer(groupID, LayerName);
     
     return 0;
 }

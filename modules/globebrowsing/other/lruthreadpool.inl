@@ -76,11 +76,7 @@ LRUThreadPool<KeyType>::LRUThreadPool(const LRUThreadPool& toCopy)
 // the destructor joins all threads
 template<typename KeyType>
 LRUThreadPool<KeyType>::~LRUThreadPool() {
-    // Stop all threads
-    {
-        std::unique_lock<std::mutex> lock(_queueMutex);
-        _stop = true;
-    }
+    _stop = true;
     
     _condition.notify_all();
 

@@ -66,19 +66,19 @@ void LayerRenderSettings::setValuesFromDictionary(
     float dictValueBlending;
     
     if(renderSettingsDict.getValue(keyOpacity, dictOpacity)) {
-        opacity.setValue(dictOpacity);
+        opacity = dictOpacity;
     }
     if(renderSettingsDict.getValue(keyGamma, dictGamma)) {
-        gamma.setValue(dictGamma);
+        gamma = dictGamma;
     }
     if(renderSettingsDict.getValue(keyMultiplier, dictMultiplier)) {
-        multiplier.setValue(dictMultiplier);
+        multiplier = dictMultiplier;
     }
     if(renderSettingsDict.getValue(keyOffset, dictOffset)) {
-        multiplier.setValue(dictOffset);
+        multiplier = dictOffset;
     }
     if(renderSettingsDict.getValue(keyValueBlending, dictValueBlending)) {
-        valueBlending.setValue(dictValueBlending);
+        valueBlending = dictValueBlending;
         useValueBlending = true;
     }
 }
@@ -105,11 +105,11 @@ glm::vec4 LayerRenderSettings::performLayerSettings(glm::vec4 currentValue) cons
 }
 
 void LayerRenderSettings::setDefaultValues() {
-    opacity.setValue(1.0f);
-    gamma.setValue(1.0f);
-    multiplier.setValue(1.0f);
-    offset.setValue(0.0f);
-    valueBlending.setValue(1.0f);
+    opacity = 1.f;
+    gamma = 1.f;
+    multiplier = 1.f;
+    offset = 0.f;
+    valueBlending = 1.f;
 }
 
 } // namespace globebrowsing

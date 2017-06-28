@@ -46,27 +46,26 @@ bool DistanceSwitch::deinitialize() {
 }
 
 void DistanceSwitch::render(const RenderData& data) {
-    
-    double distanceToCamera =
+    const double distanceToCamera =
         distance(data.camera.positionVec3(), data.modelTransform.translation);
 
     // This distance will be enough to render the globe as one pixel if the field of
     // view is 'fov' radians and the screen resolution is 'res' pixels.
-    double fov = 2 * glm::pi<double>() / 6; // 60 degrees
+    const double fov = 2 * glm::pi<double>() / 6; // 60 degrees
     int res = 2880;
         
     // linear search through nodes to find which Renderable to render
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        double distance = res * _renderables[i]->boundingSphere() / tan(fov / 2);
+    for (std::shared_ptr<Renderable> renderable : _renderables) {
+        const double distance = res * renderable->boundingSphere() / tan(fov / 2);
         if (distanceToCamera < distance) {
-            _renderables[i]->render(data);
+            renderable->render(data);
         }
     }
 }
 
 void DistanceSwitch::update(const UpdateData& data) {
-    for (unsigned int i = 0; i < _renderables.size(); ++i) {
-        _renderables[i]->update(data);
+    for (std::shared_ptr<Renderable> renderable : _renderables) {
+        renderable->update(data);
     }
 }
 

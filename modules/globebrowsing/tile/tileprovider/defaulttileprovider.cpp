@@ -146,6 +146,8 @@ int DefaultTileProvider::maxLevel() {
         return _asyncTextureDataProvider->getRawTileDataReader()->maxChunkLevel();
     }
     else {
+        // Current theoretical maximum based on the number of hashes that are possible
+        // to uniquely identify a tile. See ProviderTileHasher in memoryawaretilecache.h
         return 22;
     }
 }

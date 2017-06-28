@@ -99,6 +99,7 @@ end
 
 openspace.globebrowsing.createGibsGdalXml = function (layerName, date, resolution, format)
     tileLevel = 5
+    -- These resolutions are defined by GIBS: https://wiki.earthdata.nasa.gov/display/GIBS/GIBS+API+for+Developers#GIBSAPIforDevelopers-Script-levelAccessviaGDAL
     if resolution == "2km" then
         tileLevel = 5
     elseif resolution == "1km" then

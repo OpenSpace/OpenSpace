@@ -230,22 +230,21 @@ void Layer::update() {
     }
 }
 
-layergroupid::TypeID Layer::parseTypeIdFromDictionary(const ghoul::Dictionary& initDict) const {
-    std::string typeString;
-    initDict.getValue("Type", typeString);
-    layergroupid::TypeID typeID = layergroupid::TypeID::Unknown;
-    if (typeString.empty()) {
-        typeID = layergroupid::TypeID::DefaultTileLayer;
+layergroupid::TypeID Layer::parseTypeIdFromDictionary(
+    const ghoul::Dictionary& initDict) const
+{
+    if (initDict.hasKeyAndValue<std::string>("Type")) {
+        const std::string typeString = initDict.value<std::string>("Type");
+        return layergroupid::getTypeIDFromTypeString(typeString);
     }
     else {
-        typeID = layergroupid::getTypeIDFromTypeString(typeString);
+        return layergroupid::TypeID::DefaultTileLayer;
     }
-    return typeID;
 }
 
 void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary initDict) {
     switch (typeId) {
-        // Intentional fall throgh. Same for all tile layers
+        // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
         case layergroupid::TypeID::SingleImageTileLayer:
         case layergroupid::TypeID::SizeReferenceTileLayer:
@@ -258,10 +257,8 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
             ghoul::Dictionary tileProviderInitDict = initDict;
             tileProviderInitDict.setValue(keyLayerGroupID, _layerGroupId);
             _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
-                tileprovider::TileProvider::createFromDictionary(typeId, tileProviderInitDict));
-            if (!_tileProvider) {
-                throw ghoul::RuntimeError("Unable to create tile provider");
-            }
+                tileprovider::TileProvider::createFromDictionary(typeId, tileProviderInitDict)
+            );
             break;
         }
         case layergroupid::TypeID::SolidColor:
@@ -274,7 +271,7 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
 
 void Layer::addVisibleProperties() {
     switch (type()) {
-        // Intentional fall throgh. Same for all tile layers
+        // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
         case layergroupid::TypeID::SingleImageTileLayer:
         case layergroupid::TypeID::SizeReferenceTileLayer:
@@ -295,7 +292,7 @@ void Layer::addVisibleProperties() {
 
 void Layer::removeVisibleProperties() {
     switch (type()) {
-        // Intentional fall throgh. Same for all tile layers
+        // Intentional fall through. Same for all tile layers
         case layergroupid::TypeID::DefaultTileLayer:
         case layergroupid::TypeID::SingleImageTileLayer:
         case layergroupid::TypeID::SizeReferenceTileLayer:

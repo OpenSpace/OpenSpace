@@ -55,6 +55,7 @@ public:
     properties::FloatProperty chromaKeyTolerance;
 
     void onChange(std::function<void(void)> callback);
+
 private:
     void addVisibleProperties();
     void removeVisibleProperties();

@@ -38,19 +38,22 @@ LayerAdjustment::LayerAdjustment()
     , _typeOption(
         "type",
         "Type",
-        properties::OptionProperty::DisplayType::Dropdown)
+        properties::OptionProperty::DisplayType::Dropdown
+      )
     , chromaKeyColor(
         "chromaKeyColor",
         "Chroma key color",
         glm::vec3(0.f, 0.f, 0.f),
         glm::vec3(0.f),
-        glm::vec3(1.f))
+        glm::vec3(1.f)
+      )
     , chromaKeyTolerance(
         "chromaKeyTolerance",
         "Chroma key tolerance",
         0,
         0,
-        1)
+        1
+      )
     , _onChangeCallback([](){})
 {
     // Add options to option properties
@@ -79,14 +82,14 @@ void LayerAdjustment::setValuesFromDictionary(
     glm::vec3 dictChromaKeyColor;
     float dictChromaKeyTolerance;
     
-    if(adjustmentDict.getValue(keyType, dictType)) {
+    if (adjustmentDict.getValue(keyType, dictType)) {
         _typeOption.setValue(
             static_cast<int>(layergroupid::getAdjustmentTypeIDFromName(dictType)));
     }
-    if(adjustmentDict.getValue(keyChromaKeyColor, dictChromaKeyColor)) {
+    if (adjustmentDict.getValue(keyChromaKeyColor, dictChromaKeyColor)) {
         chromaKeyColor.setValue(dictChromaKeyColor);
     }
-    if(adjustmentDict.getValue(keyChromaKeyTolerance, dictChromaKeyTolerance)) {
+    if (adjustmentDict.getValue(keyChromaKeyTolerance, dictChromaKeyTolerance)) {
         chromaKeyTolerance.setValue(dictChromaKeyTolerance);
     }
 }
@@ -123,15 +126,8 @@ void LayerAdjustment::removeVisibleProperties() {
     }
 }
 
-namespace {
-    const char* keyName = "Name";
-    const char* keyEnabled = "Enabled";
-    const char* keyLayerGroupID = "LayerGroupID";
-    const char* keySettings = "Settings";
-}
-
 void LayerAdjustment::onChange(std::function<void(void)> callback) {
-    _onChangeCallback = callback;
+    _onChangeCallback = std::move(callback);
 }
 
 } // namespace globebrowsing

@@ -205,8 +205,10 @@ public:
 
     typedef std::string TimeKey;
 
-    std::shared_ptr<TileProvider> getTileProvider(Time t = OsEng.timeManager().time());
-    std::shared_ptr<TileProvider> getTileProvider(TimeKey timekey);
+    std::shared_ptr<TileProvider> getTileProvider(
+        const Time& t = OsEng.timeManager().time());
+    std::shared_ptr<TileProvider> getTileProvider(
+        const TimeKey& timekey);
 
 private:
     /**
@@ -320,7 +322,7 @@ private:
         
     TimeFormat* _timeFormat;
     TimeQuantizer _timeQuantizer;
-    bool _successfulInit;
+    bool _successfulInitialization;
 };
 
 } // namespace tileprovider

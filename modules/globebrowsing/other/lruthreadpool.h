@@ -33,6 +33,7 @@
 #include <queue>
 #include <thread>
 #include <vector>
+#include <atomic>
 
 // Implementatin based on http://progsch.net/wordpress/?p=81
 
@@ -89,7 +90,7 @@ private:
     std::mutex _queueMutex;
     std::condition_variable _condition;
 
-    bool _stop;
+    std::atomic<bool> _stop;
 };
 
 } // namespace globebrowsing

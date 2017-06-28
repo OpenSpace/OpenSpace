@@ -178,8 +178,9 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
         
     for (const std::shared_ptr<Layer>& layer : heightMapLayers) {
         tileprovider::TileProvider* tileProvider = layer->tileProvider();
-        if (!tileProvider)
+        if (!tileProvider) {
             continue;
+        }
         // Transform the uv coordinates to the current tile texture
         ChunkTile chunkTile = tileProvider->getChunkTile(tileIndex);
         const Tile& tile = chunkTile.tile;
@@ -190,8 +191,9 @@ float ChunkedLodGlobe::getHeight(glm::dvec3 position) const {
         }
 
 		ghoul::opengl::Texture* tileTexture = tile.texture();
-		if (!tileTexture)
-			return 0;
+		if (!tileTexture) {
+            return 0;
+        }
 
         glm::vec2 transformedUv = Tile::TileUvToTextureSamplePosition(
             uvTransform,
