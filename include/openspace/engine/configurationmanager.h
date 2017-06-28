@@ -66,6 +66,9 @@ public:
     static const std::string KeyDocumentation;
     /// The key that stores the factory documentation values
     static const std::string KeyFactoryDocumentation;
+    /// The key that decides whether or not we should require incoming web socket connections
+    /// to authorize or not
+    static const std::string KeyRequireSocketAuthentication;
     /// The key that stores the location of the scene file that is initially loaded
     static const std::string KeyConfigScene;
     /// The key that stores the location of the tasks file that is initially loaded
