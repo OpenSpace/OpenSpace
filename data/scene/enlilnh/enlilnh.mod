@@ -13,7 +13,10 @@ return {
             Source = "tsp/enlil_nh_128_128_16.tsp",
             ErrorHistogramsSource = "tsp/enlil_nh_128_128_16_50.errorHistograms",                                       
             TransferFunction = "transferfunctions/fire.txt",
-            BrickSelector = "shen",
+            -- BrickSelector = "local"
+            -- BrickSelector = "simple"
+            -- BrickSelector = "tf"
+            BrickSelector = "shen"
         }
     }
 }

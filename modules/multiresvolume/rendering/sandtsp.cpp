@@ -253,14 +253,24 @@ bool SandTSP::calculateTemporalError() {
     if (!_file.is_open())
         return false;
 
+    const long long dataOffset = dataPosition();
+
     boost::iostreams::mapped_file_source mfile;
     mfile.open(_filename);
 
-    if (mfile.is_open()) {
-        LINFO(mfile.alignment());
+    if (!mfile.is_open()) {
+        return false;
     }
 
+    auto dataStart = mfile.begin() + dataOffset;
+    LDEBUG("Size: " << std::distance(mfile.begin(), mfile.end()));
+    LDEBUG("Size: " << std::distance(dataStart, mfile.end()));
+
+    float * f = (float *)mfile.data();
+    auto off = dataOffset / sizeof(float);
+    LDEBUG("Data is: " << f[off] );
     LDEBUG("Calculating temporal error");
+
     generateLeafCoverages();
     // Statistics
     std::vector<float> meanArray(numTotalNodes_);
@@ -268,7 +278,7 @@ bool SandTSP::calculateTemporalError() {
     // Save errors
     std::vector<float> errors(numTotalNodes_);
 
-    unsigned int numBrickVals =
+    const unsigned int numBrickVals =
         paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
     // Calculate temporal error for one brick at a time
@@ -280,13 +290,20 @@ bool SandTSP::calculateTemporalError() {
         // the brick at the correct coordinate.
         std::vector<float> voxelAverages(numBrickVals);
         std::vector<float> voxelStdDevs(numBrickVals);
+        std::vector<float> memMap(numBrickVals);
 
         // Read the whole brick to fill the averages
-        std::streampos offset = dataPosition() + static_cast<long long>(brick*numBrickVals*sizeof(float));
+        const std::streampos offset = dataOffset + static_cast<long long>(brick*numBrickVals*sizeof(float));
         _file.seekg(offset);
 
         _file.read(reinterpret_cast<char*>(&voxelAverages[0]),
             static_cast<size_t>(numBrickVals)*sizeof(float));
+
+        // float * memMMap  = (float *)mfile.data();
+        // memMMap += off + static_cast<long long>(brick*numBrickVals * sizeof(float));
+
+        LDEBUG("File: " << voxelAverages[0]);
+        LDEBUG("Memmap: " << f[off+ static_cast<long long>(brick*numBrickVals)]);
 
         // Build a list of the BST leaf bricks (within the same octree level) that
         // this brick covers
@@ -313,7 +330,7 @@ bool SandTSP::calculateTemporalError() {
             for (auto leaf = coveredBricks.begin(); leaf != coveredBricks.end(); ++leaf) {
                 // Sample the leaves at the corresponding voxel position
                 auto t3 = std::chrono::steady_clock::now();
-                std::streampos offset = dataPosition() + static_cast<long long>((*leaf*numBrickVals + voxel)*sizeof(float));
+                const std::streampos offset = dataOffset + static_cast<long long>((*leaf*numBrickVals + voxel)*sizeof(float));
                 _file.seekg(offset);
 
                 float sample;
@@ -328,7 +345,7 @@ bool SandTSP::calculateTemporalError() {
 
             avgStdDev += stdDev;
             end = std::chrono::steady_clock::now();
-            LINFO("Elapsed per voxel " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - t2).count());
+            //LINFO("Elapsed per voxel " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - t2).count());
         } // for voxel
         end = std::chrono::steady_clock::now();
         LINFO("Elapsed per brick " << std::chrono::duration_cast<std::chrono::seconds>(end-t1).count());
@@ -337,6 +354,7 @@ bool SandTSP::calculateTemporalError() {
         errors[brick] = avgStdDev;
 
     } // for all bricks
+    mfile.close();
 
     std::sort(meanArray.begin(), meanArray.end());
 
