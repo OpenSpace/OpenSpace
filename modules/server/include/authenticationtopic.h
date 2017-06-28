@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODULES_SERVER__AUTHORIZATION_TOPIC_H
-#define OPENSPACE_MODULES_SERVER__AUTHORIZATION_TOPIC_H
+#ifndef OPENSPACE_MODULES_SERVER__AUTHENTICATION_TOPIC_H
+#define OPENSPACE_MODULES_SERVER__AUTHENTICATION_TOPIC_H
 
 #include <ctime>
 #include <ext/json/json.hpp>
@@ -35,10 +35,10 @@
 
 namespace openspace {
 
-class AuthorizationTopic : public Topic {
+class AuthenticationTopic : public Topic {
 public:
-    AuthorizationTopic();
-    ~AuthorizationTopic() {};
+    AuthenticationTopic();
+    ~AuthenticationTopic() {};
     void handleJson(nlohmann::json json);
     bool isDone();
 
@@ -57,7 +57,7 @@ public:
     };
 private:
     int _key;
-    bool _isAuthorized;
+    bool _isAuthenticated;
 
     bool authorize(const int key);
     int randomNumber(int min = 1000, int max = 9999);
@@ -66,4 +66,4 @@ private:
 
 }
 
-#endif //OPENSPACE_MODULES_SERVER__AUTHORIZATION_TOPIC_H
+#endif //OPENSPACE_MODULES_SERVER__AUTHENTICATION_TOPIC_H

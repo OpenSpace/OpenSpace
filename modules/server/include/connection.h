@@ -35,7 +35,7 @@
 #include <fmt/format.h>
 
 #include "topic.h"
-#include "authorizationtopic.h"
+#include "authenticationtopic.h"
 
 namespace openspace {
 
