@@ -261,7 +261,7 @@ void TemporalTileProvider::update() {
 
 void TemporalTileProvider::reset() {
     if (_successfulInitialization) {
-        for (auto& it : _tileProviderMap) {
+        for (std::pair<const TimeKey, std::shared_ptr<TileProvider>>& it : _tileProviderMap) {
             it.second->reset();
         }
     }
