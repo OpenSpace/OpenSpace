@@ -43,12 +43,8 @@ ShenBrickSelector::~ShenBrickSelector() {
 
 
 bool ShenBrickSelector::initialize() {
-    for (size_t i = 0; i < 20; i++)
-        LINFO("HEY HEY HEY PUT THE SPATIAL ERROR BACK IN");LINFO("HEY HEY HEY PUT THE SPATIAL ERROR BACK IN");
-    //_tsp->calculateSpatialError();
+    _tsp->calculateSpatialError();
     _tsp->calculateTemporalError();
-    for (size_t i = 0; i < 20; i++)
-        LINFO("HEY HEY HEY PUT THE SPATIAL ERROR BACK IN"); LINFO("HEY HEY HEY PUT THE SPATIAL ERROR BACK IN");
     return true;
 }
 

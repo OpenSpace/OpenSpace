@@ -98,31 +98,31 @@ std::vector<float> SandTSP::generateLeafCoverages() {
 }
 
 bool SandTSP::calculateSpatialError() {
-    unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
+    const unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
-    if (!_file.is_open())
+    boost::iostreams::mapped_file_source mfile;
+    mfile.open(_filename);
+
+    if (!mfile.is_open()) {
         return false;
+    }
 
-    std::vector<float> buffer(numBrickVals);
+    const float * voxelData = (float *)mfile.data();
+    const long long headerOffset = dataPosition() / sizeof(float);
+
     std::vector<float> averages(numTotalNodes_);
     std::vector<float> stdDevs(numTotalNodes_);
 
     // First pass: Calculate average color for each brick
     LDEBUG("Calculating spatial error, first pass");
-    for (unsigned int brick = 0; brick<numTotalNodes_; ++brick) {
-
+    for (size_t brick = 0; brick<numTotalNodes_; ++brick) {
         // Offset in file
-        std::streampos offset = dataPosition() + static_cast<long long>(brick*numBrickVals*sizeof(float));
-        _file.seekg(offset);
-
-        _file.read(reinterpret_cast<char*>(&buffer[0]),
-            static_cast<size_t>(numBrickVals)*sizeof(float));
-
+        const auto brickStart = headerOffset + static_cast<long long>(brick*numBrickVals);
         double average = 0.0;
-        for (auto it = buffer.begin(); it != buffer.end(); ++it) {
-            average += *it;
-        }
 
+        for (size_t i = 0; i < numBrickVals; i++) {
+            average += voxelData[brickStart + i];
+        }
         averages[brick] = average / static_cast<double>(numBrickVals);
     }
 
@@ -134,7 +134,7 @@ bool SandTSP::calculateSpatialError() {
     // Second pass: For each brick, compare the covered leaf voxels with
     // the brick average
     LDEBUG("Calculating spatial error, second pass");
-    for (unsigned int brick = 0; brick<numTotalNodes_; ++brick) {
+    for (size_t brick = 0; brick<numTotalNodes_; ++brick) {
 
         // Fetch mean intensity 
         float brickAvg = averages[brick];
@@ -155,22 +155,14 @@ bool SandTSP::calculateSpatialError() {
         else {
 
             // Calculate "standard deviation" corresponding to leaves
-            for (auto lb = coveredLeafBricks.begin();
-                lb != coveredLeafBricks.end(); ++lb) {
-
-                // Read brick
-                std::streampos offset = dataPosition() + static_cast<long long>((*lb)*numBrickVals*sizeof(float));
-                _file.seekg(offset);
-
-                _file.read(reinterpret_cast<char*>(&buffer[0]),
-                    static_cast<size_t>(numBrickVals)*sizeof(float));
+            for (auto lb = coveredLeafBricks.begin(); lb != coveredLeafBricks.end(); ++lb) {
 
                 // Add to sum
-                for (auto v = buffer.begin(); v != buffer.end(); ++v) {
-                    stdDev += pow(*v - brickAvg, 2.f);
+                const auto leafStart = headerOffset + static_cast<long long>((*lb)*numBrickVals);
+
+                for (size_t i = 0; i < numBrickVals; i++) {
+                    stdDev += pow(voxelData[leafStart + i] - brickAvg, 2.f);
                 }
-
-
             }
 
             // Finish calculation
@@ -208,10 +200,10 @@ bool SandTSP::calculateSpatialError() {
         }
 
         data_[i*NUM_DATA + SPATIAL_ERR] = glm::floatBitsToInt(stdDevs[i]);
-        if (stdDevs[i] < minNorm) {
+        if (stdDevs[i] < minNorm && 0 <= stdDevs[i]) {
             minNorm = stdDevs[i];
         }
-        else if (stdDevs[i] > maxNorm) {
+        if (stdDevs[i] > maxNorm && 0 <= stdDevs[i]) {
             maxNorm = stdDevs[i];
         }
     }
@@ -333,10 +325,10 @@ bool SandTSP::calculateTemporalError() {
         }
 
         data_[i*NUM_DATA + TEMPORAL_ERR] = glm::floatBitsToInt(errors[i]);
-        if (errors[i] < minNorm) {
+        if (errors[i] < minNorm && 0 <= errors[i]) {
             minNorm = errors[i];
         }
-        else if (errors[i] > maxNorm) {
+        if (errors[i] > maxNorm && 0 <= errors[i]) {
             maxNorm = errors[i];
         }
     }
