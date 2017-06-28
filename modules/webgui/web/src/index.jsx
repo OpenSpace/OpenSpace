@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+// AppContainer is a necessary wrapper component for hot module reloading
 import { AppContainer } from 'react-hot-loader';
-// AppContainer is a necessary wrapper component for HMR
 
 import App from './components/App';
 
