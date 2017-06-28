@@ -22,26 +22,26 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "include/authorizationtopic.h"
+#include "include/authenticationtopic.h"
 
 namespace {
-std::string _loggerCat = "AuthorizationTopic";
+std::string _loggerCat = "AuthenticationTopic";
 }
 
 namespace openspace {
 
-AuthorizationTopic::AuthorizationTopic()
+AuthenticationTopic::AuthenticationTopic()
         : Topic()
         , _key(randomNumber())
-        , _isAuthorized(false) {
+        , _isAuthenticated(false) {
     LINFO(fmt::format("Ready to authorize socket Client using key: {}", _key));
 };
 
-bool AuthorizationTopic::isDone() {
-    return _key > 0 && _isAuthorized;
+bool AuthenticationTopic::isDone() {
+    return _key > 0 && _isAuthenticated;
 }
 
-void AuthorizationTopic::handleJson(nlohmann::json json) {
+void AuthenticationTopic::handleJson(nlohmann::json json) {
     if (isDone()) {
         _connection->sendJson(message("Already authorized.", Statuses::OK));
     } else {
@@ -61,18 +61,18 @@ void AuthorizationTopic::handleJson(nlohmann::json json) {
     }
 };
 
-bool AuthorizationTopic::authorize(const int key) {
-    _isAuthorized = key == _key;
-    return _isAuthorized;
+bool AuthenticationTopic::authorize(const int key) {
+    _isAuthenticated = key == _key;
+    return _isAuthenticated;
 }
 
-int AuthorizationTopic::randomNumber(int min, int max) {
+int AuthenticationTopic::randomNumber(int min, int max) {
     assert(max > min);
     std::srand(std::time(0));
     return std::rand() % (max - min) + min;
 }
 
-nlohmann::json AuthorizationTopic::message(const std::string &message, const int &statusCode) {
+nlohmann::json AuthenticationTopic::message(const std::string &message, const int &statusCode) {
     nlohmann::json error = {{"error", message}, {"code", statusCode}};
     return error;
 }
