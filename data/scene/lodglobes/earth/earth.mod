@@ -172,7 +172,6 @@ return {
                         Type = "SizeReferenceTileLayer",
                         Name = "Size Reference",
                         Radii = earthEllipsoid,
-                        BackgroundImagePath = "../arrows.png",
                     },
                 },
                 HeightLayers = {
