@@ -187,6 +187,13 @@ documentation::Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
+            ConfigurationManager::KeyRequireSocketAuthentication,
+            new BoolVerifier,
+            "If socket connections should be authenticated or not before they are allowed to "
+            "get or set information. Defaults to `true`.",
+            Optional::Yes
+        },
+        {
             ConfigurationManager::KeyLauncher,
             new TableVerifier({
                 {

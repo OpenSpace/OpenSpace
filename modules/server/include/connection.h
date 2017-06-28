@@ -33,6 +33,8 @@
 #include <ext/json/json.hpp>
 #include <ghoul/logging/logmanager.h>
 #include <fmt/format.h>
+#include <include/openspace/engine/openspaceengine.h>
+#include <include/openspace/engine/configurationmanager.h>
 
 #include "topic.h"
 #include "authenticationtopic.h"
@@ -52,7 +54,11 @@ public:
     std::map<size_t, std::unique_ptr<Topic>> _topics;
     std::shared_ptr<ghoul::io::Socket> socket;
     std::thread thread;
+    bool isAuthenticated();
     bool active;
+
+private:
+    bool _requireAuthentication, _isAuthenticated;
 };
 
 }

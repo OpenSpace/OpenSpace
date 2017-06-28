@@ -25,7 +25,7 @@
 #include "include/connection.h"
 
 namespace {
-const char* _loggerCat = "ServerModule";
+const char* _loggerCat = "ServerModule: Connection";
 
 const char* MessageKeyType = "type";
 const char* MessageKeyPayload = "payload";
@@ -35,12 +35,21 @@ const char* MessageKeyTopic = "topic";
 namespace openspace {
 
 Connection::Connection(std::shared_ptr<ghoul::io::Socket> s)
-        : socket(s), active(true) {
-    _topicFactory.registerClass<AuthorizationTopic>("authorize");
+        : socket(s), active(true), _isAuthenticated(false) {
+    _topicFactory.registerClass<AuthenticationTopic>("authorize");
     _topicFactory.registerClass<GetPropertyTopic>("get");
     _topicFactory.registerClass<SetPropertyTopic>("set");
     _topicFactory.registerClass<SubscribePropertyTopic>("subscribe");
     _topicFactory.registerClass<BounceTopic>("bounce");
+
+    const bool hasAuthenticationConfiguration = OsEng.configurationManager().hasKeyAndValue<bool>(
+            ConfigurationManager::KeyRequireSocketAuthentication);
+    if (hasAuthenticationConfiguration) {
+        _requireAuthentication = OsEng.configurationManager().value<bool>(
+                ConfigurationManager::KeyRequireSocketAuthentication);
+    } else {
+        _requireAuthentication = true;
+    }
 }
 
 void Connection::handleMessage(std::string message) {
@@ -101,6 +110,11 @@ void Connection::sendMessage(const std::string &message) {
 
 void Connection::sendJson(const nlohmann::json &j) {
     sendMessage(j.dump());
+}
+
+bool Connection::isAuthenticated() {
+    // require either auth to be disabled or client to be authenticated
+    return !_requireAuthentication || _isAuthenticated;
 }
 
 } // namespace openspace
