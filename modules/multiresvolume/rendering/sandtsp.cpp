@@ -59,44 +59,6 @@ bool SandTSP::construct() {
     return TSP::construct();
 }
 
-std::vector<float> SandTSP::generateLeafCoverages() {
-
-    unsigned int leaves = _header.numOrigTimesteps_;
-    unsigned int levels = numBSTLevels_;
-    unsigned int nodes = numBSTNodes_;
-    unsigned int voxels = std::pow(paddedBrickDim_, 3);
-
-    // Get the number of levels -- log(number of time steps) + 1 for root
-    // int levels = ceil(log2(_header.numOrigTimesteps_) + 1);
-    // Sum the number of nodes as geometric series (1-2^levels)/1-2
-    // int bstNodeCount = -(1 - std::exp2(levels));
-    LINFO("Orig: " << _header.numOrigTimesteps_ << " Levels : " << levels << " leaves : " << leaves << " Count : " << nodes);
-
-    std::vector<float> averages(nodes);
-
-    // First propogate all the leaves values
-    for (size_t n = 0; n < leaves; n++) {
-        std::vector<float> voxelAverages(voxels);
-        std::vector<float> voxelStdDevs(voxels);
-
-        // Read the whole brick to fill the averages
-        std::streampos offset = dataPosition() + static_cast<long long>(n * voxels * sizeof(float));
-        LINFO("Brick " << n << ", offset " << offset);
-        _file.seekg(offset);
-
-        _file.read(reinterpret_cast<char*>(&voxelAverages[0]), static_cast<size_t>(voxels) * sizeof(float));
-
-        averages[nodes - leaves + n] = 1;
-    }
-
-    // For each node, sum the level below it
-    for (int n = levels - 2; 0 <= n; n--) {
-        LINFO("Levels " << n );
-        averages[n] = n;
-    }
-    return averages;
-}
-
 bool SandTSP::calculateSpatialError() {
     const unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
@@ -188,6 +150,9 @@ bool SandTSP::calculateSpatialError() {
 
     }
 
+    // Close the memory map
+    mfile.close();
+
     std::sort(medianArray.begin(), medianArray.end());
 
     // "Normalize" errors
@@ -220,24 +185,6 @@ bool SandTSP::calculateSpatialError() {
     LDEBUG("Median normalized spatial std dev: " << medNorm);
 
     return true;
-}
-
-/* https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm */
-float SandTSP::onlineVariance( std::vector<float> data ) {
-    size_t n = 0;
-    float mean = 0, M2 = 0.0;
-
-    for (float x : data) {
-        n += 1;
-        const float delta = x - mean;
-        mean += delta / n;
-        const float delta2 = x - mean;
-        M2 += delta*delta2;
-    }
-
-    if (n < 2)
-        return -FLT_MAX;
-    return M2 / n;
 }
 
 bool SandTSP::calculateTemporalError() {

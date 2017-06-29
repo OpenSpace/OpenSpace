@@ -36,11 +36,10 @@ public:
 
     bool construct();
     bool calculateSpatialError();
-    float onlineVariance(std::vector<float> data);
     bool calculateTemporalError();
 
 protected:
-    std::vector<float> generateLeafCoverages();
+
 
 }; // class SANDTSP
 

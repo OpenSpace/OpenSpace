@@ -103,6 +103,9 @@ public:
     bool isBstLeaf(unsigned int _brickIndex);
     bool isOctreeLeaf(unsigned int _brickIndex);
 
+    bool _spatialErrorReady;
+    bool _temporalErrorReady;
+
 protected:
     // Returns a list of the octree leaf nodes that a given input 
     // brick covers. If the input is already a leaf, the list will

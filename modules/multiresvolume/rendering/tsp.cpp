@@ -57,6 +57,8 @@ TSP::TSP(const std::string& filename)
     , minTemporalError_(0.0f)
     , maxTemporalError_(0.0f)
     , medianTemporalError_(0.0f)
+    , _spatialErrorReady(false)
+    , _temporalErrorReady(false)
 {
     _file.open(_filename, std::ios::in | std::ios::binary);
 }
@@ -126,7 +128,7 @@ bool TSP::readHeader() {
     LDEBUG("Num OT nodes: " << numOTNodes_);
     LDEBUG("Num BST levels: " << numBSTLevels_);
     LDEBUG("Num BST nodes: " << numBSTNodes_);
-    LDEBUG("NUm total nodes: " << numTotalNodes_);
+    LDEBUG("Num total nodes: " << numTotalNodes_);
 
     // Allocate space for TSP structure
     data_.resize(numTotalNodes_*NUM_DATA);
