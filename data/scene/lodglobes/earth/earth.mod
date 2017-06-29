@@ -121,8 +121,6 @@ return {
                             "png")
                     },
                 },
-                GrayScaleLayers = { },
-                GrayScaleColorOverlays = { },
                 NightLayers = {
                     {
                         Name = "Earth at Night 2012",

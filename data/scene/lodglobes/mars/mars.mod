@@ -62,11 +62,6 @@ return {
                         FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
                     },
                 },
-                GrayScaleLayers = {
-                },
-                GrayScaleColorOverlays = { },
-                NightLayers = { },
-                WaterMasks = { },
                 ColorOverlays = {
                     {
                         Type = "TileIndexTileLayer",

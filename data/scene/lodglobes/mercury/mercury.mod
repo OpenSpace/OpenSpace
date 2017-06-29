@@ -66,10 +66,6 @@ return {
                         FilePath = "map_service_configs/Utah/MessengerMDIS.wms"
                     }
                 },
-                GrayScaleColorOverlays = { },
-                NightLayers = { },
-                WaterMasks = { },
-                ColorOverlays = { },
                 HeightLayers = {
                     --[[
                     {
