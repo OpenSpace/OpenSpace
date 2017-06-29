@@ -5,7 +5,7 @@
   "main": "src/index.jsx",
   "private": true,
   "scripts": {
-    "lint": "eslint src",
+    "lint": "eslint --ext .jsx --ext .js src",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "copyfiles index.html dist && webpack-dev-server --progress --colors",
     "prebuild": "rimraf dist",
@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "babel-core": "^6.25.0",
+    "babel-eslint": "^7.2.3",
     "babel-loader": "^7.1.1",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",

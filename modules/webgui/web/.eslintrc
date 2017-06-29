@@ -1,5 +1,6 @@
 {
   "extends": "airbnb",
+  "parser": "babel-eslint",
   "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module",
@@ -7,4 +8,7 @@
       "jsx": true
     }
   },
+  "rules": {
+    "linebreak-style": ["error", "windows"]
+  }
 }
