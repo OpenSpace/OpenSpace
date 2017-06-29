@@ -1,0 +1,27 @@
+@import "../../variables";
+
+.TabMenuItem {
+  align-items: center;
+  display: flex;
+  flex-basis: 1px;
+  flex-direction: column;
+  flex-grow: 1;
+  height: 100%;
+  justify-content: center;
+
+  &.active {
+    background: $ui-background-active;
+    border-bottom: 2px solid $ui-highlight-secondary;
+  }
+  &:hover {
+    background: $ui-background-hover;
+  }
+}
+
+.TabMenuItem > span {
+  font-size: 0.7em;
+  letter-spacing: 0.1em;
+  padding-top: 0.3em;
+  text-transform: uppercase;
+}
+

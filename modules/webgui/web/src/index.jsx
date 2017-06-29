@@ -1,17 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-
 // AppContainer is a necessary wrapper component for hot module reloading
 import { AppContainer } from 'react-hot-loader';
 
 import App from './components/App';
 
+/* global document */
+
 const render = (Component) => {
   ReactDOM.render(
     <AppContainer>
-      <Component/>
+      <Component />
     </AppContainer>,
-    document.getElementById('root')
+    document.getElementById('root'),
   );
 };
 
