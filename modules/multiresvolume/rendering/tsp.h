@@ -122,7 +122,10 @@ protected:
     std::list<unsigned int> ChildBricks(unsigned int _brickIndex);
 
     // Returns vector of averages for each brick
-    std::vector<float> calculateBrickAverages();
+    virtual std::vector<float> calculateBrickAverages();
+
+    // Returns vector of standard deviations for each brick
+    virtual std::vector<float> calculateBrickStdDevs(std::vector<float> brickAverages);
 
     std::string _filename;
     std::ifstream _file;

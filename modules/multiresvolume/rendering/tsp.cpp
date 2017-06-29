@@ -306,32 +306,20 @@ std::vector<float> TSP::calculateBrickAverages() {
     return averages;
 }
 
-bool TSP::calculateSpatialError() {
+std::vector<float> TSP::calculateBrickStdDevs(std::vector<float> brickAverages) {
     const unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
     boost::iostreams::mapped_file_source mfile;
     mfile.open(_filename);
 
     if (!mfile.is_open()) {
-        return false;
+        return {};
     }
 
     const float * voxelData = (float *)mfile.data();
     const long long headerOffset = dataPosition() / sizeof(float);
 
-    
     std::vector<float> stdDevs(numTotalNodes_);
-
-    std::vector<float> averages = calculateBrickAverages();
-    if (!averages.size()) {
-        LERROR("Could not calculate brick averages");
-        return false;
-    }
-
-    // Spatial SNR stats
-    float minError = 1e20f;
-    float maxError = 0.f;
-    std::vector<float> medianArray(numTotalNodes_);
 
     // Second pass: For each brick, compare the covered leaf voxels with
     // the brick average
@@ -339,7 +327,7 @@ bool TSP::calculateSpatialError() {
     for (size_t brick = 0; brick<numTotalNodes_; ++brick) {
 
         // Fetch mean intensity 
-        float brickAvg = averages[brick];
+        float brickAvg = brickAverages[brick];
 
         // Sum  for std dev computation
         float stdDev = 0.f;
@@ -370,7 +358,7 @@ bool TSP::calculateSpatialError() {
             // Finish calculation
             if (sizeof(float) != sizeof(int)) {
                 LERROR("Float and int sizes don't match, can't reintepret");
-                return false;
+                return {};
             }
 
             stdDev /= static_cast<float>(coveredLeafBricks.size()*numBrickVals);
@@ -378,20 +366,29 @@ bool TSP::calculateSpatialError() {
 
         } // if not leaf
 
-        if (stdDev < minError) {
-            minError = stdDev;
-        }
-        else if (stdDev > maxError) {
-            maxError = stdDev;
-        }
-
         stdDevs[brick] = stdDev;
-        medianArray[brick] = stdDev;
-
     }
 
-    // Close the memory map
     mfile.close();
+
+    return stdDevs;
+}
+
+bool TSP::calculateSpatialError() {
+
+    std::vector<float> averages = calculateBrickAverages();
+    if (!averages.size()) {
+        LERROR("Could not calculate brick averages");
+        return false;
+    }
+
+    std::vector<float> stdDevs = calculateBrickStdDevs(averages);
+    if (!stdDevs.size()) {
+        LERROR("Could not calculate brick standard deviations");
+        return false;
+    }
+
+    std::vector<float> medianArray(stdDevs);
 
     std::sort(medianArray.begin(), medianArray.end());
 
