@@ -115,12 +115,12 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
         case layergroupid::GroupID::ColorLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::RGBA);
+                ghoul::opengl::Texture::Format::BGRA);
         }
         case layergroupid::GroupID::ColorOverlays: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::RGBA);
+                ghoul::opengl::Texture::Format::BGRA);
         }
         case layergroupid::GroupID::GrayScaleLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
@@ -135,12 +135,12 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
         case layergroupid::GroupID::NightLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::RGBA);
+                ghoul::opengl::Texture::Format::BGRA);
         }
         case layergroupid::GroupID::WaterMasks: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::RGBA);
+                ghoul::opengl::Texture::Format::BGRA);
         }
         default: {
             ghoul_assert(false, "Unknown layer group ID");

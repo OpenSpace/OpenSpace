@@ -48,8 +48,6 @@ return {
                         Name = "MOLA Pseudo Color",
                         FilePath = "map_service_configs/Utah/MolaPseudoColor.xml",
                     },
-                },
-                GrayScaleLayers = {
                     {
                         Name = "CTX Mosaic [AWS]",
                         FilePath = "map_service_configs/CTX.wms",
@@ -63,6 +61,8 @@ return {
                         Name = "CTX Mosaic [Utah]",
                         FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
                     },
+                },
+                GrayScaleLayers = {
                 },
                 GrayScaleColorOverlays = { },
                 NightLayers = { },

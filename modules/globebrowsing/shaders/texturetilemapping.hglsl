@@ -72,26 +72,50 @@
 #define SHOW_HEIGHT_RESOLUTION #{showHeightResolution}
 #define SHOW_HEIGHT_INTENSITIES #{showHeightIntensities}
 
-float performLayerSettings(float currentValue, const LayerSettings settings) {
+float performLayerSettingsRGB(float currentValue, const LayerSettings settings) {
 	float newValue = currentValue;
 
 	newValue = sign(newValue) * pow(abs(newValue), settings.gamma);
 	newValue = newValue * settings.multiplier;
 	newValue = newValue + settings.offset;
-	newValue = newValue * settings.opacity;
 
+	return newValue;
+}
+
+vec4 performLayerSettingsRGB(vec4 currentValue, const LayerSettings settings) {
+	vec4 newValue = vec4(
+		performLayerSettingsRGB(currentValue.r, settings),
+		performLayerSettingsRGB(currentValue.g, settings),
+		performLayerSettingsRGB(currentValue.b, settings),
+		performLayerSettingsRGB(currentValue.a, settings));
+
+	return newValue;
+}
+
+float performLayerSettingsAlpha(float currentValue, const LayerSettings settings) {
+	float newValue = currentValue;
+	newValue = newValue * settings.opacity;
+	return newValue;
+}
+
+vec4 performLayerSettingsAlpha(vec4 currentValue, const LayerSettings settings) {
+	vec4 newValue = currentValue;
+	newValue.a = performLayerSettingsAlpha(currentValue.a, settings);
+	return newValue;
+}
+
+float performLayerSettings(float currentValue, const LayerSettings settings) {
+	float newValue = performLayerSettingsRGB(currentValue, settings);
+	newValue = performLayerSettingsAlpha(newValue, settings);
 	return newValue;
 }
 
 vec4 performLayerSettings(vec4 currentValue, const LayerSettings settings) {
-	vec4 newValue = vec4(
-		performLayerSettings(currentValue.r, settings),
-		performLayerSettings(currentValue.g, settings),
-		performLayerSettings(currentValue.b, settings),
-		performLayerSettings(currentValue.a, settings));
-
+	vec4 newValue = performLayerSettingsRGB(currentValue, settings);
+	newValue = performLayerSettingsAlpha(newValue, settings);
 	return newValue;
 }
+
 
 #for id, layerGroup in layerGroups
 #for i in 0..#{lastLayerIndex#{layerGroup}}
