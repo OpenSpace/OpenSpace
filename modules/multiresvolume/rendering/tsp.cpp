@@ -327,10 +327,7 @@ std::vector<float> TSP::calculateBrickStdDevs(std::vector<float> brickAverages) 
     for (size_t brick = 0; brick<numTotalNodes_; ++brick) {
 
         // Fetch mean intensity 
-        float brickAvg = brickAverages[brick];
-
-        // Sum  for std dev computation
-        float stdDev = 0.f;
+        const float brickAvg = brickAverages[brick];
 
         // Get a list of leaf bricks that the current brick covers
         std::list<unsigned int> coveredLeafBricks =
@@ -340,31 +337,30 @@ std::vector<float> TSP::calculateBrickStdDevs(std::vector<float> brickAverages) 
         // Ad hoc "hack" to distinguish leafs from other nodes that happens
         // to get a zero error due to rounding errors or other reasons.
         if (coveredLeafBricks.size() == 1) {
-            stdDev = -0.1f;
+            stdDevs[brick] = -0.1f;
+            continue;
         }
-        else {
 
-            // Calculate "standard deviation" corresponding to leaves
-            for (auto lb = coveredLeafBricks.begin(); lb != coveredLeafBricks.end(); ++lb) {
+        // Else for non-leaves: Calculate "standard deviation" corresponding
+        // to leaves by averaging the stdDevs
+        float stdDev = 0.f;
+        for (auto lb = coveredLeafBricks.begin(); lb != coveredLeafBricks.end(); ++lb) {
+            // Offset in file
+            const auto leafStart = headerOffset + static_cast<long long>((*lb)*numBrickVals);
 
-                // Add to sum
-                const auto leafStart = headerOffset + static_cast<long long>((*lb)*numBrickVals);
-
-                for (size_t i = 0; i < numBrickVals; i++) {
-                    stdDev += pow(voxelData[leafStart + i] - brickAvg, 2.f);
-                }
+            for (size_t i = 0; i < numBrickVals; i++) {
+                stdDev += pow(voxelData[leafStart + i] - brickAvg, 2.f);
             }
+        }
 
-            // Finish calculation
-            if (sizeof(float) != sizeof(int)) {
-                LERROR("Float and int sizes don't match, can't reintepret");
-                return {};
-            }
+        // Finish calculation
+        if (sizeof(float) != sizeof(int)) {
+            LERROR("Float and int sizes don't match, can't reintepret");
+            return {};
+        }
 
-            stdDev /= static_cast<float>(coveredLeafBricks.size()*numBrickVals);
-            stdDev = sqrt(stdDev);
-
-        } // if not leaf
+        stdDev /= static_cast<float>(coveredLeafBricks.size()*numBrickVals);
+        stdDev = sqrt(stdDev);
 
         stdDevs[brick] = stdDev;
     }
