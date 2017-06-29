@@ -49,9 +49,9 @@
 #define NIGHTTEXTURE_BLENDING_ENABLED #{blendNightLayers}
 
 // Fifth layer type from LayerShaderManager is overlay
-#define NUMLAYERS_OVERLAY #{lastLayerIndexColorOverlays} + 1
-#define USE_OVERLAY #{useColorOverlays}
-#define OVERLAY_BLENDING_ENABLED #{blendColorOverlays}
+#define NUMLAYERS_OVERLAY #{lastLayerIndexOverlays} + 1
+#define USE_OVERLAY #{useOverlays}
+#define OVERLAY_BLENDING_ENABLED #{blendOverlays}
 
 // Global constants
 #define CHUNK_DEFAULT_HEIGHT #{defaultHeight}
@@ -359,7 +359,7 @@ vec4 calculateOverlay(
 	const vec4 currentColor,
 	const vec2 uv,
 	LevelWeights levelWeights,
-	const Layer ColorOverlays[NUMLAYERS_OVERLAY]) {
+	const Layer Overlays[NUMLAYERS_OVERLAY]) {
 
 	vec4 color = currentColor;
 
@@ -369,15 +369,15 @@ vec4 calculateOverlay(
 	levelWeights = getDefaultLevelWeights();
 #endif // OVERLAY_BLENDING_ENABLED
 
-	#for i in 0..#{lastLayerIndexColorOverlays}
+	#for i in 0..#{lastLayerIndexOverlays}
 	{
-		vec4 colorSample = getSampleColorOverlays#{i}(uv, levelWeights, ColorOverlays);
-		colorSample = performAdjustmentColorOverlays#{i}(colorSample, ColorOverlays[#{i}].adjustment);
+		vec4 colorSample = getSampleOverlays#{i}(uv, levelWeights, Overlays);
+		colorSample = performAdjustmentOverlays#{i}(colorSample, Overlays[#{i}].adjustment);
 
-		colorSample = performLayerSettings(colorSample, ColorOverlays[#{i}].settings);
+		colorSample = performLayerSettings(colorSample, Overlays[#{i}].settings);
 
 		color = blendNormal(color, colorSample);
-		color = blendColorOverlays#{i}(color, colorSample, 1.0);
+		color = blendOverlays#{i}(color, colorSample, 1.0);
 	}
 	#endfor
 

@@ -35,7 +35,7 @@ static const int NUM_LAYER_GROUPS = 5;
 static const std::string LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
     "HeightLayers",
     "ColorLayers",
-    "ColorOverlays",
+    "Overlays",
     "NightLayers",
     "WaterMasks"
 };
@@ -43,7 +43,7 @@ static const std::string LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
 enum GroupID {
     HeightLayers,
     ColorLayers,
-    ColorOverlays,
+    Overlays,
     NightLayers,
     WaterMasks,
     Unknown,

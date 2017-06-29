@@ -48,7 +48,6 @@ return {
                         Name = "Messenger_Mosaic",
                         FilePath = "map_service_configs/Utah/MessengerMosaic.wms"
                     }
-                    --[[
                     {
                         Name = "On Mercury Color",
                         FilePath = "map_service_configs/OnMercuryColor.xml",
@@ -58,7 +57,6 @@ return {
                         Name = "On Mercury Image",
                         FilePath = "map_service_configs/OnMercuryImage.xml",
                     },
-                    ]]
                 },
                 GrayScaleLayers = {
                     {
@@ -67,13 +65,11 @@ return {
                     }
                 },
                 HeightLayers = {
-                    --[[
                     {
                         Name = "On Mercury Height",
                         FilePath = "map_service_configs/OnMercuryElevationGaskell.xml",
                         Enabled = true,
                     },
-                    ]]
                 },
             },
         },

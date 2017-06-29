@@ -149,7 +149,7 @@ return {
                         FilePath = "map_service_configs/Utah/Gebco.wms",
                     }
                 },
-                ColorOverlays = {
+                Overlays = {
                     {
                         Name = "Coastlines",
                         FilePath = "map_service_configs/GIBS/Coastlines.xml",

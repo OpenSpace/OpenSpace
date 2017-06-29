@@ -62,7 +62,7 @@ return {
                         FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
                     },
                 },
-                ColorOverlays = {
+                Overlays = {
                     {
                         Type = "TileIndexTileLayer",
                         Name = "Indices",

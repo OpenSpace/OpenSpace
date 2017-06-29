@@ -132,7 +132,7 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::BGRA);
         }
-        case layergroupid::GroupID::ColorOverlays: {
+        case layergroupid::GroupID::Overlays: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::BGRA);
