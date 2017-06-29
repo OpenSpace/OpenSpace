@@ -8,9 +8,9 @@
     "lint": "eslint --ext .jsx --ext .js src",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "copyfiles index.html dist && webpack-dev-server --progress --colors",
-    "prebuild": "rimraf dist",
-    "build": "cross-env NODE_ENV=production webpack -p --config webpack.config.production.js",
-    "postbuild": "copyfiles index.html dist"
+    "prebuild": "echo rimraf dist && exit 1;",
+    "build": "echo NOT YET SUPPORTED && echo 'cross-env NODE_ENV=production webpack -p --config webpack.config.production.js'; && exit 1;",
+    "postbuild": "echo NOT YET SUPPORTED && echo 'copyfiles index.html dist'; && exit 1;"
   },
   "repository": {
     "type": "git",
