@@ -248,23 +248,10 @@ void GdalRawTileDataReader::readImageData(
             }
             break;
         }
-        case ghoul::opengl::Texture::Format::BGR: {
-            // Read the data (each rasterband is a separate channel)
-            for (int i = 0; i < 3 && i < nRastersToRead; i++) {
-                // The final destination pointer is offsetted by one datum byte size
-                // for every raster (or data channel, i.e. R in RGB)
-                char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
-
-                RawTile::ReadError err = repeatedRasterRead(3 - i, io, dataDestination);
-
-                // CE_None = 0, CE_Debug = 1, CE_Warning = 2, CE_Failure = 3, CE_Fatal = 4
-                worstError = std::max(worstError, err);
-            }
-            break;
-        }
+        case ghoul::opengl::Texture::Format::BGR:
         case ghoul::opengl::Texture::Format::BGRA: {
             if (nRastersToRead == 1) { // Grayscale
-                for (int i = 0; i < 3 && i < nRastersToRead; i++) {
+                for (int i = 0; i < 3; i++) {
                     // The final destination pointer is offsetted by one datum byte size
                     // for every raster (or data channel, i.e. R in RGB)
                     char* dataDestination = imageDataDest + (i * _initData.bytesPerDatum());
