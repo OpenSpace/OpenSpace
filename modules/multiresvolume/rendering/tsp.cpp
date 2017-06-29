@@ -384,10 +384,6 @@ bool TSP::calculateSpatialError() {
         return false;
     }
 
-    std::vector<float> medianArray(stdDevs);
-
-    std::sort(medianArray.begin(), medianArray.end());
-
     // "Normalize" errors
     float minNorm = 1e20f;
     float maxNorm = 0.f;

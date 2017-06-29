@@ -39,6 +39,8 @@ public:
     bool calculateTemporalError();
 
 protected:
+    // Returns vector of standard deviations for each brick
+    std::vector<float> calculateBrickStdDevs(std::vector<float> brickAverages);
 
 }; // class ShenTSP
 
