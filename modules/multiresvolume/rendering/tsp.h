@@ -121,6 +121,9 @@ protected:
     // Return a list of eight children brick incices given a brick index
     std::list<unsigned int> ChildBricks(unsigned int _brickIndex);
 
+    // Returns vector of averages for each brick
+    std::vector<float> calculateBrickAverages();
+
     std::string _filename;
     std::ifstream _file;
     std::streampos _dataOffset;

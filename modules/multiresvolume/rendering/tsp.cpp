@@ -272,6 +272,40 @@ GLuint TSP::ssbo() const {
     return _dataSSBO;
 }
 
+
+std::vector<float> TSP::calculateBrickAverages() {
+    const unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
+
+    boost::iostreams::mapped_file_source mfile;
+    mfile.open(_filename);
+
+    if (!mfile.is_open()) {
+        return {};
+    }
+
+    const float * voxelData = (float *)mfile.data();
+    const long long headerOffset = dataPosition() / sizeof(float);
+
+    std::vector<float> averages(numTotalNodes_);
+
+    // First pass: Calculate average color for each brick
+    LDEBUG("Calculating spatial error, first pass");
+    for (size_t brick = 0; brick<numTotalNodes_; ++brick) {
+        // Offset in file
+        const auto brickStart = headerOffset + static_cast<long long>(brick*numBrickVals);
+        double average = 0.0;
+
+        for (size_t i = 0; i < numBrickVals; i++) {
+            average += voxelData[brickStart + i];
+        }
+        averages[brick] = average / static_cast<double>(numBrickVals);
+    }
+
+    mfile.close();
+
+    return averages;
+}
+
 bool TSP::calculateSpatialError() {
     const unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
@@ -285,20 +319,13 @@ bool TSP::calculateSpatialError() {
     const float * voxelData = (float *)mfile.data();
     const long long headerOffset = dataPosition() / sizeof(float);
 
-    std::vector<float> averages(numTotalNodes_);
+    
     std::vector<float> stdDevs(numTotalNodes_);
 
-    // First pass: Calculate average color for each brick
-    LDEBUG("Calculating spatial error, first pass");
-    for (size_t brick = 0; brick<numTotalNodes_; ++brick) {
-        // Offset in file
-        const auto brickStart = headerOffset + static_cast<long long>(brick*numBrickVals);
-        double average = 0.0;
-
-        for (size_t i = 0; i < numBrickVals; i++) {
-            average += voxelData[brickStart + i];
-        }
-        averages[brick] = average / static_cast<double>(numBrickVals);
+    std::vector<float> averages = calculateBrickAverages();
+    if (!averages.size()) {
+        LERROR("Could not calculate brick averages");
+        return false;
     }
 
     // Spatial SNR stats
