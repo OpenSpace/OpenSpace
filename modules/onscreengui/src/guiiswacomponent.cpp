@@ -38,7 +38,7 @@
 
 namespace {
     using json = nlohmann::json;
-    const ImVec2 size = ImVec2(350, 500);
+    const ImVec2 WindowSize = ImVec2(350, 500);
 } // namespace
 
 namespace openspace {
@@ -59,7 +59,7 @@ void GuiIswaComponent::render() {
 
     bool e = _isEnabled;
 
-    ImGui::Begin("ISWA", &e, size, 0.5f);
+    ImGui::Begin("ISWA", &e, WindowSize, 0.5f);
 
     _isEnabled = e;
     

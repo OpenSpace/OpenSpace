@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gdalgeorefpamdataset.h 33794 2016-03-26 13:19:07Z goatbar $
+ * $Id: gdalgeorefpamdataset.h 36501 2016-11-25 14:09:24Z rouault $
  *
  * Project:  GDAL
  * Purpose:  GDALPamDataset with internal storage for georeferencing, with
@@ -31,6 +31,8 @@
 #ifndef GDAL_GEOREF_PAM_DATASET_H_INCLUDED
 #define GDAL_GEOREF_PAM_DATASET_H_INCLUDED
 
+#ifndef DOXYGEN_SKIP
+
 #include "gdal_pam.h"
 
 class CPL_DLL GDALGeorefPamDataset : public GDALPamDataset
@@ -41,17 +43,45 @@ class CPL_DLL GDALGeorefPamDataset : public GDALPamDataset
     char        *pszProjection;
     int         nGCPCount;
     GDAL_GCP    *pasGCPList;
+    char**      m_papszRPC;
+    bool        m_bPixelIsPoint;
+
+    int         m_nGeoTransformGeorefSrcIndex;
+    int         m_nGCPGeorefSrcIndex;
+    int         m_nProjectionGeorefSrcIndex;
+    int         m_nRPCGeorefSrcIndex;
+    int         m_nPixelIsPointGeorefSrcIndex;
+
+    int         GetPAMGeorefSrcIndex();
+    bool        m_bGotPAMGeorefSrcIndex;
+    int         m_nPAMGeorefSrcIndex;
+
+    bool        m_bPAMLoaded;
+    char**      m_papszMainMD;
 
   public:
         GDALGeorefPamDataset();
         virtual ~GDALGeorefPamDataset();
 
-    virtual CPLErr          GetGeoTransform( double * );
-    virtual const char     *GetProjectionRef();
+    virtual CPLErr TryLoadXML(char **papszSiblingFiles = NULL) CPL_OVERRIDE;
 
-    virtual int             GetGCPCount();
-    virtual const char     *GetGCPProjection();
-    virtual const GDAL_GCP *GetGCPs();
+    virtual CPLErr          GetGeoTransform( double * ) CPL_OVERRIDE;
+    virtual const char     *GetProjectionRef() CPL_OVERRIDE;
+
+    virtual int             GetGCPCount() CPL_OVERRIDE;
+    virtual const char     *GetGCPProjection() CPL_OVERRIDE;
+    virtual const GDAL_GCP *GetGCPs() CPL_OVERRIDE;
+
+    virtual char      **GetMetadata( const char * pszDomain = "" ) CPL_OVERRIDE;
+    virtual const char *GetMetadataItem( const char * pszName,
+                                          const char * pszDomain = "" ) CPL_OVERRIDE;
+    virtual CPLErr      SetMetadata( char ** papszMetadata,
+                             const char * pszDomain = "" ) CPL_OVERRIDE;
+    virtual CPLErr      SetMetadataItem( const char * pszName,
+                                 const char * pszValue,
+                                 const char * pszDomain = "" ) CPL_OVERRIDE;
 };
+
+#endif /* #ifndef DOXYGEN_SKIP */
 
 #endif /* GDAL_GEOREF_PAM_DATASET_H_INCLUDED */

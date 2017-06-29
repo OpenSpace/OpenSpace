@@ -1,5 +1,5 @@
 /**********************************************************************
- * $Id: cpl_aws.h 33758 2016-03-21 09:06:22Z rouault $
+ * $Id: cpl_aws.h 37174 2017-01-18 20:00:36Z rouault $
  *
  * Name:     cpl_aws.h
  * Project:  CPL - Common Portability Library
@@ -31,12 +31,17 @@
 #ifndef CPL_AWS_INCLUDED_H
 #define CPL_AWS_INCLUDED_H
 
+#ifndef DOXYGEN_SKIP
+
+#include <cstddef>
+
 #include "cpl_string.h"
 
 CPLString CPLGetAWS_SIGN4_Authorization(const CPLString& osSecretAccessKey,
                                         const CPLString& osAccessKeyId,
                                         const CPLString& osAccessToken,
                                         const CPLString& osAWSRegion,
+                                        const CPLString& osRequestPayer,
                                         const CPLString& osService,
                                         const CPLString& osVerb,
                                         const CPLString& osHost,
@@ -65,6 +70,7 @@ class VSIS3HandleHelper
         CPLString m_osSessionToken;
         CPLString m_osAWSS3Endpoint;
         CPLString m_osAWSRegion;
+        CPLString m_osRequestPayer;
         CPLString m_osBucket;
         CPLString m_osObjectKey;
         bool m_bUseHTTPS;
@@ -84,6 +90,7 @@ class VSIS3HandleHelper
                     const CPLString& osSessionToken,
                     const CPLString& osAWSS3Endpoint,
                     const CPLString& osAWSRegion,
+                    const CPLString& osRequestPayer,
                     const CPLString& osBucket,
                     const CPLString& osObjectKey,
                     bool bUseHTTPS, bool bUseVirtualHosting);
@@ -109,9 +116,11 @@ class VSIS3HandleHelper
         const CPLString& GetObjectKey() const { return m_osObjectKey; }
         const CPLString& GetAWSS3Endpoint()const  { return m_osAWSS3Endpoint; }
         const CPLString& GetAWSRegion() const { return m_osAWSRegion; }
+        const CPLString& GetRequestPayer() const { return m_osRequestPayer; }
         bool GetVirtualHosting() const { return m_bUseVirtualHosting; }
         void SetAWSS3Endpoint(const CPLString &osStr);
         void SetAWSRegion(const CPLString &osStr);
+        void SetRequestPayer(const CPLString &osStr);
         void SetVirtualHosting(bool b);
         void SetObjectKey(const CPLString &osStr);
 };
@@ -121,16 +130,21 @@ class VSIS3UpdateParams
     public:
         CPLString m_osAWSRegion;
         CPLString m_osAWSS3Endpoint;
+        CPLString m_osRequestPayer;
         bool m_bUseVirtualHosting;
 
         VSIS3UpdateParams(const CPLString& osAWSRegion = "",
                           const CPLString& osAWSS3Endpoint = "",
+                          const CPLString& osRequestPayer = "",
                           bool bUseVirtualHosting = false) :
             m_osAWSRegion(osAWSRegion),
             m_osAWSS3Endpoint(osAWSS3Endpoint),
+            m_osRequestPayer(osRequestPayer),
             m_bUseVirtualHosting(bUseVirtualHosting) {}
 };
 
 #endif /* HAVE_CURL */
+
+#endif /* #ifndef DOXYGEN_SKIP */
 
 #endif /* CPL_AWS_INCLUDED_H */

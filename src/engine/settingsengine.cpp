@@ -49,11 +49,9 @@ SettingsEngine::SettingsEngine()
     , _spiceUseExceptions("enableSpiceExceptions", "Enable Spice Exceptions", false)
 {
     _spiceUseExceptions.onChange([this] {
-        if (_spiceUseExceptions) {
-            SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::Yes);
-        } else {
-            SpiceManager::ref().setExceptionHandling(SpiceManager::UseException::No);
-        }
+        SpiceManager::ref().setExceptionHandling(
+            SpiceManager::UseException(_spiceUseExceptions)
+        );
     });
     addProperty(_spiceUseExceptions);
     addProperty(_busyWaitForDecode);
@@ -69,13 +67,12 @@ void SettingsEngine::initialize() {
     const std::vector<std::string> scenes = ghoul::filesystem::Directory(sceneDir).readFiles();
 
     for (std::size_t i = 0; i < scenes.size(); ++i) {
-        std::size_t found = scenes[i].find_last_of("/\\");
+        const std::size_t found = scenes[i].find_last_of("/\\");
         _scenes.addOption(static_cast<int>(i), scenes[i].substr(found + 1));
     }
 
     // Set interaction to change ConfigurationManager and schedule the load
-    _scenes.onChange(
-        [this, sceneDir]() {
+    _scenes.onChange([this, sceneDir]() {
         std::string sceneFile = _scenes.getDescriptionByValue(_scenes);
         OsEng.configurationManager().setValue(
             ConfigurationManager::KeyConfigScene, sceneFile);
@@ -91,15 +88,15 @@ void SettingsEngine::setModules(const std::vector<OpenSpaceModule*>& modules) {
 }
 
 bool SettingsEngine::busyWaitForDecode() {
-    return _busyWaitForDecode.value();
+    return _busyWaitForDecode;
 }
 
 bool SettingsEngine::logSGCTOutOfOrderErrors() {
-    return _logSGCTOutOfOrderErrors.value();
+    return _logSGCTOutOfOrderErrors;
 }
 
 bool SettingsEngine::useDoubleBuffering() {
-    return _useDoubleBuffering.value();
+    return _useDoubleBuffering;
 }
 
 }  // namespace openspace

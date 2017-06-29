@@ -364,7 +364,8 @@ void GUI::initializeGL() {
     _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
     _fontTexture->uploadTexture();
     GLuint id = *_fontTexture;
-    ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(id);
+    uint64_t tmp = id;
+    ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(tmp);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
