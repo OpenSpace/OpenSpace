@@ -106,6 +106,8 @@ public:
     bool _spatialErrorReady;
     bool _temporalErrorReady;
 
+    float getMaxError(NodeType type);
+    float getMinError(NodeType type);
 protected:
     // Returns a list of the octree leaf nodes that a given input 
     // brick covers. If the input is already a leaf, the list will

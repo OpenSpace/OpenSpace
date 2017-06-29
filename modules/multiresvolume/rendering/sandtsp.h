@@ -35,8 +35,6 @@ public:
     ~SandTSP();
 
     bool construct();
-    bool calculateSpatialError();
-    bool calculateTemporalError();
 
 protected:
 

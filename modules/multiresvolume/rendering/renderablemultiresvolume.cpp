@@ -130,8 +130,8 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _scaling("scaling", "Scaling", glm::vec3(1.0, 1.0, 1.0), glm::vec3(0.0), glm::vec3(10.0))
     , _translation("translation", "Translation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0), glm::vec3(10.0))
     , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28))
-    , _toleranceSpatial("spatialTolerance", "Spatial Tolerance", 1.f, 0.01f, 10.f)
-    , _toleranceTemporal("temporalTolerance", "Temporal Tolerance", 1.f, 0.01f, 10.f)
+    , _toleranceSpatial("spatialTolerance", "Spatial Tolerance", 1.f, 0.00f, 2.f)
+    , _toleranceTemporal("temporalTolerance", "Temporal Tolerance", 1.f, 0.00f, 2.f)
 {
     std::string name;
 
@@ -230,6 +230,14 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     addProperty(_rotation);
     addProperty(_toleranceSpatial);
     addProperty(_toleranceTemporal);
+
+    _toleranceSpatial.onChange([&] {
+        _shenBrickSelector->setSpatialTolerance(_toleranceSpatial.value());
+    });
+
+    _toleranceTemporal.onChange([&] {
+        _shenBrickSelector->setTemporalTolerance(_toleranceTemporal.value());
+    });
 }
 
 RenderableMultiresVolume::~RenderableMultiresVolume() {
@@ -305,7 +313,7 @@ bool RenderableMultiresVolume::setSelectorType(Selector selector) {
         case Selector::SHEN:
             if (!_shenBrickSelector) {
                 ShenBrickSelector* sbs;
-                _shenBrickSelector = sbs = new ShenBrickSelector(_tsp.get(), 100., 100.);
+                _shenBrickSelector = sbs = new ShenBrickSelector(_tsp.get(), _tsp->getMaxError(TSP::NodeType::SPATIAL), _tsp->getMaxError(TSP::NodeType::TEMPORAL));
                 _transferFunction->setCallback([sbs](const TransferFunction &tf) {
                     sbs->initialize();
                 });
@@ -385,6 +393,10 @@ bool RenderableMultiresVolume::initializeShenSelector() {
     bool success = true;
     BrickSelector * selector = _shenBrickSelector;
     success &= selector && selector->initialize();
+    _toleranceSpatial.setMaxValue(_tsp->getMaxError(TSP::NodeType::SPATIAL));
+    _toleranceSpatial.setMinValue(_tsp->getMinError(TSP::NodeType::SPATIAL));
+    _toleranceTemporal.setMaxValue(_tsp->getMaxError(TSP::NodeType::TEMPORAL));
+    _toleranceTemporal.setMinValue(_tsp->getMinError(TSP::NodeType::TEMPORAL));
     return success;
 }
 

@@ -31,6 +31,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/glm.h>
 
+// boost
+#include <boost/iostreams/device/mapped_file.hpp>
+
 // std
 #include <algorithm>
 #include <math.h>
@@ -270,31 +273,31 @@ GLuint TSP::ssbo() const {
 }
 
 bool TSP::calculateSpatialError() {
-    unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
+    const unsigned int numBrickVals = paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
-    if (!_file.is_open())
+    boost::iostreams::mapped_file_source mfile;
+    mfile.open(_filename);
+
+    if (!mfile.is_open()) {
         return false;
+    }
 
-    std::vector<float> buffer(numBrickVals);
+    const float * voxelData = (float *)mfile.data();
+    const long long headerOffset = dataPosition() / sizeof(float);
+
     std::vector<float> averages(numTotalNodes_);
     std::vector<float> stdDevs(numTotalNodes_);
 
     // First pass: Calculate average color for each brick
     LDEBUG("Calculating spatial error, first pass");
-    for (unsigned int brick = 0; brick<numTotalNodes_; ++brick) {
-
+    for (size_t brick = 0; brick<numTotalNodes_; ++brick) {
         // Offset in file
-        std::streampos offset = dataPosition() + static_cast<long long>(brick*numBrickVals*sizeof(float));
-        _file.seekg(offset);
-
-        _file.read(reinterpret_cast<char*>(&buffer[0]),
-            static_cast<size_t>(numBrickVals)*sizeof(float));
-
+        const auto brickStart = headerOffset + static_cast<long long>(brick*numBrickVals);
         double average = 0.0;
-        for (auto it = buffer.begin(); it != buffer.end(); ++it) {
-            average += *it;
-        }
 
+        for (size_t i = 0; i < numBrickVals; i++) {
+            average += voxelData[brickStart + i];
+        }
         averages[brick] = average / static_cast<double>(numBrickVals);
     }
 
@@ -306,7 +309,7 @@ bool TSP::calculateSpatialError() {
     // Second pass: For each brick, compare the covered leaf voxels with
     // the brick average
     LDEBUG("Calculating spatial error, second pass");
-    for (unsigned int brick = 0; brick<numTotalNodes_; ++brick) {
+    for (size_t brick = 0; brick<numTotalNodes_; ++brick) {
 
         // Fetch mean intensity 
         float brickAvg = averages[brick];
@@ -327,22 +330,14 @@ bool TSP::calculateSpatialError() {
         else {
 
             // Calculate "standard deviation" corresponding to leaves
-            for (auto lb = coveredLeafBricks.begin();
-                lb != coveredLeafBricks.end(); ++lb) {
-
-                // Read brick
-                std::streampos offset = dataPosition() + static_cast<long long>((*lb)*numBrickVals*sizeof(float));
-                _file.seekg(offset);
-
-                _file.read(reinterpret_cast<char*>(&buffer[0]),
-                    static_cast<size_t>(numBrickVals)*sizeof(float));
+            for (auto lb = coveredLeafBricks.begin(); lb != coveredLeafBricks.end(); ++lb) {
 
                 // Add to sum
-                for (auto v = buffer.begin(); v != buffer.end(); ++v) {
-                    stdDev += pow(*v - brickAvg, 2.f);
+                const auto leafStart = headerOffset + static_cast<long long>((*lb)*numBrickVals);
+
+                for (size_t i = 0; i < numBrickVals; i++) {
+                    stdDev += pow(voxelData[leafStart + i] - brickAvg, 2.f);
                 }
-
-
             }
 
             // Finish calculation
@@ -368,21 +363,25 @@ bool TSP::calculateSpatialError() {
 
     }
 
+    // Close the memory map
+    mfile.close();
+
     std::sort(medianArray.begin(), medianArray.end());
 
     // "Normalize" errors
     float minNorm = 1e20f;
     float maxNorm = 0.f;
     for (unsigned int i = 0; i<numTotalNodes_; ++i) {
+
         if (stdDevs[i] > 0.f) {
             stdDevs[i] = pow(stdDevs[i], 0.5f);
         }
 
         data_[i*NUM_DATA + SPATIAL_ERR] = glm::floatBitsToInt(stdDevs[i]);
-        if (stdDevs[i] < minNorm) {
+        if (stdDevs[i] < minNorm && 0 <= stdDevs[i]) {
             minNorm = stdDevs[i];
         }
-        else if (stdDevs[i] > maxNorm) {
+        if (stdDevs[i] > maxNorm && 0 <= stdDevs[i]) {
             maxNorm = stdDevs[i];
         }
     }
@@ -403,37 +402,42 @@ bool TSP::calculateSpatialError() {
 
 bool TSP::calculateTemporalError() {
 
-    if (!_file.is_open())
+    boost::iostreams::mapped_file_source mfile;
+    mfile.open(_filename);
+
+    if (!mfile.is_open()) {
         return false;
+    }
+
+    const float * voxelData = (float *)mfile.data();
+    const long long headerOffset = dataPosition() / sizeof(float);
 
     LDEBUG("Calculating temporal error");
 
+    // generateLeafCoverages();
+    // Statistics
     std::vector<float> meanArray(numTotalNodes_);
 
     // Save errors
     std::vector<float> errors(numTotalNodes_);
 
+    const unsigned int numBrickVals =
+        paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
+
     // Calculate temporal error for one brick at a time
     for (unsigned int brick = 0; brick<numTotalNodes_; ++brick) {
-
-        unsigned int numBrickVals =
-            paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
         // Save the individual voxel's average over timesteps. Because the
         // BSTs are built by averaging leaf nodes, we only need to sample
         // the brick at the correct coordinate.
         std::vector<float> voxelAverages(numBrickVals);
-        std::vector<float> voxelStdDevs(numBrickVals);
 
         // Read the whole brick to fill the averages
-        std::streampos offset = dataPosition() + static_cast<long long>(brick*numBrickVals*sizeof(float));
-        _file.seekg(offset);
-
-        _file.read(reinterpret_cast<char*>(&voxelAverages[0]),
-            static_cast<size_t>(numBrickVals)*sizeof(float));
+        const auto brickStart = headerOffset + static_cast<long long>(brick*numBrickVals);
 
         // Build a list of the BST leaf bricks (within the same octree level) that
         // this brick covers
+
         std::list<unsigned int> coveredBricks = CoveredBSTLeafBricks(brick);
 
         // If the brick is at the lowest BST level, automatically set the error 
@@ -442,37 +446,33 @@ bool TSP::calculateTemporalError() {
         // 0.0 higher up in the tree
         if (coveredBricks.size() == 1) {
             errors[brick] = -0.1f;
-        } else {
-            // Calculate standard deviation per voxel, average over brick
-            float avgStdDev = 0.f;
-            for (unsigned int voxel = 0; voxel<numBrickVals; ++voxel) {
+            continue;
+        } // done: move to next iteration
 
-                float stdDev = 0.f;
-                for (auto leaf = coveredBricks.begin();
-                    leaf != coveredBricks.end(); ++leaf) {
+          // Calculate standard deviation per voxel, average over brick
+        float avgStdDev = 0.f;
+        for (size_t voxel = 0; voxel< numBrickVals; ++voxel) {
+            float stdDev = 0.f;
+            for (auto leaf = coveredBricks.begin(); leaf != coveredBricks.end(); ++leaf) {
+                // Sample the leaves at the corresponding voxel position
+                const auto leafOffset = headerOffset + static_cast<long long>(*leaf*numBrickVals + voxel);
 
-                    // Sample the leaves at the corresponding voxel position
+                const float sample = voxelData[leafOffset];
+                stdDev += pow(sample - voxelData[brickStart + voxel], 2.f);
+            }
+            stdDev /= static_cast<float>(coveredBricks.size());
+            stdDev = sqrt(stdDev);
 
-                    std::streampos offset = dataPosition() + static_cast<long long>((*leaf*numBrickVals + voxel)*sizeof(float));
-                    _file.seekg(offset);
+            avgStdDev += stdDev;
 
-                    float sample;
-                    _file.read(reinterpret_cast<char*>(&sample), sizeof(float));
+        } // for voxel
 
-                    stdDev += pow(sample - voxelAverages[voxel], 2.f);
-                }
-                stdDev /= static_cast<float>(coveredBricks.size());
-                stdDev = sqrt(stdDev);
+        avgStdDev /= static_cast<float>(numBrickVals);
+        meanArray[brick] = avgStdDev;
+        errors[brick] = avgStdDev;
 
-                avgStdDev += stdDev;
-            } // for voxel
-
-            avgStdDev /= static_cast<float>(numBrickVals);
-            meanArray[brick] = avgStdDev;
-            errors[brick] = avgStdDev;
-
-        }
     } // for all bricks
+    mfile.close();
 
     std::sort(meanArray.begin(), meanArray.end());
 
@@ -485,10 +485,10 @@ bool TSP::calculateTemporalError() {
         }
 
         data_[i*NUM_DATA + TEMPORAL_ERR] = glm::floatBitsToInt(errors[i]);
-        if (errors[i] < minNorm) {
+        if (errors[i] < minNorm && 0 <= errors[i]) {
             minNorm = errors[i];
         }
-        else if (errors[i] > maxNorm) {
+        if (errors[i] > maxNorm && 0 <= errors[i]) {
             maxNorm = errors[i];
         }
     }
@@ -622,6 +622,25 @@ bool TSP::isOctreeLeaf(unsigned int _brickIndex) {
     return depth == numOTLevels_ - 1;
 }
 
+float TSP::getMaxError(NodeType type) {
+    switch (type) {
+    case NodeType::SPATIAL:
+        return maxSpatialError_;
+    case NodeType::TEMPORAL:
+        return maxTemporalError_;
+    }
+    return -1.;
+}
+
+float TSP::getMinError(NodeType type) {
+    switch (type) {
+    case NodeType::SPATIAL:
+        return minSpatialError_;
+    case NodeType::TEMPORAL:
+        return minTemporalError_;
+    }
+    return -1.;
+}
 
 std::list<unsigned int> TSP::CoveredLeafBricks(unsigned int _brickIndex) {
     std::list<unsigned int> out;
