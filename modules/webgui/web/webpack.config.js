@@ -1,6 +1,8 @@
 const { resolve } = require('path');
 const webpack = require('webpack');
 
+const PublicPath = '/';
+
 module.exports = {
   context: resolve(__dirname, 'src'),
   entry: [
@@ -10,24 +12,27 @@ module.exports = {
     './index.jsx',
   ],
   output: {
-    filename: 'bundle.js',
+    filename: 'static/bundle.js',
     path: resolve(__dirname, 'dist'),
-    publicPath: '/static/',
+    publicPath: PublicPath,
   },
   devtool: 'inline-source-map',
   devServer: {
     historyApiFallback: true,
     hot: true,
     contentBase: resolve(__dirname, 'dist'),
-    publicPath: '/static/',
+    publicPath: PublicPath,
   },
   module: {
     rules: [
+      // Load JS!
       {
         test: /\.jsx?$/,
-        use: [ 'babel-loader', ],
-        exclude: /node_modules/
-      }, {
+        use: ['babel-loader'],
+        exclude: /node_modules/,
+      },
+      // Load SASS!
+      {
         test: /\.scss$/,
         use: [{
             loader: 'style-loader',
@@ -48,15 +53,25 @@ module.exports = {
           },
         ],
       },
+      // Load fonts!
+      {
+        test: /\.(woff|woff2|ttf|eot)$/,
+        loader: 'file-loader',
+        options: {
+          name: 'fonts/[name].[ext]',
+          // limit: 50000,
+          // publicPath: '../',
+        },
+      },
     ],
   },
   resolve: {
     extensions: ['.js', '.jsx'],
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
     // enable HMR globally
-    new webpack.NamedModulesPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
     // prints more readable module names in the browser console on HMR updates
+    new webpack.NamedModulesPlugin(),
   ],
 };
