@@ -31,13 +31,11 @@ namespace openspace {
 namespace globebrowsing {
 namespace layergroupid  {
 
-static const int NUM_LAYER_GROUPS = 7;
+static const int NUM_LAYER_GROUPS = 5;
 static const std::string LAYER_GROUP_NAMES[NUM_LAYER_GROUPS] = {
     "HeightLayers",
     "ColorLayers",
     "ColorOverlays",
-    "GrayScaleLayers",
-    "GrayScaleColorOverlays",
     "NightLayers",
     "WaterMasks"
 };
@@ -46,8 +44,6 @@ enum GroupID {
     HeightLayers,
     ColorLayers,
     ColorOverlays,
-    GrayScaleLayers,
-    GrayScaleColorOverlays,
     NightLayers,
     WaterMasks,
     Unknown,

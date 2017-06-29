@@ -38,10 +38,6 @@
 #define USE_COLORTEXTURE #{useColorLayers}
 #define COLORTEXTURE_BLENDING_ENABLED #{blendColorLayers}
 
-#define NUMLAYERS_GRAYSCALETEXTURE #{lastLayerIndexGrayScaleLayers} + 1
-#define USE_GRAYSCALETEXTURE #{useGrayScaleLayers}
-#define GRAYSCALETEXTURE_BLENDING_ENABLED #{blendGrayScaleLayers}
-
  // Third layer type from LayerShaderManager is water mask
 #define NUMLAYERS_WATERMASK #{lastLayerIndexWaterMasks} + 1
 #define USE_WATERMASK #{useWaterMasks}
@@ -56,11 +52,6 @@
 #define NUMLAYERS_OVERLAY #{lastLayerIndexColorOverlays} + 1
 #define USE_OVERLAY #{useColorOverlays}
 #define OVERLAY_BLENDING_ENABLED #{blendColorOverlays}
-
-// Sixth layer type from LayerShaderManager is grayscale overlay
-#define NUMLAYERS_GRAYSCALE_OVERLAY #{lastLayerIndexGrayScaleColorOverlays} + 1
-#define USE_GRAYSCALE_OVERLAY #{useGrayScaleColorOverlays}
-#define GRAYSCALE_OVERLAY_BLENDING_ENABLED #{blendGrayScaleColorOverlays}
 
 // Global constants
 #define CHUNK_DEFAULT_HEIGHT #{defaultHeight}
@@ -87,7 +78,7 @@ vec4 performLayerSettingsRGB(vec4 currentValue, const LayerSettings settings) {
 		performLayerSettingsRGB(currentValue.r, settings),
 		performLayerSettingsRGB(currentValue.g, settings),
 		performLayerSettingsRGB(currentValue.b, settings),
-		performLayerSettingsRGB(currentValue.a, settings));
+		currentValue.a);
 
 	return newValue;
 }
@@ -287,39 +278,6 @@ vec4 calculateColor(
 	return color;	
 }
 
-vec4 calculateGrayScale(
-	const vec4 currentColor,
-	const vec2 uv,
-	LevelWeights levelWeights,
-	const Layer GrayScaleLayers[NUMLAYERS_GRAYSCALETEXTURE]) {
-
-	vec4 colorGrayScale = currentColor;
-
-	// The shader compiler will remove unused code when variables are multiplied by
-	// a constant 0
-#if !GRAYSCALETEXTURE_BLENDING_ENABLED
-	levelWeights = getDefaultLevelWeights();
-#endif // GRAYSCALE_OVERLAY_BLENDING_ENABLED
-
-	#for i in 0..#{lastLayerIndexGrayScaleLayers}
-	{
-		vec4 colorSample = getSampleGrayScaleLayers#{i}(uv, levelWeights, GrayScaleLayers);
-		colorSample = performAdjustmentGrayScaleLayers#{i}(colorSample, GrayScaleLayers[#{i}].adjustment);
-
-		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
-		// New settings where opacity is 1.0. Instead use opacity in blending below
-		LayerSettings newSettings = GrayScaleLayers[#{i}].settings;
-		newSettings.opacity = 1.0;
-		colorSample = performLayerSettings(colorSample, newSettings);
-
-		// Here we use opacity in blending instead of settings
-		colorGrayScale = blendGrayScaleLayers#{i}(colorGrayScale, colorSample, GrayScaleLayers[#{i}].settings.opacity);
-	}
-	#endfor
-
-	return colorGrayScale;
-}
-
 float gridDots(vec2 uv, vec2 gridResolution){
 	vec2 uvVertexSpace = fract((gridResolution) * uv) + 0.5;
 
@@ -342,7 +300,6 @@ float tileResolution(vec2 tileUV, const ChunkTile chunkTile){
 	return gridDots(uv, heightResolution);
 }
 
-
 vec4 calculateNight(
 	const vec4 currentColor,
 	const vec2 uv,
@@ -352,6 +309,7 @@ vec4 calculateNight(
 	const vec3 lightDirectionCameraSpace) {
 
 	vec4 nightColor = vec4(0,0,0,0);
+	vec4 color = currentColor;
 
 	// The shader compiler will remove unused code when variables are multiplied by
 	// a constant 0
@@ -359,25 +317,23 @@ vec4 calculateNight(
 	levelWeights = getDefaultLevelWeights();
 #endif // NIGHTTEXTURE_BLENDING_ENABLED
 
+	vec3 n = normalize(ellipsoidNormalCameraSpace);
+	vec3 l = lightDirectionCameraSpace;
+	float cosineFactor = clamp(dot(l, normalize(n + 0.15 * l)) * 3 , 0, 1);
+	
 	#for i in 0..#{lastLayerIndexNightLayers}
 	{
 		vec4 colorSample = getSampleNightLayers#{i}(uv, levelWeights, NightLayers);
 		colorSample = performAdjustmentNightLayers#{i}(colorSample, NightLayers[#{i}].adjustment);
-
 		colorSample = performLayerSettings(colorSample, NightLayers[#{i}].settings);
 
-		nightColor = blendNightLayers#{i}(nightColor, colorSample, 1.0);
+		float adjustedAlpha = cosineFactor * colorSample.a;
+		// Filter to night side
+		vec4 newColor = vec4(cosineFactor * colorSample.xyz, adjustedAlpha);
+
+		color = blendNightLayers#{i}(currentColor, newColor, adjustedAlpha);
 	}
 	#endfor
-
-
-	vec3 n = normalize(ellipsoidNormalCameraSpace);
-	vec3 l = lightDirectionCameraSpace;
-	
-	float cosineFactor = clamp(dot(l, normalize(n + 0.15 * l)) * 3 , 0, 1);
-	
-	// Blend shaded color with base color
-	vec4 color = vec4(currentColor.rgb + (cosineFactor) * nightColor.xyz, currentColor.a);
 
 	return color;
 }
@@ -428,57 +384,6 @@ vec4 calculateOverlay(
 	return color;
 }
 
-vec4 calculateGrayScaleOverlay(
-	const vec4 currentColor,
-	const vec2 uv,
-	LevelWeights levelWeights,
-	const Layer GrayScaleColorOverlays[NUMLAYERS_GRAYSCALE_OVERLAY]) {
-
-	vec4 colorGrayScale = currentColor;
-	// HSV blending
-	vec3 hsvCurrent = rgb2hsv(currentColor.rgb);
-	vec4 value = vec4(0,0,0,1);
-
-	// The shader compiler will remove unused code when variables are multiplied by
-	// a constant 0
-#if !GRAYSCALE_OVERLAY_BLENDING_ENABLED
-	levelWeights = getDefaultLevelWeights();
-#endif // GRAYSCALE_OVERLAY_BLENDING_ENABLED
-
-	#for i in 0..#{lastLayerIndexGrayScaleColorOverlays}
-	{
-		vec4 colorSample = getSampleGrayScaleColorOverlays#{i}(uv, levelWeights, GrayScaleColorOverlays);
-
-		colorSample = vec4(colorSample.r, colorSample.r, colorSample.r, colorSample.g);
-		colorSample = performAdjustmentGrayScaleColorOverlays#{i}(colorSample, GrayScaleColorOverlays[#{i}].adjustment);
-
-		colorSample = performLayerSettings(colorSample, GrayScaleColorOverlays[#{i}].settings);
-
-		colorGrayScale = blendGrayScaleColorOverlays#{i}(colorGrayScale, colorSample, 1.0);
-
-		float valueBlending = GrayScaleColorOverlays[#{i}].settings.valueBlending;
-
-		hsvCurrent.z = colorGrayScale.r * valueBlending + hsvCurrent.z * (1 - valueBlending);
-		colorGrayScale.rgb = vec3(hsvCurrent.z);
-	}
-	#endfor
-
-	vec3 hsvNew = vec3(hsvCurrent.x, hsvCurrent.y, hsvCurrent.z);
-	vec3 rgbNew = hsv2rgb(hsvNew);
-/*
-	// HSL blending
-	vec3 hslCurrent = rgb2hsl(currentColor.rgb);
-	//hslCurrent.y = hslCurrent.z > 0.7 ? 0 : hslCurrent.y;
-	vec3 hslNew = vec3(hslCurrent.x, hslCurrent.y, colorGrayScale.r);
-	vec3 rgbNew = hsl2rgb(hslNew);
-*/
-	// No color blending, use grayscale
-	//vec3 rgbNew = colorGrayScale.rgb;
-	vec4 color = blendNormal(currentColor, vec4(rgbNew, colorGrayScale.a));
-
-	return color;
-}
-
 vec4 calculateWater(
 	const vec4 currentColor,
 	const vec2 uv,
@@ -501,10 +406,10 @@ vec4 calculateWater(
 		vec4 colorSample = getSampleWaterMasks#{i}(uv, levelWeights, WaterMasks);
 		colorSample = performAdjustmentWaterMasks#{i}(colorSample, WaterMasks[#{i}].adjustment);
 
-		colorSample = performLayerSettings(colorSample, WaterMasks[#{i}].settings);
+		colorSample = performLayerSettingsAlpha(colorSample, WaterMasks[#{i}].settings);
+		colorSample.a = performLayerSettingsRGB(colorSample.a, WaterMasks[#{i}].settings);
 
 		waterColor = blendWaterMasks#{i}(waterColor, colorSample, 1.0);
-
 	}
 	#endfor
 

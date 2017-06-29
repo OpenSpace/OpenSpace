@@ -80,10 +80,6 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
     if (layerDict.getValue(keySettings, settingsDict)) {
         _renderSettings.setValuesFromDictionary(settingsDict);
     }
-    if (_layerGroupId == layergroupid::GroupID::GrayScaleColorOverlays) {
-        _renderSettings.addProperty(_renderSettings.valueBlending);
-        _renderSettings.useValueBlending = true;
-    }
 
     // Initiallize layer adjustment
     ghoul::Dictionary adjustmentDict;

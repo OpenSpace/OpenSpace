@@ -31,23 +31,31 @@
 namespace openspace {
 namespace globebrowsing {
 
+namespace {
+	const char* _loggerCat = "LayerManager";
+}
+
 LayerManager::LayerManager(const ghoul::Dictionary& layerGroupsDict)
     : properties::PropertyOwner("Layers")
 {
-    if (layergroupid::NUM_LAYER_GROUPS != layerGroupsDict.size()) {
-        throw ghoul::RuntimeError(
-            "Number of Layer Groups must be equal to " + layergroupid::NUM_LAYER_GROUPS);
-    }
+    _layerGroups.resize(layergroupid::NUM_LAYER_GROUPS);
 
-    // Create all the categories of tile providers
-    for (size_t i = 0; i < layerGroupsDict.size(); i++) {
-        const std::string& groupName = layergroupid::LAYER_GROUP_NAMES[i];
-        ghoul::Dictionary layerGroupDict = 
-            layerGroupsDict.value<ghoul::Dictionary>(groupName);
+    std::vector<std::string> layerGroupNamesInDict = layerGroupsDict.keys();
 
-        _layerGroups.push_back(
-            std::make_shared<LayerGroup>(
-                static_cast<layergroupid::GroupID>(i), layerGroupDict));
+    // Create all the layer groups
+    for (const std::string groupName : layerGroupNamesInDict) {
+
+        layergroupid::GroupID groupId = layergroupid::getGroupIDFromName(groupName);
+        
+        if (groupId != layergroupid::GroupID::Unknown) {
+            ghoul::Dictionary layerGroupDict =
+                layerGroupsDict.value<ghoul::Dictionary>(groupName);
+			_layerGroups[static_cast<int>(groupId)] =
+				std::make_shared<LayerGroup>(groupId, layerGroupDict);
+        }
+        else {
+            LWARNING("Unknown layer group: " + groupName);
+        }
     }
         
     for (const std::shared_ptr<LayerGroup>& layerGroup : _layerGroups) {
@@ -121,16 +129,6 @@ TileTextureInitData LayerManager::getTileTextureInitData(layergroupid::GroupID i
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
             return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
                 ghoul::opengl::Texture::Format::BGRA);
-        }
-        case layergroupid::GroupID::GrayScaleLayers: {
-            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::RG);
-        }
-        case layergroupid::GroupID::GrayScaleColorOverlays: {
-            size_t tileSize = preferredTileSize ? preferredTileSize : 512;
-            return TileTextureInitData(tileSize, tileSize, GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::Format::RG);
         }
         case layergroupid::GroupID::NightLayers: {
             size_t tileSize = preferredTileSize ? preferredTileSize : 512;
