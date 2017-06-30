@@ -224,27 +224,6 @@ bool ShenTSP::calculateTemporalError() {
 
     } // for all bricks
 
-        //// If the brick is at the lowest BST level, automatically set the error 
-        //// to -0.1 (enables using -1 as a marker for "no error accepted");
-        //// Somewhat ad hoc to get around the fact that the error could be
-        //// 0.0 higher up in the tree
-        //if (isBstLeaf(brick)) {
-        //    errors[brick] = -0.1f;
-        //    continue;
-        //} // done: move to next iteration
-
-        //// Calculate standard deviation per voxel, average over brick
-        //float stdDev = 0.f;
-        //for (size_t t = 0; t < numTimeSteps_; ++t) {
-        //    for (size_t voxel = 0; voxel < numBrickVals; ++voxel) {
-        //        float variance = pow(voxelData[brickStart + voxel] - voxelData[brickStart + voxel], 2.f);
-        //        stdDev += sqrt(variance);
-        //    } // for voxel
-        //}
-        //stdDev /= static_cast<float>(numBrickVals);
-        //errors[brick] = stdDev;
-
-    //} // for all bricks
     mfile.close();
 
     // Adjust errors using user-provided exponents

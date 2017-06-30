@@ -523,7 +523,6 @@ bool TSP::calculateTemporalError() {
     return true;
 }
 
-
 bool TSP::readCache() {
 
     if (!FileSys.cacheManager())
