@@ -306,7 +306,7 @@ void RenderableTimeVaryingVolume::jumpToTimestep(int target) {
     if (!t) {
         return;
     }
-    OsEng.timeManager().time().setTime(t->time);
+    OsEng.timeManager().setTimeNextFrame(t->time);
 }
 
 void RenderableTimeVaryingVolume::update(const UpdateData& data) {
