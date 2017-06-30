@@ -7,6 +7,7 @@
   "scripts": {
     "lint": "eslint --ext .jsx --ext .js src",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "storybook": "start-storybook -p 9001 -c .storybook",
     "start": "copyfiles index.html dist && webpack-dev-server --progress --colors",
     "prebuild": "echo rimraf dist && exit 1;",
     "build": "echo NOT YET SUPPORTED && echo 'cross-env NODE_ENV=production webpack -p --config webpack.config.production.js'; && exit 1;",
@@ -29,6 +30,7 @@
     "react-hot-loader": "^3.0.0-beta.7"
   },
   "devDependencies": {
+    "@storybook/react": "^3.1.7",
     "babel-core": "^6.25.0",
     "babel-eslint": "^7.2.3",
     "babel-loader": "^7.1.1",
