@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './Sidebar.scss';
-import TabMenu from './TabMenu';
+import TabMenu from './TabMenu/TabMenu';
 
 class Sidebar extends React.Component {
   constructor(props) {

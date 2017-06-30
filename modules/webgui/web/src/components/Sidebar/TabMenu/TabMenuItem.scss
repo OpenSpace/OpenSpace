@@ -1,4 +1,4 @@
-@import "../../variables";
+@import "../../../variables";
 
 .TabMenuItem {
   align-items: center;
@@ -11,16 +11,17 @@
 
   &.active {
     background: $ui-background-active;
-    border-bottom: 2px solid $ui-highlight-secondary;
+    border-bottom: 3px solid $ui-highlight-secondary;
   }
-  &:hover {
+  &:hover, &:focus {
     background: $ui-background-hover;
+    outline: 0;
   }
 }
 
 .TabMenuItem > span {
   font-size: 0.7em;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   padding-top: 0.3em;
   text-transform: uppercase;
 }

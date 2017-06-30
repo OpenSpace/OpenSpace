@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import SystemMenu from '../SystemMenu/SystemMenu';
+import SystemMenu from '../../SystemMenu/SystemMenu';
 import TabMenuItem from './TabMenuItem';
-import Icon from '../common/Icon/Icon';
+import Icon from '../../common/Icon/Icon';
 import styles from './TabMenu.scss';
 
 class TabMenu extends Component {
@@ -14,19 +14,16 @@ class TabMenu extends Component {
     this.clickTab = this.clickTab.bind(this);
   }
 
+  componentWillReceiveProps({ selected }) {
+    this.setState(previous => Object.assign(previous, { activeTab: selected }));
+  }
+
   isActive(tab) {
     return this.state.activeTab === tab;
   }
 
   clickTab(selectedTab) {
-    return () => {
-      this.setState((previous) => {
-        let { activeTab } = previous;
-        activeTab = (activeTab === selectedTab ? null : selectedTab);
-        return Object.assign({}, previous, { activeTab });
-      });
-      return this.callback(selectedTab);
-    };
+    return () => this.callback(selectedTab);
   }
 
   render() {
