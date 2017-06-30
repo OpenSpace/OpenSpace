@@ -101,11 +101,11 @@ std::vector<float> ShenTSP::calculateBrickStdDevs(std::vector<float> brickAverag
             stdDev += pow(voxelData[brickStart + i] - brickAvg, 2.f);
         }
 
-        // Finish calculation
-        stdDev /= static_cast<float>(numBrickVals);
-        stdDev = sqrt(stdDev);
+// Finish calculation
+stdDev /= static_cast<float>(numBrickVals);
+stdDev = sqrt(stdDev);
 
-        stdDevs[brick] = stdDev;
+stdDevs[brick] = stdDev;
     }
 
     mfile.close();
@@ -131,8 +131,8 @@ bool ShenTSP::calculateSpatialError() {
     float minNorm = 1e20f;
     float maxNorm = 0.f;
 
-    for (size_t i = 0; i<stdDevs.size(); ++i) {
-        
+    for (size_t i = 0; i < stdDevs.size(); ++i) {
+
         // Store the coefficient of variation (stdDev/mean)
         if (stdDevs[i] > 0.f) {
             stdDevs[i] /= averages[i];
@@ -176,10 +176,6 @@ bool ShenTSP::calculateTemporalError() {
 
     LDEBUG("Calculating temporal error");
 
-    // generateLeafCoverages();
-    // Statistics
-    std::vector<float> meanArray(numTotalNodes_);
-
     // Save errors
     std::vector<float> errors(numTotalNodes_);
 
@@ -187,18 +183,12 @@ bool ShenTSP::calculateTemporalError() {
         paddedBrickDim_*paddedBrickDim_*paddedBrickDim_;
 
     // Calculate temporal error for one brick at a time
-    for (unsigned int brick = 0; brick<numTotalNodes_; ++brick) {
+    for (unsigned int brick = 0; brick < numTotalNodes_; ++brick) {
 
         // Save the individual voxel's average over timesteps. Because the
         // BSTs are built by averaging leaf nodes, we only need to sample
         // the brick at the correct coordinate.
-        std::vector<float> voxelAverages(numBrickVals);
-
-        // Read the whole brick to fill the averages
         const auto brickStart = headerOffset + static_cast<long long>(brick*numBrickVals);
-
-        // Build a list of the BST leaf bricks (within the same octree level) that
-        // this brick covers
 
         std::list<unsigned int> coveredBricks = CoveredBSTLeafBricks(brick);
 
@@ -211,8 +201,8 @@ bool ShenTSP::calculateTemporalError() {
             continue;
         } // done: move to next iteration
 
-          // Calculate standard deviation per voxel, average over brick
-        float avgStdDev = 0.f;
+        // Calculate standard deviation per voxel, average over brick
+        float cov = 0.f;
         for (size_t voxel = 0; voxel< numBrickVals; ++voxel) {
             float stdDev = 0.f;
             for (auto leaf = coveredBricks.begin(); leaf != coveredBricks.end(); ++leaf) {
@@ -225,18 +215,37 @@ bool ShenTSP::calculateTemporalError() {
             stdDev /= static_cast<float>(coveredBricks.size());
             stdDev = sqrt(stdDev);
 
-            avgStdDev += stdDev;
+            cov += stdDev / voxelData[brickStart + voxel];
 
         } // for voxel
 
-        avgStdDev /= static_cast<float>(numBrickVals);
-        meanArray[brick] = avgStdDev;
-        errors[brick] = avgStdDev;
+        cov /= static_cast<float>(numBrickVals);
+        errors[brick] = cov;
 
     } // for all bricks
-    mfile.close();
 
-    std::sort(meanArray.begin(), meanArray.end());
+        //// If the brick is at the lowest BST level, automatically set the error 
+        //// to -0.1 (enables using -1 as a marker for "no error accepted");
+        //// Somewhat ad hoc to get around the fact that the error could be
+        //// 0.0 higher up in the tree
+        //if (isBstLeaf(brick)) {
+        //    errors[brick] = -0.1f;
+        //    continue;
+        //} // done: move to next iteration
+
+        //// Calculate standard deviation per voxel, average over brick
+        //float stdDev = 0.f;
+        //for (size_t t = 0; t < numTimeSteps_; ++t) {
+        //    for (size_t voxel = 0; voxel < numBrickVals; ++voxel) {
+        //        float variance = pow(voxelData[brickStart + voxel] - voxelData[brickStart + voxel], 2.f);
+        //        stdDev += sqrt(variance);
+        //    } // for voxel
+        //}
+        //stdDev /= static_cast<float>(numBrickVals);
+        //errors[brick] = stdDev;
+
+    //} // for all bricks
+    mfile.close();
 
     // Adjust errors using user-provided exponents
     float minNorm = 1e20f;
@@ -262,9 +271,9 @@ bool ShenTSP::calculateTemporalError() {
     maxTemporalError_ = maxNorm;
     medianTemporalError_ = medNorm;
 
-    LDEBUG("Min normalized temporal std dev: " << minNorm);
-    LDEBUG("Max normalized temporal std dev: " << maxNorm);
-    LDEBUG("Median normalized temporal std dev: " << medNorm);
+    LDEBUG("Min temporal coefficient of variation: " << minNorm);
+    LDEBUG("Max normalized temporal coefficient of variation: " << maxNorm);
+    LDEBUG("Median normalized temporal coefficient of variation: " << medNorm);
 
     return true;
 }
