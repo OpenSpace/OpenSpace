@@ -1,4 +1,4 @@
-@import "../../../variables";
+@import "../../../styles/all";
 
 .TabMenuItem {
   align-items: center;
@@ -18,11 +18,3 @@
     outline: 0;
   }
 }
-
-.TabMenuItem > span {
-  font-size: 0.7em;
-  letter-spacing: 0.15em;
-  padding-top: 0.3em;
-  text-transform: uppercase;
-}
-
