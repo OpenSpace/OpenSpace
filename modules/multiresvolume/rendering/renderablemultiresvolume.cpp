@@ -74,6 +74,7 @@ namespace {
     const std::string KeyErrorHistogramsSource = "ErrorHistogramsSource";
     const std::string KeyHints = "Hints";
     const std::string KeyTransferFunction = "TransferFunction";
+    const std::string KeyTspType = "TspType";
 
     const std::string KeyVolumeName = "VolumeName";
     const std::string KeyBrickSelector = "BrickSelector";
@@ -88,19 +89,27 @@ namespace {
 namespace openspace {
 
     const char* RenderableMultiresVolume::TYPE_SIMPLE = "simple";
-    const char* RenderableMultiresVolume::TYPE_TIME = "time";
-    const char* RenderableMultiresVolume::TYPE_TF = "tf";
-    const char* RenderableMultiresVolume::TYPE_LOCAL = "local";
-    const char* RenderableMultiresVolume::TYPE_SHEN = "shen";
+    const char* RenderableMultiresVolume::TYPE_TIME   = "time";
+    const char* RenderableMultiresVolume::TYPE_TF     = "tf";
+    const char* RenderableMultiresVolume::TYPE_LOCAL  = "local";
+    const char* RenderableMultiresVolume::TYPE_SHEN   = "shen";
 
-
+    const char* RenderableMultiresVolume::TSP_DEFAULT = "default";
+    const char* RenderableMultiresVolume::TSP_SAND    = "sand";
+    const char* RenderableMultiresVolume::TSP_SHEN    = "shen";
 
     const std::unordered_map<const char *, RenderableMultiresVolume::Selector> RenderableMultiresVolume::SelectorValues = {
-        {RenderableMultiresVolume::TYPE_SIMPLE , RenderableMultiresVolume::Selector::SIMPLE},
-        {RenderableMultiresVolume::TYPE_TF     , RenderableMultiresVolume::Selector::TF},
-        {RenderableMultiresVolume::TYPE_LOCAL  , RenderableMultiresVolume::Selector::LOCAL},
+        { RenderableMultiresVolume::TYPE_SIMPLE , RenderableMultiresVolume::Selector::SIMPLE},
+        { RenderableMultiresVolume::TYPE_TF     , RenderableMultiresVolume::Selector::TF},
+        { RenderableMultiresVolume::TYPE_LOCAL  , RenderableMultiresVolume::Selector::LOCAL},
         { RenderableMultiresVolume::TYPE_SHEN  , RenderableMultiresVolume::Selector::SHEN },
-        {RenderableMultiresVolume::TYPE_TIME   , RenderableMultiresVolume::Selector::TIME}
+        { RenderableMultiresVolume::TYPE_TIME   , RenderableMultiresVolume::Selector::TIME}
+    };
+
+    const std::unordered_map<const char *, RenderableMultiresVolume::TspType> RenderableMultiresVolume::TspTypes = {
+        { RenderableMultiresVolume::TSP_DEFAULT , RenderableMultiresVolume::TspType::DEFAULT },
+        { RenderableMultiresVolume::TSP_SAND    , RenderableMultiresVolume::TspType::SAND },
+        { RenderableMultiresVolume::TSP_SHEN    , RenderableMultiresVolume::TspType::SHEN }
     };
 
 RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dictionary)
@@ -132,6 +141,7 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     , _rotation("rotation", "Euler rotation", glm::vec3(0.0, 0.0, 0.0), glm::vec3(0), glm::vec3(6.28))
     , _toleranceSpatial("spatialTolerance", "Spatial Tolerance", 1.f, 0.00f, 2.f)
     , _toleranceTemporal("temporalTolerance", "Temporal Tolerance", 1.f, 0.00f, 2.f)
+    , _tspType(RenderableMultiresVolume::TSP_DEFAULT)
 {
     std::string name;
 
@@ -151,7 +161,9 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
         _errorHistogramsPath = absPath(_errorHistogramsPath);
     }
 
-
+    if (dictionary.getValue(KeyTspType, _tspType)) {
+        std::transform(_tspType.begin(), _tspType.end(), _tspType.begin(), ::tolower);
+    }
 
     float scalingExponent, stepSizeCoefficient;
     glm::vec3 scaling, translation, rotation;
@@ -171,7 +183,6 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     if (dictionary.getValue("StepSizeCoefficient", stepSizeCoefficient)) {
         _stepSizeCoefficient = stepSizeCoefficient;
     }
-
 
     std::string startTimeString, endTimeString;
     bool hasTimeData = true;
@@ -199,8 +210,15 @@ RenderableMultiresVolume::RenderableMultiresVolume (const ghoul::Dictionary& dic
     }
     _transferFunctionPath = absPath(_transferFunctionPath);
     _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
+    
+    // Create a TSP type based on the scene file.
+    switch (getTspType()) {
+    case TspType::SHEN:    _tsp = std::make_shared<ShenTSP>(_filename);    break;
+    case TspType::SAND:    _tsp = std::make_shared<SandTSP>(_filename);    break;
+    case TspType::DEFAULT: _tsp = std::make_shared<TSP>(_filename);        break;
+    default:                _tsp = std::make_shared<TSP>(_filename);        break;
+    }
 
-    _tsp = std::make_shared<SandTSP>(_filename);
     _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
     _selectorName = TYPE_TF;
@@ -580,10 +598,18 @@ RenderableMultiresVolume::Selector RenderableMultiresVolume::getSelector() {
     if (s == TYPE_TF)       return SelectorValues.at(TYPE_TF);
     if (s == TYPE_SIMPLE)   return SelectorValues.at(TYPE_SIMPLE);
     if (s == TYPE_LOCAL)    return SelectorValues.at(TYPE_LOCAL);
-    if (s == TYPE_SHEN)    return SelectorValues.at(TYPE_SHEN);
+    if (s == TYPE_SHEN)     return SelectorValues.at(TYPE_SHEN);
     if (s == TYPE_TIME)     return SelectorValues.at(TYPE_TIME);
 
     return Selector::SIMPLE;
+}
+
+RenderableMultiresVolume::TspType RenderableMultiresVolume::getTspType() {
+    if (_tspType == TSP_SAND)       return TspTypes.at(TSP_SAND);
+    if (_tspType == TSP_SHEN)       return TspTypes.at(TSP_SHEN);
+    if (_tspType == TSP_DEFAULT)    return TspTypes.at(TSP_DEFAULT);
+
+    return TspType::DEFAULT;
 }
 
 } // namespace openspace

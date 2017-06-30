@@ -70,6 +70,7 @@ public:
     RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
     ~RenderableMultiresVolume();
 
+    enum class TspType  {DEFAULT, SAND, SHEN};
     enum Selector {TF, SIMPLE, LOCAL, SHEN, TIME};
 
     static const char* TYPE_SIMPLE;
@@ -78,7 +79,13 @@ public:
     static const char* TYPE_LOCAL;
     static const char* TYPE_SHEN;
 
+    static const char* TSP_DEFAULT;
+    static const char* TSP_SAND;
+    static const char* TSP_SHEN;
+
     static const std::unordered_map<const char *, Selector> SelectorValues;
+    static const std::unordered_map<const char *, TspType> TspTypes;
+
 
     bool setSelectorType(Selector selector);
     bool initializeShenSelector();
@@ -93,6 +100,7 @@ public:
     virtual void render(const RenderData& data, RendererTasks& tasks);
 
     Selector getSelector();
+    TspType getTspType();
 
 private:
     double _time;
@@ -131,6 +139,8 @@ private:
 
     std::string _transferFunctionPath;
     std::string _errorHistogramsPath;
+
+    std::string _tspType;
 
     std::shared_ptr<TransferFunction> _transferFunction;
 

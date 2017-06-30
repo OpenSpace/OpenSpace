@@ -5,6 +5,9 @@ return {
         Parent = "Root",
         Renderable = {
             Type = "RenderableMultiresVolume",
+            --TspType = "default",
+            --TspType = "shen",
+            TspType = "sAnd",
             ReferenceFrame = "HEEQ",
             Translation = {0, 0, 0},
             Rotation = {2.1, 0, 0},
