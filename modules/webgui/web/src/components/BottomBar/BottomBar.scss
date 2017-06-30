@@ -1,4 +1,9 @@
+@import "../../styles/all";
+
 .BottomBar {
-  display: flex;
-  height: 60px;
+  height: $bottom-bar-height;
+
+  &:hover {
+    background: $ui-background;
+  }
 }

@@ -1,7 +1,7 @@
-@import "../../../variables";
+@import "../../../styles/all";
 
 .TabMenu {
   display: flex;
   background: $ui-background;
-  height: 60px;
+  height: $sidebar-tab-height;
 }

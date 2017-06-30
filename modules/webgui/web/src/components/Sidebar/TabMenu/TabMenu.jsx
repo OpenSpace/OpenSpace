@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import SystemMenu from '../../SystemMenu/SystemMenu';
 import TabMenuItem from './TabMenuItem';
 import Icon from '../../common/Icon/Icon';
+import SmallLabel from '../../common/SmallLabel/SmallLabel';
 import styles from './TabMenu.scss';
 
 class TabMenu extends Component {
@@ -33,15 +34,15 @@ class TabMenu extends Component {
 
         <TabMenuItem active={this.isActive('play')} onClick={this.clickTab('play')}>
           <Icon icon="playlist_play" />
-          <span>Playlist</span>
+          <SmallLabel>Playlist</SmallLabel>
         </TabMenuItem>
         <TabMenuItem active={this.isActive('view')} onClick={this.clickTab('view')}>
           <Icon icon="layers" />
-          <span>View</span>
+          <SmallLabel>View</SmallLabel>
         </TabMenuItem>
         <TabMenuItem active={this.isActive('settings')} onClick={this.clickTab('settings')}>
           <Icon icon="settings" />
-          <span>Settings</span>
+          <SmallLabel>Settings</SmallLabel>
         </TabMenuItem>
       </div>
     );

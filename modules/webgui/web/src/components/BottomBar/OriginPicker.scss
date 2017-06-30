@@ -1,3 +1,12 @@
-.OriginPicker {
+@import "../../styles/all";
 
+.OriginPicker {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  padding: $button-padding;
+
+  &:hover {
+    background: $ui-background-hover;
+  }
 }
