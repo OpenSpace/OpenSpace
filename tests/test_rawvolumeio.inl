@@ -34,7 +34,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 
-
 using namespace openspace;
 
 class RawVolumeIoTest : public testing::Test {};
@@ -92,4 +91,3 @@ TEST_F(RawVolumeIoTest, BasicInputOutput) {
         ASSERT_EQ(v, value(x));
     });
 }
-

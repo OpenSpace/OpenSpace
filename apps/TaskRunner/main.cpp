@@ -35,11 +35,11 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/ghoul.h>
+#include <ghoul/cmdparser/commandlineparser.h>
+#include <ghoul/cmdparser/singlecommand.h>
 
 #include <openspace/scripting/scriptengine.h>
-
 #include <openspace/rendering/renderable.h>
-
 #include <openspace/util/progressbar.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/configurationmanager.h>
@@ -50,10 +50,6 @@
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/engine/moduleengine.h>
-
-#include <ghoul/cmdparser/commandlineparser.h>
-#include <ghoul/cmdparser/singlecommand.h>
-
 
 namespace {
     const std::string ConfigurationFile = "openspace.cfg";
@@ -192,8 +188,6 @@ int main(int argc, char** argv) {
         std::cin >> tasksPath;
         performTasks(tasksPath);
     }
-
-
 
     return 0;
 };
