@@ -89,11 +89,11 @@ InteractionHandler::InteractionHandler()
         JsFilename
     )
     , _origin("origin", "Origin", "")
-    , _rotationalFriction("rotationalFriction", "Rotational Friction", true)
-    , _horizontalFriction("horizontalFriction", "Horizontal Friction", true)
-    , _verticalFriction("verticalFriction", "Vertical Friction", true)
-    , _sensitivity("sensitivity", "Sensitivity", 0.5f, 0.001f, 1.f)
-    , _rapidness("rapidness", "Rapidness", 1.f, 0.1f, 60.f)
+    , _rotationalFriction("rotationalFriction", "Rotational friction", true)
+    , _horizontalFriction("horizontalFriction", "Horizontal friction", true)
+    , _verticalFriction("verticalFriction", "Vertical friction", true)
+    , _sensitivity("sensitivity", "Sensitivity", 20.0f, 1.0f, 50.f)
+    , _motionLag("motionLag", "Motion lag", 0.5f, 0.f, 1.f)
     , _interactionModeOption(
           "interactionMode",
           "Interaction Mode",
@@ -113,7 +113,8 @@ InteractionHandler::InteractionHandler()
     // Create the interactionModes
     _inputState = std::make_unique<InputState>();
     // Inject the same mouse states to both orbital and global interaction mode
-    _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(_sensitivity * pow(10.0,-4), 1);
+    _mouseStates = std::make_unique<OrbitalInteractionMode::MouseStates>(
+        _sensitivity * pow(10.0,-4), 1 / (_motionLag + 0.0000001));
 
     _orbitalInteractionMode = std::make_unique<OrbitalInteractionMode>(_mouseStates);
     _globeBrowsingInteractionMode = std::make_unique<GlobeBrowsingInteractionMode>(_mouseStates);
@@ -139,8 +140,8 @@ InteractionHandler::InteractionHandler()
     _sensitivity.onChange([&]() {
         _mouseStates->setSensitivity(_sensitivity * pow(10.0,-4));
     });
-    _rapidness.onChange([&]() {
-        _mouseStates->setVelocityScaleFactor(_rapidness);
+    _motionLag.onChange([&]() {
+        _mouseStates->setVelocityScaleFactor(1 / (_motionLag + 0.0000001));
     });
 
     _interactionModeOption.onChange([this]() {
@@ -167,7 +168,7 @@ InteractionHandler::InteractionHandler()
     addProperty(_horizontalFriction);
     addProperty(_verticalFriction);
     addProperty(_sensitivity);
-    addProperty(_rapidness);
+    addProperty(_motionLag);
 }
 
 InteractionHandler::~InteractionHandler() {

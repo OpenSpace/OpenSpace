@@ -160,7 +160,7 @@ private:
     properties::BoolProperty _verticalFriction;
 
     properties::FloatProperty _sensitivity;
-    properties::FloatProperty _rapidness;
+    properties::FloatProperty _motionLag;
 };
 
 } // namespace interaction

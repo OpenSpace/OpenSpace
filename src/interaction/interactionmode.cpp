@@ -424,13 +424,13 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
 
         { // Do local roll
             glm::dquat cameraRollRotation =
-                glm::angleAxis(_mouseStates->synchedLocalRollMouseVelocity().x, dvec3(0, 0, 1));
+                glm::angleAxis(_mouseStates->synchedLocalRollMouseVelocity().x * deltaTime, dvec3(0, 0, 1));
             localCameraRotation = localCameraRotation * cameraRollRotation;
         }
         if (!_rotateToFocusNodeInterpolator.isInterpolating())
         { // Do local rotation
             dvec3 eulerAngles(_mouseStates->synchedLocalRotationMouseVelocity().y, _mouseStates->synchedLocalRotationMouseVelocity().x, 0);
-            dquat rotationDiff = dquat(eulerAngles);
+            dquat rotationDiff = dquat(eulerAngles * deltaTime);
 
             localCameraRotation = localCameraRotation * rotationDiff;
         }
@@ -447,7 +447,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
         { // Do global rotation
             dvec2 smoothMouseVelocity = _mouseStates->synchedGlobalRotationMouseVelocity();
             dvec3 eulerAngles(-smoothMouseVelocity.y, -smoothMouseVelocity.x, 0);
-            dquat rotationDiffCamSpace = dquat(eulerAngles);
+            dquat rotationDiffCamSpace = dquat(eulerAngles * deltaTime);
 
             dquat newRotationCamspace = globalCameraRotation * rotationDiffCamSpace;
             dquat rotationDiffWorldSpace = newRotationCamspace * inverse(globalCameraRotation); 
@@ -470,11 +470,11 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
                 -directionToCenter *
                 boundingSphere;
             camPos += -(centerToCamera - centerToBoundingSphere) *
-                _mouseStates->synchedTruckMovementMouseVelocity().y;
+                _mouseStates->synchedTruckMovementMouseVelocity().y * deltaTime;
         }
         { // Roll around sphere normal
             dquat cameraRollRotation =
-                angleAxis(_mouseStates->synchedGlobalRollMouseVelocity().x, -directionToCenter);
+                angleAxis(_mouseStates->synchedGlobalRollMouseVelocity().x * deltaTime, -directionToCenter);
             globalCameraRotation = cameraRollRotation * globalCameraRotation;
         }
         { // Push up to surface
@@ -591,13 +591,13 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
 
         { // Do local roll
             glm::dquat cameraRollRotation =
-                glm::angleAxis(_mouseStates->synchedLocalRollMouseVelocity().x, dvec3(0, 0, 1));
+                glm::angleAxis(_mouseStates->synchedLocalRollMouseVelocity().x * deltaTime, dvec3(0, 0, 1));
             localCameraRotation = localCameraRotation * cameraRollRotation;
         }
         if(!_rotateToFocusNodeInterpolator.isInterpolating())
         { // Do local rotation
             glm::dvec3 eulerAngles(_mouseStates->synchedLocalRotationMouseVelocity().y, _mouseStates->synchedLocalRotationMouseVelocity().x, 0);
-            glm::dquat rotationDiff = glm::dquat(eulerAngles);
+            glm::dquat rotationDiff = glm::dquat(eulerAngles * deltaTime);
 
             localCameraRotation = localCameraRotation * rotationDiff;
         }
@@ -613,8 +613,8 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         }
         { // Do global rotation (horizontal movement)
             glm::dvec3 eulerAngles = glm::dvec3(
-                -_mouseStates->synchedGlobalRotationMouseVelocity().y,
-                -_mouseStates->synchedGlobalRotationMouseVelocity().x,
+                -_mouseStates->synchedGlobalRotationMouseVelocity().y * deltaTime,
+                -_mouseStates->synchedGlobalRotationMouseVelocity().x * deltaTime,
                 0) * glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0);
             glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
 
@@ -665,11 +665,11 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         }
         { // Move position towards or away from focus node
             camPos += -directionFromSurfaceToCamera * distFromSurfaceToCamera *
-                _mouseStates->synchedTruckMovementMouseVelocity().y;
+                _mouseStates->synchedTruckMovementMouseVelocity().y * deltaTime;
         }
         { // Roll around ellipsoid normal
             glm::dquat cameraRollRotation =
-                glm::angleAxis(_mouseStates->synchedGlobalRollMouseVelocity().x, directionFromSurfaceToCamera);
+                glm::angleAxis(_mouseStates->synchedGlobalRollMouseVelocity().x * deltaTime, directionFromSurfaceToCamera);
             globalCameraRotation = cameraRollRotation * globalCameraRotation;
         }
         { // Push up to surface
