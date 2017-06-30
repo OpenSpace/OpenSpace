@@ -474,7 +474,7 @@ bool TSP::calculateTemporalError() {
                 const auto leafOffset = headerOffset + static_cast<long long>(*leaf*numBrickVals + voxel);
 
                 const float sample = voxelData[leafOffset];
-                stdDev += pow(sample - voxelAverages[brickStart + voxel], 2.f);
+                stdDev += pow(sample - voxelData[brickStart + voxel], 2.f);
             }
             stdDev /= static_cast<float>(coveredBricks.size());
             stdDev = sqrt(stdDev);
