@@ -230,9 +230,6 @@ bool ShenTSP::calculateTemporalError() {
     float minNorm = 1e20f;
     float maxNorm = 0.f;
     for (unsigned int i = 0; i<numTotalNodes_; ++i) {
-        if (errors[i] > 0.f) {
-            errors[i] = pow(errors[i], 0.25f);
-        }
 
         data_[i*NUM_DATA + TEMPORAL_ERR] = glm::floatBitsToInt(errors[i]);
         if (errors[i] < minNorm && 0 <= errors[i]) {
@@ -251,8 +248,8 @@ bool ShenTSP::calculateTemporalError() {
     medianTemporalError_ = medNorm;
 
     LDEBUG("Min temporal coefficient of variation: " << minNorm);
-    LDEBUG("Max normalized temporal coefficient of variation: " << maxNorm);
-    LDEBUG("Median normalized temporal coefficient of variation: " << medNorm);
+    LDEBUG("Max temporal coefficient of variation: " << maxNorm);
+    LDEBUG("Median temporal coefficient of variation: " << medNorm);
 
     return true;
 }
