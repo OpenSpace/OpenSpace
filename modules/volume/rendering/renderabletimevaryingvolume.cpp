@@ -198,8 +198,9 @@ bool RenderableTimeVaryingVolume::initialize() {
         jumpToTimestep(_jumpToTimestep);
     });
 
-    _currentTimestep.setMaxValue(_volumeTimesteps.size());
-    _jumpToTimestep.setMaxValue(_volumeTimesteps.size());
+    const int lastTimestep = (_volumeTimesteps.size() > 0) ? (_volumeTimesteps.size() - 1) : 0;
+    _currentTimestep.setMaxValue(lastTimestep);
+    _jumpToTimestep.setMaxValue(lastTimestep);
 
     addProperty(_stepSize);
     addProperty(_transferFunctionPath);
