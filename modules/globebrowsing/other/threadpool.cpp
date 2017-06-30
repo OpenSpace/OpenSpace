@@ -75,7 +75,7 @@ ThreadPool::ThreadPool(const ThreadPool& toCopy)
 ThreadPool::~ThreadPool() {
     // stop all threads
     {
-        std::unique_lock<std::mutex> lock(pool.queue_mutex);
+        std::unique_lock<std::mutex> lock(queue_mutex);
         stop = true;
     }
     condition.notify_all();
