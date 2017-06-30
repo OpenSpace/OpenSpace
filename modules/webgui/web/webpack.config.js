@@ -59,8 +59,6 @@ module.exports = {
         loader: 'file-loader',
         options: {
           name: 'fonts/[name].[ext]',
-          // limit: 50000,
-          // publicPath: '../',
         },
       },
     ],
