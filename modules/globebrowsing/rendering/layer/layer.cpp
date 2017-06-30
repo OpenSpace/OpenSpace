@@ -30,6 +30,8 @@ namespace openspace {
 namespace globebrowsing {
 
 namespace {
+    const char* _loggerCat = "Layer";
+
     const char* keyName = "Name";
     const char* keyEnabled = "Enabled";
     const char* keyLayerGroupID = "LayerGroupID";
@@ -252,6 +254,11 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
             // the tile provider
             ghoul::Dictionary tileProviderInitDict = initDict;
             tileProviderInitDict.setValue(keyLayerGroupID, _layerGroupId);
+            if (tileProviderInitDict.hasKeyAndValue<std::string>(keyName)) {
+                std::string name;
+                tileProviderInitDict.getValue(keyName, name);
+                LDEBUG("Initializing tile provider for layer: '" + name + "'"); 
+            }
             _tileProvider = std::shared_ptr<tileprovider::TileProvider>(
                 tileprovider::TileProvider::createFromDictionary(typeId, tileProviderInitDict)
             );
@@ -260,7 +267,7 @@ void Layer::initializeBasedOnType(layergroupid::TypeID typeId, ghoul::Dictionary
         case layergroupid::TypeID::SolidColor:
             break;
         default:
-            throw ghoul::RuntimeError("Unable to create tile provider. Unknown type.");
+            throw ghoul::RuntimeError("Unable to create layer. Unknown type.");
             break;
     }
 }

@@ -90,7 +90,7 @@ private:
     std::mutex _queueMutex;
     std::condition_variable _condition;
 
-    std::atomic<bool> _stop;
+    bool _stop;
 };
 
 } // namespace globebrowsing

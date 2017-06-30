@@ -179,6 +179,7 @@ void GdalRawTileDataReader::initialize() {
     if (numOverviews > 0) {
         _cached._maxLevel += numOverviews - 1;
     }
+    _cached._maxLevel = std::max(_cached._maxLevel, 2);
 }
 
 void GdalRawTileDataReader::readImageData(
@@ -385,14 +386,13 @@ int GdalRawTileDataReader::calculateTileLevelDifference(int minimumPixelSize) co
     GDALRasterBand* firstBand = _dataset->GetRasterBand(1);
     GDALRasterBand* maxOverview;
     int numOverviews = firstBand->GetOverviewCount();
-    int sizeLevel0;
     if (numOverviews <= 0) { // No overviews. Use first band.
         maxOverview = firstBand;
     }
     else { // Pick the highest overview.
         maxOverview = firstBand->GetOverview(numOverviews - 1);
     }
-    sizeLevel0 = maxOverview->GetXSize();
+    int sizeLevel0 = maxOverview->GetXSize();
     double diff = log2(minimumPixelSize) - log2(sizeLevel0);
     return diff;
 }

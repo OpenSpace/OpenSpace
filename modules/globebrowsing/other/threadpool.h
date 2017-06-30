@@ -67,7 +67,7 @@ private:
     std::mutex queue_mutex;
     std::condition_variable condition;
 
-    std::atomic<bool> stop;
+    bool stop;
 };
 
 } // namespace globebrowsing

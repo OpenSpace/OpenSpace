@@ -42,34 +42,15 @@ return {
                         Name = "Simple Texture",
                         FilePath = "textures/mercury.jpg",
                         Enabled = true,
-                        TilePixelSize = 256,
                     },
                     {
                         Name = "Messenger_Mosaic",
                         FilePath = "map_service_configs/Utah/MessengerMosaic.wms"
-                    }
-                    {
-                        Name = "On Mercury Color",
-                        FilePath = "map_service_configs/OnMercuryColor.xml",
-                        Enabled = true,
                     },
-                    {
-                        Name = "On Mercury Image",
-                        FilePath = "map_service_configs/OnMercuryImage.xml",
-                    },
-                },
-                GrayScaleLayers = {
                     {
                         Name = "Messenger_MDIS",
                         FilePath = "map_service_configs/Utah/MessengerMDIS.wms"
                     }
-                },
-                HeightLayers = {
-                    {
-                        Name = "On Mercury Height",
-                        FilePath = "map_service_configs/OnMercuryElevationGaskell.xml",
-                        Enabled = true,
-                    },
                 },
             },
         },

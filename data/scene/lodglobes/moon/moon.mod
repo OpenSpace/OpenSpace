@@ -45,15 +45,11 @@ return {
                 },
                 HeightLayers = {
                     {
-                        Name = "OnMoonHeight",
-                        FilePath = "map_service_configs/OnMoonHeight.xml",
-                        Enabled = true,
-                        TileSize = 64,
-                    },
-                    {
                         Name = "LolaDem",
                         FilePath = "map_service_configs/Utah/LolaDem.wms",
-                        TileSize = 64,
+                        Enabled = true,
+                        TilePixelSize = 64,
+                        Settings = { Multiplier = 0.5 },
                     }
                 },
             },

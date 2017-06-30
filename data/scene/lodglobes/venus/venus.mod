@@ -45,7 +45,6 @@ return {
                         Name = "Venus Texture",
                         FilePath = "textures/venus.jpg",
                         Enabled = true,
-                        TilePixelSize = 256,
                     },
                 },
             },

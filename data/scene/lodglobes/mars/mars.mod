@@ -49,17 +49,14 @@ return {
                         FilePath = "map_service_configs/Utah/MolaPseudoColor.xml",
                     },
                     {
-                        Name = "CTX Mosaic [AWS]",
-                        FilePath = "map_service_configs/CTX.wms",
-                        Enabled = true,
-                    },
-                    {
                         Name = "CTX Mosaic [Europe]",
                         FilePath = "map_service_configs/CTX_Mosaic.xml",
+                        BlendMode = "Color"
                     },
                     {
                         Name = "CTX Mosaic [Utah]",
                         FilePath = "map_service_configs/Utah/CTX_Mosaic.xml",
+                        BlendMode = "Color"
                     },
                 },
                 Overlays = {

@@ -40,7 +40,6 @@ return {
                         Name = "Saturn Texture",
                         FilePath = "textures/saturn.jpg",
                         Enabled = true,
-                        TilePixelSize = 256,
                     },
                 },
             },

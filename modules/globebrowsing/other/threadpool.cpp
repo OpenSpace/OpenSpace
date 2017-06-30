@@ -74,7 +74,10 @@ ThreadPool::ThreadPool(const ThreadPool& toCopy)
 // the destructor joins all threads
 ThreadPool::~ThreadPool() {
     // stop all threads
-    stop = true;
+    {
+        std::unique_lock<std::mutex> lock(pool.queue_mutex);
+        stop = true;
+    }
     condition.notify_all();
 
     // join them

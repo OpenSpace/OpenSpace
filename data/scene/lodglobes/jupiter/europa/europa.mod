@@ -32,7 +32,6 @@ return {
                         Name = "Europa Texture",
                         FilePath = "textures/europa.jpg",
                         Enabled = true,
-                        TilePixelSize = 256,
                     },
                 },
             },

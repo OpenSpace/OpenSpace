@@ -32,7 +32,6 @@ return {
                         Name = "Callisto Texture",
                         FilePath = "textures/callisto.jpg",
                         Enabled = true,
-                        TilePixelSize = 112,
                     },
                 },
             },
