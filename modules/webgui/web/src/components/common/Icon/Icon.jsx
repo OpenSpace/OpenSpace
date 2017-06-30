@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import styles from './Icon.scss';
 
 /**
- * Create a Material Design icon. http://google.github.io/material-design-icons/
+ * Create a Material Design icon. https://material.io/icons/
  * @param icon      - the name of the icon
  * @param styling   - optional array of styling class names, see Icon.scss for options. For instance
  * @returns {XML}
