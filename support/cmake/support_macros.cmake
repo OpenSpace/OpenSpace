@@ -64,7 +64,7 @@ endfunction ()
 
 
 function (set_compile_settings project)
-    set_property(TARGET ${project} PROPERTY CXX_STANDARD 14)
+    set_property(TARGET ${project} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED On)
 
     if (MSVC)
@@ -74,6 +74,8 @@ function (set_compile_settings project)
             "/ZI"       # Edit and continue support
             "/wd4201"   # Disable "nameless struct" warning
             "/wd4127"   # Disable "conditional expression is constant" warning
+            "/std:c++latest"
+            "/permissive-"
         )
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PRIVATE "/WX")
