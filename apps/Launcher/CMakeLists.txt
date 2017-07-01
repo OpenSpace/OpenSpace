@@ -25,6 +25,10 @@
 set(APPLICATION_NAME Launcher)
 set(APPLICATION_LINK_TO_OPENSPACE ON)
 
+if (WIN32)
+    set(RESOURCE_FILE ${OPENSPACE_APPS_DIR}/Launcher/openspace.rc)
+endif ()
+
 include (${GHOUL_BASE_DIR}/support/cmake/handle_external_library.cmake)
 
 set(application_path ${OPENSPACE_APPS_DIR}/Launcher)
@@ -57,6 +61,7 @@ add_executable(${APPLICATION_NAME} MACOSX_BUNDLE
     ${SOURCE_FILES}
     ${HEADER_FILES}
     ${MOC_FILES}
+    ${RESOURCE_FILE}
     ${RESOURCE_FILES}
 )
 
