@@ -451,8 +451,8 @@ TEST_F(SpiceManagerTest, getFieldOfView) {
 
     ASSERT_TRUE(found == SPICETRUE);
     //check vectors have correct values
-    for (int i = 0; i < res.bounds.size(); i++){
-        for (int j = 0; j < 3; j++){
+    for (size_t i = 0; i < res.bounds.size(); i++) {
+        for (size_t j = 0; j < 3; j++) {
             EXPECT_DOUBLE_EQ(bounds_ref[i][j], res.bounds[i][j]) << "One or more Field of View Boundary vectors \
                                                                  differ from expected output";
         }
