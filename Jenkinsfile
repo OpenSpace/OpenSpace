@@ -49,7 +49,7 @@ stage('Build') {
 					cd build
 					cmake -G "Visual Studio 14 2015 Win64" .. ''' +
 					flags + ''' ..
-					msbuild.exe OpenSpace.sln /m:8 /p:Configuration=Debug
+					msbuild.exe OpenSpace.sln /m:2 /p:Configuration=Debug
 				'''
 			}
 		}
