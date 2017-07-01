@@ -231,8 +231,8 @@ else()
     set(LIBDIR "lib")
 endif()
 
-install(TARGETS libtorrent DESTINATION ${LIBDIR})
-install(DIRECTORY include/libtorrent
-    DESTINATION include
-    PATTERN ".svn" EXCLUDE)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libtorrent-rasterbar.pc DESTINATION ${LIBDIR}/pkgconfig)
+#install(TARGETS libtorrent DESTINATION ${LIBDIR})
+#install(DIRECTORY include/libtorrent
+#    DESTINATION include
+#    PATTERN ".svn" EXCLUDE)
+#install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libtorrent-rasterbar.pc DESTINATION ${LIBDIR}/pkgconfig)

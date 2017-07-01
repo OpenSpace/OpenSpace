@@ -65,12 +65,12 @@ target_link_libraries(${APPLICATION_NAME}
     Qt5::Network
 )
 
-if (APPLE)
-    INSTALL(CODE "
-       include(BundleUtilities)
-       fixup_bundle(\"/Users/alex/Development/OpenSpace/bin/openspace/Debug/Launcher.app/Contents/MacOS/Launcher\"   \"/Users/alex/Development/OpenSpace/bin/openspace/Debug/TimelineView.app/Contents/plugins/platforms/libqcocoa.dylib\"   \"\")
-       " COMPONENT Runtime)
-endif ()
+#if (APPLE)
+#    INSTALL(CODE "
+#       include(BundleUtilities)
+#       fixup_bundle(\"${application_path}/bin/openspace/Debug/Launcher.app/Contents/MacOS/Launcher\"   \"${application_path}/bin/openspace/Debug/TimelineView.app/Contents/plugins/platforms/libqcocoa.dylib\"   \"\")
+#       " COMPONENT Runtime)
+#endif ()
 
 # Libtorrent
 include_external_library(${APPLICATION_NAME} libtorrent ${application_path}/ext/libtorrent)
