@@ -69,13 +69,14 @@ function (set_compile_settings project)
 
     if (MSVC)
         target_compile_options(${project} PRIVATE
-            "/MP"       # Multi-threading support
-            "/W4"       # Enable all warnings
-            "/ZI"       # Edit and continue support
-            "/wd4201"   # Disable "nameless struct" warning
-            "/wd4127"   # Disable "conditional expression is constant" warning
-            "/std:c++latest"
-            "/permissive-"
+            "/MP"                   # Multi-threading support
+            "/W4"                   # Enable all warnings
+            "/ZI"                   # Edit and continue support
+            "/wd4201"               # Disable "nameless struct" warning
+            "/wd4127"               # Disable "conditional expression is constant" warning
+            "/permissive-"          # Disable working, but non-conforming code
+            "/Zc:strictStrings-"    # Windows header don't adhere to this
+            # "/std:c++latest"      # Boost as of 1.64 still uses unary_function
         )
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PRIVATE "/WX")
