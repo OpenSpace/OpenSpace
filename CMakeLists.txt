@@ -27,6 +27,11 @@ cmake_minimum_required (VERSION 3.4 FATAL_ERROR)
 project (OpenSpace)
 message(STATUS "Generating OpenSpace project")
 
+set(OPENSPACE_VERSION_MAJOR 0)
+set(OPENSPACE_VERSION_MINOR 8)
+set(OPENSPACE_VERSION_PATCH 0)
+set(OPENSPACE_VERSION_STRING "prerelease-13 (Earth Day)")
+
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_APPS_DIR "${OPENSPACE_BASE_DIR}/apps")
 set(OPENSPACE_EXT_DIR "${OPENSPACE_BASE_DIR}/ext")
@@ -59,3 +64,5 @@ handle_option_tests()
 
 handle_internal_modules()
 copy_dynamic_libraries()
+
+include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)

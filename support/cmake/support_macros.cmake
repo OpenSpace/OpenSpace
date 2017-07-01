@@ -58,6 +58,12 @@ function (create_openspace_target)
     target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR})
     target_include_directories(libOpenSpace PUBLIC ${CMAKE_BINARY_DIR}/_generated/include)
 
+    configure_file(
+        ${OPENSPACE_CMAKE_EXT_DIR}/openspace_header.template 
+        ${CMAKE_BINARY_DIR}/_generated/include/openspace/openspace.h 
+        @ONLY IMMEDIATE
+    )
+
     set_compile_settings(libOpenSpace)
 endfunction ()
 
@@ -355,6 +361,7 @@ function (handle_option_tests)
 endfunction ()
 
 
+
 function (handle_internal_modules)
 # Get all modules in the correct order based on their dependencies
     file(GLOB moduleDirs RELATIVE ${OPENSPACE_MODULE_DIR} ${OPENSPACE_MODULE_DIR}/*)
@@ -507,6 +514,8 @@ function (handle_internal_modules)
     endforeach ()
     endif ()
 endfunction ()
+
+
 
 function (copy_dynamic_libraries)
     if (WIN32)
