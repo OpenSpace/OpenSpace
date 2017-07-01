@@ -185,10 +185,9 @@ if (NOT MSVC)
 endif ()
 
 # Boost
-set(Boost_USE_STATIC_LIBS ON)
-if (NOT DEFINED Boost_INCLUDE_DIR OR NOT DEFINED Boost_LIBRARIES)
-    find_package(Boost COMPONENTS REQUIRED system chrono date_time thread)
-endif ()
+set(Boost_USE_STATIC_LIBS        ON)
+set(Boost_USE_MULTITHREADED      ON)
+find_package(Boost COMPONENTS REQUIRED system chrono date_time thread)
 target_include_directories(libtorrent PUBLIC ${Boost_INCLUDE_DIR})
 target_link_libraries(libtorrent ${Boost_LIBRARIES})
 
