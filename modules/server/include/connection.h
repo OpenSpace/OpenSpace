@@ -22,50 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef OPENSPACE_MODOULES_SERVER__CONNECTION_H
+#define OPENSPACE_MODOULES_SERVER__CONNECTION_H
+
+#include <memory>
+#include <string>
+#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/io/socket/websocketserver.h>
+#include <ghoul/misc/templatefactory.h>
+#include <ext/json/json.hpp>
+#include <ghoul/logging/logmanager.h>
+#include <fmt/format.h>
+#include <include/openspace/engine/openspaceengine.h>
+#include <include/openspace/engine/configurationmanager.h>
+
+#include "topic.h"
+#include "authenticationtopic.h"
+
 namespace openspace {
 
-namespace luascriptfunctions {
+class Connection {
+public:
+    Connection(std::shared_ptr<ghoul::io::Socket> s);
 
-int connect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("connect", L, 0, nArguments);
+    void handleMessage(std::string message);
+    void sendMessage(const std::string& message);
+    void handleJson(nlohmann::json json);
+    void sendJson(const nlohmann::json& json);
 
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().connect();
-    }
-    return 0;
+    ghoul::TemplateFactory<Topic> _topicFactory;
+    std::map<size_t, std::unique_ptr<Topic>> _topics;
+    std::shared_ptr<ghoul::io::Socket> socket;
+    std::thread thread;
+    bool isAuthenticated();
+    bool active;
+
+private:
+    bool _requireAuthentication, _isAuthenticated;
+};
+
 }
 
-int disconnect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("disconnect", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().disconnect();
-    }
-    return 0;
-}
-
-int requestHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("requestHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().requestHostship();
-    }
-    return 0;
-}
-
-int resignHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("resignHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().resignHostship();
-    }
-    return 0;
-}
-
-} // namespace luascriptfunctions
-
-} // namespace openspace
+#endif //OPENSPACE_MODOULES_SERVER__CONNECTION_H

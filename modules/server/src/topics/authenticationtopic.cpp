@@ -22,50 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include "include/authenticationtopic.h"
+
+namespace {
+std::string _loggerCat = "AuthenticationTopic";
+}
+
 namespace openspace {
 
-namespace luascriptfunctions {
+AuthenticationTopic::AuthenticationTopic()
+        : Topic()
+        , _key(randomNumber())
+        , _isAuthenticated(false) {
+    LINFO(fmt::format("Ready to authorize socket Client using key: {}", _key));
+};
 
-int connect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("connect", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().connect();
-    }
-    return 0;
+bool AuthenticationTopic::isDone() {
+    return _key > 0 && _isAuthenticated;
 }
 
-int disconnect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("disconnect", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().disconnect();
+void AuthenticationTopic::handleJson(nlohmann::json json) {
+    if (isDone()) {
+        _connection->sendJson(message("Already authorized.", Statuses::OK));
+    } else {
+        try {
+            int providedKey = json.at("key").get<int>();
+            if (authorize(providedKey)) {
+                _connection->sendJson(message("Authorization OK.", Statuses::Accepted));
+                LINFO("Client successfully authorized.");
+            } else {
+                _connection->sendJson(message("Invalid key", Statuses::NotAcceptable));
+            }
+        } catch (const std::out_of_range& e) {
+            _connection->sendJson(message("Invalid request, key must be provided.", Statuses::BadRequest));
+        } catch (const std::domain_error& e) {
+            _connection->sendJson(message("Invalid request, invalid key format.", Statuses::BadRequest));
+        }
     }
-    return 0;
+};
+
+bool AuthenticationTopic::authorize(const int key) {
+    _isAuthenticated = key == _key;
+    return _isAuthenticated;
 }
 
-int requestHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("requestHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().requestHostship();
-    }
-    return 0;
+int AuthenticationTopic::randomNumber(int min, int max) {
+    assert(max > min);
+    std::srand(std::time(0));
+    return std::rand() % (max - min) + min;
 }
 
-int resignHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("resignHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().resignHostship();
-    }
-    return 0;
+nlohmann::json AuthenticationTopic::message(const std::string &message, const int &statusCode) {
+    nlohmann::json error = {{"error", message}, {"code", statusCode}};
+    return error;
 }
 
-} // namespace luascriptfunctions
-
-} // namespace openspace
+}

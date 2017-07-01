@@ -22,50 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#define __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+
+#include <openspace/util/openspacemodule.h>
+
+#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/misc/templatefactory.h>
+
+#include <deque>
+#include <memory>
+#include <thread>
+#include <mutex>
+#include <cstdint>
+#include <map>
+#include <ext/json/json.hpp>
+#include <fmt/format.h>
+
+#include "include/connection.h"
+#include "include/topic.h"
+
 namespace openspace {
 
-namespace luascriptfunctions {
+struct Message {
+    Connection* conneciton;
+    std::string messageString;
+};
 
-int connect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("connect", L, 0, nArguments);
+class ServerModule : public OpenSpaceModule {
+public:
+    ServerModule();
+    virtual ~ServerModule();
+protected:
+    void internalInitialize() override;
+private:
+    void handleConnection(Connection* socket);
+    void cleanUpFinishedThreads();
+    void consumeMessages();
+    void disconnectAll();
+    void preSync();
 
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().connect();
-    }
-    return 0;
-}
+    std::mutex _messageQueueMutex;
+    std::deque<Message> _messageQueue;
 
-int disconnect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("disconnect", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().disconnect();
-    }
-    return 0;
-}
-
-int requestHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("requestHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().requestHostship();
-    }
-    return 0;
-}
-
-int resignHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("resignHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().resignHostship();
-    }
-    return 0;
-}
-
-} // namespace luascriptfunctions
+    std::vector<std::unique_ptr<Connection>> _connections;
+    std::vector<std::unique_ptr<ghoul::io::SocketServer>> _servers;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__

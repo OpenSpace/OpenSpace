@@ -22,50 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/server/servermodule.h>
+#include "include/topic.h"
+
 namespace openspace {
 
-namespace luascriptfunctions {
+void Topic::initialize(Connection* connection, size_t topicId) {
+    _connection = connection;
+    _topicId = topicId;
+};
 
-int connect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("connect", L, 0, nArguments);
+void BounceTopic::handleJson(nlohmann::json json) {
+    _connection->sendJson(json);
+};
 
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().connect();
-    }
-    return 0;
 }
-
-int disconnect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("disconnect", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().disconnect();
-    }
-    return 0;
-}
-
-int requestHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("requestHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().requestHostship();
-    }
-    return 0;
-}
-
-int resignHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("resignHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().resignHostship();
-    }
-    return 0;
-}
-
-} // namespace luascriptfunctions
-
-} // namespace openspace

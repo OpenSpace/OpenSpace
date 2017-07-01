@@ -22,50 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef OPENSPACE_MODULES_SERVER__AUTHENTICATION_TOPIC_H
+#define OPENSPACE_MODULES_SERVER__AUTHENTICATION_TOPIC_H
+
+#include <ctime>
+#include <ext/json/json.hpp>
+#include <ghoul/logging/logmanager.h>
+#include <fmt/format.h>
+
+#include "topic.h"
+#include "connection.h"
+
 namespace openspace {
 
-namespace luascriptfunctions {
+class AuthenticationTopic : public Topic {
+public:
+    AuthenticationTopic();
+    ~AuthenticationTopic() {};
+    void handleJson(nlohmann::json json);
+    bool isDone();
 
-int connect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("connect", L, 0, nArguments);
+    /* https://httpstatuses.com/ */
+    static const struct Statuses {
+        enum StatusCode {
+            OK            = 200,
+            Accepted      = 202,
 
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().connect();
-    }
-    return 0;
+            BadRequest    = 400,
+            Unauthorized  = 401,
+            NotAcceptable = 406,
+
+            NotImplemented = 501
+        };
+    };
+private:
+    int _key;
+    bool _isAuthenticated;
+
+    bool authorize(const int key);
+    int randomNumber(int min = 1000, int max = 9999);
+    nlohmann::json message(const std::string &message, const int &statusCode = Statuses::NotImplemented);
+};
+
 }
 
-int disconnect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("disconnect", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().disconnect();
-    }
-    return 0;
-}
-
-int requestHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("requestHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().requestHostship();
-    }
-    return 0;
-}
-
-int resignHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("resignHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().resignHostship();
-    }
-    return 0;
-}
-
-} // namespace luascriptfunctions
-
-} // namespace openspace
+#endif //OPENSPACE_MODULES_SERVER__AUTHENTICATION_TOPIC_H

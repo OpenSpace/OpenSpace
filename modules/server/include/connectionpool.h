@@ -22,50 +22,44 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_MODULE_SERVER___CONNECTIONPOOL___H__
+#define __OPENSPACE_MODULE_SERVER___CONNECTIONPOOL___H__
+
+#include <ghoul/io/socket/socketserver.h>
+
+
+#include <memory>
+#include <thread>
+#include <mutex>
+#include <map>
+#include <functional>
+#include <vector>
+#include <atomic>
+
+
 namespace openspace {
 
-namespace luascriptfunctions {
+class ConnectionPool {
+public:
+    ConnectionPool(std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket);
+    ~ConnectionPool();
+    void addServer(std::shared_ptr<ghoul::io::SocketServer> server);
+    void removeServer(ghoul::io::SocketServer* server);
+    void clearServers();
+    void updateConnections();
+    
+private:
 
-int connect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("connect", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().connect();
-    }
-    return 0;
-}
-
-int disconnect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("disconnect", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().disconnect();
-    }
-    return 0;
-}
-
-int requestHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("requestHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().requestHostship();
-    }
-    return 0;
-}
-
-int resignHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("resignHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().resignHostship();
-    }
-    return 0;
-}
-
-} // namespace luascriptfunctions
+    void disconnectAllConnections();
+    std::mutex _connectionMutex;
+    void removeDisconnectedSockets();
+    void acceptNewSockets();
+    
+    std::function<void(std::shared_ptr<ghoul::io::Socket>)> _handleSocket;
+    std::vector<std::shared_ptr<ghoul::io::SocketServer>> _socketServers;
+    std::vector<std::shared_ptr<ghoul::io::Socket>> _sockets;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SERVER___CONNECTIONPOOL___H__

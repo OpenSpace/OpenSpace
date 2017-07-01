@@ -22,50 +22,66 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/server/include/connectionpool.h>
+#include <ghoul/io/socket/socket.h>
+
+#include <vector>
+#include <algorithm>
+
+
 namespace openspace {
 
-namespace luascriptfunctions {
+ConnectionPool::ConnectionPool(std::function<void(std::shared_ptr<ghoul::io::Socket> socket)> handleSocket)
+    : _handleSocket(std::move(handleSocket))
+{}
 
-int connect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("connect", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().connect();
-    }
-    return 0;
+ConnectionPool::~ConnectionPool() {
+    disconnectAllConnections();
 }
 
-int disconnect(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("disconnect", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().disconnect();
-    }
-    return 0;
+void ConnectionPool::addServer(std::shared_ptr<ghoul::io::SocketServer> server) {
+    _socketServers.push_back(server);
 }
 
-int requestHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("requestHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().requestHostship();
-    }
-    return 0;
+void ConnectionPool::removeServer(ghoul::io::SocketServer* server) {
+    std::remove_if(_socketServers.begin(), _socketServers.end(), [server](const auto& s) {
+        return s.get() == server;
+    });
 }
 
-int resignHostship(lua_State* L) {
-    int nArguments = lua_gettop(L);
-    SCRIPT_CHECK_ARGUMENTS("resignHostship", L, 0, nArguments);
-
-    if (OsEng.windowWrapper().isMaster()) {
-        OsEng.parallelConnection().resignHostship();
-    }
-    return 0;
+void ConnectionPool::clearServers() {
+    _socketServers.clear();
 }
 
-} // namespace luascriptfunctions
+void ConnectionPool::updateConnections() {
+    removeDisconnectedSockets();
+    acceptNewSockets();
+}
+
+void ConnectionPool::acceptNewSockets() {
+    for (auto& server : _socketServers) {
+        std::shared_ptr<ghoul::io::Socket> socket;
+        while (socket = server->nextPendingSocket()) {
+            _handleSocket(socket);
+            _sockets.push_back(socket);
+        }
+    }
+}
+
+void ConnectionPool::removeDisconnectedSockets() {
+    std::remove_if(_sockets.begin(), _sockets.end(), [](const std::shared_ptr<ghoul::io::Socket> socket) {
+        return !socket || !socket->isConnected();
+    });
+}
+
+void ConnectionPool::disconnectAllConnections() {
+    for (auto& socket : _sockets) {
+        if (socket && socket->isConnected()) {
+            socket->disconnect();
+        }
+    }
+    _sockets.clear();
+}
+
 
 } // namespace openspace
