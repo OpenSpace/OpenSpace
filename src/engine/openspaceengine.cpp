@@ -181,6 +181,8 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
 
     SpiceManager::initialize();
     TransformationManager::initialize();
+
+    _syncEngine->addSyncable(_scriptEngine.get());
 }
 
 OpenSpaceEngine& OpenSpaceEngine::ref() {
@@ -392,7 +394,6 @@ void OpenSpaceEngine::destroy() {
 
     _engine->_syncEngine->removeSyncables(_engine->timeManager().getSyncables());
     _engine->_syncEngine->removeSyncables(_engine->_renderEngine->getSyncables());
-    _engine->_syncEngine->removeSyncable(_engine->_scriptEngine.get());
 
     _engine->_moduleEngine->deinitialize();
     _engine->_console->deinitialize();
@@ -543,84 +544,88 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         }
     );
     
-    // Run start up scripts
-    try {
-        runPreInitializationScripts(scenePath);
-    }
-    catch (const ghoul::RuntimeError& e) {
-        LERRORC(e.component, e.message);
-    }
-
-    Scene* scene;
-    try {
-        scene = _sceneManager->loadScene(scenePath);
-    } catch (const ghoul::FileNotFoundError& e) {
-        LERRORC(e.component, e.message);
-        return;
-    } catch (const Scene::InvalidSceneError& e) {
-        LERRORC(e.component, e.message);
-        return;
-    } catch (const ghoul::RuntimeError& e) {
-        LERRORC(e.component, e.message);
-        return;
-    }
-    catch (const std::exception& e) {
-        LERROR(e.what());
-        return;
-    }
-    catch (...) {
-        LERROR("Unknown error loading the scene");
-        return;
+    Scene* scene = nullptr;
+    if (scenePath != "") {
+        // Run start up scripts
+        try {
+            runPreInitializationScripts(scenePath);
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+        }
+        // Load the scene
+        try {
+            scene = _sceneManager->loadScene(scenePath);
+        }
+        catch (const ghoul::FileNotFoundError& e) {
+            LERRORC(e.component, e.message);
+            return;
+        }
+        catch (const Scene::InvalidSceneError& e) {
+            LERRORC(e.component, e.message);
+            return;
+        }
+        catch (const ghoul::RuntimeError& e) {
+            LERRORC(e.component, e.message);
+            return;
+        }
+        catch (const std::exception& e) {
+            LERROR(e.what());
+            return;
+        }
+        catch (...) {
+            LERROR("Unknown error loading the scene");
+            return;
+        }
     }
 
     Scene* previousScene = _renderEngine->scene();
     if (previousScene) {
         _syncEngine->removeSyncables(_timeManager->getSyncables());
         _syncEngine->removeSyncables(_renderEngine->getSyncables());
-        _syncEngine->removeSyncable(_scriptEngine.get());
 
         _renderEngine->setScene(nullptr);
         _renderEngine->setCamera(nullptr);
+        _interactionHandler->setCamera(nullptr);
         _sceneManager->unloadScene(*previousScene);
     }
 
     // Initialize the RenderEngine
     _renderEngine->setScene(scene);
-    _renderEngine->setCamera(scene->camera());
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
 
-    scene->initialize();
-    _interactionHandler->setCamera(scene->camera());
+    if (scene) {
+        _renderEngine->setCamera(scene->camera());
+        scene->initialize();
+        _interactionHandler->setCamera(scene->camera());
+        try {
+            runPostInitializationScripts(scenePath);
+        } catch (const ghoul::RuntimeError& e) {
+            LFATALC(e.component, e.message);
+        }
+    
+        // Write keyboard documentation.
+        if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
+            interactionHandler().writeDocumentation(
+                absPath(configurationManager().value<std::string>(
+                    ConfigurationManager::KeyKeyboardShortcuts
+                ))
+            );
+        }
 
-    try {
-        runPostInitializationScripts(scenePath);
-    }
-    catch (const ghoul::RuntimeError& e) {
-        LFATALC(e.component, e.message);
-    }
-
-    // Write keyboard documentation.
-    if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
-        interactionHandler().writeDocumentation(
-            absPath(configurationManager().value<std::string>(
-                ConfigurationManager::KeyKeyboardShortcuts
-            ))
-        );
-    }
-
-    // If a PropertyDocumentationFile was specified, generate it now.
-    if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
-        scene->writeDocumentation(
-            absPath(configurationManager().value<std::string>(
-                ConfigurationManager::KeyPropertyDocumentation
-            ))
-        );
+        // If a PropertyDocumentationFile was specified, generate it now.
+        if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
+            scene->writeDocumentation(
+                absPath(configurationManager().value<std::string>(
+                    ConfigurationManager::KeyPropertyDocumentation
+                ))
+            );
+        }
     }
 
     _syncEngine->addSyncables(_timeManager->getSyncables());
     _syncEngine->addSyncables(_renderEngine->getSyncables());
-    _syncEngine->addSyncable(_scriptEngine.get());
 
     LTRACE("OpenSpaceEngine::loadScene(end)");
 }
@@ -1025,13 +1030,14 @@ void OpenSpaceEngine::preSynchronization() {
                 *it, ScriptEngine::RemoteScripting::Yes
             );
         }
-
         _interactionHandler->updateInputStates(dt);
-        
         _renderEngine->updateScene();
-        _interactionHandler->updateCamera(dt);
-        _renderEngine->camera()->invalidateCache();
 
+        Camera* camera = _renderEngine->camera();
+        if (camera) {
+            _interactionHandler->updateCamera(dt);
+            _renderEngine->camera()->invalidateCache();
+        }
         _parallelConnection->preSynchronization();
     }
     

@@ -44,8 +44,10 @@ GuiOriginComponent::GuiOriginComponent()
 void GuiOriginComponent::render() {
     SceneGraphNode* currentFocus = OsEng.interactionHandler().focusNode();
 
-    std::vector<SceneGraphNode*> nodes =
-        OsEng.renderEngine().scene()->allSceneGraphNodes();
+    Scene* scene = OsEng.renderEngine().scene();
+    std::vector<SceneGraphNode*> nodes = scene ?
+        scene->allSceneGraphNodes() :
+        std::vector<SceneGraphNode*>();
 
     std::sort(
         nodes.begin(),

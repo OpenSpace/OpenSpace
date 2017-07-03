@@ -42,9 +42,11 @@ Scene* SceneManager::loadScene(const std::string& path) {
 }
 
 void SceneManager::unloadScene(Scene& scene) {
-    std::remove_if(_scenes.begin(), _scenes.end(), [&scene] (auto& s) {
-        return s.get() == &scene;
-    });
+    _scenes.erase(std::remove_if(
+        _scenes.begin(), _scenes.end(), [&scene] (auto& s) {
+            return s.get() == &scene;
+        }), _scenes.end()
+    );
 }
 
 void SceneManager::unloadAll() {

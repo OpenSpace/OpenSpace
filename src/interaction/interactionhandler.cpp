@@ -194,7 +194,7 @@ void InteractionHandler::setFocusNode(SceneGraphNode* node) {
 
 void InteractionHandler::setCamera(Camera* camera) {
     _camera = camera;
-    setFocusNode(_camera->parent());
+    setFocusNode(camera ? _camera->parent() : nullptr);
 }
 
 void InteractionHandler::resetCameraDirection() {
@@ -250,7 +250,6 @@ void InteractionHandler::unlockControls() {
 
 void InteractionHandler::updateInputStates(double timeSinceLastUpdate) {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
-    ghoul_assert(_camera != nullptr, "Camera cannot be null!");
     _currentInteractionMode->updateMouseStatesFromInput(*_inputState, timeSinceLastUpdate);
 }
 

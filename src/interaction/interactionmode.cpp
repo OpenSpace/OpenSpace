@@ -511,8 +511,10 @@ GlobeBrowsingInteractionMode::~GlobeBrowsingInteractionMode() {
 
 void GlobeBrowsingInteractionMode::setFocusNode(SceneGraphNode* focusNode) {
     InteractionMode::setFocusNode(focusNode);
-
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    if (!_focusNode) {
+        return;
+    }
     Renderable* baseRenderable = _focusNode->renderable();
     if (globebrowsing::RenderableGlobe* globe = dynamic_cast<globebrowsing::RenderableGlobe*>(baseRenderable)) {
         _globe = globe;

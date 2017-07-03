@@ -308,6 +308,8 @@ void RenderEngine::deinitialize() {
 }
 
 void RenderEngine::updateScene() {
+    if (!_scene) return;
+
     const Time& currentTime = OsEng.timeManager().time();
     _scene->update({
         { glm::dvec3(0), glm::dmat3(1), 1.0 },
@@ -418,15 +420,15 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
 {
     LTRACE("RenderEngine::render(begin)");
     WindowWrapper& wrapper = OsEng.windowWrapper();
-
-    if (_disableSceneTranslationOnMaster && wrapper.isMaster()) {
-        _camera->sgctInternal.setViewMatrix(viewMatrix);
+    if (_camera) {
+        if (_disableSceneTranslationOnMaster && wrapper.isMaster()) {
+            _camera->sgctInternal.setViewMatrix(viewMatrix);
+        }
+        else {
+            _camera->sgctInternal.setViewMatrix(viewMatrix * sceneMatrix);
+        }
+        _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
     }
-    else {
-        _camera->sgctInternal.setViewMatrix(viewMatrix * sceneMatrix);
-    }
-    _camera->sgctInternal.setProjectionMatrix(projectionMatrix);
-    
 
     if (!(wrapper.isMaster() && _disableMasterRendering) && !wrapper.isGuiWindow()) {
         _renderer->render(_globalBlackOutFactor, _performanceManager != nullptr);
@@ -934,7 +936,7 @@ void RenderEngine::renderInformation() {
 
 
 #ifdef OPENSPACE_MODULE_NEWHORIZONS_ENABLED
-        bool hasNewHorizons = scene()->sceneGraphNode("NewHorizons");
+        bool hasNewHorizons = scene() && scene()->sceneGraphNode("NewHorizons");
         double currentTime = OsEng.timeManager().time().j2000Seconds();
 
         if (MissionManager::ref().hasCurrentMission()) {
