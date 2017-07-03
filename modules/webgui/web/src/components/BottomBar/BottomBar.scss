@@ -1,6 +1,7 @@
 @import "../../styles/all";
 
 .BottomBar {
+  display: flex;
   height: $bottom-bar-height;
 
   &:hover {

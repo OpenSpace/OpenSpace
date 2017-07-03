@@ -1,27 +1,5 @@
 @import "../../styles/all";
 
-.OriginPicker {
-  align-items: center;
-  display: flex;
-  height: 100%;
-  padding: $button-padding;
-
-  &:hover {
-    background: $ui-background-hover;
-  }
-}
-
-.Title {
-  display: flex;
-  flex-direction: column;
-}
-
-.Name {
-  font-size: 1.2rem;
-  height: 21px;
-  line-height: 1;
-}
-
-.OriginPicker i {
+.Icon {
   margin-right: ($base-padding / 2);
 }
