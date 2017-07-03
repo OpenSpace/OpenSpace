@@ -5,9 +5,11 @@
   display: flex;
   height: 100%;
   padding: $button-padding;
+  text-shadow: 0 1px 10px rgba(#000, 0.5);
 
   &:hover {
     background: $ui-background-hover;
+    text-shadow: none;
   }
 }
 
