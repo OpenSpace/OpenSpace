@@ -1,6 +1,12 @@
 import React from 'react';
-import styles from './Sidebar.scss';
+
 import TabMenu from './TabMenu/TabMenu';
+import SystemMenu from '../SystemMenu/SystemMenu';
+import TabMenuItem from './TabMenu/TabMenuItem';
+import Icon from '../common/Icon/Icon';
+import SmallLabel from '../common/SmallLabel/SmallLabel';
+
+import styles from './Sidebar.scss';
 
 class Sidebar extends React.Component {
   constructor(props) {
@@ -8,21 +14,42 @@ class Sidebar extends React.Component {
     this.state = { view: null };
 
     this.selectView = this.selectView.bind(this);
+    this.isActive = this.isActive.bind(this);
   }
 
   selectView(selectedView) {
-    this.setState((previous) => {
-      let { view } = previous;
-      view = (view === selectedView ? null : selectedView);
-      return Object.assign({}, previous, { view });
-    });
+    return () => {
+      this.setState((previous) => {
+        const view = (previous.view === selectedView ? null : selectedView);
+        return Object.assign({}, previous, { view });
+      });
+    };
+  }
+
+  isActive(view) {
+    return this.state.view === view;
   }
 
   render() {
     return (
       <div className={styles.Sidebar}>
         { this.state.view }
-        <TabMenu callback={this.selectView} selected={this.state.view} />
+        <TabMenu>
+          <SystemMenu />
+
+          <TabMenuItem active={this.isActive('play')} onClick={this.selectView('play')}>
+            <Icon icon="playlist_play" />
+            <SmallLabel>Playlist</SmallLabel>
+          </TabMenuItem>
+          <TabMenuItem active={this.isActive('view')} onClick={this.selectView('view')}>
+            <Icon icon="layers" />
+            <SmallLabel>View</SmallLabel>
+          </TabMenuItem>
+          <TabMenuItem active={this.isActive('settings')} onClick={this.selectView('settings')}>
+            <Icon icon="settings" />
+            <SmallLabel>Settings</SmallLabel>
+          </TabMenuItem>
+        </TabMenu>
       </div>
     );
   }
