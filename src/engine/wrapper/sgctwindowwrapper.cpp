@@ -22,17 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/opengl/ghoul_gl.h>
-#include "sgct.h"
-
 #include <openspace/engine/wrapper/sgctwindowwrapper.h>
+
+#include "sgct.h"
 
 #undef near
 #undef far
 
 namespace {
     const char* GuiWindowTag = "GUI";
-}
+} // namespace
 
 namespace openspace {
 

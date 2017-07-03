@@ -856,6 +856,9 @@ void OpenSpaceEngine::configureLogging() {
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
 
+    glbinding::Binding::useCurrentContext();
+    glbinding::Binding::initialize();
+
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
     try {
         _engine->_console->initialize();
@@ -1097,7 +1100,6 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
                              const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
-
     bool isGuiWindow = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
     bool showOverlay = isGuiWindow && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering();
     // @CLEANUP:  Replace the two windows by a single call to whether a gui should be

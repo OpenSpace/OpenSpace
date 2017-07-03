@@ -44,17 +44,17 @@ public:
      * All kinds of usage for pixel buffer objects as defined by the OpenGL standard.
      * See: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glBufferData.xhtml
      */
-	enum class Usage {
-		StreamDraw = GL_STREAM_DRAW,
-		StreamRead = GL_STREAM_READ,
-		StreamCopy = GL_STREAM_COPY,
-		StaticDraw = GL_STATIC_DRAW,
-		StaticRead = GL_STATIC_READ,
-		StaticCopy = GL_STATIC_COPY,
-		DynamicDraw = GL_DYNAMIC_DRAW,
-		DynamicRead = GL_DYNAMIC_READ,
-		DynamicCopy = GL_DYNAMIC_COPY
-	};
+    enum class Usage {
+        StreamDraw = GL_STREAM_DRAW,
+        StreamRead = GL_STREAM_READ,
+        StreamCopy = GL_STREAM_COPY,
+        StaticDraw = GL_STATIC_DRAW,
+        StaticRead = GL_STATIC_READ,
+        StaticCopy = GL_STATIC_COPY,
+        DynamicDraw = GL_DYNAMIC_DRAW,
+        DynamicRead = GL_DYNAMIC_READ,
+        DynamicCopy = GL_DYNAMIC_COPY
+    };
 
     /**
      * Access hints for OpenGL buffer mapping
@@ -100,7 +100,7 @@ public:
      * \returns the DMA address to the mapped buffer. Returns nullptr if the mapping
      * failed
      */
-    void* mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access);
+    void* mapBufferRange(GLintptr offset, GLsizeiptr length, BufferAccessMask access);
 
     /**
      * Maps the default buffer and makes the data available on the GPU
