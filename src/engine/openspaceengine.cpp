@@ -414,6 +414,10 @@ void OpenSpaceEngine::destroy() {
 
 void OpenSpaceEngine::initialize() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
+
+    glbinding::Binding::useCurrentContext();
+    glbinding::Binding::initialize();
+
     // clear the screen so the user don't have to see old buffer contents from the
     // graphics card
     LDEBUG("Clearing all Windows");
@@ -428,6 +432,7 @@ void OpenSpaceEngine::initialize() {
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
     
+    // @BUG:  This will call OpenGL functions, should it should be in the initializeGL
     LDEBUG("Detecting capabilities");
     SysCap.detectCapabilities();
 
@@ -855,9 +860,6 @@ void OpenSpaceEngine::configureLogging() {
 
 void OpenSpaceEngine::initializeGL() {
     LTRACE("OpenSpaceEngine::initializeGL(begin)");
-
-    glbinding::Binding::useCurrentContext();
-    glbinding::Binding::initialize();
 
     LTRACE("OpenSpaceEngine::initializeGL::Console::initialize(begin)");
     try {
