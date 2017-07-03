@@ -197,7 +197,9 @@ bool PerformanceManager::isMeasuringPerformance() const {
 }
     
 void PerformanceManager::outputLogs() {
-    for (size_t i = 0; i < 30; i++) LINFO("Outputting logs");
+    for (auto it = individualPerformanceLocations.begin(); it != individualPerformanceLocations.end(); ++it) {
+        LINFO("Log Count:" << it->second << " Node: " << it->first);
+    }
 }
 
 PerformanceLayout* PerformanceManager::performanceData() {
@@ -265,40 +267,43 @@ void PerformanceManager::storeScenePerformanceMeasurements(
         SceneGraphNode::PerformanceRecord r = node->performanceRecord();
         PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[i];
 
+        // Covert milliseconds to seconds
+        const float second = 1000.f;
+
         std::rotate(
             std::begin(entry.renderTime),
             std::next(std::begin(entry.renderTime)),
             std::end(entry.renderTime)
         );
-        entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / 1000.f;
+        entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / second;
         
         std::rotate(
             std::begin(entry.updateTranslation),
             std::next(std::begin(entry.updateTranslation)),
             std::end(entry.updateTranslation)
         );
-        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = r.updateTimeTranslation / 1000.f;
+        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = r.updateTimeTranslation / second;
 
         std::rotate(
             std::begin(entry.updateRotation),
             std::next(std::begin(entry.updateRotation)),
             std::end(entry.updateRotation)
         );
-        entry.updateRotation[PerformanceLayout::NumberValues - 1] = r.updateTimeRotation / 1000.f;
+        entry.updateRotation[PerformanceLayout::NumberValues - 1] = r.updateTimeRotation / second;
 
         std::rotate(
             std::begin(entry.updateScaling),
             std::next(std::begin(entry.updateScaling)),
             std::end(entry.updateScaling)
         );
-        entry.updateScaling[PerformanceLayout::NumberValues - 1] = r.updateTimeScaling / 1000.f;
+        entry.updateScaling[PerformanceLayout::NumberValues - 1] = r.updateTimeScaling / second;
 
         std::rotate(
             std::begin(entry.updateRenderable),
             std::next(std::begin(entry.updateRenderable)),
             std::end(entry.updateRenderable)
         );
-        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = r.updateTimeRenderable / 1000.f;
+        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = r.updateTimeRenderable / second;
     }
     _performanceMemory->releaseLock();
 }
