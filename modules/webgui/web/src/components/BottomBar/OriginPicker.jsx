@@ -14,8 +14,8 @@ class OriginPicker extends Component {
   }
 
   get icon() {
-    // return this.state.origin ? null : (<Icon icon="language" styling={['extralarge']} />);
-    return (<Icon icon="language" styling={['extralarge']} />);
+    // return this.state.origin ? null : (<Icon icon="language" styling="extralarge" />);
+    return (<Icon icon="language" styling="extralarge" />);
   }
 
   get origin() {
@@ -33,7 +33,7 @@ class OriginPicker extends Component {
           <SmallLabel>Origin</SmallLabel>
         </div>
       </div>
-  );
+    );
   }
 }
 

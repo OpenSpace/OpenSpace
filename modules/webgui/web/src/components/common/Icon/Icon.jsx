@@ -6,12 +6,13 @@ import styles from './Icon.scss';
 /**
  * Create a Material Design icon. https://material.io/icons/
  * @param icon      - the name of the icon
- * @param styling   - optional array of styling class names, see Icon.scss for options. For instance
+ * @param styling   - optional string of styling class names, see Icon.scss for options.
  * @returns {XML}
  * @constructor
  */
 const Icon = ({ icon, styling = [] }) => {
-  const classNames = styling.map(s => styles[s] || s)
+  const classNames = styling.split(' ')
+                            .map(s => styles[s] || s)
                             .concat(styles.base)
                             .join(' ');
   return (
@@ -21,11 +22,11 @@ const Icon = ({ icon, styling = [] }) => {
 
 Icon.propTypes = {
   icon: PropTypes.string.isRequired,
-  styling: PropTypes.arrayOf(PropTypes.string),
+  styling: PropTypes.string,
 };
 
 Icon.defaultProps = {
-  styling: [],
+  styling: '',
 };
 
 export default Icon;
