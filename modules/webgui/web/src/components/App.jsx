@@ -1,5 +1,6 @@
 import React from 'react';
 
+import '../styles/base.scss';
 import styles from './App.scss';
 import Sidebar from './Sidebar/Sidebar';
 import BottomBar from './BottomBar/BottomBar';

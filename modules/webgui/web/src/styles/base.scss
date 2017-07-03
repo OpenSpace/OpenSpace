@@ -1,0 +1,14 @@
+:global {
+  * {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    font-size: 14px;
+  }
+}
