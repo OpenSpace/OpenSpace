@@ -58,22 +58,31 @@ function (create_openspace_target)
     target_include_directories(libOpenSpace PUBLIC ${OPENSPACE_BASE_DIR})
     target_include_directories(libOpenSpace PUBLIC ${CMAKE_BINARY_DIR}/_generated/include)
 
+    configure_file(
+        ${OPENSPACE_CMAKE_EXT_DIR}/openspace_header.template 
+        ${CMAKE_BINARY_DIR}/_generated/include/openspace/openspace.h 
+        @ONLY IMMEDIATE
+    )
+
     set_compile_settings(libOpenSpace)
 endfunction ()
 
 
 
 function (set_compile_settings project)
-    set_property(TARGET ${project} PROPERTY CXX_STANDARD 14)
+    set_property(TARGET ${project} PROPERTY CXX_STANDARD 17)
     set_property(TARGET ${project} PROPERTY CXX_STANDARD_REQUIRED On)
 
     if (MSVC)
         target_compile_options(${project} PRIVATE
-            "/MP"       # Multi-threading support
-            "/W4"       # Enable all warnings
-            "/ZI"       # Edit and continue support
-            "/wd4201"   # Disable "nameless struct" warning
-            "/wd4127"   # Disable "conditional expression is constant" warning
+            "/MP"                   # Multi-threading support
+            "/W4"                   # Enable all warnings
+            "/ZI"                   # Edit and continue support
+            "/wd4201"               # Disable "nameless struct" warning
+            "/wd4127"               # Disable "conditional expression is constant" warning
+            "/permissive-"          # Disable working, but non-conforming code
+            "/Zc:strictStrings-"    # Windows header don't adhere to this
+            # "/std:c++latest"      # Boost as of 1.64 still uses unary_function
         )
         if (OPENSPACE_WARNINGS_AS_ERRORS)
             target_compile_options(${project} PRIVATE "/WX")
@@ -355,6 +364,7 @@ function (handle_option_tests)
 endfunction ()
 
 
+
 function (handle_internal_modules)
 # Get all modules in the correct order based on their dependencies
     file(GLOB moduleDirs RELATIVE ${OPENSPACE_MODULE_DIR} ${OPENSPACE_MODULE_DIR}/*)
@@ -507,6 +517,8 @@ function (handle_internal_modules)
     endforeach ()
     endif ()
 endfunction ()
+
+
 
 function (copy_dynamic_libraries)
     if (WIN32)
