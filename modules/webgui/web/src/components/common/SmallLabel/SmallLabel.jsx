@@ -13,10 +13,7 @@ const SmallLabel = (props) => {
 };
 
 SmallLabel.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.node,
-    PropTypes.arrayOf(PropTypes.node),
-  ]),
+  children: PropTypes.node,
 };
 
 SmallLabel.defaultProps = {

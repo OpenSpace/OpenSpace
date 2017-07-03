@@ -13,10 +13,7 @@ const Picker = (props) => {
 };
 
 Picker.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 Picker.Title = styles.Title;

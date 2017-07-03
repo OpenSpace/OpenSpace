@@ -13,10 +13,7 @@ const TabMenuItem = ({ children, onClick, active }) => {
 };
 
 TabMenuItem.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
+  children: PropTypes.node.isRequired,
   active: PropTypes.bool.isRequired,
   onClick: PropTypes.func,
 };

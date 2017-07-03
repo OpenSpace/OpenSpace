@@ -10,17 +10,12 @@ import styles from './TabMenu.scss';
 class TabMenu extends Component {
   constructor(props) {
     super(props);
-    this.state = { activeTab: null };
-    this.callback = props.callback || (() => {});
+    this.callback = props.callback;
     this.clickTab = this.clickTab.bind(this);
   }
 
-  componentWillReceiveProps({ selected }) {
-    this.setState(previous => Object.assign(previous, { activeTab: selected }));
-  }
-
   isActive(tab) {
-    return this.state.activeTab === tab;
+    return this.props.selected === tab;
   }
 
   clickTab(selectedTab) {
@@ -51,10 +46,12 @@ class TabMenu extends Component {
 
 TabMenu.propTypes = {
   callback: PropTypes.func,
+  selected: PropTypes.node,
 };
 
 TabMenu.defaultProps = {
   callback: (() => {}),
+  selected: null,
 };
 
 export default TabMenu;
