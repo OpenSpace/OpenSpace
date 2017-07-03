@@ -87,6 +87,10 @@ void GuiPerformanceComponent::render() {
     if (ImGui::Button("Reset measurements")) {
         OsEng.renderEngine().performanceManager()->resetPerformanceMeasurements();
     }
+
+    if (ImGui::Button("Output Logs")) {
+        OsEng.renderEngine().performanceManager()->outputLogs();
+    }
         
     if (_sceneGraphIsEnabled) {
         bool sge = _sceneGraphIsEnabled;

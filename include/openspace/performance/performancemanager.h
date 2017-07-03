@@ -58,6 +58,7 @@ public:
     void storeIndividualPerformanceMeasurement(std::string identifier, long long nanoseconds);
     void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
     
+    void outputLogs();
     PerformanceLayout* performanceData();
 
 private:

@@ -196,6 +196,10 @@ bool PerformanceManager::isMeasuringPerformance() const {
     return _doPerformanceMeasurements;
 }
     
+void PerformanceManager::outputLogs() {
+    for (size_t i = 0; i < 30; i++) LINFO("Outputting logs");
+}
+
 PerformanceLayout* PerformanceManager::performanceData() {
     void* ptr = _performanceMemory->memory();
     return reinterpret_cast<PerformanceLayout*>(ptr);
