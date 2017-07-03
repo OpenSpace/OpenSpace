@@ -77,7 +77,7 @@ public:
      * is already mapped or if something else failed.
      */
     void* mapBufferRange(KeyType key, GLintptr offset, GLsizeiptr length,
-        GLbitfield access);
+        BufferAccessMask access);
 
     /**
      * Unmaps all buffers in the PixelBufferContainer.
