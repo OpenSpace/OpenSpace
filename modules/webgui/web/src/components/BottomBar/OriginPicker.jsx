@@ -9,7 +9,7 @@ class OriginPicker extends Component {
     super(props);
 
     this.state = {
-      origin: 'Earth',
+      origin: 'Mercury',
     };
   }
 
@@ -25,11 +25,9 @@ class OriginPicker extends Component {
   render() {
     return (
       <div className={styles.OriginPicker}>
-        <div>
-          { this.icon }
-        </div>
-        <div>
-          <span>{ this.origin }</span>
+        { this.icon }
+        <div className={styles.Title}>
+          <span className={styles.Name}>{ this.origin }</span>
           <SmallLabel>Origin</SmallLabel>
         </div>
       </div>
