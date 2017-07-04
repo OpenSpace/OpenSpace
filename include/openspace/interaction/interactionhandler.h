@@ -29,6 +29,9 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/interactionmode.h>
+#include <openspace/interaction/globebrowsinginteractionmode.h>
+#include <openspace/interaction/orbitalinteractionmode.h>
+#include <openspace/interaction/keyframeinteractionmode.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>

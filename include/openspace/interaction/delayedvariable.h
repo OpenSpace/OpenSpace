@@ -22,60 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/interactionmode.h>
-#include <openspace/interaction/interactionhandler.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
-#include <openspace/util/keys.h>
-
-#include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/quaternion.hpp>
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#endif
-
-namespace {
-    const std::string _loggerCat = "InteractionMode";
-}
+#ifndef __OPENSPACE_CORE___DELAYEDVARIABLE___H__
+#define __OPENSPACE_CORE___DELAYEDVARIABLE___H__
 
 namespace openspace {
 namespace interaction {
 
-InteractionMode::InteractionMode()
-    : _rotateToFocusNodeInterpolator(Interpolator<double>([](double t){
-        return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
-    })) {
-}
-
-InteractionMode::~InteractionMode() {
-
-}
-
-void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
-    _focusNode = focusNode;
-
-    if (_focusNode != nullptr) {
-        _previousFocusNodePosition = _focusNode->worldPosition();
-        _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
+/**
+ * Class that acts as a smoothing filter to a variable. The filter has a step
+ * response on a form that resembles the function y = 1-e^(-t/scale). The variable
+ * will be updates as soon as it is set to a value (calling the set() function).
+*/
+template <typename T, typename ScaleType>
+class DelayedVariable {
+public:
+    DelayedVariable(ScaleType scaleFactor, ScaleType friction) {
+        _scaleFactor = scaleFactor;
+        _friction = glm::max(friction, ScaleType(0.0));
     }
-}
 
-SceneGraphNode* InteractionMode::focusNode() {
-    return _focusNode;
-}
-
-Interpolator<double>& InteractionMode::rotateToFocusNodeInterpolator() {
-    return _rotateToFocusNodeInterpolator;
+    void set(T value, double dt) {
+        _targetValue = value;
+        _currentValue = _currentValue + (_targetValue - _currentValue) *
+            std::min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
+    }
+    
+    void decelerate(double dt) {
+        _currentValue = _currentValue + (- _currentValue) *
+            std::min(_scaleFactor * _friction * dt, 1.0); // less or equal to 1.0 keeps it stable
+    }
+    
+    void setHard(T value) {
+        _targetValue = value;
+        _currentValue = value;
+    }
+    
+    void setFriction(ScaleType friction) {
+        _friction = glm::max(friction, ScaleType(0.0));
+    }
+    
+    void setScaleFactor(ScaleType scaleFactor) {
+        _scaleFactor = scaleFactor;
+    }
+    
+    T get() {
+        return _currentValue;
+    }
+private:
+    ScaleType _scaleFactor;
+    ScaleType _friction;
+    T _targetValue;
+    T _currentValue;
 };
 
 } // namespace interaction
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___DELAYEDVARIABLE___H__

@@ -22,60 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/interactionmode.h>
-#include <openspace/interaction/interactionhandler.h>
+#ifndef __OPENSPACE_CORE___GLOBEBROWSINGINTERACTIONMODE___H__
+#define __OPENSPACE_CORE___GLOBEBROWSINGINTERACTIONMODE___H__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
-#include <openspace/util/keys.h>
-
-#include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/quaternion.hpp>
+#include <openspace/interaction/orbitalinteractionmode.h>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodetic3.h>
 #endif
 
-namespace {
-    const std::string _loggerCat = "InteractionMode";
+namespace openspace {
+
+class Camera;
+class SceneGraphNode;
+
+namespace globebrowsing {
+    class RenderableGlobe;
 }
 
-namespace openspace {
 namespace interaction {
 
-InteractionMode::InteractionMode()
-    : _rotateToFocusNodeInterpolator(Interpolator<double>([](double t){
-        return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
-    })) {
-}
+class GlobeBrowsingInteractionMode : public OrbitalInteractionMode
+{
+public:
+    GlobeBrowsingInteractionMode(std::shared_ptr<MouseStates> mouseStates);
+    ~GlobeBrowsingInteractionMode();
 
-InteractionMode::~InteractionMode() {
+    virtual void setFocusNode(SceneGraphNode* focusNode);
+    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+    bool followingNodeRotation() const override;
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
+                   bool resetCameraDirection);
+    void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,
+                   bool resetCameraDirection);
+    
+    void goToGeodetic3(Camera& camera,  globebrowsing::Geodetic3 geo3);
+    void resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2);
+#endif
+private:
 
-}
-
-void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
-    _focusNode = focusNode;
-
-    if (_focusNode != nullptr) {
-        _previousFocusNodePosition = _focusNode->worldPosition();
-        _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
-    }
-}
-
-SceneGraphNode* InteractionMode::focusNode() {
-    return _focusNode;
-}
-
-Interpolator<double>& InteractionMode::rotateToFocusNodeInterpolator() {
-    return _rotateToFocusNodeInterpolator;
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    globebrowsing::RenderableGlobe* _globe;
+#endif
 };
 
 } // namespace interaction
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___GLOBEBROWSINGINTERACTIONMODE___H__

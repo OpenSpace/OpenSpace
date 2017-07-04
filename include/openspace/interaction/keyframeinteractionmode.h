@@ -22,60 +22,38 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_CORE___KEYFRAMEINTERACTIONMODE___H__
+#define __OPENSPACE_CORE___KEYFRAMEINTERACTIONMODE___H__
+
 #include <openspace/interaction/interactionmode.h>
-#include <openspace/interaction/interactionhandler.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
-#include <openspace/util/keys.h>
-
-#include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/quaternion.hpp>
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#endif
-
-namespace {
-    const std::string _loggerCat = "InteractionMode";
-}
+#include <openspace/util/timeline.h>
 
 namespace openspace {
 namespace interaction {
 
-InteractionMode::InteractionMode()
-    : _rotateToFocusNodeInterpolator(Interpolator<double>([](double t){
-        return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
-    })) {
-}
+class KeyframeInteractionMode : public InteractionMode
+{
+public:
+    struct CameraPose {
+        glm::dvec3 position;
+        glm::quat rotation;
+        std::string focusNode;
+        bool followFocusNodeRotation;
+    };
 
-InteractionMode::~InteractionMode() {
+    KeyframeInteractionMode();
+    ~KeyframeInteractionMode();
 
-}
+    virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
+    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+    bool followingNodeRotation() const override;
+    Timeline<CameraPose>& timeline();
 
-void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
-    _focusNode = focusNode;
-
-    if (_focusNode != nullptr) {
-        _previousFocusNodePosition = _focusNode->worldPosition();
-        _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
-    }
-}
-
-SceneGraphNode* InteractionMode::focusNode() {
-    return _focusNode;
-}
-
-Interpolator<double>& InteractionMode::rotateToFocusNodeInterpolator() {
-    return _rotateToFocusNodeInterpolator;
+private:
+    Timeline<CameraPose> _cameraPoseTimeline;
 };
 
 } // namespace interaction
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___KEYFRAMEINTERACTIONMODE___H__

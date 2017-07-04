@@ -22,60 +22,53 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/interactionmode.h>
-#include <openspace/interaction/interactionhandler.h>
+#ifndef __OPENSPACE_CORE___INPUTSTATE___H__
+#define __OPENSPACE_CORE___INPUTSTATE___H__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
 #include <openspace/util/keys.h>
 
-#include <ghoul/logging/logmanager.h>
+#include <openspace/network/parallelconnection.h>
+#include <openspace/util/mouse.h>
+#include <openspace/util/keys.h>
 
-#include <glm/gtx/quaternion.hpp>
+#include <glm/glm.hpp>
 
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#endif
-
-namespace {
-    const std::string _loggerCat = "InteractionMode";
-}
+#include <list>
 
 namespace openspace {
 namespace interaction {
 
-InteractionMode::InteractionMode()
-    : _rotateToFocusNodeInterpolator(Interpolator<double>([](double t){
-        return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
-    })) {
-}
+class InputState
+{
+public:
+    InputState();
+    ~InputState();
 
-InteractionMode::~InteractionMode() {
+    // Callback functions
+    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
+    void mouseButtonCallback(MouseButton button, MouseAction action);
+    void mousePositionCallback(double mouseX, double mouseY);
+    void mouseScrollWheelCallback(double mouseScrollDelta);
 
-}
+    // Accessors
+    const std::list<std::pair<Key, KeyModifier> >& getPressedKeys() const;
+    const std::list<MouseButton>& getPressedMouseButtons() const;
+    glm::dvec2 getMousePosition() const;
+    double getMouseScrollDelta() const;
+    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
-void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
-    _focusNode = focusNode;
-
-    if (_focusNode != nullptr) {
-        _previousFocusNodePosition = _focusNode->worldPosition();
-        _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
-    }
-}
-
-SceneGraphNode* InteractionMode::focusNode() {
-    return _focusNode;
-}
-
-Interpolator<double>& InteractionMode::rotateToFocusNodeInterpolator() {
-    return _rotateToFocusNodeInterpolator;
+    bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
+    bool isKeyPressed(Key key) const;
+    bool isMouseButtonPressed(MouseButton mouseButton) const;
+private:
+    // Input from keyboard and mouse
+    std::list<std::pair<Key, KeyModifier> > _keysDown;
+    std::list<MouseButton> _mouseButtonsDown;
+    glm::dvec2 _mousePosition;
+    double _mouseScrollDelta;
 };
 
 } // namespace interaction
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___INPUTSTATE___H__

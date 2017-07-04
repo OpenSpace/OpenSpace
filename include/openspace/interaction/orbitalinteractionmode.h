@@ -22,60 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_CORE___ORBITALINTERACTIONMODE___H__
+#define __OPENSPACE_CORE___ORBITALINTERACTIONMODE___H__
+
 #include <openspace/interaction/interactionmode.h>
-#include <openspace/interaction/interactionhandler.h>
-
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
-#include <openspace/util/keys.h>
-
-#include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/quaternion.hpp>
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#endif
-
-namespace {
-    const std::string _loggerCat = "InteractionMode";
-}
 
 namespace openspace {
 namespace interaction {
 
-InteractionMode::InteractionMode()
-    : _rotateToFocusNodeInterpolator(Interpolator<double>([](double t){
-        return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
-    })) {
-}
+class OrbitalInteractionMode : public InteractionMode
+{
+public:
+    class MouseStates
+    {
+    public:
+        /**
+        \param sensitivity
+        \param velocityScaleFactor can be set to 60 to remove the inertia of the
+        interaction. Lower value will make it harder to move the camera. 
+        */
+        MouseStates(double sensitivity, double velocityScaleFactor);
+        void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
+        void setRotationalFriction(double friction);
+        void setHorizontalFriction(double friction);
+        void setVerticalFriction(double friction);
+        void setSensitivity(double sensitivity);
+        void setVelocityScaleFactor(double scaleFactor);
 
-InteractionMode::~InteractionMode() {
+        glm::dvec2 synchedGlobalRotationMouseVelocity();
+        glm::dvec2 synchedLocalRotationMouseVelocity();
+        glm::dvec2 synchedTruckMovementMouseVelocity();
+        glm::dvec2 synchedLocalRollMouseVelocity();
+        glm::dvec2 synchedGlobalRollMouseVelocity();
 
-}
+    private:
+        double _sensitivity;
 
-void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
-    _focusNode = focusNode;
+        MouseState _globalRotationMouseState;
+        MouseState _localRotationMouseState;
+        MouseState _truckMovementMouseState;
+        MouseState _localRollMouseState;
+        MouseState _globalRollMouseState;
+    };
 
-    if (_focusNode != nullptr) {
-        _previousFocusNodePosition = _focusNode->worldPosition();
-        _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
-    }
-}
+    OrbitalInteractionMode(std::shared_ptr<MouseStates> mouseStates);
+    ~OrbitalInteractionMode();
 
-SceneGraphNode* InteractionMode::focusNode() {
-    return _focusNode;
-}
+    virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
+    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+    bool followingNodeRotation() const override;
 
-Interpolator<double>& InteractionMode::rotateToFocusNodeInterpolator() {
-    return _rotateToFocusNodeInterpolator;
+protected:
+    std::shared_ptr<MouseStates> _mouseStates;
 };
 
 } // namespace interaction
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___ORBITALINTERACTIONMODE___H__

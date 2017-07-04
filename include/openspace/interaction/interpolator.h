@@ -22,60 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/interactionmode.h>
-#include <openspace/interaction/interactionhandler.h>
+#ifndef __OPENSPACE_CORE___INTERPOLATOR___H__
+#define __OPENSPACE_CORE___INTERPOLATOR___H__
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
-#include <openspace/util/keys.h>
+#include <ghoul/misc/assert.h>
 
-#include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/quaternion.hpp>
-
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-#include <modules/globebrowsing/globes/renderableglobe.h>
-#include <modules/globebrowsing/globes/chunkedlodglobe.h>
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#endif
-
-namespace {
-    const std::string _loggerCat = "InteractionMode";
-}
+#include <functional>
 
 namespace openspace {
 namespace interaction {
 
-InteractionMode::InteractionMode()
-    : _rotateToFocusNodeInterpolator(Interpolator<double>([](double t){
-        return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
-    })) {
-}
+/*
+ * Interpolates a typename T using a transfer function argument.
+ */
+template <typename T>
+class Interpolator
+{
+public:
+    Interpolator(std::function<T(double)> transferFunction)
+    : _transferFunction(transferFunction)
+    , _t(0.0)
+    , _interpolationTime(1.0) {};
+    ~Interpolator() {};
 
-InteractionMode::~InteractionMode() {
+    void start(double interpolationTime = 0.0) {
+        ghoul_assert(interpolationTime >= 0.0, "interpolationTime should not be negative!");
+        if (interpolationTime) {
+            _interpolationTime = interpolationTime;
+        }
+        _t = 0.0;
+    };
 
-}
+    void end() { _t = 1.0; };
+    
+    void step(double deltaTime) { _t += deltaTime / _interpolationTime; };
 
-void InteractionMode::setFocusNode(SceneGraphNode* focusNode) {
-    _focusNode = focusNode;
-
-    if (_focusNode != nullptr) {
-        _previousFocusNodePosition = _focusNode->worldPosition();
-        _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
-    }
-}
-
-SceneGraphNode* InteractionMode::focusNode() {
-    return _focusNode;
-}
-
-Interpolator<double>& InteractionMode::rotateToFocusNodeInterpolator() {
-    return _rotateToFocusNodeInterpolator;
+    T value() { return _transferFunction(_t); };
+    bool isInterpolating() { return _t < 1.0; };
+private:
+    std::function<T(double)> _transferFunction;
+    double _t;
+    double _interpolationTime;
 };
 
 } // namespace interaction
 } // namespace openspace
+
+#endif // __OPENSPACE_CORE___INTERPOLATOR___H__
