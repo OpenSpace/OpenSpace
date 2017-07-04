@@ -218,11 +218,12 @@ void OrbitalInteractionMode::performLocalRotation(double deltaTime, glm::dquat& 
 
 void OrbitalInteractionMode::interpolateLocalRotation(double deltaTime, glm::dquat& localCameraRotation) {
     double t = _rotateToFocusNodeInterpolator.value();
-    _rotateToFocusNodeInterpolator.step(deltaTime);
+    _rotateToFocusNodeInterpolator.setDeltaTime(deltaTime);
+    _rotateToFocusNodeInterpolator.step();
 	localCameraRotation = glm::slerp(
         localCameraRotation,
         glm::dquat(glm::dvec3(0.0)),
-        glm::min(t * deltaTime, 1.0));
+        glm::min(t * _rotateToFocusNodeInterpolator.deltaTimeScaled(), 1.0));
 
     if (angle(localCameraRotation) < 0.01) {
         _rotateToFocusNodeInterpolator.end();

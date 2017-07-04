@@ -55,7 +55,11 @@ public:
 
     void end() { _t = 1.0; };
     
-    void step(double deltaTime) { _t += deltaTime / _interpolationTime; };
+    void setDeltaTime(double deltaTime) {
+        _scaledDeltaTime = deltaTime / _interpolationTime;
+    };
+	void step() { _t += _scaledDeltaTime; };
+    double deltaTimeScaled() { return _scaledDeltaTime; };
 
     T value() { return _transferFunction(_t); };
     bool isInterpolating() { return _t < 1.0; };
@@ -67,6 +71,7 @@ private:
     std::function<T(double)> _transferFunction;
     double _t;
     double _interpolationTime;
+    double _scaledDeltaTime;
 };
 
 } // namespace interaction

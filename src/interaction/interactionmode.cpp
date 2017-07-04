@@ -97,7 +97,8 @@ void InteractionMode::startInterpolateCameraDirection(const Camera& camera) {
 
     double angle = glm::angle(camDir, directionToCenter);
 
-    _rotateToFocusNodeInterpolator.start(glm::max(angle * 4.0, 2.0));
+    // Minimum is two second. Otherwise proportional to angle
+    _rotateToFocusNodeInterpolator.start(glm::max(angle * 2.0, 2.0));
 }
 
 } // namespace interaction
