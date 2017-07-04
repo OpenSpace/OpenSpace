@@ -33,14 +33,14 @@ namespace openspace {
 namespace interaction {
 
 /*
- * Interpolates a typename T using a transfer function argument.
+ * Interpolates a typename T using a transfer function.
  */
 template <typename T>
 class Interpolator
 {
 public:
-    Interpolator(std::function<T(double)> transferFunction)
-    : _transferFunction(transferFunction)
+    Interpolator()
+    : _transferFunction([](double t){ return t; })
     , _t(0.0)
     , _interpolationTime(1.0) {};
     ~Interpolator() {};
@@ -59,6 +59,10 @@ public:
 
     T value() { return _transferFunction(_t); };
     bool isInterpolating() { return _t < 1.0; };
+
+    void setTransferFunction(std::function<T(double)> transferFunction) {
+        _transferFunction = transferFunction;
+    }
 private:
     std::function<T(double)> _transferFunction;
     double _t;

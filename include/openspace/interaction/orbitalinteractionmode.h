@@ -27,6 +27,10 @@
 
 #include <openspace/interaction/interactionmode.h>
 
+#include <glm/gtx/quaternion.hpp>
+
+#include <tuple>
+
 namespace openspace {
 namespace interaction {
 
@@ -73,7 +77,38 @@ public:
     bool followingNodeRotation() const override;
 
 protected:
+    struct CameraRotationDecomposition {
+        glm::dquat localRotation;
+        glm::dquat globalRotation;
+    };
+
     std::shared_ptr<MouseStates> _mouseStates;
+
+    CameraRotationDecomposition decomposeCameraRotation(const Camera& camera);
+
+    void performRoll(double deltaTime, glm::dquat& localCameraRotation);
+    void performLocalRotation(double deltaTime, glm::dquat& localCameraRotation);
+    void interpolateLocalRotation(double deltaTime, glm::dquat& localCameraRotation);
+    void performHorizontalTranslationAndRotation(
+        double deltaTime,
+        glm::dvec3 objectPosition,
+        glm::dvec3& cameraPosition,
+        glm::dquat& globalCameraRotation);
+    void performVerticalTranslation(
+        double deltaTime,
+        double boundingSphere,
+        glm::dvec3 objectPosition,
+        glm::dvec3& cameraPosition);
+    void performHorizontalRotation(
+        double deltaTime,
+        glm::dvec3 objectPosition,
+        glm::dvec3& cameraPosition,
+        glm::dquat& globalCameraRotation);
+    void pushToSurface(
+        double deltaTime,
+        double boundingSphere,
+        glm::dvec3 objectPosition,
+        glm::dvec3& cameraPosition);
 };
 
 } // namespace interaction
