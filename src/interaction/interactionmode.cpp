@@ -36,6 +36,7 @@
 #include <ghoul/logging/logmanager.h>
 
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/vector_angle.hpp>
 
 namespace {
     const std::string _loggerCat = "InteractionMode";
@@ -59,7 +60,7 @@ InteractionMode::InteractionMode() {
     // value instead of current value and end value (0) as we use it when inerpoláting.
     // As an example f_orig(t) = 1 - t yields f(t) = 1 / (1 - t) which results in a linear
     // interpolation from 1 to 0.
-    
+
     auto smoothStepDerivedTranferFunction = 
         [](double t) {
             return (6 * (t + t*t) / (1 - 3 * t*t + 2 * t*t*t));
@@ -88,9 +89,16 @@ SceneGraphNode* InteractionMode::focusNode() {
     return _focusNode;
 }
 
-Interpolator<double>& InteractionMode::rotateToFocusNodeInterpolator() {
-    return _rotateToFocusNodeInterpolator;
-};
+void InteractionMode::startInterpolateCameraDirection(const Camera& camera) {
+    glm::dvec3 camPos = camera.positionVec3();
+    glm::dvec3 camDir = glm::normalize(camera.rotationQuaternion() * glm::dvec3(0, 0, -1));
+    glm::dvec3 centerPos = _focusNode->worldPosition();
+    glm::dvec3 directionToCenter = glm::normalize(centerPos - camPos);
+
+    double angle = glm::angle(camDir, directionToCenter);
+
+    _rotateToFocusNodeInterpolator.start(glm::max(angle * 4.0, 2.0));
+}
 
 } // namespace interaction
 } // namespace openspace

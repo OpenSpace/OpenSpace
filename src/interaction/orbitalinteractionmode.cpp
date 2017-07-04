@@ -223,6 +223,10 @@ void OrbitalInteractionMode::interpolateLocalRotation(double deltaTime, glm::dqu
         localCameraRotation,
         glm::dquat(glm::dvec3(0.0)),
         glm::min(t * deltaTime, 1.0));
+
+    if (angle(localCameraRotation) < 0.01) {
+        _rotateToFocusNodeInterpolator.end();
+    }
 }
 
 void OrbitalInteractionMode::performHorizontalTranslationAndRotation(

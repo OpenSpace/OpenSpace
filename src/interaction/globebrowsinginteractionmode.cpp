@@ -133,28 +133,14 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         dquat focusNodeRotationDiff = _previousFocusNodeRotation * inverse(globeRotation);
         _previousFocusNodeRotation = globeRotation;
 
-        { // Do local roll
-            glm::dquat cameraRollRotation =
-                glm::angleAxis(_mouseStates->synchedLocalRollMouseVelocity().x * deltaTime, dvec3(0, 0, 1));
-            localCameraRotation = localCameraRotation * cameraRollRotation;
+        performRoll(deltaTime, localCameraRotation);
+        if (_rotateToFocusNodeInterpolator.isInterpolating()) {
+            interpolateLocalRotation(deltaTime, localCameraRotation);
         }
-        if(!_rotateToFocusNodeInterpolator.isInterpolating())
-        { // Do local rotation
-            glm::dvec3 eulerAngles(_mouseStates->synchedLocalRotationMouseVelocity().y, _mouseStates->synchedLocalRotationMouseVelocity().x, 0);
-            glm::dquat rotationDiff = glm::dquat(eulerAngles * deltaTime);
+        else {
+            performLocalRotation(deltaTime, localCameraRotation);
+        }
 
-            localCameraRotation = localCameraRotation * rotationDiff;
-        }
-        else
-        { // Interpolate local rotation to focus node
-            double t = _rotateToFocusNodeInterpolator.value();
-            localCameraRotation = slerp(localCameraRotation, dquat(dvec3(0.0)), t);
-            _rotateToFocusNodeInterpolator.step(0.002); // Should probably depend on dt
-            // This is a fast but ugly solution to slow regaining of control...
-            if (t > 0.2) {
-                _rotateToFocusNodeInterpolator.end();
-            }
-        }
         { // Do global rotation (horizontal movement)
             glm::dvec3 eulerAngles = glm::dvec3(
                 -_mouseStates->synchedGlobalRotationMouseVelocity().y * deltaTime,

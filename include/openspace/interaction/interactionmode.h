@@ -55,7 +55,7 @@ public:
     virtual void setFocusNode(SceneGraphNode* focusNode);
 
     SceneGraphNode* focusNode();
-    Interpolator<double>& rotateToFocusNodeInterpolator();
+    void startInterpolateCameraDirection(const Camera& camera);
     virtual bool followingNodeRotation() const = 0;
     
     virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime) = 0;

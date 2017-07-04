@@ -200,7 +200,7 @@ void InteractionHandler::setCamera(Camera* camera) {
 
 void InteractionHandler::resetCameraDirection() {
     LINFO("Setting camera direction to point at focus node.");
-    _currentInteractionMode->rotateToFocusNodeInterpolator().start();
+    _currentInteractionMode->startInterpolateCameraDirection(*_camera);
 }
 
 void InteractionHandler::setInteractionMode(InteractionMode* interactionMode) {
