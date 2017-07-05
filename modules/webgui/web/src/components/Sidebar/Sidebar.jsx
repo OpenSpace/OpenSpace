@@ -38,7 +38,7 @@ class Sidebar extends React.Component {
   render() {
     const SelectedView = views[this.state.view];
     return (
-      <div className={styles.Sidebar}>
+      <section className={styles.Sidebar}>
         { SelectedView && (<SelectedView closeCallback={this.selectView} />)}
 
         <TabMenu>
@@ -57,7 +57,7 @@ class Sidebar extends React.Component {
             <SmallLabel>Settings</SmallLabel>
           </TabMenuItem>
         </TabMenu>
-      </div>
+      </section>
     );
   }
 }

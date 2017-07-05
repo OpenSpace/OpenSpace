@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import styles from './TabMenu.scss';
 
 const TabMenu = ({ children }) => (
-  <div className={styles.TabMenu}>
+  <nav className={styles.TabMenu}>
     { children }
-  </div>
+  </nav>
 );
 
 TabMenu.propTypes = {
