@@ -197,8 +197,19 @@ bool PerformanceManager::isMeasuringPerformance() const {
 }
     
 void PerformanceManager::outputLogs() {
+    LINFO("Logging from " << typeid(*this).name() << "::" << __func__);
     for (auto it = individualPerformanceLocations.begin(); it != individualPerformanceLocations.end(); ++it) {
         LINFO("Log Count:" << it->second << " Node: " << it->first);
+    }
+
+    PerformanceLayout* layout = performanceData();
+
+    for (size_t i = 0; i < layout->nFunctionEntries; ++i) {
+        LINFO("Log:" << i << " Node: " << layout->sceneGraphEntries[i].name << " " << layout->functionEntries[i].time[0]);
+    }
+
+    for (size_t i = 0; i < layout->nScaleGraphEntries; ++i) {
+        LINFO("Log:" << i << " Node: " << layout->sceneGraphEntries[i].name << " " << layout->sceneGraphEntries[i].renderTime[0];);
     }
 }
 
