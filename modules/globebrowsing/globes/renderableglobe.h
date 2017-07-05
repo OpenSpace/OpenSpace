@@ -82,6 +82,20 @@ public:
         properties::FloatProperty cameraMinHeight;        
     };
 
+    // Shadow structure
+    typedef struct {
+        std::pair<std::string, float> source;
+        std::pair<std::string, float> caster;
+    } ShadowConf;
+
+    struct ShadowRenderingStruct {
+        float xu, xp;
+        float rs, rc;
+        glm::vec3 sourceCasterVec;
+        glm::vec3 casterPositionVec;
+        bool isShadowing;
+    };
+
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
     struct AtmosphereProperties {
         properties::FloatProperty atmosphereHeightP;
@@ -158,6 +172,10 @@ private:
     GeneralProperties _generalProperties;
     properties::PropertyOwner _debugPropertyOwner;
     properties::PropertyOwner _texturePropertyOwner;
+
+    // Shadow
+    bool _shadowEnabled;
+    std::vector< ShadowConf > _shadowConfArray;
 
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
     // Atmosphere Data

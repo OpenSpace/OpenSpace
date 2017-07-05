@@ -506,7 +506,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
     * sunRadiance / M_PI;
 
   // Night illumination from cities
-  //groundRadiance *= mix(30.0, 1.0, dot(n,s));
+  //groundRadiance *= mix(5.0, 1.0, dot(n,s));
     
   // Specular reflection from sun on oceans and rivers  
   if (waterReflectance > 0.1 && muSun > 0.0) {

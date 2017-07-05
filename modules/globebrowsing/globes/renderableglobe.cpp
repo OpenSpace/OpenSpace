@@ -43,26 +43,29 @@ namespace {
     const char* keyCameraMinHeight = "CameraMinHeight";
     const char* keySegmentsPerPatch = "SegmentsPerPatch";
     const char* keyLayers = "Layers";
+    const char* keyShadowGroup = "Shadow_Group";
+    const char* keyShadowSource = "Source";
+    const char* keyShadowCaster = "Caster";
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
-    const std::string keyATMDebug = "Debug";
-    const std::string keyTextureScale = "PreCalculatedTextureScale";
-    const std::string keySaveTextures = "SaveCalculatedTextures";
-    const std::string keyAtmosphere = "Atmosphere";
-    const std::string keyAtmosphereRadius = "AtmosphereRadius";
-    const std::string keyPlanetRadius = "PlanetRadius";
-    const std::string keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
-    const std::string keyRayleigh = "Rayleigh";
-    const std::string keyRayleighHeightScale = "H_R";
-    const std::string keyOzone = "Ozone";
-    const std::string keyOzoneHeightScale = "H_O";
-    const std::string keyMie = "Mie";
-    const std::string keyMieHeightScale = "H_M";
-    const std::string keyMiePhaseConstant = "G";
-    const std::string keyImage = "Image";
-    const std::string keyToneMappingOp = "ToneMapping";
-    const std::string keyExposure = "Exposure";
-    const std::string keyBackground = "Background";
-    const std::string keyGamma = "Gamma";
+    const char* keyATMDebug = "Debug";
+    const char* keyTextureScale = "PreCalculatedTextureScale";
+    const char* keySaveTextures = "SaveCalculatedTextures";
+    const char* keyAtmosphere = "Atmosphere";
+    const char* keyAtmosphereRadius = "AtmosphereRadius";
+    const char* keyPlanetRadius = "PlanetRadius";
+    const char* keyAverageGroundReflectance = "PlanetAverageGroundReflectance";
+    const char* keyRayleigh = "Rayleigh";
+    const char* keyRayleighHeightScale = "H_R";
+    const char* keyOzone = "Ozone";
+    const char* keyOzoneHeightScale = "H_O";
+    const char* keyMie = "Mie";
+    const char* keyMieHeightScale = "H_M";
+    const char* keyMiePhaseConstant = "G";
+    const char* keyImage = "Image";
+    const char* keyToneMappingOp = "ToneMapping";
+    const char* keyExposure = "Exposure";
+    const char* keyBackground = "Background";
+    const char* keyGamma = "Gamma";    
 #endif
 }
 
@@ -98,6 +101,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     })
     , _debugPropertyOwner("Debug")
     , _texturePropertyOwner("Textures")
+    , _shadowEnabled(false)
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
     , _atmosphereProperties({
         FloatProperty("atmosphereHeight", "Atmosphere Height (KM)", 60.0f, 0.1f, 99.0f),
@@ -223,6 +227,80 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
 
     addPropertySubOwner(_debugPropertyOwner);
     addPropertySubOwner(_layerManager.get());
+
+    ghoul::Dictionary shadowDictionary;
+    bool dicSuccess = dictionary.getValue(keyShadowGroup, shadowDictionary);
+    bool disableShadows = false;
+    if (dicSuccess) {
+        std::vector< std::pair<std::string, float > > sourceArray;
+        unsigned int sourceCounter = 1;
+        while (dicSuccess) {
+            std::string sourceName;
+            std::stringstream ss;
+            ss << keyShadowSource << sourceCounter << ".Name";
+            dicSuccess = shadowDictionary.getValue(ss.str(), sourceName);
+            if (dicSuccess) {
+                float sourceRadius;
+                ss.str(std::string());
+                ss << keyShadowSource << sourceCounter << ".Radius";
+                dicSuccess = shadowDictionary.getValue(ss.str(), sourceRadius);
+                if (dicSuccess) {
+                    sourceArray.push_back(std::pair< std::string, float>(
+                        sourceName, sourceRadius));
+                }
+                else {
+                    /*LWARNING("No Radius value expecified for Shadow Source Name "
+                        << sourceName << " from " << name
+                        << " planet.\nDisabling shadows for this planet.");*/
+                    disableShadows = true;
+                    break;
+                }
+            }
+            sourceCounter++;
+        }
+
+        if (!disableShadows && !sourceArray.empty()) {
+            dicSuccess = true;
+            std::vector< std::pair<std::string, float > > casterArray;
+            unsigned int casterCounter = 1;
+            while (dicSuccess) {
+                std::string casterName;
+                std::stringstream ss;
+                ss << keyShadowCaster << casterCounter << ".Name";
+                dicSuccess = shadowDictionary.getValue(ss.str(), casterName);
+                if (dicSuccess) {
+                    float casterRadius;
+                    ss.str(std::string());
+                    ss << keyShadowCaster << casterCounter << ".Radius";
+                    dicSuccess = shadowDictionary.getValue(ss.str(), casterRadius);
+                    if (dicSuccess) {
+                        casterArray.push_back(std::pair< std::string, float>(
+                            casterName, casterRadius));
+                    }
+                    else {
+                        /*LWARNING("No Radius value expecified for Shadow Caster Name "
+                            << casterName << " from " << name
+                            << " planet.\nDisabling shadows for this planet.");*/
+                        disableShadows = true;
+                        break;
+                    }
+                }
+
+                casterCounter++;
+            }
+
+            if (!disableShadows && (!sourceArray.empty() && !casterArray.empty())) {
+                for (const auto & source : sourceArray)
+                    for (const auto & caster : casterArray) {
+                        ShadowConf sc;
+                        sc.source = source;
+                        sc.caster = caster;
+                        _shadowConfArray.push_back(sc);
+                    }
+                _shadowEnabled = true;
+            }
+        }
+    }
 
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
     //================================================================
