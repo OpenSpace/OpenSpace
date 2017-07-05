@@ -361,7 +361,7 @@ TextureFormat getTextureFormatOptimized(int rasterCount, GDALDataType gdalType) 
     return format;
 }
 
-GLuint getOpenGLDataType(GDALDataType gdalType) {
+GLenum getOpenGLDataType(GDALDataType gdalType) {
     switch (gdalType) {
         case GDT_Byte:
             return GL_UNSIGNED_BYTE;
@@ -383,7 +383,7 @@ GLuint getOpenGLDataType(GDALDataType gdalType) {
     }
 }
 
-GDALDataType getGdalDataType(GLuint glType) {
+GDALDataType getGdalDataType(GLenum glType) {
     switch (glType) {
         case GL_UNSIGNED_BYTE:
             return GDT_Byte;
@@ -419,7 +419,7 @@ size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
     }
 }
 
-size_t numberOfBytes(GLuint glType) {
+size_t numberOfBytes(GLenum glType) {
     switch (glType) {
         case GL_UNSIGNED_BYTE: return sizeof(GLubyte);
         case GL_BYTE: return sizeof(GLbyte);
@@ -435,7 +435,7 @@ size_t numberOfBytes(GLuint glType) {
     }
 }
 
-size_t getMaximumValue(GLuint glType) {
+size_t getMaximumValue(GLenum glType) {
     switch (glType) {
         case GL_UNSIGNED_BYTE:
             return 1 << 8;
@@ -452,7 +452,7 @@ size_t getMaximumValue(GLuint glType) {
     }
 }
 
-float interpretFloat(GLuint glType, const char* src) {
+float interpretFloat(GLenum glType, const char* src) {
     switch (glType) {
         case GL_UNSIGNED_BYTE:
             return static_cast<float>(*reinterpret_cast<const GLubyte*>(src));
@@ -475,7 +475,7 @@ float interpretFloat(GLuint glType, const char* src) {
     }
 }
 
-GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
+GLenum glTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
     switch (format) {
         case ghoul::opengl::Texture::Format::Red:
             switch (glType) {
@@ -494,7 +494,7 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return 0;
+                    return GLenum(0);
             }
             break;
         case ghoul::opengl::Texture::Format::RG:
@@ -514,7 +514,7 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return 0;
+                    return GLenum(0);
             }
             break;
         case ghoul::opengl::Texture::Format::RGB:
@@ -534,7 +534,7 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return 0;
+                    return GLenum(0);
             }
             break;
         case ghoul::opengl::Texture::Format::RGBA:
@@ -554,7 +554,7 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return 0;
+                    return GLenum(0);
             }
             break;
         case ghoul::opengl::Texture::Format::BGR:
@@ -574,7 +574,7 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return 0;
+                    return GLenum(0);
             }
             break;
         case ghoul::opengl::Texture::Format::BGRA:
@@ -594,12 +594,17 @@ GLint glTextureFormat(GLuint glType, ghoul::opengl::Texture::Format format) {
                 default:
                     ghoul_assert(false, "glType data type unknown");
                     LERROR("glType data type unknown: " << glType);
-                    return 0;
+                    return GLenum(0);
             }
             break;
         default:
-            LERROR("Unknown format for OpenGL texture: " << format);
-            return 0;
+            LERROR(
+                "Unknown format for OpenGL texture: " <<
+                static_cast<std::underlying_type_t<
+                    ghoul::opengl::Texture::Format>
+                >(format)
+            );
+            return GLenum(0);
             break;
     }
 }

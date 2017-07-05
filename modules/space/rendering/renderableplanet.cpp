@@ -571,15 +571,6 @@ RenderablePlanet::RenderablePlanet(const ghoul::Dictionary& dictionary)
 bool RenderablePlanet::initialize() {
     RenderEngine& renderEngine = OsEng.renderEngine();
 
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Checking System State before initialization. OpenGL error: " << errString);
-    }
-
-    //===================================================================
-    //=========== Defines the shading program to be executed ============
-    //===================================================================
     if (_programObject == nullptr && _shadowEnabled && _hasNightTexture) {
         // shadow program
         _programObject = renderEngine.buildRenderProgram(
@@ -617,21 +608,11 @@ bool RenderablePlanet::initialize() {
     _programObject->setIgnoreSubroutineUniformLocationError(IgnoreError::Yes);
     _programObject->setIgnoreUniformLocationError(IgnoreError::Yes);
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error after load shading programs. OpenGL error: " << errString);
-    }
-
     _geometry->initialize(this);
 
     // Deactivate any previously activated shader program.
     _programObject->deactivate();
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Shader Programs Creation. OpenGL error: " << errString);
-    }
-    
     loadTexture();
 
 #ifdef OPENSPACE_MODULE_ATMOSPHERE_ENABLED
@@ -918,12 +899,6 @@ void RenderablePlanet::loadTexture() {
         }
     }
 
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error after reading color texture. OpenGL error: " << errString);
-    }
-
     if (_hasNightTexture) {
         _nightTexture = nullptr;
         if (_nightTexturePath.value() != "") {
@@ -937,11 +912,6 @@ void RenderablePlanet::loadTexture() {
         }
     }
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error after reading night texture. OpenGL error: " << errString);
-    }
-    
     if (_hasHeightTexture) {
         _heightMapTexture = nullptr;
         if (_heightMapTexturePath.value() != "") {
@@ -953,11 +923,6 @@ void RenderablePlanet::loadTexture() {
                 //_nightTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
             }
         }
-    }
-
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error after reading height mapping texture. OpenGL error: " << errString);
     }
 }
 

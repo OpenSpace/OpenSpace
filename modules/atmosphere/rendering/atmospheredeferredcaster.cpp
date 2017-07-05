@@ -220,13 +220,7 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     program.setUniform("ModelTransformMatrix", _modelTransform);
     program.setUniform("dInverseModelTransformMatrix", glm::inverse(_modelTransform));
     program.setUniform("dSGCTEyeToOSWorldTransformMatrix", glm::inverse(renderData.camera.combinedViewMatrix()));
-
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("After inverse matrices. OpenGL error: " << errString);
-    }
-
+    
     // Object Space
     //program.setUniform("inverseTransformMatrix", glm::inverse(_modelTransform));
     program.setUniform("dInverseTransformMatrix", glm::inverse(_modelTransform));
@@ -966,12 +960,6 @@ void AtmosphereDeferredcaster::createComputationTextures() {
 
     //========== Create Atmosphere Tables (textures) ==============
 
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error before creating OpenGL textures for Atmosphere computation. OpenGL error: " << errString);
-    }
-
     if (!_atmosphereCalculated) {
         //============== Transmittance =================
         ghoul::opengl::TextureUnit transmittanceTableTextureUnit;
@@ -986,12 +974,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _transmittance_table_width,
             _transmittance_table_height, 0, GL_RGB, GL_FLOAT, nullptr);
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            const GLubyte * errString = gluErrorString(err);
-            LERROR("Error creating Transmittance T texture for Atmosphere computation. OpenGL error: " << errString);
-        }
-        //glBindTexture(GL_TEXTURE_2D, 0);
-
+        
         //============== Irradiance =================
         ghoul::opengl::TextureUnit irradianceTableTextureUnit;
         irradianceTableTextureUnit.activate();
@@ -1004,13 +987,7 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _irradiance_table_width,
             _irradiance_table_height, 0, GL_RGB, GL_FLOAT, nullptr);
-
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            const GLubyte * errString = gluErrorString(err);
-            LERROR("Error creating Irradiance E texture for Atmosphere computation. OpenGL error: " << errString);
-        }
-        //glBindTexture(GL_TEXTURE_2D, 0);
-
+        
         //============== InScattering =================
         ghoul::opengl::TextureUnit inScatteringTableTextureUnit;
         inScatteringTableTextureUnit.activate();
@@ -1024,12 +1001,6 @@ void AtmosphereDeferredcaster::createComputationTextures() {
         glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F_ARB, _mu_s_samples * _nu_samples,
             _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
-
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            const GLubyte * errString = gluErrorString(err);
-            LERROR("Error creating InScattering S texture for Atmosphere computation. OpenGL error: " << errString);
-        }
-        //glBindTexture(GL_TEXTURE_3D, 0);
     }
 
     //============== Delta E =================
@@ -1045,12 +1016,6 @@ void AtmosphereDeferredcaster::createComputationTextures() {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, _delta_e_table_width,
         _delta_e_table_height, 0, GL_RGB, GL_FLOAT, nullptr);
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error creating Irradiance Delta E texture for Atmosphere computation. OpenGL error: " << errString);
-    }
-    //glBindTexture(GL_TEXTURE_2D, 0);
-
     //============== Delta S =================
     ghoul::opengl::TextureUnit deltaSRayleighTableTextureUnit;
     deltaSRayleighTableTextureUnit.activate();
@@ -1065,12 +1030,6 @@ void AtmosphereDeferredcaster::createComputationTextures() {
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, _mu_s_samples * _nu_samples,
         _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error creating Rayleigh InScattering Delta S exture for Atmosphere computation. OpenGL error: " << errString);
-    }
-    //glBindTexture(GL_TEXTURE_3D, 0);
-
     ghoul::opengl::TextureUnit deltaSMieTableTextureUnit;
     deltaSMieTableTextureUnit.activate();
     glGenTextures(1, &_deltaSMieTableTexture);
@@ -1083,12 +1042,6 @@ void AtmosphereDeferredcaster::createComputationTextures() {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, _mu_s_samples * _nu_samples,
         _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
-
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error creating Mie InScattering Delta S texture for Atmosphere computation. OpenGL error: " << errString);
-    }
-    //glBindTexture(GL_TEXTURE_3D, 0);
 
     //============== Delta J (Radiance Scattered) =================
     ghoul::opengl::TextureUnit deltaJTableTextureUnit;
@@ -1104,11 +1057,6 @@ void AtmosphereDeferredcaster::createComputationTextures() {
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGB32F, _mu_s_samples * _nu_samples,
         _mu_samples, _r_samples, 0, GL_RGB, GL_FLOAT, nullptr);
 
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error creating Inscattering Irradiance Delta J texture for Atmosphere computation. OpenGL error: " << errString);
-    }
-    //glBindTexture(GL_TEXTURE_3D, 0);
 }
 
 void AtmosphereDeferredcaster::deleteComputationTextures() {
@@ -1143,12 +1091,12 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
 
     // Saving current OpenGL state
     GLboolean blendEnabled = glIsEnabled(GL_BLEND);
-    GLint blendEquationRGB;
-    GLint blendEquationAlpha;
-    GLint blendDestAlpha;
-    GLint blendDestRGB;
-    GLint blendSrcAlpha;
-    GLint blendSrcRGB;
+    GLenum blendEquationRGB;
+    GLenum blendEquationAlpha;
+    GLenum blendDestAlpha;
+    GLenum blendDestRGB;
+    GLenum blendSrcAlpha;
+    GLenum blendSrcRGB;
 
     if (blendEnabled)
         glDisable(GL_BLEND);
@@ -1177,11 +1125,7 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
     }
     _transmittanceProgramObject->deactivate();
     GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error computing Transmittance T Table. OpenGL error: " << errString);
-    }
-
+    
     // line 2 in algorithm 4.1
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _deltaETableTexture, 0);
     checkFrameBufferState("_deltaETableTexture");
@@ -1198,11 +1142,7 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
             _delta_e_table_width, _delta_e_table_height);
     }
     _irradianceProgramObject->deactivate();
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error computing Irradiance Delta E Table. OpenGL error: " << errString);
-    }
-
+    
     // line 3 in algorithm 4.1
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _deltaSRayleighTableTexture, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, _deltaSMieTableTexture, 0);
@@ -1230,11 +1170,7 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
     glDrawBuffers(1, drawBuffers);
 
     _inScatteringProgramObject->deactivate();
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error computing InScattering Rayleigh and Mie Delta Tables. OpenGL error: " << errString);
-    }
-
+    
     // line 4 in algorithm 4.1
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _irradianceTableTexture, 0);
     checkFrameBufferState("_irradianceTableTexture");
@@ -1254,11 +1190,7 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
             _delta_e_table_width, _delta_e_table_height);
     }
     _deltaEProgramObject->deactivate();
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error computing Irradiance E Table. OpenGL error: " << errString);
-    }
-
+    
     // line 5 in algorithm 4.1
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _inScatteringTableTexture, 0);
     checkFrameBufferState("_inScatteringTableTexture");
@@ -1281,10 +1213,6 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
             _mu_s_samples * _nu_samples, _mu_samples);
     }
     _deltaSProgramObject->deactivate();
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error computing InScattering S Table. OpenGL error: " << errString);
-    }
 
     // loop in line 6 in algorithm 4.1
     for (int scatteringOrder = 2; scatteringOrder <= 4; ++scatteringOrder) {
@@ -1322,11 +1250,7 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
                     _mu_s_samples * _nu_samples, _mu_samples);
         }
         _deltaJProgramObject->deactivate();
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            const GLubyte * errString = gluErrorString(err);
-            LERROR("Error computing Delta J Table (Sup. Terms). OpenGL error: " << errString);
-        }
-
+        
         // line 8 in algorithm 4.1
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _deltaETableTexture, 0);
         checkFrameBufferState("_deltaETableTexture");
@@ -1354,20 +1278,12 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
                     _delta_e_table_width, _delta_e_table_height);
         }
         _irradianceSupTermsProgramObject->deactivate();
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            const GLubyte * errString = gluErrorString(err);
-            LERROR("Error computing Delta E Table (Sup. Terms). OpenGL error: " << errString);
-        }
-
+        
         // line 9 in algorithm 4.1
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _deltaSRayleighTableTexture, 0);
         checkFrameBufferState("_deltaSRayleighTableTexture");
         glViewport(0, 0, _mu_s_samples * _nu_samples, _mu_samples);
         _inScatteringSupTermsProgramObject->activate();
-        /*if (scatteringOrder == 2)
-            _inScatteringSupTermsProgramObject->setUniform("firstIteraction", (int)1);
-        else
-            _inScatteringSupTermsProgramObject->setUniform("firstIteraction", (int)0);*/
         transmittanceTableTextureUnit.activate();
         glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
         _inScatteringSupTermsProgramObject->setUniform("transmittanceTexture", transmittanceTableTextureUnit);
@@ -1386,11 +1302,7 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
                     _mu_s_samples * _nu_samples, _mu_samples);
         }
         _inScatteringSupTermsProgramObject->deactivate();
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            const GLubyte * errString = gluErrorString(err);
-            LERROR("Error computing Delta S Table (Sup. Terms). OpenGL error: " << errString);
-        }
-
+        
         glEnable(GL_BLEND);
         glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
         glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
@@ -1412,11 +1324,7 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
                     _delta_e_table_width, _delta_e_table_height);
         }
         _irradianceFinalProgramObject->deactivate();
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            const GLubyte * errString = gluErrorString(err);
-            LERROR("Error computing E Table (Sup. Terms). OpenGL error: " << errString);
-        }
-
+        
         // line 11 in algorithm 4.1
         glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _inScatteringTableTexture, 0);
         checkFrameBufferState("_inScatteringTableTexture");
@@ -1437,11 +1345,7 @@ void AtmosphereDeferredcaster::executeCalculations(const GLuint quadCalcVAO,
                     _mu_s_samples * _nu_samples, _mu_samples);
         }
         _deltaSSupTermsProgramObject->deactivate();
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            const GLubyte * errString = gluErrorString(err);
-            LERROR("Error computing S Table (Sup. Terms). OpenGL error: " << errString);
-        }
-
+        
         glDisable(GL_BLEND);
     }
 
@@ -1473,22 +1377,11 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam()
     //========= Load Shader Programs for Calculations ==========
     //==========================================================
     loadComputationPrograms();
-
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error loading shader programs for Atmosphere computation. OpenGL error: " << errString);
-    }
-
+    
     //==========================================================
     //============ Create Textures for Calculations ============
     //==========================================================
     createComputationTextures();
-
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error creating textures for Atmosphere computation. OpenGL error: " << errString);
-    }
 
     // Saves current FBO first
     GLint defaultFBO;
@@ -1503,11 +1396,6 @@ void AtmosphereDeferredcaster::preCalculateAtmosphereParam()
     glBindFramebuffer(GL_FRAMEBUFFER, calcFBO);
     GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, drawBuffers);
-
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        const GLubyte * errString = gluErrorString(err);
-        LERROR("Error creating FrameBuffer Object for Atmosphere pre-computation. OpenGL error: " << errString);
-    }
 
     // Prepare for rendering/calculations
     GLuint quadCalcVAO;
@@ -1565,11 +1453,6 @@ void AtmosphereDeferredcaster::createRenderQuad(GLuint * vao, GLuint * vbo,
     glEnableVertexAttribArray(0);
 
     glBindVertexArray(0);
-
-    GLenum err;
-    while ((err = glGetError()) != GL_NO_ERROR) {
-        LERROR("Error creating vertexbuffer for computation. OpenGL error: " << err);
-    }
 }
 
 void AtmosphereDeferredcaster::loadAtmosphereDataIntoShaderProgram(std::unique_ptr<ghoul::opengl::ProgramObject> & shaderProg) {
@@ -1691,16 +1574,7 @@ void AtmosphereDeferredcaster::saveTextureToPPMFile(const GLenum color_buffer_at
         unsigned char * pixels = new unsigned char[width*height * 3];
         for (int t = 0; t < width*height * 3; ++t)
             pixels[t] = 255;
-
-        // check OpenGL error
-        GLenum err;
-        while ((err = glGetError()) != GL_NO_ERROR) {
-            const GLubyte * errorString = gluErrorString(err);
-
-            std::cout << "\n\nBefore Reading Texture from card. OpenGL error: "
-                << err << " - " << errorString << std::endl;
-        }
-
+        
         if (color_buffer_attachment != GL_DEPTH_ATTACHMENT) {
             glReadBuffer(color_buffer_attachment);
             glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);

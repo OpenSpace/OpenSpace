@@ -165,7 +165,6 @@ set(OPENSPACE_SOURCE
 )
 
 set(OPENSPACE_HEADER
-    ${OPENSPACE_BASE_DIR}/include/openspace/openspace.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/core_registration.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentation.h
     ${OPENSPACE_BASE_DIR}/include/openspace/documentation/documentationengine.h
