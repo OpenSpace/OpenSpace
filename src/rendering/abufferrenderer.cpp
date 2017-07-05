@@ -235,7 +235,15 @@ void ABufferRenderer::update() {
 }
     
 void ABufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
-    PerfMeasure("ABufferRenderer::render");
+    std::unique_ptr<performance::PerformanceMeasurement> perf;
+    if (doPerformanceMeasurements) {
+        perf = std::make_unique<performance::PerformanceMeasurement>(
+            "ABufferRenderer::render",
+            OsEng.renderEngine().performanceManager()
+            );
+    }
+
+//    PerfMeasure("ABufferRenderer::render");
 
     if (!_scene || !_camera) { 
         return;
