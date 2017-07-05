@@ -418,6 +418,10 @@ void OpenSpaceEngine::destroy() {
 
 void OpenSpaceEngine::initialize() {
     LTRACE("OpenSpaceEngine::initialize(begin)");
+
+    glbinding::Binding::useCurrentContext();
+    glbinding::Binding::initialize();
+
     // clear the screen so the user don't have to see old buffer contents from the
     // graphics card
     LDEBUG("Clearing all Windows");
@@ -432,6 +436,7 @@ void OpenSpaceEngine::initialize() {
         std::make_unique<ghoul::systemcapabilities::OpenGLCapabilitiesComponent>()
     );
     
+    // @BUG:  This will call OpenGL functions, should it should be in the initializeGL
     LDEBUG("Detecting capabilities");
     SysCap.detectCapabilities();
 
@@ -1106,7 +1111,6 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
                              const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
-
     bool isGuiWindow = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
     bool showOverlay = isGuiWindow && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering();
     // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
