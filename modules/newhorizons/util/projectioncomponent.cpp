@@ -913,7 +913,8 @@ bool ProjectionComponent::generateProjectionLayerTexture(const ivec2& size) {
         _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
             glm::uvec3(size, 1),
             ghoul::opengl::Texture::Format::Red,
-            ghoul::opengl::Texture::Format::Red
+            // @TODO: Remove the static cast ---abock
+            static_cast<GLenum>(ghoul::opengl::Texture::Format::Red)
         );
 
         if (_dilation.stencilTexture) {
