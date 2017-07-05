@@ -84,7 +84,11 @@ protected:
 
     std::shared_ptr<MouseStates> _mouseStates;
 
-    CameraRotationDecomposition decomposeCameraRotation(const Camera& camera);
+    CameraRotationDecomposition decomposeCameraRotation(
+        glm::dvec3 cameraPosition,
+        glm::dquat cameraRotation,
+        glm::dvec3 cameraLookUp,
+        glm::dvec3 cameraViewDirection);
 
     void performRoll(double deltaTime, glm::dquat& localCameraRotation);
     void performLocalRotation(double deltaTime, glm::dquat& localCameraRotation);

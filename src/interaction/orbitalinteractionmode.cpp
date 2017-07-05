@@ -176,24 +176,24 @@ OrbitalInteractionMode::~OrbitalInteractionMode() {
 }
 
 OrbitalInteractionMode::CameraRotationDecomposition
-	OrbitalInteractionMode::decomposeCameraRotation(const Camera& camera)
+	OrbitalInteractionMode::decomposeCameraRotation(
+		glm::dvec3 cameraPosition,
+		glm::dquat cameraRotation,
+		glm::dvec3 cameraLookUp,
+		glm::dvec3 cameraViewDirection)
 {
     // Read the current state of the camera and focus node
-    glm::dvec3 camPos = camera.positionVec3();
+    glm::dvec3 camPos = cameraPosition;
     glm::dvec3 centerPos = _focusNode->worldPosition();
-    
-    glm::dquat totalRotation = camera.rotationQuaternion();
-    glm::dvec3 directionToCenter = glm::normalize(centerPos - camPos);
-    glm::dvec3 lookUp = camera.lookUpVectorWorldSpace();
-    glm::dvec3 camDirection = camera.viewDirectionWorldSpace();
+	glm::dvec3 directionToCenter = normalize(centerPos - camPos);
 
     // Create the internal representation of the local and global camera rotations
     glm::dmat4 lookAtMat = glm::lookAt(
         glm::dvec3(0, 0, 0),
         directionToCenter,
-        normalize(camDirection + lookUp)); // To avoid problem with lookup in up direction
+        normalize(cameraViewDirection + cameraLookUp)); // To avoid problem with lookup in up direction
     glm::dquat globalCameraRotation = glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
-    glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) * totalRotation;
+    glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) * cameraRotation;
 
     return { localCameraRotation, globalCameraRotation };
 }
@@ -310,19 +310,23 @@ void OrbitalInteractionMode::pushToSurface(
 }
 
 void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, double deltaTime) {
-    using namespace glm;
     if (_focusNode) {
         // Read the current state of the camera and focus node
-        dvec3 camPos = camera.positionVec3();
-        CameraRotationDecomposition camRot = decomposeCameraRotation(camera);
-        dvec3 centerPos = _focusNode->worldPosition();
+        glm::dvec3 camPos = camera.positionVec3();
+        glm::dvec3 centerPos = _focusNode->worldPosition();
         double boundingSphere = _focusNode->boundingSphere();
         
         // Follow focus nodes movement
-        dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
+        glm::dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
         _previousFocusNodePosition = centerPos;
         camPos += focusNodeDiff;
-		
+        
+        CameraRotationDecomposition camRot = decomposeCameraRotation(
+            camPos,
+            camera.rotationQuaternion(),
+            camera.lookUpVectorWorldSpace(),
+            camera.viewDirectionWorldSpace());
+
         performRoll(deltaTime, camRot.localRotation);
 		if (_rotateToFocusNodeInterpolator.isInterpolating()) {
 			interpolateLocalRotation(deltaTime, camRot.localRotation);
