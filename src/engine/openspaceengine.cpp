@@ -122,7 +122,7 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 OpenSpaceEngine::OpenSpaceEngine(std::string programName,
                                  std::unique_ptr<WindowWrapper> windowWrapper)
     : _configurationManager(new ConfigurationManager)
-    , _sceneManager(new SceneManager)
+    , _sceneManager(nullptr)
     , _downloadManager(nullptr)
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
@@ -376,6 +376,9 @@ void OpenSpaceEngine::create(int argc, char** argv,
     sgctArguments.insert(sgctArguments.begin(), argv[0]);
     sgctArguments.insert(sgctArguments.begin() + 1, SgctConfigArgumentCommand);
     sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
+
+    // Set up scene manager
+    _engine->_sceneManager = std::make_unique<SceneManager>("${ASSETS}", "${SYNC}");
 }
 
 void OpenSpaceEngine::destroy() {

@@ -356,11 +356,13 @@ int addSceneGraphNode(lua_State* L) {
         return 0;
     }
 
-    SceneLoader loader;
-    SceneGraphNode* importedNode = loader.importNodeDictionary(*OsEng.renderEngine().scene(), d);
-    importedNode->initialize();
+    // Temporarily disabled.
+
+    //SceneLoader loader;
+    //SceneGraphNode* importedNode = loader.importNodeDictionary(*OsEng.renderEngine().scene(), d);
+    //importedNode->initialize();
         
-    return 1;
+    //return 1;
 }
 
 int removeSceneGraphNode(lua_State* L) {

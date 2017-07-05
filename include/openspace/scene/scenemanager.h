@@ -25,8 +25,12 @@
 #ifndef __OPENSPACE_CORE___SCENEMANAGER___H__
 #define __OPENSPACE_CORE___SCENEMANAGER___H__
 
+#include <openspace/scene/assetloader.h>
+#include <openspace/scene/sceneloader.h>
+
 #include <vector>
 #include <memory>
+#include <string>
 
 namespace openspace {
 
@@ -34,13 +38,15 @@ class Scene;
 
 class SceneManager {
 public:
-    SceneManager() = default;
+    SceneManager(std::string assetRoot, std::string syncRoot);
     ~SceneManager() = default;
     Scene* loadScene(const std::string& path);
     void unloadScene(Scene& scene);
     void unloadAll();
 private:
     std::vector<std::unique_ptr<Scene>> _scenes;
+    AssetLoader _assetLoader;
+    SceneLoader _sceneLoader;
 };
 
 } // namespace

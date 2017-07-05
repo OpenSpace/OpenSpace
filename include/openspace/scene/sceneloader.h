@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SCENELOADER___H__
 
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/assetloader.h>
 #include <openspace/util/camera.h>
 
 #include <ghoul/misc/dictionary.h>
@@ -40,7 +41,7 @@ class Scene;
 
 class SceneLoader {
 public:
-    SceneLoader() = default;
+    SceneLoader(AssetLoader* assetLoader);
     ~SceneLoader() = default;
 
     /**
@@ -96,7 +97,7 @@ private:
     /**
      * Load a mod file.
      */
-    std::vector<SceneLoader::LoadedNode> loadModule(const std::string& path, lua_State* luaState);
+    std::vector<SceneLoader::LoadedNode> loadAsset(const std::string& path, lua_State* luaState);
 
     /**
      * Load a directory.
@@ -112,6 +113,8 @@ private:
      * Add loaded nodes to an existing scene
      */
     std::vector<SceneGraphNode*> addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode>&& nodes);
+
+    AssetLoader* _assetLoader;
 };
 
 } // namespace openspace

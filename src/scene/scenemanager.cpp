@@ -31,9 +31,13 @@
 
 namespace openspace {
 
+SceneManager::SceneManager(std::string assetRoot, std::string syncRoot)
+    : _assetLoader(assetRoot, syncRoot)
+    , _sceneLoader(&_assetLoader)
+{}
+
 Scene* SceneManager::loadScene(const std::string& path) {
-    SceneLoader loader;
-    std::unique_ptr<Scene> scene = loader.loadScene(path);
+    std::unique_ptr<Scene> scene = _sceneLoader.loadScene(path);
     Scene* s = scene.get();
     if (s) {
         _scenes.push_back(std::move(scene));

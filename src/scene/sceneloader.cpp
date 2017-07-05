@@ -38,9 +38,8 @@
 namespace {
     const std::string _loggerCat = "SceneLoader";
     const std::string KeyPathScene = "ScenePath";
-    const std::string KeyModules = "Modules";
-    const std::string ModuleExtension = ".mod";
-    const std::string KeyPathModule = "ModulePath";
+    const std::string KeyAssets = "Assets";
+    const std::string AssetExtension = ".asset";
 
     const std::string RootNodeName = "Root";
     const std::string KeyName = "Name";
@@ -52,14 +51,11 @@ namespace {
     const std::string KeyCameraRotation = "Rotation";
 }
 
-struct ModuleInformation {
-    ghoul::Dictionary dictionary;
-    std::string moduleFile;
-    std::string modulePath;
-    std::string moduleName;
-};
-
 namespace openspace {
+
+SceneLoader::SceneLoader(AssetLoader* assetLoader) 
+    : _assetLoader(assetLoader)
+{}
 
 std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
     // Set up lua state.
@@ -82,33 +78,31 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
 
     documentation::testSpecificationAndThrow(Scene::Documentation(), sceneDictionary, "Scene");
 
-    std::string relativeSceneDirectory = ".";
-    sceneDictionary.getValue<std::string>(KeyPathScene, relativeSceneDirectory);
-    std::string modulesPath = FileSys.absPath(sceneDirectory + FileSys.PathSeparator + relativeSceneDirectory);
+    std::string assetsPath = FileSys.absPath(_assetLoader->rootAsset()->directory());
 
-    ghoul::Dictionary moduleDictionary;
-    sceneDictionary.getValue(KeyModules, moduleDictionary);
+    ghoul::Dictionary assetDictionary;
+    sceneDictionary.getValue(KeyAssets, assetDictionary);
 
     // Above we generated a ghoul::Dictionary from the scene file; now we run the scene
     // file again to load any variables defined inside into the state that is passed to
-    // the modules. This allows us to specify global variables that can then be used
-    // inside the modules to toggle settings.
+    // the assets. This allows us to specify global variables that can then be used
+    // inside the assets to toggle settings.
     ghoul::lua::runScriptFile(state, absScenePath);
-    std::vector<std::string> keys = moduleDictionary.keys();
-    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
+    std::vector<std::string> keys = assetDictionary.keys();
+    //ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
 
     std::vector<SceneLoader::LoadedNode> allNodes;
 
     for (const std::string& key : keys) {
-        std::string fullModuleName = moduleDictionary.value<std::string>(key);
-        std::replace(fullModuleName.begin(), fullModuleName.end(), '/', FileSys.PathSeparator);
-        std::string modulePath = FileSys.pathByAppendingComponent(modulesPath, fullModuleName);
+        std::string fullAssetName = assetDictionary.value<std::string>(key);
+        std::replace(fullAssetName.begin(), fullAssetName.end(), '/', FileSys.PathSeparator);
+        std::string assetPath = FileSys.pathByAppendingComponent(assetsPath, fullAssetName);
 
-        std::vector<SceneLoader::LoadedNode> nodes = loadDirectory(modulePath, state);
+        std::vector<SceneLoader::LoadedNode> nodes = loadDirectory(assetPath, state);
         std::move(nodes.begin(), nodes.end(), std::back_inserter(allNodes));
     }
 
-    FileSys.setCurrentDirectory(oldDirectory);
+    //FileSys.setCurrentDirectory(oldDirectory);
     
     std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 
@@ -148,9 +142,9 @@ std::vector<SceneGraphNode*> SceneLoader::importDirectory(Scene& scene, const st
 
     std::string absDirectoryPath = absPath(path);
 
-    ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
+    //ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
     std::vector<SceneLoader::LoadedNode> nodes = loadDirectory(path, state);
-    FileSys.setCurrentDirectory(oldDirectory);
+    //FileSys.setCurrentDirectory(oldDirectory);
     return addLoadedNodes(scene, std::move(nodes));
 }
 
@@ -200,19 +194,19 @@ std::vector<SceneLoader::LoadedNode> SceneLoader::loadDirectory(
         LERROR("Error parsing directory name '" << path << "'");
         return std::vector<SceneLoader::LoadedNode>();
     }
-    std::string moduleName = path.substr(pos + 1);
-    std::string moduleFile = FileSys.pathByAppendingComponent(path, moduleName) + ModuleExtension;
+    std::string assetName = path.substr(pos + 1);
+    std::string assetFile = FileSys.pathByAppendingComponent(path, assetName) + AssetExtension;
 
-    if (FileSys.fileExists(moduleFile)) {
+    if (FileSys.fileExists(assetFile)) {
         // TODO: Get rid of changing the working directory (global state is bad) -- emiax
         // This requires refactoring all renderables to not use relative paths in constructors.
         FileSys.setCurrentDirectory(ghoul::filesystem::Directory(path));
         
-        // We have a module file, so it is a direct include.
-        return loadModule(moduleFile, luaState);
+        // We have a asset file, so it is a direct include.
+        return loadAsset(assetName, luaState);
     } else {
         std::vector<SceneLoader::LoadedNode> allLoadedNodes;
-        // If we do not have a module file, we have to include all subdirectories.
+        // If we do not have a asset file, we have to include all subdirectories.
         using ghoul::filesystem::Directory;
         using std::string;
 
@@ -257,27 +251,22 @@ SceneLoader::LoadedNode SceneLoader::loadNode(const ghoul::Dictionary& dictionar
 }
 
 
-std::vector<SceneLoader::LoadedNode> SceneLoader::loadModule(const std::string& path, lua_State* luaState) {
-    ghoul::Dictionary moduleDictionary;
-    try {
-        ghoul::lua::loadDictionaryFromFile(path, moduleDictionary, luaState);
-    } catch (const ghoul::lua::LuaRuntimeException& e) {
-        LERRORC(e.component, e.message);
-        return std::vector<SceneLoader::LoadedNode>();
-    }
+std::vector<SceneLoader::LoadedNode> SceneLoader::loadAsset(const std::string& assetName, lua_State* luaState) {
+    AssetLoader::Asset* asset = _assetLoader->loadAsset(assetName);
+    const ghoul::Dictionary& assetDictionary = asset->dictionary();
+    std::vector<LoadedNode> loadedNodes;
 
-    std::vector<SceneLoader::LoadedNode> loadedNodes;
-    std::vector<std::string> keys = moduleDictionary.keys();
+    std::vector<std::string> keys = assetDictionary.keys();
     for (const std::string& key : keys) {
         ghoul::Dictionary nodeDictionary;
-        if (!moduleDictionary.getValue(key, nodeDictionary)) {
+        if (!assetDictionary.getValue(key, nodeDictionary)) {
             LERROR("Node dictionary did not have the corrent type");
             continue;
         }
         try {
             loadedNodes.push_back(loadNode(nodeDictionary));
         } catch (ghoul::RuntimeError& e) {
-            LERROR("Failed loading node from " << path << ": " << e.message << ", " << e.component);
+            LERROR("Failed loading node from " << assetName << ": " << e.message << ", " << e.component);
         }
     }
     return loadedNodes;

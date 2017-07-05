@@ -75,17 +75,17 @@ documentation::Documentation Scene::Documentation() {
             Optional::Yes
         },
         {
-            "Modules",
+            "Assets",
             new TableVerifier({
                 { "*", new StringAnnotationVerifier(
-                    "Loadable module folders. This means that they either have to point "
-                    "to a folder that contains a ModuleFile or a folder which contains "
-                    "other folders that eventually contain ModuleFile. This second "
+                    "Loadable asset folders. This means that they either have to point "
+                    "to a folder that contains a AssetFile or a folder which contains "
+                    "other folders that eventually contain AssetFile. This second "
                     "recursive approach is useful for grouping modules into logical "
                     "units."
                 )}
             }),
-            "This is the list of modules that will be loaded into the initial scene. The "
+            "This is the list of assets that will be loaded into the initial scene. The "
             "values in this table have to correspond to folders relative to the "
             "ScenePath key. The order in which the modules are loaded is the same as the "
             "order in which they are specified in this table."
