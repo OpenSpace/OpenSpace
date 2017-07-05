@@ -33,7 +33,7 @@ namespace globebrowsing {
 
 struct TextureFormat {
     ghoul::opengl::Texture::Format ghoulFormat;
-    GLint glFormat;
+    GLenum glFormat;
 };
 
     

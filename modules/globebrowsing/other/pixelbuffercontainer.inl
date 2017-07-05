@@ -63,7 +63,7 @@ void* PixelBufferContainer<KeyType>::mapBuffer(KeyType key, PixelBuffer::Access 
 
 template <class KeyType>
 void* PixelBufferContainer<KeyType>::mapBufferRange(KeyType key, GLintptr offset,
-    GLsizeiptr length, GLbitfield access)
+    GLsizeiptr length, BufferAccessMask access)
 {
     typename std::map<KeyType, int>::const_iterator iter = _indexMap.find(key);
     bool notFoundAmongMappedBuffers = iter == _indexMap.end();
