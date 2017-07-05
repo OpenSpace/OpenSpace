@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___ORBITALINTERACTIONMODE___H__
 
 #include <openspace/interaction/interactionmode.h>
+#include <openspace/rendering/renderable.h>
 
 #include <glm/gtx/quaternion.hpp>
 
@@ -98,19 +99,36 @@ protected:
         glm::dvec3 objectPosition,
         glm::dvec3& cameraPosition,
         glm::dquat& globalCameraRotation);
+
+    void performHorizontalTranslation(
+        double deltaTime,
+        glm::dvec3 objectPosition,
+        glm::dquat& focusNodeRotationDiff,
+        glm::dvec3& cameraPosition,
+        glm::dquat& globalCameraRotation);
+
+    void followFocusNodeRotation(
+        glm::dvec3 objectPosition,
+        glm::dquat& focusNodeRotationDiff,
+        glm::dvec3& cameraPosition);
+
+    void performGlobalRotation(
+        glm::dvec3 objectPosition,
+        glm::dquat& focusNodeRotationDiff,
+        glm::dvec3& cameraPosition,
+        glm::dquat& globalCameraRotation);
+
     void performVerticalTranslation(
         double deltaTime,
-        double boundingSphere,
         glm::dvec3 objectPosition,
         glm::dvec3& cameraPosition);
+
     void performHorizontalRotation(
         double deltaTime,
-        glm::dvec3 objectPosition,
-        glm::dvec3& cameraPosition,
+        glm::dvec3 cameraPosition,
         glm::dquat& globalCameraRotation);
     void pushToSurface(
         double deltaTime,
-        double boundingSphere,
         glm::dvec3 objectPosition,
         glm::dvec3& cameraPosition);
 };

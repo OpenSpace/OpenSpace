@@ -59,6 +59,14 @@ public:
         Overlay = 8
     };
 
+    struct SurfacePositionHandle {
+        glm::dvec3 centerToReferenceSurface;
+        glm::dvec3 referenceSurfaceToTargetDirection;
+        glm::dvec3 referenceSurfaceNormal;
+        double heightToTarget;
+        double heightToSurface;
+    };
+
     static std::unique_ptr<Renderable> createFromDictionary(const ghoul::Dictionary& dictionary);
 
     // constructors & destructor
@@ -78,6 +86,8 @@ public:
     virtual void render(const RenderData& data);
     virtual void render(const RenderData& data, RendererTasks& rendererTask);
     virtual void update(const UpdateData& data);
+    virtual SurfacePositionHandle calculateSurfacePositionHandle(
+        glm::dvec3 targetModelSpace);
 
     RenderBin renderBin() const;
     void setRenderBin(RenderBin bin);

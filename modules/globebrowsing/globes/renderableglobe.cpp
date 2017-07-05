@@ -259,6 +259,26 @@ double RenderableGlobe::interactionDepthBelowEllipsoid() {
     return _interactionDepthBelowEllipsoid;
 }
 
+Renderable::SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
+    glm::dvec3 targetModelSpace) 
+{
+    glm::dvec3 centerToEllipsoidSurface = _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
+    glm::dvec3 ellipsoidSurfaceToTarget = targetModelSpace - centerToEllipsoidSurface;
+    double heightToSurface = getHeight(targetModelSpace);
+    
+    glm::dvec3 geodeticNormal = glm::normalize(ellipsoidSurfaceToTarget);
+    if (glm::dot(geodeticNormal, centerToEllipsoidSurface) < 0) {
+        geodeticNormal *= -1.0;
+    }
+	return {
+		centerToEllipsoidSurface,
+		glm::normalize(ellipsoidSurfaceToTarget),
+        geodeticNormal,
+        glm::length(ellipsoidSurfaceToTarget),
+		heightToSurface
+	};
+}
+
 void RenderableGlobe::setSaveCamera(std::shared_ptr<Camera> camera) { 
     _savedCamera = camera;
 }

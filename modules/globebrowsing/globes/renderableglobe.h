@@ -102,7 +102,10 @@ public:
     double interactionDepthBelowEllipsoid();
 
     // Setters
-    void setSaveCamera(std::shared_ptr<Camera> camera);    
+    void setSaveCamera(std::shared_ptr<Camera> camera);
+
+    virtual SurfacePositionHandle calculateSurfacePositionHandle(
+        glm::dvec3 targetModelSpace) override; 
 private:
     // Globes. These are renderables inserted in a distance switch so that the heavier
     // <code>ChunkedLodGlobe</code> does not have to be rendered at far distances.
