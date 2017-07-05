@@ -1,0 +1,42 @@
+@import '../../styles/all';
+
+$font-size: 1rem;
+
+.Pane {
+  background: $ui-background;
+  border-bottom: 1px solid $ui-divider;
+  flex-basis: 1px;
+  flex-grow: 1;
+  height: unquote("calc(100% - #{$sidebar-tab-height})");
+}
+
+.Pane header {
+  align-items: center;
+  border-bottom: 1px solid $ui-divider;
+  display: flex;
+  font-size: $font-size;
+  justify-content: space-between;
+
+  > * {
+    padding: $sidebar-padding;
+  }
+}
+
+.title {
+  font-weight: bold;
+  letter-spacing: 0.2em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.close {
+  background: none;
+  border: 0;
+  color: $text-color-blur;
+  line-height: 1;
+
+  &:hover, &:focus {
+    background: $ui-background-hover;
+    color: $text-color-focus;
+  }
+}

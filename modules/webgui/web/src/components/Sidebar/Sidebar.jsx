@@ -5,8 +5,13 @@ import SystemMenu from '../SystemMenu/SystemMenu';
 import TabMenuItem from './TabMenu/TabMenuItem';
 import Icon from '../common/Icon/Icon';
 import SmallLabel from '../common/SmallLabel/SmallLabel';
+import ViewPane from './ViewPane';
 
 import styles from './Sidebar.scss';
+
+const views = {
+  view: ViewPane,
+};
 
 class Sidebar extends React.Component {
   constructor(props) {
@@ -31,9 +36,11 @@ class Sidebar extends React.Component {
   }
 
   render() {
+    const SelectedView = views[this.state.view];
     return (
       <div className={styles.Sidebar}>
-        { this.state.view }
+        { SelectedView && (<SelectedView closeCallback={this.selectView} />)}
+
         <TabMenu>
           <SystemMenu />
 
