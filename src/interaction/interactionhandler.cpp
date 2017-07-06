@@ -23,11 +23,11 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/interactionhandler.h>
+
 #include <openspace/network/parallelconnection.h>
 
 #include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/interactionhandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>

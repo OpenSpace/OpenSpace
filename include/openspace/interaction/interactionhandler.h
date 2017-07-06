@@ -28,8 +28,8 @@
 #include <openspace/documentation/documentationgenerator.h>
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/interaction/orbitalinteractionmode.h>
-#include <openspace/interaction/keyframeinteractionmode.h>
+#include <openspace/interaction/orbitalnavigator.h>
+#include <openspace/interaction/keyframenavigator.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>

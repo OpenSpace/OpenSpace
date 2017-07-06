@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/keyframeinteractionmode.h>
+#include <openspace/interaction/keyframenavigator.h>
 
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>

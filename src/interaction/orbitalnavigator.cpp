@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/orbitalinteractionmode.h>
+#include <openspace/interaction/orbitalnavigator.h>
 
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
