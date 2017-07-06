@@ -45,11 +45,7 @@ public:
     , _interpolationTime(1.0) {};
     ~Interpolator() {};
 
-    void start(double interpolationTime = 0.0) {
-        ghoul_assert(interpolationTime >= 0.0, "interpolationTime should not be negative!");
-        if (interpolationTime) {
-            _interpolationTime = interpolationTime;
-        }
+    void start() {
         _t = 0.0;
     };
 
@@ -58,15 +54,18 @@ public:
     void setDeltaTime(double deltaTime) {
         _scaledDeltaTime = deltaTime / _interpolationTime;
     };
-	void step() { _t += _scaledDeltaTime; _t = glm::clamp(_t, 0.0, 1.0); };
-    double deltaTimeScaled() { return _scaledDeltaTime; };
-
-    T value() { return _transferFunction(_t); };
-    bool isInterpolating() { return _t < 1.0 && _t > 0.0; };
-
     void setTransferFunction(std::function<T(double)> transferFunction) {
         _transferFunction = transferFunction;
     }
+    void setInterpolationTime(double interpolationTime) {
+        _interpolationTime = interpolationTime;
+    }
+	void step() { _t += _scaledDeltaTime; _t = glm::clamp(_t, 0.0, 1.0); };
+    double deltaTimeScaled() const { return _scaledDeltaTime; };
+
+    T value() const { return _transferFunction(_t); };
+    bool isInterpolating() const { return _t < 1.0 && _t >= 0.0; };
+
 private:
     std::function<T(double)> _transferFunction;
     double _t;

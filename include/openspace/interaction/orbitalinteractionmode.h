@@ -77,6 +77,9 @@ public:
     virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
     bool followingNodeRotation() const override;
 
+    void setFollowFocusNodeRotationDistance(double followFocusNodeRotationDistance);
+    void setMinimumAllowedDistance(double minimumAllowedDistance);
+
 protected:
     struct CameraRotationDecomposition {
         glm::dquat localRotation;
@@ -85,6 +88,9 @@ protected:
 
     std::shared_ptr<MouseStates> _mouseStates;
     Interpolator<double> _followRotationInterpolator;
+
+    double _followFocusNodeRotationDistance;
+    double _minimumAllowedDistance;
 
     CameraRotationDecomposition decomposeCameraRotation(
         glm::dvec3 cameraPosition,

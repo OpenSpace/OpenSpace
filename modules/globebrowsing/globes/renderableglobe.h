@@ -74,7 +74,6 @@ public:
         properties::BoolProperty performShading;
         properties::BoolProperty atmosphereEnabled;
         properties::FloatProperty lodScaleFactor;
-        properties::FloatProperty cameraMinHeight;
     };
     
     RenderableGlobe(const ghoul::Dictionary& dictionary);
@@ -116,7 +115,6 @@ private:
     DistanceSwitch _distanceSwitch;
     std::shared_ptr<Camera> _savedCamera;
     
-    double _interactionDepthBelowEllipsoid;
     std::string _frame;
     double _time;
 

@@ -42,6 +42,7 @@ namespace openspace {
 struct RenderData;
 struct UpdateData;
 struct RendererTasks;
+struct SurfacePositionHandle;
 
 namespace documentation { struct Documentation; } 
 
@@ -57,14 +58,6 @@ public:
         Opaque = 2,
         Transparent = 4,
         Overlay = 8
-    };
-
-    struct SurfacePositionHandle {
-        glm::dvec3 centerToReferenceSurface;
-        glm::dvec3 referenceSurfaceOutDirection;
-        glm::dvec3 referenceSurfaceNormal;
-        double heightToTarget;
-        double heightToSurface;
     };
 
     static std::unique_ptr<Renderable> createFromDictionary(const ghoul::Dictionary& dictionary);

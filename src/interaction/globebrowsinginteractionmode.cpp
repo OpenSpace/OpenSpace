@@ -25,6 +25,7 @@
 #include <openspace/interaction/globebrowsinginteractionmode.h>
 
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/updatestructures.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -75,8 +76,8 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
     if (_focusNode && _globe) {
         // Declare variables to use in interaction calculations
         // Shrink interaction ellipsoid to enable interaction below height = 0
-        double ellipsoidShrinkTerm = _globe->interactionDepthBelowEllipsoid();
-        double minHeightAboveGround = _globe->generalProperties().cameraMinHeight;
+        double ellipsoidShrinkTerm = 0.0;//_globe->interactionDepthBelowEllipsoid();
+        double minHeightAboveGround = 0.0;// _globe->generalProperties().cameraMinHeight;
 
         // Read the current state of the camera and focusnode
         dvec3 camPos = camera.positionVec3();
@@ -101,7 +102,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
         dvec3 posDiff = camPos - centerPos;
 
 
-        Renderable::SurfacePositionHandle posHandle =
+        SurfacePositionHandle posHandle =
             _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
 
@@ -151,7 +152,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
 
             cameraPositionModelSpace =
                 glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
-            Renderable::SurfacePositionHandle posHandle =
+            SurfacePositionHandle posHandle =
                 _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
             dvec3 directionFromSurfaceToCamera =

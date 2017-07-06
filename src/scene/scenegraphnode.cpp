@@ -477,6 +477,21 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
     }
 }
 
+SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(glm::dvec3 targetModelSpace) {
+    if (_renderable) {
+        return _renderable->calculateSurfacePositionHandle(targetModelSpace);
+    }
+    else {
+		return {
+			glm::dvec3(0.0, 0.0, 0.0),
+			glm::normalize(targetModelSpace),
+			glm::normalize(targetModelSpace),
+			glm::length(targetModelSpace),
+			0.0
+		};
+    }
+}
+
 const std::vector<SceneGraphNode*>& SceneGraphNode::dependencies() const {
     return _dependencies;
 }

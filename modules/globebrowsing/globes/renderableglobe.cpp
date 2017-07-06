@@ -31,8 +31,6 @@
 namespace {
     const char* keyFrame = "Frame";
     const char* keyRadii = "Radii";
-    const char* keyInteractionDepthBelowEllipsoid = "InteractionDepthBelowEllipsoid";
-    const char* keyCameraMinHeight = "CameraMinHeight";
     const char* keySegmentsPerPatch = "SegmentsPerPatch";
     const char* keyLayers = "Layers";
 }
@@ -65,7 +63,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty("performShading", "perform shading", true),
         BoolProperty("atmosphere", "atmosphere", false),
         FloatProperty("lodScaleFactor", "lodScaleFactor",10.0f, 1.0f, 50.0f),
-        FloatProperty("cameraMinHeight", "cameraMinHeight", 100.0f, 0.0f, 1000.0f)
     })
     , _debugPropertyOwner("Debug")
     , _texturePropertyOwner("Textures")
@@ -84,15 +81,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     double patchSegmentsd;
     dictionary.getValue(keySegmentsPerPatch, patchSegmentsd);
     int patchSegments = patchSegmentsd;
-        
-    if (!dictionary.getValue(keyInteractionDepthBelowEllipsoid,
-        _interactionDepthBelowEllipsoid)) {
-        _interactionDepthBelowEllipsoid = 0;
-    }
-
-    float cameraMinHeight;
-    dictionary.getValue(keyCameraMinHeight, cameraMinHeight);
-    _generalProperties.cameraMinHeight.set(cameraMinHeight);
 
     // Init layer manager
     ghoul::Dictionary layersDictionary;
@@ -117,7 +105,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     addProperty(_generalProperties.atmosphereEnabled);
     addProperty(_generalProperties.performShading);
     addProperty(_generalProperties.lodScaleFactor);
-    addProperty(_generalProperties.cameraMinHeight);
         
     _debugPropertyOwner.addProperty(_debugProperties.saveOrThrowCamera);
     _debugPropertyOwner.addProperty(_debugProperties.showChunkEdges);
@@ -255,11 +242,7 @@ const std::shared_ptr<const Camera> RenderableGlobe::savedCamera() const {
     return _savedCamera;
 }
 
-double RenderableGlobe::interactionDepthBelowEllipsoid() {
-    return _interactionDepthBelowEllipsoid;
-}
-
-Renderable::SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
+SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
     glm::dvec3 targetModelSpace) 
 {
     glm::dvec3 centerToEllipsoidSurface = _ellipsoid.geodeticSurfaceProjection(targetModelSpace);

@@ -92,6 +92,10 @@ InteractionHandler::InteractionHandler()
     , _rotationalFriction("rotationalFriction", "Rotational friction", true)
     , _horizontalFriction("horizontalFriction", "Horizontal friction", true)
     , _verticalFriction("verticalFriction", "Vertical friction", true)
+    , _followFocusNodeRotationDistance("followFocusNodeRotationDistance",
+        "Follow focus node rotation distance", 2.0f, 0.0f, 10.f)
+    , _minimumAllowedDistance("minimumAllowedDistance",
+        "Minimum allowed distance", 10.0f, 0.0f, 10000.f)
     , _sensitivity("sensitivity", "Sensitivity", 20.0f, 1.0f, 50.f)
     , _motionLag("motionLag", "Motion lag", 0.5f, 0.f, 1.f)
     , _interactionModeOption(
@@ -137,6 +141,12 @@ InteractionHandler::InteractionHandler()
     _verticalFriction.onChange([&]() {
         _mouseStates->setVerticalFriction(_verticalFriction);
     });
+    _followFocusNodeRotationDistance.onChange([&]() {
+        _orbitalInteractionMode->setFollowFocusNodeRotationDistance(_followFocusNodeRotationDistance);
+    });
+    _minimumAllowedDistance.onChange([&]() {
+        _orbitalInteractionMode->setMinimumAllowedDistance(_minimumAllowedDistance);
+    });
     _sensitivity.onChange([&]() {
         _mouseStates->setSensitivity(_sensitivity * pow(10.0,-4));
     });
@@ -167,6 +177,8 @@ InteractionHandler::InteractionHandler()
     addProperty(_rotationalFriction);
     addProperty(_horizontalFriction);
     addProperty(_verticalFriction);
+    addProperty(_followFocusNodeRotationDistance);
+    addProperty(_minimumAllowedDistance);
     addProperty(_sensitivity);
     addProperty(_motionLag);
 }

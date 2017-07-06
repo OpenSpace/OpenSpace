@@ -162,6 +162,9 @@ private:
     properties::BoolProperty _horizontalFriction;
     properties::BoolProperty _verticalFriction;
 
+    properties::FloatProperty _followFocusNodeRotationDistance;
+    properties::FloatProperty _minimumAllowedDistance;
+
     properties::FloatProperty _sensitivity;
     properties::FloatProperty _motionLag;
 };

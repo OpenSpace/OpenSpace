@@ -25,6 +25,7 @@
 #include <openspace/interaction/orbitalinteractionmode.h>
 
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/updatestructures.h>
 #include <openspace/rendering/renderable.h>
 
 #include <ghoul/logging/logmanager.h>
@@ -46,7 +47,8 @@ OrbitalInteractionMode::MouseStates::MouseStates(double sensitivity, double velo
     , _truckMovementMouseState(velocityScaleFactor)
     , _localRollMouseState(velocityScaleFactor)
     , _globalRollMouseState(velocityScaleFactor)
-{}
+{
+}
 
 void OrbitalInteractionMode::MouseStates::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
     glm::dvec2 mousePosition = inputState.getMousePosition();
@@ -170,6 +172,9 @@ OrbitalInteractionMode::OrbitalInteractionMode(
     : InteractionMode()
     , _mouseStates(mouseStates)
 {
+	_followFocusNodeRotationDistance = 2.0;
+	_minimumAllowedDistance = 10.0;
+
     auto smoothStep = 
         [](double t) {
             double res = 3.0 * t*t  - 2.0 * t*t*t;
@@ -194,8 +199,8 @@ OrbitalInteractionMode::CameraRotationDecomposition
     glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1));
 
-    Renderable::SurfacePositionHandle posHandle =
-        _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
+    SurfacePositionHandle posHandle =
+        _focusNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
 	glm::dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceOutDirection;
 	glm::dvec3 directionFromSurfaceToCamera =
@@ -291,8 +296,8 @@ void OrbitalInteractionMode::performHorizontalTranslation(
     // Get position handle
     glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1));
-    Renderable::SurfacePositionHandle posHandle =
-        _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
+    SurfacePositionHandle posHandle =
+        _focusNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
     dvec3 surfaceNormal =
         normalize(dmat3(modelTransform) * posHandle.referenceSurfaceOutDirection);
@@ -309,11 +314,16 @@ void OrbitalInteractionMode::performHorizontalTranslation(
 	double distFromCenterToSurface = length(centerToActualSurface);
 	double distFromCenterToCamera = length(posDiff);
 
+    double speedScale =
+        distFromCenterToSurface > 0.0 ?
+        glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0) :
+        1.0;
+
     // Get rotation in camera space
     glm::dvec3 eulerAngles = glm::dvec3(
         -_mouseStates->synchedGlobalRotationMouseVelocity().y * deltaTime,
         -_mouseStates->synchedGlobalRotationMouseVelocity().x * deltaTime,
-        0) * glm::clamp(distFromSurfaceToCamera / distFromCenterToSurface, 0.0, 1.0);
+        0) * speedScale;
     glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
 
     // Transform to world space
@@ -360,8 +370,8 @@ void OrbitalInteractionMode::performGlobalRotation(
 
     glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1));
-    Renderable::SurfacePositionHandle posHandle =
-        _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
+    SurfacePositionHandle posHandle =
+        _focusNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
     glm::dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceOutDirection;
     glm::dvec3 directionFromSurfaceToCamera =
@@ -389,8 +399,8 @@ void OrbitalInteractionMode::performVerticalTranslation(
 
     glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1));
-    Renderable::SurfacePositionHandle posHandle =
-        _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
+    SurfacePositionHandle posHandle =
+        _focusNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
     dvec3 posDiff = cameraPosition - objectPosition;
 
@@ -414,8 +424,8 @@ void OrbitalInteractionMode::performHorizontalRotation(
 
     glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1));
-    Renderable::SurfacePositionHandle posHandle =
-        _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
+    SurfacePositionHandle posHandle =
+        _focusNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
     glm::dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceOutDirection;
     glm::dvec3 directionFromSurfaceToCamera =
@@ -438,8 +448,8 @@ void OrbitalInteractionMode::pushToSurface(
 
     glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1));
-    Renderable::SurfacePositionHandle posHandle =
-        _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
+    SurfacePositionHandle posHandle =
+        _focusNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
     dvec3 posDiff = cameraPosition - objectPosition;
 
@@ -469,11 +479,11 @@ glm::dquat OrbitalInteractionMode::interpolateRotationDifferential(
 
     glm::dvec3 cameraPositionModelSpace =
         glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1));
-    Renderable::SurfacePositionHandle posHandle =
-        _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
+    SurfacePositionHandle posHandle =
+        _focusNode->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
     double maximumDistanceForRotation = glm::length(
-        glm::dmat3(modelTransform) * posHandle.centerToReferenceSurface) * 2.0;
+        glm::dmat3(modelTransform) * posHandle.centerToReferenceSurface) * _followFocusNodeRotationDistance;
     double distanceToCamera = glm::length(cameraPosition - objectPosition);
 
     double interpolationSign = glm::sign(maximumDistanceForRotation - distanceToCamera);
@@ -543,7 +553,7 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
 
 		performVerticalTranslation(deltaTime, centerPos, camPos);
 		performHorizontalRotation(deltaTime, camPos, camRot.globalRotation);
-		pushToSurface(1000, centerPos, camPos);
+		pushToSurface(_minimumAllowedDistance, centerPos, camPos);
 
         // Update the camera state
         camera.setPositionVec3(camPos); 
@@ -554,6 +564,18 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
 
 bool OrbitalInteractionMode::followingNodeRotation() const {
     return _followRotationInterpolator.value() >= 1.0;
+}
+
+void OrbitalInteractionMode::setFollowFocusNodeRotationDistance(
+    double followFocusNodeRotationDistance)
+{
+    _followFocusNodeRotationDistance = followFocusNodeRotationDistance;
+}
+
+void OrbitalInteractionMode::setMinimumAllowedDistance(
+    double minimumAllowedDistance)
+{
+    _minimumAllowedDistance = minimumAllowedDistance;
 }
 
 void OrbitalInteractionMode::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {

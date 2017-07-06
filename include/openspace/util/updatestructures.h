@@ -75,6 +75,14 @@ struct RaycastData {
     std::string namespaceName;
 };
 
+struct SurfacePositionHandle {
+    glm::dvec3 centerToReferenceSurface;
+    glm::dvec3 referenceSurfaceOutDirection;
+    glm::dvec3 referenceSurfaceNormal;
+    double heightToTarget;
+    double heightToSurface;
+};
+
 } // namespace openspace
 
 #endif // __OPENSPACE_CORE___UPDATESTRUCTURES___H__
