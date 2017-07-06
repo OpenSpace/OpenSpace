@@ -47,9 +47,6 @@ KeyframeInteractionMode::KeyframeInteractionMode()
 KeyframeInteractionMode::~KeyframeInteractionMode()
 { }
 
-void KeyframeInteractionMode::updateMouseStatesFromInput(const InputState&, double)
-{ }
-
 void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, double) {
     double now = OsEng.runTime();
 
@@ -114,10 +111,6 @@ void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, d
     // Linear interpolation
     camera.setPositionVec3(prevKeyframeCameraPosition * (1 - t) + nextKeyframeCameraPosition * t);
     camera.setRotation(glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t));
-}
-
-bool KeyframeInteractionMode::followingNodeRotation() const {
-    return false;
 }
 
 Timeline<KeyframeInteractionMode::CameraPose>& KeyframeInteractionMode::timeline() {

@@ -1091,7 +1091,7 @@ void ParallelConnection::sendCameraKeyframe() {
     datamessagestructures::CameraKeyframe kf;
     kf._position = OsEng.interactionHandler().focusNodeToCameraVector();
 
-    kf._followNodeRotation = OsEng.interactionHandler().interactionMode()->followingNodeRotation();
+    kf._followNodeRotation = OsEng.interactionHandler().orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
         kf._rotation = OsEng.interactionHandler().focusNodeToCameraRotation();

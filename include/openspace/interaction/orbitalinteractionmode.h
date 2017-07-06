@@ -22,12 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___ORBITALINTERACTIONMODE___H__
-#define __OPENSPACE_CORE___ORBITALINTERACTIONMODE___H__
+#ifndef __OPENSPACE_CORE___ORBITALNAVIGATOR___H__
+#define __OPENSPACE_CORE___ORBITALNAVIGATOR___H__
 
-#include <openspace/interaction/interactionmode.h>
-#include <openspace/rendering/renderable.h>
+#include <openspace/interaction/delayedvariable.h>
+#include <openspace/interaction/inputstate.h>
+#include <openspace/interaction/interpolator.h>
 
+#include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 #include <tuple>
@@ -35,9 +37,23 @@
 namespace openspace {
 namespace interaction {
 
-class OrbitalInteractionMode : public InteractionMode
+class OrbitalNavigator
 {
 public:
+	struct MouseState {
+		MouseState(double scaleFactor)
+			: velocity(scaleFactor, 1)
+			, previousPosition(0.0, 0.0) {}
+		void setFriction(double friction) {
+			velocity.setFriction(friction);
+		}
+		void setVelocityScaleFactor(double scaleFactor) {
+			velocity.setScaleFactor(scaleFactor);
+		}
+		glm::dvec2 previousPosition;
+		DelayedVariable<glm::dvec2, double> velocity;
+	};
+
     class MouseStates
     {
     public:
@@ -70,15 +86,20 @@ public:
         MouseState _globalRollMouseState;
     };
 
-    OrbitalInteractionMode(std::shared_ptr<MouseStates> mouseStates);
-    ~OrbitalInteractionMode();
+    OrbitalNavigator(std::shared_ptr<MouseStates> mouseStates);
+    ~OrbitalNavigator();
 
-    virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
-    bool followingNodeRotation() const override;
+    void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
+    void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+    bool followingNodeRotation() const;
 
     void setFollowFocusNodeRotationDistance(double followFocusNodeRotationDistance);
     void setMinimumAllowedDistance(double minimumAllowedDistance);
+
+    void setFocusNode(SceneGraphNode* focusNode);
+
+    SceneGraphNode* focusNode();
+    void startInterpolateCameraDirection(const Camera& camera);
 
 protected:
     struct CameraRotationDecomposition {
@@ -87,6 +108,12 @@ protected:
     };
 
     std::shared_ptr<MouseStates> _mouseStates;
+
+    SceneGraphNode* _focusNode = nullptr;
+    glm::dvec3 _previousFocusNodePosition;
+    glm::dquat _previousFocusNodeRotation;
+    
+    Interpolator<double> _rotateToFocusNodeInterpolator;
     Interpolator<double> _followRotationInterpolator;
 
     double _followFocusNodeRotationDistance;
@@ -149,4 +176,4 @@ protected:
 } // namespace interaction
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___ORBITALINTERACTIONMODE___H__
+#endif // __OPENSPACE_CORE___ORBITALNAVIGATOR___H__

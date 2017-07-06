@@ -28,7 +28,6 @@
 #include <openspace/documentation/documentationgenerator.h>
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/interaction/interactionmode.h>
 #include <openspace/interaction/orbitalinteractionmode.h>
 #include <openspace/interaction/keyframeinteractionmode.h>
 #include <openspace/network/parallelconnection.h>
@@ -67,7 +66,6 @@ public:
 
     // Interaction mode setters
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
-    InteractionMode* interactionMode();
     
     void goToChunk(int x, int y, int level);
     void goToGeo(double latitude, double longitude);
@@ -106,6 +104,7 @@ public:
     glm::quat focusNodeToCameraRotation() const;
     Camera* camera() const;
     const InputState& inputState() const;
+    const OrbitalNavigator& orbitalNavigator() const;
 
     /**
     * Returns the Lua library that contains all Lua functions available to affect the
@@ -136,8 +135,6 @@ private:
     
     std::string generateJson() const override;
 
-    void setInteractionMode(InteractionMode* interactionMode);
-
     bool _cameraUpdatedFromScript = false;
 
     std::multimap<KeyWithModifier, KeyInformation> _keyLua;
@@ -145,17 +142,17 @@ private:
     std::unique_ptr<InputState> _inputState;
     Camera* _camera;
 
-    InteractionMode* _currentInteractionMode;
+    std::shared_ptr<OrbitalNavigator::MouseStates> _mouseStates;
+    std::unique_ptr<OrbitalNavigator> _orbitalInteractionMode;
 
-    std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
-
-    std::unique_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
     std::unique_ptr<KeyframeInteractionMode> _keyframeInteractionMode;
 
     // Properties
     properties::StringProperty _origin;
     properties::OptionProperty _interactionModeOption;
-    
+
+    properties::BoolProperty _useKeyFrameInteraction;
+
     properties::BoolProperty _rotationalFriction;
     properties::BoolProperty _horizontalFriction;
     properties::BoolProperty _verticalFriction;

@@ -25,13 +25,18 @@
 #ifndef __OPENSPACE_CORE___KEYFRAMEINTERACTIONMODE___H__
 #define __OPENSPACE_CORE___KEYFRAMEINTERACTIONMODE___H__
 
-#include <openspace/interaction/interactionmode.h>
 #include <openspace/util/timeline.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 namespace openspace {
+
+class Camera;
+
 namespace interaction {
 
-class KeyframeInteractionMode : public InteractionMode
+class KeyframeInteractionMode
 {
 public:
     struct CameraPose {
@@ -44,9 +49,7 @@ public:
     KeyframeInteractionMode();
     ~KeyframeInteractionMode();
 
-    virtual void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
-    virtual void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
-    bool followingNodeRotation() const override;
+    void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
     Timeline<CameraPose>& timeline();
 
 private:
