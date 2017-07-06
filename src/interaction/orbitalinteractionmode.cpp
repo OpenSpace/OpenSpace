@@ -181,18 +181,13 @@ OrbitalNavigator::OrbitalNavigator()
     , _motionLag("motionLag", "Motion lag", 0.5f, 0.f, 1.f)
     , _mouseStates(_sensitivity * pow(10.0,-4), 1 / (_motionLag + 0.0000001))
 {
-	_followFocusNodeRotationDistance = 2.0;
-	_minimumAllowedDistance = 10.0;
-
     auto smoothStep = 
         [](double t) {
             double res = 3.0 * t*t  - 2.0 * t*t*t;
             return glm::clamp(res, 0.0, 1.0);
         };
-    //_followRotationInterpolator.setTransferFunction(smoothStep);
+    _followRotationInterpolator.setTransferFunction(smoothStep);
 
-
-        
     // The transfer function is used here to get a different interpolation than the one
     // obtained from newValue = lerp(0, currentValue, dt). That one will result in an
     // exponentially decreasing value but we want to be able to control it. Either as
