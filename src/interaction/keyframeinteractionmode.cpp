@@ -35,19 +35,19 @@
 #include <glm/gtx/quaternion.hpp>
 
 namespace {
-    const std::string _loggerCat = "KeyFrameInteractionMode";
+    const std::string _loggerCat = "KeyframeNavigator";
 }
 
 namespace openspace {
 namespace interaction {
 
-KeyframeInteractionMode::KeyframeInteractionMode()
+KeyframeNavigator::KeyframeNavigator()
 { }
 
-KeyframeInteractionMode::~KeyframeInteractionMode()
+KeyframeNavigator::~KeyframeNavigator()
 { }
 
-void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, double) {
+void KeyframeNavigator::updateCameraStateFromMouseStates(Camera& camera, double) {
     double now = OsEng.runTime();
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
@@ -113,7 +113,7 @@ void KeyframeInteractionMode::updateCameraStateFromMouseStates(Camera& camera, d
     camera.setRotation(glm::slerp(prevKeyframeCameraRotation, nextKeyframeCameraRotation, t));
 }
 
-Timeline<KeyframeInteractionMode::CameraPose>& KeyframeInteractionMode::timeline() {
+Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {
     return _cameraPoseTimeline;
 }
 

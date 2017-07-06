@@ -72,7 +72,7 @@ public:
     
     void resetKeyBindings();
 
-    void addKeyframe(double timestamp, KeyframeInteractionMode::CameraPose pose);
+    void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
     void removeKeyframesAfter(double timestamp);
     void clearKeyframes();
     size_t nKeyframes() const;
@@ -143,8 +143,7 @@ private:
     Camera* _camera;
 
     std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
-
-    std::unique_ptr<KeyframeInteractionMode> _keyframeInteractionMode;
+    std::unique_ptr<KeyframeNavigator> _keyFrameNavigator;
 
     // Properties
     properties::StringProperty _origin;

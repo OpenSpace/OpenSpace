@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___KEYFRAMEINTERACTIONMODE___H__
-#define __OPENSPACE_CORE___KEYFRAMEINTERACTIONMODE___H__
+#ifndef __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
+#define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 
 #include <openspace/util/timeline.h>
 
@@ -36,7 +36,7 @@ class Camera;
 
 namespace interaction {
 
-class KeyframeInteractionMode
+class KeyframeNavigator
 {
 public:
     struct CameraPose {
@@ -46,8 +46,8 @@ public:
         bool followFocusNodeRotation;
     };
 
-    KeyframeInteractionMode();
-    ~KeyframeInteractionMode();
+    KeyframeNavigator();
+    ~KeyframeNavigator();
 
     void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
     Timeline<CameraPose>& timeline();
@@ -59,4 +59,4 @@ private:
 } // namespace interaction
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___KEYFRAMEINTERACTIONMODE___H__
+#endif // __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__

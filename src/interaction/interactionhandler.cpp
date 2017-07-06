@@ -93,7 +93,7 @@ InteractionHandler::InteractionHandler()
 
     _inputState = std::make_unique<InputState>();
     _orbitalNavigator = std::make_unique<OrbitalNavigator>();
-    _keyframeInteractionMode = std::make_unique<KeyframeInteractionMode>();
+    _keyFrameNavigator = std::make_unique<KeyframeNavigator>();
     
     // Add the properties
     addProperty(_origin);
@@ -167,7 +167,7 @@ void InteractionHandler::updateCamera(double deltaTime) {
     else {
         if (_camera && focusNode()) {
             if (_useKeyFrameInteraction) {
-                _keyframeInteractionMode->updateCameraStateFromMouseStates(*_camera, deltaTime);
+                _keyFrameNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);
             }
             else {
                 _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);    
@@ -439,32 +439,32 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
     };
 }
 
-void InteractionHandler::addKeyframe(double timestamp, KeyframeInteractionMode::CameraPose pose) {
-    if (!_keyframeInteractionMode) {
+void InteractionHandler::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose) {
+    if (!_keyFrameNavigator) {
         return;
     }
-    _keyframeInteractionMode->timeline().addKeyframe(timestamp, pose);
+    _keyFrameNavigator->timeline().addKeyframe(timestamp, pose);
 }
 
 void InteractionHandler::removeKeyframesAfter(double timestamp) {
-    if (!_keyframeInteractionMode) {
+    if (!_keyFrameNavigator) {
         return;
     }
-    _keyframeInteractionMode->timeline().removeKeyframesAfter(timestamp);
+    _keyFrameNavigator->timeline().removeKeyframesAfter(timestamp);
 }
 
 void InteractionHandler::clearKeyframes() {
-    if (!_keyframeInteractionMode) {
+    if (!_keyFrameNavigator) {
         return;
     }
-    _keyframeInteractionMode->timeline().clearKeyframes();
+    _keyFrameNavigator->timeline().clearKeyframes();
 }
 
 size_t InteractionHandler::nKeyframes() const {
-    if (!_keyframeInteractionMode) {
+    if (!_keyFrameNavigator) {
         return 0;
     }
-    return _keyframeInteractionMode->timeline().keyframes().size();
+    return _keyFrameNavigator->timeline().keyframes().size();
 }
 
 } // namespace interaction
