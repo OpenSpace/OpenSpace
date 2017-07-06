@@ -40,134 +40,6 @@ namespace {
 namespace openspace {
 namespace interaction {
 
-// OrbitalNavigator
-OrbitalNavigator::MouseStates::MouseStates(double sensitivity, double velocityScaleFactor)
-    : _sensitivity(sensitivity)
-    , _globalRotationMouseState(velocityScaleFactor)
-    , _localRotationMouseState(velocityScaleFactor)
-    , _truckMovementMouseState(velocityScaleFactor)
-    , _localRollMouseState(velocityScaleFactor)
-    , _globalRollMouseState(velocityScaleFactor)
-{
-}
-
-void OrbitalNavigator::MouseStates::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
-    glm::dvec2 mousePosition = inputState.getMousePosition();
-
-    bool button1Pressed = inputState.isMouseButtonPressed(MouseButton::Button1);
-    bool button2Pressed = inputState.isMouseButtonPressed(MouseButton::Button2);
-    bool button3Pressed = inputState.isMouseButtonPressed(MouseButton::Button3);
-    bool keyCtrlPressed = inputState.isKeyPressed(Key::LeftControl);
-    bool keyShiftPressed = inputState.isKeyPressed(Key::LeftShift);
-    
-    // Update the mouse states
-    if (button1Pressed && !keyShiftPressed) {
-        if (keyCtrlPressed) {
-            glm::dvec2 mousePositionDelta =
-                _localRotationMouseState.previousPosition - mousePosition;
-            _localRotationMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
-
-            _globalRotationMouseState.previousPosition = mousePosition;
-            _globalRotationMouseState.velocity.decelerate(deltaTime);
-        }
-        else {
-            glm::dvec2 mousePositionDelta =
-                _globalRotationMouseState.previousPosition - mousePosition;
-            _globalRotationMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
-
-            _localRotationMouseState.previousPosition = mousePosition;
-            _localRotationMouseState.velocity.decelerate(deltaTime);
-        }
-    }
-    else { // !button1Pressed
-        _localRotationMouseState.previousPosition = mousePosition;
-        _localRotationMouseState.velocity.decelerate(deltaTime);
-
-        _globalRotationMouseState.previousPosition = mousePosition;
-        _globalRotationMouseState.velocity.decelerate(deltaTime);
-    }
-    if (button2Pressed) {
-        glm::dvec2 mousePositionDelta =
-            _truckMovementMouseState.previousPosition - mousePosition;
-        _truckMovementMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
-    }
-    else { // !button2Pressed
-        _truckMovementMouseState.previousPosition = mousePosition;
-        _truckMovementMouseState.velocity.decelerate(deltaTime);
-    }
-    if (button3Pressed || (keyShiftPressed && button1Pressed)) {
-        if (keyCtrlPressed) {
-            glm::dvec2 mousePositionDelta =
-                _localRollMouseState.previousPosition - mousePosition;
-            _localRollMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
-
-            _globalRollMouseState.previousPosition = mousePosition;
-            _globalRollMouseState.velocity.decelerate(deltaTime);
-        }
-        else {
-            glm::dvec2 mousePositionDelta =
-                _globalRollMouseState.previousPosition - mousePosition;
-            _globalRollMouseState.velocity.set(mousePositionDelta * _sensitivity, deltaTime);
-
-            _localRollMouseState.previousPosition = mousePosition;
-            _localRollMouseState.velocity.decelerate(deltaTime);
-        }
-    }
-    else { // !button3Pressed
-        _globalRollMouseState.previousPosition = mousePosition;
-        _globalRollMouseState.velocity.decelerate(deltaTime);
-
-        _localRollMouseState.previousPosition = mousePosition;
-        _localRollMouseState.velocity.decelerate(deltaTime);
-    }
-}
-
-void OrbitalNavigator::MouseStates::setRotationalFriction(double friction) {
-    _localRotationMouseState.setFriction(friction);
-    _localRollMouseState.setFriction(friction);
-    _globalRollMouseState.setFriction(friction);
-}
-
-void OrbitalNavigator::MouseStates::setHorizontalFriction(double friction) {
-    _globalRotationMouseState.setFriction(friction);
-}
-
-void OrbitalNavigator::MouseStates::setVerticalFriction(double friction) {
-    _truckMovementMouseState.setFriction(friction);
-}
-
-void OrbitalNavigator::MouseStates::setSensitivity(double sensitivity) {
-    _sensitivity = sensitivity;
-}
-
-void OrbitalNavigator::MouseStates::setVelocityScaleFactor(double scaleFactor) {
-    _globalRotationMouseState.setVelocityScaleFactor(scaleFactor);
-    _localRotationMouseState.setVelocityScaleFactor(scaleFactor);
-    _truckMovementMouseState.setVelocityScaleFactor(scaleFactor);
-    _localRollMouseState.setVelocityScaleFactor(scaleFactor);
-    _globalRollMouseState.setVelocityScaleFactor(scaleFactor);
-}
-
-glm::dvec2 OrbitalNavigator::MouseStates::synchedGlobalRotationMouseVelocity() {
-    return _globalRotationMouseState.velocity.get();
-}
-
-glm::dvec2 OrbitalNavigator::MouseStates::synchedLocalRotationMouseVelocity() {
-    return _localRotationMouseState.velocity.get();
-}
-
-glm::dvec2 OrbitalNavigator::MouseStates::synchedTruckMovementMouseVelocity() {
-    return _truckMovementMouseState.velocity.get();
-}
-
-glm::dvec2 OrbitalNavigator::MouseStates::synchedLocalRollMouseVelocity() {
-    return _localRollMouseState.velocity.get();
-}
-
-glm::dvec2 OrbitalNavigator::MouseStates::synchedGlobalRollMouseVelocity() {
-    return _globalRollMouseState.velocity.get();
-}
-
 OrbitalNavigator::OrbitalNavigator()
     : properties::PropertyOwner("OrbitalNavigator")
     , _rotationalFriction("rotationalFriction", "Rotational friction", true)
@@ -244,6 +116,112 @@ OrbitalNavigator::~OrbitalNavigator() {
 
 }
 
+void OrbitalNavigator::updateMouseStatesFromInput(const InputState& inputState,
+                                                  double deltaTime)
+{
+    _mouseStates.updateMouseStatesFromInput(inputState, deltaTime);
+}
+
+void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera,
+                                                        double deltaTime)
+{
+    if (_focusNode) {
+        using namespace glm;
+        // Read the current state of the camera and focusnode
+        dvec3 camPos = camera.positionVec3();
+        dvec3 centerPos = _focusNode->worldPosition();
+
+        // Follow focus nodes movement
+        dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
+        _previousFocusNodePosition = centerPos;
+        camPos += focusNodeDiff;
+
+        CameraRotationDecomposition camRot = decomposeCameraRotation(
+            camPos,
+            camera.rotationQuaternion(),
+            camera.lookUpVectorWorldSpace(),
+            camera.viewDirectionWorldSpace());
+
+        // Rotate with the globe
+        dmat3 globeStateMatrix = _focusNode->worldRotationMatrix();
+        dquat globeRotation = quat_cast(globeStateMatrix);
+        dquat focusNodeRotationDiff = _previousFocusNodeRotation * inverse(globeRotation);
+        _previousFocusNodeRotation = globeRotation;
+
+        focusNodeRotationDiff = interpolateRotationDifferential(
+            deltaTime,
+            1.0,
+            focusNodeRotationDiff,
+            centerPos,
+            camPos);
+
+        performRoll(deltaTime, camRot.localRotation);
+        if (_rotateToFocusNodeInterpolator.isInterpolating()) {
+            interpolateLocalRotation(deltaTime, camRot.localRotation);
+        }
+        else {
+            performLocalRotation(deltaTime, camRot.localRotation);
+        }
+
+        performHorizontalTranslation(
+            deltaTime,
+            centerPos,
+            focusNodeRotationDiff,
+            camPos,
+            camRot.globalRotation);
+
+        followFocusNodeRotation(
+            centerPos,
+            focusNodeRotationDiff,
+            camPos);
+
+        performGlobalRotation(
+            centerPos,
+            focusNodeRotationDiff,
+            camPos,
+            camRot.globalRotation);
+
+        performVerticalTranslation(deltaTime, centerPos, camPos);
+        performHorizontalRotation(deltaTime, camPos, camRot.globalRotation);
+        pushToSurface(_minimumAllowedDistance, centerPos, camPos);
+
+        // Update the camera state
+        camera.setPositionVec3(camPos); 
+        camera.setRotation(camRot.globalRotation * camRot.localRotation);
+        return;
+    }
+}
+
+void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
+    _focusNode = focusNode;
+
+    if (_focusNode != nullptr) {
+        _previousFocusNodePosition = _focusNode->worldPosition();
+        _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
+    }
+}
+
+void OrbitalNavigator::startInterpolateCameraDirection(const Camera& camera) {
+    glm::dvec3 camPos = camera.positionVec3();
+    glm::dvec3 camDir = glm::normalize(camera.rotationQuaternion() * glm::dvec3(0, 0, -1));
+    glm::dvec3 centerPos = _focusNode->worldPosition();
+    glm::dvec3 directionToCenter = glm::normalize(centerPos - camPos);
+
+    double angle = glm::angle(camDir, directionToCenter);
+
+    // Minimum is two second. Otherwise proportional to angle
+    _rotateToFocusNodeInterpolator.setInterpolationTime(glm::max(angle * 2.0, 2.0));
+    _rotateToFocusNodeInterpolator.start();
+}
+
+bool OrbitalNavigator::followingNodeRotation() const {
+    return _followRotationInterpolator.value() >= 1.0;
+}
+
+SceneGraphNode* OrbitalNavigator::focusNode() const {
+    return _focusNode;
+}
+
 OrbitalNavigator::CameraRotationDecomposition
 	OrbitalNavigator::decomposeCameraRotation(
 		glm::dvec3 cameraPosition,
@@ -305,37 +283,6 @@ void OrbitalNavigator::interpolateLocalRotation(double deltaTime, glm::dquat& lo
         _rotateToFocusNodeInterpolator.end();
     }
 }
-
-void OrbitalNavigator::performHorizontalTranslationAndRotation(
-	double deltaTime,
-	glm::dvec3 objectPosition,
-	glm::dvec3& cameraPosition,
-	glm::dquat& globalCameraRotation)
-{
-	glm::dvec3 centerToCamera = cameraPosition - objectPosition;
-
-    glm::dvec2 smoothMouseVelocity = _mouseStates.synchedGlobalRotationMouseVelocity();
-    glm::dvec3 eulerAngles(-smoothMouseVelocity.y, -smoothMouseVelocity.x, 0);
-    glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles * deltaTime);
-
-    glm::dquat newRotationCamspace = globalCameraRotation * rotationDiffCamSpace;
-    glm::dquat rotationDiffWorldSpace = newRotationCamspace * inverse(globalCameraRotation); 
-    glm::dvec3 rotationDiffVec3 = centerToCamera * rotationDiffWorldSpace - centerToCamera;
-
-	cameraPosition += rotationDiffVec3;
-	centerToCamera = cameraPosition - objectPosition;
-	glm::dvec3 directionToCenter = normalize(-centerToCamera);
-
-    glm::dvec3 lookUpWhenFacingCenter =
-        globalCameraRotation * glm::dvec3(0.0, 1.0, 0.0);
-    glm::dmat4 lookAtMat = glm::lookAt(
-        glm::dvec3(0, 0, 0),
-        directionToCenter,
-        lookUpWhenFacingCenter);
-	globalCameraRotation = glm::normalize(quat_cast(inverse(lookAtMat)));
-}
-
-
 
 void OrbitalNavigator::performHorizontalTranslation(
     double deltaTime,
@@ -399,7 +346,6 @@ void OrbitalNavigator::performHorizontalTranslation(
     cameraPosition += rotationDiffVec3;
 }
 
-
 void OrbitalNavigator::followFocusNodeRotation(
     glm::dvec3 objectPosition,
     glm::dquat& focusNodeRotationDiff,
@@ -412,7 +358,6 @@ void OrbitalNavigator::followFocusNodeRotation(
         - (posDiff);
     cameraPosition += rotationDiffVec3AroundCenter;
 }
-
 
 void OrbitalNavigator::performGlobalRotation(
     glm::dvec3 objectPosition,
@@ -493,7 +438,6 @@ void OrbitalNavigator::performHorizontalRotation(
     globalCameraRotation = cameraRollRotation * globalCameraRotation;
 }
 
-
 void OrbitalNavigator::pushToSurface(
     double minHeightAboveGround,
     glm::dvec3 objectPosition,
@@ -549,108 +493,6 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(
     _followRotationInterpolator.step();
 
     return glm::slerp(glm::dquat(glm::dvec3(0.0)), rotationDiff, _followRotationInterpolator.value());
-}
-
-void OrbitalNavigator::updateCameraStateFromMouseStates(Camera& camera, double deltaTime) {
-    if (_focusNode) {
-		using namespace glm;
-        // Read the current state of the camera and focusnode
-        dvec3 camPos = camera.positionVec3();
-        dvec3 centerPos = _focusNode->worldPosition();
-
-        // Follow focus nodes movement
-        dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
-        _previousFocusNodePosition = centerPos;
-        camPos += focusNodeDiff;
-
-        CameraRotationDecomposition camRot = decomposeCameraRotation(
-            camPos,
-            camera.rotationQuaternion(),
-            camera.lookUpVectorWorldSpace(),
-            camera.viewDirectionWorldSpace());
-
-        // Rotate with the globe
-        dmat3 globeStateMatrix = _focusNode->worldRotationMatrix();
-        dquat globeRotation = quat_cast(globeStateMatrix);
-        dquat focusNodeRotationDiff = _previousFocusNodeRotation * inverse(globeRotation);
-        _previousFocusNodeRotation = globeRotation;
-
-        focusNodeRotationDiff = interpolateRotationDifferential(
-            deltaTime,
-            1.0,
-            focusNodeRotationDiff,
-            centerPos,
-            camPos);
-
-        performRoll(deltaTime, camRot.localRotation);
-        if (_rotateToFocusNodeInterpolator.isInterpolating()) {
-            interpolateLocalRotation(deltaTime, camRot.localRotation);
-        }
-        else {
-            performLocalRotation(deltaTime, camRot.localRotation);
-        }
-
-        performHorizontalTranslation(
-            deltaTime,
-            centerPos,
-            focusNodeRotationDiff,
-            camPos,
-            camRot.globalRotation);
-
-        followFocusNodeRotation(
-            centerPos,
-            focusNodeRotationDiff,
-            camPos);
-
-        performGlobalRotation(
-            centerPos,
-            focusNodeRotationDiff,
-            camPos,
-            camRot.globalRotation);
-
-		performVerticalTranslation(deltaTime, centerPos, camPos);
-		performHorizontalRotation(deltaTime, camPos, camRot.globalRotation);
-		pushToSurface(_minimumAllowedDistance, centerPos, camPos);
-
-        // Update the camera state
-        camera.setPositionVec3(camPos); 
-        camera.setRotation(camRot.globalRotation * camRot.localRotation);
-        return;
-    }
-}
-
-bool OrbitalNavigator::followingNodeRotation() const {
-    return _followRotationInterpolator.value() >= 1.0;
-}
-
-void OrbitalNavigator::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {
-    _mouseStates.updateMouseStatesFromInput(inputState, deltaTime);
-}
-
-void OrbitalNavigator::setFocusNode(SceneGraphNode* focusNode) {
-    _focusNode = focusNode;
-
-    if (_focusNode != nullptr) {
-        _previousFocusNodePosition = _focusNode->worldPosition();
-        _previousFocusNodeRotation = glm::quat_cast(_focusNode->worldRotationMatrix());
-    }
-}
-
-SceneGraphNode* OrbitalNavigator::focusNode() {
-    return _focusNode;
-}
-
-void OrbitalNavigator::startInterpolateCameraDirection(const Camera& camera) {
-    glm::dvec3 camPos = camera.positionVec3();
-    glm::dvec3 camDir = glm::normalize(camera.rotationQuaternion() * glm::dvec3(0, 0, -1));
-    glm::dvec3 centerPos = _focusNode->worldPosition();
-    glm::dvec3 directionToCenter = glm::normalize(centerPos - camPos);
-
-    double angle = glm::angle(camDir, directionToCenter);
-
-    // Minimum is two second. Otherwise proportional to angle
-    _rotateToFocusNodeInterpolator.setInterpolationTime(glm::max(angle * 2.0, 2.0));
-    _rotateToFocusNodeInterpolator.start();
 }
 
 } // namespace interaction

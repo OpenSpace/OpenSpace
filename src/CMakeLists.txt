@@ -47,6 +47,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler_lua.inl
     ${OPENSPACE_BASE_DIR}/src/interaction/keyframenavigator.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/luaconsole.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/mousestate.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/orbitalnavigator.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/mission.cpp
     ${OPENSPACE_BASE_DIR}/src/mission/missionmanager.cpp
@@ -190,6 +191,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyframenavigator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/luaconsole.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/mousestate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/orbitalnavigator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/mission.h
     ${OPENSPACE_BASE_DIR}/include/openspace/mission/missionmanager.h
