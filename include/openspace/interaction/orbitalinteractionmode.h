@@ -29,6 +29,10 @@
 #include <openspace/interaction/inputstate.h>
 #include <openspace/interaction/interpolator.h>
 
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -37,7 +41,7 @@
 namespace openspace {
 namespace interaction {
 
-class OrbitalNavigator
+class OrbitalNavigator : public properties::PropertyOwner 
 {
 public:
 	struct MouseState {
@@ -86,15 +90,12 @@ public:
         MouseState _globalRollMouseState;
     };
 
-    OrbitalNavigator(std::shared_ptr<MouseStates> mouseStates);
+    OrbitalNavigator();
     ~OrbitalNavigator();
 
     void updateMouseStatesFromInput(const InputState& inputState, double deltaTime);
     void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
     bool followingNodeRotation() const;
-
-    void setFollowFocusNodeRotationDistance(double followFocusNodeRotationDistance);
-    void setMinimumAllowedDistance(double minimumAllowedDistance);
 
     void setFocusNode(SceneGraphNode* focusNode);
 
@@ -107,7 +108,16 @@ protected:
         glm::dquat globalRotation;
     };
 
-    std::shared_ptr<MouseStates> _mouseStates;
+    // Properties
+    properties::BoolProperty _rotationalFriction;
+    properties::BoolProperty _horizontalFriction;
+    properties::BoolProperty _verticalFriction;
+    properties::FloatProperty _followFocusNodeRotationDistance;
+    properties::FloatProperty _minimumAllowedDistance;
+    properties::FloatProperty _sensitivity;
+    properties::FloatProperty _motionLag;
+
+    MouseStates _mouseStates;
 
     SceneGraphNode* _focusNode = nullptr;
     glm::dvec3 _previousFocusNodePosition;
@@ -115,9 +125,6 @@ protected:
     
     Interpolator<double> _rotateToFocusNodeInterpolator;
     Interpolator<double> _followRotationInterpolator;
-
-    double _followFocusNodeRotationDistance;
-    double _minimumAllowedDistance;
 
     CameraRotationDecomposition decomposeCameraRotation(
         glm::dvec3 cameraPosition,

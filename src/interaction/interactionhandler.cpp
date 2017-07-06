@@ -59,12 +59,6 @@ namespace {
     const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/main.hbs";
     const char* KeybindingTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs";
     const char* JsFilename = "${OPENSPACE_DATA}/web/keybindings/script.js";
-    
-    const int IdOrbitalInteractionMode = 0;
-    const char* KeyOrbitalInteractionMode = "Orbital";
-    
-    const int IdKeyframeInteractionMode = 2;
-    const char* KeyKeyframeInteractionMode = "Keyframe";
 } // namespace
 
 #include "interactionhandler_lua.inl"
@@ -85,21 +79,7 @@ InteractionHandler::InteractionHandler()
         JsFilename
     )
     , _origin("origin", "Origin", "")
-    , _rotationalFriction("rotationalFriction", "Rotational friction", true)
-    , _horizontalFriction("horizontalFriction", "Horizontal friction", true)
-    , _verticalFriction("verticalFriction", "Vertical friction", true)
-    , _followFocusNodeRotationDistance("followFocusNodeRotationDistance",
-        "Follow focus node rotation distance", 2.0f, 0.0f, 10.f)
-    , _minimumAllowedDistance("minimumAllowedDistance",
-        "Minimum allowed distance", 10.0f, 0.0f, 10000.f)
-    , _sensitivity("sensitivity", "Sensitivity", 20.0f, 1.0f, 50.f)
-    , _motionLag("motionLag", "Motion lag", 0.5f, 0.f, 1.f)
     , _useKeyFrameInteraction("useKeyFrameInteraction", "Use keyframe interaction", false)
-    , _interactionModeOption(
-          "interactionMode",
-          "Interaction Mode",
-          properties::OptionProperty::DisplayType::Dropdown
-      )
 {
     _origin.onChange([this]() {
         SceneGraphNode* node = sceneGraphNode(_origin.value());
@@ -111,67 +91,14 @@ InteractionHandler::InteractionHandler()
         resetCameraDirection();
     });
 
-    // Create the interactionModes
     _inputState = std::make_unique<InputState>();
-    // Inject the same mouse states to both orbital and global interaction mode
-    _mouseStates = std::make_unique<OrbitalNavigator::MouseStates>(
-        _sensitivity * pow(10.0,-4), 1 / (_motionLag + 0.0000001));
-
-    _orbitalInteractionMode = std::make_unique<OrbitalNavigator>(_mouseStates);
+    _orbitalNavigator = std::make_unique<OrbitalNavigator>();
     _keyframeInteractionMode = std::make_unique<KeyframeInteractionMode>();
-
-    _interactionModeOption.addOption(IdOrbitalInteractionMode, KeyOrbitalInteractionMode);
-    _interactionModeOption.addOption(IdKeyframeInteractionMode, KeyKeyframeInteractionMode);
-
-    // Define lambda functions for changed properties
-    _rotationalFriction.onChange([&]() {
-        _mouseStates->setRotationalFriction(_rotationalFriction);
-    });
-    _horizontalFriction.onChange([&]() {
-        _mouseStates->setHorizontalFriction(_horizontalFriction);
-    });
-    _verticalFriction.onChange([&]() {
-        _mouseStates->setVerticalFriction(_verticalFriction);
-    });
-    _followFocusNodeRotationDistance.onChange([&]() {
-        _orbitalInteractionMode->setFollowFocusNodeRotationDistance(_followFocusNodeRotationDistance);
-    });
-    _minimumAllowedDistance.onChange([&]() {
-        _orbitalInteractionMode->setMinimumAllowedDistance(_minimumAllowedDistance);
-    });
-    _sensitivity.onChange([&]() {
-        _mouseStates->setSensitivity(_sensitivity * pow(10.0,-4));
-    });
-    _motionLag.onChange([&]() {
-        _mouseStates->setVelocityScaleFactor(1 / (_motionLag + 0.0000001));
-    });
-
-    _interactionModeOption.onChange([this]() {
-        switch(_interactionModeOption.value()) {
-            break;
-        case IdKeyframeInteractionMode:
-            //setInteractionMode(_keyframeInteractionMode.get());
-            break;
-        case IdOrbitalInteractionMode:
-        default:
-           //setInteractionMode(_orbitalInteractionMode.get());
-           break;
-        }
-    });
-
     
     // Add the properties
     addProperty(_origin);
-    addProperty(_interactionModeOption);
     addProperty(_useKeyFrameInteraction);
-
-    addProperty(_rotationalFriction);
-    addProperty(_horizontalFriction);
-    addProperty(_verticalFriction);
-    addProperty(_followFocusNodeRotationDistance);
-    addProperty(_minimumAllowedDistance);
-    addProperty(_sensitivity);
-    addProperty(_motionLag);
+	addPropertySubOwner(*_orbitalNavigator);
 }
 
 InteractionHandler::~InteractionHandler() {
@@ -183,14 +110,6 @@ void InteractionHandler::initialize() {
         if (OsEng.parallelConnection().status() == ParallelConnection::Status::ClientWithHost) {
             _useKeyFrameInteraction = true;
         }
-
-        /*
-        if (OsEng.parallelConnection().status() == ParallelConnection::Status::ClientWithHost) {
-            //setInteractionMode(_keyframeInteractionMode.get());
-        } else if (_currentInteractionMode == _keyframeInteractionMode.get()) {
-            //setInteractionMode(_orbitalInteractionMode.get());
-        }
-        */
     });
 }
 
@@ -199,7 +118,7 @@ void InteractionHandler::deinitialize() {
 }
 
 void InteractionHandler::setFocusNode(SceneGraphNode* node) {
-    _orbitalInteractionMode->setFocusNode(node);
+    _orbitalNavigator->setFocusNode(node);
 }
 
 void InteractionHandler::setCamera(Camera* camera) {
@@ -209,27 +128,11 @@ void InteractionHandler::setCamera(Camera* camera) {
 
 void InteractionHandler::resetCameraDirection() {
     LINFO("Setting camera direction to point at focus node.");
-	_orbitalInteractionMode->startInterpolateCameraDirection(*_camera);
+	_orbitalNavigator->startInterpolateCameraDirection(*_camera);
 }
-/*
-void InteractionHandler::setInteractionMode(InteractionMode* interactionMode) {
-    // Focus node is passed over from the previous interaction mode
-    SceneGraphNode* focusNode = _currentInteractionMode->focusNode();
-
-    // Set the interaction mode
-    _currentInteractionMode = interactionMode;
-
-    // Update the focusnode for the new interaction mode
-    _currentInteractionMode->setFocusNode(focusNode);
-}
-
-InteractionMode * InteractionHandler::interactionMode() {
-    return _currentInteractionMode;
-}
-*/
 
 const OrbitalNavigator& InteractionHandler::orbitalNavigator() const {
-    return *_orbitalInteractionMode;
+    return *_orbitalNavigator;
 }
 
 void InteractionHandler::goToChunk(int x, int y, int level) {
@@ -251,7 +154,7 @@ void InteractionHandler::unlockControls() {
 void InteractionHandler::updateInputStates(double timeSinceLastUpdate) {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
-    _orbitalInteractionMode->updateMouseStatesFromInput(*_inputState, timeSinceLastUpdate);
+    _orbitalNavigator->updateMouseStatesFromInput(*_inputState, timeSinceLastUpdate);
 }
 
 void InteractionHandler::updateCamera(double deltaTime) {
@@ -267,7 +170,7 @@ void InteractionHandler::updateCamera(double deltaTime) {
                 _keyframeInteractionMode->updateCameraStateFromMouseStates(*_camera, deltaTime);
             }
             else {
-                _orbitalInteractionMode->updateCameraStateFromMouseStates(*_camera, deltaTime);    
+                _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);    
             }
 			_camera->setFocusPositionVec3(focusNode()->worldPosition());
         }
@@ -275,7 +178,7 @@ void InteractionHandler::updateCamera(double deltaTime) {
 }
 
 SceneGraphNode* InteractionHandler::focusNode() const {
-    return _orbitalInteractionMode->focusNode();
+    return _orbitalNavigator->focusNode();
 }
 
 glm::dvec3 InteractionHandler::focusNodeToCameraVector() const {

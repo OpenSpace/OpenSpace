@@ -142,26 +142,13 @@ private:
     std::unique_ptr<InputState> _inputState;
     Camera* _camera;
 
-    std::shared_ptr<OrbitalNavigator::MouseStates> _mouseStates;
-    std::unique_ptr<OrbitalNavigator> _orbitalInteractionMode;
+    std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
 
     std::unique_ptr<KeyframeInteractionMode> _keyframeInteractionMode;
 
     // Properties
     properties::StringProperty _origin;
-    properties::OptionProperty _interactionModeOption;
-
     properties::BoolProperty _useKeyFrameInteraction;
-
-    properties::BoolProperty _rotationalFriction;
-    properties::BoolProperty _horizontalFriction;
-    properties::BoolProperty _verticalFriction;
-
-    properties::FloatProperty _followFocusNodeRotationDistance;
-    properties::FloatProperty _minimumAllowedDistance;
-
-    properties::FloatProperty _sensitivity;
-    properties::FloatProperty _motionLag;
 };
 
 } // namespace interaction
