@@ -59,6 +59,12 @@ public:
     void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
     
     void outputLogs();
+    
+    void logDir(std::string dir);
+    std::string logDir();
+    void prefix(std::string prefix);
+    std::string prefix();
+
     void enableLogging();
     void disableLogging();
     void toggleLogging();
@@ -69,6 +75,9 @@ public:
 private:
     bool _doPerformanceMeasurements;
     bool _loggingEnabled;
+
+    std::string _logDir;
+    std::string _prefix;
     
     std::map<std::string, size_t> individualPerformanceLocations;
     

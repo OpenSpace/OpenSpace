@@ -30,6 +30,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/sharedmemory.h>
 #include <ghoul/misc/onscopeexit.h>
+#include <ghoul/filesystem/filesystem.h>
 
 #include <algorithm>
 #include <cstring>
@@ -132,6 +133,8 @@ PerformanceManager::PerformanceManager()
     : _performanceMemory(nullptr)
     , _tick(0)
     , _loggingEnabled(false)
+    , _logDir(absPath("${BASE_PATH}"))
+    , _prefix("PM-")
 {
     using ghoul::SharedMemory;
     PerformanceManager::createGlobalSharedMemory();
@@ -207,12 +210,29 @@ void PerformanceManager::outputLogs() {
     PerformanceLayout* layout = performanceData();
 
     for (size_t i = 0; i < layout->nFunctionEntries; ++i) {
-        LINFO("Log:" << i << " Node: " << layout->sceneGraphEntries[i].name << " " << layout->functionEntries[i].time[0]);
+        LINFO("LogA:" << i << " Node: " << layout->sceneGraphEntries[i].name << " " << layout->functionEntries[i].time[0]);
     }
 
+    LINFO("Log Dir: " << absPath(_logDir + "/" + _prefix));
     for (size_t i = 0; i < layout->nScaleGraphEntries; ++i) {
-        LINFO("Log:" << i << " Node: " << layout->sceneGraphEntries[i].name << " " << layout->sceneGraphEntries[i].renderTime[0];);
+        LINFO("LogB:" << i << " Node: " << layout->sceneGraphEntries[i].name << " " << layout->sceneGraphEntries[i].renderTime[0];);
     }
+}
+
+void PerformanceManager::logDir(std::string dir) {
+    _logDir = absPath(dir);
+}
+
+std::string PerformanceManager::logDir() {
+    return _logDir;
+}
+
+void PerformanceManager::prefix(std::string prefix) {
+    _prefix = prefix;
+}
+
+std::string PerformanceManager::prefix() {
+    return _prefix;
 }
 
 void PerformanceManager::enableLogging() {

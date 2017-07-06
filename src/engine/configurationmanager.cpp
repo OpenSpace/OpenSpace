@@ -62,8 +62,11 @@ const string ConfigurationManager::KeyConfigScene = "Scene";
 const string ConfigurationManager::KeyConfigTask = "Task";
 
 const string ConfigurationManager::KeyLogging = "Logging";
+const string ConfigurationManager::PartLogDir = "LogDir";
 const string ConfigurationManager::PartLogLevel = "LogLevel";
 const string ConfigurationManager::PartImmediateFlush = "ImmediateFlush";
+const string ConfigurationManager::PartLogPerformancePrefix = "PerformancePrefix";
+
 const string ConfigurationManager::PartLogs = "Logs";
 const string ConfigurationManager::PartAppend = "Append";
 const string ConfigurationManager::PartCapabilitiesVerbosity = "CapabilitiesVerbosity";
