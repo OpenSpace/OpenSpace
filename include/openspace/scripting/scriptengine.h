@@ -71,6 +71,7 @@ public:
     void deinitialize();
     
     void initializeLuaState(lua_State* state);
+    ghoul::lua::LuaState* luaState();
 
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);

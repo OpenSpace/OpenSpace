@@ -375,6 +375,7 @@ void SceneGraphNode::setParent(SceneGraphNode& parent, UpdateScene updateScene) 
 }
 
 void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child, UpdateScene updateScene) {
+    ghoul_assert(child != nullptr, "Child may not be null");
     ghoul_assert(child->parent() == nullptr, "Child may not already have a parent");
 
     child->_parent = this;
@@ -382,10 +383,11 @@ void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child, UpdateSc
         child->setScene(_scene);
     }
 
+    SceneGraphNode* childRaw = child.get();
    _children.push_back(std::move(child));
 
    if (_scene && updateScene) {
-       _scene->addNode(child.get());
+       _scene->addNode(childRaw);
    }
 }
 

@@ -42,8 +42,6 @@ namespace {
     const std::string AssetExtension = ".asset";
 
     const std::string RootNodeName = "Root";
-    const std::string KeyName = "Name";
-    const std::string KeyParentName = "Parent";
     const std::string KeyDependencies = "Dependencies";
     const std::string KeyCamera = "Camera";
     const std::string KeyCameraFocus = "Focus";
@@ -57,7 +55,7 @@ SceneLoader::SceneLoader(AssetLoader* assetLoader)
     : _assetLoader(assetLoader)
 {}
 
-std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
+void SceneLoader::loadScene(Scene* scene, const std::string& path) {
     // Set up lua state.
     lua_State* state = ghoul::lua::createNewLuaState();
     OnExit(
@@ -91,74 +89,30 @@ std::unique_ptr<Scene> SceneLoader::loadScene(const std::string& path) {
     std::vector<std::string> keys = assetDictionary.keys();
     //ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
 
-    std::vector<SceneLoader::LoadedNode> allNodes;
-
     for (const std::string& key : keys) {
-        std::string fullAssetName = assetDictionary.value<std::string>(key);
-        std::replace(fullAssetName.begin(), fullAssetName.end(), '/', FileSys.PathSeparator);
-        std::string assetPath = FileSys.pathByAppendingComponent(assetsPath, fullAssetName);
-
-        std::vector<SceneLoader::LoadedNode> nodes = loadDirectory(assetPath, state);
-        std::move(nodes.begin(), nodes.end(), std::back_inserter(allNodes));
+        std::string assetName = assetDictionary.value<std::string>(key);
+        _assetLoader->loadAsset(assetName);
     }
-
-    //FileSys.setCurrentDirectory(oldDirectory);
     
-    std::unique_ptr<Scene> scene = std::make_unique<Scene>();
-
-    std::unique_ptr<SceneGraphNode> rootNode = std::make_unique<SceneGraphNode>();
-    rootNode->setName(SceneGraphNode::RootNodeName);
-    scene->setRoot(std::move(rootNode));
-
-    addLoadedNodes(*scene, std::move(allNodes));
-
     ghoul::Dictionary cameraDictionary;
     sceneDictionary.getValue(KeyCamera, cameraDictionary);
-    LoadedCamera loadedCamera = loadCamera(cameraDictionary);
+    std::unique_ptr<LoadedCamera> loadedCamera = loadCamera(cameraDictionary);
 
     auto& nodeMap = scene->nodesByName();
-    auto it = nodeMap.find(loadedCamera.parent);
+    auto it = nodeMap.find(loadedCamera->parent);
     if (it != nodeMap.end()) {
-        loadedCamera.camera->setParent(it->second);
+        loadedCamera->camera->setParent(it->second);
     } else {
         LWARNING(
-            "Could not find the camera parent '" + loadedCamera.parent +
+            "Could not find the camera parent '" + loadedCamera->parent +
             "'. Attaching camera to root node.");
-        loadedCamera.camera->setParent(scene->root());
+        loadedCamera->camera->setParent(scene->root());
     }
 
-    scene->setCamera(std::move(loadedCamera.camera));
-
-    return scene;
+    scene->setCamera(std::move(loadedCamera->camera));
 }
 
-std::vector<SceneGraphNode*> SceneLoader::importDirectory(Scene& scene, const std::string& path) {
-    lua_State* state = ghoul::lua::createNewLuaState();
-    OnExit(
-        // Delete the Lua state at the end of the scope, no matter what.
-        [state]() {ghoul::lua::destroyLuaState(state); }
-    );
-    OsEng.scriptEngine().initializeLuaState(state);
-
-    std::string absDirectoryPath = absPath(path);
-
-    //ghoul::filesystem::Directory oldDirectory = FileSys.currentDirectory();
-    std::vector<SceneLoader::LoadedNode> nodes = loadDirectory(path, state);
-    //FileSys.setCurrentDirectory(oldDirectory);
-    return addLoadedNodes(scene, std::move(nodes));
-}
-
-SceneGraphNode* SceneLoader::importNodeDictionary(Scene& scene, const ghoul::Dictionary& dict) {
-    std::vector<SceneLoader::LoadedNode> loadedNodes;
-    loadedNodes.push_back(loadNode(dict));
-    std::vector<SceneGraphNode*> nodes = addLoadedNodes(scene, std::move(loadedNodes));
-    if (nodes.size() == 1) {
-        return nodes[0];
-    }
-    return nullptr;
-}
-
-SceneLoader::LoadedCamera SceneLoader::loadCamera(const ghoul::Dictionary& cameraDict) {
+std::unique_ptr<SceneLoader::LoadedCamera> SceneLoader::loadCamera(const ghoul::Dictionary& cameraDict) {
     std::string focus;
     glm::vec3 cameraPosition;
     glm::vec4 cameraRotation;
@@ -174,7 +128,7 @@ SceneLoader::LoadedCamera SceneLoader::loadCamera(const ghoul::Dictionary& camer
     camera->setRotation(glm::dquat(
         cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
 
-    LoadedCamera loadedCamera(focus, std::move(camera));
+    std::unique_ptr<LoadedCamera> loadedCamera = std::make_unique<LoadedCamera>(focus, std::move(camera));
     
     if (!readSuccessful) {
         throw Scene::InvalidSceneError(
@@ -184,208 +138,4 @@ SceneLoader::LoadedCamera SceneLoader::loadCamera(const ghoul::Dictionary& camer
     return loadedCamera;
 }
 
-
-std::vector<SceneLoader::LoadedNode> SceneLoader::loadDirectory(
-    const std::string& path,
-    lua_State* luaState)
-{
-    std::string::size_type pos = path.find_last_of(FileSys.PathSeparator);
-    if (pos == std::string::npos) {
-        LERROR("Error parsing directory name '" << path << "'");
-        return std::vector<SceneLoader::LoadedNode>();
-    }
-    std::string assetName = path.substr(pos + 1);
-    std::string assetFile = FileSys.pathByAppendingComponent(path, assetName) + AssetExtension;
-
-    if (FileSys.fileExists(assetFile)) {
-        // TODO: Get rid of changing the working directory (global state is bad) -- emiax
-        // This requires refactoring all renderables to not use relative paths in constructors.
-        FileSys.setCurrentDirectory(ghoul::filesystem::Directory(path));
-        
-        // We have a asset file, so it is a direct include.
-        return loadAsset(assetName, luaState);
-    } else {
-        std::vector<SceneLoader::LoadedNode> allLoadedNodes;
-        // If we do not have a asset file, we have to include all subdirectories.
-        using ghoul::filesystem::Directory;
-        using std::string;
-
-        const Directory directory(path);
-        const std::string directoryPath = directory.path();
-
-        if (!FileSys.directoryExists(directoryPath)) {
-            LERROR("The directory " << directoryPath << " does not exist.");
-            return std::vector<SceneLoader::LoadedNode>();
-        }
-
-        for (const string& subdirectory : directory.readDirectories()) {
-            std::vector<SceneLoader::LoadedNode> loadedNodes = loadDirectory(subdirectory, luaState);
-            std::move(loadedNodes.begin(), loadedNodes.end(), std::back_inserter(allLoadedNodes));
-        }
-        return allLoadedNodes;
-    }
-}
-
-
-SceneLoader::LoadedNode SceneLoader::loadNode(const ghoul::Dictionary& dictionary) {
-    std::vector<std::string> dependencies;
-
-    std::string nodeName = dictionary.value<std::string>(KeyName);
-    std::string parentName = dictionary.value<std::string>(KeyParentName);
-    std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(dictionary);
-
-    if (dictionary.hasKey(SceneGraphNode::KeyDependencies)) {
-        if (!dictionary.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies)) {
-            LERROR("Dependencies did not have the corrent type");
-        }
-        ghoul::Dictionary nodeDependencies;
-        dictionary.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
-
-        std::vector<std::string> keys = nodeDependencies.keys();
-        for (const std::string& key : keys) {
-            std::string value = nodeDependencies.value<std::string>(key);
-            dependencies.push_back(value);
-        }
-    }
-    return SceneLoader::LoadedNode(nodeName, parentName, dependencies, std::move(node));
-}
-
-
-std::vector<SceneLoader::LoadedNode> SceneLoader::loadAsset(const std::string& assetName, lua_State* luaState) {
-    AssetLoader::Asset* asset = _assetLoader->loadAsset(assetName);
-    const ghoul::Dictionary& assetDictionary = asset->dictionary();
-    std::vector<LoadedNode> loadedNodes;
-
-    std::vector<std::string> keys = assetDictionary.keys();
-    for (const std::string& key : keys) {
-        ghoul::Dictionary nodeDictionary;
-        if (!assetDictionary.getValue(key, nodeDictionary)) {
-            LERROR("Node dictionary did not have the corrent type");
-            continue;
-        }
-        try {
-            loadedNodes.push_back(loadNode(nodeDictionary));
-        } catch (ghoul::RuntimeError& e) {
-            LERROR("Failed loading node from " << assetName << ": " << e.message << ", " << e.component);
-        }
-    }
-    return loadedNodes;
-}
-
-std::vector<SceneGraphNode*> SceneLoader::addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode>&& loadedNodes) {
-    std::map<std::string, SceneGraphNode*> existingNodes = scene.nodesByName();
-    std::map<std::string, SceneGraphNode*> addedNodes;
-
-    // Populate map of nodes to be added.
-    // Also track new branches of nodes that are attached
-    // to allow for recovery in case an invalid scene is generated.
-    for (auto& loadedNode : loadedNodes) {
-        std::string name = loadedNode.name;
-        if (existingNodes.count(name) > 0) {
-            LERROR("Node with name '" + name + "' already exists in scene");
-            continue;
-        }
-        if (addedNodes.count(name) > 0) {
-            LERROR("Duplicate node names '" + name + "' among loaded nodes");
-        }
-
-        SceneGraphNode* node = loadedNode.node.get();
-        addedNodes[name] = node;
-    }
-    
-    // Find a node by name among the exising nodes and the added nodes.
-    auto findNode = [&existingNodes, &addedNodes](const std::string name) {
-        std::map<std::string, SceneGraphNode*>::iterator it;
-        if ((it = existingNodes.find(name)) != existingNodes.end()) {
-            return it->second;
-        }
-        if ((it = addedNodes.find(name)) != addedNodes.end()) {
-            return it->second;
-        }
-        return static_cast<SceneGraphNode*>(nullptr);
-    };
-
-    std::vector<SceneGraphNode*> attachedBranches;
-    std::vector<std::unique_ptr<SceneGraphNode>> badNodes;
-    
-    // Attach each node to its parent and set up dependencies.
-    for (auto& loadedNode : loadedNodes) {
-        std::string parentName = loadedNode.parent;
-        std::vector<std::string> dependencyNames = loadedNode.dependencies;
-
-        SceneGraphNode* parent = findNode(parentName);
-        if (!parent) {
-            LERROR("Could not find parent '" + parentName + "' for '" + loadedNode.name + "'");
-            badNodes.push_back(std::move(loadedNode.node));
-            continue;
-        }
-        
-        std::vector<SceneGraphNode*> dependencies;
-        bool foundAllDeps = true;
-        for (const auto& depName : dependencyNames) {
-            SceneGraphNode* dep = findNode(depName);
-            if (!dep) {
-                LERROR("Could not find dependency '" + depName + "' for '" + loadedNode.name + "'");
-                foundAllDeps = false;
-                continue;
-            }
-            dependencies.push_back(dep);
-        }
-
-        if (!foundAllDeps) {
-            badNodes.push_back(std::move(loadedNode.node));
-            continue;
-        }
-
-        SceneGraphNode* child = loadedNode.node.get();
-        parent->attachChild(std::move(loadedNode.node), SceneGraphNode::UpdateScene::No);
-        child->setDependencies(dependencies, SceneGraphNode::UpdateScene::No);
-
-        if (existingNodes.find(parentName) != existingNodes.end()) {
-            attachedBranches.push_back(child);
-        }
-    }
-
-    // Remove all bad nodes (parent or deps missing) and all their children and dependent nodes.
-    // Use unsorted set `visited` to avoid infinite loop in case of circular deps.
-    std::unordered_set<SceneGraphNode*> visited;
-    for (size_t i = 0; i < badNodes.size(); i++) {
-        auto& badNode = badNodes[i];
-        for (auto c : badNode->children()) {
-            visited.insert(c);
-            badNodes.push_back(badNode->detachChild(*c, SceneGraphNode::UpdateScene::No));
-        }
-        for (auto& d : badNode->dependentNodes()) {
-            SceneGraphNode* parent = d->parent();
-            if (visited.count(d) == 0) {
-                visited.insert(d);
-                if (parent) {
-                    badNodes.push_back(parent->detachChild(*d, SceneGraphNode::UpdateScene::No));
-                }
-            }
-        }
-    }
-    // Warn for nodes that lack connection to the root.
-    for (auto& node : addedNodes) {
-        if (!node.second->scene()) {
-            LWARNING("Node '" << node.first << "' is not connected to the root and will not be added to the scene");
-        }
-    }
-
-    // Add the nodes to the scene.
-    for (auto& node : attachedBranches) {
-        scene.addNode(node, Scene::UpdateDependencies::No);
-    }
-
-    // Update dependencies: sort nodes topologically.
-    scene.updateDependencies();
-
-    // Return a vector of all added nodes.
-    std::vector<SceneGraphNode*> addedNodesVector;
-    std::transform(addedNodes.begin(), addedNodes.end(), std::back_inserter(addedNodesVector), [] (auto& pair) {
-        return pair.second;
-    });
-
-    return addedNodesVector;
-}
 }

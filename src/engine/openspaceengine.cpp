@@ -48,7 +48,8 @@
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
-#include <openspace/scene/scenemanager.h>
+#include <openspace/scene/sceneloader.h>
+#include <openspace/scene/assetloader.h>
 
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/task.h>
@@ -122,7 +123,7 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 OpenSpaceEngine::OpenSpaceEngine(std::string programName,
                                  std::unique_ptr<WindowWrapper> windowWrapper)
     : _configurationManager(new ConfigurationManager)
-    , _sceneManager(nullptr)
+    , _scene(new Scene)
     , _downloadManager(nullptr)
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
@@ -377,8 +378,10 @@ void OpenSpaceEngine::create(int argc, char** argv,
     sgctArguments.insert(sgctArguments.begin() + 1, SgctConfigArgumentCommand);
     sgctArguments.insert(sgctArguments.begin() + 2, absPath(sgctConfigurationPath));
 
-    // Set up scene manager
-    _engine->_sceneManager = std::make_unique<SceneManager>("${ASSETS}", "${SYNC}");
+    // Set up asset loader and scene loader
+    _engine->_assetLoader = std::make_unique<AssetLoader>(
+        OsEng.scriptEngine().luaState(), "${ASSETS}", "${SYNC}");
+    _engine->_sceneLoader = std::make_unique<SceneLoader>(_engine->_assetLoader.get());
 }
 
 void OpenSpaceEngine::destroy() {
@@ -402,7 +405,7 @@ void OpenSpaceEngine::destroy() {
     _engine->_console->deinitialize();
 
     _engine->_scriptEngine->deinitialize();
-    _engine->_sceneManager->unloadAll();
+    _engine->_scene = nullptr;
 
     delete _engine;
     FactoryManager::deinitialize();
@@ -552,7 +555,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         }
     );
     
-    Scene* scene = nullptr;
+
     if (scenePath != "") {
         // Run start up scripts
         try {
@@ -563,7 +566,17 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         }
         // Load the scene
         try {
-            scene = _sceneManager->loadScene(scenePath);
+            if (_scene) {
+                _syncEngine->removeSyncables(_timeManager->getSyncables());
+                _syncEngine->removeSyncables(_renderEngine->getSyncables());
+                _renderEngine->setScene(nullptr);
+                _renderEngine->setCamera(nullptr);
+                _interactionHandler->setCamera(nullptr);
+            }
+
+            _scene = std::make_unique<Scene>();
+            _renderEngine->setScene(_scene.get());
+            _sceneLoader->loadScene(_scene.get(), scenePath);
         }
         catch (const ghoul::FileNotFoundError& e) {
             LERRORC(e.component, e.message);
@@ -587,26 +600,16 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         }
     }
 
-    Scene* previousScene = _renderEngine->scene();
-    if (previousScene) {
-        _syncEngine->removeSyncables(_timeManager->getSyncables());
-        _syncEngine->removeSyncables(_renderEngine->getSyncables());
-
-        _renderEngine->setScene(nullptr);
-        _renderEngine->setCamera(nullptr);
-        _interactionHandler->setCamera(nullptr);
-        _sceneManager->unloadScene(*previousScene);
-    }
+    
 
     // Initialize the RenderEngine
-    _renderEngine->setScene(scene);
+
     _renderEngine->setGlobalBlackOutFactor(0.0);
     _renderEngine->startFading(1, 3.0);
 
-    if (scene) {
-        _renderEngine->setCamera(scene->camera());
-        scene->initialize();
-        _interactionHandler->setCamera(scene->camera());
+    if (_scene) {
+        _renderEngine->setCamera(_scene->camera());
+        _interactionHandler->setCamera(_scene->camera());
         try {
             runPostInitializationScripts(scenePath);
         } catch (const ghoul::RuntimeError& e) {
@@ -624,7 +627,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 
         // If a PropertyDocumentationFile was specified, generate it now.
         if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
-            scene->writeDocumentation(
+            _scene->writeDocumentation(
                 absPath(configurationManager().value<std::string>(
                     ConfigurationManager::KeyPropertyDocumentation
                 ))

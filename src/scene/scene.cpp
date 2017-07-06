@@ -32,7 +32,7 @@
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/sceneloader.h>
+#include <openspace/scene/nodeloader.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
 #include <openspace/util/time.h>
@@ -71,6 +71,9 @@ namespace {
     const char* KeyPositionObject = "Position";
     const char* KeyViewOffset = "Offset";
 
+    const std::string KeyName = "Name";
+    const std::string KeyParentName = "Parent";
+
     const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/properties/main.hbs";
     const char* PropertyOwnerTemplateFilename = "${OPENSPACE_DATA}/web/properties/propertyowner.hbs";
     const char* PropertyTemplateFilename = "${OPENSPACE_DATA}/web/properties/property.hbs";
@@ -90,7 +93,11 @@ Scene::Scene()
         },
         JsFilename
     )
-{}
+{
+    std::unique_ptr<SceneGraphNode> rootNode = std::make_unique<SceneGraphNode>();
+    rootNode->setName(SceneGraphNode::RootNodeName);
+    setRoot(std::move(rootNode));
+}
 
 Scene::~Scene(){
 }
@@ -209,21 +216,6 @@ void Scene::sortTopologically() {
     _topologicallySortedNodes = nodes;
 }
 
-void Scene::initialize() {
-    for (SceneGraphNode* node : _topologicallySortedNodes) {
-        try {
-            bool success = node->initialize();
-            if (success)
-                LDEBUG(node->name() << " initialized successfully!");
-            else
-                LWARNING(node->name() << " not initialized.");
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(std::string(_loggerCat) + "(" + e.component + ")", e.what());
-        }
-    }
-}
-
 void Scene::update(const UpdateData& data) {
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
@@ -273,6 +265,56 @@ SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
 
 const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
     return _topologicallySortedNodes;
+}
+
+
+SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
+    std::vector<std::string> dependencyNames;
+
+    std::string nodeName = dict.value<std::string>(KeyName);
+    std::string parentName = dict.value<std::string>(KeyParentName);
+    std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(dict);
+
+    if (dict.hasKey(SceneGraphNode::KeyDependencies)) {
+        if (!dict.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies)) {
+            LERROR("Dependencies did not have the corrent type");
+        }
+        ghoul::Dictionary nodeDependencies;
+        dict.getValue(SceneGraphNode::KeyDependencies, nodeDependencies);
+
+        std::vector<std::string> keys = nodeDependencies.keys();
+        for (const std::string& key : keys) {
+            std::string value = nodeDependencies.value<std::string>(key);
+            dependencyNames.push_back(value);
+        }
+    }
+
+    SceneGraphNode* parent = sceneGraphNode(parentName);
+    if (!parent) {
+        LERROR("Could not find parent '" + parentName + "' for '" + nodeName + "'");
+        return nullptr;
+    }
+
+    std::vector<SceneGraphNode*> dependencies;
+    bool foundAllDeps = true;
+    for (const auto& depName : dependencyNames) {
+        SceneGraphNode* dep = sceneGraphNode(depName);
+        if (!dep) {
+            LERROR("Could not find dependency '" + depName + "' for '" + nodeName + "'");
+            foundAllDeps = false;
+            continue;
+        }
+        dependencies.push_back(dep);
+    }
+
+    if (!foundAllDeps) {
+        return nullptr;
+    }
+
+    SceneGraphNode* rawNodePointer = node.get();
+    node->setDependencies(dependencies, SceneGraphNode::UpdateScene::No);
+    parent->attachChild(std::move(node));
+    return rawNodePointer;
 }
 
 std::string Scene::generateJson() const {

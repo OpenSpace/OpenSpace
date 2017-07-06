@@ -55,8 +55,10 @@ class NetworkEngine;
 class ParallelConnection;
 class RenderEngine;
 class SettingsEngine;
-class SceneManager;
 class VirtualPropertyManager;
+class Scene;
+class AssetLoader;
+class SceneLoader;
 
 class SyncEngine;
 class TimeManager;
@@ -182,7 +184,9 @@ private:
     
     // Components
     std::unique_ptr<ConfigurationManager> _configurationManager;
-    std::unique_ptr<SceneManager> _sceneManager;
+    std::unique_ptr<Scene> _scene;
+    std::unique_ptr<AssetLoader> _assetLoader;
+    std::unique_ptr<SceneLoader> _sceneLoader;
     std::unique_ptr<DownloadManager> _downloadManager;
     std::unique_ptr<LuaConsole> _console;
     std::unique_ptr<ModuleEngine> _moduleEngine;

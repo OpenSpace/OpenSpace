@@ -47,37 +47,10 @@ public:
     /**
      * Load a scene file.
      */
-    std::unique_ptr<Scene> loadScene(const std::string& path);
-
-    /**
-     * Import a directory of scene contents into an existing scene.
-     */
-    std::vector<SceneGraphNode*> importDirectory(Scene& scene, const std::string& directory);
-
-    /**
-     * Import a scene graph node from a dictionary into an existing scene.
-     */
-    SceneGraphNode* importNodeDictionary(Scene& scene, const ghoul::Dictionary& dictionary);
+    void loadScene(Scene* scene, const std::string& path);
 
 private:
-    struct LoadedNode {
-        LoadedNode(
-            const std::string& nodeName,
-            const std::string& parentName,
-            const std::vector<std::string>& deps,
-            std::unique_ptr<SceneGraphNode> n
-            )
-            : name(nodeName)
-            , parent(parentName)
-            , dependencies(deps)
-            , node(std::move(n)) {}
-
-        std::string name;
-        std::string parent;
-        std::vector<std::string> dependencies;
-        std::unique_ptr<SceneGraphNode> node;
-    };
-
+    
     struct LoadedCamera {
         LoadedCamera(
             const std::string& parentName,
@@ -90,29 +63,14 @@ private:
     };
 
     /**
-     * Load a scene graph node from a dictionary
-     */
-    SceneLoader::LoadedNode loadNode(const ghoul::Dictionary& dictionary);
-
-    /**
-     * Load a mod file.
-     */
-    std::vector<SceneLoader::LoadedNode> loadAsset(const std::string& path, lua_State* luaState);
-
-    /**
      * Load a directory.
      */
-    std::vector<SceneLoader::LoadedNode> loadDirectory(const std::string& path, lua_State* luaState);
+    void loadDirectory(const std::string& path);
 
     /**
      * Load a camera from a dictionary
      */
-    SceneLoader::LoadedCamera loadCamera(const ghoul::Dictionary& dictionary);
-
-    /**
-     * Add loaded nodes to an existing scene
-     */
-    std::vector<SceneGraphNode*> addLoadedNodes(Scene& scene, std::vector<SceneLoader::LoadedNode>&& nodes);
+    std::unique_ptr<SceneLoader::LoadedCamera> loadCamera(const ghoul::Dictionary& dictionary);
 
     AssetLoader* _assetLoader;
 };

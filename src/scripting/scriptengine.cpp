@@ -93,6 +93,10 @@ void ScriptEngine::initializeLuaState(lua_State* state) {
     }
 }
 
+ghoul::lua::LuaState * ScriptEngine::luaState() {
+    return &_state;
+}
+
 void ScriptEngine::addLibrary(LuaLibrary library) {
     auto sortFunc = [](const LuaLibrary::Function& lhs, const LuaLibrary::Function& rhs)
     {

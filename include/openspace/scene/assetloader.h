@@ -38,7 +38,6 @@ namespace openspace {
 
 namespace assetloader {
 int importAsset(lua_State* state);
-int exportAsset(lua_State* state);
 int resolveLocalResource(lua_State* state);
 int resolveSyncedResource(lua_State* state);
 }
@@ -70,16 +69,13 @@ public:
         friend int assetloader::resolveSyncedResource(lua_State* state);
         int resolveSyncedResourceLua();
 
-        friend int assetloader::exportAsset(lua_State* state);
-        int exportAssetLua();
-
         AssetLoader* _loader;
         std::string _directory;
         std::vector<Asset*> _dependencies;
         std::vector<Asset*> _dependants;
     };
 
-    AssetLoader(std::string assetRoot, std::string syncRoot);
+    AssetLoader(ghoul::lua::LuaState* _luaState, std::string assetRoot, std::string syncRoot);
     ~AssetLoader() = default;
 
 
@@ -87,7 +83,7 @@ public:
      * Load an asset file.
      */
     Asset* loadAsset(const std::string& identifier);
-    ghoul::lua::LuaState& luaState();
+    ghoul::lua::LuaState* luaState();
     ghoul::filesystem::Directory currentDirectory();
     Asset* rootAsset();
     const std::string& syncRoot();
@@ -95,7 +91,7 @@ public:
 private:
     void pushAsset(Asset* asset);
     void popAsset();
-    void updateGlobalLuaFunctions();
+    void updateLuaGlobals();
    
     std::unique_ptr<Asset> _rootAsset;
     std::map<std::string, std::unique_ptr<Asset>> _loadedAssets;
@@ -106,7 +102,7 @@ private:
     friend int assetloader::importAsset(lua_State* state);
     int importAssetLua();
 
-    ghoul::lua::LuaState _luaState;
+    ghoul::lua::LuaState* _luaState;
 };
 
 

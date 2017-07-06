@@ -66,11 +66,6 @@ public:
     ~Scene();
 
     /**
-     * Initalizes the SceneGraph
-     */
-    void initialize();
-
-    /**
      * Clear the scene graph,
      * i.e. set the root node to nullptr and deallocate all scene graph nodes.
      */
@@ -136,6 +131,11 @@ public:
      * Return a a map from name to scene graph node.
      */
     const std::map<std::string, SceneGraphNode*>& nodesByName() const;
+
+    /**
+     * Load a scene graph node from a dictionary and return it.
+     */
+    SceneGraphNode* loadNode(const ghoul::Dictionary& nodeDictionary);
 
     /**
      * Returns the Lua library that contains all Lua functions available to change the
