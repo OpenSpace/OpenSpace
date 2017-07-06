@@ -31,10 +31,7 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = marsEllipsoid,
-            CameraMinHeight = 10,
             SegmentsPerPatch = 90,
-            -- Allows camera to go down 10000 meters below the reference ellipsoid
-            InteractionDepthBelowEllipsoid = 10000, -- Useful when having negative height map values
             Layers = {
                 ColorLayers = {
                     {
