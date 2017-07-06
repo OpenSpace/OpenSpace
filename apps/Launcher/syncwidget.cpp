@@ -260,7 +260,7 @@ void SyncWidget::handleDirectFiles() {
 
         std::shared_ptr<openspace::DownloadManager::FileFuture> future = _downloadManager->downloadFile(
             f.url.toStdString(),
-            absPath("${SCENE}/" + f.module.toStdString() + "/" + f.destination.toStdString()),
+            absPath(f.destination.toStdString()),
             OverwriteFiles
         );
         if (future) {
@@ -367,7 +367,7 @@ void SyncWidget::syncButtonPressed() {
         );
 
         ghoul::Dictionary modules;
-        bool success = sceneDictionary.getValue<ghoul::Dictionary>("Modules", modules);
+        bool success = sceneDictionary.getValue<ghoul::Dictionary>("Assets", modules);
         if (!success) {
             LERROR("Could not find 'Modules'");
             return;
@@ -455,7 +455,7 @@ void SyncWidget::syncButtonPressed() {
                         _directFiles.append({
                             module.moduleName,
                             QString::fromStdString(url),
-                            QString::fromStdString(dest),
+                            "${SYNC}/" + module.moduleName + "/" + QString::fromStdString(dest),
                             module.modulePath
                         });
                     }
@@ -485,7 +485,7 @@ void SyncWidget::syncButtonPressed() {
                         _fileRequests.append({
                             module.moduleName,
                             QString::fromStdString(url),
-                            QString::fromStdString(dest),
+                            "${SYNC}/" + module.moduleName + "/" + QString::fromStdString(dest),
                             module.modulePath,
                             version
                         });
@@ -512,7 +512,7 @@ void SyncWidget::syncButtonPressed() {
                         _torrentFiles.append({
                             module.moduleName,
                             QString::fromStdString(file),
-                            QString::fromStdString(dest),
+                            "${SYNC}/" + module.moduleName + "/" + QString::fromStdString(dest),
                             module.modulePath
                         });
                     }

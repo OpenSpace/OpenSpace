@@ -26,8 +26,12 @@
 #define __OPENSPACE_CORE___ASSETLOADER___H__
 
 #include <openspace/scene/scenegraphnode.h>
+
+#include <openspace/scripting/lualibrary.h>
+
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/luastate.h>
+
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/filesystem/directory.h>
 
@@ -50,13 +54,22 @@ public:
         Asset(AssetLoader* loader, std::string directory);
         Asset(AssetLoader* loader, std::string directory, std::string name);
         std::string id();
-        std::string assetFilepath();
-        std::string directory();
-        ghoul::Dictionary dictionary();
+        std::string assetFilePath();
+        std::string dataFilePath();
+        std::string assetDirectory();
         AssetLoader* loader();
+        ghoul::Dictionary dataDictionary();
+        std::string syncDirectory();
+        bool isInitialized();
+        bool hasLuaTable();
+        void initialize();
+        void deinitialize();
 
         void addDependency(Asset* asset);
-        void addDependant(Asset* asset);
+        void removeDependency(Asset* asset);
+        void removeDependency(const std::string& assetId);
+
+        bool hasInitializedDependants();
 
     private:
         std::string resolveLocalResource(std::string resourceName);
@@ -69,8 +82,10 @@ public:
         friend int assetloader::resolveSyncedResource(lua_State* state);
         int resolveSyncedResourceLua();
 
+        bool _hasLuaTable;
+        bool _initialized;
         AssetLoader* _loader;
-        std::string _directory;
+        std::string _assetDirectory;
         std::vector<Asset*> _dependencies;
         std::vector<Asset*> _dependants;
     };
@@ -79,22 +94,25 @@ public:
     ~AssetLoader() = default;
 
 
-    /**
-     * Load an asset file.
-     */
-    Asset* loadAsset(const std::string& identifier);
+    void loadAsset(const std::string& identifier);
+    void unloadAsset(const std::string& identifier);
+
+    scripting::LuaLibrary luaLibrary();
+    
     ghoul::lua::LuaState* luaState();
     ghoul::filesystem::Directory currentDirectory();
     Asset* rootAsset();
     const std::string& syncRoot();
 
 private:
+    Asset* importAsset(const std::string& identifier);
+
     void pushAsset(Asset* asset);
     void popAsset();
     void updateLuaGlobals();
    
     std::unique_ptr<Asset> _rootAsset;
-    std::map<std::string, std::unique_ptr<Asset>> _loadedAssets;
+    std::map<std::string, std::unique_ptr<Asset>> _importedAssets;
     std::vector<Asset*> _assetStack;
 
     std::string _syncRoot;

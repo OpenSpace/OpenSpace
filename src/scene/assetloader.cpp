@@ -23,25 +23,30 @@
  ****************************************************************************************/
 
 #include <openspace/scene/assetloader.h>
+
+#include <openspace/scripting/script_helper.h>
+
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/onscopeexit.h>
-
 #include <ghoul/filesystem/filesystem.h>
+
+#include "assetloader_lua.inl"
 
 namespace {
     const char* AssetFileSuffix = "asset";
     const char* AssetGlobalVariableName = "asset";
+    const char* DataFileSuffix = "data";
 
     const char* ImportFunctionName = "import";
     const char* SyncedResourceFunctionName = "syncedResource";
     const char* LocalResourceFunctionName = "localResource";
+    const char* OnInitializeFunctionName = "onInitialize";
     const char* OnDeinitializeFunctionName = "onDeinitialize";
-    
+
     const char* AssetsTableName = "_assets";
-    const char* KeySceneGraphNodes = "SceneGraphNodes";
 
     const char* _loggerCat = "AssetLoader";
 }
@@ -49,6 +54,7 @@ namespace {
 namespace openspace {
 
 namespace assetloader {
+
 int importAsset(lua_State* state) {
     AssetLoader *assetLoader = (AssetLoader*)lua_touserdata(state, lua_upvalueindex(1));
     return assetLoader->importAssetLua();
@@ -68,55 +74,79 @@ int noOperation(lua_State* state) {
     return 0;
 }
 
-
-}
+} // namespace assetloader
 
 AssetLoader::AssetLoader(ghoul::lua::LuaState* luaState, std::string assetRoot, std::string syncRoot)
     : _luaState(luaState)
     , _rootAsset(std::make_unique<Asset>(this, std::move(assetRoot)))
     , _syncRoot(std::move(syncRoot))
 {
-    _assetStack.push_back(_rootAsset.get());
+    pushAsset(_rootAsset.get());
 
     // Create _assets table.
     lua_newtable(*_luaState);
     lua_setglobal(*_luaState, AssetsTableName);
 }
 
-AssetLoader::Asset* AssetLoader::loadAsset(const std::string& name) {
+AssetLoader::Asset* AssetLoader::importAsset(const std::string& name) {
     ghoul::filesystem::Directory directory = currentDirectory();
-    std::unique_ptr<Asset> asset = std::make_unique<Asset>(this, directory, name);
-    const std::string id = asset->id();
+    std::unique_ptr<Asset> newAsset = std::make_unique<Asset>(this, directory, name);
+    const std::string id = newAsset->id();
+
+    Asset* asset = newAsset.get();
 
     // Check if asset is already loaded.
-    if (_loadedAssets.find(id) != _loadedAssets.end()) {
-        return _loadedAssets[id].get();
+    const auto it = _importedAssets.find(id);
+    const bool loaded = it != _importedAssets.end();
+    if (loaded) {
+        asset = it->second.get();
     }
 
     // Create dependency link
     Asset* dependant = _assetStack.back();
-    dependant->addDependency(asset.get());
-    asset->addDependant(dependant);
+    dependant->addDependency(asset);
+
+    if (loaded) {
+        return asset;
+    }
 
     // Actually loading asset.
-    pushAsset(asset.get());
+    pushAsset(asset);
     ghoul::OnScopeExit e([this]() {
         popAsset();
     });
 
     try {
-        ghoul::lua::runScriptFile(*_luaState, asset->assetFilepath());
+        ghoul::lua::runScriptFile(*_luaState, asset->assetFilePath());
     } catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(e.message << ": " << e.component);
     }
     
-    _loadedAssets.emplace(id, std::move(asset));
-    return _loadedAssets[id].get();
+    _importedAssets.emplace(id, std::move(newAsset));
+    return _importedAssets[id].get();
 }
 
 ghoul::filesystem::Directory AssetLoader::currentDirectory() {
-    return _assetStack.back()->directory();
+    return _assetStack.back()->assetDirectory();
 }
+
+void AssetLoader::loadAsset(const std::string & identifier) {
+    ghoul_assert(_assetStack.size() == 1, "Can only load an asset from the root asset");
+    importAsset(identifier);
+}
+
+
+void AssetLoader::unloadAsset(const std::string & identifier) {
+    ghoul_assert(_assetStack.size() == 1, "Can only unload an asset from the root asset");
+
+    ghoul::filesystem::Directory directory = currentDirectory();
+    Asset tempAsset(this, directory, identifier);
+    const std::string id = tempAsset.id();
+
+    _rootAsset->removeDependency(id);
+
+}
+
 
 ghoul::lua::LuaState* AssetLoader::luaState() {
     return _luaState;
@@ -132,6 +162,10 @@ const std::string& AssetLoader::syncRoot() {
 
 void AssetLoader::pushAsset(Asset* asset) {
     _assetStack.push_back(asset);
+
+    if (!asset->hasLuaTable()) {
+        return;
+    }
     
     // Push the global asset table to the lua stack.
     lua_getglobal(*_luaState, AssetsTableName);
@@ -158,6 +192,10 @@ void AssetLoader::pushAsset(Asset* asset) {
 
     // Register default onDeinitialize function
     lua_pushcfunction(*_luaState, &assetloader::noOperation);
+    lua_setfield(*_luaState, assetTableIndex, OnInitializeFunctionName);
+
+    // Register default onDeinitialize function
+    lua_pushcfunction(*_luaState, &assetloader::noOperation);
     lua_setfield(*_luaState, assetTableIndex, OnDeinitializeFunctionName);
 
     // Extend global asset table (pushed to the lua stack earlier) with this asset 
@@ -180,32 +218,14 @@ void AssetLoader::updateLuaGlobals() {
     lua_setglobal(*_luaState, AssetGlobalVariableName);
 }
 
-/*void AssetLoader::updateGlobalLuaFunctions() {
-    Asset* asset = _assetStack.size() > 0 ? _assetStack.back() : nullptr;
-
-    // Register resolve functions
-    lua_pushlightuserdata(_luaState, asset);
-    lua_pushcclosure(_luaState, &assetloader::resolveLocalResource, 1);
-    lua_setglobal(_luaState, LocalResourceFunctionName);
-
-    lua_pushlightuserdata(_luaState, asset);
-    lua_pushcclosure(_luaState, &assetloader::resolveSyncedResource, 1);
-    lua_setglobal(_luaState, SyncedResourceFunctionName);
-
-    // Register export function
-    lua_pushlightuserdata(_luaState, asset);
-    lua_pushcclosure(_luaState, &assetloader::exportAsset, 1);
-    lua_setglobal(_luaState, ExportFunctionName);
-}*/
-
-int openspace::AssetLoader::importAssetLua() {
+int AssetLoader::importAssetLua() {
     int nArguments = lua_gettop(*_luaState);
     if (nArguments != 1)
         return luaL_error(*_luaState, "Expected %i arguments, got %i", 1, nArguments);
 
     std::string assetName = luaL_checkstring(*_luaState, -1);
 
-    Asset* asset = loadAsset(assetName);
+    Asset* asset = importAsset(assetName);
     if (!asset) {
         return luaL_error(*_luaState, "Asset '%s' not found", assetName.c_str());
     }
@@ -215,21 +235,101 @@ int openspace::AssetLoader::importAssetLua() {
     return 1;
 }
 
+scripting::LuaLibrary AssetLoader::luaLibrary() {
+    return {
+        "",
+        {
+            {
+                "loadAsset",
+                &luascriptfunctions::loadAsset,
+                {this},
+                "string",
+                ""
+            },
+            {
+                "unloadAsset",
+                &luascriptfunctions::unloadAsset,
+                {this},
+                "string",
+                ""
+            },
+        }
+    };
+}
+
+
+
 // Asset methods.
 
 std::string AssetLoader::Asset::resolveLocalResource(std::string resourceName) {
-    std::string currentAssetDirectory = directory();
+    std::string currentAssetDirectory = assetDirectory();
     return currentAssetDirectory + ghoul::filesystem::FileSystem::PathSeparator + resourceName;
 }
 
-std::string AssetLoader::Asset::resolveSyncedResource(std::string resourceName) {
-    std::string currentAssetDirectory = directory();
-    std::string rootAssetDirectory = loader()->rootAsset()->directory();
+std::string AssetLoader::Asset::syncDirectory() {
+    std::string currentAssetDirectory = assetDirectory();
+    std::string rootAssetDirectory = loader()->rootAsset()->assetDirectory();
     std::string relativePath = FileSys.relativePath(currentAssetDirectory, rootAssetDirectory);
 
     return loader()->syncRoot() +
         ghoul::filesystem::FileSystem::PathSeparator +
-        relativePath +
+        relativePath;
+}
+
+bool AssetLoader::Asset::isInitialized() {
+    return _initialized;
+}
+
+bool AssetLoader::Asset::hasLuaTable() {
+    return _hasLuaTable;
+}
+
+void AssetLoader::Asset::initialize() {
+    if (_initialized) {
+        return;
+    }
+
+    // Initialize dependencies
+    for (auto& dep : _dependencies) {
+        dep->initialize();
+    }
+
+    // Call onInitialize
+    if (_hasLuaTable) {
+        ghoul::lua::LuaState* state = loader()->luaState();
+        lua_getglobal(*state, AssetsTableName);
+        lua_getfield(*state, -1, id().c_str());
+        lua_getfield(*state, -1, OnInitializeFunctionName);
+        lua_call(*state, 0, 0);
+    }
+    _initialized = true;
+}
+
+void AssetLoader::Asset::deinitialize() {
+    if (!_initialized) {
+        return;
+    }
+
+    // Call onDeinitialize
+    _initialized = false;
+    if (_hasLuaTable) {
+        ghoul::lua::LuaState* state = loader()->luaState();
+        lua_getglobal(*state, AssetsTableName);
+        lua_getfield(*state, -1, id().c_str());
+        lua_getfield(*state, -1, OnDeinitializeFunctionName);
+        lua_call(*state, 0, 0);
+    }
+
+    // Also deinitialize any dangling dependencies
+    for (auto& dep : _dependencies) {
+        if (!dep->hasInitializedDependants()) {
+            dep->deinitialize();
+        }
+    }
+}
+
+std::string AssetLoader::Asset::resolveSyncedResource(std::string resourceName) {
+    return syncDirectory() +
         ghoul::filesystem::FileSystem::PathSeparator + 
         resourceName;
 }
@@ -269,12 +369,17 @@ int AssetLoader::Asset::resolveSyncedResourceLua() {
 }
 
 AssetLoader::Asset::Asset(AssetLoader* loader, std::string directory)
-    : _directory(directory)
+    : _assetDirectory(directory)
     , _loader(loader)
+    , _initialized(false)
+    , _hasLuaTable(false)
 {}
 
-AssetLoader::Asset::Asset(AssetLoader* loader, std::string directory, std::string name) {
-    std::string base = ghoul::filesystem::Directory(loader->rootAsset()->directory());
+AssetLoader::Asset::Asset(AssetLoader* loader, std::string directory, std::string name)
+    : _initialized(false)
+    , _hasLuaTable(true)
+{
+    std::string base = ghoul::filesystem::Directory(loader->rootAsset()->assetDirectory());
     std::string path = base;
 
     auto isRelative = [](std::string path) {
@@ -288,64 +393,89 @@ AssetLoader::Asset::Asset(AssetLoader* loader, std::string directory, std::strin
     };
 
     if (isRelative(name)) {
-        _directory = absPath(directory) + ghoul::filesystem::FileSystem::PathSeparator + name;
+        _assetDirectory = absPath(directory) + ghoul::filesystem::FileSystem::PathSeparator + name;
     } else {
-        _directory = absPath(base) + ghoul::filesystem::FileSystem::PathSeparator + name;
+        _assetDirectory = absPath(base) + ghoul::filesystem::FileSystem::PathSeparator + name;
     }
 
     _loader = loader;
 }
 
-std::string AssetLoader::Asset::assetFilepath() {
-    ghoul::filesystem::File dir(_directory);
+std::string AssetLoader::Asset::assetFilePath() {
+    ghoul::filesystem::File dir(_assetDirectory);
     const std::string baseName = dir.baseName();
-    return _directory + ghoul::filesystem::FileSystem::PathSeparator + baseName + "." + AssetFileSuffix;
+    return _assetDirectory + ghoul::filesystem::FileSystem::PathSeparator + baseName + "." + AssetFileSuffix;
 }
 
-std::string AssetLoader::Asset::directory() {
-    return _directory;
+std::string AssetLoader::Asset::dataFilePath() {
+    ghoul::filesystem::File dir(_assetDirectory);
+    const std::string baseName = dir.baseName();
+    return _assetDirectory + ghoul::filesystem::FileSystem::PathSeparator + baseName + "." + DataFileSuffix;
+}
+
+
+std::string AssetLoader::Asset::assetDirectory() {
+    return _assetDirectory;
 }
 
 std::string AssetLoader::Asset::id() {
-    return assetFilepath();
-}
-
-ghoul::Dictionary AssetLoader::Asset::dictionary() {
-    AssetLoader* assetLoader = loader();
-    ghoul::lua::LuaState* state = assetLoader->luaState();
-    ghoul::Dictionary dictionary;
-    lua_getglobal(*state, AssetsTableName);
-    lua_getfield(*state, -1, id().c_str());
-
-
-    if (lua_type(*state, -1) != LUA_TTABLE) {
-        // The asset did not export anything.
-        // Return an empty dictionary.
-        return dictionary;
-    }
-
-    lua_getfield(*state, -1, KeySceneGraphNodes);
-
-    if (lua_type(*state, -1) != LUA_TTABLE) {
-        // The asset did not export any SceneGraphNodes.
-        // Return an empty dictionary.
-        return dictionary;
-    }
-
-    ghoul::lua::luaDictionaryFromState(*state, dictionary);
-    return dictionary;
+    return assetFilePath();
 }
 
 AssetLoader* AssetLoader::Asset::loader() {
     return _loader;
 }
 
-void AssetLoader::Asset::addDependency(Asset* asset) {
-    _dependencies.push_back(asset);
+ghoul::Dictionary AssetLoader::Asset::dataDictionary() {
+    ghoul::lua::LuaState state;
+    ghoul::Dictionary dictionary;
+    ghoul::lua::loadDictionaryFromFile(dataFilePath(), dictionary, state);
+    return dictionary;
 }
 
-void AssetLoader::Asset::addDependant(Asset* asset) {
-    _dependants.push_back(asset);
+void AssetLoader::Asset::addDependency(Asset* asset) {
+    if (_initialized) {
+        asset->initialize();
+    }
+    _dependencies.push_back(asset);
+    asset->_dependants.push_back(this);
+}
+
+void AssetLoader::Asset::removeDependency(Asset * asset) {
+    _dependencies.erase(
+        std::remove(_dependencies.begin(), _dependencies.end(), asset),
+        _dependencies.end()
+    );
+    std::vector<Asset*>& dependants = asset->_dependants;
+    dependants.erase(
+        std::remove(dependants.begin(), dependants.end(), this),
+        dependants.end()
+    );
+    if (!asset->hasInitializedDependants()) {
+        asset->deinitialize();
+    }
+}
+
+void AssetLoader::Asset::removeDependency(const std::string& assetId) {
+    auto dep = std::find_if(_dependencies.begin(), _dependencies.end(), [&assetId](Asset* asset) {
+        return asset->id() == assetId;
+    });
+    if (dep != _dependencies.end()) {
+        removeDependency(*dep);
+    } else {
+        LERROR("No such dependency '" << assetId << "'");
+    }
+}
+
+
+bool AssetLoader::Asset::hasInitializedDependants() {
+    bool foundInitialized = false;
+    for (auto& dependant : _dependants) {
+        if (dependant->isInitialized()) {
+            foundInitialized = true;
+        }
+    }
+    return foundInitialized;
 }
 
 }

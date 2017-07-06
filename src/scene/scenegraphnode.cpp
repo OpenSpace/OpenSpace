@@ -406,12 +406,12 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& chil
         }
     );
 
-    std::unique_ptr<SceneGraphNode> c = std::move(*iter);
-    _children.erase(iter);
-
     if (_scene && updateScene) {
         _scene->removeNode(&child);
     }
+
+    std::unique_ptr<SceneGraphNode> c = std::move(*iter);
+    _children.erase(iter);
 
     if (_scene) {
         setScene(nullptr);

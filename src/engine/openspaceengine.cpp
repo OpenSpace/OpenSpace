@@ -490,6 +490,7 @@ void OpenSpaceEngine::initialize() {
     // Register Lua script functions
     LDEBUG("Registering Lua libraries");
     registerCoreClasses(*_scriptEngine);
+    _scriptEngine->addLibrary(_engine->_assetLoader->luaLibrary());
     
     for (OpenSpaceModule* module : _moduleEngine->modules()) {
         _scriptEngine->addLibrary(module->luaLibrary());

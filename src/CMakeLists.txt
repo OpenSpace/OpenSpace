@@ -120,6 +120,7 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/rendering/renderengine_lua.inl
     ${OPENSPACE_BASE_DIR}/src/rendering/screenspacerenderable.cpp
     ${OPENSPACE_BASE_DIR}/src/rendering/transferfunction.cpp
+    ${OPENSPACE_BASE_DIR}/src/scene/assetloader_lua.inl
     ${OPENSPACE_BASE_DIR}/src/scene/assetloader.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/translation.cpp
     ${OPENSPACE_BASE_DIR}/src/scene/rotation.cpp

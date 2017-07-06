@@ -76,8 +76,6 @@ void SceneLoader::loadScene(Scene* scene, const std::string& path) {
 
     documentation::testSpecificationAndThrow(Scene::Documentation(), sceneDictionary, "Scene");
 
-    std::string assetsPath = FileSys.absPath(_assetLoader->rootAsset()->directory());
-
     ghoul::Dictionary assetDictionary;
     sceneDictionary.getValue(KeyAssets, assetDictionary);
 
@@ -93,6 +91,7 @@ void SceneLoader::loadScene(Scene* scene, const std::string& path) {
         std::string assetName = assetDictionary.value<std::string>(key);
         _assetLoader->loadAsset(assetName);
     }
+    _assetLoader->rootAsset()->initialize();
     
     ghoul::Dictionary cameraDictionary;
     sceneDictionary.getValue(KeyCamera, cameraDictionary);

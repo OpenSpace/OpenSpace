@@ -270,7 +270,7 @@ void MainWindow::initialize() {
     configureLogging();
 
     // Load all available scenes
-    QString modulesDirectory = QString::fromStdString(absPath("${SCENE}"));
+    QString modulesDirectory = QString::fromStdString(absPath("${ASSETS}"));
     QDir d(modulesDirectory);
     d.setFilter(QDir::Files);
     QFileInfoList list = d.entryInfoList();
