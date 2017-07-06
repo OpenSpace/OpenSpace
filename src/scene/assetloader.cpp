@@ -31,8 +31,6 @@
 
 #include <ghoul/filesystem/filesystem.h>
 
-#include "assetloader_lua.inl"
-
 namespace {
     const char* AssetFileSuffix = "asset";
     const char* ImportFunctionName = "import";
