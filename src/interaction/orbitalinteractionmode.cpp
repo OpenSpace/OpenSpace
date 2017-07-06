@@ -168,8 +168,14 @@ glm::dvec2 OrbitalInteractionMode::MouseStates::synchedGlobalRollMouseVelocity()
 OrbitalInteractionMode::OrbitalInteractionMode(
     std::shared_ptr<MouseStates> mouseStates)
     : InteractionMode()
-    , _mouseStates(mouseStates) {
-        
+    , _mouseStates(mouseStates)
+{
+    auto smoothStep = 
+        [](double t) {
+            double res = 3.0 * t*t  - 2.0 * t*t*t;
+            return glm::clamp(res, 0.0, 1.0);
+        };
+    //_followRotationInterpolator.setTransferFunction(smoothStep);
 }
 
 OrbitalInteractionMode::~OrbitalInteractionMode() {
@@ -191,7 +197,7 @@ OrbitalInteractionMode::CameraRotationDecomposition
     Renderable::SurfacePositionHandle posHandle =
         _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
-	glm::dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceNormal;
+	glm::dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceOutDirection;
 	glm::dvec3 directionFromSurfaceToCamera =
 		glm::normalize(glm::dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
 
@@ -289,13 +295,13 @@ void OrbitalInteractionMode::performHorizontalTranslation(
         _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
     dvec3 surfaceNormal =
-        normalize(dmat3(modelTransform) * posHandle.referenceSurfaceNormal);
+        normalize(dmat3(modelTransform) * posHandle.referenceSurfaceOutDirection);
 
     dvec3 posDiff = cameraPosition - objectPosition;
 
     dvec3 centerToReferenceSurface = dmat3(modelTransform) * posHandle.centerToReferenceSurface;
     dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
-        posHandle.referenceSurfaceNormal * posHandle.heightToSurface;
+        posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
     dvec3 centerToActualSurface = dmat3(modelTransform) * centerToActualSurfaceModelSpace;
     dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
     double distFromSurfaceToCamera = glm::length(actualSurfaceToCamera);
@@ -357,7 +363,7 @@ void OrbitalInteractionMode::performGlobalRotation(
     Renderable::SurfacePositionHandle posHandle =
         _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
-    glm::dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceNormal;
+    glm::dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceOutDirection;
     glm::dvec3 directionFromSurfaceToCamera =
       normalize(dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
 
@@ -390,7 +396,7 @@ void OrbitalInteractionMode::performVerticalTranslation(
 
     dvec3 centerToReferenceSurface = dmat3(modelTransform) * posHandle.centerToReferenceSurface;
     dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
-        posHandle.referenceSurfaceNormal * posHandle.heightToSurface;
+        posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
     dvec3 centerToActualSurface = dmat3(modelTransform) * centerToActualSurfaceModelSpace;
     dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
 
@@ -411,7 +417,7 @@ void OrbitalInteractionMode::performHorizontalRotation(
     Renderable::SurfacePositionHandle posHandle =
         _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
-    glm::dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceNormal;
+    glm::dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceOutDirection;
     glm::dvec3 directionFromSurfaceToCamera =
       glm::normalize(glm::dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
 
@@ -422,15 +428,11 @@ void OrbitalInteractionMode::performHorizontalRotation(
 
 
 void OrbitalInteractionMode::pushToSurface(
-    double deltaTime,
+    double minHeightAboveGround,
     glm::dvec3 objectPosition,
     glm::dvec3& cameraPosition)
 {
-    double ellipsoidShrinkTerm = 0;
-    double minHeightAboveGround = 100.0;
-
-
-
+	using namespace glm;
     glm::dmat4 inverseModelTransform = _focusNode->inverseModelTransform();
     glm::dmat4 modelTransform = _focusNode->modelTransform();
 
@@ -439,32 +441,52 @@ void OrbitalInteractionMode::pushToSurface(
     Renderable::SurfacePositionHandle posHandle =
         _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
-    glm::dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceToTargetDirection;
-    glm::dvec3 directionFromSurfaceToCamera =
-        glm::normalize(glm::dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
+    dvec3 posDiff = cameraPosition - objectPosition;
 
+	dvec3 referenceSurfaceOutDirection = glm::dmat3(modelTransform) * posHandle.referenceSurfaceOutDirection;
+    dvec3 centerToReferenceSurface = glm::dmat3(modelTransform) * posHandle.centerToReferenceSurface;
+    dvec3 centerToActualSurfaceModelSpace = posHandle.centerToReferenceSurface +
+        posHandle.referenceSurfaceOutDirection * posHandle.heightToSurface;
+    dvec3 centerToActualSurface = glm::dmat3(modelTransform) * centerToActualSurfaceModelSpace;
+    dvec3 actualSurfaceToCamera = posDiff - centerToActualSurface;
+    double surfaceToCameraSigned =
+        glm::length(actualSurfaceToCamera) *
+        glm::sign(dot(actualSurfaceToCamera, referenceSurfaceOutDirection));
 
+    cameraPosition += referenceSurfaceOutDirection *
+        glm::max(minHeightAboveGround - surfaceToCameraSigned, 0.0);
+}
 
-    glm::dvec3 centerToEllipsoidSurface = glm::dmat3(modelTransform) * posHandle.centerToReferenceSurface;
-    glm::dvec3 ellipsoidSurfaceToCamera = cameraPosition - (objectPosition + centerToEllipsoidSurface);
+glm::dquat OrbitalInteractionMode::interpolateRotationDifferential(
+    double deltaTime,
+    double interpolationTime,
+    glm::dquat rotationDiff,
+    glm::dvec3 objectPosition,
+    glm::dvec3 cameraPosition)
+{
+    glm::dmat4 inverseModelTransform = _focusNode->inverseModelTransform();
+    glm::dmat4 modelTransform = _focusNode->modelTransform();
 
-    double distFromEllipsoidSurfaceToCamera = glm::length(ellipsoidSurfaceToCamera);
-    double heightToSurface = posHandle.heightToSurface + ellipsoidShrinkTerm;
-    double heightToSurfaceAndPadding = heightToSurface + minHeightAboveGround;
-    cameraPosition += directionFromSurfaceToCamera *
-        glm::max(heightToSurfaceAndPadding - distFromEllipsoidSurfaceToCamera, 0.0);
+    glm::dvec3 cameraPositionModelSpace =
+        glm::dvec3(inverseModelTransform * glm::dvec4(cameraPosition, 1));
+    Renderable::SurfacePositionHandle posHandle =
+        _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
+
+    double maximumDistanceForRotation = glm::length(
+        glm::dmat3(modelTransform) * posHandle.centerToReferenceSurface) * 2.0;
+    double distanceToCamera = glm::length(cameraPosition - objectPosition);
+
+    double interpolationSign = glm::sign(maximumDistanceForRotation - distanceToCamera);
+
+    _followRotationInterpolator.setDeltaTime(interpolationSign * deltaTime);
+    _followRotationInterpolator.step();
+
+    return glm::slerp(glm::dquat(glm::dvec3(0.0)), rotationDiff, _followRotationInterpolator.value());
 }
 
 void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, double deltaTime) {
     if (_focusNode) {
-
 		using namespace glm;
-
-        // Declare variables to use in interaction calculations
-        // Shrink interaction ellipsoid to enable interaction below height = 0
-        double ellipsoidShrinkTerm = 0;
-        double minHeightAboveGround = 100.0;
-
         // Read the current state of the camera and focusnode
         dvec3 camPos = camera.positionVec3();
         dvec3 centerPos = _focusNode->worldPosition();
@@ -485,6 +507,13 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
         dquat globeRotation = quat_cast(globeStateMatrix);
         dquat focusNodeRotationDiff = _previousFocusNodeRotation * inverse(globeRotation);
         _previousFocusNodeRotation = globeRotation;
+
+        focusNodeRotationDiff = interpolateRotationDifferential(
+            deltaTime,
+            1.0,
+            focusNodeRotationDiff,
+            centerPos,
+            camPos);
 
         performRoll(deltaTime, camRot.localRotation);
         if (_rotateToFocusNodeInterpolator.isInterpolating()) {
@@ -512,229 +541,19 @@ void OrbitalInteractionMode::updateCameraStateFromMouseStates(Camera& camera, do
             camPos,
             camRot.globalRotation);
 
-
 		performVerticalTranslation(deltaTime, centerPos, camPos);
 		performHorizontalRotation(deltaTime, camPos, camRot.globalRotation);
-		//pushToSurface(deltaTime, centerPos, camPos);
+		pushToSurface(1000, centerPos, camPos);
 
-        
         // Update the camera state
         camera.setPositionVec3(camPos); 
         camera.setRotation(camRot.globalRotation * camRot.localRotation);
         return;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#if 0
-
-        /*
-        // Read the current state of the camera and focus node
-        glm::dvec3 camPos = camera.positionVec3();
-        glm::dvec3 centerPos = _focusNode->worldPosition();
-        double boundingSphere = _focusNode->boundingSphere();
-
-        // Follow focus nodes movement
-        glm::dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
-        _previousFocusNodePosition = centerPos;
-        camPos += focusNodeDiff;
-        
-        CameraRotationDecomposition camRot = decomposeCameraRotation(
-            camPos,
-            camera.rotationQuaternion(),
-            camera.lookUpVectorWorldSpace(),
-            camera.viewDirectionWorldSpace());
-
-
-		using namespace glm;
-
-
-        double ellipsoidShrinkTerm = 0;
-        double minHeightAboveGround = 100.0;
-
-        // Sampling of height is done in the reference frame of the globe.
-        // Hence, the camera position needs to be transformed with the inverse model matrix
-        glm::dmat4 inverseModelTransform = _focusNode->inverseModelTransform();
-        glm::dmat4 modelTransform = _focusNode->modelTransform();
-        glm::dvec3 cameraPositionModelSpace =
-            glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
-
-        dvec3 posDiff = camPos - centerPos;
-
-        Renderable::SurfacePositionHandle posHandle =
-            _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
-
-        dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceToTargetDirection;
-        dvec3 directionFromSurfaceToCamera =
-            normalize(dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
-        dvec3 centerToEllipsoidSurface = dmat3(modelTransform)  * (posHandle.centerToReferenceSurface -
-            directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
-        dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
-
-        double heightToSurface =
-            posHandle.heightToSurface + ellipsoidShrinkTerm;
-        
-        double distFromCenterToSurface =
-            length(centerToEllipsoidSurface);
-        double distFromEllipsoidSurfaceToCamera = length(ellipsoidSurfaceToCamera);
-        double distFromCenterToCamera = length(posDiff);
-        double distFromSurfaceToCamera =
-            distFromEllipsoidSurfaceToCamera - heightToSurface;
-
-
-
-
-        // Rotate with the globe
-        dmat3 globeStateMatrix = _focusNode->worldRotationMatrix();
-        dquat globeRotation = quat_cast(globeStateMatrix);
-        dquat focusNodeRotationDiff = _previousFocusNodeRotation * inverse(globeRotation);
-        _previousFocusNodeRotation = globeRotation;
-
-*/
-
-
-
-
-        using namespace glm;
-
-        // Declare variables to use in interaction calculations
-        // Shrink interaction ellipsoid to enable interaction below height = 0
-        double ellipsoidShrinkTerm = 0;
-        double minHeightAboveGround = 100.0;
-
-        // Read the current state of the camera and focusnode
-        dvec3 camPos = camera.positionVec3();
-        dvec3 centerPos = _focusNode->worldPosition();
-
-        // Follow focus nodes movement
-        dvec3 focusNodeDiff = centerPos - _previousFocusNodePosition;
-        _previousFocusNodePosition = centerPos;
-        camPos += focusNodeDiff;
-
-        dquat totalRotation = camera.rotationQuaternion();
-        dvec3 lookUp = camera.lookUpVectorWorldSpace();
-        dvec3 camDirection = camera.viewDirectionWorldSpace();
-
-        // Sampling of height is done in the reference frame of the globe.
-        // Hence, the camera position needs to be transformed with the inverse model matrix
-        glm::dmat4 inverseModelTransform = _focusNode->inverseModelTransform();
-        glm::dmat4 modelTransform = _focusNode->modelTransform();
-        glm::dvec3 cameraPositionModelSpace =
-            glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
-
-        dvec3 posDiff = camPos - centerPos;
-
-
-        Renderable::SurfacePositionHandle posHandle =
-            _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
-
-
-        dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceToTargetDirection;
-        dvec3 directionFromSurfaceToCamera =
-            normalize(dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
-        dvec3 centerToEllipsoidSurface = dmat3(modelTransform)  * (posHandle.centerToReferenceSurface -
-            directionFromSurfaceToCameraModelSpace * ellipsoidShrinkTerm);
-        dvec3 ellipsoidSurfaceToCamera = camPos - (centerPos + centerToEllipsoidSurface);
-
-        double heightToSurface =
-            posHandle.heightToSurface + ellipsoidShrinkTerm;
-        
-        double distFromCenterToSurface =
-            length(centerToEllipsoidSurface);
-        double distFromEllipsoidSurfaceToCamera = length(ellipsoidSurfaceToCamera);
-        double distFromCenterToCamera = length(posDiff);
-        double distFromSurfaceToCamera =
-            distFromEllipsoidSurfaceToCamera - heightToSurface;
-
-        CameraRotationDecomposition camRot = decomposeCameraRotation(
-            camPos,
-            camera.rotationQuaternion(),
-            camera.lookUpVectorWorldSpace(),
-            camera.viewDirectionWorldSpace());
-
-
-        // Rotate with the globe
-        dmat3 globeStateMatrix = _focusNode->worldRotationMatrix();
-        dquat globeRotation = quat_cast(globeStateMatrix);
-        dquat focusNodeRotationDiff = _previousFocusNodeRotation * inverse(globeRotation);
-        _previousFocusNodeRotation = globeRotation;
-
-
-
-
-        performRoll(deltaTime, camRot.localRotation);
-		if (_rotateToFocusNodeInterpolator.isInterpolating()) {
-			interpolateLocalRotation(deltaTime, camRot.localRotation);
-		}
-        else {
-            performLocalRotation(deltaTime, camRot.localRotation);
-        }
-
-        //performVerticalTranslation(deltaTime, boundingSphere, centerPos, camPos);
-        //performHorizontalRotation(deltaTime, centerPos, camPos, camRot.globalRotation);
-        //pushToSurface(deltaTime, boundingSphere, centerPos, camPos);
-
-        // Update the camera state (re-combine the global and local rotation)
-        camera.setPositionVec3(camPos);
-        camera.setRotation(camRot.globalRotation * camRot.localRotation);
-
-#endif // 0
     }
 }
 
 bool OrbitalInteractionMode::followingNodeRotation() const {
-    return false;
+    return _followRotationInterpolator.value() >= 1.0;
 }
 
 void OrbitalInteractionMode::updateMouseStatesFromInput(const InputState& inputState, double deltaTime) {

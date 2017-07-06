@@ -61,7 +61,7 @@ public:
 
     struct SurfacePositionHandle {
         glm::dvec3 centerToReferenceSurface;
-        glm::dvec3 referenceSurfaceToTargetDirection;
+        glm::dvec3 referenceSurfaceOutDirection;
         glm::dvec3 referenceSurfaceNormal;
         double heightToTarget;
         double heightToSurface;

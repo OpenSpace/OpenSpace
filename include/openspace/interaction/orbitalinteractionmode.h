@@ -84,6 +84,7 @@ protected:
     };
 
     std::shared_ptr<MouseStates> _mouseStates;
+    Interpolator<double> _followRotationInterpolator;
 
     CameraRotationDecomposition decomposeCameraRotation(
         glm::dvec3 cameraPosition,
@@ -128,9 +129,15 @@ protected:
         glm::dvec3 cameraPosition,
         glm::dquat& globalCameraRotation);
     void pushToSurface(
-        double deltaTime,
+        double minHeightAboveGround,
         glm::dvec3 objectPosition,
         glm::dvec3& cameraPosition);
+    glm::dquat interpolateRotationDifferential(
+        double deltaTime,
+        double interpolationTime,
+        glm::dquat rotationDiff,
+        glm::dvec3 objectPosition,
+        glm::dvec3 cameraPosition);
 };
 
 } // namespace interaction

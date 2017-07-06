@@ -58,11 +58,11 @@ public:
     void setDeltaTime(double deltaTime) {
         _scaledDeltaTime = deltaTime / _interpolationTime;
     };
-	void step() { _t += _scaledDeltaTime; };
+	void step() { _t += _scaledDeltaTime; _t = glm::clamp(_t, 0.0, 1.0); };
     double deltaTimeScaled() { return _scaledDeltaTime; };
 
     T value() { return _transferFunction(_t); };
-    bool isInterpolating() { return _t < 1.0; };
+    bool isInterpolating() { return _t < 1.0 && _t > 0.0; };
 
     void setTransferFunction(std::function<T(double)> transferFunction) {
         _transferFunction = transferFunction;

@@ -105,7 +105,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
             _focusNode->renderable()->calculateSurfacePositionHandle(cameraPositionModelSpace);
 
 
-        dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceToTargetDirection;
+        dvec3 directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceOutDirection;
         dvec3 directionFromSurfaceToCamera =
             normalize(dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
         dvec3 centerToEllipsoidSurface = dmat3(modelTransform)  * (posHandle.centerToReferenceSurface -
@@ -206,7 +206,7 @@ void GlobeBrowsingInteractionMode::updateCameraStateFromMouseStates(Camera& came
 
 
 
-            directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceToTargetDirection;
+            directionFromSurfaceToCameraModelSpace = posHandle.referenceSurfaceOutDirection;
             directionFromSurfaceToCamera =
               normalize(dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace);
             centerToEllipsoidSurface = dmat3(modelTransform) * (posHandle.centerToReferenceSurface -
