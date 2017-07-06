@@ -81,17 +81,16 @@ void GuiPerformanceComponent::render() {
     v = _functionsIsEnabled;
     ImGui::Checkbox("Functions", &v);
     _functionsIsEnabled = v;
-        
+    v = OsEng.renderEngine().performanceManager()->loggingEnabled();
+    ImGui::Checkbox("Output Logs", &v);
+    OsEng.renderEngine().performanceManager()->setLogging(v);
+
     ImGui::Spacing();
-        
+
     if (ImGui::Button("Reset measurements")) {
         OsEng.renderEngine().performanceManager()->resetPerformanceMeasurements();
     }
 
-    if (ImGui::Button("Output Logs")) {
-        OsEng.renderEngine().performanceManager()->outputLogs();
-    }
-        
     if (_sceneGraphIsEnabled) {
         bool sge = _sceneGraphIsEnabled;
         ImGui::Begin("SceneGraph", &sge);

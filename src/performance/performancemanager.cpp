@@ -130,6 +130,8 @@ void PerformanceManager::destroyGlobalSharedMemory() {
     
 PerformanceManager::PerformanceManager()
     : _performanceMemory(nullptr)
+    , _tick(0)
+    , _loggingEnabled(false)
 {
     using ghoul::SharedMemory;
     PerformanceManager::createGlobalSharedMemory();
@@ -213,9 +215,32 @@ void PerformanceManager::outputLogs() {
     }
 }
 
+void PerformanceManager::enableLogging() {
+    setLogging(true);
+}
+
+void PerformanceManager::disableLogging() {
+    setLogging(false);
+}
+
+void PerformanceManager::toggleLogging() {
+    _loggingEnabled = !_loggingEnabled;
+}
+void PerformanceManager::setLogging(bool enabled) {
+    _loggingEnabled = enabled;
+}
+
+bool PerformanceManager::loggingEnabled() {
+    return _loggingEnabled;
+}
+
 PerformanceLayout* PerformanceManager::performanceData() {
     void* ptr = _performanceMemory->memory();
     return reinterpret_cast<PerformanceLayout*>(ptr);
+}
+
+void PerformanceManager::tick() {
+    _tick = (_tick + 1) % PerformanceLayout::NumberValues;
 }
 
 void PerformanceManager::storeIndividualPerformanceMeasurement
@@ -278,45 +303,49 @@ void PerformanceManager::storeScenePerformanceMeasurements(
         SceneGraphNode::PerformanceRecord r = node->performanceRecord();
         PerformanceLayout::SceneGraphPerformanceLayout& entry = layout->sceneGraphEntries[i];
 
-        // Covert milliseconds to seconds
-        const float second = 1000.f;
+        // Covert nano to microseconds
+        const float micro = 1000.f;
 
         std::rotate(
             std::begin(entry.renderTime),
             std::next(std::begin(entry.renderTime)),
             std::end(entry.renderTime)
         );
-        entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / second;
+        entry.renderTime[PerformanceLayout::NumberValues - 1] = r.renderTime / micro;
         
         std::rotate(
             std::begin(entry.updateTranslation),
             std::next(std::begin(entry.updateTranslation)),
             std::end(entry.updateTranslation)
         );
-        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = r.updateTimeTranslation / second;
+        entry.updateTranslation[PerformanceLayout::NumberValues - 1] = r.updateTimeTranslation / micro;
 
         std::rotate(
             std::begin(entry.updateRotation),
             std::next(std::begin(entry.updateRotation)),
             std::end(entry.updateRotation)
         );
-        entry.updateRotation[PerformanceLayout::NumberValues - 1] = r.updateTimeRotation / second;
+        entry.updateRotation[PerformanceLayout::NumberValues - 1] = r.updateTimeRotation / micro;
 
         std::rotate(
             std::begin(entry.updateScaling),
             std::next(std::begin(entry.updateScaling)),
             std::end(entry.updateScaling)
         );
-        entry.updateScaling[PerformanceLayout::NumberValues - 1] = r.updateTimeScaling / second;
+        entry.updateScaling[PerformanceLayout::NumberValues - 1] = r.updateTimeScaling / micro;
 
         std::rotate(
             std::begin(entry.updateRenderable),
             std::next(std::begin(entry.updateRenderable)),
             std::end(entry.updateRenderable)
         );
-        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = r.updateTimeRenderable / second;
+        entry.updateRenderable[PerformanceLayout::NumberValues - 1] = r.updateTimeRenderable / micro;
     }
     _performanceMemory->releaseLock();
+    
+    if (_loggingEnabled && _tick == PerformanceLayout::NumberValues - 1) outputLogs();
+
+    tick();
 }
 
 } // namespace performance

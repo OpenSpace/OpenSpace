@@ -59,14 +59,24 @@ public:
     void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
     
     void outputLogs();
-    PerformanceLayout* performanceData();
+    void enableLogging();
+    void disableLogging();
+    void toggleLogging();
+    void setLogging(bool enabled);
+    bool loggingEnabled();
 
+    PerformanceLayout* performanceData();
 private:
     bool _doPerformanceMeasurements;
+    bool _loggingEnabled;
     
     std::map<std::string, size_t> individualPerformanceLocations;
     
     std::unique_ptr<ghoul::SharedMemory> _performanceMemory;
+
+    size_t _tick;
+    
+    void tick();
 };
 
 } // namespace performance
