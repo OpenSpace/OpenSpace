@@ -63,6 +63,7 @@ scripting::LuaLibrary WindowWrapper::luaLibrary() {
             {
                 "setSynchronization",
                 &luascriptfunctions::setSynchronization,
+                {},
                 "bool",
                 "Enables or disables the frame synchronization of the cluster. If the "
                 "synchronization is enabled, the computers in the cluster will swap "

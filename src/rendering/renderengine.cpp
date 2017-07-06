@@ -695,18 +695,21 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             {
                 "setRenderer",
                 &luascriptfunctions::setRenderer,
+                {},
                 "string",
                 "Sets the renderer (ABuffer or FrameBuffer)"
             },
             {
                 "toggleFade",
                 &luascriptfunctions::toggleFade,
+                {},
                 "number",
                 "Toggles fading in or out"
             },
             {
                 "fadeIn",
                 &luascriptfunctions::fadeIn,
+                {},
                 "number",
                 ""
             },
@@ -714,18 +717,21 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             {
                 "fadeOut",
                 &luascriptfunctions::fadeOut,
+                {},
                 "number",
                 ""
             },
             {
                 "registerScreenSpaceRenderable",
                 &luascriptfunctions::registerScreenSpaceRenderable,
+                {},
                 "table",
                 "Will create a ScreenSpaceRenderable from a lua Table and register it in the RenderEngine"
             },
             {
                 "unregisterScreenSpaceRenderable",
                 &luascriptfunctions::unregisterScreenSpaceRenderable,
+                {},
                 "string",
                 "Given a ScreenSpaceRenderable name this script will remove it from the renderengine"
             },

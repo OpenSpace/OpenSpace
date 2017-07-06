@@ -1192,6 +1192,7 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             {
                 "loadKernel",
                 &luascriptfunctions::loadKernel,
+                {},
                 "string",
                 "Loads the provided SPICE kernel by name. The name can contain path "
                 "tokens, which are automatically resolved"
@@ -1199,6 +1200,7 @@ scripting::LuaLibrary SpiceManager::luaLibrary() {
             {
                 "unloadKernel",
                 &luascriptfunctions::unloadKernel,
+                {},
                 "{string, number}",
                 "Unloads the provided SPICE kernel. The name can contain path tokens, "
                 "which are automatically resolved"

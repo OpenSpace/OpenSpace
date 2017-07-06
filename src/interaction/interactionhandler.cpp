@@ -474,12 +474,14 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
             {
                 "clearKeys",
                 &luascriptfunctions::clearKeys,
+                {},
                 "",
                 "Clear all key bindings"
             },
             {
                 "bindKey",
                 &luascriptfunctions::bindKey,
+                {},
                 "string, string [,string]",
                 "Binds a key by name to a lua string command to execute both locally "
                 "and to broadcast to clients if this is the host of a parallel session. "
@@ -490,6 +492,7 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
             {
                 "bindKeyLocal",
                 &luascriptfunctions::bindKeyLocal,
+                {},
                 "string, string [,string]",
                 "Binds a key by name to a lua string command to execute only locally. "
                 "The first argument is the key, the second argument is the Lua command "
@@ -499,30 +502,35 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
             {
                 "saveCameraStateToFile",
                 &luascriptfunctions::saveCameraStateToFile,
+                {},
                 "string",
                 "Save the current camera state to file"
             },
             {
                 "restoreCameraStateFromFile",
                 &luascriptfunctions::restoreCameraStateFromFile,
+                {},
                 "string",
                 "Restore the camera state from file"
             },
             {
                 "resetCameraDirection",
                 &luascriptfunctions::resetCameraDirection,
+                {},
                 "void",
                 "Reset the camera direction to point at the focus node"
             },
             {
                 "goToChunk",
                 &luascriptfunctions::goToChunk,
+                {},
                 "void",
                 "Go to chunk with given index x, y, level"
             },
             {
                 "goToGeo",
                 &luascriptfunctions::goToGeo,
+                {},
                 "void",
                 "Go to geographic coordinates latitude and longitude"
             },

@@ -48,6 +48,8 @@ struct LuaLibrary {
         std::string name;
         /// The function pointer that is executed if the function is called
         lua_CFunction function;
+        /// A vector of light userdata to be passed into the function
+        std::vector<void*> userdata;
         /// A text describing the arugments to this function
         std::string argumentText;
         /// A help text describing what the function does/

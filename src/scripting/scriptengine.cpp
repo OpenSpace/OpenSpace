@@ -369,7 +369,10 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library, bo
             lua_pop(state, 1);
         }
         lua_pushstring(state, p.name.c_str());
-        lua_pushcfunction(state, p.function);
+        for (void* d : p.userdata) {
+            lua_pushlightuserdata(state, d);
+        }
+        lua_pushcclosure(state, p.function, p.userdata.size());
         lua_settable(state, TableOffset);
     }
 
@@ -421,6 +424,7 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printTrace",
                 &luascriptfunctions::printTrace,
+                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Trace'"
@@ -428,6 +432,7 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printDebug",
                 &luascriptfunctions::printDebug,
+                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Debug'"
@@ -435,6 +440,7 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printInfo",
                 &luascriptfunctions::printInfo,
+                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Info'"
@@ -442,6 +448,7 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printWarning",
                 &luascriptfunctions::printWarning,
+                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Warning'"
@@ -449,6 +456,7 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printError",
                 &luascriptfunctions::printError,
+                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Error'"
@@ -456,6 +464,7 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "printFatal",
                 &luascriptfunctions::printFatal,
+                {},
                 "*",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
                 "'Fatal'"
@@ -463,6 +472,7 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "absPath",
                 &luascriptfunctions::absolutePath,
+                {},
                 "string",
                 "Returns the absolute path to the passed path, resolving path tokens as "
                 "well as resolving relative paths"
@@ -470,12 +480,14 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "fileExists",
                 &luascriptfunctions::fileExists,
+                {},
                 "string",
                 "Checks whether the provided file exists."
             },
             {
                 "setPathToken",
                 &luascriptfunctions::setPathToken,
+                {},
                 "string, string",
                 "Registers a new path token provided by the first argument to the path "
                 "provided in the second argument"
@@ -483,6 +495,7 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "walkDirectory",
                 &luascriptfunctions::walkDirectory,
+                {},
                 "string [bool, bool]",
                 "Walks a directory and returns all contents (files and directories) of "
                 "the directory as absolute paths. The first argument is the path of the "
@@ -493,6 +506,7 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "walkDirectoryFiles",
                 &luascriptfunctions::walkDirectoryFiles,
+                {},
                 "string [bool, bool]",
                 "Walks a directory and returns the files of the directory as absolute "
                 "paths. The first argument is the path of the directory that should be "
@@ -503,6 +517,7 @@ void ScriptEngine::addBaseLibrary() {
             {
                 "walkDirectoryFolder",
                 &luascriptfunctions::walkDirectoryFolder,
+                {},
                 "string [bool, bool]",
                 "Walks a directory and returns the subfolders of the directory as "
                 "absolute paths. The first argument is the path of the directory that "

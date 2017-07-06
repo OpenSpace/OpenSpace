@@ -95,12 +95,14 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
             {
                 "loadMission",
                 &luascriptfunctions::loadMission,
+                {},
                 "string",
                 "Load mission phases from file"
             },
             {
                 "setCurrentMission",
                 &luascriptfunctions::setCurrentMission,
+                {},
                 "string",
                 "Set the currnet mission"
             },

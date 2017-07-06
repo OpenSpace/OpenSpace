@@ -269,6 +269,7 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "loadFile",
                 &luascriptfunctions::loadFile,
+                {},
                 "string",
                 "Load timed scripts from a Lua script file that returns a list of "
                 "scheduled scripts."
@@ -276,6 +277,7 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "loadScheduledScript",
                 &luascriptfunctions::loadScheduledScript,
+                {},
                 "string, string, (string, string)",
                 "Load a single scheduled script. The first argument is the time at which "
                 "the scheduled script is triggered, the second argument is the script "
@@ -287,6 +289,7 @@ LuaLibrary ScriptScheduler::luaLibrary() {
             {
                 "clear",
                 &luascriptfunctions::clear,
+                {},
                 "",
                 "Clears all scheduled scripts."
             },

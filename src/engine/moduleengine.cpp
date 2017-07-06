@@ -104,6 +104,7 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
             {
                 "isLoaded",
                 &luascriptfunctions::isLoaded,
+                {},
                 "string",
                 "Checks whether a specific module is loaded"
             }

@@ -1168,24 +1168,28 @@ scripting::LuaLibrary ParallelConnection::luaLibrary() {
             {
                 "connect",
                 &luascriptfunctions::connect,
+                {},
                 "",
                 "Connect to parallel"
             },
             {
                 "disconnect",
                 &luascriptfunctions::disconnect,
+                {},
                 "",
                 "Disconnect from parallel"
             },
             {
                 "requestHostship",
                 &luascriptfunctions::requestHostship,
+                {},
                 "",
                 "Request to be the host for this session"
             },
             {
                 "resignHostship",
                 &luascriptfunctions::resignHostship,
+                {},
                 "",
                 "Resign hostship"
             },

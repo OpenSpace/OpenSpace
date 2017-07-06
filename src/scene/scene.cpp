@@ -391,6 +391,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValue",
                 &luascriptfunctions::property_setValue,
+                {},
                 "string, *",
                 "Sets all property(s) identified by the URI (with potential wildcards) "
                 "in the first argument. The second argument can be any type, but it has "
@@ -403,6 +404,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValueRegex",
                 &luascriptfunctions::property_setValueRegex,
+                {},
                 "string, *",
                 "Sets all property(s) that pass the regular expression in the first "
                 "argument. The second argument can be any type, but it has to match "
@@ -416,6 +418,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "setPropertyValueSingle",
                 &luascriptfunctions::property_setValueSingle,
+                {},
                 "string, *",
                 "Sets all property(s) identified by the URI in the first argument to the "
                 "value passed in the second argument. The type of the second argument is "
@@ -428,6 +431,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "getPropertyValue",
                 &luascriptfunctions::property_getValue,
+                {},
                 "string",
                 "Returns the value the property, identified by "
                 "the provided URI."
@@ -435,6 +439,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "loadScene",
                 &luascriptfunctions::loadScene,
+                {},
                 "string",
                 "Loads the scene found at the file passed as an "
                 "argument. If a scene is already loaded, it is unloaded first"
@@ -442,6 +447,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "addSceneGraphNode",
                 &luascriptfunctions::addSceneGraphNode,
+                {},
                 "table",
                 "Loads the SceneGraphNode described in the table and adds it to the "
                 "SceneGraph"
@@ -449,6 +455,7 @@ scripting::LuaLibrary Scene::luaLibrary() {
             {
                 "removeSceneGraphNode",
                 &luascriptfunctions::removeSceneGraphNode,
+                {},
                 "string",
                 "Removes the SceneGraphNode identified by name"
             }

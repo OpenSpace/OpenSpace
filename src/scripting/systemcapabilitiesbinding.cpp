@@ -201,6 +201,7 @@ LuaLibrary generalSystemCapabilities() {
             {
                 "operatingSystem",
                 &luascripting::general::operatingSystem,
+                {},
                 "",
                 "Returns a parsed string of the operating system type, for example "
                 "Windows, Linux, MacOS, or others, together with the specific version, "
@@ -209,6 +210,7 @@ LuaLibrary generalSystemCapabilities() {
             {
                 "fullOperatingSystem",
                 &luascripting::general::fullOperatingSystem,
+                {},
                 "",
                 "Returns the operating system as a string. The exact format of the "
                 "returned string is implementation and operating system-dependent but it "
@@ -217,6 +219,7 @@ LuaLibrary generalSystemCapabilities() {
             {
                 "installedMainMemory",
                 &luascripting::general::installedMainMemory,
+                {},
                 "",
                 "Returns the amount of available, installed main memory (RAM) on the "
                 "system in MB."
@@ -224,30 +227,35 @@ LuaLibrary generalSystemCapabilities() {
             {
                 "cores",
                 &luascripting::general::cores,
+                {},
                 "",
                 "Returns the number of cores."
             },
             {
                 "cacheLineSize",
                 &luascripting::general::cacheLineSize,
+                {},
                 "",
                 "Returns the cache line size."
             },
             {
                 "L2Associativity",
                 &luascripting::general::L2Associativity,
+                {},
                 "",
                 "Returns the L2 associativity."
             },
             {
                 "cacheSize",
                 &luascripting::general::cacheSize,
+                {},
                 "",
                 "Returns the cache size."
             },
             {
                 "extensions",
                 &luascripting::general::extensions,
+                {},
                 "",
                 "Returns all supported exteions as comma-separated string."
             }
@@ -262,6 +270,7 @@ LuaLibrary openglSystemCapabilities() {
             {
                 "hasOpenGLVersion",
                 &luascripting::opengl::hasOpenGLVersion,
+                {},
                 "string",
                 "Tests whether the current instance supports the passed OpenGL version. "
                 "The parameter has to have the form 'X.Y' or 'X.Y.Z'."
@@ -269,12 +278,14 @@ LuaLibrary openglSystemCapabilities() {
             {
                 "openGLVersion",
                 &luascripting::opengl::openGLVersion,
+                {},
                 "",
                 "Returns the maximum OpenGL version that is supported on this platform."
             },
             {
                 "glslCompiler",
                 &luascripting::opengl::glslCompiler,
+                {},
                 "",
                 "Returns the value of a call to <code>glGetString(GL_VENDOR)</code>. "
                 "This will give detailed information about the vendor of the main "
@@ -284,24 +295,28 @@ LuaLibrary openglSystemCapabilities() {
             {
                 "gpuVendor",
                 &luascripting::opengl::gpuVendor,
+                {},
                 "",
                 "Returns the vendor of the main graphics card."
             },
             {
                 "extensions",
                 &luascripting::opengl::extensions,
+                {},
                 "",
                 "Returns all available extensions as a list of names."
             },
             {
                 "isExtensionSupported",
                 &luascripting::opengl::isExtensionSupported,
+                {},
                 "string",
                 "Checks is a specific <code>extension</code> is supported or not."
             },
             {
                 "maxTextureUnits",
                 &luascripting::opengl::maxTextureUnits,
+                {},
                 "",
                 "Returns the maximum number of texture units that are available on the "
                 "main graphics card."
@@ -309,18 +324,21 @@ LuaLibrary openglSystemCapabilities() {
             {
                 "max2DTextureSize",
                 &luascripting::opengl::max2DTextureSize,
+                {},
                 "",
                 "Returns the largest dimension for a 2D texture on this graphics card."
             },
             {
                 "max3DTextureSize",
                 &luascripting::opengl::max3DTextureSize,
+                {},
                 "",
                 "Returns the largest dimension for a 3D texture on this graphics card."
             },
             {
                 "maxAtomicCounterBufferBindings",
                 &luascripting::opengl::maxAtomicCounterBufferBindings,
+                {},
                 "",
                 "Returns the maximum number of atomic counter buffer bindings that are "
                 "available on the main graphics card."
@@ -328,6 +346,7 @@ LuaLibrary openglSystemCapabilities() {
             {
                 "maxShaderStorageBufferBindings",
                 &luascripting::opengl::maxShaderStorageBufferBindings,
+                {},
                 "",
                 "Returns the maximum number of shader storage bindings that are "
                 "available on the main graphics card."
@@ -335,6 +354,7 @@ LuaLibrary openglSystemCapabilities() {
             {
                 "maxUniformBufferBindings",
                 &luascripting::opengl::maxUniformBufferBindings,
+                {},
                 "",
                 "Returns the maximum number of uniform buffer bindings that are "
                 "available on the main graphics card."

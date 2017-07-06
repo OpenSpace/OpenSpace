@@ -160,6 +160,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "setDeltaTime",
                 &luascriptfunctions::time_setDeltaTime,
+                {},
                 "number",
                 "Sets the amount of simulation time that happens "
                 "in one second of real time"
@@ -167,6 +168,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "deltaTime",
                 &luascriptfunctions::time_deltaTime,
+                {},
                 "",
                 "Returns the amount of simulated time that passes in one "
                 "second of real time"
@@ -174,12 +176,14 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "setPause",
                 &luascriptfunctions::time_setPause,
+                {},
                 "bool",
                 "Pauses the simulation time or restores the delta time"
             },
             {
                 "togglePause",
                 &luascriptfunctions::time_togglePause,
+                {},
                 "",
                 "Toggles the pause function, i.e. temporarily setting the delta time to 0"
                 " and restoring it afterwards"
@@ -187,6 +191,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "setTime",
                 &luascriptfunctions::time_setTime,
+                {},
                 "{number, string}",
                 "Sets the current simulation time to the "
                 "specified value. If the parameter is a number, the value is the number "
@@ -196,6 +201,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "currentTime",
                 &luascriptfunctions::time_currentTime,
+                {},
                 "",
                 "Returns the current time as the number of seconds since "
                 "the J2000 epoch"
@@ -203,6 +209,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "UTC",
                 &luascriptfunctions::time_currentTimeUTC,
+                {},
                 "",
                 "Returns the current time as an ISO 8601 date string "
                 "(YYYY-MM-DDTHH:MN:SS)"
@@ -210,6 +217,7 @@ scripting::LuaLibrary Time::luaLibrary() {
             {
                 "currentWallTime",
                 &luascriptfunctions::time_currentWallTime,
+                {},
                 "",
                 "Returns the current wall time as an ISO 8601 date string "
                 "(YYYY-MM-DDTHH-MN-SS) in the UTC timezone"

@@ -1258,6 +1258,7 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "toggleShutdown",
                 &luascriptfunctions::toggleShutdown,
+                {},
                 "",
                 "Toggles the shutdown mode that will close the application after the count"
                 "down timer is reached"
@@ -1265,30 +1266,35 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             {
                 "writeDocumentation",
                 &luascriptfunctions::writeDocumentation,
+                {},
                 "",
                 "Writes out documentation files"
             },
             {
                 "downloadFile",
                 &luascriptfunctions::downloadFile,
+                {},
                 "",
                 "Downloads a file from Lua scope"
             },
             {
                 "addVirtualProperty",
                 &luascriptfunctions::addVirtualProperty,
+                {},
                 "type, name, identifier, [value, minimumValue, maximumValue]",
                 "Adds a virtual property that will set a group of properties"
             },
             {
                 "removeVirtualProperty",
                 &luascriptfunctions::removeVirtualProperty,
+                {},
                 "string",
                 "Removes a previously added virtual property"
             },
             {
                 "removeAllVirtualProperties",
                 &luascriptfunctions::removeAllVirtualProperties,
+                {},
                 "",
                 "Remove all registered virtual properties"
             }
