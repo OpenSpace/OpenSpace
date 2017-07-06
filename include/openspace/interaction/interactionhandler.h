@@ -29,7 +29,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/interactionmode.h>
-#include <openspace/interaction/globebrowsinginteractionmode.h>
 #include <openspace/interaction/orbitalinteractionmode.h>
 #include <openspace/interaction/keyframeinteractionmode.h>
 #include <openspace/network/parallelconnection.h>
@@ -151,7 +150,6 @@ private:
     std::shared_ptr<OrbitalInteractionMode::MouseStates> _mouseStates;
 
     std::unique_ptr<OrbitalInteractionMode> _orbitalInteractionMode;
-    std::unique_ptr<GlobeBrowsingInteractionMode> _globeBrowsingInteractionMode;
     std::unique_ptr<KeyframeInteractionMode> _keyframeInteractionMode;
 
     // Properties

@@ -64,9 +64,6 @@ namespace {
     const int IdOrbitalInteractionMode = 0;
     const char* KeyOrbitalInteractionMode = "Orbital";
     
-    const int IdGlobeBrowsingInteractionMode = 1;
-    const char* KeyGlobeBrowsingInteractionMode = "GlobeBrowsing";
-    
     const int IdKeyframeInteractionMode = 2;
     const char* KeyKeyframeInteractionMode = "Keyframe";
 } // namespace
@@ -121,11 +118,9 @@ InteractionHandler::InteractionHandler()
         _sensitivity * pow(10.0,-4), 1 / (_motionLag + 0.0000001));
 
     _orbitalInteractionMode = std::make_unique<OrbitalInteractionMode>(_mouseStates);
-    _globeBrowsingInteractionMode = std::make_unique<GlobeBrowsingInteractionMode>(_mouseStates);
     _keyframeInteractionMode = std::make_unique<KeyframeInteractionMode>();
 
     _interactionModeOption.addOption(IdOrbitalInteractionMode, KeyOrbitalInteractionMode);
-    _interactionModeOption.addOption(IdGlobeBrowsingInteractionMode, KeyGlobeBrowsingInteractionMode);
     _interactionModeOption.addOption(IdKeyframeInteractionMode, KeyKeyframeInteractionMode);
 
     // Set the interactionMode
@@ -156,8 +151,6 @@ InteractionHandler::InteractionHandler()
 
     _interactionModeOption.onChange([this]() {
         switch(_interactionModeOption.value()) {
-        case IdGlobeBrowsingInteractionMode:
-             setInteractionMode(_globeBrowsingInteractionMode.get());
             break;
         case IdKeyframeInteractionMode:
             setInteractionMode(_keyframeInteractionMode.get());
@@ -231,26 +224,11 @@ InteractionMode * InteractionHandler::interactionMode() {
 }
 
 void InteractionHandler::goToChunk(int x, int y, int level) {
-    if (_currentInteractionMode == _globeBrowsingInteractionMode.get()) {
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        _globeBrowsingInteractionMode->goToChunk(*_camera, globebrowsing::TileIndex(x,y,level), glm::vec2(0.5,0.5), true);
-#endif
-    } else {
-        LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
-    }
+    LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
 }
 
 void InteractionHandler::goToGeo(double latitude, double longitude) {
-    if (_currentInteractionMode == _globeBrowsingInteractionMode.get()) {
-#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-        _globeBrowsingInteractionMode->goToGeodetic2(
-            *_camera,
-            globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(), true
-        );
-#endif
-    } else {
-        LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
-    }
+    LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
 }
 
 void InteractionHandler::lockControls() {

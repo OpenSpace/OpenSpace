@@ -63,8 +63,6 @@ return {
         Renderable = {
             Type = "RenderableGlobe",
             Radii = earthEllipsoid,
-            CameraMinHeight = 300,
-            InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
