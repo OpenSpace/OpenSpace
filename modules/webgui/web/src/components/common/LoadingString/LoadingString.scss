@@ -2,9 +2,9 @@
 
 .loading {
   animation: $loading-animation;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.1) 0%,
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.3) 0%,
                                         rgba(255, 255, 255, 0.5) 40%,
-                                        rgba(255, 255, 255, 0.1) 45%);
+                                        rgba(255, 255, 255, 0.3) 45%);
   background-size: 400px;
   color: transparent;
   min-width: 5em;
