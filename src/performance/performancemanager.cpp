@@ -34,6 +34,8 @@
 
 #include <algorithm>
 #include <cstring>
+#include <iostream>
+#include <fstream>
 
 namespace {
     const char* _loggerCat = "PerformanceManager";
@@ -135,6 +137,8 @@ PerformanceManager::PerformanceManager()
     , _loggingEnabled(false)
     , _logDir(absPath("${BASE_PATH}"))
     , _prefix("PM-")
+    , _suffix("")
+    , _ext("log")
 {
     using ghoul::SharedMemory;
     PerformanceManager::createGlobalSharedMemory();
@@ -202,21 +206,61 @@ bool PerformanceManager::isMeasuringPerformance() const {
 }
     
 void PerformanceManager::outputLogs() {
-    LINFO("Logging from " << typeid(*this).name() << "::" << __func__);
+
+    // Log individual performance locations first
     for (auto it = individualPerformanceLocations.begin(); it != individualPerformanceLocations.end(); ++it) {
         LINFO("Log Count:" << it->second << " Node: " << it->first);
     }
 
+    // Log Layout values
     PerformanceLayout* layout = performanceData();
 
-    for (size_t i = 0; i < layout->nFunctionEntries; ++i) {
-        LINFO("LogA:" << i << " Node: " << layout->sceneGraphEntries[i].name << " " << layout->functionEntries[i].time[0]);
+    // Log function performance
+    for (size_t n = 0; n < layout->nFunctionEntries; n++) {
+        const auto function = layout->functionEntries[n];
+        LINFO("LogC:" << function.name << " " << layout->functionEntries[n].time[0]);
+        // Open file
+        std::string filename = _logDir + "/" + _prefix + "FUNCTION-" + function.name + _suffix + "." + _ext;
+        std::replace(filename.begin(), filename.end(), ':', '-');
+        LINFO("FILE: " << filename);
+        std::ofstream out = std::ofstream(absPath(filename));
+
+        // Comma separate data
+        for (size_t i = 0; i < PerformanceLayout::NumberValues; i++) {
+            const std::vector<float> data = { function.time[i] };
+            writeData(out, data);
+        }
+        out.close();
     }
 
-    LINFO("Log Dir: " << absPath(_logDir + "/" + _prefix));
-    for (size_t i = 0; i < layout->nScaleGraphEntries; ++i) {
-        LINFO("LogB:" << i << " Node: " << layout->sceneGraphEntries[i].name << " " << layout->sceneGraphEntries[i].renderTime[0];);
+    // Log scene object performance
+    for (size_t n = 0; n < layout->nScaleGraphEntries; n++) {
+        const auto node = layout->sceneGraphEntries[n];
+
+        // Open file
+        const std::string filename = _logDir + "/" + _prefix + "NODE-" + node.name + _suffix + "." + _ext;
+        std::ofstream out = std::ofstream(absPath(filename));
+        
+        // Comma separate data
+        for (size_t i = 0; i < PerformanceLayout::NumberValues; i++) {
+            const std::vector<float> data = {
+                node.renderTime[i],
+                node.updateRenderable[i],
+                node.updateRotation[i],
+                node.updateScaling[i],
+                node.updateTranslation[i]
+            };
+            writeData(out, data);
+        }
+        out.close();
     }
+}
+
+void PerformanceManager::writeData(std::ofstream& out, const std::vector<float> data) {
+    for (size_t i = 0; i < data.size() - 1; i++) {
+        out << data[i] << ",";
+    }
+    out << data[data.size() - 1] << "\n";
 }
 
 void PerformanceManager::logDir(std::string dir) {

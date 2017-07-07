@@ -59,7 +59,9 @@ public:
     void storeScenePerformanceMeasurements(const std::vector<SceneGraphNode*>& sceneNodes);
     
     void outputLogs();
-    
+
+    void writeData(std::ofstream& out, const std::vector<float> data);
+
     void logDir(std::string dir);
     std::string logDir();
     void prefix(std::string prefix);
@@ -78,6 +80,8 @@ private:
 
     std::string _logDir;
     std::string _prefix;
+    std::string _suffix;
+    std::string _ext;
     
     std::map<std::string, size_t> individualPerformanceLocations;
     
