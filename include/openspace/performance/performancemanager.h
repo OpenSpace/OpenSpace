@@ -62,6 +62,8 @@ public:
 
     void writeData(std::ofstream& out, const std::vector<float> data);
 
+    const std::string formatLogName(std::string nodeName);
+
     void logDir(std::string dir);
     std::string logDir();
     void prefix(std::string prefix);

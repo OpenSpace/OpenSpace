@@ -207,22 +207,13 @@ bool PerformanceManager::isMeasuringPerformance() const {
     
 void PerformanceManager::outputLogs() {
 
-    // Log individual performance locations first
-    for (auto it = individualPerformanceLocations.begin(); it != individualPerformanceLocations.end(); ++it) {
-        LINFO("Log Count:" << it->second << " Node: " << it->first);
-    }
-
     // Log Layout values
     PerformanceLayout* layout = performanceData();
 
     // Log function performance
     for (size_t n = 0; n < layout->nFunctionEntries; n++) {
         const auto function = layout->functionEntries[n];
-        LINFO("LogC:" << function.name << " " << layout->functionEntries[n].time[0]);
-        // Open file
-        std::string filename = _logDir + "/" + _prefix + "FUNCTION-" + function.name + _suffix + "." + _ext;
-        std::replace(filename.begin(), filename.end(), ':', '-');
-        LINFO("FILE: " << filename);
+        const std::string filename = formatLogName(function.name);
         std::ofstream out = std::ofstream(absPath(filename));
 
         // Comma separate data
@@ -238,7 +229,7 @@ void PerformanceManager::outputLogs() {
         const auto node = layout->sceneGraphEntries[n];
 
         // Open file
-        const std::string filename = _logDir + "/" + _prefix + "NODE-" + node.name + _suffix + "." + _ext;
+        const std::string filename = formatLogName(node.name);
         std::ofstream out = std::ofstream(absPath(filename));
         
         // Comma separate data
@@ -261,6 +252,12 @@ void PerformanceManager::writeData(std::ofstream& out, const std::vector<float> 
         out << data[i] << ",";
     }
     out << data[data.size() - 1] << "\n";
+}
+
+const std::string PerformanceManager::formatLogName(std::string nodeName) {
+    // Replace any colons with dashes
+    std::replace(nodeName.begin(), nodeName.end(), ':', '-');
+    return  _logDir + "/" + _prefix + nodeName + _suffix + "." + _ext;
 }
 
 void PerformanceManager::logDir(std::string dir) {
