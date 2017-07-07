@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
 
 #include <openspace/network/parallelconnection.h>
 
@@ -56,7 +56,7 @@ namespace {
     const char* KeyRotation = "Rotation";
 } // namespace
 
-#include "interactionhandler_lua.inl"
+#include "navigationhandler_lua.inl"
 
 namespace openspace {
 namespace interaction {

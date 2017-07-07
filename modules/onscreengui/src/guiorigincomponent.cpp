@@ -25,7 +25,7 @@
 #include <modules/onscreengui/include/guiorigincomponent.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
