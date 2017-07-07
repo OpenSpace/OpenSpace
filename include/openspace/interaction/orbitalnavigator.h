@@ -99,48 +99,100 @@ private:
     Interpolator<double> _rotateToFocusNodeInterpolator;
     Interpolator<double> _followRotationInterpolator;
 
+    /**
+     * Decomposes the cameras rotation in to a global and a local rotation defined by
+     * CameraRotationDecomposition. The global rotation defines the rotation so that the
+     * camera points towards the focus node in the direction opposite to the direction
+     * out from the surface of the object. The local rotation defines the differential
+     * from the global to the current total rotation so that
+     * <code>cameraRotation = globalRotation * localRotation</code>. 
+     */
     CameraRotationDecomposition decomposeCameraRotation(
-        glm::dvec3 cameraPosition,
-        glm::dquat cameraRotation,
-        glm::dvec3 cameraLookUp,
-        glm::dvec3 cameraViewDirection);
+        const glm::dvec3& cameraPosition,
+        const glm::dquat& cameraRotation,
+        const glm::dvec3& cameraLookUp,
+        const glm::dvec3& cameraViewDirection);
 
+    /*
+     * Performs a roll on the local rotation of the camera. The local rotation will be
+     * modified to roll around the direction the camera is pointing in.
+     */
     void performRoll(double deltaTime, glm::dquat& localCameraRotation);
+
+    /**
+     * Performs rotation around the cameras x and y axes. The local rotation will be
+     * modified with two degrees of freedom.
+     */
     void performLocalRotation(double deltaTime, glm::dquat& localCameraRotation);
+    
+    /**
+     * Interpolates the local rotation towards a 0 rotation.
+     */
     void interpolateLocalRotation(double deltaTime, glm::dquat& localCameraRotation);
+    
+    /**
+     * Translates the horizontal direction. If far from the focus object, this will
+     * result in an orbital rotation around the object. This function does not affect the
+     * rotation but only the position.
+     */
     void performHorizontalTranslation(
         double deltaTime,
-        glm::dvec3 objectPosition,
-        glm::dquat& focusNodeRotationDiff,
         glm::dvec3& cameraPosition,
-        glm::dquat& globalCameraRotation);
+        const glm::dvec3& objectPosition,
+        const glm::dquat& focusNodeRotationDiff,
+        const glm::dquat& globalCameraRotation);
+
+    /*
+     * Adds rotation to the camera position so that it follows the rotation of the focus
+     * node defined by the differential focusNodeRotationDiff. 
+     */
     void followFocusNodeRotation(
-        glm::dvec3 objectPosition,
-        glm::dquat& focusNodeRotationDiff,
-        glm::dvec3& cameraPosition);
-    void performGlobalRotation(
-        glm::dvec3 objectPosition,
-        glm::dquat& focusNodeRotationDiff,
         glm::dvec3& cameraPosition,
-        glm::dquat& globalCameraRotation);
+        const glm::dvec3& objectPosition,
+        const glm::dquat& focusNodeRotationDiff);
+
+    /**
+     * Updates the global rotation so that it points towards the focus node.
+     */
+    void performGlobalRotation(
+        glm::dquat& globalCameraRotation,
+        const glm::dvec3& objectPosition,
+        const glm::dquat& focusNodeRotationDiff,
+        const glm::dvec3& cameraPosition);
+
+    /**
+     * Translates the camera position towards or away from the focus node.
+     */
     void performVerticalTranslation(
         double deltaTime,
-        glm::dvec3 objectPosition,
-        glm::dvec3& cameraPosition);
+        glm::dvec3& cameraPosition,
+        const glm::dvec3& objectPosition);
+
+    /**
+     * Rotates the camera around the out vector of the surface.
+     */
     void performHorizontalRotation(
         double deltaTime,
-        glm::dvec3 cameraPosition,
-        glm::dquat& globalCameraRotation);
+        glm::dquat& globalCameraRotation,
+        const glm::dvec3& cameraPosition);
+
+    /**
+     * Push the camera out to the surface of the object.
+     */
     void pushToSurface(
         double minHeightAboveGround,
         glm::dvec3 objectPosition,
         glm::dvec3& cameraPosition);
+
+    /**
+     * Interpolates between rotationDiff and a 0 rotation.
+     */
     glm::dquat interpolateRotationDifferential(
         double deltaTime,
         double interpolationTime,
-        glm::dquat rotationDiff,
-        glm::dvec3 objectPosition,
-        glm::dvec3 cameraPosition);
+        const glm::dquat& rotationDiff,
+        const glm::dvec3& objectPosition,
+        const glm::dvec3& cameraPosition);
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     globebrowsing::RenderableGlobe* castRenderableToGlobe();

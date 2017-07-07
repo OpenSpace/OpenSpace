@@ -59,7 +59,7 @@ namespace openspace {
 namespace interaction {
 
 NavigationHandler::NavigationHandler()
-    : properties::PropertyOwner("navigationHandler")
+    : properties::PropertyOwner("NavigationHandler")
     , _origin("origin", "Origin", "")
     , _useKeyFrameInteraction("useKeyFrameInteraction", "Use keyframe interaction", false)
 {
