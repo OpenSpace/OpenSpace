@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 
 #include <openspace/util/timeline.h>
+#include <openspace/network/parallelconnection.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -49,8 +50,14 @@ public:
     KeyframeNavigator();
     ~KeyframeNavigator();
 
-    void updateCameraStateFromMouseStates(Camera& camera, double deltaTime);
+    void updateCamera(Camera& camera);
     Timeline<CameraPose>& timeline();
+
+    void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
+    void removeKeyframesAfter(double timestamp);
+    void clearKeyframes();
+    size_t nKeyframes() const;
+    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
 private:
     Timeline<CameraPose> _cameraPoseTimeline;

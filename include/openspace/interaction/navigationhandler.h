@@ -29,7 +29,6 @@
 
 #include <openspace/interaction/orbitalnavigator.h>
 #include <openspace/interaction/keyframenavigator.h>
-#include <openspace/network/parallelconnection.h>
 #include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -62,15 +61,8 @@ public:
     void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);    
     void goToChunk(int x, int y, int level);
     void goToGeo(double latitude, double longitude);
-    
-    void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
-    void removeKeyframesAfter(double timestamp);
-    void clearKeyframes();
-    size_t nKeyframes() const;
-    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
     void updateCamera(double deltaTime);
-    void updateInputStates(double timeSinceLastUpdate);    
 
     // Accessors
     ghoul::Dictionary getCameraStateDictionary();
@@ -80,6 +72,7 @@ public:
     Camera* camera() const;
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
+    KeyframeNavigator& keyframeNavigator() const; 
 
     // Callback functions 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
@@ -102,7 +95,7 @@ private:
     Camera* _camera;
 
     std::unique_ptr<OrbitalNavigator> _orbitalNavigator;
-    std::unique_ptr<KeyframeNavigator> _keyFrameNavigator;
+    std::unique_ptr<KeyframeNavigator> _keyframeNavigator;
 
     // Properties
     properties::StringProperty _origin;

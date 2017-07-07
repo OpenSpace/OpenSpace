@@ -79,7 +79,7 @@ NavigationHandler::NavigationHandler()
 
     _inputState = std::make_unique<InputState>();
     _orbitalNavigator = std::make_unique<OrbitalNavigator>();
-    _keyFrameNavigator = std::make_unique<KeyframeNavigator>();
+    _keyframeNavigator = std::make_unique<KeyframeNavigator>();
     
     // Add the properties
     addProperty(_origin);
@@ -120,6 +120,10 @@ const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
     return *_orbitalNavigator;
 }
 
+KeyframeNavigator& NavigationHandler::keyframeNavigator() const {
+    return *_keyframeNavigator;
+}
+
 void NavigationHandler::goToChunk(int x, int y, int level) {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     _orbitalNavigator->goToChunk(
@@ -143,12 +147,6 @@ void NavigationHandler::goToGeo(double latitude, double longitude) {
 #endif
 }
 
-void NavigationHandler::updateInputStates(double timeSinceLastUpdate) {
-    ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
-    ghoul_assert(_camera != nullptr, "Camera cannot be null!");
-    _orbitalNavigator->updateMouseStatesFromInput(*_inputState, timeSinceLastUpdate);
-}
-
 void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
@@ -159,9 +157,10 @@ void NavigationHandler::updateCamera(double deltaTime) {
     else {
         if (_camera && focusNode()) {
             if (_useKeyFrameInteraction) {
-                _keyFrameNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);
+                _keyframeNavigator->updateCamera(*_camera);
             }
             else {
+                _orbitalNavigator->updateMouseStatesFromInput(*_inputState, deltaTime);
                 _orbitalNavigator->updateCameraStateFromMouseStates(*_camera, deltaTime);    
             }
 			_camera->setFocusPositionVec3(focusNode()->worldPosition());
@@ -189,7 +188,6 @@ Camera* NavigationHandler::camera() const {
 const InputState& NavigationHandler::inputState() const {
     return *_inputState;
 }
-
 
 void NavigationHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     _inputState->mouseButtonCallback(button, action);
@@ -338,34 +336,6 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             },
         }
     };
-}
-
-void NavigationHandler::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose) {
-    if (!_keyFrameNavigator) {
-        return;
-    }
-    _keyFrameNavigator->timeline().addKeyframe(timestamp, pose);
-}
-
-void NavigationHandler::removeKeyframesAfter(double timestamp) {
-    if (!_keyFrameNavigator) {
-        return;
-    }
-    _keyFrameNavigator->timeline().removeKeyframesAfter(timestamp);
-}
-
-void NavigationHandler::clearKeyframes() {
-    if (!_keyFrameNavigator) {
-        return;
-    }
-    _keyFrameNavigator->timeline().clearKeyframes();
-}
-
-size_t NavigationHandler::nKeyframes() const {
-    if (!_keyFrameNavigator) {
-        return 0;
-    }
-    return _keyFrameNavigator->timeline().keyframes().size();
 }
 
 } // namespace interaction

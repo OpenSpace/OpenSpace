@@ -66,7 +66,7 @@
 #include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keyframenavigator.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/script_helper.h>
@@ -580,14 +580,16 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
             datamessagestructures::CameraKeyframe kf(buffer);
             kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
 
-            OsEng.navigationHandler().removeKeyframesAfter(kf._timestamp);
+            OsEng.navigationHandler().keyframeNavigator().removeKeyframesAfter(
+                kf._timestamp);
             interaction::KeyframeNavigator::CameraPose pose;
             pose.focusNode = kf._focusNode;
             pose.position = kf._position;
             pose.rotation = kf._rotation;
             pose.followFocusNodeRotation = kf._followNodeRotation;
 
-            OsEng.navigationHandler().addKeyframe(kf._timestamp, pose);
+            OsEng.navigationHandler().keyframeNavigator().addKeyframe(
+                kf._timestamp, pose);
             break;
         }
         case datamessagestructures::Type::TimeData: {
@@ -755,7 +757,7 @@ void ParallelConnection::connectionStatusMessageReceived(const std::vector<char>
 
     setStatus(status);
 
-    OsEng.navigationHandler().clearKeyframes();
+    OsEng.navigationHandler().keyframeNavigator().clearKeyframes();
     OsEng.timeManager().clearKeyframes();
 
 }
@@ -1012,7 +1014,7 @@ void ParallelConnection::sendScript(std::string script) {
 }
 
 void ParallelConnection::resetTimeOffset() {
-    OsEng.navigationHandler().clearKeyframes();
+    OsEng.navigationHandler().keyframeNavigator().clearKeyframes();
     OsEng.timeManager().clearKeyframes();
     std::lock_guard<std::mutex> latencyLock(_latencyMutex);
     _latencyDiffs.clear();

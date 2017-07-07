@@ -32,6 +32,7 @@
 
 namespace openspace {
 namespace interaction {
+    
 struct MouseState {
     MouseState(double scaleFactor)
         : velocity(scaleFactor, 1)

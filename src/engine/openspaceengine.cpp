@@ -1031,8 +1031,6 @@ void OpenSpaceEngine::preSynchronization() {
                 *it, ScriptEngine::RemoteScripting::Yes
             );
         }
-
-        _navigationHandler->updateInputStates(dt);
         
         _renderEngine->updateScene();
         _navigationHandler->updateCamera(dt);
@@ -1070,9 +1068,6 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
         _renderEngine->camera()->invalidateCache();
     }   
 
-    // Step the camera using the current mouse velocities which are synced
-    //_navigationHandler->updateCamera();
-    
     for (const auto& func : _moduleCallbacks.postSyncPreDraw) {
         func();
     }

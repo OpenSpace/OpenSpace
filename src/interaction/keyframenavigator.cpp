@@ -47,7 +47,7 @@ KeyframeNavigator::KeyframeNavigator()
 KeyframeNavigator::~KeyframeNavigator()
 { }
 
-void KeyframeNavigator::updateCameraStateFromMouseStates(Camera& camera, double) {
+void KeyframeNavigator::updateCamera(Camera& camera) {
     double now = OsEng.runTime();
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
@@ -115,6 +115,22 @@ void KeyframeNavigator::updateCameraStateFromMouseStates(Camera& camera, double)
 
 Timeline<KeyframeNavigator::CameraPose>& KeyframeNavigator::timeline() {
     return _cameraPoseTimeline;
+}
+
+void KeyframeNavigator::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose) {
+    timeline().addKeyframe(timestamp, pose);
+}
+
+void KeyframeNavigator::removeKeyframesAfter(double timestamp) {
+    timeline().removeKeyframesAfter(timestamp);
+}
+
+void KeyframeNavigator::clearKeyframes() {
+    timeline().clearKeyframes();
+}
+
+size_t KeyframeNavigator::nKeyframes() const {
+	return _cameraPoseTimeline.nKeyframes();
 }
 
 } // namespace interaction
