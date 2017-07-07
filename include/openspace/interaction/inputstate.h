@@ -26,10 +26,7 @@
 #define __OPENSPACE_CORE___INPUTSTATE___H__
 
 #include <openspace/util/keys.h>
-
-#include <openspace/network/parallelconnection.h>
 #include <openspace/util/mouse.h>
-#include <openspace/util/keys.h>
 
 #include <glm/glm.hpp>
 
@@ -55,7 +52,6 @@ public:
     const std::list<MouseButton>& getPressedMouseButtons() const;
     glm::dvec2 getMousePosition() const;
     double getMouseScrollDelta() const;
-    const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
     bool isKeyPressed(std::pair<Key, KeyModifier> keyModPair) const;
     bool isKeyPressed(Key key) const;
