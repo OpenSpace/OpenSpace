@@ -214,7 +214,7 @@ void PerformanceManager::outputLogs() {
     for (size_t n = 0; n < layout->nFunctionEntries; n++) {
         const auto function = layout->functionEntries[n];
         const std::string filename = formatLogName(function.name);
-        std::ofstream out = std::ofstream(absPath(filename));
+        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
 
         // Comma separate data
         for (size_t i = 0; i < PerformanceLayout::NumberValues; i++) {
@@ -230,7 +230,7 @@ void PerformanceManager::outputLogs() {
 
         // Open file
         const std::string filename = formatLogName(node.name);
-        std::ofstream out = std::ofstream(absPath(filename));
+        std::ofstream out = std::ofstream(absPath(filename), std::ofstream::out | std::ofstream::app);
         
         // Comma separate data
         for (size_t i = 0; i < PerformanceLayout::NumberValues; i++) {
