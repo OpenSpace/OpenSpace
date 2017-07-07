@@ -33,6 +33,14 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+#include <modules/globebrowsing/globes/renderableglobe.h>
+#include <modules/globebrowsing/globes/chunkedlodglobe.h>
+#include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodeticpatch.h>
+#include <modules/globebrowsing/tile/tileindex.h>
+#endif
+
 namespace {
     const std::string _loggerCat = "OrbitalNavigator";
 }
@@ -494,6 +502,141 @@ glm::dquat OrbitalNavigator::interpolateRotationDifferential(
 
     return glm::slerp(glm::dquat(glm::dvec3(0.0)), rotationDiff, _followRotationInterpolator.value());
 }
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+void OrbitalNavigator::goToChunk(
+    Camera& camera,
+    globebrowsing::TileIndex ti,
+    glm::vec2 uv,
+    bool resetCameraDirection)
+{
+    using namespace globebrowsing;
+    
+    RenderableGlobe* globe = castRenderableToGlobe();
+    if (!globe) {
+        LERROR("Focus node must have a RenderableGlobe renderable.");
+        return;
+    }
+
+    // Camera position in model space
+    glm::dvec3 camPos = camera.positionVec3();
+    glm::dmat4 inverseModelTransform = globe->inverseModelTransform();
+    glm::dvec3 cameraPositionModelSpace =
+    glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+    
+    GeodeticPatch patch(ti);
+    Geodetic2 corner = patch.getCorner(SOUTH_WEST);
+    Geodetic2 positionOnPatch = patch.getSize();
+    positionOnPatch.lat *= uv.y;
+    positionOnPatch.lon *= uv.x;
+    Geodetic2 pointPosition = corner + positionOnPatch;
+    
+    glm::dvec3 positionOnEllipsoid =
+        globe->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
+    double altitude = glm::length(cameraPositionModelSpace - positionOnEllipsoid);
+    
+    goToGeodetic3(camera, {pointPosition, altitude});
+    
+    if (resetCameraDirection) {
+        this->resetCameraDirection(camera, pointPosition);
+    }
+}
+
+void OrbitalNavigator::goToGeodetic2(Camera& camera,
+    globebrowsing::Geodetic2 geo2, bool resetCameraDirection)
+{
+    using namespace globebrowsing;
+
+    RenderableGlobe* globe = castRenderableToGlobe();
+    if (!globe) {
+        LERROR("Focus node must have a RenderableGlobe renderable.");
+        return;
+    }
+    
+    // Camera position in model space
+    glm::dvec3 camPos = camera.positionVec3();
+    glm::dmat4 inverseModelTransform = globe->inverseModelTransform();
+    glm::dvec3 cameraPositionModelSpace =
+    glm::dvec3(inverseModelTransform * glm::dvec4(camPos, 1));
+        
+    glm::dvec3 positionOnEllipsoid =
+    globe->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
+    double altitude = glm::length(cameraPositionModelSpace - positionOnEllipsoid);
+        
+    goToGeodetic3(camera, {geo2, altitude});
+        
+    if (resetCameraDirection) {
+        this->resetCameraDirection(camera, geo2);
+    }
+}
+    
+void OrbitalNavigator::goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 geo3) {
+	using namespace globebrowsing;
+	
+	RenderableGlobe* globe = castRenderableToGlobe();
+    if (!globe) {
+        LERROR("Focus node must have a RenderableGlobe renderable.");
+        return;
+    }
+
+    glm::dvec3 positionModelSpace = globe->ellipsoid().cartesianPosition(geo3);
+    glm::dmat4 modelTransform = globe->modelTransform();
+    glm::dvec3 positionWorldSpace = modelTransform * glm::dvec4(positionModelSpace, 1.0);
+    camera.setPositionVec3(positionWorldSpace);
+}
+
+void OrbitalNavigator::resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2) {
+    using namespace globebrowsing;
+    
+    RenderableGlobe* globe = castRenderableToGlobe();
+    if (!globe) {
+        LERROR("Focus node must have a RenderableGlobe renderable.");
+        return;
+    }
+
+    // Camera is described in world space
+    glm::dmat4 modelTransform = globe->modelTransform();
+    
+    // Lookup vector
+    glm::dvec3 positionModelSpace = globe->ellipsoid().cartesianSurfacePosition(geo2);
+    glm::dvec3 slightlyNorth = globe->ellipsoid().cartesianSurfacePosition(
+        Geodetic2(geo2.lat + 0.001, geo2.lon));
+    glm::dvec3 lookUpModelSpace = glm::normalize(slightlyNorth - positionModelSpace);
+    glm::dvec3 lookUpWorldSpace = glm::dmat3(modelTransform) * lookUpModelSpace;
+    
+    // Lookat vector
+    glm::dvec3 lookAtWorldSpace = modelTransform * glm::dvec4(positionModelSpace, 1.0);
+
+    // Eye position
+    glm::dvec3 eye = camera.positionVec3();
+    
+    // Matrix
+    glm::dmat4 lookAtMatrix = glm::lookAt(
+                    eye, lookAtWorldSpace, lookUpWorldSpace);
+    
+    // Set rotation
+    glm::dquat rotation = glm::quat_cast(inverse(lookAtMatrix));
+    camera.setRotation(rotation);
+}
+
+globebrowsing::RenderableGlobe* OrbitalNavigator::castRenderableToGlobe() {
+    using namespace globebrowsing;
+
+    Renderable* baseRenderable = _focusNode->renderable();
+	if (!baseRenderable) {
+		return nullptr;
+	}
+    if (globebrowsing::RenderableGlobe* globe =
+            dynamic_cast<globebrowsing::RenderableGlobe*>(baseRenderable))
+    {
+        return globe;
+    }
+    else {
+        return nullptr;
+    }
+}
+
+#endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 
 } // namespace interaction
 } // namespace openspace

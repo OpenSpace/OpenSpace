@@ -38,6 +38,17 @@
 #include <glm/gtx/quaternion.hpp>
 
 namespace openspace {
+
+class SceneGraphNode;
+class Camera;
+
+namespace globebrowsing {
+    class RenderableGlobe;
+    class TileIndex;
+    class Geodetic2;
+    class Geodetic3;
+}
+
 namespace interaction {
 
 class OrbitalNavigator : public properties::PropertyOwner 
@@ -54,6 +65,15 @@ public:
 
     bool followingNodeRotation() const;    
     SceneGraphNode* focusNode() const;
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
+                   bool resetCameraDirection);
+    void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,
+                   bool resetCameraDirection);
+    
+    void goToGeodetic3(Camera& camera,  globebrowsing::Geodetic3 geo3);
+#endif
 
 private:
     struct CameraRotationDecomposition {
@@ -121,6 +141,11 @@ private:
         glm::dquat rotationDiff,
         glm::dvec3 objectPosition,
         glm::dvec3 cameraPosition);
+
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    globebrowsing::RenderableGlobe* castRenderableToGlobe();
+    void resetCameraDirection(Camera& camera,  globebrowsing::Geodetic2 geo2);
+#endif
 };
 
 } // namespace interaction

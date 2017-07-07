@@ -41,6 +41,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+#include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #endif
 
@@ -120,11 +121,26 @@ const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
 }
 
 void NavigationHandler::goToChunk(int x, int y, int level) {
-    LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    _orbitalNavigator->goToChunk(
+        *_camera,
+        globebrowsing::TileIndex(x,y,level),
+        glm::vec2(0.5,0.5),
+        true);
+#else
+    LWARNING("GlobeBrowsing module must be enabled");
+#endif
 }
 
 void NavigationHandler::goToGeo(double latitude, double longitude) {
-    LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    _orbitalNavigator->goToGeodetic2(
+        *_camera,
+        globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(), true
+    );
+#else
+    LWARNING("GlobeBrowsing module must be enabled");
+#endif
 }
 
 void NavigationHandler::updateInputStates(double timeSinceLastUpdate) {
