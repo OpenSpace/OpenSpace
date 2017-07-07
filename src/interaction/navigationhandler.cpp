@@ -304,7 +304,7 @@ void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) 
 
 scripting::LuaLibrary NavigationHandler::luaLibrary() {
     return{
-        "",
+        "navigation",
         {
             {
                 "saveCameraStateToFile",
