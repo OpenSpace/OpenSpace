@@ -71,7 +71,7 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
 	engine.addLibrary(interaction::KeyBindingManager::luaLibrary());
-	engine.addLibrary(interaction::InteractionHandler::luaLibrary());
+	engine.addLibrary(interaction::NavigationHandler::luaLibrary());
     engine.addLibrary(ParallelConnection::luaLibrary());
     engine.addLibrary(ModuleEngine::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());

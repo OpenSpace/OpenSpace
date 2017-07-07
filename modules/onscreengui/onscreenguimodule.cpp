@@ -69,7 +69,7 @@ OnScreenGUIModule::OnScreenGUIModule()
                     std::vector<properties::PropertyOwner*> res = {
                         &(OsEng.windowWrapper()),
                         &(OsEng.settingsEngine()),
-                        &(OsEng.interactionHandler()),
+                        &(OsEng.navigationHandler()),
                         &(OsEng.renderEngine()),
                         &(OsEng.parallelConnection()),
                         &(OsEng.console())

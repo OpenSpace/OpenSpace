@@ -52,7 +52,7 @@ int setOrigin(lua_State* L) {
         return 0;
     }
 
-    OsEng.interactionHandler().setFocusNode(node);
+    OsEng.navigationHandler().setFocusNode(node);
 
     return 0;
 }
@@ -68,7 +68,7 @@ int goToChunk(lua_State* L) {
     int y = static_cast<int>(lua_tonumber(L, 2));
     int level = static_cast<int>(lua_tonumber(L, 3));
 
-    OsEng.interactionHandler().goToChunk(x, y, level);
+    OsEng.navigationHandler().goToChunk(x, y, level);
 
     return 0;
 }
@@ -83,7 +83,7 @@ int goToGeo(lua_State* L) {
     double latitude = static_cast<int>(lua_tonumber(L, 1));
     double longitude = static_cast<int>(lua_tonumber(L, 2));
     
-    OsEng.interactionHandler().goToGeo(latitude, longitude);
+    OsEng.navigationHandler().goToGeo(latitude, longitude);
     
     return 0;
 }
@@ -101,7 +101,7 @@ int restoreCameraStateFromFile(lua_State* L) {
         return luaL_error(L, "filepath string is empty");
     }
 
-    OsEng.interactionHandler().restoreCameraStateFromFile(cameraStateFilePath);
+    OsEng.navigationHandler().restoreCameraStateFromFile(cameraStateFilePath);
     return 0;
 }
 
@@ -118,7 +118,7 @@ int saveCameraStateToFile(lua_State* L) {
         return luaL_error(L, "filepath string is empty");
     }
 
-    OsEng.interactionHandler().saveCameraStateToFile(cameraStateFilePath);
+    OsEng.navigationHandler().saveCameraStateToFile(cameraStateFilePath);
     return 0;
 }
 
@@ -130,7 +130,7 @@ int resetCameraDirection(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 0, nArguments);
     }
 
-    OsEng.interactionHandler().resetCameraDirection();
+    OsEng.navigationHandler().resetCameraDirection();
     return 0;
 }
 

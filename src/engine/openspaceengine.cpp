@@ -137,7 +137,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _commandlineParser(new ghoul::cmdparser::CommandlineParser(
         programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     ))
-    , _interactionHandler(new interaction::InteractionHandler)
+    , _navigationHandler(new interaction::NavigationHandler)
     , _keyBindingManager(new interaction::KeyBindingManager)
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
@@ -149,10 +149,10 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
 {
-    _interactionHandler->setPropertyOwner(_globalPropertyNamespace.get());
+    _navigationHandler->setPropertyOwner(_globalPropertyNamespace.get());
     
     // New property subowners also have to be added to the OnScreenGuiModule callback!
-    _globalPropertyNamespace->addPropertySubOwner(_interactionHandler.get());
+    _globalPropertyNamespace->addPropertySubOwner(_navigationHandler.get());
     _globalPropertyNamespace->addPropertySubOwner(_settingsEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_renderEngine.get());
     _globalPropertyNamespace->addPropertySubOwner(_windowWrapper.get());
@@ -507,8 +507,8 @@ void OpenSpaceEngine::initialize() {
     _settingsEngine->initialize();
     _settingsEngine->setModules(_moduleEngine->modules());
 
-    // Initialize the InteractionHandler
-    _interactionHandler->initialize();
+    // Initialize the NavigationHandler
+    _navigationHandler->initialize();
 
     // Initialize the KeyBindingManager
     _keyBindingManager->initialize();
@@ -596,7 +596,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     _renderEngine->startFading(1, 3.0);
 
     scene->initialize();
-    _interactionHandler->setCamera(scene->camera());
+    _navigationHandler->setCamera(scene->camera());
 
     try {
         runPostInitializationScripts(scenePath);
@@ -633,7 +633,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
-    _interactionHandler->deinitialize();
+    _navigationHandler->deinitialize();
     _keyBindingManager->deinitialize();
     _renderEngine->deinitialize();
 
@@ -1032,10 +1032,10 @@ void OpenSpaceEngine::preSynchronization() {
             );
         }
 
-        _interactionHandler->updateInputStates(dt);
+        _navigationHandler->updateInputStates(dt);
         
         _renderEngine->updateScene();
-        _interactionHandler->updateCamera(dt);
+        _navigationHandler->updateCamera(dt);
         _renderEngine->camera()->invalidateCache();
 
         _parallelConnection->preSynchronization();
@@ -1071,7 +1071,7 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
     }   
 
     // Step the camera using the current mouse velocities which are synced
-    //_interactionHandler->updateCamera();
+    //_navigationHandler->updateCamera();
     
     for (const auto& func : _moduleCallbacks.postSyncPreDraw) {
         func();
@@ -1162,7 +1162,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         return;
     }
 
-    _interactionHandler->keyboardCallback(key, mod, action);
+    _navigationHandler->keyboardCallback(key, mod, action);
     _keyBindingManager->keyboardCallback(key, mod, action);
 }
 
@@ -1185,7 +1185,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         }
     }
     
-    _interactionHandler->mouseButtonCallback(button, action);
+    _navigationHandler->mouseButtonCallback(button, action);
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y) {
@@ -1193,7 +1193,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
         func(x, y);
     }
 
-    _interactionHandler->mousePositionCallback(x, y);
+    _navigationHandler->mousePositionCallback(x, y);
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
@@ -1204,7 +1204,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
         }
     }
     
-    _interactionHandler->mouseScrollWheelCallback(pos);
+    _navigationHandler->mouseScrollWheelCallback(pos);
 }
 
 void OpenSpaceEngine::encode() {
@@ -1414,9 +1414,9 @@ ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
     return *_fontManager;
 }
 
-interaction::InteractionHandler& OpenSpaceEngine::interactionHandler() {
-    ghoul_assert(_interactionHandler, "InteractionHandler must not be nullptr");
-    return *_interactionHandler;
+interaction::NavigationHandler& OpenSpaceEngine::navigationHandler() {
+    ghoul_assert(_navigationHandler, "NavigationHandler must not be nullptr");
+    return *_navigationHandler;
 }
 
 interaction::KeyBindingManager& OpenSpaceEngine::keyBindingManager() {

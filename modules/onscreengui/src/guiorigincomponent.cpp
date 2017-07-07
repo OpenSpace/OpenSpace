@@ -42,7 +42,7 @@ GuiOriginComponent::GuiOriginComponent()
 {}
 
 void GuiOriginComponent::render() {
-    SceneGraphNode* currentFocus = OsEng.interactionHandler().focusNode();
+    SceneGraphNode* currentFocus = OsEng.navigationHandler().focusNode();
 
     std::vector<SceneGraphNode*> nodes =
         OsEng.renderEngine().scene()->allSceneGraphNodes();

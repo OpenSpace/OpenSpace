@@ -49,7 +49,7 @@
 #include <fstream>
 
 namespace {
-    const char* _loggerCat = "InteractionHandler";
+    const char* _loggerCat = "NavigationHandler";
 
     const char* KeyFocus = "Focus";
     const char* KeyPosition = "Position";
@@ -61,7 +61,7 @@ namespace {
 namespace openspace {
 namespace interaction {
 
-InteractionHandler::InteractionHandler()
+NavigationHandler::NavigationHandler()
     : properties::PropertyOwner("Interaction")
     , _origin("origin", "Origin", "")
     , _useKeyFrameInteraction("useKeyFrameInteraction", "Use keyframe interaction", false)
@@ -86,54 +86,54 @@ InteractionHandler::InteractionHandler()
 	addPropertySubOwner(*_orbitalNavigator);
 }
 
-InteractionHandler::~InteractionHandler()
+NavigationHandler::~NavigationHandler()
 { }
 
-void InteractionHandler::initialize() {
-    OsEng.parallelConnection().connectionEvent()->subscribe("interactionHandler", "statusChanged", [this]() {
+void NavigationHandler::initialize() {
+    OsEng.parallelConnection().connectionEvent()->subscribe("NavigationHandler", "statusChanged", [this]() {
         if (OsEng.parallelConnection().status() == ParallelConnection::Status::ClientWithHost) {
             _useKeyFrameInteraction = true;
         }
     });
 }
 
-void InteractionHandler::deinitialize() {
-    OsEng.parallelConnection().connectionEvent()->unsubscribe("interactionHandler");
+void NavigationHandler::deinitialize() {
+    OsEng.parallelConnection().connectionEvent()->unsubscribe("NavigationHandler");
 }
 
-void InteractionHandler::setFocusNode(SceneGraphNode* node) {
+void NavigationHandler::setFocusNode(SceneGraphNode* node) {
     _orbitalNavigator->setFocusNode(node);
 }
 
-void InteractionHandler::setCamera(Camera* camera) {
+void NavigationHandler::setCamera(Camera* camera) {
     _camera = camera;
     setFocusNode(_camera->parent());
 }
 
-void InteractionHandler::resetCameraDirection() {
+void NavigationHandler::resetCameraDirection() {
     LINFO("Setting camera direction to point at focus node.");
 	_orbitalNavigator->startInterpolateCameraDirection(*_camera);
 }
 
-const OrbitalNavigator& InteractionHandler::orbitalNavigator() const {
+const OrbitalNavigator& NavigationHandler::orbitalNavigator() const {
     return *_orbitalNavigator;
 }
 
-void InteractionHandler::goToChunk(int x, int y, int level) {
+void NavigationHandler::goToChunk(int x, int y, int level) {
     LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
 }
 
-void InteractionHandler::goToGeo(double latitude, double longitude) {
+void NavigationHandler::goToGeo(double latitude, double longitude) {
     LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
 }
 
-void InteractionHandler::updateInputStates(double timeSinceLastUpdate) {
+void NavigationHandler::updateInputStates(double timeSinceLastUpdate) {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
     _orbitalNavigator->updateMouseStatesFromInput(*_inputState, timeSinceLastUpdate);
 }
 
-void InteractionHandler::updateCamera(double deltaTime) {
+void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_inputState != nullptr, "InputState cannot be null!");
     ghoul_assert(_camera != nullptr, "Camera cannot be null!");
 
@@ -153,45 +153,45 @@ void InteractionHandler::updateCamera(double deltaTime) {
     }
 }
 
-SceneGraphNode* InteractionHandler::focusNode() const {
+SceneGraphNode* NavigationHandler::focusNode() const {
     return _orbitalNavigator->focusNode();
 }
 
-glm::dvec3 InteractionHandler::focusNodeToCameraVector() const {
+glm::dvec3 NavigationHandler::focusNodeToCameraVector() const {
     return _camera->positionVec3() - focusNode()->worldPosition();
 }
 
-glm::quat InteractionHandler::focusNodeToCameraRotation() const {
+glm::quat NavigationHandler::focusNodeToCameraRotation() const {
     glm::dmat4 invWorldRotation = glm::inverse(focusNode()->worldRotationMatrix());
     return glm::quat(invWorldRotation) * glm::quat(_camera->rotationQuaternion());
 }
 
-Camera* InteractionHandler::camera() const {
+Camera* NavigationHandler::camera() const {
     return _camera;
 }
 
-const InputState& InteractionHandler::inputState() const {
+const InputState& NavigationHandler::inputState() const {
     return *_inputState;
 }
 
 
-void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
+void NavigationHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     _inputState->mouseButtonCallback(button, action);
 }
 
-void InteractionHandler::mousePositionCallback(double x, double y) {
+void NavigationHandler::mousePositionCallback(double x, double y) {
     _inputState->mousePositionCallback(x, y);
 }
 
-void InteractionHandler::mouseScrollWheelCallback(double pos) {
+void NavigationHandler::mouseScrollWheelCallback(double pos) {
     _inputState->mouseScrollWheelCallback(pos);
 }
 
-void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
+void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
     _inputState->keyboardCallback(key, modifier, action);
 }
 
-void InteractionHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict) {
+void NavigationHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict) {
     bool readSuccessful = true;
 
     std::string focus;
@@ -220,7 +220,7 @@ void InteractionHandler::setCameraStateFromDictionary(const ghoul::Dictionary& c
         cameraRotation.x, cameraRotation.y, cameraRotation.z, cameraRotation.w));
 }
 
-ghoul::Dictionary InteractionHandler::getCameraStateDictionary() {
+ghoul::Dictionary NavigationHandler::getCameraStateDictionary() {
     glm::dvec3 cameraPosition;
     glm::dquat quat;
     glm::dvec4 cameraRotation;
@@ -237,7 +237,7 @@ ghoul::Dictionary InteractionHandler::getCameraStateDictionary() {
     return cameraDict;
 }
 
-void InteractionHandler::saveCameraStateToFile(const std::string& filepath) {
+void NavigationHandler::saveCameraStateToFile(const std::string& filepath) {
     if (!filepath.empty()) {
         auto fullpath = absPath(filepath);
         LINFO("Saving camera position: " << filepath);
@@ -269,7 +269,7 @@ void InteractionHandler::saveCameraStateToFile(const std::string& filepath) {
     }
 }
 
-void InteractionHandler::restoreCameraStateFromFile(const std::string& filepath) {
+void NavigationHandler::restoreCameraStateFromFile(const std::string& filepath) {
     LINFO("Reading camera state from file: " << filepath);
     if (!FileSys.fileExists(filepath))
         throw ghoul::FileNotFoundError(filepath, "CameraFilePath");
@@ -286,7 +286,7 @@ void InteractionHandler::restoreCameraStateFromFile(const std::string& filepath)
     }
 }
 
-scripting::LuaLibrary InteractionHandler::luaLibrary() {
+scripting::LuaLibrary NavigationHandler::luaLibrary() {
     return{
         "",
         {
@@ -324,28 +324,28 @@ scripting::LuaLibrary InteractionHandler::luaLibrary() {
     };
 }
 
-void InteractionHandler::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose) {
+void NavigationHandler::addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose) {
     if (!_keyFrameNavigator) {
         return;
     }
     _keyFrameNavigator->timeline().addKeyframe(timestamp, pose);
 }
 
-void InteractionHandler::removeKeyframesAfter(double timestamp) {
+void NavigationHandler::removeKeyframesAfter(double timestamp) {
     if (!_keyFrameNavigator) {
         return;
     }
     _keyFrameNavigator->timeline().removeKeyframesAfter(timestamp);
 }
 
-void InteractionHandler::clearKeyframes() {
+void NavigationHandler::clearKeyframes() {
     if (!_keyFrameNavigator) {
         return;
     }
     _keyFrameNavigator->timeline().clearKeyframes();
 }
 
-size_t InteractionHandler::nKeyframes() const {
+size_t NavigationHandler::nKeyframes() const {
     if (!_keyFrameNavigator) {
         return 0;
     }

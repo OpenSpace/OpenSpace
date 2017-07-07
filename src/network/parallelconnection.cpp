@@ -580,14 +580,14 @@ void ParallelConnection::dataMessageReceived(const std::vector<char>& messageCon
             datamessagestructures::CameraKeyframe kf(buffer);
             kf._timestamp = calculateBufferedKeyframeTime(kf._timestamp);
 
-            OsEng.interactionHandler().removeKeyframesAfter(kf._timestamp);
+            OsEng.navigationHandler().removeKeyframesAfter(kf._timestamp);
             interaction::KeyframeNavigator::CameraPose pose;
             pose.focusNode = kf._focusNode;
             pose.position = kf._position;
             pose.rotation = kf._rotation;
             pose.followFocusNodeRotation = kf._followNodeRotation;
 
-            OsEng.interactionHandler().addKeyframe(kf._timestamp, pose);
+            OsEng.navigationHandler().addKeyframe(kf._timestamp, pose);
             break;
         }
         case datamessagestructures::Type::TimeData: {
@@ -755,7 +755,7 @@ void ParallelConnection::connectionStatusMessageReceived(const std::vector<char>
 
     setStatus(status);
 
-    OsEng.interactionHandler().clearKeyframes();
+    OsEng.navigationHandler().clearKeyframes();
     OsEng.timeManager().clearKeyframes();
 
 }
@@ -1012,7 +1012,7 @@ void ParallelConnection::sendScript(std::string script) {
 }
 
 void ParallelConnection::resetTimeOffset() {
-    OsEng.interactionHandler().clearKeyframes();
+    OsEng.navigationHandler().clearKeyframes();
     OsEng.timeManager().clearKeyframes();
     std::lock_guard<std::mutex> latencyLock(_latencyMutex);
     _latencyDiffs.clear();
@@ -1082,21 +1082,21 @@ const std::string& ParallelConnection::hostName() {
 }
 
 void ParallelConnection::sendCameraKeyframe() {
-    SceneGraphNode* focusNode = OsEng.interactionHandler().focusNode();
+    SceneGraphNode* focusNode = OsEng.navigationHandler().focusNode();
     if (!focusNode) {
         return;
     }
 
     // Create a keyframe with current position and orientation of camera
     datamessagestructures::CameraKeyframe kf;
-    kf._position = OsEng.interactionHandler().focusNodeToCameraVector();
+    kf._position = OsEng.navigationHandler().focusNodeToCameraVector();
 
-    kf._followNodeRotation = OsEng.interactionHandler().orbitalNavigator().followingNodeRotation();
+    kf._followNodeRotation = OsEng.navigationHandler().orbitalNavigator().followingNodeRotation();
     if (kf._followNodeRotation) {
         kf._position = glm::inverse(focusNode->worldRotationMatrix()) * kf._position;
-        kf._rotation = OsEng.interactionHandler().focusNodeToCameraRotation();
+        kf._rotation = OsEng.navigationHandler().focusNodeToCameraRotation();
     } else {
-        kf._rotation = OsEng.interactionHandler().camera()->rotationQuaternion();
+        kf._rotation = OsEng.navigationHandler().camera()->rotationQuaternion();
     }
 
     kf._focusNode = focusNode->name();

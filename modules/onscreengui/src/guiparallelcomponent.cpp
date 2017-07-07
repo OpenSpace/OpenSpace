@@ -83,7 +83,7 @@ void GuiParallelComponent::renderClientWithHost() {
     renderClientCommon();
 
     const size_t nTimeKeyframes = OsEng.timeManager().nKeyframes();
-    const size_t nCameraKeyframes = OsEng.interactionHandler().nKeyframes();
+    const size_t nCameraKeyframes = OsEng.navigationHandler().nKeyframes();
 
     std::string timeKeyframeInfo = "TimeKeyframes : " + std::to_string(nTimeKeyframes);
     std::string cameraKeyframeInfo = "CameraKeyframes : " + std::to_string(nCameraKeyframes);

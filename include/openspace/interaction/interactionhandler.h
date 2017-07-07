@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___INTERACTIONHANDLER___H__
-#define __OPENSPACE_CORE___INTERACTIONHANDLER___H__
+#ifndef __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
+#define __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -45,11 +45,11 @@ class SceneGraphNode;
 
 namespace interaction {
 
-class InteractionHandler : public properties::PropertyOwner
+class NavigationHandler : public properties::PropertyOwner
 {
 public:
-    InteractionHandler();
-    ~InteractionHandler();
+    NavigationHandler();
+    ~NavigationHandler();
 
     void initialize();
     void deinitialize();
@@ -112,4 +112,4 @@ private:
 } // namespace interaction
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___INTERACTIONHANDLER___H__
+#endif // __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
