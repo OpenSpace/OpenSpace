@@ -164,9 +164,7 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
     glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
 	return {
 		directionFromCenterToTarget * static_cast<double>(boundingSphere()),
-		directionFromCenterToTarget,
         directionFromCenterToTarget,
-		glm::length(targetModelSpace) - boundingSphere(),
 		0.0
 	};
 }

@@ -247,18 +247,17 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
 {
     glm::dvec3 centerToEllipsoidSurface = _ellipsoid.geodeticSurfaceProjection(targetModelSpace);
     glm::dvec3 ellipsoidSurfaceToTarget = targetModelSpace - centerToEllipsoidSurface;
-    double heightToSurface = getHeight(targetModelSpace);
-    glm::dvec3 geodeticNormal = ellipsoid().geodeticSurfaceNormal(
-                    ellipsoid().cartesianToGeodetic2(targetModelSpace));
+    // ellipsoidSurfaceOutDirection will point towards the target, we want the outward
+    // direction. Therefore it must be flipped in case the target is under the reference
+    // ellipsoid so that it always points outwards
     glm::dvec3 ellipsoidSurfaceOutDirection = glm::normalize(ellipsoidSurfaceToTarget);
     if (glm::dot(ellipsoidSurfaceOutDirection, centerToEllipsoidSurface) < 0) {
 		ellipsoidSurfaceOutDirection *= -1.0;
     }
-	return {
+	double heightToSurface = getHeight(targetModelSpace);
+    return {
 		centerToEllipsoidSurface,
 		ellipsoidSurfaceOutDirection,
-        geodeticNormal,
-        glm::length(ellipsoidSurfaceToTarget),
 		heightToSurface
 	};
 }
