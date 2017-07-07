@@ -4,11 +4,12 @@ class Subscription {
     this.topic = topic;
     this.callbacks = [];
     this.lastData = null;
+    this.onMessage = this.onMessage.bind(this);
   }
 
   onMessage(...args) {
     this.lastData = args;
-    this.callbacks.forEach(cb => cb(args));
+    this.callbacks.forEach(cb => cb(...args));
   }
 
   addCallback(callback) {
@@ -18,7 +19,7 @@ class Subscription {
     this.callbacks.push(callback);
     // if we have stored some data -- send it to the callback
     if (this.lastData) {
-      callback(this.lastData);
+      callback(...this.lastData);
     }
   }
 

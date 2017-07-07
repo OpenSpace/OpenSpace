@@ -4,7 +4,7 @@ import SmallLabel from '../common/SmallLabel/SmallLabel';
 import LoadingString from '../common/LoadingString/LoadingString';
 import Picker from './Picker';
 
-const TIME_KEY = 'whatever.openspace.stores.time.in';
+const TIME_KEY = 'special:currentTime';
 
 class TimePicker extends Component {
   constructor(props) {
@@ -34,7 +34,7 @@ class TimePicker extends Component {
    */
   subscriptionCallback(message) {
     const newState = {
-      time: message.time,
+      time: new Date(message.time),
     };
     if (!this.state.hasTime) {
       newState.hasTime = true;

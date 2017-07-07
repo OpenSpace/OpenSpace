@@ -41,7 +41,7 @@ class Connection {
     const topicCallback = this.topics[topicId];
 
     if (topicId && topicCallback) {
-      topicCallback(message);
+      topicCallback(message.payload);
     } else if (topicId) {
       // eslint-disable-next-line no-console
       console.error(`Could not find topic ${topicId}. Dropping message.`, event);
