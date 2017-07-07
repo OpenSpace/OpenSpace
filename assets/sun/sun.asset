@@ -1,5 +1,5 @@
 --local Base = asset.import('base')
---BaseSpiceKernels = import('base-spice-kernels')
+local SpiceBase = asset.import('spice/base')
 local AssetHelper = asset.import('assethelper')
 
 asset.SolarSystem = {

@@ -110,8 +110,6 @@ public:
     
     void writeDocumentation();
     void toggleShutdownMode();
-    
-    void runPostInitializationScripts(const std::string& sceneDescription);
 
     // Guaranteed to return a valid pointer
     ConfigurationManager& configurationManager();
@@ -179,7 +177,6 @@ private:
     void loadScene(const std::string& scenePath);
     void gatherCommandlineArguments();
     void loadFonts();
-    void runPreInitializationScripts(const std::string& sceneDescription);
     void configureLogging();
     
     // Components

@@ -92,9 +92,6 @@ namespace {
     const char* SgctDefaultConfigFile = "${SGCT}/single.xml";
     
     const char* SgctConfigArgumentCommand = "-config";
-    
-    const char* PreInitializeFunction = "preInitialization";
-    const char* PostInitializationFunction = "postInitialization";
 
     const int CacheVersion = 1;
     const int DownloadVersion = 1;
@@ -123,7 +120,7 @@ OpenSpaceEngine* OpenSpaceEngine::_engine = nullptr;
 OpenSpaceEngine::OpenSpaceEngine(std::string programName,
                                  std::unique_ptr<WindowWrapper> windowWrapper)
     : _configurationManager(new ConfigurationManager)
-    , _scene(new Scene)
+    , _scene(nullptr)
     , _downloadManager(nullptr)
     , _console(new LuaConsole)
     , _moduleEngine(new ModuleEngine)
@@ -385,11 +382,13 @@ void OpenSpaceEngine::create(int argc, char** argv,
 }
 
 void OpenSpaceEngine::destroy() {
+    LTRACE("OpenSpaceEngine::destroy(begin)");
     if (_engine->parallelConnection().status() != ParallelConnection::Status::Disconnected) {
         _engine->parallelConnection().signalDisconnect();
     }
 
-    LTRACE("OpenSpaceEngine::destroy(begin)");
+    _engine->_scene = nullptr;
+
     for (const auto& func : _engine->_moduleCallbacks.deinitializeGL) {
         func();
     }
@@ -405,7 +404,6 @@ void OpenSpaceEngine::destroy() {
     _engine->_console->deinitialize();
 
     _engine->_scriptEngine->deinitialize();
-    _engine->_scene = nullptr;
 
     delete _engine;
     FactoryManager::deinitialize();
@@ -558,14 +556,6 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     
 
     if (scenePath != "") {
-        // Run start up scripts
-        try {
-            runPreInitializationScripts(scenePath);
-        }
-        catch (const ghoul::RuntimeError& e) {
-            LERRORC(e.component, e.message);
-        }
-        // Load the scene
         try {
             if (_scene) {
                 _syncEngine->removeSyncables(_timeManager->getSyncables());
@@ -612,11 +602,6 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
     if (_scene) {
         _renderEngine->setCamera(_scene->camera());
         _interactionHandler->setCamera(_scene->camera());
-        try {
-            runPostInitializationScripts(scenePath);
-        } catch (const ghoul::RuntimeError& e) {
-            LFATALC(e.component, e.message);
-        }
     
         // Write keyboard documentation.
         if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
@@ -707,69 +692,6 @@ void OpenSpaceEngine::gatherCommandlineArguments() {
         "path to a cache file, overriding the value set in the OpenSpace configuration "
         "file"
     ));
-}
-
-void OpenSpaceEngine::runPreInitializationScripts(const std::string& sceneDescription) {
-    // @CLEANUP:  Move this into the scene loading?  ---abock
-    LINFO("Running Initialization scripts");
-    
-    ghoul::lua::LuaState state;
-    OsEng.scriptEngine().initializeLuaState(state);
-
-    // First execute the script to get all global variables
-    ghoul::lua::runScriptFile(state, absPath(sceneDescription));
-
-    // Get the preinitialize function
-    lua_getglobal(state, PreInitializeFunction);
-    bool isFunction = lua_isfunction(state, -1);
-    if (!isFunction) {
-        LERROR(
-            "Error executing startup script '" << sceneDescription << "'. Scene '" <<
-            sceneDescription << "' does not have a function '" <<
-            PreInitializeFunction << "'"
-        );
-        return;
-    }
-    
-    // And execute the preinitialize function
-    int success = lua_pcall(state, 0, 0, 0);
-    if (success != 0) {
-        LERROR(
-            "Error executing '" << PreInitializeFunction << "': " <<
-            lua_tostring(state, -1)
-        );
-    }
-}
-
-void OpenSpaceEngine::runPostInitializationScripts(const std::string& sceneDescription) {
-    // @CLEANUP:  Move this into the scene loading?  ---abock
-    LINFO("Running Setup scripts");
-    ghoul::lua::LuaState state;
-    OsEng.scriptEngine().initializeLuaState(state);
-    
-    // First execute the script to get all global variables
-    ghoul::lua::runScriptFile(state, absPath(sceneDescription));
-    
-    // Get the preinitialize function
-    lua_getglobal(state, PostInitializationFunction);
-    bool isFunction = lua_isfunction(state, -1);
-    if (!isFunction) {
-        LERROR(
-            "Error executing startup script '" << sceneDescription << "'. Scene '" <<
-            sceneDescription << "' does not have a function '" <<
-            PostInitializationFunction << "'"
-        );
-        return;
-    }
-    
-    // And execute the preinitialize function
-    int success = lua_pcall(state, 0, 0, 0);
-    if (success != 0) {
-        LERROR(
-            "Error executing '" << PostInitializationFunction << "': " <<
-            lua_tostring(state, -1)
-        );
-    }
 }
 
 void OpenSpaceEngine::loadFonts() {

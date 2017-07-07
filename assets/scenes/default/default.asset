@@ -1,0 +1,32 @@
+local {Sun, SunToggle} = asset.importToggle('sun', true)
+local {Earth, EarthToggle} = asset.importToggle('planets/earth', false)
+local {MilkyWay, MilkyWayToggle} = asset.importToggle('milkyway', false)
+
+SunToggle.onInitialize = function () 
+    openspace.setPropertyValue("SunMarker.renderable.enabled", false)
+end
+
+EarthToggle.onInitialize = function () 
+    openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
+    openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
+end
+
+MilkyWayToggle.onInitialize = function ()
+    openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
+    openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
+end
+
+asset.onInitialize = function ()
+    openspace.time.setTime(openspace.time.currentWallTime())
+    dofile(openspace.absPath('${SCRIPTS}/bind_common_keys.lua'))
+    openspace.resetCameraDirection()
+    openspace.addVirtualProperty("BoolProperty", "Show Trails", "*Trail.renderable.enabled", true, nil, nil)
+end
+
+asset.onDeinitialize = function ()
+    openspace.removeVirtualProperty("BoolProperty", "Show Trails", "*Trail.renderable.enabled", true, nil, nil)
+end
+
+
+
+

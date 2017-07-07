@@ -1,5 +1,6 @@
 local Sun = asset.import('sun');
 local AssetHelper = asset.import('assethelper')
+local SpiceBase = asset.import('spice/base')
 
 asset.EarthBarycenter = {
     Name = "EarthBarycenter",

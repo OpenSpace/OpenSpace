@@ -121,6 +121,7 @@ AssetLoader::Asset* AssetLoader::importAsset(const std::string& name) {
     } catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(e.message << ": " << e.component);
     }
+    LDEBUG("Loaded asset " << asset->id());
     
     _importedAssets.emplace(id, std::move(newAsset));
     return _importedAssets[id].get();
@@ -296,11 +297,16 @@ void AssetLoader::Asset::initialize() {
 
     // Call onInitialize
     if (_hasLuaTable) {
-        ghoul::lua::LuaState* state = loader()->luaState();
-        lua_getglobal(*state, AssetsTableName);
-        lua_getfield(*state, -1, id().c_str());
-        lua_getfield(*state, -1, OnInitializeFunctionName);
-        lua_call(*state, 0, 0);
+        try {
+            ghoul::lua::LuaState* state = loader()->luaState();
+            lua_getglobal(*state, AssetsTableName);
+            lua_getfield(*state, -1, id().c_str());
+            lua_getfield(*state, -1, OnInitializeFunctionName);
+            lua_call(*state, 0, 0);
+        } catch (const ghoul::lua::LuaRuntimeException& e) {
+            LERROR(e.message << ": " << e.component);
+            return;
+        }
     }
     _initialized = true;
 }
@@ -313,11 +319,17 @@ void AssetLoader::Asset::deinitialize() {
     // Call onDeinitialize
     _initialized = false;
     if (_hasLuaTable) {
-        ghoul::lua::LuaState* state = loader()->luaState();
-        lua_getglobal(*state, AssetsTableName);
-        lua_getfield(*state, -1, id().c_str());
-        lua_getfield(*state, -1, OnDeinitializeFunctionName);
-        lua_call(*state, 0, 0);
+        try {
+            ghoul::lua::LuaState* state = loader()->luaState();
+            lua_getglobal(*state, AssetsTableName);
+            lua_getfield(*state, -1, id().c_str());
+            lua_getfield(*state, -1, OnDeinitializeFunctionName);
+            lua_call(*state, 0, 0);
+        }
+        catch (const ghoul::lua::LuaRuntimeException& e) {
+            LERROR(e.message << ": " << e.component);
+            return;
+        }
     }
 
     // Also deinitialize any dangling dependencies
