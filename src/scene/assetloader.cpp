@@ -434,6 +434,10 @@ ghoul::Dictionary AssetLoader::Asset::dataDictionary() {
 }
 
 void AssetLoader::Asset::addDependency(Asset* asset) {
+    // Do nothing if the dependency already exists.
+    if (std::find(_dependencies.begin(), _dependencies.end(), asset) != _dependencies.end()) {
+        return;
+    }
     if (_initialized) {
         asset->initialize();
     }

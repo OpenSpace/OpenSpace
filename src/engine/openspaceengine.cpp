@@ -573,6 +573,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
                 _renderEngine->setScene(nullptr);
                 _renderEngine->setCamera(nullptr);
                 _interactionHandler->setCamera(nullptr);
+                _scene->clear();
             }
 
             _scene = std::make_unique<Scene>();

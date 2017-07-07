@@ -3,8 +3,7 @@
 local AssetHelper = asset.import('assethelper')
 
 asset.SolarSystem = {
-    Name = "SolarSystem",
-    Parent = "Root"
+    Name = "SolarSystem"
 }
 
 asset.SolarSystemBarycenter = {

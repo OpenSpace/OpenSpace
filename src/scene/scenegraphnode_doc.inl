@@ -46,13 +46,12 @@ documentation::Documentation SceneGraphNode::Documentation() {
         {
             "Parent",
             new StringAnnotationVerifier(
-                "Must be a name for another scenegraph node, or 'Root'"
+                "If specified, this must be a name for another scenegraph node"
             ),
             "This names the parent of the currently specified scenegraph node. The "
-            "parent must not have been defined earlier, but must exist at loading time, "
-            "or the scenegraph node creation will fail. A special parent 'Root' is "
-            "available that denotes the root of the scenegraph.",
-            Optional::No
+            "parent must already exist in the scene graph. If not specified, the node "
+            "will be attached to the root of the scenegraph.",
+            Optional::Yes
         },
         {
             "Renderable",

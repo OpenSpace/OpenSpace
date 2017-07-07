@@ -32,7 +32,6 @@
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/nodeloader.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/script_helper.h>
 #include <openspace/util/time.h>
@@ -93,22 +92,23 @@ Scene::Scene()
         },
         JsFilename
     )
-{
-    std::unique_ptr<SceneGraphNode> rootNode = std::make_unique<SceneGraphNode>();
-    rootNode->setName(SceneGraphNode::RootNodeName);
-    setRoot(std::move(rootNode));
+    , _dirtyNodeRegistry(false)
+{   
+    _rootDummy.setName(SceneGraphNode::RootNodeName);
+    _rootDummy.setScene(this);
 }
 
-Scene::~Scene(){
+Scene::~Scene() {
+    clear();
+    _rootDummy.setScene(nullptr);
 }
-    
-void Scene::setRoot(std::unique_ptr<SceneGraphNode> root) {
-    if (_root) {
-        removeNode(_root.get());
-    }
-    _root = std::move(root);
-    _root->setScene(this);
-    addNode(_root.get());
+
+void Scene::attachNode(std::unique_ptr<SceneGraphNode> node) {
+    _rootDummy.attachChild(std::move(node));
+}
+
+std::unique_ptr<SceneGraphNode> Scene::detachNode(SceneGraphNode& node) {
+    return _rootDummy.detachChild(node);
 }
 
 void Scene::setCamera(std::unique_ptr<Camera> camera) {
@@ -119,35 +119,28 @@ Camera* Scene::camera() const {
     return _camera.get();
 }
 
-void Scene::addNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
-    // Add the node and all its children.
-    node->traversePreOrder([this](SceneGraphNode* n) {
-        _topologicallySortedNodes.push_back(n);
-        _nodesByName[n->name()] = n;
-    });
-    
-    if (updateDeps) {
-        updateDependencies();
-    }
+void Scene::registerNode(SceneGraphNode* node) {
+    _topologicallySortedNodes.push_back(node);
+    _nodesByName[node->name()] = node;
+    _dirtyNodeRegistry = true;
 }
 
-void Scene::removeNode(SceneGraphNode* node, UpdateDependencies updateDeps) {
-    // Remove the node and all its children.
-    node->traversePostOrder([this](SceneGraphNode* node) {
-        _topologicallySortedNodes.erase(
-            std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), node),
-            _topologicallySortedNodes.end()
-        );
-        _nodesByName.erase(node->name());
-    });
-    
-    if (updateDeps) {
-        updateDependencies();
-    }
+void Scene::unregisterNode(SceneGraphNode* node) {
+    _topologicallySortedNodes.erase(
+        std::remove(_topologicallySortedNodes.begin(), _topologicallySortedNodes.end(), node),
+        _topologicallySortedNodes.end()
+    );
+    _nodesByName.erase(node->name());
+    _dirtyNodeRegistry = true;
 }
 
-void Scene::updateDependencies() {
+void Scene::markNodeRegistryDirty() {
+    _dirtyNodeRegistry = true;
+}
+
+void Scene::updateNodeRegistry() {
     sortTopologically();
+    _dirtyNodeRegistry = false;
 }
 
 void Scene::sortTopologically() {
@@ -217,6 +210,9 @@ void Scene::sortTopologically() {
 }
 
 void Scene::update(const UpdateData& data) {
+    if (_dirtyNodeRegistry) {
+        updateNodeRegistry();
+    }
     for (SceneGraphNode* node : _topologicallySortedNodes) {
         try {
             LTRACE("Scene::update(begin '" + node->name() + "')");
@@ -244,15 +240,19 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
 
 void Scene::clear() {
     LINFO("Clearing current scene graph");
-    _root = nullptr;
+    _rootDummy.clearChildren();
 }
 
 const std::map<std::string, SceneGraphNode*>& Scene::nodesByName() const {
     return _nodesByName;
 }
 
-SceneGraphNode* Scene::root() const {
-    return _root.get();
+SceneGraphNode* Scene::root() {
+    return &_rootDummy;
+}
+
+const SceneGraphNode* Scene::root() const {
+    return &_rootDummy;
 }
     
 SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
@@ -269,11 +269,25 @@ const std::vector<SceneGraphNode*>& Scene::allSceneGraphNodes() const {
 
 
 SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
+    // First interpret the dictionary
     std::vector<std::string> dependencyNames;
+    const std::string nodeName = dict.value<std::string>(KeyName);
+    const bool hasParent = dict.hasKey(KeyParentName);
 
-    std::string nodeName = dict.value<std::string>(KeyName);
-    std::string parentName = dict.value<std::string>(KeyParentName);
+    SceneGraphNode* parent = nullptr;
+    if (hasParent) {
+        std::string parentName = dict.value<std::string>(KeyParentName);
+        parent = sceneGraphNode(parentName);
+        if (!parent) {
+            LERROR("Could not find parent '" + parentName + "' for '" + nodeName + "'");
+            return nullptr;
+        }
+    }
+
     std::unique_ptr<SceneGraphNode> node = SceneGraphNode::createFromDictionary(dict);
+    if (!node) {
+        LERROR("Could not create node from dictionary: " + nodeName);
+    }
 
     if (dict.hasKey(SceneGraphNode::KeyDependencies)) {
         if (!dict.hasValue<ghoul::Dictionary>(SceneGraphNode::KeyDependencies)) {
@@ -289,12 +303,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
         }
     }
 
-    SceneGraphNode* parent = sceneGraphNode(parentName);
-    if (!parent) {
-        LERROR("Could not find parent '" + parentName + "' for '" + nodeName + "'");
-        return nullptr;
-    }
-
+    // Make sure all dependencies are found
     std::vector<SceneGraphNode*> dependencies;
     bool foundAllDeps = true;
     for (const auto& depName : dependencyNames) {
@@ -311,9 +320,16 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& dict) {
         return nullptr;
     }
 
+    // Now attach the node to the graph
     SceneGraphNode* rawNodePointer = node.get();
-    node->setDependencies(dependencies, SceneGraphNode::UpdateScene::No);
-    parent->attachChild(std::move(node));
+
+    if (parent) {
+        parent->attachChild(std::move(node));
+    } else {
+        attachNode(std::move(node));
+    }
+
+    rawNodePointer->setDependencies(dependencies);
     return rawNodePointer;
 }
 

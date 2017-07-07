@@ -34,8 +34,10 @@
 
 #include <openspace/util/camera.h>
 #include <openspace/util/updatestructures.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/opengl/programobject.h>
+
 
 namespace ghoul { class Dictionary; }
 
@@ -72,9 +74,14 @@ public:
     void clear();
 
     /**
-     * Set the root node of the scene
+     * Attach node to the root
      */
-    void setRoot(std::unique_ptr<SceneGraphNode> root);
+    void attachNode(std::unique_ptr<SceneGraphNode> node);
+
+    /**
+     * Detach node from the root
+     */
+    std::unique_ptr<SceneGraphNode> detachNode(SceneGraphNode& node);
 
     /**
      * Set the camera of the scene
@@ -99,7 +106,12 @@ public:
     /**
      * Return the root SceneGraphNode.
      */
-    SceneGraphNode* root() const;
+    SceneGraphNode* root();
+
+    /**
+    * Return the root SceneGraphNode.
+    */
+    const SceneGraphNode* root() const;
 
     /**
      * Return the scenegraph node with the specified name or <code>nullptr</code> if that
@@ -110,17 +122,17 @@ public:
     /**
      * Add a node and all its children to the scene.
      */
-    void addNode(SceneGraphNode* node, UpdateDependencies updateDeps = UpdateDependencies::Yes);
+    void registerNode(SceneGraphNode* node);
 
     /**
      * Remove a node and all its children from the scene.
      */
-    void removeNode(SceneGraphNode* node, UpdateDependencies updateDeps = UpdateDependencies::Yes);
+    void unregisterNode(SceneGraphNode* node);
 
     /**
-     * Update dependencies.
-     */
-    void updateDependencies();
+    * Mark the node registry as dirty
+    */
+    void markNodeRegistryDirty();
 
     /**
      * Return a vector of all scene graph nodes in the scene.
@@ -152,13 +164,19 @@ public:
 private:
     std::string generateJson() const override;
 
+    /**
+     * Update dependencies.
+     */
+    void updateNodeRegistry();
+
     void sortTopologically();
 
-    std::unique_ptr<SceneGraphNode> _root;
     std::unique_ptr<Camera> _camera;
     std::vector<SceneGraphNode*> _topologicallySortedNodes;
     std::vector<SceneGraphNode*> _circularNodes;
     std::map<std::string, SceneGraphNode*> _nodesByName;
+    bool _dirtyNodeRegistry;
+    SceneGraphNode _rootDummy;
 
     std::mutex _programUpdateLock;
     std::set<ghoul::opengl::ProgramObject*> _programsToUpdate;

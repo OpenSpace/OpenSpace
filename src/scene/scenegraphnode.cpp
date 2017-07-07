@@ -204,13 +204,13 @@ bool SceneGraphNode::initialize() {
 bool SceneGraphNode::deinitialize() {
     LDEBUG("Deinitialize: " << name());
 
+    setScene(nullptr);
+
     if (_renderable) {
         _renderable->deinitialize();
         _renderable = nullptr;
     }
-    _children.clear();
-
-    // reset variables
+    clearChildren();
     _parent = nullptr;
 
     return true;
@@ -356,47 +356,27 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     //    child->render(newData);
 }
 
-void SceneGraphNode::setParent(SceneGraphNode& parent, UpdateScene updateScene) {
+void SceneGraphNode::setParent(SceneGraphNode& parent) {
     ghoul_assert(_parent != nullptr, "Node must be attached to a parent");
-    ghoul_assert(
-        !updateScene || _scene == parent._scene,
-        "For the scene to be updated, this object must belong to the same scene as the parent"
-    );
-    ghoul_assert(
-        !updateScene || _parent->_scene == parent._scene,
-        "Old and new parent cannot belong to separate scenes"
-    );
-
-    parent.attachChild(_parent->detachChild(*this, UpdateScene::No), UpdateScene::No);
-
-    if (_scene && updateScene) {
-        _scene->updateDependencies();
-    }
+    parent.attachChild(_parent->detachChild(*this));
 }
 
-void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child, UpdateScene updateScene) {
+void SceneGraphNode::attachChild(std::unique_ptr<SceneGraphNode> child) {
     ghoul_assert(child != nullptr, "Child may not be null");
     ghoul_assert(child->parent() == nullptr, "Child may not already have a parent");
 
+    // Create link between parent and child
     child->_parent = this;
-    if (_scene) {
-        child->setScene(_scene);
-    }
-
     SceneGraphNode* childRaw = child.get();
    _children.push_back(std::move(child));
 
-   if (_scene && updateScene) {
-       _scene->addNode(childRaw);
-   }
+    // Set scene of child (and children recursively)
+    childRaw->setScene(_scene);
 }
 
-std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child, UpdateScene updateScene) {
+std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& child) {
     ghoul_assert(child._dependentNodes.empty(), "Nodes cannot depend on a node being detached");
     ghoul_assert(child._parent != nullptr, "Node must be attached to a parent");
-    
-    // Update of deps is deffered to the removal of the node from the scene
-    clearDependencies(UpdateScene::No);
 
     auto iter = std::find_if(
         _children.begin(),
@@ -406,29 +386,49 @@ std::unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode& chil
         }
     );
 
-    if (_scene && updateScene) {
-        _scene->removeNode(&child);
+    if (iter == _children.end()) {
+        LERROR("Trying to detach a non-existing child");
     }
 
+    traversePreOrder([](SceneGraphNode* node) {
+        node->clearDependencies();
+    });
+
+    // Unset scene of child (and children recursively)
+    if (_scene) {
+        child.setScene(nullptr);
+    }
+
+    // Remove link between parent and child
+    child._parent = nullptr;
     std::unique_ptr<SceneGraphNode> c = std::move(*iter);
     _children.erase(iter);
 
-    if (_scene) {
-        setScene(nullptr);
-    }
     return c;
 }
 
-void SceneGraphNode::addDependency(SceneGraphNode& dependency, UpdateScene updateScene) {
+void SceneGraphNode::clearChildren() {
+    traversePreOrder([](SceneGraphNode* node) {
+        node->clearDependencies();
+    });
+    for (auto& c : _children) {
+        if (_scene) {
+            c->setScene(nullptr);
+        }
+        c->_parent = nullptr;
+    }
+    _children.clear();
+}
+
+void SceneGraphNode::addDependency(SceneGraphNode& dependency) {
     dependency._dependentNodes.push_back(this);
     _dependencies.push_back(&dependency);
-
-    if (_scene && updateScene) {
-        _scene->updateDependencies();
+    if (_scene) {
+        _scene->markNodeRegistryDirty();
     }
 }
 
-void SceneGraphNode::removeDependency(SceneGraphNode& dependency, UpdateScene updateScene) {
+void SceneGraphNode::removeDependency(SceneGraphNode& dependency) {
     dependency._dependentNodes.erase(std::remove_if(
         dependency._dependentNodes.begin(),
         dependency._dependentNodes.end(),
@@ -444,12 +444,12 @@ void SceneGraphNode::removeDependency(SceneGraphNode& dependency, UpdateScene up
         }
     ), _dependencies.end());
 
-    if (_scene && updateScene) {
-        _scene->updateDependencies();
+    if (_scene) {
+        _scene->markNodeRegistryDirty();
     }
 }
 
-void SceneGraphNode::clearDependencies(UpdateScene updateScene) {
+void SceneGraphNode::clearDependencies() {
     for (auto dependency : _dependencies) {
         dependency->_dependentNodes.erase(std::remove_if(
             dependency->_dependentNodes.begin(),
@@ -461,21 +461,21 @@ void SceneGraphNode::clearDependencies(UpdateScene updateScene) {
     }
     _dependencies.clear();
 
-    if (_scene && updateScene) {
-        _scene->updateDependencies();
+    if (_scene) {
+        _scene->markNodeRegistryDirty();
     }
 }
 
-void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& dependencies, UpdateScene updateScene) {
-    clearDependencies(UpdateScene::No);
+void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& dependencies) {
+    clearDependencies();
 
     _dependencies = dependencies;
     for (auto dependency : dependencies) {
         dependency->_dependentNodes.push_back(this);
     }
 
-    if (_scene && updateScene) {
-        _scene->updateDependencies();
+    if (_scene) {
+        _scene->markNodeRegistryDirty();
     }
 }
 
@@ -568,9 +568,26 @@ Scene* SceneGraphNode::scene() {
 }
 
 void SceneGraphNode::setScene(Scene* scene) {
+    // Unregister from previous scene, bottom up
+    traversePostOrder([scene](SceneGraphNode* node) {
+        if (node->_scene) {
+            node->_scene->unregisterNode(node);
+        }
+        node->_scene = nullptr;
+    });
+
+    if (!scene) {
+        return;
+    }
+
+    // Register on new scene, top down
     traversePreOrder([scene](SceneGraphNode* node) {
         node->_scene = scene;
+        if (scene) {
+            scene->registerNode(node);
+        }
     });
+    
 }
 
 std::vector<SceneGraphNode*> SceneGraphNode::children() const {

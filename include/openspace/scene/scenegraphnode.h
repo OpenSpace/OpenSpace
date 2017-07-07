@@ -83,14 +83,15 @@ public:
     void render(const RenderData& data, RendererTasks& tasks);
     void updateCamera(Camera* camera) const;
 
-    void attachChild(std::unique_ptr<SceneGraphNode> child, UpdateScene updateScene = UpdateScene::Yes);
-    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child, UpdateScene updateScene = UpdateScene::Yes);
-    void setParent(SceneGraphNode& parent, UpdateScene updateScene = UpdateScene::Yes);
+    void attachChild(std::unique_ptr<SceneGraphNode> child);
+    std::unique_ptr<SceneGraphNode> detachChild(SceneGraphNode& child);
+    void clearChildren();
+    void setParent(SceneGraphNode& parent);
 
-    void addDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
-    void removeDependency(SceneGraphNode& dependency, UpdateScene updateScene = UpdateScene::Yes);
-    void clearDependencies(UpdateScene updateScene = UpdateScene::Yes);
-    void setDependencies(const std::vector<SceneGraphNode*>& dependencies, UpdateScene updateScene = UpdateScene::Yes);
+    void addDependency(SceneGraphNode& dependency);
+    void removeDependency(SceneGraphNode& dependency);
+    void clearDependencies();
+    void setDependencies(const std::vector<SceneGraphNode*>& dependencies);
 
     const std::vector<SceneGraphNode*>& dependencies() const;
     const std::vector<SceneGraphNode*>& dependentNodes() const;
