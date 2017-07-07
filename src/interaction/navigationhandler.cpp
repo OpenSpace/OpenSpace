@@ -24,8 +24,6 @@
 
 #include <openspace/interaction/navigationhandler.h>
 
-#include <openspace/network/parallelconnection.h>
-
 #include <openspace/openspace.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/query/query.h>
@@ -36,9 +34,6 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/interpolator.h>
-
-#include <glm/gtx/quaternion.hpp>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/tile/tileindex.h>
@@ -46,6 +41,7 @@
 #endif
 
 #include <ghoul/glm.h>
+#include <glm/gtx/quaternion.hpp>
 
 #include <fstream>
 
@@ -63,7 +59,7 @@ namespace openspace {
 namespace interaction {
 
 NavigationHandler::NavigationHandler()
-    : properties::PropertyOwner("Interaction")
+    : properties::PropertyOwner("navigationHandler")
     , _origin("origin", "Origin", "")
     , _useKeyFrameInteraction("useKeyFrameInteraction", "Use keyframe interaction", false)
 {

@@ -49,7 +49,7 @@ namespace openspace {
 namespace interaction {
 
 OrbitalNavigator::OrbitalNavigator()
-    : properties::PropertyOwner("OrbitalNavigator")
+    : properties::PropertyOwner("orbitalNavigator")
     , _rotationalFriction("rotationalFriction", "Rotational friction", true)
     , _horizontalFriction("horizontalFriction", "Horizontal friction", true)
     , _verticalFriction("verticalFriction", "Vertical friction", true)
