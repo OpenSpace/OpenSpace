@@ -59,11 +59,13 @@ GuiPerformanceComponent::GuiPerformanceComponent()
     , _sortingSelection("sortingSelection", "Sorting", -1, -1, 6)
     , _sceneGraphIsEnabled("showSceneGraph", "Show Scene Graph Measurements", false)
     , _functionsIsEnabled("showFunctions", "Show Function Measurements", false)
+    , _outputLogs("outputLogs", "Output Logs", false)
 {
     addProperty(_sortingSelection);
 
     addProperty(_sceneGraphIsEnabled);
     addProperty(_functionsIsEnabled);
+    addProperty(_outputLogs);
 }
 
 void GuiPerformanceComponent::render() {
@@ -81,9 +83,10 @@ void GuiPerformanceComponent::render() {
     v = _functionsIsEnabled;
     ImGui::Checkbox("Functions", &v);
     _functionsIsEnabled = v;
-    v = OsEng.renderEngine().performanceManager()->loggingEnabled();
+    v = _outputLogs;
     ImGui::Checkbox("Output Logs", &v);
     OsEng.renderEngine().performanceManager()->setLogging(v);
+    _outputLogs = v;
 
     ImGui::Spacing();
 
