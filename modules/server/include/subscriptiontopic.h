@@ -22,54 +22,29 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODOULES_SERVER__CONNECTION_H
-#define OPENSPACE_MODOULES_SERVER__CONNECTION_H
+#ifndef OPENSPACE_MODULES_SERVER__SUBSCRIPTION_TOPIC_H
+#define OPENSPACE_MODULES_SERVER__SUBSCRIPTION_TOPIC_H
 
-#include <memory>
-#include <string>
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ext/json/json.hpp>
-#include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
-#include <include/openspace/engine/openspaceengine.h>
-#include <include/openspace/engine/configurationmanager.h>
+#include <openspace/util/timemanager.h>
 
 #include "topic.h"
-#include "authenticationtopic.h"
-#include "subscriptiontopic.h"
+#include "connection.h"
 
 namespace openspace {
 
-struct MethodAndValue {
-    std::function<nlohmann::json()> method;
-    nlohmann::json value;
-};
-
-class Connection {
+class SubscriptionTopic : public Topic {
 public:
-    Connection(std::shared_ptr<ghoul::io::Socket> s);
-
-    void handleMessage(std::string message);
-    void sendMessage(const std::string& message);
+    SubscriptionTopic();
+    ~SubscriptionTopic();
     void handleJson(nlohmann::json json);
-    void sendJson(const nlohmann::json& json);
-    void refresh();
-    void addRefreshCall(std::function<nlohmann::json()>);
-
-    ghoul::TemplateFactory<Topic> _topicFactory;
-    std::map<size_t, std::unique_ptr<Topic>> _topics;
-    std::shared_ptr<ghoul::io::Socket> socket;
-    std::thread thread;
-    bool isAuthenticated();
-    bool active;
+    bool isDone();
 
 private:
-    bool _requireAuthentication, _isAuthenticated;
-    std::vector<MethodAndValue> _refreshCalls;
+    bool _requestedResourceIsSubscribable;
+    void handleSpecialCase(std::string);
+    nlohmann::json wrappedPayload(nlohmann::json &payload);
 };
 
 }
 
-#endif //OPENSPACE_MODOULES_SERVER__CONNECTION_H
+#endif //OPENSPACE_MODULES_SERVER__SUBSCRIPTION_TOPIC_H

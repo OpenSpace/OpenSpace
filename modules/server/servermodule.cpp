@@ -81,9 +81,12 @@ void ServerModule::preSync() {
 
     // Consume all messages put into the message queue by the socket threads.
     consumeMessages();
-    
+
     // Join threads for sockets that disconnected.
     cleanUpFinishedThreads();
+
+    // trigger connection refresh, so that subscribed values etc gets sent
+    triggerRefresh();
 }
                                
 void ServerModule::cleanUpFinishedThreads() {
@@ -102,6 +105,12 @@ void ServerModule::cleanUpFinishedThreads() {
             return !connection->active;
         }
     ), _connections.end());
+}
+
+void ServerModule::triggerRefresh() {
+    for (auto& connection : _connections) {
+        connection->refresh();
+    }
 }
     
 void ServerModule::disconnectAll() {

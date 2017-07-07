@@ -39,7 +39,7 @@ Connection::Connection(std::shared_ptr<ghoul::io::Socket> s)
     _topicFactory.registerClass<AuthenticationTopic>("authorize");
     _topicFactory.registerClass<GetPropertyTopic>("get");
     _topicFactory.registerClass<SetPropertyTopic>("set");
-    _topicFactory.registerClass<SubscribePropertyTopic>("subscribe");
+    _topicFactory.registerClass<SubscriptionTopic>("subscribe");
     _topicFactory.registerClass<BounceTopic>("bounce");
 
     const bool hasAuthenticationConfiguration = OsEng.configurationManager().hasKeyAndValue<bool>(
@@ -54,7 +54,7 @@ Connection::Connection(std::shared_ptr<ghoul::io::Socket> s)
 
 void Connection::handleMessage(std::string message) {
     try {
-        nlohmann::json j = nlohmann::json::parse(message);
+        nlohmann::json j = nlohmann::json::parse(message.c_str());
         handleJson(j);
     } catch (...) {
         LERROR("Json parse/handling error");
@@ -115,6 +115,22 @@ void Connection::sendJson(const nlohmann::json &j) {
 bool Connection::isAuthenticated() {
     // require either auth to be disabled or client to be authenticated
     return !_requireAuthentication || _isAuthenticated;
+}
+
+void Connection::refresh() {
+    for (auto &entry : _refreshCalls) {
+        // check if value has changed since last call, if it has -- send and update!
+        nlohmann::json newValue = entry.method();
+        if (newValue != entry.value) {
+            entry.value = newValue;
+            sendJson(newValue);
+        }
+    }
+}
+
+void Connection::addRefreshCall(std::function<nlohmann::json()> func) {
+//    struct MethodAndValue mav = { .method=std::move(func), .value=nlohmann::json };
+    _refreshCalls.push_back({std::move(func), nlohmann::json::object()});
 }
 
 } // namespace openspace

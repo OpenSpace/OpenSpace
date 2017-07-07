@@ -60,14 +60,6 @@ public:
     bool isDone() { return false; }
 };
 
-class SubscribePropertyTopic : public Topic {
-public:
-    SubscribePropertyTopic() : Topic() {};
-    ~SubscribePropertyTopic() {};
-    void handleJson(nlohmann::json json) {};
-    bool isDone() { return false; }
-};
-
 class BounceTopic : public Topic {
 public:
     BounceTopic() : Topic() {};

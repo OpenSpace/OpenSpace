@@ -59,6 +59,7 @@ private:
     void handleConnection(Connection* socket);
     void cleanUpFinishedThreads();
     void consumeMessages();
+    void triggerRefresh();
     void disconnectAll();
     void preSync();
 

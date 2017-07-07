@@ -22,54 +22,59 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef OPENSPACE_MODOULES_SERVER__CONNECTION_H
-#define OPENSPACE_MODOULES_SERVER__CONNECTION_H
+#include "include/subscriptiontopic.h"
 
-#include <memory>
-#include <string>
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ext/json/json.hpp>
-#include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
-#include <include/openspace/engine/openspaceengine.h>
-#include <include/openspace/engine/configurationmanager.h>
-
-#include "topic.h"
-#include "authenticationtopic.h"
-#include "subscriptiontopic.h"
+namespace {
+std::string _loggerCat = "SubscriptionTopic";
+}
 
 namespace openspace {
 
-struct MethodAndValue {
-    std::function<nlohmann::json()> method;
-    nlohmann::json value;
-};
-
-class Connection {
-public:
-    Connection(std::shared_ptr<ghoul::io::Socket> s);
-
-    void handleMessage(std::string message);
-    void sendMessage(const std::string& message);
-    void handleJson(nlohmann::json json);
-    void sendJson(const nlohmann::json& json);
-    void refresh();
-    void addRefreshCall(std::function<nlohmann::json()>);
-
-    ghoul::TemplateFactory<Topic> _topicFactory;
-    std::map<size_t, std::unique_ptr<Topic>> _topics;
-    std::shared_ptr<ghoul::io::Socket> socket;
-    std::thread thread;
-    bool isAuthenticated();
-    bool active;
-
-private:
-    bool _requireAuthentication, _isAuthenticated;
-    std::vector<MethodAndValue> _refreshCalls;
-};
-
+SubscriptionTopic::SubscriptionTopic()
+        : Topic()
+        , _requestedResourceIsSubscribable(false) {
+    LDEBUG("Starting new subscription");
 }
 
-#endif //OPENSPACE_MODOULES_SERVER__CONNECTION_H
+SubscriptionTopic::~SubscriptionTopic() {
+    // TODO: remove post draw call
+}
+
+bool SubscriptionTopic::isDone() {
+    return !_requestedResourceIsSubscribable || !_connection->active;
+}
+
+void SubscriptionTopic::handleJson(nlohmann::json json) {
+    std::string requestedKey = json.at("subscriptionProperty").get<std::string>();
+    std::string initial = requestedKey.substr(0, 8);
+
+    if (initial == "special:") {
+        std::string key = requestedKey.substr(8);
+        handleSpecialCase(key);
+    } else {
+        // trigger regular subscription
+    }
+}
+
+void SubscriptionTopic::handleSpecialCase(std::string instruction) {
+    if (instruction == "currentTime") {
+        _requestedResourceIsSubscribable = true;
+        _connection->addRefreshCall([this]() {
+            nlohmann::json timeJson = {{"time", OsEng.timeManager().time().ISO8601() }};
+            return wrappedPayload(timeJson);
+        });
+    } else {
+        LERROR("Unknown special case: " << instruction);
+        _requestedResourceIsSubscribable = false;
+    }
+}
+
+nlohmann::json SubscriptionTopic::wrappedPayload(nlohmann::json &payload) {
+    nlohmann::json j = {
+            {"topic", _topicId},
+            {"payload", payload}
+    };
+    return j;
+}
+
+} // namespace openspace
