@@ -39,7 +39,6 @@
 #include <ghoul/misc/interpolator.h>
 
 #include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/geometry/geodetic2.h>
@@ -55,10 +54,6 @@ namespace {
     const char* KeyFocus = "Focus";
     const char* KeyPosition = "Position";
     const char* KeyRotation = "Rotation";
-
-    const char* MainTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/main.hbs";
-    const char* KeybindingTemplateFilename = "${OPENSPACE_DATA}/web/keybindings/keybinding.hbs";
-    const char* JsFilename = "${OPENSPACE_DATA}/web/keybindings/script.js";
 } // namespace
 
 #include "interactionhandler_lua.inl"
@@ -66,18 +61,8 @@ namespace {
 namespace openspace {
 namespace interaction {
 
-// InteractionHandler
 InteractionHandler::InteractionHandler()
     : properties::PropertyOwner("Interaction")
-    , DocumentationGenerator(
-        "Documentation",
-        "keybindings",
-        {
-            { "keybindingTemplate",  KeybindingTemplateFilename },
-            { "mainTemplate", MainTemplateFilename }
-        },
-        JsFilename
-    )
     , _origin("origin", "Origin", "")
     , _useKeyFrameInteraction("useKeyFrameInteraction", "Use keyframe interaction", false)
 {
@@ -101,9 +86,8 @@ InteractionHandler::InteractionHandler()
 	addPropertySubOwner(*_orbitalNavigator);
 }
 
-InteractionHandler::~InteractionHandler() {
-
-}
+InteractionHandler::~InteractionHandler()
+{ }
 
 void InteractionHandler::initialize() {
     OsEng.parallelConnection().connectionEvent()->subscribe("interactionHandler", "statusChanged", [this]() {
@@ -141,14 +125,6 @@ void InteractionHandler::goToChunk(int x, int y, int level) {
 
 void InteractionHandler::goToGeo(double latitude, double longitude) {
     LWARNING("Interaction mode must be set to 'GlobeBrowsing'");
-}
-
-void InteractionHandler::lockControls() {
-
-}
-
-void InteractionHandler::unlockControls() {
-
 }
 
 void InteractionHandler::updateInputStates(double timeSinceLastUpdate) {
@@ -213,18 +189,6 @@ void InteractionHandler::mouseScrollWheelCallback(double pos) {
 
 void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action) {
     _inputState->keyboardCallback(key, modifier, action);
-
-    if (action == KeyAction::Press || action == KeyAction::Repeat) {
-        // iterate over key bindings
-        auto ret = _keyLua.equal_range({ key, modifier });
-        for (auto it = ret.first; it != ret.second; ++it) {
-            auto remote = it->second.synchronization ?
-                scripting::ScriptEngine::RemoteScripting::Yes :
-                scripting::ScriptEngine::RemoteScripting::No;
-
-            OsEng.scriptEngine().queueScript(it->second.command, remote);
-        }
-    }
 }
 
 void InteractionHandler::setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict) {
@@ -322,89 +286,10 @@ void InteractionHandler::restoreCameraStateFromFile(const std::string& filepath)
     }
 }
 
-void InteractionHandler::resetKeyBindings() {
-    _keyLua.clear();
-}
-
-void InteractionHandler::bindKeyLocal(Key key, KeyModifier modifier,
-                                      std::string luaCommand, std::string documentation)
-{
-    _keyLua.insert({
-        { key, modifier },
-        { std::move(luaCommand), Synchronized::No, std::move(documentation) }
-    });
-}
-
-void InteractionHandler::bindKey(Key key, KeyModifier modifier,
-                                 std::string luaCommand, std::string documentation)
-{
-    _keyLua.insert({
-        { key, modifier },
-        { std::move(luaCommand), Synchronized::Yes, std::move(documentation) }
-    });
-}
-
-    
-std::string InteractionHandler::generateJson() const {
-    std::stringstream json;
-    json << "[";
-    bool first = true;
-    for (const auto& p : _keyLua) {
-        if (!first) {
-            json << ",";
-        }
-        first = false;
-        json << "{";
-        json << "\"key\": \"" << std::to_string(p.first) << "\",";
-        json << "\"script\": \"" << p.second.command << "\",";
-        json << "\"remoteScripting\": " << (p.second.synchronization ? "true," : "false,");
-        json << "\"documentation\": \"" << p.second.documentation << "\"";
-        json << "}";
-    }
-    json << "]";
-    
-    std::string jsonString = "";
-    for (const char& c : json.str()) {
-        if (c == '\'') {
-            jsonString += "\\'";
-        } else {
-            jsonString += c;
-        }
-    }
-
-    return jsonString;
-}
-    
-
 scripting::LuaLibrary InteractionHandler::luaLibrary() {
     return{
         "",
         {
-            {
-                "clearKeys",
-                &luascriptfunctions::clearKeys,
-                "",
-                "Clear all key bindings"
-            },
-            {
-                "bindKey",
-                &luascriptfunctions::bindKey,
-                "string, string [,string]",
-                "Binds a key by name to a lua string command to execute both locally "
-                "and to broadcast to clients if this is the host of a parallel session. "
-                "The first argument is the key, the second argument is the Lua command "
-                "that is to be executed, and the optional third argument is a human "
-                "readable description of the command for documentation purposes."
-            },
-            {
-                "bindKeyLocal",
-                &luascriptfunctions::bindKeyLocal,
-                "string, string [,string]",
-                "Binds a key by name to a lua string command to execute only locally. "
-                "The first argument is the key, the second argument is the Lua command "
-                "that is to be executed, and the optional third argument is a human "
-                "readable description of the command for documentation purposes."
-            },
             {
                 "saveCameraStateToFile",
                 &luascriptfunctions::saveCameraStateToFile,

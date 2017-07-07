@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 #define __OPENSPACE_CORE___INTERACTIONHANDLER___H__
 
-#include <openspace/documentation/documentationgenerator.h>
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/orbitalnavigator.h>
@@ -39,10 +38,6 @@
 
 #include <ghoul/misc/boolean.h>
 
-#include <list>
-
-#include <mutex>
-
 namespace openspace {
 
 class Camera;
@@ -50,7 +45,7 @@ class SceneGraphNode;
 
 namespace interaction {
 
-class InteractionHandler : public properties::PropertyOwner, public DocumentationGenerator
+class InteractionHandler : public properties::PropertyOwner
 {
 public:
     InteractionHandler();
@@ -64,36 +59,16 @@ public:
     void setCamera(Camera* camera);
     void resetCameraDirection();
 
-    // Interaction mode setters
-    void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);
-    
+    void setCameraStateFromDictionary(const ghoul::Dictionary& cameraDict);    
     void goToChunk(int x, int y, int level);
     void goToGeo(double latitude, double longitude);
     
-    void resetKeyBindings();
-
     void addKeyframe(double timestamp, KeyframeNavigator::CameraPose pose);
     void removeKeyframesAfter(double timestamp);
     void clearKeyframes();
     size_t nKeyframes() const;
     const std::vector<datamessagestructures::CameraKeyframe>& keyframes() const;
 
-    void bindKeyLocal(
-        Key key,
-        KeyModifier modifier,
-        std::string luaCommand,
-        std::string documentation = ""
-    );
-    void bindKey(
-        Key key,
-        KeyModifier modifier,
-        std::string luaCommand,
-        std::string documentation = ""
-    );
-    void lockControls();
-    void unlockControls();
-
-    //void update(double deltaTime);
     void updateCamera(double deltaTime);
     void updateInputStates(double timeSinceLastUpdate);    
 
@@ -106,15 +81,6 @@ public:
     const InputState& inputState() const;
     const OrbitalNavigator& orbitalNavigator() const;
 
-    /**
-    * Returns the Lua library that contains all Lua functions available to affect the
-    * interaction. The functions contained are
-    * - openspace::luascriptfunctions::setOrigin
-    * \return The Lua library that contains all Lua functions available to affect the
-    * interaction
-    */
-    static scripting::LuaLibrary luaLibrary();
-
     // Callback functions 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
     void mouseButtonCallback(MouseButton button, MouseAction action);
@@ -124,20 +90,13 @@ public:
     void saveCameraStateToFile(const std::string& filepath);
     void restoreCameraStateFromFile(const std::string& filepath);
 
+    /**
+    * \return The Lua library that contains all Lua functions available to affect the
+    * interaction
+    */
+    static scripting::LuaLibrary luaLibrary();
 private:
-    using Synchronized = ghoul::Boolean;
-
-    struct KeyInformation {
-        std::string command;
-        Synchronized synchronization;
-        std::string documentation;
-    };
-    
-    std::string generateJson() const override;
-
     bool _cameraUpdatedFromScript = false;
-
-    std::multimap<KeyWithModifier, KeyInformation> _keyLua;
 
     std::unique_ptr<InputState> _inputState;
     Camera* _camera;

@@ -37,6 +37,7 @@
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/luaconsole.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelconnection.h>
@@ -137,6 +138,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     ))
     , _interactionHandler(new interaction::InteractionHandler)
+    , _keyBindingManager(new interaction::KeyBindingManager)
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
@@ -508,6 +510,9 @@ void OpenSpaceEngine::initialize() {
     // Initialize the InteractionHandler
     _interactionHandler->initialize();
 
+    // Initialize the KeyBindingManager
+    _keyBindingManager->initialize();
+
     // Load a light and a monospaced font
     loadFonts();
 
@@ -602,7 +607,7 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 
     // Write keyboard documentation.
     if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
-        interactionHandler().writeDocumentation(
+        keyBindingManager().writeDocumentation(
             absPath(configurationManager().value<std::string>(
                 ConfigurationManager::KeyKeyboardShortcuts
             ))
@@ -629,6 +634,7 @@ void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
     _interactionHandler->deinitialize();
+    _keyBindingManager->deinitialize();
     _renderEngine->deinitialize();
 
     LTRACE("OpenSpaceEngine::deinitialize(end)");
@@ -1157,6 +1163,7 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
     }
 
     _interactionHandler->keyboardCallback(key, mod, action);
+    _keyBindingManager->keyboardCallback(key, mod, action);
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
@@ -1410,6 +1417,11 @@ ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {
 interaction::InteractionHandler& OpenSpaceEngine::interactionHandler() {
     ghoul_assert(_interactionHandler, "InteractionHandler must not be nullptr");
     return *_interactionHandler;
+}
+
+interaction::KeyBindingManager& OpenSpaceEngine::keyBindingManager() {
+    ghoul_assert(_keyBindingManager, "KeyBindingManager must not be nullptr");
+    return *_keyBindingManager;
 }
 
 properties::PropertyOwner& OpenSpaceEngine::globalPropertyOwner() {

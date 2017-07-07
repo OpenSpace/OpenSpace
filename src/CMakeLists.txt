@@ -45,6 +45,8 @@ set(OPENSPACE_SOURCE
     ${OPENSPACE_BASE_DIR}/src/interaction/inputstate.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/interactionhandler_lua.inl
+    ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager.cpp
+    ${OPENSPACE_BASE_DIR}/src/interaction/keybindingmanager_lua.inl
     ${OPENSPACE_BASE_DIR}/src/interaction/keyframenavigator.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/luaconsole.cpp
     ${OPENSPACE_BASE_DIR}/src/interaction/mousestate.cpp
@@ -188,6 +190,7 @@ set(OPENSPACE_HEADER
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/delayedvariable.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/inputstate.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interactionhandler.h
+    ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keybindingmanager.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/interpolator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/keyframenavigator.h
     ${OPENSPACE_BASE_DIR}/include/openspace/interaction/luaconsole.h

@@ -31,6 +31,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
 #include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/keybindingmanager.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/renderable.h>
@@ -69,7 +70,8 @@ void registerCoreClasses(scripting::ScriptEngine& engine) {
     engine.addLibrary(RenderEngine::luaLibrary());
     engine.addLibrary(Scene::luaLibrary());
     engine.addLibrary(Time::luaLibrary());
-    engine.addLibrary(interaction::InteractionHandler::luaLibrary());
+	engine.addLibrary(interaction::KeyBindingManager::luaLibrary());
+	engine.addLibrary(interaction::InteractionHandler::luaLibrary());
     engine.addLibrary(ParallelConnection::luaLibrary());
     engine.addLibrary(ModuleEngine::luaLibrary());
     engine.addLibrary(scripting::ScriptScheduler::luaLibrary());
