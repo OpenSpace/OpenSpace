@@ -52,6 +52,6 @@ private:
 
 } // namespace openspace 
 
-#include "rawvolumewriter.inl";
+#include "rawvolumewriter.inl"
 
 #endif // __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
