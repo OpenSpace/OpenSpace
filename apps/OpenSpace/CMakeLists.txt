@@ -135,10 +135,10 @@ target_link_libraries(${APPLICATION_NAME}
     ${SPOUT_LIBRARY}
 )
 
-if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
+if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
     # Add the CEF binary distribution's cmake/ directory to the module path and
     # find CEF to initialize it properly.
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBGUI_MODULE_PATH}/cmake")
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
     find_package(CEF REQUIRED)
 
@@ -154,8 +154,6 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
 
     # Logical target used to link the libcef library.
     ADD_LOGICAL_TARGET("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
-    message(STATUS "------------------- CEF_LIB_DEBUG: ${CEF_LIB_DEBUG}")
-    message(STATUS "------------------- CEF_LIB_RELEASE: ${CEF_LIB_RELEASE}")
 
     # platform specific config
     if(OS_MACOSX)
@@ -166,8 +164,8 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
 
         target_link_libraries(${CEF_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
         set_target_properties(${CEF_TARGET} PROPERTIES
-            RESOURCE "${WEBGUI_RESOURCES_SRCS}"
-            MACOSX_BUNDLE_INFO_PLIST ${WEBGUI_MODULE_PATH}/mac/Info.plist
+            RESOURCE "${WEBBROWSER_RESOURCES_SRCS}"
+            MACOSX_BUNDLE_INFO_PLIST ${WEBBROWSER_MODULE_PATH}/mac/Info.plist
         )
 
         # Copy files into the main app bundle.
@@ -208,7 +206,7 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
             # Manually process and copy over resource files.
             # The Xcode generator handles this via the set_target_properties RESOURCE directive.
             set(PREFIXES "mac/")  # Remove these prefixes from input file paths.
-            COPY_MACOSX_RESOURCES("${WEBGUI_RESOURCES_SOURCES}" "${PREFIXES}" "${CEF_TARGET}" "${WEBGUI_MODULE_PATH}" "${CEF_FINAL_APP}")
+            COPY_MACOSX_RESOURCES("${WEBBROWSER_RESOURCES_SOURCES}" "${PREFIXES}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}" "${CEF_FINAL_APP}")
         endif()
     endif (OS_MACOSX)
 
@@ -228,13 +226,11 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
 		endif()
 
 		# Add the custom manifest files to the executable.
-        ADD_WINDOWS_CEF_MANIFEST("${WEBGUI_MODULE_PATH}" "${CEF_TARGET}" "exe")
+        ADD_WINDOWS_CEF_MANIFEST("${WEBBROWSER_MODULE_PATH}" "${CEF_TARGET}" "exe")
 
 		# Copy binary and resource files to the target output directory.
 		copy_files("${CEF_TARGET}" "${CEF_BINARY_FILES}" "${CEF_BINARY_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
 		copy_files("${CEF_TARGET}" "${CEF_RESOURCE_FILES}" "${CEF_RESOURCE_DIR}" "$<TARGET_FILE_DIR:${CEF_TARGET}>")
-
-
 	endif (OS_WINDOWS)
 
     set(NPM_COMMAND "npm" CACHE STRING "Location of NPM executable unless in PATH.")
@@ -243,13 +239,13 @@ if (OPENSPACE_MODULE_WEBGUI AND CEF_ROOT)
             TARGET OpenSpace POST_BUILD
             COMMAND ${NPM_COMMAND} install
             COMMAND ${NPM_COMMAND} run build
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${WEBGUI_MODULE_PATH}/web/dist "$<TARGET_FILE_DIR:${CEF_TARGET}>/gui"
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${WEBGUI_MODULE_PATH}/web/dist/static "$<TARGET_FILE_DIR:${CEF_TARGET}>/gui/static"
-            WORKING_DIRECTORY ${WEBGUI_MODULE_PATH}/web
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${WEBBROWSER_MODULE_PATH}/web/dist "$<TARGET_FILE_DIR:${CEF_TARGET}>/gui"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${WEBBROWSER_MODULE_PATH}/web/dist/static "$<TARGET_FILE_DIR:${CEF_TARGET}>/gui/static"
+            WORKING_DIRECTORY ${WEBBROWSER_MODULE_PATH}/web
             VERBATIM
     )
-elseif (OPENSPACE_MODULE_WEBGUI)
-    message(WARNING "WebGUI configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
+elseif (OPENSPACE_MODULE_WEBBROWSER)
+    message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again.")
 endif ()
 
 
