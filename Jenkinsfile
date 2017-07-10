@@ -46,8 +46,7 @@ stage('Build') {
                 checkout scm
                 bat '''
                     git submodule update --init --recursive
-                    rmdir /s build
-                    y
+                    rmdir /s build /Q
                     if not exist "build" mkdir "build"
                     cd build
                     cmake -G "Visual Studio 15 2017 Win64" .. ''' +
