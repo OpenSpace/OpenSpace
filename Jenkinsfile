@@ -30,7 +30,6 @@ stage('Build') {
                 checkout scm
                 sh 'git submodule update --init --recursive'
                 sh '''
-                    rm -rf build
                     mkdir -p build
                     cd build
                     cmake .. ''' +
@@ -46,7 +45,6 @@ stage('Build') {
                 checkout scm
                 bat '''
                     git submodule update --init --recursive
-                    rmdir /s build /Q
                     if not exist "build" mkdir "build"
                     cd build
                     cmake -G "Visual Studio 15 2017 Win64" .. ''' +
@@ -62,7 +60,6 @@ stage('Build') {
                 checkout scm
                 sh 'git submodule update --init --recursive'
                 sh '''
-                    rm -rf build
                     export PATH=${PATH}:/usr/local/bin:/Applications/CMake.app/Contents/bin
                     export CMAKE_BUILD_TOOL=/Applications/CMake.app/Contents/bin/CMake
                     srcDir=$PWD
