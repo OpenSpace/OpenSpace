@@ -32,7 +32,7 @@
 
 namespace openspace {
 namespace interaction {
-    
+
 struct MouseState {
     MouseState(double scaleFactor)
         : velocity(scaleFactor, 1)
@@ -63,11 +63,11 @@ public:
     void setSensitivity(double sensitivity);
     void setVelocityScaleFactor(double scaleFactor);
 
-    glm::dvec2 synchedGlobalRotationMouseVelocity();
-    glm::dvec2 synchedLocalRotationMouseVelocity();
-    glm::dvec2 synchedTruckMovementMouseVelocity();
-    glm::dvec2 synchedLocalRollMouseVelocity();
-    glm::dvec2 synchedGlobalRollMouseVelocity();
+    glm::dvec2 globalRotationMouseVelocity() const;
+    glm::dvec2 localRotationMouseVelocity() const;
+    glm::dvec2 truckMovementMouseVelocity() const;
+    glm::dvec2 localRollMouseVelocity() const;
+    glm::dvec2 globalRollMouseVelocity() const;
 
 private:
     double _sensitivity;

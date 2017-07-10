@@ -138,23 +138,23 @@ void MouseStates::setVelocityScaleFactor(double scaleFactor) {
     _globalRollMouseState.setVelocityScaleFactor(scaleFactor);
 }
 
-glm::dvec2 MouseStates::synchedGlobalRotationMouseVelocity() {
+glm::dvec2 MouseStates::globalRotationMouseVelocity() const{
     return _globalRotationMouseState.velocity.get();
 }
 
-glm::dvec2 MouseStates::synchedLocalRotationMouseVelocity() {
+glm::dvec2 MouseStates::localRotationMouseVelocity() const{
     return _localRotationMouseState.velocity.get();
 }
 
-glm::dvec2 MouseStates::synchedTruckMovementMouseVelocity() {
+glm::dvec2 MouseStates::truckMovementMouseVelocity() const{
     return _truckMovementMouseState.velocity.get();
 }
 
-glm::dvec2 MouseStates::synchedLocalRollMouseVelocity() {
+glm::dvec2 MouseStates::localRollMouseVelocity() const{
     return _localRollMouseState.velocity.get();
 }
 
-glm::dvec2 MouseStates::synchedGlobalRollMouseVelocity() {
+glm::dvec2 MouseStates::globalRollMouseVelocity() const{
     return _globalRollMouseState.velocity.get();
 }
 

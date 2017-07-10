@@ -51,7 +51,8 @@ public:
     
     void decelerate(double dt) {
         _currentValue = _currentValue + (- _currentValue) *
-            glm::min(_scaleFactor * _friction * dt, 1.0); // less or equal to 1.0 keeps it stable
+            glm::min(_scaleFactor * _friction * dt, 1.0);
+            // less or equal to 1.0 keeps it stable
     }
     
     void setHard(T value) {
@@ -67,7 +68,7 @@ public:
         _scaleFactor = scaleFactor;
     }
     
-    T get() {
+    T get() const {
         return _currentValue;
     }
 private:
