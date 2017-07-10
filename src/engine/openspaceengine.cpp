@@ -88,7 +88,7 @@ using namespace ghoul::cmdparser;
 
 namespace {
     const char* _loggerCat = "OpenSpaceEngine";
-    const char* SgctDefaultConfigFile = "${SGCT}/single.xml";
+    const char* SgctDefaultConfigFile = "${CONFIG}/single.xml";
     
     const char* SgctConfigArgumentCommand = "-config";
     
