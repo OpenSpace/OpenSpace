@@ -44,26 +44,26 @@ public:
      * All kinds of usage for pixel buffer objects as defined by the OpenGL standard.
      * See: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glBufferData.xhtml
      */
-	enum class Usage {
-		StreamDraw = GL_STREAM_DRAW,
-		StreamRead = GL_STREAM_READ,
-		StreamCopy = GL_STREAM_COPY,
-		StaticDraw = GL_STATIC_DRAW,
-		StaticRead = GL_STATIC_READ,
-		StaticCopy = GL_STATIC_COPY,
-		DynamicDraw = GL_DYNAMIC_DRAW,
-		DynamicRead = GL_DYNAMIC_READ,
-		DynamicCopy = GL_DYNAMIC_COPY
-	};
+    enum class Usage : std::underlying_type_t<GLenum> {
+        StreamDraw = static_cast<std::underlying_type_t<GLenum>>(GL_STREAM_DRAW),
+        StreamRead = static_cast<std::underlying_type_t<GLenum>>(GL_STREAM_READ),
+        StreamCopy = static_cast<std::underlying_type_t<GLenum>>(GL_STREAM_COPY),
+        StaticDraw = static_cast<std::underlying_type_t<GLenum>>(GL_STATIC_DRAW),
+        StaticRead = static_cast<std::underlying_type_t<GLenum>>(GL_STATIC_READ),
+        StaticCopy = static_cast<std::underlying_type_t<GLenum>>(GL_STATIC_COPY),
+        DynamicDraw = static_cast<std::underlying_type_t<GLenum>>(GL_DYNAMIC_DRAW),
+        DynamicRead = static_cast<std::underlying_type_t<GLenum>>(GL_DYNAMIC_READ),
+        DynamicCopy = static_cast<std::underlying_type_t<GLenum>>(GL_DYNAMIC_COPY)
+    };
 
     /**
      * Access hints for OpenGL buffer mapping
      * See: https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/glMapBuffer.xml
      */
-    enum class Access {
-        ReadOnly = GL_READ_ONLY,
-        WriteOnly = GL_WRITE_ONLY,
-        ReadWrite = GL_READ_WRITE
+    enum class Access : std::underlying_type_t<GLenum> {
+        ReadOnly = static_cast<std::underlying_type_t<GLenum>>(GL_READ_ONLY),
+        WriteOnly = static_cast<std::underlying_type_t<GLenum>>(GL_WRITE_ONLY),
+        ReadWrite = static_cast<std::underlying_type_t<GLenum>>(GL_READ_WRITE)
     };
 
     /**
@@ -100,7 +100,7 @@ public:
      * \returns the DMA address to the mapped buffer. Returns nullptr if the mapping
      * failed
      */
-    void* mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access);
+    void* mapBufferRange(GLintptr offset, GLsizeiptr length, BufferAccessMask access);
 
     /**
      * Maps the default buffer and makes the data available on the GPU

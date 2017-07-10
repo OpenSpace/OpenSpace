@@ -37,7 +37,6 @@ LayerGroup::LayerGroup(layergroupid::GroupID id)
     : properties::PropertyOwner(std::move(layergroupid::LAYER_GROUP_NAMES[id]))
     , _groupId(id)
     , _levelBlendingEnabled("blendTileLevels", "blend tile levels", false)
-    , _onChangeCallback([](){})
 {
     addProperty(_levelBlendingEnabled);
 }
@@ -83,7 +82,9 @@ void LayerGroup::addLayer(const ghoul::Dictionary& layerDict) {
     else {
         _layers.push_back(layer);
         update();
-        _onChangeCallback();
+        if(_onChangeCallback) {
+            _onChangeCallback();
+        }
         addPropertySubOwner(layer.get());
     }
 }
@@ -94,7 +95,9 @@ void LayerGroup::deleteLayer(const std::string& layerName) {
             removePropertySubOwner(it->get());
             _layers.erase(it);
             update();
-            _onChangeCallback();
+            if(_onChangeCallback) {
+                _onChangeCallback();
+            }
             LINFO("Deleted layer " + layerName);
             return;
         }

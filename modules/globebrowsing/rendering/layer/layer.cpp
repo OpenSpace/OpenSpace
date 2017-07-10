@@ -64,7 +64,6 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
         glm::vec4(1.f))
     }
     , _layerGroupId(id)
-    , _onChangeCallback([](){})
 {
     layergroupid::TypeID typeID = parseTypeIdFromDictionary(layerDict);
     if (typeID == layergroupid::TypeID::Unknown) {
@@ -113,7 +112,9 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
 
     // On change callbacks definitions
     _enabled.onChange([&](){
-        _onChangeCallback();
+        if (_onChangeCallback) {
+            _onChangeCallback();
+        }
     });
 
     _reset.onChange([&](){
@@ -128,15 +129,21 @@ Layer::Layer(layergroupid::GroupID id, const ghoul::Dictionary& layerDict)
         ghoul::Dictionary dict;
         initializeBasedOnType(type(), dict);
         addVisibleProperties();
-        _onChangeCallback();
+        if (_onChangeCallback) {
+            _onChangeCallback();
+        }
     });
 
     _blendModeOption.onChange([&](){
-        _onChangeCallback();
+        if (_onChangeCallback) {
+            _onChangeCallback();
+        }
     });
 
     _layerAdjustment.onChange([&](){
-        _onChangeCallback();
+        if (_onChangeCallback) {
+            _onChangeCallback();
+        }
     });
 
     _typeOption.setReadOnly(true);

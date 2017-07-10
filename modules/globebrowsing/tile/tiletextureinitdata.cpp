@@ -31,7 +31,7 @@ namespace globebrowsing {
 const glm::ivec2 TileTextureInitData::tilePixelStartOffset = glm::ivec2(-2);
 const glm::ivec2 TileTextureInitData::tilePixelSizeDifference = glm::ivec2(4);
 
-TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLuint glType,
+TileTextureInitData::TileTextureInitData(size_t width, size_t height, GLenum glType,
     Format textureFormat, ShouldAllocateDataOnCPU shouldAllocateDataOnCPU)
     : _glType(glType)
     , _ghoulTextureFormat(textureFormat)
@@ -87,7 +87,7 @@ size_t TileTextureInitData::totalNumBytes() const {
     return _totalNumBytes;
 }
 
-GLuint TileTextureInitData::glType() const {
+GLenum TileTextureInitData::glType() const {
     return _glType;
 }
 
@@ -95,7 +95,7 @@ TileTextureInitData::Format TileTextureInitData::ghoulTextureFormat() const {
     return _ghoulTextureFormat;
 }
 
-GLint TileTextureInitData::glTextureFormat() const {
+GLenum TileTextureInitData::glTextureFormat() const {
     return _glTextureFormat;
 }
 
@@ -120,7 +120,7 @@ void TileTextureInitData::calculateHashKey() {
 
     _hashKey |= _dimensionsWithoutPadding.x;
     _hashKey |= _dimensionsWithoutPadding.y << 10;
-    _hashKey |= _glType << (10 + 16);
+    _hashKey |= static_cast<std::underlying_type_t<GLenum>>(_glType) << (10 + 16);
     _hashKey |= format << (10 + 16 + 4);
 };
 
