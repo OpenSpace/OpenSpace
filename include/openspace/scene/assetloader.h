@@ -42,6 +42,7 @@ namespace openspace {
 
 namespace assetloader {
 int importAsset(lua_State* state);
+int importAssetToggle(lua_State* state);
 int resolveLocalResource(lua_State* state);
 int resolveSyncedResource(lua_State* state);
 }
@@ -69,6 +70,13 @@ public:
         void removeDependency(Asset* asset);
         void removeDependency(const std::string& assetId);
 
+        void addToggle(Asset* assetToggle);
+        void setToggle(Asset* assetToggle, bool toggleValue);
+        void toggleInitialized(Asset* assetToggle);
+        void togglerInitialized(Asset* assetToggle);
+        void toggleDeinitialized(Asset* assetToggle);
+        void togglerDeinitialized(Asset* assetToggle);
+
         bool hasInitializedDependants();
 
     private:
@@ -86,8 +94,18 @@ public:
         bool _initialized;
         AssetLoader* _loader;
         std::string _assetDirectory;
+
+        // Other assets that this asset depend on
         std::vector<Asset*> _dependencies;
+
+        // Other assets that depend on this asset
         std::vector<Asset*> _dependants;
+
+        // Other assets that this asset may toggle
+        std::vector<Asset*> _toggles;
+
+        // Other assets that may toggle this asset
+        std::vector<Asset*> _togglers;
     };
 
     AssetLoader(ghoul::lua::LuaState* _luaState, std::string assetRoot, std::string syncRoot);
@@ -105,7 +123,7 @@ public:
     const std::string& syncRoot();
 
 private:
-    Asset* importAsset(const std::string& identifier);
+    Asset* importAsset(const std::string& identifier, bool toggle = false, bool toggleOn = true);
 
     void pushAsset(Asset* asset);
     void popAsset();
@@ -119,6 +137,9 @@ private:
 
     friend int assetloader::importAsset(lua_State* state);
     int importAssetLua();
+
+    friend int assetloader::importAssetToggle(lua_State* state);
+    int importAssetToggleLua();
 
     ghoul::lua::LuaState* _luaState;
 };

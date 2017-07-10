@@ -1,6 +1,6 @@
-local {Sun, SunToggle} = asset.importToggle('sun', true)
-local {Earth, EarthToggle} = asset.importToggle('planets/earth', false)
-local {MilkyWay, MilkyWayToggle} = asset.importToggle('milkyway', false)
+local Sun, SunToggle = asset.importToggle('sun', true)
+local Earth, EarthToggle = asset.importToggle('planets/earth', true)
+--local MilkyWay, MilkyWayToggle = asset.importToggle('milkyway', false)
 
 SunToggle.onInitialize = function () 
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
@@ -11,10 +11,12 @@ EarthToggle.onInitialize = function ()
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 end
 
+--[[
 MilkyWayToggle.onInitialize = function ()
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 end
+]]--
 
 asset.onInitialize = function ()
     openspace.time.setTime(openspace.time.currentWallTime())
