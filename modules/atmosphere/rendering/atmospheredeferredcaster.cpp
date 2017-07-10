@@ -296,6 +296,9 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData & renderData, const D
     glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
     program.setUniform("inscatterTexture", _inScatteringTableTextureUnit); 
 
+    // Atmosphere Frustum Culling
+
+
     // DEBUG:
     /*
     if (_renderableClass == RenderablePlanet) {

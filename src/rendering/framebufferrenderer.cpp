@@ -127,6 +127,7 @@ void FramebufferRenderer::initialize() {
     updateRendererData();
     updateRaycastData();
     updateDeferredcastData();
+    updateHDRData();
 
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture, 0);
@@ -244,10 +245,19 @@ void FramebufferRenderer::update() {
 
     // If the resolve dictionary changed (or a file changed on disk)
     // then rebuild the resolve program.
+    if (_hdrBackGroundProgram && _hdrBackGroundProgram->isDirty()) {
+        try {
+            _hdrBackGroundProgram->rebuildFromFile();
+        } catch (const ghoul::RuntimeError& error) {
+            LERRORC(error.component, error.message);
+        }
+    }
+
     if (_resolveProgram->isDirty()) {
         try {
             _resolveProgram->rebuildFromFile();
-        } catch (const ghoul::RuntimeError& error) {
+        }
+        catch (const ghoul::RuntimeError& error) {
             LERRORC(error.component, error.message);
         }
     }
@@ -333,8 +343,8 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr);
 
-    //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, 0);
-    //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);    
 #endif
 
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainOtherDataTexture);
@@ -533,6 +543,19 @@ void FramebufferRenderer::updateDeferredcastData() {
     _dirtyDeferredcastData = false;
 }
 
+void FramebufferRenderer::updateHDRData() {
+    try {
+        _hdrBackGroundProgram = ghoul::opengl::ProgramObject::Build(
+            "HDR Background Control",
+            "${SHADERS}/framebuffer/hdrBackground.vert",
+            "${SHADERS}/framebuffer/hdrBackground.frag"
+        );
+    }
+    catch (const ghoul::RuntimeError& e) {
+        LERRORC(e.component, e.message);
+    }
+}
+
 void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasurements) {
     std::unique_ptr<performance::PerformanceMeasurement> perf;
     if (doPerformanceMeasurements) {
@@ -560,7 +583,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
-    // DEBUG: deferred g-buffer
+    // deferred g-buffer
     GLenum textureBuffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     glDrawBuffers(4, textureBuffers);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -656,12 +679,29 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
         }
     }
 
-    // DEBUG: g-buffer
+    // g-buffer1
     if (!tasks.deferredcasterTasks.empty()) {
         glBindFramebuffer(GL_FRAMEBUFFER, _deferredFramebuffer);
         GLenum dBuffer[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, dBuffer);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // HDR Background Image Control
+        _hdrBackGroundProgram->activate();
+
+        ghoul::opengl::TextureUnit mainColorTextureUnit;
+        mainColorTextureUnit.activate();
+
+        glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
+        _hdrBackGroundProgram->setUniform("mainColorTexture", mainColorTextureUnit);
+        _hdrBackGroundProgram->setUniform("nAaSamples", _nAaSamples);
+        _hdrBackGroundProgram->setUniform("backgroundExposure", _hdrExposure);
+        glBindVertexArray(_screenQuad);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+
+        _hdrBackGroundProgram->deactivate();
+        
     }
     //} else {
     //    glBindFramebuffer(GL_FRAMEBUFFER, _mainFramebuffer);
@@ -685,7 +725,7 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
             
             deferredcastProgram->activate();
 
-            // DEBUG: adding G-Buffer
+            // adding G-Buffer
             ghoul::opengl::TextureUnit mainDColorTextureUnit;
             mainDColorTextureUnit.activate();
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, _mainColorTexture);
@@ -719,7 +759,6 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
                                        *deferredcastProgram);
             
             glDisable(GL_DEPTH_TEST);
-            //glDisable(GL_BLEND);
             glDepthMask(false);
 
             glBindVertexArray(_screenQuad);
@@ -728,7 +767,6 @@ void FramebufferRenderer::render(float blackoutFactor, bool doPerformanceMeasure
 
             glDepthMask(true);
             glEnable(GL_DEPTH_TEST);
-            //glEnable(GL_BLEND);
             
             deferredcaster->postRaycast(deferredcasterTask.renderData,
                 _deferredcastData[deferredcaster],
@@ -812,7 +850,7 @@ void FramebufferRenderer::setResolution(glm::ivec2 res) {
     _dirtyResolution = true;
 }
 
-void FramebufferRenderer::setNAaSamples(int nAaSamples) {
+void FramebufferRenderer::setNAaSamples(const int nAaSamples) {
     _nAaSamples = nAaSamples;
     if (_nAaSamples == 0) {
         _nAaSamples = 1;
@@ -822,6 +860,14 @@ void FramebufferRenderer::setNAaSamples(int nAaSamples) {
         _nAaSamples = 8;
     }
     _dirtyResolution = true;
+}
+
+void FramebufferRenderer::setHDRExposure(const float hdrExposure) {
+    _hdrExposure = hdrExposure;
+    if (_hdrExposure < 0.0) {
+        LERROR("HDR Exposure constant must be greater than zero.");
+        _hdrExposure = 1.0;
+    }
 }
 
 void FramebufferRenderer::updateRendererData() {

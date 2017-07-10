@@ -93,7 +93,7 @@ return {
         --"moon",
    
         "lodglobes/earth",
-        --"lodglobes/mars",
+        "lodglobes/mars",
         "lodglobes/moon",
                 
         --"toyvolume",

@@ -30,6 +30,7 @@
 #include <openspace/properties/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/triggerproperty.h>
 
 
@@ -220,6 +221,7 @@ private:
     float _currentFadeTime;
     int _fadeDirection;
     properties::IntProperty _nAaSamples;
+    properties::FloatProperty _hdrExposure;
     uint64_t _frameNumber;
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;

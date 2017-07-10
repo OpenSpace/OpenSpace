@@ -58,7 +58,9 @@ public:
     virtual void setCamera(Camera* camera) = 0;
     virtual void setScene(Scene* scene) = 0;
     virtual void setResolution(glm::ivec2 res) = 0;
-    virtual void setNAaSamples(int nAaSamples) = 0;
+    virtual void setNAaSamples(const int nAaSamples) = 0;
+    virtual void setHDRExposure(const float hdrExposure) = 0;
+
 
     /**
     * Set raycasting uniforms on the program object, and setup raycasting.

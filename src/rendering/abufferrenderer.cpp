@@ -386,7 +386,7 @@ void ABufferRenderer::setResolution(glm::ivec2 res) {
     }
 }
 
-void ABufferRenderer::setNAaSamples(int nAaSamples) {
+void ABufferRenderer::setNAaSamples(const int nAaSamples) {
     _nAaSamples = nAaSamples;
     if (_nAaSamples == 0) {
         _nAaSamples = 1;
@@ -396,6 +396,14 @@ void ABufferRenderer::setNAaSamples(int nAaSamples) {
         _nAaSamples = 8;
     }
     _dirtyResolution = true;
+}
+
+void ABufferRenderer::setHDRExposure(const float hdrExposure) {
+    _hdrExposure = hdrExposure;
+    if (_hdrExposure < 0.0) {
+        LERROR("HDR Exposure constant must be greater than zero.");
+        _hdrExposure = 1.0;
+    }
 }
 
 void ABufferRenderer::clear() {

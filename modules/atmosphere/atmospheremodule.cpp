@@ -27,11 +27,14 @@
 #include <ghoul/misc/assert.h>
 
 #include <openspace/rendering/renderable.h>
+
 //#include <modules/atmosphere/rendering/renderableplanetatmosphere.h>
 
 namespace openspace {
 
-AtmosphereModule::AtmosphereModule() : OpenSpaceModule("Atmosphere") {}
+AtmosphereModule::AtmosphereModule() : 
+    OpenSpaceModule("Atmosphere")
+{}
 
 void AtmosphereModule::internalInitialize() {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();

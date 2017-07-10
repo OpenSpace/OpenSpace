@@ -66,11 +66,13 @@ public:
     void updateResolution();
     void updateRaycastData();
     void updateDeferredcastData();
-    
+    void updateHDRData();
+
     void setCamera(Camera* camera) override;
     void setScene(Scene* scene) override;
     void setResolution(glm::ivec2 res) override;
-    void setNAaSamples(int nAaSamples) override;
+    void setNAaSamples(const int nAaSamples) override;
+    void setHDRExposure(const float hdrExposure) override;
 
     void update() override;
     void render(float blackoutFactor, bool doPerformanceMeasurements) override;
@@ -93,6 +95,7 @@ private:
 
     std::map<Deferredcaster*, DeferredcastData> _deferredcastData;
     std::map<Deferredcaster*, std::unique_ptr<ghoul::opengl::ProgramObject>> _deferredcastPrograms;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _hdrBackGroundProgram;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _resolveProgram;
 
@@ -118,6 +121,7 @@ private:
     Scene* _scene;
     glm::vec2 _resolution;
     int _nAaSamples;
+    float _hdrExposure;
 
     ghoul::Dictionary _rendererData;
 };

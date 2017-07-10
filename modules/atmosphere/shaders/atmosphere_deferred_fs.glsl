@@ -261,7 +261,7 @@ void dCalculateRayRenderableGlobe(out dRay ray, out dvec4 planetPositionObjectCo
   // ============================
   // ====== Building Ray ========
   // Ray in object space (in KM)
-  ray.origin    = cameraPositionInObject / dvec4(1000.0, 1000.0, 1000.0, 1.0);
+  ray.origin    = cameraPositionInObject * dvec4(0.001, 0.001, 0.001, 1.0);
   ray.direction = dvec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);
 }
 
@@ -308,7 +308,7 @@ void dCalculateRayRenderablePlanet(out dRay ray, out dvec4 planetPositionObjectC
   // ============================
   // ====== Building Ray ========
   // Ray in object space (in KM)
-  ray.origin    = cameraPositionInObject / dvec4(1000.0, 1000.0, 1000.0, 1.0);
+  ray.origin    = cameraPositionInObject * dvec4(0.001, 0.001, 0.001, 1.0);
   ray.direction = dvec4(normalize(objectCoords.xyz - cameraPositionInObject.xyz), 0.0);
 }
 
@@ -360,12 +360,13 @@ vec3 inscatterRadiance(inout vec3 x, inout float t, inout float irradianceFactor
   // observer in the space) we test if the light ray is hitting the atmosphere
   vec3  x0     = fragPosObj;
   float r0     = length(fragPosObj);
-  float muSun0 = dot(fragPosObj, s) / r0;
+  float invr0  = 1.0/r0;
+  float muSun0 = dot(fragPosObj, s) * invr0;
   //vec3  x0     = x + float(pixelDepth) * v;      
-  float mu0    = dot(x0, v) / r0;
+  float mu0    = dot(x0, v) * invr0;
 
   bool groundHit = false;
-  if ((pixelDepth > 0.0) && pixelDepth < maxLength) {    
+  if ((pixelDepth > 0.0) && (pixelDepth < maxLength)) {    
     t = float(pixelDepth);  
     groundHit = true;
     // Transmittance from point r, direction mu, distance t
@@ -509,7 +510,7 @@ vec3 groundColor(const vec3 x, const float t, const vec3 v, const vec3 s, const 
   //groundRadiance *= mix(5.0, 1.0, dot(n,s));
     
   // Specular reflection from sun on oceans and rivers  
-  if (waterReflectance > 0.1 && muSun > 0.0) {
+  if ((waterReflectance > 0.1) && (muSun > 0.0)) {
     vec3  h         = normalize(s - v);
     // Fresnell Schlick's approximation
     float fresnel   = 0.02f + 0.98f * pow(1.0f - dot(-v, h), 5.0f);
@@ -573,10 +574,11 @@ void main() {
       //positionArray[i] = texelFetch(mainPositionTexture, ivec2(gl_FragCoord), i);
       //mainDepth += denormalizeFloat(texelFetch(mainDepthTexture, ivec2(gl_FragCoord), i).x);
     }
-    meanColor     /= nAaSamples;
-    meanNormal    /= nAaSamples;
-    meanPosition  /= nAaSamples;
-    meanOtherData /= nAaSamples;
+    float invNaaSamples = 1.0/nAaSamples;
+    meanColor     *= invNaaSamples;
+    meanNormal    *= invNaaSamples;
+    meanPosition  *= invNaaSamples;
+    meanOtherData *= invNaaSamples;
     //mainDepth /= nAaSamples;
 
     meanColor.a = maxAlpha;
@@ -624,8 +626,8 @@ void main() {
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
 
         // All calculations are done in Km:
-        pixelDepth /= 1000.0; 
-        fragObjectCoords.xyz /= 1000.0;
+        pixelDepth *= 0.001;
+        fragObjectCoords.xyz *= 0.001;
         
         // Now we check is if the atmosphere is occluded, i.e., if the distance to the pixel 
         // in the depth buffer is less than the distance to the atmosphere then the atmosphere
@@ -633,7 +635,7 @@ void main() {
         // Fragments positions into G-Buffer are written in OS Eye Space (Camera Rig Coords)
         // when using their positions later, one must convert them to the planet's coords 
 
-        if ((pixelDepth > 0.0) && pixelDepth < offset) {        
+        if ((pixelDepth > 0.0) && (pixelDepth < offset)) {        
           renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
         } else {
           // Following paper nomenclature      
@@ -744,8 +746,8 @@ void main() {
         double pixelDepth = distance(cameraPositionInObject.xyz, fragObjectCoords.xyz);
         
         // All calculations are done in Km:
-        pixelDepth /= 1000.0;
-        fragObjectCoords.xyz /= 1000.0;
+        pixelDepth *= 0.001;
+        fragObjectCoords.xyz *= 0.001;
         
         if (meanPosition.xyz != vec3(0.0) && (pixelDepth < offset)) {        
           renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
@@ -799,7 +801,7 @@ void main() {
           renderTarget = finalRadiance;
         }
       } else {
-        renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
+        //renderTarget = vec4(HDR(meanColor.xyz * backgroundExposure), meanColor.a);
         //renderTarget = meanColor;
       }
     }                     

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2016                                                               *
+ * Copyright (c) 2014 - 2017                                                             *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,20 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __ATMOSPHEREMODULE_H__
-#define __ATMOSPHEREMODULE_H__
+#version __CONTEXT__
 
-#include <openspace/util/openspacemodule.h>
-#include <openspace/properties/scalar/floatproperty.h>
+in vec4 position;
 
-namespace openspace {
+out vec2 texCoord;
+out vec3 vPosition;
+out vec4 worldPosition;
 
-class AtmosphereModule : public OpenSpaceModule {
-public:
-    AtmosphereModule();
-    void internalInitialize() override;
-};
+void main() {
+    gl_Position = position;
+    texCoord = 0.5 + position.xy * 0.5;
 
-} // namespace openspace
-
-#endif // __ATMOSPHEREMODULE_H__
+    vPosition = position.xyz;
+    worldPosition = position;
+}

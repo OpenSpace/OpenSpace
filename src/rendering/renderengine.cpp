@@ -130,6 +130,7 @@ RenderEngine::RenderEngine()
     , _currentFadeTime(0.f)
     , _fadeDirection(0)
     , _nAaSamples("nAaSamples", "Number of Antialiasing samples", 8, 1, 16)
+    , _hdrExposure("backgroundExposure", "HDR Exposure", 1.8f, 0.01f, 10.0f)
     , _frameNumber(0)
 {
     _performanceMeasurements.onChange([this]() {
@@ -164,7 +165,14 @@ RenderEngine::RenderEngine()
             _renderer->setNAaSamples(_nAaSamples);
         }
     });
+    _hdrExposure.onChange([this]() {
+        if (_renderer) {
+            _renderer->setHDRExposure(_hdrExposure);
+        }
+    });
+
     addProperty(_nAaSamples);
+    addProperty(_hdrExposure);
     addProperty(_applyWarping);
     
     _takeScreenshot.onChange([this](){
@@ -237,7 +245,7 @@ void RenderEngine::initialize() {
     _raycasterManager = std::make_unique<RaycasterManager>();
     _deferredcasterManager = std::make_unique<DeferredcasterManager>();
     _nAaSamples = OsEng.windowWrapper().currentNumberOfAaSamples();
-
+    
     LINFO("Seting renderer from string: " << renderingMethod);
     setRendererFromString(renderingMethod);
 
@@ -685,6 +693,7 @@ void RenderEngine::setRenderer(std::unique_ptr<Renderer> renderer) {
     _renderer = std::move(renderer);
     _renderer->setResolution(renderingResolution());
     _renderer->setNAaSamples(_nAaSamples);
+    _renderer->setHDRExposure(_hdrExposure);
     _renderer->initialize();
     _renderer->setCamera(_camera);
     _renderer->setScene(_scene);
