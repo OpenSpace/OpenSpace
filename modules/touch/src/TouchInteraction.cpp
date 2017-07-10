@@ -307,7 +307,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		return (glm::dvec2(clipspace) / clipspace.w);
 	};
 
-	const int nFingers = list.size();
+	int nFingers = std::min(static_cast<int>(list.size()), 3); // only send in first three fingers (to make it easier for LMA to converge on 3+ finger case with only zoom/pan)
 	int nDOF = std::min(nFingers * 2, 6);
     std::vector<double> par(nDOF, 0.0); 
 	par.at(0) = _lastVel.orbit.x; // use _lastVel for orbit
@@ -316,7 +316,8 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 	// Parse input data to be used in the LM algorithm
 	std::vector<glm::dvec3> selectedPoints;
 	std::vector<glm::dvec2> screenPoints;
-	for (const SelectedBody& sb : _selected) {
+	for (int i = 0; i < nFingers; ++i) {
+		const SelectedBody& sb = _selected.at(i);
 		selectedPoints.push_back(sb.coordinates);
 
 		std::vector<TuioCursor>::const_iterator c = find_if(list.begin(), list.end(), [&sb](const TuioCursor& c) { return c.getSessionID() == sb.id; });
