@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/globes/renderableglobe.h>
 #include <modules/globebrowsing/other/distanceswitch.h>
 #include <modules/globebrowsing/tile/rawtiledatareader/gdalwrapper.h>
-#include <modules/globebrowsing/tile/tileprovider/cachingtileprovider.h>
+#include <modules/globebrowsing/tile/tileprovider/defaulttileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/singleimageprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/sizereferencetileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/temporaltileprovider.h>
@@ -37,16 +37,19 @@
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbylevel.h>
 #include <modules/globebrowsing/tile/tileprovider/tileproviderbyindex.h>
-#include <modules/globebrowsing/tile/tileprovider/presentationslideprovider.h>
+
+#include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layer.h>
 
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
 
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+
+#include "globebrowsingmodule_lua.inl"
 
 namespace openspace {
 
@@ -59,11 +62,10 @@ GlobeBrowsingModule::GlobeBrowsingModule()
 void GlobeBrowsingModule::internalInitialize() {
     using namespace globebrowsing;
 
+    // Initialize
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Initialize, [&] {
-
-    _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
-    addPropertySubOwner(*_tileCache);
-
+        _tileCache = std::make_unique<globebrowsing::cache::MemoryAwareTileCache>();
+        addPropertySubOwner(*_tileCache);
 #ifdef GLOBEBROWSING_USE_GDAL
         // Convert from MB to Bytes
         GdalWrapper::create(
@@ -73,37 +75,47 @@ void GlobeBrowsingModule::internalInitialize() {
 #endif // GLOBEBROWSING_USE_GDAL
     });
   
+    // Render
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Render, [&]{
         _tileCache->update();
     });
 
-  
+    // Deinitialize
     OsEng.registerModuleCallback(OpenSpaceEngine::CallbackOption::Deinitialize, [&]{
 #ifdef GLOBEBROWSING_USE_GDAL
         GdalWrapper::ref().destroy();
 #endif // GLOBEBROWSING_USE_GDAL
     });
 
+    // Get factories
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
+    // Create factory for TileProviders
+    auto fTileProvider =
+        std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
+    ghoul_assert(fTileProvider, "TileProvider factory was not created");
+  
+    // Register renderable class
     fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
 
-    // add Tile Provider factory
-    auto fTileProvider = std::make_unique<ghoul::TemplateFactory<tileprovider::TileProvider>>();
-
-    fTileProvider->registerClass<tileprovider::CachingTileProvider>("LRUCaching");
-    fTileProvider->registerClass<tileprovider::SingleImageProvider>("SingleImage");
+    // Register TileProvider classes
+    fTileProvider->registerClass<tileprovider::DefaultTileProvider>(
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::DefaultTileLayer)]);
+    fTileProvider->registerClass<tileprovider::SingleImageProvider>(
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::SingleImageTileLayer)]);
 #ifdef GLOBEBROWSING_USE_GDAL
-    fTileProvider->registerClass<tileprovider::TemporalTileProvider>("Temporal");
+    fTileProvider->registerClass<tileprovider::TemporalTileProvider>(
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::TemporalTileLayer)]);
 #endif // GLOBEBROWSING_USE_GDAL
-
-    fTileProvider->registerClass<tileprovider::TileIndexTileProvider>("TileIndex");
-    fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>("SizeReference");
-
-    // Combining Tile Providers
-    fTileProvider->registerClass<tileprovider::TileProviderByLevel>("ByLevel");
-    fTileProvider->registerClass<tileprovider::TileProviderByIndex>("ByIndex");
-    fTileProvider->registerClass<tileprovider::PresentationSlideProvider>("PresentationSlides");
+    fTileProvider->registerClass<tileprovider::TileIndexTileProvider>(
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::TileIndexTileLayer)]);
+    fTileProvider->registerClass<tileprovider::SizeReferenceTileProvider>(
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::SizeReferenceTileLayer)]);
+    fTileProvider->registerClass<tileprovider::TileProviderByLevel>(
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::ByLevelTileLayer)]);
+    fTileProvider->registerClass<tileprovider::TileProviderByIndex>(
+        layergroupid::LAYER_TYPE_NAMES[static_cast<int>(layergroupid::TypeID::ByIndexTileLayer)]);
+  
     FactoryManager::ref().addFactory(std::move(fTileProvider));
 }
 
@@ -112,13 +124,62 @@ globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
 }
 
 scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
+    std::string listLayerGroups = layerGroupNamesList();
     return {
         "globebrowsing",
-        {},
+        {
+            {
+                "addLayer",
+                &globebrowsing::luascriptfunctions::addLayer,
+                "string, string, table",
+                "Adds a layer to the specified globe. The first argument specifies the "
+                "name of the scene graph node of which to add the layer. The renderable "
+                "of the specified scene graph node needs to be a renderable globe. "
+                "The second argument is the layer group which can be any of "
+                + listLayerGroups + ". The third argument is the dictionary defining the "
+                "layer."
+            },
+            {
+                "deleteLayer",
+                &globebrowsing::luascriptfunctions::deleteLayer,
+                "string, string",
+                "Removes a layer from the specified globe. The first argument specifies "
+                "the name of the scene graph node of which to remove the layer. "
+                "The renderable of the specified scene graph node needs to be a "
+                "renderable globe. The second argument is the layer group which can be "
+                "any of " + listLayerGroups + ". The third argument is the dictionary"
+                "defining the layer."
+            },
+        },
         {
             "${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"
+        },
+        {
+            // Documentation
         }
     };
+}
+
+std::string GlobeBrowsingModule::layerGroupNamesList() {
+    std::string listLayerGroups("");
+    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1; ++i) {
+        listLayerGroups +=
+            globebrowsing::layergroupid::LAYER_GROUP_NAMES[i] + std::string(", ");
+    }
+    listLayerGroups +=
+        std::string(" and ") + globebrowsing::layergroupid::LAYER_GROUP_NAMES[
+            globebrowsing::layergroupid::NUM_LAYER_GROUPS - 1];
+    return listLayerGroups;
+}
+
+std::string GlobeBrowsingModule::layerTypeNamesList() {
+    std::string listLayerTypes("");
+    for (int i = 0; i < globebrowsing::layergroupid::NUM_LAYER_TYPES - 1; ++i) {
+        listLayerTypes += globebrowsing::layergroupid::LAYER_TYPE_NAMES[i] + ", ";
+    }
+    listLayerTypes +=
+        " and " + globebrowsing::layergroupid::LAYER_TYPE_NAMES[globebrowsing::layergroupid::NUM_LAYER_TYPES - 1];
+    return listLayerTypes;
 }
 
 } // namespace openspace

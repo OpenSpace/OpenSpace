@@ -22,48 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___PRESENTATION_SLIDE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___PRESENTATION_SLIDE_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__
 
-#include <modules/globebrowsing/geometry/geodetic2.h>
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <openspace/properties/propertyowner.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
+#include <modules/globebrowsing/rendering/layer/layergroupid.h>
 
 #include <openspace/properties/scalarproperty.h>
-
-#include <memory>
-#include <unordered_map>
+#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/vectorproperty.h>
 
 namespace openspace {
 namespace globebrowsing {
+
 namespace tileprovider {
+    class TileProvider;
+}
 
-class PresentationSlideProvider : public TileProvider {
+class LayerAdjustment : public properties::PropertyOwner
+{
 public:
-    PresentationSlideProvider(const ghoul::Dictionary& dictionary);
-    PresentationSlideProvider(const std::string& imagePath);
-    virtual ~PresentationSlideProvider() = default;
+    LayerAdjustment();
+    ~LayerAdjustment() = default;
 
-    virtual Tile getTile(const TileIndex& tileIndex) override;
-    virtual Tile::Status getTileStatus(const TileIndex& index) override;
-    virtual TileDepthTransform depthTransform() override;
-    virtual void update() override;
-    virtual void reset() override;
-    virtual int maxLevel() override;
+    void setValuesFromDictionary(const ghoul::Dictionary& adjustmentDict);
+
+    layergroupid::AdjustmentTypeID type() const;
+
+    // Properties
+    properties::Vec3Property chromaKeyColor;
+    properties::FloatProperty chromaKeyTolerance;
+
+    void onChange(std::function<void(void)> callback);
 
 private:
-    TileProvider* slideProvider();
+    void addVisibleProperties();
+    void removeVisibleProperties();
+    
+    properties::OptionProperty _typeOption;
+    layergroupid::AdjustmentTypeID _type;
 
-    TileIndex _tileIndex;
-    properties::IntProperty _slideIndex;
-    std::vector<std::unique_ptr<TileProvider>> _slideProviders;
-    std::unique_ptr<TileProvider> _defaultProvider;
+    std::function<void(void)> _onChangeCallback;
 };
 
-} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___PRESENTATION_SLIDE_PROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_ADJUSTMENT___H__

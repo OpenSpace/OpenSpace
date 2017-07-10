@@ -22,39 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
-
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-
-#include <openspace/properties/stringproperty.h>
+#include <modules/globebrowsing/rendering/gpu/gpulayeradjustment.h>
+#include <modules/globebrowsing/rendering/layer/layeradjustment.h>
 
 namespace openspace {
 namespace globebrowsing {
-namespace tileprovider {
 
-class TileProviderByLevel : public TileProvider {
-public:
-    TileProviderByLevel(const ghoul::Dictionary& dictionary);
-    TileProviderByLevel(const std::string& imagePath);
-    virtual ~TileProviderByLevel() = default;
+void GPULayerAdjustment::setValue(ghoul::opengl::ProgramObject* programObject,
+                                      const LayerAdjustment& layerAdjustment)
+{
+    switch (layerAdjustment.type()) {
+        case layergroupid::AdjustmentTypeID::None:
+            break;
+        case layergroupid::AdjustmentTypeID::ChromaKey: {
+            gpuChromaKeyColor.setValue(programObject, layerAdjustment.chromaKeyColor.value());
+            gpuChromaKeyTolerance.setValue(programObject, layerAdjustment.chromaKeyTolerance.value());
+            break;
+        }
+        case layergroupid::AdjustmentTypeID::TransferFunction:
+            break;
+    }
+}
 
-    virtual Tile getTile(const TileIndex& tileIndex) override;
-    virtual Tile::Status getTileStatus(const TileIndex& index) override;
-    virtual TileDepthTransform depthTransform() override;
-    virtual void update() override;
-    virtual void reset() override;
-    virtual int maxLevel() override;
-private:
-    inline int providerIndex(int level) const;
-    inline TileProvider* levelProvider(int level) const;
+void GPULayerAdjustment::bind(const LayerAdjustment& layerAdjustment, ghoul::opengl::ProgramObject* programObject,
+                                  const std::string& nameBase)
+{
+    switch (layerAdjustment.type()) {
+        case layergroupid::AdjustmentTypeID::None:
+            break;
+        case layergroupid::AdjustmentTypeID::ChromaKey: {
+            gpuChromaKeyColor.bind(programObject, nameBase + "chromaKeyColor");
+            gpuChromaKeyTolerance.bind(programObject, nameBase + "chromaKeyTolerance");
+            break;
+        }
+        case layergroupid::AdjustmentTypeID::TransferFunction:
+            break;
+    }
+}
 
-    std::vector<int> _providerIndices;
-    std::vector<std::shared_ptr<TileProvider>> _levelTileProviders;
-};
-
-} // namespace tileprovider
-} // namespace globebrowsing
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
+}  // namespace globebrowsing
+}  // namespace openspace

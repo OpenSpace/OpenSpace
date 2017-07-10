@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYER_SHADER_MANAGER___H__
 
 #include <modules/globebrowsing/rendering/layer/layermanager.h>
+#include <modules/globebrowsing/rendering/layer/layer.h>
 
 #include <array>
 #include <string>
@@ -63,6 +64,9 @@ public:
         struct LayerGroupPreprocessingData {
             int lastLayerIdx;
             bool layerBlendingEnabled;
+            std::vector<layergroupid::TypeID> layerType;
+            std::vector<layergroupid::BlendModeID> blendMode;
+            std::vector<layergroupid::AdjustmentTypeID> layerAdjustmentType;
             bool operator==(const LayerGroupPreprocessingData& other) const;
         };
         

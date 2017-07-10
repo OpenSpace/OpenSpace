@@ -47,10 +47,10 @@ AsyncTileDataProvider::AsyncTileDataProvider(const std::string& name,
     const std::shared_ptr<RawTileDataReader> rawTileDataReader)
     : _name(name)
     , _rawTileDataReader(rawTileDataReader)
-    , _concurrentJobManager(
-        std::make_shared<LRUThreadPool<TileIndex::TileHashKey>>(1, 10))
+    , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))
     , _pboContainer(nullptr)
     , _resetMode(ResetMode::ShouldResetAllButRawTileDataReader)
+    , _shouldBeDeleted(false)
 {
     _globeBrowsingModule = OsEng.moduleEngine().module<GlobeBrowsingModule>();
     performReset(ResetRawTileDataReader::No);
@@ -176,7 +176,6 @@ void AsyncTileDataProvider::updatePboUsage() {
 }
 
 void AsyncTileDataProvider::update() {
-    updatePboUsage();
     endUnfinishedJobs();
 
     // May reset
@@ -203,8 +202,19 @@ void AsyncTileDataProvider::update() {
             }
             break;
         }
-        case ResetMode::ShouldNotReset:
+        case ResetMode::ShouldBeDeleted: {
+            // Clean all finished jobs
+            getRawTiles();
+            // Only allow resetting if there are no jobs currently running
+            if (_enqueuedTileRequests.size() == 0) {
+                _shouldBeDeleted = true;
+            }
             break;
+        }
+        case ResetMode::ShouldNotReset: {
+            updatePboUsage();
+            break;
+        }
         default:
             break;
     }
@@ -217,6 +227,15 @@ void AsyncTileDataProvider::reset() {
     endEnqueuedJobs();
     LINFO(std::string("Prepairing for resetting of tile reader ") +
         "'" + _name + "'");
+}
+
+void AsyncTileDataProvider::prepairToBeDeleted() {
+    _resetMode = ResetMode::ShouldBeDeleted;
+    endEnqueuedJobs();
+}
+
+bool AsyncTileDataProvider::shouldBeDeleted() {
+    return _shouldBeDeleted;
 }
 
 void AsyncTileDataProvider::performReset(ResetRawTileDataReader resetRawTileDataReader) {

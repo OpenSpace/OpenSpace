@@ -17,11 +17,6 @@
     <BlockSizeY>512</BlockSizeY>
     <BandsCount>4</BandsCount>
     <MaxConnections>5</MaxConnections>
-    <Cache>
-        <Path>./GDAL_Cache/MODIS_Terra_Brightness_Temp_Band31_Day</Path>
-        <Depth>4</Depth>
-        <Extension>.png</Extension>
-    </Cache>
     <OfflineMode>false</OfflineMode>      
     <UnsafeSSL>true</UnsafeSSL>
     <ZeroBlockHttpCodes>400</ZeroBlockHttpCodes>
