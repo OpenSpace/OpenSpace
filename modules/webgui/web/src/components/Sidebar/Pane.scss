@@ -3,6 +3,7 @@
 $font-size: 1rem;
 
 .Pane {
+  animation: $appear-animation;
   background: $ui-background;
   border-bottom: 1px solid $ui-divider;
   flex-basis: 1px;
