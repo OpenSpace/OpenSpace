@@ -61,8 +61,8 @@ stage('Build') {
             timeout(time: 30, unit: 'MINUTES') {
                 checkout scm
                 sh 'git submodule update --init --recursive'
-                rm -rf build
                 sh '''
+                    rm -rf build
                     export PATH=${PATH}:/usr/local/bin:/Applications/CMake.app/Contents/bin
                     export CMAKE_BUILD_TOOL=/Applications/CMake.app/Contents/bin/CMake
                     srcDir=$PWD
