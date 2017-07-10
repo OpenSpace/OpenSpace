@@ -38,8 +38,9 @@ int setOrigin(lua_State* L) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
 
     const int type = lua_type(L, -1);
-    if (type != LUA_TSTRING)
+    if (type != LUA_TSTRING) {
         return luaL_error(L, "Expected string, got %i", type);
+    }
 
     std::string s = luaL_checkstring(L, -1);
 
@@ -61,8 +62,9 @@ int goToChunk(lua_State* L) {
     using ghoul::lua::luaTypeToString;
     
     int nArguments = lua_gettop(L);
-    if (nArguments != 3)
-    return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
+    if (nArguments != 3) {
+        return luaL_error(L, "Expected %i arguments, got %i", 3, nArguments);
+    }
     
     int x = static_cast<int>(lua_tonumber(L, 1));
     int y = static_cast<int>(lua_tonumber(L, 2));
@@ -77,13 +79,20 @@ int goToGeo(lua_State* L) {
     using ghoul::lua::luaTypeToString;
     
     int nArguments = lua_gettop(L);
-    if (nArguments != 2)
-    return luaL_error(L, "Expected %i arguments, got %i", 2, nArguments);
+    if (nArguments != 2 && nArguments != 3) {
+        return luaL_error(L, "Expected 2 or 3 arguments.");
+    }
     
     double latitude = static_cast<int>(lua_tonumber(L, 1));
     double longitude = static_cast<int>(lua_tonumber(L, 2));
-    
-    OsEng.navigationHandler().goToGeo(latitude, longitude);
+
+    if (nArguments == 2) {
+        OsEng.navigationHandler().goToGeo(latitude, longitude);
+    }
+    else if (nArguments == 3) {
+        double altitude = static_cast<int>(lua_tonumber(L, 3));
+        OsEng.navigationHandler().goToGeo(latitude, longitude, altitude);
+    }
     
     return 0;
 }
@@ -92,8 +101,9 @@ int restoreCameraStateFromFile(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     std::string cameraStateFilePath = luaL_checkstring(L, -1);
 
@@ -109,8 +119,9 @@ int saveCameraStateToFile(lua_State* L) {
     using ghoul::lua::luaTypeToString;
 
     int nArguments = lua_gettop(L);
-    if (nArguments != 1)
+    if (nArguments != 1) {
         return luaL_error(L, "Expected %i arguments, got %i", 1, nArguments);
+    }
 
     std::string cameraStateFilePath = luaL_checkstring(L, -1);
 

@@ -52,19 +52,19 @@ void* PixelBuffer::mapBuffer(Access access) {
     return dataPtr;
 }
 
-void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length, GLbitfield access) {
+void* PixelBuffer::mapBufferRange(GLintptr offset, GLsizeiptr length, BufferAccessMask access) {
     void* dataPtr = glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, offset, length, access);
     _isMapped = dataPtr ? true : false;
     return dataPtr;
 }
 
 bool PixelBuffer::unMapBuffer() {
-    bool success = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    GLboolean success = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     if (!success) {
         LERROR("Unable to unmap pixel buffer, data may be corrupt!");
     }
     _isMapped = false;
-    return success;
+    return success == GL_TRUE;
 }
 
 void PixelBuffer::bind() {

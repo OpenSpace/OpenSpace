@@ -67,12 +67,17 @@ public:
     SceneGraphNode* focusNode() const;
 
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
-    void goToChunk(Camera& camera, globebrowsing::TileIndex ti, glm::vec2 uv,
+    void goToChunk(Camera& camera,
+                   globebrowsing::TileIndex ti,
+                   glm::vec2 uv,
                    bool resetCameraDirection);
-    void goToGeodetic2(Camera& camera, globebrowsing::Geodetic2 geo2,
-                   bool resetCameraDirection);
+    void goToGeodetic2(Camera& camera,
+                       globebrowsing::Geodetic2 geo2,
+                       bool resetCameraDirection);
     
-    void goToGeodetic3(Camera& camera,  globebrowsing::Geodetic3 geo3);
+    void goToGeodetic3(Camera& camera,
+                       globebrowsing::Geodetic3 geo3,
+                       bool resetCameraDirection);
 #endif
 
 private:

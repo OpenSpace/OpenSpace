@@ -38,6 +38,7 @@
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 #include <modules/globebrowsing/tile/tileindex.h>
 #include <modules/globebrowsing/geometry/geodetic2.h>
+#include <modules/globebrowsing/geometry/geodetic3.h>
 #endif
 
 #include <ghoul/glm.h>
@@ -100,11 +101,12 @@ void NavigationHandler::deinitialize() {
 
 void NavigationHandler::setFocusNode(SceneGraphNode* node) {
     _orbitalNavigator->setFocusNode(node);
+    _camera->setFocusPositionVec3(focusNode()->worldPosition());
 }
 
 void NavigationHandler::setCamera(Camera* camera) {
     _camera = camera;
-    setFocusNode(_camera->parent());
+    //setFocusNode(_camera->parent());
 }
 
 void NavigationHandler::resetCameraDirection() {
@@ -137,6 +139,23 @@ void NavigationHandler::goToGeo(double latitude, double longitude) {
     _orbitalNavigator->goToGeodetic2(
         *_camera,
         globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(), true
+    );
+#else
+    LWARNING("GlobeBrowsing module must be enabled");
+#endif
+}
+
+void NavigationHandler::goToGeo(double latitude, double longitude,
+                                double altitude)
+{
+#ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
+    _orbitalNavigator->goToGeodetic3(
+        *_camera,
+        {
+            globebrowsing::Geodetic2(latitude, longitude) / 180 * glm::pi<double>(),
+            altitude
+        },
+        true
     );
 #else
     LWARNING("GlobeBrowsing module must be enabled");

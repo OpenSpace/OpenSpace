@@ -30,7 +30,7 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
-#include <openspace/interaction/interactionhandler.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>

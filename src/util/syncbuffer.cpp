@@ -24,7 +24,7 @@
 
 #include <openspace/util/syncbuffer.h>
 
-#include <sgct.h>
+#include <sgct/SharedData.h>
 
 namespace openspace {
 

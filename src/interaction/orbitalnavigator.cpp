@@ -564,11 +564,7 @@ void OrbitalNavigator::goToChunk(
         globe->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
     double altitude = glm::length(cameraPositionModelSpace - positionOnEllipsoid);
     
-    goToGeodetic3(camera, {pointPosition, altitude});
-    
-    if (resetCameraDirection) {
-        this->resetCameraDirection(camera, pointPosition);
-    }
+    goToGeodetic3(camera, {pointPosition, altitude}, resetCameraDirection);
 }
 
 void OrbitalNavigator::goToGeodetic2(Camera& camera,
@@ -592,14 +588,12 @@ void OrbitalNavigator::goToGeodetic2(Camera& camera,
     globe->ellipsoid().geodeticSurfaceProjection(cameraPositionModelSpace);
     double altitude = glm::length(cameraPositionModelSpace - positionOnEllipsoid);
         
-    goToGeodetic3(camera, {geo2, altitude});
-        
-    if (resetCameraDirection) {
-        this->resetCameraDirection(camera, geo2);
-    }
+    goToGeodetic3(camera, {geo2, altitude}, resetCameraDirection);
 }
     
-void OrbitalNavigator::goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 geo3) {
+void OrbitalNavigator::goToGeodetic3(Camera& camera,
+                                     globebrowsing::Geodetic3 geo3, 
+                                     bool resetCameraDirection) {
 	using namespace globebrowsing;
 	
 	RenderableGlobe* globe = castRenderableToGlobe();
@@ -612,6 +606,10 @@ void OrbitalNavigator::goToGeodetic3(Camera& camera, globebrowsing::Geodetic3 ge
     glm::dmat4 modelTransform = globe->modelTransform();
     glm::dvec3 positionWorldSpace = modelTransform * glm::dvec4(positionModelSpace, 1.0);
     camera.setPositionVec3(positionWorldSpace);
+
+    if (resetCameraDirection) {
+        this->resetCameraDirection(camera, geo3.geodetic2);
+    }
 }
 
 void OrbitalNavigator::resetCameraDirection(Camera& camera,

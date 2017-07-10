@@ -44,7 +44,7 @@ public:
     using ShouldAllocateDataOnCPU = ghoul::Boolean;
     using Format = ghoul::opengl::Texture::Format;
 
-    TileTextureInitData(size_t width, size_t height, GLuint glType, Format textureFormat,
+    TileTextureInitData(size_t width, size_t height, GLenum glType, Format textureFormat,
         ShouldAllocateDataOnCPU shouldAllocateDataOnCPU = ShouldAllocateDataOnCPU::No);
 
     TileTextureInitData(const TileTextureInitData& original);
@@ -58,9 +58,9 @@ public:
     size_t bytesPerPixel() const;
     size_t bytesPerLine() const;
     size_t totalNumBytes() const;
-    GLuint glType() const;
+    GLenum glType() const;
     Format ghoulTextureFormat() const;
-    GLint glTextureFormat() const;
+    GLenum glTextureFormat() const;
     bool shouldAllocateDataOnCPU() const;
     HashKey hashKey() const;
 
@@ -74,9 +74,9 @@ private:
     HashKey _hashKey;
     glm::ivec3 _dimensionsWithPadding;
     glm::ivec3 _dimensionsWithoutPadding;
-    GLuint _glType;
+    GLenum _glType;
     Format _ghoulTextureFormat;
-    GLint _glTextureFormat;
+    GLenum _glTextureFormat;
     size_t _nRasters;
     size_t _bytesPerDatum;
     size_t _bytesPerPixel;

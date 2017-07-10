@@ -185,10 +185,9 @@ if (NOT MSVC)
 endif ()
 
 # Boost
-set(Boost_USE_STATIC_LIBS ON)
-if (NOT DEFINED Boost_INCLUDE_DIR OR NOT DEFINED Boost_LIBRARIES)
-    find_package(Boost COMPONENTS REQUIRED system chrono date_time thread)
-endif ()
+set(Boost_USE_STATIC_LIBS        ON)
+set(Boost_USE_MULTITHREADED      ON)
+find_package(Boost COMPONENTS REQUIRED system chrono date_time thread)
 target_include_directories(libtorrent PUBLIC ${Boost_INCLUDE_DIR})
 target_link_libraries(libtorrent ${Boost_LIBRARIES})
 
@@ -232,8 +231,8 @@ else()
     set(LIBDIR "lib")
 endif()
 
-install(TARGETS libtorrent DESTINATION ${LIBDIR})
-install(DIRECTORY include/libtorrent
-    DESTINATION include
-    PATTERN ".svn" EXCLUDE)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libtorrent-rasterbar.pc DESTINATION ${LIBDIR}/pkgconfig)
+#install(TARGETS libtorrent DESTINATION ${LIBDIR})
+#install(DIRECTORY include/libtorrent
+#    DESTINATION include
+#    PATTERN ".svn" EXCLUDE)
+#install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libtorrent-rasterbar.pc DESTINATION ${LIBDIR}/pkgconfig)
