@@ -147,6 +147,10 @@ public:
     static const std::string PartFilterIdentifierIdentifier;
     /// The part of the key storing a list of severities that should be filtered out
     static const std::string PartFilterSeverity;
+    /// The key to store the location of the web helper executable
+    static const std::string KeyWebHelperLocation;
+    /// The key to store the url of the web gui
+    static const std::string KeyWebGuiUrl;
 
     /**
      * Iteratively walks the directory structure starting with \p filename to find the

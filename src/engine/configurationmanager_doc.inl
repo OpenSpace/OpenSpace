@@ -194,6 +194,18 @@ documentation::Documentation ConfigurationManager::Documentation() {
             Optional::Yes
         },
         {
+            ConfigurationManager::KeyWebHelperLocation,
+            new StringVerifier,
+            "The location of the CEF Web helper executable. No extension should be added.",
+            Optional::No
+        },
+        {
+            ConfigurationManager::KeyWebGuiUrl,
+            new StringVerifier,
+            "The web URL for the GUI.",
+            Optional::No
+        },
+        {
             ConfigurationManager::KeyLauncher,
             new TableVerifier({
                 {

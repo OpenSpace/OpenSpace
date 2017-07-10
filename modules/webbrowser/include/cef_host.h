@@ -33,11 +33,10 @@
 
 namespace openspace {
 
-#ifdef __APPLE__
-static const std::string SUBPROCESS_PATH = "./webgui_cef_helper";
-#endif
 #ifdef WIN32
-static const std::string SUBPROCESS_PATH = "C:\\Users\\Klas\\Development\\OpenSpace\\bin\\openspace\\Debug\\openspace_web_helper.exe";
+static const std::string SUBPROCESS_ENDING = ".exe";
+#else
+static const std::string SUBPROCESS_ENDING = "";
 #endif
 
 class CefHost {

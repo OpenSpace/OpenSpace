@@ -99,6 +99,9 @@ const string ConfigurationManager::PartFilterIdentifierType = "Type";
 const string ConfigurationManager::PartFilterIdentifierIdentifier = "Identifier";
 const string ConfigurationManager::PartFilterSeverity = "PartFilterSeverity";
 
+const string ConfigurationManager::KeyWebHelperLocation = "WebHelperLocation";
+const string ConfigurationManager::KeyWebGuiUrl = "WebGuiUrl";
+
 string ConfigurationManager::findConfiguration(const string& filename) {
     using ghoul::filesystem::Directory;
     

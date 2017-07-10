@@ -41,6 +41,7 @@ public:
 private:
 	std::unique_ptr<CefHost> cefHost;
 	std::unique_ptr<BrowserInstance> guiInstance;
+	std::string guiLocation;
 };
 
 } // namespace openspace

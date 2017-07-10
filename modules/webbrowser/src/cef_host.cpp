@@ -22,6 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <include/openspace/engine/configurationmanager.h>
 #include "include/cef_host.h"
 
 namespace {
@@ -35,7 +36,11 @@ CefHost::CefHost() {
     CefMainArgs args;
     CefSettings settings;
 
-    CefString(&settings.browser_subprocess_path).FromASCII((char*) SUBPROCESS_PATH.c_str());
+    std::string subprocessPath = OsEng.configurationManager().value<std::string>(
+            ConfigurationManager::KeyWebHelperLocation);
+    subprocessPath += SUBPROCESS_ENDING;
+
+    CefString(&settings.browser_subprocess_path).FromASCII((char*) subprocessPath.c_str());
     attachDebugSettings(settings);
 
     CefInitialize(args, settings, nullptr, NULL);
