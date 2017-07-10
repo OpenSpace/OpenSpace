@@ -1,6 +1,5 @@
 /* globals WebSocket */
 
-const DEFAULT_URL = 'ws://localhost:8001';
 const TOPIC_KEY = 'topic';
 
 class Connection {
@@ -8,27 +7,32 @@ class Connection {
    * Start a connection to the web socket server
    * @param url - the server url
    */
-  constructor(url = DEFAULT_URL) {
+  constructor(url = Connection.defaultUrl) {
     this.socket = new WebSocket(url);
     this.socket.onopen = this.onOpen.bind(this);
     this.socket.onclose = this.onClose.bind(this);
+    this.socket.onerror = this.onError.bind(this);
     this.socket.onmessage = this.onMessage.bind(this);
     this.commandQueue = [];
+    this.statusCallbacks = [];
     this.topics = {};
   }
 
   onOpen(event) {
-    console.log('Opened socket connection...', event);
+    this.statusCallbacks.forEach(cb => cb(this, event, 'onOpen'));
 
     // flush command queue, save the messages that still fail to send
     this.commandQueue = this.commandQueue.filter(message => !this.sendOrStore(message));
   }
 
   onClose(event) {
-    console.log('Closed socket connection...', event);
     // TODO: Tell datamanager connection was lost, take care of callbacks somehow
+    this.statusCallbacks.forEach(cb => cb(this, event, 'onClose'));
+  }
 
-    console.log('Stored messages in command queue:', this.commandQueue);
+  onError(event) {
+    console.error('WebSocket error:', event);
+    this.statusCallbacks.forEach(cb => cb(this, event, 'onError'));
   }
 
   /**
@@ -77,10 +81,10 @@ class Connection {
     if (this.isOpen()) {
       this.socket.send(message);
       return true;
-    } else {
-      this.commandQueue.push(message);
-      return false;
     }
+
+    this.commandQueue.push(message);
+    return false;
   }
 
   /**
@@ -106,6 +110,14 @@ class Connection {
 
   isClosed() {
     return [this.socket.CLOSED, this.socket.CLOSING].includes(this.socket.readyState);
+  }
+
+  close() {
+    this.socket.close();
+  }
+
+  static get defaultUrl() {
+    return 'ws://localhost:8001';
   }
 }
 

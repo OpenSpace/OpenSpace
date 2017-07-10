@@ -92,6 +92,14 @@ class DataManager {
     this.privateConnection = this.privateConnection || new Connection();
     return this.privateConnection;
   }
+
+  set connection(newConnection) {
+    if (this.privateConnection) {
+      this.connection.close();
+    }
+
+    this.privateConnection = newConnection;
+  }
 }
 
 const instance = new DataManager();
