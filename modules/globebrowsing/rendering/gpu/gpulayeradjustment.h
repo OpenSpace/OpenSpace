@@ -22,64 +22,35 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSMENT___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSMENT___H__
 
-#include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/cache/memoryawaretilecache.h>
+#include <openspace/util/gpudata.h>
+
+namespace ghoul { namespace opengl {
+class ProgramObject;
+}}
 
 namespace openspace {
-
-class PixelBuffer;
-
 namespace globebrowsing {
 
-class AsyncTileDataProvider;
-struct RawTile;
-    
-namespace tileprovider {
+struct LayerAdjustment;
 
-/**
-* Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
-* caches them in memory using LRU caching
-*/
-class CachingTileProvider : public TileProvider {
+class GPULayerAdjustment{
 public:
-    CachingTileProvider(const ghoul::Dictionary& dictionary);
-    CachingTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader);
+    void setValue(ghoul::opengl::ProgramObject* programObject,
+        const LayerAdjustment& layerAdjustment);
 
-    virtual ~CachingTileProvider() override;
-        
-    /**
-    * \returns a Tile with status OK iff it exists in in-memory 
-    * cache. If not, it may enqueue some IO operations on a 
-    * separate thread.
-    */
-    virtual Tile getTile(const TileIndex& tileIndex) override;
-
-    virtual Tile::Status getTileStatus(const TileIndex& tileIndex) override;
-    virtual TileDepthTransform depthTransform() override;
-    virtual void update() override;
-    virtual void reset() override;
-    virtual int maxLevel() override;
-    virtual float noDataValueAsFloat() override;
+    void bind(const LayerAdjustment& layerAdjustment,
+        ghoul::opengl::ProgramObject* programObject,
+        const std::string& nameBase);
 
 private:
-    /**
-    * Collects all asynchronously downloaded <code>RawTile</code>
-    * and uses <code>createTile</code> to create <code>Tile</code>s, 
-    * which are put in the LRU cache - potentially pushing out outdated
-    * Tiles.
-    */
-    void initTexturesFromLoadedData();
-
-    std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
-  
-    cache::MemoryAwareTileCache* _tileCache;
+    GPUData<glm::vec3> gpuChromaKeyColor;
+    GPUData<float> gpuChromaKeyTolerance;
 };
 
-} // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYER_ADJUSMENT___H__

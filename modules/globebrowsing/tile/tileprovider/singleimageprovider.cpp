@@ -38,18 +38,21 @@ namespace tileprovider {
     
 SingleImageProvider::SingleImageProvider(const ghoul::Dictionary& dictionary)
     : _tile(nullptr, nullptr, Tile::Status::Unavailable)
+    , _filePath("filePath", "File Path", "")
 {
     // Required input
-    if (!dictionary.getValue<std::string>(KeyFilePath, _imagePath)) {
-        throw std::runtime_error(std::string("Must define key '") + KeyFilePath + "'");
-    }
+    std::string filePath;
+    dictionary.getValue<std::string>(KeyFilePath, filePath);
+    _filePath.setValue(filePath);
+
+    addProperty(_filePath);
 
     reset();
 }
 
 SingleImageProvider::SingleImageProvider(const std::string& imagePath)
-    : _imagePath(imagePath)
-    , _tile(nullptr, nullptr, Tile::Status::Unavailable)
+    : _tile(nullptr, nullptr, Tile::Status::Unavailable)
+    , _filePath("filePath", "File Path", imagePath)
 {
     reset();
 }
@@ -74,12 +77,15 @@ void SingleImageProvider::update() {
 }
 
 void SingleImageProvider::reset() {
-    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_imagePath);
+    if (_filePath.value().empty()) {
+        return;
+    }
+    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_filePath);
     Tile::Status tileStatus = _tileTexture ? Tile::Status::OK : Tile::Status::IOError;
 
     if (!_tileTexture) {
         throw std::runtime_error(std::string("Unable to load texture '")
-            + _imagePath + "'");
+            + _filePath.value() + "'");
     }
  
     _tileTexture->uploadTexture();
