@@ -70,12 +70,12 @@ return {
                 ColorLayers = {
                     {
                         Name = "ESRI VIIRS Combo",
-                        Type = "ByLevel",
+                        Type = "ByLevelTileLayer",
                         LevelTileProviders = {
                             {
                                 MaxLevel = 3, 
                                 TileProvider = {
-                                    Type = "Temporal",
+                                    Type = "TemporalTileLayer",
                                     Name = "Temporal VIIRS SNPP",
                                     FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_CorrectedReflectance_TrueColor.xml", }, 
                             },
@@ -90,22 +90,37 @@ return {
                         Enabled = true,
                     },
                     {
-                        Type = "Temporal",
-                        Name = "Temporal_GHRSST_L4_MUR_Sea_Surface_Temperature",
-                        FilePath = "map_service_configs/GIBS/Temporal_GHRSST_L4_MUR_Sea_Surface_Temperature.xml",
+                        Name = "BMNG",
+                        FilePath = "map_service_configs/Utah/Bmng.wms"
                     },
                     {
-                        Type = "Temporal",
+                        Type = "TemporalTileLayer",
                         Name = "Temporal_AMSR2_GCOM_W1_Sea_Ice_Concentration",
                         FilePath = "map_service_configs/GIBS/Temporal_AMSR2_GCOM_W1_Sea_Ice_Concentration.xml",
                     },
                     {
-                        Name = "BMNG",
-                        FilePath = "map_service_configs/Utah/Bmng.wms"
-                    }
+                        Type = "TemporalTileLayer",
+                        Name = "MODIS_Terra_Chlorophyll_A",
+                        FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                            "MODIS_Terra_Chlorophyll_A",
+                            "2013-07-02",
+                            "Yesterday",
+                            "1d",
+                            "1km",
+                            "png")
+                    },
+                    {
+                        Type = "TemporalTileLayer",
+                        Name = "GHRSST_L4_G1SST_Sea_Surface_Temperature",
+                        FilePath = openspace.globebrowsing.createTemporalGibsGdalXml(
+                            "GHRSST_L4_G1SST_Sea_Surface_Temperature",
+                            "2010-06-21",
+                            "Yesterday",
+                            "1d",
+                            "1km",
+                            "png")
+                    },
                 },
-                GrayScaleLayers = { },
-                GrayScaleColorOverlays = { },
                 NightLayers = {
                     {
                         Name = "Earth at Night 2012",
@@ -118,7 +133,7 @@ return {
                         },
                     },
                     {
-                        Type = "Temporal",
+                        Type = "TemporalTileLayer",
                         Name = "Temporal Earth at Night",
                         FilePath = "map_service_configs/GIBS/Temporal_VIIRS_SNPP_DayNightBand_ENCC.xml"
                     }
@@ -134,7 +149,7 @@ return {
                         FilePath = "map_service_configs/Utah/Gebco.wms",
                     }
                 },
-                ColorOverlays = {
+                Overlays = {
                     {
                         Name = "Coastlines",
                         FilePath = "map_service_configs/GIBS/Coastlines.xml",
@@ -148,14 +163,13 @@ return {
                         FilePath = "map_service_configs/GIBS/Reference_Labels.xml",
                     },
                     {
-                        Type = "TileIndex",
+                        Type = "TileIndexTileLayer",
                         Name = "Tile Indices",
                     },
                     {
-                        Type = "SizeReference",
+                        Type = "SizeReferenceTileLayer",
                         Name = "Size Reference",
                         Radii = earthEllipsoid,
-                        BackgroundImagePath = "../arrows.png",
                     },
                 },
                 HeightLayers = {

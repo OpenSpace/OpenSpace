@@ -61,13 +61,8 @@
         <YOrigin>top</YOrigin>
     </DataWindow>
     <BlockSizeX>512</BlockSizeX>
-    <BlockSizeY>512</BlockSizeY>
+    <BlockSizeY>512</BlockSizeY> 
     <UnsafeSSL>true</UnsafeSSL>
     <ZeroBlockHttpCodes>400</ZeroBlockHttpCodes>
     <ZeroBlockOnServerException>true</ZeroBlockOnServerException>
-    <Cache>
-        <Path>./GDAL_Cache/OnMoonColor</Path>
-        <Depth>4</Depth>
-        <Extension>.png</Extension>
-    </Cache>    
 </GDAL_WMS>

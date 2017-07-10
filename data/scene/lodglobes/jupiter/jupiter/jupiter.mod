@@ -45,12 +45,6 @@ return {
                         Enabled = true,
                     },
                 },
-                GrayScaleLayers = { },
-                GrayScaleColorOverlays = { },
-                NightLayers = { },
-                WaterMasks = { },
-                ColorOverlays = { },
-                HeightLayers = { },
             },
         }
     },
