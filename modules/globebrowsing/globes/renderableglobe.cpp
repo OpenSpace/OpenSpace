@@ -254,7 +254,15 @@ SurfacePositionHandle RenderableGlobe::calculateSurfacePositionHandle(
     if (glm::dot(ellipsoidSurfaceOutDirection, centerToEllipsoidSurface) < 0) {
 		ellipsoidSurfaceOutDirection *= -1.0;
     }
+
 	double heightToSurface = getHeight(targetModelSpace);
+    heightToSurface = glm::isnan(heightToSurface) ? 0.0 : heightToSurface;
+    centerToEllipsoidSurface = glm::isnan(glm::length(centerToEllipsoidSurface)) ?
+        (glm::dvec3(0.0, 1.0, 0.0) * static_cast<double>(boundingSphere())) :
+		centerToEllipsoidSurface;
+    ellipsoidSurfaceOutDirection = glm::isnan(glm::length(ellipsoidSurfaceOutDirection)) ?
+        glm::dvec3(0.0, 1.0, 0.0) : ellipsoidSurfaceOutDirection;
+
     return {
 		centerToEllipsoidSurface,
 		ellipsoidSurfaceOutDirection,
