@@ -1102,25 +1102,18 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix,
                              const glm::mat4& viewMatrix,
                              const glm::mat4& projectionMatrix)
 {
-    bool isGuiWindow = _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
-    bool showOverlay = isGuiWindow && _windowWrapper->isMaster() && _windowWrapper->isRegularRendering();
-    // @CLEANUP:  Replace the two windows by a single call to whether a gui should be
-    // rendered ---abock
+    LTRACE("OpenSpaceEngine::render(begin)");
 
-    if (showOverlay) {
+    const bool isGuiWindow =
+        _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+    if (isGuiWindow) {
         _console->update();
     }
 
-    LTRACE("OpenSpaceEngine::render(begin)");
     _renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
     
     for (const auto& func : _moduleCallbacks.render) {
         func();
-    }
-
-    if (showOverlay) {
-        _renderEngine->renderScreenLog();
-        _console->render();
     }
 
     if (_shutdown.inShutdown) {
@@ -1134,6 +1127,14 @@ void OpenSpaceEngine::postDraw() {
     LTRACE("OpenSpaceEngine::postDraw(begin)");
     
     _renderEngine->postDraw();
+
+    const bool isGuiWindow =
+        _windowWrapper->hasGuiWindow() ? _windowWrapper->isGuiWindow() : true;
+
+    if (isGuiWindow) {
+        _renderEngine->renderScreenLog();
+        _console->render();
+    }
 
     for (const auto& func : _moduleCallbacks.postDraw) {
         func();
