@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#if 0
+
 #include <modules/globebrowsing/geometry/geodetic2.h>
 #include <modules/globebrowsing/tile/tileprovider/presentationslideprovider.h>
 #include <modules/globebrowsing/tile/tileindex.h>
@@ -112,3 +114,5 @@ TileProvider* PresentationSlideProvider::slideProvider() {
 } // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
+
+#endif

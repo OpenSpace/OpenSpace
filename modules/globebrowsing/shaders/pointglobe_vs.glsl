@@ -26,29 +26,28 @@
 
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-layout(location = 0) in vec3 in_position;
+layout(location = 0) in vec2 in_position;
 
-uniform int windowWidth;
-uniform float globeRadius;
+uniform float lightIntensityClamped;
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 uniform mat4 directionToSunViewSpace;
 
 out vec4 vs_positionClipSpace;
 out vec4 vs_positionCameraSpace;
+out vec2 vs_positionModelSpace;
 
 void main() {
-    vec4 positionCameraSpace = modelViewTransform * vec4(in_position, 1);
-    vs_positionClipSpace = projectionTransform * positionCameraSpace;
+    vs_positionModelSpace = in_position;
 
-    vs_positionClipSpace = z_normalization(vs_positionClipSpace);    
-
-    vec4 pointSizeCameraSpace = modelViewTransform * vec4(0,0, in_position.z, 1);
-    pointSizeCameraSpace.x = globeRadius;
-    pointSizeCameraSpace.y = globeRadius;
-    vec4 pointSizeClipSpace = projectionTransform * pointSizeCameraSpace;
-    vec4 pointSizeNDC = pointSizeClipSpace / pointSizeClipSpace.w;
-
-    gl_PointSize = pointSizeNDC.x * 2 * windowWidth;
-    gl_Position = vs_positionClipSpace;
+    float totalIntensity = lightIntensityClamped;
+    
+    vec4 positionCameraSpace = modelViewTransform * vec4(in_position * totalIntensity, 0, 1);
+    
+    // Position
+    vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+    
+    vs_positionClipSpace = z_normalization(positionClipSpace);
+    
+    gl_Position = z_normalization(positionClipSpace);
 }

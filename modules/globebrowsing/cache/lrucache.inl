@@ -121,6 +121,11 @@ size_t LRUCache<KeyType, ValueType, HasherType>::size() const {
 }
 
 template<typename KeyType, typename ValueType, typename HasherType>
+size_t LRUCache<KeyType, ValueType, HasherType>::maximumCacheSize() const {
+    return _maximumCacheSize;
+}
+
+template<typename KeyType, typename ValueType, typename HasherType>
 void LRUCache<KeyType, ValueType, HasherType>::putWithoutCleaning(const KeyType& key,
                                                                   const ValueType& value)
 {

@@ -1,30 +1,26 @@
 return {
     -- Barycenter module
     {
-        Name = "JupiterBarycenter",
+        Name = "MercuryBarycenter",
         Parent = "SolarSystemBarycenter",
         Transform = {
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "JUPITER BARYCENTER",
+                Body = "MERCURY",
                 Observer = "SUN",
                 Kernels = "${OPENSPACE_DATA}/spice/de430_1850-2150.bsp"
             },
         },
     },
     -- RenderableGlobe module
-    {
-        Name = "Jupiter",
-        Parent = "JupiterBarycenter",
+    {   
+        Name = "Mercury",
+        Parent = "MercuryBarycenter",
         Transform = {
             Rotation = {
                 Type = "SpiceRotation",
-                SourceFrame = "IAU_JUPITER",
+                SourceFrame = "IAU_MERCURY",
                 DestinationFrame = "GALACTIC",
-            },
-            Translation = {
-                Type = "StaticTranslation",
-                Position = {0, 0, 0}, -- jupiter is at its barycenter
             },
             Scale = {
                 Type = "StaticScale",
@@ -33,35 +29,46 @@ return {
         },
         Renderable = {
             Type = "RenderableGlobe",
-            Radii = {71492000, 71492000, 66854000},
+            Radii = {2439700, 2439700.0, 2439700.0},
+            Frame = "IAU_MERCURY",
+            Body = "MERCURY",
+            
             CameraMinHeight = 300,
             InteractionDepthBelowEllipsoid = 0, -- Useful when having negative height map values
             SegmentsPerPatch = 64,
             Layers = {
                 ColorLayers = {
                     {
-                        Name = "Jupiter Texture",
-                        FilePath = "textures/jupiter.jpg",
+                        Name = "Simple Texture",
+                        FilePath = "textures/mercury.jpg",
                         Enabled = true,
                     },
+                    {
+                        Name = "Messenger_Mosaic",
+                        FilePath = "map_service_configs/Utah/MessengerMosaic.wms"
+                    },
+                    {
+                        Name = "Messenger_MDIS",
+                        FilePath = "map_service_configs/Utah/MessengerMDIS.wms"
+                    }
                 },
             },
-        }
+        },
     },
     -- Trail module
     {   
-        Name = "JupiterTrail",
+        Name = "MercuryTrail",
         Parent = "SolarSystemBarycenter",
         Renderable = {
             Type = "RenderableTrailOrbit",
             Translation = {
                 Type = "SpiceTranslation",
-                Body = "JUPITER BARYCENTER",
+                Body = "MERCURY",
                 Observer = "SUN",
             },
-            Color = { 0.8, 0.7, 0.7 },
-            Period = 4330.595,
-            Resolution = 1000
+            Color = {0.6, 0.5, 0.5 },
+            Period = 87.968,
+            Resolution = 100
         }
     }
 }
