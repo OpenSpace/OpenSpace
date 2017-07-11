@@ -22,39 +22,76 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__
 
 #include <modules/globebrowsing/tile/tileprovider/tileprovider.h>
+#include <modules/globebrowsing/cache/memoryawaretilecache.h>
 
 #include <openspace/properties/stringproperty.h>
+#include <openspace/properties/numericalproperty.h>
 
 namespace openspace {
+
+class PixelBuffer;
+
 namespace globebrowsing {
+
+class AsyncTileDataProvider;
+struct RawTile;
+    
 namespace tileprovider {
 
-class TileProviderByLevel : public TileProvider {
+/**
+* Provides tiles loaded by <code>AsyncTileDataProvider</code> and 
+* caches them in memory using LRU caching
+*/
+class DefaultTileProvider : public TileProvider {
 public:
-    TileProviderByLevel(const ghoul::Dictionary& dictionary);
-    TileProviderByLevel(const std::string& imagePath);
-    virtual ~TileProviderByLevel() = default;
+    DefaultTileProvider(const ghoul::Dictionary& dictionary);
+    DefaultTileProvider(std::shared_ptr<AsyncTileDataProvider> tileReader);
 
+    virtual ~DefaultTileProvider() override;
+        
+    /**
+    * \returns a Tile with status OK iff it exists in in-memory 
+    * cache. If not, it may enqueue some IO operations on a 
+    * separate thread.
+    */
     virtual Tile getTile(const TileIndex& tileIndex) override;
-    virtual Tile::Status getTileStatus(const TileIndex& index) override;
+
+    virtual Tile::Status getTileStatus(const TileIndex& tileIndex) override;
     virtual TileDepthTransform depthTransform() override;
     virtual void update() override;
     virtual void reset() override;
     virtual int maxLevel() override;
-private:
-    inline int providerIndex(int level) const;
-    inline TileProvider* levelProvider(int level) const;
+    virtual float noDataValueAsFloat() override;
 
-    std::vector<int> _providerIndices;
-    std::vector<std::shared_ptr<TileProvider>> _levelTileProviders;
+private:
+    /**
+    * Collects all asynchronously downloaded <code>RawTile</code>
+    * and uses <code>createTile</code> to create <code>Tile</code>s, 
+    * which are put in the LRU cache - potentially pushing out outdated
+    * Tiles.
+    */
+    void initTexturesFromLoadedData();
+
+    void initAsyncTileDataReader(TileTextureInitData initData);
+
+    std::shared_ptr<AsyncTileDataProvider> _asyncTextureDataProvider;
+  
+    cache::MemoryAwareTileCache* _tileCache;
+
+    properties::StringProperty _filePath;
+    properties::IntProperty _tilePixelSize;
+    layergroupid::GroupID _layerGroupID;
+    std::string _basePath;
+    int _preCacheLevel;
+    bool _performPreProcessing;
 };
 
 } // namespace tileprovider
 } // namespace globebrowsing
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_PROVIDER_BY_LEVEL___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___CACHING_TILE_PROVIDER___H__

@@ -42,7 +42,7 @@ int AvailableTileData::getDesiredLevel(const Chunk& chunk, const RenderData& dat
         
     for (size_t i = 0; i < layergroupid::NUM_LAYER_GROUPS; ++i) {
         for (const auto& layer : layerManager->layerGroup(i).activeLayers()) {
-            Tile::Status status = layer->tileProvider()->getTileStatus(chunk.tileIndex());
+            Tile::Status status = layer->getTileStatus(chunk.tileIndex());
             if (status == Tile::Status::OK) {
                 return UnknownDesiredLevel;
             }

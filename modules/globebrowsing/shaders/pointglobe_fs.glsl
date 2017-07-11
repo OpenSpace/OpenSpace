@@ -24,31 +24,22 @@
 
 #include "fragment.glsl"
 
-uniform vec3 directionToSunViewSpace;
+//uniform vec3 directionToSunViewSpace;
 uniform vec3 positionCameraSpace;
+//uniform float lightOverflow;
 
 in vec4 vs_positionClipSpace;
+in vec2 vs_positionModelSpace;
 
 Fragment getFragment() {
 
-    vec2 pointCoord = (gl_PointCoord.xy - vec2(0.5)) * 2;
-    pointCoord.y = -pointCoord.y; // y should point up in cam space
-    if(length(pointCoord) > 1) // Outside of circle radius?
-      discard;
-
-    // z_coord of sphere
-    float zCoord = sqrt(1 - pow(length(pointCoord),2));
-
-    // Light calculations
-    vec3 normal = normalize(vec3(pointCoord, zCoord));
-    float cosTerm = max(dot(directionToSunViewSpace, normal), 0);
-
-    vec3 color = vec3(1,1,1) * 0.7;
-    vec3 shadedColor = cosTerm * color;
-
+    float alpha = 1 - sqrt(pow(vs_positionModelSpace.x, 2) + pow(vs_positionModelSpace.y, 2));
+    alpha = pow(alpha, 3);
     Fragment frag;
-    frag.color = vec4(shadedColor,1);
+    frag.color = vec4(1,1,1, alpha);// + vec4(1,1,1,1) * 0.0000000001 * directionToSunViewSpace.x;
+    //frag.color *= 1 + (lightOverflow * lightOverflow) * 0.0001;
     frag.depth = vs_positionClipSpace.w;
+    frag.blend = BLEND_MODE_ADDITIVE;
     return frag;
 }
 
