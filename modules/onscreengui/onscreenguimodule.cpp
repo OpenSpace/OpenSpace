@@ -37,6 +37,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scene/assetloader.h>
 
 #include <ghoul/logging/logmanager.h>
 
@@ -72,7 +73,8 @@ OnScreenGUIModule::OnScreenGUIModule()
                         &(OsEng.interactionHandler()),
                         &(OsEng.renderEngine()),
                         &(OsEng.parallelConnection()),
-                        &(OsEng.console())
+                        &(OsEng.console()),
+                        OsEng.assetLoader().rootAsset()
                     };
                     return res;
                 }

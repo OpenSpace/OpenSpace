@@ -122,6 +122,7 @@ public:
     SettingsEngine& settingsEngine();
     TimeManager& timeManager();
     WindowWrapper& windowWrapper();
+    AssetLoader& assetLoader();
     ghoul::fontrendering::FontManager& fontManager();
     interaction::InteractionHandler& interactionHandler();
     properties::PropertyOwner& globalPropertyOwner();

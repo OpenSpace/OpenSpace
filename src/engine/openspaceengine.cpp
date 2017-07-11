@@ -379,6 +379,7 @@ void OpenSpaceEngine::create(int argc, char** argv,
     _engine->_assetLoader = std::make_unique<AssetLoader>(
         OsEng.scriptEngine().luaState(), "${ASSETS}", "${SYNC}");
     _engine->_sceneLoader = std::make_unique<SceneLoader>(_engine->_assetLoader.get());
+    _engine->_globalPropertyNamespace->addPropertySubOwner(_engine->_assetLoader->rootAsset());
 }
 
 void OpenSpaceEngine::destroy() {
@@ -1346,6 +1347,11 @@ TimeManager& OpenSpaceEngine::timeManager() {
 WindowWrapper& OpenSpaceEngine::windowWrapper() {
     ghoul_assert(_windowWrapper, "Window Wrapper must not be nullptr");
     return *_windowWrapper;
+}
+
+AssetLoader & OpenSpaceEngine::assetLoader() {
+    ghoul_assert(_assetLoader, "Asset loader must not be nullptr");
+    return *_assetLoader;
 }
 
 ghoul::fontrendering::FontManager& OpenSpaceEngine::fontManager() {

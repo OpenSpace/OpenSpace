@@ -28,6 +28,9 @@
 #include <openspace/scene/scenegraphnode.h>
 
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/properties/property.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/properties/scalarproperty.h>
 
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/lua/luastate.h>
@@ -45,12 +48,25 @@ int importAsset(lua_State* state);
 int importAssetToggle(lua_State* state);
 int resolveLocalResource(lua_State* state);
 int resolveSyncedResource(lua_State* state);
-}
+} // namespace assetloader
 
 class AssetLoader {
 public:
+    class Asset;
 
-    class Asset {
+    using InitializationRequirement = ghoul::Boolean;
+    using Dependency = std::pair<Asset*, InitializationRequirement>;
+
+    class DependencyToggle : public properties::PropertyOwner {
+    public:
+        DependencyToggle(Asset* dependency, Asset* dependant, bool enabled = false);
+    private:
+        properties::BoolProperty _enabled;
+        Asset* _dependant;
+        Asset* _dependency;
+    };
+
+    class Asset : public properties::PropertyOwner {
     public:
         Asset(AssetLoader* loader, std::string directory);
         Asset(AssetLoader* loader, std::string directory, std::string name);
@@ -66,19 +82,19 @@ public:
         void initialize();
         void deinitialize();
 
-        void addDependency(Asset* asset);
+        bool hasDependency(Asset* asset, InitializationRequirement initReq);
+        void addDependency(Asset* asset, bool togglableInitReq, InitializationRequirement initReq);
+        void setInitializationRequirement(Asset* dependency, InitializationRequirement initReq);
         void removeDependency(Asset* asset);
         void removeDependency(const std::string& assetId);
 
-        void addToggle(Asset* assetToggle);
-        void setToggle(Asset* assetToggle, bool toggleValue);
-        void toggleInitialized(Asset* assetToggle);
-        void togglerInitialized(Asset* assetToggle);
-        void toggleDeinitialized(Asset* assetToggle);
-        void togglerDeinitialized(Asset* assetToggle);
+        void dependencyInitialized(Asset* dependency);
+        void dependencyDeinitialized(Asset* dependency);
+        void dependantInitialized(Asset* dependant);
+        void dependantDeinitialized(Asset* dependant);
 
-        bool hasInitializedDependants();
-
+        bool hasInitializedDependants(InitializationRequirement initReq);
+        bool hasDependant(InitializationRequirement initReq);
     private:
         std::string resolveLocalResource(std::string resourceName);
         std::string resolveSyncedResource(std::string resourceName);
@@ -96,16 +112,17 @@ public:
         std::string _assetDirectory;
 
         // Other assets that this asset depend on
-        std::vector<Asset*> _dependencies;
+        std::vector<Dependency> _dependencies;
 
         // Other assets that depend on this asset
         std::vector<Asset*> _dependants;
 
+        std::vector<std::unique_ptr<DependencyToggle>> _dependencyToggles;
         // Other assets that this asset may toggle
-        std::vector<Asset*> _toggles;
+        //std::vector<Asset*> _toggles;
 
         // Other assets that may toggle this asset
-        std::vector<Asset*> _togglers;
+        //std::vector<Asset*> _togglers;
     };
 
     AssetLoader(ghoul::lua::LuaState* _luaState, std::string assetRoot, std::string syncRoot);
@@ -123,7 +140,10 @@ public:
     const std::string& syncRoot();
 
 private:
-    Asset* importAsset(const std::string& identifier, bool toggle = false, bool toggleOn = true);
+    Asset* importAsset(
+        const std::string& identifier,
+        bool togglableInitializationRequirement = false,
+        bool toggleOn = true);
 
     void pushAsset(Asset* asset);
     void popAsset();
@@ -136,10 +156,11 @@ private:
     std::string _syncRoot;
 
     friend int assetloader::importAsset(lua_State* state);
-    int importAssetLua();
-
     friend int assetloader::importAssetToggle(lua_State* state);
-    int importAssetToggleLua();
+    int importAssetLua(
+        std::string assetName,
+        bool togglableInitializationRequirement = false,
+        bool toggleOn = true);
 
     ghoul::lua::LuaState* _luaState;
 };

@@ -1,18 +1,18 @@
-local Sun, SunToggle = asset.importToggle('sun', true)
-local Earth, EarthToggle = asset.importToggle('planets/earth', true)
---local MilkyWay, MilkyWayToggle = asset.importToggle('milkyway', false)
+local Sun, SunDependency = asset.importToggle('sun', true)
+local Earth, EarthDependency = asset.importToggle('planets/earth', true)
+--local MilkyWay, MilkyWayDependency = asset.importToggle('milkyway', false)
 
-SunToggle.onInitialize = function () 
+SunDependency.onInitialize = function () 
     openspace.setPropertyValue("SunMarker.renderable.enabled", false)
 end
 
-EarthToggle.onInitialize = function () 
+EarthDependency.onInitialize = function () 
     openspace.setPropertyValue("EarthMarker.renderable.enabled", false)
     openspace.setPropertyValue("Constellation Bounds.renderable.enabled", false)
 end
 
 --[[
-MilkyWayToggle.onInitialize = function ()
+MilkyWayDependency.onInitialize = function ()
     openspace.setPropertyValue("MilkyWay.renderable.transparency", 0.55)
     openspace.setPropertyValue("MilkyWay.renderable.segments", 50)
 end
@@ -28,7 +28,3 @@ end
 asset.onDeinitialize = function ()
     openspace.removeVirtualProperty("BoolProperty", "Show Trails", "*Trail.renderable.enabled", true, nil, nil)
 end
-
-
-
-

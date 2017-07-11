@@ -103,7 +103,6 @@ asset.EarthMarker = {
     }
 }
 
-
 AssetHelper.registerSceneGraphNodes(asset, {
     asset.EarthBarycenter,
     asset.EarthInertial,

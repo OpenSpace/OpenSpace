@@ -48,7 +48,7 @@ namespace {
     const char* OnDeinitializeFunctionName = "onDeinitialize";
 
     const char* AssetsTableName = "_assets";
-    const char* TogglesTableName = "_toggles";
+    const char* DependantsTableName = "_dependants";
 
     const char* _loggerCat = "AssetLoader";
 }
@@ -59,12 +59,28 @@ namespace assetloader {
 
 int importAsset(lua_State* state) {
     AssetLoader *assetLoader = (AssetLoader*)lua_touserdata(state, lua_upvalueindex(1));
-    return assetLoader->importAssetLua();
+
+    int nArguments = lua_gettop(state);
+    if (nArguments != 1) {
+        return luaL_error(state, "Expected 1 argument, got %i", nArguments);
+    }
+
+    std::string assetName = luaL_checkstring(state, 1);
+    return assetLoader->importAssetLua(assetName, false, false);
 }
 
 int importAssetToggle(lua_State* state) {
     AssetLoader *assetLoader = (AssetLoader*)lua_touserdata(state, lua_upvalueindex(1));
-    return assetLoader->importAssetToggleLua();
+
+    int nArguments = lua_gettop(state);
+    if (nArguments != 2) {
+        return luaL_error(state, "Expected 2 arguments, got %i", nArguments);
+    }
+        
+    bool toggleEnabled = lua_toboolean(state, 2);
+
+    std::string assetName = luaL_checkstring(state, 1);
+    return assetLoader->importAssetLua(assetName, true, toggleEnabled);
 }
 
 int resolveLocalResource(lua_State* state) {
@@ -97,7 +113,7 @@ AssetLoader::AssetLoader(ghoul::lua::LuaState* luaState, std::string assetRoot, 
 
 AssetLoader::Asset* AssetLoader::importAsset(
     const std::string& name,
-    bool toggle,
+    bool togglableInitializationRequirement,
     bool toggleOn)
 {
     ghoul::filesystem::Directory directory = currentDirectory();
@@ -113,18 +129,13 @@ AssetLoader::Asset* AssetLoader::importAsset(
         asset = it->second.get();
     }
 
-    if (toggle) {
-        // This is a togglable dependency
-        Asset* toggler = _assetStack.back();
-        toggler->addToggle(asset);
-        if (toggleOn) {
-            toggler->setToggle(asset, true);
-        }
-    } else {
-        // This is a hard dependency
-        Asset* dependant = _assetStack.back();
-        dependant->addDependency(asset);
+    InitializationRequirement reqInit = InitializationRequirement::Yes;
+    if (togglableInitializationRequirement && !toggleOn) {
+        reqInit = InitializationRequirement::No;
     }
+
+    Asset* dependant = _assetStack.back();
+    dependant->addDependency(asset, togglableInitializationRequirement, reqInit);
 
     if (loaded) {
         return asset;
@@ -144,6 +155,7 @@ AssetLoader::Asset* AssetLoader::importAsset(
     LDEBUG("Imported asset " << asset->id());
     
     _importedAssets.emplace(id, std::move(newAsset));
+
     return _importedAssets[id].get();
 }
 
@@ -224,10 +236,10 @@ void AssetLoader::pushAsset(Asset* asset) {
     lua_pushcfunction(*_luaState, &assetloader::noOperation);
     lua_setfield(*_luaState, assetTableIndex, OnDeinitializeFunctionName);
 
-    // Register empty toggle table on imported asset.
-    // (importer => toggle object)
+    // Register empty dependant table on imported asset.
+    // (importer => dependant object)
     lua_newtable(*_luaState);
-    lua_setfield(*_luaState, assetTableIndex, TogglesTableName);
+    lua_setfield(*_luaState, assetTableIndex, DependantsTableName);
 
     // Extend global asset table (pushed to the lua stack earlier) with this asset 
     lua_setfield(*_luaState, globalTableIndex, asset->id().c_str());
@@ -249,39 +261,9 @@ void AssetLoader::updateLuaGlobals() {
     lua_setglobal(*_luaState, AssetGlobalVariableName);
 }
 
-int AssetLoader::importAssetLua() {
-    int nArguments = lua_gettop(*_luaState);
-    if (nArguments != 1)
-        return luaL_error(*_luaState, "Expected %i arguments, got %i", 1, nArguments);
-
-    std::string assetName = luaL_checkstring(*_luaState, -1);
-
-    Asset* importedAsset = importAsset(assetName);
-    if (!importedAsset) {
-        return luaL_error(*_luaState, "Asset '%s' not found", assetName.c_str());
-    }
-    const std::string importedAssetId = importedAsset->id();
-    lua_getglobal(*_luaState, AssetsTableName);
-    lua_getfield(*_luaState, -1, importedAssetId.c_str());
-    return 1;
-}
-
-
-int AssetLoader::importAssetToggleLua() {
-    int nArguments = lua_gettop(*_luaState);
-
-    if (nArguments != 1 && nArguments != 2) {
-        return luaL_error(*_luaState, "Expected 1 or 2 arguments, got %i", nArguments);
-    }
-
-    std::string assetName = luaL_checkstring(*_luaState, 1);
-    bool defaultOn = true;
-    if (nArguments == 2) {
-        defaultOn = lua_toboolean(*_luaState, -1);
-    }
-
+int AssetLoader::importAssetLua(std::string assetName, bool togglableInitializationRequirement, bool toggleEnabled) {
     Asset* importer = _assetStack.back();
-    Asset* importedAsset = importAsset(assetName, true, defaultOn);
+    Asset* importedAsset = importAsset(assetName, togglableInitializationRequirement, toggleEnabled);
     if (!importedAsset) {
         return luaL_error(*_luaState, "Asset '%s' not found", assetName.c_str());
     }
@@ -292,30 +274,30 @@ int AssetLoader::importAssetToggleLua() {
     lua_getfield(*_luaState, -1, importedAssetId.c_str());
     const int importedAssetIndex = lua_gettop(*_luaState);
 
-    // Extract the imported asset's toggle table
-    lua_getfield(*_luaState, -1, TogglesTableName);
-    const int togglesTableIndex = lua_gettop(*_luaState);
+    // Extract the imported asset's dependants table
+    lua_getfield(*_luaState, -1, DependantsTableName);
+    const int dependantsTableIndex = lua_gettop(*_luaState);
 
-    // Set up Toggle object
+    // Set up Dependency object
     lua_newtable(*_luaState);
-    const int currentToggleTableIndex = lua_gettop(*_luaState);
+    const int currentDependantTableIndex = lua_gettop(*_luaState);
 
     // Register default onDeinitialize function
     lua_pushcfunction(*_luaState, &assetloader::noOperation);
-    lua_setfield(*_luaState, currentToggleTableIndex, OnInitializeFunctionName);
+    lua_setfield(*_luaState, currentDependantTableIndex, OnInitializeFunctionName);
 
     // Register default onDeinitialize function
     lua_pushcfunction(*_luaState, &assetloader::noOperation);
-    lua_setfield(*_luaState, currentToggleTableIndex, OnDeinitializeFunctionName);
+    lua_setfield(*_luaState, currentDependantTableIndex, OnDeinitializeFunctionName);
 
     // duplicate the table reference on the stack, so it remains after assignment.
     lua_pushvalue(*_luaState, -1);
 
-    // Register the Toggle object on the imported asset's toggle table.
-    lua_setfield(*_luaState, togglesTableIndex, importerId.c_str());
+    // Register the dependant table on the imported asset's dependants table.
+    lua_setfield(*_luaState, dependantsTableIndex, importerId.c_str());
 
     lua_pushvalue(*_luaState, importedAssetIndex);
-    lua_pushvalue(*_luaState, currentToggleTableIndex);
+    lua_pushvalue(*_luaState, currentDependantTableIndex);
     return 2;
 }
 
@@ -370,23 +352,16 @@ bool AssetLoader::Asset::hasLuaTable() {
 }
 
 void AssetLoader::Asset::initialize() {
+    LDEBUG("Initializing asset " << id());
     if (_initialized) {
         return;
     }
 
-    // Initialize dependencies
-    for (auto& dep : _dependencies) {
-        dep->initialize();
-    }
+    _initialized = true;
 
-    // Notify togglers
-    for (auto& toggler : _togglers) {
-        toggler->toggleInitialized(this);
-    }
-
-    // Notify toggles
-    for (auto& toggle : _toggles) {
-        toggle->togglerInitialized(this);
+    // Notify dependencies
+    for (auto& dependency : _dependencies) {
+        dependency.first->dependantInitialized(this);
     }
 
     // Call onInitialize
@@ -402,12 +377,21 @@ void AssetLoader::Asset::initialize() {
             return;
         }
     }
-    _initialized = true;
+
+    // Notify dependants
+    for (auto& dependant : _dependants) {
+        dependant->dependencyInitialized(this);
+    }
 }
 
 void AssetLoader::Asset::deinitialize() {
     if (!_initialized) {
         return;
+    }
+
+    // Notify dependants
+    for (auto& dependant : _dependants) {
+        dependant->dependencyDeinitialized(this);
     }
 
     // Call onDeinitialize
@@ -426,21 +410,9 @@ void AssetLoader::Asset::deinitialize() {
         }
     }
 
-    // Notify toggles
-    for (auto& toggle : _toggles) {
-        toggle->togglerDeinitialized(this);
-    }
-
-    // Notify togglers
-    for (auto& toggler : _togglers) {
-        toggler->toggleDeinitialized(this);
-    }
-
-    // Also deinitialize any dangling dependencies
-    for (auto& dep : _dependencies) {
-        if (!dep->hasInitializedDependants()) {
-            dep->deinitialize();
-        }
+    // Notify dependencies
+    for (auto& dependency : _dependencies) {
+        dependency.first->dependantDeinitialized(this);
     }
 }
 
@@ -479,14 +451,16 @@ int AssetLoader::Asset::resolveSyncedResourceLua() {
 }
 
 AssetLoader::Asset::Asset(AssetLoader* loader, std::string directory)
-    : _assetDirectory(directory)
+    : PropertyOwner("RootAsset")
+    , _assetDirectory(directory)
     , _loader(loader)
     , _initialized(false)
     , _hasLuaTable(false)
 {}
 
 AssetLoader::Asset::Asset(AssetLoader* loader, std::string directory, std::string name)
-    : _initialized(false)
+    : PropertyOwner(name)
+    , _initialized(false)
     , _hasLuaTable(true)
 {
     std::string base = ghoul::filesystem::Directory(loader->rootAsset()->assetDirectory());
@@ -543,130 +517,192 @@ ghoul::Dictionary AssetLoader::Asset::dataDictionary() {
     return dictionary;
 }
 
-void AssetLoader::Asset::addDependency(Asset* asset) {
-    // Do nothing if the dependency already exists.
-    if (std::find(_dependencies.begin(), _dependencies.end(), asset) != _dependencies.end()) {
-        return;
+bool AssetLoader::Asset::hasDependency(Asset* asset, InitializationRequirement initReq) {
+    auto it = std::find_if(_dependencies.begin(), _dependencies.end(), [asset](const Dependency& d) {
+        return d.first == asset;
+    });
+    if (it == _dependencies.end()) {
+        return false;
     }
-    if (_initialized) {
-        asset->initialize();
-    }
-    _dependencies.push_back(asset);
-    asset->_dependants.push_back(this);
+    return initReq ? (it->second == true) : true;
 }
 
-void AssetLoader::Asset::removeDependency(Asset * asset) {
+void AssetLoader::Asset::addDependency(Asset* dependency, bool togglableInitReq, InitializationRequirement initReq) {
+    // Do nothing if the dependency already exists.
+    auto it = std::find_if(_dependencies.begin(), _dependencies.end(), [dependency](const Dependency& d) {
+        return d.first == dependency;
+    });
+    if (it != _dependencies.end()) {
+        return;
+    }
+
+    if (_initialized && initReq) {
+        dependency->initialize();
+    }
+    _dependencies.push_back(std::make_pair(dependency, initReq));
+    dependency->_dependants.push_back(this);
+
+    if (togglableInitReq) {
+        std::unique_ptr<DependencyToggle> dt = std::make_unique<DependencyToggle>(dependency, this, initReq);
+        addPropertySubOwner(dt.get());
+        _dependencyToggles.push_back(std::move(dt));
+    } else {
+        addPropertySubOwner(dependency);
+    }
+}
+
+void AssetLoader::Asset::setInitializationRequirement(Asset* dependency, InitializationRequirement initReq) {
+    auto it = std::find_if(_dependencies.begin(), _dependencies.end(), [dependency](const Dependency& d) {
+        return d.first == dependency;
+    });
+    if (it == _dependencies.end()) {
+        LERROR("The dependency does not exist");
+    }
+    it->second = initReq;
+
+    if (_initialized && initReq) {
+        dependency->initialize();
+    }
+    if (!initReq && !dependency->hasInitializedDependants(InitializationRequirement::Yes)) {
+        dependency->deinitialize();
+    }
+}
+
+void AssetLoader::Asset::removeDependency(Asset * dependency) {
     _dependencies.erase(
-        std::remove(_dependencies.begin(), _dependencies.end(), asset),
+        std::remove_if(_dependencies.begin(), _dependencies.end(), [dependency](const Dependency& d) {
+            return d.first == dependency;
+        }),
         _dependencies.end()
     );
-    std::vector<Asset*>& dependants = asset->_dependants;
+    std::vector<Asset*>& dependants = dependency->_dependants;
     dependants.erase(
         std::remove(dependants.begin(), dependants.end(), this),
         dependants.end()
     );
-    if (!asset->hasInitializedDependants()) {
-        asset->deinitialize();
+
+    if (!dependency->hasInitializedDependants(InitializationRequirement::No)) {
+        dependency->deinitialize();
     }
 }
 
 void AssetLoader::Asset::removeDependency(const std::string& assetId) {
-    auto dep = std::find_if(_dependencies.begin(), _dependencies.end(), [&assetId](Asset* asset) {
-        return asset->id() == assetId;
+    auto dep = std::find_if(_dependencies.begin(), _dependencies.end(), [&assetId](const Dependency& d) {
+        return d.first->id() == assetId;
     });
     if (dep != _dependencies.end()) {
-        removeDependency(*dep);
+        removeDependency(dep->first);
     } else {
         LERROR("No such dependency '" << assetId << "'");
     }
 }
 
-void AssetLoader::Asset::addToggle(Asset* assetToggle) {
-    if (std::find(_toggles.begin(), _toggles.end(), assetToggle) != _toggles.end()) {
-        LERROR("The asset toggle " << assetToggle->id() << " is already registered for " << id());
-        return;
-    }
-    if (std::find(_dependencies.begin(), _dependencies.end(), assetToggle) != _dependencies.end()) {
-        LERROR("The asset toggle " << assetToggle->id() << " is already registered as a dependency for " << id());
-        return;
-    }
-
-    _toggles.push_back(assetToggle);
-    assetToggle->_togglers.push_back(this);
-}
-
-void AssetLoader::Asset::setToggle(Asset* assetToggle, bool toggleValue) {
-    if (toggleValue) {
-        addDependency(assetToggle);
-    } else {
-        removeDependency(assetToggle);
-    }
-}
-
-void AssetLoader::Asset::toggleInitialized(Asset* assetToggle) {
+void AssetLoader::Asset::dependencyInitialized(Asset* dependency) {
     // Don't do anything if this asset is not initialized itself.
     if (!isInitialized()) {
         return;
     }
-    ghoul::lua::LuaState* state = _loader->luaState();
-    lua_getglobal(*state, AssetsTableName);
-    lua_getfield(*state, -1, assetToggle->id().c_str());
-    lua_getfield(*state, -1, TogglesTableName);
-    lua_getfield(*state, -1, id().c_str());
-    lua_getfield(*state, -1, OnInitializeFunctionName);
-    lua_call(*state, 0, 0);
+    if (_hasLuaTable) {
+        ghoul::lua::LuaState* state = _loader->luaState();
+        lua_getglobal(*state, AssetsTableName);
+        lua_getfield(*state, -1, dependency->id().c_str());
+        lua_getfield(*state, -1, DependantsTableName);
+        lua_getfield(*state, -1, id().c_str());
+        lua_getfield(*state, -1, OnInitializeFunctionName);
+        lua_call(*state, 0, 0);
+    }
 }
 
-void AssetLoader::Asset::toggleDeinitialized(Asset* assetToggle) {
+void AssetLoader::Asset::dependencyDeinitialized(Asset* dependency) {
     // Don't do anything if this asset is not initialized itself.
     if (!isInitialized()) {
         return;
     }
-    ghoul::lua::LuaState* state = _loader->luaState();
-    lua_getglobal(*state, AssetsTableName);
-    lua_getfield(*state, -1, assetToggle->id().c_str());
-    lua_getfield(*state, -1, TogglesTableName);
-    lua_getfield(*state, -1, id().c_str());
-    lua_getfield(*state, -1, OnDeinitializeFunctionName);
-    lua_call(*state, 0, 0);
+    if (_hasLuaTable) {
+        ghoul::lua::LuaState* state = _loader->luaState();
+        lua_getglobal(*state, AssetsTableName);
+        lua_getfield(*state, -1, dependency->id().c_str());
+        lua_getfield(*state, -1, DependantsTableName);
+        lua_getfield(*state, -1, id().c_str());
+        lua_getfield(*state, -1, OnDeinitializeFunctionName);
+        lua_call(*state, 0, 0);
+    }
 }
 
-void AssetLoader::Asset::togglerInitialized(Asset* assetToggler) {
+void AssetLoader::Asset::dependantInitialized(Asset* dependant) {
+    if (hasInitializedDependants(InitializationRequirement::Yes)) {
+        initialize();
+    }
     // Don't do anything if this asset is not initialized itself.
     if (!isInitialized()) {
         return;
     }
-    ghoul::lua::LuaState* state = _loader->luaState();
-    lua_getglobal(*state, AssetsTableName);
-    lua_getfield(*state, -1, id().c_str());
-    lua_getfield(*state, -1, TogglesTableName);
-    lua_getfield(*state, -1, assetToggler->id().c_str());
-    lua_getfield(*state, -1, OnInitializeFunctionName);
-    lua_call(*state, 0, 0);
+    if (dependant->_hasLuaTable) {
+        ghoul::lua::LuaState* state = _loader->luaState();
+        lua_getglobal(*state, AssetsTableName);
+        lua_getfield(*state, -1, id().c_str());
+        lua_getfield(*state, -1, DependantsTableName);
+        lua_getfield(*state, -1, dependant->id().c_str());
+        lua_getfield(*state, -1, OnInitializeFunctionName);
+        lua_call(*state, 0, 0);
+    }
 }
 
-void AssetLoader::Asset::togglerDeinitialized(Asset* assetToggler) {
+void AssetLoader::Asset::dependantDeinitialized(Asset* dependant) {
     // Don't do anything if this asset is not initialized itself.
     if (!isInitialized()) {
         return;
     }
-    ghoul::lua::LuaState* state = _loader->luaState();
-    lua_getglobal(*state, AssetsTableName);
-    lua_getfield(*state, -1, id().c_str());
-    lua_getfield(*state, -1, TogglesTableName);
-    lua_getfield(*state, -1, assetToggler->id().c_str());
-    lua_getfield(*state, -1, OnDeinitializeFunctionName);
-    lua_call(*state, 0, 0);
+    if (dependant->_hasLuaTable) {
+        ghoul::lua::LuaState* state = _loader->luaState();
+        lua_getglobal(*state, AssetsTableName);
+        lua_getfield(*state, -1, id().c_str());
+        lua_getfield(*state, -1, DependantsTableName);
+        lua_getfield(*state, -1, dependant->id().c_str());
+        lua_getfield(*state, -1, OnDeinitializeFunctionName);
+        lua_call(*state, 0, 0);
+    }
+
+    if (!hasInitializedDependants(InitializationRequirement::Yes)) {
+        deinitialize();
+    }
 }
 
-bool AssetLoader::Asset::hasInitializedDependants() {
-    bool foundInitialized = false;
+bool AssetLoader::Asset::hasDependant(InitializationRequirement initReq) {
+    bool foundDep = false;
     for (auto& dependant : _dependants) {
-        if (dependant->isInitialized()) {
-            foundInitialized = true;
+        if (dependant->hasDependency(this, initReq)) {
+            foundDep = true;
         }
     }
-    return foundInitialized;
+    return foundDep;
+}
+
+bool AssetLoader::Asset::hasInitializedDependants(InitializationRequirement initReq) {
+    bool foundInitializedDep = false;
+    for (auto& dependant : _dependants) {
+        if (dependant->isInitialized() && dependant->hasDependency(this, initReq)) {
+            foundInitializedDep = true;
+        }
+    }
+    return foundInitializedDep;
+}
+
+// Dependency toggle
+AssetLoader::DependencyToggle::DependencyToggle(Asset* dependency, Asset* dependant, bool enabled)
+    : PropertyOwner(dependency->name())
+    , _enabled("enabled", "Enabled", enabled)
+    , _dependency(dependency)
+    , _dependant(dependant)
+{
+    addProperty(_enabled);
+    addPropertySubOwner(_dependency);
+    _enabled.onChange([this]() {
+        _dependant->setInitializationRequirement(
+            _dependency,
+            _enabled ? InitializationRequirement::Yes : InitializationRequirement::No
+        );
+    });
 }
 
 }
