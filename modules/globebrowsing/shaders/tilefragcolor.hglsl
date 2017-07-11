@@ -61,6 +61,10 @@ uniform vec2 vertexResolution;
 	uniform vec3 lightDirectionCameraSpace;
 #endif
 
+#if PERFORM_SHADING
+	uniform float orenNayarRoughness;
+#endif
+
 in vec4 fs_position;
 in vec2 fs_uv;
 in vec3 ellipsoidNormalCameraSpace;
@@ -147,7 +151,9 @@ vec4 getTileFragColor(){
 	color = calculateShadedColor(
 		color,
 		normalize(ellipsoidNormalCameraSpace),
-		lightDirectionCameraSpace);
+		lightDirectionCameraSpace,
+		normalize(positionCameraSpace),
+		orenNayarRoughness);
 #endif // PERFORM_SHADING
 
 #if USE_ATMOSPHERE

@@ -112,6 +112,32 @@ ghoul::opengl::ProgramObject* ChunkRenderer::getActivatedProgramWithTileData(
     return programObject;
 }
 
+void ChunkRenderer::setCommonUniforms(ghoul::opengl::ProgramObject& programObject,
+                                      const Chunk& chunk, const RenderData& data)
+{
+    if (_layerManager->layerGroup(
+            layergroupid::NightLayers).activeLayers().size() > 0 ||
+        _layerManager->layerGroup(
+            layergroupid::WaterMasks).activeLayers().size() > 0 ||
+        chunk.owner().generalProperties().atmosphereEnabled ||
+        chunk.owner().generalProperties().performShading)
+    {
+        glm::dmat4 viewTransform = data.camera.combinedViewMatrix();
+        glm::vec3 directionToSunWorldSpace =
+            glm::normalize(-data.modelTransform.translation);
+        glm::vec3 directionToSunCameraSpace =
+            (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
+        programObject.setUniform(
+            "lightDirectionCameraSpace", -directionToSunCameraSpace);
+    }
+
+    if (chunk.owner().generalProperties().performShading) {
+        programObject.setUniform(
+            "orenNayarRoughness",
+            chunk.owner().generalProperties().orenNayarRoughness);
+    }
+}
+
 void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& data){
 
     ghoul::opengl::ProgramObject* programObject = getActivatedProgramWithTileData(
@@ -159,16 +185,12 @@ void ChunkRenderer::renderChunkGlobally(const Chunk& chunk, const RenderData& da
         _layerManager->layerGroup(
             layergroupid::WaterMasks).activeLayers().size() > 0 ||
         chunk.owner().generalProperties().atmosphereEnabled ||
-        chunk.owner().generalProperties().performShading) {
-        // This code temporary until real light sources can be implemented.
-        glm::vec3 directionToSunWorldSpace =
-            glm::normalize(-data.modelTransform.translation);
-        glm::vec3 directionToSunCameraSpace =
-            (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
+        chunk.owner().generalProperties().performShading)
+    {
         programObject->setUniform("modelViewTransform", modelViewTransform);
-        programObject->setUniform(
-            "lightDirectionCameraSpace", -directionToSunCameraSpace);
     }
+    
+    setCommonUniforms(*programObject, chunk, data);
 
     // OpenGL rendering settings
     glEnable(GL_DEPTH_TEST);
@@ -235,20 +257,7 @@ void ChunkRenderer::renderChunkLocally(const Chunk& chunk, const RenderData& dat
     programObject->setUniform("patchNormalCameraSpace", patchNormalCameraSpace);
     programObject->setUniform("projectionTransform", data.camera.sgctInternal.projectionMatrix());
 
-    if (_layerManager->layerGroup(
-            layergroupid::NightLayers).activeLayers().size() > 0 ||
-        _layerManager->layerGroup(
-            layergroupid::WaterMasks).activeLayers().size() > 0 ||
-        chunk.owner().generalProperties().atmosphereEnabled ||
-        chunk.owner().generalProperties().performShading)
-    {
-        glm::vec3 directionToSunWorldSpace =
-            glm::normalize(-data.modelTransform.translation);
-        glm::vec3 directionToSunCameraSpace =
-            (viewTransform * glm::dvec4(directionToSunWorldSpace, 0));
-        programObject->setUniform(
-            "lightDirectionCameraSpace", -directionToSunCameraSpace);
-    }
+    setCommonUniforms(*programObject, chunk, data);
 
     // OpenGL rendering settings
     glEnable(GL_DEPTH_TEST);
