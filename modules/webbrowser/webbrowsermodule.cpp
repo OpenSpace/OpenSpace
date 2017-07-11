@@ -31,6 +31,7 @@ namespace openspace {
 WebBrowserModule::WebBrowserModule()
     : OpenSpaceModule("WebBrowser") {
     cefHost = std::make_unique<CefHost>();
+
 }
 
 void WebBrowserModule::internalInitialize() {

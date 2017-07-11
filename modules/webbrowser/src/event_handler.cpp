@@ -35,7 +35,7 @@ namespace openspace {
 void EventHandler::initialize() {
     OsEng.registerModuleCharCallback(
             [this](unsigned int charCode, KeyModifier mod) -> bool {
-                if (true /*gui.isEnabled()*/) {
+                if (browser) {
                     return charCallback(charCode, mod);
                 } else {
                     return false;
@@ -44,7 +44,7 @@ void EventHandler::initialize() {
     );
     OsEng.registerModuleKeyboardCallback(
             [this](Key key, KeyModifier mod, KeyAction action) -> bool {
-                if (true /*gui.isEnabled()*/) {
+                if (browser) {
                     return keyboardCallback(key, mod, action);
                 } else {
                     return false;
@@ -53,7 +53,7 @@ void EventHandler::initialize() {
     );
     OsEng.registerModuleMousePositionCallback(
             [this](double x, double y) -> bool {
-                if (true /*gui.isEnabled()*/) {
+                if (browser) {
                     return mousePositionCallback(x, y);
                 } else {
                     return false;
@@ -62,7 +62,7 @@ void EventHandler::initialize() {
     );
     OsEng.registerModuleMouseButtonCallback(
             [this](MouseButton button, MouseAction action) -> bool {
-                if (true /*gui.isEnabled()*/) {
+                if (browser) {
                     return mouseButtonCallback(button, action);
                 } else {
                     return false;
@@ -71,13 +71,14 @@ void EventHandler::initialize() {
     );
     OsEng.registerModuleMouseScrollWheelCallback(
             [this](double pos) -> bool {
-                if (true /*gui.isEnabled()*/) {
+                if (browser) {
                     return mouseWheelCallback(pos);
                 } else {
                     return false;
                 }
             }
     );
+
 }
 
 bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
@@ -204,4 +205,5 @@ CefMouseEvent EventHandler::mouseEvent() {
     event.y = (int) mousePosition.y;
     return event;
 }
+
 } // namespace openspace

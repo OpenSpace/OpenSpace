@@ -45,7 +45,6 @@ public:
     void draw();
 
 private:
-    std::shared_ptr<EventHandler> eventHandler;
     CefRefPtr<WebRenderHandler> renderHandler;
     CefRefPtr<BrowserClient> client;
     CefRefPtr<CefBrowser> browser;

@@ -48,14 +48,6 @@ private:
     void initializeCallbacks();
     void deinitialize();
     void attachDebugSettings(CefSettings&);
-
-    // TODO: remove?
-    std::shared_ptr<EventHandler> eventHandler;
-    // TODO: remove?
-    CefRefPtr<GUIRenderHandler> renderHandler;
-
-    CefRefPtr<BrowserClient> client;
-    CefRefPtr<CefBrowser> browser;
 };
 
 } // namespace openspace

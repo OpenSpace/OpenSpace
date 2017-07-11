@@ -30,8 +30,8 @@ namespace {
 
 namespace openspace {
 
-BrowserInstance::BrowserInstance(WebRenderHandler* handler) : isInitialized(false) {
-    renderHandler = handler;
+BrowserInstance::BrowserInstance(WebRenderHandler* renderer) : isInitialized(false) {
+    renderHandler = renderer;
     client = new BrowserClient(renderHandler);
 
     CefBrowserSettings browserSettings;
@@ -40,7 +40,6 @@ BrowserInstance::BrowserInstance(WebRenderHandler* handler) : isInitialized(fals
     windowInfo.SetAsWindowless(nullptr, renderTransparent);
     std::string url = "";
     browser = CefBrowserHost::CreateBrowserSync(windowInfo, client.get(), url, browserSettings, NULL);
-    eventHandler = std::make_shared<EventHandler>(EventHandler(browser));
 }
 
 BrowserInstance::~BrowserInstance() {
@@ -48,8 +47,6 @@ BrowserInstance::~BrowserInstance() {
 }
 
 void BrowserInstance::initialize() {
-    eventHandler->initialize();
-
     WindowWrapper &wrapper = OsEng.windowWrapper();
     reshape(wrapper.currentWindowSize());
 

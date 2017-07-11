@@ -71,10 +71,8 @@ void CefHost::initializeCallbacks() {
             OpenSpaceEngine::CallbackOption::Render,
             [this](){
                 CefDoMessageLoopWork();
-//                render();
             }
     );
-
 }
 
 }
