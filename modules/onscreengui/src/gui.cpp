@@ -627,7 +627,7 @@ void GUI::render() {
         addScreenSpaceImage(std::string(addImageBuffer));
     }
 
-#ifdef OPENSPACE_MODULE_WEBGUI_ENABLED
+#ifdef OPENSPACE_MODULE_WEBBROWSER_ENABLED
     static const int openUrlBufferSize = 256;
     static char openUrlBuffer[openUrlBufferSize];
 
