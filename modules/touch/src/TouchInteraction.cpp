@@ -320,7 +320,7 @@ void TouchInteraction::directControl(const std::vector<TuioCursor>& list) {
 		const SelectedBody& sb = _selected.at(i);
 		selectedPoints.push_back(sb.coordinates);
 
-		std::vector<TuioCursor>::const_iterator c = find_if(list.begin(), list.end(), [&sb](const TuioCursor& c) { return c.getSessionID() == sb.id; });
+		std::vector<TuioCursor>::const_iterator c = std::find_if(list.begin(), list.end(), [&sb](const TuioCursor& c) { return c.getSessionID() == sb.id; });
 		screenPoints.push_back(glm::dvec2(2 * (c->getX() - 0.5), -2 * (c->getY() - 0.5))); // normalized -1 to 1 coordinates on screen
 	}
 	FunctionData fData = { selectedPoints, screenPoints, nDOF, castToNDC, distToMinimize, _camera, _selected.at(0).node, _lmstat, _currentRadius };
@@ -392,7 +392,7 @@ void TouchInteraction::findSelectedNode(const std::vector<TuioCursor>& list) {
 				glm::dvec3 pointInModelView = glm::inverse(node->rotationMatrix()) * (intersectionPoint - node->worldPosition());
 
 				// Add id, node and surface coordinates to the selected list
-				std::vector<SelectedBody>::iterator oldNode = find_if(newSelected.begin(), newSelected.end(), [id](SelectedBody s) { return s.id == id; });
+				std::vector<SelectedBody>::iterator oldNode = std::find_if(newSelected.begin(), newSelected.end(), [id](SelectedBody s) { return s.id == id; });
 				if (oldNode != newSelected.end()) {
 					double oldNodeDist = glm::length(oldNode->node->worldPosition() - camPos);
 					if (glm::length(camToSelectable) < oldNodeDist) { // new node is closer, remove added node and add the new one instead
@@ -432,7 +432,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
 	double minDiff = 1000;
 	int id = 0;
 	for (const TuioCursor& c : list) {
-		TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
+		TuioPoint point = std::find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
 		double diff = c.getX() - point.getX() + c.getY() - point.getY();
 		if (!c.isMoving()) {
 			diff = minDiff = 0.0;
@@ -445,7 +445,7 @@ int TouchInteraction::interpretInteraction(const std::vector<TuioCursor>& list, 
 	}
 	// find if all fingers angles are high - used in roll interpretation
 	double rollOn = std::accumulate(list.begin(), list.end(), 0.0, [&](double diff, const TuioCursor& c) {
-		TuioPoint point = find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
+		TuioPoint point = std::find_if(lastProcessed.begin(), lastProcessed.end(), [&c](const Point& p) { return p.first == c.getSessionID(); })->second;
 		double res = 0.0;
 		double lastAngle = point.getAngle(_centroid.x, _centroid.y);
 		double currentAngle = c.getAngle(_centroid.x, _centroid.y);
