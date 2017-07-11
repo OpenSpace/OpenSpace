@@ -30,6 +30,8 @@ namespace {
 const char* _loggerCat = "WebBrowser";
 }
 
+using ghoul::filesystem::Directory;
+
 namespace openspace {
 
 WebBrowserModule::WebBrowserModule() : OpenSpaceModule("WebBrowser") {
@@ -37,15 +39,40 @@ WebBrowserModule::WebBrowserModule() : OpenSpaceModule("WebBrowser") {
     CefMainArgs args;
     CefSettings settings;
 
-    std::string subprocessPath = OsEng.configurationManager().value<std::string>(
-            ConfigurationManager::KeyWebHelperLocation);
-    subprocessPath += SUBPROCESS_ENDING;
-
-    CefString(&settings.browser_subprocess_path).FromASCII((char*) subprocessPath.c_str());
+    CefString(&settings.browser_subprocess_path).FromASCII((char*) findHelperExecutable().c_str());
     attachDebugSettings(settings);
 
     CefInitialize(args, settings, nullptr, NULL);
     LDEBUG("Starting CEF... done!");
+}
+
+/**
+ * Try to find the CEF Helper executable. It looks in the bin/openspace folder. Therefore,
+ * if you change that this might cause a crash here.
+ * @return the absolute path to the file
+ */
+std::string WebBrowserModule::findHelperExecutable() {
+    std::string subprocessName = OsEng.configurationManager().value<std::string>(
+            ConfigurationManager::KeyWebHelperLocation);
+    subprocessName += SUBPROCESS_ENDING;
+	int subLength = subprocessName.length();
+
+    Directory binDir("${BASE_PATH}/bin/openspace", Directory::AbsolutePath::No);
+    std::vector<std::string> foundFiles = binDir.readFiles(Directory::Recursive::Yes, Directory::Sort::Yes);
+
+    std::vector<std::string> matchingFiles;
+    std::copy_if(foundFiles.begin(), foundFiles.end(), std::back_inserter(matchingFiles),
+                 [subprocessName, subLength](std::string s) {
+                     s = s.substr(s.size() - subLength);
+                     return s == subprocessName;
+                 });
+
+    if (matchingFiles.size() == 0) {
+        LERROR(fmt::format("Could not find requested sub process executable file name: {}", subprocessName));
+    }
+
+    // use the last one as the sorted array contains Release after Debug and we want that performance
+    return matchingFiles.back();
 }
 
 WebBrowserModule::~WebBrowserModule() {
@@ -75,7 +102,6 @@ void WebBrowserModule::internalInitialize() {
                 CefDoMessageLoopWork();
             }
     );
-
 }
 
 }

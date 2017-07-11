@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <ghoul/filesystem/directory.h>
 #include <include/openspace/engine/configurationmanager.h>
 #include <include/wrapper/cef_helpers.h>
 
@@ -45,6 +46,7 @@ public:
 
 private:
 	void attachDebugSettings(CefSettings&);
+    std::string findHelperExecutable();
 };
 
 } // namespace openspace
