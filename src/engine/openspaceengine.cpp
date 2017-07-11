@@ -36,9 +36,9 @@
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/virtualpropertymanager.h>
 #include <openspace/engine/wrapper/windowwrapper.h>
+#include <openspace/interaction/navigationhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/luaconsole.h>
-#include <openspace/interaction/navigationhandler.h>
 #include <openspace/network/networkengine.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/rendering/renderable.h>
@@ -89,7 +89,7 @@ using namespace ghoul::cmdparser;
 
 namespace {
     const char* _loggerCat = "OpenSpaceEngine";
-    const char* SgctDefaultConfigFile = "${SGCT}/single.xml";
+    const char* SgctDefaultConfigFile = "${CONFIG}/single.xml";
     
     const char* SgctConfigArgumentCommand = "-config";
     
@@ -138,7 +138,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
         programName, ghoul::cmdparser::CommandlineParser::AllowUnknownCommands::Yes
     ))
     , _navigationHandler(new interaction::NavigationHandler)
-	, _keyBindingManager(new interaction::KeyBindingManager)
+    , _keyBindingManager(new interaction::KeyBindingManager)
     , _scriptEngine(new scripting::ScriptEngine)
     , _scriptScheduler(new scripting::ScriptScheduler)
     , _virtualPropertyManager(new VirtualPropertyManager)
@@ -149,7 +149,7 @@ OpenSpaceEngine::OpenSpaceEngine(std::string programName,
     , _shutdown({false, 0.f, 0.f})
     , _isFirstRenderingFirstFrame(true)
 {
-	_navigationHandler->setPropertyOwner(_globalPropertyNamespace.get());
+    _navigationHandler->setPropertyOwner(_globalPropertyNamespace.get());
     
     // New property subowners also have to be added to the OnScreenGuiModule callback!
     _globalPropertyNamespace->addPropertySubOwner(_navigationHandler.get());
@@ -512,10 +512,9 @@ void OpenSpaceEngine::initialize() {
     _settingsEngine->initialize();
     _settingsEngine->setModules(_moduleEngine->modules());
 
-    // Initialize the InteractionHandler
-	_navigationHandler->initialize();
-	// Initialize the KeyBindingManager
-	_keyBindingManager->initialize();
+    // Initialize the NavigationHandler
+    _navigationHandler->initialize();
+    _keyBindingManager->initialize();
 
     // Load a light and a monospaced font
     loadFonts();
@@ -613,14 +612,14 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
         LFATALC(e.component, e.message);
     }
 
-	// Write keyboard documentation.
-	if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
-		keyBindingManager().writeDocumentation(
-			absPath(configurationManager().value<std::string>(
-				ConfigurationManager::KeyKeyboardShortcuts
-				))
-		);
-	}
+    // Write keyboard documentation.
+    if (configurationManager().hasKey(ConfigurationManager::KeyKeyboardShortcuts)) {
+        keyBindingManager().writeDocumentation(
+            absPath(configurationManager().value<std::string>(
+                ConfigurationManager::KeyKeyboardShortcuts
+            ))
+        );
+    }
 
     // If a PropertyDocumentationFile was specified, generate it now.
     if (configurationManager().hasKey(ConfigurationManager::KeyPropertyDocumentation)) {
@@ -641,8 +640,8 @@ void OpenSpaceEngine::loadScene(const std::string& scenePath) {
 void OpenSpaceEngine::deinitialize() {
     LTRACE("OpenSpaceEngine::deinitialize(begin)");
 
-	_navigationHandler->deinitialize();
-	_keyBindingManager->deinitialize();
+    _navigationHandler->deinitialize();
+    _keyBindingManager->deinitialize();
     _renderEngine->deinitialize();
 
     LTRACE("OpenSpaceEngine::deinitialize(end)");
@@ -1041,7 +1040,7 @@ void OpenSpaceEngine::preSynchronization() {
         }
 
         _renderEngine->updateScene();
-		_navigationHandler->updateCamera(dt);
+        _navigationHandler->updateCamera(dt);
         _renderEngine->camera()->invalidateCache();
 
         _parallelConnection->preSynchronization();
@@ -1165,8 +1164,8 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         return;
     }
 
-	_navigationHandler->keyboardCallback(key, mod, action);
-	_keyBindingManager->keyboardCallback(key, mod, action);
+    _navigationHandler->keyboardCallback(key, mod, action);
+    _keyBindingManager->keyboardCallback(key, mod, action);
 }
 
 void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier) {
@@ -1188,7 +1187,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         }
     }
     
-	_navigationHandler->mouseButtonCallback(button, action);
+    _navigationHandler->mouseButtonCallback(button, action);
 }
 
 void OpenSpaceEngine::mousePositionCallback(double x, double y) {
@@ -1196,7 +1195,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y) {
         func(x, y);
     }
 
-	_navigationHandler->mousePositionCallback(x, y);
+    _navigationHandler->mousePositionCallback(x, y);
 }
 
 void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
@@ -1207,7 +1206,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double pos) {
         }
     }
     
-	_navigationHandler->mouseScrollWheelCallback(pos);
+    _navigationHandler->mouseScrollWheelCallback(pos);
 }
 
 void OpenSpaceEngine::encode() {
@@ -1423,8 +1422,8 @@ interaction::NavigationHandler& OpenSpaceEngine::navigationHandler() {
 }
 
 interaction::KeyBindingManager& OpenSpaceEngine::keyBindingManager() {
-	ghoul_assert(_keyBindingManager, "KeyBindingManager must not be nullptr");
-	return *_keyBindingManager;
+    ghoul_assert(_keyBindingManager, "KeyBindingManager must not be nullptr");
+    return *_keyBindingManager;
 }
 
 properties::PropertyOwner& OpenSpaceEngine::globalPropertyOwner() {
